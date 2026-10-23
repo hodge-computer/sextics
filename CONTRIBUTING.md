@@ -168,6 +168,63 @@ PY
 
 This checks the proof against the checkout's target and exports logs, without contacting GitHub. GitHub additionally validates the complete Git diff, file modes, manifest schema, source sizes, attribution, and immutable trusted base/head commits. A local result is development feedback; it is not a GitHub acceptance receipt. If you rely on CI rather than running Lean locally, say so in the PR.
 
+#### Codex Cloud
+
+Use the checked-in setup script for a reproducible development environment:
+
+```sh
+bash scripts/codex-cloud-setup.sh
+```
+
+Run this command from the checkout root when configuring the environment's
+**Install script** field. The script locates the checkout from its own path, so
+invoking it by an absolute path also works from another working directory.
+It supports Linux, the normal Cloud environment, and macOS for a local equivalent.
+
+The image must already provide Python 3.11 with `venv`/`ensurepip`, Node.js,
+`curl`, `git`, `tar`, a C compiler (`cc`), and `make`; Linux also needs `zstd`
+to unpack the Lean release. Debian/Ubuntu may need `python3.11-venv`. The script creates
+a Python virtual environment, installs `scripts/requirements-content.txt`, and
+installs the pinned Lean toolchain from `formal/lean/lean-toolchain`. It preserves
+the committed Lake manifest, then runs `lake exe cache get` and
+`lake build HodgeComputer.Verify` in `formal/lean`. No services are required.
+
+Python tooling and elan are stored under `SEXTICS_CLOUD_HOME`, which defaults to
+`$HOME/.cache/sextics-cloud`. The Python virtual environment is
+`$SEXTICS_CLOUD_HOME/venv`; `ELAN_HOME` defaults to `$SEXTICS_CLOUD_HOME/elan`.
+Mathlib checkouts and compiled artifacts stay in `formal/lean/.lake`. Use
+absolute paths for installation overrides and the same values in subsequent shells.
+
+Save the following instructions in the environment's **Start skill** so each
+new shell restores the tools. Replace `/path/to/sextics` with the actual checkout
+path in that environment:
+
+```sh
+export SEXTICS_CLOUD_HOME="${SEXTICS_CLOUD_HOME:-$HOME/.cache/sextics-cloud}"
+export ELAN_HOME="${ELAN_HOME:-$SEXTICS_CLOUD_HOME/elan}"
+export PATH="$SEXTICS_CLOUD_HOME/venv/bin:$ELAN_HOME/bin:$PATH"
+cd /path/to/sextics
+export ELAN_TOOLCHAIN="$(cat formal/lean/lean-toolchain)"
+```
+
+Allow network access for GitHub clones and releases (`github.com`,
+`release-assets.githubusercontent.com`, and `releases.lean-lang.org`), Python
+packages (`pypi.org` and `files.pythonhosted.org`), and the mathlib cache
+(`lakecache.blob.core.windows.net`). Retain the environment's configured proxy
+and CA trust. A successful `lake exe cache get` is the cache readiness check;
+testing a hostname alone does not establish access to the required artifacts.
+
+Codex saves the Install script and Start skill separately. Test the setup,
+publish the environment after a successful run, and start a new task with that
+environment. Refreshing the repository does not rerun installation; test and
+republish when dependency pins change. See the official
+[Cloud environments guide](https://learn.chatgpt.com/docs/environments/cloud-environments).
+
+This setup builds the development interface. Running the protected local proof
+verifier still requires the sandbox described above: Linux needs Docker and a
+non-root user, and macOS needs `sandbox-exec`. A successful environment setup or
+interface build is separate from protected proof verification and acceptance.
+
 ### Review and acceptance
 
 The protected workflow compiles in an OS sandbox, replays every submitted module with `leanchecker`, and audits the exact theorem and transitive axioms. Proposal code receives no network access, repository write access, or GitHub credentials. A green `solve/lean` status means verification passed and the PR is ready for the owner to merge. Merge authorization is controlled by GitHub repository permissions, independently of CI. No separate approving review or workflow sign-off is required. An updated PR commit or changed base requires fresh checks before merging.
