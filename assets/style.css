@@ -793,7 +793,8 @@ body.exploring #surface:active {
 }
 .instance-panel,
 .case-notes,
-.discussion-panel {
+.discussion-panel,
+.reading-sheet {
   background: rgba(8, 17, 37, 0.74);
   backdrop-filter: blur(12px);
 }
@@ -1822,10 +1823,8 @@ dialog .modal-note {
 }
 .reading-sheet {
   padding: 32px 36px;
-  background: rgba(8, 17, 37, 0.88);
   border: 1px solid #a1b1cd2b;
   border-radius: 5px;
-  backdrop-filter: blur(16px);
   line-height: 1.85;
   color: #cbd3e0;
 }
