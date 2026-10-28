@@ -27,8 +27,8 @@ if (!Number.isInteger(n) || n !== src.meta.vertexCount || ix.length !== 3 * src.
 if (v.some((x) => !Number.isFinite(x)) || ix.some((x) => x >= n)) throw Error('Invalid mesh data.');
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'hodge-simplify-'));
 try {
-  const pos = new Float32Array(n * 3);
-  for (let i = 0; i < n; i++) pos.set(v.subarray(9 * i, 9 * i + 3), 3 * i);
+  const pos = new Float32Array(n * 6);
+  for (let i = 0; i < n; i++) pos.set(v.subarray(9 * i, 9 * i + 6), 6 * i);
   fs.writeFileSync(path.join(tmp, 'positions'), Buffer.from(pos.buffer));
   fs.writeFileSync(path.join(tmp, 'indices'), Buffer.from(ix.buffer));
   const exe = path.join(tmp, 'simplify');
@@ -94,7 +94,7 @@ try {
     edgeBound: Math.max(src.meta.edgeBound, maxEdge + 1e-5),
     adaptiveSourceTriangleCount: src.meta.triangleCount,
     adaptivePlaneTolerance: tolerance,
-    adaptiveMethod: `endpoint link-condition collapses; incident plane tolerance ${tolerance}; face orientation and normal constraints; 8 passes`
+    adaptiveMethod: `endpoint link-condition collapses; incident plane tolerance ${tolerance}; fixed boundaries; face orientation and normal constraints; 8 passes`
   };
   fs.writeFileSync(
     output,
