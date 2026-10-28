@@ -30,7 +30,7 @@ bool preservesFaceOrientation(V before, V after) {
 }
 int main(int argc, char **argv) {
   if (argc != 4 && argc != 5) {
-    cerr << "usage: simplify INPUT_POSITIONS INPUT_INDICES OUTPUT_INDICES "
+    cerr << "usage: simplify INPUT_POSITIONS_NORMALS INPUT_INDICES OUTPUT_INDICES "
             "[TOLERANCE]\n";
     return 2;
   }
@@ -45,14 +45,15 @@ int main(int argc, char **argv) {
     cerr << "Cannot open input\n";
     return 2;
   }
-  size_t nv = pf.tellg() / 12, nt = tf.tellg() / 12;
+  size_t nv = pf.tellg() / 24, nt = tf.tellg() / 12;
   pf.seekg(0);
   tf.seekg(0);
-  vector<V> p(nv);
-  for (auto &v : p) {
-    float q[3];
-    pf.read((char *)q, 12);
-    v = {q[0], q[1], q[2]};
+  vector<V> p(nv), normals(nv);
+  for (size_t i = 0; i < nv; i++) {
+    float q[6];
+    pf.read((char *)q, 24);
+    p[i] = {q[0], q[1], q[2]};
+    normals[i] = {q[3], q[4], q[5]};
   }
   vector<T> f(nt);
   tf.read((char *)f.data(), nt * 12);
@@ -126,7 +127,10 @@ int main(int argc, char **argv) {
             if (v == b)
               v = a;
           V n2 = cross(sub(p[q[1]], p[q[0]]), sub(p[q[2]], p[q[0]]));
-          if (!preservesFaceOrientation(n, n2)) {
+          V smooth{};
+          for (auto v : q)
+            for (int j = 0; j < 3; j++) smooth[j] += normals[v][j];
+          if (!preservesFaceOrientation(n, n2) || dot(n2, smooth) <= 0) {
             good = false;
             break;
           }

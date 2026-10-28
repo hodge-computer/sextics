@@ -66,8 +66,7 @@ uniform float uDisplayScale;
 uniform float uComplexScale;
 uniform float uDivisorStrength;
 uniform float uProjectionBox;
-uniform float uDivisorMode;
-uniform bool uContactProjection;
+uniform bool uHomeScene;
 uniform bool uDepthOnly;
 uniform vec4 uDivisorPlane[6];
 uniform float uTransNear;
@@ -83,7 +82,7 @@ const float PI = 3.141592653589793;
 const float TAU = 6.283185307179586;
 
 // DIVISOR_EXPRESSION
-// Value and gradient of the contact-cone ternary sextic, in factored form.
+// The homepage retains its separately curated contact-cone shading.
 vec4 contactBlock(vec3 u){
   float x=u.x,y=u.y,z=u.z,h=x*x*x+2.0*z*z*z;
   float c=y*y*y+5.0*y*y*z-22.0*y*z*z-56.0*z*z*z;
@@ -111,17 +110,31 @@ vec4 projectContact(vec4 sphere){
 float contactCubic(vec3 u) {
   return (u.y-4.0*u.z)*(u.y+2.0*u.z)*(u.y+7.0*u.z);
 }
+vec4 projectSurface(vec4 sphere){
+  // Atlas triangles approximate F=0. Correct their interpolated points before
+  // evaluating D, so flat faces cannot introduce false divisor contours.
+  for(int step=0;step<4;step++){
+    vec3 a=vec3(dot(uDivisorPlane[0],sphere),dot(uDivisorPlane[1],sphere),dot(uDivisorPlane[2],sphere));
+    vec3 b=vec3(dot(uDivisorPlane[3],sphere),dot(uDivisorPlane[4],sphere),dot(uDivisorPlane[5],sphere));
+    DivJet f=surfaceField(a,b);
+    vec4 g=f.a.x*uDivisorPlane[0]+f.a.y*uDivisorPlane[1]+f.a.z*uDivisorPlane[2]+f.b.x*uDivisorPlane[3]+f.b.y*uDivisorPlane[4]+f.b.z*uDivisorPlane[5];
+    g-=sphere*dot(sphere,g);
+    vec4 correction=f.v*g/max(dot(g,g),1e-25);
+    correction*=min(1.0,0.025/max(length(correction),1e-20));
+    sphere=normalize(sphere-correction);
+  }
+  return sphere;
+}
 float pixelDivisor(out vec2 complexValue) {
   vec3 p=vPosition*uDisplayScale+uOriginalCenter;
   float r2=dot(p,p);
   vec4 sphere=vec4(2.0*p,r2-1.0)/(1.0+r2);
-  if(uContactProjection)sphere=projectContact(sphere);
+  if(uHomeScene)sphere=projectContact(sphere);
+  else if(uDivisorStrength>0.0)sphere=projectSurface(sphere);
   vec3 a=vec3(dot(uDivisorPlane[0],sphere),dot(uDivisorPlane[1],sphere),dot(uDivisorPlane[2],sphere));
   vec3 b=vec3(dot(uDivisorPlane[3],sphere),dot(uDivisorPlane[4],sphere),dot(uDivisorPlane[5],sphere));
-  // Use the same observable as the saved mesh, evaluated at the corrected
-  // surface point. Near its zeros, rounded vertex values and interpolation
-  // can turn a smooth phase boundary into triangular yellow/violet patches.
-  complexValue = uContactProjection
+  // Preserve the homepage's contact-cubic palette at its corrected point.
+  complexValue = uHomeScene
     ? vec2(contactCubic(a+b),contactCubic(a-b))/uComplexScale : vComplex;
   return divisorField(a,b);
 }
@@ -673,8 +686,7 @@ void main() {
           'ComplexScale',
           'DivisorStrength',
           'ProjectionBox',
-          'DivisorMode',
-          'ContactProjection',
+          'HomeScene',
           'TransNear',
           'TransFar',
           'TransMinAlpha',
@@ -723,7 +735,7 @@ void main() {
       last = performance.now(),
       lastDraw = 0;
     const touches = new Map(),
-      heldArrows = new Set(),
+      heldKeys = new Set(),
       clamp = (x, a, b) => Math.max(a, Math.min(b, x)),
       clone3 = (v) => v.slice();
     function listen(target, name, fn, opts) {
@@ -824,17 +836,16 @@ void main() {
       const r = selected.render || {},
         pixel = HodgeDivisor.fragment(
           hasD ? r.divisorProgram || r.divisorTerms : null,
-          meta.phaseSigns,
-          meta.planeMatrix
+          meta.phaseSigns
         );
+      pixel.source += '\n' + HodgeDivisor.surface(selected.F, meta.phaseSigns).source;
       useDivisorShader(pixel);
       gl.uniform3fv(U.OriginalCenter, new Float32Array(meta.centerOriginal));
       gl.uniform1f(U.DisplayScale, meta.displayScale);
       gl.uniform1f(U.ComplexScale, Math.max(1e-20, meta.complexScale || 1));
       gl.uniform1f(U.ProjectionBox, projectionBox);
       gl.uniform1f(U.DivisorStrength, hasD ? 1 : 0);
-      gl.uniform1f(U.DivisorMode, 1);
-      gl.uniform1i(U.ContactProjection, meta.pairId === 'contact46006' ? 1 : 0);
+      gl.uniform1i(U.HomeScene, selected.id === 'home' ? 1 : 0);
       gl.uniform4fv(U.DivisorPlane, new Float32Array(meta.planeMatrix.flat()));
       activeMeta.divisorEvaluation = 'per-pixel polynomial';
       activeMeta.divisorOperations = pixel.operations;
@@ -892,7 +903,7 @@ void main() {
       orbitCenter = clone3(cameraCenter);
     }
     function resetCamera() {
-      heldArrows.clear();
+      heldKeys.clear();
       orbitOrientation = homeOrientation.slice();
       orbitDistance = baseDistance;
       orbitCenter = baseCenter.slice();
@@ -906,7 +917,7 @@ void main() {
       needsDraw = true;
     }
     function setMode(mode) {
-      heldArrows.clear();
+      heldKeys.clear();
       cameraMode = mode === 'free' ? 'free' : 'parallax';
       drag = null;
       touches.clear();
@@ -935,6 +946,10 @@ void main() {
     function rotateCamera(dx, dy) {
       // Move the visible surface in screen directions, even when rolled.
       orbitOrientation = ScreenTrackball.rotate(orbitOrientation, -dx * 0.0047, dy * 0.0042);
+      needsDraw = true;
+    }
+    function zoomCamera(amount) {
+      orbitDistance = clamp(orbitDistance * Math.exp(amount), minDistance, maxDistance);
       needsDraw = true;
     }
     listen(
@@ -972,7 +987,7 @@ void main() {
       window,
       'blur',
       () => {
-        heldArrows.clear();
+        heldKeys.clear();
         targetX = targetY = 0;
         drag = null;
         touches.clear();
@@ -1000,12 +1015,7 @@ void main() {
       (e) => {
         if (cameraMode !== 'free') return;
         e.preventDefault();
-        orbitDistance = clamp(
-          orbitDistance * Math.exp(e.deltaY * 0.00135),
-          minDistance,
-          maxDistance
-        );
-        needsDraw = true;
+        zoomCamera(e.deltaY * 0.00135);
       },
       { passive: false }
     );
@@ -1123,11 +1133,12 @@ void main() {
     );
     listen(window, 'keydown', (e) => {
       if (cameraMode !== 'free') return;
-      if (e.key.startsWith('Arrow')) heldArrows.add(e.key);
+      const key = e.key.toLowerCase();
+      if (/^(arrow(up|down|left|right)|[wasdzx])$/.test(key)) heldKeys.add(key);
       else if (e.key === 'Escape') setMode('parallax');
       else if (e.key === 'r' || e.key === 'R') resetCamera();
     });
-    listen(window, 'keyup', (e) => heldArrows.delete(e.key));
+    listen(window, 'keyup', (e) => heldKeys.delete(e.key.toLowerCase()));
     listen(canvas, 'webglcontextlost', () => {
       contextLost = true;
       stop('The graphics context was lost.');
@@ -1149,7 +1160,7 @@ void main() {
     }
     listen(window, 'resize', resize, { passive: true });
     listen(document, 'visibilitychange', () => {
-      heldArrows.clear();
+      heldKeys.clear();
       needsDraw = true;
       lastFrameTick = fenceStarted = performance.now();
     });
@@ -1194,12 +1205,15 @@ void main() {
         }
         return;
       }
-      if (heldArrows.size) {
-        const dx = heldArrows.has('ArrowRight') - heldArrows.has('ArrowLeft'),
-          dy = heldArrows.has('ArrowDown') - heldArrows.has('ArrowUp');
+      if (heldKeys.size) {
+        const has = (key, alias) => heldKeys.has(key) || heldKeys.has(alias);
+        const dx = has('arrowright', 'd') - has('arrowleft', 'a'),
+          dy = has('arrowdown', 's') - has('arrowup', 'w'),
+          dz = heldKeys.has('x') - heldKeys.has('z');
         if (dx || dy) rotateCamera(dx * 200 * dt, dy * 200 * dt);
+        if (dz) zoomCamera(dz * 1.2 * dt);
       }
-      // Camera easing also ramps held-arrow motion up and down without key-repeat steps.
+      // Camera easing also ramps held-key motion up and down without key-repeat steps.
       const idle = reduced ? 0 : 0.01 * Math.sin(now * 0.00023),
         idle2 = reduced ? 0 : 0.007 * Math.sin(now * 0.00017 + 1.7);
       const desiredOrientation =
@@ -1272,7 +1286,7 @@ void main() {
             activeVao,
             draw,
             6,
-            activeMeta.projectionBox === 0 && activeMeta.pairId === 'contact46006'
+            activeMeta.projectionBox === 0
           );
         } catch (error) {
           if (!usable()) return;

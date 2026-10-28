@@ -98,6 +98,7 @@
         record = {
           id: selected.id,
           title: selected.title,
+          F: selected.F.terms,
           render: selected.render,
           formalStatus: selected.formalStatus
         };

@@ -17,10 +17,10 @@ float divisorDistance(DivJet r,DivJet i,bool complexValue) {
   return (complexValue?length(vec2(r.v,i.v)/scale):r.v/scale)/norm;
 }
 `;
-  function fragment(formula, signs) {
+  function compile(formula, signs, surface = false) {
     if (!formula || (Array.isArray(formula) && !formula.length))
       return {
-        source: 'float divisorField(vec3 a,vec3 b){return 1.0;}',
+        source: GLSL + 'float divisorField(vec3 a,vec3 b){return 1.0;}',
         operations: 0,
         factors: 0
       };
@@ -132,7 +132,7 @@ float divisorDistance(DivJet r,DivJet i,bool complexValue) {
       );
     }
     if (Array.isArray(formula)) {
-      const common = variables.map((_, j) => Math.min(...formula.map(([, e]) => e[j])));
+      const common = variables.map((_, j) => surface ? 0 : Math.min(...formula.map(([, e]) => e[j])));
       for (let j = 0; j < 6; j++) if (common[j]) factor(z[j]);
       factor(sparse(formula.map(([c, e]) => [c, e.map((p, j) => p - common[j])])));
     } else if (formula.kind === 'polynomial-program') {
@@ -217,7 +217,9 @@ float divisorDistance(DivJet r,DivJet i,bool complexValue) {
     const order = quadratic.size
       ? [...basis, ...[...used].filter((n) => !basis.has(n))]
       : [...used];
-    const lines = [GLSL, 'float divisorField(vec3 a,vec3 b) {'];
+    const lines = surface
+      ? ['DivJet surfaceField(vec3 a,vec3 b) {']
+      : [GLSL, 'float divisorField(vec3 a,vec3 b) {'];
     // All factors are homogeneous. Projectively rescaling the coordinates
     // prevents degree-48/60 values from underflowing on small saved sections.
     lines.push(
@@ -241,6 +243,14 @@ float divisorDistance(DivJet r,DivJet i,bool complexValue) {
       } else expr = `${op === '+' ? 'da' : 'dm'}(d${a},d${b})`;
       lines.push(`DivJet d${n}=${expr};`);
     }
+    if (surface) {
+      const [r, i] = factors[0];
+      if (factors.length !== 1 || (r !== zero && i !== zero))
+        throw new Error('The surface polynomial must be scalar-real on this slice.');
+      const value = `d${r === zero ? i : r}`;
+      lines.push(`return DivJet(${value}.v,${value}.a/max(scale,1e-20),${value}.b/max(scale,1e-20));`, '}');
+      return { source: lines.join('\n'), operations: used.size };
+    }
     lines.push('float distance=1e30,orientation=1.0;');
     factors.forEach(([r, i], n) => {
       const complex = r !== zero && i !== zero;
@@ -252,5 +262,11 @@ float divisorDistance(DivJet r,DivJet i,bool complexValue) {
     lines.push('return orientation*distance;', '}');
     return { source: lines.join('\n'), operations: used.size, factors: factors.length };
   }
-  globalThis.HodgeDivisor = Object.freeze({ fragment });
+  globalThis.HodgeDivisor = Object.freeze({
+    fragment: (formula, signs) => compile(formula, signs),
+    surface: (terms, signs) => compile(terms.map(([c, e]) => {
+      const [p, q = 1] = String(c).split('/').map(Number);
+      return [p / q, e];
+    }), signs, true)
+  });
 })();
