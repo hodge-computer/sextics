@@ -94,7 +94,7 @@ try {
     edgeBound: Math.max(src.meta.edgeBound, maxEdge + 1e-5),
     adaptiveSourceTriangleCount: src.meta.triangleCount,
     adaptivePlaneTolerance: tolerance,
-    adaptiveMethod: `endpoint link-condition collapses; incident plane tolerance ${tolerance}; face orientation and normal constraints; 8 passes`
+    adaptiveMethod: `endpoint link-condition collapses; incident plane tolerance ${tolerance}; fixed boundaries; face orientation and normal constraints; 8 passes`
   };
   fs.writeFileSync(
     output,

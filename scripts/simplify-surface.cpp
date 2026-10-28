@@ -7,6 +7,7 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 using namespace std;
@@ -68,13 +69,17 @@ int main(int argc, char **argv) {
     for (unsigned b = 0; b < nv; b++) {
       if (star[b].empty())
         continue;
-      unordered_set<unsigned> nb;
+      unordered_map<unsigned, unsigned> nb;
       for (auto t : star[b])
         for (auto v : f[t])
           if (v != b)
-            nb.insert(v);
+            nb[v]++;
+      // Keep open boundaries fixed; an interior-edge collapse must not pull
+      // a boundary vertex inward and widen a rounding seam into a hole.
+      if (any_of(nb.begin(), nb.end(), [](auto edge) { return edge.second != 2; }))
+        continue;
       vector<pair<double, unsigned>> candidates;
-      for (auto a : nb)
+      for (auto [a, incidence] : nb)
         candidates.push_back({dot(sub(p[a], p[b]), sub(p[a], p[b])), a});
       sort(candidates.begin(), candidates.end());
       for (auto [len, a] : candidates) {
@@ -97,7 +102,7 @@ int main(int argc, char **argv) {
           continue;
         unsigned common = 0;
         bool good = true;
-        for (auto v : nb)
+        for (auto [v, incidence] : nb)
           if (na.count(v)) {
             common++;
             if (!opp.count(v))

@@ -48,7 +48,7 @@
     ]
   ],
   "mesh": "meshes/atlas192-family-block-cube.json",
-  "triangleCount": 62254,
+  "triangleCount": 62264,
   "validated": true,
   "camera": {
     "orientation": [
