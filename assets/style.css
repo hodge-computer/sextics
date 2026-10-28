@@ -791,12 +791,16 @@ body.exploring #surface:active {
 .goal-equation > .katex-display {
   text-align: left;
 }
+.instance-panel,
+.case-notes,
+.discussion-panel {
+  background: rgba(8, 17, 37, 0.74);
+  backdrop-filter: blur(12px);
+}
 .instance-panel {
   margin-top: 32px;
-  background: rgba(8, 17, 37, 0.66);
   border-radius: 5px;
   padding: 24px 30px 12px;
-  backdrop-filter: blur(12px);
 }
 .section-line {
   display: flex;
@@ -883,20 +887,11 @@ body.exploring #surface:active {
 .case-notes {
   margin: 27px 0 22px;
   padding: 24px 30px;
-  background: rgba(8, 17, 37, 0.74);
   border: 1px solid #a1b1cd19;
   border-radius: 5px;
   max-width: 980px;
 }
-.case-notes h2 {
-  font-size: 11px;
-  font-weight: 500;
-  color: #c5cddb;
-  margin: 0 0 12px;
-}
 .case-notes p {
-  font-family: var(--serif);
-  font-size: 15px;
   line-height: 1.7;
   color: #b2bbcb;
   margin: 0 0 10px;
@@ -1101,7 +1096,6 @@ dialog .modal-note {
 @media (max-width: 1200px) {
   :root {
     --sidebar: 244px;
-    --body-copy-size: 14px;
   }
   #main {
     padding: 0 30px;
@@ -1162,9 +1156,6 @@ dialog .modal-note {
   }
 }
 @media (max-width: 900px) {
-  :root {
-    --body-copy-size: 15px;
-  }
   .topbar-topic {
     display: none;
   }
@@ -1210,6 +1201,7 @@ dialog .modal-note {
 }
 @media (max-width: 680px) {
   :root {
+    --body-copy-size: 15px;
     --sidebar: 280px;
   }
   .sidebar {
@@ -1349,9 +1341,6 @@ dialog .modal-note {
   .case-notes {
     padding: 20px 18px;
   }
-  .case-notes p {
-    font-size: 14px;
-  }
   .scene-shade {
     background:
       linear-gradient(90deg, #070e2077, #070e2011),
@@ -1369,9 +1358,6 @@ dialog .modal-note {
   }
 }
 @media (max-height: 760px) and (min-width: 681px) {
-  :root {
-    --body-copy-size: 14px;
-  }
   .home-view {
     padding-top: 115px;
     gap: 35px;
@@ -1504,10 +1490,8 @@ dialog .modal-note {
 .discussion-panel {
   margin-top: 25px;
   padding: 27px 30px;
-  background: rgba(8, 18, 39, 0.92);
   border: 1px solid #7191bd45;
   border-radius: 5px;
-  backdrop-filter: blur(14px);
   scroll-margin-top: 96px;
 }
 .discussion-header {
@@ -1830,14 +1814,18 @@ dialog .modal-note {
   max-width: 620px;
   margin: 21px 0 0;
 }
+.reading-sheet,
+.case-notes,
+.discussion-markdown {
+  font-family: var(--serif);
+  font-size: var(--body-copy-size);
+}
 .reading-sheet {
   padding: 32px 36px;
   background: rgba(8, 17, 37, 0.88);
   border: 1px solid #a1b1cd2b;
   border-radius: 5px;
   backdrop-filter: blur(16px);
-  font-family: var(--serif);
-  font-size: var(--body-copy-size);
   line-height: 1.85;
   color: #cbd3e0;
 }
@@ -2494,7 +2482,7 @@ dialog.solution-dialog {
 .mathematical-prose {
   min-width: 0;
 }
-.mathematical-prose h2 {
+:is(.mathematical-prose, .discussion-markdown) h2 {
   font-family: var(--serif);
   font-weight: 400;
   font-size: 28px;
@@ -2503,7 +2491,7 @@ dialog.solution-dialog {
   line-height: 1.25;
   scroll-margin-top: 95px;
 }
-.mathematical-prose h3 {
+:is(.mathematical-prose, .discussion-markdown) h3 {
   font-family: var(--serif);
   font-weight: 400;
   font-size: 22px;
@@ -2511,8 +2499,8 @@ dialog.solution-dialog {
   margin: 30px 0 13px;
   scroll-margin-top: 95px;
 }
-.mathematical-prose h4 {
-  font-size: 15px;
+:is(.mathematical-prose, .discussion-markdown) :is(h4, h5, h6) {
+  font-size: 18px;
   font-weight: 500;
   margin: 25px 0 12px;
 }
@@ -2558,10 +2546,8 @@ dialog.solution-dialog {
   text-align: left;
   margin: 0.8em 0;
 }
-.case-notes.mathematical-prose h2 {
-  font-family: var(--sans);
-  font-size: 11px;
-  margin: 0 0 12px;
+.case-notes > h2:first-child {
+  margin-top: 0;
 }
 .chapter-view .reading-sheet {
   max-width: 1000px;
@@ -2745,10 +2731,10 @@ dialog.solution-dialog {
   .chapter-view .information-heading h1 {
     font-size: 34px;
   }
-  .mathematical-prose h2 {
+  :is(.mathematical-prose, .discussion-markdown) h2 {
     font-size: 25px;
   }
-  .mathematical-prose h3 {
+  :is(.mathematical-prose, .discussion-markdown) h3 {
     font-size: 20px;
   }
   .github-account {
@@ -2954,9 +2940,6 @@ dialog.solution-dialog {
   color: #9bb0c9;
   white-space: nowrap;
 }
-.technical-view .mathematical-prose {
-  font-size: var(--body-copy-size);
-}
 @media (max-width: 680px) {
   .contributor-details {
     padding: 22px var(--leaderboard-inset) 0;
@@ -3029,7 +3012,7 @@ dialog.solution-dialog {
   font: inherit;
   color: inherit;
 }
-.solution-body h1 {
+:is(.mathematical-prose, .discussion-markdown) h1 {
   font-family: var(--serif);
   font-size: 32px;
   font-weight: 400;
@@ -3057,7 +3040,7 @@ dialog.solution-dialog {
   font-size: 1.02em;
 }
 @media (max-width: 680px) {
-  .solution-body h1 {
+  :is(.mathematical-prose, .discussion-markdown) h1 {
     font-size: 28px;
   }
   .solution-body h2,
@@ -3765,13 +3748,6 @@ dialog.participate-dialog {
   .polynomial-value .definitions {
     font-size: 14px;
   }
-  .case-notes,
-  .case-notes p {
-    font-size: var(--case-copy-size);
-  }
-  .case-notes.mathematical-prose h2 {
-    font-size: 14px;
-  }
   .copy-instance-button {
     font-size: 13px;
     padding: 8px 12px;
@@ -4188,7 +4164,7 @@ dialog.participate-dialog {
   font-size: 11px;
 }
 .discussion-markdown {
-  font: 16px/1.75 var(--serif);
+  line-height: 1.75;
   color: #c5d0e2;
   overflow-wrap: anywhere;
   min-width: 0;
@@ -4251,18 +4227,6 @@ dialog.participate-dialog {
 }
 .discussion-markdown details > :last-child:not(summary) {
   margin-bottom: 16px;
-}
-.discussion-markdown h1,
-.discussion-markdown h2,
-.discussion-markdown h3 {
-  font: 22px/1.35 var(--serif);
-  margin: 25px 0 12px;
-}
-.discussion-markdown h4,
-.discussion-markdown h5,
-.discussion-markdown h6 {
-  font: 18px/1.4 var(--serif);
-  margin: 20px 0 12px;
 }
 .mathematical-prose pre,
 .discussion-markdown pre {
@@ -4405,9 +4369,6 @@ dialog.participate-dialog {
   cursor: default;
 }
 @media (min-width: 1700px) {
-  .discussion-markdown {
-    font-size: 18px;
-  }
   .discussion-tools a,
   .discussion-button,
   .discussion-notice,
@@ -4423,9 +4384,6 @@ dialog.participate-dialog {
   }
   .discussion-tools {
     gap: 12px;
-  }
-  .discussion-markdown {
-    font-size: 15px;
   }
   .discussion-comment-header {
     gap: 8px 12px;
