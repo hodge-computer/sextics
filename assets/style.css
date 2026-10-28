@@ -1828,8 +1828,9 @@ dialog .modal-note {
   line-height: 1.85;
   color: #cbd3e0;
 }
-.reading-sheet p {
-  margin: 0 0 23px;
+.reading-sheet p,
+.discussion-markdown p {
+  margin: 0 0 14px;
 }
 .reading-sheet > p:last-child {
   margin-bottom: 0;
@@ -1853,15 +1854,20 @@ dialog .modal-note {
   display: inline;
   vertical-align: baseline;
 }
-.page-equation {
+.page-equation,
+.discussion-math-display {
+  display: block;
   max-width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
   scrollbar-width: thin;
   scrollbar-color: #455570 transparent;
-  margin: 0 0 23px;
+  padding: 0.3em 0;
 }
-.page-equation > .katex-display {
-  margin: 8px 0 13px;
+.page-equation > .katex-display,
+.discussion-math-display > .katex-display {
+  margin: 0.5em 0;
+  text-align: left;
 }
 .page-equation > .katex-display > .katex {
   width: max-content;
@@ -2536,15 +2542,6 @@ dialog.solution-dialog {
 .mathematical-prose a {
   overflow-wrap: anywhere;
 }
-.mathematical-prose .page-equation {
-  max-width: 100%;
-  overflow: auto;
-  scrollbar-width: thin;
-}
-.mathematical-prose .katex-display {
-  text-align: left;
-  margin: 0.8em 0;
-}
 .case-notes > h2:first-child {
   margin-top: 0;
 }
@@ -2558,10 +2555,6 @@ dialog.solution-dialog {
 }
 .chapter-view .reading-sheet > p:first-child a {
   color: #9eb8d6;
-}
-.chapter-view .page-equation {
-  font-size: 0.95em;
-  padding: 9px 0;
 }
 @media (min-width: 1700px) {
   .home-progress,
@@ -4174,9 +4167,6 @@ dialog.participate-dialog {
 .discussion-markdown > :last-child {
   margin-bottom: 0;
 }
-.discussion-markdown p {
-  margin: 0 0 14px;
-}
 .discussion-markdown a {
   color: #b4cff1;
 }
@@ -4274,17 +4264,6 @@ dialog.participate-dialog {
   border: 0;
   border-top: 1px solid var(--line);
   margin: 20px 0;
-}
-.discussion-math-display {
-  display: block;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 0.3em 0;
-  max-width: 100%;
-}
-.discussion-math-display .katex-display {
-  margin: 0.5em 0;
-  text-align: left;
 }
 .discussion-markdown .katex {
   font-size: 1.05em;
