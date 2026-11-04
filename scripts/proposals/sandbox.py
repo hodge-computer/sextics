@@ -25,7 +25,7 @@ def verify(root, files, instance, metadata, order, imports, policy, output):
     lean = prefix/'bin/lean'; checker = prefix/'bin/leanchecker'
     require(checker.is_file(), 'The pinned toolchain must include leanchecker')
     version = command([str(lean),'--version']).decode().strip()
-    require('version 4.33.0,' in version, 'Wrong Lean version')
+    require('version 4.33.1,' in version, 'Wrong Lean version')
     system = platform.system()
     require(system in ('Darwin','Linux'), 'Supported verification hosts are macOS and Linux')
     if system == 'Darwin':
