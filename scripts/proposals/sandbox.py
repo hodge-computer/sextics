@@ -12,14 +12,15 @@ import uuid
 from check import command, require, target_source, witness_source
 
 
-def verify(root, files, instance, metadata, order, imports, policy, output):
+def verify(root, files, instance, metadata, order, imports, policy, output, *, prepared=False):
     lean_root = root/'formal/lean'
     lake = shutil.which('lake')
     require(lake, 'Install the pinned Lean toolchain and Lake first')
-    preparation = [lake,'--no-cache','build','HodgeComputer.Verify',*imports]
-    if platform.system() == 'Darwin':
-        preparation = ['/usr/bin/sandbox-exec','-p','(version 1)(allow default)(deny network*)',*preparation]
-    command(preparation,cwd=lean_root,timeout=policy['timeoutSeconds'])
+    if not prepared:
+        preparation = [lake,'--no-cache','build','HodgeComputer.Verify',*imports]
+        if platform.system() == 'Darwin':
+            preparation = ['/usr/bin/sandbox-exec','-p','(version 1)(allow default)(deny network*)',*preparation]
+        command(preparation,cwd=lean_root,timeout=policy['timeoutSeconds'])
     lean_path = command([lake,'env','printenv','LEAN_PATH'],cwd=lean_root).decode().strip()
     prefix = Path(command([lake,'env','lean','--print-prefix'],cwd=lean_root).decode().strip()).resolve()
     lean = prefix/'bin/lean'; checker = prefix/'bin/leanchecker'

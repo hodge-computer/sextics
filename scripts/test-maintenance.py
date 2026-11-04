@@ -56,6 +56,11 @@ class MaintenanceChecks(unittest.TestCase):
     def test_verifier_edit_rechecks_existing_solves(self):
         self.assertEqual(self.plan("scripts/proposals/Audit.lean")["instances"], ["first", "second"])
 
+    def test_shared_build_includes_dependencies_of_affected_instances(self):
+        self.write("data/first/Solution.lean", "import HodgeTarget\nimport HodgeComputer.Helper\n")
+        self.assertEqual(library.required_modules(self.root, ["first"], []),
+                         ["HodgeComputer.Helper", "HodgeComputer.Verify"])
+
     def test_each_affected_instance_has_its_own_job(self):
         instances = [f"instance-{i}" for i in range(66)]
         jobs = library.verification_jobs({"modules": ["HodgeComputer.Verify"], "instances": instances})

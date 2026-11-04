@@ -73,12 +73,22 @@ def verification_jobs(plan):
     return jobs
 
 
+def required_modules(root, instances, modules):
+    required = set(modules) | {"HodgeComputer.Verify"}
+    for instance in instances:
+        files = {p.name: p.read_bytes() for p in (root / "data" / instance).glob("*.lean")}
+        _, imports = module_order(files)
+        required.update(imports)
+    return sorted(required)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", required=True)
     parser.add_argument("--plan", action="store_true")
-    parser.add_argument("--phase", choices=("all", "shared", "applications"), default="all")
+    parser.add_argument("--phase", choices=("all", "build", "shared", "applications"), default="all")
     parser.add_argument("--instance", default="", help="Check one affected instance; omit to check all")
+    parser.add_argument("--prepared", action="store_true", help="Use the shared build prepared by this CI run")
     args = parser.parse_args()
     changed = subprocess.check_output(
         ["git", "diff", "--name-only", args.base, "HEAD"], cwd=ROOT, text=True
@@ -91,11 +101,14 @@ def main():
         parser.error("--instance must name an affected accepted solve")
     lean = ROOT / "formal/lean"
     modules = plan["modules"] if args.phase != "applications" else []
-    if modules:
-        subprocess.run(["lake", "build", *modules], cwd=lean, check=True)
-        for module in modules:
-            subprocess.run(["lake", "env", "leanchecker", "--verbose", module], cwd=lean, check=True)
     selected = ([args.instance] if args.instance else plan["instances"]) if args.phase != "shared" else []
+    if not args.prepared and (modules or selected):
+        subprocess.run(["lake", "build", *required_modules(ROOT, selected, modules)], cwd=lean, check=True)
+    if args.phase == "build":
+        print("Prepared shared Lean modules for all affected checks.")
+        return
+    for module in modules:
+        subprocess.run(["lake", "env", "leanchecker", "--verbose", module], cwd=lean, check=True)
     policy = json.loads((ROOT / ".github/solve-policy.json").read_text())
     applications = 0
     for instance_id in selected:
@@ -114,6 +127,7 @@ def main():
                 used,
                 policy,
                 Path(temporary),
+                prepared=True,
             )
         applications += 1
         print(f"Checked protected application: {folder.name}", flush=True)

@@ -97,8 +97,11 @@ local links. The build generates current files directly, without a committed
 revision hash or a stale-output gate. These checks do not grant formal acceptance.
 For Lean maintenance, `scripts/check-library.py --base <commit>` builds and
 replays changed shared modules and their dependents, then rechecks affected accepted
-applications against their protected targets. CI gives each affected instance its own job, with no workflow concurrency cap. The deploy workflow builds and publishes main without rerunning
-these checks.
+applications against their protected targets. CI first builds the shared library
+once and passes those compiled outputs to the verification jobs. Each affected
+instance then has an independent job, alongside shared-module kernel replay,
+with no workflow concurrency cap. The deploy workflow builds and publishes main
+without rerunning these checks.
 
 ## Visualization maintenance
 
