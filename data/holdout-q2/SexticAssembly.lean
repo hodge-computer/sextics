@@ -112,7 +112,7 @@ theorem hasCertificate_endpoint_from_cubic {k : ℂ} (hk : k^2+k+1=0)
     (hK : (M^3+(5 : ℂ) • (1 : Matrix ι ι ℂ))*K=1)
     (hD_fiber : activeNormFiber k D=Polynomial.C s*HoldoutDenominator.normFiber M) :
     HodgeComputer.HasCertificate HoldoutEndpointTarget.F
-      (HoldoutEndpointTarget.reflectionTarget k) 2 := by
+      (HoldoutEndpointTarget.reflectionTarget k) 6 2 := by
   obtain ⟨n,q,u,Q,P,hu,hq,hQhom,hPhom,hQ,hP,hQfiber,hPfiber⟩ :=
     HoldoutQ2.Clearing.exists_q2_representatives_with_fibre D N d hD hN
       (activePolynomials k) (activePolynomials_homogeneous k)
@@ -138,16 +138,20 @@ theorem hasCertificate_endpoint_from_cubic {k : ℂ} (hk : k^2+k+1=0)
     (HoldoutEndpointLift.denominator Q) M K (HoldoutQ2.Clearing.goodParameters k q*s)
     (mul_ne_zero hq hs) hK hfiber
   have hne := HoldoutDenominator.denominator_ne_zero_of_legal _ hlegal
-  refine ⟨2*(n+d)+4,HoldoutEndpointLift.denominator Q,
-    HoldoutEndpointLift.numerators k (P 0) (P 1) (P 2) (P 3),0,?_,?_,?_,?_,?_⟩
-  · exact hne
-  · exact HoldoutEndpointLift.denominator_homogeneous hQhom
+  have hDhom := HoldoutEndpointLift.denominator_homogeneous hQhom
+  have hDdeg := hDhom.totalDegree hne
+  refine ⟨HoldoutEndpointLift.denominator Q,
+    HoldoutEndpointLift.numerators k (P 0) (P 1) (P 2) (P 3),0,
+    HoldoutEndpointTarget.F_ne_zero, HoldoutEndpointTarget.F_homogeneous, ?_, hne, ?_, ?_, ?_, ?_⟩
+  · simpa using HodgeComputer.Homogeneous.of_isHomogeneous
+      (HoldoutEndpointTarget.reflectionTarget_homogeneous k)
+  · rw [hDdeg]
+    exact hDhom
   · intro i
     have hh := HoldoutEndpointLift.numerators_homogeneous k
       (hPhom 0) (hPhom 1) (hPhom 2) (hPhom 3) i
-    have hdeg : 2*(n+d+3)+5=(2*(n+d)+4)+6*2-5 := by omega
-    rw [hdeg] at hh
-    exact hh
+    rw [hDdeg]
+    convert HodgeComputer.Homogeneous.of_isHomogeneous hh using 1 <;> push_cast <;> omega
   · exact hlegal
   · simpa only [HodgeComputer.defect,Nat.cast_ofNat,mul_zero] using
       HoldoutEndpointLift.lift_strict_q2 k HoldoutEndpointTarget.F

@@ -395,7 +395,7 @@ theorem normalized_data : ∃ D : Poly,∃ W : Fin 6 → Poly,∃ Q : Poly,
     (transportedVector_relation W) (divergenceQuotient_relation W)
     (transported_normal W) (transported_divergence W hW)
 
-theorem physical_certificate : HodgeComputer.HasCertificate physicalF physicalA 1 := by
+theorem physical_certificate : HodgeComputer.HasCertificate physicalF physicalA 6 1 := by
   obtain ⟨D,W,Q,hd,hlegal,hnormal,hdiv⟩ := normalized_data
   exact hasCertificate_of_normalized physicalF physicalA D W Q physicalF_homogeneous physicalA_homogeneous
     physicalF_irreducible.prime hlegal

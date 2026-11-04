@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import Proposal.BundleAssembly
 import HodgeComputer.Constructions.HoldoutCover.ResiduePiolaPullback
 import HodgeComputer.Constructions.HoldoutCover.ResidueClearing
@@ -27,18 +28,18 @@ local instance : CharZero HoldoutFunctionField :=
   charZero_of_injective_ringHom (f := algebraMap ℂ HoldoutFunctionField)
     (algebraMap ℂ HoldoutFunctionField).injective
 
-def physicalSourceFor (A : HodgeComputer.Poly) : HoldoutFunctionField :=
+def physicalSourceFor (A : HodgeComputer.Sextic.Poly) : HoldoutFunctionField :=
   (physicalResidueMap (integerPartial 0 A) * physicalNormal -
     physicalResidueMap A *
       physicalResidueMap (integerPartial 0 (integerPartial 0 holdoutSextic))) /
         physicalNormal^2
 
 theorem physical_certificate_of_residue
-    (A : HodgeComputer.Poly) (hA : A.IsHomogeneous 6)
+    (A : HodgeComputer.Sextic.Poly) (hA : A.IsHomogeneous 6)
     (w : Fin 5 → HoldoutFunctionField)
     (equation : physicalSourceFor A +
       residueDivergence physicalTangent physicalNormal w = 0) :
-    HodgeComputer.HasCertificate holdoutSextic A 1 := by
+    HodgeComputer.HasCertificate holdoutSextic A 6 1 := by
   have hi : (Complex.I : ℂ)^6 = -1 := by
     rw [show (6 : ℕ) = 2*3 by decide, pow_mul, Complex.I_sq]
     norm_num
@@ -54,7 +55,7 @@ theorem physical_certificate_of_residue
     simpa only [physicalSourceFor, physicalNormal, residueDivergence,
       fieldDivergence, Finset.sum_sub_distrib, div_eq_mul_inv, Finset.sum_mul]
       using equation
-  have hreps : ∃ d : HodgeComputer.Poly, ∃ n : Fin 5 → HodgeComputer.Poly,
+  have hreps : ∃ d : HodgeComputer.Sextic.Poly, ∃ n : Fin 5 → HodgeComputer.Sextic.Poly,
       physicalResidueMap d ≠ 0 ∧
       ∀ i, physicalResidueMap (n i) = physicalResidueMap d * w i := by
     exact residue_common_representatives physicalProjection
@@ -133,7 +134,7 @@ source identities.  This theorem performs their complete residue transport
 and the legal homogeneous certificate extraction. -/
 theorem physical_certificate_of_diagonal_residue
     {R : Type*} [Field R]
-    (A : HodgeComputer.Poly) (hA : A.IsHomogeneous 6)
+    (A : HodgeComputer.Sextic.Poly) (hA : A.IsHomogeneous 6)
     (φ : R →+* HoldoutFunctionField)
     (Dq : Fin 4 → Derivation ℤ R R)
     (E : Fin 5 → Derivation ℤ HoldoutFunctionField HoldoutFunctionField)
@@ -146,7 +147,7 @@ theorem physical_certificate_of_diagonal_residue
     (equation : rq + residueDivergence Dq gq wq = 0)
     (normal : φ gq = physicalNormal)
     (source : M.det * φ rq = physicalSourceFor A) :
-    HodgeComputer.HasCertificate holdoutSextic A 1 := by
+    HodgeComputer.HasCertificate holdoutSextic A 6 1 := by
   let w : Fin 5 → HoldoutFunctionField := Fin.lastCases 0 (fun i => φ (wq i))
   have hw : φ rq + residueDivergence E (φ gq) w = 0 :=
     residue_source_map_append_zero φ Dq E compatible gq rq wq equation

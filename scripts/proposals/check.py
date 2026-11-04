@@ -3,7 +3,6 @@
 import argparse
 import ast
 from datetime import datetime, timezone
-import hashlib
 import json
 import os
 from pathlib import Path, PurePosixPath
@@ -70,7 +69,7 @@ def read_proposal(base, head, author, policy):
     require(len(ids) == 1, 'Submit one instance per PR')
     rid = ids.pop()
     folder = f'data/{rid}'
-    # A solve proposal is immutable once merged; revisions need an explicitly reviewed new format.
+    # New solves use this submission format; existing solves are maintained through repository CI.
     require(git('ls-tree', base, folder+'/instance.rec').strip(), 'Choose an existing protected instance')
     require(not git('ls-tree', base, folder+'/proof.json').strip(), 'This instance already has a merged proof')
     # Rebase if the PR carries changes to protected data that were not part of its own diff.
@@ -170,7 +169,7 @@ def polynomial(source):
         if isinstance(n, ast.Name) and n.id in variables:
             return f'(MvPolynomial.X (R := ℂ) ({variables[n.id]} : Fin 6))'
         if isinstance(n, ast.Constant) and type(n.value) is int:
-            return f'({n.value} : HodgeComputer.Poly)'
+            return f'({n.value} : MvPolynomial (Fin 6) ℂ)'
         if isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.USub): return f'(-{translate(n.operand)})'
         if isinstance(n, ast.BinOp):
             if isinstance(n.op, ast.Pow):
@@ -187,25 +186,25 @@ def polynomial(source):
 
 def target_source(instance):
     return ('import HodgeComputer.Verify\nnoncomputable section\nnamespace HodgeSubmission\n'
-            f'def F : HodgeComputer.Poly := {polynomial(instance["F"])}\n'
-            f'def A : HodgeComputer.Poly := {polynomial(instance["A"])}\n'
+            'def n : ℕ := 5\ndef d : ℕ := 6\n'
+            f'def F : MvPolynomial (Fin 6) ℂ := {polynomial(instance["F"])}\n'
+            f'def A : MvPolynomial (Fin 6) ℂ := {polynomial(instance["A"])}\n'
             f'def q : ℕ := {instance["q"]}\nend HodgeSubmission\n')
 
 
 def witness_source(raw):
     """Bind the displayed exact witness to an additional protected Lean theorem."""
     witness = json.loads(raw)
-    require(set(witness) == {'d', 'D', 'N', 'Q'}, 'Witness fields must be exactly d, D, N, Q')
-    require(type(witness['d']) is int and witness['d'] >= 0, 'Invalid denominator degree')
+    require(set(witness) == {'D', 'N', 'Q'}, 'Witness fields must be exactly D, N, Q')
     require(isinstance(witness['N'], list) and len(witness['N']) == 6, 'A witness needs six numerators')
     expressions = [witness['D'], *witness['N'], witness['Q']]
     require(all(isinstance(value, str) and value for value in expressions), 'Witness entries must be exact polynomial expressions')
     translated = [polynomial(value) for value in expressions]
     lines = ['import HodgeTarget', 'noncomputable section', 'namespace HodgeWitness',
-             f'def d : ℕ := {witness["d"]}', f'def D : HodgeComputer.Poly := {translated[0]}',
-             f'def Q : HodgeComputer.Poly := {translated[-1]}']
-    lines += [f'def N{i} : HodgeComputer.Poly := {value}' for i,value in enumerate(translated[1:-1])]
-    lines += ['def N : Fin 6 → HodgeComputer.Poly := fun i => ' + ''.join(f'if i.val = {i} then N{i} else ' for i in range(5)) + 'N5',
+             f'def D : MvPolynomial (Fin 6) ℂ := {translated[0]}',
+             f'def Q : MvPolynomial (Fin 6) ℂ := {translated[-1]}']
+    lines += [f'def N{i} : MvPolynomial (Fin 6) ℂ := {value}' for i,value in enumerate(translated[1:-1])]
+    lines += ['def N : Fin 6 → MvPolynomial (Fin 6) ℂ := fun i => ' + ''.join(f'if i.val = {i} then N{i} else ' for i in range(5)) + 'N5',
               'end HodgeWitness']
     return '\n'.join(lines)+'\n'
 
@@ -224,12 +223,7 @@ def main():
     order, imports = module_order(files)
     report = {'schemaVersion':2,'mode':policy['mode'],'instanceId':rid,'pullRequest':args.pr,
               'githubLogin':args.author,'baseCommit':args.base,'headCommit':args.head,
-              'checkedAt':datetime.now(timezone.utc).isoformat(),'formalAcceptance':False,
-              'verifierSha256':{str(p.relative_to(ROOT)):hashlib.sha256(p.read_bytes()).hexdigest()
-                  for p in [Path(__file__),ROOT/'scripts/proposals/sandbox.py',ROOT/'scripts/proposals/Audit.lean',
-                            ROOT/'formal/lean/HodgeComputer/Verify.lean',ROOT/'formal/lean/lake-manifest.json',ROOT/'.github/solve-policy.json',ROOT/'.github/workflows/solve-proposal.yml']},
-              'statementSha256':hashlib.sha256(json.dumps({k:instance[k] for k in ('F','q','A')},sort_keys=True,separators=(',',':')).encode()).hexdigest(),
-              'sourceHashes':{n:hashlib.sha256(b).hexdigest() for n,b in files.items()}}
+              'checkedAt':datetime.now(timezone.utc).isoformat()}
     args.output.mkdir(parents=True,exist_ok=True)
     if args.structure_only:
         report['result']='structure-only'

@@ -6,11 +6,11 @@ Contributor instructions are in [CONTRIBUTING.md](CONTRIBUTING.md); this documen
 
 The project uses direct GitHub PRs with protected Lean verification, GitHub merge permissions, and a trusted publication step. GitHub provides contributor identities, PRs, and discussions; the website backend handles GitHub sign-in and discussion access. Contribution format and checks are documented in [CONTRIBUTING.md](CONTRIBUTING.md); the verification and publication procedure is described below.
 
-Each instance lives permanently in `data/<id>/`. Its protected target and prospective context exist before a solve. A solve PR adds proof sources, an explanation, and optional witness data to that same folder. After a checked merge, the publisher adds an acceptance receipt. The atlas, explanations, PR links, and leaderboard are generated from the accepted sources and receipts. `/data` contains mathematical statements, context, proofs, and acceptance records. It contains no rendering settings or derived coefficient lists. The content builder expands exact expressions into coefficients and writes browser records and rendered explanations to `assets/atlas/`, which is untracked build output. Do not commit this directory.
+Each instance lives permanently in `data/<id>/`. Its protected target and prospective context exist before a solve. A solve PR adds proof sources, an explanation, and optional witness data to that same folder. After a checked merge, the publisher adds an acceptance record. The atlas, explanations, PR links, and leaderboard are generated from the accepted sources and records. `/data` contains mathematical statements, context, proofs, and acceptance records. It contains no rendering settings or derived coefficient lists. The content builder expands exact expressions into coefficients and writes browser records and rendered explanations to `assets/atlas/`, which is untracked build output. Do not commit this directory.
 
 `formal/lean/` pins the shared contract, Lean toolchain, and mathlib manifest. `scripts/proposals/` implements source restrictions, sandboxed compilation, kernel replay, theorem/axiom auditing, and publication. `.github/workflows/` invokes trusted base-branch code; candidate workflow and setup files are never executed as part of solve verification.
 
-Treat the shared formal library as the Lean counterpart of the book: retain organized, generally useful machinery with explicit scope and concrete applications; keep failed experiments and instance-specific calculations out of it. Reusable constructions belong under `formal/lean/HodgeComputer/Constructions/` when they support concrete applications. Extract accepted machinery through a maintenance PR, preserving its attribution and the original acceptance-backed instance files. New solve PRs import the maintained library and supply their target-specific proof. Build changed shared modules, replay them with `leanchecker`, and check an application against the protected target before merging library changes. The protected dependency-cache key includes the shared Lean sources as well as the pinned toolchain and manifest.
+Treat the shared formal library as the Lean counterpart of the book: retain organized, generally useful machinery with explicit scope and concrete applications; keep failed experiments and instance-specific calculations out of it. Reusable constructions belong under `formal/lean/HodgeComputer/Constructions/` when they support concrete applications. Extract accepted machinery through a maintenance PR, preserving its attribution. Maintain existing instance proofs against the current verifier and recheck affected applications in CI. New solve PRs import the maintained library and supply their target-specific proof. Build changed shared modules, replay them with `leanchecker`, and check an application against the protected target before merging library changes. The protected dependency-cache key includes the shared Lean sources as well as the pinned toolchain and manifest.
 
 `docs/index.json` and its Markdown sources define the expandable technical chapters. The content builder produces `docs/*.html` and exports the homepage view from `slices/home.json` to `assets/home-scene.json`. Like `assets/atlas/`, these are untracked build outputs; do not commit them. `assets/` contains local runtime scripts, styles, fonts, and meshes. Navigation is parsed by `assets/routes.js`; `leaderboard-view.js` owns ranking requests and rendering, and `discussion-drafts.js` owns drafts across panel mounts. The app and renderer consume `formalStatus` for accepted proof status, independently of available divisor data. `slices/` is the authoritative source for per-instance planes, cameras, and mesh selections; `slices/divisors/` holds display-divisor formulas. `assets/atlas-presentation.json` holds category labels, curated formula typesetting, and its definitions. The atlas and mathematical content are static; sign-in and discussions use the backend API.
 
@@ -20,13 +20,13 @@ Changes on `main` trigger `.github/workflows/deploy-website.yml`, which publishe
 
 The catalogue lists fixed instances of the existence problem in `formal/README.md`. `data/catalogue.json` determines displayed instance numbers; append new instances to preserve existing numbers. Solving an instance does not renumber other entries. The sidebar shows both open and solved targets by descending number. Previous/next navigation follows that same order. These numbers are presentation labels; proofs, discussion mappings, and acceptance records use stable instance IDs. Each instance has an exact statement, motivation, mathematical context, and saved visualization.
 
-A target is open until a checked and merged PR has a validated acceptance receipt. The publisher derives solved status, contributor attribution, and leaderboard credit from that receipt. Solution files are first introduced by their solve PR and remain beside the target after acceptance.
+A target is open until a checked and merged PR has an acceptance record. The publisher derives solved status, contributor attribution, and leaderboard credit from that record. Solution files are first introduced by their solve PR and remain beside the target after acceptance.
 
 Instance descriptions in `why.md` explain the mathematical role of the target against the established state of knowledge. For an open instance, use the cumulative results of the known and solved instances as they stand now. For a solved instance, use the state immediately before its own solution: do not explain it through its own proof or later advances. Exclude discussion progress, proposed constructions, reported searches, and discussion links from both kinds of description. An established result may be explained directly or cited through the book or an applicable earlier accepted construction; removing a discussion link alone does not turn a research report into established context. Keep ongoing investigations in the discussions. The accepted `solution.md` explains the argument and retains its mathematical sources and attribution. `provenance.json` links to the exact statement, mathematical context, discussion, and other atlas targets on the same sextic. Do not treat a restricted negative search as proof of nonexistence.
 
 Before adding a frontier target, screen it against the scope of every established construction, including coordinate changes, source linearity, all-polynomial-source results, finite-cover characters, and proven parameter or pole-order extensions. Breaking one displayed formula or one modular seed is not evidence of escaping the underlying method. Record the precise missing hypothesis and distinguish a known-existence certificate-extraction problem from a new geometric or character boundary. Nearby coefficient variants should not be added merely because their incidence matrices have not yet been calculated. A useful new entry isolates a mathematical obstacle that remains after these checks; an established method may still reveal an unexpected solution later.
 
-A point in the leaderboard records an accepted target, not a claim of a new technique or literature priority. Do not change acceptance criteria retroactively. Progress toward the general even-sextic problem requires extending a method over a sufficiently large parameter family, not simply increasing the number of isolated targets.
+A point in the leaderboard records an accepted target, not a claim of a new technique or literature priority. Progress toward the general even-sextic problem requires extending a method over a sufficiently large parameter family, not simply increasing the number of isolated targets.
 
 Adding or changing targets requires a separate owner-reviewed maintenance PR. Keep the variable order `X0, X1, X2, Y0, Y1, Y2`; check exact rational coefficients, sextic homogeneity, target degree `6q`, and parity under the sign involution. Maintain precise family scope and avoid claiming that a representative example proves a whole family. The catalogue is representative; solving its current entries need not settle the general conjecture.
 
@@ -34,13 +34,13 @@ Meshes are approximations for navigation and exploration. A real slice and camer
 
 ## Leaderboard
 
-The board is generated from validated acceptance receipts. Each distinct accepted instance gives one point to its direct PR author. Equal scores are ordered by when the contributors reached that score: compare the acceptance time (solve PR merge time) of each contributor's latest counted solve, earliest first. Alphabetical login order breaks an exact timestamp tie. Displayed ranks follow that order. Do not edit scores manually or award credit merely for local compilation, an unmerged proof, or a status flag.
+The board is generated from acceptance records. Each distinct accepted instance gives one point to its direct PR author. Equal scores are ordered by when the contributors reached that score: compare the acceptance time (solve PR merge time) of each contributor's latest counted solve, earliest first. Alphabetical login order breaks an exact timestamp tie. Displayed ranks follow that order. Do not edit scores manually or award credit merely for local compilation, an unmerged proof, or a status flag.
 
 The atlas index contains each accepted instance’s contributor and acceptance time. The solve board ranks those records directly; profile lookup reads the same published index. Solve scores and attribution have no GitHub API dependency at runtime. Names and avatars come from GitHub profiles through the existing backend; no contributor receives a local profile override or bundled photograph.
 
 The comments leaderboard uses `/api/comment-leaderboard` on the discussion service. It counts comments and replies across mapped atlas discussions and breaks ties by the earliest time a contributor reached their current count. The service caches identity/timestamp metadata and bounded contributor previews for two minutes; it fetches comment bodies only when an uncached contributor is selected, through `/api/comment-leaderboard/<login>`. GitHub remains the source of truth. The visible board refreshes at most once a minute, including on returning to the tab, including edits and deletions, without a commit or website deployment. Deleted accounts and minimized posts are omitted. Never commit discussion snapshots or generate static comment archives for this feature.
 
-Solver portraits link to the contributor's leaderboard entry; the construction header links to the actual merged PR from its receipt. The explanation records collaborators and prior mathematical sources. Documentation contributions retain their authorship but do not add solve points.
+Solver portraits link to the contributor's leaderboard entry; the construction header links to the actual merged PR from its record. The explanation records collaborators and prior mathematical sources. Documentation contributions retain their authorship but do not add solve points.
 
 ## Verification, sign-off, and publication
 
@@ -56,7 +56,7 @@ The checker generates `HodgeTarget` from the base record, and optional `HodgeWit
 
 Candidate code receives no networking, credentials, or repository write access. Protected target artifacts, candidate artifacts, and the final trusted wrapper have separate write permissions. Linux uses Docker; local macOS checking uses `sandbox-exec`. The pinned toolchain, dependencies, verifier, and OS remain trusted components. Verification fails if isolation is unavailable.
 
-The successful report records exact target/source hashes, base/head commits, the PR author, theorem, witness binding, toolchain, kernel replay, and axiom audit. The workflow posts `solve/lean` on the submitted commit and rejects a result if either PR commit changed during checking. For solve PRs, a green check means the proof passed. Maintenance PRs build the public release; shared Lean changes recheck affected accepted proofs. CI does not request approval or inspect GitHub reviews.
+The CI report records base/head commits, the PR author, theorem, witness binding, toolchain, kernel replay, and axiom audit. The workflow posts `solve/lean` on the submitted commit and rejects a result if either PR commit changed during checking. For solve PRs, a green check means the proof passed. Maintenance PRs build the public release; shared Lean changes recheck affected accepted proofs. CI does not request approval or inspect GitHub reviews.
 
 ### Merge permissions
 
@@ -67,29 +67,26 @@ There is no CI approval gate for solve or maintenance PRs and no approval-dispat
 step. The post-merge publisher relies on GitHub merge permissions too.
 `.github/solve-policy.json` contains verification limits and publication mode.
 
-If publication of an eligible, already-merged solve failed, rerun **Publish accepted
-solve** with its PR number. It reuses the successful Lean check against the original
-merge parents and source files. A changed head or base requires fresh verification
-before merging. This retry cannot turn a failed or unchecked proof into an acceptance.
+If credit recording for an already merged solve failed, rerun **Publish accepted solve** with its PR number. Publication reads the merged PR and records its author, original link, and merge date. CI and repository write permissions govern what may enter main.
 
-Use a **merge commit**, preserving the checked head as its second parent. Merge only against the checked base. Squash/rebase merges and base drift fail publication. When merging through GitHub CLI or an owner script, bind the merge request to the reviewed head SHA. Do not merge another solve until the previous publication commit has landed and the next proof has been checked against current main.
+### Publication and maintained proofs
 
-### Trusted publication
+`publish-solve.yml` runs on a merged PR or an explicit retry. It checks out main and invokes `scripts/proposals/publish.py`. For each newly added solve, it writes `data/<id>/acceptance.json` with exactly these fields:
 
-`publish-solve.yml` runs on a merged PR or an explicit retry. It checks out trusted main and invokes `scripts/proposals/publish.py`. The publisher requires:
+```json
+{
+  "schemaVersion": 2,
+  "githubLogin": "contributor",
+  "acceptedAt": "merge timestamp",
+  "pullRequest": {"number": 123, "url": "original PR URL"}
+}
+```
 
-- A merged PR into this repository's main branch. GitHub controls who may merge.
-- A successful protected workflow run associated with the exact checked head and base.
-- Matching workflow/verifier hashes and a matching preserved verification report.
-- A merge commit whose parents are exactly the checked base and head.
-- The same target and all proof, witness, and explanation hashes in the merged checkout.
-- Contributor attribution matching the PR author.
+These files record attribution. They contain no source hashes, verifier versions, workflow receipts, or stored claims of verification. The publication step does not inspect CI artifacts or require particular merge parents. Retries preserve existing attribution. The PR's `solve/publication` status reports whether recording credit succeeded; website deployment follows.
 
-The PR receives a separate `solve/publication` status linking to this workflow. It reports pending, successful, or failed publication independently of `solve/lean`, so a post-merge failure is visible from the PR. It then writes `data/<id>/acceptance.json` and runs the content builder and validators. The builder derives solution metadata from the receipt and original witness in memory. The workflow commits the acceptance receipt to main. Browser records and rendered instance explanations remain build output. A failed or interrupted publication leaves no accepted solve in published output; rerun the workflow once the cause is resolved. The generated acceptance record is durable even after transient CI artifacts expire.
+Accepted proof sources are maintained in ordinary maintenance PRs. `scripts/check-library.py` rechecks changed proofs, changed witnesses or targets, and applications affected by shared verifier or library changes. Keep the original contributor, PR, and acceptance date when maintaining a solve. Editorial changes to `solution.md` require content checks but no Lean run. Git retains the earlier revisions.
 
-Existing acceptance receipts and their historical authorization fields are preserved. Publication retries validate verifier sources against the original checked base, so older reports remain valid after the authorization code is removed.
-
-The atlas and leaderboard read generated files and need no GitHub service at runtime. Sign-in and discussions use the backend API. The publisher never awards credit from editable claimed identities, an unmerged proof, or a status flag. After acceptance, edit `solution.md` as ordinary reviewed documentation. The site renders the current explanation; the original submission remains in Git history and its acceptance record. Editorial changes do not require another Lean run or a new acceptance record. Changes to the target, Lean sources, proof manifest, or witness require renewed verification.
+The website builds and publishes the current contents of main. It does not authenticate historical proof sources or repeat pre-merge verification. Instance definitions remain mathematical; contributor metadata stays in the acceptance files. The atlas and leaderboard need no GitHub service at runtime.
 
 ### Release validation
 
@@ -98,12 +95,13 @@ and packages the public artifact. `validate-records.py` checks the exact records
 saved slices, and referenced assets; `check-content.py` renders formulas and checks
 local links. The build generates current files directly, without a committed
 revision hash or a stale-output gate. These checks do not grant formal acceptance.
-For shared Lean changes, `scripts/check-library.py --base <commit>` builds and
-replays changed modules and their dependents, then rechecks affected accepted
+For Lean maintenance, `scripts/check-library.py --base <commit>` builds and
+replays changed shared modules and their dependents, then rechecks affected accepted
 applications against their protected targets. CI first builds the shared library
 once and passes those compiled outputs to the verification jobs. Each affected
 instance then has an independent job, alongside shared-module kernel replay,
-with no workflow concurrency cap.
+with no workflow concurrency cap. The deploy workflow builds and publishes main
+without rerunning these checks.
 
 ## Visualization maintenance
 
@@ -135,7 +133,7 @@ Meshes are generated offline. The repository ships the saved planes, cameras, an
 
 Check finite values, normals, index bounds, projected extent, edge lengths, and polynomial residuals. Reject non-real phase restrictions rather than silently taking a real part. Compare refinements around narrow joins: a finite grid can miss small features. Use exact or direct polynomial evaluation to cross-check compact denominator evaluators.
 
-A solve can prove the existential contract without the optional `witness.json` export. Such a proof still earns credit; its denominator must be extracted separately before it can be highlighted. A maintenance change may add `slices/divisors/<id>.json`, citing the relevant definitions and supplying an exact polynomial program. This presentation file does not modify the accepted proof, receipt, witness, or credit. It must not describe an arbitrary geometric curve as the certificate divisor.
+A solve can prove the existential contract without the optional `witness.json` export. Such a proof still earns credit; its denominator must be extracted separately before it can be highlighted. A maintenance change may add `slices/divisors/<id>.json`, citing the relevant definitions and supplying an exact polynomial program. This presentation file does not modify the accepted proof, acceptance record, witness, or credit. It must not describe an arbitrary geometric curve as the certificate divisor.
 
 Quadric contact · broken reflections uses the exact rational norm exported by
 `scripts/export-quadric-contact-divisor.py`; its construction is explained in

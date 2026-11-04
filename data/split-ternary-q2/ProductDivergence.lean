@@ -300,7 +300,7 @@ theorem weighted_divergence (hOrdinary : OrdinaryPrimitive) (hTheta : ThetaPrimi
 /-- Conditional assembly: the two actual companion primitives are the only
 remaining existence inputs; no such primitives are asserted here. -/
 theorem certificate_of_companion_primitives (hOrdinary : OrdinaryPrimitive) (hTheta : ThetaPrimitive) :
-    HodgeComputer.HasCertificate SplitTernaryPhysical.physicalF SplitTernaryPhysical.physicalA 2 := by
+    HodgeComputer.HasCertificate SplitTernaryPhysical.physicalF SplitTernaryPhysical.physicalA 6 2 := by
   obtain ⟨W,hW⟩ := weighted_divergence hOrdinary hTheta
   exact SplitTernaryPhysical.physical_certificate_of_weighted_divergence W hW
 

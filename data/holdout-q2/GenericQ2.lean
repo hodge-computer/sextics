@@ -110,8 +110,11 @@ theorem D_norm_fiber {R : Type*} [CommRing R] (φ : K →+* R) :
         (1 : Matrix (Fin 27) (Fin 27) (Polynomial R)) -
         ((GenericQuadratic.representation (lineE+lineF)).map φ).map
           (Polynomial.C : R →+* Polynomial R)).det := by
-  rw [D_eq, map_mul, GenericQuadratic.D_norm_fiber]
-  simp [map_ofNat]
+  change MvPolynomial.eval₂Hom (Polynomial.C.comp φ) ![1, 1, Polynomial.X, 0]
+    (C (6:K) * GenericQuadratic.D) = _
+  simp only [map_mul, MvPolynomial.eval₂Hom_C, RingHom.comp_apply, map_ofNat]
+  exact congrArg (fun P : Polynomial R => 6 * P) (GenericQuadratic.D_norm_fiber φ)
+
 
 theorem certificate : D ≠ 0 ∧ D.IsHomogeneous 27 ∧
     (∀ i, (N i).IsHomogeneous 30) ∧

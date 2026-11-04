@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import HodgeTarget
 import HodgeComputer.Constructions.HoldoutCover.GeneralizedCover
 
@@ -18,8 +19,8 @@ local instance : CharZero CommonCoverFunctionField :=
   charZero_of_injective_ringHom (f := algebraMap ℂ CommonCoverFunctionField)
     (algebraMap ℂ CommonCoverFunctionField).injective
 
-def target : HodgeComputer.Poly := (X 1)^3*(X 4)^3
-def reflected : HodgeComputer.Poly := (X 1)^3*(X 4)
+def target : HodgeComputer.Sextic.Poly := (X 1)^3*(X 4)^3
+def reflected : HodgeComputer.Sextic.Poly := (X 1)^3*(X 4)
 def quotientSource : MvPolynomial (Fin 5) (FermatCoefficientField ℂ) :=
   C (-(genericBaseBeta ℂ)^0/(2*(genericBaseAlpha ℂ)^5))*(X 1)^3*(X 4)
 
@@ -53,8 +54,8 @@ theorem partial_binding : actualCoverJacobian.det*quotientCoverFieldMap (ρq (in
   simp only [map_zero,mul_zero,zero_mul,sub_zero]
 
 theorem certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q := by
-  change HodgeComputer.HasCertificate holdoutSextic target 1
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
+  change HodgeComputer.HasCertificate holdoutSextic target 6 1
   apply certificate_of_source_pair target reflected quotientSource (coverT^2)
   · simpa only [target, pow_one] using ((isHomogeneous_X_pow (R := ℂ) (1 : Fin 6) 3).mul (isHomogeneous_X_pow (R := ℂ) (4 : Fin 6) 3))
   · exact trace_square

@@ -9,33 +9,99 @@ import Mathlib.Tactic
 noncomputable section
 namespace HodgeComputer
 open MvPolynomial
-abbrev Poly := MvPolynomial (Fin 6) ℂ
-abbrev Coeff := MvPolynomial (Fin 5) ℂ
+abbrev AmbientPoly (n : ℕ) := MvPolynomial (Fin (n + 1)) ℂ
 
 /-- Exact cleared defect, with the pole parameter retained. -/
-def defect (F A D : Poly) (q : ℕ) (N : Fin 6 → Poly) : Poly :=
-  A * D^2 - (q : Poly) * D * HodgeTestbed.directional F N +
+def defect {n : ℕ} (F A D : AmbientPoly n) (q : ℕ)
+    (N : Fin (n + 1) → AmbientPoly n) : AmbientPoly n :=
+  A * D^2 - (q : AmbientPoly n) * D * HodgeTestbed.directional F N +
     F * HodgeTestbed.divergenceNumerator D N
 
-/-- Finite sufficient witness for the full existential challenge, including non-strict fields.
-There is no degree bound, positivity, normalization, or field-parity restriction. -/
-structure Verify (F A : Poly) (q d : ℕ) (D : Poly) (N : Fin 6 → Poly) (Q : Poly) : Prop where
+/-- Homogeneity with an integer degree. Negative degrees permit only zero. -/
+def Homogeneous {σ : Type*} (P : MvPolynomial σ ℂ) (k : ℤ) : Prop :=
+  ∀ ⦃m : σ →₀ ℕ⦄, coeff m P ≠ 0 → (m.degree : ℤ) = k
+
+theorem Homogeneous.of_isHomogeneous {σ : Type*} {P : MvPolynomial σ ℂ} {k : ℕ}
+    (h : P.IsHomogeneous k) : Homogeneous P (k : ℤ) := by
+  intro m hm
+  exact_mod_cast (show m.degree = k by
+    simpa only [Finsupp.degree_eq_weight_one, Pi.one_def] using h hm)
+
+theorem Homogeneous.isHomogeneous {σ : Type*} {P : MvPolynomial σ ℂ} {k : ℤ}
+    (h : Homogeneous P k) (hk : 0 ≤ k) : P.IsHomogeneous k.toNat := by
+  intro m hm
+  have hd := h hm
+  have he : m.degree = k.toNat := by omega
+  simpa only [Finsupp.degree_eq_weight_one, Pi.one_def] using he
+
+theorem Homogeneous.eq_zero_of_neg {σ : Type*} {P : MvPolynomial σ ℂ} {k : ℤ}
+    (h : Homogeneous P k) (hk : k < 0) : P = 0 := by
+  ext m
+  rw [coeff_zero]
+  by_contra hm
+  have hd := h hm
+  omega
+
+theorem homogeneous_zero {σ : Type*} (k : ℤ) : Homogeneous (0 : MvPolynomial σ ℂ) k := by
+  intro m hm
+  exact False.elim (hm (coeff_zero m))
+
+theorem Homogeneous.add {σ : Type*} {P Q : MvPolynomial σ ℂ} {k : ℤ}
+    (hP : Homogeneous P k) (hQ : Homogeneous Q k) : Homogeneous (P + Q) k := by
+  by_cases hk : 0 ≤ k
+  · have h := Homogeneous.of_isHomogeneous ((hP.isHomogeneous hk).add (hQ.isHomogeneous hk))
+    simpa only [Int.toNat_of_nonneg hk] using h
+  · rw [hP.eq_zero_of_neg (by omega), hQ.eq_zero_of_neg (by omega), zero_add]
+    exact homogeneous_zero k
+
+theorem Homogeneous.mul {σ : Type*} {P Q : MvPolynomial σ ℂ} {k l : ℤ}
+    (hP : Homogeneous P k) (hQ : Homogeneous Q l) : Homogeneous (P * Q) (k + l) := by
+  by_cases hk : 0 ≤ k
+  · by_cases hl : 0 ≤ l
+    · have h := Homogeneous.of_isHomogeneous ((hP.isHomogeneous hk).mul (hQ.isHomogeneous hl))
+      simpa only [Nat.cast_add, Int.toNat_of_nonneg hk, Int.toNat_of_nonneg hl] using h
+    · rw [hQ.eq_zero_of_neg (by omega), mul_zero]
+      exact homogeneous_zero _
+  · rw [hP.eq_zero_of_neg (by omega), zero_mul]
+    exact homogeneous_zero _
+
+theorem Homogeneous.C_mul {σ : Type*} {P : MvPolynomial σ ℂ} {k : ℤ}
+    (h : Homogeneous P k) (c : ℂ) : Homogeneous (C c * P) k := by
+  simpa using (Homogeneous.of_isHomogeneous (isHomogeneous_C (σ := σ) c)).mul h
+
+theorem Homogeneous.rename {σ τ : Type*} {P : MvPolynomial σ ℂ} {k : ℤ}
+    (h : Homogeneous P k) (f : σ → τ) : Homogeneous (MvPolynomial.rename f P) k := by
+  by_cases hk : 0 ≤ k
+  · simpa only [Int.toNat_of_nonneg hk] using
+      Homogeneous.of_isHomogeneous ((h.isHomogeneous hk).rename_isHomogeneous (f := f))
+  · rw [h.eq_zero_of_neg (by omega), map_zero]
+    exact homogeneous_zero _
+
+/-- A rational-vector-field certificate in projective dimension `n`, for a
+nonzero degree-`d` hypersurface and pole parameter `q`. All subtractions in
+homogeneity degrees are in the integers. The denominator degree is unrestricted. -/
+structure Verify {n : ℕ} (F A : AmbientPoly n) (d q : ℕ) (D : AmbientPoly n)
+    (N : Fin (n + 1) → AmbientPoly n) (Q : AmbientPoly n) : Prop where
+  hypersurface_ne_zero : F ≠ 0
+  hypersurface_homogeneous : F.IsHomogeneous d
+  source_homogeneous : Homogeneous A ((d : ℤ) * (q + 1) - (n + 1))
   denominator_ne_zero : D ≠ 0
-  denominator_homogeneous : D.IsHomogeneous d
-  numerator_homogeneous : ∀ i, (N i).IsHomogeneous (d + 6*q - 5)
+  denominator_homogeneous : D.IsHomogeneous D.totalDegree
+  numerator_homogeneous : ∀ i, Homogeneous (N i) ((D.totalDegree : ℤ) + d*q - n)
   denominator_legal : IsRelPrime F D
   identity : defect F A D q N = F^(q+1) * Q
 
-def HasCertificate (F A : Poly) (q : ℕ) : Prop :=
-  ∃ d D N Q, Verify F A q d D N Q
+def HasCertificate {n : ℕ} (F A : AmbientPoly n) (d q : ℕ) : Prop :=
+  ∃ D N Q, Verify F A d q D N Q
 
 /-- Normalization is a sufficient way of supplying the general cleared identity. -/
-theorem normalized_identity {F A D Q : Poly} {q : ℕ} {N : Fin 6 → Poly}
-    (h1 : (q : Poly) * HodgeTestbed.directional F N = A * D)
+theorem normalized_identity {n : ℕ} {F A D Q : AmbientPoly n} {q : ℕ}
+    {N : Fin (n + 1) → AmbientPoly n}
+    (h1 : (q : AmbientPoly n) * HodgeTestbed.directional F N = A * D)
     (h2 : HodgeTestbed.divergenceNumerator D N = F^q * Q) :
     defect F A D q N = F^(q+1) * Q := by
   unfold defect
-  rw [show (q : Poly) * D * HodgeTestbed.directional F N = D * (A*D) by rw [← h1]; ring, h2]
+  rw [show (q : AmbientPoly n) * D * HodgeTestbed.directional F N = D * (A*D) by rw [← h1]; ring, h2]
   ring
 
 /-- Coprimality ascends from a univariate specialization when F has unit leading coefficient.
@@ -60,9 +126,9 @@ theorem relPrime_of_retract {R S : Type*} [CommRing R] [CommRing S]
   simpa only [← RingHom.comp_apply, hg, RingHom.id_apply] using hu
 
 /-- Clearing D² is valid in any localization in which D is a unit. -/
-theorem localization_identity {S : Type*} [CommRing S] (f : Poly →+* S)
-    {F A D Q : Poly} {q d : ℕ} {N : Fin 6 → Poly}
-    (h : Verify F A q d D N Q) (u : S) (hu : f D * u = 1) :
+theorem localization_identity {n : ℕ} {S : Type*} [CommRing S] (f : AmbientPoly n →+* S)
+    {F A D Q : AmbientPoly n} {d q : ℕ} {N : Fin (n + 1) → AmbientPoly n}
+    (h : Verify F A d q D N Q) (u : S) (hu : f D * u = 1) :
     f A - (q : S) * f (HodgeTestbed.directional F N) * u +
       f F * f (HodgeTestbed.divergenceNumerator D N) * u^2 =
       (f F)^(q+1) * (f Q * u^2) := by

@@ -60,7 +60,7 @@ theorem physical_residue_solution : ∃ w : Fin 5 → FunctionField,
   rw [hc,physical_source_transport]
   linear_combination cOne*cTwo*ratio^3*source_transport
 
-theorem certificate : HodgeComputer.HasCertificate sextic source 1 := by
+theorem certificate : HodgeComputer.HasCertificate sextic source 6 1 := by
   obtain ⟨w,hw⟩ := physical_residue_solution
   exact certificate_of_residue_solution w hw
 

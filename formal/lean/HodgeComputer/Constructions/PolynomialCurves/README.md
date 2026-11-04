@@ -11,7 +11,7 @@ disclose AI assistance; this extraction was prepared with Codex assistance for
 
 The original namespaces are retained. Import the shared version of a helper
 instead of the identically named declarations in its original submission.
-Accepted instance files remain unchanged.
+Accepted instance files retain their attribution and are maintained against the current verifier.
 
 | Module | Interface | Application obligation |
 | --- | --- | --- |

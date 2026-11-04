@@ -24,13 +24,13 @@ namespace Submission
 open ReflectionCoupledFano
 
 theorem certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q := by
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
   obtain ⟨I, hI, hfinite, _⟩ := Arithmetic.exists_generic_field
   letI : I.IsMaximal := hI
   letI : Module.Finite Arithmetic.GenericEndpoint (Arithmetic.CoefficientField I) := hfinite
   have h := physical_certificate_of_quartic_family (Arithmetic.arithmeticFamily I)
   rw [protected_F, protected_A, protected_q]
-  simpa only [Arithmetic.complexMap_coupling] using h
+  simpa only [Arithmetic.complexMap_coupling, HodgeSubmission.d] using h
 
 end Submission
 

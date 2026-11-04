@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import Proposal.DeformedCoverCoordinates
 import HodgeComputer.Constructions.HoldoutCover.CoverSourceBinding
 
@@ -23,13 +24,13 @@ lemma physical_normal_polynomial : integerPartial 0 HodgeSubmission.F=
 lemma physical_second_normal_polynomial : integerPartial 0 (integerPartial 0 HodgeSubmission.F)=
     30*X 0^4+6*X 0*X 1*X 3*X 4+C (1/14 : ℂ)*(20*X 0^3*X 1) := by
   rw [physical_normal_polynomial]
-  have h2 : MvPolynomial.pderiv (0 : Fin 6) (2 : HodgeComputer.Poly)=0 :=
+  have h2 : MvPolynomial.pderiv (0 : Fin 6) (2 : HodgeComputer.Sextic.Poly)=0 :=
     Derivation.map_natCast _ 2
-  have h3 : MvPolynomial.pderiv (0 : Fin 6) (3 : HodgeComputer.Poly)=0 :=
+  have h3 : MvPolynomial.pderiv (0 : Fin 6) (3 : HodgeComputer.Sextic.Poly)=0 :=
     Derivation.map_natCast _ 3
-  have h5 : MvPolynomial.pderiv (0 : Fin 6) (5 : HodgeComputer.Poly)=0 :=
+  have h5 : MvPolynomial.pderiv (0 : Fin 6) (5 : HodgeComputer.Sextic.Poly)=0 :=
     Derivation.map_natCast _ 5
-  have h6 : MvPolynomial.pderiv (0 : Fin 6) (6 : HodgeComputer.Poly)=0 :=
+  have h6 : MvPolynomial.pderiv (0 : Fin 6) (6 : HodgeComputer.Sextic.Poly)=0 :=
     Derivation.map_natCast _ 6
   norm_num [integerPartial_apply,MvPolynomial.pderiv_pow,MvPolynomial.pderiv_mul,
     Pi.single_apply,Fin.ext_iff,h2,h3,h5,h6]

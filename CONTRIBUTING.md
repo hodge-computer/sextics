@@ -48,7 +48,7 @@ The manifest has exactly these fields when no JSON witness is submitted:
 
 With `witness.json`, add exactly one further field: `"witnessTheorem": "Submission.witness"`.
 
-The trusted publisher adds `acceptance.json` and derives the rendered content, the atlas status, and leaderboard credit **after** an eligible merge. Do not submit these files or manually edit generated JSON/HTML. Attribution, PR URLs, and acceptance dates come from the reviewed GitHub event, not editable manifest fields. After merging, the PR's separate `solve/publication` check reports whether acceptance and leaderboard updates were recorded, with a link to any failure. Website deployment follows successful publication.
+The trusted publisher adds `acceptance.json` and derives the rendered content, the atlas status, and leaderboard credit **after** an eligible merge. Do not submit these files or manually edit generated JSON/HTML. Attribution, PR URLs, and acceptance dates are recorded from the merged GitHub PR, separately from mathematical instance definitions. After merging, the PR's separate `solve/publication` check reports whether acceptance and leaderboard updates were recorded, with a link to any failure. Website deployment follows successful publication.
 
 ### Protected Lean statement
 
@@ -58,13 +58,14 @@ The verifier generates `HodgeTarget` from the **base branch's** exact target and
 import HodgeTarget
 
 theorem Submission.certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q := by
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A
+      HodgeSubmission.d HodgeSubmission.q := by
   -- Supply a complete proof here.
 ```
 
 This is a statement skeleton, not a proof. The manifest names the actual fully qualified theorem. Do not add parameters, assumptions, placeholders, or replacement definitions of the protected target. Do not submit `HodgeTarget.lean`.
 
-`HodgeComputer.Verify` is the finite witness interface over complex coefficients: a nonzero homogeneous denominator, six numerators of the required degrees, relative primality, and the full cleared divisibility identity. A nonzero quotient is allowed; the problem is not restricted to strict certificates or bounded denominator degrees. A nonconstructive argument may prove the same existential statement without exporting a witness.
+`HodgeComputer.Verify` is the finite witness interface over complex coefficients. It checks the hypersurface and source homogeneity, a nonzero homogeneous denominator, numerator degrees, relative primality, and the full cleared divisibility identity. The protected catalogue target specializes the general contract to `n=5` and `d=6`; `d` denotes the degree of `F`. All degree subtractions are in the integers. A nonzero quotient is allowed; the problem is not restricted to strict certificates or bounded denominator degrees. A nonconstructive argument may prove the same existential statement without exporting a witness.
 
 #### Optional displayed witness
 
@@ -72,14 +73,13 @@ This is a statement skeleton, not a proof. The manifest names the actual fully q
 
 ```json
 {
-  "d": 4,
   "D": "exact polynomial expression",
   "N": ["N0", "N1", "N2", "N3", "N4", "N5"],
   "Q": "exact polynomial expression"
 }
 ```
 
-The strings above are placeholders. Use actual polynomial expressions in `X0, X1, X2, Y0, Y1, Y2`, integer literals, `+`, `-`, `*`, nonnegative integer powers `**`, and rational coefficients formed by division by a nonzero integer. No floats, function calls, new variables, or polynomial denominators are accepted. `d` is a nonnegative integer and `N` has exactly six entries. Zero components are written `"0"`.
+The strings above are placeholders. Use actual polynomial expressions in `X0, X1, X2, Y0, Y1, Y2`, integer literals, `+`, `-`, `*`, nonnegative integer powers `**`, and rational coefficients formed by division by a nonzero integer. No floats, function calls, new variables, or polynomial denominators are accepted. `N` has exactly six entries; the denominator degree is determined by `D` itself. Zero components are written `"0"`.
 
 The verifier creates protected definitions in `HodgeWitness`. In addition to the existential theorem, prove:
 
@@ -87,8 +87,8 @@ The verifier creates protected definitions in `HodgeWitness`. In addition to the
 import HodgeWitness
 
 theorem Submission.witness :
-    HodgeComputer.Verify HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q
-      HodgeWitness.d HodgeWitness.D HodgeWitness.N HodgeWitness.Q := by
+    HodgeComputer.Verify HodgeSubmission.F HodgeSubmission.A
+      HodgeSubmission.d HodgeSubmission.q HodgeWitness.D HodgeWitness.N HodgeWitness.Q := by
   -- Supply the proof for these exact exported polynomials.
 ```
 
@@ -102,7 +102,7 @@ Use the [shared constructions](formal/README.md#reusable-constructions) when the
 
 Ordinary declarations and tactic proofs are accepted. Custom executable extensions, `axiom`, `sorry`, `admit`, and unchecked native decision procedures are refused. Shared infrastructure changes need a separate maintenance PR. Do not submit binaries, compiled artifacts, symlinks, executable scripts, Lake configuration, nested directories, or unrelated files.
 
-The complete committed diff must consist solely of newly added permitted solution files in **one existing instance folder**. Edits to `instance.rec`, `why.md`, the leaderboard, the website, the verifier, workflows, or any other existing file fail validation. A PR without a solve is treated as maintenance and checked by Repository build. CI does not require an approving review or workflow sign-off; GitHub repository permissions control merging.
+The complete committed diff must consist solely of newly added permitted solution files in **one existing instance folder**. Edits to `instance.rec`, `why.md`, the leaderboard, the website, the verifier, workflows, or any other existing file fail validation. A PR maintaining an already accepted solve, or making other source changes without adding a new solve, is checked by Repository build. Changed proof sources and affected applications of shared Lean changes are reverified. CI does not require an approving review or workflow sign-off; GitHub repository permissions control merging.
 
 Limits are in `.github/solve-policy.json`: 64 files, 16 MiB of source, a 60-minute proof budget, and 14 GiB memory. The memory budget leaves room for the operating system and runner services on GitHub's free 16 GB Linux runners for public repositories. The allowed axiom set is `propext`, `Classical.choice`, and `Quot.sound`.
 
@@ -149,13 +149,13 @@ import json, sys, tempfile
 from pathlib import Path
 import yaml
 sys.path.insert(0, "scripts/proposals")
-from acceptance import accepted_sources
+from files import proof_files
 from check import ROOT, module_order
 from sandbox import verify
 
 instance_id = "your-instance-id"
 folder = ROOT / "data" / instance_id
-files = {name: (folder / name).read_bytes() for name in accepted_sources(folder)}
+files = {name: (folder / name).read_bytes() for name in proof_files(folder)}
 manifest = json.loads(files["proof.json"])
 instance = yaml.safe_load((folder / "instance.rec").read_text())
 policy = json.loads((ROOT / ".github/solve-policy.json").read_text())
@@ -172,7 +172,7 @@ This checks the proof against the checkout's target and exports logs, without co
 
 The protected workflow compiles in an OS sandbox, replays every submitted module with `leanchecker`, and audits the exact theorem and transitive axioms. Proposal code receives no network access, repository write access, or GitHub credentials. A green `solve/lean` status means verification passed and the PR is ready for the owner to merge. Merge authorization is controlled by GitHub repository permissions, independently of CI. No separate approving review or workflow sign-off is required. An updated PR commit or changed base requires fresh checks before merging.
 
-The owner merges the checked head with a merge commit. The trusted publication workflow then validates the successful run, source hashes, unchanged target, contributor identity, and merge parents. It writes an acceptance receipt and rebuilds the website and leaderboard. The instance remains open if publication fails; fix the cause and rerun publication rather than editing status flags. See [verification and owner sign-off](MAINTAINING.md#verification-sign-off-and-publication).
+The owner merges the checked change. The publication workflow records the PR author, original PR link, and merge date in `acceptance.json`. The website derives status and credit from the current files on main. If recording credit fails, rerun publication for that PR. See [verification and owner sign-off](MAINTAINING.md#verification-sign-off-and-publication).
 
 ## Discuss an instance
 

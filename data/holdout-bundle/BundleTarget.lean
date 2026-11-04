@@ -18,8 +18,8 @@ theorem protected_source : HodgeSubmission.A = Abundle := by
 theorem protected_pole : HodgeSubmission.q = 1 := rfl
 
 theorem protected_certificate_of_bundle
-    (h : HodgeComputer.HasCertificate holdoutSextic Abundle 1) :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q := by
+    (h : HodgeComputer.HasCertificate holdoutSextic Abundle 6 1) :
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
   rw [protected_polynomial, protected_source, protected_pole]
   exact h
 

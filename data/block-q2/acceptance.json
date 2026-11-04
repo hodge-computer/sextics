@@ -1,64 +1,9 @@
 {
-  "schemaVersion": 1,
-  "formalAcceptance": true,
-  "repository": "hodge-computer/sextics",
-  "instanceId": "block-q2",
+  "schemaVersion": 2,
   "githubLogin": "benediamond",
-  "submittedAt": "2026-10-15T16:54:01Z",
   "acceptedAt": "2026-10-16T01:00:21Z",
-  "publishedAt": "2026-10-16T01:00:42.351486+00:00",
   "pullRequest": {
     "number": 38,
-    "url": "https://github.com/hodge-computer/sextics/pull/38",
-    "headCommit": "de7cbf01ce270766d9c1af2ce5b6bbdb4803dbdb",
-    "baseCommit": "0ba48dcec97ea4184c181eeb14efea0a95f1f9ae",
-    "mergeCommit": "8b5d02544edc8cd7058b5f4cb021924d0369a3f5"
-  },
-  "run": {
-    "id": 38832019390,
-    "url": "https://github.com/hodge-computer/sextics/actions/runs/38832019390",
-    "workflowPath": ".github/workflows/solve-proposal.yml",
-    "conclusion": "success"
-  },
-  "verification": {
-    "schemaVersion": 1,
-    "mode": "live",
-    "instanceId": "block-q2",
-    "pullRequest": 38,
-    "githubLogin": "benediamond",
-    "baseCommit": "0ba48dcec97ea4184c181eeb14efea0a95f1f9ae",
-    "headCommit": "de7cbf01ce270766d9c1af2ce5b6bbdb4803dbdb",
-    "checkedAt": "2026-10-16T00:57:33.043022+00:00",
-    "formalAcceptance": false,
-    "requiresOwnerMerge": true,
-    "verifierSha256": {
-      "scripts/proposals/check.py": "9005a1dec881c3c1e5d8151bb8a33aa0bd203872ad5e174f51dbf28c43bca64e",
-      "scripts/proposals/sandbox.py": "c8a1febc230b57b5666667ba82da588e912c3b6262ea3d8299bb5f53031b71d9",
-      "scripts/proposals/Audit.lean": "d1a381c70025c6de519e0b0e5e4da0db72eeba0881b843d9b9cd0e9dd459ed9f",
-      "formal/lean/HodgeComputer/Verify.lean": "007f24d3b7ac642e1bcd6adddd0a1512791c32e0e5882cd741c096c6d7e583c3",
-      "formal/lean/lake-manifest.json": "b29b4951d067b4d51a554f1735ac67640b96dbedf07ab3d49a847b67a89b9c6e",
-      ".github/solve-policy.json": "e0b12665c70fd50c3a228fd59e61c129b1d357b9f4ebde7da1072fbcdc35cecc",
-      ".github/workflows/solve-proposal.yml": "f3d5270cb25c35f9ac96d5057f154100092d240cbad788758d69a907ec247e53"
-    },
-    "statementSha256": "5a952610d1a4f073279552d05f278812e51e7ffbe29d0ec8f80967f6153ece48",
-    "sourceHashes": {
-      "Solution.lean": "552ff86c356b718e9cdf90bbdc4494593f62a734179b3925976b7ef3513a1251",
-      "Witness.lean": "2de4097e90abd8a596bb89984a069a81ddb242cb4871d0b7169394a9125913f9",
-      "proof.json": "d80d10cf41e9c97b9c98bb4247267d25181c45b6ca700601953749c60189eab7",
-      "solution.md": "2d4cc42d7418e0086069acd6f1f05af79687f793b10c92c92fd8df6dd2164427",
-      "witness.json": "3557df1b8f3bb204b3332dd153fbd87dc532c27d83a2ae54eb859698e8cb6ff3"
-    },
-    "leanVersion": "Lean (version 4.33.0, x86_64-unknown-linux-gnu, commit d8b18978322de05a8f3dba51ef03cf5461676c17, Release)",
-    "kernelReplay": true,
-    "axioms": [
-      "propext",
-      "Quot.sound",
-      "Classical.choice"
-    ],
-    "witnessChecked": true,
-    "theorem": "Submission.certificate",
-    "sandbox": "docker-no-network",
-    "toolchain": "leanprover/lean4:v4.33.0",
-    "result": "lean-checked-awaiting-owner"
+    "url": "https://github.com/hodge-computer/sextics/pull/38"
   }
 }

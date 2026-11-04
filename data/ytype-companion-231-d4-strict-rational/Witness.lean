@@ -1,4 +1,4 @@
-import HodgeComputer.Verify
+import HodgeComputer.Sextic
 
 set_option maxHeartbeats 2000000
 
@@ -16,7 +16,7 @@ noncomputable section
 
 namespace HodgeComputer.Instances.YtypeCompanion231D4StrictRational
 
-open MvPolynomial HodgeTestbed
+open MvPolynomial HodgeTestbed HodgeComputer.Sextic
 
 def F : Poly := (MvPolynomial.C (1 : ℂ)) * (MvPolynomial.X 0)^6 +
     (MvPolynomial.C (2 : ℂ)) * (MvPolynomial.X 0)^4 * (MvPolynomial.X 3)^2 +
@@ -330,19 +330,38 @@ theorem denominator_ne_zero : D ≠ 0 := by
 
   norm_num [D, show (![1,1,1,1,1,1] : Fin 6 → ℂ) 0 = 1 from rfl, show (![1,1,1,1,1,1] : Fin 6 → ℂ) 1 = 1 from rfl, show (![1,1,1,1,1,1] : Fin 6 → ℂ) 2 = 1 from rfl, show (![1,1,1,1,1,1] : Fin 6 → ℂ) 3 = 1 from rfl, show (![1,1,1,1,1,1] : Fin 6 → ℂ) 4 = 1 from rfl, show (![1,1,1,1,1,1] : Fin 6 → ℂ) 5 = 1 from rfl] at he
 
-theorem certificate : Verify F A 1 4 D N Q where
+theorem hypersurface_ne_zero : F ≠ 0 := by
+  intro h
+  have he := congrArg (MvPolynomial.eval (fun _ : Fin 6 => (1 : ℂ))) h
+  norm_num [F] at he
+
+theorem hypersurface_homogeneous : F.IsHomogeneous 6 := by
+  simpa only [F] using (((((((((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (0 : Fin 6)).pow 6)).add (((isHomogeneous_C (σ := Fin 6) (2 : ℂ)).mul ((isHomogeneous_X ℂ (0 : Fin 6)).pow 4)).mul ((isHomogeneous_X ℂ (3 : Fin 6)).pow 2))).add (((isHomogeneous_C (σ := Fin 6) (3 : ℂ)).mul ((isHomogeneous_X ℂ (0 : Fin 6)).pow 2)).mul ((isHomogeneous_X ℂ (3 : Fin 6)).pow 4))).add ((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (1 : Fin 6)).pow 6))).add ((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (2 : Fin 6)).pow 6))).add ((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (3 : Fin 6)).pow 6))).add ((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (4 : Fin 6)).pow 6))).add ((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (5 : Fin 6)).pow 6)))
+
+theorem source_homogeneous : A.IsHomogeneous 6 := by
+  simpa only [A] using (((((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (0 : Fin 6)).pow 3)).mul ((isHomogeneous_X ℂ (3 : Fin 6)).pow 2)).mul (isHomogeneous_X ℂ (4 : Fin 6))).add ((((isHomogeneous_C (σ := Fin 6) (9 / 7 : ℂ)).mul (isHomogeneous_X ℂ (0 : Fin 6))).mul ((isHomogeneous_X ℂ (3 : Fin 6)).pow 4)).mul (isHomogeneous_X ℂ (4 : Fin 6))))
+
+theorem certificate : Verify F A 6 1 D N Q where
+  hypersurface_ne_zero := hypersurface_ne_zero
+  hypersurface_homogeneous := hypersurface_homogeneous
+  source_homogeneous := by simpa using Homogeneous.of_isHomogeneous source_homogeneous
 
   denominator_ne_zero := denominator_ne_zero
 
-  denominator_homogeneous := denominator_homogeneous
+  denominator_homogeneous := by
+    rw [denominator_homogeneous.totalDegree denominator_ne_zero]
+    exact denominator_homogeneous
 
-  numerator_homogeneous := numerator_homogeneous
+  numerator_homogeneous := by
+    intro i
+    rw [denominator_homogeneous.totalDegree denominator_ne_zero]
+    simpa using Homogeneous.of_isHomogeneous (numerator_homogeneous i)
 
   denominator_legal := denominator_legal
 
   identity := normalized_identity (by simpa using e1) e2
 
-theorem solved : HasCertificate F A 1 := ⟨4, D, N, Q, certificate⟩
+theorem solved : HasCertificate F A 6 1 := ⟨D, N, Q, certificate⟩
 
 end HodgeComputer.Instances.YtypeCompanion231D4StrictRational
 

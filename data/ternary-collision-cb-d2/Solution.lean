@@ -4,7 +4,7 @@ set_option maxHeartbeats 8000000
 set_option maxRecDepth 8000
 noncomputable section
 namespace Submission
-theorem witness : HodgeComputer.Verify HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q HodgeWitness.d HodgeWitness.D HodgeWitness.N HodgeWitness.Q := by
+theorem witness : HodgeComputer.Verify HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q HodgeWitness.D HodgeWitness.N HodgeWitness.Q := by
   have hF : HodgeSubmission.F = HodgeComputer.Instances.TernaryCollisionCbD2.F := by
     apply MvPolynomial.funext; intro x
     norm_num [HodgeSubmission.F, HodgeComputer.Instances.TernaryCollisionCbD2.F] <;> ring
@@ -37,6 +37,6 @@ theorem witness : HodgeComputer.Verify HodgeSubmission.F HodgeSubmission.A Hodge
     · change HodgeWitness.N5 = HodgeComputer.Instances.TernaryCollisionCbD2.N5
       apply MvPolynomial.funext; intro x
       norm_num [HodgeWitness.N5, HodgeComputer.Instances.TernaryCollisionCbD2.N5] <;> ring
-  simpa only [hF,hA,hD,hQ,hN,HodgeSubmission.q,HodgeWitness.d] using HodgeComputer.Instances.TernaryCollisionCbD2.certificate
-theorem certificate : HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q := ⟨HodgeWitness.d,HodgeWitness.D,HodgeWitness.N,HodgeWitness.Q,witness⟩
+  simpa only [hF,hA,hD,hQ,hN,HodgeSubmission.q,HodgeSubmission.d] using HodgeComputer.Instances.TernaryCollisionCbD2.certificate
+theorem certificate : HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := ⟨HodgeWitness.D,HodgeWitness.N,HodgeWitness.Q,witness⟩
 end Submission

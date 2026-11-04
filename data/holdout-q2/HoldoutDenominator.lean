@@ -1,6 +1,9 @@
+import HodgeComputer.Sextic
 import HodgeComputer.Verify
 import Proposal.HoldoutAlgebra
 import Proposal.MatrixBezout
+
+open HodgeComputer.Sextic
 
 /-! Denominator legality for the endpoint reduction. The leading coefficient
 argument is reused from the accepted quadric-contact proof. The only geometric

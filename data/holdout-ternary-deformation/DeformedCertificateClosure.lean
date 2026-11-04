@@ -78,7 +78,7 @@ theorem hasCertificate_of_cover_residue
       residueDivergence
         (fun i => extendFiniteDerivation (L := CoverField) (physicalTangent i))
         (algebraMap PhysicalField CoverField physicalNormal) w = 0) :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A 1 := by
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A 6 1 := by
   have heq :
       algebraMap PhysicalField CoverField physicalNormalSource *
         (1 - algebraMap PhysicalField CoverField
