@@ -1,5 +1,8 @@
+import HodgeComputer.Sextic
 import Proposal.TargetDenominator
 import Proposal.MatrixBezout
+
+open HodgeComputer.Sextic
 
 noncomputable section
 namespace QuadricContactDenominator

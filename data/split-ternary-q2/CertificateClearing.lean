@@ -357,11 +357,33 @@ theorem hasCertificate_of_weighted_divergence
     rintro ⟨k,hk⟩
     apply hr
     rw [hk,map_mul,rho_F,zero_mul]
-  refine ⟨d,D,N,0,?_,hD,?_,hirr.isRelPrime_iff_not_dvd.mpr hlegal,?_⟩
-  · intro h
+  have hD0 : D ≠ 0 := by
+    intro h
     exact hd (by rw [h,map_zero])
+  have hdegree : D.totalDegree = d := hD.totalDegree hD0
+  refine ⟨D,N,0,?_⟩
+  refine {
+    hypersurface_ne_zero := hirr.ne_zero
+    hypersurface_homogeneous := ?_
+    source_homogeneous := ?_
+    denominator_ne_zero := hD0
+    denominator_homogeneous := by simpa only [hdegree] using hD
+    numerator_homogeneous := ?_
+    denominator_legal := hirr.isRelPrime_iff_not_dvd.mpr hlegal
+    identity := ?_
+  }
+  · convert (((((((((((((((MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6)).pow 6).add ((((MvPolynomial.isHomogeneous_C (σ := Fin 6) (5 : ℂ)).mul ((MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6)).pow 5)).mul (MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6))).mul (MvPolynomial.isHomogeneous_C (σ := Fin 6) (1/7 : ℂ)))).add (((((MvPolynomial.isHomogeneous_C (σ := Fin 6) (5 : ℂ)).mul ((MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6)).pow 2)).mul ((MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6)).pow 3)).mul (MvPolynomial.isHomogeneous_X ℂ (2 : Fin 6))).mul (MvPolynomial.isHomogeneous_C (σ := Fin 6) (1/7 : ℂ)))).add ((((MvPolynomial.isHomogeneous_C (σ := Fin 6) (15 : ℂ)).mul (MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6))).mul ((MvPolynomial.isHomogeneous_X ℂ (2 : Fin 6)).pow 5)).mul (MvPolynomial.isHomogeneous_C (σ := Fin 6) (1/7 : ℂ)))).add ((MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6)).pow 6)).add ((((MvPolynomial.isHomogeneous_C (σ := Fin 6) (10 : ℂ)).mul ((MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6)).pow 5)).mul (MvPolynomial.isHomogeneous_X ℂ (2 : Fin 6))).mul (MvPolynomial.isHomogeneous_C (σ := Fin 6) (1/7 : ℂ)))).add ((MvPolynomial.isHomogeneous_X ℂ (2 : Fin 6)).pow 6)).add ((MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6)).pow 6)).add ((((MvPolynomial.isHomogeneous_C (σ := Fin 6) (10 : ℂ)).mul ((MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6)).pow 5)).mul (MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6))).mul (MvPolynomial.isHomogeneous_C (σ := Fin 6) (1/7 : ℂ)))).add (((((MvPolynomial.isHomogeneous_C (σ := Fin 6) (10 : ℂ)).mul ((MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6)).pow 3)).mul (MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6))).mul ((MvPolynomial.isHomogeneous_X ℂ (5 : Fin 6)).pow 2)).mul (MvPolynomial.isHomogeneous_C (σ := Fin 6) (1/7 : ℂ)))).add ((((MvPolynomial.isHomogeneous_C (σ := Fin 6) (5 : ℂ)).mul (MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6))).mul ((MvPolynomial.isHomogeneous_X ℂ (5 : Fin 6)).pow 5)).mul (MvPolynomial.isHomogeneous_C (σ := Fin 6) (1/7 : ℂ)))).add ((MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6)).pow 6)).add ((((MvPolynomial.isHomogeneous_C (σ := Fin 6) (15 : ℂ)).mul ((MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6)).pow 5)).mul (MvPolynomial.isHomogeneous_X ℂ (5 : Fin 6))).mul (MvPolynomial.isHomogeneous_C (σ := Fin 6) (1/7 : ℂ)))).add ((MvPolynomial.isHomogeneous_X ℂ (5 : Fin 6)).pow 6)) using 1 <;>
+      norm_num [physicalF, leftTernary, rightTernary] <;> ring
+  · have h : physicalA.IsHomogeneous 12 := by
+      simpa only [physicalA] using
+        ((((isHomogeneous_X ℂ (0 : Fin 6)).pow 4).mul
+          ((isHomogeneous_X ℂ (1 : Fin 6)).pow 3)).mul
+          ((isHomogeneous_X ℂ (3 : Fin 6)).pow 3)).mul
+          ((isHomogeneous_X ℂ (4 : Fin 6)).pow 2)
+    simpa using HodgeComputer.Homogeneous.of_isHomogeneous h
   · intro i
-    simpa using hN i
+    have h := HodgeComputer.Homogeneous.of_isHomogeneous (hN i)
+    convert h using 1 <;> simp only [hdegree, Nat.cast_add] <;> ring
   · simp only [mul_zero]
     exact strict_polynomial_identity W hw D N hd hrep
 

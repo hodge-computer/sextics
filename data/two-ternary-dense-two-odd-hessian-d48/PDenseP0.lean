@@ -1,4 +1,4 @@
-import HodgeComputer.Verify
+import HodgeComputer.Sextic
 import Proposal.PExplicitWitnessComplete
 set_option maxHeartbeats 4000000
 set_option linter.unusedSimpArgs false
@@ -7,7 +7,7 @@ set_option linter.unusedTactic false
 set_option maxRecDepth 1000
 noncomputable section
 namespace HodgeComputer.DenseP0
-open MvPolynomial HodgeTestbed
+open MvPolynomial HodgeTestbed HodgeComputer.Sextic
 abbrev E := HodgeTestbed.ExplicitWitness.D
 
 def cm : SexticPoly →+* Poly := MvPolynomial.map (algebraMap ℚ ℂ)

@@ -5,6 +5,8 @@ import Mathlib.Analysis.Complex.Basic
 import Mathlib.Analysis.Real.Sqrt
 import Mathlib.Tactic.Ring
 
+open HodgeComputer.Sextic
+
 /-!
 # A strict certificate for the protected one-reflection instance
 
@@ -37,7 +39,6 @@ show how to assemble a future sector witness using the exact Verify predicate.
 -/
 
 noncomputable section
-open HodgeComputer.Sextic
 
 namespace HodgeComputer.Construction
 
