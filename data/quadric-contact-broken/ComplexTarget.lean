@@ -128,18 +128,39 @@ theorem complexMap_homogeneous {P : BasePoly} {d : ℕ} (hP : P.IsHomogeneous d)
     complexMap_horizontalS, complexMap_horizontalT, complexMap_horizontalB,
     complexMap_horizontalC]
 
+theorem targetF_homogeneous : QuadricContactDenominator.targetF.IsHomogeneous 6 := by
+  convert (((((((((((MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6)).pow 6).add ((MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6)).pow 6)).add (((MvPolynomial.isHomogeneous_C (σ := Fin 6) (5 : ℂ)).mul ((MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6)).pow 4)).mul ((MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6)).pow 2))).add (((MvPolynomial.isHomogeneous_C (σ := Fin 6) (5 : ℂ)).mul ((MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6)).pow 2)).mul ((MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6)).pow 4))).add (((MvPolynomial.isHomogeneous_C (σ := Fin 6) (5 : ℂ)).mul (((MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6)).pow 2).add ((MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6)).pow 2))).mul (((((MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6)).pow 2).mul ((MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6)).pow 2)).add ((((MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6)).mul (MvPolynomial.isHomogeneous_X ℂ (2 : Fin 6))).mul (MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6))).mul (MvPolynomial.isHomogeneous_X ℂ (5 : Fin 6)))).add (((MvPolynomial.isHomogeneous_X ℂ (2 : Fin 6)).pow 2).mul ((MvPolynomial.isHomogeneous_X ℂ (5 : Fin 6)).pow 2))))).add ((MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6)).pow 6)).add ((MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6)).pow 6)).add ((MvPolynomial.isHomogeneous_X ℂ (2 : Fin 6)).pow 6)).add ((MvPolynomial.isHomogeneous_X ℂ (5 : Fin 6)).pow 6)).add (((((((MvPolynomial.isHomogeneous_C (σ := Fin 6) (5 : ℂ)).mul (MvPolynomial.isHomogeneous_C (σ := Fin 6) (1/7 : ℂ))).mul (MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6))).mul (MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6))).mul (MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6))).mul (MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6))).mul (((MvPolynomial.isHomogeneous_X ℂ (2 : Fin 6)).pow 2).add ((MvPolynomial.isHomogeneous_C (σ := Fin 6) (2 : ℂ)).mul ((MvPolynomial.isHomogeneous_X ℂ (5 : Fin 6)).pow 2))))) using 1
+  apply MvPolynomial.funext
+  intro x
+  norm_num [QuadricContactDenominator.targetF] <;> ring
+
+theorem targetF_ne_zero : QuadricContactDenominator.targetF ≠ 0 := by
+  intro h
+  have he := congrArg (MvPolynomial.eval (fun _ : Fin 6 => (1 : ℂ))) h
+  norm_num [QuadricContactDenominator.targetF] at he
+
+theorem targetA_homogeneous : targetA.IsHomogeneous 6 := by
+  exact ((((isHomogeneous_X_pow (1 : Fin 6) 2).mul (isHomogeneous_X ℂ 0)).mul
+    (isHomogeneous_X ℂ 3)).mul
+    ((isHomogeneous_X_pow (0 : Fin 6) 2).sub (isHomogeneous_X_pow (3 : Fin 6) 2)))
+
 /-- All protected verification fields, with denominator legality left explicit. -/
 theorem strict_verify (D : BasePoly) (N : Fin 6 → BasePoly) (d : ℕ)
     (hD : D.IsHomogeneous d) (hN : ∀ i, (N i).IsHomogeneous (d+1))
     (hsource : directional QuadricContactTarget.F N = QuadricContactTarget.A * D)
     (hdiv : divergenceNumerator D N = 0)
     (hlegal : IsRelPrime QuadricContactDenominator.targetF (complexMap D)) :
-    HodgeComputer.Verify QuadricContactDenominator.targetF targetA 1 d
+    HodgeComputer.Verify QuadricContactDenominator.targetF targetA 6 1
       (complexMap D) (fun i => complexMap (N i)) 0 := by
-  refine ⟨QuadricContactDenominator.denominator_ne_zero_of_legal _ hlegal,
-    complexMap_homogeneous hD, ?_, hlegal, ?_⟩
+  have hD0 := QuadricContactDenominator.denominator_ne_zero_of_legal _ hlegal
+  have hdeg := (complexMap_homogeneous hD).totalDegree hD0
+  refine ⟨targetF_ne_zero, targetF_homogeneous, ?_, hD0, ?_, ?_, hlegal, ?_⟩
+  · simpa using HodgeComputer.Homogeneous.of_isHomogeneous targetA_homogeneous
+  · rw [hdeg]
+    exact complexMap_homogeneous hD
   · intro i
-    convert complexMap_homogeneous (hN i) using 1 <;> omega
+    rw [hdeg]
+    convert HodgeComputer.Homogeneous.of_isHomogeneous (complexMap_homogeneous (hN i)) using 1 <;> push_cast <;> omega
   · apply HodgeComputer.normalized_identity
     · have h := congrArg complexMap hsource
       simpa only [complexMap_directional, complexMap_F, complexMap_A,

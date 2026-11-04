@@ -53,8 +53,8 @@ theorem partial_binding : actualCoverJacobian.det*quotientCoverFieldMap (ρq (in
   simp only [map_zero,mul_zero,zero_mul,sub_zero]
 
 theorem certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q := by
-  change HodgeComputer.HasCertificate holdoutSextic target 1
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
+  change HodgeComputer.HasCertificate holdoutSextic target 6 1
   apply certificate_of_source_pair target reflected quotientSource ((coverT^4)⁻¹)
   · simpa only [target, pow_one] using ((isHomogeneous_X_pow (R := ℂ) (2 : Fin 6) 3).mul (isHomogeneous_X_pow (R := ℂ) (5 : Fin 6) 3))
   · exact commonCover_trace_inverse_fourth

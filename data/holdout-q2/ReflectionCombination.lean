@@ -1,5 +1,5 @@
 import Proposal.HoldoutAlgebra
-import HodgeComputer.Verify
+import HodgeComputer.CertificateOperations
 
 /-! Exact combination of the two endpoint sources and common-denominator
 combination of formal certificates. Complex coefficients are allowed by the
@@ -56,30 +56,32 @@ theorem combined_defect (l m : ℂ) (F A B D E : HodgeComputer.Poly)
 /-- Combining two certificates preserves the exact protected contract, including
 complex relative primality. This lemma also allows non-strict input fields. -/
 theorem combine_q2 (l m : ℂ) {F A B D E Q R : HodgeComputer.Poly}
-    {d e : ℕ} {N M : Fin 6 → HodgeComputer.Poly}
-    (hN : Verify F A 2 d D N Q) (hM : Verify F B 2 e E M R) :
-    Verify F (C l*A+C m*B) 2 (d+e) (D*E)
+    {N M : Fin 6 → HodgeComputer.Poly}
+    (hN : Verify F A 6 2 D N Q) (hM : Verify F B 6 2 E M R) :
+    Verify F (C l*A+C m*B) 6 2 (D*E)
       (combinedNumerators l m D E N M) (C l*E^2*Q+C m*D^2*R) := by
-  refine ⟨mul_ne_zero hN.denominator_ne_zero hM.denominator_ne_zero,
-    hN.denominator_homogeneous.mul hM.denominator_homogeneous, ?_,
+  have hdeg := MvPolynomial.totalDegree_mul_of_isDomain hN.denominator_ne_zero hM.denominator_ne_zero
+  refine ⟨hN.hypersurface_ne_zero, hN.hypersurface_homogeneous,
+    (hN.source_homogeneous.C_mul l).add (hM.source_homogeneous.C_mul m),
+    mul_ne_zero hN.denominator_ne_zero hM.denominator_ne_zero, ?_, ?_,
     hN.denominator_legal.mul_right hM.denominator_legal, ?_⟩
+  · rw [hdeg]
+    exact hN.denominator_homogeneous.mul hM.denominator_homogeneous
   · intro i
-    have hleft := (hM.denominator_homogeneous.mul (hN.numerator_homogeneous i)).C_mul l
-    have hright := (hN.denominator_homogeneous.mul (hM.numerator_homogeneous i)).C_mul m
-    have hl : e+(d+6*2-5)=d+e+6*2-5 := by omega
-    have hr : d+(e+6*2-5)=d+e+6*2-5 := by omega
-    rw [hl] at hleft
-    rw [hr] at hright
-    simpa only [combinedNumerators,mul_assoc] using hleft.add hright
+    have hleft := ((Homogeneous.of_isHomogeneous hM.denominator_homogeneous).mul (hN.numerator_homogeneous i)).C_mul l
+    have hright := ((Homogeneous.of_isHomogeneous hN.denominator_homogeneous).mul (hM.numerator_homogeneous i)).C_mul m
+    rw [hdeg, Nat.cast_add]
+    simp only [combinedNumerators, mul_assoc]
+    convert hleft.add (by convert hright using 1 <;> ring) using 1 <;> ring
   · rw [combined_defect,hN.identity,hM.identity]
     ring
 
 theorem hasCertificate_combine_q2 (l m : ℂ) {F A B : HodgeComputer.Poly}
-    (hA : HasCertificate F A 2) (hB : HasCertificate F B 2) :
-    HasCertificate F (C l*A+C m*B) 2 := by
-  obtain ⟨d,D,N,Q,hN⟩ := hA
-  obtain ⟨e,E,M,R,hM⟩ := hB
-  exact ⟨d+e,D*E,combinedNumerators l m D E N M,
+    (hA : HasCertificate F A 6 2) (hB : HasCertificate F B 6 2) :
+    HasCertificate F (C l*A+C m*B) 6 2 := by
+  obtain ⟨D,N,Q,hN⟩ := hA
+  obtain ⟨E,M,R,hM⟩ := hB
+  exact ⟨D*E,combinedNumerators l m D E N M,
     C l*E^2*Q+C m*D^2*R,combine_q2 l m hN hM⟩
 
 end HoldoutReflectionCombination

@@ -21,7 +21,7 @@ theorem certificate_of_residue_solution
       -(residueMap (MvPolynomial.pderiv 0 source)/residueMap (MvPolynomial.pderiv 0 sextic)-
         residueMap source*residueMap (MvPolynomial.pderiv 0 (MvPolynomial.pderiv 0 sextic))/
           (residueMap (MvPolynomial.pderiv 0 sextic))^2)) :
-    HodgeComputer.HasCertificate sextic source 1 := by
+    HodgeComputer.HasCertificate sextic source 6 1 := by
   have hd : residueDivergence tangent (residueMap (MvPolynomial.pderiv 0 sextic)) w =
       ∑ i,(tangent i (w i)-w i*tangent i (residueMap (MvPolynomial.pderiv 0 sextic))/
         residueMap (MvPolynomial.pderiv 0 sextic)) := by

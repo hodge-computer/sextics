@@ -53,9 +53,9 @@ def verify(root, files, instance, metadata, order, imports, policy, output):
         (sources/'HodgeChecked.lean').write_text(
             'import '+('HodgeWitness' if has_witness else 'HodgeTarget')+'\nimport Proposal.Solution\n'
             'theorem HodgeSubmission.checked : HodgeComputer.HasCertificate '
-            'HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q := '+metadata['theorem']+'\n'+
+            '(n := HodgeSubmission.n) HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := '+metadata['theorem']+'\n'+
             ('theorem HodgeSubmission.checkedWitness : HodgeComputer.Verify '
-             'HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q HodgeWitness.d '
+             '(n := HodgeSubmission.n) HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q '
              'HodgeWitness.D HodgeWitness.N HodgeWitness.Q := '+metadata['witnessTheorem']+'\n' if has_witness else ''))
         env = {'PATH':str(prefix/'bin')+':/usr/bin:/bin','HOME':'/nonexistent','LEAN_SYSROOT':str(prefix),
                'LEAN_PATH':lean_path+':'+':'.join(map(str,(protected,checked,artifacts))),'LANG':'en_US.UTF-8'}

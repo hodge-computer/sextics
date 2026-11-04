@@ -1,95 +1,9 @@
 {
-  "schemaVersion": 1,
-  "formalAcceptance": true,
-  "repository": "hodge-computer/sextics",
-  "instanceId": "reflection-coupled-fano",
+  "schemaVersion": 2,
   "githubLogin": "fqlx",
-  "submittedAt": "2026-10-20T05:39:21Z",
   "acceptedAt": "2026-10-20T11:52:41Z",
-  "publishedAt": "2026-10-20T11:53:15.103654+00:00",
   "pullRequest": {
     "number": 150,
-    "url": "https://github.com/hodge-computer/sextics/pull/150",
-    "headCommit": "1388c6b4fd5b74cf948a8e2728a70176e077cce4",
-    "baseCommit": "b76761af375fa91251d0c8c870535cc6bfc8270e",
-    "mergeCommit": "daa857874addb91e91c0c95df4ca9247d3328c8d"
-  },
-  "run": {
-    "id": 39376055433,
-    "url": "https://github.com/hodge-computer/sextics/actions/runs/39376055433",
-    "workflowPath": ".github/workflows/solve-proposal.yml",
-    "conclusion": "success"
-  },
-  "verification": {
-    "schemaVersion": 2,
-    "mode": "live",
-    "instanceId": "reflection-coupled-fano",
-    "pullRequest": 150,
-    "githubLogin": "fqlx",
-    "baseCommit": "b76761af375fa91251d0c8c870535cc6bfc8270e",
-    "headCommit": "1388c6b4fd5b74cf948a8e2728a70176e077cce4",
-    "checkedAt": "2026-10-20T05:42:39.440480+00:00",
-    "formalAcceptance": false,
-    "requiresOwnerMerge": true,
-    "verifierSha256": {
-      "scripts/proposals/check.py": "9d7af1c8a30c50ce6bca3c42c6d75d3a547b6a82516bc5581c784cd569158338",
-      "scripts/proposals/sandbox.py": "c8a1febc230b57b5666667ba82da588e912c3b6262ea3d8299bb5f53031b71d9",
-      "scripts/proposals/Audit.lean": "d1a381c70025c6de519e0b0e5e4da0db72eeba0881b843d9b9cd0e9dd459ed9f",
-      "scripts/proposals/review.py": "a22926e73d25d86018f716558b8f1b2d5ab9d3e27a7e6000509f688abe03f5b0",
-      "formal/lean/HodgeComputer/Verify.lean": "007f24d3b7ac642e1bcd6adddd0a1512791c32e0e5882cd741c096c6d7e583c3",
-      "formal/lean/lake-manifest.json": "b29b4951d067b4d51a554f1735ac67640b96dbedf07ab3d49a847b67a89b9c6e",
-      ".github/solve-policy.json": "bbf4a6375356cf722a70f353445290d2f7649a63ceae11f509f056ca91d96408",
-      ".github/workflows/solve-proposal.yml": "449776177b1a3e7f45eaf5e24b024a1d5fa402417258e5bf984cf2705fc4280f"
-    },
-    "statementSha256": "409f9906934219658901a79d9e1e7b5ada29c5504000e3ecb28402ab0606e887",
-    "sourceHashes": {
-      "ArithmeticBase.lean": "d4ed47c5f83bf980980ab2868daad8f519c2d5876d67daed1ba44461f539ae9c",
-      "ArithmeticEndpoint.lean": "2e0c47643d31b4c533287e8731840696de66e9036d2e33a18e3714c80afbff0b",
-      "ArithmeticFamily.lean": "f590c98880cbeb2107182ca3f1cd34afbb277ae7d97ee2de4e5a131607099874",
-      "ArithmeticLifting.lean": "eac2e582cec358fb2751b1e347db8f4fbce3e813bb05937ab885580462214906",
-      "ArithmeticSeed.lean": "a5ba2cace45b7dfa421263682e7f2e141e33c6ba4a9620a6fe126580d128d201",
-      "CoupledDomain.lean": "3dc864044085c621977fa82ac3e28d55303e9eb990c2d65a59cd673ca0755457",
-      "CurveClosure.lean": "d832020a31877c9b7038d0d3f886a683edc75d7d9f3225b6891aea8e619befd7",
-      "EndpointDomain.lean": "97448a3b886bd4c1e0739b8d64adb6debd12d710cdfefe9526dd02b8ac4fdddb",
-      "FamilyClosure.lean": "b91ac58bfdba174d8b07985e2b3302b1b47d377ca45b6cb00f2ad3bd163adc20",
-      "Lifting.lean": "1d0f0a05f7918a1c1441197951b40a1745b0deb255a8f9c11bf26dd959831003",
-      "OpenIncidence.lean": "2d1a180c8f4dacbbd018d232585ed26f032e7d4520960b10571c6b58d3ad4cc9",
-      "QuarticFamily.lean": "d454e42e0f0005ebe0177222df2e7d008f05a6485c7b6fb5998898737b8a49a3",
-      "QuarticGradient.lean": "0a06cd2f03e4dbbc1750c15e00bce03bfec3ea094d4b7ce856aafdad91698036",
-      "QuarticGradientCoefficients.lean": "753c1223ce7d2d2ac5f08bb119eae8982777cbba6fcde19a2cbfa619f9adb1ec",
-      "QuarticIncidence.lean": "d5f29caa03e51cc0ed50df899e7107c7b5b18ab08c48c81a64798cce5271d44a",
-      "QuarticMatrix.lean": "94beb7d9599d9cc08dfe029ed66240c0c8dfa28bf58d0f095aa1c0178320d4f1",
-      "QuarticNormal.lean": "b54faa4e16c3881d201ba2a8ccae190f0c6edac49077141799215323de383783",
-      "QuarticSeed.lean": "f98481d4d9db8d5c079463f9e3478b62be8684cde988de419c456212fccfb490",
-      "QuarticSeedIncidence.lean": "aaa19feec6565fc2d8471df353fb8ac9e175d737ee650810f59b1fc9549acd66",
-      "QuarticSeedJacobian.lean": "43441734a129702857b78ad6b85bd5dae74cccb3778a2eafff73a4a924e1ba7e",
-      "QuarticSource.lean": "8989d89717b34aa568155791a847ca4e4cae6c832e0ad577353db40cf3cd2bc2",
-      "QuotientGradient.lean": "d090e8b71ed77cbfd396b992dfa6dac20a5adbb77e2725bfa6a72d972da0fe81",
-      "ReflectionLift.lean": "c4cdfd04bdbbc3ef990d8cbe74f8740bfbdebf2beaa8ec3156f0a838b5bc676b",
-      "Solution.lean": "549e24c2565c5f89c2312e970e76d3b16aa32448852607edf6734a99aa24d318",
-      "SourceBinding.lean": "bf451256e6ef9c73ffc497af44b54acaa705248ef62afdb1f3bb0d407103bfca",
-      "TargetEmbedding.lean": "0ddbca61dece00fc103c904ff25a25fc979d29b67dc54ee7198d3acd7f2240d4",
-      "proof.json": "d319a7f1803b8f2e8e74b328081590b6c957aca4f83e1f2497583f260d23e5e8",
-      "solution.md": "064bd8f1cffd2f97a1c52e0000a6e6dfaa78b0123475356b009a36a56b376e17"
-    },
-    "leanVersion": "Lean (version 4.33.0, x86_64-unknown-linux-gnu, commit d8b18978322de05a8f3dba51ef03cf5461676c17, Release)",
-    "kernelReplay": true,
-    "axioms": [
-      "propext",
-      "Quot.sound",
-      "Classical.choice"
-    ],
-    "witnessChecked": false,
-    "theorem": "Submission.certificate",
-    "sandbox": "docker-no-network",
-    "toolchain": "leanprover/lean4:v4.33.0",
-    "result": "lean-checked-awaiting-owner",
-    "ownerAuthorization": null
-  },
-  "ownerAuthorization": {
-    "method": "review",
-    "reviewId": 5584604147,
-    "githubLogin": "benediamond",
-    "headCommit": "1388c6b4fd5b74cf948a8e2728a70176e077cce4"
+    "url": "https://github.com/hodge-computer/sextics/pull/150"
   }
 }

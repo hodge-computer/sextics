@@ -182,7 +182,7 @@ theorem hasCertificate_of_normalized
     (normal : HodgeTestbed.directional F N = A*D)
     (divergence : HodgeTestbed.divergenceNumerator D N = F*Q)
     (i : Fin 6) (hchart : ¬ F ∣ pderiv i F) :
-    HodgeComputer.HasCertificate F A 1 := by
+    HodgeComputer.HasCertificate F A 6 1 := by
   have hnormal : polynomialDirectional F N = A*D := by
     exact (polynomialDirectional_eq_directional F N).trans normal
   have hdivergence : polynomialDivNum D N = F*Q := by
@@ -191,9 +191,13 @@ theorem hasCertificate_of_normalized
     homogeneous_data_of_normalized F A D N Q hF hA hprime
       (hprime.irreducible.isRelPrime_iff_not_dvd.mp hlegal)
       hnormal hdivergence i hchart
-  refine ⟨d, H, M, Q', ⟨hH0, hH, ?_, hcoprime, ?_⟩⟩
+  refine ⟨H, M, Q', ⟨hprime.ne_zero, hF, ?_, hH0, ?_, ?_, hcoprime, ?_⟩⟩
+  · simpa using HodgeComputer.Homogeneous.of_isHomogeneous hA
+  · rw [hH.totalDegree hH0]
+    exact hH
   · intro j
-    simpa only [show d+6*1-5 = d+1 by omega] using hM j
+    rw [hH.totalDegree hH0]
+    convert HodgeComputer.Homogeneous.of_isHomogeneous (hM j) using 1 <;> push_cast <;> omega
   · apply HodgeComputer.normalized_identity
     · simpa only [Nat.cast_one, one_mul, polynomialDirectional_eq_directional] using hnormal'
     · simpa only [pow_one, polynomialDivNum_eq_divergenceNumerator] using hdiv'
@@ -232,7 +236,7 @@ theorem holdout_hasCertificate_of_normalized
     (hlegal : IsRelPrime (holdoutSextic (R := ℂ)) D)
     (normal : HodgeTestbed.directional holdoutSextic N = holdoutSource*D)
     (divergence : HodgeTestbed.divergenceNumerator D N = holdoutSextic*Q) :
-    HodgeComputer.HasCertificate holdoutSextic holdoutSource 1 := by
+    HodgeComputer.HasCertificate holdoutSextic holdoutSource 6 1 := by
   have hi : (Complex.I : ℂ)^6 = -1 := by
     rw [show (6 : ℕ) = 2*3 by decide, pow_mul, Complex.I_sq]
     norm_num

@@ -109,7 +109,7 @@ theorem quotient_normalized_of_quartic_family
 physical equation with its exact reflected numerator. -/
 theorem physical_certificate_of_quartic_family
     [Module.Finite (Endpoint.Field c) E] (p : QuarticFamily c E) :
-    HodgeComputer.HasCertificate (hypersurface c 6 2) physicalSource 1 := by
+    HodgeComputer.HasCertificate (hypersurface c 6 2) physicalSource 6 1 := by
   obtain ⟨d, N, Q, _, hlegal, hnormal, hdiv⟩ := quotient_normalized_of_quartic_family p
   obtain ⟨hlegal', hnormal', hdiv'⟩ :=
     reflection_normalized_data c d Q N hlegal hnormal hdiv

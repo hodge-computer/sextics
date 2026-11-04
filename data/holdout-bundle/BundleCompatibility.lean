@@ -219,7 +219,7 @@ end DiagonalFieldMap
 theorem certificate_of_quotient_residue (m : DiagonalFieldMap)
     (w : Fin 4 → QuotientField)
     (equation : quotientResidueSource+residueDivergence quotientTangent quotientNormal w=0) :
-    HodgeComputer.HasCertificate holdoutSextic Astar 1 := by
+    HodgeComputer.HasCertificate holdoutSextic Astar 6 1 := by
   exact physical_certificate_of_diagonal_residue Astar Astar_isHomogeneous
     m.fieldMap quotientTangent physicalDiagonalTangent
     physicalDiagonalJacobian inversePhysicalDiagonalJacobian

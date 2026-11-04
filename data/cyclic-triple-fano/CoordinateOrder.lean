@@ -24,14 +24,21 @@ theorem rename_divergence (e : Fin 6 ≃ Fin 6) (N : Fin 6 → HodgeComputer.Pol
   simp only [renamedVector, Equiv.symm_apply_apply, pderiv_rename e.injective, map_sum]
 
 theorem certificate_rename (e : Fin 6 ≃ Fin 6) (F A : HodgeComputer.Poly) (q : ℕ)
-    (h : HodgeComputer.HasCertificate F A q) :
-    HodgeComputer.HasCertificate (rename e F) (rename e A) q := by
-  obtain ⟨d,D,N,Q,h⟩ := h
-  refine ⟨d,rename e D,renamedVector e N,rename e Q,?_,?_,?_,?_,?_⟩
-  · exact (rename_injective _ e.injective).ne (by simpa using h.denominator_ne_zero)
-  · exact h.denominator_homogeneous.rename_isHomogeneous
+    (h : HodgeComputer.HasCertificate F A 6 q) :
+    HodgeComputer.HasCertificate (rename e F) (rename e A) 6 q := by
+  obtain ⟨D,N,Q,h⟩ := h
+  have hD0 : rename e D ≠ 0 :=
+    (rename_injective _ e.injective).ne (by simpa using h.denominator_ne_zero)
+  have hdeg := h.denominator_homogeneous.rename_isHomogeneous (f := e) |>.totalDegree hD0
+  refine ⟨rename e D,renamedVector e N,rename e Q,?_,?_,?_,hD0,?_,?_,?_,?_⟩
+  · exact (rename_injective _ e.injective).ne (by simpa using h.hypersurface_ne_zero)
+  · exact h.hypersurface_homogeneous.rename_isHomogeneous
+  · exact h.source_homogeneous.rename e
+  · rw [hdeg]
+    exact h.denominator_homogeneous.rename_isHomogeneous
   · intro i
-    exact (h.numerator_homogeneous (e.symm i)).rename_isHomogeneous
+    rw [hdeg]
+    exact (h.numerator_homogeneous (e.symm i)).rename e
   · let E := renameEquiv ℂ e
     change IsRelPrime (E F) (E D)
     intro p hp hq

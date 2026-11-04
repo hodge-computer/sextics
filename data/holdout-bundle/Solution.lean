@@ -14,7 +14,7 @@ machinery credited in the accompanying explanation.
 namespace Submission
 
 theorem certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q :=
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q :=
   HoldoutBundle.protected_certificate_of_bundle HoldoutBundle.bundle_certificate
 
 end Submission

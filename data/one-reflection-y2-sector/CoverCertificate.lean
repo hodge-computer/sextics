@@ -69,7 +69,7 @@ theorem holdout_hasCertificate_of_quotient_residue
     (hq : coverQuotientNormalSource +
       residueDivergence (quotientTangent (genericBaseAlpha ℂ) (genericBaseAlpha ℂ))
         coverQuotientNormal wq = 0) :
-    HodgeComputer.HasCertificate holdoutSextic holdoutSource 1 := by
+    HodgeComputer.HasCertificate holdoutSextic holdoutSource 6 1 := by
   let w : Fin 5 → CommonCoverFunctionField :=
     Fin.lastCases 0 (fun i => quotientCoverFieldMap (wq i))
   let v : Fin 5 → CommonCoverFunctionField :=
@@ -115,7 +115,7 @@ theorem holdout_hasCertificate_of_quotient_divergence
         -(ρq (integerPartial 0 coverQuotientSource)/ρq (integerPartial 0 G) -
           ρq coverQuotientSource*ρq (integerPartial 0 (integerPartial 0 G)) /
             (ρq (integerPartial 0 G))^2)) :
-    HodgeComputer.HasCertificate holdoutSextic holdoutSource 1 := by
+    HodgeComputer.HasCertificate holdoutSextic holdoutSource 6 1 := by
   apply holdout_hasCertificate_of_quotient_residue wq
   change coverQuotientNormalSource +
     residueDivergence (quotientTangent (genericBaseAlpha ℂ) (genericBaseAlpha ℂ))

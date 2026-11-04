@@ -35,7 +35,7 @@ Open a PR from that branch against `hodge-computer/sextics:main` and complete th
 | Location | Contents |
 | --- | --- |
 | [docs/](docs/README.md) | The mathematical book, including its [technical overview](docs/overview.md) |
-| [data/](data/README.md) | Exact targets, context, solution sources, and acceptance receipts |
+| [data/](data/README.md) | Exact targets, context, solution sources, and acceptance records |
 | [formal/](formal/README.md) | The Lean contract and pinned proof environment |
 | `discussions/` | Mapping from instances to native GitHub discussion threads |
 | `leaderboard/` | Generated accepted-solve credits |

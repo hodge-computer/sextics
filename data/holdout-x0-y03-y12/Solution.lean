@@ -58,8 +58,8 @@ theorem partial_binding : actualCoverJacobian.det*quotientCoverFieldMap (ρq (in
   field_simp [coverAlpha_ne_zero,coverT_ne_zero] <;> ring
 
 theorem certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q := by
-  change HodgeComputer.HasCertificate holdoutSextic target 1
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
+  change HodgeComputer.HasCertificate holdoutSextic target 6 1
   apply certificate_of_source_pair target reflected quotientSource ((coverT^2)⁻¹)
   · simpa only [target, pow_one] using (((isHomogeneous_X_pow (R := ℂ) (0 : Fin 6) 1).mul (isHomogeneous_X_pow (R := ℂ) (3 : Fin 6) 3)).mul (isHomogeneous_X_pow (R := ℂ) (4 : Fin 6) 2))
   · exact trace_inverse_square

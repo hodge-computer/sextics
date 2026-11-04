@@ -75,7 +75,7 @@ theorem holdout_hasCertificate_of_cover_residue
       residueDivergence
         (fun i => extendFiniteDerivation (L := CommonCoverFunctionField) (physicalTangent i))
         (algebraMap HoldoutFunctionField CommonCoverFunctionField physicalNormal) w = 0) :
-    HodgeComputer.HasCertificate holdoutSextic holdoutSource 1 := by
+    HodgeComputer.HasCertificate holdoutSextic holdoutSource 6 1 := by
   have hi : (Complex.I : ℂ)^6 = -1 := by
     rw [show (6 : ℕ) = 2*3 by decide, pow_mul, Complex.I_sq]
     norm_num

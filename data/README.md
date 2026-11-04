@@ -4,7 +4,7 @@
 
 A solve PR adds `proof.json`, `Solution.lean`, `solution.md`, optional `witness.json`, and optional flat Lean helpers to that same folder. It cannot edit existing files. See [the full proposal specification](../CONTRIBUTING.md).
 
-The trusted publisher adds `acceptance.json` after checking the successful workflow and merge. `scripts/build-content.py` validates the acceptance bindings and reads any exported denominator directly from `witness.json` before generating solved status and credit. Solver identity, accepted PR, and theorem come from the acceptance receipt. A hand-edited record, local compilation, or schema check cannot establish acceptance.
+After a solve is merged, the publisher adds `acceptance.json` containing its contributor, original PR number/link, and acceptance date. `scripts/build-content.py` reads these records and any exported denominator in `witness.json` to generate status and credit. The website renders the current repository contents; proof verification belongs to CI before merging.
 
 `.rec` files use YAML. Exact polynomial expressions use the variable order `X0, X1, X2, Y0, Y1, Y2`, rational coefficients, and `**` for powers. These files contain no rendering settings, display LaTeX, or expanded coefficient lists. The build derives coefficients from the exact expressions. Saved planes, cameras, and display divisors belong in `slices/`; curated typesetting belongs in `assets/atlas-presentation.json`. An accepted target must not be silently repurposed for another `(F,q,A)`.
 
@@ -14,7 +14,7 @@ Keep `why.md` separate from the solution narrative and ongoing discussion. Open 
 
 ## Editing an accepted explanation
 
-Edit `solution.md` directly and rebuild the content. The site uses its current text. This does not change the accepted proof, contributor credit, or PR link, and does not require another Lean run. The original submission is retained in Git history. The target, Lean sources, proof manifest, and witness remain tied to the checked proof.
+Edit `solution.md` directly and rebuild the content. The site uses its current text. This does not change the accepted proof, contributor credit, or PR link, and does not require another Lean run. The original submission is retained in Git history. Changes to Lean sources, targets, proof manifests, or witnesses belong in maintenance PRs and trigger fresh CI verification. Preserve the original attribution in `acceptance.json`.
 
 ## Generated files
 

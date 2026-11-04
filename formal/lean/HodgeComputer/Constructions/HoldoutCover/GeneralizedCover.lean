@@ -125,7 +125,7 @@ theorem certificate_of_source_pair
     (hpartial : actualCoverJacobian.det*quotientCoverFieldMap (ρq (integerPartial 0 B)) =
       physicalCoverFieldMap (ρp (integerPartial 0 A))-
         physicalCoverFieldMap (ρp (integerPartial 0 C))*t) :
-    HodgeComputer.HasCertificate holdoutSextic A 1 := by
+    HodgeComputer.HasCertificate holdoutSextic A 6 1 := by
   obtain ⟨p⟩ := HoldoutConic.exists_seed
   obtain ⟨wq,hq⟩ : ∃ wq : Fin 4 → GenericQuotientField,
       residueDivergence (quotientTangent (genericBaseAlpha ℂ) (genericBaseBeta ℂ))

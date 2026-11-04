@@ -35,7 +35,7 @@ theorem protected_A : HodgeSubmission.A = MvPolynomial.rename coordinateOrder ph
 end CyclicTriple
 
 theorem Submission.certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q := by
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
   rw [CyclicTriple.protected_F, CyclicTriple.protected_A]
   exact CyclicTriple.certificate_rename CyclicTriple.coordinateOrder _ _ 1
     CyclicTriple.physical_certificate
