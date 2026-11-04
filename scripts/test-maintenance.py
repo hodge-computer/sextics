@@ -68,6 +68,13 @@ class MaintenanceChecks(unittest.TestCase):
         self.assertEqual([job["instance"] for job in jobs if job["phase"] == "applications"], instances)
         self.assertEqual(library.verification_jobs({"modules": [], "instances": []}), [])
 
+    def test_import_only_umbrellas_do_not_replay_entire_subtrees(self):
+        self.write("formal/lean/HodgeComputer/Verify.lean", "def example : Nat := 0\n")
+        self.write("formal/lean/HodgeComputer.lean", "/- umbrella -/\nimport HodgeComputer.Verify\n")
+        self.assertEqual(library.replay_modules(self.root,
+            ["HodgeComputer", "HodgeComputer.Helper", "HodgeComputer.Verify"]),
+            ["HodgeComputer.Verify"])
+
     def test_candidate_receipt_does_not_turn_a_new_solve_into_maintenance(self):
         def git(*args):
             return subprocess.check_output(["git", *args], cwd=self.root, stderr=subprocess.DEVNULL).decode().strip()

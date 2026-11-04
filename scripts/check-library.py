@@ -73,6 +73,18 @@ def verification_jobs(plan):
     return jobs
 
 
+def replay_modules(root, modules):
+    # leanchecker matches module-name prefixes. Import-only umbrella modules
+    # contain nothing to replay and otherwise repeat their entire subtrees.
+    result = []
+    for module in modules:
+        path = root / "formal/lean" / Path(*module.split(".")).with_suffix(".lean")
+        declarations = re.sub(r"^import\s+[^\n]+", "", strip_comments(path.read_text()), flags=re.M)
+        if declarations.strip():
+            result.append(module)
+    return result
+
+
 def required_modules(root, instances, modules):
     required = set(modules) | {"HodgeComputer.Verify"}
     for instance in instances:
@@ -107,7 +119,8 @@ def main():
     if args.phase == "build":
         print("Prepared shared Lean modules for all affected checks.")
         return
-    for module in modules:
+    replayed = replay_modules(ROOT, modules)
+    for module in replayed:
         subprocess.run(["lake", "env", "leanchecker", "--verbose", module], cwd=lean, check=True)
     policy = json.loads((ROOT / ".github/solve-policy.json").read_text())
     applications = 0
@@ -132,7 +145,7 @@ def main():
         applications += 1
         print(f"Checked protected application: {folder.name}", flush=True)
     print(
-        f"Replayed {len(modules)} shared modules and checked {applications} accepted applications."
+        f"Replayed {len(replayed)} shared modules and checked {applications} accepted applications."
     )
 
 
