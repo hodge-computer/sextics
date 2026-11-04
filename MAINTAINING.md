@@ -100,7 +100,10 @@ local links. The build generates current files directly, without a committed
 revision hash or a stale-output gate. These checks do not grant formal acceptance.
 For shared Lean changes, `scripts/check-library.py --base <commit>` builds and
 replays changed modules and their dependents, then rechecks affected accepted
-applications against their protected targets.
+applications against their protected targets. CI first builds the shared library
+once and passes those compiled outputs to the verification jobs. Each affected
+instance then has an independent job, alongside shared-module kernel replay,
+with no workflow concurrency cap.
 
 ## Visualization maintenance
 
