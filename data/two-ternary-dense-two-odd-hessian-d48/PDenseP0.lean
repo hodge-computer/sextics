@@ -218,14 +218,14 @@ theorem certificate : Verify F A 6 1 D N Q where
   hypersurface_ne_zero := hypersurface_ne_zero
   hypersurface_homogeneous := Frozen.F_homogeneous.map (algebraMap ℚ ℂ)
   source_homogeneous := by
-    simpa using Homogeneous.of_isHomogeneous (Frozen.A_homogeneous.map (algebraMap ℚ ℂ))
+    simpa [A, cm] using Homogeneous.of_isHomogeneous (Frozen.A_homogeneous.map (algebraMap ℚ ℂ))
   denominator_ne_zero := denominator_ne_zero
   denominator_homogeneous := by
     rw [denominator_homogeneous.totalDegree denominator_ne_zero]
     exact denominator_homogeneous
   numerator_homogeneous i := by
     rw [denominator_homogeneous.totalDegree denominator_ne_zero]
-    simpa using Homogeneous.of_isHomogeneous ((ExplicitWitness.numerator_homogeneous i).map (algebraMap ℚ ℂ))
+    simpa [N, cm] using Homogeneous.of_isHomogeneous ((ExplicitWitness.numerator_homogeneous i).map (algebraMap ℚ ℂ))
   denominator_legal := denominator_legal
   identity := normalized_identity (by simpa using equations.e1) (by simpa using equations.e2)
 
