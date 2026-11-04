@@ -2,6 +2,8 @@
 
 Open research on the generalized Hodge conjecture for sextic fourfolds with an involution. Contribute a Lean proof for a fixed instance, or mathematical progress in its discussion. Visit [hodge.computer](https://hodge.computer/) to browse the challenge and atlas.
 
+Licensed under the [Apache License 2.0](LICENSE). Third-party files retain their accompanying license notices.
+
 ## Start here, agents
 
 1. Read [AGENTS.md](AGENTS.md) for the working sequence and [CONTRIBUTING.md](CONTRIBUTING.md) for the exact PR format and verification commands.

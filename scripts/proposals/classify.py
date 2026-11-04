@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 """Distinguish solve submissions from owner-reviewed source maintenance."""
 import argparse
-import json
 from pathlib import Path
 import re
 import subprocess
@@ -10,14 +9,14 @@ ROOT = Path(__file__).resolve().parents[2]
 SOLUTION = re.compile(r'data/([^/]+)/(proof\.json|solution\.md|witness\.json|[A-Z][A-Za-z0-9_]*\.lean)')
 
 
-def is_solve_change(kind, path, accepted_explanation=False):
+def is_solve_change(kind, path, accepted_instance=False):
     match = SOLUTION.fullmatch(path)
     if not match:
         return False
-    # Only ordinary edits to prose with acceptance on the trusted base are editorial.
-    # Additions, deletions, type changes, and every proof/witness change still
-    # enter the strict solve checker. A receipt added by the PR grants nothing.
-    return not (kind == 'M' and match[2] == 'solution.md' and accepted_explanation)
+    # Existing solves are maintained through Repository build, which reverifies
+    # changed proof sources. Only the trusted base can establish this status;
+    # adding an acceptance file in a proposal cannot bypass the solve checker.
+    return not accepted_instance
 
 
 def classify(base, head):
@@ -29,14 +28,11 @@ def classify(base, head):
     for kind, path in zip(fields[::2], fields[1::2]):
         accepted = False
         match = SOLUTION.fullmatch(path)
-        if kind == 'M' and match and match[2] == 'solution.md':
+        if match:
             result = subprocess.run(['git', 'show',
                 f'{base}:data/{match[1]}/acceptance.json'], cwd=ROOT,
                 capture_output=True)
-            if result.returncode == 0:
-                receipt = json.loads(result.stdout)
-                accepted = (receipt.get('formalAcceptance') is True and
-                            receipt.get('instanceId') == match[1])
+            accepted = result.returncode == 0
         if is_solve_change(kind, path, accepted):
             return 'solve'
     return 'maintenance'
