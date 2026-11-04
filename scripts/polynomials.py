@@ -27,4 +27,3 @@ def exact_polynomial(expression, variables):
             if isinstance(node.op,ast.Mult): return visit(node.left)*visit(node.right)
         raise ValueError('Invalid exact polynomial expression')
     return visit(ast.parse(expression,mode='eval').body)
-

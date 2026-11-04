@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import HodgeTarget
 import Proposal.Certificate
 
@@ -19,7 +20,7 @@ namespace CyclicTriple
 
 theorem protected_F : HodgeSubmission.F =
     MvPolynomial.rename coordinateOrder (hypersurface coupling 6 3) := by
-  have hc : (MvPolynomial.C (5/7 : ℂ) : HodgeComputer.Poly) =
+  have hc : (MvPolynomial.C (5/7 : ℂ) : HodgeComputer.Sextic.Poly) =
       5*MvPolynomial.C (1/7 : ℂ) := by
     rw [show (5/7 : ℂ) = 5*(1/7) by ring, map_mul, map_ofNat]
   simp only [hypersurface, coupling, map_add, map_mul, map_pow, MvPolynomial.rename_C,

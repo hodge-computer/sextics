@@ -1,4 +1,4 @@
-import HodgeComputer.Verify
+import HodgeComputer.Sextic
 
 set_option maxHeartbeats 2000000
 
@@ -16,7 +16,7 @@ noncomputable section
 
 namespace HodgeComputer.Instances.PassiveQuadraticD4StrictRational
 
-open MvPolynomial HodgeTestbed
+open MvPolynomial HodgeTestbed HodgeComputer.Sextic
 
 def F : Poly := (MvPolynomial.C (1 : ℂ)) * (MvPolynomial.X 0)^6 +
     (MvPolynomial.C (1 : ℂ)) * (MvPolynomial.X 0)^2 * (MvPolynomial.X 1)^2 * (MvPolynomial.X 3)^2 +

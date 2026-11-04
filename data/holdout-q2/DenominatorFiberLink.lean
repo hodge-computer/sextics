@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import Proposal.NewLineAlgebra
 import Proposal.QuadraticSolver
 import Proposal.HoldoutDenominator
@@ -141,7 +142,7 @@ theorem activeDenominator_fiber_legal :
 
 /-- The final clearing argument only needs its nonzero scalar fiber factor. -/
 theorem denominator_legal_of_active_fiber {k : ℂ} (hk : k^2+k+1=0)
-    (D : HodgeComputer.Poly) (u : ℂ) (hu : u≠0)
+    (D : HodgeComputer.Sextic.Poly) (u : ℂ) (hu : u≠0)
     (hD : HoldoutDenominator.fiber k D = Polynomial.C u *
       MvPolynomial.eval₂Hom (Polynomial.C.comp coefficientToComplex)
         activeFiberValues activeDenominator) :

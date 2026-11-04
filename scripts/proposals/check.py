@@ -169,7 +169,7 @@ def polynomial(source):
         if isinstance(n, ast.Name) and n.id in variables:
             return f'(MvPolynomial.X (R := ℂ) ({variables[n.id]} : Fin 6))'
         if isinstance(n, ast.Constant) and type(n.value) is int:
-            return f'({n.value} : HodgeComputer.Poly)'
+            return f'({n.value} : MvPolynomial (Fin 6) ℂ)'
         if isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.USub): return f'(-{translate(n.operand)})'
         if isinstance(n, ast.BinOp):
             if isinstance(n.op, ast.Pow):
@@ -187,8 +187,8 @@ def polynomial(source):
 def target_source(instance):
     return ('import HodgeComputer.Verify\nnoncomputable section\nnamespace HodgeSubmission\n'
             'def n : ℕ := 5\ndef d : ℕ := 6\n'
-            f'def F : HodgeComputer.Poly := {polynomial(instance["F"])}\n'
-            f'def A : HodgeComputer.Poly := {polynomial(instance["A"])}\n'
+            f'def F : MvPolynomial (Fin 6) ℂ := {polynomial(instance["F"])}\n'
+            f'def A : MvPolynomial (Fin 6) ℂ := {polynomial(instance["A"])}\n'
             f'def q : ℕ := {instance["q"]}\nend HodgeSubmission\n')
 
 
@@ -201,10 +201,10 @@ def witness_source(raw):
     require(all(isinstance(value, str) and value for value in expressions), 'Witness entries must be exact polynomial expressions')
     translated = [polynomial(value) for value in expressions]
     lines = ['import HodgeTarget', 'noncomputable section', 'namespace HodgeWitness',
-             f'def D : HodgeComputer.Poly := {translated[0]}',
-             f'def Q : HodgeComputer.Poly := {translated[-1]}']
-    lines += [f'def N{i} : HodgeComputer.Poly := {value}' for i,value in enumerate(translated[1:-1])]
-    lines += ['def N : Fin 6 → HodgeComputer.Poly := fun i => ' + ''.join(f'if i.val = {i} then N{i} else ' for i in range(5)) + 'N5',
+             f'def D : MvPolynomial (Fin 6) ℂ := {translated[0]}',
+             f'def Q : MvPolynomial (Fin 6) ℂ := {translated[-1]}']
+    lines += [f'def N{i} : MvPolynomial (Fin 6) ℂ := {value}' for i,value in enumerate(translated[1:-1])]
+    lines += ['def N : Fin 6 → MvPolynomial (Fin 6) ℂ := fun i => ' + ''.join(f'if i.val = {i} then N{i} else ' for i in range(5)) + 'N5',
               'end HodgeWitness']
     return '\n'.join(lines)+'\n'
 

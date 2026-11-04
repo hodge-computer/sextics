@@ -10,8 +10,6 @@ noncomputable section
 namespace HodgeComputer
 open MvPolynomial
 abbrev AmbientPoly (n : ℕ) := MvPolynomial (Fin (n + 1)) ℂ
-abbrev Poly := MvPolynomial (Fin 6) ℂ
-abbrev Coeff := MvPolynomial (Fin 5) ℂ
 
 /-- Exact cleared defect, with the pole parameter retained. -/
 def defect {n : ℕ} (F A D : AmbientPoly n) (q : ℕ)

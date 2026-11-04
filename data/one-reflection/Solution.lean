@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import HodgeComputer.CertificateOperations
 import HodgeTarget
 import Mathlib.Analysis.Complex.Basic
@@ -36,6 +37,7 @@ show how to assemble a future sector witness using the exact Verify predicate.
 -/
 
 noncomputable section
+open HodgeComputer.Sextic
 
 namespace HodgeComputer.Construction
 
@@ -60,8 +62,7 @@ theorem defect_add_same_denominator (F A B D : Poly) (q : ℕ)
     (N M : Fin 6 → Poly) :
     defect F (A+B) D q (fun i => N i + M i) =
       defect F A D q N + defect F B D q M := by
-  simp only [defect, directional_add, divergenceNumerator_add]
-  ring
+  exact HodgeComputer.defect_add_same_denominator F A B D q N M
 
 theorem defect_scale_denominator (F A D H : Poly) (q : ℕ)
     (N : Fin 6 → Poly) :
@@ -976,7 +977,7 @@ theorem targetF_ne_zero : HodgeSubmission.F ≠ 0 := by
   norm_num [HodgeSubmission.F] at he
 
 theorem Aplus_homogeneous : Aplus.IsHomogeneous 6 := by
-  simpa only [Aplus] using ((isHomogeneous_X_pow (0 : Fin 6) 3).mul S_homogeneous).C_mul (1/2 : ℂ)
+  simpa only [Aplus, mul_assoc] using ((isHomogeneous_X_pow (0 : Fin 6) 3).mul S_homogeneous).C_mul (1/2 : ℂ)
 
 theorem sector_verify (second_identity : divergenceNumerator D N = 0) :
     Verify HodgeSubmission.F Aplus 6 1 D N 0 where

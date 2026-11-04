@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import HodgeComputer.Constructions.HoldoutCover.PolynomialFamilyBridge
 import HodgeComputer.Constructions.HoldoutCover.FiniteResidueClearing
 import HodgeComputer.Constructions.HoldoutCover.HomogeneousCertificate
@@ -25,8 +26,8 @@ variable [CommRing T]
 /-- A verified polynomial family yields unrestricted normalized polynomial
 data. The application imposes homogeneity after its coordinate transport. -/
 theorem normalized_data_from_polynomial_family
-    (π : HodgeComputer.Poly →+* B) (hπ : Function.Surjective π)
-    (f A : HodgeComputer.Poly)
+    (π : HodgeComputer.Sextic.Poly →+* B) (hπ : Function.Surjective π)
+    (f A : HodgeComputer.Sextic.Poly)
     (hirr : Irreducible f) (hker : ∀ p, π p = 0 ↔ f ∣ p)
     (hg0 : algebraMap B K (π (pderiv 0 f)) ≠ 0)
     (D : Fin 5 → Derivation ℤ L L)
@@ -48,8 +49,8 @@ theorem normalized_data_from_polynomial_family
     (hpolyψ : ∀ i, ψ i ∈ (Polynomial.eval₂RingHom χ t).range)
     (hDpoly : ∀ i x, x ∈ (Polynomial.eval₂RingHom χ t).range →
       D i x ∈ (Polynomial.eval₂RingHom χ t).range) :
-    ∃ d : HodgeComputer.Poly, ∃ N : Fin 6 → HodgeComputer.Poly,
-      ∃ Q : HodgeComputer.Poly,
+    ∃ d : HodgeComputer.Sextic.Poly, ∃ N : Fin 6 → HodgeComputer.Sextic.Poly,
+      ∃ Q : HodgeComputer.Sextic.Poly,
         d ≠ 0 ∧ IsRelPrime f d ∧
         HodgeTestbed.directional f N = A * d ∧
         HodgeTestbed.divergenceNumerator d N = f * Q := by
@@ -62,7 +63,7 @@ theorem normalized_data_from_polynomial_family
     rw [(hker f).mpr (dvd_refl _), map_zero, map_zero]
   have hg : ρ (pderiv 0 f) ≠ 0 :=
     (map_ne_zero (algebraMap K L)).2 hg0
-  have hE (i : Fin 5) (p : HodgeComputer.Poly) :
+  have hE (i : Fin 5) (p : HodgeComputer.Sextic.Poly) :
       E' i (ρ p) = ρ (pderiv i.succ p) -
         ρ (pderiv i.succ f) / ρ (pderiv 0 f) * ρ (pderiv 0 p) := by
     change extendFiniteDerivation (L := L) (E i)

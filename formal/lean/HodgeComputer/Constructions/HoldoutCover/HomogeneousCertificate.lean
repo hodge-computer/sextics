@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import HodgeComputer.Verify
 import HodgeComputer.Constructions.HoldoutCover.HomogeneousField
 import HodgeComputer.Constructions.HoldoutCover.HypersurfaceCoordinates
@@ -174,8 +175,8 @@ theorem polynomialDivNum_eq_divergenceNumerator
 /-- Homogeneity imposes no extra obstruction once legal normalized
 pole-order-one polynomial data have been obtained on this normal chart. -/
 theorem hasCertificate_of_normalized
-    (F A D : HodgeComputer.Poly) (N : Fin 6 → HodgeComputer.Poly)
-    (Q : HodgeComputer.Poly)
+    (F A D : HodgeComputer.Sextic.Poly) (N : Fin 6 → HodgeComputer.Sextic.Poly)
+    (Q : HodgeComputer.Sextic.Poly)
     (hF : F.IsHomogeneous 6) (hA : A.IsHomogeneous 6) (hprime : Prime F)
     (hlegal : IsRelPrime F D)
     (normal : HodgeTestbed.directional F N = A*D)
@@ -202,7 +203,7 @@ theorem hasCertificate_of_normalized
     · simpa only [pow_one, polynomialDivNum_eq_divergenceNumerator] using hdiv'
 
 /-- The protected holdout numerator in the original coordinate order. -/
-def holdoutSource : HodgeComputer.Poly := MvPolynomial.X 0^3*MvPolynomial.X 3^3
+def holdoutSource : HodgeComputer.Sextic.Poly := MvPolynomial.X 0^3*MvPolynomial.X 3^3
 
 theorem holdoutSextic_isHomogeneous :
     (holdoutSextic (R := ℂ)).IsHomogeneous 6 := by
@@ -222,7 +223,7 @@ theorem holdoutSource_isHomogeneous : holdoutSource.IsHomogeneous 6 :=
 holdout sextic and numerator. The outstanding constructive input is precisely
 the two normalized polynomial identities and denominator legality. -/
 theorem holdout_hasCertificate_of_normalized
-    (D : HodgeComputer.Poly) (N : Fin 6 → HodgeComputer.Poly) (Q : HodgeComputer.Poly)
+    (D : HodgeComputer.Sextic.Poly) (N : Fin 6 → HodgeComputer.Sextic.Poly) (Q : HodgeComputer.Sextic.Poly)
     (hlegal : IsRelPrime (holdoutSextic (R := ℂ)) D)
     (normal : HodgeTestbed.directional holdoutSextic N = holdoutSource*D)
     (divergence : HodgeTestbed.divergenceNumerator D N = holdoutSextic*Q) :

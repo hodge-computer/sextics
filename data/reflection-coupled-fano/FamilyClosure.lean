@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import Proposal.TargetEmbedding
 import Proposal.QuarticSource
 import Proposal.QuotientGradient
@@ -39,8 +40,8 @@ are obtained from the lifted family, with finite coefficient extension
 retained as an explicit hypothesis. -/
 theorem quotient_normalized_of_quartic_family
     [Module.Finite (Endpoint.Field c) E] (p : QuarticFamily c E) :
-    ∃ d : HodgeComputer.Poly, ∃ N : Fin 6 → HodgeComputer.Poly,
-      ∃ Q : HodgeComputer.Poly,
+    ∃ d : HodgeComputer.Sextic.Poly, ∃ N : Fin 6 → HodgeComputer.Sextic.Poly,
+      ∃ Q : HodgeComputer.Sextic.Poly,
         d ≠ 0 ∧ IsRelPrime (hypersurface c 3 1) d ∧
         HodgeTestbed.directional (hypersurface c 3 1) N = quotientSource * d ∧
         HodgeTestbed.divergenceNumerator d N = hypersurface c 3 1 * Q := by
@@ -51,7 +52,7 @@ theorem quotient_normalized_of_quartic_family
   letI := a.functionField_finite
   let ρ := finiteQuotientEvaluation (K := Target.Field c)
     (L := CurveFunctionField E) (Target.projection c)
-  have hρ (f : HodgeComputer.Poly) :
+  have hρ (f : HodgeComputer.Sextic.Poly) :
       ρ f = MvPolynomial.eval₂Hom (algebraMap ℂ (CurveFunctionField E))
         (fun i => algebraMap (Polynomial E) (CurveFunctionField E) (p.curve i)) f := by
     exact a.fieldMap_residue f

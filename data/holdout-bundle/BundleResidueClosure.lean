@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import Proposal.BundleAssembly
 import HodgeComputer.Constructions.HoldoutCover.ResiduePiolaPullback
 import HodgeComputer.Constructions.HoldoutCover.ResidueClearing
@@ -27,14 +28,14 @@ local instance : CharZero HoldoutFunctionField :=
   charZero_of_injective_ringHom (f := algebraMap ℂ HoldoutFunctionField)
     (algebraMap ℂ HoldoutFunctionField).injective
 
-def physicalSourceFor (A : HodgeComputer.Poly) : HoldoutFunctionField :=
+def physicalSourceFor (A : HodgeComputer.Sextic.Poly) : HoldoutFunctionField :=
   (physicalResidueMap (integerPartial 0 A) * physicalNormal -
     physicalResidueMap A *
       physicalResidueMap (integerPartial 0 (integerPartial 0 holdoutSextic))) /
         physicalNormal^2
 
 theorem physical_certificate_of_residue
-    (A : HodgeComputer.Poly) (hA : A.IsHomogeneous 6)
+    (A : HodgeComputer.Sextic.Poly) (hA : A.IsHomogeneous 6)
     (w : Fin 5 → HoldoutFunctionField)
     (equation : physicalSourceFor A +
       residueDivergence physicalTangent physicalNormal w = 0) :
@@ -54,7 +55,7 @@ theorem physical_certificate_of_residue
     simpa only [physicalSourceFor, physicalNormal, residueDivergence,
       fieldDivergence, Finset.sum_sub_distrib, div_eq_mul_inv, Finset.sum_mul]
       using equation
-  have hreps : ∃ d : HodgeComputer.Poly, ∃ n : Fin 5 → HodgeComputer.Poly,
+  have hreps : ∃ d : HodgeComputer.Sextic.Poly, ∃ n : Fin 5 → HodgeComputer.Sextic.Poly,
       physicalResidueMap d ≠ 0 ∧
       ∀ i, physicalResidueMap (n i) = physicalResidueMap d * w i := by
     exact residue_common_representatives physicalProjection
@@ -133,7 +134,7 @@ source identities.  This theorem performs their complete residue transport
 and the legal homogeneous certificate extraction. -/
 theorem physical_certificate_of_diagonal_residue
     {R : Type*} [Field R]
-    (A : HodgeComputer.Poly) (hA : A.IsHomogeneous 6)
+    (A : HodgeComputer.Sextic.Poly) (hA : A.IsHomogeneous 6)
     (φ : R →+* HoldoutFunctionField)
     (Dq : Fin 4 → Derivation ℤ R R)
     (E : Fin 5 → Derivation ℤ HoldoutFunctionField HoldoutFunctionField)

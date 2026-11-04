@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import HodgeTarget
 import HodgeComputer.Constructions.HoldoutCover.GeneralizedCover
 
@@ -18,8 +19,8 @@ local instance : CharZero CommonCoverFunctionField :=
   charZero_of_injective_ringHom (f := algebraMap ℂ CommonCoverFunctionField)
     (algebraMap ℂ CommonCoverFunctionField).injective
 
-def target : HodgeComputer.Poly := (X 1)^3*(X 4)^3
-def reflected : HodgeComputer.Poly := (X 1)^3*(X 4)
+def target : HodgeComputer.Sextic.Poly := (X 1)^3*(X 4)^3
+def reflected : HodgeComputer.Sextic.Poly := (X 1)^3*(X 4)
 def quotientSource : MvPolynomial (Fin 5) (FermatCoefficientField ℂ) :=
   C (-(genericBaseBeta ℂ)^0/(2*(genericBaseAlpha ℂ)^5))*(X 1)^3*(X 4)
 

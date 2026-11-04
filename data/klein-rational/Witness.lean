@@ -1,4 +1,4 @@
-import HodgeComputer.Verify
+import HodgeComputer.Sextic
 
 set_option maxHeartbeats 2000000
 
@@ -16,7 +16,7 @@ noncomputable section
 
 namespace HodgeComputer.Instances.KleinRational
 
-open MvPolynomial HodgeTestbed
+open MvPolynomial HodgeTestbed HodgeComputer.Sextic
 
 def F : Poly := (MvPolynomial.C (σ := Fin 6) (1 : ℂ)) * (MvPolynomial.X (0 : Fin 6))^5 * (MvPolynomial.X (1 : Fin 6)) +
     (MvPolynomial.C (σ := Fin 6) (1 : ℂ)) * (MvPolynomial.X (0 : Fin 6)) * (MvPolynomial.X (2 : Fin 6))^5 +
@@ -447,10 +447,10 @@ theorem hypersurface_ne_zero : F ≠ 0 := by
   norm_num [F] at he
 
 theorem hypersurface_homogeneous : F.IsHomogeneous 6 := by
-  simpa only [F] using ((((((((isHomogeneous_C (σ := Fin 6) (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (0 : Fin 6)).pow 5)).mul (isHomogeneous_X ℂ (1 : Fin 6))).add (((isHomogeneous_C (σ := Fin 6) (σ := Fin 6) (1 : ℂ)).mul (isHomogeneous_X ℂ (0 : Fin 6))).mul ((isHomogeneous_X ℂ (2 : Fin 6)).pow 5))).add (((isHomogeneous_C (σ := Fin 6) (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (1 : Fin 6)).pow 5)).mul (isHomogeneous_X ℂ (2 : Fin 6)))).add (((isHomogeneous_C (σ := Fin 6) (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (3 : Fin 6)).pow 5)).mul (isHomogeneous_X ℂ (4 : Fin 6)))).add (((isHomogeneous_C (σ := Fin 6) (σ := Fin 6) (1 : ℂ)).mul (isHomogeneous_X ℂ (3 : Fin 6))).mul ((isHomogeneous_X ℂ (5 : Fin 6)).pow 5))).add (((isHomogeneous_C (σ := Fin 6) (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (4 : Fin 6)).pow 5)).mul (isHomogeneous_X ℂ (5 : Fin 6))))
+  simpa only [F] using ((((((((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (0 : Fin 6)).pow 5)).mul (isHomogeneous_X ℂ (1 : Fin 6))).add (((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul (isHomogeneous_X ℂ (0 : Fin 6))).mul ((isHomogeneous_X ℂ (2 : Fin 6)).pow 5))).add (((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (1 : Fin 6)).pow 5)).mul (isHomogeneous_X ℂ (2 : Fin 6)))).add (((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (3 : Fin 6)).pow 5)).mul (isHomogeneous_X ℂ (4 : Fin 6)))).add (((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul (isHomogeneous_X ℂ (3 : Fin 6))).mul ((isHomogeneous_X ℂ (5 : Fin 6)).pow 5))).add (((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (4 : Fin 6)).pow 5)).mul (isHomogeneous_X ℂ (5 : Fin 6))))
 
 theorem source_homogeneous : A.IsHomogeneous 6 := by
-  simpa only [A] using ((((isHomogeneous_C (σ := Fin 6) (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (0 : Fin 6)).pow 3)).mul ((isHomogeneous_X ℂ (1 : Fin 6)).pow 2)).mul (isHomogeneous_X ℂ (3 : Fin 6)))
+  simpa only [A] using ((((isHomogeneous_C (σ := Fin 6) (1 : ℂ)).mul ((isHomogeneous_X ℂ (0 : Fin 6)).pow 3)).mul ((isHomogeneous_X ℂ (1 : Fin 6)).pow 2)).mul (isHomogeneous_X ℂ (3 : Fin 6)))
 
 theorem certificate : Verify F A 6 1 D N Q where
   hypersurface_ne_zero := hypersurface_ne_zero

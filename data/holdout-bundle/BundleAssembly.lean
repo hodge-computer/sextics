@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import HodgeComputer.CertificateOperations
 import HodgeComputer.Constructions.HoldoutCover.ConicResidue
 import HodgeComputer.Constructions.HoldoutCover.CoverCertificate
@@ -12,6 +13,7 @@ Prepared with OpenAI ChatGPT collaborating-agent assistance.
 -/
 
 noncomputable section
+open HodgeComputer.Sextic
 set_option maxRecDepth 10000
 set_option maxHeartbeats 1000000
 
@@ -20,9 +22,9 @@ namespace HoldoutBundle
 open HodgeComputer HodgeTestbed HoldoutConstruction HoldoutConicIncidence MvPolynomial
 open scoped BigOperators
 
-def Astar : HodgeComputer.Poly := X 0^3 * X 3 * X 4^2
+def Astar : HodgeComputer.Sextic.Poly := X 0^3 * X 3 * X 4^2
 
-def Abundle : HodgeComputer.Poly := holdoutSource + Astar
+def Abundle : HodgeComputer.Sextic.Poly := holdoutSource + Astar
 
 theorem Astar_isHomogeneous : Astar.IsHomogeneous 6 := by
   exact ((isHomogeneous_X_pow (R := ℂ) (0 : Fin 6) 3).mul
@@ -50,8 +52,7 @@ theorem defect_add_same_denominator (F A B D : Poly) (q : ℕ)
     (N M : Fin 6 → Poly) :
     defect F (A+B) D q (fun i => N i + M i) =
       defect F A D q N + defect F B D q M := by
-  simp only [defect, directional_add, divergenceNumerator_add]
-  ring
+  exact HodgeComputer.defect_add_same_denominator F A B D q N M
 
 theorem defect_scale_denominator (F A D H : Poly) (q : ℕ)
     (N : Fin 6 → Poly) :

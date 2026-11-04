@@ -11,5 +11,5 @@ namespace Submission
   have ha : HodgeSubmission.A = DenseP0.A := by
     apply MvPolynomial.funext; intro x
     norm_num [HodgeSubmission.A,DenseP0.A,DenseP0.cm,Frozen.A,Frozen.X0,Frozen.Y1] <;> ring
-  simpa only [hf,ha,HodgeSubmission.q] using DenseP0.solved
+  simpa only [HodgeSubmission.d, hf,ha,HodgeSubmission.q] using DenseP0.solved
 end Submission

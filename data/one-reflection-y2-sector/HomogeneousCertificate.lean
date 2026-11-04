@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 /- Adapted for the instance `one-reflection-y2-sector` from the accepted holdout proof by `fqlx` (hodge-computer/sextics PR #128, prepared with OpenAI ChatGPT assistance); the target-specific source, companion and trace data are replaced, all other modules are unchanged. Adaptation prepared with Claude Code assistance for `DiamondJM`. -/
 import HodgeComputer.Verify
 import Proposal.HomogeneousField
@@ -175,8 +176,8 @@ theorem polynomialDivNum_eq_divergenceNumerator
 /-- Homogeneity imposes no extra obstruction once legal normalized
 pole-order-one polynomial data have been obtained on this normal chart. -/
 theorem hasCertificate_of_normalized
-    (F A D : HodgeComputer.Poly) (N : Fin 6 → HodgeComputer.Poly)
-    (Q : HodgeComputer.Poly)
+    (F A D : HodgeComputer.Sextic.Poly) (N : Fin 6 → HodgeComputer.Sextic.Poly)
+    (Q : HodgeComputer.Sextic.Poly)
     (hF : F.IsHomogeneous 6) (hA : A.IsHomogeneous 6) (hprime : Prime F)
     (hlegal : IsRelPrime F D)
     (normal : HodgeTestbed.directional F N = A*D)
@@ -203,10 +204,10 @@ theorem hasCertificate_of_normalized
     · simpa only [pow_one, polynomialDivNum_eq_divergenceNumerator] using hdiv'
 
 /-- The protected numerator of `one-reflection-y2-sector` in the original coordinate order. -/
-def holdoutSource : HodgeComputer.Poly := MvPolynomial.X 0^3*MvPolynomial.X 3*MvPolynomial.X 4*MvPolynomial.X 5
+def holdoutSource : HodgeComputer.Sextic.Poly := MvPolynomial.X 0^3*MvPolynomial.X 3*MvPolynomial.X 4*MvPolynomial.X 5
 
 /-- The physical polynomial multiplying the deck-trace correction term. -/
-def holdoutCompanion : HodgeComputer.Poly := MvPolynomial.X 0^3*MvPolynomial.X 3*MvPolynomial.X 4^3*MvPolynomial.X 5
+def holdoutCompanion : HodgeComputer.Sextic.Poly := MvPolynomial.X 0^3*MvPolynomial.X 3*MvPolynomial.X 4^3*MvPolynomial.X 5
 
 theorem holdoutSextic_isHomogeneous :
     (holdoutSextic (R := ℂ)).IsHomogeneous 6 := by
@@ -232,7 +233,7 @@ theorem holdoutSource_isHomogeneous : holdoutSource.IsHomogeneous 6 := by
 holdout sextic and numerator. The outstanding constructive input is precisely
 the two normalized polynomial identities and denominator legality. -/
 theorem holdout_hasCertificate_of_normalized
-    (D : HodgeComputer.Poly) (N : Fin 6 → HodgeComputer.Poly) (Q : HodgeComputer.Poly)
+    (D : HodgeComputer.Sextic.Poly) (N : Fin 6 → HodgeComputer.Sextic.Poly) (Q : HodgeComputer.Sextic.Poly)
     (hlegal : IsRelPrime (holdoutSextic (R := ℂ)) D)
     (normal : HodgeTestbed.directional holdoutSextic N = holdoutSource*D)
     (divergence : HodgeTestbed.divergenceNumerator D N = holdoutSextic*Q) :

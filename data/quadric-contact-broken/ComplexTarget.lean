@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import Proposal.RationalTarget
 import Proposal.TargetDenominator
 import Proposal.PolynomialLift
@@ -9,10 +10,10 @@ noncomputable section
 namespace QuadricContactComplex
 open MvPolynomial HodgeTestbed QuadricContactClearing
 
-def complexMap : BasePoly →+* HodgeComputer.Poly :=
+def complexMap : BasePoly →+* HodgeComputer.Sextic.Poly :=
   MvPolynomial.map (algebraMap ℚ ℂ)
 
-def targetA : HodgeComputer.Poly :=
+def targetA : HodgeComputer.Sextic.Poly :=
   X 1^2 * X 0 * X 3 * (X 0^2-X 3^2)
 
 @[simp] theorem complexMap_X (i : Fin 6) : complexMap (X i) = X i := by
@@ -33,7 +34,7 @@ def targetA : HodgeComputer.Poly :=
 
 /-- The numerator in the protected expanded variable order. -/
 theorem targetA_expanded : targetA =
-    (X 0 : HodgeComputer.Poly)^3 * X 1^2 * X 3 - X 0 * X 1^2 * X 3^3 := by
+    (X 0 : HodgeComputer.Sextic.Poly)^3 * X 1^2 * X 3 - X 0 * X 1^2 * X 3^3 := by
   unfold targetA
   ring
 

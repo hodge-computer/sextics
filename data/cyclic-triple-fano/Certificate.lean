@@ -1,3 +1,4 @@
+import HodgeComputer.Sextic
 import Proposal.LineClosure
 import Proposal.LineLifting
 import Proposal.CubicLift
@@ -11,8 +12,8 @@ set_option maxHeartbeats 1500000
 namespace CyclicTriple
 open MvPolynomial HoldoutConstruction
 
-def quotientSource : HodgeComputer.Poly := X 2*X 0^3
-def physicalSource : HodgeComputer.Poly := X 2*X 5^2*X 0^3
+def quotientSource : HodgeComputer.Sextic.Poly := X 2*X 0^3
+def physicalSource : HodgeComputer.Sextic.Poly := X 2*X 5^2*X 0^3
 
 theorem physical_homogeneous (k : ℂ) : (hypersurface k 6 3).IsHomogeneous 6 := by
   have hx (i : Fin 6) := MvPolynomial.isHomogeneous_X ℂ i
@@ -36,8 +37,8 @@ theorem source_pullback : X 5^2*cubeLast quotientSource = physicalSource := by
   ring
 
 theorem quotient_certificate_data :
-    ∃ d : HodgeComputer.Poly, ∃ N : Fin 6 → HodgeComputer.Poly,
-      ∃ Q : HodgeComputer.Poly,
+    ∃ d : HodgeComputer.Sextic.Poly, ∃ N : Fin 6 → HodgeComputer.Sextic.Poly,
+      ∃ Q : HodgeComputer.Sextic.Poly,
         d ≠ 0 ∧ IsRelPrime (hypersurface coupling 2 1) d ∧
         HodgeTestbed.directional (hypersurface coupling 2 1) N = quotientSource*d ∧
         HodgeTestbed.divergenceNumerator d N = hypersurface coupling 2 1*Q := by

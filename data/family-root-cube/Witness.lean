@@ -1,4 +1,4 @@
-import HodgeComputer.Verify
+import HodgeComputer.Sextic
 
 set_option maxHeartbeats 2000000
 
@@ -16,7 +16,7 @@ noncomputable section
 
 namespace HodgeComputer.Instances.FamilyRootCube
 
-open MvPolynomial HodgeTestbed
+open MvPolynomial HodgeTestbed HodgeComputer.Sextic
 
 def F : Poly := (MvPolynomial.C (5 : ℂ)) * (MvPolynomial.X 0)^6 +
     (MvPolynomial.C (303 / 103 : ℂ)) * (MvPolynomial.X 0)^4 * (MvPolynomial.X 2)^2 +
