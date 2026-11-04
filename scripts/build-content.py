@@ -89,7 +89,8 @@ for rid in catalogue['instanceIds']:
             record['evidenceKind'] = 'explicit-certificate'
         record['leanVerification'] = {
             'formalStatus': 'proved', 'status': 'accepted',
-            'proofFile': f'data/{rid}/Solution.lean'}
+            'proofFile': f'data/{rid}/Solution.lean',
+            'receipt': f'data/{rid}/acceptance.json'}
         display_divisor = ROOT / 'slices/divisors' / f'{rid}.json'
         if display_divisor.is_file():
             display = validate_program(json.loads(display_divisor.read_text()), ROOT)
