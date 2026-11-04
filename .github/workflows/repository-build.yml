@@ -49,13 +49,13 @@ jobs:
           python3 scripts/check-content.py
           python3 infra/aws/package.py --site . --output "$RUNNER_TEMP/release" --static-only
   lean:
+    name: Lean / ${{ matrix.instance || 'shared library' }}
     needs: build
     if: needs.build.outputs.lean == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     strategy:
       fail-fast: false
-      max-parallel: 4
       matrix: ${{ fromJSON(needs.build.outputs.matrix) }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -88,5 +88,5 @@ jobs:
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           PHASE: ${{ matrix.phase }}
-          SHARD: ${{ matrix.shard }}
-        run: python3 scripts/check-library.py --base "$BASE" --phase "$PHASE" --shard "$SHARD"
+          INSTANCE: ${{ matrix.instance }}
+        run: python3 scripts/check-library.py --base "$BASE" --phase "$PHASE" --instance "$INSTANCE"

@@ -56,6 +56,13 @@ class MaintenanceChecks(unittest.TestCase):
     def test_verifier_edit_rechecks_existing_solves(self):
         self.assertEqual(self.plan("scripts/proposals/Audit.lean")["instances"], ["first", "second"])
 
+    def test_each_affected_instance_has_its_own_job(self):
+        instances = [f"instance-{i}" for i in range(66)]
+        jobs = library.verification_jobs({"modules": ["HodgeComputer.Verify"], "instances": instances})
+        self.assertEqual(len(jobs), 67)
+        self.assertEqual([job["instance"] for job in jobs if job["phase"] == "applications"], instances)
+        self.assertEqual(library.verification_jobs({"modules": [], "instances": []}), [])
+
     def test_candidate_receipt_does_not_turn_a_new_solve_into_maintenance(self):
         def git(*args):
             return subprocess.check_output(["git", *args], cwd=self.root, stderr=subprocess.DEVNULL).decode().strip()

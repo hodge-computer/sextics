@@ -67,35 +67,35 @@ def verification_plan(root, changed):
     return {"modules": modules, "instances": applications}
 
 
+def verification_jobs(plan):
+    jobs = [{"phase": "shared", "instance": ""}] if plan["modules"] else []
+    jobs.extend({"phase": "applications", "instance": instance} for instance in plan["instances"])
+    return jobs
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", required=True)
     parser.add_argument("--plan", action="store_true")
     parser.add_argument("--phase", choices=("all", "shared", "applications"), default="all")
-    parser.add_argument("--shard", default="1/1", help="Application shard, numbered from 1")
+    parser.add_argument("--instance", default="", help="Check one affected instance; omit to check all")
     args = parser.parse_args()
     changed = subprocess.check_output(
         ["git", "diff", "--name-only", args.base, "HEAD"], cwd=ROOT, text=True
     ).splitlines()
     plan = verification_plan(ROOT, changed)
     if args.plan:
-        jobs = []
-        if plan["modules"]:
-            jobs.append({"phase": "shared", "shard": "1/1"})
-        count = min(8, len(plan["instances"]))
-        jobs.extend({"phase": "applications", "shard": f"{i+1}/{count}"} for i in range(count))
-        print(json.dumps({**plan, "matrix": {"include": jobs}}))
+        print(json.dumps({**plan, "matrix": {"include": verification_jobs(plan)}}))
         return
-    shard, shards = map(int, args.shard.split("/"))
-    if not 1 <= shard <= shards:
-        parser.error("Expected --shard INDEX/COUNT with 1 <= INDEX <= COUNT")
+    if args.instance and args.instance not in plan["instances"]:
+        parser.error("--instance must name an affected accepted solve")
     lean = ROOT / "formal/lean"
     modules = plan["modules"] if args.phase != "applications" else []
     if modules:
         subprocess.run(["lake", "build", *modules], cwd=lean, check=True)
         for module in modules:
             subprocess.run(["lake", "env", "leanchecker", "--verbose", module], cwd=lean, check=True)
-    selected = plan["instances"][shard-1::shards] if args.phase != "shared" else []
+    selected = ([args.instance] if args.instance else plan["instances"]) if args.phase != "shared" else []
     policy = json.loads((ROOT / ".github/solve-policy.json").read_text())
     applications = 0
     for instance_id in selected:
