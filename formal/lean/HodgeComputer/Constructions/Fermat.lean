@@ -313,4 +313,3 @@ theorem certificate
   simpa only [support_sum_monomial_coeff] using hsum A0.support hmono
 
 end HodgeComputer.Fermat
-
