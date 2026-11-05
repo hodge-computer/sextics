@@ -183,7 +183,8 @@ theorem hasCertificate_of_normalized
     (normal : HodgeTestbed.directional F N = A*D)
     (divergence : HodgeTestbed.divergenceNumerator D N = F*Q)
     (i : Fin 6) (hchart : ¬ F ∣ pderiv i F) :
-    HodgeComputer.HasCertificate F A 6 1 := by
+    HodgeComputer.HasCertificate F 1 A := by
+  rw [HodgeComputer.HasCertificate, hF.totalDegree hprime.ne_zero]
   have hnormal : polynomialDirectional F N = A*D := by
     exact (polynomialDirectional_eq_directional F N).trans normal
   have hdivergence : polynomialDivNum D N = F*Q := by
@@ -237,7 +238,7 @@ theorem holdout_hasCertificate_of_normalized
     (hlegal : IsRelPrime (holdoutSextic (R := ℂ)) D)
     (normal : HodgeTestbed.directional holdoutSextic N = holdoutSource*D)
     (divergence : HodgeTestbed.divergenceNumerator D N = holdoutSextic*Q) :
-    HodgeComputer.HasCertificate holdoutSextic holdoutSource 6 1 := by
+    HodgeComputer.HasCertificate holdoutSextic 1 holdoutSource := by
   have hi : (Complex.I : ℂ)^6 = -1 := by
     rw [show (6 : ℕ) = 2*3 by decide, pow_mul, Complex.I_sq]
     norm_num

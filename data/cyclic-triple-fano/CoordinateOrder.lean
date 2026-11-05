@@ -25,8 +25,10 @@ theorem rename_divergence (e : Fin 6 ≃ Fin 6) (N : Fin 6 → HodgeComputer.Sex
   simp only [renamedVector, Equiv.symm_apply_apply, pderiv_rename e.injective, map_sum]
 
 theorem certificate_rename (e : Fin 6 ≃ Fin 6) (F A : HodgeComputer.Sextic.Poly) (q : ℕ)
-    (h : HodgeComputer.HasCertificate F A 6 q) :
-    HodgeComputer.HasCertificate (rename e F) (rename e A) 6 q := by
+    (h : HodgeComputer.HasCertificate F q A) :
+    HodgeComputer.HasCertificate (rename e F) q (rename e A) := by
+  rw [HodgeComputer.HasCertificate, show (rename e F).totalDegree = F.totalDegree from
+    totalDegree_renameEquiv e F]
   obtain ⟨D,N,Q,h⟩ := h
   have hD0 : rename e D ≠ 0 :=
     (rename_injective _ e.injective).ne (by simpa using h.denominator_ne_zero)

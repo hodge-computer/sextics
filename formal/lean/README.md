@@ -10,7 +10,7 @@ This project pins Lean 4.33.1 and mathlib revision `0df444a360eaa60ab8c11dca51a8
 - each `N i` homogeneous of integer degree `D.totalDegree + d * q - n`;
 - `IsRelPrime F D` and the complete cleared certificate identity.
 
-The integer-degree predicate `HodgeComputer.Homogeneous` permits only the zero polynomial in negative degrees. The denominator degree is unrestricted, and the quotient `Q` may be nonzero. `HodgeComputer.HasCertificate (n := n) F A d q` means that such `D`, `N`, and `Q` exist. `localization_identity` relates their cleared identity to the rational field `N / D`. See the [formal contract](../README.md) for the equation and its meaning.
+The integer-degree predicate `HodgeComputer.Homogeneous` permits only the zero polynomial in negative degrees. The denominator degree is unrestricted, and the quotient `Q` may be nonzero. `HodgeComputer.HasCertificate F q A` means that such `D`, `N`, and `Q` exist, using `F.totalDegree` for `d` and inferring `n` from the common polynomial ring. The witness interface `Verify` retains an explicit `d`; `Verify.hasCertificate` derives the existence statement from a verified witness. `localization_identity` relates their cleared identity to the rational field `N / D`. See the [formal contract](../README.md) for the equation and its meaning.
 
 The catalogue uses `n = 5` and `d = 6`. Six-variable notation for its constructions is in [`HodgeComputer/Sextic.lean`](HodgeComputer/Sextic.lean), under `HodgeComputer.Sextic`; it is separate from the general verifier. Shared differential notation is in [`HodgeTestbed/Algebra.lean`](HodgeTestbed/Algebra.lean).
 

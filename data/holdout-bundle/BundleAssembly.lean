@@ -75,18 +75,18 @@ theorem verify_add_q1 {F A B D E Q R : Poly}
       (E^2*Q+D^2*R) := HodgeComputer.Verify.add h k
 
 theorem certificate_add_q1 {F A B : Poly}
-    (h : HasCertificate F A 6 1) (k : HasCertificate F B 6 1) :
-    HasCertificate F (A+B) 6 1 := HodgeComputer.HasCertificate.add h k
+    (h : HasCertificate F 1 A) (k : HasCertificate F 1 B) :
+    HasCertificate F 1 (A+B) := HodgeComputer.HasCertificate.add h k
 
 theorem first_summand_certificate :
-    HasCertificate holdoutSextic holdoutSource 6 1 := by
+    HasCertificate holdoutSextic 1 holdoutSource := by
   obtain ⟨p⟩ := HoldoutConic.exists_seed
   obtain ⟨w, hw⟩ := conic_target_residue_solution p coverQuotientSource
   exact holdout_hasCertificate_of_quotient_divergence w hw
 
 theorem bundle_certificate_of_star
-    (hstar : HasCertificate holdoutSextic Astar 6 1) :
-    HasCertificate holdoutSextic Abundle 6 1 :=
+    (hstar : HasCertificate holdoutSextic 1 Astar) :
+    HasCertificate holdoutSextic 1 Abundle :=
   certificate_add_q1 first_summand_certificate hstar
 
 end HoldoutBundle

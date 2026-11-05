@@ -5,7 +5,7 @@ noncomputable section
 namespace Submission
 
 theorem certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := by
   have hF : HodgeSubmission.F=CrossedPhysicalChart.physicalF := by
     unfold HodgeSubmission.F CrossedPhysicalChart.physicalF CrossedPhysicalChart.ternary
     simp only [show (5/7 : ℂ)=5*(1/7) by ring, map_mul, map_ofNat]

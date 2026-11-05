@@ -342,8 +342,7 @@ protected target. The exported theorem is
 
 ```lean
 Submission.certificate :
-  HodgeComputer.HasCertificate
-    HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q
+  HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A
 ```
 
 `BundleCertificate.lean` assembles the new quotient primitive and the

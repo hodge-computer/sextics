@@ -46,8 +46,7 @@ The [motivation](why.md) and [provenance](provenance.json) already explain why t
 [CoupledDomain.lean](CoupledDomain.lean) defines the quotient and physical equations. [SourceBinding.lean](SourceBinding.lean) identifies the physical equation, source, and pole parameter with the definitions generated from the protected record. [Solution.lean](Solution.lean) is the final binding to
 
     Submission.certificate :
-      HodgeComputer.HasCertificate
-        HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q
+      HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A
 
 The meaning of this statement is given by the repository's [formal contract](../../formal/README.md). It asks for a nonzero homogeneous denominator \(D\), six homogeneous numerators \(N_i\) of degree \(\deg D+1\), relative primality of \(F\) and \(D\), and a polynomial \(Q\) satisfying
 

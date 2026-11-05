@@ -229,6 +229,6 @@ theorem certificate : Verify F A 6 1 D N Q where
   denominator_legal := denominator_legal
   identity := normalized_identity (by simpa using equations.e1) (by simpa using equations.e2)
 
-theorem solved : HasCertificate F A 6 1 := ⟨D,N,Q,certificate⟩
+theorem solved : HasCertificate F 1 A := certificate.hasCertificate
 end HodgeComputer.DenseP0
 #print axioms HodgeComputer.DenseP0.solved

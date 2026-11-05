@@ -111,8 +111,9 @@ theorem hasCertificate_endpoint_from_cubic {k : ℂ} (hk : k^2+k+1=0)
     (M K : Matrix ι ι ℂ) (s : ℂ) (hs : s≠0)
     (hK : (M^3+(5 : ℂ) • (1 : Matrix ι ι ℂ))*K=1)
     (hD_fiber : activeNormFiber k D=Polynomial.C s*HoldoutDenominator.normFiber M) :
-    HodgeComputer.HasCertificate HoldoutEndpointTarget.F
-      (HoldoutEndpointTarget.reflectionTarget k) 6 2 := by
+    HodgeComputer.HasCertificate HoldoutEndpointTarget.F 2 (HoldoutEndpointTarget.reflectionTarget k) := by
+  rw [HodgeComputer.HasCertificate, HoldoutEndpointTarget.F_homogeneous.totalDegree
+    HoldoutEndpointTarget.F_ne_zero]
   obtain ⟨n,q,u,Q,P,hu,hq,hQhom,hPhom,hQ,hP,hQfiber,hPfiber⟩ :=
     HoldoutQ2.Clearing.exists_q2_representatives_with_fibre D N d hD hN
       (activePolynomials k) (activePolynomials_homogeneous k)

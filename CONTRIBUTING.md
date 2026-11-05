@@ -58,14 +58,16 @@ The verifier generates `HodgeTarget` from the **base branch's** exact target and
 import HodgeTarget
 
 theorem Submission.certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A
-      HodgeSubmission.d HodgeSubmission.q := by
+    HodgeComputer.HasCertificate
+      HodgeSubmission.F
+      HodgeSubmission.q
+      HodgeSubmission.A := by
   -- Supply a complete proof here.
 ```
 
 This is a statement skeleton, not a proof. The manifest names the actual fully qualified theorem. Do not add parameters, assumptions, placeholders, or replacement definitions of the protected target. Do not submit `HodgeTarget.lean`.
 
-`HodgeComputer.Verify` is the finite witness interface over complex coefficients. It checks that the hypersurface is nonzero and homogeneous, source homogeneity, a nonzero homogeneous denominator, numerator degrees, relative primality, and the full cleared divisibility identity. The protected catalogue target specializes the general contract to `HodgeSubmission.n = 5` and `HodgeSubmission.d = 6`; `d` denotes the degree of `F`, and `n` is inferred from the polynomial type in the theorem above. All degree subtractions are in the integers. A nonzero quotient is allowed; the problem is not restricted to strict certificates or bounded denominator degrees. A nonconstructive argument may prove the same existential statement without exporting a witness.
+`HodgeComputer.Verify` is the finite witness interface over complex coefficients. It checks that the hypersurface is nonzero and homogeneous, source homogeneity, a nonzero homogeneous denominator, numerator degrees, relative primality, and the full cleared divisibility identity. The protected catalogue target specializes the general contract to `HodgeSubmission.n = 5` and `HodgeSubmission.d = 6`; `HasCertificate` infers `n` from the polynomial type and uses `F.totalDegree` for the hypersurface degree. `Verify` retains an explicit degree for constructing and checking a witness; a proof `h : Verify F A d q D N Q` supplies the existence theorem via `h.hasCertificate`. All degree subtractions are in the integers. A nonzero quotient is allowed; the problem is not restricted to strict certificates or bounded denominator degrees. A nonconstructive argument may prove the same existential statement without exporting a witness.
 
 #### Optional displayed witness
 

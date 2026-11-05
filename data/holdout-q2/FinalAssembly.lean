@@ -12,8 +12,7 @@ theorem endpointCertificate_of_norm {k : ℂ} (hk : k^2+k+1=0)
     (hK : (M^3+(5 : ℂ) • (1 : Matrix ι ι ℂ))*K=1)
     (hD : HoldoutSexticAssembly.activeNormFiber k (HoldoutQ2.PassiveQ2.D k hk)=
       Polynomial.C (6 : ℂ)*HoldoutDenominator.normFiber M) :
-    HodgeComputer.HasCertificate HoldoutEndpointTarget.F
-      (HoldoutEndpointTarget.reflectionTarget k) 6 2 := by
+    HodgeComputer.HasCertificate HoldoutEndpointTarget.F 2 (HoldoutEndpointTarget.reflectionTarget k) := by
   have he := HoldoutQ2.PassiveQ2.equations k hk
   apply HoldoutSexticAssembly.hasCertificate_endpoint_from_cubic hk
     (HoldoutQ2.PassiveQ2.D k hk) (HoldoutQ2.PassiveQ2.N k hk) 27
@@ -28,8 +27,7 @@ theorem endpointCertificate_of_norm {k : ℂ} (hk : k^2+k+1=0)
         HodgeTestbed.directional,mul_comm] using he.2)
 
 theorem endpointCertificate (k : ℂ) (hk : k^2+k+1=0) :
-    HodgeComputer.HasCertificate HoldoutEndpointTarget.F
-      (HoldoutEndpointTarget.reflectionTarget k) 6 2 := by
+    HodgeComputer.HasCertificate HoldoutEndpointTarget.F 2 (HoldoutEndpointTarget.reflectionTarget k) := by
   apply endpointCertificate_of_norm hk
     HoldoutQ2.DenominatorFiberLink.complexSumMatrix
     HoldoutQ2.DenominatorFiberLink.complexInverseMatrix
@@ -40,8 +38,7 @@ theorem endpointCertificate (k : ℂ) (hk : k^2+k+1=0) :
 
 /-- The constructed cubic solver supplies both endpoint fields; their exact
 linear combination serves the immutable holdout-q2 numerator. -/
-theorem certificate : HodgeComputer.HasCertificate
-    HoldoutEndpointTarget.F HoldoutEndpointTarget.A 6 2 :=
+theorem certificate : HodgeComputer.HasCertificate HoldoutEndpointTarget.F 2 HoldoutEndpointTarget.A :=
   HoldoutEndpointTarget.hasCertificate_of_endpoint_solver endpointCertificate
 
 end HoldoutFinalAssembly

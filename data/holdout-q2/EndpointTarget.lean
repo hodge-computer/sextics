@@ -108,9 +108,9 @@ theorem target_combination {k : ℂ} (hk : k^2+k+1=0) :
     -(X 0 : BasePoly)^3*X 1^2*X 3^3*X 4^2*X 5^2*hp2
 
 theorem hasCertificate_of_endpoints {k : ℂ} (hk : k^2+k+1=0)
-    (h1 : HodgeComputer.HasCertificate F (reflectionTarget k) 6 2)
-    (h2 : HodgeComputer.HasCertificate F (reflectionTarget (k^2)) 6 2) :
-    HodgeComputer.HasCertificate F A 6 2 := by
+    (h1 : HodgeComputer.HasCertificate F 2 (reflectionTarget k))
+    (h2 : HodgeComputer.HasCertificate F 2 (reflectionTarget (k^2))) :
+    HodgeComputer.HasCertificate F 2 A := by
   have h := HoldoutReflectionCombination.hasCertificate_combine_q2
     ((2+k)/3) ((2+k^2)/3) h1 h2
   rwa [target_combination hk] at h
@@ -123,8 +123,8 @@ theorem exists_endpoint_root : ∃ k : ℂ, k^2+k+1=0 := by
     Polynomial.eval_X,Polynomial.eval_one] using hk⟩
 
 theorem hasCertificate_of_endpoint_solver
-    (solve : ∀ k : ℂ, k^2+k+1=0 → HodgeComputer.HasCertificate F (reflectionTarget k) 6 2) :
-    HodgeComputer.HasCertificate F A 6 2 := by
+    (solve : ∀ k : ℂ, k^2+k+1=0 → HodgeComputer.HasCertificate F 2 (reflectionTarget k)) :
+    HodgeComputer.HasCertificate F 2 A := by
   obtain ⟨k,hk⟩ := exists_endpoint_root
   exact hasCertificate_of_endpoints hk (solve k hk) (solve (k^2) (HoldoutAlgebra.square_is_root hk))
 

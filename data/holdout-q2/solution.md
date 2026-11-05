@@ -1,7 +1,7 @@
 # A finite-algebra certificate for holdout-q2
 
 The entry point is `Submission.certificate`, proving the protected statement
-`HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q`.
+`HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A`.
 The construction uses strict certificates,
 so the quotient in the cleared divisibility identity is zero.
 

@@ -1,7 +1,7 @@
 # A finite-algebra contact certificate for `quadric-contact-broken`
 
 The theorem entry point is `Submission.certificate`, with the exact target
-`HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q`.
+`HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A`.
 The construction gives a strict certificate: the residual polynomial in the
 cleared identity is zero. The line over a finite coefficient algebra, the
 invertible source matrix, and denominator legality are constructed within the proof.

@@ -89,7 +89,7 @@ The closed wrapper [Solution.lean](Solution.lean) proves
 
 ```lean
 theorem Submission.certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A
 ```
 
 with only the permitted axioms `propext`, `Classical.choice`, and `Quot.sound`.
