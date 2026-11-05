@@ -1,7 +1,7 @@
 # A certificate for `one-reflection-y2-sector` from a Fermat cover and a moving conic
 
 This submission proves the exact existential `HodgeComputer.HasCertificate` statement for the
-protected instance `one-reflection-y2-sector`, with \((F,q,A)\) unchanged:
+protected instance `one-reflection-y2-sector`:
 
 \[
 F=X_0^6+X_1^6+X_2^6+Y_0^6+Y_1^6+Y_2^6+X_0^3X_1Y_0Y_1+X_1^3X_2Y_0Y_1,\qquad
@@ -89,7 +89,7 @@ The closed wrapper [Solution.lean](Solution.lean) proves
 
 ```lean
 theorem Submission.certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q
 ```
 
 with only the permitted axioms `propext`, `Classical.choice`, and `Quot.sound`.

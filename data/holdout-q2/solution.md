@@ -1,8 +1,8 @@
 # A finite-algebra certificate for holdout-q2
 
 The entry point is `Submission.certificate`, proving the protected statement
-`HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q`.
-The equation and target are unchanged. The construction uses strict certificates,
+`HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q`.
+The construction uses strict certificates,
 so the quotient in the cleared divisibility identity is zero.
 
 Write the protected variables as \((x,a,c,y,b,d)\). Then

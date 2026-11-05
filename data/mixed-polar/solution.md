@@ -2,7 +2,7 @@
 
 ## Exact target and construction
 
-This is an existence proof for the immutable triple
+This is an existence proof for the fixed triple
 \[
 \begin{aligned}
 F={}&X_0^6+X_1^6+X_2^6+Y_0^6+Y_1^6+Y_2^6\\

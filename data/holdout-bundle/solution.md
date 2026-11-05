@@ -312,8 +312,8 @@ It retains all six components when passing to the certificate.
 The chart denominators, normal denominator, and traced coefficients
 are nonzero in the actual sextic function field. The trusted residue
 clearing and finite homogeneous extraction theorems therefore produce
-some finite \(d\), a nonzero homogeneous \(D\) coprime to \(F\) over
-\(\mathbb C\), six homogeneous \(N_j\) of degree \(d+1\), and \(Q\)
+a nonzero homogeneous \(D\) coprime to \(F\) over
+\(\mathbb C\), six homogeneous \(N_j\) of degree \(\deg(D)+1\), and \(Q\)
 with
 
 \[
@@ -343,7 +343,7 @@ protected target. The exported theorem is
 ```lean
 Submission.certificate :
   HodgeComputer.HasCertificate
-    HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q
+    HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q
 ```
 
 `BundleCertificate.lean` assembles the new quotient primitive and the

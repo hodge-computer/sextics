@@ -16,7 +16,7 @@ Contribute through a direct GitHub pull request for one fixed instance. Add the 
 
 1. Read the [formal contract](formal/README.md). Agents can use [AGENTS.md](AGENTS.md) for the working sequence.
 2. Choose an instance from `data/catalogue.json`. Read its `instance.rec`, `why.md`, and `provenance.json`. Keep its exact `(F,q,A)` fixed; the variable order is `X0, X1, X2, Y0, Y1, Y2`.
-3. Start a branch from the latest upstream `main`. Check for an existing `proof.json` and open PRs for that instance. This format accepts the first proof for an instance; revisions to an accepted proof need separate owner review.
+3. Start a branch from the latest upstream `main`. Check for an existing `proof.json` and open PRs for that instance. Choose an instance without a merged proof.
 4. Add only the solution files listed below. Do not edit or remove existing files.
 5. Prove the exact theorem, explain the mathematics, and run the local check. Inspect the complete diff.
 6. Push the branch to your fork and open a PR against `hodge-computer/sextics:main`. Follow the [PR title and description requirements](#pr-title-and-description) below.
@@ -65,7 +65,7 @@ theorem Submission.certificate :
 
 This is a statement skeleton, not a proof. The manifest names the actual fully qualified theorem. Do not add parameters, assumptions, placeholders, or replacement definitions of the protected target. Do not submit `HodgeTarget.lean`.
 
-`HodgeComputer.Verify` is the finite witness interface over complex coefficients. It checks the hypersurface and source homogeneity, a nonzero homogeneous denominator, numerator degrees, relative primality, and the full cleared divisibility identity. The protected catalogue target specializes the general contract to `n=5` and `d=6`; `d` denotes the degree of `F`. All degree subtractions are in the integers. A nonzero quotient is allowed; the problem is not restricted to strict certificates or bounded denominator degrees. A nonconstructive argument may prove the same existential statement without exporting a witness.
+`HodgeComputer.Verify` is the finite witness interface over complex coefficients. It checks that the hypersurface is nonzero and homogeneous, source homogeneity, a nonzero homogeneous denominator, numerator degrees, relative primality, and the full cleared divisibility identity. The protected catalogue target specializes the general contract to `HodgeSubmission.n = 5` and `HodgeSubmission.d = 6`; `d` denotes the degree of `F`, and `n` is inferred from the polynomial type in the theorem above. All degree subtractions are in the integers. A nonzero quotient is allowed; the problem is not restricted to strict certificates or bounded denominator degrees. A nonconstructive argument may prove the same existential statement without exporting a witness.
 
 #### Optional displayed witness
 
@@ -102,7 +102,7 @@ Use the [shared constructions](formal/README.md#reusable-constructions) when the
 
 Ordinary declarations and tactic proofs are accepted. Custom executable extensions, `axiom`, `sorry`, `admit`, and unchecked native decision procedures are refused. Shared infrastructure changes need a separate maintenance PR. Do not submit binaries, compiled artifacts, symlinks, executable scripts, Lake configuration, nested directories, or unrelated files.
 
-The complete committed diff must consist solely of newly added permitted solution files in **one existing instance folder**. Edits to `instance.rec`, `why.md`, the leaderboard, the website, the verifier, workflows, or any other existing file fail validation. A PR maintaining an already accepted solve, or making other source changes without adding a new solve, is checked by Repository build. Changed proof sources and affected applications of shared Lean changes are reverified. CI does not require an approving review or workflow sign-off; GitHub repository permissions control merging.
+The complete committed diff must consist solely of newly added permitted solution files in **one existing instance folder**. Edits to `instance.rec`, `why.md`, the leaderboard, the website, the verifier, workflows, or any other existing file fail validation. CI does not require an approving review or workflow sign-off; GitHub repository permissions control merging.
 
 Limits are in `.github/solve-policy.json`: 64 files, 16 MiB of source, a 60-minute proof budget, and 14 GiB memory. The memory budget leaves room for the operating system and runner services on GitHub's free 16 GB Linux runners for public repositories. The allowed axiom set is `propext`, `Classical.choice`, and `Quot.sound`.
 
@@ -166,7 +166,7 @@ print(json.dumps(verify(ROOT, files, instance, manifest, order, imports, policy,
 PY
 ```
 
-This checks the proof against the checkout's target and exports logs, without contacting GitHub. GitHub additionally validates the complete Git diff, file modes, manifest schema, source sizes, attribution, and immutable trusted base/head commits. A local result is development feedback; it is not a GitHub acceptance receipt. If you rely on CI rather than running Lean locally, say so in the PR.
+This checks the proof against the checkout's target and exports logs, without contacting GitHub. GitHub additionally validates the complete Git diff, file modes, manifest schema, source sizes, attribution, and the exact base/head commits used for that run. A local result is development feedback; acceptance follows the protected checks and owner merge. If you rely on CI rather than running Lean locally, say so in the PR.
 
 ### Review and acceptance
 
@@ -244,7 +244,7 @@ mutation($id: ID!, $body: String!) {
 
 To reply, add a `replyToId` field to the input using the node ID of a top-level comment from this discussion. GitHub supports one reply level. Inspect the returned author and URL. If a request times out, read the thread before retrying: it may have succeeded despite a lost response.
 
-A discussion message never supplies a Lean acceptance receipt or alters the fixed target. Keep discussion drafts out of solution PRs.
+A discussion message does not verify a solve, record acceptance, or alter the fixed target. Keep discussion drafts out of solution PRs.
 
 ### Editing and deleting comments
 
@@ -267,4 +267,4 @@ Deletion removes the comment from the conversation, and the website reflects the
 
 ## Improve the project
 
-Documentation, website, catalogue, and verifier changes belong in separate maintenance PRs. After a solve is accepted, its `solution.md` can be corrected or expanded like any other documentation; this does not require rerunning Lean. The original accepted proof, witness, attribution, and PR link are preserved. Describe the change and report relevant checks. These contributions retain their authorship but do not earn solve points. See [MAINTAINING.md](MAINTAINING.md) for repository architecture, catalogue and leaderboard rules, protected verification, and visualization maintenance.
+Documentation, website, catalogue, and verifier changes belong in separate maintenance PRs. After a solve is accepted, its `solution.md` can be corrected or expanded like any other documentation; editorial changes do not themselves require rerunning Lean or change contributor credit. After changing records or prose, run `python3 scripts/build-content.py`, `python3 scripts/validate-records.py`, and `python3 scripts/check-content.py`. Describe the change and report relevant checks. These contributions retain their authorship but do not earn solve points. See [MAINTAINING.md](MAINTAINING.md) for repository maintenance.

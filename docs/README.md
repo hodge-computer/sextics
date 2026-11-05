@@ -22,7 +22,7 @@ Chapters 2 and 3 approach the same question from opposite starting points. An ex
 
 ## Notation
 
-We use \(Z=(X_{0},X_{1},X_{2},Y_{0},Y_{1},Y_{2}), \tau (X,Y)=(X,-Y)\), and \(X=V(F)\subset \mathbb P^{5}\) for the fourfold. “\(Y\)-even” refers to total \(Y\)-degree, unless individual coordinate reflections are explicitly stated. The numerator \(A\) is \(Y\)-odd because the projective volume form changes sign under \(\tau \). The target parameter \(q\) and the denominator degree \(d\) are different quantities.
+We use \(Z=(X_{0},X_{1},X_{2},Y_{0},Y_{1},Y_{2}), \tau (X,Y)=(X,-Y)\), and \(X=V(F)\subset \mathbb P^{5}\) for the fourfold. “\(Y\)-even” refers to total \(Y\)-degree, unless individual coordinate reflections are explicitly stated. The numerator \(A\) is \(Y\)-odd because the projective volume form changes sign under \(\tau \). In the general certificate contract, \(n\) is the ambient projective dimension and \(d=\deg(F)\); here \(n=5,d=6\). The target parameter \(q\) is distinct from the unrestricted denominator degree \(\deg(D)\).
 
 ## Reading the atlas
 

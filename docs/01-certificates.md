@@ -40,7 +40,7 @@ F^{q+1} \mid  K_A(v),       K_A(v) \coloneqq  A - q\cdot v(F) + F\cdot \operator
 \end{gathered}
 \]
 
-Divisibility is in the local ring \(k[Z]_{(F)}\): clear the denominators, which are units there, and check polynomial divisibility. The required component parities are \(Y\)-odd for \(v_{0},v_{1},v_{2}\) and \(Y\)-even for \(v_{3},v_{4},v_{5}\). Averaging with respect to \(\tau \) enforces these parities without changing the target.
+Divisibility is in the local ring \(k[Z]_{(F)}\): clear the denominators, which are units there, and check polynomial divisibility. The field can be chosen with \(Y\)-odd components \(v_{0},v_{1},v_{2}\) and \(Y\)-even components \(v_{3},v_{4},v_{5}\). Averaging with respect to \(\tau \) enforces these parities without changing the target. They are not additional requirements of the Lean certificate contract.
 
 The bridge to geometry is the rational four-form \(\beta =-\iota _v\Omega /F^q\). Homogeneity makes it a projective form: its weight is zero and contraction with \(\epsilon \) is zero. Its differential satisfies
 
@@ -59,7 +59,7 @@ dF\wedge \iota _v\Omega =v(F)\cdot\Omega -6\cdot F\iota _{v}\mathrm{vol}.
 \end{gathered}
 \]
 
-Applying the quotient rule to \(\beta \) cancels the two terms containing \(\iota _{v}\mathrm{vol}\) and yields the displayed formula. The same calculation in \(\mathbb P^{n}\) for \(\operatorname{deg} F=\ell \) uses \(\operatorname{deg} v_{i}=q\ell -n\) and replaces \(6\cdot q\) by \(q\ell \).
+Applying the quotient rule to \(\beta \) cancels the two terms containing \(\iota _{v}\mathrm{vol}\) and yields the displayed formula. The same calculation in \(\mathbb P^{n}\) for \(d=\operatorname{deg} F\) uses \(\operatorname{deg} A=d\cdot(q+1)-(n+1)\) and \(\operatorname{deg} v_{i}=d\cdot q-n\), and replaces \(6\cdot q\) by \(d\cdot q\).
 
 The key equation therefore says that \(\omega _A-d\beta \) has no pole along \(X\). On the complement of the denominator locus, the residue of an exact form and the residue of a form regular across \(X\) both vanish in cohomology, proving sufficiency. The prescribed-support theorem below proves the converse, together with an auxiliary pole bound, without leaving a separate algebraization step implicit. Diamond's Section 2 gives another necessity argument with a bound along \(X\); that bound alone does not impose simple poles along the auxiliary divisor.
 
@@ -69,7 +69,7 @@ Every finite rational tuple has a common denominator. We may choose it \(Y\)-eve
 
 \[
 \begin{gathered}
-v=N/D,       \operatorname{deg} D=d,       \operatorname{deg} N_{i}=d+6\cdot q-5,       \operatorname{gcd}(D,F)=1.
+v=N/D,       \operatorname{deg} N_{i}=\operatorname{deg}(D)+6\cdot q-5,       \operatorname{gcd}(D,F)=1.
 \end{gathered}
 \]
 
@@ -88,7 +88,7 @@ E_{2}: D\cdot \operatorname{div}(N)-N(D) \in  (F^q).
 \end{gathered}
 \]
 
-The forward implication is an Euler normalization, not an extra ansatz. Indeed, the key equation first forces \(A\cdot D-q\cdot N(F)=F\cdot H\) for a polynomial \(H\). Replacing \(N\) by \(N'=N+H\epsilon /(6\cdot q)\) makes \(E_{1}\) exact. Since \(\operatorname{deg} H=d+6\cdot q-6\), Euler's identity also gives
+The forward implication is an Euler normalization, not an extra ansatz. Indeed, the key equation first forces \(A\cdot D-q\cdot N(F)=F\cdot H\) for a polynomial \(H\). Replacing \(N\) by \(N'=N+H\epsilon /(6\cdot q)\) makes \(E_{1}\) exact. Since \(\operatorname{deg} H=\operatorname{deg}(D)+6\cdot q-6\), Euler's identity also gives
 
 \[
 \begin{gathered}
@@ -146,7 +146,7 @@ The support of a divisor ignores multiplicities; a rational primitive does not. 
 
 In particular, \(D^q\) also suffices. Over the field of definition of \(F,A,D\), the numerator can be chosen over that same field. The field can be chosen with the prescribed component parities. With the even presentation \(D^q\), its numerator has those same parities; a squarefree equation \(D_{\mathrm{red}}\) can itself be odd, in which case its numerator transforms accordingly. No smoothness or normal-crossing hypothesis is imposed on \(V(D)\) or its intersection with \(X\). Without a field-parity requirement, the same equivalence applies to arbitrary homogeneous \(D\).
 
-We prove the slightly more general statement for a smooth degree-\(\ell \) hypersurface \(X\subset P=\mathbb P^{n}\), with \(n\ge 2, 1\le q\le n-1\) and \(\operatorname{deg} A=\ell (q+1)-n-1\). Put \(R=V(D_{\mathrm{red}}), e=\operatorname{deg} D_{\mathrm{red}}\), and work over \(\mathbb C\) until the final linear descent. We use unshifted de Rham complexes, with differential forms in degrees \(0,\ldots ,n\).
+We prove the slightly more general statement for a smooth degree-\(d\) hypersurface \(X\subset P=\mathbb P^{n}\), with \(n\ge 2, 1\le q\le n-1\) and \(\operatorname{deg} A=d\cdot(q+1)-(n+1)\). Put \(R=V(D_{\mathrm{red}}), e=\operatorname{deg} D_{\mathrm{red}}\), and work over \(\mathbb C\) until the final linear descent. We use unshifted de Rham complexes, with differential forms in degrees \(0,\ldots ,n\).
 
 The external inputs are the following standard facts about mixed Hodge modules and projective space. They are stated here to specify exactly what the proof uses.
 
@@ -196,10 +196,10 @@ Thus \(\omega _A-d\beta \) has poles only on \(R\). In particular, the primitive
 It remains to obtain the vector field, rather than merely assert that a rational form can be represented. The identity \(\Omega ^{n-1}_P\cong T_P(-n-1)\) and the twisted Euler sequence give
 
 \[
-0 \to  \mathcal O_P(q(\ell +e)-n-1) \to  \mathcal O_P(q(\ell +e)-n)^{n+1} \to  \Omega ^{n-1}_P(q\cdot X+q\cdot R) \to  0.
+0 \to  \mathcal O_P(q(d+e)-n-1) \to  \mathcal O_P(q(d+e)-n)^{n+1} \to  \Omega ^{n-1}_P(q\cdot X+q\cdot R) \to  0.
 \]
 
-The left term has zero \(H^{1}\). Therefore \(\beta \) is represented by a homogeneous polynomial tuple \(N\) of degree \(q(\ell +e)-n\):
+The left term has zero \(H^{1}\). Therefore \(\beta \) is represented by a homogeneous polynomial tuple \(N\) of degree \(q(d+e)-n\):
 
 \[
 \begin{gathered}

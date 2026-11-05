@@ -8,7 +8,7 @@ The project uses direct GitHub PRs with protected Lean verification, GitHub merg
 
 Each instance lives permanently in `data/<id>/`. Its protected target and prospective context exist before a solve. A solve PR adds proof sources, an explanation, and optional witness data to that same folder. After a checked merge, the publisher adds an acceptance record. The atlas, explanations, PR links, and leaderboard are generated from the accepted sources and records. `/data` contains mathematical statements, context, proofs, and acceptance records. It contains no rendering settings or derived coefficient lists. The content builder expands exact expressions into coefficients and writes browser records and rendered explanations to `assets/atlas/`, which is untracked build output. Do not commit this directory.
 
-`formal/lean/` pins the shared contract, Lean toolchain, and mathlib manifest. `scripts/proposals/` implements source restrictions, sandboxed compilation, kernel replay, theorem/axiom auditing, and publication. `.github/workflows/` invokes trusted base-branch code; candidate workflow and setup files are never executed as part of solve verification.
+`formal/lean/` pins the shared contract, Lean toolchain, and mathlib manifest. `scripts/proposals/` implements source restrictions, sandboxed compilation, kernel replay, theorem/axiom auditing, and publication. The protected `solve-proposal.yml` workflow invokes trusted base-branch code; candidate workflow and setup files are never executed as part of solve verification. The separate `repository-build.yml` workflow checks the proposed repository tree, including maintenance changes.
 
 Treat the shared formal library as the Lean counterpart of the book: retain organized, generally useful machinery with explicit scope and concrete applications; keep failed experiments and instance-specific calculations out of it. Reusable constructions belong under `formal/lean/HodgeComputer/Constructions/` when they support concrete applications. Extract accepted machinery through a maintenance PR, preserving its attribution. Maintain existing instance proofs against the current verifier and recheck affected applications in CI. New solve PRs import the maintained library and supply their target-specific proof. Build changed shared modules, replay them with `leanchecker`, and check an application against the protected target before merging library changes. The protected dependency-cache key includes the shared Lean sources as well as the pinned toolchain and manifest.
 
@@ -56,7 +56,7 @@ The checker generates `HodgeTarget` from the base record, and optional `HodgeWit
 
 Candidate code receives no networking, credentials, or repository write access. Protected target artifacts, candidate artifacts, and the final trusted wrapper have separate write permissions. Linux uses Docker; local macOS checking uses `sandbox-exec`. The pinned toolchain, dependencies, verifier, and OS remain trusted components. Verification fails if isolation is unavailable.
 
-The CI report records base/head commits, the PR author, theorem, witness binding, toolchain, kernel replay, and axiom audit. The workflow posts `solve/lean` on the submitted commit and rejects a result if either PR commit changed during checking. For solve PRs, a green check means the proof passed. Maintenance PRs build the public release; shared Lean changes recheck affected accepted proofs. CI does not request approval or inspect GitHub reviews.
+The CI report records base/head commits, the PR author, theorem, witness binding, toolchain, kernel replay, and axiom audit. The workflow posts `solve/lean` on the submitted commit and rejects a result if either PR commit changed during checking. For solve PRs, a green check means the proof passed. On maintenance PRs, that status only reports that there is no new solve; Repository build validates the release and rechecks affected accepted proofs. CI does not request approval or inspect GitHub reviews.
 
 ### Merge permissions
 
@@ -102,6 +102,13 @@ once and passes those compiled outputs to the verification jobs. Each affected
 instance then has an independent job, alongside shared-module kernel replay,
 with no workflow concurrency cap. The deploy workflow builds and publishes main
 without rerunning these checks.
+
+Use `python3 scripts/check-library.py --base <commit> --plan` to inspect the
+selection for a committed change. Changes to accepted Lean sources, manifests,
+witnesses, or targets select those instances; shared Lean changes select their
+dependents and applications. Verifier changes and non-Lean changes under
+`formal/lean/` select the full shared library and its accepted applications.
+This includes toolchain and dependency pins, as well as READMEs in that directory.
 
 ## Visualization maintenance
 
