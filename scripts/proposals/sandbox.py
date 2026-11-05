@@ -54,7 +54,7 @@ def verify(root, files, instance, metadata, order, imports, policy, output, *, p
         (sources/'HodgeChecked.lean').write_text(
             'import '+('HodgeWitness' if has_witness else 'HodgeTarget')+'\nimport Proposal.Solution\n'
             'theorem HodgeSubmission.checked : HodgeComputer.HasCertificate '
-            'HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := '+metadata['theorem']+'\n'+
+            '(n := HodgeSubmission.n) HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := '+metadata['theorem']+'\n'+
             ('theorem HodgeSubmission.checkedWitness : HodgeComputer.Verify '
              '(n := HodgeSubmission.n) HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q '
              'HodgeWitness.D HodgeWitness.N HodgeWitness.Q := '+metadata['witnessTheorem']+'\n' if has_witness else ''))

@@ -30,6 +30,7 @@ unsafe def main (args : List String) : IO UInt32 := do
           throw <| IO.userError s!"Changed protected declaration {name}"
       let some (.thmInfo result) := env.find? `HodgeSubmission.checked
         | throw <| IO.userError "Missing final theorem"
+      -- The trusted wrapper fixes the implicit dimension syntactically for this exact audit.
       let expected := mkAppN (mkConst `HodgeComputer.HasCertificate) #[
         mkConst `HodgeSubmission.n, mkConst `HodgeSubmission.F,
         mkConst `HodgeSubmission.q, mkConst `HodgeSubmission.A]
