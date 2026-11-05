@@ -1,4 +1,3 @@
-import HodgeComputer.Sextic
 /- Adapted for the instance `one-reflection-y2-sector` from the accepted holdout proof by `fqlx` (hodge-computer/sextics PR #128, prepared with OpenAI ChatGPT assistance); the target-specific source, companion and trace data are replaced, all other modules are unchanged. Adaptation prepared with Claude Code assistance for `DiamondJM`. -/
 import HodgeComputer.Verify
 import Proposal.HomogeneousField
@@ -176,14 +175,14 @@ theorem polynomialDivNum_eq_divergenceNumerator
 /-- Homogeneity imposes no extra obstruction once legal normalized
 pole-order-one polynomial data have been obtained on this normal chart. -/
 theorem hasCertificate_of_normalized
-    (F A D : HodgeComputer.Sextic.Poly) (N : Fin 6 → HodgeComputer.Sextic.Poly)
-    (Q : HodgeComputer.Sextic.Poly)
+    (F A D : HodgeComputer.Poly) (N : Fin 6 → HodgeComputer.Poly)
+    (Q : HodgeComputer.Poly)
     (hF : F.IsHomogeneous 6) (hA : A.IsHomogeneous 6) (hprime : Prime F)
     (hlegal : IsRelPrime F D)
     (normal : HodgeTestbed.directional F N = A*D)
     (divergence : HodgeTestbed.divergenceNumerator D N = F*Q)
     (i : Fin 6) (hchart : ¬ F ∣ pderiv i F) :
-    HodgeComputer.HasCertificate F A 6 1 := by
+    HodgeComputer.HasCertificate F A 1 := by
   have hnormal : polynomialDirectional F N = A*D := by
     exact (polynomialDirectional_eq_directional F N).trans normal
   have hdivergence : polynomialDivNum D N = F*Q := by
@@ -192,22 +191,18 @@ theorem hasCertificate_of_normalized
     homogeneous_data_of_normalized F A D N Q hF hA hprime
       (hprime.irreducible.isRelPrime_iff_not_dvd.mp hlegal)
       hnormal hdivergence i hchart
-  refine ⟨H, M, Q', ⟨hprime.ne_zero, hF, ?_, hH0, ?_, ?_, hcoprime, ?_⟩⟩
-  · simpa using HodgeComputer.Homogeneous.of_isHomogeneous hA
-  · rw [hH.totalDegree hH0]
-    exact hH
+  refine ⟨d, H, M, Q', ⟨hH0, hH, ?_, hcoprime, ?_⟩⟩
   · intro j
-    rw [hH.totalDegree hH0]
-    convert HodgeComputer.Homogeneous.of_isHomogeneous (hM j) using 1 <;> push_cast <;> omega
+    simpa only [show d+6*1-5 = d+1 by omega] using hM j
   · apply HodgeComputer.normalized_identity
     · simpa only [Nat.cast_one, one_mul, polynomialDirectional_eq_directional] using hnormal'
     · simpa only [pow_one, polynomialDivNum_eq_divergenceNumerator] using hdiv'
 
 /-- The protected numerator of `one-reflection-y2-sector` in the original coordinate order. -/
-def holdoutSource : HodgeComputer.Sextic.Poly := MvPolynomial.X 0^3*MvPolynomial.X 3*MvPolynomial.X 4*MvPolynomial.X 5
+def holdoutSource : HodgeComputer.Poly := MvPolynomial.X 0^3*MvPolynomial.X 3*MvPolynomial.X 4*MvPolynomial.X 5
 
 /-- The physical polynomial multiplying the deck-trace correction term. -/
-def holdoutCompanion : HodgeComputer.Sextic.Poly := MvPolynomial.X 0^3*MvPolynomial.X 3*MvPolynomial.X 4^3*MvPolynomial.X 5
+def holdoutCompanion : HodgeComputer.Poly := MvPolynomial.X 0^3*MvPolynomial.X 3*MvPolynomial.X 4^3*MvPolynomial.X 5
 
 theorem holdoutSextic_isHomogeneous :
     (holdoutSextic (R := ℂ)).IsHomogeneous 6 := by
@@ -233,11 +228,11 @@ theorem holdoutSource_isHomogeneous : holdoutSource.IsHomogeneous 6 := by
 holdout sextic and numerator. The outstanding constructive input is precisely
 the two normalized polynomial identities and denominator legality. -/
 theorem holdout_hasCertificate_of_normalized
-    (D : HodgeComputer.Sextic.Poly) (N : Fin 6 → HodgeComputer.Sextic.Poly) (Q : HodgeComputer.Sextic.Poly)
+    (D : HodgeComputer.Poly) (N : Fin 6 → HodgeComputer.Poly) (Q : HodgeComputer.Poly)
     (hlegal : IsRelPrime (holdoutSextic (R := ℂ)) D)
     (normal : HodgeTestbed.directional holdoutSextic N = holdoutSource*D)
     (divergence : HodgeTestbed.divergenceNumerator D N = holdoutSextic*Q) :
-    HodgeComputer.HasCertificate holdoutSextic holdoutSource 6 1 := by
+    HodgeComputer.HasCertificate holdoutSextic holdoutSource 1 := by
   have hi : (Complex.I : ℂ)^6 = -1 := by
     rw [show (6 : ℕ) = 2*3 by decide, pow_mul, Complex.I_sq]
     norm_num

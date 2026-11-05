@@ -26,7 +26,7 @@ def verify(root, files, instance, metadata, order, imports, policy, output, *, p
     lean = prefix/'bin/lean'; checker = prefix/'bin/leanchecker'
     require(checker.is_file(), 'The pinned toolchain must include leanchecker')
     version = command([str(lean),'--version']).decode().strip()
-    require('version 4.33.1,' in version, 'Wrong Lean version')
+    require('version 4.33.0,' in version, 'Wrong Lean version')
     system = platform.system()
     require(system in ('Darwin','Linux'), 'Supported verification hosts are macOS and Linux')
     if system == 'Darwin':
@@ -54,9 +54,9 @@ def verify(root, files, instance, metadata, order, imports, policy, output, *, p
         (sources/'HodgeChecked.lean').write_text(
             'import '+('HodgeWitness' if has_witness else 'HodgeTarget')+'\nimport Proposal.Solution\n'
             'theorem HodgeSubmission.checked : HodgeComputer.HasCertificate '
-            '(n := HodgeSubmission.n) HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := '+metadata['theorem']+'\n'+
+            'HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q := '+metadata['theorem']+'\n'+
             ('theorem HodgeSubmission.checkedWitness : HodgeComputer.Verify '
-             '(n := HodgeSubmission.n) HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q '
+             'HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q HodgeWitness.d '
              'HodgeWitness.D HodgeWitness.N HodgeWitness.Q := '+metadata['witnessTheorem']+'\n' if has_witness else ''))
         env = {'PATH':str(prefix/'bin')+':/usr/bin:/bin','HOME':'/nonexistent','LEAN_SYSROOT':str(prefix),
                'LEAN_PATH':lean_path+':'+':'.join(map(str,(protected,checked,artifacts))),'LANG':'en_US.UTF-8'}

@@ -1,4 +1,3 @@
-import HodgeComputer.Sextic
 import HodgeTarget
 import Proposal.DeformedEquation
 
@@ -12,7 +11,7 @@ namespace DeformedConic
 open MvPolynomial
 variable {R : Type*} [Field R] [CharZero R] [Algebra ℂ R]
 
-def physicalEvaluation (a b t y x0 x1 x2 : R) : HodgeComputer.Sextic.Poly →+* R :=
+def physicalEvaluation (a b t y x0 x1 x2 : R) : HodgeComputer.Poly →+* R :=
   MvPolynomial.eval₂Hom (algebraMap ℂ R) ![x0,x1,x2,a*t,y,b*t]
 
 theorem protected_cover_equation (a b t y x0 x1 x2 : R) (hbase : a^6+b^6=1) :

@@ -1,11 +1,7 @@
-import HodgeComputer.Sextic
-import HodgeComputer.CertificateOperations
 import HodgeTarget
 import Mathlib.Analysis.Complex.Basic
 import Mathlib.Analysis.Real.Sqrt
 import Mathlib.Tactic.Ring
-
-open HodgeComputer.Sextic
 
 /-!
 # A strict certificate for the protected one-reflection instance
@@ -63,7 +59,8 @@ theorem defect_add_same_denominator (F A B D : Poly) (q : ℕ)
     (N M : Fin 6 → Poly) :
     defect F (A+B) D q (fun i => N i + M i) =
       defect F A D q N + defect F B D q M := by
-  exact HodgeComputer.defect_add_same_denominator F A B D q N M
+  simp only [defect, directional_add, divergenceNumerator_add]
+  ring
 
 theorem defect_scale_denominator (F A D H : Poly) (q : ℕ)
     (N : Fin 6 → Poly) :
@@ -82,15 +79,33 @@ theorem defect_add (F A B D E : Poly) (q : ℕ) (N M : Fin 6 → Poly) :
 
 /-- Construct an exact certificate for the sum of targets at pole parameter one.
 The new denominator degree is the sum of the original degrees. -/
-theorem Verify.add_q1 {F A B D E Q R : Poly}
+theorem Verify.add_q1 {F A B D E Q R : Poly} {d e : ℕ}
     {N M : Fin 6 → Poly}
-    (h : Verify F A 6 1 D N Q) (k : Verify F B 6 1 E M R) :
-    Verify F (A+B) 6 1 (D*E) (fun i => E*N i + D*M i)
-      (E^2*Q + D^2*R) := HodgeComputer.Verify.add h k
+    (h : Verify F A 1 d D N Q) (k : Verify F B 1 e E M R) :
+    Verify F (A+B) 1 (d+e) (D*E) (fun i => E*N i + D*M i)
+      (E^2*Q + D^2*R) where
+  denominator_ne_zero := mul_ne_zero h.denominator_ne_zero k.denominator_ne_zero
+  denominator_homogeneous := h.denominator_homogeneous.mul k.denominator_homogeneous
+  numerator_homogeneous := by
+    intro i
+    have hn := k.denominator_homogeneous.mul (h.numerator_homogeneous i)
+    have hm := h.denominator_homogeneous.mul (k.numerator_homogeneous i)
+    have hnd : e + (d + 6*1 - 5) = (d+e) + 6*1 - 5 := by omega
+    have hmd : d + (e + 6*1 - 5) = (d+e) + 6*1 - 5 := by omega
+    rw [hnd] at hn
+    rw [hmd] at hm
+    exact hn.add hm
+  denominator_legal := h.denominator_legal.mul_right k.denominator_legal
+  identity := by
+    rw [defect_add, h.identity, k.identity]
+    ring
 
 theorem HasCertificate.add_q1 {F A B : Poly}
-    (h : HasCertificate F A 6 1) (k : HasCertificate F B 6 1) :
-    HasCertificate F (A+B) 6 1 := HodgeComputer.HasCertificate.add h k
+    (h : HasCertificate F A 1) (k : HasCertificate F B 1) :
+    HasCertificate F (A+B) 1 := by
+  obtain ⟨d, D, N, Q, h⟩ := h
+  obtain ⟨e, E, M, R, k⟩ := k
+  exact ⟨d+e, D*E, (fun i => E*N i + D*M i), E^2*Q+D^2*R, Verify.add_q1 h k⟩
 
 def signChange (s : Fin 6 → ℂ) : Poly →+* Poly :=
   MvPolynomial.eval₂Hom MvPolynomial.C (fun i => C (s i) * X i)
@@ -160,42 +175,23 @@ theorem signChange_homogeneous (s : Fin 6 → ℂ) {p : Poly} {d : ℕ}
       (fun c => isHomogeneous_C (Fin 6) c)
       (fun i => isHomogeneous_C_mul_X (s i) i)
 
-theorem signChange_graded (s : Fin 6 → ℂ) {p : Poly} {k : ℤ}
-    (h : Homogeneous p k) : Homogeneous (signChange s p) k := by
-  by_cases hk : 0 ≤ k
-  · simpa only [Int.toNat_of_nonneg hk] using
-      Homogeneous.of_isHomogeneous (signChange_homogeneous s (h.isHomogeneous hk))
-  · rw [h.eq_zero_of_neg (by omega), map_zero]
-    exact homogeneous_zero _
-
-theorem signChange_ne_zero (s : Fin 6 → ℂ) (hs : ∀ i, s i * s i = 1)
-    {p : Poly} (hp : p ≠ 0) : signChange s p ≠ 0 := by
-  intro hz
-  have ht := congrArg (signChange s) hz
-  rw [signChange_twice s hs, map_zero] at ht
-  exact hp ht
-
 /-- Pull a certificate through a diagonal sign involution. Polynomial
 substitution alone is insufficient: every field component also receives its
 coordinate's sign, which is necessary for both derivative identities. -/
 theorem Verify.sign_change (s : Fin 6 → ℂ) (hs : ∀ i, s i * s i = 1)
-    {F A D Q : Poly} {q : ℕ} {N : Fin 6 → Poly}
-    (h : Verify F A 6 q D N Q) :
-    Verify (signChange s F) (signChange s A) 6 q (signChange s D)
+    {F A D Q : Poly} {q d : ℕ} {N : Fin 6 → Poly}
+    (h : Verify F A q d D N Q) :
+    Verify (signChange s F) (signChange s A) q d (signChange s D)
       (signField s N) (signChange s Q) where
-  hypersurface_ne_zero := signChange_ne_zero s hs h.hypersurface_ne_zero
-  hypersurface_homogeneous := signChange_homogeneous s h.hypersurface_homogeneous
-  source_homogeneous := signChange_graded s h.source_homogeneous
-  denominator_ne_zero := signChange_ne_zero s hs h.denominator_ne_zero
-  denominator_homogeneous := by
-    rw [(signChange_homogeneous s h.denominator_homogeneous).totalDegree
-      (signChange_ne_zero s hs h.denominator_ne_zero)]
-    exact signChange_homogeneous s h.denominator_homogeneous
+  denominator_ne_zero := by
+    intro hz
+    have ht := congrArg (signChange s) hz
+    rw [signChange_twice s hs, map_zero] at ht
+    exact h.denominator_ne_zero ht
+  denominator_homogeneous := signChange_homogeneous s h.denominator_homogeneous
   numerator_homogeneous := by
     intro i
-    rw [(signChange_homogeneous s h.denominator_homogeneous).totalDegree
-      (signChange_ne_zero s hs h.denominator_ne_zero)]
-    exact (signChange_graded s (h.numerator_homogeneous i)).C_mul (s i)
+    exact (signChange_homogeneous s (h.numerator_homogeneous i)).C_mul (s i)
   denominator_legal := by
     apply relPrime_of_retract (signChange s) (signChange s) (signChange_involutive s hs)
     simpa only [signChange_twice s hs] using h.denominator_legal
@@ -242,23 +238,23 @@ theorem target_decomposition : HodgeSubmission.A = Aplus + Aminus := by
 /-- One certificate for each hidden reflection sector suffices for the exact
 protected statement. This is conditional: no sector witness is asserted here. -/
 theorem certificate_of_reflection_sectors
-    (hp : HasCertificate HodgeSubmission.F Aplus 6 1)
-    (hm : HasCertificate HodgeSubmission.F Aminus 6 1) :
-    HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
-  rw [HodgeSubmission.d, HodgeSubmission.q, target_decomposition]
+    (hp : HasCertificate HodgeSubmission.F Aplus 1)
+    (hm : HasCertificate HodgeSubmission.F Aminus 1) :
+    HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q := by
+  rw [HodgeSubmission.q, target_decomposition]
   exact HasCertificate.add_q1 hp hm
 
 /-- The involution changing the signs of X₁ and Y₁ preserves the exact F and
 interchanges the two hidden-reflection sectors. Only one sector witness is
 therefore needed. The conclusion remains conditional on that witness. -/
 theorem certificate_of_one_reflection_sector
-    (hp : HasCertificate HodgeSubmission.F Aplus 6 1) :
-    HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
+    (hp : HasCertificate HodgeSubmission.F Aplus 1) :
+    HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q := by
   apply certificate_of_reflection_sectors hp
-  obtain ⟨D, N, Q, h⟩ := hp
+  obtain ⟨d, D, N, Q, h⟩ := hp
   have hm := Verify.sign_change signs signs_square h
   rw [signChange_F, signChange_Aplus] at hm
-  exact ⟨signChange signs D, signField signs N, signChange signs Q, hm⟩
+  exact ⟨d, signChange signs D, signField signs N, signChange signs Q, hm⟩
 
 end OneReflection
 
@@ -969,30 +965,11 @@ noncomputable section
 namespace OneReflectionPhysical
 open MvPolynomial HodgeComputer HodgeTestbed HodgeComputer.Construction
 
-theorem targetF_homogeneous : HodgeSubmission.F.IsHomogeneous 6 := by
-  simpa only [HodgeSubmission.F, MvPolynomial.map_ofNat] using (((((((((MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6)).pow 6).add (((((MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6)).pow 3).mul (MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6))).mul (MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6))).mul (MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6)))).add ((MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6)).pow 6)).add (((((MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6)).pow 3).mul (MvPolynomial.isHomogeneous_X ℂ (2 : Fin 6))).mul (MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6))).mul (MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6)))).add ((MvPolynomial.isHomogeneous_X ℂ (2 : Fin 6)).pow 6)).add ((MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6)).pow 6)).add ((MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6)).pow 6)).add ((MvPolynomial.isHomogeneous_X ℂ (5 : Fin 6)).pow 6))
-
-theorem targetF_ne_zero : HodgeSubmission.F ≠ 0 := by
-  intro h
-  have he := congrArg (MvPolynomial.eval (fun _ : Fin 6 => (1 : ℂ))) h
-  norm_num [HodgeSubmission.F] at he
-
-theorem Aplus_homogeneous : Aplus.IsHomogeneous 6 := by
-  simpa only [Aplus, mul_assoc] using ((isHomogeneous_X_pow (0 : Fin 6) 3).mul S_homogeneous).C_mul (1/2 : ℂ)
-
 theorem sector_verify (second_identity : divergenceNumerator D N = 0) :
-    Verify HodgeSubmission.F Aplus 6 1 D N 0 where
-  hypersurface_ne_zero := targetF_ne_zero
-  hypersurface_homogeneous := targetF_homogeneous
-  source_homogeneous := by simpa using Homogeneous.of_isHomogeneous Aplus_homogeneous
+    Verify HodgeSubmission.F Aplus 1 30 D N 0 where
   denominator_ne_zero := D_ne_zero
-  denominator_homogeneous := by
-    rw [D_homogeneous.totalDegree D_ne_zero]
-    exact D_homogeneous
-  numerator_homogeneous := by
-    intro i
-    rw [D_homogeneous.totalDegree D_ne_zero]
-    simpa using Homogeneous.of_isHomogeneous (N_homogeneous i)
+  denominator_homogeneous := D_homogeneous
+  numerator_homogeneous := N_homogeneous
   denominator_legal := D_legal
   identity := by
     apply normalized_identity
@@ -1023,23 +1000,23 @@ def fullD : Poly := D * sigma D
 def fullN : Fin 6 → Poly := fun i => sigma D * N i + D * reflectedN i
 
 theorem full_verify (second_identity : divergenceNumerator D N = 0) :
-    Verify HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q fullD fullN 0 := by
+    Verify HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q 60 fullD fullN 0 := by
   have hp := sector_verify second_identity
   have hm := HodgeComputer.Construction.Verify.sign_change
     HodgeComputer.Construction.OneReflection.signs
     HodgeComputer.Construction.OneReflection.signs_square hp
   rw [HodgeComputer.Construction.OneReflection.signChange_F] at hm
   have hsum := HodgeComputer.Construction.Verify.add_q1 hp hm
-  change Verify HodgeSubmission.F (Aplus + sigma Aplus) 6 1
+  change Verify HodgeSubmission.F (Aplus + sigma Aplus) 1 (30+30)
     (D*sigma D) (fun i => sigma D*N i+D*reflectedN i)
     ((sigma D)^2*0+D^2*sigma 0) at hsum
-  change Verify HodgeSubmission.F HodgeSubmission.A 6 1
+  change Verify HodgeSubmission.F HodgeSubmission.A 1 (30+30)
     (D*sigma D) (fun i => sigma D*N i+D*reflectedN i) 0
   simpa only [target_sum, map_zero, mul_zero, add_zero] using hsum
 
 theorem certificate_from_second_identity (second_identity : divergenceNumerator D N = 0) :
-    HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q :=
-  ⟨fullD, fullN, 0, full_verify second_identity⟩
+    HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q :=
+  ⟨60, fullD, fullN, 0, full_verify second_identity⟩
 
 end OneReflectionPhysical
 
@@ -1219,7 +1196,7 @@ section FinalCertificateSection
 /-! A strict degree-60 certificate for the exact protected one-reflection target. -/
 
 theorem Submission.certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q :=
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q :=
   OneReflectionPhysical.certificate_from_second_identity
     OneReflectionPhysical.second_identity
 

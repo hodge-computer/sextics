@@ -1,16 +1,14 @@
 # The formal acceptance contract
 
-The target is existence of a rational-vector-field certificate, with no bound on the denominator degree. Constructive and nonconstructive proofs establish the same statement for the specified data.
+The live challenge's target is existence, not minimization of the degree of a denominator. A constructive and a nonconstructive Lean proof must prove the same statement for an immutable `(F,q,A)`.
 
-For arbitrary natural numbers `n`, `d`, and `q`, let `R = ℂ[z₀,…,zₙ]`. The contract requires `F ≠ 0`, `F` homogeneous of degree `d`, and `A` homogeneous of integer degree `d(q+1) − (n+1)`. It asks for a nonzero homogeneous denominator `D`, numerators `N₀,…,Nₙ`, and a polynomial `Q` such that:
+Let `R = ℂ[X0,X1,X2,Y0,Y1,Y2]`. For the chosen sextic `F`, pole parameter `q`, and homogeneous odd target `A`, the statement asks for a nonzero homogeneous `D` and a six-tuple `N` such that:
 
 - `D` is relatively prime to `F`.
-- Each `Nᵢ` is homogeneous of integer degree `deg(D) + dq − n`.
+- Each `Nᵢ` is homogeneous of degree `deg(D) + 6q − 5`; zero components are allowed by the homogeneous predicate.
 - The rational field `vᵢ = Nᵢ / D` satisfies `F^(q+1) ∣ A − q·dF(v) + F·div(v)` in the localization away from `F`.
 
-Integer homogeneity means that every monomial with nonzero coefficient has the specified degree. The zero polynomial is homogeneous of every integer degree; a negative degree permits only zero. There is no independent homogeneity or nonvanishing condition on `Q`.
-
-The catalogue specializes to `n=5`, `d=6`, coordinates `X0,X1,X2,Y0,Y1,Y2`, and `q∈{1,2}`. Its targets have `F(X,−Y)=F(X,Y)` and `A(X,−Y)=−A(X,Y)`. The general contract imposes no parity requirement on the field.
+The standing instances have positive integral `q`, `F(X,−Y)=F(X,Y)`, and `A(X,−Y)=−A(X,Y)`. Field parity may be enforced by averaging; it must not accidentally narrow the stated existential problem.
 
 ## A finite algebraic witness
 
@@ -31,21 +29,21 @@ The verifier generates a protected exact target from the base branch's record. C
 
 A rational-coefficient identity transfers to complex coefficients, but denominator admissibility over the complex numbers must also be established. Do not infer complex coprimality merely from rational irreducibility. Nonconstructive proofs are allowed when they establish the same protected existential theorem.
 
-The Lean project pins its toolchain and mathlib manifest. Instance-specific proofs belong to each instance's existing data folder and first enter through its solve PR. Reusable machinery from accepted proofs can be extracted into the shared library through a separate maintenance PR. CI checks the proof before the owner merges it. The publisher records contributor credit in `acceptance.json`; the website renders the current repository contents. See [the proposal specification](../CONTRIBUTING.md) and [verification workflow](../MAINTAINING.md#verification-sign-off-and-publication).
+The Lean project pins its toolchain and mathlib manifest. Instance-specific proofs belong to each instance's existing data folder and first enter through its solve PR. Reusable machinery from accepted proofs can be extracted into the shared library through a separate maintenance PR. A checked merge by the configured owner and a trusted acceptance receipt are required before the publisher derives solved status and leaderboard credit. See [the proposal specification](../CONTRIBUTING.md) and [verification workflow](../MAINTAINING.md#verification-sign-off-and-publication).
 
 ## Reusable constructions
 
-The shared library is the Lean counterpart of the mathematical book: organized, reusable statements with explicit hypotheses and concrete applications. Keep exploratory calculations, unsuccessful searches, and target-specific closure arguments outside it. Maintain accepted instance sources together with the shared contract, rechecking affected proofs in CI; new applications import the maintained library.
+The shared library is the Lean counterpart of the mathematical book: organized, reusable statements with explicit hypotheses and concrete applications. Keep exploratory calculations, unsuccessful searches, and target-specific closure arguments outside it. Preserve accepted instance sources as verification evidence; new applications import the maintained library.
 
 [`HodgeComputer.Constructions.AveragingProjectors`](lean/HodgeComputer/Constructions/AveragingProjectors.lean) gives the algebraic mechanism of Chapter 3: if a family of operators has image in a stable submodule, every element of its generated two-sided ideal has image there. It uses Mathlib's colon ideal and subgroup averaging projector, with explicit hypotheses that the relevant invariant subspaces lie in the chosen submodule. This combines the parts served by several quotients and their group translates; geometric support, quotient transfer, and membership in the generated ideal remain application obligations.
 
-[`HodgeComputer.CertificateOperations`](lean/HodgeComputer/CertificateOperations.lean) supplies `Verify.add` and `HasCertificate.add` for every dimension, degree, and pole parameter. It combines different legal denominators and retains both quotient remainders. `HasCertificate.zero` supplies the neutral source. These are the cleared-form operations of Chapter 1, extracted from `fqlx`'s [bundle assembly](https://github.com/hodge-computer/sextics/pull/161), which uses the addition formula in the accepted one-reflection construction.
+[`HodgeComputer.CertificateOperations`](lean/HodgeComputer/CertificateOperations.lean) supplies `Verify.add` and `HasCertificate.add` for every positive pole order. It combines different legal denominators and retains both quotient remainders. `HasCertificate.zero` supplies the neutral source. These are the cleared-form operations of Chapter 1, extracted from `fqlx`'s [bundle assembly](https://github.com/hodge-computer/sextics/pull/161), which uses the addition formula in the accepted one-reflection construction.
 
 [`HodgeComputer.Constructions.HoldoutCover`](lean/HodgeComputer/Constructions/HoldoutCover/README.md) contains the Fermat-cover and moving-conic machinery from `fqlx`'s accepted [holdout proof](https://github.com/hodge-computer/sextics/pull/128). The construction supplies a primitive for an arbitrary polynomial source on its weighted quotient; an application must prove the source and derivative identities that transport its own target back to the original sextic.
 
 New holdout specializations can import `HodgeComputer.Constructions.HoldoutCover.GeneralizedCover` and apply `HoldoutGeneralization.certificate_of_source_pair`. The module also supplies the vanishing traces of the square and inverse square of the cover coordinate. These are ingredients for the fixed holdout sextic, not a theorem for arbitrary sextics or targets.
 
-The accepted files under `data/holdout/` retain the original construction and attribution; they are maintained against the current verifier. New submissions use the maintained shared modules instead of copying those files. Imports retain the original declaration namespaces and mathematical attribution; do not import both copies into the same Lean module.
+The original accepted files under `data/holdout/` remain unchanged as the source of the original verification record. New submissions use the maintained shared modules instead of copying those files. Imports retain the original declaration namespaces and mathematical attribution; do not import both copies into the same Lean module.
 
 [`HodgeComputer.Constructions.AlgebraicSpecialization`](lean/HodgeComputer/Constructions/AlgebraicSpecialization.lean) proves nonvanishing at every algebraic root when an auxiliary polynomial specializes to a nonzero multiple of `(X - r)^m` and the tested polynomial is nonzero at `r`. `eval_ne_zero_of_coalescing_root_specialization` requires `m > 0`, a degree bound and the explicit kernel inclusion between coefficient maps; the quadratic-at-zero corollary is `eval_ne_zero_of_double_root_specialization`. Fixed-size resultants allow degree drops without specializing rational maps at poles. The criterion generalizes the quadratic argument in `fqlx`'s [shear construction](https://github.com/hodge-computer/sextics/discussions/58#discussioncomment-19111681), prepared with OpenAI Codex assistance.
 

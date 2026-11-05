@@ -3,13 +3,15 @@
 from fractions import Fraction
 import json
 import re
+import sys
 from pathlib import Path
 import sympy as sp
 
 from content import render
 from divisors import validate_program, validate_slice_identity
 import yaml
-from polynomials import exact_polynomial
+sys.path.insert(0, str(Path(__file__).resolve().parent / "proposals"))
+from acceptance import exact_polynomial, read_acceptance
 
 ROOT = Path(__file__).resolve().parents[1]
 ATLAS = ROOT / 'assets/atlas'
@@ -46,10 +48,10 @@ def dump(path, value):
     emit(path, json.dumps(value, ensure_ascii=False, indent=2) + '\n')
 
 
-def polynomial(expression, degree=None):
+def polynomial(expression, degree):
     variables = sp.symbols('X0 X1 X2 Y0 Y1 Y2')
     value = sp.Poly(exact_polynomial(expression, variables), *variables)
-    require(not value.is_zero and value.is_homogeneous and (degree is None or value.total_degree() == degree),
+    require(not value.is_zero and value.is_homogeneous and value.total_degree() == degree,
             f'Invalid homogeneous polynomial of degree {degree}')
     terms = [[str(c), list(m)] for m, c in value.terms() if c]
     return {'expression': expression, 'latex': sp.latex(value.as_expr()),
@@ -78,19 +80,19 @@ for rid in catalogue['instanceIds']:
     record['content'] = {'why': f'assets/atlas/{rid}/why.html'}
     emit(ATLAS / rid / 'why.html', render(prose(local_path(record['rationale'], folder)), root=ROOT, source_path=local_path(record['rationale'], folder)))
     if (folder / 'acceptance.json').is_file():
-        receipt = json.loads((folder / 'acceptance.json').read_text())
+        receipt = read_acceptance(ROOT, rid)
         record['pullRequest'] = receipt['pullRequest']
         record['formalStatus'] = 'proved'
         record['evidenceKind'] = 'existence-proof'
         if (folder / 'witness.json').is_file():
             witness = json.loads((folder / 'witness.json').read_text())
-            record['D'] = polynomial(witness['D'])
+            record['D'] = polynomial(witness['D'], witness['d'])
             record['render']['divisorTerms'] = [[float(Fraction(c)), m] for c,m in record['D']['terms']]
             record['evidenceKind'] = 'explicit-certificate'
         record['leanVerification'] = {
             'formalStatus': 'proved', 'status': 'accepted',
-            'proofFile': f'data/{rid}/Solution.lean',
-            'receipt': f'data/{rid}/acceptance.json'}
+            'proofFile': f'data/{rid}/Solution.lean', 'receipt': f'data/{rid}/acceptance.json',
+            'theorem': receipt['verification']['theorem'], 'checker': receipt['verification']['leanVersion']}
         display_divisor = ROOT / 'slices/divisors' / f'{rid}.json'
         if display_divisor.is_file():
             display = validate_program(json.loads(display_divisor.read_text()), ROOT)

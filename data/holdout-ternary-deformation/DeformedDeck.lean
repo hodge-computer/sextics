@@ -1,4 +1,3 @@
-import HodgeComputer.Sextic
 import Proposal.DeformedCoverCoordinates
 import HodgeComputer.Constructions.HoldoutCover.CoverDeckField
 
@@ -101,7 +100,7 @@ private lemma scaled_product_fixed (e : CoverField ≃+* CoverField)
 @[simp] lemma deckFieldEquiv_Y2 (z : ℂ) (hz : z^6=1) (hz0 : z ≠ 0) :
     deckFieldEquiv z hz hz0 (coverBeta*coverT)=coverBeta*coverT :=
   scaled_product_fixed _ z hz0 _ (deckFieldEquiv_beta z hz hz0) (deckFieldEquiv_T z hz hz0)
-lemma deckFieldEquiv_fixes_residue (z : ℂ) (hz : z^6=1) (hz0 : z ≠ 0) (p : HodgeComputer.Sextic.Poly) :
+lemma deckFieldEquiv_fixes_residue (z : ℂ) (hz : z^6=1) (hz0 : z ≠ 0) (p : HodgeComputer.Poly) :
     deckFieldEquiv z hz hz0 (physicalFieldMap (physicalResidueMap p))=
       physicalFieldMap (physicalResidueMap p) := by
   have he : (deckFieldEquiv z hz hz0).toRingHom.comp (physicalFieldMap.comp physicalResidueMap)=

@@ -1,9 +1,64 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 1,
+  "formalAcceptance": true,
+  "repository": "hodge-computer/sextics",
+  "instanceId": "klein-hesse",
   "githubLogin": "benediamond",
+  "submittedAt": "2026-10-15T16:53:35Z",
   "acceptedAt": "2026-10-15T22:13:35Z",
+  "publishedAt": "2026-10-15T22:14:01.709505+00:00",
   "pullRequest": {
     "number": 22,
-    "url": "https://github.com/hodge-computer/sextics/pull/22"
+    "url": "https://github.com/hodge-computer/sextics/pull/22",
+    "headCommit": "f56c6661bd0b927479d67e77e00498be76736a45",
+    "baseCommit": "e8011772367efa7c921c8f0738b9838a09568c8b",
+    "mergeCommit": "b6cfcd63818d6a6652f49dc8bde9537fa56bd3e5"
+  },
+  "run": {
+    "id": 38814662206,
+    "url": "https://github.com/hodge-computer/sextics/actions/runs/38814662206",
+    "workflowPath": ".github/workflows/solve-proposal.yml",
+    "conclusion": "success"
+  },
+  "verification": {
+    "schemaVersion": 1,
+    "mode": "live",
+    "instanceId": "klein-hesse",
+    "pullRequest": 22,
+    "githubLogin": "benediamond",
+    "baseCommit": "e8011772367efa7c921c8f0738b9838a09568c8b",
+    "headCommit": "f56c6661bd0b927479d67e77e00498be76736a45",
+    "checkedAt": "2026-10-15T22:09:41.354813+00:00",
+    "formalAcceptance": false,
+    "requiresOwnerMerge": true,
+    "verifierSha256": {
+      "scripts/proposals/check.py": "9005a1dec881c3c1e5d8151bb8a33aa0bd203872ad5e174f51dbf28c43bca64e",
+      "scripts/proposals/sandbox.py": "c8a1febc230b57b5666667ba82da588e912c3b6262ea3d8299bb5f53031b71d9",
+      "scripts/proposals/Audit.lean": "d1a381c70025c6de519e0b0e5e4da0db72eeba0881b843d9b9cd0e9dd459ed9f",
+      "formal/lean/HodgeComputer/Verify.lean": "007f24d3b7ac642e1bcd6adddd0a1512791c32e0e5882cd741c096c6d7e583c3",
+      "formal/lean/lake-manifest.json": "b29b4951d067b4d51a554f1735ac67640b96dbedf07ab3d49a847b67a89b9c6e",
+      ".github/solve-policy.json": "e0b12665c70fd50c3a228fd59e61c129b1d357b9f4ebde7da1072fbcdc35cecc",
+      ".github/workflows/solve-proposal.yml": "f3d5270cb25c35f9ac96d5057f154100092d240cbad788758d69a907ec247e53"
+    },
+    "statementSha256": "ef5440617dca5e5d11c874afe8f759039bc7d088d58138d44fcd6a2f7d1bbdc5",
+    "sourceHashes": {
+      "Solution.lean": "d2921b2b6c0dc6f357501a25dce43a3fda1a0cc41464561b5561188f6b9f38ad",
+      "Witness.lean": "825e11c0e3ed9b4834dc12417f56fddc2bc5bfea11649a9ecae645b7468bfaba",
+      "proof.json": "44e2cc2c82ed6dc04ca0b1917ea5c25c24c30e5f92e421a4e85ed7b430b58cec",
+      "solution.md": "77101947533cf1cb5df216ac3ae946da8a72edc60e464bcfb856212ed44e5d3c",
+      "witness.json": "20d825ddf18b417cb9494be4aae5a100455fbb1406279fd3ff6bddcd6e6537e3"
+    },
+    "leanVersion": "Lean (version 4.33.0, x86_64-unknown-linux-gnu, commit d8b18978322de05a8f3dba51ef03cf5461676c17, Release)",
+    "kernelReplay": true,
+    "axioms": [
+      "propext",
+      "Quot.sound",
+      "Classical.choice"
+    ],
+    "witnessChecked": true,
+    "theorem": "Submission.certificate",
+    "sandbox": "docker-no-network",
+    "toolchain": "leanprover/lean4:v4.33.0",
+    "result": "lean-checked-awaiting-owner"
   }
 }

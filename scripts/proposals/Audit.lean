@@ -30,17 +30,16 @@ unsafe def main (args : List String) : IO UInt32 := do
           throw <| IO.userError s!"Changed protected declaration {name}"
       let some (.thmInfo result) := env.find? `HodgeSubmission.checked
         | throw <| IO.userError "Missing final theorem"
-      let expected := mkAppN (mkConst `HodgeComputer.HasCertificate) #[
-        mkConst `HodgeSubmission.n, mkConst `HodgeSubmission.F, mkConst `HodgeSubmission.A,
-        mkConst `HodgeSubmission.d, mkConst `HodgeSubmission.q]
+      let expected := mkApp3 (mkConst `HodgeComputer.HasCertificate)
+        (mkConst `HodgeSubmission.F) (mkConst `HodgeSubmission.A) (mkConst `HodgeSubmission.q)
       unless result.levelParams.isEmpty && result.type == expected do
         throw <| IO.userError "Final theorem does not have the protected existential statement"
       if witness then
         let some (.thmInfo checkedWitness) := env.find? `HodgeSubmission.checkedWitness
           | throw <| IO.userError "Missing witness theorem"
         let witnessType := mkAppN (mkConst `HodgeComputer.Verify) #[
-          mkConst `HodgeSubmission.n, mkConst `HodgeSubmission.F, mkConst `HodgeSubmission.A,
-          mkConst `HodgeSubmission.d, mkConst `HodgeSubmission.q, mkConst `HodgeWitness.D, mkConst `HodgeWitness.N, mkConst `HodgeWitness.Q]
+          mkConst `HodgeSubmission.F, mkConst `HodgeSubmission.A, mkConst `HodgeSubmission.q,
+          mkConst `HodgeWitness.d, mkConst `HodgeWitness.D, mkConst `HodgeWitness.N, mkConst `HodgeWitness.Q]
         unless checkedWitness.levelParams.isEmpty && checkedWitness.type == witnessType do
           throw <| IO.userError "Witness theorem does not bind the submitted polynomial data"
       let axes ← dependencies env ([`HodgeSubmission.checked] ++ if witness then [`HodgeSubmission.checkedWitness] else [])

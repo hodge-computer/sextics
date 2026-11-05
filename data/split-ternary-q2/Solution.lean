@@ -5,7 +5,7 @@ noncomputable section
 namespace Submission
 
 theorem certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q := by
   have hF : HodgeSubmission.F=SplitTernaryPhysical.physicalF := by
     unfold HodgeSubmission.F SplitTernaryPhysical.physicalF
       SplitTernaryPhysical.leftTernary SplitTernaryPhysical.rightTernary

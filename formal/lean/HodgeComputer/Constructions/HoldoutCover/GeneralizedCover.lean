@@ -1,4 +1,3 @@
-import HodgeComputer.Sextic
 import HodgeComputer.Constructions.HoldoutCover.ConicResidue
 import HodgeComputer.Constructions.HoldoutCover.CoverCertificate
 
@@ -97,7 +96,7 @@ theorem trace_inverse_square :
     (algebraMap ℂ HoldoutFunctionField z) (nontrivial_square z hz4)
     coverT (physicalDeckAlgHom_T z hz hz0)
 
-def normalSource (A : HodgeComputer.Sextic.Poly) : HoldoutFunctionField :=
+def normalSource (A : HodgeComputer.Poly) : HoldoutFunctionField :=
   (ρp (integerPartial 0 A)*physicalNormal -
     ρp A*ρp (integerPartial 0 (integerPartial 0 holdoutSextic)))/physicalNormal^2
 
@@ -116,7 +115,7 @@ local instance : Algebra ℤ CommonCoverFunctionField := Ring.toIntAlgebra _
 local instance : Algebra ℤ GenericQuotientField := Ring.toIntAlgebra _
 
 theorem certificate_of_source_pair
-    (A C : HodgeComputer.Sextic.Poly)
+    (A C : HodgeComputer.Poly)
     (B : MvPolynomial (Fin 5) (FermatCoefficientField ℂ))
     (t : CommonCoverFunctionField)
     (hA : A.IsHomogeneous 6)
@@ -126,7 +125,7 @@ theorem certificate_of_source_pair
     (hpartial : actualCoverJacobian.det*quotientCoverFieldMap (ρq (integerPartial 0 B)) =
       physicalCoverFieldMap (ρp (integerPartial 0 A))-
         physicalCoverFieldMap (ρp (integerPartial 0 C))*t) :
-    HodgeComputer.HasCertificate holdoutSextic A 6 1 := by
+    HodgeComputer.HasCertificate holdoutSextic A 1 := by
   obtain ⟨p⟩ := HoldoutConic.exists_seed
   obtain ⟨wq,hq⟩ : ∃ wq : Fin 4 → GenericQuotientField,
       residueDivergence (quotientTangent (genericBaseAlpha ℂ) (genericBaseBeta ℂ))

@@ -1,4 +1,4 @@
-import HodgeComputer.Sextic
+import HodgeComputer.Verify
 import Proposal.PExplicitWitnessComplete
 set_option maxHeartbeats 4000000
 set_option linter.unusedSimpArgs false
@@ -7,7 +7,7 @@ set_option linter.unusedTactic false
 set_option maxRecDepth 1000
 noncomputable section
 namespace HodgeComputer.DenseP0
-open MvPolynomial HodgeTestbed HodgeComputer.Sextic
+open MvPolynomial HodgeTestbed
 abbrev E := HodgeTestbed.ExplicitWitness.D
 
 def cm : SexticPoly →+* Poly := MvPolynomial.map (algebraMap ℚ ℂ)
@@ -206,29 +206,13 @@ theorem denominator_ne_zero : D ≠ 0 := by
   have hc := congrArg (fun p : Polynomial ℂ => p.coeff 1) hd
   norm_num [dFiber] at hc
 
-theorem hypersurface_ne_zero : F ≠ 0 := by
-  intro h
-  have he := congrArg (MvPolynomial.eval (fun _ : Fin 6 => (1 : ℂ))) h
-  norm_num [F, cm, Frozen.F, Frozen.X0, Frozen.X1, Frozen.X2, Frozen.Y0, Frozen.Y1, Frozen.Y2] at he
-
-theorem denominator_homogeneous : D.IsHomogeneous 55 :=
-  ExplicitWitness.D_homogeneous.map (algebraMap ℚ ℂ)
-
-theorem certificate : Verify F A 6 1 D N Q where
-  hypersurface_ne_zero := hypersurface_ne_zero
-  hypersurface_homogeneous := Frozen.F_homogeneous.map (algebraMap ℚ ℂ)
-  source_homogeneous := by
-    simpa [A, cm] using Homogeneous.of_isHomogeneous (Frozen.A_homogeneous.map (algebraMap ℚ ℂ))
+theorem certificate : Verify F A 1 55 D N Q where
   denominator_ne_zero := denominator_ne_zero
-  denominator_homogeneous := by
-    rw [denominator_homogeneous.totalDegree denominator_ne_zero]
-    exact denominator_homogeneous
-  numerator_homogeneous i := by
-    rw [denominator_homogeneous.totalDegree denominator_ne_zero]
-    simpa [N, cm] using Homogeneous.of_isHomogeneous ((ExplicitWitness.numerator_homogeneous i).map (algebraMap ℚ ℂ))
+  denominator_homogeneous := ExplicitWitness.D_homogeneous.map (algebraMap ℚ ℂ)
+  numerator_homogeneous i := (ExplicitWitness.numerator_homogeneous i).map (algebraMap ℚ ℂ)
   denominator_legal := denominator_legal
   identity := normalized_identity (by simpa using equations.e1) (by simpa using equations.e2)
 
-theorem solved : HasCertificate F A 6 1 := ⟨D,N,Q,certificate⟩
+theorem solved : HasCertificate F A 1 := ⟨55,D,N,Q,certificate⟩
 end HodgeComputer.DenseP0
 #print axioms HodgeComputer.DenseP0.solved

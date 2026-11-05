@@ -351,51 +351,17 @@ independent prerequisite for legality, not an existence assumption on W. -/
 theorem hasCertificate_of_weighted_divergence
     (hirr : Irreducible physicalF) (W : Fin 4 → BaseField)
     (hw : (∑ i,baseD i (W i))-5*directionalP W/(3*p)-4*directionalQ W/(3*q)=source) :
-    HodgeComputer.HasCertificate physicalF physicalA 6 2 := by
+    HodgeComputer.HasCertificate physicalF physicalA 2 := by
   obtain ⟨d,D,N,hD,hN,hd,hr,hrep⟩ := homogeneous_vector_data W
   have hlegal : ¬ physicalF∣D := by
     rintro ⟨k,hk⟩
     apply hr
     rw [hk,map_mul,rho_F,zero_mul]
-  have hD0 : D ≠ 0 := by
-    intro h
+  refine ⟨d,D,N,0,?_,hD,?_,hirr.isRelPrime_iff_not_dvd.mpr hlegal,?_⟩
+  · intro h
     exact hd (by rw [h,map_zero])
-  have hdegree : D.totalDegree = d := hD.totalDegree hD0
-  refine ⟨D,N,0,?_⟩
-  refine {
-    hypersurface_ne_zero := hirr.ne_zero
-    hypersurface_homogeneous := ?_
-    source_homogeneous := ?_
-    denominator_ne_zero := hD0
-    denominator_homogeneous := by simpa only [hdegree] using hD
-    numerator_homogeneous := ?_
-    denominator_legal := hirr.isRelPrime_iff_not_dvd.mpr hlegal
-    identity := ?_
-  }
-  · have hx (i : Fin 6) (k : ℕ) : (X i ^ k : Poly).IsHomogeneous k := by
-      simpa using (isHomogeneous_X ℂ i).pow k
-    have hc := isHomogeneous_C (σ := Fin 6) (5/7 : ℂ)
-    have h2 := isHomogeneous_C (σ := Fin 6) (2 : ℂ)
-    have h3 := isHomogeneous_C (σ := Fin 6) (3 : ℂ)
-    have hleft := ((((((hx 0 6).add ((hc.mul (hx 0 5)).mul (hx 1 1))).add
-      (((hc.mul (hx 0 2)).mul (hx 1 3)).mul (hx 2 1))).add
-      (((h3.mul hc).mul (hx 0 1)).mul (hx 2 5))).add (hx 1 6)).add
-      (((h2.mul hc).mul (hx 1 5)).mul (hx 2 1))).add (hx 2 6)
-    have hright := ((((((hx 3 6).add (((h2.mul hc).mul (hx 3 5)).mul (hx 4 1))).add
-      ((((h2.mul hc).mul (hx 3 3)).mul (hx 4 1)).mul (hx 5 2))).add
-      ((hc.mul (hx 3 1)).mul (hx 5 5))).add (hx 4 6)).add
-      (((h3.mul hc).mul (hx 4 5)).mul (hx 5 1))).add (hx 5 6)
-    simpa only [physicalF, leftTernary, rightTernary, map_ofNat, pow_one] using hleft.add hright
-  · have h : physicalA.IsHomogeneous 12 := by
-      simpa only [physicalA] using
-        ((((isHomogeneous_X ℂ (0 : Fin 6)).pow 4).mul
-          ((isHomogeneous_X ℂ (1 : Fin 6)).pow 3)).mul
-          ((isHomogeneous_X ℂ (3 : Fin 6)).pow 3)).mul
-          ((isHomogeneous_X ℂ (4 : Fin 6)).pow 2)
-    simpa using HodgeComputer.Homogeneous.of_isHomogeneous h
   · intro i
-    have h := HodgeComputer.Homogeneous.of_isHomogeneous (hN i)
-    convert h using 1 <;> simp only [hdegree, Nat.cast_add] <;> ring
+    simpa using hN i
   · simp only [mul_zero]
     exact strict_polynomial_identity W hw D N hd hrep
 
@@ -487,7 +453,7 @@ lemma physicalF_irreducible : Irreducible physicalF := by
 /-- Only the explicit weighted-divergence primitive remains to be supplied. -/
 theorem physical_certificate_of_weighted_divergence (W : Fin 4 → BaseField)
     (hw : (∑ i,baseD i (W i))-5*directionalP W/(3*p)-4*directionalQ W/(3*q)=source) :
-    HodgeComputer.HasCertificate physicalF physicalA 6 2 :=
+    HodgeComputer.HasCertificate physicalF physicalA 2 :=
   hasCertificate_of_weighted_divergence physicalF_irreducible W hw
 
 end SplitTernaryPhysical

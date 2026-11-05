@@ -7,7 +7,7 @@ import subprocess
 import sys
 
 from check import ROOT, git, read_proposal, require
-from files import proof_files
+from acceptance import accepted_sources
 sys.path.insert(0, str(ROOT / 'scripts'))
 from content import render
 
@@ -26,7 +26,7 @@ def main():
         require(rid in json.loads((ROOT / 'data/catalogue.json').read_text())['instanceIds'],
                 'Choose an existing instance ID')
         local = ROOT / 'data' / rid
-        files = {name: (local / name).read_bytes() for name in proof_files(local)}
+        files = {name: (local / name).read_bytes() for name in accepted_sources(local)}
         require('solution.md' in files, 'Missing solution.md')
     else:
         require(args.head and args.author, 'Provide --head and --author with --base')

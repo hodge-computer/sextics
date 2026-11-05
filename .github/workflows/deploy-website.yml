@@ -11,7 +11,8 @@ on:
       - docs/**
       - scripts/build-content.py
       - scripts/content.py
-      - scripts/polynomials.py
+      - scripts/validate-records.py
+      - scripts/check-content.py
       - scripts/requirements-content.txt
       - scripts/discord-alerts.py
       - infra/aws/**
@@ -51,11 +52,13 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: '3.11'
-      - name: Build the site from main
+      - name: Build and validate the accepted site content
         run: |
           set -euo pipefail
           python3 -m pip install -r scripts/requirements-content.txt
           python3 scripts/build-content.py
+          python3 scripts/validate-records.py
+          python3 scripts/check-content.py
           python3 infra/aws/package.py --site . --output "$RUNNER_TEMP/sextics-release" --static-only
       - name: Obtain short-lived website publishing credentials
         uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0

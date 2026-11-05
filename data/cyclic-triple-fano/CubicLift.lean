@@ -1,4 +1,3 @@
-import HodgeComputer.Sextic
 import Proposal.CyclicDomain
 import HodgeComputer.Verify
 import Mathlib.Analysis.Complex.Polynomial.Basic
@@ -62,14 +61,14 @@ theorem cubeVariable_injective {σ : Type*} [DecidableEq σ] (j : σ) :
 
 abbrev cubeLast := cubeVariable (5 : Fin 6)
 
-theorem third_mul_three : (C ((3 : ℂ)⁻¹) : HodgeComputer.Sextic.Poly)*3 = 1 := by
+theorem third_mul_three : (C ((3 : ℂ)⁻¹) : HodgeComputer.Poly)*3 = 1 := by
   have h := congrArg (C (σ := Fin 6)) (show (3 : ℂ)⁻¹*3 = 1 by norm_num)
   simpa only [map_mul, map_ofNat, map_one] using h
 
-def liftNumerators (N : Fin 6 → HodgeComputer.Sextic.Poly) : Fin 6 → HodgeComputer.Sextic.Poly :=
+def liftNumerators (N : Fin 6 → HodgeComputer.Poly) : Fin 6 → HodgeComputer.Poly :=
   fun i => if i=5 then C ((3 : ℂ)⁻¹)*cubeLast (N i) else X 5^2*cubeLast (N i)
 
-theorem lift_directional (p : HodgeComputer.Sextic.Poly) (N : Fin 6 → HodgeComputer.Sextic.Poly) :
+theorem lift_directional (p : HodgeComputer.Poly) (N : Fin 6 → HodgeComputer.Poly) :
     HodgeTestbed.directional (cubeLast p) (liftNumerators N) =
       X 5^2*cubeLast (HodgeTestbed.directional p N) := by
   simp only [HodgeTestbed.directional, map_sum, Finset.mul_sum]
@@ -82,7 +81,7 @@ theorem lift_directional (p : HodgeComputer.Sextic.Poly) (N : Fin 6 → HodgeCom
   · simp [liftNumerators, hi]
     ring
 
-theorem lift_divergence (N : Fin 6 → HodgeComputer.Sextic.Poly) :
+theorem lift_divergence (N : Fin 6 → HodgeComputer.Poly) :
     HodgeTestbed.divergence (liftNumerators N) =
       X 5^2*cubeLast (HodgeTestbed.divergence N) := by
   simp only [HodgeTestbed.divergence, map_sum, Finset.mul_sum]
@@ -93,7 +92,7 @@ theorem lift_divergence (N : Fin 6 → HodgeComputer.Sextic.Poly) :
     linear_combination (X 5^2 * cubeLast (pderiv 5 (N 5))) * third_mul_three
   · simp [liftNumerators, hi, pderiv_mul, pderiv_X, pderiv_pow, Pi.single_apply, cubeVariable_pderiv]
 
-theorem lift_divergenceNumerator (D : HodgeComputer.Sextic.Poly) (N : Fin 6 → HodgeComputer.Sextic.Poly) :
+theorem lift_divergenceNumerator (D : HodgeComputer.Poly) (N : Fin 6 → HodgeComputer.Poly) :
     HodgeTestbed.divergenceNumerator (cubeLast D) (liftNumerators N) =
       X 5^2*cubeLast (HodgeTestbed.divergenceNumerator D N) := by
   simp only [HodgeTestbed.divergenceNumerator, lift_divergence, lift_directional,
@@ -109,7 +108,7 @@ theorem cubeLast_hypersurface (k : ℂ) :
   ring
 
 
-theorem cubeLast_univariate (p : HodgeComputer.Sextic.Poly) :
+theorem cubeLast_univariate (p : HodgeComputer.Poly) :
     MvPolynomial.finSuccEquiv ℂ 5 (cubeLast p) =
       (MvPolynomial.finSuccEquiv ℂ 5 p).map (cubeVariable (4 : Fin 5)) := by
   have he : (Fin.cases (Polynomial.X : Polynomial (MvPolynomial (Fin 5) ℂ))
@@ -130,7 +129,7 @@ theorem cubeLast_univariate (p : HodgeComputer.Sextic.Poly) :
   | mul_X p i hp =>
     simp only [map_mul, hp, Polynomial.map_mul, hX]
 
-theorem cubeLast_not_dvd (k : ℂ) (D : HodgeComputer.Sextic.Poly)
+theorem cubeLast_not_dvd (k : ℂ) (D : HodgeComputer.Poly)
     (hD : ¬ hypersurface k 2 1 ∣ D) :
     ¬ hypersurface k 6 3 ∣ cubeLast D := by
   intro hd
@@ -143,7 +142,7 @@ theorem cubeLast_not_dvd (k : ℂ) (D : HodgeComputer.Sextic.Poly)
   apply (map_dvd_iff (MvPolynomial.finSuccEquiv ℂ 5)).mp
   simpa only [hypersurface_univariate] using hd'
 
-theorem cubeLast_legal (k : ℂ) (D : HodgeComputer.Sextic.Poly)
+theorem cubeLast_legal (k : ℂ) (D : HodgeComputer.Poly)
     (hD : IsRelPrime (hypersurface k 2 1) D) :
     IsRelPrime (hypersurface k 6 3) (cubeLast D) := by
   apply (physical_irreducible k).isRelPrime_iff_not_dvd.mpr
@@ -151,7 +150,7 @@ theorem cubeLast_legal (k : ℂ) (D : HodgeComputer.Sextic.Poly)
   exact (weighted_quotient_irreducible k).isRelPrime_iff_not_dvd.mp hD
 
 theorem cubic_normalized_identities
-    (k : ℂ) (A D Q : HodgeComputer.Sextic.Poly) (N : Fin 6 → HodgeComputer.Sextic.Poly)
+    (k : ℂ) (A D Q : HodgeComputer.Poly) (N : Fin 6 → HodgeComputer.Poly)
     (h1 : HodgeTestbed.directional (hypersurface k 2 1) N = A*D)
     (h2 : HodgeTestbed.divergenceNumerator D N = hypersurface k 2 1*Q) :
     HodgeTestbed.directional (hypersurface k 6 3) (liftNumerators N) =

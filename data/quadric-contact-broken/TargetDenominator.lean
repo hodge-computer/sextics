@@ -1,7 +1,4 @@
-import HodgeComputer.Sextic
 import HodgeComputer.Verify
-
-open HodgeComputer.Sextic
 
 noncomputable section
 namespace QuadricContactDenominator

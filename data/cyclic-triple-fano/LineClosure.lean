@@ -1,4 +1,3 @@
-import HodgeComputer.Sextic
 import Proposal.LineEmbedding
 import Proposal.LineSource
 import Proposal.QuotientGradient
@@ -38,9 +37,9 @@ def LineFamily.anchoredFamily (p : LineFamily c E) : Target.AnchoredFamily c E w
 are obtained from the lifted family, with finite coefficient extension
 retained as an explicit hypothesis. -/
 theorem quotient_normalized_of_line_family
-    [Module.Finite (Endpoint.Field c) E] (p : LineFamily c E) (A : HodgeComputer.Sextic.Poly) :
-    ∃ d : HodgeComputer.Sextic.Poly, ∃ N : Fin 6 → HodgeComputer.Sextic.Poly,
-      ∃ Q : HodgeComputer.Sextic.Poly,
+    [Module.Finite (Endpoint.Field c) E] (p : LineFamily c E) (A : HodgeComputer.Poly) :
+    ∃ d : HodgeComputer.Poly, ∃ N : Fin 6 → HodgeComputer.Poly,
+      ∃ Q : HodgeComputer.Poly,
         d ≠ 0 ∧ IsRelPrime (hypersurface c 2 1) d ∧
         HodgeTestbed.directional (hypersurface c 2 1) N = A * d ∧
         HodgeTestbed.divergenceNumerator d N = hypersurface c 2 1 * Q := by
@@ -51,7 +50,7 @@ theorem quotient_normalized_of_line_family
   letI := a.functionField_finite
   let ρ := finiteQuotientEvaluation (K := Target.Field c)
     (L := CurveFunctionField E) (Target.projection c)
-  have hρ (f : HodgeComputer.Sextic.Poly) :
+  have hρ (f : HodgeComputer.Poly) :
       ρ f = MvPolynomial.eval₂Hom (algebraMap ℂ (CurveFunctionField E))
         (fun i => algebraMap (Polynomial E) (CurveFunctionField E) (p.curve i)) f := by
     exact a.fieldMap_residue f

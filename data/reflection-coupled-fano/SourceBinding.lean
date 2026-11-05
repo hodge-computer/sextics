@@ -1,4 +1,3 @@
-import HodgeComputer.Sextic
 import HodgeTarget
 import Proposal.CoupledDomain
 
@@ -11,7 +10,7 @@ noncomputable section
 namespace ReflectionCoupledFano
 
 theorem protected_F : HodgeSubmission.F = hypersurface (5/7 : ℂ) 6 2 := by
-  have hc : (MvPolynomial.C (5/7 : ℂ) : HodgeComputer.Sextic.Poly) =
+  have hc : (MvPolynomial.C (5/7 : ℂ) : HodgeComputer.Poly) =
       5 * MvPolynomial.C (1/7 : ℂ) := by
     rw [show (5/7 : ℂ) = 5 * (1/7) by ring, map_mul, map_ofNat]
   simp only [HodgeSubmission.F, hypersurface, hc]

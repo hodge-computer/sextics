@@ -11,19 +11,6 @@ def commonTarget : BasePoly := HoldoutAlgebra.commonTarget (X 0) (X 1) (X 3) (X 
 def A : BasePoly := HoldoutAlgebra.target (X 0) (X 1) (X 2) (X 3) (X 4)
 def reflectionTarget (k : ℂ) : BasePoly := commonTarget*HoldoutEndpointLift.delta k
 
-theorem F_homogeneous : F.IsHomogeneous 6 := by
-  exact (((((((((MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6)).pow 6).add ((MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6)).pow 6)).add ((MvPolynomial.isHomogeneous_X ℂ (2 : Fin 6)).pow 6)).add ((MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6)).pow 6)).add ((MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6)).pow 6)).add ((MvPolynomial.isHomogeneous_X ℂ (5 : Fin 6)).pow 6)).add (((((MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6)).pow 3).mul (MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6))).mul (MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6))).mul (MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6)))).add (((((MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6)).pow 3).mul (MvPolynomial.isHomogeneous_X ℂ (2 : Fin 6))).mul (MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6))).mul (MvPolynomial.isHomogeneous_X ℂ (5 : Fin 6))))
-
-theorem F_ne_zero : F ≠ 0 := by
-  intro h
-  have he := congrArg (MvPolynomial.eval (fun _ : Fin 6 => (1 : ℂ))) h
-  norm_num [F, HoldoutAlgebra.sextic] at he
-
-theorem reflectionTarget_homogeneous (k : ℂ) : (reflectionTarget k).IsHomogeneous 12 := by
-  exact (((((MvPolynomial.isHomogeneous_X ℂ (0 : Fin 6)).pow 3).mul ((MvPolynomial.isHomogeneous_X ℂ (1 : Fin 6)).pow 2)).mul ((MvPolynomial.isHomogeneous_X ℂ (3 : Fin 6)).pow 3)).mul ((MvPolynomial.isHomogeneous_X ℂ (4 : Fin 6)).pow 2)).mul
-    ((isHomogeneous_X_pow (2 : Fin 6) 2).sub
-      ((isHomogeneous_X_pow (5 : Fin 6) 2).C_mul (k^2)))
-
 abbrev Parameters := MvPolynomial (Fin 2) ℂ
 def complexMap : ℂ →+* FunctionField := baseMap.comp C
 def parameterMap : Parameters →+* FunctionField := eval₂Hom complexMap parameter
@@ -108,9 +95,9 @@ theorem target_combination {k : ℂ} (hk : k^2+k+1=0) :
     -(X 0 : BasePoly)^3*X 1^2*X 3^3*X 4^2*X 5^2*hp2
 
 theorem hasCertificate_of_endpoints {k : ℂ} (hk : k^2+k+1=0)
-    (h1 : HodgeComputer.HasCertificate F (reflectionTarget k) 6 2)
-    (h2 : HodgeComputer.HasCertificate F (reflectionTarget (k^2)) 6 2) :
-    HodgeComputer.HasCertificate F A 6 2 := by
+    (h1 : HodgeComputer.HasCertificate F (reflectionTarget k) 2)
+    (h2 : HodgeComputer.HasCertificate F (reflectionTarget (k^2)) 2) :
+    HodgeComputer.HasCertificate F A 2 := by
   have h := HoldoutReflectionCombination.hasCertificate_combine_q2
     ((2+k)/3) ((2+k^2)/3) h1 h2
   rwa [target_combination hk] at h
@@ -123,8 +110,8 @@ theorem exists_endpoint_root : ∃ k : ℂ, k^2+k+1=0 := by
     Polynomial.eval_X,Polynomial.eval_one] using hk⟩
 
 theorem hasCertificate_of_endpoint_solver
-    (solve : ∀ k : ℂ, k^2+k+1=0 → HodgeComputer.HasCertificate F (reflectionTarget k) 6 2) :
-    HodgeComputer.HasCertificate F A 6 2 := by
+    (solve : ∀ k : ℂ, k^2+k+1=0 → HodgeComputer.HasCertificate F (reflectionTarget k) 2) :
+    HodgeComputer.HasCertificate F A 2 := by
   obtain ⟨k,hk⟩ := exists_endpoint_root
   exact hasCertificate_of_endpoints hk (solve k hk) (solve (k^2) (HoldoutAlgebra.square_is_root hk))
 

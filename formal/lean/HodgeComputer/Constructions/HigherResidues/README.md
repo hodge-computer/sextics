@@ -1,6 +1,6 @@
 # Higher residues on polynomial-curve families
 
-This library constructs a residue primitive for a third-order hypersurface pole from a supplied polynomial-curve family. It is the formal counterpart of the higher-pole residue calculus in [Chapter 3A](../../../../../docs/03a-split-and-k3.md). The proofs are extracted from `fqlx`'s [split-ternary construction](https://github.com/hodge-computer/sextics/pull/159); its accepted files retain the original construction and attribution.
+This library constructs a residue primitive for a third-order hypersurface pole from a supplied polynomial-curve family. It is the formal counterpart of the higher-pole residue calculus in [Chapter 3A](../../../../../docs/03a-split-and-k3.md). The proofs are extracted from `fqlx`'s [split-ternary construction](https://github.com/hodge-computer/sextics/pull/159); its accepted files, attribution, and verification record remain unchanged.
 
 ## Entry point and scope
 

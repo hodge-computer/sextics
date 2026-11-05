@@ -28,7 +28,7 @@ local instance solution_local_4 : Module.Finite PhysicalField CoverField := cove
 local instance solution_local_5 : Algebra.IsIntegral PhysicalField CoverField := Algebra.IsIntegral.of_finite PhysicalField CoverField
 
 theorem deformed_hasCertificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A 6 1 := by
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A 1 := by
   obtain ⟨wq,hq⟩ := DeformedConic.quotient_residue_solution coverQuotientSource
   let g : TargetField := targetResidueMap (integerPartial 0 quotientEquation)
   let r : TargetField :=
@@ -66,7 +66,7 @@ theorem deformed_hasCertificate :
 end DeformedCover
 
 theorem Submission.certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q :=
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q :=
   DeformedCover.deformed_hasCertificate
 
 #print axioms Submission.certificate

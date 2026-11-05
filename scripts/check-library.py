@@ -17,7 +17,10 @@ from sandbox import verify
 
 
 def verification_plan(root, changed):
-    """Select shared dependents and maintained solves affected by a tree diff."""
+    """Select shared dependents and accepted applications of shared Lean changes."""
+    changed = [p for p in changed if p.startswith("formal/lean/")]
+    if not changed:
+        return {"modules": [], "instances": []}
     lean = root / "formal/lean"
     sources = {
         p.relative_to(lean).with_suffix("").as_posix().replace("/", "."): p
@@ -34,16 +37,9 @@ def verification_plan(root, changed):
     affected = {
         Path(p).relative_to("formal/lean").with_suffix("").as_posix().replace("/", ".")
         for p in changed
-        if p.startswith("formal/lean/") and p.endswith(".lean")
+        if p.endswith(".lean")
     }
-    verifier_changed = any(
-        p.startswith("scripts/proposals/") or
-        p in ("scripts/check-library.py", ".github/solve-policy.json")
-        for p in changed
-    )
-    if verifier_changed or any(
-        p.startswith("formal/lean/") and not p.endswith(".lean") for p in changed
-    ):
+    if any(not p.endswith(".lean") for p in changed):
         affected.update(sources)
     while True:
         expanded = affected | {name for name, deps in imports.items() if deps & affected}
@@ -56,13 +52,7 @@ def verification_plan(root, changed):
         folder = receipt.parent
         files = {p.name: p.read_bytes() for p in folder.glob("*.lean")}
         _, used = module_order(files)
-        prefix = f"data/{folder.name}/"
-        direct = any(
-            p.startswith(prefix) and
-            (p.endswith(".lean") or Path(p).name in ("instance.rec", "proof.json", "witness.json"))
-            for p in changed
-        )
-        if direct or verifier_changed or (set(used) | {"HodgeComputer.Verify"}) & affected:
+        if (set(used) | {"HodgeComputer.Verify"}) & affected:
             applications.append(folder.name)
     return {"modules": modules, "instances": applications}
 
