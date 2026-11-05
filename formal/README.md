@@ -6,7 +6,7 @@ For arbitrary natural numbers `n`, `d`, and `q`, let `R = ℂ[z₀,…,zₙ]`. T
 
 - `D` is relatively prime to `F`.
 - Each `Nᵢ` is homogeneous of integer degree `deg(D) + dq − n`.
-- The rational field `vᵢ = Nᵢ / D` satisfies `F^(q+1) ∣ A − q·dF(v) + F·div(v)` in the localization away from `F`.
+- The rational field `vᵢ = Nᵢ / D` satisfies `F^(q+1) ∣ A − q·dF(v) + F·div(v)` in the localization obtained by inverting polynomials relatively prime to `F`.
 
 Integer homogeneity means that every monomial with nonzero coefficient has the specified degree. The zero polynomial is homogeneous of every integer degree; a negative degree permits only zero. There is no independent homogeneity or nonvanishing condition on `Q`.
 
@@ -25,7 +25,7 @@ Since `D` is invertible in the relevant localization, a witness for the equation
 
 ## Protected verification
 
-`formal/lean/HodgeComputer/Verify.lean` defines `Verify` and the existential `HasCertificate` over complex coefficients. Its localization identity justifies the cleared equation. The shared contract imposes no denominator-degree bound or extra parity condition on the witness.
+`formal/lean/HodgeComputer/Verify.lean` defines `HodgeComputer.Verify (n := n) F A d q D N Q` and the existential `HodgeComputer.HasCertificate (n := n) F A d q` over complex coefficients. The implicit `n` is inferred from `F` and `A`, whose type is `HodgeComputer.AmbientPoly n = MvPolynomial (Fin (n + 1)) ℂ`. Its localization identity justifies the cleared equation. The shared contract imposes no denominator-degree bound or extra parity condition on the witness.
 
 The verifier generates a protected exact target from the base branch's record. Contributors prove its existential statement and, when exporting a JSON witness for display, an additional theorem about those exact witness polynomials. The protected pipeline compiles the source in isolation, replays its declarations with the kernel checker, and audits the statement and axioms. Allowed axioms are `propext`, `Classical.choice`, and `Quot.sound`.
 

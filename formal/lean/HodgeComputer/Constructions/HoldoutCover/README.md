@@ -1,6 +1,6 @@
 # The holdout Fermat cover
 
-This library extracts the 58 helper modules from `fqlx`'s accepted [PR #128](https://github.com/hodge-computer/sextics/pull/128), retaining their declarations, proofs, and attribution. Their import paths now begin with `HodgeComputer.Constructions.HoldoutCover` instead of the submission-local `Proposal` namespace. The original accepted sources remain under `data/holdout/`.
+This library extracts the 58 helper modules from `fqlx`'s accepted [PR #128](https://github.com/hodge-computer/sextics/pull/128), retaining their construction and attribution. Their import paths begin with `HodgeComputer.Constructions.HoldoutCover` instead of the submission-local `Proposal` namespace. The instance sources under `data/holdout/` and the shared modules are maintained against the current verifier.
 
 The fixed physical equation is
 
@@ -23,7 +23,7 @@ An application imports `HodgeComputer.Constructions.HoldoutCover.GeneralizedCove
 
 ## Maintenance and credit
 
-Shared changes belong in a maintenance PR; individual solve PRs only add their instance-specific files. Preserve the acceptance-backed historical copies. The maintained modules retain the original declaration namespaces, so a proof should use either the shared modules or its old local copies, not both.
+Shared changes belong in a maintenance PR; individual solve PRs only add their instance-specific files. Recheck affected accepted proofs and preserve their original attribution. The shared modules retain the original declaration namespaces, so a proof must choose either the shared modules or the instance-local copies to avoid duplicate declarations.
 
 The Fermat-cover and moving-conic construction is due to `fqlx`, with the collaborators, prior work, and AI assistance acknowledged in the accepted explanation and source comments. The target-parameterized assembly, additional trace characters and full-coefficient normal lemma were prepared with OpenAI Codex assistance for `benediamond`. Moving the code into the library does not itself earn a solve point or change any existing credit.
 

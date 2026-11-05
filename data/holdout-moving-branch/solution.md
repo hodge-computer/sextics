@@ -55,7 +55,7 @@ Irreducibility, coordinate nonvanishing, finite descent, legal denominator clear
 AD^2-D\sum_iN_iF_i+
  F\left(D\sum_i\partial_iN_i-\sum_iN_i\partial_iD\right)=F^2Q.
 \]
-[Solution](Solution.lean) binds this existential certificate to the immutable target. No expanded witness or denominator-degree bound is exported.
+[Solution](Solution.lean) binds this existential certificate to the protected target. No expanded witness or denominator-degree bound is exported.
 
 ## Attribution
 

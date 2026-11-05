@@ -1,6 +1,6 @@
 # A strict certificate from a binary-cubic Hessian construction
 
-The certificate below serves the exact immutable instance
+The certificate below serves the fixed instance
 
 \[
 \begin{aligned}
@@ -436,7 +436,8 @@ larger expansion in the six original coordinates.
 
 The displayed formulas specify all witness data: denominator degree 60,
 the polynomial \(D\), the six entries of \(N\), and \(Q=0\).
-For this data, the five fields of `HodgeComputer.Verify` require
+For this data, `HodgeComputer.Verify` checks that \(F\ne0\), that \(F\)
+and \(A\) are homogeneous of degree six, and that the witness satisfies
 \(D\ne0\), homogeneity of \(D\) of degree 60, homogeneity of every
 \(N_i\) of degree \(60+6q-5=61\),
 \(\operatorname{IsRelPrime}(F,D)\) over \(\mathbb C\), and the exact
@@ -464,7 +465,7 @@ In particular, the final theorem has the exact protected type
 
 ```lean
 theorem Submission.certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q :=
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q :=
   OneReflectionPhysical.certificate_from_second_identity
     OneReflectionPhysical.second_identity
 ```
@@ -481,7 +482,7 @@ polynomial witness.
   quotient coordinates \(p=Y_0Y_1\), \(s=Y_0^3-\varepsilon Y_1^3\) in
   the [existing discussion][hidden-reflections]; that comment discloses
   assistance from **Claude Opus 5.5**. The accompanying geometric
-  existence argument is recorded in the immutable [why.md](why.md).
+  existence argument is recorded in [why.md](why.md).
   This quotient and the earlier unsuccessful bounded searches motivated
   the search for an explicit construction.
 - The **repository authors**, including **Benjamin E. Diamond**, developed

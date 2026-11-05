@@ -108,7 +108,7 @@ The chain rule gives
 
 The denominator remains legal. The cubic substitution is injective on the coefficient ring, and the equation is monic in the unaffected coordinate \(Y_0\); divisibility by its pullback would imply divisibility before substitution. Physical irreducibility converts this nondivisibility into relative primality. [CubicLift.lean](CubicLift.lean) proves both transport and legality.
 
-Finally, homogeneous extraction gives a nonzero homogeneous denominator of some degree \(d\), six numerators of degree \(d+1\), and the full cleared identity required by `HodgeComputer.Verify`. A nonzero quotient is allowed. [Certificate.lean](Certificate.lean) assembles the proof, and [Solution.lean](Solution.lean) binds it to the protected target, including the coordinate permutation.
+Finally, homogeneous extraction gives a nonzero homogeneous denominator \(D\), six numerators of degree \(\deg(D)+1\), and the full cleared identity required by `HodgeComputer.Verify`. A nonzero quotient is allowed. [Certificate.lean](Certificate.lean) assembles the proof, and [Solution.lean](Solution.lean) binds it to the protected target, including the coordinate permutation.
 
 ## Scope and attribution
 

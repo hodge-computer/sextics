@@ -1,6 +1,6 @@
 # Elliptic companion algebra
 
-Target-independent residue and elliptic contraction machinery extracted from the accepted crossed-ternary construction of `1337isnot1337`. The original declaration namespaces and acceptance-backed instance files are preserved. See [the construction explanation](../../../../../data/crossed-ternary-asymmetric/solution.md) for mathematical attribution, collaborators, and disclosed AI assistance.
+Target-independent residue and elliptic contraction machinery extracted from the accepted crossed-ternary construction of `1337isnot1337`. The original declaration namespaces are retained; the shared modules and instance sources are maintained against the current verifier, with original attribution preserved. See [the construction explanation](../../../../../data/crossed-ternary-asymmetric/solution.md) for mathematical attribution, collaborators, and disclosed AI assistance.
 
 The entry point `Contraction` proves `CrossedElliptic.product_divergence` for arbitrary characteristic-zero fields, two groups of derivations, and supplied scalar primitives with the required independence. It does not construct those primitives or identify any application target.
 

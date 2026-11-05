@@ -1,6 +1,6 @@
 # A modular quartic, finite trace, and the reflection certificate
 
-This proposal constructs a certificate for the fixed instance **reflection-coupled-fano**. Its central ingredient is an explicit weighted quartic on the characteristic-five reduction of the reflection quotient, together with an invertible \(24\times24\) deformation matrix. An étale lifting argument supplies a polynomial family through the generic complex endpoint. Polynomial integration and finite trace then produce the rational vector field required by the certificate contract.
+This solution constructs a certificate for the fixed instance **reflection-coupled-fano**. Its central ingredient is an explicit weighted quartic on the characteristic-five reduction of the reflection quotient, together with an invertible \(24\times24\) deformation matrix. An étale lifting argument supplies a polynomial family through the generic complex endpoint. Polynomial integration and finite trace then produce the rational vector field required by the certificate contract.
 
 The construction proves existence. It does not export expanded denominator and numerator polynomials or a numerical denominator degree. Every occurrence of the coupling coefficient in characteristic zero is the exact number \(5/7\); the sextic, numerator, and pole parameter remain those of [instance.rec](instance.rec).
 
@@ -47,7 +47,7 @@ The [motivation](why.md) and [provenance](provenance.json) already explain why t
 
     Submission.certificate :
       HodgeComputer.HasCertificate
-        HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q
+        HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q
 
 The meaning of this statement is given by the repository's [formal contract](../../formal/README.md). It asks for a nonzero homogeneous denominator \(D\), six homogeneous numerators \(N_i\) of degree \(\deg D+1\), relative primality of \(F\) and \(D\), and a polynomial \(Q\) satisfying
 
@@ -473,7 +473,7 @@ Relative primality is checked separately. Treat \(H_c\) and \(F_c\) as monic pol
 
 The data in (17) need not yet be homogeneous. The shared [homogeneous certificate construction](../../formal/lean/HodgeComputer/Constructions/HoldoutCover/HomogeneousCertificate.lean) applies because \(F\) and \(A\) are homogeneous of degree six, \(F\) is prime, and the normal chart (2) is legal.
 
-This construction first chooses a denominator representative modulo \(F\) whose initial homogeneous component is legal. An exact numerator correction and multiplication by the normal derivative preserve the normalized identities. Finite homogeneous extraction then produces a nonzero homogeneous denominator \(\widetilde D\) of some degree \(d\), six homogeneous numerators \(\widetilde N_i\) of degree \(d+1\), and a polynomial \(\widetilde Q\), with
+This construction first chooses a denominator representative modulo \(F\) whose initial homogeneous component is legal. An exact numerator correction and multiplication by the normal derivative preserve the normalized identities. Finite homogeneous extraction then produces a nonzero homogeneous denominator \(\widetilde D\), six homogeneous numerators \(\widetilde N_i\) of degree \(\deg(\widetilde D)+1\), and a polynomial \(\widetilde Q\), with
 
 \[
 \gcd(F,\widetilde D)=1,\qquad
@@ -487,7 +487,7 @@ This construction first chooses a denominator representative modulo \(F\) whose 
 \qquad\text{(20)}
 \]
 
-Substituting (20) into the left side of (1) gives \(F^2\widetilde Q\). These are exactly the degree, nonvanishing, relative-primality, and identity conditions required by `HodgeComputer.Verify` at \(q=1\).
+Substituting (20) into the left side of (1) gives \(F^2\widetilde Q\). Together with nonvanishing and degree-six homogeneity of \(F\), and degree-six homogeneity of \(A\), these are the conditions required by `HodgeComputer.Verify` at \(n=5,d=6,q=1\).
 
 The theorem `physical_certificate_of_quartic_family` in [FamilyClosure.lean](FamilyClosure.lean) performs this assembly. The closed arithmetic family and the exact source binding then give the protected theorem in [Solution.lean](Solution.lean).
 

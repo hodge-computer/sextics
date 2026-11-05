@@ -6,6 +6,6 @@ The [crossed-ternary construction](#case/crossed-ternary-asymmetric) gives an al
 
 The elementary split Euler field does not settle this choice. For a three-variable block, its strict formula requires target degree three in that block, independently of \(q\); the chosen degrees are seven and five. Neither ternary has a coordinate reflection. Increasing the pole order is therefore a substantive part of this test, rather than multiplication of a known degree-six target by \(F\).
 
-For a denominator of degree \(d\), the six numerators have degree \(d+7\). A certificate must establish the full divisibility by \(F^3\), including lower-pole terms. Identifying only the leading Jacobian-ring component would not suffice. The normalized systems in [Chapter 5](#technical-information/computation) provide a concrete computational interface once a promising support is found.
+For a denominator \(D\), the six numerators have degree \(\deg(D)+7\). A certificate must establish the full divisibility by \(F^3\), including lower-pole terms. Identifying only the leading Jacobian-ring component would not suffice. The normalized systems in [Chapter 5](#technical-information/computation) provide a concrete computational interface once a promising support is found.
 
 The displayed \(3+3\) splitting is the only linear direct-sum decomposition, up to exchanging blocks; the problem cannot be reduced further to binary blocks by a linear coordinate change.

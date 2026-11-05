@@ -150,7 +150,7 @@ The shared finite-residue clearing theorem gives polynomial data \(D_0,N'_i,Q'\)
 D_0\sum_i\partial_iN'_i-\sum_iN'_i\partial_iD_0=FQ'.
 \]
 
-[DeformedCertificateClosure.lean](DeformedCertificateClosure.lean) applies this theorem, proves that the protected \(F,A\) are homogeneous of degree six, and invokes finite homogeneous extraction. The resulting \(D\) has some degree \(d\), is nonzero and relatively prime to \(F\), and all six \(N_i\) are homogeneous of degree \(d+1\). The full cleared identity is
+[DeformedCertificateClosure.lean](DeformedCertificateClosure.lean) applies this theorem, proves that the protected \(F,A\) are homogeneous of degree six, and invokes finite homogeneous extraction. The resulting \(D\) is homogeneous, nonzero and relatively prime to \(F\), and all six \(N_i\) are homogeneous of degree \(\deg(D)+1\). The full cleared identity is
 
 \[
 AD^2-D\sum_iN_iF_i+

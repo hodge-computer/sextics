@@ -64,12 +64,12 @@ The physical substitution \(X=t(x,a,1)\), \(Y=t\lambda(r,z,1)\) gives \(F=t^6(p+
 
 ## Legal homogeneous certificate
 
-Finally, [CertificateClearing.lean](CertificateClearing.lean) tracks common homogeneous fractions simultaneously in the ambient field and on \(F=0\). Their denominators remain nonzero in the hypersurface function field; exact irreducibility of \(F\) makes the resulting denominator relatively prime to \(F\). Clearing gives a homogeneous denominator \(D\) of degree \(d\), six numerators of degree \(d+7\), and the full strict identity
+Finally, [CertificateClearing.lean](CertificateClearing.lean) tracks common homogeneous fractions simultaneously in the ambient field and on \(F=0\). Their denominators remain nonzero in the hypersurface function field; exact irreducibility of \(F\) makes the resulting denominator relatively prime to \(F\). Clearing gives a homogeneous denominator \(D\), six numerators of degree \(\deg(D)+7\), and the full strict identity
 \[
 AD^2-2D\sum_iN_i\partial_iF+
 F\left(D\sum_i\partial_iN_i-\sum_iN_i\partial_iD\right)=0.
 \]
-The quotient polynomial is \(Q=0\). [Solution.lean](Solution.lean) identifies the protected polynomials exactly. This is an existential certificate construction; it does not export an expanded denominator or six expanded witnesses, and makes no claim of repository acceptance.
+The quotient polynomial is \(Q=0\). [Solution.lean](Solution.lean) identifies the protected polynomials exactly. This is an existential certificate construction; it does not export an expanded denominator or six expanded witnesses.
 
 ## Attribution
 

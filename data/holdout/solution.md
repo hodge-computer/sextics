@@ -1,6 +1,6 @@
 # The holdout certificate from a Fermat cover and a moving conic
 
-This submission proves the exact existential `HodgeComputer.HasCertificate` statement for the protected `holdout` instance, with \((F,q,A)\) unchanged. The proof is a finite algebraic construction based on an exact conic, polynomial integration, and trace between function fields.
+This solution proves the existential `HodgeComputer.HasCertificate` statement for the fixed `holdout` instance. The proof is a finite algebraic construction based on an exact conic, polynomial integration, and trace between function fields.
 
 ## 1. The fixed statement and the form of the answer
 
@@ -40,7 +40,7 @@ AD^2-DN(F)+FB_D(N)=F^2Q.
 \qquad\text{(3)}
 \]
 
-A final finite extraction makes \(D\) homogeneous of some degree \(d\), and each \(N_i\) homogeneous of degree \(d+1\), while preserving (2), \(D\ne0\), and relative primality of \(F,D\). The quotient \(Q\) is allowed to be nonzero.
+A final finite extraction makes \(D\) homogeneous and each \(N_i\) homogeneous of degree \(\deg(D)+1\), while preserving (2), \(D\ne0\), and relative primality of \(F,D\). The quotient \(Q\) is allowed to be nonzero.
 
 The construction introduces a Fermat-curve cover on which a reflection becomes available. Its quotient has a moving polynomial conic. An exact nonsingular conic seed supplies a finite algebraic family through the generic point; along this family the residue equation becomes integration of a polynomial in one variable. Finite trace descends the solution, and a deck character isolates the exact source \(A\). All these operations construct a certificate for (1); they do not replace the protected input by another instance.
 
@@ -498,7 +498,7 @@ The final source [Solution.lean](Solution.lean) contains the closed wrapper:
 
 ```lean
 theorem Submission.certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.q
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q
 ```
 
 Its proof selects the checked complex seed, applies `conic_target_residue_solution` to the positive `coverQuotientSource`, and invokes `holdout_hasCertificate_of_quotient_divergence`. The verifier supplies the protected definitions, which are matched to (1). Classical choice selects roots and finite field factors only after their existence and properties have been proved. `Submission.certificate` is a closed theorem with no hypotheses or unproved placeholders. Compilation and kernel replay establish its proof using only the permitted axioms `propext`, `Classical.choice`, and `Quot.sound`. The detailed build and submission-check results accompany the proposal.
