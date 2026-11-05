@@ -31,8 +31,8 @@ unsafe def main (args : List String) : IO UInt32 := do
       let some (.thmInfo result) := env.find? `HodgeSubmission.checked
         | throw <| IO.userError "Missing final theorem"
       let expected := mkAppN (mkConst `HodgeComputer.HasCertificate) #[
-        mkConst `HodgeSubmission.n, mkConst `HodgeSubmission.F, mkConst `HodgeSubmission.A,
-        mkConst `HodgeSubmission.d, mkConst `HodgeSubmission.q]
+        mkConst `HodgeSubmission.n, mkConst `HodgeSubmission.F,
+        mkConst `HodgeSubmission.q, mkConst `HodgeSubmission.A]
       unless result.levelParams.isEmpty && result.type == expected do
         throw <| IO.userError "Final theorem does not have the protected existential statement"
       if witness then
