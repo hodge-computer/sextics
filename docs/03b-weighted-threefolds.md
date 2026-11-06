@@ -4,7 +4,7 @@
 
 A smooth even sextic with one additional reflection in an \(X\)-coordinate and one in a \(Y\)-coordinate has its entire invariant fourth cohomology supported on a divisor. The individual reflection quotients are Fano and supply the sectors where either reflection acts positively. The remaining simultaneous negative sector comes from a family of weighted Calabi–Yau threefolds. This chapter proves the required threefold theorem and the passage from its fibers to the fourfold.
 
-The threefold argument adapts [Voisin, Proposition 2.1 and §§2.2–2.19](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf): embed the fixed threefold in varying Fano fourfolds, represent their rational Hodge classes by surfaces, and restrict those surfaces to curves. Two multiplication maps make the resulting Abel–Jacobi image nonzero. Monodromy, a supported projector, and specialization then give the full statement on every smooth member. We work over \(\mathbb C\) with rational cohomology; coefficient descent is addressed at the end.
+The proof constructs genus-four curves whose sums with their involution translates are complete intersections of two quadrics. Their normal sequence computes the Abel–Jacobi differential, and a finite exact spanning calculation supplies a surjective curve correspondence. Openness and a supported projector then extend the result to every smooth member. This retains the curve-correspondence strategy of [Voisin, Proposition 2.1](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf), with an explicit contact construction supplying the curves. We work over \(\mathbb C\) with rational cohomology; coefficient descent is addressed at the end.
 
 ## 3B.1 The weighted threefold theorem
 
@@ -40,266 +40,317 @@ H^2(T)=\mathbb Qh,\qquad H^4(T)=\mathbb Qh^2.
 
 Consequently \(P^-\) acts only on \(H^3(T)^-\). The weighted residue and Lefschetz statements used here and below are in [Dolgachev, §§3.2–3.3 and 4.2–4.3](https://sites.lsa.umich.edu/idolga/wp-content/uploads/sites/1334/2024/08/weighted82.pdf).
 
-## 3B.2 A containing Fano fourfold
+## 3B.2 Genus-four norm contacts
 
-Put \(W_5=\mathbb P(1,1,1,1,1,2)\), with weight-one coordinates \(z_0,\ldots,z_4\) and weight-two coordinate \(u\). Let \(Y=(G=0)\subset W_5\) be smooth of weighted degree six, and let \(H\) be an invariant weight-one linear form with smooth section \(T=Y\cap(H=0)\). Extend the involution on \(T\) by a positive normal coordinate. The nonzero \(u^3\) coefficient excludes the ambient singular vertex, and
-
-\[
--K_Y=\mathcal O_Y(1).
-\]
-
-Thus \(Y\) is a smooth Fano fourfold. The Fano support theorem of [Chapter 3, §3.2](#technical-information/geometric-support) gives \(H^4(Y)=N^1H^4(Y)\), and its degree-four Hodge-class corollary makes every rational \((2,2)\) class algebraic. In that corollary, a splitting of the surjection from \(\bigoplus_iH^2(D_i)(-1)\) lifts a rational Hodge class to rational \((1,1)\) classes on smooth projective resolutions of the supporting divisors; the Lefschetz \((1,1)\) theorem and Gysin pushforward supply the algebraic cycles. This recovers the uniruled-fourfold theorem of Conte–Murre recalled in [Murre, §§2.3–2.5](https://seminariomatematico.polito.it/rendiconti/71-34/473.pdf), and supplies the algebraicity needed below from the existing Fano support construction.
-
-Let
+Write \(S=\mathbb C[a,b,c,d,u]\), with weights \((1,1,1,1,2)\), and let \(\sigma\) negate \(c,d\). Superscripts indicate its eigenspaces. Consider the polynomial map
 
 \[
-R(G)=\mathbb C[z_0,\ldots,z_4,u]/(G_{z_0},\ldots,G_{z_4},G_u).
+\begin{aligned}
+\Phi:(S_2^+)^2\times(S_4^+)^2\times S_3^+\times S_3^-
+&\longrightarrow S_6^+,\\
+(f_1,f_2,g_1,g_2,A,B)&\longmapsto
+f_1g_1+f_2g_2+A^2-B^2.
+\end{aligned}
 \]
 
-The sum of the weights is seven. Weighted residues therefore identify
+Its source has dimension \(2\cdot7+2\cdot26+12+12=90\), and its target has dimension 70. Put \(h=A+B\), \(k=A-B=\sigma h\). A presentation \(G=\Phi(f_1,f_2,g_1,g_2,A,B)\) gives curves
 
 \[
-H^{3,1}(Y)=R_5,\qquad
-H^{2,2}(Y)_{\mathrm{prim}}=R_{11},\qquad
-H^{1,3}(Y)=R_{17}.
+C=(f_1=f_2=h=0),\qquad
+\sigma C=(f_1=f_2=k=0)
 \]
 
-There is no determinant twist in these eigenspaces, because the involution negates two coordinates. Infinitesimal variation follows by differentiating the residue:
+on \(T=(G=0)\). We call this a **norm contact**, since \(hk=h\sigma h\). On the open where these are complete intersections,
 
 \[
-\nabla_\eta\operatorname{Res}\frac{Q\Omega}{G^3}
-\equiv-3\operatorname{Res}\frac{Q\eta\Omega}{G^4}
-\pmod{F^2H^4(Y)}.
+C+\sigma C=T\cap(f_1=f_2=0)\sim4h_{\mathrm{hyp}}^2.
+\qquad\text{(3B.2.1)}
 \]
 
-Here \(\deg Q=11\), \(\deg\eta=6\), and \(\deg(Q\eta)=17\).
+Assume one quadric has a nonzero \(u\)-coefficient. Eliminating \(u\) identifies \(C\) with an ordinary complete intersection of degrees \((2,3)\) in \(\mathbb P^3\). If \(C\) is smooth, adjunction gives
 
-The deformations keeping the section fixed are governed by \(H^1(T_Y(-1))\). The weighted Euler and normal sequences, restricted to the smooth \(Y\), are
+\[
+K_C=\mathcal O_C(1),\qquad \deg\mathcal O_C(1)=6,\qquad g(C)=4.
+\]
+
+### Presentation changes and actual curve motion
+
+For a fixed embedded curve \(C\) and a fixed equation \(G\), the presentation fiber has dimension 19 on this open. There are four parameters for changing the basis \(f_1,f_2\), eight for replacing
+
+\[
+h\longmapsto h+f_1\ell_1+f_2\ell_2,
+\qquad \ell_i\in S_1,
+\]
+
+and seven for the syzygy
+
+\[
+(g_1,g_2)\longmapsto(g_1+f_2q,g_2-f_1q),\qquad q\in S_2^+.
+\]
+
+There is no further continuous scaling of \(h\): modulo \((f_1,f_2)\), the identity \(G=h\sigma h\ne0\) forces that scaling to have square one. Conversely, the minimal complete-intersection generators show that these are all presentation changes. Thus, where \(d\Phi\) is surjective, its 20-dimensional fixed-\(G\) fiber supplies a genuine one-dimensional family of curves.
+
+### An intrinsic chart
+
+The same incidence has a smaller description useful for explicit finite-cover constructions. On the chart where the quadrics' \(u\) and \(ab\) coefficients are independent, choose their basis so that
+
+\[
+f_1=u+Q_1,\qquad
+f_2=Q_2=ab+\lambda a^2+\mu b^2+q(c,d),
+\]
+
+where \(Q_1\) has no \(ab\) term. Each quadric has five free coefficients. Reduce the cubics \(A,B\) modulo \(Q_2\), using monomials not divisible by \(ab\). There are eight such monomials of each parity, giving \(5+5+8+8=26\) parameters.
+
+This reduction is defined on a precise open chart. Put \(z=\lambda\mu\). The determinant for cubic reduction is \(1-z\); the determinant for invariant sextic reduction is
+
+\[
+\Delta=(1-z)(1-3z)(1-2z)^3.
+\qquad\text{(3B.2.2)}
+\]
+
+To check this, project multiplication by \(Q_2\) onto monomials divisible by \(ab\). Ordering by the \(c,d\)-degree gives triangular blocks with tridiagonal determinants \(D_m=D_{m-1}-zD_{m-2}\), \(D_0=D_1=1\). In degree six the blocks are \(D_5=(1-z)(1-3z)\), three copies of \(D_3=1-2z\), and five copies of \(D_1\). The degree-three blocks give \(1-z\).
+
+On \(\Delta\ne0\), the condition for a fixed invariant weighted sextic is
+
+\[
+\operatorname{rem}_{Q_2}\!\left(G(a,b,c,d,-Q_1)-A^2+B^2\right)=0.
+\qquad\text{(3B.2.3)}
+\]
+
+The invariant sextic quotient has dimension \(44-19=25\), so this is a system of 25 equations in 26 parameters. For a cyclic equation \(G=u^3+H\), its argument is \(H-Q_1^3-A^2+B^2\).
+
+Suppose a curve component of this incidence has universal surface dominating the ratio plane \(r=b/a, s=d/c\). On \(a=1, c=t, d=st\), a moving point is specified by (3B.2.3) and
+
+\[
+Q_2(1,r,t,st)=0,\qquad
+(A+B)(1,r,t,st)=0,\qquad u=-Q_1(1,r,t,st).
+\]
+
+There are 27 equations in the 26 parameters and \(t\), over \(\mathbb C(r,s)\). Dominance, rather than this equation count alone, makes the resulting component generically finite; in characteristic zero it is generically étale. This supplies a finite algebraic moving-point field for the differential and trace constructions of [Chapter 2, §2.8](#technical-information/explicit-constructions). The closed forms needed there come from the next section.
+
+## 3B.3 Normal obstructions and residue forms
+
+### The normal sequence and the correspondence pairing
+
+For a smooth norm-contact curve, the normal sequence is
+
+\[
+0\longrightarrow N_{C/T}\longrightarrow
+E:=\mathcal O_C(2)^2\oplus\mathcal O_C(3)
+\xrightarrow{(g_1,g_2,k)}\mathcal O_C(6)
+\longrightarrow0.
+\qquad\text{(3B.3.1)}
+\]
+
+Riemann–Roch gives \(h^0(E)=h^0(\mathcal O_C(6))=33\) and \(H^1(E)=0\). Complete-intersection restriction maps are surjective. Hence
+
+\[
+H^1(N_{C/T})\simeq
+S_6/(f_1,f_2,g_1,g_2,A,B)_6,
+\qquad h^0(N_{C/T})=h^1(N_{C/T}).
+\qquad\text{(3B.3.2)}
+\]
+
+The invariant part of the displayed ideal is exactly the image of \(d\Phi\). If \(d\Phi\) has rank 70 and the negative part of this ideal has codimension one, then \(h^0N=h^1N=1\). The actual family from §3B.2 is therefore a smooth local Hilbert curve.
+
+Choose the residue volume form \(\Omega_T=\operatorname{Res}_T(\Omega_{\mathbb P}/G)\). It identifies \(T_T\simeq\Omega_T^2\) and \(\det N_{C/T}\simeq K_C\). For a deformation \(\kappa\in H^1(T,T_T)\), let \(\rho_C(\kappa)\in H^1(C,N_{C/T})\) be the obstruction to carrying \(C\) along that deformation. Let \(\Lambda\) be the smooth projective completion of a parameter curve and \(\Gamma\subset\Lambda\times T\) its closed universal correspondence. For a tangent vector \(D\) at a smooth member, with normal velocity \(v_D\), the correspondence pullback satisfies
+
+\[
+\bigl(\Gamma^*(\kappa\mathbin{\lrcorner}\Omega_T)\bigr)(D)
+=\operatorname{Tr}_C\bigl(v_D\wedge\rho_C(\kappa)\bigr),
+\qquad\text{(3B.3.3)}
+\]
+
+with compatible wedge conventions. Indeed, pullback by the universal curve followed by integration over its fibers evaluates the left side by contracting the \((2,1)\)-form with the normal velocity. Restricting a Dolbeault representative of \(\kappa\) to \(C\) gives its normal obstruction; contraction with \(\Omega_T\) turns the resulting integrand into the Serre pairing on the right. This is the infinitesimal Abel–Jacobi pairing, expressed entirely on the smooth threefold and its curve; see [Westhoff, pp. 375–377 and §3](https://msp.org/pjm/1998/183-2/pjm-v183-n2-p08-s.pdf) for the contraction description and its reduction to residues.
+
+The Euler and normal sequences identify \(H^1(T,T_T)\) with the degree-six Jacobian ring
+
+\[
+R_6(G)=\bigl(S/(G_a,G_b,G_c,G_d,G_u)\bigr)_6.
+\]
+
+Under (3B.3.2), \(\rho_C\) is the quotient map on polynomial deformations. The map is surjective, so its Serre transpose is injective on \(H^0(N_{C/T})\). In particular, nonzero curve motion has nonzero Abel–Jacobi derivative. Relation (3B.2.1) places this derivative in the negative sector.
+
+### A canonical residue formula
+
+There is an algebraic normalization of (3B.3.3). Suppose \(g_1,g_2\) have no common zero on \(C\), equivalently the sequence
+
+\[
+\mathbf f=(f_1,f_2,h,g_1,g_2)
+\]
+
+is regular in \(S\). Its weighted degrees are \((2,2,3,4,4)\), so its Artinian quotient has length 96 and socle degree 9. Let \(\tau_{\mathbf f}\) be its Grothendieck residue, normalized by
+
+\[
+\tau_{\mathbf f}\!\left(
+\det\frac{\partial(f_1,f_2,h,g_1,g_2)}
+{\partial(a,b,c,d,u)}\right)=96.
+\]
+
+For a fixed negative sextic \(R\) and a family of contacts on the fixed threefold \(T\), the corresponding one-form on the parameter curve is, up to one overall sign convention,
+
+\[
+\boxed{\qquad \eta_R=\tau_{\mathbf f}(R\,d_\Lambda h).\qquad}
+\qquad\text{(3B.3.4)}
+\]
+
+Here \(d_\Lambda\) differentiates coefficients while holding the ambient coordinates fixed. The degree is \(6+3=9\), as required.
+
+For completeness, on the cover \(g_1\ne0, g_2\ne0\), lifts of \(R|_C\) through (3B.3.1) are \((R/g_1,0,0)\) and \((0,R/g_2,0)\). Their difference represents the obstruction. If \(v=(v_1,v_2,v_3)\), then \(g_1v_1+g_2v_2+kv_3=0\), and its Serre pairing is represented by
+
+\[
+\frac{Rv_3}{g_1g_2}\,\theta_C,
+\qquad
+\theta_C=\operatorname{Res}_C\frac{\Omega_{\mathbb P}}{f_1f_2h}.
+\]
+
+The adjunction form \(\theta_C\) has twist \(K_C\otimes\mathcal O_C(-1)\), canceled by the degree-one coefficient. Its Serre trace is exactly the residue above; the actual velocity has \(v_3=-D(h)\). This proves (3B.3.4), including a constant normalization rather than an unspecified function of the parameter.
+
+If \(f_1=\lambda u+q\), eliminating \(u\) contributes \(1/\lambda\) to the four-variable residue. One differentiates \(h\) first and then substitutes \(u=-q/\lambda\); differentiating the already substituted cubic gives a different expression. At nonreduced intersections the Artinian residue remains valid without division by a pointwise Jacobian.
+
+On \(\Lambda\), these forms extend holomorphically because they equal \(\Gamma^*H^{2,1}(T)^-\). They are therefore closed. Once the pullback is injective, the polarization argument in §3B.6 makes \(\Gamma_*\Gamma^*\) invertible on the negative sector. Thus these canonical forms suffice to recover every source after applying that inverse. The identity \(\Gamma_*\eta_R=R\) does not follow without this inversion; the moving-point trace formula still requires its exact differential correction.
+
+## 3B.4 A finite spanning criterion and an exact witness
+
+### The criterion
+
+Weighted residues give
+
+\[
+H^{2,1}(T)^-\simeq R_6(G)^-,\qquad \dim R_6(G)^-=48.
+\]
+
+For example, at the weighted Fermat equation the ring is
+\(\mathbb C[a,b,c,d,u]/(a^5,b^5,c^5,d^5,u^2)\); its negative degree-six monomials have dimensions 32 without \(u\) and 16 with \(u\). The dimensions are constant throughout the smooth invariant family.
+
+Suppose a nonconstant algebraic family of curves on a fixed \(T\) has smooth general member, \(h^0N=h^1N=1\), and a nonzero formal obstruction functional
+
+\[
+\ell(t)\in\bigl(R_6(G)^-\bigr)^\vee((t)).
+\]
+
+By (3B.3.3), this functional differs from the actual correspondence differential by a common nonzero meromorphic scalar. If its coefficient rows span the 48-dimensional dual, then
+
+\[
+\Gamma^*:H^{2,1}(T)^-\hookrightarrow H^{1,0}(\Lambda).
+\qquad\text{(3B.4.1)}
+\]
+
+Indeed, a constant class in the kernel is killed by every coefficient row. Conjugation and Poincaré duality then give
+
+\[
+\Gamma_*:H^1(\Lambda)(-1)\twoheadrightarrow H^3(T)^-.
+\qquad\text{(3B.4.2)}
+\]
+
+In particular \(g(\Lambda)\ge48\). It is the genus of the parameter curve, not the genus four of its fibers, that appears in this inequality. A nodal member is allowed at \(t=0\); the pairing is applied on the smooth punctured branch.
+
+### An integral norm presentation
+
+The following witness makes the criterion effective without a genericity assumption on the chosen coefficients. Set
 
 \[
 \begin{gathered}
-0\longrightarrow\mathcal O_Y(-1)
-\longrightarrow\mathcal O_Y^5\oplus\mathcal O_Y(1)
-\longrightarrow T_{W_5}|_Y(-1)\longrightarrow0,\\
-0\longrightarrow T_Y(-1)
-\longrightarrow T_{W_5}|_Y(-1)
-\longrightarrow\mathcal O_Y(5)\longrightarrow0.
+\kappa=50,\qquad Q=61c^2+110cd+85d^2,\\
+B=50c^3+75c^2d+40cd^2+22d^3,\\
+f_1=u+Q,\qquad f_2=ab,\qquad g_1=u^2-uQ+Q^2,\\
+g_2=\kappa a^4+2\kappa b^4-2a^2b^2
+       +\kappa cd(a^2+2c^2),\qquad A=a^3+b^3,
 \end{gathered}
 \]
 
-Intermediate line-bundle cohomology vanishes, giving
+and **define** \(G=\Phi(f_1,f_2,g_1,g_2,A,B)\). Modulo five this is
 
 \[
-H^1(T_Y(-1))\simeq R_5.
+G\equiv u^3+a^6+b^6+c^6+d^6.
 \]
 
-The degree-five Jacobian ideal includes \(G_u\) multiplied by every weight-one linear form. These terms account for the weighted coordinate changes in \(u\) fixing the section. An invariant fixed-section deformation is represented by \(H\theta\), with \(\theta\in R_5^+\).
-
-## 3B.3 An exact multiplication witness
-
-At the Fermat fourfold
+Its derivatives have no common nonzero zero, proving smoothness in characteristic zero by properness of the singular locus. Modulo 23, the binary forms become
 
 \[
-G_0=z_0^6+z_1^6+z_2^6+z_3^6+z_4^6+u^3,
+Q=15c^2+18cd+16d^2,\qquad
+B=4c^3+6c^2d+17cd^2+22d^3.
 \]
 
-use the involution \(\sigma=(z_0\ z_1)(z_2\ z_3)\), fixing \(z_4,u\). Its weight-one eigenspaces have dimensions three and two, as required. The Jacobian ring is
+Here \(B\) is squarefree and coprime to \(Q\); the nonzero discriminant and resultant give these properties in characteristic zero as well. The curve \(C_0=(f_1,f_2,A+B)\) is the union of the plane cubics
 
 \[
-R=\mathbb Q[z_0,\ldots,z_4,u]/(z_0^5,\ldots,z_4^5,u^2),
-\qquad\deg z_i=1,\quad\deg u=2.
+E_a:\ a=0,\ u=-Q,\ b^3+B=0,
+\qquad
+E_b:\ b=0,\ u=-Q,\ a^3+B=0.
 \]
 
-Its socle has weighted degree 22. Define
+They are smooth and meet transversely at the three roots of \(B\). At those nodes \(g_1=3Q^2\ne0\).
 
-\[
-\begin{gathered}
-L=z_0+z_1+z_2+z_3+z_4,\qquad
-D=z_0-z_1+z_2-z_3,\\
-H=z_0+z_1+z_2+z_3,\qquad
-Q=D(L^2+u)^5=DL^{10}+5uDL^8.
-\end{gathered}
-\]
-
-Thus \(H\) is invariant and \(Q\in R_{11}^-\). Multiplication gives the following exact ranks.
-
-| Map | Source dimension | Target dimension | Rank | Maximal minor modulo 1009 |
-| --- | ---: | ---: | ---: | ---: |
-| \(Q:R_5^+\to R_{16}^-\) | 82 | 120 | 82 | 45 |
-| \(HQ:R_5^+\to R_{17}^-\) | 82 | 74 | 74 | 286 |
-
-The exact verifier `scripts/verify-weighted-voisin.py`, in the repository's [reproduction scripts](https://github.com/hodge-computer/sextics/tree/main/scripts), reconstructs the matrices and their nonzero minors. Its monomial basis consists of \(z^eu^b\) with \(0\le e_i\le4\), \(b\in\{0,1\}\), and the prescribed weighted degree. For each two-element \(\sigma\)-orbit, use its sum in the plus space and its difference in the minus space, choosing the lexicographically smaller monomial first. Fixed monomials occur only in the plus basis. Expanding multiplication by the displayed integral polynomial gives integral matrices, so the nonzero determinants modulo 1009 prove the ranks over \(\mathbb Q\). Run
+The exact verifier `scripts/verify-norm-contact-span.py`, in the repository’s [reproduction scripts](https://github.com/hodge-computer/sextics/tree/main/scripts), reconstructs the coefficient matrices, kernel directions and Taylor coefficients from this integral presentation; it reads no witness data. It uses lexicographically ordered weighted monomials and exact arithmetic in \(\mathbb F_{23}\) and \(\mathbb F_{23}[v]/(v^2-15)\). Run it with Python and NumPy:
 
 ```sh
-python3 scripts/verify-weighted-voisin.py
+python3 scripts/verify-norm-contact-span.py
 ```
 
-The section \(H=0\) is smooth. A singular point would satisfy
+The necessary finite results are as follows.
+
+| Calculation | Result |
+| --- | --- |
+| \(d\Phi\) at the nodal presentation | rank 69; a 69-minor is 10 modulo 23 |
+| 69 coordinate directions, two essential kernel directions, and 19 presentation directions | rank 90; determinant 13 modulo 23 |
+| Quadratic obstruction on the two-dimensional slice | \(q(s,t)=10s^2+12st+13t^2\), discriminant 15 |
+| First-order smoothing forms at the three nodes | \(K_1=9c^2, K_2=15c^2+13cd+18d^2\) |
+| Common-root test | \(\gcd(B,q(K_2,-K_1))=1\) |
+| Negative degree-six ideal at the nodal presentation | rank 58 |
+| First 48 obstruction coefficient rows on one branch | rank 48; minor \(22+2v\), norm 10 |
+
+The two central ranks require characteristic-zero upper bounds, since a modular rank alone supplies only a lower bound. For \(I=(f_1,f_2,g_1,g_2,A,B)\), eliminating \(u\) and setting \(a=0\) gives the quotient
 
 \[
-u=z_4=0,\qquad z_i^5=\lambda\ (0\le i\le3),\qquad
-z_0+z_1+z_2+z_3=0.
+\mathbb C[b,c,d]/(b^3,B,Q^2,c^3d).
 \]
 
-If \(\lambda=0\), every coordinate vanishes. Otherwise this is a vanishing sum of four fifth roots of unity. For a primitive fifth root \(\zeta\), a relation \(\sum_{j=0}^4n_j\zeta^j=0\) with nonnegative integral \(n_j\) forces all \(n_j\) equal, by the minimal polynomial \(1+t+\cdots+t^4\). Its length must be divisible by five, which excludes four terms.
+Its positive degree-six part contains
+\(b^2\bigl(\mathbb C[c,d]_4/\langle cB,dB,Q^2,c^3d\rangle\bigr)\), which is nonzero: there are five monomials and at most four relations. Thus \(\operatorname{rank}d\Phi\le69\), and the displayed minor proves equality.
 
-## 3B.4 Hodge loci and the Abel–Jacobi derivative
-
-### From a polynomial witness to a rational Hodge class
-
-Rational polynomial coefficients in \(Q\) do not make its associated Betti class rational. The passage to a rational Hodge class uses the real Hodge bundle, as in [Voisin, §§2.4–2.11](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf).
-
-The two rank conditions are nonempty open conditions in \((Y,H,Q)\). The real form of \(H^{2,2}(Y)^-\) is Zariski dense in its complexification, so choose a real class satisfying them. In the directions keeping \(T\) fixed, the differential of its Hodge condition is
+For the negative rank, before the last relation the quotient is \(U\otimes V\), with
 
 \[
-\theta\longmapsto HQ\theta\in R_{17}^-=H^{1,3}(Y)^-.
+U=\mathbb C[a,b]/(ab,a^3+b^3),\qquad
+V=\mathbb C[c,d]/(B,Q^2).
 \]
 
-Its surjectivity makes the real Hodge bundle map to the locally constant real cohomology space a submersion. Rational classes are dense in that real space. After a small deformation of \(Y\) keeping \(T\) fixed, a Betti-rational anti-invariant Hodge class therefore satisfies both rank conditions. Its local Hodge locus has complex dimension \(82-74=8\).
+Its negative degree-six piece is \(aV_5\oplus bV_5\oplus a^3V_3\), of dimension \(1+1+3=5\). The remaining generator \(cd(a^2+2c^2)\), multiplied by \(ac,ad,bc,bd\), imposes at most three relations: the last two lie in the same one-dimensional \(bV_5\). Hence the negative quotient has dimension at least two; the 58-minor again gives equality.
 
-This construction also applies to nearby \(T\). Before imposing smoothness, containing equations form an affine bundle over section equations. The rank conditions are open; more precisely, surjectivity in the fixed-section directions makes the rational Hodge locus project submersively onto nearby sections by the implicit function theorem. The construction consequently holds on a nonempty analytic open in the full invariant weighted-threefold family, containing very general members of that family.
+### Lifting the branch and its span
 
-Algebraicity on \(Y\) represents a multiple of the rational Hodge class by a difference of surfaces. Their classes can be made anti-invariant by averaging. Relative cycle parameter spaces dominate the local Hodge locus: their countably many proper images cover it, so one contains an open subset, and a multisection supplies a generically finite base change. Restricting the cycles to the fixed \(T\) gives an algebraic family of homologically trivial curves, since \(H^4(T)^-=0\). Weighted weak Lefschetz gives \(H^3(Y)=0\); naturality of Abel–Jacobi then makes the value of the restriction independent of the representative on \(Y\).
+Construct the characteristic-zero kernel vectors by fixing the same free coordinates in Gaussian elimination and solving with the 69-minor. The exact rank bound makes the remaining row dependent, so these are genuine tangent vectors whose reductions are the computed ones; the modular vectors are not treated as literal integral tangents. Choose the 69 coordinate directions of the invertible minor and the two essential kernel directions. Their span is a 71-dimensional affine slice transverse to the 19 presentation directions. Solving 69 equations by the algebraic implicit function theorem leaves one equation in two variables with nondegenerate quadratic term \(q\). The slice is therefore an ordinary nodal curve, with two actual algebraic branches. The common-root test says that both branches smooth all three nodes of \(C_0\). Properness and openness of smoothness exclude new singularities elsewhere. Each general fiber is consequently a smooth connected genus-four curve on the same \(T\).
 
-### The intrinsic derivative
+Choose the slope \(\alpha=19+8v\) modulo 23. It satisfies \(q(1,\alpha)=0\) and \(\partial_tq(1,\alpha)=v\ne0\). Over characteristic zero, choose the simple root of the lifted quadratic with this reduction. The 69-minor and this derivative are units at the chosen place. Recursive solution of the fixed equation \(\Phi(z(t))=G\) therefore uses only unit denominators and reduces to the verifier's series. The equation \(G\) is held fixed throughout this recurrence.
 
-Write \(\lambda\in H^2(\Omega_Y^2)^-\) for the Hodge class and \(\theta\in H^1(T_Y(-1))^+\) for a fixed-section deformation. Their contraction lies in \(H^3(\Omega_Y^1(-1))^-\). On the Hodge-locus tangent space, it is killed by multiplication by \(H\), hence lies in the image of the boundary map
+Along the punctured branch \(d\Phi\) has rank 70. There is actual curve motion because the slice is transverse to presentation changes. Consequently the normal cokernel is nonzero, its positive part is zero, and its negative ideal has rank at most 59. The verifier finds a first-order increase from 58 to 59, so this rank is exactly 59 over the branch function field.
+
+To obtain \(\ell(t)\), solve the 58 independent ideal equations with their unit constant minor. An additional column gives a relation between the two resulting left-kernel vectors; it vanishes to order exactly one. Division by \(t\) is legitimate because the central rank is exactly 58 in characteristic zero. The rank-59 bound then makes the resulting functional annihilate every ideal column at every order. It also annihilates the fixed Jacobian ideal, since differentiating \(G=f_1g_1+f_2g_2+hk\) puts every derivative of \(G\) in \(I\).
+
+The verifier checks the required fixed-equation coefficients through order 49, all 72 ideal columns and all 12 negative Jacobian directions through order 47, and the nonzero 48-minor. Unit denominators make the same minor nonzero in characteristic zero. This proves the full span in (3B.4.1), rather than merely a nonzero Abel–Jacobi image.
+
+It also checks the normalization in (3B.3.4). After eliminating \(u\), the four forms \((f_2,h,g_1,g_2)\) have degrees \((2,3,4,4)\), with quotient dimensions one in degree nine and zero in degree ten. They are a regular sequence. At the initial branch tangent,
 
 \[
-\delta:H^2(\Omega_Y^1|_T)\longrightarrow H^3(\Omega_Y^1(-1))
+\eta_R/dt=17v\,\ell_0(R)\pmod{23}.
 \]
 
-from restriction. This map is injective because \(H^2(\Omega_Y^1)=0\). The restriction and conormal sequences give the normal-function derivative
+This nonzero scalar makes the common normalization a formal unit. Thus the first 48 normalized coefficient rows have the same rank; no additional high-order residue calculation is needed.
 
-\[
-d\nu(\theta)=\psi\,\delta^{-1}(\lambda\mathbin{\lrcorner}\theta),
-\qquad
-\psi:H^2(\Omega_Y^1|_T)\longrightarrow H^2(\Omega_T^1).
-\]
+## 3B.5 Openness in the full weighted family
 
-The map \(\psi\) is injective: its kernel comes from \(H^2(\mathcal O_T(-1))\), which equals \(H^1(\mathcal O_T(1))^*=0\) by Serre duality and Kodaira vanishing. This intrinsic calculation is the one underlying [Voisin, Lemma 2.12 and Corollary 2.14](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf); it uses the smooth pair and its restriction sequences.
+The preceding calculation proves surjectivity on one fixed threefold. To obtain an open family of such threefolds, use actual smooth points of its contact parameter curve. Their obstruction lines span the 48-dimensional dual: otherwise a constant nonzero class would annihilate all of them and hence every formal coefficient. Choose 48 points with independent lines, where \(d\Phi\) has rank 70 and \(h^0N=h^1N=1\).
 
-Serre duality, \(K_Y=\mathcal O_Y(-1)\), and the Jacobian residue pairing identify
+Let \(\mathcal S\) be the smooth open of the full 70-dimensional space \(S_6^+\), and let \(\mathcal P\) be the open of norm presentations satisfying these rank and smoothness conditions. The map \(\mathcal P\to\mathcal S\) is smooth. The obstruction line is algebraic in the dual of the rank-48 Jacobian bundle. In the 48-fold fiber product of \(\mathcal P\) over \(\mathcal S\), independence of these lines is a Zariski-open condition. This open contains the selected tuple. Smooth morphisms are open, so its image contains a nonempty Zariski open \(\mathcal U\subset\mathcal S\).
 
-\[
-H^3(\Omega_Y^1(-1))\simeq H^1(T_Y)^*
-\simeq R_6^*\simeq R_{16}.
-\]
-
-Under these identifications, contraction with \(\lambda\) is multiplication by \(Q\). Indeed, pair it with \(\eta\in H^1(T_Y)\simeq R_6\). Cup/contraction symmetry identifies the pairing, up to a fixed nonzero sign, with the pairing of \(\lambda\mathbin{\lrcorner}\eta\) and \(\theta\). Ordinary weighted infinitesimal variation identifies the first factor with \(Q\eta\in R_{17}\), and the Serre–Macaulay pairing is the residue trace of \(Q\eta\theta\in R_{22}\). Therefore the injectivity of \(Q:R_5^+\to R_{16}^-\) makes \(d\nu\) injective on the eight-dimensional Hodge-locus tangent space.
-
-There is also a polynomial form of the calculation. Make an invariant weight-one coordinate change so that \(H=z_4\). For \(\theta\in\ker(HQ)\), write
-
-\[
-HQ\theta=\sum_{i=0}^4 A_iG_{z_i}+BG_u,
-\qquad \deg A_i=12,\quad\deg B=13.
-\]
-
-Then \(d\nu(\theta)\), up to a nonzero normalization, is \([A_4|_T]\in R_{12}(G|_T)^-=H^{1,2}(T)^-\). If this class vanishes, lift its Jacobian relation to write
-
-\[
-A_4=HP+\sum_{i=0}^3B_iG_{z_i}+CG_u.
-\]
-
-Substitution shows that \(H(Q\theta-PG_{z_4})\) lies in \((G_{z_0},\ldots,G_{z_3},G_u)\). Quasismoothness of \(T\) makes \((H,G_{z_0},\ldots,G_{z_3},G_u)\) a homogeneous system of parameters in the polynomial ring. It is a regular sequence in any order. Thus \(H\) is a nonzerodivisor modulo the other five generators, giving \(Q\theta=0\) in \(R_{16}\), and injectivity again gives \(\theta=0\).
-
-The resulting Abel–Jacobi map is nonconstant. The minus intermediate Jacobian is an abelian variety, because its Hodge structure has level one. Taking a suitable parameter curve and compactifying its cycle family supplies a nonzero algebraic curve correspondence into \(H^3(T)^-\). The next step proves that these images span the whole minus part for a very general member.
-
-## 3B.5 Monodromy and the weighted vertex
-
-Let \(W=\mathbb P(1,1,1,1,2)\), and let \(\mathcal B\) be the smooth locus of the full invariant degree-six linear system. The monodromy representation on \(V=H^3(T_b)^-\) is irreducible over \(\mathbb Q\).
-
-### The discriminant components
-
-The fixed loci in \(W\) are
-
-\[
-\Sigma_x=(y_0=y_1=0),\qquad
-\Sigma_y=(x_0=x_1=0),
-\]
-
-two copies of \(\mathbb P(1,1,2)\) meeting at the weighted vertex \(v\). Away from \(v\), the ambient tangent action at either fixed surface has two positive and two negative eigenvalues.
-
-The second Veronese of the invariant coordinate ring is generated by
-
-\[
-x_0^2,x_0x_1,x_1^2,y_0^2,y_0y_1,y_1^2,u.
-\]
-
-It realizes the quotient as
-
-\[
-W/\sigma=\{a_0a_2=a_1^2,\ b_0b_2=b_1^2\}\subset\mathbb P^6,
-\]
-
-and invariant sextics are its complete linear system of cubic sections. Ambient cubics separate second jets at one smooth point and first jets at two distinct points. In an affine chart, constants, linear forms and quadratics are represented by cubics after multiplying by a nonvanishing coordinate. At two coordinate points, the monomials giving their first jets have disjoint coefficients.
-
-It follows that the free-node discriminant is irreducible: the incidence of a singular section and a marked smooth quotient point is a projective bundle over the irreducible smooth quotient locus. A general singularity there is a node; upstairs it is a pair of nodes exchanged by \(\sigma\). Two marked free orbits impose independent conditions, so the locus with two pairs has codimension at least two.
-
-A general pencil encounters only four kinds of codimension-one degeneration:
-
-1. A pair of ordinary nodes in the free locus, exchanged by \(\sigma\).
-2. An ordinary node on \(\Sigma_x\setminus\{v\}\).
-3. An ordinary node on \(\Sigma_y\setminus\{v\}\).
-4. A member with zero \(u^3\) coefficient and nondegenerate quadratic term on the index-two cover at \(v\).
-
-For a marked point on either fixed surface, the value and two tangent derivatives impose three conditions against a two-dimensional choice of point. The invariant Hessian has independent tangent and normal quadratic blocks; cubic sections on the quotient allow both blocks to be nondegenerate. A degenerate block or an additional singular point imposes another condition. At the vertex, use \(u=1\) on the cover \(\mathbb C^4\to\mathbb C^4/\{\pm1\}\). The equation is
-
-\[
-c+q_2(x,y)+q_4(x,y)+q_6(x,y)=0.
-\]
-
-The quadratic is an arbitrary sum of a quadratic in \(x\) and a quadratic in \(y\), so it is generically nondegenerate on the coefficient hyperplane \(c=0\). Degeneracy or further singularities has additional codimension. These strata exhaust the possible locations of singularities, so a general pencil avoids the higher-codimension exceptions.
-
-### The local actions
-
-At a fixed ordinary node, the vanishing sphere is \(S^3\). The involution has two negative coordinates and degree \(+1\) on this sphere, so its vanishing class is invariant. The local monodromy acts trivially on \(V\).
-
-At the vertex, an equivariant holomorphic Morse lemma gives the smoothing \(\{q_2=t\}/\{\pm1\}\). Its Milnor fiber retracts onto \(\mathbb{RP}^3\) and has one-dimensional reduced rational cohomology, in degree three. The lift of \(\sigma\) has degree \(+1\) on \(S^3\), so this local cohomology is invariant. The variation map factors through \(H^3(F_{\mathrm{Mil}},\partial F_{\mathrm{Mil}};\mathbb Q)\), which is also invariant by Poincaré–Lefschetz duality. Its equivariance therefore excludes an anti-invariant transformation in global cohomology.
-
-The geometry of the resolved vertex gives the same check. In
-
-\[
-\widetilde W=\mathbb P_{\mathbb P^3}(\mathcal O\oplus\mathcal O(2))\longrightarrow W,
-\]
-
-the exceptional section \(E\simeq\mathbb P^3\) has normal bundle \(\mathcal O(-2)\). The pencil equation is locally \(c+rq_2+r^2q_4+r^3q_6=0\). At \(c=0\), its fiber is \(E\cup T'_0\), meeting along the smooth quadric \((q_2=0)\subset\mathbb P^3\). The determinant-positive involution preserves both rulings of the quadric. All cohomology of this quadric and of \(E\) is invariant.
-
-### Vanishing cycles span the minus part
-
-The base \(B\) of a general pencil is a smooth complete intersection of degrees \((6,6)\), avoiding \(v\). Its Koszul resolution and intermediate line-bundle vanishing on \(W\) give \(H^1(B,\mathcal O_B)=0\), hence \(H^1(B,\mathbb Q)=0\). The smooth projective total pencil is
-
-\[
-M=\operatorname{Bl}_B(\widetilde W),\qquad
-H^3(M)=H^3(\widetilde W)\oplus H^1(B)(-1)=0.
-\]
-
-[Deligne's global invariant cycle theorem, Theorem 4.1.1(ii)](https://www.numdam.org/item/PMIHES_1971__40__5_0.pdf), therefore says that pencil monodromy has no fixed vectors in \(H^3(T_b)\). The theorem applies to this smooth projective total space even though the vertex fiber is not an ordinary Lefschetz fiber.
-
-For an exchanged node pair, write \(w=\delta-\sigma\delta\). The two vanishing cycles are disjoint, and their combined Picard–Lefschetz transformation on \(V\) is
-
-\[
-v\longmapsto v+\frac{\varepsilon}{2}\langle v,w\rangle w,
-\qquad\varepsilon\in\{1,-1\}.
-\]
-
-Every other local transformation is trivial on \(V\). The common fixed space is consequently the orthogonal complement of the span of these \(w\)'s. Nondegeneracy of the alternating pairing and the invariant cycle theorem show that they span \(V\).
-
-Irreducibility of the free-node discriminant makes its vanishing differences one full-family monodromy orbit up to sign. A nonzero stable rational subspace pairs nontrivially with some \(w\); the displayed transvection puts \(w\) in that subspace, and its orbit then spans \(V\). This proves irreducibility. For comparison, the weighted Fermat threefold has 103 degree-six Jacobian monomials, seven fixed by the double swap. Thus \(h^{2,1}(T)^-=(103-7)/2=48\), and \(\dim V=96\).
-
-At very general fibers, the span of images of curve correspondences is monodromy-invariant: spread the cycles in the countably many relative parameter spaces and take their monodromy translates. Section 3B.4 makes it nonzero. Irreducibility therefore gives a surjective algebraic correspondence
-
-\[
-\Gamma_*:H^1(C)(-1)\twoheadrightarrow H^3(T)^-
-\]
-
-for a very general \(T\), with \(C\) a smooth projective curve, allowing a finite disjoint union.
+For every member of \(\mathcal U\), each selected presentation lies on an actual local Hilbert curve: the fixed-equation fiber has dimension 20, its presentation fibers have dimension 19, and \(h^0N=1\). Complete and normalize these parameter curves. Their combined pullback on \(H^{2,1}(T)^-\) is injective by the 48 independent tangent lines. They may belong to different components; take their finite disjoint union. Conjugation and duality give a surjective curve correspondence onto \(H^3(T)^-\) for every member of \(\mathcal U\).
 
 ## 3B.6 Supported projectors and specialization
 
-To apply the supported-projector specialization lemma of [Chapter 3, §3.6](#technical-information/geometric-support), we first produce the required cycle on the square of a divisor. The anti-projector acts on the single primitive degree \(H^3(T)^-\), and the preceding curve correspondence surjects onto that degree at very general fibers. Its transpose supplies the polarization adjoint.
+To apply the supported-projector specialization lemma of [Chapter 3, §3.6](#technical-information/geometric-support), we first produce the required cycle on the square of a divisor. The anti-projector acts on the single primitive degree \(H^3(T)^-\), and the preceding curve correspondences surject onto that degree on a nonempty Zariski open of the parameter space. Its transpose supplies the polarization adjoint.
 
-In this case, replace \(\Gamma\) by \(P^-\circ\Gamma\), choose a \(\sigma\)-stable divisor \(D\) containing its image, and set \(S=\Gamma\circ{}^t\Gamma\). The polarization on \(H^1(C)(-1)\) and the primitive polarization on \(H^3(T)\) make \({}^t\Gamma\) the adjoint up to a fixed nonzero sign. Surjectivity makes \(S|_{H^3(T)^-}\) invertible. On all other cohomology it is zero. If its rational characteristic polynomial is \(t^m+a_{m-1}t^{m-1}+\cdots+a_0\), then \(a_0\ne0\) and
+In this case, replace \(\Gamma\) by \(P^-\circ\Gamma\), choose a \(\sigma\)-stable divisor \(D\) containing its image, and set \(S=\Gamma\circ{}^t\Gamma\). The polarization on \(H^1(\Lambda)(-1)\) and the primitive polarization on \(H^3(T)\) make \({}^t\Gamma\) the adjoint up to a fixed nonzero sign. Surjectivity makes \(S|_{H^3(T)^-}\) invertible. On all other cohomology it is zero. If its rational characteristic polynomial is \(t^m+a_{m-1}t^{m-1}+\cdots+a_0\), then \(a_0\ne0\) and
 
 \[
 [P^-]=-\frac{[S^m]+a_{m-1}[S^{m-1}]+\cdots+a_1[S]}{a_0}
@@ -308,9 +359,9 @@ In this case, replace \(\Gamma\) by \(P^-\circ\Gamma\), choose a \(\sigma\)-stab
 
 Every term has a cycle representative supported on \(D\times D\). Equality of all cohomological actions implies equality of classes by Künneth and Poincaré duality. Thus the inverse is a polynomial in an existing algebraic correspondence; no algebraic inverse conjecture is needed.
 
-The family of smooth invariant weighted sextics is connected. The shared specialization lemma now applies: the projector is algebraic throughout the family, and it has a supported representative at very general fibers. Proper relative flag Hilbert schemes give such a representative at every smooth member. Fixed Hilbert polynomials keep the limiting support a divisor, and the flag conditions keep the limiting cycle on its square. Acting on cohomology proves the weighted threefold theorem.
+The family of smooth invariant weighted sextics is connected. The shared specialization lemma now applies: the projector is algebraic throughout the family, and it has a supported representative on a nonempty Zariski open, hence at very general fibers. Proper relative flag Hilbert schemes give such a representative at every smooth member. Fixed Hilbert polynomials keep the limiting support a divisor, and the flag conditions keep the limiting cycle on its square. Acting on cohomology proves the weighted threefold theorem.
 
-This step includes the cyclic covers \(u^3=h(x_0,x_1,y_0,y_1)\). They lie in a special subfamily; the proof does not assume that full-family monodromy remains irreducible after restricting to that subfamily.
+This step includes the cyclic covers \(u^3=h(x_0,x_1,y_0,y_1)\). They lie in a special subfamily, so this inclusion uses the all-smooth specialization step rather than an openness assertion within the cyclic subfamily.
 
 ## 3B.7 The two-reflection support theorem
 

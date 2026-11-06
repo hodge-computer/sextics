@@ -2,7 +2,7 @@
 
 [Previous: binary sextics and torsion contacts](#technical-information/binary-blocks) · [Contents](#technical-information/introduction) · [Next: split sextics and K3 correspondences](#technical-information/split-and-k3)
 
-A certificate constructs a primitive on the complement of a divisor. Geometry establishes the same vanishing through Gysin maps and correspondences. A finite quotient serves the image of its averaging projector; the geometry of the quotient determines whether that image has support. This chapter develops the shared tools: quotient transfer, covering rational curves, surface fibrations with \(p_g=q=0\), and supported projectors in families. Its Fano theorem supplies both reflection sectors and the algebraic Hodge classes used in [Chapter 3B](#technical-information/weighted-threefolds); the relative-projector lemma below supports the remaining two-reflection sector. Chapter 4 applies the surface criterion to paired-sign sextics. Work in characteristic zero; cohomology is rational, or algebraic de Rham after scalar extension.
+A certificate constructs a primitive on the complement of a divisor. Geometry establishes the same vanishing through Gysin maps and correspondences. A finite quotient serves the image of its averaging projector; the geometry of the quotient determines whether that image has support. This chapter develops the shared tools: quotient transfer, covering rational curves, surface fibrations with \(p_g=q=0\), and supported projectors in families. Its Fano theorem supplies the reflection-positive sectors of [Chapter 3B](#technical-information/weighted-threefolds); the relative-projector lemma below turns the weighted-threefold correspondence into support for the remaining sector. Chapter 4 applies the surface criterion to paired-sign sextics. Work in characteristic zero; cohomology is rational, or algebraic de Rham after scalar extension.
 
 ## 3.1 Divisor support and its source
 
@@ -133,8 +133,6 @@ Indeed, the Gysin description in §3.1 gives a surjection of rational Hodge stru
 \]
 
 from resolutions of finitely many supporting divisors. Polarizable rational Hodge structures are semisimple: the polarization-orthogonal complement of the kernel gives a rational Hodge splitting. A rational \((2,2)\) class therefore lifts to rational \((1,1)\) classes on the \(\widetilde D_i\). Lefschetz's \((1,1)\) theorem makes these divisor classes; their Gysin images are algebraic codimension-two classes on \(W\). The Fano case follows from covering rational curves above. This also recovers the degree-four statement of the Conte–Murre theorem for uniruled fourfolds, recalled in [Murre, §§2.3–2.5](https://seminariomatematico.polito.it/rendiconti/71-34/473.pdf).
-
-This implication is useful when varying a containing Fano fourfold: its rational Hodge classes can be represented by surfaces and then restricted to a fixed hypersurface. Chapter 3B uses exactly this consequence of the existing support theorem.
 
 ### Surface fibers with algebraic second cohomology
 

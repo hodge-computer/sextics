@@ -30,6 +30,10 @@ jobs:
         run: |
           python3 scripts/test-maintenance.py
           python3 scripts/test-publication.py
+      - name: Check the book's finite algebraic witnesses
+        run: |
+          python3 scripts/verify-norm-contact-span.py
+          python3 scripts/verify-extension-dimensions.py
       - name: Identify affected Lean modules and solves
         id: scope
         env:

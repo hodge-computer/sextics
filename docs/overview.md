@@ -23,4 +23,4 @@ Divisibility is interpreted in \(\mathbb C[X_0,X_1,X_2,Y_0,Y_1,Y_2]_{(F)}\).
 
 This algebraic formulation makes divisor support accessible through rational differential forms and exact polynomial identities.
 
-The book proves support on several complete coefficient families. In particular, [Chapter 3B](#technical-information/weighted-threefolds) combines Fano reflection quotients with a weighted version of Voisin's threefold argument to cover every smooth even sextic with one additional reflection in each parity block. This includes the full \(4+2\) split family with binary block \((X_2,Y_2)\), as well as block-symmetric examples. The general even-sextic case remains open.
+The book proves support on several complete coefficient families. In particular, [Chapter 3B](#technical-information/weighted-threefolds) combines Fano reflection quotients with explicit norm-contact curves on weighted threefolds to cover every smooth even sextic with one additional reflection in each parity block. This includes the full \(4+2\) split family with binary block \((X_2,Y_2)\), as well as block-symmetric examples. The general even-sextic case remains open.

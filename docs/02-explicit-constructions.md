@@ -419,6 +419,157 @@ This determinant determines the source on the quotient. For a sextic monomial \(
 
 The second expression uses \(Y_1^6=\lambda(p^3+iv^3)\). Thus one character can contain both polynomial and rational fiber densities. The polynomial integration principle of §2.7 applies only after checking its source hypothesis. The deck/exchange criterion of Chapter 3, §3.1, can establish support without such a polynomial presentation. This example explains why the image of an integration formula and the invariant cohomology of its quotient are different objects.
 
+### Suspending a weighted core primitive
+
+There is a direct algebraic bridge from a cyclic-cover primitive to a certificate on a separated sextic. Let
+
+\[
+F=H(x_0,x_1,x_2,x_3)+B(s,t),
+\]
+
+where \(H,B\) are nonzero homogeneous sextics over a characteristic-zero field, and let \(A\) be a homogeneous core sextic. Suppose a rational core field \(U=M/G\), homogeneous of degree seven, satisfies
+
+\[
+\operatorname{div}U-\frac{5}{3H}U(H)=A.
+\qquad\text{(2.8.1)}
+\]
+
+Here \(G\ne0\) is a homogeneous core polynomial and each component of \(M\) has degree \(\deg G+7\). Equivalently,
+
+\[
+3H\bigl(G\operatorname{div}M-M(G)\bigr)-5G M(H)=3HG^2A.
+\]
+
+Put
+
+\[
+K=M(H),\qquad C=3HGA+2K,\qquad D=18HBG,
+\qquad N=(-12BM,sC,tC).
+\]
+
+Then
+
+\[
+N(F)=AD,\qquad D\operatorname{div}N-N(D)=-72BGC\,F.
+\qquad\text{(2.8.2)}
+\]
+
+Indeed, binary Euler gives \(sB_s+tB_t=6B\), so \(N(F)=-12BK+6BC=AD\). Product-rule expansion of the divergence numerator gives
+
+\[
+-216HB^2\bigl(G\operatorname{div}M-M(G)\bigr)
+ +216B^2GK-72HBGC.
+\]
+
+Substituting (2.8.1) yields (2.8.2). The cleared pole-one equation is therefore \(F^2(-72BGC)\), as allowed in Chapter 1. Its denominator has degree \(\deg G+12\), and the numerator components have degree one more. Every irreducible factor of a core polynomial remains prime after adjoining \(s,t\); it cannot divide \(H+B\), since a nonzero binary coefficient of \(B\) is a scalar. The corresponding argument for binary factors shows \(\gcd(D,F)=1\). Thus any supplied \(U\) gives a legal certificate. Involution averaging is available when \(F,A\) have the required characters.
+
+The coefficient \(5/3\) has a differential meaning. On an affine core chart let \(h=H(x,1,y,z)\), \(a=A(x,1,y,z)\), and \(w^3=-h\). For a rational three-component field \(W\),
+
+\[
+d\left(\frac{\iota_W(dx\wedge dy\wedge dz)}{w^5}\right)
+=\frac{\operatorname{div}W-5W(h)/(3h)}{w^5}
+ \,dx\wedge dy\wedge dz.
+\]
+
+If this equals \(a\,dx\wedge dy\wedge dz/w^5\), then
+\(U=x_1^7(W_x,0,W_y,W_z)(x_0/x_1,x_2/x_1,x_3/x_1)\)
+satisfies (2.8.1). A common homogeneous denominator supplies \(M,G\). The suspension theorem is conditional on this exact primitive; it does not assert that an arbitrary core source is exact.
+
+### Moving-point currents on a cubic cover
+
+Let \(K=k(r,s)\) in characteristic zero, let
+
+\[
+P(t)=\sum_{i=0}^3p_it^{2i},\qquad p_i\in K,
+\qquad w^3=-P(t),
+\]
+
+and let \(L/K\) be a finite separable extension containing nonzero \(\alpha,\beta\) with \(\beta^3=-P(\alpha)\). All identities take place in the function field, with every displayed denominator nonzero. Derivations in \(r,s\) extend uniquely to \(L\). Take a **closed** algebraic one-form
+
+\[
+\eta=U\,dr+V\,ds\in\Omega^1_{L/k},
+\qquad \partial_rV=\partial_sU,
+\]
+
+and define the logarithmic current
+
+\[
+\Theta=\frac{\beta^2}{w^2}
+ \bigl(d\log(t-\alpha)-d\log(t+\alpha)\bigr).
+\]
+
+The differentials of the moving algebraic coordinates are included. Set
+
+\[
+\begin{aligned}
+Z&=U\alpha_s-V\alpha_r,&
+R_i&=U\partial_sp_i-V\partial_rp_i,\\
+T&=\frac{P_t(\alpha)Z+\sum_iR_i\alpha^{2i}}{P(\alpha)},&
+m_i&=\alpha(p_iT-R_i)-2i\,p_iZ.
+\end{aligned}
+\]
+
+Then the literal source formula is
+
+\[
+\boxed{
+d(\eta\wedge\Theta)
+=\frac{4\beta^2}{3w^5}
+\left[(m_1+\alpha^2m_2+\alpha^4m_3)
+ +(m_2+\alpha^2m_3)t^2+m_3t^4\right]
+ dt\wedge dr\wedge ds.}
+\qquad\text{(2.8.3)}
+\]
+
+Here is a proof including the sign. In the order \((t,r,s)\), write
+\(\eta\wedge\Theta=\iota_q(dt\wedge dr\wedge ds)/w^2\), where
+
+\[
+q=\frac{2\beta^2}{t^2-\alpha^2}(-tZ,\alpha V,-\alpha U).
+\]
+
+Closedness cancels the \(V_r-U_s\) term. Differentiating \(\beta^3=-P(\alpha)\) then gives
+\(\operatorname{div}q=-4\beta^2\alpha T/[3(t^2-\alpha^2)]\).
+Since \(w^{-2}/P=-w^{-5}\), the derivative of this current is
+\(-[P\operatorname{div}q-2q(P)/3]/w^5\) times the volume form. Its numerator is
+
+\[
+\frac{4\beta^2}{3(t^2-\alpha^2)}
+\left[\alpha P(t)T-\alpha\sum_iR_it^{2i}-tP_t(t)Z\right]
+=\frac{4\beta^2}{3(t^2-\alpha^2)}\sum_i m_it^{2i}.
+\]
+
+The sum vanishes at \(t=\pm\alpha\) by the definition of \(T\). Division by \(t^2-\alpha^2\) gives the three coefficients in (2.8.3). Thus the derivative has no remaining moving-section denominator.
+
+Apply the normalized trace of §2.7 to the current, equivalently to its flux \(q\). If \(n=[L:K]\), its source triple is exactly
+
+\[
+\frac{4}{3n}\operatorname{Tr}_{L/K}
+\left(\beta^2(m_1+\alpha^2m_2+\alpha^4m_3),
+\ \beta^2(m_2+\alpha^2m_3),\ \beta^2m_3\right).
+\qquad\text{(2.8.4)}
+\]
+
+The same statement holds for a finite étale algebra, with \(n\) its rank. Algebraic coordinates in \(L\) need not be constant under the base derivations; uniqueness of their extensions is precisely what makes trace commute with differentiation. If the triple (2.8.4) equals \((c_0,c_1,c_2)\), put \(\bar q=\operatorname{Tr}(q)/n\). The rational field \(W=-P\bar q\) satisfies
+
+\[
+\operatorname{div}W-\frac{5}{3P}W(P)=c_0+c_1t^2+c_2t^4.
+\]
+
+This supplies the exact input for the suspension bridge after the required coordinate and density transport. Finite sums with constant coefficients preserve closedness; a more general multiplier must satisfy \(d(f\eta)=0\). A pointwise span of the three source coefficients over \(K\) alone does not supply this compatibility.
+
+Closed forms pulled back from a positive-genus parameter curve give a useful source of \(\eta\); they need not be exact or logarithmic. The [norm-contact residue construction](#technical-information/weighted-threefolds/3b3-normal-obstructions-and-residue-forms) supplies canonically normalized examples, and [§2A.1](#technical-information/binary-blocks) gives an elementary elliptic specialization.
+
+The distinction from cohomological support remains essential. A cylinder correspondence may cover a Hodge subspace without its composition with pullback being the identity. Moreover the affine current must be compared across projective charts before identifying its source with that compact correspondence. For example, under \(t'=1/t\), \(\alpha'=1/\alpha\), \(w'=w/t^2\), \(\beta'=\beta/\alpha^2\),
+
+\[
+\Theta'-\Theta
+=\frac{2\beta^2(t^2+\alpha^2)}{\alpha^4w^2}
+ (\alpha\,dt-t\,d\alpha).
+\]
+
+The moving-section poles cancel in this difference, but parameter poles and chart boundaries still require their overlap corrections. Formula (2.8.4), when verified as a rational-function identity, directly gives an exact source. A cohomological spanning assertion by itself gives no such formula.
+
 ## 2.9 Moving cubic maps and Jacobian residue transport
 
 A genus-one curve can have a useful map to its Jacobian even when the curve has no chosen rational origin. For a family of cubics, this map varies with the coefficients. Transporting a differentiated residue requires both its invariant differential and the correction caused by that variation.

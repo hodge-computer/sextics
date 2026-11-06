@@ -346,7 +346,7 @@ The first two quotients are not uniruled: uniruledness of \(Z\) would descend th
 
 ### A dimension obstruction to the direct Fano-extension density test
 
-The weighted construction of [Chapter 3B](#technical-information/weighted-threefolds) does not supply the same Hodge-class density argument for a general even sextic fourfold. A one-coordinate ordinary extension is a fivefold, whose middle cohomology has odd weight and supplies no middle \(p,p\) classes. Consider instead the direct two-coordinate extension
+Another possible source of cycles is a containing Fano variety: vary it while keeping the section fixed, find rational Hodge classes on it, and restrict their algebraic representatives. This is the strategy of [Voisin's threefold argument](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf). Its direct ordinary extension to a sextic fourfold has a dimension obstruction. A one-coordinate extension is a fivefold, whose middle cohomology has odd weight and supplies no middle \(p,p\) classes. Consider instead the two-coordinate extension
 
 \[
 X=Y\cap\{u=v=0\},\qquad Y=\{G=0\}\subset\mathbb P^7,
@@ -383,6 +383,6 @@ For reproducibility, if \(a+b=8\) are the positive and negative coordinate count
 \binom{j+b-1}{b-1}\binom{6-j+a-1}{a-1}.
 \]
 
-The last column counts degree-ten monomials with each exponent at most four and polynomial character \((-1)^b\), rather than invariably taking polynomial character \(+1\). This is the determinant twist above; complex conjugation identifies the \((4,2)\) and \((2,4)\) dimensions. The equivariant Koszul formula makes these counts constant on the smooth invariant locus. The same calculation gives \(h^{5,1}(Y)^\sigma=155\) and 170, respectively. The command `python3 scripts/verify-weighted-voisin.py` also reconstructs these counts by exact monomial enumeration.
+The last column counts degree-ten monomials with each exponent at most four and polynomial character \((-1)^b\), rather than invariably taking polynomial character \(+1\). This is the determinant twist above; complex conjugation identifies the \((4,2)\) and \((2,4)\) dimensions. The equivariant Koszul formula makes these counts constant on the smooth invariant locus. The same calculation gives \(h^{5,1}(Y)^\sigma=155\) and 170, respectively. The command `python3 scripts/verify-extension-dimensions.py` reconstructs these counts by exact monomial enumeration.
 
 Consequently this fixed-section sixfold construction cannot provide the full invariant Hodge-bundle submersion used to obtain dense rational middle Hodge classes in the Voisin argument. The dimension bound concerns that density map: it gives no obstruction to divisor support from independently supplied cycles, smaller subvariations or different ambient geometry.

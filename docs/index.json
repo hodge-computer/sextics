@@ -28,7 +28,7 @@
       "number": "2",
       "title": "2. Algebraic constructions and residue transport",
       "shortTitle": "Algebraic constructions",
-      "description": "Cofactor transport, contact geometry, finite covers, and variation of rational primitives.",
+      "description": "Cofactor transport, cyclic suspension, closed currents, and variation of rational primitives.",
       "source": "docs/02-explicit-constructions.md",
       "content": "docs/explicit-constructions.html"
     },
@@ -64,7 +64,7 @@
       "number": "3b",
       "title": "3B. Weighted threefolds and two-reflection sextics",
       "shortTitle": "Weighted threefolds",
-      "description": "Fano extensions, Abel–Jacobi variation, supported projectors, and all-target two-reflection support.",
+      "description": "Norm-contact curves, Abel–Jacobi residues, finite-jet spanning, and two-reflection support.",
       "source": "docs/03b-weighted-threefolds.md",
       "content": "docs/weighted-threefolds.html"
     },
