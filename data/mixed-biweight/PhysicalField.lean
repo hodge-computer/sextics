@@ -144,7 +144,7 @@ theorem certificate_of_normalized
     (legal : IsRelPrime sextic D)
     (normal : HodgeTestbed.directional sextic N=source*D)
     (divergence : HodgeTestbed.divergenceNumerator D N=sextic*Q) :
-    HodgeComputer.HasCertificate sextic source 6 1 :=
+    HodgeComputer.HasCertificate sextic 1 source :=
   hasCertificate_of_normalized sextic source D N Q sextic_homogeneous source_homogeneous
     sextic_irreducible.prime legal normal divergence 0 normal_legal
 

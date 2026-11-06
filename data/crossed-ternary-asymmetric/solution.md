@@ -19,7 +19,7 @@ $$
 The second displayed summand is exactly the instance's second ternary polynomial, with its variables ordered to match the first. No coefficient, variable, or numerator is changed. The theorem [Submission.certificate](Solution.lean) proves the verifier-generated statement
 
 ```lean
-HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q
+HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A
 ```
 
 The proof is an existence construction using finite algebraic extensions, rational functions, and classical choice. It does not export an expanded polynomial witness or a claimed small denominator degree. For the nonzero sextic \(F\) and homogeneous degree-six target \(A\), it supplies a nonzero homogeneous denominator \(D\), six homogeneous numerators \(N_i\) of degree \(\deg(D)+1\), relative primality of \(F,D\), and a polynomial \(Q\) satisfying

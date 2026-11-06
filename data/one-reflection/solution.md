@@ -465,7 +465,7 @@ In particular, the final theorem has the exact protected type
 
 ```lean
 theorem Submission.certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q :=
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A :=
   OneReflectionPhysical.certificate_from_second_identity
     OneReflectionPhysical.second_identity
 ```

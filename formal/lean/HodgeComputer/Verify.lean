@@ -91,8 +91,17 @@ structure Verify {n : ℕ} (F A : AmbientPoly n) (d q : ℕ) (D : AmbientPoly n)
   denominator_legal : IsRelPrime F D
   identity : defect F A D q N = F^(q+1) * Q
 
-def HasCertificate {n : ℕ} (F A : AmbientPoly n) (d q : ℕ) : Prop :=
-  ∃ D N Q, Verify F A d q D N Q
+/-- Existence of a certificate for `(F, q, A)`. The ambient dimension comes
+from the polynomial ring, and the hypersurface degree comes from `F`. -/
+def HasCertificate {n : ℕ} (F : AmbientPoly n) (q : ℕ) (A : AmbientPoly n) : Prop :=
+  ∃ D N Q, Verify F A F.totalDegree q D N Q
+
+/-- A verified witness determines the hypersurface degree and supplies a certificate. -/
+theorem Verify.hasCertificate {n : ℕ} {F A D Q : AmbientPoly n} {d q : ℕ}
+    {N : Fin (n + 1) → AmbientPoly n} (h : Verify F A d q D N Q) :
+    HasCertificate F q A := by
+  refine ⟨D, N, Q, ?_⟩
+  simpa only [h.hypersurface_homogeneous.totalDegree h.hypersurface_ne_zero] using h
 
 /-- Normalization is a sufficient way of supplying the general cleared identity. -/
 theorem normalized_identity {n : ℕ} {F A D Q : AmbientPoly n} {q : ℕ}

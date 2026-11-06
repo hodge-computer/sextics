@@ -5,8 +5,7 @@ noncomputable section
 namespace Submission
 
 /-- The complete certificate for the exact protected open case. -/
-theorem certificate : HodgeComputer.HasCertificate
-    HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
+theorem certificate : HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := by
   rw [← target_F, ← target_A]
   exact QuadricContactSextic.certificate
 

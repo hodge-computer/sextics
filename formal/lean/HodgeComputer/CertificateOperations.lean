@@ -70,16 +70,17 @@ theorem Verify.add {n : ℕ} {F A B D E Q R : AmbientPoly n} {d q : ℕ}
     rw [defect_add, h.identity, k.identity]
     ring
 
-theorem HasCertificate.add {n : ℕ} {F A B : AmbientPoly n} {d q : ℕ}
-    (h : HasCertificate F A d q) (k : HasCertificate F B d q) :
-    HasCertificate F (A+B) d q := by
+theorem HasCertificate.add {n : ℕ} {F A B : AmbientPoly n} {q : ℕ}
+    (h : HasCertificate F q A) (k : HasCertificate F q B) :
+    HasCertificate F q (A+B) := by
   obtain ⟨D, N, Q, h⟩ := h
   obtain ⟨E, M, R, k⟩ := k
   exact ⟨D*E, (fun i => E*N i+D*M i), E^2*Q+D^2*R, Verify.add h k⟩
 
 /-- The zero source has a certificate with constant denominator. -/
-theorem HasCertificate.zero {n : ℕ} (F : AmbientPoly n) (d q : ℕ)
-    (hF : F ≠ 0) (hd : F.IsHomogeneous d) : HasCertificate F 0 d q := by
+theorem HasCertificate.zero {n : ℕ} (F : AmbientPoly n) {d : ℕ} (q : ℕ)
+    (hF : F ≠ 0) (hd : F.IsHomogeneous d) : HasCertificate F q 0 := by
+  rw [HasCertificate, hd.totalDegree hF]
   refine ⟨1, (fun _ => 0), 0, ?_⟩
   exact {
     hypersurface_ne_zero := hF

@@ -10,8 +10,8 @@ open scoped BigOperators
 
 /-- The closed sextic existence theorem: the denominator, all six numerators,
 homogeneity, strict differential equations, and denominator legality are proved. -/
-theorem certificate : HodgeComputer.HasCertificate
-    QuadricContactDenominator.targetF QuadricContactComplex.targetA 6 1 := by
+theorem certificate : HodgeComputer.HasCertificate QuadricContactDenominator.targetF 1 QuadricContactComplex.targetA := by
+  rw [HodgeComputer.HasCertificate, targetF_homogeneous.totalDegree targetF_ne_zero]
   let D := QuadricContact.GenericCubicCertificate.D
   let N := QuadricContact.GenericCubicCertificate.N
   have hsrc : (∑ i, N i * pderiv i QuadricContactTarget.cubic) = D * (X 1 * X 2) := by

@@ -39,7 +39,7 @@ theorem physical_certificate_of_residue
     (w : Fin 5 → HoldoutFunctionField)
     (equation : physicalSourceFor A +
       residueDivergence physicalTangent physicalNormal w = 0) :
-    HodgeComputer.HasCertificate holdoutSextic A 6 1 := by
+    HodgeComputer.HasCertificate holdoutSextic 1 A := by
   have hi : (Complex.I : ℂ)^6 = -1 := by
     rw [show (6 : ℕ) = 2*3 by decide, pow_mul, Complex.I_sq]
     norm_num
@@ -147,7 +147,7 @@ theorem physical_certificate_of_diagonal_residue
     (equation : rq + residueDivergence Dq gq wq = 0)
     (normal : φ gq = physicalNormal)
     (source : M.det * φ rq = physicalSourceFor A) :
-    HodgeComputer.HasCertificate holdoutSextic A 6 1 := by
+    HodgeComputer.HasCertificate holdoutSextic 1 A := by
   let w : Fin 5 → HoldoutFunctionField := Fin.lastCases 0 (fun i => φ (wq i))
   have hw : φ rq + residueDivergence E (φ gq) w = 0 :=
     residue_source_map_append_zero φ Dq E compatible gq rq wq equation

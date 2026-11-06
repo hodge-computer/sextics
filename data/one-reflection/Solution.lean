@@ -89,8 +89,8 @@ theorem Verify.add_q1 {F A B D E Q R : Poly}
       (E^2*Q + D^2*R) := HodgeComputer.Verify.add h k
 
 theorem HasCertificate.add_q1 {F A B : Poly}
-    (h : HasCertificate F A 6 1) (k : HasCertificate F B 6 1) :
-    HasCertificate F (A+B) 6 1 := HodgeComputer.HasCertificate.add h k
+    (h : HasCertificate F 1 A) (k : HasCertificate F 1 B) :
+    HasCertificate F 1 (A+B) := HodgeComputer.HasCertificate.add h k
 
 def signChange (s : Fin 6 → ℂ) : Poly →+* Poly :=
   MvPolynomial.eval₂Hom MvPolynomial.C (fun i => C (s i) * X i)
@@ -179,9 +179,9 @@ theorem signChange_ne_zero (s : Fin 6 → ℂ) (hs : ∀ i, s i * s i = 1)
 substitution alone is insufficient: every field component also receives its
 coordinate's sign, which is necessary for both derivative identities. -/
 theorem Verify.sign_change (s : Fin 6 → ℂ) (hs : ∀ i, s i * s i = 1)
-    {F A D Q : Poly} {q : ℕ} {N : Fin 6 → Poly}
-    (h : Verify F A 6 q D N Q) :
-    Verify (signChange s F) (signChange s A) 6 q (signChange s D)
+    {F A D Q : Poly} {d q : ℕ} {N : Fin 6 → Poly}
+    (h : Verify F A d q D N Q) :
+    Verify (signChange s F) (signChange s A) d q (signChange s D)
       (signField s N) (signChange s Q) where
   hypersurface_ne_zero := signChange_ne_zero s hs h.hypersurface_ne_zero
   hypersurface_homogeneous := signChange_homogeneous s h.hypersurface_homogeneous
@@ -242,23 +242,23 @@ theorem target_decomposition : HodgeSubmission.A = Aplus + Aminus := by
 /-- One certificate for each hidden reflection sector suffices for the exact
 protected statement. This is conditional: no sector witness is asserted here. -/
 theorem certificate_of_reflection_sectors
-    (hp : HasCertificate HodgeSubmission.F Aplus 6 1)
-    (hm : HasCertificate HodgeSubmission.F Aminus 6 1) :
-    HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
-  rw [HodgeSubmission.d, HodgeSubmission.q, target_decomposition]
+    (hp : HasCertificate HodgeSubmission.F 1 Aplus)
+    (hm : HasCertificate HodgeSubmission.F 1 Aminus) :
+    HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := by
+  rw [HodgeSubmission.q, target_decomposition]
   exact HasCertificate.add_q1 hp hm
 
 /-- The involution changing the signs of X₁ and Y₁ preserves the exact F and
 interchanges the two hidden-reflection sectors. Only one sector witness is
 therefore needed. The conclusion remains conditional on that witness. -/
 theorem certificate_of_one_reflection_sector
-    (hp : HasCertificate HodgeSubmission.F Aplus 6 1) :
-    HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
+    (hp : HasCertificate HodgeSubmission.F 1 Aplus) :
+    HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := by
   apply certificate_of_reflection_sectors hp
   obtain ⟨D, N, Q, h⟩ := hp
   have hm := Verify.sign_change signs signs_square h
   rw [signChange_F, signChange_Aplus] at hm
-  exact ⟨signChange signs D, signField signs N, signChange signs Q, hm⟩
+  exact hm.hasCertificate
 
 end OneReflection
 
@@ -1038,8 +1038,8 @@ theorem full_verify (second_identity : divergenceNumerator D N = 0) :
   simpa only [target_sum, map_zero, mul_zero, add_zero] using hsum
 
 theorem certificate_from_second_identity (second_identity : divergenceNumerator D N = 0) :
-    HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q :=
-  ⟨fullD, fullN, 0, full_verify second_identity⟩
+    HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A :=
+  (full_verify second_identity).hasCertificate
 
 end OneReflectionPhysical
 
@@ -1219,7 +1219,7 @@ section FinalCertificateSection
 /-! A strict degree-60 certificate for the exact protected one-reflection target. -/
 
 theorem Submission.certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q :=
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A :=
   OneReflectionPhysical.certificate_from_second_identity
     OneReflectionPhysical.second_identity
 

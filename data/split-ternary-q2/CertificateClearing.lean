@@ -351,7 +351,7 @@ independent prerequisite for legality, not an existence assumption on W. -/
 theorem hasCertificate_of_weighted_divergence
     (hirr : Irreducible physicalF) (W : Fin 4 → BaseField)
     (hw : (∑ i,baseD i (W i))-5*directionalP W/(3*p)-4*directionalQ W/(3*q)=source) :
-    HodgeComputer.HasCertificate physicalF physicalA 6 2 := by
+    HodgeComputer.HasCertificate physicalF 2 physicalA := by
   obtain ⟨d,D,N,hD,hN,hd,hr,hrep⟩ := homogeneous_vector_data W
   have hlegal : ¬ physicalF∣D := by
     rintro ⟨k,hk⟩
@@ -361,7 +361,7 @@ theorem hasCertificate_of_weighted_divergence
     intro h
     exact hd (by rw [h,map_zero])
   have hdegree : D.totalDegree = d := hD.totalDegree hD0
-  refine ⟨D,N,0,?_⟩
+  refine (show HodgeComputer.Verify physicalF physicalA 6 2 D N 0 from ?_).hasCertificate
   refine {
     hypersurface_ne_zero := hirr.ne_zero
     hypersurface_homogeneous := ?_
@@ -487,7 +487,7 @@ lemma physicalF_irreducible : Irreducible physicalF := by
 /-- Only the explicit weighted-divergence primitive remains to be supplied. -/
 theorem physical_certificate_of_weighted_divergence (W : Fin 4 → BaseField)
     (hw : (∑ i,baseD i (W i))-5*directionalP W/(3*p)-4*directionalQ W/(3*q)=source) :
-    HodgeComputer.HasCertificate physicalF physicalA 6 2 :=
+    HodgeComputer.HasCertificate physicalF 2 physicalA :=
   hasCertificate_of_weighted_divergence physicalF_irreducible W hw
 
 end SplitTernaryPhysical

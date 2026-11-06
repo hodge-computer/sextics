@@ -62,9 +62,9 @@ theorem combined_defect (l m : ℂ) (F A B D E : HodgeComputer.Sextic.Poly)
 /-- Combining two certificates preserves the exact protected contract, including
 complex relative primality. This lemma also allows non-strict input fields. -/
 theorem combine_q2 (l m : ℂ) {F A B D E Q R : HodgeComputer.Sextic.Poly}
-    {N M : Fin 6 → HodgeComputer.Sextic.Poly}
-    (hN : Verify F A 6 2 D N Q) (hM : Verify F B 6 2 E M R) :
-    Verify F (C l*A+C m*B) 6 2 (D*E)
+    {d : ℕ} {N M : Fin 6 → HodgeComputer.Sextic.Poly}
+    (hN : Verify F A d 2 D N Q) (hM : Verify F B d 2 E M R) :
+    Verify F (C l*A+C m*B) d 2 (D*E)
       (combinedNumerators l m D E N M) (C l*E^2*Q+C m*D^2*R) := by
   have hdeg := MvPolynomial.totalDegree_mul_of_isDomain hN.denominator_ne_zero hM.denominator_ne_zero
   refine ⟨hN.hypersurface_ne_zero, hN.hypersurface_homogeneous,
@@ -83,8 +83,8 @@ theorem combine_q2 (l m : ℂ) {F A B D E Q R : HodgeComputer.Sextic.Poly}
     ring
 
 theorem hasCertificate_combine_q2 (l m : ℂ) {F A B : HodgeComputer.Sextic.Poly}
-    (hA : HasCertificate F A 6 2) (hB : HasCertificate F B 6 2) :
-    HasCertificate F (C l*A+C m*B) 6 2 := by
+    (hA : HasCertificate F 2 A) (hB : HasCertificate F 2 B) :
+    HasCertificate F 2 (C l*A+C m*B) := by
   obtain ⟨D,N,Q,hN⟩ := hA
   obtain ⟨E,M,R,hM⟩ := hB
   exact ⟨D*E,combinedNumerators l m D E N M,

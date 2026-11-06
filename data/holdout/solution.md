@@ -498,7 +498,7 @@ The final source [Solution.lean](Solution.lean) contains the closed wrapper:
 
 ```lean
 theorem Submission.certificate :
-    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q
+    HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A
 ```
 
 Its proof selects the checked complex seed, applies `conic_target_residue_solution` to the positive `coverQuotientSource`, and invokes `holdout_hasCertificate_of_quotient_divergence`. The verifier supplies the protected definitions, which are matched to (1). Classical choice selects roots and finite field factors only after their existence and properties have been proved. `Submission.certificate` is a closed theorem with no hypotheses or unproved placeholders. Compilation and kernel replay establish its proof using only the permitted axioms `propext`, `Classical.choice`, and `Quot.sound`. The detailed build and submission-check results accompany the proposal.

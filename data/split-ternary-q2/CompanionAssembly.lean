@@ -44,7 +44,7 @@ theorem theta_primitive : ThetaPrimitive := by
   exact he
 
 theorem physical_certificate :
-    HodgeComputer.HasCertificate SplitTernaryPhysical.physicalF SplitTernaryPhysical.physicalA 6 2 :=
+    HodgeComputer.HasCertificate SplitTernaryPhysical.physicalF 2 SplitTernaryPhysical.physicalA :=
   certificate_of_companion_primitives ordinary_primitive theta_primitive
 
 #print axioms ordinary_primitive

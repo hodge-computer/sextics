@@ -376,7 +376,7 @@ theorem certificate : Verify F A 6 2 D N Q where
 
   identity := normalized_identity (by simpa using e1) e2
 
-theorem solved : HasCertificate F A 6 2 := ⟨D, N, Q, certificate⟩
+theorem solved : HasCertificate F 2 A := certificate.hasCertificate
 
 end HodgeComputer.Instances.BlockQ2
 

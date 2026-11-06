@@ -38,5 +38,5 @@ theorem witness : HodgeComputer.Verify HodgeSubmission.F HodgeSubmission.A Hodge
       apply MvPolynomial.funext; intro x
       norm_num [HodgeWitness.N5, HodgeComputer.Instances.F3BlockX0QuarticStrict.N5] <;> ring
   simpa only [hF,hA,hD,hQ,hN,HodgeSubmission.q,HodgeSubmission.d] using HodgeComputer.Instances.F3BlockX0QuarticStrict.certificate
-theorem certificate : HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := ⟨HodgeWitness.D,HodgeWitness.N,HodgeWitness.Q,witness⟩
+theorem certificate : HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := witness.hasCertificate
 end Submission

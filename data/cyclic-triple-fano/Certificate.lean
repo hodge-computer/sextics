@@ -48,7 +48,7 @@ theorem quotient_certificate_data :
   exact quotient_normalized_of_line_family (Lifting.family I) quotientSource
 
 theorem physical_certificate :
-    HodgeComputer.HasCertificate (hypersurface coupling 6 3) physicalSource 6 1 := by
+    HodgeComputer.HasCertificate (hypersurface coupling 6 3) 1 physicalSource := by
   obtain ⟨d,N,Q,_,hlegal,hnormal,hdiv⟩ := quotient_certificate_data
   obtain ⟨hnormal',hdiv'⟩ := cubic_normalized_identities coupling quotientSource d Q N hnormal hdiv
   rw [source_pullback] at hnormal'

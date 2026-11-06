@@ -25,7 +25,7 @@ Since `D` is invertible in the relevant localization, a witness for the equation
 
 ## Protected verification
 
-`formal/lean/HodgeComputer/Verify.lean` defines `HodgeComputer.Verify (n := n) F A d q D N Q` and the existential `HodgeComputer.HasCertificate (n := n) F A d q` over complex coefficients. The implicit `n` is inferred from `F` and `A`, whose type is `HodgeComputer.AmbientPoly n = MvPolynomial (Fin (n + 1)) ℂ`. Its localization identity justifies the cleared equation. The shared contract imposes no denominator-degree bound or extra parity condition on the witness.
+`formal/lean/HodgeComputer/Verify.lean` defines `HodgeComputer.Verify (n := n) F A d q D N Q` and the existential `HodgeComputer.HasCertificate F q A` over complex coefficients. `HasCertificate` uses `F.totalDegree`; it takes only `F`, `q`, and `A` as explicit inputs. The implicit `n` is inferred from `F` and `A`, whose type is `HodgeComputer.AmbientPoly n = MvPolynomial (Fin (n + 1)) ℂ`. The witness checker retains an explicit degree `d`, established by its nonvanishing and homogeneity fields. `Verify.hasCertificate` uses those fields to identify `d` with `F.totalDegree`. The localization identity justifies the cleared equation. The shared contract imposes no denominator-degree bound or extra parity condition on the witness.
 
 The verifier generates a protected exact target from the base branch's record. Contributors prove its existential statement and, when exporting a JSON witness for display, an additional theorem about those exact witness polynomials. The protected pipeline compiles the source in isolation, replays its declarations with the kernel checker, and audits the statement and axioms. Allowed axioms are `propext`, `Classical.choice`, and `Quot.sound`.
 
@@ -34,6 +34,8 @@ A rational-coefficient identity transfers to complex coefficients, but denominat
 The Lean project pins its toolchain and mathlib manifest. Instance-specific proofs belong to each instance's existing data folder and first enter through its solve PR. Reusable machinery from accepted proofs can be extracted into the shared library through a separate maintenance PR. CI checks the proof before the owner merges it. The publisher records contributor credit in `acceptance.json`; the website renders the current repository contents. See [the proposal specification](../CONTRIBUTING.md) and [verification workflow](../MAINTAINING.md#verification-sign-off-and-publication).
 
 ## Reusable constructions
+
+[`HodgeComputer.Constructions.Fermat`](lean/HodgeComputer/Constructions/Fermat.lean) proves certificate existence for the Fermat sextic at both `q = 1, 2`, for every homogeneous source of degree `6q` with odd total Y-degree. It implements Diamond's subset Euler construction for the sign-flip involution: choose a suitable coordinate subset for each monomial and combine the resulting certificates by addition. The finite subset assertion is checked in Lean's kernel.
 
 The shared library is the Lean counterpart of the mathematical book: organized, reusable statements with explicit hypotheses and concrete applications. Keep exploratory calculations, unsuccessful searches, and target-specific closure arguments outside it. Maintain accepted instance sources together with the shared contract, rechecking affected proofs in CI; new applications import the maintained library.
 

@@ -3,8 +3,7 @@ import Proposal.FinalAssembly
 
 namespace Submission
 
-theorem certificate : HodgeComputer.HasCertificate
-    HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q := by
+theorem certificate : HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := by
   have hF : HodgeSubmission.F = HoldoutEndpointTarget.F := by
     unfold HodgeSubmission.F HoldoutEndpointTarget.F HoldoutAlgebra.sextic
     ring
