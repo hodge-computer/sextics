@@ -1,11 +1,11 @@
-import Proposal.CubicCoefficientsA
-import Proposal.CubicCoefficientsB
-import Proposal.CubicCoefficientsC
-import Proposal.CubicCoefficientsD
-import Proposal.CubicJetAlgebra
+import HodgeComputer.Constructions.PolarCubic.CoefficientsA
+import HodgeComputer.Constructions.PolarCubic.CoefficientsB
+import HodgeComputer.Constructions.PolarCubic.CoefficientsC
+import HodgeComputer.Constructions.PolarCubic.CoefficientsD
+import HodgeComputer.Constructions.ResidueTransport.FirstJets
 namespace PolarCovariants.IdentityData
 open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressions
-open PolarCubicJetAlgebra TrivSqZeroExt
+open ResidueFirstJets TrivSqZeroExt
 set_option linter.unusedSimpArgs false
 set_option backward.isDefEq.respectTransparency false
 set_option maxRecDepth 131072

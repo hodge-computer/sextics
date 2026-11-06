@@ -1,4 +1,4 @@
-import Proposal.CubicDifferential
+import HodgeComputer.Constructions.PolarCubic.Differential
 import Mathlib.Tactic.LinearCombination
 
 /-! Passage from the polynomial differential identity to the rational

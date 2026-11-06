@@ -1,4 +1,4 @@
-import Proposal.CubicCoefficientExpressions
+import HodgeComputer.Constructions.PolarCubic.CoefficientExpressions
 import Mathlib.Tactic
 
 /-! Integral covariants and first coefficient jets for the reverse-edge cubic.

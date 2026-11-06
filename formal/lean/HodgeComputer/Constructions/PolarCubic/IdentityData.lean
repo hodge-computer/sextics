@@ -1,4 +1,4 @@
-import Proposal.CubicIdentityTablesC
+import HodgeComputer.Constructions.PolarCubic.IdentityTablesC
 /-! Exact sparse expression tables for the covariant syzygies.
 Partitioned only to keep compilation memory bounded. -/
 namespace PolarCovariants.IdentityData

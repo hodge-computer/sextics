@@ -1,7 +1,7 @@
-import Proposal.CubicDifferentialTables
+import HodgeComputer.Constructions.PolarCubic.DifferentialTables
 namespace PolarCovariants.DifferentialData
 open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressions
-open PolarCovariants.IdentityData PolarCubicEncodingCheck PolarCubicJetAlgebra TrivSqZeroExt
+open PolarCovariants.IdentityData PolarCubicEncodingCheck ResidueFirstJets TrivSqZeroExt
 set_option Elab.async false
 set_option linter.unusedSimpArgs false
 set_option maxRecDepth 131072

@@ -1,5 +1,5 @@
-import Proposal.CubicDifferentialJets
-import Proposal.CubicFunctorial
+import HodgeComputer.Constructions.PolarCubic.DifferentialJets
+import HodgeComputer.Constructions.PolarCubic.Functorial
 import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
 noncomputable section
 namespace PolarCovariants

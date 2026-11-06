@@ -1,5 +1,5 @@
 import Proposal.PhysicalField
-import Proposal.CubicCovariants
+import HodgeComputer.Constructions.PolarCubic.Covariants
 import Mathlib.Tactic.LinearCombination
 import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
 

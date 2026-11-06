@@ -1,4 +1,4 @@
-import Proposal.CubicCovariants
+import HodgeComputer.Constructions.PolarCubic.Covariants
 import HodgeComputer.Constructions.TransitiveCubic.BivariateExpressions
 import HodgeComputer.Constructions.TransitiveCubic.BivariateDifferentiation
 namespace PolarCovariants.IdentityData

@@ -35,13 +35,14 @@ Several broadly reusable steps still live under `HoldoutCover`: `PolynomialNorma
 
 ## Cubic covariants and moving maps
 
-There are three distinct coefficient families:
+There are four distinct coefficient families:
 
 - [BinaryCubic](lean/HodgeComputer/Constructions/BinaryCubic/README.md) supplies four-coefficient Hessian/discriminant identities and the radial cancellation used by the dense two-ternary witness.
 - [CyclicCubic](lean/HodgeComputer/Constructions/CyclicCubic/README.md) treats `a x³ + b y³ + c z³ + d x²y + e y²z + f z²x`.
 - [TransitiveCubic](lean/HodgeComputer/Constructions/TransitiveCubic/README.md) replaces the last monomial by `f x²z`. Its optional `Shear` module handles a supplied quadratic coordinate reduction.
+- [PolarCubic](lean/HodgeComputer/Constructions/PolarCubic/README.md) treats `a x³ + b y³ + c z³ + d x²y + e y²z + f xy²` and its first-order `2kxyz` perturbation.
 
-The cyclic and transitive applications import their coefficient identities directly. The reverse-edge covariant data in `mixed-polar` remains specific to its larger cubic family; substituting the transitive tables would change the mathematics.
+The cubic applications import their coefficient identities directly. These families have different covariants; substituting one family’s tables into another would change the mathematics.
 
 All four Jacobian applications use the common dual-number chain rule and first variations in [`ResidueTransport.FirstJets`](lean/HodgeComputer/Constructions/ResidueTransport/FirstJets.lean). Their remaining `CubicJetCalculus.lean` files prove the family-specific cleared differential and cubic variation. [ResidueTransport](lean/HodgeComputer/Constructions/ResidueTransport/README.md) also supplies density changes, moving-map corrections, normal changes and the coordinate-independence criterion. Constructing the Jacobian primitive and checking the physical source remain application obligations.
 
@@ -93,7 +94,7 @@ The following index covers every accepted solve. The construction column describ
 | [klein-rational](../data/klein-rational/solution.md) | Use the cyclic monomial map | [Explicit witness](lean/HodgeComputer/Constructions/Explicit.lean) |
 | [m3-coupled](../data/m3-coupled/solution.md) | A conic hidden in quadratic coordinates | [Explicit witness](lean/HodgeComputer/Constructions/Explicit.lean) |
 | [mixed-biweight](../data/mixed-biweight/solution.md) | A Jacobian primitive for the asymmetric mixed biweights | [TransitiveCubic and ResidueTransport](lean/HodgeComputer/Constructions/TransitiveCubic/README.md) |
-| [mixed-polar](../data/mixed-polar/solution.md) | A reverse-edge Jacobian construction for the balanced mixed-polar target | [ResidueTransport and polynomial normals](lean/HodgeComputer/Constructions/ResidueTransport/README.md) |
+| [mixed-polar](../data/mixed-polar/solution.md) | A reverse-edge Jacobian construction for the balanced mixed-polar target | [PolarCubic and ResidueTransport](lean/HodgeComputer/Constructions/PolarCubic/README.md) |
 | [one-reflection](../data/one-reflection/solution.md) | A strict certificate from a binary-cubic Hessian construction | [Coordinate changes and certificate addition](lean/HodgeComputer/CoordinateChanges.lean) |
 | [one-reflection-y2-sector](../data/one-reflection-y2-sector/solution.md) | A certificate for `one-reflection-y2-sector` from a Fermat cover and a moving conic | [HoldoutCover calculus; specialized quotient](lean/HodgeComputer/Constructions/HoldoutCover/README.md) |
 | [passive-quadratic-d4-strict-rational](../data/passive-quadratic-d4-strict-rational/solution.md) | A rational norm of two contact factors | [Explicit witness](lean/HodgeComputer/Constructions/Explicit.lean) |

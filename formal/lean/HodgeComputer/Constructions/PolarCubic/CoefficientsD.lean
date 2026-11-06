@@ -1,5 +1,5 @@
-import Proposal.CubicIdentityData
-import Proposal.CubicEncoding
+import HodgeComputer.Constructions.PolarCubic.IdentityData
+import HodgeComputer.Constructions.PolarCubic.Encoding
 namespace PolarCovariants.IdentityData
 open PolarCubicEncodingCheck TransitiveSignedExpressions
 set_option maxRecDepth 131072
