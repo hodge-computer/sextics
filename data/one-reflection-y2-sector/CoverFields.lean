@@ -1,5 +1,5 @@
 import Mathlib.Analysis.Complex.Polynomial.Basic
-import Proposal.AlgebraicFields
+import HodgeComputer.Constructions.HoldoutCover.AlgebraicFields
 import Proposal.CommonCoverBaseChange
 
 /- Source component: CoverFields -/

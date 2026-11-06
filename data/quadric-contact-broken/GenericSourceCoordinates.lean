@@ -1,5 +1,5 @@
 import Proposal.GenericSourceReductions
-import Proposal.CheckedPolynomialListDegree
+import HodgeComputer.Constructions.FiniteAlgebra.CheckedPolynomialListDegree
 import Mathlib.Tactic.FinCases
 
 noncomputable section

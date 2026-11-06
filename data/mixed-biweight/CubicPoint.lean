@@ -1,4 +1,5 @@
-import Proposal.CubicDiagonal
+import Proposal.JacobianModel
+import HodgeComputer.Constructions.TransitiveCubic.Diagonal
 import Proposal.PhysicalCoordinates
 
 /-! An exact Gaussian-rational point testing the proposed map's open chart.
@@ -7,7 +8,7 @@ H, J and U_x. This is a pointwise check; transferring nonvanishing to the
 physical function field requires a localization/specialization argument.
 Original cyclic construction by hodgepodgeconjecture; transitive adaptation for fqlx with OpenAI Codex assistance. -/
 namespace CycleCubicPoint
-open CyclePhysical CycleCovariants
+open CyclePhysical TransitiveCovariants
 local notation "ii" => Complex.I
 def point (i : Fin 6) : ℂ :=
   if i=0 then 2 else if i=1 then 2*ii else if i=2 then 1-ii else if i=3 then 1+ii else 0
@@ -22,9 +23,9 @@ lemma denominators_nonzero : ∀ i : Fin 4,point i.castSucc.castSucc ≠ 0 := by
   fin_cases i <;> simp [point]
   all_goals intro h; have hh := congrArg Complex.re h; norm_num at hh
 
-lemma on_cubic : CycleCubic.cubic (1-ii/8) 1 1 0 0 0 (2*ii) (-2*ii) 1=0 := by
+lemma on_cubic : TransitiveCubic.cubic (1-ii/8) 1 1 0 0 0 (2*ii) (-2*ii) 1=0 := by
   apply Complex.ext <;>
-    norm_num [CycleCubic.cubic,pow_succ,Complex.mul_re,Complex.mul_im]
+    norm_num [TransitiveCubic.cubic,pow_succ,Complex.mul_re,Complex.mul_im]
 
 lemma H_value : H (1-ii/8) 1 1 0 0 0 (2*ii) (-2*ii) 1=324-81*ii/2 := by
   rw [H_diagonal]

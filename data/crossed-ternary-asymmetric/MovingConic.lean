@@ -1,3 +1,4 @@
+import HodgeComputer.Constructions.EllipticCompanions.CompanionAlgebra
 import Proposal.ConicSeed
 import HodgeComputer.Constructions.HoldoutCover.AlgebraicFields
 import HodgeComputer.Constructions.HoldoutCover.FiniteDifferentials
@@ -11,101 +12,6 @@ import Mathlib.Data.Complex.Basic
 
 /- Prepared with OpenAI Codex assistance for contributor 1337isnot1337.
 See solution.md for the construction, provenance, and prior-work credit. -/
-
-/- Source component: OpenIncidence. -/
-section
-
-/- A second principal localization preserves a selected nonzero matrix minor
-   in the square etale incidence. Uses fqlx's accepted generic incidence
-   algebra and flat generic-fibre construction. -/
-noncomputable section
-set_option backward.isDefEq.respectTransparency false
-open scoped TensorProduct
-namespace CrossedOpenIncidence
-open HoldoutConstruction
-variable {R : Type*} [CommRing R]
-variable {ι : Type*} [Fintype ι] [DecidableEq ι]
-
-def openElement (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R) :
-    SquareEtaleRing equations :=
-  algebraMap (SquareSystemRing equations) (SquareEtaleRing equations) (Ideal.Quotient.mk _ g)
-
-abbrev OpenSystemRing (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R) :=
-  Localization.Away (openElement equations g)
-
-instance open_etale (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R) :
-    Algebra.Etale R (OpenSystemRing equations g) := by
-  letI : Algebra.Etale R (SquareEtaleRing equations) := square_system_jacobian_etale equations
-  infer_instance
-
-lemma etaleEval_polynomial {T : Type*} [CommRing T] [Algebra R T]
-    (equations : ι → MvPolynomial ι R) (x : ι → T)
-    (hx : ∀ i, MvPolynomial.aeval x (equations i)=0)
-    (hj : IsUnit (Matrix.det (fun i j => MvPolynomial.aeval x
-      (MvPolynomial.pderiv i (equations j))))) (g : MvPolynomial ι R) :
-    squareSystemEtaleEval equations x hx hj (openElement equations g) =
-      MvPolynomial.aeval x g := by
-  simp only [openElement,squareSystemEtaleEval,IsLocalization.Away.coe_liftAlgHom,
-    IsLocalization.Away.lift_eq]
-  rfl
-
-lemma open_nontrivial {T : Type*} [CommRing T] [Nontrivial T] [Algebra R T]
-    (equations : ι → MvPolynomial ι R) (x : ι → T)
-    (hx : ∀ i, MvPolynomial.aeval x (equations i)=0)
-    (hj : IsUnit (Matrix.det (fun i j => MvPolynomial.aeval x
-      (MvPolynomial.pderiv i (equations j)))))
-    (g : MvPolynomial ι R) (hg : IsUnit (MvPolynomial.aeval x g)) :
-    Nontrivial (OpenSystemRing equations g) := by
-  have hu : IsUnit (squareSystemEtaleEval equations x hx hj (openElement equations g)) := by
-    rwa [etaleEval_polynomial]
-  exact (IsLocalization.Away.liftAlgHom (openElement equations g) hu).toRingHom.domain_nontrivial
-
-abbrev GenericRing (K : Type*) [Field K] [Algebra R K]
-    (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R) :=
-  K ⊗[R] OpenSystemRing equations g
-
-variable {S : Type*} [CommRing S] [Algebra R S]
-
-def systemMap (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
-    (η : OpenSystemRing equations g →ₐ[R] S) : SquareSystemRing equations →ₐ[R] S :=
-  η.comp
-    ((IsScalarTower.toAlgHom R (SquareEtaleRing equations) (OpenSystemRing equations g)).comp
-      (IsScalarTower.toAlgHom R (SquareSystemRing equations) (SquareEtaleRing equations)))
-
-def coordinates (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
-    (η : OpenSystemRing equations g →ₐ[R] S) (i : ι) : S :=
-  systemMap equations g η (Ideal.Quotient.mk _ (MvPolynomial.X i))
-
-lemma evaluation (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
-    (η : OpenSystemRing equations g →ₐ[R] S) (P : MvPolynomial ι R) :
-    MvPolynomial.aeval (coordinates equations g η) P =
-      systemMap equations g η (Ideal.Quotient.mk _ P) := by
-  have hh : MvPolynomial.aeval (coordinates equations g η) =
-      (systemMap equations g η).comp (Ideal.Quotient.mkₐ R _) := by
-    apply MvPolynomial.algHom_ext
-    intro i
-    simp [coordinates]
-  exact congrArg (fun f : MvPolynomial ι R →ₐ[R] _ => f P) hh
-
-lemma solution (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
-    (η : OpenSystemRing equations g →ₐ[R] S) (i : ι) :
-    MvPolynomial.aeval (coordinates equations g η) (equations i)=0 := by
-  rw [evaluation]
-  have hz : Ideal.Quotient.mk (Ideal.span (Set.range equations)) (equations i)=0 :=
-    Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.subset_span ⟨i,rfl⟩)
-  rw [hz,map_zero]
-
-lemma open_unit (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
-    (η : OpenSystemRing equations g →ₐ[R] S) :
-    IsUnit (MvPolynomial.aeval (coordinates equations g η) g) := by
-  rw [evaluation]
-  have h := IsLocalization.Away.algebraMap_isUnit
-    (S := OpenSystemRing equations g) (openElement equations g)
-  exact h.map η.toRingHom
-
-end CrossedOpenIncidence
-end
-end
 
 /- Source component: FixedConicParamSeed. -/
 section
@@ -322,66 +228,6 @@ lemma freeColumn_eval_bound {R S : Type*} [CommRing R] [CommRing S]
   exact Polynomial.natDegree_map_le.trans (freeColumn_bound k j)
 
 end CrossedFixedConic
-end
-end
-
-/- Source component: FullCoefficientNormal. -/
-section
-
-/- Full-coefficient version of the accepted polynomial-normal linear algebra.
-   The freeness matrix here includes the constant coefficient row. -/
-noncomputable section
-open scoped BigOperators
-namespace CrossedPolynomialNormal
-open Polynomial HoldoutConstruction
-variable {R : Type*} [CommRing R]
-
-theorem full_linear_combination_one {n : ℕ} (hn : 0<n)
-    (Q : Fin n → Polynomial R) (bound : ∀ j, (Q j).natDegree < n)
-    (hunit : IsUnit (Matrix.det (fun i j : Fin n => (Q j).coeff i.val))) :
-    ∃ u : Fin n → R, ∑ j, C (u j)*Q j=1 := by
-  let J : Matrix (Fin n) (Fin n) R := fun i j => (Q j).coeff i.val
-  let e : Fin n → R := Pi.single ⟨0,hn⟩ 1
-  let u := J⁻¹.mulVec e
-  have hu : J.mulVec u=e := by
-    dsimp [u]
-    rw [Matrix.mulVec_mulVec,Matrix.mul_nonsing_inv J hunit,Matrix.one_mulVec]
-  refine ⟨u,?_⟩
-  apply Polynomial.ext
-  intro k
-  by_cases hk : k<n
-  · have h := congrFun hu ⟨k,hk⟩
-    simp only [Matrix.mulVec,dotProduct,J,e,Pi.single_apply] at h
-    rw [show (∑ j, (Q j).coeff k*u j) = ∑ j, u j*(Q j).coeff k by
-      apply Finset.sum_congr rfl
-      intro j hj
-      ring] at h
-    simpa [Polynomial.finsetSum_coeff,Polynomial.coeff_C_mul,Polynomial.coeff_one,
-      Fin.ext_iff] using h
-  · have hQ (j : Fin n) : (Q j).coeff k=0 :=
-      coeff_eq_zero_of_natDegree_lt (lt_of_lt_of_le (bound j) (Nat.le_of_not_gt hk))
-    have hk0 : k ≠ 0 := by omega
-    simp [Polynomial.finsetSum_coeff,Polynomial.coeff_C_mul,hQ,Polynomial.coeff_one,hk0]
-
-theorem exists_full_polynomial_normal {n : ℕ} (hn : 0<n)
-    {κ : Type*} [Fintype κ] [DecidableEq κ]
-    (G : κ → Polynomial R) (coordinate : Fin n → κ) (degree : Fin n → ℕ)
-    (bound : ∀ j, (G (coordinate j)*X^degree j).natDegree < n)
-    (hunit : IsUnit (Matrix.det (fun i j : Fin n =>
-      (G (coordinate j)*X^degree j).coeff i.val))) :
-    ∃ N : κ → Polynomial R, polynomialPairing G N=1 := by
-  let v : Fin n → κ → Polynomial R := fun j => Pi.single (coordinate j) (X^degree j)
-  have hpair (j : Fin n) : polynomialPairing G (v j) = G (coordinate j)*X^degree j := by
-    simp [v,polynomialPairing,Pi.single_apply]
-  obtain ⟨u,hu⟩ := full_linear_combination_one hn
-    (fun j => G (coordinate j)*X^degree j) bound hunit
-  refine ⟨fun i => 0+∑ j, C (u j)*v j i,?_⟩
-  rw [polynomialPairing_affine]
-  have hz : polynomialPairing G (fun _ : κ => 0)=0 := by simp [polynomialPairing]
-  rw [hz,zero_add]
-  simpa only [hpair] using hu
-
-end CrossedPolynomialNormal
 end
 end
 

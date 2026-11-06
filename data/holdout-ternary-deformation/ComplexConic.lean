@@ -1,5 +1,5 @@
 import Proposal.DeformedConic
-import Proposal.ConicLifting
+import HodgeComputer.Constructions.PolynomialCurves.ComplexPoint
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false

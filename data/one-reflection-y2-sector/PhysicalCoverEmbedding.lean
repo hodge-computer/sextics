@@ -1,5 +1,5 @@
-import Proposal.CommonCoverDomain
-import Proposal.FermatFields
+import HodgeComputer.Constructions.HoldoutCover.CommonCoverDomain
+import HodgeComputer.Constructions.HoldoutCover.FermatFields
 import Proposal.HypersurfaceCoordinates
 
 /- Source component: PhysicalCoverEmbedding -/

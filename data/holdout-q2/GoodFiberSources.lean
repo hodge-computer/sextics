@@ -1,5 +1,5 @@
 import Proposal.NewSpecialization
-import Proposal.LineContact
+import HodgeComputer.Constructions.CubicSurfaces.LineContact
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 set_option maxHeartbeats 0
 set_option maxRecDepth 100000
@@ -211,7 +211,7 @@ theorem sourcePoly_degree (j : Fin 10) : (sourcePoly j).natDegree < 27 := by
   · exact Nat.lt_succ_of_le source8_degree
   · exact Nat.lt_succ_of_le source9_degree
 theorem sourcePoly_mk (j : Fin 10) :
-    LineContact.sourceCoefficients (1 : AdjoinRoot P)
+    HodgeComputer.CubicSurfaces.LineContact.sourceCoefficients (1 : AdjoinRoot P)
       (AdjoinRoot.mk P e) (AdjoinRoot.mk P f) (AdjoinRoot.mk P g) (AdjoinRoot.mk P h) j =
     AdjoinRoot.mk P (sourcePoly j) := by
   have h9 := congrArg (AdjoinRoot.mk P) source9_reduction
@@ -244,7 +244,7 @@ theorem sourcePoly_mk (j : Fin 10) :
   have h8 := congrArg (AdjoinRoot.mk P) source8_reduction
   simp only [map_add, map_sub, map_mul, map_pow, map_neg, map_ofNat,
     map_zero, AdjoinRoot.mk_self, zero_mul, sub_eq_zero] at h8
-  fin_cases j <;> simp only [LineContact.sourceCoefficients, sourcePoly, Fin.reduceFinMk, Matrix.cons_val]
+  fin_cases j <;> simp only [HodgeComputer.CubicSurfaces.LineContact.sourceCoefficients, sourcePoly, Fin.reduceFinMk, Matrix.cons_val]
   · rw [← h0, ← h2, ← h9] <;> ring
   · rw [← h1, ← h2, ← h9] <;> ring
   · rw [← h2, ← h9] <;> ring

@@ -1,6 +1,6 @@
 import HodgeTarget
-import Proposal.ConicResidue
-import Proposal.CoverCertificate
+import HodgeComputer.Constructions.HoldoutCover.ConicResidue
+import HodgeComputer.Constructions.HoldoutCover.CoverCertificate
 
 /- Source component: Solution -/
 section

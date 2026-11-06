@@ -1,4 +1,4 @@
-import Proposal.CurveFamily
+import HodgeComputer.Constructions.HoldoutCover.CurveFamily
 import Proposal.PolynomialNormal
 
 /- Source component: ConicNormal -/

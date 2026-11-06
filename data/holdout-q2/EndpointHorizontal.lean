@@ -1,5 +1,5 @@
 import Proposal.EndpointLift
-import Proposal.FractionDerivation
+import HodgeComputer.Constructions.FiniteAlgebra.FractionDerivation
 import Mathlib.Analysis.Complex.Basic
 
 /-! Actual fraction-field derivations for the endpoint lift. In particular the

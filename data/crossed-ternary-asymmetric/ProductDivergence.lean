@@ -1,4 +1,5 @@
-import Proposal.EllipticContraction
+import Proposal.EllipticKernels
+import HodgeComputer.Constructions.EllipticCompanions.Contraction
 
 /- Prepared with OpenAI Codex assistance for contributor 1337isnot1337.
 See solution.md for the construction, provenance, and prior-work credit. -/

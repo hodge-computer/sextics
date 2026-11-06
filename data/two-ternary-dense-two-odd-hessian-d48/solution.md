@@ -182,6 +182,6 @@ This proves that the specialized polynomials are coprime even over \(\mathbb C\)
 
 ## Correspondence with the Lean proof
 
-`PExplicitWitnessDefinitions.lean` defines the factored witness above. The `PEllipticAmbientCubic`, `PEllipticAmbientRadialIdentity`, and `PEllipticAmbientActualScalar` modules prove the cubic and scalar cancellations. The coordinate-transport modules and `PEllipticAmbientPolynomialBridge` recover the two polynomial equations. `PExplicitWitnessGrading` supplies the homogeneous degrees.
+`PExplicitWitnessDefinitions.lean` defines the factored witness above. The shared [binary-cubic modules](../../formal/lean/HodgeComputer/Constructions/BinaryCubic/README.md) prove the coefficient identities and radial cancellation; `PEllipticAmbientActualScalar` supplies the instance’s coefficient specialization. The shared [rational-field calculus](../../formal/lean/HodgeComputer/Constructions/RationalFields/README.md) supplies the residue and Euler corrections. The coordinate-transport modules and `PEllipticAmbientPolynomialBridge` recover the two polynomial equations. `PExplicitWitnessGrading` supplies the homogeneous degrees.
 
 `PDenseP0.lean` transfers the identities to complex coefficients and proves complex coprimality by the specialization and Bézout argument just described. `Solution.lean` binds the resulting existence theorem to the protected atlas target. The proof concerns this fixed sextic and target; it does not establish the general sextic case or a minimal denominator degree.

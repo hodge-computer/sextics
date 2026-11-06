@@ -3,7 +3,7 @@ import HodgeComputer.Constructions.EllipticCompanions.Kernels
 /-!
 Target-independent algebra extracted from the accepted crossed-ternary proof
 by GitHub contributor `1337isnot1337`. Original declarations and namespaces
-are retained. The accepted source files remain unchanged.
+are retained. The accepted application imports the maintained shared modules.
 
 The source explanation credits fqlx's moving-conic/Fermat-cover construction,
 Benjamin Diamond's maintained library extraction, the project contributors,

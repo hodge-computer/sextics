@@ -38,7 +38,7 @@ end CyclicTriple
 theorem Submission.certificate :
     HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := by
   rw [CyclicTriple.protected_F, CyclicTriple.protected_A]
-  exact CyclicTriple.certificate_rename CyclicTriple.coordinateOrder _ _ 1
+  exact HodgeComputer.HasCertificate.rename CyclicTriple.coordinateOrder _ _ 1
     CyclicTriple.physical_certificate
 
 #print axioms Submission.certificate

@@ -1,6 +1,6 @@
 import Proposal.CoupledDomain
 import Proposal.EndpointDomain
-import Proposal.Lifting
+import HodgeComputer.Constructions.PolynomialCurves.ArithmeticLifting
 
 /-!
 Dominance of the anchored quartic family and the resulting finite extension

@@ -1,6 +1,9 @@
+import Proposal.JacobianModel
 import Proposal.CubicJetCalculus
-import Proposal.CubicSyzygy
+import HodgeComputer.Constructions.TransitiveCubic.Syzygy
 import HodgeComputer.Constructions.ResidueTransport.MovingMap
+
+open ResidueFirstJets
 
 /-! First variation of the actual physical cubic-to-Jacobian map, represented
 by dual numbers at the immutable parameter value. No parameter derivation on
@@ -13,7 +16,7 @@ set_option maxHeartbeats 2000000
 namespace CyclePhysicalCubicJets
 open CyclePhysical CyclePhysicalCoordinates CyclePhysicalNormalTransport
 open CyclePhysicalCubicTangent CycleCubicFieldDifferential.Physical
-open CycleCubicJetCalculus CycleCovariants TrivSqZeroExt
+open CycleCubicJetCalculus TransitiveCovariants TrivSqZeroExt
 local instance : Algebra ℤ FunctionField := Ring.toIntAlgebra _
 abbrev JField := Jet (K:=FunctionField)
 def aJet : JField := (coeffA,1)
@@ -27,15 +30,15 @@ def yJet : JField := (y,0)
 def hJet : JField := H aJet bJet cJet dJet eJet fJet xJet yJet 1
 def qJet : JField := Theta aJet bJet cJet dJet eJet fJet xJet yJet 1
 def jJet : JField := J aJet bJet cJet dJet eJet fJet xJet yJet 1
-def sJet : JField := inl (1/3 : FunctionField)*CycleCubic.s4Numerator aJet bJet cJet dJet eJet fJet
-def tJet : JField := inl (1/27 : FunctionField)*CycleCubic.s6Numerator aJet bJet cJet dJet eJet fJet
+def sJet : JField := inl (1/3 : FunctionField)*TransitiveCubic.s4Numerator aJet bJet cJet dJet eJet fJet
+def tJet : JField := inl (1/27 : FunctionField)*TransitiveCubic.s6Numerator aJet bJet cJet dJet eJet fJet
 def gJet : JField := 3*aJet*xJet^2+2*dJet*xJet*yJet+2*fJet*xJet
 def half : JField := inl (1/2 : FunctionField)
 def xiJet : JField := qJet*hJet⁻¹^2
 def etaJet : JField := -half*jJet*hJet⁻¹^3
 def bWeierstrassJet : JField := -half^2*tJet
-def aWeierstrass : FunctionField := CycleCubic.s4 coeffA coeffB coeffC coeffD coeffE coeffF
-def bWeierstrass : FunctionField := -CycleCubic.s6 coeffA coeffB coeffC coeffD coeffE coeffF/4
+def aWeierstrass : FunctionField := TransitiveCubic.s4 coeffA coeffB coeffC coeffD coeffE coeffF
+def bWeierstrass : FunctionField := -TransitiveCubic.s6 coeffA coeffB coeffC coeffD coeffE coeffF/4
 def xiDot : FunctionField := xiJet.snd
 def etaDot : FunctionField := etaJet.snd
 def aDot : FunctionField := sJet.snd
@@ -59,7 +62,7 @@ lemma hJet_nonzero : hJet.fst≠0 := by
   exact CyclePhysicalChart.physical_hessian_ne_zero
 lemma half_identity : 2*half=1 := by
   ext <;> norm_num [half,smul_eq_mul,op_smul_eq_smul]
-lemma jet_equation : CycleCubic.cubic aJet bJet cJet dJet eJet fJet xJet yJet 1=0 :=
+lemma jet_equation : TransitiveCubic.cubic aJet bJet cJet dJet eJet fJet xJet yJet 1=0 :=
   jet_cubic coeffA coeffB coeffC coeffD coeffE coeffF x y cubic_equation cubic_normal_ne_zero
 
 lemma coefficient_derivatives :
@@ -78,7 +81,7 @@ lemma jet_differential : gJet*D xiJet=6*etaJet := by
   exact invariant_from_cleared D hJet qJet jJet gJet hJet⁻¹ half
     (TrivSqZeroExt.inv_mul_cancel hJet_nonzero) half_identity hc
 lemma jet_curve : etaJet^2=xiJet^3+sJet*xiJet+bWeierstrassJet := by
-  have hc := CycleCovariants.IdentityData.full_syzygy aJet bJet cJet dJet eJet fJet xJet yJet
+  have hc := TransitiveCovariants.IdentityData.full_syzygy aJet bJet cJet dJet eJet fJet xJet yJet
   dsimp only at hc
   rw [jet_equation,zero_mul,add_zero] at hc
   have hthird : (3:JField)*inl (1/3:FunctionField)=1 := by
@@ -87,8 +90,8 @@ lemma jet_curve : etaJet^2=xiJet^3+sJet*xiJet+bWeierstrassJet := by
     ext <;> norm_num [smul_eq_mul,op_smul_eq_smul]
   simpa only [etaJet,xiJet,bWeierstrassJet,sJet,tJet,sub_eq_add_neg,neg_mul] using
     curve_from_syzygy27 hJet qJet jJet
-      (CycleCubic.s4Numerator aJet bJet cJet dJet eJet fJet)
-      (CycleCubic.s6Numerator aJet bJet cJet dJet eJet fJet)
+      (TransitiveCubic.s4Numerator aJet bJet cJet dJet eJet fJet)
+      (TransitiveCubic.s6Numerator aJet bJet cJet dJet eJet fJet)
       hJet⁻¹ half (inl (1/3:FunctionField)) (inl (1/27:FunctionField))
       (TrivSqZeroExt.inv_mul_cancel hJet_nonzero) half_identity hthird hinv27 hc
 
@@ -98,9 +101,9 @@ lemma etaJet_value : etaJet.fst=eta := by
   simp only [etaJet,fst_mul,fst_neg,fst_pow,fst_inv,jJet_value,hJet_value,half,fst_inl,eta]
   ring
 lemma sJet_value : sJet.fst=aWeierstrass := by
-  simp [sJet,CycleCubic.s4,CycleCubic.s4Numerator,aJet,bJet,cJet,dJet,eJet,fJet,aWeierstrass] <;> ring
+  simp [sJet,TransitiveCubic.s4,TransitiveCubic.s4Numerator,aJet,bJet,cJet,dJet,eJet,fJet,aWeierstrass] <;> ring
 lemma bWeierstrassJet_value : bWeierstrassJet.fst=bWeierstrass := by
-  simp [bWeierstrassJet,half,tJet,CycleCubic.s6,CycleCubic.s6Numerator,aJet,bJet,cJet,dJet,eJet,fJet,bWeierstrass]
+  simp [bWeierstrassJet,half,tJet,TransitiveCubic.s6,TransitiveCubic.s6Numerator,aJet,bJet,cJet,dJet,eJet,fJet,bWeierstrass]
   ring
 lemma gJet_value : gJet.fst=cubicNormal := by
   simp [gJet,aJet,dJet,fJet,xJet,yJet,cubicNormal]
@@ -127,11 +130,11 @@ lemma differential_jet :
     (derivative xiDot) etaDot cubicNormalJet differential_value h
 
 lemma aDot_formula : aDot=0 := by
-  simp [aDot,sJet,CycleCubic.s4Numerator,aJet,bJet,cJet,dJet,eJet,fJet,
+  simp [aDot,sJet,TransitiveCubic.s4Numerator,aJet,bJet,cJet,dJet,eJet,fJet,
     smul_eq_mul,op_smul_eq_smul]
 lemma bDot_formula : bDot=
     -(54*coeffA*coeffB^2*coeffC^2+8*coeffA*coeffC*coeffE^3)/4 := by
-  simp [bDot,bWeierstrassJet,tJet,half,CycleCubic.s6Numerator,
+  simp [bDot,bWeierstrassJet,tJet,half,TransitiveCubic.s6Numerator,
     aJet,bJet,cJet,dJet,eJet,fJet,smul_eq_mul,op_smul_eq_smul]
   ring
 lemma weierstrass_constants : derivative aWeierstrass=0 ∧ derivative bWeierstrass=0 := by
@@ -139,7 +142,7 @@ lemma weierstrass_constants : derivative aWeierstrass=0 ∧ derivative bWeierstr
   have h27 : derivative (27:FunctionField)=0 := derivative.map_natCast 27
   have h4 : derivative (4:FunctionField)=0 := derivative.map_natCast 4
   have h6 : derivative (6:FunctionField)=0 := derivative.map_natCast 6
-  simp [aWeierstrass,bWeierstrass,CycleCubic.s4,CycleCubic.s6,CycleCubic.s4Numerator,CycleCubic.s6Numerator,
+  simp [aWeierstrass,bWeierstrass,TransitiveCubic.s4,TransitiveCubic.s6,TransitiveCubic.s4Numerator,TransitiveCubic.s6Numerator,
     Derivation.leibniz,Derivation.leibniz_pow,Derivation.leibniz_div,
     smul_eq_mul,nsmul_eq_mul,ha,hb,hc,hd,he,hf,h27,h4,h6]
 lemma eta_nonzero : eta≠0 :=

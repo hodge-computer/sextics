@@ -1,6 +1,6 @@
 import Proposal.ConcreteLine
-import Proposal.PolynomialMatrixMap
-import Proposal.MatrixHomogeneous
+import HodgeComputer.Constructions.FiniteAlgebra.PolynomialMatrixMap
+import HodgeComputer.Constructions.FiniteAlgebra.MatrixHomogeneous
 
 noncomputable section
 open scoped BigOperators

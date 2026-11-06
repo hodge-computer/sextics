@@ -1,7 +1,7 @@
 import HodgeComputer.Sextic
 import HodgeComputer.Verify
 import Proposal.HoldoutAlgebra
-import Proposal.MatrixBezout
+import HodgeComputer.Constructions.FiniteAlgebra.MatrixBezout
 
 open HodgeComputer.Sextic
 

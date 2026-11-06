@@ -1,5 +1,5 @@
 import Proposal.GenericSpecialization
-import Proposal.CheckedPolynomialLists
+import HodgeComputer.Constructions.FiniteAlgebra.CheckedPolynomialLists
 import Proposal.GenericLineChart
 import Proposal.Subresultant
 noncomputable section

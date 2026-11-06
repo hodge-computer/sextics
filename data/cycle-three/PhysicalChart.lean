@@ -1,5 +1,6 @@
+import Proposal.CyclicCubic
 import Proposal.CubicPoint
-import Proposal.CubicFunctorial
+import HodgeComputer.Constructions.CyclicCubic.Functorial
 import Mathlib.RingTheory.Localization.Away.Basic
 
 /-! A localization lets an exact point certify nonvanishing of the covariants

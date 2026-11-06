@@ -54,7 +54,7 @@ $$
 
 It is obtained by constructing primitives on an elliptic companion for each block and contracting their elliptic factors through rational residues. Multiplication by \(u^4v^2\) and normalized trace then give a weighted divergence equation over the original rational function field \(\mathbb C(x,a,r,z)\). An explicit change of coordinates turns that equation into a rational vector field for the physical sextic. A separate hypersurface evaluation proves that clearing its denominators preserves legality.
 
-The Lean sources are grouped into thirteen flat helpers to keep the submission below the repository's file limit. Each helper identifies its original source components in comments; the mathematical namespaces and declarations remain descriptive.
+The Lean proof imports the shared [elliptic companion library](../../formal/lean/HodgeComputer/Constructions/EllipticCompanions/README.md). The companion equations, incidence seeds, scalar sources and physical certificate closure remain in this instance’s helper modules; comments identify their mathematical components.
 
 ## A polynomial family on the companion cone
 
@@ -171,7 +171,7 @@ These are the checked `first_scalar_primitive` and `second_scalar_primitive` the
 
 Translate the first primitive and its accompanying functions by an independent generic elliptic point. The translation is an actual field homomorphism, preserves the invariant derivation, and commutes with the coefficient derivatives because the generic point is constant for those derivatives.
 
-[EllipticTranslation.lean](EllipticTranslation.lean) proves more than a finite numerical avoidance test: at each affine point over the old coefficient field, the translated functions specialize to translation of the old functions by that point. The resulting field images are nonzero whenever the original functions are nonzero. Simultaneous specialization on both branches proves regularity on the whole old finite fibre, including fibres with a zero \(y_e\) coordinate.
+[Translation.lean](../../formal/lean/HodgeComputer/Constructions/EllipticCompanions/Translation.lean) proves more than a finite numerical avoidance test: at each affine point over the old coefficient field, the translated functions specialize to translation of the old functions by that point. The resulting field images are nonzero whenever the original functions are nonzero. Simultaneous specialization on both branches proves regularity on the whole old finite fibre, including fibres with a zero \(y_e\) coordinate.
 
 Finite splitting fields then supply the old poles, the needed elliptic points above them, and the finite residue supports after translation. The chosen residue functional \(R\) sums finite residues over fibres containing nonzero residues of \(f\theta\) and excludes the three theta fibres. It satisfies
 
@@ -215,7 +215,7 @@ R(f\theta)=3\alpha-\operatorname{div}_{x,a}\xi,
 \xi_i=\sum_{r^3=1728}C_i(r,-36)+B(C_i).
 $$
 
-[InfinityPairing.lean](InfinityPairing.lean) contains the local and infinity calculations. [EllipticContraction.lean](EllipticContraction.lean) constructs the pole sets and completes the global pairing and contraction.
+[Infinity.lean](../../formal/lean/HodgeComputer/Constructions/EllipticCompanions/Infinity.lean) contains the local and infinity calculations. [Contraction.lean](../../formal/lean/HodgeComputer/Constructions/EllipticCompanions/Contraction.lean) constructs the pole sets and completes the global pairing and contraction.
 
 ### The product divergence and descent
 

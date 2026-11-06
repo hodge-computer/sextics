@@ -1,6 +1,6 @@
 import Proposal.CompanionPoleTwo
-import Proposal.HigherResidue
-import Proposal.HigherCurve
+import HodgeComputer.Constructions.HigherResidues.HigherResidue
+import HodgeComputer.Constructions.HigherResidues.HigherCurve
 
 /-!
 The actual finite polynomial curve for the normal-T order [T,x,a,y,S].

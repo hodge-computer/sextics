@@ -2,7 +2,7 @@ import HodgeComputer.Sextic
 import Proposal.TargetEmbedding
 import Proposal.QuarticSource
 import Proposal.QuotientGradient
-import Proposal.CurveClosure
+import HodgeComputer.Constructions.PolynomialCurves.NormalizedCertificate
 import Proposal.ReflectionLift
 
 /-!

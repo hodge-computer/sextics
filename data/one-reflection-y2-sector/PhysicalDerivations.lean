@@ -1,7 +1,7 @@
 import Proposal.CoverFields
-import Proposal.PolynomialCalculus
-import Proposal.ResidueClearing
-import Proposal.ResidueDerivatives
+import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
+import HodgeComputer.Constructions.HoldoutCover.ResidueClearing
+import HodgeComputer.Constructions.HoldoutCover.ResidueDerivatives
 
 /- Source component: PhysicalDerivations -/
 section

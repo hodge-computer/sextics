@@ -1,5 +1,7 @@
 # Shared Lean contract
 
+For reusable constructions and worked applications, see the [technique guide](../TECHNIQUES.md).
+
 This project pins Lean 4.33.1 and mathlib revision `0df444a360eaa60ab8c11dca51a86af692955474`; the Lake manifest pins transitive dependencies. Compiled artifacts and dependency caches are ignored.
 
 [`HodgeComputer/Verify.lean`](HodgeComputer/Verify.lean) defines `HodgeComputer.Verify (n := n) F A d q D N Q` over `HodgeComputer.AmbientPoly n`, the ring `MvPolynomial (Fin (n + 1)) ℂ`. The parameters `n`, `d`, and `q` are natural numbers; `d` is the degree of `F`. The contract requires:

@@ -1,4 +1,4 @@
-import Proposal.CheckedPolynomialLists
+import HodgeComputer.Constructions.FiniteAlgebra.CheckedPolynomialLists
 import Mathlib.Algebra.Polynomial.Roots
 import Mathlib.Algebra.CharZero.Infinite
 import Mathlib.Data.Matrix.Basic

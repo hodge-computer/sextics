@@ -54,7 +54,7 @@ All thirteen coefficients of \(H\) on this curve vanish. The thirteen variables 
 
 For a square polynomial system, localize its incidence algebra at the coefficient Jacobian determinant. The shared Jacobian criterion proves this algebra étale over its parameter ring. The finite-field point proves nontriviality. Flatness over the integral base then gives a nonzero generic fiber and a finite field factor.
 
-[ConicLifting.lean](ConicLifting.lean) applies this argument over the integers; algebraic closedness embeds the resulting finite extension of \(\mathbb C\) into \(\mathbb C\). [ComplexConic.lean](ComplexConic.lean) therefore obtains a nonsingular complex incidence with the same fixed equation and endpoint constants. No assertion is made that the displayed residues themselves are a complex solution or that an arbitrary finite-field solution lifts.
+[ComplexPoint.lean](../../formal/lean/HodgeComputer/Constructions/PolynomialCurves/ComplexPoint.lean) applies this argument over the integers; algebraic closedness embeds the resulting finite extension of \(\mathbb C\) into \(\mathbb C\). [ComplexConic.lean](ComplexConic.lean) therefore obtains a nonsingular complex incidence with the same fixed equation and endpoint constants. No assertion is made that the displayed residues themselves are a complex solution or that an arbitrary finite-field solution lifts.
 
 Now let \(B\) be the function field of \(\alpha^6+\beta^6=1\), introduce three independent endpoint parameters \(k_1,k_2,k_3\), and allow all thirteen curve coefficients to vary. The complex point proves the new Jacobian-localized incidence algebra nontrivial over the integral parameter ring. [GenericConic.lean](GenericConic.lean) applies flatness again and selects a finite field extension
 

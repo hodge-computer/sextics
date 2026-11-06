@@ -1,8 +1,8 @@
-import Proposal.CurveFamily
+import HodgeComputer.Constructions.HoldoutCover.CurveFamily
 import Proposal.HypersurfaceCoordinates
-import Proposal.PolynomialCalculus
-import Proposal.ResidueClearing
-import Proposal.ResidueDerivatives
+import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
+import HodgeComputer.Constructions.HoldoutCover.ResidueClearing
+import HodgeComputer.Constructions.HoldoutCover.ResidueDerivatives
 
 /- Source component: QuotientDerivations -/
 section

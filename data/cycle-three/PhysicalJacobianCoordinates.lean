@@ -1,6 +1,6 @@
 import Proposal.PhysicalCubicVolume
 import Proposal.CubicFieldDifferential
-import Proposal.CoordinateIndependence
+import HodgeComputer.Constructions.ResidueTransport.CoordinateIndependence
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
 /-! The direct Jacobian of the physical-to-Weierstrass coordinates.
@@ -183,7 +183,7 @@ lemma coordinateDerivation_constant (j : Fin 5) (c : ℂ) :
     mul_zero,sub_zero,Finset.sum_const_zero]
 theorem coefficient_evaluation_injective :
     Function.Injective (MvPolynomial.eval₂Hom (residueMap.comp MvPolynomial.C) passive) := by
-  apply CycleCoordinateIndependence.injective_of_coordinate_derivations
+  apply ResidueCoordinateIndependence.injective_of_coordinate_derivations
     (residueMap.comp MvPolynomial.C) passive coordinateDerivation
   · exact coordinateDerivation_constant
   · exact coordinateDerivation_passive

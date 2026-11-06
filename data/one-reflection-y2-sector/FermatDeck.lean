@@ -1,5 +1,5 @@
 import Proposal.CommonCoverBaseChange
-import Proposal.FermatFields
+import HodgeComputer.Constructions.HoldoutCover.FermatFields
 
 /- Source component: FermatDeck -/
 section

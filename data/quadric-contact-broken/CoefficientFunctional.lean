@@ -1,4 +1,4 @@
-import Proposal.AdjoinRootSpecialization
+import HodgeComputer.Constructions.FiniteAlgebra.AdjoinRootSpecialization
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 
 noncomputable section

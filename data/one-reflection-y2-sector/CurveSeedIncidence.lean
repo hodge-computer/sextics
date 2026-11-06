@@ -1,6 +1,6 @@
 import Mathlib.Algebra.Polynomial.Roots
-import Proposal.CurveGradientBlocks
-import Proposal.CurveJacobianScaling
+import HodgeComputer.Constructions.HoldoutCover.CurveGradientBlocks
+import HodgeComputer.Constructions.HoldoutCover.CurveJacobianScaling
 import Proposal.CurveSeed
 
 /- Source component: CurveJacobianSeed -/

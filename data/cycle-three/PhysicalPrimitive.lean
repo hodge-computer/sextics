@@ -1,5 +1,5 @@
 import Proposal.PhysicalJacobianMap
-import Proposal.ResidueTransport
+import HodgeComputer.Constructions.ResidueTransport.Density
 import Proposal.PhysicalClearing
 
 /-! Assembling the rational residue primitive on the fixed sextic. Its three

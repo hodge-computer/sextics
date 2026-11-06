@@ -457,7 +457,7 @@ the scalar identity and general certificate operations retain their own namespac
 | `OneReflectionDifferentiation` and `OneReflectionSecondIdentity` | Prove `normal_derivative_grouped` and `divergence_grouped`, connect the physical derivatives to the scalar identity, and obtain `second_identity`, namely \(D_+\operatorname{div}N_+-N_+(D_+)=0\). |
 | `OneReflectionHomogeneity` | Proves `D_homogeneous` and `N_homogeneous`, with half-target degrees 30 and 31. |
 | `OneReflectionLegality` and `OneReflectionDenominator` | Set up the univariate specialization through `OneReflectionLegality.legal_of_fiber`, prove (6), and establish `D_legal` and `D_ne_zero`. |
-| `CertificateConstruction` | Proves the general `Verify.sign_change` and `Verify.add_q1` operations in `HodgeComputer.Construction`, including the homogeneity and denominator conditions used in (5). |
+| Shared [coordinate changes](../../formal/lean/HodgeComputer/CoordinateChanges.lean) and [certificate operations](../../formal/lean/HodgeComputer/CertificateOperations.lean) | `HodgeComputer.Verify.sign_change` and `HodgeComputer.Verify.add` supply the symmetry and addition operations, including the homogeneous degrees and denominator conditions used in (5). |
 | `OneReflectionCertificate` | Defines `fullD` and `fullN`, proves `full_verify`, and assembles the exact existential target with `certificate_from_second_identity`. |
 | `Final certificate` | Supplies the proven `second_identity` to that assembly theorem and exports `Submission.certificate`. |
 

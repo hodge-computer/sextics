@@ -1,5 +1,7 @@
 # The formal acceptance contract
 
+For reusable constructions and worked applications, see the [technique guide](TECHNIQUES.md).
+
 The target is existence of a rational-vector-field certificate, with no bound on the denominator degree. Constructive and nonconstructive proofs establish the same statement for the specified data.
 
 For arbitrary natural numbers `n`, `d`, and `q`, let `R = ℂ[z₀,…,zₙ]`. The contract requires `F ≠ 0`, `F` homogeneous of degree `d`, and `A` homogeneous of integer degree `d(q+1) − (n+1)`. It asks for a nonzero homogeneous denominator `D`, numerators `N₀,…,Nₙ`, and a polynomial `Q` such that:
@@ -47,7 +49,7 @@ The shared library is the Lean counterpart of the mathematical book: organized, 
 
 New holdout specializations can import `HodgeComputer.Constructions.HoldoutCover.GeneralizedCover` and apply `HoldoutGeneralization.certificate_of_source_pair`. The module also supplies the vanishing traces of the square and inverse square of the cover coordinate. These are ingredients for the fixed holdout sextic, not a theorem for arbitrary sextics or targets.
 
-The accepted files under `data/holdout/` retain the original construction and attribution; they are maintained against the current verifier. New submissions use the maintained shared modules instead of copying those files. Imports retain the original declaration namespaces and mathematical attribution; do not import both copies into the same Lean module.
+The accepted holdout application imports this construction directly. Its source and the later specializations share one maintained implementation, with the original declaration namespaces and attribution.
 
 [`HodgeComputer.Constructions.AlgebraicSpecialization`](lean/HodgeComputer/Constructions/AlgebraicSpecialization.lean) proves nonvanishing at every algebraic root when an auxiliary polynomial specializes to a nonzero multiple of `(X - r)^m` and the tested polynomial is nonzero at `r`. `eval_ne_zero_of_coalescing_root_specialization` requires `m > 0`, a degree bound and the explicit kernel inclusion between coefficient maps; the quadratic-at-zero corollary is `eval_ne_zero_of_double_root_specialization`. Fixed-size resultants allow degree drops without specializing rational maps at poles. The criterion generalizes the quadratic argument in `fqlx`'s [shear construction](https://github.com/hodge-computer/sextics/discussions/58#discussioncomment-19111681), prepared with OpenAI Codex assistance.
 

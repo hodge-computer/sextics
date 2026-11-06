@@ -1,4 +1,4 @@
-import Proposal.RegularSpecialization
+import HodgeComputer.Constructions.FiniteAlgebra.RegularSpecialization
 import Mathlib.Data.Complex.Basic
 import Mathlib.RingTheory.Localization.Integer
 import Mathlib.RingTheory.Localization.FractionRing

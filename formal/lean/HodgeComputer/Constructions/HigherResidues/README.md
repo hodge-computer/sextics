@@ -18,6 +18,6 @@ An application still constructs its curve family, proves dominance and the matri
 | `SourceDensityAlgebra` | Algebraic assembly of the numerator and Jacobian jets. |
 | `HigherCurve` | The polynomial-curve residue primitive assembled from these ingredients. |
 
-The original declaration namespaces are retained to preserve their mathematical interfaces. Import the shared modules for new applications; do not also import copies of these declarations from the accepted instance. Target-specific conic seeds, scalar weights, elliptic conversion, and physical certificate closure stay in the instance folder.
+The original declaration namespaces are retained to preserve their mathematical interfaces. The accepted split-ternary application imports these shared modules directly. Target-specific conic seeds, scalar weights, elliptic conversion, and physical certificate closure stay in the instance folder.
 
 Build with `lake build HodgeComputer.Constructions.HigherResidues.HigherCurve`. As with the other shared constructions, additions require kernel replay and an application against the protected certificate statement. The original construction credits `1337isnot1337`'s elliptic companion method, `fqlx`'s moving-conic work, `HeadOfNaps`, the project contributors, Lean and mathlib; its adaptation and formalization were prepared for `fqlx` with OpenAI Codex assistance.

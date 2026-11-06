@@ -15,7 +15,7 @@ Thus \(F=R^3U(X_0^2/R,X_1^2/R,1)\), with source \(A=v^3R^3x^3\).
 The Hessian covariants give a map to the cubic's Weierstrass Jacobian.
 Lean uses integral covariants scaled by \((3,9,27)\); the map coordinates
 \(\xi=\Theta/H^2\), \(\eta=-J/(2H^3)\) retain their classical values.
-[CubicSyzygy](CubicSyzygy.lean) checks the defining identity, and
+[CubicSyzygy](../../formal/lean/HodgeComputer/Constructions/TransitiveCubic/Syzygy.lean) checks the defining identity, and
 [CubicFieldDifferential](CubicFieldDifferential.lean) checks its differential.
 With \(T=Rv^6\), the Jacobian coefficients are polynomials in \(R,T\).
 The degree \((2,4,6)\) section in [JacobianSeed](JacobianSeed.lean) has an

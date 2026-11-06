@@ -1,8 +1,8 @@
-import Proposal.CoverCoordinateDerivatives
+import HodgeComputer.Constructions.HoldoutCover.CoverCoordinateDerivatives
 import Proposal.CoverCoordinates
 import Proposal.CoverScalars
-import Proposal.FiniteDifferentials
-import Proposal.PolynomialFamilyBridge
+import HodgeComputer.Constructions.HoldoutCover.FiniteDifferentials
+import HodgeComputer.Constructions.HoldoutCover.PolynomialFamilyBridge
 
 /- Source component: CoverDifferentials -/
 section

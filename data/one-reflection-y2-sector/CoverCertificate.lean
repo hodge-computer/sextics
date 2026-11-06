@@ -3,7 +3,7 @@ import Proposal.CoverDeckField
 import Proposal.CoverQuotientCompatibility
 import Proposal.CoverSourceBinding
 import Proposal.HoldoutCertificateClosure
-import Proposal.ResiduePiolaPullback
+import HodgeComputer.Constructions.HoldoutCover.ResiduePiolaPullback
 
 /- Source component: CoverCertificate -/
 section
