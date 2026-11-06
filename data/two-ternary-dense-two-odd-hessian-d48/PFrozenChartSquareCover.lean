@@ -1,5 +1,5 @@
 import Proposal.PFrozenChartCompatibility
-import Proposal.PConicReflectionCover
+import HodgeComputer.Constructions.RationalFields.ReflectionCover
 import Mathlib.Algebra.MvPolynomial.Expand
 
 /-! # Genuine u=t² substitution and its rational derivative rules -/

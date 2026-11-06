@@ -1,6 +1,6 @@
-import Proposal.AlgebraicFields
+import HodgeComputer.Constructions.HoldoutCover.AlgebraicFields
 import Proposal.ConicPolynomialFamily
-import Proposal.PolynomialFieldMap
+import HodgeComputer.Constructions.HoldoutCover.PolynomialFieldMap
 import Proposal.QuotientDerivatives
 
 /- Source component: ConicCoefficientEmbedding -/

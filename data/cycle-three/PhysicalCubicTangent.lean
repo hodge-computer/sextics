@@ -1,6 +1,7 @@
+import Proposal.CyclicCubic
 import Proposal.PhysicalNormalTransport
-import Proposal.CubicMap
-import Proposal.CubicFunctorial
+import HodgeComputer.Constructions.CyclicCubic.Map
+import HodgeComputer.Constructions.CyclicCubic.Functorial
 
 /-! The relative cubic derivation on the actual sextic function field.
 All four passive parameters are fixed and y has derivative one. This supplies

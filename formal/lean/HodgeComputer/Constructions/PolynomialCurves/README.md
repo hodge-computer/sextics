@@ -9,9 +9,7 @@ They build on the maintained
 disclose AI assistance; this extraction was prepared with Codex assistance for
 `benediamond`.
 
-The original namespaces are retained. Import the shared version of a helper
-instead of the identically named declarations in its original submission.
-Accepted instance files retain their attribution and are maintained against the current verifier.
+The original namespaces and attribution are retained. The reflection-coupled and deformed-conic applications import these helpers directly; their incidence data and target binding remain in the instance folders.
 
 | Module | Interface | Application obligation |
 | --- | --- | --- |

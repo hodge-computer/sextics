@@ -1,8 +1,8 @@
-import Proposal.CurveFamily
+import HodgeComputer.Constructions.HoldoutCover.CurveFamily
 import Proposal.CurveSeedIncidence
-import Proposal.EndpointFields
-import Proposal.FermatFields
-import Proposal.GenericIncidence
+import HodgeComputer.Constructions.HoldoutCover.EndpointFields
+import HodgeComputer.Constructions.HoldoutCover.FermatFields
+import HodgeComputer.Constructions.HoldoutCover.GenericIncidence
 
 /- Source component: FermatIncidenceSeed -/
 section

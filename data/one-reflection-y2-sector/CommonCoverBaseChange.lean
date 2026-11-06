@@ -1,5 +1,5 @@
 import Proposal.PhysicalCoverEmbedding
-import Proposal.QuotientCoverEmbedding
+import HodgeComputer.Constructions.HoldoutCover.QuotientCoverEmbedding
 
 /- Source component: CommonCoverBaseChange -/
 section

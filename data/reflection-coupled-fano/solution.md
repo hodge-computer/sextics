@@ -265,7 +265,7 @@ The equations and units survive in the chosen field factor. This argument uses t
 
 The algebra behind this step is the square-Jacobian and étale construction in the maintained Holdout library, together with mathlib's étale and flatness results. For background, see the Stacks Project sections on [smooth ring maps](https://stacks.math.columbia.edu/tag/00T1) and [étale ring maps](https://stacks.math.columbia.edu/tag/00U0).
 
-The target-specific implementation is [ArithmeticBase.lean](ArithmeticBase.lean), [ArithmeticEndpoint.lean](ArithmeticEndpoint.lean), [OpenIncidence.lean](OpenIncidence.lean), [ArithmeticLifting.lean](ArithmeticLifting.lean), [ArithmeticSeed.lean](ArithmeticSeed.lean), and [ArithmeticFamily.lean](ArithmeticFamily.lean). [QuarticIncidence.lean](QuarticIncidence.lean) proves the degree, substitution, and differentiation identities for (8). [QuarticFamily.lean](QuarticFamily.lean) packages the exact equations, invertible Jacobian, and nonzero transverse coefficient.
+The target-specific implementation is [ArithmeticBase.lean](ArithmeticBase.lean), [ArithmeticEndpoint.lean](ArithmeticEndpoint.lean), [OpenIncidence.lean](../../formal/lean/HodgeComputer/Constructions/PolynomialCurves/OpenIncidence.lean), [ArithmeticLifting.lean](ArithmeticLifting.lean), [ArithmeticSeed.lean](ArithmeticSeed.lean), and [ArithmeticFamily.lean](ArithmeticFamily.lean). [QuarticIncidence.lean](QuarticIncidence.lean) proves the degree, substitution, and differentiation identities for (8). [QuarticFamily.lean](QuarticFamily.lean) packages the exact equations, invertible Jacobian, and nonzero transverse coefficient.
 
 ## 5. Dominance and a finite extension of the target field
 
@@ -286,7 +286,7 @@ Thus substitution is injective on \(\mathbb C[x_1,x_2,x_3,x_4,u]\). The monic ir
 
 By (4), \(K\) has transcendence degree five. Since \(E/K_{\mathrm{end}}\) is finite, \(E\) has transcendence degree four, and \(E(t)\) has transcendence degree five. The extension \(L/K\) is therefore algebraic. The argument also supplies the necessary essential-finite-type property over \(\mathbb C\); this makes the algebraic extension finite. Equality of transcendence degrees alone is not used to assert finiteness.
 
-[Lifting.lean](Lifting.lean) contains the anchored-substitution lemma. [TargetEmbedding.lean](TargetEmbedding.lean) defines the target coordinate ring and field, proves the embedding, checks its coordinate evaluation identities, and proves finiteness using the shared transcendence-degree results.
+[ArithmeticLifting.lean](../../formal/lean/HodgeComputer/Constructions/PolynomialCurves/ArithmeticLifting.lean) contains the anchored-substitution lemma. [TargetEmbedding.lean](TargetEmbedding.lean) defines the target coordinate ring and field, proves the embedding, checks its coordinate evaluation identities, and proves finiteness using the shared transcendence-degree results.
 
 ## 6. A polynomial normal and five commuting derivations
 
@@ -427,7 +427,7 @@ vanishes modulo \(H_c\). Therefore it equals \(H_cQ_H\) for some polynomial \(Q_
 
 The denominator is legal: its image in \(K\) is the product of the two nonzero elements \(\partial_0H_c\) and \(d\). Since \(H_c\) is irreducible over \(\mathbb C\), this proves \(D_H\ne0\) and \(\gcd(H_c,D_H)=1\).
 
-[CurveClosure.lean](CurveClosure.lean) combines the shared polynomial integration, finite trace, and clearing results. [FamilyClosure.lean](FamilyClosure.lean), in `quotient_normalized_of_quartic_family`, supplies all their hypotheses from the constructed quartic family. This produces unrestricted normalized polynomial data on the quotient; homogeneous extraction is performed after returning to the physical variables.
+[NormalizedCertificate.lean](../../formal/lean/HodgeComputer/Constructions/PolynomialCurves/NormalizedCertificate.lean) combines the shared polynomial integration, finite trace, and clearing results. [FamilyClosure.lean](FamilyClosure.lean), in `quotient_normalized_of_quartic_family`, supplies all their hypotheses from the constructed quartic family. This produces unrestricted normalized polynomial data on the quotient; homogeneous extraction is performed after returning to the physical variables.
 
 ## 8. Exact reflection transport and homogeneous extraction
 
@@ -504,14 +504,14 @@ No `witness.json` is supplied. The proof selects a field factor finite over the 
 
 The main correspondences are:
 
-| Mathematical step | Principal submitted files |
+| Mathematical step | Principal Lean modules |
 | --- | --- |
 | Exact quotient, complex irreducibility, physical homogeneity | [CoupledDomain.lean](CoupledDomain.lean) |
 | Modular quartic and its exact incidence Jacobian | [QuarticSeed.lean](QuarticSeed.lean), [QuarticMatrix.lean](QuarticMatrix.lean), [QuarticSeedJacobian.lean](QuarticSeedJacobian.lean) |
 | Integral endpoint and characteristic-zero lifting | [EndpointDomain.lean](EndpointDomain.lean), [ArithmeticLifting.lean](ArithmeticLifting.lean), [ArithmeticSeed.lean](ArithmeticSeed.lean), [ArithmeticFamily.lean](ArithmeticFamily.lean) |
 | Polynomial normal, source derivations, nonzero evaluation determinant | [QuarticNormal.lean](QuarticNormal.lean), [QuarticFamily.lean](QuarticFamily.lean), [QuarticSource.lean](QuarticSource.lean) |
-| Dominant evaluation and finite target-field extension | [Lifting.lean](Lifting.lean), [TargetEmbedding.lean](TargetEmbedding.lean) |
-| Polynomial integration, trace, and legal clearing | [CurveClosure.lean](CurveClosure.lean), [FamilyClosure.lean](FamilyClosure.lean) |
+| Dominant evaluation and finite target-field extension | [ArithmeticLifting.lean](../../formal/lean/HodgeComputer/Constructions/PolynomialCurves/ArithmeticLifting.lean), [TargetEmbedding.lean](TargetEmbedding.lean) |
+| Polynomial integration, trace, and legal clearing | [NormalizedCertificate.lean](../../formal/lean/HodgeComputer/Constructions/PolynomialCurves/NormalizedCertificate.lean), [FamilyClosure.lean](FamilyClosure.lean) |
 | Reflection transport and exact protected target | [ReflectionLift.lean](ReflectionLift.lean), [SourceBinding.lean](SourceBinding.lean), [Solution.lean](Solution.lean) |
 
 The submission imports the maintained shared constructions rather than duplicating an accepted proof package. All target-specific definitions and identities are in the permitted flat helper files.

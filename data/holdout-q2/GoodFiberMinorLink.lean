@@ -1,5 +1,5 @@
 import Proposal.GoodFiberSources
-import Proposal.CheckedPolynomialListDegree
+import HodgeComputer.Constructions.FiniteAlgebra.CheckedPolynomialListDegree
 
 noncomputable section
 set_option maxHeartbeats 0
@@ -8,9 +8,9 @@ namespace HoldoutQ2.NewSpecialization
 
 theorem sourceMinor_gradient (i : Fin 10) (j : Fin 4) :
     sourceMinor i (Fin.castAdd 6 j) =
-      LineContact.gradientCoefficients (2 : ℚ) 2 1 1 i j := by
+      HodgeComputer.CubicSurfaces.LineContact.gradientCoefficients (2 : ℚ) 2 1 1 i j := by
   have hm : (Matrix.of fun (i : Fin 10) (j : Fin 4) => sourceMinor i (Fin.castAdd 6 j)) =
-      LineContact.gradientCoefficients (2 : ℚ) 2 1 1 := by decide +kernel
+      HodgeComputer.CubicSurfaces.LineContact.gradientCoefficients (2 : ℚ) 2 1 1 := by decide +kernel
   exact congrFun (congrFun hm i) j
 
 def sourceCoefficientData : Fin 10 → List ℚ :=

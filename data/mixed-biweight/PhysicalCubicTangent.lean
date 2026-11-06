@@ -1,5 +1,6 @@
+import Proposal.JacobianModel
 import Proposal.PhysicalNormalTransport
-import Proposal.CubicFunctorial
+import HodgeComputer.Constructions.TransitiveCubic.Functorial
 
 /-! The relative cubic derivation on the actual sextic function field.
 All four passive parameters are fixed and y has derivative one. This supplies

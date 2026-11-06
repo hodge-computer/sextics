@@ -1,6 +1,6 @@
 import Proposal.RatioDataLink
 import Proposal.RatioDenominatorLink
-import Proposal.AdjoinRootSpecialization
+import HodgeComputer.Constructions.FiniteAlgebra.AdjoinRootSpecialization
 
 set_option maxRecDepth 100000
 set_option maxHeartbeats 2000000

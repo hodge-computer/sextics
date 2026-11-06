@@ -1,4 +1,4 @@
-import Proposal.RegularSpecialization
+import HodgeComputer.Constructions.FiniteAlgebra.RegularSpecialization
 import Mathlib.Algebra.MvPolynomial.Eval
 import Mathlib.Tactic.NormNum
 

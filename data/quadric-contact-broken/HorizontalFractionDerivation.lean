@@ -1,4 +1,4 @@
-import Proposal.FractionDerivation
+import HodgeComputer.Constructions.FiniteAlgebra.FractionDerivation
 import Proposal.PolynomialLift
 import Proposal.HomogeneousSubstitution
 import Mathlib.Tactic.FinCases

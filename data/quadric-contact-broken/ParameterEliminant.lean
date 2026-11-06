@@ -1,7 +1,7 @@
 import Proposal.ParameterSpecialization
 import Proposal.GenericMonicPolynomial
 import Proposal.GenericSpecialization
-import Proposal.AdjoinRootUnits
+import HodgeComputer.Constructions.FiniteAlgebra.AdjoinRootUnits
 
 namespace ParameterEliminant
 open Polynomial

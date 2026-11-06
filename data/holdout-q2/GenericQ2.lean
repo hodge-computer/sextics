@@ -12,12 +12,12 @@ open MvPolynomial HodgeTestbed NewLineAlgebra
 abbrev K := NewLineAlgebra.Coefficients
 abbrev Poly := MvPolynomial (Fin 4) K
 
-def coefficientDenominator : K := QuinticReduction.denominator a b c d
+def coefficientDenominator : K := HodgeComputer.CubicSurfaces.QuinticReduction.denominator a b c d
 
 theorem coefficientDenominator_specialize :
     specialize coefficientDenominator = (515198970880 : ℚ) := by
-  simp only [coefficientDenominator, QuinticReduction.denominator,
-    QuinticReduction.e, QuinticReduction.r, map_mul, map_sub, map_add,
+  simp only [coefficientDenominator, HodgeComputer.CubicSurfaces.QuinticReduction.denominator,
+    HodgeComputer.CubicSurfaces.QuinticReduction.e, HodgeComputer.CubicSurfaces.QuinticReduction.r, map_mul, map_sub, map_add,
     map_pow, map_ofNat, specialize_a, specialize_b, specialize_c, specialize_d]
   norm_num
 
@@ -30,11 +30,11 @@ theorem coefficientDenominator_isUnit : IsUnit coefficientDenominator := by
 def coefficientInverse : K := Ring.inverse coefficientDenominator
 
 theorem coefficientInverse_mul :
-    coefficientInverse * QuinticReduction.denominator a b c d = 1 :=
+    coefficientInverse * HodgeComputer.CubicSurfaces.QuinticReduction.denominator a b c d = 1 :=
   Ring.inverse_mul_cancel _ coefficientDenominator_isUnit
 
 def polynomialPrimitive : Fin 4 → Poly :=
-  QuinticReduction.primitive a b c d coefficientInverse
+  HodgeComputer.CubicSurfaces.QuinticReduction.primitive a b c d coefficientInverse
 
 def divergenceCoefficients : Fin 10 → K :=
   QuadraticDivergence.normalizedCoefficients a b c d coefficientInverse
@@ -43,20 +43,20 @@ def F : Poly := GenericQuadratic.F
 
 def B : Poly := X 0^3 * X 1^2
 
-theorem F_eq : F = QuinticReduction.cubic a b c d := by
+theorem F_eq : F = HodgeComputer.CubicSurfaces.QuinticReduction.cubic a b c d := by
   exact (QuadraticDivergence.cubic_eq a b c d).symm
 
 theorem F_homogeneous : F.IsHomogeneous 3 := by
   rw [F_eq]
-  exact QuinticReduction.cubic_homogeneous a b c d
+  exact HodgeComputer.CubicSurfaces.QuinticReduction.cubic_homogeneous a b c d
 
 theorem polynomialPrimitive_homogeneous (i : Fin 4) :
     (polynomialPrimitive i).IsHomogeneous 3 :=
-  QuinticReduction.primitive_homogeneous a b c d coefficientInverse i
+  HodgeComputer.CubicSurfaces.QuinticReduction.primitive_homogeneous a b c d coefficientInverse i
 
 theorem polynomialPrimitive_source : directional F polynomialPrimitive = B := by
   rw [F_eq]
-  exact QuinticReduction.primitive_source a b c d coefficientInverse coefficientInverse_mul
+  exact HodgeComputer.CubicSurfaces.QuinticReduction.primitive_source a b c d coefficientInverse coefficientInverse_mul
 
 theorem polynomialPrimitive_divergence :
     divergence polynomialPrimitive = QuadraticSolver.quadratic divergenceCoefficients :=
@@ -69,10 +69,10 @@ theorem quadratic_certificate :
   exact GenericQuadratic.equations divergenceCoefficients
 
 /-- The original norm denominator with its harmless constant factor six. -/
-def D : Poly := Q2Reduction.denominator GenericQuadratic.D
+def D : Poly := HodgeComputer.CubicSurfaces.Q2Reduction.denominator GenericQuadratic.D
 
 def N : Fin 4 → Poly :=
-  Q2Reduction.numerators F GenericQuadratic.D polynomialPrimitive
+  HodgeComputer.CubicSurfaces.Q2Reduction.numerators F GenericQuadratic.D polynomialPrimitive
     (GenericQuadratic.N divergenceCoefficients)
 
 theorem D_eq : D = C (6:K) * GenericQuadratic.D := rfl
@@ -87,17 +87,17 @@ theorem D_ne_zero : D ≠ 0 := by
     GenericQuadratic.D_ne_zero
 
 theorem D_homogeneous : D.IsHomogeneous 27 :=
-  Q2Reduction.denominator_homogeneous GenericQuadratic.D_homogeneous
+  HodgeComputer.CubicSurfaces.Q2Reduction.denominator_homogeneous GenericQuadratic.D_homogeneous
 
 theorem N_homogeneous (i : Fin 4) : (N i).IsHomogeneous 30 := by
-  exact Q2Reduction.numerators_homogeneous F GenericQuadratic.D polynomialPrimitive
+  exact HodgeComputer.CubicSurfaces.Q2Reduction.numerators_homogeneous F GenericQuadratic.D polynomialPrimitive
     (GenericQuadratic.N divergenceCoefficients) 27 F_homogeneous
     GenericQuadratic.D_homogeneous polynomialPrimitive_homogeneous
     (GenericQuadratic.N_homogeneous divergenceCoefficients) i
 
 /-- Both exact strict equations, over all four unspecialized coefficients. -/
 theorem equations : 2 * directional F N = B * D ∧ divergenceNumerator D N = 0 :=
-  Q2Reduction.q2_equations_of_certificate F B GenericQuadratic.D polynomialPrimitive
+  HodgeComputer.CubicSurfaces.Q2Reduction.q2_equations_of_certificate F B GenericQuadratic.D polynomialPrimitive
     (GenericQuadratic.N divergenceCoefficients) F_homogeneous
     polynomialPrimitive_homogeneous polynomialPrimitive_source quadratic_certificate
 

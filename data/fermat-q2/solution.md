@@ -23,7 +23,7 @@ The denominator has degree six in the same subset, so \(N(D)=3\cdot A\cdot D\). 
 ## The numerical balance behind the construction
 For a monomial \(A\), the same subset-Euler argument works when its degree in the subset plus the subset's cardinality equals six. The factor \(1/q\) in \(N\) adjusts the first equation for general pole order. Here \(4+2=6\) is exactly the needed balance.
 
-The numerator degree is thirteen, equal to \(6+12-5\). This example provides a transparent higher-pole control, while the target's remaining degree lies in passive variables. It does not imply that every degree-twelve odd monomial has a suitable subset, or that the same shortcut survives a coupled sextic.
+The numerator degree is thirteen, equal to \(6+12-5\). This example provides a transparent higher-pole control, while the target's remaining degree lies in passive variables. The shared [Fermat theorem](../../formal/lean/HodgeComputer/Constructions/Fermat.lean) proves that a suitable subset exists for every odd monomial of degree six or twelve, and combines the monomial certificates for all homogeneous odd sources at \(q=1,2\). Coupled sextics require a separate argument.
 
 ## The retained numerator
 
@@ -46,3 +46,5 @@ A-q\cdot\mathrm dF(v)+F\cdot\operatorname{div}v
 Here both bracketed expressions vanish, so the residual is identically zero. The degree condition, nonzero denominator, and coprimality with \(F\) are separate side conditions retained with the exact record. The accepted Lean proof checks the certificate identity, homogeneous degrees, nonzero denominator, and coprimality over \(\mathbb C\).
 
 The [exact witness](witness.json) gives the denominator, all six numerators, and the quotient. The [Lean proof](Solution.lean) checks the certificate and its side conditions.
+
+The Lean proof uses the shared [explicit-witness assembly](../../formal/lean/HodgeComputer/Constructions/Explicit.lean); its instance-specific identities and displayed witness remain in this folder.

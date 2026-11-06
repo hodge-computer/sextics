@@ -1,5 +1,5 @@
 import Proposal.CompanionResidue
-import Proposal.NormalJetBinding
+import HodgeComputer.Constructions.HigherResidues.NormalJetBinding
 import Proposal.RationalAmbient
 
 /- The exact companion cone in coordinates [T,x,a,y,S], with T as the

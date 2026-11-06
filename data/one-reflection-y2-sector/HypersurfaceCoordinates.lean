@@ -1,6 +1,6 @@
 import Mathlib.Algebra.MvPolynomial.Equiv
 import Mathlib.Algebra.MvPolynomial.PDeriv
-import Proposal.HypersurfaceDomain
+import HodgeComputer.Constructions.HoldoutCover.HypersurfaceDomain
 
 /- Source component: HypersurfaceCoordinates -/
 section

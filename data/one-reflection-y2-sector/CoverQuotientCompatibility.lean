@@ -1,6 +1,6 @@
 import Proposal.CoverDifferentials
 import Proposal.FermatCoefficientDerivations
-import Proposal.FiniteDifferentials
+import HodgeComputer.Constructions.HoldoutCover.FiniteDifferentials
 import Proposal.QuotientDerivatives
 
 /- Source component: CoverQuotientCompatibility -/

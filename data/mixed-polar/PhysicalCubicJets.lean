@@ -1,6 +1,8 @@
 import Proposal.CubicJetCalculus
-import Proposal.CubicSyzygy
+import HodgeComputer.Constructions.PolarCubic.Syzygy
 import HodgeComputer.Constructions.ResidueTransport.MovingMap
+
+open ResidueFirstJets
 
 /-! First variation of the actual physical cubic-to-Jacobian map, represented
 by dual numbers at the immutable parameter value. No parameter derivation on

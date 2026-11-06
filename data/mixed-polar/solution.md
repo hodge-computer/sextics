@@ -55,7 +55,7 @@ I_6=-\frac{27}{4}a^2b^2c^2-a^2ce^3
  +\frac92abc^2df-ac^2f^3-bc^2d^3
  +\frac14c^2d^2f^2.
 \]
-The covariants in [CubicCovariants](CubicCovariants.lean), with their syzygy proved in [CubicSyzygy](CubicSyzygy.lean) from the exact certificate data in [CubicIdentityData](CubicIdentityData.lean), give
+The covariants in [CubicCovariants](../../formal/lean/HodgeComputer/Constructions/PolarCubic/Covariants.lean), with their syzygy proved in [CubicSyzygy](../../formal/lean/HodgeComputer/Constructions/PolarCubic/Syzygy.lean) from the exact certificate data in [CubicIdentityData](../../formal/lean/HodgeComputer/Constructions/PolarCubic/IdentityData.lean), give
 \[
 \xi=\Theta/H^2,\qquad \eta=-J/(2H^3).
 \]
@@ -63,7 +63,7 @@ Writing \(g=U_x(x,y,1)\), and letting \(D\) be the relative cubic derivation wit
 \[
 gD\xi=6\eta,\qquad \frac{D\xi}{2\eta}=\frac3g.
 \]
-[CubicDifferential](CubicDifferential.lean) proves the cleared differential identity. The polynomial coefficient identities are certified using the shared signed-expression and bounded-digit machinery specialized to the reverse-edge coefficient weights; [CubicEncoding](CubicEncoding.lean) supplies the injective encoding. The required nonvanishing is established on a specified localization in [PhysicalChart](PhysicalChart.lean), using the exact point
+[CubicDifferential](../../formal/lean/HodgeComputer/Constructions/PolarCubic/Differential.lean) proves the cleared differential identity. The polynomial coefficient identities are certified using the shared signed-expression and bounded-digit machinery specialized to the reverse-edge coefficient weights; [CubicEncoding](../../formal/lean/HodgeComputer/Constructions/PolarCubic/Encoding.lean) supplies the injective encoding. The required nonvanishing is established on a specified localization in [PhysicalChart](PhysicalChart.lean), using the exact point
 \[
 (X_0,X_1,X_2,Y_0,Y_1,Y_2)=(2,2i,1-i,1+i,0,0)
 \]
@@ -235,3 +235,5 @@ AD^2-D\sum_iN_i\partial_iF
 The Jacobian-map and moving-map architecture follows `hodgepodgeconjecture`'s [cycle-three construction](../cycle-three/solution.md). The transitive extension, arithmetic lifting, dominant polynomial families, finite trace, and certificate-clearing machinery build on `fqlx`'s [mixed-biweight construction](../mixed-biweight/solution.md), the [holdout construction](../holdout/solution.md), and their maintained shared modules. The modular-incidence organization follows the accepted [moving-branch specialization](../holdout-moving-branch/solution.md). The classical covariant normalization follows the invariant theory used in those constructions, including the work of Tom Fisher and the SageMath authors. Diamond's general equivalence supplies the GHC interpretation of the certificate problem; the proof here establishes the algebraic contract directly.
 
 The reverse-edge covariants and jets, the mixed-polar polynomial source, the modular seed, and the target binding were prepared for `benediamond` with OpenAI ChatGPT and Codex assistance, using Mathlib and the Hodge Computer collaborators' shared constructions.
+
+The parameterized cubic covariants and their first-order identities are maintained in the shared [PolarCubic library](../../formal/lean/HodgeComputer/Constructions/PolarCubic/README.md). The physical coefficient specialization, Jacobian incidence and balanced source transport remain in this instance.

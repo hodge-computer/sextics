@@ -1,7 +1,7 @@
-import Proposal.AlgebraicFields
-import Proposal.EndpointFields
+import HodgeComputer.Constructions.HoldoutCover.AlgebraicFields
+import HodgeComputer.Constructions.HoldoutCover.EndpointFields
 import Proposal.FermatIncidenceSeed
-import Proposal.GenericIncidence
+import HodgeComputer.Constructions.HoldoutCover.GenericIncidence
 
 /- Source component: ConicCoefficientField -/
 section

@@ -1,7 +1,7 @@
 import Proposal.ConicEmbedding
 import Proposal.ConicSourceDerivations
-import Proposal.FiniteTrace
-import Proposal.PolynomialFamilyBridge
+import HodgeComputer.Constructions.HoldoutCover.FiniteTrace
+import HodgeComputer.Constructions.HoldoutCover.PolynomialFamilyBridge
 import Proposal.QuotientDerivatives
 
 /- Source component: ConicResidue -/

@@ -14,7 +14,7 @@ Contribute through a direct GitHub pull request for one fixed instance. Add the 
 
 ### Start here
 
-1. Read the [formal contract](formal/README.md). Agents can use [AGENTS.md](AGENTS.md) for the working sequence.
+1. Read the [formal contract](formal/README.md) and consult the [technique guide](formal/TECHNIQUES.md) for reusable constructions, their hypotheses, and worked applications. Agents can use [AGENTS.md](AGENTS.md) for the working sequence.
 2. Choose an instance from `data/catalogue.json`. Read its `instance.rec`, `why.md`, and `provenance.json`. Keep its exact `(F,q,A)` fixed; the variable order is `X0, X1, X2, Y0, Y1, Y2`.
 3. Start a branch from the latest upstream `main`. Check for an existing `proof.json` and open PRs for that instance. Choose an instance without a merged proof.
 4. Add only the solution files listed below. Do not edit or remove existing files.
@@ -100,7 +100,7 @@ This additional binding prevents a correct existence proof from being paired wit
 
 Name flat helper files with `[A-Z][A-Za-z0-9_]*.lean` and import them as `Proposal.Helper`. That namespace is the verifier's temporary compilation layout, not a permanent repository directory. `Target.lean`, `Checked.lean`, and `Audit.lean` are reserved. Imports must be on single lines at the start of the module, with no dependency cycles. Trusted imports may start with `Mathlib.`, `HodgeComputer.`, or `HodgeTestbed.`.
 
-Use the [shared constructions](formal/README.md#reusable-constructions) when they apply. Keep target-specific identities in your instance's `Solution.lean` or permitted helpers; avoid copying a complete accepted proof package to reuse its machinery. Additions or changes to the shared library belong in a separate maintenance PR before the solve PR that imports them. The verifier audits the final theorem's transitive axioms, including those of imported results.
+Use the shared constructions indexed in the [technique guide](formal/TECHNIQUES.md) when their hypotheses apply. Keep target-specific identities in your instance's `Solution.lean` or permitted helpers; avoid copying a complete accepted proof package to reuse its machinery. Additions or changes to the shared library belong in a separate maintenance PR before the solve PR that imports them. The verifier audits the final theorem's transitive axioms, including those of imported results.
 
 Ordinary declarations and tactic proofs are accepted. Custom executable extensions, `axiom`, `sorry`, `admit`, and unchecked native decision procedures are refused. Shared infrastructure changes need a separate maintenance PR. Do not submit binaries, compiled artifacts, symlinks, executable scripts, Lake configuration, nested directories, or unrelated files.
 

@@ -36,4 +36,4 @@ Extracted from `fqlx`'s accepted [mixed-biweight construction](https://github.co
 
 The coordinate and source identities in `Shear` follow `fqlx`'s [quadratic-shear construction](https://github.com/hodge-computer/sextics/discussions/58#discussioncomment-19111681), also prepared with OpenAI Codex assistance. An application supplies the finite extension, root and denominator nonvanishing, extends all parameter derivations, and descends its primitive by trace. The generic nonvanishing criterion is in `HodgeComputer.Constructions.AlgebraicSpecialization`; the normal-source gauge identity is in `ResidueTransport.NormalChange`.
 
-The accepted files under `data/mixed-biweight/` are preserved. Future applications import these maintained modules rather than copying the coefficient tables.
+The accepted mixed-biweight application imports these modules directly. Its physical equation, incidence construction, coefficient specializations, and certificate closure remain in `data/mixed-biweight/`.

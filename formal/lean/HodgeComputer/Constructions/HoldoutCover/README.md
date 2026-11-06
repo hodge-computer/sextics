@@ -23,7 +23,7 @@ An application imports `HodgeComputer.Constructions.HoldoutCover.GeneralizedCove
 
 ## Maintenance and credit
 
-Shared changes belong in a maintenance PR; individual solve PRs only add their instance-specific files. Recheck affected accepted proofs and preserve their original attribution. The shared modules retain the original declaration namespaces, so a proof must choose either the shared modules or the instance-local copies to avoid duplicate declarations.
+Shared changes belong in a maintenance PR; individual solve PRs only add their instance-specific files. Recheck affected accepted proofs and preserve their original attribution. The original holdout application and the later specializations import these shared modules directly. The original declaration namespaces and attribution are retained.
 
 The Fermat-cover and moving-conic construction is due to `fqlx`, with the collaborators, prior work, and AI assistance acknowledged in the accepted explanation and source comments. The target-parameterized assembly, additional trace characters and full-coefficient normal lemma were prepared with OpenAI Codex assistance for `benediamond`. Moving the code into the library does not itself earn a solve point or change any existing credit.
 

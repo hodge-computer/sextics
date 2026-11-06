@@ -1,8 +1,8 @@
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Proposal.ConicPolynomialFamily
-import Proposal.EndpointDerivations
-import Proposal.EvaluationMatrix
-import Proposal.FiniteDifferentials
+import HodgeComputer.Constructions.HoldoutCover.EndpointDerivations
+import HodgeComputer.Constructions.HoldoutCover.EvaluationMatrix
+import HodgeComputer.Constructions.HoldoutCover.FiniteDifferentials
 
 /- Source component: ConicSourceDerivations -/
 section

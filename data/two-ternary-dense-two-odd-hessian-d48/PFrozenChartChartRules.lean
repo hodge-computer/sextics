@@ -1,5 +1,5 @@
 import Proposal.PFrozenChartChartMap
-import Proposal.PConicHomogenization
+import HodgeComputer.Constructions.RationalFields.Homogenization
 
 /-! # Proved X0-chart partial-derivative premises -/
 set_option autoImplicit false

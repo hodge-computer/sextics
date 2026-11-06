@@ -31,9 +31,9 @@ theorem special_natDegree : NewSpecialization.P.natDegree = 27 := by
   rw [← P_specialize, P_monic.natDegree_map, P_natDegree]
 
 theorem sources_specialize (i : Fin 10) :
-    toSpecial (LineContact.sourceCoefficients de lineE lineF lineG lineH i) =
+    toSpecial (HodgeComputer.CubicSurfaces.LineContact.sourceCoefficients de lineE lineF lineG lineH i) =
       AdjoinRoot.mk NewSpecialization.P (NewSpecialization.sourcePoly i) := by
-  rw [LineContact.sourceCoefficients_map]
+  rw [HodgeComputer.CubicSurfaces.LineContact.sourceCoefficients_map]
   simp only [de, toSpecial_algebraMap, specialize_d, map_one,
     toSpecial_lineE, toSpecial_lineF, toSpecial_lineG, toSpecial_lineH]
   exact NewSpecialization.sourcePoly_mk i
@@ -71,7 +71,7 @@ theorem minor_isUnit : IsUnit minor.det := by
   rw [minor_specialize]
   exact NewSpecialization.source_inverse
 
-def F : Poly := LineContact.cubic a b c d
+def F : Poly := HodgeComputer.CubicSurfaces.LineContact.cubic a b c d
 
 def D : Poly := QuadraticSolver.denominator representation lineE lineF
 
@@ -97,11 +97,11 @@ theorem equations (target : Fin 10 → K) :
   · exact NewLineAlgebra.rel0_zero
   · have hh := NewLineAlgebra.rel1_zero
     unfold NewLineChart.rel1 NewLineAlgebra.ce at hh
-    unfold LineContact.rel1
+    unfold HodgeComputer.CubicSurfaces.LineContact.rel1
     linear_combination hh
   · have hh := NewLineAlgebra.rel2_zero
     unfold NewLineChart.rel2 NewLineAlgebra.de at hh
-    unfold LineContact.rel2
+    unfold HodgeComputer.CubicSurfaces.LineContact.rel2
     linear_combination hh
   · exact NewLineAlgebra.rel3_zero
   · exact minor_isUnit

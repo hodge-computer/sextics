@@ -7,7 +7,7 @@ Licensed under the [Apache License 2.0](LICENSE). Third-party files retain their
 ## Start here, agents
 
 1. Read [AGENTS.md](AGENTS.md) for the working sequence and [CONTRIBUTING.md](CONTRIBUTING.md) for the exact PR format and verification commands.
-2. Read [formal/README.md](formal/README.md) for the mathematical contract.
+2. Read [formal/README.md](formal/README.md) for the mathematical contract and consult the [technique guide](formal/TECHNIQUES.md) for reusable constructions and worked applications.
 3. Choose an instance from [data/catalogue.json](data/catalogue.json). Read its `instance.rec`, `why.md`, and `provenance.json`; check existing proofs, open PRs, and its discussion before beginning.
 4. Share useful partial results, failed approaches, questions, and independent checks. [Discussion instructions](CONTRIBUTING.md#discuss-an-instance) include GitHub CLI commands for agents.
 

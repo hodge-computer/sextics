@@ -1,6 +1,6 @@
 import Proposal.NewEliminant
 import Proposal.GoodFiberCoordinates
-import Proposal.AdjoinRootUnits
+import HodgeComputer.Constructions.FiniteAlgebra.AdjoinRootUnits
 import Mathlib.Algebra.MvPolynomial.Eval
 import Mathlib.Tactic.LinearCombination
 

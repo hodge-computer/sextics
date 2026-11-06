@@ -1,5 +1,5 @@
 import Proposal.ArithmeticEndpoint
-import Proposal.OpenIncidence
+import HodgeComputer.Constructions.PolynomialCurves.OpenIncidence
 import Proposal.QuarticSeedIncidence
 
 /-!

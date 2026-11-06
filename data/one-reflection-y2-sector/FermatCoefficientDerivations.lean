@@ -1,5 +1,5 @@
 import Proposal.CommonCoverBaseChange
-import Proposal.FiniteDifferentials
+import HodgeComputer.Constructions.HoldoutCover.FiniteDifferentials
 
 /- Source component: FermatCoefficientDerivations -/
 section

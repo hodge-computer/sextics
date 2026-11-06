@@ -1,7 +1,7 @@
-import Proposal.LineContact
-import Proposal.AdjoinRootSpecialization
-import Proposal.PolynomialMatrixMap
-import Proposal.MatrixHomogeneous
+import HodgeComputer.Constructions.CubicSurfaces.LineContact
+import HodgeComputer.Constructions.FiniteAlgebra.AdjoinRootSpecialization
+import HodgeComputer.Constructions.FiniteAlgebra.PolynomialMatrixMap
+import HodgeComputer.Constructions.FiniteAlgebra.MatrixHomogeneous
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.Tactic.LinearCombination
 
@@ -12,7 +12,7 @@ noncomputable section
 open scoped BigOperators Matrix
 set_option maxHeartbeats 2000000
 namespace HoldoutQ2.QuadraticSolver
-open MvPolynomial HodgeTestbed HoldoutQ2.LineContact QuadricContact
+open MvPolynomial HodgeTestbed HodgeComputer.CubicSurfaces.LineContact QuadricContact
 
 variable {K E : Type*} [CommRing K] [IsDomain K] [CommRing E] [Algebra K E]
 abbrev Poly := MvPolynomial (Fin 4) K

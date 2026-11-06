@@ -1,8 +1,8 @@
 /- Adapted for the instance `one-reflection-y2-sector` from the accepted holdout proof by `fqlx` (hodge-computer/sextics PR #128, prepared with OpenAI ChatGPT assistance); the target-specific source, companion and trace data are replaced, all other modules are unchanged. Adaptation prepared with Claude Code assistance for `DiamondJM`. -/
-import Proposal.FiniteResidueClearing
+import HodgeComputer.Constructions.HoldoutCover.FiniteResidueClearing
 import Proposal.HomogeneousCertificate
 import Proposal.PhysicalDerivations
-import Proposal.Piola
+import HodgeComputer.Constructions.HoldoutCover.Piola
 
 /- Source component: HoldoutCertificateClosure -/
 section

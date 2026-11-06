@@ -1,5 +1,5 @@
-import Proposal.CheckedPolynomialLists
-import Proposal.CheckedPolynomialListDegree
+import HodgeComputer.Constructions.FiniteAlgebra.CheckedPolynomialLists
+import HodgeComputer.Constructions.FiniteAlgebra.CheckedPolynomialListDegree
 import Mathlib.RingTheory.AdjoinRoot
 import Mathlib.Tactic.NormNum
 

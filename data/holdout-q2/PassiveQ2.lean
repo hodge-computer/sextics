@@ -38,7 +38,7 @@ def N (k : ℂ) (hk : k^2+k+1=0) (i : Fin 4) : Poly k :=
 
 @[simp] theorem coefficientPolynomialMap_F (k : ℂ) (hk : k^2+k+1=0) :
     coefficientPolynomialMap k hk GenericQ2.F=F k := by
-  simp only [GenericQ2.F,GenericQuadratic.F,LineContact.cubic,
+  simp only [GenericQ2.F,GenericQuadratic.F,HodgeComputer.CubicSurfaces.LineContact.cubic,
     F,parameterPolynomialMap,HoldoutEndpointTarget.cubic,HoldoutAlgebra.cubic,
     map_add,map_sub,map_mul,map_pow,map_ofNat,coefficientPolynomialMap_X,
     coefficientPolynomialMap_C,lineCoefficientMap_a,lineCoefficientMap_b,
@@ -125,7 +125,7 @@ theorem equations (k : ℂ) (hk : k^2+k+1=0) :
       C (weight k)*X 0^3*X 1^2*coefficientPolynomialMap k hk GenericQ2.D
     linear_combination C (weight k)*hs
   · unfold N divergenceNumerator
-    rw [Q2Reduction.divergence_C_mul,directional_mul]
+    rw [HodgeComputer.CubicSurfaces.Q2Reduction.divergence_C_mul,directional_mul]
     change coefficientPolynomialMap k hk GenericQ2.D *
       (C (weight k)*divergence (fun i => coefficientPolynomialMap k hk (GenericQ2.N i))) -
       C (weight k)*directional (coefficientPolynomialMap k hk GenericQ2.D)
