@@ -40,7 +40,7 @@ F^{q+1} \mid  K_A(v),       K_A(v) \coloneqq  A - q\cdot v(F) + F\cdot \operator
 \end{gathered}
 \]
 
-Divisibility is in the local ring \(k[Z]_{(F)}\): clear the denominators, which are units there, and check polynomial divisibility. The field can be chosen with \(Y\)-odd components \(v_{0},v_{1},v_{2}\) and \(Y\)-even components \(v_{3},v_{4},v_{5}\). Averaging with respect to \(\tau \) enforces these parities without changing the target. They are not additional requirements of the Lean certificate contract.
+Divisibility is in the local ring \(k[Z]_{(F)}\): clear the denominators, which are units there, and check polynomial divisibility. The field can be chosen with \(Y\)-odd components \(v_{0},v_{1},v_{2}\) and \(Y\)-even components \(v_{3},v_{4},v_{5}\). Averaging with respect to \(\tau \) enforces these parities without changing the target.
 
 The bridge to geometry is the rational four-form \(\beta =-\iota _v\Omega /F^q\). Homogeneity makes it a projective form: its weight is zero and contraction with \(\epsilon \) is zero. Its differential satisfies
 
@@ -255,7 +255,7 @@ D_{A+B}=DE,\qquad N_{A+B}=EN+DM,\qquad
 Q_{A+B}=E^2Q+D^2R.
 \]
 
-The resulting defect is \(E^2\mathcal E_A+D^2\mathcal E_B=F^{q+1}(E^2Q+D^2R)\). Nonzero quotient terms therefore cause no obstruction to addition. Denominator legality is preserved by products, and for positive \(q\) each numerator has degree \(\deg D+\deg E+6q-5\). The shared Lean module `HodgeComputer.CertificateOperations` proves this operation for every positive pole order, including existential certificates.
+The resulting defect is \(E^2\mathcal E_A+D^2\mathcal E_B=F^{q+1}(E^2Q+D^2R)\). Nonzero quotient terms therefore cause no obstruction to addition. Denominator legality is preserved by products, and for positive \(q\) each numerator has degree \(\deg D+\deg E+6q-5\).
 
 If \(F\) and \(A\) are rational and \(v\) is defined over a number field \(K\), normalized trace gives a rational certificate:
 
@@ -307,4 +307,4 @@ A=6\cdot X_{0}^{6}\cdot X_{1}^{3}\cdot X_{2}^{2}\cdot Y_{0},       G_{0}=X_{0}\c
 
 Then \(A=\sum G_{i}\partial _{i}F\) is \(Y\)-odd and belongs to \(J(F)\), but one reduction gives the \(q=1\) numerator \(X_{1}^{3}\cdot X_{2}^{2}\cdot Y_{0}/2\). All of its exponents are at most four, so it is nonzero in the Fermat Jacobian ring \(\mathbb C[Z]/(Z_{0}^{5},\ldots ,Z_{5}^{5})\). Griffiths's graded isomorphism makes its (3,1) class nonzero. Thus the original \(q=2\) residue is nonzero, despite Jacobian membership. A complete reduction algorithm must retain this lower-pole target.
 
-For an explicit field, clearing denominators reduces verification to polynomial identities and the homogeneity and coprimality conditions. A nonzero remainder is allowed when it is divisible by \(F^{q+1}\); strictness is not an acceptance requirement. [Chapter 5](#technical-information/computation) gives the complete identity and explains how these algebraic checks enter a Lean proof of the protected instance statement.
+For an explicit field, clearing denominators reduces verification to polynomial identities and the homogeneity and coprimality conditions. A nonzero remainder is allowed when it is divisible by \(F^{q+1}\); strictness is a stronger sufficient condition. [Chapter 5](#technical-information/computation) gives the complete polynomial criterion.

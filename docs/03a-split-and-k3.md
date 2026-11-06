@@ -1,12 +1,12 @@
 # 3A. Split sextics, elliptic contraction and the K3 remainder
 
-[Previous: geometric support](#technical-information/geometric-support) · [Contents](#technical-information/introduction) · [Next: known locus and frontier](#technical-information/known-locus)
+[Previous: geometric support](#technical-information/geometric-support) · [Contents](#technical-information/introduction) · [Next: weighted threefolds and two-reflection sextics](#technical-information/weighted-threefolds)
 
 The Fano machinery of Chapter 3 applies to arbitrary ternary sextics through an elliptic companion. This proves the complete block-sign case \(F=f(X)+g(Y)\), including \(f=g\). When the involution exchanges two equal blocks instead, the same construction supports most classes and isolates an exterior square of K3 cohomology. We prove the quotient maps, support transfer, character calculations and remaining Kuga–Satake criterion here.
 
 ## 3A.1 Triple planes and the required character
 
-**Split theorem.** Let \(f\) and \(g\) be ternary homogeneous sextics, and suppose \(X=\{f(X)+g(Y)=0\}\subset \mathbb P^{5}\) is smooth. For \(\tau [X:Y]=[X:-Y]\), all \(H^{4}(X)^\tau \) is divisor-supported. Over an effective characteristic-zero field, the supporting divisor and legal certificates for every positive \(q\) can be constructed by finite algebraic operations.
+**Split theorem.** Let \(f\) and \(g\) be ternary homogeneous sextics, and suppose \(X=\{f(X)+g(Y)=0\}\subset \mathbb P^{5}\) is smooth. For \(\tau [X:Y]=[X:-Y]\), all \(H^{4}(X)^\tau \) is divisor-supported.
 
 Smoothness of \(X\) is equivalent to smoothness of the two plane curves \(C_f=\{f=0\}\) and \(C_g=\{g=0\}\). A singular point of either curve gives a singular point in the corresponding coordinate plane of \(X\). Conversely, the two groups of partial derivatives of \(F\) are precisely those of \(f\) and \(g\), and neither group can vanish at a nonzero point if its plane curve is smooth.
 
@@ -63,9 +63,7 @@ Scaling either input scales the output according to its weights. Substitution gi
 
 The cone gradient is \((\nabla f,3\cdot s^{2},3\cdot t^{2})\), so the cone is smooth away from its vertex. The ambient singular locus is the weighted line \(z=0\). Its intersection with \(W_f\) consists of the three distinct points \(s^{3}+t^{3}=0\). Near each, the derivative along that weighted line is nonzero, leaving three transverse coordinates on which \(\mu _{2}\) acts by simultaneous negation. The local singularity is 1/2(1,1,1). These quotient points are the only singularities; their terminality also follows from the quotient age 3/2>1, though normality and the anticanonical class already suffice for the curve theorem used here.
 
-Weighted adjunction gives \(-K_{W_f}=\mathcal O(1)\). The six quadratic monomials in \(z\), together with \(s,t\), generate the second Veronese ring, giving a closed embedding by \(\mathcal O(2)\) into \(\mathbb P^{7}\). Every sextic monomial in \(z\) is a product of three quadratic monomials, so the equation of \(W_f\) is included in that presentation. The normal-Fano bound of Chapter 3 supplies covering curves of anticanonical degree at most six, hence embedding degree at most twelve.
-
-Search the complete ordinary \(\operatorname{Hom}\) schemes through degree twelve in this embedding. Retain curves through the three quotient points. Lift the generic curve of a dominant component to a resolution \(\widetilde{W}_f\), spread it out, and choose a smooth affine parameter surface with generically finite evaluation \(\mathbb P^{1}\times S\to \widetilde{W}_f\). Chapter 3 computes a divisor supporting all \(H^{3}(\widetilde{W}_f)\).
+Weighted adjunction gives \(-K_{W_f}=\mathcal O(1)\), an ample rational line bundle. Thus \(W_f\) is Fano. The covering-curve theorem of Chapter 3 gives a divisor supporting all \(H^{3}(\widetilde W_f)\) on a smooth resolution.
 
 The quotient-transfer lemma then supplies a divisor \(D_f\subset T_f\times E\) supporting \(U_f\). Indeed, \(H^{1}(T_f)=H^{3}(T_f)=0\), and the invariant hyperplane part of \(H^{2}(T_f)\) contributes nothing after tensoring with \(H^{1}(E)\), which has no \(\epsilon \)-invariants. Thus \(U_f\) is exactly \(H^{3}(T_f\times E)^{\operatorname{diag} \mu _{3}}\). All graph and exceptional boundaries are included by the transfer proof. This is an algebraic support construction, not an inference from a Hodge-theoretic half twist.
 
@@ -101,92 +99,11 @@ Künneth, the vanishing of \(H^{1}\) and \(H^{3}\) of the triple planes, and the
 H^{4}(T_f\times T_g)^{\operatorname{diag} \mu _{3}} = \mathbb Q(-2)^{3} \oplus  [V_f\otimes V_g]^{\operatorname{diag} \mu _{3}}.
 \]
 
-The Tate terms are algebraic and the preceding contraction supports the tensor term. Transfer first to a smooth model of the quotient, then back to \(X/\tau \) and \(X\). This supports all \(H^{4}(X)^\tau \) and proves the split theorem. Finally, Chapter 3 descends and symmetrizes the computed equation and solves for a numerator over its prescribed power. No Hodge conjecture for abelian varieties enters this proof. ∎
-
-### Algebraic contraction with moving poles
-
-The translated-diagonal argument has a rational-function realization. On a Fermat elliptic curve with invariant derivation \(\delta\), suppose the two companion constructions give scalar identities
-
-\[
-\delta f+\operatorname{div}_x C=\alpha,\qquad
-\delta g+\operatorname{div}_y G=\beta\theta.
-\]
-
-The coefficients of the first block are constant for the second block's derivatives, and conversely. A generic elliptic translation separates the finite poles of the first primitive from the second block's pole set. Translation must be an actual field map commuting with these derivations; a numerical avoidance of finitely many points does not establish that assertion.
-
-For the kernels in the [crossed-ternary construction of `1337isnot1337`](https://github.com/hodge-computer/sextics/pull/149), a finite residue functional \(R\) satisfies \(R(\delta h)=0\), commutes with coefficient derivatives, and kills \(g\). Its pairing is
-
-\[
-R(f\theta)=3\alpha-\operatorname{div}_x\xi.
-\]
-
-Here \(\xi\) includes both the finite theta-pole evaluations and an infinity correction. The latter is constructed by a finite rational approximation beyond the relevant pole order. Omitting it would replace the global residue identity by an incorrect finite-pole formula. The product rule then gives
-
-\[
-U_i=\frac{R(C_i g)+\beta\xi_i}{3},\qquad
-V_j=\frac{R(fG_j)}{3},\qquad
-\operatorname{div}_x U+\operatorname{div}_y V=\alpha\beta.
-\]
-
-Finite algebraic extensions descend by normalized trace. The independent translation parameter is removed by trace to its rational coordinate line followed by the constant Laurent coefficient; both operations commute with the coefficient derivatives. This avoids specializing a rational expression at an unproved regular point. Coordinate transport and legal denominator clearing then return the physical certificate.
-
-This realization explains what has to be preserved in a formal extension: the companion primitives, pole separation, all residue boundaries, derivative-compatible descent, and the exact target. It does not turn a fixed pole-one primitive into an arbitrary higher-pole certificate by multiplication. The geometric all-pole theorem and a formal proof of a particular higher-pole target remain distinct tasks.
-
-### Higher-pole residue calculus
-
-The companion method extends to a third-order pole by constructing its second normal residue. Let \(H\) be a hypersurface equation in five affine coordinates, choose the normal coordinate \(x_0\), and put \(g=\partial_0H\ne0\) in its function field. For a polynomial numerator \(B\), write
-
-\[
-R_1(B)=\partial_0(B/g),\qquad
-R_2(B)=\frac12\partial_0\bigl(R_1(B)/g\bigr)
-=\frac12\left(\frac{B_{00}}{g^2}
--\frac{3B_0H_{00}+BH_{000}}{g^3}
-+\frac{3BH_{00}^2}{g^4}\right).
-\]
-
-The corresponding second residue density is \(R_2(B)/g\) in tangent coordinates. This formula alone is not a polynomial-curve primitive: its denominators must be handled along the family, and the coordinate Jacobian also varies.
-
-Suppose a dominant polynomial-curve family supplies a polynomial normal \(\psi\) with \(dH(\psi)=1\). Thicken the curve by \(c(t)+\varepsilon\psi(t)\), and write
-
-\[
-H(c+\varepsilon\psi)=\varepsilon+a\varepsilon^2+b\varepsilon^3+\cdots,
-\qquad B(c+\varepsilon\psi)\,J(\varepsilon)
-=K_0+K_1\varepsilon+K_2\varepsilon^2+\cdots.
-\]
-
-The coefficient giving the residue of the third-order pole is the polynomial density
-
-\[
-P=K_2-3aK_1+(6a^2-3b)K_0.
-\]
-
-Gradient, Hessian, third-derivative, and determinant identities express it as
-\(P=J(0)\bigl(R_2(B)+\operatorname{ResDiv}_g Z\bigr)\), where
-\(\operatorname{ResDiv}_g Z=g\sum_i\partial_i(Z_i/g)\) for the induced tangent derivations, and \(Z\) is the tangent correction. Thus integrating \(P\) in the curve parameter, transporting by the Piola identity, and subtracting \(Z\) gives a primitive for \(R_2(B)\). Normalized trace descends the primitive through the finite extension supplied by the curve family. Polynomiality of the numerator, normal, and coordinate derivatives is essential to this argument.
-
-For a split sextic with target of block bidegree \((7,5)\), this calculus provides the missing companion input. On \(H=7(f+S^3+T^3)\), with \(h\) of degree seven in the ordinary block variables, choose \(B=49hST\) and take \(T\) as normal coordinate. Since \(g=21T^2\),
-
-\[
-\tfrac12 R_1(B)=-\frac{7hS}{6T^2},\qquad
-R_1\bigl(\tfrac12R_1(B)\bigr)=R_2(B).
-\]
-
-Weighted radial descent and the elliptic identity
-\(\delta(a^2/b+b^2/a)=b/a^2-a/b^2\) convert this source to the theta character. The other companion supplies the ordinary character. After contraction and normalized trace, the resulting four-vector satisfies
-
-\[
-\operatorname{div}W-\frac{5W(p)}{3p}-\frac{4W(q_0)}{3q_0}=s,
-\]
-
-where \(p,q_0\) are the affine ternaries and \(s\) is the affine target. Substitution \(X=t(x,a,1)\), \(Y=t\lambda(r,z,1)\) gives \(F=t^6(p+\lambda^6q_0)\). The vertical component and the Jacobian contribution \(2V_\lambda/\lambda\) must both be retained when producing the physical pole-two identity; legal homogeneous clearing then gives a strict certificate with numerator degree \(\deg D+7\).
-
-The [split-ternary construction of `fqlx`](https://github.com/hodge-computer/sextics/pull/159) implements this chain for the exact asymmetric pair in [Split ternaries · third-order pole](#case/split-ternary-q2). The [shared higher-residue library](https://github.com/hodge-computer/sextics/tree/main/formal/lean/HodgeComputer/Constructions/HigherResidues) isolates the normal-jet and polynomial-family arguments. These are reusable conditional steps, not a theorem producing the required family on every hypersurface. In particular, the geometric all-pole statement does not remove the scalar-weight, descent, or denominator obligations of another formal application.
+The Tate terms are algebraic and the preceding contraction supports the tensor term. Transfer first to a smooth model of the quotient, then back to \(X/\tau \) and \(X\). This supports all \(H^{4}(X)^\tau \) and proves the split theorem. The support-to-certificate theorem and higher-pole reduction of Chapter 3 then give legal certificates at every positive pole order. No Hodge conjecture for abelian varieties enters this proof. ∎
 
 ### Involution-stable ternary decompositions
 
-The same theorem holds whenever \(F=p(U)+q(V)\) for complementary three-dimensional subspaces \(U,V\) preserved by \(\tau \). If all three negative eigendirections lie in one summand, this is the theorem just proved. Otherwise their multiplicities are one and two, after exchange of the summands. Write the resulting normal form as \(p(X_{0},X_{1},Y_{0})+q(X_{2},Y_{1},Y_{2})\). Global invariance forces \(p\) to be even in \(Y_{0}\) and, by its even total degree, \(q\) to be even in \(X_{2}\).
-
-Let \(r\) negate \(Y_{0}, s\) negate \(X_{2}\), and \(\rho \) negate the entire second ternary block. Then \(\tau=\rho\cdot r\cdot s\). The reflection theorem supports the \(r\)-invariant and \(s\)-invariant cohomology; the split theorem supports the \(\rho \)-invariant cohomology. On a simultaneous eigenspace with \(\tau =+1\), at least one of \(r,s\) is \(+1\), or \(r=s=-1\) and therefore \(\rho =+1\). The three supported spaces exhaust the required invariants. This proves the crossed case without a separate companion.
+The same theorem holds whenever \(F=p(U)+q(V)\) for complementary three-dimensional subspaces \(U,V\) preserved by \(\tau \). If all three negative eigendirections lie in one summand, this is the theorem just proved. Otherwise their multiplicities are one and two, after exchange of the summands. The normal form is \(p(X_{0},X_{1},Y_{0})+q(X_{2},Y_{1},Y_{2})\). Global invariance forces \(p\) to be even in \(Y_{0}\) and, by its even total degree, \(q\) to be even in \(X_{2}\). Divisor support is therefore a direct corollary of the [two-reflection theorem](#technical-information/weighted-threefolds).
 
 ## 3A.4 When the involution swaps the blocks
 
@@ -261,7 +178,7 @@ S_{6}\times E_{23} \dashrightarrow  W_{23,f},\\
 
 satisfies the equation because substitution gives \(u^{6}(c^{6}+a^{2}+b^{3})\). On \(c=1\), adjoining \(u\) with \(u^{6}=f\) recovers \(a=s/u^3,b=t/u^2\); the map is the diagonal \(\mu _{6}\) quotient of degree six.
 
-The cone gradient \((\nabla f,2\cdot s,3\cdot t^{2})\) has no nonzero critical zero. The ambient singularities are the isolated weight-three and weight-two vertices, both excluded by the equation. Where \(s,t\) are both nonzero their weights are coprime, so the stabilizer is trivial. Thus \(W_{23,f}\) is smooth. Adjunction gives \(-K=\mathcal O(2)\), and \(\mathcal O(1)\) is an ample line bundle. The smooth threefold curve bound gives weighted map degree \(e\le 2\). Its full incidence uses three binary \(e\)-forms, one binary \(3\cdot e\)-form and one binary \(2\cdot e\)-form: \(8\cdot e+5\) coefficients, \(6\cdot e+1\) equations and a \(6\cdot e\times 8\cdot e\) freeness matrix. Basepoint exclusion applies to all five forms collectively; the three weight-one forms may vanish together where both remaining forms are nonzero.
+The cone gradient \((\nabla f,2\cdot s,3\cdot t^{2})\) has no nonzero critical zero. The ambient singularities are the isolated weight-three and weight-two vertices, both excluded by the equation. Where \(s,t\) are both nonzero their weights are coprime, so the stabilizer is trivial. Thus \(W_{23,f}\) is smooth. Adjunction gives \(-K=\mathcal O(2)\), and \(\mathcal O(1)\) is an ample line bundle, so this is a smooth Fano threefold.
 
 Chapter 3 therefore constructs support for \(H^{3}(W_{23,f})\), and quotient transfer supports \([(H_{1}\oplus H_{5})\otimes H^{1}(E_{23})]^{\operatorname{diag} \mu _{6}}\). The other characters pair with no elliptic eigenspace. The same translated-diagonal intersection and nonzero opposite pairing as in §3A.3 then support both \(H_{1}\otimes H_{5}\) and \(H_{5}\otimes H_{1}\). This includes the whole required tensor, not merely its leading Hodge piece.
 
@@ -272,7 +189,7 @@ The swap fixes one copy of each paired tensor. Multiplying the Hodge triples abo
 | Primitive sixth-root pair | 441 | (90,261,90) | Second elliptic companion |
 | Primitive third-root pair | 441 | (54,333,54) | Triple-plane companion |
 | Joining-curve exterior square | 190 | (45,100,45) | Joining divisor |
-| K3 exterior square \(\Lambda ^{2}V_{2}\) | 210 | (19,172,19) | Unresolved in general |
+| K3 exterior square \(\Lambda ^{2}V_{2}\) | 210 | (19,172,19) | Conditional on algebraicity of the Kuga–Satake correspondence |
 
 For example, \(\Lambda ^{2}V_{2}\) has middle dimension \(1\cdot1+\binom{19}{2}=172\), and \(\Lambda ^{2}H^{1}(C)\) has extreme dimensions \(\binom{10}{2}=45\). The supported primitive part has rank 1072 and Hodge numbers (189,694,189). Adding the ambient class gives rank 1073. The full primitive numbers are (208,866,208). No generic Picard-rank assumption is used; additional algebraic K3 classes simply make additional exterior-square terms already supported.
 
@@ -343,7 +260,5 @@ f(z_{0},z_{1},z_{2})=g_{6}(z_{0},z_{1})+z_{2}^{3}g_{3}(z_{0},z_{1})+a z_{2}^{6}
 define a smooth plane sextic. On \(S=\{w^{2}=f\}\), the automorphism \(z_{2}\mapsto \zeta _{3}z_{2},w\mapsto w\) multiplies the holomorphic two-form by \(\zeta _{3}\). Its fixed locus contains \(z_{2}=0\), the genus-two curve \(w^{2}=g_{6}(z_{0},z_{1})\). Smoothness forces \(a\ne 0\) and \(g_{6}\) squarefree, so this fixed curve is smooth. The external theorem applies, and the exterior-square argument completes the polarized-split fourfold \(F_f\) for every allowed target and positive \(q\).
 
 For completeness, smoothness is equivalent to \(a\ne 0\) and squarefreeness of both \(g_{6}\) and \(\Delta=g_3^2-4\cdot a\cdot g_6\). On \(z_{2}=0\), the criterion is exactly that \(g_{6}\) have no repeated root. Away from \(z_{2}=0\) put \(t=z_{2}^{3}\). A singular zero satisfies \(t=-g_{3}/(2\cdot a), \Delta =0\) and \(d\Delta =0\). Conversely, a repeated root of \(\Delta \) with \(g_{3}\ne 0\) yields such a nonzero \(t\) and a singular point. If \(g_{3}\) vanishes at that root, \(g_{6}\) has a repeated root already. The point [0:0:1] is excluded when \(a\ne 0\) and singular when \(a=0\). This proves the criterion.
-
-For arbitrary smooth \(f\), algebraicity of the needed Kuga–Satake cycle is not established here. The general polarized-split case therefore retains its K3 remainder, and the full globally \(Y\)-even problem remains open. On the unconditional order-three family, the cited algebraicity theorem proves existence of the needed cycle. The argument here does not turn that cycle into an explicit certificate. The Fano companion sectors, by contrast, have the finite support construction of Chapter 3.
 
 There is a direct boundary to the successful elliptic trick. The double-plane involution acts by \(-1\) on the K3 transcendental cohomology. For any curve with nonzero anti-invariant \(H^{1}\), its anti-invariant \(H^{1,0}\) is also nonzero. The diagonal invariant tensor therefore contains \(H^{2,0}(S)\otimes H^{1,0}(C)_-\). A smooth quotient model then has a holomorphic three-form and cannot be uniruled. The third- and sixth-root companion selections avoid this piece; the K3 exterior square requires its antisymmetry to enter a larger correspondence, as above.

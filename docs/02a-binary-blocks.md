@@ -1,22 +1,26 @@
-# 2a. Binary blocks: finite contact covers and target spanning
+# 2A. Binary sextics and torsion contacts
 
 [Previous: explicit constructions](#technical-information/explicit-constructions) · [Contents](#technical-information/introduction) · [Next: geometric support](#technical-information/geometric-support)
 
-This chapter proves the remaining binary-block all-target theorem. The mechanism is the same as in Chapter 2: finite covers produce cofactor fields, and a spanning theorem for their targets completes the construction. Here the finite cover is the nonzero three-torsion of a genus-two Jacobian. Its two relevant moment spaces are proved below; no numerical rank test enters the theorem.
+Cubic-square presentations of a binary sextic give a concrete example of contact geometry. Their finite parameter space is the nonzero three-torsion of a genus-two Jacobian, modulo sign. Two spanning theorems for the associated Wronskians turn these contacts into rational fields. The resulting construction is useful independently of the general support theorem: it identifies the fields and explains why their targets span.
 
-**Theorem.** Let
+**Example: a binary-block family.** Let
 
 \[
-\begin{gathered}
-F=P_{0}(X_{0},X_{1})+P_{1}(Y_{0},Y_{1})+P_{2}(X_{2}^{2},Y_{2}^{2}),
-\end{gathered}
+F=P_0(X_0,X_1)+P_1(Y_0,Y_1)+P_2(X_2^2,Y_2^2),
 \]
 
-where \(P_{0},P_{1}\) are binary sextics and \(P_{2}\) is a binary cubic over an effectively presented characteristic-zero field. Suppose \(F=0\) is smooth. For \(q=1,2\) and every allowed \(Y\)-odd \(A\) of degree \(6\cdot q\), there is a constructive strict certificate, after Euler normalization if necessary. Finite trace gives a certificate over the original field. No uniform denominator-degree bound is asserted.
+where \(P_0,P_1\) are binary sextics and \(P_2\) is a binary cubic over a characteristic-zero field. Suppose \(F=0\) is smooth. Separate reflection in \(X_2\) and \(Y_2\) places this family under the [two-reflection support theorem](#technical-information/weighted-threefolds), giving certificate existence at every positive pole order. It also admits the following explicit construction.
+
+**Binary-block construction theorem.** For \(q=1,2\) and every \(Y\)-odd \(A\) of degree \(6q\), there is a rational field satisfying
+\[
+qv(F)=A,\qquad \operatorname{div}v=0,
+\]
+with the homogeneity and legal poles of Chapter 1. It is obtained from cubic-square contacts, cubic-surface lines, linear combinations and coefficient differentiation. Normalized finite trace gives a field over the original coefficient field.
 
 Write the three binary variable blocks as \(V_{0},V_{1},V_{2}\), and let \(P_{i}\) also denote the ordinary sextic in its block. Smoothness is equivalent to squarefreeness of all three sextics. Indeed, a multiple projective root of one block gives a nonzero zero of both its partials and hence a singular point of \(F\) with the other blocks zero. Conversely, the partials of a squarefree binary form vanish simultaneously only at the origin. For the third block, squarefreeness says that the endpoint coefficients and discriminant of \(P_{2}\) are nonzero.
 
-## 2a.1 The elementary fields behind the construction
+## 2A.1 The elementary fields behind the construction
 
 Suppose a block admits \(P_{i}=C_{i}^{3}+r_{i}^{2}\), with \(\operatorname{deg} C_{i}=2\) and \(\operatorname{deg} r_{i}=3\). Put
 
@@ -43,7 +47,7 @@ For two decomposed blocks \(i,j\), take \(e=e_{i}+e_{j}, D=r_{i}^{2}+r_{j}^{2}\)
 
 All these numerators are polynomial after multiplication by their displayed Jacobians. Their denominators involve only two blocks, whereas smooth \(F\) has a nonzero third block, so they are coprime to \(F\). The fields can be averaged for global \(Y\)-parity and traced in their coefficient fields. Polynomial fields \(L_{j}\partial _{x}\) and \(L_{j}\partial _y\) additionally serve \(L_{j}P_{i,x},L_{j}P_{i,y}\) strictly. Thus the remaining question is exactly what the cubics \(J\) and quintics \(C\cdot J\) span as the decompositions vary.
 
-## 2a.2 The forty-sheet contact cover
+## 2A.2 The forty-sheet contact cover
 
 For every squarefree binary sextic \(P\), the presentations
 
@@ -71,7 +75,7 @@ Multiplication by three on a characteristic-zero abelian surface is étale of de
 
 If it vanishes, coprimality forces \(r\) to divide \(\delta C\), which has degree two; thus \(\delta C=\delta r=0\). The seven-dimensional coefficient spaces therefore have invertible differential at every presentation. This also proves the coefficientwise lifting used later.
 
-## 2a.3 Raw Wronskians span every cubic
+## 2A.3 Raw Wronskians span every cubic
 
 **Raw moment theorem.** For every squarefree \(P\), the cubics \(J=\{C,r\}\) from the contact cover span \(\operatorname{Sym}^{3}\) of the binary variables.
 
@@ -158,7 +162,7 @@ coefficient expansion gives, up to the sign determined by column order,
 
 The nine \(l_{i}\) are the nine flex-tangent evaluations at \(O\) up to nonzero constants. Thus every factor is nonzero. This proves rank four in the Hesse chart. Projective changes of the plane and linear changes of the projection pencil preserve the span rank, proving the theorem for every squarefree \(P\). The displayed matrix and factorization reduce the rank claim to an explicit polynomial identity.
 
-## 2a.4 The quintic moment theorem
+## 2A.4 The quintic moment theorem
 
 **Theorem.** For every squarefree binary sextic \(P\) over an algebraically closed field of characteristic zero, the forty decompositions \(P=C^{3}+r^{2}\) give classes \(C\{C,r\}\) spanning the four-dimensional quotient \(S_{5}/\langle P_x,P_y\rangle \). Together with \(P_x,P_y\) they therefore span all binary quintics.
 
@@ -215,46 +219,28 @@ For every nonzero \(T\in A[3]\), its unique divisor \(D=p+q\) with \(\mathcal O(
 
 **A torsion-intersection bound.** Let \(G=A[3]\), of order 81, and let \(Z\) be any effective divisor of \(\Theta \)-degree at most eight on the indecomposable principally polarized surface \(A\). Every irreducible component \(E\) has \(a=E\cdot\Theta\ge2\). For \(E^{2}>0\) this follows from the Hodge index inequality \(E^{2}\le a^{2}/2\) and the fact that \(E^{2}\) is a positive even integer. If \(E^{2}=0, E\) is a translate of an elliptic curve: normalization cannot be rational on an abelian surface, and adjunction forces arithmetic genus one. If an elliptic curve had \(\Theta \)-degree one, the quotient \(A\to A/E\) would restrict to a degree-one map from the smooth genus-two theta curve to an elliptic curve, which is impossible. Such an elliptic translate contains either zero or nine points of \(G\).
 
-Now assume \(E^{2}>0\), put \(m=|E\cap G|\) and \(h=|\operatorname{Stab}(E)\cap G|\). The stabilizer subgroup acts freely, so \(h\) divides \(m\). Passing to its étale quotient gives \(E^{2}=h(E')^{2}\), hence \(h\le E^{2}/2\). Since \(E^{2}\le a^{2}/2\le 32, h\) is one of 1,3,9. Count the \(m^{2}\) ordered pairs of points of \(E\cap G\) by their difference \(g\in G\). The \(h\) stabilizer differences each contribute \(m\); each other translate is a distinct irreducible curve and contributes at most \(E^{2}\) intersection points. Therefore
+Now assume \(s=E^2>0\), put \(m=|E\cap G|\) and \(h=|\operatorname{Stab}(E)\cap G|\). The stabilizer subgroup acts freely. Passing to its étale quotient gives \(s=h(E')^2\), where \((E')^2\) is a positive even integer; hence \(h\le s/2\).
 
+Count the \(m^2\) ordered pairs of points of \(E\cap G\) by their difference in \(G\). The \(h\) stabilizer differences each contribute \(m\); each other translate is a distinct irreducible curve and contributes at most \(s\) intersection points. Since \(m\le81\),
 \[
-\begin{gathered}
-m^{2} \le  h\cdot m+(81-h)E^{2},       h\mid m,\\
-E^{2}\in2\mathbb Z_{>0},       E^{2}\le a^{2}/2,       h\le E^{2}/2.
-\end{gathered}
+m^2\le hm+(81-h)s\le81(h+s)
+\le\frac{243}{2}s\le\frac{243}{4}a^2<64a^2.
 \]
+Thus \(m<8a\). An elliptic component satisfies the same bound, since it contains at most nine torsion points and \(a\ge2\).
 
-These inequalities give the following upper bounds; the elliptic bound nine is included:
-
-| a | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
-| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| Number of points, at most | 13 | 18 | 25 | 31 | 39 | 45 | 51 |
-
-To verify the table, substitute the largest allowed even value of \(E^{2}\), solve the quadratic inequality for \(h=1,3,9\) subject to \(h\le E^{2}/2\), and retain multiples of \(h\). The bounds are deliberately permissive: the additional divisibility \(E^{2}\in 2\cdot h\mathbb Z\) is unnecessary. For a divisor of \(\Theta \)-degree eight, the partitions into component degrees are 2+2+2+2, 2+2+4, 2+3+3, 2+6, 3+5, 4+4 and 8. Their bounds are respectively 52,51,49,52,49,50,51. Multiplicities only overcount the number of distinct torsion points, so the same upper bound 52 holds for nonreduced divisors. A smaller total degree gives no larger bound.
+Summing over the reduced components of an effective divisor of \(\Theta\)-degree at most eight gives fewer than 64 torsion points. Multiplicities only increase the total intersection degree, so the same bound holds for a nonreduced divisor.
 
 Thus \(Z_B\) cannot contain eighty nonzero points of \(G\). There is no missing \(B\), and residue duality proves that the \(C\cdot J\) packet spans \(R_{5}\). ∎
 
-## 2a.5 Completion at \(q=1\)
+## 2A.5 Completion at \(q=1\)
 
-The two moment theorems say that raw \(J\) spans every active cubic, and that gradients together with \(C\cdot J\) span every active quintic. The fields in §2a.1 therefore supply the corresponding literal target packets. It remains a finite block-degree argument, which we give explicitly.
+The two moment theorems say that raw \(J\) spans every active cubic, and that gradients together with \(C\cdot J\) span every active quintic. The fields in §2A.1 therefore supply the corresponding literal target packets. It remains a finite block-degree argument, which we give explicitly.
 
-For a target monomial let \((d_{0},d_{1},d_{2})\) be its total degrees in the three blocks, so their sum is six. A block Euler field applies whenever one \(d_{i}=4\). All remaining profiles, up to permutation, are (5,1,0), (3,3,0), (3,2,1), (2,2,2), and (6,0,0). The first three are exactly the quintic-linear, two-cubic, and cubic-linear-quadratic packets. For (2,2,2), global \(Y\)-oddness forces the mixed quadratic to be \(X_{2}\cdot Y_{2}\), so the two-reflection theorem in Chapter 2 serves it. For (6,0,0), the only globally odd targets lie entirely in the mixed block; their \(X_{2}\) and \(Y_{2}\) exponents are both odd, so the same theorem applies. These alternatives exhaust every monomial.
+For a target monomial let \((d_{0},d_{1},d_{2})\) be its total degrees in the three blocks, so their sum is six. A block Euler field applies whenever one \(d_{i}=4\). All remaining profiles, up to permutation, are (5,1,0), (3,3,0), (3,2,1), (2,2,2), and (6,0,0). The first three are exactly the quintic-linear, two-cubic, and cubic-linear-quadratic packets. For (2,2,2), global \(Y\)-oddness forces the mixed quadratic to be \(X_{2}\cdot Y_{2}\), so the cubic-surface construction in Chapter 2, §2.5 serves it. For (6,0,0), the only globally odd targets lie entirely in the mixed block; their \(X_{2}\) and \(Y_{2}\) exponents are both odd, so the same doubly odd construction applies. These alternatives exhaust every monomial.
 
-For reference, counting globally odd monomials in these disjoint packets gives
+Linear target separation on the finite contact cover supplies the required combinations, and normalized trace descends the fields. Every \(q=1\) target thus has a strict certificate.
 
-| Packet | Dimension |
-|---|---:|
-| A block has degree four: subset Euler | 54 |
-| Quintic times a passive linear form | 48 |
-| Cubic times passive degrees one and two | 80 |
-| Two block cubics | 32 |
-| Mixed degree-two character in profile (2,2,2) | 9 |
-| Entirely mixed sextic targets | 3 |
-| Total | 226 |
-
-The counts use only \(\operatorname{dim}\operatorname{Sym}^d\) of two variables \(=d+1\) and the parity condition \(d_1+\operatorname{deg}_{Y_2} A\) odd; the preceding profile argument proves exhaustion independently of the totals. Linear target separation on the finite covers supplies the required combinations, and normalized trace descends the fields. Every \(q=1\) target thus has a strict certificate.
-
-## 2a.6 Completion at \(q=2\)
+## 2A.6 Completion at \(q=2\)
 
 The binary Jacobian ring \(k[x,y]/(P_x,P_y)\) is the complete intersection of two quintics, with Hilbert function
 
@@ -264,20 +250,9 @@ h=(1,2,3,4,5,4,3,2,1).
 \end{gathered}
 \]
 
-This follows from the Hilbert series \((1-t^{5})^{2}/(1-t)^{2}\). The full Jacobian ring of \(F\) is the tensor product of the three block rings. For the mixed even block, its even and odd \(Y_{2}\)-character dimensions in degrees zero through eight are
+This follows from the Hilbert series \((1-t^{5})^{2}/(1-t)^{2}\). The full Jacobian ring of \(F\) is the tensor product of the three block rings. First consider profiles with \(d_{0}\ge 6\) or \(d_{1}\ge 6\). Every monomial in that block factors into a binary sextic coefficient direction \(T\) and a remaining monomial. The \(q=1\) theorem, differentiated in the coefficient direction \(T\) by Chapter 2's raising identity, serves the product. If \(d_{2}\ge 7\), the same reasoning works with the mixed block's even sextic directions: multiplication of their four monomials by degrees one or two spans every binary degree-seven or degree-eight monomial. If \(d_{2}=6\) and \(d_{1}\) is odd, the required mixed character is even, so it too is a coefficient direction.
 
-\[
-\begin{gathered}
-h_{\mathrm{even}}=(1,1,2,2,3,2,2,1,1),\\
-h_{\mathrm{odd}} =(0,1,1,2,2,2,1,1,0).
-\end{gathered}
-\]
-
-To obtain these, begin with the even/odd monomial counts and subtract the two quintic generators, of opposite parity, times degrees zero through three; their first syzygy has degree ten and does not occur here. Thus the degree-12 globally odd quotient has dimension 866, obtained by summing \(h(d_{0})\cdot h(d_{1})\cdot h_{\mathrm{parity}}(d_{2})\) over \(d_{0}+d_{1}+d_{2}=12\), with even mixed parity when \(d_{1}\) is odd and odd mixed parity otherwise.
-
-First consider profiles with \(d_{0}\ge 6\) or \(d_{1}\ge 6\). Every monomial in that block factors into a binary sextic coefficient direction \(T\) and a remaining monomial. The \(q=1\) theorem, differentiated in the coefficient direction \(T\) by Chapter 2's raising identity, serves the product. If \(d_{2}\ge 7\), the same reasoning works with the mixed block's even sextic directions: multiplication of their four monomials by degrees one or two spans every binary degree-seven or degree-eight monomial. If \(d_{2}=6\) and \(d_{1}\) is odd, the required mixed character is even, so it too is a coefficient direction.
-
-These derivatives exist pointwise at every smooth member. The contact presentations form a finite étale cover. For each target choose spanning columns with a nonzero minor at the point; their inverse coefficient matrix and the polynomial flux formulas have regular formal coefficient lifts. The two-reflection fields have such lifts as well: their cubic-surface lines form a finite étale cover over the passive field, and the line-basis determinant is nonzero. Consequently every fixed target has a local strict family in every coefficient direction used above. The raising identity requires only its first derivative and preserves denominator legality.
+These derivatives exist pointwise at every smooth member. The contact presentations form a finite étale cover. For each target choose spanning columns with a nonzero minor at the point; their inverse coefficient matrix and the polynomial flux formulas have regular formal coefficient lifts. The doubly odd cubic fields have such lifts as well: their cubic-surface lines form a finite étale cover over the passive field, since a line has normal bundle \(\mathcal O_L(-1)\) with vanishing \(H^0,H^1\), and the line-basis determinant is nonzero. Consequently every fixed target has a local strict family in every coefficient direction used above. The raising identity requires only its first derivative and preserves denominator legality.
 
 Of the remaining profiles, any \(d_{i}=4\) is served by block Euler. Since each \(d_{i}\le 8\) in the quotient, the only profiles not yet covered are
 
@@ -287,7 +262,7 @@ Of the remaining profiles, any \(d_{i}=4\) is served by block Euler. Since each 
 \end{gathered}
 \]
 
-Indeed, the first two degrees are at most five and the third at most six; after excluding four, the only additional possibility with third degree six has odd second degree and was already covered. The \(C\cdot J\) moment theorem spans the degree-five quotient in each of the two active blocks. The first-integral product fields of §2a.1, multiplied by every quadratic in the remaining block, therefore span exactly these three profiles. Their globally odd dimensions are 32,24,24.
+Indeed, the first two degrees are at most five and the third at most six; after excluding four, the only additional possibility with third degree six has odd second degree and was already covered. The \(C\cdot J\) moment theorem spans the degree-five quotient in each of the two active blocks. The first-integral product fields of §2A.1, multiplied by every quadratic in the remaining block, therefore span exactly these three profiles.
 
 This completes the Jacobian quotient. For completeness, a target \(A\) in the degree-12 Jacobian ideal admits a parity-correct polynomial field \(w\) with \(2\cdot w(F)=A\). Put \(B=\operatorname{div} w\) and choose a \(q=1\) field \(u\) serving \(B\). Direct expansion gives
 
@@ -297,4 +272,4 @@ K_{2}(F,A;w+F\cdot u)=F K_{1}(F,B;u)=0.
 \end{gathered}
 \]
 
-Thus the Jacobian ideal is served too, and Euler normalization supplies a strict field with zero divergence. The construction covers the 866 quotient dimensions and all 2214 Jacobian dimensions, totaling the 3080 allowed degree-twelve monomials. Every step is finite algebraic arithmetic on explicit covers or the cubic-surface construction, and all field extensions are removed by trace. This proves the theorem.
+Thus the Jacobian ideal is served too, and Euler normalization supplies a strict field with zero divergence. The contact construction therefore serves both the Jacobian quotient and the Jacobian ideal. Finite trace removes the auxiliary coefficient extensions, proving the theorem.

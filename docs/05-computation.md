@@ -1,8 +1,8 @@
 # 5. Computing and checking certificates
 
-[Previous: known locus and frontier](#technical-information/known-locus) · [Contents](#technical-information/introduction)
+[Previous: families, representations and deformation](#technical-information/known-locus) · [Contents](#technical-information/introduction)
 
-The certificate formulation turns a support problem into polynomial identities. Computation can verify an explicit construction, expose an unexpected solution, or test a proposed mechanism. This chapter explains the complete coefficient system, the limits of numerical discovery, and the exact statement a submitted proof must establish.
+The certificate formulation turns a support problem into polynomial identities. Computation can verify an explicit construction, expose an unexpected solution, or test a proposed mechanism. This chapter explains the complete coefficient system, the limits of numerical discovery, and the exact polynomial criterion for a rational certificate.
 
 ## 5.1 Fixing a denominator makes the problem linear
 
@@ -104,7 +104,7 @@ S=\bigl(R[u_1,\ldots,u_m]/(E_1,\ldots,E_m)\bigr)[1/\Delta]
 
 is nonzero. Its invertible Jacobian makes it étale and hence flat over \(R\). Since \(R\) is a domain, passage to its fraction field keeps this nonzero algebra nonzero. A field factor of the generic étale algebra is a finite separable extension of that fraction field, carrying a solution and the required nonvanishing determinant. Additional open conditions may be inverted if they hold at the seed. An injective extension of the generic coefficient field, such as passage to complex coefficients, preserves the argument.
 
-This is the mechanism behind the modular quartic of §3.3 and the replacement conic of §2.7. It does not say that an arbitrary point modulo a prime lifts, or that an arbitrary change in the equation preserves a solution. The exact equation must be defined over the integral base before reduction; square nonsingularity, flatness and the generic-field injection are the bridge. The characteristic-zero coupling stays fixed, even when its modular reduction is simpler.
+This criterion requires a nonsingular point of the specified integral incidence scheme. An arbitrary point modulo a prime, or an arbitrary change in the equation, does not suffice. The exact equation must be defined over the integral base before reduction; square nonsingularity, flatness and the generic-field injection are the bridge. The characteristic-zero coupling stays fixed, even when its modular reduction is simpler.
 
 A lifted curve is still not a certificate. The application must prove that its family dominates the required hypersurface, that the induced function-field extension is finite, and that a polynomial normal and compatible commuting derivatives give the integration identity. Affine cones illustrate the danger: every point lies on a radial line \(c(t)=tp\), but the gradient of a sextic on that line is divisible by \(t^5\). No polynomial vector \(\psi(t)\) can satisfy \(\nabla F(c(t))\cdot\psi(t)=1\). Merely finding many such lines therefore supplies none of the required normal data.
 
@@ -130,9 +130,9 @@ Then \(\phi(P)(k)\ne0\) for every \(k\in K\) satisfying \(\phi(q)(k)=0\).
 \]
 Keeping the matrix sizes fixed makes this identity valid when \(P\)'s degree drops at the specialization. ∎
 
-All evaluations take place on the specified ring \(R\), which can be a localization on which \(\psi\) is defined. The test may use a degenerate point where other coordinate formulas have poles: it evaluates polynomial covariants and their resultant, while those rational formulas are formed only after their own denominators have been proved nonzero. Neither irreducibility of \(q\) nor injectivity of the coefficient maps is required. The shared `AlgebraicSpecialization` module formalizes the criterion. Its quadratic application to the cubic shears of §2.9 follows `fqlx`'s construction; its hypotheses preserve the distinction between specializing polynomial identities and evaluating rational maps.
+All evaluations take place on the specified ring \(R\), which can be a localization on which \(\psi\) is defined. The test may use a degenerate point where other coordinate formulas have poles: it evaluates polynomial covariants and their resultant, while those rational formulas are formed only after their own denominators have been proved nonzero. Neither irreducibility of \(q\) nor injectivity of the coefficient maps is required.
 
-## 5.5 Exact verification and Lean acceptance
+## 5.5 The polynomial certificate criterion
 
 For any proposed field \(v=N/D\), normalized or otherwise, form the polynomial
 
@@ -157,10 +157,4 @@ A complete explicit check establishes:
 
 The identities may be checked in expanded, sparse or factored form. The representation changes the cost of the calculation, not the statement being proved. A **strict** certificate has \(Q=0\). A nonzero \(Q\) is equally valid: the problem asks for divisibility, not a zero residual. If an even denominator and the standard component parities have been imposed during discovery, check those too; averaging can enforce them, so they must not narrow the underlying existence problem.
 
-For an atlas submission, \(F,q,A\) are fixed by the protected instance record, with \(n=5,d=6\). The Lean contract includes the first item's nonvanishing and homogeneity requirements. Smoothness and the parity of \(F,A\) belong to the target's geometric preparation and are not fields of `Verify`. A contributor proves the statement for the supplied target.
-
-Exact symbolic calculations are useful evidence and can guide the proof, but the live challenge requires a **Lean theorem of certificate existence for that protected target**. For an explicit construction, this means proving the displayed identity and its side conditions through the common certificate interface. A nonconstructive proof is also admissible if it establishes the same existential statement. Merely changing a status field or reporting a successful numerical or symbolic run does not establish formal acceptance.
-
-An existence proof obtained through finite algebraic extensions need not present an expanded \(D\). For example, the cover construction of §2.7 proves the existence of a finite curve-coefficient field, computes a residue primitive there, and descends it by trace before legal homogeneous clearing. Recovering a drawable or directly evaluable divisor is a separate extraction task. One can retain multiplication matrices and determinant or norm expressions rather than expand every coefficient, but must still identify the actual finite algebra and prove that its denominator remains nonzero on the physical hypersurface. An auxiliary cover equation or discriminant by itself is not automatically a certificate divisor.
-
-A solve PR supplies the proof and a mathematical explanation of its construction. The protected checker verifies the theorem and its allowed axioms; the owner gives the final sign-off before merge.
+The criterion is independent of how the field was obtained. A geometric support theorem, a finite-cover construction, and a direct coefficient calculation all lead to the same existence statement. Finite algebraic extensions need not be expanded coefficient by coefficient: trace, determinant and norm expressions can represent the resulting rational functions, provided their nonvanishing, homogeneity and coprimality are established.

@@ -8,7 +8,7 @@ The terms involving the selected pair are \(u^3+w^3+5\cdot(u+w)\cdot(u\cdot w+B)
 \[
 A=X_1^2\cdot X_0\cdot Y_0\cdot(X_0^2-Y_0^2)
 \]
-is odd in both reflected coordinates. Its residue therefore belongs to the sector addressed by the two-reflection construction in [Chapter 2, §2.5](#technical-information/explicit-constructions).
+is odd in both reflected coordinates. Its residue therefore belongs to the invariant sector of each of the two reflection quotients in [Chapter 3, §3.3](#technical-information/geometric-support).
 
 The point of the example is to test how little symmetry that construction needs. The remaining couplings cannot be removed merely by choosing separate reflection coordinates in the \(X\) and \(Y\) blocks. A method depending on six individual sign symmetries would consequently be using more than the equation supplies.
 
