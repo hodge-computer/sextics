@@ -2,3 +2,4 @@ PyYAML==6.0
 mistune==2.0.5
 
 sympy==1.14.0
+numpy==2.3.5

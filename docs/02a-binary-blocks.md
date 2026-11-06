@@ -47,6 +47,63 @@ For two decomposed blocks \(i,j\), take \(e=e_{i}+e_{j}, D=r_{i}^{2}+r_{j}^{2}\)
 
 All these numerators are polynomial after multiplication by their displayed Jacobians. Their denominators involve only two blocks, whereas smooth \(F\) has a nonzero third block, so they are coprime to \(F\). The fields can be averaged for global \(Y\)-parity and traced in their coefficient fields. Polynomial fields \(L_{j}\partial _{x}\) and \(L_{j}\partial _y\) additionally serve \(L_{j}P_{i,x},L_{j}P_{i,y}\) strictly. Thus the remaining question is exactly what the cubics \(J\) and quintics \(C\cdot J\) span as the decompositions vary.
 
+### An elliptic differential behind the two-contact field
+
+The product \(J_iJ_j\) also has a useful interpretation through the moving-point current of [Chapter 2, §2.8](#technical-information/explicit-constructions). Dehomogenize two binary contacts as
+
+\[
+f(r)=C(r)^3+R(r)^2,\qquad
+g(s)=D(s)^3+S(s)^2,
+\qquad P(t)=f(r)+g(s)t^6.
+\]
+
+On the rational open where the following denominators are nonzero, adjoin
+
+\[
+\alpha^3=iR/S,\qquad \beta^3=-P(\alpha),\qquad i^2=-1.
+\]
+
+Since \(R^2+S^2\alpha^6=0\), the functions
+
+\[
+V=\alpha^2D/C,\qquad U=\beta/C
+\]
+
+satisfy \(U^3+V^3+1=0\). Thus
+\(\eta=dV/U^2\) is the pullback of a regular elliptic differential and is closed. This is a source of nonexact closed forms, distinct from integrating a rational function of a single parameter.
+
+Write
+
+\[
+J_X=2CR'-3RC',\qquad J_Y=2DS'-3SD'.
+\]
+
+These are precisely the homogeneous binary Wronskians \(\{C,R\}\) and \(\{D,S\}\) on the charts \((1,r)\) and \((1,s)\). Direct differentiation gives
+
+\[
+\beta^2\eta_r=\frac{\alpha^2D J_X}{3R},\qquad
+\beta^2\eta_s=-\frac{\alpha^2C J_Y}{3S},
+\qquad
+\alpha_r=\frac{\alpha R'}{3R},\quad
+\alpha_s=-\frac{\alpha S'}{3S}.
+\]
+
+Substitute these into the three source coefficients in (2.8.3). Here \(p_1=p_2=0\), so the triple is
+
+\[
+-\frac{4i}{9}J_XJ_Y(\alpha^4,\alpha^2,1).
+\]
+
+The normalized trace in the cubic algebra \(\alpha^3=iR/S\) sends both \(\alpha^2\) and \(\alpha^4\) to zero. The displayed source and its flux are independent of the remaining choice of \(\beta\), so further normalized trace leaves them unchanged. Consequently
+
+\[
+d\,\overline{\eta\wedge\Theta}
+=-\frac{4i}{9}J_XJ_Y\,
+  \frac{t^4}{w^5}\,dt\wedge dr\wedge ds.
+\]
+
+Rescaling the differential by \(-9/(4i)\) gives the product source \(J_XJ_Y\) exactly. The auxiliary constant \(i\) can then be removed by normalized trace. Contact coefficients can likewise be descended after taking linear combinations whose source lies in the original field; tracing an individual contact otherwise traces its source as well. In the traced flux the moving-point denominator becomes \(t^6-\alpha^6=t^6+R^2/S^2\); clearing \(S^2\) gives \(R^2+S^2t^6\), the same two-contact denominator as in the elementary field above. This calculation explains the elliptic differential encoded by that field without asserting that arbitrary coupled sources have the same trace formula.
+
 ## 2A.2 The forty-sheet contact cover
 
 For every squarefree binary sextic \(P\), the presentations

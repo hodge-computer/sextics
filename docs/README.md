@@ -11,15 +11,15 @@ The intended reader knows basic algebraic geometry, differential forms and Hodge
 | Chapter | Subject |
 | --- | --- |
 | [1. From invariant cohomology to rational certificates](#technical-information/certificates) | The key equation, normalization, prescribed support, trace and coefficient descent |
-| [2. Algebraic constructions and residue transport](#technical-information/explicit-constructions) | Cofactor transport, contact geometry, finite covers and variation of rational primitives |
+| [2. Algebraic constructions and residue transport](#technical-information/explicit-constructions) | Cofactor transport, cyclic suspension, closed currents and variation of rational primitives |
 | [2A. Binary sextics and torsion contacts](#technical-information/binary-blocks) | Genus-two three-torsion, Wronskian spanning theorems and a binary-block construction |
 | [3. Geometric support](#technical-information/geometric-support) | Gysin maps, finite-group projectors, Fano and surface fibrations, and supported projectors in families |
 | [3A. Split sextics and K3 surfaces](#technical-information/split-and-k3) | Elliptic companions, polarized splitting and the algebraic Kuga–Satake criterion |
-| [3B. Weighted threefolds and two-reflection sextics](#technical-information/weighted-threefolds) | Fano extensions, Abel–Jacobi variation, monodromy and the two-reflection support theorem |
+| [3B. Weighted threefolds and two-reflection sextics](#technical-information/weighted-threefolds) | Norm-contact curves, Abel–Jacobi residues, finite-jet spanning and two-reflection support |
 | [4. Families, representations and deformation](#technical-information/known-locus) | Invariant sectors, coefficient families, generic-target reduction and limits of quotient methods |
 | [5. Computing and checking certificates](#technical-information/computation) | Complete coefficient systems, incidence lifting and the exact polynomial criterion |
 
-The Fano theorem has two roles in Chapter 3B: it supplies the reflection-invariant sectors, and it makes the containing fourfold's degree-four Hodge classes algebraic. Weighted threefolds then supply the simultaneous negative sector. Shared support and specialization lemmas keep these arguments within one framework. Binary-block and crossed-split existence follow as corollaries of the two-reflection theorem; Chapter 2A retains the independent contact construction and the general spanning results it reveals.
+The Fano quotient theorem supplies the reflection-invariant sectors in Chapter 3B. Families of norm-contact curves on weighted threefolds supply the simultaneous negative sector: their infinitesimal Abel–Jacobi maps are explicit residues, and a finite spanning test gives the required correspondence. Shared support and specialization lemmas extend the result to every smooth member. Binary-block and crossed-split existence follow as corollaries of the two-reflection theorem; Chapter 2A retains the independent contact construction and the general spanning results it reveals.
 
 ## Notation
 
