@@ -2,7 +2,7 @@
 
 [Previous: binary-block constructions](#technical-information/binary-blocks) · [Contents](#technical-information/introduction) · [Next: split sextics and K3 correspondences](#technical-information/split-and-k3)
 
-A certificate constructs a primitive on the complement of a divisor. Geometry establishes the same vanishing through Gysin maps and correspondences. A finite quotient serves the image of its averaging projector; the geometry of the quotient determines whether that image has support. Covering rational curves and surface fibrations with \(p_g=q=0\) supply two such geometric inputs. This chapter proves their common transfer mechanism and its reflection and weighted-Fano applications. Chapter 4 applies the surface criterion to paired-sign sextics. Work in characteristic zero; cohomology is rational, or algebraic de Rham after scalar extension.
+A certificate constructs a primitive on the complement of a divisor. Geometry establishes the same vanishing through Gysin maps and correspondences. A finite quotient serves the image of its averaging projector; the geometry of the quotient determines whether that image has support. This chapter develops the shared tools: quotient transfer, covering rational curves, surface fibrations with \(p_g=q=0\), and supported projectors in families. Its Fano theorem supplies both reflection sectors and the algebraic Hodge classes used in [Chapter 3B](#technical-information/weighted-threefolds); the relative-projector lemma there supports the remaining two-reflection sector. Chapter 4 applies the surface criterion to paired-sign sextics. Work in characteristic zero; cohomology is rational, or algebraic de Rham after scalar extension.
 
 ## 3.1 Divisor support and its source
 
@@ -95,6 +95,20 @@ If \(W\) is smooth, take a smooth affine open of such a component. At a point wh
 If \(W\) is singular, first compute a projective resolution \(\widetilde{W}\to W\). The generic parametrized curve is not contained in the exceptional image, so its rational lift to \(\widetilde{W}\) extends across all of \(\mathbb P^{1}\) by properness. Spread the lift over a smaller parameter open and take the same kind of slice there. The support theorem now applies to \(H^{n}(\widetilde{W})\). Curves passing through singular points downstairs must remain in the bounded search; requiring avoidance or a special weighted-coordinate lift could lose the covering component. The degree bound concerns the search downstairs, not the degree of the lifted curves or of the eventual support.
 
 Over an effectively presented field, irreducible decomposition, extraction of a closed point over a finite extension, resolution and the graph operations make this a finite geometric algorithm. It gives a common support for all middle cohomology. It asserts no practical runtime bound.
+
+### Degree-four Hodge classes
+
+**Corollary.** If a smooth projective variety \(W\) satisfies \(H^4(W)=N^1H^4(W)\), every rational Hodge class in \(H^4(W)\) is algebraic. In particular this holds for a smooth Fano fourfold.
+
+Indeed, the Gysin description in §3.1 gives a surjection of rational Hodge structures
+
+\[
+\bigoplus_i H^2(\widetilde D_i,\mathbb Q)(-1)\longrightarrow H^4(W,\mathbb Q)
+\]
+
+from resolutions of finitely many supporting divisors. Polarizable rational Hodge structures are semisimple: the polarization-orthogonal complement of the kernel gives a rational Hodge splitting. A rational \((2,2)\) class therefore lifts to rational \((1,1)\) classes on the \(\widetilde D_i\). Lefschetz's \((1,1)\) theorem makes these divisor classes; their Gysin images are algebraic codimension-two classes on \(W\). The Fano case follows from covering rational curves above. This also recovers the degree-four statement of the Conte–Murre theorem for uniruled fourfolds, recalled in [Murre, §§2.3–2.5](https://seminariomatematico.polito.it/rendiconti/71-34/473.pdf).
+
+This implication is useful when varying a containing Fano fourfold: its rational Hodge classes can be represented by surfaces and then restricted to a fixed hypersurface. Chapter 3B uses exactly this consequence of the existing support theorem.
 
 ### Surface fibers with algebraic second cohomology
 
@@ -346,3 +360,60 @@ K_q(A;v)=(F/q)K_{q-1}(c;w).
 \]
 
 This inducts to \(q\le 4\) and adds no denominator support. The full Fano construction thus terminates over effectively presented characteristic-zero fields, using finite-type algebraic operations and resolution. The theorem supplies a finite procedure for legal certificates; it does not promise strictness, a small denominator, or a practical runtime.
+
+## 3.7 Supported projectors in families
+
+The curve and surface arguments above construct support on a total space. A third input is a fiberwise algebraic projector with a representative supported on the square of a divisor. Two lemmas explain how such representatives specialize and spread. Fiberwise coniveau alone does not provide these conclusions: the projector and its support must be parametrized together, and the relative argument below uses concentration in one cohomological degree.
+
+### Specialization
+
+**Supported-projector specialization.** Let \(p:\mathcal X\to B\) be a smooth projective family of \(n\)-folds over a smooth connected complex algebraic base. Let \(P\) be a relative rational algebraic correspondence of codimension \(n\), whose restrictions are projectors. Suppose that, at a very general \(b\), its cohomology class has a representative \(Z_b\) supported on \(D_b\times D_b\), for a divisor \(D_b\subset X_b\). Then such a representative exists at every \(b\in B\).
+
+**Proof.** Write a positive integral multiple of \(Z_b\) as a difference of effective cycles. Parametrize the divisor and these cycles by relative flag Hilbert schemes, imposing the closed incidence conditions that the cycles lie in the divisor's square. There are countably many choices of Hilbert polynomials and integral multiplicities. Each resulting parameter space is proper over \(B\). On each connected component, the equality of the cycle class with the same multiple of \([P_b]\) is locally constant: universal flat cycles give flat sections of the pulled-back cohomology local system of the smooth ambient family.
+
+The component through a representative at a very general point cannot have image contained in a proper closed subset of \(B\). Its image is closed by properness, so it is all of \(B\). The same cohomological identity holds at every point of this component. The fixed Hilbert polynomial of the divisor keeps its support of dimension \(n-1\) after specialization; the flag condition keeps the cycle on its square. Dividing by the chosen integral multiple gives the required rational cycle on every fiber. ∎
+
+The hypothesis asks for equality of cohomology classes, not rational equivalence of projectors. No decomposition of the Chow motive is asserted. Chapter 3B obtains this hypothesis from a curve correspondence and a polynomial inverse on its Hodge-theoretic image.
+
+### Relative support over a curve
+
+**Relative support lemma.** Let \(p:\mathcal T\to U\) be a smooth projective family of threefolds over a smooth complex curve, with a fiberwise algebraic involution \(\sigma\). Suppose
+
+\[
+(R^jp_*\mathbb Q)^-=0\quad(j\ne3),
+\]
+
+and the anti-projector \(P^-_u=(\Delta_{T_u}-\Gamma_{\sigma_u})/2\) has a cycle representative supported on \(D_u\times D_u\) at every fiber. After removing finitely many points of \(U\), one divisor in \(\mathcal T\) supports \(H^4(\mathcal T,\mathbb Q)^-\). Its closure together with the omitted fibers supports any global class on a smooth projective model whose restriction is anti-invariant.
+
+**Proof.** The flag parameter spaces from the preceding lemma have countably many proper images covering \(U\). One component dominates \(U\). A multisection and normalization give a finite extension of its function field; after shrinking, this is a finite étale cover \(U'\to U\). On the pulled-back family there are a relative divisor \(D'\) and a relative cycle \(Z'\), supported on \(D'\times_{U'}D'\), whose fiber classes equal the anti-projector. Push \(Z'\) along the finite map of relative products and divide by the cover degree. This gives a rational relative cycle \(Z\) over \(U\) with the same fiber classes, supported on \(D\times_U D\), where \(D\) is the finite image of \(D'\). Enlarge \(D\) by its involution image.
+
+Apply \((1-\sigma)/2\) on both factors to \(Z\). This preserves its support and fiber classes and makes its global class anti-invariant in both factors. Let
+
+\[
+r:\mathcal T\times_U\mathcal T\longrightarrow U,
+\qquad V=(R^3p_*\mathbb Q)^-.
+\]
+
+Relative Künneth and the concentration assumption give
+
+\[
+(R^kr_*\mathbb Q)^{--}=0\ (k\ne6),\qquad
+(R^6r_*\mathbb Q)^{--}=V\otimes V.
+\]
+
+The Leray spectral sequence therefore identifies
+
+\[
+H^6(\mathcal T\times_U\mathcal T,\mathbb Q)^{--}
+\simeq H^0(U,V\otimes V).
+\]
+
+In particular, a class in this double-anti-invariant part is determined by its restrictions to the fibers. Both \([Z]\) and the class of the relative anti-projector lie in that part, so their fiberwise equality gives \([Z]=[P^-]\) globally. Their correspondence actions on \(H^4(\mathcal T)\) agree. The action of \(P^-\) is the identity on
+
+\[
+H^4(\mathcal T)^-\simeq H^1(U,V),
+\]
+
+whereas the action of \(Z\) vanishes after restriction to \(\mathcal T\setminus D\), because its target support is in \(D\). This proves support on the open family. Taking closures and adjoining the boundary divisors proves the last assertion; proper birational pushforward transfers it to another smooth projective model, as in §3.1. ∎
+
+The three fibration inputs now have distinct roles. Rational curves kill cohomology on an affine open. Surface fibers with \(p_g=q=0\) supply global divisor classes and a Leray–Hirsch decomposition after finite base change. The relative support lemma uses a supported projector and a single nonzero anti-invariant cohomology degree. They share the same transfer and boundary arguments, but their hypotheses are not interchangeable.

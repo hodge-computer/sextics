@@ -229,7 +229,7 @@ The target coordinates \(\Psi \) are globally \(Y\)-even. If \(S=\operatorname{d
 
 Legality follows on the ratio chart from the finite square map: its restriction maps the irreducible hypersurface \(F=0\) dominantly onto \(G=0\). Consequently a denominator coprime to \(G\) cannot pull back to a multiple of \(F\). A passive coefficient pole cannot contain \(F\) either, since the map from \(F\) to the passive parameter plane is dominant; nor can either ratio-chart boundary contain the smooth irreducible hypersurface \(F\). Clearing all these denominators therefore gives \(\operatorname{gcd}(D,F)=1\). Finite sums serve every allowed polynomial \(A\). This proves the all-\(q\), all-target theorem on every smooth coordinatewise-even sextic, and constant block-linear coordinate changes preserve the construction.
 
-**Two-reflection extension.** Suppose \(F\) is globally \(Y\)-even and even separately in one \(X\) coordinate \(x\) and one \(Y\) coordinate \(y\). The same construction serves every allowed \(A\) odd in \(x\) and \(y\). Indeed, the remaining \(X\) pair is jointly even by total degree, and the remaining \(Y\) pair is jointly even by global \(Y\)-parity. Thus the ratio substitution still gives a polynomial cubic and polynomial density.
+**Strict cubic fields in the doubly odd sector.** Suppose \(F\) is globally \(Y\)-even and even separately in one \(X\) coordinate \(x\) and one \(Y\) coordinate \(y\). The same construction gives a strict certificate for every allowed \(A\) odd in \(x\) and \(y\), at every positive \(q\). Indeed, the remaining \(X\) pair is jointly even by total degree, and the remaining \(Y\) pair is jointly even by global \(Y\)-parity. Thus the ratio substitution still gives a polynomial cubic and polynomial density.
 
 Here the coordinate-face smoothness argument need not apply, but the generic cubic is smooth nonetheless. If it had a singular point over an algebraic closure of \(k(\alpha ,\beta )\), choose an affine projective chart there and differentiate \(G=0\) with respect to \(\alpha ,\beta \). Characteristic zero lets the derivations extend to this algebraic field. All active derivatives vanish, so \(G_\alpha =G_\beta =0\) at the point. Lift it by square roots. When \(a\ne 0\), the identities
 
@@ -239,7 +239,7 @@ F_b=G_\alpha /a,       F_a=2\cdot aG_s-\alpha G_\alpha /a
 \end{gathered}
 \]
 
-show that both derivatives vanish; when \(a=0\), also \(b=0\) and joint evenness gives the same conclusion. The pair \((c,d)\) is identical. Finally \(F_x=2\cdot xG_u\) and \(F_y=2\cdot yG_w\) vanish. This contradicts smoothness of \(F\). The previous transport and legality proof now applies without change. This is a partial-target theorem on the larger family: global \(Y\)-evenness alone does not supply the selected reflections.
+show that both derivatives vanish; when \(a=0\), also \(b=0\) and joint evenness gives the same conclusion. The pair \((c,d)\) is identical. Finally \(F_x=2\cdot xG_u\) and \(F_y=2\cdot yG_w\) vanish. This contradicts smoothness of \(F\). The previous transport and legality proof now applies without change. The [two-reflection support theorem](#technical-information/weighted-threefolds) proves ordinary certificate existence for every allowed target on this same coefficient family. The present construction additionally supplies strict fields and a finite algebraic recipe in the doubly odd sector. Both results require the selected reflections, which global \(Y\)-evenness alone does not supply.
 
 The degree-45 common denominator lies over \(K\). Clearing passive coefficients contributes physical poles, so it is not a numerical degree bound in the six original coordinates. Nevertheless one finite physical support serves every \(q\) for a fixed \(F\) and pair: fix the quadratic line basis and decompositions of the 56 degree-five active monomials into the partial derivatives. Multiplying these decompositions by monomials supplies every higher-degree decomposition used in the recursion. Only their finitely many passive coefficient poles, the line poles, and the chart boundaries occur. Taking all nine coordinate pairs still gives finite support. This argument bounds neither its physical degree nor its pole multiplicities.
 
@@ -427,11 +427,33 @@ The denominator is legal. The irreducibility of \(F\) and finite surjectivity of
 
 ### Coefficient raising and the bound at every \(q\)
 
-The following identity is useful beyond conics. Suppose \(F_t=F+tT\) is a family of sextics and \(v_q(t)\) has degree \(6\cdot q-5\), with \(q\cdot v_q(t)(F_t)=A\) and \(\operatorname{div} v_q(t)=0\), where \(A\) is independent of \(t\). A dot denotes coefficient differentiation at zero. Set
+The following identity is useful beyond conics and applies to ordinary as well as strict certificates. Write \(K_q(F,A;v)=A-qv(F)+F\operatorname{div}v\), let \(F_t=F+tT\), and suppose \(A\) is independent of \(t\). A dot denotes coefficient differentiation at zero. For
+
+\[
+W=\frac{qTv_q-F\dot v_q}{q+1},
+\]
+
+the product rules give the exact identity
+
+\[
+K_{q+1}(F,AT;W)
+=T K_q(F,A;v_q)-\frac{F}{q+1}
+\left.\partial_tK_q(F_t,A;v_q(t))\right|_{t=0}.
+\]
+
+In particular, \(K_q(F_t,A;v_q(t))=F_t^{q+1}R_t\) implies
+
+\[
+K_{q+1}(F,AT;W)=-\frac{F^{q+2}\dot R}{q+1}.
+\]
+
+The degree increases from \(6q-5\) to \(6(q+1)-5\), and parity is preserved when \(T\) is even. If \(v_q=N/D\), the denominator of \(W\) divides \(D^2\); coefficient differentiation introduces no new physical divisor. The identity requires a coefficient family, or a derivation on its coefficient field, rather than an isolated certificate.
+
+For the strict normalized input \(qv_q(t)(F_t)=A\), \(\operatorname{div}v_q(t)=0\), add an Euler correction to retain those two separate identities:
 
 \[
 \begin{gathered}
-v_{q+1}=(qTv_q-F\dot{v}_q)/(q+1)-v_q(T)E_{6}/[6(q+1)].
+v_{q+1}=W-v_q(T)E_{6}/[6(q+1)].
 \end{gathered}
 \]
 

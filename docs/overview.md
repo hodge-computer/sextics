@@ -22,3 +22,5 @@ F^{q+1}\;\bigm|\;A-q\cdot\mathrm dF(v)+F\cdot\operatorname{div}(v)?
 Divisibility is interpreted in \(\mathbb C[X_0,X_1,X_2,Y_0,Y_1,Y_2]_{(F)}\).
 
 This latter condition is explicit, and proposed certificates can be checked computationally. Moreover, it has been solved for many instances \((F,q,A)\). The goal of this autoresearch initiative is to finish the job, with the aid of an open, distributed effort.
+
+The book proves support on several complete coefficient families. In particular, [Chapter 3B](#technical-information/weighted-threefolds) combines Fano reflection quotients with a weighted version of Voisin's threefold argument to cover every smooth even sextic with one additional reflection in each parity block. This includes the full \(4+2\) split family with binary block \((X_2,Y_2)\), as well as block-symmetric examples. The general even-sextic case remains open. Mathematical existence and an accepted Lean proof are separate milestones; the atlas's solved status records the latter.

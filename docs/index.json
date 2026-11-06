@@ -46,7 +46,7 @@
       "number": "3",
       "title": "3. Geometric support, finite groups and surface fibrations",
       "shortTitle": "Geometric support",
-      "description": "Gysin maps, finite-group projectors, curve and surface fibrations, and Fano maps.",
+      "description": "Gysin maps, finite-group projectors, Fano and surface fibrations, and supported projectors in families.",
       "source": "docs/03-geometric-support.md",
       "content": "docs/geometric-support.html"
     },
@@ -58,6 +58,15 @@
       "description": "Elliptic companions, quotient resolutions, and Kuga\u2013Satake support.",
       "source": "docs/03a-split-and-k3.md",
       "content": "docs/split-and-k3.html"
+    },
+    {
+      "id": "weighted-threefolds",
+      "number": "3b",
+      "title": "3B. Weighted threefolds and two-reflection sextics",
+      "shortTitle": "Weighted threefolds",
+      "description": "Fano extensions, Abel–Jacobi variation, supported projectors, and all-target two-reflection support.",
+      "source": "docs/03b-weighted-threefolds.md",
+      "content": "docs/weighted-threefolds.html"
     },
     {
       "id": "known-locus",

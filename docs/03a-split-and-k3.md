@@ -1,6 +1,6 @@
 # 3A. Split sextics, elliptic contraction and the K3 remainder
 
-[Previous: geometric support](#technical-information/geometric-support) · [Contents](#technical-information/introduction) · [Next: known locus and frontier](#technical-information/known-locus)
+[Previous: geometric support](#technical-information/geometric-support) · [Contents](#technical-information/introduction) · [Next: weighted threefolds and two-reflection sextics](#technical-information/weighted-threefolds)
 
 The Fano machinery of Chapter 3 applies to arbitrary ternary sextics through an elliptic companion. This proves the complete block-sign case \(F=f(X)+g(Y)\), including \(f=g\). When the involution exchanges two equal blocks instead, the same construction supports most classes and isolates an exterior square of K3 cohomology. We prove the quotient maps, support transfer, character calculations and remaining Kuga–Satake criterion here.
 
@@ -184,9 +184,9 @@ The [split-ternary construction of `fqlx`](https://github.com/hodge-computer/sex
 
 ### Involution-stable ternary decompositions
 
-The same theorem holds whenever \(F=p(U)+q(V)\) for complementary three-dimensional subspaces \(U,V\) preserved by \(\tau \). If all three negative eigendirections lie in one summand, this is the theorem just proved. Otherwise their multiplicities are one and two, after exchange of the summands. Write the resulting normal form as \(p(X_{0},X_{1},Y_{0})+q(X_{2},Y_{1},Y_{2})\). Global invariance forces \(p\) to be even in \(Y_{0}\) and, by its even total degree, \(q\) to be even in \(X_{2}\).
+The same theorem holds whenever \(F=p(U)+q(V)\) for complementary three-dimensional subspaces \(U,V\) preserved by \(\tau \). If all three negative eigendirections lie in one summand, this is the theorem just proved. Otherwise their multiplicities are one and two, after exchange of the summands. The normal form is \(p(X_{0},X_{1},Y_{0})+q(X_{2},Y_{1},Y_{2})\). Global invariance forces \(p\) to be even in \(Y_{0}\) and, by its even total degree, \(q\) to be even in \(X_{2}\). Divisor support is therefore a direct corollary of the [two-reflection theorem](#technical-information/weighted-threefolds).
 
-Let \(r\) negate \(Y_{0}, s\) negate \(X_{2}\), and \(\rho \) negate the entire second ternary block. Then \(\tau=\rho\cdot r\cdot s\). The reflection theorem supports the \(r\)-invariant and \(s\)-invariant cohomology; the split theorem supports the \(\rho \)-invariant cohomology. On a simultaneous eigenspace with \(\tau =+1\), at least one of \(r,s\) is \(+1\), or \(r=s=-1\) and therefore \(\rho =+1\). The three supported spaces exhaust the required invariants. This proves the crossed case without a separate companion.
+The finite support construction also remains available from the preceding results. Let \(r\) negate \(Y_0\), \(s\) negate \(X_2\), and \(\rho\) negate the second ternary block, so \(\tau=\rho rs\). Every simultaneous \(\tau\)-invariant eigenspace is invariant under at least one of \(r,s,\rho\). The reflection constructions serve the first two invariant spaces and the split companion serves the third; their supports together give the claimed finite algorithm for every positive \(q\).
 
 ## 3A.4 When the involution swaps the blocks
 
