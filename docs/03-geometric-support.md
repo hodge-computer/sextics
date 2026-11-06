@@ -1,6 +1,6 @@
 # 3. Geometric support, finite groups and surface fibrations
 
-[Previous: algebraic constructions](#technical-information/explicit-constructions) · [Contents](#technical-information/introduction) · [Next: split sextics and K3 correspondences](#technical-information/split-and-k3)
+[Previous: binary sextics and torsion contacts](#technical-information/binary-blocks) · [Contents](#technical-information/introduction) · [Next: split sextics and K3 correspondences](#technical-information/split-and-k3)
 
 A certificate constructs a primitive on the complement of a divisor. Geometry establishes the same vanishing through Gysin maps and correspondences. A finite quotient serves the image of its averaging projector; the geometry of the quotient determines whether that image has support. This chapter develops the shared tools: quotient transfer, covering rational curves, surface fibrations with \(p_g=q=0\), and supported projectors in families. Its Fano theorem supplies both reflection sectors and the algebraic Hodge classes used in [Chapter 3B](#technical-information/weighted-threefolds); the relative-projector lemma below supports the remaining two-reflection sector. Chapter 4 applies the surface criterion to paired-sign sextics. Work in characteristic zero; cohomology is rational, or algebraic de Rham after scalar extension.
 

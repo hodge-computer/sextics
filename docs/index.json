@@ -33,6 +33,15 @@
       "content": "docs/explicit-constructions.html"
     },
     {
+      "id": "binary-blocks",
+      "number": "2a",
+      "title": "2A. Binary sextics and torsion contacts",
+      "shortTitle": "Binary sextic contacts",
+      "description": "Genus-two three-torsion, Wronskian spanning, and an explicit construction on a binary-block family.",
+      "source": "docs/02a-binary-blocks.md",
+      "content": "docs/binary-blocks.html"
+    },
+    {
       "id": "geometric-support",
       "number": "3",
       "title": "3. Geometric support, finite groups and surface fibrations",

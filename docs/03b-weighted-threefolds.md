@@ -389,7 +389,7 @@ The coordinate orbit and comparison with other supported families are discussed 
 
 Two immediate applications illustrate the coefficient scope.
 
-- If \(F=h(X_0,X_1,Y_0,Y_1)+b(s,t)\), with \(h\) even in \((Y_0,Y_1)\) and \(b\) even in \(t\), homogeneity makes \(b\) even in \(s\). Thus every smooth member of this \(4+2\) split family is covered, including a sum of two arbitrary same-parity binary sextics and a separately even binary sextic.
+- If \(F=h(X_0,X_1,Y_0,Y_1)+b(s,t)\), with \(h\) even in \((Y_0,Y_1)\) and \(b\) even in \(t\), homogeneity makes \(b\) even in \(s\). Thus every smooth member of this \(4+2\) split family is covered, including a sum of two arbitrary same-parity binary sextics and a separately even binary sextic. That binary-block subfamily also admits the torsion-contact construction of [Chapter 2A](#technical-information/binary-blocks), which gives explicit fields through two general Wronskian spanning theorems.
 - If an even sextic is invariant under an \(X\)-coordinate transposition and an independent \(Y\)-coordinate transposition, their sums and differences diagonalize them over \(\mathbb Q\) to the required reflections. Block-symmetric even sextics therefore satisfy the theorem after such a coordinate change.
 
 For data over a characteristic-zero field, the support-to-certificate equivalence and coefficient descent of [Chapter 1](#technical-information/certificates) give legal certificates for every invariant target with \(1\le q\le4\), including all central \(q=1,2\) targets. The higher-pole reduction of [Chapter 3, §3.5](#technical-information/geometric-support) preserves legal denominators and extends existence to every positive \(q\).

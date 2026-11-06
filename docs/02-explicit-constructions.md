@@ -1,6 +1,6 @@
 # 2. Algebraic constructions and residue transport
 
-[Previous: certificates](#technical-information/certificates) · [Contents](#technical-information/introduction) · [Next: geometric support](#technical-information/geometric-support)
+[Previous: certificates](#technical-information/certificates) · [Contents](#technical-information/introduction) · [Next: binary sextics and torsion contacts](#technical-information/binary-blocks)
 
 A transport identity relates rational primitives on different equations. A change of variables converts \(F\) into an equation with accessible geometry; a rational field on that equation is pulled back by cofactors. Its Jacobian determines the target. Algebraic cycle classes can then prove that the resulting targets span the required space.
 
@@ -213,6 +213,28 @@ When the \(r_j\) have degree zero, multiplication by \(h\) preserves the compone
 
 As an example of a weighted density map, take
 \(\Phi=(Q_1,Q_2,Q_3,Q_4,r,s)\), with four quadratic and two linear coordinates. A smooth sextic \(F=H(\Phi)\) has an auxiliary equation of weights \((2,2,2,2,1,1)\). The determinant has degree four, so a density of weight \(6q-4\) gives a target of degree \(6q\). This is an instance of the finite weighted-Fano theorem in [Chapter 3](#technical-information/geometric-support/34-nonlinear-polynomial-piola-maps-are-finite-fano-maps). The determinant records precisely which targets come from this presentation.
+
+### Example: two reflections and a cubic surface
+
+Suppose a smooth sextic \(F\) is globally \(Y\)-even and separately even in an \(X\) coordinate \(x\) and a \(Y\) coordinate \(y\). Write the remaining coordinates as \((a,b)\) in \(X\) and \((c,d)\) in \(Y\). The two-reflection theorem of Chapter 3B gives certificate existence for every invariant target. For targets odd in both \(x\) and \(y\), the cubic-surface theorem gives an additional explicit construction.
+
+Use the source coordinate order \((x,a,b,y,c,d)\), and set
+\[
+\alpha=b/a,\qquad \beta=d/c,\qquad
+\Psi=(x^2,a^2,\alpha,y^2,c^2,\beta),\qquad
+\det(d\Psi)=16xy.
+\]
+Joint evenness in \((a,b)\) and \((c,d)\) makes \(F=G(x^2,a^2,y^2,c^2)\), with \(G\) a cubic over \(K=k(\alpha,\beta)\). Likewise, if \(A\) is odd in \(x,y\), then \(A/(16xy)\) becomes a polynomial \(B\) of active degree \(3q-1\).
+
+The generic cubic is smooth. Otherwise choose a singular point over an algebraic closure of \(K\), in an affine projective chart, and extend the coefficient derivations \(\partial_\alpha,\partial_\beta\) to that field. Differentiating its equation, all active partials being zero, gives \(G_\alpha=G_\beta=0\). Lift the point through the squares. When \(a\ne0\),
+\[
+F_b=G_\alpha/a,\qquad F_a=2aG_{a^2}-\alpha G_\alpha/a;
+\]
+when \(a=0\), also \(b=0\), and joint evenness makes both derivatives vanish. The other pair is identical, while \(F_x=2xG_{x^2}\) and \(F_y=2yG_{y^2}\). This would give a singular point of \(F=0\), a contradiction.
+
+Apply §2.4 to \(G,B\), append zero components in the passive directions, and pull the field back by \(\operatorname{adj}(d\Psi)\). Then \(qv(F)=A\) and \(\operatorname{div}v=0\); homogeneity gives component degree \(6q-5\). On the ratio chart, the square map restricts to a dominant finite map from \(F=0\) to \(G=0\), so a denominator coprime to \(G\) remains legal. Passive coefficient poles and the two chart boundaries also cannot contain \(F=0\). Clearing these poles and averaging for parity therefore gives a strict certificate at every positive \(q\).
+
+The torsion-contact construction of [Chapter 2A](#technical-information/binary-blocks) uses this cubic-surface sector together with other contact densities to cover a whole binary-block family.
 
 ## 2.6 Coefficient differentiation
 
