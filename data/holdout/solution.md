@@ -554,11 +554,11 @@ pd=p,\qquad pe=gp,\qquad pr=\tau p,
 \]
 where the physical diagonal automorphism \(g\) has weights \((0,0,0,5,1,5)\) modulo six. These identities hold in the displayed coordinates and hence on the projective models.
 
-The automorphism \(g\) fixes \(F\). At a fixed point with only \(Y_0,Y_2\) nonzero and \(Y_0^6+Y_2^6=0\), its tangent weights are \((1,1,1,2)/6\), of age \(5/6\). The finite-quotient theorem in [Chapter 3, §3.3][support] therefore supports the \(g\)-invariant fourth cohomology. The two supported quotients now satisfy [the deck/exchange descent criterion](#technical-information/known-locus/46-descent-through-a-deck-action-and-an-exchange). Consequently
+The automorphism \(g\) fixes \(F\). At a fixed point with only \(Y_0,Y_2\) nonzero and \(Y_0^6+Y_2^6=0\), its tangent weights are \((1,1,1,2)/6\), of age \(5/6\). The finite-quotient theorem in [Chapter 3, §3.3][support] therefore supports the \(g\)-invariant fourth cohomology. The two supported quotients now satisfy [the deck/exchange descent criterion](#technical-information/geometric-support/descent-through-a-deck-action-and-an-exchange). Consequently
 \[
 H^4(X,\mathbb Q)^\tau\subseteq N^1H^4(X,\mathbb Q).
 \]
-The [certificate correspondence][certificates] and the all-pole extraction in [Chapter 3, §3.6][support] give the fixed-variety theorem. This argument reaches the entire invariant fourth cohomology, including its middle Hodge component.
+The [certificate correspondence][certificates] and the all-pole reduction in [Chapter 3, §3.5][support] give the fixed-variety theorem. This argument reaches the entire invariant fourth cohomology, including its middle Hodge component.
 
 ### Target characters and the polynomial-source boundary
 

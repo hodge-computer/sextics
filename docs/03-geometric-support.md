@@ -1,8 +1,8 @@
 # 3. Geometric support, finite groups and surface fibrations
 
-[Previous: binary-block constructions](#technical-information/binary-blocks) · [Contents](#technical-information/introduction) · [Next: split sextics and K3 correspondences](#technical-information/split-and-k3)
+[Previous: algebraic constructions](#technical-information/explicit-constructions) · [Contents](#technical-information/introduction) · [Next: split sextics and K3 correspondences](#technical-information/split-and-k3)
 
-A certificate constructs a primitive on the complement of a divisor. Geometry establishes the same vanishing through Gysin maps and correspondences. A finite quotient serves the image of its averaging projector; the geometry of the quotient determines whether that image has support. This chapter develops the shared tools: quotient transfer, covering rational curves, surface fibrations with \(p_g=q=0\), and supported projectors in families. Its Fano theorem supplies both reflection sectors and the algebraic Hodge classes used in [Chapter 3B](#technical-information/weighted-threefolds); the relative-projector lemma there supports the remaining two-reflection sector. Chapter 4 applies the surface criterion to paired-sign sextics. Work in characteristic zero; cohomology is rational, or algebraic de Rham after scalar extension.
+A certificate constructs a primitive on the complement of a divisor. Geometry establishes the same vanishing through Gysin maps and correspondences. A finite quotient serves the image of its averaging projector; the geometry of the quotient determines whether that image has support. This chapter develops the shared tools: quotient transfer, covering rational curves, surface fibrations with \(p_g=q=0\), and supported projectors in families. Its Fano theorem supplies both reflection sectors and the algebraic Hodge classes used in [Chapter 3B](#technical-information/weighted-threefolds); the relative-projector lemma below supports the remaining two-reflection sector. Chapter 4 applies the surface criterion to paired-sign sextics. Work in characteristic zero; cohomology is rational, or algebraic de Rham after scalar extension.
 
 ## 3.1 Divisor support and its source
 
@@ -60,13 +60,43 @@ Maschke's theorem makes the scope exact at the representation-theoretic level. A
 
 The same argument applies on a finite auxiliary cover. Resolve a projective model equivariantly, compute the ideal there, and use the proper generically finite map to the original variety. A physical class is served when its pullback lies in the supported image; normalized pushforward then descends the support. Reflections, deck traces and exchanges are instances of this one procedure. Finding more curves on a fixed quotient improves its construction, but cannot add a representation absent from its averaging projector.
 
+### Descent through a deck action and an exchange
+
+Quotients of an auxiliary cover can support complementary parts of the original variety's cohomology. The following criterion isolates the relations needed for their combined descent.
+
+**Proposition.** Let \(p:Z\to X\) be a proper dominant generically finite morphism of smooth complex projective varieties. Let \(d,g\) be finite-order automorphisms of \(Z,X\), respectively; let \(r,\sigma\) be commuting involutions of \(Z\), and \(\tau\) an involution of \(X\). Put \(e=\sigma d\sigma\), and suppose
+\[
+pd=p,\qquad pe=gp,\qquad pr=\tau p.
+\]
+If smooth projective models of \(Z/\langle r,\sigma\rangle\) and \(X/\langle g\rangle\) have divisor-supported \(H^k\), then
+\[
+H^k(X,\mathbb Q)^\tau\subseteq N^1H^k(X,\mathbb Q).
+\]
+
+**Proof.** Quotient transfer in §3.1 supports the corresponding invariant spaces. Take \(\xi\in H^k(X)^\tau\), and write \(a=p^*\xi\) in
+\[
+V=H^k(Z)/N^1H^k(Z).
+\]
+Then \(d^*a=r^*a=a\). Since \(r,\sigma\) commute, \(p^*\xi+\sigma^*p^*\xi\) is invariant under both; its image \(a+\sigma^*a\) is therefore zero in \(V\). Thus \(\sigma^*a=-a\), which gives
+\[
+e^*a=\sigma^*d^*\sigma^*a=a.
+\]
+Let \(\operatorname{Av}_h\) denote averaging over a finite cyclic action. The relation \(pe=gp\) and dominance of \(p\) imply that the order of \(g\) divides that of \(e\), so
+\[
+a=\operatorname{Av}_e a=p^*(\operatorname{Av}_g\xi)=0
+\quad\text{in }V.
+\]
+The last equality follows from support of \(H^k(X)^{\langle g\rangle}\). Finally, proper pushforward preserves divisor support and \(p_*p^*\xi=\deg(p)\xi\). This proves the claim. ∎
+
+For a rational presentation, apply the criterion after exhibiting a finite symmetry group and resolving its action together with the cover projection equivariantly. Finiteness is a hypothesis to check; individual birational symmetries do not by themselves supply the required models.
+
 ## 3.2 Curve and surface fibrations
 
 The two criteria below reduce cohomology over an affine base to classes which vanish off a divisor. Rational curves give vanishing directly. Surface fibers with \(p_g=q=0\) give it after removing finitely many relative divisor classes. Finite trace descends the resulting support in both cases.
 
 ### Covering rational curves
 
-**Support theorem.** Let \(W\) be a smooth projective \(n\)-fold, \(n>0\). Suppose an actual morphism \(e:\mathbb P^{1}\times S\to W\) is dominant and generically finite, where \(S\) is smooth integral affine of dimension \(n-1\). Then all \(H^{n}(W)\) is supported on one divisor, obtainable by finite algebraic operations from \(e\).
+**Support theorem.** Let \(W\) be a smooth projective \(n\)-fold, \(n>0\). Suppose an actual morphism \(e:\mathbb P^{1}\times S\to W\) is dominant and generically finite, where \(S\) is smooth integral affine of dimension \(n-1\). Then all \(H^{n}(W)\) is supported on one divisor.
 
 **Proof.** Put \(V=\mathbb A^{1}\times S\). Homotopy invariance and affine de Rham computation give
 
@@ -80,21 +110,17 @@ Indeed, on \(S\) the de Rham complex is a complex of global sections ending in d
 
 Remove this image and the positive-dimensional-fiber locus of \(p\). On the remaining open the map is finite. Remove its non-étale locus as well; characteristic zero makes this another proper closed subset. Enlarge the union of the removed sets to a divisor \(E\). Then \(p^{-1}(W\setminus E)\) lies in \(V\) and is finite étale of positive degree \(m\) over \(W\setminus E\). The pullback of each global \(\alpha \in H^{n}(W)\) vanishes on \(V\), hence on this smaller open. Finite étale trace gives \(m\alpha |_{W\setminus E}=0\). Notice that no vanishing of all \(H^{n}(p^{-1}(W\setminus E))\) is asserted or needed. ∎
 
-The proof gives the algorithm: form a projective graph closure, eliminate to compute the boundary images, compute fiber-dimension and branch loci, and choose a homogeneous equation containing their union. A proper closed subset of a projective variety has a nonzero equation in some degree, so the final step terminates. If a curve family is initially unparametrized, split its generic conic by a finite extension and shrink the base before applying the theorem; its universal curve need not originally be a product.
+### Fano varieties
 
-The function-field construction in [§2.7](#technical-information/explicit-constructions/27-creating-a-reflection-on-a-finite-cover) makes a related mechanism algebraic at the level of a residue primitive: a polynomial curve family, an invertible normal matrix, polynomial integration, and finite trace. Its proof keeps track of the source density, which is necessary when transferring only a selected cohomological sector.
+A smooth Fano variety is covered by rational curves. The same holds for a normal projective variety with ample \(\mathbb Q\)-Cartier anticanonical divisor; the covering curves may pass through its singular locus. These are consequences of the bend-and-break theorems in [Debarre, Theorems 7.5 and 7.7, Proposition 9.12 and Corollary 9.13](https://perso.imj-prg.fr/wp-content/uploads/debarre-pub/M22.pdf).
 
-### Bounded Fano input
+Here is how to apply the support theorem to a smooth projective model \(\widetilde W\) of such a variety. Choose an irreducible family of parametrized rational curves with dominant evaluation. A general curve has a unique rational lift to \(\widetilde W\), and properness extends that lift over all of \(\mathbb P^1\). Spread it over a smaller parameter open. A general slice of the parameter space gives a smooth affine \((n-1)\)-fold \(S\) and a dominant generically finite morphism \(\mathbb P^1\times S\to\widetilde W\). If the family was initially unparametrized, a finite base change splits its generic conic. The preceding proof and finite trace then give
 
-We use two external curve theorems. A smooth Fano \(n\)-fold is covered by rational curves \(C\) with \(-K\cdot C\le n+1\). A normal projective \(n\)-fold with ample \(\mathbb Q\)-Cartier \(-K\) is covered by rational curves with \(-K\cdot C\le 2\cdot n\). The latter follows from Miyaoka–Mori's bound \(H\cdot C\le 2\cdot n(H\cdot B)/(-K\cdot B)\) applied to a general complete-intersection curve \(B\) in the smooth locus and \(H\) a Cartier multiple of \(-K\). In characteristic zero, a general member of a covering family on a smooth variety is free. These are [Debarre, Theorems 7.5 and 7.7, Proposition 9.12 and Corollary 9.13](https://perso.imj-prg.fr/wp-content/uploads/debarre-pub/M22.pdf).
+\[
+H^n(\widetilde W,\mathbb Q)=N^1H^n(\widetilde W,\mathbb Q).
+\]
 
-Here is how bounded curves supply the precise input required above. Embed the Fano model \(W\) by an explicit very ample Cartier line bundle \(L\), and translate the anticanonical bound into \(L\)-degree. For each allowed degree \(e\), the complete scheme of maps \(\mathbb P^{1}\to W\) is cut out by substituting binary \(e\)-forms into the homogeneous equations of \(W\), together with the basepoint-free condition. There are finitely many components in this bounded union. Since their evaluations cover \(W\), at least one has dominant marked evaluation. Dominance can be tested by elimination, or by a differential rank on smooth loci.
-
-If \(W\) is smooth, take a smooth affine open of such a component. At a point where the curve is nonconstant and marked evaluation is submersive, choose \(n-1\) parameter tangent directions which, with the curve direction, span \(T_W\). An affine linear slice through that point realizes those directions. Shrink its smooth component to obtain an affine \(S\) of dimension \(n-1\) with dominant generically finite \(\mathbb P^{1}\times S\to W\).
-
-If \(W\) is singular, first compute a projective resolution \(\widetilde{W}\to W\). The generic parametrized curve is not contained in the exceptional image, so its rational lift to \(\widetilde{W}\) extends across all of \(\mathbb P^{1}\) by properness. Spread the lift over a smaller parameter open and take the same kind of slice there. The support theorem now applies to \(H^{n}(\widetilde{W})\). Curves passing through singular points downstairs must remain in the bounded search; requiring avoidance or a special weighted-coordinate lift could lose the covering component. The degree bound concerns the search downstairs, not the degree of the lifted curves or of the eventual support.
-
-Over an effectively presented field, irreducible decomposition, extraction of a closed point over a finite extension, resolution and the graph operations make this a finite geometric algorithm. It gives a common support for all middle cohomology. It asserts no practical runtime bound.
+More generally, the same argument applies to every uniruled smooth projective \(n\)-fold. It is the existence of the covering family, rather than a particular rational curve or its equation, that supplies the cohomological conclusion.
 
 ### Degree-four Hodge classes
 
@@ -140,7 +166,7 @@ This uses the classical algebraicity of (1,1) classes on surfaces. It does not a
 
 ## 3.3 Reflection quotients
 
-**Reflection theorem.** If a smooth sextic \(F\) is even in a coordinate \(z\), every target odd in \(z\) has divisor support in its residue class. Retain the global \(Y\)-odd condition when applying this to our certificate problem. If \(F\) is separately even in \(Y_{0},Y_{1},Y_{2}\), or separately even in \(X_{0},X_{1},X_{2}\), every allowed target at every positive \(q\) has a finite geometric certificate construction.
+**Reflection theorem.** If a smooth sextic \(F\) is even in a coordinate \(z\), every target odd in \(z\) has divisor support in its residue class. Retain the global \(Y\)-odd condition when applying this to our certificate problem. If \(F\) is separately even in \(Y_{0},Y_{1},Y_{2}\), or separately even in \(X_{0},X_{1},X_{2}\), every allowed target at every positive \(q\) has a certificate.
 
 **Proof for one reflection.** Write \(F(z,x)=H(z^{2},x_{1},\ldots ,x_{5})\). The quotient by \(\sigma :z\mapsto -z\) is
 
@@ -154,54 +180,19 @@ The coefficient of \(z^{6}\) cannot vanish: otherwise the \(z\)-axis point lies 
 
 The residue volume changes sign under \(\sigma \). Therefore an odd numerator \(A\) gives a \(\sigma \)-invariant residue \(\alpha _A\), and transfer writes \(\alpha _A=\pi^{*}\beta _A\) with \(\beta _A=\pi _*\alpha _A/2\). By the preceding theorem, covering rational curves on \(W\) compute a divisor supporting \(H^{4}(W)\). Pull it back to \(X\). ∎
 
-The bounded incidence here is particularly small. A degree-\(e\) map is represented by five binary \(e\)-forms and one binary \(2\cdot e\)-form, for \(7\cdot e+6\) coefficients. The equation \(H(\phi )=0\) gives \(6\cdot e+1\) scalar equations; \(e\le 5\) suffices. The five weight-one forms must have no common zero, since \(W\) avoids the weighted vertex. The largest incidence thus has 41 coefficients and 31 equations.
-
-Freeness is an exact rank condition. Pull back the weighted Euler and hypersurface normal sequences and twist by \(\mathcal O(-1)\). Since the Euler kernel is \(\mathcal O(-1)\), whose \(H^{0}\) and \(H^{1}\) vanish, the condition \(H^{1}(\phi^{*}T_W(-1))=0\) is equivalent to surjectivity of
-
-\[
-\begin{gathered}
-H^{0}(\mathcal O(e-1)^{5} \oplus  \mathcal O(2\cdot e-1)) \to  H^{0}(\mathcal O(6\cdot e-1)).
-\end{gathered}
-\]
-
-The map multiplies by the six partials of \(H\) evaluated at \(\phi \); its matrix is \(6\cdot e\times 7\cdot e\). The splitting theorem for vector bundles on \(\mathbb P^{1}\) identifies this vanishing with nonnegative splitting degrees of \(\phi^{*}T_W\). At a free point the untwisted incidence derivative has rank \(6\cdot e+1\), so the incidence is smooth of dimension \(e+5\). Choose \(e+2\) affine slices with the evaluation rank condition to leave the required three-dimensional \(S\). These slices choose a covering family on the given \(W\); they restrict neither \(F\) nor \(A\).
-
-For three individual \(Y\) reflections, decompose an odd \(A\) into their simultaneous polynomial characters. Every character has at least one odd \(Y\)-coordinate, so each summand is served by one of the three quotients. Add the fields and take the union of the pulled-back supports. The \(X\) version follows because \(A\) has even total degree and hence odd \(X\)-parity as well. The construction commutes with block-linear changes of coordinates. All-\(q\) numerator extraction is proved in §3.6 below.
-
-### An algebraic realization by weighted quartics
-
-A reflection quotient can be treated by explicit incidence rather than by importing the geometric uniruledness theorem into a formal proof. The [coupled Fano example](https://github.com/hodge-computer/sextics/pull/150) has fixed coupling \(5/7\). Its integral equation reduces modulo five to
-
-\[
-H_0=x_0^6+x_1^6+x_2^6+x_3^6+x_4^6+u^3.
-\]
-
-Over \(\mathbb F_{25}\), choose \(j^2=2\). The weighted quartic
-
-\[
-\begin{aligned}
-x_0&=j(s^4+t^4),&x_1&=(2+j)(s^3t+st^3),&x_2&=js^2t^2,\\
-x_3&=j(s^3t-st^3),&x_4&=s^4-t^4,&u&=s^8+s^4t^4+t^8
-\end{aligned}
-\]
-
-lies on \(H_0=0\) and has no common zero in its five weight-one coordinates. In the chart \(s=1\), vary the coefficients of \(t,\ldots,t^4\) in all six coordinates, keeping the coefficient of \(t^8\) in \(u\) equal to one. The twenty-four positive coefficients of \(H\) give an invertible twenty-four-by-twenty-four incidence matrix. Inverting also the nonzero linear coefficient of \(x_1\) preserves transversality to the endpoint section.
-
-The construction of `fqlx` lifts this square incidence over the integral endpoint ring, with \(5/7\) fixed throughout. Independent endpoint constants and the transverse coordinate prove dominance; finite type and transcendence degree then give a finite extension of the quotient function field. The inverse incidence matrix supplies a polynomial normal. Integration on that family, finite trace, and legal clearing give normalized quotient certificate data, as in §2.7. Pullback through \(u=Y_2^2\) supplies the reflection-odd target.
-
-The distinction between a curve and a serving target remains essential. Even a complete primitive construction on the quotient reaches the density sector of its pullback. A target even in \(Y_2\) has the opposite residue character and does not follow by changing only the quotient source.
+For three individual \(Y\) reflections, decompose an odd \(A\) into their simultaneous polynomial characters. Every character has at least one odd \(Y\)-coordinate, so each summand is served by one of the three quotients. Add the fields and take the union of the pulled-back supports. The \(X\) version follows because \(A\) has even total degree and hence odd \(X\)-parity as well. The construction commutes with block-linear changes of coordinates. The extension to every positive \(q\) is proved in §3.5 below.
 
 ### Finite groups generated by reflections
 
 Let a finite linear \(G\) preserving \(F\) be generated by order-two hyperplane reflections, and assume \(\tau \in G\) or \(-\tau \in G\). The projector criterion of §3.1 has an elementary form here. Put \(U=\sum_s H^4(X)^s\), summing over the reflections. It is supported and \(G\)-stable. In \(H^4(X)/U\), every reflection acts by \(-1\), since \(v+s^*v\in H^4(X)^s\); hence \(G\) acts through its determinant character. Both \(\tau\) and \(-\tau\) have determinant \(-1\) in six variables and induce the same projective involution. Their invariant classes therefore lie in \(U\), proving all-target support. Mere normalization of \(G\) by \(\tau\) does not determine this last character and is insufficient. No commutativity assumption is needed.
 
-The global involution has two fixed plane sextic curves, of codimension three in \(X\). Its transverse quotient singularities are \(\frac12(1,1,1)\). It supplies no branch divisor or Fano quotient of the kind used above; the nonuniruledness of this quotient and the resulting obstruction for its natural cubic cover are proved in §4.7.
+The global involution has two fixed plane sextic curves, of codimension three in \(X\). Its transverse quotient singularities are \(\frac12(1,1,1)\). It supplies no branch divisor or Fano quotient of the kind used above; the nonuniruledness of this quotient and the resulting obstruction for its natural cubic cover are proved in §4.6.
 
 ### Finite quotients beyond reflections
 
 Let \(g\) be a finite-order automorphism of a smooth projective Calabi–Yau variety. At a fixed point, write the tangent eigenvalues as \(\exp(2\pi i a_j)\), with \(0\le a_j<1\). Their sum is the *age* of the action at that point. If one fixed point has \(0<\sum a_j<1\), [Kollár–Larsen, Theorem 2](https://arxiv.org/pdf/math/0701466) shows that the quotient by \(g\) is uniruled. A smooth projective resolution is therefore covered by rational curves. Slicing a dominating curve family gives the generically finite family required in §3.2; finite-quotient transfer then supports the \(g\)-invariant middle cohomology on a divisor.
 
-For a smooth sextic fourfold, adjunction gives trivial canonical bundle, and Lefschetz gives simple connectivity and \(b_2=1\). The latter excludes a product of positive-dimensional projective varieties. Under these additional hypotheses [Kollár–Larsen, Corollary 4](https://arxiv.org/pdf/math/0701466) strengthens the conclusion to rational connectedness. The support argument only needs uniruledness. This criterion gives existence; it does not supply the explicit rational curves or a denominator-degree bound.
+For a smooth sextic fourfold, adjunction gives trivial canonical bundle, and Lefschetz gives simple connectivity and \(b_2=1\). The latter excludes a product of positive-dimensional projective varieties. Under these additional hypotheses [Kollár–Larsen, Corollary 4](https://arxiv.org/pdf/math/0701466) strengthens the conclusion to rational connectedness. The support argument only needs uniruledness.
 
 If a diagonal action fixes \(F\) exactly and has weights \(w_j\) modulo \(n\), a monomial numerator \(Z^e\) has residue character
 
@@ -222,7 +213,7 @@ X=\{F=0\} \;\text{smooth}\;.
 \end{gathered}
 \]
 
-Then \(\Phi \) is finite and \(W=\{G=0\}\subset \mathbb P(m_{1},\ldots ,m_{6})\) is a normal Fano fourfold with quotient singularities. For every \(q\ge 1\) and weighted polynomial \(b\) of weight \(6(q+1)-M\), the residue target \(A=\delta b(\Phi )\) is divisor-supported and has a finite geometric certificate construction. In the involution problem retain the required odd target parity. No spectral derivation or eigencondition on \(b\) is assumed.
+Then \(\Phi \) is finite and \(W=\{G=0\}\subset \mathbb P(m_{1},\ldots ,m_{6})\) is a normal Fano fourfold with quotient singularities. For every \(q\ge 1\) and weighted polynomial \(b\) of weight \(6(q+1)-M\), the residue target \(A=\delta b(\Phi )\) is divisor-supported and has a certificate. In the involution problem retain the required odd target parity. No spectral derivation or eigencondition on \(b\) is assumed.
 
 ### Finiteness and quasismoothness
 
@@ -249,7 +240,7 @@ Let \(\Omega _z\) be contraction of the six-variable volume form with the ordina
 
 The weight condition makes the downstairs form homogeneous of weight zero and horizontal for the weighted Euler field. It is a global closed form on the complement of \(G=0\) in the smooth weighted projective stack. Residue gives a global \(H^{4}\) class on its smooth hypersurface stack. This may also be constructed on finite quotient charts: ordinary residues commute with the chart group and glue. Rational cohomology of a finite stabilizer vanishes in positive degrees, so the cohomology of the stack equals that of its coarse space. Thus there is a global \(\beta \in H^{4}(W)\) with \(\alpha _A=\pi^{*}\beta \). We have not assumed that an arbitrary class on \(W_{\mathrm{reg}}\) extends across its singularities.
 
-Pull \(\beta \) to a projective resolution \(\widetilde{W}\). The bounded Fano construction supports all \(H^{4}(\widetilde{W})\). Remove from \(W\) the images of that support and the exceptional locus; on the remainder the resolution is an isomorphism and \(\beta \) vanishes. Their inverse images under \(\pi \) are proper closed subsets of \(X\) and can be enlarged to a divisor. This proves the target assertion, including its global extension and boundary terms. ∎
+Pull \(\beta \) to a projective resolution \(\widetilde{W}\). The Fano support theorem gives divisor support for all \(H^{4}(\widetilde{W})\). Remove from \(W\) the images of that support and the exceptional locus; on the remainder the resolution is an isomorphism and \(\beta \) vanishes. Their inverse images under \(\pi \) are proper closed subsets of \(X\) and can be enlarged to a divisor. This proves the target assertion, including its global extension and boundary terms. ∎
 
 ### Why every primitive nonlinear polynomial atom is included
 
@@ -267,88 +258,9 @@ has degree one and satisfies \(B(F)=A\). Consequently \(A\) lies in the degree-s
 
 Six arbitrary globally \(Y\)-even quadrics composed with any cubic \(G\) illustrate the theorem: \(\delta \) is an odd sextic, and its class pulls back from a smooth cubic fourfold. This is distinct from the cubic-surface construction over passive ratios. More generally, all determinant densities on the same finite map are supported even when a chosen spectral-field constructor serves only a smaller sector. No assertion that those densities exhaust all targets on \(F\) follows.
 
-### A cubic-cover line and its density
+## 3.5 From divisor support to every pole order
 
-For the [cyclic triple-cover equation](#case/cyclic-triple-fano), set \(Z=X_2^3\). The quotient has weights \((1,1,1,1,1,3)\) and admits the line identified by `rbajaj5`,
-
-\[
-[X_0:X_1:Z:Y_0:Y_1:Y_2]=[0:s:0:is:t:it].
-\]
-
-In the affine chart \(s=1\), use coordinate order \((Y_0,Y_1,X_0,X_1,Y_2,Z)\). A family through an endpoint \((\xi,0,k_0,k_1,k_2,k_3)\) has the form
-
-\[
-(\xi+at,\ t,\ k_0+bt,\ k_1,\ k_2+ct,\ k_3+dt+et^2+ft^3).
-\]
-
-The constant equation is the endpoint relation; the six positive coefficient equations have Jacobian determinant \(-22500/2401\) at the displayed line. The same incidence, polynomial-normal, dominance and integration argument therefore constructs normalized quotient data for a polynomial source \(B\). The [exact application](https://github.com/hodge-computer/sextics/pull/153) builds on the shared machinery of `fqlx` and `HeadOfNaps`.
-
-Let \(\varphi\) substitute \(Z=X_2^3\). If \((d,N,Q)\) is normalized data for \(B\), put
-
-\[
-D=\varphi(d),\qquad
-\widetilde N_j=X_2^2\cdot\varphi(N_j)\ (j\ne X_2),\qquad
-\widetilde N_{X_2}=\tfrac13\varphi(N_Z).
-\]
-
-The chain rule transports the source to \(X_2^2\varphi(B)\) and the reduced divergence numerator to \(F X_2^2\varphi(Q)\). Monic division in an unaffected coordinate proves denominator legality. Thus \(B=X_0Y_0^3\) gives the atlas target \(X_0X_2^2Y_0^3\). A target lacking this density character is not obtained by substituting a different polynomial \(B\). The free line solves the quotient integration problem; it does not remove the character restriction of the finite map.
-
-## 3.5 A self-contained finite bound for the weighted search
-
-For the weights in §3.4 set \(\ell=\operatorname{lcm}(m_1,\ldots,m_6)\). The bundle \(\mathcal O_W(\ell )\) is very ample. The only finite combinatorial ingredient is that the ambient \(\ell \)-Veronese ring is generated in degree one. If a monomial of weight \(k\ell , k\ge 2\), has an exponent \(e_{i}\ge \ell /m_{i}\), remove the pure degree-\(\ell \) factor. Any counterexample therefore has \(0\le e_{i}<\ell /m_{i}\). In this finite box, a bounded subset-sum check shows that a degree-\(\ell \) factor always exists. The following complete integer calculation proves the assertion, the two exceptional profiles and the bound; it has no geometric oracle or omitted lookup table.
-
-```python
-from itertools import combinations_with_replacement, product
-from math import gcd, lcm
-
-profiles = []
-non_well_formed = []
-for m in combinations_with_replacement(range(1, 6), 6):
-    if not 7 <= sum(m) <= 12:
-        continue
-    profiles.append(m)
-    ell = lcm(*m)
-    assert 8*ell // (sum(m)-6) <= 20
-    if any(gcd(*(m[:i]+m[i+1:])) > 1 for i in range(6)):
-        non_well_formed.append(m)
-    for e in product(*(range(ell//a) for a in m)):
-        weight = sum(a*b for a, b in zip(m, e))
-        if weight < 2*ell or weight % ell:
-            continue
-        reachable = {0}
-        for a, b in zip(m, e):
-            reachable = {s+j*a for s in reachable for j in range(b+1)
-                         if s+j*a <= ell}
-        assert ell in reachable
-assert len(profiles) == 26
-assert non_well_formed == [(1,2,2,2,2,2), (2,2,2,2,2,2)]
-```
-
-Induction now factors every monomial of weight \(k\ell \) into degree-\(\ell \) monomials. Generation gives a closed projective embedding; passing to the hypersurface quotient preserves it. Since \(-K_W\ge (M-6)\mathcal O_W(1)\), the normal-Fano curve bound gives the complete embedding-degree search
-
-\[
-\begin{gathered}
-L\cdot C \le  \operatorname{floor}(8\ell /(M-6)) \le  20,       L=\mathcal O_W(\ell ).
-\end{gathered}
-\]
-
-The coarse cubic identifications make the same inequality valid for the two exceptional profiles. The maximum twenty occurs at (1,1,1,1,3,5). This is a bound for curves in a fixed embedding, not a bound for denominator degree. The code is an elementary finite proof of the only profile-specific combinatorial assertion; the geometry is proved above.
-
-## 3.6 From a computed support to every \(q\)
-
-Enlarge a computed proper support in \(X\) to a homogeneous hypersurface \(D=0\) with \(F\nmid D\). If finite coefficient extensions were used, take the union of conjugates; also take the union with its global involution image. The product of the equations gives a rational, globally \(Y\)-even support equation over the original effective field.
-
-For \(1\le q\le 4\), Chapter 1 supplies a numerator over \(\delta =D^q\). Euler normalization makes its extraction the complete linear coefficient system
-
-\[
-\begin{gathered}
-q\cdot N(F)=A\delta ,\\
-\delta  \operatorname{div} N-N(\delta )=F^q\cdot R,\\
-\operatorname{deg} N_{i}=q(\operatorname{deg} D+6)-5.
-\end{gathered}
-\]
-
-All coefficients of the prescribed degrees and parities are included, so the support theorem guarantees consistency. Exact linear algebra therefore finds \(N\). This is a fixed-denominator solve, with no guessed degree search remaining.
+For \(1\le q\le4\), the support-to-certificate theorem of [Chapter 1](#technical-information/certificates) converts divisor support of the residue class into a legal rational primitive. A supporting divisor can be enlarged to the zero set of a homogeneous polynomial \(D\) with \(F\nmid D\). Coefficient descent and averaging give the ground-field and involution conditions when required. The same support suffices for all larger pole orders by the following algebraic reduction.
 
 For \(q\ge 5\), the regular sequence of six quintic partials has Jacobian-ring socle degree 24. Hence \(A=\sum B_{i}F_{i}\) for homogeneous \(B_{i}\) of degree \(6\cdot q-5\). Average \(B\) to impose parity and put \(c=\operatorname{div} B\). If \(w\) serves \((q-1,c)\), direct differentiation gives
 
@@ -359,9 +271,9 @@ K_q(A;v)=(F/q)K_{q-1}(c;w).
 \end{gathered}
 \]
 
-This inducts to \(q\le 4\) and adds no denominator support. The full Fano construction thus terminates over effectively presented characteristic-zero fields, using finite-type algebraic operations and resolution. The theorem supplies a finite procedure for legal certificates; it does not promise strictness, a small denominator, or a practical runtime.
+This inducts to \(q\le4\) without enlarging the supporting divisor. Thus an all-class geometric support theorem yields certificate existence at every positive pole order.
 
-## 3.7 Supported projectors in families
+## 3.6 Supported projectors in families
 
 The curve and surface arguments above construct support on a total space. A third input is a fiberwise algebraic projector with a representative supported on the square of a divisor. Two lemmas explain how such representatives specialize and spread. Fiberwise coniveau alone does not provide these conclusions: the projector and its support must be parametrized together, and the relative argument below uses concentration in one cohomological degree.
 

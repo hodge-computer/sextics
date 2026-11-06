@@ -1,6 +1,6 @@
 # 3B. Weighted threefolds and two-reflection sextics
 
-[Previous: split sextics and K3 correspondences](#technical-information/split-and-k3) · [Contents](#technical-information/introduction) · [Next: known locus and frontier](#technical-information/known-locus)
+[Previous: split sextics and K3 correspondences](#technical-information/split-and-k3) · [Contents](#technical-information/introduction) · [Next: families, representations and deformation](#technical-information/known-locus)
 
 A smooth even sextic with one additional reflection in an \(X\)-coordinate and one in a \(Y\)-coordinate has its entire invariant fourth cohomology supported on a divisor. The individual reflection quotients are Fano and supply the sectors where either reflection acts positively. The remaining simultaneous negative sector comes from a family of weighted Calabi–Yau threefolds. This chapter proves the required threefold theorem and the passage from its fibers to the fourfold.
 
@@ -128,7 +128,7 @@ Thus \(H\) is invariant and \(Q\in R_{11}^-\). Multiplication gives the followin
 | \(Q:R_5^+\to R_{16}^-\) | 82 | 120 | 82 | 45 |
 | \(HQ:R_5^+\to R_{17}^-\) | 82 | 74 | 74 | 286 |
 
-The exact verifier `scripts/verify-weighted-voisin.py`, in the repository's [reproduction scripts](https://github.com/hodge-computer/sextics/tree/main/scripts), reconstructs the matrices and their nonzero minors. Its monomial basis consists of \(z^eu^b\) with \(0\le e_i\le4\), \(b\in\{0,1\}\), and the prescribed weighted degree. For each two-element \(\sigma\)-orbit, use its sum in the plus space and its difference in the minus space, choosing the lexicographically smaller monomial first. Fixed monomials occur only in the plus basis. Expanding multiplication by the displayed integral polynomial gives integral matrices, so the nonzero determinants modulo 1009 prove the ranks over \(\mathbb Q\). The corresponding minors modulo 101 are 62 and 89. Run
+The exact verifier `scripts/verify-weighted-voisin.py`, in the repository's [reproduction scripts](https://github.com/hodge-computer/sextics/tree/main/scripts), reconstructs the matrices and their nonzero minors. Its monomial basis consists of \(z^eu^b\) with \(0\le e_i\le4\), \(b\in\{0,1\}\), and the prescribed weighted degree. For each two-element \(\sigma\)-orbit, use its sum in the plus space and its difference in the minus space, choosing the lexicographically smaller monomial first. Fixed monomials occur only in the plus basis. Expanding multiplication by the displayed integral polynomial gives integral matrices, so the nonzero determinants modulo 1009 prove the ranks over \(\mathbb Q\). Run
 
 ```sh
 python3 scripts/verify-weighted-voisin.py
@@ -297,7 +297,7 @@ for a very general \(T\), with \(C\) a smooth projective curve, allowing a finit
 
 ## 3B.6 Supported projectors and specialization
 
-To apply the supported-projector specialization lemma of [Chapter 3, §3.7](#technical-information/geometric-support), we first produce the required cycle on the square of a divisor. The anti-projector acts on the single primitive degree \(H^3(T)^-\), and the preceding curve correspondence surjects onto that degree at very general fibers. Its transpose supplies the polarization adjoint.
+To apply the supported-projector specialization lemma of [Chapter 3, §3.6](#technical-information/geometric-support), we first produce the required cycle on the square of a divisor. The anti-projector acts on the single primitive degree \(H^3(T)^-\), and the preceding curve correspondence surjects onto that degree at very general fibers. Its transpose supplies the polarization adjoint.
 
 In this case, replace \(\Gamma\) by \(P^-\circ\Gamma\), choose a \(\sigma\)-stable divisor \(D\) containing its image, and set \(S=\Gamma\circ{}^t\Gamma\). The polarization on \(H^1(C)(-1)\) and the primitive polarization on \(H^3(T)\) make \({}^t\Gamma\) the adjoint up to a fixed nonzero sign. Surjectivity makes \(S|_{H^3(T)^-}\) invertible. On all other cohomology it is zero. If its rational characteristic polynomial is \(t^m+a_{m-1}t^{m-1}+\cdots+a_0\), then \(a_0\ne0\) and
 
@@ -357,7 +357,7 @@ h_6(x)+w h_4(x,\lambda)+w^2h_2(x,\lambda)+w^3h_0(\lambda)=0
 
 Each core coefficient is invariant under \(\sigma\). The binary restriction \(F(0,s,t)\) is nonzero and squarefree: separate evenness forces every core monomial degree to be even, so all core first derivatives vanish on the binary line; a zero restriction or a multiple root would make \(X\) singular. Excluding its roots makes \(h_0(\lambda)\ne0\), so the weighted vertex is absent. The only remaining fixed locus of \(\beta\) in a fiber is the smooth branch surface \(s=0\), where it is a reflection. Thus, after removing finitely many parameters and one affine-chart boundary, the quotients form a smooth projective family \(p:\mathcal T\to U\) of the weighted threefolds just treated.
 
-The relative support lemma of [Chapter 3, §3.7](#technical-information/geometric-support) now applies. Its two requirements are
+The relative support lemma of [Chapter 3, §3.6](#technical-information/geometric-support) now applies. Its two requirements are
 
 \[
 (R^jp_*\mathbb Q)^-=0\quad(j\ne3),
@@ -385,15 +385,13 @@ The theorem covers the entire smooth locus of a 104-coefficient linear family, o
 44+2\cdot19+3\cdot6+4\cdot1=104.
 \]
 
-The coordinate orbit and comparison with other supported families are discussed in [Chapter 4](#technical-information/known-locus). The Fano quotient results remain part of the theorem: they supply the sectors with either reflection positive, while the weighted family supplies the simultaneous negative sector. The explicit constructions for selected reflection characters remain useful for producing actual fields and denominator bounds.
+The coordinate orbit and comparison with other supported families are discussed in [Chapter 4](#technical-information/known-locus). The Fano quotient results remain part of the theorem: they supply the sectors with either reflection positive, while the weighted family supplies the simultaneous negative sector.
 
 Two immediate applications illustrate the coefficient scope.
 
-- If \(F=h(X_0,X_1,Y_0,Y_1)+b(s,t)\), with \(h\) even in \((Y_0,Y_1)\) and \(b\) even in \(t\), homogeneity makes \(b\) even in \(s\). Thus every smooth member of the full \(4+2\) split family is covered.
+- If \(F=h(X_0,X_1,Y_0,Y_1)+b(s,t)\), with \(h\) even in \((Y_0,Y_1)\) and \(b\) even in \(t\), homogeneity makes \(b\) even in \(s\). Thus every smooth member of this \(4+2\) split family is covered, including a sum of two arbitrary same-parity binary sextics and a separately even binary sextic.
 - If an even sextic is invariant under an \(X\)-coordinate transposition and an independent \(Y\)-coordinate transposition, their sums and differences diagonalize them over \(\mathbb Q\) to the required reflections. Block-symmetric even sextics therefore satisfy the theorem after such a coordinate change.
 
-These two applications establish certificate existence for [Four plus two · suspension remainder](#case/four-plus-two-residual) and [Permutation symmetry · residual sector](#case/symmetric-sextic-residual). Their explanations identify the exact reflections and target characters. The repository check `python3 scripts/verify-weighted-instances.py` verifies those hypotheses, the compact equations and their smooth Fermat reduction modulo five directly from the protected records. Formal acceptance still requires a Lean proof of each protected certificate statement, as explained in [Chapter 5](#technical-information/computation).
+For data over a characteristic-zero field, the support-to-certificate equivalence and coefficient descent of [Chapter 1](#technical-information/certificates) give legal certificates for every invariant target with \(1\le q\le4\), including all central \(q=1,2\) targets. The higher-pole reduction of [Chapter 3, §3.5](#technical-information/geometric-support) preserves legal denominators and extends existence to every positive \(q\).
 
-For data over a characteristic-zero field, the support-to-certificate equivalence and coefficient descent of [Chapter 1](#technical-information/certificates) give legal certificates for every invariant target with \(1\le q\le4\), including all central \(q=1,2\) targets. The higher-pole reduction of [Chapter 3, §3.6](#technical-information/geometric-support) preserves legal denominators and extends existence to every positive \(q\).
-
-The Hodge-locus and specialization proof supplies existence of a divisor and a rational field; it gives no bound for their degrees and no displayed denominator. The exact rank calculation certifies the two multiplication maps, while a concrete field must still satisfy the polynomial identities of Chapter 1. The two extra reflections are essential hypotheses of this proof. Global \(Y\)-evenness alone does not provide either the weighted quotient fibers or their two-minus core involution.
+The two extra reflections are essential hypotheses of this proof. Global \(Y\)-evenness alone does not provide either the weighted quotient fibers or their two-minus core involution.

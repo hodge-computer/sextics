@@ -1,10 +1,10 @@
-# 4. The known locus and the open frontier
+# 4. Families, representations and deformation
 
 [Previous: weighted threefolds and two-reflection sextics](#technical-information/weighted-threefolds) · [Contents](#technical-information/introduction) · [Next: computation](#technical-information/computation)
 
-The outstanding problem concerns a Zariski-general smooth globally \(Y\)-even sextic and every invariant primitive class. Coverage has two independent dimensions: the coefficient family on which a construction works, and the cohomological representations it serves. This chapter measures both, applies the support theorems to coupled families, and proves the generic-target reduction. The final section identifies the transcendental local systems left by the natural quotients of a general even sextic.
+Support theorems have two kinds of hypotheses: restrictions on the coefficient family and restrictions on the cohomological representation. This chapter computes their dimensions, studies two families with finite symmetries, and proves a criterion propagating one nonzero supported class over a dominant deformation family. The final section analyzes the representations of natural quotients and a dimension obstruction to an ordinary Fano-extension argument.
 
-## 4.1 Coefficient spaces, target spaces and orbit dimensions
+## 4.1 Coefficient spaces, Hodge structures and orbit dimensions
 
 Write \(S=\mathbb C[X_{0},X_{1},X_{2},Y_{0},Y_{1},Y_{2}]\) and let \(\pm \) indicate total \(Y\)-parity. Counting by \(Y\)-degree gives
 
@@ -32,23 +32,22 @@ Let \(G=GL_{3}(X)\times GL_{3}(Y)\), of dimension eighteen. For a linear coeffic
 
 The same eighteen independent derivatives give affine orbit dimension eighteen at \(F_{0}\) and generically. Projectivization removes the common scalar direction, so the generic projective orbit has dimension seventeen. We report the projective normal-form dimension, the dimension of its \(G\)-saturation, and the quotient dimension. The latter is saturation dimension minus seventeen; in particular, the ambient quotient has dimension 218.
 
-| Smooth sextic locus | Certificate conclusion | \(q\) | Normal form | Saturation | Quotient |
-| --- | --- | --- | ---: | ---: | ---: |
-| Coordinatewise-even \(F=f(X_{0}^{2},X_{1}^{2},X_{2}^{2},Y_{0}^{2},Y_{1}^{2},Y_{2}^{2})\) | Constructive strict cubic-surface fields | Every positive \(q\) | 55 | 67 | 50 |
-| \(F\) separately even in \(Y_{0},Y_{1},Y_{2}\), or its \(X/Y\) mirror | Finite covering-curve construction | Every positive \(q\) | 118 | 124 | 107 |
-| One extra \(X\) reflection and one extra \(Y\) reflection | Fano sectors and weighted-threefold support | Every positive \(q\) | 103 | 111 | 94 |
-| Arbitrary \(f(X)+g(Y)\) | Finite elliptic-companion construction | Every positive \(q\) | 55 | 55 | 38 |
-| Crossed \(p(X_{0},X_{1},Y_{0})+r(X_{2},Y_{1},Y_{2})\), with global \(Y\)-evenness | Finite elliptic-companion construction | Every positive \(q\) | 31 | 39 | 22 |
-| Polarized split \(f(X+Y)+f(X-Y)\), with the order-three plane family below | K3 correspondence existence | Every positive \(q\) | 11 | 24 | 7 |
-| Two arbitrary same-parity binary blocks and one square-binary block | Explicit binary-block construction | 1,2 | 17 | 25 | 8 |
+Each family in the following table has \(H^4(X)^\tau\subset N^1H^4(X)\) throughout its smooth locus. The support mechanisms are proved in Chapters 3, 3A and 3B.
 
-The two-reflection row is the theorem of [Chapter 3B](#technical-information/weighted-threefolds); it establishes algebraic existence without extracting a support equation or a degree bound. Here the order-three family is \(f(z_{0},z_{1},z_{2})=g_{6}(z_{0},z_{1})+z_{2}^{3}g_{3}(z_{0},z_{1})+a z_{2}^{6}\). The last row is \(F=P_{0}(X_{0},X_{1})+P_{1}(Y_{0},Y_{1})+P_{2}(X_{2}^{2},Y_{2}^{2})\). Its all-pole existence follows already from the two-reflection row, while [the binary-block chapter](#technical-information/binary-blocks) supplies strict formulas for \(q=1,2\). Arbitrary binary sextics need not have the extra reflections required by the strict cubic-surface construction.
+| Smooth sextic family | Support mechanism | Normal form | Saturation | Quotient |
+| --- | --- | ---: | ---: | ---: |
+| \(F\) separately even in \(Y_{0},Y_{1},Y_{2}\), or its \(X/Y\) mirror | Reflection quotients | 118 | 124 | 107 |
+| One extra \(X\) reflection and one extra \(Y\) reflection | Fano quotients and weighted threefolds | 103 | 111 | 94 |
+| Block-sign split \(f(X)+g(Y)\) | Elliptic companions and contraction | 55 | 55 | 38 |
+| Polarized split \(f(X+Y)+f(X-Y)\), with the order-three plane family | Algebraic Kuga–Satake correspondence | 11 | 24 | 7 |
 
-**Proof of the dimensions.** Cubics in six squares have 56 coefficients. Their preserving diagonal torus has dimension six, and all twelve off-diagonal Fermat orbit monomials lie outside the family. Hence the saturated affine dimension is \(56+12=68\). With three separate \(Y\) reflections the coefficient count is \(28+45+36+10=119\), according to half the \(Y\)-degree. \(GL_{3}(X)\) and the diagonal \(Y\) torus preserve this space, a subgroup of dimension twelve; exactly six Fermat orbit monomials lie outside it. The saturated cone therefore has dimension 125.
+The order-three family is \(f(z_0,z_1,z_2)=g_6(z_0,z_1)+z_2^3g_3(z_0,z_1)+a z_2^6\). The two-reflection theorem also applies to additive splittings and coordinate symmetries that give these reflections after a block-linear coordinate change, as described in [Chapter 3B](#technical-information/weighted-threefolds).
+
+**Proof of the dimensions.** With three separate \(Y\) reflections the coefficient count is \(28+45+36+10=119\), according to half the \(Y\)-degree. \(GL_3(X)\) and the diagonal \(Y\) torus preserve this space, a subgroup of dimension twelve; exactly six Fermat orbit monomials lie outside it. The saturated cone therefore has dimension 125.
 
 For the two-reflection family, take the reflected coordinates to be \(X_2,Y_2\). Chapter 3B counts 104 coefficients. The preserving subgroup \(GL_2(X_0,X_1)\times G_m(X_2)\times GL_2(Y_0,Y_1)\times G_m(Y_2)\) has dimension ten. Exactly eight Fermat orbit derivatives mix a reflected coordinate with an unreflected coordinate in the same block, and lie outside the coefficient family. Thus its saturated cone has dimension \(104+8=112\), proving the projective dimensions \((103,111,94)\).
 
-The ordinary split family has \(28+28=56\) coefficients and is already \(G\)-stable. Each crossed ternary block contributes sixteen coefficients, giving 32. \(GL_{2}(X_{0},X_{1})\times G_{m}(X_{2})\times G_{m}(Y_{0})\times GL_{2}(Y_{1},Y_{2})\), of dimension ten, preserves it; the eight Fermat derivatives mixing the indicated subblocks lie outside it. The binary family has \(7+7+4=18\) coefficients, is preserved by a subgroup of dimension ten, and again has exactly eight outside Fermat derivatives. These give saturated cone dimensions 40 and 26 respectively. The crossed and binary loci lie in the two-reflection locus; their separate rows record additional constructions, rather than additional existence hypotheses.
+The block-sign split family has \(28+28=56\) coefficients and is already \(G\)-stable, giving projective dimensions \((55,55,38)\).
 
 For the polarized family, the twelve coefficients are \(7+4+1\). Put \(U=X+Y\) and \(V=X-Y\). At \(f=\sum z_{i}^{6}\) the family tangent consists of \(h(U)+h(V)\) for the twelve order-three monomials \(h\). A block-linear infinitesimal change in \(X,Y\) becomes
 
@@ -61,19 +60,11 @@ For the polarized family, the twelve coefficients are \(7+4+1\). Put \(U=X+Y\) a
 
 with arbitrary \(3\times 3\) matrices \(C,E\). The eighteen displayed directions are independent. The nine \(E\) directions have mixed \(U,V\) degree and do not meet the family tangent. Of the nine \(C\) directions, exactly five meet it: \(i,j\in \{0,1\}\), and \(i=j=2\). Thus the combined tangent dimension is \(12+18-5=25\). The simultaneous \(GL_{2}(z_{0},z_{1})\times G_{m}(z_{2})\), of dimension five, supplies the matching upper bound. Subtracting one for projectivization and seventeen for the generic orbit proves every entry in the table. All witnesses used here are smooth; for the polarized witness, the invertible \(U,V\) change reduces smoothness to Fermat. ∎
 
-Among the families for which this book proves **every target at every positive pole order**, the largest projective normal-form, saturation and quotient dimensions are \((118,124,107)\) for finite constructive legal certificates, and \((55,67,50)\) for constructive strict certificates. A finite construction means specified terminating algebraic operations, as in Chapter 3; it need not be computationally practical. These are dimensions of established all-target families, not upper bounds on the full solvable locus.
+## 4.2 Representations and surface quotients
 
-The cover and Jacobian constructions in §§2.7–2.9 do not enlarge these all-target dimension records. The chain application of the descent criterion in §4.6 proves all-target existence for its fixed sextic. The surface quotient below instead supports an entire symmetry sector, of primitive Hodge dimensions \((22,74,22)\), on a nonempty open of a 26-coefficient family and at every pole order. It leaves the other representations of the involution-invariant cohomology untreated. Individual certificates, sector theorems and all-target family theorems therefore require separate coverage statements.
+A finite quotient transfers the image of its averaging projector. Divisor support for the quotient therefore need not support every cohomology class of the covering fourfold. For a polynomial map \(\Phi\), the weighted-Fano theorem of Chapter 3 identifies its residue image by the density condition \(A=\det(d\Phi)b(\Phi)\). The group-algebra formulation in §3.1 describes the corresponding restriction for finite symmetries.
 
-## 4.2 Scope of the partial-target constructions
-
-The strict cubic fields of Chapter 2 require one selected \(X\) reflection and one selected \(Y\) reflection, and construct all targets odd in those two coordinates. Counting degree-six monomials with these parities gives 104 coefficients for \(F\) and 34 raw \(q=1\) targets. Exactly two odd Jacobian directions lie in that target character, namely \(X_{i}F_{Y_{j}}\) and \(Y_{j}F_{X_{i}}\) for the selected coordinates. They are independent by regularity of the partial derivatives. Thus the primitive sector served by this strict constructor has dimension 32. The count is also obtained directly by taking the indicated coefficients of \(\prod _{i}(1-t\epsilon _{i})^{-1}\) in the group algebra of the three sign characters. Chapter 3B now establishes divisor support for every invariant class on the same smooth coefficient family, including the simultaneous negative reflection sector. The dimension 32 measures the strict construction, not the family's full mathematical coverage.
-
-For the conic construction with four arbitrary quadrics and two linears, the weighted sextic \(H\) has 77 coefficients. Four quadrics contribute \(4\cdot 21\) and two linears contribute \(2\cdot 6\) parameters. Consequently its coefficient image has affine dimension at most \(77+84+12=173\), even before accounting for changes of adapted coordinates. Its intersection with \(S_{6}^{+}\) is proper. The construction serves the specified Jacobian-density targets and has the denominator bounds proved in Chapter 2; it does not assert that those densities fill the target space.
-
-The weighted-Fano theorem of Chapter 3 likewise serves \(A=\operatorname{det}(d\Phi )b(\Phi )\). It covers every primitive \(q=1\) nonlinear polynomial Piola atom under its stated hypotheses and removes the atom's spectral condition. The density condition remains. A theorem that transfers all cohomology from a smaller model need not transfer all cohomology of the covering fourfold.
-
-For arbitrary smooth ternary \(f\), the polarized split theorem in [Chapter 3a](#technical-information/split-and-k3) supports a rank-1073 invariant substructure including the ambient class, with primitive Hodge numbers \((189,694,189)\). Its \(q=1\) sector contains every odd \(A\) with \(A(X,X)=0\). The remaining rank-210 piece has Hodge numbers \((19,172,19)\) and is an exterior square of primitive K3 cohomology. Chapter 3a proves both the decomposition and the sufficient algebraic Kuga–Satake criterion, including its application to the order-three family. No unconditional support theorem for that remaining piece for arbitrary \(f\) is asserted.
+For arbitrary smooth ternary \(f\), the polarized split decomposition of [Chapter 3A](#technical-information/split-and-k3) illustrates this distinction. It supports a rank-1073 substructure, including the ambient class, with primitive Hodge numbers \((189,694,189)\). The complementary rank-210 piece has Hodge numbers \((19,172,19)\) and is an exterior square of primitive K3 cohomology. Supporting this piece by the Kuga–Satake criterion requires algebraicity of that correspondence. The order-three family in §4.1 satisfies this additional hypothesis.
 
 ### Paired signs and a surface quotient
 
@@ -82,20 +73,20 @@ Let \(P\) be generated by the paired signs \(s_i:(X_i,Y_i)\mapsto(-X_i,-Y_i)\), 
 h=\operatorname{diag}(\zeta^2,\zeta,1,\zeta^3,\zeta^2,\zeta),
 \qquad \zeta^6=1.
 \]
-Projectively \(P\cong(\mathbb Z/2)^2\), since \(s_0s_1s_2\) is scalar. Its intersection with \(\langle h\rangle\) is trivial, and \(\tau=s_1h^3\). Thus \(\Gamma=P\times\langle h\rangle\) has order 24 and contains the prescribed involution. The \(\Gamma\)-invariant sextics form the 26-coefficient space of §2.9: six pure sixth powers, two balanced square monomials, and nine monomials for each of two edge orientations.
+Projectively \(P\cong(\mathbb Z/2)^2\), since \(s_0s_1s_2\) is scalar. Its intersection with \(\langle h\rangle\) is trivial, and \(\tau=s_1h^3\). Thus \(\Gamma=P\times\langle h\rangle\) has order 24 and contains the prescribed involution. The \(\Gamma\)-invariant sextics form a 26-coefficient space: a monomial exponent \(e\) satisfies \(e_i+e_{i+3}\equiv0\pmod2\) for each pair and has \(h\)-weight zero modulo six. These conditions also imply global \(Y\)-evenness.
 
 **Paired-sign sector theorem.** Suppose \(F\) lies in this space and \(X=V(F)\) is smooth. If the surface \(S\) over the passive field defined below is geometrically smooth, then
 \[
 H^4(X,\mathbb Q)^\Gamma\subseteq N^1H^4(X,\mathbb Q).
 \]
-The surface-smoothness condition holds on a nonempty open of the coefficient space. The supported primitive sector has Hodge dimensions \((22,74,22)\), hence rank 118; the ambient class raises the invariant rank to 119. Every residue in this sector has a certificate, at every positive \(q\).
+The surface-smoothness condition holds on a nonempty open of the coefficient space. The supported primitive sector has Hodge dimensions \((22,74,22)\), hence rank 118; the ambient class raises the invariant rank to 119.
 
 **The quotient field.** On the coordinate open put
 \[
 [u_0:u_1:u_2]=[X_0^2:X_1^2:X_2^2],\qquad
 v=Y_0/X_0,\qquad c_i=(Y_i/X_i)/v\quad(i=1,2).
 \]
-These generate the \(P\)-invariant function field, subject to the ternary cubic \(U=0\) of §2.9. The diagonal action fixes \(c_1,c_2\) and sends
+These generate the \(P\)-invariant function field. Substitution \(Y_i=vc_iX_i\), with \(c_0=1\), turns the sextic into a ternary cubic in the \(u_i\): the pair-degree conditions make every exponent of \(X_i\) even, and their total degree is six. Its coefficients are polynomials in \(v\) and the two parameters \(c_i\). The diagonal action fixes \(c_1,c_2\) and sends
 \[
 v\mapsto\zeta v,\qquad
 (u_0,u_1,u_2)\mapsto(\zeta^4u_0,\zeta^2u_1,u_2).
@@ -124,9 +115,7 @@ p_g(T)=q(T)=0.
 \]
 It has \(\chi(\mathcal O_T)=1\) and \(b_2(T)=10\), since the free cover has degree three, \(\chi(\mathcal O_S)=3\), and \(K_S^2=0\). The surface-fibration theorem of §3.2 supports all fourth cohomology on a smooth projective model of \(X/\Gamma\). Quotient transfer proves the claimed support on \(X\).
 
-This is not a rationality assertion. Since \(S\to T\) is étale, \(K_S\) is the pullback of \(K_T\), so \(T\) has Kodaira dimension one. Its genus-one fibration has multiple fibers of order three over the images of \(b=0,\infty\). The rational elliptic surface appearing through the degree-four/six Weierstrass coefficients of §2.9 is its Jacobian. The algebraicity of \(H^2(T)\), rather than uniruledness of \(T\), is the relevant support input.
-
-The cyclic instance of this surface quotient was introduced by `hodgepodgeconjecture` in the [surface-quotient argument](https://github.com/hodge-computer/sextics/discussions/55#discussioncomment-19077807). The proof above isolates its family-wide geometric hypotheses and supplies the relative-divisor and finite-descent step through §3.2.
+Since \(S\to T\) is étale, \(K_S\) is the pullback of \(K_T\), and \(T\) has Kodaira dimension one. Its genus-one fibration has multiple fibers of order three over the images of \(b=0,\infty\). The support input is the algebraicity of \(H^2(T)\); this example shows why the surface-fibration theorem also applies beyond uniruled fibers. The quotient construction follows the [surface-quotient argument of `hodgepodgeconjecture`](https://github.com/hodge-computer/sextics/discussions/55#discussioncomment-19077807).
 
 **Openness and dimensions.** At the Fermat member,
 \[
@@ -140,28 +129,30 @@ The equivariant Koszul series is constant on the smooth coefficient locus, so th
 from itertools import product
 
 w = (2, 1, 0, 3, 2, 1)
-def invariant(e):
+def character(e, weight):
     return (all((e[i]+e[i+3]) % 2 == 0 for i in range(3))
-            and sum(a*b for a, b in zip(e, w)) % 6 == 3)
+            and sum(a*b for a, b in zip(e, w)) % 6 == weight)
 
-assert [sum(sum(e) == d and invariant(e)
+assert sum(sum(e) == 6 and character(e, 0)
+           for e in product(range(7), repeat=6)) == 26
+assert [sum(sum(e) == d and character(e, 3)
             for e in product(range(5), repeat=6))
         for d in (6, 12, 18)] == [22, 74, 22]
 ```
 
-These are the \((3,1),(2,2),(1,3)\) dimensions, not just counts of raw numerators. The normal-form projective dimension is 25. Its block-linear saturation has dimension 37: the diagonal six-dimensional torus preserves the coefficient space and the twelve off-diagonal Fermat orbit derivatives lie outside it. The corresponding quotient dimension is 20. These remain partial-sector dimensions; compare the full invariant primitive dimensions \((208,866,208)\).
+These are the \((3,1),(2,2),(1,3)\) dimensions of the primitive representation. The normal-form projective dimension is 25. Its block-linear saturation has dimension 37: the diagonal six-dimensional torus preserves the coefficient space and the twelve off-diagonal Fermat orbit derivatives lie outside it. The corresponding quotient dimension is 20. The representation has rank 118, compared with rank 1282 for the full invariant primitive cohomology.
 
-The [mixed-polar construction](#case/mixed-polar) is one application: its paired surface is smooth over the passive field, and its balanced numerator has the same order-six weight nine as the projective volume. Its residue is therefore \(\Gamma\)-invariant. The instance explanation gives the exact coefficient and smoothness checks; its covariant construction realizes the geometric existence statement as an algebraic certificate.
+## 4.3 Cyclic-seven symmetry
 
-## 4.3 A coupled cyclic-seven application
-
-This example is useful because the quotient and its smoothness can be written out, including the mixed terms. Let \(\sigma \) act on \((x,y,z)=(X_{0},X_{1},X_{2})\) with weights \((1,2,4)\) modulo seven and fix \(Y\). The complete \(\sigma \)-invariant, \(Y\)-even sextic family is
+Let \(\sigma\) act on \((x,y,z)=(X_0,X_1,X_2)\) with weights \((1,2,4)\) modulo seven and fix \(Y\). The complete \(\sigma\)-invariant, \(Y\)-even sextic family is
 
 \[
 F=a\cdot x^{5}\cdot y+b\cdot y^{5}\cdot z+c\cdot z^{5}\cdot x+d\cdot x^{2}\cdot y^{2}\cdot z^{2}+x\cdot y^{3}\cdot Q_{0}(Y)+x^{3}\cdot z\cdot Q_{1}(Y)+y\cdot z^{3}\cdot Q_{2}(Y)+g(Y).
 \]
 
-where \(Q_{i}\) are arbitrary ternary quadratics and \(g\) is an arbitrary ternary sextic. This is a fifty-dimensional coefficient space. Every smooth member has its entire \((\tau ,\sigma )\)-invariant \(H^{4}\) supported on a divisor. All nineteen \(q=1\) primitive directions in this sector admit strict cubic-surface constructions.
+where \(Q_i\) are arbitrary ternary quadratics and \(g\) is an arbitrary ternary sextic. This is a fifty-dimensional coefficient space.
+
+**Cyclic-seven sector theorem.** Every smooth member of this family has \(H^4(X)^{\tau,\sigma}\subset N^1H^4(X)\). Its invariant primitive Hodge numbers are \((19,128,19)\).
 
 **Proof.** Introduce the rational coordinates
 
@@ -186,25 +177,15 @@ Its kernel consists of \(\sigma \) and the simultaneous sign change of \(x,y,z\)
 
 We check quasismoothness on every coordinate stratum. Smoothness of \(F\) implies smoothness of its plane restrictions \(F(X,0)\) and \(g(Y)\), because derivatives in the omitted coordinates vanish there. It also forces \(ab\cdot c\ne0\) by examining the three \(X\)-coordinate points. On \(U\cdot V\cdot W\ne 0\), the coordinate map is étale, with Jacobian \(14\cdot x\cdot y\cdot z\), so a singular cone point of \(P\) would lift to one of \(F\). If \(U=0\) and \(V\cdot W\ne 0\), then \(P_V=W(cW+Q_{2})\) and \(P_W=V(2\cdot cW+Q_{2})\); these cannot both vanish. The other two such strata follow cyclically. If \(U\ne 0,V=W=0\), the equation reduces to \(g=0\): for \(Y\ne 0\) use \(\nabla g\ne 0\), while for \(Y=0\) use \(P_W=aU^{2}\ne 0\). Treat the \(V\)-only and \(W\)-only strata in the same way. If \(U=V=W=0\), use smoothness of \(g\) once more. These exhaust the nonzero cone points.
 
-The singular locus of the weighted ambient space meets \(\mathcal W\) along the smooth plane cubic \(p=0\) at \(Y=0\). Transversely the singularities are \(\frac12(1,1,1)\), since the three \(Y\) directions are the odd stabilizer directions. Their age is \(\frac32\), so they are terminal. Weighted adjunction gives \(-K_\mathcal W=\mathcal O(3)\). The normal-Fano support theorem of Chapter 3 therefore gives divisor-supported \(H^{4}\) on a resolution. The quotient-transfer theorem there transfers this support to \(H^{4}(X)^{\tau ,\sigma }\). This proves the all-\(q\) support assertion without claiming that the rational quotient map extends over every boundary point.
+The singular locus of the weighted ambient space meets \(\mathcal W\) along the smooth plane cubic \(p=0\) at \(Y=0\). Transversely the singularities are \(\frac12(1,1,1)\), since the three \(Y\) directions are the odd stabilizer directions. Their age is \(\frac32\), so they are terminal. Weighted adjunction gives \(-K_\mathcal W=\mathcal O(3)\). The normal-Fano support theorem of Chapter 3 gives divisor-supported \(H^4\) on a resolution. Quotient transfer then supports \(H^4(X)^{\tau,\sigma}\), including the boundary terms introduced when resolving the rational map. ∎
 
-For the strict \(q=1\) construction, project to the \(Y\)-direction plane. Over \(k(\mathbb P^{2}_Y)\) the projective generic fibre has equation
-
-\[
-\begin{gathered}
-p(U,V,W)+T[UVQ_{0}+UWQ_{1}+VWQ_{2}]+T^{3}g=0.
-\end{gathered}
-\]
-
-Its affine part \(T\ne 0\) is smooth by generic smoothness of the projection from the smooth locus \(Y\ne 0\) of \(\mathcal W\); the projection is dominant, since its nonconstant cubic equation has affine solutions over an algebraic closure of the base field. At \(T=0\) smoothness follows from that of \(p\). Hence this is a smooth cubic surface. Set \(T=Y_{0}^{2}, \alpha =Y_{1}/Y_{0}\) and \(\beta =Y_{2}/Y_{0}\). The full six-coordinate Jacobian of \((U,V,W,T,\alpha ,\beta )\) is \(28\cdot x\cdot y\cdot z/Y_0\).
-
-The required numerator character is trivial under \(\sigma \) and odd under \(\tau \), since the residue volume has those respective characters. Enumerating monomials gives
+**Character dimensions.** The residue volume is invariant under \(\sigma\) and anti-invariant under \(\tau\). The corresponding degree-six numerator space is
 
 \[
 x\cdot y\cdot z\cdot k[Y_{0},Y_{1},Y_{2}]_{3} \oplus  \operatorname{span}\{x^{3}\cdot y^{2},y^{3}\cdot z^{2},z^{3}\cdot x^{2}\}\cdot k[Y_{0},Y_{1},Y_{2}]_{1}.
 \]
 
-There are \(10+9=19\) directions. Dividing by the full Jacobian gives the quadratic cubic-surface densities \(T^{2}\cdot \alpha _{i}\cdot \alpha _{j}\cdot \alpha _{k}/28\) and \(UT\alpha _{i}/28, VT\alpha _{i}/28, WT\alpha _{i}/28\), where \(\alpha _{0}=1, \alpha _{1}=\alpha , \alpha _{2}=\beta \). Chapter 2's six-line theorem, trace and full Piola transport now supply strict fields. The coordinates are \(Y\)-even and the Jacobian is \(Y\)-odd, giving the required field parity; chart divisors and line divisors avoid \(F\). The degree-six odd Jacobian generators \(Y_{j}F_{X_{i}}, X_{i}F_{Y_{j}}\) have nonzero \(\sigma \)-characters \(-w_{i},w_{i}\), with \(w_{i}\in \{1,2,4\}\). Consequently none of the nineteen directions is Jacobian-trivial. ∎
+There are \(10+9=19\) directions. The degree-six odd Jacobian generators \(Y_jF_{X_i}\) and \(X_iF_{Y_j}\) have nonzero \(\sigma\)-characters \(-w_i\) and \(w_i\), with \(w_i\in\{1,2,4\}\). None of the nineteen invariant directions is therefore Jacobian-trivial.
 
 For completeness, all character dimensions here follow from one explicit Koszul series. In the ring with \(u^{7}=v^{2}=1\), take the coefficient of \(t^{6\cdot q}\cdot u^{0}\cdot v^{1}\) in
 
@@ -215,13 +196,13 @@ w=(1,2,4,0,0,0),     e=(0,0,0,1,1,1).
 \end{gathered}
 \]
 
-At \(q=1\) it is 19; at \(q=2\) it is \(395-276+9=128\), the three terms being the polynomial, first Koszul and second Koszul contributions. Hodge symmetry gives \((19,128,19)\). The same monomial count in \(S_{6}\) gives fifty coefficients. Diagonal \(X\) changes and all \(Y\) changes preserve the family, so its projective saturation has dimension at most \(49+6=55\). At the smooth split Klein member, the six off-diagonal \(X\) orbit derivatives are nonzero and have the six distinct nontrivial \(\sigma \)-characters. They therefore supply six independent directions outside the invariant family, proving equality. That witness is smooth: a zero coordinate at a common zero of the ternary Klein gradient forces all coordinates to vanish; on the coordinate torus, multiplying its three derivative equations gives \(1=(-5)^{3}\), a contradiction. This remains partial-sector coverage on a family of projective dimension 49, saturated dimension 55.
+At \(q=1\) it is 19; at \(q=2\) it is \(395-276+9=128\), the three terms being the polynomial, first Koszul and second Koszul contributions. Hodge symmetry gives \((19,128,19)\). The same monomial count in \(S_6\) gives fifty coefficients. Diagonal \(X\) changes and all \(Y\) changes preserve the family, so its projective saturation has dimension at most \(49+6=55\). At the smooth split Klein member, the six off-diagonal \(X\) orbit derivatives are nonzero and have the six distinct nontrivial \(\sigma\)-characters. They supply six independent directions outside the invariant family, proving equality. The member is smooth: a zero coordinate at a common zero of the ternary Klein gradient forces all coordinates to vanish; on the coordinate torus, multiplying its three derivative equations gives \(1=(-5)^3\), a contradiction. Thus the family has projective dimension 49 and saturated dimension 55, while the supported primitive representation has rank 166.
 
-## 4.4 One generic nonzero target suffices
+## 4.4 A generic support criterion
 
-Here “generic” means the geometric generic point of the full even-sextic parameter space, or equivalently a finite-type certificate/support family dominating that space. An isolated certificate, however difficult to find, does not satisfy this hypothesis.
+Here “generic” refers to the geometric generic point of the full even-sextic parameter space. A support defined there spreads to a finite-type family dominating that space; the dominance hypothesis is essential to the deformation argument.
 
-**Theorem.** Suppose a dominating finite-type family of reduced divisor supports on smooth even sextics carries one nonzero invariant primitive (3,1) class at the geometric generic point. Its Gysin image then carries the entire invariant primitive \(H^{4}\) there. In particular, a generic \(q=1\) certificate for any one nonzero primitive target, such as \(X_{0}^{3}\cdot Y_{0}^{3}\), suffices for every required target. If \(E_i\) are the resolved support components, necessarily \(\sum _i h^{2,0}(E_i)\ge 208\).
+**Theorem.** Suppose a dominating finite-type family of reduced divisor supports on smooth even sextics carries one nonzero invariant primitive \((3,1)\) class at the geometric generic point. Its Gysin image then carries the entire invariant primitive \(H^{4}\) there. In particular, a generic \(q=1\) certificate for any nonzero invariant primitive target implies divisor support for that whole Hodge structure. If \(E_i\) are the resolved support components, necessarily \(\sum _i h^{2,0}(E_i)\ge 208\).
 
 We use two standard inputs from variation of Hodge structure. First, the infinitesimal residue variation for a hypersurface is multiplication by the deformation polynomial in its Jacobian ring. Second, images of morphisms of polarizable variations are polarizable subvariations, their polarization-orthogonal complements are again subvariations, and such morphisms are strict for the Hodge filtration. The first identification follows by differentiating \(A\cdot \Omega /F^{2}\): its next leading numerator is \(-2\cdot gA\), a harmless nonzero scalar times multiplication. For the second input, a morphism preserves the Hodge decomposition, so its image and kernel are Hodge substructures and the map is strict. Positivity of the associated Hodge metric makes the polarization nondegenerate on a substructure; its orthogonal complement is flat and is again a Hodge substructure, giving the required splitting. These arguments apply fibrewise and in families of constant rank. Resolve the support family and shrink its base before applying them.
 
@@ -271,61 +252,31 @@ Distinct support signatures give distinct joint eigenvalue tuples, regardless of
 
 If \(U^{3,1}=V\), stability under the Higgs field and the verified equality \(G\cdot V=W\) force \(U^{2,2}=W\). Complex conjugation gives its whole (1,3) part as well. Apply this to the image of the component Gysin maps, intersected with the invariant primitive sector. The assumed nonzero class rules out the zero alternative. Strictness gives a surjection \(\bigoplus _i H^{2,0}(E_i)\to H^{3,1}(X)^\tau \), proving the lower bound 208. Exceptional components whose image has codimension at least two contribute no (3,1) part, so they do not weaken that bound. ∎
 
-A certificate over the algebraic closure of the universal coefficient field uses finitely many algebraic coefficients. They lie in a finite extension; the denominator and its support spread over a nonempty open of a finite-type base change. Thus the theorem applies. Chapter 1 then converts the resulting support back to certificates for every \(q=1\) and \(q=2\) target. The class of \(X_{0}^{3}\cdot Y_{0}^{3}\) is nonzero at Fermat and hence generically: its exponents are at most four, so it is a nonzero monomial in the displayed Fermat ring.
+A certificate over the algebraic closure of the universal coefficient field uses finitely many algebraic coefficients. They lie in a finite extension; the denominator and its support spread over a nonempty open of a finite-type base change. Thus the theorem applies. Chapter 1 then converts the resulting support back to certificates for every \(q=1\) and \(q=2\) target. In particular, an odd sextic monomial with every exponent at most four is nonzero in the Fermat Jacobian ring, hence represents a nonzero generic class to which the criterion applies.
 
-### The intermediate one-reflection locus
+### The one-reflection criterion
 
-Retain the \(Y_{2}\) reflection \(r\) as well as \(\tau \). The unresolved sector has \(\tau \)-character +1 and \(r\)-character \(-1\); its residue numerators are \(Y\)-odd and \(Y_{2}\)-even. The second calculation above proves dimensions \((126,492,126)\), all monomial projectors, anchor connectivity and middle-piece multiplication surjectivity for the allowed 144-dimensional infinitesimal deformation space. Repeating the proof verbatim gives: one dominating support carrying a nonzero residual (3,1) class carries this entire residual sector. The \(r\)-invariant complement already has the Fano support of Chapter 3. Hence that missing premise would settle all targets on an open of the one-reflection family, and would force \(\sum _i h^{2,0}(E_i)\ge 126\) for a residual support.
+Retain the \(Y_{2}\) reflection \(r\) as well as \(\tau\). The residual sector has \(\tau\)-character \(+1\) and \(r\)-character \(-1\); its residue numerators are \(Y\)-odd and \(Y_{2}\)-even. The second calculation above proves dimensions \((126,492,126)\), all monomial projectors, anchor connectivity and middle-piece multiplication surjectivity for the allowed 144-dimensional infinitesimal deformation space.
 
-Its coefficient dimension is 158, by counting even-\(Y\), even-\(Y_{2}\) sextics. The preserving subgroup \(GL_{3}(X)\times GL_{2}(Y_{0},Y_{1})\times G_{m}(Y_{2})\) has dimension fourteen. Four outside Fermat orbit monomials, \(Y_{2}^{5}\cdot Y_{0},Y_{2}^{5}\cdot Y_{1},Y_{1}^{5}\cdot Y_{2},Y_{0}^{5}\cdot Y_{2}\), attain the upper bound \(158+18-14=162\). The conditional projective dimensions are therefore \(157/161/144\). Chapter 3B supplies the residual support on the proper sublocus with an additional \(X\) reflection. It does not give a family dominating this one-reflection parameter space, so the generic premise here remains unproved.
+**Corollary.** A finite-type family of divisor supports dominating the one-reflection coefficient space and carrying a nonzero residual \((3,1)\) class generically supports the entire residual sector. Consequently it supports \(H^4(X)^\tau\), and its residual support components satisfy \(\sum_i h^{2,0}(E_i)\ge126\).
 
-## 4.5 Raising \(q\) by differentiating a generic certificate
+**Proof.** Apply the preceding argument with the second set of monomial calculations. The \(r\)-invariant complement has the Fano support of Chapter 3. ∎
 
-The preceding theorem settles the Hodge-theoretically required \(q=1,2\) once its premise is met. The coefficient-raising identity of [§2.6](#technical-information/explicit-constructions) then gives every positive \(q\) over the generic coefficient field: differentiating in an even sextic direction \(C\) takes a certificate for \((q,A)\) to one for \((q+1,AC)\), preserving the reduced denominator support. That section proves the exact remainder identity and its strict Euler-normalized corollary together.
+The coefficient dimension of this family is 158, by counting even-\(Y\), even-\(Y_{2}\) sextics. The preserving subgroup \(GL_{3}(X)\times GL_{2}(Y_{0},Y_{1})\times G_{m}(Y_{2})\) has dimension fourteen. Four outside Fermat orbit monomials, \(Y_{2}^{5}\cdot Y_{0},Y_{2}^{5}\cdot Y_{1},Y_{1}^{5}\cdot Y_{2},Y_{0}^{5}\cdot Y_{2}\), attain the upper bound \(158+18-14=162\). Its projective normal-form, saturated and quotient dimensions are therefore \((157,161,144)\). The two-reflection theorem of Chapter 3B concerns a proper sublocus with an additional \(X\) reflection. Its support family does not dominate the one-reflection parameter space, so it does not supply the hypothesis of this corollary.
+
+## 4.5 Coefficient variation and pole order
+
+The coefficient-raising identity of [Chapter 2](#technical-information/explicit-constructions) gives a second propagation argument over the generic coefficient field. Differentiating in an even sextic direction \(C\) takes a certificate for \((q,A)\) to one for \((q+1,AC)\), preserving the reduced denominator support.
 
 Over the universal coefficient field, the direction \(\dot{F}=C\) is a derivation. It extends uniquely to every finite separable coefficient extension in characteristic zero. Applying the identity there and then the normalized trace of Chapter 1 produces a certificate over the original field. Thus an analytic choice of solutions is unnecessary, but a generic family is necessary.
 
 Every odd monomial of degree \(6\cdot q\) is a product of an odd sextic and \(q-1\) even sextics. To prove this, let its total \(Y\)-degree be \(s\), and choose \(b\in \{1,3,5\}\) congruent to \(s\) modulo six. Select \(b Y\) factors and \(6-b X\) factors for the odd sextic; there are enough since both remaining totals are nonnegative multiples of six. Group the remaining \(Y\) factors into all-\(Y\) sextics and the remaining \(X\) factors into all-\(X\) sextics. Iterating the raising identity and taking linear combinations proves the all-positive-\(q\) assertion.
 
-## 4.6 Descent through a deck action and an exchange
+## 4.6 Quotient representations and extension obstructions
 
-Quotients of an auxiliary cover can support complementary parts of the original variety's cohomology. The following criterion isolates the relations needed for their combined descent.
+An auxiliary quotient must both have divisor-supported cohomology and reach the required representation of the covering variety. The averaging ideal of §3.1 separates these two conditions: a new correspondence can enlarge the supported image, whereas changing a residue representative within an existing quotient does not enlarge its averaging ideal.
 
-**Proposition.** Let \(p:Z\to X\) be a proper dominant generically finite morphism of smooth complex projective varieties. Let \(d,g\) be finite-order automorphisms of \(Z,X\), respectively; let \(r,\sigma\) be commuting involutions of \(Z\), and \(\tau\) an involution of \(X\). Put \(e=\sigma d\sigma\), and suppose
-\[
-pd=p,\qquad pe=gp,\qquad pr=\tau p.
-\]
-If smooth projective models of \(Z/\langle r,\sigma\rangle\) and \(X/\langle g\rangle\) have divisor-supported \(H^k\), then
-\[
-H^k(X,\mathbb Q)^\tau\subseteq N^1H^k(X,\mathbb Q).
-\]
-
-**Proof.** Quotient transfer in §3.1 supports the corresponding invariant spaces. Take \(\xi\in H^k(X)^\tau\), and write \(a=p^*\xi\) in
-\[
-V=H^k(Z)/N^1H^k(Z).
-\]
-Then \(d^*a=r^*a=a\). Since \(r,\sigma\) commute, \(p^*\xi+\sigma^*p^*\xi\) is invariant under both; its image \(a+\sigma^*a\) is therefore zero in \(V\). Thus \(\sigma^*a=-a\), which gives
-\[
-e^*a=\sigma^*d^*\sigma^*a=a.
-\]
-Let \(\operatorname{Av}_h\) denote averaging over a finite cyclic action. The relation \(pe=gp\) and dominance of \(p\) imply that the order of \(g\) divides that of \(e\), so
-\[
-a=\operatorname{Av}_e a=p^*(\operatorname{Av}_g\xi)=0
-\quad\text{in }V.
-\]
-The last equality follows from support of \(H^k(X)^{\langle g\rangle}\). Finally, proper pushforward preserves divisor support and \(p_*p^*\xi=\deg(p)\xi\). This proves the claim. ∎
-
-For a rational presentation, apply the criterion after exhibiting a finite symmetry group and resolving its action together with the cover projection equivariantly. Finiteness is a hypothesis to check; individual birational symmetries do not by themselves supply the required models.
-
-For the chain sextic of §2.7, the cover quotient has Fano threefold fibers, and a physical diagonal quotient has a fixed point of age \(5/6\). The criterion and §3.6 give every odd target at every positive pole order. The [holdout explanation](#case/holdout), under “Geometric scope of the Fermat cover,” gives the concrete checks and target characters. This consequence of `fqlx`'s cover construction extends beyond its particular \(q=1\) Lean application.
-
-## 4.7 Scope of the support mechanisms
-
-Three conditions distinguish the constructions in this book. The auxiliary geometry must supply divisor support; the correspondence must reach the required representation; and a computed certificate must bind the resulting primitive to the exact source, normal derivatives and legal denominator. The averaging ideal of §3.1 separates the first two conditions. A polynomial-density theorem or a chosen curve family supplies the third only for the sources satisfying its hypotheses.
-
-Geometric support serves a cohomology class independently of its residue presentation. An explicit increase in pole order, however, requires the corresponding normal derivatives and moving-map corrections. Conversely, changing the numerator can change its representation even when the equation and pole order are fixed. Neither an additional incidence seed on the same quotient nor a higher-order integration identity enlarges that quotient's averaging ideal.
-
-The generic criterion of §4.4 requires one nonzero supported class in a family dominating the full even-sextic parameter space. Complete coverage on a special variety or symmetry locus does not establish that hypothesis. The following dimension and quotient calculations describe the geometric limits of the paired-sign and natural cubic-cover constructions.
+Deformation imposes a further condition. The generic criterion of §4.4 requires a family dominating the relevant coefficient space. The following calculations determine the dimensions and cohomological images of the paired-sign and natural cubic-cover constructions, then compare the source and target dimensions of a direct Fano-extension density test.
 
 ### The transcendental part of the surface fibers
 
@@ -357,7 +308,7 @@ records the dimensions of holomorphic two-forms after the successive quotients.
 
 Even on the smooth \((3,3)\) surface, the nontrivial order-three characters remain substantial. Its Euler number is 36 and \(b_2=34\), while its free quotient has \(b_2=10\). Each nontrivial complex eigenspace therefore has dimension twelve; the characters of the holomorphic forms give Hodge dimensions \((1,10,1)\). The ten-dimensional invariant eigenspace is entirely algebraic; the other two contain holomorphic two-forms. Thus the surface-fibration theorem does not extend to a nontrivial character merely by replacing the numerator or increasing its pole order.
 
-Without the extra diagonal symmetry, the paired cubic has coefficients of degree at most three in \(b\); its Jacobian coefficients have degrees at most twelve and eighteen. A minimal Weierstrass model with fundamental line bundle \(\mathcal O_{\mathbb P^1}(n)\) has \(\chi(\mathcal O)=n\) and canonical bundle pulled back from \(\mathcal O(n-2)\); see [Schütt–Shioda, §§6.6 and 8.2](https://arxiv.org/abs/0907.0298). The minimal degree-\((12,18)\) case has \(n=3\) and Kodaira dimension one, so the surface is not dominated by a family of rational curves with passive parameters fixed. Coprime coefficients and an exact degree-eighteen coefficient give a useful minimality criterion: they exclude nonminimality at finite places and infinity, respectively. Alternative quotients or correspondences need their own support argument.
+Without the extra diagonal symmetry, the paired cubic has coefficients of degree at most three in \(b\); its Jacobian coefficients have degrees at most twelve and eighteen. A minimal Weierstrass model with fundamental line bundle \(\mathcal O_{\mathbb P^1}(n)\) has \(\chi(\mathcal O)=n\) and canonical bundle pulled back from \(\mathcal O(n-2)\); see [Schütt–Shioda, §§6.6 and 8.2](https://arxiv.org/abs/0907.0298). The minimal degree-\((12,18)\) case has \(n=3\) and Kodaira dimension one, so the surface is not dominated by a family of rational curves with passive parameters fixed. Coprime coefficients and an exact degree-eighteen coefficient give a useful minimality criterion: they exclude nonminimality at finite places and infinity, respectively.
 
 ### The natural cubic cover and its standard representation
 
@@ -391,7 +342,7 @@ Let \(Z\) be a smooth equivariant projective model of the \(S_3\)-Galois closure
 | \(A_3\) | 0 | The discriminant double cover |
 | \(S_3\) | 0 | The rational base \(B\) |
 
-The first two quotients are not uniruled: uniruledness of \(Z\) would descend through its generically finite map to \(Q\). The other two have no standard invariants. Consequently no collection of uniruled intermediate quotients of this natural Galois closure can serve \(V_{\mathrm{std}}\) through the averaging ideal of §3.1. This excludes a specific extension of the Fano strategy, not divisor support itself. The surface theorem demonstrates why nonuniruledness is compatible with support; a general construction must provide that support for the remaining transcendental representation, or introduce a larger correspondence which does.
+The first two quotients are not uniruled: uniruledness of \(Z\) would descend through its generically finite map to \(Q\). The other two have no standard invariants. Consequently no collection of uniruled intermediate quotients of this natural Galois closure can serve \(V_{\mathrm{std}}\) through the averaging ideal of §3.1. This is a restriction on that quotient strategy. As the surface-fibration theorem shows, nonuniruledness itself is compatible with divisor support.
 
 ### A dimension obstruction to the direct Fano-extension density test
 
@@ -434,4 +385,4 @@ For reproducibility, if \(a+b=8\) are the positive and negative coordinate count
 
 The last column counts degree-ten monomials with each exponent at most four and polynomial character \((-1)^b\), rather than invariably taking polynomial character \(+1\). This is the determinant twist above; complex conjugation identifies the \((4,2)\) and \((2,4)\) dimensions. The equivariant Koszul formula makes these counts constant on the smooth invariant locus. The same calculation gives \(h^{5,1}(Y)^\sigma=155\) and 170, respectively. The command `python3 scripts/verify-weighted-voisin.py` also reconstructs these counts by exact monomial enumeration.
 
-Consequently this fixed-section sixfold construction cannot provide the full invariant Hodge-bundle submersion used to obtain dense rational middle Hodge classes in the Voisin argument. This excludes that specific density strategy. It leaves open support constructions using independently supplied cycles, smaller serving subvariations, or different ambient geometry, and gives no obstruction to the generalized Hodge conjecture itself.
+Consequently this fixed-section sixfold construction cannot provide the full invariant Hodge-bundle submersion used to obtain dense rational middle Hodge classes in the Voisin argument. The dimension bound concerns that density map: it gives no obstruction to divisor support from independently supplied cycles, smaller subvariations or different ambient geometry.

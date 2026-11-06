@@ -4,7 +4,7 @@ F=P(X_0,X_1,Y_0)+Q(X_2,Y_1,Y_2),
 \]
 each a dense cubic in the squares of its three coordinates. The target is the very short monomial \(A=X_0^5\cdot Y_1\). The mismatch between a simple target and two complicated blocks makes this a useful test of whether a general existence argument can be turned into explicit algebra without selecting an easier target afterward.
 
-Nonconstructive existence is known: the target is odd in the reflected coordinates \(X_0,Y_1\), placing it in a supported sector of the reflection and cubic-surface constructions. See [Chapter 3, §3.3](#technical-information/geometric-support) and [Chapter 2, §2.5](#technical-information/explicit-constructions). The constructive problem is to produce concrete rational data for this exact class.
+Nonconstructive existence is known: the target is odd in the reflected coordinates \(X_0,Y_1\), placing it in a supported sector of the reflection and cubic-surface constructions. See the reflection theorem in [Chapter 3, §3.3](#technical-information/geometric-support). The constructive problem is to produce concrete rational data for this exact class.
 
 Each ternary block can be viewed as a cubic in one selected square, with coefficients depending on the other two squares. Binary-cubic Hessians and discriminants therefore remain available, but they now vary over those passive parameters. Diagonalizing such cubics, tracing between algebraic branches, and returning to homogeneous six-variable coordinates can introduce much larger denominators than the small constant-coefficient examples.
 

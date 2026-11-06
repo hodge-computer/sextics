@@ -26,20 +26,11 @@
     {
       "id": "explicit-constructions",
       "number": "2",
-      "title": "2. Explicit constructions: transport, contact, and algebraic cycles",
-      "shortTitle": "Explicit constructions",
-      "description": "Cofactor transport, cubic target solvers, finite covers, and residue primitives.",
+      "title": "2. Algebraic constructions and residue transport",
+      "shortTitle": "Algebraic constructions",
+      "description": "Cofactor transport, contact geometry, finite covers, and variation of rational primitives.",
       "source": "docs/02-explicit-constructions.md",
       "content": "docs/explicit-constructions.html"
-    },
-    {
-      "id": "binary-blocks",
-      "number": "2a",
-      "title": "2a. Binary blocks: finite contact covers and target spanning",
-      "shortTitle": "Binary blocks",
-      "description": "Finite contact covers and all-target constructions for binary blocks.",
-      "source": "docs/02a-binary-blocks.md",
-      "content": "docs/binary-blocks.html"
     },
     {
       "id": "geometric-support",
@@ -55,7 +46,7 @@
       "number": "3a",
       "title": "3A. Split sextics, elliptic contraction and the K3 remainder",
       "shortTitle": "Split sextics & K3 surfaces",
-      "description": "Elliptic companions, quotient resolutions, and Kuga\u2013Satake support.",
+      "description": "Elliptic companions, quotient resolutions, and Kuga–Satake support.",
       "source": "docs/03a-split-and-k3.md",
       "content": "docs/split-and-k3.html"
     },
@@ -71,9 +62,9 @@
     {
       "id": "known-locus",
       "number": "4",
-      "title": "4. The known locus and the open frontier",
-      "shortTitle": "The open frontier",
-      "description": "Coefficient families, supported representations, surface quotients and the general-sextic frontier.",
+      "title": "4. Families, representations and deformation",
+      "shortTitle": "Families and deformation",
+      "description": "Invariant sectors, coefficient families, generic-target reduction, and limits of quotient methods.",
       "source": "docs/04-known-locus-and-frontier.md",
       "content": "docs/known-locus.html"
     },
