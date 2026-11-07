@@ -10,9 +10,10 @@ F=\sum_{i=0}^2(X_i^6+Y_i^6)
 \qquad A=X_0X_1X_2Y_0Y_1Y_2,\qquad q=1.
 \]
 This is an **incomplete proof draft**. The algebra below reduces the target
-to a relative rational primitive and a final transport step. The two
-unfinished lemmas in [Solution](Solution.lean) are identified below; its
-`Submission.certificate` is not a verified certificate.
+to a relative rational primitive and a final transport step. This layer's
+[Solution](Solution.lean) retains two admitted lemmas; its
+`Submission.certificate` is not a verified certificate. The status below
+also records the transport proved in the dependent PR #223.
 
 ## Reflection chart and residue
 
@@ -78,6 +79,45 @@ These are exact source identities under the stated assumptions; they do
 not construct a global splitting cover or a rational primitive. They narrow
 the trace route but close neither of the two proof obligations below.
 
+## Exact negative source and regular contact
+
+At \(\lambda=1\), let \(G=\texttt{weightedG}\) in coordinates
+\((a,b,c,d,u)\) of weights \((1,1,1,1,2)\), and let \(S_6^-\)
+be the weighted sextics odd under \((c,d)\mapsto(-c,-d)\).
+[SymmetricNegativeSource](SymmetricNegativeSource.lean) enumerates its
+60 monomials. [SymmetricNegativeJacobianIdeal](SymmetricNegativeJacobianIdeal.lean)
+identifies the twelve independent Jacobian directions with the entire
+intersection \(J(G)\cap S_6^-\), where \(J(G)\) uses all five partials. Thus
+\[
+\dim S_6^-=60,\qquad \dim(J(G)\cap S_6^-)=12,\qquad
+\dim\bigl(S_6^-/(J(G)\cap S_6^-)\bigr)=48.
+\]
+Contact spanning remains a separate obligation from this dimension statement.
+
+[ContactCubicExistence](ContactCubicExistence.lean) supplies a genuine root
+\(x\in\mathbb C^{44}\) of the actual rational contact equations, with
+bijective Jacobian. Exact finite row certificates and a certified contraction
+prove existence in the specified dyadic-centered closed ball; no approximate
+root is assumed.
+[ContactCubicTargetBinding](ContactCubicTargetBinding.lean) binds those
+equations to the exact norm identity
+\[
+G=F_1F_2+Q_2B_4+(C_++C_-)(C_+-C_-),
+\]
+where \(F_1=u+Q_1\),
+\(F_2=u^2+(h_2-Q_1)u+h_4-h_2Q_1+Q_1^2\), and
+\(G=u^3+h_2u^2+h_4u+h_6\). All factors use the certified root \(x\).
+[ContactCubicAlgebraic](ContactCubicAlgebraic.lean) identifies the same
+Jacobian with the formal Jacobian over \(\mathbb Q\). Its nonsingularity
+proves each \(x_i\) algebraic and \(\mathbb Q(x_0,\ldots,x_{43})\)
+finite-dimensional over \(\mathbb Q\).
+
+[ContactCubicTangent](ContactCubicTangent.lean) then solves the linearized
+norm identity with the \(a^2\)-coefficient of \(Q_1\) having velocity one.
+The resulting \(\dot Q_1\) lies outside the scalar span of \(F_1,Q_2\),
+giving a nontrivial first-order polynomial deformation. No integrated family
+or contact-to-primitive comparison is supplied by these results.
+
 ## Conditional clearing and the certificate
 
 Given such a primitive,
@@ -116,13 +156,26 @@ corresponding regular homogeneous current existence statement
    implication. [ContactResidueAnnihilator](ContactResidueAnnihilator.lean)
    and [WeightedFiberSmoothness](WeightedFiberSmoothness.lean) provide
    supporting algebra and smoothness results, not primitive existence.
-2. `Submission.regular_game_of_relative_primitive` must turn that primitive
+2. This layer's `Submission.regular_game_of_relative_primitive` must turn that primitive
    into `SymmetricRegularCurrent.RegularGameExists`, completing the
    affine-to-homogeneous transport. The chart and Jacobian identities do not
    themselves discharge this step.
 
-Both lemmas remain admitted in the draft. The final theorem's assembly uses
-them and therefore does not establish the protected certificate independently.
+Both lemmas remain admitted in this layer. The dependent
+[PR #223](https://github.com/hodge-computer/sextics/pull/223), at
+`21d3d74b8b60ded47e8ec9923c2869762b4e5d94`, proves
+[primitive-to-certificate transport](https://github.com/hodge-computer/sextics/blob/21d3d74b8b60ded47e8ec9923c2869762b4e5d94/data/symmetric-sextic-residual/SymmetricCertificateTransport.lean),
+closing the second gap in that combined stack. Its
+[coefficient-field reduction](https://github.com/hodge-computer/sextics/blob/21d3d74b8b60ded47e8ec9923c2869762b4e5d94/data/symmetric-sextic-residual/SymmetricCoefficientField.lean)
+makes primitive existence equivalent to a primitive for \(2\delta/f_u\),
+where \(\delta\) is the divergence of its explicit coefficient field.
+Its remaining admission is `Submission.residual_primitive_exists`.
+The broader [five-component adapter](https://github.com/hodge-computer/sextics/blob/21d3d74b8b60ded47e8ec9923c2869762b4e5d94/data/symmetric-sextic-residual/SymmetricNormalTransport.lean)
+also accepts a normal component and any nonzero coefficient-space polynomial
+denominator, with unrestricted normal-variable dependence in the numerators.
+Neither adapter constructs the missing primitive or a full current solution.
+The Lean primitive-existence goal remains unproved in the combined stack, and this layer's
+unchanged final theorem still depends on its two admissions.
 
 The intended geometric argument follows the project's
 [weighted-threefold and two-reflection construction](../../docs/03b-weighted-threefolds.md),
