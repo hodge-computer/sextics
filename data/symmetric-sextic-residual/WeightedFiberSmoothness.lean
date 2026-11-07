@@ -1,4 +1,4 @@
-import SymmetricSmoothness
+import Proposal.SymmetricSmoothness
 import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 
 /-!

@@ -1,4 +1,4 @@
-import SymmetricReflections
+import Proposal.SymmetricReflections
 import Mathlib.Algebra.MvPolynomial.PDeriv
 import Mathlib.RingTheory.Derivation.Basic
 

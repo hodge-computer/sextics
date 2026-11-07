@@ -1,4 +1,4 @@
-import WeightedPrimitiveTransportCore
+import Proposal.WeightedPrimitiveTransportCore
 import HodgeComputer.Constructions.HoldoutCover.FiniteResidueClearing
 import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
 

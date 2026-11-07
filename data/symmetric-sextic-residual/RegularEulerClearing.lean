@@ -1,4 +1,4 @@
-import AutomaticLegalClearing
+import Proposal.AutomaticLegalClearing
 import HodgeComputer.Constructions.RationalFields.EulerCorrection
 
 /-!

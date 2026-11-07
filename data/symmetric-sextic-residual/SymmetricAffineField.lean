@@ -1,4 +1,4 @@
-import SymmetricAffinePrime
+import Proposal.SymmetricAffinePrime
 import Mathlib.RingTheory.Localization.FractionRing
 import Mathlib.RingTheory.Ideal.Quotient.Operations
 

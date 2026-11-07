@@ -1,4 +1,4 @@
-import RegularEulerClearing
+import Proposal.RegularEulerClearing
 
 /-!
 # Every accepted sextic certificate gives a regular homogeneous current

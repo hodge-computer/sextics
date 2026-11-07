@@ -1,8 +1,8 @@
-import SymmetricPrime
-import SymmetricSmoothness
-import CanonicalFractionCoordinates
-import RegularEulerClearing
-import CertificateRegularCurrent
+import Proposal.SymmetricPrime
+import Proposal.SymmetricSmoothness
+import Proposal.CanonicalFractionCoordinates
+import Proposal.RegularEulerClearing
+import Proposal.CertificateRegularCurrent
 
 /-!
 # The exact symmetric-sextic endpoint with automatic legal clearing

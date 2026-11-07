@@ -1,4 +1,4 @@
-import CurrentVerifierBridge
+import Proposal.CurrentVerifierBridge
 import HodgeComputer.Constructions.FiniteAlgebra.FractionDerivation
 import Mathlib.RingTheory.Derivation.Lie
 

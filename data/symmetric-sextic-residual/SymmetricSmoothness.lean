@@ -1,5 +1,5 @@
-import Mod5Smoothness
-import SymmetricReflections
+import Proposal.Mod5Smoothness
+import Proposal.SymmetricReflections
 
 /-!
 The exact protected sextic has no nonzero common zero of its first partial

@@ -1,4 +1,4 @@
-import CurrentVerifierBridge
+import Proposal.CurrentVerifierBridge
 import HodgeComputer.Constructions.HoldoutCover.HomogeneousCertificate
 import Mathlib.RingTheory.Localization.Integer
 import Mathlib.RingTheory.MvPolynomial.EulerIdentity

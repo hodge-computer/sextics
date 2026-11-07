@@ -1,4 +1,4 @@
-import WeightedPrimitiveTransportCore
+import Proposal.WeightedPrimitiveTransportCore
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 import Mathlib.LinearAlgebra.Matrix.Notation
 

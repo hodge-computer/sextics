@@ -1,5 +1,5 @@
-import WeightedPrimitiveTransportCore
-import SymmetricPrime
+import Proposal.WeightedPrimitiveTransportCore
+import Proposal.SymmetricPrime
 
 /-!
 # The actual reflection chart is integral

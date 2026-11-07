@@ -1,5 +1,5 @@
-import SymmetricAffineField
-import WeightedPrimitiveTransport
+import Proposal.SymmetricAffineField
+import Proposal.WeightedPrimitiveTransport
 
 /-!
 # Exact primitive equation for the protected symmetric sextic

@@ -1,4 +1,4 @@
-import SymmetricReflections
+import Proposal.SymmetricReflections
 import Mathlib.Algebra.MvPolynomial.Equiv
 import Mathlib.Algebra.Polynomial.Eval.Irreducible
 import Mathlib.Algebra.Polynomial.Degree.SmallDegree
