@@ -1,7 +1,7 @@
 # Symmetric sextic: partial primitive transport
 
 This draft contains the latest primitive/current endpoints and their local Lean
-dependencies from [the source conversation](https://chatgpt.com/g/g-p-6a6d301e456881918ba2a163ea5e7e4e-math/c/6aee2915-b568-83ea-8d39-cd15c7be4120).
+dependencies from the supplied research packet.
 Prepared for `fqlx` with OpenAI Codex assistance; original source attributions
 are retained. The shared research record is [Discussion #117](https://github.com/hodge-computer/sextics/discussions/117).
 
