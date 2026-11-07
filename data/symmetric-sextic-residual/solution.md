@@ -10,8 +10,9 @@ F=\sum_{i=0}^2(X_i^6+Y_i^6)
 \qquad A=X_0X_1X_2Y_0Y_1Y_2,\qquad q=1.
 \]
 This is an **incomplete proof draft**. The algebra below reduces the target
-to a relative rational primitive and a final transport step. This layer's
-[Solution](Solution.lean) retains two admitted lemmas; its
+to a relative rational primitive and a final transport step. The classical
+existence argument below uses geometric and de Rham inputs that remain
+unformalized. This layer's [Solution](Solution.lean) retains two admitted lemmas; its
 `Submission.certificate` is not a verified certificate. The status below
 also records the transport proved in the dependent PR #223.
 
@@ -79,6 +80,16 @@ These are exact source identities under the stated assumptions; they do
 not construct a global splitting cover or a rational primitive. They narrow
 the trace route but close neither of the two proof obligations below.
 
+Following the [PR #223 exploration](https://github.com/hodge-computer/sextics/pull/223#issuecomment-6712331048),
+[CubicSelectorCancellation](CubicSelectorCancellation.lean) proves a local
+moving-section identity. For \(q=(u-\beta)h\), \(g=h(\beta)\), and
+\(f=q+(t^2-\alpha^2)H\), its cleared selector numerator satisfies
+\(N=\alpha fS+(t^2-\alpha^2)R\), with explicit \(S,R\) and both moving-root
+chain rules included. On \(f=0\), the density becomes \(2R/(g^2f_u)\),
+cancelling the finite-section denominator under the stated nonvanishing
+conditions. This does not prove an infinity correction, a traced-source
+identity, or primitive existence.
+
 ## Exact negative source and regular contact
 
 At \(\lambda=1\), let \(G=\texttt{weightedG}\) in coordinates
@@ -118,6 +129,85 @@ The resulting \(\dot Q_1\) lies outside the scalar span of \(F_1,Q_2\),
 giving a nontrivial first-order polynomial deformation. No integrated family
 or contact-to-primitive comparison is supplied by these results.
 
+## Classical existence of the relative primitive
+
+The following argument uses the established
+[weighted-threefold support theorem](../../docs/03b-weighted-threefolds.md)
+and classical algebraic de Rham theory. These inputs are not yet Lean
+theorems in this development. The contact computations above are supporting
+results; the argument does not infer support from their ranks.
+
+Put \(k=\mathbb Q(\lambda)\) and homogenize the actual equation and source:
+\[
+G_\lambda=a^6f(\lambda,b/a,c/a,d/a,u/a^2),\qquad
+P_h=bd(a^2-u)(c^2-\lambda^2u).
+\]
+Both have weighted degree six. Choose \(\tau\in\mathbb C\) transcendental
+over \(\mathbb Q\), embedding \(k\) by \(\lambda\mapsto\tau\).
+Quasismoothness and avoidance of the weighted vertex hold on a nonempty
+\(\mathbb Q\)-defined parameter open, since they hold at \(\lambda=1\).
+Every excluded parameter is algebraic, so \(T_\tau=(G_\tau=0)\) is smooth
+and geometrically integral. Write \(L_0=k(b,c,d)[u]/(f)\).
+
+On the weighted ambient space with its isolated singular vertex removed,
+let \(\Omega_w\) be contraction of
+\(da\wedge db\wedge dc\wedge dd\wedge du\) by the weighted Euler field.
+The weight-zero horizontal form \(2P_h\Omega_w/G_\tau^2\) has a global
+residue class \(\eta\in H^3_{\mathrm{dR}}(T_\tau)\).
+On \(a=1\), put \(\theta=db\wedge dc\wedge dd\). Direct differentiation gives
+\[
+\frac{2P}{f^2}\theta\wedge du
+=d\left(\frac{2P}{ff_u}\theta\right)
+ +\frac{2(f_uP_u-f_{uu}P)}{ff_u^2}\theta\wedge du.
+\]
+For the convention \(\operatorname{Res}(\theta\wedge df/f)=\theta\),
+this identifies the actual residue with \(r\theta\), where
+\(r=2(f_uP_u-f_{uu}P)/f_u^3\). It is therefore the restriction of a
+global cohomology class, rather than an arbitrary rational three-form.
+
+The involution \(\sigma:(c,d)\mapsto(-c,-d)\) preserves \(G,\Omega_w\)
+and negates \(P_h\). Thus \(\eta\) lies in the negative sector supported
+on a divisor by the weighted-threefold theorem. Restrict to a nonempty
+affine principal open \(U\) outside that divisor, \(a=0\), and \(f_u=0\).
+There \(r\theta\) has zero algebraic de Rham class.
+[Grothendieck's comparison theorem and affine de Rham computation](https://www.numdam.org/item/PMIHES_1966__29__95_0.pdf)
+give an algebraic two-form \(\beta\) on \(U\) with \(d\beta=r\theta\).
+Since \(f_u\ne0\), the differentials \(db,dc,dd\) form a basis at the
+function field. Writing \(\beta\) in that basis gives three rational
+coefficients satisfying \(\sum_{j=b,c,d}E_j\beta_j=r\), with \(\tau\)
+constant throughout.
+
+To descend this primitive, write \(\beta_j=C_j/D\) with polynomials of
+\(u\)-degree at most two. Clearing the differential equation gives
+\[
+f_u^2\sum_j\left[
+ f_u(D\partial_jC_j-C_j\partial_jD)
+ -f_j(D\partial_uC_j-C_j\partial_uD)\right]
+ -2D^2(f_uP_u-f_{uu}P)=fQ.
+\]
+Fix finite monomial bounds containing these polynomials and invert one
+nonzero coefficient of \(D\). This is a finite polynomial system over
+\(\mathbb Q(\tau)\) with a complex solution. The weak Nullstellensatz
+provides a solution over a finite extension \(k'/k\). Its denominator
+remains nonzero because its \(u\)-degree is less than that of \(f\).
+Geometric integrality makes \(L'=L_0\otimes_k k'\) a finite field extension
+of \(L_0\). The canonical \(E_j\) kill \(k'\) and commute with trace, so
+\[
+\gamma_j=\frac{1}{[L':L_0]}
+ \operatorname{Tr}_{L'/L_0}(C_j/D)
+\quad\text{satisfies}\quad \sum_jE_j\gamma_j=r.
+\]
+
+Rename \(\tau\) back to the formal parameter \(\lambda\) before extending
+constants from \(\mathbb Q\) to \(\mathbb C\); \(\lambda\) remains an
+indeterminate. Pulling back by \(u=v^2\) into the actual chart field gives
+exactly \(\sum E_j\gamma_j=\rho\), hence a `RelativePrimitive`.
+The downstream [proved transport](https://github.com/hodge-computer/sextics/blob/21d3d74b8b60ded47e8ec9923c2869762b4e5d94/data/symmetric-sextic-residual/SymmetricCertificateTransport.lean)
+then gives mathematical certificate existence with homogeneous denominator
+degree \(e\), numerator degrees \(e+1\), and the identity below.
+A nonzero quotient has degree \(2e-6\). This proof is nonconstructive and
+does not yet discharge the corresponding Lean admission.
+
 ## Conditional clearing and the certificate
 
 Given such a primitive,
@@ -149,13 +239,13 @@ corresponding regular homogeneous current existence statement
 ## Unfinished proof obligations
 
 1. `Submission.relative_primitive_exists` must prove
-   `Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive`. The intended
-   geometric route identifies the actual contact correspondence with the
-   relevant cohomology map and proves support-to-function-field exactness.
-   Contact identities and a finite rank calculation alone do not supply this
-   implication. [ContactResidueAnnihilator](ContactResidueAnnihilator.lean)
-   and [WeightedFiberSmoothness](WeightedFiberSmoothness.lean) provide
-   supporting algebra and smoothness results, not primitive existence.
+   `Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive` in Lean by
+   formalizing the classical argument above or constructing the primitive
+   explicitly. Mathematical existence follows from the stated geometric
+   inputs; their formal support-to-exactness comparison is still missing.
+   [ContactResidueAnnihilator](ContactResidueAnnihilator.lean) and
+   [WeightedFiberSmoothness](WeightedFiberSmoothness.lean) supply supporting
+   algebra and smoothness results for that formalization.
 2. This layer's `Submission.regular_game_of_relative_primitive` must turn that primitive
    into `SymmetricRegularCurrent.RegularGameExists`, completing the
    affine-to-homogeneous transport. The chart and Jacobian identities do not
