@@ -9,7 +9,7 @@ F=\sum_{i=0}^2(X_i^6+Y_i^6)
  +\frac57Q_X^2Q_Y+\frac{10}{7}Q_XQ_Y^2,
 \qquad A=X_0X_1X_2Y_0Y_1Y_2,\qquad q=1.
 \]
-This is an **incomplete proof draft**. The algebra below gives a relative-primitive route and a full affine-current route, with proved projective transports and denominator legality. The full current has a complete polynomial normal form in the variable \(u\), with unrestricted rational coefficients in \((\lambda,b,c,d)\). The one unfinished lemma in [Solution](Solution.lean) belongs to the relative route; `Submission.certificate` is not a verified certificate.
+This is an **incomplete proof draft**. The algebra below gives a relative-primitive route and a full affine-current route, with proved projective transports and denominator legality. The full current is mathematically equivalent to one linear differential equation in four rational functions of \((\lambda,b,c,d)\), with no degree or pole bound on those functions. The one unfinished lemma in [Solution](Solution.lean) belongs to the relative route; `Submission.certificate` is not a verified certificate.
 
 ## Reflection chart and residue
 
@@ -76,7 +76,7 @@ Consequently the original relative-primitive problem is **equivalent** to
 \]
 The theorem `primitive_iff_residual` proves both directions without restricting the poles of \(\gamma\). The original primitive is explicitly \(\beta_j=-2W_j/f_u+\gamma_j\), and `certificate_of_residual` constructs the protected certificate from such a \(\gamma\). This removes the explicit third-order normal denominator from the remaining source, while allowing poles along the coefficient Jacobian. It does not prove existence of the remaining primitive.
 
-## The full affine current and its polynomial normal form
+## The complete full-current reduction
 
 Put \(E=\mathbb C(\lambda,b,c,d)\). A full current has four coefficient components \(W\) and a normal component \(V\partial_u\). Its ordinary equation is
 \[
@@ -84,21 +84,53 @@ W(f)+Vf_u-f\bigl(\operatorname{div}_{\lambda,b,c,d}W+V_u\bigr)=P.
 \]
 The ordinary divergence here is essential. The physical chart has volume factor \(4a^5v\); changing to \(u=v^2\) gives \(2a^5\). There is no remaining weight in the five affine coordinates.
 
-The book's [polynomial normal-form theorem](https://github.com/hodge-computer/sextics/blob/4865499f5418a6c73d71539acfd4d27b618533f1/docs/05-computation.md#a-polynomial-normal-form-in-one-variable), presented in the independent [book PR 224](https://github.com/hodge-computer/sextics/pull/224), shows that every legal rational current for this equation, including one whose defect is only divisible by \(f^2\), can be replaced by
+The book's [polynomial normal-form theorem](https://github.com/hodge-computer/sextics/blob/b604326477ec413d538be36cb227013eda6dc93a/docs/05-computation.md#a-polynomial-normal-form-in-one-variable), merged in [book PR 224](https://github.com/hodge-computer/sextics/pull/224), shows that every legal rational current for this equation, including one whose defect is only divisible by \(f^2\), can be replaced by
 \[
-W=W_0+uW_1+u^2W_2,\qquad
+W=V_0+uV_1+u^2V_2,\qquad
 V=v_0+uv_1+u^2v_2,
-\qquad W_i\in E^4,\quad v_i\in E,
+\qquad V_i\in E^4,\quad v_i\in E,
 \]
 with an exact identity. This degree bound is complete, rather than a chosen search cutoff. It follows by reducing all five components modulo the cubic: the change \(fT\) contributes only \(-f^2\operatorname{div}T\), while the reduced defect has degree at most five. The general positive-pole-order statement is proved in [NormalRemainder](../../formal/lean/HodgeComputer/Constructions/ResidueTransport/NormalRemainder.lean), including inversion of the original denominator modulo the required power of \(f\).
 
-For this target, simultaneous interchange of \(X_0,X_1\) and \(Y_0,Y_1\) preserves \(F,A\). Averaging a homogeneous certificate under that symmetry, descending through \(u=v^2\), and cancelling the radial component places it in the ordinary affine equation above. These geometric coordinate comparisons give a mathematical equivalence with the full certificate problem; their necessity direction has not yet been composed into a Lean theorem. The complete form has fifteen rational coefficient functions. Its three normal coefficients can be eliminated algebraically, leaving three first-order linear differential equations for the twelve coefficient components. Rational dependence on the four remaining coordinates is still unrestricted, and no solution of that system has been supplied.
+For this target, simultaneous interchange of \(X_0,X_1\) and \(Y_0,Y_1\) preserves \(F,A\). Averaging a homogeneous certificate under that symmetry, descending through \(u=v^2\), and cancelling the radial component places it in the ordinary affine equation above. These geometric coordinate comparisons give a mathematical equivalence with the full certificate problem; their necessity direction has not yet been composed into a Lean theorem.
+
+The book's [complete cubic-current reduction](../../docs/05-computation.md#56-complete-cubic-currents) further removes the quadratic base term by a divergence-free current, then eliminates the redundant coefficient motions. For its specialization here, put
+\[
+a_i=f_i/\ell,\qquad D_\lambda=\partial_\lambda\big|_{a_0,a_1,a_2},\qquad
+W_*=(0,M^{-1}(p_0,p_1,p_2)^{\mathsf T}),\qquad
+\delta=\operatorname{div}_{\lambda,b,c,d}W_*.
+\]
+The nonzero Jacobian \(J\) makes \(E\) a finite separable extension of \(\mathbb C(\lambda,a_0,a_1,a_2)\). In these coordinates the original volume density is \(\ell^3/J\). Define coefficient vector fields, all killing \(\lambda\), by
+\[
+S=(3a_0,2a_1,a_2),\quad
+T=(-a_1,-2a_2,-3),\quad
+N=(-a_0a_2,3a_0-a_1a_2,2a_1-a_2^2),\quad
+\mathscr C=N-3a_2.
+\]
+The complete remaining equation is
+\[
+\boxed{\quad
+D_\lambda s+\ell^2\bigl((S+4)\alpha+T\beta+\mathscr C^2\gamma\bigr)
+ =-\frac{\ell^2}{J}\delta,
+\qquad s,\alpha,\beta,\gamma\in E.
+\quad}
+\]
+Here \(\mathscr C^2\) is the second-order operator \(N^2-6a_2N+12a_2^2-6a_1\). It retains the normal freedom lost in the earlier scalar subcase. Given a rational solution, the full current is explicitly
+\[
+\begin{aligned}
+W={}&W_*+\frac{J}{\ell^2}sD_\lambda
+ +J\bigl(\alpha S+\beta T+(\mathscr C\gamma+u\gamma)N\bigr),\\
+V={}&J\bigl((\beta-a_0\gamma)+(\alpha-a_1\gamma)u
+                  +(N\gamma-4a_2\gamma)u^2\bigr).
+\end{aligned}
+\]
+All four unknowns may be projected to the odd part under \((c,d)\mapsto(-c,-d)\). Their degrees and denominators remain unrestricted. The scalar equivalence and its reconstruction are proved mathematically and checked by exact symbolic identities; no rational solution of this equation or Lean proof of the new equivalence has been supplied.
 
 The constructive direction is already available in [SymmetricNormalTransport](SymmetricNormalTransport.lean). Write \(W=Z/D\), \(V=N_u/D\), where \(D\ne0\) is any polynomial in the four coefficient coordinates. The theorem `certificate_of_weighted_game` constructs the protected certificate from the cleared ordinary identity. It uses the reflected numerator
 \[
 \bigl(4vZ_\lambda,4vZ_b,4vZ_c,4vZ_d,2N_u\bigr)\big|_{u=v^2}
 \]
-over \(D\), then the existing homogeneous transport. All five components are retained, denominator legality is automatic, and the resulting quotient is zero. The polynomial coefficient identities and remaining differential system are recorded in the PR research discussion.
+over \(D\), then the existing homogeneous transport. All five components are retained, denominator legality is automatic, and the resulting quotient is zero. The exact target coefficients, reconstruction checks, and further calculations are recorded in the [PR research discussion](https://github.com/hodge-computer/sextics/pull/223#issuecomment-6711241613).
 
 ### The subsystem with zero normal component
 
@@ -237,7 +269,7 @@ The common denominator is nonzero, relatively prime to \(F\), and homogeneous of
 
 `Submission.residual_primitive_exists` must construct a primitive for the explicit density \(2\delta/f_u\). The checked equivalence above then proves `Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive`. The intended geometric route identifies the actual contact correspondence with the relevant cohomology map and proves support-to-function-field exactness. Contact identities and a finite rank calculation alone do not supply this implication. [ContactResidueAnnihilator](ContactResidueAnnihilator.lean) and [WeightedFiberSmoothness](WeightedFiberSmoothness.lean) provide supporting algebra and smoothness results, not primitive existence.
 
-This primitive is relative over \(\mathbb C(\lambda)\): its equation uses only \(E_b,E_c,E_d\). A global primitive involving a \(\lambda\)-component would not by itself meet that endpoint. The full ordinary-current construction above has its own independently proved endpoint and can be used if its complete coefficient system is solved. The book's weighted-fiber support argument supplies a mathematical route to the original relative primitive: spread the anti-projector's supporting divisor over a finite base extension, identify the exact residue density, and obtain relative de Rham exactness on the function field. Finite trace can then descend the primitive. Those geometric comparisons remain unformalized here.
+This primitive is relative over \(\mathbb C(\lambda)\): its equation uses only \(E_b,E_c,E_d\). A global primitive involving a \(\lambda\)-component would not by itself meet that endpoint. The full ordinary-current construction above has its own independently proved endpoint and can be used if its complete four-function equation is solved. The book's weighted-fiber support argument supplies a mathematical route to the original relative primitive: spread the anti-projector's supporting divisor over a finite base extension, identify the exact residue density, and obtain relative de Rham exactness on the function field. Finite trace can then descend the primitive. Those geometric comparisons remain unformalized here.
 
 The sole remaining lemma is admitted. The final theorem therefore still depends on `sorryAx` and does not establish the protected certificate independently. The proved transport and coordinate identities depend only on Lean's usual logical axioms.
 

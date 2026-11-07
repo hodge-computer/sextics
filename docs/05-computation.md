@@ -2,7 +2,7 @@
 
 [Previous: families, representations and deformation](#technical-information/known-locus) · [Contents](#technical-information/introduction)
 
-The certificate formulation turns a support problem into polynomial identities. Computation can verify an explicit construction, expose an unexpected solution, or test a proposed mechanism. This chapter explains complete coefficient systems, finite integration tests on algebraic curves, exact incidence lifting, and the final polynomial criterion for a rational certificate.
+The certificate formulation turns a support problem into polynomial identities. Computation can verify an explicit construction, expose an unexpected solution, or test a proposed mechanism. This chapter explains complete coefficient systems, finite integration tests on algebraic curves, exact incidence lifting, a scalar reduction for cubic currents, and the final polynomial criterion for a rational certificate.
 
 ## 5.1 Fixing a denominator makes the problem linear
 
@@ -225,7 +225,124 @@ This is a system of rank \([E^+:k(t)]\); the twist retains the full odd problem.
 
 Complete algebraic integration can be implemented by Hermite reduction followed by a polynomial-remainder reduction; the latter is needed for a true zero test. See [Chen–Du–Kauers, Definition 11 and Theorem 16](https://arxiv.org/pdf/2102.06538). Rational-system methods instead derive universal denominator and numerator-degree bounds, including infinity; see [Barkatou–Cluzeau–El Bacha–Weil, §3.1 and Remark 2](https://www.unilim.fr/pages_perso/jacques-arthur.weil/Papers/BCEW.pdf). These give equivalent ways to decide the one-variable exactness problem. The matrix rank measures the number of components, not their coefficient degrees or the cost of normalization.
 
-## 5.6 The polynomial certificate criterion
+## 5.6 Complete cubic currents
+
+The polynomial normal form admits a further reduction for a cubic whose coefficients are independent coordinates. Let \(k\) have characteristic zero, let \(E\) be a finite extension of \(k(t,a_0,a_1,a_2)\), and extend the four coordinate derivations to \(E\). They commute because the extension is separable. Put
+
+\[
+g=u^3+a_2u^2+a_1u+a_0,\qquad
+P=p_0+p_1u+p_2u^2,\qquad p_i\in E.
+\]
+
+Allow an arbitrary nonzero volume density \(\rho\in E\). For a base vector field \(W\), set
+
+\[
+\operatorname{div}_{\rho}W
+ =\rho^{-1}\bigl(\partial_t(\rho W_t)
+       +\sum_{i=0}^2\partial_{a_i}(\rho W_i)\bigr),
+\qquad
+L_g(W,R)=W(g)+Rg_u-g(\operatorname{div}_{\rho}W+\partial_uR).
+\]
+
+Define \(W_0=\sum_i p_i\partial_{a_i}\), so \(W_0(g)=P\), and define three base vector fields by their components in \((a_0,a_1,a_2)\):
+
+\[
+\begin{aligned}
+S&=(3a_0,2a_1,a_2),\\
+T&=(-a_1,-2a_2,-3),\\
+N&=(-a_0a_2,\,3a_0-a_1a_2,\,2a_1-a_2^2).
+\end{aligned}
+\]
+
+They kill \(t\). Write \(\mathscr C=N-3a_2\) for the differential operator \(\mathscr C(h)=N(h)-3a_2h\); in particular, \(\mathscr C^2\) denotes composition, not multiplication by the square of a function.
+
+**Cubic-current theorem.** There exists a rational current, regular along \(g=0\), satisfying \(L_g(W,R)-P\in g^2\mathcal R_g\) if and only if there exist \(s,\alpha,\beta,\gamma\in E\) such that
+
+\[
+\boxed{\qquad
+\partial_t s+(S+4)\alpha+T\beta+\mathscr C^2\gamma
+ =-\rho\operatorname{div}_{\rho}W_0.
+\qquad}
+\]
+
+From these four functions an exact current is
+
+\[
+\begin{aligned}
+W={}&W_0+\rho^{-1}\bigl(s\partial_t+\alpha S+\beta T
+                    +(\mathscr C\gamma+u\gamma)N\bigr),\\
+R={}&\rho^{-1}\bigl((\beta-a_0\gamma)
+             +(\alpha-a_1\gamma)u
+             +(N\gamma-4a_2\gamma)u^2\bigr).
+\end{aligned}
+\]
+
+Thus the base current can be taken affine in \(u\), with a quadratic normal component. The four remaining rational functions have unrestricted poles and degrees in the base coordinates.
+
+**Proof.** The polynomial normal-form argument also applies to \(\operatorname{div}_{\rho}\), since \(\rho\) is independent of \(u\). It gives an exact current with every component of degree at most two. Write its base part as \(V_0+uV_1+u^2V_2\). The coefficient of \(u^5\) in the current equation is \(-\operatorname{div}_{\rho}V_2=0\). Set \(K=V_2/3\). The current
+
+\[
+Z=(g_uK,-K(g))
+\]
+
+annihilates \(g\) and has divergence \(g_u\operatorname{div}_{\rho}K=0\). Subtracting \(Z\) therefore preserves the equation and removes the quadratic base coefficient. Its normal component still has degree at most two because \(g\) is monic.
+
+The determinant of \((S,T,N)\) is \(-\operatorname{Disc}(g)\ne0\). Hence every resulting base current has a unique expression
+
+\[
+W=W_0+\rho^{-1}\bigl((s_0+us_1)\partial_t
+ +(\alpha_0+u\alpha_1)S+(\beta_0+u\beta_1)T
+ +(\gamma_0+u\gamma_1)N\bigr).
+\]
+
+The lifted fields \(S+u\partial_u\), \(T+\partial_u\), and \(N+u^2\partial_u\) send \(g\) respectively to \(3g,0,(3u-a_2)g\). Consequently its normal component must be
+
+\[
+R=\rho^{-1}\bigl((\alpha_0+u\alpha_1)u
+ +(\beta_0+u\beta_1)+(\gamma_0+u\gamma_1)u^2-\gamma_1g\bigr).
+\]
+
+This expression has degree at most two and gives the correct equation modulo \(g\); it is the unique such normal component because \(g_u\) is invertible modulo \(g\). The exact equation now has just two coefficient conditions:
+
+\[
+\begin{aligned}
+\partial_t s_0+(S+4)\alpha_0+T\beta_0+\beta_1+\mathscr C\gamma_0
+ &=-\rho\operatorname{div}_{\rho}W_0,\\
+\partial_t s_1+(S+5)\alpha_1+T\beta_1+\mathscr C\gamma_1-\gamma_0
+ &=0.
+\end{aligned}
+\]
+
+The identities
+
+\[
+\mathscr C(S+5)=(S+4)\mathscr C,\qquad
+1+\mathscr CT=T\mathscr C-2(S+4),\qquad
+[\partial_t,\mathscr C]=0
+\]
+
+eliminate \(\gamma_0\). With
+
+\[
+s=s_0+\mathscr C s_1,\qquad
+\alpha=\alpha_0+\mathscr C\alpha_1-2\beta_1,\qquad
+\beta=\beta_0+\mathscr C\beta_1,\qquad
+\gamma=\gamma_1,
+\]
+
+the remaining condition is precisely the boxed scalar equation. Conversely take \(s_1=\alpha_1=\beta_1=0\), \(\gamma_0=\mathscr C\gamma\), and the displayed current satisfies it exactly. ∎
+
+The remaining normal freedom is measured by
+
+\[
+\mathscr C^2=N^2-6a_2N+(12a_2^2-6a_1).
+\]
+
+A coefficient of \(N+u^2\partial_u\) that is independent of \(u\) is absorbed by the preceding elimination; the surviving second-order term comes from its coefficient linear in \(u\). Additional current parameters therefore need not enlarge the source image.
+
+The monic hypothesis is a normalization. If \(f=\ell g\) with \(\ell\in E^\times\), the product rule gives \(L_f(\ell U)=\ell^2L_g(U)\), with the same density. Apply the theorem to source \(P/\ell^2\) and then multiply the current by \(\ell\). A nonzero coefficient Jacobian in another rational chart supplies the finite coefficient extension and its volume density. The theorem is an equivalence of rational differential equations; it does not assert that the remaining scalar equation always has a rational solution.
+
+## 5.7 The polynomial certificate criterion
 
 For any proposed field \(v=N/D\), normalized or otherwise, form the polynomial
 
