@@ -1,13 +1,15 @@
 import HodgeTarget
 import Proposal.SymmetricPrimitiveEndpoint
 import Proposal.SymmetricRegularCurrent
+import Proposal.SymmetricCertificateTransport
 
 /-!
 # Incomplete symmetric-sextic certificate
 
 This draft uses the ordinary protected target and proposal helper layout.
-Exactly two substantive proof obligations remain below. The final theorem
-depends on their `sorry` placeholders and is not an accepted certificate.
+One substantive proof obligation remains below: existence of the relative
+primitive. Its projective transport is proved. The final theorem depends
+on the remaining `sorry` placeholder and is not an accepted certificate.
 -/
 
 noncomputable section
@@ -20,25 +22,23 @@ theorem relative_primitive_exists :
     Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive := by
   sorry
 
-/-- Missing transport step: assemble the legal affine clearing data into a
-regular homogeneous current for the original protected sextic. -/
+/-- The finite polynomial transport supplies a certificate, and the proved
+certificate-to-current bridge gives the original regular-current endpoint. -/
 theorem regular_game_of_relative_primitive
     (beta : SymmetricPrimitiveEndpoint.RelativePrimitive) :
     SymmetricRegularCurrent.RegularGameExists := by
-  have affine_data := SymmetricPrimitiveEndpoint.clear_relative_primitive beta
-  -- The affine identities are proved; their projective transport and
-  -- homogeneous assembly into RegularGameExists remain to be formalized.
-  sorry
+  exact SymmetricRegularCurrent.regular_game_exists_of_certificate
+    (SymmetricCertificateTransport.certificate_of_relative_primitive beta)
 
-/-- Standard submission entry point, conditional on the two unfinished
-lemmas above. Its transitive axioms include sorryAx until those are proved. -/
+/-- Standard submission entry point, conditional on the unfinished primitive
+existence lemma. Its transitive axioms still include sorryAx. -/
 theorem certificate :
     HodgeComputer.HasCertificate
       HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := by
   obtain ⟨beta⟩ := relative_primitive_exists
-  exact SymmetricRegularCurrent.certificate_of_regular_game_exists
-    (regular_game_of_relative_primitive beta)
+  exact SymmetricCertificateTransport.certificate_of_relative_primitive beta
 
 end Submission
 
+#print axioms Submission.regular_game_of_relative_primitive
 #print axioms Submission.certificate

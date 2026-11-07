@@ -9,10 +9,7 @@ F=\sum_{i=0}^2(X_i^6+Y_i^6)
  +\frac57Q_X^2Q_Y+\frac{10}{7}Q_XQ_Y^2,
 \qquad A=X_0X_1X_2Y_0Y_1Y_2,\qquad q=1.
 \]
-This is an **incomplete proof draft**. The algebra below reduces the target
-to a relative rational primitive and a final transport step. The two
-unfinished lemmas in [Solution](Solution.lean) are identified below; its
-`Submission.certificate` is not a verified certificate.
+This is an **incomplete proof draft**. The algebra below reduces the target to a relative rational primitive. Its finite projective transport is now proved, including denominator legality. The one unfinished lemma in [Solution](Solution.lean) is identified below; `Submission.certificate` is not a verified certificate.
 
 ## Reflection chart and residue
 
@@ -57,7 +54,7 @@ three elements of \(K\) and their equation as `RelativePrimitive`.
 
 ## Cubic trace cancellation
 
-[CubicResidueTrace](CubicResidueTrace.lean) proves an exact companion-matrix
+[CubicTrace](../../formal/lean/HodgeComputer/Constructions/ResidueTransport/CubicTrace.lean) proves an exact companion-matrix
 trace identity for a cubic equation and quadratic source.
 [SymmetricCubicTrace](SymmetricCubicTrace.lean) binds their coefficients to
 the protected equation: \(f=\ell u^3+f_2u^2+f_1u+f_0\) and
@@ -74,9 +71,7 @@ Vieta identities \(f_2=-\ell(x+y+z)\),
 r(x)+r(y)+r(z)=0,\qquad r(x)+r(y)=-r(z).
 \]
 Thus the complementary pair carries the negative third-sheet source.
-These are exact source identities under the stated assumptions; they do
-not construct a global splitting cover or a rational primitive. They narrow
-the trace route but close neither of the two proof obligations below.
+Over the étale open, the unordered-pair cover is canonically the original cubic cover via the remaining root. Its transfer is \(\operatorname{Tr}-\mathrm{id}\), hence acts by \(-1\) on trace-zero elements. This is a self-correspondence, so the complementary-pair identity does not itself provide a new supporting variety. These are exact source identities under the stated assumptions; they do not construct a rational primitive or establish the primitive-existence obligation below.
 
 ## Conditional clearing and the certificate
 
@@ -92,37 +87,57 @@ Canonical residue clearing then supplies affine polynomial data
 A_HD^2-D\left(N_vH_v+\sum_jN_jH_j\right)
  +H\left(D\operatorname{div}N-N\cdot\nabla D\right)=H^2Q.
 \]
-This is the conclusion of `clear_relative_primitive`; it is an affine result.
-
-The final target requires transport back to the six original coordinates
-and legal homogeneous data: a nonzero homogeneous denominator \(D\),
-six numerators of degree \(\deg D+1\), coprimality with \(F\), and
+In fact `clear_relative_primitive` supplies the stronger normalized identities
 \[
-AD^2-D\sum_iN_iF_i
- +F\left(D\sum_i\partial_iN_i-\sum_iN_i\partial_iD\right)=F^2Q.
+N\cdot\nabla H=A_HD,\qquad
+D\operatorname{div}N-N\cdot\nabla D=HQ.
 \]
-The quotient \(Q\) is unrestricted. No expanded JSON witness is supplied.
-[SymmetricRegularCurrent](SymmetricRegularCurrent.lean) proves that the
-corresponding regular homogeneous current existence statement
-`RegularGameExists` implies the literal protected target.
+Thus the rational affine field \(w=N/D\) satisfies \(w(H)=A_H\) and \(\operatorname{div}w=HQ/D^2\).
 
-## Unfinished proof obligations
+### Explicit transport to the original coordinates
 
-1. `Submission.relative_primitive_exists` must prove
-   `Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive`. The intended
-   geometric route identifies the actual contact correspondence with the
-   relevant cohomology map and proves support-to-function-field exactness.
-   Contact identities and a finite rank calculation alone do not supply this
-   implication. [ContactResidueAnnihilator](ContactResidueAnnihilator.lean)
-   and [WeightedFiberSmoothness](WeightedFiberSmoothness.lean) provide
-   supporting algebra and smoothness results, not primitive existence.
-2. `Submission.regular_game_of_relative_primitive` must turn that primitive
-   into `SymmetricRegularCurrent.RegularGameExists`, completing the
-   affine-to-homogeneous transport. The chart and Jacobian identities do not
-   themselves discharge this step.
+Put \(U=X_0+X_1\), \(S=X_0-X_1\), and \(T=Y_0-Y_1\). The inverse chart is
+\[
+a=U/2,\qquad
+(\lambda,b,c,d,v)=\left(T/S,2X_2/U,(Y_0+Y_1)/U,2Y_2/U,S/U\right).
+\]
+[SymmetricPiolaTransport](SymmetricPiolaTransport.lean) gives the inverse Jacobian and pushes forward the chart field with radial component zero and remaining components \(w/(4v)\). The resulting original-coordinate field \(V\) satisfies
+\[
+V(F)=A,\qquad
+\operatorname{div}V=F\frac{Q}{4a^6vD^2}.
+\]
+The factor \(1/(4v)\) is required: the six-dimensional Piola input is \((0,a^5w)\), whose Jacobian denominator is \(4a^5v\). [SymmetricChartField](SymmetricChartField.lean) instantiates the coordinate derivations on the actual ambient fraction field and binds the calculation to the protected \(F,A\).
 
-Both lemmas remain admitted in the draft. The final theorem's assembly uses
-them and therefore does not establish the protected certificate independently.
+Choose \(L\ge5\) at least as large as the total degrees of all the affine data. For any such polynomial \(p\), put
+\[
+\widehat p=(US)^L p\left(T/S,2X_2/U,(Y_0+Y_1)/U,2Y_2/U,S/U\right).
+\]
+This is a finite polynomial, homogeneous of degree \(2L\), because all five inverse chart coordinates have common denominator \(US\) and homogeneous quadratic numerators. [CommonDenominatorSubstitution](../../formal/lean/HodgeComputer/Constructions/RationalFields/CommonDenominatorSubstitution.lean) proves this generic clearing identity. [SymmetricChartClearing](SymmetricChartClearing.lean) proves legality for the actual chart: an alleged \(F\)-divisibility of \(\widehat D\) pulls back at \(a=1\) to \(H\mid(4v)^LD\), contradicting primality of \(H\), \(H\nmid v\), and \(\gcd(H,D)=1\).
+
+The original denominator and numerators are explicitly
+\[
+\begin{aligned}
+D_0&=8S^2\widehat D,\\
+M_0&=U^2S\widehat N_v,&M_1&=-M_0,&M_2&=U^2S\widehat N_b,\\
+M_3&=US^2\widehat N_\lambda+U^2S\widehat N_c+U^2T\widehat N_v,\\
+M_4&=-US^2\widehat N_\lambda+U^2S\widehat N_c-U^2T\widehat N_v,\\
+M_5&=U^2S\widehat N_d.
+\end{aligned}
+\]
+With \(Q_0=1024U^{L-5}S^{L+3}\widehat Q\), [SymmetricCertificateTransport](SymmetricCertificateTransport.lean) proves
+\[
+M\cdot\nabla F=AD_0,\qquad
+D_0\operatorname{div}M-M\cdot\nabla D_0=FQ_0.
+\]
+The common denominator is nonzero, relatively prime to \(F\), and homogeneous of degree \(2L+2\); all six displayed numerators are homogeneous of degree \(2L+3\). The theorem `explicit_verify` proves that these precise polynomials satisfy the unchanged verifier, without replacing the denominator through a later normalization. Consequently `certificate_of_relative_primitive`, and the corresponding `Submission.regular_game_of_relative_primitive`, have no admitted hypotheses or proof terms beyond their displayed primitive input. No expanded JSON witness is supplied because that primitive has not been constructed.
+
+## Remaining proof obligation
+
+`Submission.relative_primitive_exists` must prove `Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive`. The intended geometric route identifies the actual contact correspondence with the relevant cohomology map and proves support-to-function-field exactness. Contact identities and a finite rank calculation alone do not supply this implication. [ContactResidueAnnihilator](ContactResidueAnnihilator.lean) and [WeightedFiberSmoothness](WeightedFiberSmoothness.lean) provide supporting algebra and smoothness results, not primitive existence.
+
+This primitive is relative over \(\mathbb C(\lambda)\): its equation uses only \(E_b,E_c,E_d\). A global primitive involving a \(\lambda\)-component would not by itself meet that endpoint. The book's weighted-fiber support argument supplies the appropriate mathematical route: spread the anti-projector's supporting divisor over a finite base extension, identify the exact residue density, and obtain relative de Rham exactness on the function field. Finite trace can then descend the primitive. Those geometric comparisons remain unformalized here.
+
+The sole remaining lemma is admitted. The final theorem therefore still depends on `sorryAx` and does not establish the protected certificate independently. The proved transport and coordinate identities depend only on Lean's usual logical axioms.
 
 The intended geometric argument follows the project's
 [weighted-threefold and two-reflection construction](../../docs/03b-weighted-threefolds.md),

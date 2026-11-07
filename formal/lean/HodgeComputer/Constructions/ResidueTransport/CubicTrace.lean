@@ -5,7 +5,7 @@ import Mathlib.Tactic.FieldSimp
 import Mathlib.Tactic.FinCases
 
 /-!
-# Exact trace cancellation for the cubic reflection cover
+# Trace cancellation for cubic residues
 
 For f(U)=U^3+a*U^2+b*U+c and a quadratic P, the coefficient
 2*(f'*P'-f''*P)/f'^3 has trace zero. The companion-matrix identities below
@@ -14,7 +14,15 @@ hypothesis. The finite-root identity gives the same calculation on the
 three distinct sheets. Consequently the unordered-pair source is the
 negative original source under the complementary-root identification.
 
-This is a source computation, not an existence proof for a primitive.
+The matrix identities hold over any commutative ring. Their interpretation
+as the inverse of multiplication by the cubic derivative requires the
+explicit nonzero discriminant hypothesis. The finite-sheet identities work
+over any field, with a nonzero leading coefficient and distinct roots.
+Trace cancellation alone supplies no rational primitive.
+
+Extracted from `fqlx`'s cubic residue calculations in PR #222, prepared with
+OpenAI ChatGPT and Codex assistance; the coefficient and variable names
+carry no choice of a hypersurface or source.
 -/
 
 namespace CubicResidueTrace
