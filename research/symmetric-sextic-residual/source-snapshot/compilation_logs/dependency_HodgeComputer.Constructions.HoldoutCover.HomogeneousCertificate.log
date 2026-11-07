@@ -1,0 +1,10 @@
+'HoldoutConstruction.denominator_congruence_divergence' depends on axioms: [propext, Classical.choice, Quot.sound]
+'HoldoutConstruction.homogeneous_data_of_normalized' depends on axioms: [propext, Classical.choice, Quot.sound]
+/workspace/scratch/0d11a6a4cf8f/sextics/formal/lean/HodgeComputer/Constructions/HoldoutCover/HomogeneousCertificate.lean:201:70: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+/workspace/scratch/0d11a6a4cf8f/sextics/formal/lean/HodgeComputer/Constructions/HoldoutCover/HomogeneousCertificate.lean:201:84: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+'HoldoutConstruction.hasCertificate_of_normalized' depends on axioms: [propext, Classical.choice, Quot.sound]
+'HoldoutConstruction.holdout_hasCertificate_of_normalized' depends on axioms: [propext, Classical.choice, Quot.sound]

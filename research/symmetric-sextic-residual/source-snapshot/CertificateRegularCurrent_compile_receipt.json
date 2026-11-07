@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "module": "CertificateRegularCurrent",
+  "exit_code": 0,
+  "seconds": 3.7008376759986277,
+  "source_sha256": "2fcd98af38b04bf736b072c4d00d1bdc34d5b79f603f7746e85d3328990e6320",
+  "object_sha256": "45ead902ba2066c20abdd1a19b6f924a517384131b9c7eebd7bba19d72880b93",
+  "log": "/workspace/scratch/0d11a6a4cf8f/proof_attempt8/compilation_logs/CertificateRegularCurrent.log",
+  "command": [
+    "flock",
+    "/workspace/scratch/0d11a6a4cf8f/lean_compile.lock",
+    "lean",
+    "-j1",
+    "-M4096",
+    "-R",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt8",
+    "-o",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt8/CertificateRegularCurrent.olean",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt8/CertificateRegularCurrent.lean"
+  ],
+  "full_certificate_proved": false
+}

@@ -1,0 +1,22 @@
+[
+  {
+    "prime": 37,
+    "variables": 31,
+    "equations": 31,
+    "terms": 3136,
+    "max_degree": 9,
+    "all_19_pivot_equations_checked": true,
+    "seconds": 0.008734401002584491,
+    "source_sha256": "4db0de514561f62ef4c492c3a57c2076674c4bd5de6f0c2202e7b89d7feca4db"
+  },
+  {
+    "prime": 5,
+    "variables": 31,
+    "equations": 31,
+    "terms": 1067,
+    "max_degree": 9,
+    "all_19_pivot_equations_checked": true,
+    "seconds": 0.016951127003267175,
+    "source_sha256": "4db0de514561f62ef4c492c3a57c2076674c4bd5de6f0c2202e7b89d7feca4db"
+  }
+]

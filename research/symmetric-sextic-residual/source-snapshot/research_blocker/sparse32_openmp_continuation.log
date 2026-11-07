@@ -1,0 +1,67 @@
+[parallel] requested_threads=4 actual_threads=4 dynamic=0 md_abi_bytes=560
+[native] runtime_avx2=1 runtime_avx512f=1
+
+--------------- INPUT DATA ---------------
+#variables                      38
+#equations                    3205
+#invalid equations               0
+field characteristic            37
+homogeneous input?               0
+signature-based computation      0
+monomial order                 DRL
+basis hash table resetting       1
+linear algebra option            2
+initial hash table size      16384 (2^14)
+max pair selection             128
+reduce gb                        1
+#threads                         4
+info level                       2
+generate pbm files               0
+------------------------------------------
+[import] mode=dictionary-native generators=3205 monomials=1359279 terms=158257737 original_terms=585 seconds=6.938830 peak_rss_kib=952372
+[state] restored completed_rounds=45 pending_pairs=53867 basis_rows=3167; initial pair generation skipped
+
+Legend for f4 information
+--------------------------------------------------------
+deg       current degree of pairs selected in this round
+sel       number of pairs selected in this round
+pairs     total number of pairs in pair list
+mat       matrix dimensions (# rows x # columns)
+density   density of the matrix
+new data  # new elements for basis in this round
+          # zero reductions during linear algebra
+time(rd)  time of the current f4 round in seconds given
+          for real and cpu time
+--------------------------------------------------------
+
+deg     sel   pairs        mat          density            new data         time(rd) in sec (real|cpu)
+------------------------------------------------------------------------------------------------------
+[compact] live 1406396 -> 1406396; capacity 2097152 -> 2097152; secondary capacity 256
+[progress] completed_rounds=45 rows=3167 pure_power_variables=7/38 unit_ideal=0 primary=1406396 secondary_capacity=256 elapsed=0.577
+  6     129   53867   38031 x 682289      0.43%      103 new      26 zero[columns] selected 544315 of 644387; primary live 1438253
+        55.11 | 56.56        
+[compact] live 1676759 -> 1439502; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6     129   55542   48451 x 430578      0.45%      109 new      20 zero[columns] selected 314331 of 382256; primary live 1446414
+        39.46 | 43.24        
+[compact] live 1687298 -> 1447492; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6     128   57002   97232 x 1163918     0.19%       85 new      43 zero[columns] selected 868862 of 1066814; primary live 1498795
+       108.88 | 114.30       
+[compact] live 1693447 -> 1499701; capacity 4194304 -> 4194304; secondary capacity 2097152
+  6     128   58215  136078 x 1260622     0.14%      124 new       4 zero[columns] selected 1069253 of 1124672; primary live 1585312
+       128.39 | 133.03       
+[compact] live 1884561 -> 1586608; capacity 4194304 -> 4194304; secondary capacity 2097152
+[progress] completed_rounds=49 rows=3588 pure_power_variables=7/38 unit_ideal=0 primary=1586608 secondary_capacity=2097152 elapsed=332.644
+  6     129   60025   49421 x 851629      0.45%      105 new      24 zero[columns] selected 707338 of 802337; primary live 1588605
+        88.90 | 92.06        
+[compact] live 1855328 -> 1589688; capacity 4194304 -> 4194304; secondary capacity 2097152
+  6     129   61596   54450 x 495458      0.45%       60 new      69 zero[columns] selected 418321 of 441137; primary live 1589715
+        56.55 | 61.39        
+[compact] live 1745133 -> 1590421; capacity 4194304 -> 4194304; secondary capacity 2097152
+  6     128   62495   65591 x 529438      0.46%       49 new      79 zero[columns] selected 419939 of 463975; primary live 1590451
+        69.64 | 77.08        
+[compact] live 1719053 -> 1591004; capacity 4194304 -> 4194304; secondary capacity 2097152
+  6     128   63197   81626 x 1113161     0.31%       27 new     101 zero[columns] selected 838722 of 1031663; primary live 1595058
+       134.65 | 142.59       
+[compact] live 1668257 -> 1595186; capacity 4194304 -> 4194304; secondary capacity 2097152
+{"status":"CHECKPOINT","complete":false,"unit_ideal":false,"variables":38,"prime":37,"generators":3867,"monomials":1541070,"terms":288999191,"original_generators":38,"seconds":689.416938,"peak_rss_kib":3041692}
+[state] saved completed_rounds=53 pending_pairs=63369 basis_rows=3829 packed_fingerprint=13e93a02d9d594b0 path=/workspace/scratch/0d11a6a4cf8f/proof_attempt7/sparse32_openmp_continuation.checkpoint.hcf.state

@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "queries_checked": 502,
+  "positive_hits": 245,
+  "negative_hits": 4,
+  "avoided_entries": 369,
+  "full_hash_collisions_forced": true,
+  "append_delete_head_change_reorder_shrink_reuse_checked": true,
+  "header_sha256": "04e98e792e5f28ea6de6a14a736e457b892dcc393bb98542ab71fea43c372cab",
+  "fixture_sha256": "9904af18c2f0d19aa9238c2a344bb7fc836b7fd22112e4b778bb3309c7581ae5"
+}

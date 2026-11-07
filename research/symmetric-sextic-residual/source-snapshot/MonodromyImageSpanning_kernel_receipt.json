@@ -1,0 +1,10 @@
+{
+  "module": "MonodromyImageSpanning",
+  "status": "PASS",
+  "exit_code": 0,
+  "seconds": 7.549,
+  "source_sha256": "b0773d92739f15ceb1e534117bd46694e842b24c1d4420c33b458f797770df1a",
+  "object_sha256": "ac8304c352708092788632fb99c42e06803959b95967ccbc2b65be0f7a0b45c8",
+  "scope": "All declarations of this module replayed against imported dependencies; imports not replayed from an empty environment.",
+  "full_certificate_proved": false
+}

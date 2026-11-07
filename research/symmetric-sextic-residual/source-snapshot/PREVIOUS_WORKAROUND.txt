@@ -1,0 +1,298 @@
+SYMMETRIC SEXTIC: ALGEBRAIC WORKAROUND AND CERTIFIED SEARCH LIMITS
+6 November 2026
+
+STATUS
+
+The complete protected HasCertificate theorem is STILL UNPROVED.
+This package preserves the prior 44-module partial development and adds three
+compiled and independently kernel-replayed Lean modules, exact characteristic-
+zero denominator obstructions, and an audited contact-equation circuit for the
+actual target. It is not an accepted solution submission.
+
+There is no Submission.certificate, added axiom asserting a primitive, changed
+verifier, or modified target. The positive repair removes the restriction to a
+cyclic cubic from the current construction. It does not manufacture the
+missing contact family, closed forms, or evaluated trace.
+
+PINNED ENVIRONMENT
+
+sextics: ca173aad142bd5f6bf5dd156b6798223a45df54f
+Lean: 4.33.1, commit 819816b2e0a3bf405af45ae5c7af2491d8f5bee6
+Mathlib: 0df444a360eaa60ab8c11dca51a86af692955474
+Protected case: symmetric-sextic-residual, q=1
+Target source SHA256:
+  a51532e0442d72e8ce95d6728390fac0f719287d1cf20020701625bc1b5409d9
+
+The newer norm-contact book argument is PR219, now merged:
+  https://github.com/hodge-computer/sextics/pull/219
+Inspected proof-source head: dcbe4222637cdfbc12dc01b43c105c162aee622a
+Merge commit: 8bba75462bea0a35acdd9e5410328e4b265976b9
+No shared Lean module was changed by that PR. We retain the exact earlier
+formal target and dependency pins. PREVIOUS_DEVELOPMENT.txt records the
+preceding stage and its historical scope.
+
+1. POSITIVE REPAIR: A GENERAL-CUBIC MOVING-POINT SOURCE
+
+The earlier explicit current covered w^3=-P(t). Our exact quotient has both
+w^2 and w terms. GeneralCubicCurrent.lean now proves the polynomial algebra
+needed for that general case.
+
+Write
+  G=w^3+a(x)w^2+b(x)w+c(x),  x=t^2,  g=G_w,
+where deg(a)<=1, deg(b)<=2, deg(c)<=3. At an actual moving point (alpha,beta),
+G(alpha,beta)=0, define
+  H=w^2+(beta+a(alpha^2))*w+beta^2+a(alpha^2)*beta+b(alpha^2).
+The current kernel is
+  (H/g) * (dlog(t-alpha)-dlog(t+alpha)).
+For a closed input eta, its differentiated source is
+  2*(M0+M1*w+M2*w^2)/g^3 * dt wedge dr wedge ds.
+
+The checked algebra proves the numerator reduction modulo G, the automatic
+relation
+  3*M0-a*M1+b*M2=0,
+and vanishing of the reduced numerator at the moving point. The latter is
+the algebraic core of cancellation of the apparent t^2-alpha^2 denominator.
+It also proves the exact normal-source identity
+  g*d_w(Rstar)-G_ww*Rstar = 2*(M0+M1*w+M2*w^2),
+  Rstar=-M1/3-(2*M2/3)*w.
+No cubic-discriminant denominator is introduced by this conversion.
+
+Theorems in GeneralCubicCurrent.lean:
+  source_reduction
+  source_cokernel
+  moving_point_remainder
+  linear_normal_source_scaled
+  linear_normal_source
+  normal_gauge
+  target_quadratic_reduction
+
+Formal scope: these are genuine polynomial/field identities. The complete
+exterior-differential construction and existence of the moving-point field
+and closed input are not Lean theorems in this file. The exact symbolic
+calculation and its assumptions are recorded separately in
+research_workaround/general_cubic_current_derivation.md and its Python audit.
+
+2. DIRECT BINDING TO THE PROTECTED F, A AND JACOBIAN
+
+SymmetricCubicModel.lean evaluates the unchanged generated HodgeSubmission
+polynomials at
+  X=(1+v,1-v,r), Y=(z+lambda*v,z-lambda*v,s*z),
+and proves
+  eval(F)=G_raw(r,s,lambda,z^2,v^2),
+  eval(A)=r*s*z*(1-v^2)*(z^2-lambda^2*v^2).
+
+It proves the full cubic expansion and its leading coefficient
+  ell=(14*lambda^6-10*lambda^4-5*lambda^2+14)/7,
+and the monic normalization when ell!=0. It also proves ell(0)=2.
+The scaled cone formulas have the correct scale^6 factors.
+
+The polynomial coordinate map with input order
+  (scale,r,z,s,v,lambda)
+and output order
+  (X0,X1,X2,Y0,Y1,Y2)
+has its actual partial-derivative matrix formally identified, followed by
+  det(J)=+4*scale^5*v*z.
+
+Thus the model and determinant are tied to the actual target; they are not
+independently supplied formulas assumed to be the target.
+
+After w=v^2, x=z^2 and monic normalization, put
+  C=2*r*s*x/ell^2.
+The protected numerator on the chosen residue chart is
+  Rstar_target=C*(1-w)*(x-lambda^2*w).
+Subtracting (C*lambda^2/3)*g, which has zero normal source, gives a linear
+numerator. The remaining normalized traces are exactly
+
+  <M1>=-C*(3*x-lambda^2*b(x)),
+  <M2>=(C/2)*(3*x+3*lambda^2+2*lambda^2*a(x)).
+
+The source bounds deg_x(M1)<=4 and deg_x(M2)<=3 leave at most nine coefficient
+functions to match. They are rational-function identities in the remaining
+base parameters, not merely nine numerical equations. Arbitrary base-
+dependent coefficients multiplying closed input forms can destroy closedness.
+No such trace equality has been found or assumed.
+
+3. A COMPLETE LEAN LOWER BOUND FOR ALL CERTIFICATE DENOMINATORS
+
+SmallDenominatorObstruction.lean proves
+  protected_verified_denominator_degree_ge_four.
+It accepts the exact unrestricted record
+  HodgeComputer.Verify HodgeSubmission.F HodgeSubmission.A
+    HodgeSubmission.F.totalDegree HodgeSubmission.q D N Q
+and concludes
+  4 <= D.totalDegree.
+
+There is no symmetry restriction, no restriction to rational coefficients,
+no assumed normalization, and no requirement that the residual Q vanish.
+
+The proof first normalizes the first equation using denominator legality,
+homogeneous projection, and Euler's identity. For degree d<=3, the resulting
+linear map (N,D) -> sum N_i*(partial_i(7F))-A*D has a symbolic square
+coefficient minor which is diagonal modulo 5, with entries 2 and -1.
+The selected derivative monomials contain a fifth power; every A*D monomial
+has each exponent at most four. The columns are therefore disjoint and the
+minor is nonzero over every characteristic-zero field. Normalization then
+forces D=0, contradicting Verify.
+
+This is a theorem about the actual full verifier, not only a failed search.
+
+4. EXACT CAS EXCLUSION OF THE SMALL SYMMETRIC DENOMINATOR FAMILY
+
+Independent exact calculations prove:
+
+  No legal homogeneous S3(X) x S3(Y)-invariant, Y-even denominator
+  of degree at most 8 can certify the protected target over C.
+
+This stronger, symmetry-restricted conclusion is NOT a Lean theorem yet.
+It is an audited exact linear-algebra/ideal-membership computation, valid
+for complex and algebraic coefficients. It is not an enumeration of Fp points.
+
+The complete equivariant vector-field bases use
+  E0=sum d/dXi, E1=sum Xi*d/dXi, E2=sum Xi^2*d/dXi
+on each block. In elementary symmetric coordinates their true ambient
+fields and divergences are retained. The basis is complete and free over
+the invariant ring; the scope notes give the elementary proof.
+
+Degree 6: after the exact first equation and the harmless F-gauge, there are
+three denominator parameters and ten numerator-kernel parameters. All
+kernel corrections are retained. Exact row combinations of the second
+equation give a^2=b^2=c^2=0. The three explicit rational row witnesses were
+independently checked.
+
+Degree 8: the first matrix has 324 numerator columns, 64 denominator columns,
+322 rows, and rank 318. Its full 70-dimensional kernel comprises 48 pure
+numerator directions, 18 denominator directions modulo F, and four
+polynomial Euler gauges. The second matrix is 435 by 1035. Eliminating all
+mixed numerator-kernel terms yields 44 necessary homogeneous quadrics in
+18 denominator parameters.
+
+The degree-four Macaulay matrix for these quadrics is 7524 by 5985. It has
+full column rank modulo 101. A separately implemented, transposed construction
+with variable and row order changes has full row rank modulo 103. Every
+rational denominator is a unit at the respective prime. A nonzero maximal
+minor therefore lifts to Q, so all quartic monomials lie in the rational
+ideal. Every complex common zero has all 18 parameters zero; the resulting
+D is a multiple of F and is illegal.
+
+The independent semantic auditor reconstructs the first equation, all kernel
+vectors, true ambient divergences, the raw second matrix, and all 44 quadrics
+without importing the generator's polynomial routines.
+
+For lower degrees in this symmetry class, multiply a putative certificate by
+p^(8-d), p=X0+X1+X2. This preserves the identities and legality: p is prime
+and does not divide F, as the point X=(1,-1,0),Y=0 shows. This reduces every
+such lower degree to the excluded degree-eight case.
+
+Files and full scope are in research_workaround/independent_degree8_scope.txt.
+These results leave larger or noninvariant supports open. They do not refute
+the claimed existence theorem.
+
+5. THE ACTUAL CONTACT INCIDENCE EQUATIONS ARE NOW AVAILABLE
+
+research_workaround/symmetric_norm_contact_circuit.json contains 1094 scalar
+arithmetic nodes and one explicit 19 by 19 solve gate for the exact target.
+Its builder and immutable input snapshot are included.
+
+The intrinsic chart has 26 parameters: five coefficients each for Q1 and
+Q2=ab+Q2', and eight each for the even and odd contact cubics Aplus,Bminus.
+The 25 equations are the actual remainder of
+  G(a,b,c,d,-Q1)-Aplus^2+Bminus^2
+modulo Q2. The solve is localized at
+  Delta=(1-mu0*mu1)*(1-3*mu0*mu1)*(1-2*mu0*mu1)^3.
+Both quartics g1,g2 are reconstructed, with the identity
+  G=(u+Q1)*g1+Q2*g2+Aplus^2-Bminus^2+remainder.
+
+Add the moving coordinate alpha and the two equations
+  Q2(1,r,alpha,s*alpha)=0,
+  (Aplus+Bminus)(1,r,alpha,s*alpha)=0,
+and define beta=-Q1(1,r,alpha,s*alpha). This gives 27 equations in 27 unknowns
+and an exact polynomial identity implying G(point,beta)=0 at every solution.
+
+The audit symbolically binds the raw target, protected source, all nine
+monic coefficients, all residual coefficients, both reduction matrices,
+their determinant factors, and g1. Exact rational arithmetic controls verify
+the circuit evaluator. Those controls are NOT contact solutions.
+
+Equation counts do not imply nonemptiness, dominance, finiteness, or etaleness.
+No suitable component or source-matching trace has been established here.
+
+6. A CONCRETE CONTACT SEED AND ITS FAILED LIFTS
+
+A structured seed for the actual mod-5 quotient at lambda=1 was constructed
+over F25 with h^2=2. Its full polynomial norm decomposition is correct, but
+its intrinsic Jacobian has rank 23 rather than 25. All 120 points of the
+specified small structured family have rank 23 or 21.
+
+Both quadratic obstruction forms on its three-dimensional tangent kernel
+vanish identically; this was independently checked in the original norm map.
+The actual target's first lift obstruction is nonzero, (1,1) in the recorded
+cokernel basis. This excludes the ordinary lift and the proposed square-root
+ramified lift of that seed. Higher ramification, other seeds and other
+components are not excluded. The scripts and exact receipts are included.
+
+The supplementary hyperelliptic-current calculation is in research/ with
+the earlier exact Gauss-Manin model. It reduces the alternative moving-point
+problem to eight source coefficients, but also proves trace cancellation for
+a generic level-set/K3 construction. It supplies no primitive.
+
+7. VERIFICATION AND REPRODUCTION
+
+All 47 Lean modules have been compiled and separately kernel-replayed across
+the three development stages. The three new modules were replayed in fresh
+processes in this run. The retained prior receipts and new receipt record
+source/object hashes and successful exit codes. The aggregate receipt checks
+the packaged source against every corresponding replay record.
+
+The complete axiom audit now covers 753 theorem declarations, including
+attributed declarations. All dependencies lie in
+  propext, Classical.choice, Quot.sound
+or a smaller set. No new source contains a proof placeholder or added axiom.
+The audit parser handles nested Lean comments and theorem attributes.
+
+Kernel replay uses Lean's leanchecker with the imported environment; it is
+not an independently implemented kernel and does not recheck all of Mathlib
+from an empty environment. The repository's protected files remain unchanged.
+
+To reproduce, use the pinned checkout/toolchain and build the imports, e.g.
+from its formal/lean directory:
+
+  lake exe cache get
+  lake build HodgeComputer.Verify Mathlib.Tactic Mathlib.RingTheory.MvPolynomial.EulerIdentity
+  lake env python3 /absolute/path/to/package/verify_partial.py --repo /absolute/path/to/sextics
+  lake env python3 /absolute/path/to/package/audit_axioms.py --repo /absolute/path/to/sextics
+
+The verifier runs sequentially, with a 4096 MiB compile allocation limit.
+See PREVIOUS_DEVELOPMENT.txt for the optional local procfs compatibility shim.
+Normal environments do not need it. Compiled objects, toolchains and caches
+are not distributed in the archive.
+
+The independent algebra audits require SymPy 1.14, python-flint 0.9 and, for
+the finite-field seed checks, NumPy. From research_workaround/:
+
+  python3 independent_degree6_audit.py
+  python3 independent_degree8_audit.py
+  python3 independent_degree8_macaulay.py 103
+  python3 general_cubic_current.py
+  python3 symmetric_norm_contact_circuit.py
+  python3 norm_contact_exact_seed.py
+  python3 norm_contact_seed_tangent.py
+
+The large degree-eight intermediate RREF JSON is deliberately not archived.
+It is reproducible using:
+  python3 invariant_degree6.py --degree 8
+  python3 analyze_quadrics.py --degree 8
+The independent auditor does not require that intermediate; it reconstructs
+all raw coefficient equations directly. The irrelevant natural-coordinate
+exploration is also omitted. All mathematical endpoint data and checks are
+included.
+
+REMAINING TASK
+
+The algebraic route now applies to the exact general cubic and its exact
+source. It still needs a genuine contact component, compatible closed forms,
+and the displayed normalized trace identities (including any required
+corrections), followed by the existing certificate-clearing construction.
+The alternative nonconstructive route still requires the geometric support
+and comparison theorems to be formalized. Neither route is complete.
+
+No external repository, discussion, proposal, or message was modified.

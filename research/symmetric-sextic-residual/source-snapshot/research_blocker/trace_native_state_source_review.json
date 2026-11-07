@@ -1,0 +1,40 @@
+{
+  "status": "PASS_WITHIN_STATED_SCOPE",
+  "review_type": "Independent read-only source inspection",
+  "material_correctness_defects_found": [],
+  "build_directory": "vendor/resumable_c88c65dfa299f4db",
+  "binary_sha256": "dd44b934f4e58a30dde1050a27f4a945e37549ca592683ccd784535c4367d5a1",
+  "checked_source_sha256": {
+    "msolve_compact_hash.patch": "b4492a0eb46f9972b463bdbdf3ce3c87f4d9c923fa2ecd881036f736e9d24df1",
+    "msolve_selective_columns.patch": "3576f40682c1fb7809f354fcbd08beac5ba96d9b2a14334887edd39bd30160ac",
+    "msolve_pair_selection_bounds.patch": "0faf0f14f0bbff59399ba93ce3495c0c766ea9d89ffa6e9fb4ed863226f60e76",
+    "resumable_state_driver.c": "6aed81e4d33c82f8e4787c480adf48e5c8a405b864e20a828d8b34076f1f0ec0"
+  },
+  "immutable_driver_copy_sha256": "6aed81e4d33c82f8e4787c480adf48e5c8a405b864e20a828d8b34076f1f0ec0",
+  "all_listed_hashes_checked_and_matched_during_completed_review": true,
+  "checks": {
+    "complete_preprocessing_boundary": true,
+    "all_live_pairs_and_exact_lcm_exponents_preserved": true,
+    "pair_lcm_matches_generators_checked_on_restore": true,
+    "initial_pair_regeneration_skipped": true,
+    "live_basis_order_and_coefficient_indices_preserved": true,
+    "redundancy_flags_degrees_and_lmps_restored": true,
+    "divisor_and_leading_masks_recomputed": true,
+    "serialized_metadata_pointer_fields_cleared": true,
+    "fresh_secondary_hash_and_matrix_storage": true,
+    "no_stale_pointer_reuse_identified": true,
+    "original_generator_prefix_retained": true,
+    "pair_selection_bounds_patch_sound": true,
+    "immutable_build_inputs_and_binary_match_receipt": true
+  },
+  "new_tests_run": false,
+  "reviewed_sources_modified": false,
+  "existing_test_receipt": "resumable_native_state_audit.json",
+  "existing_successful_small_system_restarts": 16,
+  "caveats": [
+    "Pinned native md_t ABI; finite-field, signature-free NO_TRACER path only.",
+    "FNV-1a guards accidental mismatch, not malicious alteration; distribution hashes are SHA256.",
+    "Pre-round compaction may repeat once on resume; this changes statistics/performance, not the represented ideal or pending queue."
+  ],
+  "scope": "Source-level continuation audit plus inspection of existing small-system receipt. No complete target basis, finite target quotient, requested trace, or full Lean certificate is established."
+}

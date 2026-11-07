@@ -1,0 +1,95 @@
+{
+  "status": "PASS",
+  "replay": "Each source compiled in a fresh Lean process to a separate replay output directory.",
+  "toolchain": "Lean 4.33.1",
+  "memory_limit_mib": 4096,
+  "shared_lock": "lean_compile.lock",
+  "modules": {
+    "CurrentVerifierBridge": {
+      "compiler_exit_code": 0,
+      "source_sha256": "1cb579c08c6cbc5c900078c688a8e5fdf303e3a09a5619cb11e26f6e38bc5d29",
+      "replay_log_sha256": "274706df85b87652bcdf516178937df0841d9f8aaa302ebb4d3918145af73668",
+      "endpoint_axioms": {
+        "CurrentVerifierBridge.defect_clearing": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "CurrentVerifierBridge.residueCorrection_game_mod_cube": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "CurrentVerifierBridge.verify_of_residue_primitive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "CurrentVerifierBridge.verify_of_residue_primitive_mod_cube": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "CurrentVerifierBridge.verify_of_affine_residue_primitive": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "no_sorry_or_new_axioms": true
+    },
+    "CertificateDenominatorGauge": {
+      "compiler_exit_code": 0,
+      "source_sha256": "0cd542b31e4371cea4e62e3419cef8c980d72a6aef642098fedbfc2ba93a168a",
+      "replay_log_sha256": "44489f17915bedaf3200f3f18ba76fa2fe5f3b8a3cdf3f78701abb8728265316",
+      "endpoint_axioms": {
+        "CertificateDenominatorGauge.second_equation_shift": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "CertificateDenominatorGauge.verify_shift": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "no_sorry_or_new_axioms": true
+    },
+    "ContactIncidenceAlgebra": {
+      "compiler_exit_code": 0,
+      "source_sha256": "c7a49ada2299c78f30b24aad541c655e4132983a49f7a96dd5102682dc5a08b7",
+      "replay_log_sha256": "b1feeaeaed99e3c39777f0b05c25d9d412e42ad50159b654ad6f2de95a8c2a19",
+      "endpoint_axioms": {
+        "ContactIncidenceAlgebra.incidence_minor_identity": [
+          "propext",
+          "Quot.sound"
+        ],
+        "ContactIncidenceAlgebra.cramer_tangent": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "ContactIncidenceAlgebra.cramer_wedge": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "no_sorry_or_new_axioms": true
+    }
+  },
+  "pinned_dependency_source_hashes": {
+    "HodgeComputer/Verify.lean": "60b8aaa391c27047d64d12839bc5172bc3d41d4230b15d5009263189026b5f72",
+    "HodgeComputer/Constructions/Explicit.lean": "dba2e5d3a721c9fae8990b5b5336b4998fcbf303fda2882e28583921ade3ff8f",
+    "HodgeTestbed/Algebra.lean": "3c7cbc2f81dfced1ca99a8e031f01af39ac7964425aad8b24d2e68debd1a363e",
+    "HodgeComputer/Constructions/RationalFields/Calculus.lean": "1208109bc701731dbbe5bd2141eed1e4dfb28c7594eb89b91a0f7b2a165b022b",
+    "HodgeComputer/Constructions/RationalFields/ResidueReduction.lean": "f576b06807214ded9f7fd429a28859b2cf884129caabf2510083324268100eb0",
+    "HodgeComputer/Constructions/RationalFields/EulerCorrection.lean": "c167cc8c79ce1a642a7b35c6ddd88a83459d94d927a50ecaccfa7f8f8bcc2044",
+    "HodgeComputer/Constructions/RationalFields/Homogenization.lean": "50838c2cdfe654bd2fcd991bab1f751a73bff0bd5bbd85a305f9be4cc9d8286d"
+  },
+  "seconds": 10.518791913986206,
+  "full_certificate_proved": false,
+  "scope": "Generic positive construction and transport lemmas. Actual contact/source data, chart bindings, and legal polynomial clearing for the protected target remain construction obligations.",
+  "ordinary_remainder_legality": "Factoring E=F^3 R in a field does not itself assert divisibility. The ordinary Verify adapter explicitly requires embed(Q)=embed(D)^2*r for the computed remainder r, plus IsRelPrime F D."
+}

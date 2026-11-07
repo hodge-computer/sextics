@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "independent_original_target_and_derivative_reconstruction": true,
+  "matrix_shape": [
+    286,
+    453
+  ],
+  "selected_minor": 286,
+  "center_inverse_defect_upper_bound": "10^-10",
+  "inverse_norm_upper_bound": "10^3",
+  "coordinate_bound": 100,
+  "matrix_lipschitz_bound": "160016/13",
+  "radius": "1/100000000000000000000000000000000000",
+  "ball_inverse_defect_upper_bound": "10^-10",
+  "strict_ball_neumann_inequality": true,
+  "complete_intersection_degrees": [
+    2,
+    3,
+    4,
+    4
+  ],
+  "hilbert_coefficients": [
+    1,
+    4,
+    9,
+    15,
+    19,
+    19,
+    15,
+    9,
+    4,
+    1
+  ],
+  "length": 96,
+  "socle_degree": 9,
+  "top_graded_dimension": 1,
+  "weighted_elimination_jacobian_sign": "+1",
+  "source_ball_sha256": "51afaf813d87c680c7ec1674defd284d8c0dc2f6f2c0a2415b60e8321bbb3b98",
+  "regularity_witness_sha256": "a6c0daff8d750006394e1f6c11df2ed597a4ec4ceeade5e6d5bc1cf0535de6ac",
+  "independent_matrix_sha256": "492e802d535be388dbd646f0d2614baa29afbffb504213b05eba88ae68dcc63c",
+  "audit_source_sha256": "b7ef8d3b0a0ef046816d561e2d6ab67bd5b7835d06a84436f753f5a3c0addf13",
+  "verification_seconds": 1.064,
+  "scope": "Exact regularity audit on the certified contact ball, with classical Artinian-complete-intersection consequences. No Lean proof, no trace evaluation, no final certificate."
+}

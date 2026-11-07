@@ -1,0 +1,30 @@
+refine 0 7.2251e-71
+refine 1 6.6508e-144
+refine 2 9.365e-286
+refine 3 1.8913e-572
+refine 4 4.6641e-599
+{"index": 1, "degree_tested": 4, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.0018846988677978516}
+{"index": 1, "degree_tested": 8, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.005381345748901367}
+{"index": 1, "degree_tested": 12, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.012627363204956055}
+{"index": 1, "degree_tested": 16, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.02418231964111328}
+{"index": 1, "degree_tested": 20, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.04646730422973633}
+{"index": 5, "degree_tested": 4, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.0017139911651611328}
+{"index": 5, "degree_tested": 8, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.0056955814361572266}
+{"index": 5, "degree_tested": 12, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.012592554092407227}
+{"index": 5, "degree_tested": 16, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.023312807083129883}
+{"index": 5, "degree_tested": 20, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.04862642288208008}
+{"index": 6, "degree_tested": 4, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.0017170906066894531}
+{"index": 6, "degree_tested": 8, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.005433797836303711}
+{"index": 6, "degree_tested": 12, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.011127471923828125}
+{"index": 6, "degree_tested": 16, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.024590253829956055}
+{"index": 6, "degree_tested": 20, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.055567264556884766}
+{"index": 10, "degree_tested": 4, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.001562356948852539}
+{"index": 10, "degree_tested": 8, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.0059735774993896484}
+{"index": 10, "degree_tested": 12, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.012189626693725586}
+{"index": 10, "degree_tested": 16, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.024762630462646484}
+{"index": 10, "degree_tested": 20, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.04384946823120117}
+{"index": 18, "degree_tested": 4, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.0015873908996582031}
+{"index": 18, "degree_tested": 8, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.005592823028564453}
+{"index": 18, "degree_tested": 12, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.010887384414672852}
+{"index": 18, "degree_tested": 16, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.024451494216918945}
+{"index": 18, "degree_tested": 20, "coefficient_bound": 10000000000000000, "relation_found": null, "seconds": 0.04642534255981445}

@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "scope": "Exact countermodel to unrestricted trace weights implying closed contact weights; not a symmetric-sextic obstruction",
+  "degree": 48,
+  "trace_pairing_entries_checked": 2304,
+  "trace_pairing_determinant": "-48^48*r^47*s^47",
+  "permutation_inversions": 1081,
+  "wronskian_determinant": "product(factorial(j),j=0..47)",
+  "wronskian_determinant_sha256": "b6b5caffdcf0ec8dfcade45f64e463d33763abc4b9b7908ae8cd4770217a062b",
+  "unrestricted_weight": "1/(48*s*alpha)",
+  "computed_trace_vector": "e_1 with zero-based indices 0..47",
+  "closedness_defect": "-ds wedge d(alpha)/(48*s^2*alpha)",
+  "allowed_weight_obstruction": "For f in k(alpha), Tr(s*alpha*f) is in s*k(r), hence cannot be 1",
+  "source_sha256": "5a8eca25777b2eacef6bd63300810f8949963ff7bb37b915b1a514bdd72e7c1a"
+}

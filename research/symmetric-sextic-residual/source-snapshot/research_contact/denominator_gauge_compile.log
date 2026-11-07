@@ -1,0 +1,70 @@
+/workspace/scratch/0d11a6a4cf8f/proof_attempt4/CertificateDenominatorGauge.lean:52:47: warning: This simp argument is unused:
+  pderiv_C_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [divergence, scaledEuler, sixth, pderiv_mul, pderiv_X_self, mul_one, Finset.sum_add_distrib,
+    Finset.mul_sum]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt4/CertificateDenominatorGauge.lean:53:54: warning: This simp argument is unused:
+  Finset.mul_sum
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [divergence, scaledEuler, sixth, pderiv_C_mul, pderiv_mul, pderiv_X_self, mul_one,
+    Finset.sum_add_distrib]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt4/CertificateDenominatorGauge.lean:54:15: warning: This simp argument is unused:
+  ← Finset.sum_add_distrib
+
+Hint: Omit it from the simp argument list.
+  [apply] simp only [← Finset.mul_sum]
+
+Note: Simp arguments with `←` have the additional effect of removing the other direction from the simp set, even if the simp argument itself is unused. If the hint above does not work, try replacing `←` with `-` to only get that effect and silence this warning.
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt4/CertificateDenominatorGauge.lean:55:10: warning: This simp argument is unused:
+  Finset.sum_const
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [nsmul_eq_mul, mul_comm, mul_left_comm, mul_assoc]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt4/CertificateDenominatorGauge.lean:55:28: warning: This simp argument is unused:
+  nsmul_eq_mul
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Finset.sum_const, mul_comm, mul_left_comm, mul_assoc]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt4/CertificateDenominatorGauge.lean:55:52: warning: This simp argument is unused:
+  mul_left_comm
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Finset.sum_const, nsmul_eq_mul, mul_comm, mul_assoc]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt4/CertificateDenominatorGauge.lean:55:67: warning: This simp argument is unused:
+  mul_assoc
+
+Hint: Omit it from the simp argument list.
+  [apply] simp [Finset.sum_const, nsmul_eq_mul, mul_comm, mul_left_comm]
+
+Note: This linter can be disabled with `set_option linter.unusedSimpArgs false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt4/CertificateDenominatorGauge.lean:109:48: warning: Variable name `hF` is not explicitly referenced.
+
+Hint: The binding can be removed (if unused) or named `_` (if used implicitly). Alternatively, prefix the name with `_` to silence this warning:
+  [apply] _hF
+
+Note: This linter can be disabled with `set_option linter.unusedVariables false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt4/CertificateDenominatorGauge.lean:145:38: warning: Unused tactic linter: `omega` does nothing
+
+Note: This linter can be disabled with `set_option linter.unusedTactic false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt4/CertificateDenominatorGauge.lean:145:38: warning: this tactic is never executed
+
+Note: This linter can be disabled with `set_option linter.unreachableTactic false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt4/CertificateDenominatorGauge.lean:142:23: warning: Used `tac1 <;> tac2` where `(tac1; tac2)` would suffice
+
+Note: This linter can be disabled with `set_option linter.unnecessarySeqFocus false`
+'CertificateDenominatorGauge.second_equation_shift' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CertificateDenominatorGauge.verify_shift' depends on axioms: [propext, Classical.choice, Quot.sound]

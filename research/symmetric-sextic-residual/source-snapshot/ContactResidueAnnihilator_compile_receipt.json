@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "module": "ContactResidueAnnihilator",
+  "exit_code": 0,
+  "seconds": 2.4906062119989656,
+  "source_sha256": "053f9b27fbb8011ddb4ca95b3d1fe147f7564ce92378b5c3211d965857cefc0d",
+  "object_sha256": "3b9fbe0fdf010e14aee6d5eaa72c01c5ca9de7ff12d989ea142bf9fe8c6eeb6c",
+  "log": "/workspace/scratch/0d11a6a4cf8f/proof_attempt9/compilation_logs/ContactResidueAnnihilator.log",
+  "command": [
+    "flock",
+    "/workspace/scratch/0d11a6a4cf8f/lean_compile.lock",
+    "lean",
+    "-j1",
+    "-M4096",
+    "-R",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt9",
+    "-o",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt9/ContactResidueAnnihilator.olean",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt9/ContactResidueAnnihilator.lean"
+  ],
+  "full_certificate_proved": false
+}

@@ -1,0 +1,13 @@
+{
+  "node_count": 1861,
+  "socle_rows": 220,
+  "ideal_columns": 316,
+  "canonical_cubic_parameter_slots": 16,
+  "source_coefficient_obligations": 9,
+  "P1_x_degree": 4,
+  "P2_x_degree": 3,
+  "output_bytes": 146835,
+  "output_sha256": "60e8f19f600b6440dbeae9077ee96ac0ce55e7bf053d2d706f204f6242dc5d9b",
+  "source_trace_proved": false,
+  "full_certificate_proved": false
+}

@@ -1,0 +1,34 @@
+{
+  "status": "PASS",
+  "generic_coefficient_variables": 49,
+  "exact_generic_row_identities": 44,
+  "generic_denominator_factors_checked": true,
+  "exact_QQ_base_specialization": {
+    "lambda": 1,
+    "r": 2,
+    "s": 3
+  },
+  "generic_base_parameters_left_symbolic": false,
+  "generic_scalar_ring": null,
+  "inverse_ell_treated_as_independent_scalar": false,
+  "core_polynomial_variables": 25,
+  "original_row_bindings_checked": 44,
+  "pivot_reconstruction_identities_checked": 19,
+  "reduced_row_bindings_checked": 25,
+  "exact_reduced_gradient_identities_checked": 625,
+  "exact_off_ideal_chain_rule_identities_checked": 1100,
+  "off_ideal_identity": "D^2*S_ik=D*rowfactor_i*Jred_ik+(D*d_k(rowfactor_i)-rowfactor_i*d_k(D))*F_i",
+  "source_hashes": {
+    "contact_generic_g2_numerators.json": "db69b2fa53b1ae806938a0f426e8936cea28ad905599344b3a52a48060b565e2",
+    "point_scaled_system.json": "1342ff6a2da5f9c1fe2e059a6d6892dca3f4a0cdb4052651ce0a20b28ac578cc",
+    "schur25_system.json": "e965cff9fbfdb3ec757fa0a307df629a640d79f2621bc640b9ed02b08a3b2075"
+  },
+  "script_sha256": "a2da3f1148b157ce563b620b1e8c59c8f1c6a920b213189db62b44324f728991",
+  "scope": "The generic49-parameter quotient identities are exact. All instantiated equations and gradients are polynomial identities in25 variables over QQ at the stated base specialization, not root samples. General-base binding additionally follows from the builder substitution and chain-rule construction; this independent replay does not claim to expand every generic base coefficient.",
+  "fixed_rhs_good_proved": false,
+  "quotient_basis_completed": false,
+  "source_trace_proved": false,
+  "full_certificate_proved": false,
+  "seconds": 2.8622793719987385,
+  "peak_rss_kib": 115348
+}

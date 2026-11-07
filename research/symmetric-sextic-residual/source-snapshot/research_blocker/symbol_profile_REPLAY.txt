@@ -1,0 +1,72 @@
+PROFILE-ONLY SYMBOLIC PREPROCESSING DIAGNOSTIC
+
+Validated binary:
+  vendor/symbol_profile_dd5f742c96c6e820/resumable_f4_symbol_profile
+SHA256:
+  7fabc1b759853bd2706884213fb9ede1d7db0273bf779a9379b40c06297c67f4
+
+Base: frozen OpenMP build openmp_88974186e92805c0, binary SHA256
+3a74bff5469683817a3596eb7f13cc10247a503081e5fd519ec125b7bf1cd069.
+
+The CLI, reducer choice, native metadata, and checkpoint format are unchanged.
+Use the same --input, --resume-state, --output, --checkpoint, --threads,
+--pairs, and --round-budget arguments as with the frozen OpenMP binary.
+No target computation was run during this variant's construction or validation.
+
+At a safe checkpoint, immediately before serialization, the driver prints one
+[symbol_profile] line. It also prints one on successful completion.
+
+Counters and times are PROCESS-LOCAL: they start from zero on each execution,
+including native resume. They are not stored in or restored from the sidecar.
+
+lookup_ns / lookup_seconds:
+  CLOCK_MONOTONIC time from entry to find_multiplied_reducer until a divisor
+  is found or the leading list is exhausted. Includes the original metadata
+  setup, mask scan, full exponent comparisons, quotient-exponent preparation,
+  and the small profiling overhead within that region.
+
+materialization_ns / materialization_seconds:
+  CLOCK_MONOTONIC time around only multiplied_poly_to_matrix_row called from
+  find_multiplied_reducer. Includes its allocation, multiplication, and hash
+  insertion. Excludes row materialization during initial S-pair selection.
+
+lookup_calls = lookup_hits + lookup_misses.
+materialized_rows = lookup_hits.
+materialized_terms is the sum of source reducer lengths for these rows.
+leading_positions is the total length of scanned leading-monomial prefixes,
+including positions skipped by the divisor mask.
+full_divisibility_tests counts mask-passing candidates whose exponents are
+compared, including candidates that fail those comparisons.
+
+These two measured regions need not sum to all symbolic preprocessing time:
+outer-loop allocation/bookkeeping and other calls are outside the regions.
+Clock calls and counter increments add diagnostic overhead. This variant makes
+no speedup claim. The instrumented reducer loop is serial in the frozen OpenMP
+source, so its process-local counters require no atomic updates.
+
+Build:
+  python symbol_profile_build.py
+The builder creates a new immutable vendor/symbol_profile_<hash> directory and
+refuses to overwrite an existing one. All frozen source and binary files remain
+untouched. Only symbol.c is changed in the copied upstream source tree; the
+driver additionally includes the profile helper and prints at two safe exits.
+
+Validation:
+  python symbol_profile_check.py
+This consumes the frozen OpenMP build's existing small inputs and reference
+outputs. Four complete results (8-, 16-, and 32-bit arithmetic, including block
+order and a degree-fall case) are byte-identical. A profiled checkpoint/restart
+and consumption of a frozen OpenMP sidecar also finish byte-identically.
+The native metadata ABI remains 560 bytes. Runtime was below one second.
+
+Files:
+  symbol_profile_support.h
+  symbol_profile_build.py
+  symbol_profile_check.py
+  symbol_profile_changes.patch
+  symbol_profile_build_receipt.json
+  symbol_profile_validation_receipt.json
+  symbol_profile_REPLAY.txt
+
+Scope: diagnosis only. No complete target basis, target quotient, requested
+trace, or full Lean certificate is established by this profile variant.

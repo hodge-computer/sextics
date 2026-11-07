@@ -1,0 +1,379 @@
+# Exact conic reduction and a three-direction Gauss–Manin attempt
+
+## Status and scope
+
+No full certificate has been obtained. This work preserves the exact symmetric
+sextic with coefficients 5/7 and 10/7 and source
+`A=X0*X1*X2*Y0*Y1*Y2`. It supplies an explicit source and connection circuit,
+an exhaustive obstruction to a primitive on one fixed conic fiber, and a
+bounded search that retains all three projective base directions.
+
+These are exact algebra calculations and mathematical arguments, not new Lean
+theorems. `DirectCertificate.lean` was deliberately not created: there is no
+unconditional certificate to put in it. The previously compiled
+`SymmetricReflections.lean` remains separate.
+
+The block exchange is **not** a symmetry: it exchanges the coefficients 5/7
+and 10/7. No block-exchange restriction is imposed below.
+
+## 1. The exact symmetric quotient and its branch character
+
+Use elementary symmetric coordinates
+
+\[
+p=e_1(X),\quad q=e_2(X),\quad r=e_3(X),\qquad
+P=e_1(Y),\quad Q=e_2(Y),\quad R=e_3(Y).
+\]
+
+Newton's identity is
+
+\[
+\sum X_i^6=p^6-6p^4q+9p^2q^2-2q^3+6p^3r-12pqr+3r^2.
+\]
+
+Set
+
+\[
+a=p^3-2pq,\quad b=P^3-2PQ,
+\]
+
+\[
+J(p,q)=-2p^6+6p^4q-3p^2q^2-2q^3,
+\]
+
+\[
+k=-\frac13\left[J(p,q)+J(P,Q)+\frac57q^2Q+\frac{10}{7}qQ^2\right].
+\]
+
+Then the protected sextic is exactly
+
+\[
+F=3\bigl((r+a)^2+(R+b)^2-k\bigr),\qquad A=rR.
+\]
+
+The invariant quotient alone is a conic. It is insufficient to discard its
+branch factors. The two symmetric-coordinate Jacobians are Vandermonde
+cubics, with squares
+
+\[
+D_X=c_X+l_Xr-27r^2,\quad
+c_X=p^2q^2-4q^3,\quad l_X=-4p^3+18pq,
+\]
+
+and the same formulas with capital letters for `D_Y,c_Y,l_Y`.
+The original residue has the sign-times-sign character, so its density
+contains `1/delta`, where `delta^2=D_X D_Y`.
+
+## 2. A normal coordinate with the full Jacobian retained
+
+Take `h=F` and `u=(r+a)+i(R+b)`. Then
+
+\[
+r=\frac{u+(k+h/3)/u}{2}-a,\qquad
+R=\frac{u-(k+h/3)/u}{2i}-b.
+\]
+
+With the four base coordinates held fixed,
+
+\[
+dr\wedge dR=\frac{i}{6u}\,du\wedge dh.
+\]
+
+The coefficient of the original double-pole form is consequently
+
+\[
+\frac{i\,rR}{6u\,\delta}\frac{du\wedge dh}{h^2}.
+\]
+
+Taking its residue means differentiating the entire density in `h`, including
+`delta`. Since `r_h=1/(6u)` and `R_h=i/(6u)`, the resulting relative one-form is
+
+\[
+\omega=\frac{C(u)}{\delta}\,du,
+\]
+
+\[
+C(u)=\frac{i}{36u^2}\left[
+R+ir-\frac{rR}{2}\left(\frac{l_X-54r}{D_X}
+  +i\frac{l_Y-54R}{D_Y}\right)\right].
+\]
+
+This uses an actual normal coordinate, not an assumed fixed branch or a
+polynomial-source approximation.
+
+For a polynomial model put `y=u^2 delta` and, at `h=0`, define
+
+\[
+\rho=ur=\frac{u^2+k}{2}-au,\qquad
+\upsilon=uR=\frac{u^2-k}{2i}-bu,
+\]
+
+\[
+d_X=c_Xu^2+l_Xu\rho-27\rho^2,\qquad
+d_Y=c_Yu^2+l_Yu\upsilon-27\upsilon^2,\qquad H=d_Xd_Y.
+\]
+
+Thus `y^2=H(u)`, with `deg H=8` and constant leading coefficient `-729/16`.
+The exact residue has the compact polynomial numerator
+
+\[
+\omega=\frac{B(u)}{H(u)y}\,du,
+\]
+
+\[
+B=\frac{i}{72}\left[
+\upsilon(2c_Xu+l_X\rho)d_Y
+ +i\rho d_X(2c_Yu+l_Y\upsilon)\right],\qquad\deg B\le8.
+\]
+
+`gauss_manin_circuit.py` checks the completed-square identity, normal-coordinate
+Jacobian, and this full differentiated density algebraically. Its JSON output
+stores the actual Gaussian-rational coefficient polynomials in the base
+variables; it does not replace them by generic symbols with unproved values.
+
+## 3. The projective chart has three independent base derivatives
+
+On `p != 0`, divide by its weight:
+
+\[
+q\mapsto q/p^2,\quad P\mapsto P/p,\quad
+Q\mapsto Q/p^2,\quad u\mapsto u/p^3.
+\]
+
+The affine residue has the radial factor `dp/p`. Contracting the Euler field
+and taking the chart `p=1` therefore leaves the projective form
+
+\[
+dq\wedge dP\wedge dQ\wedge\omega.
+\]
+
+No `q`, `P`, or `Q` derivative may be discarded. The coefficient field for
+the following circuit is `K=Q(i)(q,P,Q)`.
+
+## 4. An explicit finite rank-six connection circuit
+
+Write `H=sum h_j u^j`. On the squarefree locus, let `I` be the unique polynomial
+of degree below eight satisfying
+
+\[
+H'I\equiv1\pmod H.
+\]
+
+It is computed by the inverse of multiplication by `H'` in `K[u]/(H)`, an
+eight-dimensional algebra. Thus the entire construction can be kept as an
+8-by-8 rational matrix circuit without expanding enormous fractions.
+
+For any numerator `E` of degree at most fourteen, set
+
+\[
+V=-2EI\bmod H,\qquad
+\mathcal R(E)=\frac{E+VH'/2}{H}-V'.
+\]
+
+The result is polynomial of degree at most six, and the exact identity is
+
+\[
+\frac{E}{Hy}\,du
+=\frac{\mathcal R(E)}{y}\,du+d\left(\frac{V}{y}\right).
+\]
+
+Every numerical evaluation checks the equivalent polynomial identity
+`E = H*(R(E)+V') - V*H'/2`.
+
+Define
+
+\[
+c_1=-\frac{h_7}{2h_8},\quad
+c_2=\frac{3h_7^2}{8h_8^2}-\frac{h_6}{2h_8},\quad
+c_3=-\frac{5h_7^3}{16h_8^3}
+  +\frac{3h_7h_6}{4h_8^2}-\frac{h_5}{2h_8}.
+\]
+
+These are the first three coefficients of the reciprocal square-root expansion
+at infinity. A polynomial numerator `sum a_j u^j` of degree at most six has
+zero residues at infinity exactly when
+
+\[
+a_3+c_1a_4+c_2a_5+c_3a_6=0.
+\]
+
+A basis for the six-dimensional projective, second-kind quotient is
+
+\[
+f=(1,u,u^2,u^4-c_1u^3,u^5-c_2u^3,u^6-c_3u^3),
+\qquad \beta_j=f_j\,du/y.
+\]
+
+For each of the three base variables `b=q,P,Q`, column `j` of the connection
+matrix is the basis coefficient vector of
+
+\[
+\mathcal R(-f_j H_b/2)+(f_j)_b.
+\]
+
+The last term is included: the chosen basis varies with the base. Source `v`
+is the coefficient vector of `R(B)`. Both source and all connection columns
+satisfy the zero-residue relation.
+
+A sufficient rational primitive in this module would solve
+
+\[
+v=(\partial_q+M_q)U+(\partial_P+M_P)V+(\partial_Q+M_Q)W,
+\qquad U,V,W\in K^6.
+\]
+
+This is an explicit source and connection, not a theorem assuming that the
+unknown three vectors exist.
+
+## 5. Exact verification and the bounded primitive search
+
+The implementation evaluated the complete circuit at 100 smooth points over
+`F_101`, with `i=10`. At every point it verified all Hermite polynomial
+identities and the zero-residue conditions for the source and all eighteen
+connection columns.
+
+A separate calculation over `Q(i)` at `(q,P,Q)=(0,1,0)` computes all three
+connection matrices and the source
+
+\[
+\left(
+\frac{6475(1-i)}{76196},
+\frac{17475i}{38098},
+-\frac{289187(1+i)}{457176},
+-\frac{364113(1-i)}{609568},
+-\frac{285039i}{609568},
+\frac{452709(1+i)}{4876544}
+\right).
+\]
+
+Every one of the 108 exact connection entries and six source entries reduces
+to the independently computed finite-field values. The exact replay also
+differentiates the inverse/reduction circuit and checks all three connection
+curvature matrices at this point.
+
+The search permitted all eighteen components of `U,V,W`. It tried polynomial
+numerators of total base degree at most 0, 1, 2, and 3, with common denominator
+either `1` or `Delta=Norm(H')`. For a `Delta^-m` denominator the implemented
+equation includes the term `-m*(partial_b log Delta)*Id`; it does not freeze
+the denominator under differentiation.
+
+The logarithmic derivative is computed by
+
+\[
+\partial_b\log\Delta
+=\operatorname{Tr}_{K[u]/H}\left(
+\frac{H_b'}{H'}-\frac{H''H_b}{(H')^2}\right).
+\]
+
+Both degree-three systems have 360 unknown constants. They reached coefficient
+rank 360 and augmented rank 361 by the 61st sampled point. Thus this compact
+ansatz did not produce a primitive. The lower-degree trials also failed; their
+full results are retained in `gauss_manin_audit.json`. These are exact bounded
+linear-algebra calculations, not Lean kernel checks or an unrestricted no-go.
+
+## 6. A rigorous obstruction to the fiber-only shortcut
+
+On the exact fiber `p=P=1`, `q=Q=0`, put `z=r+1`, `w=R+1`. The conic equation
+is `3(z^2+w^2)=4`, parametrized by
+
+\[
+z=\frac{u+4/(3u)}2,\qquad
+w=\frac{u-4/(3u)}{2i}.
+\]
+
+The squared branch factor is
+
+\[
+D=-\frac{
+(3u^2-6u+4)(3u^2-6iu-4)
+(27u^2-46u+36)(27u^2-46iu-36)}{144u^4}.
+\]
+
+The degree-eight numerator is squarefree, checked over `Q(i)`. Hence the
+sign-times-sign double cover has genus three. The actual source above becomes
+
+\[
+C=-\frac{i(4+4i)\bigl(81u^4-492iu^2+(-400+400i)u+144\bigr)}{
+216u^2(27u^2-46u+36)(27u^2-46iu-36)}.
+\]
+
+If `C du/delta` were exact in `C(u,delta)`, average a primitive into its odd
+character. It must have the form `S(u)/delta`, with `S` rational, and satisfy
+
+\[
+S'-\frac{D'}{2D}S=C.
+\]
+
+The following pole bounds are exhaustive.
+
+* At an ordinary nonzero finite point, a pole of `S` would differentiate into
+  a pole of larger order, absent on the right side.
+* At a branch point, `-D'/(2D)` has residue `-1/2` and `C` has at most a
+  simple pole. A pole of `S` of order `m>=1` would produce a nonzero leading
+  coefficient `-m-1/2` of order `m+1`, impossible.
+* At zero, `D` has a fourth-order pole, so the connection coefficient is
+  `2/u+O(1)`; `C` has at most a double pole. A pole of `S` of order greater
+  than two would have nonzero leading coefficient `2-m` and is impossible.
+* At infinity, the connection coefficient is `-2/u+O(u^-2)` and
+  `C=O(u^-2)`. Polynomial growth of `S` greater than `u^2` has a nonzero
+  leading coefficient `m-2` and is impossible.
+
+Therefore every possible rational primitive is covered by
+
+\[
+S=(a_0+a_1u+a_2u^2+a_3u^3+a_4u^4)/u^2.
+\]
+
+Clearing the rational ODE yields a 12-by-5 Gaussian-integer coefficient matrix.
+The augmented matrix has a six-by-six minor using zero-based rows
+`[0,1,2,3,4,7]` whose determinant is **3 modulo 5**, with `i` mapped to 2.
+Since the coefficient matrix has only five columns, this proves inconsistency
+over `Q(i)` and over `C`. The full matrix and minor are retained in
+`conic_primitive_audit.json`, generated by its companion script.
+
+Normalized trace commutes with derivations in characteristic zero. A primitive
+in any finite algebraic extension would therefore descend to one in
+`C(u,delta)`. The obstruction also excludes such an algebraic fiber-only
+primitive.
+
+This conclusion is deliberately limited to the displayed fiber and to
+integration in its curve direction. It does not discard base derivatives,
+rule out a primitive with new support, or contradict Ben Diamond's existence
+argument.
+
+## 7. The remaining constructive obstacle and PR219
+
+The rank-six circuit treats differentials of the second kind on the complete
+generic curve. A full rational primitive may instead have simple poles at
+new moving points. Their nonzero residues add logarithmic classes, so the
+rank-six PDE is a sufficient ansatz rather than an equivalence for all possible
+denominators.
+
+PR219's genus-four norm contacts and moving-point currents address precisely
+this kind of additional support. The literal formula in Chapter 2, equation
+(2.8.4), supplies an exact source only after its normalized trace triple equals
+the requested source as a rational-function identity. It also requires a
+closed algebraic parameter one-form; arbitrary coefficient multipliers need
+not preserve closedness. The chapter explicitly separates that obligation
+from cohomological spanning and from chart corrections.
+
+The most specific next step is to construct the actual moving-point finite
+algebra for this target and its closed residue forms, adjoin their logarithmic
+classes to the circuit above, and solve the corrected source equation with
+all base derivatives. The new 48-dimensional geometric span is useful input,
+but does not itself supply that missing exact source identity.
+
+## Reproduction
+
+Use an environment with SymPy installed:
+
+```sh
+python conic_primitive_audit.py
+python gauss_manin_circuit.py
+python gauss_manin_exact_fiber.py
+```
+
+The circuit script regenerates `gauss_manin_circuit.json` if absent, otherwise
+reuses its exact sparse coefficient data. Remove only that generated file to
+force a full symbolic rebuild. All calculations are local; no remote
+repository was mutated.

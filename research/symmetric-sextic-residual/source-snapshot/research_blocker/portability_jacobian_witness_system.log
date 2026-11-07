@@ -1,0 +1,88 @@
+{"phase": "input_ready", "source": "point_scaled", "rhs_count": 1, "file": "jacobian_point_scaled_1rhs_p37.ms", "variables": 94, "equations": 94, "terms": 1929, "maximum_total_degree": 3, "sha256": "8d31faeb8489528759c680c354898d94168478bb875ba95cc3dc944f993b82c1"}
+{"phase": "input_ready", "source": "point_scaled", "rhs_count": 2, "file": "jacobian_point_scaled_2rhs_p37.ms", "variables": 138, "equations": 138, "terms": 3160, "maximum_total_degree": 3, "sha256": "c56be45d4784160f5ac100620f746fb3fcc3903cb1c7b17625bde3e5c3064f87"}
+{
+  "status": "PASS",
+  "exact_characteristic_zero_derivative_identities": 1936,
+  "structurally_nonzero_jacobian_entries": 595,
+  "linear_normalization_counterexample_checked": true,
+  "counterexample": {
+    "f": [
+      "x",
+      "x*y"
+    ],
+    "J": [
+      [
+        "1",
+        "0"
+      ],
+      [
+        "y",
+        "x"
+      ]
+    ],
+    "solution": {
+      "x": "0",
+      "y": "b2/b1",
+      "v1": "b1",
+      "v2": "(d-c1*b1)/c2"
+    },
+    "constraints": [
+      "J*v=b",
+      "c1*v1+c2*v2=d"
+    ],
+    "detJ": "0",
+    "consequence": "A linear normalization can leave a finite singular quotient; it must not be used as a substitute for the second unrestricted RHS."
+  },
+  "fixed_rhs_equivalence_proved": false,
+  "quotient_basis_completed": false,
+  "source_trace_proved": false,
+  "full_certificate_proved": false,
+  "source_label": "point_scaled",
+  "packet_sha256": "23d7577fcbf9cfe3f90161944278c318c8b6429a553b0c55e64eb1f6fe37328b",
+  "script_sha256": "60d1fe54e63a6bc4e069cc1ea1ed17da93bcce4446d1fca8b6946dc082ca1098",
+  "seconds": 1.3476492789995973
+}
+{"phase": "input_ready", "source": "beta", "rhs_count": 1, "file": "jacobian_beta_1rhs_p37.ms", "variables": 94, "equations": 94, "terms": 2315, "maximum_total_degree": 3, "sha256": "24d3a94fb4a49c45feaf1355998aa50cf5ec422983593cc4e0a942a3a5386579"}
+{"phase": "input_ready", "source": "beta", "rhs_count": 2, "file": "jacobian_beta_2rhs_p37.ms", "variables": 138, "equations": 138, "terms": 3842, "maximum_total_degree": 3, "sha256": "b2978b145609e9e02e6132b856d4a97ad3465a2b6d45893a336d44856062a8c7"}
+{
+  "status": "PASS",
+  "exact_characteristic_zero_derivative_identities": 1936,
+  "structurally_nonzero_jacobian_entries": 624,
+  "linear_normalization_counterexample_checked": true,
+  "counterexample": {
+    "f": [
+      "x",
+      "x*y"
+    ],
+    "J": [
+      [
+        "1",
+        "0"
+      ],
+      [
+        "y",
+        "x"
+      ]
+    ],
+    "solution": {
+      "x": "0",
+      "y": "b2/b1",
+      "v1": "b1",
+      "v2": "(d-c1*b1)/c2"
+    },
+    "constraints": [
+      "J*v=b",
+      "c1*v1+c2*v2=d"
+    ],
+    "detJ": "0",
+    "consequence": "A linear normalization can leave a finite singular quotient; it must not be used as a substitute for the second unrestricted RHS."
+  },
+  "fixed_rhs_equivalence_proved": false,
+  "quotient_basis_completed": false,
+  "source_trace_proved": false,
+  "full_certificate_proved": false,
+  "source_label": "beta",
+  "packet_sha256": "24072760d95845a89a3abeb50290e9b2308fe5afe15a73446d73cd248511b40a",
+  "script_sha256": "60d1fe54e63a6bc4e069cc1ea1ed17da93bcce4446d1fca8b6946dc082ca1098",
+  "seconds": 1.4734397319989512
+}

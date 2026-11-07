@@ -1,0 +1,71 @@
+{
+  "status": "UPSTREAM STILL HAS PAPER-LEVEL EXISTENCE; NO ACCEPTED TARGET FORMAL PROOF FOUND",
+  "checked_at_utc": "2026-11-07 02:09:32 UTC",
+  "repository": "hodge-computer/sextics",
+  "branch": "main",
+  "head": "2d60d08d25fba3e02162b39d4c50f6b467e7f506",
+  "head_commit_time": "2026-11-07T00:20:31Z",
+  "head_commit_message": "Merge pull request #220: quadratic-net support and complementary families\n\nConsolidate quadratic-net support and complementary families in the book",
+  "protected_base": "ca173aad142bd5f6bf5dd156b6798223a45df54f",
+  "known_quadratic_net_doc_commit": "a2716a5d55e176ae5f999483b4b3115831385216",
+  "target_id": "symmetric-sextic-residual",
+  "q": 1,
+  "exact_instance_unchanged_since_protected_base": true,
+  "target_directory_files": [
+    {
+      "name": "checks.json",
+      "blob_sha": "49f647d38b8499c3262e9718c2cc4a3c918c0dea"
+    },
+    {
+      "name": "instance.rec",
+      "blob_sha": "f3691315bccc8e288af362a5871348374b11e1cc"
+    },
+    {
+      "name": "provenance.json",
+      "blob_sha": "ff7faad908f3b9b255a06eebbed816b441fb0e4f"
+    },
+    {
+      "name": "why.md",
+      "blob_sha": "f6a66c3eea98b738c2ab74c83325ff5440790880"
+    }
+  ],
+  "formal_subtree_changed_since_base": false,
+  "lean_files_added_or_modified_since_base": [],
+  "target_files_changed_since_base": [
+    {
+      "path": "data/symmetric-sextic-residual/provenance.json",
+      "status": "modified"
+    },
+    {
+      "path": "data/symmetric-sextic-residual/why.md",
+      "status": "modified"
+    }
+  ],
+  "ahead_by": 4,
+  "provenance_existence_status": "Certificate existence follows from the two-reflection support theorem in docs/03b-weighted-threefolds.md.",
+  "conclusion": "Latest main still provides the prose two-reflection/support-to-certificate existence argument. The target directory has only checks.json, instance.rec, provenance.json and why.md. No target formal solution or acceptance artifact is present there, and no Lean file or formal subtree file changed since the protected baseline. No claim is made about unpublished work or other repositories.",
+  "sources": {
+    "branch": "https://api.github.com/repos/hodge-computer/sextics/branches/main",
+    "commit": "https://github.com/hodge-computer/sextics/commit/2d60d08d25fba3e02162b39d4c50f6b467e7f506",
+    "compare": "https://github.com/hodge-computer/sextics/compare/ca173aad142bd5f6bf5dd156b6798223a45df54f...2d60d08d25fba3e02162b39d4c50f6b467e7f506",
+    "target_directory": "https://github.com/hodge-computer/sextics/tree/2d60d08d25fba3e02162b39d4c50f6b467e7f506/data/symmetric-sextic-residual",
+    "files": {
+      "instance.rec": {
+        "blob_sha": "f3691315bccc8e288af362a5871348374b11e1cc",
+        "url": "https://github.com/hodge-computer/sextics/blob/2d60d08d25fba3e02162b39d4c50f6b467e7f506/data/symmetric-sextic-residual/instance.rec"
+      },
+      "checks.json": {
+        "blob_sha": "49f647d38b8499c3262e9718c2cc4a3c918c0dea",
+        "url": "https://github.com/hodge-computer/sextics/blob/2d60d08d25fba3e02162b39d4c50f6b467e7f506/data/symmetric-sextic-residual/checks.json"
+      },
+      "why.md": {
+        "blob_sha": "f6a66c3eea98b738c2ab74c83325ff5440790880",
+        "url": "https://github.com/hodge-computer/sextics/blob/2d60d08d25fba3e02162b39d4c50f6b467e7f506/data/symmetric-sextic-residual/why.md"
+      },
+      "provenance.json": {
+        "blob_sha": "ff7faad908f3b9b255a06eebbed816b441fb0e4f",
+        "url": "https://github.com/hodge-computer/sextics/blob/2d60d08d25fba3e02162b39d4c50f6b467e7f506/data/symmetric-sextic-residual/provenance.json"
+      }
+    }
+  }
+}

@@ -1,0 +1,279 @@
+{
+  "schema": "frozen-native-state-driver-sources-v1",
+  "status": "FROZEN_TESTED",
+  "source_files": {
+    "resumable_state_driver.c": {
+      "bytes": 26801,
+      "sha256": "6aed81e4d33c82f8e4787c480adf48e5c8a405b864e20a828d8b34076f1f0ec0"
+    },
+    "resumable_dictionary_driver.c": {
+      "bytes": 17655,
+      "sha256": "a2b50f453761aa0d6eb22b6612dfb8ccca3361b2d4167203f1864fae026943e5"
+    },
+    "resumable_driver.c": {
+      "bytes": 11888,
+      "sha256": "0c3366ec311be87dab0ae1d74903d0a4688fb07eeeca26366499e87e75e44d5a"
+    },
+    "build_resumable.py": {
+      "bytes": 4565,
+      "sha256": "60ef2dd668a6f483d91f391eba3ec3269b04d87873e984a18fbf45722c33b7ad"
+    },
+    "packed_f4.py": {
+      "bytes": 4167,
+      "sha256": "c4dd65e3e1a466eda5173018ad361259003225bb80d88e322c395b2e6ebf6676"
+    },
+    "check_resumable.py": {
+      "bytes": 7978,
+      "sha256": "2db4199eb9115a4cd1a89ae6669a489156b8c6f83b4aa59a4890b0693c11f239"
+    },
+    "check_dictionary_import.py": {
+      "bytes": 4199,
+      "sha256": "7536662cf74dbc48dcb78acaf6d17f511eab6ab2b61e7b578775d09b0dd560ea"
+    },
+    "check_native_state.py": {
+      "bytes": 5899,
+      "sha256": "b62a3c9be512c0bbc457537efcdd65c109831091fb9eb726e6433ec9b39472d8"
+    },
+    "msolve_compact_hash.patch": {
+      "bytes": 6322,
+      "sha256": "b4492a0eb46f9972b463bdbdf3ce3c87f4d9c923fa2ecd881036f736e9d24df1"
+    },
+    "msolve_selective_columns.patch": {
+      "bytes": 4452,
+      "sha256": "3576f40682c1fb7809f354fcbd08beac5ba96d9b2a14334887edd39bd30160ac"
+    },
+    "msolve_pair_selection_bounds.patch": {
+      "bytes": 613,
+      "sha256": "0faf0f14f0bbff59399ba93ce3495c0c766ea9d89ffa6e9fb4ed863226f60e76"
+    },
+    "compact_hash.c": {
+      "bytes": 5454,
+      "sha256": "5f879abbc337120d7037cec41005ad76a5d1b0b9192339163c072cabfd527f6e"
+    },
+    "selective_columns.c": {
+      "bytes": 2243,
+      "sha256": "9b8f64cd7053f70f4327f14ba23ed5422ad4fddac1ae70c8c3e2652e61c8c60d"
+    },
+    "resumable_state_build_receipt.json": {
+      "bytes": 1666,
+      "sha256": "b757f50c05762fd2379e5e75bf0a522a2df559a6b2956496840a77c341039c2a"
+    },
+    "resumable_state_validation_receipt.json": {
+      "bytes": 3559,
+      "sha256": "19800577e645cd297544194c90c777a3e221e542c428fd93652df78093ea710a"
+    },
+    "resumable_native_state_audit.json": {
+      "bytes": 2650,
+      "sha256": "b756259bedadc6ff95e07afc291d1641e94c07122b23fea86a9fd861ccb7ffe9"
+    },
+    "resumable_dictionary_build_receipt.json": {
+      "bytes": 1528,
+      "sha256": "9fde9c23d454fc1176666d06e38e66fc7c6272b3c98e31bc8c05fdde8cb8bd36"
+    },
+    "resumable_dictionary_validation_receipt.json": {
+      "bytes": 3559,
+      "sha256": "2c0abd9074dd23a52ecd9913e847ae6dcfa11ddc2355d1f59ffef512fd4f4e73"
+    },
+    "resumable_dictionary_input_audit.json": {
+      "bytes": 2798,
+      "sha256": "927124d129827219996dce033aaa45c7b78e6a142d335561fffd9c4553e0f0aa"
+    },
+    "resumable_state_REPLAY.txt": {
+      "bytes": 10413,
+      "sha256": "32a904694e5a0179bf2e72eeb740d7d1f52b87fc34a5f5bc34416f63ed2c52b1"
+    }
+  },
+  "minimal_upstream_files": {
+    "vendor/msolve-0.11.0/src/neogb/Makefile.am": {
+      "bytes": 1063,
+      "sha256": "beac3075f635ed79e8afec91113c2bb243eae75cdbd1e75b84d13325b03684a9"
+    },
+    "vendor/msolve-0.11.0/src/neogb/basis.c": {
+      "bytes": 16582,
+      "sha256": "e752f31c87748922ae625212c37ad26bf730568bc9a3f4dc69dbdc97d5f3388b"
+    },
+    "vendor/msolve-0.11.0/src/neogb/basis.h": {
+      "bytes": 1345,
+      "sha256": "19e4158d91b3ab97f949ec80cfc9a1d2389a05fa57cac8d644331612ca645515"
+    },
+    "vendor/msolve-0.11.0/src/neogb/convert.c": {
+      "bytes": 26174,
+      "sha256": "06a7447bddf5a6fba0f68f974f678481ed6a75739cdb27eea0480cea3913900e"
+    },
+    "vendor/msolve-0.11.0/src/neogb/data.c": {
+      "bytes": 3982,
+      "sha256": "d0a0e03795c65c45a215de5f8d410f163528c988d6485d57759c342b2f7bb868"
+    },
+    "vendor/msolve-0.11.0/src/neogb/data.h": {
+      "bytes": 19335,
+      "sha256": "652834ff70b173ab66f93d4c5c5efefaee1a293db771a5c1c1ddc32a0a73da53"
+    },
+    "vendor/msolve-0.11.0/src/neogb/engine.c": {
+      "bytes": 5388,
+      "sha256": "80dac00c1236651c25a98571d952d8d532403e72708d8c51d0643fe3556fe311"
+    },
+    "vendor/msolve-0.11.0/src/neogb/engine.h": {
+      "bytes": 2930,
+      "sha256": "38bf939e4fb1d15cdbcf96919244ef4ad343d3fc2ab31ca60adf87fba291b643"
+    },
+    "vendor/msolve-0.11.0/src/neogb/f4.c": {
+      "bytes": 23717,
+      "sha256": "a545ffd5e4117c4cc3cba421d64d7145fa295c0befc45d5fd5d0b735b5a031a5"
+    },
+    "vendor/msolve-0.11.0/src/neogb/f4.h": {
+      "bytes": 2662,
+      "sha256": "bb5a1adb357d59477c78839759f7b7270d50003493fe7b368f4b2cf04b06f6e7"
+    },
+    "vendor/msolve-0.11.0/src/neogb/f4sat.c": {
+      "bytes": 24518,
+      "sha256": "bfe3223278845151e300415d987ceb3156fc4058b7c129f91b418c1bbb13bea6"
+    },
+    "vendor/msolve-0.11.0/src/neogb/f4sat.h": {
+      "bytes": 933,
+      "sha256": "51c9400565f90dd4d98dfd2ac1a19395f9780eead7d949a043b9134b27f76d01"
+    },
+    "vendor/msolve-0.11.0/src/neogb/gb.c": {
+      "bytes": 2153,
+      "sha256": "391e1aea8d5f7375fd38fffe4197b8270cf2cb035c0256ffe82a2491c9dcaa19"
+    },
+    "vendor/msolve-0.11.0/src/neogb/hash.c": {
+      "bytes": 36483,
+      "sha256": "1cae7cab02e7a2ed35a997f391c087e6e3ff4150ec221181ff4209da2b8df3fe"
+    },
+    "vendor/msolve-0.11.0/src/neogb/hash.h": {
+      "bytes": 1742,
+      "sha256": "b8e7299deb3fbfb061613c9428cbf2b591017b4f95b19cc42cdc725108c33567"
+    },
+    "vendor/msolve-0.11.0/src/neogb/io.c": {
+      "bytes": 39262,
+      "sha256": "1abcbbe19a48d3a4fe66f8bccdbcfa67a8b4b26baa1d57dfe47906596f0182e9"
+    },
+    "vendor/msolve-0.11.0/src/neogb/io.h": {
+      "bytes": 4776,
+      "sha256": "6e3ab3f2fc4dde42d38fa48544a0dd18b93933f84bc0b5e542519cd87b498466"
+    },
+    "vendor/msolve-0.11.0/src/neogb/la.h": {
+      "bytes": 41659,
+      "sha256": "dc6065f4a0cbd3dbfafa3205c8d25bc817690cc37e8450e4519f652dc91faeee"
+    },
+    "vendor/msolve-0.11.0/src/neogb/la_ff_16.c": {
+      "bytes": 75923,
+      "sha256": "1ca8769f6246ac08df8091aebab5e2ff860151f285706749888a8cf166731629"
+    },
+    "vendor/msolve-0.11.0/src/neogb/la_ff_32.c": {
+      "bytes": 140159,
+      "sha256": "c28304ebcd1adbc9b2e5ff6c653410f144c60bca92e3554eaced4d3e834f71cf"
+    },
+    "vendor/msolve-0.11.0/src/neogb/la_ff_8.c": {
+      "bytes": 81048,
+      "sha256": "cba66106e7187f395464ca02ccc09c8a81e3695043d5604c95c91d4124d86a5b"
+    },
+    "vendor/msolve-0.11.0/src/neogb/la_qq.c": {
+      "bytes": 29000,
+      "sha256": "878fee65f5a6977dae23dbb3aed8a359db87a364fd19cc49991dd942737a9381"
+    },
+    "vendor/msolve-0.11.0/src/neogb/libneogb.h": {
+      "bytes": 1055,
+      "sha256": "65eadff24546954ffe28272b27a63547d22de35cc9a34b3ace3405a7438a704b"
+    },
+    "vendor/msolve-0.11.0/src/neogb/meta_data.c": {
+      "bytes": 12516,
+      "sha256": "d3fdd46dc530917104656f6410a784d4d6f12d99d5cc460504695e934b11e7a5"
+    },
+    "vendor/msolve-0.11.0/src/neogb/meta_data.h": {
+      "bytes": 1446,
+      "sha256": "7cd10b911a5dd98200bd2b23820d7cefd7b6f1f360999c13e0463b238cbb7e38"
+    },
+    "vendor/msolve-0.11.0/src/neogb/modular.c": {
+      "bytes": 75890,
+      "sha256": "55b35061176db77a0075c0308a6deb57a67fa79f42697928c6fadd837de2fb30"
+    },
+    "vendor/msolve-0.11.0/src/neogb/modular.h": {
+      "bytes": 6597,
+      "sha256": "9747d877fbc864a5acfaf3e9a87dd87d2f8e4f0776e5a7592810814eb0f6f6eb"
+    },
+    "vendor/msolve-0.11.0/src/neogb/nf.c": {
+      "bytes": 6630,
+      "sha256": "1c5f3b6db22f826d31846ecad88e0dfe6b51de0b2d56e2cb820da2eae0e9c962"
+    },
+    "vendor/msolve-0.11.0/src/neogb/nf.h": {
+      "bytes": 1993,
+      "sha256": "dcc10d2efee360b0f047d420c4ee2bfa15b5d04386a71070e94d94d183d09264"
+    },
+    "vendor/msolve-0.11.0/src/neogb/order.c": {
+      "bytes": 19057,
+      "sha256": "06fc44eb8c68a5ca54cd72443205169770ed083e9966cda9dac0b4af3a342bb4"
+    },
+    "vendor/msolve-0.11.0/src/neogb/sba.c": {
+      "bytes": 22891,
+      "sha256": "9fc56290f19d8f2a208bfd43b032251bd2e8032106086bf47bd4eb44248cfc7a"
+    },
+    "vendor/msolve-0.11.0/src/neogb/sba.h": {
+      "bytes": 1037,
+      "sha256": "8f0ce500c1792c3f3a3a9e252a05021fa0438d037221d42e2058aca87af81435"
+    },
+    "vendor/msolve-0.11.0/src/neogb/sort_r.h": {
+      "bytes": 10452,
+      "sha256": "4d5e5b4f39fda8be223a86ef2e0195f56a28e5769134b616a6e85bb4d6138a51"
+    },
+    "vendor/msolve-0.11.0/src/neogb/symbol.c": {
+      "bytes": 23068,
+      "sha256": "d52b122bd22d4cf8309a9519e1d36181da78e6fcd6113a5ecbbb8ace4e5c6c07"
+    },
+    "vendor/msolve-0.11.0/src/neogb/test-driver": {
+      "bytes": 4643,
+      "sha256": "313aa78e6d309ad6f4f26e1e3f99d3b63ce9db7f42b650e1202d985444c18504"
+    },
+    "vendor/msolve-0.11.0/src/neogb/tools.c": {
+      "bytes": 7167,
+      "sha256": "161041d77af592e29328f4cc452ca31480fac2f3d87ea94c39e2f63cd118ac3e"
+    },
+    "vendor/msolve-0.11.0/src/neogb/tools.h": {
+      "bytes": 2421,
+      "sha256": "3b39a5c4c713f0a6472de9a023ba2aa23a3280e0c7f87a02c4864f4e03c25fb4"
+    },
+    "vendor/msolve-0.11.0/src/neogb/update.c": {
+      "bytes": 10353,
+      "sha256": "ab35c00a9dc0d5f6f9a5e28e0bf8a28c9066d9eaee6ae4561e018a9f13c8b786"
+    },
+    "vendor/msolve-0.11.0/src/neogb/update.h": {
+      "bytes": 914,
+      "sha256": "7cf311c978fa4596e9182ee3f7f83f25471e96c6eab3b3c98c39500debb3902f"
+    },
+    "vendor/msolve-0.11.0/src/msolve/streams.h": {
+      "bytes": 866,
+      "sha256": "54f8dfdff363bf2222cca5f771ab87e98cbdb4b78074636c1567a8036e47d5f4"
+    },
+    "vendor/msolve-0.11.0/COPYING": {
+      "bytes": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    "vendor/gmp-6.3.0/gmp.h": {
+      "bytes": 84295,
+      "sha256": "e5df7b0d3ee286220a14352901341a9b0b5cbe571f135972360e581ef92bd653"
+    },
+    "vendor/gmp-6.3.0/gmp-h.in": {
+      "bytes": 84332,
+      "sha256": "3e09f57d413e03cbf4c967317748ae83bbae58b9860f150b7c913eaeee0d0542"
+    },
+    "vendor/gmp-6.3.0/COPYINGv2": {
+      "bytes": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    "vendor/gmp-6.3.0/COPYINGv3": {
+      "bytes": 35150,
+      "sha256": "e6037104443f9a7829b2aa7c5370d0789a7bda3ca65a0b904cdc0c2e285d9195"
+    },
+    "vendor/gmp-6.3.0/COPYING.LESSERv3": {
+      "bytes": 7639,
+      "sha256": "a853c2ffec17057872340eee242ae4d96cbf2b520ae27d903e1b2fef1a5f9d1c"
+    }
+  },
+  "native_binary": {
+    "relative_path": "vendor/resumable_c88c65dfa299f4db/resumable_f4",
+    "bytes": 413544,
+    "sha256": "dd44b934f4e58a30dde1050a27f4a945e37549ca592683ccd784535c4367d5a1"
+  },
+  "source_distribution_can_exclude_binary": true,
+  "scope": "Exact native implementation and regression provenance; no target Groebner basis or trace certificate."
+}

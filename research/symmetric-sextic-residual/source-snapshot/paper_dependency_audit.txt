@@ -1,0 +1,257 @@
+Paper-to-Lean dependency audit for symmetric-sextic-residual, q = 1
+================================================================
+
+Scope and source snapshot
+-------------------------
+This audit reads the local sextics/docs/03b-weighted-threefolds.md,
+especially sections 3B.6--3B.8, the prescribed-support theorem in
+docs/01-certificates.md, and the specialization/relative-support lemmas in
+docs/03-geometric-support.md section 3.6.  It concerns that nonconstructive
+paper argument, not the later finite-algebra computations.
+
+The protected conclusion is literally
+
+  HodgeComputer.HasCertificate HodgeSubmission.F 1 HodgeSubmission.A
+
+where HasCertificate F q A is defined in HodgeComputer/Verify.lean as
+
+  exists D N Q, Verify F A F.totalDegree q D N Q.
+
+Verify includes a nonzero homogeneous denominator, IsRelPrime F D, the
+prescribed numerator degrees, and the full cleared polynomial identity
+
+  A*D^2 - D*directional F N + F*divergenceNumerator D N = F^2*Q.
+
+No explicit denominator bound or Q = 0 is part of this conclusion.
+Classical choice could select a witness from a proved existence theorem;
+it cannot supply the missing existence theorem itself.
+
+What the existing formal files establish
+---------------------------------------
+SymmetricReflections.exactF_compact and exactA_compact bind the literal
+protected polynomials to the compact formulas.  exactF_swapX,
+exactF_swapY, exactF_evenY, exactA_oddY and the transformedF/transformedA
+theorems establish the required polynomial symmetries and the rational
+sum/difference coordinate change.
+
+SymmetricSmoothness.gradient_vanishes_only_at_origin and
+nonzero_point_has_nonzero_partial establish the actual complex gradient
+criterion.  target_homogeneous, target_ne_zero, target_totalDegree and
+source_homogeneous establish degree and nonvanishing facts.  These are
+polynomial assertions; the package does not turn them into an instance of
+a smooth projective hypersurface together with its Hodge cohomology.
+
+The WeightedPolynomial/WeightedRank files establish the exact finite
+polynomial multiplication data and rational ranks used in the paper.
+They do not themselves identify the matrices with a Kodaira--Spencer map,
+an infinitesimal variation of Hodge structure, or an Abel--Jacobi map.
+
+Despite its name, the previous ProjectorCore.lean contains three abstract
+monodromy linear-algebra results, culminating in
+
+  WeightedSexticMonodromy.invariant_submodule_eq_bot_or_top.
+
+Its explicit hypotheses include spanning vanishing directions, a
+nondegenerate pairing, nontrivial transvections, and transport maps.
+It neither establishes those hypotheses for this geometric family nor
+contains the polynomial inverse/projector step in section 3B.6.
+
+No HasCertificate declaration, sorry or new axiom was found in the 51
+top-level Lean sources of symmetric_sextic_contact_repair_20261106.
+The existing certificate adapters remain conditional on their genuinely
+mathematical current/primitive inputs.
+
+One newly formalizable paper step
+--------------------------------
+Mathlib.LinearAlgebra.Charpoly.Basic provides the exact existing names
+
+  LinearMap.aeval_self_charpoly
+  LinearMap.isIntegral
+  LinearMap.minpoly_coeff_zero_of_injective.
+
+For a field K, a K-vector space V, a finite-dimensional subspace W, and an
+endomorphism S with image in W and injective restriction to W, let m be
+the minimal polynomial of S restricted to W.  Its constant term c is
+nonzero.  Set
+
+  p(t) = -c^(-1) * (m(t) - c).
+
+Then p(0)=0, p(S) is the identity on W, its range is W, and it is
+idempotent.  If a named map P has image in W and S*P=S, then p(S)=P.
+These hypotheses do not assume the asserted polynomial equality.  They
+are the precise finite-dimensional algebraic part of the paper's
+supported-projector construction.  New code is in
+PolynomialSupportedProjector.lean; consult its compile receipt for the
+actual verification status.  The completed extended module passed the
+pinned Lean 4.33.1 compiler.  All five main theorems' axiom audits list only
+propext, Classical.choice and Quot.sound, with no sorryAx or added axioms.
+
+The extension in the same module also proves
+
+  PolynomialSupportedProjector.gram_injective_of_surjective
+  PolynomialSupportedProjector.exists_polynomial_gram_identity
+  PolynomialSupportedProjector.exists_polynomial_eq_projector_of_surjective_adjoint.
+
+It uses the existing LinearMap.range_self_comp_adjoint and
+LinearMap.injective_iff_surjective: for finite-dimensional real/complex
+inner-product spaces, surjective Gamma has injective Gamma*adjoint Gamma.
+The final corollary feeds this into the polynomial projector construction
+on W; no separate injectivity hypothesis remains there.
+
+The general polynomial result assumes only finite-dimensional W.  The
+inner-product extension assumes finite-dimensional source E and target W;
+the ambient H need not be finite-dimensional.  The separate whole-target
+Gram identity assumes E and H finite-dimensional.
+
+The geometry must still construct Gamma, identify S on W with its genuine
+positive-inner-product Gram operator, and provide the rational structure.
+Arbitrary surjectivity together with an arbitrary nondegenerate indefinite
+pairing does not imply that Gamma*adjoint Gamma is invertible.  The paper
+uses polarizations and Hodge compatibility, not just a bare bilinear form.
+
+Missing geometric interfaces (not existing Lean declaration names)
+-----------------------------------------------------------------
+The following mathematical statements have no corresponding definitions
+and proved declarations in the inspected project/mathlib sources.  The
+labels below name missing interfaces for planning; they are not axioms or
+new declarations in any Lean file.
+
+1. WeightedThreefold.supported_anti_projector:
+   For each smooth invariant weighted sextic threefold T, there exist a
+   divisor D and a rational algebraic cycle Z supported on D x D such that
+   cycleClass Z = cycleClass ((Delta_T - Graph_sigma)/2).
+
+   The old paper derives this using the containing Fano fourfold, rational
+   Hodge-class algebraicity, Hodge loci, the Abel--Jacobi differential,
+   monodromy, the polarization adjoint, cycle-class composition, Kunneth
+   and Poincare duality, then specialization.  Finite multiplication ranks
+   and the new polynomial calculation close only algebraic substeps.
+
+2. SupportedProjector.specializes / SupportedProjector.relative_support:
+   Very-general supported representatives specialize throughout a smooth
+   projective family; a relative anti-projector concentrated in fiber
+   cohomological degree 3 supports H^4 of the family on a divisor.
+
+   The paper uses proper relative flag Hilbert schemes, flat cycle classes,
+   finite cover/trace of relative correspondences, relative Kunneth and a
+   Leray spectral-sequence identification.  Fiberwise coniveau alone is
+   explicitly insufficient, as the paper itself explains.
+
+3. TwoReflection.divisor_support:
+   For the smooth even fourfold with the two commuting reflections,
+   H^4(X,Q)^tau is contained in N^1 H^4(X,Q).
+
+   The extra arguments include Fano quotient support for the positive
+   sectors, the smooth blown-up pencil, finite-quotient cohomology,
+   weak Lefschetz/duality, and restriction/closure/birational transfer of
+   the minus-minus sector.  The elementary three-sector linear-algebra
+   decomposition does not supply these geometric support statements.
+
+4. Residue.support_to_certificate:
+   If the residue of A*Omega/F^2 vanishes on X outside a divisor, there
+   exist legal homogeneous D,N,Q satisfying Verify F A 6 1 D N Q.
+
+   Chapter 1 proves more: a prescribed reduced support D allows denominator
+   D at q=1.  Its stated inputs are mixed Hodge modules, strictness of
+   projective direct image, the Hodge pole bound, algebraic de Rham/residue
+   comparison, Bott vanishing, and the twisted Euler sequence.  None is a
+   ready formal theorem in the inspected libraries.  For the final target
+   existence it would suffice to prove the weaker support-to-certificate
+   assertion without the prescribed-support pole bound.
+
+At present there is no honest short Lean signature for items 1--4 using
+already-defined project types: the relevant Hodge/cohomology/support and
+cycle-class structures themselves are missing.  Writing an abstract Prop
+called Supported and assuming one of these implications would only move
+the central unproved assertion into a hypothesis.
+
+Available algebraic bridge if a rational primitive is constructed
+----------------------------------------------------------------
+An alternative uses already-defined algebraic objects, without importing
+the global Hodge framework.  In the fraction field K of the coordinate
+ring of F=0, write rho for the polynomial quotient map, g=rho(d_0 F), and
+E_i for the tangent derivations.  The missing concrete existence statement
+is a tuple w : Fin 5 -> K, or such a tuple on a finite extension L/K, with
+
+  (rho(d_0 A)*g - rho(A)*rho(d_0 d_0 F))/g^2
+    + sum_i (E_i(w_i) - w_i*E_i(g)/g) = 0.
+
+The exact existing theorem
+
+  HoldoutConstruction.finite_residue_solution_clearing_canonical
+
+in HodgeComputer/Constructions/HoldoutCover/FiniteResidueClearing.lean
+proves legal polynomial clearing from this equation, under an irreducible
+hypersurface/quotient-field presentation and the explicit derivation
+compatibilities.  The exact existing theorem
+
+  HoldoutConstruction.hasCertificate_of_normalized
+
+in HomogeneousCertificate.lean then supplies homogeneous certificate data,
+assuming Prime F, F and A homogeneous of degree 6, a legal denominator,
+the two normalized identities, and a nonzero normal derivative modulo F.
+
+The previous 51-module package did not prove Prime HodgeSubmission.F.
+This algebraic hypothesis is now discharged by the separately compiled
+proof_attempt8/SymmetricPrime.lean, with exact declarations
+
+  SymmetricPrime.target_irreducible : Irreducible HodgeSubmission.F
+  SymmetricPrime.target_prime :
+    Prime (HodgeSubmission.F : HodgeComputer.AmbientPoly 5).
+
+These theorems have no mathematical hypotheses and use no new axioms or
+sorry.  The proof treats F as monic in X0, specializes the other variables
+to obtain X0^6+Y0^6+1, and applies Eisenstein at Y0-I.  Thus no geometric
+smoothness-to-irreducibility theorem is needed for this algebraic bridge.
+
+The current packet's CurrentVerifierBridge.verify_of_residue_primitive
+and verify_of_affine_residue_primitive are other proved algebraic adapters.
+They require the actual primitive equation and an explicit legal
+homogeneous clearing.  They do not manufacture the primitive from smoothness
+or symmetry alone.
+
+Thus neither the existing library nor the polynomial projector lemma alone
+closes the protected HasCertificate theorem.  The nonconstructive argument
+is a mathematical existence proof, but translating its geometric support
+and residue-comparison chain remains substantive formal development.
+
+Current algebraic endpoint and surviving obligation
+---------------------------------------------------
+The new AutomaticLegalClearing module has compiled successfully.  Its
+RegularRing F is the localization at the multiplicative set
+
+  { D : AmbientPoly 5 | D != 0 and IsRelPrime F D }.
+
+Therefore a tuple in this ring is already regular along F=0.  The new
+theorems common_legal_representatives, normalized_data_of_regular_current,
+exists_normal_chart and hasCertificate_of_regular_current construct the
+common legal denominator and homogeneous certificate automatically.  The
+application no longer needs to supply D, N, Q, a clearing equality or a
+normal chart.  The target Prime hypothesis is now supplied by SymmetricPrime.
+
+RegularEulerClearing also compiled successfully, extending that endpoint by
+an Euler correction.  Its exact final theorem is
+
+  RegularEulerClearing.hasCertificate_of_exists_regular_homogeneous_game.
+
+Its precise remaining mathematical input is the following existence
+statement, where rho = regularMap c F and delta_i are the compatible
+coordinate derivations:
+
+  exists (v : Fin 6 -> RegularRing F) (r : RegularRing F),
+    (forall i, Euler(rho(v_i)) = rho(v_i)) and
+    c.embed A - sum_i rho(v_i)*delta_i(c.embed F)
+      + c.embed F * sum_i delta_i(rho(v_i))
+        = (c.embed F)^2 * rho(r).
+
+Here Euler(f) = sum_i c.embed(X_i)*delta_i(f).  This is Euler weight one
+for the vector-field components, with a regular remainder r.  The
+coefficient coordinates and commuting derivations are separate algebraic
+setup, not geometric support assertions.
+
+This existential is not proved merely by the projector polynomial, the
+monodromy linear algebra, smoothness, irreducibility, or reflection
+identities.  It must come from an actual regular current construction, or
+from formalizing the paper's geometric support and residue-comparison chain.
+An unrestricted rational vector field is insufficient: a pole on F can
+create a spurious Euler solution.  The localization membership is essential.

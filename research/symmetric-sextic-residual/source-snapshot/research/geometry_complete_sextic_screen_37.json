@@ -1,0 +1,11 @@
+{
+  "prime": 37,
+  "degree": 6,
+  "eligibleD": 4,
+  "kernelN": 10,
+  "independent_equations": 30,
+  "projective_denominators_tested": 52060,
+  "illegal_hits": 1,
+  "legal_hits": [],
+  "seconds": 7.715705871582031
+}

@@ -1,0 +1,61 @@
+{
+  "protected_F_reflection_pencil_binding": true,
+  "protected_A_binding": true,
+  "arithmetic_DAG_weighted_target_symbolically_bound": true,
+  "general_cubic_current_raw_chart_binding": true,
+  "all_nine_monic_coefficients_bound": true,
+  "universal_u_division_g1_identity_checked": true,
+  "emitted_g1_polynomial_symbolically_bound": true,
+  "all_remainder_DAG_coefficients_symbolically_bound": true,
+  "all_reduction_matrix_DAG_entries_symbolically_bound": true,
+  "G_raw_leading_coefficient": "(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)/7",
+  "symbolic_cubic_reduction_determinant": "-mu0*mu1 + 1",
+  "symbolic_sextic_reduction_determinant": "(-3*mu0*mu1 + 1)*(-2*mu0*mu1 + 1)**3*(-mu0*mu1 + 1)",
+  "determinant_proof": "Verified block lower triangular structure; exact 5x5, three 3x3, and five 1x1 determinants.",
+  "universal_quartic_multiplication_coefficient_map_checked": true,
+  "exact_rational_remainder_replays": [
+    {
+      "trial": 0,
+      "ell": "2",
+      "Delta": "1",
+      "remainder_identity": true,
+      "point_binding_identity": true,
+      "norm_equations_all_zero": false
+    },
+    {
+      "trial": 1,
+      "ell": "13/7",
+      "Delta": "3/128",
+      "remainder_identity": true,
+      "point_binding_identity": true,
+      "norm_equations_all_zero": false
+    },
+    {
+      "trial": 2,
+      "ell": "730/7",
+      "Delta": "2625",
+      "remainder_identity": true,
+      "point_binding_identity": true,
+      "norm_equations_all_zero": false
+    },
+    {
+      "trial": 3,
+      "ell": "9365/7",
+      "Delta": "216",
+      "remainder_identity": true,
+      "point_binding_identity": true,
+      "norm_equations_all_zero": false
+    }
+  ],
+  "point_binding_proof": "Universal coefficient decomposition R=Q2*v+remainder, M*v=R_pivot, and A^2-B^2=(A+B)(A-B).",
+  "norm_parameters": 26,
+  "norm_equations": 25,
+  "moving_unknowns": 27,
+  "moving_equations": 27,
+  "scope": "All replay assignments are arbitrary arithmetic controls, not contact solutions. No incidence existence, dominance, finiteness, etaleness, source trace, or certificate asserted.",
+  "circuit_file": "symmetric_norm_contact_circuit.json",
+  "circuit_bytes": 57062,
+  "arithmetic_nodes": 1094,
+  "circuit_sha256": "e9dceee8b1f223c4657fabc95cf3f223b630f7796c7abd8c10100a85b82f23e5",
+  "inputs_sha256": "1e0ab44339528f12b5ad7aefcb0591185a26b4721c9869e83e064c5636b4b9cd"
+}

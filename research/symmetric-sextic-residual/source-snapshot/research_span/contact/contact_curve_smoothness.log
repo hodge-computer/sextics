@@ -1,0 +1,2 @@
+{'degree': 6, 'shape': [84, 175], 'numerical_smallest_singular_value': 0.027981929839700725}
+PASS degree 6 defect [5.94387058517e-31 +/- 3.71e-43]

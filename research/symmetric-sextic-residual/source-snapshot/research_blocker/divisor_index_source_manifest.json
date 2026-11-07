@@ -1,0 +1,62 @@
+{
+  "schema": "exact-divisor-index-sources-v1",
+  "status": "FROZEN_TESTED",
+  "files": {
+    "divisor_index.h": {
+      "bytes": 7922,
+      "sha256": "6a1b6229ac27bb34fbf2f0dc37043657f24ff795cb78c9cc978df517f3f05271"
+    },
+    "divisor_index.patch": {
+      "bytes": 2935,
+      "sha256": "a1196881dcaea1e92f546dfca951d4e7f967fb08f6d86e6e4e29e44ae7c2a681"
+    },
+    "divisor_index_driver.c": {
+      "bytes": 27759,
+      "sha256": "a59aba3df529083d37d0e8959065eded7dbf01d4b93682ff390abca05ebe1eea"
+    },
+    "divisor_index_build.py": {
+      "bytes": 3796,
+      "sha256": "8eefe3d5bb4dc9fd94b9558215214015c59924aa808192a7cbef22d6dd00bad1"
+    },
+    "divisor_index_check.py": {
+      "bytes": 7508,
+      "sha256": "3e659c2a0c9a4b19c67b3ec039b0dd2c10dcbcac509a11ab722fbc2d922fc465"
+    },
+    "divisor_index_invariants.c": {
+      "bytes": 3744,
+      "sha256": "fd64f2dcfbb728244a8ae67f4a24d112a6aa1bb3011e7e6b7712c40750606af0"
+    },
+    "divisor_index_build_receipt.json": {
+      "bytes": 2130,
+      "sha256": "bfd48a678c40f85eb0ae357b54c078e5edb3740065145d9a61684194e128ee60"
+    },
+    "divisor_index_audit_build_receipt.json": {
+      "bytes": 2162,
+      "sha256": "11ee46f272bba40a15a1033f112a31c947b806b5deda8fff2dd45682ff5d2197"
+    },
+    "divisor_index_validation_receipt.json": {
+      "bytes": 14833,
+      "sha256": "474440005386aa5374692cf130945d029c8ec42a3844118015e0aca6d80af291"
+    },
+    "divisor_index_REPLAY.txt": {
+      "bytes": 7593,
+      "sha256": "89a29c81bc44126b9028459e632f039d40eca608e31fcdc5d1c1eb06fbb9e112"
+    }
+  },
+  "production_binary": {
+    "relative_path": "vendor/divisor_index_03d4bfb8eda3ba46/resumable_f4_divisor_index",
+    "bytes": 438336,
+    "sha256": "b1799c3530fb2423031574019280e84e6ade1fde53f046e2854470cfa5a7c57f"
+  },
+  "audit_binary": {
+    "relative_path": "vendor/divisor_index_ac5d020c4f1ed680/resumable_f4_divisor_index",
+    "bytes": 438376,
+    "sha256": "e81d9ac3d1e1016089eade589ee660dfc7fc8d81d0806b783a6ecaf68ef29163"
+  },
+  "frozen_cache_manifest_sha256": "9f469cb05f36e65ca338fdf3a08d918a65920ef16a1b0011a3e38225108b15b6",
+  "earlier_cache_sources_unchanged": true,
+  "enumeration_limit": 256,
+  "table_slot_bytes": 8,
+  "target_run_performed": false,
+  "scope": "Exact divisor-index implementation, full-lookup shadow audit, and small native-state compatibility checks."
+}

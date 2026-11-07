@@ -1,0 +1,10 @@
+{
+  "module": "PolynomialSupportedProjector",
+  "status": "PASS",
+  "exit_code": 0,
+  "seconds": 3.608,
+  "source_sha256": "879a1848f4d99fc6e60392575eb00ec012fb82402a632fc3a5b6a53926ea8304",
+  "object_sha256": "07d315b02204695a5dedb52cf51ebed01d5bab55ed2e345962594a8a584a23b8",
+  "scope": "All declarations of this module replayed against imported dependencies; imports not replayed from an empty environment.",
+  "full_certificate_proved": false
+}

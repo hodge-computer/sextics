@@ -1,0 +1,25 @@
+{
+  "protected_instance_id": "symmetric-sextic-residual",
+  "repo_commit": "ca173aad142bd5f6bf5dd156b6798223a45df54f",
+  "protected_F": "X0**6 + 5*X0**2*X1**2*Y0*Y1/7 + 5*X0**2*X1**2*Y0*Y2/7 + 5*X0**2*X1**2*Y1*Y2/7 + 10*X0**2*X1*X2*Y0*Y1/7 + 10*X0**2*X1*X2*Y0*Y2/7 + 10*X0**2*X1*X2*Y1*Y2/7 + 5*X0**2*X2**2*Y0*Y1/7 + 5*X0**2*X2**2*Y0*Y2/7 + 5*X0**2*X2**2*Y1*Y2/7 + 10*X0*X1**2*X2*Y0*Y1/7 + 10*X0*X1**2*X2*Y0*Y2/7 + 10*X0*X1**2*X2*Y1*Y2/7 + 10*X0*X1*X2**2*Y0*Y1/7 + 10*X0*X1*X2**2*Y0*Y2/7 + 10*X0*X1*X2**2*Y1*Y2/7 + 10*X0*X1*Y0**2*Y1**2/7 + 20*X0*X1*Y0**2*Y1*Y2/7 + 10*X0*X1*Y0**2*Y2**2/7 + 20*X0*X1*Y0*Y1**2*Y2/7 + 20*X0*X1*Y0*Y1*Y2**2/7 + 10*X0*X1*Y1**2*Y2**2/7 + 10*X0*X2*Y0**2*Y1**2/7 + 20*X0*X2*Y0**2*Y1*Y2/7 + 10*X0*X2*Y0**2*Y2**2/7 + 20*X0*X2*Y0*Y1**2*Y2/7 + 20*X0*X2*Y0*Y1*Y2**2/7 + 10*X0*X2*Y1**2*Y2**2/7 + X1**6 + 5*X1**2*X2**2*Y0*Y1/7 + 5*X1**2*X2**2*Y0*Y2/7 + 5*X1**2*X2**2*Y1*Y2/7 + 10*X1*X2*Y0**2*Y1**2/7 + 20*X1*X2*Y0**2*Y1*Y2/7 + 10*X1*X2*Y0**2*Y2**2/7 + 20*X1*X2*Y0*Y1**2*Y2/7 + 20*X1*X2*Y0*Y1*Y2**2/7 + 10*X1*X2*Y1**2*Y2**2/7 + X2**6 + Y0**6 + Y1**6 + Y2**6",
+  "protected_A": "X0*X1*X2*Y0*Y1*Y2",
+  "protected_q": 1,
+  "instance_rec_sha256": "b57fe82288d74a788fd725ef24660c06a58c0bbf8430b82dd506db37aa4c9390",
+  "general_cubic_current_py_sha256": "7084f9f4fff07ec1f671983f1a2ff31a3eb83b09bc9900ea0dbf56687528f7e9",
+  "current_Q": "1 + 2 * r - w",
+  "current_P": "(1 + 2 * s) * x - lam ** 2 * w",
+  "current_exact_G": "r ** 6 + s ** 6 * x ** 3 + 2 + 30 * w + 30 * w ** 2 + 2 * w ** 3 + 2 * x ** 3 + 30 * lam ** 2 * x ** 2 * w + 30 * lam ** 4 * x * w ** 2 + 2 * lam ** 6 * w ** 3 + kappa * Q ** 2 * P + 2 * kappa * Q * P ** 2",
+  "current_monic_coefficients": {
+    "p00": "7*(r**6 + 2)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p01": "5*(2*r + 1)**2*(2*s + 1)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p02": "10*(2*r + 1)*(2*s + 1)**2/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p03": "7*(s**6 + 2)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p10": "-5*(4*lam**2*r**2 + 4*lam**2*r + lam**2 - 42)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p11": "-10*(2*lam**2 + 1)*(2*r + 1)*(2*s + 1)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p12": "-10*(-21*lam**2 + 4*s**2 + 4*s + 1)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p20": "10*(2*lam**4*r + lam**4 + 2*lam**2*r + lam**2 + 21)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p21": "5*(42*lam**4 + 8*lam**2*s + 4*lam**2 + 2*s + 1)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)"
+  },
+  "current_leading_coefficient": "(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)/7",
+  "attribution": "Intrinsic chart/matrix layout adapted from public PR219 discussion packet algebra/intrinsic_norm_incidence.py and generate_norm_system_circuit.py; the target is replaced by the exact protected symmetric weighted quotient, not the packet's cyclic example."
+}

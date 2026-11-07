@@ -1,0 +1,1402 @@
+[
+  {
+    "consistent": false,
+    "rank": 8,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      2,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 1,
+    "name": "SX",
+    "degree": 1,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 8,
+    "seconds": 0.0035026073455810547
+  },
+  {
+    "consistent": false,
+    "rank": 8,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      2
+    ],
+    "obstruction_value": 1,
+    "name": "SY",
+    "degree": 1,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 8,
+    "seconds": 0.0037627220153808594
+  },
+  {
+    "consistent": false,
+    "rank": 33,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      2,
+      2,
+      2,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 1,
+    "name": "PX",
+    "degree": 3,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 33,
+    "seconds": 0.019834041595458984
+  },
+  {
+    "consistent": false,
+    "rank": 33,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      2,
+      2,
+      2
+    ],
+    "obstruction_value": 1,
+    "name": "PY",
+    "degree": 3,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 33,
+    "seconds": 0.019477367401123047
+  },
+  {
+    "consistent": false,
+    "rank": 8,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      3,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 36,
+    "name": "DX",
+    "degree": 3,
+    "characters": [
+      1,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 8,
+    "seconds": 0.008793354034423828
+  },
+  {
+    "consistent": false,
+    "rank": 8,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      1,
+      2,
+      3
+    ],
+    "obstruction_value": 36,
+    "name": "DY",
+    "degree": 3,
+    "characters": [
+      0,
+      1
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 8,
+    "seconds": 0.008365631103515625
+  },
+  {
+    "consistent": false,
+    "rank": 33,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      3,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 1,
+    "name": "SXQX-PX",
+    "degree": 3,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 33,
+    "seconds": 0.025513887405395508
+  },
+  {
+    "consistent": false,
+    "rank": 33,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      1,
+      2,
+      3
+    ],
+    "obstruction_value": 1,
+    "name": "SYQY-PY",
+    "degree": 3,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 33,
+    "seconds": 0.057314395904541016
+  },
+  {
+    "consistent": false,
+    "rank": 14,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      3,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 1,
+    "name": "SX*SX",
+    "degree": 2,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 14,
+    "seconds": 0.00883030891418457
+  },
+  {
+    "consistent": false,
+    "rank": 20,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      2,
+      1,
+      1,
+      2
+    ],
+    "obstruction_value": 1,
+    "name": "SX*SY",
+    "degree": 2,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 20,
+    "seconds": 0.010573148727416992
+  },
+  {
+    "consistent": false,
+    "rank": 52,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      2,
+      2,
+      3,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 1,
+    "name": "SX*PX",
+    "degree": 4,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 52,
+    "seconds": 0.044480085372924805
+  },
+  {
+    "consistent": false,
+    "rank": 64,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      2,
+      2,
+      2,
+      2
+    ],
+    "obstruction_value": 1,
+    "name": "SX*PY",
+    "degree": 4,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 64,
+    "seconds": 0.04191875457763672
+  },
+  {
+    "consistent": false,
+    "rank": 18,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      4,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 36,
+    "name": "SX*DX",
+    "degree": 4,
+    "characters": [
+      1,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 18,
+    "seconds": 0.02023458480834961
+  },
+  {
+    "consistent": false,
+    "rank": 23,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      2,
+      1,
+      2,
+      3
+    ],
+    "obstruction_value": 36,
+    "name": "SX*DY",
+    "degree": 4,
+    "characters": [
+      0,
+      1
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 23,
+    "seconds": 0.023535728454589844
+  },
+  {
+    "consistent": false,
+    "rank": 52,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      4,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 1,
+    "name": "SX*SXQX-PX",
+    "degree": 4,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 52,
+    "seconds": 0.05182814598083496
+  },
+  {
+    "consistent": false,
+    "rank": 64,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      2,
+      1,
+      2,
+      3
+    ],
+    "obstruction_value": 1,
+    "name": "SX*SYQY-PY",
+    "degree": 4,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 64,
+    "seconds": 0.062401771545410156
+  },
+  {
+    "consistent": false,
+    "rank": 14,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      1,
+      1,
+      3
+    ],
+    "obstruction_value": 1,
+    "name": "SY*SY",
+    "degree": 2,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 14,
+    "seconds": 0.009102582931518555
+  },
+  {
+    "consistent": false,
+    "rank": 64,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      2,
+      2,
+      2,
+      1,
+      1,
+      2
+    ],
+    "obstruction_value": 1,
+    "name": "SY*PX",
+    "degree": 4,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 64,
+    "seconds": 0.04257464408874512
+  },
+  {
+    "consistent": false,
+    "rank": 52,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      2,
+      2,
+      3
+    ],
+    "obstruction_value": 1,
+    "name": "SY*PY",
+    "degree": 4,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 52,
+    "seconds": 0.04293370246887207
+  },
+  {
+    "consistent": false,
+    "rank": 23,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      3,
+      1,
+      1,
+      2
+    ],
+    "obstruction_value": 36,
+    "name": "SY*DX",
+    "degree": 4,
+    "characters": [
+      1,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 23,
+    "seconds": 0.02467942237854004
+  },
+  {
+    "consistent": false,
+    "rank": 18,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      1,
+      2,
+      4
+    ],
+    "obstruction_value": 36,
+    "name": "SY*DY",
+    "degree": 4,
+    "characters": [
+      0,
+      1
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 18,
+    "seconds": 0.01894068717956543
+  },
+  {
+    "consistent": false,
+    "rank": 64,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      3,
+      1,
+      1,
+      2
+    ],
+    "obstruction_value": 1,
+    "name": "SY*SXQX-PX",
+    "degree": 4,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 64,
+    "seconds": 0.05661916732788086
+  },
+  {
+    "consistent": false,
+    "rank": 52,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      1,
+      2,
+      4
+    ],
+    "obstruction_value": 1,
+    "name": "SY*SYQY-PY",
+    "degree": 4,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 52,
+    "seconds": 0.04589414596557617
+  },
+  {
+    "consistent": false,
+    "rank": 139,
+    "nullity": 3,
+    "obstruction_row": [
+      0,
+      3,
+      3,
+      3,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 1,
+    "name": "PX*PX",
+    "degree": 6,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 142,
+    "seconds": 0.21218538284301758
+  },
+  {
+    "consistent": false,
+    "rank": 161,
+    "nullity": 3,
+    "obstruction_row": [
+      0,
+      2,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "obstruction_value": 1,
+    "name": "PX*PY",
+    "degree": 6,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 164,
+    "seconds": 0.2159719467163086
+  },
+  {
+    "consistent": false,
+    "rank": 61,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      2,
+      3,
+      4,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 36,
+    "name": "PX*DX",
+    "degree": 6,
+    "characters": [
+      1,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 61,
+    "seconds": 0.08590316772460938
+  },
+  {
+    "consistent": false,
+    "rank": 68,
+    "nullity": 1,
+    "obstruction_row": [
+      0,
+      2,
+      2,
+      2,
+      1,
+      2,
+      3
+    ],
+    "obstruction_value": 36,
+    "name": "PX*DY",
+    "degree": 6,
+    "characters": [
+      0,
+      1
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 69,
+    "seconds": 0.07262182235717773
+  },
+  {
+    "consistent": false,
+    "rank": 140,
+    "nullity": 2,
+    "obstruction_row": [
+      0,
+      2,
+      3,
+      4,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 1,
+    "name": "PX*SXQX-PX",
+    "degree": 6,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 142,
+    "seconds": 0.28067541122436523
+  },
+  {
+    "consistent": false,
+    "rank": 161,
+    "nullity": 3,
+    "obstruction_row": [
+      0,
+      2,
+      2,
+      2,
+      1,
+      2,
+      3
+    ],
+    "obstruction_value": 1,
+    "name": "PX*SYQY-PY",
+    "degree": 6,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 164,
+    "seconds": 0.24337363243103027
+  },
+  {
+    "consistent": false,
+    "rank": 139,
+    "nullity": 3,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      3,
+      3,
+      3
+    ],
+    "obstruction_value": 1,
+    "name": "PY*PY",
+    "degree": 6,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 142,
+    "seconds": 0.1894512176513672
+  },
+  {
+    "consistent": false,
+    "rank": 68,
+    "nullity": 1,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      3,
+      2,
+      2,
+      2
+    ],
+    "obstruction_value": 36,
+    "name": "PY*DX",
+    "degree": 6,
+    "characters": [
+      1,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 69,
+    "seconds": 0.09231734275817871
+  },
+  {
+    "consistent": false,
+    "rank": 61,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      2,
+      3,
+      4
+    ],
+    "obstruction_value": 36,
+    "name": "PY*DY",
+    "degree": 6,
+    "characters": [
+      0,
+      1
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 61,
+    "seconds": 0.08763790130615234
+  },
+  {
+    "consistent": false,
+    "rank": 161,
+    "nullity": 3,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      3,
+      2,
+      2,
+      2
+    ],
+    "obstruction_value": 1,
+    "name": "PY*SXQX-PX",
+    "degree": 6,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 164,
+    "seconds": 0.27814602851867676
+  },
+  {
+    "consistent": false,
+    "rank": 140,
+    "nullity": 2,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      2,
+      3,
+      4
+    ],
+    "obstruction_value": 1,
+    "name": "PY*SYQY-PY",
+    "degree": 6,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 142,
+    "seconds": 0.2110893726348877
+  },
+  {
+    "consistent": false,
+    "rank": 134,
+    "nullity": 8,
+    "obstruction_row": [
+      0,
+      1,
+      3,
+      5,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 1,
+    "name": "DX*DX",
+    "degree": 6,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 142,
+    "seconds": 0.391376256942749
+  },
+  {
+    "consistent": false,
+    "rank": 14,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      3,
+      1,
+      2,
+      3
+    ],
+    "obstruction_value": 1,
+    "name": "DX*DY",
+    "degree": 6,
+    "characters": [
+      1,
+      1
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 14,
+    "seconds": 0.055417776107788086
+  },
+  {
+    "consistent": false,
+    "rank": 61,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      3,
+      5,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 36,
+    "name": "DX*SXQX-PX",
+    "degree": 6,
+    "characters": [
+      1,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 61,
+    "seconds": 0.119598388671875
+  },
+  {
+    "consistent": false,
+    "rank": 68,
+    "nullity": 1,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      3,
+      1,
+      2,
+      3
+    ],
+    "obstruction_value": 36,
+    "name": "DX*SYQY-PY",
+    "degree": 6,
+    "characters": [
+      1,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 69,
+    "seconds": 0.16893577575683594
+  },
+  {
+    "consistent": false,
+    "rank": 134,
+    "nullity": 8,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      2,
+      3,
+      4
+    ],
+    "obstruction_value": 11,
+    "name": "DY*DY",
+    "degree": 6,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 142,
+    "seconds": 0.24397921562194824
+  },
+  {
+    "consistent": false,
+    "rank": 68,
+    "nullity": 1,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      3,
+      1,
+      2,
+      3
+    ],
+    "obstruction_value": 36,
+    "name": "DY*SXQX-PX",
+    "degree": 6,
+    "characters": [
+      0,
+      1
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 69,
+    "seconds": 0.1714491844177246
+  },
+  {
+    "consistent": false,
+    "rank": 61,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      2,
+      0,
+      3,
+      4
+    ],
+    "obstruction_value": 4,
+    "name": "DY*SYQY-PY",
+    "degree": 6,
+    "characters": [
+      0,
+      1
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 61,
+    "seconds": 0.08608555793762207
+  },
+  {
+    "consistent": false,
+    "rank": 139,
+    "nullity": 3,
+    "obstruction_row": [
+      0,
+      1,
+      3,
+      5,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 1,
+    "name": "SXQX-PX*SXQX-PX",
+    "degree": 6,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 142,
+    "seconds": 0.4473435878753662
+  },
+  {
+    "consistent": false,
+    "rank": 161,
+    "nullity": 3,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      3,
+      1,
+      2,
+      3
+    ],
+    "obstruction_value": 1,
+    "name": "SXQX-PX*SYQY-PY",
+    "degree": 6,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 164,
+    "seconds": 0.5175807476043701
+  },
+  {
+    "consistent": false,
+    "rank": 139,
+    "nullity": 3,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      2,
+      3,
+      4
+    ],
+    "obstruction_value": 34,
+    "name": "SYQY-PY*SYQY-PY",
+    "degree": 6,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 142,
+    "seconds": 0.2718837261199951
+  },
+  {
+    "consistent": false,
+    "rank": 96,
+    "nullity": 1,
+    "obstruction_row": [
+      0,
+      2,
+      3,
+      3,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 1,
+    "name": "PX*QX",
+    "degree": 5,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 97,
+    "seconds": 0.09961128234863281
+  },
+  {
+    "consistent": false,
+    "rank": 96,
+    "nullity": 1,
+    "obstruction_row": [
+      0,
+      2,
+      2,
+      2,
+      1,
+      2,
+      2
+    ],
+    "obstruction_value": 1,
+    "name": "PX*QY",
+    "degree": 5,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 97,
+    "seconds": 0.09119606018066406
+  },
+  {
+    "consistent": false,
+    "rank": 96,
+    "nullity": 1,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      2,
+      2,
+      2,
+      2
+    ],
+    "obstruction_value": 1,
+    "name": "PY*QX",
+    "degree": 5,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 97,
+    "seconds": 0.06778216361999512
+  },
+  {
+    "consistent": false,
+    "rank": 96,
+    "nullity": 1,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      2,
+      3,
+      3
+    ],
+    "obstruction_value": 1,
+    "name": "PY*QY",
+    "degree": 5,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 97,
+    "seconds": 0.0647878646850586
+  },
+  {
+    "consistent": false,
+    "rank": 33,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      3,
+      4,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 36,
+    "name": "DX*QX",
+    "degree": 5,
+    "characters": [
+      1,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 33,
+    "seconds": 0.03299689292907715
+  },
+  {
+    "consistent": false,
+    "rank": 33,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      3,
+      1,
+      2,
+      2
+    ],
+    "obstruction_value": 36,
+    "name": "DX*QY",
+    "degree": 5,
+    "characters": [
+      1,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 33,
+    "seconds": 0.04311943054199219
+  },
+  {
+    "consistent": false,
+    "rank": 33,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      2,
+      1,
+      2,
+      3
+    ],
+    "obstruction_value": 36,
+    "name": "DY*QX",
+    "degree": 5,
+    "characters": [
+      0,
+      1
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 33,
+    "seconds": 0.03882646560668945
+  },
+  {
+    "consistent": false,
+    "rank": 33,
+    "nullity": 0,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      1,
+      3,
+      4
+    ],
+    "obstruction_value": 36,
+    "name": "DY*QY",
+    "degree": 5,
+    "characters": [
+      0,
+      1
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 33,
+    "seconds": 0.03235650062561035
+  },
+  {
+    "consistent": false,
+    "rank": 96,
+    "nullity": 1,
+    "obstruction_row": [
+      0,
+      1,
+      3,
+      4,
+      1,
+      1,
+      1
+    ],
+    "obstruction_value": 1,
+    "name": "SXQX-PX*QX",
+    "degree": 5,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 97,
+    "seconds": 0.10722637176513672
+  },
+  {
+    "consistent": false,
+    "rank": 96,
+    "nullity": 1,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      3,
+      1,
+      2,
+      2
+    ],
+    "obstruction_value": 1,
+    "name": "SXQX-PX*QY",
+    "degree": 5,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 0,
+    "prime": 37,
+    "ncols": 97,
+    "seconds": 0.1403813362121582
+  },
+  {
+    "consistent": false,
+    "rank": 96,
+    "nullity": 1,
+    "obstruction_row": [
+      0,
+      1,
+      2,
+      2,
+      1,
+      2,
+      3
+    ],
+    "obstruction_value": 1,
+    "name": "SYQY-PY*QX",
+    "degree": 5,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 97,
+    "seconds": 0.14761638641357422
+  },
+  {
+    "consistent": false,
+    "rank": 96,
+    "nullity": 1,
+    "obstruction_row": [
+      0,
+      1,
+      1,
+      1,
+      1,
+      3,
+      4
+    ],
+    "obstruction_value": 1,
+    "name": "SYQY-PY*QY",
+    "degree": 5,
+    "characters": [
+      0,
+      0
+    ],
+    "Y_parity": 1,
+    "prime": 37,
+    "ncols": 97,
+    "seconds": 0.10340094566345215
+  }
+]

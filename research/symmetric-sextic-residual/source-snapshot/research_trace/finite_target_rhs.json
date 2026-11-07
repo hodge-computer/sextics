@@ -1,0 +1,110 @@
+{
+  "base_parameters": {
+    "lambda": 1,
+    "r": 2,
+    "s": 3
+  },
+  "source_sha256": "4db0de514561f62ef4c492c3a57c2076674c4bd5de6f0c2202e7b89d7feca4db",
+  "coefficient_targets": [
+    {
+      "source_component": 1,
+      "x_degree": 0,
+      "target_rational": "0",
+      "target_mod_prime": {
+        "5": 0,
+        "37": 0,
+        "65537": 0
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 1,
+      "x_degree": 1,
+      "target_rational": "49980/2197",
+      "target_mod_prime": {
+        "5": 0,
+        "37": 18,
+        "65537": 37579
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 1,
+      "x_degree": 2,
+      "target_rational": "-640332/2197",
+      "target_mod_prime": {
+        "5": 4,
+        "37": 31,
+        "65537": 52866
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 1,
+      "x_degree": 3,
+      "target_rational": "-164640/2197",
+      "target_mod_prime": {
+        "5": 0,
+        "37": 6,
+        "65537": 61256
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 1,
+      "x_degree": 4,
+      "target_rational": "0",
+      "target_mod_prime": {
+        "5": 0,
+        "37": 0,
+        "65537": 0
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 2,
+      "x_degree": 0,
+      "target_rational": "0",
+      "target_mod_prime": {
+        "5": 0,
+        "37": 0,
+        "65537": 0
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 2,
+      "x_degree": 1,
+      "target_rational": "193746/2197",
+      "target_mod_prime": {
+        "5": 3,
+        "37": 1,
+        "65537": 1878
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 2,
+      "x_degree": 2,
+      "target_rational": "237846/2197",
+      "target_mod_prime": {
+        "5": 3,
+        "37": 6,
+        "65537": 4195
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 2,
+      "x_degree": 3,
+      "target_rational": "0",
+      "target_mod_prime": {
+        "5": 0,
+        "37": 0,
+        "65537": 0
+      },
+      "actual_trace": null
+    }
+  ],
+  "scope": "These are the required target coefficients, NOT computed source traces. The condition is Trace(M_i)-dim(A)*target_i=0; no quotient dimension has been computed."
+}

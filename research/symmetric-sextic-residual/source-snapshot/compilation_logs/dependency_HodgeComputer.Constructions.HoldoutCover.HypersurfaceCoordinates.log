@@ -1,0 +1,3 @@
+'HoldoutConstruction.weightedHypersurface_quotient_isDomain' depends on axioms: [propext, Classical.choice, Quot.sound]
+'HoldoutConstruction.holdoutSextic_irreducible' depends on axioms: [propext, Classical.choice, Quot.sound]
+'HoldoutConstruction.holdoutSextic_quotient_isDomain' depends on axioms: [propext, Classical.choice, Quot.sound]

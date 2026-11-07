@@ -1,0 +1,28 @@
+{
+  "field": "Q with algebraically independent coefficients",
+  "cubic_form": "w^3 + p21*x*w^2+p20*w^2+p12*x^2*w+p11*x*w+p10*w+p03*x^3+p02*x^2+p01*x+p00",
+  "kernel": "H/G_w * (dlog(t-alpha)-dlog(t+alpha))",
+  "source": "2*M/G_w^3 dt wedge dr wedge ds",
+  "moving_point_pole_cancels": true,
+  "source_w_degree": "2",
+  "source_x_degree": "5",
+  "M1_x_degree": "4",
+  "M2_x_degree": "3",
+  "source_terms": 1203,
+  "quadratic_normal_source_cokernel": "0",
+  "linear_normal_source_identity_checked": true,
+  "exact_target_Jacobian_and_gauge_checked": true,
+  "exact_symmetric_cubic_leading_coefficient": "(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)/7",
+  "exact_symmetric_monic_coefficients": {
+    "p00": "7*(r**6 + 2)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p01": "5*(2*r + 1)**2*(2*s + 1)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p02": "10*(2*r + 1)*(2*s + 1)**2/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p03": "7*(s**6 + 2)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p10": "-5*(4*lam**2*r**2 + 4*lam**2*r + lam**2 - 42)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p11": "-10*(2*lam**2 + 1)*(2*r + 1)*(2*s + 1)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p12": "-10*(-21*lam**2 + 4*s**2 + 4*s + 1)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p20": "10*(2*lam**4*r + lam**4 + 2*lam**2*r + lam**2 + 21)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)",
+    "p21": "5*(42*lam**4 + 8*lam**2*s + 4*lam**2 + 2*s + 1)/(14*lam**6 - 10*lam**4 - 5*lam**2 + 14)"
+  },
+  "scope": "General-cubic algebraic current only. No norm-contact existence, closed-form construction, final trace/source inverse, or certificate is asserted."
+}

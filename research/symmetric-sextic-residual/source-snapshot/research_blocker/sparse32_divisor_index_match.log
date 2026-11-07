@@ -1,0 +1,46 @@
+[parallel] requested_threads=4 actual_threads=4 dynamic=0 md_abi_bytes=560
+[native] runtime_avx2=1 runtime_avx512f=1
+
+--------------- INPUT DATA ---------------
+#variables                      38
+#equations                    3867
+#invalid equations               0
+field characteristic            37
+homogeneous input?               0
+signature-based computation      0
+monomial order                 DRL
+basis hash table resetting       1
+linear algebra option            2
+initial hash table size      16384 (2^14)
+max pair selection             128
+reduce gb                        1
+#threads                         4
+info level                       2
+generate pbm files               0
+------------------------------------------
+[import] mode=dictionary-native generators=3867 monomials=1541070 terms=288999191 original_terms=585 seconds=14.174749 peak_rss_kib=1607508
+[state] restored completed_rounds=53 pending_pairs=63369 basis_rows=3829; initial pair generation skipped
+
+Legend for f4 information
+--------------------------------------------------------
+deg       current degree of pairs selected in this round
+sel       number of pairs selected in this round
+pairs     total number of pairs in pair list
+mat       matrix dimensions (# rows x # columns)
+density   density of the matrix
+new data  # new elements for basis in this round
+          # zero reductions during linear algebra
+time(rd)  time of the current f4 round in seconds given
+          for real and cpu time
+--------------------------------------------------------
+
+deg     sel   pairs        mat          density            new data         time(rd) in sec (real|cpu)
+------------------------------------------------------------------------------------------------------
+[compact] live 1595186 -> 1595186; capacity 2097152 -> 2097152; secondary capacity 256
+[progress] completed_rounds=53 rows=3829 pure_power_variables=7/38 unit_ideal=0 primary=1595186 secondary_capacity=256 elapsed=0.994
+  6     128   63369   65711 x 835325      0.36%       53 new      75 zero[columns] selected 707731 of 769742; primary live 1595672
+        46.70 | 53.86        
+[compact] live 1740948 -> 1596238; capacity 4194304 -> 4194304; secondary capacity 2097152
+[divisor_index] boundary=next_round enabled=1 queries=835256 indexed_queries=835256 fallback_queries=0 divisor_candidates=36118595 scanned_entries=0 avoided_entries=2935500503 lookup_seconds=0.586970 materialize_seconds=41.493020 prepare_seconds=0.000291 table_bytes=65536 max_enumeration_product=64 product_overflows=0 total_queries=835256 total_indexed_queries=835256 total_fallback_queries=0 total_divisor_candidates=36118595 total_scanned_entries=0 total_avoided_entries=2935500503 total_table_probes=50413268 total_full_head_tests=68180 materialized_rows=65514 materialized_terms=194964886 audited=0
+{"status":"CHECKPOINT","complete":false,"unit_ideal":false,"variables":38,"prime":37,"generators":3920,"monomials":1541556,"terms":300588916,"original_generators":38,"seconds":55.208288,"peak_rss_kib":2615160}
+[state] saved completed_rounds=54 pending_pairs=64135 basis_rows=3882 packed_fingerprint=c09c0146439da26c path=/workspace/scratch/0d11a6a4cf8f/proof_attempt7/sparse32_divisor_index_match.checkpoint.hcf.state

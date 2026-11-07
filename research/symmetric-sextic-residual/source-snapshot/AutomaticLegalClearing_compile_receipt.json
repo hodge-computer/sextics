@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "module": "AutomaticLegalClearing",
+  "exit_code": 0,
+  "seconds": 19.373852711003565,
+  "source_sha256": "8134e00fcda0034c7261dd51c5419c4780d59f45b40048958262b121afaf19c5",
+  "object_sha256": "a1fcb153a36beb109ef30e581cbd403969cf6e459c8f94bf01d33ec52450cb84",
+  "log": "/workspace/scratch/0d11a6a4cf8f/proof_attempt8/compilation_logs/AutomaticLegalClearing.log",
+  "command": [
+    "flock",
+    "/workspace/scratch/0d11a6a4cf8f/lean_compile.lock",
+    "lean",
+    "-j1",
+    "-M4096",
+    "-R",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt8",
+    "-o",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt8/AutomaticLegalClearing.olean",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt8/AutomaticLegalClearing.lean"
+  ],
+  "full_certificate_proved": false
+}

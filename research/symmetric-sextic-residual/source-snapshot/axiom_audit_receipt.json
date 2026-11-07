@@ -1,0 +1,2957 @@
+{
+  "status": "PASS",
+  "lean_exit_code": 0,
+  "theorems_requested": 784,
+  "theorems_reported": 784,
+  "allowed_axioms": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "theorem_axioms": {
+    "WeightedSupport.rational_det_ne_zero_of_modular_inverse": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.full_column_rank_of_nonsingular_minor": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.full_row_rank_of_nonsingular_minor": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_0": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_1": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_2": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_3": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_4": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_5": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_6": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_7": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_8": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_9": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_10": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_11": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_12": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_13": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_14": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_15": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_16": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_17": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_18": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_19": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_20": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_21": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_22": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_23": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_24": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_25": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_26": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_27": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_28": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_29": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_30": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_31": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_32": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_33": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_34": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_35": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_36": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_37": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_38": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_39": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_40": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_41": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_42": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_43": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_44": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_45": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_46": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_47": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_48": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_49": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_50": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_51": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_52": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_53": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_54": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_55": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_56": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_57": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_58": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_59": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_60": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_61": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_62": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_63": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_64": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_65": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_66": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_67": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_68": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_69": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_70": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_71": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_72": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_73": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_74": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_75": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_76": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_77": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_78": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_79": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_80": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_binding_row_81": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_0": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_1": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_2": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_3": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_4": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_5": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_6": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_7": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_8": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_9": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_10": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_11": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_12": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_13": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_14": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_15": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_16": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_17": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_18": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_19": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_20": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_21": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_22": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_23": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_24": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_25": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_26": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_27": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_28": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_29": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_30": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_31": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_32": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_33": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_34": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_35": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_36": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_37": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_38": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_39": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_40": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_41": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_42": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_43": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_44": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_45": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_46": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_47": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_48": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_49": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_50": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_51": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_52": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_53": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_54": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_55": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_56": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_57": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_58": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_59": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_60": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_61": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_62": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_63": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_64": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_65": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_66": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_67": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_68": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_69": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_70": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_71": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_72": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_binding_row_73": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PackedCheck.foldl_range_eq_sum": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PackedCheck.dot_cast": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PackedCheck.checkRow_sound": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_modular_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_inverse_checked": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_rational_minor_nonsingular": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_minor_binding": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.Q_rational_rank": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_modular_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_inverse_checked": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_rational_minor_nonsingular": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_minor_binding": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_rational_rank": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.CheckedRank.HQ_kernel_finrank": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSexticMonodromy.exists_pairing_ne_zero_of_span_eq_top": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSexticMonodromy.direction_mem_of_transvection": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSexticMonodromy.invariant_submodule_eq_bot_or_top": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.exactF_compact": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.exactA_compact": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.evaluateF_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.evaluateA_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.exactF_swapX": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.exactF_swapY": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.exactA_swapX": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.exactA_swapY": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.exactF_evenY": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.exactA_oddY": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.transformedF_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.transformedA_formula": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.transformedF_evenS": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.transformedF_evenT": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.transformedF_evenY": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.transformedA_evenS": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.transformedA_evenT": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.transformedA_oddY": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.transformedF_recover": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricReflections.exact_reflection_hypotheses": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SexticModFive.exists_large_exponent": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SexticModFive.pivot_large": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SexticModFive.remainder_add_pivot": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SexticModFive.remainder_degree": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SexticModFive.homogeneous_expansion": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SexticModFive.column_homogeneous": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SexticModFive.column_mod_five": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SexticModFive.macaulay_mod_five": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SexticModFive.macaulay_det_ne_zero": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SexticModFive.common_zero_is_origin": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricSmoothness.qx_homogeneous": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricSmoothness.qy_homogeneous": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricSmoothness.integerSextic_homogeneous": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricSmoothness.derivative_homogeneous": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricSmoothness.integerSextic_mod_five": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricSmoothness.derivative_mod_five": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricSmoothness.integerSextic_complex_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricSmoothness.gradient_vanishes_only_at_origin": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricSmoothness.nonzero_point_has_nonzero_partial": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricSmoothness.target_homogeneous": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricSmoothness.target_ne_zero": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricSmoothness.target_totalDegree": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricSmoothness.source_homogeneous": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.exponent_apply": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.exponent_subtract": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.exponent_lower": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.L_explicit": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_power": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_variable": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_difference": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_sum": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_Q": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_HQ": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_times_monomial": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_times_orbit": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_Q_orbit": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_HQ_orbit": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.swapIndex_involutive": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.swapIndex_injective": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.sigma_involutive": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.exponent_mapDomain": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.rename_L": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.rename_D": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.rename_H": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.rename_Q": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.rename_HQ": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.rename_orbitPolynomial": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_times_orbit_anti": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_times_orbit_anti": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_anti": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.boxExponent_capped": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.boxExponent_complete": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.decode_encode": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.orbitCodes_complete": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.source_degree_and_canonical": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.q_target_degree_and_canonical": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.hq_target_degree_and_canonical": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_0": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_1": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_2": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_3": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_4": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_5": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_6": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_7": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_8": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_9": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_10": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_11": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_12": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_13": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_14": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_15": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_16": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_17": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_18": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_19": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_20": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_21": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_22": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_23": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Source_orbit_block_24": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_0": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_1": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_2": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_3": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_4": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_5": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_6": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_7": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_8": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_9": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_10": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_11": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_12": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_13": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_14": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_15": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_16": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_17": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_18": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_19": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_20": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_21": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_22": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_23": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_orbit_block_24": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_0": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_1": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_2": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_3": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_4": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_5": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_6": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_7": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_8": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_9": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_10": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_11": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_12": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_13": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_14": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_15": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_16": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_17": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_18": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_19": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_20": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_21": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_22": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_23": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_orbit_block_24": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.source_orbit_enumeration": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.q_target_orbit_enumeration": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.hq_target_orbit_enumeration": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.table_complete": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.source_orbit_complete": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.q_target_orbit_complete": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.hq_target_orbit_complete": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.sigma_preserves_capped": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.sigma_preserves_degree": [
+      "propext",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.sigma_fixed_iff": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.canonical_plus_or_sigma": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.canonical_minus_or_sigma": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.source_orbit_cover": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.q_target_orbit_cover": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.hq_target_orbit_cover": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_0": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_1": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_2": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_3": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_4": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_5": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_6": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_7": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_8": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_9": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_10": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_11": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_12": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_13": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_14": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_15": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_16": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_17": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_18": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_19": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_20": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_21": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_22": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_23": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_24": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_25": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_26": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_27": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_28": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_29": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_30": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_31": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_32": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_33": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_34": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_35": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_36": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_37": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_38": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_39": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_40": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_41": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_42": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_43": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_44": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_45": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_46": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_47": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_48": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_49": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_50": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_51": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_52": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_53": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_54": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_55": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_56": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_57": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_58": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_59": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_60": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_61": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_62": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_63": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_64": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_65": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_66": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_67": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_68": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_69": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_70": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_71": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_72": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_73": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_74": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_75": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_76": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_77": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_78": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_79": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_80": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_81": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_82": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_83": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_84": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_85": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_86": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_87": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_88": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_89": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_90": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_91": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_92": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_93": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_94": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_95": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_96": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_97": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_98": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_99": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_100": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_101": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_102": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_103": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_104": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_105": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_106": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_107": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_108": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_109": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_110": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_111": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_112": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_113": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_114": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_115": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_116": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_117": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_118": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_coefficient_row_119": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_0": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_1": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_2": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_3": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_4": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_5": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_6": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_7": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_8": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_9": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_10": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_11": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_12": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_13": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_14": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_15": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_16": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_17": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_18": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_19": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_20": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_21": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_22": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_23": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_24": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_25": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_26": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_27": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_28": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_29": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_30": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_31": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_32": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_33": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_34": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_35": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_36": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_37": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_38": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_39": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_40": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_41": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_42": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_43": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_44": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_45": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_46": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_47": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_48": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_49": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_50": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_51": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_52": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_53": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_54": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_55": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_56": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_57": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_58": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_59": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_60": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_61": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_62": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_63": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_64": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_65": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_66": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_67": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_68": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_69": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_70": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_71": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_72": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_coefficient_row_73": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_arithmetic_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_polynomial_matrix_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_polynomial_rational_rank": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_arithmetic_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_polynomial_matrix_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_polynomial_rational_rank": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_variable_power_mul_zero": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_truncationIdeal_zero": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_eq_of_quotient_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.quotientCoeff_mk": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.q_binomial_remainder": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.quotient_Q_binomial": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.q_targets_bounded": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.hq_targets_bounded": [
+      "propext"
+    ],
+    "WeightedSupport.PolynomialModel.Q_quotient_matrix_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_quotient_matrix_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_quotient_rational_rank": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_quotient_rational_rank": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.coeff_cappedIdeal_zero": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.cappedCoeff_mk": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.changeCoefficients_L": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.changeCoefficients_D": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.changeCoefficients_H": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_rational_quotient_matrix_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_rational_quotient_matrix_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.Q_rational_quotient_rank": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PolynomialModel.HQ_rational_quotient_rank": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "GeneralCubicCurrent.source_reduction": [
+      "propext",
+      "Quot.sound"
+    ],
+    "GeneralCubicCurrent.source_cokernel": [
+      "propext",
+      "Quot.sound"
+    ],
+    "GeneralCubicCurrent.moving_point_remainder": [
+      "propext",
+      "Quot.sound"
+    ],
+    "GeneralCubicCurrent.linear_normal_source_scaled": [
+      "propext",
+      "Quot.sound"
+    ],
+    "GeneralCubicCurrent.normal_gauge": [
+      "propext"
+    ],
+    "GeneralCubicCurrent.target_quadratic_reduction": [
+      "propext",
+      "Quot.sound"
+    ],
+    "GeneralCubicCurrent.linear_normal_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricCubicModel.exactF_affine_chart": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricCubicModel.exactA_affine_chart": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricCubicModel.originalCubic_expansion": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricCubicModel.monic_normalization": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricCubicModel.ell_at_zero": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricCubicModel.exactF_scaled_chart": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricCubicModel.exactA_scaled_chart": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricCubicModel.polynomialJacobian_eq": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricCubicModel.chartJacobian_det": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SymmetricCubicModel.exact_polynomial_jacobian_det": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SmallDenominatorObstruction.ones_apply": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SmallDenominatorObstruction.rowExponent_injective": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SmallDenominatorObstruction.column_mod_five": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SmallDenominatorObstruction.minor_mod_five": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SmallDenominatorObstruction.minor_det_ne_zero": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SmallDenominatorObstruction.homogeneous_expansion": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SmallDenominatorObstruction.column_expansion": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SmallDenominatorObstruction.normalized_first_equation_trivial": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SmallDenominatorObstruction.protected_source_eq_monomial": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SmallDenominatorObstruction.protected_normalized_first_equation_trivial": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SmallDenominatorObstruction.homogeneousComponent_mul_of_left": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SmallDenominatorObstruction.verified_denominator_degree_ge_four": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "SmallDenominatorObstruction.protected_verified_denominator_degree_ge_four": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CurrentVerifierBridge.quotient_action": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CurrentVerifierBridge.quotient_divergence": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CurrentVerifierBridge.defect_clearing": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CurrentVerifierBridge.verify_of_field_residual": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CurrentVerifierBridge.residueCorrection_game_error": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CurrentVerifierBridge.residueCorrection_game_mod_cube": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CurrentVerifierBridge.verify_of_field_game": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CurrentVerifierBridge.verify_of_residue_primitive": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CurrentVerifierBridge.verify_of_residue_primitive_mod_cube": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CurrentVerifierBridge.homogenized_game_defect": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CurrentVerifierBridge.verify_of_affine_residue_primitive": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CertificateDenominatorGauge.vector_directional_add": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CertificateDenominatorGauge.vector_divergenceNumerator_add": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CertificateDenominatorGauge.sixth_six": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CertificateDenominatorGauge.scaledEuler_action": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CertificateDenominatorGauge.scaledEuler_divergence": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CertificateDenominatorGauge.scaledEuler_homogeneous": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CertificateDenominatorGauge.euler_add_divergenceNumerator": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CertificateDenominatorGauge.directional_add_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CertificateDenominatorGauge.legal_shift": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CertificateDenominatorGauge.first_equation_shift": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CertificateDenominatorGauge.second_equation_shift": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CertificateDenominatorGauge.homogeneous_sextic_not_unit": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "CertificateDenominatorGauge.verify_shift": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "ContactIncidenceAlgebra.incidence_minor_identity": [
+      "propext",
+      "Quot.sound"
+    ],
+    "ContactIncidenceAlgebra.q_annihilator": [
+      "propext",
+      "Quot.sound"
+    ],
+    "ContactIncidenceAlgebra.h_annihilator": [
+      "propext",
+      "Quot.sound"
+    ],
+    "ContactIncidenceAlgebra.q_cramer_numerator": [
+      "propext",
+      "Quot.sound"
+    ],
+    "ContactIncidenceAlgebra.h_cramer_numerator": [
+      "propext",
+      "Quot.sound"
+    ],
+    "ContactIncidenceAlgebra.cramer_tangent": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "ContactIncidenceAlgebra.cramer_wedge": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedSupport.PackedCheck.Q_row_0_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_1_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_2_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_3_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_4_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_5_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_6_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_7_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_8_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_9_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_10_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_11_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_12_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_13_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_14_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_15_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_16_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_17_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_18_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_19_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_20_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_21_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_22_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_23_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_24_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_25_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_26_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_27_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_28_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_29_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_30_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_31_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_32_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_33_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_34_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_35_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_36_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_37_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_38_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_39_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_40_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_41_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_42_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_43_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_44_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_45_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_46_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_47_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_48_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_49_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_50_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_51_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_52_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_53_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_54_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_55_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_56_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_57_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_58_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_59_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_60_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_61_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_62_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_63_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_64_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_65_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_66_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_67_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_68_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_69_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_70_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_71_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_72_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_73_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_74_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_75_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_76_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_77_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_78_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_79_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_80_checked": [],
+    "WeightedSupport.PackedCheck.Q_row_81_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_0_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_1_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_2_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_3_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_4_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_5_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_6_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_7_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_8_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_9_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_10_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_11_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_12_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_13_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_14_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_15_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_16_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_17_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_18_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_19_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_20_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_21_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_22_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_23_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_24_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_25_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_26_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_27_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_28_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_29_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_30_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_31_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_32_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_33_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_34_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_35_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_36_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_37_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_38_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_39_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_40_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_41_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_42_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_43_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_44_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_45_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_46_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_47_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_48_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_49_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_50_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_51_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_52_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_53_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_54_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_55_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_56_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_57_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_58_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_59_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_60_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_61_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_62_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_63_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_64_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_65_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_66_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_67_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_68_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_69_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_70_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_71_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_72_checked": [],
+    "WeightedSupport.PackedCheck.HQ_row_73_checked": [],
+    "WeightedSupport.PolynomialModel.source_codes_nodup": [],
+    "WeightedSupport.PolynomialModel.q_target_codes_nodup": [],
+    "WeightedSupport.PolynomialModel.hq_target_codes_nodup": []
+  },
+  "log": "verification_logs/axiom_audit.log",
+  "full_certificate_proved": false
+}

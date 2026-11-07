@@ -1,0 +1,10 @@
+{
+  "module": "SignedSourceCharacters",
+  "status": "PASS",
+  "exit_code": 0,
+  "seconds": 7.679,
+  "source_sha256": "226f9e0428d8d5e5b64373b77378a92ecf1d1833823c35ebb70fbd08d121fc1a",
+  "object_sha256": "10997cfb340019c2d9a1f19e9df02fa504147ced63fae726a97a3ce54a4fd798",
+  "scope": "All declarations of this module replayed against imported dependencies; imports not replayed from an empty environment.",
+  "full_certificate_proved": false
+}

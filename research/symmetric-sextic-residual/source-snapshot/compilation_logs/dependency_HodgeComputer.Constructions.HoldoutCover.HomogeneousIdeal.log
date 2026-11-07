@@ -1,0 +1,2 @@
+'HoldoutConstruction.component_dvd_of_product' depends on axioms: [propext, Classical.choice, Quot.sound]
+'HoldoutConstruction.exists_legal_initial_representative' depends on axioms: [propext, Classical.choice, Quot.sound]

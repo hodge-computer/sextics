@@ -1,0 +1,61 @@
+{
+  "schema": "lossless-split-proof-research-archive-v1",
+  "complete_archive_file": "symmetric_sextic_contact_repair_20261106_complete.zip",
+  "complete_archive_bytes": 1479981559,
+  "complete_archive_sha256": "0661ec33be7cc41dfab0b0b7dd429f77a549f95bc44d33ed6d4bcc8e7002487b",
+  "parts": [
+    {
+      "file_name": "symmetric_sextic_contact_repair_20261106_full.zip.part001",
+      "bytes": 268435456,
+      "sha256": "bd8a36fa1a32d8739c954eb440a97dca824a859358b9faef3ba7734a513f5a3b",
+      "library_file_id": "libfile_5bff3c6316a4819180d190791530a246",
+      "download_url": "https://chatgpt.com/library?file_id=libfile_5bff3c6316a4819180d190791530a246&account_id=personal"
+    },
+    {
+      "file_name": "symmetric_sextic_contact_repair_20261106_full.zip.part002",
+      "bytes": 268435456,
+      "sha256": "2763f77502d6a05a80a48df600e9288f0357f6dd75bd48a9689d6e82fd1735cb",
+      "library_file_id": "libfile_3d4e7e793c2c8191b39548bd49e19524",
+      "download_url": "https://chatgpt.com/library?file_id=libfile_3d4e7e793c2c8191b39548bd49e19524&account_id=personal"
+    },
+    {
+      "file_name": "symmetric_sextic_contact_repair_20261106_full.zip.part003",
+      "bytes": 268435456,
+      "sha256": "e4c1679ae4b149a38cd07e1d07c89e9854676b183dd0ab78ddb16572049c3036",
+      "library_file_id": "libfile_974c991ca4f081919c9ea3ac12ddd7da",
+      "download_url": "https://chatgpt.com/library?file_id=libfile_974c991ca4f081919c9ea3ac12ddd7da&account_id=personal"
+    },
+    {
+      "file_name": "symmetric_sextic_contact_repair_20261106_full.zip.part004",
+      "bytes": 268435456,
+      "sha256": "9892a7dacce775c3ef0bba5ad37b783b86384ef21e7b5637a62215310203da52",
+      "library_file_id": "libfile_f2b71d2ac9f48191a713ba49d705dade",
+      "download_url": "https://chatgpt.com/library?file_id=libfile_f2b71d2ac9f48191a713ba49d705dade&account_id=personal"
+    },
+    {
+      "file_name": "symmetric_sextic_contact_repair_20261106_full.zip.part005",
+      "bytes": 268435456,
+      "sha256": "c62c9fef717e2d555a6c19580fc737c652e33b6d1e97aa26b3f5ee9c7c7d8326",
+      "library_file_id": "libfile_169c03ad8940819185a8dee29416d4f1",
+      "download_url": "https://chatgpt.com/library?file_id=libfile_169c03ad8940819185a8dee29416d4f1&account_id=personal"
+    },
+    {
+      "file_name": "symmetric_sextic_contact_repair_20261106_full.zip.part006",
+      "bytes": 137804279,
+      "sha256": "1e4adaa2f524a5d27e1927263ef6fffe0c1d7e35d5f007c8ad23e880878fc078",
+      "library_file_id": "libfile_f790853807688191a9c0ab74f00b971c",
+      "download_url": "https://chatgpt.com/library?file_id=libfile_f790853807688191a9c0ab74f00b971c&account_id=personal"
+    }
+  ],
+  "proof_status": "UNPROVED; NO FULL TRACE EVALUATED",
+  "large_checkpoint_files_omitted_from_compact_package": [
+    {
+      "file": "symmetric_sextic_contact_repair_20261106/research_blocker/sparse32_divisor_continuation.checkpoint.hcf",
+      "bytes": 3116905876
+    },
+    {
+      "file": "symmetric_sextic_contact_repair_20261106/research_blocker/sparse32_jacobian_retry.checkpoint.hcf",
+      "bytes": 869029384
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "module": "MonodromyImageSpanning",
+  "exit_code": 0,
+  "seconds": 4.379527573000814,
+  "source_sha256": "b0773d92739f15ceb1e534117bd46694e842b24c1d4420c33b458f797770df1a",
+  "object_sha256": "ac8304c352708092788632fb99c42e06803959b95967ccbc2b65be0f7a0b45c8",
+  "log": "/workspace/scratch/0d11a6a4cf8f/proof_attempt8/compilation_logs/MonodromyImageSpanning.log",
+  "command": [
+    "flock",
+    "/workspace/scratch/0d11a6a4cf8f/lean_compile.lock",
+    "lean",
+    "-j1",
+    "-M4096",
+    "-R",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt8",
+    "-o",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt8/MonodromyImageSpanning.olean",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt8/MonodromyImageSpanning.lean"
+  ],
+  "full_certificate_proved": false
+}

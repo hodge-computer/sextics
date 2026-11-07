@@ -1,0 +1,57 @@
+import WeightedPrimitiveTransportCore
+import SymmetricAffinePrime
+import SymmetricAffineField
+import WeightedPrimitiveTransport
+import SymmetricAffineJacobian
+import SymmetricPrimitiveEndpoint
+#print axioms WeightedPrimitiveTransport.squareLift_C
+#print axioms WeightedPrimitiveTransport.squareLift_X
+#print axioms WeightedPrimitiveTransport.normal_squareLift
+#print axioms WeightedPrimitiveTransport.second_normal_squareLift
+#print axioms WeightedPrimitiveTransport.normal_reflectedSource
+#print axioms WeightedPrimitiveTransport.exact_chart_equation
+#print axioms WeightedPrimitiveTransport.exact_chart_source
+#print axioms WeightedPrimitiveTransport.monic_residue_coefficient
+#print axioms WeightedPrimitiveTransport.normal_nonzero_factors
+#print axioms WeightedPrimitiveTransport.exact_reflected_residue_scalar
+#print axioms WeightedPrimitiveTransport.weighted_derivative
+#print axioms WeightedPrimitiveTransport.relativeCurrent_equation
+#print axioms SymmetricAffinePrime.sectionConstant_mem
+#print axioms SymmetricAffinePrime.sectionConstant_not_mem_square
+#print axioms SymmetricAffinePrime.planeSection_monic
+#print axioms SymmetricAffinePrime.planeSection_natDegree
+#print axioms SymmetricAffinePrime.planeSection_eisenstein
+#print axioms SymmetricAffinePrime.planeSection_irreducible
+#print axioms SymmetricAffinePrime.bFirst_X
+#print axioms SymmetricAffinePrime.bFirst_C
+#print axioms SymmetricAffinePrime.univariateH_formula
+#print axioms SymmetricAffinePrime.univariateH_monic
+#print axioms SymmetricAffinePrime.specialization_is_planeSection
+#print axioms SymmetricAffinePrime.chart_irreducible
+#print axioms SymmetricAffinePrime.chart_prime
+#print axioms SymmetricAffineField.quotient_surjective
+#print axioms SymmetricAffineField.quotient_kernel
+#print axioms SymmetricAffineField.residueMap_kernel
+#print axioms SymmetricAffineField.normalPoint_equation
+#print axioms SymmetricAffineField.normalPoint_derivative
+#print axioms SymmetricAffineField.equation_not_dvd_normal
+#print axioms SymmetricAffineField.normal_nonzero
+#print axioms SymmetricAffineField.cover_coordinate_nonzero
+#print axioms SymmetricAffineField.weighted_normal_nonzero
+#print axioms WeightedPrimitiveTransport.tangent_squareLift
+#print axioms WeightedPrimitiveTransport.chartTangent_squareLift
+#print axioms WeightedPrimitiveTransport.canonical_current_equation
+#print axioms WeightedPrimitiveTransport.exact_chart_clearing_of_relative_primitive
+#print axioms SymmetricAffineJacobian.chartPolynomials_eval
+#print axioms SymmetricAffineJacobian.polynomialJacobian_eq
+#print axioms SymmetricAffineJacobian.chartJacobian_det
+#print axioms SymmetricAffineJacobian.exact_polynomial_jacobian_det
+#print axioms SymmetricAffineJacobian.exactF_scaled_chart
+#print axioms SymmetricAffineJacobian.exactA_scaled_chart
+#print axioms SymmetricAffineJacobian.exactA_scaled_source
+#print axioms SymmetricAffineJacobian.projective_jacobian_factor
+#print axioms SymmetricAffineJacobian.exact_projective_source_coefficient
+#print axioms SymmetricPrimitiveEndpoint.current_lambda
+#print axioms SymmetricPrimitiveEndpoint.current_relative
+#print axioms SymmetricPrimitiveEndpoint.extend_self
+#print axioms SymmetricPrimitiveEndpoint.clear_relative_primitive

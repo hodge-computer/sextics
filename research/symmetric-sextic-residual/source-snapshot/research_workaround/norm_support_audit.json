@@ -1,0 +1,65 @@
+{
+  "status": "PASS",
+  "surfaces": [
+    {
+      "support": "U",
+      "a": "5/7",
+      "b": "10/7",
+      "distinct_root_exceptional_values": [
+        "380/49",
+        "18400/2401"
+      ],
+      "repeated_root_f": "t**6 + t**5 - 2",
+      "repeated_root_g": "20*t**3 + 40*t**2 + 25*t - 9",
+      "bezout_S": "-57618500*t**2 - 654961500*t - 1116325025",
+      "bezout_T": "2880925*t**5 + 29867150*t**4 + 25228870*t**3 - 30679010*t**2 + 43262150*t - 36822546",
+      "bezout_nonzero_constant": 2564052964,
+      "origin_hessian_determinant": "250/343",
+      "interpretation": "The case analysis in the scope note proves the origin is the sole singular point, an ordinary node."
+    },
+    {
+      "support": "V",
+      "a": "10/7",
+      "b": "5/7",
+      "distinct_root_exceptional_values": [
+        "585/49",
+        "-63775/2401"
+      ],
+      "repeated_root_f": "t**6 + t**5 - 2",
+      "repeated_root_g": "20*t**3 + 40*t**2 + 25*t - 107",
+      "bezout_S": "3981739500*t**2 + 11921555500*t + 18432513275",
+      "bezout_T": "-199086975*t**5 - 396990800*t**4 - 474863120*t**3 - 540776240*t**2 - 448769400*t - 967008592",
+      "bezout_nonzero_constant": 66604892794,
+      "origin_hessian_determinant": "2000/343",
+      "interpretation": "The case analysis in the scope note proves the origin is the sole singular point, an ordinary node."
+    }
+  ],
+  "product_map_identity_checked": true,
+  "small_denominator_obstruction": [
+    {
+      "denominator_degree": 0,
+      "coefficient_columns": 37,
+      "distinct_selected_rows": 37,
+      "diagonal_minor_determinant_mod_5": 4
+    },
+    {
+      "denominator_degree": 1,
+      "coefficient_columns": 132,
+      "distinct_selected_rows": 132,
+      "diagonal_minor_determinant_mod_5": 4
+    },
+    {
+      "denominator_degree": 2,
+      "coefficient_columns": 357,
+      "distinct_selected_rows": 357,
+      "diagonal_minor_determinant_mod_5": 4
+    },
+    {
+      "denominator_degree": 3,
+      "coefficient_columns": 812,
+      "distinct_selected_rows": 812,
+      "diagonal_minor_determinant_mod_5": 1
+    }
+  ],
+  "scope": "Exact algebraic identities only. The geometric U/V support obstruction additionally uses resolution, rationality of ordinary surface nodes, projective-space cohomology, pullback of holomorphic forms, and the Gysin description of supported Hodge classes. No primitive or full certificate is asserted."
+}

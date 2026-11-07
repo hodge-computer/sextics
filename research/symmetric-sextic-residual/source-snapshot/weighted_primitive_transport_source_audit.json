@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "checks": {
+    "jacobian_det_4_a5_v": true,
+    "homogeneous_equation_binding": true,
+    "homogeneous_numerator_binding": true,
+    "ell_leading_coefficient": true,
+    "residue_density_cleared_identity": true
+  },
+  "chart_order": [
+    "a",
+    "lambda",
+    "b",
+    "c",
+    "d",
+    "v"
+  ],
+  "jacobian_det": "4*a**5*v",
+  "ambient_volume_pullback": "4*a^5*v da wedge dlambda wedge db wedge dc wedge dd wedge dv",
+  "projective_volume_pullback": "4*a^6*v dlambda wedge db wedge dc wedge dd wedge dv",
+  "relative_primitive_needed": "sum E_{b,c,d}(beta_i) = 2*(f_u*P_u-f_uu*P)/f_u^3",
+  "source_hashes": {
+    "WeightedPrimitiveTransportCore.lean": "a05669acad4339b599d5b17b1e95ad635337d4fa56654022d2877c91f7f704df",
+    "WeightedPrimitiveTransport.lean": "01e455313f921f086d847490b2fa7fd5deec3cd2b5cf974560efacb7ce41cf9d",
+    "SymmetricAffineJacobian.lean": "7f6a7af5b7fb722defaca0e70919733024369ab306637b03a5371ed23a285c14"
+  },
+  "scope": "Independent exact polynomial/source audit, not a Lean kernel replay or proof that a relative primitive exists."
+}

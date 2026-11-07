@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "module": "CanonicalFractionCoordinates",
+  "exit_code": 0,
+  "seconds": 3.872539867996238,
+  "source_sha256": "1add38875a0505f8f3a83643b40f0ffa796b603915e82f19a18c24a46380dd06",
+  "object_sha256": "6ef297472bfbf65999e90ffeab7d3bb729b96ba7bd4f50f69edd6381a65ffce2",
+  "log": "/workspace/scratch/0d11a6a4cf8f/proof_attempt8/compilation_logs/CanonicalFractionCoordinates.log",
+  "command": [
+    "flock",
+    "/workspace/scratch/0d11a6a4cf8f/lean_compile.lock",
+    "lean",
+    "-j1",
+    "-M4096",
+    "-R",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt8",
+    "-o",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt8/CanonicalFractionCoordinates.olean",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt8/CanonicalFractionCoordinates.lean"
+  ],
+  "full_certificate_proved": false
+}

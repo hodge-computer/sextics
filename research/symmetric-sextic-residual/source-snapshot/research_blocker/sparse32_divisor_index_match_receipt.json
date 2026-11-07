@@ -1,0 +1,1193 @@
+{
+  "schema": "guarded-packed-f4-run-v1",
+  "tag": "sparse32_divisor_index_match",
+  "status": "PARTIAL_BASIS_CHECKPOINT",
+  "exit_code": 75,
+  "seconds": 71.45861017999414,
+  "native_time_budget_seconds": 300,
+  "hard_grace_seconds": 180,
+  "address_space_limit_mib": 6144,
+  "requested_threads": 4,
+  "requested_round_budget": 1,
+  "selected_runtime_environment": {
+    "MALLOC_ARENA_MAX": "2",
+    "OMP_WAIT_POLICY": "PASSIVE",
+    "OMP_STACKSIZE": "4M"
+  },
+  "peak_rss_kib": 2615160,
+  "rss_measurement": "Linux getrusage, fresh runner with one child",
+  "max_sampled_shared_cgroup_bytes": 8589934592,
+  "max_estimated_nonreclaimable_bytes": 3375673344,
+  "shared_memory_guard_basis": "Raw cgroup usage less conservatively estimated reclaimable clean file cache; process peak RSS is measured separately.",
+  "command": [
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/divisor_index_03d4bfb8eda3ba46/resumable_f4_divisor_index",
+    "--input",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/sparse32_openmp_continuation.checkpoint.hcf",
+    "--output",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/sparse32_divisor_index_match.complete.hcf",
+    "--checkpoint",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/sparse32_divisor_index_match.checkpoint.hcf",
+    "--seconds",
+    "300",
+    "--pairs",
+    "128",
+    "--reset",
+    "1",
+    "--info",
+    "2",
+    "--resume-state",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/sparse32_openmp_continuation.checkpoint.hcf.state",
+    "--threads",
+    "4",
+    "--round-budget",
+    "1"
+  ],
+  "signal_checkpoint_request": null,
+  "samples": [
+    {
+      "seconds": 0.001,
+      "shared_cgroup_bytes": 8298508288,
+      "estimated_reclaimable_clean_file_bytes": 7497998336,
+      "estimated_nonreclaimable_bytes": 800509952,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 0.501,
+      "shared_cgroup_bytes": 8441872384,
+      "estimated_reclaimable_clean_file_bytes": 7522832384,
+      "estimated_nonreclaimable_bytes": 919040000,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 1.002,
+      "shared_cgroup_bytes": 8544788480,
+      "estimated_reclaimable_clean_file_bytes": 7531057152,
+      "estimated_nonreclaimable_bytes": 1013731328,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 1.502,
+      "shared_cgroup_bytes": 8585625600,
+      "estimated_reclaimable_clean_file_bytes": 7506591744,
+      "estimated_nonreclaimable_bytes": 1079033856,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 2.003,
+      "shared_cgroup_bytes": 8589832192,
+      "estimated_reclaimable_clean_file_bytes": 7435751424,
+      "estimated_nonreclaimable_bytes": 1154080768,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 2.503,
+      "shared_cgroup_bytes": 8588349440,
+      "estimated_reclaimable_clean_file_bytes": 7361372160,
+      "estimated_nonreclaimable_bytes": 1226977280,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 3.004,
+      "shared_cgroup_bytes": 8588079104,
+      "estimated_reclaimable_clean_file_bytes": 7292076032,
+      "estimated_nonreclaimable_bytes": 1296003072,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 3.504,
+      "shared_cgroup_bytes": 8588861440,
+      "estimated_reclaimable_clean_file_bytes": 7235706880,
+      "estimated_nonreclaimable_bytes": 1353154560,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 4.005,
+      "shared_cgroup_bytes": 8588210176,
+      "estimated_reclaimable_clean_file_bytes": 7182385152,
+      "estimated_nonreclaimable_bytes": 1405825024,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 4.506,
+      "shared_cgroup_bytes": 8583692288,
+      "estimated_reclaimable_clean_file_bytes": 7127859200,
+      "estimated_nonreclaimable_bytes": 1455833088,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 5.007,
+      "shared_cgroup_bytes": 8588099584,
+      "estimated_reclaimable_clean_file_bytes": 7077277696,
+      "estimated_nonreclaimable_bytes": 1510821888,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 5.507,
+      "shared_cgroup_bytes": 8588849152,
+      "estimated_reclaimable_clean_file_bytes": 7029043200,
+      "estimated_nonreclaimable_bytes": 1559805952,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 6.007,
+      "shared_cgroup_bytes": 8588890112,
+      "estimated_reclaimable_clean_file_bytes": 6978703360,
+      "estimated_nonreclaimable_bytes": 1610186752,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 6.508,
+      "shared_cgroup_bytes": 8589008896,
+      "estimated_reclaimable_clean_file_bytes": 6922067968,
+      "estimated_nonreclaimable_bytes": 1666940928,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 7.008,
+      "shared_cgroup_bytes": 8589615104,
+      "estimated_reclaimable_clean_file_bytes": 6873767936,
+      "estimated_nonreclaimable_bytes": 1715847168,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 7.509,
+      "shared_cgroup_bytes": 8588607488,
+      "estimated_reclaimable_clean_file_bytes": 6820118528,
+      "estimated_nonreclaimable_bytes": 1768488960,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 8.01,
+      "shared_cgroup_bytes": 8588337152,
+      "estimated_reclaimable_clean_file_bytes": 6768873472,
+      "estimated_nonreclaimable_bytes": 1819463680,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 8.51,
+      "shared_cgroup_bytes": 8589934592,
+      "estimated_reclaimable_clean_file_bytes": 6880538624,
+      "estimated_nonreclaimable_bytes": 1709395968,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 9.011,
+      "shared_cgroup_bytes": 8589131776,
+      "estimated_reclaimable_clean_file_bytes": 6835458048,
+      "estimated_nonreclaimable_bytes": 1753673728,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 9.514,
+      "shared_cgroup_bytes": 8589385728,
+      "estimated_reclaimable_clean_file_bytes": 6778224640,
+      "estimated_nonreclaimable_bytes": 1811161088,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 10.015,
+      "shared_cgroup_bytes": 8589615104,
+      "estimated_reclaimable_clean_file_bytes": 6723436544,
+      "estimated_nonreclaimable_bytes": 1866178560,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 10.516,
+      "shared_cgroup_bytes": 8589910016,
+      "estimated_reclaimable_clean_file_bytes": 6670864384,
+      "estimated_nonreclaimable_bytes": 1919045632,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 11.017,
+      "shared_cgroup_bytes": 8589299712,
+      "estimated_reclaimable_clean_file_bytes": 6619308032,
+      "estimated_nonreclaimable_bytes": 1969991680,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 11.517,
+      "shared_cgroup_bytes": 8587456512,
+      "estimated_reclaimable_clean_file_bytes": 6568456192,
+      "estimated_nonreclaimable_bytes": 2019000320,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 12.018,
+      "shared_cgroup_bytes": 8589828096,
+      "estimated_reclaimable_clean_file_bytes": 6522703872,
+      "estimated_nonreclaimable_bytes": 2067124224,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 12.519,
+      "shared_cgroup_bytes": 8589897728,
+      "estimated_reclaimable_clean_file_bytes": 6468833280,
+      "estimated_nonreclaimable_bytes": 2121064448,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 13.02,
+      "shared_cgroup_bytes": 8588083200,
+      "estimated_reclaimable_clean_file_bytes": 6412324864,
+      "estimated_nonreclaimable_bytes": 2175758336,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 13.52,
+      "shared_cgroup_bytes": 8589815808,
+      "estimated_reclaimable_clean_file_bytes": 6362607616,
+      "estimated_nonreclaimable_bytes": 2227208192,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 14.021,
+      "shared_cgroup_bytes": 8583503872,
+      "estimated_reclaimable_clean_file_bytes": 6309675008,
+      "estimated_nonreclaimable_bytes": 2273828864,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 14.522,
+      "shared_cgroup_bytes": 7381303296,
+      "estimated_reclaimable_clean_file_bytes": 5101899776,
+      "estimated_nonreclaimable_bytes": 2279403520,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 15.023,
+      "shared_cgroup_bytes": 7414845440,
+      "estimated_reclaimable_clean_file_bytes": 5135454208,
+      "estimated_nonreclaimable_bytes": 2279391232,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 15.523,
+      "shared_cgroup_bytes": 7499681792,
+      "estimated_reclaimable_clean_file_bytes": 5168963584,
+      "estimated_nonreclaimable_bytes": 2330718208,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 16.024,
+      "shared_cgroup_bytes": 7540531200,
+      "estimated_reclaimable_clean_file_bytes": 5202518016,
+      "estimated_nonreclaimable_bytes": 2338013184,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 16.525,
+      "shared_cgroup_bytes": 7599648768,
+      "estimated_reclaimable_clean_file_bytes": 5219749888,
+      "estimated_nonreclaimable_bytes": 2379898880,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 17.025,
+      "shared_cgroup_bytes": 7599579136,
+      "estimated_reclaimable_clean_file_bytes": 5220237312,
+      "estimated_nonreclaimable_bytes": 2379341824,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 17.525,
+      "shared_cgroup_bytes": 7609016320,
+      "estimated_reclaimable_clean_file_bytes": 5220237312,
+      "estimated_nonreclaimable_bytes": 2388779008,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 18.026,
+      "shared_cgroup_bytes": 7617142784,
+      "estimated_reclaimable_clean_file_bytes": 5220237312,
+      "estimated_nonreclaimable_bytes": 2396905472,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 18.526,
+      "shared_cgroup_bytes": 7628881920,
+      "estimated_reclaimable_clean_file_bytes": 5220241408,
+      "estimated_nonreclaimable_bytes": 2408640512,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 19.027,
+      "shared_cgroup_bytes": 7646781440,
+      "estimated_reclaimable_clean_file_bytes": 5220241408,
+      "estimated_nonreclaimable_bytes": 2426540032,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 19.527,
+      "shared_cgroup_bytes": 7659405312,
+      "estimated_reclaimable_clean_file_bytes": 5220241408,
+      "estimated_nonreclaimable_bytes": 2439163904,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 20.028,
+      "shared_cgroup_bytes": 7672250368,
+      "estimated_reclaimable_clean_file_bytes": 5220241408,
+      "estimated_nonreclaimable_bytes": 2452008960,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 20.528,
+      "shared_cgroup_bytes": 7681163264,
+      "estimated_reclaimable_clean_file_bytes": 5220241408,
+      "estimated_nonreclaimable_bytes": 2460921856,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 21.029,
+      "shared_cgroup_bytes": 7691485184,
+      "estimated_reclaimable_clean_file_bytes": 5220241408,
+      "estimated_nonreclaimable_bytes": 2471243776,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 21.532,
+      "shared_cgroup_bytes": 7707480064,
+      "estimated_reclaimable_clean_file_bytes": 5220085760,
+      "estimated_nonreclaimable_bytes": 2487394304,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 22.033,
+      "shared_cgroup_bytes": 7760654336,
+      "estimated_reclaimable_clean_file_bytes": 5262028800,
+      "estimated_nonreclaimable_bytes": 2498625536,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 22.533,
+      "shared_cgroup_bytes": 7806349312,
+      "estimated_reclaimable_clean_file_bytes": 5295583232,
+      "estimated_nonreclaimable_bytes": 2510766080,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 23.034,
+      "shared_cgroup_bytes": 7850598400,
+      "estimated_reclaimable_clean_file_bytes": 5329137664,
+      "estimated_nonreclaimable_bytes": 2521460736,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 23.534,
+      "shared_cgroup_bytes": 7902158848,
+      "estimated_reclaimable_clean_file_bytes": 5362692096,
+      "estimated_nonreclaimable_bytes": 2539466752,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 24.034,
+      "shared_cgroup_bytes": 7941386240,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2559111168,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 24.535,
+      "shared_cgroup_bytes": 7973015552,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2590740480,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 25.035,
+      "shared_cgroup_bytes": 7974776832,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2592501760,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 25.536,
+      "shared_cgroup_bytes": 7983427584,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2601152512,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 26.037,
+      "shared_cgroup_bytes": 8000151552,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2617876480,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 26.537,
+      "shared_cgroup_bytes": 8010657792,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2628382720,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 27.038,
+      "shared_cgroup_bytes": 8019034112,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2636759040,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 27.538,
+      "shared_cgroup_bytes": 8027422720,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2645147648,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 28.039,
+      "shared_cgroup_bytes": 8036331520,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2654056448,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 28.54,
+      "shared_cgroup_bytes": 8036790272,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2654515200,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 29.04,
+      "shared_cgroup_bytes": 8045953024,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2663677952,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 29.541,
+      "shared_cgroup_bytes": 8054603776,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2672328704,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 30.041,
+      "shared_cgroup_bytes": 8064827392,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2682552320,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 30.542,
+      "shared_cgroup_bytes": 8074526720,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2692251648,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 31.042,
+      "shared_cgroup_bytes": 8083439616,
+      "estimated_reclaimable_clean_file_bytes": 5382275072,
+      "estimated_nonreclaimable_bytes": 2701164544,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 31.543,
+      "shared_cgroup_bytes": 8093769728,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2711638016,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 32.043,
+      "shared_cgroup_bytes": 8103731200,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2721599488,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 32.544,
+      "shared_cgroup_bytes": 8113692672,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2731560960,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 33.044,
+      "shared_cgroup_bytes": 8122605568,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2740473856,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 33.545,
+      "shared_cgroup_bytes": 8130994176,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2748862464,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 34.045,
+      "shared_cgroup_bytes": 8140169216,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2758037504,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 34.546,
+      "shared_cgroup_bytes": 8148819968,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2766688256,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 35.046,
+      "shared_cgroup_bytes": 8157208576,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2775076864,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 35.547,
+      "shared_cgroup_bytes": 8165072896,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2782941184,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 36.047,
+      "shared_cgroup_bytes": 8173461504,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2791329792,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 36.548,
+      "shared_cgroup_bytes": 8181850112,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2799718400,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 37.048,
+      "shared_cgroup_bytes": 8190238720,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2808107008,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 37.549,
+      "shared_cgroup_bytes": 8199413760,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2817282048,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 38.049,
+      "shared_cgroup_bytes": 8208064512,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2825932800,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 38.549,
+      "shared_cgroup_bytes": 8216190976,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2834059264,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 39.05,
+      "shared_cgroup_bytes": 8231133184,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2849001472,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 39.55,
+      "shared_cgroup_bytes": 8239259648,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2857127936,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 40.051,
+      "shared_cgroup_bytes": 8250527744,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2868396032,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 40.551,
+      "shared_cgroup_bytes": 8258654208,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2876522496,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 41.052,
+      "shared_cgroup_bytes": 8267304960,
+      "estimated_reclaimable_clean_file_bytes": 5382131712,
+      "estimated_nonreclaimable_bytes": 2885173248,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 41.552,
+      "shared_cgroup_bytes": 8277635072,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 2895642624,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 42.053,
+      "shared_cgroup_bytes": 8285712384,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 2903719936,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 42.553,
+      "shared_cgroup_bytes": 8296460288,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 2914467840,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 43.054,
+      "shared_cgroup_bytes": 8307208192,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 2925215744,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 43.554,
+      "shared_cgroup_bytes": 8316907520,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 2934915072,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 44.055,
+      "shared_cgroup_bytes": 8330338304,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 2948345856,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 44.555,
+      "shared_cgroup_bytes": 8341585920,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 2959593472,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 45.056,
+      "shared_cgroup_bytes": 8350236672,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 2968244224,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 45.556,
+      "shared_cgroup_bytes": 8359149568,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 2977157120,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 46.057,
+      "shared_cgroup_bytes": 8368324608,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 2986332160,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 46.557,
+      "shared_cgroup_bytes": 8377761792,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 2995769344,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 47.058,
+      "shared_cgroup_bytes": 8386670592,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 3004678144,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 47.558,
+      "shared_cgroup_bytes": 8394797056,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 3012804608,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 48.059,
+      "shared_cgroup_bytes": 8403709952,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 3021717504,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 48.559,
+      "shared_cgroup_bytes": 8412360704,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 3030368256,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 49.06,
+      "shared_cgroup_bytes": 8420483072,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 3038490624,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 49.56,
+      "shared_cgroup_bytes": 8429133824,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 3047141376,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 50.061,
+      "shared_cgroup_bytes": 8437784576,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 3055792128,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 50.561,
+      "shared_cgroup_bytes": 8446959616,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 3064967168,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 51.062,
+      "shared_cgroup_bytes": 8455610368,
+      "estimated_reclaimable_clean_file_bytes": 5381992448,
+      "estimated_nonreclaimable_bytes": 3073617920,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 51.562,
+      "shared_cgroup_bytes": 8463622144,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3081768960,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 52.063,
+      "shared_cgroup_bytes": 8473321472,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3091468288,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 52.563,
+      "shared_cgroup_bytes": 8480923648,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3099070464,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 53.064,
+      "shared_cgroup_bytes": 8489312256,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3107459072,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 53.564,
+      "shared_cgroup_bytes": 8497176576,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3115323392,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 54.065,
+      "shared_cgroup_bytes": 8505040896,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3123187712,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 54.565,
+      "shared_cgroup_bytes": 8514215936,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3132362752,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 55.065,
+      "shared_cgroup_bytes": 8523128832,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3141275648,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 55.566,
+      "shared_cgroup_bytes": 8532041728,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3150188544,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 56.066,
+      "shared_cgroup_bytes": 8540692480,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3158839296,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 56.567,
+      "shared_cgroup_bytes": 8550916096,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3169062912,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 57.067,
+      "shared_cgroup_bytes": 8560877568,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3179024384,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 57.568,
+      "shared_cgroup_bytes": 8569528320,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3187675136,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 58.068,
+      "shared_cgroup_bytes": 8584208384,
+      "estimated_reclaimable_clean_file_bytes": 5381853184,
+      "estimated_nonreclaimable_bytes": 3202355200,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 58.569,
+      "shared_cgroup_bytes": 8589914112,
+      "estimated_reclaimable_clean_file_bytes": 5348691968,
+      "estimated_nonreclaimable_bytes": 3241222144,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 59.069,
+      "shared_cgroup_bytes": 8589910016,
+      "estimated_reclaimable_clean_file_bytes": 5332570112,
+      "estimated_nonreclaimable_bytes": 3257339904,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 59.57,
+      "shared_cgroup_bytes": 8589844480,
+      "estimated_reclaimable_clean_file_bytes": 5325230080,
+      "estimated_nonreclaimable_bytes": 3264614400,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 60.07,
+      "shared_cgroup_bytes": 8589918208,
+      "estimated_reclaimable_clean_file_bytes": 5310943232,
+      "estimated_nonreclaimable_bytes": 3278974976,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 60.571,
+      "shared_cgroup_bytes": 8589889536,
+      "estimated_reclaimable_clean_file_bytes": 5306093568,
+      "estimated_nonreclaimable_bytes": 3283795968,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 61.072,
+      "shared_cgroup_bytes": 8589832192,
+      "estimated_reclaimable_clean_file_bytes": 5292855296,
+      "estimated_nonreclaimable_bytes": 3296976896,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 61.572,
+      "shared_cgroup_bytes": 8589639680,
+      "estimated_reclaimable_clean_file_bytes": 5286555648,
+      "estimated_nonreclaimable_bytes": 3303084032,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 62.073,
+      "shared_cgroup_bytes": 8589836288,
+      "estimated_reclaimable_clean_file_bytes": 5271085056,
+      "estimated_nonreclaimable_bytes": 3318751232,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 62.573,
+      "shared_cgroup_bytes": 8552321024,
+      "estimated_reclaimable_clean_file_bytes": 5217603584,
+      "estimated_nonreclaimable_bytes": 3334717440,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 63.073,
+      "shared_cgroup_bytes": 8546029568,
+      "estimated_reclaimable_clean_file_bytes": 5217607680,
+      "estimated_nonreclaimable_bytes": 3328421888,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 63.574,
+      "shared_cgroup_bytes": 8521125888,
+      "estimated_reclaimable_clean_file_bytes": 5217603584,
+      "estimated_nonreclaimable_bytes": 3303522304,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 64.074,
+      "shared_cgroup_bytes": 8584445952,
+      "estimated_reclaimable_clean_file_bytes": 5217472512,
+      "estimated_nonreclaimable_bytes": 3366973440,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 64.575,
+      "shared_cgroup_bytes": 8553365504,
+      "estimated_reclaimable_clean_file_bytes": 5217079296,
+      "estimated_nonreclaimable_bytes": 3336286208,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 65.076,
+      "shared_cgroup_bytes": 8528084992,
+      "estimated_reclaimable_clean_file_bytes": 5216821248,
+      "estimated_nonreclaimable_bytes": 3311263744,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 65.579,
+      "shared_cgroup_bytes": 8564666368,
+      "estimated_reclaimable_clean_file_bytes": 5204365312,
+      "estimated_nonreclaimable_bytes": 3360301056,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 66.079,
+      "shared_cgroup_bytes": 8535425024,
+      "estimated_reclaimable_clean_file_bytes": 5204365312,
+      "estimated_nonreclaimable_bytes": 3331059712,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 66.58,
+      "shared_cgroup_bytes": 8510689280,
+      "estimated_reclaimable_clean_file_bytes": 5204365312,
+      "estimated_nonreclaimable_bytes": 3306323968,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 67.08,
+      "shared_cgroup_bytes": 8554668032,
+      "estimated_reclaimable_clean_file_bytes": 5204365312,
+      "estimated_nonreclaimable_bytes": 3350302720,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 67.581,
+      "shared_cgroup_bytes": 8580038656,
+      "estimated_reclaimable_clean_file_bytes": 5204365312,
+      "estimated_nonreclaimable_bytes": 3375673344,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 68.081,
+      "shared_cgroup_bytes": 8577376256,
+      "estimated_reclaimable_clean_file_bytes": 5217476608,
+      "estimated_nonreclaimable_bytes": 3359899648,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 68.585,
+      "shared_cgroup_bytes": 8588759040,
+      "estimated_reclaimable_clean_file_bytes": 5248598016,
+      "estimated_nonreclaimable_bytes": 3340161024,
+      "rss_kib": 0,
+      "vms_kib": 0
+    },
+    {
+      "seconds": 69.085,
+      "shared_cgroup_bytes": 8532099072,
+      "estimated_reclaimable_clean_file_bytes": 5216276480,
+      "estimated_nonreclaimable_bytes": 3315822592,
+      "rss_kib": 0,
+      "vms_kib": 0
+    }
+  ],
+  "input_file": "proof_attempt7/sparse32_openmp_continuation.checkpoint.hcf",
+  "input_sha256": "1373d8e9504b5c8c61ddf1956bcfd2963d209ba33c47413050bfd09524050c8d",
+  "input_native_state_file": "proof_attempt7/sparse32_openmp_continuation.checkpoint.hcf.state",
+  "input_native_state_sha256": "364bc063e35555ca1416e8950a31d2c7e0daca7d1841f02257e315847e8a45a1",
+  "binary_sha256": "b1799c3530fb2423031574019280e84e6ade1fde53f046e2854470cfa5a7c57f",
+  "outputs": {
+    "checkpoint": {
+      "file": "sparse32_divisor_index_match.checkpoint.hcf",
+      "bytes": 2521901008,
+      "sha256": "e85ad2fa86974b214b6141b94592f7b274f033451a1c29c7787966619f4a611e",
+      "header": {
+        "version": 1,
+        "flags": 0,
+        "complete": false,
+        "variables": 38,
+        "prime": 37,
+        "order": "grevlex",
+        "elimination_block": 0,
+        "generators": 3920,
+        "monomials": 1541556,
+        "terms": 300588916,
+        "original_generators": 38
+      }
+    },
+    "native_state": {
+      "file": "sparse32_divisor_index_match.checkpoint.hcf.state",
+      "bytes": 5947532,
+      "sha256": "83b9e93c3aa53f0b0df4dddfe9afa5e09541654bacde15bc202a94bc2623e5da"
+    }
+  },
+  "basis_independently_verified": false,
+  "full_trace_evaluated": false,
+  "full_certificate_proved": false
+}

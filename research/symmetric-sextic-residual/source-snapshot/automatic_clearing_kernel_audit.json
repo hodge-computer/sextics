@@ -1,0 +1,156 @@
+{
+  "status": "PASS",
+  "toolchain": "Lean (version 4.33.1, x86_64-unknown-linux-gnu, commit 819816b2e0a3bf405af45ae5c7af2491d8f5bee6, Release)",
+  "compiler_binary_sha256": "e8baaa71855a616dc351028f3ad2200051b0671f423a1696a100e809302d5550",
+  "checker_binary_sha256": "84bc3e7cd6efa5bfecd1e7c37571fed9428fb2b3e16da0ddf62f2163573486d0",
+  "audit_script_sha256": "cda43202ae9c937149c242379cc135353b29fddfa25ed83fde83eb633c2f40ef",
+  "modules": [
+    {
+      "module": "AutomaticLegalClearing",
+      "status": "PASS",
+      "source_sha256": "8134e00fcda0034c7261dd51c5419c4780d59f45b40048958262b121afaf19c5",
+      "object_sha256": "a1fcb153a36beb109ef30e581cbd403969cf6e459c8f94bf01d33ec52450cb84",
+      "compile_receipt_sha256": "07f10f6188651e5011e7ff8bad114ca0c6526e82cd85f719714252ae6856c2ff",
+      "compiler_log_sha256": "a6b460e4016a155f5106e4ae1e8ffb8c2cdd33d58aafb202f9cf52e76a767341",
+      "endpoint_axioms": {
+        "AutomaticLegalClearing.common_legal_representatives": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "AutomaticLegalClearing.normalized_data_of_regular_current": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "AutomaticLegalClearing.exists_normal_chart": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "AutomaticLegalClearing.hasCertificate_of_regular_current": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "AutomaticLegalClearing.hasCertificate_of_regular_strict_current": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "checker_exit_code": 0,
+      "checker_log_sha256": "4b1a3be1bd97e6119eb4aaf66048a444b5ca822519b25be639ceab8441f2c5c6",
+      "checker_command": [
+        "flock",
+        "/workspace/scratch/0d11a6a4cf8f/lean_compile.lock",
+        "leanchecker",
+        "-v",
+        "AutomaticLegalClearing"
+      ],
+      "no_sorry_or_new_axioms": true
+    },
+    {
+      "module": "RegularEulerClearing",
+      "status": "PASS",
+      "source_sha256": "3cb7b355db10b1a714ce77932549f069020c4c289d5b4a28fb30f2d0e40bedb1",
+      "object_sha256": "9e401246b8e7998b28daea18eb85e4463a3136930ce04366d4323535f5e6bce0",
+      "compile_receipt_sha256": "bcd798a1f1a7de080dc075384b89ea51a3902068c65c7a3829de3b667bea4901",
+      "compiler_log_sha256": "24c9938d271eafb2e8cbe9b00745cd066bcd4419acc63ac8bb0f005142570916",
+      "endpoint_axioms": {
+        "RegularEulerClearing.divergence_is_regular": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "RegularEulerClearing.correction_degree_zero": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "RegularEulerClearing.hasCertificate_of_regular_homogeneous_game": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "RegularEulerClearing.hasCertificate_of_exists_regular_homogeneous_game": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "checker_exit_code": 0,
+      "checker_log_sha256": "23cd4e16ed37f7b60a1240f0d271aba5957f8354e415442d764d30af6afb560d",
+      "checker_command": [
+        "flock",
+        "/workspace/scratch/0d11a6a4cf8f/lean_compile.lock",
+        "leanchecker",
+        "-v",
+        "RegularEulerClearing"
+      ],
+      "no_sorry_or_new_axioms": true
+    },
+    {
+      "module": "CanonicalFractionCoordinates",
+      "status": "PASS",
+      "source_sha256": "1add38875a0505f8f3a83643b40f0ffa796b603915e82f19a18c24a46380dd06",
+      "object_sha256": "6ef297472bfbf65999e90ffeab7d3bb729b96ba7bd4f50f69edd6381a65ffce2",
+      "compile_receipt_sha256": "cf19ca2056f6fd6c8472e9d189591ddd77ced37c9d25a796e473d046ee43b527",
+      "compiler_log_sha256": "e2babd3d3b899d02d5b60feebd73b15b7eb3b568d69b399664dcb0a5033c3baa",
+      "endpoint_axioms": {
+        "CanonicalFractionCoordinates.coordinateDerivative_polynomial": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "CanonicalFractionCoordinates.polynomial_partials_commute": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "CanonicalFractionCoordinates.coordinate_derivatives_commute": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "checker_exit_code": 0,
+      "checker_log_sha256": "365e7f950ce135ee2a4bca06fc0061519cca4c440750bbb6de7ba521f303841c",
+      "checker_command": [
+        "flock",
+        "/workspace/scratch/0d11a6a4cf8f/lean_compile.lock",
+        "leanchecker",
+        "-v",
+        "CanonicalFractionCoordinates"
+      ],
+      "no_sorry_or_new_axioms": true
+    }
+  ],
+  "import_bindings": {
+    "CurrentVerifierBridge": {
+      "source_sha256": "1cb579c08c6cbc5c900078c688a8e5fdf303e3a09a5619cb11e26f6e38bc5d29",
+      "object_sha256": "a8462bbf78e242a840e3e372f9ffdfd0efb2781e1640c835915c0b690e61d47d"
+    },
+    "HodgeComputer.Verify": {
+      "source_sha256": "60b8aaa391c27047d64d12839bc5172bc3d41d4230b15d5009263189026b5f72",
+      "object_sha256": "bc6c1b4d88434dd4884124fdb7dbb1fc91ed72cfb24a72f30d6240e736e76605"
+    },
+    "HodgeComputer.Constructions.HoldoutCover.HomogeneousCertificate": {
+      "source_sha256": "c6c8d59b9ea88dbf2579287cbd1921006bb4c9dfa2ae9e22c4960a8ee1256300",
+      "object_sha256": "90f39a4e64ffe80e44994f09dabaf3bef73384a0b939cbdb057910102d973f44"
+    },
+    "HodgeComputer.Constructions.FiniteAlgebra.FractionDerivation": {
+      "source_sha256": "d702780619a2efe1ca5df51b0d7227e9cac89b37840e96bf804f4cb230bc098d",
+      "object_sha256": "b1a3d4150ed9c0651de910c98f42521546c7dd93e0ab8bcc43c09699096d1b1c"
+    }
+  },
+  "serialized_with": "lean_compile.lock",
+  "checker_scope": "leanchecker replayed each new module against its imported environment using the same Lean kernel. Imported dependencies were not replayed with --fresh; this is not an external proof checker.",
+  "mathematical_scope": "Automatic legal common-denominator clearing, Euler normalization of a regular weight-one ordinary game, homogeneous certificate existence, and canonical commuting fraction-field coordinates. The substantive regular-current existence statement remains unproved for the protected target.",
+  "polynomial_witness_inputs_removed": true,
+  "normal_chart_input_removed": true,
+  "ordinary_remainder_retained": true,
+  "geometric_support_proved": false,
+  "full_certificate_proved": false,
+  "seconds": 16.128925484998035
+}

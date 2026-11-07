@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "method": "Exact rational enclosure of normalized residue dual and contact tangent",
+  "normalized_socle_matrix": 220,
+  "ideal_columns": 219,
+  "jacobian_normalization": 96,
+  "socle_center_inverse_defect_upper_bound": "10^-10",
+  "socle_ball_inverse_defect_upper_bound": "10^-10",
+  "socle_inverse_norm_upper_bound": "10^5",
+  "tangent_error_upper_bound": "10^-22",
+  "tau_vector_error_upper_bound": "10^-11",
+  "form_value_error_upper_bound": "10^-8",
+  "form_value_approximation": [
+    0.015943842399174287,
+    0.0047796044116877505
+  ],
+  "real_part_separated_from_zero": true,
+  "meaning": "eta_target(D) is nonzero at the certified actual contact, where D(rho0)=1; eta_target=tau(R dh).",
+  "source_ball_sha256": "51afaf813d87c680c7ec1674defd284d8c0dc2f6f2c0a2415b60e8321bbb3b98",
+  "root_receipt_sha256": "4093d5a4001e84f3aea4f33188dce11a155e95fefba6f41b854722eaf1533a9d",
+  "witness_sha256": "f406932bcbc02a4fe7b6d4e357f5ca275ecd0f2b02f93198a36766efdd5dfa0b",
+  "script_sha256": "0686ce15327a004b438d57ce5860d30efc1856217bab7c8136034e8b9cb68129",
+  "verification_seconds": 1.562880277633667,
+  "source_trace_proved": false,
+  "full_certificate_proved": false,
+  "Lean_proof": false
+}

@@ -1,0 +1,85 @@
+BLOCK-EULER SUPPORT: STATUS AND PRESCRIBED-SUPPORT CORRECTION
+==========================================================
+
+Protected target
+----------------
+The target is symmetric-sextic-residual, q=1, with its unchanged coefficients
+5/7 and 10/7. Write U=sum Xi^6, V=sum Yi^6, q=e2(X), Q=e2(Y),
+A=e3(X)e3(Y), and G=7F=7(U+V)+5q^2Q+10qQ^2. The symbol q=e2(X)
+in these displayed polynomial formulas is distinct from the pole parameter.
+
+The X-block Euler support is
+
+  D_X=E_X(G)=42U+20q^2Q+20qQ^2.
+
+It is nonzero, homogeneous of degree six, independently S3-invariant in both
+blocks, and Y-even. It is legal. Indeed F is prime (proved for the actual
+target in SymmetricPrime.lean). Divisibility F | D_X would, by the equal
+degrees, make D_X a scalar multiple of F. Comparing the pure Y_i^6 and
+X_i^6 coefficients contradicts that possibility.
+
+All nonradial linear combinations of the two block Euler denominators have
+the same support on F=0, since
+
+  E_Y(G)=6G-E_X(G),
+  E_X(G)+c E_Y(G)=(1-c)D_X+6cG.
+
+The case c=1 is proportional to G and illegal. In particular, the earlier
+E_X-2E_Y near-current does not provide a new support.
+
+Earlier exact obstruction and its consequence for EVERY power
+------------------------------------------------------------
+The independent exact characteristic-zero degree-six calculation in
+proof_attempt3/independent_degree6_audit.py and norm_support_scope.txt
+excludes every invariant Y-even degree-six denominator other than a multiple
+of F. It includes the complete equivariant numerator module, every first-
+equation kernel correction, and the ordinary modulo-F divergence condition.
+
+The prescribed-support theorem in sextics/docs/01-certificates.md, section
+"Prescribed support and pole multiplicity", says that at pole parameter one,
+existence with poles supported on V(D) is equivalent to existence with the
+prescribed denominator D. Its proof expressly permits singular supports;
+it uses filtered mixed Hodge modules and projective strictness. This theorem
+has NOT been formalized in the current Lean packet.
+
+Apply that theorem to D_X. A hypothetical certificate with denominator
+D_X^m, for any m>=1, would give a certificate with denominator D_X.
+Averaging over S3(X) x S3(Y) preserves this invariant denominator and the
+target. Averaging under Y -> -Y gives the required numerator parity.
+The ordinary-to-normalized Euler correction retains D_X. This would lie in
+the complete degree-six system already excluded over characteristic zero.
+
+Therefore ALL powers of this support are already excluded by the earlier
+exact obstruction combined with the paper's prescribed-support theorem.
+This is a mathematical consequence with an explicitly external geometric
+input, not a newly completed Lean obstruction.
+
+Redundant modular tests actually performed before noticing this consequence
+--------------------------------------------------------------------------
+The new script block_euler_fixed_support.py reconstructs the complete free
+equivariant E0,E1,E2 bases independently of the earlier polynomial routines.
+It solves both equations together over F_37:
+
+  N(G)=A D,   D div(N)-N(D)=0 modulo G.
+
+The ambient, rather than invariant-coordinate, divergence is used. The
+second equation permits an arbitrary multiple of G. Converting a solution
+for G to F multiplies the numerator vector by seven.
+
+  support   denominator degree  columns  rows   coefficient rank  augmented rank
+  D_X^2     12                  1206     2648   1075              1076
+  D_X^3     18                  5276     10607  3988              3989
+
+Thus both systems are inconsistent over F_37. The power-two run took less
+than one second. The power-three run took 26.3 seconds and peaked at
+704668 KiB resident memory under a 1536 MiB address-space cap. It had already
+finished when the prescribed-support correction arrived. No power-four
+computation was run; its raw dense matrix would require 3.67 GiB.
+
+These modular failures alone are NOT characteristic-zero obstructions:
+their coefficient matrices have nontrivial kernels, and an independent
+characteristic-zero upper-rank bound was not established here. They are
+redundant evidence only. The all-powers conclusion above comes instead from
+the earlier exact degree-six result and the explicitly cited paper theorem.
+
+No current or certificate was constructed. No protected source was edited.

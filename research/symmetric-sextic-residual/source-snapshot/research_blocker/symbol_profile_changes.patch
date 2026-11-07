@@ -1,0 +1,72 @@
+--- frozen/src/neogb/symbol.c
++++ profile/src/neogb/symbol.c
+@@ -502,6 +502,8 @@
+         const md_t * const md
+         )
+ {
++    const uint64_t symbol_profile_started = symbol_profile_now();
++    ++symbol_profile_lookup_calls;
+     len_t i, k;
+ 
+     ht_t *bht = bs->ht;
+@@ -529,6 +531,7 @@
+         i++;
+     }
+     if (i < lml) {
++        ++symbol_profile_full_tests;
+         const hm_t *b = bs->hm[lmps[i]];
+         const exp_t * const f = evb[b[OFFSET]];
+         for (k=0; k < evl; ++k) {
+@@ -539,8 +542,15 @@
+             etmp[k] = (exp_t)(e[k]-f[k]);
+         }
+ 
++        symbol_profile_lookup_ns += symbol_profile_now() - symbol_profile_started;
++        ++symbol_profile_lookup_hits;
++        symbol_profile_leading_positions += (uint64_t)i + 1;
+         const hi_t h  = hdm.val - hdb[b[OFFSET]].val;
++        const uint64_t symbol_profile_row_started = symbol_profile_now();
+         rows[rr]  = multiplied_poly_to_matrix_row(sht, bht, h, etmp, b);
++        symbol_profile_materialization_ns += symbol_profile_now() - symbol_profile_row_started;
++        ++symbol_profile_rows;
++        symbol_profile_terms += b[LENGTH];
+         /* track trace information ? */
+         if (md->trace_level == LEARN_TRACER) {
+             rows[rr][BINDEX]  = lmps[i];
+@@ -555,6 +565,10 @@
+         }
+         sht->hd[m].idx  = 2;
+         *nr             = rr + 1;
++    } else {
++        symbol_profile_lookup_ns += symbol_profile_now() - symbol_profile_started;
++        ++symbol_profile_lookup_misses;
++        symbol_profile_leading_positions += (uint64_t)lml;
+     }
+ }
+ 
+--- frozen/driver.c
++++ profile/driver.c
+@@ -11,6 +11,7 @@
+ static int hc_restore_native_state(bs_t **,md_t **,mat_t **,md_t *,bs_t *,len_t);
+ static const char *hc_state_input=NULL;
+ static uint64_t hc_resume_round=0;
++#include "symbol_profile_support.h"
+ #include "gb.c"
+ 
+ typedef struct {
+@@ -158,6 +159,7 @@
+                 (unsigned long long)(round-1),(unsigned long long)rows,count,bs->ht->nv,unit,(unsigned long)bs->ht->eld,(unsigned long)md->ht->esz,realtime()-hc_started);
+         fflush(stderr);free(seen);}
+     if(hc_checkpoint_path&&(hc_checkpoint_requested||(hc_budget>0&&realtime()-hc_started>=hc_budget)||(hc_round_budget&&round-1-hc_resume_round>=hc_round_budget))){
++        symbol_profile_emit("checkpoint");
+         hc_stream_basis(hc_checkpoint_path,bs,md,0);hc_write_native_state(hc_checkpoint_path,bs,md,round-1);exit(75);}
+ }
+ 
+@@ -402,6 +404,7 @@
+         free_shared_hash_data(ht);free_basis(&bs);free(md);free(hc_orig.lengths);free(hc_orig.exponents);free(hc_orig.coefficients);return 0;
+     }
+     int error=0;bs=core_f4(bs,md,&error,h.p);if(error){errno=EINVAL;hc_die("native F4 error");}
++    symbol_profile_emit("complete");
+     hc_stream_basis(output,bs,md,1);
+     free_shared_hash_data(ht);free_basis(&bs);free(md);free(hc_orig.lengths);free(hc_orig.exponents);free(hc_orig.coefficients);
+     return 0;

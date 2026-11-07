@@ -1,0 +1,5 @@
+'CanonicalFractionCoordinates.coordinateDerivative_polynomial' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'CanonicalFractionCoordinates.polynomial_partials_commute' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CanonicalFractionCoordinates.coordinate_derivatives_commute' depends on axioms: [propext, Classical.choice, Quot.sound]

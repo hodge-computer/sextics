@@ -1,0 +1,73 @@
+EXTERNAL FOUNDATION SNAPSHOT: REPLAY AND SCOPE
+
+Pinned source: openai/math, commit
+4eaee87548250b2682affda7d05d947c05554bae.
+
+The source snapshot is 3,160 verbatim transitive dependency files plus upstream
+build/provenance/license files. The compressed archive is about 3.6 MB.
+Nothing in it is asserted to prove GF or the target rational primitive.
+
+PORTABLE STATIC REPLAY
+
+Keep these beside this note:
+  audit_openai_foundations.py
+  openai_foundations_static_receipt.json
+  openai_OAI_tree_integrity.json
+  openai_foundations_sources.tar.gz
+  external/openai_foundations_closure_index.json
+
+Run (the script extracts the local archive if the source directory is absent):
+
+  python3 audit_openai_foundations.py --local-only
+
+This rehashes and reparses every extracted source, checks every import in the
+closure, and checks the absence of the listed admission/axiom/native-evaluation
+tokens outside comments and strings. It writes openai_local_source_replay.json.
+It needs only Python's standard library. It does not invoke Lean or validate
+the source elaboration or theorem axiom sets.
+
+These are THIRD-PARTY, UNCOMPILED SOURCE SNAPSHOTS, not new kernel-checked
+modules and not dependencies of the already compiled sextics proof modules.
+
+The 400 MiB partial download and 62 MiB global source index are intermediate
+audit inputs and are NOT needed in the portable package. The global OAI Git
+tree reconstruction is a recorded completed audit; reproducing that global
+tree check requires the complete upstream OAI source tree, not just this subset.
+Every extracted file's SHA256 and Git blob hash is in the static receipt.
+
+OPTIONAL FUTURE ISOLATED KERNEL BUILD (NOT EXECUTED)
+
+Do not alter the sextics target toolchain, mathlib pin, or lakefile.
+Use a fresh directory containing the extracted snapshot. The upstream pins are:
+  Lean 4.34.1
+  mathlib d13f23b723b8a846827a245b89c10fc7d3f11612
+
+In that fresh copy only, replace lean/lakefile.lean with the proposed
+minimal-foundations-lakefile.lean, and copy FoundationAxiomAudit.lean into lean/.
+The reduced lakefile is a static-import-based proposal, not build-tested here.
+It keeps only mathlib because no other package occurs in the inspected closure.
+Then, using the matching Lean runtime:
+
+  lake update
+  lake exe cache get
+  lake build OAI.AlgebraicGeometry.Comparison.Betti.Projective.SmoothIsomorphism
+  lake build OAI.AlgebraicGeometry.Comparison.Betti.Projective.FilteredImage
+  lake build OAI.Analysis.HodgeTheory.Decomposition.Constructions
+  lake build OAI.AlgebraicGeometry.Comparison.Betti.Algebraic.CechHypercohomology
+  lake build OAI.AlgebraicTopology.Duality.Poincare.Manifold
+  lake build OAI.AlgebraicGeometry.CycleClass.Thom.Supported.AnalyticRestriction
+  lake build OAI.AlgebraicGeometry.CycleClass.Thom.Supported.GysinEnlargement
+  lake env lean FoundationAxiomAudit.lean
+
+The existing shared workspace requires all Lean invocations to use its shared
+lean_compile.lock and appropriate process memory limits. No new runtime was
+installed during this audit. A successful future build still would not prove
+the specialized contact residue theorem (AJ), algebraic support-to-generic
+exactness, or GF; those remaining mathematical obligations are detailed in
+GF_feasibility.txt.
+
+LICENSING
+
+The upstream root and lean/ LICENSE files are retained. The extracted source
+contents are unchanged. Preserve the source provenance and licenses when
+redistributing this subset.

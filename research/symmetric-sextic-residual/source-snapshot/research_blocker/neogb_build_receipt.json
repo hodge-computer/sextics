@@ -1,0 +1,65 @@
+{
+  "upstream_tag": "v0.11.0",
+  "upstream_tree": "cc044551f8e202d00691990fd3fd0b1226a88ea2",
+  "upstream_archive_sha256": "0f4e8276cacc26eb6abef47982dcb39a6d98d17c5a20b34488d6fd8676d4822d",
+  "gmp_template_archive_sha256": "a3c2b80201b89e68616f4ad30bc66aee4927c3ce50e33929ca819d5c43538898",
+  "patch_sha256": "b4492a0eb46f9972b463bdbdf3ce3c87f4d9c923fa2ecd881036f736e9d24df1",
+  "scope": "Only ordinary finite-field, signature-free, NO_TRACER F4 path is modified.",
+  "builds": [
+    {
+      "name": "original",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fPIC",
+        "-shared",
+        "-D_GNU_SOURCE",
+        "-I/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/gmp-6.3.0",
+        "-o",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/libneogb_original.so",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/msolve-0.11.0/src/neogb/gb.c",
+        "/usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0",
+        "-lm"
+      ],
+      "sha256": "4f144e3491587c5235fbc94b83c8389cbaf70cf03e8bacd8ff0bff18c6457967",
+      "exact_reference_audit_enabled": false
+    },
+    {
+      "name": "compact",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fPIC",
+        "-shared",
+        "-D_GNU_SOURCE",
+        "-I/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/gmp-6.3.0",
+        "-o",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/libneogb_compact.so",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/neogb_patched/gb.c",
+        "/usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0",
+        "-lm"
+      ],
+      "sha256": "d5ff264ccd697915388e79e6b6c64e7d7c6af732028bfa7004d9fd49fba93fe5",
+      "exact_reference_audit_enabled": false
+    },
+    {
+      "name": "compact_audit",
+      "command": [
+        "gcc",
+        "-O2",
+        "-fPIC",
+        "-shared",
+        "-D_GNU_SOURCE",
+        "-I/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/gmp-6.3.0",
+        "-DHC_COMPACT_AUDIT=1",
+        "-o",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/libneogb_compact_audit.so",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/neogb_patched/gb.c",
+        "/usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0",
+        "-lm"
+      ],
+      "sha256": "3e637ae67edd0325967b17ba94c9b63cd6fddd517282fa7b558faa4cddf5f8e7",
+      "exact_reference_audit_enabled": true
+    }
+  ]
+}

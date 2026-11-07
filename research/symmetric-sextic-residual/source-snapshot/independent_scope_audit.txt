@@ -1,0 +1,34 @@
+INDEPENDENT MATHEMATICAL AND SCOPE AUDIT
+7 November 2026
+
+A separate read-only reviewer checked all six new Lean modules against the
+protected F/A, the actual quotient field, and the canonical derivative
+equation. All six source/object hashes matched their successful compilation
+receipts. No mismatched equation, source factor, derivative index, or hidden
+geometric hypothesis was found. This review is separate from the root's
+six-module leanchecker and 51-theorem axiom audit.
+
+Confirmed factors: H=f(v^2), A_H=4vP(v^2), g=H_v=2v f_u,
+rho=2(f_u P_u-f_uu P)/f_u^3, and
+((A_H)_v H_v - A_H H_vv)/H_v^2 = g*rho.
+
+The actual chart polynomial is irreducible by monic specialization and
+Eisenstein at v-i. Its normal derivative is nonzero in the actual fraction
+field because H=0 and H_v=-48i at (lambda,b,c,d,v)=(0,0,0,0,i).
+
+The current is exactly (0,-g beta_0,-g beta_1,-g beta_2). No independence
+from lambda is assumed. The sole input of the concrete affine-clearing
+endpoint is an inhabitant of RelativePrimitive, consisting of three
+functions in the actual chart function field and their derivative equation.
+The code does not construct or postulate that inhabitant.
+
+MATERIAL SCOPE QUALIFICATION
+
+clear_relative_primitive proves legal AFFINE polynomial data, including a
+nonzero denominator relatively prime to H and a full defect divisible by H^2.
+It does not conclude the protected homogeneous HasCertificate F 1 A.
+The Jacobian module verifies coefficient identities, not a full theorem
+transporting a differential-form primitive to the final homogeneous
+certificate. The primitive existence proof and that final assembly both
+remain outstanding. Claims that only the primitive is left before an
+already-assembled HasCertificate theorem would overstate this update.

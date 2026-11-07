@@ -1,0 +1,29 @@
+{"file": "sparse30_smallopens_p37.ms", "sha256": "871150f7f2400ca12ac326915d6baf143460be1d1d5158db201406c99dbba3c9", "variables": 36, "equations": 36, "rhs_count": 0, "core_variables": 30, "core_equations": 30, "inverse_variables": 6, "core_terms": 1486, "total_terms": 1544, "maximum_core_degree": 3, "maximum_input_degree": 3, "all900_modular_gradient_polynomials_match_exact_DAG": true, "prime": 37, "base": {"lam": 1, "r": 2, "s": 3}, "small_opens": ["delta1", "delta2", "delta3", "t", "beta", "Gw"], "no_additional_open_assumptions": true, "fixed_rhs_equivalence_proved": false, "quotient_basis_completed": false, "source_trace_proved": false, "full_certificate_proved": false}
+{"file": "sparse30_witness_1rhs_p37.ms", "sha256": "60874f47d46cfb131e94961306297075a7776084de3be5269b9742306cd68845", "variables": 66, "equations": 66, "rhs_count": 1, "core_variables": 30, "core_equations": 30, "inverse_variables": 6, "core_terms": 1486, "total_terms": 5308, "maximum_core_degree": 3, "maximum_input_degree": 3, "all900_modular_gradient_polynomials_match_exact_DAG": true, "prime": 37, "base": {"lam": 1, "r": 2, "s": 3}, "small_opens": ["delta1", "delta2", "delta3", "t", "beta", "Gw"], "no_additional_open_assumptions": true, "fixed_rhs_equivalence_proved": false, "quotient_basis_completed": false, "source_trace_proved": false, "full_certificate_proved": false}
+{"file": "sparse30_witness_2rhs_p37.ms", "sha256": "70bb2cedb9f59548c002a2182be39bf690030d6a7ab7f74a62f542db907cf1f9", "variables": 96, "equations": 96, "rhs_count": 2, "core_variables": 30, "core_equations": 30, "inverse_variables": 6, "core_terms": 1486, "total_terms": 9072, "maximum_core_degree": 3, "maximum_input_degree": 3, "all900_modular_gradient_polynomials_match_exact_DAG": true, "prime": 37, "base": {"lam": 1, "r": 2, "s": 3}, "small_opens": ["delta1", "delta2", "delta3", "t", "beta", "Gw"], "no_additional_open_assumptions": true, "fixed_rhs_equivalence_proved": false, "quotient_basis_completed": false, "source_trace_proved": false, "full_certificate_proved": false}
+{
+  "status": "PASS",
+  "scalar_ring": "QQ[44 contact variables,lambda,r,s,inverse_ell]",
+  "inverse_ell_treated_as_independent_scalar": true,
+  "base_parameters_left_symbolic": true,
+  "identity_pivot_rows_checked": 14,
+  "exact_free_row_operations_checked": 30,
+  "exact_reduced_derivatives_checked": 900,
+  "exact_reconstruction_derivatives_checked": 420,
+  "exact_off_ideal_chain_identities_checked": 1320,
+  "parity_formula_coefficients_checked": 30,
+  "maximum_reconstruction_degree": 2,
+  "maximum_reduced_degree": 3,
+  "no_denominators_introduced": true,
+  "no_additional_open_assumptions": true,
+  "determinant_relation": "J30=1*J44 on the equation ideal after reconstruction",
+  "packet_sha256": "1fcf0ae48eaf733ddcef270e81f35ddbbab63ad5369d6a7024eb6772aa516b92",
+  "script_sha256": "e117d005769c8001b291a75a9e8e736b6141270debab7ba48df428681292d4ba",
+  "derivative_builder_sha256": "60d1fe54e63a6bc4e069cc1ea1ed17da93bcce4446d1fca8b6946dc082ca1098",
+  "seconds": 0.5908620459958911,
+  "scope": "Exact polynomial quotient reduction and generic characteristic-zero source/gradient identities. The emitted fixed-RHS systems have no completed quotient basis or trace evaluation.",
+  "fixed_rhs_equivalence_proved": false,
+  "quotient_basis_completed": false,
+  "source_trace_proved": false,
+  "full_certificate_proved": false
+}

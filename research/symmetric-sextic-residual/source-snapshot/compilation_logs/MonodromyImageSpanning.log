@@ -1,0 +1,11 @@
+'WeightedSexticMonodromy.orbitImageSpan_stable' depends on axioms: [propext, Quot.sound]
+'WeightedSexticMonodromy.orbitImageSpan_eq_top' depends on axioms: [propext, Quot.sound]
+'WeightedSexticMonodromy.finite_spanning_subset_of_span_eq_top' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'WeightedSexticMonodromy.exists_finite_translates_rightInverse' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'WeightedSexticMonodromy.exists_finite_translates_rightInverse_of_picardLefschetz' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

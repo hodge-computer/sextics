@@ -1,0 +1,6 @@
+✔ [1589/1595] Built Mathlib.Algebra.Lie.Basic (7.1s)
+✔ [1590/1595] Built Mathlib.Algebra.Lie.Subalgebra (4.6s)
+✔ [1591/1595] Built Mathlib.Algebra.Lie.Submodule (6.1s)
+✔ [1594/1595] Built Mathlib.Algebra.Lie.Prod (2.0s)
+✔ [1595/1595] Built Mathlib.RingTheory.Derivation.Lie (2.5s)
+Build completed successfully (1595 jobs).

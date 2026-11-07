@@ -1,0 +1,27 @@
+{
+  "checkpoint": "proof_attempt7/sparse32_core_first.checkpoint.hcf",
+  "derived_rows": 2901,
+  "derived_terms": 131939859,
+  "leading_monomial_minimal_rows": 2832,
+  "their_terms": 130137959,
+  "discarded_terms_if_only_minimal_leading_rows_retained": 1801900,
+  "pure_power_variables": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    10
+  ],
+  "degree_histogram": {
+    "1": 2,
+    "2": 5,
+    "3": 44,
+    "4": 118,
+    "5": 635,
+    "6": 2097
+  },
+  "scope": "Metadata analysis only. Selecting leading-monomial-minimal rows could lose useful derived equations; preserve originals to retain the ideal. No row has been removed by this script.",
+  "seconds": 0.3658674339967547
+}

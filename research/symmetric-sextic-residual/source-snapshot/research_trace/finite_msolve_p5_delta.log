@@ -1,0 +1,46 @@
+Initial seed for pseudo-random number generator is 1794006752
+
+--------------- INPUT DATA ---------------
+#variables                      50
+#equations                      50
+#invalid equations               0
+field characteristic             5
+homogeneous input?               0
+signature-based computation      0
+monomial order                 DRL
+basis hash table resetting     OFF
+linear algebra option            2
+initial hash table size     131072 (2^17)
+max pair selection            5000
+reduce gb                        1
+#threads                         1
+info level                       2
+generate pbm files               0
+------------------------------------------
+
+Legend for f4 information
+--------------------------------------------------------
+deg       current degree of pairs selected in this round
+sel       number of pairs selected in this round
+pairs     total number of pairs in pair list
+mat       matrix dimensions (# rows x # columns)
+density   density of the matrix
+new data  # new elements for basis in this round
+          # zero reductions during linear algebra
+time(rd)  time of the current f4 round in seconds given
+          for real and cpu time
+--------------------------------------------------------
+
+deg     sel   pairs        mat          density            new data         time(rd) in sec (real|cpu)
+------------------------------------------------------------------------------------------------------
+  3      28     124      66 x 244         1.76%       28 new       0 zero         0.00 | 0.00         
+  4     253     315     913 x 2732        0.19%      160 new      93 zero         0.01 | 0.01         
+  3       4    3166      15 x 25         12.80%        1 new       3 zero         0.00 | 0.00         
+  4     488    3206    1400 x 7012        0.11%      381 new     107 zero         0.12 | 0.12         
+  4      12   15209      35 x 35          7.92%        0 new      12 zero         0.00 | 0.00         
+  5    5000   15197   33249 x 122212      0.01%     2467 new    2533 zero         7.58 | 7.56         
+  4       7  156063      93 x 436         1.73%        4 new       3 zero         0.17 | 0.17         
+  4      15  157529     141 x 790         1.07%       11 new       4 zero         0.22 | 0.22         
+  5    2531  158436   27457 x 126195      0.01%     1026 new    1505 zero        10.50 | 10.49        
+  5    1816  238038   21890 x 120851      0.01%     1087 new     729 zeroEnlarging exponent vector for hash table failed
+for esz = 16777216, segmentation fault will follow.

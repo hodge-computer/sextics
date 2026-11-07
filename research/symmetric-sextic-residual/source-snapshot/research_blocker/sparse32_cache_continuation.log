@@ -1,0 +1,50 @@
+[parallel] requested_threads=4 actual_threads=4 dynamic=0 md_abi_bytes=560
+[native] runtime_avx2=1 runtime_avx512f=1
+
+--------------- INPUT DATA ---------------
+#variables                      38
+#equations                    3920
+#invalid equations               0
+field characteristic            37
+homogeneous input?               0
+signature-based computation      0
+monomial order                 DRL
+basis hash table resetting       1
+linear algebra option            2
+initial hash table size      16384 (2^14)
+max pair selection             256
+reduce gb                        1
+#threads                         4
+info level                       2
+generate pbm files               0
+------------------------------------------
+[import] mode=dictionary-native generators=3920 monomials=1541556 terms=300588916 original_terms=585 seconds=12.333872 peak_rss_kib=1664560
+[state] restored completed_rounds=54 pending_pairs=64135 basis_rows=3882; initial pair generation skipped
+
+Legend for f4 information
+--------------------------------------------------------
+deg       current degree of pairs selected in this round
+sel       number of pairs selected in this round
+pairs     total number of pairs in pair list
+mat       matrix dimensions (# rows x # columns)
+density   density of the matrix
+new data  # new elements for basis in this round
+          # zero reductions during linear algebra
+time(rd)  time of the current f4 round in seconds given
+          for real and cpu time
+--------------------------------------------------------
+
+deg     sel   pairs        mat          density            new data         time(rd) in sec (real|cpu)
+------------------------------------------------------------------------------------------------------
+[compact] live 1596238 -> 1596238; capacity 2097152 -> 2097152; secondary capacity 256
+[progress] completed_rounds=54 rows=3882 pure_power_variables=7/38 unit_ideal=0 primary=1596238 secondary_capacity=256 elapsed=0.838
+  6     256   64135   90193 x 1151825     0.31%       52 new     204 zero[columns] selected 846189 of 1061888; primary live 1597168
+       154.39 | 168.35       
+[compact] live 1748425 -> 1597574; capacity 4194304 -> 4194304; secondary capacity 2097152
+[reducer] boundary=next_round enabled=1 queries=1151684 positive_hits=0 negative_hits=0 scanned_entries=4105857849 avoided_entries=0 lookup_seconds=70.858242 materialize_seconds=75.911645 prepare_seconds=0.000351 cache_bytes=23945216 total_queries=1151684 total_positive_hits=0 total_negative_hits=0 total_scanned_entries=4105857849 total_avoided_entries=0 materialized_rows=89796 materialized_terms=315353396 monotone_phases=0 reset_phases=1 audited=0
+  6     256   64623  155109 x 1474808     0.16%       72 new     184 zero[columns] selected 1181806 of 1319955; primary live 1636007
+       188.68 | 202.05       
+[compact] live 1836416 -> 1636770; capacity 4194304 -> 4194304; secondary capacity 2097152
+[reducer] boundary=next_round enabled=1 queries=1474652 positive_hits=1620 negative_hits=0 scanned_entries=5145346998 avoided_entries=136144 lookup_seconds=92.128530 materialize_seconds=87.456267 prepare_seconds=0.000555 cache_bytes=23945216 total_queries=2626336 total_positive_hits=1620 total_negative_hits=0 total_scanned_entries=9251204847 total_avoided_entries=136144 materialized_rows=244493 materialized_terms=665299304 monotone_phases=1 reset_phases=1 audited=0
+{"status":"CHECKPOINT","complete":false,"unit_ideal":false,"variables":38,"prime":37,"generators":4044,"monomials":1580919,"terms":328207197,"original_generators":38,"seconds":351.914793,"peak_rss_kib":3540256}
+[state] saved completed_rounds=56 pending_pairs=65498 basis_rows=4006 packed_fingerprint=d71b83e5ebc86a38 path=/workspace/scratch/0d11a6a4cf8f/proof_attempt7/sparse32_cache_continuation.checkpoint.hcf.state

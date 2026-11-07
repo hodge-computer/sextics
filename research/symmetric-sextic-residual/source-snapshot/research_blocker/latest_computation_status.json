@@ -1,0 +1,138 @@
+{
+  "schema": "blocker-current-outcome-v1",
+  "status": "BLOCKER_NOT_COMPLETED",
+  "exact_target": "HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A",
+  "specialization": {
+    "prime": 37,
+    "lambda": 1,
+    "r": 2,
+    "s": 3
+  },
+  "routes": [
+    {
+      "route": "small_open_core",
+      "tag": "sparse32_divisor_continuation",
+      "receipt": "sparse32_divisor_continuation_receipt.json",
+      "checkpoint": {
+        "file": "sparse32_divisor_continuation.checkpoint.hcf",
+        "bytes": 3116905876,
+        "sha256": "f456064eb105b89a2a99be3d7259a26e295c436df00564c16b5572c8f9931d69",
+        "header": {
+          "version": 1,
+          "flags": 0,
+          "complete": false,
+          "variables": 38,
+          "prime": 37,
+          "order": "grevlex",
+          "elimination_block": 0,
+          "generators": 4268,
+          "monomials": 1682471,
+          "terms": 373625484,
+          "original_generators": 38
+        }
+      },
+      "native_state": {
+        "file": "sparse32_divisor_continuation.checkpoint.hcf.state",
+        "bytes": 6357220,
+        "sha256": "b3aef413b1ffc6bf72983ee2ed5f90111d5c92a5bd8c34c1d66e6fcabaca68dd"
+      },
+      "progress": {
+        "schema": "native-f4-state-timings-v1",
+        "variables": 38,
+        "prime": 37,
+        "rounds": 58,
+        "basis_rows": 4230,
+        "pending_pairs": 68546,
+        "threads": 4,
+        "wall_seconds": {
+          "selection": 21.025007,
+          "symbolic": 1801.656186,
+          "linear_algebra": 58.150907,
+          "basis_update": 7.7015,
+          "conversion": 11.045866,
+          "hash_reset": 28.545678
+        },
+        "cpu_seconds": {
+          "symbolic": 1801.384562,
+          "linear_algebra": 170.147468,
+          "conversion": 12.13716
+        },
+        "maximum_matrix_rows": 154256,
+        "maximum_matrix_columns": 1575516,
+        "basis_independently_verified": false,
+        "full_trace_evaluated": false
+      },
+      "peak_rss_kib": 4093324,
+      "address_space_limit_mib": 6144,
+      "execution_seconds": 230.38807496400113
+    },
+    {
+      "route": "jacobian_witness",
+      "tag": "sparse32_jacobian_retry",
+      "receipt": "sparse32_jacobian_retry_receipt.json",
+      "checkpoint": {
+        "file": "sparse32_jacobian_retry.checkpoint.hcf",
+        "bytes": 869029384,
+        "sha256": "1e8ab188ab21f4e04f07ee8830e7510bc32eba37b616d9952b86649e9730934d",
+        "header": {
+          "version": 1,
+          "flags": 0,
+          "complete": false,
+          "variables": 102,
+          "prime": 37,
+          "order": "grevlex",
+          "elimination_block": 0,
+          "generators": 2681,
+          "monomials": 1558806,
+          "terms": 68876431,
+          "original_generators": 102
+        }
+      },
+      "native_state": {
+        "file": "sparse32_jacobian_retry.checkpoint.hcf.state",
+        "bytes": 24183780,
+        "sha256": "d9e9c892eb1cfc28bcde01ef9afe688fe3379192326aea6d61edb94f82199751"
+      },
+      "progress": {
+        "schema": "native-f4-state-timings-v1",
+        "variables": 102,
+        "prime": 37,
+        "rounds": 65,
+        "basis_rows": 2579,
+        "pending_pairs": 109783,
+        "threads": 4,
+        "wall_seconds": {
+          "selection": 2.201135,
+          "symbolic": 300.738238,
+          "linear_algebra": 2.281821,
+          "basis_update": 4.643715,
+          "conversion": 10.721519,
+          "hash_reset": 7.106707
+        },
+        "cpu_seconds": {
+          "symbolic": 300.685403,
+          "linear_algebra": 5.47937,
+          "conversion": 10.851153
+        },
+        "maximum_matrix_rows": 58037,
+        "maximum_matrix_columns": 1146919,
+        "basis_independently_verified": false,
+        "full_trace_evaluated": false
+      },
+      "peak_rss_kib": 1407396,
+      "address_space_limit_mib": 4096,
+      "execution_seconds": 331.10760942100023
+    }
+  ],
+  "full_source_traces_evaluated": 0,
+  "new_Lean_theorems": 0,
+  "finite_quotient_completed_and_independently_verified": false,
+  "source_coefficient_identity_proved": false,
+  "full_certificate_proved": false,
+  "no_completion_fraction_or_time_estimate": "Pending pairs can grow; term and row counts do not measure percent completion.",
+  "next_mathematical_gates": [
+    "Complete and verify a suitable finite algebra with every required open condition.",
+    "Evaluate actual traces and establish the characteristic-zero source identity, adjusting the contact form if comparisons fail.",
+    "Perform legal denominator clearing and the verifier bridge, then prove the protected Lean statement."
+  ]
+}

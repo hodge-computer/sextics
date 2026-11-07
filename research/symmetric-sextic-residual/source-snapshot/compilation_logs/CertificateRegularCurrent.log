@@ -1,0 +1,20 @@
+/workspace/scratch/0d11a6a4cf8f/proof_attempt8/CertificateRegularCurrent.lean:58:0: warning: automatically included section variable(s) unused in theorem `CertificateRegularCurrent.euler_action_homogeneous`:
+  [CharZero K]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharZero K] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+'CertificateRegularCurrent.euler_action_homogeneous' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CertificateRegularCurrent.homogeneous_quotient_euler_weight_one' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'CertificateRegularCurrent.certificateCurrent_euler_weight_one' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'CertificateRegularCurrent.certificateCurrent_game' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CertificateRegularCurrent.exists_regular_homogeneous_game_of_verify' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'CertificateRegularCurrent.exists_regular_homogeneous_game_of_hasCertificate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

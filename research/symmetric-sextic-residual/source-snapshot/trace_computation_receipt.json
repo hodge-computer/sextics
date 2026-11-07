@@ -1,0 +1,19 @@
+{
+  "scope": "Exact reductions and recorded attempts; no individual full trace evaluated",
+  "requested_coefficient_traces": 9,
+  "individual_full_trace_values_evaluated": 0,
+  "exact_relation_between_requested_traces": "C2*T14-C1*T23=0",
+  "remaining_top_moment": "m=<alpha U>; its value is unknown",
+  "quotient_degree_known": false,
+  "complete_quotient_basis_available": false,
+  "source_match_proved": false,
+  "full_certificate_proved": false,
+  "retained_lean_modules": 51,
+  "new_lean_module": "ContactIncidenceElimination",
+  "new_lean_audit": "contact_elimination_lean_receipt.json",
+  "prior_50_modules": "Retained unchanged; previous package manifest was verified before this update",
+  "prior_axiom_reports": 784,
+  "new_endpoint_axiom_reports": 3,
+  "solver_status_record": "research_trace/finite_computation_status.json",
+  "normalization_warning": "eta_R is not proved to contain the required inverse of Gamma_* Gamma^* or the exact source correction"
+}

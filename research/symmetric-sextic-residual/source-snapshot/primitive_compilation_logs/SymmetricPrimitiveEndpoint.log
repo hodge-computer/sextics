@@ -1,0 +1,4 @@
+'SymmetricPrimitiveEndpoint.tangent' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrimitiveEndpoint.current_lambda' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrimitiveEndpoint.current_relative' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrimitiveEndpoint.clear_relative_primitive' depends on axioms: [propext, Classical.choice, Quot.sound]

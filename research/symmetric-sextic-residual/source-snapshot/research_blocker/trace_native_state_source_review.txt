@@ -1,0 +1,78 @@
+NATIVE F4 CHECKPOINT SOURCE REVIEW
+
+Status: PASS within the stated scope; no material correctness defect found.
+Review type: independent read-only source inspection. No optional solver tests
+were run, and no reviewed source files were changed.
+
+Reviewed files:
+  resumable_state_driver.c
+  build_resumable.py (--native-state)
+  msolve_pair_selection_bounds.patch
+  resumable_native_state_audit.json
+  msolve_compact_hash.patch and relevant pinned upstream F4, basis, hash,
+  pair-update, conversion, configuration, and metadata implementations.
+
+Pinned build:
+  vendor/resumable_c88c65dfa299f4db
+Binary SHA256:
+  dd44b934f4e58a30dde1050a27f4a945e37549ca592683ccd784535c4367d5a1
+
+Findings
+
+1. Complete boundary. The checkpoint hook precedes the next preprocessing
+   round, after previous matrix conversion, matrix cleanup, and basis/pair
+   updates. No unfinished matrix calculation needs serialization.
+
+2. Pending pairs. Every live pair retains both basis indices, pair type,
+   degree, and exact LCM exponent vector. Restore checks each saved LCM
+   against the coordinatewise maximum of its generators' leading exponents.
+   It restores the live queue without performing initial pair generation.
+
+3. Basis and coefficients. Restore removes only the separately retained
+   original-generator prefix, preserves saved live-row order, and repairs
+   each row's COEFFS index after shifting the pointer arrays.
+
+4. Redundancy and leading monomials. Row redundancy flags, row degrees,
+   and lmps indices are saved. Divisor masks and leading masks are recomputed
+   after insertion of all restored pair LCMs.
+
+5. Pointer ownership. All four pointer members of md_t are cleared before
+   serialization. Pair storage, secondary hash storage, column mapping,
+   and matrix storage are freshly allocated. Temporary pointers to exponent
+   vectors are consumed before hash enlargement can invalidate them.
+
+6. Shifted-array tails. Duplicate pointers left beyond the restored live
+   length by memmove are not double-freed: upstream destruction visits only
+   [0, ld), and new basis entries overwrite tail positions before use.
+
+7. Hash compaction. Compaction preserves the primary ht object, so the
+   original ht pointer retained by main remains valid. It retains all
+   non-null basis rows and pending pair LCMs. Secondary and matrix data do
+   not carry live monomial references across the checkpoint boundary.
+
+8. Pair-selection correction. The patched loop starts at the last selected
+   pair and extends its complete LCM group without reading beyond the live
+   queue. Upstream bootstrap normalizes mnsel to a strictly positive value.
+
+9. Build provenance. During the review, SHA256 values of all four current
+   driver/patch inputs, the immutable driver copy, and the actual binary
+   were checked against the immutable build receipt. All matched. The
+   accompanying JSON copies those already-checked hash values; report
+   persistence did not rerun tests.
+
+Limitations
+
+The sidecar is intentionally restricted to the pinned native ABI and the
+finite-field, signature-free NO_TRACER path. FNV-1a detects accidental packed
+basis/sidecar mismatch; it is not cryptographic integrity protection. The
+receipt additionally identifies distributed files with SHA256.
+
+Because the hook follows pre-round compaction, that compaction can repeat
+once when resuming the same next round. This affects statistics and possibly
+runtime, not the preserved pair queue or represented ideal.
+
+The existing audit receipt reports 16 successful small-system restarts,
+matching uninterrupted selection/matrix batches and complete bases. This
+source review inspected that receipt; it did not rerun those tests. Neither
+those checks nor this review establish a complete target Groebner basis,
+a finite target quotient, any requested trace, or the full Lean certificate.

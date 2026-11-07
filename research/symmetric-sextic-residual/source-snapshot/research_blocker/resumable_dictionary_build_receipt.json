@@ -1,0 +1,35 @@
+{
+  "status": "BUILT_NOT_YET_VALIDATED",
+  "build_directory": "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/resumable_5a57547469400e16",
+  "binary": "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/resumable_5a57547469400e16/resumable_f4",
+  "binary_sha256": "27f62ff3f1eb3172b872950082433f503c4e7c065436b4d8ec9740943a242c6b",
+  "source_fingerprints": {
+    "msolve_compact_hash.patch": "b4492a0eb46f9972b463bdbdf3ce3c87f4d9c923fa2ecd881036f736e9d24df1",
+    "msolve_selective_columns.patch": "3576f40682c1fb7809f354fcbd08beac5ba96d9b2a14334887edd39bd30160ac",
+    "resumable_dictionary_driver.c": "a2b50f453761aa0d6eb22b6612dfb8ccca3361b2d4167203f1864fae026943e5"
+  },
+  "compile_command": [
+    "gcc",
+    "-O3",
+    "-march=native",
+    "-D_GNU_SOURCE",
+    "-DHAVE_AVX2",
+    "-DHAVE_AVX512_F",
+    "-I/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/resumable_5a57547469400e16/source/src/neogb",
+    "-I/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/gmp-6.3.0",
+    "-o",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/resumable_5a57547469400e16/resumable_f4",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/resumable_5a57547469400e16/driver.c",
+    "/usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0",
+    "-lm"
+  ],
+  "cpu_support": {
+    "avx2": true,
+    "avx512f": true
+  },
+  "compaction_internal_audit": false,
+  "dictionary_native_import": true,
+  "seconds": 8.849454194001737,
+  "active_compact_library_overwritten": false,
+  "complete_basis_validation_pending": true
+}

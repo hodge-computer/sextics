@@ -1,0 +1,26 @@
+/workspace/scratch/0d11a6a4cf8f/proof_attempt8/TwoReflectionSectors.lean:23:0: warning: automatically included section variable(s) unused in theorem `TwoReflectionSectors.positive_apply`:
+  [CharZero K]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharZero K] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt8/TwoReflectionSectors.lean:26:0: warning: automatically included section variable(s) unused in theorem `TwoReflectionSectors.negative_apply`:
+  [CharZero K]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharZero K] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt8/TwoReflectionSectors.lean:44:0: warning: automatically included section variable(s) unused in theorem `TwoReflectionSectors.commute_positive`:
+  [CharZero K]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharZero K] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt8/TwoReflectionSectors.lean:48:0: warning: automatically included section variable(s) unused in theorem `TwoReflectionSectors.commute_negative`:
+  [CharZero K]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharZero K] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+'TwoReflectionSectors.three_sector_decomposition' depends on axioms: [propext, Classical.choice, Quot.sound]
+'TwoReflectionSectors.invariant_supported_of_three_sectors' depends on axioms: [propext, Classical.choice, Quot.sound]

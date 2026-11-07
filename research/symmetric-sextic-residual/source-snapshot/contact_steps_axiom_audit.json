@@ -1,0 +1,140 @@
+{
+  "status": "PASS",
+  "public_theorems_audited": 20,
+  "allowed_axioms": [
+    "Classical.choice",
+    "Quot.sound",
+    "propext"
+  ],
+  "theorem_axioms": {
+    "ContactResidueAnnihilator.differentiated_contact": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "ContactResidueAnnihilator.coordinate_source_reduction": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "ContactResidueAnnihilator.residue_kills_contact_generators": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "ContactResidueAnnihilator.residue_kills_coordinate_source": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.squareLift_C": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.squareLift_X": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.padded_eq_reflection": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.padded_homogeneous": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.padded_mod_five": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.scaledGradient_homogeneous": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.scaledGradient_mod_five": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.padded_gradient_vanishes_only_at_origin": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.padded_partials": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.squareLift_eval": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.weighted_gradient_vanishes_only_at_origin_of_algClosed": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.integer_gradient_vanishes_only_at_origin": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.exact_target_binding": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.gradient_vanishes_only_at_origin": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.nonzero_point_has_nonzero_partial": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ],
+    "WeightedFiberSmoothness.weighted_vertex_value": [
+      "propext",
+      "Classical.choice",
+      "Quot.sound"
+    ]
+  },
+  "modules": [
+    {
+      "module": "ContactResidueAnnihilator",
+      "source_sha256": "053f9b27fbb8011ddb4ca95b3d1fe147f7564ce92378b5c3211d965857cefc0d",
+      "object_sha256": "3b9fbe0fdf010e14aee6d5eaa72c01c5ca9de7ff12d989ea142bf9fe8c6eeb6c"
+    },
+    {
+      "module": "WeightedFiberSmoothness",
+      "source_sha256": "155e3ed23b50352d1aa7207a61eb36405bf741b319b5c52f56df15ea0c3c14dd",
+      "object_sha256": "89ac4471f01184b7ade103580fea0fe898a31f77a5ea67d194e9761000a44aa3"
+    }
+  ],
+  "kernel_replay": [
+    {
+      "module": "ContactResidueAnnihilator",
+      "exit_code": 0,
+      "seconds": 3.61,
+      "log_sha256": "367f8fd2d779af4bfaca71bcb921d311c72670c449286ded7b7dbab5eedcc590"
+    },
+    {
+      "module": "WeightedFiberSmoothness",
+      "exit_code": 0,
+      "seconds": 4.523,
+      "log_sha256": "4ce361d8c980d513d9cfee019cb81f2d23baff0195daf0ee8a629d17b14161c9"
+    }
+  ],
+  "kernel_scope": "Selected modules replayed against their imported environments; imports are not replayed from an empty environment.",
+  "full_certificate_proved": false,
+  "remaining_goal": "SymmetricRegularCurrent.RegularGameExists"
+}

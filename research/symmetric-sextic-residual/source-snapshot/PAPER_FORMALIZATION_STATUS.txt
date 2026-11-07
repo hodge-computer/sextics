@@ -1,0 +1,178 @@
+SYMMETRIC SEXTIC: FORMALIZATION OF THE NONCONSTRUCTIVE PAPER ARGUMENT
+==================================================================
+
+Current outcome
+---------------
+Ten new Lean modules compile and pass kernel replay against Lean 4.33.1.
+All 94 new public theorems pass an axiom audit allowing only propext,
+Classical.choice, and Quot.sound. The combined package contains the 51
+previously checked modules plus these 10 new modules.
+
+The full protected theorem is STILL UNPROVED in Lean. The paper contains a
+mathematical existence proof. This continuation formalizes additional parts
+of that proof and completes the algebraic conversion of an existing regular
+current into a legal certificate; it does not yet formalize the geometric
+argument establishing existence of the current.
+
+The literal target is unchanged:
+
+  HodgeComputer.HasCertificate
+    HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A
+
+Here q=1, A=X0*X1*X2*Y0*Y1*Y2, and
+
+  F = X0^6+X1^6+X2^6+Y0^6+Y1^6+Y2^6
+      +(5/7)*QX^2*QY+(10/7)*QX*QY^2,
+  QX=X0*X1+X0*X2+X1*X2, QY=Y0*Y1+Y0*Y2+Y1*Y2.
+
+No protected source or verifier was modified. No proof placeholder, new
+axiom, unsafe declaration, or native_decide proof occurs in the new sources.
+
+Start with SymmetricRegularCurrent.lean
+--------------------------------------
+Its main theorem is an exact equivalence:
+
+  certificate_iff_regular_game_exists :
+    HasCertificate F q A <-> RegularGameExists
+
+RegularGameExists is defined explicitly in that file. Let P be the complex
+polynomial ring in six variables and let L be its localization at all
+nonzero polynomials relatively prime to F. Let K be the fraction field of P,
+with the usual coordinate derivatives, and E the Euler derivation.
+The remaining statement asks for
+
+  v : Fin 6 -> L, r : L,
+  E(v_i)=v_i for every i,
+  A - v(F) + F*div(v) = F^2*r in K.
+
+The forward theorem consumes an EXISTENCE PROOF for this statement. It does
+not ask the caller to compute D, six polynomial numerators, Q, or any common
+denominator. The reverse theorem constructs v_i=N_i/D and r=Q/D^2 from an
+accepted certificate and proves their required Euler weights. Thus the
+remaining existence condition is neither an added restriction nor a proof
+that the original target holds.
+
+New modules and their mathematical content
+-----------------------------------------
+1. SymmetricPrime.lean
+   Proves primality of the exact protected F without geometric hypotheses.
+   Regard F as monic in X0 and specialize X1=X2=Y2=0, Y1=1. The result is
+   X0^6+Y0^6+1, Eisenstein over C[Y0] at Y0-I, because Y0^6+1 vanishes
+   simply at I. Monic specialization gives irreducibility of the original
+   F, and unique factorization gives Prime F.
+
+2. TwoReflectionSectors.lean
+   Proves the decomposition for commuting involutions into the two positive
+   reflection sectors and the residual negative-negative sector. Its
+   support-transfer conclusion is explicitly conditional on membership in
+   a submodule; it does not assert a geometric coniveau theorem.
+
+3. SignedSourceCharacters.lean
+   Supplies exact polynomial and determinant-twisted linear actions for the
+   target. The source has characters (+,-,-) and lies entirely in the
+   residual sector. Identifying these actions with pullback on residue
+   cohomology is a separate geometric statement.
+
+4. MonodromyImageSpanning.lean
+   Proves that the span of all translated images of a nonzero correspondence
+   is invariant. Irreducibility and finite dimensionality then extract
+   finitely many translates whose combined map surjects. It connects this
+   to the previous Picard-Lefschetz linear-algebra criterion. Geometric
+   monodromy and a nonzero algebraic correspondence remain explicit inputs.
+
+5. PolynomialSupportedProjector.lean
+   Constructs the polynomial projector from the minimal polynomial on the
+   image subspace. If c=m(0), the polynomial is -c^(-1)*(m-c), with constant
+   coefficient zero. The proof establishes its image, identity action on
+   the subspace, idempotence, and equality with a compatible named projector.
+   The adjoint corollaries prove injectivity of Gamma*Gamma-adjoint from
+   surjectivity between finite-dimensional real or complex inner-product
+   spaces. Algebraic cycles, polarization compatibility, rational structures,
+   and geometric support are not asserted by this linear-algebra result.
+
+6. AutomaticLegalClearing.lean
+   A finite family in L has a common legal polynomial denominator. The
+   quotient-rule bridge derives the normalized polynomial identities.
+   A normal derivative not divisible by F is obtained from Euler's identity
+   and the degree drop under differentiation. Upstream homogeneous
+   normalization then supplies the exact verifier's degree conditions.
+
+7. RegularEulerClearing.lean
+   Starts with the ordinary rational game, retaining its regular remainder.
+   Differentiation preserves regularity, and the proved Euler correction
+   converts the game to normalized identities. It then invokes automatic
+   legal clearing. No explicit polynomial certificate data is assumed.
+
+8. CanonicalFractionCoordinates.lean
+   Constructs the actual fraction field, injective polynomial embedding,
+   and coordinate derivations. Proves that the derivations commute, using
+   the polynomial commutator and the quotient rule. These are actual objects,
+   not hypothetical coordinate data.
+
+9. CertificateRegularCurrent.lean
+   Proves the reverse direction, from Verify/HasCertificate to a regular
+   homogeneous current with ordinary remainder. Its constructions and
+   identities ensure that the final reduction is an equivalence.
+
+10. SymmetricRegularCurrent.lean
+    Supplies all polynomial, prime, coordinate, commutativity, and degree
+    inputs for the exact target and proves the equivalence described above.
+
+What remains from the paper
+---------------------------
+The geometric chain in docs/03b-weighted-threefolds.md and docs/01-certificates.md
+is not present as proved Lean declarations in this checkout. Its main missing
+parts construct the nonzero geometric correspondence from the Hodge-theoretic
+argument; identify the supported projector as an algebraic cycle; specialize
+and spread support in the family; pass through the pencil/quotient argument;
+and compare divisor-supported residue classes with regular rational currents.
+
+The required Hodge, cycle-class, relative-cohomology and comparison structures
+are themselves not developed here. Classical choice permits nonconstructive
+witness selection once existence is proved; it does not prove this remaining
+existential by itself. See paper_dependency_audit.txt for the detailed source
+audit and the distinction between polynomial facts and geometric conclusions.
+
+Verification and reproduction
+-----------------------------
+Pinned sextics commit: ca173aad142bd5f6bf5dd156b6798223a45df54f
+Pinned mathlib revision: 0df444a360eaa60ab8c11dca51a86af692955474
+Lean: 4.33.1, commit 819816b2e0a3bf405af45ae5c7af2491d8f5bee6
+Protected HodgeTarget.lean SHA256:
+  a51532e0442d72e8ce95d6728390fac0f719287d1cf20020701625bc1b5409d9
+Protected instance.rec SHA256:
+  b57fe82288d74a788fd725ef24660c06a58c0bbf8430b82dd506db37aa4c9390
+
+paper_formalization_receipt.json combines all ten compile/kernel outcomes.
+paper_steps_axiom_audit.json records every one of the 94 public theorem
+dependency lists. All replay uses the Lean kernel on each new module against
+its imported environment; upstream imports are not replayed from an empty
+environment. Separate earlier receipts cover the previous 51 modules.
+
+In a normal pinned Lean environment, build the unchanged upstream dependencies:
+
+  cd /path/to/sextics/formal/lean
+  lake build HodgeComputer.Constructions.HoldoutCover.HomogeneousCertificate \
+    HodgeComputer.Constructions.FiniteAlgebra.FractionDerivation \
+    Mathlib.LinearAlgebra.Charpoly.Basic Mathlib.Analysis.InnerProductSpace.Adjoint \
+    Mathlib.RingTheory.Derivation.Lie
+
+After making the pinned Lean/Lake binaries available on PATH, from the unpacked
+combined package run:
+
+  python3 verify_partial.py --repo /path/to/sextics
+  python3 audit_paper_steps.py --repo /path/to/sextics
+
+The first command compiles and replays all listed modules. The second audits
+all 94 new public theorems and replays the ten new modules. To replay existing
+objects without recompiling them, add --replay-only to verify_partial.py.
+
+Previous computation checkpoints
+--------------------------------
+This continuation does not resume or complete the large finite-algebra search.
+All earlier source files, reports and receipts remain in the package. Its two
+large .hcf checkpoints remain in the previously saved six-part full archive;
+the compact package retains their sidecars and the exact restoration links in
+CHECKPOINT_DOWNLOADS.txt, parts_manifest.json and join_checkpoint_archive.py.
+PREVIOUS_COMPUTATION_README.txt preserves the preceding computation report.
+Those earlier computations remain incomplete and are not certificate proofs.

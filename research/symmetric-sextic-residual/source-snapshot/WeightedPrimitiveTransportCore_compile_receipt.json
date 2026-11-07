@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "module": "WeightedPrimitiveTransportCore",
+  "exit_code": 0,
+  "seconds": 12.665605778995086,
+  "source_sha256": "a05669acad4339b599d5b17b1e95ad635337d4fa56654022d2877c91f7f704df",
+  "object_sha256": "f2ece79e2f8c71e120360c4ce230b182594b67c11b71f8e29030dccf3052e591",
+  "log": "/workspace/scratch/0d11a6a4cf8f/proof_attempt10/compilation_logs/WeightedPrimitiveTransportCore.log",
+  "command": [
+    "flock",
+    "/workspace/scratch/0d11a6a4cf8f/lean_compile.lock",
+    "lean",
+    "-j1",
+    "-M4096",
+    "-R",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt10",
+    "-o",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt10/WeightedPrimitiveTransportCore.olean",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt10/WeightedPrimitiveTransportCore.lean"
+  ],
+  "full_certificate_proved": false
+}

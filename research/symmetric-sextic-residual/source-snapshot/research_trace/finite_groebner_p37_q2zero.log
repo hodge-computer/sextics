@@ -1,0 +1,34 @@
+{"phase": "input_ready", "parameters": {"prime": 37, "lam": 1, "r": 2, "s": 3, "point_elimination": false, "opens": true, "alpha_resultant": false, "branch": "q2zero", "variable_order": "contact", "order": "degrevlex", "ideal_limit": 2000, "term_limit": 20000, "tag": "p37_q2zero"}, "source_sha256": "4db0de514561f62ef4c492c3a57c2076674c4bd5de6f0c2202e7b89d7feca4db", "variables": 46, "equations": 47, "input_terms": 397, "max_input_degree": 3, "method": "FLINT 3.6.0 bounded native Buchberger", "sanity_check": "PASS", "full_regularity_localization_included": false, "generic_flatness_proved": false, "traces_computed": false}
+{
+  "parameters": {
+    "prime": 37,
+    "lam": 1,
+    "r": 2,
+    "s": 3,
+    "point_elimination": false,
+    "opens": true,
+    "alpha_resultant": false,
+    "branch": "q2zero",
+    "variable_order": "contact",
+    "order": "degrevlex",
+    "ideal_limit": 2000,
+    "term_limit": 20000,
+    "tag": "p37_q2zero"
+  },
+  "source_sha256": "4db0de514561f62ef4c492c3a57c2076674c4bd5de6f0c2202e7b89d7feca4db",
+  "variables": 46,
+  "equations": 47,
+  "input_terms": 397,
+  "max_input_degree": 3,
+  "method": "FLINT 3.6.0 bounded native Buchberger",
+  "sanity_check": "PASS",
+  "full_regularity_localization_included": false,
+  "generic_flatness_proved": false,
+  "traces_computed": false,
+  "completed": false,
+  "generators": 2000,
+  "max_terms": 4069,
+  "max_total_degree": 5,
+  "seconds": 16.665806927998347,
+  "scope": "Specialized modular experiment only. No generic trace identity follows from this computation."
+}

@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "script": "/workspace/scratch/0d11a6a4cf8f/delivery_compact/symmetric_sextic_contact_repair_20261106/research_span/contact/check_contact_curve_smoothness.py",
+  "script_sha256": "f0928ee337ba01bbc639fbcea574021181ff7643dd4eb54f15da824bdaa2319d",
+  "exit_code": 0,
+  "wall_seconds": 0.3804365489995689,
+  "user_cpu_seconds": 0.337549,
+  "system_cpu_seconds": 0.044535,
+  "peak_resident_KiB": 51440,
+  "peak_resident_MiB": 50.234375,
+  "platform": "linux",
+  "scope": "Peak resident memory of this single fresh child, measured by getrusage on Linux."
+}

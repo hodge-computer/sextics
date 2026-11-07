@@ -1,0 +1,122 @@
+'TwoReflectionSectors.positive_apply' depends on axioms: [propext, Quot.sound]
+'TwoReflectionSectors.negative_apply' depends on axioms: [propext, Quot.sound]
+'TwoReflectionSectors.positive_add_negative' depends on axioms: [propext, Classical.choice, Quot.sound]
+'TwoReflectionSectors.positive_fixed' depends on axioms: [propext, Classical.choice, Quot.sound]
+'TwoReflectionSectors.negative_negated' depends on axioms: [propext, Classical.choice, Quot.sound]
+'TwoReflectionSectors.commute_positive' depends on axioms: [propext, Quot.sound]
+'TwoReflectionSectors.commute_negative' depends on axioms: [propext, Classical.choice, Quot.sound]
+'TwoReflectionSectors.three_sector_decomposition' depends on axioms: [propext, Classical.choice, Quot.sound]
+'TwoReflectionSectors.invariant_supported_of_three_sectors' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.swapX_involutive' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.swapY_involutive' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.blockY_involutive' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.blockY_swapX' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.blockY_swapY' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.swapX_swapY' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.τ_involutive' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.r_involutive' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.s_involutive' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.τ_r_commute' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.τ_s_commute' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.r_s_commute' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.equation_swapX' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.equation_swapY' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.equation_blockY' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.source_swapX' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.source_swapY' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.source_blockY' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.source_τ' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.source_r' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.source_s' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.exact_source_residual_characters' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.source_first_positive_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.source_second_positive_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.source_residual_eq_source' depends on axioms: [propext, Classical.choice, Quot.sound]
+'WeightedSexticMonodromy.image_mem_orbitImageSpan' depends on axioms: [propext, Quot.sound]
+'WeightedSexticMonodromy.orbitImageSpan_stable' depends on axioms: [propext, Quot.sound]
+'WeightedSexticMonodromy.orbitImageSpan_eq_top' depends on axioms: [propext, Quot.sound]
+'WeightedSexticMonodromy.finite_spanning_subset_of_span_eq_top' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'WeightedSexticMonodromy.finiteTranslateMap_single' depends on axioms: [propext, Classical.choice, Quot.sound]
+'WeightedSexticMonodromy.exists_finite_translates_rightInverse' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'WeightedSexticMonodromy.exists_finite_translates_rightInverse_of_picardLefschetz' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'PolynomialSupportedProjector.projectorPolynomial_coeff_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'PolynomialSupportedProjector.aeval_restrict_apply' depends on axioms: [propext, Classical.choice, Quot.sound]
+'PolynomialSupportedProjector.projectorPolynomial_fixes' depends on axioms: [propext, Classical.choice, Quot.sound]
+'PolynomialSupportedProjector.aeval_mem_of_coeff_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'PolynomialSupportedProjector.exists_polynomial_projector' depends on axioms: [propext, Classical.choice, Quot.sound]
+'PolynomialSupportedProjector.exists_polynomial_eq_projector' depends on axioms: [propext, Classical.choice, Quot.sound]
+'PolynomialSupportedProjector.gram_injective_of_surjective' depends on axioms: [propext, Classical.choice, Quot.sound]
+'PolynomialSupportedProjector.exists_polynomial_gram_identity' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'PolynomialSupportedProjector.exists_polynomial_eq_projector_of_surjective_adjoint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'SymmetricPrime.sectionConstant_mem' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.sectionConstant_not_mem_square' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.atI_isPrime' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.planeSection_monic' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.planeSection_natDegree' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.planeSection_eisenstein' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.planeSection_irreducible' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.univariateF_formula' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.univariateF_monic' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.specialization_is_planeSection' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.target_irreducible' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.target_prime' depends on axioms: [propext, Classical.choice, Quot.sound]
+'AutomaticLegalClearing.regularMap_polynomial' depends on axioms: [propext, Classical.choice, Quot.sound]
+'AutomaticLegalClearing.common_legal_representatives' depends on axioms: [propext, Classical.choice, Quot.sound]
+'AutomaticLegalClearing.normalized_data_of_regular_current' depends on axioms: [propext, Classical.choice, Quot.sound]
+'AutomaticLegalClearing.exists_normal_chart' depends on axioms: [propext, Classical.choice, Quot.sound]
+'AutomaticLegalClearing.hasCertificate_of_regular_current_on_chart' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'AutomaticLegalClearing.hasCertificate_of_regular_current' depends on axioms: [propext, Classical.choice, Quot.sound]
+'AutomaticLegalClearing.hasCertificate_of_regular_strict_current' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'RegularEulerClearing.regularMap_fraction' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RegularEulerClearing.divergence_is_regular' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RegularEulerClearing.regularMap_sixth' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RegularEulerClearing.action_coordinate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RegularEulerClearing.euler_action_sextic' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RegularEulerClearing.coordinateEuler_divergence' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RegularEulerClearing.eulerCorrection_normalized' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RegularEulerClearing.correction_degree_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RegularEulerClearing.hasCertificate_of_regular_homogeneous_game' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'RegularEulerClearing.hasCertificate_of_exists_regular_homogeneous_game' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'CanonicalFractionCoordinates.coordinateDerivative_polynomial' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'CanonicalFractionCoordinates.polynomial_partials_commute' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CanonicalFractionCoordinates.coordinate_derivatives_commute' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CanonicalFractionCoordinates.coordinates_commute' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CertificateRegularCurrent.certificateCurrent_map' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CertificateRegularCurrent.certificateRemainder_map' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CertificateRegularCurrent.euler_action_homogeneous' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CertificateRegularCurrent.homogeneous_quotient_euler_weight_one' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'CertificateRegularCurrent.certificateCurrent_euler_weight_one' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'CertificateRegularCurrent.certificateCurrent_game' depends on axioms: [propext, Classical.choice, Quot.sound]
+'CertificateRegularCurrent.exists_regular_homogeneous_game_of_verify' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'CertificateRegularCurrent.exists_regular_homogeneous_game_of_hasCertificate' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'SymmetricRegularCurrent.certificate_of_regular_game_exists' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricRegularCurrent.regular_game_exists_of_certificate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricRegularCurrent.certificate_iff_regular_game_exists' depends on axioms: [propext, Classical.choice, Quot.sound]

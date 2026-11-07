@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "unchanged_upstream_dependencies": [
+    {
+      "status": "PASS",
+      "module": "Mathlib.LinearAlgebra.Charpoly.Basic",
+      "source_unchanged": true,
+      "command": "flock /workspace/scratch/0d11a6a4cf8f/lean_compile.lock env PATH=/workspace/scratch/0d11a6a4cf8f/toolchains/lean-4.33.1-linux/bin:$PATH LD_PRELOAD=/workspace/scratch/0d11a6a4cf8f/runtime_compat/own_exe_path.so lake build Mathlib.LinearAlgebra.Charpoly.Basic",
+      "exit_code": 0,
+      "source_sha256": "46b0cf44b0ea659c6f881a87771da4400e0e807cff76365da1895d73338904ca",
+      "object_sha256": "06f81bdd3fc94794ffab026b337cf5b505afed62e8291f9b5930d6664049055f"
+    },
+    {
+      "status": "PASS",
+      "module": "Mathlib.Analysis.InnerProductSpace.Adjoint",
+      "source_unchanged": true,
+      "command": "flock /workspace/scratch/0d11a6a4cf8f/lean_compile.lock env PATH=/workspace/scratch/0d11a6a4cf8f/toolchains/lean-4.33.1-linux/bin:$PATH LD_PRELOAD=/workspace/scratch/0d11a6a4cf8f/runtime_compat/own_exe_path.so lake build Mathlib.Analysis.InnerProductSpace.Adjoint",
+      "exit_code": 0,
+      "source_sha256": "f28b5896638f712605265a69ffe4469f1f42e1b78b10ade0844738aeecd2b2a2",
+      "object_sha256": "5028657f35d682e70747321b395c3b5ae477b51c32a42686779c5681bafcf570"
+    }
+  ],
+  "scope": "Pinned source dependency compilation only; no upstream source changes."
+}

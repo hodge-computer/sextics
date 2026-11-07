@@ -1,0 +1,101 @@
+--- a/src/neogb/symbol.c
++++ b/src/neogb/symbol.c
+@@ -490,68 +490,32 @@
+ }
+ 
+ 
++#include "divisor_index.h"
++
+ static inline void find_multiplied_reducer(
+-        bs_t *bs,
+-        const hm_t m,
+-        len_t *nr,
+-        hm_t **rows,
+-        ht_t *sht,
+-        const md_t * const md
+-        )
+-{
+-    len_t i, k;
+-
+-    ht_t *bht = bs->ht;
+-
+-    const len_t rr  = *nr;
+-
+-    const len_t evl = bht->evl;
+-
+-    const exp_t * const e  = sht->ev[m];
+-
+-    const hd_t hdm    = sht->hd[m];
+-    const len_t lml   = bs->lml;
+-    const sdm_t ns    = ~hdm.sdm;
+-
+-    const sdm_t * const lms = bs->lm;
+-    const bl_t * const lmps = bs->lmps;
+-
+-    exp_t etmp[bht->evl];
+-    const hd_t * const hdb  = bht->hd;
+-    exp_t * const * const evb = bht->ev;
+-
+-    i = 0;
+-start:
+-    while (i < lml && lms[i] & ns) {
+-        i++;
+-    }
+-    if (i < lml) {
+-        const hm_t *b = bs->hm[lmps[i]];
+-        const exp_t * const f = evb[b[OFFSET]];
+-        for (k=0; k < evl; ++k) {
+-            if (e[k] < f[k]) {
+-                i++;
+-                goto start;
+-            }
+-            etmp[k] = (exp_t)(e[k]-f[k]);
+-        }
+-
+-        const hi_t h  = hdm.val - hdb[b[OFFSET]].val;
+-        rows[rr]  = multiplied_poly_to_matrix_row(sht, bht, h, etmp, b);
+-        /* track trace information ? */
+-        if (md->trace_level == LEARN_TRACER) {
+-            rows[rr][BINDEX]  = lmps[i];
+-            if (bht->eld == bht->esz-1) {
+-                enlarge_hash_table(bht);
+-            }
++        bs_t *bs, const hm_t m, len_t *nr, hm_t **rows,
++        ht_t *sht, const md_t * const md)
++{
++    ht_t *bht=bs->ht;const len_t rr=*nr;const hd_t hdm=sht->hd[m];
++    exp_t etmp[bht->evl];double started=hc_di_now();
++    len_t i=hc_di_find(bs,sht,m,etmp);
++    double selected=hc_di_now();hc_di_lookup_seconds+=selected-started;
++    if(i<bs->lml){
++        const hm_t *b=bs->hm[bs->lmps[i]];
++        const hi_t h=hdm.val-bht->hd[b[OFFSET]].val;
++        rows[rr]=multiplied_poly_to_matrix_row(sht,bht,h,etmp,b);
++        hc_di_materialize_seconds+=hc_di_now()-selected;
++        ++hc_di_rows;hc_di_terms+=b[LENGTH];
++        if(md->trace_level==LEARN_TRACER){
++            rows[rr][BINDEX]=bs->lmps[i];
++            if(bht->eld==bht->esz-1)enlarge_hash_table(bht);
+ #if PARALLEL_HASHING
+-            rows[rr][MULT]    = check_insert_in_hash_table(etmp, h, bht);
++            rows[rr][MULT]=check_insert_in_hash_table(etmp,h,bht);
+ #else
+-            rows[rr][MULT]    = insert_in_hash_table(etmp, bht);
++            rows[rr][MULT]=insert_in_hash_table(etmp,bht);
+ #endif
+         }
+-        sht->hd[m].idx  = 2;
+-        *nr             = rr + 1;
++        sht->hd[m].idx=2;*nr=rr+1;
+     }
+ }
+ 
+@@ -567,6 +531,8 @@
+     double ct0, ct1, rt0, rt1;
+     ct0 = cputime();
+     rt0 = realtime();
++
++    hc_di_prepare(bs, md);
+ 
+     /* at the moment we have as many reducers as we have different lcms */
+     len_t nrr = mat->nc;

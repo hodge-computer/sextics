@@ -1,0 +1,13 @@
+/workspace/scratch/0d11a6a4cf8f/proof_attempt8/AutomaticLegalClearing.lean:52:8: warning: automatically included section variable(s) unused in theorem `AutomaticLegalClearing.regularMap_polynomial`:
+  [CharZero K]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharZero K] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+'AutomaticLegalClearing.common_legal_representatives' depends on axioms: [propext, Classical.choice, Quot.sound]
+'AutomaticLegalClearing.normalized_data_of_regular_current' depends on axioms: [propext, Classical.choice, Quot.sound]
+'AutomaticLegalClearing.exists_normal_chart' depends on axioms: [propext, Classical.choice, Quot.sound]
+'AutomaticLegalClearing.hasCertificate_of_regular_current' depends on axioms: [propext, Classical.choice, Quot.sound]
+'AutomaticLegalClearing.hasCertificate_of_regular_strict_current' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

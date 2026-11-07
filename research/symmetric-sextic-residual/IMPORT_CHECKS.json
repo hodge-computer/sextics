@@ -1,0 +1,44 @@
+{
+  "kind": "research_archive_import_not_a_protected_certificate",
+  "import_date_local": "2026-11-06",
+  "source_conversation": "https://chatgpt.com/g/g-p-6a6d301e456881918ba2a163ea5e7e4e-math/c/6aee2915-b568-83ea-8d39-cd15c7be4120",
+  "base_commit": "2d60d08d25fba3e02162b39d4c50f6b467e7f506",
+  "archive_sha256": "51ff792e036f2831fbee654a1699332448d91c9e40b493edd99fce83ada7e933",
+  "archive_zip_crc_passed": true,
+  "archive_file_count": 1839,
+  "archive_package_manifest_hashes_checked": 1838,
+  "included_files_byte_identical_to_archive": 742,
+  "omitted_files": 1097,
+  "snapshot_json_files_parsed": 277,
+  "listed_lean_modules": 69,
+  "lean_source_files_including_audit_inputs": 75,
+  "static_lean_admission_and_custom_axiom_token_occurrences": [],
+  "protected_input_byte_identical_to_current_instance": true,
+  "archived_toolchain": "leanprover/lean4:v4.33.1",
+  "archived_mathlib_revision": "0df444a360eaa60ab8c11dca51a86af692955474",
+  "archive_verifier_base_commit": "ca173aad142bd5f6bf5dd156b6798223a45df54f",
+  "formal_lean_tree_unchanged_from_archive_base": true,
+  "fresh_python_replay_receipts": [
+    "verification/contact_jet_rational_replay.json",
+    "verification/contact_curve_smoothness_rational_replay.json",
+    "verification/weighted_primitive_transport_source_audit.json",
+    "verification/trace_closedness_counterexample_receipt.json"
+  ],
+  "lean_compilation_performed_for_import": false,
+  "lean_kernel_replay_performed_for_import": false,
+  "original_has_certificate_proved_in_packet": false,
+  "large_external_checkpoint_parts_downloaded": false,
+  "static_scan_scope": "Comment-stripped Lean token scan only; does not replace compilation, kernel replay, or transitive axiom audit.",
+  "repository_content_checks": {
+    "build-content.py": "PASS: 82 instances, 66 credited constructions, 10 chapters",
+    "validate-records.py": "PASS: all 82 records",
+    "check-content.py": "PASS: 6923 formulas, links/routes in 160 HTML files"
+  },
+  "new_guide_local_file_links_checked": 22,
+  "new_files_whitespace_check": "PASS for guide, import metadata, and fresh replay receipts",
+  "historical_whitespace_findings_preserved": {
+    "trailing_whitespace": 1351,
+    "blank_line_at_eof": 2,
+    "scope": "All findings are within byte-preserved source-snapshot files."
+  }
+}

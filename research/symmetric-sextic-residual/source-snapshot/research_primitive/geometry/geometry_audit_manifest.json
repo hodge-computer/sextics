@@ -1,0 +1,42 @@
+{
+  "GF_feasibility.txt": {
+    "sha256": "17e493264757f2eb336dfbeaf851d7307fd96b9802f0af821c7b0e01f91316e9",
+    "bytes": 14443
+  },
+  "audit_openai_foundations.py": {
+    "sha256": "580758f9228202cb3638e95219e420140ddf8733e144bc6f34734401143fa0e2",
+    "bytes": 13022
+  },
+  "FoundationAxiomAudit.lean": {
+    "sha256": "5b364fc90dd87b4c893a7c1b136114fc58149f50832acda7cb2950edc34e46b9",
+    "bytes": 1789
+  },
+  "minimal-foundations-lakefile.lean": {
+    "sha256": "bcdd1bde2d69901160cb190822fac07ad442af842d9161879671005d8cd7aa21",
+    "bytes": 644
+  },
+  "openai_foundations_static_receipt.json": {
+    "sha256": "107292a6db2efb53930363f97df375d1cae81f02c4f5ff9ff0171b097bb815a7",
+    "bytes": 1028058
+  },
+  "openai_OAI_tree_integrity.json": {
+    "sha256": "8ec676f3d0365f2daf70ab73e706612087233d36392ae0f5d74313143bbbc44b",
+    "bytes": 281
+  },
+  "openai_local_source_replay.json": {
+    "sha256": "7ec306d3c9472b6adf3d4599f4550ce5083349f5bab439a1e984c748105ac9ea",
+    "bytes": 403
+  },
+  "external_foundations_replay.txt": {
+    "sha256": "515e5aee56d20f58817d5af46e45b2e7bf48fc03dc2721d4eec256d81d52838a",
+    "bytes": 3439
+  },
+  "openai_foundations_sources.tar.gz": {
+    "sha256": "a65691923128caba3773cc01670c66ec5e91d21baf5a1d3e4f5e44d7d71f2e72",
+    "bytes": 3617928
+  },
+  "external/openai_foundations_closure_index.json": {
+    "sha256": "e6ff0c7a71237b681f7805d9b4e223eba7f67b6b8de6d9e1f37b916bb02fd2c0",
+    "bytes": 1310452
+  }
+}

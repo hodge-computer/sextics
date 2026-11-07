@@ -1,0 +1,123 @@
+{
+  "status": "PASS",
+  "toolchain": "Lean (version 4.33.1, x86_64-unknown-linux-gnu, commit 819816b2e0a3bf405af45ae5c7af2491d8f5bee6, Release)",
+  "compiler_binary_sha256": "e8baaa71855a616dc351028f3ad2200051b0671f423a1696a100e809302d5550",
+  "checker_binary_sha256": "84bc3e7cd6efa5bfecd1e7c37571fed9428fb2b3e16da0ddf62f2163573486d0",
+  "audit_script_sha256": "d4732c775fb63d6008b5391eefa916069a907e5616672cb07ef131bebfd8deef",
+  "import_bindings": {
+    "ProjectorCore": {
+      "source_sha256": "53fe206727b3c2918e78353508516896fb5b100d5f67d03de5c5e915cdb82526",
+      "object_sha256": "5db0be3b4ed37075b0e42067def09afcb2034ea989076885db7a336fc5dc81e6"
+    },
+    "HodgeTarget": {
+      "source_sha256": "a51532e0442d72e8ce95d6728390fac0f719287d1cf20020701625bc1b5409d9",
+      "object_sha256": "8f154cd88b4cea2f60c5fbfb3b8c7b7c9b96df8ed07df93eacb290f2db931559"
+    },
+    "SymmetricReflections": {
+      "source_sha256": "b35675cec2f4a9c683feed315fd7fb47a5c0d9d5507bc2a7cde5ffd63e73d321",
+      "object_sha256": "d2ae888b1c5c8b2bd70193c7e1d0ea1651c446a207b20d0b9dca8bb7ea9ef04b"
+    }
+  },
+  "modules": [
+    {
+      "module": "MonodromyImageSpanning",
+      "status": "PASS",
+      "source_sha256": "b0773d92739f15ceb1e534117bd46694e842b24c1d4420c33b458f797770df1a",
+      "object_sha256": "ac8304c352708092788632fb99c42e06803959b95967ccbc2b65be0f7a0b45c8",
+      "compile_receipt_sha256": "44f9e3618f97c58b809fdc84519178f160001154237578070531c3635676bda2",
+      "compiler_log_sha256": "5d03011ab73cc48ddd6aa01ff25989da954942b19ed89d43f5f39c5b4711c662",
+      "endpoint_axioms": {
+        "WeightedSexticMonodromy.orbitImageSpan_stable": [
+          "propext",
+          "Quot.sound"
+        ],
+        "WeightedSexticMonodromy.orbitImageSpan_eq_top": [
+          "propext",
+          "Quot.sound"
+        ],
+        "WeightedSexticMonodromy.finite_spanning_subset_of_span_eq_top": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "WeightedSexticMonodromy.exists_finite_translates_rightInverse": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "WeightedSexticMonodromy.exists_finite_translates_rightInverse_of_picardLefschetz": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "checker_exit_code": 0,
+      "checker_log_sha256": "ed13388269405ff723db637d53bc8c0799d882ed19a50a1542fdda6ab10ad76a",
+      "checker_command": [
+        "flock",
+        "/workspace/scratch/0d11a6a4cf8f/lean_compile.lock",
+        "leanchecker",
+        "-v",
+        "MonodromyImageSpanning"
+      ],
+      "no_sorry_or_new_axioms": true
+    },
+    {
+      "module": "SymmetricPrime",
+      "status": "PASS",
+      "source_sha256": "868e0a18a03de7dd4f5ba0a31d74a2d1c5fbd18ea46ccb232e7b14fa57d161bd",
+      "object_sha256": "ecacacbad7da2acfd993449388efc8a54c9319c5595b5a63d6cec63f2e0a97de",
+      "compile_receipt_sha256": "bac840538f5e18aed37756e9a5a808a77bd181a8cb92fa3f2b62c3a5983cd615",
+      "compiler_log_sha256": "5c27536ab6c4c247ee480f83fe020e8e732c248c55158ef1ab165944ccc601cd",
+      "endpoint_axioms": {
+        "SymmetricPrime.sectionConstant_not_mem_square": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "SymmetricPrime.planeSection_irreducible": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "SymmetricPrime.univariateF_monic": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "SymmetricPrime.specialization_is_planeSection": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "SymmetricPrime.target_irreducible": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ],
+        "SymmetricPrime.target_prime": [
+          "propext",
+          "Classical.choice",
+          "Quot.sound"
+        ]
+      },
+      "checker_exit_code": 0,
+      "checker_log_sha256": "f730ac4ba0fa4451c352caea02ab9d88d3e819084007079c98bc1b3d02611823",
+      "checker_command": [
+        "flock",
+        "/workspace/scratch/0d11a6a4cf8f/lean_compile.lock",
+        "leanchecker",
+        "-v",
+        "SymmetricPrime"
+      ],
+      "no_sorry_or_new_axioms": true
+    }
+  ],
+  "serialized_with": "lean_compile.lock",
+  "checker_scope": "leanchecker replayed each new module against its imported environment using the same Lean kernel. Imported dependencies were not replayed with --fresh; this is not an external proof checker.",
+  "mathematical_scope": "Monodromy module derives finite jointly surjective translated images and a linear section from explicit geometric-input hypotheses. SymmetricPrime proves unconditional primality of the exact protected HodgeSubmission.F. Neither module proves geometric support or the final HasCertificate.",
+  "target_prime_proved": true,
+  "geometric_support_proved": false,
+  "full_certificate_proved": false,
+  "seconds": 9.83760989899747
+}

@@ -1,0 +1,122 @@
+OPENMP NATIVE F4 VARIANT
+========================
+Separate immutable build, 7 November 2026
+
+Binary:
+    vendor/openmp_88974186e92805c0/resumable_f4_openmp
+SHA256:
+    3a74bff5469683817a3596eb7f13cc10247a503081e5fd519ec125b7bf1cd069
+
+The serial source, builder, patches and active serial binary were not modified.
+The serial source manifest was checked after this build and still matches.
+The new source is resumable_openmp_driver.c; the separate builder is
+build_openmp.py. It copies the pinned source subset, applies the existing three
+patches plus msolve_openmp_private_degree.patch, and compiles with -fopenmp in
+another content-addressed directory. No full upstream repository is required.
+The existing minimal vendor subset and licenses described in
+resumable_state_REPLAY.txt suffice. The runtime additionally links libgomp.
+
+Thread control and replay
+-------------------------
+--threads accepts an integer from1 through8 and defaults to1. The driver disables
+OpenMP dynamic team shrinking, starts a test team, and rejects a runtime that
+cannot provide the requested number. Both the requested and actual team sizes
+are printed. The selected count is passed to native md->nthrds. On state restore
+it overrides the saved count, just as the pair-batch setting does.
+
+Recommended initial parallel replay, using the matching checkpoint and sidecar:
+
+    env MALLOC_ARENA_MAX=2 OMP_WAIT_POLICY=PASSIVE OMP_STACKSIZE=4M \
+      BINARY --input previous.hcf --resume-state previous.hcf.state \
+      --output complete.hcf --checkpoint next.hcf \
+      --seconds 600 --pairs 128 --reset 1 --threads 4 --info 2
+
+Eight threads can be selected with --threads8 (pass these as two CLI arguments:
+--threads 8). The independent process/shared-memory guard remains necessary.
+This note does not claim a measured target speedup. Four threads are a sensible
+first comparison; the large target was not run by the variant's builder/tester.
+
+Memory
+------
+For the supported exact sparse finite-field F4 path (laopt2), the main dense
+scratch array uses:
+
+    8 * number_of_matrix_columns * number_of_threads bytes.
+
+The pivot pointer table and polynomial/hash storage are shared. The dense array
+is reduced back to one row before serial pivot interreduction. Final basis
+reduction explicitly uses one thread upstream. Additional live sparse-row
+allocations and runtime thread stacks are separate from this formula.
+
+The completed serial target log sparse32_state_first.log observed at most
+797081 columns. For that width, the dense scratch allocation is:
+
+    threads1:  6.081245 MiB
+    threads4: 24.324982 MiB  (+18.243736 MiB)
+    threads8: 48.649963 MiB  (+42.568718 MiB)
+
+These are exact allocation formulas evaluated at an observed width, not
+measurements of total target-process memory. A later matrix can be wider.
+The runtime stacks are configured at4MiB per worker in the validated command.
+MALLOC_ARENA_MAX=2 limits allocator arena proliferation; it helps address-space
+headroom but does not impose a global memory limit. The native checkpoint I/O
+cache-release logic remains the same as the validated serial state driver.
+
+Necessary parallel-specific repair
+----------------------------------
+In the pinned upstream matrix-to-basis converter, deg was declared outside an
+OpenMP loop but omitted from its private list. Threads could therefore race on
+the degree assigned to different output rows. The additional patch changes:
+
+    private(i, j, k)
+
+to:
+
+    private(i, j, k, deg)
+
+No other row arithmetic is changed. Primary-hash compaction and the selective
+column insertion occur outside OpenMP regions. The upstream parallel regions
+finish before the safe checkpoint boundary. PARALLEL_HASHING remains0, as in
+the pinned source. The supported path is ordinary, signature-free finite-field
+NO_TRACER F4; this is not a claim about arbitrary upstream modes.
+
+State compatibility
+-------------------
+The serial and OpenMP builds use the same560-byte md_t ABI on this machine.
+Twenty-four cross-thread checkpoint tests covered serial->4, serial->8,4->8,
+8->4,4->serial and8->serial. The sidecar's saved pending-pair count and round
+count were restored exactly; initial pair generation was skipped. The saved
+thread count was overridden by the new command. Keep each packed file and
+sidecar together, and retain the variable-order metadata for the original input.
+
+Validation
+----------
+resumable_openmp_validation_receipt.json records20 completed-basis comparisons
+at4 and8 threads, over37,101,1009,65537,1073741827, with ordinary and both tested
+block orders. They matched the frozen serial driver and independent SymPy.
+Unit, nonreduced, positive-dimensional and degree-fall examples were included.
+
+All24 cross-thread state checks also matched the reference final basis. Every
+recorded matrix-round tuple (degree, selection count, pending count, dimensions,
+new rows, zero reductions) matched the serial run in these fixtures. Every saved
+checkpoint row independently reduced to0 in the corresponding original ideal.
+Actual runtime team sizes4 and8 were checked. Test subprocesses had a1GiB
+address-space cap and used the environment shown above. No target solve was
+performed as part of these tests.
+
+Rebuild and recheck:
+
+    python build_openmp.py
+    python check_openmp.py
+
+The checker requires SymPy and the already validated serial native-state binary
+whose location is recorded in resumable_state_build_receipt.json. A rebuilt
+serial driver can supply that reference on another machine. Native build/test
+receipts and resumable_openmp_source_manifest.json contain exact source hashes.
+
+Proof scope
+-----------
+The target finite algebra and its traces remain separate computations. Small
+implementation checks do not prove the target Groebner basis, zero-dimensionality,
+source identity, or protected HasCertificate theorem. Incomplete checkpoints
+remain explicitly incomplete, even when they preserve the full native queue.

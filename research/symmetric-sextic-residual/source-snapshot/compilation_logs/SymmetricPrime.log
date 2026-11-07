@@ -1,0 +1,6 @@
+'SymmetricPrime.sectionConstant_not_mem_square' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.planeSection_irreducible' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.univariateF_monic' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.specialization_is_planeSection' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.target_irreducible' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricPrime.target_prime' depends on axioms: [propext, Classical.choice, Quot.sound]

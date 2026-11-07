@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "module": "SymmetricAffinePrime",
+  "exit_code": 0,
+  "seconds": 11.932707922998816,
+  "source_sha256": "cf614cdfeca13ccd7734e24fa21135f3cd4ef1564f4031da83a6a70eac1538de",
+  "object_sha256": "f25dbf9532aacee224754349c11216addb6c337c94922694e1b451694e5459d2",
+  "log": "/workspace/scratch/0d11a6a4cf8f/proof_attempt10/compilation_logs/SymmetricAffinePrime.log",
+  "command": [
+    "flock",
+    "/workspace/scratch/0d11a6a4cf8f/lean_compile.lock",
+    "lean",
+    "-j1",
+    "-M4096",
+    "-R",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt10",
+    "-o",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt10/SymmetricAffinePrime.olean",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt10/SymmetricAffinePrime.lean"
+  ],
+  "full_certificate_proved": false
+}

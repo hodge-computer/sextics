@@ -1,0 +1,5 @@
+'SignedSourceCharacters.equation_swapX' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.equation_swapY' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.equation_blockY' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.exact_source_residual_characters' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SignedSourceCharacters.source_residual_eq_source' depends on axioms: [propext, Classical.choice, Quot.sound]

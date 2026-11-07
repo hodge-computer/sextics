@@ -1,0 +1,117 @@
+INDEPENDENT AUDIT: INVARIANT DENOMINATORS OF DEGREE AT MOST EIGHT
+==============================================================
+
+Result
+------
+The exact CAS calculation excludes every nonzero, legal, homogeneous,
+S3(X) x S3(Y)-invariant, Y-even certificate denominator of degree at most
+eight for the protected symmetric-sextic-residual target over C. This also
+excludes such denominators with coefficients in any characteristic-zero
+subfield or algebraic extension. This is not a Lean theorem and does not
+exclude noninvariant denominators or invariant denominators of larger degree.
+No certificate is constructed.
+
+Independent reconstruction
+--------------------------
+independent_degree8_audit.py imports no polynomial routines from the original
+generator. It uses SymPy's sparse polynomial engine, with variables ordered
+r,p,q,P,Q,R so lexicographic division reduces by the leading r^2 term of
+G=7F. Rational matrix operations use FLINT. It establishes:
+
+  first matrix: 322 rows, 324 numerator and 64 denominator columns, rank 318;
+  full first-equation kernel: dimension 70;
+  pure numerator kernel: dimension 48;
+  denominator gauges G times invariant even degree-two polynomials: dimension 4;
+  eligible denominator quotient by these gauges: dimension 18.
+
+Each of the 70 supplied kernel/gauge vectors is verified directly. Its
+invariant-coordinate field is reconstructed in the complete polynomial
+E0,E1,E2 bases by Cramer's rule with exact zero remainders. Its ambient
+divergence is independently checked using the discriminant Jacobian formula.
+The complete free-module argument is explained in norm_support_scope.txt.
+The 70 vectors are independent, exhaust the first-equation kernel, and have
+the correct degrees and parities. No numerator-kernel direction is discarded.
+
+General denominator gauge
+-------------------------
+When deg D=d>=6 and B is homogeneous of degree d-6, put
+
+  D'=D+BG,  N'=N+(AB/6)epsilon.
+
+Assuming N(G)=AD, Euler's identity gives
+
+  N'(G)=AD',
+  B_D'(N')=B_D(N)+G*(B div N-N(B)+AB^2),
+
+where B_D(N)=D div N-N(D). This is a modulo-G gauge. It preserves the
+ordinary certificate equations and legality; strictness is not assumed.
+The four-dimensional degree-two B-space is retained completely. The audit
+also checks this identity for all four gauge generators against all eighteen
+eligible denominator lifts, giving 72 exact polynomial checks.
+
+Necessary quadrics
+------------------
+The auditor reconstructs the raw second-equation matrix independently,
+then orders all 864 mixed denominator/kernel columns before the 171 pure
+quadratic columns. The resulting 435 by 1035 rational matrix has rank 435;
+the mixed columns have rank 391. Direct elimination gives 44 pure rational
+quadrics, exactly matching degree8_pure_quadrics.json coefficient by
+coefficient. The 96 MB intermediate RREF JSON is not loaded or relied upon.
+
+This elimination is a necessary-condition argument: the mixed symbols
+represent ai*kj, and every row combination cancelling all of them vanishes
+at every actual certificate solution. Treating them independently cannot
+invalidate necessity. Sufficiency of these quadrics is not needed.
+
+Independent second-prime Macaulay computation
+--------------------------------------------
+independent_degree8_macaulay.py constructs the degree-four multiplication
+map using exponent vectors, a permutation of the eighteen variables,
+reversed quadrics, multiplier-first columns, and a transpose of the original
+matrix orientation. It accumulates coefficients rather than assigning them.
+
+Modulo 103 the resulting matrix has 5985 rows and 7524 columns, with rank
+5985. All rational coefficient denominators are units modulo 103. This
+independently confirms the original full-rank result modulo 101.
+
+A nonzero maximal minor modulo 103 is nonzero over Q. Consequently the
+rational degree-four multiples of the 44 quadrics span the entire space of
+degree-four polynomials in eighteen variables. Their ideal contains every
+ai^4. At any common zero over C, every ai therefore vanishes. There is no
+remaining projective denominator parameter point, including points defined
+only over algebraic extensions. This is a rank-and-ideal argument, not an
+enumeration of F_103-rational points.
+
+The zero parameter tuple means D belongs to G times the degree-two gauge
+space. Such a nonzero denominator is illegal. Thus degree eight is excluded.
+
+Extension to degrees below eight
+--------------------------------
+Let p=X0+X1+X2. This is invariant and Y-even. It is a prime linear
+polynomial, and does not divide F: at X=(1,-1,0), Y=(0,0,0), p=0 but F=2.
+Therefore p is relatively prime to F.
+
+For any putative legal invariant even D of degree d<=8, multiply D and N
+by H=p^(8-d). The new denominator is nonzero, homogeneous of degree eight,
+invariant, Y-even, and still relatively prime to F. Moreover,
+
+  (HN)(F)=A(HD),
+  B_(HD)(HN)=H^2 B_D(N).
+
+For the unnormalized certificate identity the cleared defect similarly
+multiplies by H^2. Thus either presentation produces a degree-eight
+certificate, contradicting the audited degree-eight obstruction.
+
+Receipts and replay
+-------------------
+  independent_degree8_audit.json
+  independent_degree8_macaulay_103.json
+
+Both receipts include hashes of the exact rational inputs. Run the scripts
+with Python containing SymPy and python-flint; the session's installed
+environment is /workspace/scratch/c7ccdb1e10a3/mathvenv/bin/python.
+
+The rational sparse polynomial reconstruction and finite-field rank are CAS
+computations. The separate SmallDenominatorObstruction.lean theorem proves
+the degree-at-most-three obstruction against Verify in Lean, without any
+symmetry assumption; it does not formally contain this degree-eight result.

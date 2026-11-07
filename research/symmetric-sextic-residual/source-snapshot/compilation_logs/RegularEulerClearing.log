@@ -1,0 +1,26 @@
+/workspace/scratch/0d11a6a4cf8f/proof_attempt8/RegularEulerClearing.lean:64:0: warning: automatically included section variable(s) unused in theorem `RegularEulerClearing.action_coordinate`:
+  [CharZero K]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharZero K] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt8/RegularEulerClearing.lean:69:0: warning: automatically included section variable(s) unused in theorem `RegularEulerClearing.euler_action_sextic`:
+  [CharZero K]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharZero K] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+/workspace/scratch/0d11a6a4cf8f/proof_attempt8/RegularEulerClearing.lean:76:0: warning: automatically included section variable(s) unused in theorem `RegularEulerClearing.coordinateEuler_divergence`:
+  [CharZero K]
+consider restructuring your `variable` declarations so that the variables are not in scope or explicitly omit them:
+  omit [CharZero K] in theorem ...
+
+Note: This linter can be disabled with `set_option linter.unusedSectionVars false`
+'RegularEulerClearing.divergence_is_regular' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RegularEulerClearing.correction_degree_zero' depends on axioms: [propext, Classical.choice, Quot.sound]
+'RegularEulerClearing.hasCertificate_of_regular_homogeneous_game' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'RegularEulerClearing.hasCertificate_of_exists_regular_homogeneous_game' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

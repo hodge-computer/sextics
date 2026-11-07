@@ -1,0 +1,20 @@
+{
+  "status": "OPTIONAL_PATCH_GENERATED",
+  "patch_sha256": "3576f40682c1fb7809f354fcbd08beac5ba96d9b2a14334887edd39bd30160ac",
+  "helper_sha256": "9b8f64cd7053f70f4327f14ba23ed5422ad4fddac1ae70c8c3e2652e61c8c60d",
+  "original_sources": {
+    "src/neogb/hash.c": "1cae7cab02e7a2ed35a997f391c087e6e3ff4150ec221181ff4209da2b8df3fe",
+    "src/neogb/convert.c": "06a7447bddf5a6fba0f68f974f678481ed6a75739cdb27eea0480cea3913900e",
+    "src/neogb/f4.c": "a545ffd5e4117c4cc3cba421d64d7145fa295c0befc45d5fd5d0b735b5a031a5"
+  },
+  "modified_sources": {
+    "src/neogb/hash.c": "eb876ba612d7dcde66507bfe2ec0f5b023447cf928db036bbc06de9627850123",
+    "src/neogb/convert.c": "f0941b105a4ebe712ff66405d93912e4fadfc6cfeeb51bc4ca09ec1323db8f8f",
+    "src/neogb/f4.c": "1dddf831c3816cd6c2d746a1cead7e7bb3acf158e596be4e3e18afda95143f1f"
+  },
+  "activation": "Only compute_new_elements in ordinary positive-characteristic, NO_TRACER, signature-free core_f4.",
+  "other_callers": "The original converter wrapper still performs blanket insertion. Trace, saturation and final reduction callers are unchanged.",
+  "source_tree_modified": false,
+  "compaction_patch_modified": false,
+  "correctness_gate": "Independent storage invariants and completed-basis differential checks are required before production use."
+}

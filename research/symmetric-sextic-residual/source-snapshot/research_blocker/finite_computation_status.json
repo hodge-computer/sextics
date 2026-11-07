@@ -1,0 +1,81 @@
+{
+  "status": "EXACT_REPARAMETERIZATION_AND_BOUNDED_COMPUTATIONS",
+  "beta_transform": {
+    "rho0": "-beta-rho1*r^2-rho2-rho3*s-rho4*s^2",
+    "row_identity": "G_point(beta,t)=-sum(r^e_b*s^e_d*H_e)",
+    "pivot": "a^6",
+    "coordinate_determinant": -1,
+    "equation_row_determinant": -1,
+    "incidence_Jacobian_determinant_factor": 1,
+    "audit": "finite_beta_model_receipt.json"
+  },
+  "runs": [
+    {
+      "tag": "finite_g2block",
+      "status": "PROCESS_FAILED",
+      "exit_code": -11,
+      "seconds": 57.54437559299913,
+      "measured_peak_rss_kib": 3031024,
+      "max_sampled_cgroup_bytes": 6212689920,
+      "output_bytes": 0,
+      "input_sha256": "b7532e637899a1ad926fef1cad60f4858cf6c6fd399d43db57191fa8bec1da43",
+      "binary_sha256": "0ab3b9461ce12bd8ecfd9702a661eac3188a966a470022251c30fc91a01ded0a",
+      "receipt_sha256": "b707d4797ee443e467e4e4f6a82041e6a81b0535a53f0eaac8c4e578e2f13705",
+      "ordinary_hash_reset_option_inert": true,
+      "matrix_observations": 3,
+      "last_observed_matrix": {
+        "degree": 3,
+        "selected_pairs": 2,
+        "pending_pairs": 286,
+        "rows": 6,
+        "columns": 7
+      },
+      "largest_observed_matrix": {
+        "degree": 4,
+        "selected_pairs": 65,
+        "pending_pairs": 153,
+        "rows": 1942,
+        "columns": 69375
+      },
+      "explicit_failure_diagnostics": [
+        "  4      64     284Enlarging hash table failed for esz = 33554432,",
+        "segmentation fault will follow."
+      ]
+    },
+    {
+      "tag": "finite_beta_g2first",
+      "status": "PROCESS_FAILED",
+      "exit_code": -11,
+      "seconds": 523.3914845590007,
+      "measured_peak_rss_kib": 2945524,
+      "max_sampled_cgroup_bytes": 6369845248,
+      "output_bytes": 0,
+      "input_sha256": "970d9942e1639f3929bf0ea487d66d823d8091e962fe6a7ec537fd44728ef141",
+      "binary_sha256": "0ab3b9461ce12bd8ecfd9702a661eac3188a966a470022251c30fc91a01ded0a",
+      "receipt_sha256": "4f56788c4712d33c71968b0e3290858a47e14ed3a7959d818307bb9bdf771bde",
+      "ordinary_hash_reset_option_inert": true,
+      "matrix_observations": 151,
+      "last_observed_matrix": {
+        "degree": 5,
+        "selected_pairs": 64,
+        "pending_pairs": 178729,
+        "rows": 26048,
+        "columns": 138526
+      },
+      "largest_observed_matrix": {
+        "degree": 5,
+        "selected_pairs": 64,
+        "pending_pairs": 118535,
+        "rows": 32152,
+        "columns": 319714
+      },
+      "explicit_failure_diagnostics": []
+    }
+  ],
+  "reset_path_audit": "finite_reset_path_audit.json",
+  "basis_verified": false,
+  "finite_quotient_degree_known": false,
+  "trace_values_computed": false,
+  "affine_positive_dimension_proved": false,
+  "scope": "Exact equivalent equations and documented incomplete computations. The beta run signal11 has no explicit allocation diagnostic; no definite cause is assigned."
+}

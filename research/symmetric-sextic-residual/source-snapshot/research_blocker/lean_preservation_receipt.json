@@ -1,0 +1,213 @@
+{
+  "status": "PASS",
+  "lean_sources_unchanged": 51,
+  "protected_target_sha256": "a51532e0442d72e8ce95d6728390fac0f719287d1cf20020701625bc1b5409d9",
+  "new_Lean_modules": 0,
+  "existing_sources": [
+    {
+      "file": "CertificateDenominatorGauge.lean",
+      "sha256": "0cd542b31e4371cea4e62e3419cef8c980d72a6aef642098fedbfc2ba93a168a"
+    },
+    {
+      "file": "ContactIncidenceAlgebra.lean",
+      "sha256": "c7a49ada2299c78f30b24aad541c655e4132983a49f7a96dd5102682dc5a08b7"
+    },
+    {
+      "file": "ContactIncidenceElimination.lean",
+      "sha256": "3c1e00b94be983c3820d1d6167f5bc98b8b10e2983d71bbb309140e6f36a0190"
+    },
+    {
+      "file": "CurrentVerifierBridge.lean",
+      "sha256": "1cb579c08c6cbc5c900078c688a8e5fdf303e3a09a5619cb11e26f6e38bc5d29"
+    },
+    {
+      "file": "GeneralCubicCurrent.lean",
+      "sha256": "75f1088fc6c12bcc3b919c5719395e579186d731365ce8e6be6652cb0759ec1b"
+    },
+    {
+      "file": "HodgeTarget.lean",
+      "sha256": "a51532e0442d72e8ce95d6728390fac0f719287d1cf20020701625bc1b5409d9"
+    },
+    {
+      "file": "Mod5Smoothness.lean",
+      "sha256": "5e82be18d503f3d0ce109e993f82ca6f9de01d5d8f9f81ee88710641f832d9ae"
+    },
+    {
+      "file": "ModularRank.lean",
+      "sha256": "c40d35fd312d7963108a86b3b74d5c35734a6835fb64bfd62bd612ef971087cf"
+    },
+    {
+      "file": "PackedCheckSound.lean",
+      "sha256": "47c0bdbd38545f1c9fb887f4923e4a1a26898864830b5a2ae21dccbff6d41334"
+    },
+    {
+      "file": "PackedRankData.lean",
+      "sha256": "d26f68ac3e6490faff0a6e761fb88e1ef51a9a1c081689d3ac0d3be8d5e15ecd"
+    },
+    {
+      "file": "PackedRowChecks.lean",
+      "sha256": "f2ab4945005996a0023c6ae83622b018fbdf78e320ccb4c3f20c80b9cf790ac7"
+    },
+    {
+      "file": "ProjectorCore.lean",
+      "sha256": "53fe206727b3c2918e78353508516896fb5b100d5f67d03de5c5e915cdb82526"
+    },
+    {
+      "file": "SmallDenominatorObstruction.lean",
+      "sha256": "e8371e1f453219de93e3d48590d049a3d4b13ff83697437cd520d401bf1d1ea9"
+    },
+    {
+      "file": "SymmetricCubicModel.lean",
+      "sha256": "5816d74caaac2367eff3c4d4ea6216a90c7aa25709cbab2c14f7f87f7fea2e38"
+    },
+    {
+      "file": "SymmetricReflections.lean",
+      "sha256": "b35675cec2f4a9c683feed315fd7fb47a5c0d9d5507bc2a7cde5ffd63e73d321"
+    },
+    {
+      "file": "SymmetricSmoothness.lean",
+      "sha256": "f6b8c9b5814e90805dd88e3d8e4d437c7172050a474da1316a2f5923e50f8858"
+    },
+    {
+      "file": "WeightedMatrixBindings.lean",
+      "sha256": "df9dad4227cba75d8849d66f5c7d959a07f16151d28a2011591c7027dad9094d"
+    },
+    {
+      "file": "WeightedMatrixData.lean",
+      "sha256": "eb19cfd9a42193153c37c503c18372fe7b67c6fbd662d4f4885731772b396f24"
+    },
+    {
+      "file": "WeightedPolynomialBindings.lean",
+      "sha256": "ff24cad953ff38b328523ab7170a2513e0dd34a1a379752feb4f8ff84000424a"
+    },
+    {
+      "file": "WeightedPolynomialData.lean",
+      "sha256": "28e758e207411e33fd09f3a6447a54436b8e644d454ec59418919bc2f92dcb5c"
+    },
+    {
+      "file": "WeightedPolynomialModel.lean",
+      "sha256": "8743c489bff71672b9833465ebb43f5fd452bf655a3d5371e13fc0e182346f03"
+    },
+    {
+      "file": "WeightedPolynomialOrbitBlocksHQ.lean",
+      "sha256": "31aeef834d48ed9b0d6855ea76d4f19dd48a0880dfdbad03822f11de9934f410"
+    },
+    {
+      "file": "WeightedPolynomialOrbitBlocksQ.lean",
+      "sha256": "c51459a4085dfea2726b63b0ad39b44269bed7fd48443677e8780cbec3740ffb"
+    },
+    {
+      "file": "WeightedPolynomialOrbitBlocksSource.lean",
+      "sha256": "4d3f197ad9d59870b59f5ad0bf0a0739de767a2eee358ee01363a1f5348eec6f"
+    },
+    {
+      "file": "WeightedPolynomialOrbitCompleteness.lean",
+      "sha256": "e063831e7a5756eb57885906cbaa128c0f029b6edf004f1d5f3fcf5d679e538a"
+    },
+    {
+      "file": "WeightedPolynomialOrbitEnumeration.lean",
+      "sha256": "2acf0b8c358a04fbf574b655b54efa5060b8e6052fdfd0129358068054ae9375"
+    },
+    {
+      "file": "WeightedPolynomialOrbits.lean",
+      "sha256": "0af4e34d2ad7e5d56a1d4330c58883378843bcb63d7a3a57fb997ae0aa36cca1"
+    },
+    {
+      "file": "WeightedPolynomialQuotient.lean",
+      "sha256": "0b0c89d063457f4be39dea68b77086c2ec5dccac0e151e5ce3a70efabcee1dfa"
+    },
+    {
+      "file": "WeightedPolynomialRational.lean",
+      "sha256": "e45a687729a7502550ae44038063a0bc98ad553aee7f103862b70b88f6dabcfc"
+    },
+    {
+      "file": "WeightedPolynomialRowsHQ0.lean",
+      "sha256": "bb202e7fcb313665c8f9c2e28904ba3d4a4ed48ed1c10d7199382dadec318e64"
+    },
+    {
+      "file": "WeightedPolynomialRowsHQ1.lean",
+      "sha256": "664ec7455ae2e01afc6e9af6110ed4e5f1906a8332c22db061342a49ed0aaf93"
+    },
+    {
+      "file": "WeightedPolynomialRowsHQ2.lean",
+      "sha256": "1ad043ac0ac921052ac228d30678a9fa926aefb46b43a93cb6bfe3d64f436243"
+    },
+    {
+      "file": "WeightedPolynomialRowsHQ3.lean",
+      "sha256": "f50c43bb309cb7f96778016715609193e749d5b57071d46ba9da3d8388ebf2b5"
+    },
+    {
+      "file": "WeightedPolynomialRowsHQ4.lean",
+      "sha256": "3344704b8259ca46d741b380fb663034477d12c2133305b744644cfd8f38fea3"
+    },
+    {
+      "file": "WeightedPolynomialRowsHQ5.lean",
+      "sha256": "6da7d9c46da9644f3e942ab997dccf191c83ea7254c75b08ca45ee1aadf0fbad"
+    },
+    {
+      "file": "WeightedPolynomialRowsHQ6.lean",
+      "sha256": "b616c620e5a7873afc11eff4a2fd703af48f9fa7c684b81b4c5dc8590825f724"
+    },
+    {
+      "file": "WeightedPolynomialRowsHQ7.lean",
+      "sha256": "c4f599d31984a97f2c7b4f8fc16b92bf7c31d2dc776f1c954d7295151433c8ab"
+    },
+    {
+      "file": "WeightedPolynomialRowsQ0.lean",
+      "sha256": "4dc9077b9a78dd5810486a12d266635050fcda668595b3bd9c27fa04171a4f17"
+    },
+    {
+      "file": "WeightedPolynomialRowsQ1.lean",
+      "sha256": "b110e9f12491681ca17ec08a93cbb7bdf3712de9f673d8ff744f78e6d060fc64"
+    },
+    {
+      "file": "WeightedPolynomialRowsQ10.lean",
+      "sha256": "1d8444794230694f6ee63c3f590391a17eefaf1494edc8e0eabaea818e5fe6e2"
+    },
+    {
+      "file": "WeightedPolynomialRowsQ11.lean",
+      "sha256": "8a5f2bdb988745b09574f0383d76cf049cc1dd929e208228af866da198c41913"
+    },
+    {
+      "file": "WeightedPolynomialRowsQ2.lean",
+      "sha256": "3c63935b4a639515d0e990281bb0315d4283c94fc53615fc3c014d94db868fc4"
+    },
+    {
+      "file": "WeightedPolynomialRowsQ3.lean",
+      "sha256": "0b23055b9c152674bddbde27134f07803720db120022aed921f831c746410fd2"
+    },
+    {
+      "file": "WeightedPolynomialRowsQ4.lean",
+      "sha256": "134f98c9284c7df93709b0899a46315e94adff3d743636d7d4a8b030ca0d3c95"
+    },
+    {
+      "file": "WeightedPolynomialRowsQ5.lean",
+      "sha256": "ae2f66231a1256b92992740138f42fa186e8cde1e9c900f7815f99a6e40ba22d"
+    },
+    {
+      "file": "WeightedPolynomialRowsQ6.lean",
+      "sha256": "ba5870898c5ae2767dddfad709e71079b59ff9bb561770013da1d52735d90843"
+    },
+    {
+      "file": "WeightedPolynomialRowsQ7.lean",
+      "sha256": "ed96a0ce4093a957f1c25bfcf6eb15960b0fd45668f4f748f1a8336e1c2e9fc1"
+    },
+    {
+      "file": "WeightedPolynomialRowsQ8.lean",
+      "sha256": "b57393f8ed6cf0ac094cfa182ab8a4e25c9fbf1fac88f0a26c738e1f58fe33af"
+    },
+    {
+      "file": "WeightedPolynomialRowsQ9.lean",
+      "sha256": "f56f0223ad4254c66c3f35ab3daefa997185d749e7f730ce81d88e75a8e011b9"
+    },
+    {
+      "file": "WeightedPolynomialSymmetry.lean",
+      "sha256": "265a535a9406ec6b019ac54fcba75e73eae5d4a56816f58579a2f7cafa0d95e4"
+    },
+    {
+      "file": "WeightedRank.lean",
+      "sha256": "7e6da78e0de8b8de348a80e4c5c9ae2eed3e673e0aa0fd3e07962f3b86faccce"
+    }
+  ],
+  "scope": "Byte-for-byte preservation against the previously saved manifest; not a new compilation or a completed theorem."
+}

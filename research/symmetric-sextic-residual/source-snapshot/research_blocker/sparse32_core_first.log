@@ -1,0 +1,294 @@
+[native] runtime_avx2=1 runtime_avx512f=1
+
+--------------- INPUT DATA ---------------
+#variables                      38
+#equations                      38
+#invalid equations               0
+field characteristic            37
+homogeneous input?               0
+signature-based computation      0
+monomial order                 DRL
+basis hash table resetting       1
+linear algebra option            2
+initial hash table size      16384 (2^14)
+max pair selection              64
+reduce gb                        1
+#threads                         1
+info level                       2
+generate pbm files               0
+------------------------------------------
+
+Legend for f4 information
+--------------------------------------------------------
+deg       current degree of pairs selected in this round
+sel       number of pairs selected in this round
+pairs     total number of pairs in pair list
+mat       matrix dimensions (# rows x # columns)
+density   density of the matrix
+new data  # new elements for basis in this round
+          # zero reductions during linear algebra
+time(rd)  time of the current f4 round in seconds given
+          for real and cpu time
+--------------------------------------------------------
+
+deg     sel   pairs        mat          density            new data         time(rd) in sec (real|cpu)
+------------------------------------------------------------------------------------------------------
+[compact] live 1021 -> 576; capacity 8192 -> 2048; secondary capacity 256
+[progress] completed_rounds=0 rows=38 pure_power_variables=7/38 unit_ideal=0 primary=576 secondary_capacity=256 elapsed=0.000
+  3       3     107       6 x 22         20.45%        3 new       0 zero[columns] selected 19 of 19; primary live 591
+         0.00 | 0.00         
+[compact] live 702 -> 594; capacity 2048 -> 2048; secondary capacity 256
+  4      64     107    1207 x 4873        0.21%       64 new       0 zero[columns] selected 3437 of 3730; primary live 3825
+         0.01 | 0.01         
+[compact] live 7446 -> 4327; capacity 8192 -> 8192; secondary capacity 8192
+  3       2     665       6 x 7          42.86%        0 new       2 zero         0.00 | 0.00         
+[compact] live 4327 -> 4326; capacity 8192 -> 8192; secondary capacity 8192
+  4      43     663    1296 x 5489        0.34%       40 new       3 zero[columns] selected 4065 of 4236; primary live 5984
+         0.03 | 0.03         
+[compact] live 9162 -> 6284; capacity 16384 -> 16384; secondary capacity 8192
+  5      65    1048    1257 x 14909       0.58%       34 new      31 zero[columns] selected 9146 of 13717; primary live 14438
+         0.06 | 0.06         
+[compact] live 19306 -> 15011; capacity 32768 -> 32768; secondary capacity 16384
+  4      18    1631     299 x 980         1.04%        9 new       9 zero[columns] selected 484 of 699; primary live 15381
+         0.00 | 0.00         
+[compact] live 16843 -> 15518; capacity 32768 -> 32768; secondary capacity 16384
+  4       4    1766      26 x 92         13.84%        2 new       2 zero[columns] selected 25 of 70; primary live 15518
+         0.00 | 0.00         
+[compact] live 15880 -> 15562; capacity 32768 -> 32768; secondary capacity 16384
+  4       8    1810      52 x 155         7.94%        3 new       5 zero[columns] selected 32 of 111; primary live 15575
+         0.00 | 0.00         
+[compact] live 16115 -> 15636; capacity 32768 -> 32768; secondary capacity 16384
+  5      64    1871    1835 x 12074       0.29%       27 new      37 zero[columns] selected 6744 of 10303; primary live 19752
+         0.02 | 0.02         
+[compact] live 24167 -> 20199; capacity 32768 -> 32768; secondary capacity 16384
+[progress] completed_rounds=9 rows=220 pure_power_variables=7/38 unit_ideal=0 primary=20199 secondary_capacity=16384 elapsed=0.126
+  5      64    2367    1388 x 11094       0.49%       25 new      39 zero[columns] selected 7240 of 9770; primary live 23531
+         0.02 | 0.02         
+[compact] live 28300 -> 23970; capacity 32768 -> 32768; secondary capacity 16384
+  5      64    2832    1958 x 19105       0.31%       50 new      14 zero[columns] selected 14510 of 17211; primary live 34492
+         0.05 | 0.05         
+[compact] live 45246 -> 35441; capacity 65536 -> 65536; secondary capacity 32768
+  5      64    3840    4266 x 37984       0.19%       56 new       8 zero[columns] selected 24074 of 33782; primary live 47165
+         0.11 | 0.11         
+[compact] live 61575 -> 48091; capacity 65536 -> 65536; secondary capacity 65536
+  5      64    4823    1539 x 24114       0.54%       60 new       4 zero[columns] selected 21775 of 22639; primary live 62266
+         0.11 | 0.11         
+[compact] live 79535 -> 63196; capacity 131072 -> 131072; secondary capacity 65536
+  5      64    5845    2446 x 33067       0.84%       64 new       0 zero[columns] selected 29296 of 30685; primary live 70574
+         0.24 | 0.24         
+[compact] live 90393 -> 70943; capacity 131072 -> 131072; secondary capacity 65536
+  5      64    6393    2124 x 34338       1.71%       57 new       7 zero[columns] selected 28501 of 32278; primary live 72774
+         0.26 | 0.26         
+[compact] live 92191 -> 73180; capacity 131072 -> 131072; secondary capacity 65536
+  5      64    6939    2788 x 37761       1.81%       50 new      14 zero[columns] selected 32074 of 35037; primary live 75466
+         0.32 | 0.32         
+[compact] live 95648 -> 75853; capacity 131072 -> 131072; secondary capacity 65536
+  5      64    7516    2413 x 36313       2.29%       53 new      11 zero[columns] selected 30733 of 33964; primary live 77106
+         0.32 | 0.32         
+[compact] live 99033 -> 77495; capacity 131072 -> 131072; secondary capacity 65536
+  5      64    8069    2647 x 38528       2.75%       45 new      19 zero[columns] selected 33090 of 35945; primary live 78150
+         0.53 | 0.53         
+[compact] live 97373 -> 78335; capacity 131072 -> 131072; secondary capacity 65536
+  5      61    8454    1858 x 38325       4.31%       36 new      25 zero[columns] selected 31387 of 36528; primary live 78571
+         0.51 | 0.51         
+[compact] live 96886 -> 78874; capacity 131072 -> 131072; secondary capacity 131072
+[progress] completed_rounds=19 rows=716 pure_power_variables=7/38 unit_ideal=0 primary=78874 secondary_capacity=131072 elapsed=2.608
+  6      64    8878    4319 x 30720       0.14%        6 new      58 zero[columns] selected 10867 of 26465; primary live 85215
+         0.12 | 0.12         
+[compact] live 89049 -> 85503; capacity 131072 -> 131072; secondary capacity 131072
+  6      64    9153    6913 x 37225       0.11%        9 new      55 zero[columns] selected 13074 of 30376; primary live 90912
+         0.16 | 0.16         
+[compact] live 96611 -> 91308; capacity 131072 -> 131072; secondary capacity 131072
+  6      64    9534    6679 x 61362       0.13%       28 new      36 zero[columns] selected 42012 of 54747; primary live 104266
+         0.30 | 0.30         
+[compact] live 121536 -> 105065; capacity 262144 -> 262144; secondary capacity 131072
+  6      64   10348    4502 x 47454       0.20%       10 new      54 zero[columns] selected 23093 of 43016; primary live 106124
+         0.24 | 0.24         
+[compact] live 111058 -> 106239; capacity 262144 -> 262144; secondary capacity 131072
+  6      65   10471   11818 x 83251       0.10%       21 new      44 zero[columns] selected 45396 of 71498; primary live 121709
+         0.51 | 0.51         
+[compact] live 135821 -> 122444; capacity 262144 -> 262144; secondary capacity 131072
+  6      64   11238    8799 x 66527       0.12%       18 new      46 zero[columns] selected 30445 of 57792; primary live 134013
+         0.36 | 0.36         
+[compact] live 145281 -> 134542; capacity 262144 -> 262144; secondary capacity 131072
+  6      64   11825   18642 x 155926      0.09%       28 new      36 zero[columns] selected 107026 of 137348; primary live 193169
+         1.16 | 1.16         
+[compact] live 210466 -> 193522; capacity 262144 -> 262144; secondary capacity 262144
+  6      64   12214   15338 x 138648      0.26%       32 new      32 zero[columns] selected 93980 of 123374; primary live 196056
+         1.37 | 1.37         
+[compact] live 215124 -> 196421; capacity 524288 -> 524288; secondary capacity 262144
+  6      64   12621   21933 x 162026      0.20%       28 new      36 zero[columns] selected 113787 of 140157; primary live 208996
+         1.74 | 1.73         
+[compact] live 226948 -> 209431; capacity 524288 -> 524288; secondary capacity 262144
+  6      64   13104   15712 x 115083      0.26%        8 new      56 zero[columns] selected 44215 of 99435; primary live 216662
+         0.97 | 0.97         
+[compact] live 223019 -> 216949; capacity 524288 -> 524288; secondary capacity 262144
+[progress] completed_rounds=29 rows=904 pure_power_variables=7/38 unit_ideal=0 primary=216949 secondary_capacity=262144 elapsed=9.567
+  6      64   13385   10303 x 74818       0.12%        7 new      57 zero[columns] selected 33912 of 64579; primary live 220926
+         0.38 | 0.38         
+[compact] live 226346 -> 221174; capacity 524288 -> 524288; secondary capacity 262144
+  6      64   13629   12036 x 161265      0.15%       32 new      32 zero[columns] selected 99604 of 149293; primary live 254747
+         0.95 | 0.95         
+[compact] live 279514 -> 255424; capacity 524288 -> 524288; secondary capacity 262144
+  6      64   14352   26984 x 248223      0.09%       35 new      29 zero[columns] selected 175201 of 221303; primary live 313432
+         1.80 | 1.80         
+[compact] live 341504 -> 314168; capacity 524288 -> 524288; secondary capacity 524288
+  6      64   15139   26437 x 253290      0.09%       49 new      15 zero[columns] selected 196402 of 226917; primary live 339137
+         2.02 | 2.01         
+[compact] live 377174 -> 339855; capacity 524288 -> 524288; secondary capacity 524288
+  6      64   15906   20516 x 223059      0.10%       49 new      15 zero[columns] selected 173524 of 202607; primary live 345162
+         1.82 | 1.82         
+[compact] live 379078 -> 345880; capacity 524288 -> 524288; secondary capacity 524288
+  6      64   16723   20650 x 224421      0.18%       29 new      35 zero[columns] selected 109233 of 203835; primary live 346003
+         2.21 | 2.21         
+[compact] live 367025 -> 346317; capacity 524288 -> 524288; secondary capacity 524288
+  6      64   17095   15137 x 148404      0.48%       12 new      52 zero[columns] selected 109180 of 133331; primary live 346409
+         2.12 | 2.12         
+[compact] live 356831 -> 346584; capacity 524288 -> 524288; secondary capacity 524288
+  6      64   17298   15615 x 153635      0.49%       10 new      54 zero[columns] selected 93308 of 138084; primary live 346584
+         2.15 | 2.15         
+[compact] live 354912 -> 346696; capacity 524288 -> 524288; secondary capacity 524288
+  6      64   17433   15401 x 155190      0.49%        6 new      58 zero[columns] selected 10793 of 139853; primary live 346836
+         2.33 | 2.33         
+[compact] live 351970 -> 346933; capacity 524288 -> 524288; secondary capacity 524288
+  6      65   17523   20609 x 213818      0.23%        4 new      61 zero[columns] selected 45694 of 193274; primary live 350444
+         2.66 | 2.66         
+[compact] live 354671 -> 350582; capacity 524288 -> 524288; secondary capacity 524288
+[progress] completed_rounds=39 rows=1137 pure_power_variables=7/38 unit_ideal=0 primary=350582 secondary_capacity=524288 elapsed=28.078
+  6      64   17641    9153 x 133482      0.10%       19 new      45 zero[columns] selected 103149 of 124393; primary live 354860
+         0.90 | 0.90         
+[compact] live 372129 -> 355236; capacity 524288 -> 524288; secondary capacity 524288
+  6      64   18024    7879 x 113786      0.09%       28 new      36 zero[columns] selected 89420 of 105971; primary live 373358
+         0.75 | 0.75         
+[compact] live 397539 -> 373736; capacity 524288 -> 524288; secondary capacity 524288
+  6      64   18442   21104 x 153840      0.05%       27 new      37 zero[columns] selected 33947 of 132800; primary live 379187
+         1.00 | 1.00         
+[compact] live 404057 -> 379813; capacity 524288 -> 524288; secondary capacity 524288
+  6      64   19116   32987 x 351576      0.08%       36 new      28 zero[columns] selected 262747 of 318653; primary live 450934
+         4.02 | 4.02         
+[compact] live 482808 -> 451423; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   19679   33943 x 360416      0.12%       52 new      12 zero[columns] selected 274197 of 326537; primary live 462049
+         5.33 | 5.33         
+[compact] live 507987 -> 462605; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   20365   22606 x 229897      0.31%       36 new      28 zero[columns] selected 165675 of 207355; primary live 467115
+         4.60 | 4.60         
+[compact] live 500438 -> 467491; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   20812   22624 x 226078      0.40%       22 new      42 zero[columns] selected 163730 of 203518; primary live 468046
+         4.90 | 4.90         
+[compact] live 489310 -> 468222; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      65   21041   22610 x 225207      0.43%       15 new      50 zero[columns] selected 118813 of 202662; primary live 468294
+         5.52 | 5.52         
+[compact] live 483675 -> 468442; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   21225   22631 x 208271      0.32%        4 new      60 zero[columns] selected 41554 of 185704; primary live 468442
+         4.11 | 4.11         
+[compact] live 472559 -> 468441; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   21225    6954 x 42659       0.22%       17 new      47 zero[columns] selected 28263 of 35769; primary live 492118
+         0.51 | 0.51         
+[compact] live 510049 -> 492387; capacity 1048576 -> 1048576; secondary capacity 524288
+[progress] completed_rounds=49 rows=1393 pure_power_variables=7/38 unit_ideal=0 primary=492387 secondary_capacity=524288 elapsed=59.733
+  6      64   21482    3973 x 66294       1.64%       44 new      20 zero[columns] selected 57862 of 62385; primary live 518051
+         1.14 | 1.14         
+[compact] live 564486 -> 518702; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   22175   12828 x 130160      0.20%       62 new       2 zero[columns] selected 105645 of 117396; primary live 536294
+         1.28 | 1.28         
+[compact] live 604528 -> 537588; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   23590   12455 x 58966       0.10%       44 new      20 zero[columns] selected 37599 of 46575; primary live 541445
+         0.57 | 0.57         
+[compact] live 588411 -> 542173; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   24458    5643 x 59015       1.55%       52 new      12 zero[columns] selected 51520 of 53436; primary live 543560
+         1.10 | 1.10         
+[compact] live 603120 -> 544006; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   25012    6443 x 70117       0.95%       42 new      22 zero[columns] selected 46420 of 63738; primary live 544223
+         1.21 | 1.21         
+[compact] live 594876 -> 545016; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   25867   11410 x 120743      0.36%       53 new      11 zero[columns] selected 96652 of 109397; primary live 546138
+         1.59 | 1.59         
+[compact] live 613772 -> 547629; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   27437   14905 x 92557       0.54%       18 new      46 zero[columns] selected 60768 of 77716; primary live 547648
+         1.78 | 1.78         
+[compact] live 570993 -> 547960; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   27766   18311 x 131452      0.36%       30 new      34 zero[columns] selected 96570 of 113205; primary live 548246
+         2.00 | 2.00         
+[compact] live 589574 -> 548996; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   28571   13492 x 76165       0.06%       24 new      40 zero[columns] selected 42680 of 62737; primary live 565138
+         0.71 | 0.71         
+[compact] live 601302 -> 566102; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   29551    3120 x 92992       0.74%       55 new       9 zero[columns] selected 83181 of 89936; primary live 611889
+         1.25 | 1.25         
+[compact] live 678517 -> 612891; capacity 1048576 -> 1048576; secondary capacity 524288
+[progress] completed_rounds=59 rows=1817 pure_power_variables=7/38 unit_ideal=0 primary=612891 secondary_capacity=524288 elapsed=72.373
+  6      64   30700    5651 x 97357       1.05%       48 new      16 zero[columns] selected 73732 of 91770; primary live 615240
+         1.66 | 1.66         
+[compact] live 679101 -> 615700; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   31295    5650 x 58806       1.99%       32 new      32 zero[columns] selected 51738 of 53220; primary live 615980
+         1.38 | 1.38         
+[compact] live 663951 -> 616267; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   31679    4518 x 53476       2.32%       29 new      35 zero[columns] selected 44076 of 49022; primary live 616268
+         1.17 | 1.17         
+[compact] live 655829 -> 616671; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   32182    6947 x 113681      1.08%       33 new      31 zero[columns] selected 92067 of 106798; primary live 649855
+         1.92 | 1.92         
+[compact] live 700799 -> 650904; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   33332    3270 x 94861       0.93%       58 new       6 zero[columns] selected 84485 of 91655; primary live 680714
+         1.33 | 1.33         
+[compact] live 757807 -> 681592; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   34422    5618 x 58707       1.76%       44 new      20 zero[columns] selected 51786 of 53153; primary live 683112
+         1.29 | 1.29         
+[compact] live 748427 -> 683439; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   34928    5258 x 58158       2.17%       31 new      33 zero[columns] selected 50993 of 52964; primary live 683479
+         1.36 | 1.36         
+[compact] live 732840 -> 683779; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   35351    4914 x 54157       2.23%       28 new      36 zero[columns] selected 45557 of 49307; primary live 683780
+         1.39 | 1.39         
+[compact] live 725027 -> 684136; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   35838   11320 x 219337      0.65%       36 new      28 zero[columns] selected 191401 of 208081; primary live 748955
+         4.94 | 4.94         
+[compact] live 809646 -> 749461; capacity 1048576 -> 1048576; secondary capacity 524288
+  6      64   36410   73204 x 571296      0.08%       60 new       4 zero[columns] selected 475299 of 498156; primary live 1067145
+        11.96 | 11.96        
+[compact] live 1173021 -> 1068285; capacity 2097152 -> 2097152; secondary capacity 1048576
+[progress] completed_rounds=69 rows=2216 pure_power_variables=7/38 unit_ideal=0 primary=1068285 secondary_capacity=1048576 elapsed=100.847
+  6      64   37637   20648 x 269958      0.26%       55 new       9 zero[columns] selected 206563 of 249374; primary live 1116858
+         5.50 | 5.50         
+[compact] live 1216312 -> 1118127; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6      64   38961    7027 x 233892      0.55%       59 new       5 zero[columns] selected 175056 of 226929; primary live 1129602
+         4.47 | 4.47         
+[compact] live 1242587 -> 1131492; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6      64   40921   32117 x 385092      0.21%       36 new      28 zero[columns] selected 218849 of 353039; primary live 1155874
+         8.67 | 8.67         
+[compact] live 1225138 -> 1156502; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6      64   41602   21625 x 414380      0.23%       59 new       5 zero[columns] selected 361518 of 392819; primary live 1177841
+         8.01 | 8.01         
+[compact] live 1285386 -> 1179124; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6      64   42965   16421 x 426106      0.41%       63 new       1 zero[columns] selected 377777 of 409749; primary live 1189526
+        10.00 | 10.00        
+[compact] live 1297157 -> 1190362; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6      64   43925    7736 x 380112      1.02%       62 new       2 zero[columns] selected 352259 of 372440; primary live 1194606
+        10.50 | 10.50        
+[compact] live 1307096 -> 1195358; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6      64   44885   33784 x 549984      0.31%       58 new       6 zero[columns] selected 442970 of 516264; primary live 1212759
+        17.58 | 17.58        
+[compact] live 1320448 -> 1213307; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6      65   45585   20502 x 502073      0.47%       58 new       7 zero[columns] selected 390219 of 481636; primary live 1214470
+        16.49 | 16.49        
+[compact] live 1329370 -> 1215461; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6      64   46760   28296 x 256772      0.39%       41 new      23 zero[columns] selected 201511 of 228540; primary live 1216500
+         8.77 | 8.77         
+[compact] live 1297990 -> 1217087; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6      65   47470   31084 x 277796      0.50%       54 new      11 zero[columns] selected 218471 of 246777; primary live 1218233
+        12.59 | 12.59        
+[compact] live 1320981 -> 1218842; capacity 2097152 -> 2097152; secondary capacity 1048576
+[progress] completed_rounds=79 rows=2761 pure_power_variables=7/38 unit_ideal=0 primary=1218842 secondary_capacity=1048576 elapsed=203.538
+  6      64   48265   36474 x 289521      0.53%       37 new      27 zero[columns] selected 220059 of 253111; primary live 1219395
+        16.44 | 16.44        
+[compact] live 1294141 -> 1219672; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6      66   48642   42514 x 602695      0.29%       40 new      26 zero[columns] selected 475192 of 560247; primary live 1222875
+        27.34 | 27.34        
+[compact] live 1304786 -> 1223265; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6      64   49180   31644 x 336885      0.65%       29 new      35 zero[columns] selected 226460 of 305305; primary live 1227731
+        21.67 | 21.67        
+[compact] live 1289521 -> 1227931; capacity 2097152 -> 2097152; secondary capacity 1048576
+  6      65   49491   69801 x 957590      0.17%       34 new      31 zero[columns] selected 780290 of 887854; primary live 1295933
+        42.25 | 42.24        
+[compact] live 1369901 -> 1296326; capacity 2097152 -> 2097152; secondary capacity 2097152
+{"status":"CHECKPOINT","complete":false,"unit_ideal":false,"variables":38,"prime":37,"generators":2939,"monomials":1252479,"terms":131940444,"original_generators":38,"seconds":313.412528,"peak_rss_kib":1412900}

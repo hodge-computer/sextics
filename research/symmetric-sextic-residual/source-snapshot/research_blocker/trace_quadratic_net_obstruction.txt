@@ -1,0 +1,124 @@
+NO TERNARY QUADRATIC NET CONTAINING q REPRESENTS THE FERMAT SEXTIC
+================================================================
+
+Theorem
+-------
+Let q=xy+xz+yz and f=x^6+y^6+z^6. There is no complex vector space W of
+ternary quadratic forms, of dimension at most3, such that q belongs to W
+and f is a homogeneous cubic polynomial in elements of W.
+
+This is a general obstruction, not a search restricted to symmetric nets.
+The proof uses the accompanying exhaustive finite certificate. It does not
+assert that the original sextic certificate is impossible.
+
+1. Restrict to the fixed smooth conic
+-------------------------------------
+The map
+
+    [u:v] -> [u(u+v):v(u+v):-uv]
+
+parametrizes q=0. Its three coordinates never vanish simultaneously, and
+substitution verifies q=0. Restricting a ternary quadratic to this conic
+gives a binary quartic. The restricted sextic is the binary degree12 form
+
+    F12(u,v)=(u^6+v^6)(u+v)^6+u^6v^6.
+
+In the v=1 chart its monic polynomial is
+
+    F12(t,1)=t^12+6t^11+15t^10+20t^9+15t^8+6t^7+3t^6
+              +6t^5+15t^4+20t^3+15t^2+6t+1.
+
+Its value at [u:v]=[1:0] is1, so no root is at infinity.
+
+If W has the asserted property, choose its basis beginning with q and
+complete it to q,Q1,Q2 if necessary. On q=0, the restricted f is a binary
+cubic in the two quartics A=Q1|q and B=Q2|q. Over C that binary cubic factors
+into three linear forms. Consequently F12 is a product of three quartics
+lying in the two-dimensional space spanned by A and B.
+
+The good-prime calculation below also proves F12 is squarefree in
+characteristic zero. Therefore each quartic factor has four distinct roots,
+their three root sets are disjoint, and the three quartic coefficient vectors
+are linearly dependent. None has a root at infinity, so all may be normalized
+to monic univariate quartics. It is enough to exclude EVERY partition of the
+twelve roots into three groups of four with linearly dependent monic quartics.
+
+2. The exact good-prime certificate
+-----------------------------------
+The prime1459 gives the following twelve DISTINCT roots of F12(t,1):
+
+    41,188,426,550,633,660,798,825,908,1032,1270,1417.
+
+The verifier checks primality by trial division and multiplies all twelve
+linear factors, recovering every coefficient of F12 modulo1459. Thus this
+is a complete squarefree factorization, not a partial root list.
+
+There are
+
+    12!/(4!^3*3!) = choose(11,3)*choose(7,3) = 5775
+
+unordered partitions. The verifier enumerates them without repetition: the
+first group contains root index0; the second contains the least remaining
+index; the third is the complement.
+
+For each partition let a,b,c be the coefficient vectors of its three monic
+quartics. Since their leading coefficients are all1, their rank is less
+than3 exactly when the two four-coordinate vectors a-c and b-c are
+proportional. For EVERY one of the5775 partitions the verifier supplies a
+nonzero2-by-2 minor of those difference vectors. Thus every triple has
+rank3 over F1459.
+
+The complete list of nonzero minor witnesses is stored in
+trace_quadratic_net_certificate.json. The pure-stdlib program
+trace_quadratic_net_obstruction.py verifies the integer conic substitution,
+the complete modular factorization, the partition count and all5775 minors.
+
+3. Why this proves nonexistence over C
+--------------------------------------
+Let L be a number field containing all roots of the monic integer polynomial
+F12. Its roots are algebraic integers. A monic quartic whose roots are a
+four-element subset therefore also has algebraic-integer coefficients.
+
+If a dependent triple existed over C, its monic factors would be precisely
+three such root-subset polynomials. Their3-by-3 coefficient minors would
+vanish as algebraic integers. Reduce at any prime ideal of L above1459.
+Since the polynomial splits into12 distinct roots modulo1459, the reductions
+of the12 characteristic-zero roots remain distinct and exhaust the displayed
+Fp roots. The three root subsets reduce to one of the5775 partitions.
+
+Every zero algebraic-integer minor reduces to zero. This would give a
+dependent quartic triple over F1459, contradicting the exhaustive nonzero
+minor certificate. Hence no dependent triple exists over C, and the claimed
+quadratic net cannot exist. No numerical approximation, heuristic modular
+lifting, or degree assumption about a Groebner basis is used.
+
+4. Consequence for the actual symmetric sextic
+----------------------------------------------
+Write qX=X0X1+X0X2+X1X2 and qY=Y0Y1+Y0Y2+Y1Y2. The protected target is
+
+    F=sum Xi^6 + sum Yi^6 + (5/7)qX^2*qY + (10/7)qX*qY^2.
+
+Suppose F=G(X,Q0(Y),Q1(Y),Q2(Y)), with G of weighted degree6 and the Q's
+quadratic. Its coefficient of X0^2*X1^2 is (5/7)qY. In a weighted degree6
+expression, that coefficient must be linear in the Q's. Thus qY belongs to
+their net. Setting X=0 also expresses the Fermat sextic sum Yi^6 as a cubic
+in that net. The theorem above is a contradiction.
+
+After interchanging X and Y, the coefficient of Y0^2*Y1^2 is (10/7)qX, giving
+the same contradiction. The conclusion allows arbitrary nets and arbitrary
+linear changes within either block, because pulling such a net back gives
+a net in the original variables. It does not cover a coordinate change that
+mixes the two blocks or a different support construction.
+
+This rules out direct application through either original block of the
+quadratic-net theorem in the new upstream source:
+
+https://github.com/hodge-computer/sextics/blob/a2716a5d55e176ae5f999483b4b3115831385216/docs/03c-quadratic-nets.md
+
+Reproduction
+------------
+    python trace_quadratic_net_obstruction.py
+
+Only the Python standard library is required. A successful receipt proves
+this specific nonexistence theorem. It is not a proof of the original target,
+and it is not a proof that the original target is unsolvable.

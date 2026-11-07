@@ -1,0 +1,107 @@
+{
+  "status": "PASS",
+  "coefficient_field": "Q",
+  "base_specialization": {
+    "lambda": 1,
+    "r": 1,
+    "s": 1
+  },
+  "clearing_denominator": "G_w(alpha^2,beta)",
+  "point_cubic_discriminant_at_alpha_one": "-305637348492/28561",
+  "point_cubic_squarefree_over_Q_alpha": true,
+  "reduction_equations": [
+    "G(alpha^2,beta)=0",
+    "G_w Y+2 alpha G_x Z+U G_s-V G_r=0"
+  ],
+  "motion_remainders_zero": true,
+  "source_rows": 9,
+  "monomial_columns": 27,
+  "exact_rank": 8,
+  "independent_row_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "nonzero_minor_column_monomials": [
+    [
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      1,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      2,
+      0,
+      0,
+      1
+    ],
+    [
+      1,
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      1,
+      1,
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      1,
+      2,
+      0,
+      1,
+      0
+    ]
+  ],
+  "nonzero_minor": "2830222169873619447281513357706626644368269561856000000000000/7056410014866816666030739693",
+  "unique_relation_vector": [
+    "0",
+    "0",
+    "0",
+    "0",
+    "-5316/2291",
+    "0",
+    "0",
+    "0",
+    "1"
+  ],
+  "target_obeys_unique_relation": true,
+  "generic_conclusion": "The nine universal source coefficients have exactly one coefficient-field linear relation over Q(lambda,r,s); the known highest-coefficient relation supplies the upper bound and this exact nonzero specialized minor supplies the lower bound.",
+  "scope": "This rules out further linear dependencies derived solely from the generic point and motion equations. Contact-family-specific trace cancellations remain possible and are not tested here.",
+  "full_trace_evaluated": false,
+  "full_certificate_proved": false,
+  "script_sha256": "3be3b94923b428ae9dce8aa85a0c11cfab228b6418ac24e2ce35da6c98aa6fb7",
+  "seconds": 0.8850381939992076
+}

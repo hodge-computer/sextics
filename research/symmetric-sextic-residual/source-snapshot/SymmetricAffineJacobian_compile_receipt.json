@@ -1,0 +1,22 @@
+{
+  "status": "PASS",
+  "module": "SymmetricAffineJacobian",
+  "exit_code": 0,
+  "seconds": 10.410435471996607,
+  "source_sha256": "7f6a7af5b7fb722defaca0e70919733024369ab306637b03a5371ed23a285c14",
+  "object_sha256": "294c85e1fdd47766a8a1f21705fb96eefbd249f936246420cd77c019419544ff",
+  "log": "/workspace/scratch/0d11a6a4cf8f/proof_attempt10/compilation_logs/SymmetricAffineJacobian.log",
+  "command": [
+    "flock",
+    "/workspace/scratch/0d11a6a4cf8f/lean_compile.lock",
+    "lean",
+    "-j1",
+    "-M4096",
+    "-R",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt10",
+    "-o",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt10/SymmetricAffineJacobian.olean",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt10/SymmetricAffineJacobian.lean"
+  ],
+  "full_certificate_proved": false
+}

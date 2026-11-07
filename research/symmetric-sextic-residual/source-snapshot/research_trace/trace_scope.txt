@@ -1,0 +1,81 @@
+SCOPE OF THE REQUESTED CANONICAL TRACE COMPUTATION
+
+No individual full normalized trace among the nine requested coefficient
+functions has been evaluated in this subtask. No value has been inferred
+from a single contact, sampled contacts, a sign orbit, or an incomplete
+Groebner basis.
+
+The nine equations in contact_forms_global_residue.json are CANDIDATE source
+conditions for the specifically constructed eta_R = tau(R dh). They have
+never been proved to hold. The exact regularity and nonzero-form certificates
+prove that this is an available, nonzero closed form for the prescribed
+source. They do not prove that its pushforward is that same source.
+
+The public norm-contact argument itself distinguishes these statements:
+the composition Gamma_* Gamma^* must be inverted on the relevant Hodge
+sector. The actual eta_R used in the circuit has not been shown to include
+that inverse. The affine moving-current formula also needs its exact source
+comparison; cohomological support alone does not supply it. A nontrivial
+constant combination of canonical forms or an exact differential correction
+may be needed. A multiplier depending arbitrarily on r,s is not justified
+by closedness.
+
+ONE UNCONDITIONAL COMPUTED RELATION
+
+Write the monic cubic as
+  G=w^3+a(x)w^2+b(x)w+c(x),
+and let a1,b2,c3 denote the leading coefficients of a,b,c. For this exact
+target, all three depend only on (s,lambda). Define
+  C1=2*b2^2*(d_s a1)-(a1*b2+3*c3)*(d_s b2)+2*b2*(d_s c3),
+  C2=(2*a1*b2-6*c3)*(d_s a1)-a1^2*(d_s b2)+2*a1*(d_s c3).
+The general-cubic source formula gives, before taking any trace,
+  [x^4]M1=C1*alpha*U,
+  [x^3]M2=C2*alpha*U.
+Consequently the exact full trace relation
+  C2*<[x^4]M1>-C1*<[x^3]M2>=0
+is established. Here brackets mean the same normalized trace as in the
+requested finite algebra. Both requested highest target coefficients are
+zero, so these two candidate conditions reduce to the single moment
+  m=<alpha*U>=0.
+That moment's value remains uncomputed.
+
+At lambda=s=1 the exact multipliers are
+  C1=5773320/2197,
+  C2=13396320/2197.
+They are nonzero. The complete symbolic functions and verification are in
+trace_top_moment.py and trace_top_moment.json. Reproduction:
+  python trace_top_moment.py
+
+INNER SELECTED-POINT ELIMINATION
+
+With q=Q0+Qc*alpha^2 and
+  h=E0+E2*alpha^2+alpha*(O1+O3*alpha^2),
+put E=E0*Qc-E2*Q0 and O=O1*Qc-O3*Q0. Exact elimination gives
+  Res_alpha(q,h)=D=Qc*E^2+Q0*O^2,
+  alpha=-E/O on O != 0.
+The rational differential identity
+  (E/O)*(D_r/D)-2*E_r/O
+    = [O*(E*Q0_r-2*Q0*E_r)+2*Q0*E*O_r]/D
+is also checked. It reduces a prospective global-residue calculation on the
+contact curve, but does not evaluate that residue. The O=0 summand and
+compactification contributions cannot be dropped without proof.
+
+WHY NO EULER-JACOBI ZERO IS CLAIMED
+
+The usual affine Euler-Jacobi vanishing theorem requires control of zeros
+at infinity. The present homogenized equations fail the simple hypothesis:
+the point with all contact parameters zero, alpha nonzero, localization
+variable zeta zero, and homogenizing coordinate zero satisfies every top
+homogeneous equation. Thus a degree count cannot discard infinity residues.
+
+Closedness of eta_R alone only implies closedness of its trace, not a zero
+trace. Even if one establishes the expected compact holomorphic extension,
+weighted moments such as Tr(alpha*eta_R) need additional pole control.
+The monic chart u+Q1 can degenerate at the compactification boundary when
+its u-coefficient vanishes. A limiting contact can then acquire components
+over the projection's fixed locus. Excluding a quadratic root in the monic
+chart does not exclude this boundary. The current work has not proved the
+required cancellation there, and it is not used to assign any trace value.
+
+The A/B sign symmetries were separately audited: they leave the actual
+source trace operands invariant. They do not make the traces zero.

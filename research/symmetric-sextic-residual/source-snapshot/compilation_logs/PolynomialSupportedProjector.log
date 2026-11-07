@@ -1,0 +1,9 @@
+'PolynomialSupportedProjector.exists_polynomial_projector' depends on axioms: [propext, Classical.choice, Quot.sound]
+'PolynomialSupportedProjector.exists_polynomial_eq_projector' depends on axioms: [propext, Classical.choice, Quot.sound]
+'PolynomialSupportedProjector.gram_injective_of_surjective' depends on axioms: [propext, Classical.choice, Quot.sound]
+'PolynomialSupportedProjector.exists_polynomial_gram_identity' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]
+'PolynomialSupportedProjector.exists_polynomial_eq_projector_of_surjective_adjoint' depends on axioms: [propext,
+ Classical.choice,
+ Quot.sound]

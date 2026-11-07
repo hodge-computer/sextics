@@ -1,0 +1,90 @@
+{
+  "schema": "measured-f4-phases-v1",
+  "states": [
+    {
+      "schema": "native-f4-state-timings-v1",
+      "variables": 38,
+      "prime": 37,
+      "rounds": 45,
+      "basis_rows": 3167,
+      "pending_pairs": 53867,
+      "threads": 1,
+      "wall_seconds": {
+        "selection": 4.800041,
+        "symbolic": 558.352623,
+        "linear_algebra": 17.583386,
+        "basis_update": 4.56503,
+        "conversion": 4.134227,
+        "hash_reset": 17.338
+      },
+      "cpu_seconds": {
+        "symbolic": 558.305669,
+        "linear_algebra": 17.582754,
+        "conversion": 4.133816
+      },
+      "maximum_matrix_rows": 80090,
+      "maximum_matrix_columns": 797081,
+      "basis_independently_verified": false,
+      "full_trace_evaluated": false,
+      "state_file": "sparse32_state_first.checkpoint.hcf.state",
+      "state_sha256": "237b8f7b8599f8f0d247dc7e518e5808fbe1d0323b414fe0f48a90e8df810d44"
+    },
+    {
+      "schema": "native-f4-state-timings-v1",
+      "variables": 38,
+      "prime": 37,
+      "rounds": 53,
+      "basis_rows": 3829,
+      "pending_pairs": 63369,
+      "threads": 4,
+      "wall_seconds": {
+        "selection": 9.108207,
+        "symbolic": 1211.132306,
+        "linear_algebra": 32.112213,
+        "basis_update": 6.388569,
+        "conversion": 7.688026,
+        "hash_reset": 22.524247
+      },
+      "cpu_seconds": {
+        "symbolic": 1210.954917,
+        "linear_algebra": 70.200244,
+        "conversion": 8.221175
+      },
+      "maximum_matrix_rows": 136078,
+      "maximum_matrix_columns": 1260622,
+      "basis_independently_verified": false,
+      "full_trace_evaluated": false,
+      "state_file": "sparse32_openmp_continuation.checkpoint.hcf.state",
+      "state_sha256": "364bc063e35555ca1416e8950a31d2c7e0daca7d1841f02257e315847e8a45a1"
+    },
+    {
+      "schema": "native-f4-state-timings-v1",
+      "variables": 102,
+      "prime": 37,
+      "rounds": 65,
+      "basis_rows": 2579,
+      "pending_pairs": 109783,
+      "threads": 4,
+      "wall_seconds": {
+        "selection": 2.201135,
+        "symbolic": 300.738238,
+        "linear_algebra": 2.281821,
+        "basis_update": 4.643715,
+        "conversion": 10.721519,
+        "hash_reset": 7.106707
+      },
+      "cpu_seconds": {
+        "symbolic": 300.685403,
+        "linear_algebra": 5.47937,
+        "conversion": 10.851153
+      },
+      "maximum_matrix_rows": 58037,
+      "maximum_matrix_columns": 1146919,
+      "basis_independently_verified": false,
+      "full_trace_evaluated": false,
+      "state_file": "sparse32_jacobian_retry.checkpoint.hcf.state",
+      "state_sha256": "d9e9c892eb1cfc28bcde01ef9afe688fe3379192326aea6d61edb94f82199751"
+    }
+  ],
+  "interpretation": "Cumulative native timing counters; symbolic includes divisor search, row materialization and other symbolic work. These do not measure independent solver completion."
+}

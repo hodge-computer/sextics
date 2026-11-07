@@ -1,0 +1,100 @@
+INDEPENDENT FINAL MATHEMATICAL REVIEW
+
+Scope: completed read-only review of README.txt, the exact Jacobian-witness
+argument, and the sparse32 audit evidence. No expensive computation was
+rerun and no reviewed source was edited. This report persists that completed
+review; it does not perform a second review of subsequent README revisions.
+
+PROOF STATUS
+The protected HasCertificate theorem remains unproved. No individual full
+source trace has been evaluated. No complete target finite quotient or final
+rational certificate is established by this review.
+
+1. Sparse32 source and Jacobian binding
+
+No mathematical gap was found in the denominator-free elimination. The
+independent audit checks the fourteen-variable identity pivot, all 46 original
+row reconstructions, reduced and reconstruction derivatives, off-ideal chain
+rules, the two point substitutions, and all six prescribed open bindings.
+The current audit script, its helper, and both exact packets were checked
+against the recorded SHA256 values; all matched.
+
+A separate read-only comparison established that all 2,964 scalar nodes of
+point_scaled_system.json are an unchanged prefix of sparse32_system.json,
+which has 3,736 scalar nodes. Thus old source-root indices used by the audit
+refer to the original source circuit, not a modified circuit.
+
+With the recorded row and column permutations, the exact relation is
+
+  J32 = J46 = J44_point
+
+after the polynomial reconstructions. Here J46 specifically denotes the
+UNELIMINATED POINT-SCALED 46-equation Jacobian. It is not the original
+pre-scaling alpha-incidence Jacobian, whose relation has separate previously
+audited unit factors. The review recommended making this distinction
+explicit in README.txt.
+
+These are exact computer-algebra bindings, not a new Lean proof, a proof
+that the displayed fixed RHS is suitable, or a completed quotient/trace.
+
+2. Generic two-RHS Jacobian localization
+
+The argument is sound over an arbitrary field, including when the starting
+scheme is nonreduced. On the reduced corank-delta stratum, the tangent space
+lies in the kernel of the original equation Jacobian, so its dimension is
+at most delta. The bad incidence of two RHS vectors in the Jacobian image
+has dimension at most 2n-delta<2n. Independent generic RHS parameters avoid
+all these singular strata.
+
+The resulting absence of singular geometric points makes det(J) a unit in
+the augmented algebra, not merely nonzero on selected reduced components.
+The adjugate formulas then give the claimed scheme-level isomorphism with
+the full Jacobian localization. In the finite-type setting this is a finite
+etale algebra, allowing the zero algebra.
+
+For fixed RHS values, a completed zero-dimensional augmented quotient is
+also a valid acceptance gate, provided all solve variables are unrestricted.
+Any surviving singular point would have a positive-dimensional affine
+kernel fiber. Adding extra normalizations can invalidate the argument.
+The theorem correctly limits a modular conclusion to that finite-field
+fiber and does not silently establish characteristic-zero trace identities.
+The remaining residue/regularity opens are still required.
+
+3. Source normalization: substantive wording correction
+
+The earlier README phrase 'scalar normalization' was too restrictive.
+There is no proof that Gamma_* Gamma^* acts as a scalar on the chosen
+source. Correcting the chosen form may require a non-scalar inverse or a
+combination of contact forms, together with an exact differential correction.
+The review recommended stating this broader obligation explicitly.
+
+4. Source comparison: logical nuance
+
+Merely computing the nine trace values does not establish source matching.
+However, proving all nine actual characteristic-zero coefficient equalities
+against the prescribed source WOULD discharge that source-matching step.
+The unknown push-pull normalization explains why the currently chosen form
+is not guaranteed to satisfy those equalities; it is not an additional
+independent obligation after the literal source identity has been verified.
+Denominator clearing, the required geometric/current-to-verifier bridge,
+and the final Lean theorem would still remain.
+
+Recommended wording communicated to the parent:
+' The chosen contact form is not known to push forward to the prescribed
+  source. Its nine candidate coefficient comparisons must be evaluated and
+  proved. If they fail, a non-scalar combination or inverse of the
+  correspondence operator, and an exact differential correction, may be
+  needed.'
+
+The parent subsequently reported that README.txt was corrected. This
+persistence step did not re-review that revision.
+
+Verified source hashes from the completed review:
+  point_scaled_system.json
+    1342ff6a2da5f9c1fe2e059a6d6892dca3f4a0cdb4052651ce0a20b28ac578cc
+  sparse32_system.json
+    fa39ba3834eea3d71e65fd09bccd1629b45842c9a5e207d882d1c4f642e02654
+  trace_sparse32_audit.py
+    8fe8b05be80bd21361a5163766596f9cf83e4b2967a15771e62eaff3f0938049
+  trace_schur25_audit.py
+    393227a43981f5d7221b0cf0431143e7eb1a4bd78b6c2d22e28801eb9346cbe0

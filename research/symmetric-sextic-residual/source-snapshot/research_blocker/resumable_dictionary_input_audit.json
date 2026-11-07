@@ -1,0 +1,71 @@
+{
+  "status": "PASS",
+  "binary_sha256": "27f62ff3f1eb3172b872950082433f503c4e7c065436b4d8ec9740943a242c6b",
+  "source_sha256": "a2b50f453761aa0d6eb22b6612dfb8ccca3361b2d4167203f1864fae026943e5",
+  "coefficient_widths_tested": [
+    8,
+    16,
+    32
+  ],
+  "cases": [
+    {
+      "prime": 37,
+      "elimination_block": 0,
+      "shuffled_nonmonic_input": true,
+      "matches_original_flat_and_independent_SymPy": true,
+      "direct_and_flat_complete_file_hashes": [
+        "c7d5d62bab041ace08b9e7c79e35da681306b4eb0bae2f54ef57a2871df8e1f2",
+        "c7d5d62bab041ace08b9e7c79e35da681306b4eb0bae2f54ef57a2871df8e1f2"
+      ],
+      "import_only_exits_without_F4": true
+    },
+    {
+      "prime": 1009,
+      "elimination_block": 0,
+      "shuffled_nonmonic_input": true,
+      "matches_original_flat_and_independent_SymPy": true,
+      "direct_and_flat_complete_file_hashes": [
+        "5d7238fcbbcb9dc69f1130db8bde7531de83fafe52c66fe69ae3a80ea50372d8",
+        "5d7238fcbbcb9dc69f1130db8bde7531de83fafe52c66fe69ae3a80ea50372d8"
+      ],
+      "import_only_exits_without_F4": true
+    },
+    {
+      "prime": 65537,
+      "elimination_block": 0,
+      "shuffled_nonmonic_input": true,
+      "matches_original_flat_and_independent_SymPy": true,
+      "direct_and_flat_complete_file_hashes": [
+        "5a41c75a5ea052d0fdf8dea8afc4e57beae0e415d6fcffba2e2b4e0a7d3cb8db",
+        "5a41c75a5ea052d0fdf8dea8afc4e57beae0e415d6fcffba2e2b4e0a7d3cb8db"
+      ],
+      "import_only_exits_without_F4": true
+    },
+    {
+      "prime": 37,
+      "elimination_block": 1,
+      "shuffled_nonmonic_input": true,
+      "matches_original_flat_and_independent_SymPy": true,
+      "direct_and_flat_complete_file_hashes": [
+        "22e5229d5b9f2a859c5090dcf03ff4e86305adad91adaed76f3b98a63d951a50",
+        "22e5229d5b9f2a859c5090dcf03ff4e86305adad91adaed76f3b98a63d951a50"
+      ],
+      "import_only_exits_without_F4": true
+    },
+    {
+      "prime": 1009,
+      "elimination_block": 2,
+      "shuffled_nonmonic_input": true,
+      "matches_original_flat_and_independent_SymPy": true,
+      "direct_and_flat_complete_file_hashes": [
+        "2b46570b643bd7160a2e84663d045c1fd3132765fe6db0151e4087cc75509730",
+        "2b46570b643bd7160a2e84663d045c1fd3132765fe6db0151e4087cc75509730"
+      ],
+      "import_only_exits_without_F4": true
+    }
+  ],
+  "zero_input_row_omitted_correctly": true,
+  "original_generator_prefix_only_uses_flat_exponents": true,
+  "derived_input_storage": "one uint32 native id per dictionary entry; native uint32 monomial indices and field-width coefficients per term; 128 KiB read buffer; no terms-times-variables array",
+  "scope": "Input-boundary regression checks on small complete ideals, plus the separate partial-restart and SIGUSR1 validation. No target quotient or traces."
+}

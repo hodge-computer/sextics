@@ -1,0 +1,40 @@
+{
+  "status": "BUILT_NOT_YET_VALIDATED",
+  "build_directory": "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/divisor_index_ac5d020c4f1ed680",
+  "binary": "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/divisor_index_ac5d020c4f1ed680/resumable_f4_divisor_index",
+  "binary_sha256": "e81d9ac3d1e1016089eade589ee660dfc7fc8d81d0806b783a6ecaf68ef29163",
+  "source_fingerprints": {
+    "msolve_compact_hash.patch": "b4492a0eb46f9972b463bdbdf3ce3c87f4d9c923fa2ecd881036f736e9d24df1",
+    "msolve_selective_columns.patch": "3576f40682c1fb7809f354fcbd08beac5ba96d9b2a14334887edd39bd30160ac",
+    "msolve_pair_selection_bounds.patch": "0faf0f14f0bbff59399ba93ce3495c0c766ea9d89ffa6e9fb4ed863226f60e76",
+    "msolve_openmp_private_degree.patch": "bb70fe1ebfd13d19a56fd49716f6728f93a11b5381333ced7165440a96cb2d4c",
+    "divisor_index.patch": "a1196881dcaea1e92f546dfca951d4e7f967fb08f6d86e6e4e29e44ae7c2a681",
+    "divisor_index.h": "6a1b6229ac27bb34fbf2f0dc37043657f24ff795cb78c9cc978df517f3f05271",
+    "divisor_index_driver.c": "a59aba3df529083d37d0e8959065eded7dbf01d4b93682ff390abca05ebe1eea",
+    "divisor_index_build.py": "8eefe3d5bb4dc9fd94b9558215214015c59924aa808192a7cbef22d6dd00bad1"
+  },
+  "compile_command": [
+    "gcc",
+    "-O3",
+    "-march=native",
+    "-fopenmp",
+    "-D_GNU_SOURCE",
+    "-DHAVE_AVX2",
+    "-DHAVE_AVX512_F",
+    "-I/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/divisor_index_ac5d020c4f1ed680/source/src/neogb",
+    "-I/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/gmp-6.3.0",
+    "-DHC_DIVISOR_INDEX_AUDIT=1",
+    "-o",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/divisor_index_ac5d020c4f1ed680/resumable_f4_divisor_index",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/divisor_index_ac5d020c4f1ed680/driver.c",
+    "/usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0",
+    "-lm"
+  ],
+  "audit_every_lookup_against_upstream_first_divisor": true,
+  "enumeration_limit": 256,
+  "index_can_be_disabled": "--divisor-index 0",
+  "lookup_and_materialization_profile": true,
+  "seconds": 9.502991141998791,
+  "frozen_sources_or_binaries_overwritten": false,
+  "target_run_performed": false
+}

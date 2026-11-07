@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "coefficient_ring": "QQ[mu0,...,mu4,R0,...,R43]",
+  "R_independent_coefficients": 44,
+  "quartic_numerators": 19,
+  "zero_pivot_coefficients": 19,
+  "remaining_equations": 25,
+  "common_denominator": "D=(1-mu0*mu1)*(1-2*mu0*mu1)*(1-3*mu0*mu1)",
+  "independent_method": "Build multiplication blocks from actual monomial coefficient lookup; compute sizes 5,3,1 determinants and adjugates by generic determinant algorithms; exact polynomial division; independently multiply Q2*N.",
+  "denominator_polynomial_identity": "det(M_19)=(1-z)*(1-3z)*(1-2z)^3; D and det(M_19) have the same nonvanishing open.",
+  "all_numerator_coefficients_integral": true,
+  "maximum_numerator_terms": 51,
+  "total_numerator_terms": 426,
+  "modular_builder_comparison": {
+    "status": "PASS",
+    "modulus": 101,
+    "symbolic_variables": 49,
+    "equations_compared": 25,
+    "numerical_samples": 0,
+    "builder_sha256": "8c2ab6523d5482aeb9722ba29a0a54feda8f19f5cd51ab27ad27478325e11e5d"
+  },
+  "witness_sha256": "db69b2fa53b1ae806938a0f426e8936cea28ad905599344b3a52a48060b565e2",
+  "audit_script_sha256": "0d315ad7b9a61417f238071d6a3293888c438b30848ad5b974b8dba6b74c1f8b",
+  "scope": "Exact characteristic-zero polynomial elimination proof by independent CAS. The normalized equations are equivalent to the original coefficient equations on D!=0. This is not a Lean proof, quotient-basis calculation, or trace evaluation.",
+  "source_trace_proved": false,
+  "full_certificate_proved": false,
+  "seconds": 0.12374769099915284
+}

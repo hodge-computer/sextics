@@ -1,0 +1,3 @@
+'SymmetricRegularCurrent.certificate_of_regular_game_exists' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricRegularCurrent.regular_game_exists_of_certificate' depends on axioms: [propext, Classical.choice, Quot.sound]
+'SymmetricRegularCurrent.certificate_iff_regular_game_exists' depends on axioms: [propext, Classical.choice, Quot.sound]

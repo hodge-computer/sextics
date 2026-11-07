@@ -1,0 +1,668 @@
+{
+  "status": "TRACE_COMPUTATION_NOT_COMPLETED",
+  "target": "symmetric-sextic-residual",
+  "engines": {
+    "msolve": "0.11.0",
+    "FLINT": "3.6.0",
+    "python_flint": "0.9.0"
+  },
+  "basis_computed": false,
+  "quotient_dimension": null,
+  "multiplication_matrices_computed": false,
+  "trace_values": [
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null,
+    null
+  ],
+  "trace_identities_proved": 0,
+  "full_certificate_proved": false,
+  "base_specialization": {
+    "lambda": 1,
+    "r": 2,
+    "s": 3
+  },
+  "exact_preprocessing": {
+    "g2_linear_elimination": {
+      "removed_variables": 19,
+      "contact_variables_remaining": 26,
+      "contact_equations_remaining": 25,
+      "common_denominator": "(1-z)*(1-2*z)*(1-3*z), z=mu0*mu1",
+      "all_target_pivots_checked_modulo": [
+        5,
+        37,
+        65537
+      ],
+      "independent_characteristic_zero_audit": {
+        "status": "PASS",
+        "coefficient_ring": "QQ[mu0,...,mu4,R0,...,R43]",
+        "R_independent_coefficients": 44,
+        "quartic_numerators": 19,
+        "zero_pivot_coefficients": 19,
+        "remaining_equations": 25,
+        "common_denominator": "D=(1-mu0*mu1)*(1-2*mu0*mu1)*(1-3*mu0*mu1)",
+        "independent_method": "Build multiplication blocks from actual monomial coefficient lookup; compute sizes 5,3,1 determinants and adjugates by generic determinant algorithms; exact polynomial division; independently multiply Q2*N.",
+        "denominator_polynomial_identity": "det(M_19)=(1-z)*(1-3z)*(1-2z)^3; D and det(M_19) have the same nonvanishing open.",
+        "all_numerator_coefficients_integral": true,
+        "maximum_numerator_terms": 51,
+        "total_numerator_terms": 426,
+        "modular_builder_comparison": {
+          "status": "PASS",
+          "modulus": 101,
+          "symbolic_variables": 49,
+          "equations_compared": 25,
+          "numerical_samples": 0,
+          "builder_sha256": "8c2ab6523d5482aeb9722ba29a0a54feda8f19f5cd51ab27ad27478325e11e5d"
+        },
+        "witness_sha256": "db69b2fa53b1ae806938a0f426e8936cea28ad905599344b3a52a48060b565e2",
+        "audit_script_sha256": "0d315ad7b9a61417f238071d6a3293888c438b30848ad5b974b8dba6b74c1f8b",
+        "scope": "Exact characteristic-zero polynomial elimination proof by independent CAS. The normalized equations are equivalent to the original coefficient equations on D!=0. This is not a Lean proof, quotient-basis calculation, or trace evaluation.",
+        "source_trace_proved": false,
+        "full_certificate_proved": false,
+        "seconds": 0.12374769099915284
+      }
+    },
+    "alpha_elimination": {
+      "formula": "alpha=-aN/bN",
+      "open": "bN != 0",
+      "omitted_bN_zero_locus_accounted_for": false,
+      "point_equation": "P=q2*aN^2+q0*bN^2; replaced by the A/B-free G3 modulo the contact equations",
+      "eliminated_jacobian_factor": "Je=q2*bN*J"
+    }
+  },
+  "required_targets_at_specialization": [
+    {
+      "source_component": 1,
+      "x_degree": 0,
+      "target_rational": "0",
+      "target_mod_prime": {
+        "5": 0,
+        "37": 0,
+        "65537": 0
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 1,
+      "x_degree": 1,
+      "target_rational": "49980/2197",
+      "target_mod_prime": {
+        "5": 0,
+        "37": 18,
+        "65537": 37579
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 1,
+      "x_degree": 2,
+      "target_rational": "-640332/2197",
+      "target_mod_prime": {
+        "5": 4,
+        "37": 31,
+        "65537": 52866
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 1,
+      "x_degree": 3,
+      "target_rational": "-164640/2197",
+      "target_mod_prime": {
+        "5": 0,
+        "37": 6,
+        "65537": 61256
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 1,
+      "x_degree": 4,
+      "target_rational": "0",
+      "target_mod_prime": {
+        "5": 0,
+        "37": 0,
+        "65537": 0
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 2,
+      "x_degree": 0,
+      "target_rational": "0",
+      "target_mod_prime": {
+        "5": 0,
+        "37": 0,
+        "65537": 0
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 2,
+      "x_degree": 1,
+      "target_rational": "193746/2197",
+      "target_mod_prime": {
+        "5": 3,
+        "37": 1,
+        "65537": 1878
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 2,
+      "x_degree": 2,
+      "target_rational": "237846/2197",
+      "target_mod_prime": {
+        "5": 3,
+        "37": 6,
+        "65537": 4195
+      },
+      "actual_trace": null
+    },
+    {
+      "source_component": 2,
+      "x_degree": 3,
+      "target_rational": "0",
+      "target_mod_prime": {
+        "5": 0,
+        "37": 0,
+        "65537": 0
+      },
+      "actual_trace": null
+    }
+  ],
+  "solver_runs": [
+    {
+      "tag": "p37_delta",
+      "modulus": 37,
+      "base_parameters": [
+        1,
+        2,
+        3
+      ],
+      "branch": "full",
+      "variables": 50,
+      "equations": 50,
+      "input_terms": 380,
+      "max_input_degree": 4,
+      "source_sha256": "4db0de514561f62ef4c492c3a57c2076674c4bd5de6f0c2202e7b89d7feca4db",
+      "input_sha256": "653b79cd466feb8f2e03a7b4c90a634b69dd39804b55126efebb5ef298850938",
+      "binary_sha256": "0ab3b9461ce12bd8ecfd9702a661eac3188a966a470022251c30fc91a01ded0a",
+      "block_elimination_count": 0,
+      "time_limit_seconds": 240,
+      "memory_limit_mib": 3072,
+      "max_pairs_per_matrix": 5000,
+      "threads": 2,
+      "quotient_variables_eliminated": false,
+      "alpha_eliminated": false,
+      "AB_free_point_equation": false,
+      "full_regularity_localization_included": false,
+      "generic_flatness_proved": false,
+      "traces_computed": false,
+      "exit_code": -11,
+      "status": "PROCESS_FAILED",
+      "seconds": 66.40405430799728,
+      "output_bytes": 0,
+      "scope": "Specialized preliminary ideal computation. No full localized finite algebra, generic degree, or trace identity is certified.",
+      "largest_observed_matrix": {
+        "selected_degree": 6,
+        "selected_pairs": 5000,
+        "pending_pairs": 249118,
+        "rows": 87722,
+        "columns": 474154
+      },
+      "matrix_with_most_rows": {
+        "selected_degree": 6,
+        "selected_pairs": 5000,
+        "pending_pairs": 249118,
+        "rows": 87722,
+        "columns": 474154
+      },
+      "matrix_with_most_columns": {
+        "selected_degree": 6,
+        "selected_pairs": 5000,
+        "pending_pairs": 249118,
+        "rows": 87722,
+        "columns": 474154
+      },
+      "last_observed_matrix": {
+        "selected_degree": 6,
+        "selected_pairs": 5000,
+        "pending_pairs": 249118,
+        "rows": 87722,
+        "columns": 474154
+      },
+      "command_reconstructed_from_receipt": [
+        "msolve",
+        "-v",
+        "2",
+        "-g",
+        "2",
+        "-t",
+        "2",
+        "-m",
+        "5000",
+        "-f",
+        "finite_msolve_p37_delta.ms",
+        "-o",
+        "finite_msolve_p37_delta.out"
+      ],
+      "diagnostic_lines": [],
+      "log_sha256": "49a4146d9c564aec083926afff1f117915d1ecae21186406b6758b2375c9cf6e",
+      "receipt_file": "finite_msolve_p37_delta_receipt.json"
+    },
+    {
+      "tag": "p5_delta",
+      "modulus": 5,
+      "base_parameters": [
+        1,
+        2,
+        3
+      ],
+      "branch": "full",
+      "variables": 50,
+      "equations": 50,
+      "input_terms": 258,
+      "max_input_degree": 4,
+      "source_sha256": "4db0de514561f62ef4c492c3a57c2076674c4bd5de6f0c2202e7b89d7feca4db",
+      "input_sha256": "fb1a14233fb8304aeed1772fa38693ebb1f8bdd7bc6e6f580d1977a9c23b1e43",
+      "binary_sha256": "0ab3b9461ce12bd8ecfd9702a661eac3188a966a470022251c30fc91a01ded0a",
+      "block_elimination_count": 0,
+      "time_limit_seconds": 180,
+      "memory_limit_mib": 2048,
+      "max_pairs_per_matrix": 5000,
+      "threads": 1,
+      "quotient_variables_eliminated": false,
+      "alpha_eliminated": false,
+      "AB_free_point_equation": false,
+      "full_regularity_localization_included": false,
+      "generic_flatness_proved": false,
+      "traces_computed": false,
+      "exit_code": -11,
+      "status": "PROCESS_FAILED",
+      "seconds": 30.833266765999724,
+      "output_bytes": 0,
+      "scope": "Specialized preliminary ideal computation. No full localized finite algebra, generic degree, or trace identity is certified.",
+      "largest_observed_matrix": {
+        "selected_degree": 5,
+        "selected_pairs": 5000,
+        "pending_pairs": 15197,
+        "rows": 33249,
+        "columns": 122212
+      },
+      "matrix_with_most_rows": {
+        "selected_degree": 5,
+        "selected_pairs": 5000,
+        "pending_pairs": 15197,
+        "rows": 33249,
+        "columns": 122212
+      },
+      "matrix_with_most_columns": {
+        "selected_degree": 5,
+        "selected_pairs": 2531,
+        "pending_pairs": 158436,
+        "rows": 27457,
+        "columns": 126195
+      },
+      "last_observed_matrix": {
+        "selected_degree": 5,
+        "selected_pairs": 1816,
+        "pending_pairs": 238038,
+        "rows": 21890,
+        "columns": 120851
+      },
+      "command_reconstructed_from_receipt": [
+        "msolve",
+        "-v",
+        "2",
+        "-g",
+        "2",
+        "-t",
+        "1",
+        "-m",
+        "5000",
+        "-f",
+        "finite_msolve_p5_delta.ms",
+        "-o",
+        "finite_msolve_p5_delta.out"
+      ],
+      "diagnostic_lines": [
+        "  5    1816  238038   21890 x 120851      0.01%     1087 new     729 zeroEnlarging exponent vector for hash table failed",
+        "for esz = 16777216, segmentation fault will follow."
+      ],
+      "log_sha256": "d06a92ca79fef9fea44a93fbd1b75fe9cf4fef6cf9e463b9b254dc11b2349a25",
+      "receipt_file": "finite_msolve_p5_delta_receipt.json"
+    },
+    {
+      "tag": "p37_reduced_f4sat",
+      "modulus": 37,
+      "base_parameters": [
+        1,
+        2,
+        3
+      ],
+      "branch": "full",
+      "variables": 26,
+      "equations": 27,
+      "input_terms": 6223,
+      "max_input_degree": 10,
+      "source_sha256": "6c2538c989746898c668f6276dad891107813df428c59a0b872c413ed385bad1",
+      "input_sha256": "887ebd2b42669e166920c359c433616efb41df5d648bdbf4f87d7e23cd4cd6f5",
+      "binary_sha256": "0ab3b9461ce12bd8ecfd9702a661eac3188a966a470022251c30fc91a01ded0a",
+      "block_elimination_count": 0,
+      "time_limit_seconds": 240,
+      "memory_limit_mib": 3072,
+      "max_pairs_per_matrix": 1000,
+      "threads": 2,
+      "quotient_variables_eliminated": true,
+      "alpha_eliminated": true,
+      "AB_free_point_equation": true,
+      "f4sat": true,
+      "command": [
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt5/finite_msolve_0.11.0/msolve",
+        "-v",
+        "2",
+        "-g",
+        "2",
+        "-t",
+        "2",
+        "-m",
+        "1000",
+        "-f",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt5/finite_msolve_p37_reduced_f4sat.ms",
+        "-o",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt5/finite_msolve_p37_reduced_f4sat.out",
+        "-S"
+      ],
+      "full_regularity_localization_included": false,
+      "generic_flatness_proved": false,
+      "traces_computed": false,
+      "exit_code": 1,
+      "status": "PROCESS_FAILED",
+      "seconds": 0.08108755700231995,
+      "output_bytes": 0,
+      "scope": "Specialized preliminary ideal computation. No full localized finite algebra, generic degree, or trace identity is certified.",
+      "diagnostic_lines": [
+        "Error: not implemented yet (prime field of too low characteristic)"
+      ],
+      "log_sha256": "313a11be224c0fb75be4ae02ecefb09e03d89df75ec11f61c5ce5c8d61846535",
+      "receipt_file": "finite_msolve_p37_reduced_f4sat_receipt.json"
+    },
+    {
+      "tag": "p65537_reduced_f4sat",
+      "modulus": 65537,
+      "base_parameters": [
+        1,
+        2,
+        3
+      ],
+      "branch": "full",
+      "variables": 26,
+      "equations": 27,
+      "input_terms": 6223,
+      "max_input_degree": 10,
+      "source_sha256": "6c2538c989746898c668f6276dad891107813df428c59a0b872c413ed385bad1",
+      "input_sha256": "0634eb09b6f01fa468760222d42f8315c54b117f7e2fd15ead94b78041e4c6f8",
+      "binary_sha256": "0ab3b9461ce12bd8ecfd9702a661eac3188a966a470022251c30fc91a01ded0a",
+      "block_elimination_count": 0,
+      "time_limit_seconds": 240,
+      "memory_limit_mib": 3072,
+      "max_pairs_per_matrix": 1000,
+      "threads": 2,
+      "quotient_variables_eliminated": true,
+      "alpha_eliminated": true,
+      "AB_free_point_equation": true,
+      "f4sat": true,
+      "saturation_formula": "(1-z)*(1-2*z)*(1-3*z)*aN*bN",
+      "saturation_sha256": "5bce6c97a323f4d113dc3644e5a15dafa6c94097869c493c7e242b3ca21964a0",
+      "command": [
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt5/finite_msolve_0.11.0/msolve",
+        "-v",
+        "2",
+        "-g",
+        "2",
+        "-t",
+        "2",
+        "-m",
+        "1000",
+        "-f",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt5/finite_msolve_p65537_reduced_f4sat.ms",
+        "-o",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt5/finite_msolve_p65537_reduced_f4sat.out",
+        "-S"
+      ],
+      "full_regularity_localization_included": false,
+      "generic_flatness_proved": false,
+      "traces_computed": false,
+      "exit_code": -11,
+      "status": "PROCESS_FAILED",
+      "seconds": 0.2842891780019272,
+      "output_bytes": 0,
+      "scope": "Specialized preliminary ideal computation. No full localized finite algebra, generic degree, or trace identity is certified.",
+      "largest_observed_matrix": {
+        "selected_degree": 10,
+        "selected_pairs": 74,
+        "pending_pairs": 189,
+        "rows": 1135,
+        "columns": 69940
+      },
+      "matrix_with_most_rows": {
+        "selected_degree": 10,
+        "selected_pairs": 74,
+        "pending_pairs": 189,
+        "rows": 1135,
+        "columns": 69940
+      },
+      "matrix_with_most_columns": {
+        "selected_degree": 10,
+        "selected_pairs": 74,
+        "pending_pairs": 189,
+        "rows": 1135,
+        "columns": 69940
+      },
+      "last_observed_matrix": {
+        "selected_degree": 10,
+        "selected_pairs": 74,
+        "pending_pairs": 189,
+        "rows": 1135,
+        "columns": 69940
+      },
+      "diagnostic_lines": [],
+      "log_sha256": "21112559bd308f762031d1b5e89d10628c1a25abc42bf7d264f9aa630953927a",
+      "receipt_file": "finite_msolve_p65537_reduced_f4sat_receipt.json"
+    },
+    {
+      "tag": "p37_reduced_regular",
+      "modulus": 37,
+      "base_parameters": [
+        1,
+        2,
+        3
+      ],
+      "branch": "full",
+      "variables": 31,
+      "equations": 31,
+      "input_terms": 4434,
+      "max_input_degree": 9,
+      "source_sha256": "6c2538c989746898c668f6276dad891107813df428c59a0b872c413ed385bad1",
+      "input_sha256": "ff667bdf3457d13e77418448407f03309100e667a463f9d53abcc19837c63d0a",
+      "binary_sha256": "0ab3b9461ce12bd8ecfd9702a661eac3188a966a470022251c30fc91a01ded0a",
+      "block_elimination_count": 0,
+      "time_limit_seconds": 240,
+      "memory_limit_mib": 3072,
+      "max_pairs_per_matrix": 1000,
+      "threads": 2,
+      "quotient_variables_eliminated": true,
+      "alpha_eliminated": true,
+      "AB_free_point_equation": true,
+      "f4sat": false,
+      "saturation_formula": null,
+      "saturation_sha256": null,
+      "command": [
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt5/finite_msolve_0.11.0/msolve",
+        "-v",
+        "2",
+        "-g",
+        "2",
+        "-t",
+        "2",
+        "-m",
+        "1000",
+        "-f",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt5/finite_msolve_p37_reduced_regular.ms",
+        "-o",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt5/finite_msolve_p37_reduced_regular.out"
+      ],
+      "full_regularity_localization_included": false,
+      "generic_flatness_proved": false,
+      "traces_computed": false,
+      "exit_code": -11,
+      "status": "PROCESS_FAILED",
+      "seconds": 97.7626589010033,
+      "output_bytes": 0,
+      "scope": "Specialized preliminary ideal computation. No full localized finite algebra, generic degree, or trace identity is certified.",
+      "largest_observed_matrix": {
+        "selected_degree": 10,
+        "selected_pairs": 1000,
+        "pending_pairs": 5497,
+        "rows": 204612,
+        "columns": 990506
+      },
+      "matrix_with_most_rows": {
+        "selected_degree": 10,
+        "selected_pairs": 1000,
+        "pending_pairs": 5497,
+        "rows": 204612,
+        "columns": 990506
+      },
+      "matrix_with_most_columns": {
+        "selected_degree": 10,
+        "selected_pairs": 1000,
+        "pending_pairs": 5497,
+        "rows": 204612,
+        "columns": 990506
+      },
+      "last_observed_matrix": {
+        "selected_degree": 8,
+        "selected_pairs": 1000,
+        "pending_pairs": 113208,
+        "rows": 31152,
+        "columns": 287439
+      },
+      "diagnostic_lines": [
+        "  8    1000  113208   31152 x 287439      0.04%      530 new     471 zeroEnlarging exponent vector for hash table failed",
+        "for esz = 33554432, segmentation fault will follow."
+      ],
+      "log_sha256": "0b7488677de6eaedcca88154f9da34edbe37b5f7006d72f627089dc0280c09f1",
+      "receipt_file": "finite_msolve_p37_reduced_regular_receipt.json"
+    },
+    {
+      "tag": "p37_reduced_hashreset",
+      "modulus": 37,
+      "base_parameters": [
+        1,
+        2,
+        3
+      ],
+      "branch": "full",
+      "variables": 31,
+      "equations": 31,
+      "input_terms": 4434,
+      "max_input_degree": 9,
+      "source_sha256": "6c2538c989746898c668f6276dad891107813df428c59a0b872c413ed385bad1",
+      "input_sha256": "ff667bdf3457d13e77418448407f03309100e667a463f9d53abcc19837c63d0a",
+      "binary_sha256": "0ab3b9461ce12bd8ecfd9702a661eac3188a966a470022251c30fc91a01ded0a",
+      "block_elimination_count": 0,
+      "time_limit_seconds": 300,
+      "memory_limit_mib": 4608,
+      "max_pairs_per_matrix": 1000,
+      "threads": 2,
+      "reset_hash_every_n_steps": 1,
+      "quotient_variables_eliminated": true,
+      "alpha_eliminated": true,
+      "AB_free_point_equation": true,
+      "f4sat": false,
+      "saturation_formula": null,
+      "saturation_sha256": null,
+      "command": [
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt5/finite_msolve_0.11.0/msolve",
+        "-v",
+        "2",
+        "-g",
+        "2",
+        "-t",
+        "2",
+        "-m",
+        "1000",
+        "-f",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt5/finite_msolve_p37_reduced_hashreset.ms",
+        "-o",
+        "/workspace/scratch/0d11a6a4cf8f/proof_attempt5/finite_msolve_p37_reduced_hashreset.out",
+        "-u",
+        "1"
+      ],
+      "full_regularity_localization_included": false,
+      "generic_flatness_proved": false,
+      "traces_computed": false,
+      "exit_code": -11,
+      "status": "PROCESS_FAILED",
+      "seconds": 264.7190302130002,
+      "output_bytes": 0,
+      "scope": "Specialized preliminary ideal computation. No full localized finite algebra, generic degree, or trace identity is certified.",
+      "largest_observed_matrix": {
+        "selected_degree": 10,
+        "selected_pairs": 1000,
+        "pending_pairs": 5497,
+        "rows": 204612,
+        "columns": 990506
+      },
+      "matrix_with_most_rows": {
+        "selected_degree": 10,
+        "selected_pairs": 1000,
+        "pending_pairs": 5497,
+        "rows": 204612,
+        "columns": 990506
+      },
+      "matrix_with_most_columns": {
+        "selected_degree": 8,
+        "selected_pairs": 1000,
+        "pending_pairs": 149431,
+        "rows": 80666,
+        "columns": 1064516
+      },
+      "last_observed_matrix": {
+        "selected_degree": 8,
+        "selected_pairs": 1002,
+        "pending_pairs": 169089,
+        "rows": 76558,
+        "columns": 1055413
+      },
+      "diagnostic_lines": [
+        "  8    1002  169089   76558 x 1055413     0.02%      705 new     298 zeroEnlarging hash table failed for esz = 67108864,",
+        "segmentation fault will follow."
+      ],
+      "log_sha256": "b734853b357e369c3896ed10e6c5e62e87853a5cba1e20626a0ee83535ddb397",
+      "receipt_file": "finite_msolve_p37_reduced_hashreset_receipt.json"
+    }
+  ],
+  "native_flint_experiments": {
+    "raw_mod37_200_generator_limit": "Incomplete generating set; not a Groebner basis.",
+    "raw_mod37_5000_generator_limit": "External 180-second timeout; no completed basis.",
+    "alpha_eliminated_lex_mod37": "Bounded Buchberger stopped without completing a basis.",
+    "q2_zero_branch_mod37": "Reached 2000 generators at degree5 without completing a basis or proving the unit ideal."
+  },
+  "limits": [
+    "No dimension or degree of the target quotient has been established.",
+    "Partial F4 matrices and incomplete generating sets are not multiplication matrices or traces.",
+    "The reduced bN-open experiment omits a residual stratum whose generic absence has not been proved.",
+    "The experiments localize the stated cheap chart factors, not the complete determinant product S of the target finite algebra.",
+    "Specialized modular computations alone would not prove the characteristic-zero rational-function identities without specialization and reconstruction justification.",
+    "Characteristic5 kills the target couplings and is a special Fermat fibre.",
+    "Solver failure does not prove a trace identity false or a certificate nonexistent."
+  ]
+}

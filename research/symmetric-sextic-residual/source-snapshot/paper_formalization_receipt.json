@@ -1,0 +1,101 @@
+{
+  "status": "PASS",
+  "new_modules": 10,
+  "new_public_theorems_audited": 94,
+  "previous_modules": 51,
+  "total_modules": 61,
+  "lean_version": "4.33.1",
+  "sextics_commit": "ca173aad142bd5f6bf5dd156b6798223a45df54f",
+  "mathlib_revision": "0df444a360eaa60ab8c11dca51a86af692955474",
+  "protected_source_sha256": {
+    "HodgeTarget.lean": "a51532e0442d72e8ce95d6728390fac0f719287d1cf20020701625bc1b5409d9",
+    "instance.rec": "b57fe82288d74a788fd725ef24660c06a58c0bbf8430b82dd506db37aa4c9390"
+  },
+  "modules": [
+    {
+      "module": "TwoReflectionSectors",
+      "status": "PASS",
+      "source_sha256": "c8ef74a026d97c0868ba50ded19297987eafeb318d024ad092e7725bb3549017",
+      "object_sha256": "b652b7aea03af5e976abbf6accaaeee2bdaa47d02812f3c6224a8a6d8d9baf13",
+      "compile_receipt": "TwoReflectionSectors_compile_receipt.json",
+      "kernel_receipt": "TwoReflectionSectors_kernel_receipt.json"
+    },
+    {
+      "module": "SignedSourceCharacters",
+      "status": "PASS",
+      "source_sha256": "226f9e0428d8d5e5b64373b77378a92ecf1d1833823c35ebb70fbd08d121fc1a",
+      "object_sha256": "10997cfb340019c2d9a1f19e9df02fa504147ced63fae726a97a3ce54a4fd798",
+      "compile_receipt": "SignedSourceCharacters_compile_receipt.json",
+      "kernel_receipt": "SignedSourceCharacters_kernel_receipt.json"
+    },
+    {
+      "module": "MonodromyImageSpanning",
+      "status": "PASS",
+      "source_sha256": "b0773d92739f15ceb1e534117bd46694e842b24c1d4420c33b458f797770df1a",
+      "object_sha256": "ac8304c352708092788632fb99c42e06803959b95967ccbc2b65be0f7a0b45c8",
+      "compile_receipt": "MonodromyImageSpanning_compile_receipt.json",
+      "kernel_receipt": "monodromy_prime_kernel_audit.json"
+    },
+    {
+      "module": "PolynomialSupportedProjector",
+      "status": "PASS",
+      "source_sha256": "879a1848f4d99fc6e60392575eb00ec012fb82402a632fc3a5b6a53926ea8304",
+      "object_sha256": "07d315b02204695a5dedb52cf51ebed01d5bab55ed2e345962594a8a584a23b8",
+      "compile_receipt": "PolynomialSupportedProjector_compile_receipt.json",
+      "kernel_receipt": "PolynomialSupportedProjector_kernel_receipt.json"
+    },
+    {
+      "module": "SymmetricPrime",
+      "status": "PASS",
+      "source_sha256": "868e0a18a03de7dd4f5ba0a31d74a2d1c5fbd18ea46ccb232e7b14fa57d161bd",
+      "object_sha256": "ecacacbad7da2acfd993449388efc8a54c9319c5595b5a63d6cec63f2e0a97de",
+      "compile_receipt": "SymmetricPrime_compile_receipt.json",
+      "kernel_receipt": "monodromy_prime_kernel_audit.json"
+    },
+    {
+      "module": "AutomaticLegalClearing",
+      "status": "PASS",
+      "source_sha256": "8134e00fcda0034c7261dd51c5419c4780d59f45b40048958262b121afaf19c5",
+      "object_sha256": "a1fcb153a36beb109ef30e581cbd403969cf6e459c8f94bf01d33ec52450cb84",
+      "compile_receipt": "AutomaticLegalClearing_compile_receipt.json",
+      "kernel_receipt": "automatic_clearing_kernel_audit.json"
+    },
+    {
+      "module": "RegularEulerClearing",
+      "status": "PASS",
+      "source_sha256": "3cb7b355db10b1a714ce77932549f069020c4c289d5b4a28fb30f2d0e40bedb1",
+      "object_sha256": "9e401246b8e7998b28daea18eb85e4463a3136930ce04366d4323535f5e6bce0",
+      "compile_receipt": "RegularEulerClearing_compile_receipt.json",
+      "kernel_receipt": "automatic_clearing_kernel_audit.json"
+    },
+    {
+      "module": "CanonicalFractionCoordinates",
+      "status": "PASS",
+      "source_sha256": "1add38875a0505f8f3a83643b40f0ffa796b603915e82f19a18c24a46380dd06",
+      "object_sha256": "6ef297472bfbf65999e90ffeab7d3bb729b96ba7bd4f50f69edd6381a65ffce2",
+      "compile_receipt": "CanonicalFractionCoordinates_compile_receipt.json",
+      "kernel_receipt": "automatic_clearing_kernel_audit.json"
+    },
+    {
+      "module": "CertificateRegularCurrent",
+      "status": "PASS",
+      "source_sha256": "2fcd98af38b04bf736b072c4d00d1bdc34d5b79f603f7746e85d3328990e6320",
+      "object_sha256": "45ead902ba2066c20abdd1a19b6f924a517384131b9c7eebd7bba19d72880b93",
+      "compile_receipt": "CertificateRegularCurrent_compile_receipt.json",
+      "kernel_receipt": "CertificateRegularCurrent_kernel_receipt.json"
+    },
+    {
+      "module": "SymmetricRegularCurrent",
+      "status": "PASS",
+      "source_sha256": "53748b0c934c45e4c078e57085981f9515dfc5a21fa77cc42e98a0a8f8949a2c",
+      "object_sha256": "f7b12bdbdad46741669075edfbdec7a1a26438744558addbf01761d044bab179",
+      "compile_receipt": "SymmetricRegularCurrent_compile_receipt.json",
+      "kernel_receipt": "paper_steps_axiom_audit.json"
+    }
+  ],
+  "full_certificate_proved": false,
+  "paper_proof_exists": true,
+  "remaining_goal": "SymmetricRegularCurrent.RegularGameExists",
+  "proved_exact_equivalence": "SymmetricRegularCurrent.certificate_iff_regular_game_exists",
+  "kernel_scope": "Each new module replayed against its imported environment; imports were not replayed from an empty environment."
+}

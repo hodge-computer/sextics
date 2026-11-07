@@ -1,0 +1,47 @@
+{
+  "status": "BUILT_NOT_YET_VALIDATED",
+  "build_directory": "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/openmp_88974186e92805c0",
+  "binary": "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/openmp_88974186e92805c0/resumable_f4_openmp",
+  "binary_sha256": "3a74bff5469683817a3596eb7f13cc10247a503081e5fd519ec125b7bf1cd069",
+  "source_fingerprints": {
+    "msolve_compact_hash.patch": "b4492a0eb46f9972b463bdbdf3ce3c87f4d9c923fa2ecd881036f736e9d24df1",
+    "msolve_selective_columns.patch": "3576f40682c1fb7809f354fcbd08beac5ba96d9b2a14334887edd39bd30160ac",
+    "msolve_pair_selection_bounds.patch": "0faf0f14f0bbff59399ba93ce3495c0c766ea9d89ffa6e9fb4ed863226f60e76",
+    "msolve_openmp_private_degree.patch": "bb70fe1ebfd13d19a56fd49716f6728f93a11b5381333ced7165440a96cb2d4c",
+    "resumable_openmp_driver.c": "8e9d491f376e6ea2230816c017a1320b59999f1b9c8d603d63761f42656e4782",
+    "build_openmp.py": "bd2093a83f94402bc4dcf615d4d01fbead6aed70f50a243a23fd3e1bdac3ad42"
+  },
+  "frozen_serial_source": {
+    "resumable_state_driver.c": "6aed81e4d33c82f8e4787c480adf48e5c8a405b864e20a828d8b34076f1f0ec0"
+  },
+  "compile_command": [
+    "gcc",
+    "-O3",
+    "-march=native",
+    "-fopenmp",
+    "-D_GNU_SOURCE",
+    "-DHAVE_AVX2",
+    "-DHAVE_AVX512_F",
+    "-I/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/openmp_88974186e92805c0/source/src/neogb",
+    "-I/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/gmp-6.3.0",
+    "-o",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/openmp_88974186e92805c0/resumable_f4_openmp",
+    "/workspace/scratch/0d11a6a4cf8f/proof_attempt7/vendor/openmp_88974186e92805c0/driver.c",
+    "/usr/lib/x86_64-linux-gnu/libgmp.so.10.5.0",
+    "-lm"
+  ],
+  "openmp": true,
+  "default_threads": 1,
+  "allowed_threads": [
+    1,
+    8
+  ],
+  "cpu_support": {
+    "avx2": true,
+    "avx512f": true
+  },
+  "serial_sources_and_binaries_overwritten": false,
+  "seconds": 10.045545567998488,
+  "validation_pending": true,
+  "target_run_performed": false
+}
