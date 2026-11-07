@@ -14,7 +14,10 @@ sets are arbitrary. The prime pullback criterion keeps denominator legality
 separate from the rational substitution.
 
 Extracted from the homogeneous transport prepared for `fqlx`'s symmetric
-sextic draft, with OpenAI ChatGPT and Codex assistance.
+sextic draft, with OpenAI ChatGPT and Codex assistance. The same bounded
+construction consolidates the inductive homogeneous clearing used in the
+accepted holdout-q2 and quadric-contact-broken constructions, whose
+application files retain their original provenance.
 -/
 
 noncomputable section

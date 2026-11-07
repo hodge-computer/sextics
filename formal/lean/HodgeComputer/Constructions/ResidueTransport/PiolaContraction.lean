@@ -11,9 +11,11 @@ compatibility or a separate nonzero-determinant hypothesis; the specified
 inverse and chain rule suffice.
 
 This completes the paired contraction/divergence interface of the shared
-Piola calculus. Prepared for the symmetric-sextic transport in `fqlx`'s
-PR #222, with OpenAI ChatGPT and Codex assistance. The coordinate chart,
-its Jacobian and its equation remain application data.
+Piola calculus and supplies the contraction step in
+`HoldoutCover.ResiduePiolaPullback`, used by the accepted cover and residue
+constructions. Prepared with OpenAI ChatGPT and Codex assistance for a
+contribution through GitHub account `fqlx`. The coordinate chart, its
+Jacobian and its equation remain application data.
 -/
 
 noncomputable section

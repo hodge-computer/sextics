@@ -6,7 +6,7 @@ The treatment is organized around general mechanisms and their hypotheses. Examp
 
 ## Reading order
 
-The intended reader knows basic algebraic geometry, differential forms and Hodge decomposition. Chapter 1 identifies the geometric and algebraic formulations. Chapter 2 develops the algebraic calculus of rational primitives, and Chapter 2A works out the relation between binary contacts and Jacobian torsion. Chapters 3–3C establish geometric support theorems and their applications to complete families. Chapter 4 studies coefficient spaces, finite symmetries and deformation. Chapter 5 develops exact coefficient methods and finite integration tests after reduction to an algebraic curve. Foundational results from the literature are cited where they enter.
+The intended reader knows basic algebraic geometry, differential forms and Hodge decomposition. Chapter 1 identifies the geometric and algebraic formulations. Chapter 2 develops the algebraic calculus of rational primitives, and Chapter 2A works out the relation between binary contacts and Jacobian torsion. Chapters 3–3C establish geometric support theorems and their applications to complete families. Chapter 4 studies coefficient spaces, finite symmetries and deformation. Chapter 5 develops exact coefficient methods, strictification, rational integration tests and a normal form for cubic currents. Foundational results from the literature are cited where they enter.
 
 | Chapter | Subject |
 | --- | --- |
@@ -18,7 +18,7 @@ The intended reader knows basic algebraic geometry, differential forms and Hodge
 | [3B. Weighted threefolds and two-reflection sextics](#technical-information/weighted-threefolds) | Norm-contact curves, Abel–Jacobi residues, finite-jet spanning and two-reflection support |
 | [3C. Quadratic nets and pair correspondences](#technical-information/quadratic-nets) | Finite-cover incidence, discriminant conics, Fano threefolds and support without extra reflections |
 | [4. Families, representations and deformation](#technical-information/known-locus) | Invariant sectors, coefficient families, generic-target reduction, curve incidence and interpolation |
-| [5. Computing and checking certificates](#technical-information/computation) | Complete coefficient systems, incidence lifting and the exact polynomial criterion |
+| [5. Computing and checking certificates](#technical-information/computation) | Strictification, exact coefficient systems, rational integration and cubic currents |
 
 The geometric constructions combine supported images of algebraic correspondences. Chapter 3 also detects such images through two-forms on curve parameter spaces; Chapter 4 explains how dominance over the even coefficient space amplifies one nonzero invariant image. In Chapter 3B, Fano reflection quotients and norm-contact curves on weighted threefolds serve complementary sectors. In Chapter 3C, a finite map defined by three ternary quadrics and the six joining lines of its four-point fibers recover the entire invariant cohomology. The diagonal net gives the three-reflection case as a corollary. The two-reflection theorem has a different coefficient scope and remains necessary for general crossed splittings and binary-block families. Chapter 2A retains their independent contact construction and its Wronskian spanning results. Chapter 4 applies deck/exchange descent to the full cyclic-six coefficient family.
 

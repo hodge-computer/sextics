@@ -1,4 +1,4 @@
-import HodgeComputer.Constructions.HoldoutCover.Piola
+import HodgeComputer.Constructions.ResidueTransport.PiolaContraction
 
 /- Source component: ResiduePiolaPullback -/
 section
@@ -78,15 +78,9 @@ theorem residue_piola_pullback
     have h := (eq_div_iff hdet).mp hp
     simpa only [mul_comm] using h.symm
   have hdir : (∑ i, v i * D i g) = M.det * ∑ j, w j * E j g := by
-    simp only [v, Matrix.mulVec, dotProduct, Finset.sum_mul, ← Finset.mul_sum,
-      mul_assoc]
-    simp_rw [chain, Finset.mul_sum]
-    rw [Finset.sum_comm]
-    congr 1
-    ext j
-    apply Finset.sum_congr rfl
-    intro i _
-    ring
+    have h := piola_contraction D E M N hNM chain v g
+    simp_rw [congrFun hpush] at h
+    simpa only [mul_comm] using ((eq_div_iff hdet).mp h).symm
   change residueDivergence D g v = _
   rw [residueDivergence, hdiv, hdir, residueDivergence]
   ring

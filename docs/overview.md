@@ -21,6 +21,6 @@ F^{q+1}\;\bigm|\;A-q\cdot\mathrm dF(v)+F\cdot\operatorname{div}(v)?
 \]
 Divisibility is interpreted in \(\mathbb C[X_0,X_1,X_2,Y_0,Y_1,Y_2]_{(F)}\).
 
-This algebraic formulation makes divisor support accessible through rational differential forms and exact polynomial identities.
+This algebraic formulation makes divisor support accessible through rational differential forms and exact polynomial identities. The [strictification theorem in Chapter 5](#technical-information/computation) shows that, when the denominator may change, the same existence problem can be stated using the exact equations \(q\,\mathrm dF(v)=A\) and \(\operatorname{div}v=0\). Its resultant construction changes the auxiliary support while retaining the pole bound along \(F\).
 
 The book proves support on several complete coefficient families. [Chapter 3C](#technical-information/quadratic-nets) treats every smooth sextic \(F(X,Y)=G(X,Q_0(Y),Q_1(Y),Q_2(Y))\) obtained from three ternary quadrics: point-pair incidence combines a weighted Fano quotient with a family of Fano threefolds. This includes the three-reflection family through the diagonal net. The complementary [two-reflection theorem](#technical-information/weighted-threefolds) combines Fano quotients with norm-contact curves and includes the full \(4+2\) split family with binary block \((X_2,Y_2)\). [Chapter 4](#technical-information/known-locus) compares their coefficient spaces and treats further finite-symmetry families. The general even-sextic case remains open.
