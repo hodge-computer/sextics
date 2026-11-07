@@ -1,5 +1,0 @@
-'SymmetricAffinePrime.planeSection_irreducible' depends on axioms: [propext, Classical.choice, Quot.sound]
-'SymmetricAffinePrime.univariateH_formula' depends on axioms: [propext, Classical.choice, Quot.sound]
-'SymmetricAffinePrime.specialization_is_planeSection' depends on axioms: [propext, Classical.choice, Quot.sound]
-'SymmetricAffinePrime.chart_irreducible' depends on axioms: [propext, Classical.choice, Quot.sound]
-'SymmetricAffinePrime.chart_prime' depends on axioms: [propext, Classical.choice, Quot.sound]

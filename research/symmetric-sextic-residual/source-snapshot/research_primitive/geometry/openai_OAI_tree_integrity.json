@@ -1,8 +1,0 @@
-{
-  "repo_commit": "4eaee87548250b2682affda7d05d947c05554bae",
-  "subtree": "lean/OAI",
-  "file_count": 162417,
-  "computed_git_tree_sha1": "40f11c6a248322c440ddb85db0cae92269bb1352",
-  "github_reported_git_tree_sha1": "40f11c6a248322c440ddb85db0cae92269bb1352",
-  "equal": true
-}

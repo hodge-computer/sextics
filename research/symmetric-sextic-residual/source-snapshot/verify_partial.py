@@ -65,7 +65,7 @@ def main():
         'sextics_commit': head, 'mathlib_revision': MATHLIB, 'lean_version': version,
         'full_certificate_proved': False,
         'kernel_replay_scope': 'Each new module replayed into its imported environment; standard imports are not replayed from an empty environment.',
-        'polynomial_matrix_semantics': 'Actual rational quotient-product coefficient matrices and exhaustive orbit representative coverage are Lean theorems; geometric Hodge identification remains unproved.',
+        'proof_scope': 'Selected primitive/current algebra only; geometric identification, primitive existence, and the final certificate remain unproved.',
         'protected_target_sha256': sha256(repo / 'data/symmetric-sextic-residual/instance.rec'),
         'modules': [],
     }

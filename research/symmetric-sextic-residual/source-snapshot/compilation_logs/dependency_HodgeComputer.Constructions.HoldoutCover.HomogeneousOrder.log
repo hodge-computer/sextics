@@ -1,2 +1,0 @@
-'HoldoutConstruction.component_mul_initial' depends on axioms: [propext, Classical.choice, Quot.sound]
-'HoldoutConstruction.pderiv_component' depends on axioms: [propext, Classical.choice, Quot.sound]

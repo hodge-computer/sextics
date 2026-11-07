@@ -1,4 +1,0 @@
-'HoldoutConstruction.adjoinRoot_map_injective' depends on axioms: [propext, Classical.choice, Quot.sound]
-'HoldoutConstruction.irreducible_power_add_constant' depends on axioms: [propext, Classical.choice, Quot.sound]
-'HoldoutConstruction.quotient_adjoinRoot_isDomain' depends on axioms: [propext, Classical.choice, Quot.sound]
-'HoldoutConstruction.fermatCurve_adjoinRoot_isDomain' depends on axioms: [propext, Classical.choice, Quot.sound]

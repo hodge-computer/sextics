@@ -1,0 +1,12 @@
+*.log
+*.olean
+*.ilean
+__pycache__/
+verification_logs/
+primitive_verification_logs/
+contact_verification_logs/
+lean_verification_receipt.json
+primitive_transport_axiom_audit.json
+contact_steps_axiom_audit.json
+weighted_primitive_transport_source_audit.json
+trace_closedness_counterexample_receipt.json

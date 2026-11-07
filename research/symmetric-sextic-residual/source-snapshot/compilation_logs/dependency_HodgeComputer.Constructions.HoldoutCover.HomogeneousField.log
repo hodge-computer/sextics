@@ -1,4 +1,0 @@
-'HoldoutConstruction.denominator_replacement_divergence' depends on axioms: [propext, Classical.choice, Quot.sound]
-'HoldoutConstruction.homogeneous_data_from_initial_denominator' depends on axioms: [propext,
- Classical.choice,
- Quot.sound]

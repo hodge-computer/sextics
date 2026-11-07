@@ -1,5 +1,0 @@
-'WeightedSupport.CheckedRank.Q_modular_binding' depends on axioms: [propext, Classical.choice, Quot.sound]
-'WeightedSupport.CheckedRank.HQ_modular_binding' depends on axioms: [propext, Classical.choice, Quot.sound]
-'WeightedSupport.CheckedRank.Q_rational_rank' depends on axioms: [propext, Classical.choice, Quot.sound]
-'WeightedSupport.CheckedRank.HQ_rational_rank' depends on axioms: [propext, Classical.choice, Quot.sound]
-'WeightedSupport.CheckedRank.HQ_kernel_finrank' depends on axioms: [propext, Classical.choice, Quot.sound]

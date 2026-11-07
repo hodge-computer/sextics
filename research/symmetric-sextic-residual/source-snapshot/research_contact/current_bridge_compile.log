@@ -1,6 +1,0 @@
-/workspace/scratch/0d11a6a4cf8f/proof_attempt4/CurrentVerifierBridge.lean:238:74: error: unexpected token 'omit'; expected 'lemma'
-'CurrentVerifierBridge.defect_clearing' depends on axioms: [propext, Classical.choice, Quot.sound]
-'CurrentVerifierBridge.residueCorrection_game_mod_cube' depends on axioms: [propext, Classical.choice, Quot.sound]
-'CurrentVerifierBridge.verify_of_residue_primitive' depends on axioms: [propext, Classical.choice, Quot.sound]
-'CurrentVerifierBridge.verify_of_residue_primitive_mod_cube' depends on axioms: [propext, Classical.choice, Quot.sound]
-'CurrentVerifierBridge.verify_of_affine_residue_primitive' depends on axioms: [propext, Classical.choice, Quot.sound]

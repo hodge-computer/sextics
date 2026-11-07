@@ -1,7 +1,0 @@
-Exact contact residual series reconstructed.
-Exact root contraction and original-ball binding PASS.
-Contact coefficient error exponents: [-2524, -2438, -2298, -2138, -1818, -1518]
-Functional coefficient error exponents: [-2407, -2400, -2276, -2116, -1796, -1496]
-Span exact center defect <=2^ -1726
-Span propagated error <=2^ -981
-EXACT RATIONAL FINITE-JET RANK48 PASS 4.649768590927124 seconds

@@ -1,7 +1,0 @@
---- a/src/neogb/convert.c
-+++ b/src/neogb/convert.c
-@@ -661,3 +661,3 @@
- #pragma omp parallel for num_threads(st->nthrds) \
--    private(i, j, k)
-+    private(i, j, k, deg)
-     for (k = 0; k < np; ++k) {
