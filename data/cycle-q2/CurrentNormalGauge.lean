@@ -5,12 +5,12 @@ import Proposal.Normalization
 The comparison error is retained. No archived source identity is assumed. -/
 noncomputable section
 namespace CycleQ2Concrete
-open MvPolynomial HodgeTestbed HodgeComputer CycleQ2Normalization
+open MvPolynomial HodgeTestbed HodgeComputer HodgeComputer.RadialNormalization
 
  def baseB : Poly := divergenceNumerator baseD baseN
  def normalK : Poly := baseB + F * baseR - F ^ 2 * baseQ
  def normalD : Poly := baseD ^ 2
- def normalN (i : Fin 6) : Poly := baseD * baseN i + radial (-normalK) i
+ def normalN (i : Fin 6) : Poly := baseD * baseN i + radial 6 2 (-normalK) i
  def normalR : Poly := baseD ^ 2 * baseR
  def normalQ : Poly := baseD ^ 2 * baseQ
 
@@ -36,7 +36,7 @@ lemma h_normalK : normalK.IsHomogeneous 7458 := by
 lemma h_normalD : normalD.IsHomogeneous 7452 := h_baseD.pow 2
 
 lemma h_normalN (i : Fin 6) : (normalN i).IsHomogeneous 7459 := by
-  have hr : (radial (-normalK) i).IsHomogeneous 7459 := by
+  have hr : (radial 6 2 (-normalK) i).IsHomogeneous 7459 := by
     exact (h_normalK.neg.C_mul (1 / 12 : ℂ)).mul (isHomogeneous_X ℂ i)
   exact (h_baseD.mul (h_baseN i)).add hr
 
@@ -60,7 +60,7 @@ theorem normal_first_error :
   unfold normalN normalD
   rw [HodgeComputer.directional_add, HodgeTestbed.directional_mul,
     directional_radial, euler_of_homogeneous CycleQ2Workspace.originalF_homogeneous]
-  simp only [map_natCast]
+  norm_num only [map_natCast, map_ofNat, Nat.cast_ofNat, Nat.reduceMul]
   linear_combination -(F * normalK) * twelve_inverse
 
 /-- The divergence calculation retains every derivative of the old denominator
@@ -71,10 +71,10 @@ theorem normal_divergence_identity :
       baseD ^ 2 * baseB := by
     simpa only [normalD, pow_two, baseB] using
       HodgeTestbed.divergenceNumerator_mul baseD baseD baseN
-  have hr : divergenceNumerator normalD (radial (-normalK)) = -normalD * normalK := by
+  have hr : divergenceNumerator normalD (radial 6 2 (-normalK)) = -normalD * normalK := by
     rw [divergenceNumerator_radial,
       euler_of_homogeneous h_normalK.neg, euler_of_homogeneous h_normalD]
-    simp only [map_natCast]
+    norm_num only [map_natCast, map_ofNat, Nat.cast_ofNat, Nat.reduceMul]
     linear_combination -(normalD * normalK) * twelve_inverse
   unfold normalN
   rw [HodgeComputer.divergenceNumerator_add, hs, hr]

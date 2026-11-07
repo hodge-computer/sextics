@@ -63,13 +63,72 @@ entry point. **The remaining `sorry` is
 correction. No such correction or complete original certificate is claimed,
 and no expanded JSON witness is exported.
 
+## A compact unconditional search equation
+
+[CanonicalTangents.lean](CanonicalTangents.lean) gives a second, small interface
+that does not import the saved polynomial current or assume its transport
+comparison. Set \(y=Y_2\), \(a=A/y\),
+\[
+e=X_0X_2^3Y_0+X_1^3X_2Y_1,\qquad
+h=12y^5+e,\qquad g=F_y=h/2.
+\]
+The rational field \(v_0=(ay/h)e_y\) satisfies \(2v_0(F)=A\), and
+\[
+-\operatorname{div}v_0=\frac{a(48y^5-e)}{h^2}.
+\]
+With \(T_i=g\partial_i-F_i\partial_y\) for \(i<5\), it therefore
+suffices to solve
+\[
+\sum_{i<5}T_i(t_i)=\frac{a(48y^5-e)}{h^2}+F^2s.
+\]
+Here the \(t_i\) must be homogeneous rational functions of degree two and
+regular at the generic point of every component of \(F=0\); \(s\) must
+also be regular there, with degree minus six. These conditions permit
+arbitrary additional legal poles. The resulting current is
+\(v_0+\sum_i t_iT_i\).
+
+The module formalizes the cleared equation. Its canonical denominator is
+\(g\), its numerator vector is \(n_0=(A/2)e_y\), and it sets
+\(B=g\operatorname{div}n_0-dg(n_0)\). Writing \(t_i=P_i/H\), the
+exact condition is
+\[
+g^2\operatorname{tangentBoundary}(H,P)+H^2B=F^2S.
+\]
+`CanonicalTangentSolution` includes homogeneous, nonzero, legal \(H\) and
+coefficients \(P_i\) of degree \(\deg H+2\).
+`originalGoal_iff_canonical_tangent_solution` proves this is an unconditional
+existence equivalence with the protected target: normalize any hypothetical
+certificate, subtract \(v_0\), and use the legal pivot \(g\) to express
+the tangent difference in the five directions. The theorem constructs no
+solution of this equation. The saved current remains useful as an alternative
+starting point whose reported residual has an additional factor of \(F\).
+
 ## Supporting identities
 
 [CurrentNormalGauge.lean](CurrentNormalGauge.lean) formalizes the saved
 normal-gauge construction while retaining its comparison error.
-[CurrentTangents.lean](CurrentTangents.lean) provides five tangent directions
-and their full moving-denominator closure equation. Its optional simplified
-route explicitly requires the archived partial identity.
+[CurrentTangents.lean](CurrentTangents.lean) provides the five directions
+\(T_i=F_5\partial_i-F_i\partial_5\), for \(i<5\), and their full
+moving-denominator closure equation, using the shared tangent calculus in
+[`RationalFields.TangentCoordinates`](/formal/lean/HodgeComputer/Constructions/RationalFields/TangentCoordinates.lean).
+That module treats an arbitrary polynomial over a commutative coefficient ring
+and an arbitrary number of variables; [CanonicalTangents.lean](CanonicalTangents.lean)
+supplies the present specialization. The theorem
+`originalGoal_iff_five_tangent_solution` proves that this route loses no
+certificate freedom, conditional on the archived partial identity \(C=0\).
+For any polynomial vector \(M\) tangent to \(F\), the exact identity
+\[
+\sum_{i<5}M_i(F_5e_i-F_ie_5)=F_5M
+\]
+represents \(M/H\) in these five directions with denominator \(F_5H\).
+The moving-denominator boundary scales by \(F_5^2\), so the derivatives of
+the pivot are retained. [DenominatorSpecialization.lean](DenominatorSpecialization.lean)
+proves that this new pole is legal: the same monic specialization
+sends \(F\) to \(f=X^6+2X^3+X+132\) and \(F_5\) to \(X+7\), with
+\(f(-7)=117088\ne0\). `FiveTangentSolution` includes all grading and
+legality hypotheses, and `certificate_of_five_tangent_solution` assembles the
+original certificate from a solution. Neither the source comparison nor a
+solution of this five-function equation is asserted here.
 [CurrentAmbientLift.lean](CurrentAmbientLift.lean) proves reciprocal-cubic,
 adjoint, and coordinate-transport identities with off-hypersurface errors;
 instantiating the full circuit transport remains separate.
@@ -78,8 +137,13 @@ instantiating the full circuit transport remains separate.
 reductions and 21 polynomial Bézout certificates, then monicity in \(X_0\)
 to prove complex coprimality of the full multivariate denominator without a
 dense expansion. The same witnesses prove that the denominator is nonzero.
-The earlier [normalization equivalence](Normalization.lean) remains available;
-normalization preserves a partial current's residual defect.
+The [normalization equivalence](Normalization.lean) now applies
+[`RationalFields.RadialNormalization`](/formal/lean/HodgeComputer/Constructions/RationalFields/RadialNormalization.lean).
+For a degree-\(d\) hypersurface in projective dimension \(n\), its theorem
+normalizes every certificate with \(n+1\le dq\), preserving the same denominator,
+quotient, and entire cleared defect. Here \((n,d,q)=(5,6,2)\).
+The saved current's explicit comparison polynomial and its remaining closure
+equation are separate from this reusable normalization.
 
 The construction builds on `hodgepodgeconjecture`'s
 [cycle-three proof](../cycle-three/solution.md), the source-transport work of

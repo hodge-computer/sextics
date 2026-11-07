@@ -1,2 +1,5 @@
 import HodgeComputer.Constructions.RationalFields.Homogenization
 import HodgeComputer.Constructions.RationalFields.ReflectionCover
+import HodgeComputer.Constructions.RationalFields.CommonDenominatorSubstitution
+import HodgeComputer.Constructions.RationalFields.RadialNormalization
+import HodgeComputer.Constructions.RationalFields.TangentCoordinates
