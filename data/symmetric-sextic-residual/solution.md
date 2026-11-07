@@ -207,6 +207,31 @@ r(x)+r(y)+r(z)=0,\qquad r(x)+r(y)=-r(z).
 Thus the complementary pair carries the negative third-sheet source.
 Over the étale open, the unordered-pair cover is canonically the original cubic cover via the remaining root. Its transfer is \(\operatorname{Tr}-\mathrm{id}\), hence acts by \(-1\) on trace-zero elements. This is a self-correspondence, so the complementary-pair identity does not itself provide a new supporting variety. These are exact source identities under the stated assumptions; they do not construct a rational primitive or establish the primitive-existence obligation below.
 
+## An explicit supporting contact family
+
+The relative geometric route can be realized by an explicit contact component on this exact equation. For a variable triple, write \(s,e_2,e_3\) for its elementary symmetric functions and set
+\[
+S=s^2,\qquad R=e_3+s^3-2se_2,\qquad
+C(S,Q)=-2S^3+6S^2Q-3SQ^2-2Q^3.
+\]
+Newton's identities give \(\sum x_i^6=3R^2+C(S,e_2)\). Hence the fixed sextic is the sum of \(3R_X^2+3R_Y^2\) and a cubic in \((S_X,Q_X,S_Y,Q_Y)\). The book's [cubic-surface line construction](../../docs/03b-weighted-threefolds.md#3b2-genus-four-norm-contacts) produces norm contacts from lines on that cubic surface.
+
+Homogenize the reflected cubic to
+\[
+G_\lambda(a,b,c,d,u)
+ =a^6 f(\lambda,b/a,c/a,d/a,u/a^2),
+\qquad T_\lambda=(G_\lambda=0)\subset\mathbb P(1,1,1,1,2).
+\]
+At \(\lambda=1\), a simple algebraic line branch modulo 37 gives a smooth genus-four contact. Its contact-presentation derivative has rank 70, and its negative normal ideal has rank 59. A transverse algebraic curve in the fixed-equation presentation fiber has 48 independent normal-obstruction coefficient rows. The [complete construction and reproduction scripts](https://github.com/hodge-computer/sextics/pull/223#issuecomment-6712331048) include the exact source, the characteristic-zero lift, the normal-rank upper bound, the coefficient recurrence, and the nonzero 48-minor. The weighted equation is held fixed throughout that recurrence.
+
+By the book's normal-pairing and finite-spanning criterion, the resulting correspondence satisfies
+\[
+\Gamma_*:H^1(\Lambda)(-1)\twoheadrightarrow H^3(T_1)^-.
+\]
+The defining seed and the unit pivot minors continue algebraically in \(\lambda\), so the same explicit contact component serves the full negative sector on the generic reflection fiber. This realizes the supporting correspondence on the given pencil without first specializing from a different weighted threefold.
+
+The same computation supplies the canonical residue normalization \(\eta_R=\tau_{(f_1,f_2,h,g_1,g_2)}(R\,d_\Lambda h)\) and an étale moving-point component over the ratio plane \((b/a,d/c)\). Thus a finite separable extension carrying the closed forms and moving point is available for the trace construction. The literal traced-source identity for the general cubic in \(u\), including the inverse correspondence operator and differential correction, has not been computed. The cohomological argument and these family comparisons have not been formalized, and no rational primitive or explicit certificate denominator is supplied by the current draft.
+
 ## Conditional clearing and the certificate
 
 Given such a primitive,
@@ -269,7 +294,7 @@ The common denominator is nonzero, relatively prime to \(F\), and homogeneous of
 
 `Submission.residual_primitive_exists` must construct a primitive for the explicit density \(2\delta/f_u\). The checked equivalence above then proves `Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive`. The intended geometric route identifies the actual contact correspondence with the relevant cohomology map and proves support-to-function-field exactness. Contact identities and a finite rank calculation alone do not supply this implication. [ContactResidueAnnihilator](ContactResidueAnnihilator.lean) and [WeightedFiberSmoothness](WeightedFiberSmoothness.lean) provide supporting algebra and smoothness results, not primitive existence.
 
-This primitive is relative over \(\mathbb C(\lambda)\): its equation uses only \(E_b,E_c,E_d\). A global primitive involving a \(\lambda\)-component would not by itself meet that endpoint. The full ordinary-current construction above has its own independently proved endpoint and can be used if its complete four-function equation is solved. The book's weighted-fiber support argument supplies a mathematical route to the original relative primitive: spread the anti-projector's supporting divisor over a finite base extension, identify the exact residue density, and obtain relative de Rham exactness on the function field. Finite trace can then descend the primitive. Those geometric comparisons remain unformalized here.
+This primitive is relative over \(\mathbb C(\lambda)\): its equation uses only \(E_b,E_c,E_d\). A global primitive involving a \(\lambda\)-component would not by itself meet that endpoint. The full ordinary-current construction above has its own independently proved endpoint and can be used if its complete four-function equation is solved. The explicit contact component supplies the supporting correspondence for the book's weighted-fiber route: spread the anti-projector's supporting divisor over a finite base extension, identify the exact residue density, and obtain relative de Rham exactness on the function field. Finite trace descends the primitive. Those geometric comparisons remain unformalized here; the exact primitive coefficients have not been extracted from the contact construction.
 
 The sole remaining lemma is admitted. The final theorem therefore still depends on `sorryAx` and does not establish the protected certificate independently. The proved transport and coordinate identities depend only on Lean's usual logical axioms.
 

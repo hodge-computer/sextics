@@ -103,6 +103,36 @@ the tangent difference in the five directions. The theorem constructs no
 solution of this equation. The saved current remains useful as an alternative
 starting point whose reported residual has an additional factor of \(F\).
 
+## A conical current and an explicit connection presentation
+
+An alternative mathematical presentation starts from the paired Euler field
+\[
+T=X_0\partial_{X_0}-Y_0\partial_{Y_0},\qquad
+H=T(F),\quad H_1=T(H),\quad H_2=T(H_1).
+\]
+Since \(\operatorname{div}T=0\) and \(T(A)=0\), the two-component current
+\[
+V_* =\frac{A(H^2-FH_1)}{2H^3}T
+\]
+satisfies the exact identity
+\[
+A-2V_*(F)+F\operatorname{div}V_*
+ =F^2\frac{A(3H_1^2-HH_2)}{2H^4}.
+\]
+The denominator \(H^3\) has degree 18 and is independent of \(Y_2\), so it is legal. Its residual is nonzero modulo \(F\); this remains a partial current. The cancellation order is the already available \(F^2\), and an elementary normal current has the smaller denominator degree 15. The useful distinction here is the conical denominator and six-term residual numerator.
+
+On \(X_2=1\), write the actual equation as \(F=y^6+cy+f\), with \(y=Y_2\) and four physical base coordinates \(z\). The trace-zero basis
+\[
+e=(y,y^2,y^3,y^4,y^5+5c/6)
+\]
+of the degree-six separable coefficient algebra gives explicit connection matrices \(B_c,B_f\). The remaining correction is equivalent to a connection-divergence equation for four arbitrary columns \(u_j\in\mathbb C(z)^5\), with operators
+\[
+\nabla_j u_j=\partial_j u_j+(c_jB_c+f_jB_f)u_j.
+\]
+The [exact connection packet](https://github.com/hodge-computer/sextics/pull/223#issuecomment-6712406587) supplies both matrices, the five-entry forcing vector, their flatness check, reconstruction of a certificate from a solution, and the converse extraction from any certificate. Rational dependence on all four base coordinates is retained; the coefficients are not restricted to functions of \(c,f\). This is a concrete specialization of the canonical tangent/residue reduction, not an existence proof for the remaining equation. These additional identities have exact symbolic checks but have not been incorporated into the Lean endpoint.
+
+For any subsequently constructed ordinary certificate with a conical denominator, the book's [fixed-denominator strictification corollary](../../docs/05-computation.md#51-fixing-a-denominator-makes-the-problem-linear) preserves that exact denominator and its pole multiplicity. It does not apply to the unfinished \(F^2\) partial current above.
+
 ## Supporting identities
 
 [CurrentNormalGauge.lean](CurrentNormalGauge.lean) formalizes the saved

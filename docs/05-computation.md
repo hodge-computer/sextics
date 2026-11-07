@@ -21,6 +21,15 @@ For a candidate supporting divisor, this gives a deterministic target-map comput
 
 Denominator multiplicity and presentation redundancy must be distinguished. Multiplying both \(N\) and \(D\) by the same polynomial changes no rational field. Searching all numerators over \(D^{m}\) instead changes the allowed pole order. At \(q=1\) the prescribed-support theorem proves that this cannot rescue a denominator rejected by the complete numerator system over \(D\). At \(q=2\) it can: \(D^{2}\) may be necessary. Chapter 1 gives the precise statement.
 
+**Conical denominators allow strictification without increasing poles.** Over a characteristic-zero field \(k\), let \(F\in k[u,z_1,\ldots,z_n]\), with \(n\ge1\), be homogeneous of degree \(d>0\), with a nonzero constant coefficient of \(u^d\). Let the prescribed nonzero homogeneous denominator \(D\) be independent of \(u\). For \(q\ge1\), source degree \(d(q+1)-(n+1)\), and numerator degree \(\deg D+dq-n\), an ordinary certificate with denominator \(D\) can be made normalized and strict with that same denominator.
+
+Indeed, replace each numerator by its remainder \(M_i\) modulo \(F^q\). Division introduces no coefficient denominators and preserves homogeneity, while \(\deg_u M_i<dq\). The polynomial normal-form argument then gives \(q(M/D)(F)-F\operatorname{div}(M/D)=A\). Coprimality of \(F,D\), which follows from the constant leading coefficient, implies
+\[
+H=\frac{qM(F)-AD}{F}\in k[u,z_1,\ldots,z_n],\qquad
+\operatorname{div}(M/D)=H/D.
+\]
+Euler normalization therefore replaces the numerator by \(M-H\varepsilon/(dq)\), where \(\varepsilon\) is the Euler field, and retains \(D\). This assertion concerns the exact denominator already supplied: if existence is known over \(D^2\), it preserves \(D^2\) and does not imply existence over \(D\).
+
 ## 5.2 Solving \(E_{1}\) does not solve \(E_{2}\)
 
 Write \(R_F=S/J(F)\). Since \(q\) is invertible, \(E_{1}\) has a polynomial solution precisely when \(A\cdot D\in J(F)\), or equivalently \([A][D]=0\) in \(R_F\). Taking homogeneous components of a Jacobian representation gives exactly the required numerator degree; averaging gives the required parity. Thus \(E_{1}\) is an exact linear preprocessing step, with no guessed shape for \(D\).
