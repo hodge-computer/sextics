@@ -1,5 +1,5 @@
 import Proposal.SymmetricPrimitiveEndpoint
-import HodgeComputer.Constructions.ResidueTransport.CoefficientReduction
+import Proposal.CoefficientReduction
 
 /-!
 # Coefficient-field reduction on the actual symmetric chart

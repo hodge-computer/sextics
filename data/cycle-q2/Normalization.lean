@@ -1,5 +1,5 @@
 import Proposal.Assembly
-import HodgeComputer.Constructions.RationalFields.RadialNormalization
+import Proposal.RadialNormalization
 
 /-! The protected pole-order-two target is equivalent to a normalized solution.
 The same-denominator radial construction is supplied by the shared theorem for

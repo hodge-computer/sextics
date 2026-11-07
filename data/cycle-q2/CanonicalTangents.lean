@@ -1,7 +1,7 @@
 import Proposal.CurrentCore
 import Proposal.Normalization
 import Proposal.DenominatorSpecialization
-import HodgeComputer.Constructions.RationalFields.TangentCoordinates
+import Proposal.TangentCoordinates
 
 /-! Specialization of the shared tangent-coordinate calculus to the protected
 sextic. The explicit pivot legality and canonical forcing remain instance data. -/

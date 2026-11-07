@@ -139,8 +139,8 @@ For any subsequently constructed ordinary certificate with a conical denominator
 normal-gauge construction while retaining its comparison error.
 [CurrentTangents.lean](CurrentTangents.lean) provides the five directions
 \(T_i=F_5\partial_i-F_i\partial_5\), for \(i<5\), and their full
-moving-denominator closure equation, using the shared tangent calculus in
-[`RationalFields.TangentCoordinates`](/formal/lean/HodgeComputer/Constructions/RationalFields/TangentCoordinates.lean).
+moving-denominator closure equation, using the general tangent calculus in
+[`TangentCoordinates`](TangentCoordinates.lean).
 That module treats an arbitrary polynomial over a commutative coefficient ring
 and an arbitrary number of variables; [CanonicalTangents.lean](CanonicalTangents.lean)
 supplies the present specialization. The theorem
@@ -168,7 +168,7 @@ reductions and 21 polynomial Bézout certificates, then monicity in \(X_0\)
 to prove complex coprimality of the full multivariate denominator without a
 dense expansion. The same witnesses prove that the denominator is nonzero.
 The [normalization equivalence](Normalization.lean) now applies
-[`RationalFields.RadialNormalization`](/formal/lean/HodgeComputer/Constructions/RationalFields/RadialNormalization.lean).
+[`RadialNormalization`](RadialNormalization.lean).
 For a degree-\(d\) hypersurface in projective dimension \(n\), its theorem
 normalizes every certificate with \(n+1\le dq\), preserving the same denominator,
 quotient, and entire cleared defect. Here \((n,d,q)=(5,6,2)\).

@@ -68,7 +68,7 @@ Put \(\delta=\partial_bW_b+\partial_cW_c+\partial_dW_d\). The quotient rule give
 \sum_{j=b,c,d}E_j\left(-\frac{2W_j}{f_u}\right)
 =\rho-\frac{2\delta}{f_u}.
 \]
-All expressions here are evaluated at \(u=v^2\). The general identity is proved in [CoefficientReduction](../../formal/lean/HodgeComputer/Constructions/ResidueTransport/CoefficientReduction.lean), and [SymmetricCoefficientReduction](SymmetricCoefficientReduction.lean) binds its tangent derivations to this function field.
+All expressions here are evaluated at \(u=v^2\). The general identity is proved in [CoefficientReduction](CoefficientReduction.lean), and [SymmetricCoefficientReduction](SymmetricCoefficientReduction.lean) binds its tangent derivations to this function field.
 
 Consequently the original relative-primitive problem is **equivalent** to
 \[
@@ -90,7 +90,7 @@ W=V_0+uV_1+u^2V_2,\qquad
 V=v_0+uv_1+u^2v_2,
 \qquad V_i\in E^4,\quad v_i\in E,
 \]
-with an exact identity. This degree bound is complete, rather than a chosen search cutoff. It follows by reducing all five components modulo the cubic: the change \(fT\) contributes only \(-f^2\operatorname{div}T\), while the reduced defect has degree at most five. The general positive-pole-order statement is proved in [NormalRemainder](../../formal/lean/HodgeComputer/Constructions/ResidueTransport/NormalRemainder.lean), including inversion of the original denominator modulo the required power of \(f\).
+with an exact identity. This degree bound is complete, rather than a chosen search cutoff. It follows by reducing all five components modulo the cubic: the change \(fT\) contributes only \(-f^2\operatorname{div}T\), while the reduced defect has degree at most five. The general positive-pole-order statement is proved in [NormalRemainder](NormalRemainder.lean), including inversion of the original denominator modulo the required power of \(f\).
 
 For this target, simultaneous interchange of \(X_0,X_1\) and \(Y_0,Y_1\) preserves \(F,A\). Averaging a homogeneous certificate under that symmetry, descending through \(u=v^2\), and cancelling the radial component places it in the ordinary affine equation above. These geometric coordinate comparisons give a mathematical equivalence with the full certificate problem; their necessity direction has not yet been composed into a Lean theorem.
 
@@ -164,11 +164,11 @@ Its physical pushforward is
 \[
 V=(0,0,aW_b,a(W_c+vW_\lambda),a(W_c-vW_\lambda),aW_d)|_{u=v^2},
 \]
-which satisfies \(V(F)=A+hF\) and \(\operatorname{div}V=h\). The theorem `ordinary_current_transport` proves the underlying contraction and divergence formulas, and `explicit_verify_game` proves a literal homogeneous certificate with \(Q=0\) after the displayed chart clearing below. This construction needs no intermediate exact-normalization hypothesis. If a normalized field is desired, the general [radial-normalization theorem](../../formal/lean/HodgeComputer/Constructions/RationalFields/RadialNormalization.lean) applies while retaining the denominator and zero quotient.
+which satisfies \(V(F)=A+hF\) and \(\operatorname{div}V=h\). The theorem `ordinary_current_transport` proves the underlying contraction and divergence formulas, and `explicit_verify_game` proves a literal homogeneous certificate with \(Q=0\) after the displayed chart clearing below. This construction needs no intermediate exact-normalization hypothesis. If a normalized field is desired, [Euler normalization](#technical-information/certificates) retains the denominator and zero quotient.
 
 ### The scalar correction and its exact obstruction
 
-The reusable [CoefficientBalance](../../formal/lean/HodgeComputer/Constructions/ResidueTransport/CoefficientBalance.lean) module makes one scalar reduction precise. Suppose a base field \(W_0\) and a correction direction \(C\) satisfy
+The reusable [CoefficientBalance](CoefficientBalance.lean) module makes one scalar reduction precise. Suppose a base field \(W_0\) and a correction direction \(C\) satisfy
 \[
 W_0(f)=P,\qquad C(f)=\alpha f,\qquad
 C(\ell)=\alpha\ell,\qquad \operatorname{div}C=4\alpha,
@@ -188,7 +188,7 @@ For the explicit \(u\)-independent coefficient-fiber direction fixing \(f_0/\ell
 
 ## Cubic trace cancellation
 
-[CubicTrace](../../formal/lean/HodgeComputer/Constructions/ResidueTransport/CubicTrace.lean) proves an exact companion-matrix
+[CubicTrace](CubicTrace.lean) proves an exact companion-matrix
 trace identity for a cubic equation and quadratic source.
 [SymmetricCubicTrace](SymmetricCubicTrace.lean) binds their coefficients to
 the protected equation: \(f=\ell u^3+f_2u^2+f_1u+f_0\) and

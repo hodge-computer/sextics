@@ -1,4 +1,4 @@
-import HodgeComputer.Constructions.ResidueTransport.CubicTrace
+import Proposal.CubicTrace
 import Proposal.WeightedPrimitiveTransportCore
 
 /-!

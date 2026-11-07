@@ -1,5 +1,5 @@
 import Proposal.SymmetricCertificateTransport
-import HodgeComputer.Constructions.ResidueTransport.CoefficientBalance
+import Proposal.CoefficientBalance
 import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
 
 /-!
