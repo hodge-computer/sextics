@@ -1,6 +1,6 @@
 # 3B. Weighted threefolds and two-reflection sextics
 
-[Previous: split sextics and K3 correspondences](#technical-information/split-and-k3) · [Contents](#technical-information/introduction) · [Next: families, representations and deformation](#technical-information/known-locus)
+[Previous: split sextics and K3 correspondences](#technical-information/split-and-k3) · [Contents](#technical-information/introduction) · [Next: quadratic nets and pair correspondences](#technical-information/quadratic-nets)
 
 A smooth even sextic with one additional reflection in an \(X\)-coordinate and one in a \(Y\)-coordinate has its entire invariant fourth cohomology supported on a divisor. The individual reflection quotients are Fano and supply the sectors where either reflection acts positively. The remaining simultaneous negative sector comes from a family of weighted Calabi–Yau threefolds. This chapter proves the required threefold theorem and the passage from its fibers to the fourfold.
 
@@ -438,11 +438,17 @@ The theorem covers the entire smooth locus of a 104-coefficient linear family, o
 
 The coordinate orbit and comparison with other supported families are discussed in [Chapter 4](#technical-information/known-locus). The Fano quotient results remain part of the theorem: they supply the sectors with either reflection positive, while the weighted family supplies the simultaneous negative sector.
 
+The two-reflection and [quadratic-net families](#technical-information/quadratic-nets) are incomparable, even after block-linear changes. In the bidegree-\((4,2)\) part of a general two-reflection equation, the quadrics appearing as coefficients of \(X\)-quartics span the four-dimensional space
+\[
+\langle Y_0^2,Y_0Y_1,Y_1^2,t^2\rangle.
+\]
+A presentation through three \(Y\)-quadrics would bound this rank by three; the mirrored bidegree-\((2,4)\) calculation excludes an \(X\)-quadric presentation. Conversely, the 127-dimensional saturated net family cannot be contained in the 111-dimensional saturated two-reflection family. These dimensions are proved in Chapter 4.
+
 Two immediate applications illustrate the coefficient scope.
 
 - If \(F=h(X_0,X_1,Y_0,Y_1)+b(s,t)\), with \(h\) even in \((Y_0,Y_1)\) and \(b\) even in \(t\), homogeneity makes \(b\) even in \(s\). Thus every smooth member of this \(4+2\) split family is covered, including a sum of two arbitrary same-parity binary sextics and a separately even binary sextic. That binary-block subfamily also admits the torsion-contact construction of [Chapter 2A](#technical-information/binary-blocks), which gives explicit fields through two general Wronskian spanning theorems.
 - If an even sextic is invariant under an \(X\)-coordinate transposition and an independent \(Y\)-coordinate transposition, their sums and differences diagonalize them over \(\mathbb Q\) to the required reflections. Block-symmetric even sextics therefore satisfy the theorem after such a coordinate change.
 
-For data over a characteristic-zero field, the support-to-certificate equivalence and coefficient descent of [Chapter 1](#technical-information/certificates) give legal certificates for every invariant target with \(1\le q\le4\), including all central \(q=1,2\) targets. The higher-pole reduction of [Chapter 3, §3.5](#technical-information/geometric-support) preserves legal denominators and extends existence to every positive \(q\).
+Over a characteristic-zero field, the support-to-certificate equivalence and coefficient descent of [Chapter 1](#technical-information/certificates), followed by the higher-pole reduction of [Chapter 3, §3.5](#technical-information/geometric-support), give legal certificates at every positive pole order.
 
 The two extra reflections are essential hypotheses of this proof. Global \(Y\)-evenness alone does not provide either the weighted quotient fibers or their two-minus core involution.

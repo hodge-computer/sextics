@@ -31,4 +31,4 @@ The independent transpositions become \(s\mapsto-s\) and \(t\mapsto-t\), one in 
 
 Thus the target lies in the two-reflection residual sector supplied by the chapter's weighted-threefold correspondence. Reduction of the original equation modulo five is Fermat, proving smoothness. All hypotheses of the theorem hold for the exact protected equation, and the support-to-certificate theorem establishes rational certificate existence.
 
-The remaining submission is a Lean proof of that protected existence statement. Chapter 3B provides the geometric proof and exact finite algebra checks, but no cleared rational certificate or accepted Lean proof for this target. The atlas's formal status changes only after a checked solve is accepted.
+The example shows how independent block symmetries supply support beyond their individual invariant quotients. One transposition in each parity block gives the two reflections required by the theorem, which serves their joint negative residue character. [The simultaneous-permutation example](#case/diagonal-permutation) has a different group action and does not supply these independent reflections.

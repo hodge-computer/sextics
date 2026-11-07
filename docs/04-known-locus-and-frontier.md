@@ -1,8 +1,8 @@
 # 4. Families, representations and deformation
 
-[Previous: weighted threefolds and two-reflection sextics](#technical-information/weighted-threefolds) · [Contents](#technical-information/introduction) · [Next: computation](#technical-information/computation)
+[Previous: quadratic nets and pair correspondences](#technical-information/quadratic-nets) · [Contents](#technical-information/introduction) · [Next: computation](#technical-information/computation)
 
-Support theorems have two kinds of hypotheses: restrictions on the coefficient family and restrictions on the cohomological representation. This chapter computes their dimensions, studies two families with finite symmetries, and proves a criterion propagating one nonzero supported class over a dominant deformation family. The final section analyzes the representations of natural quotients and a dimension obstruction to an ordinary Fano-extension argument.
+Support theorems have two kinds of hypotheses: restrictions on the coefficient family and restrictions on the cohomological representation. This chapter computes the dimensions of coefficient families, applies finite quotients and deck/exchange descent, and proves a criterion propagating one nonzero supported class over a dominant deformation family. The final section analyzes the representations of natural quotients and a dimension obstruction to an ordinary Fano-extension argument.
 
 ## 4.1 Coefficient spaces, Hodge structures and orbit dimensions
 
@@ -30,24 +30,43 @@ For example, the trace follows by dividing \((1-t^{5})^{3}(1+t^{5})^{3}\) by \((
 
 Let \(G=GL_{3}(X)\times GL_{3}(Y)\), of dimension eighteen. For a linear coefficient family \(V\) preserved by a connected subgroup \(H\subset G\), the image of \(G\times V\to S_{6}\) has dimension at most \(\operatorname{dim} V+18-\operatorname{dim} H\): the action of \(H\) on the source, \((g,F)\mapsto(gh^{-1},hF)\), supplies fibres of dimension \(\operatorname{dim} H\). A matching differential rank at any point proves equality. At the Fermat member \(F_{0}=\sum Z_{i}^{6}\) the eighteen orbit derivatives are the distinct monomials \(6\cdot Z_{i}^{5}\cdot Z_{j}\), with \(i,j\) in the same parity block. Thus, for a monomial coefficient family containing \(F_{0}\), counting those derivatives outside \(V\) proves the required lower bound without a generic-rank assumption.
 
-The same eighteen independent derivatives give affine orbit dimension eighteen at \(F_{0}\) and generically. Projectivization removes the common scalar direction, so the generic projective orbit has dimension seventeen. We report the projective normal-form dimension, the dimension of its \(G\)-saturation, and the quotient dimension. The latter is saturation dimension minus seventeen; in particular, the ambient quotient has dimension 218.
+The same eighteen independent derivatives give affine orbit dimension eighteen at \(F_{0}\) and generically on each family below. Projectivization removes the common scalar direction, so the generic projective orbit has dimension seventeen. The equation-locus dimensions below include all block coordinate changes; their rational quotient dimensions are seventeen smaller. In particular, the ambient quotient has dimension 218.
 
-Each family in the following table has \(H^4(X)^\tau\subset N^1H^4(X)\) throughout its smooth locus. The support mechanisms are proved in Chapters 3, 3A and 3B.
+Each family in the following table has \(H^4(X)^\tau\subset N^1H^4(X)\) throughout its smooth locus. The support mechanisms are proved in Chapters 3A–3C and §4.2 below.
 
-| Smooth sextic family | Support mechanism | Normal form | Saturation | Quotient |
-| --- | --- | ---: | ---: | ---: |
-| \(F\) separately even in \(Y_{0},Y_{1},Y_{2}\), or its \(X/Y\) mirror | Reflection quotients | 118 | 124 | 107 |
-| One extra \(X\) reflection and one extra \(Y\) reflection | Fano quotients and weighted threefolds | 103 | 111 | 94 |
-| Block-sign split \(f(X)+g(Y)\) | Elliptic companions and contraction | 55 | 55 | 38 |
-| Polarized split \(f(X+Y)+f(X-Y)\), with the order-three plane family | Algebraic Kuga–Satake correspondence | 11 | 24 | 7 |
+| Smooth sextic family | Support mechanism | Projective equation locus | Quotient |
+| --- | --- | ---: | ---: |
+| \(G(X,Q_0(Y),Q_1(Y),Q_2(Y))\), or its \(X/Y\) mirror | Quadratic-net pair correspondence | 127 | 110 |
+| One extra \(X\) reflection and one extra \(Y\) reflection | Fano quotients and weighted threefolds | 111 | 94 |
+| Cyclic-six family of §4.2 | Deck/exchange descent | 91 | 74 |
+| Block-sign split \(f(X)+g(Y)\) | Elliptic companions and contraction | 55 | 38 |
+| Polarized split \(f(X+Y)+f(X-Y)\), with the order-three plane family | Algebraic Kuga–Satake correspondence | 24 | 7 |
 
 The order-three family is \(f(z_0,z_1,z_2)=g_6(z_0,z_1)+z_2^3g_3(z_0,z_1)+a z_2^6\). The two-reflection theorem also applies to additive splittings and coordinate symmetries that give these reflections after a block-linear coordinate change, as described in [Chapter 3B](#technical-information/weighted-threefolds).
 
-**Proof of the dimensions.** With three separate \(Y\) reflections the coefficient count is \(28+45+36+10=119\), according to half the \(Y\)-degree. \(GL_3(X)\) and the diagonal \(Y\) torus preserve this space, a subgroup of dimension twelve; exactly six Fermat orbit monomials lie outside it. The saturated cone therefore has dimension 125.
+### Quadratic nets and recovery from the equation
+
+Let \(N\subset S^2Y^*\) be a basepoint-free net. Its map of projective planes is finite and dominant, so the three quadratic generators are algebraically independent. For a fixed \(N\), the coefficient space is
+
+\[
+S^6X^*\oplus S^4X^*\otimes N
+\oplus S^2X^*\otimes\operatorname{Sym}^2N
+\oplus\operatorname{Sym}^3N,
+\]
+
+of dimension \(28+15\cdot3+6\cdot6+10=119\). These spaces form a rank-119 vector subbundle of the trivial sextic bundle over the basepoint-free open subset of \(\operatorname{Gr}(3,6)\), of dimension nine. Its projectivization has dimension \(119+9-1=127\).
+
+This is the dimension of the image, rather than only of its presentations. On the open set where the bidegree-\((4,2)\) contraction \(S^4X\to S^2Y^*\) has rank three, its image recovers \(N\). The recovery is regular on that rank locus. Basepoint-freeness is open, and membership of the remaining coefficient pieces in \(S^2X^*\otimes\operatorname{Sym}^2N\) and \(\operatorname{Sym}^3N\) is a closed condition in quotient bundles. Thus the smooth rank-three presentation locus is a quasiprojective subvariety of \(\mathbb P^{235}\), isomorphic to the corresponding open subset of the projective bundle. Its smooth locus is nonempty by the observation in Chapter 3C. The family is already \(G\)-stable, and its quotient dimension is \(127-17=110\).
+
+**Example: diagonal nets.** Separate evenness in the three \(Y_i\) is composition through \(N=\langle Y_0^2,Y_1^2,Y_2^2\rangle\). Its coefficient space has projective dimension 118. The only rank-one conics in this net are the three coordinate squares, so its stabilizer in \(GL_3(Y)\) has dimension three. The net orbit has dimension six; hence this special locus has projective dimension \(119+6-1=124\), quotient dimension 107. Its full support is the diagonal-net corollary of Chapter 3C.
+
+### The other coefficient families
 
 For the two-reflection family, take the reflected coordinates to be \(X_2,Y_2\). Chapter 3B counts 104 coefficients. The preserving subgroup \(GL_2(X_0,X_1)\times G_m(X_2)\times GL_2(Y_0,Y_1)\times G_m(Y_2)\) has dimension ten. Exactly eight Fermat orbit derivatives mix a reflected coordinate with an unreflected coordinate in the same block, and lie outside the coefficient family. Thus its saturated cone has dimension \(104+8=112\), proving the projective dimensions \((103,111,94)\).
 
-The block-sign split family has \(28+28=56\) coefficients and is already \(G\)-stable, giving projective dimensions \((55,55,38)\).
+The cyclic-six family has 88 coefficients. Its preserving subgroup \(GL_3(X)\times GL_1(y)\times GL_2(z_0,z_1)\) has dimension fourteen. At Fermat, the four orbit monomials mixing \(y\) with \(z_0,z_1\) lie outside its invariant coefficient space. Its projective normal form therefore has dimension 87, its saturation dimension \(88+4-1=91\), and its quotient dimension 74.
+
+The block-sign split family has \(28+28=56\) coefficients and is already \(G\)-stable, giving projective dimension 55 and quotient dimension 38.
 
 For the polarized family, the twelve coefficients are \(7+4+1\). Put \(U=X+Y\) and \(V=X-Y\). At \(f=\sum z_{i}^{6}\) the family tangent consists of \(h(U)+h(V)\) for the twelve order-three monomials \(h\). A block-linear infinitesimal change in \(X,Y\) becomes
 
@@ -60,11 +79,143 @@ For the polarized family, the twelve coefficients are \(7+4+1\). Put \(U=X+Y\) a
 
 with arbitrary \(3\times 3\) matrices \(C,E\). The eighteen displayed directions are independent. The nine \(E\) directions have mixed \(U,V\) degree and do not meet the family tangent. Of the nine \(C\) directions, exactly five meet it: \(i,j\in \{0,1\}\), and \(i=j=2\). Thus the combined tangent dimension is \(12+18-5=25\). The simultaneous \(GL_{2}(z_{0},z_{1})\times G_{m}(z_{2})\), of dimension five, supplies the matching upper bound. Subtracting one for projectivization and seventeen for the generic orbit proves every entry in the table. All witnesses used here are smooth; for the polarized witness, the invertible \(U,V\) change reduces smoothness to Fermat. ∎
 
+### Larger quadratic spaces
+
+More generally, let \(N\subset S^2Y^*\) have dimension \(r\), and let \(b_r,c_r\) be the generic dimensions of its quadratic and cubic multiplication images. Sextics composed through \(N\) have coefficient-fiber dimension
+
+\[
+28+15r+6b_r+c_r.
+\]
+
+On the rank-\(r\) contraction locus the equation again recovers \(N\), so the projective image dimension is this number plus \(r(6-r)-1\). The resulting dimensions are
+
+| \(r\) | \(b_r\) | \(c_r\) | Projective presentation locus |
+| ---: | ---: | ---: | ---: |
+| 3 | 6 | 10 | 127 |
+| 4 | 10 | 20 | 175 |
+| 5 | 15 | 28 | 225 |
+| 6 | 15 | 28 | 235 |
+
+The multiplication ranks have elementary witnesses. For \(r=4\), take \(N=\langle x^2,y^2,z^2,xy+xz+yz\rangle\). Over \(\mathbb C(x^2,y^2,z^2)\), the fourth generator has four distinct conjugates under sign changes modulo simultaneous sign, and therefore minimal polynomial of degree four. There is no relation of degree at most three among the four generators, proving \(b_4=10,c_4=20\). For \(r=5\), take
+\[
+N=\langle xy,xz,yz,x^2-y^2,y^2-z^2\rangle.
+\]
+Its pairwise products span every quartic monomial: the cross-products give \(x^2y^2,x^2z^2,y^2z^2,xyz^2\) and their permutations; products of the two square differences give the pure fourth powers; multiplying a square difference by \(xy,xz,yz\) gives the remaining monomials. Thus \(N^2=S^4Y^*\). It follows that \(N^3=N S^4Y^*=S^6Y^*\): use \(S^4Y^*=N^2\subset N S^2Y^*\) and multiply by \(S^2Y^*\). Maximal rank is open, giving the generic values. The cases \(r=3,6\) are immediate from algebraic independence and the full quadratic space.
+
+These are dimensions of presentation loci. The support theorem in Chapter 3C uses the degree-four map supplied by a net; larger multiplication images do not supply that theorem's geometric hypotheses. Its final section explains the change in the auxiliary threefolds.
+
 ## 4.2 Representations and surface quotients
 
 A finite quotient transfers the image of its averaging projector. Divisor support for the quotient therefore need not support every cohomology class of the covering fourfold. For a polynomial map \(\Phi\), the weighted-Fano theorem of Chapter 3 identifies its residue image by the density condition \(A=\det(d\Phi)b(\Phi)\). The group-algebra formulation in §3.1 describes the corresponding restriction for finite symmetries.
 
 For arbitrary smooth ternary \(f\), the polarized split decomposition of [Chapter 3A](#technical-information/split-and-k3) illustrates this distinction. It supports a rank-1073 substructure, including the ambient class, with primitive Hodge numbers \((189,694,189)\). The complementary rank-210 piece has Hodge numbers \((19,172,19)\) and is an exterior square of primitive K3 cohomology. Supporting this piece by the Kuga–Satake criterion requires algebraicity of that correspondence. The order-three family in §4.1 satisfies this additional hypothesis.
+
+### A cyclic-six family and complementary quotients
+
+The deck/exchange criterion of [Chapter 3, §3.1](#technical-information/geometric-support) can support an entire involution-invariant Hodge structure even when neither quotient alone supplies it. Let \(\zeta\) be a primitive sixth root and write the coordinates as \((X_0,X_1,X_2,y,z_0,z_1)\), with \(y,z_0,z_1\) the globally odd coordinates. Set
+
+\[
+g(X,y,z_0,z_1)=(X,\zeta y,\zeta^{-1}z_0,\zeta^{-1}z_1),
+\qquad g^3=\tau.
+\]
+
+The complete \(g\)-invariant sextic family is
+
+\[
+F=f_6(X)+a y^6+P_6(z_0,z_1)
+  +\sum_{m=1}^{3}y^mH_{6-2m,m}(X;z_0,z_1),
+\]
+
+where the subscripts record the degrees in the ternary and binary blocks. Indeed, a monomial with \(y\)-exponent \(k\) and binary degree \(\ell\) is invariant exactly when \(k-\ell\equiv0\pmod6\). With \(k+\ell\le6\), this gives \(k=\ell=0,1,2,3\) and the two pure degree-six cases. The coefficient dimension is
+
+\[
+28+1+7+15\cdot2+6\cdot3+4=88.
+\]
+
+**Cyclic-six support theorem.** Every smooth member \(X_F=V(F)\) satisfies
+
+\[
+H^4(X_F,\mathbb Q)^\tau\subseteq N^1H^4(X_F,\mathbb Q).
+\]
+
+**Proof.** Smoothness forces \(a\ne0\), squarefreeness of \(P_6\), and smoothness of \(f_6=0\). If one condition failed, the corresponding coordinate point or plane would contain a singular point of \(F\): all omitted transverse first derivatives vanish there. Thus
+
+\[
+C=\{P_6(\alpha,\beta)=aZ^6\}\subset\mathbb P^2
+\]
+
+is a smooth integral curve. Over its affine chart \(Z=1\), consider the family of sextic threefolds
+
+\[
+V_{\alpha,\beta}:
+f_6(X)+a(y^6+T^6)
+ +\sum_{m=1}^{3}(yT)^mH_{6-2m,m}(X;\alpha,\beta)=0
+\quad\text{in }\mathbb P^4_{X,y,T}.
+\]
+
+It maps to \(X_F\) by
+
+\[
+p(X,y,T;\alpha,\beta)=(X,y,\alpha T,\beta T).
+\]
+
+This map has degree six: over a general target point, \(T^6=P_6(z_0,z_1)/a\). Its generic fiber over \(C\) is a smooth, geometrically integral threefold. Indeed, it is a base change of a general hyperplane section in the pencil \([z_0:z_1]\). The pencil base \(f_6(X)+ay^6=0\) in \(\mathbb P^3\) is smooth, and its nonzero core gradient makes every pencil member smooth along the base. Bertini gives smoothness elsewhere; connectedness of ample hyperplane sections gives geometric integrality.
+
+On this cover define
+
+\[
+\begin{aligned}
+d &: (X,y,T;\alpha,\beta)
+ \longmapsto(X,y,\zeta T;\zeta^{-1}\alpha,\zeta^{-1}\beta),\\
+\sigma &: (X,y,T;\alpha,\beta)
+ \longmapsto(X,T,y;\alpha,\beta),\\
+r &: (X,y,T;\alpha,\beta)
+ \longmapsto(X,-y,-T;\alpha,\beta),\\
+e=\sigma d\sigma &: (X,y,T;\alpha,\beta)
+ \longmapsto(X,\zeta y,T;\zeta^{-1}\alpha,\zeta^{-1}\beta).
+\end{aligned}
+\]
+
+Homogeneity verifies that they preserve the equation and that
+
+\[
+pd=p,\qquad pe=gp,\qquad pr=\tau p,
+\qquad r=d^3e^3,\qquad r\sigma=\sigma r.
+\]
+
+The independent multipliers of \(y,T\) make \(\langle d,e\rangle\cong(\mathbb Z/6)^2\), and \(\sigma\) exchanges these two factors. The group is therefore the finite semidirect product \((\mathbb Z/6)^2\rtimes\mathbb Z/2\), of order 72. Compactify and resolve the cover and its projection equivariantly under this finite group. The resulting smooth projective fourfold \(\mathcal V\), its degree-six morphism \(p\), and the displayed actions meet the algebraic hypotheses of the deck/exchange criterion.
+
+We check its two quotient hypotheses. First, \(r,\sigma\) fix the parameter curve. On a smooth general fiber their invariant ring in \(y,T\) is generated by
+
+\[
+S=y^2+T^2,\qquad P=yT,
+\]
+
+and the quotient equation is
+
+\[
+f_6(X)+a(S^3-3SP^2)
+ +\sum_{m=1}^{3}P^mH_{6-2m,m}(X;\alpha,\beta)=0
+\quad\text{in }\mathbb P(1^3,2^2).
+\]
+
+Its Fano property follows directly from the finite quotient. The smooth sextic threefold \(V\subset\mathbb P^4\) has \(K_V=\mathcal O_V(1)\). The only divisorial ramification of \(\pi:V\to V/\langle r,\sigma\rangle\) is along \(y=T\) and \(y=-T\), each a hyperplane section of ramification index two; \(r\) has no divisorial fixed locus. Hurwitz gives
+
+\[
+\pi^*(-K_{V/\langle r,\sigma\rangle})=\mathcal O_V(1).
+\]
+
+The quotient is normal with quotient singularities and ample rational anticanonical divisor. Its general fibers are therefore uniruled. A smooth projective model of the total quotient \(\mathcal V/\langle r,\sigma\rangle\) is uniruled as well, so Chapter 3's covering-curve theorem supports its entire fourth cohomology.
+
+For the second quotient, choose any of the six simple projective roots of \(P_6\). It gives a fixed point of \(g\) on \(X_F\) with \(X=y=0\). In a chart with a nonzero binary coordinate, the three \(X\)-directions have eigenvalue \(\zeta\), the \(y\)-direction has eigenvalue \(\zeta^2\), and the binary-ratio direction has eigenvalue one. The simple-root derivative eliminates this last direction from the tangent space to \(X_F\). Hence the tangent age is
+
+\[
+\operatorname{age}(g)=\frac{1+1+1+2}{6}=\frac56<1.
+\]
+
+Since \(X_F\) is smooth projective with trivial canonical bundle, [Kollár–Larsen, Theorem 2](https://arxiv.org/pdf/math/0701466) makes \(X_F/\langle g\rangle\) uniruled. Its smooth projective models also have divisor-supported fourth cohomology. Both quotient hypotheses now hold, and the deck/exchange criterion proves the theorem. ∎
+
+This family is not contained in the quadratic-net family in the \(Y\) orientation. For a general member, its bidegree-\((4,2)\) contraction has image \(\langle yz_0,yz_1\rangle\). No basepoint-free three-dimensional net can contain this pencil: on \(y=0\), both forms vanish and any third homogeneous quadric has a projective zero. The net theorem and the present deck/exchange theorem therefore have distinct hypotheses.
 
 ### Paired signs and a surface quotient
 
@@ -262,7 +413,7 @@ Retain the \(Y_{2}\) reflection \(r\) as well as \(\tau\). The residual sector h
 
 **Proof.** Apply the preceding argument with the second set of monomial calculations. The \(r\)-invariant complement has the Fano support of Chapter 3. ∎
 
-The coefficient dimension of this family is 158, by counting even-\(Y\), even-\(Y_{2}\) sextics. The preserving subgroup \(GL_{3}(X)\times GL_{2}(Y_{0},Y_{1})\times G_{m}(Y_{2})\) has dimension fourteen. Four outside Fermat orbit monomials, \(Y_{2}^{5}\cdot Y_{0},Y_{2}^{5}\cdot Y_{1},Y_{1}^{5}\cdot Y_{2},Y_{0}^{5}\cdot Y_{2}\), attain the upper bound \(158+18-14=162\). Its projective normal-form, saturated and quotient dimensions are therefore \((157,161,144)\). The two-reflection theorem of Chapter 3B concerns a proper sublocus with an additional \(X\) reflection. Its support family does not dominate the one-reflection parameter space, so it does not supply the hypothesis of this corollary.
+The coefficient dimension of this family is 158, by counting even-\(Y\), even-\(Y_{2}\) sextics. The preserving subgroup \(GL_{3}(X)\times GL_{2}(Y_{0},Y_{1})\times G_{m}(Y_{2})\) has dimension fourteen. Four outside Fermat orbit monomials, \(Y_{2}^{5}\cdot Y_{0},Y_{2}^{5}\cdot Y_{1},Y_{1}^{5}\cdot Y_{2},Y_{0}^{5}\cdot Y_{2}\), attain the upper bound \(158+18-14=162\). Its projective normal-form, saturated and quotient dimensions are therefore \((157,161,144)\). The two-reflection theorem of Chapter 3B concerns a proper sublocus with an additional \(X\) reflection. Neither that support family nor the 127-dimensional quadratic-net family dominates this 161-dimensional one-reflection locus, so neither supplies the hypothesis of this corollary.
 
 ## 4.5 Coefficient variation and pole order
 

@@ -14,6 +14,7 @@
   "checkCommand": "python3 scripts/audit-structural-frontier.py",
   "references": [
     "docs/03-geometric-support.md",
+    "docs/03c-quadratic-nets.md",
     "docs/04-known-locus-and-frontier.md"
   ],
   "existenceStatus": "No certificate or existence conclusion for this target is supplied by the screened constructions."

@@ -297,7 +297,7 @@ H=f(X)+P\bigl(\alpha L_0(X)+\beta L_2(X)\bigr)
   +S^3-3SP^2.
 \]
 
-Its coordinate weights are \((1,1,1,2,2)\). The Fano support and quotient-descent results of Chapter 3, §§3.1–3.2, apply when their geometric hypotheses hold. The coordinate identity itself requires no choice of a curve or primitive on this quotient.
+Its coordinate weights are \((1,1,1,2,2)\). For smooth \(F\), invariant divisor support follows from the full cyclic-six family theorem in [Chapter 4, §4.2](#technical-information/known-locus). The calculation here gives an additional algebraic description of the cover and its source trace; the integration principle below specifies what a rational parameterization must supply to produce a literal primitive.
 
 ### Polynomial integration on a finite parameterization
 
