@@ -124,7 +124,7 @@ One further gauge is useful for sextic denominators at \(q=1\):
 \end{gathered}
 \]
 
-It preserves \(E_{1}\) and \(E_{2}\) modulo \(F\), and \(V(F,D+t\cdot F)=V(F,D)\). It need not preserve strictness, since it changes the rational field itself. Coprimality must still be checked. This gauge is distinct from adding an Euler field to a fixed \(v\).
+It preserves \(E_{1}\) and \(E_{2}\) modulo \(F\), and \(V(F,D+t\cdot F)=V(F,D)\). Coprimality is preserved as well. It need not preserve strictness, since it changes the rational field itself. This gauge is distinct from adding an Euler field to a fixed \(v\).
 
 Indeed, put \(B_D(N)=D\cdot \operatorname{div}(N)-N(D)\). For \(q=1\) and \(\operatorname{deg} D=6\), the shifted numerator has \(N'(F)=A(D+t\cdot F)\). Euler's identity gives \(\operatorname{div}(A\cdot \epsilon /6)=2\cdot A\) and \((A\cdot \epsilon /6)(D)=A\cdot D\). Expanding then gives
 
