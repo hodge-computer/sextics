@@ -84,7 +84,7 @@ W(f)+Vf_u-f\bigl(\operatorname{div}_{\lambda,b,c,d}W+V_u\bigr)=P.
 \]
 The ordinary divergence here is essential. The physical chart has volume factor \(4a^5v\); changing to \(u=v^2\) gives \(2a^5\). There is no remaining weight in the five affine coordinates.
 
-The book's [polynomial normal-form theorem](../../docs/05-computation.md) shows that every legal rational current for this equation, including one whose defect is only divisible by \(f^2\), can be replaced by
+The book's [polynomial normal-form theorem](https://github.com/hodge-computer/sextics/blob/4865499f5418a6c73d71539acfd4d27b618533f1/docs/05-computation.md#a-polynomial-normal-form-in-one-variable), presented in the independent [book PR 224](https://github.com/hodge-computer/sextics/pull/224), shows that every legal rational current for this equation, including one whose defect is only divisible by \(f^2\), can be replaced by
 \[
 W=W_0+uW_1+u^2W_2,\qquad
 V=v_0+uv_1+u^2v_2,

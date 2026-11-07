@@ -100,7 +100,7 @@ which is precisely the expression already required to lie in \((F^q)\). Degrees 
 
 For fixed \(D\), both equations are linear in the coefficients of \(N\). One can compare coefficients after reducing \(E_{2}\) modulo \(F^q\), or introduce a quotient polynomial and impose an exact identity. Thus the unrestricted fixed-denominator question is finite linear algebra. Restricting \(N\) to a convenient smaller space changes that question and requires a separate completeness argument.
 
-A certificate is **strict** when \(K_A(v)=0\) as a rational function. In normalized form this means \(E_{1}\) holds and \(E_{2}\) vanishes identically, rather than merely modulo \(F^q\). Strictness distinguishes individual witnesses. Ordinary and strict certificates have the same existence problem when the denominator is unrestricted, by the normal-form theorem in [§5.3](#technical-information/computation). That conversion may change the support and denominator degree, so the fixed-\(D\) system must retain the full \(E_2\) quotient.
+A certificate is **strict** when \(K_A(v)=0\) as a rational function. In normalized form this means \(E_{1}\) holds and \(E_{2}\) vanishes identically, rather than merely modulo \(F^q\). Strictness is a property of the chosen field; ordinary solvability does not require it.
 
 ## Euler freedom and denominator gauges
 
@@ -307,4 +307,4 @@ A=6\cdot X_{0}^{6}\cdot X_{1}^{3}\cdot X_{2}^{2}\cdot Y_{0},       G_{0}=X_{0}\c
 
 Then \(A=\sum G_{i}\partial _{i}F\) is \(Y\)-odd and belongs to \(J(F)\), but one reduction gives the \(q=1\) numerator \(X_{1}^{3}\cdot X_{2}^{2}\cdot Y_{0}/2\). All of its exponents are at most four, so it is nonzero in the Fermat Jacobian ring \(\mathbb C[Z]/(Z_{0}^{5},\ldots ,Z_{5}^{5})\). Griffiths's graded isomorphism makes its (3,1) class nonzero. Thus the original \(q=2\) residue is nonzero, despite Jacobian membership. A complete reduction algorithm must retain this lower-pole target.
 
-For an explicit field, clearing denominators reduces verification to polynomial identities and the homogeneity and coprimality conditions. A nonzero remainder divisible by \(F^{q+1}\) is valid. [Chapter 5](#technical-information/computation) gives the complete polynomial criterion and proves equivalence with strict existence when the denominator may change.
+For an explicit field, clearing denominators reduces verification to polynomial identities and the homogeneity and coprimality conditions. A nonzero remainder is allowed when it is divisible by \(F^{q+1}\); strictness is a stronger sufficient condition. [Chapter 5](#technical-information/computation) gives the complete polynomial criterion.

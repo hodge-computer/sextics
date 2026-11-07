@@ -86,41 +86,6 @@ Exact \(E_{1}\) elimination and verified gauge quotients preserve the complete s
 
 Eliminating numerators may also yield only necessary equations in \(D\). Such equations can be useful: a candidate passing them is retained for full numerator reconstruction. Their solution set may contain false positives. Generic points of that larger set need not find the exceptional subset that completes \(E_{2}\), so an expansion is not automatically a complete search method. Rank strata of the retained numerator map matter.
 
-### A polynomial normal form in one variable
-
-A different elimination removes arbitrary legal denominator dependence on one coordinate while retaining every component of the current. Let \(E\) be a characteristic-zero field with derivations \(\delta_1,\ldots,\delta_n\), extended coefficientwise to \(E[u]\), and put \(\delta_0=\partial_u\). Let \(f\in E[u]\) be irreducible of degree \(m>0\), and let \(q\ge1\) be an integer. For \(U=(U_0,\ldots,U_n)\), define
-
-\[
-\operatorname{div}U=\sum_{j=0}^n\delta_jU_j,
-\qquad L_{f,q}(U)=q\sum_{j=0}^n U_j\delta_jf-f\operatorname{div}U.
-\]
-
-**Normal-form theorem.** Suppose \(P\in E[u]\) has degree less than \((q+1)m\). There exists a rational current \(U\in E(u)^{n+1}\), regular along \(f=0\), satisfying
-
-\[
-L_{f,q}(U)-P\in f^{q+1}E[u]_{(f)}
-\]
-
-if and only if there is a polynomial current \(R\in E[u]^{n+1}\) with \(\deg_uR_j<qm\) for every component and
-
-\[
-\boxed{\quad L_{f,q}(R)=P.\quad}
-\]
-
-**Proof.** Every denominator regular along \(f\) is invertible modulo \(f^q\). Reduce each component of \(U\) modulo \(f^q\), choosing its unique representative \(R_j\) of degree less than \(qm\). Thus \(U-R=f^qT\), where \(T\) remains regular along \(f\). The derivations preserve \(E[u]_{(f)}\), and the product rule gives
-
-\[
-L_{f,q}(f^qT)=-f^{q+1}\operatorname{div}T.
-\]
-
-Hence \(L_{f,q}(R)-P\) is divisible by \(f^{q+1}\) in the localization. Coprimality of every inverted denominator with \(f\) gives the same divisibility in \(E[u]\). All the derivations preserve or lower \(u\)-degree, so this polynomial has degree less than \((q+1)m\). It must be zero. The converse takes \(U=R\). ∎
-
-For \(q=1\), every component, including the normal component, has degree less than \(m\). The theorem places no bound on denominators in the coefficient field \(E\), and supplies no existence claim. It replaces arbitrary rational dependence on \(u\) by finitely many unknown elements of \(E\); rational dependence on the remaining coordinates is retained in full.
-
-**Homogeneous corollary.** For the sextic certificate problem, ordinary and strict certificates have the same existence problem when the denominator is unrestricted, at every positive \(q\). Choose linear coordinates in which \(F\) has degree six in one variable \(u\), and put the other five coordinates in the coefficient field \(E\). Such coordinates exist over the field of definition, since it is infinite and \(F\ne0\). The source has \(u\)-degree at most \(6q<6(q+1)\), so the normal-form theorem produces a strict current \(R\), with each component of \(u\)-degree less than \(6q\).
-
-Homogeneity is preserved by uniqueness of the remainder. If the original field has component degree \(e=6q-5\), then, for a scaling parameter \(s\), both \(R(Z)\) and \(s^{-e}R(sZ)\) have \(u\)-degree less than \(6q\) and represent the original field modulo \(F^q\). They are equal. Thus \(R\) has homogeneous rational components of degree \(e\), and their coefficient denominators can be cleared homogeneously. The prescribed involution character is restored by averaging, which preserves the strict identity and denominator legality. The construction need not preserve the original support or its denominator degree; the full quotient in the fixed-denominator equations remains necessary.
-
 ## 5.4 From numerical candidates to exact coefficients
 
 Variable projection solves for the best \(z\) at each trial \(a\). It can reduce the optimization dimension, but near a rank drop its minimum-norm solution can change sharply. A singular-value cutoff can then change the effective problem. Restore the complete chosen numerator space and test any candidate in the original equations.
