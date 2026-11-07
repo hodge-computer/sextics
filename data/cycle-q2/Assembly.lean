@@ -1,4 +1,4 @@
-import CycleQ2Workspace
+import Proposal.Workspace
 
 /-!
 Conditional assembly for the unchanged cycle-q2 target.
@@ -34,18 +34,28 @@ structure NormalizedRationalSolution where
 This theorem proves the assembly only; it does not produce the input solution. -/
 theorem certificate_of_normalized_solution (s : NormalizedRationalSolution) :
     OriginalGoal := by
-  change HasCertificate originalF originalA 2
-  refine ⟨s.degree, s.denominator, s.numerators, s.quotient, ?_⟩
+  change HasCertificate originalF 2 originalA
+  apply HodgeComputer.Verify.hasCertificate (d := 6)
+    (D := s.denominator) (N := s.numerators) (Q := s.quotient)
+  have hdegree : s.denominator.totalDegree = s.degree :=
+    s.denominator_homogeneous.totalDegree s.denominator_ne_zero
   refine {
+    hypersurface_ne_zero := originalF_ne_zero
+    hypersurface_homogeneous := originalF_homogeneous
+    source_homogeneous := ?_
     denominator_ne_zero := s.denominator_ne_zero
-    denominator_homogeneous := s.denominator_homogeneous
+    denominator_homogeneous := ?_
     numerator_homogeneous := ?_
     denominator_legal := s.denominator_legal
     identity := ?_
   }
+  · simpa using HodgeComputer.Homogeneous.of_isHomogeneous originalA_homogeneous
+  · rw [hdegree]
+    exact s.denominator_homogeneous
   · intro i
-    have hdeg : s.degree + 6 * 2 - 5 = s.degree + 7 := by omega
-    simpa only [hdeg] using s.numerator_homogeneous i
+    rw [hdegree]
+    convert HodgeComputer.Homogeneous.of_isHomogeneous (s.numerator_homogeneous i) using 1 <;>
+      omega
   · simpa using
       (HodgeComputer.normalized_identity (q := 2) s.first_normal s.second_normal)
 
@@ -67,6 +77,4 @@ theorem close_partial_identity
   rw [hadd, hpartial, hcorrection]
   ring
 
-#print axioms certificate_of_normalized_solution
-#print axioms close_partial_identity
 end CycleQ2Assembly

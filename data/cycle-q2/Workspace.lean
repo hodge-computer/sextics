@@ -1,4 +1,4 @@
-import HodgeComputer.Verify
+import HodgeTarget
 
 /-!
 The original target and elementary fixed-denominator operations.
@@ -10,18 +10,44 @@ noncomputable section
 namespace CycleQ2Workspace
 open MvPolynomial HodgeComputer
 
-abbrev z (i : Fin 6) : Poly := X i
+abbrev Poly := HodgeComputer.AmbientPoly 5
 
-def originalF : Poly :=
-  z 0 ^ 6 + z 1 ^ 6 + z 2 ^ 6 + z 3 ^ 6 + z 4 ^ 6 + z 5 ^ 6 +
-  C (1 / 2 : ℂ) *
-    (z 0 ^ 3 * z 1 * z 3 * z 4 +
-     z 1 ^ 3 * z 2 * z 4 * z 5 +
-     z 2 ^ 3 * z 0 * z 5 * z 3)
+abbrev originalF : Poly := HodgeSubmission.F
+abbrev originalA : Poly := HodgeSubmission.A
 
-def originalA : Poly := z 0 ^ 2 * z 1 ^ 2 * z 2 ^ 3 * z 3 ^ 2 * z 4 ^ 2 * z 5
+def OriginalGoal : Prop :=
+  HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A
 
-def OriginalGoal : Prop := HasCertificate originalF originalA 2
+lemma originalF_homogeneous : originalF.IsHomogeneous 6 := by
+  have hx (i : Fin 6) : (X i : Poly).IsHomogeneous 1 := isHomogeneous_X ℂ i
+  have hm0 : ((X 0 : Poly)^3 * X 1 * X 3 * X 4).IsHomogeneous 6 := by
+    simpa using ((((hx 0).pow 3).mul (hx 1)).mul (hx 3)).mul (hx 4)
+  have hm1 : ((X 1 : Poly)^3 * X 2 * X 4 * X 5).IsHomogeneous 6 := by
+    simpa using ((((hx 1).pow 3).mul (hx 2)).mul (hx 4)).mul (hx 5)
+  have hm2 : ((X 2 : Poly)^3 * X 0 * X 5 * X 3).IsHomogeneous 6 := by
+    simpa using ((((hx 2).pow 3).mul (hx 0)).mul (hx 5)).mul (hx 3)
+  have h := ((((((isHomogeneous_X_pow (0 : Fin 6) 6).add
+    (isHomogeneous_X_pow 1 6)).add (isHomogeneous_X_pow 2 6)).add
+    (isHomogeneous_X_pow 3 6)).add (isHomogeneous_X_pow 4 6)).add
+    (isHomogeneous_X_pow 5 6)).add (((hm0.add hm1).add hm2).C_mul (1 / 2 : ℂ))
+  convert h using 1
+  unfold originalF HodgeSubmission.F
+  ring
+
+lemma originalA_homogeneous : originalA.IsHomogeneous 12 := by
+  have hx (i : Fin 6) : (X i : Poly).IsHomogeneous 1 := isHomogeneous_X ℂ i
+  simpa only [originalA, HodgeSubmission.A, mul_assoc] using
+    ((((((hx 0).pow 2).mul ((hx 1).pow 2)).mul ((hx 2).pow 3)).mul
+      ((hx 3).pow 2)).mul ((hx 4).pow 2)).mul (hx 5)
+
+lemma originalF_ne_zero : originalF ≠ 0 := by
+  intro h
+  have hh := congrArg (MvPolynomial.eval
+    (fun _ : Fin 6 => (1 : ℂ))) h
+  norm_num [originalF, HodgeSubmission.F] at hh
+
+lemma originalF_totalDegree : originalF.totalDegree = 6 :=
+  originalF_homogeneous.totalDegree originalF_ne_zero
 
 /-- The fixed-D linear part of the exact original equation. -/
 def fixedOperator (F D : Poly) (N : Fin 6 → Poly) (Q : Poly) : Poly :=
@@ -63,11 +89,5 @@ theorem defect_scale (F A D H : Poly) (N : Fin 6 → Poly) :
   unfold defect
   rw [HodgeTestbed.directional_mul, HodgeTestbed.divergenceNumerator_mul]
   ring
-
-#check OriginalGoal
-#check HodgeComputer.Verify
-#print axioms defect_decomposition
-#print axioms fixedOperator_add
-#print axioms defect_scale
 
 end CycleQ2Workspace
