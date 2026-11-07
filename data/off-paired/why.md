@@ -10,7 +10,7 @@ The [Fermat-cover construction](#technical-information/explicit-constructions) i
 \]
 It is not invariant under \(y\leftrightarrow T\). Thus the equation no longer descends through \(S=y^2+T^2\), \(P=yT\) to the weighted quotient used by that construction. Maintaining the same bidegree and central target is insufficient to maintain the transfer.
 
-The complementary quotient in [Chapter 2, §2.8](#technical-information/explicit-constructions) is also unavailable unchanged: the added term has weight four under its diagonal weights \((5,1,5)\) on \(Y\). Preserving the two-link bidegree does not preserve either of these serving quotients.
+The [cyclic-six family theorem](#technical-information/known-locus/a-cyclic-six-family-and-complementary-quotients) requires invariance under the action with weights \((5,1,5)\) on \(Y\). The added term has weight four, so the equation does not retain that action. Preserving the two-link bidegree does not preserve the complementary quotients used by the theorem.
 
 This makes the instance a useful comparison with [the cyclic coupling](#case/cycle-three): both produce an unmatched \(T^2\) term on this cover, but only the cyclic example retains the full paired-sign group. One can therefore ask whether the obstruction is best addressed through a replacement cover, a different quotient, or a method insensitive to these sign characters. A failed correction to the existing conic does not exclude such alternatives.
 

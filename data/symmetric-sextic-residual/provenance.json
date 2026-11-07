@@ -13,7 +13,7 @@
   "sameVarietyInstances": [],
   "mathematicalChecks": "checks.json",
   "checkCommand": "sage -python scripts/audit-frontier.py",
-  "existenceStatus": "Certificate existence follows from the two-reflection support theorem in docs/03b-weighted-threefolds.md; a checked Lean proof for this protected target remains outstanding.",
+  "existenceStatus": "Certificate existence follows from the two-reflection support theorem in docs/03b-weighted-threefolds.md.",
   "references": [
     "docs/03b-weighted-threefolds.md \u00a7\u00a73B.7\u20133B.8",
     "docs/03-geometric-support.md \u00a7\u00a73.3\u20133.4"

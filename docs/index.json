@@ -69,11 +69,20 @@
       "content": "docs/weighted-threefolds.html"
     },
     {
+      "id": "quadratic-nets",
+      "number": "3c",
+      "title": "3C. Quadratic nets and pair correspondences",
+      "shortTitle": "Quadratic nets",
+      "description": "Four-point fibers, six-line incidence, Fano resolvents and divisor support for quadratic-net sextics.",
+      "source": "docs/03c-quadratic-nets.md",
+      "content": "docs/quadratic-nets.html"
+    },
+    {
       "id": "known-locus",
       "number": "4",
       "title": "4. Families, representations and deformation",
       "shortTitle": "Families and deformation",
-      "description": "Invariant sectors, coefficient families, generic-target reduction, and limits of quotient methods.",
+      "description": "Coefficient spaces, cyclic-six descent, invariant sectors and generic-target propagation.",
       "source": "docs/04-known-locus-and-frontier.md",
       "content": "docs/known-locus.html"
     },

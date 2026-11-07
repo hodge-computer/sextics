@@ -101,6 +101,8 @@ H^{4}(T_f\times T_g)^{\operatorname{diag} \mu _{3}} = \mathbb Q(-2)^{3} \oplus  
 
 The Tate terms are algebraic and the preceding contraction supports the tensor term. Transfer first to a smooth model of the quotient, then back to \(X/\tau \) and \(X\). This supports all \(H^{4}(X)^\tau \) and proves the split theorem. The support-to-certificate theorem and higher-pole reduction of Chapter 3 then give legal certificates at every positive pole order. No Hodge conjecture for abelian varieties enters this proof. ∎
 
+The [quadratic-net theorem](#technical-information/quadratic-nets) has different coefficient hypotheses. A ternary sextic expressible as a cubic in three quadratic forms belongs to a family of dimension at most \(9+10=19\): nine parameters for their span in \(\operatorname{Gr}(3,6)\), and ten for the cubic. All ternary sextics form a 28-dimensional space. The split theorem therefore covers general pairs \(f,g\) outside both orientations of the quadratic-net family.
+
 ### Involution-stable ternary decompositions
 
 The same theorem holds whenever \(F=p(U)+q(V)\) for complementary three-dimensional subspaces \(U,V\) preserved by \(\tau \). If all three negative eigendirections lie in one summand, this is the theorem just proved. Otherwise their multiplicities are one and two, after exchange of the summands. The normal form is \(p(X_{0},X_{1},Y_{0})+q(X_{2},Y_{1},Y_{2})\). Global invariance forces \(p\) to be even in \(Y_{0}\) and, by its even total degree, \(q\) to be even in \(X_{2}\). Divisor support is therefore a direct corollary of the [two-reflection theorem](#technical-information/weighted-threefolds).
@@ -257,7 +259,7 @@ f(z_{0},z_{1},z_{2})=g_{6}(z_{0},z_{1})+z_{2}^{3}g_{3}(z_{0},z_{1})+a z_{2}^{6}
 \end{gathered}
 \]
 
-define a smooth plane sextic. On \(S=\{w^{2}=f\}\), the automorphism \(z_{2}\mapsto \zeta _{3}z_{2},w\mapsto w\) multiplies the holomorphic two-form by \(\zeta _{3}\). Its fixed locus contains \(z_{2}=0\), the genus-two curve \(w^{2}=g_{6}(z_{0},z_{1})\). Smoothness forces \(a\ne 0\) and \(g_{6}\) squarefree, so this fixed curve is smooth. The external theorem applies, and the exterior-square argument completes the polarized-split fourfold \(F_f\) for every allowed target and positive \(q\).
+define a smooth plane sextic. On \(S=\{w^{2}=f\}\), the automorphism \(z_{2}\mapsto \zeta _{3}z_{2},w\mapsto w\) multiplies the holomorphic two-form by \(\zeta _{3}\). Its fixed locus contains \(z_{2}=0\), the genus-two curve \(w^{2}=g_{6}(z_{0},z_{1})\). Smoothness forces \(a\ne 0\) and \(g_{6}\) squarefree, so this fixed curve is smooth. The external theorem applies, and the exterior-square argument supports the entire invariant fourth cohomology of the polarized-split fourfold \(F_f\). The support-to-certificate theorem then applies at every positive pole order.
 
 For completeness, smoothness is equivalent to \(a\ne 0\) and squarefreeness of both \(g_{6}\) and \(\Delta=g_3^2-4\cdot a\cdot g_6\). On \(z_{2}=0\), the criterion is exactly that \(g_{6}\) have no repeated root. Away from \(z_{2}=0\) put \(t=z_{2}^{3}\). A singular zero satisfies \(t=-g_{3}/(2\cdot a), \Delta =0\) and \(d\Delta =0\). Conversely, a repeated root of \(\Delta \) with \(g_{3}\ne 0\) yields such a nonzero \(t\) and a singular point. If \(g_{3}\) vanishes at that root, \(g_{6}\) has a repeated root already. The point [0:0:1] is excluded when \(a\ne 0\) and singular when \(a=0\). This proves the criterion.
 

@@ -11,7 +11,7 @@ The [equal-coefficient cover](#technical-information/explicit-constructions) giv
 \]
 It is not invariant under \(y\leftrightarrow T\) over the Fermat coefficient field. Thus neither the original exchange nor this particular cover supplies the desired quotient. The successful cover argument suggests a direction, but its hypotheses still need to be re-established for this fixed sextic.
 
-The complementary diagonal quotient is broken too: under weights \((5,1,5)\) on \(Y\), the two monomials of the skew term have weights four and two. Neither is invariant. Its polynomial-source theorem therefore does not bypass the missing exchange on this deformation.
+The [full cyclic-six family theorem](#technical-information/known-locus/a-cyclic-six-family-and-complementary-quotients) requires invariance under weights \((5,1,5)\) on \(Y\). The two monomials of the skew term have weights four and two. Neither is invariant, so that theorem's all-target conclusion does not apply to this deformation.
 
 A nonsingular replacement conic solves the analogous curve problem for [the ternary deformation](#case/holdout-ternary-deformation), where the quotient survives. That example supplies reusable lifting and integration machinery, but does not cure the missing exchange here: the equation must first be placed on a serving auxiliary geometry.
 

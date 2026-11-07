@@ -2,7 +2,7 @@
 
 [Previous: explicit constructions](#technical-information/explicit-constructions) · [Contents](#technical-information/introduction) · [Next: geometric support](#technical-information/geometric-support)
 
-Cubic-square presentations of a binary sextic give a concrete example of contact geometry. Their finite parameter space is the nonzero three-torsion of a genus-two Jacobian, modulo sign. Two spanning theorems for the associated Wronskians turn these contacts into rational fields. The resulting construction is useful independently of the general support theorem: it identifies the fields and explains why their targets span.
+Cubic-square presentations of a binary sextic give a concrete example of contact geometry. Their finite parameter space is the nonzero three-torsion of a genus-two Jacobian, modulo sign. Two spanning theorems for the associated Wronskians turn these contacts into rational fields. The resulting construction is useful independently of the two-reflection support theorem: it identifies the fields and explains why their targets span.
 
 **Example: a binary-block family.** Let
 

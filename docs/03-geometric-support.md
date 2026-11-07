@@ -2,7 +2,7 @@
 
 [Previous: binary sextics and torsion contacts](#technical-information/binary-blocks) · [Contents](#technical-information/introduction) · [Next: split sextics and K3 correspondences](#technical-information/split-and-k3)
 
-A certificate constructs a primitive on the complement of a divisor. Geometry establishes the same vanishing through Gysin maps and correspondences. A finite quotient serves the image of its averaging projector; the geometry of the quotient determines whether that image has support. This chapter develops the shared tools: quotient transfer, covering rational curves, surface fibrations with \(p_g=q=0\), and supported projectors in families. Its Fano theorem supplies the reflection-positive sectors of [Chapter 3B](#technical-information/weighted-threefolds); the relative-projector lemma below turns the weighted-threefold correspondence into support for the remaining sector. Chapter 4 applies the surface criterion to paired-sign sextics. Work in characteristic zero; cohomology is rational, or algebraic de Rham after scalar extension.
+A certificate constructs a primitive on the complement of a divisor. Geometry establishes the same vanishing through Gysin maps and correspondences. This chapter develops the shared tools: finite quotients, correspondences over a common base, covering rational curves, surface fibrations with \(p_g=q=0\), and supported projectors in families. The reflection and relative-projector results supply the two parts of [Chapter 3B](#technical-information/weighted-threefolds). Fano support and correspondence transfer also underlie the quadratic-net theorem of [Chapter 3C](#technical-information/quadratic-nets). Work in characteristic zero; cohomology is rational, or algebraic de Rham after scalar extension.
 
 ## 3.1 Divisor support and its source
 
@@ -39,6 +39,22 @@ shows that \(\operatorname{ker} r_*\) is supported on the exceptional divisors. 
 Conversely, take \(\alpha \in H^{k}(M)^G\) and assume \(H^{k}(N)\) is supported. The class \(p^{*}p_*r^{*}\alpha \) is supported. Over the dense open where \(p\) is the finite group quotient, transfer identifies it with \(\sum _g g^{*}r^{*}\alpha =|G|r^{*}\alpha \). Their difference is supported on the omitted boundary, which can be included in a divisor. Push forward by \(r\) and divide by \(|G|\). This proves the lemma and explains why the boundary cannot be dropped. The same proof shows invariance of the all-supported assertion under smooth projective birational modification. ∎
 
 These constructions use algebraic graphs, blowups and traces. An abstract Hodge isomorphism alone would not transport a supporting equation.
+
+### Correspondences over a common base
+
+Let \(M,N\) be smooth projective varieties of the same dimension \(d\). A \(d\)-cycle \(C\subset M\times N\) whose components dominate both factors preserves divisor support:
+\[
+C_*\bigl(N^1H^k(M)\bigr)\subseteq N^1H^k(N).
+\]
+Resolve each component of \(C\). Both projections are proper and generically finite. The inverse image of a supporting divisor has dimension at most \(d-1\), and its proper image has dimension at most \(d-1\) as well. Pullback and pushforward through this resolution give the asserted correspondence action. The same argument applies componentwise when \(N\) is disconnected.
+
+**Common-base boundary lemma.** Suppose smooth projective \(d\)-folds \(M_i\) have dominant morphisms to one projective variety \(B\), and all correspondences under consideration lie in the relative products \(M_i\times_B M_j\). Let \(B^\circ\subset B\) be dense open and \(M_i^\circ=M_i\times_B B^\circ\). An identity between the restricted correspondences, or their composites, gives the same identity on global cohomology modulo classes supported on the complement of the output open.
+
+Indeed, if the output point lies over \(B^\circ\), the relative-product condition forces every intermediate point and the input point to lie over \(B^\circ\). Restriction therefore commutes with each proper correspondence action and with its composites. The error operator has image in
+\[
+\ker\bigl(H^k(M_j)\longrightarrow H^k(M_j^\circ)\bigr).
+\]
+The complement is a proper closed subset and can be included in a divisor. This proves the claim. The common base is essential to this argument: equality on an arbitrary product open alone does not control contributions from the omitted source.
 
 ### Averaging projectors and the part served by a quotient
 
@@ -114,6 +130,8 @@ Remove this image and the positive-dimensional-fiber locus of \(p\). On the rema
 
 A smooth Fano variety is covered by rational curves. The same holds for a normal projective variety with ample \(\mathbb Q\)-Cartier anticanonical divisor; the covering curves may pass through its singular locus. These are consequences of the bend-and-break theorems in [Debarre, Theorems 7.5 and 7.7, Proposition 9.12 and Corollary 9.13](https://perso.imj-prg.fr/wp-content/uploads/debarre-pub/M22.pdf).
 
+For Kawamata log terminal (klt) singularities, [Zhang, Proposition 1](https://arxiv.org/pdf/math/0408301) gives a stronger sufficient condition: if \(-K_W\) is nef and big, every smooth projective model of \(W\) is uniruled. Apply the proposition to the rational inverse of a resolution. This covers the quotient singularities of the weighted Fano varieties used below.
+
 Here is how to apply the support theorem to a smooth projective model \(\widetilde W\) of such a variety. Choose an irreducible family of parametrized rational curves with dominant evaluation. A general curve has a unique rational lift to \(\widetilde W\), and properness extends that lift over all of \(\mathbb P^1\). Spread it over a smaller parameter open. A general slice of the parameter space gives a smooth affine \((n-1)\)-fold \(S\) and a dominant generically finite morphism \(\mathbb P^1\times S\to\widetilde W\). If the family was initially unparametrized, a finite base change splits its generic conic. The preceding proof and finite trace then give
 
 \[
@@ -164,9 +182,13 @@ This uses the classical algebraicity of (1,1) classes on surfaces. It does not a
 
 ## 3.3 Reflection quotients
 
-**Reflection theorem.** If a smooth sextic \(F\) is even in a coordinate \(z\), every target odd in \(z\) has divisor support in its residue class. Retain the global \(Y\)-odd condition when applying this to our certificate problem. If \(F\) is separately even in \(Y_{0},Y_{1},Y_{2}\), or separately even in \(X_{0},X_{1},X_{2}\), every allowed target at every positive \(q\) has a certificate.
+**Reflection theorem.** Let \(X=\{F=0\}\) be a smooth sextic fourfold, with \(F\) even in a coordinate \(z\). For the reflection \(\sigma:z\mapsto-z\),
+\[
+H^4(X,\mathbb Q)^\sigma\subseteq N^1H^4(X,\mathbb Q).
+\]
+In particular, every residue with numerator odd in \(z\) is divisor-supported.
 
-**Proof for one reflection.** Write \(F(z,x)=H(z^{2},x_{1},\ldots ,x_{5})\). The quotient by \(\sigma :z\mapsto -z\) is
+**Proof.** Write \(F(z,x)=H(z^{2},x_{1},\ldots ,x_{5})\). The quotient by \(\sigma\) is
 
 \[
 \begin{gathered}
@@ -176,9 +198,9 @@ W=\{H(u,x)=0\} \subset  \mathbb P(2,1,1,1,1,1).
 
 The coefficient of \(z^{6}\) cannot vanish: otherwise the \(z\)-axis point lies on \(X\) and all derivatives vanish there, because evenness forbids the only potentially relevant monomials \(z^{5}\cdot x_i\). Thus \(W\) misses the sole singular point of its weighted ambient space. On an ordinary chart \(x_i\ne 0\), if \(H\) and all its partials vanished, lifting \(u\) to \(z^{2}\) would make \(F\) and all its partials vanish. Hence \(W\) is smooth. Weighted adjunction gives \(-K_W=\mathcal O_W(1)\), an ample line bundle because \(W\) avoids the weighted singular point. Equivalently, Hurwitz gives \(\pi^{*}(-K_W)=\mathcal O_X(1)\), since \(K_X=0\) and the reflection branch divisor has class \(\mathcal O_X(1)\).
 
-The residue volume changes sign under \(\sigma \). Therefore an odd numerator \(A\) gives a \(\sigma \)-invariant residue \(\alpha _A\), and transfer writes \(\alpha _A=\pi^{*}\beta _A\) with \(\beta _A=\pi _*\alpha _A/2\). By the preceding theorem, covering rational curves on \(W\) compute a divisor supporting \(H^{4}(W)\). Pull it back to \(X\). ∎
+The Fano support theorem and quotient transfer give \(H^4(X)^\sigma\subseteq N^1H^4(X)\). The residue volume changes sign under \(\sigma\), so an odd numerator gives an invariant residue. ∎
 
-For three individual \(Y\) reflections, decompose an odd \(A\) into their simultaneous polynomial characters. Every character has at least one odd \(Y\)-coordinate, so each summand is served by one of the three quotients. Add the fields and take the union of the pulled-back supports. The \(X\) version follows because \(A\) has even total degree and hence odd \(X\)-parity as well. The construction commutes with block-linear changes of coordinates. The extension to every positive \(q\) is proved in §3.5 below.
+**Three-reflection corollary.** If \(F\) is separately even in the three coordinates of either block, all of \(H^4(X)^\tau\) is divisor-supported. This is the diagonal-net case of [Chapter 3C](#technical-information/quadratic-nets); the two block-sign involutions agree projectively. It also follows from the finite-group argument below. Section 3.5 converts the support into certificate existence for every allowed numerator at every positive pole order.
 
 ### Finite groups generated by reflections
 
@@ -254,7 +276,7 @@ B=b(\Phi ) \operatorname{adj}(d\Phi )\cdot e_j/c
 
 has degree one and satisfies \(B(F)=A\). Consequently \(A\) lies in the degree-six Jacobian ideal. In the invariant \(q=1\) problem, parity averaging makes \(\operatorname{div}B\) a \(Y\)-odd constant, hence zero. This case is already polynomial and has zero primitive target. Every nonzero primitive nonlinear polynomial atom must therefore satisfy the theorem's degree hypotheses. Linear maps and arbitrary rational adapted maps are not covered by this argument.
 
-Six arbitrary globally \(Y\)-even quadrics composed with any cubic \(G\) illustrate the theorem: \(\delta \) is an odd sextic, and its class pulls back from a smooth cubic fourfold. This is distinct from the cubic-surface construction over passive ratios. More generally, all determinant densities on the same finite map are supported even when a chosen spectral-field constructor serves only a smaller sector. No assertion that those densities exhaust all targets on \(F\) follows.
+Six arbitrary globally \(Y\)-even quadrics composed with any cubic \(G\) illustrate the theorem: \(\delta \) is an odd sextic, and its class pulls back from a smooth cubic fourfold. This is distinct from the cubic-surface construction over passive ratios. More generally, all determinant densities on the same finite map are supported even when a chosen spectral-field constructor serves only a smaller sector. For the special map \((X,Y)\mapsto(X,Q_0(Y),Q_1(Y),Q_2(Y))\), [Chapter 3C](#technical-information/quadratic-nets) proves support for the entire \(\tau\)-invariant fourth cohomology.
 
 ## 3.5 From divisor support to every pole order
 
