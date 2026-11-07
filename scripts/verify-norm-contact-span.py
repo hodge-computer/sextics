@@ -1,36 +1,33 @@
 #!/usr/bin/env python3
-"""Reconstruct a full-span norm-contact witness for weighted threefolds.
+"""Reconstruct the book's smooth full-span norm-contact witness.
 
-Python 3.9+ and NumPy; no input files or network access required.
+Python 3.9+ and NumPy; no witness files, extra packages, or network required.
 Run: python3 scripts/verify-norm-contact-span.py
-Pass --output PATH to save the finite arithmetic receipt as JSON.
+Pass --output PATH to save the reconstructed finite-arithmetic receipt.
 
-All computations are exact integer arithmetic modulo 23, or in
-F_23[v]/(v^2-15). No floating-point linear algebra is used. The integral
-seed is defined below, independently of any catalogue instance. The
-script checks its smoothness reduction, nodal curve, incidence slice,
-fixed-equation branch, normalized residue and full 48-dimensional span.
+The maintained witness comes from a line on a cubic surface and a smooth
+contact curve.  All main calculations are exact modulo 37.  A simple line
+root, unit pivot minors, and the geometric normal-rank bound in Chapter 3B
+lift the result to characteristic zero.  The weighted equation is fixed
+throughout the coefficient recurrence.
 
-Nonzero modular minors give characteristic-zero lower bounds. The exact
-central upper bounds and the geometric interpretation are proved in
-Chapter 3B; they are not inferred from modular ranks.
+The coefficient-map, presentation-gauge, and Artinian-residue infrastructure
+is retained from the earlier nodal computation.  Generic helper APIs remain
+available for the published research scripts that import this module; the
+superseded nodal branch itself is no longer a maintained witness.
 """
 from functools import lru_cache
 from itertools import permutations, product
 from pathlib import Path
+from fractions import Fraction
 import argparse
 import json
 import time
 import numpy as np
 
-P, NONSQUARE = 23, 15
+P, NONSQUARE = 37, 2
 assert pow(NONSQUARE, (P-1)//2, P) == P-1
 blocks = [(2, 0), (2, 0), (4, 0), (4, 0), (3, 0), (3, 1)]
-INTEGRAL_SEED = {
-    "kappa": 50,
-    "C": [61, 110, 85],
-    "B": [50, 75, 40, 22],
-}
 
 
 @lru_cache(None)
@@ -97,7 +94,7 @@ def base_inverse(matrix):
 
 
 def extension_rank(matrix):
-    """Rank over F_23[v]/(v^2-15), and row/column pivots."""
+    """Rank over the configured quadratic field, and row/column pivots."""
     a = np.array(matrix, dtype=np.int64, copy=True) % P
     row_order = list(range(len(a)))
     rank, columns = 0, []
@@ -162,7 +159,8 @@ def decode(v):
 def poly_add(f, g, scalar=1, prime=P):
     h = f.copy()
     for e, c in g.items():
-        h[e] = (h.get(e, 0)+scalar*c) % prime
+        coefficient = h.get(e, 0)+scalar*c
+        h[e] = coefficient if prime is None else coefficient % prime
     return {e: c for e, c in h.items() if c}
 
 
@@ -171,7 +169,8 @@ def poly_mul(f, g, prime=P):
     for e, c in f.items():
         for m, d in g.items():
             n = tuple(x+y for x, y in zip(e, m))
-            h[n] = (h.get(n, 0)+c*d) % prime
+            coefficient = h.get(n, 0)+c*d
+            h[n] = coefficient if prime is None else coefficient % prime
     return {e: c for e, c in h.items() if c}
 
 
@@ -229,28 +228,6 @@ def ideal_matrix(z):
     return out
 
 
-def seed_forms(prime):
-    """Reduce one fixed integral norm presentation at the specified prime."""
-    C = {(0, 0, 2-j, j, 0): c % prime
-         for j, c in enumerate(INTEGRAL_SEED["C"]) if c % prime}
-    B = {(0, 0, 3-j, j, 0): c % prime
-         for j, c in enumerate(INTEGRAL_SEED["B"]) if c % prime}
-    u = {(0, 0, 0, 0, 1): 1}
-    f1 = poly_add(u, C, prime=prime)
-    f2 = {(1, 1, 0, 0, 0): 1}
-    g1 = poly_add(
-        poly_add(poly_mul(u, u, prime), poly_mul(u, C, prime),
-                 -1, prime),
-        poly_mul(C, C, prime), prime=prime)
-    k = INTEGRAL_SEED["kappa"]
-    g2 = {e: c % prime for e, c in [
-        ((4, 0, 0, 0, 0), k), ((0, 4, 0, 0, 0), 2*k),
-        ((2, 2, 0, 0, 0), -2), ((2, 0, 1, 1, 0), k),
-        ((0, 0, 3, 1, 0), 2*k)] if c % prime}
-    A = {(3, 0, 0, 0, 0): 1, (0, 3, 0, 0, 0): 1}
-    return [f1, f2, g1, g2, A, B], C
-
-
 def phi_polynomials(forms, prime=P):
     f1, f2, g1, g2, A, B = forms
     return poly_add(
@@ -259,25 +236,6 @@ def phi_polynomials(forms, prime=P):
         poly_add(poly_mul(A, A, prime), poly_mul(B, B, prime),
                  -1, prime),
         prime=prime)
-
-
-def smoothness_check():
-    # This reduction only certifies smoothness of the integral witness.
-    # The moving contact family is constructed below at prime 23.
-    forms, _ = seed_forms(5)
-    reduced = phi_polynomials(forms, 5)
-    expected = {
-        (6, 0, 0, 0, 0): 1, (0, 6, 0, 0, 0): 1,
-        (0, 0, 6, 0, 0): 1, (0, 0, 0, 6, 0): 1,
-        (0, 0, 0, 0, 3): 1,
-    }
-    assert reduced == expected
-    return {
-        "prime": 5,
-        "equation": "a^6+b^6+c^6+d^6+u^3",
-        "partial_derivative_coefficients": [1, 1, 1, 1, 3],
-        "weighted_vertex_avoided": True,
-    }
 
 
 def base_determinant(matrix):
@@ -335,52 +293,6 @@ class GradedQuotient:
         return vector[self.free]
 
 
-def univariate(form):
-    """Binary homogeneous form at c=1, in ascending powers of d."""
-    degree = next(iter(form))[2]+next(iter(form))[3]
-    result = [0]*(degree+1)
-    for e, c in form.items():
-        assert e[0] == e[1] == e[4] == 0
-        result[e[3]] = int(c) % P
-    return trim(result)
-
-
-def trim(poly):
-    result = [int(c) % P for c in poly]
-    while result and result[-1] == 0:
-        result.pop()
-    return result
-
-
-def polynomial_gcd(left, right):
-    left, right = trim(left), trim(right)
-    while right:
-        remainder = left[:]
-        inverse = pow(right[-1], -1, P)
-        while len(remainder) >= len(right):
-            scalar = remainder[-1]*inverse % P
-            shift = len(remainder)-len(right)
-            for j, c in enumerate(right):
-                remainder[shift+j] = (remainder[shift+j]-scalar*c) % P
-            remainder = trim(remainder)
-        left, right = right, remainder
-    return [(c*pow(left[-1], -1, P)) % P for c in left] if left else []
-
-
-def node_value(form, C):
-    """Restrict a quadratic variation to a=b=0, u=-C."""
-    result = {}
-    for e, c in form.items():
-        if e[0] or e[1]:
-            continue
-        if e[4]:
-            assert e == (0, 0, 0, 0, 1)
-            result = poly_add(result, C, -c)
-        else:
-            result = poly_add(result, {e: c})
-    return result
-
-
 def gauge_vectors(forms):
     """Infinitesimal changes of presentation of the same embedded curve."""
     f1, f2, g1, g2, A, B = forms
@@ -407,82 +319,6 @@ def gauge_vectors(forms):
     return np.array(answer, dtype=np.int64).T
 
 
-def source_data():
-    forms, C = seed_forms(P)
-    z0 = encode(forms)
-    M = differential(z0)
-    incidence = base_receipt(M)
-    assert incidence["rank"] == 69
-    tangents = nullspace(M)
-    assert tangents.shape == (21, 90)
-    f1, f2, g1, g2, A, B = forms
-    curve_forms = [f1, f2, poly_add(A, B)]
-    quotients = {d: GradedQuotient(d, curve_forms, [2, 2, 3])
-                 for d in (2, 3, 6)}
-    dimensions = [len(quotients[d].free) for d in (2, 3, 6)]
-    assert dimensions == [9, 15, 33]
-    images = []
-    for tangent in tangents:
-        delta = decode(tangent)
-        images.append(np.concatenate((
-            quotients[2].reduce(delta[0]),
-            quotients[2].reduce(delta[1]),
-            quotients[3].reduce(poly_add(delta[4], delta[5])))))
-    image = base_receipt(np.array(images, dtype=np.int64).T)
-    assert image["rank"] == 2
-    ds = tangents[image["minor_columns"]]
-
-    gauge = gauge_vectors(forms)
-    assert gauge.shape == (90, 19)
-    assert not np.any(M @ gauge % P)
-    assert len(base_rref(gauge)[1]) == 19
-    coordinate_vectors = np.eye(90, dtype=np.int64)[
-        :, incidence["minor_columns"]]
-    slice_and_gauge = np.concatenate((coordinate_vectors, ds.T, gauge), axis=1)
-    assert slice_and_gauge.shape == (90, 90)
-    transverse_determinant = base_determinant(slice_and_gauge)
-    assert transverse_determinant
-
-    left = nullspace(M.T)
-    assert left.shape == (1, 70)
-    ell = left[0]
-    d1, d2 = [np.stack((d, np.zeros(90, dtype=np.int64)), axis=-1)
-              for d in ds]
-    q = [int(ell @ quadratic(d1, d1)[:, 0] % P),
-         int(ell @ (quadratic(d1, d2)+quadratic(d2, d1))[:, 0] % P),
-         int(ell @ quadratic(d2, d2)[:, 0] % P)]
-    assert q == [10, 12, 13]
-    discriminant = (q[1]**2-4*q[0]*q[2]) % P
-    assert discriminant == NONSQUARE
-    K1, K2 = [node_value(decode(d)[1], C) for d in ds]
-    bad = poly_add(poly_add({}, poly_mul(K2, K2), q[0]),
-                   poly_mul(K1, K2), -q[1])
-    bad = poly_add(bad, poly_mul(K1, K1), q[2])
-    Cu, Bu = univariate(C), univariate(B)
-    derivative_B = [j*Bu[j] % P for j in range(1, len(Bu))]
-    assert len(Bu) == 4  # No root at c=0.
-    assert polynomial_gcd(Bu, derivative_B) == [1]
-    assert polynomial_gcd(Bu, Cu) == [1]
-    assert polynomial_gcd(Bu, univariate(bad)) == [1]
-    receipt = {
-        "incidence_derivative": incidence,
-        "curve_graded_dimensions": dict(zip(("2", "3", "6"), dimensions)),
-        "normal_tangent_image": image,
-        "essential_kernel_basis_indices": image["minor_columns"],
-        "presentation_gauge_rank": 19,
-        "slice_plus_gauge_determinant": transverse_determinant,
-        "quadratic_obstruction": q,
-        "quadratic_discriminant": discriminant,
-        "node_smoothing_quadratics": [
-            [int(K.get((0, 0, 2-j, j, 0), 0)) for j in range(3)]
-            for K in (K1, K2)],
-        "B_squarefree": True, "C_B_coprime": True,
-        "both_branches_smooth_all_nodes": True,
-        "node_smoothing_gcd": [1],
-    }
-    return z0, ds, receipt
-
-
 def fixed_jacobian_directions(z0):
     Gcoeff = quadratic(np.stack((z0, np.zeros(90, dtype=np.int64)), axis=-1),
                        np.stack((z0, np.zeros(90, dtype=np.int64)), axis=-1))[:, 0]
@@ -504,114 +340,6 @@ def fixed_jacobian_directions(z0):
     return result
 
 
-def continue_branch(z0, ds, source, degree):
-    M = differential(z0)
-    selected_rows = source["incidence_derivative"]["minor_rows"]
-    selected_cols = source["incidence_derivative"]["minor_columns"]
-    missing = next(i for i in range(70) if i not in selected_rows)
-    inverse = base_inverse(M[np.ix_(selected_rows, selected_cols)])
-    ell = np.zeros(70, dtype=np.int64)
-    ell[missing] = 1
-    ell[selected_rows] = -M[missing, selected_cols] @ inverse % P
-    assert not np.any(ell @ M % P)
-    assert not np.any(M @ ds[0] % P) and not np.any(M @ ds[1] % P)
-    d1 = np.stack((ds[0], np.zeros(90, dtype=np.int64)), axis=-1)
-    d2 = np.stack((ds[1], np.zeros(90, dtype=np.int64)), axis=-1)
-    alpha = np.array([19, 8], dtype=np.int64)
-    q_alpha = (np.array([10, 0])+mul([12, 0], alpha) +
-               mul([13, 0], mul(alpha, alpha))) % P
-    assert not np.any(q_alpha)
-    z = np.zeros((degree+1, 90, 2), dtype=np.int64)
-    z[0, :, 0] = z0
-    z[1] = (d1+mul(alpha, d2)) % P
-    denominator = ell @ (quadratic(z[1], d2)+quadratic(d2, z[1])) % P
-    assert denominator.tolist() == [0, 1]
-    denominator_inverse = inv(denominator)
-    assert not np.any(ell @ quadratic(z[1], z[1]) % P)
-    for n in range(2, degree+1):
-        forcing = np.zeros((70, 2), dtype=np.int64)
-        for i in range(1, n):
-            forcing = (forcing+quadratic(z[i], z[n-i])) % P
-        assert not np.any(ell @ forcing % P), ("obstruction", n)
-        normal = np.zeros((90, 2), dtype=np.int64)
-        normal[selected_cols] = -inverse @ forcing[selected_rows] % P
-        assert not np.any((M @ normal+forcing) % P), ("coefficient", n)
-        next_forcing = quadratic(z[1], normal)+quadratic(normal, z[1])
-        for i in range(2, n):
-            next_forcing += quadratic(z[i], z[n+1-i])
-        correction = -mul(ell @ next_forcing % P,
-                          denominator_inverse) % P
-        z[n] = (normal+mul(correction, d2)) % P
-    return z, {"slope": alpha.tolist(),
-               "quadratic_root_derivative": denominator.tolist(),
-               "verified_fixed_equation_through_degree": degree}
-
-
-def obstruction_series(z, order):
-    matrices = np.array([ideal_matrix(a) for a in z], dtype=np.int64)
-    M0 = matrices[0, :, :, 0]
-    _, cols = base_rref(M0)
-    assert len(cols) == 58
-    _, rows = base_rref(M0[:, cols].T)
-    assert len(rows) == 58
-    free = [j for j in range(60) if j not in rows]
-    inverse = base_inverse(M0[np.ix_(rows, cols)].T)
-    # L is a formal basis of the left kernel of the 58 selected columns.
-    # Axes: order, functional coordinate, basis vector, field coordinate.
-    L = np.zeros((order+2, 60, 2, 2), dtype=np.int64)
-    for k in range(2):
-        L[0, free[k], k, 0] = 1
-        L[0, rows, k, 0] = -inverse @ M0[free[k], cols] % P
-    for n in range(1, order+2):
-        rhs = np.zeros((58, 2, 2), dtype=np.int64)
-        for i in range(1, n+1):
-            # Shape 58 equations by 60 functional coordinates.
-            a = matrices[i][:, cols, :].transpose(1, 0, 2)
-            rhs = (rhs+matmul(a, L[n-i])) % P
-        L[n, rows] = (-inverse @ rhs.reshape(58, 4)).reshape(58, 2, 2) % P
-
-    # Any extra column with first-order rank gain fixes the remaining ratio.
-    candidates = [j for j in range(72) if j not in cols]
-    chosen, K = None, None
-    for col in candidates:
-        k1 = np.zeros((2, 2), dtype=np.int64)
-        for i in range(2):
-            k1 = (k1+matmul(L[i].transpose(1, 0, 2),
-                            matrices[1-i, :, col, :])) % P
-        if np.any(k1):
-            chosen = col
-            break
-    assert chosen is not None, "No first-order rank gain in the anti ideal"
-    K = np.zeros((order+2, 2, 2), dtype=np.int64)
-    for n in range(order+2):
-        for i in range(n+1):
-            K[n] = (K[n]+matmul(L[i].transpose(1, 0, 2),
-                               matrices[n-i, :, chosen, :])) % P
-    assert not np.any(K[0])
-    assert np.any(K[1])
-    ell = np.zeros((order+1, 60, 2), dtype=np.int64)
-    for n in range(order+1):
-        for i in range(n+1):
-            ell[n] = (ell[n]+
-                      mul(K[i+1, 1], L[n-i, :, 0]) -
-                      mul(K[i+1, 0], L[n-i, :, 1])) % P
-    assert np.any(ell[0])
-    # Verify the kernel identity against ALL 72 columns, not only those used.
-    for n in range(order+1):
-        total = np.zeros((72, 2), dtype=np.int64)
-        for i in range(n+1):
-            total = (total+matmul(matrices[i].transpose(1, 0, 2),
-                                  ell[n-i])) % P
-        assert not np.any(total), ("full ideal kernel", n)
-    return ell, {"constant_ideal_rank": 58,
-                 "constant_ideal_minor_determinant":
-                     base_determinant(M0[np.ix_(rows, cols)]),
-                 "selected_extra_column": chosen,
-                 "first_order_relation": K[1].tolist(),
-                 "selected_ideal_columns": cols,
-                 "selected_ideal_rows": rows}
-
-
 def rank_receipt(a):
     rank, rows, cols = extension_rank(a)
     minor = a[np.ix_(rows, cols)]
@@ -620,156 +348,387 @@ def rank_receipt(a):
             "minor_determinant": determinant}
 
 
-def residue_normalization(z0, z1, ell0):
-    """Check the canonical Artinian trace and its nonzero AJ scalar."""
-    f1, f2, g1, g2, A, B = decode(z0)
-    C = {e: c for e, c in f1.items() if e[4] == 0}
-    f3 = poly_add(A, B)
-    reduced_g1 = {e: 3*c % P for e, c in poly_mul(C, C).items()}
-    forms = [f2, f3, reduced_g1, g2]
-    q9 = GradedQuotient(9, forms, [2, 3, 4, 4], core_only=True)
-    q10 = GradedQuotient(10, forms, [2, 3, 4, 4], core_only=True)
-    assert len(q9.free) == 1 and not q10.free
+# The smooth witness.  The constants below are residues of algebraic numbers,
+# not literal characteristic-zero line coefficients.  The four line equations
+# and their unit Jacobian specify the exact algebraic lift in Chapter 3B.
+LINE = (2, -3, -2, 15)
+SQRT_MINUS_ONE, SQRT_THREE = 6, 15
+REFLECTION_PARAMETER = 1
+ZERO_EXPONENT = (0, 0, 0, 0, 0)
+ONE = {ZERO_EXPONENT: 1}
+VARIABLES = [{tuple(int(i == j) for i in range(5)): 1} for j in range(5)]
 
-    def derivative(f, variable):
-        result = {}
-        for e, c in f.items():
-            if e[variable]:
-                m = list(e)
-                m[variable] -= 1
-                result[tuple(m)] = e[variable]*c % P
-        return result
 
-    jacobian = {}
-    for permutation in permutations(range(4)):
-        inversions = sum(permutation[i] > permutation[j]
-                         for i in range(4) for j in range(i+1, 4))
-        term = {(0, 0, 0, 0, 0): 1}
-        for row, col in enumerate(permutation):
-            term = poly_mul(term, derivative(forms[row], col))
-        jacobian = poly_add(jacobian, term, (-1)**inversions)
-    top_jacobian = int(q9.reduce(jacobian)[0])
-    assert top_jacobian
-    normalization = 96*pow(top_jacobian, -1, P) % P
+def poly_scale(f, scalar, prime=P):
+    return poly_add({}, f, scalar, prime)
 
-    def substitute_u(poly):
-        powers = [{(0, 0, 0, 0, 0): 1}]
-        for _ in range(4):
-            powers.append(poly_mul(powers[-1],
-                                   {e: -c % P for e, c in C.items()}))
-        out = {}
-        for e, coefficient in poly.items():
-            m = tuple(e[:4])+(0,)
-            out = poly_add(out, poly_mul({m: coefficient}, powers[e[4]]))
-        return out
 
-    # Differentiate f3 in the ambient coordinates BEFORE substituting u=-C.
-    df3 = []
-    for field_part in (0, 1):
-        delta = decode(z1[:, field_part])
-        df3.append(poly_add(delta[4], delta[5]))
-    eta0 = []
-    for m in minus_basis:
-        values = []
-        for derivative_f3 in df3:
-            numerator = substitute_u(poly_mul({m: 1}, derivative_f3))
-            values.append(normalization*int(q9.reduce(numerator)[0]) % P)
-        eta0.append(values)
-    eta0 = np.array(eta0, dtype=np.int64)
-    nonzero = next(i for i, e in enumerate(ell0) if np.any(e))
-    ratio = mul(eta0[nonzero], inv(ell0[nonzero]))
-    assert np.any(ratio)
-    assert np.array_equal(eta0, mul(ratio, ell0))
-    assert ratio.tolist() == [0, 17]
-    return {
-        "degrees_after_eliminating_u": [2, 3, 4, 4],
-        "degree9_quotient_dimension": 1,
-        "degree10_quotient_dimension": 0,
-        "length": 96, "socle_degree": 9,
-        "top_monomial": q9.basis[q9.free[0]],
-        "Jacobian_top_coordinate": top_jacobian,
-        "trace_normalization_multiplier": normalization,
-        "normalized_form_over_obstruction_functional": ratio.tolist(),
-        "convention": "eta_S=Res_f(S*d_B(f3)); a global contraction sign is immaterial",
+def poly_sum(terms, prime=P):
+    result = {}
+    for scalar, form in terms:
+        result = poly_add(result, form, scalar, prime)
+    return result
+
+
+def poly_power(f, exponent, prime=P):
+    number_of_variables = len(next(iter(f), ZERO_EXPONENT))
+    result = {(0,)*number_of_variables: 1}
+    for _ in range(exponent):
+        result = poly_mul(result, f, prime)
+    return result
+
+
+def poly_derivative(f, variable, prime=P):
+    result = {}
+    for e, coefficient in f.items():
+        if e[variable]:
+            m = list(e)
+            m[variable] -= 1
+            value = e[variable]*coefficient
+            result[tuple(m)] = value if prime is None else value % prime
+    return {e: c for e, c in result.items() if c}
+
+
+def poly_evaluate(f, point, prime=P):
+    result = 0
+    for e, coefficient in f.items():
+        term = int(coefficient)
+        for x, n in zip(point, e):
+            term = term*pow(int(x), n, prime) % prime
+        result = (result+term) % prime
+    return result
+
+
+def substitute_u(f, value):
+    powers = [poly_power(value, n) for n in range(1+max((e[4] for e in f), default=0))]
+    result = {}
+    for e, coefficient in f.items():
+        result = poly_add(result, poly_mul({e[:4]+(0,): coefficient}, powers[e[4]]))
+    return result
+
+
+def cubic(S, Q, prime=P):
+    return poly_sum([
+        (-2, poly_power(S, 3, prime)),
+        (6, poly_mul(poly_power(S, 2, prime), Q, prime)),
+        (-3, poly_mul(S, poly_power(Q, 2, prime), prime)),
+        (-2, poly_power(Q, 3, prime)),
+    ], prime)
+
+
+def weighted_equation(prime=P, parameter=REFLECTION_PARAMETER):
+    """The weighted sextic and its square completion, over Q or a prime field."""
+    a, b, c, d, u = VARIABLES
+    power = lambda f, n: poly_power(f, n, prime)
+    multiply = lambda f, g: poly_mul(f, g, prime)
+    combine = lambda terms: poly_sum(terms, prime)
+    sx, sy = combine([(2, a), (1, b)]), combine([(2, c), (1, d)])
+    qx = combine([(1, power(a, 2)), (2, multiply(a, b)), (-1, u)])
+    qy = combine([(1, power(c, 2)), (2, multiply(c, d)), (-parameter**2, u)])
+    rx = combine([(4, power(a, 3)), (3, multiply(power(a, 2), b)),
+                  (2, multiply(a, power(b, 2))), (1, power(b, 3)),
+                  (1, multiply(combine([(4, a), (1, b)]), u))])
+    ry = combine([(4, power(c, 3)), (3, multiply(power(c, 2), d)),
+                  (2, multiply(c, power(d, 2))), (1, power(d, 3)),
+                  (parameter**2, multiply(combine([(4, c), (1, d)]), u))])
+    x6 = combine([(2, power(a, 6)), (30, multiply(power(a, 4), u)),
+                  (30, multiply(power(a, 2), power(u, 2))),
+                  (2, power(u, 3)), (1, power(b, 6))])
+    y6 = combine([(2, power(c, 6)), (30*parameter**2, multiply(power(c, 4), u)),
+                  (30*parameter**4, multiply(power(c, 2), power(u, 2))),
+                  (2*parameter**6, power(u, 3)), (1, power(d, 6))])
+    S, T = power(sx, 2), power(sy, 2)
+    assert x6 == combine([(3, power(rx, 2)), (1, cubic(S, qx, prime))])
+    assert y6 == combine([(3, power(ry, 2)), (1, cubic(T, qy, prime))])
+    coefficient = Fraction(5, 7) if prime is None else 5*pow(7, -1, prime) % prime
+    F = combine([(1, x6), (1, y6),
+                 (coefficient, multiply(power(qx, 2), qy)),
+                 (2*coefficient, multiply(qx, power(qy, 2)))])
+    source = multiply(multiply(combine([(1, power(a, 2)), (-1, u)]), b),
+                      multiply(combine([(1, power(c, 2)), (-parameter**2, u)]), d))
+    return F, source, (S, qx, T, qy, rx, ry)
+
+
+def line_equation_polynomials():
+    """Coefficients of G(S,Q,kS+lQ,nS+mQ), in four line coordinates."""
+    variables = [{tuple(int(i == j) for i in range(6)): 1} for j in range(6)]
+    k, l, n, m, S, Q = variables
+    T = poly_add(poly_mul(k, S), poly_mul(l, Q))
+    V = poly_add(poly_mul(n, S), poly_mul(m, Q))
+    restriction = poly_sum([
+        (1, cubic(S, Q)), (1, cubic(T, V)),
+        (5*pow(7, -1, P), poly_mul(poly_power(Q, 2), V)),
+        (10*pow(7, -1, P), poly_mul(Q, poly_power(V, 2))),
+    ])
+    equations = [{} for _ in range(4)]
+    for e, coefficient in restriction.items():
+        assert e[4]+e[5] == 3
+        equations[e[5]][e[:4]] = coefficient
+    return equations
+
+
+def smooth_seed():
+    # The identities also hold literally over Q, before modular specialization.
+    weighted_equation(prime=None)
+    reduced, _, _ = weighted_equation(prime=5)
+    assert reduced == {(6, 0, 0, 0, 0): 2, (0, 6, 0, 0, 0): 1,
+                       (0, 0, 6, 0, 0): 2, (0, 0, 0, 6, 0): 1,
+                       (0, 0, 0, 0, 3): 4}
+    F, source, (S, Q, T, V, rx, ry) = weighted_equation()
+    k, l, n, m = LINE
+    equations = line_equation_polynomials()
+    assert all(poly_evaluate(eq, LINE) == 0 for eq in equations)
+    jac = np.array([[poly_evaluate(poly_derivative(eq, j), LINE) for j in range(4)]
+                    for eq in equations], dtype=np.int64)
+    line_det = base_determinant(jac)
+    assert line_det == 3
+    assert SQRT_MINUS_ONE**2 % P == P-1 and SQRT_THREE**2 % P == 3
+    t0, v0 = poly_sum([(k, S), (l, Q)]), poly_sum([(n, S), (m, Q)])
+    surface_restriction = poly_sum([
+        (1, cubic(S, Q)), (1, cubic(t0, v0)),
+        (5*pow(7, -1, P), poly_mul(poly_power(Q, 2), v0)),
+        (10*pow(7, -1, P), poly_mul(Q, poly_power(v0, 2))),
+    ])
+    assert not surface_restriction
+    f1, f2 = poly_add(T, t0, -1), poly_add(V, v0, -1)
+    g1 = poly_sum([(-2, poly_power(T, 2)), (-2, poly_mul(T, t0)),
+                   (-2, poly_power(t0, 2)), (6, poly_mul(poly_add(T, t0), V)),
+                   (-3, poly_power(V, 2))])
+    g2 = poly_sum([(6, poly_power(t0, 2)), (-3, poly_mul(t0, poly_add(V, v0))),
+                   (-2, poly_power(V, 2)), (-2, poly_mul(V, v0)), (-2, poly_power(v0, 2)),
+                   (5*pow(7, -1, P), poly_power(Q, 2)),
+                   (10*pow(7, -1, P), poly_mul(Q, poly_add(V, v0)))])
+    A, B = poly_scale(rx, SQRT_THREE), poly_scale(ry, SQRT_MINUS_ONE*SQRT_THREE)
+    forms = [f1, f2, g1, g2, A, B]
+    assert phi_polynomials(forms) == F
+    h = poly_add(A, B)
+    u_coefficient = f1.get((0, 0, 0, 0, 1), 0)
+    assert u_coefficient
+    value = poly_scale({e: co for e, co in f1.items() if e[4] == 0},
+                       -pow(u_coefficient, -1, P))
+    q, h3 = substitute_u(f2, value), substitute_u(h, value)
+    minors = [poly_add(poly_mul(poly_derivative(q, i), poly_derivative(h3, j)),
+                       poly_mul(poly_derivative(q, j), poly_derivative(h3, i)), -1)
+              for i in range(4) for j in range(i+1, 4)]
+    singular = GradedQuotient(6, [q, h3]+minors, [2]+[3]*7, core_only=True)
+    assert len(singular.basis) == 84 and not singular.free
+    regular = GradedQuotient(10, [f1, f2, h, g1, g2], [2, 2, 3, 4, 4])
+    assert len(regular.basis) == 581 and not regular.free
+    u1, u2 = [f.get((0, 0, 0, 0, 1), 0) for f in (f1, f2)]
+    ab1, ab2 = [f.get((1, 1, 0, 0, 0), 0) for f in (f1, f2)]
+    chart_det = (u1*ab2-u2*ab1) % P
+    assert chart_det == 20
+    second_quadric = poly_scale(poly_sum([(-u2, f1), (u1, f2)]), pow(chart_det, -1, P))
+    product_value = second_quadric.get((2, 0, 0, 0, 0), 0)*second_quadric.get((0, 2, 0, 0, 0), 0) % P
+    chart_delta = (1-product_value)*(1-3*product_value)*(1-2*product_value)**3 % P
+    assert product_value == 10 and chart_delta == 9
+    receipt = {
+        "line_residues": [x % P for x in LINE], "line_equation_jacobian_determinant": line_det,
+        "sqrt_minus_one_residue": SQRT_MINUS_ONE, "sqrt_three_residue": SQRT_THREE,
+        "square_completion_verified_over_Q": True, "norm_presentation_verified": True,
+        "smooth_weighted_equation_mod5": "2a^6+b^6+2c^6+d^6+4u^3",
+        "curve_singular_ideal_degree": 6, "curve_singular_ideal_rank": 84,
+        "regular_sequence_degree": 10, "regular_sequence_rank": 581,
+        "intrinsic_chart_pivot_determinant": chart_det,
+        "intrinsic_chart_product": product_value, "intrinsic_chart_reduction_denominator": chart_delta,
     }
+    return forms, source, receipt
+
+
+def smooth_slice(forms):
+    z0 = encode(forms)
+    M = differential(z0)
+    incidence = base_receipt(M)
+    assert incidence["rank"] == 70 and incidence["minor_determinant"] == 21
+    tangents = nullspace(M)
+    gauge = gauge_vectors(forms)
+    assert tangents.shape == (20, 90) and gauge.shape == (90, 19)
+    assert not np.any(M @ gauge % P) and len(base_rref(gauge)[1]) == 19
+    chosen = next(j for j, v in enumerate(tangents)
+                  if len(base_rref(np.column_stack((gauge, v)))[1]) == 20)
+    tangent = tangents[chosen]
+    coordinates = np.eye(90, dtype=np.int64)[:, incidence["minor_columns"]]
+    transverse_det = base_determinant(np.column_stack((coordinates, tangent, gauge)))
+    assert transverse_det == 10
+    f1, f2, _, _, A, B = forms
+    curve = [f1, f2, poly_add(A, B)]
+    q2, q3 = [GradedQuotient(degree, curve, [2, 2, 3]) for degree in (2, 3)]
+    delta = decode(tangent)
+    velocity = np.concatenate((q2.reduce(delta[0]), q2.reduce(delta[1]),
+                               q3.reduce(poly_add(delta[4], delta[5]))))
+    assert np.any(velocity)
+    receipt = {"incidence_derivative": incidence, "presentation_gauge_rank": 19,
+               "essential_kernel_index": chosen, "slice_plus_gauge_determinant": transverse_det,
+               "normal_velocity_nonzero": True, "normal_velocity": velocity.tolist()}
+    return z0, tangent, coordinates, receipt
+
+
+def base_quadratic(v, w):
+    result = np.zeros(70, dtype=np.int64)
+    np.add.at(result, term_row, term_sign*v[term_i]*w[term_j])
+    return result % P
+
+
+def smooth_branch(z0, tangent, coordinates, order):
+    inverse = base_inverse(differential(z0) @ coordinates % P)
+    coefficients = [z0, tangent]
+    for n in range(2, order+1):
+        forcing = sum((base_quadratic(coefficients[i], coefficients[n-i])
+                       for i in range(1, n)), np.zeros(70, dtype=np.int64)) % P
+        coefficients.append(coordinates @ (-inverse @ forcing % P) % P)
+    for n in range(1, order+1):
+        coefficient = sum((base_quadratic(coefficients[i], coefficients[n-i])
+                           for i in range(n+1)), np.zeros(70, dtype=np.int64)) % P
+        assert not np.any(coefficient), ("fixed weighted equation", n)
+    return coefficients
+
+
+def base_ideal_matrix(z):
+    result = np.zeros((60, 72), dtype=np.int64)
+    result[ideal_rows, ideal_cols] = z[ideal_parameters]
+    return result
+
+
+def smooth_obstruction_series(z):
+    matrices = [base_ideal_matrix(coefficient) for coefficient in z]
+    ideal = base_receipt(matrices[0])
+    assert ideal["rank"] == 59 and ideal["minor_determinant"] == 4
+    rows, cols = ideal["minor_rows"], ideal["minor_columns"]
+    free = next(j for j in range(60) if j not in rows)
+    inverse = base_inverse(matrices[0][np.ix_(rows, cols)])
+    coefficients = []
+    for n in range(len(z)):
+        forcing = matrices[n][free, cols].copy()
+        for i in range(n):
+            forcing = (forcing+coefficients[i][rows] @ matrices[n-i][np.ix_(rows, cols)]) % P
+        row = np.zeros(60, dtype=np.int64)
+        row[rows] = -forcing @ inverse % P
+        if n == 0:
+            row[free] = 1
+        coefficients.append(row)
+        total = sum((coefficients[i] @ matrices[n-i] for i in range(n+1)),
+                    np.zeros(72, dtype=np.int64)) % P
+        assert not np.any(total), ("all 72 normal ideal columns", n)
+    ideal["normalization_free_coordinate"] = free
+    return np.array(coefficients, dtype=np.int64), ideal
+
+
+def smooth_residue_normalization(forms, tangent, ell0, source):
+    f1, f2, g1, g2, A, B = forms
+    defining = [f1, f2, poly_add(A, B), g1, g2]
+    quotient = GradedQuotient(9, defining, [2, 2, 3, 4, 4])
+    assert len(quotient.free) == 1
+    jacobian = {}
+    for permutation in permutations(range(5)):
+        sign = (-1)**sum(permutation[i] > permutation[j] for i in range(5) for j in range(i+1, 5))
+        term = ONE
+        for row, col in enumerate(permutation):
+            term = poly_mul(term, poly_derivative(defining[row], col))
+        jacobian = poly_add(jacobian, term, sign)
+    top_jacobian = int(quotient.reduce(jacobian)[0])
+    assert top_jacobian == 3
+    normalization = 96*pow(top_jacobian, -1, P) % P
+    delta = decode(tangent)
+    dh = poly_add(delta[4], delta[5])
+    eta = np.array([normalization*int(quotient.reduce(poly_mul({m: 1}, dh))[0]) % P
+                    for m in minus_basis], dtype=np.int64)
+    nonzero = next(j for j, value in enumerate(ell0) if value)
+    scalar = int(eta[nonzero])*pow(int(ell0[nonzero]), -1, P) % P
+    assert scalar == 14 and np.array_equal(eta, scalar*ell0 % P)
+    source_vector = np.array([source.get(m, 0) for m in minus_basis], dtype=np.int64)
+    assert int(eta @ source_vector % P) == 20
+    return {"socle_degree": 9, "socle_dimension": 1, "length": 96,
+            "Jacobian_top_coordinate": top_jacobian,
+            "trace_normalization_multiplier": normalization,
+            "normalized_form_over_obstruction_functional": scalar,
+            "all_60_negative_source_columns_verified": True,
+            "example_source_value": 20}
+
+
+def moving_point_check(forms, tangent, source):
+    f1, f2, _, _, A, B = forms
+    curve = [f1, f2, poly_add(A, B)]
+    delta = decode(tangent)
+    velocity = [delta[0], delta[1], poly_add(delta[4], delta[5])]
+    point, ratio = (1, 3, 27, 18, 4), 13
+    assert point[3]*pow(point[2], -1, P) % P == ratio
+    assert all(poly_evaluate(f, point) == 0 for f in curve)
+    jac = np.array([
+        [poly_evaluate(velocity[j], point),
+         (poly_evaluate(poly_derivative(f, 2), point)+ratio*poly_evaluate(poly_derivative(f, 3), point)) % P,
+         poly_evaluate(poly_derivative(f, 4), point)]
+        for j, f in enumerate(curve)], dtype=np.int64)
+    determinant = base_determinant(jac)
+    assert determinant == 11 and poly_evaluate(source, point) == 25
+    return {"a_b_c_d_u": list(point), "ratios_b_over_a_d_over_c": [3, ratio],
+            "unknowns_at_fixed_ratios": ["contact parameter", "c", "u"],
+            "local_jacobian_determinant": determinant, "example_source_value": 25}
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--order", type=int, default=47,
-                        help="last Taylor order, at least 47 (default: 47)")
+    parser.add_argument("--order", type=int, default=50,
+                        help="last Taylor order, at least 47 (default: 50)")
     parser.add_argument("--output", type=Path,
                         help="optional path for the reconstructed JSON receipt")
     args = parser.parse_args()
     if args.order < 47:
         parser.error("--order must be at least 47 to check the full-span witness")
     started = time.time()
-    smoothness = smoothness_check()
-    z0, ds, source = source_data()
-    forms, _ = seed_forms(P)
-    target = phi_polynomials(forms)
-    z0_ext = np.stack((z0, np.zeros(90, dtype=np.int64)), axis=-1)
-    assert np.array_equal(quadratic(z0_ext, z0_ext)[:, 0],
-                          np.array([target.get(e, 0) for e in plus_basis]))
-    z, branch = continue_branch(z0, ds, source, args.order+2)
-    # Reconstruct every coefficient of Phi(z(t)), including all cross terms.
-    for n in range(1, len(z)):
-        coefficient = np.zeros((70, 2), dtype=np.int64)
-        for i in range(n+1):
-            coefficient = (coefficient+quadratic(z[i], z[n-i])) % P
-        assert not np.any(coefficient), ("fixed equation", n)
-    ell, obstruction = obstruction_series(z, args.order)
+    forms, source, seed = smooth_seed()
+    z0, tangent, coordinates, slice_receipt = smooth_slice(forms)
+    z = smooth_branch(z0, tangent, coordinates, args.order)
+    ell, obstruction = smooth_obstruction_series(z)
     J = fixed_jacobian_directions(z0)
-    assert not np.any(np.einsum("nif,ij->njf", ell, J) % P)
-    full = rank_receipt(ell[:48])
-    assert full["rank"] == 48
-    assert full["minor_determinant"] == [22, 2]
-    determinant_norm = (22**2-NONSQUARE*2**2) % P
-    assert determinant_norm == 10
-    normalization = residue_normalization(z0, z[1], ell[0])
+    assert not np.any(ell @ J % P)
+    full = base_receipt(ell[:48])
+    assert full["rank"] == 48 and full["minor_rows"] == list(range(48))
+    assert full["minor_determinant"] == 17
+    example_vector = np.array([source.get(m, 0) for m in minus_basis], dtype=np.int64)
+    assert len(base_rref(np.column_stack((base_ideal_matrix(z0), example_vector)))[1]) == 60
+    normalization = smooth_residue_normalization(forms, tangent, ell[0], source)
+    moving = moving_point_check(forms, tangent, source)
     receipt = {
-        "prime": P, "quadratic_extension": "v^2=15",
-        "integral_seed": INTEGRAL_SEED,
-        "fixed_equation": "G=f1*g1+f2*g2+A^2-B^2 from the integral seed",
-        "smoothness": smoothness,
-        "central_contact": source,
+        "prime": P, "reflection_parameter": REFLECTION_PARAMETER,
+        "fixed_equation": "sum(X_i^6+Y_i^6)+(5/7)Q_X^2 Q_Y+(10/7)Q_X Q_Y^2 in the reflection chart",
+        "smooth_seed": seed, "slice": slice_receipt,
         "last_Taylor_order": args.order,
-        "branch": branch, "obstruction": obstruction,
-        "canonical_residue": normalization,
-        "jacobian_direction_rank": 12,
-        "full_span": full, "full_minor_norm": determinant_norm,
+        "fixed_equation_verified_through_order": args.order,
+        "all_72_ideal_columns_verified_through_order": args.order,
+        "obstruction": obstruction, "jacobian_direction_rank": 12,
+        "full_span_first_48_rows": full, "canonical_residue": normalization,
+        "moving_point": moving,
         "checks": [
-            "smooth weighted integral witness by reduction modulo 5",
-            "squarefree B, coprime C and B, and three simultaneously smoothed nodes",
-            "rank-69 incidence differential and rank-90 slice/gauge decomposition",
-            "simple tangent-cone root and nonzero punctured-branch rank gain",
-            "every fixed-equation coefficient through the reported branch order",
-            "every coefficient annihilates all 72 anti-ideal columns",
-            "every coefficient annihilates all 12 fixed Jacobian directions",
-            "regular Artinian sequence and canonical residue scalar",
-            "48-by-48 minor of the first 48 obstruction coefficient rows",
+            "square completion over Q and fixed weighted-equation identity",
+            "simple algebraic cubic-surface line root modulo 37",
+            "smooth weighted equation by reduction modulo 5",
+            "smooth genus-four contact curve and regular Artinian sequence",
+            "rank-70 incidence differential and genuine nongauge normal motion",
+            "fixed-equation coefficient recurrence without factorial division",
+            "all 72 negative ideal columns and all 12 fixed Jacobian columns",
+            "nonzero 48-minor of exactly the first 48 obstruction coefficient rows",
+            "canonical residue normalization on all 60 negative monomials",
+            "etale moving-point component over the ratio plane",
         ],
         "elapsed_seconds": round(time.time()-started, 3),
         "scope": (
             "Finite exact algebra for the general norm-contact theorem. "
-            "Characteristic-zero central upper bounds, branch lifting and "
-            "the Abel--Jacobi interpretation are proved in Chapter 3B."
+            "Chapter 3B supplies the characteristic-zero algebraic line lift, "
+            "the geometric normal-rank upper bound 59, and the Abel--Jacobi interpretation. "
+            "This verifier does not construct a prescribed-source rational primitive."
         ),
     }
     if args.output:
         args.output.write_text(json.dumps(receipt, indent=2)+"\n")
     print(json.dumps({
-        "incidence_rank_at_seed": source["incidence_derivative"]["rank"],
-        "slice_and_gauge_rank": 90,
-        "anti_ideal_rank_at_seed": obstruction["constant_ideal_rank"],
-        "both_branches_smooth_all_nodes": True,
-        "fixed_equation_checked_through_order":
-            branch["verified_fixed_equation_through_degree"],
+        "incidence_rank_at_seed": 70, "anti_ideal_rank_at_seed": 59,
+        "line_equation_jacobian_determinant": seed["line_equation_jacobian_determinant"],
+        "contact_curve_smooth": True, "actual_normal_motion": True,
+        "fixed_equation_checked_through_order": args.order,
         "Taylor_rows": 48, "span_rank": full["rank"],
         "minor_determinant": full["minor_determinant"],
-        "minor_norm": determinant_norm,
-        "canonical_residue_scalar":
-            normalization["normalized_form_over_obstruction_functional"],
+        "canonical_residue_scalar": normalization["normalized_form_over_obstruction_functional"],
+        "moving_point_jacobian_determinant": moving["local_jacobian_determinant"],
         "seconds": receipt["elapsed_seconds"],
     }, indent=2))
 

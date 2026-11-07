@@ -73,6 +73,18 @@ Assume one quadric has a nonzero \(u\)-coefficient. Eliminating \(u\) identifies
 K_C=\mathcal O_C(1),\qquad \deg\mathcal O_C(1)=6,\qquad g(C)=4.
 \]
 
+**Construction from a cubic-surface line.** Suppose
+\[
+G=A^2-B^2+H(q_0,q_1,q_2,q_3),
+\qquad q_i\in S_2^+,\quad A\in S_3^+,\quad B\in S_3^-,
+\]
+where \(H\) is an ordinary cubic form. A line \(L=(\ell_1=\ell_2=0)\) on \(H=0\) gives \(H=\ell_1H_1+\ell_2H_2\), with quadratic \(H_i\). Pulling back supplies the norm presentation
+\[
+f_i=\ell_i(q_0,q_1,q_2,q_3),\qquad
+g_i=H_i(q_0,q_1,q_2,q_3).
+\]
+This replaces a search for all six contact forms by a line calculation on a cubic surface. The pulled-back curve must still be a smooth complete intersection with the stated \(u\)-coefficient condition; the line alone does not imply these properties or the normal-rank and spanning conditions below.
+
 ### Presentation changes and actual curve motion
 
 For a fixed embedded curve \(C\) and a fixed equation \(G\), the presentation fiber has dimension 19 on this open. There are four parameters for changing the basis \(f_1,f_2\), eight for replacing
@@ -245,102 +257,117 @@ Indeed, a constant class in the kernel is killed by every coefficient row. Conju
 
 In particular \(g(\Lambda)\ge48\). It is the genus of the parameter curve, not the genus four of its fibers, that appears in this inequality. A nodal member is allowed at \(t=0\); the pairing is applied on the smooth punctured branch.
 
-### An integral norm presentation
+### A smooth algebraic norm presentation
 
-The following witness makes the criterion effective without a genericity assumption on the chosen coefficients. Set
-
-\[
-\begin{gathered}
-\kappa=50,\qquad Q=61c^2+110cd+85d^2,\\
-B=50c^3+75c^2d+40cd^2+22d^3,\\
-f_1=u+Q,\qquad f_2=ab,\qquad g_1=u^2-uQ+Q^2,\\
-g_2=\kappa a^4+2\kappa b^4-2a^2b^2
-       +\kappa cd(a^2+2c^2),\qquad A=a^3+b^3,
-\end{gathered}
-\]
-
-and **define** \(G=\Phi(f_1,f_2,g_1,g_2,A,B)\). Modulo five this is
+We construct one smooth threefold and one contact family satisfying the criterion. Put
 
 \[
-G\equiv u^3+a^6+b^6+c^6+d^6.
+\begin{aligned}
+\Theta(x,y,u)&=2x^6+y^6+30x^4u+30x^2u^2+2u^3,\\
+Q_x&=a^2+2ab-u,\qquad Q_y=c^2+2cd-u,\\
+G&=\Theta(a,b,u)+\Theta(c,d,u)
+       +\frac57Q_x^2Q_y+\frac{10}{7}Q_xQ_y^2.
+\end{aligned}
 \]
 
-Its derivatives have no common nonzero zero, proving smoothness in characteristic zero by properness of the singular locus. Modulo 23, the binary forms become
+Modulo five, this is \(2a^6+b^6+2c^6+d^6+4u^3\). Its affine cone is smooth away from the origin, proving quasismoothness in characteristic zero by properness of the singular locus. The nonzero \(u^3\)-coefficient excludes the weighted vertex, so \(T=(G=0)\) is smooth.
+
+The square completion
 
 \[
-Q=15c^2+18cd+16d^2,\qquad
-B=4c^3+6c^2d+17cd^2+22d^3.
+\begin{aligned}
+S_x&=(2a+b)^2,\qquad
+R_x=(a^2-u)b+(2a+b)^3-2(2a+b)Q_x,\\
+S_y&=(2c+d)^2,\qquad
+R_y=(c^2-u)d+(2c+d)^3-2(2c+d)Q_y,\\
+\Psi(S,Q)&=-2S^3+6S^2Q-3SQ^2-2Q^3
+\end{aligned}
 \]
 
-Here \(B\) is squarefree and coprime to \(Q\); the nonzero discriminant and resultant give these properties in characteristic zero as well. The curve \(C_0=(f_1,f_2,A+B)\) is the union of the plane cubics
+gives \(\Theta(a,b,u)=3R_x^2+\Psi(S_x,Q_x)\), and similarly for \(c,d\). Thus
 
 \[
-E_a:\ a=0,\ u=-Q,\ b^3+B=0,
-\qquad
-E_b:\ b=0,\ u=-Q,\ a^3+B=0.
+G=3R_x^2+3R_y^2+H(S_x,Q_x,S_y,Q_y),
+\quad
+H(S,Q,T,V)=\Psi(S,Q)+\Psi(T,V)+\frac57Q^2V+\frac{10}{7}QV^2.
 \]
 
-They are smooth and meet transversely at the three roots of \(B\). At those nodes \(g_1=3Q^2\ne0\).
+Choose a graph line on this cubic surface by imposing the four coefficient equations
 
-The exact verifier `scripts/verify-norm-contact-span.py`, in the repository’s [reproduction scripts](https://github.com/hodge-computer/sextics/tree/main/scripts), reconstructs the coefficient matrices, kernel directions and Taylor coefficients from this integral presentation; it reads no witness data. It uses lexicographically ordered weighted monomials and exact arithmetic in \(\mathbb F_{23}\) and \(\mathbb F_{23}[v]/(v^2-15)\). Run it with Python and NumPy:
+\[
+H(S,Q,kS+lQ,nS+mQ)\equiv0.
+\]
+
+They have the simple solution
+
+\[
+(k,l,n,m)\equiv(2,-3,-2,15)\pmod{37},
+\]
+
+where their Jacobian determinant is \(3\). Hensel's lemma gives a unique lift in these residue classes. The invertible Jacobian makes this an isolated algebraic solution, so its coordinates lie in a number field with a place over 37. Adjoin the simple roots \(i^2=-1\), \((\sqrt3)^2=3\), choosing \(i\equiv6\), \(\sqrt3\equiv15\) at that place.
+
+Set \(T_0=kS_x+lQ_x\), \(V_0=nS_x+mQ_x\), and use the cubic-surface construction of §3B.2:
+
+\[
+\begin{aligned}
+f_1&=S_y-T_0,&f_2&=Q_y-V_0,\\
+A&=\sqrt3R_x,&B&=i\sqrt3R_y,\\
+g_1&=\frac{H(S_x,Q_x,S_y,Q_y)-H(S_x,Q_x,T_0,Q_y)}{S_y-T_0},\\
+g_2&=\frac{H(S_x,Q_x,T_0,Q_y)-H(S_x,Q_x,T_0,V_0)}{Q_y-V_0}.
+\end{aligned}
+\]
+
+The two divided differences are polynomials, of weighted degree four. These forms satisfy \(G=f_1g_1+f_2g_2+A^2-B^2\) over the number field, with the required characters. The equation \(G\) itself remains the displayed rational polynomial.
+
+The exact verifier `scripts/verify-norm-contact-span.py`, in the repository's [reproduction scripts](https://github.com/hodge-computer/sextics/tree/main/scripts), reconstructs this presentation, its coefficient matrices, tangent direction and formal coefficients from the defining equations. It reads no witness data. It uses lexicographically ordered weighted monomials and exact arithmetic in \(\mathbb F_{37}\). Run it with Python and NumPy:
 
 ```sh
 python3 scripts/verify-norm-contact-span.py
 ```
 
-The necessary finite results are as follows.
+The finite results needed in the proof are:
 
-| Calculation | Result |
+| Calculation modulo 37 | Result |
 | --- | --- |
-| \(d\Phi\) at the nodal presentation | rank 69; a 69-minor is 10 modulo 23 |
-| 69 coordinate directions, two essential kernel directions, and 19 presentation directions | rank 90; determinant 13 modulo 23 |
-| Quadratic obstruction on the two-dimensional slice | \(q(s,t)=10s^2+12st+13t^2\), discriminant 15 |
-| First-order smoothing forms at the three nodes | \(K_1=9c^2, K_2=15c^2+13cd+18d^2\) |
-| Common-root test | \(\gcd(B,q(K_2,-K_1))=1\) |
-| Negative degree-six ideal at the nodal presentation | rank 58 |
-| First 48 obstruction coefficient rows on one branch | rank 48; minor \(22+2v\), norm 10 |
+| \(d\Phi\) at the presentation | rank 70; a 70-minor is 21 |
+| Negative degree-six ideal \(I_6^-\), \(I=(f_1,f_2,g_1,g_2,A,B)\) | rank 59; a 59-minor is 4 |
+| Singular ideal of the eliminated \((2,3)\) curve, degree six | rank 84 of 84 |
+| \((f_1,f_2,A+B,g_1,g_2)\), weighted degree ten | rank 581 of 581 |
+| 70 pivot directions, one essential tangent and 19 presentation directions | determinant 10 |
+| First 48 obstruction coefficient rows | rank 48; a 48-minor is 17 |
 
-The two central ranks require characteristic-zero upper bounds, since a modular rank alone supplies only a lower bound. For \(I=(f_1,f_2,g_1,g_2,A,B)\), eliminating \(u\) and setting \(a=0\) gives the quotient
+The \(u\)-coefficient of \(f_1\) is \(l\), a unit at the chosen place. Eliminating \(u\) identifies \(C_0=(f_1=f_2=A+B=0)\) with an ordinary \((2,3)\) complete intersection. Its singular ideal consists of those two equations and the six two-by-two Jacobian minors. Containing every degree-six monomial excludes a projective singular point over the algebraic closure. The unit minor proves the same in characteristic zero. Thus \(C_0\) is a smooth connected genus-four curve. The degree-ten calculation makes the five-form ideal supported only at the affine origin, so its generators are a regular sequence. The residue formula of §3B.3 therefore applies on a neighborhood of this contact.
 
-\[
-\mathbb C[b,c,d]/(b^3,B,Q^2,c^3d).
-\]
+### A smooth branch and its full span
 
-Its positive degree-six part contains
-\(b^2\bigl(\mathbb C[c,d]_4/\langle cB,dB,Q^2,c^3d\rangle\bigr)\), which is nonzero: there are five monomials and at most four relations. Thus \(\operatorname{rank}d\Phi\le69\), and the displayed minor proves equality.
+Let \(z_0\) be the 90 coefficients of the lifted presentation. Choose the 70 pivot coordinate directions of the displayed minor, collected in a matrix \(E\), and the first nullspace basis vector \(v\) outside the 19 presentation directions. Construct \(v\) in characteristic zero by fixing the same free coordinates and solving with the unit 70-minor. This gives a genuine tangent with the computed reduction; no modular vector is treated as a literal characteristic-zero tangent. The determinant 10 proves transversality to presentation changes, and reduction in the curve coordinate ring also verifies that the normal velocity is nonzero.
 
-For the negative rank, before the last relation the quotient is \(U\otimes V\), with
+The fixed-equation fiber in this 71-dimensional affine slice is an actual smooth algebraic parameter curve, with local parametrization
 
 \[
-U=\mathbb C[a,b]/(ab,a^3+b^3),\qquad
-V=\mathbb C[c,d]/(B,Q^2).
+z(t)=z_0+tv+Ex(t),\qquad x(0)=x'(0)=0,
+\qquad \Phi(z(t))=G.
 \]
 
-Its negative degree-six piece is \(aV_5\oplus bV_5\oplus a^3V_3\), of dimension \(1+1+3=5\). The remaining generator \(cd(a^2+2c^2)\), multiplied by \(ac,ad,bc,bd\), imposes at most three relations: the last two lie in the same one-dimensional \(bV_5\). Hence the negative quotient has dimension at least two; the 58-minor again gives equality.
+The algebraic implicit function theorem applies because \(d\Phi(z_0)E\) is invertible. Since \(\Phi\) is quadratic, each coefficient of \(x(t)\) is obtained by applying this one inverse matrix to the quadratic convolution of earlier coefficients. All denominators are units at the chosen place; neither factorials nor the coefficient order are inverted. The recurrence therefore reduces to the computation modulo 37 even beyond order 37. Smoothness of the embedded curves and nonzero normal motion persist near \(t=0\).
 
-### Lifting the branch and its span
+We also need a characteristic-zero upper bound on the negative ideal rank. Actual motion gives \(h^0(N_{C/T})\ge1\), and (3B.3.2) gives \(h^1N=h^0N\). The invariant cokernel vanishes because \(d\Phi\) has rank 70. Thus the negative ideal has rank at most 59. Its unit 59-minor proves equality, both at the seed and over the branch function field. In particular \(h^0N=h^1N=1\).
 
-Construct the characteristic-zero kernel vectors by fixing the same free coordinates in Gaussian elimination and solving with the 69-minor. The exact rank bound makes the remaining row dependent, so these are genuine tangent vectors whose reductions are the computed ones; the modular vectors are not treated as literal integral tangents. Choose the 69 coordinate directions of the invertible minor and the two essential kernel directions. Their span is a 71-dimensional affine slice transverse to the 19 presentation directions. Solving 69 equations by the algebraic implicit function theorem leaves one equation in two variables with nondegenerate quadratic term \(q\). The slice is therefore an ordinary nodal curve, with two actual algebraic branches. The common-root test says that both branches smooth all three nodes of \(C_0\). Properness and openness of smoothness exclude new singularities elsewhere. Each general fiber is consequently a smooth connected genus-four curve on the same \(T\).
+Normalize the left kernel of the \(60\)-by-\(72\) matrix \(I_6^-(t)\) by its unit 59-minor, fixing the remaining coordinate to one. The rank bound makes the resulting \(\ell(t)\) annihilate every ideal column to every order. It also annihilates the fixed Jacobian ideal: differentiating the identity \(G=f_1g_1+f_2g_2+(A+B)(A-B)\) puts every partial derivative of \(G\) in \(I(t)\). The negative degree-six Jacobian part has dimension 12: eight directions multiply the weight-five derivatives by opposite-character linear forms, and four multiply \(G_u\) by negative quadrics.
 
-Choose the slope \(\alpha=19+8v\) modulo 23. It satisfies \(q(1,\alpha)=0\) and \(\partial_tq(1,\alpha)=v\ne0\). Over characteristic zero, choose the simple root of the lifted quadratic with this reduction. The 69-minor and this derivative are units at the chosen place. Recursive solution of the fixed equation \(\Phi(z(t))=G\) therefore uses only unit denominators and reduces to the verifier's series. The equation \(G\) is held fixed throughout this recurrence.
+The verifier checks the fixed equation and all 72 ideal columns through order 50, annihilation of all 12 fixed Jacobian directions, and the nonzero minor of \(\ell_0,\ldots,\ell_{47}\). Unit denominators lift the minor 17 to a nonzero characteristic-zero minor. These rows consequently span the entire dual of \(R_6(G)^-\), proving (3B.4.1).
 
-Along the punctured branch \(d\Phi\) has rank 70. There is actual curve motion because the slice is transverse to presentation changes. Consequently the normal cokernel is nonzero, its positive part is zero, and its negative ideal has rank at most 59. The verifier finds a first-order increase from 58 to 59, so this rank is exactly 59 over the branch function field.
-
-To obtain \(\ell(t)\), solve the 58 independent ideal equations with their unit constant minor. An additional column gives a relation between the two resulting left-kernel vectors; it vanishes to order exactly one. Division by \(t\) is legitimate because the central rank is exactly 58 in characteristic zero. The rank-59 bound then makes the resulting functional annihilate every ideal column at every order. It also annihilates the fixed Jacobian ideal, since differentiating \(G=f_1g_1+f_2g_2+hk\) puts every derivative of \(G\) in \(I\).
-
-The verifier checks the required fixed-equation coefficients through order 49, all 72 ideal columns and all 12 negative Jacobian directions through order 47, and the nonzero 48-minor. Unit denominators make the same minor nonzero in characteristic zero. This proves the full span in (3B.4.1), rather than merely a nonzero Abel–Jacobi image.
-
-It also checks the normalization in (3B.3.4). After eliminating \(u\), the four forms \((f_2,h,g_1,g_2)\) have degrees \((2,3,4,4)\), with quotient dimensions one in degree nine and zero in degree ten. They are a regular sequence. At the initial branch tangent,
+Finally, use the residue normalization \(\tau_{\mathbf f}(\det\partial\mathbf f)=96\) from §3B.3, where \(\mathbf f=(f_1,f_2,A+B,g_1,g_2)\). The degree-nine Artinian quotient is one-dimensional, and the verifier checks for every negative degree-six monomial \(R\) that
 
 \[
-\eta_R/dt=17v\,\ell_0(R)\pmod{23}.
+\tau_{\mathbf f}\bigl(R\,\dot h\bigr)=14\ell_0(R)\pmod{37}.
 \]
 
-This nonzero scalar makes the common normalization a formal unit. Thus the first 48 normalized coefficient rows have the same rank; no additional high-order residue calculation is needed.
+Thus the canonical one-form and the normalized obstruction series differ by a formal unit. Multiplication by that common unit preserves the rank of their first 48 coefficient rows. The criterion gives the surjection (3B.4.2) for this smooth contact family.
 
 ## 3B.5 Openness in the full weighted family
 
-The preceding calculation proves surjectivity on one fixed threefold. To obtain an open family of such threefolds, use actual smooth points of its contact parameter curve. Their obstruction lines span the 48-dimensional dual: otherwise a constant nonzero class would annihilate all of them and hence every formal coefficient. Choose 48 points with independent lines, where \(d\Phi\) has rank 70 and \(h^0N=h^1N=1\).
+The smooth contact family just constructed proves surjectivity on one fixed threefold. To obtain an open family of such threefolds, choose smooth points of its parameter curve. Their obstruction lines span the 48-dimensional dual: otherwise a constant nonzero class would annihilate all of them and hence every formal coefficient. Choose 48 points with independent lines, where \(d\Phi\) has rank 70 and \(h^0N=h^1N=1\).
 
 Let \(\mathcal S\) be the smooth open of the full 70-dimensional space \(S_6^+\), and let \(\mathcal P\) be the open of norm presentations satisfying these rank and smoothness conditions. The map \(\mathcal P\to\mathcal S\) is smooth. The obstruction line is algebraic in the dual of the rank-48 Jacobian bundle. In the 48-fold fiber product of \(\mathcal P\) over \(\mathcal S\), independence of these lines is a Zariski-open condition. This open contains the selected tuple. Smooth morphisms are open, so its image contains a nonempty Zariski open \(\mathcal U\subset\mathcal S\).
 
