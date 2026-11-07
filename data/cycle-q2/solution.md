@@ -1,62 +1,89 @@
-# A normalized rational current for the cyclic pole-order-two target
+# A source-bound correction of the cyclic pole-order-two current
 
 ## Construction
 
-Use the exact sextic \(F\), degree-twelve source \(A\), and \(q=2\) from
-the [instance record](instance.rec), with coordinates
-\(z=(X_0,X_1,X_2,Y_0,Y_1,Y_2)\).
-For a nonzero homogeneous denominator \(D\) of degree \(m\), relatively prime
-to \(F\) over \(\mathbb C\), seek six homogeneous numerators \(N_i\) of
-degree \(m+7\) and a polynomial \(Q\) satisfying
-\[
-AD^2-2D\sum_iN_i\partial_iF+
-F\left(D\sum_i\partial_iN_i-\sum_iN_i\partial_iD\right)=F^3Q.
-\]
-There is no bound on \(m\), prescribed denominator support, or restriction
-\(Q=0\).
+Use the protected sextic \(F\), source \(A\), and \(q=2\) from the
+[instance record](instance.rec). [CurrentData.lean](CurrentData.lean) defines
+the saved physical current \((D_0,N_0)\), remainder \(R_0\), and quotient
+\(Q_0\) through 13,874 shared polynomial expressions. Their homogeneous
+weights are respectively \(3726\), \(3733\), \(7452\), and \(7446\);
+the zero numerator component is allowed. These are concrete polynomial
+definitions, with rational divisions only inside complex constants.
+The exported equation and source are proved equal to the protected target.
 
-The radial correction reduces this identity to two normalized equations.
-Put \(S=AD-2\sum_iN_i\partial_iF\). The cleared identity implies
-\(F\mid DS\); coprimality gives \(S=FH\), where \(H\) is homogeneous of
-degree \(m+6\). Set
+Write the full cleared defect as
 \[
-N'_i=N_i+\frac{z_iH}{12}.
+E(D,N)=AD^2-2D\sum_iN_i\partial_iF+
+F\left(D\sum_i\partial_iN_i-\sum_iN_i\partial_iD\right).
 \]
-Euler's identity for the sextic gives \(2\sum_iN'_i\partial_iF=AD\).
-Writing \(B(D,N)=D\sum_i\partial_iN_i-\sum_iN_i\partial_iD\), Euler's
-identities for \(D\) and \(H\) also give
+The reported partial-current identity would assert
+\(E(D_0,N_0)=-F^2R_0+F^3Q_0\). Its generic transport proof is not yet
+formalized. The Lean construction therefore retains the literal comparison
+polynomial
 \[
-B(D,N')-B(D,N)=DH.
+C=E(D_0,N_0)+F^2R_0-F^3Q_0
 \]
-Thus the complete cleared defect is unchanged: the added terms are
-\(-DFH+FDH=0\). The same denominator and quotient satisfy
+as `transportError`; it does not assume \(C=0\). The proposition
+`ArchivedPartialIdentityGoal` names that separate obligation.
+
+For a new homogeneous denominator \(H\), six correction numerators \(M_i\),
+and an unrestricted quotient correction \(S\), set
 \[
-2\sum_iN'_i\partial_iF=AD,\qquad B(D,N')=F^2Q.
+D_*=D_0H,\qquad N_{*,i}=HN_{0,i}+D_0M_i,\qquad Q_*=H^2Q_0+S.
 \]
-Conversely, these equations imply the original cleared identity.
-[Normalization.lean](Normalization.lean) proves this equivalence, including
-the numerator degrees and preservation of denominator legality. Normalization
-preserves any nonzero residual defect of a partial current; it does not repair it.
+Let \(E_0(H,M)\) denote the same defect with zero source. The maintained
+certificate-addition identity gives
+\[
+E(D_*,N_*)-F^3Q_*=
+D_0^2E_0(H,M)+H^2C-F^2H^2R_0-F^3S.
+\]
+[CurrentCorrection.lean](CurrentCorrection.lean) proves this exact reconstruction
+identity, including all derivatives of the moving denominator and numerators.
+New denominator factors are allowed, with no degree bound, fixed support
+profile, or zero-quotient restriction.
 
 ## Certificate
 
-[Workspace.lean](Workspace.lean) binds the construction to the protected target
-and proves its degree, nonvanishing, and polynomial identities.
-The `NormalizedRationalSolution` structure in [Assembly.lean](Assembly.lean)
-retains all denominator, grading, and normalized-equation obligations.
-`certificate_of_normalized_solution` converts an inhabitant into the full
-maintained `HodgeComputer.Verify` witness, with an unrestricted quotient.
+`ActualCurrentCorrection` requires the right-hand side above to vanish,
+the correct homogeneous degrees, and nonvanishing and complex coprimality
+of the new denominator \(H\). The saved denominator's nonvanishing and
+coprimality are proved in [CurrentDenominator.lean](CurrentDenominator.lean),
+so legality of \(D_0H\) follows automatically.
+`certificate_of_actual_current_correction`
+then supplies the full maintained `HodgeComputer.Verify` witness: denominator
+\(D_*\), six numerators \(N_{*,i}\), and unrestricted quotient \(Q_*\).
+Conversely, any original certificate can be expressed as a correction of this
+fixed current after clearing denominators. The theorem
+`originalGoal_iff_actual_current_correction` proves that this concrete interface
+does not restrict the original existence problem.
 
-[Solution.lean](Solution.lean) supplies the standard protected entry point
-`Submission.certificate`. **The proof is incomplete at
-`Submission.missing_rational_solution`**, whose explicit `sorry` asks for an
-inhabitant of `NormalizedRationalSolution`. The normalization equivalence and
-conditional assembly are proved, but they do not establish this existence.
-No expanded JSON witness is exported.
+[Solution.lean](Solution.lean) supplies the protected `Submission.certificate`
+entry point. **The remaining `sorry` is
+`Submission.missing_rational_correction`**, which asks for this concrete
+correction. No such correction or complete original certificate is claimed,
+and no expanded JSON witness is exported.
+
+## Supporting identities
+
+[CurrentNormalGauge.lean](CurrentNormalGauge.lean) formalizes the saved
+normal-gauge construction while retaining its comparison error.
+[CurrentTangents.lean](CurrentTangents.lean) provides five tangent directions
+and their full moving-denominator closure equation. Its optional simplified
+route explicitly requires the archived partial identity.
+[CurrentAmbientLift.lean](CurrentAmbientLift.lean) proves reciprocal-cubic,
+adjoint, and coordinate-transport identities with off-hypersurface errors;
+instantiating the full circuit transport remains separate.
+
+[CurrentDenominator.lean](CurrentDenominator.lean) uses exact specialization
+reductions and 21 polynomial Bézout certificates, then monicity in \(X_0\)
+to prove complex coprimality of the full multivariate denominator without a
+dense expansion. The same witnesses prove that the denominator is nonzero.
+The earlier [normalization equivalence](Normalization.lean) remains available;
+normalization preserves a partial current's residual defect.
 
 The construction builds on `hodgepodgeconjecture`'s
 [cycle-three proof](../cycle-three/solution.md), the source-transport work of
-`benediamond`, the character analysis of `DiamondJM`, and the contributions of
-`fqlx` and collaborators recorded in
+`benediamond`, the character analysis of `DiamondJM`, and contributions of
+`fqlx` and collaborators in
 [Discussion #61](https://github.com/hodge-computer/sextics/discussions/61).
 Prepared for `fqlx` with OpenAI ChatGPT and Codex assistance.

@@ -1,20 +1,24 @@
 import HodgeTarget
-import Proposal.Normalization
+import Proposal.CurrentCorrection
+import Proposal.CurrentTangents
+import Proposal.CurrentAmbientLift
+import Proposal.CurrentDenominator
 
-/-! Radial normalization for the protected cycle-q2 certificate. -/
+/-! A source-bound correction of the saved physical current for cycle-q2. -/
 
 noncomputable section
 
 namespace Submission
 
-/-- The remaining existence of a legal homogeneous normalized rational current. -/
-theorem missing_rational_solution :
-    Nonempty CycleQ2Assembly.NormalizedRationalSolution := by
+/-- Close the literal defect of the concrete saved current, allowing new poles. -/
+theorem missing_rational_correction :
+    Nonempty CycleQ2Concrete.ActualCurrentCorrection := by
   sorry
 
 theorem certificate :
     HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := by
-  exact CycleQ2Normalization.originalGoal_iff_normalized.mpr missing_rational_solution
+  obtain ⟨c⟩ := missing_rational_correction
+  exact CycleQ2Concrete.certificate_of_actual_current_correction c
 
 end Submission
 
