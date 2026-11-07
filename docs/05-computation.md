@@ -117,6 +117,10 @@ Hence \(L_{f,q}(R)-P\) is divisible by \(f^{q+1}\) in the localization. Coprimal
 
 For \(q=1\), every component, including the normal component, has degree less than \(m\). The theorem places no bound on denominators in the coefficient field \(E\), and supplies no existence claim. It replaces arbitrary rational dependence on \(u\) by finitely many unknown elements of \(E\); rational dependence on the remaining coordinates is retained in full.
 
+**Homogeneous corollary.** For the sextic certificate problem, ordinary and strict certificates have the same existence problem when the denominator is unrestricted, at every positive \(q\). Choose linear coordinates in which \(F\) has degree six in one variable \(u\), and put the other five coordinates in the coefficient field \(E\). Such coordinates exist over the field of definition, since it is infinite and \(F\ne0\). The source has \(u\)-degree at most \(6q<6(q+1)\), so the normal-form theorem produces a strict current \(R\), with each component of \(u\)-degree less than \(6q\).
+
+Homogeneity is preserved by uniqueness of the remainder. If the original field has component degree \(e=6q-5\), then, for a scaling parameter \(s\), both \(R(Z)\) and \(s^{-e}R(sZ)\) have \(u\)-degree less than \(6q\) and represent the original field modulo \(F^q\). They are equal. Thus \(R\) has homogeneous rational components of degree \(e\), and their coefficient denominators can be cleared homogeneously. The prescribed involution character is restored by averaging, which preserves the strict identity and denominator legality. The construction need not preserve the original support or its denominator degree; the full quotient in the fixed-denominator equations remains necessary.
+
 ## 5.4 From numerical candidates to exact coefficients
 
 Variable projection solves for the best \(z\) at each trial \(a\). It can reduce the optimization dimension, but near a rank drop its minimum-norm solution can change sharply. A singular-value cutoff can then change the effective problem. Restore the complete chosen numerator space and test any candidate in the original equations.

@@ -3,6 +3,7 @@ import Proposal.SymmetricPrimitiveEndpoint
 import Proposal.SymmetricRegularCurrent
 import Proposal.SymmetricCertificateTransport
 import Proposal.SymmetricCoefficientField
+import Proposal.SymmetricNormalTransport
 
 /-!
 # Incomplete symmetric-sextic certificate
@@ -12,6 +13,17 @@ One substantive proof obligation remains below: a primitive for the explicit
 reduced density. Its equivalence with the original relative primitive and
 its projective transport are proved. The final theorem depends
 on the remaining `sorry` placeholder and is not an accepted certificate.
+
+The independent four-direction route in
+`SymmetricBalancedTransport.certificate_of_base_coefficients` permits
+normal-variable dependence in the component numerators. The full five-
+component ordinary-game endpoint is
+`SymmetricNormalTransport.certificate_of_weighted_game`, with a normal
+component and any nonzero coefficient-space denominator. The research
+obstruction to the purely normal-independent scalar-correction strategy
+does not exclude these broader endpoints. No current solving their
+equations has yet been supplied; the relative existence lemma below
+retains its original single admission.
 -/
 
 noncomputable section

@@ -1,4 +1,4 @@
-# A relative primitive for the symmetric sextic
+# Reflection-chart reductions for the symmetric sextic
 
 ## Target and draft status
 
@@ -9,7 +9,7 @@ F=\sum_{i=0}^2(X_i^6+Y_i^6)
  +\frac57Q_X^2Q_Y+\frac{10}{7}Q_XQ_Y^2,
 \qquad A=X_0X_1X_2Y_0Y_1Y_2,\qquad q=1.
 \]
-This is an **incomplete proof draft**. The algebra below reduces the target to a relative rational primitive. Its finite projective transport is now proved, including denominator legality. The one unfinished lemma in [Solution](Solution.lean) is identified below; `Submission.certificate` is not a verified certificate.
+This is an **incomplete proof draft**. The algebra below gives a relative-primitive route and a full affine-current route, with proved projective transports and denominator legality. The full current has a complete polynomial normal form in the variable \(u\), with unrestricted rational coefficients in \((\lambda,b,c,d)\). The one unfinished lemma in [Solution](Solution.lean) belongs to the relative route; `Submission.certificate` is not a verified certificate.
 
 ## Reflection chart and residue
 
@@ -75,6 +75,84 @@ Consequently the original relative-primitive problem is **equivalent** to
 \sum_{j=b,c,d}E_j\gamma_j=\frac{2\delta}{f_u},\qquad \gamma_j\in K.
 \]
 The theorem `primitive_iff_residual` proves both directions without restricting the poles of \(\gamma\). The original primitive is explicitly \(\beta_j=-2W_j/f_u+\gamma_j\), and `certificate_of_residual` constructs the protected certificate from such a \(\gamma\). This removes the explicit third-order normal denominator from the remaining source, while allowing poles along the coefficient Jacobian. It does not prove existence of the remaining primitive.
+
+## The full affine current and its polynomial normal form
+
+Put \(E=\mathbb C(\lambda,b,c,d)\). A full current has four coefficient components \(W\) and a normal component \(V\partial_u\). Its ordinary equation is
+\[
+W(f)+Vf_u-f\bigl(\operatorname{div}_{\lambda,b,c,d}W+V_u\bigr)=P.
+\]
+The ordinary divergence here is essential. The physical chart has volume factor \(4a^5v\); changing to \(u=v^2\) gives \(2a^5\). There is no remaining weight in the five affine coordinates.
+
+The book's [polynomial normal-form theorem](../../docs/05-computation.md) shows that every legal rational current for this equation, including one whose defect is only divisible by \(f^2\), can be replaced by
+\[
+W=W_0+uW_1+u^2W_2,\qquad
+V=v_0+uv_1+u^2v_2,
+\qquad W_i\in E^4,\quad v_i\in E,
+\]
+with an exact identity. This degree bound is complete, rather than a chosen search cutoff. It follows by reducing all five components modulo the cubic: the change \(fT\) contributes only \(-f^2\operatorname{div}T\), while the reduced defect has degree at most five. The general positive-pole-order statement is proved in [NormalRemainder](../../formal/lean/HodgeComputer/Constructions/ResidueTransport/NormalRemainder.lean), including inversion of the original denominator modulo the required power of \(f\).
+
+For this target, simultaneous interchange of \(X_0,X_1\) and \(Y_0,Y_1\) preserves \(F,A\). Averaging a homogeneous certificate under that symmetry, descending through \(u=v^2\), and cancelling the radial component places it in the ordinary affine equation above. These geometric coordinate comparisons give a mathematical equivalence with the full certificate problem; their necessity direction has not yet been composed into a Lean theorem. The complete form has fifteen rational coefficient functions. Its three normal coefficients can be eliminated algebraically, leaving three first-order linear differential equations for the twelve coefficient components. Rational dependence on the four remaining coordinates is still unrestricted, and no solution of that system has been supplied.
+
+The constructive direction is already available in [SymmetricNormalTransport](SymmetricNormalTransport.lean). Write \(W=Z/D\), \(V=N_u/D\), where \(D\ne0\) is any polynomial in the four coefficient coordinates. The theorem `certificate_of_weighted_game` constructs the protected certificate from the cleared ordinary identity. It uses the reflected numerator
+\[
+\bigl(4vZ_\lambda,4vZ_b,4vZ_c,4vZ_d,2N_u\bigr)\big|_{u=v^2}
+\]
+over \(D\), then the existing homogeneous transport. All five components are retained, denominator legality is automatic, and the resulting quotient is zero. The polynomial coefficient identities and remaining differential system are recorded in the PR research discussion.
+
+### The subsystem with zero normal component
+
+[SymmetricBalancedTransport](SymmetricBalancedTransport.lean) supplies a separate endpoint that permits a nonzero \(\lambda\)-component. Seek a rational field
+\[
+W=W_\lambda\partial_\lambda+W_b\partial_b+W_c\partial_c+W_d\partial_d
+\]
+and a rational function \(h\) satisfying
+\[
+W(f)=P+hf,\qquad \operatorname{div}W=h.
+\]
+These are sufficient identities in the ambient weighted coordinate field. Their coefficients may depend on \(u\), although this subsystem has no \(\partial_u\)-component. They do not have to be interpreted as a three-component relative primitive. In particular, the \(\lambda\)-component is retained throughout the proof.
+
+Write \(W=Z/D\) and \(h=H_0/D\). The exact polynomial obligations are
+\[
+\sum_{i=\lambda,b,c,d}Z_i\partial_i f=DP+H_0f,
+\qquad
+D\sum_i\partial_iZ_i-\sum_iZ_i\partial_iD=DH_0.
+\]
+The theorem `certificate_of_base_coefficients` proves the protected certificate from these two identities and any nonzero polynomial denominator \(D\) in \((\lambda,b,c,d)\). The numerators \(Z_i,H_0\) may depend polynomially on \(u\). The denominator is not restricted to the earlier determinant \(J\). Extra coefficient-space divisors are allowed. Their legality is proved uniformly: the irreducible chart equation depends on \(v\), so it cannot divide a nonzero polynomial independent of \(v\). The existing homogeneous transport then proves legality in the original coordinates.
+
+The direct affine current is
+\[
+w=4v\,(W_\lambda,W_b,W_c,W_d,0)|_{u=v^2}.
+\]
+It satisfies the ordinary affine game
+\[
+A_H-w(H)+H\operatorname{div}w=0.
+\]
+Its physical pushforward is
+\[
+V=(0,0,aW_b,a(W_c+vW_\lambda),a(W_c-vW_\lambda),aW_d)|_{u=v^2},
+\]
+which satisfies \(V(F)=A+hF\) and \(\operatorname{div}V=h\). The theorem `ordinary_current_transport` proves the underlying contraction and divergence formulas, and `explicit_verify_game` proves a literal homogeneous certificate with \(Q=0\) after the displayed chart clearing below. This construction needs no intermediate exact-normalization hypothesis. If a normalized field is desired, the general [radial-normalization theorem](../../formal/lean/HodgeComputer/Constructions/RationalFields/RadialNormalization.lean) applies while retaining the denominator and zero quotient.
+
+### The scalar correction and its exact obstruction
+
+The reusable [CoefficientBalance](../../formal/lean/HodgeComputer/Constructions/ResidueTransport/CoefficientBalance.lean) module makes one scalar reduction precise. Suppose a base field \(W_0\) and a correction direction \(C\) satisfy
+\[
+W_0(f)=P,\qquad C(f)=\alpha f,\qquad
+C(\ell)=\alpha\ell,\qquad \operatorname{div}C=4\alpha,
+\qquad \ell\ne0.
+\]
+Then
+\[
+W=W_0+\frac{s}{\ell^3}C,\qquad h=\frac{\alpha s}{\ell^3}
+\]
+has the required matching automatically, and its divergence is balanced **if and only if**
+\[
+C(s)=-\ell^3\operatorname{div}W_0.
+\]
+The generic theorem works for any number of coordinates and any exponent \(r\), with \(\operatorname{div}C=(r+1)\alpha\). It does not assert that the scalar equation has a rational solution. `certificate_of_scalar_correction` combines this reduction with the exact target transport, assuming the displayed identities and a common-denominator representation. Only nonvanishing and independence of the normal variable are required of that denominator; its degree and extra base divisors are unrestricted.
+
+For the explicit \(u\)-independent coefficient-fiber direction fixing \(f_0/\ell,f_1/\ell,f_2/\ell\), the scalar equation has no rational solution. A [nonzero local contour period](https://github.com/hodge-computer/sextics/pull/223#issuecomment-6711115729) proves this for every rational denominator, including arbitrary extra invariant divisors. The argument excludes the whole \(u\)-independent four-component ansatz. It does not exclude \(u\)-dependent coefficient components, a normal component, or the original relative primitive. The full polynomial form above retains precisely those additional freedoms. The conditional Lean balance theorem remains general; the period obstruction and its exact computation are recorded separately in the PR discussion.
 
 ## Cubic trace cancellation
 
@@ -159,7 +237,7 @@ The common denominator is nonzero, relatively prime to \(F\), and homogeneous of
 
 `Submission.residual_primitive_exists` must construct a primitive for the explicit density \(2\delta/f_u\). The checked equivalence above then proves `Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive`. The intended geometric route identifies the actual contact correspondence with the relevant cohomology map and proves support-to-function-field exactness. Contact identities and a finite rank calculation alone do not supply this implication. [ContactResidueAnnihilator](ContactResidueAnnihilator.lean) and [WeightedFiberSmoothness](WeightedFiberSmoothness.lean) provide supporting algebra and smoothness results, not primitive existence.
 
-This primitive is relative over \(\mathbb C(\lambda)\): its equation uses only \(E_b,E_c,E_d\). A global primitive involving a \(\lambda\)-component would not by itself meet that endpoint. The book's weighted-fiber support argument supplies the appropriate mathematical route: spread the anti-projector's supporting divisor over a finite base extension, identify the exact residue density, and obtain relative de Rham exactness on the function field. Finite trace can then descend the primitive. Those geometric comparisons remain unformalized here.
+This primitive is relative over \(\mathbb C(\lambda)\): its equation uses only \(E_b,E_c,E_d\). A global primitive involving a \(\lambda\)-component would not by itself meet that endpoint. The full ordinary-current construction above has its own independently proved endpoint and can be used if its complete coefficient system is solved. The book's weighted-fiber support argument supplies a mathematical route to the original relative primitive: spread the anti-projector's supporting divisor over a finite base extension, identify the exact residue density, and obtain relative de Rham exactness on the function field. Finite trace can then descend the primitive. Those geometric comparisons remain unformalized here.
 
 The sole remaining lemma is admitted. The final theorem therefore still depends on `sorryAx` and does not establish the protected certificate independently. The proved transport and coordinate identities depend only on Lean's usual logical axioms.
 
