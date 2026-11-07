@@ -52,6 +52,30 @@ The needed two-form is
 [SymmetricPrimitiveEndpoint](SymmetricPrimitiveEndpoint.lean) packages these
 three elements of \(K\) and their equation as `RelativePrimitive`.
 
+## An explicit coefficient field reduces the pole
+
+Write \(f=\ell u^3+f_2u^2+f_1u+f_0\) and
+\(P=p_0+p_1u+p_2u^2\), and set
+\[
+M=\frac{\partial(f_0,f_1,f_2)}{\partial(b,c,d)},\qquad
+J=\det M,\qquad Z=\operatorname{adj}(M)(p_0,p_1,p_2)^{\mathsf T},
+\qquad W=Z/J.
+\]
+[SymmetricCoefficientField](SymmetricCoefficientField.lean) defines all these polynomials from the actual equation and source. The adjugate identity proves \(W(f)=P\), and normal independence gives \(W(f_u)=P_u\). The denominator is nonzero in \(K\): at \((\lambda,b,c,d)=(0,1,1,2)\), it specializes to \(-564000/49\), while \(H\) remains a degree-six polynomial in \(v\). Thus \(H\) cannot divide \(J\).
+
+Put \(\delta=\partial_bW_b+\partial_cW_c+\partial_dW_d\). The quotient rule gives the exact identity
+\[
+\sum_{j=b,c,d}E_j\left(-\frac{2W_j}{f_u}\right)
+=\rho-\frac{2\delta}{f_u}.
+\]
+All expressions here are evaluated at \(u=v^2\). The general identity is proved in [CoefficientReduction](../../formal/lean/HodgeComputer/Constructions/ResidueTransport/CoefficientReduction.lean), and [SymmetricCoefficientReduction](SymmetricCoefficientReduction.lean) binds its tangent derivations to this function field.
+
+Consequently the original relative-primitive problem is **equivalent** to
+\[
+\sum_{j=b,c,d}E_j\gamma_j=\frac{2\delta}{f_u},\qquad \gamma_j\in K.
+\]
+The theorem `primitive_iff_residual` proves both directions without restricting the poles of \(\gamma\). The original primitive is explicitly \(\beta_j=-2W_j/f_u+\gamma_j\), and `certificate_of_residual` constructs the protected certificate from such a \(\gamma\). This removes the explicit third-order normal denominator from the remaining source, while allowing poles along the coefficient Jacobian. It does not prove existence of the remaining primitive.
+
 ## Cubic trace cancellation
 
 [CubicTrace](../../formal/lean/HodgeComputer/Constructions/ResidueTransport/CubicTrace.lean) proves an exact companion-matrix
@@ -133,7 +157,7 @@ The common denominator is nonzero, relatively prime to \(F\), and homogeneous of
 
 ## Remaining proof obligation
 
-`Submission.relative_primitive_exists` must prove `Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive`. The intended geometric route identifies the actual contact correspondence with the relevant cohomology map and proves support-to-function-field exactness. Contact identities and a finite rank calculation alone do not supply this implication. [ContactResidueAnnihilator](ContactResidueAnnihilator.lean) and [WeightedFiberSmoothness](WeightedFiberSmoothness.lean) provide supporting algebra and smoothness results, not primitive existence.
+`Submission.residual_primitive_exists` must construct a primitive for the explicit density \(2\delta/f_u\). The checked equivalence above then proves `Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive`. The intended geometric route identifies the actual contact correspondence with the relevant cohomology map and proves support-to-function-field exactness. Contact identities and a finite rank calculation alone do not supply this implication. [ContactResidueAnnihilator](ContactResidueAnnihilator.lean) and [WeightedFiberSmoothness](WeightedFiberSmoothness.lean) provide supporting algebra and smoothness results, not primitive existence.
 
 This primitive is relative over \(\mathbb C(\lambda)\): its equation uses only \(E_b,E_c,E_d\). A global primitive involving a \(\lambda\)-component would not by itself meet that endpoint. The book's weighted-fiber support argument supplies the appropriate mathematical route: spread the anti-projector's supporting divisor over a finite base extension, identify the exact residue density, and obtain relative de Rham exactness on the function field. Finite trace can then descend the primitive. Those geometric comparisons remain unformalized here.
 

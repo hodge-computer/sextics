@@ -2,25 +2,35 @@ import HodgeTarget
 import Proposal.SymmetricPrimitiveEndpoint
 import Proposal.SymmetricRegularCurrent
 import Proposal.SymmetricCertificateTransport
+import Proposal.SymmetricCoefficientField
 
 /-!
 # Incomplete symmetric-sextic certificate
 
 This draft uses the ordinary protected target and proposal helper layout.
-One substantive proof obligation remains below: existence of the relative
-primitive. Its projective transport is proved. The final theorem depends
+One substantive proof obligation remains below: a primitive for the explicit
+reduced density. Its equivalence with the original relative primitive and
+its projective transport are proved. The final theorem depends
 on the remaining `sorry` placeholder and is not an accepted certificate.
 -/
 
 noncomputable section
 namespace Submission
 
-/-- Missing geometric step: identify the actual contact correspondence with
-the required residue class and prove exactness in the chart function field.
-The finite contact-rank calculation alone does not establish this theorem. -/
-theorem relative_primitive_exists :
-    Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive := by
+/-- Remaining existence problem, with the coefficient field and its
+denominator already constructed and checked. The reduced source is exactly
+`2*div(W)/f_u`; no restriction on additional poles of its primitive is imposed. -/
+theorem residual_primitive_exists :
+    ResidueCoefficientReduction.HasPrimitive
+      SymmetricCoefficientReduction.relativeTangent
+      SymmetricCoefficientField.residualDensity := by
   sorry
+
+/-- The checked coefficient-field correction recovers the original relative
+primitive from the equivalent residual problem. -/
+theorem relative_primitive_exists :
+    Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive :=
+  SymmetricCoefficientField.primitive_iff_residual.mpr residual_primitive_exists
 
 /-- The finite polynomial transport supplies a certificate, and the proved
 certificate-to-current bridge gives the original regular-current endpoint. -/
@@ -35,8 +45,8 @@ existence lemma. Its transitive axioms still include sorryAx. -/
 theorem certificate :
     HodgeComputer.HasCertificate
       HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := by
-  obtain ⟨beta⟩ := relative_primitive_exists
-  exact SymmetricCertificateTransport.certificate_of_relative_primitive beta
+  obtain ⟨gamma, hgamma⟩ := residual_primitive_exists
+  exact SymmetricCoefficientField.certificate_of_residual gamma hgamma
 
 end Submission
 

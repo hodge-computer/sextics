@@ -5,3 +5,4 @@ import HodgeComputer.Constructions.ResidueTransport.FirstJets
 import HodgeComputer.Constructions.ResidueTransport.CoordinateIndependence
 import HodgeComputer.Constructions.ResidueTransport.CubicTrace
 import HodgeComputer.Constructions.ResidueTransport.PiolaContraction
+import HodgeComputer.Constructions.ResidueTransport.CoefficientReduction
