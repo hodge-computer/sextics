@@ -1,0 +1,319 @@
+**This advances the calculation, but the full cycle‑q2 certificate remains unconstructed.** I checked the update against the recovered source packet, reran the physical-current calculations, and independently rebuilt the 72-point calculation over \(\mathbb Q\).
+
+The most important finding is that the remaining problem is more substantial than “clear one last simple residue.” The checked formulas give a precise rational remainder and a useful geometric reduction, but neither yet supplies the global primitive.
+
+I saved the reproducible audit, exact witnesses, and receipts:
+
+- [cycle_q2_oct29_independent_audit.zip](https://chatgpt.com/library?file_id=libfile_f54dacc2d27881919d32d2562d3dd1ec&account_id=personal)
+- [AUDIT_REPORT.txt](sandbox:/workspace/scratch/f76c975bc460/deliverables/cycle_q2_oct29_independent_audit/AUDIT_REPORT.txt)
+
+All **eight verification jobs** in the packaged replay passed. Their scopes are deliberately explicit:
+
+| Claim | Independent result |
+|---|---|
+| Physical source binding and generic \(c/Z\) partial current | **Verified exactly** |
+| Four physical connection matrices at the stated physical point | **All have rank five** |
+| Six curvature matrices at that point | **All vanish exactly** |
+| Printed seven-generator compact ideal | **Radical, with exactly 72 geometric points** |
+| Actual spectral equation and graph over that compact locus | **No solutions; both spectral-root possibilities excluded** |
+| Every original gate solution lies on that compact locus over \(\mathbb Q\) | **Not established by this replay** |
+| Original homogeneous \((D,N_0,\ldots,N_5,Q)\) certificate | **Not produced** |
+
+## 1. Step 7 is stronger—and different—than the summary’s “simple residue” description
+
+The recovered packet contains an explicit generic current. Its remaining source is fully specified.
+
+Set
+\[
+L=P^6+U^2,\qquad S=2c-Ux^2,\qquad t=P^3U,
+\]
+and
+\[
+H=LS^3+\frac12P^2U^2xS^2+t(U^3+U)x^3+t(1-d).
+\]
+Write
+\[
+j=H_x,\qquad
+N=\frac{P^2U^2x^2(Ux^2-2c)^2}{12}.
+\]
+
+The actual physical family is
+\[
+H=0,\qquad d=-Z^6-cZ.
+\]
+
+The trace-free numerator in the checked construction is
+\[
+\boxed{
+N^\perp
+=
+N+\frac{jP^4U^2}{144(P^6+U^2)^2}.
+}
+\]
+Thus \(w^\perp=N^\perp/j\).
+
+**Here \(N^\perp\) is a scalar numerator.** The recovered construction does not identify it with the constant five-component kernel vector appearing in the pasted summary. Those objects should not be treated as interchangeable without a separate comparison.
+
+Now put
+\[
+k=c+6Z^5,\qquad B=N_xj-Nj_x.
+\]
+The explicit currents are
+\[
+J_c=\frac{tB}{2j^3},
+\]
+\[
+J_Z
+=
+-\frac{ZtB}{2kj^3}
++\frac{(24Z^5-c)N^\perp}{2k^3j}.
+\]
+
+With the physical derivations
+\[
+\mathcal D_c=\delta_c-Z\delta_d,\qquad
+\mathcal D_Z=\partial_Z-k\delta_d,
+\]
+the generic identity is
+\[
+\boxed{
+\frac12w_{cd}
+=
+\mathcal D_cJ_c+\mathcal D_ZJ_Z
++
+\frac{15Z^4(48Z^5-7c)}{k^4}\,w^\perp.
+}
+\]
+
+I replayed the symbolic verification of this identity and its binding to the physical source. It is a genuine closed-form partial current.
+
+### The apparent \(1/j\) pole cancels in the remaining differential form
+
+Let
+\[
+\Omega=dP\wedge dU\wedge dZ\wedge dc.
+\]
+On the physical hypersurface,
+\[
+(H_{\mathrm{phys}})_Z=tk,
+\]
+so
+\[
+\Omega
+=
+-\frac{j}{tk}\,
+dP\wedge dU\wedge dx\wedge dc.
+\]
+
+Consequently, the remaining form is
+\[
+\boxed{
+\frac{15Z^4(48Z^5-7c)}{k^4}
+\frac{N^\perp}{j}\,\Omega
+=
+-\frac{15Z^4(48Z^5-7c)N^\perp}{tk^5}
+\,dP\wedge dU\wedge dx\wedge dc.
+}
+\]
+
+**It is regular at generic \(j=0\)** where \(t\), \(k\), and \(L\) are units. The scalar expression \(N^\perp/j\) therefore does not, by itself, represent an intrinsic remaining simple-pole residue along \(j=0\).
+
+This is useful progress: the generic ramification pole has disappeared from the remaining top form. The construction still leaves possible poles at \(k=0\), other boundary loci, and the unresolved global class.
+
+### The remaining representative is nonzero
+
+At
+\[
+(P,U,Z,c)=(1,2,1,3/2),\qquad d=-5/2,
+\]
+the scalar prefactor is
+\[
+\gamma=\frac8{45}.
+\]
+The five coordinates of \(\gamma w^\perp\) in the checked trace-free basis reduce modulo \(101\) to
+\[
+\boxed{(21,4,78,50,63).}
+\]
+
+That proves the displayed rational representative is nonzero. It **does not** prove that its de Rham class is nonzero: another rational current could still remove it.
+
+The four-direction connection check also passes at this physical point, including differentiation before specialization. Full rank and flatness are consistency checks; they do not establish that the inhomogeneous rational differential equation has a solution.
+
+## 2. I verified and strengthened the 72-point graph argument
+
+Starting directly from the seven compact equations in your attachment, the independent calculation over \(\mathbb Q\) gives:
+
+- An **18-element reduced Gröbner basis**.
+- A quotient of dimension **72**.
+- A lexicographic presentation
+  \[
+  s-S(w),\quad u-U(w),\quad v-V(w),\quad h(w),
+  \]
+  with \(h\) squarefree of degree \(72\).
+- Exactly **72 distinct geometric points**.
+- Two rational components of degrees **6 and 66**.
+
+The six diagonal points satisfy
+\[
+s=u=v=w,\qquad
+72w^6+216w^4+217w^2+72=0.
+\]
+
+I also checked that the coefficient formulas used in this computation match the actual preserved source.
+
+On this compact locus,
+\[
+b_0=\frac{s^4}{96},
+\qquad
+4a_0^3+27b_0^2=0.
+\]
+
+The graph contradiction can be made stronger than the explanation in the transcript. Define
+\[
+E=v^{16}R^6,\qquad K=\kappa^3.
+\]
+The actual graph
+\[
+x=\frac{\kappa}{q^{16}R^2}
+\]
+implies
+\[
+x^3=\frac KE.
+\]
+
+Combining the spectral equation
+\[
+x^3+a_0x+b_0=0
+\]
+with the discriminant identity gives the necessary condition
+\[
+\boxed{
+(2K-b_0E)^2(K+4b_0E)=0.
+}
+\]
+
+I computed and exported exact rational inverses for **both**
+\[
+2K-b_0E
+\quad\text{and}\quad
+K+4b_0E
+\]
+in the 72-dimensional quotient. Each inverse multiplies its factor to exactly \(1\).
+
+Therefore:
+
+> **The actual graph and spectral equation have no common point over the compact 72-point scheme.**
+
+Both the double-root and simple-root possibilities are covered. The packet includes the explicit inverse polynomials, so this conclusion can be checked without trusting the narrative.
+
+## 3. One precise inclusion still separates that result from the original gate
+
+Let \(I\) be the rebuilt necessary base ideal coming from the original ramification/critical equations, and let \(J\) be the seven-generator compact ideal. On the stated torus chart, put
+\[
+h=suvw\,\kappa R.
+\]
+
+The inclusion needed to transfer the graph contradiction is
+\[
+\boxed{J\subseteq I:h^\infty.}
+\]
+
+It says that every solution of the original localized base equations must lie on the compact 72-point scheme.
+
+The direction matters. Reducing the original equations to zero modulo \(J\) proves
+\[
+I\subseteq J.
+\]
+That confirms that the compact points satisfy the original base equations. It does not exclude additional original components.
+
+I independently rebuilt the toric equations and verified their source binding, unit factors, and necessary elimination identities. I also checked squarefreeness directly in the physical polynomial ring:
+\[
+\gcd(J_{\mathrm{strip}},\partial_pJ_{\mathrm{strip}})
+=
+\gcd(J_{\mathrm{strip}},\partial_qJ_{\mathrm{strip}})
+=
+\gcd(J_{\mathrm{strip}},\partial_zJ_{\mathrm{strip}})
+=1.
+\]
+This supplies a valid squarefreeness check on the physical torus. Squarefreeness alone does not prove the required empty-locus result.
+
+**The fresh characteristic-zero source-inclusion computation did not complete within its 240-second limit.** It produced no completed basis, so I have recorded no membership conclusion from that attempt.
+
+The newly named `verify_suvw_hessian_and_ramification_gates.py` and its receipt were not among the files I could retrieve. Their characteristic-zero result may supply the needed inclusion, but I cannot certify that from the transcript alone.
+
+A compact, decisive proof object would be seven exact identities
+\[
+h^{n_i}g_i=\sum_j c_{ij}f_j,
+\]
+where \(g_i\) are the compact generators and \(f_j\) generate the original base ideal. Those identities, combined with the graph inverses already verified, would close this particular gate.
+
+## 4. Passing these gates does not yet make the moving support serve the source
+
+The recovered geometric account clarifies that the two gates are nested formulations of one sufficient singularity test:
+\[
+\{f=df=\operatorname{Hess}(f)=0\}
+\subseteq
+\{f=df=J_{\rm ram}=dJ_{\rm ram}=0\}.
+\]
+
+Thus emptiness of the reduced ramification locus already implies the older Hessian gate. These are local geometric qualifications on
+\[
+pqzR\kappa\ne0.
+\]
+
+The global source test is a separate map:
+\[
+T_\chi:
+H^{3,1}(X)_\chi
+\longrightarrow H^1(Z,\omega_Z)_\chi.
+\]
+
+I independently checked that its original \(H^{3,1}\) domain has dimension **six**. The full character-sector Hodge dimensions are
+\[
+(0,6,26,6,0).
+\]
+
+The rank-five trace-free connection and this six-dimensional global Hodge space are different objects. The phrase “the span of five connection columns” does not establish the required global Gysin membership.
+
+There is also a consequential possibility in the existing adjoint calculation. The candidate adjoint ideal already has vanishing \(H^1\). If the remaining global comparison proves that it lies inside the actual adjoint ideal with only a finite-support discrepancy, the same \(H^1\) vanishing follows for the actual ideal. That would make this support’s relevant Gysin image zero.
+
+**So completing these local gates could help exclude this particular support.** It would still be useful, but it would not automatically construct the missing primitive. The global comparison required for that exclusion is itself unfinished.
+
+### A cheaper source-specific test is available
+
+The preserved source proof gives a nonzero pairing with
+\[
+\beta=
+\operatorname{Res}
+\left(
+\frac{X_0X_1^2Y_0Y_1^2\,\Omega}{F^2}
+\right).
+\]
+
+Its numerator is exactly \(P_2\), the third element of the checked six-column basis. Therefore, proving the single restriction
+\[
+T_\chi(P_2)=0
+\]
+would already exclude this support for the actual \(H^{3,1}\) source component, by adjointness of restriction and Gysin.
+
+That reduces an exclusion test to one column. **I have not computed that restriction column**, and a nonzero result would only leave the support viable.
+
+## What remains before we can call it the certificate
+
+The current construction still needs a rational solution of the physical divergence equation for
+\[
+\frac{15Z^4(48Z^5-7c)}{(c+6Z^5)^4}
+\frac{N^\perp}{j},
+\]
+with all four directions \(P,U,Z,c\), the volume form, character, and boundary corrections retained—or a properly compared geometric construction that serves the full source class.
+
+The final output must then satisfy the unchanged original target
+\[
+AD^2-2D\sum_iN_iF_i
++
+F\left(D\sum_i\partial_iN_i-\sum_iN_i\partial_iD\right)
+=F^3Q,
+\]
+with the required homogeneity and denominator legality. The public instance fixes the same \(F\), \(q=2\), and \(A\) used throughout this audit. genui{"citation":{"ref":"turn1view1"}}
+
+**The concrete gain from this round is a checked physical remainder, a stronger exact 72-point graph exclusion, and a precise statement of the remaining proof obligations. No original \((D,N_i,Q)\) tuple has yet been constructed.**

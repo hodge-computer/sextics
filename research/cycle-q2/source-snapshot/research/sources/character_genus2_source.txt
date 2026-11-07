@@ -1,0 +1,413 @@
+**I tried it on cycle Q2. I found an explicit correspondence that preserves the missing character, and I evaluated the actual source through it. I did not obtain the original cycle-Q2 certificate.**
+
+The useful advance is that the geometric part is now concrete: the correspondence reaches the entire two-dimensional character component of the lifted curve, and the source reduces to an explicitly computed, **nonzero** compact row. What remains is a coupled rational current equation in the physical parameter directions.
+
+The formulas, source adapters, verification scripts, exact fiber corrections, and replay receipts are in [](https://chatgpt.com/library?file_id=libfile_c206599d657481918cf64e7ab2c9dfb5&account_id=personal). All 12 replay jobs passed, together with the precision comparison described below. These are computational verification results; the packet does not claim a Lean proof or an original \(D,N,Q\) witness.
+
+## 1. The character forces a genus-two lift
+
+I retained the original target
+\[
+F=\sum_{i=0}^{2}(X_i^6+Y_i^6)
++\frac12\left(
+X_0^3X_1Y_0Y_1+
+X_1^3X_2Y_1Y_2+
+X_2^3X_0Y_2Y_0
+\right),
+\]
+with
+\[
+A=X_0^2X_1^2X_2^3Y_0^2Y_1^2Y_2,\qquad q=2.
+\]
+
+The required certificate is still
+\[
+AD^2-2D\sum_iN_iF_i+
+F\left(D\sum_i\partial_iN_i-\sum_iN_i\partial_iD\right)
+=F^3Q,
+\]
+with the original homogeneity and denominator conditions.
+
+The diagonal symmetry with weights
+\[
+(2,1,0,3,2,1)
+\]
+fixes \(F\). The numerator has weight \(17\), and the six-coordinate volume has weight \(9\), so the source carries the nontrivial cubic character
+\[
+\zeta_6^{17+9}=\zeta_6^2.
+\]
+
+To track it explicitly, use
+\[
+R=X_2^2,\quad v=\frac{Y_0}{X_0},\quad
+c_1=\frac{Y_1}{vX_1},\quad c_2=\frac{Y_2}{vX_2},
+\quad x=\frac{X_0^2}{R},\quad y_c=\frac{X_1^2}{R}.
+\]
+Then \(F=R^3U\), where
+\[
+U=(1+v^6)x^3+(1+c_1^6v^6)y_c^3+1+c_2^6v^6
++\frac{v^2}{2}\left(c_1x^2y_c+c_1c_2y_c^2+c_2x\right).
+\]
+
+Putting
+\[
+u=v^6,\qquad W=v^2,\qquad T=Ru,
+\]
+the exact source becomes
+\[
+\frac{c_1^2c_2W}{48}
+\frac{dR}{R}\wedge du\wedge dc_1\wedge dc_2
+\wedge\frac{x^2y_c^2\,dx\wedge dy_c}{U^3}.
+\]
+
+**The factor \(W\), with \(W^3=u\), is the character that must survive.** Taking only invariant coordinates would discard it.
+
+Starting from the [accepted cycle-three polynomial family](https://github.com/hodge-computer/sextics/blob/1c59174c1e49b87c70358512201992293b5a5080/data/cycle-three/solution.md),
+\[
+R(T)=aT^2+bT+c,
+\]
+the corresponding character lift is
+\[
+W^3=\frac{T}{R(T)}.
+\]
+On \(ac(b^2-4ac)\ne0\), this is a genus-two curve.
+
+Set
+\[
+\delta=b^2-4ac,\qquad
+\eta^6=\delta,\qquad
+z=\eta W,\qquad
+\kappa=-\frac{2b}{\eta^3},
+\]
+and
+\[
+y=2aW^3T+bW^3-1.
+\]
+The curve takes the particularly useful form
+\[
+\boxed{C_\kappa:\quad y^2=z^6+\kappa z^3+1.}
+\]
+
+## 2. An explicit elliptic correspondence reaches the missing component
+
+There is a rational map
+\[
+X_+=3+\frac{(\kappa-2)z}{(z+1)^2},
+\qquad
+Y_+=\frac{(\kappa-2)y}{(z+1)^3}
+\]
+to
+\[
+\boxed{
+E_+:\quad
+Y_+^2=X_+^3-(15+6\kappa)X_+
++\kappa^2+14\kappa+22.
+}
+\]
+
+The relevant statement is stronger than merely having an elliptic quotient: **its character projection spans the component needed by this lifted source.**
+
+Let
+\[
+\sigma(z,y)=(\omega z,y),\qquad
+P_1=\frac13\left(1+\omega^{-1}\sigma^*+\omega^{-2}\sigma^{2*}\right),
+\]
+where \(\omega^3=1\), \(\omega\ne1\). Write
+\[
+e_0=\frac{dz}{y},\qquad e_3=\frac{z^3\,dz}{y},
+\qquad \omega_+=\frac{dX_+}{2Y_+}.
+\]
+
+The checked identities are
+\[
+P_1\omega_+=\frac12e_0
+\]
+and
+\[
+P_1(24X_+\omega_+)
+=
+12e_0-24e_3
++24d_f\!\left(\frac{yz}{1+z^3}\right),
+\]
+where \(d_f\) is differentiation along the curve.
+
+Thus, modulo exact fiber differentials, the coefficient matrix is
+\[
+\begin{pmatrix}
+1/2&0\\
+12&-24
+\end{pmatrix},
+\qquad \det=-12.
+\]
+
+This proves that the correspondence reaches the **whole two-dimensional character component of \(H^1_{\mathrm{dR}}(C_\kappa)\)** relevant here. It does not identify the entire global character component of the original fourfold with one elliptic curve.
+
+That is the positive geometric result from this attempt.
+
+## 3. I bound the construction to the actual Q2 source
+
+I then used the accepted polynomial family and normal to compute the second-normal density of the actual source.
+
+This matters because the HigherResidues entry point requires the polynomial curve, normal, inverse matrices, compatible derivations, and polynomiality hypotheses. An elliptic quotient alone does not supply those inputs or the source-transport argument. ([github.com](https://github.com/hodge-computer/sextics/blob/main/formal/lean/HodgeComputer/Constructions/HigherResidues/README.md?utm_source=chatgpt.com))
+
+On the accepted Jacobian, write
+\[
+V=Y^2-X^3-\bar A X-\bar B.
+\]
+Let \(\bar A_1,\bar B_1\) denote the appropriately scaled first derivatives of the Weierstrass coefficients under the balanced cubic deformation. The compact-equivalent source numerator is
+\[
+\boxed{
+\mathcal P
+=
+-\frac{c_1^2c_2}{144R}
+\left[
+(\bar A_1X+\bar B_1)^2
+-\frac{R^6A_E(T/R)}{12}V
+\right].
+}
+\]
+
+The minus sign is required for the ordered volume
+\[
+dR\wedge dT\wedge dc_1\wedge dc_2\wedge dX\wedge dY.
+\]
+An independent audit checked this orientation, the cubic-invariant normalization, and the internal \(V\)-correction.
+
+The useful divisibility is
+\[
+\mathcal P=R\,\overline{\mathcal P},
+\]
+with \(\overline{\mathcal P}\) polynomial.
+
+For the actual polynomial curve \(\phi(T)\) and polynomial normal \(\psi(T)\), define
+\[
+V(\phi+\varepsilon\psi)
+=
+\varepsilon+a_N\varepsilon^2+b_N\varepsilon^3+\cdots,
+\]
+and
+\[
+\overline{\mathcal P}(\phi+\varepsilon\psi)\det M_\varepsilon
+=
+L_0+L_1\varepsilon+L_2\varepsilon^2+\cdots.
+\]
+Here \(M_\varepsilon\) includes the normal and the moving endpoint tangent fields. Put \(s=\psi_R\).
+
+Keeping the cubic-root motion
+\[
+W_\varepsilon=W(1+\varepsilon s/R)^{-1/3},
+\]
+the actual density is
+\[
+\boxed{
+\theta
+=
+W\left[
+RL_2+
+\left(\frac{2s}{3}-3a_NR\right)L_1+
+\left((6a_N^2-3b_N)R-2a_Ns-\frac{s^2}{9R}\right)L_0
+\right]dT.
+}
+\]
+
+Consequently,
+\[
+\boxed{
+\theta=W\left(\Pi(T)+\frac{\Xi(T)}{R(T)}\right)dT
+}
+\]
+for explicitly computable polynomials \(\Pi,\Xi\) over the actual finite incidence field.
+
+This includes the normal motion, root motion, and determinant jets. Only a **simple additional \(R(T)\) pole** remains.
+
+The resulting fiber poles occur at points fixed by the order-three action. Since the differential has a nontrivial character, its residues there vanish. The compact reduction therefore does not silently discard a third-kind term.
+
+The packet retains the distinction between this compact source transport and the literal moving-map corrections needed to transport a completed primitive back to the original six coordinates.
+
+## 4. The actual compact row is nonzero
+
+The density can be reduced by a finite, explicit Hermite recurrence.
+
+It is convenient to work before adjoining \(\eta\), on
+\[
+y^2=1-2bW^3+\delta W^6.
+\]
+The reduction identity is
+\[
+d_f(W^ny)
+=
+\left[
+nW^{n-1}-b(2n+3)W^{n+2}
++\delta(n+3)W^{n+5}
+\right]\frac{dW}{y}.
+\]
+
+The implementation returns
+\[
+\theta
+=
+(\alpha+\beta W^3)\frac{dW}{y}
++d_f\!\left(yr(W)+s(W)\right),
+\]
+including every coefficient of the Laurent primitives \(r,s\).
+
+I evaluated this on the actual accepted incidence branch, rather than leaving \(\alpha,\beta\) as unspecified inputs:
+
+- The full \(13\times13\) incidence Jacobian is invertible at the accepted modulo-five seed.
+- The incidence point was Hensel-lifted to \(5^{24}\), at fixed integer parameters
+  \[
+  (c_1,c_2,R(0),X(0))=(2,3,1,3).
+  \]
+- The polynomial normal, endpoint motions, derivatives of the normal, and source jets were recomputed on that lift.
+- The Hermite reduction tracked precision through divisions by multiples of five.
+
+The resulting **raw \(W\)-basis coefficients** are
+\[
+\boxed{
+\alpha=\frac{941029}{25}+O(5^9),\qquad
+\beta=\frac{2118988}{25}+O(5^9).
+}
+\]
+In particular,
+\[
+25\alpha\equiv4\pmod5,\qquad
+25\beta\equiv3\pmod5.
+\]
+Both have valuation exactly \(-2\), so both are nonzero.
+
+The precision calculation allows 15 digits of worst-case pivot loss. Coefficients that vanish modulo \(5^{24}\) were retained as uncertain \(O(5^{24})\) coefficients, rather than treated as identically zero.
+
+Repeating the reduction at input precision \(20\) gives
+\[
+\alpha=\frac{3529}{25}+O(5^5),\qquad
+\beta=\frac{9613}{25}+O(5^5),
+\]
+which agree with the higher-precision values on their overlap. Reassembling the compact row and returned fiber primitive gives zero residual at the recorded precision.
+
+**This establishes nonvanishing of the relative compact source at an actual characteristic-zero specialization. It does not obstruct physical parameter-direction currents.**
+
+## 5. The remaining equation is now explicit
+
+In the projected elliptic basis
+\[
+\left(P_1\omega_+,\;P_1(24X_+\omega_+)\right),
+\]
+the actual source row is
+\[
+\boxed{
+g=
+\left(
+\frac{2\alpha}{\eta}+\frac{\beta}{\eta^4},
+-\frac{\beta}{24\eta^4}
+\right).
+}
+\]
+The powers of \(\eta\) are necessary because the computed \(\alpha,\beta\) use \(W\), while the correspondence uses \(z=\eta W\).
+
+In particular, the second component of \(g\) is rigorously nonzero at the checked specialization.
+
+The connection matrix is
+\[
+\boxed{
+M_\kappa
+=
+\frac1{\kappa^2-4}
+\begin{pmatrix}
+-(\kappa+1)/3&1/72\\
+-8(2\kappa+5)&(\kappa+1)/3
+\end{pmatrix}.
+}
+\]
+
+The remaining compact equation is
+\[
+\boxed{
+\sum_i\left(
+D_i h_i+h_i(D_i\kappa)M_\kappa
+\right)=g.
+}
+\]
+
+Here the \(D_i\) are the **actual physical endpoint/base derivations**, acting through the finite incidence extension. They differentiate the polynomial-family coefficients, roots, source amplitudes, and moving-map data.
+
+There are four endpoint/base directions before radial descent. After radial descent, the base parameters can be taken as
+\[
+c_1,\qquad c_2,\qquad \frac{X(0)}{R(0)^2}.
+\]
+
+I kept the fixed-parameter endpoint ODE route closed. The equation above retains the physical parameter directions requested in your proposal.
+
+## 6. There is an explicit auxiliary Q2 current—but it does not yet transport to the original source
+
+The new elliptic surface itself admits particularly simple polynomial-curve data.
+
+Write
+\[
+H=Y^2-X^3+(15+6\kappa)X-\kappa^2-14\kappa-22,
+\]
+and set
+\[
+t=X-3,\qquad C=Y+\kappa+7-3X.
+\]
+On \(C\ne0\), use coordinates
+\[
+X=3+t,
+\]
+\[
+Y=\frac12\left(C+\frac{H+t^3}{C}\right),
+\]
+\[
+\kappa=2+3t+\frac12\left(C-\frac{H+t^3}{C}\right).
+\]
+
+For fixed \(C\) and \(H=0\), this is an actual polynomial curve in \(t\). The coordinate determinant is \(1/(2C)\), and the normal and tangent fields are
+\[
+n=\left(0,\frac1{2C},-\frac1{2C}\right),
+\qquad
+\tau=\left(1,\frac{3t^2}{2C},3-\frac{3t^2}{2C}\right).
+\]
+They satisfy
+\[
+n(H)=1,\qquad \tau(H)=0,\qquad
+\operatorname{div}n=\operatorname{div}\tau=0.
+\]
+
+For a polynomial auxiliary numerator \(B\), expand
+\[
+B=B_0+HB_1+H^2B_2+H^3Q
+\]
+in these coordinates, and choose the polynomial antiderivative \(I_t=B_2\). Then
+\[
+\boxed{
+\mathcal V=(B_0/2+HB_1)n-HI\tau
+}
+\]
+satisfies
+\[
+\boxed{
+B-2\mathcal V(H)+H\operatorname{div}\mathcal V=H^3Q.
+}
+\]
+
+This is an explicit auxiliary third-pole current, verified directly.
+
+Adding two passive coordinates puts this construction in the five-coordinate setting of the named HigherResidues theorem. The unmodified accepted Jacobian cone has six ambient coordinates, so invoking that particular theorem there also requires radial descent or a dimension-generalized argument. The `PolynomialCurves` interface supplies machinery for turning suitable polynomial-family data into the required algebraic construction; that does not remove the source-transport obligations. ([github.com](https://github.com/hodge-computer/sextics/blob/main/formal/lean/HodgeComputer/Constructions/PolynomialCurves/README.md?utm_source=chatgpt.com))
+
+The unresolved application condition is precise: **the actual incidence-field amplitudes are not known to be polynomial along this new curve as \(\kappa\) moves.** Holding them constant would change the source and bypass the coupled equation above.
+
+## What this attempt establishes
+
+| Part of the proposed route | Result |
+|---|---|
+| Preserve cycle Q2’s missing character | Explicit \(W^3=T/R(T)\) lift |
+| Construct geometry containing that component | Explicit elliptic correspondence; determinant \(-12\) |
+| Bind the geometry to the actual Q2 source | Checked second-normal density with full jets |
+| Reduce the fiber contribution | Terminating Hermite algorithm with retained exact primitive |
+| Evaluate the actual compact source | Nonzero pair, with controlled characteristic-zero precision |
+| Construct a current on the auxiliary surface | Explicit formula |
+| Solve the physical parameter-current equation | **Still open** |
+| Produce and replay the original homogeneous \(D,N,Q\) certificate | **Not achieved** |
+
+The packet also records two secondary checks: the nodal-discriminant calculation leaves a nonzero regular residual after pole removal, and the critical-center elliptic quotient loses nonzero source channels under ordinary trace. Neither is treated as an obstruction to all physical currents.
+
+The next certificate-producing step is therefore a rational solution of the displayed coupled equation for the **actual** row \(g\), followed by the retained moving-map corrections, descent, and verification of the original polynomial identity. The correspondence now supplies the required curve character; the remaining difficulty is its physical parameter dependence.

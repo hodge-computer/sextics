@@ -1,0 +1,173 @@
+{
+  "status": "COMPILATION VERIFIED; ORIGINAL CERTIFICATE NOT FOUND",
+  "execution": [
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "compile_polynomials.py",
+        "input_physical_current.json.gz",
+        "--output",
+        "compiled_partial_polynomials.json.gz"
+      ],
+      "returncode": 0,
+      "seconds": 5.928
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "verify_translation.py",
+        "input_physical_current.json.gz"
+      ],
+      "returncode": 0,
+      "seconds": 4.472
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "check_target.py"
+      ],
+      "returncode": 0,
+      "seconds": 1.431
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "check_full_symmetry.py"
+      ],
+      "returncode": 0,
+      "seconds": 5.402
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "compile_normal_gauge.py"
+      ],
+      "returncode": 0,
+      "seconds": 19.999
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "verify_closure_interface.py"
+      ],
+      "returncode": 0,
+      "seconds": 1.888
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "export_checker_program.py",
+        "compiled_partial_polynomials.json.gz",
+        "partial_program.txt"
+      ],
+      "returncode": 0,
+      "seconds": 1.744
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "export_checker_program.py",
+        "normal_gauge_polynomials.json.gz",
+        "normal_gauge_program.txt"
+      ],
+      "returncode": 0,
+      "seconds": 3.857
+    },
+    {
+      "command": [
+        "g++",
+        "-O2",
+        "-std=c++17",
+        "literal_checker.cpp",
+        "-o",
+        "literal_checker"
+      ],
+      "returncode": 0,
+      "seconds": 1.406
+    },
+    {
+      "command": [
+        "/opt/pyvenv/bin/python",
+        "check_literal_polynomials.py"
+      ],
+      "returncode": 0,
+      "seconds": 16.876
+    },
+    {
+      "command": [
+        "literal_checker",
+        "partial_program.txt",
+        "1009",
+        "982",
+        "776",
+        "604",
+        "497",
+        "616",
+        "182"
+      ],
+      "returncode": 0,
+      "seconds": 0.103
+    },
+    {
+      "command": [
+        "literal_checker",
+        "partial_program.txt",
+        "1013",
+        "634",
+        "836",
+        "152",
+        "51",
+        "690",
+        "652"
+      ],
+      "returncode": 0,
+      "seconds": 0.125
+    },
+    {
+      "command": [
+        "literal_checker",
+        "normal_gauge_program.txt",
+        "1009",
+        "982",
+        "776",
+        "604",
+        "497",
+        "616",
+        "182",
+        "normal"
+      ],
+      "returncode": 0,
+      "seconds": 1.541
+    },
+    {
+      "command": [
+        "literal_checker",
+        "normal_gauge_program.txt",
+        "1013",
+        "634",
+        "836",
+        "152",
+        "51",
+        "690",
+        "652",
+        "normal"
+      ],
+      "returncode": 0,
+      "seconds": 0.864
+    }
+  ],
+  "all_arithmetic_checks_pass": true,
+  "original_certificate": false,
+  "scope": "Exact generic compiler translation and universal interface algebra; exact finite-field evaluations reject the particular original polynomial tuple over characteristic zero. The inherited ambient partial identity has not been independently expanded generically in this run.",
+  "earlier_attempts_in_this_turn": [
+    {
+      "attempt": "Python order-three normal-gauge jet evaluation",
+      "result": "Timed out at the 200-second command limit; no conclusion taken. Replaced by the compiled C++17 verifier, which completed."
+    },
+    {
+      "attempt": "First combined run_checks.py launch",
+      "result": "Command timed out before a complete combined receipt. The final replay was completed in three recorded chunks; no outcome was attributed to the interrupted launch."
+    }
+  ],
+  "additional_completed_check": "INPUT_SPECIALIZATION_CHECK.json"
+}

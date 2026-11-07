@@ -1,0 +1,17 @@
+**No—I have not found a complete, verified cycle-q2 certificate.** The latest full-identity search explicitly reports that no candidate passed the original six-variable certificate condition. fileciteturn3file2L1-L3
+
+What we have is **partial currents, exact reductions, and exclusions of particular denominator families**. We still lack the actual homogeneous polynomials \(D,N_0,\ldots,N_5,Q\) satisfying
+
+\[
+\boxed{
+AD^2-2D\sum_iN_i\,\partial_iF
++F\left(D\sum_i\partial_iN_i-\sum_iN_i\,\partial_iD\right)
+=F^3Q,
+}
+\]
+
+with \(D\neq0\), \(\gcd_{\mathbb C}(D,F)=1\), and \(\deg N_i=\deg D+7\). Those are the certificate obligations—not merely a reduced equation or a successful modular sample. fileciteturn3file0L86-L110
+
+**The remaining gap is mathematical, not just Lean verification:** the correction currents have not been combined into a rational current that serves the entire actual source without leaving another residual. The full witness has not been constructed. fileciteturn3file0L9-L14
+
+My earlier updates overstated how much the repeated reductions brought us toward completion. They produced useful intermediate results, but they did **not** establish that we were close to the full certificate.

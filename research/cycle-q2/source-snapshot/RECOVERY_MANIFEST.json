@@ -1,0 +1,106 @@
+{
+  "source_archive": "cycle_q2_normalized.zip",
+  "source_archive_sha256": "a81dd5d48e4117d59417eff3bc65d35ed1ed1c348b720e7f43254de733d53115",
+  "source_archive_crc_ok": true,
+  "source_files_unchanged": true,
+  "lean_module_count": 8,
+  "explicit_sorry_lines": [
+    {
+      "path": "formal/CycleQ2Draft.lean",
+      "line": 20
+    }
+  ],
+  "lean_build_attempted_in_this_handoff": false,
+  "files": [
+    {
+      "path": "formal/.vscode/extensions.json",
+      "bytes": 54,
+      "sha256": "6fd11accded93d31107cc7e2925b6c0d66c63217be236b5df32282f87faaba9e",
+      "original_member": "cycle_q2_normalized/formal/.vscode/extensions.json"
+    },
+    {
+      "path": "formal/CycleQ2Assembly.lean",
+      "bytes": 2912,
+      "sha256": "5de40b5b2be59d8fce85aef0ed2aadf6fa5f8cd787e8c0e14b43ffe29148fb63",
+      "original_member": "cycle_q2_normalized/formal/CycleQ2Assembly.lean"
+    },
+    {
+      "path": "formal/CycleQ2Draft.lean",
+      "bytes": 1259,
+      "sha256": "b262085645797b24dcbade6b632c75cb8f6fb5b295257a71a22890b843d000a7",
+      "original_member": "cycle_q2_normalized/formal/CycleQ2Draft.lean"
+    },
+    {
+      "path": "formal/CycleQ2Normalization.lean",
+      "bytes": 11379,
+      "sha256": "9b5ab0ae8d847fe38ae64a725629d7d9cd33b3230bb1c4da18d90280d01be9a7",
+      "original_member": "cycle_q2_normalized/formal/CycleQ2Normalization.lean"
+    },
+    {
+      "path": "formal/CycleQ2Workspace.lean",
+      "bytes": 2674,
+      "sha256": "cea5bd607e9ba221e396abb330297467ad753d38c287d236b6db3e68d43c6da6",
+      "original_member": "cycle_q2_normalized/formal/CycleQ2Workspace.lean"
+    },
+    {
+      "path": "formal/HodgeComputer/Verify.lean",
+      "bytes": 3960,
+      "sha256": "007f24d3b7ac642e1bcd6adddd0a1512791c32e0e5882cd741c096c6d7e583c3",
+      "original_member": "cycle_q2_normalized/formal/HodgeComputer/Verify.lean"
+    },
+    {
+      "path": "formal/HodgeComputer.lean",
+      "bytes": 28,
+      "sha256": "5389703cdc19fb770de3c0b3fe17692b9569f11de7c8c59c1cc9860177a7a24e",
+      "original_member": "cycle_q2_normalized/formal/HodgeComputer.lean"
+    },
+    {
+      "path": "formal/HodgeTestbed/Algebra.lean",
+      "bytes": 5293,
+      "sha256": "3c7cbc2f81dfced1ca99a8e031f01af39ac7964425aad8b24d2e68debd1a363e",
+      "original_member": "cycle_q2_normalized/formal/HodgeTestbed/Algebra.lean"
+    },
+    {
+      "path": "formal/HodgeTestbed.lean",
+      "bytes": 28,
+      "sha256": "06955affeded9d8cf7891f62914ec00b598859c55f511853d2bbf9e99896f596",
+      "original_member": "cycle_q2_normalized/formal/HodgeTestbed.lean"
+    },
+    {
+      "path": "formal/lake-manifest.json",
+      "bytes": 3550,
+      "sha256": "ca6127f97292736d145121fda1962ec502ac9375bfafbd3628d60ad096260616",
+      "original_member": "cycle_q2_normalized/formal/lake-manifest.json"
+    },
+    {
+      "path": "formal/lakefile.toml",
+      "bytes": 519,
+      "sha256": "9e38adf9bd42f70cf1f785270cf6747edee01447890dca9fbeef69867c645129",
+      "original_member": "cycle_q2_normalized/formal/lakefile.toml"
+    },
+    {
+      "path": "formal/lean-toolchain",
+      "bytes": 25,
+      "sha256": "302cd63c54178885b89e669f33b38f12f4dd7ae7e5cac537b3203e3768d8fb2b",
+      "original_member": "cycle_q2_normalized/formal/lean-toolchain"
+    },
+    {
+      "path": "NORMALIZATION.md",
+      "bytes": 6127,
+      "sha256": "3c3bdb19de40abe10d307d58f315f01faccaec220ee3a45a5dc4f7955d37b57f",
+      "original_member": "cycle_q2_normalized/NORMALIZATION.md"
+    },
+    {
+      "path": "STATUS.json",
+      "bytes": 889,
+      "sha256": "2894969065b93692ac8c734f21b23d0ab52a6f43486c2a0194a4b1dd7502ad60",
+      "original_member": "cycle_q2_normalized/STATUS.json"
+    },
+    {
+      "path": "provenance/UPSTREAM_LOCK.json",
+      "bytes": 1277,
+      "sha256": "a80db5468ccf73afd96a8da8907482423b93e3a58777c60829c107099febeafb",
+      "original_member": "cycle_q2_normalized/provenance/UPSTREAM_LOCK.json"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+**Done — I set up a working native Lean environment for cycle-q2 and verified it through compilation and kernel replay.**
+
+### Installed and configured
+
+| Component | Configuration |
+|---|---|
+| Lean | **4.33.1**, matching the project’s pinned toolchain |
+| Mathlib | Pinned revision `0df444a360eaa60ab8c11dca51a86af692955474` |
+| Hodge Computer repository | Pinned commit `ee9d97a68f80cdd1bffd85e35c9d7e951ed9777c` |
+| Cycle-q2 target | Generated directly from the official `instance.rec` using the repository’s target generator |
+| Python | **3.11.17**, with the repository’s pinned verifier dependencies |
+
+### Verification passed
+
+I successfully:
+
+- Built **`HodgeComputer.Verify`** and **`HodgeComputer.CertificateOperations`**.
+- Compiled the exact cycle-q2 target and **six helper theorems**, including source homogeneity and the specialization of the cleared certificate identity to \(q=2\).
+- Ran **`leanchecker` kernel replay** on the official checker, generated target, and helper proofs.
+- Audited the helper proofs’ axioms: only the permitted `propext`, `Classical.choice`, and `Quot.sound` appeared.
+- Confirmed that an intentionally invalid proof was **rejected**.
+
+The exact commands, exit codes, hashes, and audit results are in [verification-receipt.json](sandbox:/workspace/scratch/a969c52c9c62/cycle-q2-lean-setup/verification-receipt.json).
+
+### Use it here
+
+```bash
+cd /workspace/scratch/a969c52c9c62/cycle-q2-lean-setup
+
+# Check the compiler
+python3 scripts/run.py lean --version
+
+# Compile the cycle-q2 helper proofs
+python3 scripts/run.py --local lean CycleQ2Smoke.lean
+
+# Repeat the build, kernel replay, and axiom checks
+.venv/bin/python scripts/verify.py
+```
+
+The runner handles this host’s executable-path compatibility issue. The official Lean compiler and verifier files are unchanged. Local proof compilation uses **two threads and a 4 GB memory limit**, with kernel replays run sequentially.
+
+**Files:** [cycle-q2-lean-setup.zip](https://chatgpt.com/library?file_id=libfile_f5dcf0523a5c8191b6c467824d566fec&account_id=personal) · [README.md](sandbox:/workspace/scratch/a969c52c9c62/cycle-q2-lean-setup/README.md)
+
+**The environment is ready for further proof work; the full cycle-q2 certificate remains open.** The repository’s separate Docker-isolated submission workflow has not been run here, so these successful development checks are not a project acceptance receipt. genui{"citation":{"ref":"turn1view1"}}

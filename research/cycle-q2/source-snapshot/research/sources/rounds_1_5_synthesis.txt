@@ -1,0 +1,117 @@
+I will follow the **Solo Routine** to stop all running subagents/tasks and pull the complete progress made so far.
+
+Killed 2 subagents
+Listed 0 tasks
+Ran check subagent transcript progress
+Ran inspect Round 5 worker transcript
+Ran check task-717 log and recent tasks in worker
+Ran extract recent findings from Round 5 worker
+Ran read all non-empty task logs from Round 5 worker
+Ran summarize discoveries in steps 1-609 of Round 5 worker
+Analyzed output.txt:L80-406
+Analyzed output.txt:L406
+Analyzed output.txt:L80-406
+Ran read specific breakthrough steps from Round 5 worker · Exited with code 1
+Ran print exact outputs of breakthrough steps in Round 5 worker
+Analyzed output.txt:L80-399
+Analyzed output.txt:L399
+Ran extract exact command outputs from Round 5 worker
+Analyzed output.txt:L80-302
+Analyzed output.txt:L302
+
+All running subagents and background tasks have been terminated. Below is the complete synthesis of all mathematical and computational progress achieved across Rounds 1–5 (covering both Turn 1's [`discussioncomment-19223852`](https://github.com/hodge-computer/sextics/discussions/61#discussioncomment-19223852) bundles/gists and Turn 2's reverse-point moving-divisor / multiplier-ideal program).
+
+---
+
+## 1. Overall Status of the Full Certificate (`cycle-q2`)
+
+No global rational polynomial certificate $(D, N_0, \dots, N_5, Q) \in \mathbf{Q}[X_0, X_1, X_2, Y_0, Y_1, Y_2]$ with $\gcd(D, F) = 1$, $\deg N_i = \deg D + 7$, and $\deg Q = 2\deg D - 6$ satisfying
+$$A D^2 - 2D\sum_{i=0}^5 N_i F_i + F\!\left(D\sum_{i=0}^5 \partial_i N_i - \sum_{i=0}^5 N_i \partial_i D\right) = F^3 Q$$
+for $F = \sum_{i=0}^2 (X_i^6 + Y_i^6) + \frac{1}{2}\sum_{i=0}^2 X_i^3 X_{i+1} Y_i Y_{i+1}$ and $A = X_0^2 X_1^2 X_2^3 Y_0^2 Y_1^2 Y_2$ ([`verify_full_certificate.py`](file:///Users/ben/Downloads/cycle-q2-complete-field-module-and-W-obstruction/full_cert_round2/root_analysis/verify_full_certificate.py#L52-L95)) has been produced yet.
+
+However, the investigation **resolved the finite-target defect question for the Turn 2 reverse-point construction** (proving that $\operatorname{Supp}(I/J)$ is **empty**, so $K_{\mathrm{def}} = \mathcal{O}_B$, $H^1(B, J(40,64,40)) = 0$, and the reverse-point Gysin channel vanishes) and produced major constructive reductions across Routes 01, 02, 03, and 04.
+
+---
+
+## 2. Progress on Turn 2: Reverse-Point Moving-Divisor Program ($B = (\mathbf{P}^1)^3$, $K_{\mathrm{def}} = J : I$, and $\Gamma_*$)
+
+Your Turn 2 update reduced the reverse-point Jacobian moving-divisor construction ($x_0 = \kappa/(q^8 R)^2$, branch $w^2 = f_c = \kappa^3 + c a_0 \kappa t^4 + b_0 t^6$ on $B = (\mathbf{P}^1)^3$ with $t = q^8 R$) to five outstanding steps starting with computing the finite defect ideal $K_{\mathrm{def}} = J : I$ on $\{p q z \kappa R \ne 0,\ f_c = 0\}$ and its evaluation map from the $2{,}706$-dimensional retained block of $H^0(B, I(40,64,40))$.
+
+Using the local precursor packages in [`full_cert_round3/`](file:///Users/ben/Downloads/cycle-q2-complete-field-module-and-W-obstruction/full_cert_round3/READ_ME_FIRST.txt) and [`verify_suvw_hessian_and_ramification_gates.py`](file:///Users/ben/Downloads/verify_suvw_hessian_and_ramification_gates.py), we determined the exact fate of Steps 1–3:
+
+### 2.1 Step 1 ($K_{\mathrm{def}} = J : I$): The Off-Center Multiplicity-$\ge 3$ Defect Locus Is Empty ($\operatorname{Supp}(I/J) = \emptyset$)
+On $\{p q z \kappa R \ne 0\}$, $I_P = \mathcal{O}_{B,P}$ and $f_1 = t^6(x_0^3 + a_0 x_0 + b_0)$ ($x_0 = \kappa/t^2$) is reduced ([`offcenter_structure.json`](file:///Users/ben/Downloads/cycle-q2-complete-field-module-and-W-obstruction/full_cert_round3/original_constructive/offcenter_structure.json#L28-L74)), so any point of multiplicity $\le 2$ has trivial multiplier ideal $J_P = \mathcal{O}_{B,P} = I_P$. Thus $\operatorname{Supp}(I/J)$ is contained in the multiplicity-$\ge 3$ locus $\{h = \nabla h = \operatorname{Hess}(h) = 0\}$ of $h = x_0^3 + a_0 x_0 + b_0$, which splits into **Case A ($3x_0^2 + a_0 = 0$)** and **Case B ($3x_0^2 + a_0 \ne 0$)**:
+
+1. **Case A ($3x_0^2 + a_0 = 0 \implies \Delta_0 = 4a_0^3 + 27b_0^2 = 0$) — Unconditionally Empty Over $\mathbf{Q}/\mathbf{C}$**:
+   - **Non-nodal / cuspidal cubics ($a_0 = b_0 = 0$)**: Excluded over $\mathbf{Q}$ in `0.01s` across all 3 affine charts of the 6-term plane cubic $G_0(u_0, u_1, h) = (1+X)u_0^3 + \mu u_0^2 u_1 + (1+Y)u_1^3 + \epsilon u_1^2 h + \nu u_0 h^2 + (1+T)h^3$ ([`weighted_multisection_compactification.py`](file:///Users/ben/Downloads/cycle-q2-complete-field-module-and-W-obstruction/full_cert_round3/original_constructive/weighted_multisection_compactification.py#L71-L73)).
+   - **Subcase A1 (1-nodal non-transverse total space)**: Excluded over $\mathbf{Q}$ in `2.32s` (`std == 1` across all 3 $\mathbf{P}^2$ charts).
+   - **Subcase A2 (reducible $G_0$ on $(1+X)(1+Y)(1+T) = 0$)**: Excluded over $\mathbf{Q}$ in `16.51s` (`std == 1` on each branch $X=-1, Y=-1, T=-1$).
+   - **Subcase A3 (reducible Kodaira-$I_2$ locus on $(1+X)(1+Y)(1+T) \ne 0$)**: Parameterizing the $I_2$ locus via $1+X = \rho w$ and $t = \frac{2w}{2w-1}$ eliminates all conic/torus variables to $e_1(\rho, w, T) = e_2(\rho, w, T) = 0$, whose $\rho$-resultant is $4 P_{I_2}(w, T)$ (`2,257` terms, bidegree `(60, 36)`, irreducible over $\mathbf{Q}$). Using the exact rank-2 Hessian perturbation identity at $a_0 = -3x_0^2,\ b_0 = 2x_0^3$:
+     $$54 b_0 \operatorname{Hess}(h) = \frac{27 b_0}{a_0}\widetilde{M} + \big(u \tilde{a}^\top + \tilde{a} u^\top\big), \qquad \widetilde{M} := 2a_0 \operatorname{Hess}(b_0) - 3b_0 \operatorname{Hess}(a_0),$$
+     $\operatorname{Hess}(h) = 0$ forces $\det\widetilde{M} = 0$. Taking $Q_M(w,T) = \operatorname{Res}_\rho(e_1, \det\widetilde{M})$ over $\mathbf{Q}$ gives $\gcd_{\mathbf{Q}[w,T]}(P_{I_2}, Q_M) = 1$, zero off-boundary intersections across all 9 boundary lines $w \in \{0, 1/6, 1/4, 1/3, 1/2, \infty\},\ T \in \{0, -1, \infty\}$, and unit GCD `1` with $\operatorname{Norm}_\rho(2\kappa^3 - (q^8 R)^6 b_0)$ across all $1{,}680$ Bézout points.
+
+2. **Case B ($3x_0^2 + a_0 \ne 0$) and Joint $(s, u, v, w)$ Syzygy Saturation**:
+   - In the 3-to-1 étale torus quotient $(s, u, v, w) = (p q z, p^3, q^3, z^3)$ ($s^3 = u v w$) of [`verify_suvw_hessian_and_ramification_gates.py`](file:///Users/ben/Downloads/verify_suvw_hessian_and_ramification_gates.py#L83-L222), exact characteristic-zero syzygies prove that **every** off-center multiplicity-$\ge 3$ point (Case A $\cup$ Case B) lies in
+     $$I_{\mathrm{base}} = \big(s^3 - u v w,\ T_{\mathrm{ram}},\ \delta_0 T_{\mathrm{ram}},\ \delta_1 T_{\mathrm{ram}},\ \delta_2 T_{\mathrm{ram}},\ K_{01},\ K_{02},\ K_{12},\ \Phi\big) : (s \kappa R)^\infty,$$
+     where $T_{\mathrm{ram}} = \det(A, B, l)$ (`2,085` terms) and $\Phi = \kappa \det(A, B, R_i) + \det(V, m, R_i)$ (`2,078` terms) are irreducible over $\mathbf{Q}$ and $\gcd_{\mathbf{Q}}(T_{\mathrm{ram}}, \delta_i T_{\mathrm{ram}}) = 1$.
+   - Over $\mathbf{F}_{1009}$ ([`verify_suvw_hessian_and_ramification_gates.py`](file:///Users/ben/Downloads/verify_suvw_hessian_and_ramification_gates.py#L345-L401)), computing $I_{\mathrm{base}}$ from scratch via `slimgb` and quotienting by $s^9 \kappa^2 R^2$ yields the 0-dimensional degree-72 Kodaira-$I_3$ ideal $G_3$ (`vdim = 72`, where $\Delta_0 \equiv 0$, so **Case B is already empty over $\overline{\mathbf{F}}_{1009}$ even before imposing the graph equation**), and adjoining `(f_wx, Q_pairs, crit) : wx^\infty + (graph^3)` yields the **unit ideal `<1>`** (`J_FULL_MOD1009 == <1>`), proving **Case A $\cup$ Case B is empty over the entire algebraic closure $\overline{\mathbf{F}}_{1009}$** by Hilbert's Nullstellensatz.
+   - Over $\mathbf{Q}$ ([`verify_suvw_hessian_and_ramification_gates.py`](file:///Users/ben/Downloads/verify_suvw_hessian_and_ramification_gates.py#L276-L341)), $I_{\mathrm{orig},\mathbf{Q}} \subseteq G_{3,\mathbf{Q}}$ and $G_{3,\mathbf{Q}} + (f_{wx}, Q_{\mathrm{pairs}}, \mathrm{crit}, \mathrm{graph}^3) = \langle 1 \rangle$ in `6.68s`. Furthermore, in the 6-to-1 quotient $(\alpha, \zeta, \xi) = (pq, z^2, p^3 z)$, stripping the boundary factor $\alpha^3\zeta$ from $8\xi^2 q^2 a_0 = \alpha^3\zeta \bar{a}$ reduces Case B's $4 \times 3$ matrix $M_{43}$ to column degrees `(36, 7, 24)` whose four $3\times 3$ minors $M_1, M_2, M_3, M_4 \in \mathbf{Z}[\alpha, \zeta, \xi]$ have degree `67`, no torus boundary factors, and pairwise $\mathbf{Q}$-GCD equal to `1`. *(When stopped, Round 5 worker `task-717` was running an 8-core CRT cofactor lift to write $s^9 \kappa^2 R^2 \cdot g_m = \sum_{l=1}^8 c_{l,m} f_l \pmod{s^3 - uvw}$ directly over $\mathbf{Q}$ so that even the single reverse inclusion $G_{3,\mathbf{Q}} \subseteq (I_{\mathrm{orig},\mathbf{Q}} : (s\kappa R)^\infty)$ is certified without modular reduction at $1009$.)*
+
+### 2.2 Steps 2 & 3: Artin Length $0$, Vanishing of $H^1(B, J(40,64,40))$, and Vanishing of Both Traced and Untraced Gysin Channels
+1. **Step 2 Evaluation Target Is Zero**: Because $\operatorname{Supp}(I/J) = \emptyset$, we have $K_{\mathrm{def}} = J : I = \mathcal{O}_B$ and $J = I$ globally on $B = (\mathbf{P}^1)^3$. Thus the evaluation target $H^0(B, (\mathcal{O}_B/K_{\mathrm{def}})(40,64,40)) = 0$ has **Artin length $0$**, and by the exact twisted Hilbert–Burch resolution $H^1(B, I(40,64,40)) = 0$ ([`audit_corrected_adjoint_resolution.py`](file:///Users/ben/Downloads/cycle-q2-complete-field-module-and-W-obstruction/full_cert_round3/horizontal_hodge/audit_corrected_adjoint_resolution.py#L45-L78)), we obtain
+   $$H^1\!\left(B, J(40,64,40)\right) = 0.$$
+2. **Step 3 Traced Jacobian Correspondence Channel Vanishes**: By Grauert–Riemenschneider vanishing and Serre duality on any smooth projective resolution $\widetilde{Z} \to B$ of $w^2 = f_c$ ([`horizontal_hodge/ACCOUNT.txt`](file:///Users/ben/Downloads/cycle-q2-complete-field-module-and-W-obstruction/full_cert_round3/horizontal_hodge/ACCOUNT.txt#L54-L78)), $H^{2,0}(\widetilde{Z})_{\mathrm{odd}} \cong \overline{H^1(B, J(40,64,40))^\vee} = 0$ and $H^{2,0}(\widetilde{Z})_{\mathrm{even}} \cong H^{2,0}(B) = 0$. Therefore, the traced Jacobian correspondence Gysin map $\Gamma_* : H^{2,0}(\widetilde{Z}) \to H^{3,1}(X_F)_\chi$ is **identically zero**, and cannot serve the nonzero source projection $\alpha_{3,1} \in H^{3,1}(X_F)_\chi$.
+3. **Round 5 Extension to the Untraced 3-Sheeted Implicit-Origin Cover $\widetilde{\Gamma} \to \widetilde{Z}$ ($H^{2,0}(\widetilde{\Gamma})_{\chi,\mathrm{tr}=0}$)**:
+   - The 3-sheeted infinity-origin surface $S_{\mathrm{inf}} \subset \mathbf{P}^1_p \times \mathbf{P}^1_q \times \mathbf{P}^1_\xi$ defined by $(1+p^6)\xi^3 + \frac{1}{2}pq\xi^2 + (1+q^6) = 0$ is **globally smooth across all 8 projective charts** (`Sing GB = [1]`), making $B_3 = S_{\mathrm{inf}} \times \mathbf{P}^1_z$ a smooth threefold.
+   - On the $w$-even trace-zero sector, $H^{2,0}(B_3)^{K_{24}} \cong H^{2,0}(S_{\mathrm{inf}})^{K_{24}}$ is 2-dimensional (spanned by $\{1, \xi\}\frac{dp\wedge dq}{\partial_\xi P_{\mathrm{inf}}}$). However, exact characteristic-zero evaluation of the $\mathbf{P}^1_z$ Čech residue trace $\operatorname{tr}_{\mathbf{P}^1_z}(Q_\xi^* \beta^{P_m})$ over $\mathbf{Q}(\xi_0)(z)$ across all 6 basis cocycles $P_0,\dots,P_5$ of $H^{3,1}(X_F)_\chi$ ([`task-565.log`](file:///Users/ben/.gemini/antigravity/brain/4862793e-ed1b-46ae-9b1c-4f0e975db6ad/.system_generated/tasks/task-565.log), `24.0s`) yields **`[0, 0, 0, 0, 0, 0]`** (`EXACT_Q_XI0_TRACES = [0, 0, 0, 0, 0, 0]` for all $i_0 \in \{0,2,5\}$), proving that the $w$-even trace-zero forms also have **identically zero Gysin pushforward** to $H^{3,1}(X_F)_\chi$.
+   - On the $w$-odd trace-zero sector, the Tschirnhausen twists on $B_3$ satisfy $(42,66,40) \ge (40,64,40)$ and $(44,66,40) \ge (40,64,40)$, so $H^1(B_3, \pi_{\mathrm{inf}}^* I(42,66,40)) = H^1(B_3, \pi_{\mathrm{inf}}^* I(44,66,40)) = 0$.
+
+### 2.3 Round 5 Exclusion of the Step-7 Moving Divisor $k = c + 6Z^5 = 0$
+Testing the candidate moving divisor $k = c + 6Z^5 = 0$ from [`step7_audit_packet/README.md`](file:///Users/ben/Downloads/cycle-q2-complete-field-module-and-W-obstruction/step7_audit_packet/README.md#L76-L138):
+- We proved the exact identity ([`task-214.log`](file:///Users/ben/.gemini/antigravity/brain/4862793e-ed1b-46ae-9b1c-4f0e975db6ad/.system_generated/tasks/task-214.log)):
+  $$G = \frac{U \cdot F}{X_2^6} \qquad\text{and}\qquad k = c + 6Z^5 = \frac{F_{Y_2}}{X_2^5}.$$
+- Thus the projective closure of $\{k = 0\}$ on $X_F$ is $D_{X_2} \cup D_k$, where $D_{X_2} = V(F, X_2)$ is a smooth sextic threefold ($H^{2,0} = 0$) and $D_k = V(F, F_{Y_2})$ is the single-coordinate polar threefold.
+- Resolving $D_k$ along its singular curve $C_1 = \{X_1 = X_2 = Y_2 = 0\} \cap D_k$ (`5` generic smooth charts, `20` Type-A smooth charts, `45` Type-B smooth charts in Step 275) proves that all 4 candidate $\chi$-eigenmonomials of degree 5 in $H^0(\mathbf{P}^5, \mathcal{O}(5))_\chi$ acquire uncancelable poles (`pole -2` and `-1` along $\{x_2 = 0, 1 + x_1 y_2^5 = 0\}$), establishing **$H^{2,0}(\widetilde{D}_k)_\chi = 0$** (and by cyclic symmetry excluding $F_{X_i} = 0$ and $F_{Y_i} = 0$ for all $i=0,1,2$).
+
+---
+
+## 3. Progress on Turn 1 (`discussioncomment-19223852` Bundles & Companion Gists)
+
+All three research bundles from [`discussioncomment-19223852`](https://github.com/hodge-computer/sextics/discussions/61#discussioncomment-19223852) and both companion gists were extracted into [`/Users/ben/.gemini/antigravity/scratch/q2_work/`](file:///Users/ben/.gemini/antigravity/scratch/q2_work/), audited, and extended with new constructive theorems across Routes 01–04:
+
+### 3.1 Route 02 (Proper 18D K3 Module, 6-Border Adjoint PDE, and Coupled Slice DAE)
+1. **Unconditional Exact $\mathbf{Q}$ Verification of the Proper-K3 Module ([`task-235.log`](file:///Users/ben/.gemini/antigravity/brain/4862793e-ed1b-46ae-9b1c-4f0e975db6ad/.system_generated/tasks/task-235.log), `28.07s`)**:
+   - Proved exact $\mathbf{Q}$ invertibility at $(\lambda,\mu) = (2,3)$ of the weighted Griffiths reduction matrices at pole 2 (`30x30`, `50`-bit num), pole 3 (`140x140`, `805`-bit num), and pole 4 (`385x385`, `2610`-bit num).
+   - Verified exact flatness $[\nabla_\lambda, \nabla_\mu] = 0$ over $\mathbf{Q}$ for all $18 \times 18$ entries through jet order 5.
+   - Proved **exact $\mathbf{Q}$ invertibility of the $18 \times 18$ cyclic basis matrix $G(2,3)$** (`1784`-bit numerator, `1999`-bit denominator, reducing mod $101$ to `16`), removing the modular-only witness caveat in [`github_k3_update.txt`](file:///Users/ben/.gemini/antigravity/scratch/q2_work/bundle1/q2-strategy-atlas/audits/github_k3_update.txt#L25-L27).
+   - Verified over $\mathbf{Q}$ the exact 6-border redundancy identity $P_{3,3} = \partial_\mu P_{3,2} + \sum_\gamma b_{(3,2),\gamma} P_{\gamma + e_\mu}$ across all 18 entries, confirming the reduction to 6 border unknowns $\mathcal{B}_6 = \{(3,2),(4,1),(5,0),(0,6),(1,5),(2,4)\}$.
+2. **Apparent Frame Pole Cancellation in the Intrinsic Cyclic Basis (Round 5 Steps 388–395)**:
+   - Proved that the degree-132 factor $d_{17,1}(2,\mu)$ appearing in columns $1..17$ of $\Gamma_\mu(2,\mu)$ in [`rational_slice_lambda2_p1009.json`](file:///Users/ben/.gemini/antigravity/scratch/q2_work/gist_benediamond/rational_slice_lambda2_p1009.json) is an apparent frame pole of the fixed monomial frame that **cancels identically** in the intrinsic 18th-order cyclic Picard–Fuchs operator and source.
+3. **Monomial-Basis Anatomy of the 29 DAE Constraints & Uniform $\Delta_W$ Unlocking (Rounds 2–3)**:
+   - In the unshifted monomial basis $\mu^d$ ($U = \mu^{-2}\sum_{d=0}^{12} \tilde{U}_{k,d}(\lambda)\mu^d$), 24 of the 29 DAE constraints on $\tilde{\mathbf{u}}(\lambda)$ are $\lambda$-independent coordinate vanishings ($\tilde{U}_{17,0..12} = 0$, $\tilde{U}_{k,12} = 0$ for the 10 $V$-degree-0 frame monomials $k \in \{0..7,15,16\}$, and $\tilde{U}_{10,0} = 0$), and the remaining 5 constraints are $\mathbb{Z}/6\mathbb{Z}$-equivariant equations recovered at univariate slice order $K = 0$.
+   - Enlarging the DAE ansatz by a **uniform** moving denominator $F(\lambda,\mu) = d_{\mathrm{pole4}}(\lambda,\mu) = \Delta_W(\lambda,\mu)$ (the degree-144 intrinsic K3 discriminant) across all 18 components **completely unlocks $H^{0,2}$ ($U_{17}, V_{17}$ have `0/157` forced vanishings)** and collapses the DAE constraints from $(19, 28)$ to **`(6, 15)` pure projective boundary conditions** at $\mu = \infty, 0$ (zero interior $\mu$-constraints).
+
+### 3.2 Route 01 (Toric Cubic / Mixed Current / Fold-Parity Hankel Pole Elimination)
+In [`MIXED_ONE_CHANNEL_CURRENT.md`](file:///Users/ben/.gemini/antigravity/scratch/q2_work/bundle2/cycle-q2-current-and-remainder/kummer/MIXED_ONE_CHANNEL_CURRENT.md), integrating by parts twice along $D_K$ trades the cubic discriminant pole $\Delta_c^{-3}$ for a fold pole $T^{-6}$ in the single $e_1$ channel ($R_{\mathrm{new}} = -\frac{PZb A_2}{81 T^6}e_1$).
+- **Fold-Parity Hankel Pole-Elimination Theorem (Round 3)**: Using the $e_1$-preserving Hankel operator $\mathcal{P}_1^*(f_1) = (D_N^2 - D_M D_K)f_1$ with principal symbol $\mathcal{P}_1^*(g T^m) = m(m-2)h_K^2 E(T)^2 S_1 g T^{m-4} + O(T^{m-3})$ ($S_1 = h_N^2 + h_M$, $\gcd(P^2 S_1, T) = \gcd(E(T), T) = 1$), both apparent indicial resonances $m=0$ ($T^{-4}$) and $m=+2$ ($T^{-2}$) **vanish identically across $T = 0$** by fold sheet-involution parity of $W_0 = k/J_c$.
+- Verified in 4D formal Laurent jets over $\mathbb{F}_{1000003}$ (`35/35` jet terms at $T^{-4}$ and `10/10` jet terms at $T^{-2}$ vanish automatically): a 5-term rational Laurent current $f_1 = \sum_{m \in \{-3,-2,-1,+1,+3\}} g_m T^m$ **eliminates the $T = 0$ fold pole completely ($T^{-7} \to T^0$, physical $T^{-6} \to T^0$)** inside the $e_1$ channel, transferring the poles to $(P^2 S_1)\cdot E(T) = 0$.
+
+### 3.3 Route 03 + Route 04 (Compact $2 \times 2$ Elliptic Gauss–Manin & `q = 1` Character-2 Bridge)
+- **Exact 3-Variable Closed Forms ([`task-35.log`](file:///Users/ben/.gemini/antigravity/brain/09ee2493-d3b0-4fd1-baa4-a2780b9ab8a2/.system_generated/tasks/task-35.log))**: Derived closed-form factorizations $\det M_1(r) = \frac{729}{16}r_0^3 r_1^{11} r_2^2 F_1(r) F_{\mathrm{sym}}(z)$, $\det M_2(r) = \frac{729}{16}r_0^2 r_1^3 r_2^{11} F_2(r) F_{\mathrm{sym}}(z)$, and exact rational formulas for $g_1(r_0,r_1,r_2)$ and $g_2(r_0,r_1,r_2)$ in [`fixed-sextic-q1-character-bridge.md`](file:///Users/ben/.gemini/antigravity/scratch/q2_work/bundle1/q2-strategy-atlas/source-accounts/fixed-sextic-q1-character-bridge.md).
+- **Unconditional 3D Gauss–Manin Equivalence**: Proved that $-\frac{1}{2}\mathbf{\lambda}(E_{\mathrm{tot}})$ and $\mathbf{\lambda}(A_{\mathrm{phys}})$ differ by an exact 3D Gauss–Manin divergence $-\sum_{i \in \{P,U,Z\}}(\partial_i + \Gamma_i^{(2)})v_i^{\mathrm{pre}}$, so the $\det M_i(r) = 0$ poles of $E_{\mathrm{tot}}$ have **zero 3D residue obstruction** and reduce Route 04 + Route 03 back to Route 03's $2 \times 3$ Gauss–Manin PDE $\sum_{i \in \{P,U,Z\}}(\partial_i + \Gamma_i^{(2)})v_i = \mathbf{\lambda}(A_{\mathrm{phys}})$ in [`polynomial-normal-compact2.md`](file:///Users/ben/.gemini/antigravity/scratch/q2_work/bundle1/q2-strategy-atlas/source-accounts/polynomial-normal-compact2.md#L197-L206).
+- **1D Diagonal Fuchsian Degree-Gap Obstruction ([`task-114.log`](file:///Users/ben/.gemini/antigravity/brain/09ee2493-d3b0-4fd1-baa4-a2780b9ab8a2/.system_generated/tasks/task-114.log))**: Proved over $\overline{\mathbb{Q}}(z)$ that on the symmetric diagonal $r_0 = r_1 = r_2 = v$, subtracting the unique principal part $\tilde{u}_{\mathrm{sing}}(z)$ of $L(\tilde{u}_0) = f_{\mathrm{cyc}}(z)$ cancels two powers of $D_8(z)D_{72}(z)$ (all local logarithmic residues vanish!) but leaves numerator degree $7 \notin \{6, 9, 11, 12, \dots\} = \{\deg\mathrm{num}(L(p)) : p \in \overline{\mathbb{Q}}[z]\}$, proving **no 1D diagonal rational primitive exists even for $A_{\mathrm{phys}}$**.
+
+---
+
+## 4. Summary of Excluded Divisor Supports vs. Remaining Open Paths
+
+| Support / Route | Status | Proven Mathematical Reason |
+| :--- | :--- | :--- |
+| **Compact base `r * s * v * Disc * B8 * W`** | **Excluded over $\mathbf{Q}$** | Transverse cusp on $W = 0 \implies H^{2,0}_{\mathrm{rel}} = 0$ ([`READ_ME_FIRST.txt`](file:///Users/ben/Downloads/cycle-q2-complete-field-module-and-W-obstruction/full_cert_round3/READ_ME_FIRST.txt#L67-L118)). |
+| **$\Theta$-divisor & Cross-$Y$ polar $T_Y = Y_0 F_{Y_0} + Y_1 F_{Y_1}$** | **Excluded over $\mathbf{Q}$** | $H^{2,0} = 0$ on resolved proper divisors (`theta_branch_closure_receipt.json`, `CROSS_Y_POLAR_H20.txt`). |
+| **Exchange moving divisor $Y_0^6 + Y_2^6 - Y_1^6 = 0$** | **Excluded over $\mathbf{Q}$** | Injective Kodaira–Spencer map (`rank 80 -> 90` over $\mathbf{Q}$) $\implies H^{2,0} = 0$ ([`new_exchange/ACCOUNT.txt`](file:///Users/ben/Downloads/cycle-q2-complete-field-module-and-W-obstruction/full_cert_round3/attachments_route/new_exchange/ACCOUNT.txt#L41-L103)). |
+| **Single-coordinate polar $k = c + 6Z^5 = F_{Y_2}/X_2^5 = 0$** | **Excluded over $\mathbf{Q}$ (New)** | Explicit blowup resolution of $D_k = V(F, F_{Y_2})$ along $C_1$ gives $H^{2,0}(\widetilde{D}_k)_\chi = 0$ (Step 275). |
+| **Reverse-point Jacobian $x_0 = \kappa/(q^8 R)^2$ ($w^2 = f_c$)** | **Obstructed (New)** | $\operatorname{Supp}(I/J) = \emptyset \implies K_{\mathrm{def}} = \mathcal{O}_B \implies H^1(B, J(40,64,40)) = 0 \implies \Gamma_* = 0$; $w$-even trace-zero $\mathbf{P}^1_z$-residues also vanish (`[0,0,0,0,0,0]`, [`task-565.log`](file:///Users/ben/.gemini/antigravity/brain/4862793e-ed1b-46ae-9b1c-4f0e975db6ad/.system_generated/tasks/task-565.log)). |
+| **Route 01 Joint $(\mathcal{P}_1^*, \mathcal{P}_2^*, \mathcal{P}_3^*)$ / 6-Sheet Scalar PDE** | **Open** | $\mathcal{P}_1^*(f_1)$ eliminates $T = 0$ completely ($T^{-6} \to T^0$); closing the transverse pole $(P^2 S_1)\cdot E(T) = 0$ via $(\mathcal{P}_2^*, \mathcal{P}_3^*)$ remains open. |
+| **Route 02 Proper-K3 6-Border Adjoint / Uniform $\Delta_W$ DAE** | **Open** | $G(2,3)$ invertibility, flatness, and 6-border reduction verified over $\mathbf{Q}$; uniform $F = \Delta_W(\lambda,\mu)$ unlocks $H^{0,2}$ and leaves only $(6,15)$ boundary conditions at $\mu = \infty, 0$. |
+| **Route 03 Off-Diagonal 3D Compact Elliptic PDE** | **Open** | 1D diagonal excluded by degree gap $7 \notin \{6,9,11,\dots\}$, but off-diagonal 3D currents $(v_P, v_U, v_Z)$ with new characteristic cubic poles $\chi(ds) \equiv 0 \pmod s$ remain open. |

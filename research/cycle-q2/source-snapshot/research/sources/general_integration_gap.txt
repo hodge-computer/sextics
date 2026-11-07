@@ -1,0 +1,61 @@
+**Not from the packet we have in this thread. We have a checked reduction and an explicit partial current, but the mathematical step that would complete the original certificate is still missing. It is not merely waiting to be translated into Lean.**
+
+## The exact gap
+
+Our constructed current satisfies
+\[
+A-2v(F)+F\operatorname{div}v
+=
+F^2\mathcal R_{\mathrm{phys}}+F^3Q_{\mathrm{phys}},
+\qquad
+\mathcal R_{\mathrm{phys}}\ne0\text{ on }F=0.
+\]
+
+The certificate requires the right-hand side to be divisible by **\(F^3\)**. We still need another current that cancels the displayed \(F^2\) term. Clearing denominators or choosing a different \(Q\) cannot accomplish that. This is explicitly recorded in the [physical identity and remaining gap](sandbox:/workspace/scratch/ede5694a9fc1/solve_cycle_q2/PARTIAL_PHYSICAL_IDENTITY.md).
+
+In the reduced system, the missing mathematical statement is
+\[
+\boxed{
+\exists\,u_P,u_U,u_Z,u_b
+\quad
+\sum_{j=P,U,Z,b}(\partial_j u_j+B_j u_j)
+=
+-\begin{pmatrix}
+-\dfrac{PZbA_2}{81T^6}\\[3pt]0
+\end{pmatrix}.
+}
+\]
+
+We have neither constructed those rational currents nor proved a theorem guaranteeing their existence for this actual source. The nonzero remainder does **not** prove that they cannot exist—it identifies what remains to be solved.
+
+## What is ready to formalize?
+
+| Component | Current status | Lean readiness |
+|---|---|---|
+| Actual source and rank-two connection | Explicit formulas and mathematical derivation | Supporting lemmas can be formalized |
+| Mixed current serving both source components up to the stated remainder | Generic exact symbolic checks completed | Concrete identities can be formalized |
+| Normal correction and transport to the original six variables | Explicit conditional reconstruction | Can be formalized as a reconstruction theorem |
+| Rational current cancelling the remaining scalar | **Missing** | Requires further mathematical work |
+| Completed original \(D,N_i,Q\) certificate | **Not established** | No complete proof to port |
+
+“Ready to formalize” here means that formulas and arguments are available. These components have not themselves been checked by Lean.
+
+The theorem we can currently aim to encode is essentially
+\[
+\boxed{
+\text{A rational solution of the remaining equation}
+\;\Longrightarrow\;
+\text{an original cycle-q2 certificate}.
+}
+\]
+The hypothesis on the left is the unresolved part. Formalizing the implication would preserve useful work, but it would not prove the original theorem.
+
+## What would make this a complete proof?
+
+We do **not** necessarily need enormous expanded numerator polynomials before starting Lean. A finite construction of the missing current, together with proofs of its identity and denominator legality, could be enough. A rigorously applicable existence theorem could also prove the existential certificate statement, although actual certificate generation would additionally need an effective construction.
+
+What we currently lack is that construction or existence argument—not simply polynomial expansion.
+
+The general rational-integration machinery provides a way to formulate and attempt the calculation. Our backend run did not return a primitive or even an exactness decision; it stopped before the relevant de Rham computation. It therefore supplies no missing existence proof. [Backend report](sandbox:/workspace/scratch/ede5694a9fc1/solve_cycle_q2/backend/BACKEND_STATUS.md)
+
+**My recommendation is to keep solving the remaining equation before treating this as a full Lean implementation project.** Formalizing the partial identities is reasonable reusable work, but calling that “coding up the full proof” would overstate what we have.
