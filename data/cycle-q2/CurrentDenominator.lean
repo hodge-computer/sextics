@@ -1,6 +1,5 @@
 import Proposal.CurrentData
-import Mathlib.Algebra.Polynomial.Roots
-import Mathlib.RingTheory.Coprime.Basic
+import Proposal.DenominatorSpecialization
 
 /-! Actual denominator specialization at (X1,X2,Y0,Y1,Y2)=(1,1,2,2,1).
 Exact rational reductions and Bezout data certify the specialized gcd.
@@ -9,19 +8,6 @@ and proves nonvanishing of the concrete denominator. -/
 noncomputable section
 set_option maxHeartbeats 2000000
 namespace CycleQ2Concrete.Denominator
-abbrev UPoly := Polynomial ℂ
-
-def specVars : Fin 6 → UPoly := ![Polynomial.X, 1, 1, 2, 2, 1]
-def spec : CycleQ2Concrete.Poly →+* UPoly :=
-  MvPolynomial.eval₂Hom Polynomial.C specVars
-
-def f : UPoly := Polynomial.X^6 + 2*Polynomial.X^3 + Polynomial.X + 132
-
-@[simp] lemma spec_C (c : ℂ) : spec (MvPolynomial.C c) = Polynomial.C c := by
-  simp [spec]
-@[simp] lemma spec_X (i : Fin 6) : spec (MvPolynomial.X i) = specVars i := by
-  simp [spec]
-
 /-- Explicit polynomial quotient witness, rather than an unproved reduction oracle. -/
 def Modulo (p r : UPoly) : Prop := ∃ q, p = f*q+r
 
@@ -64,14 +50,6 @@ lemma coprime_power {p : UPoly} (h : IsCoprime f p) (n : ℕ) : IsCoprime f (p^n
       change IsCoprime f 1
       exact ⟨0, 1, by ring⟩
   | succ n ih => simpa only [pow_succ] using ih.mul_right h
-
-/-- Exact binding of the small univariate polynomial to the original sextic. -/
-theorem specialized_originalF : spec CycleQ2Workspace.originalF = f := by
-  apply Polynomial.funext
-  intro x
-  unfold CycleQ2Workspace.originalF HodgeSubmission.F f
-  simp [map_add, map_mul, map_pow, specVars]
-  norm_num <;> ring
 
 def r00000 : UPoly := (Polynomial.C ((1 : ℂ) / (1 : ℂ)) * Polynomial.X ^ 1)
 def q00000 : UPoly := 0
@@ -2442,63 +2420,6 @@ theorem specialized_baseD_coprime : IsCoprime f (spec baseD) := by
   simp only [map_mul, map_pow, spec_C]
   norm_num only [div_one, Polynomial.C_1, one_mul]
   exact (((((((((((((((((((((coprime_power coprime_a00012 1).mul_right (coprime_power coprime_a00013 2)).mul_right (coprime_power coprime_a00014 10)).mul_right (coprime_power coprime_a00015 2)).mul_right (coprime_power coprime_a00018 2)).mul_right (coprime_power coprime_a00026 1)).mul_right (coprime_power coprime_a00033 1)).mul_right (coprime_power coprime_a00034 3)).mul_right (coprime_power coprime_a00042 5)).mul_right (coprime_power coprime_a00100 5)).mul_right (coprime_power coprime_a00101 7)).mul_right (coprime_power coprime_a00103 7)).mul_right (coprime_power coprime_a00105 4)).mul_right (coprime_power coprime_a00106 2)).mul_right (coprime_power coprime_a00123 4)).mul_right (coprime_power coprime_a00124 6)).mul_right (coprime_power coprime_a00134 11)).mul_right (coprime_power coprime_a07867 1)).mul_right (coprime_power coprime_a07942 1)).mul_right (coprime_power coprime_a07947 1)).mul_right (coprime_power coprime_a07960 2))
-
-abbrev Coeff := MvPolynomial (Fin 5) ℂ
-
-def equation : Polynomial Coeff :=
-  Polynomial.X^6 +
-    (Polynomial.C (MvPolynomial.C (1/2) * MvPolynomial.X 0 * MvPolynomial.X 2 * MvPolynomial.X 3) * Polynomial.X^3 +
-    Polynomial.C (MvPolynomial.C (1/2) * MvPolynomial.X 1^3 * MvPolynomial.X 2 * MvPolynomial.X 4) * Polynomial.X +
-    Polynomial.C ((MvPolynomial.X 0)^6 + (MvPolynomial.X 1)^6 + (MvPolynomial.X 2)^6 +
-      (MvPolynomial.X 3)^6 + (MvPolynomial.X 4)^6 +
-      MvPolynomial.C (1/2) * MvPolynomial.X 0^3 * MvPolynomial.X 1 * MvPolynomial.X 3 * MvPolynomial.X 4))
-
-lemma equation_monic : equation.Monic := by
-  apply Polynomial.monic_X_pow_add
-  apply lt_of_le_of_lt (Polynomial.degree_add_le _ _)
-  apply max_lt
-  · apply lt_of_le_of_lt (Polynomial.degree_add_le _ _)
-    apply max_lt
-    · exact lt_of_le_of_lt (Polynomial.degree_C_mul_X_pow_le 3 _) (by decide)
-    · simpa using lt_of_le_of_lt (Polynomial.degree_C_mul_X_pow_le 1 _) (by decide : (1 : WithBot ℕ) < 6)
-  · exact lt_of_le_of_lt Polynomial.degree_C_le (by decide)
-
-lemma originalF_univariate :
-    MvPolynomial.finSuccEquiv ℂ 5 CycleQ2Workspace.originalF = equation := by
-  have he : (Fin.cases (Polynomial.X : Polynomial Coeff) (fun j => Polynomial.C (MvPolynomial.X j))) =
-      ![Polynomial.X,Polynomial.C (MvPolynomial.X 0),Polynomial.C (MvPolynomial.X 1),
-        Polynomial.C (MvPolynomial.X 2),Polynomial.C (MvPolynomial.X 3),Polynomial.C (MvPolynomial.X 4)] := by
-    funext i
-    fin_cases i <;> rfl
-  simp [CycleQ2Workspace.originalF,HodgeSubmission.F,equation,MvPolynomial.finSuccEquiv_apply,he]
-  ring
-
-def coefficientSpec : Coeff →+* ℂ := MvPolynomial.eval ![1,1,2,2,1]
-
-lemma mapped_univariate (P : CycleQ2Concrete.Poly) :
-    (MvPolynomial.finSuccEquiv ℂ 5 P).map coefficientSpec = spec P := by
-  have he : (Fin.cases (Polynomial.X : Polynomial Coeff) (fun j => Polynomial.C (MvPolynomial.X j))) =
-      ![Polynomial.X,Polynomial.C (MvPolynomial.X 0),Polynomial.C (MvPolynomial.X 1),
-        Polynomial.C (MvPolynomial.X 2),Polynomial.C (MvPolynomial.X 3),Polynomial.C (MvPolynomial.X 4)] := by
-    funext i
-    fin_cases i <;> rfl
-  induction P using MvPolynomial.induction_on with
-  | C a => simp [MvPolynomial.finSuccEquiv_apply,coefficientSpec,spec]
-  | add p q hp hq => simp only [map_add,Polynomial.map_add,hp,hq]
-  | mul_X p i hp =>
-    rw [map_mul,Polynomial.map_mul,hp,map_mul]
-    congr 1
-    fin_cases i <;> simp [MvPolynomial.finSuccEquiv_apply,he,coefficientSpec,spec,specVars,Polynomial.C_ofNat]
-
-lemma ambient_relPrime_of_specialization (D : CycleQ2Concrete.Poly)
-    (h : IsRelPrime f (spec D)) : IsRelPrime CycleQ2Workspace.originalF D := by
-  apply IsRelPrime.of_map (MvPolynomial.finSuccEquiv ℂ 5)
-  apply HodgeComputer.relPrime_of_specialization coefficientSpec
-  · rw [originalF_univariate]
-    rw [equation_monic]
-    exact isUnit_one
-  · rw [mapped_univariate,mapped_univariate,specialized_originalF]
-    exact h
 
 lemma f_not_isUnit : ¬ IsUnit f := by
   intro h

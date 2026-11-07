@@ -1,4 +1,4 @@
-import Proposal.CubicResidueTrace
+import Proposal.CubicTrace
 import Proposal.WeightedPrimitiveTransportCore
 
 /-!
