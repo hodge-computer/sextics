@@ -353,7 +353,7 @@ At \(q=1\) it is 19; at \(q=2\) it is \(395-276+9=128\), the three terms being t
 
 Here “generic” refers to the geometric generic point of the full even-sextic parameter space. A support defined there spreads to a finite-type family dominating that space; the dominance hypothesis is essential to the deformation argument.
 
-**Theorem.** Suppose a dominating finite-type family of reduced divisor supports on smooth even sextics carries one nonzero invariant primitive \((3,1)\) class at the geometric generic point. Its Gysin image then carries the entire invariant primitive \(H^{4}\) there. In particular, a generic \(q=1\) certificate for any nonzero invariant primitive target implies divisor support for that whole Hodge structure. If \(E_i\) are the resolved support components, necessarily \(\sum _i h^{2,0}(E_i)\ge 208\).
+**Theorem.** A polarizable subvariation of the invariant primitive fourth cohomology, over a dominant finite-type base change of the smooth even-sextic family, is the whole variation if its \((3,1)\) part is nonzero. Consequently, if a dominating family of reduced divisor supports carries one nonzero invariant primitive \((3,1)\) class at the geometric generic point, its Gysin image carries the entire invariant primitive \(H^4\) there. In particular, a generic \(q=1\) certificate for any nonzero invariant primitive target implies divisor support for that whole Hodge structure. If \(E_i\) are the resolved support components, necessarily \(\sum _i h^{2,0}(E_i)\ge208\).
 
 We use two standard inputs from variation of Hodge structure. First, the infinitesimal residue variation for a hypersurface is multiplication by the deformation polynomial in its Jacobian ring. Second, images of morphisms of polarizable variations are polarizable subvariations, their polarization-orthogonal complements are again subvariations, and such morphisms are strict for the Hodge filtration. The first identification follows by differentiating \(A\cdot \Omega /F^{2}\): its next leading numerator is \(-2\cdot gA\), a harmless nonzero scalar times multiplication. For the second input, a morphism preserves the Hodge decomposition, so its image and kernel are Hodge substructures and the map is strict. Positivity of the associated Hodge metric makes the polarization nondegenerate on a substructure; its orthogonal complement is flat and is again a Hodge substructure, giving the required splitting. These arguments apply fibrewise and in families of constant rank. Resolve the support family and shrink its base before applying them.
 
@@ -404,6 +404,57 @@ Distinct support signatures give distinct joint eigenvalue tuples, regardless of
 If \(U^{3,1}=V\), stability under the Higgs field and the verified equality \(G\cdot V=W\) force \(U^{2,2}=W\). Complex conjugation gives its whole (1,3) part as well. Apply this to the image of the component Gysin maps, intersected with the invariant primitive sector. The assumed nonzero class rules out the zero alternative. Strictness gives a surjection \(\bigoplus _i H^{2,0}(E_i)\to H^{3,1}(X)^\tau \), proving the lower bound 208. Exceptional components whose image has codimension at least two contribute no (3,1) part, so they do not weaken that bound. ∎
 
 A certificate over the algebraic closure of the universal coefficient field uses finitely many algebraic coefficients. They lie in a finite extension; the denominator and its support spread over a nonempty open of a finite-type base change. Thus the theorem applies. Chapter 1 then converts the resulting support back to certificates for every \(q=1\) and \(q=2\) target. In particular, an odd sextic monomial with every exponent at most four is nonzero in the Fermat Jacobian ring, hence represents a nonzero generic class to which the criterion applies.
+
+### Curve families and the parity of deformations
+
+**Corollary.** Let an algebraic family of smooth curves on even sextics have a smooth incidence chart dominating the full even-sextic coefficient space. At a point where the coefficient projection is submersive, suppose two actual motions of the curve in the fixed fourfold have
+
+\[
+\operatorname{Tr}_C\bigl(s\wedge t\wedge\delta_C(A|_C)\bigr)\ne0
+\]
+
+for an odd sextic \(A\). Then the invariant primitive fourth cohomology of the geometric generic even sextic is divisor-supported.
+
+**Proof.** The normal pairing is the curve-family two-form of [Chapter 3, §3.2](#technical-information/geometric-support). Close the family in the relative Hilbert scheme, choose a geometric generic component after finite base change if necessary, resolve, and take relative surface sections. Shrinking the base gives a smooth projective surface family with its universal curve correspondence. Nonvanishing of the pairing on a smooth chart is an open condition, so it holds generically on the dominating component. Average the correspondence under \(\tau\) and project away from the ambient hyperplane-square class. Since \(A\) represents an invariant \((3,1)\) class, the resulting primitive image is nonzero. This image is a polarizable subvariation, so the theorem makes it the whole invariant primitive variation. The correspondence is divisor-supported by Chapter 3. ∎
+
+If \(T\) is the resulting smooth projective parameter surface, strictness gives \(h^{2,0}(T)\ge208\). The same argument requires at least 126 holomorphic two-forms for a parameter surface whose correspondence serves the residual variation in the one-reflection criterion below. These bounds concern a construction dominating the specified coefficient family; a surface with fewer two-forms may still detect classes on special fourfolds.
+
+The parity distinction explains why dominance and the nonzero pairing are compatible. The residue volume form is \(\tau\)-odd, so invariant \(H^{3,1}(X)\) has odd numerators. Allowed embedded deformations have even numerators. Submersivity of the curve incidence projection therefore gives
+
+\[
+\delta_C(B|_C)=0\qquad(B\in S_6^+),
+\]
+
+while permitting \(\delta_C(A|_C)\ne0\) for odd \(A\). Indeed, a lift of the deformation of \(X\) to the incidence gives an ambient normal section of \(C\) mapping to \(B|_C\). Its connecting class is zero.
+
+There is a useful restriction test before computing the trace. Put \(E_C^\pm=\operatorname{im}(S_6^\pm\to H^0(C,\mathcal O_C(6)))\). At such a submersive incidence point, the odd-numerator pairing factors through
+
+\[
+E_C^-/(E_C^-\cap E_C^+).
+\]
+
+In particular, it vanishes for every odd target if \(E_C^-\subseteq E_C^+\). One geometric sufficient condition is
+
+\[
+C\cap\tau C=\varnothing,
+\qquad
+H^1\bigl(\mathbb P^5,\mathcal I_{C\cup\tau C}(6)\bigr)=0.
+\]
+
+To prove this, prescribe a section on the disjoint union by \(A|_C\) on \(C\) and its \(\tau\)-translate on \(\tau C\). The cohomology vanishing extends that invariant section to a sextic on \(\mathbb P^5\); averaging the extension gives an even sextic with the same restriction to \(C\). Hence every odd restriction lies in \(E_C^+\). Thus a nonzero pairing in a dominating curve construction requires either intersection with the conjugate curve or failure of this degree-six interpolation condition.
+
+**Example: an injective block projection.** Write the coordinate space as \(V_X\oplus V_Y\). If \(C\subset\mathbb P(W)\) and either projection \(W\to V_X\) or \(W\to V_Y\) is injective, every sextic on \(\mathbb P(W)\) extends to a pure-block sextic, which is even. Thus \(E_C^-\subseteq E_C^+\). The pairing vanishes at a submersive even-incidence point for every curve in such a linear subspace, independently of its degree and genus.
+
+For equations \(E(c,u)=0\) defining a verified smooth incidence chart, with coefficient variables \(c\) and curve variables \(u\), submersivity is the finite rank condition
+
+\[
+\operatorname{im}(\partial_cE)\subseteq\operatorname{im}(\partial_uE),
+\qquad
+\operatorname{rank}[\partial_uE\ \partial_cE]
+=\operatorname{rank}(\partial_uE).
+\]
+
+The relative kernel supplies actual curve motions through the chart. A tangent-rank calculation on an unverified or nonreduced incidence scheme does not establish the smoothness hypothesis.
 
 ### The one-reflection criterion
 

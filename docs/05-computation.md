@@ -2,7 +2,7 @@
 
 [Previous: families, representations and deformation](#technical-information/known-locus) · [Contents](#technical-information/introduction)
 
-The certificate formulation turns a support problem into polynomial identities. Computation can verify an explicit construction, expose an unexpected solution, or test a proposed mechanism. This chapter explains the complete coefficient system, the limits of numerical discovery, and the exact polynomial criterion for a rational certificate.
+The certificate formulation turns a support problem into polynomial identities. Computation can verify an explicit construction, expose an unexpected solution, or test a proposed mechanism. This chapter develops complete coefficient systems, normal forms and strictification, exact incidence lifting, rational integration on algebraic curves, and a scalar reduction for cubic currents. It ends with the polynomial criterion for a rational certificate.
 
 ## 5.1 Fixing a denominator makes the problem linear
 
@@ -20,6 +20,15 @@ Here \(C\) has degree \(2\cdot\deg(D)-6\). Introducing its full coefficient spac
 For a candidate supporting divisor, this gives a deterministic target-map computation without a separate geometric resolution. A geometric calculation can explain its source and image; the coefficient system supplies an independent algebraic test. The prescribed-support theorem in Chapter 1 proves that this complete coefficient test and geometric support have the same image when the stated pole bound is used.
 
 Denominator multiplicity and presentation redundancy must be distinguished. Multiplying both \(N\) and \(D\) by the same polynomial changes no rational field. Searching all numerators over \(D^{m}\) instead changes the allowed pole order. At \(q=1\) the prescribed-support theorem proves that this cannot rescue a denominator rejected by the complete numerator system over \(D\). At \(q=2\) it can: \(D^{2}\) may be necessary. Chapter 1 gives the precise statement.
+
+**Conical denominators allow strictification without increasing poles.** Over a characteristic-zero field \(k\), let \(F\in k[u,z_1,\ldots,z_n]\), with \(n\ge1\), be homogeneous of degree \(d>0\), with a nonzero constant coefficient of \(u^d\). Let the prescribed nonzero homogeneous denominator \(D\) be independent of \(u\). For \(q\ge1\), source degree \(d(q+1)-(n+1)\), and numerator degree \(\deg D+dq-n\), an ordinary certificate with denominator \(D\) can be made normalized and strict with that same denominator.
+
+Indeed, replace each numerator by its remainder \(M_i\) modulo \(F^q\). Division introduces no coefficient denominators and preserves homogeneity, while \(\deg_u M_i<dq\). The polynomial normal-form argument of §5.3 then gives \(q(M/D)(F)-F\operatorname{div}(M/D)=A\). Coprimality of \(F,D\), which follows from the constant leading coefficient, implies
+\[
+H=\frac{qM(F)-AD}{F}\in k[u,z_1,\ldots,z_n],\qquad
+\operatorname{div}(M/D)=H/D.
+\]
+Euler normalization therefore replaces the numerator by \(M-H\varepsilon/(dq)\), where \(\varepsilon\) is the Euler field, and retains \(D\). This assertion concerns the exact denominator already supplied: if existence is known over \(D^2\), it preserves \(D^2\) and does not imply existence over \(D\).
 
 ## 5.2 Solving \(E_{1}\) does not solve \(E_{2}\)
 
@@ -174,7 +183,7 @@ The function \(\delta\) has homogeneous degree \(dq-n-1\), so \(\operatorname{di
 
 For sextics in \(\mathbb P^5\), this gives the source and component degrees \(6q\) and \(6q-5\), at every positive \(q\). For even \(F\) and odd \(A\), the involution projector imposes the standard component parities while preserving strictness. Multiplying a common denominator by its conjugate gives an even legal denominator. This optional averaging can increase the denominator degree and need not preserve the intermediate \(u\)-degree bound.
 
-This equivalence concerns existence with an unrestricted denominator. For a fixed \(D\), strictness can still impose additional equations. The full quotient in the fixed-denominator systems of §§5.1–5.2 must therefore be retained.
+This equivalence concerns existence with an unrestricted denominator. For a general fixed \(D\), strictness can still impose additional equations; the conical case in §5.1 retains the prescribed denominator. The full quotient in the fixed-denominator systems of §§5.1–5.2 must therefore be retained unless such a strictification argument applies.
 
 The resultant support depends only on the restriction of the denominator to \(X\). If \(D\) is replaced by \(D+FG\) of the same homogeneous degree, then \(\operatorname{Res}_u(F,D+FG)=\operatorname{Res}_u(F,D)\) up to a nonzero scalar; the equality is exact when \(F\) is monic in \(u\). Thus the denominator gauge in Chapter 1 leaves this cone unchanged, although it can change the ambient open set on which the original primitive is defined.
 
@@ -261,7 +270,217 @@ Keeping the matrix sizes fixed makes this identity valid when \(P\)'s degree dro
 
 All evaluations take place on the specified ring \(R\), which can be a localization on which \(\psi\) is defined. The test may use a degenerate point where other coordinate formulas have poles: it evaluates polynomial covariants and their resultant, while those rational formulas are formed only after their own denominators have been proved nonzero. Neither irreducibility of \(q\) nor injectivity of the coefficient maps is required.
 
-## 5.5 The polynomial certificate criterion
+## 5.5 Rational exactness on algebraic curves
+
+First integrals can turn a rational differential equation in several variables into integration on a curve. Let \(E/k_0\) be a finitely generated field extension of characteristic zero and transcendence degree \(r+1\). Let \(C\) be a nonzero \(k_0\)-derivation, and suppose algebraically independent \(a_1,\ldots,a_r\in E\) satisfy \(C(a_i)=0\). Put
+
+\[
+k=k_0(a_1,\ldots,a_r).
+\]
+
+Choose \(t\in E\) with \(C(t)\ne0\). Then \(t\) is transcendental over \(k\): derivations vanish on algebraic extensions of their constant field in characteristic zero. Since \(E/k\) has transcendence degree one, \(E/k(t)\) is finite and separable. The normalized derivation
+
+\[
+\partial_t=C/C(t)
+\]
+
+is the unique extension of \(d/dt\). For \(R\in E\), the equation \(C(s)=R\) is equivalent to
+
+\[
+ds=\omega,\qquad
+\omega=\frac{R}{C(t)}\,dt\in\Omega^1_{E/k}.
+\]
+
+Here all rational functions of the first integrals are coefficients in \(k\). Poles along equations in the \(a_i\) are therefore permitted without choosing their orders in advance. If the initial equation is \(C(\theta)+b\theta=R\) and a nonzero \(\mu\in E\) satisfies \(C(\mu)=b\mu\), the substitution \(s=\mu\theta\) gives the same additive problem with right side \(\mu R\).
+
+### A finite pole bound
+
+Let \(T/k\) be the smooth projective curve with function field \(E\). For a rational differential \(\omega\), write \(m_p=\max(0,-\operatorname{ord}_p\omega)\), and define the effective divisor
+
+\[
+D_\omega=\sum_p\max(m_p-1,0)\,p.
+\]
+
+**Exactness criterion.** A rational primitive of \(\omega\) exists if and only if
+
+\[
+\boxed{\quad\omega\in dL(D_\omega),\qquad
+L(D_\omega)=H^0(T,\mathcal O_T(D_\omega)).\quad}
+\]
+
+**Proof.** At a pole of a rational function \(s\), choose a local parameter \(z\). After extending the residue field if necessary, its leading term is \(a z^{-n}\), with \(n>0\) and \(a\ne0\). The leading term of \(ds\) is \(-na z^{-n-1}dz\), nonzero in characteristic zero. Thus a primitive can have no poles away from those of \(\omega\), and its pole order is at most one less at every pole of \(\omega\). Hence it belongs to \(L(D_\omega)\). The converse is the definition of the displayed image. ∎
+
+Both sides can be compared in the finite-dimensional space
+
+\[
+H^0(T,\Omega^1_{T/k}(P_\omega)),
+\qquad P_\omega=\sum_p m_p p.
+\]
+
+Choosing Riemann–Roch bases turns exactness into finite linear algebra over \(k\). All places of the normalization are included, especially infinity and ramified places; a denominator exponent in one affine presentation is not itself the differential's pole order.
+
+Every exact differential has zero residues. On a positive-genus curve that necessary condition is insufficient: a nonzero regular differential has no residues, while \(D_\omega=0\) and the derivative of every global regular function is zero. The remaining linear image test retains this obstruction.
+
+The spaces of sections and their differentiation map commute with constant-field extension, so membership in this finite image descends by faithful flatness. Nor can a finite algebraic extension of \(E\) change additive exactness: if \(ds=\omega\) after such an extension \(L/E\), then
+
+\[
+d\left(\frac{\operatorname{Tr}_{L/E}(s)}{[L:E]}\right)=\omega.
+\]
+
+This is the differential trace identity of Chapter 1. The finite criterion concerns the supplied curve and differential; it gives no bound for an unknown supporting divisor in a higher-dimensional variety.
+
+### Periods in families
+
+Let \(\pi:\mathcal T\to B\) be a dominant morphism of irreducible complex varieties with smooth integral generic fiber of dimension one, and suppose \(B\) is smooth. Let \(\omega\) be a rational relative differential. Suppose a connected analytic neighborhood \(U\subset B^{\mathrm{an}}\) of \(b_*\) carries a holomorphic family of closed contours \(\gamma_b\) in the smooth locus of \(\pi\), avoiding the poles of \(\omega\). Concretely, the family can be given by a holomorphic map \(U\times\mathcal A\to\mathcal T^{\mathrm{an}}\) over \(U\), where \(\mathcal A\) is a fixed annulus and each contour is the image of a fixed circle. If
+
+\[
+\int_{\gamma_{b_*}}\omega\ne0,
+\]
+
+then \(\omega\) has no rational primitive on the generic fiber.
+
+Indeed, these contour integrals define a holomorphic function on \(U\). A hypothetical identity \(\omega=d_{\mathcal T/B}s\), with \(s\in\mathbb C(\mathcal T)\), restricts to a meromorphic primitive on fibers over a nonempty algebraic open subset of \(B\). A pole of that primitive on a smooth fiber would give a pole of its derivative, so the primitive has no poles on the chosen contour. Its integral is therefore zero there. Since \(U\) is a full-dimensional analytic neighborhood in an irreducible base, it meets this algebraic open densely; the analytic identity theorem forces every period on \(U\), including the one at \(b_*\), to vanish.
+
+The fiber at \(b_*\) may be singular away from the contour. Parameter-dependent denominators of the unknown primitive may also vanish at \(b_*\): the argument never specializes that primitive there. What matters is a period extending over a full parameter neighborhood. A period computed only on a special fiber or a lower-dimensional parameter slice does not by itself supply this generic obstruction.
+
+### Differential systems and symmetry
+
+Choose a \(k(t)\)-basis of \(E\), express its derivatives in that basis, and write \(s\) in coordinates. Then \(\partial_t s=h\) becomes a rational first-order system
+
+\[
+y'+M(t)y=b(t)
+\]
+
+of rank \([E:k(t)]\). One may construct the basis directly in a finite quotient algebra. For a presentation by relations \(Q_i(t,x)=0\) with invertible Jacobian in the generic field, implicit differentiation gives the coordinate derivatives, and reduction modulo the relations gives the connection matrix. Passing to a primitive element is a choice of presentation, not an additional existence condition.
+
+Finite symmetries can reduce this rank. Suppose an involution fixes \(k(t)\), commutes with \(\partial_t\), and negates \(h\). Odd projection of any primitive is again a primitive. Write \(E=E^+(w)\), \(w^2=g\in E^+\), and \(s=wz\) with \(z\in E^+\). Then
+
+\[
+\partial_t z+\frac{\partial_t g}{2g}\,z=\frac hw.
+\]
+
+This is a system of rank \([E^+:k(t)]\); the twist retains the full odd problem. More generally, group projectors restrict an equivariant equation to the source's representation.
+
+Complete algebraic integration can be implemented by Hermite reduction followed by a polynomial-remainder reduction; the latter is needed for a true zero test. See [Chen–Du–Kauers, Definition 11 and Theorem 16](https://arxiv.org/pdf/2102.06538). Rational-system methods instead derive universal denominator and numerator-degree bounds, including infinity; see [Barkatou–Cluzeau–El Bacha–Weil, §3.1 and Remark 2](https://www.unilim.fr/pages_perso/jacques-arthur.weil/Papers/BCEW.pdf). These give equivalent ways to decide the one-variable exactness problem. The matrix rank measures the number of components, not their coefficient degrees or the cost of normalization.
+
+## 5.6 Complete cubic currents
+
+The polynomial normal form of §5.3 admits a further reduction for a cubic whose coefficients are independent coordinates. Let \(k\) have characteristic zero, let \(E\) be a finite extension of \(k(t,a_0,a_1,a_2)\), and extend the four coordinate derivations to \(E\). They commute because the extension is separable. Put
+
+\[
+g=u^3+a_2u^2+a_1u+a_0,\qquad
+P=p_0+p_1u+p_2u^2,\qquad p_i\in E.
+\]
+
+Allow an arbitrary nonzero volume density \(\rho\in E\). For a base vector field \(W\), set
+
+\[
+\operatorname{div}_{\rho}W
+ =\rho^{-1}\bigl(\partial_t(\rho W_t)
+       +\sum_{i=0}^2\partial_{a_i}(\rho W_i)\bigr),
+\qquad
+L_g(W,R)=W(g)+Rg_u-g(\operatorname{div}_{\rho}W+\partial_uR).
+\]
+
+Define \(W_0=\sum_i p_i\partial_{a_i}\), so \(W_0(g)=P\), and define three base vector fields by their components in \((a_0,a_1,a_2)\):
+
+\[
+\begin{aligned}
+S&=(3a_0,2a_1,a_2),\\
+T&=(-a_1,-2a_2,-3),\\
+N&=(-a_0a_2,\,3a_0-a_1a_2,\,2a_1-a_2^2).
+\end{aligned}
+\]
+
+They kill \(t\). Write \(\mathscr C=N-3a_2\) for the differential operator \(\mathscr C(h)=N(h)-3a_2h\); in particular, \(\mathscr C^2\) denotes composition, not multiplication by the square of a function.
+
+**Cubic-current theorem.** There exists a rational current, regular along \(g=0\), satisfying \(L_g(W,R)-P\in g^2\mathcal R_g\) if and only if there exist \(s,\alpha,\beta,\gamma\in E\) such that
+
+\[
+\boxed{\qquad
+\partial_t s+(S+4)\alpha+T\beta+\mathscr C^2\gamma
+ =-\rho\operatorname{div}_{\rho}W_0.
+\qquad}
+\]
+
+From these four functions an exact current is
+
+\[
+\begin{aligned}
+W={}&W_0+\rho^{-1}\bigl(s\partial_t+\alpha S+\beta T
+                    +(\mathscr C\gamma+u\gamma)N\bigr),\\
+R={}&\rho^{-1}\bigl((\beta-a_0\gamma)
+             +(\alpha-a_1\gamma)u
+             +(N\gamma-4a_2\gamma)u^2\bigr).
+\end{aligned}
+\]
+
+Thus the base current can be taken affine in \(u\), with a quadratic normal component. The four remaining rational functions have unrestricted poles and degrees in the base coordinates.
+
+**Proof.** The polynomial normal-form argument also applies to \(\operatorname{div}_{\rho}\), since \(\rho\) is independent of \(u\). It gives an exact current with every component of degree at most two. Write its base part as \(V_0+uV_1+u^2V_2\). The coefficient of \(u^5\) in the current equation is \(-\operatorname{div}_{\rho}V_2=0\). Set \(K=V_2/3\). The current
+
+\[
+Z=(g_uK,-K(g))
+\]
+
+annihilates \(g\) and has divergence \(g_u\operatorname{div}_{\rho}K=0\). Subtracting \(Z\) therefore preserves the equation and removes the quadratic base coefficient. Its normal component still has degree at most two because \(g\) is monic.
+
+The determinant of \((S,T,N)\) is \(-\operatorname{Disc}(g)\ne0\). Hence every resulting base current has a unique expression
+
+\[
+W=W_0+\rho^{-1}\bigl((s_0+us_1)\partial_t
+ +(\alpha_0+u\alpha_1)S+(\beta_0+u\beta_1)T
+ +(\gamma_0+u\gamma_1)N\bigr).
+\]
+
+The lifted fields \(S+u\partial_u\), \(T+\partial_u\), and \(N+u^2\partial_u\) send \(g\) respectively to \(3g,0,(3u-a_2)g\). Consequently its normal component must be
+
+\[
+R=\rho^{-1}\bigl((\alpha_0+u\alpha_1)u
+ +(\beta_0+u\beta_1)+(\gamma_0+u\gamma_1)u^2-\gamma_1g\bigr).
+\]
+
+This expression has degree at most two and gives the correct equation modulo \(g\); it is the unique such normal component because \(g_u\) is invertible modulo \(g\). The exact equation now has just two coefficient conditions:
+
+\[
+\begin{aligned}
+\partial_t s_0+(S+4)\alpha_0+T\beta_0+\beta_1+\mathscr C\gamma_0
+ &=-\rho\operatorname{div}_{\rho}W_0,\\
+\partial_t s_1+(S+5)\alpha_1+T\beta_1+\mathscr C\gamma_1-\gamma_0
+ &=0.
+\end{aligned}
+\]
+
+The identities
+
+\[
+\mathscr C(S+5)=(S+4)\mathscr C,\qquad
+1+\mathscr CT=T\mathscr C-2(S+4),\qquad
+[\partial_t,\mathscr C]=0
+\]
+
+eliminate \(\gamma_0\). With
+
+\[
+s=s_0+\mathscr C s_1,\qquad
+\alpha=\alpha_0+\mathscr C\alpha_1-2\beta_1,\qquad
+\beta=\beta_0+\mathscr C\beta_1,\qquad
+\gamma=\gamma_1,
+\]
+
+the remaining condition is precisely the boxed scalar equation. Conversely take \(s_1=\alpha_1=\beta_1=0\), \(\gamma_0=\mathscr C\gamma\), and the displayed current satisfies it exactly. ∎
+
+The remaining normal freedom is measured by
+
+\[
+\mathscr C^2=N^2-6a_2N+(12a_2^2-6a_1).
+\]
+
+A coefficient of \(N+u^2\partial_u\) that is independent of \(u\) is absorbed by the preceding elimination; the surviving second-order term comes from its coefficient linear in \(u\). Additional current parameters therefore need not enlarge the source image.
+
+The monic hypothesis is a normalization. If \(f=\ell g\) with \(\ell\in E^\times\), the product rule gives \(L_f(\ell U)=\ell^2L_g(U)\), with the same density. Apply the theorem to source \(P/\ell^2\) and then multiply the current by \(\ell\). A nonzero coefficient Jacobian in another rational chart supplies the finite coefficient extension and its volume density. The theorem is an equivalence of rational differential equations; it does not assert that the remaining scalar equation always has a rational solution.
+
+## 5.7 The polynomial certificate criterion
 
 For any proposed field \(v=N/D\), normalized or otherwise, form the polynomial
 
