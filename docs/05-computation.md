@@ -2,7 +2,7 @@
 
 [Previous: families, representations and deformation](#technical-information/known-locus) · [Contents](#technical-information/introduction)
 
-The certificate formulation turns a support problem into polynomial identities. Computation can verify an explicit construction, expose an unexpected solution, or test a proposed mechanism. This chapter explains the complete coefficient system, the limits of numerical discovery, and the exact polynomial criterion for a rational certificate.
+The certificate formulation turns a support problem into polynomial identities. Computation can verify an explicit construction, expose an unexpected solution, or test a proposed mechanism. This chapter explains complete coefficient systems, finite integration tests on algebraic curves, exact incidence lifting, and the final polynomial criterion for a rational certificate.
 
 ## 5.1 Fixing a denominator makes the problem linear
 
@@ -86,6 +86,37 @@ Exact \(E_{1}\) elimination and verified gauge quotients preserve the complete s
 
 Eliminating numerators may also yield only necessary equations in \(D\). Such equations can be useful: a candidate passing them is retained for full numerator reconstruction. Their solution set may contain false positives. Generic points of that larger set need not find the exceptional subset that completes \(E_{2}\), so an expansion is not automatically a complete search method. Rank strata of the retained numerator map matter.
 
+### A polynomial normal form in one variable
+
+A different elimination removes arbitrary legal denominator dependence on one coordinate while retaining every component of the current. Let \(E\) be a characteristic-zero field with derivations \(\delta_1,\ldots,\delta_n\), extended coefficientwise to \(E[u]\), and put \(\delta_0=\partial_u\). Let \(f\in E[u]\) be irreducible of degree \(m>0\), and let \(q\ge1\) be an integer. For \(U=(U_0,\ldots,U_n)\), define
+
+\[
+\operatorname{div}U=\sum_{j=0}^n\delta_jU_j,
+\qquad L_{f,q}(U)=q\sum_{j=0}^n U_j\delta_jf-f\operatorname{div}U.
+\]
+
+**Normal-form theorem.** Suppose \(P\in E[u]\) has degree less than \((q+1)m\). There exists a rational current \(U\in E(u)^{n+1}\), regular along \(f=0\), satisfying
+
+\[
+L_{f,q}(U)-P\in f^{q+1}E[u]_{(f)}
+\]
+
+if and only if there is a polynomial current \(R\in E[u]^{n+1}\) with \(\deg_uR_j<qm\) for every component and
+
+\[
+\boxed{\quad L_{f,q}(R)=P.\quad}
+\]
+
+**Proof.** Every denominator regular along \(f\) is invertible modulo \(f^q\). Reduce each component of \(U\) modulo \(f^q\), choosing its unique representative \(R_j\) of degree less than \(qm\). Thus \(U-R=f^qT\), where \(T\) remains regular along \(f\). The derivations preserve \(E[u]_{(f)}\), and the product rule gives
+
+\[
+L_{f,q}(f^qT)=-f^{q+1}\operatorname{div}T.
+\]
+
+Hence \(L_{f,q}(R)-P\) is divisible by \(f^{q+1}\) in the localization. Coprimality of every inverted denominator with \(f\) gives the same divisibility in \(E[u]\). All the derivations preserve or lower \(u\)-degree, so this polynomial has degree less than \((q+1)m\). It must be zero. The converse takes \(U=R\). ∎
+
+For \(q=1\), every component, including the normal component, has degree less than \(m\). The theorem places no bound on denominators in the coefficient field \(E\), and supplies no existence claim. It replaces arbitrary rational dependence on \(u\) by finitely many unknown elements of \(E\); rational dependence on the remaining coordinates is retained in full.
+
 ## 5.4 From numerical candidates to exact coefficients
 
 Variable projection solves for the best \(z\) at each trial \(a\). It can reduce the optimization dimension, but near a rank drop its minimum-norm solution can change sharply. A singular-value cutoff can then change the effective problem. Restore the complete chosen numerator space and test any candidate in the original equations.
@@ -132,7 +163,100 @@ Keeping the matrix sizes fixed makes this identity valid when \(P\)'s degree dro
 
 All evaluations take place on the specified ring \(R\), which can be a localization on which \(\psi\) is defined. The test may use a degenerate point where other coordinate formulas have poles: it evaluates polynomial covariants and their resultant, while those rational formulas are formed only after their own denominators have been proved nonzero. Neither irreducibility of \(q\) nor injectivity of the coefficient maps is required.
 
-## 5.5 The polynomial certificate criterion
+## 5.5 Rational exactness on algebraic curves
+
+First integrals can turn a rational differential equation in several variables into integration on a curve. Let \(E/k_0\) be a finitely generated field extension of characteristic zero and transcendence degree \(r+1\). Let \(C\) be a nonzero \(k_0\)-derivation, and suppose algebraically independent \(a_1,\ldots,a_r\in E\) satisfy \(C(a_i)=0\). Put
+
+\[
+k=k_0(a_1,\ldots,a_r).
+\]
+
+Choose \(t\in E\) with \(C(t)\ne0\). Then \(t\) is transcendental over \(k\): derivations vanish on algebraic extensions of their constant field in characteristic zero. Since \(E/k\) has transcendence degree one, \(E/k(t)\) is finite and separable. The normalized derivation
+
+\[
+\partial_t=C/C(t)
+\]
+
+is the unique extension of \(d/dt\). For \(R\in E\), the equation \(C(s)=R\) is equivalent to
+
+\[
+ds=\omega,\qquad
+\omega=\frac{R}{C(t)}\,dt\in\Omega^1_{E/k}.
+\]
+
+Here all rational functions of the first integrals are coefficients in \(k\). Poles along equations in the \(a_i\) are therefore permitted without choosing their orders in advance. If the initial equation is \(C(\theta)+b\theta=R\) and a nonzero \(\mu\in E\) satisfies \(C(\mu)=b\mu\), the substitution \(s=\mu\theta\) gives the same additive problem with right side \(\mu R\).
+
+### A finite pole bound
+
+Let \(T/k\) be the smooth projective curve with function field \(E\). For a rational differential \(\omega\), write \(m_p=\max(0,-\operatorname{ord}_p\omega)\), and define the effective divisor
+
+\[
+D_\omega=\sum_p\max(m_p-1,0)\,p.
+\]
+
+**Exactness criterion.** A rational primitive of \(\omega\) exists if and only if
+
+\[
+\boxed{\quad\omega\in dL(D_\omega),\qquad
+L(D_\omega)=H^0(T,\mathcal O_T(D_\omega)).\quad}
+\]
+
+**Proof.** At a pole of a rational function \(s\), choose a local parameter \(z\). After extending the residue field if necessary, its leading term is \(a z^{-n}\), with \(n>0\) and \(a\ne0\). The leading term of \(ds\) is \(-na z^{-n-1}dz\), nonzero in characteristic zero. Thus a primitive can have no poles away from those of \(\omega\), and its pole order is at most one less at every pole of \(\omega\). Hence it belongs to \(L(D_\omega)\). The converse is the definition of the displayed image. ∎
+
+Both sides can be compared in the finite-dimensional space
+
+\[
+H^0(T,\Omega^1_{T/k}(P_\omega)),
+\qquad P_\omega=\sum_p m_p p.
+\]
+
+Choosing Riemann–Roch bases turns exactness into finite linear algebra over \(k\). All places of the normalization are included, especially infinity and ramified places; a denominator exponent in one affine presentation is not itself the differential's pole order.
+
+Every exact differential has zero residues. On a positive-genus curve that necessary condition is insufficient: a nonzero regular differential has no residues, while \(D_\omega=0\) and the derivative of every global regular function is zero. The remaining linear image test retains this obstruction.
+
+The spaces of sections and their differentiation map commute with constant-field extension, so membership in this finite image descends by faithful flatness. Nor can a finite algebraic extension of \(E\) change additive exactness: if \(ds=\omega\) after such an extension \(L/E\), then
+
+\[
+d\left(\frac{\operatorname{Tr}_{L/E}(s)}{[L:E]}\right)=\omega.
+\]
+
+This is the differential trace identity of Chapter 1. The finite criterion concerns the supplied curve and differential; it gives no bound for an unknown supporting divisor in a higher-dimensional variety.
+
+### Periods in families
+
+Let \(\pi:\mathcal T\to B\) be a dominant morphism of irreducible complex varieties with smooth integral generic fiber of dimension one, and suppose \(B\) is smooth. Let \(\omega\) be a rational relative differential. Suppose a connected analytic neighborhood \(U\subset B^{\mathrm{an}}\) of \(b_*\) carries a holomorphic family of closed contours \(\gamma_b\) in the smooth locus of \(\pi\), avoiding the poles of \(\omega\). Concretely, the family can be given by a holomorphic map \(U\times\mathcal A\to\mathcal T^{\mathrm{an}}\) over \(U\), where \(\mathcal A\) is a fixed annulus and each contour is the image of a fixed circle. If
+
+\[
+\int_{\gamma_{b_*}}\omega\ne0,
+\]
+
+then \(\omega\) has no rational primitive on the generic fiber.
+
+Indeed, these contour integrals define a holomorphic function on \(U\). A hypothetical identity \(\omega=d_{\mathcal T/B}s\), with \(s\in\mathbb C(\mathcal T)\), restricts to a meromorphic primitive on fibers over a nonempty algebraic open subset of \(B\). A pole of that primitive on a smooth fiber would give a pole of its derivative, so the primitive has no poles on the chosen contour. Its integral is therefore zero there. Since \(U\) is a full-dimensional analytic neighborhood in an irreducible base, it meets this algebraic open densely; the analytic identity theorem forces every period on \(U\), including the one at \(b_*\), to vanish.
+
+The fiber at \(b_*\) may be singular away from the contour. Parameter-dependent denominators of the unknown primitive may also vanish at \(b_*\): the argument never specializes that primitive there. What matters is a period extending over a full parameter neighborhood. A period computed only on a special fiber or a lower-dimensional parameter slice does not by itself supply this generic obstruction.
+
+### Differential systems and symmetry
+
+Choose a \(k(t)\)-basis of \(E\), express its derivatives in that basis, and write \(s\) in coordinates. Then \(\partial_t s=h\) becomes a rational first-order system
+
+\[
+y'+M(t)y=b(t)
+\]
+
+of rank \([E:k(t)]\). One may construct the basis directly in a finite quotient algebra. For a presentation by relations \(Q_i(t,x)=0\) with invertible Jacobian in the generic field, implicit differentiation gives the coordinate derivatives, and reduction modulo the relations gives the connection matrix. Passing to a primitive element is a choice of presentation, not an additional existence condition.
+
+Finite symmetries can reduce this rank. Suppose an involution fixes \(k(t)\), commutes with \(\partial_t\), and negates \(h\). Odd projection of any primitive is again a primitive. Write \(E=E^+(w)\), \(w^2=g\in E^+\), and \(s=wz\) with \(z\in E^+\). Then
+
+\[
+\partial_t z+\frac{\partial_t g}{2g}\,z=\frac hw.
+\]
+
+This is a system of rank \([E^+:k(t)]\); the twist retains the full odd problem. More generally, group projectors restrict an equivariant equation to the source's representation.
+
+Complete algebraic integration can be implemented by Hermite reduction followed by a polynomial-remainder reduction; the latter is needed for a true zero test. See [Chen–Du–Kauers, Definition 11 and Theorem 16](https://arxiv.org/pdf/2102.06538). Rational-system methods instead derive universal denominator and numerator-degree bounds, including infinity; see [Barkatou–Cluzeau–El Bacha–Weil, §3.1 and Remark 2](https://www.unilim.fr/pages_perso/jacques-arthur.weil/Papers/BCEW.pdf). These give equivalent ways to decide the one-variable exactness problem. The matrix rank measures the number of components, not their coefficient degrees or the cost of normalization.
+
+## 5.6 The polynomial certificate criterion
 
 For any proposed field \(v=N/D\), normalized or otherwise, form the polynomial
 
