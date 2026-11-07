@@ -133,9 +133,8 @@ The draft remains ineligible for protected acceptance while its admission remain
 
 ## Research history: reusable results and unsuccessful approaches
 
-The following is a condensed account of the approaches recorded in
-[the source conversation](https://chatgpt.com/g/g-p-6a6d301e456881918ba2a163ea5e7e4e-math/c/6aea2396-5700-83ea-85c4-ad3a8a0ba501)
-and [Discussion #61](https://github.com/hodge-computer/sextics/discussions/61).
+The following is a condensed account of the approaches recorded in the research
+notes and [Discussion #61](https://github.com/hodge-computer/sextics/discussions/61).
 These are historical reports, not additional Lean theorems of this submission;
 their mathematical computations were not rerun to prepare this explanation.
 Related successes for `cycle-three`, `holdout`, reflection, or symmetric-sextic
