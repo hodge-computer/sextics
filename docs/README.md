@@ -18,7 +18,7 @@ The intended reader knows basic algebraic geometry, differential forms and Hodge
 | [3B. Weighted threefolds and two-reflection sextics](#technical-information/weighted-threefolds) | Norm-contact curves, Abel–Jacobi residues, finite-jet spanning and two-reflection support |
 | [3C. Quadratic nets and pair correspondences](#technical-information/quadratic-nets) | Finite-cover incidence, discriminant conics, Fano threefolds and support without extra reflections |
 | [4. Families, representations and deformation](#technical-information/known-locus) | Invariant sectors, coefficient families, generic-target reduction and limits of quotient methods |
-| [5. Computing and checking certificates](#technical-information/computation) | Complete coefficient systems, strictification by remainders and resultants, incidence lifting and exact verification |
+| [5. Computing and checking certificates](#technical-information/computation) | Complete coefficient systems, incidence lifting and the exact polynomial criterion |
 
 The geometric constructions combine supported images of algebraic correspondences. In Chapter 3B, Fano reflection quotients and norm-contact curves on weighted threefolds serve complementary sectors. In Chapter 3C, a finite map defined by three ternary quadrics and the six joining lines of its four-point fibers recover the entire invariant cohomology. The diagonal net gives the three-reflection case as a corollary. The two-reflection theorem has a different coefficient scope and remains necessary for general crossed splittings and binary-block families. Chapter 2A retains their independent contact construction and its Wronskian spanning results. Chapter 4 applies deck/exchange descent to the full cyclic-six coefficient family.
 
