@@ -3,3 +3,4 @@ import HodgeComputer.Constructions.ResidueTransport.NormalChange
 import HodgeComputer.Constructions.ResidueTransport.MovingMap
 import HodgeComputer.Constructions.ResidueTransport.FirstJets
 import HodgeComputer.Constructions.ResidueTransport.CoordinateIndependence
+import HodgeComputer.Constructions.ResidueTransport.PiolaContraction
