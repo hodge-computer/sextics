@@ -55,6 +55,29 @@ The needed two-form is
 [SymmetricPrimitiveEndpoint](SymmetricPrimitiveEndpoint.lean) packages these
 three elements of \(K\) and their equation as `RelativePrimitive`.
 
+## Cubic trace cancellation
+
+[CubicResidueTrace](CubicResidueTrace.lean) proves an exact companion-matrix
+trace identity for a cubic equation and quadratic source.
+[SymmetricCubicTrace](SymmetricCubicTrace.lean) binds their coefficients to
+the protected equation: \(f=\ell u^3+f_2u^2+f_1u+f_0\) and
+\(P=p_0+p_1u+p_2u^2\). Its scalar density
+\(r(u)=2(f_uP_u-f_{uu}P)/f_u^3\) satisfies \(\rho=r(v^2)\).
+The corresponding companion-matrix expression has matrix trace zero;
+interpreting its derivative inverse requires nonzero cubic discriminant
+and \(\ell\ne0\).
+
+For pairwise distinct \(x,y,z\), assuming \(\ell\ne0\) and the explicit
+Vieta identities \(f_2=-\ell(x+y+z)\),
+\(f_1=\ell(xy+xz+yz)\), the checked scalar identity gives
+\[
+r(x)+r(y)+r(z)=0,\qquad r(x)+r(y)=-r(z).
+\]
+Thus the complementary pair carries the negative third-sheet source.
+These are exact source identities under the stated assumptions; they do
+not construct a global splitting cover or a rational primitive. They narrow
+the trace route but close neither of the two proof obligations below.
+
 ## Conditional clearing and the certificate
 
 Given such a primitive,
