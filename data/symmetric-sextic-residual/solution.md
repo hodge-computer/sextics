@@ -91,6 +91,96 @@ cancelling the finite-section denominator under the stated nonvanishing
 conditions. This does not prove an infinity correction, a traced-source
 identity, or primitive existence.
 
+## Normalized selector and the conditional trace endpoint
+
+Set \(b=r,\ c=t,\ d=st,\ x=t^2\), holding \(\lambda\) fixed, and write
+
+\[
+f(x,u)=\ell u^3+B(x)u^2+C(x)u+D(x).
+\]
+
+For a moving point \((\alpha,\beta_*)\) with
+\(f(\alpha^2,\beta_*)=0\), put
+\[
+q_\alpha(u)=\frac{f(\alpha^2,u)}{u-\beta_*},\qquad
+h_\alpha=q_\alpha-\frac13f_u(\alpha^2,u),\qquad
+\Theta=\frac{h_\alpha}{f_u(x,u)}
+ \bigl(d\log(t-\alpha)-d\log(t+\alpha)\bigr).
+\]
+The subtraction makes \(h_\alpha\) linear in \(u\).
+On the distinct-sheet open with \(\alpha\ne0\), the logarithmic residues
+at \(t=\alpha\) are \(2/3\) on the selected sheet and \(-1/3\) on each
+other sheet; the signs reverse at \(t=-\alpha\).
+[CubicSelectorCurrent](CubicSelectorCurrent.lean) proves the paired-current
+divergence formula, its full chain rule, and local cancellation identities.
+These apply to \(\eta\wedge\Theta\) when \(\eta=U\,dr+V\,ds\) is closed
+and the stated coordinate and derivation hypotheses hold.
+
+[CubicSourceReconstruction](CubicSourceReconstruction.lean) proves the exact
+companion-matrix trace test and source reconstruction. For a reduced numerator
+\(C_0+C_1u+C_2u^2\), nonzero discriminant and \(\ell\ne0\) give the
+trace-zero condition
+\[
+3\ell C_0-BC_1+CC_2=0.
+\]
+Under this condition, \(S=S_0+S_1u\), with
+\(S_0=-C_1/(6\ell)\) and \(S_1=-C_2/(3\ell)\), satisfies
+\[
+f_uS_u-f_{uu}S=C_0+C_1u+C_2u^2.
+\]
+For the proposed normalized contact current, the written polynomial argument
+gives \(\deg_xS_0\le3\), \(\deg_xS_1\le2\). This degree argument is not yet
+a general Lean theorem and does not bound the rational \(r,s\) denominators
+or establish a global weighted-sextic source.
+
+[CubicTraceDescent](CubicTraceDescent.lean) proves descent of a supplied
+current through finite normalized trace. The target-bound
+[SymmetricTraceEndpoint](SymmetricTraceEndpoint.lean) defines two functions
+directly in the actual chart field \(K\):
+\[
+\kappa=\frac{p_2}{3\ell},\qquad
+T_1=P_u-\kappa f_{uu},\qquad
+T_0=P-\kappa f_u-T_1u,
+\]
+with every expression evaluated at \(u=v^2\). It proves \(\ell\ne0\) there
+and the literal density identity
+\[
+\rho=\frac{2\bigl(f_uT_1-f_{uu}(T_0+T_1u)\bigr)}{f_u^3}.
+\]
+The endpoint treats \(T_0,T_1\) as elements of \(K\); no separate
+coefficient-subfield membership is asserted.
+For a finite extension \(L/K\), let \(\widetilde E_j\) extend
+\(E_b,E_c,E_d\) compatibly. A supplied upstairs current must satisfy
+\[
+\sum_{j=1}^3\widetilde E_j(w_j)
+ =\frac{2\bigl(f_us_1-f_{uu}(s_0+s_1u)\bigr)}{f_u^3},
+\qquad w_j,s_0,s_1\in L,
+\]
+with the base quantities mapped to \(L\). The two exact conditions
+\[
+\overline{\operatorname{Tr}}_{L/K}(s_0)=T_0,\qquad
+\overline{\operatorname{Tr}}_{L/K}(s_1)=T_1,
+\qquad
+\overline{\operatorname{Tr}}_{L/K}
+ =\frac{1}{[L:K]}\operatorname{Tr}_{L/K}
+\]
+let `relativePrimitiveOfTrace` construct the existing `RelativePrimitive`
+by tracing the three current components.
+
+The same descent module also proves a relative bridge from the ordinary game
+\[
+\sum_{j=b,c,d}W_jf_j+Vf_u
+ -f\left(\sum_{j=b,c,d}\partial_jW_j+\partial_uV\right)=P:
+\qquad \beta_j=\left.-\frac{2W_j}{f_u}\right|_{u=v^2}.
+\]
+It retains the normal component \(V\) and normal dependence of every \(W_j\).
+Applying the contact route still requires forming a suitable finite extension
+of \(K\) from the moving-point field over \(k(r,s)\), converting the ratio
+coordinates and derivations, and proving the full normalized-trace matches.
+A single branch or the rank-48 contact span supplies none of these equalities.
+The four new modules contain no admissions; they leave the one existing
+primitive-existence admission unchanged.
+
 ## Exact negative source and regular contact
 
 At \(\lambda=1\), let \(G=\texttt{weightedG}\) in coordinates
