@@ -10,11 +10,12 @@ F=\sum_{i=0}^2(X_i^6+Y_i^6)
 \qquad A=X_0X_1X_2Y_0Y_1Y_2,\qquad q=1.
 \]
 This is an **incomplete proof draft**. The algebra below reduces the target
-to a relative rational primitive and a final transport step. The classical
-existence argument below uses geometric and de Rham inputs that remain
-unformalized. This layer's [Solution](Solution.lean) retains two admitted lemmas; its
-`Submission.certificate` is not a verified certificate. The status below
-also records the transport proved in the dependent PR #223.
+to a relative rational primitive. The classical existence argument below
+uses geometric and de Rham inputs that remain unformalized. This layer's
+[Solution](Solution.lean) retains one admitted lemma,
+`Submission.relative_primitive_exists`; its `Submission.certificate` is
+not a verified certificate. The primitive-to-certificate transport from
+PR #223 is included here and has no admissions.
 
 ## Reflection chart and residue
 
@@ -78,7 +79,7 @@ r(x)+r(y)+r(z)=0,\qquad r(x)+r(y)=-r(z).
 Thus the complementary pair carries the negative third-sheet source.
 These are exact source identities under the stated assumptions; they do
 not construct a global splitting cover or a rational primitive. They narrow
-the trace route but close neither of the two proof obligations below.
+the trace route but do not prove primitive existence.
 
 Following the [PR #223 exploration](https://github.com/hodge-computer/sextics/pull/223#issuecomment-6712331048),
 [CubicSelectorCancellation](CubicSelectorCancellation.lean) proves a local
@@ -202,7 +203,7 @@ Rename \(\tau\) back to the formal parameter \(\lambda\) before extending
 constants from \(\mathbb Q\) to \(\mathbb C\); \(\lambda\) remains an
 indeterminate. Pulling back by \(u=v^2\) into the actual chart field gives
 exactly \(\sum E_j\gamma_j=\rho\), hence a `RelativePrimitive`.
-The downstream [proved transport](https://github.com/hodge-computer/sextics/blob/21d3d74b8b60ded47e8ec9923c2869762b4e5d94/data/symmetric-sextic-residual/SymmetricCertificateTransport.lean)
+The included [proved transport](SymmetricCertificateTransport.lean)
 then gives mathematical certificate existence with homogeneous denominator
 degree \(e\), numerator degrees \(e+1\), and the identity below.
 A nonzero quotient has degree \(2e-6\). This proof is nonconstructive and
@@ -222,7 +223,24 @@ Canonical residue clearing then supplies affine polynomial data
 A_HD^2-D\left(N_vH_v+\sum_jN_jH_j\right)
  +H\left(D\operatorname{div}N-N\cdot\nabla D\right)=H^2Q.
 \]
-This is the conclusion of `clear_relative_primitive`; it is an affine result.
+The stronger normalized identities proved by `clear_relative_primitive`
+are \(N\cdot\nabla H=A_HD\) and
+\(D\operatorname{div}N-N\cdot\nabla D=HQ\); these imply the displayed
+affine identity.
+
+[SymmetricPiolaTransport](SymmetricPiolaTransport.lean) transports the
+normalized equations through the six-coordinate inverse Jacobian.
+[SymmetricChartField](SymmetricChartField.lean) implements the chart in
+a rational function field, and
+[SymmetricChartClearing](SymmetricChartClearing.lean) clears its common
+denominator while preserving relative primality.
+[SymmetricCertificateTransport](SymmetricCertificateTransport.lean) proves
+`explicit_verify` for the resulting six homogeneous numerators and
+denominator. Its `certificate_of_relative_primitive` is the final step
+used by `Submission.certificate`. These four helpers are copied without
+changes from `benediamond`'s
+[PR #223](https://github.com/hodge-computer/sextics/pull/223) at commit
+`21d3d74b8b60ded47e8ec9923c2869762b4e5d94`.
 
 The final target requires transport back to the six original coordinates
 and legal homogeneous data: a nonzero homogeneous denominator \(D\),
@@ -236,26 +254,20 @@ The quotient \(Q\) is unrestricted. No expanded JSON witness is supplied.
 corresponding regular homogeneous current existence statement
 `RegularGameExists` implies the literal protected target.
 
-## Unfinished proof obligations
+## Remaining Lean obligation
 
-1. `Submission.relative_primitive_exists` must prove
-   `Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive` in Lean by
-   formalizing the classical argument above or constructing the primitive
-   explicitly. Mathematical existence follows from the stated geometric
-   inputs; their formal support-to-exactness comparison is still missing.
-   [ContactResidueAnnihilator](ContactResidueAnnihilator.lean) and
-   [WeightedFiberSmoothness](WeightedFiberSmoothness.lean) supply supporting
-   algebra and smoothness results for that formalization.
-2. This layer's `Submission.regular_game_of_relative_primitive` must turn that primitive
-   into `SymmetricRegularCurrent.RegularGameExists`, completing the
-   affine-to-homogeneous transport. The chart and Jacobian identities do not
-   themselves discharge this step.
+`Submission.relative_primitive_exists` must prove
+`Nonempty SymmetricPrimitiveEndpoint.RelativePrimitive` by formalizing
+classical existence or constructing the primitive explicitly. Mathematical
+existence follows from the stated geometric inputs; their formal
+support-to-exactness comparison is still missing.
+[ContactResidueAnnihilator](ContactResidueAnnihilator.lean) and
+[WeightedFiberSmoothness](WeightedFiberSmoothness.lean) supply supporting
+algebra and smoothness results for that formalization. This is the only
+admission in the included certificate proof.
 
-Both lemmas remain admitted in this layer. The dependent
-[PR #223](https://github.com/hodge-computer/sextics/pull/223), at
-`21d3d74b8b60ded47e8ec9923c2869762b4e5d94`, proves
-[primitive-to-certificate transport](https://github.com/hodge-computer/sextics/blob/21d3d74b8b60ded47e8ec9923c2869762b4e5d94/data/symmetric-sextic-residual/SymmetricCertificateTransport.lean),
-closing the second gap in that combined stack. Its
+The dependent [PR #223](https://github.com/hodge-computer/sextics/pull/223)
+also supplies an alternative residual endpoint. Its
 [coefficient-field reduction](https://github.com/hodge-computer/sextics/blob/21d3d74b8b60ded47e8ec9923c2869762b4e5d94/data/symmetric-sextic-residual/SymmetricCoefficientField.lean)
 makes primitive existence equivalent to a primitive for \(2\delta/f_u\),
 where \(\delta\) is the divergence of its explicit coefficient field.
@@ -264,8 +276,9 @@ The broader [five-component adapter](https://github.com/hodge-computer/sextics/b
 also accepts a normal component and any nonzero coefficient-space polynomial
 denominator, with unrestricted normal-variable dependence in the numerators.
 Neither adapter constructs the missing primitive or a full current solution.
-The Lean primitive-existence goal remains unproved in the combined stack, and this layer's
-unchanged final theorem still depends on its two admissions.
+The Lean primitive-existence goal remains unproved in the combined stack,
+and the exact protected theorem in this layer still depends on that one
+admission.
 
 The intended geometric argument follows the project's
 [weighted-threefold and two-reflection construction](../../docs/03b-weighted-threefolds.md),
