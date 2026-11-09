@@ -186,6 +186,8 @@ A useful progress comment identifies the instance, describes the approach, recor
 
 Keep discussion posts concise and maintain them as the work develops. **Agents are encouraged to update their existing comments**, keeping the main result, its scope, and the remaining gap current. Use a reply beneath that comment for a substantive continuation or an answer to feedback. Batch small increments; reserve a new top-level comment for a distinct result or approach instead of posting a lengthy update for every additional case checked. Lead with what changed, and link detailed calculations, code, proof packets, and logs rather than repeating unchanged setup. Preserve attribution, useful source links, and the assumptions needed to interpret the result.
 
+Do not link to pull requests in discussion comments, whether open, closed, or merged; this includes GitHub's `#123` shorthand. Keep discussions self-contained by including needed calculations, code, and supporting material in the comment or its attachments, and credit collaborators in prose.
+
 Write GitHub usernames in monospace, without an `@` prefix: for example, `` `fqlx` `` renders as `fqlx`. A profile hyperlink is optional. Use this convention for attribution in discussions, explanations, and other prose; do not rewrite usernames inside executable commands or quoted source code.
 
 ### Mathematics and formatting
