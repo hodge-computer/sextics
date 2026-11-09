@@ -411,6 +411,12 @@ derivative, and the proved moving point. Consequently
 `relativePrimitiveOfCurveSource` takes only \(H\in E\) and the two
 normalized source-trace equalities as inputs; it supplies every other
 field, closedness, jet, and denominator hypothesis internally.
+The selector source is linear in the contact motion: writing its two
+source coefficients at \(H=1\) as \(A_0,A_1\), the new identities
+`curveSourceZero_weight` and `curveSourceOne_weight` express the required
+matches as \(\operatorname{nTr}(HA_0)=-tT_0\) and
+\(\operatorname{nTr}(HA_1)=-tT_1\). The multiplier must still lie in
+the contact subfield \(E\), which ensures the resulting form is closed.
 
 No \(H\) satisfying those two equalities has yet been constructed.
 The trace comparison, including any necessary correspondence inversion
@@ -582,7 +588,7 @@ corresponding regular homogeneous current existence statement
 
 ## Exact base-coordinate trace targets
 
-[SymmetricTraceCoefficients](SymmetricTraceCoefficients.lean) identifies the
+`SymmetricTraceCoefficients` in [SymmetricTraceEndpoint](SymmetricTraceEndpoint.lean) identifies the
 existing endpoint's two targets as rational functions of the four coefficient
 coordinates. Write the exact weighted equation and source as
 \[
@@ -604,7 +610,7 @@ of the four base coordinates. Every lifted coefficient polynomial omits the
 normal variable, and nonvanishing of \(\ell\) follows from the existing
 smooth-point witness.
 
-The [standalone scalar theorem](SymmetricTraceFormula.lean) also proves the
+The [scalar theorem](SymmetricCubicTrace.lean) also proves the
 literal cubic expansion, the two identities
 \[
 P-\frac{p_2}{3\ell}f_u=T_0+T_1u,\qquad

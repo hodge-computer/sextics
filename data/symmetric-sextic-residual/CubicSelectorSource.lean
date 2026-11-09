@@ -546,3 +546,63 @@ end CubicSelectorSource
 #print axioms CubicSelectorSource.sourceOnePolynomial_eval
 #print axioms CubicSelectorSource.sourceZeroPolynomial_degree
 #print axioms CubicSelectorSource.sourceOnePolynomial_degree
+
+noncomputable section
+namespace CubicSelectorSource
+set_option maxHeartbeats 2000000
+set_option maxRecDepth 16384
+set_option backward.isDefEq.respectTransparency false
+
+section Ring
+variable {R : Type*} [CommRing R]
+
+def Jet.scaleMotion (s : R) (j : Jet R) : Jet R where
+  l := j.l
+  a := j.a
+  g := j.g
+  alpha := j.alpha
+  aDot := s*j.aDot
+  gDot := s*j.gDot
+  betaDot := s*j.betaDot
+  delta := j.delta
+  h0 := j.h0
+  h1 := j.h1
+  h2 := j.h2
+  k0 := s*j.k0
+  k1 := s*j.k1
+  k2 := s*j.k2
+
+theorem sourceZeroNumerator_scaleMotion (s : R) (j : Jet R) :
+    sourceZeroNumerator (j.scaleMotion s) = s*sourceZeroNumerator j := by
+  simp only [sourceZeroNumerator, cubicB, cubicC, cubicD, quotientLinear,
+    quotientConstantNumerator, remainderOneThree, Jet.scaleMotion]
+  ring
+
+theorem sourceOneNumerator_scaleMotion (s : R) (j : Jet R) :
+    sourceOneNumerator (j.scaleMotion s) = s*sourceOneNumerator j := by
+  simp only [sourceOneNumerator, cubicB, cubicC, quotientLinear,
+    quotientConstantNumerator, remainderTwoThree, Jet.scaleMotion]
+  ring
+
+end Ring
+section Field
+variable {K : Type*} [Field K] [CharZero K]
+
+theorem sourceZero_scaleMotion (s : K) (j : Jet K) :
+    sourceZero (j.scaleMotion s) = s*sourceZero j := by
+  rw [sourceZero, sourceZeroNumerator_scaleMotion]
+  exact mul_div_assoc _ _ _
+
+theorem sourceOne_scaleMotion (s : K) (j : Jet K) :
+    sourceOne (j.scaleMotion s) = s*sourceOne j := by
+  rw [sourceOne, sourceOneNumerator_scaleMotion]
+  exact mul_div_assoc _ _ _
+
+theorem pencilJet_smul (s : K) (D : Derivation ℤ K K) (p : Pencil K) (x alpha beta : K) :
+    pencilJet (s • D) p x alpha beta = (pencilJet D p x alpha beta).scaleMotion s := by
+  simp only [pencilJet, Jet.scaleMotion, Derivation.smul_apply, smul_eq_mul]
+  congr 1 <;> ring
+
+end Field
+end CubicSelectorSource
+#print axioms CubicSelectorSource.pencilJet_smul

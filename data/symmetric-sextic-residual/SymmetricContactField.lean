@@ -3640,3 +3640,53 @@ end SymmetricContactField
 #print axioms SymmetricContactField.contactParameterDerivative_coefficient
 #print axioms SymmetricContactField.contact_form_nonzero
 #print axioms SymmetricContactField.relativePrimitiveOfCurveSource
+
+noncomputable section
+namespace SymmetricContactField
+open MvPolynomial SymmetricAffineField SymmetricRatioCurrent CubicSelectorSource
+set_option maxHeartbeats 2000000
+set_option maxRecDepth 16384
+set_option backward.isDefEq.respectTransparency false
+
+theorem contactMotion_eq_smul_one (H : CurveField) :
+    contactMotion H = (H : LiftedField) • contactMotion (1 : CurveField) := by
+  ext z
+  change ((H : LiftedField)*movingR tau)*movingS z-((H : LiftedField)*movingS tau)*movingR z =
+    (H : LiftedField)*((1*movingR tau)*movingS z-(1*movingS tau)*movingR z)
+  ring
+
+theorem actualJet_scaleMotion (H : CurveField) :
+    actualJet H = (actualJet (1 : CurveField)).scaleMotion (H : LiftedField) := by
+  simp only [actualJet, contactMotion_eq_smul_one H, pencilJet_smul]
+
+theorem curveSourceOne_weight (H : CurveField) :
+    curveSourceOne H = (H : LiftedField)*curveSourceOne (1 : CurveField) := by
+  change sourceOne (actualJet H) = (H : LiftedField)*sourceOne (actualJet (1 : CurveField))
+  rw [actualJet_scaleMotion, sourceOne_scaleMotion]
+
+theorem curveSourceZero_weight (H : CurveField) :
+    curveSourceZero H = (H : LiftedField)*curveSourceZero (1 : CurveField) := by
+  change sourceZero (actualJet H)-genericCoordinates 72*sourceOne (actualJet H) =
+    (H : LiftedField)*(sourceZero (actualJet (1 : CurveField))-
+      genericCoordinates 72*sourceOne (actualJet (1 : CurveField)))
+  rw [actualJet_scaleMotion, sourceZero_scaleMotion, sourceOne_scaleMotion]
+  rw [mul_sub, mul_left_comm (genericCoordinates 72) (H : LiftedField)]
+
+def traceWeightZero : LiftedField := curveSourceZero (1 : CurveField)
+def traceWeightOne : LiftedField := curveSourceOne (1 : CurveField)
+
+theorem trace_source_zero (H : CurveField) :
+    Algebra.normalizedTrace FunctionField LiftedField (curveSourceZero H) =
+      Algebra.normalizedTrace FunctionField LiftedField ((H : LiftedField)*traceWeightZero) := by
+  rw [curveSourceZero_weight]
+  rfl
+
+theorem trace_source_one (H : CurveField) :
+    Algebra.normalizedTrace FunctionField LiftedField (curveSourceOne H) =
+      Algebra.normalizedTrace FunctionField LiftedField ((H : LiftedField)*traceWeightOne) := by
+  rw [curveSourceOne_weight]
+  rfl
+
+end SymmetricContactField
+#print axioms SymmetricContactField.trace_source_zero
+#print axioms SymmetricContactField.trace_source_one
