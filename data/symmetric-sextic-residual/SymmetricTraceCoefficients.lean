@@ -9,6 +9,13 @@ explicit quotients of polynomials in `(lambda,b,c,d)`.  Thus they belong to
 the coefficient subfield, independently of the cubic normal coordinate.
 These identities specify the two source traces required from a contact
 current.  They do not construct that current or a relative primitive.
+
+The chart, source reconstruction, and conditional trace endpoint are the
+work of `fqlx`, `benediamond`, and their credited collaborators in the
+upstream research drafts #222 and #223.  This coefficient-field binding
+was prepared for `kmehltretter82` with OpenAI Codex assistance.  It extends
+the existing research draft; the protected primitive-existence obligation
+remains open.
 -/
 
 noncomputable section
