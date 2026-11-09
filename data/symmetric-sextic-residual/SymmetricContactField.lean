@@ -2,6 +2,8 @@ import Proposal.SymmetricRatioCurrent
 import HodgeComputer.Constructions.PolynomialCurves.ArithmeticLifting
 import Mathlib.Data.ZMod.Basic
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+import Mathlib.Tactic.LinearCombination
 
 /-!
 # Integral contact-point incidence for the exact reflection pencil
@@ -2524,6 +2526,558 @@ theorem movingSection_nonzero : movingSection ≠ 0 := by
     (map_ne_zero (algebraMap FunctionField LiftedField)).mpr t_nonzero
   exact ht ((mul_eq_zero.mp heq).resolve_left (by norm_num))
 
+
+open MvPolynomial SymmetricAffineField SymmetricRatioCurrent SymmetricContactField
+open HoldoutConstruction
+open scoped BigOperators
+set_option maxHeartbeats 2000000
+set_option maxRecDepth 16384
+set_option backward.isDefEq.respectTransparency false
+
+/-- Any two tangent vectors to a nonsingular one-dimensional square slice
+have zero two-by-two coordinate minors. -/
+theorem kernel_wedge_zero {L : Type*} [Field L] (n : ℕ)
+    (A : Matrix (Fin n) (Fin (n+1)) L)
+    (hsurj : Function.Surjective A.mulVec)
+    (v w : Fin (n+1) → L) (hv : A.mulVec v = 0) (hw : A.mulVec w = 0) :
+    ∀ i j, v i*w j-w i*v j = 0 := by
+  let f := A.mulVecLin
+  have hs : Function.Surjective f := hsurj
+  have hd := f.finrank_range_add_finrank_ker
+  rw [LinearMap.range_eq_top.mpr hs, finrank_top] at hd
+  have hk : Module.finrank L (LinearMap.ker f) = 1 := by
+    simp only [Module.finrank_fintype_fun_eq_card, Fintype.card_fin] at hd
+    omega
+  let v' : LinearMap.ker f := ⟨v,hv⟩
+  let w' : LinearMap.ker f := ⟨w,hw⟩
+  by_cases hz : v' = 0
+  · have hzv : v = 0 := congrArg Subtype.val hz
+    intro i j
+    simp [hzv]
+  · obtain ⟨c,hc⟩ := exists_smul_eq_of_finrank_eq_one hk hz w'
+    have hcw : c • v = w := congrArg Subtype.val hc
+    intro i j
+    rw [← hcw]
+    simp only [Pi.smul_apply, smul_eq_mul]
+    ring
+
+/-- A nonsingular full incidence forces surjectivity of its contact block,
+without assuming a particular contact minor is invertible. -/
+theorem contact_block_surjective {L : Type*} [Field L] (n : ℕ)
+    (J : Matrix (Fin n ⊕ Fin 3) (Fin (n+1) ⊕ Fin 2) L)
+    (hsurj : Function.Surjective J.mulVec)
+    (hzero : ∀ i j, J (Sum.inl i) (Sum.inr j) = 0) :
+    Function.Surjective (Matrix.mulVec (fun i j => J (Sum.inl i) (Sum.inl j))) := by
+  intro y
+  obtain ⟨v,hv⟩ := hsurj (Sum.elim y (fun _ => 0))
+  refine ⟨fun j => v (Sum.inl j), ?_⟩
+  ext i
+  have hi := congrFun hv (Sum.inl i)
+  simpa only [Matrix.mulVec, dotProduct, Fintype.sum_sum_type, hzero,
+    zero_mul, Finset.sum_const_zero, add_zero, Sum.elim_inl] using hi
+
+
+def normTermSupported (s : Term) : Bool :=
+  s.parameters.all (fun j => decide (j = 0)) && s.unknowns.all (fun j => decide (j.val < 71))
+
+theorem norm_support : ∀ i : Fin 70,
+    (equationData (normIndex i)).all normTermSupported = true := by decide
+
+theorem norm_term_support (i : Fin 70) (s : Term) (hs : s ∈ equationData (normIndex i)) :
+    (∀ j ∈ s.parameters, j = 0) ∧ (∀ j ∈ s.unknowns, j.val < 71) := by
+  have h := norm_support i
+  simp only [List.all_eq_true] at h
+  have ht := h s hs
+  simpa [normTermSupported, List.all_eq_true] using ht
+
+theorem polynomialValue_parameters {L : Type*} [CommRing L]
+    (p q : Fin 3 → L) (x : Index → L) (ss : List Term)
+    (h : ∀ s ∈ ss, ∀ j ∈ s.parameters, p j = q j) :
+    polynomialValue p x ss = polynomialValue q x ss := by
+  induction ss with
+  | nil => rfl
+  | cons s ss ih =>
+    have hp : s.parameters.map p = s.parameters.map q :=
+      List.map_congr_left (fun j hj => h s (by simp) j hj)
+    rw [polynomialValue, polynomialValue]
+    unfold termValue
+    rw [hp, ih (fun t ht => h t (by simp [ht]))]
+
+theorem polynomialPartial_parameters {L : Type*} [CommRing L]
+    (p q : Fin 3 → L) (x : Index → L) (ss : List Term) (k : Index)
+    (h : ∀ s ∈ ss, ∀ j ∈ s.parameters, p j = q j) :
+    polynomialPartial p x k ss = polynomialPartial q x k ss := by
+  induction ss with
+  | nil => rfl
+  | cons s ss ih =>
+    have hp : s.parameters.map p = s.parameters.map q :=
+      List.map_congr_left (fun j hj => h s (by simp) j hj)
+    rw [polynomialPartial, polynomialPartial, hp, ih (fun t ht => h t (by simp [ht]))]
+
+theorem monomialPartial_unused {L : Type*} [CommRing L]
+    (x : Index → L) (ss : List Index) (k : Index) (h : ∀ j ∈ ss, j ≠ k) :
+    monomialPartial ss x k = 0 := by
+  induction ss with
+  | nil => rfl
+  | cons j ss ih =>
+    have hj : j ≠ k := h j (by simp)
+    have ht : ∀ i ∈ ss, i ≠ k := fun i hi => h i (by simp [hi])
+    simp [monomialPartial, hj, ih ht]
+
+theorem polynomialPartial_unused {L : Type*} [CommRing L]
+    (p : Fin 3 → L) (x : Index → L) (ss : List Term) (k : Index)
+    (h : ∀ s ∈ ss, ∀ j ∈ s.unknowns, j ≠ k) :
+    polynomialPartial p x k ss = 0 := by
+  induction ss with
+  | nil => rfl
+  | cons s ss ih =>
+    rw [polynomialPartial, monomialPartial_unused x s.unknowns k
+      (h s (by simp)), ih (fun t ht => h t (by simp [ht]))]
+    simp
+
+def incidenceJacobian : Matrix Index Index LiftedField :=
+  fun i j => polynomialPartial genericParameters genericCoordinates j (equationData i)
+
+theorem incidenceJacobian_unit : IsUnit incidenceJacobian := by
+  apply (Matrix.isUnit_iff_isUnit_det incidenceJacobian).mpr
+  have hj := squareGeneric_jacobian equations contactFactor
+  have hm : (fun i j : Index => aeval genericCoordinates (pderiv i (equations j))) =
+      incidenceJacobian.transpose := by
+    ext i j
+    rw [equations, eval_partial_polynomial]
+    simp only [generic_parameter]
+    rfl
+  change IsUnit (Matrix.det (fun i j : Index => aeval genericCoordinates (pderiv i (equations j)))) at hj
+  rw [hm, Matrix.det_transpose] at hj
+  exact hj
+
+def rowEquiv : Fin 70 ⊕ Fin 3 ≃ Index := finSumFinEquiv
+def columnEquiv : Fin 71 ⊕ Fin 2 ≃ Index := finSumFinEquiv
+
+def contactJacobian : Matrix (Fin 70) (Fin 71) LiftedField :=
+  fun i j => incidenceJacobian (rowEquiv (Sum.inl i)) (columnEquiv (Sum.inl j))
+
+theorem incidenceJacobian_point_zero (i : Fin 70) (j : Fin 2) :
+    incidenceJacobian (rowEquiv (Sum.inl i)) (columnEquiv (Sum.inr j)) = 0 := by
+  change polynomialPartial genericParameters genericCoordinates (Fin.natAdd 71 j)
+    (equationData (normIndex i)) = 0
+  apply polynomialPartial_unused
+  intro s hs k hk heq
+  have hlt := (norm_term_support i s hs).2 k hk
+  rw [heq] at hlt
+  simp only [Fin.val_natAdd] at hlt
+  omega
+
+theorem contactJacobian_surjective : Function.Surjective contactJacobian.mulVec := by
+  have hs : Function.Surjective
+      (incidenceJacobian.submatrix rowEquiv columnEquiv).mulVec := by
+    intro y
+    obtain ⟨v,hv⟩ := (Matrix.mulVec_surjective_iff_isUnit.mpr incidenceJacobian_unit)
+      (y ∘ rowEquiv.symm)
+    refine ⟨v ∘ columnEquiv, ?_⟩
+    rw [Matrix.submatrix_mulVec_equiv]
+    simpa only [Function.comp_assoc, Equiv.self_comp_symm, Function.comp_id,
+      hv, Equiv.symm_comp_self, Function.id_comp]
+  exact contact_block_surjective 70
+    (incidenceJacobian.submatrix rowEquiv columnEquiv) hs incidenceJacobian_point_zero
+
+
+def curveCoefficientMap : Base →+* LiftedField :=
+  eval₂Hom (Int.castRingHom LiftedField) (fun _ => genericParameters 0)
+
+theorem curveCoefficientMap_derivative (D : Derivation ℤ LiftedField LiftedField)
+    (hl : D (genericParameters 0) = 0) (p : Base) : D (curveCoefficientMap p) = 0 := by
+  induction p using MvPolynomial.induction_on with
+  | C z => simp [curveCoefficientMap, Derivation.map_intCast]
+  | add p q hp hq => simp only [map_add, hp, hq, add_zero]
+  | mul_X p j hp =>
+    rw [map_mul, Derivation.leibniz]
+    have hx : curveCoefficientMap (X j) = genericParameters 0 := by simp [curveCoefficientMap]
+    rw [hx, hp, hl]
+    simp
+
+theorem eval₂_polynomial {L : Type*} [CommRing L] (f : Base →+* L)
+    (x : Index → L) (ss : List Term) :
+    eval₂Hom f x (polynomial ss) = polynomialValue (fun j => f (X j)) x ss := by
+  letI : Algebra Base L := f.toAlgebra
+  exact eval_polynomial x ss
+
+theorem eval₂_partial_polynomial {L : Type*} [CommRing L] (f : Base →+* L)
+    (x : Index → L) (ss : List Term) (k : Index) :
+    eval₂Hom f x (pderiv k (polynomial ss)) =
+      polynomialPartial (fun j => f (X j)) x k ss := by
+  letI : Algebra Base L := f.toAlgebra
+  exact eval_partial_polynomial x ss k
+
+theorem curve_polynomial_value (i : Fin 70) :
+    polynomialValue (fun j => curveCoefficientMap (X j)) genericCoordinates
+      (equationData (normIndex i)) = 0 := by
+  rw [polynomialValue_parameters _ genericParameters]
+  · exact generic_values (normIndex i)
+  · intro s hs j hj
+    rw [(norm_term_support i s hs).1 j hj]
+    simp [curveCoefficientMap]
+
+theorem curve_polynomial_partial (i : Fin 70) (k : Index) :
+    polynomialPartial (fun j => curveCoefficientMap (X j)) genericCoordinates k
+      (equationData (normIndex i)) = incidenceJacobian (normIndex i) k := by
+  apply polynomialPartial_parameters
+  intro s hs j hj
+  rw [(norm_term_support i s hs).1 j hj]
+  simp [curveCoefficientMap]
+
+theorem norm_tangent_kernel (D : Derivation ℤ LiftedField LiftedField)
+    (hl : D (genericParameters 0) = 0) :
+    contactJacobian.mulVec (fun j => D (genericCoordinates (columnEquiv (Sum.inl j)))) = 0 := by
+  ext i
+  have h := derivation_eval₂_chain D curveCoefficientMap genericCoordinates
+    (curveCoefficientMap_derivative D hl) (equations (normIndex i))
+  simp only [equations, eval₂_polynomial, curve_polynomial_value, map_zero,
+    eval₂_partial_polynomial, curve_polynomial_partial] at h
+  have he := columnEquiv.sum_comp
+    (fun j => incidenceJacobian (normIndex i) j*D (genericCoordinates j))
+  rw [← he] at h
+  have hz (j : Fin 2) : incidenceJacobian (normIndex i) (columnEquiv (Sum.inr j)) = 0 :=
+    incidenceJacobian_point_zero i j
+  change (∑ j : Fin 71, incidenceJacobian (normIndex i) (columnEquiv (Sum.inl j))*
+    D (genericCoordinates (columnEquiv (Sum.inl j)))) = 0
+  simpa only [Fintype.sum_sum_type, hz, zero_mul, Finset.sum_const_zero, add_zero] using h.symm
+
+
+theorem wedge_closure {L : Type*} [Field L]
+    (R S : Derivation ℤ L L) (tau : L) (ss : Set L)
+    (h : ∀ a ∈ ss, R a*S tau-S a*R tau = 0)
+    {a : L} (ha : a ∈ Subfield.closure ss) : R a*S tau-S a*R tau = 0 := by
+  induction ha using Subfield.closure_induction with
+  | mem a ha => exact h a ha
+  | one => simp
+  | add a b _ _ ha hb =>
+    simp only [map_add]
+    linear_combination ha+hb
+  | neg a _ ha =>
+    simp only [map_neg]
+    linear_combination -ha
+  | inv a _ ha =>
+    simp only [Derivation.leibniz_inv, smul_eq_mul]
+    linear_combination (-a⁻¹^2)*ha
+  | mul a b _ _ ha hb =>
+    simp only [Derivation.leibniz, smul_eq_mul]
+    linear_combination a*hb+b*ha
+
+theorem derivative_closure_zero {L : Type*} [Field L]
+    (D : Derivation ℤ L L) (ss : Set L) (h : ∀ a ∈ ss, D a = 0)
+    {a : L} (ha : a ∈ Subfield.closure ss) : D a = 0 := by
+  induction ha using Subfield.closure_induction with
+  | mem a ha => exact h a ha
+  | one => simp
+  | add a b _ _ ha hb => simp [ha,hb]
+  | neg a _ ha => simp [ha]
+  | inv a _ ha => simp [Derivation.leibniz_inv,ha]
+  | mul a b _ _ ha hb => simp [Derivation.leibniz,ha,hb]
+
+def movingR : Derivation ℤ LiftedField LiftedField := extended 1
+def movingS : Derivation ℤ LiftedField LiftedField := extended 2
+
+theorem ratio_r_s_commute : Function.Commute (ratioTangent 1) (ratioTangent 2) := by
+  intro z
+  have ht : SymmetricPrimitiveEndpoint.tangent 1 t = 0 := by simpa using tangent_t 1
+  change SymmetricPrimitiveEndpoint.tangent 1 (t*SymmetricPrimitiveEndpoint.tangent 3 z) =
+    t*SymmetricPrimitiveEndpoint.tangent 3 (SymmetricPrimitiveEndpoint.tangent 1 z)
+  simp only [Derivation.leibniz, ht, smul_eq_mul, mul_zero, add_zero]
+  rw [tangent_commute 1 3 z]
+
+theorem moving_r_s_commute : Function.Commute movingR movingS :=
+  extendFiniteDerivation_commute (ratioTangent 1) (ratioTangent 2) ratio_r_s_commute
+
+theorem moving_lambda_zero : movingR (genericParameters 0) = 0 ∧
+    movingS (genericParameters 0) = 0 := by
+  have hR : ratioTangent 1 (parameterCoordinates 0) = 0 := by
+    change parameterDerivations 1 (parameterCoordinates 0) = 0
+    simpa using parameter_coordinate_derivative 1 0
+  have hS : ratioTangent 2 (parameterCoordinates 0) = 0 := by
+    change parameterDerivations 2 (parameterCoordinates 0) = 0
+    simpa using parameter_coordinate_derivative 2 0
+  simp only [movingR, movingS, extended, genericParameters,
+    extendFiniteDerivation_apply, hR, hS, map_zero, and_self]
+
+def curveGenerators : Set LiftedField :=
+  Set.range (fun j : Fin 71 => genericCoordinates (columnEquiv (Sum.inl j))) ∪ {genericParameters 0}
+def CurveField : Subfield LiftedField := Subfield.closure curveGenerators
+
+def tau : LiftedField := genericCoordinates 70
+
+theorem curve_wedge (H : CurveField) : movingR H*movingS tau-movingS H*movingR tau = 0 := by
+  apply wedge_closure movingR movingS tau curveGenerators ?_ H.property
+  intro a ha
+  rcases ha with ⟨j,rfl⟩ | ha
+  · have h := kernel_wedge_zero 70 contactJacobian contactJacobian_surjective
+      (fun k => movingR (genericCoordinates (columnEquiv (Sum.inl k))))
+      (fun k => movingS (genericCoordinates (columnEquiv (Sum.inl k))))
+      (norm_tangent_kernel movingR moving_lambda_zero.1)
+      (norm_tangent_kernel movingS moving_lambda_zero.2) j 70
+    exact h
+  · have he : a = genericParameters 0 := Set.mem_singleton_iff.mp ha
+    rw [he, moving_lambda_zero.1, moving_lambda_zero.2]
+    ring
+
+theorem curve_time_zero (H : CurveField) : liftedTime H = 0 := by
+  apply derivative_closure_zero liftedTime curveGenerators ?_ H.property
+  intro a ha
+  rcases ha with ⟨j,rfl⟩ | ha
+  · exact generic_coordinates_time _
+  · have he : a = genericParameters 0 := Set.mem_singleton_iff.mp ha
+    rw [he, genericParameters, liftedTime, extendFiniteDerivation_apply,
+      time_parameter_coordinate, map_zero]
+
+def formR (H : CurveField) : LiftedField := H*movingR tau
+def formS (H : CurveField) : LiftedField := H*movingS tau
+
+/-- Every rational contact-curve coefficient gives an actual closed form
+on the lifted ratio plane, retaining all moving-point derivatives. -/
+theorem contact_form_closed (H : CurveField) : movingR (formS H) = movingS (formR H) := by
+  have h := curve_wedge H
+  simp only [formS, formR, Derivation.leibniz, smul_eq_mul]
+  rw [moving_r_s_commute tau]
+  linear_combination h
+
+theorem contact_form_time_zero (H : CurveField) :
+    liftedTime (formR H) = 0 ∧ liftedTime (formS H) = 0 := by
+  have ht : liftedTime tau = 0 := generic_coordinates_time 70
+  have hr : liftedTime (movingR tau) = 0 := by
+    change extended 0 (extended 1 tau) = 0
+    rw [extended_time_r_commute]
+    change movingR (liftedTime tau) = 0
+    rw [ht, map_zero]
+  have hs : liftedTime (movingS tau) = 0 := by
+    change extended 0 (extended 2 tau) = 0
+    rw [extended_time_s_commute]
+    change movingS (liftedTime tau) = 0
+    rw [ht, map_zero]
+  simp [formR, formS, Derivation.leibniz, curve_time_zero, hr, hs]
+
+open MvPolynomial SymmetricAffineField SymmetricRatioCurrent SymmetricContactField
+open SymmetricTraceEndpoint WeightedPrimitiveTransport CubicSelectorSource HoldoutConstruction
+open scoped BigOperators
+set_option maxHeartbeats 2000000
+set_option maxRecDepth 16384
+set_option backward.isDefEq.respectTransparency false
+
+section Coefficients
+variable {L : Type*} [Field L] [CharZero L]
+
+def ratioPencil (lam r s : L) : Pencil L :=
+  let a := 1+2*r
+  let b := 1+2*s
+  ![2+2*lam^6-(5/7:L)*lam^2-(10/7:L)*lam^4,
+    30+(10/7:L)*lam^2*a+(10/7:L)*lam^4*a,
+    30*lam^4+(5/7:L)*b+(20/7:L)*lam^2*b,
+    30-(5/7:L)*lam^2*a^2,
+    -(10/7:L)*a*b-(20/7:L)*lam^2*a*b,
+    30*lam^2-(10/7:L)*b^2,
+    2+r^6,(5/7:L)*a^2*b,(10/7:L)*a*b^2,2+s^6]
+
+theorem ratioPencil_equation (f : ℂ →+* L) (lam r s t u : L) :
+    eval₂Hom f ![lam,r,t,s*t,u] rawWeighted = pencilEquation (ratioPencil lam r s) (t^2) u := by
+  simp [rawWeighted, leftQuadric, rightQuadric, ratioPencil,
+    pencilEquation, pencilB, pencilC, pencilD, map_div₀, map_ofNat]
+  ring
+
+theorem ratioPencil_normal (f : ℂ →+* L) (lam r s t u : L) :
+    eval₂Hom f ![lam,r,t,s*t,u] (pderiv 4 rawWeighted) =
+      pencilNormal (ratioPencil lam r s) (t^2) u := by
+  have hthirty : (pderiv 4 : Derivation ℂ Poly Poly) 30 = 0 :=
+    (pderiv 4 : Derivation ℂ Poly Poly).map_natCast 30
+  have htwo : (pderiv 4 : Derivation ℂ Poly Poly) 2 = 0 :=
+    (pderiv 4 : Derivation ℂ Poly Poly).map_natCast 2
+  simp [rawWeighted, leftQuadric, rightQuadric, ratioPencil,
+    pencilNormal, pencilB, pencilC, pderiv_mul, pderiv_pow,
+    pderiv_X, Pi.single_apply, map_div₀, map_ofNat, htwo, hthirty]
+  ring
+
+theorem ratioPencil_second (f : ℂ →+* L) (lam r s t u : L) :
+    eval₂Hom f ![lam,r,t,s*t,u] (pderiv 4 (pderiv 4 rawWeighted)) =
+      pencilSecond (ratioPencil lam r s) (t^2) u := by
+  have hthirty : (pderiv 4 : Derivation ℂ Poly Poly) 30 = 0 :=
+    (pderiv 4 : Derivation ℂ Poly Poly).map_natCast 30
+  have htwo : (pderiv 4 : Derivation ℂ Poly Poly) 2 = 0 :=
+    (pderiv 4 : Derivation ℂ Poly Poly).map_natCast 2
+  have hthree : (pderiv 4 : Derivation ℂ Poly Poly) 3 = 0 :=
+    (pderiv 4 : Derivation ℂ Poly Poly).map_natCast 3
+  simp [rawWeighted, leftQuadric, rightQuadric, ratioPencil,
+    pencilSecond, pencilB, pderiv_mul, pderiv_pow, pderiv_X,
+    Pi.single_apply, map_div₀, map_ofNat, htwo, hthree, hthirty]
+  ring
+
+end Coefficients
+
+def physicalT : LiftedField := algebraMap FunctionField LiftedField t
+def physicalU : LiftedField := algebraMap FunctionField LiftedField normalCoordinate
+
+def actualPencil : Pencil LiftedField := ratioPencil
+  (genericParameters 0) (genericParameters 1) (genericParameters 2)
+
+def physicalEvaluation : Poly →+* LiftedField :=
+  (algebraMap FunctionField LiftedField).comp weightedMap
+
+theorem physicalEvaluation_hom : physicalEvaluation =
+    eval₂Hom coefficientEmbedding ![genericParameters 0,genericParameters 1,physicalT,
+      genericParameters 2*physicalT,physicalU] := by
+  apply MvPolynomial.ringHom_ext
+  · intro z
+    simp [physicalEvaluation, coefficientEmbedding, constantMap]
+  · intro i
+    simp only [physicalEvaluation, RingHom.comp_apply, eval₂Hom_X']
+    fin_cases i <;> simp only [Matrix.cons_val]
+    · simp [physicalEvaluation, genericParameters, parameterCoordinates]
+    · simp [physicalEvaluation, genericParameters, parameterCoordinates]
+    · rfl
+    · change algebraMap FunctionField LiftedField d =
+        algebraMap FunctionField LiftedField (d/t)*algebraMap FunctionField LiftedField t
+      rw [← map_mul, div_mul_cancel₀ _ t_nonzero]
+    · rfl
+
+theorem actual_pencil_equation : pencilEquation actualPencil (physicalT^2) physicalU = 0 := by
+  rw [actualPencil, ← ratioPencil_equation coefficientEmbedding]
+  rw [← physicalEvaluation_hom]
+  have hz : weightedMap rawWeighted = 0 := by
+    change residueMap chartEquation = 0
+    exact (residueMap_kernel chartEquation).mpr dvd_rfl
+  change algebraMap FunctionField LiftedField (weightedMap rawWeighted) = 0
+  rw [hz, map_zero]
+
+theorem actual_point_equation :
+    pencilEquation actualPencil ((genericCoordinates 71)^2) (genericCoordinates 72) = 0 := by
+  rw [actualPencil, ← ratioPencil_equation coefficientEmbedding]
+  exact movingEvaluation_equation
+
+theorem actual_pencil_normal : pencilNormal actualPencil (physicalT^2) physicalU =
+    algebraMap FunctionField LiftedField normal := by
+  rw [actualPencil, ← ratioPencil_normal coefficientEmbedding]
+  rw [← physicalEvaluation_hom]
+  rfl
+
+theorem actual_pencil_second : pencilSecond actualPencil (physicalT^2) physicalU =
+    algebraMap FunctionField LiftedField secondNormal := by
+  rw [actualPencil, ← ratioPencil_second coefficientEmbedding]
+  rw [← physicalEvaluation_hom]
+  rfl
+
+
+theorem actual_pencil_normal_nonzero : pencilNormal actualPencil (physicalT^2) physicalU ≠ 0 := by
+  rw [actual_pencil_normal]
+  exact (map_ne_zero (algebraMap FunctionField LiftedField)).mpr SymmetricTraceEndpoint.normal_nonzero
+
+theorem actual_pencil_leading : actualPencil 0 =
+    algebraMap FunctionField LiftedField (weightedMap leadingPolynomial) := by
+  change actualPencil 0 = physicalEvaluation leadingPolynomial
+  rw [physicalEvaluation_hom]
+  simp [actualPencil, ratioPencil, leadingPolynomial, map_div₀, map_ofNat]
+
+theorem actual_pencil_leading_nonzero : actualPencil 0 ≠ 0 := by
+  rw [actual_pencil_leading]
+  exact (map_ne_zero (algebraMap FunctionField LiftedField)).mpr leading_nonzero
+
+theorem genericParameters_time (i : Fin 3) : liftedTime (genericParameters i) = 0 := by
+  simp only [genericParameters, liftedTime, extendFiniteDerivation_apply,
+    time_parameter_coordinate, map_zero]
+
+theorem ratioPencil_time_constant {L : Type*} [Field L] [CharZero L]
+    (T : Derivation ℤ L L) (lam r s : L)
+    (hl : T lam = 0) (hr : T r = 0) (hs : T s = 0) (i : Fin 10) :
+    T (ratioPencil lam r s i) = 0 := by
+  have hn2 : T (2 : L) = 0 := T.map_natCast 2
+  have hn5 : T (5 : L) = 0 := T.map_natCast 5
+  have hn7 : T (7 : L) = 0 := T.map_natCast 7
+  have hn10 : T (10 : L) = 0 := T.map_natCast 10
+  have hn20 : T (20 : L) = 0 := T.map_natCast 20
+  have hn30 : T (30 : L) = 0 := T.map_natCast 30
+  fin_cases i <;> simp [ratioPencil, Derivation.leibniz, Derivation.leibniz_pow,
+    Derivation.leibniz_div, smul_eq_mul, hn2, hn5, hn7, hn10, hn20, hn30, hl, hr, hs]
+
+theorem actual_pencil_time (i : Fin 10) : liftedTime (actualPencil i) = 0 :=
+  ratioPencil_time_constant liftedTime _ _ _ (genericParameters_time 0)
+    (genericParameters_time 1) (genericParameters_time 2) i
+
+def contactMotion (H : CurveField) : Derivation ℤ LiftedField LiftedField :=
+  formR H • movingS-formS H • movingR
+
+theorem contactMotion_leading (H : CurveField) : contactMotion H (actualPencil 0) = 0 := by
+  have hl : contactMotion H (genericParameters 0) = 0 := by
+    simp [contactMotion, Derivation.smul_apply, smul_eq_mul,
+      moving_lambda_zero.1, moving_lambda_zero.2]
+  have hn2 : contactMotion H (2 : LiftedField) = 0 := (contactMotion H).map_natCast 2
+  have hn5 : contactMotion H (5 : LiftedField) = 0 := (contactMotion H).map_natCast 5
+  have hn7 : contactMotion H (7 : LiftedField) = 0 := (contactMotion H).map_natCast 7
+  have hn10 : contactMotion H (10 : LiftedField) = 0 := (contactMotion H).map_natCast 10
+  simp [actualPencil, ratioPencil, Derivation.leibniz, Derivation.leibniz_pow,
+    Derivation.leibniz_div, smul_eq_mul, hn2, hn5, hn7, hn10, hl]
+
+theorem physical_time : liftedTime physicalT = 1 := by
+  simpa only [liftedTime, extended, physicalT, ite_true] using extended_t (L := LiftedField) 0
+
+theorem physical_r_s : movingR physicalT = 0 ∧ movingS physicalT = 0 := by
+  constructor
+  · simpa [movingR, physicalT] using extended_t (L := LiftedField) 1
+  · simpa [movingS, physicalT] using extended_t (L := LiftedField) 2
+
+theorem contactMotion_time (H : CurveField) : contactMotion H physicalT = 0 := by
+  simp [contactMotion, Derivation.smul_apply, smul_eq_mul, physical_r_s.1, physical_r_s.2]
+
+def actualJet (H : CurveField) : Jet LiftedField :=
+  pencilJet (contactMotion H) actualPencil (physicalT^2) (genericCoordinates 71) (genericCoordinates 72)
+
+theorem actual_moving_operator (H : CurveField) :
+    movingOperator liftedTime movingR movingS physicalT (genericCoordinates 71) (formR H) (formS H) =
+      pencilMotionOperator liftedTime (contactMotion H) physicalT (genericCoordinates 71) := by
+  rfl
+
+theorem actual_jet_chain_rules (H : CurveField) :
+    let j := actualJet H
+    let Y := movingOperator liftedTime movingR movingS physicalT j.alpha (formR H) (formS H)
+    Y (selector j (physicalU-genericCoordinates 72)) =
+      j.alpha*(j.aDot*(physicalU-genericCoordinates 72)+2*j.gDot-j.a*j.betaDot)/3-
+        j.a*motion j (physicalU-genericCoordinates 72)/(3*normal j (physicalU-genericCoordinates 72)) ∧
+    Y (normal j (physicalU-genericCoordinates 72)) = normalMotion j (physicalU-genericCoordinates 72)-
+      secondNormal j (physicalU-genericCoordinates 72)*motion j (physicalU-genericCoordinates 72)/
+        normal j (physicalU-genericCoordinates 72) := by
+  dsimp only
+  change _ ∧ _
+  have h := pencilJet_chain_rules liftedTime (contactMotion H) actualPencil physicalT
+    (genericCoordinates 71) (genericCoordinates 72) physicalU actual_pencil_time
+    (generic_coordinates_time 71) (generic_coordinates_time 72) physical_time
+    (contactMotion_time H) (contactMotion_leading H) actual_point_equation
+    actual_pencil_equation actual_pencil_normal_nonzero
+  rw [show (actualJet H).alpha = genericCoordinates 71 from rfl, actual_moving_operator H]
+  exact h
+
+
+def curveSourceZero (H : CurveField) : LiftedField :=
+  sourceZero (actualJet H)-genericCoordinates 72*sourceOne (actualJet H)
+
+def curveSourceOne (H : CurveField) : LiftedField := sourceOne (actualJet H)
+
+/-- All field, differential, jet, and denominator hypotheses are now
+proved for these actual contact forms. The two literal source traces
+remain the mathematical source-comparison obligation. -/
+def relativePrimitiveOfCurveSource (H : CurveField)
+    (h0 : Algebra.normalizedTrace FunctionField LiftedField (curveSourceZero H) =
+      -t*targetSource0)
+    (h1 : Algebra.normalizedTrace FunctionField LiftedField (curveSourceOne H) =
+      -t*targetSource1) : SymmetricPrimitiveEndpoint.RelativePrimitive := by
+  refine relativePrimitiveOfClosedSelector (actualJet H) (genericCoordinates 72)
+    (formR H) (formS H) (generic_coordinates_time 71)
+    (contact_form_time_zero H).1 (contact_form_time_zero H).2 (contact_form_closed H)
+    actual_pencil_leading_nonzero movingSection_nonzero rfl ?_ ?_ ?_
+    (actual_jet_chain_rules H).1 (actual_jet_chain_rules H).2 h0 h1
+  · exact (pencilJet_normal (contactMotion H) actualPencil (physicalT^2)
+      (genericCoordinates 71) (genericCoordinates 72) physicalU).trans actual_pencil_normal
+  · exact (pencilJet_second (contactMotion H) actualPencil (physicalT^2)
+      (genericCoordinates 71) (genericCoordinates 72) physicalU).trans actual_pencil_second
+  · rw [actualJet, pencilJet_equation]
+    change pencilEquation actualPencil (physicalT^2) physicalU-
+      pencilEquation actualPencil ((genericCoordinates 71)^2) (genericCoordinates 72) = 0
+    rw [actual_pencil_equation, actual_point_equation, sub_self]
+
 end SymmetricContactField
 
 #print axioms SymmetricContactField.seed_jacobian_unit
@@ -2531,3 +3085,7 @@ end SymmetricContactField
 #print axioms SymmetricContactField.movingEvaluation_equation
 #print axioms SymmetricContactField.generic_coordinates_time
 #print axioms SymmetricContactField.movingSection_nonzero
+#print axioms SymmetricContactField.contact_form_closed
+#print axioms SymmetricContactField.contact_form_time_zero
+#print axioms SymmetricContactField.actual_jet_chain_rules
+#print axioms SymmetricContactField.relativePrimitiveOfCurveSource
