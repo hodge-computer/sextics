@@ -1,5 +1,6 @@
 import Proposal.SymmetricTraceEndpoint
 import Proposal.CubicSelectorSource
+import HodgeComputer.Constructions.ResidueTransport.CoordinateIndependence
 
 /-!
 # The ratio-chart current and the actual protected primitive
@@ -93,6 +94,95 @@ theorem ratio_time_s_commute : Function.Commute (ratioTangent 0) (ratioTangent 2
   rw [tangent_commute 2 3 x]
   field_simp [t_nonzero]
   ring
+
+def parameterCoordinates : Fin 3 → FunctionField :=
+  ![weightedMap (X (0 : Fin 4).castSucc), weightedMap (X (1 : Fin 4).castSucc), d/t]
+
+def parameterDerivations : Fin 3 → Derivation ℤ FunctionField FunctionField :=
+  ![tangent 0, tangent 1, t • tangent 3]
+
+theorem parameter_coordinate_derivative (i j : Fin 3) :
+    parameterDerivations i (parameterCoordinates j) = if j = i then 1 else 0 := by
+  have hx0 (k : Fin 4) : tangent k (weightedMap (X 0)) = if k = 0 then 1 else 0 := by
+    simpa only [show (0 : Fin 4).castSucc = (0 : Fin 5) from by decide,
+      eq_comm] using tangent_coordinate k 0
+  have hx1 (k : Fin 4) : tangent k (weightedMap (X 1)) = if k = 1 then 1 else 0 := by
+    simpa only [show (1 : Fin 4).castSucc = (1 : Fin 5) from by decide,
+      eq_comm] using tangent_coordinate k 1
+  have hs0 : tangent 0 (d/t) = 0 := by
+    simp [Derivation.leibniz_div, tangent_t, tangent_d]
+  have hs1 : tangent 1 (d/t) = 0 := by
+    simp [Derivation.leibniz_div, tangent_t, tangent_d]
+  have hs3 : tangent 3 (d/t) = 1/t := by
+    simp [Derivation.leibniz_div, tangent_t, tangent_d]
+    field_simp [t_nonzero]
+  fin_cases i <;> fin_cases j <;>
+    simp [parameterDerivations, parameterCoordinates, hx0, hx1,
+      Derivation.smul_apply, smul_eq_mul, hs0, hs1, hs3, t_nonzero]
+
+def constantMap : ℂ →+* FunctionField := weightedMap.comp C
+
+theorem parameter_constant_derivative (i : Fin 3) (z : ℂ) :
+    parameterDerivations i (constantMap z) = 0 := by
+  have hc (j : Fin 4) : tangent j (constantMap z) = 0 := by
+    change tangent j (weightedMap (C z)) = 0
+    rw [tangent_weighted]
+    simp
+  fin_cases i <;> simp [parameterDerivations, Derivation.smul_apply, smul_eq_mul, hc]
+
+def complexParameterMap : MvPolynomial (Fin 3) ℂ →+* FunctionField :=
+  eval₂Hom constantMap parameterCoordinates
+
+theorem complexParameterMap_injective : Function.Injective complexParameterMap :=
+  ResidueCoordinateIndependence.injective_of_coordinate_derivations constantMap
+    parameterCoordinates parameterDerivations parameter_constant_derivative
+    parameter_coordinate_derivative
+
+abbrev ParameterRing := MvPolynomial (Fin 3) ℤ
+
+/-- The exact integral coefficient ring embeds in the actual chart field.
+This is the generic-base hypothesis needed for arithmetic incidence lifting. -/
+def parameterMap : ParameterRing →+* FunctionField :=
+  complexParameterMap.comp (MvPolynomial.map (Int.castRingHom ℂ))
+
+theorem parameterMap_injective : Function.Injective parameterMap :=
+  complexParameterMap_injective.comp (MvPolynomial.map_injective _ Int.cast_injective)
+
+@[simp] theorem parameterMap_X (i : Fin 3) : parameterMap (X i) = parameterCoordinates i := by
+  simp [parameterMap, complexParameterMap]
+
+@[simp] theorem parameterMap_C (z : ℤ) : parameterMap (C z) = z := by
+  simp [parameterMap, complexParameterMap, constantMap]
+
+theorem time_parameter_coordinate (i : Fin 3) : ratioTangent 0 (parameterCoordinates i) = 0 := by
+  have hx (j : Fin 4) (k : Fin 4) : tangent j (weightedMap (X k.castSucc)) =
+      if k = j then 1 else 0 := tangent_coordinate j k
+  have htd : ratioTangent 0 d = d/t := by
+    simp [ratioTangent, tangent_d]
+  have htt : ratioTangent 0 t = 1 := by simpa using ratio_t 0
+  have hts : ratioTangent 0 (d/t) = 0 := by
+    rw [Derivation.leibniz_div, htd, htt]
+    simp only [smul_eq_mul]
+    field_simp [t_nonzero]
+    ring
+  fin_cases i
+  · change tangent 2 (weightedMap (X (0 : Fin 4).castSucc))+
+      (d/t)*tangent 3 (weightedMap (X (0 : Fin 4).castSucc)) = 0
+    rw [hx, hx]
+    norm_num [Fin.ext_iff]
+  · change tangent 2 (weightedMap (X (1 : Fin 4).castSucc))+
+      (d/t)*tangent 3 (weightedMap (X (1 : Fin 4).castSucc)) = 0
+    rw [hx, hx]
+    norm_num [Fin.ext_iff]
+  · exact hts
+
+theorem time_parameterMap (p : ParameterRing) : ratioTangent 0 (parameterMap p) = 0 := by
+  induction p using MvPolynomial.induction_on with
+  | C z => simp [Derivation.map_intCast]
+  | add p q hp hq => simp only [map_add, hp, hq, add_zero]
+  | mul_X p j hp =>
+    rw [map_mul, Derivation.leibniz, parameterMap_X, time_parameter_coordinate, hp]
+    simp
 
 /-- The cofactor formula includes the negative volume Jacobian. -/
 def toChart (w : Fin 3 → FunctionField) : Fin 3 → FunctionField :=
@@ -268,3 +358,5 @@ end SymmetricRatioCurrent
 #print axioms SymmetricRatioCurrent.toChart_divergence
 #print axioms SymmetricRatioCurrent.relativePrimitiveOfShiftedSelector
 #print axioms SymmetricRatioCurrent.relativePrimitiveOfClosedSelector
+#print axioms SymmetricRatioCurrent.parameterMap_injective
+#print axioms SymmetricRatioCurrent.time_parameterMap

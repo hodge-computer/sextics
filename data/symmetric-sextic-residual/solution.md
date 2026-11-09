@@ -178,11 +178,10 @@ The same descent module also proves a relative bridge from the ordinary game
 \qquad \beta_j=\left.-\frac{2W_j}{f_u}\right|_{u=v^2}.
 \]
 It retains the normal component \(V\) and normal dependence of every \(W_j\).
-Applying the contact route still requires forming a suitable finite extension
-of \(K\) from the moving-point field over \(k(r,s)\), converting the ratio
-coordinates of that field into the canonical chart and binding its jets,
-and proving the full normalized-trace matches. The ratio-coordinate
-transport itself is proved below.
+Applying the contact route still requires binding the moving-point jets,
+constructing the required closed one-form, and proving the full
+normalized-trace matches. The finite moving-point extension and
+ratio-coordinate transport are proved below.
 A single branch or the rank-48 contact span supplies none of these equalities.
 These trace modules contain no admissions; they leave the one existing
 primitive-existence admission unchanged.
@@ -265,10 +264,65 @@ normalized-trace identities
 \qquad \overline{\operatorname{Tr}}(S_1)=-tT_1.
 \]
 
-Both new helpers compile and pass kernel replay without admissions.
-They do not construct the moving-point extension, bind the contact-family
-jets to it, or prove these two full trace identities. The protected
-primitive-existence theorem remains admitted.
+These selector and ratio helpers contain no admissions. They do not bind
+the contact-family jets or prove these two full trace identities. The
+protected primitive-existence theorem remains admitted.
+
+### A finite moving-point field in the actual chart
+
+[SymmetricRatioCurrent](SymmetricRatioCurrent.lean) also proves that the
+integral parameter ring \(\mathbb Z[\lambda,r,s]\) embeds in the actual
+chart field \(K\), by its coordinate derivations. The time derivative
+\(T\) kills this ring.
+
+[SymmetricContactField](SymmetricContactField.lean) constructs a finite
+separable extension \(L/K\) containing a norm contact and a moving point.
+Its 73 unknowns are 70 coefficient corrections, a contact parameter
+\(\tau\), and the point coordinates \(\alpha,\beta_*\). The six
+contact forms have coefficients
+
+\[
+z_j=c_j+v_j\tau+(E x)_j,
+\]
+
+where \(c,v\) are explicit balanced integral lifts of the maintained
+norm-contact seed and tangent, and \(E\) selects its 70 pivot columns.
+The first 70 equations are every coefficient of \(7\Phi(z)-7G_\lambda\).
+The other three are
+
+\[
+f_1(1,r,\alpha,s\alpha,\beta_*)=
+f_2(1,r,\alpha,s\alpha,\beta_*)=
+(A+B)(1,r,\alpha,s\alpha,\beta_*)=0.
+\]
+
+At \((\lambda,r,s)=(1,3,13)\) modulo 37, the explicit seed
+\((x,\tau,\alpha,\beta_*)=(0,0,27,4)\) solves all 73 equations.
+Sparse integer arithmetic and an explicit inverse matrix prove that its
+Jacobian is invertible over \(\mathbb F_{37}\). The maintained
+`square_system_generic_lift`, together with the injective parameter map,
+then gives the finite separable field factor. The modular seed itself is
+not asserted to solve the characteristic-zero equations.
+
+`norm_identity` proves the full polynomial identity for the unchanged
+weighted sextic. The three point equations therefore imply
+
+\[
+f(\lambda,r,\alpha,s\alpha,\beta_*)=0
+\]
+
+in \(L\); this is `movingEvaluation_equation`. Differentiating the
+square system with the canonical extension of \(T\) and using its
+invertible Jacobian proves that every incidence coordinate is constant
+in that direction. In particular \(T\alpha=T\beta_*=0\). Since
+\(Tt=1\), the equation \(t^2-\alpha^2=0\) would imply \(2t=0\),
+contradicting \(t\ne0\). Thus `movingSection_nonzero` establishes the
+selector's section denominator in this actual extension.
+
+This constructs the moving-point field and proves its time compatibility.
+It does not yet construct the closed one-form, bind the selector jets,
+or prove the normalized source traces. Those remain necessary to remove
+`Submission.relative_primitive_exists`'s admission.
 
 ## Exact negative source and regular contact
 
