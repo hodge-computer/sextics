@@ -1007,3 +1007,266 @@ theorem primitive_iff_square_equation :
 #print axioms chartCurrent_divergence
 #print axioms lift_equation
 end SquarePrimitive
+
+noncomputable section
+namespace HermiteIdentity
+
+variable {K : Type*} [Field K] [CharZero K]
+
+/-- Hermite reduction on a plane curve for the anti-invariant double-cover connection.
+The formulas for D are the implicit chain rule with g=fᵤ, n=fₓ. -/
+theorem reduce (D : Derivation ℤ K K)
+    (x g n gu nu nn Q Qx Qu : K)
+    (hx : x ≠ 0) (hg : g ≠ 0) (hn : n ≠ 0)
+    (hQ : D Q = Qx-n*Qu/g)
+    (hnD : D n = nn-n*nu/g)
+    (hgD : D g = nu-n*gu/g) :
+    (g*Qu-gu*Q)/g^3 =
+      (D (-Q/(n*g)) + (-Q/(n*g))/(2*x)) +
+        (2*x*(Qx*n-Q*nn)+Q*n)/(2*x*n^2*g) := by
+  have hprod : D (n*g) = (nn-n*nu/g)*g+n*(nu-n*gu/g) := by
+    rw [Derivation.leibniz, hnD, hgD]
+    ring
+  rw [Derivation.leibniz_div]
+  simp only [map_neg, hQ, hprod, smul_eq_mul]
+  field_simp [hx, hg, hn]
+  ring
+
+
+theorem reduce_scaled (D : Derivation ℤ K K)
+    (x g n gu nu nn Q Qx Qu : K)
+    (hx : x ≠ 0) (hg : g ≠ 0) (hn : n ≠ 0)
+    (hQ : D Q = Qx-n*Qu/g)
+    (hnD : D n = nn-n*nu/g)
+    (hgD : D g = nu-n*gu/g) :
+    (g*Qu-gu*Q)/g^3 =
+      (D (-Q/(n*g)) + (-Q/(n*g))/(2*x)) +
+        ((2*x*(Qx*n-Q*nn)+Q*n)/(n^2*g))/(2*x) := by
+  rw [reduce D x g n gu nu nn Q Qx Qu hx hg hn hQ hnD hgD]
+  field_simp [hx, hg, hn]
+
+#print axioms reduce_scaled
+
+#print axioms reduce
+end HermiteIdentity
+
+noncomputable section
+namespace HermiteNonzero
+open MvPolynomial WeightedPrimitiveTransport SymmetricAffineField SymmetricRatioCurrent
+open SymmetricTraceEndpoint ChartSquareBase SquareDifferentials
+set_option maxHeartbeats 4000000
+set_option backward.isDefEq.respectTransparency false
+
+def H : Poly := X 2*pderiv 2 rawWeighted + X 3*pderiv 3 rawWeighted
+
+theorem Gx_nonzero : evalG (pderiv 3 G) ≠ 0 := by
+  intro hz
+  have h : t*weightedMap (pderiv 2 rawWeighted) + ChartSquareBase.d*weightedMap (pderiv 3 rawWeighted) = 0 := by
+    have hh := raw_derivative_x
+    rw [hz] at hh
+    field_simp [t_nonzero] at hh
+    simpa using hh.symm
+  have hdiv : chartEquation ∣ squareLift H := by
+    rw [← residueMap_kernel]
+    change weightedMap H = 0
+    simp only [H, map_add, map_mul]
+    simpa [t, ChartSquareBase.d, weightedMap] using h
+  have hi6 : Complex.I ^ 6 = -1 := by
+    calc
+      Complex.I ^ 6 = (Complex.I ^ 2)^3 := by rw [← pow_mul]
+      _ = -1 := by rw [Complex.I_sq]; norm_num
+  let point : Fin 5 → ℂ := ![0,-1/2,Complex.I,-Complex.I/2,0]
+  have heq : eval point chartEquation = 0 := by
+    norm_num [point, chartEquation, rawWeighted, leftQuadric, rightQuadric,
+      Fin.ext_iff, Matrix.cons_val_two, Matrix.cons_val_three, Matrix.cons_val_four,
+      Complex.I_sq, hi6]
+    ring_nf
+    rw [hi6]
+    norm_num
+  have hval : eval point (squareLift H) = -(387/32 : ℂ) := by
+    have htwo2 : (pderiv 2 : Derivation ℂ Poly Poly) 2 = 0 := (pderiv 2 : Derivation ℂ Poly Poly).map_natCast 2
+    have htwo3 : (pderiv 3 : Derivation ℂ Poly Poly) 2 = 0 := (pderiv 3 : Derivation ℂ Poly Poly).map_natCast 2
+    have hthirty2 : (pderiv 2 : Derivation ℂ Poly Poly) 30 = 0 := (pderiv 2 : Derivation ℂ Poly Poly).map_natCast 30
+    have hthirty3 : (pderiv 3 : Derivation ℂ Poly Poly) 30 = 0 := (pderiv 3 : Derivation ℂ Poly Poly).map_natCast 30
+    norm_num [H, point, rawWeighted, leftQuadric, rightQuadric, htwo2, htwo3, hthirty2, hthirty3,
+      pderiv_mul, pderiv_pow, pderiv_X, Pi.single_apply, Fin.ext_iff,
+      Matrix.cons_val_two, Matrix.cons_val_three, Matrix.cons_val_four, map_ofNat,
+      Complex.I_sq, hi6]
+    ring_nf
+    rw [hi6]
+    norm_num
+  have hd := map_dvd (eval point) hdiv
+  rw [heq, zero_dvd_iff, hval] at hd
+  norm_num at hd
+
+#print axioms Gx_nonzero
+end HermiteNonzero
+
+noncomputable section
+namespace HermiteBinding
+open MvPolynomial SymmetricAffineField SymmetricRatioCurrent SymmetricPrimitiveEndpoint
+open SymmetricTraceEndpoint ChartSquareBase SquareDifferentials SquareStable
+set_option maxHeartbeats 1500000
+set_option backward.isDefEq.respectTransparency true
+
+def Q : GP := X 1*X 2*(1-X 4)*(X 3-X 0*X 4)
+
+theorem evalG_X (i : Fin 5) : evalG (X i) = generators i := by
+  exact eval₂Hom_X' _ _ _
+
+theorem Dx_generator_aux (q : FunctionField) (hq : Dx (v^2) = -q) (i : Fin 5) :
+    Dx (evalG (X i)) = evalG (pderiv 3 (X i)) - evalG (pderiv 4 (X i))*q := by
+  rw [evalG_X]
+  fin_cases i <;> norm_num [pderiv_X, Pi.single_apply, Fin.ext_iff]
+  · change Dx (lambda^2) = 0
+    rw [← coordinate_lambda, pow_two, Derivation.leibniz]
+    simp only [Dx_param, Fin.reduceEq, ite_false, smul_eq_mul, mul_zero, zero_mul, add_zero]
+  · change Dx b = 0
+    rw [← coordinate_b, Dx_param]
+  · change Dx (ChartSquareBase.d/t) = 0
+    rw [← coordinate_s, Dx_param]
+  · change Dx (t^2) = 1
+    exact Dx_tsq
+  · change Dx (v^2) = -q
+    exact hq
+
+theorem Dx_evalG_aux (q : FunctionField) (hq : Dx (v^2) = -q) (p : GP) : Dx (evalG p) =
+    evalG (pderiv 3 p)-evalG (pderiv 4 p)*q := by
+  induction p using MvPolynomial.induction_on with
+  | C z =>
+    simp only [map_C, pderiv_C, map_zero, zero_mul, sub_zero]
+    simpa only [evalG, eval₂Hom_C] using Dx_const z
+  | add p r hp hr =>
+    simp only [map_add, hp, hr]
+    ring
+  | mul_X p i hp =>
+    simp only [map_mul, Derivation.leibniz, pderiv_mul, map_add, smul_eq_mul]
+    rw [hp, Dx_generator_aux q hq]
+    ring
+
+theorem Dx_evalG (p : GP) : Dx (evalG p) =
+    evalG (pderiv 3 p)-evalG (pderiv 4 p)*evalG (pderiv 3 G)/normal := by
+  have hq : Dx (v^2) = -(evalG (pderiv 3 G)/normal) := by rw [Dx_u]; ring
+  simpa only [mul_div_assoc] using Dx_evalG_aux (evalG (pderiv 3 G)/normal) hq p
+
+
+def q0 : SquareField := ⟨evalG Q, evalG_mem _⟩
+def qx0 : SquareField := ⟨evalG (pderiv 3 Q), evalG_mem _⟩
+def qu0 : SquareField := ⟨evalG (pderiv 4 Q), evalG_mem _⟩
+def n0 : SquareField := ⟨evalG (pderiv 3 G), evalG_mem _⟩
+def nn0 : SquareField := ⟨evalG (pderiv 3 (pderiv 3 G)), evalG_mem _⟩
+def nu0 : SquareField := ⟨evalG (pderiv 4 (pderiv 3 G)), evalG_mem _⟩
+def g0 : SquareField := ⟨normal, normal_mem⟩
+def gu0 : SquareField := ⟨secondNormal, by rw [secondNormal_eq_Guu]; exact evalG_mem _⟩
+def x0 : SquareField := ⟨t^2, by simpa [generators] using generator_mem 3⟩
+
+def hermiteCurrent : SquareField := -q0/(n0*g0)
+def hermiteRemainder : SquareField := (2*x0*(qx0*n0-q0*nn0)+q0*n0)/(n0^2*g0)
+
+theorem Dx_normal : Dx normal = (nu0 : FunctionField)-(n0 : FunctionField)*(gu0 : FunctionField)/normal := by
+  calc
+    Dx normal = Dx (evalG (pderiv 4 G)) := by rw [normal_eq_Gu]
+    _ = evalG (pderiv 4 (pderiv 3 G))-secondNormal*evalG (pderiv 3 G)/normal := by
+      rw [Dx_evalG, HoldoutConstruction.pderiv_commute 3 4 G, ← secondNormal_eq_Guu]
+    _ = _ := by change _ = evalG (pderiv 4 (pderiv 3 G))-evalG (pderiv 3 G)*secondNormal/normal; ring
+
+theorem n0_nonzero : (n0 : FunctionField) ≠ 0 := HermiteNonzero.Gx_nonzero
+
+theorem x0_nonzero : (x0 : FunctionField) ≠ 0 := pow_ne_zero 2 t_nonzero
+
+theorem g0_nonzero : (g0 : FunctionField) ≠ 0 := SymmetricTraceEndpoint.normal_nonzero
+
+theorem Dx_q0 : Dx (q0 : FunctionField) = (qx0 : FunctionField)-(n0 : FunctionField)*(qu0 : FunctionField)/(g0 : FunctionField) := by
+  change Dx (evalG Q) = evalG (pderiv 3 Q)-evalG (pderiv 3 G)*evalG (pderiv 4 Q)/normal
+  rw [Dx_evalG]
+  ring
+
+theorem Dx_n0 : Dx (n0 : FunctionField) = (nn0 : FunctionField)-(n0 : FunctionField)*(nu0 : FunctionField)/(g0 : FunctionField) := by
+  change Dx (evalG (pderiv 3 G)) = evalG (pderiv 3 (pderiv 3 G))-evalG (pderiv 3 G)*evalG (pderiv 4 (pderiv 3 G))/normal
+  rw [Dx_evalG]
+  ring
+
+theorem Dx_g0 : Dx (g0 : FunctionField) = (nu0 : FunctionField)-(n0 : FunctionField)*(gu0 : FunctionField)/(g0 : FunctionField) := Dx_normal
+
+theorem hermite_identity_field :
+    ((g0 : FunctionField)*(qu0 : FunctionField)-(gu0 : FunctionField)*(q0 : FunctionField))/(g0 : FunctionField)^3 =
+      Dx (hermiteCurrent : FunctionField)+(hermiteCurrent : FunctionField)/(2*(x0 : FunctionField)) +
+        (hermiteRemainder : FunctionField)/(2*(x0 : FunctionField)) := by
+  have htwo : ((2 : SquareField) : FunctionField) = 2 := rfl
+  have hpow : ((n0^2 : SquareField) : FunctionField) = (n0 : FunctionField)^2 := rfl
+  simpa only [hermiteCurrent, hermiteRemainder, Subfield.coe_div, Subfield.coe_mul,
+    Subfield.coe_add, Subfield.coe_sub, Subfield.coe_neg, htwo, hpow] using
+    HermiteIdentity.reduce_scaled Dx (x0 : FunctionField) (g0 : FunctionField)
+      (n0 : FunctionField) (gu0 : FunctionField) (nu0 : FunctionField) (nn0 : FunctionField)
+      (q0 : FunctionField) (qx0 : FunctionField) (qu0 : FunctionField)
+      x0_nonzero g0_nonzero n0_nonzero Dx_q0 Dx_n0 Dx_g0
+
+
+theorem P_eq_xQ : P = X 3*Q := by
+  simp only [P, Q]
+  ring
+
+theorem Pu_eq_xQu : pderiv 4 P = X 3*pderiv 4 Q := by
+  rw [P_eq_xQ, pderiv_mul]
+  simp [pderiv_X, Pi.single_apply, Fin.ext_iff]
+
+theorem source_q : t*source = t^2*(q0 : FunctionField) := by
+  rw [source_eq_P, P_eq_xQ, map_mul, evalG_X]
+  rfl
+
+theorem sourceDerivative_qu : t*sourceDerivative = t^2*(qu0 : FunctionField) := by
+  rw [sourceDerivative_eq_Pu, Pu_eq_xQu, map_mul, evalG_X]
+  rfl
+
+theorem target_source_form : t*residueDensity =
+    2*(x0 : FunctionField)*(((g0 : FunctionField)*(qu0 : FunctionField)-(gu0 : FunctionField)*(q0 : FunctionField))/(g0 : FunctionField)^3) := by
+  calc
+    t*residueDensity = 2*(normal*(t*sourceDerivative)-secondNormal*(t*source))/normal^3 := by
+      change t*(2*(normal*sourceDerivative-secondNormal*source)/normal^3) = _
+      ring
+    _ = _ := by
+      rw [source_q, sourceDerivative_qu]
+      change 2*(normal*(t^2*(qu0 : FunctionField))-secondNormal*(t^2*(q0 : FunctionField)))/normal^3 = 2*t^2*((normal*(qu0 : FunctionField)-secondNormal*(q0 : FunctionField))/normal^3)
+      ring
+
+theorem actual_hermite_decomposition :
+    t*residueDensity = (hermiteCurrent : FunctionField) +
+      2*(x0 : FunctionField)*Dx (hermiteCurrent : FunctionField) + (hermiteRemainder : FunctionField) := by
+  rw [target_source_form, hermite_identity_field]
+  have hx := x0_nonzero
+  field_simp [hx]
+  ring
+
+
+theorem square_hermite_decomposition :
+    (⟨t*residueDensity, scaled_residue_mem⟩ : SquareField) =
+      hermiteCurrent + 2*x0*Dx0 hermiteCurrent + hermiteRemainder := by
+  apply Subtype.ext
+  exact actual_hermite_decomposition
+
+theorem primitive_iff_hermite_remainder :
+    Nonempty RelativePrimitive ↔
+      ∃ a b c : SquareField, Dr0 a + Ds0 b + c + 2*x0*Dx0 c = hermiteRemainder := by
+  rw [SquarePrimitive.primitive_iff_square_equation]
+  constructor
+  · rintro ⟨a,b,c,h⟩
+    refine ⟨a,b,c-hermiteCurrent,?_⟩
+    change Dr0 a+Ds0 b+c+2*x0*Dx0 c = ⟨t*residueDensity,scaled_residue_mem⟩ at h
+    rw [square_hermite_decomposition] at h
+    simp only [map_sub, mul_sub]
+    linear_combination h
+  · rintro ⟨a,b,c,h⟩
+    refine ⟨a,b,c+hermiteCurrent,?_⟩
+    change Dr0 a+Ds0 b+(c+hermiteCurrent)+2*x0*Dx0 (c+hermiteCurrent) = ⟨t*residueDensity,scaled_residue_mem⟩
+    rw [square_hermite_decomposition]
+    simp only [map_add, mul_add]
+    linear_combination h
+
+#print axioms primitive_iff_hermite_remainder
+
+#print axioms actual_hermite_decomposition
+
+#print axioms hermite_identity_field
+
+#print axioms Dx_evalG
+end HermiteBinding

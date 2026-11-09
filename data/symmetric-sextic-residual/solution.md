@@ -436,6 +436,19 @@ The forward direction descends by normalized finite trace; the reverse
 direction constructs the chart current explicitly. This equivalence does not
 provide a solution of the displayed equation.
 
+The same helper proves a first exact pole reduction for the actual cubic
+\(f(x,u)\). Put \(r=b\), \(s=d/c\), and
+\(Q=rs(1-u)(x-\lambda^2u)\). With \(C_0=-Q/(f_xf_u)\),
+`HermiteBinding.actual_hermite_decomposition` proves
+\[
+c\rho=C_0+2xD_xC_0+
+\frac{2x(Q_xf_x-Qf_{xx})+Qf_x}{f_x^2f_u}.
+\]
+The proof establishes that both \(f_x\) and \(f_u\) are nonzero in the
+actual chart field. Thus `primitive_iff_hermite_remainder` replaces the
+original source by the displayed lower-pole remainder, but still requires
+three rational functions solving its differential equation.
+
 ## Exact negative source and regular contact
 
 At \(\lambda=1\), let \(G=\texttt{weightedG}\) in coordinates
