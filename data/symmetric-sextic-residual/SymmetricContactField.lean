@@ -13,6 +13,12 @@ The 70 coefficient equations of a norm presentation are restricted to a
 system of size 73 over Z[lambda,r,s]. All finite data are exact inputs to
 kernel-checked arithmetic, not an asserted characteristic-zero root.
 
+The field factor below is selected from a 74-variable augmentation,
+inverting both the 70-dimensional coefficient Jacobian minor and the
+ambient point minor in `(r,alpha,beta)`. These opens are verified at the
+seed and retained in characteristic zero. They make the contact parameter
+nonconstant and provide its normalized derivation.
+
 The finite seed is derived from the norm-contact construction in
 `scripts/verify-norm-contact-span.py`. Its balanced integral lifts define
 the square incidence; they are not asserted to solve it in characteristic
@@ -2360,24 +2366,318 @@ set_option maxHeartbeats 2000000
 set_option maxRecDepth 16384
 set_option backward.isDefEq.respectTransparency false
 
-abbrev GenericIncidence := SquareGenericAlgebra FunctionField equations
+
+
+open MvPolynomial SymmetricAffineField SymmetricRatioCurrent
+open HoldoutConstruction ReflectionCoupledFano
+open scoped BigOperators
+set_option maxHeartbeats 2000000
+set_option maxRecDepth 16384
+set_option backward.isDefEq.respectTransparency false
+
+abbrev JointIndex := Index ⊕ Fin 3
+abbrev JointPolynomial := MvPolynomial JointIndex ℤ
+
+def flatten : EqPoly →+* JointPolynomial :=
+  eval₂Hom ((rename Sum.inr : Base →ₐ[ℤ] JointPolynomial).toRingHom) (fun i => X (Sum.inl i))
+
+def unflatten : JointPolynomial →+* EqPoly :=
+  eval₂Hom ((C : Base →+* EqPoly).comp (C : ℤ →+* Base))
+    (Sum.elim X (fun j => C (X j)))
+
+theorem unflatten_flatten (p : EqPoly) : unflatten (flatten p) = p := by
+  have hc (a : Base) : unflatten (rename Sum.inr a) = C a := by
+    induction a using MvPolynomial.induction_on with
+    | C n => simp [unflatten]
+    | add p q hp hq => simp [hp,hq]
+    | mul_X p j hp =>
+      simp only [map_mul, rename_X, hp]
+      simp [unflatten]
+  induction p using MvPolynomial.induction_on with
+  | C a => simpa [flatten] using hc a
+  | add p q hp hq => simp [hp,hq]
+  | mul_X p j hp =>
+    simp only [map_mul, hp]
+    simp [flatten, unflatten]
+
+theorem eval_unflatten {L : Type*} [CommRing L] [Algebra Base L]
+    (x : Index → L) (p : JointPolynomial) :
+    aeval x (unflatten p) =
+      eval₂Hom (Int.castRingHom L) (Sum.elim x (fun j => algebraMap Base L (X j))) p := by
+  induction p using MvPolynomial.induction_on with
+  | C z => simp [unflatten]
+  | add p q hp hq => simp [hp,hq]
+  | mul_X p j hp =>
+    simp only [map_mul, hp]
+    cases j <;> simp [unflatten]
+
+theorem eval_flatten {L : Type*} [CommRing L] [Algebra Base L]
+    (x : Index → L) (p : EqPoly) :
+    eval₂Hom (Int.castRingHom L) (Sum.elim x (fun j => algebraMap Base L (X j))) (flatten p) =
+      aeval x p := by
+  rw [← eval_unflatten, unflatten_flatten]
+
+def pointEquationIndex (i : Fin 3) : Index := Fin.natAdd 70 i
+
+def pointVariable : Fin 3 → JointIndex := ![Sum.inr 1,Sum.inl 71,Sum.inl 72]
+
+def pointAmbientDerivative (j i : Fin 3) : EqPoly :=
+  unflatten (pderiv (pointVariable j) (flatten (equations (pointEquationIndex i))))
+
+def pointAmbientMinorPolynomial : EqPoly :=
+  Matrix.det (fun i j : Fin 3 => pointAmbientDerivative j i)
+
+def pointAmbientSeedData : Matrix (Fin 3) (Fin 3) (ZMod 37) :=
+  ![![23,14,34],![27,15,14],![24,24,12]]
+
+
+
+def jointMonomial (s : Term) : List JointIndex :=
+  s.parameters.map Sum.inr ++ s.unknowns.map Sum.inl
+
+def jointPolynomial : List Term → JointPolynomial
+  | [] => 0
+  | s :: ss => C s.coefficient*(s |> jointMonomial |>.map X).prod+jointPolynomial ss
+
+def jointMonomialPartial {L : Type*} [CommRing L] :
+    List JointIndex → (JointIndex → L) → JointIndex → L
+  | [], _, _ => 0
+  | j :: ss, z, k => (if j = k then (ss.map z).prod else 0)+z j*jointMonomialPartial ss z k
+
+def jointPolynomialPartial {L : Type*} [CommRing L]
+    (z : JointIndex → L) (k : JointIndex) : List Term → L
+  | [] => 0
+  | s :: ss => s.coefficient*jointMonomialPartial (jointMonomial s) z k+jointPolynomialPartial z k ss
+
+theorem monomialPoly_prod (ss : List Index) : monomialPoly ss = (ss.map X).prod := by
+  induction ss with
+  | nil => rfl
+  | cons i ss ih => simp [monomialPoly, ih]
+
+theorem flatten_polynomial (ss : List Term) : flatten (polynomial ss) = jointPolynomial ss := by
+  induction ss with
+  | nil => simp [polynomial, jointPolynomial]
+  | cons s ss ih =>
+    simp only [polynomial, jointPolynomial, map_add, map_mul, ih]
+    simp only [flatten, termCoefficient, monomialPoly_prod, eval₂Hom_C,
+      map_mul, map_list_prod, rename_C, rename_X, eval₂Hom_X',
+      List.map_map, Function.comp_def, jointMonomial, List.map_append,
+      List.prod_append, mul_assoc]
+    have hc (z : ℤ) : (rename Sum.inr : Base →ₐ[ℤ] JointPolynomial).toRingHom (C z) = C z := by simp
+    have hx (j : Fin 3) : (rename Sum.inr : Base →ₐ[ℤ] JointPolynomial).toRingHom (X j) = X (Sum.inr j) := by simp
+    simp only [hc,hx]
+
+theorem eval_joint_monomial_partial {L : Type*} [CommRing L]
+    (z : JointIndex → L) (ss : List JointIndex) (k : JointIndex) :
+    eval₂Hom (Int.castRingHom L) z (pderiv k (ss.map X).prod) = jointMonomialPartial ss z k := by
+  induction ss with
+  | nil => simp [jointMonomialPartial]
+  | cons j ss ih =>
+    by_cases hj : j = k
+    · subst j
+      simp only [jointMonomialPartial, List.map_cons, List.prod_cons,
+        pderiv_mul, pderiv_X, Pi.single_apply, if_pos rfl, ite_true, map_add, map_mul,
+        map_one, map_zero, zero_mul, one_mul, ih, eval₂Hom_X', map_list_prod,
+        List.map_map, Function.comp_def]
+    · simp only [jointMonomialPartial, List.map_cons, List.prod_cons,
+        pderiv_mul, pderiv_X, Pi.single_apply, if_neg hj, if_neg (Ne.symm hj),
+        map_add, map_mul, map_zero, zero_mul, zero_add, ih, eval₂Hom_X']
+
+theorem eval_joint_polynomial_partial {L : Type*} [CommRing L]
+    (z : JointIndex → L) (ss : List Term) (k : JointIndex) :
+    eval₂Hom (Int.castRingHom L) z (pderiv k (jointPolynomial ss)) =
+      jointPolynomialPartial z k ss := by
+  induction ss with
+  | nil => simp [jointPolynomial, jointPolynomialPartial]
+  | cons s ss ih =>
+    simp only [jointPolynomial, jointPolynomialPartial, pderiv_mul,
+      pderiv_C, map_add, map_mul, map_zero, zero_mul, zero_add,
+      eval₂Hom_C, Int.coe_castRingHom, eval_joint_monomial_partial, ih]
+
+set_option maxHeartbeats 0 in
+theorem seed_pointAmbient_finite : ∀ i j : Fin 3,
+    jointPolynomialPartial (Sum.elim seedPoint seedParameters) (pointVariable j)
+      (equationData (pointEquationIndex i)) = pointAmbientSeedData i j := by decide
+
+theorem seed_pointAmbient_table (i j : Fin 3) :
+    aeval seedPoint (pointAmbientDerivative j i) = pointAmbientSeedData i j := by
+  rw [pointAmbientDerivative, eval_unflatten, equations, flatten_polynomial,
+    eval_joint_polynomial_partial]
+  simpa [specialAlgebra, specialMap] using seed_pointAmbient_finite i j
+
+theorem seed_pointAmbient_unit : IsUnit (aeval seedPoint pointAmbientMinorPolynomial) := by
+  have hm := RingHom.map_det (aeval seedPoint).toRingHom (fun i j : Fin 3 => pointAmbientDerivative j i)
+  change aeval seedPoint pointAmbientMinorPolynomial = Matrix.det
+    (fun i j : Fin 3 => aeval seedPoint (pointAmbientDerivative j i)) at hm
+  have he : (fun i j : Fin 3 => aeval seedPoint (pointAmbientDerivative j i)) = pointAmbientSeedData :=
+    funext (fun i => funext (fun j => seed_pointAmbient_table i j))
+  rw [hm, he]
+  exact isUnit_iff_ne_zero.mpr (by decide)
+
+open MvPolynomial SymmetricAffineField SymmetricRatioCurrent SymmetricContactField
+open HoldoutConstruction ReflectionCoupledFano
+open scoped BigOperators
+set_option maxHeartbeats 2000000
+set_option maxRecDepth 16384
+set_option backward.isDefEq.respectTransparency false
+
+theorem zero_block_surjective {L ι κ σ τ : Type*} [Field L]
+    [Fintype ι] [Fintype κ] [Fintype σ] [Fintype τ]
+    (J : Matrix (ι ⊕ κ) (σ ⊕ τ) L) (hsurj : Function.Surjective J.mulVec)
+    (hzero : ∀ i j, J (Sum.inl i) (Sum.inr j) = 0) :
+    Function.Surjective (Matrix.mulVec (fun i j => J (Sum.inl i) (Sum.inl j))) := by
+  intro y
+  obtain ⟨v,hv⟩ := hsurj (Sum.elim y (fun _ => 0))
+  refine ⟨fun j => v (Sum.inl j), ?_⟩
+  ext i
+  have hi := congrFun hv (Sum.inl i)
+  simpa only [Matrix.mulVec, dotProduct, Fintype.sum_sum_type, hzero,
+    zero_mul, Finset.sum_const_zero, add_zero, Sum.elim_inl] using hi
+
+theorem seed_norm_motion_zero : ∀ (i : Fin 70) (j : Fin 3),
+    jacobianData (normIndex i) (Fin.natAdd 70 j) = 0 := by decide
+
+def normJacobianSeed : Matrix (Fin 70) (Fin 70) (ZMod 37) :=
+  fun i j => jacobianData (normIndex i) (normIndex j)
+
+theorem normJacobianSeed_unit : IsUnit normJacobianSeed := by
+  have hj : IsUnit jacobianData := by
+    apply isUnit_iff_exists_inv.mpr
+    refine ⟨inverseData, ?_⟩
+    ext i j
+    simpa [Matrix.mul_apply, Matrix.one_apply] using seed_inverse_table i j
+  let e : Fin 70 ⊕ Fin 3 ≃ Index := finSumFinEquiv
+  have hs : Function.Surjective (jacobianData.submatrix e e).mulVec := by
+    intro y
+    obtain ⟨v,hv⟩ := (Matrix.mulVec_surjective_iff_isUnit.mpr hj) (y ∘ e.symm)
+    refine ⟨v ∘ e, ?_⟩
+    rw [Matrix.submatrix_mulVec_equiv]
+    simpa only [Function.comp_assoc, Equiv.self_comp_symm, Function.comp_id,
+      hv, Equiv.symm_comp_self, Function.id_comp]
+  apply Matrix.mulVec_surjective_iff_isUnit.mp
+  exact zero_block_surjective (jacobianData.submatrix e e) hs seed_norm_motion_zero
+
+
+def normMinorPolynomial : EqPoly := Matrix.det
+  (fun i j : Fin 70 => pderiv (normIndex i) (equations (normIndex j)))
+
+theorem seed_normMinor_unit : IsUnit (aeval seedPoint normMinorPolynomial) := by
+  have hm := RingHom.map_det (aeval seedPoint).toRingHom
+    (fun i j : Fin 70 => pderiv (normIndex i) (equations (normIndex j)))
+  change aeval seedPoint normMinorPolynomial = Matrix.det
+    (fun i j : Fin 70 => aeval seedPoint (pderiv (normIndex i) (equations (normIndex j)))) at hm
+  have he : (fun i j : Fin 70 => aeval seedPoint (pderiv (normIndex i) (equations (normIndex j)))) =
+      normJacobianSeed.transpose := by
+    ext i j
+    rw [equations, eval_partial_polynomial]
+    simpa [normJacobianSeed, specialAlgebra, specialMap] using
+      seed_jacobian_table (normIndex j) (normIndex i)
+  rw [hm, he, Matrix.det_transpose]
+  exact (Matrix.isUnit_iff_isUnit_det normJacobianSeed).mp normJacobianSeed_unit
+
+def anchorPolynomial : EqPoly := normMinorPolynomial*pointAmbientMinorPolynomial
+
+theorem seed_anchor_unit : IsUnit (aeval seedPoint anchorPolynomial) := by
+  rw [anchorPolynomial, map_mul]
+  exact seed_normMinor_unit.mul seed_pointAmbient_unit
+
+abbrev AugmentedIndex := Index ⊕ Unit
+abbrev AugmentedPolynomial := MvPolynomial AugmentedIndex Base
+
+def augmentedEquations : AugmentedIndex → AugmentedPolynomial
+  | Sum.inl i => rename Sum.inl (equations i)
+  | Sum.inr _ => rename Sum.inl anchorPolynomial*X (Sum.inr ())-1
+
+def augmentedSeed : AugmentedIndex → ZMod 37 :=
+  Sum.elim seedPoint (fun _ => (aeval seedPoint anchorPolynomial)⁻¹)
+
+theorem pderiv_inr_rename_inl {R ι κ : Type*} [CommRing R] [DecidableEq ι] [DecidableEq κ]
+    (p : MvPolynomial ι R) (j : κ) :
+    pderiv (Sum.inr j) (rename Sum.inl p) = 0 := by
+  induction p using MvPolynomial.induction_on with
+  | C a => simp
+  | add p q hp hq => simp [hp,hq]
+  | mul_X p i hp =>
+    simp [pderiv_mul, pderiv_X, Pi.single_apply, hp]
+
+theorem augmented_seed_equations (i : AugmentedIndex) :
+    aeval augmentedSeed (augmentedEquations i) = 0 := by
+  cases i with
+  | inl i => simpa [augmentedEquations, aeval_rename, augmentedSeed, Function.comp_def] using seed_equations i
+  | inr i =>
+    have hq : aeval seedPoint anchorPolynomial ≠ 0 := seed_anchor_unit.ne_zero
+    simp [augmentedEquations, aeval_rename, augmentedSeed, Function.comp_def, hq]
+
+theorem augmented_seed_jacobian : IsUnit (Matrix.det
+    (fun i j : AugmentedIndex => aeval augmentedSeed (pderiv i (augmentedEquations j)))) := by
+  let M : Matrix Index Index (ZMod 37) :=
+    fun i j => aeval seedPoint (pderiv i (equations j))
+  let B : Matrix Index Unit (ZMod 37) :=
+    fun i j => aeval augmentedSeed (pderiv (Sum.inl i) (augmentedEquations (Sum.inr j)))
+  let Q : Matrix Unit Unit (ZMod 37) := fun _ _ => aeval seedPoint anchorPolynomial
+  have hm : (fun i j : AugmentedIndex => aeval augmentedSeed (pderiv i (augmentedEquations j))) =
+      Matrix.fromBlocks M B 0 Q := by
+    ext i j
+    cases i with
+    | inl i =>
+      cases j with
+      | inl j =>
+        simp [augmentedEquations, pderiv_rename Sum.inl_injective,
+          aeval_rename, augmentedSeed, M, Function.comp_def]
+      | inr j => rfl
+    | inr i =>
+      cases j with
+      | inl j => simp [augmentedEquations, pderiv_inr_rename_inl]
+      | inr j =>
+        cases i; cases j
+        simp [augmentedEquations, pderiv_mul, pderiv_inr_rename_inl,
+          pderiv_X, Pi.single_apply, aeval_rename, augmentedSeed, Q, Function.comp_def]
+  rw [hm, Matrix.det_fromBlocks_zero₂₁]
+  apply seed_jacobian_unit.mul
+  simpa [Q] using seed_anchor_unit
+
+
+theorem augmented_root_anchor_unit {T : Type*} [CommRing T] [Algebra Base T]
+    (z : AugmentedIndex → T) (hroot : ∀ i, aeval z (augmentedEquations i) = 0) :
+    IsUnit (aeval (fun i => z (Sum.inl i)) anchorPolynomial) := by
+  have h := hroot (Sum.inr ())
+  simp only [augmentedEquations, map_sub, map_mul, map_one, aeval_X,
+    aeval_rename, Function.comp_def, sub_eq_zero] at h
+  exact isUnit_iff_exists_inv.mpr ⟨z (Sum.inr ()),h⟩
+
+/-- Arithmetic lifting can preserve the nonsingular contact-parameter open,
+instead of choosing an unconstrained component of the original incidence. -/
+theorem exists_anchored_field :
+    ∃ I : Ideal (SquareGenericAlgebra FunctionField augmentedEquations), I.IsMaximal ∧
+      Module.Finite FunctionField ((SquareGenericAlgebra FunctionField augmentedEquations) ⧸ I) ∧
+      Algebra.IsSeparable FunctionField ((SquareGenericAlgebra FunctionField augmentedEquations) ⧸ I) ∧
+      (∀ i, aeval (squareGenericCoordinates augmentedEquations I) (augmentedEquations i) = 0) ∧
+      IsUnit (Matrix.det (fun i j => aeval (squareGenericCoordinates augmentedEquations I)
+        (pderiv i (augmentedEquations j)))) := by
+  exact square_system_generic_lift (R := Base) (K := FunctionField) (T := ZMod 37)
+    augmentedEquations augmentedSeed augmented_seed_equations augmented_seed_jacobian parameterMap_injective
+
+
+open WeightedPrimitiveTransport
+
+abbrev GenericIncidence := SquareGenericAlgebra FunctionField augmentedEquations
 instance (priority := 2000) genericIncidence_module : Module FunctionField GenericIncidence :=
   Algebra.toModule
 instance (priority := 2000) genericIncidence_smul : SMul FunctionField GenericIncidence :=
   genericIncidence_module.toSMul
 
-def contactFactor : Ideal GenericIncidence := Classical.choose exists_generic_field
+def contactFactor : Ideal GenericIncidence := Classical.choose exists_anchored_field
 instance contactFactor_maximal : contactFactor.IsMaximal :=
-  (Classical.choose_spec exists_generic_field).1
+  (Classical.choose_spec exists_anchored_field).1
 abbrev LiftedField := GenericIncidence ⧸ contactFactor
 instance liftedField_field : Field LiftedField := Ideal.Quotient.field contactFactor
 instance (priority := 2000) liftedField_module : Module FunctionField LiftedField := Algebra.toModule
 instance (priority := 2000) liftedField_smul : SMul FunctionField LiftedField :=
   liftedField_module.toSMul
 instance liftedField_finite : Module.Finite FunctionField LiftedField :=
-  (Classical.choose_spec exists_generic_field).2.1
+  (Classical.choose_spec exists_anchored_field).2.1
 instance liftedField_separable : Algebra.IsSeparable FunctionField LiftedField :=
-  (Classical.choose_spec exists_generic_field).2.2.1
+  (Classical.choose_spec exists_anchored_field).2.2.1
 instance liftedField_charZero : CharZero LiftedField :=
   charZero_of_injective_ringHom (f := algebraMap FunctionField LiftedField)
     (algebraMap FunctionField LiftedField).injective
@@ -2390,7 +2690,9 @@ instance liftedField_parameterTower : IsScalarTower Base FunctionField LiftedFie
   IsScalarTower.of_algebraMap_eq (R := Base) (S := FunctionField) (A := LiftedField)
     (fun _ => rfl)
 
-def genericCoordinates : Index → LiftedField := squareGenericCoordinates equations contactFactor
+def augmentedCoordinates : AugmentedIndex → LiftedField := squareGenericCoordinates augmentedEquations contactFactor
+
+def genericCoordinates (i : Index) : LiftedField := augmentedCoordinates (Sum.inl i)
 
 def genericParameters (i : Fin 3) : LiftedField :=
   algebraMap FunctionField LiftedField (parameterCoordinates i)
@@ -2401,9 +2703,71 @@ def genericParameters (i : Fin 3) : LiftedField :=
   rw [parameterMap_X]
   rfl
 
+
+
+theorem generic_equations (i : Index) : aeval genericCoordinates (equations i) = 0 := by
+  have h := squareGeneric_solution augmentedEquations contactFactor (Sum.inl i)
+  change aeval augmentedCoordinates (rename Sum.inl (equations i)) = 0 at h
+  rw [aeval_rename] at h
+  change aeval genericCoordinates (equations i) = 0 at h
+  exact h
+
+theorem generic_original_jacobian : IsUnit (Matrix.det
+    (fun i j : Index => aeval genericCoordinates (pderiv i (equations j)))) := by
+  let J : Matrix AugmentedIndex AugmentedIndex LiftedField :=
+    fun i j => aeval augmentedCoordinates (pderiv j (augmentedEquations i))
+  have hJ : IsUnit J := by
+    apply (Matrix.isUnit_iff_isUnit_det J).mpr
+    have h := squareGeneric_jacobian augmentedEquations contactFactor
+    have hm : (fun i j : AugmentedIndex =>
+        aeval augmentedCoordinates (pderiv i (augmentedEquations j))) = J.transpose := rfl
+    change IsUnit (Matrix.det (fun i j : AugmentedIndex =>
+      aeval augmentedCoordinates (pderiv i (augmentedEquations j)))) at h
+    rw [hm, Matrix.det_transpose] at h
+    exact h
+  have hz (i : Index) (j : Unit) : J (Sum.inl i) (Sum.inr j) = 0 := by
+    simp [J, augmentedEquations, pderiv_inr_rename_inl]
+  let A : Matrix Index Index LiftedField :=
+    fun i j => aeval genericCoordinates (pderiv j (equations i))
+  have hs : Function.Surjective A.mulVec := by
+    have h := zero_block_surjective J (Matrix.mulVec_surjective_iff_isUnit.mpr hJ) hz
+    have he : (fun i j => J (Sum.inl i) (Sum.inl j)) = A := by
+      ext i j
+      simp [J, A, augmentedEquations, pderiv_rename Sum.inl_injective,
+        aeval_rename, Function.comp_def]
+      rfl
+    rw [he] at h
+    exact h
+  have hA := (Matrix.isUnit_iff_isUnit_det A).mp (Matrix.mulVec_surjective_iff_isUnit.mp hs)
+  have hm : (fun i j : Index => aeval genericCoordinates (pderiv i (equations j))) = A.transpose := rfl
+  rw [hm, Matrix.det_transpose]
+  exact hA
+
+theorem generic_normMinor_unit : IsUnit (aeval genericCoordinates normMinorPolynomial) := by
+  have h := augmented_root_anchor_unit augmentedCoordinates
+    (squareGeneric_solution augmentedEquations contactFactor)
+  change IsUnit (aeval genericCoordinates anchorPolynomial) at h
+  rw [anchorPolynomial, map_mul] at h
+  exact isUnit_of_mul_isUnit_left h
+
+theorem generic_pointAmbient_unit : IsUnit (aeval genericCoordinates pointAmbientMinorPolynomial) := by
+  have h := augmented_root_anchor_unit augmentedCoordinates
+    (squareGeneric_solution augmentedEquations contactFactor)
+  change IsUnit (aeval genericCoordinates anchorPolynomial) at h
+  rw [anchorPolynomial, map_mul] at h
+  exact isUnit_of_mul_isUnit_right h
+
+theorem generic_norm_jacobian : IsUnit (Matrix.det
+    (fun i j : Fin 70 => aeval genericCoordinates (pderiv (normIndex i) (equations (normIndex j))))) := by
+  have hm := RingHom.map_det (aeval genericCoordinates).toRingHom
+    (fun i j : Fin 70 => pderiv (normIndex i) (equations (normIndex j)))
+  change aeval genericCoordinates normMinorPolynomial = Matrix.det
+    (fun i j : Fin 70 => aeval genericCoordinates (pderiv (normIndex i) (equations (normIndex j)))) at hm
+  exact hm ▸ generic_normMinor_unit
+
 theorem generic_values (i : Index) :
     polynomialValue genericParameters genericCoordinates (equationData i) = 0 := by
-  have h := squareGeneric_solution equations contactFactor i
+  have h := generic_equations i
   change aeval genericCoordinates (polynomial (equationData i)) = 0 at h
   rw [eval_polynomial] at h
   simpa only [generic_parameter] using h
@@ -2506,8 +2870,8 @@ theorem liftedTime_base (p : Base) : liftedTime (algebraMap Base LiftedField p) 
 
 theorem generic_coordinates_time (i : Index) : liftedTime (genericCoordinates i) = 0 := by
   apply square_system_derivative_zero (liftedTime) equations (genericCoordinates)
-    (liftedTime_base) (squareGeneric_solution equations contactFactor)
-    (squareGeneric_jacobian equations contactFactor) i
+    (liftedTime_base) generic_equations
+    generic_original_jacobian i
 
 def movingSection : LiftedField :=
   (algebraMap FunctionField LiftedField t)^2-(genericCoordinates 71)^2
@@ -2640,7 +3004,7 @@ def incidenceJacobian : Matrix Index Index LiftedField :=
 
 theorem incidenceJacobian_unit : IsUnit incidenceJacobian := by
   apply (Matrix.isUnit_iff_isUnit_det incidenceJacobian).mpr
-  have hj := squareGeneric_jacobian equations contactFactor
+  have hj := generic_original_jacobian
   have hm : (fun i j : Index => aeval genericCoordinates (pderiv i (equations j))) =
       incidenceJacobian.transpose := by
     ext i j
@@ -3078,14 +3442,201 @@ def relativePrimitiveOfCurveSource (H : CurveField)
       pencilEquation actualPencil ((genericCoordinates 71)^2) (genericCoordinates 72) = 0
     rw [actual_pencil_equation, actual_point_equation, sub_self]
 
+open MvPolynomial SymmetricAffineField SymmetricRatioCurrent
+open HoldoutConstruction ReflectionCoupledFano
+open scoped BigOperators
+set_option maxHeartbeats 2000000
+set_option maxRecDepth 16384
+set_option backward.isDefEq.respectTransparency false
+
+def contactCoefficientMatrix : Matrix (Fin 70) (Fin 70) LiftedField :=
+  fun i j => contactJacobian i j.castSucc
+
+def contactParameterColumn : Fin 70 → LiftedField := fun i => contactJacobian i 70
+
+theorem contactCoefficientMatrix_unit : IsUnit contactCoefficientMatrix := by
+  apply (Matrix.isUnit_iff_isUnit_det contactCoefficientMatrix).mpr
+  have h := generic_norm_jacobian
+  have hm : (fun i j : Fin 70 => aeval genericCoordinates
+      (pderiv (normIndex i) (equations (normIndex j)))) = contactCoefficientMatrix.transpose := by
+    ext i j
+    rw [equations, eval_partial_polynomial]
+    simp only [generic_parameter]
+    rfl
+  rw [hm, Matrix.det_transpose] at h
+  exact h
+
+def normVelocity : Fin 70 → LiftedField := -contactCoefficientMatrix⁻¹.mulVec contactParameterColumn
+
+theorem normVelocity_equation : contactCoefficientMatrix.mulVec normVelocity = -contactParameterColumn := by
+  rw [normVelocity, Matrix.mulVec_neg, Matrix.mulVec_mulVec,
+    Matrix.mul_nonsing_inv _ ((Matrix.isUnit_iff_isUnit_det contactCoefficientMatrix).mp contactCoefficientMatrix_unit), Matrix.one_mulVec]
+
+theorem contact_derivative_equation (D : Derivation ℤ LiftedField LiftedField)
+    (hl : D (genericParameters 0) = 0) :
+    contactCoefficientMatrix.mulVec (fun j => D (genericCoordinates (normIndex j))) =
+      (-D tau) • contactParameterColumn := by
+  ext k
+  have h := congrFun (norm_tangent_kernel D hl) k
+  change (∑ j : Fin 71, contactJacobian k j*
+    D (genericCoordinates (columnEquiv (Sum.inl j)))) = 0 at h
+  rw [Fin.sum_univ_castSucc] at h
+  change (∑ j : Fin 70, contactCoefficientMatrix k j*D (genericCoordinates (normIndex j)))+
+    contactParameterColumn k*D tau = 0 at h
+  change (∑ j : Fin 70, contactCoefficientMatrix k j*D (genericCoordinates (normIndex j))) =
+    -D tau*contactParameterColumn k
+  linear_combination h
+
+theorem matrix_vector_solution {F n : Type*} [Field F] [Fintype n] [DecidableEq n]
+    (A : Matrix n n F) (hA : IsUnit A) (v b : n → F) (h : A.mulVec v = b) :
+    v = A⁻¹.mulVec b := by
+  have hdet := (Matrix.isUnit_iff_isUnit_det A).mp hA
+  calc
+    v = (A⁻¹*A).mulVec v := by rw [Matrix.nonsing_inv_mul _ hdet, Matrix.one_mulVec]
+    _ = A⁻¹.mulVec b := by rw [← Matrix.mulVec_mulVec,h]
+
+theorem contact_derivative_chain (D : Derivation ℤ LiftedField LiftedField)
+    (hl : D (genericParameters 0) = 0) (i : Fin 70) :
+    D (genericCoordinates (normIndex i)) = normVelocity i*D tau := by
+  have h := matrix_vector_solution contactCoefficientMatrix contactCoefficientMatrix_unit
+    (fun j => D (genericCoordinates (normIndex j))) ((-D tau) • contactParameterColumn)
+    (contact_derivative_equation D hl)
+  rw [Matrix.mulVec_smul] at h
+  have hi := congrFun h i
+  change D (genericCoordinates (normIndex i)) =
+    (-D tau)*(contactCoefficientMatrix⁻¹.mulVec contactParameterColumn) i at hi
+  change D (genericCoordinates (normIndex i)) =
+    -((contactCoefficientMatrix⁻¹.mulVec contactParameterColumn) i)*D tau
+  calc
+    _ = (-D tau)*(contactCoefficientMatrix⁻¹.mulVec contactParameterColumn) i := hi
+    _ = -((contactCoefficientMatrix⁻¹.mulVec contactParameterColumn) i*D tau) := by
+      rw [neg_mul, mul_comm]
+    _ = _ := (neg_mul _ _).symm
+
+theorem contact_derivative_zero_of_tau_zero (D : Derivation ℤ LiftedField LiftedField)
+    (hl : D (genericParameters 0) = 0) (htau : D tau = 0) (j : Fin 71) :
+    D (genericCoordinates (columnEquiv (Sum.inl j))) = 0 := by
+  refine Fin.lastCases ?_ (fun i => ?_) j
+  · exact htau
+  · change D (genericCoordinates (normIndex i)) = 0
+    rw [contact_derivative_chain D hl i, htau, mul_zero]
+
+open MvPolynomial SymmetricAffineField SymmetricRatioCurrent
+open HoldoutConstruction ReflectionCoupledFano
+open scoped BigOperators
+set_option maxHeartbeats 2000000
+set_option maxRecDepth 16384
+set_option backward.isDefEq.respectTransparency false
+
+def jointCoordinates : JointIndex → LiftedField := Sum.elim genericCoordinates genericParameters
+
+theorem joint_equation (i : Index) :
+    eval₂Hom (Int.castRingHom LiftedField) jointCoordinates (flatten (equations i)) = 0 := by
+  have hp : (fun j => algebraMap Base LiftedField (X j)) = genericParameters :=
+    funext generic_parameter
+  unfold jointCoordinates
+  rw [← hp, eval_flatten, generic_equations]
+
+theorem joint_derivative_equation (D : Derivation ℤ LiftedField LiftedField) (i : Index) :
+    (∑ j : Index, eval₂Hom (Int.castRingHom LiftedField) jointCoordinates
+      (pderiv (Sum.inl j) (flatten (equations i)))*D (genericCoordinates j))+
+    (∑ j : Fin 3, eval₂Hom (Int.castRingHom LiftedField) jointCoordinates
+      (pderiv (Sum.inr j) (flatten (equations i)))*D (genericParameters j)) = 0 := by
+  have h := derivation_eval₂_chain D (Int.castRingHom LiftedField) jointCoordinates
+    (fun z => D.map_intCast z) (flatten (equations i))
+  rw [joint_equation, map_zero] at h
+  simpa only [Fintype.sum_sum_type, jointCoordinates, Sum.elim_inl, Sum.elim_inr] using h.symm
+
+def pointAmbientMatrix : Matrix (Fin 3) (Fin 3) LiftedField :=
+  fun i j => aeval genericCoordinates (pointAmbientDerivative j i)
+
+theorem pointAmbientMatrix_unit : IsUnit pointAmbientMatrix := by
+  apply (Matrix.isUnit_iff_isUnit_det pointAmbientMatrix).mpr
+  have h := RingHom.map_det (aeval genericCoordinates).toRingHom
+    (fun i j : Fin 3 => pointAmbientDerivative j i)
+  change aeval genericCoordinates pointAmbientMinorPolynomial = Matrix.det pointAmbientMatrix at h
+  exact h ▸ generic_pointAmbient_unit
+
+theorem pointAmbientMatrix_flat (i j : Fin 3) : pointAmbientMatrix i j =
+    eval₂Hom (Int.castRingHom LiftedField) jointCoordinates
+      (pderiv (pointVariable j) (flatten (equations (pointEquationIndex i)))) := by
+  rw [pointAmbientMatrix, pointAmbientDerivative, eval_unflatten]
+  simp only [generic_parameter]
+  rfl
+
+theorem genericParameters_r (i : Fin 3) : movingR (genericParameters i) = if i = 1 then 1 else 0 := by
+  change extendFiniteDerivation (ratioTangent 1)
+    (algebraMap FunctionField LiftedField (parameterCoordinates i)) = _
+  rw [extendFiniteDerivation_apply]
+  change algebraMap FunctionField LiftedField
+    (parameterDerivations 1 (parameterCoordinates i)) = _
+  rw [parameter_coordinate_derivative]
+  split_ifs <;> simp
+
+theorem movingR_tau_nonzero : movingR tau ≠ 0 := by
+  intro htau
+  have hc : ∀ j : Fin 71, movingR (genericCoordinates (columnEquiv (Sum.inl j))) = 0 :=
+    contact_derivative_zero_of_tau_zero movingR moving_lambda_zero.1 htau
+  let v : Fin 3 → LiftedField := ![1,movingR (genericCoordinates 71),movingR (genericCoordinates 72)]
+  have hz : pointAmbientMatrix.mulVec v = 0 := by
+    ext i
+    have h := joint_derivative_equation movingR (pointEquationIndex i)
+    let f : Index → LiftedField := fun j =>
+      eval₂Hom (Int.castRingHom LiftedField) jointCoordinates
+        (pderiv (Sum.inl j) (flatten (equations (pointEquationIndex i))))*
+        movingR (genericCoordinates j)
+    have he := columnEquiv.sum_comp f
+    change (∑ j : Index, f j)+_ = 0 at h
+    rw [← he] at h
+    dsimp only [f] at h
+    simp only [Fintype.sum_sum_type, hc, mul_zero, Finset.sum_const_zero,
+      zero_add, Fin.sum_univ_two, Fin.sum_univ_three, genericParameters_r] at h
+    simp only [show (0 : Fin 3) ≠ 1 from by decide,
+      show (2 : Fin 3) ≠ 1 from by decide, if_false, if_pos rfl,
+      mul_one, mul_zero, add_zero, zero_add, ite_true, ite_false] at h
+    have hf0 := pointAmbientMatrix_flat i 0
+    have hf1 := pointAmbientMatrix_flat i 1
+    have hf2 := pointAmbientMatrix_flat i 2
+    simp only [pointVariable, Matrix.cons_val] at hf0 hf1 hf2
+    rw [show columnEquiv (Sum.inr 0) = (71 : Index) from rfl,
+      show columnEquiv (Sum.inr 1) = (72 : Index) from rfl] at h
+    rw [← hf0, ← hf1, ← hf2] at h
+    simp only [Matrix.mulVec, dotProduct, v, Fin.sum_univ_three, Matrix.cons_val, mul_one, Pi.zero_apply]
+    linear_combination h
+  have hinj := Matrix.mulVec_injective_iff_isUnit.mpr pointAmbientMatrix_unit
+  have hv := hinj (hz.trans (Matrix.mulVec_zero pointAmbientMatrix).symm)
+  have h := congrFun hv 0
+  norm_num [v] at h
+
+
+def contactParameterDerivative : Derivation ℤ LiftedField LiftedField :=
+  (movingR tau)⁻¹ • movingR
+
+theorem contactParameterDerivative_tau : contactParameterDerivative tau = 1 := by
+  change (movingR tau)⁻¹*movingR tau = 1
+  exact inv_mul_cancel₀ movingR_tau_nonzero
+
+theorem contactParameterDerivative_coefficient (i : Fin 70) :
+    contactParameterDerivative (genericCoordinates (normIndex i)) = normVelocity i := by
+  change (movingR tau)⁻¹*movingR (genericCoordinates (normIndex i)) = normVelocity i
+  rw [contact_derivative_chain movingR moving_lambda_zero.1 i,
+    mul_comm (normVelocity i) (movingR tau), ← mul_assoc,
+    inv_mul_cancel₀ movingR_tau_nonzero, one_mul]
+
+theorem contact_form_nonzero (H : CurveField) (hH : H ≠ 0) : formR H ≠ 0 := by
+  have hc : (H : LiftedField) ≠ 0 := by
+    intro h
+    apply hH
+    exact Subtype.ext h
+  exact mul_ne_zero hc movingR_tau_nonzero
+
 end SymmetricContactField
 
-#print axioms SymmetricContactField.seed_jacobian_unit
-#print axioms SymmetricContactField.norm_identity
 #print axioms SymmetricContactField.movingEvaluation_equation
-#print axioms SymmetricContactField.generic_coordinates_time
-#print axioms SymmetricContactField.movingSection_nonzero
-#print axioms SymmetricContactField.contact_form_closed
-#print axioms SymmetricContactField.contact_form_time_zero
-#print axioms SymmetricContactField.actual_jet_chain_rules
+#print axioms SymmetricContactField.generic_norm_jacobian
+#print axioms SymmetricContactField.generic_pointAmbient_unit
+#print axioms SymmetricContactField.contact_derivative_chain
+#print axioms SymmetricContactField.movingR_tau_nonzero
+#print axioms SymmetricContactField.contactParameterDerivative_coefficient
+#print axioms SymmetricContactField.contact_form_nonzero
 #print axioms SymmetricContactField.relativePrimitiveOfCurveSource
