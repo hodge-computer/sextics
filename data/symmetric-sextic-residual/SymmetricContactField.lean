@@ -3690,3 +3690,1982 @@ theorem trace_source_one (H : CurveField) :
 end SymmetricContactField
 #print axioms SymmetricContactField.trace_source_zero
 #print axioms SymmetricContactField.trace_source_one
+
+
+/-! Integrated scratch module: DerivativeRules. -/
+
+
+noncomputable section
+namespace CandidateDerivativeRules
+open MvPolynomial SymmetricAffineField SymmetricRatioCurrent SymmetricPrimitiveEndpoint
+open SymmetricTraceEndpoint ChartSquareBase SquareDifferentials SquareStable HermiteBinding
+
+set_option maxHeartbeats 2000000
+set_option backward.isDefEq.respectTransparency false
+
+theorem Dr_generator_aux (q : FunctionField) (hq : Dr (v^2) = -q) (i : Fin 5) :
+    Dr (evalG (X i)) = evalG (pderiv 1 (X i)) - evalG (pderiv 4 (X i))*q := by
+  rw [evalG_X]
+  fin_cases i <;> norm_num [pderiv_X, Pi.single_apply, Fin.ext_iff]
+  · change Dr (lambda^2) = 0
+    rw [← coordinate_lambda, pow_two, Derivation.leibniz]
+    simp only [Dr_param, Fin.reduceEq, ite_false, smul_eq_mul, mul_zero, zero_mul, add_zero]
+  · change Dr b = 1
+    rw [← coordinate_b, Dr_param]
+    norm_num <;> decide
+  · change Dr (ChartSquareBase.d/t) = 0
+    rw [← coordinate_s, Dr_param]
+    norm_num <;> decide
+  · change Dr (t^2) = 0
+    rw [pow_two, Derivation.leibniz, Dr_t]
+    ring
+  · change Dr (v^2) = -q
+    exact hq
+
+theorem Dr_evalG_aux (q : FunctionField) (hq : Dr (v^2) = -q) (p : GP) : Dr (evalG p) =
+    evalG (pderiv 1 p)-evalG (pderiv 4 p)*q := by
+  induction p using MvPolynomial.induction_on with
+  | C z =>
+    simp only [map_C, pderiv_C, map_zero, zero_mul, sub_zero]
+    simpa only [evalG, eval₂Hom_C] using Dr_const z
+  | add p r hp hr =>
+    simp only [map_add, hp, hr]
+    ring
+  | mul_X p i hp =>
+    simp only [map_mul, Derivation.leibniz, pderiv_mul, map_add, smul_eq_mul]
+    rw [hp, Dr_generator_aux q hq]
+    ring
+
+theorem Dr_evalG (p : GP) : Dr (evalG p) =
+    evalG (pderiv 1 p)-evalG (pderiv 4 p)*evalG (pderiv 1 G)/normal := by
+  have hq : Dr (v^2) = -(evalG (pderiv 1 G)/normal) := by rw [Dr_u]; ring
+  simpa only [mul_div_assoc] using Dr_evalG_aux (evalG (pderiv 1 G)/normal) hq p
+
+theorem Ds_generator_aux (q : FunctionField) (hq : Ds (v^2) = -q) (i : Fin 5) :
+    Ds (evalG (X i)) = evalG (pderiv 2 (X i)) - evalG (pderiv 4 (X i))*q := by
+  rw [evalG_X]
+  fin_cases i <;> norm_num [pderiv_X, Pi.single_apply, Fin.ext_iff]
+  · change Ds (lambda^2) = 0
+    rw [← coordinate_lambda, pow_two, Derivation.leibniz]
+    simp only [Ds_param, Fin.reduceEq, ite_false, smul_eq_mul, mul_zero, zero_mul, add_zero]
+  · change Ds b = 0
+    rw [← coordinate_b, Ds_param]
+    norm_num <;> decide
+  · change Ds (ChartSquareBase.d/t) = 1
+    rw [← coordinate_s, Ds_param]
+    norm_num <;> decide
+  · change Ds (t^2) = 0
+    rw [pow_two, Derivation.leibniz, Ds_t]
+    ring
+  · change Ds (v^2) = -q
+    exact hq
+
+theorem Ds_evalG_aux (q : FunctionField) (hq : Ds (v^2) = -q) (p : GP) : Ds (evalG p) =
+    evalG (pderiv 2 p)-evalG (pderiv 4 p)*q := by
+  induction p using MvPolynomial.induction_on with
+  | C z =>
+    simp only [map_C, pderiv_C, map_zero, zero_mul, sub_zero]
+    simpa only [evalG, eval₂Hom_C] using Ds_const z
+  | add p r hp hr =>
+    simp only [map_add, hp, hr]
+    ring
+  | mul_X p i hp =>
+    simp only [map_mul, Derivation.leibniz, pderiv_mul, map_add, smul_eq_mul]
+    rw [hp, Ds_generator_aux q hq]
+    ring
+
+theorem Ds_evalG (p : GP) : Ds (evalG p) =
+    evalG (pderiv 2 p)-evalG (pderiv 4 p)*evalG (pderiv 2 G)/normal := by
+  have hq : Ds (v^2) = -(evalG (pderiv 2 G)/normal) := by rw [Ds_u]; ring
+  simpa only [mul_div_assoc] using Ds_evalG_aux (evalG (pderiv 2 G)/normal) hq p
+
+#print axioms Dr_evalG
+#print axioms Ds_evalG
+end CandidateDerivativeRules
+
+namespace CandidatePolynomialIdentity
+open MvPolynomial SymmetricAffineField SymmetricRatioCurrent SymmetricPrimitiveEndpoint
+open SymmetricTraceEndpoint ChartSquareBase SquareDifferentials SquareStable HermiteBinding
+open CandidateDerivativeRules
+
+set_option maxHeartbeats 4000000
+set_option backward.isDefEq.respectTransparency false
+
+def num1 (k : Fin 5) (p d : GP) : GP :=
+  ((pderiv k p * pderiv 4 G - pderiv 4 p * pderiv k G)*d -
+    p*(pderiv k d*pderiv 4 G-pderiv 4 d*pderiv k G))
+
+def targetNum : GP :=
+  2*X 3*(pderiv 3 Q*pderiv 3 G-Q*pderiv 3 (pderiv 3 G))+Q*pderiv 3 G
+
+def clearance (a b c d : GP) : GP :=
+  (pderiv 3 G)^2*(num1 1 a d+num1 2 b d+c*d*pderiv 4 G+
+    2*X 3*num1 3 c d)-targetNum*d^2
+
+theorem of_cleared (a b c d : GP) (hd : evalG d ≠ 0)
+    (heq : evalG (clearance a b c d) = 0) : Nonempty RelativePrimitive := by
+  apply primitive_iff_hermite_remainder.mpr
+  let aa : SquareField := ⟨evalG a / evalG d, SquareField.div_mem (evalG_mem a) (evalG_mem d)⟩
+  let bb : SquareField := ⟨evalG b / evalG d, SquareField.div_mem (evalG_mem b) (evalG_mem d)⟩
+  let cc : SquareField := ⟨evalG c / evalG d, SquareField.div_mem (evalG_mem c) (evalG_mem d)⟩
+  refine ⟨aa,bb,cc,?_⟩
+  apply Subtype.ext
+  change Dr (evalG a / evalG d) + Ds (evalG b / evalG d) + evalG c / evalG d +
+    2*(t^2)*Dx (evalG c / evalG d) =
+    (2*t^2*(evalG (pderiv 3 Q)*evalG (pderiv 3 G)-
+      evalG Q*evalG (pderiv 3 (pderiv 3 G)))+evalG Q*evalG (pderiv 3 G))/
+      (evalG (pderiv 3 G)^2*normal)
+  rw [Derivation.leibniz_div, Derivation.leibniz_div, Derivation.leibniz_div]
+  rw [Dr_evalG, Dr_evalG, Ds_evalG, Ds_evalG, Dx_evalG, Dx_evalG]
+  have hn : evalG (pderiv 3 G) ≠ 0 := HermiteNonzero.Gx_nonzero
+  have hg : normal ≠ 0 := SymmetricTraceEndpoint.normal_nonzero
+  have hp := heq
+  simp only [clearance, num1, targetNum, map_add, map_sub, map_mul, map_pow,
+    map_ofNat, evalG_X] at hp
+  rw [← normal_eq_Gu] at hp
+  have hx : generators 3 = t^2 := rfl
+  rw [hx] at hp
+  simp only [smul_eq_mul]
+  field_simp [hd, hn, hg]
+  linear_combination hp
+
+#print axioms of_cleared
+end CandidatePolynomialIdentity
+
+namespace CandidateSquareEquation
+open MvPolynomial SymmetricAffineField SymmetricRatioCurrent SymmetricPrimitiveEndpoint
+open SymmetricTraceEndpoint ChartSquareBase SquareDifferentials SquareStable HermiteBinding
+open WeightedPrimitiveTransport
+set_option maxHeartbeats 4000000
+set_option backward.isDefEq.respectTransparency false
+
+theorem evalG_eq_weighted : evalG G = weightedMap rawWeighted := by
+  have hc5 : residueMap (C (5/7 : ℂ)) = (5/7 : FunctionField) := by
+    change constants (5/7) = _
+    simp only [map_div₀, map_ofNat]
+  have hc10 : residueMap (C (10/7 : ℂ)) = (10/7 : FunctionField) := by
+    change constants (10/7) = _
+    simp only [map_div₀, map_ofNat]
+  simp [normal, weightedMap, evalG, G, generators, lambda, b, ChartSquareBase.d, v, t,
+    constants, rawWeighted, leftQuadric, rightQuadric, map_ofNat]
+  simp only [hc5, hc10]
+  have ht : residueMap (X 2) ≠ 0 := t_eq_residue ▸ t_nonzero
+  field_simp [ht]
+  all_goals ring
+
+theorem evalG_G_zero : evalG G = 0 := by
+  rw [evalG_eq_weighted]
+  change residueMap chartEquation = 0
+  rw [residueMap_kernel]
+
+#print axioms evalG_G_zero
+end CandidateSquareEquation
+
+namespace CandidatePolynomialIdentity
+open MvPolynomial SymmetricAffineField SymmetricPrimitiveEndpoint SquareDifferentials
+open CandidateSquareEquation
+
+theorem of_divisible (a b c d : GP) (hd : evalG d ≠ 0)
+    (h : G ∣ clearance a b c d) : Nonempty RelativePrimitive := by
+  apply of_cleared a b c d hd
+  obtain ⟨q,hq⟩ := h
+  rw [hq, map_mul, evalG_G_zero, zero_mul]
+
+#print axioms of_divisible
+end CandidatePolynomialIdentity
+
+
+/-! Integrated scratch module: BaseInjection. -/
+
+
+noncomputable section
+namespace CandidateBaseInjection
+open MvPolynomial SymmetricAffineField SymmetricRatioCurrent SymmetricPrimitiveEndpoint
+open SymmetricTraceEndpoint ChartSquareBase SquareDifferentials SquareStable HermiteBinding
+
+set_option maxHeartbeats 3000000
+set_option backward.isDefEq.respectTransparency false
+
+theorem lambda_nonzero : lambda ≠ 0 := by
+  intro hz
+  have h : tangent 0 lambda = 1 := by
+    rw [← coordinate_lambda]
+    simpa [parameterDerivations] using parameter_coordinate_derivative 0 0
+  rw [hz, map_zero] at h
+  norm_num at h
+
+def baseCoord : Fin 4 → FunctionField := ![lambda^2,b,ChartSquareBase.d/t,t^2]
+def baseDerivation : Fin 4 → Derivation ℤ FunctionField FunctionField :=
+  ![(1/(2*lambda)) • tangent 0, Dr, Ds, Dx]
+
+theorem tangent0_lambda : tangent 0 lambda = 1 := by
+  rw [← coordinate_lambda]
+  simpa [parameterDerivations] using parameter_coordinate_derivative 0 0
+
+theorem tangent0_b : tangent 0 b = 0 := by
+  rw [← coordinate_b]
+  simpa [parameterDerivations] using parameter_coordinate_derivative 0 1
+
+theorem tangent0_s : tangent 0 (ChartSquareBase.d/t) = 0 := by
+  rw [← coordinate_s]
+  simpa [parameterDerivations] using parameter_coordinate_derivative 0 2
+
+theorem tangent0_t : tangent 0 t = 0 := by simpa using tangent_t 0
+
+theorem base_derivative_coords (i j : Fin 4) :
+    baseDerivation i (baseCoord j) = if j = i then 1 else 0 := by
+  have hrLam : Dr lambda = 0 := by rw [← coordinate_lambda, Dr_param]; norm_num <;> decide
+  have hsLam : Ds lambda = 0 := by rw [← coordinate_lambda, Ds_param]; norm_num <;> decide
+  have hxLam : Dx lambda = 0 := by rw [← coordinate_lambda, Dx_param]
+  have hrb : Dr b = 1 := by rw [← coordinate_b, Dr_param]; norm_num <;> decide
+  have hsb : Ds b = 0 := by rw [← coordinate_b, Ds_param]; norm_num <;> decide
+  have hxb : Dx b = 0 := by rw [← coordinate_b, Dx_param]
+  have hrs : Dr (ChartSquareBase.d/t) = 0 := by rw [← coordinate_s, Dr_param]; norm_num <;> decide
+  have hss : Ds (ChartSquareBase.d/t) = 1 := by rw [← coordinate_s, Ds_param]; norm_num <;> decide
+  have hxs : Dx (ChartSquareBase.d/t) = 0 := by rw [← coordinate_s, Dx_param]
+  have hrt : Dr (t^2) = 0 := by rw [pow_two, Derivation.leibniz, Dr_t]; ring
+  have hst : Ds (t^2) = 0 := by rw [pow_two, Derivation.leibniz, Ds_t]; ring
+  have h0t : tangent 0 (t^2) = 0 := by rw [pow_two, Derivation.leibniz, tangent0_t]; ring
+  have hLam2 : tangent 0 (lambda^2) = 2*lambda := by rw [pow_two, Derivation.leibniz,tangent0_lambda]; ring
+  have hrLam2 : Dr (lambda^2) = 0 := by rw [pow_two, Derivation.leibniz, hrLam]; ring
+  have hsLam2 : Ds (lambda^2) = 0 := by rw [pow_two, Derivation.leibniz, hsLam]; ring
+  have hxLam2 : Dx (lambda^2) = 0 := by rw [pow_two, Derivation.leibniz, hxLam]; ring
+  fin_cases i <;> fin_cases j
+  · change (1/(2*lambda))*tangent 0 (lambda^2) = 1
+    rw [hLam2]; field_simp [lambda_nonzero]
+  · change (1/(2*lambda))*tangent 0 b = 0
+    rw [tangent0_b, mul_zero]
+  · change (1/(2*lambda))*tangent 0 (ChartSquareBase.d/t) = 0
+    rw [tangent0_s, mul_zero]
+  · change (1/(2*lambda))*tangent 0 (t^2) = 0
+    rw [h0t, mul_zero]
+  · exact hrLam2
+  · exact hrb
+  · exact hrs
+  · exact hrt
+  · exact hsLam2
+  · exact hsb
+  · exact hss
+  · exact hst
+  · exact hxLam2
+  · exact hxb
+  · exact hxs
+  · exact Dx_tsq
+
+theorem base_derivative_const (i : Fin 4) (z : ℂ) : baseDerivation i (constants z) = 0 := by
+  fin_cases i <;> simp [baseDerivation, Derivation.smul_apply, smul_eq_mul,
+    tangent_constant, Dr_const, Ds_const, Dx_const]
+
+def baseMap : MvPolynomial (Fin 4) ℂ →+* FunctionField := eval₂Hom constants baseCoord
+
+theorem baseMap_injective : Function.Injective baseMap :=
+  ResidueCoordinateIndependence.injective_of_coordinate_derivations constants
+    baseCoord baseDerivation base_derivative_const base_derivative_coords
+
+#print axioms baseMap_injective
+end CandidateBaseInjection
+
+namespace CandidateBaseInjection
+open MvPolynomial SymmetricAffineField SymmetricPrimitiveEndpoint SquareDifferentials ChartSquareBase
+open CandidateSquareEquation CandidatePolynomialIdentity
+
+theorem evalG_rename_base (p : MvPolynomial (Fin 4) ℂ) :
+    evalG (rename Fin.castSucc p) = baseMap p := by
+  unfold evalG baseMap
+  rw [eval₂Hom_rename]
+  have hc : generators ∘ Fin.castSucc = baseCoord := by
+    funext i
+    fin_cases i <;> rfl
+  rw [hc]
+
+theorem evalG_rename_nonzero (p : MvPolynomial (Fin 4) ℂ) (hp : p ≠ 0) :
+    evalG (rename Fin.castSucc p) ≠ 0 := by
+  rw [evalG_rename_base, ne_eq, ← map_zero baseMap]
+  exact fun h => hp (baseMap_injective h)
+
+theorem of_pseudodivisible (a b c d : GP) (hd : evalG d ≠ 0)
+    (p : MvPolynomial (Fin 4) ℂ) (hp : p ≠ 0)
+    (h : G ∣ rename Fin.castSucc p * clearance a b c d) : Nonempty RelativePrimitive := by
+  apply of_cleared a b c d hd
+  obtain ⟨q,hq⟩ := h
+  have hzero : evalG (rename Fin.castSucc p * clearance a b c d) = 0 := by
+    rw [hq, map_mul, evalG_G_zero, zero_mul]
+  rw [map_mul] at hzero
+  exact (mul_eq_zero.mp hzero).resolve_left (evalG_rename_nonzero p hp)
+
+#print axioms of_pseudodivisible
+end CandidateBaseInjection
+
+
+/-! Integrated scratch module: RemovableMoment. -/
+
+
+noncomputable section
+namespace RemovableMoment
+open CubicTraceDescent
+variable {K : Type*} [Field K] [CharZero K]
+
+def cubic (l B C D u : K) : K := l*u^3+B*u^2+C*u+D
+def normal (l B C u : K) : K := 3*l*u^2+2*B*u+C
+def normalDeriv (l B u : K) : K := 6*l*u+2*B
+def fx (Bp Cp Dp u : K) : K := Bp*u^2+Cp*u+Dp
+def K0 (l B C D Bp Dp x : K) : K := (-B*C+4*x*Bp*C+9*l*D-12*l*x*Dp)/(12*l)
+def K1 (l B C Bp Cp x : K) : K := (-B^2+4*x*B*Bp+3*l*C-6*l*x*Cp)/(6*l)
+
+/-- A cleared algebraic identity. No contact-source matching is claimed. -/
+theorem density_identity (l B C D Bp Cp Dp x u : K)
+    (hl : l ≠ 0) (hg : normal l B C u ≠ 0) :
+    linearDensity (normal l B C u) (normalDeriv l B u) u
+       (K0 l B C D Bp Dp x) (K1 l B C Bp Cp x) =
+       1/(normal l B C u) -
+       2*x*(2*Bp*u+Cp-normalDeriv l B u*fx Bp Cp Dp u/(normal l B C u))/(normal l B C u)^2 -
+       3*(B+3*l*u)*cubic l B C D u/(normal l B C u)^3 := by
+  simp only [linearDensity, K0, K1, cubic, fx, normalDeriv]
+  field_simp [hl, hg]
+  <;> simp only [normal]
+  <;> ring
+
+theorem density_eq_tangent_current (E : Derivation ℤ K K)
+    (l B C D Bp Cp Dp u t : K)
+    (hl : l ≠ 0) (hg : normal l B C u ≠ 0)
+    (hf : cubic l B C D u = 0) (ht : E t = 1)
+    (hEg : E (normal l B C u) =
+      2*t*(2*Bp*u+Cp-normalDeriv l B u*fx Bp Cp Dp u/(normal l B C u))) :
+    linearDensity (normal l B C u) (normalDeriv l B u) u
+      (K0 l B C D Bp Dp (t^2)) (K1 l B C Bp Cp (t^2)) =
+      E (t/normal l B C u) := by
+  rw [density_identity l B C D Bp Cp Dp (t^2) u hl hg, hf]
+  simp only [mul_zero, zero_div, sub_zero, Derivation.leibniz_div, ht, hEg, smul_eq_mul]
+  field_simp [hg]
+  <;> ring
+
+#print axioms density_identity
+#print axioms density_eq_tangent_current
+end RemovableMoment
+
+namespace RemovableMomentRatio
+open SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent CubicTraceDescent HoldoutConstruction
+open scoped BigOperators
+
+set_option maxHeartbeats 2000000
+set_option backward.isDefEq.respectTransparency false
+
+variable {L : Type*} [Field L] [Algebra FunctionField L] [FiniteDimensional FunctionField L]
+
+/-- The trace comparison may differ by a time-constant scalar multiple of
+any pair whose density is the displayed time derivative. This is conditional:
+the closed contact form and trace identities are not supplied here. -/
+def relativePrimitiveOfRatioTraceModuloCorrection
+    (s0 s1 : L) (w : Fin 3 → L) (a k0 k1 : FunctionField)
+    (ha : ratioTangent 0 a = 0)
+    (hK : linearDensity normal secondNormal normalCoordinate k0 k1 = ratioTangent 0 (t/normal))
+    (hcurrent : (∑ i, extendFiniteDerivation (L := L) (ratioTangent i) (w i)) =
+      linearDensity (algebraMap FunctionField L normal)
+        (algebraMap FunctionField L secondNormal)
+        (algebraMap FunctionField L normalCoordinate) s0 s1)
+    (hsource0 : Algebra.normalizedTrace FunctionField L s0 = -t*targetSource0+a*k0)
+    (hsource1 : Algebra.normalizedTrace FunctionField L s1 = -t*targetSource1+a*k1) :
+    RelativePrimitive := by
+  let htrace : Fin 3 → FunctionField := fun i => Algebra.normalizedTrace FunctionField L (w i)
+  let hc : Fin 3 → FunctionField := ![htrace 0-a*(t/normal),htrace 1,htrace 2]
+  have h := finiteTrace_primitive_of_source_match
+    (K := FunctionField) (L := L) ratioTangent
+    (fun i => extendFiniteDerivation (L := L) (ratioTangent i))
+    (fun i x => extendFiniteDerivation_apply (ratioTangent i) x)
+    normal secondNormal normalCoordinate (-t*targetSource0+a*k0) (-t*targetSource1+a*k1)
+    s0 s1 w hcurrent hsource0 hsource1
+  have hsplit : linearDensity normal secondNormal normalCoordinate
+        (-t*targetSource0+a*k0) (-t*targetSource1+a*k1) =
+      -t*residueDensity+a*ratioTangent 0 (t/normal) := by
+    have he : linearDensity normal secondNormal normalCoordinate
+        (-t*targetSource0+a*k0) (-t*targetSource1+a*k1) =
+        linearDensity normal secondNormal normalCoordinate (-t*targetSource0) (-t*targetSource1) +
+          a*linearDensity normal secondNormal normalCoordinate k0 k1 := by
+      simp only [linearDensity, div_eq_mul_inv]
+      ring
+    rw [he, target_ratio_density, hK]
+  rw [hsplit] at h
+  have hcdiv : (∑ i, ratioTangent i (hc i)) = -t*residueDensity := by
+    simp only [Fin.sum_univ_three] at h ⊢
+    change ratioTangent 0 (htrace 0-a*(t/normal)) + ratioTangent 1 (htrace 1) +
+      ratioTangent 2 (htrace 2) = -t*residueDensity
+    rw [map_sub, Derivation.leibniz, ha]
+    simp only [smul_eq_mul, zero_mul, add_zero, mul_zero, zero_add]
+    change ratioTangent 0 (htrace 0)+ratioTangent 1 (htrace 1)+ratioTangent 2 (htrace 2) = _ at h
+    linear_combination h
+  refine ⟨toChart hc,?_⟩
+  rw [toChart_divergence, hcdiv]
+  field_simp [t_nonzero]
+
+#print axioms relativePrimitiveOfRatioTraceModuloCorrection
+end RemovableMomentRatio
+
+namespace RemovableMomentRatio
+open SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent CubicTraceDescent HoldoutConstruction RemovableMoment
+open scoped BigOperators
+variable {L : Type*} [Field L] [Algebra FunctionField L] [FiniteDimensional FunctionField L]
+
+/-- The explicit six-moment correction, conditional on its coefficient-jet
+binding and the two source-trace identities. No contact weight is assumed. -/
+def relativePrimitiveOfExplicitCorrection
+    (s0 s1 : L) (w : Fin 3 → L) (a l B C D Bp Cp Dp : FunctionField)
+    (ha : ratioTangent 0 a = 0) (hl : l ≠ 0)
+    (hf : RemovableMoment.cubic l B C D normalCoordinate = 0)
+    (hNormal : RemovableMoment.normal l B C normalCoordinate = SymmetricTraceEndpoint.normal)
+    (hSecond : RemovableMoment.normalDeriv l B normalCoordinate = secondNormal)
+    (hEg : ratioTangent 0 (RemovableMoment.normal l B C normalCoordinate) =
+      2*t*(2*Bp*normalCoordinate+Cp-
+        RemovableMoment.normalDeriv l B normalCoordinate *
+          RemovableMoment.fx Bp Cp Dp normalCoordinate /
+            RemovableMoment.normal l B C normalCoordinate))
+    (hcurrent : (∑ i, extendFiniteDerivation (L := L) (ratioTangent i) (w i)) =
+      linearDensity (algebraMap FunctionField L SymmetricTraceEndpoint.normal)
+        (algebraMap FunctionField L secondNormal)
+        (algebraMap FunctionField L normalCoordinate) s0 s1)
+    (hsource0 : Algebra.normalizedTrace FunctionField L s0 = -t*targetSource0+
+      a*RemovableMoment.K0 l B C D Bp Dp (t^2))
+    (hsource1 : Algebra.normalizedTrace FunctionField L s1 = -t*targetSource1+
+      a*RemovableMoment.K1 l B C Bp Cp (t^2)) : RelativePrimitive := by
+  apply relativePrimitiveOfRatioTraceModuloCorrection s0 s1 w a
+    (RemovableMoment.K0 l B C D Bp Dp (t^2))
+    (RemovableMoment.K1 l B C Bp Cp (t^2)) ha ?_ hcurrent hsource0 hsource1
+  have hg : RemovableMoment.normal l B C normalCoordinate ≠ 0 := by
+    rw [hNormal]
+    exact SymmetricTraceEndpoint.normal_nonzero
+  have ht : ratioTangent 0 t = 1 := by simpa using ratio_t 0
+  have h := RemovableMoment.density_eq_tangent_current (ratioTangent 0)
+    l B C D Bp Cp Dp normalCoordinate t hl hg hf ht hEg
+  simpa only [hNormal, hSecond] using h
+
+#print axioms relativePrimitiveOfExplicitCorrection
+end RemovableMomentRatio
+
+
+/-! Integrated scratch module: SixMoments. -/
+
+
+noncomputable section
+namespace SixMoments
+variable {K : Type*} [Field K]
+
+def coeffK0 (l b0 b1 c0 c1 c2 d0 d1 d2 d3 x : K) : K :=
+  let B := b0+b1*x
+  let C := c0+c1*x+c2*x^2
+  let D := d0+d1*x+d2*x^2+d3*x^3
+  (-B*C+4*x*b1*C+9*l*D-12*l*x*(d1+2*d2*x+3*d3*x^2))/(12*l)
+
+def coeffK1 (l b0 b1 c0 c1 c2 x : K) : K :=
+  let B := b0+b1*x
+  let C := c0+c1*x+c2*x^2
+  (-B^2+4*x*B*b1+3*l*C-6*l*x*(c1+2*c2*x))/(6*l)
+
+variable [CharZero K]
+theorem coeffK0_expansion (l b0 b1 c0 c1 c2 d0 d1 d2 d3 x : K) (hl : l ≠ 0) :
+    coeffK0 l b0 b1 c0 c1 c2 d0 d1 d2 d3 x =
+      (-b0*c0+9*l*d0)/(12*l)+(-b0*c1+3*b1*c0-3*l*d1)/(12*l)*x+
+      (-b0*c2+3*b1*c1-15*l*d2)/(12*l)*x^2+(b1*c2-9*l*d3)/(4*l)*x^3 := by
+  simp only [coeffK0]
+  field_simp [hl]
+  <;> ring
+
+theorem coeffK1_expansion (l b0 b1 c0 c1 c2 x : K) (hl : l ≠ 0) :
+    coeffK1 l b0 b1 c0 c1 c2 x =
+      (-b0^2+3*l*c0)/(6*l)+(2*b0*b1-3*l*c1)/(6*l)*x+
+      (b1^2-3*l*c2)/(2*l)*x^2 := by
+  simp only [coeffK1]
+  field_simp [hl]
+  <;> ring
+
+/-- Six cross-multiplied conditions and the seventh pivot determine a common
+scalar. No trace identity or time-independence is assumed here. -/
+theorem six_conditions_suffice (m t k : Fin 7 → K) (hk : k 6 ≠ 0)
+    (h : ∀ j, j ≠ 6 → k 6*(m j-t j) = k j*(m 6-t 6)) :
+    ∃ a, ∀ j, m j-t j = a*k j := by
+  refine ⟨(m 6-t 6)/k 6,?_⟩
+  intro j
+  by_cases hj : j = 6
+  · subst j
+    field_simp [hk]
+  · have hh := h j hj
+    field_simp [hk]
+    linear_combination hh
+
+theorem pivot_ratio_constant (E : Derivation ℤ K K) (a b : K)
+    (ha : E a = 0) (hb : E b = 0) : E (a/b) = 0 := by
+  simp [Derivation.leibniz_div, ha, hb]
+
+#print axioms coeffK0_expansion
+#print axioms coeffK1_expansion
+#print axioms six_conditions_suffice
+#print axioms pivot_ratio_constant
+end SixMoments
+
+
+/-! Integrated scratch module: RemovableBinding. -/
+
+
+noncomputable section
+namespace RemovableBinding
+open MvPolynomial SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent ChartSquareBase SquareDifferentials SquareStable HermiteBinding
+open CandidateDerivativeRules CandidateSquareEquation WeightedPrimitiveTransport
+set_option maxHeartbeats 5000000
+set_option backward.isDefEq.respectTransparency false
+
+@[simp] theorem pd_two (i : Fin 5) : pderiv i (2 : GP) = 0 :=
+  (pderiv i : Derivation ℂ GP GP).map_natCast 2
+@[simp] theorem pd_three (i : Fin 5) : pderiv i (3 : GP) = 0 :=
+  (pderiv i : Derivation ℂ GP GP).map_natCast 3
+@[simp] theorem pd_thirty (i : Fin 5) : pderiv i (30 : GP) = 0 :=
+  (pderiv i : Derivation ℂ GP GP).map_natCast 30
+
+def lb : GP := 1+2*X 1
+def rb : GP := X 3*(1+2*X 2)
+def L : GP := 2+2*X 0^3-C (5/7:ℂ)*X 0-C (10/7:ℂ)*X 0^2
+def B : GP := 30+30*X 0^2*X 3+C (5/7:ℂ)*(rb+2*X 0*lb)+
+  C (10/7:ℂ)*(X 0^2*lb+2*X 0*rb)
+def Cc : GP := 30+30*X 0*X 3^2+C (5/7:ℂ)*(-X 0*lb^2-2*lb*rb)+
+  C (10/7:ℂ)*(-2*X 0*lb*rb-rb^2)
+def D : GP := 2+X 1^6+2*X 3^3+X 2^6*X 3^3+
+  C (5/7:ℂ)*lb^2*rb+C (10/7:ℂ)*lb*rb^2
+
+theorem equation_coefficients : G = L*X 4^3+B*X 4^2+Cc*X 4+D := by
+  simp [G,L,B,Cc,D,lb,rb,map_ofNat]
+  ring
+
+theorem normal_coefficients : pderiv 4 G = 3*L*X 4^2+2*B*X 4+Cc := by
+  have hn (i : Fin 5) (n : ℕ) : pderiv i (n : GP) = 0 := (pderiv i : Derivation ℂ GP GP).map_natCast n
+  simp [hn,G,L,B,Cc,D,lb,rb,map_add,pderiv_mul,pderiv_pow,pderiv_X,
+    Pi.single_apply,Fin.ext_iff,map_ofNat]
+  ring
+
+theorem second_coefficients : pderiv 4 (pderiv 4 G) = 6*L*X 4+2*B := by
+  have hn (i : Fin 5) (n : ℕ) : pderiv i (n : GP) = 0 := (pderiv i : Derivation ℂ GP GP).map_natCast n
+  simp [hn,normal_coefficients,L,B,Cc,lb,rb,map_add,pderiv_mul,pderiv_pow,pderiv_X,
+    Pi.single_apply,Fin.ext_iff,map_ofNat]
+  ring
+
+theorem x_derivative_coefficients : pderiv 3 G = pderiv 3 B*X 4^2+pderiv 3 Cc*X 4+pderiv 3 D := by
+  have hn (i : Fin 5) (n : ℕ) : pderiv i (n : GP) = 0 := (pderiv i : Derivation ℂ GP GP).map_natCast n
+  simp [hn,G,L,B,Cc,D,lb,rb,map_add,pderiv_mul,pderiv_pow,pderiv_X,
+    Pi.single_apply,Fin.ext_iff,map_ofNat]
+  ring
+
+theorem xu_derivative_coefficients : pderiv 3 (pderiv 4 G) = 2*pderiv 3 B*X 4+pderiv 3 Cc := by
+  have hn (i : Fin 5) (n : ℕ) : pderiv i (n : GP) = 0 := (pderiv i : Derivation ℂ GP GP).map_natCast n
+  simp [hn,normal_coefficients,G,L,B,Cc,D,lb,rb,map_add,pderiv_mul,pderiv_pow,pderiv_X,
+    Pi.single_apply,Fin.ext_iff,map_ofNat]
+  ring
+
+
+def l0 : FunctionField := evalG L
+def b0 : FunctionField := evalG B
+def c0 : FunctionField := evalG Cc
+def d0 : FunctionField := evalG D
+def bp0 : FunctionField := evalG (pderiv 3 B)
+def cp0 : FunctionField := evalG (pderiv 3 Cc)
+def dp0 : FunctionField := evalG (pderiv 3 D)
+
+theorem normalCoord_eval : normalCoordinate = evalG (X 4) := by
+  rw [evalG_X]
+  change weightedMap (X 4) = v^2
+  exact u_as_weighted.symm
+
+theorem field_equation : RemovableMoment.cubic l0 b0 c0 d0 normalCoordinate = 0 := by
+  have h := congrArg evalG equation_coefficients
+  rw [evalG_G_zero] at h
+  simp only [map_add, map_mul, map_pow, ← normalCoord_eval] at h
+  change 0 = l0*normalCoordinate^3+b0*normalCoordinate^2+c0*normalCoordinate+d0 at h
+  exact h.symm
+
+theorem field_normal : RemovableMoment.normal l0 b0 c0 normalCoordinate = normal := by
+  rw [normal_eq_Gu]
+  have h := congrArg evalG normal_coefficients
+  simp only [map_add, map_mul, map_pow, map_ofNat, ← normalCoord_eval] at h
+  change _ = 3*l0*normalCoordinate^2+2*b0*normalCoordinate+c0 at h
+  exact h.symm
+
+theorem field_second : RemovableMoment.normalDeriv l0 b0 normalCoordinate = secondNormal := by
+  rw [secondNormal_eq_Guu]
+  have h := congrArg evalG second_coefficients
+  simp only [map_add, map_mul, map_pow, map_ofNat, ← normalCoord_eval] at h
+  change _ = 6*l0*normalCoordinate+2*b0 at h
+  exact h.symm
+
+theorem field_fx : RemovableMoment.fx bp0 cp0 dp0 normalCoordinate = evalG (pderiv 3 G) := by
+  have h := congrArg evalG x_derivative_coefficients
+  simp only [map_add, map_mul, map_pow, ← normalCoord_eval] at h
+  change _ = bp0*normalCoordinate^2+cp0*normalCoordinate+dp0 at h
+  exact h.symm
+
+theorem field_xu : evalG (pderiv 3 (pderiv 4 G)) = 2*bp0*normalCoordinate+cp0 := by
+  have h := congrArg evalG xu_derivative_coefficients
+  simp only [map_add, map_mul, map_ofNat, ← normalCoord_eval] at h
+  exact h
+
+theorem field_l_nonzero : l0 ≠ 0 := by
+  let lpoly : MvPolynomial (Fin 4) ℂ := 2+2*X 0^3-C (5/7:ℂ)*X 0-C (10/7:ℂ)*X 0^2
+  have he : rename Fin.castSucc lpoly = L := by
+    simp [lpoly,L,map_ofNat]
+  have hp : lpoly ≠ 0 := by
+    intro h
+    have hh := congrArg (eval (fun _ => (0:ℂ))) h
+    norm_num [lpoly, map_ofNat] at hh
+  change evalG L ≠ 0
+  rw [← he]
+  exact CandidateBaseInjection.evalG_rename_nonzero lpoly hp
+
+theorem field_time_normal : ratioTangent 0 (RemovableMoment.normal l0 b0 c0 normalCoordinate) =
+    2*t*(2*bp0*normalCoordinate+cp0-
+      RemovableMoment.normalDeriv l0 b0 normalCoordinate *
+        RemovableMoment.fx bp0 cp0 dp0 normalCoordinate /
+          RemovableMoment.normal l0 b0 c0 normalCoordinate) := by
+  rw [field_normal,field_second,field_fx]
+  have hs : ratioTangent 0 normal = 2*t*Dx normal := by
+    simp only [Dx,Derivation.smul_apply,smul_eq_mul]
+    field_simp [t_nonzero]
+  rw [hs, normal_eq_Gu, Dx_evalG, ← normal_eq_Gu, ← secondNormal_eq_Guu, field_xu]
+
+#print axioms field_equation
+#print axioms field_normal
+#print axioms field_second
+#print axioms field_time_normal
+#print axioms field_l_nonzero
+
+#print axioms equation_coefficients
+#print axioms normal_coefficients
+#print axioms second_coefficients
+#print axioms x_derivative_coefficients
+#print axioms xu_derivative_coefficients
+end RemovableBinding
+
+namespace RemovableBinding
+open MvPolynomial SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent CubicTraceDescent HoldoutConstruction RemovableMomentRatio
+open scoped BigOperators
+set_option maxHeartbeats 2000000
+set_option backward.isDefEq.respectTransparency false
+
+def actualK0 : FunctionField := RemovableMoment.K0 l0 b0 c0 d0 bp0 dp0 (t^2)
+def actualK1 : FunctionField := RemovableMoment.K1 l0 b0 c0 bp0 cp0 (t^2)
+
+theorem actualK_density : linearDensity normal secondNormal normalCoordinate actualK0 actualK1 =
+    ratioTangent 0 (t/normal) := by
+  have ht : ratioTangent 0 t = 1 := by simpa using ratio_t 0
+  have h := RemovableMoment.density_eq_tangent_current (ratioTangent 0)
+    l0 b0 c0 d0 bp0 cp0 dp0 normalCoordinate t field_l_nonzero
+    (field_normal ▸ SymmetricTraceEndpoint.normal_nonzero) field_equation ht field_time_normal
+  simpa only [field_normal,field_second,actualK0,actualK1] using h
+
+variable {L : Type*} [Field L] [Algebra FunctionField L] [FiniteDimensional FunctionField L]
+
+def relativePrimitiveOfActualCorrection
+    (s0 s1 : L) (w : Fin 3 → L) (a : FunctionField)
+    (ha : ratioTangent 0 a = 0)
+    (hcurrent : (∑ i, extendFiniteDerivation (L := L) (ratioTangent i) (w i)) =
+      linearDensity (algebraMap FunctionField L normal)
+        (algebraMap FunctionField L secondNormal)
+        (algebraMap FunctionField L normalCoordinate) s0 s1)
+    (hsource0 : Algebra.normalizedTrace FunctionField L s0 = -t*targetSource0+a*actualK0)
+    (hsource1 : Algebra.normalizedTrace FunctionField L s1 = -t*targetSource1+a*actualK1) :
+    RelativePrimitive :=
+  relativePrimitiveOfRatioTraceModuloCorrection s0 s1 w a actualK0 actualK1
+    ha actualK_density hcurrent hsource0 hsource1
+
+#print axioms actualK_density
+#print axioms relativePrimitiveOfActualCorrection
+end RemovableBinding
+
+namespace RemovableBinding
+open MvPolynomial SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent ChartSquareBase SquareDifferentials SquareStable HermiteBinding
+open CandidateDerivativeRules CandidateSquareEquation WeightedPrimitiveTransport
+set_option maxHeartbeats 3000000
+set_option backward.isDefEq.respectTransparency false
+
+def baseL : MvPolynomial (Fin 4) ℂ :=
+  2+2*X 0^3-C (5/7:ℂ)*X 0-C (10/7:ℂ)*X 0^2
+def baseB1 : MvPolynomial (Fin 4) ℂ :=
+  30*X 0^2+C (5/7:ℂ)*(1+2*X 2)+(2*C (10/7:ℂ))*X 0*(1+2*X 2)
+def baseC2 : MvPolynomial (Fin 4) ℂ :=
+  30*X 0-C (10/7:ℂ)*(1+2*X 2)^2
+def pivotNumer : MvPolynomial (Fin 4) ℂ := baseB1^2-3*baseL*baseC2
+
+theorem baseL_lift : rename Fin.castSucc baseL = L := by
+  simp [baseL,L,map_ofNat]
+
+theorem pivotNumer_nonzero : pivotNumer ≠ 0 := by
+  intro h
+  have hh := congrArg (eval (fun _ => (0:ℂ))) h
+  norm_num [pivotNumer,baseB1,baseC2,baseL,map_ofNat] at hh
+
+def pivot : FunctionField := CandidateBaseInjection.baseMap pivotNumer/(2*l0)
+
+theorem pivot_nonzero : pivot ≠ 0 := by
+  apply div_ne_zero
+  · apply fun h => pivotNumer_nonzero (CandidateBaseInjection.baseMap_injective (by simpa using h))
+  · exact mul_ne_zero (by norm_num) field_l_nonzero
+
+#print axioms pivot_nonzero
+end RemovableBinding
+
+namespace RemovableBinding
+open MvPolynomial SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent ChartSquareBase SquareDifferentials SquareStable HermiteBinding
+open CandidateDerivativeRules CandidateSquareEquation WeightedPrimitiveTransport
+set_option maxHeartbeats 5000000
+set_option backward.isDefEq.respectTransparency false
+
+def baseLeft : MvPolynomial (Fin 4) ℂ := 1+2*X 1
+def baseRight : MvPolynomial (Fin 4) ℂ := 1+2*X 2
+def baseB0 : MvPolynomial (Fin 4) ℂ :=
+  30+2*C (5/7:ℂ)*X 0*baseLeft+C (10/7:ℂ)*X 0^2*baseLeft
+def baseC0 : MvPolynomial (Fin 4) ℂ := 30-C (5/7:ℂ)*X 0*baseLeft^2
+def baseC1 : MvPolynomial (Fin 4) ℂ :=
+  -2*C (5/7:ℂ)*baseLeft*baseRight-(2*C (10/7:ℂ))*X 0*baseLeft*baseRight
+
+theorem B_coeff_base : B = rename Fin.castSucc baseB0+rename Fin.castSucc baseB1*X 3 := by
+  simp [B,baseB0,baseB1,baseLeft,lb,rb,map_ofNat]
+  ring
+
+theorem C_coeff_base : Cc = rename Fin.castSucc baseC0+rename Fin.castSucc baseC1*X 3+
+    rename Fin.castSucc baseC2*X 3^2 := by
+  simp [Cc,baseC0,baseC1,baseC2,baseLeft,baseRight,lb,rb,map_ofNat]
+  ring
+
+theorem Bp_coeff_base : pderiv 3 B = rename Fin.castSucc baseB1 := by
+  simp [B,baseB1,lb,rb,map_add,pderiv_mul,pderiv_pow,pderiv_X,
+    Pi.single_apply,Fin.ext_iff,map_ofNat]
+  ring
+
+theorem Cp_coeff_base : pderiv 3 Cc = rename Fin.castSucc baseC1+2*rename Fin.castSucc baseC2*X 3 := by
+  simp [Cc,baseC1,baseC2,baseLeft,baseRight,lb,rb,map_add,pderiv_mul,pderiv_pow,pderiv_X,
+    Pi.single_apply,Fin.ext_iff,map_ofNat]
+  ring
+
+def fb0 : FunctionField := CandidateBaseInjection.baseMap baseB0
+def fb1 : FunctionField := CandidateBaseInjection.baseMap baseB1
+def fc0 : FunctionField := CandidateBaseInjection.baseMap baseC0
+def fc1 : FunctionField := CandidateBaseInjection.baseMap baseC1
+def fc2 : FunctionField := CandidateBaseInjection.baseMap baseC2
+
+theorem field_B : b0 = fb0+fb1*t^2 := by
+  have h := congrArg evalG B_coeff_base
+  simp only [map_add,map_mul,CandidateBaseInjection.evalG_rename_base,evalG_X] at h
+  rw [evalG_X] at h
+  change _ = fb0+fb1*t^2 at h
+  exact h
+
+theorem field_Bp : bp0 = fb1 := by
+  have h := congrArg evalG Bp_coeff_base
+  simp only [CandidateBaseInjection.evalG_rename_base] at h
+  exact h
+
+theorem field_C : c0 = fc0+fc1*t^2+fc2*t^4 := by
+  have h := congrArg evalG C_coeff_base
+  simp only [map_add,map_mul,map_pow,CandidateBaseInjection.evalG_rename_base,evalG_X] at h
+  rw [evalG_X] at h
+  change _ = fc0+fc1*t^2+fc2*(t^2)^2 at h
+  calc
+    _ = fc0+fc1*t^2+fc2*(t^2)^2 := h
+    _ = _ := by ring
+
+theorem field_Cp : cp0 = fc1+2*fc2*t^2 := by
+  have h := congrArg evalG Cp_coeff_base
+  simp only [map_add,map_mul,map_ofNat,CandidateBaseInjection.evalG_rename_base,evalG_X] at h
+  rw [evalG_X] at h
+  change _ = fc1+2*fc2*t^2 at h
+  exact h
+
+theorem pivot_formula : pivot = (fb1^2-3*l0*fc2)/(2*l0) := by
+  have hl : l0 = CandidateBaseInjection.baseMap baseL := by
+    change evalG L = _
+    rw [← baseL_lift, CandidateBaseInjection.evalG_rename_base]
+  simp only [pivot,pivotNumer,map_sub,map_pow,map_mul,map_ofNat,fb1,fc2,hl]
+
+#print axioms field_B
+#print axioms field_Bp
+#print axioms field_C
+#print axioms field_Cp
+#print axioms pivot_formula
+end RemovableBinding
+
+namespace RemovableBinding
+open SymmetricAffineField SymmetricTraceEndpoint SymmetricRatioCurrent
+
+theorem actualK1_expansion : actualK1 =
+    (-fb0^2+3*l0*fc0)/(6*l0)+(2*fb0*fb1-3*l0*fc1)/(6*l0)*t^2+
+      pivot*(t^2)^2 := by
+  rw [actualK1,RemovableMoment.K1,field_B,field_Bp,field_C,field_Cp,pivot_formula]
+  field_simp [field_l_nonzero]
+  <;> ring
+
+#print axioms actualK1_expansion
+end RemovableBinding
+
+namespace RemovableBinding
+open MvPolynomial SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent ChartSquareBase SquareDifferentials SquareStable HermiteBinding
+open CandidateDerivativeRules CandidateSquareEquation WeightedPrimitiveTransport
+set_option maxHeartbeats 5000000
+set_option backward.isDefEq.respectTransparency false
+
+def baseD0 : MvPolynomial (Fin 4) ℂ := 2+X 1^6
+def baseD1 : MvPolynomial (Fin 4) ℂ := C (5/7:ℂ)*baseLeft^2*baseRight
+def baseD2 : MvPolynomial (Fin 4) ℂ := C (10/7:ℂ)*baseLeft*baseRight^2
+def baseD3 : MvPolynomial (Fin 4) ℂ := 2+X 2^6
+
+theorem D_coeff_base : D = rename Fin.castSucc baseD0+rename Fin.castSucc baseD1*X 3+
+    rename Fin.castSucc baseD2*X 3^2+rename Fin.castSucc baseD3*X 3^3 := by
+  simp [D,baseD0,baseD1,baseD2,baseD3,baseLeft,baseRight,lb,rb,map_ofNat]
+  ring
+
+theorem Dp_coeff_base : pderiv 3 D = rename Fin.castSucc baseD1+
+    2*rename Fin.castSucc baseD2*X 3+3*rename Fin.castSucc baseD3*X 3^2 := by
+  simp [D,baseD1,baseD2,baseD3,baseLeft,baseRight,lb,rb,map_add,pderiv_mul,pderiv_pow,pderiv_X,
+    Pi.single_apply,Fin.ext_iff,map_ofNat]
+  ring
+
+def fd0 : FunctionField := CandidateBaseInjection.baseMap baseD0
+def fd1 : FunctionField := CandidateBaseInjection.baseMap baseD1
+def fd2 : FunctionField := CandidateBaseInjection.baseMap baseD2
+def fd3 : FunctionField := CandidateBaseInjection.baseMap baseD3
+
+theorem field_D : d0 = fd0+fd1*t^2+fd2*(t^2)^2+fd3*(t^2)^3 := by
+  have h := congrArg evalG D_coeff_base
+  simp only [map_add,map_mul,map_pow,CandidateBaseInjection.evalG_rename_base] at h
+  rw [evalG_X] at h
+  exact h
+
+theorem field_Dp : dp0 = fd1+2*fd2*t^2+3*fd3*(t^2)^2 := by
+  have h := congrArg evalG Dp_coeff_base
+  simp only [map_add,map_mul,map_pow,map_ofNat,CandidateBaseInjection.evalG_rename_base] at h
+  rw [evalG_X] at h
+  exact h
+
+theorem actualK0_expansion : actualK0 =
+    (-fb0*fc0+9*l0*fd0)/(12*l0)+(-fb0*fc1+3*fb1*fc0-3*l0*fd1)/(12*l0)*t^2+
+      (-fb0*fc2+3*fb1*fc1-15*l0*fd2)/(12*l0)*(t^2)^2+
+        (fb1*fc2-9*l0*fd3)/(4*l0)*(t^2)^3 := by
+  rw [actualK0,RemovableMoment.K0,field_B,field_Bp,field_C,field_D,field_Dp]
+  field_simp [field_l_nonzero]
+  <;> ring
+
+#print axioms field_D
+#print axioms field_Dp
+#print axioms actualK0_expansion
+end RemovableBinding
+
+namespace RemovableBinding
+open MvPolynomial SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent ChartSquareBase SquareDifferentials SquareStable HermiteBinding
+open CandidateDerivativeRules CandidateSquareEquation WeightedPrimitiveTransport
+set_option maxHeartbeats 4000000
+set_option backward.isDefEq.respectTransparency false
+
+theorem time_evalG_of_omits_x_u (p : GP) (hx : pderiv 3 p = 0) (hu : pderiv 4 p = 0) :
+    ratioTangent 0 (evalG p) = 0 := by
+  have hs : ratioTangent 0 (evalG p) = 2*t*Dx (evalG p) := by
+    simp only [Dx,Derivation.smul_apply,smul_eq_mul]
+    field_simp [t_nonzero]
+  rw [hs,Dx_evalG,hx,hu]
+  simp
+
+theorem baseL_time : ratioTangent 0 l0 = 0 := by
+  rw [l0, ← baseL_lift]
+  apply time_evalG_of_omits_x_u
+  · simp [baseL,map_ofNat,pderiv_mul,pderiv_pow,pderiv_X,Pi.single_apply,Fin.ext_iff]
+  · simp [baseL,map_ofNat,pderiv_mul,pderiv_pow,pderiv_X,Pi.single_apply,Fin.ext_iff]
+
+theorem pivotNumer_time : ratioTangent 0 (CandidateBaseInjection.baseMap pivotNumer) = 0 := by
+  rw [← CandidateBaseInjection.evalG_rename_base]
+  apply time_evalG_of_omits_x_u
+  · simp [pivotNumer,baseB1,baseC2,baseL,map_ofNat,pderiv_mul,pderiv_pow,pderiv_X,
+      Pi.single_apply,Fin.ext_iff]
+  · simp [pivotNumer,baseB1,baseC2,baseL,map_ofNat,pderiv_mul,pderiv_pow,pderiv_X,
+      Pi.single_apply,Fin.ext_iff]
+
+theorem pivot_time : ratioTangent 0 pivot = 0 := by
+  have htwo : ratioTangent 0 (2 : FunctionField) = 0 := (ratioTangent 0).map_natCast 2
+  simp [pivot,Derivation.leibniz_div,Derivation.leibniz,pivotNumer_time,baseL_time,htwo]
+
+#print axioms pivot_time
+end RemovableBinding
+
+namespace RemovableBinding
+open SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent CubicTraceDescent HoldoutConstruction
+open scoped BigOperators
+set_option maxHeartbeats 4000000
+set_option backward.isDefEq.respectTransparency false
+
+def momentSlots : Fin 7 → FunctionField := ![
+  (-fb0*fc0+9*l0*fd0)/(12*l0),
+  (-fb0*fc1+3*fb1*fc0-3*l0*fd1)/(12*l0),
+  (-fb0*fc2+3*fb1*fc1-15*l0*fd2)/(12*l0),
+  (fb1*fc2-9*l0*fd3)/(4*l0),
+  (-fb0^2+3*l0*fc0)/(6*l0),
+  (2*fb0*fb1-3*l0*fc1)/(6*l0),
+  pivot]
+
+theorem momentSlots_pivot : momentSlots 6 = pivot := rfl
+
+theorem momentSlots_K0 : actualK0 = momentSlots 0+momentSlots 1*t^2+
+    momentSlots 2*(t^2)^2+momentSlots 3*(t^2)^3 := by
+  exact actualK0_expansion
+
+theorem momentSlots_K1 : actualK1 = momentSlots 4+momentSlots 5*t^2+
+    momentSlots 6*(t^2)^2 := by
+  exact actualK1_expansion
+
+variable {L : Type*} [Field L] [Algebra FunctionField L] [FiniteDimensional FunctionField L]
+
+/-- A literal six-moment endpoint. The existence of the contact form and
+its six full trace equations remain hypotheses. -/
+def relativePrimitiveOfSixMoments
+    (s0 s1 : L) (w : Fin 3 → L) (m q : Fin 7 → FunctionField)
+    (hm_time : ratioTangent 0 (m 6) = 0) (hq_time : ratioTangent 0 (q 6) = 0)
+    (hcurrent : (∑ i, extendFiniteDerivation (L := L) (ratioTangent i) (w i)) =
+      linearDensity (algebraMap FunctionField L normal)
+        (algebraMap FunctionField L secondNormal)
+        (algebraMap FunctionField L normalCoordinate) s0 s1)
+    (htrace0 : Algebra.normalizedTrace FunctionField L s0 = -t*targetSource0 +
+      ((m 0-q 0)+(m 1-q 1)*t^2+(m 2-q 2)*(t^2)^2+(m 3-q 3)*(t^2)^3))
+    (htrace1 : Algebra.normalizedTrace FunctionField L s1 = -t*targetSource1 +
+      ((m 4-q 4)+(m 5-q 5)*t^2+(m 6-q 6)*(t^2)^2))
+    (hslots : ∀ j, j ≠ 6 → momentSlots 6*(m j-q j) = momentSlots j*(m 6-q 6)) :
+    RelativePrimitive := by
+  let a := (m 6-q 6)/pivot
+  have hscalar : ∀ j, m j-q j = a*momentSlots j := by
+    obtain ⟨aa,haa⟩ := SixMoments.six_conditions_suffice m q momentSlots
+      (by rw [momentSlots_pivot]; exact pivot_nonzero) hslots
+    have heq : aa = a := by
+      have h := haa 6
+      rw [momentSlots_pivot] at h
+      dsimp [a]
+      apply (eq_div_iff pivot_nonzero).2
+      exact h.symm
+    simpa [heq] using haa
+  have ha : ratioTangent 0 a = 0 := by
+    dsimp only [a]
+    exact SixMoments.pivot_ratio_constant (ratioTangent 0) _ _
+      (by simp [hm_time,hq_time]) pivot_time
+  apply relativePrimitiveOfActualCorrection s0 s1 w a ha hcurrent
+  · rw [htrace0,momentSlots_K0, hscalar 0,hscalar 1,hscalar 2,hscalar 3]
+    ring
+  · rw [htrace1,momentSlots_K1, hscalar 4,hscalar 5,hscalar 6]
+    ring
+
+#print axioms momentSlots_K0
+#print axioms momentSlots_K1
+#print axioms relativePrimitiveOfSixMoments
+end RemovableBinding
+
+
+/-! Integrated scratch module: ContactSix. -/
+
+
+noncomputable section
+namespace ContactSix
+open SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent SymmetricContactField CubicSelectorSource CubicTraceDescent
+open RemovableBinding HoldoutConstruction
+open scoped BigOperators
+set_option maxHeartbeats 4000000
+set_option backward.isDefEq.respectTransparency false
+
+/-- The exact selected-field closed contact form has the selector density.
+The remaining conditions concern its full finite traces. -/
+theorem actualContact_current (H : CurveField) :
+    let j := actualJet H
+    let w := closedSelectorCurrent j (genericCoordinates 72) (formR H) (formS H)
+    (∑ i, extendFiniteDerivation (L := LiftedField) (ratioTangent i) (w i)) =
+      linearDensity (algebraMap FunctionField LiftedField normal)
+        (algebraMap FunctionField LiftedField secondNormal)
+        (algebraMap FunctionField LiftedField normalCoordinate) (curveSourceZero H) (curveSourceOne H) := by
+  let j := actualJet H
+  let beta := genericCoordinates 72
+  have hg : CubicSelectorSource.normal j
+      (algebraMap FunctionField LiftedField normalCoordinate-beta) = algebraMap FunctionField LiftedField normal := by
+    exact (pencilJet_normal (contactMotion H) actualPencil (physicalT^2)
+      (genericCoordinates 71) (genericCoordinates 72) physicalU).trans actual_pencil_normal
+  have hgu : CubicSelectorSource.secondNormal j
+      (algebraMap FunctionField LiftedField normalCoordinate-beta) = algebraMap FunctionField LiftedField secondNormal := by
+    exact (pencilJet_second (contactMotion H) actualPencil (physicalT^2)
+      (genericCoordinates 71) (genericCoordinates 72) physicalU).trans actual_pencil_second
+  have hf : CubicSelectorSource.equation j (algebraMap FunctionField LiftedField normalCoordinate-beta) = 0 := by
+    dsimp only [j,beta]
+    rw [actualJet, pencilJet_equation]
+    change pencilEquation actualPencil (physicalT^2) physicalU-
+      pencilEquation actualPencil ((genericCoordinates 71)^2) (genericCoordinates 72) = 0
+    rw [actual_pencil_equation, actual_point_equation, sub_self]
+  have hnormal_ne : CubicSelectorSource.normal j
+      (algebraMap FunctionField LiftedField normalCoordinate-beta) ≠ 0 := by
+    rw [hg]
+    exact (map_ne_zero (algebraMap FunctionField LiftedField)).mpr
+      SymmetricTraceEndpoint.normal_nonzero
+  have h := CubicSelectorSource.current_density (extended 0) (extended 1) (extended 2)
+    (algebraMap FunctionField LiftedField t) (algebraMap FunctionField LiftedField normalCoordinate-beta)
+    (formR H) (formS H) j
+    extended_time_r_commute extended_time_s_commute
+    (by simpa using extended_t (L := LiftedField) 0)
+    (by simpa using extended_t (L := LiftedField) 1)
+    (by simpa using extended_t (L := LiftedField) 2)
+    (generic_coordinates_time 71) (contact_form_time_zero H).1 (contact_form_time_zero H).2
+    (contact_form_closed H) rfl actual_pencil_leading_nonzero movingSection_nonzero
+    hnormal_ne hf (actual_jet_chain_rules H).1 (actual_jet_chain_rules H).2
+  rw [hg, hgu, CubicSelectorSource.linearDensity_shift] at h
+  simpa [closedSelectorCurrent, Fin.sum_univ_three, extended, hg,
+    curveSourceZero,curveSourceOne,j,beta] using h
+
+/-- The selected actual contact form gives the primitive if its full normalized
+traces satisfy the six moment conditions. No such weight is constructed. -/
+def relativePrimitiveOfContactSix (H : CurveField) (m q : Fin 7 → FunctionField)
+    (hm_time : ratioTangent 0 (m 6) = 0) (hq_time : ratioTangent 0 (q 6) = 0)
+    (htrace0 : Algebra.normalizedTrace FunctionField LiftedField (curveSourceZero H) = -t*targetSource0 +
+      ((m 0-q 0)+(m 1-q 1)*t^2+(m 2-q 2)*(t^2)^2+(m 3-q 3)*(t^2)^3))
+    (htrace1 : Algebra.normalizedTrace FunctionField LiftedField (curveSourceOne H) = -t*targetSource1 +
+      ((m 4-q 4)+(m 5-q 5)*t^2+(m 6-q 6)*(t^2)^2))
+    (hslots : ∀ j, j ≠ 6 → momentSlots 6*(m j-q j) = momentSlots j*(m 6-q 6)) :
+    RelativePrimitive := by
+  apply relativePrimitiveOfSixMoments (curveSourceZero H) (curveSourceOne H)
+    (closedSelectorCurrent (actualJet H) (genericCoordinates 72) (formR H) (formS H))
+    m q hm_time hq_time ?_ htrace0 htrace1 hslots
+  exact actualContact_current H
+
+#print axioms actualContact_current
+#print axioms relativePrimitiveOfContactSix
+end ContactSix
+
+
+/-! Integrated scratch module: TargetSlots. -/
+
+
+noncomputable section
+namespace TargetSlots
+open MvPolynomial SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent ChartSquareBase SquareDifferentials SquareStable HermiteBinding
+open CandidateDerivativeRules CandidateSquareEquation WeightedPrimitiveTransport RemovableBinding
+set_option maxHeartbeats 4000000
+set_option backward.isDefEq.respectTransparency false
+
+def z : FunctionField := lambda^2
+def r : FunctionField := b
+def s : FunctionField := ChartSquareBase.d/t
+def x : FunctionField := t^2
+def u : FunctionField := normalCoordinate
+
+theorem leading_binding : weightedMap leadingPolynomial = l0 := by
+  change residueMap (squareLift leadingPolynomial) = evalG L
+  rw [squareLift_leading, ← baseL_lift, CandidateBaseInjection.evalG_rename_base]
+  have hc5 : residueMap (C (5/7 : ℂ)) = (5/7 : FunctionField) := by
+    change constants (5/7) = _
+    simp only [map_div₀, map_ofNat]
+  have hc10 : residueMap (C (10/7 : ℂ)) = (10/7 : FunctionField) := by
+    change constants (10/7) = _
+    simp only [map_div₀, map_ofNat]
+  simp [CandidateBaseInjection.baseMap, CandidateBaseInjection.baseCoord, baseL,leadingPolynomial,
+    constants,lambda,weightedMap,squareLift,Fin.ext_iff,Matrix.cons_val_two,
+    Matrix.cons_val_three,map_ofNat]
+  simp only [hc5,hc10]
+  ring
+
+theorem source_coeff_binding : t*weightedMap sourceQuadraticCoefficient = r*s*x*z := by
+  simp [sourceQuadraticCoefficient,weightedMap,squareLift,r,s,x,z,t,ChartSquareBase.d,b,lambda,
+    Fin.ext_iff,Matrix.cons_val_two,Matrix.cons_val_three,map_ofNat]
+  have ht : residueMap (X 2) ≠ 0 := t_eq_residue ▸ t_nonzero
+  field_simp [ht]
+  <;> ring
+
+theorem source_binding : t*source = r*s*x*(1-u)*(x-z*u) := by
+  rw [source_eq_P]
+  simp [P,evalG,r,s,x,z,u,normalCoord_eval,generators,b,lambda,ChartSquareBase.d,t]
+  <;> field_simp [t_nonzero]
+  <;> ring
+
+theorem source_derivative_binding : t*sourceDerivative = r*s*x*(-x-z+2*z*u) := by
+  rw [sourceDerivative_eq_Pu]
+  simp [P,evalG,r,s,x,z,u,normalCoord_eval,generators,b,lambda,ChartSquareBase.d,t,
+    pderiv_mul,pderiv_pow,pderiv_X,Pi.single_apply,Fin.ext_iff,map_ofNat]
+  <;> field_simp [t_nonzero]
+  <;> ring
+
+theorem target1_binding : -t*targetSource1 = r*s*x*(x+z+2*z*b0/(3*l0)) := by
+  have hsrc := source_derivative_binding
+  have hc := source_coeff_binding
+  have hg := field_second
+  rw [RemovableMoment.normalDeriv] at hg
+  rw [targetSource1,normalCorrection,leading_binding]
+  field_simp [field_l_nonzero]
+  dsimp only [u] at *
+  linear_combination (-3*l0)*hsrc + secondNormal*hc - (r*s*x*z)*hg
+
+theorem target0_binding : -t*targetSource0 = r*s*x*(z*c0/(3*l0)-x) := by
+  have hs := source_binding
+  have hsd := source_derivative_binding
+  have hc := source_coeff_binding
+  have hg := field_normal
+  have hgg := field_second
+  rw [RemovableMoment.normal] at hg
+  rw [RemovableMoment.normalDeriv] at hgg
+  rw [targetSource0,targetSource1,normalCorrection,leading_binding]
+  field_simp [field_l_nonzero]
+  dsimp only [u] at *
+  linear_combination (-3*l0)*hs + (3*l0*normalCoordinate)*hsd + (normal-normalCoordinate*secondNormal)*hc - (r*s*x*z)*hg + (r*s*x*z*normalCoordinate)*hgg
+
+#print axioms leading_binding
+#print axioms target0_binding
+#print axioms target1_binding
+end TargetSlots
+
+namespace TargetSlots
+open MvPolynomial SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent ChartSquareBase SquareDifferentials SquareStable HermiteBinding
+open CandidateDerivativeRules CandidateSquareEquation WeightedPrimitiveTransport RemovableBinding
+open ContactSix CubicTraceDescent HoldoutConstruction
+open scoped BigOperators
+set_option maxHeartbeats 4000000
+set_option backward.isDefEq.respectTransparency false
+
+def targetMomentSlots : Fin 7 → FunctionField := ![
+  0, r*s*z*fc0/(3*l0), r*s*(z*fc1/(3*l0)-1), r*s*z*fc2/(3*l0),
+  0, r*s*z*(1+2*fb0/(3*l0)), r*s*(1+2*z*fb1/(3*l0))]
+
+theorem target0_expansion : -t*targetSource0 =
+    targetMomentSlots 0+targetMomentSlots 1*t^2+targetMomentSlots 2*(t^2)^2+
+      targetMomentSlots 3*(t^2)^3 := by
+  rw [target0_binding,field_C]
+  change r*s*x*(z*(fc0+fc1*t^2+fc2*t^4)/(3*l0)-x) =
+    0+(r*s*z*fc0/(3*l0))*t^2+(r*s*(z*fc1/(3*l0)-1))*(t^2)^2+
+      (r*s*z*fc2/(3*l0))*(t^2)^3
+  dsimp [x]
+  field_simp [field_l_nonzero]
+  <;> ring
+
+theorem target1_expansion : -t*targetSource1 =
+    targetMomentSlots 4+targetMomentSlots 5*t^2+targetMomentSlots 6*(t^2)^2 := by
+  rw [target1_binding,field_B]
+  change r*s*x*(x+z+2*z*(fb0+fb1*t^2)/(3*l0)) =
+    0+(r*s*z*(1+2*fb0/(3*l0)))*t^2+(r*s*(1+2*z*fb1/(3*l0)))*(t^2)^2
+  dsimp [x]
+  field_simp [field_l_nonzero]
+  <;> ring
+
+theorem time_r : ratioTangent 0 r = 0 := by
+  change ratioTangent 0 b = 0
+  rw [← coordinate_b]
+  exact time_parameter_coordinate 1
+
+theorem time_s : ratioTangent 0 s = 0 := by
+  change ratioTangent 0 (ChartSquareBase.d/t) = 0
+  rw [← coordinate_s]
+  exact time_parameter_coordinate 2
+
+theorem time_z : ratioTangent 0 z = 0 := by
+  have h : ratioTangent 0 lambda = 0 := by
+    rw [← coordinate_lambda]
+    exact time_parameter_coordinate 0
+  simp [z,Derivation.leibniz_pow,h]
+
+theorem time_fb1 : ratioTangent 0 fb1 = 0 := by
+  change ratioTangent 0 (CandidateBaseInjection.baseMap baseB1) = 0
+  rw [← CandidateBaseInjection.evalG_rename_base]
+  apply time_evalG_of_omits_x_u
+  · simp [baseB1,map_ofNat,pderiv_mul,pderiv_pow,pderiv_X,Pi.single_apply,Fin.ext_iff]
+  · simp [baseB1,map_ofNat,pderiv_mul,pderiv_pow,pderiv_X,Pi.single_apply,Fin.ext_iff]
+
+theorem target_slot6_time : ratioTangent 0 (targetMomentSlots 6) = 0 := by
+  change ratioTangent 0 (r*s*(1+2*z*fb1/(3*l0))) = 0
+  have htwo : ratioTangent 0 (2 : FunctionField) = 0 := (ratioTangent 0).map_natCast 2
+  have hthree : ratioTangent 0 (3 : FunctionField) = 0 := (ratioTangent 0).map_natCast 3
+  simp [Derivation.leibniz,Derivation.leibniz_div, time_r,time_s,time_z,time_fb1,
+    baseL_time,htwo,hthree]
+
+variable {L : Type*} [Field L] [Algebra FunctionField L] [FiniteDimensional FunctionField L]
+
+#print axioms target0_expansion
+#print axioms target1_expansion
+#print axioms target_slot6_time
+end TargetSlots
+
+namespace TargetSlots
+open SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent RemovableBinding ContactSix SymmetricContactField
+
+/-- For the actual selected contact field, six literal normalized-trace
+conditions suffice. A contact weight meeting them is still required. -/
+def relativePrimitiveOfContactMoments (H : CurveField) (m : Fin 7 → FunctionField)
+    (hm_time : ratioTangent 0 (m 6) = 0)
+    (htrace0 : Algebra.normalizedTrace FunctionField LiftedField (curveSourceZero H) =
+      m 0+m 1*t^2+m 2*(t^2)^2+m 3*(t^2)^3)
+    (htrace1 : Algebra.normalizedTrace FunctionField LiftedField (curveSourceOne H) =
+      m 4+m 5*t^2+m 6*(t^2)^2)
+    (hslots : ∀ j, j ≠ 6 → momentSlots 6*(m j-targetMomentSlots j) =
+      momentSlots j*(m 6-targetMomentSlots 6)) : RelativePrimitive := by
+  apply relativePrimitiveOfContactSix H m targetMomentSlots hm_time target_slot6_time ?_ ?_ hslots
+  · rw [htrace0,target0_expansion]
+    ring
+  · rw [htrace1,target1_expansion]
+    ring
+
+#print axioms relativePrimitiveOfContactMoments
+end TargetSlots
+
+
+/-! Integrated scratch module: SelectorInterpolation. -/
+
+
+noncomputable section
+namespace SelectorInterpolation
+open CubicSelectorSource
+set_option maxHeartbeats 10000000
+set_option maxRecDepth 16384
+variable {K : Type*} [Field K] [CharZero K]
+
+def S0 (D : Derivation ℤ K K) (p : Pencil K) (x alpha beta : K) : K :=
+  sourceZero (pencilJet D p x alpha beta)-beta*sourceOne (pencilJet D p x alpha beta)
+def S1 (D : Derivation ℤ K K) (p : Pencil K) (x alpha beta : K) : K :=
+  sourceOne (pencilJet D p x alpha beta)
+
+theorem interpolate1 (D : Derivation ℤ K K) (p : Pencil K) (x alpha beta : K)
+    (hx : D x = 0) (hl : p 0 ≠ 0) :
+    S1 D p x alpha beta =
+      S1 D p 0 alpha beta+(-3*S1 D p 0 alpha beta+4*S1 D p 1 alpha beta-S1 D p 2 alpha beta)/2*x+
+        (S1 D p 0 alpha beta-2*S1 D p 1 alpha beta+S1 D p 2 alpha beta)/2*x^2 := by
+  have hn1 : D (1:K) = 0 := D.map_one_eq_zero
+  have hn2 : D (2:K) = 0 := D.map_natCast 2
+  have hn3 : D (3:K) = 0 := D.map_natCast 3
+  simp only [S1,sourceOne,sourceOneNumerator, cubicB, cubicC, quotientLinear,
+    quotientConstantNumerator,remainderTwoThree,pencilJet,pointA,pointG,
+    differenceZero,differenceOne,differenceTwo,differenceZeroDx,pencilNormal,
+    pencilB,pencilC,map_add,map_zero,map_one,Derivation.leibniz,Derivation.leibniz_pow,
+    smul_eq_mul,hx,hn1,hn2,hn3]
+  field_simp [hl]
+  <;> ring
+
+
+theorem interpolate0 (D : Derivation ℤ K K) (p : Pencil K) (x alpha beta : K)
+    (hx : D x = 0) (hl : p 0 ≠ 0) :
+    S0 D p x alpha beta =
+      S0 D p 0 alpha beta+(-11*S0 D p 0 alpha beta+18*S0 D p 1 alpha beta-
+        9*S0 D p 2 alpha beta+2*S0 D p 3 alpha beta)/6*x+
+      (2*S0 D p 0 alpha beta-5*S0 D p 1 alpha beta+4*S0 D p 2 alpha beta-
+        S0 D p 3 alpha beta)/2*x^2+
+      (-S0 D p 0 alpha beta+3*S0 D p 1 alpha beta-3*S0 D p 2 alpha beta+
+        S0 D p 3 alpha beta)/6*x^3 := by
+  have hn1 : D (1:K) = 0 := D.map_one_eq_zero
+  have hn2 : D (2:K) = 0 := D.map_natCast 2
+  have hn3 : D (3:K) = 0 := D.map_natCast 3
+  simp only [S0,sourceZero,sourceOne,sourceZeroNumerator,sourceOneNumerator,cubicB,cubicC,cubicD,
+    quotientLinear,quotientConstantNumerator,remainderOneThree,remainderTwoThree,
+    pencilJet,pointA,pointG,differenceZero,differenceOne,differenceTwo,differenceZeroDx,
+    pencilNormal,pencilB,pencilC,map_add,map_zero,map_one,Derivation.leibniz,Derivation.leibniz_pow,
+    smul_eq_mul,hx,hn1,hn2,hn3]
+  field_simp [hl]
+  <;> ring
+
+#print axioms interpolate0
+
+#print axioms interpolate1
+end SelectorInterpolation
+
+
+/-! Integrated scratch module: TraceInterpolation. -/
+
+
+noncomputable section
+namespace TraceInterpolation
+variable {K L : Type*} [Field K] [CharZero K] [Field L] [Algebra K L] [FiniteDimensional K L]
+
+local notation "Tr" => Algebra.normalizedTrace K L
+
+theorem trace_base_mul (z : K) (v : L) : Tr ((algebraMap K L z)*v) = z*Tr v := by
+  simpa only [Algebra.smul_def,smul_eq_mul,Algebra.algebraMap_self,RingHom.id_apply] using (map_smul Tr z v)
+
+theorem trace_base_mul_right (z : K) (v : L) : Tr (v*(algebraMap K L z)) = Tr v*z := by
+  rw [mul_comm,trace_base_mul,mul_comm]
+
+theorem trace_two_mul (v : L) : Tr (2*v) = 2*Tr v := by
+  simpa only [map_ofNat] using trace_base_mul (2 : K) v
+
+theorem trace_three_mul (v : L) : Tr (3*v) = 3*Tr v := by
+  simpa only [map_ofNat] using trace_base_mul (3 : K) v
+
+theorem trace_four_mul (v : L) : Tr (4*v) = 4*Tr v := by
+  simpa only [map_ofNat] using trace_base_mul (4 : K) v
+
+theorem trace_five_mul (v : L) : Tr (5*v) = 5*Tr v := by
+  simpa only [map_ofNat] using trace_base_mul (5 : K) v
+
+theorem trace_nine_mul (v : L) : Tr (9*v) = 9*Tr v := by
+  simpa only [map_ofNat] using trace_base_mul (9 : K) v
+
+theorem trace_eleven_mul (v : L) : Tr (11*v) = 11*Tr v := by
+  simpa only [map_ofNat] using trace_base_mul (11 : K) v
+
+theorem trace_eighteen_mul (v : L) : Tr (18*v) = 18*Tr v := by
+  simpa only [map_ofNat] using trace_base_mul (18 : K) v
+
+theorem trace_div_two (v : L) : Tr (v/2) = Tr v/2 := by
+  have h := trace_base_mul_right ((2 : K)⁻¹) v
+  simpa only [map_inv₀,map_ofNat,div_eq_mul_inv] using h
+
+theorem trace_div_six (v : L) : Tr (v/6) = Tr v/6 := by
+  have h := trace_base_mul_right ((6 : K)⁻¹) v
+  simpa only [map_inv₀,map_ofNat,div_eq_mul_inv] using h
+
+theorem trace_quadratic (a0 a1 a2 : L) (x : K) :
+    Tr (a0+(-3*a0+4*a1-a2)/2*algebraMap K L x+
+       (a0-2*a1+a2)/2*(algebraMap K L x)^2) =
+      Tr a0+(-3*Tr a0+4*Tr a1-Tr a2)/2*x+
+        (Tr a0-2*Tr a1+Tr a2)/2*x^2 := by
+  rw [← map_pow (algebraMap K L)]
+  simp only [map_add,map_sub,map_neg,trace_base_mul_right,trace_div_two,
+    trace_two_mul,trace_three_mul,trace_four_mul]
+  simp only [neg_mul,map_neg,trace_three_mul]
+
+theorem trace_cubic (a0 a1 a2 a3 : L) (x : K) :
+    Tr (a0+(-11*a0+18*a1-9*a2+2*a3)/6*algebraMap K L x+
+       (2*a0-5*a1+4*a2-a3)/2*(algebraMap K L x)^2+
+       (-a0+3*a1-3*a2+a3)/6*(algebraMap K L x)^3) =
+      Tr a0+(-11*Tr a0+18*Tr a1-9*Tr a2+2*Tr a3)/6*x+
+        (2*Tr a0-5*Tr a1+4*Tr a2-Tr a3)/2*x^2+
+        (-Tr a0+3*Tr a1-3*Tr a2+Tr a3)/6*x^3 := by
+  simp only [← map_pow (algebraMap K L)]
+  simp only [map_add,map_sub,map_neg,trace_base_mul_right,trace_div_two,trace_div_six,
+    trace_two_mul,trace_three_mul,trace_four_mul,trace_five_mul,trace_nine_mul,
+    trace_eleven_mul,trace_eighteen_mul]
+  simp only [neg_mul,map_neg,trace_eleven_mul]
+
+#print axioms trace_quadratic
+#print axioms trace_cubic
+end TraceInterpolation
+
+
+/-! Integrated scratch module: TimeSource. -/
+
+
+noncomputable section
+namespace TimeSource
+open CubicSelectorSource
+set_option maxHeartbeats 5000000
+set_option maxRecDepth 16384
+variable {K : Type*} [Field K] [CharZero K]
+
+theorem sourceOne_time_zero (T D : Derivation ℤ K K) (p : Pencil K) (x alpha beta : K)
+    (hTD : ∀ v, T (D v) = D (T v)) (hp : ∀ i, T (p i) = 0)
+    (hx : T x = 0) (ha : T alpha = 0) (hb : T beta = 0) :
+    T (sourceOne (pencilJet D p x alpha beta)) = 0 := by
+  have hdp (i : Fin 10) : T (D (p i)) = 0 := by rw [hTD,hp,map_zero]
+  have hda : T (D alpha) = 0 := by rw [hTD,ha,map_zero]
+  have hdb : T (D beta) = 0 := by rw [hTD,hb,map_zero]
+  have hdx : T (D x) = 0 := by rw [hTD,hx,map_zero]
+  have ht2 : T (2:K) = 0 := T.map_natCast 2
+  have ht3 : T (3:K) = 0 := T.map_natCast 3
+  have ht4 : T (4:K) = 0 := T.map_natCast 4
+  have ht8 : T (8:K) = 0 := T.map_natCast 8
+  have ht9 : T (9:K) = 0 := T.map_natCast 9
+  have hd2 : D (2:K) = 0 := D.map_natCast 2
+  have hd3 : D (3:K) = 0 := D.map_natCast 3
+  have hTn (n : ℕ) : T (n:K) = 0 := T.map_natCast n
+  have hDn (n : ℕ) : D (n:K) = 0 := D.map_natCast n
+  simp [sourceOne,sourceOneNumerator,cubicB,cubicC,quotientLinear,
+    quotientConstantNumerator,remainderTwoThree,pencilJet,pointA,pointG,
+    differenceZero,differenceOne,differenceTwo,differenceZeroDx,pencilNormal,
+    pencilB,pencilC,Derivation.leibniz,Derivation.leibniz_pow,Derivation.leibniz_div,
+    smul_eq_mul,hp,hx,ha,hb,hdp,hda,hdb,hdx,hTn,hDn,ht2,ht3,ht4,ht8,ht9,hd2,hd3,Derivation.map_one_eq_zero]
+
+#print axioms sourceOne_time_zero
+end TimeSource
+
+
+/-! Integrated scratch module: ContactTime. -/
+
+
+noncomputable section
+namespace ContactTime
+open SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent SymmetricContactField CubicSelectorSource HoldoutConstruction
+set_option maxHeartbeats 2000000
+set_option backward.isDefEq.respectTransparency false
+
+theorem contactMotion_commute_time (H : CurveField) (v : LiftedField) :
+    liftedTime (contactMotion H v) = contactMotion H (liftedTime v) := by
+  have hR : liftedTime (movingR v) = movingR (liftedTime v) := by
+    exact extended_time_r_commute v
+  have hS : liftedTime (movingS v) = movingS (liftedTime v) := by
+    exact extended_time_s_commute v
+  simp only [contactMotion,Derivation.sub_apply,Derivation.smul_apply,smul_eq_mul,
+    map_sub,Derivation.leibniz,(contact_form_time_zero H).1,(contact_form_time_zero H).2,
+    zero_mul,mul_zero,zero_add,add_zero,hR,hS]
+
+theorem sampled_sourceOne_time (H : CurveField) (n : ℕ) :
+    liftedTime (sourceOne (pencilJet (contactMotion H) actualPencil (n : LiftedField)
+      (genericCoordinates 71) (genericCoordinates 72))) = 0 := by
+  apply TimeSource.sourceOne_time_zero liftedTime (contactMotion H)
+  · exact contactMotion_commute_time H
+  · exact actual_pencil_time
+  · exact liftedTime.map_natCast n
+  · exact generic_coordinates_time 71
+  · exact generic_coordinates_time 72
+
+#print axioms contactMotion_commute_time
+#print axioms sampled_sourceOne_time
+end ContactTime
+
+
+/-! Integrated scratch module: AutomaticMoments. -/
+
+
+noncomputable section
+namespace AutomaticMoments
+open SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent SymmetricContactField CubicSelectorSource CubicTraceDescent
+open RemovableBinding HoldoutConstruction SelectorInterpolation
+set_option maxHeartbeats 4000000
+set_option maxRecDepth 16384
+set_option backward.isDefEq.respectTransparency false
+
+def sample0 (H : CurveField) (n : ℕ) : LiftedField :=
+  S0 (contactMotion H) actualPencil n (genericCoordinates 71) (genericCoordinates 72)
+def sample1 (H : CurveField) (n : ℕ) : LiftedField :=
+  S1 (contactMotion H) actualPencil n (genericCoordinates 71) (genericCoordinates 72)
+def trace0 (H : CurveField) (n : ℕ) : FunctionField := Algebra.normalizedTrace FunctionField LiftedField (sample0 H n)
+def trace1 (H : CurveField) (n : ℕ) : FunctionField := Algebra.normalizedTrace FunctionField LiftedField (sample1 H n)
+
+def moments (H : CurveField) : Fin 7 → FunctionField := ![
+  trace0 H 0, (-11*trace0 H 0+18*trace0 H 1-9*trace0 H 2+2*trace0 H 3)/6,
+  (2*trace0 H 0-5*trace0 H 1+4*trace0 H 2-trace0 H 3)/2,
+  (-trace0 H 0+3*trace0 H 1-3*trace0 H 2+trace0 H 3)/6,
+  trace1 H 0, (-3*trace1 H 0+4*trace1 H 1-trace1 H 2)/2,
+  (trace1 H 0-2*trace1 H 1+trace1 H 2)/2]
+
+theorem motion_x_zero (H : CurveField) : contactMotion H (physicalT^2) = 0 := by
+  simp [Derivation.leibniz_pow,contactMotion_time]
+
+theorem trace1_time_zero (H : CurveField) (n : ℕ) : ratioTangent 0 (trace1 H n) = 0 := by
+  change ratioTangent 0 (Algebra.normalizedTrace FunctionField LiftedField
+    (sourceOne (pencilJet (contactMotion H) actualPencil n (genericCoordinates 71) (genericCoordinates 72)))) = 0
+  rw [← finiteNormalizedTrace_derivation (ratioTangent 0) liftedTime
+    (fun x => extendFiniteDerivation_apply (ratioTangent 0) x)]
+  rw [ContactTime.sampled_sourceOne_time H n]
+  exact map_zero _
+
+theorem moments_six_time (H : CurveField) : ratioTangent 0 (moments H 6) = 0 := by
+  change ratioTangent 0 ((trace1 H 0-2*trace1 H 1+trace1 H 2)/2)=0
+  have htwo : ratioTangent 0 (2 : FunctionField) = 0 := (ratioTangent 0).map_natCast 2
+  simp [Derivation.leibniz_div,Derivation.leibniz,trace1_time_zero,htwo]
+
+theorem trace0_expansion (H : CurveField) :
+    Algebra.normalizedTrace FunctionField LiftedField (curveSourceZero H) =
+      moments H 0+moments H 1*t^2+moments H 2*(t^2)^2+moments H 3*(t^2)^3 := by
+  have hi := interpolate0 (contactMotion H) actualPencil (physicalT^2)
+    (genericCoordinates 71) (genericCoordinates 72) (motion_x_zero H) actual_pencil_leading_nonzero
+  change curveSourceZero H = _ at hi
+  have ht : physicalT^2 = algebraMap FunctionField LiftedField (t^2) := by simp [physicalT]
+  rw [ht] at hi
+  have hh := congrArg (Algebra.normalizedTrace FunctionField LiftedField) hi
+  rw [TraceInterpolation.trace_cubic] at hh
+  have h0 : Algebra.normalizedTrace FunctionField LiftedField
+      (S0 (contactMotion H) actualPencil 0 (genericCoordinates 71) (genericCoordinates 72)) = trace0 H 0 := by simp only [trace0,sample0,Nat.cast_zero]
+  have h1 : Algebra.normalizedTrace FunctionField LiftedField
+      (S0 (contactMotion H) actualPencil 1 (genericCoordinates 71) (genericCoordinates 72)) = trace0 H 1 := by simp only [trace0,sample0,Nat.cast_one]
+  have h2 : Algebra.normalizedTrace FunctionField LiftedField
+      (S0 (contactMotion H) actualPencil 2 (genericCoordinates 71) (genericCoordinates 72)) = trace0 H 2 := by simp only [trace0,sample0,Nat.cast_ofNat]
+  have h3 : Algebra.normalizedTrace FunctionField LiftedField
+      (S0 (contactMotion H) actualPencil 3 (genericCoordinates 71) (genericCoordinates 72)) = trace0 H 3 := by simp only [trace0,sample0,Nat.cast_ofNat]
+  rw [h0,h1,h2,h3] at hh
+  change Algebra.normalizedTrace FunctionField LiftedField (curveSourceZero H) =
+    trace0 H 0+(-11*trace0 H 0+18*trace0 H 1-9*trace0 H 2+2*trace0 H 3)/6*t^2+
+    (2*trace0 H 0-5*trace0 H 1+4*trace0 H 2-trace0 H 3)/2*(t^2)^2+
+    (-trace0 H 0+3*trace0 H 1-3*trace0 H 2+trace0 H 3)/6*(t^2)^3
+  exact hh
+
+theorem trace1_expansion (H : CurveField) :
+    Algebra.normalizedTrace FunctionField LiftedField (curveSourceOne H) =
+      moments H 4+moments H 5*t^2+moments H 6*(t^2)^2 := by
+  have hi := interpolate1 (contactMotion H) actualPencil (physicalT^2)
+    (genericCoordinates 71) (genericCoordinates 72) (motion_x_zero H) actual_pencil_leading_nonzero
+  change curveSourceOne H = _ at hi
+  have ht : physicalT^2 = algebraMap FunctionField LiftedField (t^2) := by simp [physicalT]
+  rw [ht] at hi
+  have hh := congrArg (Algebra.normalizedTrace FunctionField LiftedField) hi
+  rw [TraceInterpolation.trace_quadratic] at hh
+  have h0 : Algebra.normalizedTrace FunctionField LiftedField
+      (S1 (contactMotion H) actualPencil 0 (genericCoordinates 71) (genericCoordinates 72)) = trace1 H 0 := by simp only [trace1,sample1,Nat.cast_zero]
+  have h1 : Algebra.normalizedTrace FunctionField LiftedField
+      (S1 (contactMotion H) actualPencil 1 (genericCoordinates 71) (genericCoordinates 72)) = trace1 H 1 := by simp only [trace1,sample1,Nat.cast_one]
+  have h2 : Algebra.normalizedTrace FunctionField LiftedField
+      (S1 (contactMotion H) actualPencil 2 (genericCoordinates 71) (genericCoordinates 72)) = trace1 H 2 := by simp only [trace1,sample1,Nat.cast_ofNat]
+  rw [h0,h1,h2] at hh
+  change Algebra.normalizedTrace FunctionField LiftedField (curveSourceOne H) =
+    trace1 H 0+(-3*trace1 H 0+4*trace1 H 1-trace1 H 2)/2*t^2+
+    (trace1 H 0-2*trace1 H 1+trace1 H 2)/2*(t^2)^2
+  exact hh
+
+/-- This automatically constructs all seven full normalized trace slots for
+any actual closed contact form. Only the six match conditions remain. -/
+def relativePrimitiveOfSixTraceMatches (H : CurveField)
+    (hslots : ∀ j, j ≠ 6 → momentSlots 6*(moments H j-TargetSlots.targetMomentSlots j) =
+      momentSlots j*(moments H 6-TargetSlots.targetMomentSlots 6)) : RelativePrimitive :=
+  TargetSlots.relativePrimitiveOfContactMoments H (moments H) (moments_six_time H)
+    (trace0_expansion H) (trace1_expansion H) hslots
+
+#print axioms trace0_expansion
+#print axioms trace1_expansion
+#print axioms moments_six_time
+#print axioms relativePrimitiveOfSixTraceMatches
+end AutomaticMoments
+
+
+/-! Integrated scratch module: DirectContactSix. -/
+
+
+noncomputable section
+namespace DirectContactSix
+open SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent SymmetricContactField CubicSelectorSource CubicTraceDescent
+open RemovableBinding HoldoutConstruction
+open scoped BigOperators
+set_option maxHeartbeats 4000000
+set_option backward.isDefEq.respectTransparency false
+
+def directMotion (U V : LiftedField) : Derivation ℤ LiftedField LiftedField :=
+  U • movingS - V • movingR
+
+theorem directMotion_time (U V : LiftedField) : directMotion U V physicalT = 0 := by
+  simp [directMotion,Derivation.smul_apply,smul_eq_mul,physical_r_s.1,physical_r_s.2]
+
+theorem directMotion_leading (U V : LiftedField) : directMotion U V (actualPencil 0) = 0 := by
+  have hl : directMotion U V (genericParameters 0) = 0 := by
+    simp [directMotion, Derivation.smul_apply, smul_eq_mul,
+      moving_lambda_zero.1,moving_lambda_zero.2]
+  have hn2 : directMotion U V (2 : LiftedField) = 0 := (directMotion U V).map_natCast 2
+  have hn5 : directMotion U V (5 : LiftedField) = 0 := (directMotion U V).map_natCast 5
+  have hn7 : directMotion U V (7 : LiftedField) = 0 := (directMotion U V).map_natCast 7
+  have hn10 : directMotion U V (10 : LiftedField) = 0 := (directMotion U V).map_natCast 10
+  simp [actualPencil, ratioPencil, Derivation.leibniz, Derivation.leibniz_pow,
+    Derivation.leibniz_div, smul_eq_mul, hn2, hn5, hn7, hn10, hl]
+
+def directJet (U V : LiftedField) : Jet LiftedField :=
+  pencilJet (directMotion U V) actualPencil (physicalT^2) (genericCoordinates 71) (genericCoordinates 72)
+
+theorem direct_jet_chain_rules (U V : LiftedField) :
+    let j := directJet U V
+    let Y := movingOperator liftedTime movingR movingS physicalT j.alpha U V
+    Y (selector j (physicalU-genericCoordinates 72)) =
+      j.alpha*(j.aDot*(physicalU-genericCoordinates 72)+2*j.gDot-j.a*j.betaDot)/3-
+        j.a*motion j (physicalU-genericCoordinates 72)/(3*normal j (physicalU-genericCoordinates 72)) ∧
+    Y (normal j (physicalU-genericCoordinates 72)) = normalMotion j (physicalU-genericCoordinates 72)-
+      secondNormal j (physicalU-genericCoordinates 72)*motion j (physicalU-genericCoordinates 72)/
+        normal j (physicalU-genericCoordinates 72) := by
+  dsimp only
+  have h := pencilJet_chain_rules liftedTime (directMotion U V) actualPencil physicalT
+    (genericCoordinates 71) (genericCoordinates 72) physicalU actual_pencil_time
+    (generic_coordinates_time 71) (generic_coordinates_time 72) physical_time
+    (directMotion_time U V) (directMotion_leading U V) actual_point_equation
+    actual_pencil_equation actual_pencil_normal_nonzero
+  change _ ∧ _
+  exact h
+
+def directSourceZero (U V : LiftedField) : LiftedField :=
+  sourceZero (directJet U V)-genericCoordinates 72*sourceOne (directJet U V)
+def directSourceOne (U V : LiftedField) : LiftedField := sourceOne (directJet U V)
+
+theorem directContact_current (U V : LiftedField)
+    (hU : liftedTime U = 0) (hV : liftedTime V = 0) (hclosed : movingR V = movingS U) :
+    let j := directJet U V
+    let w := closedSelectorCurrent j (genericCoordinates 72) U V
+    (∑ i, extendFiniteDerivation (L := LiftedField) (ratioTangent i) (w i)) =
+      linearDensity (algebraMap FunctionField LiftedField SymmetricTraceEndpoint.normal)
+        (algebraMap FunctionField LiftedField secondNormal)
+        (algebraMap FunctionField LiftedField normalCoordinate) (directSourceZero U V) (directSourceOne U V) := by
+  let j := directJet U V
+  let beta := genericCoordinates 72
+  have hg : CubicSelectorSource.normal j
+      (algebraMap FunctionField LiftedField normalCoordinate-beta) = algebraMap FunctionField LiftedField SymmetricTraceEndpoint.normal := by
+    exact (pencilJet_normal (directMotion U V) actualPencil (physicalT^2)
+      (genericCoordinates 71) (genericCoordinates 72) physicalU).trans actual_pencil_normal
+  have hgu : CubicSelectorSource.secondNormal j
+      (algebraMap FunctionField LiftedField normalCoordinate-beta) = algebraMap FunctionField LiftedField secondNormal := by
+    exact (pencilJet_second (directMotion U V) actualPencil (physicalT^2)
+      (genericCoordinates 71) (genericCoordinates 72) physicalU).trans actual_pencil_second
+  have hf : CubicSelectorSource.equation j (algebraMap FunctionField LiftedField normalCoordinate-beta) = 0 := by
+    dsimp only [j,beta]
+    rw [directJet, pencilJet_equation]
+    change pencilEquation actualPencil (physicalT^2) physicalU-
+      pencilEquation actualPencil ((genericCoordinates 71)^2) (genericCoordinates 72) = 0
+    rw [actual_pencil_equation, actual_point_equation, sub_self]
+  have hnormal_ne : CubicSelectorSource.normal j
+      (algebraMap FunctionField LiftedField normalCoordinate-beta) ≠ 0 := by
+    rw [hg]
+    exact (map_ne_zero (algebraMap FunctionField LiftedField)).mpr
+      SymmetricTraceEndpoint.normal_nonzero
+  have h := CubicSelectorSource.current_density (extended 0) (extended 1) (extended 2)
+    (algebraMap FunctionField LiftedField t) (algebraMap FunctionField LiftedField normalCoordinate-beta)
+    U V j extended_time_r_commute extended_time_s_commute
+    (by simpa using extended_t (L := LiftedField) 0)
+    (by simpa using extended_t (L := LiftedField) 1)
+    (by simpa using extended_t (L := LiftedField) 2)
+    (generic_coordinates_time 71) hU hV hclosed rfl actual_pencil_leading_nonzero movingSection_nonzero
+    hnormal_ne hf (direct_jet_chain_rules U V).1 (direct_jet_chain_rules U V).2
+  rw [hg, hgu, CubicSelectorSource.linearDensity_shift] at h
+  simpa [closedSelectorCurrent, Fin.sum_univ_three, extended, hg,
+    directSourceZero,directSourceOne,j,beta] using h
+
+/-- A direct closed form works in the existing selected field without a
+representation as H dτ. The source trace equations are still required. -/
+def relativePrimitiveOfDirectContactSix (U V : LiftedField) (m q : Fin 7 → FunctionField)
+    (hU : liftedTime U = 0) (hV : liftedTime V = 0) (hclosed : movingR V = movingS U)
+    (hm_time : ratioTangent 0 (m 6) = 0) (hq_time : ratioTangent 0 (q 6) = 0)
+    (htrace0 : Algebra.normalizedTrace FunctionField LiftedField (directSourceZero U V) = -t*targetSource0 +
+      ((m 0-q 0)+(m 1-q 1)*t^2+(m 2-q 2)*(t^2)^2+(m 3-q 3)*(t^2)^3))
+    (htrace1 : Algebra.normalizedTrace FunctionField LiftedField (directSourceOne U V) = -t*targetSource1 +
+      ((m 4-q 4)+(m 5-q 5)*t^2+(m 6-q 6)*(t^2)^2))
+    (hslots : ∀ j, j ≠ 6 → momentSlots 6*(m j-q j) = momentSlots j*(m 6-q 6)) :
+    RelativePrimitive := by
+  apply relativePrimitiveOfSixMoments (directSourceZero U V) (directSourceOne U V)
+    (closedSelectorCurrent (directJet U V) (genericCoordinates 72) U V)
+    m q hm_time hq_time ?_ htrace0 htrace1 hslots
+  exact directContact_current U V hU hV hclosed
+
+#print axioms directContact_current
+#print axioms relativePrimitiveOfDirectContactSix
+end DirectContactSix
+
+
+/-! Integrated scratch module: DirectContactTime. -/
+
+
+noncomputable section
+namespace DirectContactTime
+open SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent SymmetricContactField CubicSelectorSource HoldoutConstruction
+open DirectContactSix
+set_option maxHeartbeats 2000000
+set_option backward.isDefEq.respectTransparency false
+
+theorem directMotion_commute_time (U V : LiftedField) (hU : liftedTime U = 0)
+    (hV : liftedTime V = 0) (v : LiftedField) :
+    liftedTime (directMotion U V v) = directMotion U V (liftedTime v) := by
+  have hR : liftedTime (movingR v) = movingR (liftedTime v) := by exact extended_time_r_commute v
+  have hS : liftedTime (movingS v) = movingS (liftedTime v) := by exact extended_time_s_commute v
+  simp only [directMotion,Derivation.sub_apply,Derivation.smul_apply,smul_eq_mul,
+    map_sub,Derivation.leibniz,hU,hV,zero_mul,mul_zero,zero_add,add_zero,hR,hS]
+
+theorem sampled_sourceOne_time (U V : LiftedField) (hU : liftedTime U = 0)
+    (hV : liftedTime V = 0) (n : ℕ) :
+    liftedTime (sourceOne (pencilJet (directMotion U V) actualPencil (n : LiftedField)
+      (genericCoordinates 71) (genericCoordinates 72))) = 0 := by
+  apply TimeSource.sourceOne_time_zero liftedTime (directMotion U V)
+  · exact directMotion_commute_time U V hU hV
+  · exact actual_pencil_time
+  · exact liftedTime.map_natCast n
+  · exact generic_coordinates_time 71
+  · exact generic_coordinates_time 72
+
+#print axioms directMotion_commute_time
+#print axioms sampled_sourceOne_time
+end DirectContactTime
+
+
+/-! Integrated scratch module: DirectAutomaticMoments. -/
+
+
+noncomputable section
+namespace DirectAutomaticMoments
+open SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent SymmetricContactField CubicSelectorSource CubicTraceDescent
+open RemovableBinding HoldoutConstruction SelectorInterpolation DirectContactSix
+set_option maxHeartbeats 4000000
+set_option maxRecDepth 16384
+set_option backward.isDefEq.respectTransparency false
+
+def sample0 (U V : LiftedField) (n : ℕ) : LiftedField :=
+  S0 (directMotion U V) actualPencil n (genericCoordinates 71) (genericCoordinates 72)
+def sample1 (U V : LiftedField) (n : ℕ) : LiftedField :=
+  S1 (directMotion U V) actualPencil n (genericCoordinates 71) (genericCoordinates 72)
+def trace0 (U V : LiftedField) (n : ℕ) : FunctionField := Algebra.normalizedTrace FunctionField LiftedField (sample0 U V n)
+def trace1 (U V : LiftedField) (n : ℕ) : FunctionField := Algebra.normalizedTrace FunctionField LiftedField (sample1 U V n)
+
+def moments (U V : LiftedField) : Fin 7 → FunctionField := ![
+  trace0 U V 0, (-11*trace0 U V 0+18*trace0 U V 1-9*trace0 U V 2+2*trace0 U V 3)/6,
+  (2*trace0 U V 0-5*trace0 U V 1+4*trace0 U V 2-trace0 U V 3)/2,
+  (-trace0 U V 0+3*trace0 U V 1-3*trace0 U V 2+trace0 U V 3)/6,
+  trace1 U V 0, (-3*trace1 U V 0+4*trace1 U V 1-trace1 U V 2)/2,
+  (trace1 U V 0-2*trace1 U V 1+trace1 U V 2)/2]
+
+theorem motion_x_zero (U V : LiftedField) : directMotion U V (physicalT^2) = 0 := by
+  simp [Derivation.leibniz_pow,directMotion_time]
+
+theorem trace1_time_zero (U V : LiftedField) (hU : liftedTime U = 0) (hV : liftedTime V = 0) (n : ℕ) : ratioTangent 0 (trace1 U V n) = 0 := by
+  change ratioTangent 0 (Algebra.normalizedTrace FunctionField LiftedField
+    (sourceOne (pencilJet (directMotion U V) actualPencil n (genericCoordinates 71) (genericCoordinates 72)))) = 0
+  rw [← finiteNormalizedTrace_derivation (ratioTangent 0) liftedTime
+    (fun x => extendFiniteDerivation_apply (ratioTangent 0) x)]
+  rw [DirectContactTime.sampled_sourceOne_time U V hU hV n]
+  exact map_zero _
+
+theorem moments_six_time (U V : LiftedField) (hU : liftedTime U = 0) (hV : liftedTime V = 0) : ratioTangent 0 (moments U V 6) = 0 := by
+  change ratioTangent 0 ((trace1 U V 0-2*trace1 U V 1+trace1 U V 2)/2)=0
+  have htwo : ratioTangent 0 (2 : FunctionField) = 0 := (ratioTangent 0).map_natCast 2
+  simp [Derivation.leibniz_div,Derivation.leibniz,trace1_time_zero U V hU hV,htwo]
+
+theorem trace0_expansion (U V : LiftedField) :
+    Algebra.normalizedTrace FunctionField LiftedField ((directSourceZero U V)) =
+      moments U V 0+moments U V 1*t^2+moments U V 2*(t^2)^2+moments U V 3*(t^2)^3 := by
+  have hi := interpolate0 (directMotion U V) actualPencil (physicalT^2)
+    (genericCoordinates 71) (genericCoordinates 72) (motion_x_zero U V) actual_pencil_leading_nonzero
+  change (directSourceZero U V) = _ at hi
+  have ht : physicalT^2 = algebraMap FunctionField LiftedField (t^2) := by simp [physicalT]
+  rw [ht] at hi
+  have hh := congrArg (Algebra.normalizedTrace FunctionField LiftedField) hi
+  rw [TraceInterpolation.trace_cubic] at hh
+  have h0 : Algebra.normalizedTrace FunctionField LiftedField
+      (S0 (directMotion U V) actualPencil 0 (genericCoordinates 71) (genericCoordinates 72)) = trace0 U V 0 := by simp only [trace0,sample0,Nat.cast_zero]
+  have h1 : Algebra.normalizedTrace FunctionField LiftedField
+      (S0 (directMotion U V) actualPencil 1 (genericCoordinates 71) (genericCoordinates 72)) = trace0 U V 1 := by simp only [trace0,sample0,Nat.cast_one]
+  have h2 : Algebra.normalizedTrace FunctionField LiftedField
+      (S0 (directMotion U V) actualPencil 2 (genericCoordinates 71) (genericCoordinates 72)) = trace0 U V 2 := by simp only [trace0,sample0,Nat.cast_ofNat]
+  have h3 : Algebra.normalizedTrace FunctionField LiftedField
+      (S0 (directMotion U V) actualPencil 3 (genericCoordinates 71) (genericCoordinates 72)) = trace0 U V 3 := by simp only [trace0,sample0,Nat.cast_ofNat]
+  rw [h0,h1,h2,h3] at hh
+  change Algebra.normalizedTrace FunctionField LiftedField ((directSourceZero U V)) =
+    trace0 U V 0+(-11*trace0 U V 0+18*trace0 U V 1-9*trace0 U V 2+2*trace0 U V 3)/6*t^2+
+    (2*trace0 U V 0-5*trace0 U V 1+4*trace0 U V 2-trace0 U V 3)/2*(t^2)^2+
+    (-trace0 U V 0+3*trace0 U V 1-3*trace0 U V 2+trace0 U V 3)/6*(t^2)^3
+  exact hh
+
+theorem trace1_expansion (U V : LiftedField) :
+    Algebra.normalizedTrace FunctionField LiftedField ((directSourceOne U V)) =
+      moments U V 4+moments U V 5*t^2+moments U V 6*(t^2)^2 := by
+  have hi := interpolate1 (directMotion U V) actualPencil (physicalT^2)
+    (genericCoordinates 71) (genericCoordinates 72) (motion_x_zero U V) actual_pencil_leading_nonzero
+  change (directSourceOne U V) = _ at hi
+  have ht : physicalT^2 = algebraMap FunctionField LiftedField (t^2) := by simp [physicalT]
+  rw [ht] at hi
+  have hh := congrArg (Algebra.normalizedTrace FunctionField LiftedField) hi
+  rw [TraceInterpolation.trace_quadratic] at hh
+  have h0 : Algebra.normalizedTrace FunctionField LiftedField
+      (S1 (directMotion U V) actualPencil 0 (genericCoordinates 71) (genericCoordinates 72)) = trace1 U V 0 := by simp only [trace1,sample1,Nat.cast_zero]
+  have h1 : Algebra.normalizedTrace FunctionField LiftedField
+      (S1 (directMotion U V) actualPencil 1 (genericCoordinates 71) (genericCoordinates 72)) = trace1 U V 1 := by simp only [trace1,sample1,Nat.cast_one]
+  have h2 : Algebra.normalizedTrace FunctionField LiftedField
+      (S1 (directMotion U V) actualPencil 2 (genericCoordinates 71) (genericCoordinates 72)) = trace1 U V 2 := by simp only [trace1,sample1,Nat.cast_ofNat]
+  rw [h0,h1,h2] at hh
+  change Algebra.normalizedTrace FunctionField LiftedField ((directSourceOne U V)) =
+    trace1 U V 0+(-3*trace1 U V 0+4*trace1 U V 1-trace1 U V 2)/2*t^2+
+    (trace1 U V 0-2*trace1 U V 1+trace1 U V 2)/2*(t^2)^2
+  exact hh
+
+/-- Direct one-form version: all source moment coefficients are defined by
+full selected-field traces; no representation as H dτ is required. -/
+def relativePrimitiveOfSixTraceMatches (U V : LiftedField)
+    (hU : liftedTime U = 0) (hV : liftedTime V = 0) (hclosed : movingR V = movingS U)
+    (hslots : ∀ j, j ≠ 6 → momentSlots 6*(moments U V j-TargetSlots.targetMomentSlots j) =
+      momentSlots j*(moments U V 6-TargetSlots.targetMomentSlots 6)) : RelativePrimitive := by
+  apply relativePrimitiveOfDirectContactSix U V (moments U V) TargetSlots.targetMomentSlots
+    hU hV hclosed (moments_six_time U V hU hV) TargetSlots.target_slot6_time ?_ ?_ hslots
+  · rw [trace0_expansion,TargetSlots.target0_expansion]
+    ring
+  · rw [trace1_expansion,TargetSlots.target1_expansion]
+    ring
+
+#print axioms trace0_expansion
+#print axioms trace1_expansion
+#print axioms moments_six_time
+#print axioms relativePrimitiveOfSixTraceMatches
+end DirectAutomaticMoments
+
+
+/-! Integrated scratch module: SymmetricIntrinsicCoordinates. -/
+
+
+/-! Actual rational coordinates of the monic26 contact chart, as elements of
+    the existing selected contact curve field. Nonvanishing of the quadric
+    normalization pivot remains explicit; no source trace is asserted. -/
+noncomputable section
+namespace SymmetricIntrinsicCoordinates
+open SymmetricContactField
+
+set_option maxHeartbeats 4000000
+set_option maxRecDepth 16384
+set_option backward.isDefEq.respectTransparency false
+
+/-- The actual first71 contact coordinates, viewed in the contact subfield. -/
+def curveCoordinate (i : Fin 71) : CurveField :=
+  ⟨genericCoordinates (columnEquiv (Sum.inl i)), by
+    apply Subfield.subset_closure
+    exact Or.inl ⟨i,rfl⟩⟩
+
+private theorem active_lt : ∀ i : Fin 90, ∀ j : Index,
+    activeCoordinate i = some j → j.val < 71 := by decide
+
+/-- The actual90 norm-presentation coefficients, internal to CurveField. -/
+def coefficient (i : Fin 90) : CurveField :=
+  (coefficientConstant i : CurveField) +
+  (coefficientVelocity i : CurveField) * curveCoordinate 70 +
+  (activeCoordinate i).elim 0 (fun j =>
+    if h : j.val < 71 then curveCoordinate ⟨j.val,h⟩ else 0)
+
+@[simp] theorem coefficient_coe (i : Fin 90) :
+    (coefficient i : LiftedField) = coefficientValue genericCoordinates i := by
+  have h70 : columnEquiv (Sum.inl (70 : Fin 71)) = (70 : Index) := Fin.ext rfl
+  unfold coefficient coefficientValue
+  change (coefficientConstant i : LiftedField) +
+    (coefficientVelocity i : LiftedField) * genericCoordinates (columnEquiv (Sum.inl 70)) +
+    ↑((activeCoordinate i).elim (0 : CurveField) (fun j =>
+      if h : j.val < 71 then curveCoordinate ⟨j.val,h⟩ else 0)) = _
+  rw [h70]
+  cases h : activeCoordinate i with
+  | none => rfl
+  | some j =>
+    have hj : j.val < 71 := active_lt i j h
+    have he : columnEquiv (Sum.inl (⟨j.val,hj⟩ : Fin 71)) = j := Fin.ext rfl
+    simp only [Option.elim_some, dif_pos hj]
+    change _ + genericCoordinates (columnEquiv (Sum.inl ⟨j.val,hj⟩)) = _
+    rw [he]
+
+/-- Determinant of the u,a² coefficient block used for the monic chart. -/
+def pivot : CurveField := coefficient 0*coefficient 13-coefficient 6*coefficient 7
+
+def leftCoefficient (j : Fin 7) : CurveField :=
+  (coefficient 13*coefficient ⟨j.val,by omega⟩-
+    coefficient 6*coefficient ⟨7+j.val,by omega⟩)/pivot
+
+def rightCoefficient (j : Fin 7) : CurveField :=
+  (-coefficient 7*coefficient ⟨j.val,by omega⟩+
+    coefficient 0*coefficient ⟨7+j.val,by omega⟩)/pivot
+
+/-- Coefficients of Q1, in ab,b²,c²,cd,d² order. -/
+def left : Fin 5 → CurveField := ![
+  leftCoefficient 5,leftCoefficient 4,leftCoefficient 3,leftCoefficient 2,leftCoefficient 1]
+
+/-- Coefficients of Q2−a², in ab,b²,c²,cd,d² order. -/
+def right : Fin 5 → CurveField := ![
+  rightCoefficient 5,rightCoefficient 4,rightCoefficient 3,rightCoefficient 2,rightCoefficient 1]
+
+def positiveEliminator : CurveField :=
+  coefficient 76-coefficient 71*left 0-coefficient 77*right 0
+
+/-- Reduced even cubic, in the exact monic26 AP0...AP7 order. -/
+def positive : Fin 8 → CurveField := ![
+  coefficient 67-coefficient 66*left 4-positiveEliminator*right 4,
+  coefficient 68-coefficient 66*left 3-positiveEliminator*right 3,
+  coefficient 69-coefficient 66*left 2-positiveEliminator*right 2,
+  coefficient 70-coefficient 66*left 1-positiveEliminator*right 1,
+  coefficient 72-coefficient 71*left 4-coefficient 77*right 4,
+  coefficient 73-coefficient 71*left 3-coefficient 77*right 3,
+  coefficient 74-coefficient 71*left 2-coefficient 77*right 2,
+  coefficient 75-coefficient 66*left 0-coefficient 71*left 1-
+    coefficient 77*right 1-positiveEliminator*right 0]
+
+/-- Reduced odd cubic, in the exact monic26 BP0...BP7 order. -/
+def negative : Fin 8 → CurveField := ![
+  coefficient 79-coefficient 78*left 4-coefficient 88*right 4,
+  coefficient 81-coefficient 78*left 3-coefficient 80*left 4-
+    coefficient 89*right 4-coefficient 88*right 3,
+  coefficient 82-coefficient 78*left 2-coefficient 80*left 3-
+    coefficient 89*right 3-coefficient 88*right 2,
+  coefficient 83-coefficient 80*left 2-coefficient 89*right 2,
+  coefficient 84-coefficient 78*left 1-coefficient 88*right 1,
+  coefficient 85-coefficient 80*left 1-coefficient 89*right 1,
+  coefficient 86-coefficient 78*left 0-coefficient 88*right 0,
+  coefficient 87-coefficient 80*left 0-coefficient 89*right 0]
+
+/-- L0...L4,M0...M4,AP0...AP7,BP0...BP7 in the actual selected field. -/
+def parameter : Fin 26 → CurveField := ![
+ left 0,left 1,left 2,left 3,left 4,
+ right 0,right 1,right 2,right 3,right 4,
+ positive 0,positive 1,positive 2,positive 3,positive 4,positive 5,positive 6,positive 7,
+ negative 0,negative 1,negative 2,negative 3,negative 4,negative 5,negative 6,negative 7]
+
+def sigma : CurveField := parameter 0
+
+/-- The candidate compact1forms use a direct coefficient pair, avoiding any
+assumption that the normalized contact derivative preserves CurveField. -/
+def formR (ell : CurveField) : LiftedField := ell*movingR (sigma : LiftedField)
+def formS (ell : CurveField) : LiftedField := ell*movingS (sigma : LiftedField)
+
+theorem curve_wedge_pair (ell eta : CurveField) :
+    movingR ell*movingS eta-movingS ell*movingR eta = 0 := by
+  have h1 := curve_wedge ell
+  have h2 := curve_wedge eta
+  have hh : movingR tau * (movingR ell*movingS eta-movingS ell*movingR eta) = 0 := by
+    linear_combination movingR (eta : LiftedField)*h1-movingR (ell : LiftedField)*h2
+  exact (mul_eq_zero.mp hh).resolve_left movingR_tau_nonzero
+
+/-- The actual compact candidate is closed, with no trace match assumed. -/
+theorem form_closed (ell : CurveField) : movingR (formS ell) = movingS (formR ell) := by
+  have hw := curve_wedge_pair ell sigma
+  simp only [formR, formS, Derivation.leibniz, smul_eq_mul]
+  rw [moving_r_s_commute (sigma : LiftedField)]
+  linear_combination hw
+
+/-- The compact candidate has no physical-time dependence. -/
+theorem form_time_zero (ell : CurveField) :
+    liftedTime (formR ell) = 0 ∧ liftedTime (formS ell) = 0 := by
+  have ht : liftedTime (sigma : LiftedField) = 0 := curve_time_zero sigma
+  have hr : liftedTime (movingR (sigma : LiftedField)) = 0 := by
+    change SymmetricRatioCurrent.extended 0 (SymmetricRatioCurrent.extended 1 _) = 0
+    rw [SymmetricRatioCurrent.extended_time_r_commute]
+    change movingR (liftedTime (sigma : LiftedField)) = 0
+    rw [ht,map_zero]
+  have hs : liftedTime (movingS (sigma : LiftedField)) = 0 := by
+    change SymmetricRatioCurrent.extended 0 (SymmetricRatioCurrent.extended 2 _) = 0
+    rw [SymmetricRatioCurrent.extended_time_s_commute]
+    change movingS (liftedTime (sigma : LiftedField)) = 0
+    rw [ht,map_zero]
+  simp [formR,formS,Derivation.leibniz,curve_time_zero,hr,hs]
+
+theorem formR_reparameterized (ell : CurveField) :
+    formR ell = ((ell : LiftedField)*contactParameterDerivative (sigma : LiftedField))*movingR tau := by
+  change (ell : LiftedField)*movingR (sigma : LiftedField) =
+    ((ell : LiftedField)*((movingR tau)⁻¹*movingR (sigma : LiftedField)))*movingR tau
+  field_simp [movingR_tau_nonzero]
+
+theorem formS_reparameterized (ell : CurveField) :
+    formS ell = ((ell : LiftedField)*contactParameterDerivative (sigma : LiftedField))*movingS tau := by
+  have hw := curve_wedge sigma
+  change (ell : LiftedField)*movingS (sigma : LiftedField) =
+    ((ell : LiftedField)*((movingR tau)⁻¹*movingR (sigma : LiftedField)))*movingS tau
+  field_simp [movingR_tau_nonzero]
+  linear_combination -(ell : LiftedField)*hw
+
+end SymmetricIntrinsicCoordinates
+#print axioms SymmetricIntrinsicCoordinates.coefficient_coe
+#print axioms SymmetricIntrinsicCoordinates.form_closed
+#print axioms SymmetricIntrinsicCoordinates.form_time_zero
+#print axioms SymmetricIntrinsicCoordinates.formR_reparameterized
+#print axioms SymmetricIntrinsicCoordinates.formS_reparameterized
+
+
+/-! Integrated scratch module: Intrinsic26Endpoint. -/
+
+
+noncomputable section
+namespace Intrinsic26Endpoint
+open SymmetricAffineField SymmetricPrimitiveEndpoint SymmetricTraceEndpoint
+open SymmetricRatioCurrent SymmetricContactField RemovableBinding
+open SymmetricIntrinsicCoordinates DirectAutomaticMoments
+set_option maxHeartbeats 2000000
+set_option backward.isDefEq.respectTransparency false
+
+/-- For the actual monic 26-coordinate candidate, a CurveField scalar and
+six full selected-field normalized trace equations suffice. This theorem
+constructs neither the scalar nor the six moment identities. -/
+def relativePrimitiveOfIntrinsic26Matches (ell : CurveField)
+    (hslots : ∀ j, j ≠ 6 → momentSlots 6*(moments (SymmetricIntrinsicCoordinates.formR ell)
+      (SymmetricIntrinsicCoordinates.formS ell) j-TargetSlots.targetMomentSlots j) =
+      momentSlots j*(moments (SymmetricIntrinsicCoordinates.formR ell)
+        (SymmetricIntrinsicCoordinates.formS ell) 6-TargetSlots.targetMomentSlots 6)) : RelativePrimitive :=
+  DirectAutomaticMoments.relativePrimitiveOfSixTraceMatches
+    (SymmetricIntrinsicCoordinates.formR ell) (SymmetricIntrinsicCoordinates.formS ell)
+    (SymmetricIntrinsicCoordinates.form_time_zero ell).1
+    (SymmetricIntrinsicCoordinates.form_time_zero ell).2
+    (SymmetricIntrinsicCoordinates.form_closed ell) hslots
+
+#print axioms relativePrimitiveOfIntrinsic26Matches
+end Intrinsic26Endpoint

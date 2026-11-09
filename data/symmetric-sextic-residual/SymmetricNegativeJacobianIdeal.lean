@@ -80,6 +80,118 @@ theorem negative_jacobian_quotient_finrank :
   rw [jacobianPiece_eq_directionSpan]
   exact direction_quotient_finrank
 
+/-! The target source on the fixed λ = 1 weighted fiber is outside the
+full Jacobian ideal. This only excludes this polynomial Jacobian reduction;
+it does not rule out rational primitives. -/
+
+namespace FixedSource
+
+set_option maxHeartbeats 12000000
+set_option maxRecDepth 100000
+
+def sourceP : Poly := X 1 * X 3 * (X 0 ^ 2 - X 4) * (X 2 ^ 2 - X 4)
+
+theorem sourceP_mem : sourceP ∈ source := by
+  apply (bihomogeneous_iff_mem_source sourceP).mp
+  have hX (i : Fin 5) : (X i : Poly).IsWeightedHomogeneous bidegreeWeight
+      (bidegreeWeight i) := isWeightedHomogeneous_X ℂ _ _
+  have ha2 : (X 0 ^ 2 : Poly).IsWeightedHomogeneous bidegreeWeight (2,0) := by
+    convert (hX 0).pow 2 using 1 <;> norm_num [nsmul_eq_mul] <;> decide
+  have hc2 : (X 2 ^ 2 : Poly).IsWeightedHomogeneous bidegreeWeight (2,0) := by
+    convert (hX 2).pow 2 using 1 <;> norm_num [nsmul_eq_mul] <;> decide
+  have hu : (X 4 : Poly).IsWeightedHomogeneous bidegreeWeight (2,0) := by
+    simpa [Matrix.cons_val_two, Matrix.cons_val_three, Matrix.cons_val_four] using hX 4
+  have hbd : (X 1 * X 3 : Poly).IsWeightedHomogeneous bidegreeWeight (2,1) := by
+    convert (hX 1).mul (hX 3) using 1 <;>
+      norm_num [Matrix.cons_val_two, Matrix.cons_val_three, Matrix.cons_val_four] <;> decide
+  have h := (hbd.mul (ha2.sub hu)).mul (hc2.sub hu)
+  simpa [sourceP] using h
+
+def pt : Fin 13 → Fin 5 → ℂ := ![![1, 0, -1, 1, 0],
+  ![1, -1, 1, 1, -1],
+  ![1, -1, 1, 0, 0],
+  ![-1, 1, -1, 1, 1],
+  ![1, 0, 1, 0, 1],
+  ![1, 1, 1, -1, 0],
+  ![-1, -1, -1, 0, 0],
+  ![1, -1, 0, -1, -1],
+  ![-1, -1, 1, 1, 1],
+  ![-1, 1, -1, 0, -1],
+  ![1, -1, -1, 1, -1],
+  ![1, 0, 1, -1, 1],
+  ![1, 0, 1, 1, 1]]
+
+def wt : Fin 13 → ℂ :=
+  ![10939849613120, -2319288112048, 15787456569360, 20638239699096,
+    -10237592071663, 8911771677120, -1296196365360, 14735288919104,
+    -2278873935576, 16551894112432, -57935410598496, 2979477168834,
+    1480749502002]
+
+def gradients : Fin 5 → IntPoly :=
+  let a := X 0; let b := X 1; let c := X 2; let d := X 3; let u := X 4
+  let L := WeightedFiberSmoothness.leftQuadric
+  let R := WeightedFiberSmoothness.rightQuadric
+  ![84*a^5+840*a^3*u+420*a*u^2+(10*L*R+10*R^2)*(2*a+2*b),
+    42*b^5+(10*L*R+10*R^2)*(2*a),
+    84*c^5+840*c^3*u+420*c*u^2+(5*L^2+20*L*R)*(2*c+2*d),
+    42*d^5+(5*L^2+20*L*R)*(2*c),
+    7*(30*a^4+30*c^4+60*a^2*u+60*c^2*u+12*u^2)-5*L^2-30*L*R-10*R^2]
+
+theorem gradient_eq (i : Fin 5) : pderiv i WeightedFiberSmoothness.integerWeighted = gradients i := by
+  have h2 (i : Fin 5) : pderiv i (2 : IntPoly) = 0 :=
+    (pderiv i : Derivation ℤ IntPoly IntPoly).map_natCast 2
+  have h4 (i : Fin 5) : pderiv i (4 : IntPoly) = 0 :=
+    (pderiv i : Derivation ℤ IntPoly IntPoly).map_natCast 4
+  have h5 (i : Fin 5) : pderiv i (5 : IntPoly) = 0 :=
+    (pderiv i : Derivation ℤ IntPoly IntPoly).map_natCast 5
+  have h7 (i : Fin 5) : pderiv i (7 : IntPoly) = 0 :=
+    (pderiv i : Derivation ℤ IntPoly IntPoly).map_natCast 7
+  have h10 (i : Fin 5) : pderiv i (10 : IntPoly) = 0 :=
+    (pderiv i : Derivation ℤ IntPoly IntPoly).map_natCast 10
+  have h30 (i : Fin 5) : pderiv i (30 : IntPoly) = 0 :=
+    (pderiv i : Derivation ℤ IntPoly IntPoly).map_natCast 30
+  fin_cases i <;>
+    simp [h2, h4, h5, h7, h10, h30, WeightedFiberSmoothness.integerWeighted,
+      WeightedFiberSmoothness.leftQuadric, WeightedFiberSmoothness.rightQuadric,
+      gradients, map_add, pderiv_mul, pderiv_pow, pderiv_X, Pi.single_apply,
+      Fin.ext_iff, Matrix.cons_val_two, Matrix.cons_val_three, Matrix.cons_val_four] <;> ring
+
+def functional : Poly →ₗ[ℂ] ℂ :=
+  ∑ i : Fin 13, (wt i) • (aeval (pt i)).toLinearMap
+
+theorem source_eval : functional sourceP = (261577601003264 : ℂ) := by
+  norm_num [functional, wt, pt, sourceP, Fin.sum_univ_succ, Matrix.cons_val_two,
+    Matrix.cons_val_three, Matrix.cons_val_four, Matrix.cons_val_fin_one, map_mul,
+    map_sub, map_pow, MvPolynomial.aeval_X]
+
+theorem direction_eval (j : Fin 12) : functional (direction j) = 0 := by
+  rw [direction_eq_scaled]
+  simp only [map_smul, smul_eq_mul]
+  apply mul_eq_zero_of_right
+  simp only [integerDirection, gradient_eq]
+  fin_cases j <;> norm_num [functional, wt, pt, gradients, multiplier, partialIndex,
+      WeightedFiberSmoothness.integerWeighted, WeightedFiberSmoothness.leftQuadric,
+      WeightedFiberSmoothness.rightQuadric, Fin.sum_univ_succ, Matrix.cons_val_two,
+      Matrix.cons_val_three, Matrix.cons_val_four, Matrix.cons_val_fin_one,
+      pderiv_C_mul, pderiv_pow, pderiv_X, map_ofNat]
+
+theorem source_not_jacobian : sourceP ∉ jacobianIdeal := by
+  intro h
+  have hs : sourceP ∈ ambientDirectionSpan :=
+    (source_mem_jacobian_iff sourceP sourceP_mem).mp h
+  have hle : ambientDirectionSpan ≤ LinearMap.ker functional := by
+    apply Submodule.span_le.mpr
+    rintro _ ⟨j,rfl⟩
+    exact direction_eval j
+  have hz := hle hs
+  change functional sourceP = 0 at hz
+  rw [source_eval] at hz
+  norm_num at hz
+
+#print axioms source_not_jacobian
+
+end FixedSource
+
 #print axioms source_mem_jacobian_iff
 #print axioms jacobianPiece_eq_directionSpan
 #print axioms negative_jacobian_quotient_finrank
