@@ -129,9 +129,13 @@ Under this condition, \(S=S_0+S_1u\), with
 f_uS_u-f_{uu}S=C_0+C_1u+C_2u^2.
 \]
 For the proposed normalized contact current, the written polynomial argument
-gives \(\deg_xS_0\le3\), \(\deg_xS_1\le2\). This degree argument is not yet
-a general Lean theorem and does not bound the rational \(r,s\) denominators
-or establish a global weighted-sextic source.
+gives \(\deg_xS_0\le3\), \(\deg_xS_1\le2\).
+[CubicSelectorSource](CubicSelectorSource.lean) now proves these bounds for
+its explicit source polynomials, given divided-difference and motion
+coefficient degrees \((2,1,0)\). Its evaluation theorems bind those
+polynomials to the scalar source formula. The bounds concern the formal
+fibre variable \(x\); they do not bound rational \(r,s\) denominators or
+establish a global weighted-sextic source.
 
 [CubicTraceDescent](CubicTraceDescent.lean) proves descent of a supplied
 current through finite normalized trace. The target-bound
@@ -176,10 +180,95 @@ The same descent module also proves a relative bridge from the ordinary game
 It retains the normal component \(V\) and normal dependence of every \(W_j\).
 Applying the contact route still requires forming a suitable finite extension
 of \(K\) from the moving-point field over \(k(r,s)\), converting the ratio
-coordinates and derivations, and proving the full normalized-trace matches.
+coordinates of that field into the canonical chart and binding its jets,
+and proving the full normalized-trace matches. The ratio-coordinate
+transport itself is proved below.
 A single branch or the rank-48 contact span supplies none of these equalities.
-The four new modules contain no admissions; they leave the one existing
+These trace modules contain no admissions; they leave the one existing
 primitive-existence admission unchanged.
+
+### The explicit selector source and its chart transport
+
+[CubicSelectorSource](CubicSelectorSource.lean) computes the source of the
+closed paired current, rather than assuming a source for an unnamed
+current. At the moving point, write \(z=u-\beta_*\) and
+
+\[
+f(\alpha^2,u)=\ell z^3+az^2+gz,\qquad
+f(x,u)=f(\alpha^2,u)+(x-\alpha^2)H(x,u),\qquad
+q=\frac{az+2g}{3}.
+\]
+
+Let \(D=U\partial_s-V\partial_r\), \(Z=D\alpha\), and put
+\(A=2xZf_x+\alpha Df\). The differentiated current numerator is
+
+\[
+N=(f_uq_u-qf_{uu})A+f_uqA_u-\alpha f_u^2Dq.
+\]
+
+The definitions `sourceZeroNumerator` and `sourceOneNumerator` give
+explicit polynomial expressions \(n_0,n_1\) in the moving-point jets and
+the coefficients of \(H\) and its motion. The checked identity is
+
+\[
+18\ell^2N=(x-\alpha^2)
+ \left[f_u(2n_1)-f_{uu}(n_0+2n_1z)\right]+fQ,
+\]
+
+with an explicit polynomial \(Q\). Thus
+\(S_0=n_0/(18\ell^2)\), \(S_1=n_1/(9\ell^2)\) give the entire density
+on \(f=0\). `current_density` proves that the explicit paired current
+has this density when the one-form is closed and the moving-point jet
+chain rules hold. More precisely, for
+\(Y=tZ T+\alpha(U S-V R)\), these rules are
+
+\[
+Y(q)=\alpha D_{\mathrm{coeff}}q-\frac{q_uA}{f_u},
+\qquad Y(f_u)=A_u-\frac{f_{uu}A}{f_u}.
+\]
+
+Here \(D_{\mathrm{coeff}}\) holds \(x,u\) fixed and includes the moving
+\(\alpha,\beta_*\) coefficients. Its source in the original normal coordinate is
+
+\[
+S_0+S_1(u-\beta_*)=(S_0-\beta_*S_1)+S_1u.
+\]
+
+The constant coefficient must therefore be unshifted **before** tracing;
+the trace of \(\beta_*S_1\) is not replaced by a product of traces.
+
+[SymmetricRatioCurrent](SymmetricRatioCurrent.lean) binds the ratio
+coordinates and their canonical derivations to the actual chart field.
+Writing \(B=E_b,C=E_c,D=E_d,t=c\), it proves \(t\ne0\) and constructs
+
+\[
+T=C+\frac dtD,\qquad R=B,\qquad S=tD.
+\]
+
+The required commutation and coordinate identities also hold for their
+canonical finite extensions. The volume change
+\(db\wedge dc\wedge dd=-t\,dt\wedge dr\wedge ds\) gives the cofactor map
+
+\[
+(w_t,w_r,w_s)\longmapsto
+ \left(-\frac{w_r}{t},-\frac{w_t}{t},-\frac{d\,w_t}{t^2}-w_s\right),
+\qquad
+\sum E_j\gamma_j=-\frac{Tw_t+Rw_r+Sw_s}{t}.
+\]
+
+Consequently `relativePrimitiveOfClosedSelector` constructs the existing
+`RelativePrimitive` from supplied closed moving-point data and the exact
+normalized-trace identities
+
+\[
+\overline{\operatorname{Tr}}(S_0-\beta_*S_1)=-tT_0,
+\qquad \overline{\operatorname{Tr}}(S_1)=-tT_1.
+\]
+
+Both new helpers compile and pass kernel replay without admissions.
+They do not construct the moving-point extension, bind the contact-family
+jets to it, or prove these two full trace identities. The protected
+primitive-existence theorem remains admitted.
 
 ## Exact negative source and regular contact
 
