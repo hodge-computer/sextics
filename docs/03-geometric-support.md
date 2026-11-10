@@ -425,3 +425,46 @@ H^4(\mathcal T)^-\simeq H^1(U,V),
 whereas the action of \(Z\) vanishes after restriction to \(\mathcal T\setminus D\), because its target support is in \(D\). This proves support on the open family. Taking closures and adjoining the boundary divisors proves the last assertion; proper birational pushforward transfers it to another smooth projective model, as in §3.1. ∎
 
 The three fibration inputs now have distinct roles. Rational curves kill cohomology on an affine open. Surface fibers with \(p_g=q=0\) supply global divisor classes and a Leray–Hirsch decomposition after finite base change. The relative support lemma uses a supported projector and a single nonzero anti-invariant cohomology degree. They share the same transfer and boundary arguments, but their hypotheses are not interchangeable.
+
+### Relative support for an invariant sector
+
+The involution in the preceding lemma can be replaced by any finite group, and anti-invariants by invariants, when the remaining cohomology of the fibers is spanned by powers of a polarization.
+
+**Relative support lemma for an invariant sector.** Let \(p:\mathcal T\to U\) be a smooth projective family of threefolds over a smooth complex curve, with a fiberwise action of a finite group \(G\) and a \(G\)-invariant relatively ample class \(h\). Suppose
+
+\[
+R^jp_*\mathbb Q=\mathbb Qh^{j/2}\ (j\ne3\text{ even}),\qquad R^jp_*\mathbb Q=0\ (j\ne3\text{ odd}),
+\]
+
+and put \(V=(R^3p_*\mathbb Q)^G\). Suppose that at every fiber the projector of \(H^*(T_u)\) onto \(V_u\), zero in the other degrees and on the complement of the invariants, has a cycle representative supported on \(D_u\times D_u\). After removing finitely many points of \(U\), one divisor in \(\mathcal T\) supports \(H^1(U,V)\subset H^4(\mathcal T,\mathbb Q)\).
+
+**Proof.** Remove points so that \(U\) is affine. As in the preceding proof, flag parameter spaces and a finite trace give, after further shrinking, a rational relative cycle \(Z\) supported on \(D\times_UD\) whose fiber classes are those of the projector. Replace \(Z\) by \(\pi_G\circ Z\circ\pi_G\), with \(\pi_G\) the averaging correspondence, and \(D\) by its \(G\)-orbit. The projector is also the fiber class of
+
+\[
+P=\pi_G-\sum_{k=0}^3\pi_{2k},\qquad
+\pi_{2k}=\frac{\mathrm{pr}_1^*h^{3-k}\cdot\mathrm{pr}_2^*h^k}{h^3}.
+\]
+
+Let \(r:\mathcal T\times_U\mathcal T\to U\). The difference \(\delta=[Z]-[P]\) is \(G\times G\)-invariant and restricts to zero on every fiber. Since \(U\) is an affine curve, the Leray sequence places it in
+
+\[
+H^1\bigl(U,(R^5r_*\mathbb Q)^{G\times G}\bigr),\qquad
+(R^5r_*\mathbb Q)^{G\times G}=(\mathbb Qh\otimes V)\oplus(V\otimes\mathbb Qh),
+\]
+
+by relative Künneth and the hypothesis on the other degrees. Hence
+
+\[
+\delta=\mathrm{pr}_1^*\beta_1\cdot\mathrm{pr}_2^*h+\mathrm{pr}_1^*h\cdot\mathrm{pr}_2^*\beta_2,
+\qquad\beta_i\in H^1(U,V).
+\]
+
+Let \(\beta\in H^1(U,V)\), the first Leray step \(L^1H^4(\mathcal T)\). The first term of \(\delta\) acts on it through \(\beta\cdot\beta_1\in L^2=0\). The second acts through \(\mathrm{pr}_{2*}\mathrm{pr}_1^*(\beta h)=p^*p_*(\beta h)\), and \(\beta h\in H^1(U,R^5p_*\mathbb Q)=0\). So \(\delta_*\beta=0\). In the same way \(\pi_{2k*}\beta\) is a multiple of \(p^*p_*(\beta h^{3-k})\cdot h^k\), where \(\beta h^{3-k}\in H^1(U,R^{9-2k}p_*\mathbb Q)\) vanishes for \(k<3\) and \(p_*\beta=0\) for degree reasons. Therefore
+
+\[
+Z_*\beta=P_*\beta=\pi_{G*}\beta=\beta,
+\]
+
+and \(Z_*\beta\) vanishes on \(\mathcal T\setminus D\) because the target support of \(Z\) is in \(D\). ∎
+
+The classes \(h^k\) themselves are supported on hyperplane sections. [Chapter 3D](#technical-information/hodge-loci) applies this lemma to weighted Calabi–Yau threefolds with an order-three symmetry.
