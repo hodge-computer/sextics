@@ -1,6 +1,6 @@
 # 3C. Quadratic nets and pair correspondences
 
-[Previous: weighted threefolds and two-reflection sextics](#technical-information/weighted-threefolds) · [Contents](#technical-information/introduction) · [Next: families, representations and deformation](#technical-information/known-locus)
+[Previous: weighted threefolds and two-reflection sextics](#technical-information/weighted-threefolds) · [Contents](#technical-information/introduction) · [Next: Hodge loci on Fano extensions](#technical-information/hodge-loci)
 
 A basepoint-free net of ternary quadrics defines a four-to-one map of projective planes. The six unordered pairs in a general fiber are parametrized by the component lines of singular conics in the net. For sextics obtained by substitution through the net, this pair cover becomes a fourfold fibered in Fano threefolds. Its incidence with the original cover supplies the invariant fourth cohomology.
 

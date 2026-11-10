@@ -479,3 +479,23 @@ Two immediate applications illustrate the coefficient scope.
 Over a characteristic-zero field, the support-to-certificate equivalence and coefficient descent of [Chapter 1](#technical-information/certificates), followed by the higher-pole reduction of [Chapter 3, §3.5](#technical-information/geometric-support), give legal certificates at every positive pole order.
 
 The two extra reflections are essential hypotheses of this proof. Global \(Y\)-evenness alone does not provide either the weighted quotient fibers or their two-minus core involution.
+
+## 3B.9 Paired signs
+
+The proof of the two-reflection theorem uses the two reflections only through the involutions \(\beta=r_sr_t\) and \(\sigma=\tau r_t\), each of which negates a pair of coordinates. The same proof therefore applies to three paired signs.
+
+**Paired-sign proposition.** Let \(X=(F=0)\subset\mathbb P^5\) be a smooth sextic and \(\mathbb C^6=P_0\oplus P_1\oplus P_2\) a decomposition into coordinate planes. Suppose \(F\) is invariant under the three involutions \(s_i\) acting by \(-1\) on \(P_i\) and by \(+1\) on the other two planes. Let \(\pi_P\) be the averaging projector of the group \(P=\{1,s_0,s_1,s_2\}\subset PGL_6\). Then
+
+\[
+(1-\pi_P)\,H^4(X,\mathbb Q)\subset N^1H^4(X,\mathbb Q).
+\]
+
+**Proof.** A nontrivial character of \(P\) is \(+1\) on exactly one \(s_i\). Call that involution \(\beta\), let \(\sigma\) be another one, write \((s,t)\) for the coordinates of the plane of \(\beta\) and \(x\) for the remaining four. On the corresponding isotypic part \(\beta=+\) and \(\sigma=-\), as for \(V_{--}\) in §3B.7, and each step of that proof holds with evenness in the pair \((s,t)\) and in each of the other two planes:
+
+- on \(X\cap\{s=t=0\}\) the derivatives \(\partial_sF,\partial_tF\) vanish, being odd in \((s,t)\), so this surface is smooth;
+- every monomial has even degree in each plane, so the four core derivatives vanish on the line \(x=0\); hence \(F(0,s,t)\) is nonzero and squarefree, and the weighted vertex is absent for general \(\lambda=t/s\);
+- \(\beta\) fixes \(\lambda\) and acts on \(V_\lambda=X\cap\{t=\lambda s\}\) as the reflection \(s\mapsto-s\), so \(T_\lambda=V_\lambda/\beta\) is a quasismooth sextic in \(\mathbb P(1,1,1,1,2)\) with \(\sigma\)-invariant equation, and \(\sigma\) negates exactly two of its four coordinates of weight one.
+
+The weighted threefold theorem and the relative support lemma apply as before. ∎
+
+No further involution is assumed, and \(H^{4,0}(X)\) is \(P\)-invariant. When the planes are the pairs \((X_i,Y_i)\), the \(Y\)-even invariant sextics form the 74-coefficient family of [Chapter 4, §4.6](#technical-information/known-locus). On its smooth members the proposition supports the part of type \((150,636,150)\) of the \(Y\)-even primitive cohomology, and leaves the \(P\)-invariant part, of type \((58,230,58)\). A \(Y\)-odd numerator is served when it has odd degree in at least one pair \((X_i,Y_i)\). [Chapter 3D](#technical-information/hodge-loci) supports part of the remaining sector in the presence of an order-three symmetry.

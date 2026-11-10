@@ -34,6 +34,7 @@ jobs:
         run: |
           python3 scripts/verify-norm-contact-span.py
           python3 scripts/verify-extension-dimensions.py
+          python3 scripts/verify-hodge-locus-span.py
       - name: Identify affected Lean modules and solves
         id: scope
         env:
