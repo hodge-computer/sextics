@@ -7,26 +7,27 @@ Pass --output PATH to save the finite-arithmetic receipt.
 
 The witness is the Fermat weighted sextic T = {x0^6+x1^6+x2^6+x3^6+w^3 = 0}
 in P(1,1,1,1,2) with the order-three symmetry g = (omega^2, omega^2, omega, 1; 1),
-three del Pezzo fourfolds Y = {F0 + t*a + t^2 = 0} in P(1,1,1,1,2,3), and
-eighteen invariant classes Q on them.  Every polynomial is generated from the
-rule in `coefficient`; nothing is read from disk.
+the del Pezzo fourfold Y = {F0 + t*a + t^2 = 0} in P(1,1,1,1,2,3) with
+    a = 5*(x0^3 + x1^3 + x2^3 + x3^3 + x0*x2*x3 + x1*x2*x3 + x3*w),
+and the invariant class Q = x2*w^4 on it.  Nothing is read from disk.
 
-For each pair (a, Q) the script computes, modulo the prime 2^31 - 1,
+The script computes, modulo the prime 2^31 - 1,
   * the rank of mu_Q : K -> [t*K*Q] from the invariant cubics to R(Ft)_15,
   * its kernel, and for each kernel vector a solution of
         t*K*Q = sum_z c_z * dFt/dz ,
   * the class of c_t restricted to t = 0 in R(F0)_12,
-and then the dimension of the span of these classes.  Surjectivity of every
-mu_Q together with a full span is equivalent to full row rank of one integer
-matrix (Chapter 3D), so the modular ranks are lower bounds that settle the
-statement over the rational numbers.  Smoothness is not computed: the three
-fourfolds reduce to a Fermat equation modulo five.
+and checks that every one of the 33 standard monomials of R(F0)_12 of
+character omega has a nonzero coefficient in one of these classes.  The
+diagonal automorphisms of the Fermat sextic act on those monomials through
+pairwise distinct characters, so the translates of the classes span
+(Chapter 3D).  Surjectivity of mu_Q together with a nonzero coordinate is full
+row rank of an integer matrix, so the modular computation settles the statement
+over the rational numbers.  Smoothness is not computed: the fourfold reduces to
+a Fermat equation modulo five.
 
 The script first runs the same recipe on a quartic surface containing a line,
 where the answer is known: the classes must be multiples of evaluation at the
 point where the line meets the plane section.
-It also checks smoothness of the
-cyclic three-link sextic used as an example in the same chapter.
 """
 from itertools import permutations
 import argparse
@@ -247,84 +248,43 @@ def weighted_sextic():
                 if not any(m[variables:])]
 
     F0 = {tuple(6//weights[i] if j == i else 0 for j in range(6)): 1 for i in range(5)}
-    cubics = invariant(3, 0, 5)
     K_monomials = invariant(3, 0)
-    Q_monomials = invariant(9, 1)
-    assert (len(cubics), len(K_monomials)) == (9, 10)
+    assert len(K_monomials) == 10
+    assert len(monomials(15, weights, characters, 3, 1)) == 1247
     t = (0, 0, 0, 0, 0, 1)
-    classes, table = [], []
-    for i in (1, 2, 3):
-        integral = {m: 5*coefficient(i, k) for k, m in enumerate(cubics) if coefficient(i, k)}
-        # Modulo five the equation is F0 + t^2, whose partial derivatives are
-        # 6*x_i^5, 3*w^2 and 2*t: the fourfold is quasismooth.
-        assert integral and all(c % 5 == 0 for c in integral.values())
-        a = {m: c % P for m, c in integral.items()}
-        Ft = add(add(F0, mul({t: 1}, a)), {(0, 0, 0, 0, 0, 2): 1})
-        Qs = [{m: coefficient(10*i + j, k) % P for k, m in enumerate(Q_monomials)
-               if coefficient(10*i + j, k) % P} for j in range(1, 7)]
-        dim_R15, results = normal_function_classes(
-            Ft, Qs[0], K_monomials, 5, weights, 15, characters, 3, 1, extra=Qs[1:])
-        assert dim_R15 == 7
-        for j, (rank, found) in enumerate(results, start=1):
-            assert rank == 7 and len(found) == 3
-            classes.append(found)
-            table.append({'a': i, 'Q': 10*i + j, 'rankMu': rank, 'kernel': len(found)})
+    # a = 5*(x0^3 + x1^3 + x2^3 + x3^3 + x0*x2*x3 + x1*x2*x3 + x3*w) and Q = x2*w^4.
+    # Modulo five the equation is F0 + t^2, whose partial derivatives are
+    # 6*x_i^5, 3*w^2 and 2*t: the fourfold is quasismooth.
+    a = {m: 5 for m in [(3, 0, 0, 0, 0, 0), (0, 3, 0, 0, 0, 0), (0, 0, 3, 0, 0, 0),
+                        (0, 0, 0, 3, 0, 0), (1, 0, 1, 1, 0, 0), (0, 1, 1, 1, 0, 0),
+                        (0, 0, 0, 1, 1, 0)]}
+    Q = {(0, 0, 1, 0, 4, 0): 1}
+    assert set(a) <= set(invariant(3, 0, 5)) and set(Q) <= set(invariant(9, 1))
+    Ft = add(add(F0, mul({t: 1}, a)), {(0, 0, 0, 0, 0, 2): 1})
+    dim_R15, [(rank, classes)] = normal_function_classes(
+        Ft, Q, K_monomials, 5, weights, 15, characters, 3, 1)
+    assert (dim_R15, rank, len(classes)) == (7, 7, 3)
     # Classes in R(F0)_12 of character one.  F0 is Fermat: J(F0) is spanned by
     # the monomials divisible by some x_i^5 or by w^2.
     standard = [m[:5] for m in invariant(12, 1, 5) if max(m[:4]) <= 4 and m[4] <= 1]
     position = {m: i for i, m in enumerate(standard)}
     assert len(standard) == 33
-    flat = [B for found in classes for B in found]
-    M = np.zeros((len(standard), len(flat)), dtype=np.int64)
-    for j, B in enumerate(flat):
+    # The diagonal group mu_6^4 x mu_3 sees exponents modulo (6, 6, 6, 6, 3).
+    assert len({tuple(e % 6 for e in m[:4]) + (m[4] % 3,) for m in standard}) == 33
+    M = np.zeros((len(classes), len(standard)), dtype=np.int64)
+    for i, B in enumerate(classes):
         for e, c in B.items():
             if e in position:
-                M[position[e], j] = c
-    _, pivots = eliminate(M, M.shape[1])
-    cumulative, seen = [], 0
-    for row, found in zip(table, classes):
-        seen += len(found)
-        row['cumulativeSpan'] = sum(1 for c in pivots if c < seen)
-        cumulative.append(row['cumulativeSpan'])
-    assert cumulative[-1] == 33, cumulative
-    return {'prime': P, 'invariantCubics': 9, 'dimR15': 7, 'dimH12Invariant': 33,
-            'pairs': table, 'span': cumulative[-1]}
-
-
-def cyclic_three_links():
-    """Smoothness of F = sum(X_i^6 + Y_i^6) + (1/2) sum M_i, M_i = X_i^3 X_{i+1} Y_i Y_{i+1}.
-
-    At a singular point the products X_i dF/dX_i and Y_i dF/dY_i vanish, so
-    12 X_i^6 = -(3 m_i + m_{i-1}) and 12 Y_i^6 = -(m_i + m_{i-1}) for m_i = M_i.
-    Substituting into m_i^6 gives three ternary sextics in (m_0, m_1, m_2), not
-    all zero.  They generate every form of degree sixteen, so they have no
-    common zero and the sextic is smooth.
-    """
-    unit = [{tuple(int(i == j) for j in range(3)): 1} for i in range(3)]
-    A = [add({e: 3*c for e, c in unit[i].items()}, unit[i - 1]) for i in range(3)]
-    B = [add(unit[i], unit[i - 1]) for i in range(3)]
-
-    def power(poly, k):
-        result = {(0, 0, 0): 1}
-        for _ in range(k):
-            result = mul(result, poly)
-        return result
-
-    sextics = []
-    for i in range(3):
-        left = {e: c * 12**6 % P for e, c in power(unit[i], 6).items()}
-        right = mul(mul(power(A[i], 3), A[(i + 1) % 3]), mul(B[i], B[(i + 1) % 3]))
-        sextics.append(add(left, right, -1))
-    rows = monomials(16, (1, 1, 1))
-    position = {m: i for i, m in enumerate(rows)}
-    columns = [mul({m: 1}, f) for f in sextics for m in monomials(10, (1, 1, 1))]
-    M = np.zeros((len(rows), len(columns)), dtype=np.int64)
-    for j, g in enumerate(columns):
-        for e, c in g.items():
-            M[position[e], j] = c
-    rank, _ = eliminate(M, M.shape[1])
-    assert (len(rows), rank) == (153, 153)
-    return {'degreeSixteenForms': 153, 'rank': rank}
+                M[i, position[e]] = c
+    reached = int(np.count_nonzero(M.any(axis=0)))
+    supports = sorted(int(np.count_nonzero(row)) for row in M)
+    image_rank, _ = eliminate(M.copy(), M.shape[1])
+    assert image_rank == 2
+    assert reached == 33, reached
+    return {'prime': P, 'a': '5*(x0^3+x1^3+x2^3+x3^3+x0*x2*x3+x1*x2*x3+x3*w)', 'Q': 'x2*w^4',
+            'dimS15': 1247, 'dimR15': dim_R15, 'rankMu': rank, 'kernel': len(classes),
+            'imageRank': image_rank, 'classSupports': supports,
+            'standardMonomials': len(standard), 'monomialsReached': reached}
 
 
 def main():
@@ -336,19 +296,17 @@ def main():
     line = line_on_quartic()
     print('Line on a quartic surface: 19 kernel directions, all classes '
           'proportional to evaluation at the point of the line.', flush=True)
-    cyclic = cyclic_three_links()
-    print('Cyclic three-link sextic: the three ternary sextics span all 153 forms '
-          'of degree sixteen; the fourfold is smooth.', flush=True)
     sextic = weighted_sextic()
-    for row in sextic['pairs']:
-        print(f"a_{row['a']}, Q_{row['Q']}: rank mu = {row['rankMu']}, kernel = {row['kernel']}, "
-              f"cumulative span = {row['cumulativeSpan']}", flush=True)
-    print(f"Span of the normal-function classes: {sextic['span']} of {sextic['dimH12Invariant']}.")
+    print(f"Fermat weighted sextic, a = {sextic['a']}, Q = {sextic['Q']}:")
+    print(f"  dim R(Ft)_15 of character omega = {sextic['dimR15']}, rank mu_Q = {sextic['rankMu']}, "
+          f"kernel = {sextic['kernel']}, rank of the normal-function classes = {sextic['imageRank']}")
+    print(f"  standard monomials with a nonzero coefficient in some class: "
+          f"{sextic['monomialsReached']} of {sextic['standardMonomials']}; "
+          f"their diagonal characters are pairwise distinct.")
     print(f'All Hodge-locus checks passed in {time.time() - start:.0f}s.')
     if args.output:
         with open(args.output, 'w') as handle:
-            json.dump({'lineOnQuartic': line, 'cyclicThreeLinks': cyclic,
-                       'weightedSextic': sextic}, handle, indent=2)
+            json.dump({'lineOnQuartic': line, 'weightedSextic': sextic}, handle, indent=2)
             handle.write('\n')
 
 

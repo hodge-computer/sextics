@@ -99,7 +99,7 @@ The Abel–Jacobi image of \(Z_s|_T\) is the class of \(\widetilde\lambda_F-\wid
 d\nu(K)=\bigl[\nabla_K\widetilde\lambda_F\bigr]\in H^3(T,\mathbb C)/F^2H^3(T).
 \]
 
-Let \(\mathbb P'\) be the ambient space of \(Y\) and \(D=\{t=0\}\). Residues identify \(H^4(Y,T)_{\mathrm{prim}}\) with \(H^5(\mathbb P'\setminus Y,D\setminus T)\). A class there is represented by a pair \((\varphi,\eta)\): a rational five-form on \(\mathbb P'\) with poles on \(Y\) and a rational four-form on \(D\) with poles on \(T\), modulo pairs \((d\alpha,\alpha|_D+d\gamma)\). Every such pair is a relative cocycle for reasons of degree. By the comparison of the Hodge filtration with the filtration by order of pole in [Deligne, Théorie de Hodge II, §3.1](https://numdam.org/item/PMIHES_1971__40__5_0/), applied to the cone of the restriction map, pairs with pole orders at most three and two lie in \(F^2H^4(Y,T)\), and \((0,\eta)\) is the image of the residue of \(\eta\).
+Let \(\mathbb P'\) be the ambient space of \(Y\) and \(D=\{t=0\}\). Both \(\mathbb P'\) and \(D\) are locally quotients of smooth varieties by finite groups, and \(Y\) and \(T\) avoid their singular points. Rational forms, residues and pole orders are taken on these local uniformizing covers, as in the weighted residue theorems of §3D.1; there the filtrations below are compatible with restriction to \(t=0\). Residues identify \(H^4(Y,T)_{\mathrm{prim}}\) with \(H^5(\mathbb P'\setminus Y,D\setminus T)\). A class there is represented by a pair \((\varphi,\eta)\): a rational five-form on \(\mathbb P'\) with poles on \(Y\) and a rational four-form on \(D\) with poles on \(T\), modulo pairs \((d\alpha,\alpha|_D+d\gamma)\). Every such pair is a relative cocycle for reasons of degree. By the comparison of the Hodge filtration with the filtration by order of pole in [Deligne, Théorie de Hodge II, §3.1](https://numdam.org/item/PMIHES_1971__40__5_0/), applied to the cone of the restriction map, pairs with pole orders at most three and two lie in \(F^2H^4(Y,T)\), and \((0,\eta)\) is the image of the residue of \(\eta\).
 
 Take \(\widetilde\lambda_F=[(P_s\Omega/\widetilde F_s^3,0)]\). At the base point \(P\equiv Q\) modulo the Jacobian ideal, and we may take \(Q=P\). Along \(\widetilde F+\varepsilon tK\),
 
@@ -153,7 +153,15 @@ A rational Hodge class is needed only to produce cycles. The inclusion it yields
 
 **Density lemma.** Let \(\mathcal O_T\) be the set of pairs \((\widetilde F,Q)\) with \(\widetilde F|_{t=0}=F_0\), \(Y\) smooth, and \(\mu_Q\) surjective. Then \(\beta_Q(\ker\mu_Q)\subset W_T\) for every pair in \(\mathcal O_T\).
 
-**Proof.** Over \(\mathcal A\) the spaces \(H^{2,2}(Y)^G_{\mathrm{prim}}\) form an algebraic vector bundle \(\mathcal H\), and \(\mathcal O_T\) is Zariski open in it. On \(\mathcal O_T\) the kernels of \(\mu\) form an algebraic bundle and \(\beta\) is algebraic, so the locus \(\mathcal S\) where the inclusion holds is Zariski closed in \(\mathcal O_T\). Let \(\mathcal H_{\mathbb R}\) be the real classes. At a point of \(\mathcal O_T\cap\mathcal H_{\mathbb R}\) the flat transport map from \(\mathcal H_{\mathbb R}\) to a fixed fiber \(H^4(Y_0,\mathbb R)^G_{\mathrm{prim}}\) is a submersion: its image contains the real \((2,2)\)-classes and the real parts of \(\overline\nabla_K\lambda\), the map \(\overline\nabla\lambda\) is onto \(H^{1,3}(Y)^G\), and \(H^{4,0}(Y)=0\). This is Green's density criterion in equivariant form, as used in [Voisin, §2.17](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf). Hence rational Hodge classes are dense in \(\mathcal O_T\cap\mathcal H_{\mathbb R}\). They lie in \(\mathcal S\) by the normal-function lemma, so \(\mathcal O_T\cap\mathcal H_{\mathbb R}\subset\mathcal S\). In each fiber the real classes are Zariski dense. Therefore \(\mathcal S=\mathcal O_T\). ∎
+**Proof.** Over \(\mathcal A\) the graded pieces
+
+\[
+\operatorname{Gr}^2_FH^4(Y)^G_{\mathrm{prim}}\simeq R_{2d-w_t}^{[(\delta\chi_t)^{-1}]}
+\]
+
+form an algebraic vector bundle \(\mathcal H\), and \(\mathcal O_T\) is Zariski open in it. On \(\mathcal O_T\) the kernels of \(\mu\) form an algebraic bundle and \(\beta\) is algebraic, so the locus \(\mathcal S\) where the inclusion holds is Zariski closed in \(\mathcal O_T\).
+
+The subspaces \(H^{2,2}(Y)\) of the flat bundle do not vary algebraically, but each projects isomorphically onto the fiber of \(\mathcal H\). Let \(\mathcal H_{\mathbb R}\subset\mathcal H\) be the image of the real classes of type \((2,2)\). It is a real form of each fiber and varies real-analytically. At a point of \(\mathcal O_T\cap\mathcal H_{\mathbb R}\) the flat transport map from the real \((2,2)\)-classes to a fixed fiber \(H^4(Y_0,\mathbb R)^G_{\mathrm{prim}}\) is a submersion: its image contains the real \((2,2)\)-classes and the real parts of \(\overline\nabla_K\lambda\), the map \(\overline\nabla\lambda\) is onto \(H^{1,3}(Y)^G\), and \(H^{4,0}(Y)=0\). This is Green's density criterion in equivariant form, as used in [Voisin, §2.17](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf). Hence rational Hodge classes are dense in \(\mathcal O_T\cap\mathcal H_{\mathbb R}\). They lie in \(\mathcal S\) by the normal-function lemma, so \(\mathcal O_T\cap\mathcal H_{\mathbb R}\subset\mathcal S\). A real form is Zariski dense in each fiber. Therefore \(\mathcal S=\mathcal O_T\). ∎
 
 **Spanning criterion.** Suppose \(\delta\ne1\) and there are pairs \((\widetilde F_i,Q_i)\in\mathcal O_T\), \(1\le i\le m\), whose subspaces \(\beta_{Q_i}(\ker\mu_{Q_i})\) together span \((R_0)_{2d}^{[\delta^{-1}]}\). Then
 
@@ -187,6 +195,8 @@ If \(\Theta\) is surjective, then each \(\mu_{Q_i}\) is surjective, and an arbit
 \]
 
 in the relevant graded pieces.
+
+The same remark covers part of the span. Let \(\pi\) be a linear map on \((S_0)_{2d}^{[\delta^{-1}]}\) vanishing on \(J(F_0)\), and let \(\Theta_\pi\) be \(\Theta\) with its last component composed with \(\pi\). It is surjective exactly when each \(\mu_{Q_i}\) is surjective and the subspaces \(\pi\beta_{Q_i}(\ker\mu_{Q_i})\) span the image of \(\pi\). For integral data, full row rank modulo one prime again proves this in characteristic zero. For a single pair and a linear form \(\pi\), it is enough to find, modulo the prime, that \(\mu_Q\) is surjective and that one solution of \(tKQ=\sum_zc_z\partial_z\widetilde F\) has \(\pi(c_t|_{t=0})\ne0\).
 
 ## 3D.4 Order-three weighted sextics
 
@@ -238,25 +248,22 @@ When \(\mu_Q\) is surjective, the invariant class has a two-dimensional locus of
 F_0=x_0^6+x_1^6+x_2^6+x_3^6+w^3
 \]
 
-and the three cubics \(a_i=5a_i'\) with
+and the single pair
 
 \[
-\begin{aligned}
-a_1'&=x_0^3+2x_0^2x_1+5x_0x_1^2+4x_0x_2x_3+6x_1^3+5x_1x_2x_3-5x_2^3-4x_3^3+2x_3w,\\
-a_2'&=3x_0^2x_1-3x_0x_1^2-4x_0x_2x_3+x_1^3-6x_2^3-3x_3^3-3x_3w,\\
-a_3'&=-x_0^3+4x_0^2x_1+2x_0x_1^2+x_0x_2x_3-4x_1^3-5x_1x_2x_3+6x_2^3-2x_3^3+5x_3w.
-\end{aligned}
+a=5\bigl(x_0^3+x_1^3+x_2^3+x_3^3+x_0x_2x_3+x_1x_2x_3+x_3w\bigr),
+\qquad Q=x_2w^4.
 \]
 
-Modulo five each \(\widetilde F_i=F_0+ta_i+t^2\) is \(F_0+t^2\), whose partial derivatives are monomials. The three fourfolds are therefore quasismooth. For \(1\le i\le3\) and \(1\le j\le6\) let \(Q_{ij}\) be the polynomial whose coefficient on the \(k\)-th of the 187 monomials of \(S_9^{[\omega]}\), in increasing lexicographic order of exponent vectors \((e_0,e_1,e_2,e_3,e_w,e_t)\) and with \(k\ge0\), is
+Modulo five \(\widetilde F=F_0+ta+t^2\) is \(F_0+t^2\), whose partial derivatives are monomials. The fourfold is therefore quasismooth. Because \(F_0\) is Fermat, \(J(F_0)\) is spanned by monomials, and \((R_0)_{12}^{[\omega]}\) has as a basis the 33 standard monomials
 
 \[
-\bigl((10i+j)(k+2)^3+k\bigr)\bmod13\;-\;6.
+x_0^{e_0}x_1^{e_1}x_2^{e_2}x_3^{e_3}w^{e_w},\qquad e_i\le4,\quad e_w\le1,
 \]
 
-The cubics \(a_i'\) follow the same rule with multiplier \(i\) on the nine invariant cubic monomials.
+of degree twelve and character \(\omega\).
 
-The verifier `scripts/verify-hodge-locus-span.py`, in the repository's [reproduction scripts](https://github.com/hodge-computer/sextics/tree/main/scripts), reconstructs these polynomials, the maps \(\mu_Q\), their kernels, solutions \(c_z\) and the classes \(\beta_Q(K)\). It reads no witness data and uses exact arithmetic modulo \(2^{31}-1\). Run it with Python and NumPy:
+The verifier `scripts/verify-hodge-locus-span.py`, in the repository's [reproduction scripts](https://github.com/hodge-computer/sextics/tree/main/scripts), reconstructs the map \(\mu_Q\), its kernel, solutions \(c_z\) and the classes \(\beta_Q(K)\). It reads no witness data and uses exact arithmetic modulo \(2^{31}-1\). Run it with Python and NumPy:
 
 ```sh
 python3 scripts/verify-hodge-locus-span.py
@@ -266,14 +273,30 @@ The finite results are:
 
 | Calculation modulo \(2^{31}-1\) | Result |
 | --- | --- |
-| \(\dim S_{15}^{[\omega]}\), and rank of \(J(\widetilde F_i)\) in it | \(1247\), \(1240\) for each \(i\) |
-| Rank of \(\mu_{Q_{ij}}\) on the ten invariant cubics | \(7\) for all eighteen pairs |
-| Dimension of \(\ker\mu_{Q_{ij}}\) and of its image under \(\beta\) | \(3\) and \(2\) |
-| Dimension of the span after \(1,2,\ldots,17\) pairs | \(2,4,\ldots,32,33\) |
+| \(\dim S_{15}^{[\omega]}\), and rank of \(J(\widetilde F)\) in it | \(1247\), \(1240\) |
+| Rank of \(\mu_Q\) on the ten invariant cubics | \(7\) |
+| Dimension of \(\ker\mu_Q\) and of its image under \(\beta\) | \(3\) and \(2\) |
+| Standard monomials with a nonzero coefficient in some \(\beta_Q(K)\) | all \(33\) |
 
-Because \(F_0\) is Fermat, \(J(F_0)\) is spanned by monomials and the last line is the rank of a coefficient matrix on the 33 standard monomials of \((R_0)_{12}^{[\omega]}\). Each kernel contains the rescaling direction, on which \(\beta\) vanishes, so every pair contributes exactly \(n-c=2\) dimensions until the space is exhausted. By §3D.3 these ranks say that \(\Theta\) has full row rank modulo the prime, hence over \(\mathbb Q\).
+The kernel contains the rescaling direction, on which \(\beta\) vanishes, so the image has dimension \(n-c=2\). By the last remark of §3D.3, applied to the 33 coordinate forms, the last line holds in characteristic zero: for every standard monomial \(m\), the space \(\beta_Q(\ker\mu_Q)\) contains a class with a nonzero coefficient on \(m\).
 
-**Proof of the theorem.** The witness and the spanning criterion give a nonempty Zariski-open set \(\mathcal U\) of invariant sextics with \(H^3(T,\mathbb Q)^g\subset N^1H^3(T,\mathbb Q)\). For \(T\in\mathcal U\) there are a smooth projective curve \(\Lambda\), possibly disconnected, and a correspondence \(\Gamma\) with \(\Gamma_*H^1(\Lambda,\mathbb Q)\supset H^3(T,\mathbb Q)^g\). Replace \(\Gamma\) by \(\pi_g\circ\Gamma\), with \(\pi_g=(1+g+g^2)/3\), and let \(D\) be a \(g\)-stable divisor containing its image. As in [§3B.6](#technical-information/weighted-threefolds), \(\Gamma\circ{}^t\Gamma\) is invertible on \(H^3(T)^g\) and zero on the rest of the cohomology, and a polynomial in it without constant term represents the projector by a cycle supported on \(D\times D\).
+**From two dimensions to thirty-three.** The group \(\mu_6^4\times\mu_3\) acts diagonally on \((x_0,x_1,x_2,x_3;w)\). It preserves \(F_0\) and commutes with \(g\), so it preserves \(W_T\). Each standard monomial spans an eigenline of \((R_0)_{12}^{[\omega]}\). The 33 characters are pairwise distinct, because the exponents of a standard monomial are determined by their residues modulo six and three. A stable subspace is therefore spanned by the standard monomials it contains, and it contains every standard monomial on which one of its vectors has a nonzero coefficient. The density lemma gives \(\beta_Q(\ker\mu_Q)\subset W_T\). Hence \(W_T=(R_0)_{12}^{[\omega]}\) at the Fermat member.
+
+This is not yet a witness for the spanning criterion, and support at the Fermat member alone says nothing about its neighbors. Extend each element \(h\) of the diagonal group to the ambient space of \(Y\) by fixing \(t\). Since \(h^*F_0=F_0\), the pairs \((h^*\widetilde F,h^*Q)\) lie in \(\mathcal O_T\), and
+
+\[
+\beta_{h^*Q}(\ker\mu_{h^*Q})=h^*\beta_Q(\ker\mu_Q).
+\]
+
+By the preceding paragraph these subspaces together span \((R_0)_{12}^{[\omega]}\). The finite orbit of the pair is thus a witness for the spanning criterion, whose hypothesis is open in \(F_0\). Only one pair needs a calculation.
+
+**Proof of the theorem.** The witness and the spanning criterion give a nonempty Zariski-open set \(\mathcal U\) of invariant sextics with \(H^3(T,\mathbb Q)^g\subset N^1H^3(T,\mathbb Q)\). For \(T\in\mathcal U\) there are a smooth projective curve \(\Lambda\), possibly disconnected, and a correspondence \(\Gamma\) with \(\Gamma_*H^1(\Lambda,\mathbb Q)\supset H^3(T,\mathbb Q)^g\). Let \(D\) be a \(g\)-stable divisor containing its image. Let \(\pi_g=(1+g+g^2)/3\), and let \(\pi_1^\Lambda\) be the projector onto \(H^1(\Lambda)\): on a component with a chosen point \(p\) it is \(\Delta_\Lambda-[p]\times\Lambda-\Lambda\times[p]\). Replace \(\Gamma\) by
+
+\[
+\pi_g\circ\Gamma\circ\pi_1^\Lambda .
+\]
+
+Its image is still contained in \(D\). The second projector is needed here: unlike the anti-projector of [§3B.6](#technical-information/weighted-threefolds), \(\pi_g\) fixes the even cohomology of \(T\), on which a curve correspondence acts through \(H^0(\Lambda)\) and \(H^2(\Lambda)\). Now \(\Gamma_*\) vanishes outside \(H^1(\Lambda)\) and maps it onto \(H^3(T)^g\). As in §3B.6, the transpose is the adjoint for the polarizations up to a sign, so \(\Gamma\circ{}^t\Gamma\) is invertible on \(H^3(T)^g\). It is zero on the rest of the cohomology, and a polynomial in it without constant term represents the projector by a cycle supported on \(D\times D\).
 
 Weighted weak Lefschetz gives \(H^{2k}(T)=\mathbb Qh^k\) and \(h^3=3\). The projector is thus the class of the relative algebraic cycle
 
@@ -343,4 +366,18 @@ with indices modulo three. For a smooth member, the \(Y\)-even primitive cohomol
 | Trivial on the paired signs and on \(h^2\) | \((22,74,22)\) | [Paired-sign sector theorem, §4.2](#technical-information/known-locus), when its surface is smooth |
 | Trivial on some \(s_i\) and on \(\gamma_{i+1}\) | \((36,156,36)\) | The theorem above, applied to the three pairs \((s_i,\gamma_{i+1})\) |
 
-Here \(\gamma_{i+1}\) is the conjugate acting trivially on \((X_i,Y_i)\). The three rows exhaust the characters. The last row consists of six characters of type \((6,26,6)\): two for each cyclic conjugate. Thus, when the surface of §4.2 is smooth, all of \(H^4(X,\mathbb Q)^\tau\) is supported on a divisor, although none of the three mechanisms reaches it alone. The member \(a_i=b_i=1\), \(c_i=\tfrac12\), \(e_i=0\) is smooth. Indeed, with \(m_i=X_i^3X_{i+1}Y_iY_{i+1}\), the vanishing of \(X_i\partial_{X_i}F\) and \(Y_i\partial_{Y_i}F\) at a singular point gives \(12X_i^6=-(3m_i+m_{i-1})\) and \(12Y_i^6=-(m_i+m_{i-1})\); substitution into \(m_i^6\) yields three ternary sextics in \((m_0,m_1,m_2)\), which generate every form of degree sixteen and so have no common zero, while \(m=0\) forces all coordinates to vanish. The verifier of §3D.4 checks this rank. This member illustrates the last row: at pole order two, the numerator \(A=X_0^2X_1^2X_2^3Y_0^2Y_1^2Y_2\) has its residue there, invariant under \(s_2\) and \(\gamma\).
+Here \(\gamma_{i+1}\) is the conjugate acting trivially on \((X_i,Y_i)\). The three rows exhaust the characters. The last row consists of six characters of type \((6,26,6)\): two for each cyclic conjugate. Thus, when the surface of §4.2 is smooth, all of \(H^4(X,\mathbb Q)^\tau\) is supported on a divisor, although none of the three mechanisms reaches it alone. The member \(a_i=b_i=1\), \(c_i=\tfrac12\), \(e_i=0\) is smooth. Indeed, at a nonzero point where the gradient vanishes, let \(M>0\) be the largest modulus of a coordinate. If \(X_i\) attains it, then
+
+\[
+6X_i^5=-\tfrac12\bigl(3X_i^2X_{i+1}Y_iY_{i+1}+X_{i-1}^3Y_{i-1}Y_i\bigr)
+\]
+
+has modulus \(6M^5\) on the left and at most \(2M^5\) on the right. If \(Y_i\) attains it, then
+
+\[
+6Y_i^5=-\tfrac12\bigl(X_i^3X_{i+1}Y_{i+1}+X_{i-1}^3X_iY_{i-1}\bigr)
+\]
+
+has modulus \(6M^5\) on the left and at most \(M^5\) on the right. Both are impossible.
+
+This member illustrates the last row: at pole order two, the numerator \(A=X_0^2X_1^2X_2^3Y_0^2Y_1^2Y_2\) has its residue there, invariant under \(s_2\) and \(\gamma\).
