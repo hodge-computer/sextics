@@ -1,202 +1,155 @@
-# 3D. Hodge loci on Fano extensions
+# 3D. Hodge loci of surface sections
 
 [Previous: quadratic nets and pair correspondences](#technical-information/quadratic-nets) · [Contents](#technical-information/introduction) · [Next: families, representations and deformation](#technical-information/known-locus)
 
-A Calabi–Yau threefold can be a fixed section of a varying Fano fourfold. Rational Hodge classes on the fourfold are algebraic, and when the fourfold has more deformations fixing the section than such a class imposes conditions, its algebraic representatives restrict to a moving family of one-cycles on the threefold. The derivative of their Abel–Jacobi images is a product in Jacobian rings. A finite rank calculation can then show that an entire invariant sector of the third cohomology is supported on a divisor.
+A divisor class on a surface section of a Calabi–Yau threefold stays algebraic along a locus of sections. When a symmetry moves the holomorphic three-form, the invariant part of this locus has positive expected dimension. Curves in the class then move on the threefold, and the derivative of their Abel–Jacobi images is a trace on an Artinian algebra. If the invariant variation of Hodge structure has no proper sub-variation, one nonzero derivative supports the whole invariant sector of the third cohomology on a divisor.
 
-This is the strategy of [Voisin, Proposition 2.1](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf). Chapter 3B follows the same strategy with explicitly constructed curves. Here the curves are supplied by the Hodge conjecture on the Fano fourfold, and the calculation uses only the equations. The chapter applies the method to weighted sextic threefolds with an order-three symmetry that moves the holomorphic three-form, and then to sextic fourfolds with a paired sign and such a symmetry.
+Moving cycles along Hodge loci is the strategy of [Voisin, Proposition 2.1](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf), and the loci of surface sections of a Calabi–Yau threefold are studied in [Voisin, §2](https://www.cmls.polytechnique.fr/perso/voisin/Articlesweb/griffithsgroup.pdf). Chapter 3B follows the same strategy with explicitly constructed curves. This chapter applies it to weighted sextic threefolds with an order-three symmetry that moves the holomorphic three-form, and then to sextic fourfolds with a paired sign and such a symmetry.
 
-## 3D.1 Fixed sections and the dimension count
+## 3D.1 Invariant sections and the dimension count
 
-Let \(S=\mathbb C[z_0,\ldots,z_4,t]\) have weights \((w_0,\ldots,w_4,w_t)\), put \(S_0=\mathbb C[z_0,\ldots,z_4]\) and \(d=w_0+\cdots+w_4\). Let a finite abelian group \(G\) act diagonally, with character \(\chi_t\) on \(t\), and let \(\delta\) be the product of the characters of \(z_0,\ldots,z_4\). For a character \(\chi\), the superscript \([\chi]\) denotes the \(\chi\)-isotypic part.
+Let \(S=\mathbb C[z_0,\ldots,z_4]\) have weights \((w_0,\ldots,w_4)\) and put \(d=w_0+\cdots+w_4\). Let a finite abelian group \(G\) act diagonally, and let \(\delta\) be the product of the characters of the variables. For a character \(\chi\), the superscript \([\chi]\) denotes the \(\chi\)-isotypic part, and the superscript \(G\) the invariants.
 
-Let \(\widetilde F\in S_d\) be \(G\)-invariant and \(F_0=\widetilde F|_{t=0}\). Put
+Let \(F\in S_d^G\) define a quasismooth threefold \(T\subset\mathbb P(w_0,\ldots,w_4)\) that avoids the singular locus. It is a smooth Calabi–Yau threefold. With \(R(F)=S/J(F)\), the weighted residue theorems of [Dolgachev, §4.2–4.3](https://sites.lsa.umich.edu/idolga/wp-content/uploads/sites/1334/2024/08/weighted82.pdf) give
 
 \[
-Y=\{\widetilde F=0\}\subset\mathbb P(w_0,\ldots,w_4,w_t),
+H^{3-j,j}(T)\simeq R(F)_{jd},
+\]
+
+and the residue of \(B\,\Omega/F^{j+1}\) has character \(\chi(B)\delta\). Thus \(G\) acts on \(H^{3,0}(T)\) through \(\delta\), and \(H^{2,1}(T)^G\simeq R(F)_d^{[\delta^{-1}]}\).
+
+Let \(h\in S_e^G\), with \(0<e<d\), cut a smooth surface \(D=T\cap\{h=0\}\). Then \(K_D=N_{D/T}=\mathcal O_D(e)\) and \(H^1(D,\mathcal O_D)=0\). The invariant first-order motions of \(D\) in \(T\) and the invariant holomorphic two-forms are
+
+\[
+H^0(N_{D/T})^G=S_e^G/\mathbb Ch,
 \qquad
-T=Y\cap\{t=0\}=\{F_0=0\}\subset\mathbb P(w_0,\ldots,w_4).
+H^{2,0}(D)^G\simeq(S_e/\mathbb Ch)^{[\delta^{-1}]},
 \]
 
-Assume that \(Y\) and \(T\) are quasismooth and avoid the singular loci of their ambient spaces. Then both are smooth, \(K_T\) is trivial, and \(K_Y=\mathcal O_Y(-w_t)\), so \(Y\) is a Fano fourfold. Its rational Hodge classes of degree four are algebraic by the [corollary of Chapter 3, §3.2](#technical-information/geometric-support), and weighted weak Lefschetz gives \(H^3(Y)=H^5(Y)=0\).
+the second through the residues of \(\sigma\,\Omega/(Fh)\).
 
-Let \(R=S/J(\widetilde F)\) and \(R_0=S_0/J(F_0)\) be the Jacobian rings. The weighted residue theorems of [Dolgachev, §4.2–4.3](https://sites.lsa.umich.edu/idolga/wp-content/uploads/sites/1334/2024/08/weighted82.pdf) give
+Let \(\lambda\) be a \(G\)-invariant divisor class on \(D\). Its flat transport to \(T\cap\{h+\varepsilon L=0\}\) stays of type \((1,1)\) to first order exactly when \(L\) lies in the kernel of
 
 \[
-H^{4-p,p}(Y)_{\mathrm{prim}}\simeq R_{pd-w_t},
+\operatorname{NL}_\lambda:S_e^G\longrightarrow\bigl(H^{2,0}(D)^G\bigr)^\vee,
 \qquad
-H^{3-j,j}(T)\simeq(R_0)_{jd}.
+\operatorname{NL}_\lambda(L)(\sigma)=\langle\overline\nabla_L\lambda,\sigma\rangle .
 \]
 
-The residue of \(P\,\Omega/\widetilde F^{p+1}\) has character \(\chi(P)\delta\chi_t\), and the residue of \(B\,\Omega/F_0^{j+1}\) has character \(\chi(B)\delta\). In particular \(G\) acts on \(H^{3,0}(T)\) through \(\delta\), and
+Modulo rescaling of \(h\), the expected dimension of the locus of invariant sections on which \(\lambda\) stays algebraic is therefore
 
 \[
-H^{2,2}(Y)^G_{\mathrm{prim}}\simeq R_{2d-w_t}^{[(\delta\chi_t)^{-1}]},
-\qquad
-H^{1,3}(Y)^G\simeq R_{3d-w_t}^{[(\delta\chi_t)^{-1}]},
-\qquad
-H^{1,2}(T)^G\simeq(R_0)_{2d}^{[\delta^{-1}]}.
+n-c=\dim S_e^G-1-\dim(S_e/\mathbb Ch)^{[\delta^{-1}]} .
 \]
 
-A first-order invariant deformation of \(Y\) fixing \(T\) is \(\widetilde F+\varepsilon tK\) with \(K\in S_{d-w_t}^{[\chi_t^{-1}]}\). For \(Q\) representing a class in \(H^{2,2}(Y)^G_{\mathrm{prim}}\), the first-order condition for that class to remain of type \((2,2)\) is the vanishing of
+For \(\delta=1\) the two spaces coincide and the count is zero. This is necessary: the invariant part of \(H^3(T)\) then contains \(H^{3,0}(T)\), and for a general member of a family with irreducible invariant variation no nonzero part of it is supported on a divisor. For \(\delta\ne1\) the count is \(\dim S_e^G-1-\dim S_e^{[\delta^{-1}]}\). A positive count requires a symmetry that moves the holomorphic three-form.
+
+**Integration lemma.** Suppose \(\operatorname{NL}_\lambda\) is surjective. Near \((F,h)\), the pairs \((F',h')\) of invariant polynomials for which \(\lambda\) remains of type \((1,1)\) form a smooth family. It is submersive over the invariant \(F'\), with fibers of dimension \(n-c\) modulo rescaling. On it \(\lambda\) is the class of a unique line bundle \(\mathcal L'\), which is \(G\)-invariant, and for large \(m\) the curves of \(|\mathcal L'(m)|\) form a projective bundle over it.
+
+**Proof.** The locus is the zero set of a holomorphic section of the bundle with fibers \(H^{0,2}(D')^G\): the \((0,2)\)-part of the flat transport of \(\lambda\). Its derivative is \(\overline\nabla\lambda\), as in [Voisin, §2, Lemma 2](https://www.cmls.polytechnique.fr/perso/voisin/Articlesweb/griffithsgroup.pdf). By hypothesis this derivative is already surjective on the directions in which only \(h\) moves. That gives smoothness and both dimension statements. A class of type \((1,1)\) is the class of a line bundle. It is unique because \(H^1(\mathcal O_{D'})=0\), hence invariant. Serre vanishing and base change give the projective bundle. ∎
+
+## 3D.2 Two trace formulas
+
+Suppose
 
 \[
-\mu_Q:S_{d-w_t}^{[\chi_t^{-1}]}\longrightarrow R_{3d-w_t}^{[(\delta\chi_t)^{-1}]},
-\qquad K\longmapsto[tKQ].
+F=f_1g_1+f_2g_2+hk
 \]
 
-The source has dimension \(n=\dim R_{d-w_t}^{[\chi_t^{-1}]}\) modulo the Jacobian ideal. The socle of \(R\) has degree \(4d-2w_t\) and character \((\delta\chi_t)^{-2}\), so the target is dual to \(R_{d-w_t}^{[(\delta\chi_t)^{-1}]}\). The expected dimension of the locus of fourfolds through \(T\) on which an invariant class remains Hodge is therefore
+with homogeneous \(f_i\), \(g_i\) and \(k\), not assumed to be eigenvectors of \(G\), and suppose that \(C=V(f_1,f_2,h)\) is a smooth curve. It lies on \(D\). Along \(C\) we have \(dF=g_1\,df_1+g_2\,df_2+k\,dh\), and \(D\) is smooth, so \(g_1\) and \(g_2\) have no common zero on \(C\). Hence
 
 \[
-n-c=\dim R_{d-w_t}^{[\chi_t^{-1}]}-\dim R_{d-w_t}^{[(\delta\chi_t)^{-1}]}.
+\mathcal A=S/(f_1,f_2,g_1,g_2,h)
 \]
 
-For \(\delta=1\) the two spaces coincide and the count is zero. This is necessary: the invariant part of \(H^3(T)\) then contains \(H^{3,0}(T)\), and for a general member of a family with irreducible invariant variation no nonzero part of it is supported on a divisor. A positive count requires a symmetry that moves the holomorphic three-form. The comparison in [Chapter 4, §4.6](#technical-information/known-locus) is the analogous count for a sixfold containing a sextic fourfold, where the source is too small.
+is an Artinian complete intersection, with one-dimensional socle in degree \(d+e\). Let \(\tau:\mathcal A_{d+e}\to\mathbb C\) be a nonzero linear form.
 
-## 3D.2 The derivative of the normal function
-
-Suppose \(K\in\ker\mu_Q\). Then
+**Obstruction lemma.** Let \(A\in S_d\) and \(L,\sigma\in S_e\). On \(V(F+\varepsilon A,\ h+\varepsilon L)\), the first-order obstruction to the class of \(C\) remaining of type \((1,1)\), paired with the two-form of numerator \(\sigma\), is a fixed nonzero multiple of
 
 \[
-tKQ=\sum_{z\in\{z_0,\ldots,z_4,t\}}c_z\,\partial_z\widetilde F
+\tau\bigl((A-kL)\,\sigma\bigr).
 \]
 
-for homogeneous \(c_z\), and we put
+In particular \(\operatorname{NL}_{[C]}(L)(\sigma)\) is a nonzero multiple of \(\tau(kL\sigma)\).
+
+**Proof.** Let \(\rho\in H^1(T_D)\) be the Kodaira–Spencer class of the deformation and \(\omega\) the two-form. The intersection form is flat and \(F^2\) is orthogonal to \(F^1\), so
 
 \[
-\beta_Q(K)=\bigl[c_t|_{t=0}\bigr]\in(R_0)_{2d}^{[\delta^{-1}]}\simeq H^{1,2}(T)^G.
+\langle\overline\nabla[C],\omega\rangle=-\langle\overline\nabla\omega,[C]\rangle=-\int_C(\rho\mathbin{\lrcorner}\omega)|_C .
 \]
 
-The partial derivatives of \(\widetilde F\) form a regular sequence, so two solutions differ by a Koszul syzygy. Their coefficients \(c_t\) differ by an element of the ideal \((\partial_z\widetilde F)_{z\ne t}\), which restricts to \(J(F_0)\) on \(t=0\). Thus \(\beta_Q(K)\) is well defined. It depends only on the class of \(Q\) in \(R\), and it vanishes on the rescaling direction \(K=\partial_t\widetilde F\), for which \(c_t=tQ\).
-
-Let \(N^1H^3(T,\mathbb Q)\) be the part supported on divisors. It is \(G\)-stable. Put
+The integrand depends only on the image of \(\rho|_C\) in \(H^1(N_{C/D})\). That image is the class of the differences of local first-order deformations of \(C\) inside the moving surface. The normal bundle of \(C\) in the ambient space is \(\mathcal O_C(\deg f_1)\oplus\mathcal O_C(\deg f_2)\oplus\mathcal O_C(e)\), and a normal field \((u_1,u_2,u_3)\) follows the deformation when
 
 \[
-W_T=H^{1,2}(T)\cap\bigl(N^1H^3(T,\mathbb Q)^G\otimes\mathbb C\bigr).
+u_3=-L,\qquad g_1u_1+g_2u_2+ku_3=-A .
 \]
 
-**Normal-function lemma.** Let \(\lambda\in H^4(Y,\mathbb Q)^G_{\mathrm{prim}}\) be a Hodge class whose \((2,2)\)-component is represented by \(Q\), and suppose \(\mu_Q\) is surjective. Then
+Take \(u_2=0\) where \(g_1\ne0\), and \(u_1=0\) where \(g_2\ne0\). The two solutions differ by \((kL-A)/(g_1g_2)\) times the generator \((g_2,-g_1)\) of \(N_{C/D}\simeq\mathcal O_C(\deg f_1+\deg f_2-d)\). Multiplication by \(\sigma\) gives the Čech class of
 
 \[
-\beta_Q(\ker\mu_Q)\subset W_T.
+\frac{(kL-A)\,\sigma}{g_1g_2}\quad\text{in}\quad H^1(C,K_C),\qquad K_C=\mathcal O_C(\deg f_1+\deg f_2+e-d).
 \]
 
-**Proof.** Let \(\mathcal A\) parametrize the invariant \(\widetilde F'\) restricting to \(F_0\), with smooth zero locus. The locus \(M\subset\mathcal A\) on which the flat transport of \(\lambda\) remains of type \((2,2)\) has tangent space the kernel of \(\overline\nabla\lambda:T\mathcal A\to H^{1,3}(Y)^G\), and \(\overline\nabla_K\lambda\) is a constant multiple of \([tKQ]\). By surjectivity \(M\) is smooth near \(\widetilde F\) with tangent space \(\ker\mu_Q\). Modulo the directions in the Jacobian ideal, along which \(Y\) moves by automorphisms fixing \(T\), its dimension is \(n-c\).
+The trace of such a class is a nonzero multiple of \(\tau\) of its numerator. Indeed \(g_1,g_2\) is a regular sequence on the coordinate ring of \(C\), so the class determines its numerator in \(\mathcal A\), and both spaces are one-dimensional. ∎
 
-For \(s\in M\) the class \(\lambda\) is a rational Hodge class on the Fano fourfold \(Y_s\), hence the class of a cycle \(Z_s\) with rational coefficients. Relative Hilbert schemes have countably many components. By Baire's theorem there is a dense open subset of \(M\) near each point of which, after a finite cover, the \(Z_s\) form an algebraic family. The spaces \(\ker\mu\) and the maps \(\beta\) vary continuously along \(M\) and \(W_T\) is closed, so it suffices to treat such points.
-
-Every \(Y_s\) contains \(T\), and \(Z_s|_T\) is homologous to zero because \(\lambda\) is primitive. The cycles \(Z_s|_T-Z_{s_0}|_T\) are algebraically equivalent to zero. Their Abel–Jacobi images \(\nu(s)\) lie in the image \(J_a(T)\) of the Abel–Jacobi map on such cycles. A family of one-cycles over a curve acts through a correspondence whose image is supported on a surface, so the tangent space of \(J_a(T)\) is the \((1,2)\)-part of a Hodge structure contained in \(N^1H^3(T,\mathbb Q)\). Hence \(d\nu(K)\) lies in \(H^{1,2}(T)\cap(N^1H^3(T,\mathbb Q)\otimes\mathbb C)\).
-
-It remains to identify \(d\nu(K)\) with a nonzero multiple of \(\beta_Q(K)\). Since \(H^3(Y_s)=0\), the pair gives an exact sequence of mixed Hodge structures
+**Derivative lemma.** Let \(\lambda\) be a divisor class on \(D\), and let \(h_s\) be a family of sections of the fixed \(T\) along which \(\lambda\) stays algebraic, with tangent \(L\) at \(h\). Let \(\nu(s)\) be the Abel–Jacobi image of a curve of class \(\lambda+mH\) on \(D_s\), for \(m\) large; it does not depend on the curve. For \(A\in S_d\), with class \(\eta_A\in H^{2,1}(T)\), the number
 
 \[
-0\longrightarrow H^3(T)\longrightarrow H^4(Y_s,T)\longrightarrow H^4(Y_s)\longrightarrow H^4(T).
+\langle d\nu(L),\eta_A\rangle
 \]
 
-The Abel–Jacobi image of \(Z_s|_T\) is the class of \(\widetilde\lambda_F-\widetilde\lambda_{\mathbb Q}\) in \(H^3(T,\mathbb C)/(F^2+H^3(T,\mathbb Q))\), for lifts of \(\lambda\) to \(F^2H^4(Y_s,T)\) and to \(H^4(Y_s,T;\mathbb Q)\). The threefold does not move. Hence \(H^3(T)\) and \(F^2H^3(T)\) are constant, the rational lift is flat, and
+is a fixed nonzero multiple of the obstruction of \(\lambda\) on \(V(F+\varepsilon A,\ h)\), paired with the two-form of numerator \(L\). For \(\lambda=[C]\) it is a nonzero multiple of \(\tau(AL)\).
+
+**Proof.** Let \(\Gamma\) be a smooth curve of the class moving with \(D_s\), with normal field \(v\in H^0(N_{\Gamma/T})\) over \(L|_\Gamma\). By Griffiths's formula for the differential of the Abel–Jacobi map (compare [Voisin, §2, Lemma 7](https://www.cmls.polytechnique.fr/perso/voisin/Articlesweb/griffithsgroup.pdf), which computes the derivative of this normal function),
 
 \[
-d\nu(K)=\bigl[\nabla_K\widetilde\lambda_F\bigr]\in H^3(T,\mathbb C)/F^2H^3(T).
+\langle d\nu(L),\eta\rangle=\int_\Gamma(v\mathbin{\lrcorner}\eta)|_\Gamma .
 \]
 
-Let \(\mathbb P'\) be the ambient space of \(Y\) and \(D=\{t=0\}\). Both \(\mathbb P'\) and \(D\) are locally quotients of smooth varieties by finite groups, and \(Y\) and \(T\) avoid their singular points. Rational forms, residues and pole orders are taken on these local uniformizing covers, as in the weighted residue theorems of §3D.1; there the filtrations below are compatible with restriction to \(t=0\). Residues identify \(H^4(Y,T)_{\mathrm{prim}}\) with \(H^5(\mathbb P'\setminus Y,D\setminus T)\). A class there is represented by a pair \((\varphi,\eta)\): a rational five-form on \(\mathbb P'\) with poles on \(Y\) and a rational four-form on \(D\) with poles on \(T\), modulo pairs \((d\alpha,\alpha|_D+d\gamma)\). Every such pair is a relative cocycle for reasons of degree. By the comparison of the Hodge filtration with the filtration by order of pole in [Deligne, Théorie de Hodge II, §3.1](https://numdam.org/item/PMIHES_1971__40__5_0/), applied to the cone of the restriction map, pairs with pole orders at most three and two lie in \(F^2H^4(Y,T)\), and \((0,\eta)\) is the image of the residue of \(\eta\).
-
-Take \(\widetilde\lambda_F=[(P_s\Omega/\widetilde F_s^3,0)]\). At the base point \(P\equiv Q\) modulo the Jacobian ideal, and we may take \(Q=P\). Along \(\widetilde F+\varepsilon tK\),
+Since \(H^1(K_D)=0\), the restriction of \(\eta\) to \(D\) lifts to a class \(\widetilde\eta\) in \(H^1(N_{D/T}^*\otimes\Omega^1_D)\), through
 
 \[
-\frac{d}{d\varepsilon}\frac{P_s\Omega}{\widetilde F_s^3}
-=\frac{\dot P\,\Omega}{\widetilde F^3}-3\frac{tKQ\,\Omega}{\widetilde F^4}.
+0\longrightarrow N_{D/T}^*\otimes\Omega_D^1\longrightarrow\Omega_T^2|_D\longrightarrow K_D\longrightarrow0 .
 \]
 
-Let \(E\) be the weighted Euler field, \(v=\sum_zc_z\partial_z\), and \(\alpha=\widetilde F^{-3}\iota_E\iota_v(dz_0\wedge\cdots\wedge dz_4\wedge dt)\). Griffiths' reduction formula gives
+For a local section \(dh\wedge\beta\) of the subbundle, \((v\mathbin{\lrcorner}(dh\wedge\beta))|_\Gamma=L\,\beta|_\Gamma\), because \(dh\) vanishes on the tangent directions of \(\Gamma\). Hence
 
 \[
-3\frac{tKQ\,\Omega}{\widetilde F^4}
-=\pm d\alpha+\frac{(\sum_z\partial_zc_z)\Omega}{\widetilde F^3}.
+\langle d\nu(L),\eta\rangle=\int_D L\,\widetilde\eta\cup[\Gamma],
 \]
 
-The derivative of the lift is therefore a pair with pole order at most three, plus \(\mp(d\alpha,0)\sim\pm(0,\alpha|_D)\). On \(D\) both \(t\) and \(dt\) vanish, so only the \(\partial_t\)-component of \(v\) survives:
+and the part \(mH\) of \([\Gamma]\) contributes nothing, because complete-intersection curves of \(T\) move in a rational family. Contraction with the holomorphic three-form identifies the sequence above with \(0\to T_D\to T_T|_D\to N_{D/T}\to0\), and \(\eta_A\) with the Kodaira–Spencer class of \(F+\varepsilon A\). A lift of its restriction to \(H^1(T_D)\) is the Kodaira–Spencer class \(\rho\) of \(V(F+\varepsilon A,h)\), and \(L\,\widetilde\eta\) becomes a constant multiple of \(\rho\mathbin{\lrcorner}\omega_L\), where \(\omega_L\) is the two-form of numerator \(L\). The pairing is thus \(\int_D(\rho\mathbin{\lrcorner}\omega_L)\cup\lambda\), which the obstruction lemma computes. ∎
+
+**Orbit sums.** Suppose the translates \(\gamma C\), \(\gamma\in G\), are pairwise disjoint, and put \(E=\sum_\gamma\gamma C\). For invariant \(L\), and for \(\sigma\) and \(A\) of character \(\delta^{-1}\), every translate contributes equally to the two pairings. The formulas \(\tau(kL\sigma)\) and \(\tau(AL)\) therefore hold for \(E\), up to the factor \(|G|\).
+
+## 3D.3 One moving class and the Higgs field
+
+**Higgs lemma.** Let \(\mathbb V\) be a polarized rational variation of Hodge structure of weight three with \(V^{3,0}=0\) over a smooth connected base \(B\). For a tangent vector \(v\) at \(b\), the map \(\overline\nabla_v:V^{2,1}_b\to V^{1,2}_b\simeq(V^{2,1}_b)^\vee\) is a symmetric bilinear form \(H_v\) on \(V^{2,1}_b\). Suppose that at one point the only endomorphisms \(P\) of \(V^{2,1}_b\) with
 
 \[
-\alpha|_D=\pm\frac{c_t|_{t=0}\,\Omega_D}{F_0^3}.
+P^{\mathsf T}H_v=H_vP\quad\text{for all }v
 \]
 
-The derivative lies in \(H^3(T)\) because \(\lambda\) is flat. By strictness \(H^3(T)\cap F^2H^4(Y,T)=F^2H^3(T)\). Hence \(d\nu(K)\) is a nonzero multiple of the class of \(c_t|_{t=0}\) in \((R_0)_{2d}=H^{1,2}(T)\). Its character shows that it is \(G\)-invariant. ∎
+are the scalars. Then on every finite étale cover of a dense open subset of \(B\), the pullback of \(\mathbb V\) has no rational sub-variation other than zero and itself.
 
-The argument is the weighted form of [Voisin, §§2.12–2.15](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf). It does not use the dimension: for a hypersurface \(Y\) of dimension \(2m\) with section \(T\), a primitive Hodge class of degree \(2m\) and its restricted cycles, the same recipe gives the derivative of the normal function in \(H^{m-1,m}(T)\).
+**Proof.** The condition fails only on a proper closed analytic subset, so it holds at some point of the given open subset. A rational sub-variation has an orthogonal complement for the polarization, and the projector onto it is flat, self-adjoint and of type \((0,0)\). Flatness makes it commute with every \(\overline\nabla_v\). Self-adjointness makes its action on \(V^{1,2}\) the transpose of its action \(P\) on \(V^{2,1}\). Hence \(P^{\mathsf T}H_v=H_vP\), so \(P\) is a scalar idempotent: zero or the identity. By conjugation the same holds on \(V^{1,2}\). ∎
 
-There is an equivalent formula without a choice of \(c_z\). The ring
+**Moving-class criterion.** Let \(\mathcal B\) be an irreducible family of invariant polynomials \(F\) as in §3D.1, with \(\delta\ne1\), all defining smooth threefolds. Suppose that
+
+1. at one member there are an invariant section \(h\) and an invariant divisor class \(\lambda\) on \(D\) with \(\operatorname{NL}_\lambda\) surjective, together with \(L\in\ker\operatorname{NL}_\lambda\) and \(A\in S_d^{[\delta^{-1}]}\) for which the pairing of the derivative lemma is nonzero;
+2. at one member the hypothesis of the Higgs lemma holds for \(\mathbb V=(R^3p_*\mathbb Q)^G\) over \(\mathcal B\).
+
+Then for \(T\) in a nonempty Zariski-open subset of \(\mathcal B\) there are a smooth projective curve \(\Lambda\) and a correspondence \(\Gamma\) with
 
 \[
-R_{\log}=S/\bigl(\partial_z\widetilde F\ (z\ne t),\ t\,\partial_t\widetilde F\bigr)
+\Gamma_*H^1(\Lambda,\mathbb Q)\supset H^3(T,\mathbb Q)^G .
 \]
 
-is a complete intersection, and multiplication by \(\partial_t\widetilde F\) embeds \(R_0\) in it with cokernel \(R\). Its socle is the image of the socle of \(R_0\). Consequently, for \(A\in(R_0)_d^{[\delta^{-1}]}\simeq H^{2,1}(T)^G\),
+In particular \(H^3(T,\mathbb Q)^G\subset N^1H^3(T,\mathbb Q)\).
 
-\[
-\operatorname{soc}_{R_0}\bigl(A\,\beta_Q(K)\bigr)=\kappa\,\operatorname{soc}_{R_{\log}}(tKQ\,A)
-\]
+In Jacobian rings the forms of the second hypothesis are \(H_A(B,B')=\operatorname{soc}(ABB')\) on \(R(F)_d^{[\delta^{-1}]}\), for the \(A\in R(F)_d^G\) tangent to \(\mathcal B\).
 
-with a nonzero constant \(\kappa\) depending only on the two socle generators.
-
-**Example: a line on a quartic surface.** Let \(Y=\{\ell_1G_1+\ell_2G_2=0\}\subset\mathbb P^3\) be a smooth quartic surface containing the line \(L=\{\ell_1=\ell_2=0\}\), and let \(T=Y\cap\{t=0\}\) be a smooth plane quartic. The primitive class of \(L\) is represented in \(R_4\) by the Jacobian determinant
-
-\[
-Q=\det\frac{\partial(\ell_1,G_1,\ell_2,G_2)}{\partial(x,y,z,t)},
-\]
-
-by the formula for complete-intersection cycles in [Villaflor Loyola, Theorem 1](https://arxiv.org/abs/1812.03964). The target \(R_8\) of \(\mu_Q\) is the one-dimensional socle, so \(\ker\mu_Q\subset S_3\) has dimension nineteen: these are the quartics through \(T\) that still contain a line \(L_s\). The Abel–Jacobi image of \(L_s\cap T\) is a point of \(T\subset J(T)\) near \(p=L\cap T\). Its derivative spans the tangent line of the canonical curve at \(p\), which pairs with \(H^{1,0}(T)\simeq(R_0)_1\) by evaluation at \(p\). The recipe must therefore return, for every \(K\in\ker\mu_Q\), a class in \((R_0)_5\) whose socle pairing with a linear form \(A\) is a multiple of \(A(p)\). The verifier of §3D.4 confirms this on an explicit example: the nineteen functionals span one line, and that line is evaluation at \(p\).
-
-## 3D.3 A spanning criterion
-
-A rational Hodge class is needed only to produce cycles. The inclusion it yields extends to all classes by density.
-
-**Density lemma.** Let \(\mathcal O_T\) be the set of pairs \((\widetilde F,Q)\) with \(\widetilde F|_{t=0}=F_0\), \(Y\) smooth, and \(\mu_Q\) surjective. Then \(\beta_Q(\ker\mu_Q)\subset W_T\) for every pair in \(\mathcal O_T\).
-
-**Proof.** Over \(\mathcal A\) the graded pieces
-
-\[
-\operatorname{Gr}^2_FH^4(Y)^G_{\mathrm{prim}}\simeq R_{2d-w_t}^{[(\delta\chi_t)^{-1}]}
-\]
-
-form an algebraic vector bundle \(\mathcal H\), and \(\mathcal O_T\) is Zariski open in it. On \(\mathcal O_T\) the kernels of \(\mu\) form an algebraic bundle and \(\beta\) is algebraic, so the locus \(\mathcal S\) where the inclusion holds is Zariski closed in \(\mathcal O_T\).
-
-The subspaces \(H^{2,2}(Y)\) of the flat bundle do not vary algebraically, but each projects isomorphically onto the fiber of \(\mathcal H\). Let \(\mathcal H_{\mathbb R}\subset\mathcal H\) be the image of the real classes of type \((2,2)\). It is a real form of each fiber and varies real-analytically. At a point of \(\mathcal O_T\cap\mathcal H_{\mathbb R}\) the flat transport map from the real \((2,2)\)-classes to a fixed fiber \(H^4(Y_0,\mathbb R)^G_{\mathrm{prim}}\) is a submersion: its image contains the real \((2,2)\)-classes and the real parts of \(\overline\nabla_K\lambda\), the map \(\overline\nabla\lambda\) is onto \(H^{1,3}(Y)^G\), and \(H^{4,0}(Y)=0\). This is Green's density criterion in equivariant form, as used in [Voisin, §2.17](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf). Hence rational Hodge classes are dense in \(\mathcal O_T\cap\mathcal H_{\mathbb R}\). They lie in \(\mathcal S\) by the normal-function lemma, so \(\mathcal O_T\cap\mathcal H_{\mathbb R}\subset\mathcal S\). A real form is Zariski dense in each fiber. Therefore \(\mathcal S=\mathcal O_T\). ∎
-
-**Spanning criterion.** Suppose \(\delta\ne1\) and there are pairs \((\widetilde F_i,Q_i)\in\mathcal O_T\), \(1\le i\le m\), whose subspaces \(\beta_{Q_i}(\ker\mu_{Q_i})\) together span \((R_0)_{2d}^{[\delta^{-1}]}\). Then
-
-\[
-H^3(T,\mathbb Q)^G\subset N^1H^3(T,\mathbb Q).
-\]
-
-For fixed polynomials \(\widetilde F_i-F_0\) and \(Q_i\), the hypothesis is a Zariski-open condition on \(F_0\).
-
-**Proof.** The density lemma gives \(W_T=H^{1,2}(T)^G\). The rational Hodge structure \(N^1H^3(T,\mathbb Q)^G\) then has the full \((1,2)\)-part of \(H^3(T)^G\), and by conjugation the full \((2,1)\)-part, while \(H^{3,0}(T)^G=0\) because \(\delta\ne1\). Smoothness, surjectivity of the \(\mu_{Q_i}\) and the rank of the span are open conditions; the last one because \(\beta\) varies algebraically where \(\mu\) has constant rank. ∎
-
-The hypothesis is the surjectivity of one explicit linear map. Let \(\Theta\) send a tuple
-
-\[
-\bigl(K_i,(c^{(i)}_z)_z\bigr)_{1\le i\le m},\qquad (e_z)_{z\ne t},
-\]
-
-of homogeneous polynomials of the appropriate degrees and characters to
-
-\[
-\Bigl(tK_iQ_i-\sum_zc^{(i)}_z\partial_z\widetilde F_i\Bigr)_{1\le i\le m}
-\quad\text{and}\quad
-\sum_ic^{(i)}_t|_{t=0}-\sum_{z\ne t}e_z\,\partial_zF_0 .
-\]
-
-If \(\Theta\) is surjective, then each \(\mu_{Q_i}\) is surjective, and an arbitrary last component is attained with all first components zero, which is the spanning condition. The converse is equally direct. For polynomials with integer coefficients \(\Theta\) is an integer matrix. Its rank over \(\mathbb Q\) is at least its rank modulo any prime. Full row rank modulo one prime therefore proves the hypothesis in characteristic zero, without comparing kernels in the two characteristics. Elimination block by block computes this rank as
-
-\[
-\operatorname{rank}\Theta=\sum_i\operatorname{rank}\bigl[J(\widetilde F_i)\mid tQ_iS_{d-w_t}\bigr]
-+\dim\Bigl(J(F_0)+\sum_i\{c_t|_{t=0}\}\Bigr),
-\]
-
-in the relevant graded pieces.
-
-The same remark covers part of the span. Let \(\pi\) be a linear map on \((S_0)_{2d}^{[\delta^{-1}]}\) vanishing on \(J(F_0)\), and let \(\Theta_\pi\) be \(\Theta\) with its last component composed with \(\pi\). It is surjective exactly when each \(\mu_{Q_i}\) is surjective and the subspaces \(\pi\beta_{Q_i}(\ker\mu_{Q_i})\) span the image of \(\pi\). For integral data, full row rank modulo one prime again proves this in characteristic zero. For a single pair and a linear form \(\pi\), it is enough to find, modulo the prime, that \(\mu_Q\) is surjective and that one solution of \(tKQ=\sum_zc_z\partial_z\widetilde F\) has \(\pi(c_t|_{t=0})\ne0\).
+**Proof.** By the integration lemma, the pairs carrying the class form a smooth family that is submersive over \(\mathcal B\) near the first member, with a projective bundle of curves of class \(\lambda+mH\). Its image contains a nonempty Zariski-open subset. The pairing is nonzero, so \(L\) is not a multiple of \(h\) and the fibers have positive dimension. Choose in the fibers a curve of sections tangent to \(L\), and a section of the projective bundle over it. Spread this out over a finite étale cover of an open subset of \(\mathcal B\), and complete and normalize the parameter curves. The result is a family of smooth projective curves \(\Lambda\) with a relative correspondence \(\Gamma\) to the threefolds. By the derivative lemma its Abel–Jacobi map is not constant near the first member, and its derivative pairs nontrivially with \(H^{2,1}(T)^G\). The image of \(\pi_G\circ\Gamma_*\), with \(\pi_G\) the averaging projector, is therefore a nonzero rational sub-variation of the pullback of \(\mathbb V\). Since \(\delta\ne1\), \(\mathbb V\) has no \((3,0)\)-part, and by the Higgs lemma the sub-variation is everything. ∎
 
 ## 3D.4 Order-three weighted sextics
 
@@ -214,7 +167,7 @@ act on \(\mathbb P(1,1,1,1,2)\) with coordinates \((x_0,x_1,x_2,x_3;w)\).
 H^3(T,\mathbb Q)^g\subset N^1H^3(T,\mathbb Q).
 \]
 
-More precisely, the projector of \(H^*(T,\mathbb Q)\) onto \(H^3(T,\mathbb Q)^g\), zero in the other degrees and on the other eigenspaces, is cohomologous to a rational algebraic cycle supported on \(D\times D\) for some divisor \(D\subset T\).
+More precisely, the projector of \(H^*(T,\mathbb Q)\) onto \(H^3(T,\mathbb Q)^g\), zero in the other degrees and on the other eigenspaces, is cohomologous to a rational algebraic cycle supported on \(Z\times Z\) for some divisor \(Z\subset T\).
 
 As in [Chapter 3B, §3B.1](#technical-information/weighted-threefolds), \(T\) avoids the weighted vertex and is a smooth Calabi–Yau threefold with \(h^{2,1}=103\). Here \(\delta=\omega^5=\omega^2\). The Jacobian ring gives the Hodge numbers of the three eigenspaces:
 
@@ -226,88 +179,115 @@ As in [Chapter 3B, §3B.1](#technical-information/weighted-threefolds), \(T\) av
 
 The theorem concerns the first row. Its Hodge type predicts divisor support; the proof supplies it.
 
-**The extension.** Give \(t\) weight three and trivial character. Up to rescaling \(t\), the invariant sextics restricting to \(F_0\) with a nonzero coefficient of \(t^2\) are
+**The count.** Take cubic sections, \(e=3\). There are nine invariant cubic monomials and seven of character \(\omega=\delta^{-1}\), so
 
 \[
-\widetilde F=F_0+t\,a+t^2,\qquad a\in\mathbb C[x,w]_3^{g},
+n-c=9-1-7=1 .
 \]
 
-a nine-dimensional family. Neither singular point of \(\mathbb P(1,1,1,1,2,3)\) lies on \(Y\). A quasismooth \(Y\) is thus a smooth del Pezzo fourfold of degree one, the double cover of \(\mathbb P(1,1,1,1,2)\) branched along \(\{a^2=4F_0\}\). In the notation of §3D.1, \(d=6\), \(w_t=3\), and
+A surjective \(\operatorname{NL}_\lambda\) leaves a one-parameter family of sections of each threefold.
+
+**A seed.** Let \(F_0=x_0^6+x_1^6+x_2^6+x_3^6+w^3\) be the Fermat member, let \(b\) be an invariant cubic, and put \(F_b=F_0+b^2\). Choose \(r^3=2\) and \(i^2=-1\), and set
 
 \[
-\bigl(h^{3,1},h^{2,2}_{\mathrm{prim}},h^{1,3}\bigr)(Y)^g=(7,52,7),
-\qquad
-n-c=\dim R_3^{[1]}-\dim R_3^{[\omega]}=9-7=2.
+\begin{aligned}
+f_1&=x_0^2-r\,x_1x_3,&g_1&=x_0^4+r\,x_0^2x_1x_3+r^2x_1^2x_3^2,\\
+f_2&=w+x_2^2,&g_2&=w^2-w\,x_2^2+x_2^4,\\
+h&=b-i(x_1^3+x_3^3),&k&=b+i(x_1^3+x_3^3).
+\end{aligned}
 \]
 
-When \(\mu_Q\) is surjective, the invariant class has a two-dimensional locus of fourfolds through \(T\), and \(\beta_Q\) maps its tangent space to a subspace of the 33-dimensional space \((R_0)_{12}^{[\omega]}\) of dimension at most two.
-
-**A witness.** Take the Fermat member
+Then \(F_b=f_1g_1+f_2g_2+hk\). On the del Pezzo fourfold \(F_0+t^2=0\) in \(\mathbb P(1,1,1,1,2,3)\), the equations \(f_1=f_2=t-i(x_1^3+x_3^3)=0\) define a surface of Aoki–Shioda type, as in [Braun–Fortin–Lopez Garcia–Villaflor Loyola, §2.2](https://arxiv.org/abs/2401.00470), and \(T_b\) is its section \(t=b\). Put
 
 \[
-F_0=x_0^6+x_1^6+x_2^6+x_3^6+w^3
+D=V(F_b,h),\qquad C=V(f_1,f_2,h),\qquad E=C+gC+g^2C .
 \]
 
-and the single pair
+The polynomials \(f_1\) and \(f_2\) are not eigenvectors of \(g\), while \(h\) is invariant. Thus \(D\) and the divisor \(E\) are invariant, and \(C\) is not.
+
+For general \(b\) the threefold \(T_b\), the surface \(D\) and the curve \(C\) are smooth, and the three translates of \(C\) are disjoint. Indeed \(T_0\) is the Fermat member. The surface \(D\) is the section \(h=0\) of \(\{x_0^6+x_2^6+w^3=2x_1^3x_3^3\}\), whose only singular points are the two points where \(x_1\) or \(x_3\) is the only nonzero coordinate. The invariant cubics have no common zero on that threefold, so a general \(h\) avoids the two points and cuts a smooth surface. After elimination of \(w\), the curve \(C\) is the intersection of a quadric cone and a cubic in \(\mathbb P^3\), and it is smooth for the same reason. Two translates can meet only at the same two points.
+
+**Finite results.** The verifier `scripts/verify-hodge-locus-span.py`, in the repository's [reproduction scripts](https://github.com/hodge-computer/sextics/tree/main/scripts), reconstructs the algebra \(\mathcal A\), its trace and the pairings of §3D.2 modulo \(109\), with \(r=57\), \(i=33\) and
 
 \[
-a=5\bigl(x_0^3+x_1^3+x_2^3+x_3^3+x_0x_2x_3+x_1x_2x_3+x_3w\bigr),
-\qquad Q=x_2w^4.
+b=5x_0^3+10x_0^2x_1+25x_0x_1^2+20x_0x_2x_3+30x_1^3+25x_1x_2x_3-25x_2^3-20x_3^3+10x_3w ,
 \]
 
-Modulo five \(\widetilde F=F_0+ta+t^2\) is \(F_0+t^2\), whose partial derivatives are monomials. The fourfold is therefore quasismooth. Because \(F_0\) is Fermat, \(J(F_0)\) is spanned by monomials, and \((R_0)_{12}^{[\omega]}\) has as a basis the 33 standard monomials
-
-\[
-x_0^{e_0}x_1^{e_1}x_2^{e_2}x_3^{e_3}w^{e_w},\qquad e_i\le4,\quad e_w\le1,
-\]
-
-of degree twelve and character \(\omega\).
-
-The verifier `scripts/verify-hodge-locus-span.py`, in the repository's [reproduction scripts](https://github.com/hodge-computer/sextics/tree/main/scripts), reconstructs the map \(\mu_Q\), its kernel, solutions \(c_z\) and the classes \(\beta_Q(K)\). It reads no witness data and uses exact arithmetic modulo \(2^{31}-1\). Run it with Python and NumPy:
+and the Higgs forms at the Fermat member. It reads no witness data. Run it with Python and NumPy:
 
 ```sh
 python3 scripts/verify-hodge-locus-span.py
 ```
 
-The finite results are:
-
-| Calculation modulo \(2^{31}-1\) | Result |
+| Calculation | Result |
 | --- | --- |
-| \(\dim S_{15}^{[\omega]}\), and rank of \(J(\widetilde F)\) in it | \(1247\), \(1240\) |
-| Rank of \(\mu_Q\) on the ten invariant cubics | \(7\) |
-| Dimension of \(\ker\mu_Q\) and of its image under \(\beta\) | \(3\) and \(2\) |
-| Standard monomials with a nonzero coefficient in some \(\beta_Q(K)\) | all \(33\) |
+| Length and socle degree of \(\mathcal A\) | \(96\) and \(9\) |
+| Rank of \(\tau(kL\sigma)\), for the nine \(L\in S_3^g\) and the seven \(\sigma\in S_3^{[\omega]}\) | \(7\) |
+| Rank after adjoining the row \(L\mapsto\tau(x_2x_3^3w\,L)\) | \(8\) |
+| Matrices \(P\) with \(P^{\mathsf T}H_m=H_mP\) for the \(35\) invariant monomials \(m\) at \(F_0\) | the scalars |
 
-The kernel contains the rescaling direction, on which \(\beta\) vanishes, so the image has dimension \(n-c=2\). By the last remark of §3D.3, applied to the 33 coordinate forms, the last line holds in characteristic zero: for every standard monomial \(m\), the space \(\beta_Q(\ker\mu_Q)\) contains a class with a nonzero coefficient on \(m\).
+The first three lines are computed at a prime of \(\mathbb Q(r,i)\) above \(109\). Length \(96\) there is the length in characteristic zero, so \(\mathcal A\) and \(\tau\) reduce well, and a rank modulo the prime is a lower bound for the rank in characteristic zero. Rank eight says that \(\operatorname{NL}_E\) is surjective and that \(\tau(x_2x_3^3w\,L)\ne0\) for some \(L\) in its kernel. Both are open conditions on \(b\), so they hold together with the smoothness conditions for general \(b\).
 
-**From two dimensions to thirty-three.** The group \(\mu_6^4\times\mu_3\) acts diagonally on \((x_0,x_1,x_2,x_3;w)\). It preserves \(F_0\) and commutes with \(g\), so it preserves \(W_T\). Each standard monomial spans an eigenline of \((R_0)_{12}^{[\omega]}\). The 33 characters are pairwise distinct, because the exponents of a standard monomial are determined by their residues modulo six and three. A stable subspace is therefore spanned by the standard monomials it contains, and it contains every standard monomial on which one of its vectors has a nonzero coefficient. The density lemma gives \(\beta_Q(\ker\mu_Q)\subset W_T\). Hence \(W_T=(R_0)_{12}^{[\omega]}\) at the Fermat member.
+For the last line, the Jacobian ring of \(F_0\) is \(\mathbb C[x,w]/(x_0^5,\ldots,x_3^5,w^2)\) with its monomial basis: 33 monomials of degree six and character \(\omega\), and 35 invariant ones. For an invariant monomial \(m\), the form \(H_m(a,b)\) is one if \(abm=x_0^4x_1^4x_2^4x_3^4w\) and zero otherwise. Each entry of \(P^{\mathsf T}H_m=H_mP\) therefore identifies two entries of \(P\) or annihilates one. Over the 35 monomials these relations leave a single free class of entries, the diagonal.
 
-This is not yet a witness for the spanning criterion, and support at the Fermat member alone says nothing about its neighbors. Extend each element \(h\) of the diagonal group to the ambient space of \(Y\) by fixing \(t\). Since \(h^*F_0=F_0\), the pairs \((h^*\widetilde F,h^*Q)\) lie in \(\mathcal O_T\), and
+For the seed, the sequence
 
 \[
-\beta_{h^*Q}(\ker\mu_{h^*Q})=h^*\beta_Q(\ker\mu_Q).
+0\longrightarrow\mathcal O_D(4)\longrightarrow\mathcal O_D(E+4H)\longrightarrow\bigoplus_{j}\mathcal O_{g^jC}(2)\longrightarrow0
 \]
 
-By the preceding paragraph these subspaces together span \((R_0)_{12}^{[\omega]}\). The finite orbit of the pair is thus a witness for the spanning criterion, whose hypothesis is open in \(F_0\). Only one pair needs a calculation.
+shows that \(m=4\) suffices in the integration lemma: the higher cohomology of \(\mathcal O_D(E+4H)\) vanishes, it has \(69\) sections, and its curves have degree \(54\) and arithmetic genus \(208\).
 
-**Proof of the theorem.** The witness and the spanning criterion give a nonempty Zariski-open set \(\mathcal U\) of invariant sextics with \(H^3(T,\mathbb Q)^g\subset N^1H^3(T,\mathbb Q)\). For \(T\in\mathcal U\) there are a smooth projective curve \(\Lambda\), possibly disconnected, and a correspondence \(\Gamma\) with \(\Gamma_*H^1(\Lambda,\mathbb Q)\supset H^3(T,\mathbb Q)^g\). Let \(D\) be a \(g\)-stable divisor containing its image. Let \(\pi_g=(1+g+g^2)/3\), and let \(\pi_1^\Lambda\) be the projector onto \(H^1(\Lambda)\): on a component with a chosen point \(p\) it is \(\Delta_\Lambda-[p]\times\Lambda-\Lambda\times[p]\). Replace \(\Gamma\) by
+**Proof of the theorem.** The seed and the finite results verify the hypotheses of the moving-class criterion for the family of all smooth invariant sextics, with \(\lambda=[E]\), the orbit-sum formulas of §3D.2 and \(A=x_2x_3^3w\). The criterion gives a nonempty Zariski-open set \(\mathcal U\) of invariant sextics and, for \(T\in\mathcal U\), a smooth projective curve \(\Lambda\), possibly disconnected, and a correspondence \(\Gamma\) with \(\Gamma_*H^1(\Lambda,\mathbb Q)\supset H^3(T,\mathbb Q)^g\). Let \(Z\) be a \(g\)-stable divisor containing its image. Let \(\pi_g=(1+g+g^2)/3\), and let \(\pi_1^\Lambda\) be the projector onto \(H^1(\Lambda)\): on a component with a chosen point \(p\) it is \(\Delta_\Lambda-[p]\times\Lambda-\Lambda\times[p]\). Replace \(\Gamma\) by
 
 \[
 \pi_g\circ\Gamma\circ\pi_1^\Lambda .
 \]
 
-Its image is still contained in \(D\). The second projector is needed here: unlike the anti-projector of [§3B.6](#technical-information/weighted-threefolds), \(\pi_g\) fixes the even cohomology of \(T\), on which a curve correspondence acts through \(H^0(\Lambda)\) and \(H^2(\Lambda)\). Now \(\Gamma_*\) vanishes outside \(H^1(\Lambda)\) and maps it onto \(H^3(T)^g\). As in §3B.6, the transpose is the adjoint for the polarizations up to a sign, so \(\Gamma\circ{}^t\Gamma\) is invertible on \(H^3(T)^g\). It is zero on the rest of the cohomology, and a polynomial in it without constant term represents the projector by a cycle supported on \(D\times D\).
+Its image is still contained in \(Z\). The second projector is needed here: unlike the anti-projector of [§3B.6](#technical-information/weighted-threefolds), \(\pi_g\) fixes the even cohomology of \(T\), on which a curve correspondence acts through \(H^0(\Lambda)\) and \(H^2(\Lambda)\). Now \(\Gamma_*\) vanishes outside \(H^1(\Lambda)\) and maps it onto \(H^3(T)^g\). As in §3B.6, the transpose is the adjoint for the polarizations up to a sign, so \(\Gamma\circ{}^t\Gamma\) is invertible on \(H^3(T)^g\). It is zero on the rest of the cohomology, and a polynomial in it without constant term represents the projector by a cycle supported on \(Z\times Z\).
 
-Weighted weak Lefschetz gives \(H^{2k}(T)=\mathbb Qh^k\) and \(h^3=3\). The projector is thus the class of the relative algebraic cycle
+Weighted weak Lefschetz gives \(H^{2k}(T)=\mathbb QH^k\) and \(H^3=3\). The projector is thus the class of the relative algebraic cycle
 
 \[
 \pi_g-\sum_{k=0}^3\pi_{2k},\qquad
-\pi_{2k}=\tfrac13\,\mathrm{pr}_1^*h^{3-k}\cdot\mathrm{pr}_2^*h^k,
+\pi_{2k}=\tfrac13\,\mathrm{pr}_1^*H^{3-k}\cdot\mathrm{pr}_2^*H^k,
 \]
 
 over the connected family of all smooth invariant sextics. The supported-projector specialization lemma of [Chapter 3, §3.6](#technical-information/geometric-support) extends the supported representative from \(\mathcal U\) to every member. ∎
 
-Without the group the method gives nothing, as it must: for the trivial group \(n=c\). For the involution \((+,+,-,-;+)\) of Chapter 3B and classes on \(Y\) anti-invariant under it, the same weight-three extension has \(n=c=12\), so that sector is not reached by this extension; its support comes from the norm-contact curves.
+**Remark: the same theorem through a Fano fourfold.** The moving curves can also be obtained from Hodge classes on a fourfold containing \(T\), as in [Voisin, Proposition 2.1](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf). The proof above does not use this route. It is sketched here.
+
+*The extension.* Give \(t\) weight three and trivial character. For an invariant cubic \(a\), the sextic \(\widetilde F=F+ta+t^2\) defines a fourfold \(Y\subset\mathbb P(1,1,1,1,2,3)\) with \(T=Y\cap\{t=0\}\). It is the double cover of \(\mathbb P(1,1,1,1,2)\) branched along \(a^2=4F\). Neither singular point of the ambient space lies on \(Y\), so a quasismooth \(Y\) is a smooth del Pezzo fourfold of degree one. Its rational Hodge classes of degree four are algebraic by the [corollary of Chapter 3, §3.2](#technical-information/geometric-support), and \(H^3(Y)=0\). With \(R=R(\widetilde F)\), residues give \(H^{4-p,p}(Y)_{\mathrm{prim}}\simeq R_{6p-3}\), and the invariant classes have numerators of character \(\omega\). The invariant Hodge numbers are \((h^{3,1},h^{2,2}_{\mathrm{prim}},h^{1,3})=(7,52,7)\).
+
+*Hodge loci.* The fourfolds through \(T\) are deformed by \(\widetilde F+\varepsilon tK\), with \(K\) an invariant cubic in \((x,w,t)\). A class whose \((2,2)\)-part is represented by \(Q\in R_9^{[\omega]}\) stays of type \((2,2)\) to first order when \(K\) lies in the kernel of
+
+\[
+\mu_Q:K\longmapsto[tKQ]\in R_{15}^{[\omega]} .
+\]
+
+Modulo the Jacobian ideal the source has dimension nine and the target seven. When \(\mu_Q\) is surjective, the Hodge locus of a rational Hodge class is therefore smooth of dimension two. Relative Hilbert schemes have countably many components, so by Baire's theorem the algebraic representatives of the class form algebraic families over a dense open subset of that locus. They restrict to a moving family of one-cycles on \(T\).
+
+*The derivative.* If \(tKQ=\sum_zc_z\,\partial_z\widetilde F\), the derivative of the Abel–Jacobi images of the restricted cycles is a nonzero multiple of
+
+\[
+\beta_Q(K)=\bigl[c_t|_{t=0}\bigr]\in R(F)_{12}^{[\omega]}\simeq H^{1,2}(T)^g .
+\]
+
+This is the weighted form of [Voisin, §§2.12–2.15](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf). The Abel–Jacobi image is read from the extension \(0\to H^3(T)\to H^4(Y,T)\to H^4(Y)\): it is the difference of a lift of the class to \(F^2H^4(Y,T)\) and a rational lift. The threefold does not move, so the rational lift is flat, and the derivative is the class in \(H^3(T)/F^2H^3(T)\) of the derivative of the first lift. The Hodge filtration is the filtration by order of pole. Take the lift given by the pair \((Q\,\Omega/\widetilde F^3,0)\) of rational forms on the ambient space and on \(\{t=0\}\). Griffiths's reduction with the vector field \(\sum_zc_z\partial_z\) lowers the pole order of the term \(tKQ\,\Omega/\widetilde F^4\) of its derivative. The exact term restricts to \(\{t=0\}\) as the form of numerator \(c_t|_{t=0}\) and pole order three, since \(t\) and \(dt\) vanish there. The class does not depend on the choice of the \(c_z\), because the partial derivatives form a regular sequence, and it vanishes on the rescaling direction \(K=\partial_t\widetilde F\).
+
+*Density.* For surjective \(\mu_Q\), Green's density criterion, as in [Voisin, §2.17](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf), makes the rational Hodge classes dense among the real classes of type \((2,2)\) on the nearby fourfolds through \(T\). The inclusion of \(\beta_Q(\ker\mu_Q)\) in the divisor-supported part of \(H^{1,2}(T)^g\) is a Zariski-closed condition on \(Q\) in the bundle of the spaces \(R_9^{[\omega]}\), over the pairs \((a,Q)\) with \(\mu_Q\) surjective. It therefore extends from rational Hodge classes to every such pair. Surjectivity of \(\mu_Q\) and \(\beta_Q\ne0\) are open conditions on \((F,a,Q)\). One such triple therefore gives a nonzero divisor-supported part of \(H^3(T)^g\) on a nonempty open set of threefolds, and the Higgs lemma applies to it as in the moving-class criterion.
+
+*Two witnesses.* The verifier of this section reconstructs \(\mu_Q\), its kernel and the classes \(\beta_Q(K)\) modulo \(109\) in two cases. At the Fermat member, take
+
+\[
+a=5\bigl(x_0^3+x_1^3+x_2^3+x_3^3+x_0x_2x_3+x_1x_2x_3+x_3w\bigr),\qquad Q=x_2w^4 .
+\]
+
+Modulo five the fourfold is \(F_0+t^2=0\), so it is smooth. The map \(\mu_Q\) has rank seven, and \(\beta_Q(\ker\mu_Q)\) has dimension two and a nonzero coefficient on each of the 33 standard monomials of \(R(F_0)_{12}^{[\omega]}\). These three statements persist in characteristic zero. The diagonal automorphisms \(\mu_6^4\times\mu_3\) of the Fermat sextic preserve the divisor-supported part and act on those monomials through pairwise distinct characters, so the divisor-supported part of \(H^{1,2}(T)^g\) is everything at the Fermat member. Moreover the translates of \(\beta_Q(\ker\mu_Q)\) are the spaces \(\beta_{Q'}(\ker\mu_{Q'})\) of the translated pairs \((a',Q')\). That finitely many such spaces span is an open condition on \(F\), so the same holds for general \(F\). This argument needs no Higgs lemma.
+
+For the seed of this section, write \(F_b+2bt+t^2=(t+h)(t+k)+f_1g_1+f_2g_2\), and let \(Q\) be the part of character \(\omega\) of the Jacobian determinant of \((f_1,g_1,f_2,g_2,t+h,t+k)\). As in [Villaflor Loyola, Theorem 1](https://arxiv.org/abs/1812.03964), it represents the invariant part of the class of the surface \(f_1=f_2=t+h=0\). The substitution \(t\mapsto t-b\) carries this fourfold and this surface to the fourfold \(F_0+t^2=0\) and the surface of the seed. Modulo \(109\), \(\mu_Q\) has rank seven, and its kernel is spanned by \(\partial_t\widetilde F\), by \(h-k\), and by one further direction. On \(h-k\) the class \(\beta_Q\) vanishes: the move \((h,k)\mapsto(ch,k/c)\) changes the fourfold and keeps the curve. On the further direction, the pairing of \(\beta_Q\) with \(A\in R(F_b)_6^{[\omega]}\) through the socle of \(R(F_b)\) is proportional to \(A\mapsto\tau(AL)\), for \(L\) in the kernel of \(\operatorname{NL}_E\). At that prime the two routes compute the same Abel–Jacobi derivative on this seed.
+
+The count \(9-7\) is the fourfold counterpart of the count of §3D.1, and it also vanishes when the symmetry fixes the holomorphic three-form. This route needs the Hodge conjecture on the fourfold and the density argument, which the proof above avoids.
 
 ## 3D.5 Sextic fourfolds with a paired sign and an order-three symmetry
 
@@ -339,7 +319,7 @@ is a quasismooth sextic avoiding the vertex. Its equation is invariant under \(g
 
 By the order-three weighted threefold theorem, the projector onto \(H^3(T_\lambda)^g\) has a supported representative at every fiber. The relative support lemma for an invariant sector supplies a divisor of the total space \(\mathcal T\to U\) supporting \(H^1(U,(R^3p_*\mathbb Q)^g)\).
 
-Let \(\alpha\) be an invariant class. Its pullback to the blowup, restricted over \(U\), is \(\beta\)-invariant, hence the pullback of a \(g\)-invariant class \(\alpha'\) on \(\mathcal T\). Leray gives \(\alpha'=c\,h^2+\alpha''\) with \(\alpha''\in H^1(U,(R^3p_*\mathbb Q)^g)\). Both terms vanish off a divisor. Adding the omitted fibers and the exceptional divisor and pushing forward supports \(\alpha\) on \(X\). ∎
+Let \(\alpha\) be an invariant class. Its pullback to the blowup, restricted over \(U\), is \(\beta\)-invariant, hence the pullback of a \(g\)-invariant class \(\alpha'\) on \(\mathcal T\). Leray gives \(\alpha'=c\,H^2+\alpha''\) with \(\alpha''\in H^1(U,(R^3p_*\mathbb Q)^g)\). Both terms vanish off a divisor. Adding the omitted fibers and the exceptional divisor and pushing forward supports \(\alpha\) on \(X\). ∎
 
 In the coordinates of this book, take \((u,v)=(X_2,Y_2)\) and \((x_0,x_1,x_2,x_3)=(X_0,X_1,Y_0,Y_1)\). Then \(\beta\) is the paired sign \(s_2\) and
 
