@@ -255,6 +255,40 @@ Weighted weak Lefschetz gives \(H^{2k}(T)=\mathbb QH^k\) and \(H^3=3\). The proj
 
 over the connected family of all smooth invariant sextics. The supported-projector specialization lemma of [Chapter 3, §3.6](#technical-information/geometric-support) extends the supported representative from \(\mathcal U\) to every member. ∎
 
+**Remark: the same theorem through a Fano fourfold.** The moving curves can also be obtained from Hodge classes on a fourfold containing \(T\), as in [Voisin, Proposition 2.1](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf). The proof above does not use this route. It is sketched here.
+
+*The extension.* Give \(t\) weight three and trivial character. For an invariant cubic \(a\), the sextic \(\widetilde F=F+ta+t^2\) defines a fourfold \(Y\subset\mathbb P(1,1,1,1,2,3)\) with \(T=Y\cap\{t=0\}\). It is the double cover of \(\mathbb P(1,1,1,1,2)\) branched along \(a^2=4F\). Neither singular point of the ambient space lies on \(Y\), so a quasismooth \(Y\) is a smooth del Pezzo fourfold of degree one. Its rational Hodge classes of degree four are algebraic by the [corollary of Chapter 3, §3.2](#technical-information/geometric-support), and \(H^3(Y)=0\). With \(R=R(\widetilde F)\), residues give \(H^{4-p,p}(Y)_{\mathrm{prim}}\simeq R_{6p-3}\), and the invariant classes have numerators of character \(\omega\). The invariant Hodge numbers are \((h^{3,1},h^{2,2}_{\mathrm{prim}},h^{1,3})=(7,52,7)\).
+
+*Hodge loci.* The fourfolds through \(T\) are deformed by \(\widetilde F+\varepsilon tK\), with \(K\) an invariant cubic in \((x,w,t)\). A class whose \((2,2)\)-part is represented by \(Q\in R_9^{[\omega]}\) stays of type \((2,2)\) to first order when \(K\) lies in the kernel of
+
+\[
+\mu_Q:K\longmapsto[tKQ]\in R_{15}^{[\omega]} .
+\]
+
+Modulo the Jacobian ideal the source has dimension nine and the target seven. When \(\mu_Q\) is surjective, the Hodge locus of a rational Hodge class is therefore smooth of dimension two. Relative Hilbert schemes have countably many components, so by Baire's theorem the algebraic representatives of the class form algebraic families over a dense open subset of that locus. They restrict to a moving family of one-cycles on \(T\).
+
+*The derivative.* If \(tKQ=\sum_zc_z\,\partial_z\widetilde F\), the derivative of the Abel–Jacobi images of the restricted cycles is a nonzero multiple of
+
+\[
+\beta_Q(K)=\bigl[c_t|_{t=0}\bigr]\in R(F)_{12}^{[\omega]}\simeq H^{1,2}(T)^g .
+\]
+
+This is the weighted form of [Voisin, §§2.12–2.15](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf). The Abel–Jacobi image is read from the extension \(0\to H^3(T)\to H^4(Y,T)\to H^4(Y)\): it is the difference of a lift of the class to \(F^2H^4(Y,T)\) and a rational lift. The threefold does not move, so the rational lift is flat, and the derivative is the class in \(H^3(T)/F^2H^3(T)\) of the derivative of the first lift. The Hodge filtration is the filtration by order of pole. Take the lift given by the pair \((Q\,\Omega/\widetilde F^3,0)\) of rational forms on the ambient space and on \(\{t=0\}\). Griffiths's reduction with the vector field \(\sum_zc_z\partial_z\) lowers the pole order of the term \(tKQ\,\Omega/\widetilde F^4\) of its derivative. The exact term restricts to \(\{t=0\}\) as the form of numerator \(c_t|_{t=0}\) and pole order three, since \(t\) and \(dt\) vanish there. The class does not depend on the choice of the \(c_z\), because the partial derivatives form a regular sequence, and it vanishes on the rescaling direction \(K=\partial_t\widetilde F\).
+
+*Density.* For surjective \(\mu_Q\), Green's density criterion, as in [Voisin, §2.17](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf), makes the rational Hodge classes dense among the real classes of type \((2,2)\) on the nearby fourfolds through \(T\). The inclusion of \(\beta_Q(\ker\mu_Q)\) in the divisor-supported part of \(H^{1,2}(T)^g\) is a Zariski-closed condition on \(Q\) in the bundle of the spaces \(R_9^{[\omega]}\), over the pairs \((a,Q)\) with \(\mu_Q\) surjective. It therefore extends from rational Hodge classes to every such pair. Surjectivity of \(\mu_Q\) and \(\beta_Q\ne0\) are open conditions on \((F,a,Q)\). One such triple therefore gives a nonzero divisor-supported part of \(H^3(T)^g\) on a nonempty open set of threefolds, and the Higgs lemma applies to it as in the moving-class criterion.
+
+*Two witnesses.* The verifier of this section reconstructs \(\mu_Q\), its kernel and the classes \(\beta_Q(K)\) modulo \(109\) in two cases. At the Fermat member, take
+
+\[
+a=5\bigl(x_0^3+x_1^3+x_2^3+x_3^3+x_0x_2x_3+x_1x_2x_3+x_3w\bigr),\qquad Q=x_2w^4 .
+\]
+
+Modulo five the fourfold is \(F_0+t^2=0\), so it is smooth. The map \(\mu_Q\) has rank seven, and \(\beta_Q(\ker\mu_Q)\) has dimension two and a nonzero coefficient on each of the 33 standard monomials of \(R(F_0)_{12}^{[\omega]}\). These three statements persist in characteristic zero. The diagonal automorphisms \(\mu_6^4\times\mu_3\) of the Fermat sextic preserve the divisor-supported part and act on those monomials through pairwise distinct characters, so the divisor-supported part of \(H^{1,2}(T)^g\) is everything at the Fermat member. Moreover the translates of \(\beta_Q(\ker\mu_Q)\) are the spaces \(\beta_{Q'}(\ker\mu_{Q'})\) of the translated pairs \((a',Q')\). That finitely many such spaces span is an open condition on \(F\), so the same holds for general \(F\). This argument needs no Higgs lemma.
+
+For the seed of this section, write \(F_b+2bt+t^2=(t+h)(t+k)+f_1g_1+f_2g_2\), and let \(Q\) be the part of character \(\omega\) of the Jacobian determinant of \((f_1,g_1,f_2,g_2,t+h,t+k)\). As in [Villaflor Loyola, Theorem 1](https://arxiv.org/abs/1812.03964), it represents the invariant part of the class of the surface \(f_1=f_2=t+h=0\). The substitution \(t\mapsto t-b\) carries this fourfold and this surface to the fourfold \(F_0+t^2=0\) and the surface of the seed. Modulo \(109\), \(\mu_Q\) has rank seven, and its kernel is spanned by \(\partial_t\widetilde F\), by \(h-k\), and by one further direction. On \(h-k\) the class \(\beta_Q\) vanishes: the move \((h,k)\mapsto(ch,k/c)\) changes the fourfold and keeps the curve. On the further direction, the pairing of \(\beta_Q\) with \(A\in R(F_b)_6^{[\omega]}\) through the socle of \(R(F_b)\) is proportional to \(A\mapsto\tau(AL)\), for \(L\) in the kernel of \(\operatorname{NL}_E\). At that prime the two routes compute the same Abel–Jacobi derivative on this seed.
+
+The count \(9-7\) is the fourfold counterpart of the count of §3D.1, and it also vanishes when the symmetry fixes the holomorphic three-form. This route needs the Hodge conjecture on the fourfold and the density argument, which the proof above avoids.
+
 ## 3D.5 Sextic fourfolds with a paired sign and an order-three symmetry
 
 The passage to a fourfold uses the relative support lemma for an invariant sector in [Chapter 3, §3.6](#technical-information/geometric-support).
