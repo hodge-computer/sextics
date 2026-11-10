@@ -460,6 +460,54 @@ actual chart field. Thus `primitive_iff_hermite_remainder` replaces the
 original source by the displayed lower-pole remainder, but still requires
 three rational functions solving its differential equation.
 
+## Finite-order relative-current checkpoint
+
+The following is a computational checkpoint, not a proof of the protected
+primitive. Put \(z=\lambda^2\), \(K=2(1+c^6)\), and
+\(\ell=2(1+z^3)\). Consider the family
+\[
+f_t=f_0+tH,\qquad f_0=b^6+d^6+K+\ell u^3,
+\]
+\[
+H=6u+6u^2+6zc^4u+6z^2c^2u^2+
+ \frac{(1+2b-u)^2(c^2+2cd-zu)
+ +2(1+2b-u)(c^2+2cd-zu)^2}{7}.
+\]
+The protected weighted equation is exactly \(f_5\). Over the function
+field of \(f_0=0\), explicit rational coefficients give a relative current
+through order \(t^2\): after lifting the normal coordinate to a formal
+root of \(f_t\), its tangent divergence equals the protected residue density
+modulo \(t^3\). The construction and its independent exact characteristic-zero
+replays are in the separate [research checkpoint](https://github.com/fqlx/sextics/tree/8f8bdf6a11e6e9612c87c83a55d70d8c8299a66b/research/symmetric-sextic-residual).
+The second-order replay checks 22 radial contributions and 35 residual
+currents. These are computer-algebra checks, not Lean proofs, and a finite
+jet does not imply a rational current at \(t=5\).
+
+For example, write \(S=b^6+d^6\), \(H_b=(S+K)^2-4Kb^6\), and
+\(g_0=3\ell u^2\). On \(f_0=0\), with
+\(D_b=\partial_b-(6b^5/g_0)\partial_u\) and \(D_d\) defined similarly,
+the following rational currents satisfy the displayed identities:
+\[
+\begin{aligned}
+D_b\!\left(\frac{b^2d^2(S-K)(S+K)}{u^2H_b}\right)
+ +D_d\!\left(\frac{bd^3(S+K)^2}{u^2H_b}\right)
+ &=\frac{bd^2}{u^2},\\
+D_b\!\left(\frac{b^4d^2(S^2+4Kd^6-K^2)}{5uH_b}\right)
+ +D_d\!\left(\frac{b^3d^3(S^2+4Kd^6+3K^2)}{5uH_b}\right)
+ &=\frac{b^3d^2}{u}.
+\end{aligned}
+\]
+Their \(b,d\) swaps supply two further currents. These identities explain
+part of the second-order construction; they concern the diagonal starting
+fiber, not the coupled endpoint.
+
+The checkpoint also contains a separately kernel-replayed finite-étale
+total-trace backbone for a strengthened contact incidence algebra. It gives
+compatible derivations and a primitive constructor **assuming** a suitable
+upstairs current and the complete source-trace identity. The actual trace
+values and the six source matches have not been computed, and these scratch
+modules are not included in the proposal's Lean dependency closure.
+
 ## Exact negative source and regular contact
 
 At \(\lambda=1\), let \(G=\texttt{weightedG}\) in coordinates
