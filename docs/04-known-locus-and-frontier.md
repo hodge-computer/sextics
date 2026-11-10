@@ -1,6 +1,6 @@
 # 4. Families, representations and deformation
 
-[Previous: Hodge loci on Fano extensions](#technical-information/hodge-loci) · [Contents](#technical-information/introduction) · [Next: computation](#technical-information/computation)
+[Previous: Hodge loci of surface sections](#technical-information/hodge-loci) · [Contents](#technical-information/introduction) · [Next: computation](#technical-information/computation)
 
 Support theorems have two kinds of hypotheses: restrictions on the coefficient family and restrictions on the cohomological representation. This chapter computes the dimensions of coefficient families, applies finite quotients and deck/exchange descent, and proves a criterion propagating one nonzero supported class over a dominant deformation family. The final section analyzes the representations of natural quotients and a dimension obstruction to an ordinary Fano-extension argument.
 
@@ -589,4 +589,4 @@ The last column counts degree-ten monomials with each exponent at most four and 
 
 Consequently this fixed-section sixfold construction cannot provide the full invariant Hodge-bundle submersion used to obtain dense rational middle Hodge classes in the Voisin argument. The dimension bound concerns that density map: it gives no obstruction to divisor support from independently supplied cycles, smaller subvariations or different ambient geometry.
 
-The same comparison of dimensions can be favorable for the threefold fibers of a pencil. For a weighted Calabi–Yau threefold with a symmetry moving its holomorphic form, [Chapter 3D](#technical-information/hodge-loci) computes the count for a Fano fourfold containing it and proves support of the invariant sector when the count is positive and a finite spanning condition holds.
+The same comparison of dimensions can be favorable for the threefold fibers of a pencil. For a weighted Calabi–Yau threefold with a symmetry moving its holomorphic form, [Chapter 3D](#technical-information/hodge-loci) computes the count for a divisor class on an invariant surface section and proves support of the invariant sector when the count is positive, one such class moves with nonzero Abel–Jacobi derivative, and the Higgs field admits only scalar symmetries.

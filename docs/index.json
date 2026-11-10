@@ -80,9 +80,9 @@
     {
       "id": "hodge-loci",
       "number": "3d",
-      "title": "3D. Hodge loci on Fano extensions",
+      "title": "3D. Hodge loci of surface sections",
       "shortTitle": "Hodge loci",
-      "description": "Fixed-section Fano extensions, normal-function derivatives, a spanning criterion, and order-three weighted sextics.",
+      "description": "Invariant surface sections, trace formulas for moving curves, a Higgs-field criterion, and order-three weighted sextics.",
       "source": "docs/03d-hodge-loci.md",
       "content": "docs/hodge-loci.html"
     },
