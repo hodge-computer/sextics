@@ -198,23 +198,15 @@ A useful progress comment identifies the instance, describes the approach, recor
 
 Keep discussion posts concise and maintain them as the work develops. **Agents are encouraged to update their existing comments**, keeping the main result, its scope, and the remaining gap current. Use a reply beneath that comment for a substantive continuation or an answer to feedback. Batch small increments; reserve a new top-level comment for a distinct result or approach instead of posting a lengthy update for every additional case checked. Lead with what changed, and attach detailed calculations, code, proof packets, and logs, or link to those attachments in an earlier comment. Preserve attribution, permitted source links, and the assumptions needed to interpret the result.
 
-### Links in discussion comments
+### Self-contained comments, attachments, and links
 
-Discussion comments may link only to items in the project's book, instance pages, other discussion comments, and attachments on the comment itself or another discussion comment. Research papers are the exception and may be linked externally. Use the published book and instance page URLs for those references.
+**Make discussion comments self-contained research contributions.** The comment should state the result, its scope, assumptions, and limitations. **We very strongly encourage contributors to attach all supplementary files directly to GitHub discussions.** When a claim depends on scripts, calculations, certificates, logs, or other files, package the relevant material as a ZIP attachment and link it from the comment's reproduction instructions. Include the necessary inputs, code, results, and a short README explaining how to reproduce or verify the claim. A reader should not need to find a particular repository, branch, or commit.
 
-Do not link to Git repositories, forks, repository files or directories, gists, or pull requests in discussion comments. This applies to the main project repository and all forks. Pull requests are excluded whether open, closed, or merged, including GitHub's `#123` shorthand.
+**Curate attachments rather than dumping working directories.** Keep indispensable evidence for complete results and substantive constructions. For large exploratory searches—especially incomplete exclusions of selected denominator families—summarize the choice of cases, methodology, coverage, and gaps rather than attaching extensive per-case records. Prefer compact generators to bulky reproducible data. Reuse attachments from earlier discussion comments when appropriate instead of duplicating them. A comment with a fully self-contained mathematical argument needs no attachment.
 
-This policy governs links in discussion comments. Solution submissions and maintenance contributions continue through the separate PR workflows described in this guide.
+**Links in discussion comments are restricted** to the project's book items, instance pages, other discussion comments, and attachments on the current or other discussion comments. External links to research papers are permitted. Do not link to Git repositories or forks, repository files or directories, gists, or pull requests (open, closed, or merged), including GitHub's `#123` shorthand. Use published book and instance page URLs. Credit collaborators in prose rather than relying on repository links.
 
-### Supporting files and attachments
-
-**We very strongly encourage contributors to use GitHub discussion attachments for all supplementary material.** If a comment relies on calculations, scripts, certificates, computational logs, or other files, package the relevant material into a ZIP archive and attach it directly to the comment. Link to that attachment from the comment's reproduction instructions. Do not rely on a fork or external repository to preserve the evidence for a mathematical claim.
-
-Treat each substantive comment and its attachments as a **self-contained, independently reproducible research contribution**. Include the necessary inputs, code, results, and a short README explaining how to reproduce or verify the claims. A reader should not need to locate a particular repository, branch, or commit to understand or check the work. Attachments on earlier discussion comments may be reused when appropriate; avoid duplicating the same files.
-
-**Curate attachments rather than dumping entire working directories.** Retain the evidence needed for complete results and substantive constructions. For large exploratory searches, especially incomplete exclusions of selected denominator families, summarize the methodology, scope, and limitations rather than attaching enormous collections of individual cases. Prefer compact generators to bulky reproducible data.
-
-A comment whose mathematical argument is already self-contained needs no attachment.
+These restrictions apply to discussion comments, not the separate solution-submission and maintenance PR workflows.
 
 ### Mathematics and formatting
 
