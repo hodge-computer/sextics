@@ -6,10 +6,11 @@ import Proposal.GeometricFormalInputs
 /-!
 Nonconstructive geometric route for the unchanged cycle-q2 target.
 
-DRAFT: the geometric support and certificate bridge have not been formalized.
-The admission below is the entire remaining existence obligation, not a
-routine tactic gap. A development build would still leave the protected
-theorem dependent on sorryAx. No completed solve is claimed.
+DRAFT: the algebraic residue-to-certificate bridge is proved and bound to the
+actual projective affine chart. Geometric primitive existence remains open.
+The admission below is that precise existence obligation, not a routine
+tactic gap. The protected theorem still depends on sorryAx. No completed
+solve is claimed.
 
 The previous explicit-current development is preserved in Current*.lean and
 is no longer an import dependency of this entry point.
@@ -18,42 +19,33 @@ is no longer an import dependency of this entry point.
 noncomputable section
 namespace CycleQ2Nonconstructive
 
-/-- The fixed-instance consequence of Chapters 3D and 1 after separating the
-finite algebraic inputs. This definition proves nothing about support.
-
-Its proof must still bind the seed matrix to the geometric trace pairings,
-prove smoothness, integrate the Hodge locus, construct and specialize the
-supported projector, transfer support, and obtain the legal homogeneous
-certificate. It is NOT a theorem for arbitrary symmetric hypersurfaces. -/
-def GeometricExistenceBridge : Prop :=
-  CycleQ2GeometricTarget.AlgebraicInputs →
-    CycleQ2GeometricSeed.FiniteSeedInputs →
-      HodgeComputer.HasCertificate
-        HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A
-
-/-- Conditional assembly only; the input h must be proved, not postulated. -/
-theorem certificate_of_geometric_bridge (h : GeometricExistenceBridge) :
-    HodgeComputer.HasCertificate
-      HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A :=
-  h CycleQ2GeometricTarget.algebraicInputs CycleQ2GeometricSeed.finiteSeedInputs
+/-- The actual remaining geometric obligation in the chart X0 = 1.
+The field is Frac(C[x0,...,x4]/(F(1,x))). Its four tangent derivations and
+normal-source coefficient are concrete definitions, not assumed operators
+or identities. A nonconstructive existence proof suffices. -/
+def AffineResiduePrimitiveExists : Prop :=
+  ∃ w : Fin 4 → CycleQ2AffineHypersurface.AffineFunctionField,
+    CycleQ2AffineResidueClosure.affineResidueExpression
+      CycleQ2AffineClearing.affineA w = 0
 
 end CycleQ2Nonconstructive
 
 namespace Submission
 
-/-- UNPROVED: formalize the geometric support and support-to-certificate chain.
-The checked gradient, irreducibility, finite Higgs calculation, and rational
-denominator-clearing lemmas do not prove the geometric support or filtered
-primitive existence needed for this implication. -/
+/-- UNPROVED: establish primitive existence from geometric support and the
+algebraic de Rham comparison, or prove this concrete existential directly.
+The checked finite seed/Higgs calculations alone do not supply this theorem.
+All subsequent algebraic steps to the protected target are proved. -/
 theorem missing_geometric_existence :
-    CycleQ2Nonconstructive.GeometricExistenceBridge := by
+    CycleQ2Nonconstructive.AffineResiduePrimitiveExists := by
   sorry
 
 theorem certificate :
     HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := by
-  exact CycleQ2Nonconstructive.certificate_of_geometric_bridge missing_geometric_existence
+  exact CycleQ2AffineResidueClosure.protected_certificate_of_affine_residue_primitive
+    missing_geometric_existence
 
 end Submission
 
-#print axioms CycleQ2Nonconstructive.certificate_of_geometric_bridge
+#print axioms CycleQ2AffineResidueClosure.protected_certificate_of_affine_residue_primitive
 #print axioms Submission.certificate
