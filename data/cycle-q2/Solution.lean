@@ -1,6 +1,7 @@
 import HodgeTarget
 import Proposal.GeometricTarget
 import Proposal.GeometricSeed
+import Proposal.GeometricFormalInputs
 
 /-!
 Nonconstructive geometric route for the unchanged cycle-q2 target.
@@ -41,7 +42,9 @@ end CycleQ2Nonconstructive
 namespace Submission
 
 /-- UNPROVED: formalize the geometric support and support-to-certificate chain.
-The already separated finite algebra is not a proof of this implication. -/
+The checked gradient, irreducibility, finite Higgs calculation, and rational
+denominator-clearing lemmas do not prove the geometric support or filtered
+primitive existence needed for this implication. -/
 theorem missing_geometric_existence :
     CycleQ2Nonconstructive.GeometricExistenceBridge := by
   sorry
