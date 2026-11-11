@@ -121,7 +121,7 @@ dF\wedge \iota _v\Omega =v(F)\cdot\Omega -6\cdot F\iota _{v}\mathrm{vol}.
 
 Applying the quotient rule to \(\beta \) cancels the two terms containing \(\iota _{v}\mathrm{vol}\) and yields the displayed formula. The same calculation in \(\mathbb P^{n}\) for \(d=\operatorname{deg} F\) uses \(\operatorname{deg} A=d\cdot(q+1)-(n+1)\) and \(\operatorname{deg} v_{i}=d\cdot q-n\), and replaces \(6\cdot q\) by \(d\cdot q\).
 
-The key equation therefore says that \(\omega _A-d\beta \) has no pole along \(X\). On the complement \(W\) of the denominator locus, \(\beta \) has a pole of order at most \(q\) along \(X\) and \(\omega _A-d\beta \) is regular, so the residue of \(\omega _A\) vanishes on \(X\cap W\). This proves sufficiency. The prescribed-support theorem below proves the converse. [Diamond, §2.2](https://arxiv.org/html/2603.29157v2#S2.SS2) proves the corresponding equivalence on Čech cochains over a principal open set, with a holomorphic \(\beta \), and [§2.3](https://arxiv.org/html/2603.29157v2#S2.SS3) makes \(\beta \) algebraic after shrinking that set. The bound on the pole order along the divisor is a separate statement, and it uses the Hodge filtration.
+The key equation therefore says that \(\omega _A-d\beta \) has no pole along \(X\). On the complement \(W\) of the denominator locus, \(\beta \) has a pole of order at most \(q\) along \(X\) and \(\omega _A-d\beta \) is regular, so the residue of \(\omega _A\) vanishes on \(X\cap W\). This proves sufficiency. The prescribed-support theorem below proves the converse. [Diamond, §2.2](https://arxiv.org/html/2603.29157v2#S2.SS2) proves the corresponding equivalence on Čech cochains over a principal open set, with a holomorphic \(\beta \), and [§2.3](https://arxiv.org/html/2603.29157v2#S2.SS3) makes \(\beta \) algebraic after shrinking that set. The bound on the pole order along the divisor is a separate statement, and it uses Hodge theory.
 
 ## One denominator and the normalized equations
 
@@ -208,7 +208,7 @@ In particular, \(D^q\) also suffices. Over the field of definition of \(F,A,D\),
 
 We prove the slightly more general statement for a smooth degree-\(d\) hypersurface \(X\subset P=\mathbb P^{n}\), with \(n\ge 2, 1\le q\le n-1\) and \(\operatorname{deg} A=d\cdot(q+1)-(n+1)\). Put \(R=V(D_{\mathrm{red}}), e=\operatorname{deg} D_{\mathrm{red}}\), and work over \(\mathbb C\) until the final linear descent. We use unshifted de Rham complexes, with differential forms in degrees \(0,\ldots ,n\).
 
-The two implications from support to certificates differ in nature. The second statement follows from the pole-order lemma on the affine complement of \(R\), without Hodge theory. The pole bound of the third statement uses the Hodge filtration.
+The two implications from support to certificates differ in nature. The second statement follows from the pole-order lemma on the affine complement of \(R\), without Hodge theory. The pole bound of the third statement uses the degeneration of a logarithmic Hodge spectral sequence on a resolution of the support.
 
 **Forms and fields.** Let \(m\ge 0\). The identity \(\Omega ^{n-1}_P\cong T_P(-n-1)\) and the twisted Euler sequence give
 
@@ -254,23 +254,12 @@ Put \(\beta =\psi +\widetilde\sigma \). It has poles of order at most \(q\) alon
 
 The argument follows [Diamond, Construction 2.14](https://arxiv.org/html/2603.29157v2#S2.SS3). There the exactness of \(\rho \) comes from a primitive of \(\omega _A\) modulo regular forms, on an open set where a partial derivative of \(F\) is invertible. Here it is the hypothesis, and affineness of \(U\) replaces the invertible derivative, so the support is not enlarged. The argument gives no bound on \(m\).
 
-**Proof of \(1\Longrightarrow 3\).** The external inputs are the following standard facts about mixed Hodge modules and projective space. They are stated here to specify exactly what the proof uses.
+**Proof of \(1\Longrightarrow 3\).** Forms in this proof are holomorphic; global sections of coherent sheaves on \(P\) are algebraic. Beyond Bott vanishing, the proof uses resolution of singularities and two facts.
 
-- Localization along a reduced divisor \(T\) carries a Hodge filtration \(\mathcal F\) with \(\mathcal F_{-1}\mathcal O_P(*T)=0\) and \(\mathcal F_{k}\mathcal O_P(*T)\subset \mathcal O_P((k+1)T)\) for \(k\ge 0\); equality holds when \(T\) is smooth. Inclusions and quotients of these filtered modules are strict. See [Mustaţă–Popa, Hodge ideals, equation (0.1) and §§4–7](https://people.math.harvard.edu/~mpopa/papers/SI.pdf).
-- Projective direct image is strict: for a filtered mixed Hodge module \(M\) on projective \(P\), the map from the hypercohomology of \(\mathcal F^p\operatorname{DR}(M)\) to that of \(\operatorname{DR}(M)\) is injective. Here its \(j\)-th term is \(\Omega ^{j}_P\otimes \mathcal F_{j-p}M\). See [Mustaţă–Popa, Hodge ideals for \(\mathbb Q\)-divisors, §1 and equation (1.1)](https://www.numdam.org/item/10.5802/jep.94.pdf).
-- Algebraic de Rham comparison identifies localization with the derived direct image from the divisor complement; this is the comparison input used in [Diamond, §2.3](https://arxiv.org/html/2603.29157v2#S2.SS3). Bott vanishing gives \(H^{i}(P,\Omega ^{j}_P(b))=0\) for \(b>0\) and \(i>0\), as recalled in [Hodge ideals, §25](https://people.math.harvard.edu/~mpopa/papers/SI.pdf); line bundles on \(\mathbb P^{n}\) also have zero \(H^{1}\) for \(n\ge 2\).
+- Let \(E\) be a divisor with simple normal crossings on a smooth projective variety \(\widetilde X\). Then \(\mathbb H^{m}(\widetilde X,\Omega ^{\bullet}_{\widetilde X}(\log E))=H^{m}(\widetilde X\setminus E,\mathbb C)\), and for every \(p\) the map from \(\mathbb H^{m}(\widetilde X,\sigma _{\ge p}\Omega ^{\bullet}_{\widetilde X}(\log E))\) to this group is injective. The injectivity is the degeneration at \(E_{1}\) of the logarithmic Hodge spectral sequence. See [Deligne, Théorie de Hodge II, Proposition 3.1.8 and Corollaire 3.2.13](https://www.numdam.org/item/PMIHES_1971__40__5_0/).
+- Let \(\mathcal L\) be a holomorphic line bundle on a complex manifold. The currents of type \((j,i)\) with values in \(\mathcal L\), for varying \(i\), form a resolution of \(\Omega ^{j}\otimes \mathcal L\) under \(\bar\partial \), by modules over the smooth functions. See [Demailly, §1.C](https://arxiv.org/abs/alg-geom/9410022).
 
-Set
-
-\[
-\begin{gathered}
-M=\mathcal O_P(*(X+R))/\mathcal O_P(*R).
-\end{gathered}
-\]
-
-The residue comparison is \(\mathbb H^{n}(P,\operatorname{DR}(M))\cong H^{n-1}(X\setminus R,\mathbb C)\), with the usual residue Tate shift. To see the shift, work first on \(P\setminus R\) with a local normal coordinate \(t\) for the smooth \(X\). Modulo regular forms, all higher normal poles are exact and the only normal de Rham class is \(\mathrm dt/t\), one degree higher than the corresponding class on \(X\). Localization along \(R\) extends this residue identification to \(P\). Since \(X\) is smooth, \(\omega _A\) belongs to the top term of \(\mathcal F^{n-q}\operatorname{DR}(M)\): it comes from \(\mathcal F_q\mathcal O_P(*X)=\mathcal O_P((q+1)X)\). If its residue vanishes, strictness of projective direct image says that its class already vanishes in \(\mathbb H^{n}(P,\mathcal F^{n-q}\operatorname{DR}(M))\). This is the only step that requires more than unfiltered de Rham exactness.
-
-For \(n-q\le j\le n\) put \(a_j=j-n+q+1\) and introduce the finite complex
+*Reduction to \(X\).* For \(n-q\le j\le n\) put \(a_j=j-n+q+1\) and introduce the finite complex
 
 \[
 \begin{gathered}
@@ -279,9 +268,73 @@ K^{j}=0 \;\text{for}\; j<n-q.
 \end{gathered}
 \]
 
-Differentiation increases each pole order by at most one, so it gives the differential of \(K^{\bullet} \). The Hodge pole bound provides a map of complexes \(\mathcal F^{n-q}\operatorname{DR}(M)\to K^{\bullet} \). To check this on quotients, a filtered representative has poles at most \(a_j\) along both \(X\) and \(R\). A representative lying in \(\mathcal O_P(*R)\) therefore lies in \(\mathcal O_P(a_jR)\). Strictness identifies precisely those representatives with \(\mathcal F_{a_j-1}\mathcal O_P(*R)\), so the quotient map is well defined. Consequently the class of \(\omega _A\) is zero in \(\mathbb H^{n}(P,K^{\bullet} )\).
+Differentiation increases each pole order by at most one, so it gives the differential of \(K^{\bullet} \). Sending a form to its class is a map of complexes \(P^{n-q}\Omega ^{\bullet}_P(*X)\to K^{\bullet} \). We show that the class of \(\omega _A\) in \(\mathbb H^{n}(P,K^{\bullet} )\) is zero.
 
-Each \(K^{j}\) has zero higher cohomology. Indeed, in
+Let \(T\) be the divisor cut on \(X\) by \(D_{\mathrm{red}}\); it need not be reduced. The forms with logarithmic poles along \(X\) define a subcomplex \(\Lambda ^{\bullet} \subset K^{\bullet} \) with terms
+
+\[
+\begin{gathered}
+\Lambda ^{j}=\Omega ^{j}_P(\log X)(a_jR)/\Omega ^{j}_P(a_jR) \cong  \Omega ^{j-1}_X(a_jT),
+\end{gathered}
+\]
+
+where the isomorphism is the residue. For an integer \(p\) and \(j\ge p\), put \(P^{p}\Omega ^{j}_X(*T)=\Omega ^{j}_X((j-p+1)T)\), as for the pair \((P,X)\). Then \(\Lambda ^{\bullet} \) is the complex \(P^{n-q-1}\Omega ^{\bullet}_X(*T)\), placed one degree higher. On \(\sigma _{\ge n-q}\Omega ^{\bullet}_P(\log X)\), the map to \(K^{\bullet} \) is the residue followed by the inclusion of \(\sigma _{\ge n-q-1}\Omega ^{\bullet}_X\) in \(P^{n-q-1}\Omega ^{\bullet}_X(*T)\). By the pole-order lemma and the definition of the residue, the class of \(\omega _A\) in \(\mathbb H^{n}(P,K^{\bullet} )\) is therefore the image of a class
+
+\[
+\begin{gathered}
+c\in \mathbb H^{n-1}(X,\sigma _{\ge n-q-1}\Omega ^{\bullet}_X)
+\end{gathered}
+\]
+
+whose image in \(H^{n-1}(X,\mathbb C)\) is \(\operatorname{Res}_X(\omega _A)\). By hypothesis, that image vanishes on \(X\setminus T\). The following lemma, with \(m=n-1\) and \(p=n-q-1\), shows that \(c\) maps to zero in \(\mathbb H^{n-1}(X,P^{n-q-1}\Omega ^{\bullet}_X(*T))\), and so the class of \(\omega _A\) in \(\mathbb H^{n}(P,K^{\bullet} )\) is zero.
+
+**Pole-bound lemma.** Let \(T\) be an effective divisor on \(X\), and let \(c\in \mathbb H^{m}(X,\sigma _{\ge p}\Omega ^{\bullet}_X)\). If the image of \(c\) in \(H^{m}(X,\mathbb C)\) vanishes on \(X\setminus T\), then the image of \(c\) in \(\mathbb H^{m}(X,P^{p}\Omega ^{\bullet}_X(*T))\) is zero. The proof uses only that \(X\) is smooth and projective.
+
+*Proof.* Choose a projective birational morphism \(\pi :\widetilde X\to X\) from a smooth variety which is an isomorphism over \(X\setminus T\) and for which \(E=\pi ^{-1}(T)_{\mathrm{red}}\) has simple normal crossings. Let \(\widetilde c\) be the image of the pullback of \(c\) in \(\mathbb H^{m}(\widetilde X,\sigma _{\ge p}\Omega ^{\bullet}_{\widetilde X}(\log E))\). Its image in \(H^{m}(\widetilde X\setminus E,\mathbb C)=H^{m}(X\setminus T,\mathbb C)\) is the restriction of the image of \(c\), which is zero. By the first fact, \(\widetilde c=0\).
+
+It remains to construct a map \(\mu \) from \(\mathbb H^{m}(\widetilde X,\sigma _{\ge p}\Omega ^{\bullet}_{\widetilde X}(\log E))\) to \(\mathbb H^{m}(X,P^{p}\Omega ^{\bullet}_X(*T))\) that sends \(\widetilde c\) to the image of \(c\).
+
+The source is computed by the double complex of smooth forms \(\mathcal A^{j,i}_{\widetilde X}(\log E)=\Omega ^{j}_{\widetilde X}(\log E)\otimes \mathcal A^{0,i}_{\widetilde X}\), for \(j\ge p\), with the differentials \(\partial \) and \(\bar\partial \). For the target, let \(\mathcal D^{j,i}_X\) be the sheaf of currents of type \((j,i)\), put \(a=j-p+1\), and let \(\mathcal C^{j,i}=\mathcal D^{j,i}_X\otimes \mathcal O_X(a\cdot T)\) for \(j\ge p\). For a local equation \(g\) of \(T\), a section of \(\mathcal C^{j,i}\) is \(S\otimes g^{-a}\) for a unique current \(S\). The differentials are \(\bar\partial S\otimes g^{-a}\) and
+
+\[
+\begin{gathered}
+\nabla (S\otimes g^{-a})=(g\cdot \partial S-a\cdot \partial g\wedge S)\otimes g^{-(a+1)}.
+\end{gathered}
+\]
+
+The second is the formula for the derivative of \(S/g^{a}\). It does not depend on \(g\), it squares to zero, and it anticommutes with \(\bar\partial \). By the second fact, the column \(\mathcal C^{j,\bullet }\) resolves \(\Omega ^{j}_X(a\cdot T)\), and on these subsheaves \(\nabla \) is the exterior derivative. So the total complex of \(\mathcal C\) computes the hypercohomology of \(P^{p}\Omega ^{\bullet}_X(*T)\).
+
+A current \(S\) on \(\widetilde X\) has a pushforward, defined by \(\langle \pi _*S,\varphi \rangle =\langle S,\pi ^{*}\varphi \rangle \) for test forms \(\varphi \) on \(X\). The pushforward preserves the type, commutes with \(\partial \) and \(\bar\partial \), and satisfies the projection formula \(\pi _*(\pi ^{*}u\wedge S)=u\wedge \pi _*S\) for a smooth form \(u\). Since \(\pi \) is birational, \(\pi _*\pi ^{*}\alpha =\alpha \) for every smooth form \(\alpha \) on \(X\).
+
+Let \(\eta \) be a section of \(\mathcal A^{j,i}_{\widetilde X}(\log E)\) over the preimage of an open set on which \(g\) is defined. The function \(\pi ^{*}g\) vanishes on \(E\) and \(\eta \) has at most simple poles along \(E\), so \(\pi ^{*}g^{a}\cdot \eta \) is a smooth form. Put
+
+\[
+\begin{gathered}
+\pi _\sharp (\eta )=\pi _*(\pi ^{*}g^{a}\cdot \eta )\otimes g^{-a}.
+\end{gathered}
+\]
+
+This does not depend on \(g\), and it commutes with \(\bar\partial \) because \(\pi ^{*}g\) is holomorphic. In \(\nabla \pi _\sharp (\eta )\) the two terms containing \(\partial g\) cancel, by the product rule and the projection formula, and what remains is
+
+\[
+\begin{gathered}
+\nabla \pi _\sharp (\eta )=\pi _*(\pi ^{*}g^{a+1}\cdot \partial \eta )\otimes g^{-(a+1)}=\pi _\sharp (\partial \eta ).
+\end{gathered}
+\]
+
+So \(\pi _\sharp \) is a map of double complexes. Let \(\mu \) be the map it induces. For a smooth form \(\alpha \) on \(X\) of type \((j,i)\),
+
+\[
+\begin{gathered}
+\pi _\sharp (\pi ^{*}\alpha )=g^{a}\cdot \pi _*\pi ^{*}\alpha \otimes g^{-a}=\alpha \otimes 1.
+\end{gathered}
+\]
+
+Hence \(\mu \) composed with the pullback is the map induced by the inclusion of \(\sigma _{\ge p}\Omega ^{\bullet}_X\) in \(P^{p}\Omega ^{\bullet}_X(*T)\). The image of \(c\) is therefore \(\mu (\widetilde c)=0\). ∎
+
+In the language of mixed Hodge modules, the lemma combines the strictness of the Hodge filtration under projective direct image with the bound \(\mathcal F_{k}\mathcal O_X(*T)\subset \mathcal O_X((k+1)T)\) of [Mustaţă–Popa, Hodge ideals, equation (0.1)](https://people.math.harvard.edu/~mpopa/papers/SI.pdf).
+
+*Conclusion.* Each \(K^{j}\) has zero higher cohomology. Indeed, in
 
 \[
 \begin{gathered}
