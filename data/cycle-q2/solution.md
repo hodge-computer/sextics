@@ -4,9 +4,12 @@
 
 **Draft; not a completed Lean proof.** The algebraic implication from a
 rational primitive of the actual affine residue to the unchanged certificate
-is now proved. The existence of that primitive remains unproved. The one
-explicit admission, `Submission.missing_geometric_existence`, states this
-precise existential assertion. Consequently `Submission.certificate` still
+is proved. Its formulation in actual relative Kähler differentials and
+exterior powers is now proved too, together with the formal normal residue
+density and universal exterior pullback calculations. The existence of a
+primitive remains unproved. The one
+explicit admission, `Submission.missing_geometric_existence`, states exactness
+of that genuine exterior form. Consequently `Submission.certificate` still
 depends on `sorryAx` and must not be accepted.
 
 A nonconstructive existence proof is sufficient. Neither an evaluated
@@ -75,16 +78,160 @@ In Lean, it is:
         CycleQ2AffineClearing.affineA w = 0
 
 [Solution.lean](Solution.lean) names this proposition
-`CycleQ2Nonconstructive.AffineResiduePrimitiveExists`. Its single
-admission is a proof of this proposition. The final theorem then applies
+`CycleQ2Nonconstructive.AffineResiduePrimitiveExists`. The proved theorem
+`exact_form_iff_primitive` identifies it with
+`CycleQ2Nonconstructive.AffineResidueFormExact`, which asserts exactness of
+the actual top exterior form described below. The single admission now
+states that equivalent exterior-form assertion. The final theorem applies
 
-    CycleQ2AffineResidueClosure.protected_certificate_of_affine_residue_primitive
+    CycleQ2AffineExactness.protected_certificate_of_exact_residueSourceForm
 
 from [GeometricFormalInputs.lean](GeometricFormalInputs.lean).
 That implication has no assumed grading, regular lift, residue
 homomorphism, derivative compatibility, or desired defect identity:
 all of these have been proved for the actual target. It does not prove
 the boxed existence assertion.
+
+## Genuine exterior forms and the normal residue calculation
+
+The module of differentials is mathlib's actual relative module
+\(\Omega^1_{K/\mathbb C}\). The universal differential satisfies
+\[
+dz=\sum_{j=1}^4 E_j(z)\,dx_j
+\quad(z\in K),
+\]
+and the four \(dx_j\) form a proved \(K\)-basis. This includes the
+quotient relation \(df=0\), the eliminated coordinate, and arbitrary
+fractions. All derivations are complex-linear; the base field has not been
+changed to absolute differentials over the integers.
+
+Let \(\mathrm{vol}=dx_1\wedge\cdots\wedge dx_4\), and let
+\(\beta_j\) be the increasing wedge omitting \(dx_j\).
+The actual third and fourth exterior powers have the resulting bases.
+The degree-three exterior derivative is complex-linear and satisfies
+\[
+d_3(b\beta_j)=db\wedge\beta_j.
+\]
+The proof identifies the wedge with multiplication in mathlib's exterior
+algebra, proves the scalar Leibniz rule, and proves uniqueness from this
+generator formula. In particular,
+\[
+d_3\left(\sum_{j=1}^4(-1)^{j-1}\frac{w_j}{g}\beta_j\right)
+=\frac1g\left(\sum_jE_j(w_j)-\frac1g\sum_jw_jE_j(g)\right)\mathrm{vol}.
+\]
+Consequently the boxed PDE is equivalent to existence of a three-form
+\(\eta\) with
+\[
+d_3\eta=(c/g)\,\mathrm{vol}.
+\]
+The negative of the displayed three-form is the primitive of the positive
+source when the PDE holds. This sign is part of the checked equivalence.
+
+The normal density is also derived in a genuine formal coordinate, rather
+than supplied as an assumed residue formula. Hensel's lemma constructs
+\(z(T)\in K[[T]]\), with constant coefficient \(x_0\), such that
+\[
+f(z(T),x_1,x_2,x_3,x_4)=T.
+\]
+The resulting polynomial substitution is proved injective, and its
+constant-coefficient map is exactly the existing quotient map to \(K\).
+The actual chain rule gives \(g(z(T))z'(T)=1\). Writing
+\(g_0=\partial_0g\) and \(g_{00}=\partial_0^2g\), its first three jets are
+\[
+z'(0)=1/g,\qquad z''(0)=-g_0/g^3,\qquad
+z'''(0)=(3g_0^2-g g_{00})/g^5.
+\]
+The formal Laurent density uses the image of the actual equation \(f\):
+\[
+\frac{a(z(T))z'(T)}{T^3}.
+\]
+Its \(T^{-1}\)-coefficient is proved equal to \(c/g\).
+`residueSourceForm_eq_formalResidue` binds this coefficient to the genuine
+top exterior form used by the certificate implication.
+
+The coordinate change is also proved in universal differential forms. Set
+\(S=K[[T]]\), write \(\phi\) for the actual normal substitution, and put
+\(v=z'(T)\). The coefficientwise extensions of the four complex tangent
+derivations satisfy
+\[
+\widetilde E_j(\phi(P))
+=\phi(\partial_jP)-v\phi(f_j)\phi(\partial_0P).
+\]
+They commute with one another and with \(\partial_T\). Their actual
+five-coordinate Jacobian determinant is \(v\). The proof additionally
+differentiates \(\phi(f)=T\) inside the full algebraic Kähler module
+\(\Omega^1_{S/\mathbb C}\) and constructs the induced exterior pullback.
+It proves
+\[
+\phi^*(dx_0\wedge\cdots\wedge dx_4)
+=v\,dT\wedge d\phi(x_1)\wedge\cdots\wedge d\phi(x_4).
+\]
+This uses the universal properties of differentials and exterior powers;
+it does not assume that the differential module of a power-series ring
+has rank five. Thus the normal-density factor is tied to the actual
+universal coordinate-volume pullback. The global comparison with the
+cohomological residue and geometric support is still needed.
+
+Coefficientwise derivations on actual Laurent series are also proved to
+obey the Leibniz rule. Taking any Laurent coefficient commutes with them,
+even when a primitive has negative powers of the formal parameter.
+The proof does not infer a rational generic primitive from an unbounded
+formal deformation.
+
+## Explicit reduction to the weighted pencil
+
+The paired-sign reduction is now bound directly to the actual function
+field and source. In the same affine coordinates, put
+\[
+u=x_1,\qquad v=x_4,\qquad \lambda=v/u,\qquad w=u^2.
+\]
+The proof obtains \(u\ne0\) by applying the actual tangent derivative
+\(E_1\) to a hypothetical equality \(u=0\): it already satisfies
+\(E_1(u)=1\). The weighted equation is
+\[
+T_\lambda=1+x_0^6+x_2^6+x_3^6+(1+\lambda^6)w^3
++\tfrac12(x_0x_2x_3+\lambda x_0^3x_3w+\lambda x_2w^2).
+\]
+Its vanishing after \(w=u^2\), \(\lambda=v/u\) is proved from the
+actual quotient equation. Its source is
+\[
+b=x_0^2x_2^2x_3^2w^2,\qquad a=\lambda b.
+\]
+Here the normal coordinate \(x_0\) is unchanged. Differentiating the
+literal polynomial identity \(u a=v b\) twice in that normal coordinate
+proves \(c_a=\lambda c_b\), where \(c_b\) is the same proved
+normal-source formula with \(a\) replaced by \(b\).
+
+Define three actual complex derivations of \(K\) by
+\[
+R_1=E_2,\qquad R_2=E_3,\qquad
+R_3=\frac{E_1+\lambda E_4}{2u}.
+\]
+Each annihilates \(\lambda\); the last is the direction of the weighted
+coordinate \(w\) and has zero ordinary coordinate divergence. For any
+\(t=(t_1,t_2,t_3)\in K^3\), define
+\[
+W(t)=\left(\frac{\lambda t_3}{2u},\ \lambda t_1,\
+\lambda t_2,\ \frac{\lambda^2t_3}{2u}\right).
+\]
+The actual product and quotient rules give the checked identity
+\[
+\operatorname{affineResidueExpression}(a,W(t))
+=\lambda\left(c_b+\sum_{j=1}^3R_j(t_j)
+-\frac1g\sum_{j=1}^3t_jR_j(g)\right).
+\]
+Consequently
+`CycleQ2AffineWeightedTransfer.protected_certificate_of_relative_primitive`
+proves the unchanged protected certificate from existence of a solution
+to this three-derivation equation. There is no assumed coordinate chain
+rule or transfer identity in that theorem.
+
+This gives a concrete algebraic endpoint for the weighted-threefold route.
+The new module does not assert that a solution of the three-derivation
+equation exists, construct a relative cohomology theory, or identify a
+cylinder image containing the specified source. Those are the remaining
+geometric and de Rham inputs. The final admission continues to state the
+original equivalent four-dimensional exterior exactness.
 
 ## The proved algebraic conversion
 
@@ -248,8 +395,10 @@ three-form primitive. If the latter is
 The derivative formula is precisely the boxed equation above.
 
 This is a smaller classical bridge than the earlier filtered projective
-argument. The formalization still needs the geometric support theorem,
-the actual residue-form identification, and algebraic de Rham comparison.
+argument. The formalization still needs the geometric support theorem and
+global algebraic de Rham comparison. The local normal-density calculation
+and universal exterior pullback are proved above; their
+comparison with the global cohomological residue remains to be formalized.
 It does not need an explicit coefficient list or a separately prescribed
 pole bound. The allowed regular ambient remainder becomes \(Q\), so
 ambient exactness is not asserted.
@@ -278,6 +427,39 @@ covering that subset. It also proves that finite unions of such supports
 remain proper and admit a legal square \(S^2\).
 This selects an equation after a support is given; it does not prove
 that the specific residue is supported there.
+
+The countability step used in very-general-point specialization is now
+proved for actual polynomial conditions. Over an uncountable field,
+countably many nonzero polynomials in finitely many variables admit a
+common nonvanishing point. The complex version permits a prescribed
+nonempty principal open. Consequently, if countably many actual affine
+algebraic zero loci cover such an open, one zero locus is the whole affine
+space. This proves the selection step; the families of supported
+projectors and their proper images still have to be supplied.
+
+### An exact auxiliary one-term family
+
+There is now an unconditional checked certificate, with \(Q=0\), for the
+distinct family
+\[
+F_s=\sum_{j=0}^2(X_j^6+Y_j^6)+sX_2^3X_0Y_2Y_0,
+\qquad s\in\mathbb C,
+\]
+with the same source \(A\). Put \(U=X_2^6+Y_2^6\),
+\(V=X_1^6+Y_1^6\), and \(M=X_2^3X_0Y_2Y_0\). The witness has
+\[
+D=36UV,\quad
+N_i=\begin{cases}
+3AVZ_i,&i\in\{2,5\},\\
+-2sAMZ_i,&i\in\{1,4\},\\
+0,&i\in\{0,3\},
+\end{cases}
+\]
+where \((Z_0,\ldots,Z_5)=(X_0,X_1,X_2,Y_0,Y_1,Y_2)\).
+The exact polynomial identity, degree-12 denominator, degree-19 numerators,
+and coprimality for every complex \(s\) are proved by
+`CycleQ2PureM2.hasCertificate`. The protected target has all three mixed
+terms, so this family theorem does not solve the protected instance.
 
 ### Actual Fermat Jacobian algebra
 
@@ -375,6 +557,131 @@ obstruction/Abel--Jacobi interpretation require separate justification.
 The trace and matrix binding are algebraic progress, not a proof of
 divisor support.
 
+### Cartier-curve resolution algebra
+
+The new `CycleQ2CartierResolution` namespace supplies literal matrices for
+the cubic
+\[
+G=a^3-b^3+c^3+d^3.
+\]
+Its \(4\times6\) and \(6\times2\) maps, together with two explicit
+homotopies, give \(6\times6\) matrices \(B_0,B_1\) satisfying
+\[
+B_0B_1=B_1B_0=GI_6.
+\]
+All polynomial identities, including compatibility with the residual
+ideal's four displayed generators, are proved over an arbitrary
+commutative ring. Over a domain with \(G\ne0\), the proof lifts a kernel
+vector and cancels \(G\) to establish genuine quotient-module exactness:
+\[
+\ker(\overline B_0)=\operatorname{im}(\overline B_1),\qquad
+\ker(\overline B_1)=\operatorname{im}(\overline B_0)
+\quad\text{over }R/(G).
+\]
+This supplies the complete periodic algebraic complex, including the
+homotopy columns omitted by the two original second syzygies. Saturation,
+base change through a surface section, and its geometric interpretation
+are separate obligations.
+
+### The literal Segre seed and its local differential data
+
+`CycleQ2SegreSeed` contains the actual chosen section polynomials, the
+nine entries of the degree-fourteen seed matrix, and explicit cofactor
+quotients. Its 25 linkage identities hold over an arbitrary commutative
+ring. With
+\[
+(a,b,c,d)=(x_0^2,r x_1x_3,w,x_2^2),\qquad
+G=a^3-b^3+c^3+d^3,
+\]
+the code proves, for the literal raw seed matrix \(M_0\),
+\[
+\operatorname{Cof}(M_0)_{ij}=GQ_{ij}.
+\]
+This is a characteristic-zero polynomial identity before imposing any
+surface equation \(h\); it even holds with \(r\) an arbitrary coefficient.
+The selected left and right sections satisfy the explicit product
+identities modulo \(G\), and the first right-section numerator is proved
+equal to the chosen \(\Gamma_4\) numerator. A proved two-outer-product
+factorization makes the cofactor calculation finite and inspectable.
+These identities bind the abstract matrix construction to the chosen seed.
+They do not prove its basepoint freeness or the required Jacobian ranks.
+
+`CycleQ2SegreRelations` proves the sixteen universal polynomial relations
+among the nine cofactors of a \(3\times3\) matrix. They are the six
+off-diagonal entries of each of \(M\operatorname{Cof}(M)^{\mathsf T}\)
+and \(\operatorname{Cof}(M)^{\mathsf T}M\), together with two diagonal
+differences for each matrix. The residual-elimination theorem uses an
+actual invertible complementary block of those relations, not a dimension
+count alone.
+
+When the cofactors vanish and one matrix entry is a unit,
+`CycleQ2SegreLocal` proves an explicit normalized outer-product
+factorization. `CycleQ2SegreImage.image_linearEquiv` identifies the actual
+image of the matrix's linear map with a free rank-one module. A separate
+ideal-membership theorem shows that coordinate-power witnesses imply a
+nonzero matrix entry at every nonzero field point. It does not supply the
+particular seed's coordinate-power witnesses.
+
+`CycleQ2SegreCech` gives the explicit transition units between these charts,
+their multiplicative cocycle identity, the gluing of the first-column
+local equations, and equality of their principal ideals on overlaps.
+The formulas commute with coefficient maps, including localization.
+Their logarithmic differentials use the genuine universal module
+\(\Omega^1_{R/K}\):
+\[
+d\log(u)=u^{-1}du,\qquad
+d\log(uv)=d\log(u)+d\log(v).
+\]
+The transition differentials satisfy the corresponding additive cocycle
+identity and evaluate to \(u^{-1}\delta(u)\) under every derivation
+\(\delta\). The homogeneous degree twist is retained explicitly. For
+degree-fourteen entries, the intended divisor bundle is
+\(\mathcal O_D(14H)\otimes L^{-1}\); with
+\(L=\mathcal O_D(10H-E)\), this is \(\mathcal O_D(E+4H)\).
+The untwisted image cocycle alone is not the divisor class.
+
+These are actual module, transition, and differential identities.
+The actual projective cover, the identification with that specified bundle,
+and the nonzerodivisor condition for an effective Cartier divisor remain
+unproved. The construction of the projective family, its cycle class and
+cylinder map, and the comparison with the Artinian trace still remain.
+
+### Nonlinear polynomial lifting with redundant equations
+
+The lifting lemmas now prove existence from actual polynomial data.
+For a square system \(e_i(T,x)\) with coefficients in \(K[[T]]\), a
+constant seed solving \(e(0,x_0)=0\) and a unit seed Jacobian give a
+solution \(x(T)\) with \(x(0)=x_0\). Formal smoothness of the
+Jacobian-localized presentation and the required adic completeness are
+proved or supplied by checked library theorems. Existence of a formal
+solution is not a premise.
+
+Suppose the omitted equations \(r\) satisfy a literal polynomial identity
+\[
+Ar+Be=0
+\]
+and the determinant of \(A\) is a unit at the seed.
+`CycleQ2SegreFormalLifting.lift_all_equations` proves that the constructed
+formal solution satisfies every omitted equation as well. The complementary
+block stays invertible because its constant determinant is a unit.
+
+The separate `CycleQ2OpenSquareLifting` theorem gives an algebraic generic
+solution inside a prescribed principal open. It adds the actual equation
+\(u\,c(x)-1=0\) and proves that the augmented Jacobian determinant is
+\(c(x)\det J(x)\). An actual nonsingular seed with \(c(x_0)\) a unit,
+together with an injective coefficient map \(R\to K\), yields a solution
+over a finite separable field extension of \(K\), with \(c\) still a unit.
+This theorem does not assert specialization to the protected target.
+
+Applying these results to the chosen incidence system still requires the
+actual quotient normal forms, seed equations, and invertible minors to be
+proved in Lean. Its relations initially live in a ring localized at two
+leading coefficients. If inverse variables are used to present that ring,
+the inverse equations must be included, or the identities must first be
+justified after clearing denominators. First-order numerical ranks alone
+do not discharge these obligations. Neither lifting theorem identifies a
+curve correspondence with the specified residue class.
+
 ## Remaining formal obligations
 
 | Obligation | Status |
@@ -383,11 +690,19 @@ divisor support.
 | Gradient condition, absolute irreducibility, affine quotient field | Proved; geometric Jacobian criterion remains. |
 | Actual Fermat Jacobian bases, socle trace, finite commutant | Proved; geometric Higgs comparison remains. |
 | Sparse seed quotient trace, degree-nine dimension and uniqueness, all 72 matrix entries | Proved; smooth geometric seed and obstruction/derivative comparison remain. |
-| Moving curve family and Hodge-locus integration | Not formalized. |
+| Cubic Cartier matrix factorization and periodic quotient complex | Polynomial identities and genuine exactness proved; geometric base change remains. |
+| Literal Segre seed, cofactor quotients, and selected section products | Universal polynomial identities proved for the actual chosen entries. |
+| Unit-entry image modules, transition units, and logarithmic differentials | Proved, including coefficient-map naturality and the homogeneous degree twist. |
+| Formal and algebraic generic lifting of polynomial systems | Existence proved from actual seed equations and unit Jacobian; complementary relations force all omitted equations. |
+| Actual large incidence system and moving projective curve family | Normal-form, seed-minor, and geometric binding remain. |
 | Generation of the invariant variation, supported projector and specialization | Not formalized. |
-| Paired-sign quotient and relative support transfer | Not formalized. |
+| Paired-sign weighted equation, source, and relative primitive transfer | Exact equation/source and three-derivation-to-certificate implication proved; cohomological support comparison remains. |
 | Proper support to homogeneous legal equation | Proved for actual projective closed subsets. |
-| Support/cohomological vanishing to the displayed affine primitive | Residue-form and algebraic de Rham comparison not formalized. |
+| Countable algebraic avoidance and covering of a complex principal open | Proved for actual polynomial zero loci. |
+| Actual Kähler differentials, exterior derivative, and exactness/PDE equivalence | Proved over the actual complex function field. |
+| Formal normal chart, universal exterior pullback, and pole-three Laurent residue density | Proved, including faithfulness, actual tangent chain rules, and equality with the exterior source coefficient. |
+| Support/cohomological vanishing to the displayed affine primitive | Global residue and algebraic de Rham comparison not formalized. |
+| Auxiliary one-mixed-term family | Unconditional certificate proved for that distinct family. |
 | Displayed affine primitive to the unchanged protected certificate | Fully proved algebraically. |
 
 The polynomial-curve constructors in the existing library require actual
@@ -395,7 +710,9 @@ polynomial coordinates, normal fields, or densities in a parameter.
 An algebraic Hilbert parameter curve does not automatically satisfy those
 hypotheses. The arithmetic-lifting constructor likewise needs an identified
 finite polynomial incidence system and its actual invertible Jacobian
-minor. The finite Noether--Lefschetz matrix alone supplies neither.
+minor. The new lifting results discharge the general existence step once
+those concrete hypotheses are proved; the finite Noether--Lefschetz
+matrix alone supplies neither.
 These interfaces cannot be used to bypass the remaining existence proof.
 
 ## Preserved current route
@@ -421,18 +738,22 @@ printed axiom dependencies are exactly
 `propext`, `Classical.choice`, and `Quot.sound`.
 No native decision procedure or added axiom supplies these results.
 
-The consolidated `Proposal.GeometricFormalInputs` module also compiles and
-passes independent kernel replay, including the actual affine
-residue-to-certificate theorem. Compilation took 575.482 seconds with an
-8 GiB development memory cap; replay took 49.491 seconds. Its checked
-source SHA-256 is
-`a01de5f5c96d4d8035e83a05ded0e2405e1e4a5a80c8b7ee6a2952f7031c3190`.
-The source-policy check passes for all 61 helper modules.
+The consolidated `Proposal.GeometricFormalInputs` module contains 61
+components and is checked as a single module after the independently
+checked components are assembled. Its 603,322-byte source has SHA-256
+
+```text
+68f06d3630e974fc8a7a0bc57ef952744bc98b00979c0092aecf2471f2640590
+```
+
+The final compilation and replay receipts bind that hash and record an
+8 GiB development memory cap. The source-policy check covers all 61
+helper modules.
 
 The protected target is generated from base
 `e3936ff366ae2302f21fb9e5730bbbd284c81d69`.
 This revision continues PR head
-`e726cf88b27b9bbcbb0d8724fe3b7a33a51a9aae`.
+`3026c51b18735109a67d602110eeb55b7b52cc33`.
 The protected instance, shared library, verifier, workflows, and proof
 manifest are unchanged.
 

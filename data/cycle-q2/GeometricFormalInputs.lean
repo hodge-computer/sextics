@@ -34,6 +34,29 @@ import HodgeComputer.Constructions.HoldoutCover.ResidueDerivatives
 import HodgeComputer.Constructions.RationalFields.Homogenization
 import HodgeComputer.Constructions.RationalFields.CommonDenominatorSubstitution
 import Mathlib.RingTheory.Localization.Away.Basic
+import Mathlib.RingTheory.Kaehler.Basic
+import Mathlib.LinearAlgebra.ExteriorPower.Basis
+import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
+import Mathlib.Algebra.Polynomial.Roots
+import Mathlib.Data.Set.Countable
+import Mathlib.Analysis.Complex.Cardinality
+import Mathlib.RingTheory.Nullstellensatz
+import Mathlib.RingTheory.Henselian
+import Mathlib.RingTheory.AdicCompletion.Completeness
+import Mathlib.RingTheory.PowerSeries.Inverse
+import Mathlib.RingTheory.HahnSeries.Multiplication
+import Mathlib.RingTheory.PowerSeries.Derivative
+import Mathlib.RingTheory.HahnSeries.PowerSeries
+import Mathlib.RingTheory.HahnSeries.Summable
+import Mathlib.LinearAlgebra.Matrix.Notation
+import Mathlib.RingTheory.Ideal.Quotient.Defs
+import Mathlib.RingTheory.Ideal.Span
+import Mathlib.LinearAlgebra.Matrix.Adjugate
+import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Mathlib.LinearAlgebra.FreeModule.Basic
+import HodgeComputer.Constructions.PolynomialCurves.ArithmeticLifting
+import HodgeComputer.Constructions.HoldoutCover.GenericIncidence
+import Mathlib.RingTheory.Smooth.AdicCompletion
 
 /-!
 # Checked inputs for the nonconstructive cycle-q2 route
@@ -42,7 +65,13 @@ This module proves the complete algebraic implication from an actual affine
 residue primitive to the unchanged protected certificate. The function field,
 derivations, residue map, normal-source identity, lifts, homogeneous degrees,
 and legal denominator clearing are all bound to the actual protected target.
-It does not prove that the residue primitive exists.
+The actual relative Kaehler module, exterior powers, and degree-three exterior
+derivative are constructed. Exactness of the resulting source form is proved
+equivalent to the residue PDE. A genuine formal normal chart sends f to T;
+the Laurent residue of its pole-three density is proved to be that source.
+The actual universal exterior pullback has the proved normal Jacobian factor;
+the coefficient tangents obey the corresponding implicit chain rule.
+It does not prove that the residue primitive or exterior-form primitive exists.
 
 The finite Higgs matrices are bound to the actual Fermat Jacobian quotient,
 graded bases, and socle trace. The sparse seed matrix is bound to an actual
@@ -52,8 +81,26 @@ is a proved polynomial statement, not a formal geometric Jacobian criterion.
 
 The affine route uses elementary normal-pole reduction and unrestricted
 legal denominators. It requires no mixed-Hodge-module strictness or Bott
-vanishing. A proof of geometric support and its algebraic de Rham comparison
-with the actual residue primitive is still missing.
+vanishing. A proof of geometric support and its global algebraic de Rham
+comparison with the actual residue primitive is still missing. Countable
+algebraic avoidance is proved for actual complex coefficient spaces.
+Formal lifting and coefficient extraction do not assert algebraization of
+a formal primitive. The one-mixed-term certificate is proved for that distinct
+family only; the protected target has all three mixed terms.
+The actual Cartier-curve cubic matrix factorization and exactness of its
+periodic quotient complex are proved. The actual Segre seed identities,
+cofactor relations, local image line, transition cocycle, and universal
+logarithmic differentials are proved. Square polynomial systems have genuine
+formal lifts and finite separable generic solutions on prescribed opens.
+An invertible complementary relation block forces all residual equations.
+The actual large incidence system's quotient normal forms and seed minors
+are not yet bound to these lifting theorems. These algebraic results do not
+assert the geometric cylinder map or generation of invariant cohomology.
+The paired-sign weighted equation and source are also bound to the actual
+function field. Three concrete derivations preserve its pencil parameter;
+their relative primitive equation implies the protected four-variable
+residue equation by an explicit divergence identity. Existence of that
+relative primitive remains a separate obligation.
 
 All finite checks use ordinary kernel-checked proofs. The source generator
 and its spanning-forest choices are outside the trust boundary.
@@ -10666,6 +10713,3767 @@ end CycleQ2AffineResidueClosure
 #print axioms CycleQ2AffineResidueClosure.regular_affine_primitive_closure
 #print axioms CycleQ2AffineResidueClosure.protected_regular_ambient_of_affine_primitive
 #print axioms CycleQ2AffineResidueClosure.protected_certificate_of_affine_residue_primitive
+end
+end
+
+
+/- Component: continuation_2/AffineKaehler.lean -/
+section
+/-!
+# Actual relative Kähler differentials of the protected affine chart
+
+The four independent coordinate differentials form a basis of the genuine
+mathlib module Ω[K⁄ℂ], where K is the already constructed function field of
+the exact chart F(1,x)=0. The universal differential is computed by the
+already constructed tangent derivations. No cohomological vanishing or
+primitive-existence hypothesis is used.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 2000000
+noncomputable section
+
+namespace CycleQ2AffineDifferentials
+
+open MvPolynomial HodgeComputer CycleQ2AffineHypersurface CycleQ2AffineClearing
+open scoped BigOperators
+
+abbrev K := AffineFunctionField
+abbrev Omega := Ω[K⁄ℂ]
+
+local instance intAlgebra : Algebra ℤ K := Ring.toIntAlgebra _
+
+theorem affineMap_eq_algebraMap (P : AmbientPoly 4) :
+    affineMap P = algebraMap (AmbientPoly 4) K P := rfl
+
+theorem affineMap_constant (c : ℂ) :
+    affineMap (C c) = algebraMap ℂ K c := rfl
+
+theorem tangent_complex_constant (j : Fin 4) (c : ℂ) :
+    affineTangent j (algebraMap ℂ K c) = 0 := by
+  rw [← affineMap_constant]
+  exact affineTangent_constant j c
+
+theorem tangent_complex_smul (j : Fin 4) (c : ℂ) (z : K) :
+    affineTangent j (c • z) = c • affineTangent j z := by
+  simp only [Algebra.smul_def, Derivation.leibniz, smul_eq_mul,
+    tangent_complex_constant, mul_zero, add_zero]
+  simp
+
+/-- The actual tangent operator, with its complex scalar linearity included
+in the type. Its underlying function is unchanged. -/
+def complexTangent (j : Fin 4) : Derivation ℂ K K where
+  toFun := affineTangent j
+  map_add' := (affineTangent j).map_add
+  map_smul' := tangent_complex_smul j
+  map_one_eq_zero' := (affineTangent j).map_one_eq_zero
+  leibniz' := (affineTangent j).leibniz
+
+@[simp] theorem complexTangent_apply (j : Fin 4) (z : K) :
+    complexTangent j z = affineTangent j z := rfl
+
+abbrev d : Derivation ℂ K Omega := KaehlerDifferential.D ℂ K
+
+/-- The four independent coordinate differentials in the actual universal
+module of relative differentials. -/
+def coordinateDifferential (j : Fin 4) : Omega := d (affineMap (X j.succ))
+
+private theorem sum_derivations_apply
+    (q : Fin 5 → Derivation ℂ (AmbientPoly 4) Omega) (P : AmbientPoly 4) :
+    (∑ i, q i) P = ∑ i, q i P := by
+  simpa only [Derivation.coeFnAddMonoidHom_apply, Finset.sum_apply] using
+    congrFun (map_sum Derivation.coeFnAddMonoidHom q Finset.univ) P
+
+theorem differential_polynomial (P : AmbientPoly 4) :
+    d (affineMap P) = ∑ i : Fin 5, affineMap (pderiv i P) • d (affineMap (X i)) := by
+  let dp : Derivation ℂ (AmbientPoly 4) Omega := d.compAlgebraMap (AmbientPoly 4)
+  have he : dp = ∑ i : Fin 5,
+      (LinearMap.toSpanSingleton (AmbientPoly 4) Omega (dp (X i))).compDer (pderiv i) := by
+    apply MvPolynomial.derivation_ext
+    intro i
+    rw [sum_derivations_apply]
+    simp [Derivation.coe_comp, pderiv_X, Pi.single_apply]
+  have hh := Derivation.congr_fun he P
+  rw [sum_derivations_apply] at hh
+  simpa only [dp, Derivation.compAlgebraMap_apply,
+    Derivation.coe_comp, LinearMap.comp_apply, LinearMap.coe_restrictScalars,
+    Derivation.coeFn_coe, LinearMap.toSpanSingleton_apply,
+    affineMap_eq_algebraMap, IsScalarTower.algebraMap_smul] using hh
+
+theorem differential_normal :
+    d (affineMap (X (0 : Fin 5))) =
+      ∑ j : Fin 4, (-affineMap (pderiv j.succ affineF) /
+        affineMap (pderiv 0 affineF)) • coordinateDifferential j := by
+  have hf := differential_polynomial affineF
+  rw [affineMap_F, map_zero, Fin.sum_univ_succ] at hf
+  have he : affineMap (pderiv 0 affineF) • d (affineMap (X (0 : Fin 5))) =
+      -(∑ j : Fin 4, affineMap (pderiv j.succ affineF) • coordinateDifferential j) :=
+    eq_neg_of_add_eq_zero_left hf.symm
+  calc
+    _ = (affineMap (pderiv 0 affineF))⁻¹ •
+        (affineMap (pderiv 0 affineF) • d (affineMap (X (0 : Fin 5)))) := by
+      rw [smul_smul, inv_mul_cancel₀ normal_ne_zero, one_smul]
+    _ = _ := by
+      rw [he]
+      simp only [smul_neg, Finset.smul_sum, smul_smul]
+      rw [← Finset.sum_neg_distrib]
+      apply Finset.sum_congr rfl
+      intro j hj
+      rw [← neg_smul]
+      congr 1
+      simp [div_eq_mul_inv, mul_comm]
+
+theorem differential_polynomial_coordinates (P : AmbientPoly 4) :
+    d (affineMap P) =
+      ∑ j : Fin 4, affineTangent j (affineMap P) • coordinateDifferential j := by
+  rw [differential_polynomial, Fin.sum_univ_succ, differential_normal, Finset.smul_sum,
+    ← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro j hj
+  rw [affineTangent_apply, smul_smul]
+  simp only [coordinateDifferential]
+  rw [← add_smul]
+  congr 1
+  ring
+
+/-- The universal differential on every element of the actual chart field
+is exactly its four actual implicit-coordinate partial derivatives. -/
+theorem differential_coordinates (z : K) :
+    d z = ∑ j : Fin 4, affineTangent j z • coordinateDifferential j := by
+  obtain ⟨a, b, hb, rfl⟩ := IsFractionRing.div_surjective AffineCoordinateRing z
+  obtain ⟨P, rfl⟩ := affineProjection_surjective a
+  obtain ⟨T, rfl⟩ := affineProjection_surjective b
+  change d (affineMap P / affineMap T) =
+    ∑ j : Fin 4, affineTangent j (affineMap P / affineMap T) • coordinateDifferential j
+  rw [Derivation.leibniz_div, differential_polynomial_coordinates,
+    differential_polynomial_coordinates]
+  simp only [Derivation.leibniz_div, Finset.smul_sum, smul_sub,
+    ← Finset.sum_sub_distrib, smul_smul, smul_eq_mul, sub_smul]
+  apply Finset.sum_congr rfl
+  intro j hj
+  rw [mul_sub, sub_smul]
+
+/-- Evaluation of a universal differential against the four actual
+complex tangent derivations. -/
+def coordinateMap : Omega →ₗ[K] (Fin 4 → K) :=
+  LinearMap.pi fun j => (complexTangent j).liftKaehlerDifferential
+
+@[simp] theorem coordinateMap_d (z : K) (j : Fin 4) :
+    coordinateMap (d z) j = affineTangent j z :=
+  Derivation.liftKaehlerDifferential_comp_D (complexTangent j) z
+
+@[simp] theorem coordinateMap_coordinateDifferential (i j : Fin 4) :
+    coordinateMap (coordinateDifferential i) j = if i = j then 1 else 0 := by
+  change coordinateMap (d (affineMap (X i.succ))) j = _
+  rw [coordinateMap_d]
+  exact affineTangent_coordinate j i
+
+def coordinateExpansion : (Fin 4 → K) →ₗ[K] Omega :=
+  Fintype.linearCombination K coordinateDifferential
+
+@[simp] theorem coordinateExpansion_apply (v : Fin 4 → K) :
+    coordinateExpansion v = ∑ j, v j • coordinateDifferential j := rfl
+
+theorem coordinateExpansion_coordinateMap :
+    coordinateExpansion.comp coordinateMap = LinearMap.id := by
+  apply Derivation.liftKaehlerDifferential_unique
+  ext z
+  change coordinateExpansion (coordinateMap (d z)) = d z
+  rw [coordinateExpansion_apply]
+  simp only [coordinateMap_d]
+  exact (differential_coordinates z).symm
+
+theorem coordinateMap_coordinateExpansion :
+    coordinateMap.comp coordinateExpansion = LinearMap.id := by
+  ext v j
+  simp [coordinateExpansion_apply, coordinateMap_coordinateDifferential,
+    Finset.sum_apply, Pi.smul_apply, smul_eq_mul, Pi.single_apply, eq_comm]
+
+/-- Concrete coordinates on the actual relative Kähler module. -/
+def differentialCoordinates : Omega ≃ₗ[K] (Fin 4 → K) where
+  toLinearMap := coordinateMap
+  invFun := coordinateExpansion
+  left_inv z := LinearMap.congr_fun coordinateExpansion_coordinateMap z
+  right_inv v := LinearMap.congr_fun coordinateMap_coordinateExpansion v
+
+/-- The four independent coordinate differentials are a basis. -/
+def coordinateBasis : Module.Basis (Fin 4) K Omega :=
+  Module.Basis.ofEquivFun differentialCoordinates
+
+@[simp] theorem coordinateBasis_apply (j : Fin 4) :
+    coordinateBasis j = coordinateDifferential j := by
+  rw [coordinateBasis, Module.Basis.coe_ofEquivFun]
+  change coordinateExpansion (Pi.single j 1) = coordinateDifferential j
+  simp [coordinateExpansion]
+
+@[simp] theorem coordinateBasis_repr_d (z : K) (j : Fin 4) :
+    coordinateBasis.repr (d z) j = affineTangent j z := by
+  rw [coordinateBasis, Module.Basis.ofEquivFun_repr_apply]
+  exact coordinateMap_d z j
+
+end CycleQ2AffineDifferentials
+
+#print axioms CycleQ2AffineDifferentials.differential_coordinates
+#print axioms CycleQ2AffineDifferentials.coordinateBasis_apply
+#print axioms CycleQ2AffineDifferentials.coordinateBasis_repr_d
+end
+end
+
+
+/- Component: continuation_2/AffineExterior.lean -/
+section
+/-!
+# Genuine exterior forms on the protected hypersurface function field
+
+This file works with exterior powers of the actual relative Kähler module.
+The coordinate exterior derivative is characterized on the exact coordinate
+generators, and its top-degree exactness criterion is compared with the
+already defined residue equation. It asserts no geometric vanishing.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 2000000
+noncomputable section
+
+namespace CycleQ2AffineExterior
+
+open CycleQ2AffineDifferentials CycleQ2AffineHypersurface
+open scoped BigOperators
+
+abbrev Form (p : ℕ) := ⋀[K]^p Omega
+
+def omitIndex (i : Fin 4) : Set.powersetCard (Fin 4) 3 :=
+  ⟨{i}ᶜ, by simp [Finset.card_compl]⟩
+
+theorem omitIndex_bijective : Function.Bijective omitIndex := by
+  constructor
+  · intro i j hij
+    have he := congrArg (fun s : Set.powersetCard (Fin 4) 3 => (s : Finset (Fin 4))ᶜ) hij
+    simpa only [omitIndex, compl_compl, Finset.singleton_inj] using he
+  · intro s
+    have hc : ((s : Finset (Fin 4))ᶜ).card = 1 := by
+      simp [Finset.card_compl, s.property]
+    obtain ⟨i, hi⟩ := Finset.card_eq_one.mp hc
+    refine ⟨i, Subtype.ext ?_⟩
+    change {i}ᶜ = (s : Finset (Fin 4))
+    rw [← hi, compl_compl]
+
+def omitEquiv : Fin 4 ≃ Set.powersetCard (Fin 4) 3 :=
+  Equiv.ofBijective omitIndex omitIndex_bijective
+
+/-- The increasing three-fold coordinate wedges, indexed by the omitted
+coordinate. This is a basis of the genuine third exterior power. -/
+def thirdBasis : Module.Basis (Fin 4) K (Form 3) :=
+  (coordinateBasis.exteriorPower 3).reindex omitEquiv.symm
+
+theorem thirdBasis_apply (i : Fin 4) :
+    thirdBasis i = exteriorPower.ιMulti K 3 (i.removeNth coordinateDifferential) := by
+  rw [thirdBasis, Module.Basis.reindex_apply, Equiv.symm_symm]
+  change coordinateBasis.exteriorPower 3 (omitIndex i) = _
+  rw [exteriorPower.basis_apply]
+  unfold exteriorPower.ιMulti_family
+  congr 1
+  funext j
+  simp only [Function.comp_apply, coordinateBasis_apply,
+    Set.powersetCard.ofFinEmbEquiv_symm_apply, omitIndex,
+    Finset.orderEmbOfFin_compl_singleton_eq_succAboveOrderEmb, Fin.removeNth]
+  rfl
+
+/-- Canonical exterior multiplication of a one-form and a three-form. -/
+def wedgeOneThree : Omega →ₗ[K] (Form 3 →ₗ[K] Form 4) :=
+  exteriorPower.alternatingMapLinearEquiv.toLinearMap.comp
+    (exteriorPower.ιMulti K 4).curryLeft
+
+@[simp] theorem wedgeOneThree_wedge (a : Omega) (v : Fin 3 → Omega) :
+    wedgeOneThree a (exteriorPower.ιMulti K 3 v) =
+      exteriorPower.ιMulti K 4 (Matrix.vecCons a v) := by
+  simp [wedgeOneThree]
+
+@[simp] theorem wedgeOneThree_basis (a : Omega) (i : Fin 4) :
+    wedgeOneThree a (thirdBasis i) =
+      exteriorPower.ιMulti K 4 (Matrix.vecCons a (i.removeNth coordinateDifferential)) := by
+  rw [thirdBasis_apply, wedgeOneThree_wedge]
+
+def volume : Form 4 := exteriorPower.ιMulti K 4 coordinateDifferential
+
+def topIndex : Set.powersetCard (Fin 4) 4 := ⟨Finset.univ, by simp⟩
+
+theorem topIndex_unique (s : Set.powersetCard (Fin 4) 4) : s = topIndex := by
+  apply Subtype.ext
+  exact Finset.eq_of_subset_of_card_le (Finset.subset_univ _) (by simp [s.property])
+
+theorem topBasis_apply : coordinateBasis.exteriorPower 4 topIndex = volume := by
+  rw [exteriorPower.basis_apply]
+  unfold exteriorPower.ιMulti_family volume
+  congr 1
+  funext j
+  rw [Function.comp_apply, coordinateBasis_apply]
+  have ho : (fun i : Fin 4 => i) =
+      (Finset.univ : Finset (Fin 4)).orderEmbOfFin (by simp) :=
+    Finset.orderEmbOfFin_unique _ (fun _ => Finset.mem_univ _) strictMono_id
+  exact congrArg coordinateDifferential (congrFun ho j).symm
+
+def volumeCoefficient : Form 4 →ₗ[K] K :=
+  (coordinateBasis.exteriorPower 4).coord topIndex
+
+@[simp] theorem volumeCoefficient_volume : volumeCoefficient volume = 1 := by
+  rw [← topBasis_apply]
+  simp [volumeCoefficient]
+
+theorem topForm_eq_coefficient (η : Form 4) :
+    η = volumeCoefficient η • volume := by
+  calc
+    η = ∑ s, (coordinateBasis.exteriorPower 4).repr η s •
+        coordinateBasis.exteriorPower 4 s :=
+      ((coordinateBasis.exteriorPower 4).sum_repr η).symm
+    _ = _ := by
+      rw [Finset.sum_eq_single topIndex]
+      · rw [topBasis_apply]
+        rfl
+      · intro i hi hne
+        exact (hne (topIndex_unique i)).elim
+      · simp
+
+theorem volume_ne_zero : volume ≠ 0 := by
+  intro h
+  have hh := volumeCoefficient_volume
+  rw [h, map_zero] at hh
+  exact zero_ne_one hh
+
+/-- The exact Koszul sign of a coordinate wedge. -/
+theorem wedge_coordinate_basis (j i : Fin 4) :
+    wedgeOneThree (coordinateDifferential j) (thirdBasis i) =
+      (if j = i then (-1 : K) ^ i.val else 0) • volume := by
+  rw [wedgeOneThree_basis]
+  by_cases h : j = i
+  · subst j
+    rw [if_pos rfl]
+    have hh := (exteriorPower.ιMulti K 4).neg_one_pow_smul_map_insertNth i
+      (coordinateDifferential i) (i.removeNth coordinateDifferential)
+    rw [Fin.insertNth_self_removeNth] at hh
+    simpa only [volume, ← Int.cast_smul_eq_zsmul K, Int.cast_pow,
+      Int.cast_neg, Int.cast_one] using hh.symm
+  · rw [if_neg h, zero_smul]
+    obtain ⟨k, hk⟩ := Fin.exists_succAbove_eq h
+    apply (exteriorPower.ιMulti K 4).map_eq_zero_of_eq (i := 0) (j := k.succ)
+    · simp [Fin.removeNth, hk]
+    · exact (Fin.succ_ne_zero k).symm
+
+/-- The universal-property wedge agrees with multiplication in the actual
+exterior algebra. -/
+theorem wedgeOneThree_coe (a : Omega) (η : Form 3) :
+    (wedgeOneThree a η : ExteriorAlgebra K Omega) =
+      ExteriorAlgebra.ι K a * (η : ExteriorAlgebra K Omega) := by
+  have he : (Form 4).subtype.comp (wedgeOneThree a) =
+      (LinearMap.mulLeft K (ExteriorAlgebra.ι K a)).comp (Form 3).subtype := by
+    apply thirdBasis.ext
+    intro i
+    change (wedgeOneThree a (thirdBasis i) : ExteriorAlgebra K Omega) =
+      ExteriorAlgebra.ι K a * (thirdBasis i : ExteriorAlgebra K Omega)
+    rw [wedgeOneThree_basis, thirdBasis_apply]
+    change ExteriorAlgebra.ιMulti K 4
+        (Matrix.vecCons a (i.removeNth coordinateDifferential)) =
+      ExteriorAlgebra.ι K a * ExteriorAlgebra.ιMulti K 3 (i.removeNth coordinateDifferential)
+    rw [ExteriorAlgebra.ιMulti_succ_apply]
+    rfl
+  exact LinearMap.congr_fun he η
+
+theorem wedge_d_basis (a : K) (i : Fin 4) :
+    wedgeOneThree (d a) (thirdBasis i) =
+      ((-1 : K) ^ i.val * affineTangent i a) • volume := by
+  rw [differential_coordinates, map_sum]
+  simp only [map_smul, LinearMap.sum_apply, LinearMap.smul_apply,
+    wedge_coordinate_basis, smul_smul]
+  simp [mul_comm]
+
+/-- The algebraic exterior differential in degree three, written in the
+basis of exact coordinate wedges. It is complex-linear, not K-linear. -/
+def exteriorD3 : Form 3 →ₗ[ℂ] Form 4 :=
+  ∑ i : Fin 4,
+    ((LinearMap.toSpanSingleton K (Form 4) ((-1 : K) ^ i.val • volume)).restrictScalars ℂ).comp
+      ((complexTangent i).toLinearMap.comp ((thirdBasis.coord i).restrictScalars ℂ))
+
+theorem exteriorD3_apply (η : Form 3) :
+    exteriorD3 η =
+      (∑ i : Fin 4, (-1 : K) ^ i.val * affineTangent i (thirdBasis.repr η i)) • volume := by
+  simp only [exteriorD3, LinearMap.sum_apply, LinearMap.comp_apply,
+    LinearMap.coe_restrictScalars, LinearMap.toSpanSingleton_apply,
+    Module.Basis.coord_apply, Derivation.coeFn_coe, complexTangent_apply,
+    smul_smul, ← Finset.sum_smul]
+  congr 1
+  apply Finset.sum_congr rfl
+  intro i hi
+  ring
+
+/-- The coordinate definition is the usual differential of a scalar times
+a wedge of exact coordinate differentials. -/
+theorem exteriorD3_smul_basis (a : K) (i : Fin 4) :
+    exteriorD3 (a • thirdBasis i) = wedgeOneThree (d a) (thirdBasis i) := by
+  rw [exteriorD3_apply, wedge_d_basis]
+  congr 1
+  rw [Finset.sum_eq_single i]
+  · simp
+  · intro j hj hji
+    simp [Module.Basis.repr_self, Finsupp.smul_apply, Finsupp.single_apply, hji, Ne.symm hji]
+  · simp
+
+@[simp] theorem exteriorD3_basis (i : Fin 4) : exteriorD3 (thirdBasis i) = 0 := by
+  simpa only [one_smul, Derivation.map_one_eq_zero, map_zero, LinearMap.zero_apply] using
+    exteriorD3_smul_basis 1 i
+
+theorem exteriorD3_eq_sum_wedge (η : Form 3) :
+    exteriorD3 η =
+      ∑ i : Fin 4, wedgeOneThree (d (thirdBasis.repr η i)) (thirdBasis i) := by
+  rw [exteriorD3_apply]
+  simp only [wedge_d_basis, Finset.sum_smul]
+
+/-- The actual scalar Leibniz rule for this exterior differential. -/
+theorem exteriorD3_leibniz (a : K) (η : Form 3) :
+    exteriorD3 (a • η) = wedgeOneThree (d a) η + a • exteriorD3 η := by
+  have hh := congrArg (wedgeOneThree (d a)) (thirdBasis.sum_repr η)
+  simp only [map_sum, map_smul] at hh
+  rw [exteriorD3_eq_sum_wedge]
+  simp only [map_smul, Finsupp.smul_apply, smul_eq_mul, Derivation.leibniz,
+    map_add, LinearMap.add_apply, LinearMap.smul_apply, Finset.sum_add_distrib]
+  rw [← Finset.smul_sum, ← exteriorD3_eq_sum_wedge, hh]
+  exact add_comm _ _
+
+/-- The scalar-times-generator formula uniquely determines the exterior
+differential on the genuine third exterior power. -/
+theorem exteriorD3_unique (δ : Form 3 →ₗ[ℂ] Form 4)
+    (hδ : ∀ (a : K) (i : Fin 4),
+      δ (a • thirdBasis i) = wedgeOneThree (d a) (thirdBasis i)) :
+    δ = exteriorD3 := by
+  apply LinearMap.ext
+  intro η
+  calc
+    δ η = δ (∑ i, thirdBasis.repr η i • thirdBasis i) :=
+      congrArg δ (thirdBasis.sum_repr η).symm
+    _ = ∑ i, wedgeOneThree (d (thirdBasis.repr η i)) (thirdBasis i) := by
+      rw [map_sum]
+      apply Finset.sum_congr rfl
+      intro i hi
+      exact hδ _ i
+    _ = exteriorD3 η := (exteriorD3_eq_sum_wedge η).symm
+
+end CycleQ2AffineExterior
+
+#print axioms CycleQ2AffineExterior.thirdBasis_apply
+#print axioms CycleQ2AffineExterior.topForm_eq_coefficient
+#print axioms CycleQ2AffineExterior.wedge_coordinate_basis
+#print axioms CycleQ2AffineExterior.exteriorD3_smul_basis
+#print axioms CycleQ2AffineExterior.exteriorD3_leibniz
+#print axioms CycleQ2AffineExterior.exteriorD3_unique
+end
+end
+
+
+/- Component: continuation_2/AffineExactnessCriterion.lean -/
+section
+/-!
+# Actual top-form exactness is equivalent to the protected residue PDE
+
+Write g for the nonzero normal derivative and c for the actual second normal
+source. The residue source is the genuine top exterior form (c/g) dx1∧⋯∧dx4.
+The three-form with coefficients (-1)^i w_i/g has derivative
+(residueDivergence w/g) dx1∧⋯∧dx4. Thus a solved PDE c+div_g(w)=0 makes its
+negative a primitive of the positive source form. No exactness is assumed
+without appearing explicitly as a hypothesis in the final implication.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 2000000
+noncomputable section
+
+namespace CycleQ2AffineExactness
+
+open MvPolynomial HodgeComputer CycleQ2AffineDifferentials CycleQ2AffineExterior
+open CycleQ2AffineHypersurface CycleQ2AffineClearing CycleQ2AffineResidueClosure
+open HoldoutConstruction
+open scoped BigOperators
+
+local instance intAlgebra : Algebra ℤ K := Ring.toIntAlgebra _
+
+def normalDensity : K := affineMap (pderiv 0 affineF)
+
+theorem normalDensity_ne_zero : normalDensity ≠ 0 := normal_ne_zero
+
+def coordinateSign (i : Fin 4) : K := (-1 : K) ^ i.val
+
+theorem coordinateSign_mul_self (i : Fin 4) :
+    coordinateSign i * coordinateSign i = 1 := by
+  unfold coordinateSign
+  rw [← pow_add, show i.val + i.val = 2 * i.val by omega, pow_mul]
+  simp
+
+@[simp] theorem tangent_coordinateSign (j i : Fin 4) :
+    affineTangent j (coordinateSign i) = 0 := by
+  simp only [coordinateSign, Derivation.leibniz_pow, map_neg,
+    Derivation.map_one_eq_zero, neg_zero, smul_zero]
+
+def signedCoefficients (η : Form 3) (i : Fin 4) : K :=
+  coordinateSign i * thirdBasis.repr η i
+
+def densityVector (η : Form 3) (i : Fin 4) : K :=
+  normalDensity * signedCoefficients η i
+
+theorem exteriorD3_as_divergence (η : Form 3) :
+    exteriorD3 η = fieldDivergence affineTangent (signedCoefficients η) • volume := by
+  rw [exteriorD3_apply]
+  congr 1
+  unfold fieldDivergence signedCoefficients
+  apply Finset.sum_congr rfl
+  intro i hi
+  rw [Derivation.leibniz, tangent_coordinateSign]
+  simp only [smul_eq_mul, mul_zero, add_zero, coordinateSign]
+
+theorem densityVector_residueDivergence (η : Form 3) :
+    residueDivergence affineTangent normalDensity (densityVector η) =
+      normalDensity * fieldDivergence affineTangent (signedCoefficients η) :=
+  residueDivergence_cancel_density affineTangent normalDensity normalDensity_ne_zero _
+
+theorem volumeCoefficient_exteriorD3 (η : Form 3) :
+    volumeCoefficient (exteriorD3 η) = fieldDivergence affineTangent (signedCoefficients η) := by
+  rw [exteriorD3_as_divergence, map_smul, volumeCoefficient_volume, smul_eq_mul, mul_one]
+
+/-- The actual source top-form, with the positive residue sign. -/
+def residueSourceForm (A : AmbientPoly 4) : Form 4 :=
+  (affineNormalSource A / normalDensity) • volume
+
+@[simp] theorem volumeCoefficient_residueSourceForm (A : AmbientPoly 4) :
+    volumeCoefficient (residueSourceForm A) = affineNormalSource A / normalDensity := by
+  simp [residueSourceForm]
+
+/-- The explicit three-form whose coordinate coefficients are (-1)^i w_i/g. -/
+def residuePrimitiveForm (w : Fin 4 → K) : Form 3 :=
+  thirdBasis.equivFun.symm (fun i => coordinateSign i * (w i / normalDensity))
+
+@[simp] theorem residuePrimitiveForm_repr (w : Fin 4 → K) (i : Fin 4) :
+    thirdBasis.repr (residuePrimitiveForm w) i =
+      coordinateSign i * (w i / normalDensity) := by
+  change thirdBasis.coord i (thirdBasis.equivFun.symm _) = _
+  exact Module.Basis.coord_equivFun_symm thirdBasis i _
+
+theorem densityVector_residuePrimitiveForm (w : Fin 4 → K) :
+    densityVector (residuePrimitiveForm w) = w := by
+  funext i
+  simp only [densityVector, signedCoefficients, residuePrimitiveForm_repr]
+  rw [← mul_assoc (coordinateSign i), coordinateSign_mul_self, one_mul]
+  field_simp [normalDensity_ne_zero]
+
+theorem residuePrimitiveForm_densityVector (η : Form 3) :
+    residuePrimitiveForm (densityVector η) = η := by
+  apply thirdBasis.repr.injective
+  ext i
+  rw [residuePrimitiveForm_repr]
+  simp only [densityVector, signedCoefficients]
+  rw [mul_div_cancel_left₀ _ normalDensity_ne_zero,
+    ← mul_assoc, coordinateSign_mul_self, one_mul]
+
+/-- Exact identity between the genuine exterior derivative and the existing
+weighted residue divergence. -/
+theorem exteriorD3_residuePrimitiveForm (w : Fin 4 → K) :
+    exteriorD3 (residuePrimitiveForm w) =
+      (residueDivergence affineTangent normalDensity w / normalDensity) • volume := by
+  have hd := densityVector_residueDivergence (residuePrimitiveForm w)
+  rw [densityVector_residuePrimitiveForm] at hd
+  rw [exteriorD3_as_divergence]
+  congr 1
+  apply (eq_div_iff normalDensity_ne_zero).mpr
+  simpa only [mul_comm] using hd.symm
+
+theorem affineResidueExpression_densityVector (A : AmbientPoly 4) (η : Form 3) :
+    affineResidueExpression A (densityVector η) =
+      affineNormalSource A + normalDensity * volumeCoefficient (exteriorD3 η) := by
+  change affineNormalSource A +
+    residueDivergence affineTangent normalDensity (densityVector η) = _
+  rw [densityVector_residueDivergence, volumeCoefficient_exteriorD3]
+
+/-- The sign convention is explicit: a zero residue PDE gives the negative
+of the positive source form as the derivative of `residuePrimitiveForm w`. -/
+theorem exteriorD3_residuePrimitiveForm_add_source (A : AmbientPoly 4) (w : Fin 4 → K) :
+    exteriorD3 (residuePrimitiveForm w) + residueSourceForm A =
+      (affineResidueExpression A w / normalDensity) • volume := by
+  rw [exteriorD3_residuePrimitiveForm, residueSourceForm, ← add_smul]
+  change (residueDivergence affineTangent normalDensity w / normalDensity +
+    affineNormalSource A / normalDensity) • volume =
+      ((affineNormalSource A + residueDivergence affineTangent normalDensity w) /
+        normalDensity) • volume
+  congr 1
+  ring
+
+/-- Genuine exactness of the actual top exterior source is equivalent to
+the already defined concrete residue PDE. Neither side is asserted here. -/
+theorem exact_residueSourceForm_iff (A : AmbientPoly 4) :
+    (∃ η : Form 3, exteriorD3 η = residueSourceForm A) ↔
+      ∃ w : Fin 4 → K, affineResidueExpression A w = 0 := by
+  constructor
+  · rintro ⟨η, hη⟩
+    refine ⟨densityVector (-η), ?_⟩
+    rw [affineResidueExpression_densityVector, map_neg, hη, map_neg,
+      volumeCoefficient_residueSourceForm]
+    field_simp [normalDensity_ne_zero]
+    ring
+  · rintro ⟨w, hw⟩
+    have hh := exteriorD3_residuePrimitiveForm_add_source A w
+    rw [hw, zero_div, zero_smul] at hh
+    refine ⟨-residuePrimitiveForm w, ?_⟩
+    rw [map_neg, eq_neg_of_add_eq_zero_left hh, neg_neg]
+
+/-- Actual exterior-form exactness now implies the unchanged protected
+certificate through the proved residue, chart, and denominator constructions. -/
+theorem protected_certificate_of_exact_residueSourceForm
+    (h : ∃ η : Form 3, exteriorD3 η = residueSourceForm affineA) :
+    HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A :=
+  protected_certificate_of_affine_residue_primitive ((exact_residueSourceForm_iff affineA).mp h)
+
+end CycleQ2AffineExactness
+
+#print axioms CycleQ2AffineExactness.exteriorD3_residuePrimitiveForm_add_source
+#print axioms CycleQ2AffineExactness.exact_residueSourceForm_iff
+#print axioms CycleQ2AffineExactness.protected_certificate_of_exact_residueSourceForm
+end
+end
+
+
+/- Component: continuation_2/VeryGeneralPoint.lean -/
+section
+/-!
+Actual very-general-point selection in affine coefficient spaces.
+
+The countable-proper-image specialization argument requires a complex point
+outside countably many proper algebraic conditions. This module proves that
+selection statement for genuine polynomial equations. It does not assert
+that any moving cycle, supported projector, or primitive exists.
+-/
+
+set_option autoImplicit false
+noncomputable section
+
+namespace CycleQ2VeryGeneral
+
+open MvPolynomial
+
+variable {K : Type*} [Field K] [Uncountable K]
+
+theorem exists_avoiding_univariate {ι : Type*} [Countable ι]
+    (p : ι → Polynomial K) (hp : ∀ i, p i ≠ 0) :
+    ∃ x : K, ∀ i, (p i).eval x ≠ 0 := by
+  classical
+  let roots : ι → Set K := fun i => {x | (p i).eval x = 0}
+  have hroots (i : ι) : (roots i).Finite := by
+    simpa only [roots, Polynomial.IsRoot] using
+      (Polynomial.finite_setOfPred_isRoot (hp i))
+  have hcount : (⋃ i, roots i).Countable :=
+    Set.countable_iUnion (fun i => (hroots i).countable)
+  have hout : ∃ x : K, x ∉ ⋃ i, roots i := by
+    by_contra h
+    push Not at h
+    have heq : (⋃ i, roots i) = Set.univ := Set.eq_univ_of_forall h
+    exact Set.not_countable_univ (heq ▸ hcount)
+  obtain ⟨x, hx⟩ := hout
+  refine ⟨x, fun i hi => hx ?_⟩
+  exact Set.mem_iUnion.mpr ⟨i, hi⟩
+
+/-- Countably many genuine nonzero multivariate polynomials have a common
+nonvanishing point over an uncountable field. -/
+theorem exists_avoiding_polynomials (n : ℕ) {ι : Type*} [Countable ι]
+    (p : ι → MvPolynomial (Fin n) K) (hp : ∀ i, p i ≠ 0) :
+    ∃ x : Fin n → K, ∀ i, eval x (p i) ≠ 0 := by
+  classical
+  induction n with
+  | zero =>
+      refine ⟨Fin.elim0, ?_⟩
+      intro i hi
+      obtain ⟨c, hc⟩ := (isEmptyAlgEquiv K (Fin 0)).symm.surjective (p i)
+      have hpi : p i = C c := by simpa using hc.symm
+      rw [hpi, eval_C] at hi
+      exact hp i (by simp [hpi, hi])
+  | succ n ih =>
+      let q : ι → Polynomial (MvPolynomial (Fin n) K) :=
+        fun i => finSuccEquiv K n (p i)
+      have hq (i : ι) : q i ≠ 0 := by
+        intro hz
+        apply hp i
+        apply (finSuccEquiv K n).injective
+        simpa only [q, map_zero] using hz
+      have hlc (i : ι) : (q i).leadingCoeff ≠ 0 := by
+        simpa only [ne_eq, Polynomial.leadingCoeff_eq_zero] using hq i
+      obtain ⟨y, hy⟩ := ih (fun i => (q i).leadingCoeff) hlc
+      let s : ι → Polynomial K := fun i => (q i).map (eval y)
+      have hs (i : ι) : s i ≠ 0 := by
+        intro hz
+        have hc := congrArg (fun z : Polynomial K => z.coeff (q i).natDegree) hz
+        simp only [s, Polynomial.coeff_map, Polynomial.coeff_zero] at hc
+        exact hy i hc
+      obtain ⟨x, hx⟩ := exists_avoiding_univariate s hs
+      refine ⟨Fin.cons x y, ?_⟩
+      intro i
+      simpa only [eval_eq_eval_mv_eval', q, s] using hx i
+
+/-- A very general complex coefficient point can also be required to lie in
+any prescribed nonempty principal open, without a coefficient bound. -/
+theorem complex_point_in_principal_open_avoiding (n : ℕ)
+    {ι : Type*} [Countable ι] (g : MvPolynomial (Fin n) ℂ) (hg : g ≠ 0)
+    (p : ι → MvPolynomial (Fin n) ℂ) (hp : ∀ i, p i ≠ 0) :
+    ∃ x : Fin n → ℂ, eval x g ≠ 0 ∧ ∀ i, eval x (p i) ≠ 0 := by
+  letI : Uncountable ℂ := Set.not_countable_univ_iff.mp not_countable_complex
+  let family : Option ι → MvPolynomial (Fin n) ℂ := fun i => Option.elim i g p
+  have hn (i : Option ι) : family i ≠ 0 := by
+    cases i with
+    | none => exact hg
+    | some i => exact hp i
+  obtain ⟨x, hx⟩ := exists_avoiding_polynomials n family hn
+  exact ⟨x, hx none, fun i => hx (some i)⟩
+
+/-- A countable family of genuine affine algebraic zero loci covering a
+nonempty principal open has a member equal to the whole affine space.
+This is the countability step in proper-image specialization, without any
+assumed existence of projectors or cycle families. -/
+theorem complex_countable_algebraic_cover (n : ℕ)
+    {ι : Type*} [Countable ι]
+    (I : ι → Ideal (MvPolynomial (Fin n) ℂ))
+    (g : MvPolynomial (Fin n) ℂ) (hg : g ≠ 0)
+    (hcover : ∀ x : Fin n → ℂ, eval x g ≠ 0 →
+      ∃ i, x ∈ zeroLocus ℂ (I i)) :
+    ∃ i, zeroLocus ℂ (I i) = Set.univ := by
+  classical
+  by_contra h
+  push Not at h
+  have hn (i : ι) : I i ≠ ⊥ := by
+    intro hi
+    apply h i
+    simp only [hi, zeroLocus_bot, Set.top_eq_univ]
+  have hp (i : ι) : ∃ p : MvPolynomial (Fin n) ℂ, p ∈ I i ∧ p ≠ 0 := by
+    by_contra hh
+    push Not at hh
+    apply hn i
+    apply le_antisymm
+    · intro p hp
+      exact (Ideal.mem_bot).mpr (hh p hp)
+    · exact bot_le
+  choose p hpI hpne using hp
+  obtain ⟨x, hxg, hxp⟩ := complex_point_in_principal_open_avoiding n g hg p hpne
+  obtain ⟨i, hxi⟩ := hcover x hxg
+  apply hxp i
+  exact hxi (p i) (hpI i)
+
+end CycleQ2VeryGeneral
+
+#print axioms CycleQ2VeryGeneral.exists_avoiding_polynomials
+#print axioms CycleQ2VeryGeneral.complex_point_in_principal_open_avoiding
+#print axioms CycleQ2VeryGeneral.complex_countable_algebraic_cover
+end
+end
+
+
+/- Component: continuation_2/AffineFormalSpecialization.lean -/
+section
+/-!
+An actual formal neighborhood of the protected affine hypersurface.
+
+The normal derivative is already proved nonzero in its function field. Hensel's
+lemma therefore solves the exact one-parameter deformation in that function
+field's power series ring. This is a specialization tool: it does not turn a
+formal primitive at the Fermat member into a rational primitive of the family.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 1000000
+noncomputable section
+
+namespace CycleQ2FormalSpecialization
+
+open scoped PowerSeries
+
+/-- Hensel lifting written with the actual constant-coefficient specialization.
+No algebraicity or rationality of the resulting power series is inferred. -/
+theorem simple_root_lifts {k : Type*} [Field k]
+    (p : Polynomial (PowerSeries k)) (hp : p.Monic) (a : k)
+    (ha : p.eval₂ (PowerSeries.constantCoeff (R := k)) a = 0)
+    (hderiv : p.derivative.eval₂ (PowerSeries.constantCoeff (R := k)) a ≠ 0) :
+    ∃ z : PowerSeries k, p.eval z = 0 ∧ z.constantCoeff = a := by
+  let I : Ideal (PowerSeries k) := Ideal.span {PowerSeries.X}
+  have hmem : p.eval (PowerSeries.C a) ∈ I := by
+    rw [Ideal.mem_span_singleton, PowerSeries.X_dvd_iff]
+    simpa only [← Polynomial.eval₂_at_apply, PowerSeries.constantCoeff_C] using ha
+  have hu : IsUnit (p.derivative.eval (PowerSeries.C a)) := by
+    apply PowerSeries.isUnit_iff_constantCoeff.mpr
+    apply isUnit_iff_ne_zero.mpr
+    simpa only [← Polynomial.eval₂_at_apply, PowerSeries.constantCoeff_C] using hderiv
+  obtain ⟨z, hz, hza⟩ := HenselianRing.is_henselian p hp (PowerSeries.C a)
+    hmem (hu.map (Ideal.Quotient.mk I))
+  refine ⟨z, hz, ?_⟩
+  rw [Ideal.mem_span_singleton, PowerSeries.X_dvd_iff] at hza
+  simpa only [map_sub, PowerSeries.constantCoeff_C, sub_eq_zero] using hza
+
+open MvPolynomial CycleQ2AffineClearing CycleQ2AffineGeometry
+  CycleQ2AffineHypersurface
+
+abbrev K := AffineFunctionField
+
+def fieldCoordinate (i : Fin 5) : K := affineMap (MvPolynomial.X i)
+
+/-- The family parameter is zero at the protected target and minus one at
+the Fermat polynomial. The eliminated coordinate is the polynomial variable;
+the other four coordinates are constants in the actual function field. -/
+def targetFamily : Polynomial (PowerSeries K) :=
+  Polynomial.X ^ 6 +
+    Polynomial.C (PowerSeries.C (1 + fieldCoordinate 1 ^ 6 +
+      fieldCoordinate 2 ^ 6 + fieldCoordinate 3 ^ 6 + fieldCoordinate 4 ^ 6)) +
+    Polynomial.C (PowerSeries.C (1 / 2 : K) * (1 + PowerSeries.X)) *
+      (Polynomial.X * Polynomial.C (PowerSeries.C (fieldCoordinate 2 * fieldCoordinate 3)) +
+        Polynomial.X ^ 3 * Polynomial.C (PowerSeries.C
+          (fieldCoordinate 1 * fieldCoordinate 3 * fieldCoordinate 4)) +
+        Polynomial.C (PowerSeries.C
+          (fieldCoordinate 1 ^ 3 * fieldCoordinate 4 * fieldCoordinate 2)))
+
+theorem targetFamily_monic : targetFamily.Monic := by
+  unfold targetFamily
+  rw [add_assoc]
+  apply Polynomial.monic_X_pow_add
+  compute_degree!
+
+theorem targetFamily_specializes :
+    targetFamily.eval₂ (PowerSeries.constantCoeff (R := K)) (fieldCoordinate 0) = 0 := by
+  have hc (c : ℂ) : affineMap (MvPolynomial.C c) = algebraMap ℂ K c := rfl
+  have h := congrArg affineMap affineF_formula
+  simp only [affineMap_F, map_add, map_mul, map_pow, map_one, hc] at h
+  norm_num only [map_div₀, map_one, map_ofNat] at h
+  convert h.symm using 1 <;> norm_num only [targetFamily, fieldCoordinate,
+    Polynomial.eval₂_add, Polynomial.eval₂_mul,
+    Polynomial.eval₂_pow, Polynomial.eval₂_X, Polynomial.eval₂_C, Polynomial.eval₂_one, map_add, map_mul,
+    map_one, map_zero, map_pow, map_ofNat, PowerSeries.constantCoeff_C,
+    PowerSeries.constantCoeff_X] <;> ring
+
+theorem targetFamily_simple :
+    targetFamily.derivative.eval₂ (PowerSeries.constantCoeff (R := K))
+      (fieldCoordinate 0) ≠ 0 := by
+  have hc (c : ℂ) : affineMap (MvPolynomial.C c) = algebraMap ℂ K c := rfl
+  have h := congrArg (fun P => affineMap (MvPolynomial.pderiv 0 P)) affineF_formula
+  norm_num [MvPolynomial.pderiv_mul, MvPolynomial.pderiv_pow,
+    MvPolynomial.pderiv_X, Pi.single_apply, Fin.ext_iff, hc] at h
+  have hn := normal_ne_zero
+  rw [h] at hn
+  convert hn using 1 <;>
+    norm_num [targetFamily, fieldCoordinate, Polynomial.derivative_add,
+      Polynomial.derivative_mul, Polynomial.derivative_pow,
+      Polynomial.eval₂_add, Polynomial.eval₂_mul, Polynomial.eval₂_pow,
+      Polynomial.eval₂_X, Polynomial.eval₂_C] <;> simp only [map_ofNat] <;> ring
+
+/-- The protected hypersurface has a genuine formal solution along the
+specified deformation, with its original coordinate as constant coefficient. -/
+theorem exists_target_formal_coordinate :
+    ∃ z : PowerSeries K, targetFamily.eval z = 0 ∧
+      z.constantCoeff = fieldCoordinate 0 :=
+  simple_root_lifts targetFamily targetFamily_monic (fieldCoordinate 0)
+    targetFamily_specializes targetFamily_simple
+
+end CycleQ2FormalSpecialization
+
+#print axioms CycleQ2FormalSpecialization.simple_root_lifts
+#print axioms CycleQ2FormalSpecialization.exists_target_formal_coordinate
+end
+end
+
+
+/- Component: continuation_2/LaurentCoefficientDerivations.lean -/
+section
+/-!
+Coefficientwise derivations and exactness under formal Laurent extension.
+
+The exponent is a deformation parameter, not a coordinate to differentiate.
+The actual Hahn-series multiplication is used in the Leibniz proof. Taking
+any Laurent coefficient commutes with these derivations, including for
+series with negative powers. Consequently a Laurent primitive specializes
+coefficientwise; no converse from formal deformation to a rational primitive
+of a generic algebraic family is asserted.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+noncomputable section
+
+namespace CycleQ2LaurentDerivation
+
+open scoped BigOperators
+
+variable {C K : Type*} [CommRing C] [CommRing K] [Algebra C K]
+
+abbrev Series := HahnSeries ℤ K
+
+/-- Use the coefficient algebra explicitly. The power-series imports also
+provide a compatible algebra through the power-series embedding; fixing
+this instance keeps the scalar action definitionally coefficientwise. -/
+local instance coefficientAlgebra : Algebra C (Series (K := K)) :=
+  HahnSeries.instAlgebra
+
+def coefficientwise (D : Derivation C K K) (s : Series (K := K)) : Series (K := K) where
+  coeff n := D (s.coeff n)
+  isPWO_support' := s.isPWO_support.mono (by
+    intro n hn hzero
+    exact hn (by simp only [hzero, map_zero]))
+
+@[simp] theorem coefficientwise_coeff (D : Derivation C K K) (s : Series (K := K)) (n : ℤ) :
+    (coefficientwise D s).coeff n = D (s.coeff n) := rfl
+
+theorem support_coefficientwise_subset (D : Derivation C K K) (s : Series (K := K)) :
+    (coefficientwise D s).support ⊆ s.support := by
+  intro n hn hzero
+  exact hn (by simp only [coefficientwise_coeff, hzero, map_zero])
+
+theorem coefficientwise_mul (D : Derivation C K K) (s t : Series (K := K)) :
+    coefficientwise D (s * t) = s * coefficientwise D t + t * coefficientwise D s := by
+  ext n
+  rw [coefficientwise_coeff, HahnSeries.coeff_mul, map_sum, HahnSeries.coeff_add,
+    HahnSeries.coeff_mul_right' t.isPWO_support (support_coefficientwise_subset D t),
+    mul_comm t (coefficientwise D s),
+    HahnSeries.coeff_mul_left' s.isPWO_support (support_coefficientwise_subset D s)]
+  simp only [Derivation.leibniz, smul_eq_mul, coefficientwise_coeff, Finset.sum_add_distrib]
+  congr 1
+  apply Finset.sum_congr rfl
+  intro ij hij
+  exact mul_comm _ _
+
+/-- An actual derivation of the Laurent-series ring, obtained by applying the
+coefficient derivation while keeping the formal parameter constant. -/
+def extend (D : Derivation C K K) : Derivation C (Series (K := K)) (Series (K := K)) where
+  toFun := coefficientwise D
+  map_add' s t := by
+    ext n
+    simp
+  map_smul' c s := by
+    ext n
+    simp only [coefficientwise_coeff, HahnSeries.coeff_smul,
+      RingHom.id_apply, Derivation.map_smul]
+  map_one_eq_zero' := by
+    ext n
+    by_cases hn : n = 0 <;> simp [HahnSeries.coeff_one, hn]
+  leibniz' s t := by
+    change coefficientwise D (s * t) = s * coefficientwise D t + t * coefficientwise D s
+    exact coefficientwise_mul D s t
+
+@[simp] theorem extend_coeff (D : Derivation C K K) (s : Series (K := K)) (n : ℤ) :
+    (extend D s).coeff n = D (s.coeff n) := rfl
+
+theorem extend_commute (D E : Derivation C K K) (h : Function.Commute D E) :
+    Function.Commute (extend D) (extend E) := by
+  intro s
+  ext n
+  exact h (s.coeff n)
+
+@[simp] theorem extend_single (D : Derivation C K K) (n : ℤ) (a : K) :
+    extend D (HahnSeries.single n a) = HahnSeries.single n (D a) := by
+  ext j
+  by_cases hj : j = n <;> simp [hj]
+
+/-- Coefficient extraction is a left inverse on exactness, even when a
+primitive has a pole in the deformation parameter. -/
+theorem divergence_coefficient {ι : Type*} [Fintype ι]
+    (D : ι → Derivation C K K) (v : ι → Series (K := K)) (b : Series (K := K))
+    (h : (∑ i, extend (D i) (v i)) = b) (n : ℤ) :
+    (∑ i, D i ((v i).coeff n)) = b.coeff n := by
+  have hc := congrArg (fun s : Series (K := K) => s.coeff n) h
+  simpa only [HahnSeries.coeff_sum, extend_coeff] using hc
+
+/-- Extending the coefficient field to formal Laurent series cannot make a
+constant source exact unless it was already exact over the original ring. -/
+theorem exists_divergence_constant_iff {ι : Type*} [Fintype ι]
+    (D : ι → Derivation C K K) (b : K) :
+    (∃ v : ι → Series (K := K), ∑ i, extend (D i) (v i) = HahnSeries.single 0 b) ↔
+      ∃ v : ι → K, ∑ i, D i (v i) = b := by
+  constructor
+  · rintro ⟨v, hv⟩
+    refine ⟨fun i => (v i).coeff 0, ?_⟩
+    simpa using divergence_coefficient D v _ hv 0
+  · rintro ⟨v, hv⟩
+    refine ⟨fun i => HahnSeries.single 0 (v i), ?_⟩
+    simp_rw [extend_single]
+    change (∑ i, HahnSeries.single.addMonoidHom 0 (D i (v i))) =
+      HahnSeries.single.addMonoidHom 0 b
+    rw [← map_sum (HahnSeries.single.addMonoidHom 0), hv]
+
+end CycleQ2LaurentDerivation
+
+#print axioms CycleQ2LaurentDerivation.extend
+#print axioms CycleQ2LaurentDerivation.divergence_coefficient
+#print axioms CycleQ2LaurentDerivation.exists_divergence_constant_iff
+end
+end
+
+
+/- Component: continuation_2/AffineNormalExpansion.lean -/
+section
+/-!
+The actual normal formal coordinate at the generic point of f=0.
+
+We solve f(x0(T),x1,...,x4)=T in K[[T]], prove that its constant-coefficient
+map is the actual residue map on polynomials, and prove injectivity of the
+resulting polynomial substitution. The formal derivative satisfies the
+actual normal chain rule. These are local algebraic facts, independent of
+any assertion that the target residue is exact.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 2000000
+noncomputable section
+
+namespace CycleQ2NormalExpansion
+
+open MvPolynomial HodgeComputer CycleQ2AffineClearing CycleQ2AffineGeometry
+  CycleQ2AffineHypersurface CycleQ2FormalSpecialization
+
+abbrev K := AffineFunctionField
+abbrev S := PowerSeries K
+
+def normalEquation : Polynomial S :=
+  Polynomial.X ^ 6 +
+    (Polynomial.C (PowerSeries.C (1 + fieldCoordinate 1 ^ 6 +
+      fieldCoordinate 2 ^ 6 + fieldCoordinate 3 ^ 6 + fieldCoordinate 4 ^ 6)) +
+      Polynomial.C (PowerSeries.C (1 / 2 : K)) *
+        (Polynomial.X * Polynomial.C (PowerSeries.C (fieldCoordinate 2 * fieldCoordinate 3)) +
+          Polynomial.X ^ 3 * Polynomial.C (PowerSeries.C
+            (fieldCoordinate 1 * fieldCoordinate 3 * fieldCoordinate 4)) +
+          Polynomial.C (PowerSeries.C
+            (fieldCoordinate 1 ^ 3 * fieldCoordinate 4 * fieldCoordinate 2))) -
+      Polynomial.C PowerSeries.X)
+
+theorem normalEquation_monic : normalEquation.Monic := by
+  unfold normalEquation
+  apply Polynomial.monic_X_pow_add
+  compute_degree!
+
+theorem normalEquation_specializes :
+    normalEquation.eval₂ (PowerSeries.constantCoeff (R := K)) (fieldCoordinate 0) = 0 := by
+  convert targetFamily_specializes using 1 <;>
+    simp [normalEquation, targetFamily] <;> ring
+
+theorem normalEquation_simple :
+    normalEquation.derivative.eval₂ (PowerSeries.constantCoeff (R := K))
+      (fieldCoordinate 0) ≠ 0 := by
+  convert targetFamily_simple using 1 <;>
+    simp [normalEquation, targetFamily, Polynomial.derivative_pow]
+
+theorem normal_root_exists :
+    ∃ z : S, normalEquation.eval z = 0 ∧ z.constantCoeff = fieldCoordinate 0 :=
+  simple_root_lifts normalEquation normalEquation_monic (fieldCoordinate 0)
+    normalEquation_specializes normalEquation_simple
+
+def normalRoot : S := Classical.choose normal_root_exists
+
+theorem normalRoot_equation : normalEquation.eval normalRoot = 0 :=
+  (Classical.choose_spec normal_root_exists).1
+
+@[simp] theorem normalRoot_constantCoeff :
+    normalRoot.constantCoeff = fieldCoordinate 0 :=
+  (Classical.choose_spec normal_root_exists).2
+
+def normalCoordinates : Fin 5 → S :=
+  Fin.cases normalRoot (fun j => PowerSeries.C (fieldCoordinate j.succ))
+
+def normalExpansion : AmbientPoly 4 →+* S :=
+  MvPolynomial.eval₂Hom (PowerSeries.C.comp (affineMap.comp MvPolynomial.C)) normalCoordinates
+
+@[simp] theorem normalExpansion_C (c : ℂ) :
+    normalExpansion (MvPolynomial.C c) = PowerSeries.C (affineMap (MvPolynomial.C c)) := by
+  simp [normalExpansion]
+
+@[simp] theorem normalExpansion_X_zero :
+    normalExpansion (MvPolynomial.X (0 : Fin 5)) = normalRoot := by
+  simp [normalExpansion, normalCoordinates]
+
+@[simp] theorem normalExpansion_X_succ (j : Fin 4) :
+    normalExpansion (MvPolynomial.X j.succ) = PowerSeries.C (fieldCoordinate j.succ) := by
+  simp [normalExpansion, normalCoordinates]
+
+/-- The constant coefficient is exactly the previously constructed quotient
+map into the protected hypersurface function field, on every polynomial. -/
+theorem constantCoeff_normalExpansion (P : AmbientPoly 4) :
+    (normalExpansion P).constantCoeff = affineMap P := by
+  have h : (PowerSeries.constantCoeff (R := K)).comp normalExpansion = affineMap := by
+    apply MvPolynomial.ringHom_ext
+    · intro c
+      simp
+    · intro i
+      refine Fin.cases ?_ (fun j => ?_) i
+      · simp [fieldCoordinate]
+      · simp [fieldCoordinate]
+  exact RingHom.congr_fun h P
+
+/-- The normal parameter is the actual protected equation f. -/
+theorem normalExpansion_F : normalExpansion affineF = PowerSeries.X := by
+  have hf := congrArg normalExpansion affineF_formula
+  have hr := normalRoot_equation
+  have hc : normalExpansion (MvPolynomial.C (1 / 2 : ℂ)) =
+      PowerSeries.C (1 / 2 : K) := by
+    rw [normalExpansion_C]
+    congr 1
+    change (affineMap.comp MvPolynomial.C) (1 / 2 : ℂ) = _
+    rw [map_div₀, map_one, map_ofNat]
+  norm_num [normalEquation, Polynomial.eval_add, Polynomial.eval_mul,
+    Polynomial.eval_pow, Polynomial.eval_X, Polynomial.eval_C] at hr
+  simp only [map_add, map_mul, map_pow, map_one, hc] at hf
+  have h1 : normalExpansion (MvPolynomial.X (1 : Fin 5)) =
+      PowerSeries.C (fieldCoordinate 1) := normalExpansion_X_succ 0
+  have h2 : normalExpansion (MvPolynomial.X (2 : Fin 5)) =
+      PowerSeries.C (fieldCoordinate 2) := normalExpansion_X_succ 1
+  have h3 : normalExpansion (MvPolynomial.X (3 : Fin 5)) =
+      PowerSeries.C (fieldCoordinate 3) := normalExpansion_X_succ 2
+  have h4 : normalExpansion (MvPolynomial.X (4 : Fin 5)) =
+      PowerSeries.C (fieldCoordinate 4) := normalExpansion_X_succ 3
+  rw [hf]
+  simp only [normalExpansion_X_zero, h1, h2, h3, h4]
+  change 1 + normalRoot ^ 6 + PowerSeries.C (fieldCoordinate 1) ^ 6 +
+    PowerSeries.C (fieldCoordinate 2) ^ 6 + PowerSeries.C (fieldCoordinate 3) ^ 6 +
+    PowerSeries.C (fieldCoordinate 4) ^ 6 +
+      PowerSeries.C (1 / 2 : K) *
+        (normalRoot * PowerSeries.C (fieldCoordinate 2) * PowerSeries.C (fieldCoordinate 3) +
+          normalRoot ^ 3 * PowerSeries.C (fieldCoordinate 1) *
+            PowerSeries.C (fieldCoordinate 3) * PowerSeries.C (fieldCoordinate 4) +
+          PowerSeries.C (fieldCoordinate 1) ^ 3 * PowerSeries.C (fieldCoordinate 4) *
+            PowerSeries.C (fieldCoordinate 2)) = _
+  simp only [one_div]
+  linear_combination hr
+
+theorem normalExpansion_injective : Function.Injective normalExpansion := by
+  have hnonzero (P : AmbientPoly 4) (hP : P ≠ 0) : normalExpansion P ≠ 0 := by
+    obtain ⟨m, U, hFU, hfactor⟩ := WfDvdMonoid.max_power_factor hP affineF_irreducible
+    have hU : normalExpansion U ≠ 0 := by
+      intro h
+      have hc := congrArg (PowerSeries.constantCoeff (R := K)) h
+      rw [constantCoeff_normalExpansion, map_zero] at hc
+      exact hFU ((affineMap_kernel U).mp hc)
+    rw [hfactor, map_mul, map_pow, normalExpansion_F]
+    exact mul_ne_zero (pow_ne_zero _ PowerSeries.X_ne_zero) hU
+  intro P Q h
+  by_contra hn
+  exact hnonzero (P - Q) (sub_ne_zero.mpr hn) (by rw [map_sub, h, sub_self])
+
+abbrev Dt : Derivation K S S := PowerSeries.derivative K
+
+def normalVelocity : S := Dt normalRoot
+
+/-- Chain rule for every polynomial under the actual formal normal chart. -/
+theorem normalExpansion_chain_rule (P : AmbientPoly 4) :
+    Dt (normalExpansion P) = normalExpansion (pderiv 0 P) * normalVelocity := by
+  induction P using MvPolynomial.induction_on with
+  | C c => simp [Dt]
+  | add P Q ihP ihQ =>
+      simp only [map_add, ihP, ihQ, add_mul]
+  | mul_X P i ih =>
+      refine Fin.cases ?_ (fun j => ?_) i
+      · simp only [map_mul, Derivation.leibniz, normalExpansion_X_zero, ih,
+          normalVelocity, pderiv_mul, pderiv_X_self, mul_one, map_add,
+          smul_eq_mul]
+        ring
+      · simp only [map_mul, Derivation.leibniz, normalExpansion_X_succ, ih,
+          pderiv_mul, pderiv_X, Pi.single_apply, Fin.succ_ne_zero,
+          if_false, mul_zero, add_zero, map_add, map_zero, smul_eq_mul,
+          PowerSeries.derivative_C, mul_zero, zero_add]
+        ring
+
+theorem normal_velocity_identity :
+    normalExpansion (pderiv 0 affineF) * normalVelocity = 1 := by
+  have h := normalExpansion_chain_rule affineF
+  rw [normalExpansion_F, PowerSeries.derivative_X] at h
+  exact h.symm
+
+end CycleQ2NormalExpansion
+
+#print axioms CycleQ2NormalExpansion.normalExpansion_F
+#print axioms CycleQ2NormalExpansion.normalExpansion_injective
+#print axioms CycleQ2NormalExpansion.normalExpansion_chain_rule
+#print axioms CycleQ2NormalExpansion.normal_velocity_identity
+end
+end
+
+
+/- Component: continuation_2/AffineFormalResidue.lean -/
+section
+/-!
+The actual pole-three residue coefficient in a genuine formal normal chart.
+
+The normal chart sends f to T and holds the four other coordinates fixed.
+Its Jacobian in the normal direction is dx0/dT. We prove that the T^(-1)
+coefficient of A(x(T)) (dx0/dT) / T^3 is precisely the previously defined
+normal source divided by g. This supplies the local residue calculation;
+it does not assert geometric support or global de Rham vanishing.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 3000000
+noncomputable section
+
+namespace CycleQ2FormalResidue
+
+open MvPolynomial HodgeComputer CycleQ2AffineClearing CycleQ2AffineHypersurface
+  CycleQ2AffineResidueClosure CycleQ2NormalExpansion HoldoutConstruction
+open SplitHigherResidue
+
+abbrev K := AffineFunctionField
+abbrev S := PowerSeries K
+
+local instance coefficientCharZero : CharZero K :=
+  charZero_of_injective_algebraMap (algebraMap ℂ K).injective
+
+def normalG : K := affineMap (pderiv 0 affineF)
+def normalG1 : K := affineMap (pderiv 0 (pderiv 0 affineF))
+def normalG2 : K := affineMap (pderiv 0 (pderiv 0 (pderiv 0 affineF)))
+
+theorem normalG_ne_zero : normalG ≠ 0 := normal_ne_zero
+
+theorem velocity_first_identity :
+    normalExpansion (pderiv 0 (pderiv 0 affineF)) * normalVelocity ^ 2 +
+      normalExpansion (pderiv 0 affineF) * Dt normalVelocity = 0 := by
+  have h := congrArg Dt normal_velocity_identity
+  simp only [Derivation.leibniz, normalExpansion_chain_rule,
+    smul_eq_mul, Derivation.map_one_eq_zero] at h
+  linear_combination h
+
+theorem velocity_second_identity :
+    normalExpansion (pderiv 0 (pderiv 0 (pderiv 0 affineF))) * normalVelocity ^ 3 +
+      3 * normalExpansion (pderiv 0 (pderiv 0 affineF)) * normalVelocity * Dt normalVelocity +
+      normalExpansion (pderiv 0 affineF) * Dt (Dt normalVelocity) = 0 := by
+  have h := congrArg Dt velocity_first_identity
+  simp only [map_add, Derivation.leibniz, normalExpansion_chain_rule,
+    Derivation.leibniz_pow, smul_eq_mul, map_zero] at h
+  norm_num only [Nat.cast_ofNat, pow_one, Nat.reduceSub] at h
+  linear_combination h
+
+theorem velocity_constant : normalVelocity.constantCoeff = 1 / normalG := by
+  have h := congrArg (PowerSeries.constantCoeff (R := K)) normal_velocity_identity
+  simp only [map_mul, constantCoeff_normalExpansion, map_one] at h
+  apply (eq_div_iff normalG_ne_zero).mpr
+  simpa only [normalG, mul_comm] using h
+
+theorem velocity_first_constant :
+    (Dt normalVelocity).constantCoeff = -normalG1 / normalG ^ 3 := by
+  have h := congrArg (PowerSeries.constantCoeff (R := K)) velocity_first_identity
+  simp only [map_add, map_mul, map_pow, constantCoeff_normalExpansion, map_zero,
+    velocity_constant] at h
+  change normalG1 * (1 / normalG) ^ 2 +
+    normalG * (Dt normalVelocity).constantCoeff = 0 at h
+  apply (eq_div_iff (pow_ne_zero _ normalG_ne_zero)).mpr
+  field_simp [normalG_ne_zero] at h
+  linear_combination h
+
+theorem velocity_second_constant :
+    (Dt (Dt normalVelocity)).constantCoeff =
+      (3 * normalG1 ^ 2 - normalG * normalG2) / normalG ^ 5 := by
+  have h := congrArg (PowerSeries.constantCoeff (R := K)) velocity_second_identity
+  simp only [map_add, map_mul, map_pow, map_ofNat, constantCoeff_normalExpansion,
+    map_zero, velocity_constant, velocity_first_constant] at h
+  change normalG2 * (1 / normalG) ^ 3 +
+    3 * normalG1 * (1 / normalG) * (-normalG1 / normalG ^ 3) +
+    normalG * (Dt (Dt normalVelocity)).constantCoeff = 0 at h
+  apply (eq_div_iff (pow_ne_zero _ normalG_ne_zero)).mpr
+  field_simp [normalG_ne_zero] at h
+  linear_combination h
+
+def densityStream (A : AmbientPoly 4) : S := normalExpansion A * normalVelocity
+
+theorem densityStream_second_derivative (A : AmbientPoly 4) :
+    Dt (Dt (densityStream A)) =
+      normalExpansion (pderiv 0 (pderiv 0 A)) * normalVelocity ^ 3 +
+        3 * normalExpansion (pderiv 0 A) * normalVelocity * Dt normalVelocity +
+        normalExpansion A * Dt (Dt normalVelocity) := by
+  simp only [densityStream, Derivation.leibniz, map_add, normalExpansion_chain_rule,
+    smul_eq_mul]
+  ring
+
+/-- The normal Taylor coefficient is the actual residue density used in
+the protected affine exactness criterion. -/
+theorem densityStream_coefficient_two (A : AmbientPoly 4) :
+    PowerSeries.coeff 2 (densityStream A) = affineNormalSource A / normalG := by
+  have hcoef := PowerSeries.constantCoeff_iterate_derivative (densityStream A) 2
+  norm_num only [Function.iterate_succ_apply', Function.iterate_zero_apply,
+    Nat.factorial_succ, Nat.factorial_zero, Nat.cast_mul, Nat.cast_ofNat,
+    Nat.cast_one, mul_one] at hcoef
+  have hderiv := congrArg (PowerSeries.constantCoeff (R := K))
+    (densityStream_second_derivative A)
+  simp only [map_add, map_mul, map_pow, map_ofNat, constantCoeff_normalExpansion,
+    velocity_constant, velocity_first_constant, velocity_second_constant] at hderiv
+  have he : PowerSeries.coeff 2 (densityStream A) =
+      (affineMap (pderiv 0 (pderiv 0 A)) * (1 / normalG) ^ 3 +
+        3 * affineMap (pderiv 0 A) * (1 / normalG) * (-normalG1 / normalG ^ 3) +
+        affineMap A * ((3 * normalG1 ^ 2 - normalG * normalG2) / normalG ^ 5)) / 2 := by
+    rw [hcoef] at hderiv
+    apply (eq_div_iff (by norm_num : (2 : K) ≠ 0)).mpr
+    simpa only [mul_comm] using hderiv
+  rw [he]
+  unfold affineNormalSource normalSourceTwo normalG normalG1 normalG2
+  field_simp [normal_ne_zero]
+  ring
+
+/-- The density of the actual pulled-back pole-three form in the genuine
+normal chart. Its denominator is the image of f, not a formal replacement. -/
+def poleThreeDensity (A : AmbientPoly 4) : HahnSeries ℤ K :=
+  HahnSeries.ofPowerSeries ℤ K (normalExpansion A) /
+      (HahnSeries.ofPowerSeries ℤ K (normalExpansion affineF)) ^ 3 *
+    HahnSeries.ofPowerSeries ℤ K normalVelocity
+
+theorem poleThreeDensity_expansion (A : AmbientPoly 4) :
+    poleThreeDensity A = HahnSeries.ofPowerSeries ℤ K (densityStream A) *
+      HahnSeries.single (-3) 1 := by
+  simp only [poleThreeDensity, normalExpansion_F, HahnSeries.ofPowerSeries_X,
+    div_eq_mul_inv, HahnSeries.single_pow, nsmul_eq_mul, one_pow,
+    HahnSeries.inv_single, inv_one, densityStream, map_mul]
+  norm_num
+  ring
+
+/-- The Laurent residue of the actual pole-three normal pullback is c/g. -/
+theorem poleThreeDensity_residue (A : AmbientPoly 4) :
+    (poleThreeDensity A).coeff (-1) = affineNormalSource A / normalG := by
+  rw [poleThreeDensity_expansion, HahnSeries.coeff_mul_single]
+  norm_num only [Int.reduceSub, mul_one]
+  change (HahnSeries.ofPowerSeries ℤ K (densityStream A)).coeff ((2 : ℕ) : ℤ) = _
+  rw [HahnSeries.ofPowerSeries_apply_coeff, densityStream_coefficient_two]
+
+/-- Binding to the genuine exterior form used by the certificate theorem.
+The coefficient is computed from the actual normal pullback, not postulated. -/
+theorem residueSourceForm_eq_formalResidue (A : AmbientPoly 4) :
+    CycleQ2AffineExactness.residueSourceForm A =
+      (poleThreeDensity A).coeff (-1) • CycleQ2AffineExterior.volume := by
+  rw [poleThreeDensity_residue]
+  rfl
+
+end CycleQ2FormalResidue
+
+#print axioms CycleQ2FormalResidue.densityStream_coefficient_two
+#print axioms CycleQ2FormalResidue.poleThreeDensity_residue
+#print axioms CycleQ2FormalResidue.residueSourceForm_eq_formalResidue
+end
+end
+
+
+/- Component: continuation_2/NormalChartDerivations.lean -/
+section
+/-!+# Actual coordinate derivations and Jacobian of the formal normal chart
+
+The coefficient derivations are the actual complex tangent derivations of
+the protected affine function field, extended coefficient by coefficient.
+The formal parameter is held constant.  The normal derivative and the four
+tangent derivations therefore give the implicit-coordinate Jacobian of the
+faithful chart already constructed from `f ↦ T`.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 2000000
+noncomputable section
+
+namespace CycleQ2PowerSeriesTangents
+
+variable {C K : Type*} [CommRing C] [CommRing K] [Algebra C K]
+
+def coefficientwise (D : Derivation C K K) (f : PowerSeries K) : PowerSeries K :=
+  PowerSeries.mk fun n => D (PowerSeries.coeff n f)
+
+@[simp] theorem coefficientwise_coeff (D : Derivation C K K) (f : PowerSeries K) (n : ℕ) :
+    PowerSeries.coeff n (coefficientwise D f) = D (PowerSeries.coeff n f) := by
+  simp [coefficientwise]
+
+theorem coefficientwise_mul (D : Derivation C K K) (f g : PowerSeries K) :
+    coefficientwise D (f * g) = f * coefficientwise D g + g * coefficientwise D f := by
+  rw [mul_comm g (coefficientwise D f)]
+  ext n
+  simp only [coefficientwise_coeff, PowerSeries.coeff_mul, map_sum, map_add,
+    Derivation.leibniz, smul_eq_mul, Finset.sum_add_distrib]
+  congr 1
+  apply Finset.sum_congr rfl
+  intro ij hij
+  ring
+
+/-- Coefficientwise extension as an actual complex-linear derivation. -/
+def extend (D : Derivation C K K) : Derivation C (PowerSeries K) (PowerSeries K) where
+  toFun := coefficientwise D
+  map_add' f g := by
+    ext n
+    simp
+  map_smul' c f := by
+    ext n
+    simp only [coefficientwise_coeff, PowerSeries.coeff_smul, Derivation.map_smul,
+      RingHom.id_apply]
+  map_one_eq_zero' := by
+    ext n
+    by_cases hn : n = 0 <;> simp [PowerSeries.coeff_one, hn]
+  leibniz' f g := by
+    change coefficientwise D (f * g) = f * coefficientwise D g + g * coefficientwise D f
+    exact coefficientwise_mul D f g
+
+@[simp] theorem extend_coeff (D : Derivation C K K) (f : PowerSeries K) (n : ℕ) :
+    PowerSeries.coeff n (extend D f) = D (PowerSeries.coeff n f) :=
+  coefficientwise_coeff D f n
+
+@[simp] theorem extend_C (D : Derivation C K K) (a : K) :
+    extend D (PowerSeries.C a) = PowerSeries.C (D a) := by
+  ext n
+  by_cases hn : n = 0 <;> simp [PowerSeries.coeff_C, hn]
+
+@[simp] theorem extend_X (D : Derivation C K K) : extend D PowerSeries.X = 0 := by
+  ext n
+  by_cases hn : n = 1 <;> simp [PowerSeries.coeff_X, hn]
+
+theorem extend_commute (D E : Derivation C K K) (h : Function.Commute D E) :
+    Function.Commute (extend D) (extend E) := by
+  intro f
+  ext n
+  simpa only [extend_coeff] using h (PowerSeries.coeff n f)
+
+theorem derivative_extend_commute (D : Derivation C K K) :
+    Function.Commute (PowerSeries.derivative K) (extend D) := by
+  intro f
+  ext n
+  simp [PowerSeries.coeff_derivative, Derivation.leibniz, smul_eq_mul, mul_comm]
+
+end CycleQ2PowerSeriesTangents
+
+namespace CycleQ2PolynomialChainRule
+
+open MvPolynomial
+
+variable {R B M σ : Type*} [CommRing R] [CommRing B] [Algebra R B]
+  [Fintype σ] [DecidableEq σ] [AddCommGroup M] [Module B M] [Module R M]
+
+/-- The genuine derivation chain rule for any polynomial algebra map. -/
+theorem apply (φ : MvPolynomial σ R →ₐ[R] B) (δ : Derivation R B M)
+    (P : MvPolynomial σ R) :
+    δ (φ P) = ∑ i : σ, φ (pderiv i P) • δ (φ (X i)) := by
+  induction P using MvPolynomial.induction_on with
+  | C c =>
+      have hc : φ (MvPolynomial.C c) = algebraMap R B c := φ.commutes c
+      rw [hc, Derivation.map_algebraMap]
+      simp
+  | add P Q ihP ihQ =>
+      simp only [map_add, ihP, ihQ, add_smul, Finset.sum_add_distrib]
+  | mul_X P i ih =>
+      have hs :
+          (∑ j : σ, (φ (pderiv j P) * φ (X i)) • δ (φ (X j))) =
+          φ (X i) • ∑ j : σ, φ (pderiv j P) • δ (φ (X j)) := by
+        rw [Finset.smul_sum]
+        apply Finset.sum_congr rfl
+        intro j hj
+        rw [smul_smul]
+        congr 1
+        ring
+      have hd :
+          (∑ j : σ, (φ P * φ (pderiv j (X i))) • δ (φ (X j))) =
+          φ P • δ (φ (X i)) := by
+        simp [pderiv_X, Pi.single_apply, apply_ite]
+      rw [map_mul, Derivation.leibniz, ih]
+      simp only [pderiv_mul, map_add, map_mul, add_smul, Finset.sum_add_distrib]
+      rw [hs, hd]
+      exact add_comm _ _
+
+end CycleQ2PolynomialChainRule
+
+namespace CycleQ2NormalChart
+
+open MvPolynomial HodgeComputer CycleQ2AffineClearing CycleQ2AffineHypersurface
+  CycleQ2AffineDifferentials CycleQ2FormalSpecialization CycleQ2NormalExpansion
+
+abbrev K := AffineFunctionField
+abbrev S := PowerSeries K
+
+def normalAlgHom : AmbientPoly 4 →ₐ[ℂ] S where
+  toRingHom := normalExpansion
+  commutes' c := by
+    change normalExpansion (MvPolynomial.C c) = algebraMap ℂ S c
+    rw [normalExpansion_C, PowerSeries.algebraMap_apply]
+    rfl
+
+def tangent (j : Fin 4) : Derivation ℂ S S :=
+  CycleQ2PowerSeriesTangents.extend (complexTangent j)
+
+def parameterDerivative : Derivation ℂ S S :=
+  (PowerSeries.derivative K).restrictScalars ℂ
+
+@[simp] theorem parameterDerivative_apply (f : S) : parameterDerivative f = Dt f := rfl
+
+@[simp] theorem tangent_C (j : Fin 4) (a : K) :
+    tangent j (PowerSeries.C a) = PowerSeries.C (affineTangent j a) := by
+  exact CycleQ2PowerSeriesTangents.extend_C (complexTangent j) a
+
+@[simp] theorem tangent_X (j : Fin 4) : tangent j PowerSeries.X = 0 :=
+  CycleQ2PowerSeriesTangents.extend_X (complexTangent j)
+
+@[simp] theorem tangent_coordinate (j i : Fin 4) :
+    tangent j (PowerSeries.C (fieldCoordinate i.succ)) = if i = j then 1 else 0 := by
+  rw [tangent_C]
+  simp only [fieldCoordinate, affineTangent_coordinate]
+  split_ifs <;> simp
+
+theorem tangent_normalExpansion_chain (j : Fin 4) (P : AmbientPoly 4) :
+    tangent j (normalExpansion P) =
+      normalExpansion (pderiv 0 P) * tangent j normalRoot +
+        normalExpansion (pderiv j.succ P) := by
+  have h := CycleQ2PolynomialChainRule.apply normalAlgHom (tangent j) P
+  change tangent j (normalExpansion P) =
+    ∑ i : Fin 5, normalExpansion (pderiv i P) * tangent j (normalExpansion (X i)) at h
+  rw [Fin.sum_univ_succ] at h
+  simpa only [normalExpansion_X_zero, normalExpansion_X_succ, tangent_coordinate,
+    mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ, if_true] using h
+
+theorem tangent_normalRoot (j : Fin 4) :
+    tangent j normalRoot = -normalVelocity * normalExpansion (pderiv j.succ affineF) := by
+  have h := tangent_normalExpansion_chain j affineF
+  rw [normalExpansion_F, tangent_X] at h
+  calc
+    tangent j normalRoot =
+        (normalExpansion (pderiv 0 affineF) * normalVelocity) * tangent j normalRoot := by
+      rw [normal_velocity_identity, one_mul]
+    _ = -normalVelocity * normalExpansion (pderiv j.succ affineF) := by
+      linear_combination -normalVelocity * h
+
+/-- The actual implicit-coordinate derivative with `f` held equal to the
+formal parameter.  Its reciprocal normal derivative is the proved velocity. -/
+theorem tangent_normalExpansion (j : Fin 4) (P : AmbientPoly 4) :
+    tangent j (normalExpansion P) = normalExpansion (pderiv j.succ P) -
+      normalVelocity * normalExpansion (pderiv j.succ affineF) *
+        normalExpansion (pderiv 0 P) := by
+  rw [tangent_normalExpansion_chain, tangent_normalRoot]
+  ring
+
+theorem tangents_commute (i j : Fin 4) : Function.Commute (tangent i) (tangent j) := by
+  apply CycleQ2PowerSeriesTangents.extend_commute
+  exact affineTangents_commute i j
+
+theorem parameter_tangent_commute (j : Fin 4) :
+    Function.Commute parameterDerivative (tangent j) :=
+  CycleQ2PowerSeriesTangents.derivative_extend_commute (complexTangent j)
+
+/-- The coordinate derivations are ordered `(∂T,E₁,E₂,E₃,E₄)`. -/
+def coordinateDerivative : Fin 5 → Derivation ℂ S S :=
+  Fin.cases parameterDerivative tangent
+
+/-- Rows are coordinate derivations; columns are the five original affine
+coordinate functions after the actual normal substitution. -/
+def jacobian : Matrix (Fin 5) (Fin 5) S :=
+  fun i j => coordinateDerivative i (normalExpansion (X j))
+
+theorem jacobian_zero_row (i : Fin 5) :
+    jacobian 0 i = if i = 0 then normalVelocity else 0 := by
+  refine Fin.cases ?_ (fun j => ?_) i
+  · simp [jacobian, coordinateDerivative, normalVelocity]
+  · simp [jacobian, coordinateDerivative, Dt]
+
+theorem jacobian_succ_zero (j : Fin 4) :
+    jacobian j.succ 0 = -normalVelocity * normalExpansion (pderiv j.succ affineF) := by
+  simpa [jacobian, coordinateDerivative] using tangent_normalRoot j
+
+theorem jacobian_succ_succ (i j : Fin 4) :
+    jacobian i.succ j.succ = if j = i then 1 else 0 := by
+  change tangent i (normalExpansion (X j.succ)) = _
+  rw [normalExpansion_X_succ, tangent_coordinate]
+
+/-- The determinant is the actual normal velocity, with positive sign in
+the stipulated parameter-first coordinate order. -/
+theorem jacobian_det : Matrix.det jacobian = normalVelocity := by
+  have hminor : jacobian.submatrix Fin.succ Fin.succ =
+      (1 : Matrix (Fin 4) (Fin 4) S) := by
+    ext i j
+    simp [Matrix.submatrix, jacobian_succ_succ, Matrix.one_apply, eq_comm]
+  rw [Matrix.det_succ_row_zero]
+  simp [jacobian_zero_row, hminor]
+
+/-! The algebraic Kähler module of a power-series ring need not be generated
+by these five coordinate differentials.  The following argument instead
+differentiates the actual polynomial relation inside that entire module. -/
+
+abbrev Omega := Ω[S⁄ℂ]
+abbrev universalD : Derivation ℂ S Omega := KaehlerDifferential.D ℂ S
+abbrev TopForm := ⋀[S]^5 Omega
+
+theorem normalExpansion_complex_constant (c : ℂ) :
+    normalExpansion (MvPolynomial.C c) = algebraMap ℂ S c := by
+  rw [normalExpansion_C, PowerSeries.algebraMap_apply]
+  rfl
+
+/-- The universal polynomial chain rule in the full algebraic Kähler module
+of the power-series ring; no finite-rank or continuity assertion is used. -/
+theorem universal_polynomial_differential (P : AmbientPoly 4) :
+    universalD (normalExpansion P) =
+      ∑ i : Fin 5, normalExpansion (pderiv i P) • universalD (normalExpansion (X i)) := by
+  exact CycleQ2PolynomialChainRule.apply normalAlgHom universalD P
+
+def tangentDifferential (j : Fin 4) : Omega :=
+  universalD (PowerSeries.C (fieldCoordinate j.succ))
+
+theorem universal_normal_differential :
+    universalD normalRoot = normalVelocity • universalD PowerSeries.X -
+      ∑ j : Fin 4, (normalVelocity * normalExpansion (pderiv j.succ affineF)) •
+        tangentDifferential j := by
+  have h := universal_polynomial_differential affineF
+  rw [normalExpansion_F, Fin.sum_univ_succ] at h
+  simp only [normalExpansion_X_zero, normalExpansion_X_succ] at h
+  have hm := congrArg (fun η : Omega => normalVelocity • η) h
+  have hv : normalVelocity * normalExpansion (pderiv 0 affineF) = 1 := by
+    rw [mul_comm, normal_velocity_identity]
+  simp only [smul_add, Finset.smul_sum, smul_smul, hv, one_smul] at hm
+  exact (eq_sub_iff_add_eq).mpr hm.symm
+
+private def wedgeWithTangents : Omega →ₗ[S] TopForm where
+  toFun a := exteriorPower.ιMulti S 5 (Matrix.vecCons a tangentDifferential)
+  map_add' a b := (exteriorPower.ιMulti S 5).map_vecCons_add tangentDifferential a b
+  map_smul' c a := (exteriorPower.ιMulti S 5).map_vecCons_smul tangentDifferential c a
+
+private theorem wedgeWithTangents_tangent (j : Fin 4) :
+    wedgeWithTangents (tangentDifferential j) = 0 := by
+  apply (exteriorPower.ιMulti S 5).map_eq_zero_of_eq
+    (Matrix.vecCons (tangentDifferential j) tangentDifferential)
+    (i := 0) (j := j.succ)
+  · simp
+  · exact (Fin.succ_ne_zero j).symm
+
+/-- The ordered coordinate volume `dT ∧ dx₁ ∧ ... ∧ dx₄` in the actual
+universal exterior power of the formal chart ring. -/
+def normalVolume : TopForm :=
+  exteriorPower.ιMulti S 5 (Matrix.vecCons (universalD PowerSeries.X) tangentDifferential)
+
+/-- The wedge of the actual universal differentials of the substituted
+five affine coordinates: the coordinate-generator exterior pullback. -/
+def pulledBackCoordinateVolume : TopForm :=
+  exteriorPower.ιMulti S 5 (fun i : Fin 5 => universalD (normalExpansion (X i)))
+
+/-- The Jacobian factor also holds in genuine universal exterior forms,
+not merely after evaluating against the five coordinate derivations. -/
+theorem pulledBackCoordinateVolume_eq :
+    pulledBackCoordinateVolume = normalVelocity • normalVolume := by
+  have ht : (fun i : Fin 5 => universalD (normalExpansion (X i))) =
+      Matrix.vecCons (universalD normalRoot) tangentDifferential := by
+    funext i
+    refine Fin.cases ?_ (fun j => ?_) i
+    · simp
+    · simp [tangentDifferential]
+  unfold pulledBackCoordinateVolume
+  rw [ht]
+  change wedgeWithTangents (universalD normalRoot) = _
+  rw [universal_normal_differential, map_sub, map_smul, map_sum]
+  simp only [map_smul, wedgeWithTangents_tangent, smul_zero,
+    Finset.sum_const_zero, sub_zero]
+  rfl
+
+section UniversalExteriorPullback
+
+abbrev AmbientOmega := Ω[(AmbientPoly 4)⁄ℂ]
+
+local instance normalAlgebra : Algebra (AmbientPoly 4) S :=
+  normalAlgHom.toRingHom.toAlgebra
+
+local instance normalOmegaModule : Module (AmbientPoly 4) Omega :=
+  Module.compHom Omega normalAlgHom.toRingHom
+
+local instance normalTopModule : Module (AmbientPoly 4) TopForm :=
+  Module.compHom TopForm normalAlgHom.toRingHom
+
+local instance normalOmegaTower : IsScalarTower (AmbientPoly 4) S Omega where
+  smul_assoc a b η := by
+    change (normalAlgHom a * b) • η = normalAlgHom a • (b • η)
+    exact mul_smul _ _ _
+
+local instance normalTopTower : IsScalarTower (AmbientPoly 4) S TopForm where
+  smul_assoc a b η := by
+    change (normalAlgHom a * b) • η = normalAlgHom a • (b • η)
+    exact mul_smul _ _ _
+
+local instance normalComplexOmegaTower : IsScalarTower ℂ (AmbientPoly 4) Omega where
+  smul_assoc c a η := by
+    change normalAlgHom (c • a) • η = c • (normalAlgHom a • η)
+    rw [map_smul]
+    exact smul_assoc _ _ _
+
+/-- The actual map of universal one-forms induced by the normal chart. -/
+def oneFormPullback : AmbientOmega →ₗ[AmbientPoly 4] Omega :=
+  (universalD.compAlgebraMap (AmbientPoly 4)).liftKaehlerDifferential
+
+@[simp] theorem oneFormPullback_D (P : AmbientPoly 4) :
+    oneFormPullback (KaehlerDifferential.D ℂ (AmbientPoly 4) P) =
+      universalD (normalExpansion P) := by
+  rw [oneFormPullback, Derivation.liftKaehlerDifferential_comp_D]
+  rfl
+
+private def targetWedgeOverAmbient :
+    Omega [⋀^Fin 5]→ₗ[AmbientPoly 4] TopForm where
+  toMultilinearMap := (exteriorPower.ιMulti S 5).toMultilinearMap.restrictScalars (AmbientPoly 4)
+  map_eq_zero_of_eq' := (exteriorPower.ιMulti S 5).map_eq_zero_of_eq
+
+/-- The induced exterior pullback, defined by the universal alternating
+property and the genuine one-form pullback. -/
+def exteriorPullback : (⋀[AmbientPoly 4]^5 AmbientOmega) →ₗ[AmbientPoly 4] TopForm :=
+  exteriorPower.alternatingMapLinearEquiv
+    (targetWedgeOverAmbient.compLinearMap oneFormPullback)
+
+def ambientCoordinateVolume : ⋀[AmbientPoly 4]^5 AmbientOmega :=
+  exteriorPower.ιMulti (AmbientPoly 4) 5
+    (fun i : Fin 5 => KaehlerDifferential.D ℂ (AmbientPoly 4) (X i))
+
+theorem exteriorPullback_ambientCoordinateVolume :
+    exteriorPullback ambientCoordinateVolume = normalVelocity • normalVolume := by
+  rw [exteriorPullback, ambientCoordinateVolume,
+    exteriorPower.alternatingMapLinearEquiv_apply_ιMulti,
+    AlternatingMap.compLinearMap_apply]
+  simp only [oneFormPullback_D]
+  exact pulledBackCoordinateVolume_eq
+
+end UniversalExteriorPullback
+
+end CycleQ2NormalChart
+
+#print axioms CycleQ2PowerSeriesTangents.extend
+#print axioms CycleQ2NormalChart.tangent_normalExpansion
+#print axioms CycleQ2NormalChart.jacobian_det
+#print axioms CycleQ2NormalChart.universal_normal_differential
+#print axioms CycleQ2NormalChart.pulledBackCoordinateVolume_eq
+#print axioms CycleQ2NormalChart.exteriorPullback_ambientCoordinateVolume
+end
+end
+
+
+/- Component: continuation_2/PureM2Certificate.lean -/
+section
+/-!+# An exact certificate along the genuine one-term Fermat deformation
+
+For every complex parameter `s`, this module gives a complete certificate for
+`sum X_i^6 + s * X₂^3 X₀ X₅ X₃`, with the original protected source monomial.
+The denominator is `36 * (X₂^6+X₅^6) * (X₁^6+X₄^6)`.  The factor 36 clears
+the rational scalar coefficients of the vector field.  This is a distinct
+one-term family, not an assertion about the protected three-term sextic.
+-/
+
+noncomputable section
+namespace CycleQ2PureM2
+
+set_option maxRecDepth 10000
+
+open MvPolynomial HodgeComputer
+
+abbrev Poly := AmbientPoly 5
+abbrev A : Poly := HodgeSubmission.A
+
+def U : Poly := X 2 ^ 6 + X 5 ^ 6
+def V : Poly := X 1 ^ 6 + X 4 ^ 6
+def M : Poly := X 2 ^ 3 * X 0 * X 5 * X 3
+def F (s : ℂ) : Poly :=
+  X 0 ^ 6 + X 1 ^ 6 + X 2 ^ 6 + X 3 ^ 6 + X 4 ^ 6 + X 5 ^ 6 + C s * M
+
+def D : Poly := C 36 * (U * V)
+
+def N (s : ℂ) : Fin 6 → Poly :=
+  ![0, C (-2 * s) * (A * M * X 1), C 3 * (A * V * X 2),
+    0, C (-2 * s) * (A * M * X 4), C 3 * (A * V * X 5)]
+
+theorem U_homogeneous : U.IsHomogeneous 6 := by
+  exact (isHomogeneous_X_pow (2 : Fin 6) 6).add (isHomogeneous_X_pow 5 6)
+
+theorem V_homogeneous : V.IsHomogeneous 6 := by
+  exact (isHomogeneous_X_pow (1 : Fin 6) 6).add (isHomogeneous_X_pow 4 6)
+
+theorem M_homogeneous : M.IsHomogeneous 6 := by
+  have hx (i : Fin 6) : (X i : Poly).IsHomogeneous 1 := isHomogeneous_X ℂ i
+  simpa [M] using ((((hx 2).pow 3).mul (hx 0)).mul (hx 5)).mul (hx 3)
+
+theorem F_homogeneous (s : ℂ) : (F s).IsHomogeneous 6 := by
+  exact ((((((isHomogeneous_X_pow (0 : Fin 6) 6).add
+    (isHomogeneous_X_pow 1 6)).add (isHomogeneous_X_pow 2 6)).add
+    (isHomogeneous_X_pow 3 6)).add (isHomogeneous_X_pow 4 6)).add
+    (isHomogeneous_X_pow 5 6)).add (M_homogeneous.C_mul s)
+
+theorem D_homogeneous : D.IsHomogeneous 12 := by
+  simpa [D] using (U_homogeneous.mul V_homogeneous).C_mul (36 : ℂ)
+
+theorem D_ne_zero : D ≠ 0 := by
+  intro h
+  have hh := congrArg (MvPolynomial.eval (fun _ : Fin 6 => (1 : ℂ))) h
+  norm_num [D, U, V] at hh
+
+theorem D_totalDegree : D.totalDegree = 12 := D_homogeneous.totalDegree D_ne_zero
+
+theorem N_homogeneous (s : ℂ) (i : Fin 6) : (N s i).IsHomogeneous 19 := by
+  have hA : A.IsHomogeneous 12 := CycleQ2Workspace.originalA_homogeneous
+  have hx (j : Fin 6) : (X j : Poly).IsHomogeneous 1 := isHomogeneous_X ℂ j
+  have hU (j : Fin 6) : (C (3 : ℂ) * (A * V * X j)).IsHomogeneous 19 := by
+    simpa using ((hA.mul V_homogeneous).mul (hx j)).C_mul (3 : ℂ)
+  have hM (j : Fin 6) : (C (-2 * s) * (A * M * X j)).IsHomogeneous 19 := by
+    simpa using ((hA.mul M_homogeneous).mul (hx j)).C_mul (-2 * s)
+  fin_cases i
+  · exact isHomogeneous_zero (Fin 6) ℂ 19
+  · exact hM 1
+  · exact hU 2
+  · exact isHomogeneous_zero (Fin 6) ℂ 19
+  · exact hM 4
+  · exact hU 5
+
+/- The elementary univariate retraction and monic argument also used for the
+Fermat subset denominators.  Here the perturbation is linear in `X 0`, so it
+preserves monicity and both denominator factors are constant in this variable. -/
+private def toUni : Poly →+* Polynomial Poly :=
+  MvPolynomial.eval₂Hom (Polynomial.C.comp MvPolynomial.C)
+    (fun i => if i = 0 then Polynomial.X else Polynomial.C (X i))
+
+private def fromUni : Polynomial Poly →+* Poly :=
+  Polynomial.eval₂RingHom (RingHom.id Poly) (X 0)
+
+private theorem retract : fromUni.comp toUni = RingHom.id Poly := by
+  apply MvPolynomial.ringHom_ext
+  · intro c
+    simp [toUni, fromUni]
+  · intro i
+    by_cases hi : i = 0 <;> simp [toUni, fromUni, hi]
+
+private theorem monic_relPrime_constant {R : Type*} [CommRing R] [IsDomain R]
+    {f : Polynomial R} (hf : f.Monic) {c : R} (hc : c ≠ 0) :
+    IsRelPrime f (Polynomial.C c) := by
+  intro p hpf hpc
+  by_contra hunit
+  have hpos := Polynomial.natDegree_pos_of_not_isUnit_of_dvd_monic hf hunit hpf
+  have hle := Polynomial.natDegree_le_of_dvd hpc (Polynomial.C_ne_zero.mpr hc)
+  simp only [Polynomial.natDegree_C] at hle
+  omega
+
+private theorem toUni_F_monic (s : ℂ) : (toUni (F s)).Monic := by
+  have hrepr : toUni (F s) = (Polynomial.X : Polynomial Poly) ^ 6 +
+      (Polynomial.C (C s * X 2 ^ 3 * X 5 * X 3) * Polynomial.X +
+       Polynomial.C (X 1 ^ 6 + X 2 ^ 6 + X 3 ^ 6 + X 4 ^ 6 + X 5 ^ 6)) := by
+    simp [toUni, F, M]
+    ring
+  rw [hrepr]
+  apply Polynomial.monic_X_pow_add
+  exact (Polynomial.degree_add_le_of_le (Polynomial.degree_C_mul_X_le _)
+    Polynomial.degree_C_le).trans_lt (by norm_num)
+
+private theorem toUni_D : toUni D = Polynomial.C D := by
+  simp [toUni, D, U, V]
+
+theorem F_ne_zero (s : ℂ) : F s ≠ 0 := by
+  intro h
+  exact (toUni_F_monic s).ne_zero (by rw [h, map_zero])
+
+theorem denominator_legal (s : ℂ) : IsRelPrime (F s) D := by
+  apply HodgeComputer.relPrime_of_retract toUni fromUni retract
+  rw [toUni_D]
+  exact monic_relPrime_constant (toUni_F_monic s) D_ne_zero
+
+private theorem sum_six (f : Fin 6 → Poly) :
+    ∑ i, f i = f 0 + (f 1 + (f 2 + (f 3 + (f 4 + f 5)))) := by
+  simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero]
+  rfl
+
+set_option maxHeartbeats 2000000 in
+theorem normalized_directional (s : ℂ) :
+    (2 : Poly) * HodgeTestbed.directional (F s) (N s) = A * D := by
+  unfold HodgeTestbed.directional
+  rw [sum_six]
+  simp [F, N, A,
+    HodgeSubmission.A, D, U, V, M, map_add, pderiv_X, map_mul, map_neg, map_ofNat]
+  ring
+
+set_option maxHeartbeats 2000000 in
+theorem divergence_zero (s : ℂ) : HodgeTestbed.divergenceNumerator D (N s) = 0 := by
+  have h2 (i : Fin 6) : pderiv i (2 : Poly) = 0 := (pderiv i).map_natCast 2
+  have h3 (i : Fin 6) : pderiv i (3 : Poly) = 0 := (pderiv i).map_natCast 3
+  have h36 (i : Fin 6) : pderiv i (36 : Poly) = 0 := (pderiv i).map_natCast 36
+  unfold HodgeTestbed.divergenceNumerator HodgeTestbed.divergence HodgeTestbed.directional
+  rw [sum_six, sum_six]
+  simp [N, A, HodgeSubmission.A,
+    D, U, V, M, map_add, pderiv_mul, pderiv_X,
+    h2, h3, h36, map_mul, map_neg, map_ofNat]
+  ring
+
+theorem verified (s : ℂ) : Verify (F s) A 6 2 D (N s) 0 where
+  hypersurface_ne_zero := F_ne_zero s
+  hypersurface_homogeneous := F_homogeneous s
+  source_homogeneous := by
+    simpa using Homogeneous.of_isHomogeneous CycleQ2Workspace.originalA_homogeneous
+  denominator_ne_zero := D_ne_zero
+  denominator_homogeneous := by simpa only [D_totalDegree] using D_homogeneous
+  numerator_homogeneous := by
+    intro i
+    simpa [D_totalDegree] using Homogeneous.of_isHomogeneous (N_homogeneous s i)
+  denominator_legal := denominator_legal s
+  identity := normalized_identity (normalized_directional s) (by
+    simpa only [mul_zero] using divergence_zero s)
+
+/-- A complete, unconditional certificate along this one-term family. -/
+theorem hasCertificate (s : ℂ) : HasCertificate (F s) 2 HodgeSubmission.A :=
+  (verified s).hasCertificate
+
+end CycleQ2PureM2
+
+#print axioms CycleQ2PureM2.denominator_legal
+#print axioms CycleQ2PureM2.normalized_directional
+#print axioms CycleQ2PureM2.divergence_zero
+#print axioms CycleQ2PureM2.hasCertificate
+end
+end
+
+
+/- Component: continuation_2/CartierMatrixFactorization.lean -/
+section
+/-!
+# Actual polynomial resolution data for the invariant Cartier curve
+
+All entries below are literal polynomials over an arbitrary commutative ring.
+The six by six matrices factor the actual cubic a^3-b^3+c^3+d^3.
+The augmentation is the previously constructed elliptic-sextic residual ideal.
+The two original second syzygies alone do not give the full hypersurface
+resolution: the four columns of H0 are necessary.
+
+No geometric deformation theorem or characteristic-zero rank lifting is
+asserted in this file.
+-/
+
+set_option autoImplicit false
+set_option maxHeartbeats 2000000
+
+namespace CycleQ2CartierResolution
+
+variable {R : Type*} [CommRing R] (a b c d : R)
+
+def cubic : R := a ^ 3 - b ^ 3 + c ^ 3 + d ^ 3
+
+def first : Matrix (Fin 4) (Fin 6) R :=
+  !![a^2, b^2, -c^2, d^2, a*d, -b*c;
+     c, -d, a, -b, 0, 0;
+     b, a, 0, 0, c, -d;
+     0, 0, d, c, b, a]
+
+def second : Matrix (Fin 6) (Fin 2) R :=
+  !![d, 0; c, 0; 0, b; 0, a; -a, -d; b, -c]
+
+def homotopy0 : Matrix (Fin 6) (Fin 4) R :=
+  !![a, c^2, -b^2, b*c;
+     -b, -d^2, a^2, a*d;
+     -c, a^2, a*d, d^2;
+     d, b^2, -b*c, c^2;
+     0, -b*c, c^2, -b^2;
+     0, -a*d, -d^2, a^2]
+
+def homotopy1 : Matrix (Fin 2) (Fin 6) R :=
+  !![d^2, c^2, -b*c, -a*d, -a^2, -b^2;
+     -a*d, b*c, -b^2, a^2, -d^2, -c^2]
+
+def even : Matrix (Fin 6) (Fin 6) R :=
+  !![d, 0, a, c^2, -b^2, b*c;
+     c, 0, -b, -d^2, a^2, a*d;
+     0, b, -c, a^2, a*d, d^2;
+     0, a, d, b^2, -b*c, c^2;
+     -a, -d, 0, -b*c, c^2, -b^2;
+     b, -c, 0, -a*d, -d^2, a^2]
+
+def odd : Matrix (Fin 6) (Fin 6) R :=
+  !![d^2, c^2, -b*c, -a*d, -a^2, -b^2;
+     -a*d, b*c, -b^2, a^2, -d^2, -c^2;
+     a^2, b^2, -c^2, d^2, a*d, -b*c;
+     c, -d, a, -b, 0, 0;
+     b, a, 0, 0, c, -d;
+     0, 0, d, c, b, a]
+
+def generators : Matrix (Fin 1) (Fin 4) R :=
+  !![a^2*b - c*d^2 + 2*c*(a*c+b*d),
+     -2*a^3*c+a^2*d^2+a*b*c^2+2*b^3*c-b^2*c*d,
+     -2*a^2*c*d-a*b^3+a*d^3-2*b^2*c^2+b*c^2*d,
+     a*b^2*c-2*a*c*d^2-b^3*d+2*b*c^3+d^4]
+
+def cubicColumn : Matrix (Fin 1) (Fin 6) R :=
+  !![-a*b, 0, 2*a*c-d^2, -2*b*c, -b*d, 0]
+
+theorem first_second : first a b c d * second a b c d = 0 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [first, second, Matrix.mul_apply, Fin.sum_univ_succ] <;> ring
+
+theorem first_homotopy0 : first a b c d * homotopy0 a b c d =
+    cubic a b c d • (1 : Matrix (Fin 4) (Fin 4) R) := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [first, homotopy0, cubic, Matrix.mul_apply, Fin.sum_univ_succ] <;> ring
+
+theorem homotopy_identity :
+    second a b c d * homotopy1 a b c d + homotopy0 a b c d * first a b c d =
+      cubic a b c d • (1 : Matrix (Fin 6) (Fin 6) R) := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [first, second, homotopy0, homotopy1, cubic,
+      Matrix.mul_apply, Fin.sum_univ_succ] <;> ring
+
+theorem homotopy1_second : homotopy1 a b c d * second a b c d =
+    cubic a b c d • (1 : Matrix (Fin 2) (Fin 2) R) := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [homotopy1, second, cubic, Matrix.mul_apply, Fin.sum_univ_succ] <;> ring
+
+theorem homotopy1_homotopy0 : homotopy1 a b c d * homotopy0 a b c d = 0 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [homotopy1, homotopy0, Matrix.mul_apply, Fin.sum_univ_succ] <;> ring
+
+theorem even_odd : even a b c d * odd a b c d =
+    cubic a b c d • (1 : Matrix (Fin 6) (Fin 6) R) := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [even, odd, cubic, Matrix.mul_apply, Fin.sum_univ_succ] <;> ring
+
+theorem odd_even : odd a b c d * even a b c d =
+    cubic a b c d • (1 : Matrix (Fin 6) (Fin 6) R) := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [even, odd, cubic, Matrix.mul_apply, Fin.sum_univ_succ] <;> ring
+
+theorem augmentation_first :
+    generators a b c d * first a b c d + cubic a b c d • cubicColumn a b c d = 0 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [generators, first, cubicColumn, cubic,
+      Matrix.mul_apply, Fin.sum_univ_succ] <;> ring
+
+theorem cubicColumn_second : cubicColumn a b c d * second a b c d = 0 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [cubicColumn, second, Matrix.mul_apply, Fin.sum_univ_succ] <;> ring
+
+theorem cubicColumn_homotopy0 :
+    cubicColumn a b c d * homotopy0 a b c d + generators a b c d = 0 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    norm_num [cubicColumn, homotopy0, generators,
+      Matrix.mul_apply, Fin.sum_univ_succ] <;> ring
+
+end CycleQ2CartierResolution
+
+#print axioms CycleQ2CartierResolution.even_odd
+#print axioms CycleQ2CartierResolution.odd_even
+#print axioms CycleQ2CartierResolution.homotopy_identity
+#print axioms CycleQ2CartierResolution.augmentation_first
+#print axioms CycleQ2CartierResolution.cubicColumn_homotopy0
+end
+
+
+/- Component: continuation_2/CartierMatrixFactorizationExactness.lean -/
+section
+/-!
+# Genuine exactness of the actual periodic complex modulo the cubic
+
+A matrix factorization over a domain gives an exact two-periodic complex
+after quotienting by its nonzero scalar. The proof lifts a kernel vector,
+uses divisibility by the scalar, and cancels that scalar in the domain.
+The resulting theorem is applied to the actual six by six cubic matrices.
+
+This proves quotient-module exactness. It does not assert saturation,
+base change through the cubic section, or nonlinear geometric lifting.
+-/
+
+set_option autoImplicit false
+
+noncomputable section
+namespace CycleQ2CartierResolution
+
+open Matrix
+
+variable {R : Type*} [CommRing R] [IsDomain R]
+
+theorem matrixFactorization_exact_mod
+    {n : Type*} [Fintype n] [DecidableEq n]
+    (g : R) (hg : g ≠ 0) (A B : Matrix n n R)
+    (hAB : A * B = g • (1 : Matrix n n R))
+    (hBA : B * A = g • (1 : Matrix n n R))
+    (x : n → R ⧸ Ideal.span ({g} : Set R)) :
+    A.map (Ideal.Quotient.mk (Ideal.span ({g} : Set R))) *ᵥ x = 0 ↔
+      ∃ y, B.map (Ideal.Quotient.mk (Ideal.span ({g} : Set R))) *ᵥ y = x := by
+  let I : Ideal R := Ideal.span ({g} : Set R)
+  let q : R →+* R ⧸ I := Ideal.Quotient.mk I
+  change A.map q *ᵥ x = 0 ↔ ∃ y, B.map q *ᵥ y = x
+  have hqg : q g = 0 := by
+    apply (Ideal.Quotient.eq_zero_iff_mem).mpr
+    exact Ideal.subset_span (Set.mem_singleton g)
+  have hqAB : A.map q * B.map q = 0 := by
+    rw [← Matrix.map_mul, hAB]
+    ext i j
+    simp [Matrix.map_apply, Matrix.smul_apply, smul_eq_mul, hqg]
+  constructor
+  · intro hx
+    choose z hz using fun i => Ideal.Quotient.mk_surjective (x i)
+    have hqz : q ∘ z = x := funext hz
+    have hdiv : ∀ i, g ∣ (A *ᵥ z) i := by
+      intro i
+      apply Ideal.mem_span_singleton.mp
+      apply (Ideal.Quotient.eq_zero_iff_mem).mp
+      change q ((A *ᵥ z) i) = 0
+      rw [RingHom.map_mulVec, hqz, hx]
+      rfl
+    choose y hy using hdiv
+    have hAz : A *ᵥ z = g • y := by
+      funext i
+      exact hy i
+    have hcancel : g • z = g • (B *ᵥ y) := by
+      calc
+        g • z = (B * A) *ᵥ z := by
+          rw [hBA, smul_mulVec, one_mulVec]
+        _ = B *ᵥ (A *ᵥ z) := (mulVec_mulVec z B A).symm
+        _ = B *ᵥ (g • y) := by rw [hAz]
+        _ = g • (B *ᵥ y) := mulVec_smul B g y
+    have hzy : z = B *ᵥ y := by
+      funext i
+      apply mul_left_cancel₀ hg
+      exact congrArg (fun v : n → R => v i) hcancel
+    refine ⟨q ∘ y, ?_⟩
+    funext i
+    rw [← RingHom.map_mulVec, ← hzy]
+    exact hz i
+  · rintro ⟨y, rfl⟩
+    rw [mulVec_mulVec, hqAB, zero_mulVec]
+
+abbrev cubicQuotient (a b c d : R) := R ⧸ Ideal.span ({cubic a b c d} : Set R)
+
+def cubicQuotientMap (a b c d : R) : R →+* cubicQuotient a b c d :=
+  Ideal.Quotient.mk (Ideal.span ({cubic a b c d} : Set R))
+
+theorem even_exact_mod_cubic (a b c d : R) (hg : cubic a b c d ≠ 0)
+    (x : Fin 6 → cubicQuotient a b c d) :
+    (even a b c d).map (cubicQuotientMap a b c d) *ᵥ x = 0 ↔
+      ∃ y, (odd a b c d).map (cubicQuotientMap a b c d) *ᵥ y = x :=
+  matrixFactorization_exact_mod (cubic a b c d) hg (even a b c d) (odd a b c d)
+    (even_odd a b c d) (odd_even a b c d) x
+
+theorem odd_exact_mod_cubic (a b c d : R) (hg : cubic a b c d ≠ 0)
+    (x : Fin 6 → cubicQuotient a b c d) :
+    (odd a b c d).map (cubicQuotientMap a b c d) *ᵥ x = 0 ↔
+      ∃ y, (even a b c d).map (cubicQuotientMap a b c d) *ᵥ y = x :=
+  matrixFactorization_exact_mod (cubic a b c d) hg (odd a b c d) (even a b c d)
+    (odd_even a b c d) (even_odd a b c d) x
+
+end CycleQ2CartierResolution
+
+#print axioms CycleQ2CartierResolution.matrixFactorization_exact_mod
+#print axioms CycleQ2CartierResolution.even_exact_mod_cubic
+#print axioms CycleQ2CartierResolution.odd_exact_mod_cubic
+end
+end
+
+
+/- Component: continuation_2/SegreSyzygyElimination.lean -/
+section
+/-!
+# The actual nonlinear Segre relations and complementary-equation elimination
+
+The sixteen rows are the twelve off-diagonal adjugate relations and four
+diagonal differences. They are polynomial identities for every three by
+three matrix, not identities only at the geometric seed.
+
+The last two theorems justify dropping redundant equations after adjoining
+an inverse of the complementary relation minor. They do not assume that a
+selected square system has a solution; that input is supplied separately by
+the trusted generic lifting theorem.
+-/
+
+set_option autoImplicit false
+set_option maxHeartbeats 2000000
+
+namespace CycleQ2SegreRelations
+open Matrix
+
+variable {R : Type*} [CommRing R]
+
+def cofactors (M : Matrix (Fin 3) (Fin 3) R) : Fin 9 → R :=
+  ![M 1 1*M 2 2-M 1 2*M 2 1,
+    M 1 2*M 2 0-M 1 0*M 2 2,
+    M 1 0*M 2 1-M 1 1*M 2 0,
+    M 0 2*M 2 1-M 0 1*M 2 2,
+    M 0 0*M 2 2-M 0 2*M 2 0,
+    M 0 1*M 2 0-M 0 0*M 2 1,
+    M 0 1*M 1 2-M 0 2*M 1 1,
+    M 0 2*M 1 0-M 0 0*M 1 2,
+    M 0 0*M 1 1-M 0 1*M 1 0]
+
+def cofactorMatrix (M : Matrix (Fin 3) (Fin 3) R) : Matrix (Fin 3) (Fin 3) R :=
+  !![cofactors M 0, cofactors M 1, cofactors M 2;
+     cofactors M 3, cofactors M 4, cofactors M 5;
+     cofactors M 6, cofactors M 7, cofactors M 8]
+
+theorem cofactorMatrix_eq_transpose_adjugate (M : Matrix (Fin 3) (Fin 3) R) :
+    cofactorMatrix M = M.adjugate.transpose := by
+  rw [adjugate_fin_three]
+  ext i j
+  fin_cases i <;> fin_cases j
+  · change M 1 1*M 2 2-M 1 2*M 2 1 = M 1 1*M 2 2-M 1 2*M 2 1
+    ring
+  · change M 1 2*M 2 0-M 1 0*M 2 2 = -(M 1 0*M 2 2)+M 1 2*M 2 0
+    ring
+  · change M 1 0*M 2 1-M 1 1*M 2 0 = M 1 0*M 2 1-M 1 1*M 2 0
+    ring
+  · change M 0 2*M 2 1-M 0 1*M 2 2 = -(M 0 1*M 2 2)+M 0 2*M 2 1
+    ring
+  · change M 0 0*M 2 2-M 0 2*M 2 0 = M 0 0*M 2 2-M 0 2*M 2 0
+    ring
+  · change M 0 1*M 2 0-M 0 0*M 2 1 = -(M 0 0*M 2 1)+M 0 1*M 2 0
+    ring
+  · change M 0 1*M 1 2-M 0 2*M 1 1 = M 0 1*M 1 2-M 0 2*M 1 1
+    ring
+  · change M 0 2*M 1 0-M 0 0*M 1 2 = -(M 0 0*M 1 2)+M 0 2*M 1 0
+    ring
+  · change M 0 0*M 1 1-M 0 1*M 1 0 = M 0 0*M 1 1-M 0 1*M 1 0
+    ring
+
+def relations (M : Matrix (Fin 3) (Fin 3) R) : Matrix (Fin 16) (Fin 9) R :=
+  !![0,0,0, M 0 0,M 0 1,M 0 2, 0,0,0;
+     0,0,0, 0,0,0, M 0 0,M 0 1,M 0 2;
+     M 1 0,M 1 1,M 1 2, 0,0,0, 0,0,0;
+     0,0,0, 0,0,0, M 1 0,M 1 1,M 1 2;
+     M 2 0,M 2 1,M 2 2, 0,0,0, 0,0,0;
+     0,0,0, M 2 0,M 2 1,M 2 2, 0,0,0;
+     M 0 1,0,0, M 1 1,0,0, M 2 1,0,0;
+     M 0 2,0,0, M 1 2,0,0, M 2 2,0,0;
+     0,M 0 0,0, 0,M 1 0,0, 0,M 2 0,0;
+     0,M 0 2,0, 0,M 1 2,0, 0,M 2 2,0;
+     0,0,M 0 0, 0,0,M 1 0, 0,0,M 2 0;
+     0,0,M 0 1, 0,0,M 1 1, 0,0,M 2 1;
+     -M 0 0,-M 0 1,-M 0 2, M 1 0,M 1 1,M 1 2, 0,0,0;
+     -M 0 0,-M 0 1,-M 0 2, 0,0,0, M 2 0,M 2 1,M 2 2;
+     -M 0 0,M 0 1,0, -M 1 0,M 1 1,0, -M 2 0,M 2 1,0;
+     -M 0 0,0,M 0 2, -M 1 0,0,M 1 2, -M 2 0,0,M 2 2]
+
+/-- The sixteen genuine nonlinear polynomial relations on the nine cofactors. -/
+theorem relations_cofactors (M : Matrix (Fin 3) (Fin 3) R) :
+    relations M *ᵥ cofactors M = 0 := by
+  funext i
+  fin_cases i <;>
+    norm_num [relations, cofactors, Matrix.mulVec, dotProduct, Fin.sum_univ_succ] <;> ring
+
+variable {n m : Type*} [Fintype n] [Fintype m] [DecidableEq n]
+
+/-- At any point where the chosen complementary relation block is a unit,
+vanishing of the selected equations forces all residual equations to vanish. -/
+theorem residual_eq_zero_of_relation_block
+    (A : Matrix n n R) (B : Matrix n m R) (v : n → R) (e : m → R)
+    (hrel : A *ᵥ v + B *ᵥ e = 0) (he : e = 0) (hdet : IsUnit A.det) : v = 0 := by
+  have hv : A *ᵥ v = 0 := by simpa [he] using hrel
+  calc
+    v = (A⁻¹ * A) *ᵥ v := by rw [nonsing_inv_mul A hdet, one_mulVec]
+    _ = A⁻¹ *ᵥ (A *ᵥ v) := (mulVec_mulVec v A⁻¹ A).symm
+    _ = 0 := by rw [hv, mulVec_zero]
+
+/-- The elimination lemma after arbitrary coefficient evaluation, as needed
+at the generic algebraic point produced by square-system lifting. -/
+theorem evaluated_residual_eq_zero
+    {S : Type*} [CommRing S] (f : R →+* S)
+    (A : Matrix n n R) (B : Matrix n m R) (v : n → R) (e : m → R)
+    (hrel : A *ᵥ v + B *ᵥ e = 0)
+    (he : f ∘ e = 0) (hdet : IsUnit (f A.det)) : f ∘ v = 0 := by
+  apply residual_eq_zero_of_relation_block (A.map f) (B.map f) (f ∘ v) (f ∘ e)
+  · funext i
+    change (A.map f *ᵥ (f ∘ v)) i + (B.map f *ᵥ (f ∘ e)) i = 0
+    rw [← RingHom.map_mulVec, ← RingHom.map_mulVec, ← map_add]
+    have hz := congrArg (fun z : n → R => z i) hrel
+    change (A *ᵥ v) i + (B *ᵥ e) i = 0 at hz
+    rw [hz, map_zero]
+  · exact he
+  · change IsUnit (f.mapMatrix A).det
+    rw [← f.map_det]
+    exact hdet
+
+end CycleQ2SegreRelations
+
+#print axioms CycleQ2SegreRelations.relations_cofactors
+#print axioms CycleQ2SegreRelations.residual_eq_zero_of_relation_block
+#print axioms CycleQ2SegreRelations.evaluated_residual_eq_zero
+end
+
+
+/- Component: continuation_2/SegreLocalFactorization.lean -/
+section
+/-!
+# Local factorization of the actual three-by-three Segre equations
+
+The nine equations are the row-major cofactors, i.e. the transpose of
+mathlib's actual adjugate. Their vanishing is equivalent to all two-by-two
+minors vanishing. On every chart where one entry is a unit, the matrix has
+an explicit outer-product factorization. Its image has a generator whose
+pivot coordinate is one, with the coordinate projection as a left inverse.
+No global line-bundle, deformation, or geometric existence claim is made.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 4000000
+
+noncomputable section
+namespace CycleQ2SegreLocal
+
+open Matrix
+open scoped BigOperators
+
+variable {R : Type*} [CommRing R]
+
+/-- Row-major signed cofactors; the equation index is `(row,column)`. -/
+def cofactors (M : Matrix (Fin 3) (Fin 3) R) : Matrix (Fin 3) (Fin 3) R :=
+  M.adjugate.transpose
+
+/-- The actual nine cofactor equations imply every two-by-two minor. -/
+theorem minors_of_cofactors_zero (M : Matrix (Fin 3) (Fin 3) R)
+    (h : cofactors M = 0) (i j k l : Fin 3) :
+    M i j * M k l = M i l * M k j := by
+  have ha : M.adjugate = 0 := by
+    simpa [cofactors] using congrArg Matrix.transpose h
+  rw [Matrix.adjugate_fin_three] at ha
+  have h00 : M 1 1 * M 2 2 - M 1 2 * M 2 1 = 0 :=
+    congrArg (fun A : Matrix (Fin 3) (Fin 3) R => A 0 0) ha
+  have h01 : -(M 0 1 * M 2 2) + M 0 2 * M 2 1 = 0 :=
+    congrArg (fun A : Matrix (Fin 3) (Fin 3) R => A 0 1) ha
+  have h02 : M 0 1 * M 1 2 - M 0 2 * M 1 1 = 0 :=
+    congrArg (fun A : Matrix (Fin 3) (Fin 3) R => A 0 2) ha
+  have h10 : -(M 1 0 * M 2 2) + M 1 2 * M 2 0 = 0 :=
+    congrArg (fun A : Matrix (Fin 3) (Fin 3) R => A 1 0) ha
+  have h11 : M 0 0 * M 2 2 - M 0 2 * M 2 0 = 0 :=
+    congrArg (fun A : Matrix (Fin 3) (Fin 3) R => A 1 1) ha
+  have h12 : -(M 0 0 * M 1 2) + M 0 2 * M 1 0 = 0 :=
+    congrArg (fun A : Matrix (Fin 3) (Fin 3) R => A 1 2) ha
+  have h20 : M 1 0 * M 2 1 - M 1 1 * M 2 0 = 0 :=
+    congrArg (fun A : Matrix (Fin 3) (Fin 3) R => A 2 0) ha
+  have h21 : -(M 0 0 * M 2 1) + M 0 1 * M 2 0 = 0 :=
+    congrArg (fun A : Matrix (Fin 3) (Fin 3) R => A 2 1) ha
+  have h22 : M 0 0 * M 1 1 - M 0 1 * M 1 0 = 0 :=
+    congrArg (fun A : Matrix (Fin 3) (Fin 3) R => A 2 2) ha
+  fin_cases i <;> fin_cases j <;> fin_cases k <;> fin_cases l <;> dsimp at * <;>
+    solve
+    | ring1
+    | linear_combination h00
+    | linear_combination -h00
+    | linear_combination h01
+    | linear_combination -h01
+    | linear_combination h02
+    | linear_combination -h02
+    | linear_combination h10
+    | linear_combination -h10
+    | linear_combination h11
+    | linear_combination -h11
+    | linear_combination h12
+    | linear_combination -h12
+    | linear_combination h20
+    | linear_combination -h20
+    | linear_combination h21
+    | linear_combination -h21
+    | linear_combination h22
+    | linear_combination -h22
+
+/-- A unit entry gives a normalized column and the actual pivot row. -/
+theorem unit_pivot_factorization (M : Matrix (Fin 3) (Fin 3) R)
+    (h : cofactors M = 0) (i0 j0 : Fin 3) (u : Rˣ)
+    (hu : (u : R) = M i0 j0) (i j : Fin 3) :
+    M i j = (M i j0 * (↑(u⁻¹) : R)) * M i0 j := by
+  have hm := minors_of_cofactors_zero M h i j i0 j0
+  calc
+    M i j = (M i j * M i0 j0) * (↑(u⁻¹) : R) := by
+      rw [← hu, mul_assoc, Units.mul_inv, mul_one]
+    _ = (M i j0 * M i0 j) * (↑(u⁻¹) : R) := by rw [hm]
+    _ = (M i j0 * (↑(u⁻¹) : R)) * M i0 j := by ring
+
+/-- Conversely, every literal outer product satisfies all nine equations. -/
+theorem cofactors_outerProduct (a b : Fin 3 → R) :
+    cofactors (fun i j => a i * b j) = 0 := by
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp [cofactors, Matrix.adjugate_fin_three, Matrix.transpose_apply] <;> ring
+
+/-- No field hypothesis is needed for the pivot chart. -/
+theorem normalized_factorization (M : Matrix (Fin 3) (Fin 3) R)
+    (h : cofactors M = 0) (i0 j0 : Fin 3) (hu : IsUnit (M i0 j0)) :
+    ∃ a b : Fin 3 → R, a i0 = 1 ∧ b = M i0 ∧
+      (∀ i j, M i j = a i * b j) := by
+  obtain ⟨u, hu⟩ := hu
+  refine ⟨fun i => M i j0 * (↑(u⁻¹) : R), M i0, ?_, rfl, ?_⟩
+  · change M i0 j0 * (↑(u⁻¹) : R) = 1
+    rw [← hu, Units.mul_inv]
+  · exact unit_pivot_factorization M h i0 j0 u hu
+
+/-- The normalized column generates the image. Its pivot coordinate gives
+an explicit left inverse, so this local image is a free rank-one summand. -/
+theorem image_generator_with_retraction (M : Matrix (Fin 3) (Fin 3) R)
+    (h : cofactors M = 0) (i0 j0 : Fin 3) (hu : IsUnit (M i0 j0)) :
+    ∃ a : Fin 3 → R,
+      a i0 = 1 ∧
+      (∀ x : Fin 3 → R, M *ᵥ x = (∑ j, M i0 j * x j) • a) ∧
+      (∀ r : R, (r • a) i0 = r) ∧
+      (∀ r : R, ∃ x : Fin 3 → R, M *ᵥ x = r • a) := by
+  obtain ⟨u, hunit⟩ := hu
+  let a : Fin 3 → R := fun i => M i j0 * (↑(u⁻¹) : R)
+  have ha : a i0 = 1 := by
+    dsimp [a]
+    rw [← hunit, Units.mul_inv]
+  have hf (i j : Fin 3) : M i j = a i * M i0 j :=
+    unit_pivot_factorization M h i0 j0 u hunit i j
+  have hmul (x : Fin 3 → R) : M *ᵥ x = (∑ j, M i0 j * x j) • a := by
+    funext i
+    simp only [Matrix.mulVec, dotProduct, Pi.smul_apply, smul_eq_mul]
+    rw [Finset.sum_mul]
+    apply Finset.sum_congr rfl
+    intro j hj
+    rw [hf]
+    ring
+  refine ⟨a, ha, hmul, ?_, ?_⟩
+  · intro r
+    simp [ha]
+  · intro r
+    refine ⟨Pi.single j0 ((↑(u⁻¹) : R) * r), ?_⟩
+    rw [hmul]
+    simp [Pi.single_apply, ← hunit]
+
+end CycleQ2SegreLocal
+
+#print axioms CycleQ2SegreLocal.minors_of_cofactors_zero
+#print axioms CycleQ2SegreLocal.normalized_factorization
+#print axioms CycleQ2SegreLocal.image_generator_with_retraction
+end
+end
+
+
+/- Component: continuation_2/SegreImageLine.lean -/
+section
+/-!
+# The actual image module on a Segre pivot chart
+
+A vanishing cofactor matrix and a unit entry give an explicit linear
+isomorphism from the coefficient ring to the matrix image. The separate
+basepoint lemma shows how actual ideal-membership witnesses provide a
+pivot after evaluation in a field. Neither theorem assumes a line bundle.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+
+noncomputable section
+namespace CycleQ2SegreImage
+
+open Matrix
+open scoped BigOperators
+
+variable {R : Type*} [CommRing R]
+
+/-- The image submodule of the actual matrix map is a free line on any
+unit-entry chart. The isomorphism is proved directly from the equations. -/
+theorem image_linearEquiv (M : Matrix (Fin 3) (Fin 3) R)
+    (h : CycleQ2SegreLocal.cofactors M = 0)
+    (i0 j0 : Fin 3) (hu : IsUnit (M i0 j0)) :
+    Nonempty (R ≃ₗ[R] LinearMap.range M.mulVecLin) := by
+  obtain ⟨a, ha, hmul, hret, hsurj⟩ :=
+    CycleQ2SegreLocal.image_generator_with_retraction M h i0 j0 hu
+  let f : R →ₗ[R] LinearMap.range M.mulVecLin :=
+    { toFun := fun r => ⟨r • a, hsurj r⟩
+      map_add' := by
+        intro r s
+        apply Subtype.ext
+        exact add_smul r s a
+      map_smul' := by
+        intro r s
+        apply Subtype.ext
+        exact mul_smul r s a }
+  have hinj : Function.Injective f := by
+    intro r s hrs
+    have hval := congrArg (fun v : LinearMap.range M.mulVecLin => v.val i0) hrs
+    change (r • a) i0 = (s • a) i0 at hval
+    simpa only [hret] using hval
+  have honto : Function.Surjective f := by
+    intro y
+    obtain ⟨x, hx⟩ := y.property
+    refine ⟨∑ j, M i0 j * x j, ?_⟩
+    apply Subtype.ext
+    change (∑ j, M i0 j * x j) • a = y.val
+    rw [← hmul]
+    exact hx
+  exact ⟨LinearEquiv.ofBijective f ⟨hinj, honto⟩⟩
+
+/-- Ideal membership is enough to exclude a common zero of the matrix
+entries wherever one of the tested coordinates is nonzero. -/
+theorem exists_nonzero_entry_of_coordinate_powers
+    {ι K : Type*} [Field K] (M : Matrix (Fin 3) (Fin 3) R)
+    (coordinates : ι → R) (degrees : ι → ℕ)
+    (hmem : ∀ i, coordinates i ^ degrees i ∈
+      Ideal.span (Set.range (fun p : Fin 3 × Fin 3 => M p.1 p.2)))
+    (φ : R →+* K) (hpoint : ∃ i, φ (coordinates i) ≠ 0) :
+    ∃ i j, φ (M i j) ≠ 0 := by
+  by_contra! hzero
+  have hker : Ideal.span (Set.range (fun p : Fin 3 × Fin 3 => M p.1 p.2)) ≤
+      RingHom.ker φ := by
+    apply Ideal.span_le.mpr
+    rintro z ⟨p, rfl⟩
+    exact hzero p.1 p.2
+  obtain ⟨i, hi⟩ := hpoint
+  have hz : φ (coordinates i ^ degrees i) = 0 := hker (hmem i)
+  rw [map_pow] at hz
+  exact pow_ne_zero _ hi hz
+
+/-- The same basepoint witnesses yield an actual unit-entry chart in any
+field-valued point satisfying the nonzero-coordinate condition. -/
+theorem exists_unit_entry_of_coordinate_powers
+    {ι K : Type*} [Field K] (M : Matrix (Fin 3) (Fin 3) R)
+    (coordinates : ι → R) (degrees : ι → ℕ)
+    (hmem : ∀ i, coordinates i ^ degrees i ∈
+      Ideal.span (Set.range (fun p : Fin 3 × Fin 3 => M p.1 p.2)))
+    (φ : R →+* K) (hpoint : ∃ i, φ (coordinates i) ≠ 0) :
+    ∃ i j, IsUnit (φ (M i j)) := by
+  obtain ⟨i, j, hij⟩ := exists_nonzero_entry_of_coordinate_powers
+    M coordinates degrees hmem φ hpoint
+  exact ⟨i, j, isUnit_iff_ne_zero.mpr hij⟩
+
+end CycleQ2SegreImage
+
+#print axioms CycleQ2SegreImage.image_linearEquiv
+#print axioms CycleQ2SegreImage.exists_nonzero_entry_of_coordinate_powers
+#print axioms CycleQ2SegreImage.exists_unit_entry_of_coordinate_powers
+end
+end
+
+
+/- Component: continuation_2/SegreCechDlog.lean -/
+section
+/-!
+# Explicit overlap units and the Kähler Čech cocycle of a rank-one matrix
+
+The common coefficient ring in these theorems may be the coordinate ring of
+any overlap of unit-entry charts. No field hypothesis is used. The transition
+units are calculated from the actual matrix entries and chosen pivot units.
+The additive cocycle takes values in mathlib's universal Kähler module.
+
+The first-column equations generate the same ideal on overlaps. A separate
+nonzerodivisor hypothesis is needed to call their zero scheme an effective
+Cartier divisor. This file does not construct a cycle class, a Gysin map, an
+Abel--Jacobi map, or a rational primitive.
+-/
+
+set_option autoImplicit false
+set_option maxHeartbeats 2000000
+
+noncomputable section
+namespace CycleQ2SegreCech
+
+open Matrix
+
+variable {R : Type*} [CommRing R]
+
+abbrev Chart := Fin 3 × Fin 3
+
+/-- The image generator normalized to one at the pivot row. -/
+def column (M : Matrix (Fin 3) (Fin 3) R) (p : Chart) (up : Rˣ) : Fin 3 → R :=
+  fun i => M i p.2 * (↑(up⁻¹) : R)
+
+private theorem transition_mul_reverse
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q : Chart) (up uq : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2) :
+    (M q.1 p.2 * (↑(up⁻¹) : R)) * (M p.1 q.2 * (↑(uq⁻¹) : R)) = 1 := by
+  have hm := CycleQ2SegreLocal.minors_of_cofactors_zero M hM q.1 p.2 p.1 q.2
+  calc
+    _ = (M q.1 p.2 * M p.1 q.2) * ((↑(up⁻¹) : R) * (↑(uq⁻¹) : R)) := by ring
+    _ = (M q.1 q.2 * M p.1 p.2) * ((↑(up⁻¹) : R) * (↑(uq⁻¹) : R)) := by rw [hm]
+    _ = ((up : R) * ↑(up⁻¹)) * ((uq : R) * ↑(uq⁻¹)) := by rw [← hp, ← hq]; ring
+    _ = 1 := by rw [Units.mul_inv, Units.mul_inv, mul_one]
+
+/-- The unit carrying the normalized image generator on chart `q` to the
+one on chart `p`. Its inverse is another explicit matrix-entry ratio. -/
+def transition
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q : Chart) (up uq : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2) : Rˣ where
+  val := M q.1 p.2 * (↑(up⁻¹) : R)
+  inv := M p.1 q.2 * (↑(uq⁻¹) : R)
+  val_inv := transition_mul_reverse M hM p q up uq hp hq
+  inv_val := transition_mul_reverse M hM q p uq up hq hp
+
+@[simp] theorem transition_val
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q : Chart) (up uq : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2) :
+    (transition M hM p q up uq hp hq : R) = column M p up q.1 := rfl
+
+theorem column_pivot
+    (M : Matrix (Fin 3) (Fin 3) R) (p : Chart) (up : Rˣ)
+    (hp : (up : R) = M p.1 p.2) : column M p up p.1 = 1 := by
+  simp [column, ← hp]
+
+/-- The explicit normalized columns glue by the displayed transition unit. -/
+theorem column_overlap
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q : Chart) (up uq : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2)
+    (i : Fin 3) :
+    column M p up i = (transition M hM p q up uq hp hq : R) * column M q uq i := by
+  change M i p.2 * (↑(up⁻¹) : R) =
+    (M q.1 p.2 * (↑(up⁻¹) : R)) * (M i q.2 * (↑(uq⁻¹) : R))
+  rw [CycleQ2SegreLocal.unit_pivot_factorization M hM q.1 q.2 uq hq i p.2]
+  ring
+
+@[simp] theorem transition_self
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p : Chart) (up : Rˣ) (hp : (up : R) = M p.1 p.2) :
+    transition M hM p p up up hp hp = 1 := by
+  apply Units.ext
+  exact column_pivot M p up hp
+
+theorem transition_reverse
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q : Chart) (up uq : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2) :
+    transition M hM q p uq up hq hp = (transition M hM p q up uq hp hq)⁻¹ := by
+  apply Units.ext
+  rfl
+
+/-- The multiplicative Čech cocycle on every triple overlap. -/
+theorem transition_cocycle
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q r : Chart) (up uq ur : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2)
+    (hr : (ur : R) = M r.1 r.2) :
+    transition M hM p q up uq hp hq * transition M hM q r uq ur hq hr =
+      transition M hM p r up ur hp hr := by
+  apply Units.ext
+  exact (column_overlap M hM p q up uq hp hq r.1).symm
+
+/-- The pivot row gives the local first-column equation. The same transition
+unit relates its equations on different charts. -/
+theorem row_overlap
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q : Chart) (up uq : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2)
+    (j : Fin 3) :
+    M q.1 j = (transition M hM p q up uq hp hq : R) * M p.1 j :=
+  CycleQ2SegreLocal.unit_pivot_factorization M hM p.1 p.2 up hp q.1 j
+
+theorem first_column_ideal_overlap
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q : Chart) (up uq : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2) :
+    Ideal.span ({M q.1 0} : Set R) = Ideal.span ({M p.1 0} : Set R) := by
+  rw [row_overlap M hM p q up uq hp hq 0]
+  exact Ideal.span_singleton_mul_left_unit (transition M hM p q up uq hp hq).isUnit _
+
+/-- Passing to an overlap ring preserves the actual cofactor equations. -/
+theorem cofactors_map_zero
+    {S : Type*} [CommRing S] (f : R →+* S)
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0) :
+    CycleQ2SegreLocal.cofactors (f.mapMatrix M) = 0 := by
+  unfold CycleQ2SegreLocal.cofactors
+  rw [← f.map_adjugate]
+  change f.mapMatrix (CycleQ2SegreLocal.cofactors M) = 0
+  rw [hM]
+  ext i j
+  exact f.map_zero
+
+/-- Restriction of an overlap unit is the unit computed from the restricted
+matrix. In particular the displayed cocycle is compatible with localization. -/
+theorem transition_map
+    {S : Type*} [CommRing S] (f : R →+* S)
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q : Chart) (up uq : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2) :
+    Units.map f.toMonoidHom (transition M hM p q up uq hp hq) =
+      transition (f.mapMatrix M) (cofactors_map_zero f M hM) p q
+        (Units.map f.toMonoidHom up) (Units.map f.toMonoidHom uq)
+        (congrArg f hp) (congrArg f hq) := by
+  apply Units.ext
+  exact f.map_mul _ _
+
+/-- A homogeneous matrix of degree `d` needs the ambient `O(d)` transition
+as well as the normalized-image transition. Here `xp,xq` trivialize `O(1)`
+on the chosen projective coordinate charts. -/
+def twistedTransition
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q : Chart) (up uq : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2)
+    (xp xq : Rˣ) (d : ℕ) : Rˣ :=
+  (xp * xq⁻¹)^d * transition M hM p q up uq hp hq
+
+theorem twistedTransition_cocycle
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q r : Chart) (up uq ur : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2)
+    (hr : (ur : R) = M r.1 r.2) (xp xq xr : Rˣ) (d : ℕ) :
+    twistedTransition M hM p q up uq hp hq xp xq d *
+      twistedTransition M hM q r uq ur hq hr xq xr d =
+        twistedTransition M hM p r up ur hp hr xp xr d := by
+  have ha : (xp * xq⁻¹)^d * (xq * xr⁻¹)^d = (xp * xr⁻¹)^d := by
+    rw [← mul_pow]
+    congr 1
+    group
+  dsimp [twistedTransition]
+  calc
+    _ = ((xp * xq⁻¹)^d * (xq * xr⁻¹)^d) *
+        (transition M hM p q up uq hp hq * transition M hM q r uq ur hq hr) := by
+      ac_rfl
+    _ = _ := by rw [ha, transition_cocycle]
+
+/-- The degree-`d` local first-column equations transform by the twisted
+unit, so their local principal ideals agree. -/
+theorem homogeneous_first_column_overlap
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q : Chart) (up uq : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2)
+    (xp xq : Rˣ) (d : ℕ) :
+    M q.1 0 * (↑(xq⁻¹) : R)^d =
+      (twistedTransition M hM p q up uq hp hq xp xq d : R) *
+        (M p.1 0 * (↑(xp⁻¹) : R)^d) := by
+  have ha : ((xp * xq⁻¹)^d : Rˣ) * (xp⁻¹)^d = (xq⁻¹)^d := by
+    rw [← mul_pow]
+    congr 1
+    calc
+      _ = (xp * xp⁻¹) * xq⁻¹ := by ac_rfl
+      _ = xq⁻¹ := by rw [mul_inv_cancel, one_mul]
+  have hb : (↑(xp * xq⁻¹) : R)^d * (↑(xp⁻¹) : R)^d = (↑(xq⁻¹) : R)^d :=
+    congrArg (fun u : Rˣ => (u : R)) ha
+  rw [row_overlap M hM p q up uq hp hq 0]
+  change ((transition M hM p q up uq hp hq : R) * M p.1 0) * (↑(xq⁻¹) : R)^d =
+    ((↑(xp * xq⁻¹) : R)^d * (transition M hM p q up uq hp hq : R)) *
+      (M p.1 0 * (↑(xp⁻¹) : R)^d)
+  rw [← hb]
+  ring
+
+section Differential
+
+variable (K : Type*) [CommRing K] [Algebra K R]
+
+/-- Logarithmic differential in the actual universal Kähler module. -/
+def unitDlog (u : Rˣ) : Ω[R⁄K] :=
+  (↑(u⁻¹) : R) • KaehlerDifferential.D K R (u : R)
+
+@[simp] theorem unitDlog_one : unitDlog K (1 : Rˣ) = 0 := by
+  simp [unitDlog]
+
+theorem unitDlog_mul (u v : Rˣ) :
+    unitDlog K (u * v) = unitDlog K u + unitDlog K v := by
+  simp only [unitDlog, _root_.mul_inv_rev, Units.val_mul, Derivation.leibniz,
+    smul_add, smul_smul]
+  have hu : ((↑(v⁻¹) : R) * ↑(u⁻¹)) * ↑u = ↑(v⁻¹) := by simp [mul_assoc]
+  have hv : ((↑(v⁻¹) : R) * ↑(u⁻¹)) * ↑v = ↑(u⁻¹) := by
+    calc
+      _ = (↑(u⁻¹) : R) * (↑(v⁻¹) * ↑v) := by ring
+      _ = ↑(u⁻¹) := by rw [Units.inv_mul, mul_one]
+  rw [hu, hv, add_comm]
+
+theorem unitDlog_inv (u : Rˣ) : unitDlog K u⁻¹ = -unitDlog K u := by
+  have h := unitDlog_mul K u u⁻¹
+  simp only [mul_inv_cancel, unitDlog_one] at h
+  exact eq_neg_of_add_eq_zero_right h.symm
+
+theorem unitDlog_pow (u : Rˣ) (n : ℕ) : unitDlog K (u^n) = n • unitDlog K u := by
+  induction n with
+  | zero => simp
+  | succ n ih => rw [pow_succ, unitDlog_mul, ih, succ_nsmul]
+
+/-- Evaluation by any derivation gives the ordinary logarithmic derivative;
+the construction is genuinely universal, rather than an assumed trace. -/
+theorem unitDlog_apply
+    {V : Type*} [AddCommGroup V] [Module K V] [Module R V] [IsScalarTower K R V]
+    (d : Derivation K R V) (u : Rˣ) :
+    d.liftKaehlerDifferential (unitDlog K u) = (↑(u⁻¹) : R) • d (u : R) := by
+  simp [unitDlog]
+
+/-- The universal logarithmic differential commutes with restriction to an
+algebra, including every further localization of a chart overlap. -/
+theorem unitDlog_map
+    {S : Type*} [CommRing S] [Algebra K S] [Algebra R S] [IsScalarTower K R S]
+    (u : Rˣ) :
+    KaehlerDifferential.map K K R S (unitDlog K u) =
+      unitDlog K (Units.map (algebraMap R S).toMonoidHom u) := by
+  simp only [unitDlog, map_smul, KaehlerDifferential.map_D,
+    Units.coe_map_inv, Units.coe_map]
+  exact (algebraMap_smul S (↑(u⁻¹) : R) _).symm
+
+/-- The ambient twist is retained in the Kähler cocycle. The actual Segre
+entries have `d=14`; identifying the seed divisor class is a separate binding. -/
+theorem twistedTransition_dlog
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q : Chart) (up uq : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2)
+    (xp xq : Rˣ) (d : ℕ) :
+    unitDlog K (twistedTransition M hM p q up uq hp hq xp xq d) =
+      d • (unitDlog K xp - unitDlog K xq) +
+        unitDlog K (transition M hM p q up uq hp hq) := by
+  rw [twistedTransition, unitDlog_mul, unitDlog_pow, unitDlog_mul, unitDlog_inv,
+    sub_eq_add_neg]
+
+/-- The actual Kähler Čech one-cocycle of the normalized image generators. -/
+theorem transition_dlog_cocycle
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q r : Chart) (up uq ur : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2)
+    (hr : (ur : R) = M r.1 r.2) :
+    unitDlog K (transition M hM p q up uq hp hq) +
+      unitDlog K (transition M hM q r uq ur hq hr) =
+        unitDlog K (transition M hM p r up ur hp hr) := by
+  rw [← unitDlog_mul, transition_cocycle]
+
+theorem transition_dlog_reverse
+    (M : Matrix (Fin 3) (Fin 3) R) (hM : CycleQ2SegreLocal.cofactors M = 0)
+    (p q : Chart) (up uq : Rˣ)
+    (hp : (up : R) = M p.1 p.2) (hq : (uq : R) = M q.1 q.2) :
+    unitDlog K (transition M hM q p uq up hq hp) =
+      -unitDlog K (transition M hM p q up uq hp hq) := by
+  rw [transition_reverse, unitDlog_inv]
+
+end Differential
+end CycleQ2SegreCech
+
+#print axioms CycleQ2SegreCech.transition_cocycle
+#print axioms CycleQ2SegreCech.first_column_ideal_overlap
+#print axioms CycleQ2SegreCech.transition_dlog_cocycle
+#print axioms CycleQ2SegreCech.unitDlog_apply
+end
+end
+
+
+/- Component: continuation_2/OpenSquareLifting.lean -/
+section
+/-!
+A nonsingular square polynomial system has a finite separable generic point
+inside any principal open containing the seed.  The open condition is imposed
+by an actual additional equation u * c(x) - 1, whose Jacobian is block triangular.
+This is an algebraic existence statement, not a formal-series lifting premise.
+It creates no particular incidence seed or rank certificate.
+-/
+
+noncomputable section
+
+set_option maxHeartbeats 300000
+set_option backward.isDefEq.respectTransparency false
+
+namespace CycleQ2OpenSquareLifting
+
+open MvPolynomial HoldoutConstruction
+
+variable {R T : Type*} [CommRing R] [CommRing T] [Algebra R T]
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+
+/-- The inverse coordinate is the left summand; the original coordinates are
+in the right summand. -/
+def extendedPoint (x : ι → T) (u : T) : Unit ⊕ ι → T :=
+  Sum.elim (fun _ => u) x
+
+/-- Actual polynomial equations for the chosen square system on the principal
+open defined by c. -/
+def openSystem (equations : ι → MvPolynomial ι R) (c : MvPolynomial ι R) :
+    Unit ⊕ ι → MvPolynomial (Unit ⊕ ι) R :=
+  Sum.elim (fun _ => X (Sum.inl ()) * rename Sum.inr c - 1)
+    (fun i => rename Sum.inr (equations i))
+
+@[simp] theorem aeval_extended_rename (x : ι → T) (u : T)
+    (p : MvPolynomial ι R) :
+    aeval (extendedPoint x u) (rename (Sum.inr : ι → Unit ⊕ ι) p) = aeval x p := by
+  rw [aeval_rename]
+  rfl
+
+@[simp] theorem pderiv_inverse_rename (p : MvPolynomial ι R) :
+    pderiv (Sum.inl ()) (rename (Sum.inr : ι → Unit ⊕ ι) p) = 0 := by
+  induction p using MvPolynomial.induction_on with
+  | C a => simp
+  | add p q hp hq => simp [hp, hq]
+  | mul_X p i hp => simp [pderiv_mul, hp, pderiv_X, Pi.single_apply]
+
+@[simp] theorem pderiv_original_rename (i : ι) (p : MvPolynomial ι R) :
+    pderiv (Sum.inr i) (rename (Sum.inr : ι → Unit ⊕ ι) p) =
+      rename Sum.inr (pderiv i p) :=
+  pderiv_rename Sum.inr_injective i p
+
+/-- An actual solution with an inverse for c evaluates every augmented
+polynomial equation to zero. -/
+theorem openSystem_seed (equations : ι → MvPolynomial ι R)
+    (c : MvPolynomial ι R) (x : ι → T) (u : T)
+    (hx : ∀ i, aeval x (equations i) = 0) (hu : u * aeval x c = 1) :
+    ∀ i, aeval (extendedPoint x u) (openSystem equations c i) = 0 := by
+  intro i
+  cases i with
+  | inl z => cases z; simpa [openSystem, aeval_rename, extendedPoint, Function.comp_def] using sub_eq_zero.mpr hu
+  | inr i => simpa [openSystem] using hx i
+
+/-- The full augmented Jacobian is a triangular block matrix.  This equality
+holds at every point, independently of the polynomial equations. -/
+theorem openSystem_jacobian_det (equations : ι → MvPolynomial ι R)
+    (c : MvPolynomial ι R) (x : ι → T) (u : T) :
+    Matrix.det (fun i j => aeval (extendedPoint x u)
+      (pderiv i (openSystem equations c j))) =
+    aeval x c * Matrix.det (fun i j => aeval x (pderiv i (equations j))) := by
+  have hmatrix :
+      (fun i j => aeval (extendedPoint x u) (pderiv i (openSystem equations c j))) =
+      Matrix.fromBlocks (fun (_ _ : Unit) => aeval x c)
+        (0 : Matrix Unit ι T)
+        (fun i (_ : Unit) => u * aeval x (pderiv i c))
+        (fun i j => aeval x (pderiv i (equations j))) := by
+    ext i j
+    cases i with
+    | inl z =>
+      cases z
+      cases j with
+      | inl w => cases w; simp [openSystem, aeval_rename, extendedPoint, Function.comp_def, Matrix.fromBlocks]
+      | inr j => simp [openSystem, Matrix.fromBlocks]
+    | inr i =>
+      cases j with
+      | inl w =>
+        cases w
+        simp [openSystem, aeval_rename, extendedPoint, Function.comp_def, Matrix.fromBlocks, pderiv_X]
+      | inr j => simp [openSystem, Matrix.fromBlocks]
+  rw [hmatrix, Matrix.det_fromBlocks_zero₁₂, Matrix.det_unique]
+
+/-- Every solution of the augmented system solves the original system, and
+its value of c is a unit. -/
+theorem solution_on_open (equations : ι → MvPolynomial ι R)
+    (c : MvPolynomial ι R) (z : Unit ⊕ ι → T)
+    (hz : ∀ i, aeval z (openSystem equations c i) = 0) :
+    (∀ i, aeval (fun i => z (Sum.inr i)) (equations i) = 0) ∧
+      IsUnit (aeval (fun i => z (Sum.inr i)) c) := by
+  have hrename (p : MvPolynomial ι R) :
+      aeval z (rename (Sum.inr : ι → Unit ⊕ ι) p) =
+        aeval (fun i => z (Sum.inr i)) p := by rw [aeval_rename]; rfl
+  constructor
+  · intro i
+    simpa only [openSystem, Sum.elim_inr, hrename] using hz (Sum.inr i)
+  · have hi := hz (Sum.inl ())
+    simp only [openSystem, Sum.elim_inl, map_sub, map_mul, aeval_X, map_one,
+      hrename, sub_eq_zero] at hi
+    refine ⟨⟨aeval (fun i => z (Sum.inr i)) c, z (Sum.inl ()), ?_, hi⟩, rfl⟩
+    exact (mul_comm (aeval (fun i => z (Sum.inr i)) c) (z (Sum.inl ()))).trans hi
+
+section GenericPoint
+
+set_option backward.isDefEq.respectTransparency false
+
+variable {K : Type*} [Field K] [Algebra R K] [Nontrivial T]
+
+/-- A genuine finite separable generic solution inside the specified open
+locus, obtained from a nonsingular special-fiber seed.  Coefficients must
+embed in K; the special-fiber coefficient map need not be injective. -/
+theorem square_system_generic_lift_on_open
+    (equations : ι → MvPolynomial ι R) (c : MvPolynomial ι R)
+    (seed : ι → T)
+    (hseed : ∀ i, aeval seed (equations i) = 0)
+    (hjac : IsUnit (Matrix.det
+      (fun i j => aeval seed (pderiv i (equations j)))))
+    (hc : IsUnit (aeval seed c))
+    (hinj : Function.Injective (algebraMap R K)) :
+    ∃ I : Ideal (SquareGenericAlgebra K (openSystem equations c)), I.IsMaximal ∧
+      Module.Finite K ((SquareGenericAlgebra K (openSystem equations c)) ⧸ I) ∧
+      Algebra.IsSeparable K ((SquareGenericAlgebra K (openSystem equations c)) ⧸ I) ∧
+      ∃ x : ι → ((SquareGenericAlgebra K (openSystem equations c)) ⧸ I),
+        (∀ i, aeval x (equations i) = 0) ∧ IsUnit (aeval x c) := by
+  obtain ⟨u, hu⟩ := hc.exists_left_inv
+  have haug := openSystem_seed equations c seed u hseed hu
+  have hjaug : IsUnit (Matrix.det (fun i j => aeval (extendedPoint seed u)
+      (pderiv i (openSystem equations c j)))) := by
+    rw [openSystem_jacobian_det]
+    exact hc.mul hjac
+  obtain ⟨I, hI, hfinite, hsep, hsol, hj⟩ :=
+    ReflectionCoupledFano.square_system_generic_lift (K := K)
+      (openSystem equations c) (extendedPoint seed u) haug hjaug hinj
+  clear hj
+  generalize hcoords : squareGenericCoordinates (K := K) (openSystem equations c) I = z at hsol
+  refine ⟨I, hI, hfinite, hsep, (fun i => z (Sum.inr i)), ?_, ?_⟩
+  · intro i
+    have hi := hsol (Sum.inr i)
+    change aeval z (rename (Sum.inr : ι → Unit ⊕ ι) (equations i)) = 0 at hi
+    rw [aeval_rename] at hi
+    exact hi
+  · have hi := hsol (Sum.inl ())
+    change aeval z (X (Sum.inl ()) * rename (Sum.inr : ι → Unit ⊕ ι) c - 1) = 0 at hi
+    simp only [map_sub, map_mul, aeval_X, map_one, aeval_rename, sub_eq_zero] at hi
+    refine ⟨⟨aeval (fun i => z (Sum.inr i)) c, z (Sum.inl ()), ?_, hi⟩, rfl⟩
+    exact (mul_comm (aeval (fun i => z (Sum.inr i)) c) (z (Sum.inl ()))).trans hi
+
+end GenericPoint
+
+end CycleQ2OpenSquareLifting
+
+#print axioms CycleQ2OpenSquareLifting.openSystem_jacobian_det
+#print axioms CycleQ2OpenSquareLifting.square_system_generic_lift_on_open
+end
+end
+
+
+/- Component: continuation_2/SquareAdicLifting.lean -/
+section
+/-!
+Actual adic lifting of square polynomial systems with invertible seed Jacobian.
+The proof uses the established étale Jacobian localization and mathlib's
+compatible infinitesimal lifts into an adically complete ring.  The seed is
+preserved.  No existence of a formal solution is assumed.
+-/
+
+noncomputable section
+
+set_option maxHeartbeats 1200000
+set_option backward.isDefEq.respectTransparency false
+
+namespace CycleQ2SquareAdicLifting
+
+open MvPolynomial HoldoutConstruction
+
+variable {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
+variable {ι : Type*} [Fintype ι] [DecidableEq ι]
+
+/-- The actual polynomial presentation map into its Jacobian localization. -/
+def polynomialToEtale (equations : ι → MvPolynomial ι R) :
+    MvPolynomial ι R →ₐ[R] SquareEtaleRing equations :=
+  (IsScalarTower.toAlgHom R (SquareSystemRing equations) (SquareEtaleRing equations)).comp
+    (Ideal.Quotient.mkₐ R (Ideal.span (Set.range equations)))
+
+@[simp] theorem polynomialToEtale_equation (equations : ι → MvPolynomial ι R) (i : ι) :
+    polynomialToEtale equations (equations i) = 0 := by
+  have hz : Ideal.Quotient.mk (Ideal.span (Set.range equations)) (equations i) = 0 :=
+    Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.subset_span (Set.mem_range_self i))
+  change algebraMap (SquareSystemRing equations) (SquareEtaleRing equations)
+    (Ideal.Quotient.mk _ (equations i)) = 0
+  rw [hz, map_zero]
+
+/-- The square system lifts from the residue ring into any complete adic
+algebra, while retaining its specified residue coordinates. -/
+theorem square_system_adic_lift (equations : ι → MvPolynomial ι R)
+    (I : Ideal S) [IsAdicComplete I S] (seed : ι → S ⧸ I)
+    (hseed : ∀ i, aeval seed (equations i) = 0)
+    (hjac : IsUnit (Matrix.det
+      (fun i j => aeval seed (pderiv i (equations j))))) :
+    ∃ x : ι → S,
+      (∀ i, Ideal.Quotient.mk I (x i) = seed i) ∧
+      (∀ i, aeval x (equations i) = 0) := by
+  letI : Algebra.Etale R (SquareEtaleRing equations) :=
+    square_system_jacobian_etale equations
+  let f : SquareEtaleRing equations →ₐ[R] S ⧸ I :=
+    squareSystemEtaleEval equations seed hseed hjac
+  obtain ⟨g, hg⟩ := Algebra.FormallySmooth.exists_mkₐ_comp_eq_of_isAdicComplete f
+  let x : ι → S := fun i => g (polynomialToEtale equations (X i))
+  have heval : aeval x = g.comp (polynomialToEtale equations) := by
+    ext i
+    simp [x]
+  have hres : f.comp (polynomialToEtale equations) = aeval seed := by
+    ext i
+    simp [f, polynomialToEtale, squareSystemEtaleEval, squareSystemEval,
+      IsLocalization.Away.liftAlgHom, Ideal.Quotient.lift_mk]
+  refine ⟨x, ?_, ?_⟩
+  · intro i
+    have h := AlgHom.congr_fun hg (polynomialToEtale equations (X i))
+    change Ideal.Quotient.mk I (x i) = f (polynomialToEtale equations (X i)) at h
+    rw [h]
+    have hs := AlgHom.congr_fun hres (X i)
+    simpa only [AlgHom.comp_apply, aeval_X] using hs
+  · intro i
+    rw [heval, AlgHom.comp_apply, polynomialToEtale_equation, map_zero]
+
+section PowerSeries
+
+variable {K : Type*} [CommRing K]
+
+/-- Square equations with arbitrary formal coefficients have an actual
+formal solution through each nonsingular constant seed.  The hypotheses
+are polynomial evaluation and the actual partial-derivative Jacobian. -/
+theorem square_system_powerSeries_lift
+    (equations : ι → MvPolynomial ι (PowerSeries K)) (seed : ι → K)
+    (hseed : ∀ i, eval₂ PowerSeries.constantCoeff seed (equations i) = 0)
+    (hjac : IsUnit (Matrix.det (fun i j =>
+      eval₂ PowerSeries.constantCoeff seed (pderiv i (equations j))))) :
+    ∃ x : ι → PowerSeries K,
+      (∀ i, PowerSeries.constantCoeff (x i) = seed i) ∧
+      (∀ i, aeval x (equations i) = 0) := by
+  letI : Algebra (PowerSeries K) K := PowerSeries.constantCoeff.toAlgebra
+  let cc : PowerSeries K →ₐ[PowerSeries K] K :=
+    { PowerSeries.constantCoeff with commutes' := by intro r; rfl }
+  let I : Ideal (PowerSeries K) := RingHom.ker cc
+  have hI : I = Ideal.span {PowerSeries.X} := by
+    ext z
+    simp only [I, RingHom.mem_ker, Ideal.mem_span_singleton, PowerSeries.X_dvd_iff]
+    rfl
+  letI : IsAdicComplete I (PowerSeries K) := by
+    rw [hI]
+    infer_instance
+  let e : ((PowerSeries K) ⧸ I) ≃ₐ[PowerSeries K] K :=
+    Ideal.quotientKerAlgEquivOfSurjective (f := cc) PowerSeries.constantCoeff_surj
+  let seed' : ι → (PowerSeries K) ⧸ I := fun i => e.symm (seed i)
+  have heval (p : MvPolynomial ι (PowerSeries K)) :
+      aeval seed' p = e.symm (eval₂ PowerSeries.constantCoeff seed p) := by
+    exact (MvPolynomial.comp_aeval_apply seed e.symm.toAlgHom p).symm
+  have hs : ∀ i, aeval seed' (equations i) = 0 := by
+    intro i
+    rw [heval, hseed i, map_zero]
+  have hj : IsUnit (Matrix.det (fun i j => aeval seed' (pderiv i (equations j)))) := by
+    simp only [heval]
+    have hd :
+        Matrix.det (fun i j => e.symm
+          (eval₂ PowerSeries.constantCoeff seed (pderiv i (equations j)))) =
+        e.symm (Matrix.det (fun i j =>
+          eval₂ PowerSeries.constantCoeff seed (pderiv i (equations j)))) :=
+      (e.symm.toAlgHom.map_det (fun i j =>
+        eval₂ PowerSeries.constantCoeff seed (pderiv i (equations j)))).symm
+    rw [hd]
+    exact hjac.map e.symm.toRingEquiv.toRingHom
+  obtain ⟨x, hx, heq⟩ := square_system_adic_lift equations I seed' hs hj
+  refine ⟨x, ?_, heq⟩
+  intro i
+  have hi := congrArg e (hx i)
+  change cc (x i) = e (e.symm (seed i)) at hi
+  have hcc (z : PowerSeries K) : cc z = PowerSeries.constantCoeff z := rfl
+  simpa only [AlgEquiv.apply_symm_apply, hcc] using hi
+
+end PowerSeries
+
+end CycleQ2SquareAdicLifting
+
+#print axioms CycleQ2SquareAdicLifting.square_system_adic_lift
+#print axioms CycleQ2SquareAdicLifting.square_system_powerSeries_lift
+end
+end
+
+
+/- Component: continuation_2/SegreFormalLifting.lean -/
+section
+/-!
+# Formal lifting with genuine redundant polynomial equations
+
+A nonsingular square subsystem lifts through its seed. If the residual
+polynomials satisfy actual polynomial relations whose complementary block
+is invertible at the seed, every omitted equation vanishes along that lift.
+All coefficient series may vary: the theorem is not a tangent-only statement.
+No seed or minor of the particular large incidence system is assumed proved.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 1200000
+noncomputable section
+
+namespace CycleQ2SegreFormalLifting
+
+open MvPolynomial Matrix
+
+variable {K ι κ : Type*} [CommRing K]
+  [Fintype ι] [DecidableEq ι] [Fintype κ] [DecidableEq κ]
+
+/-- The complete nonlinear system has a seed-preserving formal solution.
+The premises concern polynomial identities and the two actual seed minors;
+none assumes a formal solution of either the full or square system. -/
+theorem lift_all_equations
+    (equations : ι → MvPolynomial ι (PowerSeries K))
+    (residual : κ → MvPolynomial ι (PowerSeries K))
+    (A : Matrix κ κ (MvPolynomial ι (PowerSeries K)))
+    (B : Matrix κ ι (MvPolynomial ι (PowerSeries K)))
+    (hrelations : A *ᵥ residual + B *ᵥ equations = 0)
+    (seed : ι → K)
+    (hseed : ∀ i, eval₂ PowerSeries.constantCoeff seed (equations i) = 0)
+    (hjac : IsUnit (Matrix.det (fun i j =>
+      eval₂ PowerSeries.constantCoeff seed (pderiv i (equations j)))))
+    (hcomplement : IsUnit (eval₂ PowerSeries.constantCoeff seed A.det)) :
+    ∃ x : ι → PowerSeries K,
+      (∀ i, PowerSeries.constantCoeff (x i) = seed i) ∧
+      (∀ i, aeval x (equations i) = 0) ∧
+      (∀ j, aeval x (residual j) = 0) := by
+  obtain ⟨x, hx, heq⟩ :=
+    CycleQ2SquareAdicLifting.square_system_powerSeries_lift equations seed hseed hjac
+  have hcc (p : MvPolynomial ι (PowerSeries K)) :
+      PowerSeries.constantCoeff (aeval x p) = eval₂ PowerSeries.constantCoeff seed p := by
+    induction p using MvPolynomial.induction_on with
+    | C c => simp
+    | add p q hp hq => simp only [map_add, eval₂_add, hp, hq]
+    | mul_X p i hp => simp only [map_mul, aeval_X, eval₂_mul, eval₂_X, hp, hx]
+  have hunit : IsUnit (aeval x A.det) := by
+    apply PowerSeries.isUnit_iff_constantCoeff.mpr
+    rw [hcc]
+    exact hcomplement
+  let φ : MvPolynomial ι (PowerSeries K) →+* PowerSeries K :=
+    (aeval x).toRingHom
+  have heq' : φ ∘ equations = 0 := by
+    funext i
+    exact heq i
+  have hr : φ ∘ residual = 0 :=
+    CycleQ2SegreRelations.evaluated_residual_eq_zero
+      φ A B residual equations hrelations heq' hunit
+  refine ⟨x, hx, heq, ?_⟩
+  intro j
+  exact congrFun hr j
+
+end CycleQ2SegreFormalLifting
+
+#print axioms CycleQ2SegreFormalLifting.lift_all_equations
+end
+end
+
+
+/- Component: continuation_2/SegreSeedPolynomials.lean -/
+section
+/-!
+# Literal polynomial identities for the chosen Segre seed
+
+All coefficients and sections come from the explicit seed and its 25 linkage
+pairings.  Every theorem is a universal identity over a commutative ring,
+proved by ordinary ring normalization or by smaller proved identities.
+In particular, no relation r^3=2 is needed here: r is an arbitrary coefficient.
+The nine cofactors are divisible by the actual G before imposing h.
+This module asserts no rank bound, projective basepoint freeness, deformation
+existence, residue primitive, or protected certificate.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxRecDepth 100000
+set_option maxHeartbeats 8000000
+set_option linter.unusedSimpArgs false
+
+noncomputable section
+namespace CycleQ2SegreSeed
+
+open Matrix
+
+variable {R : Type*} [CommRing R]
+
+def linkageP (a b c d : R) : R := a * c + b * d
+def linkageG (a b c d : R) : R := a ^ 3 - b ^ 3 + c ^ 3 + d ^ 3
+
+def linkageE (a b c d : R) : Fin 5 → R :=
+  ![a * c + b * d,
+  a ^ 3 - b ^ 3,
+  a ^ 2 * d + b ^ 2 * c,
+  a * d ^ 2 - b * c ^ 2,
+  c ^ 3 + d ^ 3]
+
+def linkageEprime (a b c d : R) : Fin 5 → R :=
+  ![a * c + b * d,
+  a ^ 3 + d ^ 3,
+  a ^ 2 * b - c * d ^ 2,
+  a * b ^ 2 + c ^ 2 * d,
+  -b ^ 3 + c ^ 3]
+
+def linkageQ (a b c d : R) : Matrix (Fin 5) (Fin 5) R :=
+  ![![a * c + b * d,
+  a ^ 3 + d ^ 3,
+  a ^ 2 * b - c * d ^ 2,
+  a * b ^ 2 + c ^ 2 * d,
+  -b ^ 3 + c ^ 3],
+  ![a ^ 3 - b ^ 3,
+  -a ^ 2 * c ^ 2 + a * b * c * d - b ^ 2 * d ^ 2,
+  -a ^ 2 * d ^ 2 - a * b * c ^ 2 + b ^ 2 * c * d,
+  a ^ 2 * c * d - a * b * d ^ 2 - b ^ 2 * c ^ 2,
+  a ^ 2 * c ^ 2 - a * b * c * d + b ^ 2 * d ^ 2],
+  ![a ^ 2 * d + b ^ 2 * c,
+  a ^ 2 * b ^ 2 - a * c ^ 2 * d + b * c * d ^ 2,
+  a * b ^ 3 - a * d ^ 3 - b * c ^ 2 * d,
+  a * c * d ^ 2 + b ^ 4 - b * d ^ 3,
+  -a ^ 2 * b ^ 2 + a * c ^ 2 * d - b * c * d ^ 2],
+  ![a * d ^ 2 - b * c ^ 2,
+  -a ^ 2 * b * c + a * b ^ 2 * d - c ^ 2 * d ^ 2,
+  -a * b ^ 2 * c + b ^ 3 * d - d ^ 4,
+  a ^ 2 * b * d - b ^ 3 * c + c * d ^ 3,
+  a ^ 2 * b * c - a * b ^ 2 * d + c ^ 2 * d ^ 2],
+  ![c ^ 3 + d ^ 3,
+  a ^ 2 * c ^ 2 - a * b * c * d + b ^ 2 * d ^ 2,
+  a ^ 2 * d ^ 2 + a * b * c ^ 2 - b ^ 2 * c * d,
+  -a ^ 2 * c * d + a * b * d ^ 2 + b ^ 2 * c ^ 2,
+  -a ^ 2 * c ^ 2 + a * b * c * d - b ^ 2 * d ^ 2]]
+
+def linkageT (a b c d : R) : Matrix (Fin 5) (Fin 5) R :=
+  ![![0,
+  0,
+  0,
+  0,
+  0],
+  ![0,
+  a ^ 3,
+  a ^ 2 * b,
+  a * b ^ 2,
+  -b ^ 3],
+  ![0,
+  a ^ 2 * d,
+  a * b * d,
+  b ^ 2 * d,
+  b ^ 2 * c],
+  ![0,
+  a * d ^ 2,
+  b * d ^ 2,
+  -b * c * d,
+  -b * c ^ 2],
+  ![0,
+  d ^ 3,
+  -c * d ^ 2,
+  c ^ 2 * d,
+  c ^ 3]]
+
+/-- All 25 exact linkage pairings, with their literal polynomial quotients. -/
+theorem linkage_pairing (a b c d : R) (i j : Fin 5) :
+    linkageE a b c d i * linkageEprime a b c d j =
+      linkageP a b c d * linkageQ a b c d i j +
+      linkageG a b c d * linkageT a b c d i j := by
+  fin_cases i <;> fin_cases j <;>
+    simp only [linkageE, linkageEprime, linkageP, linkageG, linkageQ, linkageT,
+      Matrix.of_apply, Matrix.cons_val_zero', Matrix.cons_val_succ',
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+      Matrix.cons_val_three, Matrix.cons_val_four, Matrix.head_cons, Matrix.tail_cons] <;> ring
+
+/-- The ordinary signed cross product, used only as a polynomial expression. -/
+def cross (u v : Fin 3 → R) : Fin 3 → R :=
+  ![u 1 * v 2 - u 2 * v 1, u 2 * v 0 - u 0 * v 2, u 0 * v 1 - u 1 * v 0]
+
+/-- A small Cauchy--Binet identity, proved directly over a commutative ring. -/
+theorem cofactors_rank_two (u v s t : Fin 3 → R) :
+    (Matrix.adjugate (fun i j => u i * s j + v i * t j)).transpose =
+      fun i j => cross u v i * cross s t j := by
+  rw [Matrix.adjugate_fin_three]
+  ext i j
+  fin_cases i <;> fin_cases j <;>
+    simp only [Matrix.transpose_apply, cross, Matrix.of_apply,
+      Matrix.cons_val_zero', Matrix.cons_val_succ', Matrix.cons_val_zero,
+      Matrix.cons_val_one, Matrix.cons_val_two, Matrix.head_cons, Matrix.tail_cons] <;> ring
+
+def coreRight0 (a b c d u0 u1 u2 : R) : R :=
+  (a*c+b*d)*u0 + (a^2*b-c*d^2)*u1 + (a*b^2+c^2*d)*u2
+
+def coreRight1 (a b c d u0 u1 u2 : R) : R :=
+  (a^3-b^3)*u0 + (-a^2*d^2-a*b*c^2+b^2*c*d)*u1 +
+    (a^2*c*d-a*b*d^2-b^2*c^2)*u2
+
+def coreMinorQuotient (a b c d u0 u1 u2 v0 v1 v2 : R) : R :=
+  -(a^2*b)*(u0*v1-v0*u1) - (a*b^2)*(u0*v2-v0*u2) +
+    (a*b*c*d)*(u1*v2-v1*u2)
+
+/-- The three central two-by-two minors have their actual common factor G. -/
+theorem coreRight_minor (a b c d u0 u1 u2 v0 v1 v2 : R) :
+    coreRight0 a b c d u0 u1 u2 * coreRight1 a b c d v0 v1 v2 -
+      coreRight0 a b c d v0 v1 v2 * coreRight1 a b c d u0 u1 u2 =
+      linkageG a b c d * coreMinorQuotient a b c d u0 u1 u2 v0 v1 v2 := by
+  unfold coreRight0 coreRight1 linkageG coreMinorQuotient
+  ring
+
+def coreProductCorrection (a b u1 v1 v2 : R) : R :=
+  u1 * (v1 * (a^2*b) + v2 * (a*b^2))
+
+theorem core_product (a b c d u0 u1 v0 v1 v2 : R) :
+    (u0*linkageP a b c d + u1*(a^3-b^3)) * coreRight0 a b c d v0 v1 v2 =
+      linkageP a b c d * (u0*coreRight0 a b c d v0 v1 v2 +
+        u1*coreRight1 a b c d v0 v1 v2) +
+      linkageG a b c d * coreProductCorrection a b u1 v1 v2 := by
+  unfold coreRight0 coreRight1 linkageG linkageP coreProductCorrection
+  ring
+
+def seedP (r x0 x1 x2 x3 w : R) : R := linkageP (x0^2) (r*x1*x3) w (x2^2)
+def seedG (r x0 x1 x2 x3 w : R) : R := linkageG (x0^2) (r*x1*x3) w (x2^2)
+
+theorem seedG_expanded (r x0 x1 x2 x3 w : R) :
+    seedG r x0 x1 x2 x3 w = x0^6-r^3*x1^3*x3^3+x2^6+w^3 := by
+  unfold seedG linkageG
+  ring
+
+def leftCoeff0 (x0 x1 x2 x3 w : R) : Fin 3 → R :=
+  ![-w ^ 2 * x1 * x3 + x1 ^ 2 * x2 ^ 4,
+  -w * x1 ^ 4 + x0 ^ 2 * x2 ^ 4 + x1 * x2 ^ 3 * x3 ^ 2,
+  -w ^ 2 * x0 * x3 + x1 ^ 4 * x3 ^ 2 + x2 ^ 2 * x3 ^ 4]
+
+def leftCoeff1 (x0 x1 x2 x3 w : R) : Fin 3 → R :=
+  ![x0 * x1 * x2 ^ 2 - x0 * x2 * x3 ^ 2,
+  x3 ^ 4,
+  x3 ^ 4]
+
+def rightCoeff0 (x0 x1 x2 x3 w : R) : Fin 3 → R :=
+  ![2 * w ^ 2 + 2 * w * x3 ^ 2,
+  w * x0 * x2 + x0 ^ 2 * x2 ^ 2,
+  x0 * x1 ^ 2 * x3 + x1 * x2 * x3 ^ 2 - x2 ^ 3 * x3 + x3 ^ 4]
+
+def rightCoeff2 (x0 x1 x2 x3 w : R) : Fin 3 → R :=
+  ![w + x3 ^ 2,
+  w,
+  0]
+
+def rightCoeff3 (x0 x1 x2 x3 w : R) : Fin 3 → R :=
+  ![0,
+  x0 * x3,
+  0]
+
+def baseRow0 (r x0 x1 x2 x3 w : R) (j : Fin 3) : R :=
+  coreRight0 (x0^2) (r*x1*x3) w (x2^2)
+    (rightCoeff0 x0 x1 x2 x3 w j) (rightCoeff2 x0 x1 x2 x3 w j)
+    (rightCoeff3 x0 x1 x2 x3 w j)
+
+def baseRow1 (r x0 x1 x2 x3 w : R) (j : Fin 3) : R :=
+  coreRight1 (x0^2) (r*x1*x3) w (x2^2)
+    (rightCoeff0 x0 x1 x2 x3 w j) (rightCoeff2 x0 x1 x2 x3 w j)
+    (rightCoeff3 x0 x1 x2 x3 w j)
+
+def rightMinorQuotient (r x0 x1 x2 x3 w : R) (j k : Fin 3) : R :=
+  coreMinorQuotient (x0^2) (r*x1*x3) w (x2^2)
+    (rightCoeff0 x0 x1 x2 x3 w j) (rightCoeff2 x0 x1 x2 x3 w j)
+    (rightCoeff3 x0 x1 x2 x3 w j)
+    (rightCoeff0 x0 x1 x2 x3 w k) (rightCoeff2 x0 x1 x2 x3 w k)
+    (rightCoeff3 x0 x1 x2 x3 w k)
+
+def rightCrossQuotient (r x0 x1 x2 x3 w : R) : Fin 3 → R :=
+  ![rightMinorQuotient r x0 x1 x2 x3 w 1 2,
+    rightMinorQuotient r x0 x1 x2 x3 w 2 0,
+    rightMinorQuotient r x0 x1 x2 x3 w 0 1]
+
+theorem baseRow_minor (r x0 x1 x2 x3 w : R) (j k : Fin 3) :
+    baseRow0 r x0 x1 x2 x3 w j * baseRow1 r x0 x1 x2 x3 w k -
+      baseRow0 r x0 x1 x2 x3 w k * baseRow1 r x0 x1 x2 x3 w j =
+      seedG r x0 x1 x2 x3 w * rightMinorQuotient r x0 x1 x2 x3 w j k := by
+  exact coreRight_minor _ _ _ _ _ _ _ _ _ _
+
+theorem baseRow_cross (r x0 x1 x2 x3 w : R) :
+    cross (baseRow0 r x0 x1 x2 x3 w) (baseRow1 r x0 x1 x2 x3 w) =
+      fun j => seedG r x0 x1 x2 x3 w * rightCrossQuotient r x0 x1 x2 x3 w j := by
+  ext j
+  fin_cases j
+  · exact baseRow_minor r x0 x1 x2 x3 w 1 2
+  · exact baseRow_minor r x0 x1 x2 x3 w 2 0
+  · exact baseRow_minor r x0 x1 x2 x3 w 0 1
+
+/-- The actual raw matrix, written without expanding its chosen section coefficients. -/
+def rawMatrix (r x0 x1 x2 x3 w : R) : Matrix (Fin 3) (Fin 3) R :=
+  fun i j => leftCoeff0 x0 x1 x2 x3 w i * baseRow0 r x0 x1 x2 x3 w j +
+    leftCoeff1 x0 x1 x2 x3 w i * baseRow1 r x0 x1 x2 x3 w j
+
+def rawCofactorQuotient (r x0 x1 x2 x3 w : R) : Matrix (Fin 3) (Fin 3) R :=
+  fun i j => cross (leftCoeff0 x0 x1 x2 x3 w) (leftCoeff1 x0 x1 x2 x3 w) i *
+    rightCrossQuotient r x0 x1 x2 x3 w j
+
+def productCorrection (r x0 x1 x2 x3 w : R) (i j : Fin 3) : R :=
+  coreProductCorrection (x0^2) (r*x1*x3) (leftCoeff1 x0 x1 x2 x3 w i)
+    (rightCoeff2 x0 x1 x2 x3 w j) (rightCoeff3 x0 x1 x2 x3 w j)
+
+def leftSection (r x0 x1 x2 x3 w : R) (i : Fin 3) : R :=
+  leftCoeff0 x0 x1 x2 x3 w i * seedP r x0 x1 x2 x3 w +
+    leftCoeff1 x0 x1 x2 x3 w i * ((x0^2)^3-(r*x1*x3)^3)
+
+def rightSectionNumerator (r x0 x1 x2 x3 w : R) : Fin 3 → R :=
+  baseRow0 r x0 x1 x2 x3 w
+
+/-- Each raw entry is exactly the product built from the chosen linkage sections. -/
+theorem rawMatrix_factorization (r x0 x1 x2 x3 w : R) :
+    rawMatrix r x0 x1 x2 x3 w =
+      fun i j => leftCoeff0 x0 x1 x2 x3 w i * baseRow0 r x0 x1 x2 x3 w j +
+        leftCoeff1 x0 x1 x2 x3 w i * baseRow1 r x0 x1 x2 x3 w j := rfl
+
+/-- The literal quotient polynomials agree with the smaller factored expressions. -/
+theorem rawCofactorQuotient_factorization (r x0 x1 x2 x3 w : R) :
+    rawCofactorQuotient r x0 x1 x2 x3 w =
+      fun i j => cross (leftCoeff0 x0 x1 x2 x3 w) (leftCoeff1 x0 x1 x2 x3 w) i *
+        rightCrossQuotient r x0 x1 x2 x3 w j := rfl
+
+/-- All nine cofactors of the actual raw seed matrix are divisible by G, before h. -/
+theorem rawMatrix_cofactor_identity (r x0 x1 x2 x3 w : R) :
+    (rawMatrix r x0 x1 x2 x3 w).adjugate.transpose =
+      fun i j => seedG r x0 x1 x2 x3 w * rawCofactorQuotient r x0 x1 x2 x3 w i j := by
+  rw [rawMatrix_factorization, cofactors_rank_two, rawCofactorQuotient_factorization]
+  ext i j
+  rw [baseRow_cross]
+  ring
+
+/-- The actual selected L and M sections multiply to p times the raw entry modulo G. -/
+theorem selected_product_identity (r x0 x1 x2 x3 w : R) (i j : Fin 3) :
+    leftSection r x0 x1 x2 x3 w i * rightSectionNumerator r x0 x1 x2 x3 w j =
+      seedP r x0 x1 x2 x3 w * rawMatrix r x0 x1 x2 x3 w i j +
+      seedG r x0 x1 x2 x3 w * productCorrection r x0 x1 x2 x3 w i j := by
+  exact core_product _ _ _ _ _ _ _ _ _
+
+/-- The chosen first M section is the original Gamma4 numerator. -/
+theorem first_rightSection (r x0 x1 x2 x3 w : R) :
+    rightSectionNumerator r x0 x1 x2 x3 w 0 =
+      (w+x3^2) * (2*w*seedP r x0 x1 x2 x3 w +
+        (x0^2)^2*(r*x1*x3)-w*(x2^2)^2) := by
+  simp only [rightSectionNumerator, baseRow0, coreRight0, rightCoeff0, rightCoeff2,
+    rightCoeff3, seedP, linkageP, Matrix.cons_val_zero]
+  ring
+
+end CycleQ2SegreSeed
+
+#print axioms CycleQ2SegreSeed.linkage_pairing
+#print axioms CycleQ2SegreSeed.rawMatrix_cofactor_identity
+#print axioms CycleQ2SegreSeed.selected_product_identity
+#print axioms CycleQ2SegreSeed.first_rightSection
+
+set_option linter.unusedSimpArgs true
+end
+end
+
+
+/- Component: continuation_2/AffineWeightedTransfer.lean -/
+section
+/-!
+# Actual paired-sign relative residue transfer
+
+All coordinates and derivations below belong to the already constructed
+function field of the protected chart X0=1.  The parameter is lambda=Y2/X2
+and the weighted coordinate is X2^2.  An explicit change of divergence
+coefficients transfers a three-direction relative primitive to the actual
+four-direction affine residue equation.  No relative primitive, geometric
+family, Leray statement, or cohomological vanishing is assumed to exist.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 2000000
+noncomputable section
+
+namespace CycleQ2AffineWeightedTransfer
+
+open MvPolynomial HodgeComputer CycleQ2AffineClearing CycleQ2AffineHypersurface
+  CycleQ2AffineResidueClosure CycleQ2AffineDifferentials HoldoutConstruction
+open scoped BigOperators
+
+abbrev K := AffineFunctionField
+abbrev Poly := AmbientPoly 4
+
+local instance coefficientCharZero : CharZero K :=
+  charZero_of_injective_algebraMap (algebraMap ℂ K).injective
+local instance coefficientIntAlgebra : Algebra ℤ K := Ring.toIntAlgebra _
+
+/-- Coordinates are (X1,X2,Y0,Y1,Y2) in the protected X0=1 chart. -/
+def z (i : Fin 5) : K := affineMap (X i)
+def u : K := z 1
+def v : K := z 4
+def parameter : K := v / u
+
+def E (i : Fin 4) : Derivation ℂ K K := complexTangent i
+
+@[simp] theorem E_apply (i : Fin 4) (x : K) : E i x = affineTangent i x := rfl
+
+@[simp] theorem E_u (i : Fin 4) : E i u = if i = 0 then 1 else 0 := by
+  simpa [E, u, z, eq_comm] using affineTangent_coordinate i 0
+
+@[simp] theorem E_v (i : Fin 4) : E i v = if i = 3 then 1 else 0 := by
+  simpa [E, v, z, eq_comm] using affineTangent_coordinate i 3
+
+/-- Nonvanishing is proved in the actual quotient field by differentiating
+an alleged zero coordinate; no additional divisibility premise is used. -/
+theorem u_ne_zero : u ≠ 0 := by
+  intro hu
+  have h : E 0 u = 1 := by simp only [E_u, if_true]
+  rw [hu, map_zero] at h
+  exact zero_ne_one h
+
+@[simp] theorem E_two (i : Fin 4) : E i (2 : K) = 0 := (E i).map_natCast 2
+
+@[simp] theorem E_parameter_zero : E 0 parameter = -parameter / u := by
+  rw [parameter, Derivation.leibniz_div]
+  simp only [E_u, E_v, Fin.reduceEq, if_false, if_true, smul_eq_mul, mul_zero,
+    zero_sub, mul_one]
+  ring
+
+@[simp] theorem E_parameter_one : E 1 parameter = 0 := by
+  rw [parameter, Derivation.leibniz_div]
+  simp only [E_u, E_v, Fin.reduceEq, if_false, smul_eq_mul, mul_zero, sub_self]
+
+@[simp] theorem E_parameter_two : E 2 parameter = 0 := by
+  rw [parameter, Derivation.leibniz_div]
+  simp only [E_u, E_v, Fin.reduceEq, if_false, smul_eq_mul, mul_zero, sub_self]
+
+@[simp] theorem E_parameter_three : E 3 parameter = 1 / u := by
+  rw [parameter, Derivation.leibniz_div]
+  simp only [E_u, E_v, Fin.reduceEq, if_false, if_true, smul_eq_mul, mul_zero,
+    sub_zero, mul_one]
+  field_simp [u_ne_zero]
+
+/-- Actual relative derivations in the Y0, Y1, X2^2 directions. -/
+def relativeDerivation : Fin 3 → Derivation ℂ K K :=
+  ![E 1, E 2, (2 * u)⁻¹ • (E 0 + parameter • E 3)]
+
+@[simp] theorem relativeDerivation_zero (x : K) : relativeDerivation 0 x = E 1 x := rfl
+@[simp] theorem relativeDerivation_one (x : K) : relativeDerivation 1 x = E 2 x := rfl
+@[simp] theorem relativeDerivation_two (x : K) :
+    relativeDerivation 2 x = (E 0 x + parameter * E 3 x) / (2 * u) := by
+  change ((2 * u)⁻¹ • (E 0 + parameter • E 3)) x = _
+  simp only [Derivation.smul_apply, Derivation.add_apply, smul_eq_mul]
+  ring
+
+/-- Every relative direction fixes the actual quotient parameter. -/
+theorem relative_parameter (j : Fin 3) : relativeDerivation j parameter = 0 := by
+  fin_cases j
+  · exact E_parameter_one
+  · exact E_parameter_two
+  · change relativeDerivation 2 parameter = 0
+    rw [relativeDerivation_two, E_parameter_zero, E_parameter_three]
+    ring
+
+/-- The radial relative direction has zero ordinary coordinate divergence. -/
+theorem radial_divergence : E 0 (1 / (2 * u)) + E 3 (parameter / (2 * u)) = 0 := by
+  simp only [Derivation.leibniz_div, Derivation.leibniz, Derivation.map_one_eq_zero,
+    E_two, E_u, E_parameter_three, smul_eq_mul, Fin.reduceEq, if_false,
+    if_true, mul_zero, add_zero, mul_one]
+  field_simp [u_ne_zero]
+  ring
+
+/-- The actual weighted numerator before multiplying by lambda. -/
+def weightedSource : Poly := X 0 ^ 2 * X 1 ^ 4 * X 2 ^ 2 * X 3 ^ 2
+
+theorem parameter_mul_u : parameter * u = v := by
+  unfold parameter
+  exact div_mul_cancel₀ v u_ne_zero
+
+/-- The actual polynomial equation in the weighted coordinate X2^2 and
+the quotient parameter Y2/X2. -/
+def weightedEquation (a c d w l : K) : K :=
+  1 + a ^ 6 + c ^ 6 + d ^ 6 + (1 + l ^ 6) * w ^ 3 +
+    (a * c * d) / 2 + (l * a ^ 3 * d * w) / 2 + (l * c * w ^ 2) / 2
+
+theorem weighted_equation : weightedEquation (z 0) (z 2) (z 3) (u ^ 2) parameter = 0 := by
+  have hhalf : affineMap (C (1 / 2 : ℂ)) = (1 / 2 : K) := by
+    change (algebraMap ℂ K) (1 / 2 : ℂ) = (1 / 2 : K)
+    simp only [map_div₀, map_one, map_ofNat]
+  have hf := (congrArg affineMap CycleQ2AffineGeometry.affineF_formula).symm.trans
+    affineMap_F
+  simp only [map_add, map_mul, map_pow, map_one, hhalf] at hf
+  change 1 + z 0 ^ 6 + u ^ 6 + z 2 ^ 6 + z 3 ^ 6 + v ^ 6 +
+    (1 / 2 : K) * (z 0 * z 2 * z 3 + z 0 ^ 3 * u * z 3 * v +
+      u ^ 3 * v * z 2) = 0 at hf
+  rw [← parameter_mul_u] at hf
+  calc
+    weightedEquation (z 0) (z 2) (z 3) (u ^ 2) parameter =
+      1 + z 0 ^ 6 + u ^ 6 + z 2 ^ 6 + z 3 ^ 6 + (parameter * u) ^ 6 +
+        (1 / 2 : K) * (z 0 * z 2 * z 3 + z 0 ^ 3 * u * z 3 * (parameter * u) +
+          u ^ 3 * (parameter * u) * z 2) := by
+            unfold weightedEquation
+            ring
+    _ = 0 := hf
+
+/-- The actual weighted numerator is a²c²d²w². -/
+theorem weighted_source_value :
+    affineMap weightedSource = z 0 ^ 2 * z 2 ^ 2 * z 3 ^ 2 * (u ^ 2) ^ 2 := by
+  simp only [weightedSource, map_mul, map_pow]
+  change z 0 ^ 2 * u ^ 4 * z 2 ^ 2 * z 3 ^ 2 = _
+  ring
+
+theorem affineA_formula : affineA =
+    X 0 ^ 2 * X 1 ^ 3 * X 2 ^ 2 * X 3 ^ 2 * X 4 := by
+  have h1 : Fin.cases (1 : Poly) X (1 : Fin 6) = X (0 : Fin 5) := rfl
+  have h2 : Fin.cases (1 : Poly) X (2 : Fin 6) = X (1 : Fin 5) := rfl
+  have h3 : Fin.cases (1 : Poly) X (3 : Fin 6) = X (2 : Fin 5) := rfl
+  have h4 : Fin.cases (1 : Poly) X (4 : Fin 6) = X (3 : Fin 5) := rfl
+  have h5 : Fin.cases (1 : Poly) X (5 : Fin 6) = X (4 : Fin 5) := rfl
+  simp [affineA, CycleQ2AffineChart.dehomogenize, HodgeSubmission.A, h1, h2, h3, h4, h5]
+
+theorem source_product : affineA * X 1 = weightedSource * X 4 := by
+  rw [affineA_formula]
+  unfold weightedSource
+  ring
+
+private theorem normal_partial_product_coordinate (P : Poly) (j : Fin 5) (hj : j ≠ 0) :
+    pderiv 0 (P * X j) = pderiv 0 P * X j := by
+  simp [pderiv_X, hj, mul_comm]
+
+theorem source_first_jet_product : pderiv 0 affineA * X 1 = pderiv 0 weightedSource * X 4 := by
+  have h := congrArg (pderiv (0 : Fin 5)) source_product
+  simpa only [normal_partial_product_coordinate _ _ (by decide : (1 : Fin 5) ≠ 0),
+    normal_partial_product_coordinate _ _ (by decide : (4 : Fin 5) ≠ 0)] using h
+
+theorem source_second_jet_product :
+    pderiv 0 (pderiv 0 affineA) * X 1 = pderiv 0 (pderiv 0 weightedSource) * X 4 := by
+  have h := congrArg (pderiv (0 : Fin 5)) source_first_jet_product
+  simpa only [normal_partial_product_coordinate _ _ (by decide : (1 : Fin 5) ≠ 0),
+    normal_partial_product_coordinate _ _ (by decide : (4 : Fin 5) ≠ 0)] using h
+
+private theorem mapped_source_ratio (P Q : Poly) (h : P * X 1 = Q * X 4) :
+    affineMap P = parameter * affineMap Q := by
+  have hm := congrArg affineMap h
+  simp only [map_mul] at hm
+  change affineMap P * u = affineMap Q * v at hm
+  rw [(eq_div_iff u_ne_zero).mpr hm]
+  unfold parameter
+  ring
+
+theorem affine_source_ratio : affineMap affineA = parameter * affineMap weightedSource :=
+  mapped_source_ratio _ _ source_product
+
+/-- The literal normal jets prove the normal-source scaling for the exact
+protected numerator; the normal variable is not changed. -/
+theorem normal_source_ratio :
+    affineNormalSource affineA = parameter * affineNormalSource weightedSource := by
+  have h0 := mapped_source_ratio _ _ source_product
+  have h1 := mapped_source_ratio _ _ source_first_jet_product
+  have h2 := mapped_source_ratio _ _ source_second_jet_product
+  simp only [affineNormalSource, SplitHigherResidue.normalSourceTwo, h0, h1, h2]
+  ring
+
+/-- The actual coefficient transfer in the (X2,Y0,Y1,Y2) directions. -/
+def transferVector (w : Fin 3 → K) : Fin 4 → K :=
+  ![parameter * w 2 / (2 * u), parameter * w 0, parameter * w 1,
+    parameter ^ 2 * w 2 / (2 * u)]
+
+def normalDensity : K := affineMap (pderiv 0 affineF)
+
+def relativeResidueExpression (w : Fin 3 → K) : K :=
+  affineNormalSource weightedSource +
+    (∑ j, relativeDerivation j (w j)) -
+    (∑ j, w j * relativeDerivation j normalDensity) / normalDensity
+
+private theorem sum_three (f : Fin 3 → K) : (∑ i, f i) = f 0 + f 1 + f 2 := by
+  have h : (∑ i, f i) = f 0 + (f 1 + f 2) := by
+    simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero]
+    rfl
+  rw [h]
+  ring
+
+private theorem sum_four (f : Fin 4 → K) : (∑ i, f i) = f 0 + f 1 + f 2 + f 3 := by
+  have h : (∑ i, f i) = f 0 + (f 1 + (f 2 + f 3)) := by
+    simp only [Fin.sum_univ_succ, Fin.sum_univ_zero, add_zero]
+    rfl
+  rw [h]
+  ring
+
+@[simp] theorem transferVector_zero (w : Fin 3 → K) :
+    transferVector w 0 = parameter * w 2 / (2 * u) := rfl
+@[simp] theorem transferVector_one (w : Fin 3 → K) :
+    transferVector w 1 = parameter * w 0 := rfl
+@[simp] theorem transferVector_two (w : Fin 3 → K) :
+    transferVector w 2 = parameter * w 1 := rfl
+@[simp] theorem transferVector_three (w : Fin 3 → K) :
+    transferVector w 3 = parameter ^ 2 * w 2 / (2 * u) := rfl
+
+/-- The product-rule terms cancel because the radial direction has zero
+divergence and fixes lambda. All derivatives are the actual field operators. -/
+theorem transferred_divergence (w : Fin 3 → K) :
+    (∑ i, E i (transferVector w i)) =
+      parameter * ∑ j, relativeDerivation j (w j) := by
+  rw [sum_four, sum_three]
+  simp only [transferVector_zero, transferVector_one, transferVector_two,
+    transferVector_three, relativeDerivation_zero,
+    relativeDerivation_one, relativeDerivation_two, Derivation.leibniz_div,
+    Derivation.leibniz, Derivation.leibniz_pow, E_parameter_zero, E_parameter_one,
+    E_parameter_two, E_parameter_three, E_two, E_u, smul_eq_mul, nsmul_eq_mul,
+    Fin.reduceEq, if_true, if_false, Nat.cast_ofNat, Nat.reduceSub, pow_one]
+  field_simp [u_ne_zero]
+  ring
+
+/-- The logarithmic normal-density term undergoes the same transfer. -/
+theorem transferred_density_term (w : Fin 3 → K) :
+    (∑ i, transferVector w i * E i normalDensity) =
+      parameter * ∑ j, w j * relativeDerivation j normalDensity := by
+  rw [sum_four, sum_three]
+  simp only [transferVector_zero, transferVector_one, transferVector_two,
+    transferVector_three, relativeDerivation_zero,
+    relativeDerivation_one, relativeDerivation_two]
+  ring
+
+/-- Exact actual-field relative-PDE transfer for the protected source. -/
+theorem affine_residue_transfer (w : Fin 3 → K) :
+    affineResidueExpression affineA (transferVector w) =
+      parameter * relativeResidueExpression w := by
+  unfold affineResidueExpression residueDivergence fieldDivergence
+  rw [normal_source_ratio]
+  change parameter * affineNormalSource weightedSource +
+    ((∑ i, E i (transferVector w i)) -
+      (∑ i, transferVector w i * E i normalDensity) / normalDensity) = _
+  rw [transferred_divergence, transferred_density_term]
+  unfold relativeResidueExpression
+  ring
+
+/-- An actual relative three-direction primitive suffices for the original
+protected certificate. Its existence is not asserted in this module. -/
+theorem protected_certificate_of_relative_primitive
+    (h : ∃ w : Fin 3 → K, relativeResidueExpression w = 0) :
+    HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := by
+  obtain ⟨w, hw⟩ := h
+  apply protected_certificate_of_affine_residue_primitive
+  refine ⟨transferVector w, ?_⟩
+  rw [affine_residue_transfer, hw, mul_zero]
+
+end CycleQ2AffineWeightedTransfer
+
+#print axioms CycleQ2AffineWeightedTransfer.u_ne_zero
+#print axioms CycleQ2AffineWeightedTransfer.normal_source_ratio
+#print axioms CycleQ2AffineWeightedTransfer.weighted_equation
+#print axioms CycleQ2AffineWeightedTransfer.affine_residue_transfer
+#print axioms CycleQ2AffineWeightedTransfer.protected_certificate_of_relative_primitive
 end
 end
 
