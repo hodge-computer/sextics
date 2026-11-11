@@ -229,7 +229,7 @@ The resultant support in the homogeneous strictification theorem depends only on
 
 ### The regular error and its cohomological obstruction
 
-Suppose now that \(X=V(F)\subset\mathbb P^n\) is smooth and \(D\) is nonconstant. On \(U_D=\mathbb P^n\setminus V(D)\), an ordinary certificate gives \(\omega_A=d\beta+\eta\), where \(\eta\) is a regular \(n\)-form. Correcting \(\beta\) by a regular \((n-1)\)-form requires \([\eta]=0\) in \(H^n_{\mathrm{dR}}(U_D)\). Exactness of \(\omega_A\) on \(U_D\setminus X\) requires the image of that class to vanish there. Holomorphicity of \(\eta\) alone implies neither condition. The residue sequence underlying this distinction is the one used in [Diamond, §2.2](https://arxiv.org/html/2603.29157v2#S2.SS2).
+Suppose now that \(X=V(F)\subset\mathbb P^n\) is smooth and \(D\) is nonconstant. On \(U_D=\mathbb P^n\setminus V(D)\), an ordinary certificate gives \(\omega_A=d\beta+\eta\), where \(\eta\) is a regular \(n\)-form. Correcting \(\beta\) by a regular \((n-1)\)-form requires \([\eta]=0\) in \(H^n_{\mathrm{dR}}(U_D)\). Exactness of \(\omega_A\) on \(U_D\setminus X\) requires the image of that class to vanish there. Holomorphicity of \(\eta\) alone implies neither condition. The residue sequence underlying this distinction is the one used in [Diamond, §2.2](https://arxiv.org/html/2603.29157v3#S2.SS2).
 
 The resultant denominator gives a geometric way to remove the ambient obstruction. Projection from \(p=[1:0:\cdots:0]\notin X\) identifies
 
