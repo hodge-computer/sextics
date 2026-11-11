@@ -61,7 +61,7 @@ dF\wedge \iota _v\Omega =v(F)\cdot\Omega -6\cdot F\iota _{v}\mathrm{vol}.
 
 Applying the quotient rule to \(\beta \) cancels the two terms containing \(\iota _{v}\mathrm{vol}\) and yields the displayed formula. The same calculation in \(\mathbb P^{n}\) for \(d=\operatorname{deg} F\) uses \(\operatorname{deg} A=d\cdot(q+1)-(n+1)\) and \(\operatorname{deg} v_{i}=d\cdot q-n\), and replaces \(6\cdot q\) by \(d\cdot q\).
 
-The key equation therefore says that \(\omega _A-d\beta \) has no pole along \(X\). On the complement of the denominator locus, the residue of an exact form and the residue of a form regular across \(X\) both vanish in cohomology, proving sufficiency. The prescribed-support theorem below proves the converse, together with an auxiliary pole bound, without leaving a separate algebraization step implicit. Diamond's Section 2 gives another necessity argument with a bound along \(X\); that bound alone does not impose simple poles along the auxiliary divisor.
+The key equation therefore says that \(\omega _A-d\beta \) has no pole along \(X\). On the complement of the denominator locus, the residue of an exact form and the residue of a form regular across \(X\) both vanish in cohomology, proving sufficiency. The prescribed-support theorem below proves the converse. A certificate with poles on the supporting divisor comes from pole reduction on the affine complement of that divisor; [Diamond's Section 2](https://arxiv.org/html/2603.29157v2#S2) obtains one from a Čech–de Rham construction. The bound on its pole order along the divisor is a separate statement, and it uses the Hodge filtration.
 
 ## One denominator and the normalized equations
 
@@ -148,13 +148,67 @@ In particular, \(D^q\) also suffices. Over the field of definition of \(F,A,D\),
 
 We prove the slightly more general statement for a smooth degree-\(d\) hypersurface \(X\subset P=\mathbb P^{n}\), with \(n\ge 2, 1\le q\le n-1\) and \(\operatorname{deg} A=d\cdot(q+1)-(n+1)\). Put \(R=V(D_{\mathrm{red}}), e=\operatorname{deg} D_{\mathrm{red}}\), and work over \(\mathbb C\) until the final linear descent. We use unshifted de Rham complexes, with differential forms in degrees \(0,\ldots ,n\).
 
-The external inputs are the following standard facts about mixed Hodge modules and projective space. They are stated here to specify exactly what the proof uses.
+The two implications from support to certificates differ in nature. The second statement follows from pole reduction on the affine complement of \(R\), without Hodge theory. The pole bound of the third statement uses the Hodge filtration.
+
+**Forms and fields.** Let \(m\ge 0\). The identity \(\Omega ^{n-1}_P\cong T_P(-n-1)\) and the twisted Euler sequence give
+
+\[
+0 \to  \mathcal O_P(q\cdot d+m\cdot e-n-1) \to  \mathcal O_P(q\cdot d+m\cdot e-n)^{n+1} \to  \Omega ^{n-1}_P(q\cdot X+m\cdot R) \to  0.
+\]
+
+The left term has zero \(H^{1}\). Therefore every global section \(\beta \) of the right term is represented by a homogeneous polynomial tuple \(N\) of degree \(q\cdot d+m\cdot e-n\):
+
+\[
+\begin{gathered}
+\beta =-\iota _N\Omega /(F^q\cdot D_{\mathrm{red}}^m).
+\end{gathered}
+\]
+
+With \(v=N/D_{\mathrm{red}}^m\), the differential identity of the key equation shows that \(v\) is a certificate exactly when \(\omega _A-d\beta \) has no pole along \(X\).
+
+**Proof of \(1\Longrightarrow 2\).** Put \(U=P\setminus R\) and \(X^{\circ}=X\cap U\). Both are smooth affine varieties, so taking sections over \(U\) is exact on quasi-coherent sheaves. All forms in this proof are algebraic.
+
+*Pole reduction.* For \(m\ge 2\), differentiation induces a map
+
+\[
+\Omega ^{n-1}_P((m-1)X)/\Omega ^{n-1}_P((m-2)X) \longrightarrow  \Omega ^{n}_P(m\cdot X)/\Omega ^{n}_P((m-1)X).
+\]
+
+For a local equation \(f\) of \(X\), it sends the class of \(\gamma /f^{m-1}\) to the class of \(-(m-1)\cdot df\wedge \gamma /f^{m}\). It is therefore \(\mathcal O_X\)-linear. It is surjective, because \(df\) does not vanish on the smooth \(X\) and the target has top degree. Since \(U\) is affine, a section of the target over \(U\) is the image of a section of \(\Omega ^{n-1}_P((m-1)X)\) over \(U\). Hence every section of \(\Omega ^{n}_P(m\cdot X)\) over \(U\) is \(d\psi +\omega '\), where \(\psi \) is a section of \(\Omega ^{n-1}_P((m-1)X)\) and \(\omega '\) a section of \(\Omega ^{n}_P((m-1)X)\). Applying this \(q\) times to \(\omega _A\) gives, over \(U\),
+
+\[
+\begin{gathered}
+\omega _A=d\psi +\omega _{1},       \psi \in \Gamma (U,\Omega ^{n-1}_P(q\cdot X)),       \omega _{1}\in \Gamma (U,\Omega ^{n}_P(X)).
+\end{gathered}
+\]
+
+No hypothesis has been used so far.
+
+*The residue.* A form of top degree with a simple pole is logarithmic. Let \(\rho \in \Gamma (X^{\circ},\Omega ^{n-1}_X)\) be the Poincaré residue of \(\omega _{1}\). Exact forms have zero residue, so \(\rho \) represents \(\operatorname{Res}_X(\omega _A)\) on \(X^{\circ}\). By [Grothendieck's comparison theorem](https://www.numdam.org/item/PMIHES_1966__29__95_0/), the cohomology of the smooth affine variety \(X^{\circ}\) is that of its complex of algebraic forms. In top degree this reads
+
+\[
+H^{n-1}(X^{\circ},\mathbb C)=\Gamma (X^{\circ},\Omega ^{n-1}_X)/d\Gamma (X^{\circ},\Omega ^{n-2}_X).
+\]
+
+The first statement therefore gives an algebraic \(\sigma \) with \(d\sigma =\rho \). The residue sequence
+
+\[
+0 \to  \Omega ^{n-1}_P \to  \Omega ^{n-1}_P(\log X) \to  \Omega ^{n-2}_X \to  0
+\]
+
+is exact on sections over \(U\), so \(\sigma \) is the residue of a logarithmic form \(\widetilde\sigma \) over \(U\). Residues commute with \(d\). Thus \(\omega _{1}-d\widetilde\sigma \) is logarithmic with zero residue, and so it is regular on \(U\).
+
+Put \(\beta =\psi +\widetilde\sigma \). It has poles of order at most \(q\) along \(X\), and \(\omega _A-d\beta \) is regular on \(U\). A section over \(U\) is a rational section with poles along \(R\), so \(\beta \) is a global section of \(\Omega ^{n-1}_P(q\cdot X+m\cdot R)\) for some \(m\). The paragraph on forms and fields turns it into a certificate with denominator \(D_{\mathrm{red}}^m\). ∎
+
+The argument is special to top degree: there a simple pole is logarithmic, and the leading term of a higher pole can always be removed. It gives no bound on \(m\).
+
+**Proof of \(1\Longrightarrow 3\).** The external inputs are the following standard facts about mixed Hodge modules and projective space. They are stated here to specify exactly what the proof uses.
 
 - Localization along a reduced divisor \(T\) carries a Hodge filtration \(\mathcal F\) with \(\mathcal F_{-1}\mathcal O_P(*T)=0\) and \(\mathcal F_{k}\mathcal O_P(*T)\subset \mathcal O_P((k+1)T)\) for \(k\ge 0\); equality holds when \(T\) is smooth. Inclusions and quotients of these filtered modules are strict. See [Mustaţă–Popa, Hodge ideals, equation (0.1) and §§4–7](https://people.math.harvard.edu/~mpopa/papers/SI.pdf).
 - Projective direct image is strict: for a filtered mixed Hodge module \(M\) on projective \(P\), the map from the hypercohomology of \(\mathcal F^p\operatorname{DR}(M)\) to that of \(\operatorname{DR}(M)\) is injective. Here its \(j\)-th term is \(\Omega ^{j}_P\otimes \mathcal F_{j-p}M\). See [Mustaţă–Popa, Hodge ideals for \(\mathbb Q\)-divisors, §1 and equation (1.1)](https://www.numdam.org/item/10.5802/jep.94.pdf).
 - Algebraic de Rham comparison identifies localization with the derived direct image from the divisor complement; this is the comparison input used in [Diamond, §2.3](https://arxiv.org/html/2603.29157v2#S2.SS3). Bott vanishing gives \(H^{i}(P,\Omega ^{j}_P(b))=0\) for \(b>0\) and \(i>0\), as recalled in [Hodge ideals, §25](https://people.math.harvard.edu/~mpopa/papers/SI.pdf); line bundles on \(\mathbb P^{n}\) also have zero \(H^{1}\) for \(n\ge 2\).
 
-**Proof.** Set
+Set
 
 \[
 \begin{gathered}
@@ -193,21 +247,7 @@ both twists are positive because \(a_j\ge 1\) and \(e>0\). Bott vanishing and th
 
 Thus \(\omega _A-d\beta \) has poles only on \(R\). In particular, the primitive has at most \(q\)-fold poles along every component of \(R\) and along \(X\), with no added support.
 
-It remains to obtain the vector field, rather than merely assert that a rational form can be represented. The identity \(\Omega ^{n-1}_P\cong T_P(-n-1)\) and the twisted Euler sequence give
-
-\[
-0 \to  \mathcal O_P(q(d+e)-n-1) \to  \mathcal O_P(q(d+e)-n)^{n+1} \to  \Omega ^{n-1}_P(q\cdot X+q\cdot R) \to  0.
-\]
-
-The left term has zero \(H^{1}\). Therefore \(\beta \) is represented by a homogeneous polynomial tuple \(N\) of degree \(q(d+e)-n\):
-
-\[
-\begin{gathered}
-\beta =-\iota _N\Omega /(F^q\cdot D_{\mathrm{red}}^q).
-\end{gathered}
-\]
-
-With \(v=N/D_{\mathrm{red}}^q\), the differential identity proved above converts the absence of an \(X\)-pole into the key equation. This proves \(1\Longrightarrow 3\). The implication \(3\Longrightarrow 2\) is immediate, and \(2\Longrightarrow 1\) is the residue argument already given. Multiplying \(N\) by \((D/D_{\mathrm{red}})^q\) gives the prescribed denominator \(D^q\). Averaging the field under \(\tau \) preserves this even denominator and the target, and enforces the component parities. It can also retain \(D_{\mathrm{red}}^q\), since stability of its reduced support implies \(D_{\mathrm{red}}\circ \tau =\pm D_{\mathrm{red}}\). Finally, the fixed-denominator normalized equations form a finite linear system over the original coefficient field. Consistency over \(\mathbb C\) implies consistency over that field by Gaussian elimination. ∎
+The paragraph on forms and fields, with \(m=q\), turns \(\beta \) into a certificate with denominator \(D_{\mathrm{red}}^q\). This proves \(1\Longrightarrow 3\). The implication \(3\Longrightarrow 2\) is immediate, and \(2\Longrightarrow 1\) is the residue argument already given. Multiplying \(N\) by \((D/D_{\mathrm{red}})^q\) gives the prescribed denominator \(D^q\). Averaging the field under \(\tau \) preserves this even denominator and the target, and enforces the component parities. It can also retain \(D_{\mathrm{red}}^q\), since stability of its reduced support implies \(D_{\mathrm{red}}\circ \tau =\pm D_{\mathrm{red}}\). Finally, the fixed-denominator normalized equations form a finite linear system over the original coefficient field. Consistency over \(\mathbb C\) implies consistency over that field by Gaussian elimination. ∎
 
 This also proves the claimed necessity of certificates for an arbitrary divisor support: choose an ambient \(D\) cutting that divisor, apply the theorem, and use the resulting polynomial tuple. If the original coefficients lie in a smaller field, the descent argument below gives a certificate over that field, possibly with a different support. The proof bounds poles on a chosen support; it supplies no bound on the degree \(e\) of the support itself.
 
