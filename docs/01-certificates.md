@@ -262,6 +262,20 @@ Conversely, the proof above is [Diamond, Construction 2.14](https://arxiv.org/ht
 
 Neither argument bounds \(m\), the pole order along \(R\). That bound is the third statement.
 
+**Remark: primitives with unbounded singularities.** The first statement already follows from the existence of a holomorphic form \(\beta \) of degree \(n-1\) on \(U\setminus X\), with no condition on its singularities along \(X\), such that \(\omega _A-d\beta \) extends to a holomorphic form \(h\) on \(U\). To see this, keep the notation of the proof of \(1\Longrightarrow 2\). On \(U\setminus X\),
+
+\[
+\omega _{1}=d(\beta -\psi )+h.
+\]
+
+Let \(c\) be a cycle of dimension \(n-1\) on \(X^{\circ}\), and let \(\tau (c)\) be the boundary of a small tube around \(c\) in \(U\), made of discs normal to \(X\). It is a cycle in \(U\setminus X\). For a suitable orientation of the tube, [Leray's residue formula](https://www.numdam.org/item/BSMF_1959__87__81_0/) for the closed form \(\omega _{1}\), which has a simple pole, reads
+
+\[
+\int _{\tau (c)}\omega _{1}=2\pi i\int _{c}\rho .
+\]
+
+By Stokes's theorem the integral of \(d(\beta -\psi )\) over \(\tau (c)\) is zero. So is the integral of \(h\), because \(h\) is closed on \(U\) and \(\tau (c)\) is a boundary there. Hence \(\rho \) has no periods, and its class in \(H^{n-1}(X^{\circ},\mathbb C)\), which is \(\operatorname{Res}_X(\omega _A)\) on \(X^{\circ}\), is zero. The form \(\beta \) enters only through integrals over compact cycles away from \(X\), so nothing is assumed about its singularities. By the theorem, it can then be replaced by a rational form with poles of order at most \(q\) along \(X\) and along \(R\), and no others.
+
 **Proof of \(1\Longrightarrow 3\).** The external inputs are the following standard facts about mixed Hodge modules and projective space. They are stated here to specify exactly what the proof uses.
 
 - Localization along a reduced divisor \(T\) carries a Hodge filtration \(\mathcal F\) with \(\mathcal F_{-1}\mathcal O_P(*T)=0\) and \(\mathcal F_{k}\mathcal O_P(*T)\subset \mathcal O_P((k+1)T)\) for \(k\ge 0\); equality holds when \(T\) is smooth. Inclusions and quotients of these filtered modules are strict. See [Mustaţă–Popa, Hodge ideals, equation (0.1) and §§4–7](https://people.math.harvard.edu/~mpopa/papers/SI.pdf).
