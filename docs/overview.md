@@ -14,7 +14,7 @@ This particular instance of the GHC is interesting in its own right. Further, as
 
 > **Parity convention.** In these coordinates, “even” and “odd” mean even and odd total degree in the three \(Y\) variables.
 
-In a recent work, [Diamond](https://arxiv.org/abs/2603.29157) shows that the prediction of the GHC as regards \(H\subset H^4(X,\mathbb Q)\) is *equivalent* to a purely algebraic one. For \(F\) given as above—an even homogeneous sextic whose vanishing locus is smooth—is it true that, for each \(q\in\{1,2\}\) and each *odd* monomial \(A\) of degree \(6\cdot q\), there exists a vector field \(v=(v_0,\ldots,v_5)\) whose components are homogeneous *rational* functions of total degree \(6\cdot q-5\), and whose common denominator \(D\) is not divisible by \(F\), such that
+In a recent work, [Diamond](https://arxiv.org/abs/2603.29157) shows that the prediction of the GHC as regards \(H\subset H^4(X,\mathbb Q)\) is *equivalent* to a purely algebraic one. For \(F\) given as above—an even homogeneous sextic whose vanishing locus is smooth—is it true that, for \(q=2\) and each *odd* monomial \(A\) of degree \(6\cdot q\), there exists a vector field \(v=(v_0,\ldots,v_5)\) whose components are homogeneous *rational* functions of total degree \(6\cdot q-5\), and whose common denominator \(D\) is not divisible by \(F\), such that
 
 \[
 F^{q+1}\;\bigm|\;A-q\cdot\mathrm dF(v)+F\cdot\operatorname{div}(v)?
