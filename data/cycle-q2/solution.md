@@ -5,9 +5,19 @@
 **Draft; not a completed Lean proof.** The algebraic implication from a
 rational primitive of the actual affine residue to the unchanged certificate
 is proved. Its formulation in actual relative Kähler differentials and
-exterior powers is now proved too, together with the formal normal residue
-density and universal exterior pullback calculations. The existence of a
-primitive remains unproved. The one
+exterior powers, the formal normal residue density, and universal exterior
+pullback are proved. Specialization from the actual generic pencil and
+descent through finite algebraic extensions are now proved as well.
+The concrete incidence equations, their polynomial relations, and the
+sparse and theta-one seed Čech residue calculations are also formalized.
+The actual fixed-sextic Jacobian now has rank 1922, its image is the
+actual relation kernel, and a trace-one complex tangent exists by a
+nonconstructive augmented-matrix rank argument. Exact characteristic-zero
+Jacobian identities now cover the literal seed curve by normal charts.
+Bases of the genuine seed conormal module, actual local lifts of the
+trace-family coefficient motion, and the relative Kodaira--Spencer/transition
+identity are also proved.
+The existence of a primitive remains unproved. The one
 explicit admission, `Submission.missing_geometric_existence`, states exactness
 of that genuine exterior form. Consequently `Submission.certificate` still
 depends on `sorryAx` and must not be accepted.
@@ -177,6 +187,64 @@ obey the Leibniz rule. Taking any Laurent coefficient commutes with them,
 even when a primitive has negative powers of the formal parameter.
 The proof does not infer a rational generic primitive from an unbounded
 formal deformation.
+
+## Actual generic specialization and finite descent
+
+`CycleQ2GenericSpecialization` constructs an actual deformation of the
+protected affine hypersurface. Choose any polynomial \(H\) whose image
+in \(K\) is nonzero and put
+\[
+\tau=-f/H\in\mathbb C(x_0,\ldots,x_4).
+\]
+The generic coordinate ring is the actual quotient
+\(\mathbb C[x_0,\ldots,x_4,t]/(f+tH)\). The proof identifies its
+kernel, embeds it in the ambient rational function field, and proves
+that this field is its fraction field. It also proves that \(\tau\)
+is transcendental over \(\mathbb C\), so the parameter field is
+genuinely \(\mathbb C(t)\).
+
+The generic tangent derivations annihilate \(\tau\) and every element
+of \(\mathbb C(t)\), and commute pairwise. A faithful Hensel chart
+maps this actual generic field into \(K((T))\), sends \(\tau\) to
+\(T\), and intertwines the generic tangents with the coefficientwise
+affine tangents. The generic residue density is computed with the
+parameter held fixed. Its constant Laurent coefficient is precisely
+\(c/g\), the density of the protected affine residue form.
+
+Consequently a generic rational primitive specializes to an actual
+primitive on the protected hypersurface by taking constant Laurent
+coefficients. The primitive may have negative powers of \(T\); no
+regularity at the special fiber is assumed. This is the checked theorem
+`affine_primitive_of_generic_primitive`, with the final implication
+`protected_certificate_of_generic_relative_primitive`.
+The concrete `protectedDirection` gives the pencil containing both the
+protected and Fermat equations. The theorem does not assume that this
+pencil has a generic primitive.
+
+`CycleQ2FiniteDifferentialDescent` proves that a derivation extends
+uniquely to a finite characteristic-zero field extension, that these
+extensions preserve commutators, and that normalized field trace
+commutes with the extended derivations. It does not require a Galois
+extension. Applied to the actual affine field, primitive existence
+over a finite extension is equivalent to primitive existence over the
+base field.
+
+`CycleQ2GenericFiniteSpecialization` composes these results. A primitive
+over any finite extension of the actual generic field descends by trace
+and then specializes to the protected certificate. The extension need
+not itself embed in the selected Laurent chart: trace is taken first.
+This removes the finite-extension and specialization obligations from
+that route. It leaves the existence of the initial generic primitive
+unproved.
+
+`CycleQ2VeryGeneralPencil` also proves faithful polynomial specialization
+along a pencil through an arbitrary prescribed complex point, over a
+chosen countable coefficient subfield. This uses simultaneous avoidance
+of its countably many nonzero polynomial conditions. Applying this to
+a generic primitive requires first retaining its finitely many
+coefficients in that subfield. The theorem does not embed a field of
+several independent variables over all of \(\mathbb C\) into
+\(\mathbb C(t)\) while fixing every complex number.
 
 ## Explicit reduction to the weighted pencil
 
@@ -551,11 +619,61 @@ MR=I_8,\qquad M\ell=(0,0,0,0,0,0,0,2)^{\mathsf T}
 \]
 for the actual trace.
 
-The sparse \(b\) surface is singular. These trace identities must not be
-silently used as a smooth geometric seed. A smooth deformation and the
-obstruction/Abel--Jacobi interpretation require separate justification.
-The trace and matrix binding are algebraic progress, not a proof of
-divisor support.
+### Actual Čech comparison and the smooth seed
+
+The sparse trace is now compared with a literal Čech calculation on the
+curve, rather than merely a functional on an Artinian quotient.
+After eliminating \(w=-x_2^2\), set
+\(U=x_1x_3\) and \(V=x_2\). The actual reduced projective curve
+is covered by \(D_+(U)\) and \(D_+(V)\). The cover is proved on
+mathlib's `ProjectiveSpectrum`, including nonclosed primes, for every
+member \(h_\theta=h+\theta x_0^3\).
+
+The boundary predicate uses arbitrary denominator powers: a homogeneous
+numerator represents a boundary precisely when suitable multiples can
+be written as a sum from the two chart sections, modulo the actual
+curve ideal. Two explicit Laurent charts and their residue functional
+annihilate every such boundary. The argument is not a search limited
+to a fixed pole order.
+
+For the sparse member \(\theta=0\), the theorem
+`CycleQ2SeedCech.cechResidue_eq_trace` proves, for every homogeneous
+degree-nine numerator \(p\),
+\[
+\operatorname{Res}_{\check C}\frac{p}{U^2V^4}=3r\,\tau(p).
+\]
+Moreover `cechBoundary_iff_trace_zero` proves both directions: the
+actual Čech class vanishes if and only if \(\tau(p)=0\).
+The 72-entry matrix, its right inverse, and its selected tangent are
+therefore bound to this actual Čech calculation. The first seven
+selected tangent classes are boundaries and the last has residue
+\(r\ne0\).
+
+The smooth-member calculation is separate. In the cubic order
+\[
+(wx_3,x_3^3,x_2^3,x_1x_2x_3,x_1^3,x_0x_2x_3,
+x_0x_1^2,x_0^2x_1,x_0^3),
+\]
+write \(L=\sum_jv_jL_j\). The actual Laurent calculation for
+\(-x_2^3x_3^3L/(U^2V^4)\) gives
+\[
+\operatorname{Res}_{\check C}=3r\,\ell_\theta(v),\qquad
+\ell_\theta(v)=\frac{\theta i\,v_1-(1+i)v_8}{6}.
+\]
+`CycleQ2SeedCechTheta.nonboundary_of_derivativeTrace_ne_zero` proves
+that a nonzero value of this functional yields a nonboundary for every
+\(r\ne0\). At \(\theta=1\), the additional \(iv_1/6\) term
+is retained. No equality of the entire sparse and smooth trace matrices
+is asserted.
+
+The selected polynomial \(ix_0^2x_1+(i-1)x_0^3\) has residue \(r\)
+for every \(\theta\). At the smooth member this is an algebraic test
+class; it is not yet a proved tangent to a moving divisor family.
+The sparse surface is singular, and its tangent-space calculation
+cannot simply be transported to the smooth member. Identifying these
+Čech classes with an obstruction or Abel--Jacobi derivative, constructing
+the relevant moving correspondence, and proving divisor support remain
+separate obligations.
 
 ### Cartier-curve resolution algebra
 
@@ -604,7 +722,9 @@ identities modulo \(G\), and the first right-section numerator is proved
 equal to the chosen \(\Gamma_4\) numerator. A proved two-outer-product
 factorization makes the cofactor calculation finite and inspectable.
 These identities bind the abstract matrix construction to the chosen seed.
-They do not prove its basepoint freeness or the required Jacobian ranks.
+The characteristic-zero basepoint cover is now proved separately, as
+described below. The large Jacobian rank conditions still require their
+own proofs.
 
 `CycleQ2SegreRelations` proves the sixteen universal polynomial relations
 among the nine cofactors of a \(3\times3\) matrix. They are the six
@@ -619,8 +739,9 @@ When the cofactors vanish and one matrix entry is a unit,
 factorization. `CycleQ2SegreImage.image_linearEquiv` identifies the actual
 image of the matrix's linear map with a free rank-one module. A separate
 ideal-membership theorem shows that coordinate-power witnesses imply a
-nonzero matrix entry at every nonzero field point. It does not supply the
-particular seed's coordinate-power witnesses.
+nonzero matrix entry at every nonzero field point. The arithmetic
+argument below supplies coordinate-power ideal membership for the
+actual complex seed and strengthens the cover to relevant primes.
 
 `CycleQ2SegreCech` gives the explicit transition units between these charts,
 their multiplicative cocycle identity, the gluing of the first-column
@@ -641,10 +762,381 @@ degree-fourteen entries, the intended divisor bundle is
 The untwisted image cocycle alone is not the divisor class.
 
 These are actual module, transition, and differential identities.
-The actual projective cover, the identification with that specified bundle,
-and the nonzerodivisor condition for an effective Cartier divisor remain
-unproved. The construction of the projective family, its cycle class and
-cylinder map, and the comparison with the Artinian trace still remain.
+The projective prime cover, regularity of the linkage element, and local
+principality of the two actual linkage ideals are now proved below.
+The geometric identification with the specified divisor bundle, the
+construction of the projective family, its cycle class and cylinder map,
+and the Abel--Jacobi comparison still remain.
+
+### The actual moving incidence equations and their relations
+
+`CycleQ2IncidenceNormalForm` proves the full moving normal form over
+every commutative coefficient ring in which the two selected leading
+coefficients are units. The cubic and sextic include every invariant
+monomial, including their leading coefficients. Their leading monomials
+are \(x_0^3\) and \(w^3\), which are relatively prime. The proof
+establishes existence and uniqueness of normal representatives,
+preservation of weighted degree and character, and compatibility with
+coefficient specialization.
+
+The quotient piece is defined as the image of actual homogeneous
+polynomials in the actual quotient ring. Its proved basis consists of
+the corresponding standard monomials. Ordinary kernel-checked finite
+enumeration gives 9 cubic parameters, 45 sextic parameters, and
+\[
+\dim S_{14}^{\mu_3}=239,\qquad
+\dim S_{28}^{\mu_3}=1058,\qquad
+\dim S_{42}^{\mu_3}=2465.
+\]
+These are proved dimensions of the actual graded quotient pieces, not
+definitions setting a desired dimension.
+
+The matrix family is centered on the literal raw seed:
+\(M=M_{\mathrm{raw}}+\delta M\), with nine sets of 239 matrix
+coefficients. `CycleQ2IncidenceEquations` defines the 9,522 equations
+as the degree-28 coefficients of the nine cofactor remainders. Their
+simultaneous vanishing is equivalent to actual cofactor membership in
+\((h,F)\). The literal smooth seed satisfies every equation by the
+proved universal cofactor factorization.
+
+`CycleQ2IncidenceJacobian.infinitesimal_incidenceEquations_eq` proves
+the exact first-order equation, for all square-zero thickenings:
+\[
+E(h+t\eta,F+t\zeta,M+t\delta M)
+=t\,\operatorname{NF}\!\left(
+D\operatorname{Cof}_M(\delta M)+\eta kQ-\zeta Q\right).
+\]
+Here \(Q\) is the actual matrix of cofactor quotients at the seed.
+Thus the claimed linearization is tied to the same moving remainder
+equations.
+
+The sixteen universal Segre identities give a 39,440-by-9,522 coefficient
+relation matrix after reduction and expansion in the proved degree-28
+and degree-42 bases. `coefficientRelations_incidenceEquations` proves
+the identity for the entire moving family. It is not inferred from
+evaluation at seed points on a single fiber.
+
+The universal coefficient ring is the polynomial ring in the raw
+cubic, sextic, and matrix parameters, localized at the product of the
+two leading coefficients. Its specialization maps, leading units, and
+actual seed are proved. `CycleQ2IncidencePolynomialPresentation`
+supplies ordinary polynomial numerators for the equations and proves
+equivalence of their zero sets on this open, together with the precise
+derivative scaling.
+
+`CycleQ2IncidencePolynomialRelations` goes further: one common power
+of the leading product clears both the equations and all their
+relations. Injectivity of the localization proves the resulting
+polynomial relation identity in the original polynomial ring.
+At the literal seed both leading coefficients are one, so the clearing
+factor is one. Differentiating the actual polynomial identity proves
+`seed_relations_jacobian`, the exact relation-matrix-times-Jacobian
+identity at that seed. None of these theorems asserts a large rank or
+an unverified determinant value.
+
+### A nonconstructive characteristic-zero tangent with nonzero residue
+
+`CycleQ2SegreNonconstructiveTangent.exists_actual_trace_one_tangent`
+proves existence of an actual fixed-sextic incidence tangent at
+\(r=57,\iota=i\). It satisfies all 9,522 linearized equations and has
+normalized derivative trace one. The complex tangent is chosen from a
+proved rank inequality; no complex correction vector or denominator is
+required as input.
+
+Here is the finite argument, with every matrix bound to the original
+normal-form coefficient equations. Over \(\mathbb F_{109}\), let \(E\)
+be the 9522-by-2151 entry block, \(C\) the nine actual cubic columns, and
+\(J=(C\ E)\) the fixed-sextic Jacobian. Seven checked coefficient
+functionals form a matrix \(L\) with
+\[
+LE=0,\qquad (LC)B=I_7
+\]
+for a checked 9-by-7 matrix \(B\). Their arithmetic is linked to the
+actual polynomial normal forms and monomial exponents. The structural
+factor argument gives \(\operatorname{rank}E\ge1915\), and the independent
+complex relation bound, together with Gaussian rank transfer, gives
+\(\operatorname{rank}J\le1922\). Thus the restriction of \(L\) to
+\(\operatorname{im}J\) is onto a seven-dimensional space and
+\[
+\operatorname{im}J\cap\ker L=\operatorname{im}E.
+\]
+This is a proved equality of the actual subspaces.
+
+The small vector
+\[
+v=(0,76,93,93,92,93,93,71,0)
+\]
+has \((LC)v=0\) and \(33v_1-34v_8=1\). Consequently \(Cv\) lies in
+\(\operatorname{im}E\). Classical choice selects \(w\) with \(Ew=Cv\),
+so \((v,-w)\) is an actual modular tangent with trace one. This does
+not assume that any modular kernel vector lifts to characteristic zero.
+
+The row
+\[
+\ell(\eta)=i\eta_1-(1+i)\eta_8
+\]
+is defined over the Gaussian integers. The indexing theorem identifies
+column 1 with \(x_3^3\) and column 8 with \(x_0^3\). Appending this row
+to the same integral Jacobian gives rank at least 1923 modulo 109, hence
+rank at least 1923 over \(\mathbb C\). The complex Jacobian itself has
+rank 1922. Rank-nullity therefore gives a complex kernel vector on which
+\(\ell\ne0\), and scaling gives \(\ell=6\). The normalized trace is
+\(\ell/6=1\). All existence statements follow from proved finite
+linear algebra and ordinary kernel-checked arithmetic.
+
+`CycleQ2IncidenceCubicCechTrace` proves the residue formula for every
+invariant cubic coefficient vector. Substituting the chosen tangent via
+`CycleQ2IncidenceTraceDirection` gives actual curve Čech residue 171,
+normal trace \(-1/171\) with the fixed sign convention, and a class that
+is not an all-poles Čech boundary. These formulas concern the chosen
+\(\theta=1\) curve component. The orbit-sum character comparison and the
+identification with a geometric Abel--Jacobi derivative remain separate
+obligations.
+
+The previously checked explicit Gaussian tangent is retained in the
+research archive. The active proof uses the smaller nonconstructive
+rank argument; the seed polynomials and multiplication tables used by
+the detector proof retain their literal definitions.
+
+### Characteristic-zero cover and actual local factor sequences
+
+The arithmetic continuation uses the actual seed with \(r=57\) and
+\(\iota=i\). The moving normal form and universal linkage identities
+permit arbitrary \(r\); this choice is distinct from the earlier sparse
+trace calculation requiring \(r^3=2\).
+
+Over \(\mathbb F_{109}\), ordinary kernel-checked identities place
+\(x_0^{24},x_1^{24},x_2^{24},x_3^{24},w^{12}\) in the ideal of the nine
+matrix entries and the actual seed equations. Every invariant monomial
+of weighted degree 120 is divisible by one of these monomials: otherwise
+its weighted degree is at most 114. The actual coefficient matrix
+presenting this entire homogeneous ideal piece is therefore surjective.
+
+`CycleQ2ArithmeticSurjectivity` transfers this finite rank statement
+through the Gaussian integers. It lifts a right inverse and uses its
+nonzero determinant after reduction to prove surjectivity over
+\(\mathbb C\). It does not lift a modular kernel vector. The result for
+the literal complex seed is
+\[
+x_0^{120},x_1^{120},x_2^{120},x_3^{120},w^{60}\in(M_{ij})\subset S,
+\quad S=\mathbb C[x_0,x_1,x_2,x_3,w]/(h,F).
+\]
+`CycleQ2SegreComplexBasepoint.prime_pivot_cover` proves the cover on every
+relevant prime. The entries generate the unit ideal on every nonempty
+coordinate localization. On those actual rings, the sixteen-relation
+kernel equals the cofactor-derivative image. Common-denominator clearing
+and projection onto the original degree and character supply homogeneous
+local lifts. These specialized theorems have no remaining basepoint or
+local-exactness premise.
+
+The actual linkage element
+\(p=x_0^2w+r x_1x_3x_2^2\) is proved regular whenever \(\iota\ne1\).
+The seed quotient is free of rank nine over the three remaining
+coordinates. In the fiber \((x_1,x_2,x_3)=(0,0,1)\), its equations make
+\(x_0,w,p\) units. The determinant of multiplication by \(p\) is
+therefore nonzero over the base domain. This proves regularity without
+assuming that the full seed quotient is a domain.
+
+For the actual five-generator linkage ideals \(I,J\) and selected
+sections \(a_i,b_j\), the proved identities are
+\[
+IJ\subset(p),\qquad a_i b_j=pM_{ij}.
+\]
+Thus both ideals have regular principal generators on every unit-entry
+chart. A Bezout argument using all nine entries also proves, on every
+nonempty coordinate localization, the actual exact sequence
+\[
+0\longrightarrow S_{\rm loc}\xrightarrow{c\mapsto(ca,-cb)}
+I_{\rm loc}^{3}\oplus J_{\rm loc}^{3}
+\longrightarrow\ker(D\operatorname{Cof}_M)\longrightarrow0.
+\]
+The second map divides \(v_i b_j+a_i w_j\) by the regular element \(p\).
+Its existence, linearity, kernel, and surjectivity are proved.
+The graded lifting theorem retains the left degree-ten invariant and
+right degree-eight character-one factors, with degree-fourteen invariant
+matrix output.
+
+The regular linkage pairing now also gives actual linear equivalences
+\[
+J_{\rm loc}\simeq
+\operatorname{Hom}_{S_{\rm loc}}(I_{\rm loc},S_{\rm loc})
+\simeq\operatorname{im}M_{\rm loc}.
+\]
+The first sends \(y\) to \(x\mapsto xy/p\); the second uses the
+literal products \(a_i y/p\). The selected \(b_j\) map to the actual
+matrix columns. The degree-eight character-one input gives the exact
+degree-four invariant dual twist and degree-fourteen invariant matrix
+coordinates. These maps commute with the actual restriction maps.
+
+On every coordinate chart the three cyclic component ideals are
+pairwise comaximal. `SeedLinkageOrbitProduct` proves that the actual
+linkage ideal is their product, and that the cyclic action maps each
+component ideal exactly to the next. This supplies the orbit ideal
+identity. It does not yet prove that the geometric trace of the orbit
+sum is three times the selected-component trace: the character,
+orientation, and differential comparison still need to be checked.
+
+### Actual seed and curve Čech complexes
+
+The seed quotient has the proved free basis \(x_0^a w^b\),
+\(0\le a,b<3\), over \(\mathbb C[x_1,x_2,x_3]\). The three
+coordinate opens cover every relevant prime. Their actual localization
+maps embed in Laurent coordinates, whose grading is proved equivalent
+to fractions with a polynomial numerator of the original weighted degree
+and character. A literal contraction gives Čech \(H^1=0\) in every
+grade; compatible zero-cochains glue uniquely to an actual quotient
+element with a homogeneous polynomial representative. The top Čech
+quotient in degree zero and character zero has proved dimension seven.
+All pole exponents are arbitrary.
+
+Both chosen curve quotients are free of rank six over
+\(\mathbb C[x_1,x_3]\). Their leading monomials are
+\((x_0^2,x_2^3)\) on the left and \((x_2^2,x_0^3)\) on the right.
+The six basis shifts have degrees at most three. The two base-coordinate
+opens cover every relevant prime; sections glue uniquely, and the
+actual Čech differential is surjective in every degree at least two.
+
+The right coordinate transformation is explicitly included:
+\[
+(x_0,x_1,x_2,x_3,w)
+=(u+v,2y_1,u-v,2y_3,4r y_1y_3).
+\]
+The global and localized restriction kernels are proved to equal the
+original chosen component ideals
+\[
+(x_0^2-rx_1x_3,w+x_2^2),\qquad
+(x_0^2+x_2^2,w-rx_1x_3).
+\]
+The actual restriction maps commute with overlaps and preserve degree,
+including the scalar factors in the right-chart denominators. Regularity
+of the last base coordinate makes the middle-chart comparison faithful.
+Consequently, the two-open gluing calculation gives agreement on all
+three original seed charts.
+
+Checked modular minors and Gaussian-integer transfer prove surjectivity
+of the actual complex restriction maps, with dimensions
+\[
+S_{10}^{(0)}\longrightarrow H_{10}(C_{\rm left}):113\to57,
+\qquad
+S_8^{(1)}\longrightarrow H_8(C_{\rm right}):68\to45.
+\]
+Separate minors of actual monomial multiples of the linkage generators
+prove \(\dim I_{10}^{(0)}=56\) and \(\dim J_8^{(1)}=23\).
+These two ideal pieces equal the corresponding global restriction kernels.
+The ideals and maps are concrete polynomial constructions, not abstract
+spaces defined to have the required ranks.
+
+The cyclic orbit identification is now proved as well. On every nonempty
+seed coordinate open, each linkage ideal is the intersection of its three
+literal curve components. The diagonal cube-root action is defined on the
+actual quotient and its localizations. A homogeneous fraction is an
+eigenvector up to a unit; membership in one component therefore forces
+membership in all three. Consequently, for a genuinely homogeneous local
+section, membership in the orbit ideal is equivalent to vanishing under
+restriction to the chosen component.
+
+This closes the positive-degree vanishing statements
+\[
+\check H^1(I_{10}^{(0)})=0,\qquad
+\check H^1(J_8^{(1)})=0.
+\]
+The theorems `CycleQ2SeedLinkageCechVanishing.left_idealCechExact` and
+`right_idealCechExact` use the actual three coordinate localizations.
+Starting from an ideal-valued cocycle, seed exactness supplies ambient
+local sections. Their restrictions glue to a homogeneous curve section;
+the checked restriction surjectivity lifts it globally. Subtracting that
+lift gives ideal-valued homogeneous singleton sections with the original
+Čech differences. The orbit identification supplies the ideal membership
+in this last step. No orbit, gluing, or surjectivity premise remains.
+
+Finally, the literal degree-28 relation kernel modulo the actual global
+cofactor image is proved linearly equivalent to the graded Čech \(H^1\)
+of the cofactor kernel. Its source is bound to the actual coefficient
+system, and the complex local-exactness theorem discharges local
+liftability. For the reverse direction, entrywise scalar Čech \(H^1\)
+vanishing lifts a kernel cocycle to local matrices. Their cofactor images
+agree on overlaps, so homogeneous gluing produces a global relation
+vector with the prescribed connecting class. This proves surjectivity of
+the same connecting map, rather than merely equality of dimensions.
+
+### Actual global factor dimensions and coefficient-matrix binding
+
+The actual global factor domain is
+\[
+(I_{10}^{(0)})^3\oplus(J_8^{(1)})^3,
+\qquad \dim=3\cdot56+3\cdot23=237.
+\]
+Its map to degree-fourteen matrix variations is defined by dividing the
+literal factor expression by the proved regular linkage element. Local
+factor gauges, actual degree-zero gluing, and a nonzero global gauge
+vector show that its kernel is exactly a one-dimensional scalar line.
+Its image therefore has dimension 236 and lies in the actual cofactor
+kernel. The reverse inclusion is now proved: any local graded factor
+lifts of a cofactor-kernel element differ by a scalar Čech cocycle;
+the actual \(\check H^1(\mathcal O)=0\) contraction corrects them, and actual
+ideal-valued \(H^0\) gluing produces global factors. Thus
+\[
+\ker D_{\rm cof}=\operatorname{im}(\text{global factor map}),
+\qquad \dim\ker D_{\rm cof}=236.
+\]
+Since the degree-fourteen matrix space has dimension
+\(9\cdot239=2151\), the cofactor differential has rank exactly 1915.
+These are `CycleQ2SeedGlobalFactorExact.entry_kernel_eq_factor_image`,
+`entry_kernel_finrank`, and `entry_rank`; no global-liftability hypothesis
+remains.
+
+These dimensions refer to the original maps. The theorem
+`CycleQ2SegreEntryCoefficientBinding.entryJacobianBlock_rank_eq`
+identifies the rank of the literal 9522-by-2151 matrix-entry block of
+`linearizedMatrix` with the rank of that cofactor differential. It uses
+the actual normal form, a surjective coefficient-to-quotient decoding map,
+and equality of kernels. Similarly,
+`CycleQ2SegreCoefficientRankBinding.coefficient_rank_eq` identifies the
+rank of the literal 39440-by-9522 coefficient relation matrix with its
+actual quotient relation map. No independently defined model matrix is
+substituted for either coefficient matrix.
+
+The second actual connecting map is also proved. A kernel cocycle is
+lifted on the three pair opens to the actual factor sequence, and its
+triple defect is a degree-zero scalar gauge. Positive factor \(H^1\)
+vanishing proves that its scalar top class is zero exactly when the
+original kernel cocycle is a kernel boundary. Simultaneous lifts form a
+linear submodule; descending that relation gives a genuine injective
+linear map
+\[
+\frac{\ker R}{\operatorname{im}D_{\rm cof}}
+\xrightarrow{\;\sim\;}\check H^1(\ker D_{\rm cof})
+\hookrightarrow\check H^2(\mathcal O)^{(0)}.
+\]
+The right-hand space has the already proved seven-element basis.
+Consequently the actual obstruction quotient has dimension at most seven,
+\(\dim\ker R\le1915+7=1922\), and the actual relation map has rank at
+least \(9522-1922=7600\). The coefficient binding gives the unconditional
+theorem `CycleQ2SegreActualRelationRank.literal_coefficient_matrix_rank_lower_bound`
+for the original 39440-by-9522 matrix.
+
+The seven checked cubic detectors now give the opposite rank bound.
+`CycleQ2SegreExactRanks` proves
+\[
+\operatorname{rank}J_{\mathrm{fixed}}
+=\operatorname{rank}J_{\mathrm{full}}=1922,\qquad
+\operatorname{rank}R=7600,\qquad
+\operatorname{im}J_{\mathrm{fixed}}=\ker R.
+\]
+The obstruction quotient has dimension exactly seven, and its previously
+constructed injection into scalar Čech \(H^2\) is now surjective.
+`relationObstructionEquivH2` packages this same connecting map as a
+linear equivalence; it does not substitute a separately defined
+seven-dimensional model.
+
+The full parameter space has dimension 2205. Its actual incidence
+tangent space therefore has dimension 283, and projection onto the 45
+independent sextic coefficient directions is surjective. Its kernel,
+the fixed-sextic tangent space, has dimension 238. The resulting linear
+right inverse supplies actual cubic and matrix corrections to every
+sextic coefficient variation. These are finite statements about the
+original equations. They do not yet identify an Abel--Jacobi map or a
+supported cohomology class.
 
 ### Nonlinear polynomial lifting with redundant equations
 
@@ -671,16 +1163,386 @@ solution inside a prescribed principal open. It adds the actual equation
 \(c(x)\det J(x)\). An actual nonsingular seed with \(c(x_0)\) a unit,
 together with an injective coefficient map \(R\to K\), yields a solution
 over a finite separable field extension of \(K\), with \(c\) still a unit.
-This theorem does not assert specialization to the protected target.
+The actual generic-specialization theorem above separately handles
+specialization of a primitive to the protected target; it does not
+assert that this incidence lift supplies such a primitive.
 
-Applying these results to the chosen incidence system still requires the
-actual quotient normal forms, seed equations, and invertible minors to be
-proved in Lean. Its relations initially live in a ring localized at two
-leading coefficients. If inverse variables are used to present that ring,
-the inverse equations must be included, or the identities must first be
-justified after clearing denominators. First-order numerical ranks alone
-do not discharge these obligations. Neither lifting theorem identifies a
-curve correspondence with the specified residue class.
+The actual quotient normal forms, seed equations, coefficient relations,
+and denominator-cleared polynomial presentation are proved. The actual
+range/kernel equality proved above now discharges the finite linear
+hypothesis of the compatible lifting constructor. No displayed enormous
+minor or assumed numerical rank is needed. The geometric identification
+of the resulting family with the specified residue class is still open.
+
+There is now a structural substitute for choosing and printing enormous
+complementary minors. For finite matrices \(J,R\) with
+\(\operatorname{im}J=\ker R\),
+`CycleQ2LinearExactSequenceSplit.exists_matrix_split` proves the existence
+of matrices \(P,Q,V,W,T,B\) satisfying
+\[
+QP+VW=I,\qquad PJB=I,\qquad TRV=I,\qquad RQ=0,\qquad PV=0.
+\]
+It chooses bases and linear splittings of the actual exact sequence.
+The compatible affine lifting theorem uses these identities to impose a
+square system on the slice \(x=a+Bz\). The first determinant and the
+complementary relation determinant are both exactly one at the seed.
+Every omitted equation then follows from the original polynomial
+relations. This construction is nonconstructive. For the literal incidence
+system, `CycleQ2SegreExactRanks.exists_compatible_square_blocks`
+discharges its exactness hypothesis. These are arbitrary proved linear
+coordinate splittings, rather than claimed values of selected minors.
+
+The parameter substitution is tied to the literal incidence presentation.
+It works over the fraction field of the polynomial ring in all 45
+independent sextic coefficients and extends each cubic/matrix direction
+by zero on those coordinates. The resulting finite generic incidence
+statement retains each sextic coefficient exactly, proves both leading
+coefficients are units, and gives all nine original cofactor ideal
+memberships over a finite separable extension. The actual exactness
+identity supplies the splitting used in this construction.
+
+### Actual open conditions and the moving parameter
+
+`CycleQ2IncidenceBasepointOpen` constructs an actual polynomial in the
+full incidence parameters, with value one at the chosen seed. The proof
+uses a surjective homogeneous multiplication map in degree 120 and a
+nonconstructively chosen right inverse. Its determinant gives an open
+condition on which powers of all five coordinates lie in the ideal
+generated by the nine matrix entries, the cubic, and the sextic. On
+quotienting by the cubic and sextic, every relevant prime therefore has
+a matrix pivot. `IncidenceBasepointChart` retains this condition in the
+actual localized universal coefficient ring, including its original seed.
+
+For a point of the actual incidence system in this open,
+`IncidenceImageLine` proves that localization of the global matrix-image
+module is the local matrix image and is free of rank one on a pivot
+chart. `SegreGenericSection` proves that the ideal of a generic linear
+combination of matrix columns has one regular local equation there,
+with the exact unit transition on overlaps. These are actual module
+and equation statements; a global projective Cartier divisor and its
+cycle/cylinder map are not asserted by them.
+
+`CycleQ2GenericSexticGradient` separately proves that every faithful
+specialization of the 45 independent sextic coefficients to a field
+has no nonzero common zero of its five partial derivatives. A degree-30
+homogeneous multiplication map is surjective at the Fermat specialization;
+its nonzero determinant becomes a unit under any such faithful field map.
+This is the actual algebraic gradient condition. A geometric smoothness
+theorem is not silently used or added to it.
+
+For the external parameter \(t\), the affine slice follows the chosen
+fixed-sextic trace-one direction and corrects it by the square Jacobian
+block. Its implicit derivative is computed by the adjugate formula. The
+polynomial trace numerator has seed value one; retaining its open set
+makes the actual fixed linear trace of the derivative a unit. The
+canonical derivation on the fraction field, and its extension through a
+finite separable field, fix all 45 sextic coefficients and send \(t\)
+to one.
+
+Scalar rescaling of the cubic must also be excluded. Write \(h_8\) for
+its leading coefficient and \(\lambda(h)=\ell(h)/6\) for the fixed
+normalized trace. At the seed, \(h_8=1\) and \(\lambda(h)=0\). If
+\(N_\lambda\) and \(N_8\) are the corresponding implicit derivative
+numerators, the additional projective numerator is
+\[
+ h_8N_\lambda-\lambda(h)N_8.
+\]
+Its seed value is one. The proved derivative identity identifies it with
+\(\det(J)[h_8D\lambda(h)-\lambda(h)Dh_8]\). Retaining this numerator
+and the leading coefficient detects a nonzero derivative of
+\(\lambda(h)/h_8\), so coefficient motion cannot be explained by
+rescaling the section.
+
+The generic component is chosen through the actual seed. The pointed
+étale theorem uses flat going-down and localization of prime ideals to
+choose a finite separable generic field quotient whose prime contracts
+inside the seed kernel. The square-system, open-system, and compatible
+affine constructions preserve this same quotient and its specialization
+property. `CycleQ2IncidenceCertifiedGenericPoint.finite_pointed_trace_point`
+discharges the actual exactness and basepoint hypotheses. For original
+parameter polynomials, with their specified coefficient maps, it retains
+\[
+p(y_{\rm generic})=0\quad\Longrightarrow\quad p(y_{\rm seed})=0.
+\]
+In particular a scalar algebra element nonzero at the seed remains
+nonzero on this chosen generic component.
+
+These are algebraic incidence, scalar-specialization, and coefficient-trace
+statements. Specialization of arbitrary module or cohomology classes does
+not follow from the scalar statement. The fixed coefficient functional
+away from the seed has not been identified with the Abel--Jacobi
+functional. That relative comparison remains necessary. Likewise, the
+generic gradient condition does not assert global quasismoothness of
+the literal \(r=57\) seed surface. The exact cubic and seed-curve
+Jacobian conditions are proved below. The needed surface smoothness
+and persistence of the actual geometric class and trace remain
+separate requirements.
+
+### Exact Jacobian conditions at the literal seed
+
+The three components `SeedCubicGradient`, `SeedCurveGradientArithmetic`,
+and `SeedCurveGradient` prove algebraic Jacobian conditions for the actual
+chosen cubic and curve. Write
+\[
+b=x_3^3+x_2^3+x_1x_2x_3+x_0x_2x_3+x_0x_1^2+x_0^3,
+\qquad h=b-i(x_1^3+x_3^3),
+\qquad f=x_0^2-57x_1x_3.
+\]
+Here the coefficient is the integer \(57\) in \(\mathbb C\). No relation
+\(57^3=2\), or characteristic-109 hypothesis, is used.
+
+For the cubic, explicit Gaussian-integer polynomial identities give
+\[
+d_jx_j^5=\sum_{k=0}^3 u_{jk}\,\partial_k h,
+\qquad 0\le j\le3,
+\]
+with nonzero integer multipliers
+\[
+(d_0,d_1,d_2,d_3)
+=(4272557211,2848371474,9526326,9526326).
+\]
+The identities are proved over every commutative ring with a chosen
+element satisfying \(i^2+1=0\), then bound to the actual polynomial
+`smoothH Complex.I`. Inverting the displayed constants over \(\mathbb C\)
+places all four fifth powers in its gradient ideal.
+`nonzero_gradient_over_complex_extension` consequently excludes a common
+zero of these four partial derivatives whenever at least one of
+\(x_0,\ldots,x_3\) is nonzero, over every field extension of the complex
+coefficients.
+
+For the curve after eliminating \(w\), put
+\[
+M_{jk}=(\partial_j f)(\partial_k h)
+       -(\partial_k f)(\partial_j h),
+\qquad
+J_C=(f,h,M_{01},M_{02},M_{03},M_{12},M_{13},M_{23}).
+\]
+Four further explicit Gaussian-integer identities, with proved nonzero
+integer multipliers, establish
+\[
+x_j^6\in J_C\quad(0\le j\le3)
+\]
+over \(\mathbb C\). `generators_binding` identifies every displayed
+arithmetic generator with the actual equation or Jacobian minor.
+`prime_minor_cover` therefore proves that, for every prime ideal
+containing \(f,h\) but not all four coordinates, at least one \(M_{jk}\)
+lies outside that prime. This covers all relevant prime ideals, including nonclosed primes.
+
+Restoring the weight-two coordinate gives the ordered equation tuple
+\[
+(f,\ h,\ w+x_2^2).
+\]
+Its normal Jacobian determinant in columns \((x_j,x_k,w)\) is exactly
+\(M_{jk}\), as proved by `normalMinor_eq`. If a prime contains these
+three equations and all four base coordinates, it also contains \(w\).
+Thus `weighted_prime_normal_cover` supplies a nonvanishing normal minor
+at every relevant prime of the actual weighted seed curve.
+`weighted_field_normal_cover` gives the corresponding unit determinant
+after every homomorphism to a field satisfying the equations and the
+nonzero-coordinate condition.
+
+These results supply concrete algebraic hypotheses for geometric
+smoothness and local normal-module arguments. The geometric Jacobian
+criterion and its scheme-theoretic application remain separate steps.
+The three components do not establish smoothness of the entire seed
+surface or threefold, identify an Abel--Jacobi derivative, construct a
+global support class, or prove the residue primitive required by
+`Submission.missing_geometric_existence`.
+
+### Genuine conormal bases and the actual normal matrix
+
+The normal coordinates are now realized in the actual ideal cotangent
+module. Let \(R=\mathbb C[x_0,x_1,x_2,x_3,w]\) with the existing weighted
+grading, and let
+\[
+I=(f_1,f_2,h),\qquad
+f_1=x_0^2-rx_1x_3,\qquad f_2=w+x_2^2.
+\]
+For any coefficient algebra \(S\) in which \(I\) vanishes,
+`CycleQ2ConormalJacobian` works with the genuine base-changed conormal
+module
+\[
+S\otimes_R I/I^2.
+\]
+A polynomial derivation into \(S\) becomes \(R\)-linear on \(I\), kills
+\(I^2\), and induces an \(S\)-linear functional on this tensor product.
+Inverting the actual equation-derivative matrix supplies functionals dual
+to the equation classes. Ideal generation proves spanning, and these duals
+prove independence. `conormalBasisOfJacobian` therefore constructs a basis
+from the unit determinant of the actual Jacobian matrix.
+
+`SeedConormalBasis` applies this to the literal seed equations. Its explicit
+triangular chart inverts
+\[
+m=-r x_3(3x_2^2+x_1x_3+x_0x_3).
+\]
+The chart contains the complex point
+\((0,0,c,1,-c^2)\), where \(c^3=i-1\), for every nonzero \(r\).
+The point and the nonzero value of \(m\) are proved, so this construction
+has a nonempty actual seed chart. A second constructor works for any
+invertible normal Jacobian minor.
+
+`CycleQ2ConormalCover.exists_actual_conormal_basis` combines that
+constructor with the exact \(r=57,\theta=1\) curve-gradient identities.
+For every relevant prime of the actual curve quotient, the original
+three equation classes form a basis after prime localization. The
+permutation between the gradient certificate's order \((f_1,h,f_2)\)
+and the normal calculation's order \((f_1,f_2,h)\) is explicit.
+
+The proved conormal relation for the actual sextic is
+\[
+[F]=g_1[f_1]+g_2[f_2]+k[h].
+\]
+Consequently, evaluation of a genuine normal homomorphism on \([F],[h]\)
+is exactly the previously checked matrix
+\[
+\beta(u_1,u_2,u_3)=(g_1u_1+g_2u_2+ku_3,\ u_3).
+\]
+This is `actualEquationNormalMap_eq`; its scalar-extension form
+`baseChangedNormalMap_eq` also applies on arbitrary prime charts.
+For the target ideal \(J=(F,h)\),
+`surfaceConormalBasisOnFirstOpen` constructs a genuine two-element
+conormal basis on a source Jacobian chart where \(g_1\) is a unit.
+If \(d_1,d_2,d_3\) are the supplied source duals, the target duals are \(g_1^{-1}d_1\) and
+\(d_3-k g_1^{-1}d_1\).
+
+`CycleQ2NaturalNormalMap` constructs the actual cotangent map induced by
+\(J\subseteq I\), extends scalars, and dualizes:
+\[
+\iota_S:S\otimes_R (J/J^2)\longrightarrow S\otimes_R (I/I^2),
+\qquad
+\iota_S^\vee:\operatorname{Hom}_S(S\otimes_R (I/I^2),S)
+\longrightarrow\operatorname{Hom}_S(S\otimes_R (J/J^2),S).
+\]
+The definition uses `Ideal.mapCotangent`, `LinearMap.baseChange`, and
+`LinearMap.dualMap`; it does not choose equation coordinates.
+`naturalNormalMap_equation_coordinates` proves
+\[
+\operatorname{ev}_{F,h}\circ\iota_S^\vee
+=\beta\circ\operatorname{ev}_{f_1,f_2,h}
+\]
+on arbitrary scalar extensions. On a source Jacobian chart where \(g_1\)
+is a unit, `naturalNormalMap_in_equation_bases` expresses the same equality
+through the genuine source and target conormal bases.
+`actualEquationNormalMap_eq_naturalNormalMap` also binds the earlier
+literal-chart evaluation map directly to this dual natural map.
+
+The next comparison must assemble these maps on the second denominator
+chart and retain the grading when constructing the normal sequence.
+The source equation degrees are
+\((2,2,3)\), the target degrees are \((6,3)\), and the expected normal
+line has twist \(\mathcal O_C(-2)\). Pairing its connecting cocycle with a cubic
+therefore lands in the degree-one canonical piece of the curve.
+
+The previously proved local splitting formulas already give the overlap
+coefficient \((kL-A)/(g_1g_2)\), with first-chart-minus-second-chart sign.
+The next concrete theorem is to identify the actual normal connecting
+class in these conormal coordinates with that all-poles Čech class,
+including independence of lifts and refinement. The existing paired
+residue is \(-1/(3r)=-1/171\) at \(r=57\). Its interpretation as the
+trace of this actual connecting class, its relative persistence, and its
+subsequent Abel--Jacobi/de Rham comparison remain unproved.
+
+There is a direct algebraic route to simplify that next comparison. The
+regular order \((f_2,f_1,h)\) successively uses monicity in \(w,x_0,x_2\).
+After eliminating \(w\) and quotienting by \(f_1\), the cubic is still
+monic of degree three in \(x_2\), even if the coefficient ring has zero
+divisors. Likewise \((h,F)\) is regular because modulo \(h\), the actual
+sextic is monic of degree three in \(w\). These presentations do not
+require \(r\ne0\) or \(\theta\ne0\).
+
+The additional Lean lemma would say that for \(I=(a,b,c)\) in this
+regular order,
+\[
+au+bv+cw\in I^2\quad\Longrightarrow\quad u,v,w\in I.
+\]
+It is the degree-one case of the regular-sequence implication in
+[Stacks Project, Lemma 10.69.2](https://stacks.math.columbia.edu/tag/00LN).
+After subtracting an \(I^2\) representation, cancellation of \(c\)
+modulo \((a,b)\) writes \(w=as+bt\); cancellation of \(b\) modulo
+\((a)\) writes \(v+ct=az\); cancellation of \(a\) then gives
+\(u+cs=-bz\). The coefficient statement proves independence of the
+actual equation classes in \(I/I^2\), and its length-two version handles
+\(J/J^2\). Binding the existing `Ideal.mapCotangent` to these global
+bases would identify the natural map with \(\beta\) without extra
+Jacobian refinements. This is a proposed next formalization, not a
+completed global-basis theorem in the submitted source. The \(g_1/g_2\)
+cover and homogeneous twists would still be needed for the connecting
+class, and ambient derivation lifts would still use Jacobian opens.
+
+### Actual local lifts and the relative transition identity
+
+The coefficient motion now acts on the literal polynomial and localized
+surface rings. `CycleQ2LocalizationDerivation` first constructs the unique
+extension of a derivation through an arbitrary localization. Its proof
+uses the graph homomorphism into the square-zero extension
+\(S\oplus S\varepsilon\), with \(\varepsilon^2=0\). The localization's
+universal property extends this graph, and its second coordinate gives
+the derivation. No domain hypothesis is required.
+
+`CycleQ2PolynomialCoefficientDerivation` applies the same construction to
+multivariate polynomials. The resulting derivation fixes every coordinate
+and satisfies
+\[
+D_{\rm coeff}(a x^e)=D(a)x^e.
+\]
+This formula is proved for the actual polynomial algebra, along with
+uniqueness from the coefficient and coordinate values.
+
+Let \(D\) be the coefficient motion, let \(D_a,D_b\) be two coordinate
+derivations, and let \(F,h\) be the two actual surface equations. Put
+\[
+\Delta=D_a(F)D_b(h)-D_b(F)D_a(h).
+\]
+On the localization where \(\Delta\) is a unit, define
+\[
+\begin{aligned}
+\widetilde D={}&D+
+ \frac{D_b(F)D(h)-D_b(h)D(F)}{\Delta}D_a\\
+&+\frac{D_a(h)D(F)-D_a(F)D(h)}{\Delta}D_b.
+\end{aligned}
+\]
+`CycleQ2SurfaceLocalDerivations` proves
+\(\widetilde D(F)=\widetilde D(h)=0\), proves that the actual ideal
+\((F,h)\) is preserved, and constructs the induced derivation on the
+literal localized quotient. It also proves that every element annihilated
+by \(D_a,D_b\) retains its original coefficient derivative.
+
+`CycleQ2IncidenceLocalDerivations` binds this construction to the finite
+trace family's actual specialized sextic and cubic. The sextic's
+coefficient derivative is zero. `actualLocalTime_coefficients` proves
+that each resulting local surface derivation restricts to the already
+constructed derivative of the coefficient field, which is finite over
+the trace parameter field. A separate
+Jacobian-cover argument is still needed to use these opens as a cover
+of the entire moving surface.
+
+The transition calculation now retains the variation of the surface
+coordinates. On a common overlap ring, let \(D_p,D_q\) be two local
+lifts and let \(g_{pq}g_{qr}=g_{pr}\) be the actual unit transition
+identity. Write
+\[
+a_{pq}=D_p\log g_{pq}=g_{pq}^{-1}D_p(g_{pq}).
+\]
+`CycleQ2SegreKodairaSpencer.boundary_eq_contraction` proves the chain
+identity
+\[
+a_{qr}-a_{pr}+a_{pq}
+ =\left\langle D_q-D_p,\,d\log g_{qr}\right\rangle.
+\]
+It also proves the cocycle identity on quadruple overlaps, the formula
+for the actual matrix-entry transitions, compatibility with coefficient
+maps, and change-of-lift behavior. The degree-fourteen homogeneous twist
+is retained in `twisted_boundary_eq_contraction`.
+
+When \(D_p,D_q\) agree on the coefficient ring \(A\), their difference
+is constructed as a genuine \(A\)-derivation of the overlap ring \(R\).
+`CycleQ2RelativeKodairaSpencer` identifies the displayed contraction with
+evaluation on the actual relative Kähler module \(\Omega_{R/A}\).
+The identity does not require the local derivations to commute. It is
+an explicit comparison of cochains on a common ring. The global graded
+cover, comparison with the normal connecting class, and de Rham/Gysin
+interpretation must still be constructed.
 
 ## Remaining formal obligations
 
@@ -689,13 +1551,30 @@ curve correspondence with the specified residue class.
 | Protected target, actions, degrees, nonvanishing | Proved for the exact instance. |
 | Gradient condition, absolute irreducibility, affine quotient field | Proved; geometric Jacobian criterion remains. |
 | Actual Fermat Jacobian bases, socle trace, finite commutant | Proved; geometric Higgs comparison remains. |
-| Sparse seed quotient trace, degree-nine dimension and uniqueness, all 72 matrix entries | Proved; smooth geometric seed and obstruction/derivative comparison remain. |
+| Sparse seed quotient trace, degree-nine dimension and uniqueness, all 72 matrix entries | Proved; actual all-poles Čech comparison and vanishing equivalence now proved too. |
+| Actual curve chart cover and the theta-one nine-column residue functional | Proved on the actual curve; obstruction/Abel--Jacobi interpretation remains. |
+| Literal cubic and r=57 seed-curve Jacobian conditions | Exact Gaussian-integer identities prove the cubic gradient condition and a normal-minor cover at every relevant curve prime. Geometric smoothness and the entire surface condition remain separate. |
+| Actual seed conormal modules and normal matrix | Genuine equation-class bases are constructed on every relevant prime chart. The actual natural cotangent map and its dual are constructed; the dual's equation-coordinate matrix is the existing normal matrix. The target conormal basis is constructed on source Jacobian charts where g1 is a unit; graded gluing and the global normal-sequence comparison remain. |
 | Cubic Cartier matrix factorization and periodic quotient complex | Polynomial identities and genuine exactness proved; geometric base change remains. |
 | Literal Segre seed, cofactor quotients, and selected section products | Universal polynomial identities proved for the actual chosen entries. |
-| Unit-entry image modules, transition units, and logarithmic differentials | Proved, including coefficient-map naturality and the homogeneous degree twist. |
-| Formal and algebraic generic lifting of polynomial systems | Existence proved from actual seed equations and unit Jacobian; complementary relations force all omitted equations. |
-| Actual large incidence system and moving projective curve family | Normal-form, seed-minor, and geometric binding remain. |
-| Generation of the invariant variation, supported projector and specialization | Not formalized. |
+| Actual complex basepoint cover and local Segre exactness | Proved on every relevant prime and every nonempty coordinate localization, including homogeneous local lifts. |
+| Regular linkage element and actual local factor sequence | Proved; the literal factor ideals are principal with regular generators on unit-entry charts. |
+| Seed quotient Čech complex | Actual localization comparison, graded H0 gluing, H1 vanishing, and degree-zero invariant H2 dimension seven proved. |
+| Chosen curves, restrictions, and orbit ideals | Actual six-term bases, two-open cover and gluing, restriction kernels, cyclic orbit identification, and the 56/23 section dimensions proved. |
+| Positive graded H1 of both linkage ideals | Proved for the actual degree-ten invariant and degree-eight character-one pieces. |
+| Actual relation-kernel obstruction | The actual connecting maps identify the obstruction with kernel Čech H1 and scalar Čech H2; its dimension is exactly seven. |
+| Actual matrix-entry Jacobian and coefficient relations | Entry-block rank 1915, combined Jacobian rank 1922, relation-matrix rank 7600, and actual image/kernel equality proved. |
+| Unit-entry image modules, transition units, and logarithmic differentials | Proved, including coefficient-map naturality, the homogeneous degree twist, and the relative Kodaira--Spencer contraction/boundary identity. |
+| Local lifts of the actual trace-family motion | Constructed on each actual surface Jacobian-minor localization, with proved coefficient restriction and preservation of both equations; the global covering comparison remains. |
+| Formal and algebraic generic lifting of polynomial systems | Existence proved from actual seed equations and unit Jacobian; exact sequences provide compatible square blocks, and complementary relations force all omitted equations. |
+| Actual large incidence system, graded bases, literal seed, and full first-order equations | Proved, including a nonconstructively chosen characteristic-zero fixed-sextic tangent with trace one satisfying all 9,522 equations. |
+| Universal coefficient relations and polynomial denominator clearing | Proved, including the exact relation-Jacobian identity at the seed. |
+| All 45 sextic coefficient directions | Actual tangent projection is surjective, with total tangent dimension 283 and fixed-sextic kernel dimension 238. |
+| Universal basepoint and generic gradient opens | Actual homogeneous multiplication maps and faithful field specializations prove the stated algebraic conditions. |
+| Generic component through the seed | Proved for the actual compatible incidence algebra: the generic prime contracts inside the seed kernel, and polynomial identities specialize. |
+| Moving projective curve family | Incidence, local image lines, and regular local section equations are constructed; the global curve/cylinder and relative geometric trace comparisons remain. |
+| Generation of the invariant variation and supported projector | Not formalized. |
+| Actual generic primitive specialization and finite-extension descent | Proved, including primitives with parameter poles; existence of the initial generic primitive remains. |
 | Paired-sign weighted equation, source, and relative primitive transfer | Exact equation/source and three-derivation-to-certificate implication proved; cohomological support comparison remains. |
 | Proper support to homogeneous legal equation | Proved for actual projective closed subsets. |
 | Countable algebraic avoidance and covering of a complex principal open | Proved for actual polynomial zero loci. |
@@ -708,12 +1587,13 @@ curve correspondence with the specified residue class.
 The polynomial-curve constructors in the existing library require actual
 polynomial coordinates, normal fields, or densities in a parameter.
 An algebraic Hilbert parameter curve does not automatically satisfy those
-hypotheses. The arithmetic-lifting constructor likewise needs an identified
-finite polynomial incidence system and its actual invertible Jacobian
-minor. The new lifting results discharge the general existence step once
-those concrete hypotheses are proved; the finite Noether--Lefschetz
-matrix alone supplies neither.
-These interfaces cannot be used to bypass the remaining existence proof.
+hypotheses. The actual finite incidence system and its compatible square
+blocks are now proved, so an assumed large Jacobian rank is no longer
+the obstruction. The missing work is the geometric comparison from the
+moving line or curve data to the specified cohomology class, generation
+and support of the invariant variation, and the global algebraic de Rham
+comparison with the protected rational form. These interfaces cannot be
+used to bypass that existence proof.
 
 ## Preserved current route
 
@@ -725,35 +1605,68 @@ expressions and literal `transportError`, whose vanishing is not assumed.
 proof would imply that correction existential as well.
 
 The denominator, normal-gauge, tangent and ambient-lift developments remain
-available in their original files. The new formalization is consolidated
-into one helper to keep all this work within the 64-file submission limit.
+available in their original files. Their source bodies remain unchanged.
+
+## Source layout
+
+The active development contains 447 consolidated components. The original
+61-component [GeometricFormalInputs.lean](GeometricFormalInputs.lean)
+baseline is retained byte-for-byte, together with its checked artifact.
+The 386 continuation components are grouped into four existing permitted
+files, preserving their order and complete proof bodies:
+
+| File | Components | Contents |
+| --- | ---: | --- |
+| [GeometricFormalInputs.lean](GeometricFormalInputs.lean) | 61 baseline | Existing affine residue/certificate bridge and foundational geometric inputs. |
+| [GeometricTarget.lean](GeometricTarget.lean) | 100 continuation | `AffineFiniteDescent` through `CurveRestrictionModularLeft`, after the original target/action declarations. |
+| [Assembly.lean](Assembly.lean) | 36 continuation | `CurveRestrictionModularRight` through `SegreModularActionFlat01`, after the original assembly declarations. |
+| [Normalization.lean](Normalization.lean) | 11 continuation | `SegreModularActionFlat02` through `SegreModularCubicData2`, after the original normalization declarations. |
+| [Solution.lean](Solution.lean) | 239 continuation | `SegreRelationsSeedCharts` through `SeedNaturalNormalMap`, followed by the existing entry-point body. |
+
+`Workspace` and the original `GeometricSeed` precede the baseline. The
+continuation then imports in the order shown in the table. The original
+support declarations in the reused files are retained as well. Every
+helper component in `Solution.lean` occurs before the admitted theorem,
+so those proofs cannot use that later admission.
+
+This layout keeps the complete proposal within 64 files while bounding
+the amount of source elaborated in one process. Two development attempts
+to compile the expanded monolithic helper ended in `SIGKILL`; neither is
+reported as a successful check. The split changes imports, file placement,
+and scheduling scaffolding, while preserving every component's mathematical
+proof body. A standalone check of each stage and its kernel replay are
+required for this final layout.
 
 ## Verification
 
 Development compilation uses Lean 4.33.1 and pinned mathlib revision
 `0df444a360eaa60ab8c11dca51a86af692955474`.
-Every new component described as proved above has compiled and passed
-independent `leanchecker` kernel replay. The final affine constructor's
-printed axiom dependencies are exactly
-`propext`, `Classical.choice`, and `Quot.sound`.
-No native decision procedure or added axiom supplies these results.
+The recovered 373-component continuation has matching standalone compile
+and independent `leanchecker` receipts. Its printed endpoint axiom reports
+contain only `propext`, `Classical.choice`, and `Quot.sound`.
 
-The consolidated `Proposal.GeometricFormalInputs` module contains 61
-components and is checked as a single module after the independently
-checked components are assembled. Its 603,322-byte source has SHA-256
+All thirteen additional local-geometry components have compiled individually.
+The final four-stage source layout is being checked serially, with exact
+source hashes bound to each compile and independent kernel replay. The
+61-component baseline is reused from its successful recorded check.
+The first three stages have completed both checks:
 
-```text
-68f06d3630e974fc8a7a0bc57ef952744bc98b00979c0092aecf2471f2640590
-```
+| Stage | Compilation, seconds | Independent replay, seconds |
+| --- | ---: | ---: |
+| `GeometricTarget` | 839.781 | 336.938 |
+| `Assembly` | 788.955 | 372.881 |
+| `Normalization` | 228.262 | 22.153 |
 
-The final compilation and replay receipts bind that hash and record an
-8 GiB development memory cap. The source-policy check covers all 61
-helper modules.
+The final `Solution` stage, containing the remaining 239 components and
+the entry point, is still being checked. Its frozen source SHA-256 is
+`5bf1220b1bcb565a85e920f38b8ffe504ee562cbed2df99533c7f59d22444b62`.
+No final-layout pass is asserted while that check is pending.
+No native decision procedure or added axiom supplies the proved results.
 
 The protected target is generated from base
 `e3936ff366ae2302f21fb9e5730bbbd284c81d69`.
 This revision continues PR head
-`3026c51b18735109a67d602110eeb55b7b52cc33`.
+`638af005150a402fb0638f13d6516ce1e16d5d00`.
 The protected instance, shared library, verifier, workflows, and proof
 manifest are unchanged.
 
@@ -762,6 +1675,18 @@ The full proposal fails the source-policy check because
 `Solution.lean` still contains its explicitly labeled admission.
 A development compile of the entry point does not turn that admission
 into a proof. No accepted certificate or evaluated witness is claimed.
+
+The 55 legacy Lean files outside the active seven-module import closure
+have not been rebuilt in this continuation. In particular, checking the
+unchanged `CurrentNormalGauge` and `CurrentTangents` in the new import
+environment requires first compiling the 52-module `CurrentCorrection`
+dependency chain beyond the reused `Workspace`; its artifacts are absent
+from the reused cache. Static source and import checks do not replace
+that compilation.
+The protected verifier also compiles unused submitted helpers and applies
+one shared 3,600-second deadline to all compilation, independent replay,
+and final auditing. The staged development checks do not establish
+compliance with that full-proposal deadline.
 
 The proposal has 64 permitted files and remains below the 16 MiB source
 limit. These format and resource conditions do not establish the remaining
