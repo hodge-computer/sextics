@@ -1,5 +1,76 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Uncompiled implementation continuation — 12 November 2026
+
+**Source draft only. No Lean elaboration, compilation, language server,
+Lake invocation, kernel replay, tests, or proposal-verifier execution was
+performed for this continuation.** It starts from source commit
+`8d88f06e782704e301a6e817195f907e816f46d8`. The historical verification
+records later in this document describe earlier sources and do not certify
+the four new components or the modified combined files.
+
+The reconstructed mathematical argument has now supplied the following
+concrete Lean source bodies, using the existing definitions rather than
+new abstract placeholders for the geometric objects:
+
+| Existing proposal file | New namespace | Implemented scope |
+| --- | --- | --- |
+| `GeometricFormalInputs.lean` | `CycleQ2ExplicitPoleReduction` | Explicit third-order to first-order pole reduction in the actual ambient rational-function field; regularity and specialization of its coefficient to the existing residue source form. |
+| `GeometricFormalInputs.lean` | `CycleQ2AffineTopCohomology` | The quotient of actual fourth exterior forms by the image of the actual complex-linear exterior derivative, with zero class equivalent to an actual three-form primitive. |
+| `GeometricTarget.lean` | `CycleQ2GeometricBridgeAlgebra` | The finite Higgs projector dichotomy transferred to endomorphisms of the actual degree-six, character-one Fermat Jacobian component and its actual socle pairings. |
+| `Solution.lean` | `CycleQ2OrbitTraceBridge` | Character eigenvalues for the existing localization action, the literal ambient test, and the correctly twisted three-term orbit and nonzero-pairing identities. |
+
+The pole reduction defines the genuine normal derivation
+\(D_t=g^{-1}\partial_0\), with \(D_t f=1\) proved from the existing
+protected equation. For \(b=a/g\), its correction coefficient is
+
+\[
+\psi=-\frac{b}{2f^2}-\frac{D_t b}{2f},\qquad
+D_t\psi=\frac{b}{f^3}-\frac{D_t^2b/2}{f}.
+\]
+
+The regular simple-pole coefficient specializes to exactly
+`CycleQ2AffineExactness.residueSourceForm`; this algebraic specialization
+is not being called a cohomological residue map.
+
+The top quotient uses **complex scalars**, as required by the actual
+differential. It establishes the precise algebraic target for a future
+comparison map:
+
+```lean
+CycleQ2AffineTopCohomology.residueClass CycleQ2AffineClearing.affineA = 0 ↔
+  ∃ η : CycleQ2AffineExterior.Form 3,
+    CycleQ2AffineExterior.exteriorD3 η =
+      CycleQ2AffineExactness.residueSourceForm CycleQ2AffineClearing.affineA
+```
+
+It does not establish the left-hand vanishing. The projector result likewise
+does not construct a geometric polarized variation or a supported projector.
+The orbit result identifies the actual localization action but does not
+construct the semiregularity or Abel–Jacobi comparison.
+
+**The final `Submission.missing_geometric_existence` theorem and its single
+explicit admission are unchanged. There is still no closed Lean proof of
+`CycleQ2Nonconstructive.AffineResidueFormExact`.** In particular, these
+source bodies do not replace the admission by a new axiom, an assumed zero
+residue class, a conditional assertion presented as unconditional, or a
+choice of a nonexistent witness.
+
+The remaining geometric work includes the actual normal-class-to-surface
+and Abel–Jacobi comparison; the identification of the Jacobian pairings
+with a geometric variation and the supported-cycle construction; the
+relative Leray/vanishing argument; and the cohomological residue and
+algebraic de Rham comparisons that prove the actual top class is zero.
+Those results are not supplied by the finite algebra alone or by an
+existing theorem in the inspected project and pinned Mathlib sources.
+
+This continuation is integrated into existing proposal files, so it adds
+no submitted helper files. The protected instance, goal, proof manifest,
+shared library, and workflow definitions are unchanged. It is saved on a
+separate branch with no pull request, whose push does not match the
+repository's build/verification workflow triggers. Compilation is deferred
+as requested.
+
 ## Status and protected goal
 
 **Draft; not a completed Lean proof.** The algebraic implication from a
@@ -1901,7 +1972,11 @@ The complete proposal remains within the existing 64-file limit and the
 16 MiB source limit. The new source is consolidated without adding another
 submitted file.
 
-## Verification
+## Historical verification of earlier source checkpoints
+
+The uncompiled continuation documented at the beginning of this file has
+no verification receipt. The records below retain their original source
+scope and must not be applied to the newly modified source files.
 
 Development uses Lean 4.33.1 and mathlib revision
 `0df444a360eaa60ab8c11dca51a86af692955474`. There are two distinct

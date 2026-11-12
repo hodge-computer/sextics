@@ -36,6 +36,7 @@ import HodgeComputer.Constructions.RationalFields.CommonDenominatorSubstitution
 import Mathlib.RingTheory.Localization.Away.Basic
 import Mathlib.RingTheory.Kaehler.Basic
 import Mathlib.LinearAlgebra.ExteriorPower.Basis
+import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
 import Mathlib.Algebra.Polynomial.Roots
 import Mathlib.Data.Set.Countable
@@ -57,6 +58,10 @@ import Mathlib.LinearAlgebra.FreeModule.Basic
 import HodgeComputer.Constructions.PolynomialCurves.ArithmeticLifting
 import HodgeComputer.Constructions.HoldoutCover.GenericIncidence
 import Mathlib.RingTheory.Smooth.AdicCompletion
+
+/- SOURCE STATUS (2026-11-12): the new continuation blocks explicitly marked
+uncompiled below have not been elaborated, compiled, or kernel-replayed.
+Historical verification records do not cover this modified source. -/
 
 /-!
 # Checked inputs for the nonconstructive cycle-q2 route
@@ -14502,3 +14507,374 @@ theorem protected_certificate_iff_square_primitive :
 end CycleQ2FormalInputs
 
 #print axioms CycleQ2FormalInputs.protected_certificate_iff_square_primitive
+
+
+/- Uncompiled continuation: PoleReduction.lean (2026-11-12). -/
+section Q2UncompiledPoleReduction
+
+/-!
+# Explicit pole-three reduction for the actual Q2 affine chart
+
+Source-only draft against the 8d88f06e782704e301a6e817195f907e816f46d8
+project tree. This file has deliberately NOT been compiled.
+
+The calculations use the existing ambient rational-function field, its
+complex-linear coordinate derivation, the actual protected polynomial,
+and the existing regular-subring specialization map. They introduce no
+new existence assumption.
+
+On the ambient open where `g = partial_0 f` is invertible, put
+`D_t = g^(-1) partial_0` and `b = a/g`. The rational coefficient
+
+  `psi = -b/(2*f^2) - D_t(b)/(2*f)`
+
+satisfies
+
+  `D_t(psi) = b/f^3 - (D_t(D_t(b))/2)/f`.
+
+For `vol = dx1 wedge ... wedge dx4`, this is the coefficient identity
+behind `omega - d(psi * vol) = (D_t^2(b)/2) * (df/f) wedge vol`.
+This module proves the coefficient identity and binds the resulting
+regular simple-pole coefficient to the existing `residueSourceForm`.
+It does not define a cohomological residue map or prove that the source
+form has a primitive. Those geometric steps remain separate obligations.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+
+noncomputable section
+
+namespace CycleQ2ExplicitPoleReduction
+
+open MvPolynomial HodgeComputer CycleQ2Bridge CycleQ2ComplexDerivations
+open CycleQ2AffineClearing CycleQ2AffineGeometry CycleQ2ActualResidueClosure
+open CycleQ2AffineResidue CycleQ2AffineResidueClosure
+open HoldoutConstruction SplitHigherResidue
+
+section FieldCalculus
+
+variable {R K : Type*} [CommRing R] [Field K] [CharZero K] [Algebra R K]
+
+/-- The normalized normal derivation. Its normalization is proved for the
+actual Q2 equation below; it is not supplied as an existence hypothesis. -/
+def normalized (D : Derivation R K K) (g : K) : Derivation R K K :=
+  g⁻¹ • D
+
+theorem normalized_apply (D : Derivation R K K) (g x : K) :
+    normalized D g x = D x / g := by
+  simp only [normalized, Derivation.smul_apply, smul_eq_mul, div_eq_mul_inv]
+  ring
+
+/-- Two elementary integrations in the normal direction lower a third
+order pole to a first order pole. This is an identity of actual field
+derivations, with the equation and its nonzero denominator explicit. -/
+theorem triple_pole_identity (D : Derivation R K K) (f b : K)
+    (hf : f ≠ 0) (hDf : D f = 1) :
+    D (-b / (2 * f ^ 2) - D b / (2 * f)) =
+      b / f ^ 3 - (D (D b) / 2) / f := by
+  have htwo : D (2 : K) = 0 := D.map_natCast 2
+  simp only [map_sub, map_neg, Derivation.leibniz_div,
+    Derivation.leibniz, Derivation.leibniz_pow, htwo, hDf,
+    smul_eq_mul, nsmul_eq_mul]
+  field_simp [hf]
+  ring
+
+/-- The second normalized derivative is the existing normal-source
+coefficient divided by the normal Jacobian. -/
+theorem second_normal_coefficient (D : Derivation R K K) (a g : K)
+    (hg : g ≠ 0) :
+    normalized D g (normalized D g (a / g)) / 2 =
+      normalSourceTwo a (D a) (D (D a)) g (D g) (D (D g)) / g := by
+  simp only [normalized_apply, normalSourceTwo,
+    Derivation.leibniz_div, Derivation.leibniz_inv,
+    Derivation.leibniz, Derivation.leibniz_pow,
+    map_sub, map_add, map_neg, smul_eq_mul, nsmul_eq_mul]
+  ring_nf
+  field_simp [hg]
+  ring
+
+end FieldCalculus
+
+/-- The existing ambient function field, before imposing the equation. -/
+abbrev RF := RationalFunction 4
+
+def ambientEquation : RF := polynomialMap 4 affineF
+
+def normalGradient : RF := polynomialMap 4 (pderiv 0 affineF)
+
+/-- The genuine complex-linear partial derivative of the ambient field. -/
+def coordinateDerivative : Derivation ℂ RF RF := complexRationalPartial 4 0
+
+theorem coordinateDerivative_polynomial (P : AmbientPoly 4) :
+    coordinateDerivative (polynomialMap 4 P) = polynomialMap 4 (pderiv 0 P) :=
+  complexRationalPartial_map 4 0 P
+
+theorem ambientEquation_ne_zero : ambientEquation ≠ 0 :=
+  polynomialMap_ne_zero affineF_ne_zero
+
+theorem normalGradient_ne_zero : normalGradient ≠ 0 :=
+  polynomialMap_ne_zero affine_normal_ne_zero
+
+theorem coordinateDerivative_equation :
+    coordinateDerivative ambientEquation = normalGradient :=
+  coordinateDerivative_polynomial affineF
+
+/-- This is `g^(-1) partial_0` on the actual ambient rational functions. -/
+def normalDerivative : Derivation ℂ RF RF :=
+  normalized coordinateDerivative normalGradient
+
+theorem normalDerivative_apply (z : RF) :
+    normalDerivative z = coordinateDerivative z / normalGradient :=
+  normalized_apply coordinateDerivative normalGradient z
+
+theorem normalDerivative_equation : normalDerivative ambientEquation = 1 := by
+  rw [normalDerivative_apply, coordinateDerivative_equation,
+    div_self normalGradient_ne_zero]
+
+def density (A : AmbientPoly 4) : RF := polynomialMap 4 A / normalGradient
+
+/-- The coefficient of the explicit ambient four-form correction. -/
+def poleCorrection (A : AmbientPoly 4) : RF :=
+  -density A / (2 * ambientEquation ^ 2) -
+    normalDerivative (density A) / (2 * ambientEquation)
+
+/-- The coefficient of `(df/f) wedge vol` after the explicit reduction. -/
+def simpleCoefficient (A : AmbientPoly 4) : RF :=
+  normalDerivative (normalDerivative (density A)) / 2
+
+theorem simpleCoefficient_eq_actualNormalSource (A : AmbientPoly 4) :
+    simpleCoefficient A = actualNormalSource affineF A / normalGradient := by
+  change normalized coordinateDerivative normalGradient
+      (normalized coordinateDerivative normalGradient
+        (polynomialMap 4 A / normalGradient)) / 2 = _
+  rw [second_normal_coefficient coordinateDerivative
+    (polynomialMap 4 A) normalGradient normalGradient_ne_zero]
+  simp only [coordinateDerivative, normalGradient,
+    complexRationalPartial_map, actualNormalSource]
+
+/-- Pole reduction for the literal protected equation, with all
+normalization and nonvanishing side conditions already discharged. -/
+theorem actual_normal_pole_reduction (A : AmbientPoly 4) :
+    normalDerivative (poleCorrection A) =
+      density A / ambientEquation ^ 3 - simpleCoefficient A / ambientEquation := by
+  simpa only [poleCorrection, simpleCoefficient] using
+    triple_pole_identity normalDerivative ambientEquation (density A)
+      ambientEquation_ne_zero normalDerivative_equation
+
+/-- The same identity expressed relative to the original coordinate
+volume, instead of the normal-coordinate volume. -/
+theorem actual_coordinate_pole_reduction (A : AmbientPoly 4) :
+    coordinateDerivative (poleCorrection A) =
+      polynomialMap 4 A / ambientEquation ^ 3 -
+        actualNormalSource affineF A / ambientEquation := by
+  have h := actual_normal_pole_reduction A
+  rw [normalDerivative_apply, density, simpleCoefficient_eq_actualNormalSource] at h
+  have hmul := (eq_div_iff normalGradient_ne_zero).mp h.symm
+  calc
+    coordinateDerivative (poleCorrection A) =
+        ((polynomialMap 4 A / normalGradient) / ambientEquation ^ 3 -
+          (actualNormalSource affineF A / normalGradient) / ambientEquation) *
+          normalGradient := hmul.symm
+    _ = _ := by
+      field_simp [ambientEquation_ne_zero, normalGradient_ne_zero]
+      ring
+
+/-- A regular-subring representative of the simple-pole coefficient.
+The zero vector here merely selects the already-constructed normal
+source from `residueExpressionRegular`; it is not asserted to solve
+the residue PDE. -/
+def simpleCoefficientRegular (A : AmbientPoly 4) : RegularAtF :=
+  residueExpressionRegular A (fun _ : Fin 4 => 0) * normalInverse
+
+theorem simpleCoefficientRegular_val (A : AmbientPoly 4) :
+    ((simpleCoefficientRegular A : RegularAtF) : RF) = simpleCoefficient A := by
+  rw [simpleCoefficient_eq_actualNormalSource]
+  change ((residueExpressionRegular A (fun _ : Fin 4 => 0) : RegularAtF) : RF) *
+    (normalInverse : RF) = _
+  rw [residueExpressionRegular_val, normalInverse_val]
+  simp [actualResidueExpression, residueDivergence,
+    HoldoutConstruction.fieldDivergence, normalGradient, div_eq_mul_inv]
+
+/-- The first-order residue coefficient has no pole along the protected
+equation. Its possible auxiliary poles are already legal. -/
+theorem simpleCoefficient_regular (A : AmbientPoly 4) :
+    CycleQ2Regularity.RegularAlong affineF (simpleCoefficient A) := by
+  rw [← simpleCoefficientRegular_val A]
+  exact (simpleCoefficientRegular A).property
+
+/-- This is the existing algebraic specialization of a regular rational
+coefficient modulo `affineF`, not an assumed cohomological residue map. -/
+theorem residue_simpleCoefficientRegular (A : AmbientPoly 4) :
+    residue (simpleCoefficientRegular A) =
+      affineNormalSource A / CycleQ2AffineExactness.normalDensity := by
+  rw [simpleCoefficientRegular, map_mul,
+    residue_residueExpressionRegular, residue_normalInverse]
+  simp [affineResidueExpression, residueDivergence,
+    HoldoutConstruction.fieldDivergence,
+    CycleQ2AffineExactness.normalDensity, div_eq_mul_inv]
+
+/-- The simple-pole coefficient gives exactly the already-defined top
+exterior form on the actual hypersurface function field. No exactness
+or vanishing of this form is assumed or concluded. -/
+theorem simple_residue_form_eq_source (A : AmbientPoly 4) :
+    residue (simpleCoefficientRegular A) • CycleQ2AffineExterior.volume =
+      CycleQ2AffineExactness.residueSourceForm A := by
+  rw [residue_simpleCoefficientRegular]
+  rfl
+
+/-- Specialization to the unchanged protected Q2 numerator. -/
+theorem protected_simple_residue_form_eq_source :
+    residue (simpleCoefficientRegular affineA) • CycleQ2AffineExterior.volume =
+      CycleQ2AffineExactness.residueSourceForm affineA :=
+  simple_residue_form_eq_source affineA
+
+end CycleQ2ExplicitPoleReduction
+
+end
+
+end Q2UncompiledPoleReduction
+
+
+/- Uncompiled continuation: TopDeRham.lean (2026-11-12). -/
+section Q2UncompiledTopDeRham
+
+/-!
+# The actual generic-point top de Rham quotient
+
+SOURCE-ONLY DRAFT: no Lean elaboration or compilation has been performed.
+
+This module takes the quotient of the existing genuine fourth exterior power
+by the image of the existing complex-linear exterior differential. It supplies
+the precise target for a future comparison theorem. It does not assert that
+the protected residue class is zero, introduce a cohomological vanishing
+assumption as an axiom, or prove divisor support.
+-/
+
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+
+noncomputable section
+
+namespace CycleQ2AffineTopCohomology
+
+open CycleQ2AffineDifferentials CycleQ2AffineExterior
+
+/-- There are no fifth exterior forms: the actual relative Kähler module
+has the already constructed four-element coordinate basis. -/
+instance formFiveSubsingleton : Subsingleton (Form 5) := by
+  refine ⟨?_⟩
+  intro η ξ
+  apply (coordinateBasis.exteriorPower 5).repr.injective
+  apply Finsupp.ext
+  intro s
+  have hcard : (s : Finset (Fin 4)).card ≤ 4 := by
+    simpa using Finset.card_le_univ (s : Finset (Fin 4))
+  have hs : (s : Finset (Fin 4)).card = 5 := s.property
+  exact False.elim (by omega)
+
+/-- Any possible outgoing differential in top degree is zero. This
+statement does not require constructing the lower-degree de Rham complex. -/
+theorem to_formFive_eq_zero (δ : Form 4 →ₗ[ℂ] Form 5) : δ = 0 := by
+  apply LinearMap.ext
+  intro ω
+  exact Subsingleton.elim _ _
+
+/-- Exact fourth forms form a complex subspace. They are not being treated
+as a subspace over the full function field. -/
+def exactTopForms : Submodule ℂ (Form 4) :=
+  LinearMap.range exteriorD3
+
+/-- The actual top-degree algebraic de Rham quotient at the generic point.
+All fourth forms are closed because the fifth exterior power vanishes. -/
+abbrev TopDeRham := (Form 4) ⧸ exactTopForms
+
+/-- The quotient map on actual rational fourth forms. -/
+def classOf : Form 4 →ₗ[ℂ] TopDeRham :=
+  exactTopForms.mkQ
+
+/-- Zero in this quotient means existence of an actual rational three-form
+primitive, with the original exterior derivative and the original sign. -/
+theorem classOf_eq_zero_iff (ω : Form 4) :
+    classOf ω = 0 ↔ ∃ η : Form 3, exteriorD3 η = ω := by
+  change (Submodule.Quotient.mk ω : TopDeRham) = 0 ↔ _
+  rw [Submodule.Quotient.mk_eq_zero]
+  change ω ∈ LinearMap.range exteriorD3 ↔ _
+  exact LinearMap.mem_range
+
+@[simp] theorem classOf_exteriorD3 (η : Form 3) :
+    classOf (exteriorD3 η) = 0 :=
+  (classOf_eq_zero_iff _).mpr ⟨η, rfl⟩
+
+/-- Adding an actual exact form preserves the class. -/
+theorem classOf_add_exteriorD3 (ω : Form 4) (η : Form 3) :
+    classOf (ω + exteriorD3 η) = classOf ω := by
+  rw [map_add, classOf_exteriorD3, add_zero]
+
+/-- The class of the already defined positive residue source form. -/
+def residueClass (A : HodgeComputer.AmbientPoly 4) : TopDeRham :=
+  classOf (CycleQ2AffineExactness.residueSourceForm A)
+
+theorem residueClass_eq_zero_iff (A : HodgeComputer.AmbientPoly 4) :
+    residueClass A = 0 ↔
+      ∃ η : Form 3,
+        exteriorD3 η = CycleQ2AffineExactness.residueSourceForm A :=
+  classOf_eq_zero_iff _
+
+/-- The quotient criterion is bound to the existing four-function
+equation. Neither vanishing nor existence is asserted here. -/
+theorem residueClass_eq_zero_iff_primitive
+    (A : HodgeComputer.AmbientPoly 4) :
+    residueClass A = 0 ↔
+      ∃ w : Fin 4 → CycleQ2AffineHypersurface.AffineFunctionField,
+        CycleQ2AffineResidueClosure.affineResidueExpression A w = 0 :=
+  (residueClass_eq_zero_iff A).trans
+    (CycleQ2AffineExactness.exact_residueSourceForm_iff A)
+
+section UniversalProperty
+
+variable {V : Type*} [AddCommGroup V] [Module ℂ V]
+
+/-- A complex-linear map on forms that kills actual differentials factors
+through the quotient. This is an algebraic universal property, not a
+constructed Betti or sheaf-cohomology comparison map. -/
+def descend (Φ : Form 4 →ₗ[ℂ] V)
+    (hΦ : ∀ η : Form 3, Φ (exteriorD3 η) = 0) :
+    TopDeRham →ₗ[ℂ] V :=
+  exactTopForms.liftQ Φ (by
+    rintro ω ⟨η, rfl⟩
+    exact hΦ η)
+
+@[simp] theorem descend_classOf (Φ : Form 4 →ₗ[ℂ] V)
+    (hΦ : ∀ η : Form 3, Φ (exteriorD3 η) = 0) (ω : Form 4) :
+    descend Φ hΦ (classOf ω) = Φ ω :=
+  rfl
+
+/-- Once an injective comparison map is actually constructed, vanishing
+of its image yields an actual primitive. The comparison map, its
+injectivity, and vanishing remain explicit hypotheses. -/
+theorem exact_of_injective_comparison (comparison : TopDeRham →ₗ[ℂ] V)
+    (hinj : Function.Injective comparison) (ω : Form 4)
+    (hzero : comparison (classOf ω) = 0) :
+    ∃ η : Form 3, exteriorD3 η = ω := by
+  apply (classOf_eq_zero_iff ω).mp
+  apply hinj
+  simpa only [map_zero] using hzero
+
+end UniversalProperty
+
+/-- The already established homogeneous certificate constructor can be
+applied to a proved zero class. This theorem does not prove that class
+zero and is not a replacement for missing_geometric_existence. -/
+theorem protected_certificate_of_residueClass_eq_zero
+    (h : residueClass CycleQ2AffineClearing.affineA = 0) :
+    HodgeComputer.HasCertificate
+      HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A :=
+  CycleQ2AffineExactness.protected_certificate_of_exact_residueSourceForm
+    ((residueClass_eq_zero_iff CycleQ2AffineClearing.affineA).mp h)
+
+end CycleQ2AffineTopCohomology
+
+end
+
+end Q2UncompiledTopDeRham
