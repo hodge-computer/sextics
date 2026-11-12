@@ -1,5 +1,248 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Restriction, projective cohomology, and incidence schemes — 12 November 2026
+
+**This continuation supplies further geometric and cohomological
+constructions. It does not prove `Submission.missing_geometric_existence`.**
+The new declarations have explicit proof bodies and introduce no new
+admissions or declared axioms. Lean elaboration, compilation, and kernel
+checking remain deferred, so they are not claimed as verified Lean results.
+
+Three further modules connect the previously constructed objects:
+
+| Helper | Construction | Remaining boundary |
+| --- | --- | --- |
+| [GeometricPrincipalRestriction.lean](GeometricPrincipalRestriction.lean) | Canonical localization, Kähler and exterior restriction maps for actual inclusions of principal opens; compatibility with every differential; diagrams of regular complexes and cohomology. Its `CycleQ2GeometricRationalSpread` namespace clears finite denominators and constructs the actual filtered-colimit isomorphism with generic top cohomology. | The residue is still not shown to vanish on any open. The restriction diagram does not yet provide sheaf gluing, sheaf hypercohomology, or the Betti comparison. |
+| [GeometricConeCech.lean](GeometricConeCech.lean) | The actual punctured affine cone, its two-open cover, and canonical localization-to-section maps. The Čech quotient injects into genuine derived sheaf cohomology through the actual Mayer--Vietoris boundary, preserving the nonzero classes, including the literal incidence tangent at \(r=57,\theta=1\). | The canonical-bundle comparison and geometric Serre trace remain separate constructions. |
+| [GeometricProjectiveCurve.lean](GeometricProjectiveCurve.lean) | The homogeneous quotient grading and actual projective curve; degree-one modules with explicit frames; an actual additive sheaf and an injection into its derived cohomology. The same module constructs the weighted incidence surface and generic-section projective zero locus, with actual scheme morphisms and exact equation bindings. | The canonical module-sheaf and Serre identifications remain open. The incidence candidate still needs the divisor-class, flatness, smooth-fiber, and Abel--Jacobi comparisons. |
+
+### Restriction and the generic-point limit
+
+Write \(B=R[g^{-1}]\) for the already constructed smooth Jacobian-open
+coordinate ring. For an actual inclusion \(D(t)\subseteq D(s)\) in
+\(\operatorname{Spec}(B)\), the localization universal property constructs
+\(B[s^{-1}]\to B[t^{-1}]\). The maps on Kähler differentials and exterior
+powers are canonical, and commute with every differential of the regular
+complex. The intersection of two nonempty principal opens is the
+nonempty open \(D(st)\), since \(B\) is a domain. Thus restriction gives a
+filtered diagram as the opens shrink.
+
+Every rational exterior form has finitely many coefficients in the actual
+function field. Clearing those coefficients in the original affine ring
+constructs a common denominator. Multiplying that denominator by a
+prescribed \(t\ne0\) keeps the resulting form inside \(D(t)\).
+Injectivity of the already constructed maps on exterior forms then gives:
+
+* every generic top-cohomology class is represented on some such open;
+* a regular class that maps to zero generically becomes zero after a
+  further principal restriction;
+* two regular classes with the same generic image become equal after a
+  further principal restriction.
+
+These statements establish the universal property, rather than merely
+defining the generic quotient to be a limit. The source constructs an
+actual isomorphism of complex vector spaces
+
+\[
+  \mathop{\mathrm{colim}}_{D(s)\ne\varnothing}
+    H^4\bigl(\Gamma(D(s),\Omega^\bullet)\bigr)
+  \;\simeq\;
+    \Omega^4_{K/\mathbb C}/d\Omega^3_{K/\mathbb C}.
+\]
+
+Here the left-hand groups are the constructed cohomology quotients of
+global regular-form complexes. No sheaf-hypercohomology identification is
+implicit in this notation. The colimit comparison agrees with each
+existing `toGeneric` map, including the protected residue class.
+
+Consequently the new `CycleQ2Nonconstructive.exact_form_iff_regular_zero`
+states the exact equivalent target
+
+\[
+  \texttt{AffineResidueFormExact}
+  \quad\Longleftrightarrow\quad
+  \exists s\in B,\ s\ne0\ \text{and}\ [\rho]_{D(s)}=0.
+\]
+
+This preserves unrestricted nonconstructive existence. It neither bounds
+the primitive's denominator nor asserts injectivity of cohomology from one
+fixed affine open to the generic point. The missing support argument must
+still produce the vanishing on some open.
+
+### From localization fractions to actual sheaf sections
+
+After eliminating \(w=-x_2^2\), the curve ring is the homogeneous coordinate
+ring of an ordinary degree-\((2,3)\) curve in \(\mathbb P^3\). The two
+denominators from the normal calculation give an actual cover of its
+punctured affine cone. On each patch and the overlap, the canonical
+localization-to-section equivalence respects the restriction maps.
+The existing quotient by all localization coboundaries therefore agrees
+with the quotient by actual structure-sheaf-section coboundaries. The
+normalization and selected normal-pairing classes remain nonzero under
+this comparison.
+
+The source then goes beyond cochain homology. An explicit additive
+free-Yoneda equivalence identifies Mathlib's degree-zero sheaf cohomology
+with sections and proves compatibility with restriction. For the actual
+structure sheaf on the cone, the Mayer--Vietoris sequence supplies
+
+\[
+  H^0(U,\mathcal O)\oplus H^0(V,\mathcal O)
+  \longrightarrow H^0(U\cap V,\mathcal O)
+  \xrightarrow{\delta} H^1(U\cup V,\mathcal O).
+\]
+
+Its exactness identifies the entire kernel of \(\delta\) with the existing
+section coboundaries. Hence `sectionToSheafH1` is an injective additive map
+from the actual section Čech quotient to genuine Ext-defined cohomology
+(`H'` in Mathlib's notation). Both the normalization and selected
+normal-pairing class remain nonzero there. This injection needs no affine
+acyclicity assertion; a surjectivity assertion would require more work.
+
+These comparisons retain the existing sparse `originalB` and theta
+family. They do not identify that family with the full nine-coefficient
+cubic used by the written modular rank-seven/rank-eight calculation.
+There is now also a direct binding to the actual incidence seed:
+`incidenceCubicCoefficients` is the cubic part of the previously constructed
+`parameterDirection`. Its checked trace is one, its cubic is the restriction
+of the actual full invariant tangent polynomial, and
+`incidenceSheafClass_ne_zero` carries its paired normal connecting class
+into genuine derived cohomology at \(r=57,\theta=1\). This statement
+does not impose the incompatible complex equation \(57^3=2\).
+
+### The actual projective degree-one class
+
+The projective construction retains the grading instead of assigning a
+projective interpretation to the ungraded cone quotient. The new general
+`HomogeneousQuotient.gradedRing` constructs the grading of a quotient by
+any homogeneous ideal from the original direct-sum decomposition. Its
+application to the actual quadratic and cubic equations defines
+`projectiveCurve` as a genuine scheme. The two original degree-four
+denominators cover this scheme, and Mathlib's canonical projective affine
+charts identify their rings with homogeneous degree-zero localizations.
+
+On a chart with a homogeneous denominator \(f\) of degree \(d\),
+`degreeOneModule` consists of the actual fractions
+\[
+  a/f^n,\qquad a\in A_{1+nd}.
+\]
+Closure and restriction to product-denominator charts are proved by
+clearing denominators. The original normal-pairing numerator has degree
+nine, so division by \(g_1g_2\), of degree eight, gives an actual member of
+the overlap's degree-one module. Its quotient by the two genuine
+single-chart restrictions maps to the previously constructed scalar
+Čech quotient and onwards to cone sheaf cohomology. The source proves
+`incidenceDegreeOneClass_ne_zero` and identifies both images with the
+literal incidence classes.
+
+The next comparison is now constructed as well. On the first chart the
+degree-one module has frame \(x_1\); on the second it has frame \(x_2\).
+The ratio \(t=x_2/x_1\) is an invertible section of the actual projective
+structure sheaf on the overlap. The source constructs the additive sheaf
+\[
+  \mathcal F=\ker\!\left(
+    j_{1*}\mathcal O_{U_1}\oplus j_{2*}\mathcal O_{U_2}
+    \xrightarrow{\ (a,b)\mapsto a-tb\ }
+    j_{12*}\mathcal O_{U_1\cap U_2}\right).
+\]
+Its evaluated sections are proved to be the compatible pairs, using
+free-sheaf representability of sections and the actual kernel universal
+property. This yields local section equivalences with the degree-one
+modules, and both equivalences commute with the actual restrictions.
+Consequently the projective Mayer--Vietoris boundary gives
+\[
+  \mathrm{DegreeOneCech}(r,\theta)
+    \hookrightarrow H'^1(C,\mathcal F),\qquad r\ne0.
+\]
+`degreeOneToProjectiveH1_injective` proves this injection, and
+`incidenceProjectiveSheafClass_ne_zero` gives the nonzero class at
+\(r=57,\theta=1\). `incidence_class_images` binds the projective and
+cone derived classes to the same concrete degree-one numerator. It does
+not supply a general map between those two derived cohomology groups.
+
+This is an actual additive sheaf and actual derived cohomology. Packaging
+the sheaf as an \(\mathcal O_C\)-module, identifying it with the canonical
+bundle, and constructing the geometric Serre trace and pairing are still
+required. The argument proves an injection and makes no affine-acyclicity
+or derived-cohomology surjectivity claim.
+
+The homogeneous core of a prime also constructs the continuous map from
+the punctured cone to this projective scheme. Its preimages of homogeneous
+basic opens agree with the original cone basic opens. A compatible map
+of structure sheaves is still needed to promote it to a scheme morphism.
+
+The ordinary projective presentation also gives a more direct prospective
+route to the remaining twist calculation: the Koszul resolution of
+\(\mathcal O_C(1)\) starts with
+\(\mathcal O_{\mathbb P^3}(-4)\), followed by
+\(\mathcal O_{\mathbb P^3}(-1)\oplus\mathcal O_{\mathbb P^3}(-2)\).
+The corresponding resolution of \(\mathcal O_C(5)\) starts with
+\(\mathcal O_{\mathbb P^3}(0)\). Constructing those module-sheaf
+resolutions, their cohomological comparison, and the resulting trace
+remains a prospective route beyond the additive sheaf constructed here.
+
+### A concrete incidence route for the moving family
+
+The existing incidence algebra provides a possible shorter geometric
+route than the written Hodge-locus reconstruction. Its fixed and full
+Jacobian ranks, trace-one fixed-sextic tangent, lifts of all 45 sextic
+coefficient directions, and `finite_pointed_trace_point` are tied to
+literal polynomial equations. The actual seed-surface minor cover also
+persists along the pointed trace construction.
+
+The `CycleQ2GeometricIncidenceProj` namespace now constructs projective
+schemes from these actual equations. The geometric variables have weights
+\((1,1,1,1,2)\), while coefficient and section parameters have degree zero.
+The actual cubic \(h\), sextic \(F\), and matrix entries are proved
+homogeneous in degrees three, six, and fourteen. The existing
+`PointSurface y` quotient therefore has an actual weighted projective
+spectrum, together with scheme morphisms to its affine coefficient base
+and weighted ambient space.
+
+Over \(S[T_0,T_1,T_2]\), the three literal entries of \(M T\) give the
+projective candidate
+\[
+  \Gamma=\operatorname{Proj}
+    \frac{S[T_0,T_1,T_2][x_0,x_1,x_2,x_3,w]}
+         {(h,F,(MT)_0,(MT)_1,(MT)_2)}.
+\]
+The source constructs actual morphisms from this scheme to the incidence
+surface, the weighted ambient scheme, and the affine parameter base.
+Swapping the geometric and section polynomial variables and quotienting
+the geometric coefficients sends its defining ideal to the exact
+previous `sectionIdeal`; this is
+`toSectionPolynomial_genericCurveIdeal`. It is an image-ideal identity,
+not yet a quotient-ring or scheme base-change isomorphism.
+
+The previously proved local regularity retains all three independent
+section variables. It does not assert that every specialized section is
+a nonzero regular divisor. The projective candidate still needs its
+Cartier and divisor-class identifications and a suitable parameter open
+with nonempty flat smooth curve fibers. Identifying the seed divisor class
+with \(E+4H\), and the relative ambient-test/orbit pairing with the
+Abel--Jacobi derivative, remains essential. These scheme definitions do
+not supply the Abel--Jacobi comparison or establish closed immersions.
+
+The existing graded linkage duality specifies which line bundle must be
+constructed. In [SolutionSupport05.lean](SolutionSupport05.lean),
+`actualImage_selected` identifies the selected right-ideal sections with
+the actual matrix columns, `actualDuality_grade` retains the degree-four
+twist, `actualImage_grade` gives the degree-fourteen columns, and
+`actualDuality_restriction` supplies their compatibility. Together with
+`localized_linkageIdeal_eq_components` in
+[SolutionSupport03.lean](SolutionSupport03.lean), these give concrete
+algebraic data for the missing sheafification and identification with
+\(\mathcal O_D(E+4H)\). This identification has not yet been proved at
+the scheme/sheaf level. Likewise, the existing nonzero character vector
+alone does not prove that its pairing with the chosen vertical cubic
+direction remains nonzero; the relative pairing must retain the seed's
+explicit normal-pairing value \(-1/171\).
+
+The proposal now contains **62 Lean modules and 64 total proposal files**.
+The target and original final admission are unchanged. The moving-curve
+and Abel--Jacobi construction, geometric polarized variation, supported
+correspondences, and analytic de Rham comparison remain unfinished.
+
 ## Concrete geometric objects and regular forms — 12 November 2026
 
 **This continuation implements further prerequisites of the written proof.
@@ -83,8 +326,8 @@ the same complex affine open, and its zero restriction must be proved from
 that support construction. These geometric conclusions are not assumptions
 silently added to the final theorem.
 
-All four new helpers are imported by the submission. The proposal contains
-**59 Lean modules and 61 total proposal files**. The protected target and
+All four new helpers were imported by the submission. At this checkpoint,
+the proposal contained **59 Lean modules and 61 total proposal files**. The protected target and
 the original final admission are unchanged. Source inspection and static
 dependency checks are distinct from Lean validation; no completed
 certificate is claimed for this checkpoint.
