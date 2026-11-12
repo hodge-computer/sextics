@@ -14,9 +14,15 @@ The actual fixed-sextic Jacobian now has rank 1922, its image is the
 actual relation kernel, and a trace-one complex tangent exists by a
 nonconstructive augmented-matrix rank argument. Exact characteristic-zero
 Jacobian identities now cover the literal seed curve by normal charts.
-Bases of the genuine seed conormal module, actual local lifts of the
-trace-family coefficient motion, and the relative Kodaira--Spencer/transition
-identity are also proved.
+Global equation-class bases of the genuine seed conormal modules and
+nonvanishing of the actual chosen-curve normal connecting class are now
+proved. The full relative surface Čech calculation, its character dimensions
+7, 8, 8, canonical tensor base change, and conditional character-one
+persistence on the actual pointed component are proved. Exact seed-surface
+Jacobian identities and a coefficient-open argument now cover every
+relevant prime of the actual finite pointed trace surface. Actual local
+lifts of coefficient motion and the relative Kodaira--Spencer/transition
+identity remain available for the next geometric comparison.
 The existence of a primitive remains unproved. The one
 explicit admission, `Submission.missing_geometric_existence`, states exactness
 of that genuine exterior form. Consequently `Submission.certificate` still
@@ -1434,41 +1440,14 @@ The source equation degrees are
 line has twist \(\mathcal O_C(-2)\). Pairing its connecting cocycle with a cubic
 therefore lands in the degree-one canonical piece of the curve.
 
-The previously proved local splitting formulas already give the overlap
-coefficient \((kL-A)/(g_1g_2)\), with first-chart-minus-second-chart sign.
-The next concrete theorem is to identify the actual normal connecting
-class in these conormal coordinates with that all-poles Čech class,
-including independence of lifts and refinement. The existing paired
-residue is \(-1/(3r)=-1/171\) at \(r=57\). Its interpretation as the
-trace of this actual connecting class, its relative persistence, and its
-subsequent Abel--Jacobi/de Rham comparison remain unproved.
-
-There is a direct algebraic route to simplify that next comparison. The
-regular order \((f_2,f_1,h)\) successively uses monicity in \(w,x_0,x_2\).
-After eliminating \(w\) and quotienting by \(f_1\), the cubic is still
-monic of degree three in \(x_2\), even if the coefficient ring has zero
-divisors. Likewise \((h,F)\) is regular because modulo \(h\), the actual
-sextic is monic of degree three in \(w\). These presentations do not
-require \(r\ne0\) or \(\theta\ne0\).
-
-The additional Lean lemma would say that for \(I=(a,b,c)\) in this
-regular order,
-\[
-au+bv+cw\in I^2\quad\Longrightarrow\quad u,v,w\in I.
-\]
-It is the degree-one case of the regular-sequence implication in
-[Stacks Project, Lemma 10.69.2](https://stacks.math.columbia.edu/tag/00LN).
-After subtracting an \(I^2\) representation, cancellation of \(c\)
-modulo \((a,b)\) writes \(w=as+bt\); cancellation of \(b\) modulo
-\((a)\) writes \(v+ct=az\); cancellation of \(a\) then gives
-\(u+cs=-bz\). The coefficient statement proves independence of the
-actual equation classes in \(I/I^2\), and its length-two version handles
-\(J/J^2\). Binding the existing `Ideal.mapCotangent` to these global
-bases would identify the natural map with \(\beta\) without extra
-Jacobian refinements. This is a proposed next formalization, not a
-completed global-basis theorem in the submitted source. The \(g_1/g_2\)
-cover and homogeneous twists would still be needed for the connecting
-class, and ambient derivation lifts would still use Jacobian opens.
+The actual global conormal bases and the genuine normal connecting
+construction have now been completed. The subsequent section
+[Global conormal bases and the genuine chosen-curve class](#global-conormal-bases-and-the-genuine-chosen-curve-class)
+gives the exact comparison with arbitrary localization boundaries and the
+resulting nonzero theorem. It also distinguishes the value \(-1/513\)
+for the selected trace-\(1/3\) tangent from \(-1/171\) for the
+trace-one tangent. The graded projective interpretation, semiregularity,
+moving-class identification, and Abel--Jacobi/de Rham comparisons remain.
 
 ### Actual local lifts and the relative transition identity
 
@@ -1513,9 +1492,11 @@ trace family's actual specialized sextic and cubic. The sextic's
 coefficient derivative is zero. `actualLocalTime_coefficients` proves
 that each resulting local surface derivation restricts to the already
 constructed derivative of the coefficient field, which is finite over
-the trace parameter field. A separate
-Jacobian-cover argument is still needed to use these opens as a cover
-of the entire moving surface.
+the trace parameter field. The new theorem
+`CycleQ2IncidenceSurfaceGradientOpen.actual_trace_prime_minor_cover`
+proves that these Jacobian-minor opens cover every relevant prime
+of this actual pointed trace surface. The projective graded-cover
+and sheaf comparisons remain separate.
 
 The transition calculation now retains the variation of the surface
 coordinates. On a common overlap ring, let \(D_p,D_q\) be two local
@@ -1544,6 +1525,268 @@ an explicit comparison of cochains on a common ring. The global graded
 cover, comparison with the normal connecting class, and de Rham/Gysin
 interpretation must still be constructed.
 
+## Global conormal bases and the genuine chosen-curve class
+
+The equation-coordinate bases are now proved without restricting to a
+Jacobian chart. The auxiliary monomial order has weights
+\((3,1,4,1,9)\) on \((x_0,x_1,x_2,x_3,w)\). The actual equations
+\(f_1,f_2,h_\theta\) have monic leading monomials
+\(x_0^2,w,x_2^3\), and the actual surface equations
+\(F,h_\theta\) have monic leading monomials \(w^3,x_2^3\).
+These leading monomials have pairwise disjoint supports in each sequence.
+The checked monic-division argument proves the required regular-sequence
+relations. An independent cotangent argument then proves that the actual
+equation classes form bases of the scalar-extended conormal modules.
+
+In `CycleQ2SeedGlobalConormal`, `seedConormalBasis` and
+`surfaceConormalBasis` work over every algebra annihilating the actual
+curve ideal. They require neither a chosen Jacobian minor nor invertibility
+of \(g_1\) or \(g_2\). The natural map is the genuine map induced by
+\(J\subseteq I\) on cotangent modules, with
+\(I=(f_1,f_2,h_\theta)\) and \(J=(F,h_\theta)\). In these proved
+equation bases its dual is
+\[
+ (u_0,u_1,u_2)\longmapsto
+ (g_1u_0+g_2u_1+k_\theta u_2,\;u_2),
+\]
+using the literal identity
+\(F=f_1g_1+f_2g_2+h_\theta k_\theta\).
+
+The actual localizations at \(g_1\), \(g_2\), and \(g_1g_2\)
+carry this dual-conormal map. Its kernel is trivialized by
+\((g_2,-g_1,0)\), and those trivializations commute with the actual
+restriction maps. On each single open the normal map is surjective.
+`CycleQ2ActualNormalCech.NormalCech` is the overlap kernel modulo the
+sum of the two genuine kernel-restriction images.
+`normalCechEquivalence` identifies it with the scalar overlap quotient.
+Under that equivalence the connecting class, defined from the difference
+of two genuine local normal lifts of \((A,L)\), is represented by
+\[
+ \frac{k_\theta L-A}{g_1g_2}.
+\]
+The class is unchanged by arbitrary changes of either lift by a local
+kernel section. Thus the scalar formula is a proved coordinate description
+of the genuine connecting construction.
+
+The boundary comparison now handles arbitrary sections of the two actual
+localizations. `CycleQ2LocalizationBoundary.clear_two_open_boundary`
+clears their denominators and retains the extra common-product factor
+that can occur when an equality is known only after localization. It
+does not assume that the original ring is a domain or that either
+localization map is injective. Its specialization
+`CycleQ2SeedLocalizationBoundary.paired_boundary_witness` gives unrestricted
+polynomial witnesses with some \(N\geq2\), \(M\geq4\). The subsequent
+homogeneous projection produces the degrees required by the existing
+all-poles Čech model. No fixed denominator bound is imposed.
+
+Consequently a zero genuine normal connecting class would give a boundary
+annihilated by the previously checked residue functional. Its explicitly
+nonzero value proves
+
+```lean
+CycleQ2SeedNormalNonzero.actual_seed_ambient_test_nonzero :
+  CycleQ2ActualNormalCech.connectingClass 57 1
+    CycleQ2NormalConnecting.derivativeA 0 ≠ 0
+```
+
+The general theorem holds for every complex \(r\ne0\) and every
+\(\theta\). There is no assumed smoothness, Jacobian rank, conormal
+basis, or residue nonvanishing in this result. Here the ambient test is
+\(A=x_2x_3^3w\), with \(L=0\). The exact paired representative has
+value
+\[
+ -(3r)^{-1}\operatorname{derivativeTrace}(\theta,v).
+\]
+For the earlier selected tangent the trace is \(1/3\), giving
+\(-1/513\) at \(r=57\). The distinct trace-one direction gives
+\(-1/171\); these are different inputs to the same formula.
+
+`CycleQ2SeedTwoOpenCover.relevant_prime_cover` proves that these two
+denominator opens cover every relevant prime of the actual curve for
+\(r\ne0\). On the curve, simultaneous membership of
+\(g_1=3r^2(x_1x_3)^2\) and \(g_2=3x_2^4\) forces all five
+coordinates into the prime, contradicting relevance. The cover theorem
+therefore concerns arbitrary prime ideals, rather than only complex
+closed points.
+
+This is still an ungraded Čech quotient on the affine cone. The expected
+projective normal sequence has twists
+\[
+0\longrightarrow\mathcal O_C(-2)
+\longrightarrow\mathcal O_C(2)^{\oplus2}\oplus\mathcal O_C(3)
+\longrightarrow\mathcal O_C(6)\oplus\mathcal O_C(3)
+\longrightarrow0.
+\]
+Its kernel generator has coordinate degree four; the scalar connecting
+coefficient has degree minus two, and multiplication by a cubic gives
+the canonical degree-one curve class. The graded sheaf comparison and
+the semiregularity map into the surface's top cohomology are not proved
+by the preceding ungraded construction.
+
+The ambient-test class is also different from the normal obstruction of
+the actual fixed-sextic incidence motion, which vanishes. The chosen curve
+is not itself stable under the order-three action. Its nonzero class
+therefore does not, without a further comparison, establish nonvanishing
+of the orbit trace or of a class on the moving component.
+
+## Relative surface Čech modules and the pointed component
+
+The relative calculation now uses the full invariant cubic and sextic
+coefficient families over an arbitrary nontrivial commutative ring \(R\).
+After normalizing their leading coefficients, the actual quotient
+\[
+ R[x_0,x_1,x_2,x_3,w]/(H,F)
+\]
+is free of rank nine over \(R[x_1,x_2,x_3]\), with basis given by the
+actual quotient classes \(x_0^aw^b\), \(0\leq a,b<3\).
+The proof uses the coprime monic leading monomials \(x_0^3,w^3\),
+so it also applies to coefficient rings with zero divisors.
+The three coordinate opens \(x_1,x_2,x_3\) cover every relevant prime:
+their simultaneous vanishing forces \(x_0\) by the cubic and then
+\(w\) by the sextic.
+
+The localized bases, restrictions, and coefficient maps are constructed
+on the actual quotient and its actual coordinate localizations. The
+Laurent-coordinate descriptions follow from those constructions. In
+weighted degree zero the quotient of the triple-open module by the three
+pair-open images is free, with character dimensions
+\[
+\begin{array}{c|ccc}
+ \chi\in\mathbb Z/3 &0&1&2\\\hline
+ \operatorname{rank}_R&7&8&8.
+\end{array}
+\]
+In `CycleQ2UniversalSurfaceCharacterPersistence`, `actualCoordinates` and
+`coordinates_actualTopMap` prove the actual quotient's coordinate basis
+and the coefficientwise naturality of its localization-induced maps.
+
+For every nontrivial commutative \(R\)-algebra \(S\), these maps give a canonical
+tensor base-change equivalence in each character:
+\[
+ S\otimes_R\operatorname{ActualTopCech}_{R,\chi}
+ \simeq_S\operatorname{ActualTopCech}_{S,\chi}.
+\]
+The theorem
+`CycleQ2UniversalSurfaceCharacterPersistence.actualBaseChange_tmul`
+identifies the image of \(s\otimes z\) with
+\(s\cdot\operatorname{actualTopMap}_\chi(R\to S)(z)\).
+This identifies the equivalence with the original coefficient map,
+rather than only asserting that two free modules have equal rank.
+
+The character relevant to the intended ambient test is one. The polynomial
+\(A=x_2x_3^3w\) has character one and the residue volume has character
+two, making \(A\Omega/F^2\) invariant. An invariant cubic gives a
+canonical residue of character two, so its dual top surface cohomology
+piece has character one. The corresponding explicit Čech piece has
+rank eight. The previously computed character-zero rank-seven piece
+remains a distinct piece. Identifying this character calculation with
+the projective canonical pairing is still a geometric obligation.
+
+The normalization is bound to the literal incidence family:
+`universalIdeal_normalized` and `mapped_universalIdeal_normalized` prove
+equality of the original and normalized defining ideals, before and
+after arbitrary coefficient specialization. The quotient equivalences
+preserve each original polynomial class. The literal seed specialization
+uses \((r,\iota)=(57,\mathrm i)\), without assuming \(r^3=2\).
+`pointSurfaceEquiv` gives the same identification for the actual finite
+trace-family surface.
+
+Retain the chosen additional coefficient open \(c\), and form
+\[
+ A_z=\operatorname{ParameterRing}(\mathbb C)[c^{-1}]
+       /\ker(\operatorname{openGeneric}_z).
+\]
+This is `CycleQ2IncidenceTraceComponent.ComponentRing`. Its generic
+coefficient map is injective. Pointedness extends through both coefficient
+localizations, so the literal seed specialization factors through
+\(A_z\) whenever \(c\) has seed value one. The additional open is a
+unit throughout this component ring, and all the actual cleared incidence
+equations vanish there.
+
+`CycleQ2IncidenceTraceCharacterComponent.componentTop_nonzero` proves
+persistence for a class of any specified character defined on this actual
+component: a nonzero image under the actual seed coefficient map has a
+nonzero image under the actual generic coefficient map. Its relevant
+specializations are `characterOne_nonzero` and `characterOne_rank_eight`.
+The class need not lift to the unconstrained ambient parameter ring.
+
+What is missing is a construction of the geometric ambient-test class on
+this component and a proof that its seed equals the image of the computed
+normal connecting class. The nonzero chosen-curve class and the conditional
+surface-persistence theorem do not supply that identification. Orbit trace,
+the projective semiregularity comparison, and the Abel--Jacobi/de Rham
+interpretation remain separate obligations.
+
+## Exact seed-surface cover and its persistence
+
+The complete seed surface now has an exact algebraic Jacobian-minor
+cover. Write
+\[
+ q=x_0^6+x_2^6-185193x_1^3x_3^3,\qquad
+ G=w^3+q,\qquad F=G+hk,
+\]
+with the literal cubic \(h=\operatorname{smoothH}(\mathrm i)\),
+the literal \(k=\operatorname{smoothK}(\mathrm i)\), and
+\(185193=57^3\). For each \(j=1,2,3\), a proved exact
+Gaussian-integer identity expresses a nonzero constant multiple of
+\(x_j^{17}\) in the ideal generated by \(q,h\) and their six
+two-column Jacobian minors in \(x_0,x_1,x_2,x_3\).
+The sparse representation retains all 889 multiplier coefficient pairs
+and the original exact denominators. Its evaluation theorem is proved
+in Lean under every ring homomorphism from the Gaussian integers to a
+commutative target ring. The identities are
+then checked by ordinary kernel reduction, with no finite-characteristic
+replacement for the characteristic-zero conclusion.
+
+Consider a relevant prime containing \(F,h\). The existing coordinate
+cover guarantees that one of \(x_1,x_2,x_3\) lies outside it. If the
+prime contains \(w\), the new identities force at least one branch
+Jacobian minor outside it. If it does not contain \(w\), the already
+checked cubic-gradient cover and
+\(\partial_wG=3w^2\) supply a two-column minor outside it.
+The minors of \((F,h)\) and \((G,h)\) agree modulo \(h\).
+This proves `CycleQ2SeedSurfaceGradient.prime_minor_cover` for every
+relevant prime of the literal seed surface.
+
+`actual_prime_normal_cover` binds the result to the determinants of the
+actual ordered tuple `(actualSeedEquation 57 1, thetaH 1)` used in the
+conormal construction. `actual_field_normal_cover` gives a unit determinant
+under every field-valued point satisfying these two equations and the
+relevance condition. No relation \(r^3=2\) is used.
+
+The propagation to the family is also proved. For a finite homogeneous
+generator family, the absence of a relevant prime at the seed implies,
+by radical membership, that the seed ideal contains powers of every
+coordinate. It then contains a sufficiently high full invariant graded
+piece. The existing finite homogeneous coefficient-matrix construction
+produces a coefficient polynomial \(s\) with seed value one such that
+the same prime-cover conclusion holds after any coefficient specialization
+where \(s\) is a unit. These steps are the theorems
+`coordinate_powers_of_prime_cover`, `high_degree_homogeneous_mem`, and
+`exists_prime_cover_open` in `CycleQ2HomogeneousPrimeCoverOpen`.
+
+For the actual invariant cubic/sextic family, the homogeneous generators
+are \(F,h\), and the cubes of all its two-column Jacobian minors.
+Cubing makes every minor generator character zero. Their weighted degrees,
+compatibility with coefficient maps, and literal seed specialization are
+proved. Primality recovers a nonvanishing original minor from a nonvanishing
+cube. This yields a coefficient open containing the literal seed on which
+the actual surface minor cover persists.
+
+The pointed trace condition says that a polynomial coefficient vanishing
+at the generic point must vanish at the seed. It therefore makes every
+coefficient polynomial of seed value one nonzero, and hence a unit, in
+the trace extension field. The resulting endpoint is
+`CycleQ2IncidenceSurfaceGradientOpen.actual_trace_prime_minor_cover`:
+every relevant prime containing the actual specialized `actualF B z`
+and `actualH B z` omits at least one of their genuine two-column Jacobian
+minors. These are the same minor opens used to construct `actualLocalTime`.
+
+This completes the algebraic cover condition for those local derivations.
+It does not assert an already constructed projective smooth family, identify
+the ambient-test semiregularity class, or supply the missing Abel--Jacobi,
+support, and de Rham comparisons.
+
 ## Remaining formal obligations
 
 | Obligation | Status |
@@ -1553,19 +1796,21 @@ interpretation must still be constructed.
 | Actual Fermat Jacobian bases, socle trace, finite commutant | Proved; geometric Higgs comparison remains. |
 | Sparse seed quotient trace, degree-nine dimension and uniqueness, all 72 matrix entries | Proved; actual all-poles Čech comparison and vanishing equivalence now proved too. |
 | Actual curve chart cover and the theta-one nine-column residue functional | Proved on the actual curve; obstruction/Abel--Jacobi interpretation remains. |
-| Literal cubic and r=57 seed-curve Jacobian conditions | Exact Gaussian-integer identities prove the cubic gradient condition and a normal-minor cover at every relevant curve prime. Geometric smoothness and the entire surface condition remain separate. |
-| Actual seed conormal modules and normal matrix | Genuine equation-class bases are constructed on every relevant prime chart. The actual natural cotangent map and its dual are constructed; the dual's equation-coordinate matrix is the existing normal matrix. The target conormal basis is constructed on source Jacobian charts where g1 is a unit; graded gluing and the global normal-sequence comparison remain. |
+| Literal cubic, seed-curve, and seed-surface Jacobian conditions | Exact Gaussian-integer identities prove the cubic gradient condition and normal-minor covers at all relevant curve and surface primes. The seed-surface cover persists to the actual finite pointed trace surface through a proved coefficient open. A geometric smoothness interpretation remains separate. |
+| Actual seed conormal modules and normal matrix | Global genuine equation-class bases are proved over every algebra annihilating the curve ideal. The actual natural map and its dual agree with the computed normal matrix in those bases. No Jacobian-unit hypothesis is needed for these bases. |
+| Genuine chosen-curve ambient-test connecting class | Actual dual-conormal restrictions, local surjectivity, kernel trivializations, connecting-class comparison, independence of lifts, and nonvanishing against all localization boundaries are proved. The two denominator opens cover every relevant curve prime. Graded sheaf, semiregularity, and orbit-trace comparisons remain. |
 | Cubic Cartier matrix factorization and periodic quotient complex | Polynomial identities and genuine exactness proved; geometric base change remains. |
 | Literal Segre seed, cofactor quotients, and selected section products | Universal polynomial identities proved for the actual chosen entries. |
 | Actual complex basepoint cover and local Segre exactness | Proved on every relevant prime and every nonempty coordinate localization, including homogeneous local lifts. |
 | Regular linkage element and actual local factor sequence | Proved; the literal factor ideals are principal with regular generators on unit-entry charts. |
-| Seed quotient Čech complex | Actual localization comparison, graded H0 gluing, H1 vanishing, and degree-zero invariant H2 dimension seven proved. |
+| Seed and full relative surface Čech complexes | Actual localized quotient models and coefficient maps are proved. Degree-zero character dimensions are 7, 8, 8, with canonical tensor base change over nontrivial coefficient algebras. The relevant ambient-test piece is character one, of rank eight. |
+| Pointed-component persistence for the surface class | The actual component coefficient ring, its seed and injective generic maps, and persistence for a class in its character-one Čech module are proved. Construction of the geometric ambient-test class and its seed identification remain. |
 | Chosen curves, restrictions, and orbit ideals | Actual six-term bases, two-open cover and gluing, restriction kernels, cyclic orbit identification, and the 56/23 section dimensions proved. |
 | Positive graded H1 of both linkage ideals | Proved for the actual degree-ten invariant and degree-eight character-one pieces. |
 | Actual relation-kernel obstruction | The actual connecting maps identify the obstruction with kernel Čech H1 and scalar Čech H2; its dimension is exactly seven. |
 | Actual matrix-entry Jacobian and coefficient relations | Entry-block rank 1915, combined Jacobian rank 1922, relation-matrix rank 7600, and actual image/kernel equality proved. |
 | Unit-entry image modules, transition units, and logarithmic differentials | Proved, including coefficient-map naturality, the homogeneous degree twist, and the relative Kodaira--Spencer contraction/boundary identity. |
-| Local lifts of the actual trace-family motion | Constructed on each actual surface Jacobian-minor localization, with proved coefficient restriction and preservation of both equations; the global covering comparison remains. |
+| Local lifts of the actual trace-family motion | Constructed on actual surface Jacobian-minor localizations, now proved to cover all relevant primes. Coefficient restriction and preservation of both equations are proved. Binding external ambient-test lifts and projective sheaf comparisons remain. |
 | Formal and algebraic generic lifting of polynomial systems | Existence proved from actual seed equations and unit Jacobian; exact sequences provide compatible square blocks, and complementary relations force all omitted equations. |
 | Actual large incidence system, graded bases, literal seed, and full first-order equations | Proved, including a nonconstructively chosen characteristic-zero fixed-sextic tangent with trace one satisfying all 9,522 equations. |
 | Universal coefficient relations and polynomial denominator clearing | Proved, including the exact relation-Jacobian identity at the seed. |
@@ -1595,6 +1840,28 @@ and support of the invariant variation, and the global algebraic de Rham
 comparison with the protected rational form. These interfaces cannot be
 used to bypass that existence proof.
 
+The next central comparison must construct the actual divisor or
+semiregularity connecting map from the chosen-curve normal class into the
+character-one surface Čech module, and prove that its pairing equals the
+computed curve residue. It must then construct that same class on the
+pointed component and identify its seed specialization. Lifting an arbitrary
+nonzero seed coordinate vector into a free relative module would not supply
+this geometric identification.
+
+The existing trace-family local derivations follow the fixed-sextic
+incidence motion. They have not yet been bound to the external ambient test
+\(F+\varepsilon A\). Similarly, an orbit response must include the
+character twist: for a generator \(g\) with \(gA=\zeta A\), the
+expected covariant formula is
+\[
+ \sum_{j=0}^2 o_{g^jC}(A)
+ =\sum_{j=0}^2\zeta^{-j}g^j o_C(A)=3e_1o_C(A).
+\]
+This formula is a remaining comparison, not a theorem claimed by the current
+formalization. The ordinary sum of translates of a character-one vector
+would vanish. Neither the existing fixed-sextic obstruction nor an untwisted
+orbit sum can replace the required ambient-test class.
+
 ## Preserved current route
 
 All `Current*.lean` files remain unchanged and are not dependencies of the
@@ -1609,11 +1876,10 @@ available in their original files. Their source bodies remain unchanged.
 
 ## Source layout
 
-The active development contains 447 consolidated components. The original
+The active development contains 485 consolidated components. The original
 61-component [GeometricFormalInputs.lean](GeometricFormalInputs.lean)
-baseline is retained byte-for-byte, together with its checked artifact.
-The 386 continuation components are grouped into four existing permitted
-files, preserving their order and complete proof bodies:
+baseline remains byte-for-byte unchanged, together with its checked artifact.
+The 424 continuation components occupy four existing permitted files:
 
 | File | Components | Contents |
 | --- | ---: | --- |
@@ -1621,47 +1887,105 @@ files, preserving their order and complete proof bodies:
 | [GeometricTarget.lean](GeometricTarget.lean) | 100 continuation | `AffineFiniteDescent` through `CurveRestrictionModularLeft`, after the original target/action declarations. |
 | [Assembly.lean](Assembly.lean) | 36 continuation | `CurveRestrictionModularRight` through `SegreModularActionFlat01`, after the original assembly declarations. |
 | [Normalization.lean](Normalization.lean) | 11 continuation | `SegreModularActionFlat02` through `SegreModularCubicData2`, after the original normalization declarations. |
-| [Solution.lean](Solution.lean) | 239 continuation | `SegreRelationsSeedCharts` through `SeedNaturalNormalMap`, followed by the existing entry-point body. |
+| [Solution.lean](Solution.lean) | 277 continuation | The previous 239 components, followed by 38 new components for global conormal bases, genuine normal classes, relative character Čech modules, and seed/moving surface covers, then the unchanged entry-point body. |
 
 `Workspace` and the original `GeometricSeed` precede the baseline. The
-continuation then imports in the order shown in the table. The original
-support declarations in the reused files are retained as well. Every
-helper component in `Solution.lean` occurs before the admitted theorem,
-so those proofs cannot use that later admission.
+continuation imports in the table's order. All prior component proof bodies
+and the exact original entry-point body are preserved. Every new helper
+occurs before `Submission.missing_geometric_existence`, so no new helper
+can use that later admission. The assembly record checks each component
+body hash and its final byte range. Only `Solution.lean` and `solution.md`
+change relative to checkpoint `5c9d41d179dd`.
 
-This layout keeps the complete proposal within 64 files while bounding
-the amount of source elaborated in one process. Two development attempts
-to compile the expanded monolithic helper ended in `SIGKILL`; neither is
-reported as a successful check. The split changes imports, file placement,
-and scheduling scaffolding, while preserving every component's mathematical
-proof body. Every stage has now passed compilation and separate kernel
-replay, as recorded below.
+The complete proposal remains within the existing 64-file limit and the
+16 MiB source limit. The new source is consolidated without adding another
+submitted file.
 
 ## Verification
 
-Development compilation uses Lean 4.33.1 and pinned mathlib revision
-`0df444a360eaa60ab8c11dca51a86af692955474`.
-The recovered 373-component continuation has matching standalone compile
-and independent `leanchecker` receipts. All thirteen additional local-geometry
-components have compiled individually. The complete final four-stage layout
-has now passed compilation and separate independent kernel replay, with
-unchanged source hashes at both gates:
+Development uses Lean 4.33.1 and mathlib revision
+`0df444a360eaa60ab8c11dca51a86af692955474`. There are two distinct
+validation scopes: the previous complete four-stage checkpoint, and this
+revision's individually checked components plus their new integration check.
+
+### New components and integration
+
+All 38 new components have matching source-hash receipts for compilation
+and separate independent `leanchecker` replay:
+
+| Group | Components | Compilation, seconds | Independent replay, seconds |
+| --- | ---: | ---: | ---: |
+| Global conormal bases and genuine chosen-curve class | 12 | 103.890 | 55.538 |
+| Seed and pointed surface Jacobian covers | 10 | 57.165 | 45.576 |
+| Relative surface and character-one persistence | 16 | 171.326 | 88.299 |
+| Total | 38 | 332.381 | 189.413 |
+
+The separate `Proposal.NextContinuationVerification` module imports the
+previous checked `Proposal.Solution` and jointly elaborates
+33 new component bodies. It imports the 5 new sparse-arithmetic
+artifacts after their individual compilation and independent replay, rather
+than elaborating those large exact calculations a second time. Their complete
+source bodies are still included in the submitted `Solution.lean`.
+The integration compilation took 209.628 seconds, and its independent
+kernel replay took 26.164 seconds. All seven imported checkpoint
+artifacts and each reused arithmetic artifact are pinned by SHA-256.
+
+This is a check of new helper integration over a previously checked
+checkpoint. It is **not a fresh compilation or replay of the complete newly
+assembled proposal**. The source-preservation audit and component checks do
+not expand that stated execution scope.
+
+The new component logs contain 93 printed endpoint axiom reports.
+All reported helper axiom sets are subsets of `propext`, `Classical.choice`,
+and `Quot.sound`; the same holds for the printed integration endpoints.
+This audits those printed endpoints, not every declaration independently.
+No native decision procedure or added axiom supplies the arithmetic proofs.
+All component compilations used one thread. Thirty used a 4,096 MiB Lean
+memory limit, and eight used 5,120 MiB. Eight root components recorded a
+5,120 MiB RSS ceiling; the eight leading-term/surface components and sixteen
+relative-surface components recorded a 5,376 MiB ceiling. These guarded
+runs retained a 2,048 MiB available-memory threshold. The six normal-class
+receipts record no external RSS or available-memory guard. The integration
+used a 4,096 MiB Lean limit, a 5,120 MiB RSS ceiling, and a 2,048 MiB
+available-memory threshold.
+The maximum sampled component RSS was 3740.74 MiB. Integration
+resource settings and sampled peaks are recorded in its separate receipt.
+
+The original expanded surface arithmetic attempt timed out without a
+successful artifact. The replacement sparse representation retains all
+889 Gaussian-integer multiplier pairs and the exact denominators, and
+proves its evaluation soundness in Lean. Each of the three coordinate
+identities is checked by ordinary kernel reduction. The earlier failed
+attempt and its bounded diagnostic remain recorded as unsuccessful checks.
+
+The newly assembled `Solution.lean` source SHA-256 is
+`87eda90e5f60dc243e9285f0c578ee2dbab2fcef777f113bb3c1cd8f688dea18`.
+The separate integration source SHA-256 is
+`d2c75cf1f8e9932aef0c6c4642c1afb3f3b9971ea202da19f50c9daf16177260`.
+These are different sources and their receipts are not interchangeable.
+
+### Historical four-stage checkpoint
+
+The preceding 447-component source checkpoint passed all four complete
+stage compilations and separate independent replays:
 
 | Stage | Compilation, seconds | Independent replay, seconds |
 | --- | ---: | ---: |
 | `GeometricTarget` | 839.781 | 336.938 |
 | `Assembly` | 788.955 | 372.881 |
 | `Normalization` | 228.262 | 22.153 |
-| `Solution` | 2126.165 | 891.574 |
+| Previous `Solution` | 2126.165 | 891.574 |
 
-The successful stages total 3,983.163 seconds of compilation and 1,623.546
-seconds of independent replay: 5,606.709 seconds, or approximately 93.45
-minutes. The serial development driver's wall elapsed time was 6,341.150
-seconds, including its recorded pauses and unsuccessful split attempts.
-Earlier monolithic attempts and the historical baseline check are separate
-measurements.
+These historical successful stages total 3,983.163 seconds of compilation
+and 1,623.546 seconds of independent replay, or 5,606.709 seconds. Their
+driver wall time was 6,341.150 seconds, including recorded pauses and
+unsuccessful split attempts. Those timings do not describe a fresh run of
+this revision. The exact four Lean sources are preserved in source commit
+[`314847b0c2e4`](https://github.com/fqlx/sextics/commit/314847b0c2e435df0f22e3d0fe42a232e75fa48d),
+with the final prior verification explanation in
+[`5c9d41d179dd`](https://github.com/fqlx/sextics/commit/5c9d41d179ddeabf367b5c2b6a7f3ed39f874abb).
 
-The checked stage source SHA-256 values are:
+Their source SHA-256 values are:
 
 ```text
 GeometricTarget.lean
@@ -1670,79 +1994,54 @@ Assembly.lean
   f5a7b3eadace85bfa69b137a76b5d79c74301080ca187dbc899b0df26f1dcfa1
 Normalization.lean
   54e5b909d2dd17b400059066b50e18b3eca384a36e203fd101b095cd1c11db20
-Solution.lean
+Previous Solution.lean
   5bf1220b1bcb565a85e920f38b8ffe504ee562cbed2df99533c7f59d22444b62
 ```
 
-These Lean sources are preserved in source checkpoint
-[`314847b0c2e4`](https://github.com/fqlx/sextics/commit/314847b0c2e435df0f22e3d0fe42a232e75fa48d).
-The original 61-component `GeometricFormalInputs` baseline is reused from
-its successful recorded 1,696.056-second compilation and 62.465-second
-replay. Its source SHA-256 is
-`68f06d3630e974fc8a7a0bc57ef952744bc98b00979c0092aecf2471f2640590`.
-Its main artifact SHA-256 is
+The original 61-component baseline was reused from its recorded
+1,696.056-second compilation and 62.465-second replay. Its source SHA-256
+is `68f06d3630e974fc8a7a0bc57ef952744bc98b00979c0092aecf2471f2640590`;
+its main artifact SHA-256 is
 `139c853a60871649e05f18d1ff5a1a96f56f6b8a010acc85d10823a09b094560`.
-The unchanged `Workspace` and `GeometricSeed` sources and artifacts also
-match their successful historical compile/replay receipts. The baseline
-receipt does not record its thread or memory settings.
+The baseline receipt does not record its thread or memory settings.
+The unchanged `Workspace` and `GeometricSeed` artifacts also match their
+successful historical receipts.
 
-The four successful compile logs contain 758 printed axiom reports:
+Those four historical compile logs contain 758 printed axiom reports:
 757 helper reports covering 714 distinct helper declarations, plus the
-protected certificate. All helper reports use only `propext`,
-`Classical.choice`, and `Quot.sound`; 15 helper reports use no axioms.
-Among these printed reports, only `Submission.certificate` includes
-`sorryAx`. This is an audit of the
-printed endpoints, with repeated reports counted explicitly. It is not
-an additional all-declaration axiom audit. No native decision procedure or
-added axiom supplies the proved helper results.
+certificate. All helper reports use only the three standard axioms named
+above; 15 helper reports use none. Among those reports, only
+`Submission.certificate` includes `sorryAx`. Failed monolithic and earlier
+split attempts remain separate from these successful checks.
 
-The successful compiler runs used one compiler thread. `GeometricTarget` used a
-5,120 MiB managed-memory limit and RSS guard; the other three stages used
-5,376 MiB. Each replay used `leanchecker --verbose` for its exact module,
-with the Lean runtime defaults and external guards. Each process was guarded
-by a 2,048 MiB available-memory threshold. The largest sampled process RSS was
-5,153.14 MiB during compilation and 4,826.55 MiB during replay, sampled every
-0.2 seconds. These are sampled per-process peaks.
-
-The first split attempt stopped at the degree-42 count's 4,096 MiB internal
-memory allowance. Assembly's first attempts stopped at the RSS guard and
-then its internal memory allowance. The successful runs retained the same
-mathematical source; no code-generation switch or proof/data-body rewrite
-was needed. Both earlier monolithic `SIGKILL` attempts and these split
-stops are retained as unsuccessful attempts.
+### Protected boundary and remaining execution limits
 
 The protected target is generated from base
-`e3936ff366ae2302f21fb9e5730bbbd284c81d69`; its generated source SHA-256 is
+`e3936ff366ae2302f21fb9e5730bbbd284c81d69`, with generated source SHA-256
 `8052a2dfa06a0e7b8f3322a38f9f7a3a49ce3b3f5ebeb0f9d10ac354ab1fa6c2`.
-This continuation builds on PR head
-`638af005150a402fb0638f13d6516ce1e16d5d00`.
 The protected instance, shared library, verifier, workflows, and proof
-manifest are unchanged. Static source-policy checks pass every helper and
-the complete helper prefix in `Solution.lean`.
+manifest remain unchanged. Static source-policy checks pass every helper
+and the complete helper prefix in `Solution.lean`.
 
-The full proposal fails the source-policy check because `Solution.lean`
-still contains its explicitly labeled admission. Compilation and kernel
-replay of that entry point do not turn the admission into a proof. No
-accepted certificate or evaluated witness is claimed.
+The full proposal is rejected by source policy because it still contains
+the one explicit admission, `Submission.missing_geometric_existence`.
+Its protected certificate still depends on `sorryAx`. Neither compilation
+nor kernel replay of an admitted entry point proves that missing theorem.
+No completed certificate or evaluated witness is claimed.
 
 The 55 legacy Lean files outside the active seven-module `Proposal` import
 closure have not been rebuilt against the new import environment. Checking
 `CurrentNormalGauge` and `CurrentTangents` first requires the 52-module
-`CurrentCorrection` dependency chain beyond the reused `Workspace`; its
-artifacts are absent from the reused cache. Static source and import
-checks do not replace that compilation.
+`CurrentCorrection` dependency chain beyond the reused `Workspace`; those
+artifacts are absent from the reused cache. Static source checks do not
+replace their compilation.
 
-The protected Linux verifier uses a two-CPU, 14-GiB container and compiles
-all submitted helpers, including unused ones, under one shared
-3,600-second deadline for compilation, independent replay, wrappers, and
-final auditing. The measured development sum exceeds 3,600 seconds, but
-it uses different resources and reuses the baseline. It is not an official
-timeout result. The complete protected run and compliance with its
-full-proposal deadline remain untested.
-
-The proposal has 64 permitted files and remains below the 16 MiB source
-limit. These format conditions and the completed development checks do
-not establish the remaining geometric existence theorem.
+The protected Linux verifier compiles every submitted helper, including
+unused ones, in a two-CPU, 14-GiB container under one shared 3,600-second
+deadline covering compilation, independent replay, wrappers, and final
+auditing. The historical development sum exceeds that deadline but differs
+in resources and scope; it is not an official timeout result. The complete
+protected run and its full-proposal budget compliance remain untested.
 
 ## Attribution
 
