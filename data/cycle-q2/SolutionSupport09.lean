@@ -263,7 +263,10 @@ def localLinearAction (ζ : R) (hζ : ζ ^ 3 = 1) (r ι : R)
     (s : Finset (Fin 3)) : SeedLocal R r ι s →ₗ[R] SeedLocal R r ι s where
   __ := (localAction ζ hζ r ι s).toAddMonoidHom
   map_smul' c q := by
-    simp only [Algebra.smul_def, map_mul, localAction_scalar]
+    simp only [RingHom.id_apply, Algebra.smul_def]
+    change localAction ζ hζ r ι s (algebraMap R (SeedLocal R r ι s) c * q) =
+      algebraMap R (SeedLocal R r ι s) c * localAction ζ hζ r ι s q
+    rw [map_mul, localAction_scalar]
 
 @[simp] theorem localLinearAction_apply (ζ : R) (hζ : ζ ^ 3 = 1) (r ι : R)
     (s : Finset (Fin 3)) (q : SeedLocal R r ι s) :
@@ -282,7 +285,7 @@ theorem baseFactor_univ (ζ : R) (hζ : ζ ^ 3 = 1) :
 theorem tripleDenominator_character (n : ℕ) :
     (baseGrade (n • openExponent (Finset.univ : Finset (Fin 3)))).2 = 0 := by
   have hb : (baseGrade (openExponent (Finset.univ : Finset (Fin 3)))).2 = 0 := by
-    norm_num [baseGrade, openExponent]
+    norm_num [baseGrade, openExponent] <;> decide
   rw [map_nsmul]
   change n • (baseGrade (openExponent (Finset.univ : Finset (Fin 3)))).2 = 0
   rw [hb, nsmul_zero]
@@ -340,7 +343,8 @@ theorem localLinearAction_characterOne [Nontrivial R]
     (hq : ∀ ab, HasGrade ab (0, (1 : ZMod 3))
       (localizedCoordinates R r ι Finset.univ q ab)) :
     localLinearAction ζ hζ r ι Finset.univ q = ζ • q := by
-  simpa using localAction_triple_homogeneous ζ hζ r ι q
+  have hv : (1 : ZMod 3).val = 1 := by decide
+  simpa only [localLinearAction_apply, hv, pow_one] using localAction_triple_homogeneous ζ hζ r ι q
     (0, (1 : ZMod 3)) hq
 
 theorem actual_triple_twistedOrbit_eq_three_smul [Nontrivial R]

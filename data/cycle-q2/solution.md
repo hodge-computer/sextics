@@ -1,5 +1,28 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Local modular compilation — 12 November 2026
+
+The full modular development build compiled locally after fixing elaboration
+errors in `SolutionSupport08.lean` and `SolutionSupport09.lean`. All 50
+proposal modules and the generated `HodgeTarget` compiled from source, in
+dependency order, using Lean 4.33.1 and Mathlib revision
+`0df444a360eaa60ab8c11dca51a86af692955474`. The run used one Lean worker and
+an 8,192 MiB Lean memory limit. The successful compilation steps took a
+combined 2,755.53 seconds, excluding failed attempts; the largest
+reported per-process peak RSS was 5,128,650,752 bytes.
+
+The compiled fixes have SHA-256
+`feab4aede408385dd0c4759c5a9f34ce7cc86614416a8f8d1945e8c9170f9997`
+for `SolutionSupport08.lean` and
+`df1eea70354d117e377d294cc483355a7a35d977a11a1c81e41aed584a705134`
+for `SolutionSupport09.lean`. The compilation used the other proposal sources
+from modular checkpoint `2493df96772fbace8f9689cf7ab3f346e280d926`.
+
+This is a development build, not protected verification or independent kernel
+replay. The existing `sorry` in `Submission.missing_geometric_existence`
+remains, and the final certificate depends on `sorryAx`. The geometric
+existence theorem and complete certificate are therefore still unproved.
+
 ## Modular source layout — 12 November 2026
 
 **This is a source-organization refactor of the incomplete proof.** The
@@ -48,10 +71,11 @@ Smaller modules permit separate compilation and reuse of unchanged compiled
 dependencies. They do not remove the memory needed to load those dependencies
 or make an expensive individual theorem cheaper. No reduction in peak memory
 or total protected-verifier time is claimed without a matching measurement.
-The full newly split dependency graph has not yet completed a fresh Lean
-build or independent kernel replay. Historical successful compilations below
-apply to their exact original filenames and source hashes, not to the new
-module layout.
+At this modular source checkpoint, the full newly split dependency graph had
+not yet completed a fresh Lean build or independent kernel replay. The later
+local compilation and its limits are recorded above. Historical successful
+compilations below apply to their exact original filenames and source hashes,
+not to the new module layout.
 
 ### Bounded compilation sample
 
