@@ -1634,63 +1634,115 @@ the amount of source elaborated in one process. Two development attempts
 to compile the expanded monolithic helper ended in `SIGKILL`; neither is
 reported as a successful check. The split changes imports, file placement,
 and scheduling scaffolding, while preserving every component's mathematical
-proof body. A standalone check of each stage and its kernel replay are
-required for this final layout.
+proof body. Every stage has now passed compilation and separate kernel
+replay, as recorded below.
 
 ## Verification
 
 Development compilation uses Lean 4.33.1 and pinned mathlib revision
 `0df444a360eaa60ab8c11dca51a86af692955474`.
 The recovered 373-component continuation has matching standalone compile
-and independent `leanchecker` receipts. Its printed endpoint axiom reports
-contain only `propext`, `Classical.choice`, and `Quot.sound`.
-
-All thirteen additional local-geometry components have compiled individually.
-The final four-stage source layout is being checked serially, with exact
-source hashes bound to each compile and independent kernel replay. The
-61-component baseline is reused from its successful recorded check.
-The first three stages have completed both checks:
+and independent `leanchecker` receipts. All thirteen additional local-geometry
+components have compiled individually. The complete final four-stage layout
+has now passed compilation and separate independent kernel replay, with
+unchanged source hashes at both gates:
 
 | Stage | Compilation, seconds | Independent replay, seconds |
 | --- | ---: | ---: |
 | `GeometricTarget` | 839.781 | 336.938 |
 | `Assembly` | 788.955 | 372.881 |
 | `Normalization` | 228.262 | 22.153 |
+| `Solution` | 2126.165 | 891.574 |
 
-The final `Solution` stage, containing the remaining 239 components and
-the entry point, is still being checked. Its frozen source SHA-256 is
-`5bf1220b1bcb565a85e920f38b8ffe504ee562cbed2df99533c7f59d22444b62`.
-No final-layout pass is asserted while that check is pending.
-No native decision procedure or added axiom supplies the proved results.
+The successful stages total 3,983.163 seconds of compilation and 1,623.546
+seconds of independent replay: 5,606.709 seconds, or approximately 93.45
+minutes. The serial development driver's wall elapsed time was 6,341.150
+seconds, including its recorded pauses and unsuccessful split attempts.
+Earlier monolithic attempts and the historical baseline check are separate
+measurements.
+
+The checked stage source SHA-256 values are:
+
+```text
+GeometricTarget.lean
+  83e9434d3124124d2bb610de1accd88e39a96a25a73cb0449c7809f4f3a8a809
+Assembly.lean
+  f5a7b3eadace85bfa69b137a76b5d79c74301080ca187dbc899b0df26f1dcfa1
+Normalization.lean
+  54e5b909d2dd17b400059066b50e18b3eca384a36e203fd101b095cd1c11db20
+Solution.lean
+  5bf1220b1bcb565a85e920f38b8ffe504ee562cbed2df99533c7f59d22444b62
+```
+
+These Lean sources are preserved in source checkpoint
+[`314847b0c2e4`](https://github.com/fqlx/sextics/commit/314847b0c2e435df0f22e3d0fe42a232e75fa48d).
+The original 61-component `GeometricFormalInputs` baseline is reused from
+its successful recorded 1,696.056-second compilation and 62.465-second
+replay. Its source SHA-256 is
+`68f06d3630e974fc8a7a0bc57ef952744bc98b00979c0092aecf2471f2640590`.
+Its main artifact SHA-256 is
+`139c853a60871649e05f18d1ff5a1a96f56f6b8a010acc85d10823a09b094560`.
+The unchanged `Workspace` and `GeometricSeed` sources and artifacts also
+match their successful historical compile/replay receipts. The baseline
+receipt does not record its thread or memory settings.
+
+The four successful compile logs contain 758 printed axiom reports:
+757 helper reports covering 714 distinct helper declarations, plus the
+protected certificate. All helper reports use only `propext`,
+`Classical.choice`, and `Quot.sound`; 15 helper reports use no axioms.
+Among these printed reports, only `Submission.certificate` includes
+`sorryAx`. This is an audit of the
+printed endpoints, with repeated reports counted explicitly. It is not
+an additional all-declaration axiom audit. No native decision procedure or
+added axiom supplies the proved helper results.
+
+The successful compiler runs used one compiler thread. `GeometricTarget` used a
+5,120 MiB managed-memory limit and RSS guard; the other three stages used
+5,376 MiB. Each replay used `leanchecker --verbose` for its exact module,
+with the Lean runtime defaults and external guards. Each process was guarded
+by a 2,048 MiB available-memory threshold. The largest sampled process RSS was
+5,153.14 MiB during compilation and 4,826.55 MiB during replay, sampled every
+0.2 seconds. These are sampled per-process peaks.
+
+The first split attempt stopped at the degree-42 count's 4,096 MiB internal
+memory allowance. Assembly's first attempts stopped at the RSS guard and
+then its internal memory allowance. The successful runs retained the same
+mathematical source; no code-generation switch or proof/data-body rewrite
+was needed. Both earlier monolithic `SIGKILL` attempts and these split
+stops are retained as unsuccessful attempts.
 
 The protected target is generated from base
-`e3936ff366ae2302f21fb9e5730bbbd284c81d69`.
-This revision continues PR head
+`e3936ff366ae2302f21fb9e5730bbbd284c81d69`; its generated source SHA-256 is
+`8052a2dfa06a0e7b8f3322a38f9f7a3a49ce3b3f5ebeb0f9d10ac354ab1fa6c2`.
+This continuation builds on PR head
 `638af005150a402fb0638f13d6516ce1e16d5d00`.
 The protected instance, shared library, verifier, workflows, and proof
-manifest are unchanged.
+manifest are unchanged. Static source-policy checks pass every helper and
+the complete helper prefix in `Solution.lean`.
 
-The combined development checks are distinct from protected acceptance.
-The full proposal fails the source-policy check because
-`Solution.lean` still contains its explicitly labeled admission.
-A development compile of the entry point does not turn that admission
-into a proof. No accepted certificate or evaluated witness is claimed.
+The full proposal fails the source-policy check because `Solution.lean`
+still contains its explicitly labeled admission. Compilation and kernel
+replay of that entry point do not turn the admission into a proof. No
+accepted certificate or evaluated witness is claimed.
 
-The 55 legacy Lean files outside the active seven-module import closure
-have not been rebuilt in this continuation. In particular, checking the
-unchanged `CurrentNormalGauge` and `CurrentTangents` in the new import
-environment requires first compiling the 52-module `CurrentCorrection`
-dependency chain beyond the reused `Workspace`; its artifacts are absent
-from the reused cache. Static source and import checks do not replace
-that compilation.
-The protected verifier also compiles unused submitted helpers and applies
-one shared 3,600-second deadline to all compilation, independent replay,
-and final auditing. The staged development checks do not establish
-compliance with that full-proposal deadline.
+The 55 legacy Lean files outside the active seven-module `Proposal` import
+closure have not been rebuilt against the new import environment. Checking
+`CurrentNormalGauge` and `CurrentTangents` first requires the 52-module
+`CurrentCorrection` dependency chain beyond the reused `Workspace`; its
+artifacts are absent from the reused cache. Static source and import
+checks do not replace that compilation.
+
+The protected Linux verifier uses a two-CPU, 14-GiB container and compiles
+all submitted helpers, including unused ones, under one shared
+3,600-second deadline for compilation, independent replay, wrappers, and
+final auditing. The measured development sum exceeds 3,600 seconds, but
+it uses different resources and reuses the baseline. It is not an official
+timeout result. The complete protected run and compliance with its
+full-proposal deadline remain untested.
 
 The proposal has 64 permitted files and remains below the 16 MiB source
-limit. These format and resource conditions do not establish the remaining
-existence theorem.
+limit. These format conditions and the completed development checks do
+not establish the remaining geometric existence theorem.
 
 ## Attribution
 
