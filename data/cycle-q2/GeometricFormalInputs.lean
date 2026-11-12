@@ -14878,3 +14878,304 @@ end CycleQ2AffineTopCohomology
 end
 
 end Q2UncompiledTopDeRham
+
+
+/- Component: continuation_20261112/AffineDeRhamComplex.lean -/
+section Q2UncompiledAffineDeRhamComplex
+
+/-!
+# The lower exterior differentials on the protected affine function field
+
+SOURCE DRAFT, 12 November 2026. No elaboration or compilation has been run.
+All the forms below
+are exterior powers of the existing actual Kaehler differential module.
+The differential in degree three is the existing residue differential.
+
+The coordinate construction uses the four already constructed commuting
+tangent derivations of the protected function field. The scalar-times-wedge
+identities identify the new maps with exterior differentiation; the three
+successive-composition identities supply the actual complex identities.
+No comparison with singular cohomology or geometric vanishing is asserted.
+-/
+
+section
+noncomputable section
+set_option autoImplicit false
+set_option backward.isDefEq.respectTransparency false
+
+namespace CycleQ2AffineDeRhamComplex
+
+open CycleQ2AffineHypersurface CycleQ2AffineDifferentials CycleQ2AffineExterior
+open scoped BigOperators
+
+/-- The six increasing pairs, in lexicographic order. -/
+def pairLeft : Fin 6 → Fin 4 := ![0, 0, 0, 1, 1, 2]
+
+def pairRight : Fin 6 → Fin 4 := ![1, 2, 3, 2, 3, 3]
+
+def pairCoordinates (k : Fin 6) : Fin 2 → Fin 4 :=
+  ![pairLeft k, pairRight k]
+
+def pairIndex : Fin 6 → Set.powersetCard (Fin 4) 2 :=
+  ![⟨{0, 1}, by decide⟩, ⟨{0, 2}, by decide⟩, ⟨{0, 3}, by decide⟩,
+    ⟨{1, 2}, by decide⟩, ⟨{1, 3}, by decide⟩, ⟨{2, 3}, by decide⟩]
+
+theorem pairIndex_bijective : Function.Bijective pairIndex := by
+  constructor
+  · decide
+  · rintro ⟨s, hs⟩
+    obtain ⟨a, b, hab, rfl⟩ := Finset.card_eq_two.mp hs
+    -- Only Fin 4 and equality of explicit finsets are enumerated here.
+    -- This avoids reducing the transported Fintype of powersetCard.
+    fin_cases a <;> fin_cases b <;> first
+      | exact (hab rfl).elim
+      | exact ⟨0, Subtype.ext (by decide)⟩
+      | exact ⟨1, Subtype.ext (by decide)⟩
+      | exact ⟨2, Subtype.ext (by decide)⟩
+      | exact ⟨3, Subtype.ext (by decide)⟩
+      | exact ⟨4, Subtype.ext (by decide)⟩
+      | exact ⟨5, Subtype.ext (by decide)⟩
+
+def pairEquiv : Fin 6 ≃ Set.powersetCard (Fin 4) 2 :=
+  Equiv.ofBijective pairIndex pairIndex_bijective
+
+theorem pairCoordinates_orderEmb (k : Fin 6) :
+    pairCoordinates k =
+      (pairIndex k : Finset (Fin 4)).orderEmbOfFin (pairIndex k).property := by
+  apply Finset.orderEmbOfFin_unique (pairIndex k).property
+  · intro j
+    fin_cases k <;> fin_cases j <;> decide
+  · fin_cases k <;> decide
+
+/-- A basis of the genuine second exterior power, not a replacement module
+of formal coefficient vectors. -/
+def secondBasis : Module.Basis (Fin 6) K (Form 2) :=
+  (coordinateBasis.exteriorPower 2).reindex pairEquiv.symm
+
+theorem secondBasis_apply (k : Fin 6) :
+    secondBasis k = exteriorPower.ιMulti K 2
+      (coordinateDifferential ∘ pairCoordinates k) := by
+  rw [secondBasis, Module.Basis.reindex_apply, Equiv.symm_symm]
+  change coordinateBasis.exteriorPower 2 (pairIndex k) = _
+  rw [exteriorPower.basis_apply]
+  unfold exteriorPower.ιMulti_family
+  congr 1
+  funext j
+  simp only [Function.comp_apply, coordinateBasis_apply,
+    Set.powersetCard.ofFinEmbEquiv_symm_apply, ← pairCoordinates_orderEmb]
+
+/-- The actual two-by-two minor formula for exterior coordinates. -/
+theorem secondBasis_repr_wedge (v : Fin 2 → Omega) (k : Fin 6) :
+    secondBasis.repr (exteriorPower.ιMulti K 2 v) k =
+      coordinateBasis.repr (v 0) (pairLeft k) *
+        coordinateBasis.repr (v 1) (pairRight k) -
+      coordinateBasis.repr (v 0) (pairRight k) *
+        coordinateBasis.repr (v 1) (pairLeft k) := by
+  rw [secondBasis, Module.Basis.repr_reindex_apply, Equiv.symm_symm]
+  change (coordinateBasis.exteriorPower 2).repr _ (pairIndex k) = _
+  rw [exteriorPower.basis_repr_apply, exteriorPower.ιMultiDual_apply_ιMulti]
+  simp only [Set.powersetCard.ofFinEmbEquiv_symm_apply,
+    ← pairCoordinates_orderEmb, Matrix.det_fin_two, Matrix.of_apply,
+    Module.Basis.coord_apply, pairCoordinates,
+    Matrix.cons_val_zero, Matrix.cons_val_one]
+
+/-- The corresponding determinant formula in degree three, using the
+existing basis indexed by the omitted coordinate. -/
+theorem thirdBasis_repr_wedge (v : Fin 3 → Omega) (i : Fin 4) :
+    thirdBasis.repr (exteriorPower.ιMulti K 3 v) i =
+      (Matrix.of fun j k => coordinateBasis.repr (v j) (i.succAbove k)).det := by
+  rw [thirdBasis, Module.Basis.repr_reindex_apply, Equiv.symm_symm]
+  change (coordinateBasis.exteriorPower 3).repr _ (omitIndex i) = _
+  rw [exteriorPower.basis_repr_apply, exteriorPower.ιMultiDual_apply_ιMulti]
+  simp only [Set.powersetCard.ofFinEmbEquiv_symm_apply, omitIndex,
+    Finset.orderEmbOfFin_compl_singleton_eq_succAboveOrderEmb,
+    Module.Basis.coord_apply] <;> rfl
+
+def wedgeOneOne (a b : Omega) : Form 2 :=
+  exteriorPower.ιMulti K 2 ![a, b]
+
+/-- Canonical exterior multiplication in degrees one and two. -/
+def wedgeOneTwo : Omega →ₗ[K] (Form 2 →ₗ[K] Form 3) :=
+  exteriorPower.alternatingMapLinearEquiv.toLinearMap.comp
+    (exteriorPower.ιMulti K 3).curryLeft
+
+@[simp] theorem wedgeOneTwo_wedge (a : Omega) (v : Fin 2 → Omega) :
+    wedgeOneTwo a (exteriorPower.ιMulti K 2 v) =
+      exteriorPower.ιMulti K 3 (Matrix.vecCons a v) := by
+  simp [wedgeOneTwo]
+
+theorem wedgeOneTwo_basis (a : Omega) (k : Fin 6) :
+    wedgeOneTwo a (secondBasis k) = exteriorPower.ιMulti K 3
+      (Matrix.vecCons a (coordinateDifferential ∘ pairCoordinates k)) := by
+  rw [secondBasis_apply, wedgeOneTwo_wedge]
+
+def firstCoordinateDerivative (i j : Fin 4) : Omega →ₗ[ℂ] K :=
+  (complexTangent i).toLinearMap.comp ((coordinateBasis.coord j).restrictScalars ℂ)
+
+def firstCoefficients (k : Fin 6) : Omega →ₗ[ℂ] K :=
+  firstCoordinateDerivative (pairLeft k) (pairRight k) -
+    firstCoordinateDerivative (pairRight k) (pairLeft k)
+
+/-- Exterior differentiation of actual one-forms. Complex linearity is
+built in; the coordinate partial derivatives are not K-linear. -/
+def exteriorD1 : Omega →ₗ[ℂ] Form 2 :=
+  (secondBasis.equivFun.symm.toLinearMap.restrictScalars ℂ).comp
+    (LinearMap.pi firstCoefficients)
+
+@[simp] theorem exteriorD1_repr (ω : Omega) (k : Fin 6) :
+    secondBasis.repr (exteriorD1 ω) k =
+      affineTangent (pairLeft k) (coordinateBasis.repr ω (pairRight k)) -
+      affineTangent (pairRight k) (coordinateBasis.repr ω (pairLeft k)) := by
+  change secondBasis.coord k (secondBasis.equivFun.symm _) = _
+  rw [Module.Basis.coord_equivFun_symm] <;> rfl
+
+def secondCoordinateDerivative (i : Fin 4) (k : Fin 6) : Form 2 →ₗ[ℂ] K :=
+  (complexTangent i).toLinearMap.comp ((secondBasis.coord k).restrictScalars ℂ)
+
+def secondCoefficients : Fin 4 → (Form 2 →ₗ[ℂ] K) :=
+  ![secondCoordinateDerivative 1 5 - secondCoordinateDerivative 2 4 +
+      secondCoordinateDerivative 3 3,
+    secondCoordinateDerivative 0 5 - secondCoordinateDerivative 2 2 +
+      secondCoordinateDerivative 3 1,
+    secondCoordinateDerivative 0 4 - secondCoordinateDerivative 1 2 +
+      secondCoordinateDerivative 3 0,
+    secondCoordinateDerivative 0 3 - secondCoordinateDerivative 1 1 +
+      secondCoordinateDerivative 2 0]
+
+/-- Exterior differentiation of actual two-forms, with the increasing
+triple convention of `CycleQ2AffineExterior.thirdBasis`. -/
+def exteriorD2 : Form 2 →ₗ[ℂ] Form 3 :=
+  (thirdBasis.equivFun.symm.toLinearMap.restrictScalars ℂ).comp
+    (LinearMap.pi secondCoefficients)
+
+@[simp] theorem exteriorD2_repr (η : Form 2) (i : Fin 4) :
+    thirdBasis.repr (exteriorD2 η) i =
+      ![affineTangent 1 (secondBasis.repr η 5) -
+          affineTangent 2 (secondBasis.repr η 4) +
+          affineTangent 3 (secondBasis.repr η 3),
+        affineTangent 0 (secondBasis.repr η 5) -
+          affineTangent 2 (secondBasis.repr η 2) +
+          affineTangent 3 (secondBasis.repr η 1),
+        affineTangent 0 (secondBasis.repr η 4) -
+          affineTangent 1 (secondBasis.repr η 2) +
+          affineTangent 3 (secondBasis.repr η 0),
+        affineTangent 0 (secondBasis.repr η 3) -
+          affineTangent 1 (secondBasis.repr η 1) +
+          affineTangent 2 (secondBasis.repr η 0)] i := by
+  change thirdBasis.coord i (thirdBasis.equivFun.symm _) = _
+  rw [Module.Basis.coord_equivFun_symm] <;> fin_cases i <;> rfl
+
+/-- Differentiating a scalar times an exact coordinate one-form gives the
+actual exterior product of its differential and that coordinate one-form. -/
+theorem exteriorD1_smul_coordinate (a : K) (i : Fin 4) :
+    exteriorD1 (a • coordinateDifferential i) =
+      wedgeOneOne (d a) (coordinateDifferential i) := by
+  apply secondBasis.repr.injective
+  ext k
+  rw [exteriorD1_repr, wedgeOneOne, secondBasis_repr_wedge]
+  fin_cases i <;> fin_cases k <;>
+    simp [pairLeft, pairRight, ← coordinateBasis_apply, coordinateBasis_repr_d]
+
+/-- The degree-two map differentiates scalar coefficients of actual closed
+coordinate wedges, with the standard exterior sign. -/
+theorem exteriorD2_smul_basis (a : K) (k : Fin 6) :
+    exteriorD2 (a • secondBasis k) = wedgeOneTwo (d a) (secondBasis k) := by
+  apply thirdBasis.repr.injective
+  ext i
+  rw [exteriorD2_repr, wedgeOneTwo_basis, thirdBasis_repr_wedge]
+  fin_cases k <;> fin_cases i <;>
+    simp [pairCoordinates, pairLeft, pairRight, Matrix.det_fin_three,
+      Matrix.of_apply, ← coordinateBasis_apply, coordinateBasis_repr_d,
+      Fin.succAbove]
+
+theorem exteriorD1_eq_sum_wedge (ω : Omega) :
+    exteriorD1 ω = ∑ i : Fin 4,
+      wedgeOneOne (d (coordinateBasis.repr ω i)) (coordinateDifferential i) := by
+  calc
+    exteriorD1 ω = exteriorD1
+        (∑ i : Fin 4, coordinateBasis.repr ω i • coordinateBasis i) :=
+      congrArg exteriorD1 (coordinateBasis.sum_repr ω).symm
+    _ = _ := by
+      rw [map_sum]
+      apply Finset.sum_congr rfl
+      intro i hi
+      rw [coordinateBasis_apply, exteriorD1_smul_coordinate]
+
+theorem exteriorD2_eq_sum_wedge (η : Form 2) :
+    exteriorD2 η = ∑ k : Fin 6,
+      wedgeOneTwo (d (secondBasis.repr η k)) (secondBasis k) := by
+  calc
+    exteriorD2 η = exteriorD2
+        (∑ k : Fin 6, secondBasis.repr η k • secondBasis k) :=
+      congrArg exteriorD2 (secondBasis.sum_repr η).symm
+    _ = _ := by
+      rw [map_sum]
+      apply Finset.sum_congr rfl
+      intro k hk
+      exact exteriorD2_smul_basis _ k
+
+/-- The first complex identity follows from the already constructed
+commuting derivations on the actual hypersurface function field. -/
+@[simp] theorem exteriorD1_d (a : K) : exteriorD1 (d a) = 0 := by
+  apply secondBasis.repr.injective
+  ext k
+  rw [exteriorD1_repr]
+  simp only [coordinateBasis_repr_d, map_zero, Finsupp.zero_apply]
+  exact sub_eq_zero.mpr (affineTangents_commute (pairLeft k) (pairRight k) a)
+
+@[simp] theorem exteriorD2_exteriorD1 (ω : Omega) :
+    exteriorD2 (exteriorD1 ω) = 0 := by
+  have h10 (a : K) : affineTangent 1 (affineTangent 0 a) =
+      affineTangent 0 (affineTangent 1 a) := affineTangents_commute 1 0 a
+  have h20 (a : K) : affineTangent 2 (affineTangent 0 a) =
+      affineTangent 0 (affineTangent 2 a) := affineTangents_commute 2 0 a
+  have h30 (a : K) : affineTangent 3 (affineTangent 0 a) =
+      affineTangent 0 (affineTangent 3 a) := affineTangents_commute 3 0 a
+  have h21 (a : K) : affineTangent 2 (affineTangent 1 a) =
+      affineTangent 1 (affineTangent 2 a) := affineTangents_commute 2 1 a
+  have h31 (a : K) : affineTangent 3 (affineTangent 1 a) =
+      affineTangent 1 (affineTangent 3 a) := affineTangents_commute 3 1 a
+  have h32 (a : K) : affineTangent 3 (affineTangent 2 a) =
+      affineTangent 2 (affineTangent 3 a) := affineTangents_commute 3 2 a
+  apply thirdBasis.repr.injective
+  ext i
+  fin_cases i <;>
+    simp [exteriorD2_repr, exteriorD1_repr, pairLeft, pairRight,
+      map_add, map_sub, h10, h20, h30, h21, h31, h32] <;> abel
+
+/-- The top differential already used in the protected existence statement
+composes to zero with the genuine new degree-two exterior differential. -/
+@[simp] theorem exteriorD3_exteriorD2 (η : Form 2) :
+    exteriorD3 (exteriorD2 η) = 0 := by
+  have h10 (a : K) : affineTangent 1 (affineTangent 0 a) =
+      affineTangent 0 (affineTangent 1 a) := affineTangents_commute 1 0 a
+  have h20 (a : K) : affineTangent 2 (affineTangent 0 a) =
+      affineTangent 0 (affineTangent 2 a) := affineTangents_commute 2 0 a
+  have h30 (a : K) : affineTangent 3 (affineTangent 0 a) =
+      affineTangent 0 (affineTangent 3 a) := affineTangents_commute 3 0 a
+  have h21 (a : K) : affineTangent 2 (affineTangent 1 a) =
+      affineTangent 1 (affineTangent 2 a) := affineTangents_commute 2 1 a
+  have h31 (a : K) : affineTangent 3 (affineTangent 1 a) =
+      affineTangent 1 (affineTangent 3 a) := affineTangents_commute 3 1 a
+  have h32 (a : K) : affineTangent 3 (affineTangent 2 a) =
+      affineTangent 2 (affineTangent 3 a) := affineTangents_commute 3 2 a
+  rw [exteriorD3_apply]
+  suffices (∑ i : Fin 4, (-1 : K) ^ i.val *
+      affineTangent i (thirdBasis.repr (exteriorD2 η) i)) = 0 by
+    rw [this, zero_smul]
+  simp [Fin.sum_univ_succ, exteriorD2_repr, map_add, map_sub,
+    h10, h20, h30, h21, h31, h32] <;> abel
+
+theorem exteriorD2_comp_exteriorD1 : exteriorD2.comp exteriorD1 = 0 := by
+  ext ω
+  exact exteriorD2_exteriorD1 ω
+
+theorem exteriorD3_comp_exteriorD2 : exteriorD3.comp exteriorD2 = 0 := by
+  ext η
+  exact exteriorD3_exteriorD2 η
+
+end CycleQ2AffineDeRhamComplex
+end
+end
+
+end Q2UncompiledAffineDeRhamComplex
