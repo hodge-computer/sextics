@@ -121,9 +121,9 @@ import Mathlib.LinearAlgebra.Projection
 import Mathlib.LinearAlgebra.Charpoly.Basic
 import Mathlib.Algebra.Polynomial.AlgebraMap
 
-/- SOURCE STATUS (2026-11-12): the new continuation blocks explicitly marked
-uncompiled below have not been elaborated, compiled, or kernel-replayed.
-Historical verification records do not cover this modified source. -/
+/- DEVELOPMENT CONTINUATION (2026-11-12): compilation status is recorded in
+solution.md. Historical verification records cover only their recorded
+source revisions. -/
 
 /-!
 # Checked inputs for the nonconstructive cycle-q2 route
@@ -38302,7 +38302,8 @@ existence of a residue primitive. Interpreting a geometric polarized sub-VHS
 projector as one of these endomorphisms remains a separate geometric theorem.
 
 Written against the recorded project sources and the pinned mathlib source
-at 0df444a360eaa60ab8c11dca51a86af692955474. This draft has not been compiled.
+at 0df444a360eaa60ab8c11dca51a86af692955474. Development compilation status
+is recorded in solution.md.
 -/
 
 set_option autoImplicit false
@@ -38461,10 +38462,10 @@ theorem actual_trace_selfAdjoint_projector_trivial
       (higgs_equations_of_actual_trace_selfAdjoint P hP) hMatrix with hZero | hOne
   · left
     apply e.injective
-    simpa only [map_zero] using hZero
+    simpa only [actualEndomorphismMatrix, e, map_zero] using hZero
   · right
     apply e.injective
-    simpa only [map_one] using hOne
+    simpa only [actualEndomorphismMatrix, e, map_one] using hOne
 
 /-- Consequently no proper nonzero image can occur for such a projector. -/
 theorem actual_trace_selfAdjoint_projector_range
@@ -38494,8 +38495,8 @@ section Q2UncompiledProjectorConstruction
 /-!
 # Orthogonal generation and polynomial projectors for cycle-q2
 
-SOURCE DRAFT, 12 November 2026. No elaboration, compilation, or kernel replay
-has been run. These lemmas extend the existing actual Fermat trace-pairing
+DEVELOPMENT CONTINUATION, 12 November 2026. Compilation status is recorded
+in solution.md. These lemmas extend the existing actual Fermat trace-pairing
 bridge. They do not define a geometric variation of Hodge structure or an
 algebraic cycle class map, and they do not prove residue exactness.
 
@@ -38564,7 +38565,8 @@ theorem actual_trace_orthogonal_range_surjective
       (LinearMap.range f) W hW horth with hZero | hTop
   · exfalso
     apply hf
-    ext x
+    apply LinearMap.ext
+    intro x
     have hx : f x ∈ LinearMap.range f := ⟨x, rfl⟩
     rw [hZero] at hx
     simpa only [Submodule.mem_bot, LinearMap.zero_apply] using hx
@@ -38742,7 +38744,7 @@ section Q2UncompiledFiniteTopDeRham
 /-!
 # Finite field trace on the actual generic-point top de Rham quotient
 
-SOURCE-ONLY DRAFT. No Lean elaboration, compilation, or kernel replay was run.
+DEVELOPMENT CONTINUATION. Compilation status is recorded in solution.md.
 
 For a finite extension of the protected affine function field, this file
 constructs its actual relative Kähler module, the pulled-back coordinate
@@ -38761,6 +38763,7 @@ residue class vanishes, and does not replace `missing_geometric_existence`.
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
+set_option maxHeartbeats 2000000
 
 noncomputable section
 
@@ -38783,7 +38786,7 @@ abbrev d : Derivation ℂ L (Omega L) := KaehlerDifferential.D ℂ L
 
 theorem tangent_complex_constant (j : Fin 4) (c : ℂ) :
     CycleQ2AffineFiniteDescent.tangent L j (algebraMap ℂ L c) = 0 := by
-  rw [← IsScalarTower.algebraMap_apply ℂ K L]
+  rw [IsScalarTower.algebraMap_apply ℂ K L]
   exact CycleQ2AffineFiniteDescent.tangent_complex_constant L j c
 
 theorem tangent_complex_smul (j : Fin 4) (c : ℂ) (z : L) :

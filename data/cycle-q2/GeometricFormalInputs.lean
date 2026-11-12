@@ -59,9 +59,9 @@ import HodgeComputer.Constructions.PolynomialCurves.ArithmeticLifting
 import HodgeComputer.Constructions.HoldoutCover.GenericIncidence
 import Mathlib.RingTheory.Smooth.AdicCompletion
 
-/- SOURCE STATUS (2026-11-12): the new continuation blocks explicitly marked
-uncompiled below have not been elaborated, compiled, or kernel-replayed.
-Historical verification records do not cover this modified source. -/
+/- DEVELOPMENT CONTINUATION (2026-11-12): compilation status is recorded in
+solution.md. Historical verification records cover only their recorded
+source revisions. -/
 
 /-!
 # Checked inputs for the nonconstructive cycle-q2 route
@@ -14678,7 +14678,6 @@ theorem actual_coordinate_pole_reduction (A : AmbientPoly 4) :
           normalGradient := hmul.symm
     _ = _ := by
       field_simp [ambientEquation_ne_zero, normalGradient_ne_zero]
-      ring
 
 /-- A regular-subring representative of the simple-pole coefficient.
 The zero vector here merely selects the already-constructed normal
@@ -14742,7 +14741,7 @@ section Q2UncompiledTopDeRham
 /-!
 # The actual generic-point top de Rham quotient
 
-SOURCE-ONLY DRAFT: no Lean elaboration or compilation has been performed.
+Development continuation. Compilation status is recorded in `solution.md`.
 
 This module takes the quotient of the existing genuine fourth exterior power
 by the image of the existing complex-linear exterior differential. It supplies
@@ -14809,7 +14808,12 @@ theorem classOf_eq_zero_iff (ω : Form 4) :
 /-- Adding an actual exact form preserves the class. -/
 theorem classOf_add_exteriorD3 (ω : Form 4) (η : Form 3) :
     classOf (ω + exteriorD3 η) = classOf ω := by
-  rw [map_add, classOf_exteriorD3, add_zero]
+  calc
+    classOf (ω + exteriorD3 η) =
+        classOf ω + classOf (exteriorD3 η) := classOf.map_add ω (exteriorD3 η)
+    _ = classOf ω + 0 :=
+      congrArg (fun c : TopDeRham => classOf ω + c) (classOf_exteriorD3 η)
+    _ = classOf ω := add_zero _
 
 /-- The class of the already defined positive residue source form. -/
 def residueClass (A : HodgeComputer.AmbientPoly 4) : TopDeRham :=
@@ -14886,7 +14890,8 @@ section Q2UncompiledAffineDeRhamComplex
 /-!
 # The lower exterior differentials on the protected affine function field
 
-SOURCE DRAFT, 12 November 2026. No elaboration or compilation has been run.
+Development continuation, 12 November 2026. Compilation status is recorded
+in `solution.md`.
 All the forms below
 are exterior powers of the existing actual Kaehler differential module.
 The differential in degree three is the existing residue differential.
@@ -14917,8 +14922,12 @@ def pairCoordinates (k : Fin 6) : Fin 2 → Fin 4 :=
   ![pairLeft k, pairRight k]
 
 def pairIndex : Fin 6 → Set.powersetCard (Fin 4) 2 :=
-  ![⟨{0, 1}, by decide⟩, ⟨{0, 2}, by decide⟩, ⟨{0, 3}, by decide⟩,
-    ⟨{1, 2}, by decide⟩, ⟨{1, 3}, by decide⟩, ⟨{2, 3}, by decide⟩]
+  ![⟨{0, 1}, by change ({0, 1} : Finset (Fin 4)).card = 2; decide⟩,
+    ⟨{0, 2}, by change ({0, 2} : Finset (Fin 4)).card = 2; decide⟩,
+    ⟨{0, 3}, by change ({0, 3} : Finset (Fin 4)).card = 2; decide⟩,
+    ⟨{1, 2}, by change ({1, 2} : Finset (Fin 4)).card = 2; decide⟩,
+    ⟨{1, 3}, by change ({1, 3} : Finset (Fin 4)).card = 2; decide⟩,
+    ⟨{2, 3}, by change ({2, 3} : Finset (Fin 4)).card = 2; decide⟩]
 
 theorem pairIndex_bijective : Function.Bijective pairIndex := by
   constructor
@@ -14929,12 +14938,12 @@ theorem pairIndex_bijective : Function.Bijective pairIndex := by
     -- This avoids reducing the transported Fintype of powersetCard.
     fin_cases a <;> fin_cases b <;> first
       | exact (hab rfl).elim
-      | exact ⟨0, Subtype.ext (by decide)⟩
-      | exact ⟨1, Subtype.ext (by decide)⟩
-      | exact ⟨2, Subtype.ext (by decide)⟩
-      | exact ⟨3, Subtype.ext (by decide)⟩
-      | exact ⟨4, Subtype.ext (by decide)⟩
-      | exact ⟨5, Subtype.ext (by decide)⟩
+      | (refine ⟨0, ?_⟩; apply Subtype.ext; dsimp only [pairIndex] <;> decide)
+      | (refine ⟨1, ?_⟩; apply Subtype.ext; dsimp only [pairIndex] <;> decide)
+      | (refine ⟨2, ?_⟩; apply Subtype.ext; dsimp only [pairIndex] <;> decide)
+      | (refine ⟨3, ?_⟩; apply Subtype.ext; dsimp only [pairIndex] <;> decide)
+      | (refine ⟨4, ?_⟩; apply Subtype.ext; dsimp only [pairIndex] <;> decide)
+      | (refine ⟨5, ?_⟩; apply Subtype.ext; dsimp only [pairIndex] <;> decide)
 
 def pairEquiv : Fin 6 ≃ Set.powersetCard (Fin 4) 2 :=
   Equiv.ofBijective pairIndex pairIndex_bijective
@@ -15048,6 +15057,7 @@ def exteriorD2 : Form 2 →ₗ[ℂ] Form 3 :=
   (thirdBasis.equivFun.symm.toLinearMap.restrictScalars ℂ).comp
     (LinearMap.pi secondCoefficients)
 
+set_option maxHeartbeats 1000000 in
 @[simp] theorem exteriorD2_repr (η : Form 2) (i : Fin 4) :
     thirdBasis.repr (exteriorD2 η) i =
       ![affineTangent 1 (secondBasis.repr η 5) -
@@ -15062,8 +15072,10 @@ def exteriorD2 : Form 2 →ₗ[ℂ] Form 3 :=
         affineTangent 0 (secondBasis.repr η 3) -
           affineTangent 1 (secondBasis.repr η 1) +
           affineTangent 2 (secondBasis.repr η 0)] i := by
-  change thirdBasis.coord i (thirdBasis.equivFun.symm _) = _
-  rw [Module.Basis.coord_equivFun_symm] <;> fin_cases i <;> rfl
+  calc
+    thirdBasis.repr (exteriorD2 η) i = secondCoefficients i η :=
+      thirdBasis.coord_equivFun_symm i (fun j => secondCoefficients j η)
+    _ = _ := by fin_cases i <;> rfl
 
 /-- Differentiating a scalar times an exact coordinate one-form gives the
 actual exterior product of its differential and that coordinate one-form. -/
@@ -15076,17 +15088,30 @@ theorem exteriorD1_smul_coordinate (a : K) (i : Fin 4) :
   fin_cases i <;> fin_cases k <;>
     simp [pairLeft, pairRight, ← coordinateBasis_apply, coordinateBasis_repr_d]
 
+set_option maxHeartbeats 1000000 in
 /-- The degree-two map differentiates scalar coefficients of actual closed
 coordinate wedges, with the standard exterior sign. -/
 theorem exteriorD2_smul_basis (a : K) (k : Fin 6) :
     exteriorD2 (a • secondBasis k) = wedgeOneTwo (d a) (secondBasis k) := by
+  have hrepr (j : Fin 6) :
+      secondBasis.repr (a • secondBasis k) j = if k = j then a else 0 := by
+    rw [LinearEquiv.map_smul, Finsupp.smul_apply, Module.Basis.repr_self_apply]
+    simp only [smul_eq_mul, mul_ite, mul_one, mul_zero]
+  have hcoord (j l : Fin 4) :
+      coordinateBasis.repr (coordinateDifferential j) l =
+        if j = l then 1 else 0 := by
+    simpa only [coordinateBasis_apply] using coordinateBasis.repr_self_apply j l
   apply thirdBasis.repr.injective
-  ext i
+  apply Finsupp.ext
+  intro i
   rw [exteriorD2_repr, wedgeOneTwo_basis, thirdBasis_repr_wedge]
+  -- Resolve the actual module coordinates once, before the finite scalar cases.
+  simp only [hrepr, apply_ite, map_zero, Matrix.det_fin_three, Matrix.of_apply,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Matrix.vecHead, Matrix.vecTail, Function.comp_apply, Fin.succ_zero_eq_one,
+    pairCoordinates, coordinateBasis_repr_d, hcoord]
   fin_cases k <;> fin_cases i <;>
-    simp [pairCoordinates, pairLeft, pairRight, Matrix.det_fin_three,
-      Matrix.of_apply, ← coordinateBasis_apply, coordinateBasis_repr_d,
-      Fin.succAbove]
+    simp [pairLeft, pairRight, Fin.succAbove]
 
 theorem exteriorD1_eq_sum_wedge (ω : Omega) :
     exteriorD1 ω = ∑ i : Fin 4,
@@ -15163,16 +15188,18 @@ composes to zero with the genuine new degree-two exterior differential. -/
   suffices (∑ i : Fin 4, (-1 : K) ^ i.val *
       affineTangent i (thirdBasis.repr (exteriorD2 η) i)) = 0 by
     rw [this, zero_smul]
-  simp [Fin.sum_univ_succ, exteriorD2_repr, map_add, map_sub,
+  simp [Fin.sum_univ_succ, exteriorD2_repr, map_add, map_sub, pow_succ,
     h10, h20, h30, h21, h31, h32] <;> abel
 
 theorem exteriorD2_comp_exteriorD1 : exteriorD2.comp exteriorD1 = 0 := by
-  ext ω
-  exact exteriorD2_exteriorD1 ω
+  apply LinearMap.ext
+  intro ω
+  simpa only [LinearMap.comp_apply, LinearMap.zero_apply] using exteriorD2_exteriorD1 ω
 
 theorem exteriorD3_comp_exteriorD2 : exteriorD3.comp exteriorD2 = 0 := by
-  ext η
-  exact exteriorD3_exteriorD2 η
+  apply LinearMap.ext
+  intro η
+  simpa only [LinearMap.comp_apply, LinearMap.zero_apply] using exteriorD3_exteriorD2 η
 
 end CycleQ2AffineDeRhamComplex
 end

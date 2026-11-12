@@ -20,8 +20,8 @@ import Proposal.GeometricSeed
 import Proposal.GeometricFormalInputs
 import Proposal.Normalization
 
-/- SOURCE STATUS (2026-11-12): the new continuation blocks explicitly marked
-uncompiled below have not been elaborated, compiled, or kernel-replayed.
+/- SOURCE STATUS (2026-11-12): Development continuation; compilation status is
+recorded in solution.md.
 Historical verification records do not cover this modified source. -/
 
 /-! Continued checked algebraic inputs, partitioned at whole-component
@@ -35189,8 +35189,8 @@ section Q2UncompiledNormalKoszulBridge
 /-!
 # The literal seed quotient maps to the genuine normal Cech module
 
-Uncompiled continuation of `CycleQ2SeedNormalNonzero`.
-No compiler or elaborator has been run.
+Development continuation; compilation status is recorded in solution.md.
+This extends `CycleQ2SeedNormalNonzero`.
 
 The map sends a polynomial numerator p to p/(g1*g2) on the actual curve
 overlap. Each of the five complete-intersection generators is killed:
@@ -37383,9 +37383,9 @@ section Q2UncompiledOrbitTrace
 /-!
 # The actual cyclic action and the character-one orbit trace
 
-Draft written against the source snapshot at commit 8d88f06. It has not been
-compiled or elaborated. This component is integrated before the
-nonconstructive endpoint in `Solution.lean`.
+Development continuation; compilation status is recorded in solution.md.
+Written against the source snapshot at commit 8d88f06, this component is
+integrated before the nonconstructive endpoint in `Solution.lean`.
 
 The localization statements below concern the existing, literal diagonal
 action on the seed quotient and its actual coordinate localizations. In

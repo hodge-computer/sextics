@@ -1,5 +1,41 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Development compilation checkpoint — 12 November 2026
+
+**The complete Lean existence proof remains unfinished.** This checkpoint
+preserves compiler-driven repairs to the exterior differential, projector,
+and finite-trace constructions. `Submission.missing_geometric_existence`
+still contains the existing explicit admission. The complete proposal has
+not passed protected verification or a new independent kernel replay.
+
+The source snapshot was taken at **18:57 UTC on 12 November 2026**, against
+parent commit `2dc62680311df2045971a268f1410b00e045d875`. The existing
+development run uses Lean 4.33.1, pinned Mathlib revision
+`0df444a360eaa60ab8c11dca51a86af692955474`, one worker, and a 7,168 MiB
+Lean memory limit. Its recorded results are:
+
+| Scope | Result at this checkpoint |
+| --- | --- |
+| Full `Proposal.GeometricFormalInputs` | Compiled successfully, exit 0, 1,345.43 seconds; sampled peak process-tree RSS 6,184,751,104 bytes. |
+| Extracted `DebugQ2.TargetSections` | Compiled successfully, exit 0, 149.05 seconds. This diagnostic covers finite descent, actual trace projectors, supported projectors, and finite top de Rham constructions. |
+| Full `Proposal.GeometricTarget` | Still running in the recorded receipt; no exit status yet. The diagnostic result does not establish compilation of the complete module. |
+| Full `Proposal.Solution` and protected certificate verification | Not completed in this development run. The final existence theorem remains admitted. |
+
+The successful full-module receipt matches the submitted
+`GeometricFormalInputs.lean` SHA-256
+`ca30a92600d3196948fedc0dc9965452cf3f17ece8fc4eeeed2bb320cc35b3df`.
+The diagnostic source SHA-256 is
+`6ff9f1958b17e8b607b5f601414a1e52170e451b77a9629ec460c4f82e444d42`,
+extracted from `GeometricTarget.lean` with SHA-256
+`c8fdd4b50a68e3d28e5ce8ddf352200d87a4dedf5858b80346b854558a89a595`.
+`Solution.lean` has SHA-256
+`2dedc1e8c78fe0a3d50e44d7d6a63decc1ed7dbf2216df0d500cae4fef471688`;
+its changes since the parent commit are compilation-status comments only.
+
+These results are development compilation evidence, with the scopes above.
+Earlier source-only statements below describe their historical checkpoints;
+earlier kernel-replay records do not certify the newly modified sources.
+
 ## Current Lean source continuation — 12 November 2026
 
 **The complete Lean existence proof is still unfinished.** This continuation
@@ -9,13 +45,15 @@ components, and actual exterior powers of Kaehler differentials. It does not
 remove or discharge `Submission.missing_geometric_existence`. The one existing
 explicit admission in that theorem remains.
 
-**No Lean elaboration, compilation, language server, Lake invocation, kernel
+**At the source-only checkpoint `2dc62680311df2045971a268f1410b00e045d875`,
+no Lean elaboration, compilation, language server, Lake invocation, kernel
 replay, mathematical recomputation, or proposal-verifier execution was run.**
 The additions were reviewed as source against the existing declarations and
-Mathlib revision `0df444a360eaa60ab8c11dca51a86af692955474`. They are uncompiled
-proof drafts, including their dependency on the earlier uncompiled bridge
+Mathlib revision `0df444a360eaa60ab8c11dca51a86af692955474`. They were uncompiled
+proof drafts at that checkpoint, including their dependency on the earlier uncompiled bridge
 commit `619b7e36367aef388d7d3419995ccb5d1fc618ef`. Earlier verification records in
-this document do not certify the modified sources.
+this document do not certify the modified sources. The development compilation
+checkpoint above records the later compiler repairs and their verification scope.
 
 The source base for this continuation is
 `baf0dbc951fdcac9b9453bc67a8b85935ca3e371`, which records the full classical
@@ -293,8 +331,9 @@ This continuation is integrated into existing proposal files, so it adds
 no submitted helper files. The protected instance, goal, proof manifest,
 shared library, and workflow definitions are unchanged. It is saved on a
 separate branch with no pull request, whose push does not match the
-repository's build/verification workflow triggers. Compilation is deferred
-as requested.
+repository's build/verification workflow triggers. At that source-only
+checkpoint, compilation was deferred as requested; the development compilation
+checkpoint above records the later run.
 
 ## Status and protected goal
 
@@ -2199,8 +2238,9 @@ submitted file.
 
 ## Historical verification of earlier source checkpoints
 
-The uncompiled continuation documented at the beginning of this file has
-no verification receipt. The records below retain their original source
+The continuation documented at the beginning of this file was initially
+uncompiled. Its later development compilation scope is recorded in the current
+checkpoint above. The historical records below retain their original source
 scope and must not be applied to the newly modified source files.
 
 Development uses Lean 4.33.1 and mathlib revision
