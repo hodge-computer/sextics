@@ -1,5 +1,129 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Classical existence proof — 12 November 2026
+
+**The written classical argument is complete; the Lean formalization remains
+incomplete.** This update records a nonconstructive proof of the precise
+mathematical statement named by
+`Submission.missing_geometric_existence`,
+including its conversion to the ordinary protected certificate. The full
+argument and finite certificates are included below under
+[Complete classical proof and finite certificates](#complete-classical-proof-and-finite-certificates).
+
+This commit changes only this explanation. No Lean elaboration, compilation,
+language server, Lake invocation, kernel replay, or proposal-verifier execution
+was run. The existing explicit admission in `Solution.lean` remains;
+neither this written proof nor its finite calculations are a checked Lean
+replacement. No expanded coefficient tuple is claimed.
+
+Prepared for `fqlx` with OpenAI ChatGPT assistance. Credit to
+`benediamond` and collaborators for the geometric route, and to Claire
+Voisin and the other authors cited in the reconstruction for its classical
+inputs. The proof reconstructs and expands
+[Chapter 3D at the pinned source revision](https://github.com/hodge-computer/sextics/blob/520a2a29c40cc40e1df2b1c41980552f25d08e65/docs/03d-hodge-loci.md);
+it does not claim independent authorship of that strategy.
+
+### Exact conclusion and geometric route
+
+Use the protected chart \(X_0=1\), with equation \(f\), numerator \(a\),
+function field \(K=\operatorname{Frac}(\mathbf C[x_0,\ldots,x_4]/(f))\),
+and \(g=\partial_0f\), as defined in the existing explanation. The conclusion is
+
+\[
+\exists\,\eta\in\Omega^3_{K/\mathbf C},\qquad
+d\eta=
+\frac12\left(
+\frac{a_{00}}{g^3}
+-\frac{3a_0g_0+ag_{00}}{g^4}
++\frac{3ag_0^2}{g^5}
+\right)dx_1\wedge dx_2\wedge dx_3\wedge dx_4.
+\]
+
+The complete proof below supplies the following chain.
+
+1. The complete-intersection socle trace is identified with the actual curve
+   Serre trace by the Koszul connecting isomorphism. The rank-seven
+   Noether–Lefschetz map and rank-eight augmentation give a surface motion
+   preserving the orbit divisor class and having nonzero Abel–Jacobi
+   derivative.
+2. The holomorphic implicit function theorem integrates the divisor class.
+   Lefschetz \((1,1)\), a positive twist, and the flag Hilbert scheme produce
+   genuine algebraic moving curves over a dense open of the full parameter
+   space.
+3. The scalar-only Higgs equations imply irreducibility of the invariant
+   rational variation. The curve correspondence therefore surjects onto the
+   invariant \(H^3\). Polarization and a polynomial in the correspondence
+   produce a projector supported on a divisor square.
+4. Proper Hilbert parameter spaces spread a supported representative to
+   every smooth member, including the special weighted pencil obtained from
+   the protected fourfold. Normalized trace descends the relative
+   correspondence from a finite cover.
+5. Over the affine pencil base, the next Leray filtration piece is zero.
+   The relative projector therefore fixes the whole relevant
+   \(H^1(U,R^3)\) class. Together with the hyperplane contribution, this
+   proves divisor support of the full protected residue class.
+6. Explicit normal pole reduction identifies the literal affine source
+   form. Grothendieck's affine algebraic de Rham theorem gives its rational
+   three-form primitive. An explicit product-rule identity clears and
+   homogenizes that primitive to the required certificate.
+
+### Exact finite checks
+
+The finite inputs were checked with exact arithmetic; no Lean process was
+involved.
+
+| Input | Result |
+| --- | --- |
+| Complete-intersection length and socle degree | \(96\), degree \(9\) |
+| Noether–Lefschetz rank | \(7\) |
+| Rank after adjoining the Abel–Jacobi test row | \(8\) |
+| Explicit maximal minors modulo \(109\) | \(80\) and \(76\) |
+| Higgs equations on \(33\times33\) matrices | \(1088\) independent identifications; only scalar matrices remain |
+| Recorded peak memory | \(27168\) KiB |
+| Recorded elapsed time | Approximately \(0.22\) seconds |
+
+The characteristic-zero seed uses \(r^3=2\), whereas \(r=57\) and \(i=33\)
+are residues modulo \(109\). Flatness of the complete-intersection model
+transfers the nonzero minors to characteristic zero. This reconstruction
+does not identify that seed with the literal complex \(r=57\) used in parts
+of the older formal continuation.
+
+The appendices contain the complete integer Higgs forest certificate and
+the exact-check receipt. For independent reproduction, retrieve the
+[pinned finite-input script](https://github.com/hodge-computer/sextics/blob/520a2a29c40cc40e1df2b1c41980552f25d08e65/scripts/verify-hodge-locus-span.py).
+With Python 3 and NumPy available, import that downloaded file and call only
+the two functions below; running the script's `main()` also performs two
+larger fourfold calculations that this proof does not use.
+
+```python
+import hashlib
+import importlib.util
+import json
+from pathlib import Path
+
+source = Path("verify-hodge-locus-span.py")
+assert hashlib.sha256(source.read_bytes()).hexdigest() == (
+    "9d673eff17a53fee04eb2677615db689833cf33b5fa23fe16ad42467d22a40a9"
+)
+spec = importlib.util.spec_from_file_location("q2_finite_inputs", source)
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+seed_receipt, _ = module.seed_divisor()
+print(json.dumps(seed_receipt, indent=2))
+print(json.dumps(module.higgs_field(), indent=2))
+```
+
+The source SHA-256 is also recorded verbatim in Appendix B. The displayed
+reproduction snippet is documentation; it was not executed for this push.
+
+### Earlier formalization checkpoints
+
+The following sections retain the existing implementation and historical
+verification record. References there to missing geometric comparisons
+describe the Lean formalization; the ordinary mathematical proofs are
+supplied by the new reconstruction appended below.
+
+
 ## Uncompiled implementation continuation — 12 November 2026
 
 **Source draft only. No Lean elaboration, compilation, language server,
@@ -2134,3 +2258,1681 @@ in the project's two-ternary-dense-hessian development. The earlier work
 of `hodgepodgeconjecture`, `DiamondJM`, `fqlx`, and the Hodge Computer
 collaborators remains preserved and credited. This continuation was
 prepared for `fqlx` with OpenAI ChatGPT assistance.
+
+
+## Complete classical proof and finite certificates
+
+The following sections preserve the complete written reconstruction in plain-text
+notation. The exact finite certificates follow as JSON. The proof is mathematical;
+the admission in the Lean source is still present.
+
+### Statement, scope, and attribution
+
+```text
+CYCLE-Q2: A CLASSICAL EXISTENCE PROOF OF THE MISSING GEOMETRIC STATEMENT
+Completed written reconstruction and finite-input audit: 12 November 2026
+
+Target:
+  Submission.missing_geometric_existence :
+  CycleQ2Nonconstructive.AffineResidueFormExact
+
+STATUS, ATTRIBUTION, AND SCOPE
+=============================
+
+This document gives a classical, nonconstructive proof of the exact
+mathematical existence statement, and an explicit conversion of its
+rational primitive into the ordinary homogeneous q=2 certificate.
+The argument follows the moving-Hodge-class strategy in the project's
+Chapter 3D, itself based on work of Claire Voisin. It expands the trace,
+moving-class, algebraization, supported-projector, specialization, and
+full-residue comparisons that are needed to reach the protected instance.
+It is a reconstruction and verification of that route, not a claim of
+independent authorship of the underlying strategy.
+
+The finite algebra calculations used in the proof were rerun exactly.
+They give Noether-Lefschetz rank 7, augmented rank 8, and a scalar-only
+Higgs commutant. The bounded Python calculation took about 0.22 seconds
+and reported peak RSS 27,168 KiB, approximately 26.5 MiB. It invoked no
+Lean, Lake, compiler, language server, kernel replay, or project build.
+
+This is an ordinary mathematical proof, using the classical theorems
+identified below. The Lean theorem has not been filled in or checked by
+Lean, and its existing explicit sorry remains in the source. The proof
+establishes existence; an expanded coefficient tuple for D, N_i, Q has
+not been computed. No replacement axiom or admission has been introduced.
+
+All project sources used here are pinned at:
+  hodge-computer/sextics
+  520a2a29c40cc40e1df2b1c41980552f25d08e65
+
+THE PRECISE CONCLUSION
+======================
+
+Use homogeneous coordinates Z=(X0,X1,X2,Y0,Y1,Y2) and set
+
+  F = sum_{i=0}^2 (Xi^6+Yi^6)
+      +(X0^3 X1 Y0 Y1+X1^3 X2 Y1 Y2+X2^3 X0 Y2 Y0)/2,
+  A = X0^2 X1^2 X2^3 Y0^2 Y1^2 Y2.
+
+In the affine chart X0=1 put
+
+  (x0,x1,x2,x3,x4)=(X1,X2,Y0,Y1,Y2)/X0,
+  f=1+sum_{i=0}^4 xi^6
+       +(x0 x2 x3+x0^3 x1 x3 x4+x1^3 x2 x4)/2,
+  a=x0^2 x1^3 x2^2 x3^2 x4,
+  K=Frac(C[x0,...,x4]/(f)),
+  g=partial_0 f, g0=partial_0 g, g00=partial_0^2 g,
+  vol=dx1 wedge dx2 wedge dx3 wedge dx4,
+  rho=(1/2)[a_00/g^3-(3a_0 g0+a g00)/g^4+3a g0^2/g^5] vol.
+
+THEOREM. There exists eta in Omega^3_{K/C} with d eta=rho.
+
+In the project's notation this is exactly
+
+  exists eta : CycleQ2AffineExterior.Form 3,
+    CycleQ2AffineExterior.exteriorD3 eta =
+      CycleQ2AffineExactness.residueSourceForm
+        CycleQ2AffineClearing.affineA.
+
+Moreover there are a nonzero homogeneous D coprime to F, homogeneous
+N_0,...,N_5 of degree deg(D)+7, and a homogeneous Q such that
+
+  A D^2 - 2D sum_i N_i partial_i F
+    +F[D sum_i partial_i N_i-sum_i N_i partial_i D] = F^3 Q.
+
+PROOF ORGANIZATION
+
+Part I supplies the exact finite rank inputs and their certificates.
+Part II turns these into genuine moving algebraic curves with a nonzero
+invariant Abel-Jacobi map. Part III proves that their images fill the
+invariant H^3 and constructs supported projectors, including for special
+members and the actual pencil. Part IV proves divisor support of the
+full protected fourfold residue class, obtains the literal rational
+primitive by affine algebraic de Rham comparison, and explicitly clears
+and homogenizes it to the displayed polynomial identity.
+
+The symbols used for the auxiliary weighted threefold coordinates in
+Parts I-III are local to those parts. They are not the five affine
+coordinates of the protected fourfold in Part IV.
+```
+
+### Part I: finite algebra inputs
+
+```text
+PART I. THE FINITE ALGEBRA INPUTS
+================================
+
+1. The weighted family and its Hodge spaces
+------------------------------------------
+
+Let S=C[s0,s1,s2,s3,w] have weights (1,1,1,1,2), and let
+  g_T=diag(zeta^2,zeta^2,zeta,1;1), zeta^3=1, zeta!=1.
+Let B denote the irreducible smooth parameter open of invariant sextics
+avoiding the weighted vertex, with the coefficient of w^3 normalized to
+one. Its fibers T are smooth projective Calabi-Yau threefolds. The
+determinant character of the residue volume is delta=zeta^2, so the
+invariant part of H^{3,0} is zero. The invariant rational variation
+V=H^3(T,Q)^{g_T} has only Hodge types (2,1) and (1,2).
+
+Weighted residues identify H^{2,1}(T)^{g_T} with the degree-six,
+character-zeta part of the Jacobian ring. At Fermat,
+
+  R=C[s0,s1,s2,s3,w]/(s0^5,s1^5,s2^5,s3^5,w^2).
+
+There are 33 such degree-six monomials, and 35 invariant degree-six
+Jacobian monomials representing deformation directions. Thus V has
+Hodge numbers (0,33,33,0). These dimensions remain constant over B.
+The other cohomology groups are H^{2k}(T,Q)=Q H^k, k=0,1,2,3,
+H^1=H^5=0, and integral_T H^3=3. Weighted weak Lefschetz and weighted
+residue theory justify these identifications [R3]. Alternatively the
+nonmiddle Betti numbers can be checked at Fermat via its smooth double
+cover by an ordinary sextic and then transported over the connected B.
+
+2. The moving-divisor rank calculations
+---------------------------------------
+
+Choose r^3=2 and i^2=-1. The auxiliary seed of Part II has
+
+  F0=sum_j sj^6+w^3, Fb=F0+b^2,
+  f1=s0^2-r s1 s3,
+  g1=s0^4+r s0^2 s1 s3+r^2 s1^2 s3^2,
+  f2=w+s2^2,
+  g2=w^2-w s2^2+s2^4,
+  h=b-i(s1^3+s3^3), k=b+i(s1^3+s3^3).
+
+Then Fb=f1 g1+f2 g2+hk. For the calculation take
+
+  b=5s0^3+10s0^2 s1+25s0 s1^2+20s0 s2 s3+30s1^3
+       +25s1 s2 s3-25s2^3-20s3^3+10s3 w.
+
+Reduce at p=109, r=57, i=33. Directly, 57^3=2 and 33^2=-1
+in F_109. In the quotient A_CI=S/(f1,f2,g1,g2,h) the Hilbert
+function is
+
+  degree:     0  1  2   3   4   5   6  7  8  9  10
+  dimension:  1  4  9  15  19  19  15  9  4  1   0.
+
+Eliminating w using f2 shows the quotient is generated in degree one.
+Consequently the zero degree-ten piece implies that all higher pieces
+vanish. The quotient is Artinian of length 96. Five generators in this
+five-variable polynomial ring therefore form a regular sequence. Its
+socle degree is 2+2+4+4+3-(1+1+1+1+2)=9. The Hilbert series is
+  (1+t)(1+t+t^2+t^3)^2(1+t+t^2).
+
+Choose a nonzero socle functional tau:A_CI,9 -> F_109. With the
+normalization produced by the pinned exact script, order the invariant
+cubic columns as
+
+  (s3w, s3^3, s2^3, s1s2s3, s1^3,
+    s0s2s3, s0s1^2, s0^2s1, s0^3),
+
+and the character-zeta cubic rows as
+
+  (s2w, s2s3^2, s1s2^2, s1^2s3, s0s2^2, s0s1s3, s0^2s3).
+
+The matrix M_{sigma,L}=tau(k L sigma) is
+
+   0  78   0   0   8   0  75  66  63
+  78  68   0   6   0  62   0   0  47
+   0   6   0  39  49  62  39   0   0
+   0   0  39   0   4   0  70   0   0
+   0  62   0  62  39   0   0   0   0
+   0  47  62   0  70   0   0   0   0
+  94  91   0   0   0  47   0   0   0.
+
+For Btest=s2 s3^3 w, the additional row v_L=tau(Btest L) is
+  v=(0,21,0,0,0,0,0,0,70).
+
+The determinant of the first seven columns of M is 80 modulo 109.
+The determinant of the first eight columns of the stacked matrix
+(M;v) is 76 modulo 109. Thus rank M=7 and rank(M;v)=8.
+An additional directly checkable witness is
+
+  ell=(19,26,71,38,38,74,19,24,0)^t,
+  M ell=0, v ell=1, all modulo 109.
+
+Part II.1 proves transfer of these ranks to characteristic zero using
+flatness of the complete-intersection model at this prime. It then
+intersects this nonempty rank-open with the separately nonempty opens
+where the varieties and curves are smooth. The modular vector ell is
+not assumed to be a characteristic-zero kernel vector.
+
+3. The scalar Higgs calculation over the integers
+-------------------------------------------------
+
+Let E be the set of exponent vectors a=(a0,a1,a2,a3,aw) with
+  a0+a1+a2+a3+2aw=6,
+  0<=aj<=4, 0<=aw<=1,
+  2a0+2a1+a2=1 modulo 3.
+Let Tdir be the analogous set with character 0. Their cardinalities
+are 33 and 35. Let soc=(4,4,4,4,1).
+
+For m in Tdir define the symmetric 33-by-33 matrix
+  H_m(a,b)=1 if a+b+m=soc, and 0 otherwise.
+These are precisely the Higgs forms, up to a common nonzero residue
+normalization: the variation is Jacobian multiplication followed by
+the socle pairing.
+
+Consider all equations P^t H_m=H_m P. For fixed m every row of H_m
+has at most one nonzero entry. Write partner_m(a)=soc-m-a when this
+belongs to E, and leave it undefined otherwise. The equation (a,b) is
+
+  P[partner_m(b),a]=P[partner_m(a),b],
+
+where an undefined partner means zero. Each equation therefore merely
+identifies two entries of P or identifies one entry with zero. Form a
+graph with one node for each of the 1089 entries, and one extra zero
+node, using these identifications as edges.
+
+Exact enumeration gives two connected components:
+  - all 1056 off-diagonal entries together with the zero node;
+  - all 33 diagonal entries.
+There is a spanning forest of 1088 equation edges. Hence the equations
+force every off-diagonal entry to vanish and every diagonal entry to be
+equal. Scalar matrices do satisfy them. The solution space is therefore
+exactly C I, of dimension one. This conclusion holds integrally as an
+entry-identification argument; it is not inferred from a single random
+finite-field rank.
+
+Appendix A contains the complete compact forest certificate, with the
+33 basis exponents, 35 deformation exponents, and each retained edge
+labelled by the precise equation from which it came. For node number
+33*i+j the entry is P[i,j], and node 1089 is zero. Thus the certificate
+can be checked by integer comparisons of five-component exponent vectors
+and ordinary graph connectivity, without any algebraic-geometry software.
+
+4. Reproduction record
+-----------------------
+
+The seed's quotient and trace were computed using the inspected project
+script at [P2]. Its generated matrix was then checked with a separate
+small integer modular elimination routine, including the two explicit
+minors and the normalized kernel vector. The Higgs equations and forest
+were independently reconstructed directly from their monomial definition.
+
+  Source SHA256:
+  9d673eff17a53fee04eb2677615db689833cf33b5fa23fe16ad42467d22a40a9
+  Forest JSON SHA256 (including its terminal newline):
+  f2ee2a403c3d8baa41684b9db9abe3208a066cea8f06bb22d5e8d662aef6212e
+
+The calculation was limited to 1 GiB address space and 120 seconds CPU;
+it actually reported 27,168 KiB peak RSS and 0.2214 seconds elapsed.
+The larger alternative fourfold computation was not needed. None of
+this invoked Lean or the project's full proof compilation.
+```
+
+### Part II: moving algebraic curves
+
+```text
+PART II. FROM THE FINITE RANKS TO GENUINE MOVING ALGEBRAIC CURVES
+===============================================================
+
+This part uses the verified ranks in Part I. For consistency with the
+source calculation, its auxiliary weighted coordinates are named
+(x0,x1,x2,x3,w); they correspond to (s0,s1,s2,s3,w) in Part I.
+
+1. SEED, CHARACTERS, AND SMOOTH COMPLEX POINT
+
+Write S=C[x0,x1,x2,x3,w], with weights (1,1,1,1,2), and let
+g=(zeta^2,zeta^2,zeta,1;1), zeta^3=1, zeta!=1. Its determinant
+character on the ambient residue volume is delta=zeta^2.
+
+Let b be an invariant cubic and choose r^3=2 and i^2=-1. Set
+
+  F0 = x0^6+x1^6+x2^6+x3^6+w^3,
+  Fb = F0+b^2,
+  f1 = x0^2-r*x1*x3,
+  g1 = x0^4+r*x0^2*x1*x3+r^2*x1^2*x3^2,
+  f2 = w+x2^2,
+  g2 = w^2-w*x2^2+x2^4,
+  h = b-i*(x1^3+x3^3),
+  k = b+i*(x1^3+x3^3).
+
+Then Fb=f1*g1+f2*g2+h*k. Define T=V(Fb), D=V(Fb,h),
+C=V(f1,f2,h), and E=C+gC+g^2C.
+
+The following are independently nonempty open conditions in the
+irreducible affine space S_3^g of b's:
+
+  (a) T is smooth: b=0 gives Fermat. Every T avoids the weighted vertex,
+      because its equation at (0,0,0,0,w) is w^3.
+  (b) D is smooth: on h=0 its other equation is
+      x0^6+x2^6+w^3=2*x1^3*x3^3. That hypersurface has precisely the
+      x1-coordinate and x3-coordinate points as singular points.
+      The invariant cubic system contains xj^3 for every j, so it has no
+      base point on this hypersurface. Bertini and avoidance of those two
+      points give a smooth D.
+  (c) C is smooth: eliminate w=-x2^2. It is a cubic section of the
+      quadric cone x0^2=r*x1*x3 in P^3. The restricted invariant cubics
+      are basepoint free (again they contain the four pure cubes).
+      A general section avoids the cone vertex and is smooth by Bertini.
+      The complete-intersection coordinate ring has depth two, hence
+      H^0(O_C)=C. Thus a smooth C is connected, and so irreducible.
+  (d) C,gC,g^2C are disjoint: intersecting C with a distinct translate
+      forces x0=x2=w=0 and x1*x3=0. The only possible intersections are
+      exactly the two points excluded in (b).
+
+Adjunction gives
+
+  K_D=O_D(3), N_{D/T}=O_D(3), K_C=O_C(1), N_{C/D}=O_C(-2).
+
+The degree of C is 2*2*3/2=6 and its genus is four. The surface coordinate
+ring is a complete intersection of dimension three, so
+H^1(D,O_D(n))=0 for every n; in particular H^1(O_D)=H^1(K_D)=0.
+
+ARITHMETIC TRANSFER. At the prime with r=57 and i=33 in F_109,
+57^3=2 and 33^2=-1. Localize Z[r,i]/(r^3-2,i^2+1) at
+(109,r-57,i-33). Since 3r^2 and 2i are nonzero modulo 109, this is an
+unramified number-field DVR R. The quotient
+
+  A_R=R[x0,x1,x2,x3,w]/(f1,f2,g1,g2,h)
+
+has the stated finite-length complete-intersection special fiber.
+Equivalently, the five homogeneous generators form a regular sequence
+modulo the uniformizer. The relative regular-sequence flatness criterion
+makes A_R flat over R. Each graded piece is therefore finite free over R,
+with the same rank in the special and generic fibers. Its degree-nine
+piece is a free line. Choose a basis of that line and the dual trace so
+that its reduction agrees with the modular trace, up to a nonzero scalar.
+The nonzero modular minors are then units of R and remain nonzero in
+characteristic zero.
+
+This can also be seen locally by taking the six elements consisting of
+the uniformizer and the five homogeneous generators in a regular ring
+of dimension six: the finite special fiber makes them a system of
+parameters, hence a regular sequence. Permuting that regular sequence
+shows that the uniformizer is a non-zero-divisor on the quotient.
+
+The rank conditions are open in b wherever the Artinian quotient has
+its complete-intersection Hilbert function. Their nonempty open meets
+(a)–(d). Therefore an actual smooth complex seed satisfying BOTH ranks
+exists. It is unnecessary to assert that the displayed integral lift of
+the modular b is itself smooth. Likewise the modular kernel vector is
+evidence of a rank jump; it need not satisfy the same equations over C.
+
+2. THE ARTINIAN TRACE REALLY IS THE CURVE SERRE TRACE
+
+Put A=S/(f1,f2,g1,g2,h). The five weighted degrees are 2,2,4,4,3.
+Their product divided by the product of variable weights is 96, and
+their sum minus the sum of variable weights is 9. Thus A has length 96
+and a one-dimensional socle A_9. Let tau:A_9->C be any nonzero functional.
+
+Since D and C are smooth, g1 and g2 have no common zero on C. Their
+Koszul sequence, twisted by O_C(9), is
+
+  0 -> O_C(1) -> O_C(5) direct_sum O_C(5) -> O_C(9) -> 0.
+
+Here H^1(O_C(5))=H^0(O_C(-4))^*=0 by K_C=O_C(1) and Serre duality.
+The depth-two coordinate ring identifies its graded pieces with the
+global sections in this sequence. Hence its boundary gives an actual
+isomorphism
+
+  A_9  ->  H^1(C,K_C),
+  p    |-> [p/(g1*g2)].
+
+The Serre trace of this class is c*tau(p) for ONE fixed c!=0, independent
+of p. This proves nonvanishing of the comparison; dimensions alone
+would not have sufficed without the surjective Koszul boundary.
+
+3. THE NORMAL CONNECTING FRACTION AND HODGE OBSTRUCTION
+
+For the first-order surface deformation (Fb+epsilon*B,h+epsilon*L),
+the local normal fields for C in the ambient weighted projective space
+satisfy
+
+  u3=-L,
+  g1*u1+g2*u2+k*u3=-B.
+
+On g1!=0 choose u2=0, and on g2!=0 choose u1=0. Their difference is
+
+  ((kL-B)/(g1*g2))*(g2,-g1,0),
+
+so its coefficient is the actual class in H^1(N_{C/D})=H^1(O_C(-2)).
+
+Let rho be the Kodaira-Spencer class of the surface deformation and
+omega_sigma the canonical two-form represented by the cubic sigma.
+Flatness of the intersection pairing and Griffiths transversality give
+
+  <bar_nabla_[B,L][C],omega_sigma>
+    = - integral_C (rho contraction omega_sigma)|C.
+
+After restriction to C, contraction with omega_sigma kills the tangent
+part T_C. Thus this expression depends only on the image of rho in
+H^1(N_{C/D}), just computed. Adjunction identifies multiplication by
+sigma with N_{C/D} tensor K_D|C -> K_C. The trace calculation of Section 2
+therefore gives
+
+  <bar_nabla_[B,L][C],omega_sigma>
+       = c0*tau((B-kL)*sigma),  c0!=0,
+
+up to a uniform sign convention. This is also the usual divisor
+semiregularity/Atiyah obstruction formula, but the displayed calculation
+derives precisely the required pairing rather than merely invoking a
+map with the desired source and target.
+
+4. THE ORBIT SUM AND THE TWO DISTINCT CHARACTER SPACES
+
+For invariant L and sigma of character zeta, omega_sigma has character
+zeta*delta=1. Thus naturality shows that each translate of C gives the
+same fixed-threefold obstruction pairing. Consequently NL_E is a
+nonzero constant times 3*tau(kL*sigma).
+
+For the external degree-six test B=x2*x3^3*w, B has character zeta,
+whereas eta_B=Res(B*Omega/Fb^2) has character zeta*delta=1. If L is
+invariant, omega_L has character delta=zeta^2. The Kodaira-Spencer
+class rho_B has character zeta, so the tensor
+
+  rho_B contraction omega_L
+
+is invariant. Its integral over C, gC, and g^2C is therefore the same.
+The ambient-B obstruction paired with omega_L is 3*c0*tau(BL).
+
+This argument uses intrinsic equivariance and does not assume that the
+non-invariant Artinian presentation A itself carries a scalar g-action.
+The invariant surface obstruction space has dimension seven. The
+external-B obstruction is in a DIFFERENT character component of
+dimension eight, paired against the eight-dimensional invariant cubic
+space modulo h. These two spaces are never identified.
+
+The recorded ranks now imply that there is an invariant cubic L with
+
+  NL_E(L)=0,  tau(BL)!=0.
+
+Indeed the row tau(BL) does not lie in the row space of the rank-seven
+matrix; equivalently it is nonzero on its kernel. That kernel in the
+nine-dimensional cubic space has dimension two. The rescaling vector h
+lies in both kernels because h=0 in A. Hence L is nonzero modulo h,
+leaving a genuine one-dimensional tangent direction of surface motion.
+
+5. INTEGRATE THE CLASS, NOT THE ORIGINAL SMALL CURVE
+
+Let Bpar be the smooth irreducible open of ALL invariant sextic
+polynomials (modulo harmless equation rescaling), and let U parameterize
+smooth invariant cubic sections D of their threefolds. Around the seed,
+choose a small simply connected analytic neighborhood and transport
+lambda=[E] flatly. It stays g-invariant because the automorphism is
+defined on the whole family and commutes with Gauss-Manin transport.
+
+The condition that lambda has type (1,1) is exactly vanishing of its
+projection into the rank-seven bundle H^{0,2}(D)^g. Its derivative in
+the cubic-section directions is NL_E, which is surjective. The
+holomorphic implicit function theorem therefore gives a smooth local
+Hodge locus Z, with Z -> Bpar a submersion whose fibers have dimension
+9-1-7=1. In particular the selected vector L integrates to an actual
+analytic curve in a fixed-threefold fiber of Z.
+
+By Lefschetz (1,1), lambda is the Chern class of a line bundle on each
+D in Z. Since H^1(O_D)=0, the line bundle is unique up to isomorphism.
+After shrinking to a contractible analytic neighborhood these line
+bundles form a holomorphic relative line bundle. For m sufficiently
+large, Serre vanishing, cohomology/base change and Bertini give a
+projective bundle of sections of L_lambda(m), with a nonempty open of
+smooth effective curves. This is an actual analytic family of curves
+Gamma, and its projection to Z is smooth and surjective. A tangent L
+therefore lifts to a genuine infinitesimal motion of a smooth Gamma.
+
+The original C need not deform along L, and no unobstructedness of its
+Hilbert point is asserted. High twisting is what supplies effective
+smooth curves representing the transported class.
+
+Optional explicit bound at the seed: E is a disjoint union and
+O_E(E+4H) is the direct sum of O_{g^j C}(2). The exact sequence
+
+  0 -> O_D(4) -> O_D(E+4H) -> direct_sum_j O_{g^j C}(2) -> 0
+
+and H^1(O_D(4))=H^1(O_C(2))=0 show H^1(O_D(E+4H))=0. Both the
+left-hand line bundle and the restrictions on E are generated by
+sections, so O_D(E+4H) is basepoint free. It has intersection 12 with
+each component of E and positive intersection with every other
+irreducible curve, since E is effective and H is ample. Its square is
+-36+8*18+16*9=252. Nakai's criterion makes it ample, so a general
+smooth member is connected. Thus m=4 can be used on a sufficiently
+small neighborhood, although no fixed bound is needed in the proof.
+
+6. WHY THE ACTUAL ABEL-JACOBI DERIVATIVE IS NONZERO
+
+Keep T fixed and take a curve Gamma_s in the above relative linear
+systems with section tangent L. The cycles Gamma_s-Gamma_0 are
+homologous to zero. Let nu(s) be their Abel-Jacobi image. Sweeping Gamma
+along a short path gives its bounding three-chain, so differentiation
+of the defining period integral gives
+
+  <d nu(L),eta> = integral_Gamma (v contraction eta)|Gamma,
+
+where v is the normal field of Gamma in T. This derivation requires no
+universal-moduli or sufficiently-ample-surface theorem.
+
+Use the conormal sequence
+
+  0 -> N_{D/T}^* tensor Omega_D^1
+    -> Omega_T^2|D -> K_D -> 0.
+
+Since H^1(K_D)=0, eta|D has a lift eta_tilde in the H^1 of the left
+term. Locally the inclusion is dh wedge beta. Restricting its contraction
+by v to Gamma keeps exactly dh(v)*beta; the other term has dh along
+Gamma and vanishes. As dh(v)=-L, the derivative is, up to a fixed sign,
+
+  integral_D [Gamma] cup (L*eta_tilde).
+
+For eta=eta_B, contraction with the nowhere-vanishing holomorphic
+three-form identifies eta_B with the Kodaira-Spencer class of Fb+eps B.
+The surface deformation (Fb+eps B,h) supplies a lift rho_B in H^1(T_D),
+and its contraction with the three-form is a valid eta_tilde. The local
+tensor identity then identifies L*eta_tilde with plus or minus
+rho_B contraction omega_L. Therefore
+
+  <d nu(L),eta_B>
+    = c1 * <ambient-B obstruction of [Gamma], omega_L>.
+
+Since [Gamma]=lambda+mH and O_D(1) extends over the ambient deformation,
+the mH contribution to this obstruction is zero. By Sections 3–4,
+
+  <d nu(L),eta_B> = c2 * 3 * tau(BL),  c2!=0.
+
+This is nonzero for the chosen L. It is the derivative of an actual
+curve family, tested against an actual invariant H^{2,1} class.
+
+The choice of conormal lift does not affect this answer: two lifts
+differ by a boundary from H^0(K_D); its pairing with lambda is precisely
+NL_lambda(L) evaluated on that section, and hence vanishes.
+
+If one prefers the primitive-class formulation used in Voisin's
+normal-function treatment, replace lambda by lambda0=E-2H.
+Indeed H_T^3=3, deg C=6, deg E=18, i_*E=6H_T^2 and i_*H=3H_T^2,
+so i_*lambda0=0. Also lambda0 is primitive on D and lambda0^2=-72.
+The hyperplane subtraction changes neither NL nor the derivative.
+Take a higher positive twist to represent lambda0 by effective curves.
+
+7. ALGEBRAIZE AND SPREAD THE NONZERO FAMILY
+
+The passage from an analytic Hodge-class germ to an algebraic family
+requires the following argument.
+
+All curves in the local family have the same Hilbert polynomial with
+respect to a fixed projective embedding: their degree and arithmetic
+genus are determined by the flat class lambda+mH. Hence the analytic
+family maps into ONE finite-type relative flag Hilbert scheme H
+parameterizing (T,D,Gamma). Its projection to Bpar contains an analytic
+open because Z -> Bpar is a submersion.
+
+Let W be the irreducible Zariski closure of the image of a connected
+analytic germ of this family in H. Then W -> Bpar is dominant. Every
+nonempty analytic open of the germ has the same Zariski closure W
+(identity theorem). The nonzero vertical derivative condition is open
+in that germ. It therefore meets the nonempty algebraic open where W
+is smooth over Bpar. At such a point, the vertical tangent of W contains
+a vector on which the averaged Abel-Jacobi derivative is nonzero.
+
+Take a projective compactification/resolution of W over Bpar. Cut it by
+sufficiently general relative ample hypersurfaces to relative dimension
+one, choosing their tangent hyperplanes to retain a vertical direction
+outside the kernel of that derivative. This is ordinary relative
+Bertini in characteristic zero, with a prescribed open tangent
+condition at one smooth point. After shrinking the base and normalizing,
+the resulting parameter family Lambda -> Bpar' is smooth and projective.
+It may be disconnected; alternatively use its Stein factorization and a
+finite etale base change. The universal curve restricts over the dense
+open originally in H, and its closure supplies a codimension-two cycle
+Gamma on Lambda times_{Bpar'} T.
+
+The resulting correspondence induces a morphism of rational variations
+
+  R^1 p_{Lambda*} Q(-1) -> R^3 p_{T*} Q.
+
+Its averaged component is nonzero, because its Abel-Jacobi differential
+still pairs nontrivially with the invariant class eta_B. This supplies
+the genuine nonzero subvariation used in the next Higgs step.
+
+An alternative algebraicity input is Cattani–Deligne–Kaplan, Theorem 1.1
+and Corollary 1.2: the relevant integral Hodge-class germ is algebraic.
+Together with the relative Picard/Hilbert construction, this gives the
+same algebraic family. The Hilbert-closure argument above already
+supplies the needed repair, so the stronger CDK theorem is optional.
+No Hodge conjecture is assumed: the only cycle-existence assertion at
+this point is Lefschetz (1,1) for divisor classes on surfaces.
+```
+
+### Part III: supported projectors
+
+```text
+PART III. HIGGS IRREDUCIBILITY AND SUPPORTED PROJECTORS
+======================================================
+
+The hypotheses of this part are now established: Part I.3 supplies the
+scalar Higgs equations, and Part II supplies the nonzero algebraic
+cylinder correspondence over a dense open of the full parameter base.
+
+1. THE PRECISE HIGGS IRREDUCIBILITY LEMMA
+
+Let B be a smooth connected complex algebraic variety and V a polarized
+rational variation of Hodge structure of weight three whose only Hodge
+types are (2,1) and (1,2). Put E=F^2(V tensor O_B). Polarization identifies
+V_C/F^2 with E^vee, and the Higgs field has the form
+
+  theta: T_B -> Hom(E,E^vee),
+
+with symmetric forms theta_v. Consider the bundle map
+
+  L: End(E) -> Hom(T_B, Hom(E,E^vee)),
+  L(P)(v) = P^t theta_v - theta_v P.
+
+Scalar endomorphisms are in its kernel everywhere. If at one point its
+kernel consists exactly of scalars, the maximal-rank locus B_good is a
+nonempty open set. In the present geometric situation the bundles and
+Higgs map are algebraic, so this may be taken Zariski open. Analytic
+openness together with a proper analytic bad locus would also suffice
+to meet every nonempty Zariski open of the connected base.
+
+Let B' -> U be a finite etale cover of a dense open U in B, and work on
+one connected component of B'. Suppose W is a rational subvariation of
+the pullback of V. A sub-Hodge structure of a polarized Hodge structure
+has nondegenerate restricted polarization: its positive Hodge metric is
+the restriction of the ambient positive metric. Consequently W has a
+rational orthogonal complement, and the projection e onto W is flat,
+self-adjoint for the polarization, and of Hodge type (0,0).
+
+Choose a point of B' above U intersect B_good. If P is e on E there, then
+self-adjointness makes its action on E^vee equal to P^t. Flatness implies
+commutation with the Higgs field, so
+
+  P^t theta_v = theta_v P
+
+for all tangent directions. Etaleness is relevant here: tangent vectors
+on B' supply all tangent vectors on B. Therefore P=c I. As e is an
+idempotent, c is 0 or 1. Since e is rational, its action on the conjugate
+Hodge summand is correspondingly 0 or I. Thus e is 0 or I on the whole
+fiber. Flatness keeps its rank constant, proving W=0 or W=V everywhere
+on the connected component.
+
+This proves irreducibility as a variation even after the finite covers
+used to spread a family of parameter curves. No assertion that an
+arbitrary rational local subsystem is automatically a subvariation is
+needed; the image of an algebraic correspondence is a subvariation.
+
+For the invariant weighted sextics, E is the character-one degree-six
+Fermat Jacobian component, of dimension 33, and the invariant tangent
+directions are the 35 character-zero degree-six classes. The actual
+Higgs forms are, up to the conventional nonzero residue normalization,
+the socle triple-product forms. Thus the finite equations in the project
+are exactly the equations of this lemma, rather than a dimension count
+used as a substitute for the Higgs comparison.
+
+2. FROM A NONZERO CURVE CORRESPONDENCE TO THE WHOLE INVARIANT SECTOR
+
+Suppose, after the allowed base change and shrinking, that there is a
+smooth projective family of parameter curves Lambda and an algebraic
+relative correspondence Gamma of codimension two from Lambda to the
+family of threefolds T. Averaging Gamma by the order-three action gives
+a morphism of rational variations
+
+  R^1(Lambda/B')_* Q(-1) -> V.
+
+Its image has constant rank and is a rational subvariation: the cycle
+class gives a morphism of local systems and of Hodge filtrations. A
+nonzero invariant Abel–Jacobi derivative at any point makes this image
+nonzero. The preceding lemma makes it equal to all of V. In each fiber,
+Gamma is a two-dimensional cycle on Lambda x T, so its target image is
+contained in a proper closed subset of dimension at most two. Enlarge
+that subset to a divisor and take the union of its three translates.
+
+Part II supplies the genuinely algebraic family of curves and its
+nonzero invariant Abel-Jacobi derivative. Therefore the image is all V.
+
+3. A SUPPORTED PROJECTOR, INCLUDING THE NECESSARY POLARIZATION ARGUMENT
+
+Fix a fiber T. On each connected component of Lambda choose a point p,
+and set
+
+  pi_1 = Delta_Lambda - [p] x Lambda - Lambda x [p].
+
+This is the Chow–Kunneth projector on H^1. Replace Gamma by
+pi_g composed Gamma composed pi_1, with pi_g=(1+g+g^2)/3. It then vanishes
+on H^0 and H^2 of the curve and maps H^1 onto V=H^3(T,Q)^g. Its target
+support remains in the chosen g-stable divisor Z.
+
+The cup-product polarizations on H^1(Lambda)(-1) and H^3(T) make the
+transpose correspondence equal to the adjoint up to a fixed sign.
+Here all of H^3(T) is primitive, because H^1(T)=0. This point avoids any
+need for an unproved algebraicity statement about an inverse Lefschetz
+operator.
+
+For a surjective morphism A of polarized Hodge structures, AA^dagger is
+invertible on the target. Indeed the positive Hodge metrics make
+
+  <AA^dagger y,y> = <A^dagger y,A^dagger y>,
+
+and A^dagger is injective. Thus M=Gamma composed transpose(Gamma) is
+invertible on V, whether its comparison with AA^dagger carries a plus
+or minus sign. This positivity argument matters: the corresponding
+claim for arbitrary nondegenerate bilinear forms would be false.
+
+M vanishes on every other cohomology degree and on the noninvariant
+part of H^3. Let q(t) in Q[t] be its characteristic polynomial on V.
+Since M is invertible, q(0) is nonzero. Then
+
+  p(t)=1-q(t)/q(0)
+
+has zero constant term and p(M)|V=I. Since Gamma has target support Z,
+transpose(Gamma) has source support Z, so M and all its positive powers
+are represented by cycles supported on Z x Z. Hence p(M) is a rational
+cycle supported on Z x Z whose action is the desired projector in every
+cohomological degree. Composition uses intersection with supports, so
+the support statement remains valid even when intersections have excess
+dimension; it is not a claim about arbitrary moved representatives.
+
+For the smooth weighted sextic, H^{2k}(T,Q)=Q H^k and integral_T H^3=3.
+The other odd groups except H^3 vanish. Consequently the globally
+defined relative cycle
+
+  P = pi_g - sum_{k=0}^3 (1/3) pr_1^* H^{3-k} pr_2^* H^k
+
+has exactly the same action as p(M). Poincare duality and Kunneth identify
+degree-six classes on T x T with degree-preserving cohomological
+endomorphisms, so equality of all these actions means equality of the
+cycle classes, not merely equality on V.
+
+4. SPECIALIZATION OF A SUPPORTED REPRESENTATIVE
+
+Let X -> B be a smooth projective family of n-folds and P a relative
+rational codimension-n correspondence. Assume its fiber class has a
+representative supported on a divisor square at very general points.
+In our application this holds on the open obtained in Section 2.
+
+There is a countable collection of proper parameter spaces S_i -> B
+parametrizing tuples consisting of:
+
+  - a closed subscheme D of relative dimension n-1;
+  - finitely many effective n-dimensional cycles in X_b x X_b supported
+    on D x D, with positive or negative integral multiplicities;
+  - a positive integer N, so that their signed sum is to represent N[P_b].
+
+Use products of fixed-Hilbert-polynomial relative Hilbert schemes for
+the components. Taking tuples with integral multiplicities avoids any
+need to realize an arbitrary effective cycle as the fundamental cycle
+of a single nonreduced subscheme. The flag condition that each component
+lies in D x D is closed. Each such parameter space is proper over B,
+and there are countably many polynomials, tuples, and multiplicities.
+
+The universal flat cycles define a locally constant section of the
+pulled-back cohomology local system. Its difference from N[P] therefore
+vanishes on a union of connected components. This can also be seen by
+restricting to normalized algebraic curves in a parameter component:
+the ambient family over such a smooth curve is smooth, and the class
+of a flat algebraic cycle has constant transported fiber class.
+
+Discard components where that equality does not hold. The remaining
+proper components have closed images in B. Exclude all images which
+are proper closed subsets. There are countably many; a nonempty open
+in the irreducible complex base is not their union. Choose b outside
+them where a supported representative exists. The component carrying
+that representative cannot have proper image and hence maps onto B.
+
+This single proper component S_0 -> B has universal supported cycles
+with the same fixed cohomological equality on every fiber. For each
+b' choose a point above b'. The fixed Hilbert polynomial of D has
+degree n-1, so its support cannot become all of X_{b'}; the incidence
+condition preserves support on its square. Divide by N. This proves
+the assertion for every smooth member.
+
+No assertion that an arbitrary rational Hodge class extends as an
+algebraic cycle is being used. P was an algebraic relative cycle from
+the start, and the issue was the existence of a representative with
+smaller support. Proper Hilbert parameter spaces preserve that specific
+property once it holds at very general points.
+
+5. RELATIVE SUPPORT OVER THE ACTUAL AFFINE PENCIL
+
+Pull back the single S_0 above to any smooth affine curve U mapping to
+B, in particular to the actual pencil of weighted quotients. The
+proper map S_0 x_B U -> U is surjective, even if this pencil is entirely
+inside the complement of the first good open. Choose a component
+dominating U and a closed point of its generic fiber. Its residue field
+is finite over C(U); normalize and shrink U. In characteristic zero this
+gives a finite etale cover U' -> U with a map U' -> S_0.
+
+Thus over U' there is a relative divisor D' and relative rational cycle
+Z' supported on D' x_{U'} D', with every fiber class equal to the desired
+projector. Push Z' through the finite map of relative products and divide
+by its degree. The descended relative correspondence Z has the same
+fiberwise action. Its support lies in D x_U D, where D is the finite
+image of D'; D has relative dimension at most two and is proper in the
+total threefold family T -> U.
+
+Relative correspondences act on Rp_*Q and hence preserve the Leray
+filtration on H^4(T,Q). On its graded pieces their actions are induced
+by the corresponding maps of local systems R^j p_*Q. For an affine
+complex curve, every local system has H^i=0 for i>1 (the curve has the
+homotopy type of a finite one-dimensional CW complex). Hence
+
+  0 -> H^1(U,R^3p_*Q) -> H^4(T,Q) -> H^0(U,R^4p_*Q) -> 0,
+  L^2 H^4(T,Q)=0.
+
+On H^1(U,V), the associated graded action of Z is the identity. Since
+there is no next Leray step, its action on this subgroup of H^4(T,Q) is
+exactly the identity. The action's image is supported on D by the target
+support of Z. Therefore every class in H^1(U,V) vanishes on T minus D.
+
+This is the reason fiberwise projector identities suffice here. In a
+higher-dimensional base, an uncontrolled higher Leray piece could remain;
+it is absent for the affine-curve base used in the proof.
+```
+
+### Part IV: the protected pencil and certificate
+
+```text
+PART IV. THE PROTECTED PENCIL AND THE EXACT ALGEBRAIC ENDPOINT
+===========================================================
+
+Parts I-III have proved the following geometric result, used as (G):
+
+(G) For every smooth invariant sextic T in P(1,1,1,1,2), with action
+    g_T=diag(zeta^2,zeta^2,zeta,1;1), the cohomological projector onto
+    H^3(T,Q)^{g_T} is represented by a rational algebraic correspondence
+    supported on Z x Z for a proper divisor Z in T. Over any smooth
+    curve mapping to this family, after shrinking the curve, there is
+    a relative correspondence with divisor support whose action on
+    R^3 is the invariant projector.
+
+The relative assertion is over the shrunken original curve: the finite
+cover used to construct it has already been removed by normalized
+trace in Part III.5. It applies even when that curve lies outside the
+first open where the moving curves were constructed.
+
+1. Exact protected data and smoothness
+-------------------------------------
+
+Use projective coordinates
+
+  Z = (Z0,...,Z5) = (X0,X1,X2,Y0,Y1,Y2),
+
+and set
+
+  F = sum_{i=0}^2 (Xi^6 + Yi^6)
+      + (X0^3 X1 Y0 Y1 + X1^3 X2 Y1 Y2 + X2^3 X0 Y2 Y0)/2,
+
+  A = X0^2 X1^2 X2^3 Y0^2 Y1^2 Y2.
+
+Thus deg F = 6 and deg A = 12. Let X = V(F) in P^5, let
+
+  Omega = contraction_{sum Zi partial_Zi}(dZ0 wedge ... wedge dZ5),
+  alpha = Res_X(A Omega/F^3) in H^4(X,C).
+
+The hypersurface X is smooth. Indeed, suppose a nonzero point of the affine
+cone were critical and let M > 0 be the maximum modulus of its six
+coordinates. If |Xi| = M, the equation partial_Xi F = 0 gives
+
+  6 M^5 <= (3+1) M^5/2 = 2 M^5.
+
+Each Xi occurs with exponents 3 and 1 in two mixed monomials. If instead
+|Yi| = M, its two mixed exponents are both 1, and
+
+  6 M^5 <= (1+1) M^5/2 = M^5.
+
+Either inequality is impossible. This proves smoothness without a
+computer algebra calculation.
+
+F is irreducible over C. A factorization into two positive-degree
+homogeneous factors would give intersecting hypersurfaces in P^5, and
+their intersection would be singular for F by the product rule.
+Repeated factors also contradict smoothness. Dehomogenization at Z0=1
+therefore gives an irreducible polynomial f.
+
+Write the affine coordinates as
+
+  (x0,x1,x2,x3,x4) = (X1,X2,Y0,Y1,Y2)/X0.
+
+Then
+
+  f = 1 + sum_{i=0}^4 xi^6
+      + (x0 x2 x3 + x0^3 x1 x3 x4 + x1^3 x2 x4)/2,
+  a = x0^2 x1^3 x2^2 x3^2 x4.
+
+Let R=C[x0,...,x4], K=Frac(R/(f)), and
+
+  g = partial_0 f
+    = 6 x0^5 + (x2 x3 + 3 x0^2 x1 x3 x4)/2.
+
+Since g is a nonzero polynomial of degree 5 and f has degree 6, f does
+not divide g. Thus g is a nonzero element of K. The differential relation
+
+  g dx0 + sum_{j=1}^4 f_j dxj = 0,  where f_j=partial_j f,
+
+shows that dx1,...,dx4 form a K-basis of Omega^1_{K/C}.
+
+2. The symmetries, including the determinant character
+------------------------------------------------------
+
+Let zeta be a primitive cube root of unity. Define
+
+  beta(X0,X1,X2,Y0,Y1,Y2) = (X0,X1,-X2,Y0,Y1,-Y2),
+  gamma = diag(zeta^2,zeta^2,1,zeta,1,1).
+
+Both transformations fix F. For beta the three mixed monomials have
+total degrees 0,2,4 in X2,Y2. For gamma their weights are respectively
+9,6,3, all divisible by 3. All pure sixth powers are fixed as well.
+
+A is beta-invariant, since its X2,Y2 exponents add to 4. Its gamma-weight
+is 2*2+2*2+2*1=10, hence gamma^*A=zeta A. Crucially,
+
+  det(beta)=1,   det(gamma)=zeta^5=zeta^2,
+  gamma^*Omega=zeta^2 Omega.
+
+Consequently the rational differential A Omega/F^3 and its full residue
+class alpha are invariant under beta and gamma. Invariance of A alone
+under gamma would be false; the determinant character is essential.
+
+3. Resolving the protected pencil and identifying the quotient
+-------------------------------------------------------------
+
+Put u=X2, v=Y2 and consider the pencil lambda=v/u. Its base locus is
+
+  S = X intersect {u=v=0}.
+
+This is a smooth surface. At u=v=0 both partial_u F and partial_v F
+vanish; hence a singular point of S, computed in its P^3 of remaining
+coordinates, would be singular on X. The two equations u,v cut out S
+as a smooth codimension-two complete intersection on X.
+
+The blowup of this smooth center resolves the pencil:
+
+  pi : Xtilde=Bl_S X -> X,
+  p  : Xtilde -> P^1.
+
+The incidence description of the graph is valid because u,v form a
+regular sequence. Xtilde is smooth. A smooth fibre is the sextic
+threefold V_lambda=X intersect {v=lambda u} in P^4. The apparent blowup
+on that fibre is along the Cartier divisor S and is an isomorphism.
+
+Generic smoothness and properness allow us to remove finitely many
+parameters so that p is smooth projective. Also remove infinity and the
+six roots of 1+lambda^6. Denote the resulting nonempty connected affine
+curve by U; it may be shrunk further later.
+
+On each fibre beta sends u to -u and fixes the other four coordinates
+
+  s=(s0,s1,s2,s3)=(X0,X1,Y0,Y1).
+
+The quotient has weight-two coordinate w=u^2. Its equation in
+P(1,1,1,1,2) is
+
+  G_lambda = sum_{i=0}^3 si^6 + (1+lambda^6)w^3
+      + (s0^3 s1 s2 s3 + lambda s1^3 s3 w
+                              + lambda s0 s2 w^2)/2.
+
+This follows by substituting v=lambda u into the protected F. In
+particular the last two mixed terms give respectively u^2 and u^4,
+not another choice of powers.
+
+G_lambda avoids the unique singular vertex of the weighted projective
+space, because 1+lambda^6 is nonzero. It is quasismooth: a nonzero
+critical point (s,w) of its affine cone, lifted by any square root u of
+w, would be a critical point of G_lambda(s,u^2), since
+
+  partial_si G_lambda(s,u^2) = partial_si G_lambda(s,w),
+  partial_u G_lambda(s,u^2) = 2u partial_w G_lambda(s,w).
+
+That would contradict smoothness of V_lambda. Away from the weighted
+vertex quasismoothness is ordinary smoothness. Thus the quotients form
+a smooth projective family p_T:Tcal->U with a finite double quotient
+
+  q:Xtilde_U -> Tcal.
+
+The quotient is branched. No unramified-cover assertion is needed.
+The action gamma fixes lambda and descends to
+
+  g_T=diag(zeta^2,zeta^2,zeta,1;1).
+
+If the invariant parameter space is written using a monic w^3 term,
+divide G_lambda by 1+lambda^6. This is a regular coefficient map over U
+and needs no extraction of roots or additional base change.
+
+4. Quotient cohomology and the full Leray class
+---------------------------------------------
+
+For a finite group G acting on a complex algebraic variety M, with
+quotient q:M->M/G, rational cohomology satisfies
+
+  q^*:H^*(M/G,Q) -> H^*(M,Q)^G  is an isomorphism.
+
+Freeness of the action is unnecessary. One proof uses proper base
+change: the fibres of q are finite, so R^i q_*Q=0 for i>0. The invariant
+subsheaf (q_*Q)^G is Q, because each fibre is a single orbit. The
+averaging idempotent over Q makes invariants an exact direct summand.
+Taking cohomology proves the assertion. Chenevert, Theorem 3.1.3,
+gives the corresponding sheaf-theoretic isotypic decomposition [R6].
+
+Apply this to the total space over U. Since pi^*alpha is beta-invariant,
+there is a unique alpha' in H^4(Tcal,C) such that q^*alpha'=pi^*alpha.
+The commuting gamma action and injectivity of q^* make alpha'
+g_T-invariant.
+
+For a smooth fibre T_lambda one has
+
+  H^4(T_lambda,Q) = Q h_lambda^2,
+
+where h=c1(O(1)). This can be deduced here without weighted weak
+Lefschetz: the ordinary sextic V_lambda in P^4 has H^2=Q H by weak
+Lefschetz, and H^4=Q H^2 by Poincare duality. Its hyperplane class is
+beta-invariant. Quotient cohomology gives the statement for T_lambda.
+The sheaf O(1) is an actual line bundle off the weighted vertex and
+therefore on Tcal; its pullback is O_{V_lambda}(1). In particular h^2
+is a global nonzero lift of the unique fibrewise H^4 class. One can
+check nonvanishing by integral_{T_lambda} h^3=6/2=3.
+
+The affine curve U has the homotopy type of a one-dimensional CW
+complex. Hence H^r(U,L)=0 for r>=2 for every local system L. The Leray
+spectral sequence therefore gives the exact sequence
+
+  0 -> H^1(U,R^3 p_{T*}C) -> H^4(Tcal,C)
+       -> H^0(U,R^4 p_{T*}C) -> 0.
+
+The last term is C h^2, globally split by the indicated h^2. Thus
+
+  alpha' = c0 h^2 + alpha'',
+  alpha'' in H^1(U,(R^3 p_{T*}C)^{g_T}).
+
+Here the invariant summand commutes with H^1 by the averaging
+idempotent. This is a statement about the whole class alpha', not a
+statement in one associated Hodge-graded quotient.
+
+Apply (G), shrinking U as necessary. Its relative correspondence
+preserves the Leray filtration, since it gives an endomorphism of the
+derived direct image over U. In degree 4 the Leray piece L^1 is
+H^1(U,R^3), and L^2=0. Consequently the correspondence acts as the
+identity on alpha'' itself: there is no further filtration term in
+which an error could lie. Its target support is contained in a relative
+divisor D, so alpha'' restricts to zero on Tcal minus D.
+
+The class h^2 is also supported on a divisor: a nonzero weight-one
+coordinate section, for example s0, trivializes O(1) on its nonvanishing
+set, where h and hence h^2 vanish. It follows that alpha' vanishes on
+the complement of a proper divisor in Tcal.
+
+Pull that support back through finite q. Take its closure in Xtilde
+and add the omitted fibres and the exceptional divisor of pi. Each
+component has dimension at most 3. Its proper image in the fourfold
+X is therefore a proper closed subset. Outside this image pi is an
+isomorphism and alpha vanishes. Enlarge the image to a proper divisor
+Z_X on X, if necessary, by choosing a nonzero homogeneous polynomial
+in its ideal modulo F. We have proved
+
+  alpha|_{X minus Z_X}=0.                                      (4.1)
+
+No assertion that a finite map is an etale cover and no unproved
+splitting of the total Leray filtration are used here.
+
+5. Exact local residue after reducing the pole order
+---------------------------------------------------
+
+On the ambient affine open g!=0 define
+
+  D_t = g^{-1} partial_0,       b=a/g,
+  nu = dx1 wedge dx2 wedge dx3 wedge dx4.
+
+These definitions are made before imposing f=0. They satisfy D_t f=1
+and, for every rational H,
+
+  dH wedge nu = (D_t H) df wedge nu.
+
+The dehomogenization of A Omega/F^3 is
+
+  omega = a dx0 wedge nu/f^3 = b df wedge nu/f^3.
+
+Let
+
+  psi = [-b/(2f^2) - (D_t b)/(2f)] nu.
+
+A direct differentiation gives
+
+  dpsi = [b/f^3 - (D_t^2 b)/(2f)] df wedge nu,
+
+and hence
+
+  omega-dpsi = c' (df/f) wedge nu,   c'=(D_t^2 b)/2.             (5.1)
+
+Write g_0=partial_0 g and g_00=partial_0^2 g. Expanding c' gives
+
+  c' = (1/2)[ a_00/g^3
+               -(3a_0 g_0+a g_00)/g^4 + 3a g_0^2/g^5 ].
+
+This coefficient is regular along f=0 on g!=0. The Poincare residue
+of (5.1) is
+
+  rho = (c/g) nu,
+  c = (1/2)[ a_00/g^2
+              -(3a_0 g_0+a g_00)/g^3 + 3a g_0^2/g^4 ],        (5.2)
+
+with all coefficients now interpreted in K. This is precisely the
+affine source four-form of the protected exactness target.
+
+The residue is compatible with restriction and unchanged by adding
+the differential of a form with the displayed lower pole order. This
+also follows directly from the logarithmic de Rham definition of the
+residue; the explicit (5.1) is enough here. Thus the class of rho on
+any such open subset of X is the restriction of the full alpha.
+
+The normal derivation D_t DOES NOT descend to K, since D_t f=1.
+Equation (5.1) alone must not be claimed to prove rho exact. It proves
+the residue identification; actual exactness follows from (4.1) and
+algebraic de Rham comparison in the next step.
+
+6. From divisor support to the rational primitive
+------------------------------------------------
+
+Choose a nonzero h in R/(f) vanishing on the closed support Z_X in the
+affine chart; if that intersection is empty take h=1. Because R/(f)
+is a domain and h,g are nonzero, the principal open
+
+  W = D(hg) in Spec(R/(f))
+
+is nonempty. It is a smooth affine fourfold, lies outside Z_X, and the
+form rho is regular on it. By (4.1)-(5.2) its complex cohomology class
+is zero. All four-forms on W are closed, since W has dimension four.
+
+Grothendieck's algebraic de Rham theorem for smooth affine complex
+varieties identifies H^4(W,C) with the degree-four cohomology of the
+complex of global regular algebraic differential forms [R5, Theorem 1
+and equation (4)]. Consequently there is
+
+  eta_W in Gamma(W,Omega_W^3),   d eta_W=rho.
+
+Localization commutes with Kähler differentials, exterior powers, and
+their exterior differential. Passing to the function field gives
+
+  eta in Omega^3_{K/C},   d eta=rho.                           (6.1)
+
+This proves the exact affine-residue-form existence conclusion. There
+is no quantitative bound on the poles of eta in this argument and
+none is needed for the existential protected target.
+
+7. Explicit return to an ordinary polynomial certificate
+-------------------------------------------------------
+
+This section proves an elementary bridge from (6.1) to the final
+polynomial identity, including the denominator legality and degrees.
+It does not invoke the prescribed-support Hodge-theoretic theorem.
+
+Because dx1,...,dx4 is a K-basis, write
+
+  eta = sum_{j=1}^4 (-1)^{j-1} u_j
+           dx1 wedge ... wedge omit(dxj) wedge ... wedge dx4,
+  u_j in K.
+
+The tangent derivations on the hypersurface are induced by
+
+  E_j = partial_j - (f_j/g) partial_0,   1<=j<=4.
+
+They satisfy E_j f=0, and (6.1) is equivalent to
+
+  sum_j E_j u_j = c'|_{f=0}.                                  (7.1)
+
+Let L=R_{(f)}, the ring of rational functions regular at the generic
+point of the prime divisor f=0. Its residue field is K. Choose any
+lifts utilde_j in L of the four u_j. All denominators of these lifts
+are prime to f. The derivations partial_i, D_t, and E_j preserve L;
+E_j preserves its ideal fL and induces the tangent derivation on K.
+Thus (7.1) says exactly
+
+  c' - sum_j E_j utilde_j in fL.                              (7.2)
+
+Define the following five rational affine components in L:
+
+  U_0 = b/2 + (f/2)D_t b + f sum_{j=1}^4 f_j utilde_j,
+  U_j = -fg utilde_j,                    1<=j<=4.             (7.3)
+
+They satisfy the exact rational-function identity
+
+  a + f div(U) - 2 sum_{i=0}^4 U_i f_i
+      = f^2 g [c' - sum_{j=1}^4 E_j utilde_j].                (7.4)
+
+Here is the full product-rule check. Pairing (7.3) with df cancels
+the two sums involving utilde_j and gives
+
+  sum_i U_i f_i = a/2 + (f/2) partial_0 b.
+
+On taking divergence, the terms f_j g utilde_j cancel. The terms with
+undifferentiated utilde_j in the remaining multiple of f also cancel,
+because partial_0 f_j=partial_j g. Hence
+
+  div(U) = partial_0 b
+       + f[(1/2)partial_0(D_t b)
+            + sum_j f_j partial_0 utilde_j
+            - g sum_j partial_j utilde_j]
+     = partial_0 b + fg[c'-sum_j E_j utilde_j].
+
+Substitution proves (7.4). By (7.2), the right side lies in f^3 L.
+
+Choose a common nonzero polynomial denominator d, not divisible by
+f, for the five U_i, and put n_i=dU_i in R. Clearing the denominator
+in (7.4) gives the polynomial
+
+  P = a d^2 - 2d sum_i n_i f_i
+          + f[d sum_i partial_i n_i - sum_i n_i partial_i d]
+      in f^3 L.
+
+Since R is a unique factorization domain and f is irreducible,
+f^3 L intersect R = f^3 R. Therefore there is q in R with
+
+  a d^2 - 2d sum_i n_i f_i
+       + f[d sum_i partial_i n_i - sum_i n_i partial_i d]
+       = f^3 q.                                               (7.5)
+
+This is an ordinary certificate; no demand that q=0 is imposed.
+
+8. Homogenization and every certificate side condition
+------------------------------------------------------
+
+For a polynomial p in five affine variables and r>=deg p, denote by
+h_r(p) its homogenization to degree r in Z0,...,Z5, using Z0 as the
+homogenizing variable and xi=Z_{i+1}/Z0. Homogenize the zero
+polynomial as zero at any required nonnegative degree.
+
+Choose an integer
+
+  m >= max(3, deg d, max_{i:n_i!=0}(deg n_i-7)).
+
+Set
+
+  D   = h_m(d),
+  N_0 = 0,
+  N_{i+1} = h_{m+7}(n_i),                0<=i<=4.
+
+The affine index 0 corresponds to the projective index 1; setting
+projective N_0=0 causes no conflict with the nonzero affine U_0.
+
+Each term on the left of (7.5) has degree at most 2m+12: use
+deg a<=12, deg f=6, deg f_i<=5, deg d<=m, and deg n_i<=m+7.
+If q is nonzero, deg(f^3 q)=18+deg q, so
+
+  deg q <= 2m-6.
+
+The choice m>=3 makes this homogenization degree nonnegative. Put
+
+  Q = h_{2m-6}(q).
+
+The two sides of the following identity are homogeneous of degree
+2m+12 and dehomogenize to (7.5):
+
+  A D^2 - 2D sum_{i=0}^5 N_i F_i
+       + F[D sum_{i=0}^5 partial_i N_i
+                         - sum_{i=0}^5 N_i partial_i D]
+       = F^3 Q.                                               (8.1)
+
+Dehomogenization is injective on the homogeneous piece of a fixed
+degree, so (8.1) holds identically. The numerator N_0 contributes
+zero to both sums, and the other terms have exactly the required
+homogeneous degrees.
+
+Finally D is nonzero because d is nonzero. If F divided D, then f
+would divide d after dehomogenization, contrary to its construction.
+Since F is irreducible, this proves gcd(D,F)=1. Each N_i belongs to
+the homogeneous piece of degree m+7, and D has degree m. Thus every
+side condition of the ordinary q=2 certificate is satisfied.
+
+The proof yields existence of a certificate; it does not expand a
+numerical coefficient list for D or N_i. It equally proves the
+rational-form exactness used as the missing geometric input. A
+machine-checked Lean replacement remains a separate formalization
+task; neither its existence nor successful compilation is claimed.
+```
+
+### Conclusion and formalization status
+
+```text
+CONCLUSION AND THE REMAINING FORMALIZATION TASK
+==============================================
+
+The chain is complete at the level of classical mathematics:
+
+  exact finite ranks
+  -> genuine moving algebraic curves with nonzero invariant Abel-Jacobi
+  -> the whole invariant H^3, by the scalar Higgs equations
+  -> divisor-supported projectors, on every smooth member
+  -> support of the full protected fourfold residue class
+  -> the literal rational primitive eta with d eta=rho
+  -> the ordinary homogeneous q=2 certificate.
+
+The proof uses no Hodge conjecture. The algebraicity needed in the
+moving-class step is Lefschetz (1,1) on surfaces plus the relative
+Hilbert construction. The finite ranks are now checked, rather than
+left as unexecuted project inputs. All intermediary existence steps
+have been given as ordinary mathematical arguments.
+
+The characteristic-zero seed has r^3=2. The residue r=57 occurs only
+in F_109. It must not be replaced by the literal complex number 57.
+The older Lean continuation uses a different literal-complex seed in
+some declarations; this written proof does not claim those declarations
+already formalize the present seed or the classical geometric steps.
+
+The source theorem Submission.missing_geometric_existence is therefore
+still an unfilled Lean proof obligation. Replacing its sorry with an
+actual checked proof requires formalizing or linking the relevant
+geometric theorems. This document does not make that replacement and
+no Lean compilation was attempted. It does settle the requested
+mathematical existence argument and gives an explicit final algebraic
+bridge, without computing the large certificate coefficient tuple.
+```
+
+### References
+
+```text
+PROJECT AND PRIMARY REFERENCES
+===============================
+
+[P1] hodge-computer/sextics, Chapter 3D, Moving cycles along Hodge loci.
+     Exact seed, finite maps, and the strategy reconstructed here.
+https://github.com/hodge-computer/sextics/blob/520a2a29c40cc40e1df2b1c41980552f25d08e65/docs/03d-hodge-loci.md
+
+[P2] Same revision, scripts/verify-hodge-locus-span.py.
+     Exact finite-input definitions and arithmetic.
+https://github.com/hodge-computer/sextics/blob/520a2a29c40cc40e1df2b1c41980552f25d08e65/scripts/verify-hodge-locus-span.py
+
+[P3] Same revision, Chapter 3, Geometric support, especially Section 3.6.
+https://github.com/hodge-computer/sextics/blob/520a2a29c40cc40e1df2b1c41980552f25d08e65/docs/03-geometric-support.md
+
+[P4] Same revision, Chapter 1, Certificates; protected instance.
+https://github.com/hodge-computer/sextics/blob/520a2a29c40cc40e1df2b1c41980552f25d08e65/docs/01-certificates.md
+https://github.com/hodge-computer/sextics/blob/520a2a29c40cc40e1df2b1c41980552f25d08e65/data/cycle-q2/instance.rec
+
+[R1] Claire Voisin, The Griffiths group of a general Calabi-Yau threefold
+     is not finitely generated, Duke Mathematical Journal 102 (2000),
+     151-186. Section 2, Lemma 2 and Lemma 7: Hodge-locus tangent space
+     and the vertical Abel-Jacobi derivative. The intrinsic proof in
+     Part II establishes the formula for these particular cubic
+     sections, so no unverified sufficiently-ample-surface hypothesis
+     is imported from the paper's global universal-moduli setup.
+https://www.cmls.polytechnique.fr/perso/voisin/Articlesweb/griffithsgroup.pdf
+
+[R2] Claire Voisin, Sur les zero-cycles de certaines hypersurfaces
+     munies d'un automorphisme, Annali SNS Pisa IV 19 (1992), 473-492,
+     Proposition 2.1 and Section 2. Historical moving-Hodge-class
+     strategy in a related involution setting; the present weighted
+     order-three adaptation is proved in Parts I-III.
+https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf
+
+[R3] Igor Dolgachev, Weighted projective varieties (1982).
+     Sections 3.2, 3.4, and 4.2-4.3: vanishing, graded section rings,
+     weighted weak Lefschetz and residue/Jacobian-ring descriptions.
+https://sites.lsa.umich.edu/idolga-new/wp-content/uploads/sites/1467/2024/08/weighted82.pdf
+
+[R4] Pierre Deligne, Theorie de Hodge II, Publications mathematiques
+     de l'IHES 40 (1971), 5-57, Sections 2.1 and 4.2: polarizations,
+     positivity and orthogonal decompositions of polarizable Hodge
+     structures and their variations.
+https://www.numdam.org/item/PMIHES_1971__40__5_0.pdf
+
+[R5] Alexander Grothendieck, On the de Rham cohomology of algebraic
+     varieties, Publications mathematiques de l'IHES 29 (1966),
+     95-103, Theorem 1, equation (4), and Theorem 1'. This is the
+     precise smooth-affine global-forms comparison used in Part IV.6.
+https://www.numdam.org/item/PMIHES_1966__29__95_0.pdf
+
+[R6] Gabriel Chenevert, Exponential sums, hypersurfaces with many
+     symmetries and Galois representations, PhD thesis, McGill (2008),
+     Theorem 3.1.3, printed pages 53-54: finite-quotient cohomological
+     decomposition, including group actions with fixed points.
+     Part IV.4 also gives the short constant-sheaf proof needed here.
+https://www.math.mcgill.ca/goren/Students/Chenevert.thesis.pdf
+
+[R7] The Stacks Project, Section 108.7, Properties of the Hilbert functor,
+     especially Lemmas 108.7.5 and 108.7.7: closed flag conditions and
+     properness for a fixed Hilbert polynomial.
+https://stacks.math.columbia.edu/tag/0DM5
+
+[R8] Eduardo Cattani, Pierre Deligne, Aroldo Kaplan, On the locus of
+     Hodge classes, Journal of the AMS 8 (1995), 483-506, Theorem 1.1
+     and Corollary 1.2. Optional alternative for algebraizing the
+     Hodge-class germ; the proof here uses the flag-Hilbert closure
+     argument in Part II.7 and does not require this alternative.
+https://arxiv.org/pdf/alg-geom/9402009
+```
+
+### Appendix A: complete integer Higgs forest certificate
+
+Each edge records its deformation direction, matrix equation, and the two
+entry nodes it identifies. Node 1089 denotes zero. The exponent bases and
+all 1088 retained equations are included.
+
+```json
+{"basis":[[0,0,1,3,1],[0,0,4,0,1],[0,0,4,2,0],[0,1,2,1,1],[0,1,2,3,0],[0,2,0,2,1],[0,2,0,4,0],[0,2,3,1,0],[0,3,1,0,1],[0,3,1,2,0],[0,4,2,0,0],[1,0,2,1,1],[1,0,2,3,0],[1,1,0,2,1],[1,1,0,4,0],[1,1,3,1,0],[1,2,1,0,1],[1,2,1,2,0],[1,3,2,0,0],[1,4,0,1,0],[2,0,0,2,1],[2,0,0,4,0],[2,0,3,1,0],[2,1,1,0,1],[2,1,1,2,0],[2,2,2,0,0],[2,3,0,1,0],[3,0,1,0,1],[3,0,1,2,0],[3,1,2,0,0],[3,2,0,1,0],[4,0,2,0,0],[4,1,0,1,0]],"directions":[[0,0,0,4,1],[0,0,3,1,1],[0,0,3,3,0],[0,1,1,2,1],[0,1,1,4,0],[0,1,4,1,0],[0,2,2,0,1],[0,2,2,2,0],[0,3,0,1,1],[0,3,0,3,0],[0,3,3,0,0],[0,4,1,1,0],[1,0,1,2,1],[1,0,1,4,0],[1,0,4,1,0],[1,1,2,0,1],[1,1,2,2,0],[1,2,0,1,1],[1,2,0,3,0],[1,2,3,0,0],[1,3,1,1,0],[2,0,2,0,1],[2,0,2,2,0],[2,1,0,1,1],[2,1,0,3,0],[2,1,3,0,0],[2,2,1,1,0],[2,4,0,0,0],[3,0,0,1,1],[3,0,0,3,0],[3,0,3,0,0],[3,1,1,1,0],[3,3,0,0,0],[4,0,1,1,0],[4,2,0,0,0]],"zeroNode":1089,"entryNode":"P[row,column] has node 33*row+column","edgeColumns":["directionIndex","equationRow","equationColumn","leftNode","rightNode"],"independentEquations":[[0,0,10,1023,1089],[0,0,18,957,1089],[0,0,25,825,1089],[0,0,29,594,1089],[0,0,31,330,1089],[0,1,10,1024,1089],[0,1,18,958,1089],[0,1,25,826,1089],[0,1,29,595,1089],[0,1,31,331,1089],[0,2,10,1025,1089],[0,2,18,959,1089],[0,2,25,827,1089],[0,2,29,596,1089],[0,2,31,332,1089],[0,3,10,1026,1089],[0,3,18,960,1089],[0,3,25,828,1089],[0,3,29,597,1089],[0,3,31,333,1089],[0,4,10,1027,1089],[0,4,18,961,1089],[0,4,25,829,1089],[0,4,29,598,1089],[0,4,31,334,1089],[0,5,10,1028,1089],[0,5,18,962,1089],[0,5,25,830,1089],[0,5,29,599,1089],[0,5,31,335,1089],[0,6,10,1029,1089],[0,6,18,963,1089],[0,6,25,831,1089],[0,6,29,600,1089],[0,6,31,336,1089],[0,7,10,1030,1089],[0,7,18,964,1089],[0,7,25,832,1089],[0,7,29,601,1089],[0,7,31,337,1089],[0,8,10,1031,1089],[0,8,18,965,1089],[0,8,25,833,1089],[0,8,29,602,1089],[0,8,31,338,1089],[0,9,10,1032,1089],[0,9,18,966,1089],[0,9,25,834,1089],[0,9,29,603,1089],[0,9,31,339,1089],[0,10,11,1089,1034],[0,10,12,1089,1035],[0,10,13,1089,1036],[0,10,14,1089,1037],[0,10,15,1089,1038],[0,10,16,1089,1039],[0,10,17,1089,1040],[0,10,18,967,1041],[0,10,19,1089,1042],[0,10,20,1089,1043],[0,10,21,1089,1044],[0,10,22,1089,1045],[0,10,23,1089,1046],[0,10,24,1089,1047],[0,10,25,835,1048],[0,10,26,1089,1049],[0,10,27,1089,1050],[0,10,28,1089,1051],[0,10,29,604,1052],[0,10,30,1089,1053],[0,10,31,340,1054],[0,10,32,1089,1055],[0,11,18,968,1089],[0,11,25,836,1089],[0,11,29,605,1089],[0,11,31,341,1089],[0,12,18,969,1089],[0,12,25,837,1089],[0,12,29,606,1089],[0,12,31,342,1089],[0,13,18,970,1089],[0,13,25,838,1089],[0,13,29,607,1089],[0,13,31,343,1089],[0,14,18,971,1089],[0,14,25,839,1089],[0,14,29,608,1089],[0,14,31,344,1089],[0,15,18,972,1089],[0,15,25,840,1089],[0,15,29,609,1089],[0,15,31,345,1089],[0,16,18,973,1089],[0,16,25,841,1089],[0,16,29,610,1089],[0,16,31,346,1089],[0,17,18,974,1089],[0,17,25,842,1089],[0,17,29,611,1089],[0,17,31,347,1089],[0,18,19,1089,976],[0,18,20,1089,977],[0,18,21,1089,978],[0,18,22,1089,979],[0,18,23,1089,980],[0,18,24,1089,981],[0,18,25,843,982],[0,18,26,1089,983],[0,18,27,1089,984],[0,18,28,1089,985],[0,18,29,612,986],[0,18,30,1089,987],[0,18,31,348,988],[0,18,32,1089,989],[0,19,25,844,1089],[0,19,29,613,1089],[0,19,31,349,1089],[0,20,25,845,1089],[0,20,29,614,1089],[0,20,31,350,1089],[0,21,25,846,1089],[0,21,29,615,1089],[0,21,31,351,1089],[0,22,25,847,1089],[0,22,29,616,1089],[0,22,31,352,1089],[0,23,25,848,1089],[0,23,29,617,1089],[0,23,31,353,1089],[0,24,25,849,1089],[0,24,29,618,1089],[0,24,31,354,1089],[0,25,26,1089,851],[0,25,27,1089,852],[0,25,28,1089,853],[0,25,29,619,854],[0,25,30,1089,855],[0,25,31,355,856],[0,25,32,1089,857],[0,26,29,620,1089],[0,26,31,356,1089],[0,27,29,621,1089],[0,27,31,357,1089],[0,28,29,622,1089],[0,28,31,358,1089],[0,29,30,1089,624],[0,29,31,359,625],[0,29,32,1089,626],[0,30,31,360,1089],[0,31,32,1089,362],[1,0,9,1056,1089],[1,0,17,990,1089],[1,0,19,924,1089],[1,0,24,858,1089],[1,0,26,792,1089],[1,0,28,627,1089],[1,0,30,561,1089],[1,0,32,297,1089],[1,1,9,1057,1089],[1,1,17,991,1089],[1,1,19,925,1089],[1,1,24,859,1089],[1,1,26,793,1089],[1,1,28,628,1089],[1,1,30,562,1089],[1,1,32,298,1089],[1,2,9,1058,1089],[1,2,17,992,1089],[1,2,19,926,1089],[1,2,24,860,1089],[1,2,26,794,1089],[1,2,28,629,1089],[1,2,30,563,1089],[1,2,32,299,1089],[1,3,9,1059,1089],[1,3,17,993,1089],[1,3,19,927,1089],[1,3,24,861,1089],[1,3,26,795,1089],[1,3,28,630,1089],[1,3,30,564,1089],[1,3,32,300,1089],[1,4,9,1060,1089],[1,4,17,994,1089],[1,4,19,928,1089],[1,4,24,862,1089],[1,4,26,796,1089],[1,4,28,631,1089],[1,4,30,565,1089],[1,4,32,301,1089],[1,5,9,1061,1089],[1,5,17,995,1089],[1,5,19,929,1089],[1,5,24,863,1089],[1,5,26,797,1089],[1,5,28,632,1089],[1,5,30,566,1089],[1,5,32,302,1089],[1,6,9,1062,1089],[1,6,17,996,1089],[1,6,19,930,1089],[1,6,24,864,1089],[1,6,26,798,1089],[1,6,28,633,1089],[1,6,30,567,1089],[1,6,32,303,1089],[1,7,9,1063,1089],[1,7,17,997,1089],[1,7,19,931,1089],[1,7,24,865,1089],[1,7,26,799,1089],[1,7,28,634,1089],[1,7,30,568,1089],[1,7,32,304,1089],[1,8,9,1064,1089],[1,8,17,998,1089],[1,8,19,932,1089],[1,8,24,866,1089],[1,8,26,800,1089],[1,8,28,635,1089],[1,8,30,569,1089],[1,8,32,305,1089],[1,9,10,1089,1066],[1,9,11,1089,1067],[1,9,12,1089,1068],[1,9,13,1089,1069],[1,9,14,1089,1070],[1,9,15,1089,1071],[1,9,16,1089,1072],[1,9,17,999,1073],[1,9,18,1089,1074],[1,9,19,933,1075],[1,9,20,1089,1076],[1,9,21,1089,1077],[1,9,22,1089,1078],[1,9,23,1089,1079],[1,9,24,867,1080],[1,9,25,1089,1081],[1,9,26,801,1082],[1,9,27,1089,1083],[1,9,28,636,1084],[1,9,29,1089,1085],[1,9,30,570,1086],[1,9,31,1089,1087],[1,9,32,306,1088],[1,10,17,1000,1089],[1,10,19,934,1089],[1,10,24,868,1089],[1,10,26,802,1089],[1,10,28,637,1089],[1,10,30,571,1089],[1,10,32,307,1089],[1,11,17,1001,1089],[1,11,19,935,1089],[1,11,24,869,1089],[1,11,26,803,1089],[1,11,28,638,1089],[1,11,30,572,1089],[1,11,32,308,1089],[1,12,17,1002,1089],[1,12,19,936,1089],[1,12,24,870,1089],[1,12,26,804,1089],[1,12,28,639,1089],[1,12,30,573,1089],[1,12,32,309,1089],[1,13,17,1003,1089],[1,13,19,937,1089],[1,13,24,871,1089],[1,13,26,805,1089],[1,13,28,640,1089],[1,13,30,574,1089],[1,13,32,310,1089],[1,14,17,1004,1089],[1,14,19,938,1089],[1,14,24,872,1089],[1,14,26,806,1089],[1,14,28,641,1089],[1,14,30,575,1089],[1,14,32,311,1089],[1,15,17,1005,1089],[1,15,19,939,1089],[1,15,24,873,1089],[1,15,26,807,1089],[1,15,28,642,1089],[1,15,30,576,1089],[1,15,32,312,1089],[1,16,17,1006,1089],[1,16,19,940,1089],[1,16,24,874,1089],[1,16,26,808,1089],[1,16,28,643,1089],[1,16,30,577,1089],[1,16,32,313,1089],[1,17,18,1089,1008],[1,17,19,941,1009],[1,17,20,1089,1010],[1,17,21,1089,1011],[1,17,22,1089,1012],[1,17,23,1089,1013],[1,17,24,875,1014],[1,17,25,1089,1015],[1,17,26,809,1016],[1,17,27,1089,1017],[1,17,28,644,1018],[1,17,29,1089,1019],[1,17,30,578,1020],[1,17,31,1089,1021],[1,17,32,314,1022],[1,18,19,942,1089],[1,18,24,876,1089],[1,18,26,810,1089],[1,18,28,645,1089],[1,18,30,579,1089],[1,18,32,315,1089],[1,19,20,1089,944],[1,19,21,1089,945],[1,19,22,1089,946],[1,19,23,1089,947],[1,19,24,877,948],[1,19,25,1089,949],[1,19,26,811,950],[1,19,27,1089,951],[1,19,28,646,952],[1,19,29,1089,953],[1,19,30,580,954],[1,19,31,1089,955],[1,19,32,316,956],[1,20,24,878,1089],[1,20,26,812,1089],[1,20,28,647,1089],[1,20,30,581,1089],[1,20,32,317,1089],[1,21,24,879,1089],[1,21,26,813,1089],[1,21,28,648,1089],[1,21,30,582,1089],[1,21,32,318,1089],[1,22,24,880,1089],[1,22,26,814,1089],[1,22,28,649,1089],[1,22,30,583,1089],[1,22,32,319,1089],[1,23,24,881,1089],[1,23,26,815,1089],[1,23,28,650,1089],[1,23,30,584,1089],[1,23,32,320,1089],[1,24,25,1089,883],[1,24,26,816,884],[1,24,27,1089,885],[1,24,28,651,886],[1,24,29,1089,887],[1,24,30,585,888],[1,24,31,1089,889],[1,24,32,321,890],[1,25,26,817,1089],[1,25,28,652,1089],[1,25,30,586,1089],[1,25,32,322,1089],[1,26,27,1089,819],[1,26,28,653,820],[1,26,29,1089,821],[1,26,30,587,822],[1,26,31,1089,823],[1,26,32,323,824],[1,27,28,654,1089],[1,27,30,588,1089],[1,27,32,324,1089],[1,28,29,1089,656],[1,28,30,589,657],[1,28,31,1089,658],[1,28,32,325,659],[1,29,30,590,1089],[1,29,32,326,1089],[1,30,31,1089,592],[1,30,32,327,593],[1,31,32,328,1089],[2,0,19,891,1089],[2,0,26,759,1089],[2,0,30,528,1089],[2,0,32,264,1089],[2,1,19,892,1089],[2,1,26,760,1089],[2,1,30,529,1089],[2,1,32,265,1089],[2,2,19,893,1089],[2,2,26,761,1089],[2,2,30,530,1089],[2,2,32,266,1089],[2,3,19,894,1089],[2,3,26,762,1089],[2,3,30,531,1089],[2,3,32,267,1089],[2,4,19,895,1089],[2,4,26,763,1089],[2,4,30,532,1089],[2,4,32,268,1089],[2,5,19,896,1089],[2,5,26,764,1089],[2,5,30,533,1089],[2,5,32,269,1089],[2,6,19,897,1089],[2,6,26,765,1089],[2,6,30,534,1089],[2,6,32,270,1089],[2,7,19,898,1089],[2,7,26,766,1089],[2,7,30,535,1089],[2,7,32,271,1089],[2,8,9,1089,1065],[2,8,17,1089,1073],[2,8,19,899,1075],[2,8,24,1089,1080],[2,8,26,767,1082],[2,8,28,1089,1084],[2,8,30,536,1086],[2,8,32,272,1088],[2,9,19,900,1089],[2,9,26,768,1089],[2,9,30,537,1089],[2,9,32,273,1089],[2,10,19,901,1089],[2,10,26,769,1089],[2,10,30,538,1089],[2,10,32,274,1089],[2,11,19,902,1089],[2,11,26,770,1089],[2,11,30,539,1089],[2,11,32,275,1089],[2,12,19,903,1089],[2,12,26,771,1089],[2,12,30,540,1089],[2,12,32,276,1089],[2,13,19,904,1089],[2,13,26,772,1089],[2,13,30,541,1089],[2,13,32,277,1089],[2,14,19,905,1089],[2,14,26,773,1089],[2,14,30,542,1089],[2,14,32,278,1089],[2,15,19,906,1089],[2,15,26,774,1089],[2,15,30,543,1089],[2,15,32,279,1089],[2,16,17,1089,1007],[2,16,19,907,1009],[2,16,24,1089,1014],[2,16,26,775,1016],[2,16,28,1089,1018],[2,16,30,544,1020],[2,16,32,280,1022],[2,17,19,908,1089],[2,17,26,776,1089],[2,17,30,545,1089],[2,17,32,281,1089],[2,18,19,909,1089],[2,18,26,777,1089],[2,18,30,546,1089],[2,18,32,282,1089],[2,19,20,1089,911],[2,19,21,1089,912],[2,19,22,1089,913],[2,19,23,877,914],[2,19,24,1089,915],[2,19,25,1089,916],[2,19,26,778,917],[2,19,27,646,918],[2,19,28,1089,919],[2,19,29,1089,920],[2,19,30,547,921],[2,19,31,1089,922],[2,19,32,283,923],[2,20,26,779,1089],[2,20,30,548,1089],[2,20,32,284,1089],[2,21,26,780,1089],[2,21,30,549,1089],[2,21,32,285,1089],[2,22,26,781,1089],[2,22,30,550,1089],[2,22,32,286,1089],[2,23,24,1089,882],[2,23,26,782,884],[2,23,28,1089,886],[2,23,30,551,888],[2,23,32,287,890],[2,24,26,783,1089],[2,24,30,552,1089],[2,24,32,288,1089],[2,25,26,784,1089],[2,25,30,553,1089],[2,25,32,289,1089],[2,26,27,653,786],[2,26,28,1089,787],[2,26,29,1089,788],[2,26,30,554,789],[2,26,31,1089,790],[2,26,32,290,791],[2,27,28,1089,655],[2,27,30,555,657],[2,27,32,291,659],[2,28,30,556,1089],[2,28,32,292,1089],[2,29,30,557,1089],[2,29,32,293,1089],[2,30,31,1089,559],[2,30,32,294,560],[2,31,32,295,1089],[3,0,26,726,1089],[3,0,30,495,1089],[3,0,32,231,1089],[3,1,26,727,1089],[3,1,30,496,1089],[3,1,32,232,1089],[3,2,26,728,1089],[3,2,30,497,1089],[3,2,32,233,1089],[3,3,26,729,1089],[3,3,30,498,1089],[3,3,32,234,1089],[3,4,26,730,1089],[3,4,30,499,1089],[3,4,32,235,1089],[3,5,26,731,1089],[3,5,30,500,1089],[3,5,32,236,1089],[3,6,26,732,1089],[3,6,30,501,1089],[3,6,32,237,1089],[3,7,19,1089,1075],[3,7,26,733,1082],[3,7,30,502,1086],[3,7,32,238,1088],[3,8,26,734,1089],[3,8,30,503,1089],[3,8,32,239,1089],[3,9,10,1089,1033],[3,9,18,933,1041],[3,9,25,801,1048],[3,9,26,735,1049],[3,9,29,570,1052],[3,9,30,504,1053],[3,9,31,306,1054],[3,9,32,240,1055],[3,10,24,835,1089],[3,10,26,736,1089],[3,10,28,604,1089],[3,10,30,505,1089],[3,10,32,241,1089],[3,11,26,737,1089],[3,11,30,506,1089],[3,11,32,242,1089],[3,12,26,738,1089],[3,12,30,507,1089],[3,12,32,243,1089],[3,13,26,739,1089],[3,13,30,508,1089],[3,13,32,244,1089],[3,14,26,740,1089],[3,14,30,509,1089],[3,14,32,245,1089],[3,15,19,1089,1009],[3,15,26,741,1016],[3,15,30,510,1020],[3,15,32,246,1022],[3,16,26,742,1089],[3,16,30,511,1089],[3,16,32,247,1089],[3,17,18,941,975],[3,17,25,809,982],[3,17,26,743,983],[3,17,29,578,986],[3,17,30,512,987],[3,17,31,314,988],[3,17,32,248,989],[3,18,19,1089,943],[3,18,24,843,948],[3,18,26,744,950],[3,18,28,612,952],[3,18,30,513,954],[3,18,32,249,956],[3,19,22,877,1089],[3,19,25,811,1089],[3,19,26,745,1089],[3,19,29,580,1089],[3,19,30,514,1089],[3,19,31,316,1089],[3,19,32,250,1089],[3,20,26,746,1089],[3,20,30,515,1089],[3,20,32,251,1089],[3,21,26,747,1089],[3,21,30,516,1089],[3,21,32,252,1089],[3,22,26,748,884],[3,22,30,517,888],[3,22,32,253,890],[3,23,26,749,1089],[3,23,30,518,1089],[3,23,32,254,1089],[3,24,25,816,850],[3,24,26,750,851],[3,24,29,585,854],[3,24,30,519,855],[3,24,31,321,856],[3,24,32,255,857],[3,25,26,751,818],[3,25,28,619,820],[3,25,30,520,822],[3,25,32,256,824],[3,26,27,1089,753],[3,26,28,620,754],[3,26,29,587,755],[3,26,30,521,756],[3,26,31,323,757],[3,26,32,257,758],[3,27,30,522,1089],[3,27,32,258,1089],[3,28,29,589,623],[3,28,30,523,624],[3,28,31,325,625],[3,28,32,259,626],[3,29,30,524,591],[3,29,32,260,593],[3,30,31,327,526],[3,30,32,261,527],[3,31,32,262,329],[4,18,19,1089,910],[4,18,26,1089,917],[4,18,30,1089,921],[4,18,32,1089,923],[4,25,26,1089,785],[4,25,30,1089,789],[4,25,32,1089,791],[4,29,30,1089,558],[4,29,32,1089,560],[4,31,32,1089,296],[5,0,26,660,1089],[5,0,30,429,1089],[5,0,32,165,1089],[5,1,26,661,1089],[5,1,30,430,1089],[5,1,32,166,1089],[5,2,26,662,1089],[5,2,30,431,1089],[5,2,32,167,1089],[5,3,26,663,1089],[5,3,30,432,1089],[5,3,32,168,1089],[5,4,26,664,1089],[5,4,30,433,1089],[5,4,32,169,1089],[5,5,26,665,1082],[5,5,30,434,1086],[5,5,32,170,1088],[5,6,26,666,1089],[5,6,30,435,1089],[5,6,32,171,1089],[5,7,26,667,1089],[5,7,30,436,1089],[5,7,32,172,1089],[5,8,26,668,1089],[5,8,30,437,1089],[5,8,32,173,1089],[5,9,26,669,1089],[5,9,30,438,1089],[5,9,32,174,1089],[5,10,26,670,1089],[5,10,30,439,1089],[5,10,32,175,1089],[5,11,26,671,1089],[5,11,30,440,1089],[5,11,32,176,1089],[5,12,26,672,1089],[5,12,30,441,1089],[5,12,32,177,1089],[5,13,26,673,1016],[5,13,30,442,1020],[5,13,32,178,1022],[5,14,26,674,1089],[5,14,30,443,1089],[5,14,32,179,1089],[5,15,26,675,1089],[5,15,30,444,1089],[5,15,32,180,1089],[5,16,26,676,1089],[5,16,30,445,1089],[5,16,32,181,1089],[5,17,26,677,1089],[5,17,30,446,1089],[5,17,32,182,1089],[5,18,26,678,1089],[5,18,30,447,1089],[5,18,32,183,1089],[5,19,26,679,1089],[5,19,30,448,1089],[5,19,32,184,1089],[5,20,26,680,884],[5,20,30,449,888],[5,20,32,185,890],[5,21,26,681,1089],[5,21,30,450,1089],[5,21,32,186,1089],[5,22,26,682,1089],[5,22,30,451,1089],[5,22,32,187,1089],[5,23,26,683,1089],[5,23,30,452,1089],[5,23,32,188,1089],[5,24,26,684,1089],[5,24,30,453,1089],[5,24,32,189,1089],[5,25,26,685,1089],[5,25,30,454,1089],[5,25,32,190,1089],[5,26,27,1089,687],[5,26,28,1089,688],[5,26,29,1089,689],[5,26,30,455,690],[5,26,31,1089,691],[5,26,32,191,692],[5,27,30,456,1089],[5,27,32,192,1089],[5,28,30,457,1089],[5,28,32,193,1089],[5,29,30,458,1089],[5,29,32,194,1089],[5,30,31,1089,460],[5,30,32,195,461],[5,31,32,196,1089],[6,0,25,693,1089],[6,0,29,462,1089],[6,0,30,396,1089],[6,0,31,198,1089],[6,0,32,132,1089],[6,1,25,694,1089],[6,1,29,463,1089],[6,1,30,397,1089],[6,1,31,199,1089],[6,1,32,133,1089],[6,2,25,695,1089],[6,2,29,464,1089],[6,2,30,398,1089],[6,2,31,200,1089],[6,2,32,134,1089],[6,3,25,696,1089],[6,3,29,465,1089],[6,3,30,399,1089],[6,3,31,201,1089],[6,3,32,135,1089],[6,4,25,697,1081],[6,4,29,466,1085],[6,4,30,400,1086],[6,4,31,202,1087],[6,4,32,136,1088],[6,5,25,698,1089],[6,5,29,467,1089],[6,5,30,401,1089],[6,5,31,203,1089],[6,5,32,137,1089],[6,6,25,699,1048],[6,6,29,468,1052],[6,6,30,402,1053],[6,6,31,204,1054],[6,6,32,138,1055],[6,7,25,700,1089],[6,7,29,469,1089],[6,7,30,403,1089],[6,7,31,205,1089],[6,7,32,139,1089],[6,8,25,701,1089],[6,8,29,470,1089],[6,8,30,404,1089],[6,8,31,206,1089],[6,8,32,140,1089],[6,9,25,702,1089],[6,9,29,471,1089],[6,9,30,405,1089],[6,9,31,207,1089],[6,9,32,141,1089],[6,10,25,703,1089],[6,10,29,472,1089],[6,10,30,406,1089],[6,10,31,208,1089],[6,10,32,142,1089],[6,11,25,704,1089],[6,11,29,473,1089],[6,11,30,407,1089],[6,11,31,209,1089],[6,11,32,143,1089],[6,12,25,705,1015],[6,12,29,474,1019],[6,12,30,408,1020],[6,12,31,210,1021],[6,12,32,144,1022],[6,13,25,706,1089],[6,13,29,475,1089],[6,13,30,409,1089],[6,13,31,211,1089],[6,13,32,145,1089],[6,14,25,707,982],[6,14,29,476,986],[6,14,30,410,987],[6,14,31,212,988],[6,14,32,146,989],[6,15,25,708,1089],[6,15,29,477,1089],[6,15,30,411,1089],[6,15,31,213,1089],[6,15,32,147,1089],[6,16,25,709,1089],[6,16,29,478,1089],[6,16,30,412,1089],[6,16,31,214,1089],[6,16,32,148,1089],[6,17,25,710,949],[6,17,29,479,953],[6,17,30,413,954],[6,17,31,215,955],[6,17,32,149,956],[6,18,25,711,1089],[6,18,29,480,1089],[6,18,30,414,1089],[6,18,31,216,1089],[6,18,32,150,1089],[6,19,25,712,1089],[6,19,29,481,1089],[6,19,30,415,1089],[6,19,31,217,1089],[6,19,32,151,1089],[6,20,25,713,1089],[6,20,29,482,1089],[6,20,30,416,1089],[6,20,31,218,1089],[6,20,32,152,1089],[6,21,25,714,850],[6,21,29,483,854],[6,21,30,417,855],[6,21,31,219,856],[6,21,32,153,857],[6,22,25,715,1089],[6,22,29,484,1089],[6,22,30,418,1089],[6,22,31,220,1089],[6,22,32,154,1089],[6,23,25,716,1089],[6,23,29,485,1089],[6,23,30,419,1089],[6,23,31,221,1089],[6,23,32,155,1089],[6,24,25,717,817],[6,24,26,1089,818],[6,24,29,486,821],[6,24,30,420,822],[6,24,31,222,823],[6,24,32,156,824],[6,25,26,1089,719],[6,25,27,1089,720],[6,25,28,586,721],[6,25,29,487,722],[6,25,30,421,723],[6,25,31,223,724],[6,25,32,157,725],[6,26,28,587,1089],[6,26,29,488,1089],[6,26,30,422,1089],[6,26,31,224,1089],[6,26,32,158,1089],[6,27,29,489,1089],[6,27,30,423,1089],[6,27,31,225,1089],[6,27,32,159,1089],[6,28,29,490,590],[6,28,30,424,591],[6,28,31,226,592],[6,28,32,160,593],[6,29,30,425,492],[6,29,31,227,493],[6,29,32,161,494],[6,30,31,228,427],[6,30,32,162,428],[6,31,32,163,230],[7,0,30,363,1089],[7,0,32,99,1089],[7,1,30,364,1089],[7,1,32,100,1089],[7,2,30,365,1089],[7,2,32,101,1089],[7,3,30,366,1086],[7,3,32,102,1088],[7,4,30,367,1089],[7,4,32,103,1089],[7,5,30,368,1053],[7,5,32,104,1055],[7,6,30,369,1089],[7,6,32,105,1089],[7,7,30,370,1089],[7,7,32,106,1089],[7,8,30,371,1089],[7,8,32,107,1089],[7,9,30,372,1089],[7,9,32,108,1089],[7,10,30,373,1089],[7,10,32,109,1089],[7,11,30,374,1020],[7,11,32,110,1022],[7,12,30,375,1089],[7,12,32,111,1089],[7,13,30,376,987],[7,13,32,112,989],[7,14,30,377,1089],[7,14,32,113,1089],[7,15,30,378,1089],[7,15,32,114,1089],[7,16,30,379,954],[7,16,32,115,956],[7,17,30,380,921],[7,17,32,116,923],[7,18,30,381,1089],[7,18,32,117,1089],[7,19,30,382,1089],[7,19,32,118,1089],[7,20,30,383,855],[7,20,32,119,857],[7,21,30,384,1089],[7,21,32,120,1089],[7,22,30,385,1089],[7,22,32,121,1089],[7,23,30,386,822],[7,23,32,122,824],[7,24,30,387,789],[7,24,32,123,791],[7,25,26,1089,686],[7,25,30,388,690],[7,25,32,124,692],[7,26,29,455,1089],[7,26,30,389,1089],[7,26,31,191,1089],[7,26,32,125,1089],[7,27,30,390,591],[7,27,32,126,593],[7,28,30,391,558],[7,28,32,127,560],[7,29,30,392,459],[7,29,32,128,461],[7,30,31,195,394],[7,30,32,129,395],[7,31,32,130,197],[8,0,32,66,1089],[8,1,32,67,1089],[8,2,32,68,1088],[8,3,32,69,1089],[8,4,32,70,1055],[8,5,32,71,1089],[8,6,32,72,1089],[8,7,32,73,1089],[8,8,32,74,1089],[8,9,32,75,1089],[8,10,32,76,1089],[8,11,32,77,1089],[8,12,32,78,989],[8,13,32,79,1089],[8,14,32,80,1089],[8,15,32,81,956],[8,16,32,82,1089],[8,17,32,83,1089],[8,18,32,84,1089],[8,19,32,85,1089],[8,20,32,86,1089],[8,21,32,87,1089],[8,22,32,88,824],[8,23,32,89,1089],[8,24,26,1089,752],[8,24,30,1089,756],[8,24,32,90,758],[8,25,29,421,1089],[8,25,31,157,1089],[8,25,32,91,1089],[8,26,32,92,1089],[8,27,32,93,1089],[8,28,30,1089,525],[8,28,32,94,527],[8,29,30,1089,426],[8,29,31,161,427],[8,29,32,95,428],[8,30,31,162,1089],[8,30,32,96,1089],[8,31,32,97,164],[9,0,32,33,1089],[9,1,32,34,1088],[9,2,32,35,1089],[9,3,32,36,1055],[9,4,32,37,1089],[9,5,32,38,1089],[9,6,32,39,1089],[9,7,32,40,1089],[9,8,32,41,1089],[9,9,32,42,1089],[9,10,32,43,1089],[9,11,32,44,989],[9,12,32,45,1089],[9,13,32,46,1089],[9,14,32,47,1089],[9,15,32,48,923],[9,16,32,49,1089],[9,17,32,50,1089],[9,18,32,51,1089],[9,19,32,52,1089],[9,20,32,53,1089],[9,21,32,54,1089],[9,22,32,55,791],[9,23,32,56,758],[9,24,32,57,1089],[9,25,32,58,1089],[9,26,32,59,1089],[9,27,32,60,527],[9,28,32,61,1089],[9,29,30,1089,393],[9,29,32,62,395],[9,30,31,129,1089],[9,30,32,63,1089],[9,31,32,64,131],[10,0,32,0,1088],[10,1,32,1,1089],[10,2,32,2,1089],[10,3,32,3,1089],[10,4,32,4,1089],[10,5,32,5,1089],[10,6,32,6,1089],[10,7,32,7,1089],[10,8,32,8,1089],[10,9,32,9,1089],[10,10,32,10,1089],[10,11,32,11,1089],[10,12,32,12,1089],[10,13,32,13,956],[10,14,32,14,923],[10,15,32,15,1089],[10,16,32,16,1089],[10,17,32,17,1089],[10,18,32,18,1089],[10,19,32,19,1089],[10,20,32,20,824],[10,21,32,21,791],[10,22,32,22,1089],[10,23,25,1089,718],[10,23,29,1089,722],[10,23,31,1089,724],[10,23,32,23,725],[10,24,32,24,692],[10,25,32,25,1089],[10,26,32,26,1089],[10,27,29,1089,491],[10,27,30,1089,492],[10,27,31,1089,493],[10,27,32,27,494],[10,28,30,1089,459],[10,28,32,28,461],[10,29,32,29,1089],[10,30,32,30,1089],[10,31,32,31,1089],[11,20,32,1089,758],[11,31,32,1089,32],[12,7,30,238,1020],[12,7,32,1089,1022],[12,15,26,510,884],[12,15,30,246,888],[12,15,32,1089,890],[12,18,32,1089,824],[12,22,30,253,657],[12,22,32,1089,659],[12,25,30,256,591],[12,25,32,1089,593],[12,26,32,1089,527],[12,28,31,1089,361],[12,29,32,1089,329],[12,30,32,1089,263],[14,26,32,1089,461],[14,30,32,1089,197],[15,25,32,1089,494],[15,29,31,1089,229],[15,29,32,1089,230],[15,30,32,1089,164],[16,30,32,1089,131],[17,30,32,1089,98],[18,30,32,1089,65]]}
+```
+
+### Appendix B: exact-check receipt
+
+```json
+{
+  "scope": "Exact finite arithmetic only. No Lean compilation or proof verification.",
+  "projectCommit": "520a2a29c40cc40e1df2b1c41980552f25d08e65",
+  "sourceSha256": "9d673eff17a53fee04eb2677615db689833cf33b5fa23fe16ad42467d22a40a9",
+  "seed": {
+    "prime": 109,
+    "r": 57,
+    "i": 33,
+    "length": 96,
+    "socleDegree": 9,
+    "noetherLefschetzRank": 7,
+    "rankWithDerivativeRow": 8
+  },
+  "invariantCubicBasis": [
+    [
+      0,
+      0,
+      0,
+      1,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      3,
+      0
+    ],
+    [
+      0,
+      0,
+      3,
+      0,
+      0
+    ],
+    [
+      0,
+      1,
+      1,
+      1,
+      0
+    ],
+    [
+      0,
+      3,
+      0,
+      0,
+      0
+    ],
+    [
+      1,
+      0,
+      1,
+      1,
+      0
+    ],
+    [
+      1,
+      2,
+      0,
+      0,
+      0
+    ],
+    [
+      2,
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      3,
+      0,
+      0,
+      0,
+      0
+    ]
+  ],
+  "characterOneCubicBasis": [
+    [
+      0,
+      0,
+      1,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      1,
+      2,
+      0
+    ],
+    [
+      0,
+      1,
+      2,
+      0,
+      0
+    ],
+    [
+      0,
+      2,
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      2,
+      0,
+      0
+    ],
+    [
+      1,
+      1,
+      0,
+      1,
+      0
+    ],
+    [
+      2,
+      0,
+      0,
+      1,
+      0
+    ]
+  ],
+  "noetherLefschetzMatrixMod109": [
+    [
+      0,
+      78,
+      0,
+      0,
+      8,
+      0,
+      75,
+      66,
+      63
+    ],
+    [
+      78,
+      68,
+      0,
+      6,
+      0,
+      62,
+      0,
+      0,
+      47
+    ],
+    [
+      0,
+      6,
+      0,
+      39,
+      49,
+      62,
+      39,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      39,
+      0,
+      4,
+      0,
+      70,
+      0,
+      0
+    ],
+    [
+      0,
+      62,
+      0,
+      62,
+      39,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      47,
+      62,
+      0,
+      70,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      94,
+      91,
+      0,
+      0,
+      0,
+      47,
+      0,
+      0,
+      0
+    ]
+  ],
+  "derivativeRowMod109": [
+    0,
+    21,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    70
+  ],
+  "noetherLefschetzMinorColumnsZeroBased": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "noetherLefschetzMinorDeterminantMod109": 80,
+  "augmentedMinorColumnsZeroBased": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "augmentedMinorDeterminantMod109": 76,
+  "normalizedKernelVectorMod109": [
+    19,
+    26,
+    71,
+    38,
+    38,
+    74,
+    19,
+    24,
+    0
+  ],
+  "noetherLefschetzValueMod109": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "derivativeValueMod109": 1,
+  "higgs": {
+    "dimension": 33,
+    "directions": 35,
+    "independentEquations": 1088,
+    "solutionDimension": 1,
+    "freeComponent": "all 33 diagonal entries",
+    "zeroComponent": "all 1056 off-diagonal entries",
+    "forestSha256": "f2ee2a403c3d8baa41684b9db9abe3208a066cea8f06bb22d5e8d662aef6212e"
+  },
+  "elapsedSeconds": 0.2214030270006333,
+  "peakRssKiB": 27168,
+  "addressSpaceLimitMiB": 1024,
+  "cpuLimitSeconds": 120
+}
+```
