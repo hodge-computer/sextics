@@ -2,6 +2,8 @@ import Proposal.SolutionSupport09
 import Proposal.GeometricSeedSmooth
 import Proposal.GeometricProjector
 import Proposal.GeometricExistence
+import Proposal.GeometricSerre
+import Proposal.GeometricVariation
 
 /-! Source partition of Solution.lean. See solution.md for verification status. -/
 
@@ -39,8 +41,12 @@ Its final Lean formalization remains open. The source-only continuation
 adds a smooth-member gradient witness in the actual fixed-r seed family,
 positive-adjoint rational projectors, the affine-curve filtration argument,
 and the actual rational cochain complex with its top homology comparison.
-The geometric realization and affine algebraic de Rham comparison remain
-to be constructed. These new helpers have not been compiled.
+The next continuation constructs the genuine smooth affine Jacobian open
+and its further principal opens, their regular differential bases, the
+actual graded normal Cech pairing, and a paired Fermat Jacobian Higgs model.
+The projective Serre and moving-curve interpretations, geometric variation,
+supported correspondences, and analytic de Rham comparison remain to be
+constructed. These new helpers have not been compiled.
 The admission below is that precise existence obligation, not a routine
 tactic gap. The protected theorem still depends on sorryAx. No completed
 solve is claimed.

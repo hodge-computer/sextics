@@ -1,5 +1,6 @@
 import Proposal.GeometricDeRham
 import Proposal.GeometricLeray
+import Proposal.GeometricRegularDeRham
 
 /-!
 # Assembly of the geometric support and affine comparison steps
@@ -18,6 +19,11 @@ correct comparison direction and the genuine rational-form complex. Its
 geometric inputs remain explicit. In particular, this file does not provide
 a geometric comparison, a supported relative correspondence, or a proof of
 `Submission.missing_geometric_existence`.
+
+The later regular-open specialization uses the constructed smooth affine
+localization, its genuine regular forms, and the actual protected residue.
+Its map to generic-point cohomology and its source-binding identity are
+proved by `GeometricRegularDeRham`; they are not extra input hypotheses.
 -/
 
 set_option autoImplicit false
@@ -113,6 +119,68 @@ theorem certificate_of_leray_and_affine_comparison
       edge hyperplane hedge invariants next hhyperplane_invariant hnext
       restriction projector hgraded hsupport hhyperplane_support x hinvariant
       C a hcomparison hsource)
+
+/-- Specialization to the genuine regular de Rham quotient of a constructed
+affine open. The protected regular residue and its map to the original
+function-field class are fixed by the preceding construction.
+
+The remaining comparison must be the geometric comparison on this same
+open. Its injectivity and the zero comparison class are still hypotheses;
+this theorem does not construct them. -/
+theorem exact_of_regular_open_comparison
+    (s : CycleQ2GeometricRegularDeRham.OpenRing) (hs : s ≠ 0)
+    (comparison : CycleQ2GeometricRegularDeRham.TopDeRham s →ₗ[ℂ] Betti)
+    (hinjective : Function.Injective comparison)
+    (hzero : comparison (CycleQ2GeometricRegularDeRham.residueClass s) = 0) :
+    ∃ η : Form 3, exteriorD3 η =
+      CycleQ2AffineExactness.residueSourceForm CycleQ2AffineClearing.affineA := by
+  have hregular : CycleQ2GeometricRegularDeRham.residueClass s = 0 :=
+    hinjective (by simpa only [map_zero] using hzero)
+  have hgeneric := congrArg (CycleQ2GeometricRegularDeRham.toGeneric s hs) hregular
+  apply (CycleQ2AffineTopCohomology.residueClass_eq_zero_iff
+    CycleQ2AffineClearing.affineA).mp
+  simpa only [CycleQ2GeometricRegularDeRham.toGeneric_residueClass, map_zero]
+    using hgeneric
+
+/-- The Leray/support argument now assembles with a specific regular
+residue class on any further nonempty principal open. No arbitrary
+regular class, generic-point map, or residue-binding premise is supplied.
+The actual geometric comparison, class, correspondence and support
+properties still need construction. -/
+theorem exact_of_regular_open_leray
+    (s : CycleQ2GeometricRegularDeRham.OpenRing) (hs : s ≠ 0)
+    (comparison : CycleQ2GeometricRegularDeRham.TopDeRham s →ₗ[ℂ] Betti)
+    (hinjective : Function.Injective comparison)
+    (edge : H →ₗ[ℂ] ℂ) (hyperplane : H)
+    (hedge : edge hyperplane = 1)
+    (invariants next : Submodule ℂ H)
+    (hhyperplane_invariant : hyperplane ∈ invariants)
+    (hnext : next = ⊥)
+    (restriction : H →ₗ[ℂ] Betti) (projector : Module.End ℂ H)
+    (hgraded : ∀ x ∈ invariants ⊓ LinearMap.ker edge,
+      next.mkQ (projector x) = next.mkQ x)
+    (hsupport : restriction.comp projector = 0)
+    (hhyperplane_support : restriction hyperplane = 0)
+    (x : H) (hinvariant : x ∈ invariants)
+    (hcomparison : comparison (CycleQ2GeometricRegularDeRham.residueClass s) =
+      restriction x) :
+    ∃ η : Form 3, exteriorD3 η =
+      CycleQ2AffineExactness.residueSourceForm CycleQ2AffineClearing.affineA := by
+  apply exact_of_regular_open_comparison s hs comparison hinjective
+  rw [hcomparison]
+  exact CycleQ2GeometricLeray.invariant_class_restriction_eq_zero
+    edge hyperplane hedge invariants next hhyperplane_invariant hnext
+    restriction projector hgraded hsupport hhyperplane_support hinvariant
+
+theorem certificate_of_regular_open_comparison
+    (s : CycleQ2GeometricRegularDeRham.OpenRing) (hs : s ≠ 0)
+    (comparison : CycleQ2GeometricRegularDeRham.TopDeRham s →ₗ[ℂ] Betti)
+    (hinjective : Function.Injective comparison)
+    (hzero : comparison (CycleQ2GeometricRegularDeRham.residueClass s) = 0) :
+    HodgeComputer.HasCertificate
+      HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A :=
+  CycleQ2AffineExactness.protected_certificate_of_exact_residueSourceForm
+    (exact_of_regular_open_comparison s hs comparison hinjective hzero)
 
 end CycleQ2GeometricExistence
 
