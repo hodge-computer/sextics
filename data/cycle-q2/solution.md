@@ -1,8 +1,70 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Source-only geometric formalization — 12 November 2026
+
+**This continuation adds Lean proof source, with compilation deliberately
+deferred. The final existence theorem is not yet formalized.** No Lean
+elaboration, Lake build, language server, kernel replay, or protected
+verification was launched for these additions. The written classical argument
+below remains the mathematical reference; the new source must still be
+checked by Lean before its declarations are counted as verified.
+
+Five flat helpers implement distinct steps of that argument:
+
+| Helper | New source-level construction | Geometric input still required |
+| --- | --- | --- |
+| [GeometricSeedSmooth.lean](GeometricSeedSmooth.lean) | A full cubic-parameter family exactly containing the existing incidence seed; an explicit nonzero-gradient witness whenever \(r^3\ne0,4\), including literal \(r=57\). | The weighted-projective Jacobian interpretation, geometric smooth opens, and intersection with the relevant rank open. |
+| [GeometricProjector.lean](GeometricProjector.lean) | Surjectivity of a positive-metric map gives injectivity of its adjoint composite; rational comparison yields a rational minimal polynomial and the supported projection operator. | Actual geometric cohomology, the Hodge metrics and correspondence comparison, and a submodule realized by divisor-supported cycles. |
+| [GeometricLeray.lean](GeometricLeray.lean) | The explicit edge-kernel decomposition and the passage from graded identity to identity on the full first-piece class when the next filtration piece vanishes. | The actual Leray filtration, edge map, invariant hyperplane lift, correspondence action, and restriction maps. |
+| [GeometricDeRham.lean](GeometricDeRham.lean) | The existing actual rational exterior derivatives form a Mathlib cochain complex; its degree-four homology is canonically identified with the protected rational-form quotient. | Comparison with algebraic forms on an affine open and with its Betti cohomology. |
+| [GeometricExistence.lean](GeometricExistence.lean) | The Leray and affine-comparison implications are assembled into the exact rational primitive and protected certificate statements, with their hypotheses explicit. | A concrete construction satisfying those geometric hypotheses for the protected source. |
+
+The affine comparison has the correct two-map shape. It compares regular
+algebraic de Rham cohomology with Betti cohomology on the **same affine open**;
+a separate map then restricts regular forms to the function field. The new
+assembly does not assume an injection from arbitrary rational-form cohomology
+into the cohomology of a single fixed open.
+
+The seed calculation preserves an important distinction. The written proof
+uses \(r^3=2\), whereas the existing incidence implementation contains literal
+\(r=57\) over the complex numbers. In their common full cubic family the
+equation is
+
+\[
+F_{r,b}=x_0^6+x_1^6+x_2^6+x_3^6+w^3
+       +(2-r^3)x_1^3x_3^3+b^2.
+\]
+
+The middle two gradient equations at \(b=0\) have determinant
+\(4-(2-r^3)^2=r^3(4-r^3)\). This yields the new witness for the actual
+literal-57 family without identifying 57 with a cube root of two. The zero
+cubic is a point of the full parameter space; it is not claimed to belong to
+the normalized incidence chart with leading cubic coefficient one.
+
+The active proposal now has **55 Lean modules and 57 total proposal files**.
+All five helpers are reachable from `Solution.lean`. The existing theorem
+bodies are preserved, including the one explicit admission in
+`Submission.missing_geometric_existence`; the new helpers add none.
+
+### What prevents the unconditional endpoint
+
+Source inspection of the pinned Mathlib and existing proposal did not locate
+the geometric Serre/semiregularity comparison, the moving-curve Abel--Jacobi
+construction, a polarized variation with its actual Jacobian-ring comparison,
+the supported algebraic correspondences, or the required algebraic de Rham
+comparison. The existing algebraic modules are not implementations of these
+geometric theorems. Their constructions and hypotheses must be formalized
+before `GeometricExistence` can be applied to the actual protected variety.
+
+Independent source review checked the new algebra, comparison directions,
+and named APIs against the pinned library. It found no definite mathematical
+contradiction in the targeted portions of the written argument; that review
+does not certify the whole classical proof or establish that the new Lean
+files elaborate. No certificate without the existing admission is claimed.
+
 ## Local modular compilation — 12 November 2026
 
-The full modular development build compiled locally after fixing elaboration
+The 50-module modular checkpoint compiled locally after fixing elaboration
 errors in `SolutionSupport08.lean` and `SolutionSupport09.lean`. All 50
 proposal modules and the generated `HodgeTarget` compiled from source, in
 dependency order, using Lean 4.33.1 and Mathlib revision
@@ -17,6 +79,8 @@ for `SolutionSupport08.lean` and
 `df1eea70354d117e377d294cc483355a7a35d977a11a1c81e41aed584a705134`
 for `SolutionSupport09.lean`. The compilation used the other proposal sources
 from modular checkpoint `2493df96772fbace8f9689cf7ab3f346e280d926`.
+This build did not include the five later source-only helpers or the later
+changes to `Solution.lean` described above.
 
 This is a development build, not protected verification or independent kernel
 replay. The existing `sorry` in `Submission.missing_geometric_existence`
@@ -48,8 +112,8 @@ at the pinned checkpoint rather than submitted with this geometric route.
 The [preserved current route](#preserved-current-route) remains available for
 further work. The [source layout](#source-layout) below lists the new helpers.
 
-The active proposal contains **50 Lean modules and 52 total proposal files**,
-leaving 12 file slots below the limit. There are 43 numbered body modules,
+At this modular checkpoint, the proposal contained **50 Lean modules and 52
+total proposal files**, leaving 12 file slots below the limit. There are 43 numbered body modules,
 four import facades, the final `Solution.lean`, and the unchanged `Workspace`
 and `GeometricSeed`. The largest module has **4,795 lines**. Structural checks
 verify complete source-body coverage, matching copied bytes, balanced scopes

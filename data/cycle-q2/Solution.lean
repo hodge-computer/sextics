@@ -1,4 +1,7 @@
 import Proposal.SolutionSupport09
+import Proposal.GeometricSeedSmooth
+import Proposal.GeometricProjector
+import Proposal.GeometricExistence
 
 /-! Source partition of Solution.lean. See solution.md for verification status. -/
 
@@ -31,7 +34,13 @@ identity, with the degree twist retained.
 The seed normal coordinates are realized by bases of the genuine ideal
 cotangent module on every relevant prime chart; the existing normal matrix
 is bound to evaluation on the actual defining-equation classes.
-Geometric primitive existence remains open.
+The written classical existence argument is recorded in solution.md.
+Its final Lean formalization remains open. The source-only continuation
+adds a smooth-member gradient witness in the actual fixed-r seed family,
+positive-adjoint rational projectors, the affine-curve filtration argument,
+and the actual rational cochain complex with its top homology comparison.
+The geometric realization and affine algebraic de Rham comparison remain
+to be constructed. These new helpers have not been compiled.
 The admission below is that precise existence obligation, not a routine
 tactic gap. The protected theorem still depends on sorryAx. No completed
 solve is claimed.
@@ -67,7 +76,7 @@ end CycleQ2Nonconstructive
 
 namespace Submission
 
-/-- UNPROVED: establish actual exterior-form exactness from geometric support
+/-- UNPROVED IN LEAN: establish actual exterior-form exactness from geometric support
 and global algebraic de Rham comparison, or prove this existential directly.
 The checked finite seed/Higgs calculations alone do not supply this theorem.
 All subsequent algebraic steps to the protected target are proved. -/
