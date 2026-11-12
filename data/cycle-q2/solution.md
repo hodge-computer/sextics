@@ -1,6 +1,91 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Development compilation checkpoint — 12 November 2026
+## Modular source layout — 12 November 2026
+
+**This is a source-organization refactor of the incomplete proof.** The
+previous large modules are split into flat, separately importable helpers,
+with small compatibility modules retaining their original names. The final
+`Solution.lean` contains the original existence obligation, certificate
+implication, and endpoint axiom reports. The existing
+`Submission.missing_geometric_existence` admission remains.
+
+The preserved source checkpoint is
+[`2cb80949c1d0`](https://github.com/fqlx/sextics/commit/2cb80949c1d060bd884bef43cae335ee188d245e).
+The split retains declaration order, complete theorem and definition bodies,
+namespace contexts, and scoped elaboration settings. Most boundaries follow
+the existing complete components. Three large literal-data components are
+divided only between complete public definitions, with their original
+namespace and option contexts reopened in each part.
+
+The repository accepts flat `Proposal.Helper` modules and limits a proposal
+to 64 files. Its verifier compiles and independently replays every submitted
+Lean module, including unused ones. The 55 `Current*.lean` files, which are
+outside the active geometric proof's import closure, are therefore retained
+at the pinned checkpoint rather than submitted with this geometric route.
+The [preserved current route](#preserved-current-route) remains available for
+further work. The [source layout](#source-layout) below lists the new helpers.
+
+The active proposal contains **50 Lean modules and 52 total proposal files**,
+leaving 12 file slots below the limit. There are 43 numbered body modules,
+four import facades, the final `Solution.lean`, and the unchanged `Workspace`
+and `GeometricSeed`. The largest module has **4,795 lines**. Structural checks
+verify complete source-body coverage, matching copied bytes, balanced scopes
+at the new boundaries, the original scoped settings, an acyclic import graph,
+and reachability of every submitted Lean helper from `Solution`. No proof
+body, declaration visibility, protected target, verifier, or workflow was
+changed, and no admission or axiom was added.
+
+An independent audit matched **9,061 declaration bodies and their source-level
+qualified names**, checked **543 exact copied byte segments**, and verified
+complete, disjoint coverage of the original bodies. The only changed source
+text inside those bodies is the explanatory archive comment before the final
+entry point; every endpoint declaration remains byte-for-byte unchanged.
+All retired current-route files were also checked to be proposal additions,
+absent from the immutable upstream base, so their retirement preserves the
+submission's one-instance, additions-only boundary relative to that base.
+
+Smaller modules permit separate compilation and reuse of unchanged compiled
+dependencies. They do not remove the memory needed to load those dependencies
+or make an expensive individual theorem cheaper. No reduction in peak memory
+or total protected-verifier time is claimed without a matching measurement.
+The full newly split dependency graph has not yet completed a fresh Lean
+build or independent kernel replay. Historical successful compilations below
+apply to their exact original filenames and source hashes, not to the new
+module layout.
+
+### Bounded compilation sample
+
+The new actual `Proposal.GeometricFormalInputs01` module compiled successfully
+with exit 0 in **395.50 seconds**, using one worker and a **5,120 MiB** Lean
+memory cap. Its sampled peak process-tree RSS was **5,353,160,704 bytes**.
+The compiled source SHA-256 is
+`70276723f9bf3370ad7d7444989d29e110c548d51c1429e8ffa1315bc665c454`.
+The test used verified unchanged dependencies and compiled the new module
+from source; no monolithic artifact was renamed or substituted.
+
+The adjacent `Proposal.GeometricFormalInputs02` module then compiled
+successfully with exit 0 in **245.22 seconds**, importing the newly compiled
+first module. Its source SHA-256 is
+`67b85d98deda614126cfe43e1f7a44619f64091ef98d73e473f618d7c34dbed3`;
+sampled peak process-tree RSS was **4,898,963,456 bytes** under the same limits.
+These two successful samples cover 9,414 source lines and one new import
+boundary. They do not establish that all 50 modules compile together.
+
+An earlier sample under a 4,096 MiB Lean cap failed after 30.56 seconds with
+Lean's `memory_exception` from the interpreter. This was a configured Lean
+memory-limit failure, not evidence that the smaller file contained a proof
+error or that the operating system ran out of memory. The successful retry
+used a 6,144 MiB process-tree RSS guard and a 2,048 MiB available-memory
+reserve. This sample does not establish compilation of every new helper,
+independent kernel replay, or protected acceptance.
+
+The continuing original build completed the full `GeometricTarget` module
+successfully on 12 November 2026: exit 0, 1,047.63 seconds, sampled peak
+process-tree RSS 5,500,706,816 bytes. Its source SHA-256 was
+`c8fdd4b50a68e3d28e5ce8ddf352200d87a4dedf5858b80346b854558a89a595`.
+That result is evidence about the source before this split.
+
+## Historical monolithic compilation checkpoint — 12 November 2026
 
 **The complete Lean existence proof remains unfinished.** This checkpoint
 preserves compiler-driven repairs to the exterior differential, projector,
@@ -36,7 +121,7 @@ These results are development compilation evidence, with the scopes above.
 Earlier source-only statements below describe their historical checkpoints;
 earlier kernel-replay records do not certify the newly modified sources.
 
-## Current Lean source continuation — 12 November 2026
+## Earlier Lean source continuation — 12 November 2026
 
 **The complete Lean existence proof is still unfinished.** This continuation
 implements further parts of the written proof with explicit Lean proof bodies,
@@ -2199,42 +2284,45 @@ orbit sum can replace the required ambient-test class.
 
 ## Preserved current route
 
-All `Current*.lean` files remain unchanged and are not dependencies of the
-active entry point. [CurrentData.lean](CurrentData.lean) retains its 13,874
+All 55 `Current*.lean` files are preserved unchanged at
+[the source checkpoint before modularization](https://github.com/fqlx/sextics/tree/2cb80949c1d060bd884bef43cae335ee188d245e/data/cycle-q2).
+They are outside the active geometric proof's dependency closure and have
+been removed from this proposal's submitted file set to make room for the
+smaller geometric helpers.
+[CurrentData.lean](https://github.com/fqlx/sextics/blob/2cb80949c1d060bd884bef43cae335ee188d245e/data/cycle-q2/CurrentData.lean) retains its 13,874
 expressions and literal `transportError`, whose vanishing is not assumed.
-[CurrentCorrection.lean](CurrentCorrection.lean) retains reconstruction and
+[CurrentCorrection.lean](https://github.com/fqlx/sextics/blob/2cb80949c1d060bd884bef43cae335ee188d245e/data/cycle-q2/CurrentCorrection.lean) retains reconstruction and
 `originalGoal_iff_actual_current_correction`: a future completed geometric
 proof would imply that correction existential as well.
 
 The denominator, normal-gauge, tangent and ambient-lift developments remain
-available in their original files. Their source bodies remain unchanged.
+available at the same immutable checkpoint. No claim about the unresolved
+current correction changes in this refactor.
 
 ## Source layout
 
-The active development contains 485 consolidated components. The original
-61-component [GeometricFormalInputs.lean](GeometricFormalInputs.lean)
-baseline remains byte-for-byte unchanged, together with its checked artifact.
-The 424 continuation components occupy four existing permitted files:
+The five formerly large files retain their names as compatibility modules
+or the final entry point. Their declarations now live in numbered helper
+modules, ordered as in the original sources. `Workspace` and `GeometricSeed`
+retain their original source bodies. Each helper imports its predecessor,
+and the first helper in a group imports the original prerequisite modules.
 
-| File | Components | Contents |
-| --- | ---: | --- |
-| [GeometricFormalInputs.lean](GeometricFormalInputs.lean) | 61 baseline | Existing affine residue/certificate bridge and foundational geometric inputs. |
-| [GeometricTarget.lean](GeometricTarget.lean) | 100 continuation | `AffineFiniteDescent` through `CurveRestrictionModularLeft`, after the original target/action declarations. |
-| [Assembly.lean](Assembly.lean) | 36 continuation | `CurveRestrictionModularRight` through `SegreModularActionFlat01`, after the original assembly declarations. |
-| [Normalization.lean](Normalization.lean) | 11 continuation | `SegreModularActionFlat02` through `SegreModularCubicData2`, after the original normalization declarations. |
-| [Solution.lean](Solution.lean) | 277 continuation | The previous 239 components, followed by 38 new components for global conormal bases, genuine normal classes, relative character Čech modules, and seed/moving surface covers, then the unchanged entry-point body. |
+| Compatibility module or entry point | Numbered helpers | Largest helper, lines | Mathematical scope |
+| --- | --- | ---: | --- |
+| [GeometricFormalInputs.lean](GeometricFormalInputs.lean) | `GeometricFormalInputs01`–`04` (4) | 4,758 | Affine residue/certificate bridge, foundational inputs, pole reduction, and exterior differentials. |
+| [GeometricTarget.lean](GeometricTarget.lean) | `GeometricTarget01`–`11` (11) | 4,795 | Target actions, finite descent, incidence and seed calculations, projectors, and finite top de Rham constructions. |
+| [Assembly.lean](Assembly.lean) | `Assembly01`–`10` (10) | 4,757 | Conditional assembly, restriction calculations, actual Gaussian-action data, and Cech components. |
+| [Normalization.lean](Normalization.lean) | `Normalization01`–`09` (9) | 4,621 | Radial normalization and the remaining modular-action and cubic literal data. |
+| [Solution.lean](Solution.lean) | `SolutionSupport01`–`09` (9) | 4,786 | Normal and conormal classes, residue and surface comparisons, character components, and orbit trace; the final obligation remains in `Solution.lean`. |
 
-`Workspace` and the original `GeometricSeed` precede the baseline. The
-continuation imports in the table's order. All prior component proof bodies
-and the exact original entry-point body are preserved. Every new helper
-occurs before `Submission.missing_geometric_existence`, so no new helper
-can use that later admission. The assembly record checks each component
-body hash and its final byte range. Only `Solution.lean` and `solution.md`
-change relative to checkpoint `5c9d41d179dd`.
-
-The complete proposal remains within the existing 64-file limit and the
-16 MiB source limit. The new source is consolidated without adding another
-submitted file.
+The large basepoint, Gaussian-action, and cubic-data components are split
+between complete definitions, retaining each original literal coefficient.
+Every supporting declaration precedes the final admitted theorem in the
+import graph, so the new helpers cannot depend on that admission. The exact
+existence theorem and certificate bodies remain unchanged. Counts and the
+source-preservation audit for this modular layout are recorded in the
+current checkpoint above; the historical component totals below describe
+their earlier consolidation checkpoints.
 
 ## Historical verification of earlier source checkpoints
 
@@ -2369,12 +2457,12 @@ Its protected certificate still depends on `sorryAx`. Neither compilation
 nor kernel replay of an admitted entry point proves that missing theorem.
 No completed certificate or evaluated witness is claimed.
 
-The 55 legacy Lean files outside the active seven-module `Proposal` import
-closure have not been rebuilt against the new import environment. Checking
-`CurrentNormalGauge` and `CurrentTangents` first requires the 52-module
-`CurrentCorrection` dependency chain beyond the reused `Workspace`; those
-artifacts are absent from the reused cache. Static source checks do not
-replace their compilation.
+In the historical layout, 55 legacy Lean files outside the active
+seven-module `Proposal` import closure had not been rebuilt against the
+new import environment. They are preserved at the checkpoint linked under
+[Preserved current route](#preserved-current-route) and are no longer part
+of the modular geometric proposal. No new verification of those archived
+sources is claimed.
 
 The protected Linux verifier compiles every submitted helper, including
 unused ones, in a two-CPU, 14-GiB container under one shared 3,600-second
