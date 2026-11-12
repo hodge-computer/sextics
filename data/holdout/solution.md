@@ -636,7 +636,7 @@ Clearing the nonzero denominators in (8) shows that \(f(r)=0\) implies the base 
 [constructions]: https://github.com/hodge-computer/sextics/blob/main/docs/02-explicit-constructions.md
 [support]: https://github.com/hodge-computer/sextics/blob/main/docs/03-geometric-support.md
 [frontier]: https://github.com/hodge-computer/sextics/blob/main/docs/04-known-locus-and-frontier.md
-[diamond]: https://arxiv.org/html/2603.29157v2#S2
+[diamond]: https://arxiv.org/html/2603.29157#S2
 [hidden-reflections]: https://github.com/hodge-computer/sextics/discussions/54#discussioncomment-18986773
 [one-reflection]: https://github.com/hodge-computer/sextics/blob/main/data/one-reflection/solution.md
 [quadric-pr]: https://github.com/hodge-computer/sextics/pull/122
