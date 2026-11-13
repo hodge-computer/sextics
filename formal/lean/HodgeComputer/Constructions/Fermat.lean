@@ -29,7 +29,6 @@ def OddSource (A : HodgeComputer.AmbientPoly n) : Prop :=
 end HodgeComputer.Fermat
 
 namespace HodgeComputer.Fermat
-set_option maxHeartbeats 0
 set_option maxRecDepth 100000
 open scoped BigOperators
 
@@ -57,7 +56,6 @@ theorem subset_euler (a : Fin 6 → ℕ) (q : ℕ) (hq : q = 1 ∨ q = 2)
 end HodgeComputer.Fermat
 
 
-set_option maxHeartbeats 1000000
 noncomputable section
 namespace HodgeComputer.Fermat
 open MvPolynomial HodgeTestbed

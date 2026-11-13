@@ -27,7 +27,6 @@ normalization uses explicit inverses in the coefficient ring.
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 
 namespace ResidueFirstJets
 

@@ -266,7 +266,6 @@ end
 section
 
 noncomputable section
-set_option maxHeartbeats 200000
 namespace CrossedEllipticTranslation
 variable {L : Type*} [Field L] [CharZero L]
 

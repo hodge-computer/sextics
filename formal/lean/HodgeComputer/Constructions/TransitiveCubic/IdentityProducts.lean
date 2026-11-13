@@ -2,7 +2,6 @@ import HodgeComputer.Constructions.TransitiveCubic.IdentityData
 namespace TransitiveCovariants.IdentityData
 open PolynomialEncoding.BivariateExpressions TransitiveCovariants.Reflection
 set_option maxRecDepth 131072
-set_option maxHeartbeats 32000000
 lemma Hp2_generated : multiply HData HData=Hp2Data := by rfl
 lemma Hp3_generated : multiply HData Hp2Data=Hp3Data := by rfl
 lemma Hp4_generated : multiply HData Hp3Data=Hp4Data := by rfl

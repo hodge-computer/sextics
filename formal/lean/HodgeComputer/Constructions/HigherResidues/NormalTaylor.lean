@@ -6,7 +6,6 @@ Prepared with OpenAI Codex assistance for fqlx. The hypotheses are the
 explicit chain-rule identities of an actual hypersurface evaluation. -/
 
 noncomputable section
-set_option maxHeartbeats 4000000
 namespace SplitNormalTaylor
 open scoped BigOperators
 variable {K : Type*} [Field K] [CharZero K]

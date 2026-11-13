@@ -17,8 +17,6 @@ OpenAI ChatGPT assistance for a contribution through GitHub account fqlx.
 
 noncomputable section
 
-set_option maxHeartbeats 1000000
-
 namespace HoldoutConstruction
 
 private theorem residue_source_map_append_zero

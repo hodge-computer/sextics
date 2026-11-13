@@ -223,7 +223,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 800000
 namespace CrossedElliptic
 open Polynomial CrossedRationalResidue
 variable {F L : Type*} [Field F] [Field L] [CharZero L]
@@ -394,7 +393,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 400000
 namespace CrossedElliptic
 open Polynomial CrossedRationalResidue CrossedEllipticTranslation
 variable (K : Type*) [Field K] [CharZero K]

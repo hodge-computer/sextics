@@ -68,8 +68,6 @@ def numerators (a b c d : R) : Fin 4 → Poly (R := R) :=
       term (1296*z^2*a^5*d^4) 1 2 3 +
       term (69984*a^9*d^7) 1 3 3]
 
-set_option maxHeartbeats 2000000
-
 /-- The complete quintic reduction, with only scalar coefficient clearing. -/
 theorem source (a b c d : R) :
     directional (cubic a b c d) (numerators a b c d) =

@@ -4,7 +4,6 @@ import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
 /- Actual polynomial and rational-source jets for the normal Taylor formula.
 Prepared with OpenAI Codex assistance for fqlx. -/
 noncomputable section
-set_option maxHeartbeats 3000000
 namespace SplitNormalJetBinding
 open HoldoutConstruction
 open scoped BigOperators

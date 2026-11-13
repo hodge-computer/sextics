@@ -15,7 +15,6 @@ ideal in the finite etale algebra.
 noncomputable section
 
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 800000
 
 namespace HoldoutConicIncidence
 
