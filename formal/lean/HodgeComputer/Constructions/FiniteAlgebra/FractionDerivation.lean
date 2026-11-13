@@ -112,10 +112,12 @@ def extend (D : Derivation ℚ P P) : Derivation ℚ F F :=
        map_add' := quotientD_add D } : F →+ F).toRatLinearMap
     (by intro x y; exact quotientD_mul D x y)
 
+omit [IsScalarTower ℚ P F] in
 @[simp] theorem extend_map (D : Derivation ℚ P P) (a : P) :
     extend (F := F) D (algebraMap P F a) = algebraMap P F (D a) :=
   quotientD_map D a
 
+ omit [IsScalarTower ℚ P F] in
  theorem extend_div (D : Derivation ℚ P P) (a b : P) (hb : b ≠ 0) :
     extend (F := F) D (algebraMap P F a / algebraMap P F b) =
       (algebraMap P F (D a) * algebraMap P F b -

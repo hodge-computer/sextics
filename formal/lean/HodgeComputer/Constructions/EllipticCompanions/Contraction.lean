@@ -255,9 +255,11 @@ lemma first_theta_split (hG : G≠0) : ((thetaPolynomial K).map (algebraMap K (F
   rw [Polynomial.map_mul] at hs
   exact hs.of_dvd (mul_ne_zero (Polynomial.map_ne_zero hG)
     (Polynomial.map_ne_zero thetaPolynomial_ne_zero)) (dvd_mul_left _ _)
+omit [CharZero K] in
 lemma G_split (hG : G≠0) : (G.map (inclusion K G)).Splits := by
   have h := (first_G_split K G hG).map (algebraMap (First K G) (Points K G))
   simpa only [Polynomial.map_map,← IsScalarTower.algebraMap_eq K (First K G) (Points K G),inclusion] using h
+omit [CharZero K] in
 lemma theta_split (hG : G≠0) : (thetaPolynomial (Points K G)).Splits := by
   have h := (first_theta_split K G hG).map (algebraMap (First K G) (Points K G))
   simpa only [Polynomial.map_map,thetaPolynomial_map] using h
@@ -268,6 +270,7 @@ lemma pointPolynomial_ne_zero : pointPolynomial K G≠0 := by
   intro r hr
   exact (monic_X_pow_sub_C _ (by decide : (2 : ℕ)≠0)).ne_zero
 
+omit [CharZero K] in
 lemma root_has_point (hG : G≠0) (r : Points K G) (hr : (G.map (inclusion K G)).eval r=0) :
     ∃ s : Points K G,s^2=r^3-432 := by
   classical

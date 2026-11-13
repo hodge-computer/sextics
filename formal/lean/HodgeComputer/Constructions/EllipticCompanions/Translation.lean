@@ -74,6 +74,7 @@ omit [CharZero K] in
 lemma FibreRegular.base (r c : K) : FibreRegular r (algebraMap K (E K) c) := by
   rw [← map_constant]
   exact FibreRegular.rational r _ (RegularAt.C r c)
+omit [CharZero K] in
 lemma FibreRegular.one (r : K) : FibreRegular r (1 : E K) := by
   simpa using FibreRegular.base r (1 : K)
 omit [CharZero K] in
@@ -104,6 +105,7 @@ lemma fibreValue_mul (r s : K) (hs : s^2=r^3-432) (f g : E K)
 omit [CharZero K] in
 lemma fibreValue_base (r s c : K) : fibreValue r s (algebraMap K (E K) c)=c := by
   rw [← map_constant,fibreValue_apply,first_algebraMap,second_algebraMap,valueAt_C,map_zero,mul_zero,add_zero]
+omit [CharZero K] in
 lemma fibreValue_one (r s : K) : fibreValue r s (1 : E K)=1 := by
   simpa using fibreValue_base r s (1 : K)
 omit [CharZero K] in
@@ -252,6 +254,7 @@ lemma FibreSpecializes.mul (Φ : F →+* E L) (ψplus ψminus : F →+* L) (r s 
 lemma FibreSpecializes.one (Φ : F →+* E L) (ψplus ψminus : F →+* L) (r s : L) :
     FibreSpecializes Φ ψplus ψminus r s 1 := by
   simp only [FibreSpecializes,map_one,fibreValue_one,and_self,FibreRegular.one]
+omit [CharZero L] in
 lemma FibreSpecializes.zero (Φ : F →+* E L) (ψplus ψminus : F →+* L) (r s : L) :
     FibreSpecializes Φ ψplus ψminus r s 0 := by
   have hr : FibreRegular r (0 : E L) := by simpa using FibreRegular.base r (0 : L)
