@@ -1,5 +1,5 @@
 import Proposal.CubicPoint
-import HodgeComputer.Constructions.PolarCubic.Functorial
+import Proposal.PolarCubicFunctorial
 import Mathlib.RingTheory.Localization.Away.Basic
 
 /-! A localization lets an exact point certify nonvanishing of the covariants

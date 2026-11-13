@@ -44,7 +44,7 @@ function field; they are not extra hypotheses on the final theorem.
 ## Covariants and their exact identities
 
 The integral covariants \(H,\Theta,J\) are specified in
-[Covariants.lean](../../formal/lean/HodgeComputer/Constructions/CyclicCubic/Covariants.lean). Their normalization is fixed
+[Covariants.lean](CyclicCubicCovariants.lean). Their normalization is fixed
 throughout. Define
 \[
 \begin{aligned}
@@ -64,7 +64,7 @@ Thus
  \eta^2=\xi^3+s_4\xi-s_6/4.
 \]
 The proof establishes the full polynomial syzygy, including the term divisible
-by \(U\), in [Syzygy.lean](../../formal/lean/HodgeComputer/Constructions/CyclicCubic/Syzygy.lean). In particular, the
+by \(U\), in [Syzygy.lean](CyclicCubicSyzygy.lean). In particular, the
 specialization to the physical field is not a numerical check at a selected
 cubic.
 
@@ -73,7 +73,7 @@ The large polynomial identity is verified by an exact encoding argument.
 the polynomial operations used to form its 190 coefficients. Each coefficient
 has a fixed diagonal weight in the six parameters. At a fixed weight, the
 exponents of \(a,b,c\) are determined by those of \(d,e,f\); the latter are
-less than 19. [Kronecker.lean](../../formal/lean/HodgeComputer/Constructions/CyclicCubic/Kronecker.lean) therefore proves
+less than 19. [Kronecker.lean](CyclicCubicKronecker.lean) therefore proves
 injectivity of their encoding with exponents \(1,19,361\). Signed expressions
 are split into two polynomials with natural coefficients. A proved coefficient
 bound makes evaluation at \(2^{42}\) injective on these polynomials.

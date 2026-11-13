@@ -1,3 +1,0 @@
-import HodgeComputer.Constructions.PolarCubic.Map
-import HodgeComputer.Constructions.PolarCubic.Syzygy
-import HodgeComputer.Constructions.PolarCubic.Functorial
