@@ -1,5 +1,400 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Proof selected for formalization — 13 November 2026
+
+The route to formalize is the surface-section argument of
+[Diamond's Chapter 3D](https://github.com/hodge-computer/sextics/blob/01b48136366f28affae56762c42d707642baa0d5/docs/03d-hodge-loci.md).
+The precise classical conclusion is
+\[
+\exists \eta\in\Omega^3_{K/\mathbb C},\qquad d\eta=\rho,
+\]
+where \(K\) is the function field of the unchanged affine chart and
+\(\rho\) is the literal source in
+[the final Lean goal](Solution.lean). The ordinary mathematical proof below
+uses the stated classical geometry and comparison theorems. Its geometric
+lemmas still need Lean implementations; this update adds no Lean proof,
+axiom, or replacement for the existing admission.
+
+The detailed arguments in Parts I–IV below remain the mathematical reference.
+This section fixes one consistent sequence of statements to implement and
+makes explicit several coefficient and specialization issues that a formal
+proof must retain.
+
+### The theorem and its shortest closing argument
+
+Put
+\[
+\begin{aligned}
+F&=\sum_{i=0}^2(X_i^6+Y_i^6)
+ +\frac12\sum_{i=0}^2X_i^3X_{i+1}Y_iY_{i+1},\\
+A&=X_0^2X_1^2X_2^3Y_0^2Y_1^2Y_2,
+\end{aligned}
+\]
+with cyclic indices, and let \(X=V(F)\subset\mathbb P^5_{\mathbb C}\).
+Let \(\zeta\) be a primitive cube root of unity. In the original variable
+order the automorphisms are
+\[
+\beta=\operatorname{diag}(1,1,-1,1,1,-1),\qquad
+\gamma=\operatorname{diag}(\zeta^2,\zeta^2,1,\zeta,1,1).
+\]
+Diamond's fourfold theorem says that, for a smooth sextic invariant under
+these two actions,
+\[
+H^4(X,\mathbb Q)^{\langle\beta,\gamma\rangle}
+\subseteq N^1H^4(X,\mathbb Q).
+\qquad\text{(D)}
+\]
+Here a class is in \(N^1\) if it restricts to zero off a proper algebraic
+divisor. The construction proving (D), including the passage to a special
+pencil, is specified in the next subsections.
+
+All target-specific hypotheses of (D) can be checked directly. If the
+gradient of \(F\) vanished at a nonzero cone point, let \(M>0\) be the
+maximum coordinate modulus. A maximizing \(X_i\) gives
+\(6M^5\leq 2M^5\); a maximizing \(Y_i\) gives
+\(6M^5\leq M^5\). Both are impossible. Thus \(X\) is smooth.
+The three mixed monomials have \(\beta\)-exponents \(0,2,4\) and
+\(\gamma\)-weights \(9,6,3\), so \(F\) is invariant.
+
+Write
+\(\Omega=\iota_{\sum Z_i\partial_{Z_i}}
+(dZ_0\wedge\cdots\wedge dZ_5)\).
+The numerator \(A\) has \(\beta\)-exponent four and \(\gamma\)-weight
+ten. Since \(\det\beta=1\) and \(\det\gamma=\zeta^2\), the whole form
+\(A\Omega/F^3\) is invariant. Its scaling degree is \(12+6-18=0\).
+Define \(\alpha_{\mathrm{dR}}\) as its algebraic cohomological residue
+and \(\alpha\) as the complex comparison image of that class. This
+fixes the residue normalization consistently.
+
+It is unnecessary to assert that \(\alpha\) is rational. Averaging over
+the finite group is defined over \(\mathbb Q\), so the complex invariant
+space is the scalar extension of the rational invariant space. Apply
+(D) to a finite rational basis and take the union of the supporting
+divisors. This gives one proper divisor \(Z\subset X\) with
+\[
+\alpha|_{X\setminus Z}=0.
+\qquad\text{(S)}
+\]
+
+On \(X_0=1\), use
+\((x_0,x_1,x_2,x_3,x_4)=(X_1,X_2,Y_0,Y_1,Y_2)\), and put
+\[
+\begin{aligned}
+f&=1+\sum_{j=0}^4x_j^6+
+ \frac12(x_0x_2x_3+x_0^3x_1x_3x_4+x_1^3x_2x_4),\\
+a&=x_0^2x_1^3x_2^2x_3^2x_4,\quad g=\partial_0f,\quad
+\nu=dx_1\wedge dx_2\wedge dx_3\wedge dx_4.
+\end{aligned}
+\]
+Smoothness implies irreducibility of \(F\) and \(f\). The polynomial
+\(g\) is nonzero of degree five, so its image modulo \(f\) is nonzero.
+In the ambient rational-function ring set
+\(D_t=g^{-1}\partial_0\) and \(b=a/g\). Direct differentiation of
+\[
+\psi=\left(-\frac{b}{2f^2}-\frac{D_tb}{2f}\right)\nu
+\]
+gives
+\[
+\frac{a\,dx_0\wedge\nu}{f^3}-d\psi
+=\frac{D_t^2b}{2}\frac{df}{f}\wedge\nu.
+\]
+Consequently the restriction of the full residue class is represented by
+\[
+\rho=\frac12\left[
+\frac{a_{00}}{g^3}
+-\frac{3a_0g_0+a g_{00}}{g^4}
++\frac{3a g_0^2}{g^5}\right]\nu.
+\qquad\text{(R)}
+\]
+This is exactly the source already bound in
+[the pole-reduction module](GeometricFormalInputs04.lean). The normal
+derivation satisfies \(D_tf=1\); the displayed calculation is a residue
+identification in the ambient ring.
+
+Let \(R=\mathbb C[x_0,\ldots,x_4]/(f)\) and \(B=R[g^{-1}]\).
+Choose a nonzero \(h\in R\) vanishing on the proper closed subset
+\(Z\cap\operatorname{Spec}R\), taking \(h=1\) if it is empty. Its image
+\(s\in B\) is nonzero. The open
+\[
+W=\operatorname{Spec}B[s^{-1}]=D(gh)
+\]
+is nonempty, smooth, affine, and disjoint from \(Z\). Formula (R) is
+regular and closed there, since \(W\) has dimension four, and (S)
+says that its comparison class is zero.
+[Grothendieck's affine algebraic de Rham theorem, Theorem 1 and equation (4)](https://www.numdam.org/item/PMIHES_1966__29__95_0.pdf)
+identifies complex cohomology with the cohomology of the complex of
+global regular forms on this actual \(W\). It supplies
+\(\eta_W\in\Gamma(W,\Omega_W^3)\) with \(d\eta_W=\rho\).
+Localization to \(K=\operatorname{Frac}R\) gives the asserted rational
+primitive.
+
+Thus the exact intermediate Lean statement to establish is
+
+    ∃ s : CycleQ2GeometricRegularDeRham.OpenRing,
+      s ≠ 0 ∧ CycleQ2GeometricRegularDeRham.residueClass s = 0
+
+The existing equivalence in [Solution.lean](Solution.lean) and the
+algebraic certificate constructor then give the protected theorem.
+This proof allows complex coefficients, as does the protected contract.
+
+### The geometric input: a genuine moving class
+
+Use the full smooth parameter open \(B_{\mathrm{par}}\) of invariant
+weighted sextics in \(\mathbb P(1,1,1,1,2)\), with the coefficient of
+\(w^3\) normalized to one. It has dimension 44. The action is
+\(g_T=(\zeta^2,\zeta^2,\zeta,1;1)\), and the invariant rational
+variation \(\mathbb V=(R^3p_*\mathbb Q)^{g_T}\) has Hodge types
+\((2,1),(1,2)\), with dimensions 33 and 33.
+
+For the seed, use \(r^3=2\) and \(i^2=-1\) in characteristic zero.
+The values 57 and 33 occur only after reduction at the chosen prime
+above 109. With the factorization of Part II,
+\[
+F_b=F_0+b^2=f_1g_1+f_2g_2+hk,\qquad
+C=V(f_1,f_2,h)\subset D=V(F_b,h),
+\]
+put \(E=C+g_TC+g_T^2C\). For a suitable invariant cubic \(b\), all
+varieties in this expression are smooth and the three curves are
+disjoint. The rank conditions and smoothness conditions are nonempty
+Zariski opens in the irreducible space of invariant cubics.
+
+The rank-open comes from the complete-intersection calculation over
+the number-field DVR. Smoothness of the threefold has the Fermat
+witness \(b=0\). For the surface and curve, the invariant cubic system
+is basepoint free away from the finitely many excluded singular
+vertices. Its universal section zero locus is smooth there; properness
+and characteristic-zero generic smoothness give a nonempty open of
+smooth fibers. This justifies intersecting the required opens.
+
+To match primitive-class hypotheses without assuming integral
+torsion-freeness, start with
+\[
+\lambda=N([E]-2H_D)
+\]
+for a positive integer \(N\) annihilating the possibly torsion Gysin
+image of \([E]-2H_D\). Such an \(N\) exists:
+\(\deg E=18\), \(\int_T H^3=3\), and \(i_*H_D=3H_T^2\) give
+\(i_*([E]-2H_D)=0\) rationally. Also
+\(([E]-2H_D)\cdot H_D=0\). The class \(\lambda\) is integral,
+invariant, and in the kernel of integral Gysin. Multiplication by
+\(N\ne0\) preserves every rank and nonvanishing conclusion over
+\(\mathbb C\).
+
+Let
+\(\mathcal A=\mathbb C[x_0,x_1,x_2,x_3,w]/(f_1,f_2,g_1,g_2,h)\).
+Its degree-nine piece is a line. Define the geometric functional by
+the Koszul boundary followed by Serre trace:
+\[
+\mathcal A_9\xrightarrow{\ \partial\ }H^1(C,K_C)
+\xrightarrow{\ \operatorname{Tr}_C\ }\mathbb C.
+\]
+The exact sequence
+\[
+0\longrightarrow\mathcal O_C(1)
+\longrightarrow\mathcal O_C(5)^{\oplus2}
+\longrightarrow\mathcal O_C(9)\longrightarrow0
+\]
+and \(H^1(\mathcal O_C(5))=0\) identify the first arrow as an
+isomorphism. Hence this functional is a nonzero scalar multiple of
+the finite socle functional \(\tau\). A formal proof needs this
+comparison; no particular normalization of the scalar is necessary.
+
+The local normal-lift calculation gives, up to common nonzero scalars,
+\[
+\operatorname{NL}_{\lambda}(L)(\sigma)
+=c\,3N\,\tau(kL\sigma),\qquad
+\langle d\nu(L),\eta_{B_{\mathrm{test}}}\rangle
+=c'\,3N\,\tau(B_{\mathrm{test}}L),
+\]
+where \(L\) is invariant,
+\(\sigma\) has character \(\zeta\), and
+\(B_{\mathrm{test}}=x_2x_3^3w\) also has character \(\zeta\).
+The residue class \(\eta_{B_{\mathrm{test}}}\) is invariant because
+the residue volume has character \(\zeta^2\).
+The two formulas concern their respective geometric maps.
+
+Ranks seven and eight imply that the first map is surjective and
+that some \(L\) in its kernel has nonzero second pairing. The
+holomorphic implicit function theorem gives a smooth local Hodge
+locus submersive over the full sextic base. Its vertical dimension
+is \(9-1-7=1\).
+
+Here the moving object is the line bundle of class \(\lambda\).
+On a contractible Stein neighborhood, the exponential sequence,
+Grauert cohomology and base change, and coherent Stein acyclicity produce this
+relative holomorphic line bundle. Its uniqueness on each surface
+uses \(H^1(\mathcal O_D)=0\). For sufficiently large \(m\), its twist
+by \(\mathcal O_D(m)\) has a smooth relative linear system, giving
+actual curves \(\Gamma\) whose motion lifts \(L\).
+
+The Abel–Jacobi derivative formula must be proved for these cubic
+surface sections. The sufficiently-ample-surface setup in
+[Voisin's 2000 paper](https://www.cmls.polytechnique.fr/perso/voisin/Articlesweb/griffithsgroup.pdf)
+cannot simply be substituted for this case. The required specialized
+proof uses the swept-chain derivative and
+\[
+0\longrightarrow N_{D/T}^*\otimes\Omega_D^1
+\longrightarrow\Omega_T^2|_D\longrightarrow K_D\longrightarrow0.
+\]
+The hypothesis \(H^1(K_D)=0\) gives the needed lift. Contracting by
+the curve's normal field gives the obstruction pairing above.
+Its lift ambiguity pairs to zero because \(L\) lies in the
+Noether–Lefschetz kernel. The ambient hyperplane twist contributes
+zero. Only the curve line bundle is made sufficiently positive;
+the surface remains a cubic section.
+
+### Algebraization, generation, and support
+
+The analytic curve family maps to the algebraic flag Hilbert scheme
+of triples \((T,D,\Gamma)\), with the fixed Hilbert polynomials of
+\(D\) and \(\Gamma\). Work on the open where both are smooth and
+\(\Gamma\subset D\) is Cartier. This family map can be constructed from
+the Grassmannian of sufficiently twisted curve ideals. If the Hodge
+locus has dimension \(d\) and \(n=h^0(D,\mathcal O_D(\Gamma))\), the
+analytic family has dimension \(d+n-1\) and injective differential.
+Conversely, any first-order flag deformation lies over the kernel
+of the same Noether–Lefschetz obstruction. The kernel of the tangent
+map from flags \((T,D,\Gamma)\) to pairs \((T,D)\) has dimension
+\(h^0(N_{\Gamma/D})=n-1\). Thus the flag Hilbert scheme is smooth at
+this point and submersive over the full sextic base.
+
+Its algebraic component therefore dominates that base. Relative
+hyperplane cuts with the prescribed first-order tangent, projective
+completion, resolution, and shrinking give smooth projective
+parameter curves carrying a relative algebraic correspondence.
+The nonzero derivative persists on an analytic neighborhood of the
+smooth submersive point, which meets the inverse image of every
+dense base open. A finite étale base change is allowed if needed
+for connected fibers; retain a connected component carrying the
+nonzero derivative. Averaging the resulting correspondence gives
+a nonzero cylinder map of rational variations, since its derivative
+pairs nontrivially with an invariant class:
+\[
+\pi_g\circ\Gamma_*:
+R^1p_{\Lambda*}\mathbb Q(-1)\longrightarrow\mathbb V.
+\]
+The Tate twist makes both sides weight three.
+
+At Fermat the 35 Higgs forms on the 33-dimensional upper Hodge
+space satisfy
+\[
+\{P:P^{\mathsf T}H_m=H_mP\ \text{for all }m\}=\mathbb C I.
+\]
+These forms are identified with the geometric Higgs field through
+the residue/Jacobian comparison. Polarization gives an orthogonal
+flat Hodge projector onto any rational sub-variation. Its upper
+block satisfies these equations, so its idempotence forces it to
+be zero or identity. The maximal-rank condition persists on an open
+of the full base and after finite étale base change. The nonzero
+cylinder image is consequently all of \(\mathbb V\).
+
+For a fiber, replace the correspondence by
+\(\Gamma'=\pi_g\circ\Gamma\circ\pi_1^\Lambda\) to remove the parameter
+curve's degree-zero and degree-two cohomology. Choose a \(g_T\)-stable
+divisor \(Z\) containing its target image, which has dimension at
+most two. Since \(H^1(T,\mathbb Q)=0\), all of \(H^3(T,\mathbb Q)\)
+is primitive. The transpose correspondence agrees, up to a fixed
+sign, with the adjoint for the cup-product polarizations. Let
+\(M=\Gamma'\circ{}^t\Gamma'\). Hodge positivity makes \(M\)
+invertible on \(V=H^3(T,\mathbb Q)^g\), and it vanishes on all other
+degrees and eigenspaces. If \(m(t)\) is its minimal polynomial on
+\(V\), then \(m(0)\ne0\) and
+\[
+p(t)=1-\frac{m(t)}{m(0)}
+\]
+has zero constant term. The cycle \(M\) and all its positive powers
+have representatives supported on \(Z\times Z\); so does \(p(M)\).
+It acts as the desired projector in every degree. Weighted weak
+Lefschetz gives \(H^{2k}(T,\mathbb Q)=\mathbb QH^k\),
+\(H^1(T)=H^5(T)=0\), and \(\int_T H^3=3\).
+Künneth and Poincaré duality identify its full cohomology class with
+the fiber restriction of the relative algebraic correspondence
+\[
+P=\pi_g-\frac13\sum_{k=0}^3
+\operatorname{pr}_1^*H^{3-k}\operatorname{pr}_2^*H^k.
+\]
+
+Fixed-Hilbert-polynomial proper flag spaces parameterize supported
+representatives of this fixed class. Equality of the flat cycle
+classes persists on connected components. There are countably many
+numerical choices, so a component dominates the irreducible complex
+base. Properness then supplies a supported representative on every
+smooth member. The requisite closed flag condition and properness
+are [Stacks, Lemmas 108.7.5 and 108.7.7](https://stacks.math.columbia.edu/tag/0DM5).
+This is specialization of the support of an already algebraic
+relative projector.
+
+Pull this proper component back to the protected pencil and choose
+a component dominating it. A closed point of its generic fiber has
+residue field finite over \(\mathbb C(U)\). Normalization and
+shrinking give a finite étale cover with a relative supported cycle.
+Normalized pushforward descends it to the original affine base curve.
+Its fiberwise action is the invariant projector.
+
+The pencil is \(Y_2=tX_2\), resolved by blowing up its smooth base
+surface. Its paired-sign quotient has equation
+\[
+\begin{aligned}
+G_t={}&s_0^6+s_1^6+s_2^6+s_3^6+(1+t^6)w^3\\
+&+\frac12(s_0^3s_1s_2s_3+t s_1^3s_3w+t s_0s_2w^2).
+\end{aligned}
+\]
+Remove the singular fibers, infinity, and the zeros of \(1+t^6\).
+The normalized equation \(\widetilde G_t=G_t/(1+t^6)\) defines the
+required map into \(B_{\mathrm{par}}\) and the same hypersurface.
+The finite quotient may be branched; rational quotient cohomology
+still identifies it with the invariant part. Over this affine curve,
+Leray has only columns zero and one. Subtracting the global
+hyperplane-square class leaves the complex invariant class in
+\(H^1(U,\mathbb V_{\mathbb C})\), the invariant part of
+\(L^1H^4(\mathcal T,\mathbb C)\). The relative supported cycle acts
+identically on this actual subspace because \(L^2H^4=0\).
+There is no claim of equality of the relative actions on all
+degree-four classes merely from fiberwise equality.
+
+The hyperplane-square class is separately divisor-supported.
+Pull the supports back to the resolved fourfold, add the omitted
+fibers and exceptional divisor, and push down. This proves (D).
+Irreducibility of the variation along the protected pencil is not
+a hypothesis.
+
+### Implementation order and verification scope
+
+The useful formalization units are the following genuine comparisons.
+The names in this table describe intended lemmas, not declarations
+already available in Lean.
+
+| Unit | Required conclusion |
+| --- | --- |
+| Geometric seed trace | The actual Koszul boundary is an isomorphism to canonical-sheaf \(H^1\), and its Serre trace is a nonzero multiple of the computed socle trace. |
+| Moving class and derivative | The integral primitive orbit class has a smooth Hodge locus, an actual algebraic family of curves, and the stated nonzero Abel–Jacobi derivative. |
+| Geometric Higgs comparison | The actual invariant variation has the computed Jacobian Higgs forms over the full parameter base. |
+| Supported projector | The cylinder map, polarization, and zero-constant polynomial construct the full cohomological projector with divisor-square support. |
+| Proper specialization and Leray | The supported representative reaches the special pencil and annihilates the restriction of its whole invariant degree-four class. |
+| Affine comparison | The literal regular residue on \(W\) maps to that restricted class and has a regular primitive. |
+
+The first unit should use the chosen characteristic-zero seed.
+Existing additive-sheaf classes at literal complex parameter 57
+cannot be identified with this seed without a separate proved
+comparison. Exact rational primitive, localization, and
+certificate-clearing interfaces are already present downstream.
+
+For this continuation, the original seed and Higgs routines were
+rerun from the pinned verifier, with SHA-256
+9d673eff17a53fee04eb2677615db689833cf33b5fa23fe16ad42467d22a40a9.
+They returned length 96, socle degree 9, ranks 7 and 8, upper Hodge
+dimension 33, 35 effective directions, and scalar solution dimension 1.
+Independent integer modular elimination reproduced the minors 80 and
+76 and the normalized vector with image \((0,0,0,0,0,0,0,1)\).
+These computations verify the finite inputs. The geometric lemmas,
+the final existence theorem, and the protected certificate have not
+thereby been checked by Lean.
+
+The underlying strategy remains credited to Ben Diamond, Claire Voisin,
+and the collaborators credited in Chapter 3D and the references below.
+This reconstruction and implementation plan were prepared for
+fqlx with OpenAI ChatGPT assistance.
+
 ## Upstream compatibility — 13 November 2026
 
 Following `benediamond`'s [review comment](https://github.com/hodge-computer/sextics/pull/245#issuecomment-6857093789),
