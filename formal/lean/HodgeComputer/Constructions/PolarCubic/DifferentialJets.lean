@@ -5,7 +5,6 @@ open PolarCovariants.IdentityData PolarCubicEncodingCheck ResidueFirstJets TrivS
 set_option linter.unusedSimpArgs false
 set_option backward.isDefEq.respectTransparency false
 set_option maxRecDepth 131072
-set_option maxHeartbeats 32000000
 variable {K : Type*} [CommRing K]
 
 private theorem jet_fst_ofNat (n : ℕ) [n.AtLeastTwo] :

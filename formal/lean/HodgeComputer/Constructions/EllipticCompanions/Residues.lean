@@ -349,7 +349,6 @@ end
 section
 
 noncomputable section
-set_option maxHeartbeats 200000
 set_option backward.isDefEq.respectTransparency false
 open scoped BigOperators
 namespace CrossedRationalResidue
@@ -470,7 +469,6 @@ end
 section
 
 noncomputable section
-set_option maxHeartbeats 400000
 namespace CrossedElliptic
 open Polynomial
 variable (K : Type*) [Field K]
@@ -1024,7 +1022,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 namespace CrossedRadialResidue
 open CrossedElliptic HoldoutConstruction CrossedRationalResidue
 open scoped BigOperators

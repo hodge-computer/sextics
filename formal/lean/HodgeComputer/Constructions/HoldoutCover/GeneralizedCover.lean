@@ -11,7 +11,6 @@ prior mathematical and formal sources acknowledged in the accepted proof.
 -/
 
 noncomputable section
-set_option maxHeartbeats 200000
 set_option maxRecDepth 10000
 
 namespace HoldoutGeneralization

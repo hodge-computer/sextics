@@ -9,7 +9,6 @@ open ResidueFirstJets TrivSqZeroExt
 set_option linter.unusedSimpArgs false
 set_option backward.isDefEq.respectTransparency false
 set_option maxRecDepth 131072
-set_option maxHeartbeats 8000000
 variable {K : Type*} [CommRing K]
 theorem data_identity0 (v : ℕ → K) (x y : K) :
     denote v x y FinalL0Data=denote v x y FinalR0Data := by

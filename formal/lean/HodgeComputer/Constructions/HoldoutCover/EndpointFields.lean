@@ -130,7 +130,6 @@ only on the former; generic construction takes place over the latter.
 
 noncomputable section
 
-set_option maxHeartbeats 600000
 
 namespace HoldoutConstruction
 

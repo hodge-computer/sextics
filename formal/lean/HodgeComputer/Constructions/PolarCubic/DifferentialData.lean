@@ -5,7 +5,6 @@ open PolarCovariants.IdentityData PolarCubicEncodingCheck ResidueFirstJets TrivS
 set_option Elab.async false
 set_option linter.unusedSimpArgs false
 set_option maxRecDepth 131072
-set_option maxHeartbeats 32000000
 variable {K : Type*} [CommRing K]
 theorem coefficient0_9_1 (v : ℕ → K) :
     ringEval v FinalL0_9_1=ringEval v FinalR0_9_1 := by

@@ -5,7 +5,6 @@ namespace PolarCovariants.IdentityData
 open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressions
 set_option linter.unusedSimpArgs false
 set_option maxRecDepth 131072
-set_option maxHeartbeats 32000000
 variable {K : Type*} [CommRing K]
 noncomputable def Right1Sum39_6_11 : Expr := (.add Right1Term39_6_11 Right1Sum40_6_11)
 noncomputable def Right1Sum39_6_10 : Expr := (.add Right1Term39_6_10 Right1Sum40_6_10)

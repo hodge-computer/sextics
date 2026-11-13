@@ -3,7 +3,6 @@ import HodgeComputer.Constructions.CyclicCubic.EncodingCheck
 namespace CycleCovariants.IdentityData
 open Lean.Grind.CommRing CycleSignedExpressions CycleCubicEncodingCheck
 set_option maxRecDepth 131072
-set_option maxHeartbeats 16000000
 theorem coefficient_7_5 {K : Type*} [CommRing K] (v : ℕ → K) :
     ringEval v Left_7_5=ringEval v Right_7_5 := by
   apply identity_of_encoding_context v Left_7_5 Right_7_5 (25,23,24) (2^42)

@@ -8,7 +8,6 @@ six by six blocks. This calculation is generic over a field. -/
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 0
 
 namespace HoldoutConicIncidence
 

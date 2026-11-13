@@ -7,7 +7,6 @@ below are independently certified in `CubicSyzygy` and `CubicDifferential`.
 Prepared with OpenAI Codex assistance. -/
 set_option linter.unusedVariables false
 set_option maxRecDepth 65536
-set_option maxHeartbeats 4000000
 namespace PolarCubic
 variable {K : Type*} [CommRing K]
 noncomputable def cubic (a b c d e f x y z : K) : K :=

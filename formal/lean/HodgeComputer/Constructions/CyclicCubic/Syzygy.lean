@@ -11,7 +11,6 @@ namespace CycleCovariants.IdentityData
 open Lean.Grind.CommRing CycleSignedExpressions CycleBivariateExpressions
 open CycleCovariants.Reflection
 set_option maxRecDepth 131072
-set_option maxHeartbeats 4000000
 variable {K : Type*} [CommRing K]
 theorem data_identity (v : ℕ → K) (x y : K) :
     denote v x y LeftData=denote v x y RightData := by

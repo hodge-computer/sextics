@@ -3,7 +3,6 @@ import HodgeComputer.Constructions.PolarCubic.Encoding
 namespace PolarCovariants.IdentityData
 open PolarCubicEncodingCheck TransitiveSignedExpressions
 set_option maxRecDepth 131072
-set_option maxHeartbeats 32000000
 theorem coefficient0_5_9 {K : Type*} [CommRing K] (v : ℕ → K) :
     ringEval v FinalL0_5_9=ringEval v FinalR0_5_9 := by
   apply identity_of_encoding_context v FinalL0_5_9 FinalR0_5_9 (23,27,22) (2^57)

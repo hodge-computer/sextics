@@ -4,7 +4,6 @@ import HodgeComputer.Constructions.HoldoutCover.CurveJacobianStaged
 section
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 0
 namespace HoldoutConicJacobian
 variable {K : Type*} [Field K]
 

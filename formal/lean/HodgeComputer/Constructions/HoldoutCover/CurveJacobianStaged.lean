@@ -11,7 +11,6 @@ section
 These intermediate lemmas do not assert a Hodge certificate. -/
 
 set_option maxRecDepth 100000
-set_option maxHeartbeats 0
 
 noncomputable section
 namespace HoldoutConicJacobian

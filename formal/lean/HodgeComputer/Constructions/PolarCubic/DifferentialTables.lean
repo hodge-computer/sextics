@@ -6,7 +6,6 @@ open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressi
 open PolarCovariants.IdentityData PolarCubicEncodingCheck ResidueFirstJets TrivSqZeroExt
 set_option linter.unusedSimpArgs false
 set_option maxRecDepth 131072
-set_option maxHeartbeats 32000000
 variable {K : Type*} [CommRing K]
 noncomputable def Ux_2_0 : Expr := (.mul (.natCast 3) U_3_0)
 noncomputable def Ux_1_1 : Expr := (.mul (.natCast 2) U_2_1)

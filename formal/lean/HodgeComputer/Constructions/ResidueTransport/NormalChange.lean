@@ -25,7 +25,6 @@ used in `fqlx`'s quadratic-shear construction, prepared with OpenAI Codex
 assistance.
 -/
 
-set_option maxHeartbeats 2000000
 
 namespace ResidueNormalChange
 

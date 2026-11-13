@@ -100,7 +100,6 @@ end
 section
 
 noncomputable section
-set_option maxHeartbeats 200000
 namespace CrossedEllipticTheta
 open Polynomial CrossedRationalResidue
 variable {K : Type*} [Field K] [CharZero K]

@@ -67,7 +67,6 @@ theorem numerator_homogeneous (d e f g h : R) (i : Fin 4) :
   · exact ((nb_homogeneous d e f g h).C_mul g).sub
       ((minusNC_homogeneous e f g h).C_mul h)
 
-set_option maxHeartbeats 4000000
 set_option maxRecDepth 4000
 
 theorem numerator_divergence (d e f g h : R) :

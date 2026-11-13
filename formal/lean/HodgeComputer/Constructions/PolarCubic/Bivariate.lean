@@ -4,7 +4,6 @@ import HodgeComputer.Constructions.TransitiveCubic.BivariateDifferentiation
 namespace PolarCovariants.IdentityData
 open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressions
 set_option maxRecDepth 131072
-set_option maxHeartbeats 32000000
 variable {K : Type*} [CommRing K]
 def H_2_0 : Expr := ExpressionData.HCoeff201Expr
 def H_1_2 : Expr := ExpressionData.HCoeff120Expr

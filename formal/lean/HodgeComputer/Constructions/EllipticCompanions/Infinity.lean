@@ -73,7 +73,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 namespace CrossedEllipticInfinity
 open Polynomial CrossedRationalResidue CrossedElliptic
 variable {K : Type*} [Field K] [CharZero K]
@@ -384,7 +383,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 namespace CrossedEllipticInfinity
 open Polynomial CrossedElliptic CrossedRationalResidue
 variable {K : Type*} [Field K] [CharZero K]
@@ -497,7 +495,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 400000
 namespace CrossedElliptic
 open Polynomial CrossedRationalResidue CrossedEllipticTheta CrossedEllipticInfinity
 open scoped BigOperators
