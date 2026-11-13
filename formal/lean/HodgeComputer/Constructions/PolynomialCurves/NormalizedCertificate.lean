@@ -22,7 +22,6 @@ variable [Field K] [CharZero K] [Algebra B K] [IsFractionRing B K]
 variable [Field L] [CharZero L] [Algebra K L] [FiniteDimensional K L]
 variable [CommRing T]
 
-set_option backward.isDefEq.respectTransparency false in
 /-- A verified polynomial family yields unrestricted normalized polynomial
 data. The application imposes homogeneity after its coordinate transport. -/
 theorem normalized_data_from_polynomial_family
@@ -69,9 +68,9 @@ theorem normalized_data_from_polynomial_family
     change extendFiniteDerivation (L := L) (E i)
       (algebraMap K L (algebraMap B K (π p))) = _
     rw [extendFiniteDerivation_apply]
-    dsimp only [E]
-    rw [residueTangent_apply]
-    simp only [map_sub, map_mul, map_div₀, integerPartial_apply]
+    refine (congrArg (algebraMap K L) (residueTangent_apply π hπ (integerPartial 0)
+      (integerPartial i.succ) f hker hg0 p)).trans ?_
+    simp only [map_sub, map_mul, map_div₀]
     rfl
   obtain ⟨w, hw⟩ := residue_solution_from_polynomial_curve (K := K)
     π hπ f A D E' M ψ χ t timeIndex hconst htime hf hg hdet hM0 hMX hψ
@@ -107,10 +106,12 @@ theorem normalized_data_from_polynomial_family
       π hπ (integerPartial 0) (fun i : Fin 5 => integerPartial i.succ) f A w
       hirr hker hg0 (fun i => integerPartial_commute i.succ 0 f) heq
   refine ⟨d, Fin.cases N0 N, Q, hd, hlegal, ?_, ?_⟩
-  · simpa only [HodgeTestbed.directional, Fin.sum_univ_succ,
+  · set_option backward.isDefEq.respectTransparency false in
+    simpa only [HodgeTestbed.directional, Fin.sum_univ_succ,
       Fin.cases_zero, Fin.cases_succ, integerPartial, Derivation.restrictScalars_apply,
       Derivation.coeFn_coe, mul_comm] using hnormal
-  · simpa only [HodgeTestbed.divergenceNumerator, HodgeTestbed.divergence,
+  · set_option backward.isDefEq.respectTransparency false in
+    simpa only [HodgeTestbed.divergenceNumerator, HodgeTestbed.divergence,
       HodgeTestbed.directional, residueDivNum, Fin.sum_univ_succ,
       Fin.cases_zero, Fin.cases_succ, integerPartial, Derivation.restrictScalars_apply,
       Derivation.coeFn_coe, mul_comm] using hdiv

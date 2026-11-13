@@ -540,32 +540,35 @@ def baseTime : Derivation ℤ (RatFunc K) (RatFunc K) :=
 def baseCoefficient (D : Derivation ℤ K K) : Derivation ℤ (RatFunc K) (RatFunc K) :=
   extendRingDerivation (L := RatFunc K) (coefficientPolynomialDerivation D)
 
-set_option backward.isDefEq.respectTransparency false in
 omit [CharZero K] in
 lemma baseTime_C (c : K) : baseTime (RatFunc.C c) = 0 := by
   change baseTime (algebraMap K[X] (RatFunc K) (C c)) = 0
-  rw [baseTime,extendRingDerivation_apply]
-  simp [timePolynomialDerivation_apply]
-set_option backward.isDefEq.respectTransparency false in
+  refine (extendRingDerivation_apply (L := RatFunc K)
+    (timePolynomialDerivation (E := K)) (C c)).trans ?_
+  change algebraMap K[X] (RatFunc K) (Polynomial.derivative (C c)) = 0
+  rw [Polynomial.derivative_C,map_zero]
 omit [CharZero K] in
 lemma baseTime_X : baseTime (RatFunc.X : RatFunc K) = 1 := by
   change baseTime (algebraMap K[X] (RatFunc K) X) = 1
-  rw [baseTime,extendRingDerivation_apply]
-  simp [timePolynomialDerivation_apply]
-set_option backward.isDefEq.respectTransparency false in
+  refine (extendRingDerivation_apply (L := RatFunc K)
+    (timePolynomialDerivation (E := K)) X).trans ?_
+  change algebraMap K[X] (RatFunc K) (Polynomial.derivative X) = 1
+  rw [Polynomial.derivative_X,map_one]
 omit [CharZero K] in
 lemma baseCoefficient_C (D : Derivation ℤ K K) (c : K) :
     baseCoefficient D (RatFunc.C c) = RatFunc.C (D c) := by
   change baseCoefficient D (algebraMap K[X] (RatFunc K) (C c)) = _
-  rw [baseCoefficient,extendRingDerivation_apply]
-  simp
-set_option backward.isDefEq.respectTransparency false in
+  refine (extendRingDerivation_apply (L := RatFunc K)
+    (coefficientPolynomialDerivation D) (C c)).trans ?_
+  exact congrArg (algebraMap K[X] (RatFunc K)) (coefficientPolynomialDerivation_C D c)
 omit [CharZero K] in
 lemma baseCoefficient_X (D : Derivation ℤ K K) :
     baseCoefficient D (RatFunc.X : RatFunc K) = 0 := by
   change baseCoefficient D (algebraMap K[X] (RatFunc K) X) = 0
-  rw [baseCoefficient,extendRingDerivation_apply]
-  simp
+  refine (extendRingDerivation_apply (L := RatFunc K)
+    (coefficientPolynomialDerivation D) X).trans ?_
+  exact (congrArg (algebraMap K[X] (RatFunc K))
+    (coefficientPolynomialDerivation_X D)).trans (map_zero _)
 
 def time : Derivation ℤ (E K) (E K) := extendFiniteDerivation (K := RatFunc K) (L := E K) (baseTime (K := K))
 def coefficient (D : Derivation ℤ K K) : Derivation ℤ (E K) (E K) :=
