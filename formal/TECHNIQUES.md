@@ -43,7 +43,7 @@ There are four distinct coefficient families:
 
 - [BinaryCubic](lean/HodgeComputer/Constructions/BinaryCubic/README.md) supplies four-coefficient Hessian/discriminant identities and the radial cancellation used by the dense two-ternary witness.
 - [CyclicCubic](lean/HodgeComputer/Constructions/CyclicCubic/README.md) treats `a x³ + b y³ + c z³ + d x²y + e y²z + f z²x`.
-- [TransitiveCubic](lean/HodgeComputer/Constructions/TransitiveCubic/README.md) replaces the last monomial by `f x²z`. Its optional `Shear` module handles a supplied quadratic coordinate reduction.
+- [TransitiveCubic](lean/HodgeComputer/Constructions/TransitiveCubic/README.md) replaces the last monomial by `f x²z`.
 - [PolarCubic](lean/HodgeComputer/Constructions/PolarCubic/README.md) treats `a x³ + b y³ + c z³ + d x²y + e y²z + f xy²` and its first-order `2kxyz` perturbation.
 
 The cubic applications import their coefficient identities directly. These families have different covariants; substituting one family’s tables into another would change the mathematics.

@@ -1,8 +1,8 @@
 import Mathlib.RingTheory.MvPolynomial.WeightedHomogeneous
 import Mathlib.Algebra.Polynomial.Eval.Defs
 import Mathlib.Tactic
-import HodgeComputer.Constructions.TransitiveCubic.SignedExpressions
-import HodgeComputer.Constructions.TransitiveCubic.PolynomialDigitCheck
+import HodgeComputer.Constructions.PolynomialEncoding.SignedExpressions
+import HodgeComputer.Constructions.PolynomialEncoding.PolynomialDigitCheck
 
 /-! Diagonal-weight encoding for the reverse edge xy², with congruences
 modulo 3 reducing the required digit base. The established signed-expression
@@ -174,7 +174,7 @@ end PolarCubicKronecker
 Successful checking certifies both nonnegative parts of the expression.
 Prepared with OpenAI Codex assistance. -/
 namespace PolarCubicGradeCheck
-open Lean.Grind.CommRing TransitiveSignedExpressions PolarCubicKronecker MvPolynomial
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolarCubicKronecker MvPolynomial
 
 def gradeAdd : Option Grade → Option Grade → Option Grade
   | some a, some b => if a=b then some a else none
@@ -328,7 +328,7 @@ All proof obligations are ordinary kernel-checkable propositions.
 Prepared with OpenAI Codex assistance. -/
 noncomputable section
 namespace PolarCubicEncodingCheck
-open Lean.Grind.CommRing TransitiveSignedExpressions PolarCubicKronecker
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolarCubicKronecker
 open PolarCubicGradeCheck MvPolynomial
 
 def value (b : ℕ) (i : ℕ) : ℕ :=
@@ -379,7 +379,7 @@ theorem encoded_identity (e f : Expr) (w : Grade) (b : ℕ)
   have hew := grade_sound e w he
   have hfw := grade_sound f w hf
   apply encode_injective_on_grade w hw p q (hew.1.add hfw.2) (hfw.1.add hew.2)
-  apply TransitivePolynomialDigits.eval_injective_bounded b hb
+  apply PolynomialEncoding.PolynomialDigits.eval_injective_bounded b hb
   · change evaluation 1 p<b
     have he1 := congrArg Prod.fst (evaluation_parts 1 e)
     have hf2 := congrArg Prod.snd (evaluation_parts 1 f)

@@ -1,4 +1,4 @@
-import HodgeComputer.Constructions.TransitiveCubic.SignedExpressions
+import HodgeComputer.Constructions.PolynomialEncoding.SignedExpressions
 namespace PolarCovariants.ExpressionData
 open Lean.Grind.CommRing
 set_option maxRecDepth 65536

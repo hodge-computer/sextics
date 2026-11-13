@@ -1,6 +1,6 @@
 import HodgeComputer.Constructions.PolarCubic.Covariants
 namespace PolarCovariants
-open TransitiveSignedExpressions ExpressionData Lean.Grind.CommRing
+open PolynomialEncoding.SignedExpressions ExpressionData Lean.Grind.CommRing
 set_option maxRecDepth 65536
 set_option maxHeartbeats 4000000
 variable {K L : Type*} [CommRing K] [CommRing L]

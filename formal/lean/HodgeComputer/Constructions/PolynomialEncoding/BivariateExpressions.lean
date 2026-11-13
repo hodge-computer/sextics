@@ -1,12 +1,12 @@
-import HodgeComputer.Constructions.TransitiveCubic.SignedExpressions
+import HodgeComputer.Constructions.PolynomialEncoding.SignedExpressions
 import Mathlib.Tactic
 
 /-! Sparse bivariate polynomials whose coefficients are ring expressions.
 The operations preserve evaluation, with no assumptions about ordering or
 uniqueness of the input terms. This connects coefficient certificates to the
 whole covariant identity. Prepared with OpenAI Codex assistance. -/
-namespace TransitiveBivariateExpressions
-open Lean.Grind.CommRing TransitiveSignedExpressions
+namespace PolynomialEncoding.BivariateExpressions
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions
 
 inductive Biv where
   | nil
@@ -85,5 +85,5 @@ lemma cons_denote_eq (v : ℕ → K) (x y : K) (a b : Expr) (i j : ℕ) (p q : B
     denote v x y (.cons a i j p)=denote v x y (.cons b i j q) := by
   simp only [denote,hab,hpq]
 
-end TransitiveBivariateExpressions
-#print axioms TransitiveBivariateExpressions.multiply_denote
+end PolynomialEncoding.BivariateExpressions
+#print axioms PolynomialEncoding.BivariateExpressions.multiply_denote

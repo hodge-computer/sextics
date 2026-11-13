@@ -69,7 +69,7 @@ specialization to the physical field is not a numerical check at a selected
 cubic.
 
 The large polynomial identity is verified by an exact encoding argument.
-[BivariateExpressions.lean](../../formal/lean/HodgeComputer/Constructions/CyclicCubic/BivariateExpressions.lean) proves the semantics of
+[BivariateExpressions.lean](../../formal/lean/HodgeComputer/Constructions/PolynomialEncoding/BivariateExpressions.lean) proves the semantics of
 the polynomial operations used to form its 190 coefficients. Each coefficient
 has a fixed diagonal weight in the six parameters. At a fixed weight, the
 exponents of \(a,b,c\) are determined by those of \(d,e,f\); the latter are
@@ -77,7 +77,7 @@ less than 19. [Kronecker.lean](../../formal/lean/HodgeComputer/Constructions/Cyc
 injectivity of their encoding with exponents \(1,19,361\). Signed expressions
 are split into two polynomials with natural coefficients. A proved coefficient
 bound makes evaluation at \(2^{42}\) injective on these polynomials.
-[PolynomialDigitCheck.lean](../../formal/lean/HodgeComputer/Constructions/CyclicCubic/PolynomialDigitCheck.lean) proves this last step.
+[PolynomialDigitCheck.lean](../../formal/lean/HodgeComputer/Constructions/PolynomialEncoding/PolynomialDigitCheck.lean) proves this last step.
 The coefficient files use kernel reduction to check the resulting finite
 equalities and bounds. The syntax, grading, products, and evaluation bindings
 are all proved in Lean; generated data are not trusted as an external oracle.

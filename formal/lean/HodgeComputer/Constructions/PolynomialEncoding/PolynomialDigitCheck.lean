@@ -6,7 +6,7 @@ import Mathlib.Tactic
 Evaluation at b is injective when each polynomial has coefficient sum less
 than b. The bound is essential: a successful numerical evaluation without it
 does not prove a polynomial identity. Prepared with OpenAI Codex assistance. -/
-namespace CyclePolynomialDigits
+namespace PolynomialEncoding.PolynomialDigits
 open Polynomial
 
 lemma eval_divX (p : Polynomial ℕ) (b : ℕ) :
@@ -64,5 +64,5 @@ theorem eval_injective_bounded (b : ℕ) (hb : 0<b) (p q : Polynomial ℕ)
       _=q.divX*X+C (q.coeff 0) := by rw [hdiv,hc]
       _=q := divX_mul_X_add q
 
-end CyclePolynomialDigits
-#print axioms CyclePolynomialDigits.eval_injective_bounded
+end PolynomialEncoding.PolynomialDigits
+#print axioms PolynomialEncoding.PolynomialDigits.eval_injective_bounded

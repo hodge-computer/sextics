@@ -1,6 +1,6 @@
 import HodgeComputer.Constructions.PolarCubic.DifferentialData
 namespace PolarCovariants.DifferentialData
-open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressions
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 open PolarCovariants.IdentityData PolarCubicEncodingCheck ResidueFirstJets TrivSqZeroExt
 set_option linter.unusedSimpArgs false
 set_option backward.isDefEq.respectTransparency false

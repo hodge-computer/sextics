@@ -4,7 +4,7 @@ import HodgeComputer.Constructions.PolarCubic.CoefficientsC
 import HodgeComputer.Constructions.PolarCubic.CoefficientsD
 import HodgeComputer.Constructions.ResidueTransport.FirstJets
 namespace PolarCovariants.IdentityData
-open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressions
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 open ResidueFirstJets TrivSqZeroExt
 set_option linter.unusedSimpArgs false
 set_option backward.isDefEq.respectTransparency false

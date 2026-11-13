@@ -7,7 +7,7 @@ This permits positional-encoding certificates to use nonnegative polynomial
 coefficients while retaining the exact signed expression. All semantic
 identities are proved, and no executable extension is introduced.
 Prepared with OpenAI Codex assistance. -/
-namespace TransitiveSignedExpressions
+namespace PolynomialEncoding.SignedExpressions
 open Lean.Grind.CommRing
 
 def pairMul {R : Type*} [CommSemiring R] (p q : R × R) : R × R :=
@@ -115,5 +115,5 @@ lemma ringEval_denote (ctx : Context R) (e : Expr) :
     ringEval (fun i=>ctx.get i) e=e.denote ctx := by
   induction e <;> simp only [ringEval,Expr.denote,Var.denote,denoteInt_eq, *]
 end Ring
-end TransitiveSignedExpressions
-#print axioms TransitiveSignedExpressions.splitEval_difference
+end PolynomialEncoding.SignedExpressions
+#print axioms PolynomialEncoding.SignedExpressions.splitEval_difference

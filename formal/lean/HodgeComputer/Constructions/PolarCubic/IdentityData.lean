@@ -2,7 +2,7 @@ import HodgeComputer.Constructions.PolarCubic.IdentityTablesC
 /-! Exact sparse expression tables for the covariant syzygies.
 Partitioned only to keep compilation memory bounded. -/
 namespace PolarCovariants.IdentityData
-open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressions
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 set_option linter.unusedSimpArgs false
 set_option maxRecDepth 131072
 set_option maxHeartbeats 32000000

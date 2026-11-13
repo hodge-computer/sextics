@@ -1,11 +1,11 @@
 import HodgeComputer.Constructions.CyclicCubic.Kronecker
-import HodgeComputer.Constructions.CyclicCubic.SignedExpressions
+import HodgeComputer.Constructions.PolynomialEncoding.SignedExpressions
 
 /-! A proved syntactic diagonal-weight checker for signed expressions.
 Successful checking certifies both nonnegative parts of the expression.
 Prepared with OpenAI Codex assistance. -/
 namespace CycleCubicGradeCheck
-open Lean.Grind.CommRing CycleSignedExpressions CycleCubicKronecker MvPolynomial
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions CycleCubicKronecker MvPolynomial
 
 def gradeAdd : Option Grade → Option Grade → Option Grade
   | some a, some b => if a=b then some a else none

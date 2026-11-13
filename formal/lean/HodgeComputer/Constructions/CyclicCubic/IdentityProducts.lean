@@ -1,6 +1,6 @@
 import HodgeComputer.Constructions.CyclicCubic.IdentityData
 namespace CycleCovariants.IdentityData
-open CycleBivariateExpressions CycleCovariants.Reflection
+open PolynomialEncoding.BivariateExpressions CycleCovariants.Reflection
 set_option maxRecDepth 131072
 set_option maxHeartbeats 16000000
 lemma Hp2_generated : multiply HData HData=Hp2Data := by rfl

@@ -1,7 +1,7 @@
 import HodgeComputer.Constructions.TransitiveCubic.IdentityData
 import HodgeComputer.Constructions.TransitiveCubic.EncodingCheck
 namespace TransitiveCovariants.IdentityData
-open TransitiveCubicEncodingCheck TransitiveSignedExpressions
+open TransitiveCubicEncodingCheck PolynomialEncoding.SignedExpressions
 set_option maxRecDepth 131072
 set_option maxHeartbeats 32000000
 theorem coefficient_3_15 {K : Type*} [CommRing K] (v : ℕ → K) :
