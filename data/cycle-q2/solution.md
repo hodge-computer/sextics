@@ -1,5 +1,106 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Current Lean source continuation — 12 November 2026
+
+**The complete Lean existence proof is still unfinished.** This continuation
+implements further parts of the written proof with explicit Lean proof bodies,
+using the existing polynomial quotients, normal Cech modules, Fermat Jacobian
+components, and actual exterior powers of Kaehler differentials. It does not
+remove or discharge `Submission.missing_geometric_existence`. The one existing
+explicit admission in that theorem remains.
+
+**No Lean elaboration, compilation, language server, Lake invocation, kernel
+replay, mathematical recomputation, or proposal-verifier execution was run.**
+The additions were reviewed as source against the existing declarations and
+Mathlib revision `0df444a360eaa60ab8c11dca51a86af692955474`. They are uncompiled
+proof drafts, including their dependency on the earlier uncompiled bridge
+commit `619b7e36367aef388d7d3419995ccb5d1fc618ef`. Earlier verification records in
+this document do not certify the modified sources.
+
+The source base for this continuation is
+`baf0dbc951fdcac9b9453bc67a8b85935ca3e371`, which records the full classical
+proof below. The new work is integrated into the three existing Lean files;
+it adds no proposal modules and does not change the protected data or target.
+
+| Existing file | Namespace | New construction and conclusion |
+| --- | --- | --- |
+| `Solution.lean` | `CycleQ2NormalKoszulBridge` | The literal five-generator seed quotient maps to the actual normal Cech quotient by a simple-pole representative. Its normal connecting class has numerator `originalK * L - A`. On degree-nine numerators, the existing seed trace is the coefficient of a specific nonzero actual Cech class, giving an exact equivalence of vanishing. |
+| `GeometricFormalInputs.lean` | `CycleQ2AffineDeRhamComplex` | A basis of the genuine second exterior power, the actual degree-one and degree-two exterior derivatives, their scalar-times-wedge formulas, and all successive-composition identities through the existing degree-three differential. |
+| `GeometricTarget.lean` | `CycleQ2GeometricBridgeAlgebra`, `CycleQ2SupportedProjectorAlgebra` | Construction of the projection associated to complementary submodules, its self-adjointness for the actual Fermat trace pairings, the resulting zero-or-full-image criterion, and a zero-constant polynomial projector with the required composition-closure property. |
+| `GeometricTarget.lean` | `CycleQ2AffineFiniteTopCohomology` | Actual Kaehler differentials and exterior pullback over a finite extension of the protected function field, normalized trace on three-forms and four-forms, compatibility with differentiation, and split-injective pullback on the existing top de Rham quotient. |
+
+### The trace now reaches an actual Cech class
+
+The new map sends a polynomial numerator `p` to the class of
+`p / (g1 * g2)` in the existing overlap localization. The three curve equations
+vanish there, while multiplication by either `g1` or `g2` yields a genuine
+single-open boundary. These five identities descend the map through the
+existing `SeedAlgebra`; its image under the existing normal/scalar Cech
+equivalence is proved, not postulated.
+
+An explicit polynomial inclusion and elimination comparison connect the
+four-variable reduced quotient to that map. The existing one-dimensional
+degree-nine quotient calculation then gives
+
+\[
+\left[\frac{p}{g_1g_2}\right]
+=\operatorname{seedTrace}([p])\,\nu,
+\qquad \nu\ne0,
+\]
+
+when the eliminated numerator is homogeneous of degree nine. Nonvanishing
+of `nu` uses the existing residue calculation excluding boundaries of
+arbitrary pole order. The declarations `seedTrace_simplePoleClass` and
+`seedTrace_eq_zero_iff_simplePoleClass` state these conclusions on the actual
+objects.
+
+This construction concerns the sparse seed with `r^3 = 2`. Its associated
+surface is singular. The classical proof separately intersects the nonempty
+rank open with the nonempty smooth open in the full parameter family. Neither
+that generic intersection with the required geometric family nor the
+projective Serre/semiregularity identification is asserted by this Cech map.
+
+### Exterior differentiation and finite-cover descent
+
+The new lower differentials use the already constructed commuting tangent
+derivations of the protected hypersurface function field. Their codomains are
+the actual exterior powers of `Omega[K / C]`; coefficient vectors are only
+coordinates in proved bases. The scalar-times-wedge formulas identify the
+coordinate maps with exterior differentiation. The supplied proof bodies
+establish `d1(d a) = 0`, `d2(d1 omega) = 0`, and `d3(d2 eta) = 0`.
+
+For a finite extension `L/K`, separability and the transitivity sequence for
+Kaehler differentials prove that the pulled-back four coordinate forms are
+a basis of `Omega[L / C]`. Exterior pullback is constructed from the universal
+alternating property. Normalized field trace on coefficients gives actual
+maps `traceThree` and `traceFour`, with
+
+\[
+\operatorname{Tr}(d\eta)=d\operatorname{Tr}(\eta),
+\qquad
+\operatorname{Tr}(\operatorname{pullback}\omega)=\omega.
+\]
+
+Consequently `pullbackClass_injective` supplies the finite-cover injection on
+the original top de Rham quotient. `exact_pullback_iff` descends an actual
+primitive by its constructed trace. These statements do not assert that the
+specific protected source becomes exact on such an extension.
+
+### What still prevents closing the final theorem
+
+The remaining work is geometric: construct and compare the projective sheaf
+classes and Serre trace; build the smooth moving-curve family and its nonzero
+Abel--Jacobi/cylinder map; identify the actual Fermat pairings with the
+polarized variation; realize the polynomial projector by divisor-supported
+algebraic correspondences and spread it to the protected pencil; and prove
+the Leray and algebraic de Rham comparisons giving vanishing of the specific
+residue class. None of these statements is replaced here by a new axiom, an
+admitted lemma, or an altered final target.
+
+Prepared for `fqlx` with OpenAI ChatGPT assistance, continuing the credited
+geometric route and existing formal developments described below.
+
+
 ## Classical existence proof — 12 November 2026
 
 **The written classical argument is complete; the Lean formalization remains
@@ -10,7 +111,7 @@ including its conversion to the ordinary protected certificate. The full
 argument and finite certificates are included below under
 [Complete classical proof and finite certificates](#complete-classical-proof-and-finite-certificates).
 
-This commit changes only this explanation. No Lean elaboration, compilation,
+The preceding classical-proof commit changed only this explanation. No Lean elaboration, compilation,
 language server, Lake invocation, kernel replay, or proposal-verifier execution
 was run. The existing explicit admission in `Solution.lean` remains;
 neither this written proof nor its finite calculations are a checked Lean

@@ -35183,6 +35183,428 @@ end
 end
 
 
+/- Component: continuation_20261112/MovingClassBridge.lean -/
+section Q2UncompiledNormalKoszulBridge
+
+/-!
+# The literal seed quotient maps to the genuine normal Cech module
+
+Uncompiled continuation of `CycleQ2SeedNormalNonzero`.
+No compiler or elaborator has been run.
+
+The map sends a polynomial numerator p to p/(g1*g2) on the actual curve
+overlap. Each of the five complete-intersection generators is killed:
+the three curve equations vanish already in the overlap, and each of the
+two remaining generators gives a single-open boundary. Consequently the
+map factors through the existing `CycleQ2SeedTrace.SeedAlgebra`.
+
+The target is the existing quotient of actual normal-kernel sections,
+identified with scalar sections by `normalCechEquivalence`. This fragment
+does not identify that ungraded quotient with projective sheaf cohomology,
+construct the surface semiregularity map, or assert a Serre trace comparison.
+-/
+
+section
+noncomputable section
+set_option autoImplicit false
+
+namespace CycleQ2NormalKoszulBridge
+
+open CycleQ2ConormalJacobian CycleQ2SeedTrace CycleQ2NormalConnecting
+  CycleQ2ActualNormalCech CycleQ2SeedNormalNonzero
+
+/-- The simple-pole numerator map in the actual overlap localization. -/
+def simplePoleRepresentative (r θ : ℂ) : P →ₗ[P] Overlap r θ where
+  toFun p := algebraMap P (Overlap r θ) p *
+    (↑((firstOverlapUnit r θ)⁻¹) : Overlap r θ) *
+    (↑((secondOverlapUnit r θ)⁻¹) : Overlap r θ)
+  map_add' p q := by
+    simp only [map_add, add_mul]
+  map_smul' a p := by
+    simp only [smul_eq_mul, Algebra.smul_def, map_mul, mul_assoc]
+
+@[simp] theorem simplePoleRepresentative_apply (r θ : ℂ) (p : P) :
+    simplePoleRepresentative r θ p = algebraMap P (Overlap r θ) p *
+      (↑((firstOverlapUnit r θ)⁻¹) : Overlap r θ) *
+      (↑((secondOverlapUnit r θ)⁻¹) : Overlap r θ) := rfl
+
+/-- The actual scalar Cech class of the simple-pole representative. -/
+def simplePoleClass (r θ : ℂ) : P →ₗ[P] ScalarCech r θ :=
+  (scalarBoundaries r θ).mkQ.comp (simplePoleRepresentative r θ)
+
+@[simp] theorem simplePoleClass_apply (r θ : ℂ) (p : P) :
+    simplePoleClass r θ p =
+      (Submodule.Quotient.mk (simplePoleRepresentative r θ p) : ScalarCech r θ) := rfl
+
+theorem simplePoleRepresentative_zero_of_curve (r θ : ℂ) (p : P)
+    (hp : p ∈ ambientCurveIdeal r θ) :
+    simplePoleRepresentative r θ p = 0 := by
+  rw [simplePoleRepresentative_apply, overlap_annihilates r θ p hp,
+    zero_mul, zero_mul]
+
+theorem simplePoleClass_zero_of_curve (r θ : ℂ) (p : P)
+    (hp : p ∈ ambientCurveIdeal r θ) : simplePoleClass r θ p = 0 := by
+  change (scalarBoundaries r θ).mkQ (simplePoleRepresentative r θ p) = 0
+  rw [simplePoleRepresentative_zero_of_curve r θ p hp, map_zero]
+
+theorem simplePoleClass_curveEquation (r θ : ℂ) (i : Fin 3) :
+    simplePoleClass r θ (curveEquations r θ i) = 0 :=
+  simplePoleClass_zero_of_curve r θ _ (curveEquation_mem r θ i)
+
+/-- Cancelling g1 leaves the inverse of g2, a section on the second open. -/
+theorem simplePoleRepresentative_g1 (r θ : ℂ) :
+    simplePoleRepresentative r θ (originalG1 r) =
+      secondRestriction r θ (↑((secondOpenUnit r θ)⁻¹) : SecondOpen r θ) := by
+  rw [simplePoleRepresentative_apply, ← firstOverlapUnit_value,
+    (firstOverlapUnit r θ).mul_inv, one_mul]
+  rfl
+
+/-- Cancelling g2 leaves the inverse of g1, a section on the first open. -/
+theorem simplePoleRepresentative_g2 (r θ : ℂ) :
+    simplePoleRepresentative r θ originalG2 =
+      firstRestriction r θ (↑((firstOpenUnit r θ)⁻¹) : FirstOpen r θ) := by
+  rw [simplePoleRepresentative_apply, ← secondOverlapUnit_value]
+  calc
+    (secondOverlapUnit r θ : Overlap r θ) *
+        (↑((firstOverlapUnit r θ)⁻¹) : Overlap r θ) *
+        (↑((secondOverlapUnit r θ)⁻¹) : Overlap r θ) =
+        (↑((firstOverlapUnit r θ)⁻¹) : Overlap r θ) *
+          ((secondOverlapUnit r θ : Overlap r θ) *
+            (↑((secondOverlapUnit r θ)⁻¹) : Overlap r θ)) := by ring
+    _ = (↑((firstOverlapUnit r θ)⁻¹) : Overlap r θ) := by
+      rw [(secondOverlapUnit r θ).mul_inv, mul_one]
+    _ = _ := rfl
+
+theorem simplePoleClass_g1 (r θ : ℂ) :
+    simplePoleClass r θ (originalG1 r) = 0 := by
+  rw [simplePoleClass_apply]
+  apply (Submodule.Quotient.mk_eq_zero (scalarBoundaries r θ)).mpr
+  rw [simplePoleRepresentative_g1]
+  exact Submodule.mem_sup_right
+    (show secondRestriction r θ (↑((secondOpenUnit r θ)⁻¹) : SecondOpen r θ) ∈
+      LinearMap.range (secondRestrictionAlg r θ).toLinearMap from
+        ⟨(↑((secondOpenUnit r θ)⁻¹) : SecondOpen r θ), rfl⟩)
+
+theorem simplePoleClass_g2 (r θ : ℂ) :
+    simplePoleClass r θ originalG2 = 0 := by
+  rw [simplePoleClass_apply]
+  apply (Submodule.Quotient.mk_eq_zero (scalarBoundaries r θ)).mpr
+  rw [simplePoleRepresentative_g2]
+  exact Submodule.mem_sup_left
+    (show firstRestriction r θ (↑((firstOpenUnit r θ)⁻¹) : FirstOpen r θ) ∈
+      LinearMap.range (firstRestrictionAlg r θ).toLinearMap from
+        ⟨(↑((firstOpenUnit r θ)⁻¹) : FirstOpen r θ), rfl⟩)
+
+/-- Every generator of the existing five-generator seed ideal maps to zero.
+No abstract quotient-pairing or geometric trace hypothesis is supplied. -/
+theorem originalIdeal_le_ker (r : ℂ) :
+    originalIdeal r ≤ LinearMap.ker (simplePoleClass r 0) := by
+  rw [originalIdeal, Ideal.span_le]
+  rintro _ ⟨i, rfl⟩
+  change simplePoleClass r 0 (originalRelations r i) = 0
+  fin_cases i
+  · simpa [originalRelations, curveEquations] using
+      simplePoleClass_curveEquation r 0 0
+  · simpa [originalRelations] using simplePoleClass_g1 r 0
+  · simpa [originalRelations, curveEquations] using
+      simplePoleClass_curveEquation r 0 1
+  · simpa [originalRelations] using simplePoleClass_g2 r 0
+  · simpa [originalRelations, curveEquations, thetaH] using
+      simplePoleClass_curveEquation r 0 2
+
+/-- The Koszul simple-pole boundary from the literal seed quotient to the
+existing scalar Cech module. The construction needs no smoothness premise. -/
+def seedScalarBoundary (r : ℂ) : SeedAlgebra r →ₗ[P] ScalarCech r 0 :=
+  (originalIdeal r).liftQ (simplePoleClass r 0) (originalIdeal_le_ker r)
+
+@[simp] theorem seedScalarBoundary_mk (r : ℂ) (p : P) :
+    seedScalarBoundary r (seedQuotient r p) = simplePoleClass r 0 p := rfl
+
+/-- The same actual boundary with values in genuine normal-kernel sections
+modulo the actual restriction boundaries. -/
+def seedNormalBoundary (r : ℂ) : SeedAlgebra r →ₗ[P] NormalCech r 0 :=
+  (normalCechEquivalence r 0).symm.toLinearMap.comp (seedScalarBoundary r)
+
+@[simp] theorem normalCechEquivalence_seedNormalBoundary (r : ℂ)
+    (x : SeedAlgebra r) :
+    normalCechEquivalence r 0 (seedNormalBoundary r x) = seedScalarBoundary r x := by
+  change normalCechEquivalence r 0
+      ((normalCechEquivalence r 0).symm (seedScalarBoundary r x)) = _
+  exact (normalCechEquivalence r 0).apply_symm_apply _
+
+/-- The actual normal lift difference has the simple-pole numerator kL-A. -/
+theorem normalOverlapCoefficient_eq_simplePole (r θ : ℂ) (A L : P) :
+    normalOverlapCoefficient r θ A L =
+      simplePoleRepresentative r θ (thetaK θ * L - A) := by
+  simp only [normalOverlapCoefficient, overlapCoefficient,
+    simplePoleRepresentative_apply, overlap_algebraMap, map_sub, map_mul]
+
+theorem connectingClass_eq_simplePole (r θ : ℂ) (A L : P) :
+    connectingClass r θ A L =
+      (normalCechEquivalence r θ).symm
+        (simplePoleClass r θ (thetaK θ * L - A)) := by
+  apply (normalCechEquivalence r θ).injective
+  rw [connectingClass_eq_scalar, LinearEquiv.apply_symm_apply]
+  rw [simplePoleClass_apply, normalOverlapCoefficient_eq_simplePole]
+
+/-- The existing normal connecting class factors through the literal seed
+algebra. In particular, changing kL-A by any of the five ideal generators
+does not change the actual normal class. -/
+theorem connectingClass_eq_seedNormalBoundary (r : ℂ) (A L : P) :
+    connectingClass r 0 A L =
+      seedNormalBoundary r (seedQuotient r (originalK * L - A)) := by
+  rw [connectingClass_eq_simplePole]
+  change (normalCechEquivalence r 0).symm
+      (simplePoleClass r 0 (thetaK 0 * L - A)) =
+    (normalCechEquivalence r 0).symm
+      (simplePoleClass r 0 (originalK * L - A))
+  simp only [thetaK, map_zero, zero_mul, add_zero]
+
+/-- This is an actual nonzero value of the constructed quotient map,
+detected by the already proved localization-residue calculation. -/
+theorem seedNormalBoundary_test_ne_zero (r : ℂ) (hr : r ≠ 0) :
+    seedNormalBoundary r (seedQuotient r (-derivativeA)) ≠ 0 := by
+  have h := ambient_test_nonzero r 0 hr
+  rw [connectingClass_eq_seedNormalBoundary, mul_zero, zero_sub] at h
+  exact h
+
+theorem seedNormalBoundary_ne_zero (r : ℂ) (hr : r ≠ 0) :
+    seedNormalBoundary r ≠ 0 := by
+  intro hz
+  apply seedNormalBoundary_test_ne_zero r hr
+  rw [hz, LinearMap.zero_apply]
+
+section DegreeNine
+
+open MvPolynomial CycleQ2SeedCechTheta CycleQ2SeedBoundaryProjection
+  CycleQ2SeedLocalizationBoundary
+
+/-- The literal inclusion of the four unweighted coordinates into the
+five-variable weighted polynomial ring, before imposing w=-x2^2. -/
+def polynomialLift : Poly →ₐ[ℂ] P :=
+  MvPolynomial.aeval ![X 0, X 1, X 2, X 3]
+
+@[simp] theorem substitute_polynomialLift (p : Poly) :
+    substitute (polynomialLift p) = p := by
+  have hh : substitute.comp polynomialLift = AlgHom.id ℂ Poly := by
+    ext1 i
+    change substitute (polynomialLift (X i)) = X i
+    fin_cases i <;> simp [polynomialLift, substitute]
+  exact congrArg (fun f : Poly →ₐ[ℂ] Poly => f p) hh
+
+/-- Eliminating w and lifting back does not change the class in the literal
+five-variable seed algebra: the eliminated equation is one of its generators. -/
+theorem seedQuotient_polynomialLift_substitute (r : ℂ) (p : P) :
+    seedQuotient r (polynomialLift (substitute p)) = seedQuotient r p := by
+  have hf2 : seedQuotient r originalF2 = 0 := by
+    apply Ideal.Quotient.eq_zero_iff_mem.mpr
+    exact Ideal.subset_span ⟨2, rfl⟩
+  have hw : seedQuotient r (X 4) = -((seedQuotient r (X 2)) ^ 2) := by
+    rw [originalF2, map_add, map_pow] at hf2
+    exact eq_neg_of_add_eq_zero_left hf2
+  have hh : (seedQuotient r).comp (polynomialLift.comp substitute) = seedQuotient r := by
+    ext1 i
+    change seedQuotient r (polynomialLift (substitute (X i))) = seedQuotient r (X i)
+    fin_cases i <;> simp [polynomialLift, substitute, hw]
+  exact congrArg (fun f : P →ₐ[ℂ] SeedAlgebra r => f p) hh
+
+theorem simplePoleClass_substitute (r : ℂ) (p : P) :
+    simplePoleClass r 0 p = simplePoleClass r 0 (polynomialLift (substitute p)) := by
+  have hh := congrArg (seedScalarBoundary r) (seedQuotient_polynomialLift_substitute r p)
+  exact hh.symm
+
+private theorem lift_relation_zero (r : ℂ) :
+    polynomialLift (relation r 0) = originalF1 r := by
+  simp [polynomialLift, relation, originalF1]
+
+private theorem lift_relation_three (r : ℂ) :
+    polynomialLift (relation r 3) = originalH := by
+  simp [polynomialLift, relation, h, b, originalH, originalB]
+
+private theorem g1_lift_relation (r : ℂ) :
+    originalG1 r =
+      originalF1 r * (X 0 ^ 2 + C (2 * r) * X 1 * X 3) +
+        C (3 * r ^ 2) * polynomialLift (relation r 1) := by
+  simp [polynomialLift, relation, originalG1, originalF1, map_mul, map_pow]
+  ring
+
+private theorem g2_lift_relation (r : ℂ) :
+    originalG2 = originalF2 * (X 4 - 2 * X 2 ^ 2) +
+      C (3 : ℂ) * polynomialLift (relation r 2) := by
+  simp [polynomialLift, relation, originalG2, originalF2]
+  ring
+
+private theorem mem_of_constant_mul (I : Ideal P) (c : ℂ) (hc : c ≠ 0)
+    (p : P) (hp : C c * p ∈ I) : p ∈ I := by
+  have hh := I.mul_mem_left (C (c⁻¹)) hp
+  simpa only [← mul_assoc, ← map_mul, inv_mul_cancel₀ hc, map_one, one_mul] using hh
+
+/-- The four-variable relation ideal maps into the original five-variable
+ideal. The only divisions are by 3 and by 3*r^2, with r explicitly nonzero. -/
+theorem polynomialLift_relation_mem (r : ℂ) (hr : r ≠ 0) (i : Fin 4) :
+    polynomialLift (relation r i) ∈ originalIdeal r := by
+  have hg (j : Fin 5) : originalRelations r j ∈ originalIdeal r :=
+    Ideal.subset_span ⟨j, rfl⟩
+  have hf1 : originalF1 r ∈ originalIdeal r := hg 0
+  have hg1 : originalG1 r ∈ originalIdeal r := hg 1
+  have hf2 : originalF2 ∈ originalIdeal r := hg 2
+  have hg2 : originalG2 ∈ originalIdeal r := hg 3
+  fin_cases i
+  · rw [lift_relation_zero]
+    exact hf1
+  · apply mem_of_constant_mul (originalIdeal r) (3 * r ^ 2)
+      (mul_ne_zero (by norm_num) (pow_ne_zero _ hr))
+    have hh := (originalIdeal r).sub_mem hg1
+      ((originalIdeal r).mul_mem_right
+        (X 0 ^ 2 + C (2 * r) * X 1 * X 3) hf1)
+    rw [g1_lift_relation, add_sub_cancel_left] at hh
+    exact hh
+  · apply mem_of_constant_mul (originalIdeal r) (3 : ℂ) (by norm_num)
+    have hh := (originalIdeal r).sub_mem hg2
+      ((originalIdeal r).mul_mem_right (X 4 - 2 * X 2 ^ 2) hf2)
+    rw [g2_lift_relation r, add_sub_cancel_left] at hh
+    exact hh
+  · rw [lift_relation_three]
+    exact hg 4
+
+theorem polynomialLift_mem (r : ℂ) (hr : r ≠ 0) {p : Poly}
+    (hp : p ∈ reducedIdeal r) : polynomialLift p ∈ originalIdeal r := by
+  have hle : reducedIdeal r ≤ Ideal.comap polynomialLift.toRingHom (originalIdeal r) := by
+    rw [reducedIdeal, Ideal.span_le]
+    rintro _ ⟨i, rfl⟩
+    exact polynomialLift_relation_mem r hr i
+  exact hle hp
+
+/-- An explicit comparison between the two existing quotient algebras,
+used here as a complex-linear map. -/
+def reducedToSeed (r : ℂ) (hr : r ≠ 0) : ReducedAlgebra r →ₗ[ℂ] SeedAlgebra r :=
+  ((reducedIdeal r).restrictScalars ℂ).liftQ
+    ((seedQuotient r).toLinearMap.comp polynomialLift.toLinearMap) (by
+      intro p hp
+      change seedQuotient r (polynomialLift p) = 0
+      exact Ideal.Quotient.eq_zero_iff_mem.mpr (polynomialLift_mem r hr hp))
+
+@[simp] theorem reducedToSeed_mk (r : ℂ) (hr : r ≠ 0) (p : Poly) :
+    reducedToSeed r hr (reducedQuotient r p) = seedQuotient r (polynomialLift p) := rfl
+
+/-- The actual simple-pole class attached to the four-variable quotient. -/
+def reducedScalarBoundary (r : ℂ) (hr : r ≠ 0) :
+    ReducedAlgebra r →ₗ[ℂ] ScalarCech r 0 :=
+  ((seedScalarBoundary r).restrictScalars ℂ).comp (reducedToSeed r hr)
+
+@[simp] theorem reducedScalarBoundary_mk (r : ℂ) (hr : r ≠ 0) (p : Poly) :
+    reducedScalarBoundary r hr (reducedQuotient r p) =
+      simplePoleClass r 0 (polynomialLift p) := rfl
+
+/-- The image in the actual Cech module of the distinguished degree-nine
+normalization monomial. -/
+def normalizationCechClass (r : ℂ) (hr : r ≠ 0) : ScalarCech r 0 :=
+  reducedScalarBoundary r hr (normalizationClass r)
+
+/-- The existing quotient trace is the coefficient of the actual simple-pole
+class on the degree-nine image. This does not presuppose a Serre trace. -/
+theorem reducedScalarBoundary_degreeNine (r : ℂ) (hr : r ≠ 0)
+    (hcube : r ^ 3 = 2) {x : ReducedAlgebra r} (hx : x ∈ degreeNinePiece r) :
+    reducedScalarBoundary r hr x =
+      reducedTrace r hcube x • normalizationCechClass r hr := by
+  calc
+    reducedScalarBoundary r hr x = reducedScalarBoundary r hr
+        (reducedTrace r hcube x • normalizationClass r) :=
+      congrArg (reducedScalarBoundary r hr) (degreeNine_class_eq_trace_smul r hcube hx)
+    _ = _ := map_smul (reducedScalarBoundary r hr) _ _
+
+theorem simplePoleClass_degreeNine (r : ℂ) (hr : r ≠ 0) (hcube : r ^ 3 = 2)
+    (p : Poly) (hp : p.IsHomogeneous 9) :
+    simplePoleClass r 0 (polynomialLift p) =
+      traceLinear r p • normalizationCechClass r hr := by
+  simpa only [reducedScalarBoundary_mk, reducedTrace_mk] using
+    (reducedScalarBoundary_degreeNine r hr hcube
+      (x := reducedQuotient r p) ⟨p, hp, rfl⟩)
+
+/-- Pairing the ambient-test normal class with a cubic is exactly the
+simple-pole class of the lifted negative derivative numerator. -/
+theorem simplePoleRepresentative_lift_derivative (r θ : ℂ) (p : Poly) :
+    simplePoleRepresentative r θ (polynomialLift (-derivativeNumerator p)) =
+      pairedNormalOverlap r θ p := by
+  simp only [simplePoleRepresentative_apply, overlap_algebraMap, overlapAmbient,
+    ambientCurveMap, RingHom.comp_apply, substitute_polynomialLift,
+    pairedNormalOverlap, normalOverlapCoefficient, overlapCoefficient,
+    map_zero, mul_zero, zero_sub]
+  rw [← substitute_derivativeA p]
+  simp only [map_neg, map_mul]
+  ring
+
+/-- The same all-poles boundary argument used for the genuine normal class
+also detects the cubic-paired scalar class itself. -/
+theorem pairedScalarClass_ne_zero (r θ : ℂ) (hr : r ≠ 0)
+    (v : Fin 9 → ℂ) (hv : derivativeTrace θ v ≠ 0) :
+    (Submodule.Quotient.mk
+      (pairedNormalOverlap r θ (cubicDeformation v)) : ScalarCech r θ) ≠ 0 := by
+  intro hz
+  have hbd := (Submodule.Quotient.mk_eq_zero (scalarBoundaries r θ)).mp hz
+  obtain ⟨x, ⟨a, rfl⟩, y, ⟨b, rfl⟩, hab⟩ := Submodule.mem_sup.mp hbd
+  change firstRestriction r θ a + secondRestriction r θ b =
+    pairedNormalOverlap r θ (cubicDeformation v) at hab
+  obtain ⟨N, M, q, s, hN, hM, hmem⟩ :=
+    paired_boundary_witness r θ hr (cubicDeformation v) a b hab.symm
+  exact no_unrestricted_boundary r θ hr v hv N M q s hN hM hmem
+
+/-- The distinguished degree-nine image is nonzero in the actual ungraded
+Cech quotient, including boundaries with unrestricted pole orders. -/
+theorem normalizationCechClass_ne_zero (r : ℂ) (hr : r ≠ 0)
+    (hcube : r ^ 3 = 2) : normalizationCechClass r hr ≠ 0 := by
+  intro hz
+  have hv : derivativeTrace 0 selectedTangent ≠ 0 := by
+    rw [selectedTangent_trace]
+    norm_num
+  apply pairedScalarClass_ne_zero r 0 hr selectedTangent hv
+  rw [← simplePoleRepresentative_lift_derivative]
+  change simplePoleClass r 0
+    (polynomialLift (-derivativeNumerator (cubicDeformation selectedTangent))) = 0
+  rw [simplePoleClass_degreeNine r hr hcube _
+    (derivativeNumerator_homogeneous selectedTangent).neg, hz, smul_zero]
+
+/-- The existing finite trace detects vanishing of the genuine simple-pole
+class for every homogeneous degree-nine numerator, not just the saved matrix. -/
+theorem simplePoleClass_degreeNine_eq_zero_iff (r : ℂ) (hr : r ≠ 0)
+    (hcube : r ^ 3 = 2) (p : Poly) (hp : p.IsHomogeneous 9) :
+    simplePoleClass r 0 (polynomialLift p) = 0 ↔ traceLinear r p = 0 := by
+  rw [simplePoleClass_degreeNine r hr hcube p hp]
+  constructor
+  · intro hz
+    rcases smul_eq_zero.mp hz with hc | hnormalization
+    · exact hc
+    · exact False.elim ((normalizationCechClass_ne_zero r hr hcube) hnormalization)
+  · intro hc
+    rw [hc, zero_smul]
+
+/-- The existing five-variable seed trace is now the coefficient of a
+specific nonzero class in the genuine scalar Cech quotient. The degree
+condition is imposed on the actual eliminated numerator. -/
+theorem seedTrace_simplePoleClass (r : ℂ) (hr : r ≠ 0) (hcube : r ^ 3 = 2)
+    (p : P) (hp : (substitute p).IsHomogeneous 9) :
+    simplePoleClass r 0 p =
+      seedTrace r hcube (seedQuotient r p) • normalizationCechClass r hr := by
+  rw [simplePoleClass_substitute,
+    simplePoleClass_degreeNine r hr hcube (substitute p) hp, seedTrace_mk]
+
+/-- The finite quotient trace and the actual Cech class have exactly the
+same vanishing criterion on the canonical degree-nine numerators. -/
+theorem seedTrace_eq_zero_iff_simplePoleClass (r : ℂ) (hr : r ≠ 0)
+    (hcube : r ^ 3 = 2) (p : P) (hp : (substitute p).IsHomogeneous 9) :
+    seedTrace r hcube (seedQuotient r p) = 0 ↔ simplePoleClass r 0 p = 0 := by
+  rw [seedTrace_mk, simplePoleClass_substitute,
+    simplePoleClass_degreeNine_eq_zero_iff r hr hcube (substitute p) hp]
+
+end DegreeNine
+
+end CycleQ2NormalKoszulBridge
+end
+end
+
+end Q2UncompiledNormalKoszulBridge
+
+
 /- Component: continuation_20261112/UniversalSurfaceTopCech.lean -/
 section
 /-! # The seven-dimensional quotient of the actual universal normalized localization complex -/
