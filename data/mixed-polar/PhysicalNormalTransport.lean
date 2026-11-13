@@ -1,5 +1,6 @@
 import Proposal.PhysicalChart
 import HodgeComputer.Constructions.HoldoutCover.ResiduePiolaPullback
+import HodgeComputer.Constructions.ResidueTransport.NormalChange
 
 /-! Exact correction from the physical X0-normal to the paired-sign normal.
 This closes the normal-chart source obligation independently of the cubic
@@ -17,25 +18,6 @@ open scoped BigOperators
 instance physical_charZero : CharZero FunctionField :=
   charZero_of_injective_ringHom (f := residueMap.comp MvPolynomial.C)
     (residueMap.comp MvPolynomial.C).injective
-
-section Algebra
-variable {K : Type*} [Field K]
-lemma paired_normal_change (D : Derivation ℤ K K)
-    (p q B f g fpp fpq fqq : K)
-    (hf : f≠0) (hh : p*f+q*g≠0)
-    (DB : D B=0)
-    (Dp : D p= -g/f) (Dq : D q=1)
-    (Df : D f=fpq-g/f*fpp) (Dg : D g=fqq-g/f*fpq) :
-    B*q/f-B*p*q*fpp/f^2 =
-      B*p*q*(3*(p*f+q*g)-(p^2*fpp+2*p*q*fpq+q^2*fqq))/(p*f+q*g)^2+
-      (D (-B*p*q^2/(p*f+q*g))-(-B*p*q^2/(p*f+q*g))*D f/f) := by
-  simp only [Derivation.leibniz_div,Derivation.leibniz,Derivation.leibniz_pow,
-    map_neg,map_add,smul_eq_mul,nsmul_eq_mul,Dp,Dq,Df,Dg,DB]
-  generalize hG : p*f+q*g=G at *
-  field_simp [hf,hh]
-  rw [← hG]
-  ring
-end Algebra
 
 local notation "p" => coordinate
 lemma coordinate_X (i : Fin 6) : residueMap (MvPolynomial.X i)=p i := rfl
@@ -134,7 +116,7 @@ theorem physical_source_transport :
       cOne*cTwo*ratio^3*cubicNormalJet/cubicNormal+
         residueDivergence tangent (gradient 0) correctionVector := by
   have hn : gradient 0≠0 := normal_ne_zero
-  have hp := paired_normal_change (tangent 2) (p 0) (p 3) otherProduct (gradient 0) (gradient 3)
+  have hp := ResidueNormalChange.paired_normal_change (tangent 2) (p 0) (p 3) otherProduct (gradient 0) (gradient 3)
     (hessian 0 0) (hessian 0 3) (hessian 3 3) hn paired_gradient_ne_zero
     otherProduct_constant
     tangent_p0 tangent_p3 (by rw [tangent_gradient,hessian_commute 3 0])

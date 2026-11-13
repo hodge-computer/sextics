@@ -51,25 +51,6 @@ lemma coefficientMap_injective : Function.Injective coefficientMap := by
     fin_cases j <;> rfl
 
 /-- Generic-size counterpart of the shared five-coordinate determinant lemma. -/
-lemma endpoint_det {R : Type*} [CommRing R] {n : ℕ}
-    (M : Matrix (Fin (n+2)) (Fin (n+2)) R) (g : R)
-    (hnormal : ∀ i, M i 0=if i=0 then g else 0)
-    (htime : M 1 1=1)
-    (hmiddle : ∀ j : Fin n, M 1 j.succ.succ=0)
-    (hendpoints : ∀ i j : Fin n, M i.succ.succ j.succ.succ=if i=j then 1 else 0) :
-    M.det=g := by
-  have hc (i : Fin (n+1)) : M i.succ 0=0 := by
-    rw [hnormal,if_neg (Fin.succ_ne_zero i)]
-  rw [det_single_first_column M hc]
-  have hr (j : Fin n) : (M.submatrix Fin.succ Fin.succ) 0 j.succ=0 := hmiddle j
-  rw [det_single_first_row (M.submatrix Fin.succ Fin.succ) hr]
-  have hi : (M.submatrix Fin.succ Fin.succ).submatrix Fin.succ Fin.succ=
-      (1 : Matrix (Fin n) (Fin n) R) := by
-    ext i j
-    exact hendpoints i j
-  rw [hi,Matrix.det_one,mul_one]
-  change M 0 0*M 1 1=g
-  rw [hnormal,if_pos rfl,htime,mul_one]
 
 def evaluationPolynomialMatrix : Matrix (Fin 6) (Fin 6) (Polynomial CoefficientField) :=
   fun i => Fin.cases (fullNormal i) (fun j => polynomialDerivation j (fullCurve i))

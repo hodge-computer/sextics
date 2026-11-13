@@ -1,4 +1,5 @@
 import Proposal.JacobianModel
+import HodgeComputer.Constructions.PolynomialCurves.WeierstrassConic
 import Mathlib.Algebra.MvPolynomial.PDeriv
 import Mathlib.RingTheory.Derivation.MapCoeffs
 import Mathlib.Algebra.Polynomial.Degree.Lemmas
@@ -18,6 +19,8 @@ set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 8000000
 namespace CycleJacobianIncidence
 open Polynomial
+export WeierstrassConic (Coeff CurvePoly cv cp curve coefficientDeriv coefficientDeriv_coeff coefficientDeriv_C
+  coefficientDeriv_X slotCoordinate slotDegree curve_coefficientDeriv curveEval valueCurve curveEval_eq_valueCurve)
 variable {R : Type*} [CommRing R]
 
 /-- The fixed-alpha model, in curve-coordinate order R,X,Y. -/
@@ -58,34 +61,9 @@ lemma gradient_map {S : Type*} [CommRing S] (f : R →+* S)
     f (gradient c₁ c₂ t v i)=gradient (f c₁) (f c₂) (f t) (fun j => f (v j)) i := by
   fin_cases i <;> simp [gradient,a8r,b256r,CycleJacobian.a8,map_ofNat]
 
-abbrev Coeff (R : Type*) [CommRing R] := MvPolynomial (Fin 13) R
-abbrev CurvePoly (R : Type*) [CommRing R] := Polynomial (Coeff R)
-def cv (i : Fin 13) : CurvePoly R := C (MvPolynomial.X i)
-def cp (r : R) : CurvePoly R := C (MvPolynomial.C r)
-def curve (k : Fin 2 → R) : Fin 3 → CurvePoly R :=
-  ![cp (k 0)+cv 0*X+cv 1*X^2,
-    cp (k 1)+cv 2*X+cv 3*X^2+cv 4*X^3+cv 5*X^4,
-    cv 6+cv 7*X+cv 8*X^2+cv 9*X^3+cv 10*X^4+cv 11*X^5+cv 12*X^6]
 def equations (c₁ c₂ : R) (k : Fin 2 → R) (i : Fin 13) : Coeff R :=
   (H (cp c₁) (cp c₂) X (curve k)).coeff i.val
 
-def coefficientDeriv (i : Fin 13) : Derivation R (CurvePoly R) (CurvePoly R) :=
-  PolynomialModule.equivPolynomialSelf.compDer (MvPolynomial.pderiv i).mapCoeffs
-@[simp] lemma coefficientDeriv_coeff (i : Fin 13) (f : CurvePoly R) (n : ℕ) :
-    (coefficientDeriv i f).coeff n = MvPolynomial.pderiv i (f.coeff n) := rfl
-@[simp] lemma coefficientDeriv_C (i : Fin 13) (p : Coeff R) :
-    coefficientDeriv i (C p) = C (MvPolynomial.pderiv i p) := by
-  ext n
-  by_cases hn : n=0 <;> simp [coefficientDeriv_coeff,Polynomial.coeff_C,hn]
-@[simp] lemma coefficientDeriv_X (i : Fin 13) : coefficientDeriv i (X : CurvePoly R)=0 := by
-  ext n
-  simp [coefficientDeriv_coeff,Polynomial.coeff_X,apply_ite]
-def slotCoordinate : Fin 13 → Fin 3 := ![0,0,1,1,1,1,2,2,2,2,2,2,2]
-def slotDegree : Fin 13 → ℕ := ![1,2,1,2,3,4,0,1,2,3,4,5,6]
-lemma curve_coefficientDeriv (k : Fin 2 → R) (j : Fin 13) (i : Fin 3) :
-    coefficientDeriv j (curve k i)=if i=slotCoordinate j then X^slotDegree j else 0 := by
-  fin_cases j <;> fin_cases i <;>
-    simp [curve,cv,cp,slotCoordinate,slotDegree,Derivation.leibniz,Derivation.leibniz_pow,smul_eq_mul]
 lemma H_coefficientDeriv (c₁ c₂ : R) (k : Fin 2 → R) (j : Fin 13) :
     coefficientDeriv j (H (cp c₁) (cp c₂) X (curve k)) =
       gradient (cp c₁) (cp c₂) X (curve k) (slotCoordinate j)*X^slotDegree j := by
@@ -114,18 +92,6 @@ lemma H_natDegree_le (c₁ c₂ : R) (k : Fin 2 → R) :
   simp only [Matrix.cons_val_zero,Matrix.cons_val_one,Matrix.cons_val]
   compute_degree
 
-def curveEval {S : Type*} [CommRing S] (k : Fin 2 → R) (f : R →+* S)
-    (v : Fin 13 → S) : Fin 3 → Polynomial S :=
-  fun i => (curve k i).map (MvPolynomial.eval₂Hom f v)
-def valueCurve (k : Fin 2 → R) (v : Fin 13 → R) : Fin 3 → Polynomial R :=
-  ![C (k 0)+C (v 0)*X+C (v 1)*X^2,
-    C (k 1)+C (v 2)*X+C (v 3)*X^2+C (v 4)*X^3+C (v 5)*X^4,
-    C (v 6)+C (v 7)*X+C (v 8)*X^2+C (v 9)*X^3+C (v 10)*X^4+C (v 11)*X^5+C (v 12)*X^6]
-lemma curveEval_eq_valueCurve {S : Type*} [CommRing S] (k : Fin 2 → R)
-    (f : R →+* S) (v : Fin 13 → S) :
-    curveEval k f v=valueCurve (fun i => f (k i)) v := by
-  funext i
-  fin_cases i <;> simp [curveEval,curve,valueCurve,cv,cp]
 lemma equations_eval {S : Type*} [CommRing S] (c₁ c₂ : R) (k : Fin 2 → R)
     (f : R →+* S) (v : Fin 13 → S) (i : Fin 13) :
     MvPolynomial.eval₂Hom f v (equations c₁ c₂ k i)=
