@@ -78,6 +78,15 @@
       "content": "docs/quadratic-nets.html"
     },
     {
+      "id": "hodge-loci",
+      "number": "3d",
+      "title": "3D. Hodge loci of surface sections",
+      "shortTitle": "Hodge loci",
+      "description": "Invariant surface sections, trace formulas for moving curves, a Higgs-field criterion, and order-three weighted sextics.",
+      "source": "docs/03d-hodge-loci.md",
+      "content": "docs/hodge-loci.html"
+    },
+    {
       "id": "known-locus",
       "number": "4",
       "title": "4. Families, representations and deformation",

@@ -2,7 +2,7 @@
 
 [Previous: binary sextics and torsion contacts](#technical-information/binary-blocks) · [Contents](#technical-information/introduction) · [Next: split sextics and K3 correspondences](#technical-information/split-and-k3)
 
-A certificate constructs a primitive on the complement of a divisor. Geometry establishes the same vanishing through Gysin maps and correspondences. This chapter develops the shared tools: finite quotients, correspondences over a common base, covering rational curves, surface fibrations with \(p_g=q=0\), and supported projectors in families. The reflection and relative-projector results supply the two parts of [Chapter 3B](#technical-information/weighted-threefolds). Fano support and correspondence transfer also underlie the quadratic-net theorem of [Chapter 3C](#technical-information/quadratic-nets). Work in characteristic zero; cohomology is rational, or algebraic de Rham after scalar extension.
+A certificate constructs a primitive on the complement of a divisor. Geometry establishes the same vanishing through Gysin maps and correspondences. This chapter develops the shared tools: finite quotients, correspondences over a common base, two-forms on curve families, covering rational curves, surface fibrations with \(p_g=q=0\), and supported projectors in families. The reflection and relative-projector results supply the two parts of [Chapter 3B](#technical-information/weighted-threefolds). Fano support and correspondence transfer also underlie the quadratic-net theorem of [Chapter 3C](#technical-information/quadratic-nets). Work in characteristic zero; cohomology is rational, or algebraic de Rham after scalar extension.
 
 ## 3.1 Divisor support and its source
 
@@ -106,9 +106,85 @@ The last equality follows from support of \(H^k(X)^{\langle g\rangle}\). Finally
 
 For a rational presentation, apply the criterion after exhibiting a finite symmetry group and resolving its action together with the cover projection equivariantly. Finiteness is a hypothesis to check; individual birational symmetries do not by themselves supply the required models.
 
-## 3.2 Curve and surface fibrations
+## 3.2 Curve correspondences and fibrations
 
-The two criteria below reduce cohomology over an affine base to classes which vanish off a divisor. Rational curves give vanishing directly. Surface fibers with \(p_g=q=0\) give it after removing finitely many relative divisor classes. Finite trace descends the resulting support in both cases.
+Families of curves on a fourfold give divisor support through their cylinder correspondences. Their action on \(H^{3,1}\) can be tested by a normal-bundle pairing. A covering family of rational curves gives a different conclusion by vanishing on an affine open. Surface fibers with \(p_g=q=0\) give that vanishing after removing finitely many relative divisor classes. These constructions share the support and transfer arguments of §3.1.
+
+### Two-forms on curve families
+
+Let \(X\) be a smooth complex projective fourfold, and let \(\mathcal C\subset S\times X\) be a flat algebraic family whose fibers are smooth connected curves over a dense open of the smooth parameter variety \(S\). The universal cycle associates to \(\omega\in H^{3,1}(X)\) a closed two-form \(\beta_\omega\) on that open. On a smooth projective parameter space its class is the cylinder pullback \(p_*e^*\omega\in H^{2,0}(S)\), where \(p,e\) are the projections of the universal curve.
+
+When \(K_X\simeq\mathcal O_X\), this form has a useful obstruction-theoretic expression. Fix a nonvanishing volume form \(\Omega_X\), embed \(X\) as a smooth divisor in a smooth fivefold \(P\), and let \(C\) be one of the curves. Put \(N=N_{C/X}\), and write
+
+\[
+0\longrightarrow N\longrightarrow N_{C/P}
+\longrightarrow N_{X/P}|_C\longrightarrow0,
+\qquad
+\delta_C:H^0(C,N_{X/P}|_C)\longrightarrow H^1(C,N).
+\]
+
+A section \(A\in H^0(X,N_{X/P})\) gives an embedded Kodaira–Spencer class \(\kappa_A\in H^1(X,T_X)\). Set \(\omega_A=\kappa_A\mathbin{\lrcorner}\Omega_X\). Adjunction identifies \(\det N\) with \(K_C\). For tangent vectors to \(S\) whose normal sections are \(s,t\in H^0(C,N)\),
+
+\[
+\boxed{\quad
+\beta_{\omega_A}(s,t)
+=\operatorname{Tr}_C\bigl(s\wedge t\wedge\delta_C(A|_C)\bigr).
+\quad}
+\]
+
+The equality uses a fixed choice of signs and normalization of the cycle class. Its nonvanishing is independent of that choice. Equivalently, the right side pairs \(\delta_C(A|_C)\) with \(s\wedge t\in H^0(C,N^\vee\otimes K_C)\) by Serre duality.
+
+**Proof of the formula.** The Hilbert-scheme formula of [Kuznetsov–Markushevich, Theorem 6.1 and formula (25)](https://homepage.mi-ras.ru/~akuznet/publications/SymplecticStructuresOnModuliSpacesOfSheavesViaTheAtyiahClass.pdf) pairs \(s,t,\omega_A|_C\) with the conormal inclusion \(N^\vee\to\Omega_X^1|_C\). For a curve in a fourfold there is one copy of that inclusion. Contracting \(\kappa_A|_C\) with \(\Omega_X\), then applying the conormal inclusion, gives the projection of \(\kappa_A|_C\) to \(H^1(C,N)\), with values in \(\det N\). Naturality of the tangent and normal exact sequences identifies this projection with \(\delta_C(A|_C)\). Wedge with \(s,t\), use \(\det N\simeq K_C\), and take the Serre trace. This is also the infinitesimal expression for the universal-cycle pullback, so it holds after pullback to any smooth algebraic family of curves. ∎
+
+**Curve-family support criterion.** If \(\beta_\omega\) is nonzero on an actual algebraic family, there are a smooth projective surface \(T\) and a cycle \(\Gamma\in\operatorname{CH}^3(T\times X)_{\mathbb Q}\) such that \(\Gamma^*\omega\ne0\) in \(H^{2,0}(T)\). The image of
+
+\[
+\Gamma_*:H^2(T,\mathbb Q)(-1)\longrightarrow H^4(X,\mathbb Q)
+\]
+
+is divisor-supported and has nonzero \((3,1)\) part.
+
+**Proof.** Close the image of \(S\) in the projective Hilbert scheme of \(X\), take a reduced irreducible component on which the form is nonzero, and resolve it to \(\widetilde M\). Pulling back the universal flat curve gives a cycle in \(\operatorname{CH}^3(\widetilde M\times X)\). Its action gives a global class in \(H^{2,0}(\widetilde M)\) restricting to the displayed two-form. Thus extension across the parameter boundary is supplied by the universal cycle. A general smooth complete-intersection surface \(T\subset\widetilde M\) retains the nonzero class, by weak Lefschetz. Restrict the universal cycle to obtain \(\Gamma\).
+
+Every component of \(\Gamma\) has dimension three, so its proper image in \(X\) is contained in a divisor. Its action therefore vanishes on the complement of that divisor. If \(\eta=\Gamma^*\omega\ne0\), the nonzero pairing \(\int_T\eta\wedge\overline\eta\) equals \(\int_X\omega\wedge\Gamma_*\overline\eta\). Hence \(\Gamma_*\overline\eta\) is a nonzero \((1,3)\) class; conjugation gives the asserted \((3,1)\) image. ∎
+
+This criterion detects a nonzero supported image; at a fixed fourfold it does not assert that the particular input \(\omega\) belongs to that image. For invariant \(\omega\), replace \(\Gamma\) by its average under the involution on \(X\). The pullback of \(\omega\) remains nonzero, and the new image is invariant. [Chapter 4, §4.4](#technical-information/known-locus) gives the further conclusion available when the curve construction dominates the even-sextic coefficient space.
+
+### Vanishing tests for the normal pairing
+
+The normal sections must come from actual motions in a family. A two-dimensional Zariski tangent space at an obstructed point alone does not supply them. On a curve of genus \(g\) in a fourfold with trivial canonical bundle, adjunction and Riemann–Roch give
+
+\[
+\chi(N)=1-g.
+\]
+
+Thus two independent sections require \(h^1(N)\ge g+1\). A nonzero obstruction space is compatible with a smooth parameter family; requiring \(H^1(N)=0\) would instead make every displayed pairing zero.
+
+**Example: complete-intersection curves.** Suppose \(C=V_X(G_1,G_2,G_3)\) is a smooth complete intersection in a smooth sextic \(X\subset\mathbb P^5\), with \(G_i\) homogeneous of degrees \(d_i\). The regular sequence \((F,G_1,G_2,G_3)\) identifies
+
+\[
+N_{C/\mathbb P^5}
+\simeq\mathcal O_C(6)\oplus\bigoplus_{i=1}^3\mathcal O_C(d_i),
+\]
+
+and the normal map to \(\mathcal O_C(6)\) is projection to the first summand. Its connecting map \(\delta_C\) is zero. Hence \(\beta_{\omega_A}\) vanishes on every pair of Hilbert tangent directions at \(C\), for every sextic numerator \(A\). This conclusion concerns the whole normal pairing, including motions outside the evident complete-intersection presentation.
+
+**Ambient sections and residual curves.** Let \(T\) be smooth projective, let \(Z\in\operatorname{CH}^2(T\times X)_{\mathbb Q}\) be the class of a family of surfaces, and let \(h\) be a polarization on \(X\). A curve correspondence of the form
+
+\[
+\Gamma=(d\,\operatorname{pr}_X^*h+\operatorname{pr}_T^*\ell)\cdot Z,
+\qquad \ell\in\operatorname{CH}^1(T),
+\]
+
+kills \(H^{3,1}(X)_{\mathrm{prim}}\). Indeed, the projection formula gives
+
+\[
+\Gamma^*\alpha=d\,Z^*(h\alpha)+\ell\cup Z^*\alpha=0:
+\]
+
+primitivity makes \(h\alpha=0\), while \(Z^*\alpha\) has type \((1,-1)\). This includes relative hypersurface sections of a moving surface family, with a parameter line bundle accounting for the class \(\ell\). If such a section splits into curve correspondences \(\Gamma_1+\Gamma_2\), then \(\Gamma_1^*\alpha=-\Gamma_2^*\alpha\). Residual constructions therefore preserve the primitive action up to sign; they cannot create a nonzero action from a component whose action is zero.
+
+More generally, a smooth projective parameter resolution with \(H^{2,0}=0\) cannot carry a nonzero cylinder two-form. This rules out a complete family parametrized by a rational variety even when it contains many moving curves.
 
 ### Covering rational curves
 
@@ -349,3 +425,22 @@ H^4(\mathcal T)^-\simeq H^1(U,V),
 whereas the action of \(Z\) vanishes after restriction to \(\mathcal T\setminus D\), because its target support is in \(D\). This proves support on the open family. Taking closures and adjoining the boundary divisors proves the last assertion; proper birational pushforward transfers it to another smooth projective model, as in §3.1. ∎
 
 The three fibration inputs now have distinct roles. Rational curves kill cohomology on an affine open. Surface fibers with \(p_g=q=0\) supply global divisor classes and a Leray–Hirsch decomposition after finite base change. The relative support lemma uses a supported projector and a single nonzero anti-invariant cohomology degree. They share the same transfer and boundary arguments, but their hypotheses are not interchangeable.
+
+### Relative support for an invariant sector
+
+The involution in the preceding lemma can be replaced by any finite group, and anti-invariants by invariants. The part of the conclusion that lives in the middle Leray step needs no hypothesis on the other cohomological degrees.
+
+**Relative support lemma for an invariant sector.** Let \(p:\mathcal T\to U\) be a smooth projective family of threefolds over a smooth complex curve, with a fiberwise action of a finite group \(G\), and put \(V=(R^3p_*\mathbb Q)^G\). Suppose that at every fiber the projector of \(H^*(T_u)\) onto \(V_u\), zero in the other degrees and on the complement of the invariants, has a cycle representative supported on \(D_u\times D_u\). After removing finitely many points of \(U\), one divisor in \(\mathcal T\) supports \(H^1(U,V)\subset H^4(\mathcal T,\mathbb Q)\).
+
+**Proof.** Remove points so that \(U\) is affine. The projector is a flat section of the cohomology of the fibers of \(\mathcal T\times_U\mathcal T\), which is all the first step of the preceding proof uses. As there, flag parameter spaces and a finite trace give, after further shrinking, a rational relative cycle \(Z\) supported on \(D\times_UD\) whose fiber classes are those of the projector.
+
+The correspondence \(Z\) acts on \(Rp_*\mathbb Q\). Its action on \(H^4(\mathcal T,\mathbb Q)\) therefore preserves the Leray filtration \(L\), and on the graded piece \(H^1(U,R^3p_*\mathbb Q)\) it is induced by the fiberwise action on \(R^3p_*\mathbb Q\), the projection onto \(V\). Local systems on an affine curve have no cohomology above degree one, so
+
+\[
+L^2H^4(\mathcal T,\mathbb Q)=0,\qquad
+L^1H^4(\mathcal T,\mathbb Q)=H^1(U,R^3p_*\mathbb Q).
+\]
+
+Hence \(Z_*\beta=\beta\) for every \(\beta\in H^1(U,V)\), and \(Z_*\beta\) vanishes on \(\mathcal T\setminus D\) because the target support of \(Z\) is in \(D\). ∎
+
+The remaining step \(H^0(U,R^4p_*\mathbb Q)\) of \(H^4(\mathcal T)\) is treated separately. In [Chapter 3D](#technical-information/hodge-loci), which applies this lemma to weighted Calabi–Yau threefolds with an order-three symmetry, it is spanned by the square of a polarization and is supported on a hyperplane section.

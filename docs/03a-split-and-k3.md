@@ -249,7 +249,7 @@ The adjoint cycle has codimension \(r+1\) in \(\Sigma \times S^{r}\). Its suppor
 
 ### An unconditional order-three family
 
-We use one external algebraicity theorem: a K3 surface with a non-symplectic automorphism of order three whose fixed locus contains a curve has algebraic Kuga–Satake correspondence. This is [Bolognesi–Laterveer, introduction's corollary, Theorem 4.4 and §6](https://arxiv.org/html/2310.11981v2). Their theorem supplies the algebraic cycle; its proof is not replaced here by the abstract Clifford calculation.
+We use one external algebraicity theorem: a K3 surface with a non-symplectic automorphism of order three whose fixed locus contains a curve has algebraic Kuga–Satake correspondence. This is [Bolognesi–Laterveer, introduction's corollary, Theorem 4.4 and §6](https://arxiv.org/html/2310.11981). Their theorem supplies the algebraic cycle; its proof is not replaced here by the abstract Clifford calculation.
 
 Let
 
