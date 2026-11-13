@@ -1,5 +1,80 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Smaller proof modules — 12 November 2026
+
+This refactor continues the newer `fqlx/cycle-q2-modular` development at
+[`6a78158`](https://github.com/fqlx/sextics/commit/6a781583858cde35157487c221ccc35f1878ec05).
+It preserves the mathematical source of that checkpoint. In particular,
+`Solution.lean`, its protected certificate statement, and its existing
+`Submission.missing_geometric_existence` admission are unchanged.
+
+The first modularization still left many source files near 4,700 lines.
+Forty of those modules now act as small import wrappers over 117 smaller
+parts. Existing `Proposal` import paths continue to work. Parts retain
+the original order, namespaces, options, component documentation, and
+complete declaration bodies; data definitions remain with their associated
+equality proofs.
+
+| Module family | Existing modules split | New parts | Largest part, lines |
+| --- | ---: | ---: | ---: |
+| Assembly | 10 | 25 | 2,546 |
+| Normalization | 8 | 20 | 1,984 |
+| GeometricFormalInputs | 3 | 11 | 2,270 |
+| GeometricTarget | 11 | 31 | 1,894 |
+| SolutionSupport | 8 | 30 | 3,240 |
+
+Three complete proof blocks intentionally exceed 2,000 lines:
+[Assembly01Part02.lean](Assembly01Part02.lean),
+[GeometricFormalInputs01Part02.lean](GeometricFormalInputs01Part02.lean), and
+[SolutionSupport04Part01.lean](SolutionSupport04Part01.lean).
+The first and third retain tightly coupled private helper proofs; the second
+contains the existing long `scalar_of_entryConstraints` theorem. Further
+division would require a proof refactor. Sparse arithmetic components also
+remain intact. The largest new part is 141,460 bytes, compared with 594,392
+bytes for the largest module before this refactor.
+
+The proposal now has 181 permitted files, approximately 7.0 MiB of source,
+within the current upstream limits of 256 files and 16 MiB. The verifier and
+its policy are unchanged. The 64-file counts in the historical sections below
+describe those earlier checkpoints.
+
+### Refactor validation scope
+
+Source-range reconstruction verifies that all 40 original module bodies are
+preserved exactly. The complete helper import graph is acyclic, all 178
+helpers pass the repository's source/import policy, and the sole explicit
+admission remains in the unchanged entry point. An independent static review
+checks scope closure, file-level options, local attributes, and private-helper
+references at the new boundaries.
+
+Bounded development compilation checked the following new part chains and
+their original-name import wrappers. Each group used its own artifact tree
+and source-hash-verified dependencies from the same `6a78158` checkpoint.
+
+| Original module | Successful checks / selected modules | Result |
+| --- | ---: | --- |
+| Assembly01 | 4/4 | Passed |
+| Normalization02 | 3/3 | Passed |
+| GeometricFormalInputs01 | 5/5 | Passed |
+| GeometricTarget04 | 3/3 | Passed |
+| SolutionSupport01 | 8/8 | Passed |
+
+The checks used Lean 4.33.1 and the pinned Mathlib revision, one worker,
+a 5,120 MiB managed-memory limit, a 6,144 MiB RSS ceiling, a 1,536 MiB
+available-memory reserve, and a 360-second deadline per module.
+The 23 passing module checks cover these selected chains against cached
+baseline dependencies. They are not a fresh build of the entire refactored
+import closure or an independent kernel replay. No protected acceptance is
+claimed. Explanation rendering, local links, record/content validation, and
+whitespace checks also pass.
+
+An initial coarser split of `SolutionSupport01` exceeded the 5,120 MiB managed-memory limit in existing cubic arithmetic checks. Those three complete arithmetic components were then isolated into separate modules without editing their proofs. The refined chain passed under the same limit. This is evidence for this selected layout and sample, not a general memory guarantee.
+
+This source refactor does not establish the remaining geometric existence
+argument. The projective, cycle-class, Abel–Jacobi, and residue-exactness
+obligations described below retain their previous status. The admission still
+prevents acceptance of the complete proposal.
+
 ## Restriction, projective cohomology, and incidence schemes — 12 November 2026
 
 **This continuation supplies further geometric and cohomological

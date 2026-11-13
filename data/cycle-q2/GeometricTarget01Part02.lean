@@ -1,0 +1,1799 @@
+import Proposal.GeometricTarget01Part01
+
+/-! Continuation of GeometricTarget01.lean; complete source components and declarations. -/
+
+set_option Elab.async false
+
+/- Component: continuation_3/IncidenceNormalForm.lean -/
+section
+/-!
+# Normal forms for the two equations of the Segre incidence chart
+
+This file proves the product criterion needed here from the division algorithm.
+It does not take a Groebner basis as a hypothesis.  The coefficient ring may have
+zero divisors: the two leading coefficients are normalized to one.
+-/
+
+noncomputable section
+
+open MvPolynomial
+open scoped MonomialOrder
+
+namespace CycleQ2IncidenceNormalForm
+
+variable {σ R : Type*} [CommRing R]
+
+/-- No monomial of `p` is divisible by either distinguished leading monomial. -/
+def Reduced (m : MonomialOrder σ) (h F p : MvPolynomial σ R) : Prop :=
+  ∀ d ∈ p.support, ¬ m.degree h ≤ d ∧ ¬ m.degree F ≤ d
+
+lemma degree_mul_monic (m : MonomialOrder σ) {p q : MvPolynomial σ R}
+    (hp : p ≠ 0) (hq : m.Monic q) :
+    m.degree (p * q) = m.degree p + m.degree q := by
+  apply m.degree_mul_of_mul_leadingCoeff_ne_zero
+  simpa [hq.leadingCoeff_eq_one] using m.leadingCoeff_ne_zero_iff.mpr hp
+
+lemma reduced_sub (m : MonomialOrder σ) {h F p q : MvPolynomial σ R}
+    (hp : Reduced m h F p) (hq : Reduced m h F q) :
+    Reduced m h F (p - q) := by
+  intro d hd
+  by_cases hpd : p.coeff d = 0
+  · have hqd : q.coeff d ≠ 0 := by
+      intro hqd
+      have := mem_support_iff.mp hd
+      simp [coeff_sub, hpd, hqd] at this
+    exact hq d (mem_support_iff.mpr hqd)
+  · exact hp d (mem_support_iff.mpr hpd)
+
+/-- The two-monic-polynomial product criterion, proved by dividing the first
+coefficient by the second equation.  Disjoint supports of the leading exponents
+prevent cancellation of the two remaining leading terms. -/
+theorem reduced_eq_zero_of_representation
+    (m : MonomialOrder σ) {h F p a b : MvPolynomial σ R}
+    (hh : m.Monic h) (hF : m.Monic F)
+    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0)
+    (hp : Reduced m h F p) (heq : p = a * h + b * F) : p = 0 := by
+  obtain ⟨q, r, ha, _, hr⟩ := m.div_single
+    (show IsUnit (m.leadingCoeff F) by rw [hF.leadingCoeff_eq_one]; exact isUnit_one) a
+  let s := b + q * h
+  have hp' : p = r * h + s * F := by
+    rw [heq, ha]
+    dsimp [s]
+    ring
+  by_contra hp0
+  have hpn := hp (m.degree p) (m.degree_mem_support hp0)
+  by_cases hr0 : r = 0
+  · have hs0 : s ≠ 0 := by
+      intro hs0
+      simp [hr0, hs0] at hp'
+      exact hp0 hp'
+    have hpd : m.degree p = m.degree s + m.degree F := by
+      rw [hp', hr0, zero_mul, zero_add, degree_mul_monic m hs0 hF]
+    apply hpn.2
+    rw [hpd]
+    intro i
+    simp only [Finsupp.add_apply]
+    omega
+  have hrd : m.degree (r * h) = m.degree r + m.degree h :=
+    degree_mul_monic m hr0 hh
+  have hrn : ¬ m.degree F ≤ m.degree (r * h) := by
+    intro hd
+    apply hr (m.degree r) (m.degree_mem_support hr0)
+    rw [hrd] at hd
+    intro i
+    rcases hcop i with hi | hi
+    · simpa only [Finsupp.add_apply, hi, add_zero] using hd i
+    · simp [hi]
+  have hhd : m.degree h ≤ m.degree (r * h) := by
+    rw [hrd]
+    intro i
+    simp only [Finsupp.add_apply]
+    omega
+  by_cases hs0 : s = 0
+  · have hpd : m.degree p = m.degree (r * h) := by
+      rw [hp', hs0, zero_mul, add_zero]
+    apply hpn.1
+    rw [hpd]
+    exact hhd
+  have hsd : m.degree (s * F) = m.degree s + m.degree F :=
+    degree_mul_monic m hs0 hF
+  have hFd : m.degree F ≤ m.degree (s * F) := by
+    rw [hsd]
+    intro i
+    simp only [Finsupp.add_apply]
+    omega
+  have hne : m.toSyn (m.degree (r * h)) ≠ m.toSyn (m.degree (s * F)) := by
+    intro hd
+    apply hrn
+    rwa [m.toSyn.injective hd]
+  rcases lt_or_gt_of_ne hne with hd | hd
+  · have hpd : m.degree p = m.degree (s * F) := by
+      rw [hp', m.degree_add_eq_right_of_lt hd]
+    apply hpn.2
+    rw [hpd]
+    exact hFd
+  · have hpd : m.degree p = m.degree (r * h) := by
+      rw [hp', m.degree_add_of_lt hd]
+    apply hpn.1
+    rw [hpd]
+    exact hhd
+
+/-- Uniqueness is an actual consequence of the two polynomial equations and the
+coprimality of their leading monomials, over an arbitrary coefficient ring. -/
+theorem reduced_unique
+    (m : MonomialOrder σ) {h F p r₁ r₂ a₁ a₂ b₁ b₂ : MvPolynomial σ R}
+    (hh : m.Monic h) (hF : m.Monic F)
+    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0)
+    (hr₁ : Reduced m h F r₁) (hr₂ : Reduced m h F r₂)
+    (hp₁ : p = a₁ * h + b₁ * F + r₁)
+    (hp₂ : p = a₂ * h + b₂ * F + r₂) : r₁ = r₂ := by
+  apply sub_eq_zero.mp
+  apply reduced_eq_zero_of_representation m hh hF hcop (reduced_sub m hr₁ hr₂)
+    (a := a₂ - a₁) (b := b₂ - b₁)
+  linear_combination hp₂ - hp₁
+
+/-- Existence of a reduced representative uses the library's ordinary
+multivariate division theorem. -/
+theorem exists_reduced_representation
+    (m : MonomialOrder σ) (h F p : MvPolynomial σ R)
+    (hh : m.Monic h) (hF : m.Monic F) :
+    ∃ a b r, p = a * h + b * F + r ∧ Reduced m h F r := by
+  let equations : Fin 2 → MvPolynomial σ R := ![h, F]
+  have he : ∀ i, IsUnit (m.leadingCoeff (equations i)) := by
+    intro i
+    fin_cases i
+    · change IsUnit (m.leadingCoeff h)
+      rw [hh.leadingCoeff_eq_one]
+      exact isUnit_one
+    · change IsUnit (m.leadingCoeff F)
+      rw [hF.leadingCoeff_eq_one]
+      exact isUnit_one
+  obtain ⟨q, r, hp, _, hr⟩ := m.div he p
+  refine ⟨q 0, q 1, r, ?_, ?_⟩
+  · simpa [Finsupp.linearCombination_apply, Finsupp.sum_fintype, equations,
+      Fin.sum_univ_two, smul_eq_mul] using hp
+  · intro d hd
+    exact ⟨hr d hd 0, hr d hd 1⟩
+
+theorem existsUnique_reduced_representative
+    (m : MonomialOrder σ) (h F p : MvPolynomial σ R)
+    (hh : m.Monic h) (hF : m.Monic F)
+    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0) :
+    ∃! r, Reduced m h F r ∧ ∃ a b, p = a * h + b * F + r := by
+  obtain ⟨a, b, r, hp, hr⟩ := exists_reduced_representation m h F p hh hF
+  refine ⟨r, ⟨hr, a, b, hp⟩, ?_⟩
+  rintro r' ⟨hr', a', b', hp'⟩
+  exact reduced_unique m hh hF hcop hr' hr hp' hp
+
+theorem unit_scaled_representation_iff (u v : Rˣ) (h F p r : MvPolynomial σ R) :
+    (∃ a b, p = a * h + b * F + r) ↔
+      (∃ a b, p = a * (C (u : R) * h) + b * (C (v : R) * F) + r) := by
+  constructor
+  · rintro ⟨a, b, hp⟩
+    refine ⟨a * C (↑u⁻¹ : R), b * C (↑v⁻¹ : R), ?_⟩
+    have hcancel (z : Rˣ) (a q : MvPolynomial σ R) :
+        (a * C (↑z⁻¹ : R)) * (C (z : R) * q) = a * q := by
+      calc
+        _ = a * (C (↑z⁻¹ : R) * C (z : R)) * q := by ring
+        _ = a * q := by rw [← map_mul, Units.inv_mul, map_one, mul_one]
+    simpa only [hcancel] using hp
+  · rintro ⟨a, b, hp⟩
+    exact ⟨a * C (u : R), b * C (v : R), by simpa only [mul_assoc] using hp⟩
+
+def equationsIdeal (h F : MvPolynomial σ R) : Ideal (MvPolynomial σ R) :=
+  Ideal.span {h, F}
+
+def reducedExponents (m : MonomialOrder σ) (h F : MvPolynomial σ R) :
+    Set (σ →₀ ℕ) :=
+  {d | ¬ m.degree h ≤ d ∧ ¬ m.degree F ≤ d}
+
+def reducedSubmodule (m : MonomialOrder σ) (h F : MvPolynomial σ R) :
+    Submodule R (MvPolynomial σ R) :=
+  MvPolynomial.restrictSupport R (reducedExponents m h F)
+
+lemma mem_reducedSubmodule (m : MonomialOrder σ) (h F p : MvPolynomial σ R) :
+    p ∈ reducedSubmodule m h F ↔ Reduced m h F p := Iff.rfl
+
+def reducedQuotientMap (m : MonomialOrder σ) (h F : MvPolynomial σ R) :
+    reducedSubmodule m h F →ₗ[R] MvPolynomial σ R ⧸ equationsIdeal h F :=
+  (Ideal.Quotient.mkₐ R (equationsIdeal h F)).toLinearMap.comp
+    (reducedSubmodule m h F).subtype
+
+theorem reducedQuotientMap_bijective
+    (m : MonomialOrder σ) (h F : MvPolynomial σ R)
+    (hh : m.Monic h) (hF : m.Monic F)
+    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0) :
+    Function.Bijective (reducedQuotientMap m h F) := by
+  constructor
+  · intro p q hpq
+    apply Subtype.ext
+    apply sub_eq_zero.mp
+    change Ideal.Quotient.mk (equationsIdeal h F) p.val =
+      Ideal.Quotient.mk (equationsIdeal h F) q.val at hpq
+    have hpq' := Ideal.Quotient.eq.mp hpq
+    obtain ⟨a, b, heq⟩ := Ideal.mem_span_pair.mp hpq'
+    exact reduced_eq_zero_of_representation m hh hF hcop
+      (reduced_sub m p.property q.property) heq.symm
+  · intro q
+    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective q
+    obtain ⟨a, b, r, hp, hr⟩ := exists_reduced_representation m h F p hh hF
+    refine ⟨⟨r, hr⟩, ?_⟩
+    change Ideal.Quotient.mk (equationsIdeal h F) r =
+      Ideal.Quotient.mk (equationsIdeal h F) p
+    apply Ideal.Quotient.eq.mpr
+    apply Ideal.mem_span_pair.mpr
+    refine ⟨-a, -b, ?_⟩
+    rw [hp]
+    ring
+
+/-- The standard-monomial submodule is the whole quotient, with no unproved
+injectivity or flatness assumption. -/
+noncomputable def reducedQuotientEquiv
+    (m : MonomialOrder σ) (h F : MvPolynomial σ R)
+    (hh : m.Monic h) (hF : m.Monic F)
+    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0) :
+    reducedSubmodule m h F ≃ₗ[R] MvPolynomial σ R ⧸ equationsIdeal h F :=
+  LinearEquiv.ofBijective (reducedQuotientMap m h F)
+    (reducedQuotientMap_bijective m h F hh hF hcop)
+
+/-- The classes of standard monomials form a basis over the coefficient ring. -/
+noncomputable def quotientBasis
+    (m : MonomialOrder σ) (h F : MvPolynomial σ R)
+    (hh : m.Monic h) (hF : m.Monic F)
+    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0) :
+    Module.Basis (reducedExponents m h F) R (MvPolynomial σ R ⧸ equationsIdeal h F) :=
+  (MvPolynomial.basisRestrictSupport R (reducedExponents m h F)).map
+    (reducedQuotientEquiv m h F hh hF hcop)
+
+theorem quotientBasis_apply
+    (m : MonomialOrder σ) (h F : MvPolynomial σ R)
+    (hh : m.Monic h) (hF : m.Monic F)
+    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0)
+    (d : reducedExponents m h F) :
+    quotientBasis m h F hh hF hcop d =
+      Ideal.Quotient.mk (equationsIdeal h F) (monomial d.val 1) := by
+  change Ideal.Quotient.mk (equationsIdeal h F)
+    (AddMonoidAlgebra.ofCoeff
+      (((Finsupp.supportedEquivFinsupp (R := R) (reducedExponents m h F)).symm
+        (Finsupp.single d 1) : Finsupp.supported R R (reducedExponents m h F)) :
+        (σ →₀ ℕ) →₀ R)) = _
+  rw [Finsupp.supportedEquivFinsupp_symm_single]
+  rfl
+
+/-- Reduction preserves every grading for which the two defining equations
+are homogeneous.  Taking the grading monoid to be `ℕ × ZMod 3` preserves the
+ordinary weighted degree and the order-three character simultaneously. -/
+theorem reduced_isWeightedHomogeneous
+    {M : Type*} [AddCommMonoid M] (w : σ → M)
+    (m : MonomialOrder σ) {h F p r a b : MvPolynomial σ R} {dh dF d : M}
+    (hh : m.Monic h) (hF : m.Monic F)
+    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0)
+    (hhhom : h.IsWeightedHomogeneous w dh) (hFhom : F.IsWeightedHomogeneous w dF)
+    (hphom : p.IsWeightedHomogeneous w d) (hr : Reduced m h F r)
+    (heq : p = a * h + b * F + r) : r.IsWeightedHomogeneous w d := by
+  classical
+  letI := MvPolynomial.weightedGradedAlgebra R w
+  have hI : (equationsIdeal h F).IsHomogeneous (weightedHomogeneousSubmodule R w) := by
+    apply Ideal.homogeneous_span
+    intro q hq
+    rcases hq with rfl | hq
+    · exact ⟨dh, hhhom⟩
+    · obtain rfl := hq
+      exact ⟨dF, hFhom⟩
+  have hpr : p - r ∈ equationsIdeal h F := by
+    apply Ideal.mem_span_pair.mpr
+    exact ⟨a, b, by rw [heq]; ring⟩
+  have hprojected := weightedHomogeneousComponent_mem_of_mem R w hI hpr d
+  rw [map_sub, weightedHomogeneousComponent_eq_self hphom] at hprojected
+  obtain ⟨a', b', heq'⟩ := Ideal.mem_span_pair.mp hprojected
+  have hr' : Reduced m h F (weightedHomogeneousComponent w d r) := by
+    intro e he
+    rw [support_weightedHomogeneousComponent] at he
+    exact hr e (Finset.mem_filter.mp he).1
+  have hrep' : p = a' * h + b' * F + weightedHomogeneousComponent w d r := by
+    linear_combination -heq'
+  have hequal : r = weightedHomogeneousComponent w d r :=
+    reduced_unique m hh hF hcop hr hr' heq hrep'
+  rw [hequal]
+  exact weightedHomogeneousComponent_isWeightedHomogeneous (w := w) d r
+
+theorem reduced_isHomogeneous
+    (m : MonomialOrder σ) {h F p r a b : MvPolynomial σ R} {dh dF d : ℕ}
+    (hh : m.Monic h) (hF : m.Monic F)
+    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0)
+    (hhhom : h.IsHomogeneous dh) (hFhom : F.IsHomogeneous dF)
+    (hphom : p.IsHomogeneous d) (hr : Reduced m h F r)
+    (heq : p = a * h + b * F + r) : r.IsHomogeneous d :=
+  reduced_isWeightedHomogeneous (1 : σ → ℕ) m hh hF hcop hhhom hFhom hphom hr heq
+
+/-! ## The concrete auxiliary order
+
+The coefficient ring in this presentation contains `x₁,x₂,x₃`.  The two
+polynomial variables are `x₀,w`, with auxiliary weights `3,7`.  This is enough
+to prove the rank-nine freeness over that coefficient ring; the ordinary
+weighted degree and character gradings can subsequently be taken componentwise.
+-/
+
+abbrev Exponent := Fin 2 →₀ ℕ
+
+def auxiliaryWeight : Exponent →+ ℕ where
+  toFun d := 3 * d 0 + 7 * d 1
+  map_zero' := by simp
+  map_add' a b := by
+    simp only [Finsupp.add_apply]
+    omega
+
+/-- A separate type keeps the auxiliary order distinct from the divisibility
+order on exponent vectors. -/
+def AuxiliaryExponent := Exponent
+
+def toAuxiliary : Exponent ≃ AuxiliaryExponent := Equiv.refl _
+def ofAuxiliary : AuxiliaryExponent ≃ Exponent := Equiv.refl _
+
+noncomputable instance : AddCommMonoid AuxiliaryExponent := ofAuxiliary.addCommMonoid
+
+lemma ofAuxiliary_add (a b : AuxiliaryExponent) :
+    ofAuxiliary (a + b) = ofAuxiliary a + ofAuxiliary b := rfl
+
+def auxiliaryKey (a : AuxiliaryExponent) : Lex (ℕ × Lex Exponent) :=
+  toLex (auxiliaryWeight (ofAuxiliary a), toLex (ofAuxiliary a))
+
+lemma auxiliaryKey_injective : Function.Injective auxiliaryKey := by
+  intro a b hab
+  exact ofAuxiliary.injective (toLex.injective (Prod.mk.inj (toLex.injective hab)).2)
+
+noncomputable instance : LinearOrder AuxiliaryExponent :=
+  LinearOrder.lift' auxiliaryKey auxiliaryKey_injective
+
+lemma auxiliaryKey_add (a b : AuxiliaryExponent) :
+    auxiliaryKey (a + b) = auxiliaryKey a + auxiliaryKey b := by
+  change toLex (auxiliaryWeight (ofAuxiliary a + ofAuxiliary b),
+    toLex (ofAuxiliary a + ofAuxiliary b)) =
+    toLex (auxiliaryWeight (ofAuxiliary a) + auxiliaryWeight (ofAuxiliary b),
+      toLex (ofAuxiliary a) + toLex (ofAuxiliary b))
+  rw [map_add, toLex_add]
+
+noncomputable instance : IsOrderedCancelAddMonoid AuxiliaryExponent where
+  le_of_add_le_add_left a b c h := by
+    change auxiliaryKey b ≤ auxiliaryKey c
+    change auxiliaryKey (a + b) ≤ auxiliaryKey (a + c) at h
+    simpa only [auxiliaryKey, ofAuxiliary_add, map_add, toLex_add,
+      Prod.Lex.toLex_le_toLex, add_lt_add_iff_left, add_right_inj,
+      add_le_add_iff_left] using h
+  add_le_add_left a b h c := by
+    change auxiliaryKey a ≤ auxiliaryKey b at h
+    change auxiliaryKey (a + c) ≤ auxiliaryKey (b + c)
+    simpa only [auxiliaryKey, ofAuxiliary_add, map_add, toLex_add,
+      Prod.Lex.toLex_le_toLex, add_lt_add_iff_right, add_left_inj,
+      add_le_add_iff_right] using h
+
+noncomputable instance : WellFoundedLT AuxiliaryExponent :=
+  ⟨InvImage.wf auxiliaryKey wellFounded_lt⟩
+
+noncomputable def auxiliaryOrder : MonomialOrder (Fin 2) where
+  syn := AuxiliaryExponent
+  toSyn := { toEquiv := toAuxiliary, map_add' _ _ := rfl }
+  toSyn_monotone a b hab := by
+    change toLex (auxiliaryWeight a, toLex a) ≤ toLex (auxiliaryWeight b, toLex b)
+    rw [Prod.Lex.toLex_le_toLex]
+    have hw : auxiliaryWeight a ≤ auxiliaryWeight b := by
+      have h0 := hab 0
+      have h1 := hab 1
+      dsimp [auxiliaryWeight]
+      omega
+    rcases lt_or_eq_of_le hw with hw | hw
+    · exact Or.inl hw
+    · exact Or.inr ⟨hw, Finsupp.toLex_monotone hab⟩
+
+lemma auxiliaryOrder_lt_of_weight_lt {a b : Exponent}
+    (h : auxiliaryWeight a < auxiliaryWeight b) : a ≺[auxiliaryOrder] b := by
+  change toLex (auxiliaryWeight a, toLex a) < toLex (auxiliaryWeight b, toLex b)
+  exact Prod.Lex.toLex_lt_toLex.mpr (Or.inl h)
+
+lemma degree_monic_add_sum [Nontrivial R] {ι : Type*} [Fintype ι]
+    (m : MonomialOrder σ) (d : σ →₀ ℕ) (e : ι → σ →₀ ℕ) (c : ι → R)
+    (hd : 0 ≺[m] d) (he : ∀ i, e i ≺[m] d) :
+    m.degree (monomial d 1 + ∑ i, monomial (e i) (c i)) = d ∧
+      m.Monic (monomial d 1 + ∑ i, monomial (e i) (c i)) := by
+  classical
+  have htail : m.degree (∑ i, monomial (e i) (c i)) ≺[m] d := by
+    apply lt_of_le_of_lt m.degree_sum_le
+    apply (Finset.sup_lt_iff (by simpa using hd)).mpr
+    intro i _
+    exact lt_of_le_of_lt (m.degree_monomial_le _) (he i)
+  have hlead : m.degree (monomial d (1 : R)) = d := by
+    rw [m.degree_monomial, if_neg one_ne_zero]
+  have htail' : m.degree (∑ i, monomial (e i) (c i)) ≺[m]
+      m.degree (monomial d (1 : R)) := by
+    rwa [hlead]
+  exact ⟨(m.degree_add_of_lt htail').trans hlead,
+    m.monic_monomial_one.add_of_lt htail'⟩
+
+def cubicTailExponent (i : Fin 4) : Exponent :=
+  ![0, Finsupp.single 0 1, Finsupp.single 0 2, Finsupp.single 1 1] i
+
+/-- The invariant cubic has no `x₀ w` term.  Its only term involving `w` is
+`w x₃`, whose coefficient is absorbed into the coefficient ring here. -/
+def normalizedCubic (c : Fin 4 → R) : MvPolynomial (Fin 2) R :=
+  monomial (Finsupp.single 0 3) 1 + ∑ i, monomial (cubicTailExponent i) (c i)
+
+abbrev SexticTailIndex :=
+  {ij : Fin 7 × Fin 3 // ij.1.val + 2 * ij.2.val ≤ 6}
+
+def sexticTailExponent (i : SexticTailIndex) : Exponent :=
+  Finsupp.single 0 i.val.1.val + Finsupp.single 1 i.val.2.val
+
+/-- Every term of the weighted sextic other than `w³` has `w` exponent at most
+two and satisfies `x₀` exponent plus twice `w` exponent at most six. -/
+def normalizedSextic (c : SexticTailIndex → R) : MvPolynomial (Fin 2) R :=
+  monomial (Finsupp.single 1 3) 1 + ∑ i, monomial (sexticTailExponent i) (c i)
+
+theorem normalizedCubic_leading_data [Nontrivial R] (c : Fin 4 → R) :
+    auxiliaryOrder.degree (normalizedCubic c) = Finsupp.single 0 3 ∧
+      auxiliaryOrder.Monic (normalizedCubic c) := by
+  apply degree_monic_add_sum auxiliaryOrder
+  · apply auxiliaryOrder_lt_of_weight_lt
+    norm_num [auxiliaryWeight]
+  · intro i
+    apply auxiliaryOrder_lt_of_weight_lt
+    fin_cases i <;> norm_num [auxiliaryWeight, cubicTailExponent]
+
+theorem normalizedSextic_leading_data [Nontrivial R] (c : SexticTailIndex → R) :
+    auxiliaryOrder.degree (normalizedSextic c) = Finsupp.single 1 3 ∧
+      auxiliaryOrder.Monic (normalizedSextic c) := by
+  apply degree_monic_add_sum auxiliaryOrder
+  · apply auxiliaryOrder_lt_of_weight_lt
+    norm_num [auxiliaryWeight]
+  · intro i
+    apply auxiliaryOrder_lt_of_weight_lt
+    have hi := i.property
+    have hj := i.val.2.isLt
+    simp only [auxiliaryWeight, AddMonoidHom.coe_mk, ZeroHom.coe_mk,
+      sexticTailExponent, Finsupp.add_apply, Finsupp.single_apply]
+    norm_num
+    omega
+
+/-- Standard monomials for the actual incidence chart have both distinguished
+exponents strictly less than three. -/
+def Standard (p : MvPolynomial (Fin 2) R) : Prop :=
+  ∀ d ∈ p.support, d 0 < 3 ∧ d 1 < 3
+
+lemma single_three_le_iff (i : σ) (d : σ →₀ ℕ) :
+    Finsupp.single i 3 ≤ d ↔ 3 ≤ d i := by
+  classical
+  constructor
+  · intro h
+    simpa using h i
+  · intro h j
+    by_cases hji : j = i
+    · subst j
+      simpa using h
+    · simp [Ne.symm hji]
+
+theorem reduced_iff_standard [Nontrivial R]
+    (hcoeff : Fin 4 → R) (Fcoeff : SexticTailIndex → R)
+    (p : MvPolynomial (Fin 2) R) :
+    Reduced auxiliaryOrder (normalizedCubic hcoeff) (normalizedSextic Fcoeff) p ↔
+      Standard p := by
+  simp only [Reduced, Standard, (normalizedCubic_leading_data hcoeff).1,
+    (normalizedSextic_leading_data Fcoeff).1, single_three_le_iff, not_le]
+
+/-- The actual two-variable coefficient chart has unique standard remainders.
+The assumptions here are just the coefficients of its normalized cubic and
+sextic; no basis, confluence, Groebner, or rank hypothesis is supplied. -/
+theorem existsUnique_standard_representative [Nontrivial R]
+    (hcoeff : Fin 4 → R) (Fcoeff : SexticTailIndex → R)
+    (p : MvPolynomial (Fin 2) R) :
+    ∃! r, Standard r ∧ ∃ a b,
+      p = a * normalizedCubic hcoeff + b * normalizedSextic Fcoeff + r := by
+  obtain ⟨hd, hm⟩ := normalizedCubic_leading_data hcoeff
+  obtain ⟨Fd, Fm⟩ := normalizedSextic_leading_data Fcoeff
+  have hcop : ∀ i, auxiliaryOrder.degree (normalizedCubic hcoeff) i = 0 ∨
+      auxiliaryOrder.degree (normalizedSextic Fcoeff) i = 0 := by
+    intro i
+    rw [hd, Fd]
+    fin_cases i <;> simp
+  simpa only [reduced_iff_standard] using
+    existsUnique_reduced_representative auxiliaryOrder
+      (normalizedCubic hcoeff) (normalizedSextic Fcoeff) p hm Fm hcop
+
+noncomputable def standardRemainder [Nontrivial R]
+    (hcoeff : Fin 4 → R) (Fcoeff : SexticTailIndex → R)
+    (p : MvPolynomial (Fin 2) R) : MvPolynomial (Fin 2) R :=
+  (existsUnique_standard_representative hcoeff Fcoeff p).choose
+
+theorem standardRemainder_spec [Nontrivial R]
+    (hcoeff : Fin 4 → R) (Fcoeff : SexticTailIndex → R)
+    (p : MvPolynomial (Fin 2) R) :
+    Standard (standardRemainder hcoeff Fcoeff p) ∧ ∃ a b,
+      p = a * normalizedCubic hcoeff + b * normalizedSextic Fcoeff +
+        standardRemainder hcoeff Fcoeff p :=
+  (existsUnique_standard_representative hcoeff Fcoeff p).choose_spec.1
+
+theorem eq_standardRemainder [Nontrivial R]
+    (hcoeff : Fin 4 → R) (Fcoeff : SexticTailIndex → R)
+    (p r : MvPolynomial (Fin 2) R)
+    (hr : Standard r) (hp : ∃ a b,
+      p = a * normalizedCubic hcoeff + b * normalizedSextic Fcoeff + r) :
+    r = standardRemainder hcoeff Fcoeff p :=
+  (existsUnique_standard_representative hcoeff Fcoeff p).choose_spec.2 r ⟨hr, hp⟩
+
+lemma standard_map {S : Type*} [CommRing S] (φ : R →+* S)
+    {p : MvPolynomial (Fin 2) R} (hp : Standard p) :
+    Standard (MvPolynomial.map φ p) := by
+  intro d hd
+  exact hp d (MvPolynomial.support_map_subset φ p hd)
+
+@[simp] theorem map_normalizedCubic {S : Type*} [CommRing S]
+    (φ : R →+* S) (c : Fin 4 → R) :
+    MvPolynomial.map φ (normalizedCubic c) = normalizedCubic (φ ∘ c) := by
+  simp [normalizedCubic]
+
+@[simp] theorem map_normalizedSextic {S : Type*} [CommRing S]
+    (φ : R →+* S) (c : SexticTailIndex → R) :
+    MvPolynomial.map φ (normalizedSextic c) = normalizedSextic (φ ∘ c) := by
+  simp [normalizedSextic]
+
+/-- Normal reduction commutes with every coefficient specialization.  In
+particular, it commutes with maps from the localized universal coefficient ring
+to the residue field or to the generic lifted field. -/
+theorem standardRemainder_map [Nontrivial R] {S : Type*} [CommRing S] [Nontrivial S]
+    (φ : R →+* S) (hcoeff : Fin 4 → R) (Fcoeff : SexticTailIndex → R)
+    (p : MvPolynomial (Fin 2) R) :
+    MvPolynomial.map φ (standardRemainder hcoeff Fcoeff p) =
+      standardRemainder (φ ∘ hcoeff) (φ ∘ Fcoeff) (MvPolynomial.map φ p) := by
+  obtain ⟨hr, a, b, hp⟩ := standardRemainder_spec hcoeff Fcoeff p
+  apply eq_standardRemainder _ _ _ _ (standard_map φ hr)
+  refine ⟨MvPolynomial.map φ a, MvPolynomial.map φ b, ?_⟩
+  simpa only [map_add, map_mul, map_normalizedCubic, map_normalizedSextic] using
+    congrArg (MvPolynomial.map φ) hp
+
+theorem standardRemainder_eq_zero_iff [Nontrivial R]
+    (hcoeff : Fin 4 → R) (Fcoeff : SexticTailIndex → R)
+    (p : MvPolynomial (Fin 2) R) :
+    standardRemainder hcoeff Fcoeff p = 0 ↔
+      p ∈ equationsIdeal (normalizedCubic hcoeff) (normalizedSextic Fcoeff) := by
+  constructor
+  · intro hr
+    obtain ⟨_, a, b, hp⟩ := standardRemainder_spec hcoeff Fcoeff p
+    apply Ideal.mem_span_pair.mpr
+    exact ⟨a, b, by simpa [hr] using hp.symm⟩
+  · intro hp
+    obtain ⟨a, b, hp⟩ := Ideal.mem_span_pair.mp hp
+    symm
+    apply eq_standardRemainder _ _ _ _ (by simp [Standard])
+    exact ⟨a, b, by simpa using hp.symm⟩
+
+lemma concrete_coprime [Nontrivial R]
+    (hcoeff : Fin 4 → R) (Fcoeff : SexticTailIndex → R) :
+    ∀ i, auxiliaryOrder.degree (normalizedCubic hcoeff) i = 0 ∨
+      auxiliaryOrder.degree (normalizedSextic Fcoeff) i = 0 := by
+  intro i
+  rw [(normalizedCubic_leading_data hcoeff).1, (normalizedSextic_leading_data Fcoeff).1]
+  fin_cases i <;> simp
+
+noncomputable def concreteExponentEquiv [Nontrivial R]
+    (hcoeff : Fin 4 → R) (Fcoeff : SexticTailIndex → R) :
+    reducedExponents auxiliaryOrder (normalizedCubic hcoeff) (normalizedSextic Fcoeff) ≃
+      Fin 3 × Fin 3 where
+  toFun d :=
+    (⟨d.val 0, by
+      have hd := d.property.1
+      rw [(normalizedCubic_leading_data hcoeff).1, single_three_le_iff] at hd
+      omega⟩,
+     ⟨d.val 1, by
+      have hd := d.property.2
+      rw [(normalizedSextic_leading_data Fcoeff).1, single_three_le_iff] at hd
+      omega⟩)
+  invFun ij := ⟨Finsupp.single 0 ij.1.val + Finsupp.single 1 ij.2.val, by
+    constructor
+    · rw [(normalizedCubic_leading_data hcoeff).1, single_three_le_iff]
+      simpa using Nat.not_le_of_lt ij.1.isLt
+    · rw [(normalizedSextic_leading_data Fcoeff).1, single_three_le_iff]
+      simpa using Nat.not_le_of_lt ij.2.isLt⟩
+  left_inv d := by
+    apply Subtype.ext
+    ext i
+    fin_cases i <;> simp
+  right_inv ij := by
+    apply Prod.ext <;> apply Fin.ext <;> simp
+
+/-- Rank-nine quotient basis for the normalized incidence chart, indexed by
+the exponents `0 ≤ i,j < 3` of `x₀ⁱ wʲ`. -/
+noncomputable def incidenceBasis [Nontrivial R]
+    (hcoeff : Fin 4 → R) (Fcoeff : SexticTailIndex → R) :
+    Module.Basis (Fin 3 × Fin 3) R
+      (MvPolynomial (Fin 2) R ⧸ equationsIdeal
+        (normalizedCubic hcoeff) (normalizedSextic Fcoeff)) :=
+  (quotientBasis auxiliaryOrder (normalizedCubic hcoeff) (normalizedSextic Fcoeff)
+    (normalizedCubic_leading_data hcoeff).2 (normalizedSextic_leading_data Fcoeff).2
+    (concrete_coprime hcoeff Fcoeff)).reindex (concreteExponentEquiv hcoeff Fcoeff)
+
+theorem incidenceBasis_apply [Nontrivial R]
+    (hcoeff : Fin 4 → R) (Fcoeff : SexticTailIndex → R) (ij : Fin 3 × Fin 3) :
+    incidenceBasis hcoeff Fcoeff ij =
+      Ideal.Quotient.mk (equationsIdeal (normalizedCubic hcoeff) (normalizedSextic Fcoeff))
+        (X 0 ^ ij.1.val * X 1 ^ ij.2.val) := by
+  rw [incidenceBasis, Module.Basis.reindex_apply, quotientBasis_apply]
+  congr 1
+  change monomial (Finsupp.single 0 ij.1.val + Finsupp.single 1 ij.2.val) 1 = _
+  rw [MvPolynomial.monomial_single_add, ← MvPolynomial.X_pow_eq_monomial]
+
+/-- Scaling either defining equation by a unit does not change which polynomial
+is its standard remainder.  This is the precise passage from a localization
+chart with invertible leading coefficients to the monic presentation. -/
+theorem existsUnique_standard_unit_scaled [Nontrivial R]
+    (hcoeff : Fin 4 → R) (Fcoeff : SexticTailIndex → R) (u v : Rˣ)
+    (p : MvPolynomial (Fin 2) R) :
+    ∃! r, Standard r ∧ ∃ a b,
+      p = a * (C (u : R) * normalizedCubic hcoeff) +
+        b * (C (v : R) * normalizedSextic Fcoeff) + r := by
+  apply (existsUnique_congr (fun r ↦ and_congr_right (fun _ ↦
+    unit_scaled_representation_iff u v (normalizedCubic hcoeff)
+      (normalizedSextic Fcoeff) p r))).mp
+  exact existsUnique_standard_representative hcoeff Fcoeff p
+
+/-- Grouping the eight non-leading invariant cubic coefficients by powers of
+`x₀` gives the exact cubic family used by the incidence chart.  The three
+coefficient-ring variables are `x₁,x₂,x₃`, in that order. -/
+def invariantCubicTailCoefficients (c : Fin 8 → R) : Fin 4 → MvPolynomial (Fin 3) R :=
+  ![C (c 2) * X 0 ^ 3 + C (c 4) * X 0 * X 1 * X 2 +
+      C (c 5) * X 1 ^ 3 + C (c 6) * X 2 ^ 3,
+    C (c 1) * X 0 ^ 2 + C (c 3) * X 1 * X 2,
+    C (c 0) * X 0,
+    C (c 7) * X 2]
+
+noncomputable def invariantIncidenceBasis [Nontrivial R]
+    (hcoeff : Fin 8 → R) (Fcoeff : SexticTailIndex → MvPolynomial (Fin 3) R) :
+    Module.Basis (Fin 3 × Fin 3) (MvPolynomial (Fin 3) R)
+      (MvPolynomial (Fin 2) (MvPolynomial (Fin 3) R) ⧸ equationsIdeal
+        (normalizedCubic (invariantCubicTailCoefficients hcoeff))
+        (normalizedSextic Fcoeff)) :=
+  incidenceBasis (invariantCubicTailCoefficients hcoeff) Fcoeff
+
+/-! ## Full-variable weighted order and invariant polynomial family -/
+
+/-- Adding an additive natural-valued weight in front of a monomial order gives
+another monomial order.  The old order breaks ties, so zero weights are allowed. -/
+def WeightedExponent (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) := σ →₀ ℕ
+
+def toWeighted (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
+    (σ →₀ ℕ) ≃ WeightedExponent m W := Equiv.refl _
+def ofWeighted (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
+    WeightedExponent m W ≃ (σ →₀ ℕ) := Equiv.refl _
+
+noncomputable instance (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
+    AddCommMonoid (WeightedExponent m W) := (ofWeighted m W).addCommMonoid
+
+lemma ofWeighted_add (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ)
+    (a b : WeightedExponent m W) :
+    ofWeighted m W (a + b) = ofWeighted m W a + ofWeighted m W b := rfl
+
+def weightedKey (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ)
+    (a : WeightedExponent m W) : Lex (ℕ × m.syn) :=
+  toLex (W (ofWeighted m W a), m.toSyn (ofWeighted m W a))
+
+lemma weightedKey_injective (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
+    Function.Injective (weightedKey m W) := by
+  intro a b hab
+  exact (ofWeighted m W).injective (m.toSyn.injective (Prod.mk.inj (toLex.injective hab)).2)
+
+noncomputable instance (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
+    LinearOrder (WeightedExponent m W) :=
+  LinearOrder.lift' (weightedKey m W) (weightedKey_injective m W)
+
+noncomputable instance (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
+    IsOrderedCancelAddMonoid (WeightedExponent m W) where
+  le_of_add_le_add_left a b c h := by
+    change weightedKey m W b ≤ weightedKey m W c
+    change weightedKey m W (a + b) ≤ weightedKey m W (a + c) at h
+    simpa only [weightedKey, ofWeighted_add, map_add,
+      Prod.Lex.toLex_le_toLex, add_lt_add_iff_left, add_right_inj,
+      add_le_add_iff_left] using h
+  add_le_add_left a b h c := by
+    change weightedKey m W a ≤ weightedKey m W b at h
+    change weightedKey m W (a + c) ≤ weightedKey m W (b + c)
+    simpa only [weightedKey, ofWeighted_add, map_add,
+      Prod.Lex.toLex_le_toLex, add_lt_add_iff_right, add_left_inj,
+      add_le_add_iff_right] using h
+
+noncomputable instance (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
+    WellFoundedLT (WeightedExponent m W) :=
+  ⟨InvImage.wf (weightedKey m W) wellFounded_lt⟩
+
+noncomputable def weightedOrder (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
+    MonomialOrder σ where
+  syn := WeightedExponent m W
+  toSyn := { toEquiv := toWeighted m W, map_add' _ _ := rfl }
+  toSyn_monotone a b hab := by
+    change toLex (W a, m.toSyn a) ≤ toLex (W b, m.toSyn b)
+    rw [Prod.Lex.toLex_le_toLex]
+    have hw : W a ≤ W b := by
+      rw [← add_tsub_cancel_of_le hab, map_add]
+      exact Nat.le_add_right _ _
+    rcases lt_or_eq_of_le hw with hw | hw
+    · exact Or.inl hw
+    · exact Or.inr ⟨hw, m.toSyn_monotone hab⟩
+
+lemma weightedOrder_lt_of_weight_lt
+    (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) {a b : σ →₀ ℕ}
+    (h : W a < W b) : a ≺[weightedOrder m W] b := by
+  change toLex (W a, m.toSyn a) < toLex (W b, m.toSyn b)
+  exact Prod.Lex.toLex_lt_toLex.mpr (Or.inl h)
+
+abbrev FullExponent := Fin 5 →₀ ℕ
+
+def fullAuxiliaryWeight : FullExponent →+ ℕ where
+  toFun e := 3 * e 0 + e 1 + e 2 + e 3 + 7 * e 4
+  map_zero' := by simp
+  map_add' a b := by
+    simp only [Finsupp.add_apply]
+    omega
+
+noncomputable def fullAuxiliaryOrder : MonomialOrder (Fin 5) :=
+  weightedOrder MonomialOrder.lex fullAuxiliaryWeight
+
+def fullDegree (e : Fin 5 → ℕ) : ℕ := e 0 + e 1 + e 2 + e 3 + 2 * e 4
+def fullCharacter (e : Fin 5 → ℕ) : ℕ := (2 * e 0 + 2 * e 1 + e 2) % 3
+
+/-- All invariant monomials of the stated weighted degree; no search-selected
+subset of the coefficients is used. -/
+abbrev FullInvariantIndex (d : ℕ) :=
+  {e : Fin 5 → Fin (d + 1) //
+    fullDegree (fun i ↦ (e i).val) = d ∧ fullCharacter (fun i ↦ (e i).val) = 0}
+
+abbrev FullCubicTailIndex := {e : FullInvariantIndex 3 // (e.val 0).val < 3}
+abbrev FullSexticTailIndex := {e : FullInvariantIndex 6 // (e.val 4).val < 3}
+
+def fullExponentOf {d : ℕ} (e : Fin 5 → Fin (d + 1)) : FullExponent :=
+  ∑ i, Finsupp.single i (e i).val
+
+@[simp] lemma fullExponentOf_apply {d : ℕ} (e : Fin 5 → Fin (d + 1)) (i : Fin 5) :
+    fullExponentOf e i = (e i).val := by
+  classical
+  simp [fullExponentOf, Finsupp.single_apply]
+
+def normalizedFullCubic (c : FullCubicTailIndex → R) : MvPolynomial (Fin 5) R :=
+  monomial (Finsupp.single 0 3) 1 + ∑ e, monomial (fullExponentOf e.val.val) (c e)
+
+def normalizedFullSextic (c : FullSexticTailIndex → R) : MvPolynomial (Fin 5) R :=
+  monomial (Finsupp.single 4 3) 1 + ∑ e, monomial (fullExponentOf e.val.val) (c e)
+
+theorem normalizedFullCubic_leading_data [Nontrivial R] (c : FullCubicTailIndex → R) :
+    fullAuxiliaryOrder.degree (normalizedFullCubic c) = Finsupp.single 0 3 ∧
+      fullAuxiliaryOrder.Monic (normalizedFullCubic c) := by
+  apply degree_monic_add_sum fullAuxiliaryOrder
+  · apply weightedOrder_lt_of_weight_lt
+    norm_num [fullAuxiliaryWeight]
+  · intro e
+    apply weightedOrder_lt_of_weight_lt
+    have hd := e.val.property.1
+    have hc := e.val.property.2
+    have h0 := e.property
+    simp only [fullDegree, fullCharacter] at hd hc
+    simp [fullAuxiliaryWeight]
+    have h4 : (e.val.val 4).val ≤ 1 := by omega
+    rcases Nat.le_one_iff_eq_zero_or_eq_one.mp h4 with h4 | h4
+    · omega
+    · have hc_lt : 2 * (e.val.val 0).val + 2 * (e.val.val 1).val +
+          (e.val.val 2).val < 3 := by omega
+      rw [Nat.mod_eq_of_lt hc_lt] at hc
+      omega
+
+theorem normalizedFullSextic_leading_data [Nontrivial R] (c : FullSexticTailIndex → R) :
+    fullAuxiliaryOrder.degree (normalizedFullSextic c) = Finsupp.single 4 3 ∧
+      fullAuxiliaryOrder.Monic (normalizedFullSextic c) := by
+  apply degree_monic_add_sum fullAuxiliaryOrder
+  · apply weightedOrder_lt_of_weight_lt
+    norm_num [fullAuxiliaryWeight]
+  · intro e
+    apply weightedOrder_lt_of_weight_lt
+    have hd := e.val.property.1
+    have h4 := e.property
+    simp only [fullDegree] at hd
+    simp [fullAuxiliaryWeight]
+    omega
+
+def FullStandard (p : MvPolynomial (Fin 5) R) : Prop :=
+  ∀ e ∈ p.support, e 0 < 3 ∧ e 4 < 3
+
+theorem full_reduced_iff_standard [Nontrivial R]
+    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
+    (p : MvPolynomial (Fin 5) R) :
+    Reduced fullAuxiliaryOrder (normalizedFullCubic hcoeff) (normalizedFullSextic Fcoeff) p ↔
+      FullStandard p := by
+  simp only [Reduced, FullStandard, (normalizedFullCubic_leading_data hcoeff).1,
+    (normalizedFullSextic_leading_data Fcoeff).1, single_three_le_iff, not_le]
+
+lemma full_coprime [Nontrivial R]
+    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) :
+    ∀ i, fullAuxiliaryOrder.degree (normalizedFullCubic hcoeff) i = 0 ∨
+      fullAuxiliaryOrder.degree (normalizedFullSextic Fcoeff) i = 0 := by
+  intro i
+  rw [(normalizedFullCubic_leading_data hcoeff).1, (normalizedFullSextic_leading_data Fcoeff).1]
+  fin_cases i <;> simp
+
+theorem existsUnique_full_standard_representative [Nontrivial R]
+    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
+    (p : MvPolynomial (Fin 5) R) :
+    ∃! r, FullStandard r ∧ ∃ a b,
+      p = a * normalizedFullCubic hcoeff + b * normalizedFullSextic Fcoeff + r := by
+  simpa only [full_reduced_iff_standard] using
+    existsUnique_reduced_representative fullAuxiliaryOrder
+      (normalizedFullCubic hcoeff) (normalizedFullSextic Fcoeff) p
+      (normalizedFullCubic_leading_data hcoeff).2 (normalizedFullSextic_leading_data Fcoeff).2
+      (full_coprime hcoeff Fcoeff)
+
+def fullGrading : Fin 5 → ℕ × ZMod 3 :=
+  ![(1, 2), (1, 2), (1, 1), (1, 0), (2, 0)]
+
+theorem fullGrading_weight (e : FullExponent) :
+    Finsupp.weight fullGrading e =
+      (fullDegree e, ((2 * e 0 + 2 * e 1 + e 2 : ℕ) : ZMod 3)) := by
+  rw [Finsupp.weight_eq_sum]
+  apply Prod.ext <;>
+    simp [fullGrading, fullDegree, Fin.sum_univ_succ, nsmul_eq_mul] <;> ring
+
+theorem fullGrading_eq_iff (e : FullExponent) (d : ℕ) :
+    Finsupp.weight fullGrading e = (d, 0) ↔ fullDegree e = d ∧ fullCharacter e = 0 := by
+  rw [fullGrading_weight, Prod.mk.injEq]
+  simp only [fullCharacter, ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero]
+
+def fullIndexOf {d : ℕ} (e : FullExponent)
+    (he : Finsupp.weight fullGrading e = (d, 0)) : FullInvariantIndex d := by
+  have hh := (fullGrading_eq_iff e d).mp he
+  have hb : ∀ i, e i < d + 1 := by
+    intro i
+    have hd := hh.1
+    simp only [fullDegree] at hd
+    fin_cases i
+    · change e 0 < d + 1
+      omega
+    · change e 1 < d + 1
+      omega
+    · change e 2 < d + 1
+      omega
+    · change e 3 < d + 1
+      omega
+    · change e 4 < d + 1
+      omega
+  exact ⟨fun i ↦ ⟨e i, hb i⟩, hh⟩
+
+@[simp] lemma fullIndexOf_apply {d : ℕ} (e : FullExponent)
+    (he : Finsupp.weight fullGrading e = (d, 0)) (i : Fin 5) :
+    ((fullIndexOf e he).val i).val = e i := rfl
+
+@[simp] lemma fullIndexOf_exponent {d : ℕ} (e : FullExponent)
+    (he : Finsupp.weight fullGrading e = (d, 0)) :
+    fullExponentOf (fullIndexOf e he).val = e := by
+  ext i
+  simp
+
+theorem fullGrading_of_invariant {d : ℕ} (e : FullInvariantIndex d) :
+    Finsupp.weight fullGrading (fullExponentOf e.val) = (d, 0) := by
+  rw [fullGrading_weight]
+  apply Prod.ext
+  · simpa only [fullDegree, fullExponentOf_apply] using e.property.1
+  · have hc := congrArg (fun n : ℕ ↦ (n : ZMod 3)) e.property.2
+    simpa [fullCharacter] using hc
+
+theorem normalizedFullCubic_homogeneous (c : FullCubicTailIndex → R) :
+    (normalizedFullCubic c).IsWeightedHomogeneous fullGrading (3, 0) := by
+  apply (weightedHomogeneousSubmodule R fullGrading (3, 0)).add_mem
+  · apply isWeightedHomogeneous_monomial
+    rw [Finsupp.weight_single]
+    decide
+  · apply (weightedHomogeneousSubmodule R fullGrading (3, 0)).sum_mem
+    intro e _
+    exact isWeightedHomogeneous_monomial fullGrading _ _ (fullGrading_of_invariant e.val)
+
+theorem normalizedFullSextic_homogeneous (c : FullSexticTailIndex → R) :
+    (normalizedFullSextic c).IsWeightedHomogeneous fullGrading (6, 0) := by
+  apply (weightedHomogeneousSubmodule R fullGrading (6, 0)).add_mem
+  · apply isWeightedHomogeneous_monomial
+    rw [Finsupp.weight_single]
+    decide
+  · apply (weightedHomogeneousSubmodule R fullGrading (6, 0)).sum_mem
+    intro e _
+    exact isWeightedHomogeneous_monomial fullGrading _ _ (fullGrading_of_invariant e.val)
+
+/-- The raw full families have all nine cubic and all forty-five sextic
+coefficients, including their leading coefficients. -/
+def rawFullCubic (a : R) (c : FullCubicTailIndex → R) : MvPolynomial (Fin 5) R :=
+  monomial (Finsupp.single 0 3) a + ∑ e, monomial (fullExponentOf e.val.val) (c e)
+
+def rawFullSextic (a : R) (c : FullSexticTailIndex → R) : MvPolynomial (Fin 5) R :=
+  monomial (Finsupp.single 4 3) a + ∑ e, monomial (fullExponentOf e.val.val) (c e)
+
+def fullCubicLeadingIndex : FullInvariantIndex 3 :=
+  ⟨![3, 0, 0, 0, 0], by decide⟩
+
+def fullSexticLeadingIndex : FullInvariantIndex 6 :=
+  ⟨![0, 0, 0, 0, 3], by decide⟩
+
+lemma fullCubic_tail_iff_ne (e : FullInvariantIndex 3) :
+    (e.val 0).val < 3 ↔ e ≠ fullCubicLeadingIndex := by
+  constructor
+  · intro he h
+    subst e
+    change (3 : ℕ) < 3 at he
+    omega
+  · intro he
+    by_contra h0
+    apply he
+    have hd := e.property.1
+    have hb := (e.val 0).isLt
+    simp only [fullDegree] at hd
+    apply Subtype.ext
+    funext i
+    apply Fin.ext
+    fin_cases i <;> simp [fullCubicLeadingIndex] <;> omega
+
+lemma fullSextic_tail_iff_ne (e : FullInvariantIndex 6) :
+    (e.val 4).val < 3 ↔ e ≠ fullSexticLeadingIndex := by
+  constructor
+  · intro he h
+    subst e
+    change (3 : ℕ) < 3 at he
+    omega
+  · intro he
+    by_contra h4
+    apply he
+    have hd := e.property.1
+    simp only [fullDegree] at hd
+    apply Subtype.ext
+    funext i
+    apply Fin.ext
+    fin_cases i <;> simp [fullSexticLeadingIndex] <;> omega
+
+noncomputable def fullCubicTailEquiv :
+    FullCubicTailIndex ≃ {e : FullInvariantIndex 3 // e ≠ fullCubicLeadingIndex} :=
+  Equiv.subtypeEquivRight fullCubic_tail_iff_ne
+
+noncomputable def fullSexticTailEquiv :
+    FullSexticTailIndex ≃ {e : FullInvariantIndex 6 // e ≠ fullSexticLeadingIndex} :=
+  Equiv.subtypeEquivRight fullSextic_tail_iff_ne
+
+@[simp] lemma fullCubicLeadingIndex_exponent :
+    fullExponentOf fullCubicLeadingIndex.val = Finsupp.single 0 3 := by
+  ext i
+  fin_cases i <;> simp [fullCubicLeadingIndex]
+
+@[simp] lemma fullSexticLeadingIndex_exponent :
+    fullExponentOf fullSexticLeadingIndex.val = Finsupp.single 4 3 := by
+  ext i
+  fin_cases i <;> simp [fullSexticLeadingIndex]
+
+/-- The complete invariant coefficient family, with one independent coefficient
+for every invariant monomial of weighted degree `d`. -/
+def fullInvariantPolynomial (d : ℕ) (c : FullInvariantIndex d → R) :
+    MvPolynomial (Fin 5) R :=
+  ∑ e, monomial (fullExponentOf e.val) (c e)
+
+lemma fullExponentOf_injective {d : ℕ} :
+    Function.Injective (fullExponentOf (d := d)) := by
+  intro e f h
+  funext i
+  apply Fin.ext
+  simpa only [fullExponentOf_apply] using congrArg (fun s : FullExponent ↦ s i) h
+
+theorem fullInvariantPolynomial_coeff (d : ℕ) (c : FullInvariantIndex d → R)
+    (e : FullInvariantIndex d) :
+    (fullInvariantPolynomial d c).coeff (fullExponentOf e.val) = c e := by
+  classical
+  have heq (f : FullInvariantIndex d) :
+      fullExponentOf f.val = fullExponentOf e.val ↔ f = e := by
+    constructor
+    · intro h
+      exact Subtype.ext (fullExponentOf_injective h)
+    · rintro rfl
+      rfl
+  simp [fullInvariantPolynomial, coeff_sum, coeff_monomial, heq]
+
+/-- Every homogeneous invariant polynomial is exactly a member of the full
+coefficient family, with its own monomial coefficients. -/
+theorem fullInvariantPolynomial_of_homogeneous {d : ℕ} {p : MvPolynomial (Fin 5) R}
+    (hp : p.IsWeightedHomogeneous fullGrading (d, 0)) :
+    fullInvariantPolynomial d (fun e ↦ p.coeff (fullExponentOf e.val)) = p := by
+  classical
+  ext s
+  by_cases hs : ∃ e : FullInvariantIndex d, fullExponentOf e.val = s
+  · obtain ⟨e, rfl⟩ := hs
+    exact fullInvariantPolynomial_coeff d _ e
+  · have hp0 : p.coeff s = 0 := by
+      by_contra hp0
+      exact hs ⟨fullIndexOf s (hp hp0), fullIndexOf_exponent s (hp hp0)⟩
+    rw [hp0]
+    simp only [fullInvariantPolynomial, coeff_sum, coeff_monomial]
+    apply Finset.sum_eq_zero
+    intro e _
+    have he : fullExponentOf e.val ≠ s := fun he ↦ hs ⟨e, he⟩
+    simp [he]
+
+theorem fullInvariantPolynomial_homogeneous (d : ℕ) (c : FullInvariantIndex d → R) :
+    (fullInvariantPolynomial d c).IsWeightedHomogeneous fullGrading (d, 0) := by
+  apply (weightedHomogeneousSubmodule R fullGrading (d, 0)).sum_mem
+  intro e _
+  exact isWeightedHomogeneous_monomial fullGrading _ _ (fullGrading_of_invariant e)
+
+@[simp] theorem map_fullInvariantPolynomial {S : Type*} [CommRing S]
+    (φ : R →+* S) (d : ℕ) (c : FullInvariantIndex d → R) :
+    MvPolynomial.map φ (fullInvariantPolynomial d c) =
+      fullInvariantPolynomial d (φ ∘ c) := by
+  simp [fullInvariantPolynomial]
+
+theorem fullInvariantPolynomial_cubic (c : FullInvariantIndex 3 → R) :
+    fullInvariantPolynomial 3 c =
+      rawFullCubic (c fullCubicLeadingIndex) (fun e ↦ c e.val) := by
+  classical
+  rw [fullInvariantPolynomial,
+    Fintype.sum_eq_add_sum_subtype_ne _ fullCubicLeadingIndex]
+  simp only [fullCubicLeadingIndex_exponent, rawFullCubic]
+  exact congrArg (fun q : MvPolynomial (Fin 5) R ↦
+    monomial (Finsupp.single 0 3) (c fullCubicLeadingIndex) + q)
+    (fullCubicTailEquiv.sum_comp
+      (fun e ↦ monomial (fullExponentOf e.val.val) (c e.val))).symm
+
+theorem fullInvariantPolynomial_sextic (c : FullInvariantIndex 6 → R) :
+    fullInvariantPolynomial 6 c =
+      rawFullSextic (c fullSexticLeadingIndex) (fun e ↦ c e.val) := by
+  classical
+  rw [fullInvariantPolynomial,
+    Fintype.sum_eq_add_sum_subtype_ne _ fullSexticLeadingIndex]
+  simp only [fullSexticLeadingIndex_exponent, rawFullSextic]
+  exact congrArg (fun q : MvPolynomial (Fin 5) R ↦
+    monomial (Finsupp.single 4 3) (c fullSexticLeadingIndex) + q)
+    (fullSexticTailEquiv.sum_comp
+      (fun e ↦ monomial (fullExponentOf e.val.val) (c e.val))).symm
+
+theorem rawFullCubic_eq_unit_mul (u : Rˣ) (c : FullCubicTailIndex → R) :
+    rawFullCubic (u : R) c =
+      C (u : R) * normalizedFullCubic (fun e ↦ (↑u⁻¹ : R) * c e) := by
+  simp [rawFullCubic, normalizedFullCubic, mul_add, Finset.mul_sum,
+    C_mul_monomial, ← mul_assoc]
+
+theorem rawFullSextic_eq_unit_mul (u : Rˣ) (c : FullSexticTailIndex → R) :
+    rawFullSextic (u : R) c =
+      C (u : R) * normalizedFullSextic (fun e ↦ (↑u⁻¹ : R) * c e) := by
+  simp [rawFullSextic, normalizedFullSextic, mul_add, Finset.mul_sum,
+    C_mul_monomial, ← mul_assoc]
+
+/-- This applies directly over the localized universal coefficient ring: the
+inverted leading coefficients are units, and no inverse equations are asserted
+in an unconstrained polynomial ring. -/
+theorem existsUnique_full_standard_unit_leading [Nontrivial R]
+    (u v : Rˣ) (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
+    (p : MvPolynomial (Fin 5) R) :
+    ∃! r, FullStandard r ∧ ∃ a b,
+      p = a * rawFullCubic (u : R) hcoeff + b * rawFullSextic (v : R) Fcoeff + r := by
+  rw [rawFullCubic_eq_unit_mul, rawFullSextic_eq_unit_mul]
+  apply (existsUnique_congr (fun r ↦ and_congr_right (fun _ ↦
+    unit_scaled_representation_iff u v
+      (normalizedFullCubic (fun e ↦ (↑u⁻¹ : R) * hcoeff e))
+      (normalizedFullSextic (fun e ↦ (↑v⁻¹ : R) * Fcoeff e)) p r))).mp
+  exact existsUnique_full_standard_representative
+    (fun e ↦ (↑u⁻¹ : R) * hcoeff e) (fun e ↦ (↑v⁻¹ : R) * Fcoeff e) p
+
+/-- The normal-form chart for the entire invariant cubic/sextic coefficient
+space.  Its only open conditions are invertibility of the two indicated
+leading coefficients. -/
+theorem existsUnique_full_invariant_representative [Nontrivial R]
+    (hcoeff : FullInvariantIndex 3 → R) (Fcoeff : FullInvariantIndex 6 → R)
+    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
+    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex)) (p : MvPolynomial (Fin 5) R) :
+    ∃! r, FullStandard r ∧ ∃ a b,
+      p = a * fullInvariantPolynomial 3 hcoeff + b * fullInvariantPolynomial 6 Fcoeff + r := by
+  rw [fullInvariantPolynomial_cubic, fullInvariantPolynomial_sextic]
+  simpa only [hu.unit_spec, Fu.unit_spec] using
+    existsUnique_full_standard_unit_leading hu.unit Fu.unit
+      (fun e ↦ hcoeff e.val) (fun e ↦ Fcoeff e.val) p
+
+theorem full_standard_preserves_grading [Nontrivial R]
+    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
+    {p r a b : MvPolynomial (Fin 5) R} {d : ℕ} {χ : ZMod 3}
+    (hp : p.IsWeightedHomogeneous fullGrading (d, χ)) (hr : FullStandard r)
+    (heq : p = a * normalizedFullCubic hcoeff + b * normalizedFullSextic Fcoeff + r) :
+    r.IsWeightedHomogeneous fullGrading (d, χ) := by
+  exact reduced_isWeightedHomogeneous fullGrading fullAuxiliaryOrder
+    (normalizedFullCubic_leading_data hcoeff).2 (normalizedFullSextic_leading_data Fcoeff).2
+    (full_coprime hcoeff Fcoeff) (normalizedFullCubic_homogeneous hcoeff)
+    (normalizedFullSextic_homogeneous Fcoeff) hp
+    ((full_reduced_iff_standard hcoeff Fcoeff r).mpr hr) heq
+
+theorem full_invariant_standard_preserves_grading [Nontrivial R]
+    (hcoeff : FullInvariantIndex 3 → R) (Fcoeff : FullInvariantIndex 6 → R)
+    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
+    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex))
+    {p r a b : MvPolynomial (Fin 5) R} {d : ℕ} {χ : ZMod 3}
+    (hp : p.IsWeightedHomogeneous fullGrading (d, χ)) (hr : FullStandard r)
+    (heq : p = a * fullInvariantPolynomial 3 hcoeff +
+      b * fullInvariantPolynomial 6 Fcoeff + r) :
+    r.IsWeightedHomogeneous fullGrading (d, χ) := by
+  let hc : FullCubicTailIndex → R := fun e ↦ (↑hu.unit⁻¹ : R) * hcoeff e.val
+  let Fc : FullSexticTailIndex → R := fun e ↦ (↑Fu.unit⁻¹ : R) * Fcoeff e.val
+  have hh : fullInvariantPolynomial 3 hcoeff = C (hu.unit : R) * normalizedFullCubic hc := by
+    rw [fullInvariantPolynomial_cubic]
+    exact (congrArg (fun z ↦ rawFullCubic z (fun e ↦ hcoeff e.val)) hu.unit_spec.symm).trans
+      (rawFullCubic_eq_unit_mul hu.unit _)
+  have hF : fullInvariantPolynomial 6 Fcoeff = C (Fu.unit : R) * normalizedFullSextic Fc := by
+    rw [fullInvariantPolynomial_sextic]
+    exact (congrArg (fun z ↦ rawFullSextic z (fun e ↦ Fcoeff e.val)) Fu.unit_spec.symm).trans
+      (rawFullSextic_eq_unit_mul Fu.unit _)
+  rw [hh, hF] at heq
+  exact full_standard_preserves_grading hc Fc hp hr
+    (a := a * C (hu.unit : R)) (b := b * C (Fu.unit : R))
+    (by simpa only [mul_assoc] using heq)
+
+noncomputable def fullRemainder [Nontrivial R]
+    (hcoeff : FullInvariantIndex 3 → R) (Fcoeff : FullInvariantIndex 6 → R)
+    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
+    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex)) (p : MvPolynomial (Fin 5) R) :
+    MvPolynomial (Fin 5) R :=
+  (existsUnique_full_invariant_representative hcoeff Fcoeff hu Fu p).choose
+
+theorem fullRemainder_spec [Nontrivial R]
+    (hcoeff : FullInvariantIndex 3 → R) (Fcoeff : FullInvariantIndex 6 → R)
+    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
+    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex)) (p : MvPolynomial (Fin 5) R) :
+    FullStandard (fullRemainder hcoeff Fcoeff hu Fu p) ∧ ∃ a b,
+      p = a * fullInvariantPolynomial 3 hcoeff + b * fullInvariantPolynomial 6 Fcoeff +
+        fullRemainder hcoeff Fcoeff hu Fu p :=
+  (existsUnique_full_invariant_representative hcoeff Fcoeff hu Fu p).choose_spec.1
+
+theorem fullRemainder_preserves_grading [Nontrivial R]
+    (hcoeff : FullInvariantIndex 3 → R) (Fcoeff : FullInvariantIndex 6 → R)
+    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
+    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex))
+    {p : MvPolynomial (Fin 5) R} {d : ℕ} {χ : ZMod 3}
+    (hp : p.IsWeightedHomogeneous fullGrading (d, χ)) :
+    (fullRemainder hcoeff Fcoeff hu Fu p).IsWeightedHomogeneous fullGrading (d, χ) := by
+  obtain ⟨hr, a, b, heq⟩ := fullRemainder_spec hcoeff Fcoeff hu Fu p
+  exact full_invariant_standard_preserves_grading hcoeff Fcoeff hu Fu hp hr heq
+
+lemma fullStandard_map {S : Type*} [CommRing S] (φ : R →+* S)
+    {p : MvPolynomial (Fin 5) R} (hp : FullStandard p) :
+    FullStandard (MvPolynomial.map φ p) := by
+  intro d hd
+  exact hp d (MvPolynomial.support_map_subset φ p hd)
+
+/-- Actual full-family coefficient specialization, including the leading-unit
+chart, commutes with reduction. -/
+theorem fullRemainder_map [Nontrivial R] {S : Type*} [CommRing S] [Nontrivial S]
+    (φ : R →+* S) (hcoeff : FullInvariantIndex 3 → R) (Fcoeff : FullInvariantIndex 6 → R)
+    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
+    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex)) (p : MvPolynomial (Fin 5) R) :
+    MvPolynomial.map φ (fullRemainder hcoeff Fcoeff hu Fu p) =
+      fullRemainder (φ ∘ hcoeff) (φ ∘ Fcoeff) (hu.map φ) (Fu.map φ) (MvPolynomial.map φ p) := by
+  obtain ⟨hr, a, b, hp⟩ := fullRemainder_spec hcoeff Fcoeff hu Fu p
+  apply (existsUnique_full_invariant_representative
+    (φ ∘ hcoeff) (φ ∘ Fcoeff) (hu.map φ) (Fu.map φ) (MvPolynomial.map φ p)).choose_spec.2
+  refine ⟨fullStandard_map φ hr, MvPolynomial.map φ a, MvPolynomial.map φ b, ?_⟩
+  simpa only [map_add, map_mul, map_fullInvariantPolynomial] using congrArg (MvPolynomial.map φ) hp
+
+theorem fullRemainder_eq_zero_iff [Nontrivial R]
+    (hcoeff : FullInvariantIndex 3 → R) (Fcoeff : FullInvariantIndex 6 → R)
+    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
+    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex)) (p : MvPolynomial (Fin 5) R) :
+    fullRemainder hcoeff Fcoeff hu Fu p = 0 ↔
+      p ∈ equationsIdeal (fullInvariantPolynomial 3 hcoeff) (fullInvariantPolynomial 6 Fcoeff) := by
+  constructor
+  · intro hr
+    obtain ⟨_, a, b, hp⟩ := fullRemainder_spec hcoeff Fcoeff hu Fu p
+    apply Ideal.mem_span_pair.mpr
+    exact ⟨a, b, by simpa [hr] using hp.symm⟩
+  · intro hp
+    obtain ⟨a, b, hp⟩ := Ideal.mem_span_pair.mp hp
+    symm
+    apply (existsUnique_full_invariant_representative hcoeff Fcoeff hu Fu p).choose_spec.2
+    exact ⟨by simp [FullStandard], a, b, by simpa using hp.symm⟩
+
+end CycleQ2IncidenceNormalForm
+
+#print axioms CycleQ2IncidenceNormalForm.reduced_eq_zero_of_representation
+#print axioms CycleQ2IncidenceNormalForm.quotientBasis_apply
+#print axioms CycleQ2IncidenceNormalForm.fullInvariantPolynomial_of_homogeneous
+#print axioms CycleQ2IncidenceNormalForm.existsUnique_full_invariant_representative
+#print axioms CycleQ2IncidenceNormalForm.fullRemainder_map
+#print axioms CycleQ2IncidenceNormalForm.fullRemainder_preserves_grading
+#print axioms CycleQ2IncidenceNormalForm.fullRemainder_eq_zero_iff
+end
+end
+
+
+/- Component: continuation_3/LinearAnnihilatorKernel.lean -/
+section
+/-! Exactness forced by a small annihilator and dimension bounds. The proof
+uses only the actual entry image, the full image, and the restricted detector.
+No preselected entry correction or large invertible matrix is assumed.
+-/
+
+noncomputable section
+set_option maxHeartbeats 300000
+
+namespace CycleQ2LinearAnnihilatorKernel
+
+variable {K V W X : Type*} [Field K]
+  [AddCommGroup V] [Module K V] [Module.Finite K V]
+  [AddCommGroup W] [Module K W] [AddCommGroup X] [Module K X]
+
+theorem annihilator_kernel_eq_entry_range
+    (E : W →ₗ[K] V) (J : X →ₗ[K] V) (r s : ℕ) (L : V →ₗ[K] (Fin s → K))
+    (hEJ : LinearMap.range E≤LinearMap.range J)
+    (hJ : Module.finrank K (LinearMap.range J)≤r+s)
+    (hE : r≤Module.finrank K (LinearMap.range E))
+    (hLE : L.comp E=0)
+    (hsurj : Function.Surjective (L.domRestrict (LinearMap.range J))) :
+    LinearMap.range J ⊓ LinearMap.ker L=LinearMap.range E := by
+  let U : Submodule K V := LinearMap.range J
+  let P : Submodule K U := (LinearMap.range E).comap U.subtype
+  let T : U →ₗ[K] (Fin s → K) := L.domRestrict U
+  have hPK : P≤LinearMap.ker T := by
+    intro y hy
+    change (y:V)∈LinearMap.range E at hy
+    obtain ⟨w,hw⟩ := hy
+    change L (y:V)=0
+    rw [←hw]
+    exact LinearMap.congr_fun hLE w
+  have hPdim : Module.finrank K P=Module.finrank K (LinearMap.range E) :=
+    (Submodule.comapSubtypeEquivOfLe hEJ).finrank_eq
+  have hPbound : r≤Module.finrank K P := by
+    rw [hPdim]
+    exact hE
+  have hTsurj : Function.Surjective T := hsurj
+  have hTdim : Module.finrank K (LinearMap.range T)=s := by
+    rw [LinearMap.range_eq_top.mpr hTsurj]
+    simp only [finrank_top,Module.finrank_fintype_fun_eq_card,Fintype.card_fin]
+  have hUbound : Module.finrank K U≤r+s := hJ
+  have hnull := T.finrank_range_add_finrank_ker
+  rw [hTdim] at hnull
+  have hKbound : Module.finrank K (LinearMap.ker T)≤r := by omega
+  have heq : P=LinearMap.ker T :=
+    Submodule.eq_of_le_of_finrank_eq hPK
+      (Nat.le_antisymm (Submodule.finrank_mono hPK) (hKbound.trans hPbound))
+  ext y
+  constructor
+  · intro hy
+    let q : U := ⟨y,hy.1⟩
+    have hq : q∈LinearMap.ker T := by
+      change L y=0
+      exact hy.2
+    have hp : q∈P := by rw [heq]; exact hq
+    change y∈LinearMap.range E at hp
+    exact hp
+  · intro hy
+    refine ⟨hEJ hy,?_⟩
+    obtain ⟨w,rfl⟩ := hy
+    change L (E w)=0
+    exact LinearMap.congr_fun hLE w
+
+theorem exists_entry_correction
+    (E : W →ₗ[K] V) (J : X →ₗ[K] V) (r s : ℕ) (L : V →ₗ[K] (Fin s → K))
+    (hEJ : LinearMap.range E≤LinearMap.range J)
+    (hJ : Module.finrank K (LinearMap.range J)≤r+s)
+    (hE : r≤Module.finrank K (LinearMap.range E))
+    (hLE : L.comp E=0)
+    (hsurj : Function.Surjective (L.domRestrict (LinearMap.range J)))
+    (y : V) (hy : y∈LinearMap.range J) (hLy : L y=0) :
+    ∃ w : W, E w=y := by
+  change y∈LinearMap.range E
+  rw [←annihilator_kernel_eq_entry_range E J r s L hEJ hJ hE hLE hsurj]
+  exact ⟨hy,hLy⟩
+
+end CycleQ2LinearAnnihilatorKernel
+
+#print axioms CycleQ2LinearAnnihilatorKernel.annihilator_kernel_eq_entry_range
+#print axioms CycleQ2LinearAnnihilatorKernel.exists_entry_correction
+end
+end
+
+
+/- Component: continuation_3/LinearAnnihilatorRank.lean -/
+section
+/-! # Rank gained by directions detected by an annihilator of an existing image -/
+
+noncomputable section
+set_option maxHeartbeats 300000
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+namespace CycleQ2LinearAnnihilatorRank
+
+variable {K X Z V Y W : Type*} [Field K]
+  [AddCommGroup X] [Module K X] [AddCommGroup Z] [Module K Z]
+  [AddCommGroup V] [Module K V] [AddCommGroup Y] [Module K Y]
+  [AddCommGroup W] [Module K W] [FiniteDimensional K Y]
+
+/-- The old image lies in the kernel of the restricted detector, while the
+new detected image lies in its range. Rank-nullity gives the sum bound. -/
+theorem rank_add_le_of_annihilator (f : X →ₗ[K] Y) (g : Z →ₗ[K] Y)
+    (H : V →ₗ[K] Y) (L : Y →ₗ[K] W)
+    (hf : LinearMap.range f≤LinearMap.range H)
+    (hg : LinearMap.range g≤LinearMap.range H) (hLf : L.comp f=0) :
+    Module.finrank K (LinearMap.range f)+Module.finrank K (LinearMap.range (L.comp g))≤
+      Module.finrank K (LinearMap.range H) := by
+  let R := LinearMap.range H
+  let T : R →ₗ[K] W := L.comp R.subtype
+  have hzero (y : LinearMap.range f) : L y.val=0 := by
+    obtain ⟨x,hx⟩ := y.property
+    rw [←hx]
+    exact LinearMap.congr_fun hLf x
+  let inclusion : LinearMap.range f →ₗ[K] LinearMap.ker T :=
+    { toFun := fun y => ⟨⟨y.val,hf y.property⟩,hzero y⟩
+      map_add' := fun _ _ => rfl
+      map_smul' := fun _ _ => rfl }
+  have hinj : Function.Injective inclusion := by
+    intro a b hab
+    apply Subtype.ext
+    exact congrArg (fun y : LinearMap.ker T => y.val.val) hab
+  have h1 : Module.finrank K (LinearMap.range f)≤Module.finrank K (LinearMap.ker T) :=
+    LinearMap.finrank_le_finrank_of_injective hinj
+  have h2 : LinearMap.range (L.comp g)≤LinearMap.range T := by
+    rintro z ⟨x,rfl⟩
+    exact ⟨⟨g x,hg ⟨x,rfl⟩⟩,rfl⟩
+  have h3 := Submodule.finrank_mono h2
+  have h4 := T.finrank_range_add_finrank_ker
+  change Module.finrank K (LinearMap.range T)+Module.finrank K (LinearMap.ker T)=
+    Module.finrank K (LinearMap.range H) at h4
+  omega
+
+variable {m n a b k : Type*} [Fintype m] [Fintype n] [Fintype a] [Fintype b] [Fintype k]
+
+theorem selected_columns_range_le (H : Matrix m n K) (c : a → n) :
+    LinearMap.range (Matrix.mulVecLin (H.submatrix id c))≤
+      LinearMap.range (Matrix.mulVecLin H) := by
+  rw [Matrix.range_mulVecLin,Matrix.range_mulVecLin]
+  apply Submodule.span_mono
+  rintro _ ⟨j,rfl⟩
+  exact ⟨c j,rfl⟩
+
+/-- A checked left-annihilator of one selected column block detects new
+independent columns without any assumption about an unchecked large minor. -/
+theorem selected_column_rank_add_le (H : Matrix m n K) (c0 : a → n) (c1 : b → n)
+    (L : Matrix k m K) (hL : L*H.submatrix id c0=0) :
+    (H.submatrix id c0).rank+(L*H.submatrix id c1).rank≤H.rank := by
+  simp only [Matrix.rank]
+  rw [Matrix.mulVecLin_mul L (H.submatrix id c1)]
+  apply rank_add_le_of_annihilator (Matrix.mulVecLin (H.submatrix id c0))
+    (Matrix.mulVecLin (H.submatrix id c1)) (Matrix.mulVecLin H) (Matrix.mulVecLin L)
+    (selected_columns_range_le H c0) (selected_columns_range_le H c1)
+  rw [←Matrix.mulVecLin_mul,hL]
+  ext x
+  simp
+
+end CycleQ2LinearAnnihilatorRank
+
+#print axioms CycleQ2LinearAnnihilatorRank.rank_add_le_of_annihilator
+#print axioms CycleQ2LinearAnnihilatorRank.selected_column_rank_add_le
+end
+end
+
+
+/- Component: continuation_3/LinearExactSequenceSplit.lean -/
+section
+/-! # Compatible nonconstructive coordinates for an exact Jacobian sequence
+
+The equation space is split into the image of the Jacobian and a complement
+detected by the actual relation matrix.  Both square seed blocks become the
+identity in these coordinates.  The coordinate changes are selected from
+proved exactness; no numerical pivot or inverse is an extra premise.
+-/
+
+noncomputable section
+set_option maxHeartbeats 600000
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+namespace CycleQ2LinearExactSequenceSplit
+
+open Matrix
+
+variable {K X Y Z : Type*} [Field K]
+  [AddCommGroup X] [Module K X] [AddCommGroup Y] [Module K Y]
+  [AddCommGroup Z] [Module K Z]
+
+/-- A compatible splitting, including an extension of the relation-coordinate
+projection from the actual image to the whole relation space. -/
+theorem exists_split (f : X →ₗ[K] Y) (g : Y →ₗ[K] Z)
+    (hexact : LinearMap.range f = LinearMap.ker g) :
+    ∃ (B : LinearMap.ker g →ₗ[K] X)
+      (S : LinearMap.range g →ₗ[K] Y)
+      (P : Y →ₗ[K] LinearMap.ker g)
+      (T : Z →ₗ[K] LinearMap.range g),
+      f.comp B = (LinearMap.ker g).subtype ∧
+      g.rangeRestrict.comp S = LinearMap.id ∧
+      (LinearMap.ker g).subtype.comp P + S.comp g.rangeRestrict = LinearMap.id ∧
+      P.comp (LinearMap.ker g).subtype = LinearMap.id ∧
+      P.comp S = 0 ∧
+      T.comp (LinearMap.range g).subtype = LinearMap.id := by
+  let f' : X →ₗ[K] LinearMap.ker g :=
+    f.codRestrict (LinearMap.ker g) (fun x => hexact ▸ LinearMap.mem_range_self f x)
+  have hf' : Function.Surjective f' := by
+    intro y
+    obtain ⟨x,hx⟩ := (show y.val ∈ LinearMap.range f from hexact.symm ▸ y.property)
+    exact ⟨x,Subtype.ext hx⟩
+  obtain ⟨B,hB⟩ := f'.exists_rightInverse_of_surjective (LinearMap.range_eq_top.mpr hf')
+  obtain ⟨S,hS⟩ := g.rangeRestrict.exists_rightInverse_of_surjective g.range_rangeRestrict
+  obtain ⟨T,hT⟩ := (LinearMap.range g).subtype.exists_leftInverse_of_injective
+    (LinearMap.range g).ker_subtype
+  have hSval (z : LinearMap.range g) : g (S z)=z.val := by
+    exact congrArg Subtype.val (LinearMap.congr_fun hS z)
+  let P : Y →ₗ[K] LinearMap.ker g :=
+    (LinearMap.id - S.comp g.rangeRestrict).codRestrict (LinearMap.ker g) (by
+      intro y
+      change g (y-S (g.rangeRestrict y))=0
+      rw [map_sub,hSval]
+      exact sub_self _)
+  refine ⟨B,S,P,T,?_,hS,?_,?_,?_,hT⟩
+  · ext y
+    exact congrArg Subtype.val (LinearMap.congr_fun hB y)
+  · ext y
+    change y-S (g.rangeRestrict y)+S (g.rangeRestrict y)=y
+    exact sub_add_cancel _ _
+  · ext y
+    change y.val-S (g.rangeRestrict y.val)=y.val
+    have hz : g.rangeRestrict y.val=0 := Subtype.ext y.property
+    rw [hz,map_zero,sub_zero]
+  · ext z
+    change S z-S (g.rangeRestrict (S z))=0
+    have hsz := LinearMap.congr_fun hS z
+    change g.rangeRestrict (S z)=z at hsz
+    rw [hsz,sub_self]
+
+variable {m n l : Type*} [Fintype m] [Fintype n] [Fintype l] [DecidableEq m]
+
+/-- Compatible square blocks for an exact pair of literal matrices.  The
+first block is the Jacobian on chosen parameter directions; the second
+is the relation matrix on complementary equation coordinates. -/
+theorem exists_matrix_split (J : Matrix m n K) (R : Matrix l m K)
+    (hexact : LinearMap.range (Matrix.mulVecLin J)=LinearMap.ker (Matrix.mulVecLin R)) :
+    ∃ (P : Matrix (Fin J.rank) m K)
+      (Q : Matrix m (Fin J.rank) K)
+      (V : Matrix m (Fin R.rank) K)
+      (W : Matrix (Fin R.rank) m K)
+      (T : Matrix (Fin R.rank) l K)
+      (B : Matrix n (Fin J.rank) K),
+      Q*P+V*W=1 ∧ P*J*B=1 ∧ T*R*V=1 ∧ R*Q=0 ∧ P*V=0 := by
+  classical
+  let f := Matrix.mulVecLin J
+  let g := Matrix.mulVecLin R
+  obtain ⟨B,S,P,T,hB,hS,hdecomp,hP,hPS,hT⟩ := exists_split f g hexact
+  have hdim : Module.finrank K (LinearMap.ker g)=J.rank := by
+    rw [←hexact]
+    rfl
+  let bU : Module.Basis (Fin J.rank) K (LinearMap.ker g) :=
+    (Module.finBasis K (LinearMap.ker g)).reindex (finCongr hdim)
+  let bV := Module.finBasis K (LinearMap.range g)
+  let P0 := bU.equivFun.toLinearMap.comp P
+  let Q0 := (LinearMap.ker g).subtype.comp bU.equivFun.symm.toLinearMap
+  let V0 := S.comp bV.equivFun.symm.toLinearMap
+  let W0 := bV.equivFun.toLinearMap.comp g.rangeRestrict
+  let T0 := bV.equivFun.toLinearMap.comp T
+  let B0 := B.comp bU.equivFun.symm.toLinearMap
+  refine ⟨LinearMap.toMatrix' P0,LinearMap.toMatrix' Q0,LinearMap.toMatrix' V0,
+    LinearMap.toMatrix' W0,LinearMap.toMatrix' T0,LinearMap.toMatrix' B0,?_,?_,?_,?_,?_⟩
+  · apply Matrix.toLin'.injective
+    simp only [map_add,Matrix.toLin'_mul,Matrix.toLin'_toMatrix',Matrix.toLin'_one]
+    apply LinearMap.ext
+    intro y
+    change (bU.equivFun.symm (bU.equivFun (P y))).val+
+      S (bV.equivFun.symm (bV.equivFun (g.rangeRestrict y)))=y
+    simp only [LinearEquiv.symm_apply_apply]
+    exact LinearMap.congr_fun hdecomp y
+  · apply Matrix.toLin'.injective
+    simp only [Matrix.toLin'_mul,Matrix.toLin'_toMatrix',Matrix.toLin'_one]
+    apply LinearMap.ext
+    intro x
+    change bU.equivFun (P (f (B (bU.equivFun.symm x))))=x
+    have hb := LinearMap.congr_fun hB (bU.equivFun.symm x)
+    change f (B (bU.equivFun.symm x))=(bU.equivFun.symm x).val at hb
+    have hp := LinearMap.congr_fun hP (bU.equivFun.symm x)
+    change P (bU.equivFun.symm x).val=bU.equivFun.symm x at hp
+    rw [hb,hp,LinearEquiv.apply_symm_apply]
+  · apply Matrix.toLin'.injective
+    simp only [Matrix.toLin'_mul,Matrix.toLin'_toMatrix',Matrix.toLin'_one]
+    apply LinearMap.ext
+    intro x
+    change bV.equivFun (T (g (S (bV.equivFun.symm x))))=x
+    have hSv := congrArg Subtype.val (LinearMap.congr_fun hS (bV.equivFun.symm x))
+    change g (S (bV.equivFun.symm x))=(bV.equivFun.symm x).val at hSv
+    have ht := LinearMap.congr_fun hT (bV.equivFun.symm x)
+    change T (bV.equivFun.symm x).val=bV.equivFun.symm x at ht
+    rw [hSv,ht,LinearEquiv.apply_symm_apply]
+  · apply Matrix.toLin'.injective
+    simp only [Matrix.toLin'_mul,Matrix.toLin'_toMatrix',map_zero]
+    apply LinearMap.ext
+    intro x
+    exact (bU.equivFun.symm x).property
+  · apply Matrix.toLin'.injective
+    simp only [Matrix.toLin'_mul,Matrix.toLin'_toMatrix',map_zero]
+    apply LinearMap.ext
+    intro x
+    change bU.equivFun (P (S (bV.equivFun.symm x)))=0
+    have hps := LinearMap.congr_fun hPS (bV.equivFun.symm x)
+    change P (S (bV.equivFun.symm x))=0 at hps
+    rw [hps,map_zero]
+
+end CycleQ2LinearExactSequenceSplit
+
+#print axioms CycleQ2LinearExactSequenceSplit.exists_split
+#print axioms CycleQ2LinearExactSequenceSplit.exists_matrix_split
+end
+end
+
+
+/- Component: continuation_3/LinearKernelProjection.lean -/
+section
+/-! # A projection from a kernel with a compensating family
+
+If every value of a linear map can be produced using directions killed by a
+parameter projection, every parameter direction lifts to its kernel. This is
+pure linear algebra; it makes no assertion about nonlinear integration.
+-/
+
+noncomputable section
+
+namespace CycleQ2LinearKernelProjection
+
+variable {K U V W T : Type*} [Ring K]
+  [AddCommGroup U] [Module K U]
+  [AddCommGroup V] [Module K V]
+  [AddCommGroup W] [Module K W]
+  [AddCommGroup T] [Module K T]
+
+theorem exists_kernel_correction
+    (f : V →ₗ[K] W) (i : U →ₗ[K] V) (p : V →ₗ[K] T)
+    (hip : p.comp i=0)
+    (hrange : LinearMap.range f≤LinearMap.range (f.comp i)) (v : V) :
+    ∃u : U, f (v-i u)=0 ∧ p (v-i u)=p v := by
+  obtain ⟨u,hu⟩ := hrange (LinearMap.mem_range_self f v)
+  refine ⟨u,?_,?_⟩
+  · change f (i u)=f v at hu
+    rw [map_sub,hu,sub_self]
+  · have hpu : p (i u)=0 := congrArg (fun q : U →ₗ[K] T => q u) hip
+    rw [map_sub,hpu,sub_zero]
+
+theorem kernel_projection_surjective
+    (f : V →ₗ[K] W) (i : U →ₗ[K] V) (p : V →ₗ[K] T)
+    (hip : p.comp i=0)
+    (hrange : LinearMap.range f≤LinearMap.range (f.comp i))
+    (hp : Function.Surjective p) :
+    Function.Surjective (p.comp (LinearMap.ker f).subtype) := by
+  intro t
+  obtain ⟨v,hv⟩ := hp t
+  obtain ⟨u,hu,hup⟩ := exists_kernel_correction f i p hip hrange v
+  exact ⟨⟨v-i u,hu⟩,hup.trans hv⟩
+
+end CycleQ2LinearKernelProjection
+
+#print axioms CycleQ2LinearKernelProjection.kernel_projection_surjective
+end
+end
+
+
+/- Component: continuation_3/LinearKernelTrace.lean -/
+section
+/-! A strict rank increase after adjoining a scalar row is equivalent to a
+kernel direction with nonzero scalar value. Over a field that direction can
+be normalized to any prescribed value. Both directions use finite-dimensional
+linear algebra and require no chosen matrix minor or explicit kernel vector.
+-/
+
+noncomputable section
+set_option maxHeartbeats 300000
+
+namespace CycleQ2LinearKernelTrace
+
+variable {K V W U : Type*} [Field K]
+  [AddCommGroup V] [Module K V] [Module.Finite K V]
+  [AddCommGroup W] [Module K W] [AddCommGroup U] [Module K U]
+
+theorem rank_le_of_kernel_le (f : V →ₗ[K] W) (g : V →ₗ[K] U)
+    (hker : LinearMap.ker f≤LinearMap.ker g) :
+    Module.finrank K (LinearMap.range g)≤Module.finrank K (LinearMap.range f) := by
+  have hk := Submodule.finrank_mono hker
+  have hf := f.finrank_range_add_finrank_ker
+  have hg := g.finrank_range_add_finrank_ker
+  omega
+
+theorem exists_kernel_trace_one_of_rank_lt (f : V →ₗ[K] W) (ℓ : V →ₗ[K] K)
+    (hrank : Module.finrank K (LinearMap.range f)<
+      Module.finrank K (LinearMap.range (f.prod ℓ))) :
+    ∃ v : V, f v=0 ∧ ℓ v=1 := by
+  classical
+  have hex : ∃ v : V, f v=0 ∧ ℓ v≠0 := by
+    by_contra hn
+    push_neg at hn
+    have hk : LinearMap.ker f≤LinearMap.ker (f.prod ℓ) := by
+      intro v hv
+      change f v=0 at hv
+      change (f v,ℓ v)=(0,0)
+      exact Prod.ext hv (hn v hv)
+    exact not_lt_of_ge (rank_le_of_kernel_le f (f.prod ℓ) hk) hrank
+  obtain ⟨v,hv,hℓ⟩ := hex
+  refine ⟨(ℓ v)⁻¹ • v,?_,?_⟩
+  · simp only [map_smul,hv,smul_zero]
+  · simp only [map_smul,smul_eq_mul,inv_mul_cancel₀ hℓ]
+
+theorem rank_add_one_le_of_kernel_trace_one (f : V →ₗ[K] W) (ℓ : V →ₗ[K] K)
+    (hex : ∃ v : V, f v=0 ∧ ℓ v=1) :
+    Module.finrank K (LinearMap.range f)+1≤
+      Module.finrank K (LinearMap.range (f.prod ℓ)) := by
+  obtain ⟨v,hv,hℓ⟩ := hex
+  have hle : LinearMap.ker (f.prod ℓ)≤LinearMap.ker f := by
+    intro w hw
+    change (f.prod ℓ) w=0 at hw
+    change f w=0
+    exact congrArg Prod.fst hw
+  have hn : ¬LinearMap.ker f≤LinearMap.ker (f.prod ℓ) := by
+    intro hk
+    have hz := hk (show v∈LinearMap.ker f from hv)
+    change (f.prod ℓ) v=0 at hz
+    have hzero : ℓ v=0 := congrArg Prod.snd hz
+    exact one_ne_zero (hℓ.symm.trans hzero)
+  have hd := Submodule.finrank_lt_finrank_of_lt (lt_of_le_not_ge hle hn)
+  have hf := f.finrank_range_add_finrank_ker
+  have hg := (f.prod ℓ).finrank_range_add_finrank_ker
+  omega
+
+theorem exists_kernel_trace_value_of_rank_lt (f : V →ₗ[K] W) (ℓ : V →ₗ[K] K)
+    (hrank : Module.finrank K (LinearMap.range f)<
+      Module.finrank K (LinearMap.range (f.prod ℓ))) (a : K) :
+    ∃ v : V, f v=0 ∧ ℓ v=a := by
+  obtain ⟨v,hv,hℓ⟩ := exists_kernel_trace_one_of_rank_lt f ℓ hrank
+  refine ⟨a • v,?_,?_⟩
+  · simp only [map_smul,hv,smul_zero]
+  · simp only [map_smul,hℓ,smul_eq_mul,mul_one]
+
+end CycleQ2LinearKernelTrace
+
+#print axioms CycleQ2LinearKernelTrace.exists_kernel_trace_one_of_rank_lt
+#print axioms CycleQ2LinearKernelTrace.rank_add_one_le_of_kernel_trace_one
+end
+end
+
+
+/- Component: continuation_3/cylinder_bridge/LinearRangeDescent.lean -/
+section
+/-! # Linear descent to the actual range
+
+A linear map that kills the kernel of another map descends to that map's
+actual range. The generic construction keeps the quotient universal
+property separate from the concrete localized coefficient rings.
+-/
+
+noncomputable section
+set_option backward.isDefEq.respectTransparency false
+
+namespace CycleQ2LinearRangeDescent
+
+variable {R M N P : Type*} [CommRing R]
+  [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+  [AddCommGroup P] [Module R P]
+
+def descendRange (f : M →ₗ[R] N) (g : M →ₗ[R] P)
+    (h : LinearMap.ker f ≤ LinearMap.ker g) : LinearMap.range f →ₗ[R] P :=
+  ((LinearMap.ker f).liftQ g h).comp f.quotKerEquivRange.symm.toLinearMap
+
+theorem descendRange_apply_image (f : M →ₗ[R] N) (g : M →ₗ[R] P)
+    (h : LinearMap.ker f ≤ LinearMap.ker g) (x : M) :
+    descendRange f g h ⟨f x,⟨x,rfl⟩⟩=g x := by
+  unfold descendRange
+  rw [LinearMap.comp_apply,LinearEquiv.coe_coe,
+    LinearMap.quotKerEquivRange_symm_apply_image]
+  rfl
+
+def kernelQuotientInjection (g : M →ₗ[R] P) (K : Submodule R M)
+    (h : LinearMap.ker g=K) : (M ⧸ K) →ₗ[R] P :=
+  K.liftQ g (le_of_eq h.symm)
+
+theorem kernelQuotientInjection_injective (g : M →ₗ[R] P) (K : Submodule R M)
+    (h : LinearMap.ker g=K) : Function.Injective (kernelQuotientInjection g K h) := by
+  apply LinearMap.ker_eq_bot.mp
+  exact Submodule.ker_liftQ_eq_bot' K g h.symm
+
+end CycleQ2LinearRangeDescent
+
+#print axioms CycleQ2LinearRangeDescent.descendRange_apply_image
+#print axioms CycleQ2LinearRangeDescent.kernelQuotientInjection_injective
+end
+end
+
+
+/- Component: continuation_3/LinkageIdealPrincipal.lean -/
+section
+/-!
+# Local principality from a regular linkage pairing
+
+If I*J is contained in (p), p is regular, and a selected pairing a*b is
+p times a unit, the selected sections generate I and J. The argument
+works in arbitrary commutative rings, including reducible seed rings.
+-/
+
+noncomputable section
+set_option maxHeartbeats 1000000
+
+namespace CycleQ2LinkageIdealPrincipal
+
+variable {R : Type*} [CommRing R]
+
+theorem factors_regular (p a b u : R)
+    (hp : Function.Injective (fun x : R => p*x)) (hu : IsUnit u)
+    (hab : a*b=p*u) :
+    Function.Injective (fun x : R => a*x) ∧
+      Function.Injective (fun x : R => b*x) := by
+  constructor
+  · intro x y h
+    apply hu.mul_right_injective
+    apply hp
+    calc
+      p*(u*x) = b*(a*x) := by rw [← mul_assoc, ← hab]; ring
+      _ = b*(a*y) := congrArg (b*·) h
+      _ = p*(u*y) := by linear_combination y * hab
+  · intro x y h
+    apply hu.mul_right_injective
+    apply hp
+    calc
+      p*(u*x) = a*(b*x) := by rw [← mul_assoc, ← hab]; ring
+      _ = a*(b*y) := congrArg (a*·) h
+      _ = p*(u*y) := by linear_combination y * hab
+
+theorem ideal_eq_selected (I J : Ideal R) (p a b u : R)
+    (hp : Function.Injective (fun x : R => p*x)) (hu : IsUnit u)
+    (ha : a∈I) (hb : b∈J) (hab : a*b=p*u)
+    (hpair : ∀ x∈I, ∀ y∈J, p ∣ x*y) : I=Ideal.span {a} := by
+  rcases hu with ⟨v,rfl⟩
+  have hbinj := (factors_regular p a b (v:R) hp v.isUnit hab).2
+  apply le_antisymm
+  · intro x hx
+    obtain ⟨q,hq⟩ := hpair x hx b hb
+    apply Ideal.mem_span_singleton.mpr
+    refine ⟨(↑(v⁻¹):R)*q, ?_⟩
+    apply hbinj
+    calc
+      b*x = p*q := by simpa only [mul_comm] using hq
+      _ = b*(a*((↑(v⁻¹):R)*q)) := by
+        calc
+          p*q = (p*(v:R))*(↑(v⁻¹):R)*q := by simp [mul_assoc]
+          _ = b*(a*((↑(v⁻¹):R)*q)) := by rw [← hab]; ring
+  · exact Ideal.span_le.mpr (Set.singleton_subset_iff.mpr ha)
+
+/-- Both actual factor ideals become principal on every chart where
+one selected product has unit quotient by the linkage element. -/
+theorem ideals_principal (I J : Ideal R) (p a b u : R)
+    (hp : Function.Injective (fun x : R => p*x)) (hu : IsUnit u)
+    (ha : a∈I) (hb : b∈J) (hab : a*b=p*u)
+    (hpair : ∀ x∈I, ∀ y∈J, p ∣ x*y) :
+    I=Ideal.span {a} ∧ J=Ideal.span {b} := by
+  refine ⟨ideal_eq_selected I J p a b u hp hu ha hb hab hpair, ?_⟩
+  apply ideal_eq_selected J I p b a u hp hu hb ha (by simpa [mul_comm] using hab)
+  intro y hy x hx
+  simpa only [mul_comm] using hpair x hx y hy
+
+/-- Regularity survives every localization, without requiring that the
+localization map itself be injective. -/
+theorem localization_mul_injective (M : Submonoid R) (S : Type*)
+    [CommRing S] [Algebra R S] [IsLocalization M S]
+    (p : R) (hp : Function.Injective (fun x : R => p*x)) :
+    Function.Injective (fun x : S => algebraMap R S p*x) := by
+  have hpn : p ∈ nonZeroDivisors R := by
+    apply mem_nonZeroDivisors_iff_left.mpr
+    intro x hx
+    apply hp
+    simpa only [mul_zero] using hx
+  have hsn : algebraMap R S p ∈ nonZeroDivisors S :=
+    IsLocalization.nonZeroDivisors_le_comap M S hpn
+  intro x y h
+  change algebraMap R S p*x=algebraMap R S p*y at h
+  apply sub_eq_zero.mp
+  apply (mem_nonZeroDivisors_iff_left.mp hsn)
+  rw [mul_sub, h, sub_self]
+
+end CycleQ2LinkageIdealPrincipal
+
+#print axioms CycleQ2LinkageIdealPrincipal.ideals_principal
+#print axioms CycleQ2LinkageIdealPrincipal.localization_mul_injective
+end
+end
+
+
