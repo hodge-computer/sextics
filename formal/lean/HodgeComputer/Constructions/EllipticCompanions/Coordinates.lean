@@ -218,7 +218,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open Polynomial CrossedRationalResidue
 variable (K : Type*) [Field K]

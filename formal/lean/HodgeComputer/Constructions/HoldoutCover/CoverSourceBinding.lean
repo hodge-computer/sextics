@@ -15,7 +15,6 @@ injective maps of residue function fields.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
 set_option maxRecDepth 10000
 
 namespace HoldoutConstruction

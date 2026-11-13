@@ -177,7 +177,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open Polynomial CrossedEllipticTranslation
 variable (K : Type*) [Field K] [CharZero K]
@@ -313,7 +312,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open Polynomial HoldoutConstruction CrossedEllipticTranslation
 

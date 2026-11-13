@@ -247,8 +247,6 @@ quotient rule and preserve the polynomial subring of the function field.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
-
 namespace HoldoutConstruction
 
 section RingFraction
@@ -352,16 +350,19 @@ def curveCoefficientDerivation (D : Derivation ℤ E E) :
     Derivation ℤ (CurveFunctionField E) (CurveFunctionField E) :=
   extendRingDerivation (L := CurveFunctionField E) (coefficientPolynomialDerivation D)
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] theorem curveTimeDerivation_coefficient (a : E) :
     curveTimeDerivation (algebraMap E (CurveFunctionField E) a) = 0 := by
   change curveTimeDerivation
     (algebraMap (Polynomial E) (CurveFunctionField E) (Polynomial.C a)) = 0
   simp [curveTimeDerivation]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] theorem curveTimeDerivation_time :
     curveTimeDerivation (curveTime (E := E)) = 1 := by
   simp [curveTimeDerivation, curveTime]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] theorem curveCoefficientDerivation_coefficient (D : Derivation ℤ E E) (a : E) :
     curveCoefficientDerivation D (algebraMap E (CurveFunctionField E) a) =
       algebraMap E (CurveFunctionField E) (D a) := by
@@ -371,6 +372,7 @@ def curveCoefficientDerivation (D : Derivation ℤ E E) :
     coefficientPolynomialDerivation_C]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] theorem curveCoefficientDerivation_time (D : Derivation ℤ E E) :
     curveCoefficientDerivation D (curveTime (E := E)) = 0 := by
   simp [curveCoefficientDerivation, curveTime]

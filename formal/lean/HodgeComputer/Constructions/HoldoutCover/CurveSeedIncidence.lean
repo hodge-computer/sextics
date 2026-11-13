@@ -130,7 +130,6 @@ section
 coefficient Jacobian is the two explicit nonsingular parity blocks. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutConicIncidence
 

@@ -11,7 +11,6 @@ is retained in the library README and the accepted source explanation.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace EllipticCompanion
 open Polynomial HoldoutConstruction CrossedElliptic
 abbrev P2 := MvPolynomial (Fin 2) ℂ

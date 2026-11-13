@@ -349,7 +349,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 open scoped BigOperators
 namespace CrossedRationalResidue
 open Polynomial
@@ -523,7 +522,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open Polynomial HoldoutConstruction
 variable {K : Type*} [Field K] [CharZero K]
@@ -776,7 +774,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open Polynomial HoldoutConstruction
 open scoped BigOperators
@@ -947,7 +944,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open HoldoutConstruction CrossedRationalResidue Polynomial
 open scoped BigOperators
@@ -1027,7 +1023,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedRadialResidue
 open CrossedElliptic HoldoutConstruction CrossedRationalResidue
 open scoped BigOperators

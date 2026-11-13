@@ -8,7 +8,6 @@ The proof uses two single-column/row Laplace expansions and the determinant
 of the identity matrix. No derivative construction is assumed here. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 set_option maxRecDepth 10000
 
 namespace HoldoutConstruction

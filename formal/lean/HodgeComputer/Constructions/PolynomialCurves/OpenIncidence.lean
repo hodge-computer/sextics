@@ -11,7 +11,6 @@ Jacobian condition; transversality is not inferred from rank alone.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 set_option maxRecDepth 4096
 namespace ReflectionCoupledFano
 open HoldoutConstruction
@@ -38,6 +37,7 @@ abbrev OpenSquareGeneric (K : Type*) [Field K] [Algebra R K]
 instance openSquareGeneric_commRing (eqs : ι → MvPolynomial ι R) (i : ι) :
     CommRing (OpenSquareGeneric K eqs i) := inferInstance
 
+set_option backward.isDefEq.respectTransparency false in
 def openSquareEtaleEval (eqs : ι → MvPolynomial ι R) (x : ι → T)
     (hx : ∀ j, MvPolynomial.aeval x (eqs j) = 0)
     (hj : IsUnit (Matrix.det

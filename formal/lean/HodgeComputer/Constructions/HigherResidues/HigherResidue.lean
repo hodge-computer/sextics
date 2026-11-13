@@ -11,7 +11,6 @@ Prepared with OpenAI Codex assistance for contributor fqlx.
 
 noncomputable section
 set_option maxRecDepth 100000
-set_option backward.isDefEq.respectTransparency false
 namespace SplitHigherResidue
 open HoldoutConstruction Polynomial
 open scoped BigOperators
@@ -198,6 +197,7 @@ theorem linear_thickening_density_identity (D : ι → Derivation ℤ K K)
   rw [hneg,hdiv]
   linear_combination r₀*hJ₂+(r₁+advect D w r₀-3*a*r₀)*hJ₁
 
+set_option backward.isDefEq.respectTransparency false in
 theorem determinant_linear_coeff_two_four {K : Type*} [Field K] [CharZero K] (W : Matrix (Fin 4) (Fin 4) K) :
     2*(Matrix.det (fun (i j : Fin 4) => (Polynomial.C (if i=j then (1:K) else 0)+
       Polynomial.C (W i j)*Polynomial.X))).coeff 2 =

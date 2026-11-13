@@ -3,7 +3,6 @@ import HodgeComputer.Constructions.HoldoutCover.CurveJacobianStaged
 /- Source component: CurveJacobianScaling -/
 section
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace HoldoutConicJacobian
 variable {K : Type*} [Field K]
 

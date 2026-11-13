@@ -12,8 +12,6 @@ vector is then obtained from those same coefficients.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
-
 namespace HoldoutConicIncidence
 
 open HoldoutConstruction Polynomial

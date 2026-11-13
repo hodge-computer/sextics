@@ -26,7 +26,6 @@ normalization uses explicit inverses in the coefficient ring.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace ResidueFirstJets
 
@@ -135,6 +134,7 @@ open TrivSqZeroExt
 @[simp] lemma snd_numeral (n : ℕ) [n.AtLeastTwo] :
     (ofNat(n) : Jet (K:=K)).snd=0 := rfl
 
+set_option backward.isDefEq.respectTransparency false in
 def jetDerivation (D : Derivation ℤ K K) : Derivation ℤ (Jet (K:=K)) (Jet (K:=K)) where
   toFun z := (D z.fst,D z.snd)
   map_add' := by intro a b; ext <;> simp [map_add]

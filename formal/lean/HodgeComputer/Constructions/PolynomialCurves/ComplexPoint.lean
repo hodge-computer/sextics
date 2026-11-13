@@ -12,10 +12,10 @@ No continuity in the deformation coefficient is assumed: it remains 1/14.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace DeformedConic
 open HoldoutConstruction
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A nonsingular integral square system with a point in some characteristic
 has a nonsingular complex point. Flatness supplies the generic-fiber step;
 algebraic closedness then embeds the finite field factor in the complexes. -/

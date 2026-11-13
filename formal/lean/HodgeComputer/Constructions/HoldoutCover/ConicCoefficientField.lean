@@ -14,8 +14,6 @@ ideal in the finite etale algebra.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
-
 namespace HoldoutConicIncidence
 
 open HoldoutConstruction

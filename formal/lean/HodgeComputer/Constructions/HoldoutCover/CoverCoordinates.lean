@@ -12,8 +12,6 @@ account fqlx.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
-
 namespace HoldoutConstruction
 
 attribute [local instance] fermatCurve_adjoinRoot_isDomain fermat_base_charZero

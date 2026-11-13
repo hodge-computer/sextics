@@ -13,7 +13,6 @@ data and makes no assertion that such data have already been constructed.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace ReflectionCoupledFano
 open HoldoutConstruction MvPolynomial
 open scoped BigOperators
