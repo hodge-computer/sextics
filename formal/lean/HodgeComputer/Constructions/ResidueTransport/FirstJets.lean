@@ -134,16 +134,17 @@ open TrivSqZeroExt
 @[simp] lemma snd_numeral (n : ℕ) [n.AtLeastTwo] :
     (ofNat(n) : Jet (K:=K)).snd=0 := rfl
 
-set_option backward.isDefEq.respectTransparency false in
 def jetDerivation (D : Derivation ℤ K K) : Derivation ℤ (Jet (K:=K)) (Jet (K:=K)) where
   toFun z := (D z.fst,D z.snd)
-  map_add' := by intro a b; ext <;> simp [map_add]
-  map_smul' := by intro n a; ext <;> simp
-  map_one_eq_zero' := by ext <;> simp
-  leibniz' := by
-    intro a b
-    ext <;> simp [Derivation.leibniz,smul_eq_mul]
-    ring
+  map_add' a b := TrivSqZeroExt.ext (map_add D a.fst b.fst) (map_add D a.snd b.snd)
+  map_smul' n a := TrivSqZeroExt.ext (D.map_smul n a.fst) (D.map_smul n a.snd)
+  map_one_eq_zero' := TrivSqZeroExt.ext D.map_one_eq_zero (map_zero D)
+  leibniz' a b := TrivSqZeroExt.ext (D.leibniz a.fst b.fst)
+    (show D (a.fst*b.snd+a.snd*b.fst) =
+        (a.fst*D b.snd+a.snd*D b.fst)+(b.fst*D a.snd+b.snd*D a.fst) by
+      rw [map_add,D.leibniz,D.leibniz]
+      simp only [smul_eq_mul]
+      ring)
 
 lemma jetDerivation_fst (D : Derivation ℤ K K) (a : Jet (K:=K)) :
     (jetDerivation D a).fst=D a.fst := rfl
