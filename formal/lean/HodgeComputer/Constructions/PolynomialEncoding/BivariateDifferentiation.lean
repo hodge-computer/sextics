@@ -1,10 +1,10 @@
-import HodgeComputer.Constructions.TransitiveCubic.BivariateExpressions
+import HodgeComputer.Constructions.PolynomialEncoding.BivariateExpressions
 import Mathlib.Algebra.MvPolynomial.PDeriv
 
 /-! Differentiation of the sparse bivariate expressions used in the exact
 coefficient certificates. Prepared for fqlx with OpenAI Codex assistance. -/
-namespace TransitiveBivariateExpressions
-open Lean.Grind.CommRing TransitiveSignedExpressions MvPolynomial
+namespace PolynomialEncoding.BivariateExpressions
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions MvPolynomial
 
 def dx : Biv → Biv
   | .nil => .nil
@@ -50,4 +50,4 @@ lemma pderiv_denote_dy (v : ℕ → K) (p : Biv) :
       simp [dy,denote,ringEval,ringEval_C,pderiv_mul,pderiv_pow,Pi.single_apply]
       ring
 
-end TransitiveBivariateExpressions
+end PolynomialEncoding.BivariateExpressions

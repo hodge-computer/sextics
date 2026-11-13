@@ -1,6 +1,6 @@
 import HodgeComputer.Constructions.TransitiveCubic.IdentityProducts
 namespace TransitiveCovariants.IdentityData
-open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressions
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 open TransitiveCovariants.Reflection
 set_option maxRecDepth 131072
 set_option maxHeartbeats 4000000

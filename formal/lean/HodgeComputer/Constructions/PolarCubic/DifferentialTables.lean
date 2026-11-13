@@ -2,7 +2,7 @@ import HodgeComputer.Constructions.PolarCubic.Bivariate
 import HodgeComputer.Constructions.PolarCubic.Encoding
 import HodgeComputer.Constructions.ResidueTransport.FirstJets
 namespace PolarCovariants.DifferentialData
-open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressions
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 open PolarCovariants.IdentityData PolarCubicEncodingCheck ResidueFirstJets TrivSqZeroExt
 set_option linter.unusedSimpArgs false
 set_option maxRecDepth 131072

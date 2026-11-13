@@ -1,7 +1,7 @@
 import HodgeComputer.Constructions.TransitiveCubic.Covariants
 import HodgeComputer.Constructions.TransitiveCubic.IdentityEvaluation
 import HodgeComputer.Constructions.TransitiveCubic.EncodingCheck
-import HodgeComputer.Constructions.TransitiveCubic.BivariateDifferentiation
+import HodgeComputer.Constructions.PolynomialEncoding.BivariateDifferentiation
 import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
 
 /-! The universal relative differential identity on the affine cubic chart.
@@ -34,7 +34,7 @@ computation is trusted. This avoids expanding the complete identity with ring.
 Original encoding by hodgepodgeconjecture; transitive adaptation for fqlx with
 OpenAI Codex assistance. -/
 namespace DifferentialData
-open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressions
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 open TransitiveCovariants.Reflection TransitiveCovariants.IdentityData
 open TransitiveCubicEncodingCheck
 set_option maxRecDepth 131072
@@ -1246,51 +1246,51 @@ lemma relative_identity (a b c d e f : K) :
   let v := DifferentialData.baseCoefficients a b c d e f
   have h := DifferentialData.semantic_identity (fun i => C (v i)) x y
   dsimp only at h
-  have hux : TransitiveBivariateExpressions.denote (fun i => C (v i)) x y
+  have hux : PolynomialEncoding.BivariateExpressions.denote (fun i => C (v i)) x y
       DifferentialData.UxData=pderiv 0 (Upoly a b c d e f) := by
     rw [← DifferentialData.Ux_generated,
-      ← TransitiveBivariateExpressions.pderiv_denote_dx]
-    change pderiv 0 (TransitiveBivariateExpressions.denote
+      ← PolynomialEncoding.BivariateExpressions.pderiv_denote_dx]
+    change pderiv 0 (PolynomialEncoding.BivariateExpressions.denote
       (fun i => C (DifferentialData.baseCoefficients a b c d e f i)) x y
       TransitiveCovariants.IdentityData.UData)=_
     rw [DifferentialData.U_binding]
-  have huy : TransitiveBivariateExpressions.denote (fun i => C (v i)) x y
+  have huy : PolynomialEncoding.BivariateExpressions.denote (fun i => C (v i)) x y
       DifferentialData.UyData=pderiv 1 (Upoly a b c d e f) := by
     rw [← DifferentialData.Uy_generated,
-      ← TransitiveBivariateExpressions.pderiv_denote_dy]
-    change pderiv 1 (TransitiveBivariateExpressions.denote
+      ← PolynomialEncoding.BivariateExpressions.pderiv_denote_dy]
+    change pderiv 1 (PolynomialEncoding.BivariateExpressions.denote
       (fun i => C (DifferentialData.baseCoefficients a b c d e f i)) x y
       TransitiveCovariants.IdentityData.UData)=_
     rw [DifferentialData.U_binding]
-  have hhx : TransitiveBivariateExpressions.denote (fun i => C (v i)) x y
+  have hhx : PolynomialEncoding.BivariateExpressions.denote (fun i => C (v i)) x y
       DifferentialData.HxData=pderiv 0 (Hpoly a b c d e f) := by
     rw [← DifferentialData.Hx_generated,
-      ← TransitiveBivariateExpressions.pderiv_denote_dx]
-    change pderiv 0 (TransitiveBivariateExpressions.denote
+      ← PolynomialEncoding.BivariateExpressions.pderiv_denote_dx]
+    change pderiv 0 (PolynomialEncoding.BivariateExpressions.denote
       (fun i => C (DifferentialData.baseCoefficients a b c d e f i)) x y
       TransitiveCovariants.IdentityData.HData)=_
     rw [DifferentialData.H_binding]
-  have hhy : TransitiveBivariateExpressions.denote (fun i => C (v i)) x y
+  have hhy : PolynomialEncoding.BivariateExpressions.denote (fun i => C (v i)) x y
       DifferentialData.HyData=pderiv 1 (Hpoly a b c d e f) := by
     rw [← DifferentialData.Hy_generated,
-      ← TransitiveBivariateExpressions.pderiv_denote_dy]
-    change pderiv 1 (TransitiveBivariateExpressions.denote
+      ← PolynomialEncoding.BivariateExpressions.pderiv_denote_dy]
+    change pderiv 1 (PolynomialEncoding.BivariateExpressions.denote
       (fun i => C (DifferentialData.baseCoefficients a b c d e f i)) x y
       TransitiveCovariants.IdentityData.HData)=_
     rw [DifferentialData.H_binding]
-  have hqx : TransitiveBivariateExpressions.denote (fun i => C (v i)) x y
+  have hqx : PolynomialEncoding.BivariateExpressions.denote (fun i => C (v i)) x y
       DifferentialData.ThetaxData=pderiv 0 (Thetapoly a b c d e f) := by
     rw [← DifferentialData.Thetax_generated,
-      ← TransitiveBivariateExpressions.pderiv_denote_dx]
-    change pderiv 0 (TransitiveBivariateExpressions.denote
+      ← PolynomialEncoding.BivariateExpressions.pderiv_denote_dx]
+    change pderiv 0 (PolynomialEncoding.BivariateExpressions.denote
       (fun i => C (DifferentialData.baseCoefficients a b c d e f i)) x y
       TransitiveCovariants.IdentityData.ThetaData)=_
     rw [DifferentialData.Theta_binding]
-  have hqy : TransitiveBivariateExpressions.denote (fun i => C (v i)) x y
+  have hqy : PolynomialEncoding.BivariateExpressions.denote (fun i => C (v i)) x y
       DifferentialData.ThetayData=pderiv 1 (Thetapoly a b c d e f) := by
     rw [← DifferentialData.Thetay_generated,
-      ← TransitiveBivariateExpressions.pderiv_denote_dy]
-    change pderiv 1 (TransitiveBivariateExpressions.denote
+      ← PolynomialEncoding.BivariateExpressions.pderiv_denote_dy]
+    change pderiv 1 (PolynomialEncoding.BivariateExpressions.denote
       (fun i => C (DifferentialData.baseCoefficients a b c d e f i)) x y
       TransitiveCovariants.IdentityData.ThetaData)=_
     rw [DifferentialData.Theta_binding]

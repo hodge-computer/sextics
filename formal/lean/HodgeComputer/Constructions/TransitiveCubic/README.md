@@ -18,7 +18,7 @@ Import `HodgeComputer.Constructions.TransitiveCubic` for the covariant library, 
 - `Map` supplies the invariant-differential identity for the rational map `xi=Theta/H²`, `eta=−J/(2H³)`, with its nonzero-denominator hypotheses.
 - `Functorial` transports the polynomial covariants through ring homomorphisms; `Diagonal` provides a useful diagonal specialization.
 
-`ReflectionData`, `IdentityData`, `IdentityProducts`, `IdentityEvaluation`, `CoefficientsA`–`CoefficientsH`, and `Differential` contain the exact coefficient proofs. `Kronecker`, `GradeCheck`, `EncodingCheck`, `SignedExpressions`, `BivariateExpressions`, `BivariateDifferentiation`, and `PolynomialDigitCheck` justify their finite polynomial encodings. These are proof infrastructure for the stated identities, not numerical samples or additional geometric assumptions.
+`ReflectionData`, `IdentityData`, `IdentityProducts`, `IdentityEvaluation`, `CoefficientsA`–`CoefficientsH`, and `Differential` contain the exact coefficient proofs. `Kronecker`, `GradeCheck`, and `EncodingCheck`, together with the shared [PolynomialEncoding](../PolynomialEncoding/README.md) modules, justify their finite polynomial encodings. These are proof infrastructure for the stated identities, not numerical samples or additional geometric assumptions.
 
 The normalization is
 

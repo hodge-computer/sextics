@@ -35,7 +35,7 @@ def ThetaJetpoly (a b c d e f k : K) : Affine K :=
 def JJetpoly (a b c d e f k : K) : Affine K :=
   JJet (C a) (C b) (C c) (C d) (C e) (C f) (C k) x y 1
 namespace DifferentialData
-open TransitiveSignedExpressions TransitiveBivariateExpressions IdentityData
+open PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions IdentityData
 def baseCoefficients (a b c d e f : K) : ℕ → K :=
   fun i => match i with | 0 => a | 1 => b | 2 => c | 3 => d | 4 => e | 5 => f | _ => 0
 lemma U_binding (a b c d e f : K) :

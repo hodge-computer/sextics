@@ -1,5 +1,5 @@
 import HodgeComputer.Constructions.TransitiveCubic.GradeCheck
-import HodgeComputer.Constructions.TransitiveCubic.PolynomialDigitCheck
+import HodgeComputer.Constructions.PolynomialEncoding.PolynomialDigitCheck
 
 /-! A deterministic coefficient-identity certificate. The numerical equality
 is used only after proving both the diagonal weight and a coefficient bound.
@@ -7,7 +7,7 @@ All proof obligations are ordinary kernel-checkable propositions.
 Prepared with OpenAI Codex assistance. -/
 noncomputable section
 namespace TransitiveCubicEncodingCheck
-open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveCubicKronecker
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions TransitiveCubicKronecker
 open TransitiveCubicGradeCheck MvPolynomial
 
 def value (b : ℕ) (i : ℕ) : ℕ :=
@@ -58,7 +58,7 @@ theorem encoded_identity (e f : Expr) (w : Grade) (b : ℕ)
   have hew := grade_sound e w he
   have hfw := grade_sound f w hf
   apply encode_injective_on_grade w hw p q (hew.1.add hfw.2) (hfw.1.add hew.2)
-  apply TransitivePolynomialDigits.eval_injective_bounded b hb
+  apply PolynomialEncoding.PolynomialDigits.eval_injective_bounded b hb
   · change evaluation 1 p<b
     have he1 := congrArg Prod.fst (evaluation_parts 1 e)
     have hf2 := congrArg Prod.snd (evaluation_parts 1 f)

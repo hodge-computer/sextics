@@ -8,7 +8,7 @@ import HodgeComputer.Constructions.CyclicCubic.CoefficientsG
 import HodgeComputer.Constructions.CyclicCubic.CoefficientsH
 import HodgeComputer.Constructions.CyclicCubic.IdentityEvaluation
 namespace CycleCovariants.IdentityData
-open Lean.Grind.CommRing CycleSignedExpressions CycleBivariateExpressions
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 open CycleCovariants.Reflection
 set_option maxRecDepth 131072
 set_option maxHeartbeats 4000000

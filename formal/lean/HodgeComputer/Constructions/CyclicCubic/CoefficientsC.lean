@@ -1,7 +1,7 @@
 import HodgeComputer.Constructions.CyclicCubic.IdentityData
 import HodgeComputer.Constructions.CyclicCubic.EncodingCheck
 namespace CycleCovariants.IdentityData
-open Lean.Grind.CommRing CycleSignedExpressions CycleCubicEncodingCheck
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions CycleCubicEncodingCheck
 set_option maxRecDepth 131072
 set_option maxHeartbeats 16000000
 theorem coefficient_9_6 {K : Type*} [CommRing K] (v : ℕ → K) :

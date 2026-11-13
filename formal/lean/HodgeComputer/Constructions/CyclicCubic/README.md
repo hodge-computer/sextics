@@ -15,7 +15,7 @@ Import `HodgeComputer.Constructions.CyclicCubic`, or the individual modules. Dec
 - `Syzygy` proves the full polynomial identity, including the multiple of the cubic before restriction to its zero set.
 - `Map` proves `CycleCubicMap.differential` for the rational map `xi = Theta/H²`, `eta = -J/(2H³)`, with explicit nonvanishing and derivation hypotheses.
 - `Functorial` and `Diagonal` supply coefficient substitution and diagonal specializations.
-- `CoefficientsA`–`CoefficientsH` and the encoding modules contain the exact coefficient proofs supporting these theorems.
+- `CoefficientsA`–`CoefficientsH` and the encoding modules contain the exact coefficient proofs supporting these theorems. The family-independent encodings are the shared [PolynomialEncoding](../PolynomialEncoding/README.md) modules.
 
 The [transitive cubic](../TransitiveCubic/README.md) has `f x²z` in place of `f z²x`; its covariants are different. Matching file shapes do not identify these two families.
 

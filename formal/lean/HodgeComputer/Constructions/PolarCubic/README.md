@@ -17,6 +17,6 @@ Import `HodgeComputer.Constructions.PolarCubic` or an individual module:
 - `Differential` proves the cleared invariant-differential identities and their first-order versions.
 - `Map` proves `PolarCubicMap.differential` with explicit normal-chart and nonvanishing hypotheses.
 - `Functorial` transports the expressions through coefficient maps.
-- `CoefficientExpressions`, `Bivariate`, `Encoding`, the identity tables, `CoefficientsA`–`CoefficientsD` and differential tables implement the exact coefficient proofs. They reuse the common polynomial encodings from `TransitiveCubic`; their coefficients are different.
+- `CoefficientExpressions`, `Bivariate`, `Encoding`, the identity tables, `CoefficientsA`–`CoefficientsD` and differential tables implement the exact coefficient proofs. They use the shared [PolynomialEncoding](../PolynomialEncoding/README.md) modules; their coefficients are different.
 
 Square-zero evaluation and the subsequent first-variation calculus are shared with [ResidueTransport.FirstJets](../ResidueTransport/FirstJets.lean). The application still supplies the physical coefficients, Jacobian family, primitive, normal correction and balanced source identity. A first-order identity is not a full polynomial identity at arbitrary nonzero `k`.

@@ -34,7 +34,7 @@ end PolarCubic
 
 namespace PolarCovariants
 variable {K : Type*} [CommRing K]
-open TransitiveSignedExpressions ExpressionData
+open PolynomialEncoding.SignedExpressions ExpressionData
 noncomputable def coefficientContext (a b c d e f : K) : ℕ → K :=
   fun i => if i=0 then a else if i=1 then b else if i=2 then c else
     if i=3 then d else if i=4 then e else if i=5 then f else 0

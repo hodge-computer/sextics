@@ -1,7 +1,7 @@
 import HodgeComputer.Constructions.CyclicCubic.ReflectionData
-import HodgeComputer.Constructions.CyclicCubic.BivariateExpressions
+import HodgeComputer.Constructions.PolynomialEncoding.BivariateExpressions
 namespace CycleCovariants.IdentityData
-open Lean.Grind.CommRing CycleCovariants.Reflection CycleBivariateExpressions
+open Lean.Grind.CommRing CycleCovariants.Reflection PolynomialEncoding.BivariateExpressions
 set_option maxRecDepth 131072
 set_option maxHeartbeats 16000000
 def H_3_0 : Expr := HCoeff300Expr

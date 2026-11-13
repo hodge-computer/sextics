@@ -1,8 +1,8 @@
 import HodgeComputer.Constructions.PolarCubic.Covariants
-import HodgeComputer.Constructions.TransitiveCubic.BivariateExpressions
-import HodgeComputer.Constructions.TransitiveCubic.BivariateDifferentiation
+import HodgeComputer.Constructions.PolynomialEncoding.BivariateExpressions
+import HodgeComputer.Constructions.PolynomialEncoding.BivariateDifferentiation
 namespace PolarCovariants.IdentityData
-open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressions
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 set_option maxRecDepth 131072
 set_option maxHeartbeats 32000000
 variable {K : Type*} [CommRing K]

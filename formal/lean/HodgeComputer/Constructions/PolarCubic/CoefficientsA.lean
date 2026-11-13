@@ -1,7 +1,7 @@
 import HodgeComputer.Constructions.PolarCubic.IdentityData
 import HodgeComputer.Constructions.PolarCubic.Encoding
 namespace PolarCovariants.IdentityData
-open PolarCubicEncodingCheck TransitiveSignedExpressions
+open PolarCubicEncodingCheck PolynomialEncoding.SignedExpressions
 set_option maxRecDepth 131072
 set_option maxHeartbeats 32000000
 theorem coefficient0_18_0 {K : Type*} [CommRing K] (v : ℕ → K) :
