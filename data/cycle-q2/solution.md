@@ -1,5 +1,94 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Concrete geometric objects and regular forms — 12 November 2026
+
+**This continuation implements further prerequisites of the written proof.
+It does not close `Submission.missing_geometric_existence`.** The new Lean
+source has complete proof bodies without additional admissions, but its
+elaboration, compilation, and kernel replay remain deferred. The preceding
+local modular compilation fixes from `0da28f2391f2353a75bb3bd14bd4f24fb6dd024b`
+are retained.
+
+Four helpers now construct specific objects appearing in the remaining
+comparisons:
+
+| Helper | Construction in this continuation | Boundary of the result |
+| --- | --- | --- |
+| [GeometricSerre.lean](GeometricSerre.lean) | An injective degree-nine Koszul boundary, its equivalence onto its actual Čech image, a unique normalized trace there, and a cubic pairing on genuine normal Čech classes. The pairing is bound to the literal connecting fraction and its nonzero ambient test. | The image is not defined to be projective cohomology. Twisted projective sheaves, the projective Čech comparison and Koszul surjectivity, geometric Serre trace, and semiregularity remain to be constructed. |
+| [GeometricVariation.lean](GeometricVariation.lean) | The actual degree-six and degree-twelve character-one Fermat Jacobian components, their socle-trace duality, the resulting 66-dimensional paired graded model, and Higgs operators given by actual quotient multiplication. Compatible graded self-adjoint projectors are trivial. | This is the algebraic graded fiber. Its identification with a polarized geometric variation, connection, Hodge filtration and residue pairing is still required. |
+| [GeometricAffineScheme.lean](GeometricAffineScheme.lean) | A genuine smooth affine scheme obtained by inverting the actual normal partial, its open immersion into the protected affine hypersurface, a basis of its actual Kähler module, and the same constructions on further principal opens. | It supplies the geometric open and its differential basis, but not a Betti comparison or divisor-support vanishing. |
+| [GeometricRegularDeRham.lean](GeometricRegularDeRham.lean) | Genuine regular Kähler and exterior forms on these concrete opens, their bounded de Rham complex, its cochain map to the rational complex, its fourth-homology quotient, and the protected residue expressed over the regular coordinate ring. | The analytic comparison and the geometric proof that the residue class vanishes on a suitable open remain necessary. |
+
+### Actual smooth opens
+
+Let \(R=\mathbb C[x_0,\ldots,x_4]/(f)\), with the existing protected
+dehomogenized polynomial \(f\), and let \(g=[\partial f/\partial x_0]\).
+The new open is the actual scheme \(\operatorname{Spec}(R[g^{-1}])\).
+Its presentation combines the hypersurface equation with the localization
+equation. The chosen Jacobian determinant is \(g^2\), which is a unit in
+that coordinate ring. The Mathlib submersive-presentation construction
+therefore supplies standard smoothness of relative dimension four and the
+genuine regular differential basis
+\(dx_1,dx_2,dx_3,dx_4\).
+
+The same presentation method gives these bases on
+\(\operatorname{Spec}(R[g^{-1}][s^{-1}])\). For \(s\ne0\), that open is
+nonempty. This extra localization matters: the written support argument
+must remove its support divisor, and does not assert that the residue
+already vanishes on the entire initial Jacobian open.
+
+The regular-to-generic restriction is constructed on the actual Kähler
+and exterior modules and proved to commute with each differential. The
+associated sheaves of these form modules are also constructed, with the
+canonical identification of their global sections on the affine scheme.
+Exterior differentiation is complex-linear, so constructing its sheaf map
+requires more than the tilde functor on coordinate-ring-linear maps.
+The fixed regular residue maps to the existing protected rational residue,
+including its normal-density factor and sign. The new specialization in
+`GeometricExistence` therefore uses a concrete regular class and a proved
+source-binding identity. It no longer asks a caller to supply an arbitrary
+regular class, a map to the generic quotient, or that binding equation.
+An injective geometric comparison on the same chosen open and its
+support-derived zero class are still required.
+
+### Actual normal pairing and actual Jacobian components
+
+The new normal pairing is defined after passing to genuine normal Čech
+classes. Multiplication by a homogeneous cubic lands in the image of the
+degree-nine boundary, whose normalized trace is constructed from the
+existing quotient trace and a proved linear equivalence. Consequently,
+changing a representative by any actual localization coboundary leaves
+the pairing unchanged. For the existing normal connecting class its value
+is exactly the quotient trace of \((kL-A)\sigma\), with the sign fixed by
+the local lift calculation. The sparse seed condition \(r^3=2\) remains
+explicit; no identification with literal complex \(r=57\) is made.
+
+For the Higgs calculation, complementary monomials in the actual socle
+pair the degree-twelve, character-one piece with the dual of the
+degree-six, character-one piece. The trace pairing is proved to be the
+Kronecker pairing on those bases. Multiplication by an actual invariant
+degree-six tangent class is then intertwined with the paired Higgs
+operators. Their projector result is a theorem about those concrete
+graded modules; it does not declare them to be a geometric Hodge
+structure by definition.
+
+### Remaining global construction
+
+The written moving-curve argument still requires a formal implementation
+of the surface Hodge locus, its relative line bundle and effective curves,
+and the Abel--Jacobi differential and algebraization. The subsequent
+variation and supported-correspondence construction also remains open.
+Finally, the regular algebraic class must be compared with cohomology on
+the same complex affine open, and its zero restriction must be proved from
+that support construction. These geometric conclusions are not assumptions
+silently added to the final theorem.
+
+All four new helpers are imported by the submission. The proposal contains
+**59 Lean modules and 61 total proposal files**. The protected target and
+the original final admission are unchanged. Source inspection and static
+dependency checks are distinct from Lean validation; no completed
+certificate is claimed for this checkpoint.
+
 ## Source-only geometric formalization — 12 November 2026
 
 **This continuation adds Lean proof source, with compilation deliberately
@@ -41,7 +130,7 @@ literal-57 family without identifying 57 with a cube root of two. The zero
 cubic is a point of the full parameter space; it is not claimed to belong to
 the normalized incidence chart with leading cubic coefficient one.
 
-The active proposal now has **55 Lean modules and 57 total proposal files**.
+At this checkpoint the proposal had **55 Lean modules and 57 total proposal files**.
 All five helpers are reachable from `Solution.lean`. The existing theorem
 bodies are preserved, including the one explicit admission in
 `Submission.missing_geometric_existence`; the new helpers add none.
