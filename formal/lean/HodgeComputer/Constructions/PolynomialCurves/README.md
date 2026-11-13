@@ -9,7 +9,7 @@ They build on the maintained
 disclose AI assistance; this extraction was prepared with Codex assistance for
 `benediamond`.
 
-The original namespaces and attribution are retained. The reflection-coupled and deformed-conic applications import these helpers directly; their incidence data and target binding remain in the instance folders.
+The original namespaces and attribution are retained. The reflection-coupled and deformed-conic applications import these helpers directly; their incidence data and target binding remain in the instance folders. `WeierstrassConic` is extracted from `hodgepodgeconjecture`'s cyclic cubic construction ([PR #165](https://github.com/hodge-computer/sextics/pull/165)), prepared with OpenAI Codex assistance; the four cubic applications import it.
 
 | Module | Interface | Application obligation |
 | --- | --- | --- |
@@ -17,6 +17,7 @@ The original namespaces and attribution are retained. The reflection-coupled and
 | `ArithmeticLifting` | `ReflectionCoupledFano.anchored_polynomial_family_injective` | Independent constant terms, and a nonzero distinguished polynomial coordinate with zero constant term. The coordinate need not be linear. |
 | `OpenIncidence` | `ReflectionCoupledFano.openSquare_exists_fieldFactor` | The same incidence data, with one chosen coordinate also a unit at the seed. The finite generic solution preserves both units. |
 | `ComplexPoint` | `DeformedConic.complex_point_of_etale_nontrivial` | Nontriviality of the Jacobian-localized integral square incidence. A finite field factor embeds into the algebraically closed complex field. |
+| `WeierstrassConic` | `WeierstrassConic.curve`, `coefficientDeriv`, `curve_coefficientDeriv`, `curveEval_eq_valueCurve` | The equation that the curve `(r, x, y)` of degrees `(2, 4, 6)` is to satisfy, its gradient, and a seed with invertible coefficient Jacobian. The module fixes the thirteen coefficient variables and their derivations only. |
 | `NormalizedCertificate` | `ReflectionCoupledFano.normalized_data_from_polynomial_family` | A domain for the six-variable hypersurface, a finite extension of its function field, a polynomial normal, commuting derivations, and a nonzero normal/tangent determinant. |
 
 The last theorem supplies unrestricted normalized polynomial data with a legal
