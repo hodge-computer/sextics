@@ -15,7 +15,6 @@ noncomputable section
 namespace DeformedConic
 open HoldoutConstruction
 
-set_option backward.isDefEq.respectTransparency false in
 /-- A nonsingular integral square system with a point in some characteristic
 has a nonsingular complex point. Flatness supplies the generic-fiber step;
 algebraic closedness then embeds the finite field factor in the complexes. -/
@@ -42,17 +41,17 @@ theorem complex_point_of_etale_nontrivial {n : ℕ}
         simp
       · intro i
         simp [v]
-        change f ((MvPolynomial.aeval (R := ℤ) (squareGenericCoordinates eqs I))
-          (MvPolynomial.X i)) = f (squareGenericCoordinates eqs I i)
-        rw [MvPolynomial.aeval_X]
     exact congrArg (fun g : MvPolynomial (Fin n) ℤ →+* ℂ => g P) hh
   refine ⟨v,fun i => ?_,?_⟩
   · rw [← hm,heq,map_zero]
   · have hu := hjac.map f.toRingHom
-    rw [RingHom.map_det] at hu
-    change IsUnit (Matrix.det (fun i j => f (MvPolynomial.aeval
-      (squareGenericCoordinates eqs I) (MvPolynomial.pderiv i (eqs j))))) at hu
-    simpa only [hm] using hu
+    have hdet : f.toRingHom (Matrix.det (fun i j => MvPolynomial.aeval
+        (squareGenericCoordinates eqs I) (MvPolynomial.pderiv i (eqs j)))) =
+        Matrix.det (fun i j => MvPolynomial.aeval v (MvPolynomial.pderiv i (eqs j))) :=
+      (RingHom.map_det f.toRingHom _).trans (congrArg Matrix.det (by
+        ext i j
+        exact hm _))
+    exact (congrArg IsUnit hdet).mp hu
 
 
 end DeformedConic

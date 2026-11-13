@@ -350,32 +350,40 @@ def curveCoefficientDerivation (D : Derivation ℤ E E) :
     Derivation ℤ (CurveFunctionField E) (CurveFunctionField E) :=
   extendRingDerivation (L := CurveFunctionField E) (coefficientPolynomialDerivation D)
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp] theorem curveTimeDerivation_coefficient (a : E) :
     curveTimeDerivation (algebraMap E (CurveFunctionField E) a) = 0 := by
   change curveTimeDerivation
     (algebraMap (Polynomial E) (CurveFunctionField E) (Polynomial.C a)) = 0
-  simp [curveTimeDerivation]
+  refine (extendRingDerivation_apply (L := CurveFunctionField E)
+    (timePolynomialDerivation (E := E)) (Polynomial.C a)).trans ?_
+  change algebraMap (Polynomial E) (CurveFunctionField E)
+    (Polynomial.derivative (Polynomial.C a)) = 0
+  rw [Polynomial.derivative_C, map_zero]
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp] theorem curveTimeDerivation_time :
     curveTimeDerivation (curveTime (E := E)) = 1 := by
-  simp [curveTimeDerivation, curveTime]
+  refine (extendRingDerivation_apply (L := CurveFunctionField E)
+    (timePolynomialDerivation (E := E)) Polynomial.X).trans ?_
+  change algebraMap (Polynomial E) (CurveFunctionField E)
+    (Polynomial.derivative Polynomial.X) = 1
+  rw [Polynomial.derivative_X, map_one]
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp] theorem curveCoefficientDerivation_coefficient (D : Derivation ℤ E E) (a : E) :
     curveCoefficientDerivation D (algebraMap E (CurveFunctionField E) a) =
       algebraMap E (CurveFunctionField E) (D a) := by
   change curveCoefficientDerivation D
     (algebraMap (Polynomial E) (CurveFunctionField E) (Polynomial.C a)) = _
-  simp only [curveCoefficientDerivation, extendRingDerivation_apply,
-    coefficientPolynomialDerivation_C]
-  rfl
+  refine (extendRingDerivation_apply (L := CurveFunctionField E)
+    (coefficientPolynomialDerivation D) (Polynomial.C a)).trans ?_
+  exact congrArg (algebraMap (Polynomial E) (CurveFunctionField E))
+    (coefficientPolynomialDerivation_C D a)
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp] theorem curveCoefficientDerivation_time (D : Derivation ℤ E E) :
     curveCoefficientDerivation D (curveTime (E := E)) = 0 := by
-  simp [curveCoefficientDerivation, curveTime]
+  refine (extendRingDerivation_apply (L := CurveFunctionField E)
+    (coefficientPolynomialDerivation D) Polynomial.X).trans ?_
+  exact (congrArg (algebraMap (Polynomial E) (CurveFunctionField E))
+    (coefficientPolynomialDerivation_X D)).trans (map_zero _)
 
 theorem curveTime_coefficient_commute (D : Derivation ℤ E E) :
     Function.Commute curveTimeDerivation (curveCoefficientDerivation D) :=
