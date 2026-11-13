@@ -45,11 +45,22 @@ and commutation, and the equation and determinant-weighted source identities.
 degrees, and protected pole parameter. Polynomial equivariance is not itself
 a formalization of residues or cohomology.
 
-Classically, smoothness follows by choosing a maximum-modulus coordinate
+The exact affine gradient condition is now proved in
+[GeometricFormalInputs.lean](GeometricFormalInputs.lean), by choosing a maximum-modulus coordinate
 \(M>0\) at a hypothetical nonzero gradient zero. The pure derivative has
 modulus \(6M^5\); mixed derivatives contribute at most \(2M^5\) for an
-\(X\)-coordinate and \(M^5\) for a \(Y\)-coordinate. This estimate is not
-yet encoded in the new Lean helpers.
+\(X\)-coordinate and \(M^5\) for a \(Y\)-coordinate. The theorem is bound
+to `HodgeSubmission.F` and proves that every nonzero affine representative
+has a nonzero partial derivative. A formal geometric Jacobian criterion is
+still needed when using this fact as scheme or analytic smoothness.
+
+The same new module proves `Irreducible HodgeSubmission.F`, its primality,
+and that its hypersurface quotient is a domain. This proof is purely
+algebraic: view the equation as monic in \(X_0\), specialize
+\((X_1,X_2,Y_0,Y_1,Y_2)=(0,0,t+1,0,i)\), and apply Eisenstein at \(t\)
+to \(X_0^6+(t+1)^6-1\). It reuses the existing proved
+`HoldoutConstruction.irreducible_power_add_constant` and mathlib's monic
+specialization theorem.
 
 Chapter 3D.5 supplies
 \[
@@ -108,6 +119,47 @@ they do not imply divisor support without the geometric argument.
 
 ## Active proof boundary
 
+### New formal inputs
+
+`GeometricFormalInputs.lean` consolidates the additional formalization into
+one source file, preserving all of the earlier route within the proposal's
+64-file limit. Besides the exact gradient and irreducibility theorems, it
+contains the following developments.
+
+- **Finite Higgs calculation.** The 33 character-one monomials and 35
+  invariant tangent monomials are checked against the weighted socle
+  `(4,4,4,4,1)`. The monomial lists, completeness, and multiplication table
+  have passed kernel replay. The scalar-commutant proof and its idempotent
+  corollary also compile and pass kernel replay. They use ordinary proof terms for
+  1,088 matrix-entry equalities. Geometric identification with the actual
+  Higgs field remains a separate obligation.
+- **Finite averaging.** Verified certificates can be combined over the
+  product of their denominators, with explicit numerator and quotient sums.
+  All grading and coprimality conditions are proved. Weights summing to one
+  retain a common source. This supplies the algebraic averaging step; it
+  does not establish that the initial certificates exist.
+- **Actual rational differential calculus.** Coordinate derivations on the
+  fraction field are constructed using the accepted fraction-derivation
+  library. Their action, quotient-rule divergence, and cleared defect are
+  identified with the protected polynomial expressions.
+- **Legal residual-denominator cancellation.** If the rational defect is
+  `F^(q+1) * P/T` with `T` coprime to `F`, Euclid's lemma produces the
+  polynomial quotient required by `Verify`. This proves the algebraic
+  clearing step, while filtered de Rham existence and pole control remain
+  unformalized.
+- **Square denominators lose no generality.** For an irreducible sextic,
+  `HasCertificate F 2 A` is equivalent to existence of a homogeneous
+  `S`, with `F` not dividing `S`, and homogeneous `N` of degree
+  `2 * degree(S) + 7` satisfying the localized equation for `N/S^2`.
+  The forward proof rewrites `N/D` as `(D*N)/D^2`. This is an equivalence
+  with the original goal, not a proof of either existential statement.
+
+The existing `Normalization.lean` already contains same-denominator sextic
+normalization. Rechecking that reduction does not discharge any new
+existence obligation.
+
+### Remaining existence theorem
+
 [Solution.lean](Solution.lean) defines
 `CycleQ2Nonconstructive.GeometricExistenceBridge`, taking the separated
 `AlgebraicInputs` and `FiniteSeedInputs` to the unchanged `HasCertificate`
@@ -119,15 +171,38 @@ The outstanding chain is:
 
 | Obligation | Status of this revision |
 | --- | --- |
-| Smoothness and geometric setup | Classical estimate; not encoded here. |
+| Smoothness and geometric setup | Exact gradient condition and absolute irreducibility proved; geometric Jacobian criterion and setup remain. |
 | Trace-algebra binding and obstruction/derivative formulas | Finite matrix data separated; geometric binding not formalized. |
 | Hodge-locus integration to moving curves | No Lean implementation here. |
-| Higgs criterion and spanning of the invariant variation | Earlier finite calculations do not formalize the geometric statement. |
+| Higgs criterion and spanning of the invariant variation | Complete finite monomial matrix calculation and scalar-idempotent consequence proved; geometric Higgs comparison and projector argument remain. |
 | Supported projector and specialization | Correspondence, polarization and specialization proofs required. |
 | Paired-sign quotient and relative support transfer | Quotient, Leray and boundary proofs required. |
-| Support-to-certificate bridge | Filtered de Rham strictness, pole bounds, Euler sequence and clearing required. |
+| Support-to-certificate bridge | Rational derivations, homogeneity bookkeeping and legal clearing proved; filtered de Rham strictness, pole bounds and Euler-sequence existence remain. |
 
-This is a draft refactor and port of finite algebra, not completion of that chain.
+The exact unresolved assertion can now be stated without imposing an
+additional denominator ansatz:
+
+```lean
+∃ (e : ℕ) (S : HodgeComputer.AmbientPoly 5)
+    (N : Fin 6 → HodgeComputer.AmbientPoly 5),
+  S.IsHomogeneous e ∧ ¬ HodgeSubmission.F ∣ S ∧
+  (∀ i, HodgeComputer.Homogeneous (N i) (2 * (e : ℤ) + 7)) ∧
+  CycleQ2Bridge.LocalizedEquation
+    HodgeSubmission.F HodgeSubmission.A 2 (S ^ 2) N
+```
+
+`CycleQ2FormalInputs.protected_certificate_iff_square_primitive` binds this
+equivalence to the protected target. No proof of this existential is supplied
+by the new helpers. In the intended nonconstructive route, geometric support
+and the filtered de Rham argument must provide it.
+
+The existing polynomial-curve constructors require polynomial coordinates,
+normal fields, or densities in a parameter. An algebraic Hilbert parameter
+curve alone does not establish those hypotheses. Likewise, the existing
+arithmetic-lifting theorem needs an identified square polynomial incidence
+system with a nonsingular seed; the Noether--Lefschetz rank matrix is not
+automatically such an incidence Jacobian. These constructions therefore do
+not yet close this obligation.
 
 ## Preserved current route
 
@@ -143,18 +218,38 @@ verifier, workflow, generated file, or proof-manifest field is changed.
 
 ## Verification
 
-The new sources have **not been Lean-compiled in the authoring runtime**.
-No Lean/Lake executable was present; the direct toolchain fetch failed at DNS
-resolution. No kernel-replay or protected-acceptance pass is claimed, and
-historical checks of the old modules do not certify these sources.
+Lean 4.33.1 is now installed, and compilation uses the repository's pinned
+mathlib revision `0df444a360eaa60ab8c11dca51a86af692955474`. The original
+`Workspace`, `GeometricTarget`, and `GeometricSeed` modules compile and pass
+independent `leanchecker` replay. Minimal tactic fixes reduce the beta
+vector literals, finish the gamma ring identity, and explicitly expand the
+seed's matrix multiplication. Statements and numerical data are unchanged.
 
-Local exact arithmetic parses the formulas and Gaussian-rational arrays from
-the new Lean source, verifies the target weights and degrees, all 64 entries
-of \(MR=I_8\), all eight tangent-image entries, and rejection of a corrupted
-inverse. Static checks cover the exact theorem and unchanged manifest, one
-active admission, no admissions in the new helpers, allowed file names, and
-local explanation links. These checks are not Lean proofs. The proposal has
-63 permitted files, within the 64-file limit.
+The new exact gradient, irreducibility, finite averaging, and localized
+certificate bridge components also compile and pass kernel replay. Their
+printed dependencies are exactly `propext`, `Classical.choice`, and
+`Quot.sound`. The finite Higgs calculation, including the scalar-commutant
+and trivial-projector theorems, also passes both checks. The consolidated
+`Proposal.GeometricFormalInputs` module compiles and passes independent
+kernel replay, including its exact-target equivalence. Compilation took
+277.474 seconds with a 6 GiB development memory cap; replay took 31.292
+seconds. The new helper also passes the protected source-policy check.
+
+The checked consolidated source has SHA-256
+`c2feeabced7e719067869d48ea255cb375ab1b90621763285ef108617ff06156`.
+The unchanged protected target was generated from base commit
+`e3936ff366ae2302f21fb9e5730bbbd284c81d69`; the development began at PR head
+`c8a524e7b22ae9d6a1a3728ce3c081ddb01368d4`. The source comparison confirms
+that the protected instance and shared formal library still match that base.
+
+These are development compilation and kernel-replay checks, separate from
+the protected sandbox verifier. `Submission.certificate` still depends on
+the original admitted geometric bridge and is not an accepted certificate.
+The proposal has 64 permitted files. No protected equation, source, verifier,
+workflow, or proof-manifest field has been changed.
+
+The repository content build, record validation, and local-link/KaTeX checks
+also pass. These prose and record checks do not establish the certificate.
 
 ## Attribution
 

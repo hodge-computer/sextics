@@ -63,11 +63,13 @@ theorem beta_gamma_commute (ω : ℂ) (z : Fin 6 → ℂ) :
 
 theorem equationValue_beta (z : Fin 6 → ℂ) :
     equationValue (beta z) = equationValue z := by
-  norm_num [equationValue, beta] <;> ring
+  dsimp [equationValue, beta]
+  ring
 
 theorem sourceValue_beta (z : Fin 6 → ℂ) :
     sourceValue (beta z) = sourceValue z := by
-  norm_num [sourceValue, beta] <;> ring
+  dsimp [sourceValue, beta]
+  ring
 
 theorem equationValue_gamma (ω : ℂ) (hω : ω ^ 3 = 1) (z : Fin 6 → ℂ) :
     equationValue (gamma ω z) = equationValue z := by
@@ -85,7 +87,7 @@ theorem equationValue_gamma (ω : ℂ) (hω : ω ^ 3 = 1) (z : Fin 6 → ℂ) :
       _ = 1 := by rw [hω]; norm_num
   dsimp [equationValue, gamma]
   ring_nf
-  simp [hω, h6, h9, h12]
+  simp [hω, h6, h9, h12] <;> ring
 
 theorem sourceValue_gamma (ω : ℂ) (hω : ω ^ 3 = 1) (z : Fin 6 → ℂ) :
     sourceValue (gamma ω z) = ω * sourceValue z := by

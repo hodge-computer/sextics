@@ -44,6 +44,7 @@ def tangentImage : Fin 8 → ℂ := ![0, 0, 0, 0, 0, 0, 0, 2]
 set_option maxHeartbeats 4000000 in
 theorem seed_right_inverse : seedMatrix * seedRightInverse = 1 := by
   ext i j
+  rw [Matrix.mul_apply]
   fin_cases i <;> fin_cases j <;>
     norm_num [Matrix.mul_apply, Fin.sum_univ_succ, seedMatrix, seedRightInverse] <;>
     ring_nf <;> norm_num [Complex.I_sq]
