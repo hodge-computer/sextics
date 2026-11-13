@@ -21,8 +21,6 @@ The accepted [holdout-q2](../data/holdout-q2/solution.md) and [quadric-contact-b
 
 The 41 small explicit witnesses now share their assembly and legality interface. They still prove their own polynomial identities and bind the exact displayed tuple to the protected witness. Their contact, cofactor and norm interpretations are developed in [Chapter 2](../docs/02-explicit-constructions.md); a checked individual tuple is not a general existence theorem for that interpretation.
 
-For the Fermat sextic, [`Constructions.Fermat`](lean/HodgeComputer/Constructions/Fermat.lean) supplies the stronger theorem `HodgeComputer.Fermat.certificate`: every homogeneous odd source at `q = 1` or `q = 2` has a certificate. Its subset Euler construction and finite subset assertion are proved in Lean. The original `fermat-q2` application retains its own displayed witness.
-
 ## Construct primitives and clear them
 
 | Construction | Library | What remains with an application |
