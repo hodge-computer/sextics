@@ -11,7 +11,6 @@ Jacobian condition; transversality is not inferred from rank alone.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 set_option maxRecDepth 4096
 set_option maxHeartbeats 1000000
 namespace ReflectionCoupledFano

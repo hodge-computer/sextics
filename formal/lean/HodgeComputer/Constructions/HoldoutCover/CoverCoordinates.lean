@@ -12,7 +12,6 @@ account fqlx.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutConstruction
 

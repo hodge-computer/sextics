@@ -18,7 +18,6 @@ namespace HoldoutConicJacobian
 variable {K : Type*} [Field K]
 
 
-set_option backward.isDefEq.respectTransparency false
 
 def evenFactor (r : K) : K :=
   16*r^11 - 80*r^10 + 96*r^9 + 144*r^8 - 380*r^7 + 240*r^6 + 84*r^5 - 178*r^4 + 63*r^3 + 9*r^2 - 8*r + 1

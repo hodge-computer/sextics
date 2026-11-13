@@ -17,7 +17,6 @@ This module supplies reusable steps; it asserts no new instance certificate.
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedRationalResidue
 open Polynomial
 variable {K : Type*} [Field K]
@@ -72,7 +71,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 200000
 namespace CrossedEllipticInfinity
 open Polynomial CrossedRationalResidue CrossedElliptic
@@ -158,7 +156,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedEllipticInfinity
 open Polynomial CrossedRationalResidue CrossedElliptic
 variable {K : Type*} [Field K] [CharZero K]
@@ -217,7 +214,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedRationalResidue
 open Polynomial CrossedElliptic CrossedRationalCoefficientMap
 variable {K : Type*} [Field K] [CharZero K]
@@ -277,7 +273,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedEllipticInfinity
 open Polynomial CrossedElliptic CrossedRationalResidue CrossedEllipticTheta
 variable {K : Type*} [Field K] [CharZero K]
@@ -383,7 +378,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 200000
 namespace CrossedEllipticInfinity
 open Polynomial CrossedElliptic CrossedRationalResidue
@@ -496,7 +490,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 400000
 namespace CrossedElliptic
 open Polynomial CrossedRationalResidue CrossedEllipticTheta CrossedEllipticInfinity

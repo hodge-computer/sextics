@@ -3,7 +3,6 @@ namespace PolarCovariants.DifferentialData
 open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressions
 open PolarCovariants.IdentityData PolarCubicEncodingCheck ResidueFirstJets TrivSqZeroExt
 set_option linter.unusedSimpArgs false
-set_option backward.isDefEq.respectTransparency false
 set_option maxRecDepth 131072
 set_option maxHeartbeats 32000000
 variable {K : Type*} [CommRing K]

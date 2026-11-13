@@ -96,7 +96,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedMonicHypersurface
 open Polynomial HoldoutConstruction
 variable {K : Type*} [Field K] [CharZero K] {n : ℕ}
@@ -279,7 +278,6 @@ section
    in the square etale incidence. Uses fqlx's accepted generic incidence
    algebra and flat generic-fibre construction. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 open scoped TensorProduct
 namespace CrossedOpenIncidence
 open HoldoutConstruction

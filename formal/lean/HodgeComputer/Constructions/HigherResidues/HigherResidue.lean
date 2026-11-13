@@ -12,7 +12,6 @@ Prepared with OpenAI Codex assistance for contributor fqlx.
 noncomputable section
 set_option maxHeartbeats 4000000
 set_option maxRecDepth 100000
-set_option backward.isDefEq.respectTransparency false
 namespace SplitHigherResidue
 open HoldoutConstruction Polynomial
 open scoped BigOperators

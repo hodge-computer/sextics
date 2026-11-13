@@ -12,7 +12,6 @@ No continuity in the deformation coefficient is assumed: it remains 1/14.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 800000
 namespace DeformedConic
 open HoldoutConstruction

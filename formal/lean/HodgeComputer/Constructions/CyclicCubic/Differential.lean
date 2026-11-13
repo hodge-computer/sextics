@@ -10,7 +10,6 @@ namespace CycleCovariants
 open MvPolynomial
 set_option maxRecDepth 4096
 set_option maxHeartbeats 2000000
-set_option backward.isDefEq.respectTransparency false
 variable {K : Type*} [CommRing K]
 abbrev Affine (K : Type*) [CommRing K] := MvPolynomial (Fin 2) K
 local notation "x" => (X (R := K) (0:Fin 2))

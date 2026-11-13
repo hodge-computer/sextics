@@ -247,7 +247,6 @@ quotient rule and preserve the polynomial subring of the function field.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutConstruction
 

@@ -17,7 +17,6 @@ This module supplies reusable steps; it asserts no new instance certificate.
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open Polynomial CrossedRationalResidue
 variable {K : Type*} [Field K] [CharZero K]
@@ -113,7 +112,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open Polynomial CrossedRationalResidue
 variable {K : Type*} [Field K] [CharZero K]
@@ -211,7 +209,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 800000
 namespace CrossedElliptic
 open Polynomial CrossedRationalResidue
@@ -302,7 +299,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open Polynomial CrossedRationalResidue CrossedEllipticTranslation
 variable {K : Type*} [Field K] [CharZero K]
@@ -380,7 +376,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 400000
 namespace CrossedElliptic
 open Polynomial CrossedRationalResidue CrossedEllipticTranslation
@@ -462,7 +457,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open Polynomial HoldoutConstruction
 variable {K : Type*} [Field K] [CharZero K]
@@ -522,7 +516,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedRationalResidue
 open Polynomial CrossedElliptic
 variable {K : Type*} [Field K] [CharZero K]

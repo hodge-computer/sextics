@@ -18,7 +18,6 @@ This file alone asserts neither nonsingularity nor a Hodge certificate.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutConicIncidence
 
@@ -311,7 +310,6 @@ section
 /-! Scalar evaluation and degree bounds for the anchored coefficient family. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutConicIncidence
 
@@ -388,7 +386,6 @@ In particular, a seed in a residue field evaluates the very same polynomial
 presentation that is used over the generic coefficient field. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutConicIncidence
 
