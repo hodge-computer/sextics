@@ -108,7 +108,8 @@ selection for a committed change. Changes to accepted Lean sources, manifests,
 witnesses, or targets select those instances; shared Lean changes select their
 dependents and applications. Verifier changes and non-Lean changes under
 `formal/lean/` select the full shared library and its accepted applications.
-This includes toolchain and dependency pins, as well as READMEs in that directory.
+This includes toolchain and dependency pins. Markdown files in that directory
+are documentation and select nothing.
 
 ## Visualization maintenance
 
