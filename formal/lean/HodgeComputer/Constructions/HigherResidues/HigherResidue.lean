@@ -198,11 +198,12 @@ theorem linear_thickening_density_identity (D : ι → Derivation ℤ K K)
   rw [hneg,hdiv]
   linear_combination r₀*hJ₂+(r₁+advect D w r₀-3*a*r₀)*hJ₁
 
-set_option backward.isDefEq.respectTransparency false in
 theorem determinant_linear_coeff_two_four {K : Type*} [Field K] [CharZero K] (W : Matrix (Fin 4) (Fin 4) K) :
     2*(Matrix.det (fun (i j : Fin 4) => (Polynomial.C (if i=j then (1:K) else 0)+
       Polynomial.C (W i j)*Polynomial.X))).coeff 2 =
       (∑ i, W i i)^2-(∑ i, ∑ j, W i j*W j i) := by
+  change 2*(Matrix.det (Matrix.of fun (i j : Fin 4) => (Polynomial.C (if i=j then (1:K) else 0)+
+    Polynomial.C (W i j)*Polynomial.X))).coeff 2 = _
   rw [Matrix.det_succ_row_zero]
   simp [Fin.sum_univ_succ, Matrix.submatrix_apply, Matrix.det_fin_three,
     Fin.succAbove, Polynomial.coeff_mul, Finset.Nat.sum_antidiagonal_succ]
