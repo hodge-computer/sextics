@@ -4,6 +4,9 @@ import Proposal.GeometricProjector
 import Proposal.GeometricExistence
 import Proposal.GeometricSerre
 import Proposal.GeometricVariation
+import Proposal.GeometricConeCech
+import Proposal.GeometricPrincipalRestriction
+import Proposal.GeometricProjectiveCurve
 
 /-! Source partition of Solution.lean. See solution.md for verification status. -/
 
@@ -44,6 +47,24 @@ and the actual rational cochain complex with its top homology comparison.
 The next continuation constructs the genuine smooth affine Jacobian open
 and its further principal opens, their regular differential bases, the
 actual graded normal Cech pairing, and a paired Fermat Jacobian Higgs model.
+The subsequent source constructs genuine restriction maps and a filtered
+diagram of regular de Rham complexes on the principal-open basis. Finite
+denominators identify its top-cohomology colimit with the original generic
+quotient. The normal calculation also reaches actual structure-sheaf
+sections on the punctured curve cone and their Cech complex. The genuine
+Mayer--Vietoris boundary injects the resulting section quotient into
+derived sheaf H^1, preserving the selected nonzero classes, including
+the actual trace-one incidence tangent at theta = 1 and literal r = 57.
+The curve quotient grading and its genuine projective spectrum with
+the two specific affine denominator charts are also constructed. The
+degree-one localized modules, their affine frames, and the actual
+transition unit now define a genuine additive sheaf on this projective
+curve. Its section comparison and Mayer--Vietoris boundary preserve the
+nonzero incidence class in actual derived projective H^1. The weighted
+incidence surface and generic-section zero locus are also actual Proj
+schemes, with maps to their bases and ambient schemes and an exact
+binding to the previous polynomial section ideal. Their flatness,
+smooth curve fibers, and divisor-class identification remain open.
 The projective Serre and moving-curve interpretations, geometric variation,
 supported correspondences, and analytic de Rham comparison remain to be
 constructed. These new helpers have not been compiled.
@@ -77,6 +98,16 @@ def AffineResidueFormExact : Prop :=
 theorem exact_form_iff_primitive :
     AffineResidueFormExact ↔ AffineResiduePrimitiveExists :=
   CycleQ2AffineExactness.exact_residueSourceForm_iff CycleQ2AffineClearing.affineA
+
+/-- The geometric support argument may be carried out on any sufficiently
+small nonempty principal open. This equivalence is supplied by actual
+restriction and finite-denominator constructions; it does not assert
+vanishing on such an open. The new source has not been compiled. -/
+theorem exact_form_iff_regular_zero :
+    AffineResidueFormExact ↔
+      ∃ s : CycleQ2GeometricRegularDeRham.OpenRing, s ≠ 0 ∧
+        CycleQ2GeometricRegularDeRham.residueClass s = 0 :=
+  CycleQ2GeometricRationalSpread.protected_exact_iff_exists_regular_zero
 
 end CycleQ2Nonconstructive
 
