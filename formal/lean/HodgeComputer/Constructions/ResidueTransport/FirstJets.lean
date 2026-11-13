@@ -163,12 +163,13 @@ lemma curve_first_variation (ξ η a b : Jet (K:=K))
   norm_num at hs
   linear_combination hs
 
-set_option backward.isDefEq.respectTransparency false in
 lemma differential_first_variation (D : Derivation ℤ K K) (ξ η g : Jet (K:=K))
     (h : g*jetDerivation D ξ=6*η) :
     g.fst*D ξ.snd+g.snd*D ξ.fst=6*η.snd := by
   have hs := congrArg TrivSqZeroExt.snd h
-  simpa [jetDerivation,smul_eq_mul,op_smul_eq_smul,add_comm] using hs
+  simp only [snd_mul,jetDerivation_fst,jetDerivation_snd,fst_numeral,snd_numeral,
+    smul_eq_mul,op_smul_eq_smul,mul_zero,add_zero] at hs
+  linear_combination hs
 
 lemma differential_jet_from_cleared (g η Dξ ξdotDerivative ηdot gdot : K)
     (hvalue : g*Dξ=6*η)

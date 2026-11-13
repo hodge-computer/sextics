@@ -106,15 +106,13 @@ theorem normalized_data_from_polynomial_family
       π hπ (integerPartial 0) (fun i : Fin 5 => integerPartial i.succ) f A w
       hirr hker hg0 (fun i => integerPartial_commute i.succ 0 f) heq
   refine ⟨d, Fin.cases N0 N, Q, hd, hlegal, ?_, ?_⟩
-  · set_option backward.isDefEq.respectTransparency false in
-    simpa only [HodgeTestbed.directional, Fin.sum_univ_succ,
-      Fin.cases_zero, Fin.cases_succ, integerPartial, Derivation.restrictScalars_apply,
-      Derivation.coeFn_coe, mul_comm] using hnormal
-  · set_option backward.isDefEq.respectTransparency false in
-    simpa only [HodgeTestbed.divergenceNumerator, HodgeTestbed.divergence,
+  · simp only [HodgeTestbed.directional, Fin.sum_univ_succ,
+      Fin.cases_zero, Fin.cases_succ, integerPartial, mul_comm] at hnormal ⊢
+    exact hnormal
+  · simp only [HodgeTestbed.divergenceNumerator, HodgeTestbed.divergence,
       HodgeTestbed.directional, residueDivNum, Fin.sum_univ_succ,
-      Fin.cases_zero, Fin.cases_succ, integerPartial, Derivation.restrictScalars_apply,
-      Derivation.coeFn_coe, mul_comm] using hdiv
+      Fin.cases_zero, Fin.cases_succ, integerPartial, mul_comm] at hdiv ⊢
+    exact hdiv
 
 end ReflectionCoupledFano
 

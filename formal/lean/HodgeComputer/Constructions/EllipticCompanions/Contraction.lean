@@ -125,6 +125,7 @@ lemma theta_roots_card [DecidableEq K] (hs : (thetaPolynomial K).Splits) : (thet
   dsimp [thetaPolynomial]
   compute_degree
   norm_num
+omit [CharZero K] in
 lemma mem_theta_roots [DecidableEq K] (r : K) : r∈(thetaPolynomial K).roots.toFinset ↔ r^3=1728 := by
   rw [Multiset.mem_toFinset,Polynomial.mem_roots thetaPolynomial_ne_zero,Polynomial.IsRoot,thetaPolynomial_eval,sub_eq_zero]
 
@@ -242,19 +243,23 @@ instance pointsFinite : FiniteDimensional K (Points K G) :=
 
 def inclusion : K →+* Points K G := algebraMap K (Points K G)
 
+omit [CharZero K] in
 lemma first_G_split (hG : G≠0) : (G.map (algebraMap K (First K G))).Splits := by
   have hs := IsSplittingField.splits (First K G) (G*thetaPolynomial K)
   rw [Polynomial.map_mul] at hs
   exact hs.of_dvd (mul_ne_zero (Polynomial.map_ne_zero hG)
     (Polynomial.map_ne_zero thetaPolynomial_ne_zero)) (dvd_mul_right _ _)
+omit [CharZero K] in
 lemma first_theta_split (hG : G≠0) : ((thetaPolynomial K).map (algebraMap K (First K G))).Splits := by
   have hs := IsSplittingField.splits (First K G) (G*thetaPolynomial K)
   rw [Polynomial.map_mul] at hs
   exact hs.of_dvd (mul_ne_zero (Polynomial.map_ne_zero hG)
     (Polynomial.map_ne_zero thetaPolynomial_ne_zero)) (dvd_mul_left _ _)
+omit [CharZero K] in
 lemma G_split (hG : G≠0) : (G.map (inclusion K G)).Splits := by
   have h := (first_G_split K G hG).map (algebraMap (First K G) (Points K G))
   simpa only [Polynomial.map_map,← IsScalarTower.algebraMap_eq K (First K G) (Points K G),inclusion] using h
+omit [CharZero K] in
 lemma theta_split (hG : G≠0) : (thetaPolynomial (Points K G)).Splits := by
   have h := (first_theta_split K G hG).map (algebraMap (First K G) (Points K G))
   simpa only [Polynomial.map_map,thetaPolynomial_map] using h
@@ -265,6 +270,7 @@ lemma pointPolynomial_ne_zero : pointPolynomial K G≠0 := by
   intro r hr
   exact (monic_X_pow_sub_C _ (by decide : (2 : ℕ)≠0)).ne_zero
 
+omit [CharZero K] in
 lemma root_has_point (hG : G≠0) (r : Points K G) (hr : (G.map (inclusion K G)).eval r=0) :
     ∃ s : Points K G,s^2=r^3-432 := by
   classical

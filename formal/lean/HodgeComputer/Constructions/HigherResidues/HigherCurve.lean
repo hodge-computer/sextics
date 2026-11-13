@@ -100,7 +100,6 @@ lemma source_density_jets (π : P →+* K) (F A : P)
   convert hs using 1
   ring
 
-set_option backward.isDefEq.respectTransparency false in
 omit [CharZero K] in
 lemma linearMatrix_det_coeff_mem {n : ℕ} (S : Subring K)
     (M₀ M₁ : Matrix (Fin n) (Fin n) K)
@@ -110,8 +109,10 @@ lemma linearMatrix_det_coeff_mem {n : ℕ} (S : Subring K)
   let B : Matrix (Fin n) (Fin n) S := fun i j => ⟨M₁ i j,h₁ i j⟩
   let L : Matrix (Fin n) (Fin n) S[X] := A.map C+(X : S[X]) • B.map C
   have hm : (Polynomial.mapRingHom S.subtype).mapMatrix L=linearMatrix M₀ M₁ := by
-    ext i j
-    simp [L,A,B,linearMatrix,Polynomial.mapRingHom,smul_eq_mul]
+    refine Matrix.ext fun i j => ?_
+    exact (by rw [Polynomial.map_add,Polynomial.map_mul,Polynomial.map_X,Polynomial.map_C,
+      Polynomial.map_C] : Polynomial.map S.subtype (C (A i j)+X*C (B i j)) =
+        C (S.subtype (A i j))+X*C (S.subtype (B i j)))
   have hd := (Polynomial.mapRingHom S.subtype).map_det L
   have hc := congrArg (fun p : K[X] => p.coeff k) hd
   rw [hm] at hc
