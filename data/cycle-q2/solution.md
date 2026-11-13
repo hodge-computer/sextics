@@ -1,5 +1,160 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Classical geometric audit — 13 November 2026
+
+This continuation records an independent reconstruction and review of the
+surface-section argument in Chapter 3D for the unchanged protected target.
+The written classical proof gives existence of a legal ordinary certificate;
+**the Lean submission remains incomplete**. The existing admission in
+`Submission.missing_geometric_existence` is unchanged. No Lean elaboration,
+compilation, kernel replay, or full proposal verification was run for this
+documentation update, and no expanded coefficient witness is claimed.
+
+The audit starts from the actual
+[Chapter 3D source](https://github.com/hodge-computer/sextics/blob/97c875622f1c2573d0fcbff9e30b239f2fb6b176/docs/03d-hodge-loci.md),
+not from an earlier assertion of completeness in this explanation. The
+[surface-section revision](https://github.com/hodge-computer/sextics/commit/88d582a3a6144dfe6a7bfb42ecb97eff26512cda)
+credits Fable 5.2 and replaces the Fano-fourfold density route with moving
+divisor classes on surfaces. Credit remains with `benediamond`, the project
+collaborators, Claire Voisin, and the authors of the classical results cited
+below. Prepared for `fqlx` with OpenAI ChatGPT assistance.
+
+### Geometric comparisons supplied by the review
+
+The complete argument below now spells out the following points.
+
+1. The integral orbit class has an actual relative line bundle on a small
+   contractible Stein neighborhood of its Hodge locus. The exponential
+   sequence, together with proper base change and Stein acyclicity, proves
+   this family statement; pointwise Lefschetz \((1,1)\) alone would not.
+2. A sufficiently positive twist gives an embedded analytic curve family
+   and a holomorphic map to the algebraic flag Hilbert scheme through its
+   Grassmannian presentation. A matching tangent-dimension bound proves
+   that the Hilbert point is smooth and its projection to the full sextic
+   parameter base is submersive. Relative cuts with prescribed first jets
+   preserve the nonzero Abel--Jacobi direction through completion,
+   resolution, and shrinking. Part II.7 supplies these details.
+3. The checked Higgs matrices are bound to the actual infinitesimal period
+   map using the ordinary sextic cover \(w=t^2\), with
+   \(\phi^*\Omega_{\mathrm{weighted}}=2t\Omega_{\mathbf P^4}\).
+   The pairing agrees up to one common nonzero residue normalization,
+   which cancels from \(P^{\mathsf T}H_m=H_mP\). The normalized full
+   parameter chart has dimension 44; the 35 checked monomials are its
+   effective Jacobian deformation directions.
+4. Polarization proves irreducibility for rational **sub-variations** on
+   finite étale covers of dense opens of that full base. No irreducibility
+   of arbitrary differential submodules, or of the restriction to the
+   protected pencil, is asserted. Supported-projector specialization is
+   the step that reaches the particular pencil.
+5. The supported relative correspondence fixes the whole class in
+   \(L^1H^4\), since \(L^2H^4=0\) over the affine curve. The normal pole
+   subtraction identifies the literal protected four-form. Grothendieck's
+   comparison is applied on an actual nonempty smooth affine open, then
+   localization gives its rational primitive. Parts III--IV retain the
+   full argument and the exact denominator-clearing identity.
+
+The three mathematical reviews covered the moving-class/Abel--Jacobi
+construction, the polarized variation and arithmetic lift, and the
+supported-projector-to-protected-residue passage. They found no remaining
+classical gap in the assembled argument. These are written mathematical
+reviews, not kernel checks or external acceptance of the proposal.
+
+The original characteristic-zero seed is over \(\mathbb Q(r,i)\), with
+\(r^3=2\) and \(i^2=-1\); \(57\) and \(33\) are its residues at the
+chosen prime above \(109\). This argument does not identify that seed with
+the literal complex \(r=57\) used by some later Lean helper modules. The
+individual orbit curves need not deform separately: their sum's line
+bundle is the moving object. The conormal-lift ambiguity pairs to zero
+because its pairing is the Noether--Lefschetz obstruction on the chosen
+kernel direction. The Koszul sequence in Part II.2 identifies the actual
+socle functional with Serre trace.
+
+### Exact finite and algebraic checks
+
+The original seed and Higgs routines were replayed without running the
+supplementary fourfold computations. The source was the
+[pinned verifier](https://github.com/hodge-computer/sextics/blob/97c875622f1c2573d0fcbff9e30b239f2fb6b176/scripts/verify-hodge-locus-span.py),
+whose SHA-256 is
+`9d673eff17a53fee04eb2677615db689833cf33b5fa23fe16ad42467d22a40a9`.
+
+| Check | Result |
+| --- | --- |
+| Complete-intersection Hilbert function through degree ten | \((1,4,9,15,19,19,15,9,4,1,0)\) |
+| Noether--Lefschetz rank and augmented rank | \(7\) and \(8\) |
+| First seven-column and eight-column minors modulo \(109\) | \(80\) and \(76\) |
+| Normalized modular direction | \((19,26,71,38,38,74,19,24,0)^{\mathsf T}\) |
+| Augmented matrix times that direction | \((0,0,0,0,0,0,0,1)^{\mathsf T}\) |
+| Higgs dimension and effective directions | \(33\) and \(35\) |
+| Integral entry-identification forest | \(1088\) edges; only scalars remain |
+| Weighted-to-ordinary triple pairings | All \(38115\) comparisons agree |
+| Euler-volume pullback coefficients | All five agree |
+| Protected-source and universal differential identities | Fourteen exact checks pass |
+
+The matrix, monomial orders and minors are displayed in Part I and
+Appendix B; the complete integer Higgs forest is in Appendix A. The
+fourteen endpoint checks cover the protected degrees, paired-sign and
+order-three characters, literal weighted quotient, vertex coefficient,
+affine equation and numerator, normal partial, residue coefficient,
+pole reduction, normal pairing, divergence lift, and order-three
+remainder. They verify algebraic identities, not the existence of a
+primitive by a bounded search. The product-rule proof of the identities
+is given in Part IV.5 and Part IV.7.
+
+The following bounded reproduction, run from the repository root with
+Python and NumPy, replays the original two inputs and all 38115 ordinary
+cover comparisons. It does not invoke Lean or the large fourfold routines.
+
+```python
+from pathlib import Path
+from itertools import product
+import hashlib
+import importlib.util
+
+source = Path("scripts/verify-hodge-locus-span.py")
+assert hashlib.sha256(source.read_bytes()).hexdigest() == (
+    "9d673eff17a53fee04eb2677615db689833cf33b5fa23fe16ad42467d22a40a9"
+)
+spec = importlib.util.spec_from_file_location("chapter3d", source)
+chapter = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(chapter)
+seed, _ = chapter.seed_divisor()
+higgs = chapter.higgs_field()
+
+standard = list(product(range(5), range(5), range(5), range(5), range(2)))
+degree = lambda a: sum(a[:4]) + 2*a[4]
+character = lambda a: (2*a[0] + 2*a[1] + a[2]) % 3
+E = [a for a in standard if degree(a) == 6 and character(a) == 1]
+T = [a for a in standard if degree(a) == 6 and character(a) == 0]
+assert (len(E), len(T)) == (33, 35)
+cover_E = lambda a: (*a[:4], 2*a[4] + 1)
+cover_T = lambda a: (*a[:4], 2*a[4])
+weighted_socle = (4, 4, 4, 4, 1)
+ordinary_socle = (4, 4, 4, 4, 4)
+comparisons = 0
+for m, a, b in product(T, E, E):
+    weighted = tuple(x+y+z for x, y, z in zip(m, a, b)) == weighted_socle
+    ordinary = tuple(x+y+z for x, y, z in
+                     zip(cover_T(m), cover_E(a), cover_E(b))) == ordinary_socle
+    assert weighted == ordinary
+    comparisons += 1
+assert comparisons == 38115
+print(seed, higgs, {"ordinary_cover_comparisons": comparisons})
+```
+
+### Formal endpoint
+
+The algebraic conversion from actual residue exactness to the protected
+certificate remains proved in the existing helpers. Its geometric input
+still needs Lean proof terms for the actual moving-cycle comparison,
+polarized variation, supported correspondences, and algebraic de Rham
+comparison. The exact remaining assertion is
+\[
+\exists\eta\in\Omega^3_{K/\mathbf C},\qquad d\eta=\rho,
+\]
+with the actual hypersurface field and literal source of Part IV.5--6.
+This documentation update leaves every Lean source, the manifest, and
+the protected \((F,q,A)\) unchanged.
+
 ## Checked finite seed and incidence charts — 12 November 2026
 
 This continuation proves three additional concrete algebraic results. It does
@@ -3320,6 +3475,34 @@ These are precisely the Higgs forms, up to a common nonzero residue
 normalization: the variation is Jacobian multiplication followed by
 the socle pairing.
 
+Here is a direct geometric binding of that assertion at Fermat. The
+ordinary sextic Y={F(x,t^2)=0} in P^4 is smooth near Fermat and maps to
+the weighted threefold by w=t^2, as the quotient by t -> -t. Finite
+quotient cohomology identifies the weighted variation with the invariant
+ordinary variation. The literal Euler-volume pullback is
+
+  phi^*Omega_weighted = 2t Omega_ordinary.
+
+Thus a weighted Hodge numerator x^a w^b pulls back to 2x^a t^(2b+1),
+of ordinary degree seven; a degree-six deformation numerator pulls
+back to x^m t^(2n). The two Hodge numerators contribute the extra t^2
+in the ordinary triple product. Weighted exponents sum to (4,4,4,4,1)
+exactly when the corresponding ordinary exponents sum to (4,4,4,4,4),
+the ordinary Fermat socle. Ordinary Griffiths residue theory identifies
+multiplication with the infinitesimal period map and this socle with
+the polarization, up to one common nonzero factor. Pullback multiplies
+the intersection pairing by the cover degree two; this only changes
+the same common normalization. All 38115 triple comparisons and the
+five volume coefficients were checked exactly in the 13 November audit.
+
+The normalized full coefficient chart has dimension 44: there are 45
+invariant sextic monomials before setting the w^3 coefficient to one.
+The 35 standard monomials above span its effective Jacobian tangent
+directions, not the whole coefficient tangent space. The irreducibility
+argument concerns rational sub-variations over that full base and its
+finite etale covers. It does not assert irreducibility of an arbitrary
+underlying local subsystem or of the restriction to the protected pencil.
+
 Consider all equations P^t H_m=H_m P. For fixed m every row of H_m
 has at most one nonzero entry. Write partner_m(a)=soc-m-a when this
 belongs to E, and leave it undefined otherwise. The equation (a,b) is
@@ -3570,9 +3753,18 @@ analytic curve in a fixed-threefold fiber of Z.
 
 By Lefschetz (1,1), lambda is the Chern class of a line bundle on each
 D in Z. Since H^1(O_D)=0, the line bundle is unique up to isomorphism.
-After shrinking to a contractible analytic neighborhood these line
-bundles form a holomorphic relative line bundle. For m sufficiently
-large, Serre vanishing, cohomology/base change and Bertini give a
+The relative line bundle is an actual family, not just a collection of
+fiberwise choices. Shrink Z to a contractible Stein polydisc S. The
+smooth proper surface family is topologically locally trivial, and the
+flat integral class lifts to H^2(D_S,Z) over this contractible base.
+Grauert's theorem and Stein acyclicity identify H^2(D_S,O) with
+H^0(S,R^2 pi_*O). The class maps to zero there by the Hodge-locus
+condition. The exponential sequence therefore gives a holomorphic
+line bundle on D_S with this first Chern class. On the central fiber
+it is O_D(E), by H^1(O_D)=0. There is no global Poincare-bundle
+assumption or unaccounted obstruction to this local construction.
+
+For m sufficiently large, Serre vanishing, cohomology/base change and Bertini give a
 projective bundle of sections of L_lambda(m), with a nonempty open of
 smooth effective curves. This is an actual analytic family of curves
 Gamma, and its projection to Z is smooth and surjective. A tangent L
@@ -3657,30 +3849,70 @@ requires the following argument.
 
 All curves in the local family have the same Hilbert polynomial with
 respect to a fixed projective embedding: their degree and arithmetic
-genus are determined by the flat class lambda+mH. Hence the analytic
-family maps into ONE finite-type relative flag Hilbert scheme H
-parameterizing (T,D,Gamma). Its projection to Bpar contains an analytic
-open because Z -> Bpar is a submersion.
+genus are determined by the flat class lambda+mH. Use a sufficiently
+high even Veronese embedding of the weighted ambient space, and form
+the algebraic flag Hilbert scheme H parameterizing (T,D,Gamma), locally
+where the surface and curve are smooth and Gamma is Cartier on D.
 
-Let W be the irreducible Zariski closure of the image of a connected
-analytic germ of this family in H. Then W -> Bpar is dominant. Every
-nonempty analytic open of the germ has the same Zariski closure W
-(identity theorem). The nonzero vertical derivative condition is open
-in that germ. It therefore meets the nonempty algebraic open where W
-is smooth over Bpar. At such a point, the vertical tangent of W contains
-a vector on which the averaged Abel-Jacobi derivative is nonzero.
+The analytic family has a holomorphic map to H^an. To construct the map
+as a family, take a large uniform ambient twist of the nearby curve
+ideals. Analytic cohomology and base change give a vector subbundle of
+the fixed ambient space of homogeneous sections. Its Grassmannian map
+satisfies the multiplication and incidence equations defining the
+Hilbert scheme and the flag condition. Pointwise Chow's theorem alone
+would not establish this family statement.
 
-Take a projective compactification/resolution of W over Bpar. Cut it by
-sufficiently general relative ample hypersurfaces to relative dimension
-one, choosing their tangent hyperplanes to retain a vertical direction
-outside the kernel of that derivative. This is ordinary relative
-Bertini in characteristic zero, with a prescribed open tangent
-condition at one smooth point. After shrinking the base and normalizing,
-the resulting parameter family Lambda -> Bpar' is smooth and projective.
-It may be disconnected; alternatively use its Stein factorization and a
-finite etale base change. The universal curve restricts over the dense
-open originally in H, and its closure supplies a codimension-two cycle
-Gamma on Lambda times_{Bpar'} T.
+Let z=(T,D,Gamma), d=dim S, and n=h^0(D,O_D(Gamma)). The analytic
+projective bundle in Section 5 has dimension d+n-1 and injective
+differential to H^an: the pair coordinates recover the base tangent,
+and the complete linear system embeds in the Hilbert scheme of a
+fixed surface.
+
+Conversely, every first-order flag deformation gives the line bundle
+O_{D_epsilon}(Gamma_epsilon), so its pair direction lies in the kernel
+of the total Noether-Lefschetz obstruction. This obstruction equals
+that for E because mH is ambient. The initial class and its flat
+transport are invariant, so its target is the seven-dimensional
+invariant H^{0,2}. Its vertical restriction is already surjective;
+the total kernel therefore has dimension d. The kernel of the map
+from flag tangents to pair tangents is H^0(Gamma,N_{Gamma/D}). The
+exact sequence
+
+  0 -> O_D -> O_D(Gamma) -> N_{Gamma/D} -> 0
+
+and H^1(O_D)=0 give dimension n-1 for this kernel. Hence
+
+  dim T_z H <= d+n-1.
+
+The analytic family gives the reverse inequality on local dimension.
+Local dimension and embedding dimension agree; H is smooth at z.
+Its projection to the full sextic base has surjective differential,
+and its vertical tangent contains the chosen nonzero Abel-Jacobi
+direction. The algebraic irreducible component through z therefore
+dominates Bpar. This does not assume algebraicity of an arbitrary
+analytic Hodge locus.
+
+Let a>=1 be its relative dimension. In a projective completion over
+an affine base open, cut by a-1 sufficiently ample relative hypersurfaces
+with prescribed first jets at z, so their differentials have common
+vertical kernel the chosen Abel-Jacobi line. Bertini with prescribed
+finite jets supplies these cuts. The resulting component is smooth
+near z and submersive over the base there. Resolve it projectively in
+characteristic zero, without changing this smooth neighborhood.
+Generic smoothness and properness then give, after shrinking, a smooth
+projective family of parameter curves Lambda. It may be disconnected;
+Stein factorization and removal of its branch locus give a finite
+etale cover if connected fibers are desired.
+
+Nonvanishing survives this shrinking even if the original base point
+is removed because a distant point of its fiber was singular. Near z
+the map is submersive and the derivative remains nonzero. This analytic
+open meets the inverse image of every dense Zariski-open base subset.
+Some retained smooth fiber therefore still has a nonzero derivative.
+The universal Hilbert family pulls back through the resolved parameter
+family and supplies a relative codimension-two algebraic cycle Gamma
+on Lambda times_{Bpar'} T. Boundary cycle members may be singular;
+smoothness of the projective parameter curves is what is needed here.
 
 The resulting correspondence induces a morphism of rational variations
 
@@ -3690,13 +3922,16 @@ Its averaged component is nonzero, because its Abel-Jacobi differential
 still pairs nontrivially with the invariant class eta_B. This supplies
 the genuine nonzero subvariation used in the next Higgs step.
 
-An alternative algebraicity input is Cattani–Deligne–Kaplan, Theorem 1.1
-and Corollary 1.2: the relevant integral Hodge-class germ is algebraic.
-Together with the relative Picard/Hilbert construction, this gives the
-same algebraic family. The Hilbert-closure argument above already
-supplies the needed repair, so the stronger CDK theorem is optional.
-No Hodge conjecture is assumed: the only cycle-existence assertion at
-this point is Lefschetz (1,1) for divisor classes on surfaces.
+The invariant intermediate Jacobian is an abelian variety because
+its Hodge structure has only types (2,1),(1,2). The Abel-Jacobi map of
+the projective parameter curve factors through its Jacobian. If its
+invariant H^1 cylinder map were zero, that homomorphism would have
+zero differential, contradicting the preserved nonzero derivative.
+In particular the parameter curve is not being assumed rational.
+
+No Hodge conjecture or algebraicity theorem for arbitrary Hodge loci
+is required: divisor algebraicity is Lefschetz (1,1) on surfaces,
+and the actual family is obtained by the Hilbert argument above.
 ```
 
 ### Part III: supported projectors
@@ -4381,6 +4616,35 @@ numerical coefficient list for D or N_i. It equally proves the
 rational-form exactness used as the missing geometric input. A
 machine-checked Lean replacement remains a separate formalization
 task; neither its existence nor successful compilation is claimed.
+
+9. Optional descent to rational polynomial coefficients
+--------------------------------------------------------
+
+Although the protected existential statement permits complex
+coefficients, the argument also implies existence over Q. Fix the
+finite degrees of one complex witness in (8.1). All coefficient
+equations are polynomial equations over Q. In the finite-dimensional
+homogeneous quotient by (F), choose a rational basis and one coordinate
+of the class of D that is nonzero at this witness. Adjoin a variable
+whose product with this coordinate is one. This expresses D not in
+(F), hence D!=0 and gcd(D,F)=1 because F is absolutely irreducible.
+
+The resulting finite system over Q has a complex point, so it has
+a Qbar point and a point over some number field. Pass to a normal
+closure K0/Q and write v=N/D for that field-valued rational vector
+field. Its normalized trace
+
+  v_Q=(1/[K0:Q]) sum_sigma sigma(v)
+
+is rational over Q. The operator v |-> -2v(F)+F div(v) is Q-linear
+and commutes with coefficient conjugation and coordinate derivatives.
+Therefore A-2v_Q(F)+F div(v_Q) remains divisible by F^3 in the local
+ring at (F). Each conjugate denominator stays prime to F, and their
+product supplies a common rational denominator prime to F.
+Homogeneous degree seven of the vector components is preserved.
+Clearing this product denominator gives an ordinary homogeneous
+certificate over Q. This does not supply a degree bound, an expanded
+coefficient tuple, or an additional Lean proof.
 ```
 
 ### Conclusion and formalization status
