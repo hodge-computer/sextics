@@ -70,14 +70,17 @@ lemma FibreRegular.rational (r : K) (f : RatFunc K) (hf : RegularAt r f) :
     FibreRegular r (algebraMap (RatFunc K) (E K) f) := by
   rw [FibreRegular,first_algebraMap,second_algebraMap]
   exact ⟨hf,(by simpa using RegularAt.C r (0 : K))⟩
+omit [CharZero K] in
 lemma FibreRegular.base (r c : K) : FibreRegular r (algebraMap K (E K) c) := by
   rw [← map_constant]
   exact FibreRegular.rational r _ (RegularAt.C r c)
 lemma FibreRegular.one (r : K) : FibreRegular r (1 : E K) := by
   simpa using FibreRegular.base r (1 : K)
+omit [CharZero K] in
 lemma FibreRegular.y (r : K) : FibreRegular r (y K) := by
   rw [FibreRegular,first_y,second_y]
   exact ⟨(by simpa using RegularAt.C r (0 : K)),by simpa using RegularAt.C r (1 : K)⟩
+omit [CharZero K] in
 lemma FibreRegular.x (r : K) : FibreRegular r (x K) :=
   FibreRegular.rational r _ (RegularAt.polynomial r X)
 lemma FibreRegular.pow {r : K} {f : E K} (hf : FibreRegular r f) (n : ℕ) : FibreRegular r (f^n) := by
@@ -98,13 +101,16 @@ lemma fibreValue_mul (r s : K) (hs : s^2=r^3-432) (f g : E K)
     valueAt_mul hf.1 hg.2,valueAt_mul hf.2 hg.1,hv]
   linear_combination -valueAt r (second K f)*valueAt r (second K g)*hs
 
+omit [CharZero K] in
 lemma fibreValue_base (r s c : K) : fibreValue r s (algebraMap K (E K) c)=c := by
   rw [← map_constant,fibreValue_apply,first_algebraMap,second_algebraMap,valueAt_C,map_zero,mul_zero,add_zero]
 lemma fibreValue_one (r s : K) : fibreValue r s (1 : E K)=1 := by
   simpa using fibreValue_base r s (1 : K)
+omit [CharZero K] in
 lemma fibreValue_x (r s : K) : fibreValue r s (x K)=r := by
   rw [x,fibreValue_apply,first_algebraMap,second_algebraMap,map_zero,mul_zero,add_zero]
   simpa using valueAt_polynomial r X
+omit [CharZero K] in
 lemma fibreValue_y (r s : K) : fibreValue r s (y K)=s := by
   rw [fibreValue_apply,first_y,second_y,map_zero]
   have h1 : valueAt r (1 : RatFunc K)=1 := by simpa using valueAt_C r (1 : K)
@@ -130,9 +136,11 @@ lemma conjugate_root : (equation K).eval₂ (algebraMap (RatFunc K) (E K)) (-y K
   exact sub_eq_zero.mpr (relation K)
 def conjugate : E K →+* E K :=
   AdjoinRoot.lift (algebraMap (RatFunc K) (E K)) (-y K) conjugate_root
+omit [CharZero K] in
 lemma conjugate_rational (f : RatFunc K) :
     conjugate (algebraMap (RatFunc K) (E K) f)=algebraMap (RatFunc K) (E K) f :=
   AdjoinRoot.lift_of conjugate_root
+omit [CharZero K] in
 lemma conjugate_y : conjugate (y K)= -y K := AdjoinRoot.lift_root conjugate_root
 lemma conjugate_expansion (f : E K) :
     conjugate f=algebraMap (RatFunc K) (E K) (first K f)-
@@ -228,6 +236,7 @@ variable {F L : Type*} [Field F] [Field L] [CharZero L]
 def FibreSpecializes (Φ : F →+* E L) (ψplus ψminus : F →+* L) (r s : L) (f : F) : Prop :=
   FibreRegular r (Φ f) ∧ fibreValue r s (Φ f)=ψplus f ∧ fibreValue r (-s) (Φ f)=ψminus f
 
+omit [CharZero L] in
 lemma FibreSpecializes.add (Φ : F →+* E L) (ψplus ψminus : F →+* L) (r s : L)
     {f g : F} (hf : FibreSpecializes Φ ψplus ψminus r s f)
     (hg : FibreSpecializes Φ ψplus ψminus r s g) : FibreSpecializes Φ ψplus ψminus r s (f+g) := by
@@ -313,6 +322,7 @@ namespace CrossedElliptic
 open Polynomial CrossedRationalResidue CrossedEllipticTranslation
 variable {K : Type*} [Field K] [CharZero K]
 
+omit [CharZero K] in
 lemma FibreRegular.sub {r : K} {f g : E K} (hf : FibreRegular r f) (hg : FibreRegular r g) :
     FibreRegular r (f-g) := by simpa only [sub_eq_add_neg] using hf.add hg.neg
 lemma FibreRegular.div_of_values {r s : K} (hs : s^2=r^3-432) {f g : E K}
@@ -532,6 +542,7 @@ open Polynomial CrossedElliptic
 variable {K : Type*} [Field K] [CharZero K]
 local instance : Algebra ℤ (RatFunc K) := Ring.toIntAlgebra _
 
+omit [CharZero K] in
 lemma valueAt_coefficient (r : K) (D : Derivation ℤ K K) (hr : D r=0) (f : RatFunc K) :
     valueAt r (baseCoefficient D f)=D (valueAt r f) := by
   rw [← residue_div_uniformizer,← residue_div_uniformizer]

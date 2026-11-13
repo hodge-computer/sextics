@@ -55,7 +55,7 @@ private theorem commonCoverBaseChange_of_C
       -MvPolynomial.eval₂Hom_C_eq_bind₁] <;>
     first
       | rfl
-      | (rw [map_mul]; rfl)
+      | exact (map_mul (algebraMap (GenericCommonCoverRing ℂ) CommonCoverFunctionField) _ _).trans rfl
 
 @[simp] theorem quotientCoverFieldMap_root :
     quotientCoverFieldMap (algebraMap GenericQuotientRing GenericQuotientField

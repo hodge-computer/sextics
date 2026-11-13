@@ -109,7 +109,7 @@ lemma linearMatrix_det_coeff_mem {n : ℕ} (S : Subring K)
   let B : Matrix (Fin n) (Fin n) S := fun i j => ⟨M₁ i j,h₁ i j⟩
   let L : Matrix (Fin n) (Fin n) S[X] := A.map C+(X : S[X]) • B.map C
   have hm : (Polynomial.mapRingHom S.subtype).mapMatrix L=linearMatrix M₀ M₁ := by
-    ext i j
+    refine Matrix.ext fun i j => ?_
     exact (by rw [Polynomial.map_add,Polynomial.map_mul,Polynomial.map_X,Polynomial.map_C,
       Polynomial.map_C] : Polynomial.map S.subtype (C (A i j)+X*C (B i j)) =
         C (S.subtype (A i j))+X*C (S.subtype (B i j)))

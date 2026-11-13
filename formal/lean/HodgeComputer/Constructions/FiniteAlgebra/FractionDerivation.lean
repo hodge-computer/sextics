@@ -60,11 +60,13 @@ private theorem quotientD_div (D : Derivation ℚ P P) (a b : P) (hb : b ≠ 0) 
     (algebraMap P F b * algebraMap P F (D (den x)) +
       algebraMap P F (den x) * algebraMap P F (D b)) * hcross'
 
+omit [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem quotientD_map (D : Derivation ℚ P P) (a : P) :
     quotientD D (algebraMap P F a) = algebraMap P F (D a) := by
   have h := quotientD_div (F := F) D a 1 one_ne_zero
   simpa using h
 
+omit [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem quotientD_add (D : Derivation ℚ P P) (x y : F) :
     quotientD D (x+y) = quotientD D x + quotientD D y := by
   obtain ⟨a,b,hb,rfl⟩ := IsFractionRing.div_surjective P x
@@ -83,6 +85,7 @@ private theorem quotientD_add (D : Derivation ℚ P P) (x y : F) :
   field_simp
   ring
 
+omit [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem quotientD_mul (D : Derivation ℚ P P) (x y : F) :
     quotientD D (x*y) = x * quotientD D y + y * quotientD D x := by
   obtain ⟨a,b,hb,rfl⟩ := IsFractionRing.div_surjective P x

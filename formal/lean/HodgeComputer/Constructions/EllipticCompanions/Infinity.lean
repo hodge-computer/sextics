@@ -310,6 +310,7 @@ lemma primitiveZero_derivative : baseTime (primitiveZero (K:=K))=firstDensity :=
   rw [← hd]
   ring
 
+omit [CharZero K] in
 lemma primitiveOne_derivative (h : RatFunc K) :
     -baseTime (primitiveOne h)+3*h=jetOperator h := by
   have hc2 : baseTime (2 : RatFunc K)=0 := baseTime.map_natCast 2
@@ -360,6 +361,7 @@ lemma infinity_theta_expression (f : E K) :
   have h1 := reciprocal_kernelOne (K:=K)
   linear_combination reciprocal (first K f)*h0+reciprocal (second K f)*h1
 
+omit [CharZero K] in
 lemma residue_integration_by_parts (J0 J1 f0 f1 h : RatFunc K) :
     residue (K:=K) 0 (J0*baseTime f0+J1*baseTime f1+3*h*f1)=
       residue (K:=K) 0 (-baseTime J0*f0+(-baseTime J1+3*h)*f1) := by
@@ -411,11 +413,13 @@ lemma boundary_one (h : RatFunc K) (hh : RegularAt 0 h) : boundary h (1 : E K)=0
   have hr := ((RegularAt.C (0 : K) (-6)).mul (hX.pow 2)).mul hh
   simpa only [h6,boundaryKernelZero] using hr
 
+omit [CharZero K] in
 lemma kernelZero_coefficient (D : Derivation ℤ K K) (h : RatFunc K) (hh : baseCoefficient D h=0) :
     baseCoefficient D (boundaryKernelZero h)=0 := by
   have h6 : baseCoefficient D (6 : RatFunc K)=0 := (baseCoefficient D).map_natCast 6
   simp [boundaryKernelZero,Derivation.leibniz,Derivation.leibniz_pow,baseCoefficient_X,h6,hh]
 
+omit [CharZero K] in
 lemma kernelOne_coefficient (D : Derivation ℤ K K) :
     baseCoefficient D (boundaryKernelOne (K:=K))=0 := by
   have h108 : baseCoefficient D (108 : RatFunc K)=0 := (baseCoefficient D).map_natCast 108
