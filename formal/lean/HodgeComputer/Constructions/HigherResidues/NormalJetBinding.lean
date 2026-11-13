@@ -4,7 +4,6 @@ import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
 /- Actual polynomial and rational-source jets for the normal Taylor formula.
 Prepared with OpenAI Codex assistance for fqlx. -/
 noncomputable section
-set_option maxHeartbeats 3000000
 namespace SplitNormalJetBinding
 open HoldoutConstruction
 open scoped BigOperators
@@ -17,11 +16,13 @@ def hessian (π : P →+* K) (A : P) : Matrix (Fin 5) (Fin 5) K :=
 def third (π : P →+* K) (A : P) (i j k : Fin 5) : K :=
   π (integerPartial k (integerPartial j (integerPartial i A)))
 
+omit [CharZero K] in
 lemma hessian_symm (π : P →+* K) (A : P) : (hessian π A).IsSymm := by
   apply Matrix.IsSymm.ext
   intro i j
   exact congrArg π (integerPartials_commute i j A)
 
+omit [CharZero K] in
 lemma third_cycle (π : P →+* K) (A : P) (i j k : Fin 5) :
     third π A i j k=third π A k i j := by
   unfold third
@@ -71,6 +72,7 @@ lemma quotientHessian_symm (A g : K) (a z : Fin 5 → K)
   rw [haa.apply i j,hzz.apply i j]
   ring
 
+omit [CharZero K] in
 lemma quotient_tangent_first (D : Derivation ℤ K K) (A g c : K)
     (a z : Fin 5 → K) (i : Fin 5) (hg : g≠0)
     (hA : D A=a i-c*a 0) (hG : D g=z i-c*z 0) :
@@ -79,6 +81,7 @@ lemma quotient_tangent_first (D : Derivation ℤ K K) (A g c : K)
   field_simp [hg]
   ring
 
+omit [CharZero K] in
 lemma quotient_tangent_second (D : Derivation ℤ K K) (A g c : K)
     (a z : Fin 5 → K) (aa zz : Matrix (Fin 5) (Fin 5) K)
     (i j : Fin 5) (hg : g≠0)
@@ -93,6 +96,7 @@ lemma quotient_tangent_second (D : Derivation ℤ K K) (A g c : K)
   field_simp [hg]
   ring
 
+omit [CharZero K] in
 lemma quotient_firstJet (A g : K) (ψ a z : Fin 5 → K) (hg : g≠0) :
     SplitNormalTaylor.firstJet ψ (quotientGradient A g a z)=
       SplitNormalTaylor.firstJet ψ a/g-A*SplitNormalTaylor.firstJet ψ z/g^2 := by

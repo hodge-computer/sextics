@@ -1,9 +1,8 @@
 import HodgeComputer.Constructions.TransitiveCubic.ReflectionData
-import HodgeComputer.Constructions.TransitiveCubic.BivariateExpressions
+import HodgeComputer.Constructions.PolynomialEncoding.BivariateExpressions
 namespace TransitiveCovariants.IdentityData
-open Lean.Grind.CommRing TransitiveCovariants.Reflection TransitiveBivariateExpressions
+open Lean.Grind.CommRing TransitiveCovariants.Reflection PolynomialEncoding.BivariateExpressions
 set_option maxRecDepth 131072
-set_option maxHeartbeats 32000000
 def H_3_0 : Expr := HCoeff300Expr
 def H_2_1 : Expr := HCoeff210Expr
 def H_2_0 : Expr := HCoeff201Expr

@@ -8,10 +8,9 @@ import HodgeComputer.Constructions.TransitiveCubic.CoefficientsG
 import HodgeComputer.Constructions.TransitiveCubic.CoefficientsH
 import HodgeComputer.Constructions.TransitiveCubic.IdentityEvaluation
 namespace TransitiveCovariants.IdentityData
-open Lean.Grind.CommRing TransitiveSignedExpressions TransitiveBivariateExpressions
+open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 open TransitiveCovariants.Reflection
 set_option maxRecDepth 131072
-set_option maxHeartbeats 8000000
 variable {K : Type*} [CommRing K]
 theorem data_identity (v : ℕ → K) (x y : K) :
   denote v x y LeftData=denote v x y RightData := by
@@ -37,7 +36,7 @@ theorem full_syzygy (a b c d e f x y : K) :
   simp only [← Right_generated,← R1_generated,← R2_generated,← R3_generated,← R4_generated,← R5_generated,← R6_generated,← R7_generated,← R8_generated,← R9_generated,← R10_generated,← R11_generated,← T12c_generated,← T12p0_generated,← T11c_generated,← T11p0_generated,← T10c_generated,← T10p0_generated,← T9c_generated,← T9p0_generated,← T8c_generated,← T8p0_generated,← T7c_generated,← T7p1_generated,← T7p0_generated,← T6c_generated,← T6p1_generated,← T6p0_generated,← T5c_generated,← T5p1_generated,← T5p0_generated,← T4c_generated,← T4p0_generated,← T3c_generated,← T3p0_generated,← T2c_generated,← T1c_generated,← T1p0_generated,← T0c_generated,← Left_generated,← Leftp0_generated,← Qp3_generated,← Qp2_generated,← Up5_generated,← Up4_generated,← Up3_generated,← Up2_generated,← Hp6_generated,← Hp5_generated,← Hp4_generated,← Hp3_generated,← Hp2_generated,multiply_denote,scale_denote,merge_denote] at h
   simp only [ctx,H_evaluation,Theta_evaluation,J_evaluation,U_evaluation] at h
   simp only [ctx] at hs ht
-  simp only [hs,ht,ringEval,Int.cast_ofNat,Int.cast_neg,pow_zero,mul_one] at h
+  simp only [hs,ht,ringEval,Int.cast_ofNat,pow_zero,mul_one] at h
   linear_combination h
 end TransitiveCovariants.IdentityData
 #print axioms TransitiveCovariants.IdentityData.full_syzygy

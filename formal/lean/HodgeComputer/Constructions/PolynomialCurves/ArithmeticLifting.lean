@@ -47,7 +47,7 @@ theorem square_system_generic_lift
       IsUnit (Matrix.det (fun i j => MvPolynomial.aeval
         (squareGenericCoordinates equations I)
           (MvPolynomial.pderiv i (equations j)))) := by
-  letI : Nontrivial (SquareEtaleRing equations) :=
+  let : Nontrivial (SquareEtaleRing equations) :=
     square_system_jacobian_nontrivial equations seed hseed hjac
   exact squareGeneric_exists_fieldFactor equations hinj
 
@@ -57,6 +57,7 @@ section AnchoredDominance
 
 variable {R S : Type*} [CommRing R] [CommRing S] [IsDomain S]
 
+omit [IsDomain S] in
 /-- Constant terms of an anchored polynomial substitution only see the
 constant coefficient of the source polynomial. -/
 theorem anchored_constantCoeff

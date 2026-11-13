@@ -10,16 +10,15 @@ The coefficients are arbitrary. The library proves polynomial identities for thi
 
 ## Entry points
 
-Import `HodgeComputer.Constructions.TransitiveCubic` for the covariant library, or an individual module below. Import `HodgeComputer.Constructions.TransitiveCubic.Shear` separately for the optional coordinate and source reduction tools.
+Import `HodgeComputer.Constructions.TransitiveCubic` for the covariant library, or an individual module below.
 
 - `Cubic` defines the equation and invariants `s4`, `s6`.
 - `Covariants` defines integral `H`, `Theta`, and `J`.
 - `Syzygy` proves their identity on the affine chart `z=1`, including its multiple of `U` before restriction.
 - `Map` supplies the invariant-differential identity for the rational map `xi=Theta/H²`, `eta=−J/(2H³)`, with its nonzero-denominator hypotheses.
 - `Functorial` transports the polynomial covariants through ring homomorphisms; `Diagonal` provides a useful diagonal specialization.
-- `Shear` gives a quadratic coordinate change removing a reverse-edge term, its invariant identities, and the infinitesimal source reduction inside the transitive family. `TransitiveCubicShear.base_shear` and `discriminant_identity` assume the explicit root relation `3ak² + 2dk + f = 0`; `first_variation_shear` and `second_normal_source_unchanged` retain the required nonzero normal and shear coefficients. The polynomial identities hold over commutative rings; the divided source identities use characteristic-zero fields.
 
-`ReflectionData`, `IdentityData`, `IdentityProducts`, `IdentityEvaluation`, `CoefficientsA`–`CoefficientsH`, and `Differential` contain the exact coefficient proofs. `Kronecker`, `GradeCheck`, `EncodingCheck`, `SignedExpressions`, `BivariateExpressions`, `BivariateDifferentiation`, and `PolynomialDigitCheck` justify their finite polynomial encodings. These are proof infrastructure for the stated identities, not numerical samples or additional geometric assumptions.
+`ReflectionData`, `IdentityData`, `IdentityProducts`, `IdentityEvaluation`, `CoefficientsA`–`CoefficientsH`, and `Differential` contain the exact coefficient proofs. `Kronecker`, `GradeCheck`, and `EncodingCheck`, together with the shared [PolynomialEncoding](../PolynomialEncoding/README.md) modules, justify their finite polynomial encodings. These are proof infrastructure for the stated identities, not numerical samples or additional geometric assumptions.
 
 The normalization is
 
@@ -33,7 +32,5 @@ An application still constructs the relevant Jacobian family, a primitive on it,
 ## Attribution and applications
 
 Extracted from `fqlx`'s accepted [mixed-biweight construction](https://github.com/hodge-computer/sextics/pull/170), which adapts the cubic machinery and polynomial encodings of `hodgepodgeconjecture`'s [cyclic construction](https://github.com/hodge-computer/sextics/pull/165). The classical covariant normalization follows Tom Fisher and SageMath, as credited in those constructions. Both submissions were prepared with OpenAI Codex assistance. The shared copy uses `Transitive…` namespaces to distinguish this family from the directed cyclic family.
-
-The coordinate and source identities in `Shear` follow `fqlx`'s [quadratic-shear construction](https://github.com/hodge-computer/sextics/discussions/58#discussioncomment-19111681), also prepared with OpenAI Codex assistance. An application supplies the finite extension, root and denominator nonvanishing, extends all parameter derivations, and descends its primitive by trace. The generic nonvanishing criterion is in `HodgeComputer.Constructions.AlgebraicSpecialization`; the normal-source gauge identity is in `ResidueTransport.NormalChange`.
 
 The accepted mixed-biweight application imports these modules directly. Its physical equation, incidence construction, coefficient specializations, and certificate closure remain in `data/mixed-biweight/`.

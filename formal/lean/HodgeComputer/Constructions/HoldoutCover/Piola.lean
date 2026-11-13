@@ -191,6 +191,19 @@ theorem residueDivergence_add (E : ι → Derivation ℤ K K) (g : K) (v w : ι 
     add_mul, Finset.sum_add_distrib]
   ring
 
+theorem residueDivergence_sub (E : ι → Derivation ℤ K K) (g : K) (v w : ι → K) :
+    residueDivergence E g (v-w) = residueDivergence E g v - residueDivergence E g w := by
+  simp only [residueDivergence, fieldDivergence, Pi.sub_apply, map_sub,
+    sub_mul, Finset.sum_sub_distrib]
+  ring
+
+theorem residueDivergence_smul (E : ι → Derivation ℤ K K) (g s : K) (w : ι → K) :
+    residueDivergence E g (fun i => s*w i) =
+      s*residueDivergence E g w + ∑ i, w i * E i s := by
+  simp only [residueDivergence, fieldDivergence, Derivation.leibniz, smul_eq_mul,
+    Finset.sum_add_distrib, mul_assoc, ← Finset.mul_sum]
+  ring
+
 theorem residueDivergence_cancel_density (E : ι → Derivation ℤ K K)
     (g : K) (hg : g ≠ 0) (v : ι → K) :
     residueDivergence E g (fun j => g*v j) = g*fieldDivergence E v := by

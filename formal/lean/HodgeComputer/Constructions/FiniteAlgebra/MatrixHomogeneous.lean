@@ -66,6 +66,7 @@ theorem determinant_homogeneous_rows
     simp
   simpa only [hdegree] using hh'
 
+ omit [DecidableEq n] in
  theorem matrix_mul_homogeneous
     (A B : Matrix n n (MvPolynomial σ K)) (a b : ℕ)
     (hA : ∀ i j, (A i j).IsHomogeneous a)
@@ -74,6 +75,7 @@ theorem determinant_homogeneous_rows
   rw [Matrix.mul_apply]
   exact IsHomogeneous.sum Finset.univ _ _ (fun k _ => (hA i k).mul (hB k j))
 
+ omit [DecidableEq n] in
  theorem matrix_trace_homogeneous
     (A : Matrix n n (MvPolynomial σ K)) (a : ℕ)
     (hA : ∀ i j, (A i j).IsHomogeneous a) : A.trace.IsHomogeneous a := by

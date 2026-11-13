@@ -42,7 +42,7 @@ def verification_plan(root, changed):
         for p in changed
     )
     if verifier_changed or any(
-        p.startswith("formal/lean/") and not p.endswith(".lean") for p in changed
+        p.startswith("formal/lean/") and not p.endswith((".lean", ".md")) for p in changed
     ):
         affected.update(sources)
     while True:

@@ -13,7 +13,7 @@ The library constructs the cover with \(T^6=Y_0^6+Y_2^6\), the Fermat coefficien
 
 ## Entry points
 
-- `PolynomialNormal.lean`: generic coefficient linear algebra constructs a polynomial normal. `polynomial_linear_combination_one` cancels positive coefficients around a prescribed constant direction; `full_polynomial_combination_one` instead solves for the constant term and positive coefficients together. The latter applies to the mixed-polar Jacobian incidence.
+- `PolynomialNormal.lean`: generic coefficient linear algebra constructs a polynomial normal. `polynomial_linear_combination_one` cancels positive coefficients around a prescribed constant direction; `full_polynomial_combination_one` instead solves for the constant term and positive coefficients together. The latter applies to the Jacobian incidences of the cubic applications.
 - `ConicResidue.lean`: `HoldoutConicIncidence.conic_target_residue_solution` gives a residue primitive for every polynomial source on the fixed weighted quotient.
 - `GeneralizedCover.lean`: `HoldoutGeneralization.certificate_of_source_pair` converts a homogeneous degree-six physical target into a certificate when the application supplies its quotient-source identity, its normal derivative identity, and a trace-zero correction.
 - `GeneralizedCover.lean`: `trace_square` and `trace_inverse_square` complement the accepted `commonCover_trace_inverse_fourth` character calculation.

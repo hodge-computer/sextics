@@ -1,6 +1,6 @@
 import Proposal.CyclicCubic
 import Proposal.CubicJetCalculus
-import HodgeComputer.Constructions.CyclicCubic.Syzygy
+import Proposal.CyclicCubicSyzygy
 import HodgeComputer.Constructions.ResidueTransport.MovingMap
 
 open ResidueFirstJets

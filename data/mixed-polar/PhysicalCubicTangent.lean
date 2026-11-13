@@ -1,5 +1,5 @@
 import Proposal.PhysicalNormalTransport
-import HodgeComputer.Constructions.PolarCubic.Functorial
+import Proposal.PolarCubicFunctorial
 
 /-! The relative cubic derivation on the actual sextic function field.
 All four passive parameters are fixed and y has derivative one. This supplies

@@ -198,7 +198,9 @@ theorem hasCertificate_of_normalized
     exact hH
   · intro j
     rw [hH.totalDegree hH0]
-    convert HodgeComputer.Homogeneous.of_isHomogeneous (hM j) using 1 <;> push_cast <;> omega
+    convert HodgeComputer.Homogeneous.of_isHomogeneous (hM j) using 1
+    push_cast
+    omega
   · apply HodgeComputer.normalized_identity
     · simpa only [Nat.cast_one, one_mul, polynomialDirectional_eq_directional] using hnormal'
     · simpa only [pow_one, polynomialDivNum_eq_divergenceNumerator] using hdiv'

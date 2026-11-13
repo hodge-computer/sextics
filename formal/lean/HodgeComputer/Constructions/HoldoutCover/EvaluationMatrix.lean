@@ -8,7 +8,6 @@ The proof uses two single-column/row Laplace expansions and the determinant
 of the identity matrix. No derivative construction is assumed here. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 set_option maxRecDepth 10000
 
 namespace HoldoutConstruction
@@ -49,6 +48,27 @@ theorem endpoint_evaluation_det (M : Matrix (Fin 5) (Fin 5) R) (g k : R)
   rw [hi, Matrix.det_one, mul_one]
   change M 0 0 * M 1 1 = g*k
   rw [hnormal, if_pos rfl, htime]
+
+/-- The same expansion for any number of endpoint columns, with unit time entry. -/
+theorem endpoint_det {n : ℕ} (M : Matrix (Fin (n+2)) (Fin (n+2)) R) (g : R)
+    (hnormal : ∀ i, M i 0 = if i = 0 then g else 0)
+    (htime : M 1 1 = 1)
+    (hmiddle : ∀ j : Fin n, M 1 j.succ.succ = 0)
+    (hendpoints : ∀ i j : Fin n,
+      M i.succ.succ j.succ.succ = if i = j then 1 else 0) :
+    Matrix.det M = g := by
+  have hc (i : Fin (n+1)) : M i.succ 0 = 0 := by
+    rw [hnormal, if_neg (Fin.succ_ne_zero i)]
+  rw [det_single_first_column M hc]
+  have hr (j : Fin n) : (M.submatrix Fin.succ Fin.succ) 0 j.succ = 0 := hmiddle j
+  rw [det_single_first_row (M.submatrix Fin.succ Fin.succ) hr]
+  have hi : (M.submatrix Fin.succ Fin.succ).submatrix Fin.succ Fin.succ =
+      (1 : Matrix (Fin n) (Fin n) R) := by
+    ext i j
+    exact hendpoints i j
+  rw [hi, Matrix.det_one, mul_one]
+  change M 0 0 * M 1 1 = g
+  rw [hnormal, if_pos rfl, htime, mul_one]
 
 /-- Constant coefficient commutes with the determinant. -/
 theorem polynomial_evaluation_det_constant

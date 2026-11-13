@@ -68,8 +68,6 @@ def numerators (a b c d : R) : Fin 4 → Poly (R := R) :=
       term (1296*z^2*a^5*d^4) 1 2 3 +
       term (69984*a^9*d^7) 1 3 3]
 
-set_option maxHeartbeats 2000000
-
 /-- The complete quintic reduction, with only scalar coefficient clearing. -/
 theorem source (a b c d : R) :
     directional (cubic a b c d) (numerators a b c d) =
@@ -78,7 +76,7 @@ theorem source (a b c d : R) :
   simp only [directional, Fin.sum_univ_four, cubic, term, map_add, map_sub,
     pderiv_mul, pderiv_C, pderiv_X, Pi.single_apply, Fin.isValue]
   norm_num [Fin.ext_iff]
-  simp only [numerators, Matrix.cons_val, Matrix.cons_val_zero, Matrix.cons_val_one,
+  simp only [numerators, Matrix.cons_val_zero, Matrix.cons_val_one,
     Matrix.cons_val_two, Matrix.cons_val_three, Matrix.head_cons, Matrix.tail_cons,
     term, denominator, e, r, map_add, map_sub, map_mul, map_pow, map_ofNat]
 
@@ -99,9 +97,7 @@ theorem cubic_homogeneous (a b c d : R) :
 
 theorem numerators_homogeneous (a b c d : R) (i : Fin 4) :
     (numerators a b c d i).IsHomogeneous 3 := by
-  fin_cases i <;> simp only [numerators, Matrix.cons_val_zero,
-    Matrix.cons_val_one, Matrix.cons_val_two, Matrix.cons_val_three,
-    Matrix.head_cons, Matrix.tail_cons]
+  fin_cases i <;> simp only [numerators]
   all_goals
     repeat first
       | apply IsHomogeneous.add

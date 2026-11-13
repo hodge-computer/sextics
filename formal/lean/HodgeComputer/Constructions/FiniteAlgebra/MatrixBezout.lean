@@ -55,8 +55,8 @@ theorem cubic_matrix_bezout (z a b : R) (M K : Matrix n n R)
       (z • (1 : Matrix n n R) - M) *
         (z ^ 2 • (1 : Matrix n n R) + z • M + M ^ 2 + a • (1 : Matrix n n R)) =
       (z ^ 3 + a * z + b) • (1 : Matrix n n R) - (M ^ 3 + a • M + b • (1 : Matrix n n R)) := by
-    simp only [sub_mul, mul_add, add_mul, smul_mul_assoc, mul_smul_comm,
-      smul_smul, pow_succ, pow_zero, one_mul, mul_one, mul_assoc]
+    simp only [sub_mul, mul_add, smul_mul_assoc, mul_smul_comm,
+      pow_succ, pow_zero, one_mul, mul_one, mul_assoc]
     module
   rw [← mul_assoc, mul_neg, hf, neg_sub, sub_mul,
     smul_mul_assoc, one_mul, hK]

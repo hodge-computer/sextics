@@ -64,7 +64,8 @@ theorem Verify.add {n : ℕ} {F A B D E Q R : AmbientPoly n} {d q : ℕ}
     have hn := (Homogeneous.of_isHomogeneous k.denominator_homogeneous).mul (h.numerator_homogeneous i)
     have hm := (Homogeneous.of_isHomogeneous h.denominator_homogeneous).mul (k.numerator_homogeneous i)
     rw [MvPolynomial.totalDegree_mul_of_isDomain h.denominator_ne_zero k.denominator_ne_zero, Nat.cast_add]
-    convert hn.add (by convert hm using 1 <;> ring) using 1 <;> ring
+    convert hn.add (by convert hm using 1; ring) using 1
+    ring
   denominator_legal := h.denominator_legal.mul_right k.denominator_legal
   identity := by
     rw [defect_add, h.identity, k.identity]

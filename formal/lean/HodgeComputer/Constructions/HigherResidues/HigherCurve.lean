@@ -4,14 +4,13 @@ import HodgeComputer.Constructions.HigherResidues.SourceDensityAlgebra
 /- Polynomial-curve integration for a third-order hypersurface pole.
 Prepared with OpenAI Codex assistance for fqlx. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 6000000
 set_option maxRecDepth 100000
 namespace SplitHigherResidue
 open Polynomial HoldoutConstruction SplitNormalJetBinding
 open scoped BigOperators
 variable {K : Type*} [Field K] [CharZero K]
 
+omit [CharZero K] in
 lemma firstGradientJet_zero (π : P →+* K) (F : P) (ψ : Fin 5 → K) :
     firstGradientJet π F ψ 0=SplitNormalTaylor.firstJet ψ (gradient π (integerPartial 0 F)) := by
   unfold firstGradientJet SplitNormalTaylor.firstJet hessian gradient
@@ -98,8 +97,10 @@ lemma source_density_jets (π : P →+* K) (F A : P)
     (advect E (fun i => ψ i.succ) (normalSourceOne (π A) (gradient π A 0)
       (gradient π F 0) (hessian π F 0 0)/gradient π F 0))
     (hessianDensity E (fun i => ψ i.succ) (π A/gradient π F 0)) hg h₀ h₁ h₂'
-  convert hs using 1 <;> ring
+  convert hs using 1
+  ring
 
+omit [CharZero K] in
 lemma linearMatrix_det_coeff_mem {n : ℕ} (S : Subring K)
     (M₀ M₁ : Matrix (Fin n) (Fin n) K)
     (h₀ : ∀ i j,M₀ i j∈S) (h₁ : ∀ i j,M₁ i j∈S) (k : ℕ) :
@@ -108,8 +109,10 @@ lemma linearMatrix_det_coeff_mem {n : ℕ} (S : Subring K)
   let B : Matrix (Fin n) (Fin n) S := fun i j => ⟨M₁ i j,h₁ i j⟩
   let L : Matrix (Fin n) (Fin n) S[X] := A.map C+(X : S[X]) • B.map C
   have hm : (Polynomial.mapRingHom S.subtype).mapMatrix L=linearMatrix M₀ M₁ := by
-    ext i j
-    simp [L,A,B,linearMatrix,Polynomial.mapRingHom,smul_eq_mul]
+    refine Matrix.ext fun i j => ?_
+    exact (by rw [Polynomial.map_add,Polynomial.map_mul,Polynomial.map_X,Polynomial.map_C,
+      Polynomial.map_C] : Polynomial.map S.subtype (C (A i j)+X*C (B i j)) =
+        C (S.subtype (A i j))+X*C (S.subtype (B i j)))
   have hd := (Polynomial.mapRingHom S.subtype).map_det L
   have hc := congrArg (fun p : K[X] => p.coeff k) hd
   rw [hm] at hc

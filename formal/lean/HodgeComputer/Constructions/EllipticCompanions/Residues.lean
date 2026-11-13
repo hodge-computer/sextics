@@ -191,7 +191,7 @@ lemma div_uniformizer_power_decomposition (a : K) (n : ℕ) (P : K[X]) :
     rw [← hp]
     have hu := uniformizer_ne_zero a
     field_simp
-    <;> ring
+    ring
 
 /-- Every rational function has a finite principal part at any given rational point. -/
 lemma exists_regular_add_poleSum (a : K) (f : RatFunc K) :
@@ -251,7 +251,7 @@ lemma derivation_inverse_power (D : Derivation ℤ (RatFunc K) (RatFunc K))
   rw [D.leibniz_inv,D.leibniz_pow]
   simp only [smul_eq_mul,nsmul_eq_mul,Nat.cast_add,Nat.cast_one,Nat.add_sub_cancel]
   field_simp
-  simp only [pow_add,pow_succ]
+  simp only [pow_succ]
   ring
 
 lemma residue_derivation_term (a c k : K) (n : ℕ)
@@ -349,8 +349,6 @@ end
 section
 
 noncomputable section
-set_option maxHeartbeats 200000
-set_option backward.isDefEq.respectTransparency false
 open scoped BigOperators
 namespace CrossedRationalResidue
 open Polynomial
@@ -396,7 +394,7 @@ def infinityCoefficient : RatFunc K →ₗ[K] K where
 lemma infinityCoefficient_polynomial (P : K[X]) :
     infinityCoefficient (algebraMap K[X] (RatFunc K) P) = 0 := by
   induction P using Polynomial.induction_on' with
-  | add P Q hP hQ => simpa only [map_add,hP,hQ,add_zero]
+  | add P Q hP hQ => simp only [map_add,hP,hQ,add_zero]
   | monomial n c =>
     have he : (RatFunc.X^2)⁻¹ *
         reciprocal (algebraMap K[X] (RatFunc K) (monomial n c)) =
@@ -434,11 +432,11 @@ lemma infinityCoefficient_term (a c : K) (n : ℕ) :
         RatFunc.C c*(RatFunc.X)⁻¹ +
         RatFunc.C (c*a)/(1-RatFunc.C a*RatFunc.X) := by
       simp only [map_mul,map_inv₀,map_pow,reciprocal_C,reciprocal_uniformizer]
-      simp only [pow_one,div_pow,inv_div,map_mul]
+      simp only [div_pow,inv_div]
       have hL : (1-RatFunc.X*RatFunc.C a : RatFunc K) ≠ 0 := by
         simpa only [mul_comm] using one_sub_C_mul_X_ne_zero a
       field_simp [X_ne_zero,one_sub_C_mul_X_ne_zero,hL]
-      <;> ring
+      ring
     change residue (K := K) 0 _ = _
     rw [he,map_add]
     have hr : RegularAt (0 : K)
@@ -456,7 +454,7 @@ lemma infinityCoefficient_term (a c : K) (n : ℕ) :
       rw [show n+1+1=n+2 by omega]
       simp only [div_pow,inv_div]
       field_simp [X_ne_zero,one_sub_C_mul_X_ne_zero]
-      simp only [pow_succ,pow_add]
+      simp only [pow_succ]
       ring
     change residue (K := K) 0 _ = _
     rw [he,residue_div_polynomials (hQ := by simp)]
@@ -470,7 +468,6 @@ end
 section
 
 noncomputable section
-set_option maxHeartbeats 400000
 namespace CrossedElliptic
 open Polynomial
 variable (K : Type*) [Field K]
@@ -525,7 +522,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open Polynomial HoldoutConstruction
 variable {K : Type*} [Field K] [CharZero K]
@@ -544,24 +540,35 @@ def baseTime : Derivation ℤ (RatFunc K) (RatFunc K) :=
 def baseCoefficient (D : Derivation ℤ K K) : Derivation ℤ (RatFunc K) (RatFunc K) :=
   extendRingDerivation (L := RatFunc K) (coefficientPolynomialDerivation D)
 
+omit [CharZero K] in
 lemma baseTime_C (c : K) : baseTime (RatFunc.C c) = 0 := by
   change baseTime (algebraMap K[X] (RatFunc K) (C c)) = 0
-  rw [baseTime,extendRingDerivation_apply]
-  simp [timePolynomialDerivation_apply]
+  refine (extendRingDerivation_apply (L := RatFunc K)
+    (timePolynomialDerivation (E := K)) (C c)).trans ?_
+  change algebraMap K[X] (RatFunc K) (Polynomial.derivative (C c)) = 0
+  rw [Polynomial.derivative_C,map_zero]
+omit [CharZero K] in
 lemma baseTime_X : baseTime (RatFunc.X : RatFunc K) = 1 := by
   change baseTime (algebraMap K[X] (RatFunc K) X) = 1
-  rw [baseTime,extendRingDerivation_apply]
-  simp [timePolynomialDerivation_apply]
+  refine (extendRingDerivation_apply (L := RatFunc K)
+    (timePolynomialDerivation (E := K)) X).trans ?_
+  change algebraMap K[X] (RatFunc K) (Polynomial.derivative X) = 1
+  rw [Polynomial.derivative_X,map_one]
+omit [CharZero K] in
 lemma baseCoefficient_C (D : Derivation ℤ K K) (c : K) :
     baseCoefficient D (RatFunc.C c) = RatFunc.C (D c) := by
   change baseCoefficient D (algebraMap K[X] (RatFunc K) (C c)) = _
-  rw [baseCoefficient,extendRingDerivation_apply]
-  simp
+  refine (extendRingDerivation_apply (L := RatFunc K)
+    (coefficientPolynomialDerivation D) (C c)).trans ?_
+  exact congrArg (algebraMap K[X] (RatFunc K)) (coefficientPolynomialDerivation_C D c)
+omit [CharZero K] in
 lemma baseCoefficient_X (D : Derivation ℤ K K) :
     baseCoefficient D (RatFunc.X : RatFunc K) = 0 := by
   change baseCoefficient D (algebraMap K[X] (RatFunc K) X) = 0
-  rw [baseCoefficient,extendRingDerivation_apply]
-  simp
+  refine (extendRingDerivation_apply (L := RatFunc K)
+    (coefficientPolynomialDerivation D) X).trans ?_
+  exact (congrArg (algebraMap K[X] (RatFunc K))
+    (coefficientPolynomialDerivation_X D)).trans (map_zero _)
 
 def time : Derivation ℤ (E K) (E K) := extendFiniteDerivation (K := RatFunc K) (L := E K) (baseTime (K := K))
 def coefficient (D : Derivation ℤ K K) : Derivation ℤ (E K) (E K) :=
@@ -602,7 +609,7 @@ lemma y_ne_zero : y K ≠ 0 := by
 
 lemma time_y : time (K := K) (y K) = 3*(x K)^2/(2*y K) := by
   have h := congrArg (time (K := K)) (relation K)
-  simp only [Derivation.leibniz_pow,map_sub,Derivation.map_natCast,time_x,
+  simp only [Derivation.leibniz_pow,map_sub,time_x,
     smul_eq_mul,nsmul_eq_mul] at h
   have hc : time (K := K) (432 : E K) = 0 := (time (K := K)).map_natCast 432
   rw [hc] at h
@@ -612,16 +619,18 @@ lemma time_y : time (K := K) (y K) = 3*(x K)^2/(2*y K) := by
 
 lemma coefficient_y (D : Derivation ℤ K K) : coefficient D (y K) = 0 := by
   have h := congrArg (coefficient D) (relation K)
-  simp only [Derivation.leibniz_pow,map_sub,Derivation.map_natCast,coefficient_x,
+  simp only [Derivation.leibniz_pow,map_sub,coefficient_x,
     smul_eq_mul,nsmul_eq_mul] at h
   have hc : coefficient D (432 : E K) = 0 := (coefficient D).map_natCast 432
   rw [hc] at h
   norm_num at h
   exact h.resolve_left (y_ne_zero (K := K))
 
+omit [CharZero K] in
 lemma residue_time (a : K) (f : RatFunc K) :
     CrossedRationalResidue.residue a (baseTime (K := K) f) = 0 :=
   CrossedRationalResidue.residue_exact_derivative a baseTime baseTime_C baseTime_X f
+omit [CharZero K] in
 lemma residue_coefficient (a : K) (D : Derivation ℤ K K) (f : RatFunc K) :
     CrossedRationalResidue.residue a (baseCoefficient D f) =
       D (CrossedRationalResidue.residue a f) :=
@@ -774,7 +783,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open Polynomial HoldoutConstruction
 open scoped BigOperators
@@ -805,6 +813,7 @@ def differentialTrace : E K →ₗ[K] RatFunc K :=
   ((Algebra.trace (RatFunc K) (E K)).restrictScalars K).comp
     (LinearMap.mulLeft K (-3/y K))
 
+omit [CharZero K] in
 lemma differentialTrace_apply (f : E K) :
     differentialTrace f = Algebra.trace (RatFunc K) (E K) ((-3/y K)*f) := rfl
 
@@ -944,7 +953,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open HoldoutConstruction CrossedRationalResidue Polynomial
 open scoped BigOperators
@@ -957,10 +965,12 @@ No regularity at the expansion point is required. -/
 def rationalConstantTerm : RatFunc K →ₗ[K] K :=
   (residue (K:=K) 0).comp (LinearMap.mulRight K (RatFunc.X)⁻¹)
 
+omit [CharZero K] in
 lemma rationalConstantTerm_apply (f : RatFunc K) :
     rationalConstantTerm f=residue (K:=K) 0 (f/RatFunc.X) := by
   simp only [rationalConstantTerm,LinearMap.comp_apply,LinearMap.mulRight_apply,div_eq_mul_inv]
 
+omit [CharZero K] in
 lemma rationalConstantTerm_C (c : K) : rationalConstantTerm (RatFunc.C c)=c := by
   rw [rationalConstantTerm_apply]
   have hu : uniformizer (0 : K)=RatFunc.X := by simp [uniformizer]
@@ -971,6 +981,7 @@ lemma rationalConstantTerm_C (c : K) : rationalConstantTerm (RatFunc.C c)=c := b
   simp only [pow_one,ite_true] at hr
   rw [hr,smul_eq_mul,mul_one]
 
+omit [CharZero K] in
 lemma rationalConstantTerm_derivation (D : Derivation ℤ K K) (f : RatFunc K) :
     rationalConstantTerm (baseCoefficient D f)=D (rationalConstantTerm f) := by
   rw [rationalConstantTerm_apply,rationalConstantTerm_apply]
@@ -1023,8 +1034,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 namespace CrossedRadialResidue
 open CrossedElliptic HoldoutConstruction CrossedRationalResidue
 open scoped BigOperators
@@ -1049,6 +1058,7 @@ def independentCoordinates (c : Fin 3 → K) : Fin 4 → RatFunc K :=
   ![RatFunc.X*RatFunc.C (c 0),RatFunc.X,
     RatFunc.X^2*RatFunc.C (c 1),RatFunc.X^2*RatFunc.C (c 2)]
 
+omit [CharZero K] in
 lemma coneDerivations_coordinate (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 → K)
     (hc : ∀ i j,D i (c j)=if j=i then 1 else 0) (i j : Fin 4) :
     coneDerivations D c i (independentCoordinates c j)=if j=i then 1 else 0 := by
@@ -1058,15 +1068,17 @@ lemma coneDerivations_coordinate (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 �
   fin_cases i <;> fin_cases j <;>
     simp [coneDerivations,independentCoordinates,Derivation.sub_apply,Derivation.smul_apply,
       Derivation.leibniz,Derivation.leibniz_pow,smul_eq_mul,
-      baseTime_X,baseTime_C,baseCoefficient_X,baseCoefficient_C,hc,h2] <;>
+      baseTime_X,baseTime_C,baseCoefficient_X,baseCoefficient_C,hc] <;>
     field_simp <;> ring
 
+omit [CharZero K] in
 lemma coneDerivations_constant (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 → K)
     (a : K) (ha : ∀ i,D i a=0) (i : Fin 4) :
     coneDerivations D c i (RatFunc.C a)=0 := by
   fin_cases i <;> simp [coneDerivations,Derivation.sub_apply,Derivation.smul_apply,
     baseTime_C,baseCoefficient_C,ha]
 
+omit [CharZero K] in
 lemma radial_divergence_identity (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 → K)
     (hc : ∀ i,D i (c i)=1) (g : K) (hg : g≠0) (w : Fin 4 → RatFunc K) :
     residueDivergence (coneDerivations D c) (RatFunc.X^5*RatFunc.C g) w=
@@ -1078,8 +1090,8 @@ lemma radial_divergence_identity (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 �
     (baseCoefficient (D i)).map_natCast 2
   simp [residueDivergence,fieldDivergence,coneDerivations,projectedField,
     Fin.sum_univ_succ,Derivation.sub_apply,Derivation.smul_apply,Derivation.leibniz,
-    Derivation.leibniz_div,Derivation.leibniz_pow,Derivation.leibniz_inv,
-    smul_eq_mul,Algebra.smul_def,Algebra.algebraMap_self,RingHom.id_apply,
+    Derivation.leibniz_div,Derivation.leibniz_pow,
+    smul_eq_mul,
     baseTime_X,baseTime_C,baseCoefficient_X,baseCoefficient_C,hc,h2]
   field_simp
   ring

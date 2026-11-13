@@ -15,8 +15,6 @@ trace then returns the primitive to the quotient's own function field.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
-
 namespace HoldoutConicIncidence
 
 open HoldoutConstruction Polynomial

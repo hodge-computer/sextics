@@ -1,5 +1,52 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Upstream compatibility — 13 November 2026
+
+Following `benediamond`'s [review comment](https://github.com/hodge-computer/sextics/pull/245#issuecomment-6857093789),
+the branch incorporates upstream `main` at
+[`01b4813`](https://github.com/hodge-computer/sextics/commit/01b48136366f28affae56762c42d707642baa0d5).
+The merge is conflict-free. It preserves every cycle-q2 Lean source and the
+proof manifest from the preceding branch head `139a5b0`; the protected target,
+pinned Lean version, and Mathlib revision are unchanged.
+
+The compatibility audit resolves all 13 distinct direct shared imports and
+their 20-module shared-library dependency closure against this upstream
+revision. None imports the removed or relocated Fermat, cyclic/polar cubic,
+algebraic-specialization, or averaging-projector modules. The seven changed
+modules in that closure require no source migration in this proposal:
+
+| Shared module | Compatibility finding |
+| --- | --- |
+| `CertificateOperations` | Proof cleanup preserves the public interface. |
+| `FiniteAlgebra.FractionDerivation` | Unused inferred arguments were removed. The existing `rationalPartial_map` proof in [GeometricFormalInputs01Part03.lean](GeometricFormalInputs01Part03.lean) uses `rw [QuadricContactFraction.extend_map]` without explicit instance arguments. |
+| `HigherResidues.HigherResidue` | The proposal does not call `normal_cofactor_contraction`, whose unused normal-row hypothesis was removed. |
+| `HoldoutCover.FiniteDifferentials` | The proposal does not call `derivations_ext_finite_quotient_fraction`, whose unused domain instance was removed. |
+| `HoldoutCover.GenericIncidence` | The removed elaborator option does not change its public declarations. |
+| `HoldoutCover.Piola` | The new subtraction and scalar-product divergence lemmas extend the existing interface. |
+| `PolynomialCurves.ArithmeticLifting` | The proposal does not call `anchored_constantCoeff`, whose unused domain instance was removed. |
+
+The newly shared `WeierstrassConic` and `WeierstrassChart` constructions use a
+specific thirteen-coefficient curve and five-coordinate chart. They do not
+directly replace this proposal's Segre incidence and exterior-form geometry;
+such a replacement would need additional mathematical identifications. The
+proposal's own scoped elaborator options are retained: upstream's cleanup
+does not establish that those options can be removed from these proofs.
+
+Validation for this update checks all 181 helper modules with the repository's
+source/import policy, the unchanged Lean sources, the 184-file proposal
+boundary, explanation links and displayed mathematics, and the catalogue
+records. With pinned Lean 4.33.1, the updated `FractionDerivation` module and
+an isolated check containing the unchanged `rationalPartial` and
+`rationalPartial_map` bodies both compile. The latter check supplies the
+required Mathlib imports explicitly; it does not import the full proposal.
+Both modules are independently replayed with `leanchecker`, and their checked
+declarations use only `propext`, `Classical.choice`, and `Quot.sound`.
+
+This maintenance update does not discharge
+`Submission.missing_geometric_existence`. Import and source compatibility
+checks do not constitute a fresh compilation or independent kernel replay
+of the complete proposal.
+
 ## Classical geometric audit — 13 November 2026
 
 This continuation records an independent reconstruction and review of the

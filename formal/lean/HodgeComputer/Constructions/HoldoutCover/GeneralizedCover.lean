@@ -11,7 +11,6 @@ prior mathematical and formal sources acknowledged in the accepted proof.
 -/
 
 noncomputable section
-set_option maxHeartbeats 200000
 set_option maxRecDepth 10000
 
 namespace HoldoutGeneralization
@@ -204,15 +203,13 @@ theorem certificate_of_source_pair
   apply hasCertificate_of_normalized holdoutSextic A D (Fin.cases N₀ N) Q
     holdoutSextic_isHomogeneous hA (holdoutSextic_irreducible Complex.I hi).prime hlegal
     ?_ ?_ 0 holdoutSextic_not_dvd_pderiv_zero
-  · set_option backward.isDefEq.respectTransparency false in
-    simpa only [HodgeTestbed.directional, Fin.sum_univ_succ,
-      Fin.cases_zero, Fin.cases_succ, integerPartial, Derivation.restrictScalars_apply,
-      Derivation.coeFn_coe, mul_comm] using hnormal
-  · set_option backward.isDefEq.respectTransparency false in
-    simpa only [HodgeTestbed.divergenceNumerator, HodgeTestbed.divergence,
+  · simp only [HodgeTestbed.directional, Fin.sum_univ_succ,
+      Fin.cases_zero, Fin.cases_succ, integerPartial, mul_comm] at hnormal ⊢
+    exact hnormal
+  · simp only [HodgeTestbed.divergenceNumerator, HodgeTestbed.divergence,
       HodgeTestbed.directional, residueDivNum, Fin.sum_univ_succ,
-      Fin.cases_zero, Fin.cases_succ, integerPartial, Derivation.restrictScalars_apply,
-      Derivation.coeFn_coe, mul_comm] using hdiv
+      Fin.cases_zero, Fin.cases_succ, integerPartial, mul_comm] at hdiv ⊢
+    exact hdiv
 
 end HoldoutGeneralization
 

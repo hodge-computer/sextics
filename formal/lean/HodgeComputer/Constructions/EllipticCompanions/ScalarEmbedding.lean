@@ -11,7 +11,6 @@ is retained in the library README and the accepted source explanation.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace EllipticCompanion
 open Polynomial HoldoutConstruction CrossedElliptic
 abbrev P2 := MvPolynomial (Fin 2) ℂ
@@ -36,24 +35,28 @@ lemma coefficientMap_injective (φ : P2 →+* K) (hφ : Function.Injective φ)
 lemma base_univariate (p : P2) : MvPolynomial.finSuccEquiv ℂ 2 (base p)=C p :=
   (MvPolynomial.finSuccEquiv ℂ 2).apply_symm_apply _
 
+omit [CharZero K] in
 lemma coefficientMap_base (φ : P2 →+* K) (u : K) (p : P2) :
     coefficientMap φ u (base p)=algebraMap K (E K) (φ p) := by
   change Polynomial.eval₂ (algebraMap K (E K)) (algebraMap K (E K) u*a (K:=K))
     ((MvPolynomial.finSuccEquiv ℂ 2 (base p)).map φ)=_
   rw [base_univariate,Polynomial.map_C,Polynomial.eval₂_C]
 
+omit [CharZero K] in
 lemma coefficientMap_S (φ : P2 →+* K) (u : K) :
     coefficientMap φ u (MvPolynomial.X 0)=algebraMap K (E K) u*a (K:=K) := by
   change Polynomial.eval₂ (algebraMap K (E K)) (algebraMap K (E K) u*a (K:=K))
     ((MvPolynomial.finSuccEquiv ℂ 2 (MvPolynomial.X 0)).map φ)=_
   rw [MvPolynomial.finSuccEquiv_X_zero,Polynomial.map_X,Polynomial.eval₂_X]
 
+omit [CharZero K] in
 lemma coefficientMap_X_succ (φ : P2 →+* K) (u : K) (i : Fin 2) :
     coefficientMap φ u (MvPolynomial.X i.succ)=algebraMap K (E K) (φ (MvPolynomial.X i)) := by
   change Polynomial.eval₂ (algebraMap K (E K)) (algebraMap K (E K) u*a (K:=K))
     ((MvPolynomial.finSuccEquiv ℂ 2 (MvPolynomial.X i.succ)).map φ)=_
   rw [MvPolynomial.finSuccEquiv_X_succ,Polynomial.map_C,Polynomial.eval₂_C]
 
+omit [CharZero K] in
 lemma coefficientMap_C (φ : P2 →+* K) (u : K) (c : ℂ) :
     coefficientMap φ u (MvPolynomial.C c)=algebraMap K (E K) (φ (MvPolynomial.C c)) := by
   change Polynomial.eval₂ (algebraMap K (E K)) (algebraMap K (E K) u*a (K:=K))

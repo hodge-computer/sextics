@@ -12,6 +12,7 @@ open MvPolynomial
 variable {k K σ : Type*} [Field k] [Field K] [CharZero k]
   [Fintype σ] [DecidableEq σ]
 
+omit [CharZero k] [Fintype σ] in
 lemma pderiv_degree_lt (p : MvPolynomial σ k) (i : σ) (hp : 0<p.totalDegree) :
     (pderiv i p).totalDegree<p.totalDegree := by
   classical

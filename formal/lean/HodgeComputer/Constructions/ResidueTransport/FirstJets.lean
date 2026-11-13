@@ -26,8 +26,6 @@ normalization uses explicit inverses in the coefficient ring.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 
 namespace ResidueFirstJets
 
@@ -138,13 +136,15 @@ open TrivSqZeroExt
 
 def jetDerivation (D : Derivation ℤ K K) : Derivation ℤ (Jet (K:=K)) (Jet (K:=K)) where
   toFun z := (D z.fst,D z.snd)
-  map_add' := by intro a b; ext <;> simp [map_add]
-  map_smul' := by intro n a; ext <;> simp
-  map_one_eq_zero' := by ext <;> simp
-  leibniz' := by
-    intro a b
-    ext <;> simp [Derivation.leibniz,smul_eq_mul]
-    ring
+  map_add' a b := TrivSqZeroExt.ext (map_add D a.fst b.fst) (map_add D a.snd b.snd)
+  map_smul' n a := TrivSqZeroExt.ext (D.map_smul n a.fst) (D.map_smul n a.snd)
+  map_one_eq_zero' := TrivSqZeroExt.ext D.map_one_eq_zero (map_zero D)
+  leibniz' a b := TrivSqZeroExt.ext (D.leibniz a.fst b.fst)
+    (show D (a.fst*b.snd+a.snd*b.fst) =
+        (a.fst*D b.snd+a.snd*D b.fst)+(b.fst*D a.snd+b.snd*D a.fst) by
+      rw [map_add,D.leibniz,D.leibniz]
+      simp only [smul_eq_mul]
+      ring)
 
 lemma jetDerivation_fst (D : Derivation ℤ K K) (a : Jet (K:=K)) :
     (jetDerivation D a).fst=D a.fst := rfl
@@ -168,7 +168,9 @@ lemma differential_first_variation (D : Derivation ℤ K K) (ξ η g : Jet (K:=K
     (h : g*jetDerivation D ξ=6*η) :
     g.fst*D ξ.snd+g.snd*D ξ.fst=6*η.snd := by
   have hs := congrArg TrivSqZeroExt.snd h
-  simpa [jetDerivation,smul_eq_mul,op_smul_eq_smul,add_comm] using hs
+  simp only [snd_mul,jetDerivation_fst,jetDerivation_snd,fst_numeral,snd_numeral,
+    smul_eq_mul,op_smul_eq_smul,mul_zero,add_zero] at hs
+  linear_combination hs
 
 lemma differential_jet_from_cleared (g η Dξ ξdotDerivative ηdot gdot : K)
     (hvalue : g*Dξ=6*η)

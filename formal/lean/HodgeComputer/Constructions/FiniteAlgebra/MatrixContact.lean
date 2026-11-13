@@ -29,16 +29,19 @@ def matrixDeriv (δ : Derivation k R R) :
   map_add' A B := by ext a b; exact map_add δ _ _
   map_smul' c A := by ext a b; exact δ.toLinearMap.map_smul c _
 
+omit [Fintype n] [DecidableEq n] in
 @[simp] theorem matrixDeriv_apply (δ : Derivation k R R)
     (M : Matrix n n R) (a b : n) : matrixDeriv δ M a b = δ (M a b) := rfl
 
+omit [Fintype n] in
 @[simp] theorem matrixDeriv_one (δ : Derivation k R R) :
     matrixDeriv δ (1 : Matrix n n R) = 0 := by
   ext a b
   by_cases h : a = b
-  · subst b; simp [Matrix.one_apply]
-  · simp [Matrix.one_apply, h]
+  · subst b; simp
+  · simp [h]
 
+ omit [DecidableEq n] in
  theorem matrixDeriv_mul (δ : Derivation k R R) (A B : Matrix n n R) :
     matrixDeriv δ (A * B) = matrixDeriv δ A * B + A * matrixDeriv δ B := by
   ext a b
@@ -53,6 +56,7 @@ def matrixDeriv (δ : Derivation k R R) :
     intro j _
     ring
 
+ omit [Fintype n] [DecidableEq n] in
  theorem matrixDeriv_smul (δ : Derivation k R R) (c : R) (A : Matrix n n R) :
     matrixDeriv δ (c • A) = δ c • A + c • matrixDeriv δ A := by
   ext a b
@@ -60,6 +64,7 @@ def matrixDeriv (δ : Derivation k R R) :
     smul_eq_mul, Derivation.leibniz]
   ring
 
+ omit [DecidableEq n] in
  theorem deriv_trace (δ : Derivation k R R) (A : Matrix n n R) :
     δ A.trace = (matrixDeriv δ A).trace := by
   simp [Matrix.trace]
@@ -218,11 +223,12 @@ def columnFunctional (w : n → R) (j : n) : Matrix n n R →ₗ[R] R where
   map_add' A B := by simp [mul_add, Finset.sum_add_distrib]
   map_smul' c A := by simp [Finset.mul_sum, mul_left_comm]
 
+ omit [DecidableEq n] in
  theorem deriv_columnFunctional (δ : Derivation k R R) (w : n → R) (j : n)
     (hw : ∀ a, δ (w a) = 0) (M : Matrix n n R) :
     δ (columnFunctional w j M) = columnFunctional w j (matrixDeriv δ M) := by
   simp only [columnFunctional, LinearMap.coe_mk, AddHom.coe_mk, map_sum,
-    Derivation.leibniz, hw, smul_zero, mul_zero, add_zero, smul_eq_mul, matrixDeriv_apply]
+    Derivation.leibniz, hw, mul_zero, add_zero, smul_eq_mul, matrixDeriv_apply]
 
  theorem pderiv_contact_column {K σ : Type*} [CommRing K] [Fintype σ]
     (L J : Matrix n n (MvPolynomial σ K))

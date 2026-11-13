@@ -89,7 +89,8 @@ variable (K : Type*) [Field K]
 
 lemma equation_natDegree : (equation K).natDegree = 2 := by
   rw [equation_eq]
-  compute_degree <;> simp
+  compute_degree
+  simp
 
 def basis : Module.Basis (Fin 2) (RatFunc K) (E K) :=
   (AdjoinRoot.powerBasis' (equation_monic K)).basis.reindex (finCongr (equation_natDegree K))
@@ -136,7 +137,7 @@ lemma trace_expansion (f : E K) : Algebra.trace (RatFunc K) (E K) f = 2*first K 
   have hm : algebraMap (RatFunc K) (E K) (second K f)*y K = (second K f) • y K :=
     (Algebra.smul_def _ _).symm
   rw [hm,map_smul,trace_y,smul_zero,add_zero]
-  simp [smul_eq_mul]
+  simp
 
 end CrossedElliptic
 end
@@ -168,13 +169,14 @@ def translatedY (x y u v : L) : L := -y+slope x y u v*(x-translatedX x y u v)
 lemma translatedX_fraction (x y u v : L) (h : x-u≠0) :
     translatedX x y u v=xNumerator x y u v/(x-u)^2 := by
   unfold translatedX slope xNumerator
-  field_simp <;> ring
+  field_simp
+  ring
 
 lemma translatedY_fraction (x y u v : L) (h : x-u≠0) :
     translatedY x y u v=yNumerator x y u v/(x-u)^3 := by
   rw [translatedY,translatedX_fraction x y u v h]
   unfold slope yNumerator
-  field_simp <;> ring
+  field_simp
 
 lemma translated_curve (x y u v : L) (h : x-u≠0)
     (hp : y^2=x^3-432) (hq : v^2=u^3-432) :
@@ -192,7 +194,8 @@ lemma inverse_slope (x y u v : L) (h : x-u≠0)
     (h' : translatedX x y u v-u≠0) :
     slope (translatedX x y u v) (translatedY x y u v) u (-v)= -slope x y u v := by
   unfold translatedY slope
-  field_simp <;> ring
+  field_simp
+  ring
 
 lemma inverse_x (x y u v : L) (h : x-u≠0)
     (h' : translatedX x y u v-u≠0) :
@@ -215,7 +218,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open Polynomial CrossedRationalResidue
 variable (K : Type*) [Field K]
