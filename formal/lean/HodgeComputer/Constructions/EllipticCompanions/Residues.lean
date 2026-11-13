@@ -540,22 +540,26 @@ def baseTime : Derivation ℤ (RatFunc K) (RatFunc K) :=
 def baseCoefficient (D : Derivation ℤ K K) : Derivation ℤ (RatFunc K) (RatFunc K) :=
   extendRingDerivation (L := RatFunc K) (coefficientPolynomialDerivation D)
 
+set_option backward.isDefEq.respectTransparency false in
 omit [CharZero K] in
 lemma baseTime_C (c : K) : baseTime (RatFunc.C c) = 0 := by
   change baseTime (algebraMap K[X] (RatFunc K) (C c)) = 0
   rw [baseTime,extendRingDerivation_apply]
   simp [timePolynomialDerivation_apply]
+set_option backward.isDefEq.respectTransparency false in
 omit [CharZero K] in
 lemma baseTime_X : baseTime (RatFunc.X : RatFunc K) = 1 := by
   change baseTime (algebraMap K[X] (RatFunc K) X) = 1
   rw [baseTime,extendRingDerivation_apply]
   simp [timePolynomialDerivation_apply]
+set_option backward.isDefEq.respectTransparency false in
 omit [CharZero K] in
 lemma baseCoefficient_C (D : Derivation ℤ K K) (c : K) :
     baseCoefficient D (RatFunc.C c) = RatFunc.C (D c) := by
   change baseCoefficient D (algebraMap K[X] (RatFunc K) (C c)) = _
   rw [baseCoefficient,extendRingDerivation_apply]
   simp
+set_option backward.isDefEq.respectTransparency false in
 omit [CharZero K] in
 lemma baseCoefficient_X (D : Derivation ℤ K K) :
     baseCoefficient D (RatFunc.X : RatFunc K) = 0 := by
@@ -619,9 +623,11 @@ lemma coefficient_y (D : Derivation ℤ K K) : coefficient D (y K) = 0 := by
   norm_num at h
   exact h.resolve_left (y_ne_zero (K := K))
 
+omit [CharZero K] in
 lemma residue_time (a : K) (f : RatFunc K) :
     CrossedRationalResidue.residue a (baseTime (K := K) f) = 0 :=
   CrossedRationalResidue.residue_exact_derivative a baseTime baseTime_C baseTime_X f
+omit [CharZero K] in
 lemma residue_coefficient (a : K) (D : Derivation ℤ K K) (f : RatFunc K) :
     CrossedRationalResidue.residue a (baseCoefficient D f) =
       D (CrossedRationalResidue.residue a f) :=
@@ -961,6 +967,7 @@ lemma rationalConstantTerm_apply (f : RatFunc K) :
     rationalConstantTerm f=residue (K:=K) 0 (f/RatFunc.X) := by
   simp only [rationalConstantTerm,LinearMap.comp_apply,LinearMap.mulRight_apply,div_eq_mul_inv]
 
+omit [CharZero K] in
 lemma rationalConstantTerm_C (c : K) : rationalConstantTerm (RatFunc.C c)=c := by
   rw [rationalConstantTerm_apply]
   have hu : uniformizer (0 : K)=RatFunc.X := by simp [uniformizer]
@@ -1047,6 +1054,7 @@ def independentCoordinates (c : Fin 3 → K) : Fin 4 → RatFunc K :=
   ![RatFunc.X*RatFunc.C (c 0),RatFunc.X,
     RatFunc.X^2*RatFunc.C (c 1),RatFunc.X^2*RatFunc.C (c 2)]
 
+omit [CharZero K] in
 lemma coneDerivations_coordinate (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 → K)
     (hc : ∀ i j,D i (c j)=if j=i then 1 else 0) (i j : Fin 4) :
     coneDerivations D c i (independentCoordinates c j)=if j=i then 1 else 0 := by
@@ -1059,12 +1067,14 @@ lemma coneDerivations_coordinate (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 �
       baseTime_X,baseTime_C,baseCoefficient_X,baseCoefficient_C,hc] <;>
     field_simp <;> ring
 
+omit [CharZero K] in
 lemma coneDerivations_constant (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 → K)
     (a : K) (ha : ∀ i,D i a=0) (i : Fin 4) :
     coneDerivations D c i (RatFunc.C a)=0 := by
   fin_cases i <;> simp [coneDerivations,Derivation.sub_apply,Derivation.smul_apply,
     baseTime_C,baseCoefficient_C,ha]
 
+omit [CharZero K] in
 lemma radial_divergence_identity (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 → K)
     (hc : ∀ i,D i (c i)=1) (g : K) (hg : g≠0) (w : Fin 4 → RatFunc K) :
     residueDivergence (coneDerivations D c) (RatFunc.X^5*RatFunc.C g) w=

@@ -28,6 +28,7 @@ lemma normal_zero_coordinate (g ψ : Fin 5 → K) (hg : g 0≠0)
   field_simp [hg]
   linear_combination hnormal
 
+omit [CharZero K] in
 theorem first_jet_formula (E : Fin 4 → Derivation ℤ K K)
     (g ψ b : Fin 5 → K) (B : K) (hg : g 0≠0)
     (hnormal : (∑ i,g i*ψ i)=1)

@@ -169,6 +169,7 @@ omit [CharZero K] [IsDomain (AdjoinRoot p)] in
   rw [MvPolynomial.finSuccEquiv_X_succ]
   rfl
 
+omit [CharZero K] in
 lemma residueMap_kernel (f : MvPolynomial (Fin (n+1)) K) : residueMap p f=0 ↔ equation p ∣ f :=
   residue_fractionMap_kernel (projection p) (equation p) (projection_kernel p) f
 
@@ -353,6 +354,7 @@ lemma evaluation (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
     simp [coordinates]
   exact congrArg (fun f : MvPolynomial ι R →ₐ[R] _ => f P) hh
 
+omit [DecidableEq ι] in
 lemma solution (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
     (η : OpenSystemRing equations g →ₐ[R] S) (i : ι) :
     MvPolynomial.aeval (coordinates equations g η) (equations i)=0 := by
@@ -361,6 +363,7 @@ lemma solution (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
     Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.subset_span ⟨i,rfl⟩)
   rw [hz,map_zero]
 
+omit [DecidableEq ι] in
 lemma open_unit (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
     (η : OpenSystemRing equations g →ₐ[R] S) :
     IsUnit (MvPolynomial.aeval (coordinates equations g η) g) := by

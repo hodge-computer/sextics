@@ -163,6 +163,7 @@ lemma curve_first_variation (ξ η a b : Jet (K:=K))
   norm_num at hs
   linear_combination hs
 
+set_option backward.isDefEq.respectTransparency false in
 lemma differential_first_variation (D : Derivation ℤ K K) (ξ η g : Jet (K:=K))
     (h : g*jetDerivation D ξ=6*η) :
     g.fst*D ξ.snd+g.snd*D ξ.fst=6*η.snd := by

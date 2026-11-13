@@ -26,6 +26,7 @@ lemma linearMatrix_tail (M₀ M₁ : Matrix (Fin 5) (Fin 5) K) :
       linearMatrix (M₀.submatrix Fin.succ Fin.succ) (M₁.submatrix Fin.succ Fin.succ) := by
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 omit [CharZero K] in
 lemma linearMatrix_updatedRow_zero (M₀ M₁ : Matrix (Fin 5) (Fin 5) K) (d : Fin 5 → K) :
     ((linearMatrix M₀ M₁).updateRow 0 (C ∘ d)).det.coeff 0 = (M₀.updateRow 0 d).det := by

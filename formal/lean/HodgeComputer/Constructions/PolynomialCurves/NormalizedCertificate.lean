@@ -22,6 +22,7 @@ variable [Field K] [CharZero K] [Algebra B K] [IsFractionRing B K]
 variable [Field L] [CharZero L] [Algebra K L] [FiniteDimensional K L]
 variable [CommRing T]
 
+set_option backward.isDefEq.respectTransparency false in
 /-- A verified polynomial family yields unrestricted normalized polynomial
 data. The application imposes homogeneity after its coordinate transport. -/
 theorem normalized_data_from_polynomial_family

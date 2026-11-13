@@ -24,6 +24,7 @@ omit [IsDomain P] [Algebra ℚ P] [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem repr_eq (x : F) :
     algebraMap P F (num x) / algebraMap P F (den x) = x :=
   (Classical.choose_spec (Classical.choose_spec (IsFractionRing.div_surjective P x))).2
+omit [Algebra ℚ P] [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem den_ne (x : F) : algebraMap P F (den x) ≠ 0 :=
   IsFractionRing.to_map_ne_zero_of_mem_nonZeroDivisors (den_mem x)
 omit [Algebra ℚ P] [Algebra ℚ F] [IsScalarTower ℚ P F] in

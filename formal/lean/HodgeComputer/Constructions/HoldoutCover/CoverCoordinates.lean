@@ -39,6 +39,7 @@ private theorem commonCoverBaseChange_of_C
   rw [physicalCoverFieldMap_coordinateRing]
   simp [physicalRoot, coverX0]
 
+set_option backward.isDefEq.respectTransparency false in
 @[simp] theorem physicalCoverFieldMap_parameter (i : Fin 5) :
     physicalCoverFieldMap
       (algebraMap HoldoutCoordinateRing HoldoutFunctionField (physicalParameter i)) =

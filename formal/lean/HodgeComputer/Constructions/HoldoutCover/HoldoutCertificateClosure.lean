@@ -106,10 +106,12 @@ theorem holdout_hasCertificate_of_cover_residue
       (physical_normal_source_trace T hT physicalNormalSource
         (physicalResidueMap (MvPolynomial.X 4)^4)) heq
   apply holdout_hasCertificate_of_normalized D (Fin.cases N₀ N) Q hlegal
-  · simpa only [HodgeTestbed.directional, Fin.sum_univ_succ,
+  · set_option backward.isDefEq.respectTransparency false in
+    simpa only [HodgeTestbed.directional, Fin.sum_univ_succ,
       Fin.cases_zero, Fin.cases_succ, integerPartial, Derivation.restrictScalars_apply,
       Derivation.coeFn_coe, mul_comm] using hnormal
-  · simpa only [HodgeTestbed.divergenceNumerator, HodgeTestbed.divergence,
+  · set_option backward.isDefEq.respectTransparency false in
+    simpa only [HodgeTestbed.divergenceNumerator, HodgeTestbed.divergence,
       HodgeTestbed.directional, residueDivNum, Fin.sum_univ_succ,
       Fin.cases_zero, Fin.cases_succ, integerPartial, Derivation.restrictScalars_apply,
       Derivation.coeFn_coe, mul_comm] using hdiv

@@ -91,6 +91,7 @@ def traceSquare (D : ι → Derivation ℤ K K) (w : ι → K) : K :=
 def hessianDensity (D : ι → Derivation ℤ K K) (w : ι → K) (r : K) : K :=
   ∑ i, ∑ j, w i*w j*D i (D j r)
 
+omit [CharZero K] in
 lemma second_lie_divergence (D : ι → Derivation ℤ K K) (w : ι → K) (r : K)
     (hc : ∀ i j, Function.Commute (D i) (D j)) :
     fieldDivergence D (fun i => w i*fieldDivergence D (fun j => r*w j)-

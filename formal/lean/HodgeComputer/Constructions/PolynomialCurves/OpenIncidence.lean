@@ -80,6 +80,7 @@ theorem openGeneric_eval (eqs : ι → MvPolynomial ι R) (i : ι)
     simp [openGenericCoordinates]
   exact congrArg (fun f : MvPolynomial ι R →ₐ[R] _ => f p) h
 
+omit [DecidableEq ι] in
 theorem openGeneric_solution (eqs : ι → MvPolynomial ι R) (i : ι)
     (I : Ideal (OpenSquareGeneric K eqs i)) (j : ι) :
     MvPolynomial.aeval (openGenericCoordinates eqs i I) (eqs j) = 0 := by
