@@ -1,5 +1,128 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Checked finite seed and incidence charts — 12 November 2026
+
+This continuation proves three additional concrete algebraic results. It does
+**not** close `Submission.missing_geometric_existence`, construct the full
+rational primitive, or establish a protected acceptance result.
+
+### Explicit quotient tests at the literal complex seed
+
+[GeometricExplicitTangent.lean](GeometricExplicitTangent.lean) proves seven
+literal ideal memberships for the existing cubic
+\[
+L=i x_0^2x_1+(i-1)x_0^3.
+\]
+This is the already defined `CycleQ2SeedCechTheta.selectedTangent`; the new
+result is its binding to all seven obstruction tests at \(r=57,\theta=1\).
+For the actual polynomials \(f_1,f_2,g_1,g_2,h,k\) at that seed,
+`CycleQ2ExplicitSeedDirection.selected_test_mem` proves
+\[
+kL\sigma\in(f_1,f_2,g_1,g_2,h)
+\]
+for each of
+\[
+\sigma=x_2w,\ x_2x_3^2,\ x_1x_2^2,\ x_1^2x_3,
+\ x_0x_2^2,\ x_0x_1x_3,\ x_0^2x_3.
+\]
+The proof consists of explicit polynomial Bezout identities over Gaussian
+coefficients, followed by exact binding to the existing five-variable seed
+ideal. It assumes no equation \(57^3=2\).
+
+The same module proves that \(3L\) has derivative trace one, is not a
+coboundary in the existing unrestricted localization complex, and has paired
+normal trace exactly \(-1/171\). Its important declarations are
+`traceOne_test_mem`, `traceOne_trace`, `traceOne_not_boundary`, and
+`traceOne_paired_normal_trace`.
+
+These statements do not identify the quotient tests with the geometric
+Noether--Lefschetz map or identify the paired trace with the derivative of an
+Abel--Jacobi map. Nor do they identify \(3L\) with the cubic component of the
+separately constructed, nonconstructively chosen incidence tangent: equality
+of their scalar traces does not imply equality of the directions.
+
+### Actual polynomial charts for the section zero locus
+
+[GeometricIncidenceSection.lean](GeometricIncidenceSection.lean) strengthens
+the existing principal-ideal calculation for the literal equations \(MT=0\).
+For any commutative ring \(R\), a three-by-three matrix \(M\) with zero
+cofactors, and a unit entry \(M_{ab}\),
+`CycleQ2IncidenceSection.sectionQuotientEquiv` constructs an algebra isomorphism
+\[
+R[T_0,T_1,T_2]/((MT)_0,(MT)_1,(MT)_2)\simeq R[U,V].
+\]
+It constructs both inverse substitutions, solving the row equation for
+\(T_b\). No field, domain, or reducedness hypothesis is imposed on \(R\).
+The actual quotient algebra is therefore smooth and flat over \(R\), as
+proved by `sectionQuotient_smooth` and `sectionQuotient_flat`.
+
+Here \(R\) is the surface chart ring. This is not a theorem that every
+individual curve fiber is smooth or that the family is flat over its
+section-parameter space. The global projective gluing, divisor-class
+identification, suitable smooth-family open, and Abel--Jacobi comparison
+remain further geometric steps.
+
+### The invariant-coordinate dictionary retains the exact source
+
+[GeometricInvariantQuotient.lean](GeometricInvariantQuotient.lean) binds a
+rational coordinate substitution to the generated protected \(F\) and \(A\).
+On \(X_0=1\), write \((x,a,y,z,b)=(X_1,X_2,Y_0,Y_1,Y_2)\), and put
+\[
+t=yz,\qquad u=za^2,\qquad r=z^3,\qquad\lambda=b/a.
+\]
+On the nonempty coordinate open used for the substitution, the quotient
+equation is
+\[
+H=r^4+(1+x^6+xt/2+\lambda x^3u/2)r^2
+  +((1+\lambda^6)u^3+\lambda tu^2/2)r+t^6=z^6f.
+\]
+The forward Jacobian, in the displayed coordinate order, is \(-6z^4\).
+The entire protected ambient form transforms to
+\[
+-\frac{\lambda x^2t^2u^2r^4}{6H^3}
+  \,dx\wedge dt\wedge du\wedge dr\wedge d\lambda.
+\]
+The module proves the polynomial substitution, differential coefficients,
+Jacobian determinant, numerator binding, and rational-density pullback.
+It also proves the scalar normal-residue formula under the required jet
+scalings. These identities preserve the character and all density factors;
+they do not assert vanishing of a cohomology class or supply a primitive.
+This quotient can be transformed back to the previously studied elliptic
+cubic, so it is a verified dictionary, not a removal of that route's
+unresolved compact class.
+
+### Verification and the remaining endpoint
+
+Each new module was compiled with pinned Lean 4.33.1 and individually replayed
+with `leanchecker`. The printed transitive axioms of the principal new
+declarations are exactly `propext`, `Classical.choice`, and `Quot.sound`.
+
+| New module | Compile time | Peak compile RSS | Kernel replay |
+| --- | ---: | ---: | --- |
+| `GeometricExplicitTangent` | 42.15 s | 3.73 GiB | Passed |
+| `GeometricIncidenceSection` | 7.04 s | 3.47 GiB | Passed |
+| `GeometricInvariantQuotient` | 12.05 s | 3.22 GiB | Passed |
+
+The selected checks used one compiler worker, a 5,120 MiB managed-memory
+limit, a 6,144 MiB monitored RSS ceiling, and existing pinned compiled
+dependencies, including compatibility modules from the source-preserved
+pre-refactor layout. This is compilation and independent replay of the
+three new modules, not a fresh build or replay of the complete refactored
+dependency closure. The original explicit admission remains.
+
+The proposal now has 184 permitted files (approximately 7.02 MiB), within
+the unchanged 256-file and 16-MiB limits. All 181 helper modules pass the
+source/import policy. The full proposal correctly fails that policy at the
+existing placeholder in `Solution.lean`; the generated protected target and
+the certificate entry point are unchanged.
+
+The next substantive geometric comparison must connect an actual moving
+divisor family to the nonzero paired class and its invariant Abel--Jacobi
+derivative. Supported correspondences and restriction of the **specific**
+protected residue to zero on a nonempty principal open must then supply the
+existing algebraic exactness criterion. None of those conclusions is
+introduced as a new axiom or hidden in the new definitions.
+
 ## Smaller proof modules — 12 November 2026
 
 This refactor continues the newer `fqlx/cycle-q2-modular` development at
