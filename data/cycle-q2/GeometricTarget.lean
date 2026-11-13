@@ -118,6 +118,10 @@ import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Analysis.SpecialFunctions.Pow.Complex
 import Proposal.GeometricFormalInputs
 
+/- SOURCE STATUS (2026-11-12): the new continuation blocks explicitly marked
+uncompiled below have not been elaborated, compiled, or kernel-replayed.
+Historical verification records do not cover this modified source. -/
+
 /-!
 # Checked inputs for the nonconstructive cycle-q2 route
 
@@ -38275,3 +38279,207 @@ end
 
 
 /- End of continuation partition. -/
+
+
+/- Uncompiled continuation: GeometricBridgeAlgebra.lean (2026-11-12). -/
+section Q2UncompiledHiggsBridge
+
+/-!
+# Self-adjoint projectors on the actual Fermat Jacobian component
+
+This file supplies an algebraic step in the reconstructed geometric argument.
+The existing finite theorem `CycleQ2FermatHiggs.compatible_projector_trivial`
+concerns matrices. Here it is applied to endomorphisms of the actual
+`CycleQ2FermatJacobian.gradedPiece 6 1`, using the actual socle triple-product
+pairings and the already constructed monomial basis.
+
+In particular, the compatibility premise below is an equality in the actual
+Fermat derivative quotient, not a premise asserting geometric support or
+existence of a residue primitive. Interpreting a geometric polarized sub-VHS
+projector as one of these endomorphisms remains a separate geometric theorem.
+
+Written against the recorded project sources and the pinned mathlib source
+at 0df444a360eaa60ab8c11dca51a86af692955474. This draft has not been compiled.
+-/
+
+set_option autoImplicit false
+
+noncomputable section
+
+namespace CycleQ2GeometricBridgeAlgebra
+
+open CycleQ2FermatJacobian
+
+open scoped BigOperators
+
+/-- The actual degree-six character-one component of the Fermat quotient. -/
+abbrev InvariantHodgeModel := gradedPiece 6 1
+
+/-- The actual degree-six character-zero deformation component. -/
+abbrev InvariantTangentModel := gradedPiece 6 0
+
+/-- The triple-product form on the actual quotient, linear in both inputs.
+The names of the models indicate their intended geometric interpretation;
+no Hodge-theoretic comparison is assumed or asserted in this definition. -/
+def actualTracePairing (t : InvariantTangentModel) :
+    InvariantHodgeModel →ₗ[ℂ] InvariantHodgeModel →ₗ[ℂ] ℂ where
+  toFun u :=
+    { toFun := fun v =>
+        socleTrace ((u : JacobianRing) * (v : JacobianRing) * (t : JacobianRing))
+      map_add' := by
+        intro v w
+        simp [mul_add, add_mul]
+      map_smul' := by
+        intro c v
+        simp [mul_smul_comm, smul_mul_assoc] }
+  map_add' := by
+    intro u v
+    ext w
+    simp [add_mul]
+  map_smul' := by
+    intro c u
+    ext v
+    simp [smul_mul_assoc]
+
+@[simp] theorem actualTracePairing_apply (t : InvariantTangentModel)
+    (u v : InvariantHodgeModel) :
+    actualTracePairing t u v =
+      socleTrace ((u : JacobianRing) * (v : JacobianRing) * (t : JacobianRing)) :=
+  rfl
+
+theorem actualTracePairing_symmetric (t : InvariantTangentModel)
+    (u v : InvariantHodgeModel) :
+    actualTracePairing t u v = actualTracePairing t v u := by
+  change socleTrace ((u : JacobianRing) * (v : JacobianRing) * (t : JacobianRing)) =
+    socleTrace ((v : JacobianRing) * (u : JacobianRing) * (t : JacobianRing))
+  rw [mul_comm (u : JacobianRing) (v : JacobianRing)]
+
+@[simp] theorem actualTracePairing_flip_apply (t : InvariantTangentModel)
+    (u v : InvariantHodgeModel) :
+    (actualTracePairing t).flip v u = actualTracePairing t u v :=
+  rfl
+
+/-- Its matrices are the already proved finite Fermat Higgs matrices. -/
+theorem actualTracePairing_basis (m : Fin 35) (i j : Fin 33) :
+    actualTracePairing (degreeSixCharacterZeroBasis m)
+      (degreeSixCharacterOneBasis i) (degreeSixCharacterOneBasis j) =
+        CycleQ2FermatHiggs.higgsMatrix ℂ m i j :=
+  actual_component_trace_matrix m i j
+
+/-- The matrix of an actual endomorphism, with the established quotient basis. -/
+def actualEndomorphismMatrix
+    (P : Module.End ℂ InvariantHodgeModel) : Matrix (Fin 33) (Fin 33) ℂ :=
+  LinearMap.toMatrixAlgEquiv degreeSixCharacterOneBasis P
+
+theorem actualEndomorphismMatrix_apply
+    (P : Module.End ℂ InvariantHodgeModel) (i j : Fin 33) :
+    actualEndomorphismMatrix P i j =
+      degreeSixCharacterOneBasis.repr (P (degreeSixCharacterOneBasis j)) i :=
+  LinearMap.toMatrixAlgEquiv_apply degreeSixCharacterOneBasis P i j
+
+theorem actualTracePairing_expand_left (t : InvariantTangentModel)
+    (u v : InvariantHodgeModel) :
+    actualTracePairing t u v =
+      ∑ i : Fin 33, degreeSixCharacterOneBasis.repr u i *
+        actualTracePairing t (degreeSixCharacterOneBasis i) v := by
+  have h := congrArg ((actualTracePairing t).flip v)
+    (degreeSixCharacterOneBasis.sum_repr u)
+  simpa only [map_sum, map_smul, actualTracePairing_flip_apply, smul_eq_mul]
+    using h.symm
+
+theorem actualTracePairing_expand_right (t : InvariantTangentModel)
+    (u v : InvariantHodgeModel) :
+    actualTracePairing t u v =
+      ∑ i : Fin 33, degreeSixCharacterOneBasis.repr v i *
+        actualTracePairing t u (degreeSixCharacterOneBasis i) := by
+  have h := congrArg (actualTracePairing t u)
+    (degreeSixCharacterOneBasis.sum_repr v)
+  simpa only [map_sum, map_smul, smul_eq_mul] using h.symm
+
+/-- The left side of the finite commutant equation is evaluation of the
+actual trace pairing after applying the endomorphism to its first input. -/
+theorem transpose_mul_higgs_eq_actualTracePairing
+    (P : Module.End ℂ InvariantHodgeModel) (m : Fin 35) (i j : Fin 33) :
+    ((actualEndomorphismMatrix P).transpose *
+        CycleQ2FermatHiggs.higgsMatrix ℂ m) i j =
+      actualTracePairing (degreeSixCharacterZeroBasis m)
+        (P (degreeSixCharacterOneBasis i)) (degreeSixCharacterOneBasis j) := by
+  rw [actualTracePairing_expand_left]
+  simp only [Matrix.mul_apply, Matrix.transpose_apply,
+    actualEndomorphismMatrix_apply, actualTracePairing_basis]
+
+/-- The right side of the finite commutant equation is evaluation after
+applying the actual endomorphism to the second input. -/
+theorem higgs_mul_eq_actualTracePairing
+    (P : Module.End ℂ InvariantHodgeModel) (m : Fin 35) (i j : Fin 33) :
+    (CycleQ2FermatHiggs.higgsMatrix ℂ m * actualEndomorphismMatrix P) i j =
+      actualTracePairing (degreeSixCharacterZeroBasis m)
+        (degreeSixCharacterOneBasis i) (P (degreeSixCharacterOneBasis j)) := by
+  rw [actualTracePairing_expand_right]
+  simp only [Matrix.mul_apply, actualEndomorphismMatrix_apply,
+    actualTracePairing_basis]
+  apply Finset.sum_congr rfl
+  intro k _
+  exact mul_comm _ _
+
+/-- Self-adjointness for the genuine triple-product pairings implies the
+finite matrix compatibility equations, with no geometric comparison premise. -/
+theorem higgs_equations_of_actual_trace_selfAdjoint
+    (P : Module.End ℂ InvariantHodgeModel)
+    (hP : ∀ (t : InvariantTangentModel) (u v : InvariantHodgeModel),
+      actualTracePairing t (P u) v = actualTracePairing t u (P v)) :
+    ∀ m : Fin 35,
+      (actualEndomorphismMatrix P).transpose *
+          CycleQ2FermatHiggs.higgsMatrix ℂ m =
+        CycleQ2FermatHiggs.higgsMatrix ℂ m * actualEndomorphismMatrix P := by
+  intro m
+  ext i j
+  rw [transpose_mul_higgs_eq_actualTracePairing,
+    higgs_mul_eq_actualTracePairing]
+  exact hP (degreeSixCharacterZeroBasis m)
+    (degreeSixCharacterOneBasis i) (degreeSixCharacterOneBasis j)
+
+/-- An idempotent on the actual Fermat component that is self-adjoint for
+every actual trace pairing is zero or the identity. This is the algebraic
+projector conclusion needed at the Fermat point in the geometric Higgs
+argument. It does not assert existence of a geometric subvariation projector. -/
+theorem actual_trace_selfAdjoint_projector_trivial
+    (P : Module.End ℂ InvariantHodgeModel)
+    (hP : ∀ (t : InvariantTangentModel) (u v : InvariantHodgeModel),
+      actualTracePairing t (P u) v = actualTracePairing t u (P v))
+    (hIdempotent : P * P = P) : P = 0 ∨ P = 1 := by
+  let e := LinearMap.toMatrixAlgEquiv degreeSixCharacterOneBasis
+  have hMatrix : actualEndomorphismMatrix P * actualEndomorphismMatrix P =
+      actualEndomorphismMatrix P := by
+    change e P * e P = e P
+    rw [← map_mul, hIdempotent]
+  rcases CycleQ2FermatHiggs.compatible_projector_trivial
+      (actualEndomorphismMatrix P)
+      (higgs_equations_of_actual_trace_selfAdjoint P hP) hMatrix with hZero | hOne
+  · left
+    apply e.injective
+    simpa only [map_zero] using hZero
+  · right
+    apply e.injective
+    simpa only [map_one] using hOne
+
+/-- Consequently no proper nonzero image can occur for such a projector. -/
+theorem actual_trace_selfAdjoint_projector_range
+    (P : Module.End ℂ InvariantHodgeModel)
+    (hP : ∀ (t : InvariantTangentModel) (u v : InvariantHodgeModel),
+      actualTracePairing t (P u) v = actualTracePairing t u (P v))
+    (hIdempotent : P * P = P) :
+    LinearMap.range P = ⊥ ∨ LinearMap.range P = ⊤ := by
+  rcases actual_trace_selfAdjoint_projector_trivial P hP hIdempotent with hZero | hOne
+  · left
+    rw [hZero]
+    simp
+  · right
+    rw [hOne]
+    simp [Module.End.one_eq_id]
+
+end CycleQ2GeometricBridgeAlgebra
+
+end
+
+end Q2UncompiledHiggsBridge
