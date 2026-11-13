@@ -45,12 +45,15 @@ Abel--Jacobi identifications remain separate obligations.
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+set_option maxHeartbeats 1000000
 
 noncomputable section
 
 namespace CycleQ2GeometricProjectiveCurve
 
 open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+open scoped DirectSum
 open MvPolynomial CycleQ2SeedTrace CycleQ2ConormalJacobian
   CycleQ2NormalConnecting CycleQ2SeedCechTheta CycleQ2ActualNormalCech
 
@@ -75,8 +78,8 @@ theorem mem_grade (I : Ideal A) (n : ℕ) (q : A ⧸ I) :
 def gradeMap (I : Ideal A) (n : ℕ) :
     𝒜 n →ₗ[R] grade 𝒜 I n where
   toFun p := ⟨Ideal.Quotient.mk I p, ⟨p, p.property, rfl⟩⟩
-  map_add' p q := Subtype.ext (map_add (Ideal.Quotient.mk I) p q)
-  map_smul' c p := Subtype.ext ((Ideal.Quotient.mkₐ R I).map_smul c p)
+  map_add' p q := Subtype.ext (map_add (Ideal.Quotient.mk I) (p : A) (q : A))
+  map_smul' c p := Subtype.ext ((Ideal.Quotient.mkₐ R I).toLinearMap.map_smul c (p : A))
 
 instance grade_gradedMonoid (I : Ideal A) :
     SetLike.GradedMonoid (grade 𝒜 I) where
@@ -90,7 +93,7 @@ instance grade_gradedMonoid (I : Ideal A) :
 /-- Decompose an element and then pass every homogeneous component to
 the quotient. -/
 def toQuotientGrades (I : Ideal A) :
-    A →ₗ[R] ⨁ n : ℕ, grade 𝒜 I n :=
+    A →ₗ[R] (⨁ n : ℕ, grade 𝒜 I n) :=
   (DirectSum.lmap (gradeMap 𝒜 I)).comp
     (DirectSum.decomposeLinearEquiv 𝒜).toLinearMap
 
@@ -108,9 +111,12 @@ theorem toQuotientGrades_vanishes (I : Ideal A)
 to the actual ring quotient. -/
 def decompose (I : Ideal A)
     (hI : I.IsHomogeneous 𝒜) :
-    (A ⧸ I) →ₗ[R] ⨁ n : ℕ, grade 𝒜 I n :=
-  (I.restrictScalars R).liftQ (toQuotientGrades 𝒜 I)
-    (toQuotientGrades_vanishes 𝒜 I hI)
+    (A ⧸ I) →ₗ[R] (⨁ n : ℕ, grade 𝒜 I n) := by
+  let f : A →ₗ[R] (⨁ n : ℕ, grade 𝒜 I n) := toQuotientGrades 𝒜 I
+  have hf : I.restrictScalars R ≤ LinearMap.ker f :=
+    toQuotientGrades_vanishes 𝒜 I hI
+  exact ((I.restrictScalars R).liftQ f hf).comp
+    (Submodule.Quotient.restrictScalarsEquiv R I).symm.toLinearMap
 
 @[simp] theorem decompose_mk (I : Ideal A)
     (hI : I.IsHomogeneous 𝒜) (p : A) :

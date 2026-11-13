@@ -28,6 +28,8 @@ surjectivity, and duality; those geometric constructions remain outstanding.
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
+-- These explicit dependent submodule maps need more elaboration steps.
+set_option maxHeartbeats 1000000
 
 noncomputable section
 
@@ -218,22 +220,29 @@ def cubicNormalClass (r : ℂ) (hr : r ≠ 0) :
       map_add' n m := by
         apply Subtype.ext
         change polynomialLift (s : Poly) •
-            normalCoordinates r ((n : NormalCech r 0) + (m : NormalCech r 0)) = _
-        rw [map_add, smul_add]
+            normalCoordinates r ((n : NormalCech r 0) + (m : NormalCech r 0)) =
+          polynomialLift (s : Poly) • normalCoordinates r (n : NormalCech r 0) +
+            polynomialLift (s : Poly) • normalCoordinates r (m : NormalCech r 0)
+        rw [(normalCoordinates r).map_add, smul_add]
       map_smul' c n := by
         apply Subtype.ext
         change polynomialLift (s : Poly) •
             normalCoordinates r (c • (n : NormalCech r 0)) =
           c • (polynomialLift (s : Poly) • normalCoordinates r (n : NormalCech r 0))
-        rw [map_smul]
+        rw [(normalCoordinates r).map_smul]
         exact smul_comm _ _ _ }
   map_add' s t := by
     apply LinearMap.ext
     intro n
     apply Subtype.ext
     change polynomialLift ((s : Poly) + (t : Poly)) •
-        normalCoordinates r (n : NormalCech r 0) = _
-    rw [map_add, add_smul]
+        normalCoordinates r (n : NormalCech r 0) =
+      polynomialLift (s : Poly) • normalCoordinates r (n : NormalCech r 0) +
+        polynomialLift (t : Poly) • normalCoordinates r (n : NormalCech r 0)
+    have hadd : polynomialLift ((s : Poly) + (t : Poly)) =
+        polynomialLift (s : Poly) + polynomialLift (t : Poly) :=
+      map_add polynomialLift _ _
+    rw [hadd, add_smul]
   map_smul' c s := by
     apply LinearMap.ext
     intro n
@@ -272,7 +281,7 @@ def normalTracePairing (r : ℂ) (hr : r ≠ 0) (hcube : r ^ 3 = 2) :
     simp only [LinearMap.comp_apply, map_add, LinearMap.add_apply]
   map_smul' c s := by
     ext n
-    simp only [LinearMap.comp_apply, map_smul, LinearMap.smul_apply]
+    simp only [LinearMap.comp_apply, map_smul, LinearMap.smul_apply, RingHom.id_apply]
 
 @[simp] theorem normalTracePairing_numerator (r : ℂ) (hr : r ≠ 0)
     (hcube : r ^ 3 = 2) (s : Cubics) (p : Sextics) :
@@ -311,8 +320,13 @@ theorem normalTracePairing_connecting (r : ℂ) (hr : r ≠ 0)
     normalTracePairing r hr hcube s (connectingInImage r A L hdegree) =
       seedTrace r hcube
         (seedQuotient r (polynomialLift (s : Poly) * (originalK * L - A))) := by
-  rw [connectingInImage, normalTracePairing_numerator, seedTrace_mk,
-    map_mul, substitute_polynomialLift]
+  rw [connectingInImage, normalTracePairing_numerator, seedTrace_mk]
+  change traceLinear r ((s : Poly) * substitute (originalK * L - A)) =
+    traceLinear r (substitute (polynomialLift (s : Poly) * (originalK * L - A)))
+  have hm : substitute (polynomialLift (s : Poly) * (originalK * L - A)) =
+      substitute (polynomialLift (s : Poly)) * substitute (originalK * L - A) :=
+    map_mul substitute _ _
+  rw [hm, substitute_polynomialLift]
 
 theorem ambientNumerator_homogeneous :
     (substitute (originalK * 0 - derivativeA)).IsHomogeneous 6 := by

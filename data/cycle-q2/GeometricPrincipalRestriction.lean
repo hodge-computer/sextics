@@ -34,6 +34,9 @@ No Lean elaboration, compilation, or kernel replay was run for this file.
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+set_option maxHeartbeats 1000000
+set_option synthInstance.maxHeartbeats 100000
 
 noncomputable section
 
@@ -126,9 +129,15 @@ private theorem restrictionTower (s t : OpenRing) (h : Inclusion s t) :
     letI := restrictionAlgebra s t h
     IsScalarTower ℂ (LocalRing s) (LocalRing t) := by
   letI := restrictionAlgebra s t h
-  apply IsScalarTower.of_algebraMap_eq
-  intro c
-  exact ((functionRestriction s t h).commutes c).symm
+  constructor
+  intro c a z
+  change functionRestriction s t h (c • a) * z =
+    c • (functionRestriction s t h a * z)
+  have hsmul : functionRestriction s t h (c • a) =
+      c • functionRestriction s t h a :=
+    (functionRestriction s t h).toLinearMap.map_smul c a
+  rw [hsmul]
+  exact smul_mul_assoc c (functionRestriction s t h a) z
 
 /-- Canonical restriction of the actual universal Kähler one-forms. -/
 def oneFormRestriction (s t : OpenRing) (h : Inclusion s t) :
@@ -154,7 +163,9 @@ def oneFormRestriction (s t : OpenRing) (h : Inclusion s t) :
   change KaehlerDifferential.map ℂ ℂ (LocalRing s) (LocalRing t) (a • ω) =
     algebraMap (LocalRing s) (LocalRing t) a •
       KaehlerDifferential.map ℂ ℂ (LocalRing s) (LocalRing t) ω
-  rw [map_smul, IsScalarTower.algebraMap_smul]
+  rw [map_smul]
+  exact (IsScalarTower.algebraMap_smul (R := LocalRing s) (A := LocalRing t) a
+    (KaehlerDifferential.map ℂ ℂ (LocalRing s) (LocalRing t) ω)).symm
 
 @[simp] theorem oneFormRestriction_basis (s t : OpenRing)
     (h : Inclusion s t) (i : Fin 4) :
@@ -264,10 +275,16 @@ theorem exteriorRestriction_coordinates (s t : OpenRing)
       exteriorPullback s hs p ω := by
   apply (CycleQ2AffineDifferentials.coordinateBasis.exteriorPower p).repr.injective
   ext i
+  have hcoord (j l : Set.powersetCard (Fin 4) p) :
+      (CycleQ2AffineDifferentials.coordinateBasis.exteriorPower p).repr
+        (exteriorPower.ιMulti_family CycleQ2AffineDifferentials.K p
+          CycleQ2AffineDifferentials.coordinateBasis j) l = if j = l then 1 else 0 := by
+    simpa only [exteriorPower.basis_apply] using
+      (CycleQ2AffineDifferentials.coordinateBasis.exteriorPower p).repr_self_apply j l
   rw [exteriorRestriction_coordinates]
   simp only [map_sum, exteriorPullback_smul, exteriorPullback_basis,
     functionRestriction_toGeneric s t hs ht h]
-  simp [exteriorPullback_repr, Finsupp.smul_apply, Finsupp.single_apply]
+  simp [exteriorPullback_repr, hcoord]
 
 theorem exteriorRestriction_injective (s t : OpenRing)
     (hs : s ≠ 0) (ht : t ≠ 0) (h : Inclusion s t) (p : ℕ) :
@@ -405,6 +422,9 @@ theorem complexRestriction_id (s : OpenRing) (hs : s ≠ 0) :
                       apply ModuleCat.hom_ext
                       apply LinearMap.ext
                       intro a
+                      haveI : Subsingleton ((complex s hs).X (n + 1 + 1 + 1 + 1 + 1)) := by
+                        change Subsingleton (Fin 0 → ℂ)
+                        infer_instance
                       exact Subsingleton.elim _ _
 
 theorem complexRestriction_comp (s t u : OpenRing)
@@ -449,6 +469,9 @@ theorem complexRestriction_comp (s t u : OpenRing)
                       apply ModuleCat.hom_ext
                       apply LinearMap.ext
                       intro a
+                      haveI : Subsingleton ((complex u hu).X (n + 1 + 1 + 1 + 1 + 1)) := by
+                        change Subsingleton (Fin 0 → ℂ)
+                        infer_instance
                       exact Subsingleton.elim _ _
 
 /-! ## The diagram on nonempty principal opens -/
@@ -554,8 +577,8 @@ theorem topRestriction_comp (s t u : OpenRing)
   change topRestriction t u ht hu htu
       (topRestriction s t hs ht hst (classOf s ω)) =
     topRestriction s u hs hu (htu.trans hst) (classOf s ω)
-  rw [topRestriction_classOf, topRestriction_classOf, topRestriction_classOf,
-    exteriorRestriction_comp s t u hs ht hu hst htu]
+  rw [topRestriction_classOf, topRestriction_classOf, topRestriction_classOf]
+  exact congrArg (classOf u) (exteriorRestriction_comp s t u hs ht hu hst htu 4 ω)
 
 /-- The top cohomology quotients with their actual induced restrictions.
 No sheaf property of this cohomology presheaf is asserted. -/
@@ -744,7 +767,9 @@ theorem toGeneric_eq_zero_iff_eventually_zero
         topRestriction t s ht hs (basicOpen_le_of_dvd hts) ξ = 0 := by
   refine Submodule.Quotient.induction_on (exactTopForms t) ξ ?_
   intro ω
-  change toGeneric t ht (classOf t ω) = 0 ↔ _
+  change toGeneric t ht (classOf t ω) = 0 ↔
+    ∃ (s : OpenRing) (hs : s ≠ 0) (hts : t ∣ s),
+      topRestriction t s ht hs (basicOpen_le_of_dvd hts) (classOf t ω) = 0
   constructor
   · intro hzero
     rw [toGeneric_classOf] at hzero
@@ -756,8 +781,8 @@ theorem toGeneric_eq_zero_iff_eventually_zero
     apply (classOf_eq_zero_iff s _).mpr
     refine ⟨η', ?_⟩
     apply exteriorPullback_injective s hs 4
-    rw [exteriorD3_pullback, hη', hη,
-      exteriorRestriction_toGeneric t s ht hs (basicOpen_le_of_dvd hts)]
+    rw [exteriorD3_pullback, hη', hη]
+    exact (exteriorRestriction_toGeneric t s ht hs (basicOpen_le_of_dvd hts) 4 ω).symm
   · rintro ⟨s, hs, hts, hzero⟩
     have h := congrArg (toGeneric s hs) hzero
     simpa only [topRestriction_toGeneric, map_zero] using h

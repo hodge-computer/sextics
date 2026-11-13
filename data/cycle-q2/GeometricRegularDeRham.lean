@@ -28,6 +28,8 @@ class is asserted by these constructions.
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+set_option maxHeartbeats 1000000
 
 noncomputable section
 
@@ -41,6 +43,8 @@ abbrev BaseRing := CycleQ2GeometricAffineScheme.BaseRing
 abbrev normalClass := CycleQ2GeometricAffineScheme.normalClass
 abbrev OpenRing := CycleQ2GeometricAffineScheme.OpenRing
 abbrev K := CycleQ2AffineDifferentials.K
+
+local instance affineFunctionFieldIntAlgebra : Algebra ℤ K := Ring.toIntAlgebra _
 
 local instance coefficientCharZero : CharZero K :=
   charZero_of_injective_algebraMap (algebraMap ℂ K).injective
@@ -91,7 +95,9 @@ theorem normal_mul_inverse :
   apply mul_left_cancel₀ normalJacobian_ne_zero
   rw [mul_inv_cancel₀ normalJacobian_ne_zero]
   have h := congrArg functionFieldMap normal_mul_inverse
-  simpa only [map_mul, functionFieldMap_algebraMap, map_one] using h
+  simp only [map_mul, functionFieldMap_algebraMap, map_one] at h
+  change normalJacobian * functionFieldMap normalInverse = 1 at h
+  exact h
 
 /-- A concrete algebraic description of the image of the principal-open
 coordinate ring in the function field. -/
@@ -115,7 +121,7 @@ theorem functionFieldMap_mem_regular (a : OpenRing) :
   have hrepr : functionFieldMap a = affineMap P * (normalJacobian⁻¹) ^ n := by
     apply mul_right_cancel₀ (pow_ne_zero n normalJacobian_ne_zero)
     rw [h]
-    field_simp [normalJacobian_ne_zero]
+    rw [mul_assoc, ← mul_pow, inv_mul_cancel₀ normalJacobian_ne_zero, one_pow, mul_one]
   rw [hrepr]
   exact regularFunctions.mul_mem (polynomial_mem_regular P)
     (regularFunctions.pow_mem inverse_mem_regular n)
@@ -191,12 +197,15 @@ def tangent (j : Fin 4) : Derivation ℂ OpenRing OpenRing where
   map_smul' c a := by
     apply functionFieldMap_injective
     simp only [derivativeValue_spec, map_smul,
-      CycleQ2AffineDifferentials.tangent_complex_smul]
+      CycleQ2AffineDifferentials.tangent_complex_smul, RingHom.id_apply]
   map_one_eq_zero' := by
     apply functionFieldMap_injective
+    change functionFieldMap (derivativeValue j 1) = functionFieldMap 0
     simp only [derivativeValue_spec, map_one, Derivation.map_one_eq_zero, map_zero]
   leibniz' a b := by
     apply functionFieldMap_injective
+    change functionFieldMap (derivativeValue j (a * b)) =
+      functionFieldMap (a * derivativeValue j b + b * derivativeValue j a)
     simp only [derivativeValue_spec, smul_eq_mul, map_add, map_mul,
       Derivation.leibniz]
 
@@ -300,9 +309,16 @@ private theorem localFieldTower (s : OpenRing) (hs : s ≠ 0) :
     letI := localFieldAlgebra s hs
     IsScalarTower ℂ (LocalRing s) K := by
   letI := localFieldAlgebra s hs
-  apply IsScalarTower.of_algebraMap_eq
-  intro c
-  exact ((localFunctionFieldMap s hs).commutes c).symm
+  constructor
+  intro c a z
+  simp only [Algebra.smul_def, map_mul]
+  change localFunctionFieldMap s hs (c • a) * z =
+    algebraMap ℂ K c * (localFunctionFieldMap s hs a * z)
+  have hsmul : localFunctionFieldMap s hs (c • a) =
+      c • localFunctionFieldMap s hs a :=
+    (localFunctionFieldMap s hs).toLinearMap.map_smul c a
+  rw [hsmul]
+  simp only [Algebra.smul_def, mul_assoc]
 
 /-- Canonical restriction on universal one-forms. -/
 def oneFormPullback (s : OpenRing) (hs : s ≠ 0) :
@@ -349,8 +365,16 @@ theorem oneFormPullback_coordinates (s : OpenRing) (hs : s ≠ 0) (ω : Omega s)
 theorem oneFormPullback_repr (s : OpenRing) (hs : s ≠ 0) (ω : Omega s) (i : Fin 4) :
     CycleQ2AffineDifferentials.coordinateBasis.repr (oneFormPullback s hs ω) i =
       localFunctionFieldMap s hs ((coordinateBasis s).repr ω i) := by
+  have hcoord (j l : Fin 4) :
+      CycleQ2AffineDifferentials.coordinateBasis.repr
+          (CycleQ2AffineDifferentials.coordinateDifferential j) l =
+        if j = l then 1 else 0 := by
+    simpa only [CycleQ2AffineDifferentials.coordinateBasis_apply] using
+      CycleQ2AffineDifferentials.coordinateBasis.repr_self_apply j l
   rw [oneFormPullback_coordinates]
-  simp [Finsupp.smul_apply, Finsupp.single_apply]
+  simp only [map_sum, map_smul, Finsupp.sum_apply, Finsupp.smul_apply,
+    Module.Basis.repr_self_apply]
+  simp [hcoord]
 
 theorem oneFormPullback_injective (s : OpenRing) (hs : s ≠ 0) :
     Function.Injective (oneFormPullback s hs) := by
@@ -440,8 +464,16 @@ theorem exteriorPullback_repr (s : OpenRing) (hs : s ≠ 0) (p : ℕ)
           (((coordinateBasis s).exteriorPower p).sum_repr ω).symm
       _ = _ := by
         simp only [map_sum, exteriorPullback_smul, exteriorPullback_basis]
+  have hcoord (j l : Set.powersetCard (Fin 4) p) :
+      (CycleQ2AffineDifferentials.coordinateBasis.exteriorPower p).repr
+        (exteriorPower.ιMulti_family K p CycleQ2AffineDifferentials.coordinateBasis j) l =
+          if j = l then 1 else 0 := by
+    simpa only [exteriorPower.basis_apply] using
+      (CycleQ2AffineDifferentials.coordinateBasis.exteriorPower p).repr_self_apply j l
   rw [h]
-  simp [Finsupp.smul_apply, Finsupp.single_apply]
+  simp only [map_sum, map_smul, Finsupp.sum_apply, Finsupp.smul_apply,
+    Module.Basis.repr_self_apply]
+  simp [hcoord]
 
 theorem exteriorPullback_injective (s : OpenRing) (hs : s ≠ 0) (p : ℕ) :
     Function.Injective (exteriorPullback s hs p) := by
@@ -576,11 +608,16 @@ theorem exteriorD3_apply (s : OpenRing) (η : Form s 3) :
         tangentOn s i ((thirdBasis s).repr η i)) • volume s := by
   simp only [exteriorD3, LinearMap.sum_apply, LinearMap.comp_apply,
     LinearMap.coe_restrictScalars, LinearMap.toSpanSingleton_apply,
-    Module.Basis.coord_apply, Derivation.coeFn_coe, smul_smul, ← Finset.sum_smul]
-  congr 1
+    Module.Basis.coord_apply, Derivation.coeFn_coe]
+  rw [Finset.sum_smul]
   apply Finset.sum_congr rfl
   intro i hi
-  ring
+  calc
+    _ = (tangentOn s i ((thirdBasis s).repr η i) *
+        (-1 : LocalRing s) ^ i.val) • volume s :=
+      (mul_smul (tangentOn s i ((thirdBasis s).repr η i))
+        ((-1 : LocalRing s) ^ i.val) (volume s)).symm
+    _ = _ := by rw [mul_comm]
 
 theorem exteriorD1_pullback (s : OpenRing) (hs : s ≠ 0) (ω : Omega s) :
     exteriorPullback s hs 2 (exteriorD1 s ω) =
@@ -596,9 +633,10 @@ theorem exteriorD2_pullback (s : OpenRing) (hs : s ≠ 0) (η : Form s 2) :
       CycleQ2AffineDeRhamComplex.exteriorD2 (exteriorPullback s hs 2 η) := by
   apply CycleQ2AffineExterior.thirdBasis.repr.injective
   ext i
-  rw [exteriorPullback_third_repr, exteriorD2_repr,
-    CycleQ2AffineDeRhamComplex.exteriorD2_repr]
+  rw [exteriorPullback_third_repr, exteriorD2_repr]
+  conv_rhs => rw [CycleQ2AffineDeRhamComplex.exteriorD2_repr]
   fin_cases i <;> simp only [Matrix.cons_val_zero, Matrix.cons_val_succ,
+    Matrix.cons_val_zero', Matrix.cons_val_succ',
     map_add, map_sub, localFunctionFieldMap_tangent, exteriorPullback_second_repr]
 
 theorem exteriorD3_pullback (s : OpenRing) (hs : s ≠ 0) (η : Form s 3) :
@@ -863,8 +901,11 @@ def topOpcyclesIso (s : OpenRing) (hs : s ≠ 0) :
     (topShortComplex s hs).opcycles ≅ ModuleCat.of ℂ (TopDeRham s) := by
   have hf : (topShortComplex s hs).f.hom = exteriorD3 s :=
     congrArg ModuleCat.Hom.hom (complex_d_three s hs)
-  simpa only [hf, TopDeRham, exactTopForms] using
-    (topShortComplex s hs).moduleCatOpcyclesIso
+  have h := (topShortComplex s hs).moduleCatOpcyclesIso
+  change (topShortComplex s hs).opcycles ≅
+    ModuleCat.of ℂ ((Form s 4) ⧸ LinearMap.range (topShortComplex s hs).f.hom) at h
+  rw [hf] at h
+  exact h
 
 def topShortHomologyIso (s : OpenRing) (hs : s ≠ 0) :
     (topShortComplex s hs).homology ≅ ModuleCat.of ℂ (TopDeRham s) :=
@@ -890,7 +931,9 @@ def homologyClassOf (s : OpenRing) (hs : s ≠ 0) :
   have h := congrArg
     (fun f : ModuleCat.of ℂ (TopDeRham s) ⟶ ModuleCat.of ℂ (TopDeRham s) =>
       f (classOf s ω)) (homologyIso s hs).inv_hom_id
-  simpa only [ModuleCat.comp_apply, ModuleCat.id_apply] using h
+  change (homologyIso s hs).hom ((homologyIso s hs).inv (classOf s ω)) =
+    classOf s ω at h
+  exact h
 
 /-! ## The corresponding algebraic sheaves
 
@@ -908,7 +951,8 @@ def formSheaf (s : OpenRing) (p : ℕ) :
 def formGlobalSectionsIso (s : OpenRing) (p : ℕ) :
     ModuleCat.of (LocalRing s) (Form s p) ≅
       (AlgebraicGeometry.modulesSpecToSheaf.obj (formSheaf s p)).presheaf.obj (.op ⊤) :=
-  AlgebraicGeometry.tilde.isoTop (ModuleCat.of (LocalRing s) (Form s p))
+  AlgebraicGeometry.tilde.isoTop (R := CommRingCat.of (LocalRing s))
+    (ModuleCat.of (LocalRing s) (Form s p))
 
 end CycleQ2GeometricRegularDeRham
 

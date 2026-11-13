@@ -114,9 +114,11 @@ def topOpcyclesIso :
       ModuleCat.of ℂ CycleQ2AffineTopCohomology.TopDeRham := by
   have hf : topShortComplex.f.hom = exteriorD3 :=
     congrArg ModuleCat.Hom.hom topShortComplex_f
-  simpa only [hf, CycleQ2AffineTopCohomology.TopDeRham,
-    CycleQ2AffineTopCohomology.exactTopForms] using
-      topShortComplex.moduleCatOpcyclesIso
+  have h := topShortComplex.moduleCatOpcyclesIso
+  change topShortComplex.opcycles ≅
+    ModuleCat.of ℂ ((Form 4) ⧸ LinearMap.range topShortComplex.f.hom) at h
+  rw [hf] at h
+  exact h
 
 /-- With zero outgoing differential, homology is canonically the cokernel
 of the actual degree-three differential. -/
@@ -149,7 +151,10 @@ def classOf : Form 4 →ₗ[ℂ] complex.homology 4 :=
     (fun f : ModuleCat.of ℂ CycleQ2AffineTopCohomology.TopDeRham ⟶
         ModuleCat.of ℂ CycleQ2AffineTopCohomology.TopDeRham =>
       f (CycleQ2AffineTopCohomology.classOf ω)) homologyIso.inv_hom_id
-  simpa only [ModuleCat.comp_apply, ModuleCat.id_apply] using h
+  change homologyIso.hom
+    (homologyIso.inv (CycleQ2AffineTopCohomology.classOf ω)) =
+      CycleQ2AffineTopCohomology.classOf ω at h
+  exact h
 
 theorem classOf_eq_zero_iff (ω : Form 4) :
     classOf ω = 0 ↔ ∃ η : Form 3, exteriorD3 η = ω := by
@@ -157,7 +162,9 @@ theorem classOf_eq_zero_iff (ω : Form 4) :
   · intro h
     apply (CycleQ2AffineTopCohomology.classOf_eq_zero_iff ω).mp
     have h' := congrArg homologyIso.hom h
-    simpa only [homologyIso_classOf, map_zero] using h'
+    change homologyIso.hom (classOf ω) = homologyIso.hom 0 at h'
+    rw [homologyIso_classOf, map_zero] at h'
+    exact h'
   · rintro ⟨η, rfl⟩
     simp only [classOf, LinearMap.comp_apply,
       CycleQ2AffineTopCohomology.classOf_exteriorD3, map_zero]

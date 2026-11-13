@@ -34,12 +34,14 @@ geometric trace remain separate constructions.
 
 set_option autoImplicit false
 set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+set_option maxHeartbeats 1000000
 
 noncomputable section
 
 namespace CycleQ2GeometricConeCech
 
-open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Abelian Opposite TopologicalSpace AlgebraicGeometry
 open MvPolynomial CycleQ2SeedTrace CycleQ2ConormalJacobian
   CycleQ2NormalConnecting CycleQ2SeedCechTheta CycleQ2ActualNormalCech
 
@@ -115,7 +117,9 @@ def puncturedInclusion (r θ : ℂ) : puncturedCone r θ ⟶ cone r θ :=
   (puncturedOpen r θ).ι
 
 instance puncturedInclusion_isOpenImmersion (r θ : ℂ) :
-    IsOpenImmersion (puncturedInclusion r θ) := inferInstance
+    IsOpenImmersion (puncturedInclusion r θ) := by
+  change IsOpenImmersion (puncturedOpen r θ).ι
+  infer_instance
 
 /-- The actual four opens and their inclusions form a Mayer-Vietoris square. -/
 def coneMayerVietoris (r θ : ℂ) (hr : r ≠ 0) :
@@ -135,6 +139,10 @@ def coneMayerVietoris (r θ : ℂ) (hr : r ≠ 0) :
 /-! ## Genuine structure-sheaf sections and restrictions -/
 
 abbrev Sections (r θ : ℂ) (U : (cone r θ).Opens) := Γ(cone r θ, U)
+
+instance sectionsCurveAlgebra (r θ : ℂ) (U : (cone r θ).Opens) :
+    Algebra (CurveRing r θ) (Sections r θ U) :=
+  AlgebraicGeometry.StructureSheaf.openAlgebra (R := CurveRing r θ) (op U)
 
 /-- The ambient polynomial action is induced by the literal curve map. -/
 def sectionAmbientMap (r θ : ℂ) (U : (cone r θ).Opens) : P →+* Sections r θ U :=
@@ -157,6 +165,21 @@ def sectionRestriction (r θ : ℂ) (U V : (cone r θ).Opens) (h : V ≤ U) :
 abbrev FirstSections (r θ : ℂ) := Sections r θ (firstPatch r θ)
 abbrev SecondSections (r θ : ℂ) := Sections r θ (secondPatch r θ)
 abbrev OverlapSections (r θ : ℂ) := Sections r θ (overlapPatch r θ)
+
+instance firstSectionsLocalization (r θ : ℂ) :
+    IsLocalization.Away (curveG1 r θ) (FirstSections r θ) :=
+  AlgebraicGeometry.StructureSheaf.IsLocalization.to_basicOpen
+    (CurveRing r θ) (curveG1 r θ)
+
+instance secondSectionsLocalization (r θ : ℂ) :
+    IsLocalization.Away (curveG2 r θ) (SecondSections r θ) :=
+  AlgebraicGeometry.StructureSheaf.IsLocalization.to_basicOpen
+    (CurveRing r θ) (curveG2 r θ)
+
+instance overlapSectionsLocalization (r θ : ℂ) :
+    IsLocalization.Away (curveG1 r θ * curveG2 r θ) (OverlapSections r θ) :=
+  AlgebraicGeometry.StructureSheaf.IsLocalization.to_basicOpen
+    (CurveRing r θ) (curveG1 r θ * curveG2 r θ)
 
 def firstSectionsRestriction (r θ : ℂ) :
     FirstSections r θ →ₐ[P] OverlapSections r θ :=
@@ -214,12 +237,13 @@ theorem first_restriction_compatibility (r θ : ℂ) (x : FirstOpen r θ) :
         (firstSectionsEquiv r θ).toRingHom =
       (overlapSectionsEquiv r θ).toRingHom.comp (firstRestriction r θ) := by
     apply IsLocalization.ringHom_ext (Submonoid.powers (curveG1 r θ))
-    ext a
+    apply RingHom.ext
+    intro a
     change firstSectionsRestriction r θ
         (firstSectionsEquiv r θ (algebraMap (CurveRing r θ) (FirstOpen r θ) a)) =
       overlapSectionsEquiv r θ
         (firstRestriction r θ (algebraMap (CurveRing r θ) (FirstOpen r θ) a))
-    rw [firstSectionsEquiv_base, IsLocalization.Away.awayToAwayRight_eq,
+    rw [firstSectionsEquiv_base, firstRestriction, IsLocalization.Away.awayToAwayRight_eq,
       overlapSectionsEquiv_base] <;> rfl
   exact RingHom.congr_fun hh x
 
@@ -231,12 +255,13 @@ theorem second_restriction_compatibility (r θ : ℂ) (x : SecondOpen r θ) :
         (secondSectionsEquiv r θ).toRingHom =
       (overlapSectionsEquiv r θ).toRingHom.comp (secondRestriction r θ) := by
     apply IsLocalization.ringHom_ext (Submonoid.powers (curveG2 r θ))
-    ext a
+    apply RingHom.ext
+    intro a
     change secondSectionsRestriction r θ
         (secondSectionsEquiv r θ (algebraMap (CurveRing r θ) (SecondOpen r θ) a)) =
       overlapSectionsEquiv r θ
         (secondRestriction r θ (algebraMap (CurveRing r θ) (SecondOpen r θ) a))
-    rw [secondSectionsEquiv_base, IsLocalization.Away.awayToAwayLeft_eq,
+    rw [secondSectionsEquiv_base, secondRestriction, IsLocalization.Away.awayToAwayLeft_eq,
       overlapSectionsEquiv_base] <;> rfl
   exact RingHom.congr_fun hh x
 
@@ -264,13 +289,16 @@ theorem sectionBoundaries_eq_sup (r θ : ℂ) :
   constructor
   · rintro ⟨⟨x, y⟩, rfl⟩
     exact Submodule.sub_mem _
-      (le_sup_left (show firstSectionsRestriction r θ x ∈
+      (le_sup_left (a := LinearMap.range (firstSectionsRestriction r θ).toLinearMap)
+        (b := LinearMap.range (secondSectionsRestriction r θ).toLinearMap) (show firstSectionsRestriction r θ x ∈
         LinearMap.range (firstSectionsRestriction r θ).toLinearMap from ⟨x, rfl⟩))
-      (le_sup_right (show secondSectionsRestriction r θ y ∈
+      (le_sup_right (a := LinearMap.range (firstSectionsRestriction r θ).toLinearMap)
+        (b := LinearMap.range (secondSectionsRestriction r θ).toLinearMap) (show secondSectionsRestriction r θ y ∈
         LinearMap.range (secondSectionsRestriction r θ).toLinearMap from ⟨y, rfl⟩))
   · intro hz
     obtain ⟨x, ⟨a, rfl⟩, y, ⟨b, rfl⟩, hxy⟩ := Submodule.mem_sup.mp hz
     refine ⟨(a, -b), ?_⟩
+    change firstSectionsRestriction r θ a + secondSectionsRestriction r θ b = z at hxy
     simpa only [sectionCoboundary_apply, map_neg, sub_neg_eq_add] using hxy
 
 private theorem map_first_boundaries (r θ : ℂ) :
@@ -371,8 +399,12 @@ def sectionOpcyclesIso (r θ : ℂ) :
     (sectionShortComplex r θ).opcycles ≅ ModuleCat.of P (SectionCech r θ) := by
   have hf : (sectionShortComplex r θ).f.hom = sectionCoboundary r θ :=
     congrArg ModuleCat.Hom.hom (sectionComplex_d_zero r θ)
-  simpa only [hf, SectionCech, sectionBoundaries] using
-    (sectionShortComplex r θ).moduleCatOpcyclesIso
+  have h := (sectionShortComplex r θ).moduleCatOpcyclesIso
+  change (sectionShortComplex r θ).opcycles ≅
+    ModuleCat.of P ((OverlapSections r θ) ⧸
+      LinearMap.range (sectionShortComplex r θ).f.hom) at h
+  rw [hf] at h
+  exact h
 
 def sectionShortHomologyIso (r θ : ℂ) :
     (sectionShortComplex r θ).homology ≅ ModuleCat.of P (SectionCech r θ) :=
@@ -401,14 +433,20 @@ def scalarToSectionHomology (r θ : ℂ) :
   have h := congrArg
     (fun f : ModuleCat.of P (SectionCech r θ) ⟶ ModuleCat.of P (SectionCech r θ) =>
       f (scalarCechSectionsEquiv r θ z)) (sectionHomologyIso r θ).inv_hom_id
-  simpa only [ModuleCat.comp_apply, ModuleCat.id_apply] using h
+  change (sectionHomologyIso r θ).hom
+    ((sectionHomologyIso r θ).inv (scalarCechSectionsEquiv r θ z)) =
+      scalarCechSectionsEquiv r θ z at h
+  exact h
 
 theorem scalarToSectionHomology_injective (r θ : ℂ) :
     Function.Injective (scalarToSectionHomology r θ) := by
   intro x y hxy
   apply (scalarCechSectionsEquiv r θ).injective
   have h := congrArg (fun z => (sectionHomologyIso r θ).hom z) hxy
-  simpa only [sectionHomologyIso_scalar] using h
+  change (sectionHomologyIso r θ).hom (scalarToSectionHomology r θ x) =
+    (sectionHomologyIso r θ).hom (scalarToSectionHomology r θ y) at h
+  exact (sectionHomologyIso_scalar r θ x).symm.trans
+    (h.trans (sectionHomologyIso_scalar r θ y))
 
 /-! ## The existing nonzero classes as actual sheaf-section classes -/
 
@@ -456,9 +494,9 @@ theorem selectedAmbientSectionClass_ne_zero (r : ℂ) (hr : r ≠ 0) :
 
 namespace HZero
 
-universe u v w
+universe v w
 
-variable {C : Type u} [Category.{v} C]
+variable {C : Type v} [Category.{v} C]
 
 /-- Additive Yoneda for the free abelian presheaf generated by an object.
 The construction is explicit on the free generators. -/
@@ -472,28 +510,25 @@ def freeYonedaSections (F : Cᵒᵖ ⥤ AddCommGrpCat.{v}) (U : C) :
         apply AddCommGrpCat.hom_ext
         apply FreeAbelianGroup.lift_ext
         intro g
-        simp only [Functor.comp_map, AddCommGrpCat.free_map,
-          AddCommGrpCat.comp_apply, AddCommGrpCat.ofHom_apply,
-          FreeAbelianGroup.map_of_apply, FreeAbelianGroup.lift_apply_of]
-        change F.map (g.op ≫ f) x = F.map f (F.map g.op x)
+        simp [Functor.comp_map, AddCommGrpCat.free_map,
+          AddCommGrpCat.hom_comp, AddCommGrpCat.hom_ofHom, yoneda_obj_map,
+          ← Functor.map_comp]
         rw [F.map_comp] <;> rfl }
   left_inv α := by
     apply NatTrans.ext
-    intro V
+    funext V
     apply AddCommGrpCat.hom_ext
     apply FreeAbelianGroup.lift_ext
     intro g
-    simp only [AddCommGrpCat.ofHom_apply, FreeAbelianGroup.lift_apply_of]
+    simp only [AddCommGrpCat.hom_ofHom, AddCommGrpCat.ofHom_apply,
+      FreeAbelianGroup.lift_apply_of]
     have h := congrArg
       (fun k : (yoneda.obj U ⋙ AddCommGrpCat.free).obj (op U) ⟶ F.obj V =>
         k (FreeAbelianGroup.of (𝟙 U))) (α.naturality g.op)
-    simpa only [Functor.comp_map, AddCommGrpCat.free_map,
-      AddCommGrpCat.comp_apply, AddCommGrpCat.ofHom_apply,
-      FreeAbelianGroup.map_of_apply, yoneda_obj_map, Category.comp_id] using h.symm
+    simpa [Functor.comp_map, AddCommGrpCat.free_map, AddCommGrpCat.hom_comp,
+      AddCommGrpCat.hom_ofHom, yoneda_obj_map] using h.symm
   right_inv x := by
-    simp only [AddCommGrpCat.ofHom_apply, FreeAbelianGroup.lift_apply_of]
-    change F.map (𝟙 U).op x = x
-    simp
+    simp [AddCommGrpCat.hom_ofHom]
   map_add' α β := rfl
 
 theorem freeYonedaSections_precomp (F : Cᵒᵖ ⥤ AddCommGrpCat.{v})
@@ -504,10 +539,10 @@ theorem freeYonedaSections_precomp (F : Cᵒᵖ ⥤ AddCommGrpCat.{v})
   have h := congrArg
     (fun k : (yoneda.obj U ⋙ AddCommGrpCat.free).obj (op U) ⟶ F.obj (op V) =>
       k (FreeAbelianGroup.of (𝟙 U))) (α.naturality g.op)
-  simpa only [freeYonedaSections, NatTrans.comp_app, Functor.whiskerRight_app,
-    Functor.comp_map, AddCommGrpCat.free_map, AddCommGrpCat.comp_apply,
-    AddCommGrpCat.ofHom_apply, FreeAbelianGroup.map_of_apply,
-    yoneda_obj_map, yoneda_map_app, Category.comp_id, Category.id_comp] using h
+  simpa [freeYonedaSections, NatTrans.comp_app, Functor.whiskerRight_app,
+    Functor.comp_map, AddCommGrpCat.free_map, AddCommGrpCat.hom_comp,
+    AddCommGrpCat.hom_ofHom, yoneda_obj_map, yoneda_map_app] using h
+
 
 variable {J : GrothendieckTopology C}
   [HasSheafify J AddCommGrpCat.{v}]
@@ -548,12 +583,14 @@ theorem sectionsEquiv_naturality (F : Sheaf J AddCommGrpCat.{v})
     (sheafificationAdjunction J AddCommGrpCat).homEquiv_naturality_left]
   exact freeYonedaSections_precomp F.obj g _
 
+
 end HZero
 
 /-- The actual structure sheaf, with only its additive group retained. -/
 def additiveStructureSheaf (r θ : ℂ) :
     Sheaf (Opens.grothendieckTopology (cone r θ)) AddCommGrpCat :=
-  (sheafCompose _ (forget₂ CommRingCat AddCommGrpCat)).obj (cone r θ).sheaf
+  (sheafCompose _ (forget₂ CommRingCat RingCat ⋙
+    forget₂ RingCat AddCommGrpCat)).obj (cone r θ).sheaf
 
 /-- The standard derived category supplies Ext without an affine
 acyclicity or geometric vanishing hypothesis. -/
@@ -584,7 +621,12 @@ private theorem fromBiprod_sections (r θ : ℂ) (hr : r ≠ 0)
         secondSectionsRestriction r θ
           (HZero.sectionsEquiv (additiveStructureSheaf r θ) (secondPatch r θ) b) := by
   rw [GrothendieckTopology.MayerVietorisSquare.fromBiprod_biprodIsoProd_inv_apply,
-    map_sub, HZero.sectionsEquiv_naturality, HZero.sectionsEquiv_naturality] <;> rfl
+    map_sub]
+  have ha := HZero.sectionsEquiv_naturality (additiveStructureSheaf r θ)
+    (g := homOfLE (PrimeSpectrum.basicOpen_mul_le_left (curveG1 r θ) (curveG2 r θ))) a
+  have hb := HZero.sectionsEquiv_naturality (additiveStructureSheaf r θ)
+    (g := homOfLE (PrimeSpectrum.basicOpen_mul_le_right (curveG1 r θ) (curveG2 r θ))) b
+  exact congrArg₂ (· - ·) ha hb
 
 theorem sectionsConnecting_coboundary (r θ : ℂ) (hr : r ≠ 0)
     (x : FirstSections r θ) (y : SecondSections r θ) :
@@ -597,8 +639,14 @@ theorem sectionsConnecting_coboundary (r θ : ℂ) (hr : r ≠ 0)
   have hz : (HZero.sectionsEquiv F (overlapPatch r θ)).symm
       (sectionCoboundary r θ (x, y)) = S.fromBiprod F 0 z := by
     apply (HZero.sectionsEquiv F (overlapPatch r θ)).injective
-    rw [AddEquiv.apply_symm_apply, fromBiprod_sections]
-    simp only [a, b, AddEquiv.apply_symm_apply, sectionCoboundary_apply]
+    rw [AddEquiv.apply_symm_apply]
+    change sectionCoboundary r θ (x, y) =
+      HZero.sectionsEquiv (additiveStructureSheaf r θ) (overlapPatch r θ)
+        ((coneMayerVietoris r θ hr).fromBiprod (additiveStructureSheaf r θ) 0
+          ((AddCommGrpCat.biprodIsoProd _ _).inv (a, b)))
+    rw [fromBiprod_sections]
+    dsimp only [a, b, F]
+    simp only [AddEquiv.apply_symm_apply, sectionCoboundary_apply]
   change S.δ F 0 1 rfl
     ((HZero.sectionsEquiv F (overlapPatch r θ)).symm
       (sectionCoboundary r θ (x, y))) = 0
@@ -629,8 +677,13 @@ theorem sectionsConnecting_ker (r θ : ℂ) (hr : r ≠ 0) :
     refine ⟨(HZero.sectionsEquiv F (firstPatch r θ) a,
       HZero.sectionsEquiv F (secondPatch r θ) b), ?_⟩
     have hh := congrArg (HZero.sectionsEquiv F (overlapPatch r θ)) hw'
+    change HZero.sectionsEquiv (additiveStructureSheaf r θ) (overlapPatch r θ)
+      ((coneMayerVietoris r θ hr).fromBiprod (additiveStructureSheaf r θ) 0
+        ((AddCommGrpCat.biprodIsoProd _ _).inv (a, b))) =
+      HZero.sectionsEquiv F (overlapPatch r θ)
+        ((HZero.sectionsEquiv F (overlapPatch r θ)).symm z) at hh
     rw [fromBiprod_sections, AddEquiv.apply_symm_apply] at hh
-    exact hh
+    simpa only [sectionCoboundary_apply] using hh
   · rintro ⟨⟨x, y⟩, rfl⟩
     exact sectionsConnecting_coboundary r θ hr x y
 
@@ -704,7 +757,8 @@ theorem incidenceCubic_eq :
     cubicDeformation incidenceCubicCoefficients =
       substitute (CycleQ2IncidenceNormalForm.fullInvariantPolynomial 3
         (fun j => CycleQ2IncidenceTraceDirection.parameterDirection (Sum.inl j))) :=
-  (CycleQ2IncidenceCubicCechTrace.substitute_cubic _).symm
+  (CycleQ2IncidenceCubicCechTrace.substitute_cubic
+    (fun j => CycleQ2IncidenceTraceDirection.parameterDirection (Sum.inl j))).symm
 
 /-- The actual ambient-test normal connecting representative, paired with
 the actual incidence tangent's cubic, modulo every localization boundary. -/

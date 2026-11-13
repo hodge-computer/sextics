@@ -136,7 +136,7 @@ theorem higgs_add (s t : Tangent) : higgs (s + t) = higgs s + higgs t := by
   apply LinearMap.ext
   intro x
   apply Prod.ext
-  · simp only [higgs_apply, LinearMap.add_apply, Prod.add_fst, add_zero]
+  · simp [higgs_apply]
   · apply LinearMap.ext
     intro v
     change socleTrace ((x.1 : JacobianRing) * (v : JacobianRing) *
@@ -467,7 +467,8 @@ theorem lowerToDual_basis_apply (i j : Fin 33) :
     have hi := (basis_properties i).2.2 k
     change basisMonomial j k + (socle k - basisMonomial i k) = socle k at hk
     omega
-  · rintro rfl k
+  · intro h k
+    rw [h]
     change basisMonomial i k + (socle k - basisMonomial i k) = socle k
     exact Nat.add_sub_of_le ((basis_properties i).2.2 k)
 
@@ -530,13 +531,14 @@ theorem upper_mul_tangent_mem (u : Upper) (t : Tangent) :
     smul_mul_assoc, mul_smul_comm, smul_smul]
   apply (gradedPiece 12 1).sum_mem
   intro i hi
+  apply (gradedPiece 12 1).smul_mem
   apply (gradedPiece 12 1).sum_mem
   intro m hm
   apply (gradedPiece 12 1).smul_mem
-  change (degreeSixCharacterOneBasis i : JacobianRing) *
-    (degreeSixCharacterZeroBasis m : JacobianRing) ∈ gradedPiece 12 1
+  change (degreeSixCharacterOneBasis m : JacobianRing) *
+    (degreeSixCharacterZeroBasis i : JacobianRing) ∈ gradedPiece 12 1
   simpa only [degreeSixCharacterOneBasis_coe, degreeSixCharacterZeroBasis_coe] using
-    hbasis i m
+    hbasis m i
 
 /-- The lower Higgs component is actual multiplication in the quotient. -/
 def actualHiggsLower (t : Tangent) : Upper →ₗ[ℂ] ActualLower where

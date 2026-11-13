@@ -139,6 +139,7 @@ private theorem independentVariable_complement :
         submersivePresentation, localizedPresentation,
         Algebra.PreSubmersivePresentation.comp_map,
         Algebra.PreSubmersivePresentation.localizationAway_map, affinePresentation]
+      exact not_congr eq_comm
 
 /-- A basis of the genuine regular Kaehler differentials, obtained from
 the complementary coordinates in the proved submersive presentation. -/
