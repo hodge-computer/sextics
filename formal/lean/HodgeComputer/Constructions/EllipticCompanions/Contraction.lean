@@ -21,7 +21,6 @@ This module supplies reusable steps; it asserts no new instance certificate.
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedRationalResidue
 open Polynomial CrossedElliptic
 variable {K L : Type*} [Field K] [Field L]
@@ -73,7 +72,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedRationalCoefficientMap
 open Polynomial
 variable {K L M : Type*} [Field K] [Field L] [Field M]
@@ -108,22 +106,26 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedElliptic
 open Polynomial CrossedRationalResidue CrossedEllipticTheta
 open scoped BigOperators
 variable {K L : Type*} [Field K] [Field L] [CharZero K] [CharZero L]
 
 def thetaPolynomial (K : Type*) [Field K] : K[X] := X^3-C 1728
+omit [CharZero K] in
 lemma thetaPolynomial_ne_zero : thetaPolynomial K≠0 := (monic_X_pow_sub_C (1728 : K) (by decide : (3 : ℕ)≠0)).ne_zero
+omit [CharZero K] [CharZero L] in
 lemma thetaPolynomial_map (j : K →+* L) : (thetaPolynomial K).map j=thetaPolynomial L := by
   simp [thetaPolynomial,map_ofNat]
+omit [CharZero K] in
 lemma thetaPolynomial_eval (r : K) : (thetaPolynomial K).eval r=r^3-1728 := by simp [thetaPolynomial]
 lemma theta_roots_card [DecidableEq K] (hs : (thetaPolynomial K).Splits) : (thetaPolynomial K).roots.toFinset.card=3 := by
   have hsep : (thetaPolynomial K).Separable := separable_X_pow_sub_C 1728 (by norm_num) (by norm_num)
   rw [Multiset.toFinset_card_of_nodup (Polynomial.nodup_roots hsep),← hs.natDegree_eq_card_roots]
   dsimp [thetaPolynomial]
-  compute_degree <;> norm_num
+  compute_degree
+  norm_num
+omit [CharZero K] in
 lemma mem_theta_roots [DecidableEq K] (r : K) : r∈(thetaPolynomial K).roots.toFinset ↔ r^3=1728 := by
   rw [Multiset.mem_toFinset,Polynomial.mem_roots thetaPolynomial_ne_zero,Polynomial.IsRoot,thetaPolynomial_eval,sub_eq_zero]
 
@@ -140,6 +142,7 @@ lemma theta_trace_regular (r : L) (f : E L) (hf : FibreRegular r f) (hr : r^3≠
   rw [theta_trace]
   exact (hf.1.mul h0).add (hf.2.mul h1)
 
+omit [CharZero K] [CharZero L] in
 lemma coefficientMap_regular_of_dvd (j : K →+* L) (r : L) (f : RatFunc K) (G : K[X])
     (hd : f.denom∣G) (hG : (G.map j).eval r≠0) :
     RegularAt r (CrossedRationalCoefficientMap.map j f) := by
@@ -213,7 +216,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedEllipticPoleFields
 open Polynomial CrossedElliptic CrossedRationalResidue
 variable (K : Type*) [Field K] [CharZero K] (G : K[X])
@@ -241,28 +243,34 @@ instance pointsFinite : FiniteDimensional K (Points K G) :=
 
 def inclusion : K →+* Points K G := algebraMap K (Points K G)
 
+omit [CharZero K] in
 lemma first_G_split (hG : G≠0) : (G.map (algebraMap K (First K G))).Splits := by
   have hs := IsSplittingField.splits (First K G) (G*thetaPolynomial K)
   rw [Polynomial.map_mul] at hs
   exact hs.of_dvd (mul_ne_zero (Polynomial.map_ne_zero hG)
     (Polynomial.map_ne_zero thetaPolynomial_ne_zero)) (dvd_mul_right _ _)
+omit [CharZero K] in
 lemma first_theta_split (hG : G≠0) : ((thetaPolynomial K).map (algebraMap K (First K G))).Splits := by
   have hs := IsSplittingField.splits (First K G) (G*thetaPolynomial K)
   rw [Polynomial.map_mul] at hs
   exact hs.of_dvd (mul_ne_zero (Polynomial.map_ne_zero hG)
     (Polynomial.map_ne_zero thetaPolynomial_ne_zero)) (dvd_mul_left _ _)
+omit [CharZero K] in
 lemma G_split (hG : G≠0) : (G.map (inclusion K G)).Splits := by
   have h := (first_G_split K G hG).map (algebraMap (First K G) (Points K G))
   simpa only [Polynomial.map_map,← IsScalarTower.algebraMap_eq K (First K G) (Points K G),inclusion] using h
+omit [CharZero K] in
 lemma theta_split (hG : G≠0) : (thetaPolynomial (Points K G)).Splits := by
   have h := (first_theta_split K G hG).map (algebraMap (First K G) (Points K G))
   simpa only [Polynomial.map_map,thetaPolynomial_map] using h
+omit [CharZero K] in
 lemma pointPolynomial_ne_zero : pointPolynomial K G≠0 := by
   classical
   apply Finset.prod_ne_zero_iff.mpr
   intro r hr
   exact (monic_X_pow_sub_C _ (by decide : (2 : ℕ)≠0)).ne_zero
 
+omit [CharZero K] in
 lemma root_has_point (hG : G≠0) (r : Points K G) (hr : (G.map (inclusion K G)).eval r=0) :
     ∃ s : Points K G,s^2=r^3-432 := by
   classical
@@ -423,8 +431,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 600000
 namespace CrossedElliptic
 open Polynomial HoldoutConstruction CrossedRationalResidue CrossedDivergenceDescent
 open scoped BigOperators
@@ -544,8 +550,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 400000
 namespace CrossedElliptic
 open Polynomial HoldoutConstruction CrossedRationalResidue CrossedDivergenceDescent
 open scoped BigOperators

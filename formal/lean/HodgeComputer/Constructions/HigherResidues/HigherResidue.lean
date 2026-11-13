@@ -10,9 +10,7 @@ Prepared with OpenAI Codex assistance for contributor fqlx.
 -/
 
 noncomputable section
-set_option maxHeartbeats 4000000
 set_option maxRecDepth 100000
-set_option backward.isDefEq.respectTransparency false
 namespace SplitHigherResidue
 open HoldoutConstruction Polynomial
 open scoped BigOperators
@@ -25,6 +23,7 @@ def advect (D : ι → Derivation ℤ K K) (w : ι → K) (r : K) : K :=
 def advectVector (D : ι → Derivation ℤ K K) (w v : ι → K) : ι → K :=
   fun i => advect D w (v i)
 
+omit [CharZero K] in
 lemma advect_mul (D : ι → Derivation ℤ K K) (w : ι → K) (r s : K) :
     advect D w (r*s) = advect D w r*s+r*advect D w s := by
   simp only [advect, Derivation.leibniz, smul_eq_mul, mul_add,
@@ -32,14 +31,17 @@ lemma advect_mul (D : ι → Derivation ℤ K K) (w : ι → K) (r s : K) :
   conv_lhs => rw [add_comm]
   congr 1 <;> apply Finset.sum_congr rfl <;> intro i hi <;> ring
 
+omit [CharZero K] in
 lemma advect_add (D : ι → Derivation ℤ K K) (w : ι → K) (r s : K) :
     advect D w (r+s) = advect D w r+advect D w s := by
   simp only [advect, map_add, mul_add, Finset.sum_add_distrib]
 
+omit [CharZero K] in
 lemma divergence_smul (D : ι → Derivation ℤ K K) (r : K) (w : ι → K) :
     fieldDivergence D (fun i => r*w i) = advect D w r+r*fieldDivergence D w := by
   exact fieldDivergence_smul D r w
 
+omit [CharZero K] in
 lemma divergence_advect (D : ι → Derivation ℤ K K) (w v : ι → K)
     (hc : ∀ i j, Function.Commute (D i) (D j)) :
     fieldDivergence D (advectVector D w v) =
@@ -61,6 +63,7 @@ lemma divergence_advect (D : ι → Derivation ℤ K K) (w v : ι → K)
     intro i hi
     rw [hc i j]
 
+omit [CharZero K] in
 lemma advect_advect (D : ι → Derivation ℤ K K) (w : ι → K) (r : K) :
     advect D w (advect D w r) =
       advect D (advectVector D w w) r+
@@ -88,6 +91,7 @@ def traceSquare (D : ι → Derivation ℤ K K) (w : ι → K) : K :=
 def hessianDensity (D : ι → Derivation ℤ K K) (w : ι → K) (r : K) : K :=
   ∑ i, ∑ j, w i*w j*D i (D j r)
 
+omit [CharZero K] in
 lemma second_lie_divergence (D : ι → Derivation ℤ K K) (w : ι → K) (r : K)
     (hc : ∀ i j, Function.Commute (D i) (D j)) :
     fieldDivergence D (fun i => w i*fieldDivergence D (fun j => r*w j)-
@@ -133,7 +137,7 @@ theorem second_density_transgression (D : ι → Derivation ℤ K K)
         (1/2)*fieldDivergence D (fun i => w i*fieldDivergence D (fun j => r₀*w j)-
           r₀*advectVector D w w i) := by
     simp only [fieldDivergence, secondCorrection, map_add, Derivation.leibniz,
-      hhalf, mul_zero, add_zero, Finset.sum_const_zero, smul_eq_mul,
+      hhalf, mul_zero, add_zero, smul_eq_mul,
       Finset.sum_add_distrib, Finset.mul_sum]
   rw [hlin, divergence_smul, divergence_smul, second_lie_divergence D w r₀ hc]
   unfold secondDensity
@@ -194,6 +198,7 @@ theorem linear_thickening_density_identity (D : ι → Derivation ℤ K K)
   rw [hneg,hdiv]
   linear_combination r₀*hJ₂+(r₁+advect D w r₀-3*a*r₀)*hJ₁
 
+set_option backward.isDefEq.respectTransparency false in
 theorem determinant_linear_coeff_two_four {K : Type*} [Field K] [CharZero K] (W : Matrix (Fin 4) (Fin 4) K) :
     2*(Matrix.det (fun (i j : Fin 4) => (Polynomial.C (if i=j then (1:K) else 0)+
       Polynomial.C (W i j)*Polynomial.X))).coeff 2 =
@@ -279,7 +284,7 @@ theorem determinant_updateRow_inverse {K : Type*} [Field K] {n : ℕ}
 theorem normal_cofactor_contraction {K : Type*} [Field K] {n : ℕ}
     (D E : Fin n → Derivation ℤ K K)
     (M N : Matrix (Fin (n+1)) (Fin (n+1)) K) (g ψ : Fin (n+1) → K)
-    (hNM : N*M=1) (hN : ∀ j,N 0 j=g j) (hM : ∀ j,M j 0=ψ j)
+    (hNM : N*M=1) (hM : ∀ j,M j 0=ψ j)
     (hg : g 0≠0) (hψ : ∑ j,g j*ψ j=1)
     (chain : ∀ j x,E j x=∑ i,tangentInverse N g i j*D i x) (a : K) :
     ∑ i,D i a*N i.succ 0 = -g 0*∑ j,ψ j.succ*E j a := by
@@ -437,6 +442,7 @@ theorem tangent_determinant_coefficients_zero_one {K : Type*} [Field K] [CharZer
   constructor <;> ring
 
 
+ omit [CharZero K] in
  theorem tangent_linear_factorization
     (A B W : Matrix (Fin 4) (Fin 4) K) (hB : B=W*A) :
     A.map C+(X : K[X]) • B.map C =

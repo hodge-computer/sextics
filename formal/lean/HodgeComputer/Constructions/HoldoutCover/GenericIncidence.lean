@@ -201,8 +201,6 @@ coordinate-ring incidence before passage to a generic coefficient field.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
-
 namespace HoldoutConstruction
 
 open scoped TensorProduct

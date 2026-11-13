@@ -12,8 +12,6 @@ No continuity in the deformation coefficient is assumed: it remains 1/14.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 800000
 namespace DeformedConic
 open HoldoutConstruction
 
@@ -28,10 +26,10 @@ theorem complex_point_of_etale_nontrivial {n : ℕ}
   obtain ⟨I,hI,hfin,hsep,heq,hjac⟩ :=
     squareGeneric_exists_fieldFactor (K := ℂ) eqs
       (show Function.Injective (algebraMap ℤ ℂ) from Int.cast_injective)
-  letI := hI
+  let := hI
   let E := (SquareGenericAlgebra ℂ eqs) ⧸ I
-  letI : Field E := Ideal.Quotient.field I
-  letI : Module.Finite ℂ E := hfin
+  let : Field E := Ideal.Quotient.field I
+  let : Module.Finite ℂ E := hfin
   let f : E →ₐ[ℂ] ℂ := IsAlgClosed.lift
   let v : Fin n → ℂ := fun i => f (squareGenericCoordinates eqs I i)
   have hm (P : MvPolynomial (Fin n) ℤ) :
@@ -43,17 +41,17 @@ theorem complex_point_of_etale_nontrivial {n : ℕ}
         simp
       · intro i
         simp [v]
-        change f ((MvPolynomial.aeval (R := ℤ) (squareGenericCoordinates eqs I))
-          (MvPolynomial.X i)) = f (squareGenericCoordinates eqs I i)
-        rw [MvPolynomial.aeval_X]
     exact congrArg (fun g : MvPolynomial (Fin n) ℤ →+* ℂ => g P) hh
   refine ⟨v,fun i => ?_,?_⟩
   · rw [← hm,heq,map_zero]
   · have hu := hjac.map f.toRingHom
-    rw [RingHom.map_det] at hu
-    change IsUnit (Matrix.det (fun i j => f (MvPolynomial.aeval
-      (squareGenericCoordinates eqs I) (MvPolynomial.pderiv i (eqs j))))) at hu
-    simpa only [hm] using hu
+    have hdet : f.toRingHom (Matrix.det (fun i j => MvPolynomial.aeval
+        (squareGenericCoordinates eqs I) (MvPolynomial.pderiv i (eqs j)))) =
+        Matrix.det (fun i j => MvPolynomial.aeval v (MvPolynomial.pderiv i (eqs j))) :=
+      (RingHom.map_det f.toRingHom _).trans (congrArg Matrix.det (by
+        ext i j
+        exact hm _))
+    exact (congrArg IsUnit hdet).mp hu
 
 
 end DeformedConic

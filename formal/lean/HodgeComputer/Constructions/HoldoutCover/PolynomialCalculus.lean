@@ -107,7 +107,7 @@ theorem derivation_eval₂_chain
     have hdelta : (∑ i, MvPolynomial.eval₂Hom φ x p *
         MvPolynomial.eval₂Hom φ x (MvPolynomial.pderiv i (MvPolynomial.X j))*D (x i)) =
       MvPolynomial.eval₂Hom φ x p*D (x j) := by
-      simp [MvPolynomial.pderiv_X, Pi.single_apply, apply_ite, mul_ite, ite_mul]
+      simp [MvPolynomial.pderiv_X, Pi.single_apply, apply_ite, ite_mul]
     rw [hdelta]
     ring
 

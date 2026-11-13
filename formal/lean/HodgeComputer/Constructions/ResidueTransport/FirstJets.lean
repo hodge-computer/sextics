@@ -26,8 +26,6 @@ normalization uses explicit inverses in the coefficient ring.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 
 namespace ResidueFirstJets
 
@@ -136,6 +134,7 @@ open TrivSqZeroExt
 @[simp] lemma snd_numeral (n : ℕ) [n.AtLeastTwo] :
     (ofNat(n) : Jet (K:=K)).snd=0 := rfl
 
+set_option backward.isDefEq.respectTransparency false in
 def jetDerivation (D : Derivation ℤ K K) : Derivation ℤ (Jet (K:=K)) (Jet (K:=K)) where
   toFun z := (D z.fst,D z.snd)
   map_add' := by intro a b; ext <;> simp [map_add]
@@ -168,7 +167,9 @@ lemma differential_first_variation (D : Derivation ℤ K K) (ξ η g : Jet (K:=K
     (h : g*jetDerivation D ξ=6*η) :
     g.fst*D ξ.snd+g.snd*D ξ.fst=6*η.snd := by
   have hs := congrArg TrivSqZeroExt.snd h
-  simpa [jetDerivation,smul_eq_mul,op_smul_eq_smul,add_comm] using hs
+  simp only [snd_mul,jetDerivation_fst,jetDerivation_snd,fst_numeral,snd_numeral,
+    smul_eq_mul,op_smul_eq_smul,mul_zero,add_zero] at hs
+  linear_combination hs
 
 lemma differential_jet_from_cleared (g η Dξ ξdotDerivative ηdot gdot : K)
     (hvalue : g*Dξ=6*η)

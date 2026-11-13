@@ -4,8 +4,6 @@ import HodgeComputer.Constructions.HigherResidues.NormalJetBinding
 /- Actual normal-row Taylor jets of a polynomial hypersurface.
 Prepared with OpenAI Codex assistance for fqlx. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 4000000
 set_option maxRecDepth 100000
 namespace SplitHigherResidue
 open Polynomial HoldoutConstruction SplitNormalJetBinding
@@ -30,7 +28,6 @@ def normalVariation (D : Fin 4 → Derivation ℤ K K) (ψ : Fin 5 → K) :
 lemma normalQuadraticJet_eq (π : P →+* K) (F : P) (ψ : Fin 5 → K) :
     normalQuadraticJet π F ψ=SplitNormalTaylor.secondJet ψ (hessian π F) := by
   unfold normalQuadraticJet SplitNormalTaylor.secondJet
-  congr 1
   simp only [Fin.sum_univ_succ,Fin.sum_univ_zero]
   ring
 

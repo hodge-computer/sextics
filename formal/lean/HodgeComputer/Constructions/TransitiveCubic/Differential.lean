@@ -12,8 +12,6 @@ noncomputable section
 namespace TransitiveCovariants
 open MvPolynomial
 set_option maxRecDepth 131072
-set_option maxHeartbeats 4000000
-set_option backward.isDefEq.respectTransparency false
 variable {K : Type*} [CommRing K]
 abbrev Affine (K : Type*) [CommRing K] := MvPolynomial (Fin 2) K
 local notation "x" => (X (R := K) (0:Fin 2))
@@ -38,7 +36,6 @@ open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding
 open TransitiveCovariants.Reflection TransitiveCovariants.IdentityData
 open TransitiveCubicEncodingCheck
 set_option maxRecDepth 131072
-set_option maxHeartbeats 4000000
 def Hx_2_0 : Expr := (.mul (.natCast 3) H_3_0)
 def Hx_1_1 : Expr := (.mul (.natCast 2) H_2_1)
 def Hx_1_0 : Expr := (.mul (.natCast 2) H_2_0)
@@ -1202,7 +1199,7 @@ theorem semantic_identity {L : Type*} [CommRing L] (v : ℕ → L) (xx yy : L) :
     h*(ux*qy-uy*qx)-2*q*(ux*hy-uy*hx)+3*j=u*(hx*qy-hy*qx) := by
   dsimp only
   have h := data_identity v xx yy
-  simp only [← Right_generated,← C_generated,← C1n_generated,← C1_generated,← C0_generated,← Left_generated,← Left0_generated,← J3_generated,← QBneg_generated,← QB_generated,← B_generated,← B1n_generated,← B1_generated,← B0_generated,← HA_generated,← A_generated,← A1n_generated,← A1_generated,← A0_generated,multiply_denote,scale_denote,merge_denote,ringEval,Int.cast_neg,Int.cast_ofNat] at h
+  simp only [← Right_generated,← C_generated,← C1n_generated,← C1_generated,← C0_generated,← Left_generated,← Left0_generated,← J3_generated,← QBneg_generated,← QB_generated,← B_generated,← B1n_generated,← B1_generated,← B0_generated,← HA_generated,← A_generated,← A1n_generated,← A1_generated,← A0_generated,multiply_denote,scale_denote,merge_denote,ringEval,Int.cast_ofNat] at h
   linear_combination h
 
 def baseCoefficients (a b c d e f : K) : ℕ → K :=

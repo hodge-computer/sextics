@@ -2,6 +2,9 @@ name = "HodgeTestbed"
 version = "0.1.0"
 defaultTargets = ["HodgeTestbed", "HodgeComputer"]
 
+[leanOptions]
+maxHeartbeats = 0
+
 [[require]]
 name = "mathlib"
 git = "https://github.com/leanprover-community/mathlib4.git"

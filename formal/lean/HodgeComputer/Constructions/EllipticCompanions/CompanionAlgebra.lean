@@ -96,11 +96,11 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedMonicHypersurface
 open Polynomial HoldoutConstruction
 variable {K : Type*} [Field K] [CharZero K] {n : ℕ}
 
+omit [CharZero K] in
 lemma derivative_finSuccEquiv (f : MvPolynomial (Fin (n+1)) K) :
     (MvPolynomial.finSuccEquiv K n f).derivative=
       MvPolynomial.finSuccEquiv K n (integerPartial 0 f) := by
@@ -109,7 +109,7 @@ lemma derivative_finSuccEquiv (f : MvPolynomial (Fin (n+1)) K) :
     rw [show MvPolynomial.finSuccEquiv K n (MvPolynomial.C c)=C (MvPolynomial.C c)
       from (MvPolynomial.finSuccEquiv K n).commutes c]
     rw [derivative_C,integerPartial_C,map_zero]
-  | add p q hp hq => simp only [map_add,derivative_add,hp,hq]
+  | add p q hp hq => simp only [map_add,hp,hq]
   | mul_X p j hp =>
     have hx : (MvPolynomial.finSuccEquiv K n (MvPolynomial.X j)).derivative=
         MvPolynomial.finSuccEquiv K n (integerPartial 0 (MvPolynomial.X j)) := by
@@ -132,9 +132,11 @@ instance field_charZero : CharZero (FunctionField p) :=
 def equation : MvPolynomial (Fin (n+1)) K := (MvPolynomial.finSuccEquiv K n).symm p
 def projection : MvPolynomial (Fin (n+1)) K →+* CoordinateRing p :=
   (AdjoinRoot.mk p).comp (MvPolynomial.finSuccEquiv K n).toRingHom
+omit [CharZero K] [IsDomain (AdjoinRoot p)] in
 lemma projection_surjective : Function.Surjective (projection p) :=
   (AdjoinRoot.mk_surjective (g:=p)).comp (MvPolynomial.finSuccEquiv K n).surjective
 
+omit [CharZero K] [IsDomain (AdjoinRoot p)] in
 lemma projection_kernel (f : MvPolynomial (Fin (n+1)) K) : projection p f=0 ↔ equation p ∣ f := by
   change AdjoinRoot.mk p (MvPolynomial.finSuccEquiv K n f)=0 ↔ _
   rw [AdjoinRoot.mk_eq_zero,← map_dvd_iff (MvPolynomial.finSuccEquiv K n)]
@@ -143,6 +145,7 @@ lemma projection_kernel (f : MvPolynomial (Fin (n+1)) K) : projection p f=0 ↔ 
 def residueMap : MvPolynomial (Fin (n+1)) K →+* FunctionField p :=
   (algebraMap (CoordinateRing p) (FunctionField p)).comp (projection p)
 
+omit [CharZero K] [IsDomain (AdjoinRoot p)] in
 @[simp] lemma residueMap_C (c : K) : residueMap p (MvPolynomial.C c)=algebraMap K (FunctionField p) c := by
   change algebraMap (CoordinateRing p) (FunctionField p)
     (AdjoinRoot.mk p (MvPolynomial.finSuccEquiv K n (MvPolynomial.C c)))=_
@@ -150,6 +153,7 @@ def residueMap : MvPolynomial (Fin (n+1)) K →+* FunctionField p :=
     from (MvPolynomial.finSuccEquiv K n).commutes c]
   rfl
 
+omit [CharZero K] [IsDomain (AdjoinRoot p)] in
 @[simp] lemma residueMap_X_zero : residueMap p (MvPolynomial.X 0)=
     algebraMap (CoordinateRing p) (FunctionField p) (AdjoinRoot.root p) := by
   change algebraMap (CoordinateRing p) (FunctionField p)
@@ -157,6 +161,7 @@ def residueMap : MvPolynomial (Fin (n+1)) K →+* FunctionField p :=
   rw [MvPolynomial.finSuccEquiv_X_zero]
   rfl
 
+omit [CharZero K] [IsDomain (AdjoinRoot p)] in
 @[simp] lemma residueMap_X_succ (j : Fin n) : residueMap p (MvPolynomial.X j.succ)=
     algebraMap (CoordinateRing p) (FunctionField p) (AdjoinRoot.of p (MvPolynomial.X j)) := by
   change algebraMap (CoordinateRing p) (FunctionField p)
@@ -164,9 +169,11 @@ def residueMap : MvPolynomial (Fin (n+1)) K →+* FunctionField p :=
   rw [MvPolynomial.finSuccEquiv_X_succ]
   rfl
 
+omit [CharZero K] in
 lemma residueMap_kernel (f : MvPolynomial (Fin (n+1)) K) : residueMap p f=0 ↔ equation p ∣ f :=
   residue_fractionMap_kernel (projection p) (equation p) (projection_kernel p) f
 
+omit [IsDomain (AdjoinRoot p)] in
 lemma normal_ne_zero (hp : p.Monic) (hi : Irreducible p) :
     residueMap p (integerPartial 0 (equation p))≠0 := by
   have hd : p.degree≠0 := ne_of_gt (hp.degree_pos_of_not_isUnit hi.not_isUnit)
@@ -279,7 +286,6 @@ section
    in the square etale incidence. Uses fqlx's accepted generic incidence
    algebra and flat generic-fibre construction. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 open scoped TensorProduct
 namespace CrossedOpenIncidence
 open HoldoutConstruction
@@ -295,7 +301,7 @@ abbrev OpenSystemRing (equations : ι → MvPolynomial ι R) (g : MvPolynomial �
 
 instance open_etale (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R) :
     Algebra.Etale R (OpenSystemRing equations g) := by
-  letI : Algebra.Etale R (SquareEtaleRing equations) := square_system_jacobian_etale equations
+  let : Algebra.Etale R (SquareEtaleRing equations) := square_system_jacobian_etale equations
   infer_instance
 
 lemma etaleEval_polynomial {T : Type*} [CommRing T] [Algebra R T]
@@ -336,6 +342,7 @@ def coordinates (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
     (η : OpenSystemRing equations g →ₐ[R] S) (i : ι) : S :=
   systemMap equations g η (Ideal.Quotient.mk _ (MvPolynomial.X i))
 
+omit [DecidableEq ι] in
 lemma evaluation (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
     (η : OpenSystemRing equations g →ₐ[R] S) (P : MvPolynomial ι R) :
     MvPolynomial.aeval (coordinates equations g η) P =
@@ -347,6 +354,7 @@ lemma evaluation (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
     simp [coordinates]
   exact congrArg (fun f : MvPolynomial ι R →ₐ[R] _ => f P) hh
 
+omit [DecidableEq ι] in
 lemma solution (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
     (η : OpenSystemRing equations g →ₐ[R] S) (i : ι) :
     MvPolynomial.aeval (coordinates equations g η) (equations i)=0 := by
@@ -355,6 +363,7 @@ lemma solution (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
     Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.subset_span ⟨i,rfl⟩)
   rw [hz,map_zero]
 
+omit [DecidableEq ι] in
 lemma open_unit (equations : ι → MvPolynomial ι R) (g : MvPolynomial ι R)
     (η : OpenSystemRing equations g →ₐ[R] S) :
     IsUnit (MvPolynomial.aeval (coordinates equations g η) g) := by

@@ -11,7 +11,6 @@ Fermat endpoint coordinate ring nontrivial. The seed is evaluated before
 passing to any fraction field. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutConicIncidence
 

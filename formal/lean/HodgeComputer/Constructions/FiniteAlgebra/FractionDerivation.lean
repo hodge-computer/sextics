@@ -17,13 +17,17 @@ variable {P F : Type*} [CommRing P] [IsDomain P] [Field F]
 
 private def num (x : F) : P := Classical.choose (IsFractionRing.div_surjective P x)
 private def den (x : F) : P := Classical.choose (Classical.choose_spec (IsFractionRing.div_surjective P x))
+omit [IsDomain P] [Algebra ℚ P] [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem den_mem (x : F) : den (P := P) x ∈ nonZeroDivisors P :=
   (Classical.choose_spec (Classical.choose_spec (IsFractionRing.div_surjective P x))).1
+omit [IsDomain P] [Algebra ℚ P] [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem repr_eq (x : F) :
     algebraMap P F (num x) / algebraMap P F (den x) = x :=
   (Classical.choose_spec (Classical.choose_spec (IsFractionRing.div_surjective P x))).2
+omit [Algebra ℚ P] [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem den_ne (x : F) : algebraMap P F (den x) ≠ 0 :=
   IsFractionRing.to_map_ne_zero_of_mem_nonZeroDivisors (den_mem x)
+omit [Algebra ℚ P] [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem map_ne {x : P} (hx : x ≠ 0) : algebraMap P F x ≠ 0 := by
   exact fun h => hx ((IsFractionRing.injective P F) (by simpa using h))
 
@@ -32,6 +36,7 @@ private def quotientD (D : Derivation ℚ P P) (x : F) : F :=
     algebraMap P F (num x) * algebraMap P F (D (den x))) /
     algebraMap P F (den x) ^ 2
 
+omit [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem quotientD_div (D : Derivation ℚ P P) (a b : P) (hb : b ≠ 0) :
     quotientD D (algebraMap P F a / algebraMap P F b) =
       (algebraMap P F (D a) * algebraMap P F b -
@@ -55,11 +60,13 @@ private theorem quotientD_div (D : Derivation ℚ P P) (a b : P) (hb : b ≠ 0) 
     (algebraMap P F b * algebraMap P F (D (den x)) +
       algebraMap P F (den x) * algebraMap P F (D b)) * hcross'
 
+omit [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem quotientD_map (D : Derivation ℚ P P) (a : P) :
     quotientD D (algebraMap P F a) = algebraMap P F (D a) := by
   have h := quotientD_div (F := F) D a 1 one_ne_zero
   simpa using h
 
+omit [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem quotientD_add (D : Derivation ℚ P P) (x y : F) :
     quotientD D (x+y) = quotientD D x + quotientD D y := by
   obtain ⟨a,b,hb,rfl⟩ := IsFractionRing.div_surjective P x
@@ -76,8 +83,9 @@ private theorem quotientD_add (D : Derivation ℚ P P) (x y : F) :
     quotientD_div D _ _ hd0]
   simp only [map_add, map_mul, Derivation.leibniz, smul_eq_mul]
   field_simp
-  <;> ring
+  ring
 
+omit [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem quotientD_mul (D : Derivation ℚ P P) (x y : F) :
     quotientD D (x*y) = x * quotientD D y + y * quotientD D x := by
   obtain ⟨a,b,hb,rfl⟩ := IsFractionRing.div_surjective P x
@@ -93,7 +101,7 @@ private theorem quotientD_mul (D : Derivation ℚ P P) (x y : F) :
     quotientD_div D _ _ hd0]
   simp only [map_mul, Derivation.leibniz, map_add, smul_eq_mul]
   field_simp
-  <;> ring
+  ring
 
 /-- A derivation on a rational algebra extends to its fraction field. Its action
 is proved from the quotient rule; no derivative of a chosen representative is assumed. -/
@@ -104,10 +112,12 @@ def extend (D : Derivation ℚ P P) : Derivation ℚ F F :=
        map_add' := quotientD_add D } : F →+ F).toRatLinearMap
     (by intro x y; exact quotientD_mul D x y)
 
+omit [IsScalarTower ℚ P F] in
 @[simp] theorem extend_map (D : Derivation ℚ P P) (a : P) :
     extend (F := F) D (algebraMap P F a) = algebraMap P F (D a) :=
   quotientD_map D a
 
+ omit [IsScalarTower ℚ P F] in
  theorem extend_div (D : Derivation ℚ P P) (a b : P) (hb : b ≠ 0) :
     extend (F := F) D (algebraMap P F a / algebraMap P F b) =
       (algebraMap P F (D a) * algebraMap P F b -

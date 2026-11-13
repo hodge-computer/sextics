@@ -67,7 +67,6 @@ theorem numerator_homogeneous (d e f g h : R) (i : Fin 4) :
   · exact ((nb_homogeneous d e f g h).C_mul g).sub
       ((minusNC_homogeneous e f g h).C_mul h)
 
-set_option maxHeartbeats 4000000
 set_option maxRecDepth 4000
 
 theorem numerator_divergence (d e f g h : R) :
@@ -77,7 +76,7 @@ theorem numerator_divergence (d e f g h : R) :
     nb, minusNC, map_add, map_sub, map_neg, pderiv_mul, pderiv_C,
     pderiv_X, Pi.single_apply]
   norm_num [Fin.ext_iff, map_ofNat]
-  <;> ring
+  ring
 
 theorem numerator_tangency (d e f g h : R) :
     directional (pole e f) (numerator d e f g h) = 0 := by
@@ -85,7 +84,6 @@ theorem numerator_tangency (d e f g h : R) :
   simp only [numerator, Matrix.cons_val_zero, Matrix.cons_val_succ,
     pole, map_sub, pderiv_mul, pderiv_C, pderiv_X, Pi.single_apply]
   norm_num [Fin.ext_iff]
-  <;> ring
 
 theorem source_with_residual (a b c d e f g h : R) :
     directional (cubic a b c d) (numerator d e f g h) =
@@ -170,7 +168,7 @@ theorem gradient_expansion (a b c d : R) (i : Fin 4) :
     simp only [gradientCoefficients, quadraticMonomials, Fin.sum_univ_succ,
       Fin.sum_univ_zero, add_zero, Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_succ,
       Matrix.cons_val_zero', Matrix.cons_val_succ', Matrix.cons_val_one,
-      map_add, map_mul, map_neg, map_ofNat, map_zero] <;>
+      map_mul, map_neg, map_ofNat, map_zero] <;>
     ring
 
 theorem gradientCoefficients_map {S : Type*} [CommRing S] (φ : R →+* S)

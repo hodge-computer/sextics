@@ -29,7 +29,6 @@ def OddSource (A : HodgeComputer.AmbientPoly n) : Prop :=
 end HodgeComputer.Fermat
 
 namespace HodgeComputer.Fermat
-set_option maxHeartbeats 0
 set_option maxRecDepth 100000
 open scoped BigOperators
 
@@ -57,7 +56,6 @@ theorem subset_euler (a : Fin 6 → ℕ) (q : ℕ) (hq : q = 1 ∨ q = 2)
 end HodgeComputer.Fermat
 
 
-set_option maxHeartbeats 1000000
 noncomputable section
 namespace HodgeComputer.Fermat
 open MvPolynomial HodgeTestbed
@@ -142,7 +140,7 @@ def eulerNumerator (I : Finset (Fin 6)) (A : R) (i : Fin 6) : R :=
 
 lemma pderiv_partialF (I : Finset (Fin 6)) (i : Fin 6) :
     pderiv i (partialF I) = if i ∈ I then 6 * X i ^ 5 else 0 := by
-  simp [partialF, pderiv_pow, pderiv_X, Pi.single_apply, Finset.sum_ite_eq']
+  simp [partialF, pderiv_X, Pi.single_apply, Finset.sum_ite_eq']
 
 lemma pderiv_F (i : Fin 6) : pderiv i F = 6 * X i ^ 5 := by
   change pderiv i (partialF Finset.univ) = _
@@ -172,7 +170,7 @@ lemma divergence_euler (I : Finset (Fin 6)) (A : R) :
   simp only [eulerNumerator, apply_ite, map_zero, Finset.sum_ite_mem, Finset.univ_inter]
   apply Finset.sum_congr rfl
   intro i hi
-  simp [pderiv_mul, pderiv_X, mul_comm]
+  simp [pderiv_X, mul_comm]
   ring
 
 
@@ -220,13 +218,16 @@ lemma monomial_hasCertificate (q : ℕ) (hq : q ≠ 0) (a : Fin 6 →₀ ℕ) (c
     denominator_legal := ?_
     identity := ?_
   }
-  · convert Homogeneous.of_isHomogeneous hAhom using 1 <;> push_cast <;> ring
+  · convert Homogeneous.of_isHomogeneous hAhom using 1
+    push_cast
+    ring
   · intro i
     change Homogeneous (eulerNumerator I (monomial a c) i) _
     unfold eulerNumerator
     split_ifs with hi
-    · convert Homogeneous.of_isHomogeneous (hAhom.mul (isHomogeneous_X ℂ i)) using 1 <;>
-        simp only [hdegree, Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat] <;> ring
+    · convert Homogeneous.of_isHomogeneous (hAhom.mul (isHomogeneous_X ℂ i)) using 1
+      simp only [hdegree, Nat.cast_add, Nat.cast_mul, Nat.cast_ofNat]
+      ring
     · exact homogeneous_zero _
   · apply IsRelPrime.mul_right
     · apply IsUnit.isRelPrime_right

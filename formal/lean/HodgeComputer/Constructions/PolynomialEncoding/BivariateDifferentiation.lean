@@ -31,9 +31,9 @@ lemma pderiv_denote_dx (v : ℕ → K) (p : Biv) :
     rw [denote,map_add,ih]
     rw [ringEval_C]
     cases i with
-    | zero => simp [dx,denote,pderiv_mul,pderiv_pow,Pi.single_apply]
+    | zero => simp [dx]
     | succ i =>
-      simp [dx,denote,ringEval,ringEval_C,pderiv_mul,pderiv_pow,Pi.single_apply]
+      simp [dx,denote,ringEval,ringEval_C]
       ring
 
 lemma pderiv_denote_dy (v : ℕ → K) (p : Biv) :
@@ -45,9 +45,9 @@ lemma pderiv_denote_dy (v : ℕ → K) (p : Biv) :
     rw [denote,map_add,ih]
     rw [ringEval_C]
     cases j with
-    | zero => simp [dy,denote,pderiv_mul,pderiv_pow,Pi.single_apply]
+    | zero => simp [dy]
     | succ j =>
-      simp [dy,denote,ringEval,ringEval_C,pderiv_mul,pderiv_pow,Pi.single_apply]
+      simp [dy,denote,ringEval,ringEval_C]
       ring
 
 end PolynomialEncoding.BivariateExpressions
