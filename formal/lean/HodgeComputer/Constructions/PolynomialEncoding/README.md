@@ -11,4 +11,4 @@ Import the individual modules. Declarations lie in the namespaces `PolynomialEnc
 - `BivariateDifferentiation` differentiates these polynomials in each variable and proves agreement with the partial derivatives of their evaluation.
 - `PolynomialDigitCheck` proves that evaluation at `b` is injective on polynomials with natural coefficients whose coefficient sum is less than `b`.
 
-The [cyclic](../CyclicCubic/README.md), [transitive](../TransitiveCubic/README.md) and [polar](../PolarCubic/README.md) cubic packages apply them. Each package keeps its own monomial weights, grade check and coefficient tables.
+The [transitive cubic package](../TransitiveCubic/README.md) applies them, as do the cyclic and polar cubic families proved in [cycle-three](../../../../../data/cycle-three/solution.md) and [mixed-polar](../../../../../data/mixed-polar/solution.md). Each family keeps its own monomial weights, grade check and coefficient tables.

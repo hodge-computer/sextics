@@ -1,4 +1,4 @@
-import HodgeComputer.Constructions.CyclicCubic.Cubic
+import Proposal.CyclicCubicCubic
 import Proposal.JacobianModel
 
 /-! Exact polynomial identities for the physical paired-sign cubic reduction.

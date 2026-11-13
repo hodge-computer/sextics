@@ -1,5 +1,5 @@
 import Proposal.PhysicalCubicTangent
-import HodgeComputer.Constructions.PolarCubic.Map
+import Proposal.PolarCubicMap
 
 /-! The covariant invariant differential on the exact physical field.
 The universal polynomial identity is instantiated using the proved physical

@@ -53,6 +53,15 @@ class MaintenanceChecks(unittest.TestCase):
         self.assertEqual(self.plan("data/first/solution.md", "data/first/acceptance.json"),
                          {"modules": [], "instances": []})
 
+    def test_documentation_inside_the_library_requires_no_lean(self):
+        self.assertEqual(self.plan("formal/lean/HodgeComputer/README.md"),
+                         {"modules": [], "instances": []})
+
+    def test_other_files_inside_the_library_recheck_everything(self):
+        plan = self.plan("formal/lean/lakefile.toml")
+        self.assertEqual(plan["instances"], ["first", "second"])
+        self.assertEqual(plan["modules"], ["HodgeComputer.Helper", "HodgeComputer.Verify"])
+
     def test_verifier_edit_rechecks_existing_solves(self):
         self.assertEqual(self.plan("scripts/proposals/Audit.lean")["instances"], ["first", "second"])
 

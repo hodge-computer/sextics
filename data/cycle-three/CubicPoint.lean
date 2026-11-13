@@ -1,5 +1,5 @@
 import Proposal.CyclicCubic
-import HodgeComputer.Constructions.CyclicCubic.Diagonal
+import Proposal.CyclicCubicDiagonal
 import Proposal.PhysicalCoordinates
 
 /-! An exact Gaussian-rational point testing the proposed map's open chart.

@@ -39,12 +39,12 @@ Several broadly reusable steps still live under `HoldoutCover`: `PolynomialNorma
 
 ## Cubic covariants and moving maps
 
-There are four distinct coefficient families:
+The library holds two coefficient families:
 
 - [BinaryCubic](lean/HodgeComputer/Constructions/BinaryCubic/README.md) supplies four-coefficient Hessian/discriminant identities and the radial cancellation used by the dense two-ternary witness.
-- [CyclicCubic](lean/HodgeComputer/Constructions/CyclicCubic/README.md) treats `a x³ + b y³ + c z³ + d x²y + e y²z + f z²x`.
-- [TransitiveCubic](lean/HodgeComputer/Constructions/TransitiveCubic/README.md) replaces the last monomial by `f x²z`.
-- [PolarCubic](lean/HodgeComputer/Constructions/PolarCubic/README.md) treats `a x³ + b y³ + c z³ + d x²y + e y²z + f xy²` and its first-order `2kxyz` perturbation.
+- [TransitiveCubic](lean/HodgeComputer/Constructions/TransitiveCubic/README.md) treats `a x³ + b y³ + c z³ + d x²y + e y²z + f x²z`.
+
+Two further six-coefficient families are proved beside their one application: the cyclic family, with last monomial `f z²x`, in [cycle-three](../data/cycle-three/solution.md), and the polar family, with last monomial `f xy²` and its first-order `2kxyz` perturbation, in [mixed-polar](../data/mixed-polar/solution.md). All three six-coefficient families check their coefficient identities with the shared [PolynomialEncoding](lean/HodgeComputer/Constructions/PolynomialEncoding/README.md) modules.
 
 The cubic applications import their coefficient identities directly. These families have different covariants; substituting one family’s tables into another would change the mathematics.
 
@@ -65,7 +65,7 @@ The following index covers every accepted solve. The construction column describ
 | [contact46006](../data/contact46006/solution.md) | Start with a plane contact presentation | [Explicit witness](lean/HodgeComputer/Constructions/Explicit.lean) |
 | [coupled-pair-rational-d4-strict](../data/coupled-pair-rational-d4-strict/solution.md) | Deform the sextic while retaining a logarithmic field | [Explicit witness](lean/HodgeComputer/Constructions/Explicit.lean) |
 | [crossed-ternary-asymmetric](../data/crossed-ternary-asymmetric/solution.md) | A moving conic companion and algebraic elliptic contraction | [EllipticCompanions](lean/HodgeComputer/Constructions/EllipticCompanions/README.md) |
-| [cycle-three](../data/cycle-three/solution.md) | A paired-sign cubic and its Jacobian residue primitive | [CyclicCubic and ResidueTransport](lean/HodgeComputer/Constructions/CyclicCubic/README.md) |
+| [cycle-three](../data/cycle-three/solution.md) | A paired-sign cubic and its Jacobian residue primitive | [ResidueTransport](lean/HodgeComputer/Constructions/ResidueTransport/README.md) |
 | [cyclic-triple-fano](../data/cyclic-triple-fano/solution.md) | A free weighted line and cubic pullback | [PolynomialCurves and coordinate changes](lean/HodgeComputer/CoordinateChanges.lean) |
 | [f3-block-x0-quartic-strict](../data/f3-block-x0-quartic-strict/solution.md) | A contact conic in the square-coordinate plane | [Explicit witness](lean/HodgeComputer/Constructions/Explicit.lean) |
 | [family-block-cube](../data/family-block-cube/solution.md) | An osculating cube for a binary cubic | [Explicit witness](lean/HodgeComputer/Constructions/Explicit.lean) |
@@ -98,7 +98,7 @@ The following index covers every accepted solve. The construction column describ
 | [klein-rational](../data/klein-rational/solution.md) | Use the cyclic monomial map | [Explicit witness](lean/HodgeComputer/Constructions/Explicit.lean) |
 | [m3-coupled](../data/m3-coupled/solution.md) | A conic hidden in quadratic coordinates | [Explicit witness](lean/HodgeComputer/Constructions/Explicit.lean) |
 | [mixed-biweight](../data/mixed-biweight/solution.md) | A Jacobian primitive for the asymmetric mixed biweights | [TransitiveCubic and ResidueTransport](lean/HodgeComputer/Constructions/TransitiveCubic/README.md) |
-| [mixed-polar](../data/mixed-polar/solution.md) | A reverse-edge Jacobian construction for the balanced mixed-polar target | [PolarCubic and ResidueTransport](lean/HodgeComputer/Constructions/PolarCubic/README.md) |
+| [mixed-polar](../data/mixed-polar/solution.md) | A reverse-edge Jacobian construction for the balanced mixed-polar target | [ResidueTransport](lean/HodgeComputer/Constructions/ResidueTransport/README.md) |
 | [one-reflection](../data/one-reflection/solution.md) | A strict certificate from a binary-cubic Hessian construction | [Coordinate changes and certificate addition](lean/HodgeComputer/CoordinateChanges.lean) |
 | [one-reflection-y2-sector](../data/one-reflection-y2-sector/solution.md) | A certificate for `one-reflection-y2-sector` from a Fermat cover and a moving conic | [HoldoutCover calculus; specialized quotient](lean/HodgeComputer/Constructions/HoldoutCover/README.md) |
 | [passive-quadratic-d4-strict-rational](../data/passive-quadratic-d4-strict-rational/solution.md) | A rational norm of two contact factors | [Explicit witness](lean/HodgeComputer/Constructions/Explicit.lean) |
