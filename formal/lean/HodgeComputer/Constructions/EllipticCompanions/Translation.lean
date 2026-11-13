@@ -251,6 +251,7 @@ lemma FibreSpecializes.mul (Φ : F →+* E L) (ψplus ψminus : F →+* L) (r s 
   refine ⟨by rw [map_mul]; exact hf.1.mul hg.1,?_,?_⟩
   · rw [map_mul,fibreValue_mul r s hs _ _ hf.1 hg.1,hf.2.1,hg.2.1,map_mul]
   · rw [map_mul,fibreValue_mul r (-s) (by simpa using hs) _ _ hf.1 hg.1,hf.2.2,hg.2.2,map_mul]
+omit [CharZero L] in
 lemma FibreSpecializes.one (Φ : F →+* E L) (ψplus ψminus : F →+* L) (r s : L) :
     FibreSpecializes Φ ψplus ψminus r s 1 := by
   simp only [FibreSpecializes,map_one,fibreValue_one,and_self,FibreRegular.one]
