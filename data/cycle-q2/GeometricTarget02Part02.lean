@@ -1,3 +1,4 @@
+import Proposal.GeometricCurveCoordinates
 import Proposal.GeometricTarget02Part01
 
 /-! Continuation of GeometricTarget02.lean; complete source components and declarations. -/
@@ -1002,8 +1003,6 @@ theorem laurentEval_zero_of_curveIdeal (r : ℂ) (e : Bool) {p : Poly}
   change chartEmbedding r e (powerEval r e p) = 0
   rw [powerEval_zero_of_curveIdeal r e hp, map_zero]
 
-def curveA : Poly := X 1 * X 3
-def curveB : Poly := X 2
 
 theorem uniformizer_ne_zero : seriesMap (PowerSeries.X : PS) ≠ 0 := by
   intro hh

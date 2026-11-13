@@ -7,6 +7,8 @@ import Proposal.GeometricVariation
 import Proposal.GeometricConeCech
 import Proposal.GeometricPrincipalRestriction
 import Proposal.GeometricProjectiveCurve
+import Proposal.GeometricDiamondRank
+import Proposal.GeometricIntegralPrimitive
 
 /-! Source partition of Solution.lean. See solution.md for verification status. -/
 
@@ -14,6 +16,10 @@ set_option Elab.async false
 
 /-!
 Nonconstructive geometric route for the unchanged cycle-q2 target.
+
+The following paragraphs describe the existing source development. They
+are not a claim that its complete dependency chain has passed validation;
+the separately checked algebraic continuation is listed in solution.md.
 
 DRAFT: the algebraic residue-to-certificate bridge is proved and bound to the
 actual projective affine chart. The genuine relative exterior forms, their
@@ -67,10 +73,19 @@ binding to the previous polynomial section ideal. Their flatness,
 smooth curve fibers, and divisor-class identification remain open.
 The projective Serre and moving-curve interpretations, geometric variation,
 supported correspondences, and analytic de Rham comparison remain to be
-constructed. These new helpers have not been compiled.
+constructed. That geometric continuation has not been validated as a complete chain.
 The admission below is that precise existence obligation, not a routine
 tactic gap. The protected theorem still depends on sorryAx. No completed
 solve is claimed.
+
+The kernel-checked continuation of 13 November is recorded separately in
+solution.md. It includes the cube-root specialization and rectangular rank
+transfer, integral torsion clearing, the all-poles Koszul kernel, homogeneous
+coefficient extraction, and the actual degree-one Cech boundary and descent
+criterion, including its binding to the finite zero-trace calculation.
+The curve coordinates, grading, and localized chart objects are
+shared with this original projective construction. Those checked algebraic
+steps do not supply the remaining geometric comparison and support theorem.
 
 The previous explicit-current development is archived at commit
 2cb80949c1d060bd884bef43cae335ee188d245e and is outside the active proposal.
@@ -116,7 +131,8 @@ namespace Submission
 /-- UNPROVED IN LEAN: establish actual exterior-form exactness from geometric support
 and global algebraic de Rham comparison, or prove this existential directly.
 The checked finite seed/Higgs calculations alone do not supply this theorem.
-All subsequent algebraic steps to the protected target are proved. -/
+The subsequent source builds the algebraic bridge to the protected target;
+that complete dependency chain has not yet passed validation. -/
 theorem missing_geometric_existence :
     CycleQ2Nonconstructive.AffineResidueFormExact := by
   sorry

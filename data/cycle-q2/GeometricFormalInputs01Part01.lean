@@ -456,16 +456,14 @@ theorem tangent_injective : Function.Injective tangentMonomial := by
 theorem basis_complete : ∀ a b c d : Fin 5, ∀ w : Fin 2,
     let v : Fin 5 → ℕ := ![a.val, b.val, c.val, d.val, w.val]
     weightedDegree v = 6 → character v = 1 → ∃ i, basisMonomial i = v := by
-  intro a b c d w
-  fin_cases a <;> fin_cases b <;> fin_cases c <;> fin_cases d <;>
-    fin_cases w <;> decide +kernel
+  intro a
+  fin_cases a <;> decide +kernel
 
 theorem tangent_complete : ∀ a b c d : Fin 5, ∀ w : Fin 2,
     let v : Fin 5 → ℕ := ![a.val, b.val, c.val, d.val, w.val]
     weightedDegree v = 6 → character v = 0 → ∃ m, tangentMonomial m = v := by
-  intro a b c d w
-  fin_cases a <;> fin_cases b <;> fin_cases c <;> fin_cases d <;>
-    fin_cases w <;> decide +kernel
+  intro a
+  fin_cases a <;> decide +kernel
 
 def ComplementRow (m : Fin 35) (i : Fin 33) : Prop :=
     match complement m i with

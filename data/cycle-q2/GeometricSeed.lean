@@ -1,6 +1,8 @@
 import Mathlib.Analysis.Complex.Basic
 import Mathlib.Data.Matrix.Mul
-import Mathlib.Tactic
+import Mathlib.Tactic.FinCases
+import Mathlib.Tactic.NormNum
+import Mathlib.Tactic.Ring
 
 /-!
 Exact finite algebra from the saved sparse Chapter 3D seed.

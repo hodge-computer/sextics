@@ -1,3 +1,4 @@
+import Proposal.GeometricCurveCoordinates
 import Proposal.SolutionSupport01Part06
 
 /-! Components extracted from SolutionSupport01.lean, in their original order.
@@ -456,19 +457,6 @@ theorem smoothF_eq_thetaEquation (r : ℂ) (hr : r^3=2) :
 theorem substitute_thetaH (θ : ℂ) : substitute (thetaH θ) = curveH θ := by
   simp [thetaH, curveH, originalH, originalB, h, b, substitute]
 
-abbrev CurveRing (r θ : ℂ) := Poly ⧸ curveIdeal r θ
-
-def curveMap (r θ : ℂ) : Poly →+* CurveRing r θ := Ideal.Quotient.mk _
-def ambientCurveMap (r θ : ℂ) : WeightedPoly →+* CurveRing r θ :=
-  (curveMap r θ).comp substitute.toRingHom
-
-@[simp] theorem curveMap_f1 (r θ : ℂ) : curveMap r θ (relation r 0)=0 := by
-  apply Ideal.Quotient.eq_zero_iff_mem.mpr
-  exact Ideal.subset_span (by simp)
-
-@[simp] theorem curveMap_h (r θ : ℂ) : curveMap r θ (curveH θ)=0 := by
-  apply Ideal.Quotient.eq_zero_iff_mem.mpr
-  exact Ideal.subset_span (by simp)
 
 @[simp] theorem ambientCurveMap_f1 (r θ : ℂ) : ambientCurveMap r θ (originalF1 r)=0 := by
   change curveMap r θ (substitute (originalF1 r))=0
@@ -488,27 +476,6 @@ def ambientCurveMap (r θ : ℂ) : WeightedPoly →+* CurveRing r θ :=
   rw [thetaEquation_decomposition r θ hr]
   simp
 
-theorem ambientCurveMap_g1 (r θ : ℂ) :
-    ambientCurveMap r θ (originalG1 r)=
-      curveMap r θ (C (3*r^2)*curveA^2) := by
-  have hh := substitute_relations r 1
-  change substitute (originalG1 r)=
-    relation r 0*(X 0^2+C (2*r)*X 1*X 3)+C (3*r^2)*relation r 1 at hh
-  change curveMap r θ (substitute (originalG1 r)) = _
-  rw [hh]
-  simp only [map_add, map_mul, curveMap_f1, zero_mul, zero_add]
-  have he : relation r 1=curveA^2 := by
-    change X 1^2*X 3^2=(X 1*X 3)^2
-    ring
-  rw [he]
-
-theorem ambientCurveMap_g2 (r θ : ℂ) :
-    ambientCurveMap r θ originalG2=curveMap r θ (C 3*curveB^4) := by
-  have hc : (C (3 : ℂ) : Poly) = 3 := map_ofNat C 3
-  rw [hc]
-  norm_num [ambientCurveMap, originalG2, substitute, curveB]
-  rw [map_ofNat (curveMap r θ) 3]
-  ring
 
 /-- This is the actual equation-normal map on the curve quotient. -/
 def seedEquationMap (r θ : ℂ) :
@@ -569,22 +536,12 @@ theorem conormal_relation (r θ : ℂ) (hr : r^3=2) :
   rw [hh, map_add, map_add, map_smul, map_smul, map_smul]
   rfl
 
-def curveG1 (r θ : ℂ) : CurveRing r θ := ambientCurveMap r θ (originalG1 r)
-def curveG2 (r θ : ℂ) : CurveRing r θ := ambientCurveMap r θ originalG2
-
-abbrev FirstOpen (r θ : ℂ) := Localization.Away (curveG1 r θ)
-abbrev SecondOpen (r θ : ℂ) := Localization.Away (curveG2 r θ)
-abbrev Overlap (r θ : ℂ) := Localization.Away (curveG1 r θ*curveG2 r θ)
 
 def firstOpenUnit (r θ : ℂ) : (FirstOpen r θ)ˣ :=
   (IsLocalization.Away.algebraMap_isUnit (S := FirstOpen r θ) (curveG1 r θ)).unit
 def secondOpenUnit (r θ : ℂ) : (SecondOpen r θ)ˣ :=
   (IsLocalization.Away.algebraMap_isUnit (S := SecondOpen r θ) (curveG2 r θ)).unit
 
-def firstRestriction (r θ : ℂ) : FirstOpen r θ →+* Overlap r θ :=
-  IsLocalization.Away.awayToAwayRight (curveG1 r θ) (curveG2 r θ)
-def secondRestriction (r θ : ℂ) : SecondOpen r θ →+* Overlap r θ :=
-  IsLocalization.Away.awayToAwayLeft (curveG2 r θ) (curveG1 r θ)
 
 def firstOverlapUnit (r θ : ℂ) : (Overlap r θ)ˣ :=
   Units.map (firstRestriction r θ).toMonoidHom (firstOpenUnit r θ)

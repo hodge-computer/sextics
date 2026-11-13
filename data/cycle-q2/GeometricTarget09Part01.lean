@@ -1,3 +1,4 @@
+import Proposal.GeometricCurveCoordinates
 import Proposal.Workspace
 import HodgeTarget
 import Mathlib.Analysis.Complex.Basic
@@ -665,8 +666,6 @@ def powerEval (r θ : ℂ) (e : Bool) : Poly →+* PowerChart r θ e :=
 @[simp] theorem powerEval_X_three (r θ : ℂ) (e : Bool) :
     powerEval r θ e (X 3) = powerBase r θ e (endpointY e) := by simp [powerEval, powerCoordinates]
 
-def curveH (θ : ℂ) : Poly := h + C θ * X 0 ^ 3
-def curveIdeal (r θ : ℂ) : Ideal Poly := Ideal.span {relation r 0, curveH θ}
 
 theorem powerEval_curveF1 (r θ : ℂ) (e : Bool) : powerEval r θ e (relation r 0) = 0 := by
   simp only [relation, Matrix.cons_val_zero, map_sub, map_mul, map_pow,

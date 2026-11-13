@@ -1,3 +1,4 @@
+import Proposal.GeometricCurveCoordinates
 import Proposal.GeometricFormalInputs01Part02
 
 /-! Continuation of GeometricFormalInputs01.lean; complete source components and declarations. -/
@@ -1367,7 +1368,6 @@ noncomputable section
 namespace CycleQ2SeedTrace
 open MvPolynomial
 
-abbrev Poly := MvPolynomial (Fin 4) ℂ
 abbrev Exp := Fin 4 →₀ ℕ
 
 def exponent (a : Fin 4 → ℕ) : Exp := Finsupp.equivFunOnFinite.symm a
@@ -1380,17 +1380,8 @@ def topExponent : Exp := exponent ![3, 9, 3, 9]
 def cutoff (i : Fin 4) : ℕ := topExponent i + 1
 def truncationIdeal : Ideal Poly := Ideal.span (Set.range fun i : Fin 4 => X i ^ cutoff i)
 
-def b : Poly := X 3 ^ 3 + X 2 ^ 3 + X 1 * X 2 * X 3 + X 0 * X 2 * X 3 + X 0 * X 1 ^ 2
-def h : Poly := b - C Complex.I * (X 1 ^ 3 + X 3 ^ 3)
 def k : Poly := b + C Complex.I * (X 1 ^ 3 + X 3 ^ 3)
 
-def relation (r : ℂ) : Fin 4 → Poly := ![
-  X 0 ^ 2 - C r * X 1 * X 3,
-  X 1 ^ 2 * X 3 ^ 2,
-  X 2 ^ 4,
-  h]
-
-def reducedIdeal (r : ℂ) : Ideal Poly := Ideal.span (Set.range (relation r))
 
 def traceNumerator (r : ℂ) : Poly :=
     C ((1 : ℂ)) * mon 3 9 3 0 +

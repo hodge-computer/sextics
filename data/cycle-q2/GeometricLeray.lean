@@ -4,8 +4,9 @@ import Mathlib.LinearAlgebra.Quotient.Basic
 /-!
 # The algebra of the affine-curve Leray step
 
-Source-only continuation of the written nonconstructive proof, Parts III.5
-and IV.4. This module has not been elaborated or compiled.
+Algebraic continuation of the written nonconstructive proof, Parts III.5
+and IV.4. This module has been compiled and independently kernel replayed;
+the geometric realizations described below remain separate obligations.
 
 The written proof uses a first Leray piece, a vanishing next piece, and a
 correspondence acting as the identity on the associated quotient. The first

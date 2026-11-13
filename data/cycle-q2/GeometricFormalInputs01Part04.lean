@@ -1,3 +1,4 @@
+import Proposal.GeometricCurveCoordinates
 import Proposal.GeometricFormalInputs01Part03
 
 /-! Continuation of GeometricFormalInputs01.lean; complete source components and declarations. -/
@@ -166,17 +167,14 @@ noncomputable section
 namespace CycleQ2SeedTrace
 open MvPolynomial
 
-abbrev WeightedPoly := MvPolynomial (Fin 5) ℂ
 
 def originalB : WeightedPoly :=
   X 3 ^ 3 + X 2 ^ 3 + X 1 * X 2 * X 3 + X 0 * X 2 * X 3 + X 0 * X 1 ^ 2
 def originalH : WeightedPoly := originalB - C Complex.I * (X 1 ^ 3 + X 3 ^ 3)
 def originalK : WeightedPoly := originalB + C Complex.I * (X 1 ^ 3 + X 3 ^ 3)
 def originalF1 (r : ℂ) : WeightedPoly := X 0 ^ 2 - C r * X 1 * X 3
-def originalG1 (r : ℂ) : WeightedPoly :=
-  X 0 ^ 4 + C r * X 0 ^ 2 * X 1 * X 3 + C (r ^ 2) * X 1 ^ 2 * X 3 ^ 2
+
 def originalF2 : WeightedPoly := X 4 + X 2 ^ 2
-def originalG2 : WeightedPoly := X 4 ^ 2 - X 4 * X 2 ^ 2 + X 2 ^ 4
 
 def seedEquation : WeightedPoly :=
   X 0 ^ 6 + X 1 ^ 6 + X 2 ^ 6 + X 3 ^ 6 + X 4 ^ 3 + originalB ^ 2
@@ -198,8 +196,6 @@ def originalRelations (r : ℂ) : Fin 5 → WeightedPoly :=
 
 def originalIdeal (r : ℂ) : Ideal WeightedPoly := Ideal.span (Set.range (originalRelations r))
 
-def substitute : WeightedPoly →ₐ[ℂ] Poly :=
-  MvPolynomial.aeval ![X 0, X 1, X 2, X 3, -(X 2 ^ 2)]
 
 theorem substitute_relations (r : ℂ) (i : Fin 5) :
     substitute (originalRelations r i) =

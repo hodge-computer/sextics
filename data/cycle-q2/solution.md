@@ -1,5 +1,235 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Kernel-checked algebraic continuation — 13 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains admitted.
+This continuation supplies checked algebraic steps for the selected Diamond
+argument. It does not replace geometric hypotheses with axioms or assert a
+completed certificate. The verification statements in this section apply to
+the named modules; the full older geometric dependency chain has not
+thereby been validated.
+
+### A characteristic-zero seed from the modular calculation
+
+[GeometricDiamondSeed.lean](GeometricDiamondSeed.lean) uses the actual maps
+\(\mathbb Z[i]\to\mathbb F_{109}\), with \(i\mapsto33\), and
+\(\mathbb Z[i]\hookrightarrow\mathbb C\). It proves
+\[
+p(57)\ne0\text{ in }\mathbb F_{109}
+\quad\Longrightarrow\quad
+\exists r\in\mathbb C,\quad r^3=2\quad\text{and}\quad p(r)\ne0
+\]
+for every polynomial \(p\in\mathbb Z[i][T]\). In particular, the modular
+parameter is not substituted as the literal complex number 57 into a
+statement requiring \(r^3=2\).
+
+The proof obtains three distinct complex roots of \(T^3-2\) from two real
+intermediate-value arguments and an explicit factorization. If \(p\)
+vanished at all three roots, the factor theorem would make \(T^3-2\) divide
+\(p\) over \(\mathbb C\). Monic divisibility descent gives the same
+divisibility over \(\mathbb Z[i]\), contradicting reduction at 57.
+Applying this argument to a product preserves any finite collection of
+nonvanishing conditions at **one common** characteristic-zero root. The
+matrix-family theorem includes determinants of different sizes and one
+additional polynomial containing all cleared denominators.
+
+[GeometricDiamondRank.lean](GeometricDiamondRank.lean) makes the transfer
+usable directly from rectangular rank certificates. For a finite family
+\(A_j(T)\) of Gaussian-polynomial matrices and a polynomial \(d\) nonzero
+at the modular seed, it proves
+\[
+\exists r\in\mathbb C,\quad r^3=2,\quad d(r)\ne0,\qquad
+\operatorname{rank}_{\mathbb F_{109}}A_j(57)
+\leq\operatorname{rank}_{\mathbb C}A_j(r)\quad\text{for every }j.
+\]
+The proof uses the shared
+[rank retraction](GeometricRankRetraction.lean): a rank-\(k\) matrix over a
+field admits matrices \(C,B\) with \(CAB=I_k\). Lifting the entries of
+these two matrices to constant Gaussian polynomials supplies a nonzero
+square determinant. Thus the theorem needs no explicit pivot list or
+preselected minor. The old faithful-specialization argument imports this
+same extracted retraction theorem.
+
+This result does not, by itself, transfer the complete incidence tangent
+argument. In particular, the existing lower bound 7600 for the relation
+matrix is proved at literal complex parameter 57. The corresponding
+Jacobian upper bound needs a structural proof at the selected root or an
+appropriate modular certificate before it can be combined with the lifted
+lower bounds. The literal-57 seed is also a point of the full invariant
+parameter family; using that separate route requires keeping its existing
+geometric objects and the full-family argument consistently matched.
+
+There is also a separate parameter issue: the current incidence matrix is
+bound to `thetaH 1`, whereas the sparse reduced-ideal trace calculation is
+at \(\theta=0\). Selecting a genuine cube root does not identify these two
+curves. A spreading or comparison argument must reconcile their parameter
+values before the corresponding rank and trace results can be combined.
+
+### The actual localization boundary and its homogeneous witnesses
+
+[GeometricKoszulKernel.lean](GeometricKoszulKernel.lean) works with the
+genuine rings \(R_f\), \(R_g\), and \(R_{fg}\), and defines
+\[
+\delta:R\longrightarrow R_{fg}/(\operatorname{im}R_f+
+  \operatorname{im}R_g),\qquad p\longmapsto[p/(fg)].
+\]
+If \(f\) is a nonzerodivisor on \(R\) and \(g\) is a nonzerodivisor on
+\(R/(f)\), it proves \(\ker\delta=(f,g)\). Boundaries may have arbitrary
+pole order. The proof clears both the section denominators and the extra
+annihilator allowed by equality in a localization, then cancels powers
+using the regular-pair hypotheses. It does not assume that the localization
+maps are injective.
+
+[GeometricGradedWitness.lean](GeometricGradedWitness.lean) proves homogeneous
+coefficient extraction in a finite homogeneous ideal. For generators of
+degrees \(2,3,4,4\), a degree-nine element has a relation
+\[
+p=a f_1+b h+c g_1+d g_2,
+\qquad \deg(a,b,c,d)=(7,6,5,5),
+\]
+where degree means the appropriate homogeneous component, including the
+zero polynomial. The construction projects an arbitrary ideal witness to
+the required graded component; generators above the target degree receive
+zero coefficients.
+
+[GeometricHomogeneousBoundary.lean](GeometricHomogeneousBoundary.lean)
+then proves the literal identity in the overlap of the two actual
+localizations of \(R=K[x]/(f_1,h)\):
+\[
+\frac{\bar p}{\bar g_1\bar g_2}
+=\operatorname{res}_1\!\left(\frac{\bar d}{\bar g_1}\right)
+ +\operatorname{res}_2\!\left(\frac{\bar c}{\bar g_2}\right).
+\]
+The retained quintic numerators make both chart sections homogeneous of
+degree one. For the first-minus-second convention, the chart pair is
+\((\bar d/\bar g_1,-\bar c/\bar g_2)\). Thus an ungraded ideal relation
+has the precise homogeneous witnesses needed by the projective Čech
+construction. This forward identity needs no regular-sequence hypothesis.
+The canonical-bundle and Serre-trace identifications are separate
+geometric obligations.
+
+[GeometricKoszulTrace.lean](GeometricKoszulTrace.lean) applies these witnesses
+to the existing `degreeNineCechClass`, in the original first-minus-second
+Čech quotient. Its forward theorem kills the class of every homogeneous
+degree-nine element of the four-generator ideal. Under regularity of the
+two quartic images on the curve ring and its first quotient, it also proves
+the converse. At \(\theta=0\), the nonzero constants \(3r^2\) and \(3\)
+identify that ideal with the existing `reducedIdeal r`, for \(r\ne0\).
+Thus the criterion concerns the actual reduced seed quotient and retains
+the homogeneous degree of its existing Čech class. The same module proves
+that two homogeneous degree-nine polynomials representing the same reduced
+quotient element have equal Čech classes, without a regularity hypothesis.
+
+[GeometricTraceBoundary.lean](GeometricTraceBoundary.lean) now binds the
+existing finite socle-trace calculation to this same homogeneous Čech
+class. For \(r^3=2\) and a homogeneous degree-nine \(p\), it proves
+\[
+\operatorname{traceLinear}_r(p)=0
+\quad\Longrightarrow\quad
+\operatorname{degreeNineCechClass}_{r,0}(p)=0.
+\]
+The earlier finite calculation gives
+\(p-\operatorname{traceLinear}_r(p)x_0x_1^8\in\mathrm{reducedIdeal}(r)\).
+The new homogeneous boundary theorem applies directly when the trace is
+zero, with \(r\ne0\) derived from \(r^3=2\). This bridge needs no
+regular-pair hypothesis. It proves the displayed implication; it does not
+identify the computed functional with a geometric Serre trace.
+
+To check this application independently, the existing coordinate and
+localization definitions were moved to
+[GeometricCurveCoordinates.lean](GeometricCurveCoordinates.lean), and the
+existing quotient grading, degree-one chart modules, and Čech class were
+moved to [GeometricDegreeOneCech.lean](GeometricDegreeOneCech.lean). The
+projective construction imports these same public definitions. The
+quotient-grading implementation required an elaboration repair: the
+componentwise decomposition now descends directly through the additive
+quotient, with its scalar law proved on representatives. Its representative
+formula and both decomposition inverse identities are retained and checked.
+This extraction does not establish the later projective-sheaf or Serre
+comparisons.
+
+### Integral primitivity without assuming torsion-freeness
+
+[GeometricIntegralPrimitive.lean](GeometricIntegralPrimitive.lean) uses the
+actual tensor product \(\mathbb Q\otimes_{\mathbb Z}M\) and proves
+\[
+1\otimes x=0\quad\Longleftrightarrow\quad
+\exists n\in\mathbb N,\quad n>0\quad\text{and}\quad nx=0.
+\]
+Consequently, the rational Gysin identities
+\(j_*E=6q\) and \(j_*H=3q\) give a positive integer \(N\) such that
+\(j_*(N(E-2H))=0\) integrally. The same \(N\) preserves every nonzero
+additive observable valued in a rational vector space, as well as every
+additive fixed-point condition. This justifies the torsion-clearing step
+without assuming that integral cohomology has no torsion. Construction of
+the geometric Gysin map and identification of the observable with the
+Abel–Jacobi derivative remain to be supplied.
+
+The existing [GeometricLeray.lean](GeometricLeray.lean) has also been checked.
+It proves the linear argument that a correspondence acting identically on
+the first filtration quotient acts identically on the class when the next
+piece is zero. After subtracting the normalized hyperplane lift, this gives
+vanishing under the restriction map. The actual geometric filtration,
+correspondence, and comparison with the protected residue are still needed
+to instantiate that argument.
+
+### Verification performed for this continuation
+
+The following fourteen modules compile under the repository's pinned Lean
+4.33.1 and Mathlib revision `0df444a360eaa60ab8c11dca51a86af692955474`.
+Each also passed independent `leanchecker` replay. The 52 audited
+declarations use only `propext`, `Classical.choice`, and `Quot.sound`.
+
+| Checked step | Modules |
+| --- | --- |
+| Complex seed and simultaneous rank bounds | `GeometricDiamondSeed`, `GeometricRankRetraction`, `GeometricDiamondRank` |
+| Unrestricted and homogeneous localization boundaries | `GeometricKoszulKernel`, `GeometricGradedWitness`, `GeometricHomogeneousBoundary` |
+| Existing curve objects and the actual homogeneous class | `GeometricCurveCoordinates`, `GeometricDegreeOneCech`, `GeometricKoszulTrace`, `GeometricTraceBoundary` |
+| Positive integral primitive multiples | `GeometricIntegralPrimitive` |
+| Earlier finite seed and filtration algebra | `GeometricSeed`, `GeometricLeray` |
+| Protected nonsingularity and finite monomial completeness | `GeometricFormalInputs01Part01` |
+
+Each check used one compiler process with bounded memory. The final
+degree-one core and its concrete Koszul comparison compiled in 15.85 and
+12.86 seconds respectively. The long intermediate conversion failures were
+repaired by direct homogeneous witnesses and explicit map arguments; the
+final source keeps its original heartbeat limit. No increased proof budget
+or unchecked evaluator is used to bypass the kernel.
+
+The minimal dependency chain for the earlier finite trace calculation also
+compiled: all 31 local modules passed without admission warnings. Its
+first source component needed a proof-performance repair in
+`basis_complete` and `tangent_complete`: five outer cases with quantified
+kernel decision replace 1,250 simultaneous elaborator goals. The theorem
+statements and finite data are unchanged. The repaired complete module
+compiled in 30.73 seconds under the original memory limit and separately
+passed kernel replay and the four selected axiom audits. The final
+`GeometricTraceBoundary` module compiled in 5.63 seconds and passed its
+independent replay and axiom audit. These checks cover the displayed
+trace-zero implication, while the larger projective and final-certificate
+dependency chain remains unvalidated.
+
+The existing [GeometricSeed.lean](GeometricSeed.lean) was also compiled and
+independently replayed after replacing its aggregate tactic import with
+the three tactics it actually uses. Its exact complex right-inverse and
+tangent identities pass the same axiom audit. This verifies the finite
+matrix statements, while their identification with geometric trace
+pairings remains a separate step.
+
+The final admission is unchanged. In particular, these checks do not
+establish the moving-cycle comparison, the geometric variation and
+supported correspondence, or the comparison of the protected residue
+with its restriction in regular algebraic de Rham cohomology.
+
+The next geometric interface is concrete: the
+[projective source](GeometricProjectiveCurve.lean) declares
+`degreeOneSheaf` as an additive sheaf and injects its Čech classes into
+derived cohomology. An \(\mathcal O_C\)-module structure, the identification
+with the canonical sheaf, and a geometric Serre trace still need to be
+constructed. Likewise, [AffineComparison](GeometricExistence.lean) currently requires a comparison
+map and its injectivity as inputs. The actual smooth affine comparison and
+the support argument must supply those inputs for the protected residue.
+
 ## Proof selected for formalization — 13 November 2026
 
 The route to formalize is the surface-section argument of
@@ -12,8 +242,8 @@ where \(K\) is the function field of the unchanged affine chart and
 \(\rho\) is the literal source in
 [the final Lean goal](Solution.lean). The ordinary mathematical proof below
 uses the stated classical geometry and comparison theorems. Its geometric
-lemmas still need Lean implementations; this update adds no Lean proof,
-axiom, or replacement for the existing admission.
+lemmas still need Lean implementations. The checked algebraic continuation
+above implements supporting steps and does not replace the existing admission.
 
 The detailed arguments in Parts I–IV below remain the mathematical reference.
 This section fixes one consistent sequence of statements to implement and
