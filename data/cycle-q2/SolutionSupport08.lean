@@ -2661,7 +2661,7 @@ def simplePoleRepresentative (r θ : ℂ) : P →ₗ[P] Overlap r θ where
   map_add' p q := by
     simp only [map_add, add_mul]
   map_smul' a p := by
-    simp only [smul_eq_mul, Algebra.smul_def, map_mul, mul_assoc]
+    simp only [smul_eq_mul, Algebra.smul_def, map_mul, mul_assoc, RingHom.id_apply]
 
 @[simp] theorem simplePoleRepresentative_apply (r θ : ℂ) (p : P) :
     simplePoleRepresentative r θ p = algebraMap P (Overlap r θ) p *
@@ -2778,6 +2778,7 @@ theorem normalOverlapCoefficient_eq_simplePole (r θ : ℂ) (A L : P) :
       simplePoleRepresentative r θ (thetaK θ * L - A) := by
   simp only [normalOverlapCoefficient, overlapCoefficient,
     simplePoleRepresentative_apply, overlap_algebraMap, map_sub, map_mul]
+  ring
 
 theorem connectingClass_eq_simplePole (r θ : ℂ) (A L : P) :
     connectingClass r θ A L =
@@ -2866,12 +2867,14 @@ private theorem g1_lift_relation (r : ℂ) :
       originalF1 r * (X 0 ^ 2 + C (2 * r) * X 1 * X 3) +
         C (3 * r ^ 2) * polynomialLift (relation r 1) := by
   simp [polynomialLift, relation, originalG1, originalF1, map_mul, map_pow]
+  simp only [map_ofNat]
   ring
 
 private theorem g2_lift_relation (r : ℂ) :
     originalG2 = originalF2 * (X 4 - 2 * X 2 ^ 2) +
       C (3 : ℂ) * polynomialLift (relation r 2) := by
   simp [polynomialLift, relation, originalG2, originalF2]
+  simp only [map_ofNat]
   ring
 
 private theorem mem_of_constant_mul (I : Ideal P) (c : ℂ) (hc : c ≠ 0)
@@ -2890,7 +2893,8 @@ theorem polynomialLift_relation_mem (r : ℂ) (hr : r ≠ 0) (i : Fin 4) :
   have hf2 : originalF2 ∈ originalIdeal r := hg 2
   have hg2 : originalG2 ∈ originalIdeal r := hg 3
   fin_cases i
-  · rw [lift_relation_zero]
+  · change polynomialLift (relation r 0) ∈ originalIdeal r
+    rw [lift_relation_zero]
     exact hf1
   · apply mem_of_constant_mul (originalIdeal r) (3 * r ^ 2)
       (mul_ne_zero (by norm_num) (pow_ne_zero _ hr))
@@ -2904,7 +2908,8 @@ theorem polynomialLift_relation_mem (r : ℂ) (hr : r ≠ 0) (i : Fin 4) :
       ((originalIdeal r).mul_mem_right (X 4 - 2 * X 2 ^ 2) hf2)
     rw [g2_lift_relation r, add_sub_cancel_left] at hh
     exact hh
-  · rw [lift_relation_three]
+  · change polynomialLift (relation r 3) ∈ originalIdeal r
+    rw [lift_relation_three]
     exact hg 4
 
 theorem polynomialLift_mem (r : ℂ) (hr : r ≠ 0) {p : Poly}
@@ -2971,7 +2976,9 @@ theorem simplePoleRepresentative_lift_derivative (r θ : ℂ) (p : Poly) :
     pairedNormalOverlap, normalOverlapCoefficient, overlapCoefficient,
     map_zero, mul_zero, zero_sub]
   rw [← substitute_derivativeA p]
-  simp only [map_neg, map_mul]
+  simp only [show ∀ x : Poly, substitute.toRingHom (polynomialLift x) = x from
+    substitute_polynomialLift]
+  simp only [map_neg, map_mul, AlgHom.toRingHom_eq_coe, AlgHom.coe_toRingHom]
   ring
 
 /-- The same all-poles boundary argument used for the genuine normal class
