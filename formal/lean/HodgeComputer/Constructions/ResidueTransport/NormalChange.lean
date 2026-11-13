@@ -67,4 +67,29 @@ lemma paired_normal_change (D : Derivation ℤ K K)
   rw [← hG]
   ring
 
+section Cubed
+
+variable [CharZero K]
+
+/-- The same change of normal for the source with numerator `p ^ 3 * q ^ 3`.
+The final summand is `D C - C * D f / f` for
+`C = -p ^ 3 * q ^ 4 / (p * f + q * g)`. -/
+lemma cubed_paired_normal_change (D : Derivation ℤ K K)
+    (p q f g fpp fpq fqq : K)
+    (hf : f ≠ 0) (hh : p * f + q * g ≠ 0)
+    (Dp : D p = -g / f) (Dq : D q = 1)
+    (Df : D f = fpq - g / f * fpp) (Dg : D g = fqq - g / f * fpq) :
+    3 * p ^ 2 * q ^ 3 / f - p ^ 3 * q ^ 3 * fpp / f ^ 2 =
+      p ^ 3 * q ^ 3 * (7 * (p * f + q * g) -
+        (p ^ 2 * fpp + 2 * p * q * fpq + q ^ 2 * fqq)) / (p * f + q * g) ^ 2 +
+      (D (-p ^ 3 * q ^ 4 / (p * f + q * g)) -
+        (-p ^ 3 * q ^ 4 / (p * f + q * g)) * D f / f) := by
+  simp only [Derivation.leibniz_div, Derivation.leibniz, Derivation.leibniz_pow,
+    map_neg, map_add, smul_eq_mul, nsmul_eq_mul, Dp, Dq, Df, Dg]
+  norm_num
+  field_simp
+  ring
+
+end Cubed
+
 end ResidueNormalChange
