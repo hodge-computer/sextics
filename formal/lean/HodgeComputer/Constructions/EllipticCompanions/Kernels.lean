@@ -77,6 +77,7 @@ lemma RegularAt.div {a : K} {f g : RatFunc K} (hf : RegularAt a f) (hg : Regular
   rw [div_eq_mul_inv]
   exact hf.mul (hg.inv hn)
 
+set_option backward.isDefEq.respectTransparency false in
 lemma baseTime_polynomial [CharZero K] (P : K[X]) :
     CrossedElliptic.baseTime (algebraMap K[X] (RatFunc K) P)=
       algebraMap K[X] (RatFunc K) P.derivative := by
@@ -274,6 +275,7 @@ lemma first_y : first K (y K)=0 := by
   change (basis K).repr (y K) 0=0
   rw [← basis_one,(basis K).repr_self]
   simp
+omit [CharZero K] in
 lemma first_coeff_y (f : RatFunc K) : first K (algebraMap (RatFunc K) (E K) f*y K)=0 := by
   rw [← Algebra.smul_def,map_smul,first_y,smul_zero]
 
@@ -436,6 +438,7 @@ lemma polynomial_image_eval (P : K[X]) :
       RatFunc.algebraMap_C,RatFunc.algebraMap_X,eval₂_mul,eval₂_C,eval₂_pow,eval₂_X]
 
 omit [CharZero K] in
+omit [CharZero L] in
 lemma map_polynomial_eval (φ : K →+* L) (P : K[X]) :
     map φ (algebraMap K[X] (RatFunc K) P)=P.eval₂ ((RatFunc.C : L →+* RatFunc L).comp φ) RatFunc.X := by
   rw [map_polynomial]
@@ -482,6 +485,7 @@ lemma time_compatible (φ : K →+* L) (f : RatFunc K) :
   | f P Q hQ =>
     simp only [map_div₀,Derivation.leibniz_div,smul_eq_mul,map_mul,map_sub,map_pow,map_inv₀,hp]
 
+omit [CharZero K] [CharZero L] in
 lemma map_killed (φ : K →+* L) (D : Derivation ℤ L L) (h : ∀ c,D (φ c)=0) (f : RatFunc K) :
     baseCoefficient D (map φ f)=0 := by
   have hp (P : K[X]) : baseCoefficient D (map φ (algebraMap K[X] (RatFunc K) P))=0 := by
@@ -533,10 +537,12 @@ lemma equation_root (φ : K →+* L) : (equation K).eval₂ (coefficientMap φ) 
 
 def map (φ : K →+* L) : E K →+* E L :=
   AdjoinRoot.lift (f:=equation K) (coefficientMap φ) (y L) (equation_root φ)
+omit [CharZero K] [CharZero L] in
 lemma map_rational (φ : K →+* L) (f : RatFunc K) :
     map φ (algebraMap (RatFunc K) (E K) f)=
       algebraMap (RatFunc L) (E L) (CrossedRationalCoefficientMap.map φ f) :=
   AdjoinRoot.lift_of (equation_root φ)
+omit [CharZero K] [CharZero L] in
 lemma map_y (φ : K →+* L) : map φ (y K)=y L := AdjoinRoot.lift_root (equation_root φ)
 lemma map_x (φ : K →+* L) : map φ (x K)=x L := by
   rw [x,map_rational,CrossedRationalCoefficientMap.map_X]

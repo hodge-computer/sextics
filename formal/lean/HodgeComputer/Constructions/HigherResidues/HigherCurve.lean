@@ -100,6 +100,7 @@ lemma source_density_jets (π : P →+* K) (F A : P)
   convert hs using 1
   ring
 
+set_option backward.isDefEq.respectTransparency false in
 omit [CharZero K] in
 lemma linearMatrix_det_coeff_mem {n : ℕ} (S : Subring K)
     (M₀ M₁ : Matrix (Fin n) (Fin n) K)

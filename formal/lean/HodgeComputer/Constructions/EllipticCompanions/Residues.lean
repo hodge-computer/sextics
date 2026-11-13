@@ -978,6 +978,7 @@ lemma rationalConstantTerm_C (c : K) : rationalConstantTerm (RatFunc.C c)=c := b
   simp only [pow_one,ite_true] at hr
   rw [hr,smul_eq_mul,mul_one]
 
+omit [CharZero K] in
 lemma rationalConstantTerm_derivation (D : Derivation ℤ K K) (f : RatFunc K) :
     rationalConstantTerm (baseCoefficient D f)=D (rationalConstantTerm f) := by
   rw [rationalConstantTerm_apply,rationalConstantTerm_apply]

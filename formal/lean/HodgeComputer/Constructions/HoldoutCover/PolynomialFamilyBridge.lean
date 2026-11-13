@@ -161,6 +161,7 @@ variable [Field K] [CharZero K] [Algebra Q K] [IsFractionRing Q K]
 variable [Field L] [CharZero L] [Algebra K L] [FiniteDimensional K L]
 variable [CommRing T] {n : ℕ}
 
+omit [IsDomain Q] in
 /-- An actual polynomial family on the hypersurface produces the residue
 equation needed by legal denominator clearing. All remaining matrix,
 Hessian, and polynomiality hypotheses are derived from the stated data. -/

@@ -36,6 +36,7 @@ private def quotientD (D : Derivation ℚ P P) (x : F) : F :=
     algebraMap P F (num x) * algebraMap P F (D (den x))) /
     algebraMap P F (den x) ^ 2
 
+omit [Algebra ℚ F] [IsScalarTower ℚ P F] in
 private theorem quotientD_div (D : Derivation ℚ P P) (a b : P) (hb : b ≠ 0) :
     quotientD D (algebraMap P F a / algebraMap P F b) =
       (algebraMap P F (D a) * algebraMap P F b -
