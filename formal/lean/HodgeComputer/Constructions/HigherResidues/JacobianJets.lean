@@ -26,7 +26,6 @@ lemma linearMatrix_tail (M₀ M₁ : Matrix (Fin 5) (Fin 5) K) :
       linearMatrix (M₀.submatrix Fin.succ Fin.succ) (M₁.submatrix Fin.succ Fin.succ) := by
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
 omit [CharZero K] in
 lemma linearMatrix_updatedRow_zero (M₀ M₁ : Matrix (Fin 5) (Fin 5) K) (d : Fin 5 → K) :
     ((linearMatrix M₀ M₁).updateRow 0 (C ∘ d)).det.coeff 0 = (M₀.updateRow 0 d).det := by
@@ -35,10 +34,14 @@ lemma linearMatrix_updatedRow_zero (M₀ M₁ : Matrix (Fin 5) (Fin 5) K) (d : F
   rw [RingHom.map_det]
   congr 1
   ext i j
+  change (Polynomial.constantCoeff : K[X] →+* K)
+    (((linearMatrix M₀ M₁).updateRow 0 (C ∘ d)) i j) = (M₀.updateRow 0 d) i j
   by_cases hi : i=0
   · subst i
-    simp [linearMatrix,Matrix.updateRow]
-  · simp [linearMatrix,Matrix.updateRow,hi]
+    rw [Matrix.updateRow_self,Matrix.updateRow_self]
+    exact Polynomial.coeff_C_zero
+  · rw [Matrix.updateRow_ne hi,Matrix.updateRow_ne hi]
+    simp [linearMatrix]
 
 omit [CharZero K] in
 lemma quadratic_times_coeff_one (g l m : K) (P : K[X]) :

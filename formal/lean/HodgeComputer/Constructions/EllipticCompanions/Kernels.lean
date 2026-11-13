@@ -77,12 +77,11 @@ lemma RegularAt.div {a : K} {f g : RatFunc K} (hf : RegularAt a f) (hg : Regular
   rw [div_eq_mul_inv]
   exact hf.mul (hg.inv hn)
 
-set_option backward.isDefEq.respectTransparency false in
 lemma baseTime_polynomial [CharZero K] (P : K[X]) :
     CrossedElliptic.baseTime (algebraMap K[X] (RatFunc K) P)=
-      algebraMap K[X] (RatFunc K) P.derivative := by
-  rw [CrossedElliptic.baseTime,HoldoutConstruction.extendRingDerivation_apply]
-  rfl
+      algebraMap K[X] (RatFunc K) P.derivative :=
+  HoldoutConstruction.extendRingDerivation_apply (L := RatFunc K)
+    (HoldoutConstruction.timePolynomialDerivation (E := K)) P
 
 lemma RegularAt.time [CharZero K] {a : K} {f : RatFunc K} (hf : RegularAt a f) :
     RegularAt a (CrossedElliptic.baseTime f) := by

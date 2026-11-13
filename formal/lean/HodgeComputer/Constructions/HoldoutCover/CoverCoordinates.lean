@@ -39,7 +39,6 @@ private theorem commonCoverBaseChange_of_C
   rw [physicalCoverFieldMap_coordinateRing]
   simp [physicalRoot, coverX0]
 
-set_option backward.isDefEq.respectTransparency false in
 @[simp] theorem physicalCoverFieldMap_parameter (i : Fin 5) :
     physicalCoverFieldMap
       (algebraMap HoldoutCoordinateRing HoldoutFunctionField (physicalParameter i)) =
@@ -54,7 +53,9 @@ set_option backward.isDefEq.respectTransparency false in
     norm_num [physicalCoverCoefficientMap, Fin.ext_iff,
       commonCoverBaseChange_of_C, coverCoefficient, coverAlpha, coverBeta,
       -MvPolynomial.eval₂Hom_C_eq_bind₁] <;>
-    rfl
+    first
+      | rfl
+      | (rw [map_mul]; rfl)
 
 @[simp] theorem quotientCoverFieldMap_root :
     quotientCoverFieldMap (algebraMap GenericQuotientRing GenericQuotientField
