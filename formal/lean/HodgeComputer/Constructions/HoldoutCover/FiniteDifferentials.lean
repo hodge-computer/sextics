@@ -478,6 +478,7 @@ theorem derivations_agree_quotient_fraction
   obtain ⟨a,b,_,rfl⟩ := IsFractionRing.div_surjective B z
   rw [map_div₀, Derivation.leibniz_div, Derivation.leibniz_div, hring a, hring b]
 
+omit [IsDomain B] in
 theorem derivations_ext_finite_quotient_fraction [CharZero K]
     [Algebra K L] [FiniteDimensional K L]
     (π : MvPolynomial σ R →+* B) (hπ : Function.Surjective π)

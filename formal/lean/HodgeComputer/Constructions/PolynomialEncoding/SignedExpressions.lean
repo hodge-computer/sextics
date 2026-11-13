@@ -93,7 +93,7 @@ lemma pairPow_difference (p : R×R) (n : ℕ) :
   induction n with
   | zero => simp [pairPow]
   | succ n ih =>
-    simp only [pairPow,pairMul,Prod.fst,Prod.snd,pow_succ']
+    simp only [pairPow,pairMul,pow_succ']
     linear_combination (p.1-p.2)*ih
 lemma splitEval_difference (v : Nat → R) (e : Expr) :
     (splitEval v e).1-(splitEval v e).2=ringEval v e := by
@@ -106,7 +106,7 @@ lemma splitEval_difference (v : Nat → R) (e : Expr) :
   | add a b ha hb => simp only [splitEval,ringEval]; linear_combination ha+hb
   | sub a b ha hb => simp only [splitEval,ringEval]; linear_combination ha-hb
   | mul a b ha hb =>
-    simp only [splitEval,pairMul,ringEval,Prod.fst,Prod.snd]
+    simp only [splitEval,pairMul,ringEval]
     rw [← ha,← hb]
     ring
   | pow a n ha => rw [splitEval,pairPow_difference,ha]; rfl

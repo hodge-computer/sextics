@@ -115,6 +115,7 @@ def kernelOne : RatFunc K := 3888*RatFunc.X^4/(RatFunc.X^3-1728)^2
 lemma root_ne_zero (r : K) (hr : r^3=1728) : r≠0 := by
   intro h; rw [h] at hr; norm_num at hr
 
+omit [CharZero K] in
 lemma cofactor_at_root (r : K) : (cofactor r).eval r=3*r^2 := by
   simp [cofactor]
   ring
@@ -130,6 +131,7 @@ lemma cofactor_fraction_ne_zero (r : K) (hr : r^3=1728) :
   apply cofactor_at_root_ne_zero r hr
   simp [h]
 
+omit [CharZero K] in
 lemma cubic_factor (r : K) (hr : r^3=1728) :
     (RatFunc.X : RatFunc K)^3-1728=uniformizer r*algebraMap K[X] (RatFunc K) (cofactor r) := by
   have h := congrArg (RatFunc.C : K →+* RatFunc K) hr
@@ -153,7 +155,7 @@ lemma kernelZero_decomposition (r : K) (hr : r^3=1728) :
   rw [map_pow,h1728] at hn
   rw [kernelZero,cubic_factor r hr]
   simp only [uniformizer,cofactor,remainderZero,map_mul,map_sub,map_add,map_pow,map_neg,
-    RatFunc.algebraMap_X,RatFunc.algebraMap_C,h12,h2,hp12,hp2]
+    RatFunc.algebraMap_X,RatFunc.algebraMap_C,hp12,hp2]
   have hu' : (RatFunc.X : RatFunc K)-RatFunc.C r≠0 := by simpa [uniformizer] using hu
   have hc' : (RatFunc.X : RatFunc K)^2+RatFunc.C r*RatFunc.X+(RatFunc.C r)^2≠0 := by
     simpa [cofactor] using hc
@@ -177,7 +179,7 @@ lemma kernelOne_decomposition (r : K) (hr : r^3=1728) :
   rw [map_pow,h1728] at hn
   rw [kernelOne,cubic_factor r hr]
   simp only [uniformizer,cofactor,remainderOne,map_mul,map_sub,map_add,map_pow,map_neg,
-    RatFunc.algebraMap_X,RatFunc.algebraMap_C,h1728,h864,hp1728,hp864]
+    RatFunc.algebraMap_X,RatFunc.algebraMap_C,hp1728,hp864]
   have hu' : (RatFunc.X : RatFunc K)-RatFunc.C r≠0 := by simpa [uniformizer] using hu
   have hc' : (RatFunc.X : RatFunc K)^2+RatFunc.C r*RatFunc.X+(RatFunc.C r)^2≠0 := by
     simpa [cofactor] using hc
@@ -208,6 +210,7 @@ open Polynomial CrossedRationalResidue CrossedElliptic
 variable {K : Type*} [Field K] [CharZero K]
 local instance : Algebra ℤ (RatFunc K) := Ring.toIntAlgebra _
 
+omit [CharZero K] in
 lemma residue_C_mul (r c : K) (f : RatFunc K) :
     residue r (RatFunc.C c*f)=c*residue r f := by
   rw [← RatFunc.smul_eq_C_mul,map_smul,smul_eq_mul]
@@ -270,6 +273,7 @@ variable {K : Type*} [Field K] [CharZero K]
 local instance : Algebra ℤ (RatFunc K) := Ring.toIntAlgebra _
 local instance : Algebra ℤ (E K) := Ring.toIntAlgebra _
 
+omit [CharZero K] in
 lemma first_y : first K (y K)=0 := by
   change (basis K).repr (y K) 0=0
   rw [← basis_one,(basis K).repr_self]
@@ -283,6 +287,7 @@ lemma y_add_scalar_ne_zero (c : K) : y K+algebraMap K (E K) c≠0 := by
   rw [← map_constant K c,map_add,second_y,second_algebraMap,map_zero,add_zero] at hs
   exact one_ne_zero hs
 
+omit [CharZero K] in
 lemma cubic_sub_constant_ne_zero (c : K) : (RatFunc.X : RatFunc K)^3-RatFunc.C c≠0 := by
   have h := polynomialMap_ne_zero (monic_X_pow_sub_C c (by decide : (3 : ℕ)≠0)).ne_zero
   simpa only [map_sub,map_pow,RatFunc.algebraMap_X,RatFunc.algebraMap_C] using h
@@ -426,6 +431,7 @@ variable [CharZero K] [CharZero L]
 local instance : Algebra ℤ (RatFunc K) := Ring.toIntAlgebra _
 local instance : Algebra ℤ (RatFunc L) := Ring.toIntAlgebra _
 
+omit [CharZero K] in
 lemma polynomial_image_eval (P : K[X]) :
     algebraMap K[X] (RatFunc K) P=P.eval₂ RatFunc.C RatFunc.X := by
   induction P using Polynomial.induction_on' with
@@ -434,6 +440,7 @@ lemma polynomial_image_eval (P : K[X]) :
     simp only [← Polynomial.C_mul_X_pow_eq_monomial,map_mul,map_pow,
       RatFunc.algebraMap_C,RatFunc.algebraMap_X,eval₂_mul,eval₂_C,eval₂_pow,eval₂_X]
 
+omit [CharZero K] in
 lemma map_polynomial_eval (φ : K →+* L) (P : K[X]) :
     map φ (algebraMap K[X] (RatFunc K) P)=P.eval₂ ((RatFunc.C : L →+* RatFunc L).comp φ) RatFunc.X := by
   rw [map_polynomial]
@@ -493,6 +500,7 @@ lemma map_killed (φ : K →+* L) (D : Derivation ℤ L L) (h : ∀ c,D (φ c)=0
   | f P Q hQ =>
     simp only [map_div₀,Derivation.leibniz_div,hp,smul_zero,sub_self,smul_zero]
 
+omit [CharZero L] in
 lemma derivation_ratCast (D : Derivation ℤ L L) (q : ℚ) : D (q : L)=0 := by
   rw [Rat.cast_def,Derivation.leibniz_div,D.map_intCast,D.map_natCast]
   simp
@@ -522,6 +530,7 @@ local instance : Algebra ℤ (E L) := Ring.toIntAlgebra _
 
 def coefficientMap (φ : K →+* L) : RatFunc K →+* E L :=
   (algebraMap (RatFunc L) (E L)).comp (CrossedRationalCoefficientMap.map φ)
+omit [CharZero K] [CharZero L] in
 lemma equation_root (φ : K →+* L) : (equation K).eval₂ (coefficientMap φ) (y L)=0 := by
   conv_lhs => arg 3; rw [equation_eq]
   simp only [Polynomial.eval₂_sub,Polynomial.eval₂_pow,Polynomial.eval₂_X,Polynomial.eval₂_C,Polynomial.eval₂_ofNat,

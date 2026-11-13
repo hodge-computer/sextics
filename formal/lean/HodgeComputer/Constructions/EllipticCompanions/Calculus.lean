@@ -34,7 +34,7 @@ lemma normal_values (ρ : R →+* L) (D A : R) (N g : Fin 4 → R)
     (hd : ρ D≠0) (hn : (∑ i,N i*g i)=A*D) :
     (∑ i,values ρ D N i*ρ (g i))=ρ A := by
   have he := congrArg ρ hn
-  simp only [map_sum,map_mul,map_add,map_zero,Fin.sum_univ_succ,Fin.sum_univ_zero] at he
+  simp only [map_mul,map_add,map_zero,Fin.sum_univ_succ,Fin.sum_univ_zero] at he
   simp only [values,Fin.sum_univ_succ,Fin.sum_univ_zero]
   field_simp
   linear_combination he
@@ -45,7 +45,7 @@ lemma normal_jets (ρ : R →+* L) (Δ : Fin 4 → Derivation ℤ R R) (D A : R)
       (∑ i,values ρ D N i*ρ (Δ j (g i)))=ρ (Δ j A) := by
   have he := congrArg ρ hn
   have he' := congrArg (fun p => ρ (Δ j p)) hn
-  simp only [map_sum,map_mul,map_add,map_zero,Derivation.leibniz,smul_eq_mul,
+  simp only [map_mul,map_add,map_zero,Derivation.leibniz,smul_eq_mul,
     Fin.sum_univ_succ,Fin.sum_univ_zero] at he he'
   simp only [jet,values,Fin.sum_univ_succ,Fin.sum_univ_zero]
   field_simp
@@ -55,7 +55,7 @@ lemma divergence_jets (ρ : R →+* L) (Δ : Fin 4 → Derivation ℤ R R) (D : 
     (hd : ρ D≠0)
     (hdiv : ρ (D*(∑ i,Δ i (N i))-(∑ i,N i*Δ i D))=0) :
     (∑ i,jet ρ Δ D N i i)=0 := by
-  simp only [map_sub,map_mul,map_sum,map_add,map_zero,Fin.sum_univ_succ,Fin.sum_univ_zero] at hdiv
+  simp only [map_sub,map_mul,map_add,map_zero,Fin.sum_univ_succ,Fin.sum_univ_zero] at hdiv
   simp only [jet,Fin.sum_univ_succ,Fin.sum_univ_zero]
   field_simp
   linear_combination hdiv
@@ -106,7 +106,7 @@ theorem affine_first_equation
     -(l/(3*p))*(Pd+l^6*Qd)
       +6*l^5*q*((3*p*src+Pd+l^6*Qd)/(18*p*l^4*q)) = src*l := by
   field_simp
-  <;> ring
+  ring
 
 theorem affine_divergence_quotient
     (p q l src Pd Qd : K) (hp : p ≠ 0) (hq : q ≠ 0) (hl : l ≠ 0) :
@@ -114,7 +114,7 @@ theorem affine_divergence_quotient
       -(3*p*src+Pd)/(9*p*q*l^5)+2*l*Qd/(9*p*q)
       = -(p+l^6*q)*(3*p*src+Pd)/(9*p^2*q*l^5) := by
   field_simp
-  <;> ring
+  ring
 
 end CrossedEllipticJet
 end
@@ -161,8 +161,8 @@ theorem scalar_equation (δ Dx Dy : Derivation ℤ L L)
   have he : δ (scalarB u a b v)+Dx (scalarX u v)+Dy (scalarY u v)-
       (B/u^4-(a*Bs+b*Bt)/u^3)=(jetNumerator u a b px py v J-B+u*(a*Bs+b*Bt))/u^4 := by
     simp only [scalarB,scalarX,scalarY,jetNumerator,Derivation.leibniz_div,Derivation.leibniz,
-      Derivation.leibniz_pow,map_sub,map_add,map_neg,hδ3,hx3,hy3,hδu,ha,hb,hDxu,hDyu,
-      hδs,hδt,hDx,hDy,smul_eq_mul,nsmul_eq_mul,smul_zero,mul_zero,zero_mul,add_zero,zero_add]
+      Derivation.leibniz_pow,map_sub,map_neg,hδ3,hx3,hy3,hδu,ha,hb,hDxu,hDyu,
+      hδs,hδt,hDx,hDy,smul_eq_mul,smul_zero,mul_zero,add_zero]
     norm_num only
     field_simp [hu]
     ring
@@ -277,9 +277,9 @@ lemma translatedX_derivation (D : Derivation ℤ L L) (x y u v : L)
   have hi : D (translatedX x y u v)+translatedY x y u v/3=
       ((y-v)*(y^2-x^3+432)+(v-y)*(v^2-u^3+432))/(3*(x-u)^3) := by
     simp only [translatedY,translatedX,slope,div_eq_mul_inv]
-    simp only [map_sub,map_add,map_neg,Derivation.leibniz_pow,Derivation.leibniz,
+    simp only [map_sub,Derivation.leibniz_pow,Derivation.leibniz,
       Derivation.leibniz_inv,hx,hy,hu,hv,smul_eq_mul,nsmul_eq_mul,Nat.cast_ofNat,
-      sub_zero,zero_sub,mul_zero,zero_mul,add_zero,zero_add]
+      sub_zero]
     norm_num only
     generalize hd : x-u=d at *
     field_simp [h]
@@ -297,8 +297,7 @@ lemma translatedY_derivation (D : Derivation ℤ L L) (x y u v : L)
         (-u^3+2*u^2*x-u*x^2+v^2-2*v*y+x^3-432)*(v^2-u^3+432))/(2*(x-u)^4) := by
     simp only [translatedY,translatedX,slope,div_eq_mul_inv]
     simp only [map_sub,map_add,map_neg,Derivation.leibniz_pow,
-      Derivation.leibniz_inv,Derivation.leibniz,hx,hy,hu,hv,smul_eq_mul,nsmul_eq_mul,Nat.cast_ofNat,sub_zero,zero_sub,
-      mul_zero,zero_mul,add_zero,zero_add]
+      Derivation.leibniz_inv,Derivation.leibniz,hx,hy,hu,hv,smul_eq_mul,nsmul_eq_mul,Nat.cast_ofNat,sub_zero]
     norm_num only
     generalize hd : x-u=d at *
     field_simp [h]

@@ -91,18 +91,17 @@ theorem normalized_data_from_polynomial_family
         (ρ (pderiv 0 A) * ρ (pderiv 0 f) -
           ρ A * ρ (pderiv 0 (pderiv 0 f))) / (ρ (pderiv 0 f))^2 := by
       field_simp
-      <;> ring
     have hw' :
         (ρ (pderiv 0 A) * ρ (pderiv 0 f) -
           ρ A * ρ (pderiv 0 (pderiv 0 f))) / (ρ (pderiv 0 f))^2 +
           residueDivergence E' (ρ (pderiv 0 f)) w = 0 := by
       rw [hw, hs]
       ring
-    convert hw' using 1 <;>
-      simp only [ρ, finiteQuotientEvaluation, RingHom.comp_apply,
-        map_div₀, map_sub, map_mul, map_pow, integerPartial_apply,
-        residueDivergence, fieldDivergence, Finset.sum_sub_distrib,
-        div_eq_mul_inv, map_inv₀, Finset.sum_mul] <;> ring
+    convert hw' using 1
+    simp only [ρ, finiteQuotientEvaluation, RingHom.comp_apply,
+      map_sub, map_mul, map_pow, integerPartial_apply,
+      residueDivergence, fieldDivergence, Finset.sum_sub_distrib,
+      div_eq_mul_inv, map_inv₀, Finset.sum_mul]
   obtain ⟨d, N0, N, Q, hd, hlegal, hnormal, hdiv, _⟩ :=
     finite_residue_solution_clearing_canonical (K := K) (L := L)
       π hπ (integerPartial 0) (fun i : Fin 5 => integerPartial i.succ) f A w

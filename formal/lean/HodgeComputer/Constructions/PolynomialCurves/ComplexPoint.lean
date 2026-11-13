@@ -28,10 +28,10 @@ theorem complex_point_of_etale_nontrivial {n : ℕ}
   obtain ⟨I,hI,hfin,hsep,heq,hjac⟩ :=
     squareGeneric_exists_fieldFactor (K := ℂ) eqs
       (show Function.Injective (algebraMap ℤ ℂ) from Int.cast_injective)
-  letI := hI
+  let := hI
   let E := (SquareGenericAlgebra ℂ eqs) ⧸ I
-  letI : Field E := Ideal.Quotient.field I
-  letI : Module.Finite ℂ E := hfin
+  let : Field E := Ideal.Quotient.field I
+  let : Module.Finite ℂ E := hfin
   let f : E →ₐ[ℂ] ℂ := IsAlgClosed.lift
   let v : Fin n → ℂ := fun i => f (squareGenericCoordinates eqs I i)
   have hm (P : MvPolynomial (Fin n) ℤ) :

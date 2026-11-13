@@ -30,7 +30,6 @@ def normalVariation (D : Fin 4 → Derivation ℤ K K) (ψ : Fin 5 → K) :
 lemma normalQuadraticJet_eq (π : P →+* K) (F : P) (ψ : Fin 5 → K) :
     normalQuadraticJet π F ψ=SplitNormalTaylor.secondJet ψ (hessian π F) := by
   unfold normalQuadraticJet SplitNormalTaylor.secondJet
-  congr 1
   simp only [Fin.sum_univ_succ,Fin.sum_univ_zero]
   ring
 

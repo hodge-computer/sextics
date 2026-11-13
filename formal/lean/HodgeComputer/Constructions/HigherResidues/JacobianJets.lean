@@ -17,15 +17,18 @@ def linearMatrix {n : ℕ} (M₀ M₁ : Matrix (Fin n) (Fin n) K) : Matrix (Fin 
 def quadraticRow {n : ℕ} (G₀ G₁ G₂ : Fin n → K) : Fin n → K[X] :=
   ((C ∘ G₀)+(X : K[X]) • (C ∘ G₁))+(X : K[X])^2 • (C ∘ G₂)
 
+omit [CharZero K] in
 lemma linearMatrix_det_zero {n : ℕ} (M₀ M₁ : Matrix (Fin n) (Fin n) K) :
     (linearMatrix M₀ M₁).det.coeff 0 = M₀.det := by
   simpa [linearMatrix,add_comm] using Polynomial.coeff_det_X_add_C_zero M₁ M₀
 
+omit [CharZero K] in
 lemma linearMatrix_tail (M₀ M₁ : Matrix (Fin 5) (Fin 5) K) :
     (linearMatrix M₀ M₁).submatrix Fin.succ Fin.succ =
       linearMatrix (M₀.submatrix Fin.succ Fin.succ) (M₁.submatrix Fin.succ Fin.succ) := by
   rfl
 
+omit [CharZero K] in
 lemma linearMatrix_updatedRow_zero (M₀ M₁ : Matrix (Fin 5) (Fin 5) K) (d : Fin 5 → K) :
     ((linearMatrix M₀ M₁).updateRow 0 (C ∘ d)).det.coeff 0 = (M₀.updateRow 0 d).det := by
   change (Polynomial.constantCoeff : K[X] →+* K)
@@ -38,11 +41,13 @@ lemma linearMatrix_updatedRow_zero (M₀ M₁ : Matrix (Fin 5) (Fin 5) K) (d : F
     simp [linearMatrix,Matrix.updateRow]
   · simp [linearMatrix,Matrix.updateRow,hi]
 
+omit [CharZero K] in
 lemma quadratic_times_coeff_one (g l m : K) (P : K[X]) :
     ((C g+(X : K[X])*C l+(X : K[X])^2*C m)*P).coeff 1 =
       g*P.coeff 1+l*P.coeff 0 := by
   simp [Polynomial.coeff_mul,Finset.Nat.sum_antidiagonal_succ]
 
+omit [CharZero K] in
 lemma quadratic_times_coeff_two (g l m : K) (P : K[X]) :
     ((C g+(X : K[X])*C l+(X : K[X])^2*C m)*P).coeff 2 =
       g*P.coeff 2+l*P.coeff 1+m*P.coeff 0 := by
@@ -92,7 +97,7 @@ theorem jacobian_jet_equations
     rw [determinant_updateRow_inverse M N hNM d]
     rw [Fin.sum_univ_succ]
     simp only [d,Fin.cases_zero,Fin.cases_succ,zero_mul,zero_add]
-    rw [normal_cofactor_contraction D E M N g ψ hNM hN hM hg hψ chain a]
+    rw [normal_cofactor_contraction D E M N g ψ hNM hM hg hψ chain a]
     unfold advect
     ring
   have hr1 := determinant_normal_row_coeff_one L (quadraticRow g G₁ G₂) q a b d hrow

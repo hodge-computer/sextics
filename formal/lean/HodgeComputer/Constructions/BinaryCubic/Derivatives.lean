@@ -32,7 +32,7 @@ theorem weighted_derivatives (D : Derivation ℚ R R) (v : Data R) (hw : Weights
   have hd := hw.d
   simp only [f, H, delta, h0, t, k, l, h4, h6, Hp, fp, kp, tp, lp,
     rf, rH, rt, rk, rl, map_add, map_sub, Derivation.leibniz, Derivation.leibniz_pow,
-    smul_eq_mul, deriv_ofNat D 2, deriv_ofNat D 3, deriv_ofNat D 4, deriv_ofNat D 6, deriv_ofNat D 8, deriv_ofNat D 9, deriv_ofNat D 12, deriv_ofNat D 18, deriv_ofNat D 27, ha, hb, hc, hd]
+    smul_eq_mul, deriv_ofNat D 2, deriv_ofNat D 3, deriv_ofNat D 4, deriv_ofNat D 6, deriv_ofNat D 9, deriv_ofNat D 18, deriv_ofNat D 27, ha, hb, hc, hd]
   norm_num
   constructor
   · ring
@@ -52,6 +52,6 @@ theorem constant_derivatives (D : Derivation ℚ R R) (v : Data R)
     D (f v) = 0 ∧ D (H v) = 0 ∧ D (delta v) = 0 ∧ D (h0 v) = 0 ∧
     D (t v) = 0 ∧ D (k v) = 0 ∧ D (l v) = 0 := by
   simp [f, H, delta, h0, t, k, l, h4, h6, Hp, fp, kp, ha, hb, hc, hd,
-    Derivation.leibniz, Derivation.leibniz_pow, smul_eq_mul, deriv_ofNat D 2, deriv_ofNat D 3, deriv_ofNat D 4, deriv_ofNat D 6, deriv_ofNat D 8, deriv_ofNat D 9, deriv_ofNat D 12, deriv_ofNat D 18, deriv_ofNat D 27]
+    Derivation.leibniz, Derivation.leibniz_pow, smul_eq_mul, deriv_ofNat D 2, deriv_ofNat D 3, deriv_ofNat D 4, deriv_ofNat D 6, deriv_ofNat D 9, deriv_ofNat D 18, deriv_ofNat D 27]
 
 end HodgeTestbed.EllipticAmbient.Cubic

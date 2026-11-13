@@ -28,6 +28,7 @@ def FibreRegular (r : K) (f : E K) : Prop := RegularAt r (first K f) ∧ Regular
 def fibreValue (r s : K) : E K →ₗ[K] K :=
   ((valueAt r).comp ((first K).restrictScalars K))+
     s • ((valueAt r).comp ((second K).restrictScalars K))
+omit [CharZero K] in
 lemma fibreValue_apply (r s : K) (f : E K) :
     fibreValue r s f=valueAt r (first K f)+s*valueAt r (second K f) := rfl
 
@@ -47,11 +48,13 @@ lemma first_mul (f g : E K) : first K (f*g)=first K f*first K g+
 lemma second_mul (f g : E K) : second K (f*g)=first K f*second K g+second K f*first K g := by
   rw [mul_expansion,map_add,second_algebraMap,second_coeff_y,zero_add]
 
+omit [CharZero K] in
 lemma FibreRegular.add {r : K} {f g : E K} (hf : FibreRegular r f) (hg : FibreRegular r g) :
     FibreRegular r (f+g) := by
   constructor <;> rw [map_add]
   · exact hf.1.add hg.1
   · exact hf.2.add hg.2
+omit [CharZero K] in
 lemma FibreRegular.neg {r : K} {f : E K} (hf : FibreRegular r f) : FibreRegular r (-f) := by
   constructor <;> rw [map_neg]
   · exact hf.1.neg
@@ -59,9 +62,11 @@ lemma FibreRegular.neg {r : K} {f : E K} (hf : FibreRegular r f) : FibreRegular 
 lemma FibreRegular.mul {r : K} {f g : E K} (hf : FibreRegular r f) (hg : FibreRegular r g) :
     FibreRegular r (f*g) := by
   have hc : RegularAt r ((RatFunc.X : RatFunc K)^3-432) := by
-    convert RegularAt.polynomial r (X^3-C (432 : K)) using 1 <;> simp [map_ofNat]
+    convert RegularAt.polynomial r (X^3-C (432 : K)) using 1
+    simp [map_ofNat]
   exact ⟨by rw [first_mul]; exact (hf.1.mul hg.1).add ((hc.mul hf.2).mul hg.2),
     by rw [second_mul]; exact (hf.1.mul hg.2).add (hf.2.mul hg.1)⟩
+omit [CharZero K] in
 lemma FibreRegular.rational (r : K) (f : RatFunc K) (hf : RegularAt r f) :
     FibreRegular r (algebraMap (RatFunc K) (E K) f) := by
   rw [FibreRegular,first_algebraMap,second_algebraMap]
@@ -85,7 +90,8 @@ lemma fibreValue_mul (r s : K) (hs : s^2=r^3-432) (f g : E K)
     (hf : FibreRegular r f) (hg : FibreRegular r g) :
     fibreValue r s (f*g)=fibreValue r s f*fibreValue r s g := by
   have hc : RegularAt r ((RatFunc.X : RatFunc K)^3-432) := by
-    convert RegularAt.polynomial r (X^3-C (432 : K)) using 1 <;> simp [map_ofNat]
+    convert RegularAt.polynomial r (X^3-C (432 : K)) using 1
+    simp [map_ofNat]
   have hv : valueAt r ((RatFunc.X : RatFunc K)^3-432)=r^3-432 := by
     convert valueAt_polynomial r (X^3-C (432 : K)) using 1 <;> simp [map_ofNat]
   simp only [fibreValue_apply,first_mul,second_mul,map_add,
@@ -118,6 +124,7 @@ namespace CrossedElliptic
 open Polynomial CrossedRationalResidue
 variable {K : Type*} [Field K] [CharZero K]
 
+omit [CharZero K] in
 lemma conjugate_root : (equation K).eval₂ (algebraMap (RatFunc K) (E K)) (-y K)=0 := by
   conv_lhs => arg 3; rw [equation_eq]
   simp only [Polynomial.eval₂_sub,Polynomial.eval₂_pow,Polynomial.eval₂_X,Polynomial.eval₂_C,Polynomial.eval₂_ofNat,
@@ -167,16 +174,20 @@ lemma inverse_expansion (f : E K) : f⁻¹=algebraMap (RatFunc K) (E K) (first K
   field_simp
   linear_combination hp
 
+omit [CharZero K] in
 lemma FibreRegular.norm_regular {r : K} {f : E K} (hf : FibreRegular r f) :
     RegularAt r (fibreNorm f) := by
   have hc : RegularAt r ((RatFunc.X : RatFunc K)^3-432) := by
-    convert RegularAt.polynomial r (X^3-C (432 : K)) using 1 <;> simp [map_ofNat]
+    convert RegularAt.polynomial r (X^3-C (432 : K)) using 1
+    simp [map_ofNat]
   simpa only [fibreNorm,pow_two] using (hf.1.mul hf.1).sub (hc.mul (hf.2.mul hf.2))
 
+omit [CharZero K] in
 lemma fibreNorm_value (r s : K) (hs : s^2=r^3-432) (f : E K) (hf : FibreRegular r f) :
     valueAt r (fibreNorm f)=fibreValue r s f*fibreValue r (-s) f := by
   have hc : RegularAt r ((RatFunc.X : RatFunc K)^3-432) := by
-    convert RegularAt.polynomial r (X^3-C (432 : K)) using 1 <;> simp [map_ofNat]
+    convert RegularAt.polynomial r (X^3-C (432 : K)) using 1
+    simp [map_ofNat]
   have hv : valueAt r ((RatFunc.X : RatFunc K)^3-432)=r^3-432 := by
     convert valueAt_polynomial r (X^3-C (432 : K)) using 1 <;> simp [map_ofNat]
   simp only [fibreNorm,pow_two,map_sub,valueAt_mul hf.1 hf.1,
@@ -361,11 +372,13 @@ lemma local_translatedY (r s u v : K) (hs : s^2=r^3-432) (hru : r≠u) :
     map_sub,hv,htv,fibreValue_x,fibreValue_y]
   rfl
 
+omit [CharZero K] in
 lemma translatedX_symmetric (x y u v : K) : translatedX x y u v=translatedX u v x y := by
   unfold translatedX slope
   by_cases hd : x=u
   · subst x; simp
   · field_simp [sub_ne_zero.mpr hd,sub_ne_zero.mpr (Ne.symm hd)]; ring
+omit [CharZero K] in
 lemma translatedY_symmetric (x y u v : K) (hd : x≠u) :
     translatedY x y u v=translatedY u v x y := by
   unfold translatedY translatedX slope
@@ -474,7 +487,7 @@ lemma coefficient_basis_expansion (D : Derivation ℤ K K) (f : E K) :
       algebraMap (RatFunc K) (E K) (baseCoefficient D (second K f))*y K := by
   have h := congrArg (coefficient D) (first_second_expansion K f)
   simp only [map_add,Derivation.leibniz,coefficient_base,coefficient_y,smul_eq_mul,
-    mul_zero,add_zero] at h
+    mul_zero] at h
   linear_combination h
 
 lemma first_coefficient (D : Derivation ℤ K K) (f : E K) :
@@ -501,7 +514,7 @@ lemma delta_basis_expansion (f : E K) :
   have h432 : algebraMap (RatFunc K) (E K) (432 : RatFunc K)=(432 : E K) := map_natCast _ 432
   have h3 : algebraMap (RatFunc K) (E K) (3 : RatFunc K)=(3 : E K) := map_natCast _ 3
   have h2 : algebraMap (RatFunc K) (E K) (2 : RatFunc K)=(2 : E K) := map_natCast _ 2
-  simp only [map_sub,map_add,map_mul,map_pow,map_neg,map_div₀,h432,h3,h2]
+  simp only [map_sub,map_mul,map_pow,map_neg,map_div₀,h432,h3,h2]
   have hr := relation K
   dsimp only [x] at hr
   dsimp only [x]
@@ -537,6 +550,7 @@ lemma valueAt_coefficient (r : K) (D : Derivation ℤ K K) (hr : D r=0) (f : Rat
     rw [Derivation.leibniz_div_const _ _ _ hu]
     simp only [smul_eq_mul,div_eq_mul_inv,mul_comm]
   rw [← he,residue_coefficient]
+omit [CharZero K] in
 lemma valueAt_polynomial_mul (r : K) (P : K[X]) (f : RatFunc K) (hf : RegularAt r f) :
     valueAt r (algebraMap K[X] (RatFunc K) P*f)=P.eval r*valueAt r f := by
   rw [valueAt_mul (RegularAt.polynomial r P) hf,valueAt_polynomial]

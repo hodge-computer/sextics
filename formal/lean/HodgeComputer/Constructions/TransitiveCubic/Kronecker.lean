@@ -23,8 +23,8 @@ lemma weight_formula (m : Exponent) :
       (3*m 0+2*m 3+2*m 5,3*m 1+m 3+2*m 4,3*m 2+m 4+m 5) := by
   rw [Finsupp.weight_apply,Finsupp.sum_fintype]
   · simp only [weights,Fin.sum_univ_succ,Matrix.cons_val_zero,Matrix.cons_val_succ,
-      Fin.reduceSucc,Matrix.cons_val_one,Matrix.cons_val,Finset.univ_eq_empty,Finset.sum_empty,
-      Prod.smul_mk,Prod.mk_add_mk,nsmul_eq_mul]
+      Fin.reduceSucc,Finset.univ_eq_empty,Finset.sum_empty,
+      nsmul_eq_mul]
     ext <;> simp <;> ring
   · intro; simp
 
@@ -60,7 +60,7 @@ lemma recover_coefficient (a b s t u : ℕ)
 lemma code_injective_on_grade (w : Grade) (hw : w.1<38 ∧ w.2.1<38 ∧ w.2.2<38) :
     Set.InjOn code {m : Exponent | Finsupp.weight weights m=w} := by
   intro m hm n hn he
-  rw [Set.mem_setOf_eq,weight_formula] at hm hn
+  rw [Set.mem_ofPred_eq,weight_formula] at hm hn
   have hm0 := congrArg Prod.fst hm
   have hm1 := congrArg (fun z : Grade => z.2.1) hm
   have hm2 := congrArg (fun z : Grade => z.2.2) hm
@@ -89,7 +89,7 @@ lemma encode_monomial (m : Exponent) (r : R) :
     encode (MvPolynomial.monomial m r)=Polynomial.monomial (code m) r := by
   rw [← Polynomial.C_mul_X_pow_eq_monomial]
   simp [encode,MvPolynomial.eval₂Hom_monomial,Finsupp.prod_fintype,
-    Fin.prod_univ_succ,code,pow_add,pow_mul,mul_assoc,mul_comm,mul_left_comm]
+    Fin.prod_univ_succ,code,pow_add,pow_mul,mul_assoc]
 
 lemma encode_finsupp (p : MvPolynomial (Fin 6) R) :
     (encode p).toFinsupp.coeff=Finsupp.mapDomain code (AddMonoidAlgebra.coeff p) := by

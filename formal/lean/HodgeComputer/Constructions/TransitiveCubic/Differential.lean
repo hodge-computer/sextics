@@ -1202,7 +1202,7 @@ theorem semantic_identity {L : Type*} [CommRing L] (v : ℕ → L) (xx yy : L) :
     h*(ux*qy-uy*qx)-2*q*(ux*hy-uy*hx)+3*j=u*(hx*qy-hy*qx) := by
   dsimp only
   have h := data_identity v xx yy
-  simp only [← Right_generated,← C_generated,← C1n_generated,← C1_generated,← C0_generated,← Left_generated,← Left0_generated,← J3_generated,← QBneg_generated,← QB_generated,← B_generated,← B1n_generated,← B1_generated,← B0_generated,← HA_generated,← A_generated,← A1n_generated,← A1_generated,← A0_generated,multiply_denote,scale_denote,merge_denote,ringEval,Int.cast_neg,Int.cast_ofNat] at h
+  simp only [← Right_generated,← C_generated,← C1n_generated,← C1_generated,← C0_generated,← Left_generated,← Left0_generated,← J3_generated,← QBneg_generated,← QB_generated,← B_generated,← B1n_generated,← B1_generated,← B0_generated,← HA_generated,← A_generated,← A1n_generated,← A1_generated,← A0_generated,multiply_denote,scale_denote,merge_denote,ringEval,Int.cast_ofNat] at h
   linear_combination h
 
 def baseCoefficients (a b c d e f : K) : ℕ → K :=

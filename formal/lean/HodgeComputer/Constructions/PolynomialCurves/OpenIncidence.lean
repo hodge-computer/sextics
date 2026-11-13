@@ -69,6 +69,7 @@ def openGenericCoordinates (eqs : ι → MvPolynomial ι R) (i : ι)
     (OpenSquareGeneric K eqs i) ⧸ I :=
   openGenericMap eqs i I (Ideal.Quotient.mk _ (MvPolynomial.X j))
 
+omit [DecidableEq ι] in
 theorem openGeneric_eval (eqs : ι → MvPolynomial ι R) (i : ι)
     (I : Ideal (OpenSquareGeneric K eqs i)) (p : MvPolynomial ι R) :
     MvPolynomial.aeval (openGenericCoordinates eqs i I) p =
@@ -114,6 +115,7 @@ theorem openGeneric_jacobian (eqs : ι → MvPolynomial ι R) (i : ι)
     exact (openGeneric_eval eqs i I _).symm
   exact he ▸ hm
 
+omit [DecidableEq ι] in
 theorem openGeneric_coordinate_unit (eqs : ι → MvPolynomial ι R) (i : ι)
     (I : Ideal (OpenSquareGeneric K eqs i)) :
     IsUnit (openGenericCoordinates eqs i I i) := by
@@ -137,9 +139,9 @@ theorem openSquare_exists_fieldFactor [Nontrivial T]
       IsUnit (Matrix.det (fun j k => MvPolynomial.aeval
         (openGenericCoordinates eqs i I) (MvPolynomial.pderiv j (eqs k)))) ∧
       IsUnit (openGenericCoordinates eqs i I i) := by
-  letI : Nontrivial (OpenSquareEtale eqs i) :=
+  let : Nontrivial (OpenSquareEtale eqs i) :=
     (openSquareEtaleEval eqs x hx hj i hi).toRingHom.domain_nontrivial
-  letI : Algebra.Etale R (SquareEtaleRing eqs) := square_system_jacobian_etale eqs
+  let : Algebra.Etale R (SquareEtaleRing eqs) := square_system_jacobian_etale eqs
   obtain ⟨I, hI, hfin, hsep⟩ := genericEtale_exists_fieldFactor
     R K (OpenSquareEtale eqs i) hinj
   exact ⟨I, hI, hfin, hsep, openGeneric_solution eqs i I,

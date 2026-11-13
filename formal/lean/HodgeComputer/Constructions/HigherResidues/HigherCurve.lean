@@ -12,6 +12,7 @@ open Polynomial HoldoutConstruction SplitNormalJetBinding
 open scoped BigOperators
 variable {K : Type*} [Field K] [CharZero K]
 
+omit [CharZero K] in
 lemma firstGradientJet_zero (π : P →+* K) (F : P) (ψ : Fin 5 → K) :
     firstGradientJet π F ψ 0=SplitNormalTaylor.firstJet ψ (gradient π (integerPartial 0 F)) := by
   unfold firstGradientJet SplitNormalTaylor.firstJet hessian gradient
@@ -98,8 +99,10 @@ lemma source_density_jets (π : P →+* K) (F A : P)
     (advect E (fun i => ψ i.succ) (normalSourceOne (π A) (gradient π A 0)
       (gradient π F 0) (hessian π F 0 0)/gradient π F 0))
     (hessianDensity E (fun i => ψ i.succ) (π A/gradient π F 0)) hg h₀ h₁ h₂'
-  convert hs using 1 <;> ring
+  convert hs using 1
+  ring
 
+omit [CharZero K] in
 lemma linearMatrix_det_coeff_mem {n : ℕ} (S : Subring K)
     (M₀ M₁ : Matrix (Fin n) (Fin n) K)
     (h₀ : ∀ i j,M₀ i j∈S) (h₁ : ∀ i j,M₁ i j∈S) (k : ℕ) :

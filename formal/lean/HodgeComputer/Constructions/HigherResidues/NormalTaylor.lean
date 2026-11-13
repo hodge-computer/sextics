@@ -21,6 +21,7 @@ def firstJet (ψ b : Fin 5 → K) : K := ∑ i,ψ i*b i
 def secondJet (ψ : Fin 5 → K) (BB : Matrix (Fin 5) (Fin 5) K) : K :=
   (∑ i,∑ j,ψ i*ψ j*BB i j)/2
 
+omit [CharZero K] in
 lemma normal_zero_coordinate (g ψ : Fin 5 → K) (hg : g 0≠0)
     (hnormal : (∑ i,g i*ψ i)=1) :
     ψ 0=(1-∑ i : Fin 4,g i.succ*ψ i.succ)/g 0 := by
@@ -62,7 +63,7 @@ theorem second_jet_formula (E : Fin 4 → Derivation ℤ K K)
   have hf21 := hF 2 1; have hf31 := hF 3 1; have hf41 := hF 4 1
   have hf32 := hF 3 2; have hf42 := hF 4 2; have hf43 := hF 4 3
   simp only [secondJet,advect,restrictedHessian,Fin.sum_univ_succ,Fin.sum_univ_zero,
-    Fin.sum_univ_four,hE,map_sub,Derivation.leibniz,Derivation.leibniz_div,
+    hE,map_sub,Derivation.leibniz,Derivation.leibniz_div,
     hEb,hEg,smul_eq_mul]
   rw [normal_zero_coordinate g ψ hg hnormal]
   have hs2 {n : ℕ} : (2 : Fin (n+3)).succ=(3 : Fin (n+4)) := rfl

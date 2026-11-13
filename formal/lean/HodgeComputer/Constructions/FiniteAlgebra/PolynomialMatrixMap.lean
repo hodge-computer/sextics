@@ -73,7 +73,7 @@ instance coefficientAlgebra_comm (ρ : E →+* Matrix n n (MvPolynomial σ K)) :
       matrixDeriv (MvPolynomial.pderiv i) (polynomialMatrixMap ρ (MvPolynomial.C a)) := by
     rw [MvPolynomial.pderiv_C, map_zero, polynomialMatrixMap_C]
     ext a b
-    simp [matrixDeriv_apply, Matrix.map_apply, MvPolynomial.pderiv_C]
+    simp [matrixDeriv_apply, Matrix.map_apply]
   have hX (j : σ) :
       polynomialMatrixMap ρ (MvPolynomial.pderiv i (MvPolynomial.X j)) =
       matrixDeriv (MvPolynomial.pderiv i) (polynomialMatrixMap ρ (MvPolynomial.X j)) := by

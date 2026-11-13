@@ -33,8 +33,8 @@ theorem finite_of_same_finite_trdeg [Algebra.EssFiniteType K L]
     rcases Cardinal.add_eq_left_iff.mp hadd with h | h
     · exact False.elim ((not_le_of_gt hfinite) ((le_max_left _ _).trans h))
     · exact h
-  letI : Algebra.IsAlgebraic F L := trdeg_eq_zero_iff.mp hz
-  letI : Algebra.EssFiniteType F L := Algebra.EssFiniteType.of_comp K F L
+  let : Algebra.IsAlgebraic F L := trdeg_eq_zero_iff.mp hz
+  let : Algebra.EssFiniteType F L := Algebra.EssFiniteType.of_comp K F L
   exact Algebra.finite_of_essFiniteType_of_isAlgebraic
 
 end HoldoutConstruction
@@ -196,7 +196,7 @@ theorem monic_root_embedding_injective (p : Polynomial R) (hp : p.Monic)
   have hroot : (p.map (algebraMap R F)).eval₂ ψ x = 0 := by
     rw [Polynomial.eval₂_map, hψ]
     exact hx
-  letI : Fact (Irreducible (p.map (algebraMap R F))) :=
+  let : Fact (Irreducible (p.map (algebraMap R F))) :=
     ⟨(hp.irreducible_iff_irreducible_map_fraction_map (K := F)).mp hirr⟩
   let g : AdjoinRoot (p.map (algebraMap R F)) →+* L :=
     AdjoinRoot.lift (f := p.map (algebraMap R F)) ψ x hroot

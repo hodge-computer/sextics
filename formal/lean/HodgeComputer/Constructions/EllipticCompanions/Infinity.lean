@@ -29,7 +29,8 @@ lemma RegularAt.subtract_value_div_X {f : RatFunc K} (hf : RegularAt 0 f) :
   let N := P-Polynomial.C (P.eval 0/Q.eval 0)*Q
   have hN : N.eval 0=0 := by
     simp only [N,eval_sub,eval_mul,eval_C]
-    field_simp <;> ring
+    field_simp
+    ring
   have hx : (X : K[X]) ∣ N := by
     rw [Polynomial.X_dvd_iff]
     simpa only [Polynomial.coeff_zero_eq_eval_zero] using hN
@@ -83,9 +84,11 @@ local instance : Algebra ℤ (RatFunc K) := Ring.toIntAlgebra _
 def jetOperator (h : RatFunc K) : RatFunc K :=
   5*h+2*RatFunc.X*baseTime h-3456*RatFunc.X^3*h-864*RatFunc.X^4*baseTime h
 
+omit [CharZero K] in
 lemma jetOperator_add (h k : RatFunc K) : jetOperator (h+k)=jetOperator h+jetOperator k := by
   simp only [jetOperator,map_add]
   ring
+omit [CharZero K] in
 lemma jetOperator_zero : jetOperator (0 : RatFunc K)=0 := by simp [jetOperator]
 
 lemma euler_power (n : ℕ) : (RatFunc.X : RatFunc K)*baseTime (RatFunc.X^n)=
@@ -110,7 +113,7 @@ lemma jetOperator_monomial (a : K) (n : ℕ) :
   have h3456 : RatFunc.C (3456 : K)=(3456 : RatFunc K) := map_natCast _ 3456
   have h864 : RatFunc.C (864 : K)=(864 : RatFunc K) := map_natCast _ 864
   have hn : RatFunc.C (n : K)=(n : RatFunc K) := map_natCast _ n
-  simp only [jetOperator,Derivation.leibniz,baseTime_C,zero_smul,add_zero,smul_eq_mul,
+  simp only [jetOperator,Derivation.leibniz,baseTime_C,smul_eq_mul,
     hd,map_mul,map_add,h5,h2,h3456,h864,hn,pow_add]
   field_simp
   ring
@@ -227,7 +230,7 @@ lemma time_reciprocal (f : RatFunc K) : reciprocal (baseTime f)=
     -(RatFunc.X : RatFunc K)^2*baseTime (reciprocal f) := by
   have he := rational_intertwines (reciprocal (K:=K)).toRingHom baseTime
     (-(RatFunc.X : RatFunc K)^2 • baseTime)
-    (fun c => by simp [reciprocal_C,Derivation.smul_apply,baseTime_C])
+    (fun c => by simp [reciprocal_C,baseTime_C])
     (by
       change (-(RatFunc.X : RatFunc K)^2 • baseTime) (reciprocal RatFunc.X)=reciprocal (baseTime RatFunc.X)
       rw [reciprocal_X,Derivation.smul_apply,Derivation.leibniz_inv,baseTime_X]
@@ -244,6 +247,7 @@ lemma coefficient_reciprocal (D : Derivation ℤ K K) (f : RatFunc K) :
   · change baseCoefficient D (reciprocal RatFunc.X)=reciprocal (baseCoefficient D RatFunc.X)
     rw [reciprocal_X,Derivation.leibniz_inv,baseCoefficient_X,map_zero,smul_zero]
 
+omit [CharZero K] in
 lemma exists_power_regular_zero (f : RatFunc K) : ∃ n : ℕ,RegularAt 0 (RatFunc.X^n*f) := by
   induction f using RatFunc.induction_on with
   | f P Q hQ =>
@@ -258,7 +262,7 @@ lemma exists_power_regular_zero (f : RatFunc K) : ∃ n : ℕ,RegularAt 0 (RatFu
       intro h; apply hr; simp [h]
     have hx : (RatFunc.X : RatFunc K)≠0 := X_ne_zero
     have hm := congrArg (algebraMap K[X] (RatFunc K)) hR
-    simp only [map_mul,map_pow,map_sub,map_zero,sub_zero,RatFunc.algebraMap_X] at hm
+    simp only [map_mul,map_pow,map_zero,sub_zero,RatFunc.algebraMap_X] at hm
     have he : (RatFunc.X : RatFunc K)^n*
         (algebraMap K[X] (RatFunc K) P/algebraMap K[X] (RatFunc K) Q)=
         algebraMap K[X] (RatFunc K) P/algebraMap K[X] (RatFunc K) R := by
@@ -305,7 +309,7 @@ lemma primitiveZero_derivative : baseTime (primitiveZero (K:=K))=firstDensity :=
   simp only [primitiveZero,firstDensity,denominator,div_eq_mul_inv]
   simp only [Derivation.leibniz,Derivation.leibniz_inv,Derivation.leibniz_pow,map_sub,
     hc36,hc1728,hc1,baseTime_X,smul_eq_mul,nsmul_eq_mul,
-    zero_mul,mul_zero,mul_one,zero_sub,sub_zero,add_zero,zero_add]
+    mul_zero,mul_one,zero_sub,add_zero]
   norm_num only
   generalize hd : (1-1728*(RatFunc.X : RatFunc K)^3)=d at *
   field_simp [hz]
@@ -319,7 +323,7 @@ lemma primitiveOne_derivative (h : RatFunc K) :
   have hc1 : baseTime (K:=K) (1 : RatFunc K)=0 := (baseTime (K:=K)).map_one_eq_zero
   simp only [primitiveOne,jetOperator,Derivation.leibniz,Derivation.leibniz_pow,map_sub,map_neg,
     hc2,hc432,hc1,baseTime_X,smul_eq_mul,nsmul_eq_mul,
-    zero_mul,mul_zero,mul_one,zero_sub,sub_zero,add_zero,zero_add]
+    mul_zero,mul_one,zero_sub,add_zero]
   norm_num only
   ring
 
@@ -336,7 +340,7 @@ lemma reciprocal_kernelZero : ((RatFunc.X : RatFunc K)^2)⁻¹*reciprocal (kerne
     field_simp
   rw [he]
   generalize hd : (1-1728*(RatFunc.X : RatFunc K)^3)=d at *
-  field_simp [hx,hz] <;> ring
+  field_simp [hx,hz]
 
 lemma reciprocal_kernelOne : ((RatFunc.X : RatFunc K)^2)⁻¹*reciprocal (kernelOne (K:=K))=
     forcing := by
@@ -349,7 +353,7 @@ lemma reciprocal_kernelOne : ((RatFunc.X : RatFunc K)^2)⁻¹*reciprocal (kernel
     field_simp
   rw [he]
   generalize hd : (1-1728*(RatFunc.X : RatFunc K)^3)=d at *
-  field_simp [hx,hz] <;> ring
+  field_simp [hx,hz]
 
 lemma infinity_theta_expression (f : E K) :
     infinityCoefficient (differentialTrace (thetaRatio*f))=
@@ -401,6 +405,7 @@ def boundary (h : RatFunc K) : E K →ₗ[K] K :=
      ((LinearMap.mulLeft K (boundaryKernelOne (K:=K))).comp
         ((reciprocal (K:=K)).toLinearMap.comp ((second K).restrictScalars K))))
 
+omit [CharZero K] in
 lemma boundary_apply (h : RatFunc K) (f : E K) : boundary h f=
     residue (K:=K) 0 (boundaryKernelZero h*reciprocal (first K f)+
       boundaryKernelOne*reciprocal (second K f)) := rfl
@@ -528,7 +533,7 @@ lemma residueAt_regular (r : K) (f : E K) (hf : FibreRegular r f) : residueAt r 
 
 lemma theta_cubic_constant (D : Derivation ℤ K K) (r : K) (hr : r^3=1728) : D r=0 := by
   have h := congrArg D hr
-  simp only [Derivation.leibniz_pow,D.map_natCast,smul_eq_mul,nsmul_eq_mul] at h
+  simp only [Derivation.leibniz_pow,smul_eq_mul,nsmul_eq_mul] at h
   have h1728 : D (1728 : K)=0 := D.map_natCast 1728
   rw [h1728] at h
   norm_num only at h
