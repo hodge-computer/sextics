@@ -10,6 +10,13 @@
   ],
   "statementSource": "instance.rec",
   "contextSource": "why.md",
+  "checkCommand": "python3 scripts/verify-hodge-locus-span.py",
+  "existenceStatus": "Certificate existence follows from the paired-sign and order-three support theorem in docs/03d-hodge-loci.md.",
+  "references": [
+    "docs/03d-hodge-loci.md \u00a7\u00a73D.4\u20133D.5",
+    "docs/03b-weighted-threefolds.md \u00a73B.7",
+    "docs/03-geometric-support.md \u00a73.6"
+  ],
   "discussionUrl": "https://github.com/hodge-computer/sextics/discussions/61",
   "sameVarietyInstances": [
     "cycle-three"

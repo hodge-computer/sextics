@@ -515,4 +515,4 @@ polynomial witness.
 [geometry]: https://github.com/hodge-computer/sextics/blob/main/docs/03-geometric-support.md
 [sylvester-solution]: https://github.com/hodge-computer/sextics/blob/main/data/family-sylvester-norm/solution.md
 [sylvester-pr]: https://github.com/hodge-computer/sextics/pull/30
-[diamond]: https://arxiv.org/html/2603.29157v2#S2
+[diamond]: https://arxiv.org/html/2603.29157#S2

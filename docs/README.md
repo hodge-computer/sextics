@@ -6,7 +6,7 @@ The treatment is organized around general mechanisms and their hypotheses. Examp
 
 ## Reading order
 
-The intended reader knows basic algebraic geometry, differential forms and Hodge decomposition. Chapter 1 identifies the geometric and algebraic formulations. Chapter 2 develops the algebraic calculus of rational primitives, and Chapter 2A works out the relation between binary contacts and Jacobian torsion. Chapters 3–3C establish geometric support theorems and their applications to complete families. Chapter 4 studies coefficient spaces, finite symmetries and deformation. Chapter 5 develops exact coefficient methods, strictification, rational integration tests and a normal form for cubic currents. Foundational results from the literature are cited where they enter.
+The intended reader knows basic algebraic geometry, differential forms and Hodge decomposition. Chapter 1 identifies the geometric and algebraic formulations. Chapter 2 develops the algebraic calculus of rational primitives, and Chapter 2A works out the relation between binary contacts and Jacobian torsion. Chapters 3–3D establish geometric support theorems and their applications to complete families. Chapter 4 studies coefficient spaces, finite symmetries and deformation. Chapter 5 develops exact coefficient methods, strictification, rational integration tests and a normal form for cubic currents. Foundational results from the literature are cited where they enter.
 
 | Chapter | Subject |
 | --- | --- |
@@ -17,6 +17,7 @@ The intended reader knows basic algebraic geometry, differential forms and Hodge
 | [3A. Split sextics and K3 surfaces](#technical-information/split-and-k3) | Elliptic companions, polarized splitting and the algebraic Kuga–Satake criterion |
 | [3B. Weighted threefolds and two-reflection sextics](#technical-information/weighted-threefolds) | Norm-contact curves, Abel–Jacobi residues, finite-jet spanning and two-reflection support |
 | [3C. Quadratic nets and pair correspondences](#technical-information/quadratic-nets) | Finite-cover incidence, discriminant conics, Fano threefolds and support without extra reflections |
+| [3D. Hodge loci of surface sections](#technical-information/hodge-loci) | Invariant sections, trace formulas for moving curves, a Higgs-field criterion and order-three weighted sextics |
 | [4. Families, representations and deformation](#technical-information/known-locus) | Invariant sectors, coefficient families, generic-target reduction, curve incidence and interpolation |
 | [5. Computing and checking certificates](#technical-information/computation) | Strictification, exact coefficient systems, rational integration and cubic currents |
 

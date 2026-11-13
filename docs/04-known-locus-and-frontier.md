@@ -1,6 +1,6 @@
 # 4. Families, representations and deformation
 
-[Previous: quadratic nets and pair correspondences](#technical-information/quadratic-nets) · [Contents](#technical-information/introduction) · [Next: computation](#technical-information/computation)
+[Previous: Hodge loci of surface sections](#technical-information/hodge-loci) · [Contents](#technical-information/introduction) · [Next: computation](#technical-information/computation)
 
 Support theorems have two kinds of hypotheses: restrictions on the coefficient family and restrictions on the cohomological representation. This chapter computes the dimensions of coefficient families, applies finite quotients and deck/exchange descent, and proves a criterion propagating one nonzero supported class over a dominant deformation family. The final section analyzes the representations of natural quotients and a dimension obstruction to an ordinary Fano-extension argument.
 
@@ -588,3 +588,5 @@ For reproducibility, if \(a+b=8\) are the positive and negative coordinate count
 The last column counts degree-ten monomials with each exponent at most four and polynomial character \((-1)^b\), rather than invariably taking polynomial character \(+1\). This is the determinant twist above; complex conjugation identifies the \((4,2)\) and \((2,4)\) dimensions. The equivariant Koszul formula makes these counts constant on the smooth invariant locus. The same calculation gives \(h^{5,1}(Y)^\sigma=155\) and 170, respectively. The command `python3 scripts/verify-extension-dimensions.py` reconstructs these counts by exact monomial enumeration.
 
 Consequently this fixed-section sixfold construction cannot provide the full invariant Hodge-bundle submersion used to obtain dense rational middle Hodge classes in the Voisin argument. The dimension bound concerns that density map: it gives no obstruction to divisor support from independently supplied cycles, smaller subvariations or different ambient geometry.
+
+The same comparison of dimensions can be favorable for the threefold fibers of a pencil. For a weighted Calabi–Yau threefold with a symmetry moving its holomorphic form, [Chapter 3D](#technical-information/hodge-loci) computes the count for a divisor class on an invariant surface section and proves support of the invariant sector when the count is positive, one such class moves with nonzero Abel–Jacobi derivative, and the Higgs field admits only scalar symmetries.
