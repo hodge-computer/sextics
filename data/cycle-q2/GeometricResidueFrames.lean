@@ -17,7 +17,9 @@ function field is needed.
 These are local algebraic pieces for an adjunction comparison. This file
 does not identify global projective sheaves, prove a Serre trace theorem,
 or conclude that the protected residue is exact.
-Validation: source implementation only; not compiled or kernel-replayed.
+Validation: compiled with the repository's pinned Lean 4.33.1 and independently
+kernel-replayed. This check establishes the displayed local differential
+identities; it does not establish the global comparisons listed above.
 -/
 
 set_option autoImplicit false

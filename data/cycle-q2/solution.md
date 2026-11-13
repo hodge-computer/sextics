@@ -1,5 +1,184 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Checked local differentials and the actual Čech trace — 13 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains admitted.
+This continuation proves two further parts of the selected nonconstructive
+argument: the local comparison with genuine Kähler differentials and a
+unique trace coordinate on every homogeneous Čech class, with arbitrary
+pole order. These results use the existing curve and localization objects.
+They do not yet construct the global support and de Rham comparison needed
+by the final theorem.
+
+### The cofactor quotient maps isomorphically to actual differentials
+
+[GeometricCofactorKaehler.lean](GeometricCofactorKaehler.lean) works with the
+literal affine chart ring localized at a Jacobian minor. For an arbitrary
+ordering \(e\) of the three coordinates, it constructs the linear map
+\[
+R^3/(R\,df+R\,dh)\longrightarrow\Omega^1_{R/\mathbb C},
+\qquad [\mathbf e_j]\longmapsto d x_{e(j)},
+\]
+and proves that it is an isomorphism. The module on the right is Mathlib's
+universal Kähler differential module of this same localized ring. The proof
+obtains a basis from the actual submersive presentation and identifies its
+pivot determinant with the cofactor inverted by the localization. Thus no
+comparison map or freeness assertion is supplied as an extra hypothesis.
+
+The resulting `kaehlerResidueEquiv` identifies the actual differential
+module with \(R\). It sends \(dx_{e(j)}\) to the signed cofactor \(c_j\).
+Whenever two cofactors are units in the same chart ring, it proves
+\[
+c_k^{-1}dx_{e(k)}=c_l^{-1}dx_{e(l)}.
+\]
+The first and second affine equation pairs used by the projective curve
+are explicit specializations of this construction. The orientation is the
+chosen coordinate ordering; the theorem does not silently identify
+different chart rings or different orderings.
+
+The supporting
+[cofactor quotient calculation](GeometricCofactorResidue.lean) now compiles
+after repairs to scalar and quotient-membership elaboration. The existing
+[affine Jacobian charts](GeometricAffineCurveCharts.lean),
+[coordinate-change determinants](GeometricAdjunctionOverlap.lean), and
+[residue-frame identities](GeometricResidueFrames.lean) also compile and
+pass independent kernel replay. In particular, the oriented adjunction
+transition is the actual degree-one transition \(x_2/x_1\). Transport
+between chart differential modules and global canonical-sheaf gluing
+remain separate obligations.
+
+### Every homogeneous Čech class has a degree-nine representative
+
+This calculation uses the sparse curve at \(\theta=0\), with \(r^3=2\).
+It retains the actual quartic denominators
+\[
+g_1=3r^2(x_1x_3)^2,\qquad g_2=3x_2^4
+\]
+in its coordinate ring. In
+[GeometricCechPoleReduction.lean](GeometricCechPoleReduction.lean), the
+existing finite trace relations first show that every coordinate
+annihilates the normalization class \([x_0x_1^8]\). Factoring each monomial
+of degree greater than nine into a degree-nine part and a positive-degree
+part then proves that every homogeneous polynomial of degree greater than
+nine belongs to the actual four-generator `reducedIdeal r`.
+
+[GeometricCechSurjectivity.lean](GeometricCechSurjectivity.lean) applies this
+ideal-membership theorem to arbitrary homogeneous overlap fractions. A
+degree-one fraction with denominator \(g_1^ng_2^m\) has numerator degree
+\(1+4(n+m)\). When both poles occur and \(n+m>2\), homogeneous coefficient
+extraction produces a relation that lowers one pole order. Terms with only
+one pole are genuine sections on one chart and hence Čech boundaries.
+Induction reduces every class to a simple-pole fraction with a degree-nine
+numerator. The existing trace reduction then gives
+\[
+\forall z\in\mathrm{DegreeOneCech}(r,0),\quad
+\exists c\in\mathbb C,\qquad
+z=\left[\frac{c\,x_0x_1^8}{g_1g_2}\right].
+\]
+This is `normalizedCechClass_surjective`. It concerns the original
+first-minus-second quotient of the actual homogeneous localized modules,
+with no bound on pole order and no substituted Čech model. Surjectivity
+does not require a regular-pair hypothesis. On its own it does not assert
+that the displayed normalization class is nonzero or identify the
+coefficient with the geometric Serre trace.
+
+### Concrete cancellation for the two actual denominators
+
+[GeometricCurveRegularPair.lean](GeometricCurveRegularPair.lean) proves the
+previously required regularity hypotheses on the literal curve ring
+\(R_r=\mathrm{CurveRing}(r,0)\), for every \(r\ne0\): multiplication by
+\(g_1\) is injective on \(R_r\), and multiplication by \(g_2\) is injective
+on \(R_r/(g_1)\).
+
+The proof constructs faithful comparison maps to two successive monic root
+algebras over \(\mathbb C[x_1,x_3]\). Their quadratic and cubic equations
+are precisely the two curve equations, so their power bases preserve
+cancellation from the base. The same construction is carried out after
+imposing \((x_1x_3)^2=0\); it retains the squared denominator rather than
+replacing it with its radical. For the second denominator the controlling
+binary polynomial is
+\[
+N_r(x,y)=\big((1-i)y^3-i x^3\big)^2-rx^5y.
+\]
+Neither \(x\) nor \(y\) divides \(N_r\). Prime-power cancellation shows
+that \(N_rp\in(x^2y^2)\) implies \(p\in(x^2y^2)\). An explicit identity
+\(x_2q=N_r\) in the monic tower then proves that \(x_2\), and consequently
+\(3x_2^4\), is a nonzerodivisor in the required quotient.
+
+The resulting `degreeNineCechClass_zero_iff_reducedIdeal` applies the
+existing all-poles Koszul kernel theorem without additional regularity
+assumptions. For every homogeneous degree-nine \(p\), it gives
+\[
+\left[\frac{p}{g_1g_2}\right]=0
+\quad\Longleftrightarrow\quad
+p\in\mathrm{reducedIdeal}(r).
+\]
+These results concern \(\theta=0\). They do not equate this curve with the
+separate incidence calculation at literal \(r=57,\theta=1\).
+
+### The finite trace now detects exactly the actual Čech class
+
+[GeometricCechTrace.lean](GeometricCechTrace.lean) combines these concrete
+regularity theorems with the finite normalized trace. For \(r^3=2\), it
+proves
+\[
+\operatorname{degreeNineCechClass}_{r,0}(p)=0
+\quad\Longleftrightarrow\quad
+\operatorname{traceLinear}_r(p)=0.
+\]
+It also proves that two homogeneous degree-nine numerators give equal
+actual Čech classes exactly when their traces agree. Since
+\(\operatorname{traceLinear}_r(x_0x_1^8)=1\), the normalization class is
+nonzero, and the earlier surjectivity becomes a bijection:
+\[
+\forall z\in\mathrm{DegreeOneCech}(r,0),\quad
+\exists!c\in\mathbb C,\qquad
+z=\left[\frac{c\,x_0x_1^8}{g_1g_2}\right].
+\]
+The theorem `existsUnique_normalizedCechClass` makes this uniqueness
+explicit. All regularity premises are discharged for the actual ring;
+the result allows arbitrary-pole boundaries. It supplies a unique scalar
+coordinate on the original algebraic Čech quotient. Identifying that
+quotient and coordinate with canonical-sheaf cohomology and its geometric
+Serre trace is still a further comparison.
+
+### Verification and remaining global obligations
+
+The following nine modules were compiled from their final source bytes
+under the pinned Lean 4.33.1 and Mathlib revision
+`0df444a360eaa60ab8c11dca51a86af692955474`. Each compiled module also passed
+independent `leanchecker` replay.
+
+| Module | Compilation | Kernel replay |
+| --- | ---: | ---: |
+| `GeometricAffineCurveCharts` | 4.02 s | 3.04 s |
+| `GeometricAdjunctionOverlap` | 5.23 s | 3.23 s |
+| `GeometricCofactorResidue` | 4.23 s | 3.03 s |
+| `GeometricResidueFrames` | 4.23 s | 3.85 s |
+| `GeometricCofactorKaehler` | 16.88 s | 3.63 s |
+| `GeometricCechPoleReduction` | 5.23 s | 3.83 s |
+| `GeometricCechSurjectivity` | 48.19 s | 35.54 s |
+| `GeometricCurveRegularPair` | 13.88 s | 3.62 s |
+| `GeometricCechTrace` | 3.63 s | 5.63 s |
+
+The audited endpoint declarations use only `propext`, `Classical.choice`,
+and `Quot.sound`. Each check used one bounded compiler process; the largest
+peak compiler memory among these modules was 3,849 MiB. No heartbeat limit
+was increased. The explanation's local links and displayed mathematics
+also pass the repository renderer and bundled KaTeX check.
+
+These are targeted checks of the stated continuation. The full proposal
+and the final certificate have not passed verification: source validation
+still rejects the single unchanged admission in `Solution.lean`. The global
+canonical-sheaf and Serre comparisons, the moving-cycle and Abel–Jacobi
+interpretation, the geometric variation and supported correspondence, and
+the smooth affine de Rham comparison remain necessary. In particular,
+`AffineComparison` in [GeometricExistence.lean](GeometricExistence.lean)
+still requires a geometric comparison and its injectivity as inputs.
+
+This formal continuation follows the Diamond argument credited below and
+was prepared for `fqlx` with OpenAI ChatGPT assistance.
+
 ## Kernel-checked algebraic continuation — 13 November 2026
 
 The final theorem `Submission.missing_geometric_existence` remains admitted.
@@ -224,9 +403,13 @@ with its restriction in regular algebraic de Rham cohomology.
 The next geometric interface is concrete: the
 [projective source](GeometricProjectiveCurve.lean) declares
 `degreeOneSheaf` as an additive sheaf and injects its Čech classes into
-derived cohomology. An \(\mathcal O_C\)-module structure, the identification
-with the canonical sheaf, and a geometric Serre trace still need to be
-constructed. Likewise, [AffineComparison](GeometricExistence.lean) currently requires a comparison
+derived cohomology. The source in
+[GeometricTwistedModule.lean](GeometricTwistedModule.lean) supplies an
+\(\mathcal O_C\)-module structure on that same sheaf, but its complete
+dependency chain has not been checked here. The local differential
+comparison above is now checked; its global identification with the
+canonical sheaf and a geometric Serre trace remain to be constructed.
+Likewise, [AffineComparison](GeometricExistence.lean) currently requires a comparison
 map and its injectivity as inputs. The actual smooth affine comparison and
 the support argument must supply those inputs for the protected residue.
 

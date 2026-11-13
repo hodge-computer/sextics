@@ -19,7 +19,9 @@ at sample points or in a field of meromorphic functions.
 
 This implements the local formulas needed for a canonical-sheaf comparison.
 It does not itself construct that sheaf comparison or a Serre trace.
-Validation: source implementation, not Lean-compiled or kernel-replayed.
+Validation: this module compiles under Lean 4.33.1 and the pinned Mathlib
+revision, and passes independent leanchecker replay. The global
+canonical-sheaf and Serre-trace comparisons remain separate obligations.
 -/
 
 set_option autoImplicit false

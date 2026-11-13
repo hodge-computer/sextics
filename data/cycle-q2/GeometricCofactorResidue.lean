@@ -22,9 +22,9 @@ Kaehler module, and assembling the local equivalences into the global
 canonical-sheaf comparison, are distinct application steps. Neither that
 global comparison nor the final protected certificate is asserted here.
 
-Validation status: source implementation. No Lean compilation or kernel
-replay is claimed for this file. The companion checker verifies its finite
-polynomial identities independently, not its Lean elaboration.
+Validation: compiled with the repository's pinned Lean 4.33.1 and independently
+kernel-replayed. This check establishes the local cokernel statements in this
+file; the Kähler and global canonical-sheaf comparisons remain separate.
 -/
 
 set_option autoImplicit false
@@ -58,7 +58,7 @@ def coefficient (a b : Coordinates R) : Coordinates R →ₗ[R] R where
     simp only [Pi.add_apply]
     ring
   map_smul' c v := by
-    simp only [Pi.smul_apply, smul_eq_mul]
+    simp only [Pi.smul_apply, smul_eq_mul, RingHom.id_apply]
     ring
 
 @[simp] theorem coefficient_apply (a b v : Coordinates R) :
@@ -119,7 +119,7 @@ theorem relations_le_kernel (a b : Coordinates R) :
   apply Submodule.span_le.mpr
   intro v hv
   simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hv
-  rcases hv with rfl | rfl
+  rcases hv with hv | hv <;> subst v
   · change coefficient a b a = 0
     exact coefficient_first_relation a b
   · change coefficient a b b = 0
@@ -250,7 +250,7 @@ theorem relations_row_change (a b : Coordinates R) (α β γ δ : R)
   · apply Submodule.span_le.mpr
     intro x hx
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hx
-    rcases hx with rfl | rfl
+    rcases hx with hx | hx <;> subst x
     · exact (relations a b).add_mem
         ((relations a b).smul_mem _ (first_relation_mem a b))
         ((relations a b).smul_mem _ (second_relation_mem a b))
@@ -260,25 +260,29 @@ theorem relations_row_change (a b : Coordinates R) (α β γ δ : R)
   · apply Submodule.span_le.mpr
     intro x hx
     simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hx
-    rcases hx with rfl | rfl
+    rcases hx with hx | hx <;> subst x
     · have h : (α * δ - β * γ) • a ∈
           relations (α • a + β • b) (γ • a + δ • b) := by
         rw [← row_inverse_first a b α β γ δ]
-        exact (relations _ _).sub_mem
-          ((relations _ _).smul_mem _ (first_relation_mem _ _))
-          ((relations _ _).smul_mem _ (second_relation_mem _ _))
+        exact (relations (α • a + β • b) (γ • a + δ • b)).sub_mem
+          ((relations (α • a + β • b) (γ • a + δ • b)).smul_mem δ
+            (first_relation_mem (α • a + β • b) (γ • a + δ • b)))
+          ((relations (α • a + β • b) (γ • a + δ • b)).smul_mem β
+            (second_relation_mem (α • a + β • b) (γ • a + δ • b)))
       have h' := (relations (α • a + β • b) (γ • a + δ • b)).smul_mem
         (↑(v⁻¹) : R) h
-      simpa only [hv, smul_smul, v.inv_mul, one_smul] using h'
+      simpa only [hv, smul_smul, v.inv_mul, one_smul, SetLike.mem_coe] using h'
     · have h : (α * δ - β * γ) • b ∈
           relations (α • a + β • b) (γ • a + δ • b) := by
         rw [← row_inverse_second a b α β γ δ]
-        exact (relations _ _).sub_mem
-          ((relations _ _).smul_mem _ (second_relation_mem _ _))
-          ((relations _ _).smul_mem _ (first_relation_mem _ _))
+        exact (relations (α • a + β • b) (γ • a + δ • b)).sub_mem
+          ((relations (α • a + β • b) (γ • a + δ • b)).smul_mem α
+            (second_relation_mem (α • a + β • b) (γ • a + δ • b)))
+          ((relations (α • a + β • b) (γ • a + δ • b)).smul_mem γ
+            (first_relation_mem (α • a + β • b) (γ • a + δ • b)))
       have h' := (relations (α • a + β • b) (γ • a + δ • b)).smul_mem
         (↑(v⁻¹) : R) h
-      simpa only [hv, smul_smul, v.inv_mul, one_smul] using h'
+      simpa only [hv, smul_smul, v.inv_mul, one_smul, SetLike.mem_coe] using h'
 
 
 /-- The cofactor construction commutes with every ring restriction map. -/
