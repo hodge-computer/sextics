@@ -229,6 +229,35 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
 ```
 
 
+### Seed-fiber points in an actual coordinate chart lie in the good open
+
+[GeometricIncidenceSeedFiberGoodOpen.lean](GeometricIncidenceSeedFiberGoodOpen.lean)
+proves `mem_goodOpen_of_seed_of_mem_coordinatePatch`: an actual surface
+point lying over the original seed and in a specified weight-one chart
+belongs to the constructed relative smooth open.
+
+The proof represents the point in the actual affine chart, lifts its
+compatible pair with the complex seed point to the canonical scheme
+pullback, and applies the exact affine fiber isomorphism. The original
+seed minor cover gives a missed minor in the seed prime. The retained
+projection formula and normalized-minor specialization transfer that
+nonmembership to the original relative chart. The exact preimage
+formula for `minorOpen` then puts the original point in `goodOpen`.
+
+There is no supplied smoothness premise. The weight-one chart membership
+remains an input to this local lemma and is discharged by a separate
+whole-fiber coordinate argument. Independent source review checked the
+point lift, projection directions, prime membership, and chart/base
+identities. Static scans passed. **No elaboration, compilation, or
+kernel replay was run.** Deferred bounded check:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceSeedFiberGoodOpen.olean \
+  Proposal/GeometricIncidenceSeedFiberGoodOpen.lean
+```
+
+
 ## Specialized seed geometry continuation — source draft, 14 November 2026
 
 This continuation proceeds in bounded components. Every new Lean module
