@@ -1145,12 +1145,8 @@ void main() {
     });
     function resize() {
       if (!usable()) return;
-      const w0 = Math.max(1, canvas.clientWidth),
-        h0 = Math.max(1, canvas.clientHeight),
-        budget = window.innerWidth < 760 ? 1_500_000 : 3_000_000,
-        dpr = Math.min(window.devicePixelRatio || 1, 2, Math.sqrt(budget / (w0 * h0))),
-        w = Math.max(1, Math.floor(w0 * dpr)),
-        h = Math.max(1, Math.floor(h0 * dpr));
+      const w = window.pixelWidth,
+        h = window.pixelHeight;
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;
