@@ -165,6 +165,37 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
 ```
 
 
+### Polynomial primes over the original coefficient seed
+
+[GeometricIncidenceSeedPrimeTransport.lean](GeometricIncidenceSeedPrimeTransport.lean)
+proves `seed_fiber_prime_coordinate_cover`. Its inputs are a relevant
+prime of the original parameter polynomial ring, membership of the
+original \(F,h\) equations, and containment of the seed coefficient
+kernel. Its conclusion is that some weight-one coordinate is outside
+that prime.
+
+The complex prime is obtained by contraction along the canonical complex
+coefficient inclusion. Modulo the original prime, specializing a
+coefficient and including it again is the identity: their difference
+is killed by `seedMap`. Polynomial ring-homomorphism extensionality
+extends this identity to all geometric polynomials. Consequently the
+contracted prime contains the literal seed equations and has exactly
+the same coordinate memberships. The original seed coordinate-cover
+theorem applies.
+
+The coefficient-fiber hypothesis is explicit here; its discharge from
+the actual scheme structure morphism is supplied separately.
+Independent review checked the quotient-difference orientation and the
+seed equation/coordinate transport. Static scans passed. **No elaboration,
+compilation, or kernel replay was run.** Deferred bounded check:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceSeedPrimeTransport.olean \
+  Proposal/GeometricIncidenceSeedPrimeTransport.lean
+```
+
+
 ## Specialized seed geometry continuation — source draft, 14 November 2026
 
 This continuation proceeds in bounded components. Every new Lean module
