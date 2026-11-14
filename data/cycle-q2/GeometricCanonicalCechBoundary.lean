@@ -120,7 +120,7 @@ theorem canonicalOverlapGenerator_restriction (r : ℂ) (hr : r ^ 3 = 2) :
   change frameGenerator (firstDenominatorFrame r hr) (overlapProjectivePatch r 0) _ = _
   rw [← frameGenerator_naturality (firstDenominatorFrame r hr)
     ((overlapProjectivePatch_eq r 0).le.trans inf_le_left) le_rfl,
-    firstDenominatorFrame_generator]
+    firstDenominatorFrame_generator r hr]
   rfl
 
 /-- The actual homogeneous section transported to the differential sheaf. -/

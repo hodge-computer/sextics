@@ -1,6 +1,153 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Current integration with the Cartier-boundary continuation — 14 November 2026
+## Literal canonical cohomology and projective normal classes — 14 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains open.
+This continuation computes the complete actual canonical cohomology group
+at the literal incidence seed and constructs actual derived projective
+classes from the homogeneous relative-normal frames. It proves a nonzero
+ambient normal class and seven zero cubic images of one fixed incidence
+normal class. The precise sheaf comparisons and remaining geometric
+obligations are stated below.
+
+### The complete canonical cohomology line at the literal incidence seed
+
+`GeometricLiteralHOne.lean` closes the full complex-linear cohomology calculation at **`(r, θ) = (57, 1)`**. It uses the intrinsic complex scalar action induced by the actual structure morphism and differential module sheaf. Its `literalCanonicalNormalizationEquiv` is an equivalence
+
+\[
+\Phi:\mathbb C\simeq_{\mathbb C}H^1(C_{57,1},\Omega^1_{C_{57,1}/\mathbb C}),
+\qquad \Phi(a)=aN.
+\]
+
+Here `N = literalCanonicalNormalization` is precisely the image of the original homogeneous Čech class
+
+\[
+\left[\frac{x_3^9}{g_1g_2}\right]
+\]
+
+through `degreeOneToProjectiveH1 57 1` and the already constructed `literalCanonicalH1Equiv`. This fixes the normalization through our existing literal canonical module isomorphism. The inverse coordinate `literalCanonicalCoordinate` is defined on **every** actual canonical cohomology class, sends `N` to `1`, and vanishes exactly on the zero class. The actual complex vector space is finite-dimensional, with finrank one.
+
+The proof first compares the incoming complex action on homogeneous localization sections with the existing degree-zero projective coefficient action. Consequently `degreeOneCechHOneLinearEquiv` upgrades the previously proved full Čech-to-derived equivalence to a complex-linear equivalence for every `r ≠ 0` and every `θ`. The literal incidence Čech coordinate and the actual canonical comparison then prove bijectivity of scalar multiplication of `N`. No geometric trace is supplied as a premise.
+
+For the original nine cubic columns, put
+
+\[
+\rho(v)=\frac{i v_1-(1+i)v_8}{6}.
+\]
+
+`literalPairedCanonicalLinear v` is explicitly the image of `pairedDegreeOneClass 57 1 v` through the same actual canonical map. Its numerator is `-derivativeNumerator (cubicDeformation v)`, namely \(x_2^3x_3^3\operatorname{cubicDeformation}(v)\). The checked identities are
+
+\[
+P(v)=\frac{12+24i}{5}\,\rho(v)N,
+\qquad
+\operatorname{literalCanonicalCoordinate}(P(v))
+ =\frac{12+24i}{5}\,\rho(v),
+\qquad
+P(v)=0\iff\rho(v)=0.
+\]
+
+Every nonzero complex-linear functional \(\tau\) on this **full actual derived cohomology group** is injective and satisfies \(\tau(N)\ne0\). Thus
+
+\[
+\tau(P(v))=\frac{12+24i}{5}\,\tau(N)\rho(v)
+\]
+
+has one common nonzero coefficient. More generally, for any complex-linear map \(f\) into this group and any two nonzero complex-linear functionals \(\tau,\sigma\), `canonical_trace_kernel_independent` proves
+\(\ker(\tau\circ f)=\ker(\sigma\circ f)\).
+
+These results concern the original homogeneous classes and actual differential-sheaf cohomology. Identifying a geometric Serre trace, the moving-cycle or cylinder derivative, and the remaining support/comparison statements still requires the corresponding geometric proofs. This checkpoint does not remove the final admission in `Solution.lean`.
+
+### Genuine projective cohomology of the inverse-square normal frames
+
+`GeometricProjectiveNormalClass.lean` constructs an actual module sheaf on the
+literal projective curve $C=C_{57,1}$. On the existing cover $U_1=D_+(g_1)$,
+$U_2=D_+(g_2)$, let $t=x_2/x_1$. The sheaf $M$ is the existing
+`TwistedModule.moduleSheaf` with transition $t^{-2}$. Its interpretation is
+fixed by the actual surface-relative conormal duals: the two frames are
+$x_i^{-2}\gamma$, where $\gamma=(g_2,-g_1,0)$ is the proved intrinsic
+normal-kernel generator. The helper proves their literal equation values,
+the inverse-square overlap transition, and compatibility with both canonical
+tensor–Hom restriction maps. The maps from the degree-zero projective chart
+rings into these relative-normal modules are injective and respect scalar
+multiplication.
+
+For every homogeneous cubic $\sigma$, actual sheaf gluing constructs a
+module-sheaf morphism $\mu_\sigma:M\to\mathcal O_C(1)$. The image of the
+source frame on $U_i$ is the degree-one fraction $\sigma/x_i^2$; its
+coefficient in the ordinary degree-one frame $x_i$ is
+$\sigma/x_i^3$. No global comparison map is supplied as a hypothesis.
+
+For a homogeneous polynomial $p$ of degree six, the degree-zero fraction
+$p x_1^2/(g_1g_2)$ defines an actual overlap section of $M$, and its
+Mayer–Vietoris boundary gives a genuine derived class
+$\alpha_p\in H^1(C,M)$. The theorem `cubicH1Map_normalClass` proves that
+$H^1(\mu_\sigma)(\alpha_p)$ is exactly the previously constructed
+degree-one class with numerator $p\sigma$, including its specified
+denominator and sign. Composing with the proved literal canonical sheaf
+isomorphism gives the following closed statements:
+
+* For $p_A=x_2^3x_3^3$ and
+  $L=i x_0^2x_1+(i-1)x_0^3$,
+  `selectedCubicPairing_literalNormalClass` identifies the image of
+  $\alpha_{p_A}$ with `selectedAmbientClass`. This target is nonzero, so
+  `literalNormalClass_ne_zero` proves $\alpha_{p_A}\ne0$. Its overlap
+  normal homomorphism is exactly
+  `relativeConnectingRepresentative 57 1 derivativeA 0`.
+* For $p_L=kL$, the theorem
+  `selectedIncidenceNormalClass_in_seven_kernels` proves that the same seven
+  specified cubic maps kill $\alpha_{p_L}$. Its overlap homomorphism is
+  exactly `relativeConnectingRepresentative 57 1 0 weightedSelectedCubic`.
+
+These are actual sheaf morphisms and derived cohomology classes, with closed
+literal parameter values. The remaining geometric comparison is to identify
+$M$ with the intrinsic normal sheaf of the actual projective immersion and
+to identify this explicit cubic morphism with the surface-normal adjunction
+pairing. This helper does not establish the surface Cartier $H^2$ boundary,
+its nonvanishing, or a geometric Serre trace, and does not close the final
+`missing_geometric_existence` obligation.
+
+### Verification of the literal cohomology and normal-class continuation
+
+The local checked scope now contains thirty proposal objects in a
+seventy-seven-module proposal dependency closure. The twenty-four
+previously checked objects retain exactly their archived sources,
+compiled objects, and seventy-one-module dependency context. Six objects
+receive fresh source-bound compilation and independent kernel replay:
+`GeometricIncidenceTraceData`, `GeometricIncidenceCechTrace`,
+`GeometricTwistedDifferential`, `GeometricCanonicalCechBoundary`,
+`GeometricLiteralHOne`, and `GeometricProjectiveNormalClass`. Separate
+pure-import endpoint audits check the allowed axioms `propext`,
+`Classical.choice`, and `Quot.sound`.
+
+The existing canonical-boundary helper needs one explicit-argument
+elaboration repair: its use of `firstDenominatorFrame_generator` now
+supplies `r hr`. The statement and mathematical construction are
+unchanged. The literal linear equivalence is assembled through its
+proved scalar normalization, with pointwise agreement with the original
+cohomology maps; this keeps compilation within the unchanged resource
+limits. No proof budget is increased.
+
+The declaration-free import facade `GeometricTarget09` is replaced in
+its sole importer by its own sole import, `GeometricTarget09Part04`.
+All surviving declarations and transitive surviving dependencies are
+preserved, and the import graph remains acyclic. The proposal therefore
+contains exactly 256 files, within the existing limit. The staged-tree
+audit also checks protected-file preservation, exact source and object
+hashes, replay freshness, and the rendered mathematical explanation.
+These local checks do not establish a full build or acceptance of the
+older aggregate proposal.
+
+The only admission remains `Solution.lean:138`. The new explicit normal
+frame sheaf still has to be identified with the normal sheaf of the
+projective immersion, and the cubic pairing with the intrinsic
+surface-normal adjunction pairing. The surface Cartier second-cohomology
+boundary and its nonvanishing, the geometric trace and moving-cycle
+comparisons, and the global support and algebraic de Rham passage to the
+protected residue remain separate proof obligations. Scratch work on a
+cubic presentation and inverse-ideal bases is not part of this checked
+checkpoint.
+
+## Earlier integration with the Cartier-boundary continuation — 14 November 2026
 
 The final existence theorem remains open. The combined proposal preserves
 the new actual inverse-ideal lift, four-open Cartier boundary, coordinate
