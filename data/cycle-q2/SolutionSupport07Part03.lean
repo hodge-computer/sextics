@@ -1,3 +1,4 @@
+import Proposal.GeometricIncidenceCechTrace
 import Proposal.GeometricCurveCover
 import Proposal.SolutionSupport07Part02
 import Proposal.GeometricSeedConormalBases
@@ -388,31 +389,6 @@ theorem boundary_of_unrestricted_witness (r θ : ℂ) (p : Poly)
   apply Ideal.mem_span_pair.mpr
   exact ⟨homogeneousComponent (D - 2) u, homogeneousComponent (D - 3) v, hh⟩
 
-theorem cubicColumn_homogeneous (j : Fin 9) : (cubicColumn j).IsHomogeneous 3 := by
-  have hm (a b c d : ℕ) (hd : a + b + c + d = 3) : (mon a b c d).IsHomogeneous 3 := by
-    simpa only [hd] using CycleQ2SeedCech.mon_homogeneous a b c d
-  fin_cases j
-  · simpa [cubicColumn] using (hm 0 0 2 1 (by omega)).neg
-  · simpa [cubicColumn] using hm 0 0 0 3 (by omega)
-  · simpa [cubicColumn] using hm 0 0 3 0 (by omega)
-  · simpa [cubicColumn] using hm 0 1 1 1 (by omega)
-  · simpa [cubicColumn] using hm 0 3 0 0 (by omega)
-  · simpa [cubicColumn] using hm 1 0 1 1 (by omega)
-  · simpa [cubicColumn] using hm 1 2 0 0 (by omega)
-  · simpa [cubicColumn] using hm 2 1 0 0 (by omega)
-  · simpa [cubicColumn] using hm 3 0 0 0 (by omega)
-
-theorem cubicDeformation_homogeneous (v : Fin 9 → ℂ) :
-    (cubicDeformation v).IsHomogeneous 3 := by
-  show (∑ j : Fin 9, C (v j) * cubicColumn j) ∈ homogeneousSubmodule (Fin 4) ℂ 3
-  apply Submodule.sum_mem
-  intro j hj
-  exact (cubicColumn_homogeneous j).C_mul (v j)
-
-theorem derivativeNumerator_homogeneous (v : Fin 9 → ℂ) :
-    (derivativeNumerator (cubicDeformation v)).IsHomogeneous 9 := by
-  exact (((isHomogeneous_X_pow (2 : Fin 4) 3).neg).mul
-    (isHomogeneous_X_pow (3 : Fin 4) 3)).mul (cubicDeformation_homogeneous v)
 
 /-- The actual nonzero trace excludes arbitrary polynomial boundary
 coefficients once denominators have been cleared. -/

@@ -1,5 +1,239 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Canonical sheaf and trace on the actual incidence curve — 14 November 2026
+
+The final admission, `Submission.missing_geometric_existence`, remains
+open. This continuation works on the same literal incidence member
+\((r,\theta)=(57,1)\) of the incidence calculation. It constructs
+the actual canonical-sheaf comparison and gives a single complex trace
+coordinate for the complete existing degree-one Čech quotient. These
+results do not yet provide the moving-cycle and global support argument
+needed for exactness of the protected residue form.
+
+### Actual affine derivations and the projective canonical sheaf
+
+[GeometricLocalizedDifferentials.lean](GeometricLocalizedDifferentials.lean) and
+[GeometricAffineDifferentialSheaf.lean](GeometricAffineDifferentialSheaf.lean)
+construct the derivative of genuine regular functions on every affine
+open. Given a ring-linear frame of the actual Kähler module, they prove
+that the associated differential sheaf is isomorphic to the structure
+module sheaf. The proof constructs both maps and proves the inverse
+identities using the sheaf differential universal property. No premise
+asserting extension of local derivations or a sheaf comparison is needed.
+
+[GeometricTwistedDifferential.lean](GeometricTwistedDifferential.lean) carries
+these constructions through an actual affine open immersion. The
+coefficient map is defined independently as a morphism into the genuine
+direct image of the affine structure module. On each subopen of the
+chart image it becomes a linear map to the original structure-sheaf
+sections. Its derivative formula, restriction compatibility, and value
+one on the normalized frame are proved. Every sheaf-valued derivation
+reconstructs from its coefficient and the actual frame on every such
+subopen.
+
+[GeometricProjectiveAffine.lean](GeometricProjectiveAffine.lean),
+[GeometricProjectiveAffineCoefficients.lean](GeometricProjectiveAffineCoefficients.lean),
+and [GeometricProjectiveOverlap.lean](GeometricProjectiveOverlap.lean)
+give the complex-algebra coordinate presentations, actual scheme maps
+over \(\operatorname{Spec}\mathbb C\), and actual homogeneous-overlap
+restrictions. [GeometricCanonicalSheaf.lean](GeometricCanonicalSheaf.lean)
+identifies the section maps induced by those open immersions with the
+previously specified projective coordinate maps. The induced maps on
+universal differentials agree on every differential, by the universal
+property and generation by coordinate differentials.
+
+The full-overlap canonical calculation is now parameterized by the
+two actual unit Jacobian ideals in
+[GeometricCanonicalSheaf.lean](GeometricCanonicalSheaf.lean).
+[GeometricCanonicalSheaf.lean](GeometricCanonicalSheaf.lean)
+discharges these hypotheses at \((57,1)\), using the existing exact
+integral identities and the same three signed cofactors as the whole-chart
+Kähler construction. Thus the Jacobian certificates and Čech calculation concern the same curve.
+
+The differential and section-comparison parts of
+[GeometricCanonicalSheaf.lean](GeometricCanonicalSheaf.lean) place the normalized forms in the genuine projective differential sheaf.
+Their transition is
+\[
+\eta_2=(x_2/x_1)\eta_1.
+\]
+[GeometricCanonicalSheaf.lean](GeometricCanonicalSheaf.lean)
+proves that restriction to the original quartic-denominator Čech cover
+gives exactly the previously constructed transition unit. The equality
+holds for actual structure-sheaf sections and actual differential-sheaf
+restrictions.
+
+[GeometricTwistedDifferential.lean](GeometricTwistedDifferential.lean) glues
+the two frames and two coefficient derivations into module-sheaf morphisms
+and proves the two inverse identities.
+The coefficient transition follows by applying the independently defined
+first-chart coefficient map to the frame transition. Its normalization
+is established before gluing, so the argument is not circular.
+
+[GeometricCanonicalSheaf.lean](GeometricCanonicalSheaf.lean) supplies the
+actual specialization. The generic construction also requires \(r\ne0\);
+this and both Jacobian hypotheses are discharged at \((57,1)\). Its
+`incidenceCanonicalSheafIso` is an isomorphism
+\[
+\mathcal L_{57,1}\;\simeq\;\Omega^1_{C_{57,1}/\mathbb C}
+\]
+between the existing degree-one module sheaf and the existing genuine
+differential sheaf. The forward map is the explicitly constructed
+`incidenceCanonicalSheafMap`. Every chart, coefficient map, frame,
+transition, reconstruction identity, and inverse normalization in this
+application is constructed from the specified incidence curve.
+
+The same file transports this isomorphism through the genuine derived
+cohomology functor. Its `incidenceDegreeOneToCanonicalH1` composes the
+existing Mayer–Vietoris injection with the induced additive equivalence
+on derived first cohomology. This map is injective, and a Čech class maps
+to zero exactly when it was zero in the original quotient. The
+normalization described below therefore gives a nonzero element of the
+actual differential-sheaf \(H^1\) on this same literal curve.
+
+### The complete Čech quotient is a complex line
+
+[GeometricIncidenceCechTrace.lean](GeometricIncidenceCechTrace.lean)
+equips the original degree-one Čech quotient with its natural complex
+scalar structure, coming from the actual localization modules. It then
+proves that the complete quotient on the original two-open cover at
+\((57,1)\) is a complex line. The proof includes arbitrary pole orders.
+
+There are three substantive steps. First,
+[GeometricIncidenceTraceData.lean](GeometricIncidenceTraceData.lean)
+contains exact characteristic-zero identities reducing the 32 normal
+degree-nine monomials to multiples of \(x_3^9\). The trace module applies
+these identities to the actual polynomial quotient. It proves that every
+coordinate kills the spanning degree-nine class, so every homogeneous
+polynomial of larger degree belongs to the actual four-generator ideal.
+The localization argument then lowers arbitrary poles and shows that every
+original Čech class is a scalar multiple of
+\[
+\xi=\left[\frac{x_3^9}{g_1g_2}\right].
+\]
+
+Second, [GeometricCurveRegularPair.lean](GeometricCurveRegularPair.lean)
+now proves denominator regularity for every \(\theta\) and every
+\(r\ne0\). Its comparison with two successive monic root algebras retains
+the additional \(\theta x_0^3\) term of the actual incidence equation.
+This supplies the converse all-poles kernel theorem: a degree-nine class
+vanishes exactly when its numerator belongs to the four-generator ideal.
+
+Third, the independent dual certificates in
+[GeometricIncidenceTraceData.lean](GeometricIncidenceTraceData.lean)
+prove that \(x_3^9\) does not belong to that ideal. The explicit degree-15
+polynomial \(T\) defines the normalized functional
+\[
+\lambda(p)=\frac{1}{285}
+ [x_0^3x_1^9x_2^3x_3^9]\bigl(Tp\bigr).
+\]
+Four polynomial identities, together with the fixed quartic rescalings,
+show that multiplication by \(T\) sends each
+actual generator into
+\((x_0^4,x_1^{10},x_2^4,x_3^{10})\). Ideal induction therefore proves
+\(\lambda\) vanishes on arbitrary ideal elements, while direct coefficient
+extraction gives \(\lambda(x_3^9)=1\). The finite matrix calculation was
+used to discover these certificates; their validity is established by
+ordinary Lean proofs of the polynomial identities.
+
+Combining these steps constructs a complex-linear equivalence
+\[
+\mathbb C\;\simeq\;\mathrm{DegreeOneCech}(57,1)
+\]
+and proves `Module.finrank ℂ (DegreeOneCech 57 1) = 1` in
+`incidenceCech_finrank`. This nonvanishing argument is independent of the
+older source-only cone and incidence-tangent continuation.
+
+The same trace module binds the original derivative numerator and the
+original nine-parameter cubic family to these actual quotient classes.
+For every \(v\in\mathbb C^9\) it proves
+\[
+\operatorname{pairedDegreeOneClass}(57,1,v)
+ =\frac{12+24i}{5}\,
+   \operatorname{derivativeTrace}(1,v)\,\xi,
+\qquad
+\operatorname{derivativeTrace}(1,v)
+ =\frac{i v_1-(1+i)v_8}{6}.
+\]
+Since the constant and \(\xi\) are nonzero, the paired class is zero
+exactly when the computed derivative trace is zero. The injection into
+genuine differential-sheaf cohomology preserves this zero criterion.
+The definitions of the cubic columns, deformation, derivative numerator,
+and trace row are relocated unchanged from the older aggregate files.
+No separately chosen trace-one cubic is presented as the fixed-sextic
+incidence tangent.
+
+These results still do not assert that the Čech injection is surjective
+onto all derived \(H^1\), or identify the coefficient functional with a
+geometric Serre trace. The actual Serre pairing and the family-level
+moving-cycle comparison remain separate mathematical obligations.
+
+### A compatible seed with full gradient rank
+
+[GeometricCanonicalSheaf.lean](GeometricCanonicalSheaf.lean)
+provides an explicit member with the required Jacobian ranks for the
+threefold, surface section, and curve together. With \(r^3=2\) and \(b=x_0^3+x_2^3\), it proves the
+factorization into the specified incidence equations and proves nonzero
+gradient or full normal-gradient rank at every nonzero point satisfying
+the respective equations, over every relevant field extension. The statements are bound to the actual
+evaluated polynomials and their partial derivatives. This gradient-rank
+witness is a separate member of the parameter family; the rank-seven
+Noether–Lefschetz obstruction and rank-eight augmented derivative
+conditions are not asserted at this
+particular member. Their simultaneous occurrence still requires the
+appropriate geometric open-locus and family arguments.
+
+### Verification and remaining theorem
+
+All 25 exact-source modules checked in this continuation compiled with
+Lean 4.33.1 and mathlib commit
+`0df444a360eaa60ab8c11dca51a86af692955474`, and passed independent
+`leanchecker` replay. Source hashes were matched to successful compilation
+receipts, and the resulting module hashes were matched to successful
+replay receipts. The audited endpoints depend only on `propext`,
+`Classical.choice`, and `Quot.sound`. The six consolidated or extended
+proof modules have the following scope.
+
+| Verification scope | Modules |
+| --- | --- |
+| Genuine affine and projective differential comparison | `GeometricAffineDifferentialSheaf`, `GeometricTwistedDifferential`, `GeometricCanonicalSheaf` |
+| Literal incidence Jacobian and the separate compatible gradient witness | The Jacobian and compatible-seed sections of `GeometricCanonicalSheaf` |
+| Complete incidence Čech quotient and independent nonzero normalization | `GeometricCurveRegularPair`, `GeometricIncidenceTraceData`, `GeometricIncidenceCechTrace` |
+
+The 14 modules from the concurrent sparse-seed canonical-sheaf continuation
+are also recompiled and independently replayed against the merged affine
+API. The four incoming normal/conormal modules and their changed shared
+polynomial-input module are checked as well; their constructions and
+explanation are preserved in the following checkpoint. Existing declaration namespaces are preserved. Consolidating the new
+helper sources keeps the proposal at its 256-file limit; all 253 helper
+modules pass the source-command and acyclic-import checks. An independent comparison of all 11 relocated public declarations
+preserves their statements and fully qualified namespaces: ten declaration
+bodies are byte-identical, and the remaining proof invokes an existing
+homogeneity theorem with the same conclusion. The older aggregate modules
+were not rebuilt; source preservation is distinct from compilation of
+those source-only continuations.
+
+This is verification of the stated continuation, not a successful full
+solve. The final source still contains one admission, and the entire older
+geometric dependency chain has not been validated as a closed proof of
+`Submission.certificate`.
+
+The protected polynomial target, manifest, and final admission are
+unchanged. The concurrent normal-module construction below supplies the
+intrinsic relative-normal comparison and its literal connecting coefficient.
+The remaining proof must identify its projective graded normal-sheaf
+boundary and cup product with the canonical differential class, establish
+the geometric Serre pairing on the incidence family, and construct
+the moving curves and their nonzero Abel–Jacobi image, establish the
+geometric variation and supported correspondence, and carry that support
+statement through the actual Leray and algebraic de Rham comparisons.
+Only then does the existing residue-to-certificate bridge remove the
+admission. Classical choice in the checked local and linear constructions
+does not supply any of those missing geometric statements.
+
+This continuation follows the Diamond argument credited below and was
+prepared for `fqlx` with OpenAI ChatGPT assistance. It preserves the
+concurrent canonical-sheaf and homogeneous-chart continuations below.
+
 ## Actual relative conormal modules and the normal connecting cochain — 14 November 2026
 
 The final admission, `Submission.missing_geometric_existence`, remains

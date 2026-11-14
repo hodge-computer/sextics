@@ -1,3 +1,4 @@
+import Proposal.GeometricIncidenceCechTrace
 import Mathlib.LinearAlgebra.Finsupp.LinearCombination
 import Mathlib.Tactic
 import Mathlib.RingTheory.Localization.Away.Basic
@@ -779,10 +780,6 @@ theorem true_derivative_column_residue (r θ : ℂ) (j : Fin 9) :
   rw [true_jet_derivative_columns] at hh
   exact congrArg TrivSqZeroExt.snd hh
 
-/-- The ordering is exactly the nine h-monomials of the Segre incidence
-Jacobian.  The x₃³ entry varies with θ; the sparse and smooth rows differ. -/
-def derivativeTraceCoefficients (θ : ℂ) : Fin 9 → ℂ :=
-  ![0, θ*Complex.I/6, 0, 0, 0, 0, 0, 0, -(1+Complex.I)/6]
 
 theorem negative_trueJetVector_snd (r θ : ℂ) (j : Fin 9) :
     -(trueJetVector r θ j).snd = (3*r) * derivativeTraceCoefficients θ j := by
@@ -819,10 +816,7 @@ theorem cechResidue_C_mul (r θ : ℂ) (c : ℂ) (p : Poly) (n m : ℕ) :
   simp only [cechResidue, fractionResidue_eq_endpointResidue, he, endpointResidue_scalar]
   ring
 
-def cubicDeformation (v : Fin 9 → ℂ) : Poly := ∑ j : Fin 9, C (v j) * cubicColumn j
 
-def derivativeTrace (θ : ℂ) (v : Fin 9 → ℂ) : ℂ :=
-  ∑ j : Fin 9, derivativeTraceCoefficients θ j * v j
 
 theorem deformation_residue (r θ : ℂ) (v : Fin 9 → ℂ) :
     cechResidue r θ (derivativeNumerator (cubicDeformation v)) 2 4 =
@@ -840,19 +834,7 @@ theorem deformation_residue (r θ : ℂ) (v : Fin 9 → ℂ) :
   intro j hj
   ring
 
-theorem derivativeTrace_explicit (θ : ℂ) (v : Fin 9 → ℂ) :
-    derivativeTrace θ v = (θ*Complex.I*v 1-(1+Complex.I)*v 8)/6 := by
-  norm_num [derivativeTrace, derivativeTraceCoefficients, Fin.sum_univ_succ,
-    Matrix.cons_val_zero', Matrix.cons_val_succ', Matrix.head_cons, Matrix.tail_cons,
-    Fin.reduceSucc]
-  rw [show ((Fin.succ (2 : Fin 3)).succ.succ.succ.succ.succ : Fin 9) = 8 from rfl]
-  ring
 
-/-- Exact characteristic-zero version of the two-entry functional used in
-segre_trace_tangent.py.  No sparse-matrix invariance is assumed. -/
-theorem smooth_derivativeTrace_explicit (v : Fin 9 → ℂ) :
-    derivativeTrace 1 v = (Complex.I*v 1-(1+Complex.I)*v 8)/6 := by
-  simpa using derivativeTrace_explicit 1 v
 
 theorem normalized_deformation_residue (r θ : ℂ) (hr : r ≠ 0) (v : Fin 9 → ℂ) :
     cechResidue r θ (derivativeNumerator (cubicDeformation v)) 2 4 / (3*r) =

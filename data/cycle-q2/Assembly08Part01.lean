@@ -1,3 +1,4 @@
+import Proposal.GeometricIncidenceCechTrace
 import Proposal.Workspace
 import Proposal.GeometricTarget
 import Proposal.Assembly07
@@ -1710,13 +1711,7 @@ open CycleQ2CechLinearCubic
 open CycleQ2SeedCech (PS Jet firstJet endpointX endpointY unit_pow_cancel)
 open MvPolynomial CycleQ2SeedTrace
 
-/-- Ordering is exactly that of segre_trace_tangent.py's h_monomials after
-w=-x₂²: w*x₃, x₃³, x₂³, x₁x₂x₃, x₁³, x₀x₂x₃, x₀x₁², x₀²x₁, x₀³. -/
-def cubicColumn : Fin 9 → Poly := ![
-  -mon 0 0 2 1, mon 0 0 0 3, mon 0 0 3 0, mon 0 1 1 1, mon 0 3 0 0,
-  mon 1 0 1 1, mon 1 2 0 0, mon 2 1 0 0, mon 3 0 0 0]
 
-def derivativeNumerator (p : Poly) : Poly := -X 2^3 * X 3^3 * p
 
 def derivativeIntegral (r θ : ℂ) (e : Bool) (p : Poly) : PowerChart r θ e :=
   -powerBase r θ e (endpointY e)^3 * powerEval r θ e p *

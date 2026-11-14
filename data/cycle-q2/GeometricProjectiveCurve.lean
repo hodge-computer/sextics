@@ -1,3 +1,4 @@
+import Proposal.GeometricIncidenceCechTrace
 import Proposal.GeometricProjectiveCech
 import Proposal.GeometricTraceBoundary
 import Mathlib.AlgebraicGeometry.ProjectiveSpectrum.Functor
@@ -132,11 +133,6 @@ theorem simplePoleRepresentative_eq_fraction (r θ : ℂ) (p : Poly) :
       ScalarCech r θ) = _
   rw [simplePoleClass_apply, simplePoleRepresentative_eq_fraction]
 
-/-- The paired normal class is represented in the degree-one chart
-modules, rather than only in the ungraded cone localization. -/
-def pairedDegreeOneClass (r θ : ℂ) (v : Fin 9 → ℂ) : DegreeOneCech r θ :=
-  degreeNineCechClass r θ (-derivativeNumerator (cubicDeformation v))
-    (derivativeNumerator_homogeneous v).neg
 
 theorem pairedDegreeOneClass_toScalar (r θ : ℂ) (v : Fin 9 → ℂ) :
     degreeOneCechToScalar r θ (pairedDegreeOneClass r θ v) =
