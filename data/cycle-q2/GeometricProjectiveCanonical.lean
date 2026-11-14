@@ -1,9 +1,151 @@
+import Mathlib.Algebra.Category.ModuleCat.Sheaf.PushforwardContinuous
+import Proposal.GeometricModuleLocalIso
+import Proposal.GeometricAffineChartSections
+import Proposal.GeometricProjectiveAffineCoefficients
 import Proposal.GeometricCanonicalGluing
-import Proposal.GeometricModuleOverFrame
 import Proposal.GeometricDifferentialChartTransport
-import Proposal.GeometricProjectiveChartSections
 import Proposal.GeometricProjectiveDifferentialForms
 import Proposal.GeometricTwistedModule
+
+section ConsolidatedGeometricModuleOverFrame
+
+/-!
+# Evaluating an actual over-site frame on every subopen
+
+An isomorphism from the restriction of a module sheaf to the unit module
+on an open's over-site supplies the natural family of linear equivalences
+used by the actual two-open module gluing theorem. The component and
+inverse-generator formulas use the original isomorphism maps directly.
+-/
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+universe u
+
+namespace CycleQ2GeometricModuleOverFrame
+
+open CategoryTheory Opposite TopologicalSpace
+open CycleQ2GeometricModuleLocalIso
+
+variable {X : TopCat.{u}} {R : X.Sheaf RingCat.{u}}
+variable {M : SheafOfModules.{u} R} {U : Opens X}
+
+/-- Evaluate the genuine over-site isomorphism at each subopen. -/
+def patchIsoOfOverFrame
+    (e : M.over U ≅ SheafOfModules.unit (R.over U)) :
+    PatchIso M (SheafOfModules.unit R) U where
+  app O hO := ((SheafOfModules.evaluation (R.over U)
+    (op (Over.mk (homOfLE hO)))).mapIso e).toLinearEquiv
+  naturality {O P} hPO hO s := by
+    let f : Over.mk (homOfLE (hPO.trans hO)) ⟶ Over.mk (homOfLE hO) :=
+      Over.homMk (homOfLE hPO) (Subsingleton.elim _ _)
+    exact (PresheafOfModules.naturality_apply e.hom.val f.op s).symm
+
+@[simp] theorem patchIsoOfOverFrame_app
+    (e : M.over U ≅ SheafOfModules.unit (R.over U))
+    (O : Opens X) (hO : O ≤ U) (s : M.val.obj (op O)) :
+    (patchIsoOfOverFrame e).app O hO s =
+      e.hom.val.app (op (Over.mk (homOfLE hO))) s := rfl
+
+@[simp] theorem patchIsoOfOverFrame_symm_app
+    (e : M.over U ≅ SheafOfModules.unit (R.over U))
+    (O : Opens X) (hO : O ≤ U) (a : R.obj.obj (op O)) :
+    ((patchIsoOfOverFrame e).app O hO).symm a =
+      e.inv.val.app (op (Over.mk (homOfLE hO))) a := rfl
+
+/-- The local generator is exactly the image of one under the original
+inverse over-site isomorphism, with no intervening comparison map. -/
+theorem patchIsoOfOverFrame_inverse_one
+    (e : M.over U ≅ SheafOfModules.unit (R.over U))
+    (O : Opens X) (hO : O ≤ U) :
+    ((patchIsoOfOverFrame e).app O hO).symm (1 : R.obj.obj (op O)) =
+      e.inv.val.app (op (Over.mk (homOfLE hO))) (1 : R.obj.obj (op O)) := rfl
+
+#print axioms patchIsoOfOverFrame
+#print axioms patchIsoOfOverFrame_inverse_one
+
+end CycleQ2GeometricModuleOverFrame
+end
+
+end ConsolidatedGeometricModuleOverFrame
+
+section ConsolidatedGeometricProjectiveChartSections
+
+/-!
+# The literal coordinate sections of the actual projective affine charts
+
+The coordinate maps obtained by transporting the actual structure sheaf
+through the affine chart schemes agree with the existing literal quotient
+coordinate maps. These identities bind the affine differential frames to
+the explicit projective residue forms.
+-/
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2GeometricProjectiveChartSections
+
+open CategoryTheory AlgebraicGeometry CycleQ2GeometricProjectiveCurve
+  CycleQ2GeometricProjectiveAffine CycleQ2GeometricProjectiveAffineCoefficients
+  CycleQ2GeometricAffineChartSections
+
+private theorem basicOpen_sectionMap (r θ : ℂ) (j : Fin 4)
+    {B : Type} [CommRing B] (q : ProjectiveCoordinateRing r θ j ≃+* B) :
+    (Scheme.ΓSpecIso (CommRingCat.of B)).inv ≫
+        (Proj.basicOpenToSpec (curveGrade r θ) (coordinateDen r θ j) ≫
+          Spec.map (CommRingCat.ofHom q.symm.toRingHom)).appTop ≫
+        (Proj.basicOpen (curveGrade r θ) (coordinateDen r θ j)).topIso.hom =
+      CommRingCat.ofHom q.symm.toRingHom ≫
+        (Proj.basicOpenIsoAway (curveGrade r θ) (coordinateDen r θ j)
+          (coordinate_mem_grade r θ j) (by decide)).hom := by
+  rw [Scheme.Hom.comp_appTop, Category.assoc,
+    ← Scheme.ΓSpecIso_inv_naturality_assoc]
+  dsimp only [Scheme.Hom.appTop]
+  rw [Proj.basicOpenToSpec_app_top]
+  simp only [Category.assoc, Iso.inv_hom_id_assoc, Iso.inv_hom_id, Category.comp_id,
+    Proj.basicOpenIsoAway_hom]
+
+/-- The first actual affine chart coordinate map is exactly the inverse of
+the literal first coordinate-section equivalence. -/
+theorem first_chartSection_top (r θ : ℂ) :
+    chartSection (firstCoordinateChartIso r θ)
+        (Over.mk (𝟙 (coordinateProjectivePatch r θ 1))) =
+      (firstCoordinateSectionsEquiv r θ).symm.toRingHom := by
+  have hcat : CommRingCat.ofHom (chartSection (firstCoordinateChartIso r θ)
+        (Over.mk (𝟙 (coordinateProjectivePatch r θ 1)))) =
+      CommRingCat.ofHom (firstCoordinateSectionsEquiv r θ).symm.toRingHom := by
+    rw [chartSection_top]
+    exact basicOpen_sectionMap r θ 1 (firstCoordinateEquiv r θ).toRingEquiv
+  exact congrArg CommRingCat.Hom.hom hcat
+
+/-- The second actual affine chart coordinate map is exactly the inverse
+of the literal second coordinate-section equivalence. -/
+theorem second_chartSection_top (r θ : ℂ) :
+    chartSection (secondCoordinateChartIso r θ)
+        (Over.mk (𝟙 (coordinateProjectivePatch r θ 2))) =
+      (secondCoordinateSectionsEquiv r θ).symm.toRingHom := by
+  have hcat : CommRingCat.ofHom (chartSection (secondCoordinateChartIso r θ)
+        (Over.mk (𝟙 (coordinateProjectivePatch r θ 2)))) =
+      CommRingCat.ofHom (secondCoordinateSectionsEquiv r θ).symm.toRingHom := by
+    rw [chartSection_top]
+    exact basicOpen_sectionMap r θ 2 (secondCoordinateEquiv r θ).toRingEquiv
+  exact congrArg CommRingCat.Hom.hom hcat
+
+end CycleQ2GeometricProjectiveChartSections
+
+end
+
+end ConsolidatedGeometricProjectiveChartSections
+
+section ConsolidatedGeometricProjectiveCanonical
 
 /-!
 # The actual canonical comparison on the projective curve
@@ -249,3 +391,5 @@ def literalProjectiveCanonicalIso :
 
 end CycleQ2GeometricProjectiveCanonical
 end
+
+end ConsolidatedGeometricProjectiveCanonical

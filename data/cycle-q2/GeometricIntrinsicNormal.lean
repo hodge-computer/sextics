@@ -1948,3 +1948,536 @@ coefficient; it carries the same functional used by the local adjunction. -/
 #print axioms normalOpenAlgebraConormalEquiv_tmul
 end CycleQ2GeometricIntrinsicNormal
 end
+
+/-! ## Actual inverse-ideal maps and their affine normalization
+
+The following continuation constructs the genuine scalar and reduction maps,
+their short complex, and the actual affine and open-cartesian comparisons.
+The short complex is not asserted to be exact without Cartier regularity.
+-/
+
+section IntrinsicHomScalar
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2GeometricIntrinsicHomMaps
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf CycleQ2GeometricIntrinsicNormal
+
+variable {T : TopCat.{0}} (R : T.Sheaf CommRingCat.{0})
+  (M N : SheafOfModules.{0} (ringSheaf R))
+
+/-- Restrict an actual module-sheaf morphism to all subopens of U. -/
+def localHomOfMorphism (f : M ⟶ N) (U : Opens T) : LocalLinearHom R M N U :=
+  ⟨Functor.whiskerLeft (Over.forget U).op
+    ((PresheafOfModules.toPresheaf (ringSheaf R).obj).map f.val),
+    fun V r m => (f.val.app (op V.left)).hom.map_smul r m⟩
+
+@[simp] theorem localHomOfMorphism_app (f : M ⟶ N) (U : Opens T)
+    (V : Over U) (m : M.val.obj (op V.left)) :
+    (localHomOfMorphism R M N f U).val.app (op V) m =
+      f.val.app (op V.left) m := rfl
+
+theorem localHomOfMorphism_restrict (f : M ⟶ N)
+    {U V : Opens T} (h : V ⟶ U) :
+    (moduleHomSheaf R M N).val.map h.op (localHomOfMorphism R M N f U) =
+      localHomOfMorphism R M N f V := by
+  apply localLinearHom_ext
+  intro W m
+  rfl
+
+/-- The compatible local restrictions of a fixed, genuine sheaf morphism. -/
+def homSection (f : M ⟶ N) : (moduleHomSheaf R M N).sections :=
+  PresheafOfModules.sectionsMk (fun U => localHomOfMorphism R M N f U.unop)
+    (fun {_ _} h => localHomOfMorphism_restrict R M N f h.unop)
+
+/-- Scalar multiplication of a fixed sheaf morphism, bundled as an actual
+morphism from the structure module into the intrinsic internal Hom. -/
+def scalarHom (f : M ⟶ N) :
+    SheafOfModules.unit (ringSheaf R) ⟶ moduleHomSheaf R M N :=
+  (SheafOfModules.unitHomEquiv (moduleHomSheaf R M N)).symm (homSection R M N f)
+
+theorem scalarHom_app (f : M ⟶ N) (U : Opens T) (r : R.obj.obj (op U)) :
+    (scalarHom R M N f).val.app (op U) r =
+      r • localHomOfMorphism R M N f U := rfl
+
+theorem scalarHom_local_evaluate (f : M ⟶ N) (U : Opens T)
+    (r : R.obj.obj (op U)) (V : Over U) (m : M.val.obj (op V.left)) :
+    ((scalarHom R M N f).val.app (op U) r).val.app (op V) m =
+      R.obj.map V.hom.op r • f.val.app (op V.left) m := rfl
+
+theorem scalarHom_evaluate (f : M ⟶ N) (U : Opens T)
+    (r : R.obj.obj (op U)) (m : M.val.obj (op U)) :
+    localLinearHomEvaluate R M N U ((scalarHom R M N f).val.app (op U) r) m =
+      r • f.val.app (op U) m := by
+  change R.obj.map (𝟙 U).op r • f.val.app (op U) m = _
+  rw [op_id, R.obj.map_id]
+  rfl
+
+end CycleQ2GeometricIntrinsicHomMaps
+
+#print axioms CycleQ2GeometricIntrinsicHomMaps.scalarHom_local_evaluate
+#print axioms CycleQ2GeometricIntrinsicHomMaps.scalarHom_evaluate
+
+end
+end IntrinsicHomScalar
+
+section IntrinsicHomPostcomposition
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+
+open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
+open CycleQ2GeometricDifferentialSheaf
+
+attribute [local instance] overHomCommModuleMk localLinearRingModule moduleHomObjModule
+
+variable {T : TopCat.{0}} (R : T.Sheaf CommRingCat.{0})
+  (L : SheafOfModules.{0} (ringSheaf R))
+  {M N P : SheafOfModules.{0} (ringSheaf R)}
+
+/-- Postcomposition is the literal composition of the restricted
+additive natural transformations, with linearity inherited from the
+given genuine module-sheaf morphism. -/
+def localLinearHomPostcompose (f : M ⟶ N) (U : Opens T)
+    (g : LocalLinearHom R L M U) : LocalLinearHom R L N U :=
+  ⟨g.val ≫ Functor.whiskerLeft (Over.forget U).op
+      ((PresheafOfModules.toPresheaf (ringSheaf R).obj).map f.val), by
+    intro V r m
+    change f.val.app (op V.left) (g.val.app (op V) (r • m)) =
+      r • f.val.app (op V.left) (g.val.app (op V) m)
+    rw [g.property V r m]
+    exact (f.val.app (op V.left)).hom.map_smul r (g.val.app (op V) m)⟩
+
+@[simp] theorem localLinearHomPostcompose_app (f : M ⟶ N) (U : Opens T)
+    (g : LocalLinearHom R L M U) (V : Over U) (m : L.val.obj (op V.left)) :
+    (localLinearHomPostcompose R L f U g).val.app (op V) m =
+      f.val.app (op V.left) (g.val.app (op V) m) := rfl
+
+theorem localLinearHomPostcompose_restrict (f : M ⟶ N)
+    {U V : (Opens T)ᵒᵖ} (h : U ⟶ V) (g : LocalLinearHom R L M U.unop) :
+    restrictLocalLinearHom R L N h (localLinearHomPostcompose R L f U.unop g) =
+      localLinearHomPostcompose R L f V.unop (restrictLocalLinearHom R L M h g) := by
+  apply localLinearHom_ext R L N
+  intro W m
+  rfl
+
+def localLinearHomPostcomposeLinearMap (f : M ⟶ N) (U : Opens T) :
+    LocalLinearHom R L M U →ₗ[R.obj.obj (op U)] LocalLinearHom R L N U where
+  toFun := localLinearHomPostcompose R L f U
+  map_add' g h := by
+    apply localLinearHom_ext R L N
+    intro V m
+    change f.val.app (op V.left) (g.val.app (op V) m + h.val.app (op V) m) =
+      f.val.app (op V.left) (g.val.app (op V) m) +
+        f.val.app (op V.left) (h.val.app (op V) m)
+    exact (f.val.app (op V.left)).hom.map_add _ _
+  map_smul' r g := by
+    apply localLinearHom_ext R L N
+    intro V m
+    change f.val.app (op V.left) (R.obj.map V.hom.op r • g.val.app (op V) m) =
+      R.obj.map V.hom.op r • f.val.app (op V.left) (g.val.app (op V) m)
+    exact (f.val.app (op V.left)).hom.map_smul _ _
+
+@[simp] theorem localLinearHomPostcompose_id (U : Opens T) (g : LocalLinearHom R L M U) :
+    localLinearHomPostcompose R L (𝟙 M) U g = g := by
+  apply localLinearHom_ext R L M
+  intro V m
+  rfl
+
+@[simp] theorem localLinearHomPostcompose_comp (f : M ⟶ N) (h : N ⟶ P)
+    (U : Opens T) (g : LocalLinearHom R L M U) :
+    localLinearHomPostcompose R L (f ≫ h) U g =
+      localLinearHomPostcompose R L h U (localLinearHomPostcompose R L f U g) := by
+  apply localLinearHom_ext R L P
+  intro V m
+  rfl
+
+@[simp] theorem localLinearHomEvaluate_postcompose (f : M ⟶ N) (U : Opens T)
+    (g : LocalLinearHom R L M U) (m : L.val.obj (op U)) :
+    localLinearHomEvaluate R L N U (localLinearHomPostcompose R L f U g) m =
+      f.val.app (op U) (localLinearHomEvaluate R L M U g m) := rfl
+
+/-- A genuine target morphism induces a genuine morphism between the
+actual intrinsic module-Hom sheaves. -/
+def moduleHomPostcompose (f : M ⟶ N) :
+    moduleHomSheaf R L M ⟶ moduleHomSheaf R L N where
+  val.app U := ModuleCat.ofHom (localLinearHomPostcomposeLinearMap R L f U.unop)
+  val.naturality {U V} h := by
+    apply ModuleCat.hom_ext
+    apply LinearMap.ext
+    intro g
+    exact (localLinearHomPostcompose_restrict R L f h g).symm
+
+@[simp] theorem moduleHomPostcompose_app (f : M ⟶ N) (U : Opens T)
+    (g : LocalLinearHom R L M U) :
+    (moduleHomPostcompose R L f).val.app (op U) g =
+      localLinearHomPostcompose R L f U g := rfl
+
+@[simp] theorem moduleHomPostcompose_id :
+    moduleHomPostcompose R L (𝟙 M) = 𝟙 (moduleHomSheaf R L M) := by
+  apply SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro U
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro g
+  exact localLinearHomPostcompose_id R L U.unop g
+
+@[simp] theorem moduleHomPostcompose_comp (f : M ⟶ N) (h : N ⟶ P) :
+    moduleHomPostcompose R L (f ≫ h) = moduleHomPostcompose R L f ≫ moduleHomPostcompose R L h := by
+  apply SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro U
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro g
+  exact localLinearHomPostcompose_comp R L f h U.unop g
+
+@[simp] theorem moduleHomPostcompose_zero :
+    moduleHomPostcompose R L (0 : M ⟶ N) = 0 := by
+  apply SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro U
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro g
+  apply localLinearHom_ext R L N
+  intro V m
+  rfl
+
+#print axioms localLinearHomPostcompose_restrict
+#print axioms localLinearHomEvaluate_postcompose
+#print axioms moduleHomPostcompose
+#print axioms moduleHomPostcompose_comp
+#print axioms moduleHomPostcompose_zero
+
+end CycleQ2GeometricIntrinsicNormal
+end
+
+end IntrinsicHomPostcomposition
+
+section IntrinsicHomPostcompositionScalar
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicHomMaps
+
+open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf CycleQ2GeometricIntrinsicNormal
+
+variable {T : TopCat.{0}} (R : T.Sheaf CommRingCat.{0})
+  (L M N : SheafOfModules.{0} (ringSheaf R))
+
+@[simp] theorem localHomOfMorphism_postcompose (f : L ⟶ M) (g : M ⟶ N)
+    (U : Opens T) :
+    localLinearHomPostcompose R L g U (localHomOfMorphism R L M f U) =
+      localHomOfMorphism R L N (f ≫ g) U := by
+  apply localLinearHom_ext R L N
+  intro V m
+  rfl
+
+/-- Postcomposition commutes with the actual scalar-generated map into
+the intrinsic Hom sheaf. -/
+theorem scalarHom_postcompose (f : L ⟶ M) (g : M ⟶ N) :
+    scalarHom R L M f ≫ moduleHomPostcompose R L g =
+      scalarHom R L N (f ≫ g) := by
+  apply SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro U
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro r
+  apply localLinearHom_ext R L N
+  intro V m
+  change g.val.app (op V.left) (R.obj.map V.hom.op r • f.val.app (op V.left) m) =
+    R.obj.map V.hom.op r • g.val.app (op V.left) (f.val.app (op V.left) m)
+  exact (g.val.app (op V.left)).hom.map_smul _ _
+
+#print axioms scalarHom_postcompose
+
+end CycleQ2GeometricIntrinsicHomMaps
+end
+
+end IntrinsicHomPostcompositionScalar
+
+section IntrinsicCartierMaps
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2GeometricIntrinsicHomMaps
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf CycleQ2GeometricIntrinsicNormal
+
+variable {T : TopCat.{0}} (R : T.Sheaf CommRingCat.{0})
+  (M N : SheafOfModules.{0} (ringSheaf R))
+
+theorem scalarHom_zero : scalarHom R M N 0 = 0 := by
+  apply SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro U
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro r
+  apply localLinearHom_ext
+  intro V m
+  change R.obj.map V.hom.op r • (0 : N.val.obj (op V.left)) = 0
+  exact smul_zero _
+
+end CycleQ2GeometricIntrinsicHomMaps
+
+namespace CycleQ2GeometricIntrinsicCartierSequence
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf CycleQ2GeometricIntrinsicNormal
+  CycleQ2GeometricIntrinsicHomMaps
+
+variable {X Y : Scheme.{0}} (j : X ⟶ Y)
+
+/-- The actual inverse-ideal internal Hom, attached to the kernel of the
+original structure-sheaf map. No Cartier trivialization is chosen here. -/
+def inverseIdealSheaf : SheafOfModules.{0} (ringSheaf Y.sheaf) :=
+  moduleHomSheaf Y.sheaf (kernelIdealSheaf j) (SheafOfModules.unit (ringSheaf Y.sheaf))
+
+/-- Multiplication of the actual ideal inclusion by surface functions. -/
+def inverseIdealScalar :
+    SheafOfModules.unit (ringSheaf Y.sheaf) ⟶ inverseIdealSheaf j :=
+  scalarHom Y.sheaf (kernelIdealSheaf j) (SheafOfModules.unit (ringSheaf Y.sheaf))
+    (kernel.ι (schemeStructureMap j))
+
+def inverseIdealSectionEvaluate (U : Y.Opens)
+    (f : (inverseIdealSheaf j).val.obj (op U)) :
+    RingHom.ker (j.app U).hom →ₗ[Γ(Y, U)] Γ(Y, U) :=
+  (localLinearHomEvaluate Y.sheaf (kernelIdealSheaf j)
+    (SheafOfModules.unit (ringSheaf Y.sheaf)) U f).comp
+      (kernelIdealSectionEquiv j U).symm.toLinearMap
+
+/-- This scalar map evaluates to the literal multiplication map on the
+actual section-ring kernel, with its original inclusion into O_Y. -/
+theorem inverseIdealScalar_evaluate (U : Y.Opens) (a : Γ(Y, U))
+    (x : RingHom.ker (j.app U).hom) :
+    inverseIdealSectionEvaluate j U ((inverseIdealScalar j).val.app (op U) a) x =
+      a * (x : Γ(Y, U)) := by
+  change localLinearHomEvaluate Y.sheaf (kernelIdealSheaf j)
+    (SheafOfModules.unit (ringSheaf Y.sheaf)) U
+      ((scalarHom Y.sheaf (kernelIdealSheaf j) (SheafOfModules.unit (ringSheaf Y.sheaf))
+        (kernel.ι (schemeStructureMap j))).val.app (op U) a)
+      ((kernelIdealSectionEquiv j U).symm x) = _
+  rw [scalarHom_evaluate]
+  have hx := kernelIdealSectionEquiv_coe j U ((kernelIdealSectionEquiv j U).symm x)
+  have he : (kernelIdealSectionEquiv j U ((kernelIdealSectionEquiv j U).symm x) : Γ(Y, U)) =
+      (x : Γ(Y, U)) :=
+    congrArg (fun z : RingHom.ker (j.app U).hom => (z : Γ(Y, U)))
+      ((kernelIdealSectionEquiv j U).apply_symm_apply x)
+  exact congrArg (fun z : Γ(Y, U) => a * z) (hx.symm.trans he)
+
+/-- Reduction is postcomposition with the original map to the curve's
+structure module, on every subopen of the ambient scheme. -/
+def inverseIdealReduction : inverseIdealSheaf j ⟶ normalDirectImageSheaf j :=
+  moduleHomPostcompose Y.sheaf (kernelIdealSheaf j) (schemeStructureMap j)
+
+theorem inverseIdealReduction_evaluate (U : Y.Opens)
+    (f : (inverseIdealSheaf j).val.obj (op U))
+    (x : RingHom.ker (j.app U).hom) :
+    normalSectionEvaluate j U ((inverseIdealReduction j).val.app (op U) f) x =
+      j.app U (inverseIdealSectionEvaluate j U f x) := rfl
+
+theorem inverseIdealScalar_comp_reduction :
+    inverseIdealScalar j ≫ inverseIdealReduction j = 0 := by
+  change scalarHom Y.sheaf (kernelIdealSheaf j) (SheafOfModules.unit (ringSheaf Y.sheaf))
+    (kernel.ι (schemeStructureMap j)) ≫
+      moduleHomPostcompose Y.sheaf (kernelIdealSheaf j) (schemeStructureMap j) = 0
+  rw [scalarHom_postcompose, kernel.condition, scalarHom_zero]
+
+/-- The genuine inverse-ideal short complex. Local Cartier regularity is
+needed to prove exactness; no exactness assumption is hidden in this data. -/
+def inverseIdealComplex : ShortComplex (SheafOfModules.{0} (ringSheaf Y.sheaf)) where
+  X₁ := SheafOfModules.unit (ringSheaf Y.sheaf)
+  X₂ := inverseIdealSheaf j
+  X₃ := normalDirectImageSheaf j
+  f := inverseIdealScalar j
+  g := inverseIdealReduction j
+  zero := inverseIdealScalar_comp_reduction j
+
+/-- Specialization to the unchanged original curve-to-surface morphism. -/
+def literalInverseIdealComplex (r θ : ℂ) :
+    ShortComplex (SheafOfModules.{0}
+      (ringSheaf (CycleQ2CartierProjectiveCover.projectiveSurface r θ).sheaf)) :=
+  inverseIdealComplex (CycleQ2GeometricLiteralSurface.curveToSurface r θ)
+
+end CycleQ2GeometricIntrinsicCartierSequence
+
+#print axioms CycleQ2GeometricIntrinsicHomMaps.scalarHom_zero
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.inverseIdealScalar_evaluate
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.inverseIdealReduction_evaluate
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.inverseIdealScalar_comp_reduction
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.literalInverseIdealComplex
+
+end
+end IntrinsicCartierMaps
+
+section IntrinsicAffineInverseIdeal
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicCartierSequence
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf CycleQ2GeometricIntrinsicNormal
+
+section Evaluation
+
+variable {X Y : Scheme.{0}} (j : X ⟶ Y)
+
+def inverseIdealSectionEvaluationLinearMap (U : Y.Opens) :
+    (inverseIdealSheaf j).val.obj (op U) →ₗ[Γ(Y, U)]
+      (RingHom.ker (j.app U).hom →ₗ[Γ(Y, U)] Γ(Y, U)) where
+  toFun := inverseIdealSectionEvaluate j U
+  map_add' f g := by
+    apply LinearMap.ext
+    intro a
+    rfl
+  map_smul' r f := by
+    apply LinearMap.ext
+    intro a
+    let v : Γ(Y, U) := inverseIdealSectionEvaluate j U f a
+    change Y.presheaf.map (𝟙 (op U)) r • v = r • v
+    exact congrArg (fun s : Γ(Y, U) => s • v)
+      (ConcreteCategory.congr_hom (Y.presheaf.map_id (op U)) r)
+
+end Evaluation
+
+variable {A B : CommRingCat.{0}} (φ : A ⟶ B)
+
+/-- The inverse-ideal sections on the actual affine scheme are exactly
+the functionals on the actual kernel of its structure-ring map. -/
+def affineInverseIdealSectionEquiv :
+    (inverseIdealSheaf (Spec.map φ)).val.obj (op ⊤) ≃
+      (RingHom.ker ((Spec.map φ).app ⊤).hom →ₗ[Γ(Spec A, ⊤)] Γ(Spec A, ⊤)) :=
+  (localLinearHomTopEquiv (Spec A).sheaf (kernelIdealSheaf (Spec.map φ))
+      (SheafOfModules.unit (ringSheaf (Spec A).sheaf))).trans
+    ((affineTopLinearMapEquiv
+      (show (Spec A).Modules from kernelIdealSheaf (Spec.map φ))
+      (show (Spec A).Modules from SheafOfModules.unit (ringSheaf (Spec A).sheaf))).trans
+        ((kernelIdealSectionEquiv (Spec.map φ) ⊤).arrowCongr
+          (LinearEquiv.refl Γ(Spec A, ⊤) Γ(Spec A, ⊤))).toEquiv)
+
+@[simp] theorem affineInverseIdealSectionEquiv_apply
+    (f : (inverseIdealSheaf (Spec.map φ)).val.obj (op ⊤)) :
+    affineInverseIdealSectionEquiv φ f = inverseIdealSectionEvaluate (Spec.map φ) ⊤ f := rfl
+
+theorem affineInverseIdealSectionEvaluate_bijective :
+    Function.Bijective (inverseIdealSectionEvaluate (Spec.map φ) ⊤) :=
+  (affineInverseIdealSectionEquiv φ).bijective
+
+def affineInverseIdealSectionLinearEquiv :
+    (inverseIdealSheaf (Spec.map φ)).val.obj (op ⊤) ≃ₗ[Γ(Spec A, ⊤)]
+      (RingHom.ker ((Spec.map φ).app ⊤).hom →ₗ[Γ(Spec A, ⊤)] Γ(Spec A, ⊤)) where
+  __ := affineInverseIdealSectionEquiv φ
+  map_add' := (inverseIdealSectionEvaluationLinearMap (Spec.map φ) ⊤).map_add
+  map_smul' r f := (inverseIdealSectionEvaluationLinearMap (Spec.map φ) ⊤).map_smul r f
+
+/-- Every actual affine inverse-ideal functional has its unique intrinsic
+sheaf extension, with the displayed evaluation normalization. -/
+theorem affineInverseIdealSection_existsUnique
+    (l : RingHom.ker ((Spec.map φ).app ⊤).hom →ₗ[Γ(Spec A, ⊤)] Γ(Spec A, ⊤)) :
+    ∃! f : (inverseIdealSheaf (Spec.map φ)).val.obj (op ⊤),
+      inverseIdealSectionEvaluate (Spec.map φ) ⊤ f = l :=
+  (affineInverseIdealSectionEvaluate_bijective φ).existsUnique l
+
+section OpenBaseChange
+
+variable {X Y X' Y' : Scheme.{0}}
+  (j : X ⟶ Y) (i : Y' ⟶ Y) (k : X' ⟶ X) (j' : X' ⟶ Y')
+  [IsOpenImmersion i] [IsOpenImmersion k]
+  (H : IsPullback j' k i j)
+
+/-- The actual inverse-ideal sections respect an open cartesian square,
+through the intrinsic ideal comparison and the structure-module unit. -/
+def inverseIdealSectionOpenBaseChangeEquiv :
+    (inverseIdealSheaf j).val.obj (op i.opensRange) ≃
+      (inverseIdealSheaf j').val.obj (op ⊤) :=
+  (localLinearHomOpenImmersionEquiv i
+      (show Y.Modules from kernelIdealSheaf j)
+      (show Y.Modules from SheafOfModules.unit (ringSheaf Y.sheaf))).trans
+    ((Iso.homCongr (kernelIdealOpenBaseChangeIso j i k j' H)
+      (Scheme.Modules.restrictUnitIso i)).trans
+      (localLinearHomTopEquiv Y'.sheaf (kernelIdealSheaf j')
+        (SheafOfModules.unit (ringSheaf Y'.sheaf))).symm)
+
+/-- The chart comparison evaluates the same original inverse-ideal
+functional through the actual map of ambient section rings. -/
+theorem inverseIdealSectionOpenBaseChangeEquiv_evaluate
+    (f : (inverseIdealSheaf j).val.obj (op i.opensRange))
+    (a : RingHom.ker (j'.app ⊤).hom) :
+    inverseIdealSectionEvaluate j' ⊤
+        (inverseIdealSectionOpenBaseChangeEquiv j i k j' H f) a =
+      (i.appIso ⊤).hom
+        (inverseIdealSectionEvaluate j (i ''ᵁ ⊤)
+          ((inverseIdealSheaf j).val.map
+            (homOfLE (i.image_le_opensRange ⊤)).op f)
+          (normalOpenIdealPullback j i k j' H ⊤ a)) := by
+  let K := kernelIdealOpenBaseChangeIso j i k j' H
+  let x : (kernelIdealSheaf j).val.obj (op (i ''ᵁ ⊤)) :=
+    K.inv.val.app (op ⊤) ((kernelIdealSectionEquiv j' ⊤).symm a)
+  let F := localLinearHomOpenImmersionEquiv i
+    (show Y.Modules from kernelIdealSheaf j)
+    (show Y.Modules from SheafOfModules.unit (ringSheaf Y.sheaf)) f
+  let e := i.appIso ⊤
+  calc
+    _ = e.hom (f.val.app (op (Over.mk (homOfLE (i.image_le_opensRange ⊤)))) x) := by
+      change e.hom (F.val.app (op ⊤) x) = _
+      exact congrArg e.hom (localLinearHomOpenImmersionEquiv_app i
+        (show Y.Modules from kernelIdealSheaf j)
+        (show Y.Modules from SheafOfModules.unit (ringSheaf Y.sheaf)) f ⊤ x)
+    _ = _ := by
+      apply congrArg e.hom
+      change f.val.app (op (Over.mk (homOfLE (i.image_le_opensRange ⊤)))) x =
+        localLinearHomEvaluate Y.sheaf (kernelIdealSheaf j)
+          (SheafOfModules.unit (ringSheaf Y.sheaf)) (i ''ᵁ ⊤)
+          ((inverseIdealSheaf j).val.map
+            (homOfLE (i.image_le_opensRange ⊤)).op f)
+          ((kernelIdealSectionEquiv j (i ''ᵁ ⊤)).symm
+            (kernelIdealSectionEquiv j (i ''ᵁ ⊤) x))
+      rw [LinearEquiv.symm_apply_apply]
+      have h := presheafHom_map_app_op_mk_id
+        (F := (kernelIdealSheaf j).val.presheaf)
+        (G := (SheafOfModules.unit (ringSheaf Y.sheaf)).val.presheaf)
+        (homOfLE (i.image_le_opensRange ⊤)) f.val
+      exact (ConcreteCategory.congr_hom h x).symm
+
+end OpenBaseChange
+
+end CycleQ2GeometricIntrinsicCartierSequence
+
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.affineInverseIdealSectionLinearEquiv
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.affineInverseIdealSection_existsUnique
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.inverseIdealSectionOpenBaseChangeEquiv_evaluate
+
+end
+end IntrinsicAffineInverseIdeal

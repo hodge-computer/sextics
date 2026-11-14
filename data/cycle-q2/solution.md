@@ -1,5 +1,226 @@
 # A nonconstructive geometric route for cycle-q2
 
+## The original projective class and the actual Cartier short exact sequence — 14 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains open.
+This continuation closes the comparison between the original derived
+Cartier class and its actual homogeneous coordinate descendant. It also
+constructs compatible signed cubic residue sections in the genuine
+exterior-square sheaf, glues the intrinsic normal sections with their
+inverse-square transition, and proves short exactness of the actual
+inverse-ideal sheaf sequence. The unchanged existence theorem still requires the geometric
+normal/cup and variation comparisons, supported correspondence, and de
+Rham exactness argument.
+
+### Equality with the original derived Cartier class
+
+[GeometricProjectiveDescent.lean](GeometricProjectiveDescent.lean) retains
+the original homogeneous second-descent witnesses. It sends the mixed
+localizations to actual structure-sheaf sections on the common projective
+opens and proves that every restriction and face map commutes with this
+realization. The original two staircase primitives give the actual
+diagonal coboundary
+\[
+\delta b=\operatorname{res}(c)+\operatorname{res}(d).
+\]
+Consequently, the derived class of the Cartier endpoint is the class of
+the negative coordinate endpoint. The proof compares the actual finite
+Čech classes on a common refinement; it retains their original cocycles
+and primitives.
+
+The second comparison identifies the two actual Mayer--Vietoris
+extensions with the finite injective-presentation construction. It uses
+explicit morphisms of the two short exact sequences and naturality of
+their extension classes. This comparison has positive normalization.
+Thus the minus sign in the resulting equality is exactly the sign from
+the original second descent.
+
+On the literal surface \(D=D_{57,1}\), the theorem
+`literalDerivedClass_eq_signed_coordinate` proves
+\[
+[c_{\mathrm{Cartier}}]
+=\delta_{\mathrm{MV}}(-q_H)
+\quad\text{in }H^2(D,\mathcal O_D),
+\]
+where \(q_H\) is the first coordinate representative of the same retained
+homogeneous descendant. The four Cartier sections are identified with
+their original `Proj.awayToSection` normalization, and the terminal-open
+equivalence is the existing equivalence to ordinary derived cohomology.
+
+The closed theorem `literal_retained_global_descent` supplies the original
+mixed endpoints, their actual second descent, the ordinary coordinate
+descent, this equality, and nonvanishing. It also retains the coefficient
+of the unchanged detector cubic and the separate nonvanishing statement
+for the character-one projection of \(-q_H\). The equality above concerns
+the unprojected Cartier class. Compatibility with an automorphism-induced
+action on derived cohomology is a further geometric comparison.
+
+### Signed cubic residue sections on the actual neighborhood
+
+[GeometricSurfaceResidueSections.lean](GeometricSurfaceResidueSections.lean)
+compares the actual residue frames on all subopens of the Jacobian charts.
+It derives their values from the universal Kähler differential and the
+literal augmented Jacobian determinant. The proof also gives the actual
+differential expansion under the change of surface coordinates, including
+the derivative of the weighted coordinate.
+
+Writing \(b=x_2/x_1\), the raw residue sections satisfy
+\[
+\rho_2=-b^3\rho_1.
+\]
+For the same weighted homogeneous cubic \(p\), its actual coefficient
+sections satisfy \(p_2=b^{-3}p_1\). The coordinate orientation signs are
+inserted before gluing: the first-chart section is \(-p_1\rho_1\), while
+the second-chart section is \(p_2\rho_2\). These sections agree in the
+genuine exterior-square sheaf on every common subopen. The construction
+uses its canonical sheafification map and does not assume that map is
+injective.
+
+`existsUnique_gluedCubicSection` constructs their unique gluing on the
+actual union of the twelve Jacobian opens. `gluedCubicSection_on_subopen`
+proves the literal restriction formula on every chart subopen. At
+\((r,\theta)=(57,1)\), `literal_residueNeighborhood_preimage` proves that
+the inverse image of this surface neighborhood is the entire original
+curve. The resulting section is defined on this specific neighborhood.
+
+### Intrinsic normal sections on the coordinate patches
+
+[GeometricSurfaceNormalSections.lean](GeometricSurfaceNormalSections.lean)
+extends the intrinsic normal comparison to every subopen of an actual
+minor chart. Equality of normal homomorphisms is detected by their values
+on the original defining-equation classes, using the actual local ideal
+generators and sheaf separation.
+
+The literal local normal vectors are evaluated on the fixed coordinate
+equations before specializing the Jacobian minor. Their restriction
+formulas preserve this normalization. The minor frames agree on their
+actual overlaps within each coordinate patch, and the actual curve
+preimage covers give unique normal sections on the two coordinate
+patches. This construction uses the normal sheaf's support on the curve,
+so the gluing argument uses the proved inverse-image cover.
+
+The normal sections retain their exact values on the two fixed equation
+classes. On every common subopen of the two coordinate patches,
+`coordinateNormalVector_transition` proves
+\[
+\nu_2=b^{-2}\nu_1.
+\]
+The proof uses the weight-two change of the equations and weight-four
+change of their normal-vector coefficients, followed by generator-based
+extensionality. This transition has no additional orientation sign.
+
+The same module constructs the canonical action of the actual curve
+section ring on these intrinsic normal sections. Its restriction law,
+agreement with the ambient structure-ring action, and annihilation by the
+actual curve ideal are proved. The resulting module structure is provided
+explicitly; it does not replace the existing ambient module instance.
+
+### The genuine inverse-ideal short exact sequence
+
+[GeometricIntrinsicNormal.lean](GeometricIntrinsicNormal.lean) now contains
+the actual scalar and postcomposition morphisms of internal Hom sheaves.
+For the original curve inclusion \(j:C\to D\), with actual kernel ideal
+sheaf \(I\), these give, at the literal parameter \((57,1)\), the genuine
+short exact sequence
+\[
+0\longrightarrow\mathcal O_D\longrightarrow
+\mathcal Hom_{\mathcal O_D}(I,\mathcal O_D)
+\longrightarrow
+\mathcal Hom_{\mathcal O_D}(I,j_*\mathcal O_C)\longrightarrow0.
+\]
+The first map sends \(a\) to multiplication by \(a\), and the second is
+postcomposition with the original structure map. Their composite is
+proved to be zero. Affine Hom comparison and open-cartesian-base-change
+equivalences retain these literal evaluation formulas.
+
+The continuation in
+[GeometricGradedCechDescent.lean](GeometricGradedCechDescent.lean) supplies
+the regular-principal-ideal algebra and its actual projective realization.
+Writing \(a=(g_1,g_2,f_1,f_2)\), the twelve opens
+\[
+W_{ij}=D_+(a_i)\cap D_+(x_j)
+\]
+cover the whole literal surface. They are Cartier-by-coordinate opens,
+distinct from the Jacobian residue neighborhood above. The first two
+kernel generators are \(f_2/x_j^2\) and \(f_1/x_j^2\); on the last two
+opens the curve ideal is the unit ideal. Their regularity, principal
+kernel identities, and the surjectivity of the original structure-map
+components are all proved on the actual section rings. The named affine
+chart squares are proved cartesian with the original `Proj.awayι` maps.
+
+For a regular principal kernel on an actual affine scheme, the same
+module proves injectivity, exactness, and surjectivity of the actual
+intrinsic short-complex components. These statements use the affine Hom
+equivalences to retain the sheaf maps themselves, in addition to the
+corresponding algebraic Hom sequence on the displayed projective charts.
+The actual cartesian maps transport these statements to every principal
+subopen of the twelve charts. These principal subopens form a basis of
+the whole surface. Kernel germs are first restricted until their image
+is zero, and basis exactness then supplies local preimages. Stalk
+injectivity and local surjectivity give the other two parts of short
+exactness.
+
+The resulting closed theorem `literalInverseIdealComplex_shortExact`
+proves short exactness of the literal module-sheaf complex without any
+premises. `literalInverseIdealAdditiveComplex_shortExact` proves the same
+for its genuine underlying additive-sheaf complex, supplying the sequence
+needed for ordinary derived cohomology. The additive result is proved
+from the actual local maps; no unproved cokernel-preservation claim about
+the forgetful functor is used. The general parameter versions require
+exactly \(r\ne0\) and \(\theta\ne0\), which are discharged at \((57,1)\).
+
+These local normal and exterior sections are inputs for the next
+comparison. The connecting map's value on the original normal cohomology
+class and the contraction/cup diagram still have to be constructed and
+identified with the original
+Cartier class. No global adjunction or moving-family conclusion is
+asserted by this checkpoint.
+
+### Verification and preservation of the concurrent development
+
+| Module | Lines | Compile (s) | Kernel replay (s) |
+| --- | ---: | ---: | ---: |
+| `GeometricProjectiveDescent` | 1,753 | 184.72 | 95.26 |
+| `GeometricSurfaceResidueSections` | 1,787 | 161.45 | 109.66 |
+| `GeometricSurfaceNormalSections` | 2,166 | 84.02 | 42.37 |
+| `GeometricIntrinsicNormal` | 2,483 | 84.30 | 14.83 |
+| `GeometricGradedCechDescent` | 2,751 | 107.89 | 19.39 |
+| `GeometricProjectiveCanonical` | 395 | 42.64 | 36.63 |
+| `GeometricSurfaceCurveCharts` | 599 | 17.39 | 7.50 |
+
+The five proof modules and the two consolidated dependencies passed Lean compilation and independent
+kernel replay under the existing bounded single-worker configuration.
+Their endpoint dependency audits use only `propext`, `Classical.choice`,
+and `Quot.sound`. Exact source hashes were matched to the staged sources
+and the emitted modules before recording the replays. The source closure
+of the checked modules was reconciled with the incoming development.
+
+The checkpoint preserves `c9b6a097ae4aa8ce2853794612ef7dd253b04155`,
+including its actual cubic-residue gluing, intrinsic source-normal
+comparison, and ordinary cohomology scalar action. The earlier family,
+Cartier transition-defect, normalized-class, cyclic-orbit, and obstruction
+contributions are retained as well. The two cubic-residue constructions
+retain their respective displayed orientation conventions.
+
+To remain within the 256-file limit, three small helpers are consolidated
+into their existing sole importers. `GeometricModuleOverFrame` and
+`GeometricProjectiveChartSections` are incorporated into
+`GeometricProjectiveCanonical`; `GeometricAffineProjectiveCharts` is
+incorporated into `GeometricSurfaceCurveCharts`. All five original
+non-import bodies are preserved byte for byte inside separate named
+sections, retaining their options and local scopes. Public declaration
+names are unchanged. The two combined destinations are separately
+compiled and replayed. The three released file slots hold the three
+new proof modules.
+
+The protected target and its original admission remain unchanged. The
+helper source/import checks and explanation checks pass; the complete
+proposal still fails the source gate at that admission. These results
+are not a completed certificate or a fresh validation of the entire
+proposal dependency chain. This continuation follows the Diamond
+argument credited below and was prepared for `fqlx` with OpenAI ChatGPT
+assistance.
+
 ## Actual cubic residue sections and canonical normal comparison — 14 November 2026
 
 This checkpoint constructs compatible cubic two-form sections on an actual
@@ -149,6 +370,7 @@ body. The proposal remains within the 256-file limit. The original
 protected target, source manifest, and final existence statement are
 unchanged. Earlier checkpoint explanations follow below, with links through
 the removed facades redirected to their surviving modules.
+
 
 ## Actual first-order families and Cartier transition defects — 14 November 2026
 
@@ -512,9 +734,11 @@ the negative of the projected coordinate cocycle.
 The independent continuation described in the next section supplies a
 homogeneous descent, actual Laurent-weight support, and a nonzero class
 via coordinate-cover connecting maps. The canonical projection here
-applies to any original staircase. Identifying its coordinate-cover
-derived image with the original Cartier derived class, with the negative
-sign above, remains a separate comparison.
+applies to any original staircase. The continuation in
+[GeometricProjectiveDescent.lean](GeometricProjectiveDescent.lean) now
+identifies its coordinate-cover derived image with the original Cartier
+derived class, retaining the negative sign above and the original
+staircase witnesses.
 
 ### Differential frames on the actual scheme charts
 
@@ -954,7 +1178,7 @@ The exact public sources passed the following bounded checks. Times are in secon
 | [GeometricSurfaceDehomogenizedCharts](GeometricSurfaceDehomogenizedCharts.lean) | 88.04 | 4.83 | 6.55 | 15 |
 | [GeometricSurfaceProjectiveCoefficients](GeometricSurfaceProjectiveCoefficients.lean) | 60.20 | 25.93 | 2.82 | 14 |
 | [GeometricDehomogenizedCharts](GeometricDehomogenizedCharts.lean) | 10.89 | 3.82 | 8.33 | 7 |
-| [GeometricAffineProjectiveCharts](GeometricAffineProjectiveCharts.lean) | 3.01 | 3.04 | 2.41 | 6 |
+| [GeometricAffineProjectiveCharts](GeometricSurfaceCurveCharts.lean) | 3.01 | 3.04 | 2.41 | 6 |
 | [GeometricSurfaceCurveCharts](GeometricSurfaceCurveCharts.lean) | 18.55 | 19.01 | 3.01 | 18 |
 | [GeometricCartierCohomologyScalar](GeometricCartierCohomologyScalar.lean) | 127.40 | 137.74 | 3.25 | 19 |
 
@@ -3179,7 +3403,7 @@ transports module-valued derivations through this data.
 combines these constructions into `chartFrameIso`: a genuine isomorphism
 from the restricted projective differential sheaf to the structure module.
 It proves the inverse-one formula on the whole chart and on every
-subopen. [GeometricProjectiveChartSections.lean](GeometricProjectiveChartSections.lean)
+subopen. [GeometricProjectiveChartSections.lean](GeometricProjectiveCanonical.lean)
 identifies the terminal section maps with the literal first and second
 chart-ring equivalences, so these frames use the same affine forms as
 the earlier cofactor calculation.
@@ -3207,7 +3431,7 @@ precisely the previously constructed transition unit.
 two-open gluing of additive local isomorphisms from sheaf unique gluing.
 [GeometricModuleLocalIso.lean](GeometricModuleLocalIso.lean) proves
 scalar compatibility and obtains an isomorphism of module sheaves.
-[GeometricModuleOverFrame.lean](GeometricModuleOverFrame.lean) evaluates
+[GeometricModuleOverFrame.lean](GeometricProjectiveCanonical.lean) evaluates
 an over-site frame on every subopen, and
 [GeometricCanonicalGluing.lean](GeometricCanonicalGluing.lean) shows that
 the single overlap identity between frame generators glues to the
@@ -3301,7 +3525,7 @@ homogeneous fraction, without a domain or smoothness hypothesis.
 The first and second specializations are exactly the previously defined
 `ChartRing ![firstQuadric r, firstCubic theta]` and its second-chart
 counterpart. Constants and coordinate generators are bound explicitly.
-[GeometricAffineProjectiveCharts.lean](GeometricAffineProjectiveCharts.lean)
+[GeometricAffineProjectiveCharts.lean](GeometricSurfaceCurveCharts.lean)
 composes these equivalences with Mathlib's `Proj.basicOpenIsoSpec` and
 `Proj.basicOpenIsoAway`. It obtains isomorphisms of the actual coordinate
 open schemes with the spectra of these equation rings, and equivalences

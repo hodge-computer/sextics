@@ -1,3 +1,12 @@
+import Proposal.GeometricLiteralSurface
+import Proposal.GeometricCoordinateH2
+import Proposal.GeometricCartierNormalLift
+import Proposal.GeometricIntrinsicNormal
+import Mathlib.RingTheory.Localization.Algebra
+import Mathlib.Topology.Sheaves.Abelian
+import Mathlib.Topology.Sheaves.LocallySurjective
+import Mathlib.CategoryTheory.Abelian.ShortExact
+
 import Mathlib.RingTheory.GradedAlgebra.HomogeneousLocalization
 import Mathlib.RingTheory.Localization.BaseChange
 import Mathlib.Algebra.Algebra.Bilinear
@@ -1143,3 +1152,1600 @@ end CycleQ2GradedCechProjection
 #print axioms CycleQ2GradedCechProjection.BiMorphism.projected_signed_diagonal
 #print axioms CycleQ2GradedCechProjection.cartierCoordinateDescent_project
 #print axioms CycleQ2GradedCechProjection.literal_weightZero_coordinate_descent
+
+end -- original noncomputable section
+
+/-!
+## Actual regular Cartier ideals and the intrinsic short exact sequence
+
+The continuation identifies the original curve ideal on twelve actual
+projective affine charts, proves its displayed generator regular, and
+retains the original structure-map reduction. The actual intrinsic
+inverse-ideal short complex is exact on affine schemes with this regular
+principal kernel. The cartesian chart squares transport the three actual
+maps to every principal subopen. These opens form a basis of the literal
+surface, giving short exactness of both the module-sheaf complex and its
+underlying additive complex. Evaluation of the genuine connecting morphism
+on the original normal class remains a separate obligation.
+-/
+
+section RegularPrincipalHomSequence
+
+set_option autoImplicit false
+set_option Elab.async false
+
+noncomputable section
+namespace CycleQ2RegularPrincipalHomSequence
+
+open CycleQ2GeometricCartierNormalLift
+
+variable {R : Type*} [CommRing R] (I : Ideal R)
+
+def scalarInclusion : R →ₗ[R] (I →ₗ[R] R) where
+  toFun a := a • I.subtype
+  map_add' a b := add_smul a b I.subtype
+  map_smul' a b := mul_smul a b I.subtype
+
+def quotientReduction : (I →ₗ[R] R) →ₗ[R] (I →ₗ[R] R ⧸ I) where
+  toFun f := (Ideal.Quotient.mkₐ R I).toLinearMap.comp f
+  map_add' f g := by ext x; exact map_add (Ideal.Quotient.mk I) (f x) (g x)
+  map_smul' a f := by ext x; exact (Ideal.Quotient.mkₐ R I).toLinearMap.map_smul a (f x)
+
+theorem scalarInclusion_apply (a : R) (x : I) : scalarInclusion I a x = a * (x : R) := rfl
+
+theorem quotientReduction_apply (f : I →ₗ[R] R) (x : I) :
+    quotientReduction I f x = Ideal.Quotient.mk I (f x) := rfl
+
+theorem quotientReduction_scalarInclusion (a : R) :
+    quotientReduction I (scalarInclusion I a) = 0 := by
+  ext x
+  apply Ideal.Quotient.eq_zero_iff_mem.mpr
+  exact I.mul_mem_left a x.property
+
+variable (b : R) (hb : IsSMulRegular R b) (hI : I = Ideal.span ({b} : Set R))
+
+theorem principalIdealEquiv_one_coe :
+    (principalIdealEquiv I b hb hI 1 : R) = b := one_mul b
+
+/-- Equality of homomorphisms from the actual regular principal ideal
+is detected on its original generator. -/
+theorem principalHom_ext {Q : Type*} [AddCommGroup Q] [Module R Q]
+    {f g : I →ₗ[R] Q}
+    (h : f (principalIdealEquiv I b hb hI 1) =
+      g (principalIdealEquiv I b hb hI 1)) : f = g := by
+  ext x
+  obtain ⟨a,rfl⟩ := (principalIdealEquiv I b hb hI).surjective x
+  have ha : principalIdealEquiv I b hb hI a =
+      a • principalIdealEquiv I b hb hI 1 := by
+    simpa only [smul_eq_mul, mul_one] using
+      (principalIdealEquiv I b hb hI).map_smul a (1 : R)
+  rw [ha, map_smul, map_smul, h]
+
+include b hb hI
+
+theorem scalarInclusion_injective : Function.Injective (scalarInclusion I) := by
+  intro a c hac
+  have h := congrArg (fun f : I →ₗ[R] R => f (principalIdealEquiv I b hb hI 1)) hac
+  rw [scalarInclusion_apply, scalarInclusion_apply, principalIdealEquiv_one_coe] at h
+  apply hb
+  simpa only [smul_eq_mul, mul_comm] using h
+
+/-- Every normal functional lifts through the actual quotient map. -/
+theorem quotientReduction_surjective : Function.Surjective (quotientReduction I) := by
+  intro f
+  obtain ⟨a,ha⟩ := Ideal.Quotient.mk_surjective (f (principalIdealEquiv I b hb hI 1))
+  refine ⟨a • inverseIdealGenerator I b hb hI, ?_⟩
+  apply principalHom_ext I b hb hI
+  change Ideal.Quotient.mk I
+    (a * (principalIdealEquiv I b hb hI).symm (principalIdealEquiv I b hb hI 1)) = _
+  rw [LinearEquiv.symm_apply_apply, mul_one]
+  exact ha
+
+/-- The scalar kernel and quotient reduction are exact for the genuine
+Hom modules of a regular principal ideal. -/
+theorem scalar_quotient_exact : Function.Exact (scalarInclusion I) (quotientReduction I) := by
+  intro f
+  constructor
+  · intro hf
+    have hz : Ideal.Quotient.mk I (f (principalIdealEquiv I b hb hI 1)) = 0 :=
+      congrArg (fun g : I →ₗ[R] R ⧸ I => g (principalIdealEquiv I b hb hI 1)) hf
+    have hm := Ideal.Quotient.eq_zero_iff_mem.mp hz
+    have hm' : f (principalIdealEquiv I b hb hI 1) ∈ Ideal.span ({b} : Set R) :=
+      (le_of_eq hI) hm
+    obtain ⟨a,ha⟩ := Ideal.mem_span_singleton'.mp hm'
+    refine ⟨a, principalHom_ext I b hb hI ?_⟩
+    rw [scalarInclusion_apply, principalIdealEquiv_one_coe]
+    exact ha
+  · rintro ⟨a,rfl⟩
+    exact quotientReduction_scalarInclusion I a
+
+end CycleQ2RegularPrincipalHomSequence
+
+#print axioms CycleQ2RegularPrincipalHomSequence.scalarInclusion_injective
+#print axioms CycleQ2RegularPrincipalHomSequence.quotientReduction_surjective
+#print axioms CycleQ2RegularPrincipalHomSequence.scalar_quotient_exact
+
+end -- component noncomputable section
+end RegularPrincipalHomSequence
+
+section RegularPrincipalAlgebraSequence
+
+set_option autoImplicit false
+set_option Elab.async false
+
+noncomputable section
+namespace CycleQ2RegularPrincipalHomSequence
+
+open CycleQ2GeometricCartierNormalLift
+
+variable {R : Type*} [CommRing R] (I : Ideal R)
+  (B : Type*) [CommRing B] [Algebra R B]
+
+/-- Reduction along the actual algebra map, with its existing scalar
+action. This version does not replace the target ring by a quotient. -/
+def algebraReduction : (I →ₗ[R] R) →ₗ[R] (I →ₗ[R] B) where
+  toFun f := (Algebra.linearMap R B).comp f
+  map_add' f g := by ext x; exact map_add (algebraMap R B) (f x) (g x)
+  map_smul' a f := by ext x; exact (Algebra.linearMap R B).map_smul a (f x)
+
+theorem algebraReduction_apply (f : I →ₗ[R] R) (x : I) :
+    algebraReduction I B f x = algebraMap R B (f x) := rfl
+
+theorem algebraReduction_scalarInclusion (hker : I = RingHom.ker (algebraMap R B)) (a : R) :
+    algebraReduction I B (scalarInclusion I a) = 0 := by
+  ext x
+  change algebraMap R B (a * (x : R)) = 0
+  have hx : algebraMap R B (x : R) = 0 := (le_of_eq hker) x.property
+  rw [map_mul, hx, mul_zero]
+
+theorem algebraReduction_surjective (b : R) (hb : IsSMulRegular R b)
+    (hp : I = Ideal.span ({b} : Set R)) (hs : Function.Surjective (algebraMap R B)) :
+    Function.Surjective (algebraReduction I B) := by
+  intro f
+  obtain ⟨a,ha⟩ := hs (f (principalIdealEquiv I b hb hp 1))
+  refine ⟨a • inverseIdealGenerator I b hb hp, ?_⟩
+  apply principalHom_ext I b hb hp
+  change algebraMap R B
+    (a * (principalIdealEquiv I b hb hp).symm (principalIdealEquiv I b hb hp 1)) = _
+  rw [LinearEquiv.symm_apply_apply, mul_one]
+  exact ha
+
+theorem scalar_algebra_exact (b : R) (hb : IsSMulRegular R b)
+    (hp : I = Ideal.span ({b} : Set R))
+    (hker : I = RingHom.ker (algebraMap R B)) :
+    Function.Exact (scalarInclusion I) (algebraReduction I B) := by
+  intro f
+  constructor
+  · intro hf
+    have hz : algebraMap R B (f (principalIdealEquiv I b hb hp 1)) = 0 :=
+      congrArg (fun g : I →ₗ[R] B => g (principalIdealEquiv I b hb hp 1)) hf
+    have hm : f (principalIdealEquiv I b hb hp 1) ∈ I := (le_of_eq hker.symm) hz
+    have hm' : f (principalIdealEquiv I b hb hp 1) ∈ Ideal.span ({b} : Set R) :=
+      (le_of_eq hp) hm
+    obtain ⟨a,ha⟩ := Ideal.mem_span_singleton'.mp hm'
+    refine ⟨a, principalHom_ext I b hb hp ?_⟩
+    rw [scalarInclusion_apply, principalIdealEquiv_one_coe]
+    exact ha
+  · rintro ⟨a,rfl⟩
+    exact algebraReduction_scalarInclusion I B hker a
+
+end CycleQ2RegularPrincipalHomSequence
+
+#print axioms CycleQ2RegularPrincipalHomSequence.algebraReduction_surjective
+#print axioms CycleQ2RegularPrincipalHomSequence.scalar_algebra_exact
+
+end -- component noncomputable section
+end RegularPrincipalAlgebraSequence
+
+section ActualProjectiveCartierIdeal
+
+/-!
+# Actual regular principal ideal charts for the literal projective curve
+
+The canonical degree-zero projection is linear over genuine homogeneous
+fractions. Consequently it contracts a principal ideal generated by such
+a fraction to the same principal ideal in the homogeneous localization.
+
+On the actual Cartier-by-coordinate refinement, this proves that the
+literal curve ideal is generated by f2/x_j^2 or f1/x_j^2 on the two
+cofactor opens, and by one on the two opens disjoint from the curve.
+The generators are regular by the original monic regular-sequence proof.
+For r and theta nonzero the twelve actual opens cover the whole surface.
+
+The kernel and the surjective quotient map are transported to the actual
+scheme section rings. Their scalar/inverse-ideal/normal Hom sequence is
+exact on each displayed affine chart, with reduction by the actual
+structure-map component. Passing this algebra to the global intrinsic
+Hom sheaves and identifying its derived connecting map are further steps.
+-/
+
+
+section DegreeZeroIdealCore
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+noncomputable section
+
+namespace CycleQ2GradedLocalizationProjection
+
+variable {A σ : Type*} [CommRing A] [SetLike σ A] [AddSubgroupClass σ A]
+variable (𝒜 : ℕ → σ) [GradedRing 𝒜]
+
+theorem fraction_mul (f : A) (n m : ℕ) (a b : A) :
+    fraction f (n + m) (a * b) = fraction f n a * fraction f m b := by
+  unfold fraction
+  rw [show powerDenominator f (n + m) =
+    powerDenominator f n * powerDenominator f m from Subtype.ext (pow_add f n m)]
+  exact IsLocalization.mk'_mul (Localization.Away f) a b
+    (powerDenominator f n) (powerDenominator f m)
+
+variable {f : A} {d : ℕ} (hf : f ∈ 𝒜 d)
+
+/-- The genuine weight-zero projection is linear over the degree-zero
+homogeneous localization, including when the original ring has zero divisors. -/
+theorem degreeZero_mul_homogeneous (h : HomogeneousLocalization.Away 𝒜 f)
+    (z : Localization.Away f) :
+    degreeZero 𝒜 hf (h.val * z) = h * degreeZero 𝒜 hf z := by
+  obtain ⟨n, a, ha, rfl⟩ := HomogeneousLocalization.Away.mk_surjective 𝒜 hf h
+  obtain ⟨m, b, rfl⟩ := exists_fraction f z
+  rw [HomogeneousLocalization.Away.val_mk, Localization.mk_eq_mk']
+  change degreeZero 𝒜 hf (fraction f n a * fraction f m b) = _
+  rw [← fraction_mul, degreeZero_fraction, degreeZero_fraction]
+  apply HomogeneousLocalization.val_injective
+  simp only [HomogeneousLocalization.val_mul, projectedFraction_val,
+    HomogeneousLocalization.Away.val_mk, Localization.mk_eq_mk']
+  change fraction f (n + m) (GradedRing.proj 𝒜 ((n + m) * d) (a * b)) =
+    fraction f n a * fraction f m (GradedRing.proj 𝒜 (m * d) b)
+  rw [← fraction_mul]
+  congr 1
+  change (DirectSum.decompose 𝒜 (a * b) ((n + m) * d) : A) =
+    a * DirectSum.decompose 𝒜 b (m * d)
+  rw [Nat.add_mul]
+  exact DirectSum.coe_decompose_mul_add_of_left_mem 𝒜 ha
+
+theorem degreeZero_homogeneous_mul (z : Localization.Away f)
+    (h : HomogeneousLocalization.Away 𝒜 f) :
+    degreeZero 𝒜 hf (z * h.val) = degreeZero 𝒜 hf z * h := by
+  rw [mul_comm z, degreeZero_mul_homogeneous, mul_comm h]
+
+include hf in
+/-- Contracting the ordinary principal ideal of an actual degree-zero
+element gives its principal ideal in the genuine projective chart ring. -/
+theorem principalIdeal_comap_val (h : HomogeneousLocalization.Away 𝒜 f) :
+    (Ideal.span ({h.val} : Set (Localization.Away f))).comap
+      (algebraMap (HomogeneousLocalization.Away 𝒜 f) (Localization.Away f)) =
+        Ideal.span ({h} : Set (HomogeneousLocalization.Away 𝒜 f)) := by
+  ext x
+  constructor
+  · intro hx
+    change x.val ∈ Ideal.span ({h.val} : Set (Localization.Away f)) at hx
+    obtain ⟨a, ha⟩ := Ideal.mem_span_singleton'.mp hx
+    apply Ideal.mem_span_singleton'.mpr
+    refine ⟨degreeZero 𝒜 hf a, ?_⟩
+    have he := congrArg (degreeZero 𝒜 hf) ha
+    rw [degreeZero_homogeneous_mul, degreeZero_val] at he
+    exact he
+  · intro hx
+    obtain ⟨a, ha⟩ := Ideal.mem_span_singleton'.mp hx
+    change x.val ∈ Ideal.span ({h.val} : Set (Localization.Away f))
+    apply Ideal.mem_span_singleton'.mpr
+    exact ⟨a.val, (HomogeneousLocalization.val_mul a h).symm.trans
+      (congrArg HomogeneousLocalization.val ha)⟩
+
+/-- Regularity of the same element in the ordinary localization descends
+along the injective homogeneous-localization inclusion. -/
+theorem isSMulRegular_of_val (h : HomogeneousLocalization.Away 𝒜 f)
+    (hh : IsSMulRegular (Localization.Away f) h.val) :
+    IsSMulRegular (HomogeneousLocalization.Away 𝒜 f) h := by
+  intro x y hxy
+  change h * x = h * y at hxy
+  apply HomogeneousLocalization.val_injective
+  apply hh
+  change h.val * x.val = h.val * y.val
+  simpa only [HomogeneousLocalization.val_mul] using
+    congrArg HomogeneousLocalization.val hxy
+
+section NormalizedElement
+
+variable {a z b : A} {e k : ℕ}
+variable (ha : a ∈ 𝒜 e) (hz : z ∈ 𝒜 1) (hb : b ∈ 𝒜 k)
+
+/-- The actual degree-zero fraction `b / z^k` on `D₊(a) ∩ D₊(z)`.
+Its presentation uses only powers of the homogeneous product denominator. -/
+def normalizedElement : HomogeneousLocalization.Away 𝒜 (a * z) :=
+  HomogeneousLocalization.Away.mk 𝒜 (SetLike.mul_mem_graded ha hz) k
+    (b * a ^ k) (by
+      simpa only [nsmul_eq_mul, Nat.cast_id, Nat.mul_add, Nat.mul_one, Nat.add_comm] using
+        SetLike.mul_mem_graded hb (SetLike.pow_mem_graded k ha))
+
+theorem normalizedElement_val_mul :
+    (normalizedElement 𝒜 ha hz hb).val *
+      (algebraMap A (Localization.Away (a * z)) z) ^ k =
+        algebraMap A (Localization.Away (a * z)) b := by
+  have hua : IsUnit (algebraMap A (Localization.Away (a * z)) a) :=
+    IsLocalization.Away.isUnit_of_dvd (a * z) ⟨z, rfl⟩
+  apply (hua.pow k).mul_right_cancel
+  have hspec := IsLocalization.mk'_spec (Localization.Away (a * z))
+    (b * a ^ k) (powerDenominator (a * z) k)
+  change fraction (a * z) k (b * a ^ k) *
+    algebraMap A (Localization.Away (a * z)) ((a * z) ^ k) = _ at hspec
+  simp only [normalizedElement, HomogeneousLocalization.Away.val_mk,
+    Localization.mk_eq_mk']
+  change (fraction (a * z) k (b * a ^ k) *
+    algebraMap A (Localization.Away (a * z)) z ^ k) *
+      algebraMap A (Localization.Away (a * z)) a ^ k = _
+  simpa only [map_mul, map_pow, mul_pow, mul_assoc, mul_comm, mul_left_comm] using hspec
+
+theorem normalizedElement_span_val :
+    Ideal.span ({(normalizedElement 𝒜 ha hz hb).val} :
+      Set (Localization.Away (a * z))) =
+        Ideal.span ({algebraMap A (Localization.Away (a * z)) b} :
+          Set (Localization.Away (a * z))) := by
+  have huz : IsUnit (algebraMap A (Localization.Away (a * z)) z) :=
+    IsLocalization.Away.isUnit_of_dvd (a * z) ⟨a, mul_comm a z⟩
+  rw [← normalizedElement_val_mul 𝒜 ha hz hb,
+    Ideal.span_singleton_mul_right_unit (huz.pow k)]
+
+theorem normalizedElement_regular
+    (hbreg : IsSMulRegular (Localization.Away (a * z))
+      (algebraMap A (Localization.Away (a * z)) b)) :
+    IsSMulRegular (HomogeneousLocalization.Away 𝒜 (a * z))
+      (normalizedElement 𝒜 ha hz hb) := by
+  apply isSMulRegular_of_val
+  apply IsSMulRegular.of_right_eq_zero_of_smul
+  intro x hx
+  apply hbreg.right_eq_zero_of_smul
+  change algebraMap A (Localization.Away (a * z)) b * x = 0
+  change (normalizedElement 𝒜 ha hz hb).val * x = 0 at hx
+  rw [← normalizedElement_val_mul 𝒜 ha hz hb]
+  calc
+    ((normalizedElement 𝒜 ha hz hb).val *
+        algebraMap A (Localization.Away (a * z)) z ^ k) * x =
+      algebraMap A (Localization.Away (a * z)) z ^ k *
+        ((normalizedElement 𝒜 ha hz hb).val * x) := by ring
+    _ = 0 := by rw [hx, mul_zero]
+
+end NormalizedElement
+
+end CycleQ2GradedLocalizationProjection
+
+#print axioms CycleQ2GradedLocalizationProjection.degreeZero_mul_homogeneous
+#print axioms CycleQ2GradedLocalizationProjection.principalIdeal_comap_val
+#print axioms CycleQ2GradedLocalizationProjection.isSMulRegular_of_val
+
+namespace CycleQ2ProjectiveCartierIdeal
+
+open MvPolynomial HomogeneousLocalization
+  CycleQ2GeometricSeedNormalIdeals CycleQ2GeometricCartierNormalLift
+  CycleQ2GeometricSurfaceCoordinates CycleQ2CartierSurfaceGrading
+  CycleQ2GradedLocalizationProjection CycleQ2GradedCechProjection
+open CycleQ2GeometricLiteralSurface (curveGradedMap curveChartMap_mk_eq_zero_iff
+  curveToSurface curveToSurface_chart_ker projChartSectionsEquiv)
+
+/-- This is the actual homogeneous-localization kernel of the literal
+surface-to-curve map, not an independently chosen homogeneous ideal. -/
+theorem curveChartKernel_eq_comap (r θ : ℂ) (s : SurfaceRing r θ) {d : ℕ}
+    (hs : s ∈ surfaceGrade r θ d) :
+    RingHom.ker (Away.map (curveGradedMap r θ) s) =
+      ((curveIdealOnSurface r θ).map
+        (algebraMap (SurfaceRing r θ) (Localization.Away s))).comap
+        (algebraMap (Away (surfaceGrade r θ) s) (Localization.Away s)) := by
+  ext x
+  obtain ⟨n, p, hp, rfl⟩ := Away.mk_surjective (surfaceGrade r θ) hs x
+  change Away.map (curveGradedMap r θ) s
+    (Away.mk (surfaceGrade r θ) hs n p hp) = 0 ↔ _
+  rw [curveChartMap_mk_eq_zero_iff]
+  change (∃ k : ℕ, s ^ k * p ∈ curveIdealOnSurface r θ) ↔
+    (Away.mk (surfaceGrade r θ) hs n p hp).val ∈
+      (curveIdealOnSurface r θ).map
+        (algebraMap (SurfaceRing r θ) (Localization.Away s))
+  rw [Away.val_mk, Localization.mk_eq_mk',
+    IsLocalization.mk'_mem_map_algebraMap_iff]
+  constructor
+  · rintro ⟨k, hk⟩
+    exact ⟨s ^ k, ⟨k, rfl⟩, hk⟩
+  · rintro ⟨t, ⟨k, rfl⟩, hk⟩
+    exact ⟨k, hk⟩
+
+end CycleQ2ProjectiveCartierIdeal
+
+#print axioms CycleQ2GradedLocalizationProjection.normalizedElement_val_mul
+#print axioms CycleQ2GradedLocalizationProjection.normalizedElement_regular
+#print axioms CycleQ2ProjectiveCartierIdeal.curveChartKernel_eq_comap
+
+
+end
+end DegreeZeroIdealCore
+
+
+section ActualProjectiveIdealCharts
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+noncomputable section
+
+namespace CycleQ2ProjectiveCartierIdeal
+
+open MvPolynomial HomogeneousLocalization
+  CycleQ2ConormalJacobian CycleQ2NormalConnecting CycleQ2SeedTrace
+  CycleQ2GeometricSeedNormalIdeals CycleQ2GeometricCartierNormalLift
+  CycleQ2GeometricSurfaceCoordinates CycleQ2CartierSurfaceGrading
+  CycleQ2GradedLocalizationProjection CycleQ2GradedCechProjection
+open CycleQ2GeometricLiteralSurface (curveGradedMap curveChartMap_mk_eq_zero_iff
+  curveToSurface curveToSurface_chart_ker projChartSectionsEquiv
+  gradedAwayMap_surjective curveGradedMap_homogeneous_surjective
+  projMap_app_basicOpen curve_irrelevant_le)
+
+def refinedDenominator (r θ : ℂ) (i : Fin 4) (j : Fin 3) : SurfaceRing r θ :=
+  coverElement r θ i * coordinateElement r θ j
+
+theorem refinedDenominator_homogeneous (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    refinedDenominator r θ i j ∈ surfaceGrade r θ (coverDegree i + 1) :=
+  SetLike.mul_mem_graded (coverElement_mem_grade r θ i)
+    (coordinateElement_homogeneous r θ j)
+
+abbrev RefinedRing (r θ : ℂ) (i : Fin 4) (j : Fin 3) :=
+  Away (surfaceGrade r θ) (refinedDenominator r θ i j)
+
+def refinedIdeal (r θ : ℂ) (i : Fin 4) (j : Fin 3) : Ideal (RefinedRing r θ i j) :=
+  RingHom.ker (Away.map (curveGradedMap r θ) (refinedDenominator r θ i j))
+
+/-- The actual generator is `f₂/x_j²` or `f₁/x_j²` on the two cofactor
+opens. On the complementary opens the curve is empty and its ideal is the unit ideal. -/
+def refinedGenerator (r θ : ℂ) (i : Fin 4) (j : Fin 3) : RefinedRing r θ i j := by
+  refine Fin.cases ?_ (fun i => ?_) i
+  · exact normalizedElement (surfaceGrade r θ) (coverElement_mem_grade r θ 0)
+      (coordinateElement_homogeneous r θ j)
+      (surfaceQuotient_mem_grade r θ originalF2_homogeneous)
+  · refine Fin.cases ?_ (fun _ => 1) i
+    exact normalizedElement (surfaceGrade r θ) (coverElement_mem_grade r θ 1)
+      (coordinateElement_homogeneous r θ j)
+      (surfaceQuotient_mem_grade r θ (originalF1_homogeneous r))
+
+theorem localizedIdeal_principal_first (r θ : ℂ) (z : SurfaceRing r θ) :
+    (curveIdealOnSurface r θ).map (algebraMap (SurfaceRing r θ)
+      (Localization.Away (surfaceQuotient r θ (originalG1 r) * z))) =
+        Ideal.span ({algebraMap (SurfaceRing r θ)
+          (Localization.Away (surfaceQuotient r θ (originalG1 r) * z))
+          (surfaceQuotient r θ originalF2)} : Set _) := by
+  let L := Localization.Away (surfaceQuotient r θ (originalG1 r) * z)
+  let φ : WeightedPoly →+* L := (algebraMap (SurfaceRing r θ) L).comp (surfaceQuotient r θ)
+  have hu : IsUnit (φ (originalG1 r)) :=
+    IsLocalization.Away.isUnit_of_dvd (surfaceQuotient r θ (originalG1 r) * z) ⟨z, rfl⟩
+  rw [curveIdealOnSurface, CycleQ2GeometricRelativeConormal.relativeIdeal, Ideal.map_map]
+  exact mapped_curveIdeal_principal_first r θ φ
+    (by simp [φ]) (by simp [φ]) hu.unit (IsUnit.unit_spec hu)
+
+theorem localizedIdeal_principal_second (r θ : ℂ) (z : SurfaceRing r θ) :
+    (curveIdealOnSurface r θ).map (algebraMap (SurfaceRing r θ)
+      (Localization.Away (surfaceQuotient r θ originalG2 * z))) =
+        Ideal.span ({algebraMap (SurfaceRing r θ)
+          (Localization.Away (surfaceQuotient r θ originalG2 * z))
+          (surfaceQuotient r θ (originalF1 r))} : Set _) := by
+  let L := Localization.Away (surfaceQuotient r θ originalG2 * z)
+  let φ : WeightedPoly →+* L := (algebraMap (SurfaceRing r θ) L).comp (surfaceQuotient r θ)
+  have hu : IsUnit (φ originalG2) :=
+    IsLocalization.Away.isUnit_of_dvd (surfaceQuotient r θ originalG2 * z) ⟨z, rfl⟩
+  rw [curveIdealOnSurface, CycleQ2GeometricRelativeConormal.relativeIdeal, Ideal.map_map]
+  exact mapped_curveIdeal_principal_second r θ φ
+    (by simp [φ]) (by simp [φ]) hu.unit (IsUnit.unit_spec hu)
+
+theorem localizedGenerator_regular_first (r θ : ℂ) (z : SurfaceRing r θ) :
+    IsSMulRegular (Localization.Away (surfaceQuotient r θ (originalG1 r) * z))
+      (algebraMap (SurfaceRing r θ)
+        (Localization.Away (surfaceQuotient r θ (originalG1 r) * z))
+        (surfaceQuotient r θ originalF2)) := by
+  apply regular_after_localizing
+  intro x hx
+  calc
+    (surfaceQuotient r θ (originalG1 r) * z) * x =
+      z * (surfaceQuotient r θ (originalG1 r) * x) := by ring
+    _ = 0 := by rw [first_generator_torsion r θ x hx, mul_zero]
+
+theorem localizedGenerator_regular_second (r θ : ℂ) (z : SurfaceRing r θ) :
+    IsSMulRegular (Localization.Away (surfaceQuotient r θ originalG2 * z))
+      (algebraMap (SurfaceRing r θ)
+        (Localization.Away (surfaceQuotient r θ originalG2 * z))
+        (surfaceQuotient r θ (originalF1 r))) := by
+  apply regular_after_localizing
+  intro x hx
+  calc
+    (surfaceQuotient r θ originalG2 * z) * x =
+      z * (surfaceQuotient r θ originalG2 * x) := by ring
+    _ = 0 := by rw [second_generator_torsion r θ x hx, mul_zero]
+
+theorem curveChartKernel_principal_of_localized (r θ : ℂ)
+    {s : SurfaceRing r θ} {d : ℕ} (hs : s ∈ surfaceGrade r θ d)
+    (b : Away (surfaceGrade r θ) s)
+    (hI : (curveIdealOnSurface r θ).map
+      (algebraMap (SurfaceRing r θ) (Localization.Away s)) = Ideal.span ({b.val} : Set _)) :
+    RingHom.ker (Away.map (curveGradedMap r θ) s) = Ideal.span ({b} : Set _) := by
+  rw [curveChartKernel_eq_comap r θ s hs, hI]
+  exact principalIdeal_comap_val (surfaceGrade r θ) hs b
+
+theorem refinedIdeal_principal_first (r θ : ℂ) (j : Fin 3) :
+    refinedIdeal r θ 0 j = Ideal.span ({refinedGenerator r θ 0 j} : Set _) := by
+  apply curveChartKernel_principal_of_localized r θ
+    (refinedDenominator_homogeneous r θ 0 j)
+  exact (localizedIdeal_principal_first r θ (coordinateElement r θ j)).trans
+    (normalizedElement_span_val (surfaceGrade r θ) (coverElement_mem_grade r θ 0)
+      (coordinateElement_homogeneous r θ j)
+      (surfaceQuotient_mem_grade r θ originalF2_homogeneous)).symm
+
+theorem refinedIdeal_principal_second (r θ : ℂ) (j : Fin 3) :
+    refinedIdeal r θ 1 j = Ideal.span ({refinedGenerator r θ 1 j} : Set _) := by
+  apply curveChartKernel_principal_of_localized r θ
+    (refinedDenominator_homogeneous r θ 1 j)
+  exact (localizedIdeal_principal_second r θ (coordinateElement r θ j)).trans
+    (normalizedElement_span_val (surfaceGrade r θ) (coverElement_mem_grade r θ 1)
+      (coordinateElement_homogeneous r θ j)
+      (surfaceQuotient_mem_grade r θ (originalF1_homogeneous r))).symm
+
+theorem curveChartKernel_eq_top_of_mem (r θ : ℂ) (s : SurfaceRing r θ) {d : ℕ}
+    (hs : s ∈ surfaceGrade r θ d) (hI : s ∈ curveIdealOnSurface r θ) :
+    RingHom.ker (Away.map (curveGradedMap r θ) s) = ⊤ := by
+  apply top_unique
+  intro x _
+  obtain ⟨n, p, hp, rfl⟩ := Away.mk_surjective (surfaceGrade r θ) hs x
+  apply (curveChartMap_mk_eq_zero_iff r θ s hs n p hp).mpr
+  refine ⟨1, ?_⟩
+  simpa only [pow_one] using (curveIdealOnSurface r θ).mul_mem_right p hI
+
+theorem refinedIdeal_eq_top_third (r θ : ℂ) (j : Fin 3) : refinedIdeal r θ 2 j = ⊤ := by
+  apply curveChartKernel_eq_top_of_mem r θ _ (refinedDenominator_homogeneous r θ 2 j)
+  apply (curveIdealOnSurface r θ).mul_mem_right
+  exact Ideal.mem_map_of_mem _ (curveEquation_mem r θ 0)
+
+theorem refinedIdeal_eq_top_fourth (r θ : ℂ) (j : Fin 3) : refinedIdeal r θ 3 j = ⊤ := by
+  apply curveChartKernel_eq_top_of_mem r θ _ (refinedDenominator_homogeneous r θ 3 j)
+  apply (curveIdealOnSurface r θ).mul_mem_right
+  exact Ideal.mem_map_of_mem _ (curveEquation_mem r θ 1)
+
+/-- On every member of the actual Cartier-by-coordinate refinement,
+the genuine homogeneous localization kernel is generated by the displayed section. -/
+theorem refinedIdeal_principal (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    refinedIdeal r θ i j = Ideal.span ({refinedGenerator r θ i j} : Set _) := by
+  fin_cases i
+  · exact refinedIdeal_principal_first r θ j
+  · exact refinedIdeal_principal_second r θ j
+  · change refinedIdeal r θ 2 j = Ideal.span ({(1 : RefinedRing r θ 2 j)} : Set _)
+    rw [Ideal.span_singleton_one]
+    exact refinedIdeal_eq_top_third r θ j
+  · change refinedIdeal r θ 3 j = Ideal.span ({(1 : RefinedRing r θ 3 j)} : Set _)
+    rw [Ideal.span_singleton_one]
+    exact refinedIdeal_eq_top_fourth r θ j
+
+/-- These are genuine nonzerodivisors in the projective chart rings.
+The proof uses the original monic regular sequence, without a smoothness premise. -/
+theorem refinedGenerator_regular (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    IsSMulRegular (RefinedRing r θ i j) (refinedGenerator r θ i j) := by
+  fin_cases i
+  · exact normalizedElement_regular (surfaceGrade r θ) (coverElement_mem_grade r θ 0)
+      (coordinateElement_homogeneous r θ j)
+      (surfaceQuotient_mem_grade r θ originalF2_homogeneous)
+      (localizedGenerator_regular_first r θ (coordinateElement r θ j))
+  · exact normalizedElement_regular (surfaceGrade r θ) (coverElement_mem_grade r θ 1)
+      (coordinateElement_homogeneous r θ j)
+      (surfaceQuotient_mem_grade r θ (originalF1_homogeneous r))
+      (localizedGenerator_regular_second r θ (coordinateElement r θ j))
+  · exact IsSMulRegular.one _
+  · exact IsSMulRegular.one _
+
+theorem refinedGenerator_first_val_mul (r θ : ℂ) (j : Fin 3) :
+    (refinedGenerator r θ 0 j).val *
+      algebraMap (SurfaceRing r θ) (Localization.Away (refinedDenominator r θ 0 j))
+        (coordinateElement r θ j) ^ 2 =
+      algebraMap (SurfaceRing r θ) (Localization.Away (refinedDenominator r θ 0 j))
+        (surfaceQuotient r θ originalF2) :=
+  normalizedElement_val_mul (surfaceGrade r θ) (coverElement_mem_grade r θ 0)
+    (coordinateElement_homogeneous r θ j)
+    (surfaceQuotient_mem_grade r θ originalF2_homogeneous)
+
+theorem refinedGenerator_second_val_mul (r θ : ℂ) (j : Fin 3) :
+    (refinedGenerator r θ 1 j).val *
+      algebraMap (SurfaceRing r θ) (Localization.Away (refinedDenominator r θ 1 j))
+        (coordinateElement r θ j) ^ 2 =
+      algebraMap (SurfaceRing r θ) (Localization.Away (refinedDenominator r θ 1 j))
+        (surfaceQuotient r θ (originalF1 r)) :=
+  normalizedElement_val_mul (surfaceGrade r θ) (coverElement_mem_grade r θ 1)
+    (coordinateElement_homogeneous r θ j)
+    (surfaceQuotient_mem_grade r θ (originalF1_homogeneous r))
+
+section ActualProjectiveSections
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+open CycleQ2CartierProjectiveCover (projectiveSurface coverFamily projective_four_cover)
+open CycleQ2ProjectiveCoordinateCohomology (coordinateOpen coordinate_cover)
+
+def refinedOpen (r θ : ℂ) (i : Fin 4) (j : Fin 3) : (projectiveSurface r θ).Opens :=
+  Proj.basicOpen (surfaceGrade r θ) (refinedDenominator r θ i j)
+
+theorem refinedOpen_eq (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    refinedOpen r θ i j = coverFamily r θ i ⊓ coordinateOpen r θ j :=
+  Proj.basicOpen_mul (surfaceGrade r θ) _ _
+
+/-- The twelve displayed actual affine opens cover the literal projective surface. -/
+theorem refinedOpen_cover (r θ : ℂ) (hr : r ≠ 0) (hθ : θ ≠ 0) :
+    (⨆ i : Fin 4, ⨆ j : Fin 3, refinedOpen r θ i j) = ⊤ := by
+  calc
+    (⨆ i : Fin 4, ⨆ j : Fin 3, refinedOpen r θ i j) =
+        (⨆ i : Fin 4, coverFamily r θ i) ⊓
+          (⨆ j : Fin 3, coordinateOpen r θ j) := by
+      simp only [refinedOpen_eq, iSup_inf_eq, inf_iSup_eq]
+      exact iSup_comm
+    _ = ⊤ := by rw [projective_four_cover r θ hr, coordinate_cover r θ hθ]; simp
+
+theorem literal_refinedOpen_cover :
+    (⨆ i : Fin 4, ⨆ j : Fin 3, refinedOpen 57 1 i j) = ⊤ :=
+  refinedOpen_cover 57 1 (by norm_num) one_ne_zero
+
+def refinedSectionsEquiv (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    RefinedRing r θ i j ≃+* Γ(projectiveSurface r θ, refinedOpen r θ i j) :=
+  projChartSectionsEquiv (surfaceGrade r θ) (refinedDenominator r θ i j)
+    (refinedDenominator_homogeneous r θ i j) (by omega)
+
+def refinedSectionGenerator (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    Γ(projectiveSurface r θ, refinedOpen r θ i j) :=
+  refinedSectionsEquiv r θ i j (refinedGenerator r θ i j)
+
+/-- The displayed section generates the kernel of the actual scheme
+structure map on the actual open, with the canonical chart equivalence. -/
+theorem refinedSectionKernel_principal (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    RingHom.ker ((curveToSurface r θ).app (refinedOpen r θ i j)).hom =
+      Ideal.span ({refinedSectionGenerator r θ i j} : Set _) := by
+  have hk :
+      (RingHom.ker ((curveToSurface r θ).app (refinedOpen r θ i j)).hom).comap
+        (refinedSectionsEquiv r θ i j).toRingHom = refinedIdeal r θ i j :=
+    curveToSurface_chart_ker r θ (refinedDenominator r θ i j)
+      (refinedDenominator_homogeneous r θ i j) (by omega)
+  calc
+    RingHom.ker ((curveToSurface r θ).app (refinedOpen r θ i j)).hom =
+        ((RingHom.ker ((curveToSurface r θ).app (refinedOpen r θ i j)).hom).comap
+          (refinedSectionsEquiv r θ i j).toRingHom).map
+            (refinedSectionsEquiv r θ i j).toRingHom :=
+      (Ideal.map_comap_of_surjective _ (refinedSectionsEquiv r θ i j).surjective _).symm
+    _ = (refinedIdeal r θ i j).map (refinedSectionsEquiv r θ i j).toRingHom := by rw [hk]
+    _ = Ideal.span ({refinedSectionGenerator r θ i j} : Set _) := by
+      rw [refinedIdeal_principal, Ideal.map_span]
+      simp only [Set.image_singleton]
+      rfl
+
+theorem refinedSectionGenerator_regular (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    IsSMulRegular Γ(projectiveSurface r θ, refinedOpen r θ i j)
+      (refinedSectionGenerator r θ i j) := by
+  intro x y hxy
+  apply (refinedSectionsEquiv r θ i j).symm.injective
+  apply refinedGenerator_regular r θ i j
+  change refinedGenerator r θ i j * (refinedSectionsEquiv r θ i j).symm x =
+    refinedGenerator r θ i j * (refinedSectionsEquiv r θ i j).symm y
+  change refinedSectionGenerator r θ i j * x = refinedSectionGenerator r θ i j * y at hxy
+  have h := congrArg (refinedSectionsEquiv r θ i j).symm hxy
+  simpa only [map_mul, refinedSectionGenerator, RingEquiv.symm_apply_apply] using h
+
+open CycleQ2GeometricProjectiveCurve (curveGrade projectiveCurve)
+
+/-- The actual structure-map target on each refined chart is the genuine
+curve section ring, and every such section lifts from this surface chart. -/
+theorem refinedStructureMap_surjective (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    Function.Surjective ((curveToSurface r θ).app (refinedOpen r θ i j)).hom := by
+  intro q
+  let s := refinedDenominator r θ i j
+  have hs : s ∈ surfaceGrade r θ (coverDegree i + 1) :=
+    refinedDenominator_homogeneous r θ i j
+  have hd : 0 < coverDegree i + 1 := by omega
+  let eB := projChartSectionsEquiv (curveGrade r θ) (curveGradedMap r θ s)
+    ((curveGradedMap r θ).2 hs) hd
+  obtain ⟨a, ha⟩ := gradedAwayMap_surjective (surfaceGrade r θ) (curveGrade r θ)
+    (curveGradedMap r θ) (curveGradedMap_homogeneous_surjective r θ) s hs (eB.symm q)
+  refine ⟨refinedSectionsEquiv r θ i j a, ?_⟩
+  change (Proj.map (curveGradedMap r θ) (curve_irrelevant_le r θ)).app
+    (Proj.basicOpen (surfaceGrade r θ) s)
+      (projChartSectionsEquiv (surfaceGrade r θ) s hs hd a) = q
+  rw [projMap_app_basicOpen (surfaceGrade r θ) (curveGrade r θ)
+    (curveGradedMap r θ) (curve_irrelevant_le r θ) s hs hd, ha]
+  exact eB.apply_symm_apply q
+
+abbrev RefinedSections (r θ : ℂ) (i : Fin 4) (j : Fin 3) :=
+  Γ(projectiveSurface r θ, refinedOpen r θ i j)
+
+abbrev RefinedCurveSections (r θ : ℂ) (i : Fin 4) (j : Fin 3) :=
+  Γ(projectiveCurve r θ, (curveToSurface r θ) ⁻¹ᵁ refinedOpen r θ i j)
+
+def refinedSectionMap (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    RefinedSections r θ i j →+* RefinedCurveSections r θ i j :=
+  ((curveToSurface r θ).app (refinedOpen r θ i j)).hom
+
+open CycleQ2RegularPrincipalHomSequence
+
+theorem refinedScalarInclusion_injective (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    Function.Injective (scalarInclusion (RingHom.ker (refinedSectionMap r θ i j))) :=
+  scalarInclusion_injective _ (refinedSectionGenerator r θ i j)
+    (refinedSectionGenerator_regular r θ i j) (refinedSectionKernel_principal r θ i j)
+
+/-- Reduction is literally postcomposition by the curve-to-surface
+structure-map component. The curve section ring is not replaced by a chosen quotient. -/
+theorem refinedHomReduction_apply (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    letI : Algebra (RefinedSections r θ i j) (RefinedCurveSections r θ i j) :=
+      (refinedSectionMap r θ i j).toAlgebra
+    ∀ (f : RingHom.ker (refinedSectionMap r θ i j) →ₗ[RefinedSections r θ i j]
+        RefinedSections r θ i j) (x : RingHom.ker (refinedSectionMap r θ i j)),
+      algebraReduction (RingHom.ker (refinedSectionMap r θ i j))
+        (RefinedCurveSections r θ i j) f x =
+          (curveToSurface r θ).app (refinedOpen r θ i j) (f x) := by
+  intros
+  rfl
+
+theorem refinedHomReduction_surjective (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    letI : Algebra (RefinedSections r θ i j) (RefinedCurveSections r θ i j) :=
+      (refinedSectionMap r θ i j).toAlgebra
+    Function.Surjective (algebraReduction (RingHom.ker (refinedSectionMap r θ i j))
+      (RefinedCurveSections r θ i j)) := by
+  letI : Algebra (RefinedSections r θ i j) (RefinedCurveSections r θ i j) :=
+    (refinedSectionMap r θ i j).toAlgebra
+  exact algebraReduction_surjective _ _ (refinedSectionGenerator r θ i j)
+    (refinedSectionGenerator_regular r θ i j) (refinedSectionKernel_principal r θ i j)
+    (refinedStructureMap_surjective r θ i j)
+
+/-- Exactness on the actual refined affine chart, with the actual ideal,
+the actual scalar inclusion, and reduction to the actual curve section ring. -/
+theorem refinedHomSequence_exact (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    letI : Algebra (RefinedSections r θ i j) (RefinedCurveSections r θ i j) :=
+      (refinedSectionMap r θ i j).toAlgebra
+    Function.Exact (scalarInclusion (RingHom.ker (refinedSectionMap r θ i j)))
+      (algebraReduction (RingHom.ker (refinedSectionMap r θ i j))
+        (RefinedCurveSections r θ i j)) := by
+  letI : Algebra (RefinedSections r θ i j) (RefinedCurveSections r θ i j) :=
+    (refinedSectionMap r θ i j).toAlgebra
+  exact scalar_algebra_exact _ _ (refinedSectionGenerator r θ i j)
+    (refinedSectionGenerator_regular r θ i j) (refinedSectionKernel_principal r θ i j) rfl
+
+end ActualProjectiveSections
+
+end CycleQ2ProjectiveCartierIdeal
+
+#print axioms CycleQ2ProjectiveCartierIdeal.refinedIdeal_principal
+#print axioms CycleQ2ProjectiveCartierIdeal.refinedGenerator_regular
+#print axioms CycleQ2ProjectiveCartierIdeal.literal_refinedOpen_cover
+#print axioms CycleQ2ProjectiveCartierIdeal.refinedSectionKernel_principal
+#print axioms CycleQ2ProjectiveCartierIdeal.refinedSectionGenerator_regular
+#print axioms CycleQ2ProjectiveCartierIdeal.refinedStructureMap_surjective
+#print axioms CycleQ2ProjectiveCartierIdeal.refinedScalarInclusion_injective
+#print axioms CycleQ2ProjectiveCartierIdeal.refinedHomReduction_surjective
+#print axioms CycleQ2ProjectiveCartierIdeal.refinedHomSequence_exact
+
+end
+end ActualProjectiveIdealCharts
+
+end ActualProjectiveCartierIdeal
+
+section ActualProjectiveCartierSquares
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+noncomputable section
+
+namespace CycleQ2ProjectiveCartierIdeal
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  HomogeneousLocalization
+open CycleQ2GeometricSeedNormalIdeals CycleQ2GeometricCartierNormalLift
+  CycleQ2CartierSurfaceGrading
+open CycleQ2GeometricProjectiveCurve (curveGrade projectiveCurve)
+open CycleQ2CartierProjectiveCover (projectiveSurface)
+open CycleQ2GeometricLiteralSurface (curveGradedMap curveToSurface curve_irrelevant_le
+  gradedAwayMap_surjective curveGradedMap_homogeneous_surjective)
+
+abbrev RefinedCurveRing (r θ : ℂ) (i : Fin 4) (j : Fin 3) :=
+  Away (curveGrade r θ) (curveGradedMap r θ (refinedDenominator r θ i j))
+
+def refinedCurveRingMap (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    RefinedRing r θ i j →+* RefinedCurveRing r θ i j :=
+  Away.map (curveGradedMap r θ) (refinedDenominator r θ i j)
+
+def refinedSurfaceChart (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    Spec (CommRingCat.of (RefinedRing r θ i j)) ⟶ projectiveSurface r θ :=
+  Proj.awayι (surfaceGrade r θ) (refinedDenominator r θ i j)
+    (refinedDenominator_homogeneous r θ i j) (by omega)
+
+def refinedCurveChart (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    Spec (CommRingCat.of (RefinedCurveRing r θ i j)) ⟶ projectiveCurve r θ :=
+  Proj.awayι (curveGrade r θ) (curveGradedMap r θ (refinedDenominator r θ i j))
+    ((curveGradedMap r θ).2 (refinedDenominator_homogeneous r θ i j)) (by omega)
+
+instance (r θ : ℂ) (i : Fin 4) (j : Fin 3) : IsOpenImmersion (refinedSurfaceChart r θ i j) :=
+  inferInstanceAs (IsOpenImmersion (Proj.awayι (surfaceGrade r θ)
+    (refinedDenominator r θ i j) (refinedDenominator_homogeneous r θ i j) (by omega)))
+
+instance (r θ : ℂ) (i : Fin 4) (j : Fin 3) : IsOpenImmersion (refinedCurveChart r θ i j) :=
+  inferInstanceAs (IsOpenImmersion (Proj.awayι (curveGrade r θ)
+    (curveGradedMap r θ (refinedDenominator r θ i j))
+    ((curveGradedMap r θ).2 (refinedDenominator_homogeneous r θ i j)) (by omega)))
+
+theorem refinedSurfaceChart_range (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    (refinedSurfaceChart r θ i j).opensRange = refinedOpen r θ i j :=
+  Proj.opensRange_awayι (surfaceGrade r θ) (refinedDenominator r θ i j)
+    (refinedDenominator_homogeneous r θ i j) (by omega)
+
+theorem refinedCurveChart_range (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    (refinedCurveChart r θ i j).opensRange =
+      (curveToSurface r θ) ⁻¹ᵁ refinedOpen r θ i j :=
+  Proj.opensRange_awayι (curveGrade r θ)
+    (curveGradedMap r θ (refinedDenominator r θ i j))
+    ((curveGradedMap r θ).2 (refinedDenominator_homogeneous r θ i j)) (by omega)
+
+theorem refinedChart_square (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    refinedCurveChart r θ i j ≫ curveToSurface r θ =
+      Spec.map (CommRingCat.ofHom (refinedCurveRingMap r θ i j)) ≫
+        refinedSurfaceChart r θ i j :=
+  Proj.awayι_comp_map (curveGradedMap r θ) (curve_irrelevant_le r θ)
+    (by omega) (refinedDenominator r θ i j) (refinedDenominator_homogeneous r θ i j)
+
+/-- The two actual homogeneous-localization charts form the cartesian
+square of the original projective closed immersion. -/
+theorem refinedChart_isPullback (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    IsPullback (Spec.map (CommRingCat.ofHom (refinedCurveRingMap r θ i j)))
+      (refinedCurveChart r θ i j) (refinedSurfaceChart r θ i j)
+      (curveToSurface r θ) := by
+  apply IsOpenImmersion.isPullback
+  · exact refinedChart_square r θ i j
+  · rw [refinedSurfaceChart_range, refinedCurveChart_range]
+
+theorem refinedCurveRingMap_surjective (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    Function.Surjective (refinedCurveRingMap r θ i j) :=
+  gradedAwayMap_surjective (surfaceGrade r θ) (curveGrade r θ) (curveGradedMap r θ)
+    (curveGradedMap_homogeneous_surjective r θ) (refinedDenominator r θ i j)
+    (refinedDenominator_homogeneous r θ i j)
+
+theorem refinedCurveRingMap_kernel (r θ : ℂ) (i : Fin 4) (j : Fin 3) :
+    RingHom.ker (refinedCurveRingMap r θ i j) =
+      Ideal.span ({refinedGenerator r θ i j} : Set _) :=
+  refinedIdeal_principal r θ i j
+
+end CycleQ2ProjectiveCartierIdeal
+
+#print axioms CycleQ2ProjectiveCartierIdeal.refinedChart_isPullback
+#print axioms CycleQ2ProjectiveCartierIdeal.refinedCurveRingMap_surjective
+#print axioms CycleQ2ProjectiveCartierIdeal.refinedCurveRingMap_kernel
+
+end -- component noncomputable section
+end ActualProjectiveCartierSquares
+
+section IntrinsicAffineCartierExactness
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicCartierSequence
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricIntrinsicNormal CycleQ2GeometricCartierNormalLift
+  CycleQ2RegularPrincipalHomSequence
+
+variable {A B : CommRingCat.{0}} (φ : A ⟶ B)
+
+theorem affineInverseIdealScalar_injective (b : Γ(Spec A, ⊤))
+    (hb : IsSMulRegular Γ(Spec A, ⊤) b)
+    (hp : RingHom.ker ((Spec.map φ).app ⊤).hom = Ideal.span ({b} : Set Γ(Spec A, ⊤))) :
+    Function.Injective ((inverseIdealScalar (Spec.map φ)).val.app (op ⊤)) := by
+  intro a c hac
+  apply scalarInclusion_injective (RingHom.ker ((Spec.map φ).app ⊤).hom) b hb hp
+  apply LinearMap.ext
+  intro x
+  have h := congrArg (fun f => inverseIdealSectionEvaluate (Spec.map φ) ⊤ f x) hac
+  exact (inverseIdealScalar_evaluate (Spec.map φ) ⊤ a x).symm.trans
+    (h.trans (inverseIdealScalar_evaluate (Spec.map φ) ⊤ c x))
+
+theorem affineInverseIdealReduction_surjective (b : Γ(Spec A, ⊤))
+    (hb : IsSMulRegular Γ(Spec A, ⊤) b)
+    (hp : RingHom.ker ((Spec.map φ).app ⊤).hom = Ideal.span ({b} : Set Γ(Spec A, ⊤)))
+    (hs : Function.Surjective ((Spec.map φ).app ⊤)) :
+    Function.Surjective ((inverseIdealReduction (Spec.map φ)).val.app (op ⊤)) := by
+  intro n
+  let I := RingHom.ker ((Spec.map φ).app ⊤).hom
+  let e := principalIdealEquiv I b hb hp
+  obtain ⟨a,ha⟩ := hs (normalSectionEvaluate (Spec.map φ) ⊤ n (e 1))
+  let l : I →ₗ[Γ(Spec A, ⊤)] Γ(Spec A, ⊤) := a • e.symm.toLinearMap
+  let f := (affineInverseIdealSectionEquiv φ).symm l
+  refine ⟨f, ?_⟩
+  apply (affineNormalSectionEquiv φ).injective
+  apply principalHom_ext I b hb hp
+  calc
+    _ = (Spec.map φ).app ⊤ (inverseIdealSectionEvaluate (Spec.map φ) ⊤ f (e 1)) :=
+      inverseIdealReduction_evaluate (Spec.map φ) ⊤ f (e 1)
+    _ = (Spec.map φ).app ⊤ (l (e 1)) :=
+      congrArg (fun h : I →ₗ[Γ(Spec A, ⊤)] Γ(Spec A, ⊤) => (Spec.map φ).app ⊤ (h (e 1)))
+        ((affineInverseIdealSectionEquiv φ).apply_symm_apply l)
+    _ = (Spec.map φ).app ⊤ a := by
+      apply congrArg ((Spec.map φ).app ⊤)
+      change a * e.symm (e 1) = a
+      rw [LinearEquiv.symm_apply_apply, mul_one]
+    _ = _ := ha
+
+theorem affineInverseIdealSequence_exact (b : Γ(Spec A, ⊤))
+    (hb : IsSMulRegular Γ(Spec A, ⊤) b)
+    (hp : RingHom.ker ((Spec.map φ).app ⊤).hom = Ideal.span ({b} : Set Γ(Spec A, ⊤))) :
+    Function.Exact ((inverseIdealScalar (Spec.map φ)).val.app (op ⊤))
+      ((inverseIdealReduction (Spec.map φ)).val.app (op ⊤)) := by
+  intro f
+  constructor
+  · intro hf
+    let I := RingHom.ker ((Spec.map φ).app ⊤).hom
+    let e := principalIdealEquiv I b hb hp
+    have hz : (Spec.map φ).app ⊤ (inverseIdealSectionEvaluate (Spec.map φ) ⊤ f (e 1)) = 0 :=
+      (inverseIdealReduction_evaluate (Spec.map φ) ⊤ f (e 1)).symm.trans
+        (congrArg (fun n => normalSectionEvaluate (Spec.map φ) ⊤ n (e 1)) hf)
+    have hm : inverseIdealSectionEvaluate (Spec.map φ) ⊤ f (e 1) ∈ Ideal.span ({b} : Set Γ(Spec A, ⊤)) :=
+      (le_of_eq hp) hz
+    obtain ⟨a,ha⟩ := Ideal.mem_span_singleton'.mp hm
+    refine ⟨a, ?_⟩
+    apply (affineInverseIdealSectionEquiv φ).injective
+    apply principalHom_ext I b hb hp
+    exact (inverseIdealScalar_evaluate (Spec.map φ) ⊤ a (e 1)).trans
+      ((congrArg (fun z : Γ(Spec A, ⊤) => a * z) (principalIdealEquiv_one_coe I b hb hp)).trans ha)
+  · rintro ⟨a,rfl⟩
+    exact congrArg (fun h => h.val.app (op ⊤) a)
+      (inverseIdealScalar_comp_reduction (Spec.map φ))
+
+end CycleQ2GeometricIntrinsicCartierSequence
+
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.affineInverseIdealScalar_injective
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.affineInverseIdealReduction_surjective
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.affineInverseIdealSequence_exact
+
+end -- component noncomputable section
+end IntrinsicAffineCartierExactness
+
+section IntrinsicCartierOpenTransport
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+noncomputable section
+
+namespace CycleQ2IntrinsicCartierOpenTransport
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricIntrinsicNormal CycleQ2GeometricIntrinsicCartierSequence
+
+variable {X Y : Scheme.{0}} {A B : CommRingCat.{0}}
+variable (j : X ⟶ Y) (φ : A ⟶ B)
+  (i : Spec A ⟶ Y) (k : Spec B ⟶ X)
+  [IsOpenImmersion i] [IsOpenImmersion k]
+  (H : IsPullback (Spec.map φ) k i j)
+
+def ambientSectionsEquiv : Γ(Y, i.opensRange) ≃+* Γ(Spec A, ⊤) :=
+  (IsOpenImmersion.ΓIsoTop i).symm.commRingCatIsoToRingEquiv
+
+theorem ambientSectionsEquiv_apply (a : Γ(Y, i.opensRange)) :
+    ambientSectionsEquiv i a = (i.appIso ⊤).hom
+      (Y.presheaf.map (homOfLE (i.image_le_opensRange ⊤)).op a) := rfl
+
+/-- The actual open-base-change equivalence intertwines multiplication
+of the original ideal inclusion with multiplication on the affine chart. -/
+theorem inverseIdealScalar_openBaseChange (a : Γ(Y, i.opensRange)) :
+    inverseIdealSectionOpenBaseChangeEquiv j i k (Spec.map φ) H
+      ((inverseIdealScalar j).val.app (op i.opensRange) a) =
+        (inverseIdealScalar (Spec.map φ)).val.app (op ⊤) (ambientSectionsEquiv i a) := by
+  apply (affineInverseIdealSectionEquiv φ).injective
+  apply LinearMap.ext
+  intro x
+  change inverseIdealSectionEvaluate (Spec.map φ) ⊤
+      (inverseIdealSectionOpenBaseChangeEquiv j i k (Spec.map φ) H
+        ((inverseIdealScalar j).val.app (op i.opensRange) a)) x =
+    inverseIdealSectionEvaluate (Spec.map φ) ⊤
+      ((inverseIdealScalar (Spec.map φ)).val.app (op ⊤) (ambientSectionsEquiv i a)) x
+  rw [inverseIdealSectionOpenBaseChangeEquiv_evaluate]
+  rw [← PresheafOfModules.naturality_apply (inverseIdealScalar j).val]
+  rw [inverseIdealScalar_evaluate, inverseIdealScalar_evaluate]
+  rw [map_mul, normalOpenIdealPullback_coe]
+  have hx := ConcreteCategory.congr_hom (i.appIso ⊤).inv_hom_id (x : Γ(Spec A, ⊤))
+  change (i.appIso ⊤).hom ((i.appIso ⊤).inv (x : Γ(Spec A, ⊤))) = x at hx
+  rw [hx]
+  rfl
+
+theorem baseChangeStructureSectionIso_app_forward (V : (Spec A).Opens)
+    (a : Γ(Y, i ''ᵁ V)) :
+    (baseChangeStructureSectionIso j i k (Spec.map φ) H V).hom
+      (j.app (i ''ᵁ V) a) = (Spec.map φ).app V ((i.appIso V).hom a) := by
+  have h := ConcreteCategory.congr_hom
+    (baseChangeStructureSectionIso_app j i k (Spec.map φ) H V) ((i.appIso V).hom a)
+  have ha := ConcreteCategory.congr_hom (i.appIso V).hom_inv_id a
+  change (i.appIso V).inv ((i.appIso V).hom a) = a at ha
+  simpa only [CommRingCat.comp_apply, ha] using h
+
+/-- Reduction commutes with the two genuine local-Hom comparisons because
+it is postcomposition with the same cartesian structure-map square. -/
+theorem inverseIdealReduction_openBaseChange
+    (f : (inverseIdealSheaf j).val.obj (op i.opensRange)) :
+    normalSectionOpenBaseChangeEquiv j i k (Spec.map φ) H
+      ((inverseIdealReduction j).val.app (op i.opensRange) f) =
+        (inverseIdealReduction (Spec.map φ)).val.app (op ⊤)
+          (inverseIdealSectionOpenBaseChangeEquiv j i k (Spec.map φ) H f) := by
+  apply (affineNormalSectionEquiv φ).injective
+  apply LinearMap.ext
+  intro x
+  change normalSectionEvaluate (Spec.map φ) ⊤
+      (normalSectionOpenBaseChangeEquiv j i k (Spec.map φ) H
+        ((inverseIdealReduction j).val.app (op i.opensRange) f)) x =
+    normalSectionEvaluate (Spec.map φ) ⊤
+      ((inverseIdealReduction (Spec.map φ)).val.app (op ⊤)
+        (inverseIdealSectionOpenBaseChangeEquiv j i k (Spec.map φ) H f)) x
+  rw [normalSectionOpenBaseChangeEquiv_evaluate]
+  rw [← PresheafOfModules.naturality_apply (inverseIdealReduction j).val]
+  rw [inverseIdealReduction_evaluate, inverseIdealReduction_evaluate]
+  rw [inverseIdealSectionOpenBaseChangeEquiv_evaluate]
+  exact baseChangeStructureSectionIso_app_forward j φ i k H ⊤ _
+
+theorem normalOpenBaseChange_zero :
+    normalSectionOpenBaseChangeEquiv j i k (Spec.map φ) H 0 = 0 := by
+  apply (affineNormalSectionEquiv φ).injective
+  apply LinearMap.ext
+  intro x
+  change normalSectionEvaluate (Spec.map φ) ⊤
+    (normalSectionOpenBaseChangeEquiv j i k (Spec.map φ) H 0) x = 0
+  rw [normalSectionOpenBaseChangeEquiv_evaluate, map_zero]
+  change (baseChangeStructureSectionIso j i k (Spec.map φ) H ⊤).hom 0 = 0
+  exact map_zero _
+
+include H
+
+/-- Injectivity transports along the actual cartesian affine chart. -/
+theorem inverseIdealScalar_injective_of_affine
+    (hf : Function.Injective ((inverseIdealScalar (Spec.map φ)).val.app (op ⊤))) :
+    Function.Injective ((inverseIdealScalar j).val.app (op i.opensRange)) := by
+  intro a b hab
+  apply (ambientSectionsEquiv i).injective
+  apply hf
+  rw [← inverseIdealScalar_openBaseChange j φ i k H,
+    ← inverseIdealScalar_openBaseChange j φ i k H, hab]
+
+/-- Surjectivity transports with the original normal-sheaf comparison. -/
+theorem inverseIdealReduction_surjective_of_affine
+    (hg : Function.Surjective ((inverseIdealReduction (Spec.map φ)).val.app (op ⊤))) :
+    Function.Surjective ((inverseIdealReduction j).val.app (op i.opensRange)) := by
+  intro n
+  obtain ⟨f, hf⟩ := hg (normalSectionOpenBaseChangeEquiv j i k (Spec.map φ) H n)
+  refine ⟨(inverseIdealSectionOpenBaseChangeEquiv j i k (Spec.map φ) H).symm f, ?_⟩
+  apply (normalSectionOpenBaseChangeEquiv j i k (Spec.map φ) H).injective
+  rw [inverseIdealReduction_openBaseChange, Equiv.apply_symm_apply, hf]
+
+/-- Exactness transports with both actual sheaf morphisms and their
+canonical local-Hom equivalences. -/
+theorem inverseIdealSequence_exact_of_affine
+    (he : Function.Exact ((inverseIdealScalar (Spec.map φ)).val.app (op ⊤))
+      ((inverseIdealReduction (Spec.map φ)).val.app (op ⊤))) :
+    Function.Exact ((inverseIdealScalar j).val.app (op i.opensRange))
+      ((inverseIdealReduction j).val.app (op i.opensRange)) := by
+  intro f
+  constructor
+  · intro hf
+    have hz : (inverseIdealReduction (Spec.map φ)).val.app (op ⊤)
+        (inverseIdealSectionOpenBaseChangeEquiv j i k (Spec.map φ) H f) = 0 := by
+      rw [← inverseIdealReduction_openBaseChange, hf, normalOpenBaseChange_zero]
+    obtain ⟨a, ha⟩ := (he _).mp hz
+    refine ⟨(ambientSectionsEquiv i).symm a, ?_⟩
+    apply (inverseIdealSectionOpenBaseChangeEquiv j i k (Spec.map φ) H).injective
+    rw [inverseIdealScalar_openBaseChange, RingEquiv.apply_symm_apply, ha]
+  · rintro ⟨a, rfl⟩
+    exact congrArg (fun h => h.val.app (op i.opensRange) a)
+      (inverseIdealScalar_comp_reduction j)
+
+end CycleQ2IntrinsicCartierOpenTransport
+
+#print axioms CycleQ2IntrinsicCartierOpenTransport.inverseIdealScalar_openBaseChange
+#print axioms CycleQ2IntrinsicCartierOpenTransport.inverseIdealReduction_openBaseChange
+#print axioms CycleQ2IntrinsicCartierOpenTransport.inverseIdealSequence_exact_of_affine
+
+end -- component noncomputable section
+end IntrinsicCartierOpenTransport
+
+section IntrinsicCartierPrincipalBasis
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+noncomputable section
+
+namespace CycleQ2IntrinsicCartierPrincipalBasis
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricIntrinsicNormal CycleQ2GeometricIntrinsicCartierSequence
+  CycleQ2GeometricCartierNormalLift
+
+section AffineSections
+variable {A B : CommRingCat.{0}} (φ : A ⟶ B)
+
+theorem sectionGenerator_regular (b : A) (hb : IsSMulRegular A b) :
+    IsSMulRegular Γ(Spec A, ⊤) ((specTopRingEquiv A).symm b) := by
+  intro x y hxy
+  apply (specTopRingEquiv A).injective
+  apply hb
+  have h := congrArg (specTopRingEquiv A) hxy
+  simpa only [smul_eq_mul, map_mul, RingEquiv.apply_symm_apply] using h
+
+theorem sectionKernel_principal (b : A)
+    (hp : RingHom.ker φ.hom = Ideal.span ({b} : Set A)) :
+    RingHom.ker ((Spec.map φ).app ⊤).hom =
+      Ideal.span ({(specTopRingEquiv A).symm b} : Set Γ(Spec A, ⊤)) := by
+  ext z
+  constructor
+  · intro hz
+    have hz' : specTopRingEquiv A z ∈ Ideal.span ({b} : Set A) := by
+      rw [← hp]
+      change φ (specTopRingEquiv A z) = 0
+      rw [← affineSectionMap_normalization]
+      exact (congrArg (specTopRingEquiv B) hz).trans (map_zero _)
+    obtain ⟨a, ha⟩ := Ideal.mem_span_singleton'.mp hz'
+    apply Ideal.mem_span_singleton'.mpr
+    refine ⟨(specTopRingEquiv A).symm a, ?_⟩
+    apply (specTopRingEquiv A).injective
+    simpa only [map_mul, RingEquiv.apply_symm_apply] using ha
+  · intro hz
+    obtain ⟨a, rfl⟩ := Ideal.mem_span_singleton'.mp hz
+    change (Spec.map φ).app ⊤ (a * (specTopRingEquiv A).symm b) = 0
+    apply (specTopRingEquiv B).injective
+    rw [affineSectionMap_normalization, map_zero, map_mul,
+      RingEquiv.apply_symm_apply, map_mul]
+    have hb : φ b = 0 := (le_of_eq hp.symm) (Ideal.subset_span (Set.mem_singleton b))
+    rw [hb, mul_zero]
+
+theorem affineSectionMap_surjective (hs : Function.Surjective φ) :
+    Function.Surjective ((Spec.map φ).app ⊤) := by
+  intro y
+  obtain ⟨x, hx⟩ := hs (specTopRingEquiv B y)
+  refine ⟨(specTopRingEquiv A).symm x, (specTopRingEquiv B).injective ?_⟩
+  rw [affineSectionMap_normalization, RingEquiv.apply_symm_apply, hx]
+
+theorem affineIntrinsic_exactness (b : A) (hb : IsSMulRegular A b)
+    (hp : RingHom.ker φ.hom = Ideal.span ({b} : Set A))
+    (hs : Function.Surjective φ) :
+    Function.Injective ((inverseIdealScalar (Spec.map φ)).val.app (op ⊤)) ∧
+      Function.Exact ((inverseIdealScalar (Spec.map φ)).val.app (op ⊤))
+        ((inverseIdealReduction (Spec.map φ)).val.app (op ⊤)) ∧
+      Function.Surjective ((inverseIdealReduction (Spec.map φ)).val.app (op ⊤)) := by
+  exact ⟨affineInverseIdealScalar_injective φ _
+      (sectionGenerator_regular b hb) (sectionKernel_principal φ b hp),
+    affineInverseIdealSequence_exact φ _
+      (sectionGenerator_regular b hb) (sectionKernel_principal φ b hp),
+    affineInverseIdealReduction_surjective φ _
+      (sectionGenerator_regular b hb) (sectionKernel_principal φ b hp)
+      (affineSectionMap_surjective φ hs)⟩
+
+end AffineSections
+
+section PrincipalLocalization
+variable {A B : Type} [CommRing A] [CommRing B] (φ : A →+* B) (a : A)
+
+def principalMap : Localization.Away a →+* Localization.Away (φ a) :=
+  IsLocalization.Away.map _ _ φ a
+
+theorem principalMap_base (b : A) :
+    principalMap φ a (algebraMap A (Localization.Away a) b) =
+      algebraMap B (Localization.Away (φ a)) (φ b) := by
+  simp only [principalMap, IsLocalization.Away.map, IsLocalization.map_eq]
+
+theorem principalMap_surjective (hs : Function.Surjective φ) :
+    Function.Surjective (principalMap φ a) := by
+  let : IsLocalization ((Submonoid.powers a).map φ) (Localization.Away (φ a)) := by
+    rw [Submonoid.map_powers]
+    infer_instance
+  exact IsLocalization.map_surjective_of_surjective (Submonoid.powers a)
+    (Localization.Away a) (Localization.Away (φ a)) (g := φ) hs
+
+theorem principalMap_kernel :
+    RingHom.ker (principalMap φ a) =
+      (RingHom.ker φ).map (algebraMap A (Localization.Away a)) := by
+  exact IsLocalization.ker_map (S := Localization.Away a)
+    (Localization.Away (φ a)) φ (Submonoid.map_powers φ a)
+
+theorem principalMap_kernel_principal (b : A)
+    (hp : RingHom.ker φ = Ideal.span ({b} : Set A)) :
+    RingHom.ker (principalMap φ a) =
+      Ideal.span ({algebraMap A (Localization.Away a) b} : Set (Localization.Away a)) := by
+  rw [principalMap_kernel, hp, Ideal.map_span, Set.image_singleton]
+
+theorem principalGenerator_regular (b : A) (hb : IsSMulRegular A b) :
+    IsSMulRegular (Localization.Away a) (algebraMap A (Localization.Away a) b) := by
+  apply regular_after_localizing b a
+  intro x hx
+  have hx0 : x = 0 := hb (show b • x = b • (0 : A) by simpa only [smul_eq_mul, mul_zero] using hx)
+  rw [hx0, mul_zero]
+
+theorem principal_square :
+    Spec.map (CommRingCat.ofHom (algebraMap B (Localization.Away (φ a)))) ≫
+      Spec.map (CommRingCat.ofHom φ) =
+    Spec.map (CommRingCat.ofHom (principalMap φ a)) ≫
+      Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a))) := by
+  rw [← Spec.map_comp, ← Spec.map_comp]
+  apply congrArg Spec.map
+  ext b
+  exact (principalMap_base φ a b).symm
+
+theorem principal_isPullback :
+    IsPullback
+      (Spec.map (CommRingCat.ofHom (principalMap φ a)))
+      (Spec.map (CommRingCat.ofHom (algebraMap B (Localization.Away (φ a)))))
+      (Spec.map (CommRingCat.ofHom (algebraMap A (Localization.Away a))))
+      (Spec.map (CommRingCat.ofHom φ)) := by
+  apply IsOpenImmersion.isPullback
+  · exact principal_square φ a
+  · rw [Scheme.Hom.opensRange_localizationAway (R := CommRingCat.of A) a,
+      Scheme.Hom.opensRange_localizationAway (R := CommRingCat.of B) (φ a)]
+    rfl
+
+end PrincipalLocalization
+
+section ActualRefinedCharts
+
+open CycleQ2ProjectiveCartierIdeal CycleQ2GeometricLiteralSurface
+  CycleQ2IntrinsicCartierOpenTransport
+open CycleQ2GeometricProjectiveCurve (projectiveCurve)
+open CycleQ2CartierProjectiveCover (projectiveSurface)
+
+variable (r θ : ℂ) (u : Fin 4) (v : Fin 3) (a : RefinedRing r θ u v)
+
+/-- A principal subopen of an actual Cartier--coordinate affine surface chart. -/
+def principalSurfaceChart :
+    Spec (CommRingCat.of (Localization.Away a)) ⟶ projectiveSurface r θ :=
+  Spec.map (CommRingCat.ofHom (algebraMap (RefinedRing r θ u v) (Localization.Away a))) ≫
+    refinedSurfaceChart r θ u v
+
+/-- The matching principal subopen of the original curve chart. -/
+def principalCurveChart :
+    Spec (CommRingCat.of (Localization.Away (refinedCurveRingMap r θ u v a))) ⟶
+      projectiveCurve r θ :=
+  Spec.map (CommRingCat.ofHom (algebraMap (RefinedCurveRing r θ u v)
+    (Localization.Away (refinedCurveRingMap r θ u v a)))) ≫
+      refinedCurveChart r θ u v
+
+instance : IsOpenImmersion (principalSurfaceChart r θ u v a) := by
+  dsimp [principalSurfaceChart]
+  infer_instance
+
+instance : IsOpenImmersion (principalCurveChart r θ u v a) := by
+  dsimp [principalCurveChart]
+  infer_instance
+
+theorem principalSurfaceChart_range :
+    (principalSurfaceChart r θ u v a).opensRange =
+      (refinedSurfaceChart r θ u v) ''ᵁ PrimeSpectrum.basicOpen a := by
+  dsimp only [principalSurfaceChart]
+  rw [Scheme.Hom.opensRange_comp]
+  exact congrArg (fun W : (Spec (CommRingCat.of (RefinedRing r θ u v))).Opens =>
+    (refinedSurfaceChart r θ u v) ''ᵁ W)
+      (Scheme.Hom.opensRange_localizationAway (R := CommRingCat.of (RefinedRing r θ u v)) a)
+
+theorem principalChart_isPullback :
+    IsPullback
+      (Spec.map (CommRingCat.ofHom (principalMap (refinedCurveRingMap r θ u v) a)))
+      (principalCurveChart r θ u v a) (principalSurfaceChart r θ u v a)
+      (curveToSurface r θ) :=
+  (principal_isPullback (refinedCurveRingMap r θ u v) a).paste_vert
+    (refinedChart_isPullback r θ u v)
+
+/-- The literal intrinsic Cartier sequence is short exact on every principal
+subopen of each actual homogeneous Cartier--coordinate chart. This uses the
+original kernel ideal sheaf, its internal Hom, and the original reduction map. -/
+theorem refinedPrincipal_inverseIdeal_exactness :
+    let W := (refinedSurfaceChart r θ u v) ''ᵁ PrimeSpectrum.basicOpen a
+    Function.Injective ((inverseIdealScalar (curveToSurface r θ)).val.app (op W)) ∧
+      Function.Exact ((inverseIdealScalar (curveToSurface r θ)).val.app (op W))
+        ((inverseIdealReduction (curveToSurface r θ)).val.app (op W)) ∧
+      Function.Surjective ((inverseIdealReduction (curveToSurface r θ)).val.app (op W)) := by
+  let φ := CommRingCat.ofHom (principalMap (refinedCurveRingMap r θ u v) a)
+  have hlocal := affineIntrinsic_exactness φ
+    (algebraMap (RefinedRing r θ u v) (Localization.Away a) (refinedGenerator r θ u v))
+    (principalGenerator_regular a (refinedGenerator r θ u v) (refinedGenerator_regular r θ u v))
+    (principalMap_kernel_principal (refinedCurveRingMap r θ u v) a
+      (refinedGenerator r θ u v) (refinedCurveRingMap_kernel r θ u v))
+    (principalMap_surjective (refinedCurveRingMap r θ u v) a
+      (refinedCurveRingMap_surjective r θ u v))
+  have hcart := principalChart_isPullback r θ u v a
+  have hi := inverseIdealScalar_injective_of_affine (curveToSurface r θ) φ
+    (principalSurfaceChart r θ u v a) (principalCurveChart r θ u v a) hcart hlocal.1
+  have he := inverseIdealSequence_exact_of_affine (curveToSurface r θ) φ
+    (principalSurfaceChart r θ u v a) (principalCurveChart r θ u v a) hcart hlocal.2.1
+  have hs := inverseIdealReduction_surjective_of_affine (curveToSurface r θ) φ
+    (principalSurfaceChart r θ u v a) (principalCurveChart r θ u v a) hcart hlocal.2.2
+  rw [principalSurfaceChart_range] at hi he hs
+  exact ⟨hi, he, hs⟩
+
+end ActualRefinedCharts
+
+end CycleQ2IntrinsicCartierPrincipalBasis
+
+#print axioms CycleQ2IntrinsicCartierPrincipalBasis.affineIntrinsic_exactness
+#print axioms CycleQ2IntrinsicCartierPrincipalBasis.principalMap_kernel_principal
+#print axioms CycleQ2IntrinsicCartierPrincipalBasis.principalGenerator_regular
+#print axioms CycleQ2IntrinsicCartierPrincipalBasis.refinedPrincipal_inverseIdeal_exactness
+
+end -- component noncomputable section
+end IntrinsicCartierPrincipalBasis
+
+section ActualSheafLocalExactness
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2GeometricSheafLocalExactness
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace TopCat.Presheaf
+
+variable {X : TopCat.{0}}
+
+/-- Component exactness on a basis implies exactness of the genuine sheaf
+complex. A germ in the kernel is first represented on a basis open where its
+image already vanishes, so no global section-surjectivity is assumed. -/
+theorem additiveSheaf_exact_of_basis
+    (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{0} X))
+    (B : Set (Opens X)) (hB : Opens.IsBasis B)
+    (he : ∀ U ∈ B, Function.Exact (S.f.hom.app (op U)) (S.g.hom.app (op U))) :
+    S.Exact := by
+  apply (TopCat.Sheaf.exact_iff_stalkFunctor_map_exact S).mpr
+  intro x
+  apply (ShortComplex.ab_exact_iff _).mpr
+  intro t ht
+  obtain ⟨U, hxU, s, rfl⟩ := TopCat.Presheaf.exists_germ_eq S.X₂.obj t
+  change (TopCat.Presheaf.stalkFunctor AddCommGrpCat x).map S.g.hom
+      (TopCat.Presheaf.germ S.X₂.obj U x hxU s) = 0 at ht
+  rw [TopCat.Presheaf.stalkFunctor_map_germ_apply] at ht
+  have hz : TopCat.Presheaf.germ S.X₃.obj U x hxU (S.g.hom.app (op U) s) =
+      TopCat.Presheaf.germ S.X₃.obj U x hxU 0 := ht.trans (map_zero _).symm
+  obtain ⟨V, hxV, hVB, hVU, hVU', hv⟩ :=
+    TopCat.Presheaf.germ_eq_of_isBasis hB S.X₃.obj x hxU hxU hz
+  have hk : S.g.hom.app (op V) (S.X₂.obj.map (homOfLE hVU).op s) = 0 := by
+    simpa only [← S.g.hom.naturality_apply, map_zero] using hv
+  obtain ⟨a, ha⟩ := (he V hVB _).mp hk
+  refine ⟨TopCat.Presheaf.germ S.X₁.obj V x hxV a, ?_⟩
+  change (TopCat.Presheaf.stalkFunctor AddCommGrpCat x).map S.f.hom
+      (TopCat.Presheaf.germ S.X₁.obj V x hxV a) = _
+  rw [TopCat.Presheaf.stalkFunctor_map_germ_apply, ha,
+    TopCat.Presheaf.germ_res_apply]
+
+/-- A componentwise short exact complex on a basis is short exact as a
+complex of additive sheaves. -/
+theorem additiveSheaf_shortExact_of_basis
+    (S : ShortComplex (TopCat.Sheaf AddCommGrpCat.{0} X))
+    (B : Set (Opens X)) (hB : Opens.IsBasis B)
+    (hi : ∀ U ∈ B, Function.Injective (S.f.hom.app (op U)))
+    (he : ∀ U ∈ B, Function.Exact (S.f.hom.app (op U)) (S.g.hom.app (op U)))
+    (hs : ∀ U ∈ B, Function.Surjective (S.g.hom.app (op U))) :
+    S.ShortExact where
+  exact := additiveSheaf_exact_of_basis S B hB he
+  mono_f := by
+    apply (TopCat.Presheaf.mono_iff_stalk_mono S.f).mpr
+    intro x
+    exact (AddCommGrpCat.mono_iff_injective _).mpr
+      (TopCat.Presheaf.stalkFunctor_map_injective_of_isBasis hB hi x)
+  epi_g := by
+    apply (TopCat.Sheaf.isLocallySurjective_iff_epi S.g).mp
+    apply (TopCat.Presheaf.isLocallySurjective_iff S.g.hom).mpr
+    intro U t x hx
+    obtain ⟨V, hVB, hxV, hVU⟩ := Opens.isBasis_iff_nbhd.mp hB hx
+    obtain ⟨s, hs⟩ := hs V hVB (S.X₃.obj.map (homOfLE hVU).op t)
+    exact ⟨V, hVU, ⟨s, hs⟩, hxV⟩
+
+/-- The actual additive forgetful functor sends the zero module-sheaf
+morphism to the zero additive-sheaf morphism. -/
+instance moduleSheaf_toSheaf_preservesZeroMorphisms
+    (R : CategoryTheory.Sheaf (Opens.grothendieckTopology X) RingCat.{0}) :
+    (SheafOfModules.toSheaf.{0} R).PreservesZeroMorphisms where
+  map_zero M N := by
+    ext U s
+    rfl
+
+/-- A basis-local component criterion for the actual category of modules
+over a ring sheaf. The faithful additive forgetful functor reflects the
+resulting short exact sequence. -/
+theorem moduleSheaf_shortExact_of_basis
+    (R : CategoryTheory.Sheaf (Opens.grothendieckTopology X) RingCat.{0})
+    (S : ShortComplex (SheafOfModules.{0} R))
+    (B : Set (Opens X)) (hB : Opens.IsBasis B)
+    (hi : ∀ U ∈ B, Function.Injective (S.f.val.app (op U)))
+    (he : ∀ U ∈ B, Function.Exact (S.f.val.app (op U)) (S.g.val.app (op U)))
+    (hs : ∀ U ∈ B, Function.Surjective (S.g.val.app (op U))) :
+    S.ShortExact := by
+  haveI : (SheafOfModules.toSheaf.{0} R).PreservesZeroMorphisms :=
+    moduleSheaf_toSheaf_preservesZeroMorphisms (X := X) R
+  apply CategoryTheory.ShortExact.reflects_shortExact_of_faithful (SheafOfModules.toSheaf.{0} R)
+  exact additiveSheaf_shortExact_of_basis (S.map (SheafOfModules.toSheaf.{0} R)) B hB hi he hs
+
+/-- Neighborhood form of the basis criterion. Every neighborhood must
+contain a smaller neighborhood with the three displayed component facts. -/
+theorem moduleSheaf_shortExact_of_neighborhoods
+    (R : CategoryTheory.Sheaf (Opens.grothendieckTopology X) RingCat.{0})
+    (S : ShortComplex (SheafOfModules.{0} R))
+    (h : ∀ (U : Opens X) (x : X), x ∈ U →
+      ∃ (V : Opens X), V ≤ U ∧ x ∈ V ∧
+        Function.Injective (S.f.val.app (op V)) ∧
+        Function.Exact (S.f.val.app (op V)) (S.g.val.app (op V)) ∧
+        Function.Surjective (S.g.val.app (op V))) :
+    S.ShortExact := by
+  let B : Set (Opens X) := {V |
+    Function.Injective (S.f.val.app (op V)) ∧
+      Function.Exact (S.f.val.app (op V)) (S.g.val.app (op V)) ∧
+      Function.Surjective (S.g.val.app (op V))}
+  have hB : Opens.IsBasis B := by
+    rw [Opens.isBasis_iff_nbhd]
+    intro U x hx
+    obtain ⟨V, hVU, hxV, hi, he, hs⟩ := h U x hx
+    exact ⟨V, ⟨hi, he, hs⟩, hxV, hVU⟩
+  exact moduleSheaf_shortExact_of_basis R S B hB
+    (fun _ hV => hV.1) (fun _ hV => hV.2.1) (fun _ hV => hV.2.2)
+
+section AffineCover
+
+open AlgebraicGeometry CycleQ2GeometricDifferentialSheaf
+
+/-- Principal affine subopens of an open affine cover form a basis of the
+actual ambient scheme. -/
+theorem affineOpenImages_isBasis
+    (Y : Scheme.{0}) {ι : Type} (A : ι → CommRingCat.{0})
+    (j : ∀ i, Spec (A i) ⟶ Y) [∀ i, IsOpenImmersion (j i)]
+    (hcover : (⨆ i, (j i).opensRange) = ⊤) :
+    Opens.IsBasis {V : Y.Opens | ∃ i, ∃ a : A i, V = j i ''ᵁ PrimeSpectrum.basicOpen a} := by
+  rw [Opens.isBasis_iff_nbhd]
+  intro U x hx
+  have hxc : x ∈ ⨆ i, (j i).opensRange := by rw [hcover]; trivial
+  obtain ⟨i, hi⟩ := Opens.mem_iSup.mp hxc
+  obtain ⟨y, rfl⟩ := (Scheme.Hom.mem_opensRange).mp hi
+  obtain ⟨V, ⟨a, rfl⟩, hya, haU⟩ :=
+    Opens.isBasis_iff_nbhd.mp (PrimeSpectrum.isBasis_basic_opens (R := A i))
+      (show y ∈ (j i) ⁻¹ᵁ U from hx)
+  refine ⟨j i ''ᵁ PrimeSpectrum.basicOpen a, ⟨i, a, rfl⟩, ⟨y, hya, rfl⟩, ?_⟩
+  exact ((j i).image_mono haU).trans ((j i).image_preimage_le U)
+
+/-- The sheaf short-exactness criterion in the form used by the literal
+Cartier charts: the three component properties are required on every
+principal subopen of every affine chart in the actual cover. -/
+theorem moduleSheaf_shortExact_of_affine_cover
+    (Y : Scheme.{0}) (S : ShortComplex (SheafOfModules.{0} (ringSheaf Y.sheaf)))
+    {ι : Type} (A : ι → CommRingCat.{0})
+    (j : ∀ i, Spec (A i) ⟶ Y) [∀ i, IsOpenImmersion (j i)]
+    (hcover : (⨆ i, (j i).opensRange) = ⊤)
+    (hi : ∀ i (a : A i), Function.Injective
+      (S.f.val.app (op (j i ''ᵁ PrimeSpectrum.basicOpen a))))
+    (he : ∀ i (a : A i), Function.Exact
+      (S.f.val.app (op (j i ''ᵁ PrimeSpectrum.basicOpen a)))
+      (S.g.val.app (op (j i ''ᵁ PrimeSpectrum.basicOpen a))))
+    (hs : ∀ i (a : A i), Function.Surjective
+      (S.g.val.app (op (j i ''ᵁ PrimeSpectrum.basicOpen a)))) :
+    S.ShortExact := by
+  apply moduleSheaf_shortExact_of_basis (ringSheaf Y.sheaf) S
+    {V | ∃ i, ∃ a : A i, V = j i ''ᵁ PrimeSpectrum.basicOpen a}
+    (affineOpenImages_isBasis Y A j hcover)
+  · rintro V ⟨i, a, rfl⟩
+    exact hi i a
+  · rintro V ⟨i, a, rfl⟩
+    exact he i a
+  · rintro V ⟨i, a, rfl⟩
+    exact hs i a
+
+end AffineCover
+
+end CycleQ2GeometricSheafLocalExactness
+
+#print axioms CycleQ2GeometricSheafLocalExactness.additiveSheaf_exact_of_basis
+#print axioms CycleQ2GeometricSheafLocalExactness.moduleSheaf_shortExact_of_basis
+#print axioms CycleQ2GeometricSheafLocalExactness.moduleSheaf_shortExact_of_neighborhoods
+
+#print axioms CycleQ2GeometricSheafLocalExactness.moduleSheaf_shortExact_of_affine_cover
+
+end -- component noncomputable section
+end ActualSheafLocalExactness
+
+section LiteralCartierShortExactness
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2GeometricIntrinsicCartierSequence
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+open CycleQ2GeometricDifferentialSheaf CycleQ2GeometricSheafLocalExactness
+open CycleQ2CartierProjectiveCover CycleQ2ProjectiveCartierIdeal
+open CycleQ2IntrinsicCartierPrincipalBasis
+
+/-- The genuine affine principal subopens of the twelve Cartier charts. -/
+def cartierPrincipalBasis (r θ : ℂ) : Set (projectiveSurface r θ).Opens :=
+  {V | ∃ (i : Fin 4) (j : Fin 3) (a : RefinedRing r θ i j),
+    V = refinedSurfaceChart r θ i j ''ᵁ PrimeSpectrum.basicOpen a}
+
+/-- These principal subopens form a basis of the entire projective surface. -/
+theorem cartierPrincipalBasis_isBasis (r θ : ℂ) (hr : r ≠ 0) (hθ : θ ≠ 0) :
+    Opens.IsBasis (cartierPrincipalBasis r θ) := by
+  have hcover :
+      (⨆ ij : Fin 4 × Fin 3, (refinedSurfaceChart r θ ij.1 ij.2).opensRange) = ⊤ := by
+    simpa only [iSup_prod, refinedSurfaceChart_range] using refinedOpen_cover r θ hr hθ
+  have h := affineOpenImages_isBasis (projectiveSurface r θ)
+    (fun ij : Fin 4 × Fin 3 => CommRingCat.of (RefinedRing r θ ij.1 ij.2))
+    (fun ij => refinedSurfaceChart r θ ij.1 ij.2) hcover
+  convert h using 1
+  ext V
+  constructor
+  · rintro ⟨i, j, a, ha⟩
+    exact ⟨(i, j), a, ha⟩
+  · rintro ⟨⟨i, j⟩, a, ha⟩
+    exact ⟨i, j, a, ha⟩
+
+/-- The original scalar/reduction complex is short exact as a genuine
+module-sheaf complex. The proof uses every principal subopen of the actual
+Cartier chart cover, together with the checked localized regular generators. -/
+theorem literalInverseIdealComplex_shortExact_of_parameters
+    (r θ : ℂ) (hr : r ≠ 0) (hθ : θ ≠ 0) :
+    (literalInverseIdealComplex r θ).ShortExact := by
+  apply moduleSheaf_shortExact_of_basis _ (literalInverseIdealComplex r θ)
+    (cartierPrincipalBasis r θ) (cartierPrincipalBasis_isBasis r θ hr hθ)
+  · rintro V ⟨i, j, a, rfl⟩
+    exact (refinedPrincipal_inverseIdeal_exactness r θ i j a).1
+  · rintro V ⟨i, j, a, rfl⟩
+    exact (refinedPrincipal_inverseIdeal_exactness r θ i j a).2.1
+  · rintro V ⟨i, j, a, rfl⟩
+    exact (refinedPrincipal_inverseIdeal_exactness r θ i j a).2.2
+
+/-- The exact original inverse-ideal short exact sequence at the literal
+incidence parameters. No geometric comparison or exactness premise remains. -/
+theorem literalInverseIdealComplex_shortExact :
+    (literalInverseIdealComplex 57 1).ShortExact :=
+  literalInverseIdealComplex_shortExact_of_parameters 57 1 (by norm_num) one_ne_zero
+
+/-- The underlying additive sheaf complex, retaining the literal scalar
+and reduction maps, for constructing its actual derived connecting map. -/
+def literalInverseIdealAdditiveComplex (r θ : ℂ) :
+    ShortComplex (TopCat.Sheaf AddCommGrpCat.{0} (projectiveSurface r θ)) := by
+  have : (SheafOfModules.toSheaf.{0}
+      (ringSheaf (projectiveSurface r θ).sheaf)).PreservesZeroMorphisms :=
+    moduleSheaf_toSheaf_preservesZeroMorphisms (X := (projectiveSurface r θ : TopCat))
+      (ringSheaf (projectiveSurface r θ).sheaf)
+  exact (literalInverseIdealComplex r θ).map
+    (SheafOfModules.toSheaf.{0} (ringSheaf (projectiveSurface r θ).sheaf))
+
+/-- The underlying additive complex is short exact by the same actual
+component calculations. This does not rely on a cokernel-preservation
+assumption for the additive forgetful functor. -/
+theorem literalInverseIdealAdditiveComplex_shortExact_of_parameters
+    (r θ : ℂ) (hr : r ≠ 0) (hθ : θ ≠ 0) :
+    (literalInverseIdealAdditiveComplex r θ).ShortExact := by
+  apply additiveSheaf_shortExact_of_basis _ (cartierPrincipalBasis r θ)
+    (cartierPrincipalBasis_isBasis r θ hr hθ)
+  · rintro V ⟨i, j, a, rfl⟩
+    exact (refinedPrincipal_inverseIdeal_exactness r θ i j a).1
+  · rintro V ⟨i, j, a, rfl⟩
+    exact (refinedPrincipal_inverseIdeal_exactness r θ i j a).2.1
+  · rintro V ⟨i, j, a, rfl⟩
+    exact (refinedPrincipal_inverseIdeal_exactness r θ i j a).2.2
+
+/-- Short exactness of the literal incidence additive sheaf sequence. -/
+theorem literalInverseIdealAdditiveComplex_shortExact :
+    (literalInverseIdealAdditiveComplex 57 1).ShortExact :=
+  literalInverseIdealAdditiveComplex_shortExact_of_parameters 57 1 (by norm_num) one_ne_zero
+
+end CycleQ2GeometricIntrinsicCartierSequence
+
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.cartierPrincipalBasis_isBasis
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.literalInverseIdealComplex_shortExact_of_parameters
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.literalInverseIdealComplex_shortExact
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.literalInverseIdealAdditiveComplex_shortExact_of_parameters
+#print axioms CycleQ2GeometricIntrinsicCartierSequence.literalInverseIdealAdditiveComplex_shortExact
+
+end -- component noncomputable section
+end LiteralCartierShortExactness
