@@ -75,6 +75,39 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
 ```
 
 
+### The actual smooth open of the relative surface
+
+[GeometricIncidenceSmoothSchemeOpens.lean](GeometricIncidenceSmoothSchemeOpens.lean)
+constructs the open immersions from the normalized-minor localization
+spectra into the existing projective surface. Their compositions with
+`surfaceToBase` equal the canonical coefficient spectrum maps.
+The previously established relative ring smoothness therefore gives
+smoothness and flatness of the actual scheme morphisms.
+
+The open `minorOpen` is the actual image of each immersion.
+Its preimage in the original affine coordinate chart is exactly the
+principal open of `normalizedMinor`. The open `goodOpen y` is the
+union over the four weight-one charts and injective pairs of geometric
+columns. The endpoints
+`CycleQ2IncidenceSmoothSchemeOpens.goodOpen_smooth` and
+`goodOpen_flat` prove that its inclusion followed by the unchanged
+surface structure morphism is smooth and flat over the original base.
+
+The union proof uses Zariski locality and explicit open-immersion lifts
+of the constituent restrictions. No smoothness premise is supplied by
+the caller. Containment of the actual seed fiber in this open is still
+a separate obligation. Independent source/API review and static scans
+passed; a composition was explicitly reassociated during review.
+**No elaboration, compilation, or kernel replay was run.**
+The deferred bounded command is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceSmoothSchemeOpens.olean \
+  Proposal/GeometricIncidenceSmoothSchemeOpens.lean
+```
+
+
 ## Specialized seed geometry continuation — source draft, 14 November 2026
 
 This continuation proceeds in bounded components. Every new Lean module
