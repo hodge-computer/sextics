@@ -294,6 +294,58 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
 ```
 
 
+### A proper smooth neighborhood of the original seed
+
+[GeometricIncidenceSmoothNeighborhood.lean](GeometricIncidenceSmoothNeighborhood.lean)
+closes the source-level uniform surface-neighborhood obligation.
+Let \(f\) be the unchanged `surfaceToBase incidencePoint\), and let \(U\)
+be the constructed `goodOpen incidencePoint`. The base open is explicit:
+\[
+ V=\operatorname{Spec}(\mathrm{ParameterAlgebra})
+       \setminus f\bigl(\mathrm{surface}(\mathrm{incidencePoint})\setminus U\bigr).
+\]
+Properness makes the removed image closed. The proved whole-fiber
+containment shows that the original seed point belongs to \(V\), and
+the complete inverse image \(f^{-1}(V)\) lies in \(U\).
+
+Its inclusion factors through \(U\) by an explicit open-immersion lift.
+Smoothness of \(U\) over the original base therefore implies smoothness
+of the full inverse image over that base. Cancellation of the target
+open immersion gives smoothness of the genuine target-restricted
+morphism \(f|_V:f^{-1}(V)\to V\). Flatness follows, and properness is
+preserved by this restriction.
+
+The closed endpoint
+`CycleQ2IncidenceSmoothNeighborhood.exists_seed_smooth_neighborhood`
+has no geometric premises. It gives an open \(V\) containing the
+original seed point such that the restriction of the original
+projective surface family is smooth, flat, and proper over \(V\).
+The named witness is `seedSmoothBase`, and its actual restricted
+morphism is `seedSmoothFamily`.
+
+This supersedes earlier source-level pending-work notes about
+whole-seed-fiber containment and a uniform smooth/flat surface
+neighborhood. It does not assert relative dimension two, spread the
+chosen regular section, establish the required nonempty curve or its
+divisor class, or supply the Abel--Jacobi, support, and residue-exactness
+comparisons. Those remain separate mathematical/formal obligations.
+
+Independent source review checked the seed inclusion, the full source
+preimage, the lift and restriction identities, and pinned Mathlib's
+properness restriction instance. All new helpers in this continuation
+are source-only: **no Lean elaboration, compilation, kernel replay,
+or transitive axiom audit was run.** No full build or large symbolic
+computation was launched. The protected `Solution.lean` statement and
+its final admission have not been edited. With the pinned environment
+and compiled imports described above, the deferred bounded check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceSmoothNeighborhood.olean \
+  Proposal/GeometricIncidenceSmoothNeighborhood.lean
+```
+
+
 ## Specialized seed geometry continuation — source draft, 14 November 2026
 
 This continuation proceeds in bounded components. Every new Lean module
