@@ -20,7 +20,7 @@ import Proposal.GeometricTarget
 import Proposal.GeometricSeed
 import Proposal.GeometricFormalInputs
 import Proposal.Normalization09Part02
-import Proposal.SolutionSupport08
+import Proposal.SolutionSupport08Part06
 
 /-! Source partition of Solution.lean. See solution.md for verification status. -/
 

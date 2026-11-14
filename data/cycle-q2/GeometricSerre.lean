@@ -1,5 +1,5 @@
 import Mathlib.Algebra.Module.Submodule.Equiv
-import Proposal.SolutionSupport08
+import Proposal.SolutionSupport08Part06
 
 /-!
 # Graded normal pairing in the actual seed Cech quotient

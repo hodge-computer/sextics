@@ -1,5 +1,146 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Actual first-order families and Cartier transition defects — 14 November 2026
+
+This continuation constructs the first-order extension of the original
+normalized surface family, its actual localization kernels and restriction
+maps, and the algebraic comparison between Cartier transition defects and
+splitting differences. It follows Ben Diamond's surface-section route.
+The formalization and implementation were prepared for `fqlx` with OpenAI
+ChatGPT assistance. The final geometric existence theorem in
+[Solution.lean](Solution.lean) still has its single admission.
+
+### The original family and its faithful epsilon coefficient
+
+[GeometricFamilyDeformation.lean](GeometricFamilyDeformation.lean) starts with
+the original normalized cubic and sextic. If
+\[
+R_h=R[x_0,x_1,x_2,x_3,w]/(h),\qquad
+C=R_h/(F),
+\]
+its extension is the actual quotient
+\[
+E=R_h[\varepsilon]/(\varepsilon^2,F-\varepsilon A).
+\]
+The monic cubic and sextic normal forms prove that multiplication by
+\(F\) on \(R_h\) is injective. The resulting identification
+\[
+\ker(E\longrightarrow C)=\varepsilon C
+\]
+is consequently faithful. The closed ring is identified with the original
+`SurfaceRing`, preserving every polynomial class. The same construction
+on each original coordinate localization identifies the closed fibre with
+the original `SurfaceLocal`; it does not introduce an independently chosen
+coefficient ring or kernel equivalence.
+
+Global epsilon coefficients commute with coefficient specialization, and
+localized epsilon coefficients commute with the actual coordinate
+restrictions. Their combined localized-specialization square is a further
+construction. The scaled version records the factor in
+a map \(\varepsilon x\mapsto\varepsilon' c\phi(x)\).
+Leading-unit normalization is also proved: replacing \(F\) by a unit
+multiple replaces the perturbation by the corresponding unit inverse.
+The original parameter-ring evaluation into dual numbers includes the
+matrix parameters and both normalized coefficient quotient rules.
+These evaluation formulas do not assert that an arbitrary test polynomial
+belongs to the invariant coefficient tangent space.
+
+The literal seed specialization is tied back to `thetaH 1` and
+`actualSeedEquation`, so its regularity follows from the same monic-family
+argument. These are equalities of the original equations.
+
+### Matrix image coefficients and choice independence
+
+For a matrix with vanishing two-by-two minors and a proved entry
+certificate \(\sum_q w_q M_q=1\), the continuation constructs its actual
+image projector and faithful scalar action on `LinearMap.range M.mulVecLin`.
+The finite projector and scalar formulas commute with ring maps.
+On a common overlap their first-order defect satisfies the cocycle identity,
+and the prism calculation gives the algebraic boundary expression for a
+change of lifts on that overlap.
+The coordinate-local family adapter supplies the actual square-zero
+extension and its kernel, including the restriction squares needed to
+apply those formulas on the same overlap. Assembly into the actual family
+Cech class, with choice differences compatible with pair restrictions,
+is a further application.
+
+The entry certificate and minor equations remain ordinary algebraic inputs
+of this family interface. Binding them to every original incidence point,
+and identifying its scalar class with the previously computed nonzero
+Cartier class, are further application steps. The explicit idempotent
+correction \(3x^2-2x^3\) preserves any specified subring containing the
+initial lift; it does not by itself construct a homogeneous initial lift.
+
+### Actual splittings, universal dlog, and the Cartier sign
+
+[GeometricSquareZeroAtiyah.lean](GeometricSquareZeroAtiyah.lean) proves the
+algebraic transition identity. Differences of actual algebra splittings
+are derivations of the closed ring. The universal Kaehler differential
+therefore gives an actual contraction with \(d\log t\), and the transition
+defect is the sum of a Cech boundary and that contraction. Multiplicativity
+of dlog, the contraction cocycle identity, and change-of-frame invariance
+are proved with the same epsilon coefficient.
+
+[GeometricCartierDeformation.lean](GeometricCartierDeformation.lean)
+constructs algebra splittings on the genuine two-equation Jacobian
+localizations using a standard-smooth presentation. It also proves the
+explicit negative-graph construction: for derivations \(D_i\) of the fixed
+cubic ring \(R_h\) satisfying \(D_iF=A\), the map
+\(p\mapsto p-\varepsilon D_ip\) descends to the deformed quotient.
+The difference \(\sigma_j-\sigma_i\) has coefficient \(D_i-D_j\).
+The individual \(D_i\) are not treated as derivations of the closed
+hypersurface quotient.
+
+For an actual factorization \(F=f_1g_1+f_2g_2\), the quotient relation
+\(F=\varepsilon a\) constructs the needed units on the two principal
+triple intersections. Their normalized product-minus-direct defects are
+proved to be the literal fractions
+\[
+\frac{a}{g_1f_1},\qquad -\frac{a}{g_2f_2}.
+\]
+With \(a=A-kL=-(kL-A)\), these have exactly the negative sign of the
+previously named Cartier cocycle. The units and fractions are constructed
+in the actual localized extension. Identification of these presentations
+with every earlier `CoverLocal` map is the next comparison.
+
+The inverse-ideal frame and cofactor frame have their explicit weight-two
+changes recorded. A later projective matrix-image comparison must also
+retain the degree shift from the original left sections, right sections,
+and linkage denominator. Cone-local image duality and cancellation of
+coordinate frame factors alone do not establish that projective comparison.
+Writing \(E_{\mathrm{orb}}\) for the orbit divisor, the intended positive presentation is
+\(\operatorname{im}(M:\mathcal O^3\to\mathcal O(14)^3)
+\cong\mathcal O(E_{\mathrm{orb}}+4H)\); its coordinate-normalized presentation in
+\(\mathcal O^3\) differs by \(\mathcal O(-14)\) and would instead be
+\(\mathcal O(E_{\mathrm{orb}}-10H)\). Neither sheaf identification is asserted here.
+The moving-class, supported-correspondence, and global de Rham steps remain
+necessary for the protected existence theorem.
+
+### Verification scope
+
+All three exact combined proposal modules compiled and their emitted modules
+passed independent kernel replay. The checks retained the existing bounded
+single-worker configuration and proof budgets. The separate aggregate
+audit checked 95 distinct endpoints in 3.08 seconds;
+every dependency audit uses only `propext`, `Classical.choice`, and
+`Quot.sound`. The exact source receipts are:
+
+| Module | Lines | Compile (s) | Kernel replay (s) |
+| --- | ---: | ---: | ---: |
+| `GeometricFamilyDeformation` | 2,037 | 58.97 | 39.90 |
+| `GeometricSquareZeroAtiyah` | 719 | 12.75 | 8.07 |
+| `GeometricCartierDeformation` | 671 | 18.04 | 4.66 |
+
+
+Every original scratch proof body is preserved in its own scoped section;
+the assembly only redirects imports and closes the original file scopes.
+Three declaration-free import facades are removed, with their callers and
+explanation links redirected to the same direct dependencies. Those files
+are outside the previously checked dependency closure. The protected target
+and the final theorem statement are unchanged. Source-policy checking still
+rejects the one existing admission at `Solution.lean:138`; the partial
+continuation is not a completed solve.
+
 ## The original normalized class and first-order obstruction algebra — 14 November 2026
 
 This checkpoint binds the nonzero character-one Cartier descendant to the
@@ -4764,13 +4905,13 @@ Abel--Jacobi derivative, remains essential. These scheme definitions do
 not supply the Abel--Jacobi comparison or establish closed immersions.
 
 The existing graded linkage duality specifies which line bundle must be
-constructed. In [SolutionSupport05.lean](SolutionSupport05.lean),
+constructed. In [SolutionSupport05Part03.lean](SolutionSupport05Part03.lean),
 `actualImage_selected` identifies the selected right-ideal sections with
 the actual matrix columns, `actualDuality_grade` retains the degree-four
 twist, `actualImage_grade` gives the degree-fourteen columns, and
 `actualDuality_restriction` supplies their compatibility. Together with
 `localized_linkageIdeal_eq_components` in
-[SolutionSupport03.lean](SolutionSupport03.lean), these give concrete
+[SolutionSupport03Part03.lean](SolutionSupport03Part03.lean), these give concrete
 algebraic data for the missing sheafification and identification with
 \(\mathcal O_D(E+4H)\). This identification has not yet been proved at
 the scheme/sheaf level. Likewise, the existing nonzero character vector
