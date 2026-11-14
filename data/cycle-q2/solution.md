@@ -1,5 +1,344 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Current integration with the Cartier-boundary continuation — 14 November 2026
+
+The final existence theorem remains open. The combined proposal preserves
+the new actual inverse-ideal lift, four-open Cartier boundary, coordinate
+Čech exactness, and sparse canonical-boundary comparison, together with
+the derived-cohomology and literal normal-nonvanishing work below. The
+Cartier checkpoint is retained in full as a separate historical section.
+
+This last merge changes none of the sources or compiled objects in the
+71-module dependency closure of the twenty-four checked cohomology
+objects. Their exact source, object, and independent-replay evidence is
+therefore retained without another Lean rebuild. A separate source audit
+checks the new merge, the complete incoming-source preservation, the one
+existing import-facade substitution in the overlapping aggregate file,
+the protected files, and the rendered explanation. The three new incoming
+helpers are preserved exactly; this merge audit does not claim a fresh
+local compilation of them or a full build of the older aggregate chain.
+
+The incoming continuation removes four further declaration-free wrappers
+and adds three proof helpers, leaving 255 proposal files after integration.
+Earlier file counts below describe their respective checkpoints. The only
+admission is still the existing `sorry` in `Solution.lean`; the actual
+projective normal/Cartier comparison, geometric trace and support argument,
+and algebraic de Rham passage to the protected residue remain to be closed.
+
+## Integrated cohomology and incidence checkpoints — 14 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains open.
+This integration preserves both the full derived-cohomology continuation
+and the incoming literal-incidence canonical-sheaf and Čech-trace
+continuation. The two detailed sections immediately below record those
+earlier checkpoints and their respective verification scopes.
+
+The combined source retains the actual affine H¹-vanishing theorem, the
+full Čech-to-derived-H¹ comparison, the intrinsic complex scalar action,
+and the sparse canonical H¹ coordinate. It also retains the literal
+canonical isomorphisms, the complete literal degree-one Čech line, and the
+selected cubic's seven zero classes and nonzero ambient detector. The
+actual relative-normal connecting class is proved nonzero in its cone
+Čech quotient. These comparisons use the actual sheaves, localization
+maps, and relative conormal duals described below.
+
+The shared regular-pair module preserves both generalized constructions:
+its entire prior source is followed by the incoming `Theta` namespace
+verbatim. The shared affine differential-sheaf module is the incoming
+source without alteration. The cohomology integration checks twenty-four
+proposal objects: the two changed shared sources are compiled and
+independently replayed, ten affected dependent objects receive fresh
+independent replay, and twelve retain their unchanged checked source and
+dependency contexts. The endpoint audit permits only `propext`,
+`Classical.choice`, and `Quot.sound`. This local integration scope does
+not certify the four new incoming proof modules or the older aggregate
+modules afresh; their earlier validation claims are recorded in the
+preserved incidence checkpoint below.
+
+Four declaration-free import facades, `GeometricTarget05` through
+`GeometricTarget08`, are flattened into their sole importers. Each edit
+replaces one import line by the facade's sole import, and all other
+surviving source bytes are preserved. The surviving modules have exactly
+the same transitive surviving dependencies, and the import graph remains
+acyclic. This keeps the proposal within its 256-file limit without
+changing proof bodies or increasing proof budgets.
+
+The integration checks the exact staged source tree, source and artifact
+hashes, replay freshness, protected-file preservation, and rendered
+mathematical explanation. It introduces no axiom or admission. The only
+admission remains the existing `sorry` in `Solution.lean`; whole-proposal
+verification and acceptance have not been established.
+
+The next mathematical obligations are the projective graded
+normal-sheaf boundary and its canonical pairing, the geometric
+Serre/semiregularity and moving-cycle comparisons, and the global support
+and algebraic de Rham passage to the protected residue. None of the
+computed one-dimensional trace coordinates supplies those constructions
+by itself.
+
+## Affine vanishing and the full projective canonical cohomology — 14 November 2026
+
+The final admission, `Submission.missing_geometric_existence`, remains
+open. This continuation closes the cohomological gap identified in the
+preceding checkpoint: the two actual affine denominator opens have zero
+first cohomology, and the actual Mayer–Vietoris comparison is surjective.
+At the sparse seed it gives a complex-linear isomorphism
+\[
+H^1(C_{r,0},\Omega^1_{C_{r,0}/\mathbb C})\simeq_{\mathbb C}\mathbb C,
+\qquad r^3=2,
+\]
+whose coordinate agrees with the previously checked finite degree-nine
+trace. The complex action is induced by the actual coefficient maps of
+the sheaf. The global canonical-sheaf comparison is also now proved at
+the separate literal incidence seed \((r,\theta)=(57,1)\).
+
+### Affine vanishing in the actual category of additive sheaves
+
+[GeometricAffineCohomology.lean](GeometricAffineCohomology.lean) proves
+`affine_H_one_eq_zero` and `affine_H_one_subsingleton` for the actual
+additive structure sheaf on \(\operatorname{Spec}A\), for every commutative
+ring \(A\). Affine acyclicity is a conclusion, not an input. The proof
+works with the same derived `Ext` definition of sheaf cohomology used by
+the projective construction.
+
+The algebraic step contracts a cocycle on a finite cover by basic opens.
+Uniform powers clear its finitely many denominators and the possible
+localization torsion in the cocycle equations. Since the basic opens
+cover the spectrum, suitable powers of their defining functions generate
+the unit ideal. A finite weighted sum then supplies the coboundary. This
+argument does not assume that the ring is a domain.
+
+For an actual short exact sequence of additive sheaves beginning with
+\(\mathcal O\), local surjectivity supplies local lifts of a global
+section. The preceding contraction corrects their differences, and the
+sheaf gluing axiom gives a global lift. An injective presentation and the
+actual `Ext` exact sequence then imply \(H^1(\operatorname{Spec}A,\mathcal O)=0\).
+The enough-injectives and local-surjectivity instances are supplied by
+the pinned Mathlib sources.
+
+[GeometricAffineCohomology.lean](GeometricAffineCohomology.lean)
+constructs the required restriction map
+\[
+F.H'\,1\,U\longrightarrow(F\!\mid_U).H\,1
+\]
+and proves it injective on a small thin site. The proof uses exact
+restriction, additive Yoneda, and an injective presentation; it does not
+assume that restriction preserves injective objects. It also constructs
+the sheaf equivalence for the actual chart-site equivalence, including
+the comparison of the constant integer sources defining cohomology.
+These degree-one injections suffice to transport affine vanishing to
+the ambient-site groups on the two projective opens. No all-degree
+restriction isomorphism is asserted.
+
+### The full Čech comparison and its intrinsic scalar action
+
+[GeometricAffineCohomology.lean](GeometricAffineCohomology.lean) identifies
+the restricted twisted sheaf with the actual affine structure sheaf,
+using the previously proved chart section isomorphisms and linear
+frames. Consequently both groups
+\[
+(\mathcal L_{r,\theta}).H'\,1\,U_1,
+\qquad (\mathcal L_{r,\theta}).H'\,1\,U_2
+\]
+are zero for all parameters. When \(r\ne0\), the actual two-open cover
+and Mayer–Vietoris exactness make the original Čech comparison bijective:
+
+```lean
+degreeOneCechHOneEquiv (r θ : ℂ) (hr : r ≠ 0) :
+  DegreeOneCech r θ ≃+ ProjectiveSheafH1 r θ
+```
+
+[GeometricSheafCohomologyScalar.lean](GeometricSheafCohomologyScalar.lean)
+constructs multiplication by a complex constant as an endomorphism of
+the actual additive sheaf underlying a module sheaf. Applying the actual
+cohomology functor gives its complex module structure in every degree.
+The resulting maps commute with module-sheaf morphisms, the section/zero-cohomology
+comparison, and the Mayer–Vietoris boundary.
+[GeometricProjectiveCohomologyLinear.lean](GeometricProjectiveCohomologyLinear.lean)
+proves the scalar compatibility of the homogeneous overlap fractions and
+applies this construction to the canonical-sheaf isomorphism. Thus the
+normalized canonical class depends complex-linearly on its coefficient.
+
+Combining this linearity, the established sparse-seed Čech normalization,
+and the new surjectivity gives
+
+```lean
+canonicalNormalizationEquiv (r : ℂ) (hr : r ^ 3 = 2) :
+  ℂ ≃ₗ[ℂ] DifferentialSheafH1 r 0
+```
+
+Its inverse, `canonicalResidueCoordinate`, is defined on all of the
+actual derived group. It sends the class of the normalization numerator
+\(x_0x_1^8\), with denominator \(g_1g_2\), to one. For every homogeneous
+degree-nine polynomial \(p\), the proved identity is
+\[
+\operatorname{canonicalResidueCoordinate}_r
+ \bigl(\operatorname{degreeNineCanonicalClass}_r(p)\bigr)
+ =\operatorname{traceLinear}_r(p).
+\]
+In particular this coordinate detects zero on the whole derived group,
+not only on the previously identified image of the Čech map.
+
+### The literal canonical sheaf and parameter discipline
+
+The cofactor, overlap, and gluing arguments in
+[GeometricChartKaehler.lean](GeometricChartKaehler.lean),
+[GeometricCanonicalOverlap.lean](GeometricCanonicalOverlap.lean),
+[GeometricProjectiveDifferentialForms.lean](GeometricProjectiveDifferentialForms.lean),
+and [GeometricProjectiveCanonical.lean](GeometricProjectiveCanonical.lean)
+now work with the two actual chart Jacobian ideals as their common input.
+The already proved literal Jacobian cover supplies that input at
+\((57,1)\), yielding the closed theorem
+
+```lean
+literalProjectiveCanonicalIso :
+  projectiveDifferentialSheaf 57 1 ≅ degreeOneModuleSheaf 57 1
+```
+
+The sparse-seed public endpoints are retained. Likewise,
+[GeometricCurveRegularPair.lean](GeometricCurveRegularPair.lean) now proves
+the denominator regular-pair and degree-nine kernel results for every
+\(r\ne0\) and every \(\theta\), retaining the earlier sparse wrappers.
+This permits the literal calculation to use the same actual all-poles
+Čech kernel theorem. It does not identify the literal curve with the
+sparse curve.
+
+### A nonzero canonical class at the literal seed
+
+[GeometricLiteralCanonicalClass.lean](GeometricLiteralCanonicalClass.lean)
+constructs an exact complex-linear coefficient functional on the original
+four-variable polynomial ring at \((57,1)\). Its 24 coefficient terms
+annihilate every polynomial in the ideal
+\[
+J_{57,1}=(f_{57},h_1,g_1,g_2),
+\]
+including arbitrary polynomial multiples of the four generators. These
+identities are checked in Lean; no numerical rank or external symbolic
+calculation is used as a proof. On the degree-nine witness it gives
+\[
+\lambda(x_0^3x_2^3x_3^3)=228\ne0.
+\]
+The actual all-poles Čech kernel theorem then proves that the corresponding
+homogeneous fraction is nonzero in the Čech quotient. The original
+Mayer–Vietoris injection and the new literal canonical-sheaf isomorphism
+carry it into a nonzero class of
+\(H^1(C_{57,1},\Omega^1_{C_{57,1}/\mathbb C})\). The resulting
+`literalCanonicalClass_ne_zero` and
+`literalDifferentialSheafH1_nontrivial` have no extra ideal-membership,
+comparison, or smoothness premises.
+
+The same helper also proves a statement about the particular selected cubic
+\[
+L=i x_0^2x_1+(i-1)x_0^3.
+\]
+For the seven displayed weighted cubic tests \(\sigma_j\), after the actual
+substitution eliminating the weighted coordinate, every degree-nine
+class represented by \(k_1L\sigma_j/(g_1g_2)\) is zero in this same
+canonical-sheaf cohomology group. The seven exact Bézout identities used
+here are copied, with their provenance recorded, from the earlier
+explicit-direction calculation into a separate namespace. They are
+checked independently without importing the unvalidated historical
+aggregate; the earlier source is preserved byte-for-byte.
+
+For the same \(L\), the ambient normal-lift numerator is
+\[
+-\operatorname{substitute}(x_2x_3^3w)\,L
+ =x_2^3x_3^3L,
+\qquad
+\lambda(x_2^3x_3^3L)=228(i-1)\ne0.
+\]
+The theorem `selectedCubic_kernel_and_detector` therefore proves the
+seven actual zero-class equations together with this actual nonzero
+ambient class. Its `degreeNineCanonicalClass_zero_iff` identifies the
+kernel for every homogeneous degree-nine numerator with membership in
+\(J_{57,1}\). This is a statement about these explicit classes; it does
+not claim a seven-dimensional kernel or identify a deformation or
+cylinder differential by definition.
+
+### Binding the detector to the actual relative normal cochain
+
+The final section of
+[GeometricLiteralCanonicalClass.lean](GeometricLiteralCanonicalClass.lean)
+uses the preserved incoming relative-normal construction directly. It
+extracts the coefficient of `relativeConnectingRepresentative` through
+the actual relative-normal/kernel equivalence and the proved kernel frame.
+Multiplying this coefficient by the selected cubic is exactly the
+homogeneous degree-nine overlap representative used above. The seven test
+products satisfy the corresponding identities, including their values
+on the literal equation classes.
+
+It also proves the closed theorem
+
+```lean
+CycleQ2GeometricLiteralNormalBinding.literal_normalConnectingClass_ne_zero :
+  CycleQ2ActualNormalCech.connectingClass 57 1 derivativeA 0 ≠ 0
+```
+
+Indeed, a zero normal connecting class would make its scalar coefficient
+a boundary. Multiplication by the chosen weighted cubic preserves that
+boundary submodule. Its carrier agrees with the previously checked Koszul
+boundary submodule: both are the sum of the same two localization-map
+ranges. The regular-pair kernel theorem would then put the paired
+numerator into \(J_{57,1}\), contradicting the exact nonzero detector.
+
+This conclusion concerns the actual ungraded cone normal Čech quotient.
+Its projective normal-sheaf descent, the geometric connecting-map
+comparison, and the surface boundary or semiregularity interpretation
+remain separate constructions. No projective normal-cohomology or
+Serre-duality premise is introduced in the nonvanishing proof.
+
+### Verification of this checkpoint
+
+The concurrent relative-normal-module checkpoint is preserved below, and
+its non-document sources are unchanged. To keep the combined proposal
+within its 256-file limit, the new affine-vanishing, restriction, and full-H¹
+helpers are combined in `GeometricAffineCohomology.lean`. This combination
+retains all three original declaration bodies and namespaces. The projective
+linearity construction retains its original separate module,
+`GeometricProjectiveCohomologyLinear.lean`. Its linear equivalence is
+packaged from the existing additive equivalence and a separately proved
+scalar-compatibility lemma, retaining the same pointwise map. Both modules
+are compiled and independently replayed again from their final source.
+
+The cohomology verification scope is the nine changed or new Lean helpers, the
+three previously checked dependents affected by the refactors, and three
+additional literal-cover dependencies first checked in this continuation.
+The changed and new sources are compiled from their final bytes. Each of
+these fifteen proposal modules is independently replayed with
+`leanchecker`, and the public endpoint audits allow only `propext`,
+`Classical.choice`, and `Quot.sound`. The additional pinned Mathlib
+dependency closure is compiled from unchanged pinned sources. The incoming
+relative-conormal, seed-normal-ideal, and importing formal-input modules,
+plus the conormal-basis and normal-connecting helpers, are also rebuilt and
+replayed because they enter this checked dependency chain. This gives
+twenty explicitly checked proposal modules in the integrated checkpoint.
+The affected cohomology dependents are replayed against those new artifacts.
+All concurrent non-document sources are preserved byte-for-byte.
+
+The source audit preserves the protected target, manifest, instance,
+toolchain, and verifier. It checks the import graph, permitted flat-file
+scope and size limits, exact source/artifact hashes, and replay freshness.
+No new admission, axiom, unsafe evaluation, executable extension, or
+proof-budget increase is introduced. The only admission remains the
+existing `sorry` in `Solution.lean`. This checkpoint verification is not
+a successful build or acceptance of the whole proposal.
+
+### Scope of this continuation
+
+These results compute actual first cohomology of the canonical
+differential sheaf and supply the literal canonical comparison. They do
+not yet construct the normal-sequence/cylinder comparison identifying the
+selected polynomial class with the geometric moving-cycle derivative.
+The relevant geometric variation, supported correspondence, and regular
+algebraic de Rham comparison bound to the protected residue are also still
+required for `Submission.missing_geometric_existence`. The target,
+manifest, and final admission are unchanged. The full historical aggregate
+dependency chain has not passed a complete build.
+
+The earlier checkpoint descriptions below record their status before
+this continuation; their former affine-vanishing and scalar-linearity gaps
+are resolved by the results above.
+
 ## Actual Cartier boundary and coordinate Čech exactness — 14 November 2026
 
 The final admission, `Submission.missing_geometric_existence`, remains
@@ -452,7 +791,7 @@ does not supply this boundary map, its nonvanishing, or a geometric trace.
 The moving-cycle, variation, supported-correspondence, and algebraic de
 Rham comparisons remain further obligations of the nonconstructive route.
 
-## Checked canonical differential sheaf and its nonzero class — 14 November 2026
+## Earlier checkpoint: canonical differential sheaf and its nonzero class — 14 November 2026
 
 The final admission, `Submission.missing_geometric_existence`, remains
 open. The present continuation closes the canonical differential-sheaf
@@ -597,10 +936,10 @@ group. The map from its complex coefficient to the derived class is
 injective. For every homogeneous degree-nine numerator, the transported
 class is zero exactly when the already checked finite trace is zero.
 
-This does not assert surjectivity of the Čech comparison, an isomorphism
+That checkpoint did not assert surjectivity of the Čech comparison, an isomorphism
 from all derived cohomology to \(\mathbb C\), or identification with a
-geometric Serre trace. The current construction has only the additivity
-and injectivity that are explicitly proved.
+geometric Serre trace. At that stage the construction had only the proved additivity
+and injectivity.
 
 ### Verification and the remaining obligation
 
@@ -616,7 +955,7 @@ The whole proposal is still a draft: the final theorem retains its
 passed a complete compilation. The local successful checks reported here
 do not claim full-proposal acceptance.
 
-The next cohomological gap is the actual first-cohomology vanishing on
+At that stage the next cohomological gap was the actual first-cohomology vanishing on
 the two affine denominator opens, together with the required comparison
 between ambient-site `H'` and cohomology of a restricted sheaf. The
 existing Mayer–Vietoris sequence would then make the Čech injection
