@@ -23,7 +23,7 @@ jobs:
   verify:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
     name: Protected proposal verification
-    runs-on: ubuntu-24.04
+    runs-on: ${{ vars.SOLVE_RUNNER || 'ubuntu-24.04' }}
     timeout-minutes: 85
     steps:
       - name: Resolve current immutable PR commits
