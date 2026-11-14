@@ -1,4 +1,5 @@
 import Proposal.GeometricSparseJacobianCover
+import Proposal.GeometricAffineJacobianCover
 import Proposal.GeometricGlobalResidue
 import Mathlib.LinearAlgebra.Isomorphisms
 import Mathlib.RingTheory.Extension.Cotangent.Basic
@@ -11,8 +12,8 @@ identifies the three-coordinate module modulo its two gradient rows with
 Mathlib's Kähler differential module. This comparison is valid for every
 pair of equations; no smoothness hypothesis or comparison map is assumed.
 
-At the sparse parameters, the proved unit Jacobian ideal then gives a
-residue trivialization on each entire affine chart. The image of a coordinate
+A unit Jacobian ideal gives a residue trivialization on each entire affine
+chart. Both the sparse and literal-incidence parameters have proved covers. The image of a coordinate
 class is its actual universal differential. These are affine statements;
 the projective sheaf and Serre trace comparisons are separate.
 -/
@@ -215,38 +216,123 @@ theorem globalForm_eq_normalized (v : Fin 2 → AffinePoly) (h : jacobianIdeal v
   rw [kaehlerResidueEquiv_globalForm, map_smul, kaehlerResidueEquiv_coordinate, hu]
   exact u.inv_mul.symm
 
-/-- The full first chart has a proved, unlocalized residue trivialization. -/
-def firstChartKaehlerEquiv (r : ℂ) (hr : r ^ 3 = 2) :
-    KaehlerDifferential ℂ (ChartRing (firstEquations r 0)) ≃ₗ[ChartRing (firstEquations r 0)]
-      ChartRing (firstEquations r 0) :=
-  kaehlerResidueEquiv (firstEquations r 0) (first_chart_jacobianIdeal_eq_top r hr)
+/-- The two actual chart Jacobian ideals, with their original quotient rings. -/
+def ChartJacobianCover (r θ : ℂ) : Prop :=
+  jacobianIdeal (firstEquations r θ) = ⊤ ∧ jacobianIdeal (secondEquations r θ) = ⊤
 
-/-- The full second chart has a proved, unlocalized residue trivialization. -/
-def secondChartKaehlerEquiv (r : ℂ) (hr : r ^ 3 = 2) :
-    KaehlerDifferential ℂ (ChartRing (secondEquations r 0)) ≃ₗ[ChartRing (secondEquations r 0)]
-      ChartRing (secondEquations r 0) :=
-  kaehlerResidueEquiv (secondEquations r 0) (second_chart_jacobianIdeal_eq_top r hr)
+/-- The three signed cofactors and all ordered two-column minors generate
+exactly the same ideal in the actual affine quotient. -/
+theorem jacobianIdeal_eq_ordered (v : Fin 2 → AffinePoly) :
+    jacobianIdeal v = CycleQ2GeometricAffineJacobianCover.jacobianIdeal v := by
+  apply le_antisymm
+  · apply Ideal.span_le.mpr
+    rintro _ ⟨j, rfl⟩
+    fin_cases j
+    · exact Ideal.subset_span ⟨(1, 2), rfl⟩
+    · exact Ideal.subset_span ⟨(2, 0), rfl⟩
+    · exact Ideal.subset_span ⟨(0, 1), rfl⟩
+  · apply Ideal.span_le.mpr
+    rintro _ ⟨⟨j, k⟩, rfl⟩
+    have h0 : chartMinor v 0 ∈ jacobianIdeal v := Ideal.subset_span ⟨0, rfl⟩
+    have h1 : chartMinor v 1 ∈ jacobianIdeal v := Ideal.subset_span ⟨1, rfl⟩
+    have h2 : chartMinor v 2 ∈ jacobianIdeal v := Ideal.subset_span ⟨2, rfl⟩
+    fin_cases j <;> fin_cases k
+    · simp [CycleQ2GeometricAffineJacobianCover.minor]
+    · exact h2
+    · have hn := (jacobianIdeal v).neg_mem h1
+      change -(chartMap v) (pderiv 2 (v 0) * pderiv 0 (v 1) -
+        pderiv 0 (v 0) * pderiv 2 (v 1)) ∈ jacobianIdeal v at hn
+      change (chartMap v) (pderiv 0 (v 0) * pderiv 2 (v 1) -
+        pderiv 2 (v 0) * pderiv 0 (v 1)) ∈ jacobianIdeal v
+      simpa only [map_sub, neg_sub] using hn
+    · have hn := (jacobianIdeal v).neg_mem h2
+      change -(chartMap v) (pderiv 0 (v 0) * pderiv 1 (v 1) -
+        pderiv 1 (v 0) * pderiv 0 (v 1)) ∈ jacobianIdeal v at hn
+      change (chartMap v) (pderiv 1 (v 0) * pderiv 0 (v 1) -
+        pderiv 0 (v 0) * pderiv 1 (v 1)) ∈ jacobianIdeal v
+      simpa only [map_sub, neg_sub] using hn
+    · simp [CycleQ2GeometricAffineJacobianCover.minor]
+    · exact h0
+    · exact h1
+    · have hn := (jacobianIdeal v).neg_mem h0
+      change -(chartMap v) (pderiv 1 (v 0) * pderiv 2 (v 1) -
+        pderiv 2 (v 0) * pderiv 1 (v 1)) ∈ jacobianIdeal v at hn
+      change (chartMap v) (pderiv 2 (v 0) * pderiv 1 (v 1) -
+        pderiv 1 (v 0) * pderiv 2 (v 1)) ∈ jacobianIdeal v
+      simpa only [map_sub, neg_sub] using hn
+    · simp [CycleQ2GeometricAffineJacobianCover.minor]
 
-def firstChartForm (r : ℂ) (hr : r ^ 3 = 2) :
-    KaehlerDifferential ℂ (ChartRing (firstEquations r 0)) :=
-  globalForm (firstEquations r 0) (first_chart_jacobianIdeal_eq_top r hr)
+/-- The existing sparse smoothness certificate supplies both actual ideals. -/
+theorem sparseChartJacobianCover (r : ℂ) (hr : r ^ 3 = 2) : ChartJacobianCover r 0 :=
+  ⟨first_chart_jacobianIdeal_eq_top r hr, second_chart_jacobianIdeal_eq_top r hr⟩
 
-def secondChartForm (r : ℂ) (hr : r ^ 3 = 2) :
-    KaehlerDifferential ℂ (ChartRing (secondEquations r 0)) :=
-  globalForm (secondEquations r 0) (second_chart_jacobianIdeal_eq_top r hr)
+/-- The independent literal-incidence certificates supply the same actual
+cover at `(57, 1)`, without changing either parameter. -/
+theorem literalChartJacobianCover : ChartJacobianCover 57 1 := by
+  constructor
+  · exact (jacobianIdeal_eq_ordered _).trans
+      CycleQ2GeometricAffineJacobianCover.first_jacobianIdeal_eq_top
+  · exact (jacobianIdeal_eq_ordered _).trans
+      CycleQ2GeometricAffineJacobianCover.second_jacobianIdeal_eq_top
+
+namespace At
+
+variable (r θ : ℂ) (h : ChartJacobianCover r θ)
+
+/-- The full first chart's residue coefficient equivalence. -/
+def firstChartKaehlerEquiv :
+    KaehlerDifferential ℂ (ChartRing (firstEquations r θ)) ≃ₗ[ChartRing (firstEquations r θ)]
+      ChartRing (firstEquations r θ) :=
+  kaehlerResidueEquiv (firstEquations r θ) h.1
+
+/-- The full second chart's residue coefficient equivalence. -/
+def secondChartKaehlerEquiv :
+    KaehlerDifferential ℂ (ChartRing (secondEquations r θ)) ≃ₗ[ChartRing (secondEquations r θ)]
+      ChartRing (secondEquations r θ) :=
+  kaehlerResidueEquiv (secondEquations r θ) h.2
+
+def firstChartForm : KaehlerDifferential ℂ (ChartRing (firstEquations r θ)) :=
+  globalForm (firstEquations r θ) h.1
+
+def secondChartForm : KaehlerDifferential ℂ (ChartRing (secondEquations r θ)) :=
+  globalForm (secondEquations r θ) h.2
+
+@[simp] theorem firstChartKaehlerEquiv_firstChartForm :
+    firstChartKaehlerEquiv r θ h (firstChartForm r θ h) = 1 :=
+  kaehlerResidueEquiv_globalForm _ _
+
+@[simp] theorem secondChartKaehlerEquiv_secondChartForm :
+    secondChartKaehlerEquiv r θ h (secondChartForm r θ h) = 1 :=
+  kaehlerResidueEquiv_globalForm _ _
+
+end At
+
+/-- The original sparse endpoint, using its proved cover. -/
+abbrev firstChartKaehlerEquiv (r : ℂ) (hr : r ^ 3 = 2) :=
+  At.firstChartKaehlerEquiv r 0 (sparseChartJacobianCover r hr)
+
+abbrev secondChartKaehlerEquiv (r : ℂ) (hr : r ^ 3 = 2) :=
+  At.secondChartKaehlerEquiv r 0 (sparseChartJacobianCover r hr)
+
+abbrev firstChartForm (r : ℂ) (hr : r ^ 3 = 2) :=
+  At.firstChartForm r 0 (sparseChartJacobianCover r hr)
+
+abbrev secondChartForm (r : ℂ) (hr : r ^ 3 = 2) :=
+  At.secondChartForm r 0 (sparseChartJacobianCover r hr)
 
 @[simp] theorem firstChartKaehlerEquiv_firstChartForm (r : ℂ) (hr : r ^ 3 = 2) :
     firstChartKaehlerEquiv r hr (firstChartForm r hr) = 1 :=
-  kaehlerResidueEquiv_globalForm _ _
+  At.firstChartKaehlerEquiv_firstChartForm r 0 (sparseChartJacobianCover r hr)
 
 @[simp] theorem secondChartKaehlerEquiv_secondChartForm (r : ℂ) (hr : r ^ 3 = 2) :
     secondChartKaehlerEquiv r hr (secondChartForm r hr) = 1 :=
-  kaehlerResidueEquiv_globalForm _ _
+  At.secondChartKaehlerEquiv_secondChartForm r 0 (sparseChartJacobianCover r hr)
 
 #print axioms residueKaehlerEquiv
 #print axioms residueKaehlerEquiv_coordinate
 #print axioms kaehlerResidueEquiv
 #print axioms differential_coordinate_eq_smul
+#print axioms literalChartJacobianCover
 #print axioms firstChartKaehlerEquiv
 #print axioms secondChartKaehlerEquiv
 
