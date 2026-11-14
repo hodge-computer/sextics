@@ -1643,6 +1643,84 @@ timeout --signal=TERM --kill-after=5s 55s \
   Proposal/GeometricSeedProjectivePrincipalOpens.lean
 ```
 
+### Actual chart scalars and native restriction transport — 14 November 2026
+
+Continuing from `5c116a9b93be24bc052fe128c01eb03ce7401d7a`, this
+checkpoint supplies the scalar compatibility missing from the native
+principal-section comparison. Mathlib's `restrictAppIso` is an
+additive section isomorphism; its linearity over the original chart or
+overlap ring must be proved using its actual coefficient map.
+
+[GeometricSeedChartSectionScalars.lean](GeometricSeedChartSectionScalars.lean)
+upgrades the existing `chartSectionIso e V` to an algebra equivalence
+over the original affine ring. The algebra on
+\(B=\Gamma(X,V)\) is defined by the exact existing `chartSection e V`.
+Its compatibility proof cancels the section isomorphism with its inverse.
+For any native module sheaf on the affine spectrum, the component pulls
+the section-ring action back through this actual isomorphism and proves
+that the resulting \(B\)-action forms a scalar tower with the untouched
+native affine-ring action. These structures are explicit definitions
+and local instances.
+
+[GeometricSeedProjectiveChartOverlaps.lean](GeometricSeedProjectiveChartOverlaps.lean)
+identifies both native chart subopens and their over-site images with the
+principal opens already used for localization. The right-chart statements
+retain the same ordered projective intersection \(U_i\cap U_j\);
+only the affine scalar ring and normalized coordinate change.
+
+[GeometricSeedChartModuleRestriction.lean](GeometricSeedChartModuleRestriction.lean)
+proves the exact inverse coefficient identity
+\[
+(e.\mathrm{hom}.\mathrm{appIso}(W))^{-1}
+\;\text{followed by open transport}
+=e^{-1}.\mathrm{app}(W).
+\]
+It then constructs the native section comparison through the actual
+chart isomorphism, proves its scalar law, and packages it as
+`chartRestrictionEquiv`, linear over \(\Gamma(X,V)\).
+On the restricted-sheaf side this ring acts through the actual open
+inclusion; on the affine side it acts through `chartSectionIso`.
+The theorem `chartRestrictionEquiv_naturality` uses the restricted
+original morphism and holds on every section. This generic component
+requires no localization, regularity, finite-presentation, or descent
+hypothesis.
+
+**Next specialization.** Compose this native restriction comparison with
+the already constructed image and dual models, upgrading those affine-ring
+linear maps to overlap-ring linear maps using the proved scalar towers
+and actual localization instances. The projective image-dual square,
+global internal-Hom identification, and sheaf gluing are not asserted
+by this checkpoint alone.
+
+**Verification status.** All three sources received independent
+mathematical/source review against the pinned APIs and bounded static
+checks. No Lean elaboration, full build, kernel replay, or new transitive
+axiom audit was run. The protected theorem and its existing final
+admission remain unchanged. With the same pinned, already prepared
+dependency artifacts, the deferred commands are separate checks; the
+restriction module requires the scalar module's checked output:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedChartSectionScalars.olean \
+  Proposal/GeometricSeedChartSectionScalars.lean
+```
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedProjectiveChartOverlaps.olean \
+  Proposal/GeometricSeedProjectiveChartOverlaps.lean
+```
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedChartModuleRestriction.olean \
+  Proposal/GeometricSeedChartModuleRestriction.lean
+```
+
 ### The original ideal and the actual differential sheaves
 
 Write \(j:C\hookrightarrow D\) for the original immersion at
