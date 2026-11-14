@@ -719,3 +719,578 @@ end CycleQ2OriginalCartierConnectingCore
 end
 
 end CheckedCartierNormalPart04
+
+/-! SOURCE-ONLY CONTINUATION: the appended actual cubic adjunction binding
+was recovered and assembled in this turn, but has not been compiled or independently
+replayed in its final module context. Verification is deferred at the user's request.
+The original module above is preserved verbatim. -/
+
+section CheckedGeometricCartierNormalConnectingV7Part1
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2ActualCubicAdjunctionBinding
+
+open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry MvPolynomial
+open CycleQ2SeedTrace CycleQ2GeometricProjectiveCurve
+  CycleQ2GeometricProjectiveAffine CycleQ2GeometricAffineCurveCharts
+  CycleQ2GeometricSurfaceCurveCharts CycleQ2GeometricDifferentialSheaf
+  CycleQ2GeometricAffineChartSections CycleQ2GeometricSheafKaehlerMap
+  CycleQ2GeometricSurfaceExteriorSections CycleQ2GeometricPrincipalChartSections
+  CycleQ2GeometricSurfaceJacobianCharts CycleQ2GeometricAffineOverlap
+  CycleQ2GeometricDifferentialChartTransport
+
+/-- The two independently constructed coordinate presentations are the
+same literal ring equivalence, as checked on every homogeneous fraction. -/
+theorem firstChartEquiv_eq (r θ : ℂ) :
+    CycleQ2GeometricDehomogenizedCharts.firstChartEquiv r θ =
+      (firstCoordinateEquiv r θ).toRingEquiv := by
+  ext z
+  obtain ⟨n, a, ha, rfl⟩ :=
+    HomogeneousLocalization.Away.mk_surjective (curveGrade r θ)
+      (coordinate_mem_grade r θ 1) z
+  obtain ⟨p, hp, rfl⟩ := ha
+  have hp' : p.IsHomogeneous n := by simpa using hp
+  exact (firstCurveChartEquiv_homogeneousFraction r θ n p hp').trans
+    (firstCoordinateEquiv_fraction r θ n p hp').symm
+
+theorem secondChartEquiv_eq (r θ : ℂ) :
+    CycleQ2GeometricDehomogenizedCharts.secondChartEquiv r θ =
+      (secondCoordinateEquiv r θ).toRingEquiv := by
+  ext z
+  obtain ⟨n, a, ha, rfl⟩ :=
+    HomogeneousLocalization.Away.mk_surjective (curveGrade r θ)
+      (coordinate_mem_grade r θ 2) z
+  obtain ⟨p, hp, rfl⟩ := ha
+  have hp' : p.IsHomogeneous n := by simpa using hp
+  exact (secondCurveChartEquiv_homogeneousFraction r θ n p hp').trans
+    (secondCoordinateEquiv_fraction r θ n p hp').symm
+
+theorem firstAffineChart_eq (r θ : ℂ) :
+    CycleQ2GeometricAffineProjectiveCharts.firstAffineChart r θ =
+      firstCoordinateChartIso r θ := by
+  unfold CycleQ2GeometricAffineProjectiveCharts.firstAffineChart firstCoordinateChartIso
+  rw [firstChartEquiv_eq]
+
+theorem secondAffineChart_eq (r θ : ℂ) :
+    CycleQ2GeometricAffineProjectiveCharts.secondAffineChart r θ =
+      secondCoordinateChartIso r θ := by
+  unfold CycleQ2GeometricAffineProjectiveCharts.secondAffineChart secondCoordinateChartIso
+  rw [secondChartEquiv_eq]
+
+section PrincipalDifferentials
+
+variable {X : Scheme.{0}} {U : X.Opens} {A : Type} [CommRing A] [Algebra ℂ A]
+  (e : U.toScheme ≅ Spec (CommRingCat.of A))
+  (f : X ⟶ Spec (CommRingCat.of ℂ))
+  (h : e.inv ≫ U.ι ≫ f = Spec.map (CommRingCat.ofHom (algebraMap ℂ A)))
+  (s : A)
+  (hs : (principalChart e s).inv ≫ (principalOpen e s).ι ≫ f =
+    Spec.map (CommRingCat.ofHom (algebraMap ℂ (Localization.Away s))))
+
+/-- Restricting an affine differential through the actual principal chart
+is the same as its original universal sheaf lift on that subopen. -/
+theorem principal_chartKaehlerSection (V : Over (principalOpen e s))
+    (ω : KaehlerDifferential ℂ A) :
+    chartKaehlerSection (principalChart e s) f hs V
+      (KaehlerDifferential.map ℂ ℂ A (Localization.Away s) ω) =
+      chartKaehlerSection e f h
+        (Over.mk (V.hom ≫ homOfLE (principalOpen_le e s))) ω := by
+  have hm : differentialMap (IsScalarTower.toAlgHom ℂ A (Localization.Away s)) ω =
+      KaehlerDifferential.map ℂ ℂ A (Localization.Away s) ω := by
+    have hω : ω ∈ Submodule.span A (Set.range (KaehlerDifferential.D ℂ A)) := by
+      rw [KaehlerDifferential.span_range_derivation]
+      trivial
+    induction hω using Submodule.span_induction with
+    | mem x hx =>
+        obtain ⟨a, rfl⟩ := hx
+        rw [differentialMap_D, KaehlerDifferential.map_D]
+        rfl
+    | zero => simp only [map_zero]
+    | add x y _ _ hx hy => simp only [map_add, hx, hy]
+    | smul a x _ hx =>
+        rw [differentialMap_smul, map_smul, hx]
+        exact (IsScalarTower.algebraMap_smul (R := A) (A := Localization.Away s) a
+          (KaehlerDifferential.map ℂ ℂ A (Localization.Away s) x))
+  rw [← hm]
+  exact sectionLift_differentialMap X.sheaf (schemeCoefficient f)
+    (differentialSheaf X.sheaf (schemeCoefficient f))
+    (universalDifferential X.sheaf (schemeCoefficient f)) V.left
+    (chartSection e (Over.mk (V.hom ≫ homOfLE (principalOpen_le e s))))
+    (chartSection_complex e f h _) (chartSection (principalChart e s) V)
+    (chartSection_complex (principalChart e s) f hs V)
+    (IsScalarTower.toAlgHom ℂ A (Localization.Away s))
+    (principal_chartSection e s V) ω
+
+end PrincipalDifferentials
+
+open CycleQ2GeometricSectionDifferentials
+  CycleQ2GeometricProjectiveChartModules CycleQ2GeometricProjectiveSectionForms
+  CycleQ2GeometricProjectiveAffineCoefficients
+  CycleQ2GeometricSparseJacobianCover CycleQ2GeometricChartKaehler
+
+section UniversalSection
+
+variable {X : TopCat.{0}} (R : X.Sheaf CommRingCat.{0})
+  (c : ℂ →+* R.obj.obj (op ⊤)) (U : Opens X)
+  {A : Type} [CommRing A] [Algebra ℂ A]
+
+/-- The affine universal lift is the actual differential-sheaf unit after
+the corresponding map on ordinary Kähler differentials. -/
+theorem sectionLift_eq_toSheaf :
+    letI := sectionAlgebra R c U
+    ∀ (φ : A →ₐ[ℂ] SectionRing R U) (ω : KaehlerDifferential ℂ A),
+      sectionLift R c (differentialSheaf R c) (universalDifferential R c)
+        U φ.toRingHom φ.commutes ω = toSheaf R c U (differentialMap φ ω) := by
+  letI := sectionAlgebra R c U
+  intro φ ω
+  have hω : ω ∈ Submodule.span A (Set.range (KaehlerDifferential.D ℂ A)) := by
+    rw [KaehlerDifferential.span_range_derivation]
+    trivial
+  induction hω using Submodule.span_induction with
+  | mem x hx =>
+      obtain ⟨a, rfl⟩ := hx
+      rw [sectionLift_D, differentialMap_D, toSheaf_D]
+      rfl
+  | zero => simp only [map_zero]
+  | add x y _ _ hx hy => simp only [map_add, hx, hy]
+  | smul a x _ hx =>
+      rw [sectionLift_smul, differentialMap_smul, map_smul, hx]
+      rfl
+
+end UniversalSection
+
+local instance projectiveSectionAlgebra (r θ : ℂ) (O : (projectiveCurve r θ).Opens) :
+    Algebra ℂ Γ(projectiveCurve r θ, O) :=
+  sectionAlgebra (projectiveCurve r θ).sheaf (projectiveGlobalCoefficient r θ) O
+
+private theorem sectionLift_congr {X : TopCat.{0}}
+    {R : X.Sheaf CommRingCat.{0}} {c : ℂ →+* R.obj.obj (op ⊤)}
+    {M : SheafOfModules.{0} (ringSheaf R)}
+    {d : M.val.Derivation' (coefficientMap R c)} {O : Opens X}
+    {A : Type} [CommRing A] [Algebra ℂ A]
+    {f g : A →+* R.obj.obj (op O)}
+    {hf : ∀ z : ℂ, f (algebraMap ℂ A z) = coefficientOn R c O z}
+    {hg : ∀ z : ℂ, g (algebraMap ℂ A z) = coefficientOn R c O z}
+    (hfg : f = g) (ω : KaehlerDifferential ℂ A) :
+    sectionLift R c M d O f hf ω = sectionLift R c M d O g hg ω := by
+  subst g
+  rfl
+
+theorem firstSheafFrame_eq_chart (r θ : ℂ)
+    (h1 : jacobianIdeal (firstEquations r θ) = ⊤)
+    (h2 : jacobianIdeal (secondEquations r θ) = ⊤) :
+    firstSheafFrame r θ h1 h2 =
+      chartKaehlerSection (firstCoordinateChartIso r θ) (projectiveToComplex r θ)
+        (firstCoordinateChartIso_overComplex r θ)
+        (chartTop (coordinateProjectivePatch r θ 1))
+        (-globalForm (firstEquations r θ) h1) := by
+  have ht : chartSection (firstCoordinateChartIso r θ)
+      (chartTop (coordinateProjectivePatch r θ 1)) = (firstSectionAlgEquiv r θ).toRingHom := by
+    have hcat : CommRingCat.ofHom (chartSection (firstCoordinateChartIso r θ)
+        (chartTop (coordinateProjectivePatch r θ 1))) =
+        CommRingCat.ofHom (firstSectionAlgEquiv r θ).toRingHom := by
+      dsimp only [chartTop]
+      rw [chartSection_top]
+      exact firstCoordinateChartIso_section_map r θ
+    exact congrArg CommRingCat.Hom.hom hcat
+  have hf := ((congrArg (differentialMap (firstSectionAlgEquiv r θ).toAlgHom)
+    (firstOrientedAffineEquiv_symm_one r θ h1)).symm.trans
+      (firstSectionForm_eq r θ h1 h2)).symm
+  exact (congrArg (toSheaf (projectiveCurve r θ).sheaf (projectiveGlobalCoefficient r θ)
+    (coordinateProjectivePatch r θ 1)) hf).trans
+      ((sectionLift_eq_toSheaf (projectiveCurve r θ).sheaf (projectiveGlobalCoefficient r θ)
+        (coordinateProjectivePatch r θ 1) (firstSectionAlgEquiv r θ).toAlgHom
+        (-globalForm (firstEquations r θ) h1)).symm.trans
+          (sectionLift_congr ht (-globalForm (firstEquations r θ) h1)).symm)
+
+theorem secondSheafFrame_eq_chart (r θ : ℂ)
+    (h1 : jacobianIdeal (firstEquations r θ) = ⊤)
+    (h2 : jacobianIdeal (secondEquations r θ) = ⊤) :
+    secondSheafFrame r θ h1 h2 =
+      chartKaehlerSection (secondCoordinateChartIso r θ) (projectiveToComplex r θ)
+        (secondCoordinateChartIso_overComplex r θ)
+        (chartTop (coordinateProjectivePatch r θ 2))
+        (globalForm (secondEquations r θ) h2) := by
+  have ht : chartSection (secondCoordinateChartIso r θ)
+      (chartTop (coordinateProjectivePatch r θ 2)) = (secondSectionAlgEquiv r θ).toRingHom := by
+    have hcat : CommRingCat.ofHom (chartSection (secondCoordinateChartIso r θ)
+        (chartTop (coordinateProjectivePatch r θ 2))) =
+        CommRingCat.ofHom (secondSectionAlgEquiv r θ).toRingHom := by
+      dsimp only [chartTop]
+      rw [chartSection_top]
+      exact secondCoordinateChartIso_section_map r θ
+    exact congrArg CommRingCat.Hom.hom hcat
+  have hf := ((congrArg (differentialMap (secondSectionAlgEquiv r θ).toAlgHom)
+    (secondOrientedAffineEquiv_symm_one r θ h2)).symm.trans
+      (secondSectionForm_eq r θ h1 h2)).symm
+  exact (congrArg (toSheaf (projectiveCurve r θ).sheaf (projectiveGlobalCoefficient r θ)
+    (coordinateProjectivePatch r θ 2)) hf).trans
+      ((sectionLift_eq_toSheaf (projectiveCurve r θ).sheaf (projectiveGlobalCoefficient r θ)
+        (coordinateProjectivePatch r θ 2) (secondSectionAlgEquiv r θ).toAlgHom
+        (globalForm (secondEquations r θ) h2)).symm.trans
+          (sectionLift_congr ht (globalForm (secondEquations r θ) h2)).symm)
+
+open CycleQ2GeometricProjectiveFrameRestriction
+
+theorem firstDenominatorFrame_subopen (r θ : ℂ)
+    (h1 : jacobianIdeal (firstEquations r θ) = ⊤)
+    (h2 : jacobianIdeal (secondEquations r θ) = ⊤)
+    (W : (projectiveCurve r θ).Opens) (hW : W ≤ firstProjectivePatch r θ) :
+    (projectiveDifferentialSheaf r θ).val.map (homOfLE hW).op
+        (firstDenominatorFrame r θ h1 h2) =
+      chartKaehlerSection (firstCoordinateChartIso r θ) (projectiveToComplex r θ)
+        (firstCoordinateChartIso_overComplex r θ)
+        (Over.mk (homOfLE (hW.trans (firstProjectivePatch_le_firstCoordinate r θ))))
+        (-globalForm (firstEquations r θ) h1) := by
+  have hc := ConcreteCategory.congr_hom
+    ((projectiveDifferentialSheaf r θ).val.presheaf.map_comp
+      (homOfLE (firstProjectivePatch_le_firstCoordinate r θ)).op (homOfLE hW).op)
+    (firstSheafFrame r θ h1 h2)
+  change _ = (projectiveDifferentialSheaf r θ).val.map (homOfLE hW).op
+    (firstDenominatorFrame r θ h1 h2) at hc
+  refine hc.symm.trans ?_
+  rw [firstSheafFrame_eq_chart]
+  exact sectionLift_restriction (projectiveCurve r θ).sheaf
+    (projectiveGlobalCoefficient r θ) (projectiveDifferentialSheaf r θ)
+    (projectiveUniversalDifferential r θ) _
+    (chartSection (firstCoordinateChartIso r θ) (chartTop _))
+    (chartSection_complex _ _ (firstCoordinateChartIso_overComplex r θ) _)
+    W (hW.trans (firstProjectivePatch_le_firstCoordinate r θ))
+    (chartSection (firstCoordinateChartIso r θ)
+      (Over.mk (homOfLE (hW.trans (firstProjectivePatch_le_firstCoordinate r θ)))))
+    (chartSection_complex _ _ (firstCoordinateChartIso_overComplex r θ)
+      (Over.mk (homOfLE (hW.trans (firstProjectivePatch_le_firstCoordinate r θ)))))
+    (chartSection_naturality _ (toChartTop
+      (Over.mk (homOfLE (hW.trans (firstProjectivePatch_le_firstCoordinate r θ)))))) _
+
+theorem secondDenominatorFrame_subopen (r θ : ℂ)
+    (h1 : jacobianIdeal (firstEquations r θ) = ⊤)
+    (h2 : jacobianIdeal (secondEquations r θ) = ⊤)
+    (W : (projectiveCurve r θ).Opens) (hW : W ≤ secondProjectivePatch r θ) :
+    (projectiveDifferentialSheaf r θ).val.map (homOfLE hW).op
+        (secondDenominatorFrame r θ h1 h2) =
+      chartKaehlerSection (secondCoordinateChartIso r θ) (projectiveToComplex r θ)
+        (secondCoordinateChartIso_overComplex r θ)
+        (Over.mk (homOfLE (hW.trans (secondProjectivePatch_le_secondCoordinate r θ))))
+        (globalForm (secondEquations r θ) h2) := by
+  have hc := ConcreteCategory.congr_hom
+    ((projectiveDifferentialSheaf r θ).val.presheaf.map_comp
+      (homOfLE (secondProjectivePatch_le_secondCoordinate r θ)).op (homOfLE hW).op)
+    (secondSheafFrame r θ h1 h2)
+  change _ = (projectiveDifferentialSheaf r θ).val.map (homOfLE hW).op
+    (secondDenominatorFrame r θ h1 h2) at hc
+  refine hc.symm.trans ?_
+  rw [secondSheafFrame_eq_chart]
+  exact sectionLift_restriction (projectiveCurve r θ).sheaf
+    (projectiveGlobalCoefficient r θ) (projectiveDifferentialSheaf r θ)
+    (projectiveUniversalDifferential r θ) _
+    (chartSection (secondCoordinateChartIso r θ) (chartTop _))
+    (chartSection_complex _ _ (secondCoordinateChartIso_overComplex r θ) _)
+    W (hW.trans (secondProjectivePatch_le_secondCoordinate r θ))
+    (chartSection (secondCoordinateChartIso r θ)
+      (Over.mk (homOfLE (hW.trans (secondProjectivePatch_le_secondCoordinate r θ)))))
+    (chartSection_complex _ _ (secondCoordinateChartIso_overComplex r θ)
+      (Over.mk (homOfLE (hW.trans (secondProjectivePatch_le_secondCoordinate r θ)))))
+    (chartSection_naturality _ (toChartTop
+      (Over.mk (homOfLE (hW.trans (secondProjectivePatch_le_secondCoordinate r θ)))))) _
+
+open CycleQ2GeometricSurfacePrincipalCurveCharts CycleQ2GeometricSurfaceNormalCover
+  CycleQ2CurveCubicCoefficients
+
+theorem firstNormalCurve_le_coordinate (r θ : ℂ) (i : Fin 2) (j : Fin 3) :
+    firstNormalCurveOpen r θ i j ≤ coordinateProjectivePatch r θ 1 :=
+  principalOpen_le (CycleQ2GeometricAffineProjectiveCharts.firstAffineChart r θ)
+    (firstAffineCurveMap r θ (firstJacobian r θ i j))
+
+theorem secondNormalCurve_le_coordinate (r θ : ℂ) (i : Fin 2) (j : Fin 3) :
+    secondNormalCurveOpen r θ i j ≤ coordinateProjectivePatch r θ 2 :=
+  principalOpen_le (CycleQ2GeometricAffineProjectiveCharts.secondAffineChart r θ)
+    (secondAffineCurveMap r θ (secondJacobian r θ i j))
+
+theorem firstNormalCurve_chartSection (r θ : ℂ) (i : Fin 2) (j : Fin 3)
+    (V : Over (firstNormalCurveOpen r θ i j)) (a : FirstChartRing r θ) :
+    chartSection (firstNormalCurveChart r θ i j) V
+        (algebraMap (FirstChartRing r θ) (FirstNormalCurveRing r θ i j) a) =
+      chartSection (firstCoordinateChartIso r θ)
+        (Over.mk (homOfLE (V.hom.le.trans (firstNormalCurve_le_coordinate r θ i j)))) a := by
+  have h := principal_chartSection (CycleQ2GeometricAffineProjectiveCharts.firstAffineChart r θ)
+    (firstAffineCurveMap r θ (firstJacobian r θ i j)) V a
+  exact h.trans (congrArg (fun e => chartSection e
+    (Over.mk (homOfLE (V.hom.le.trans (firstNormalCurve_le_coordinate r θ i j)))) a)
+      (firstAffineChart_eq r θ))
+
+theorem secondNormalCurve_chartSection (r θ : ℂ) (i : Fin 2) (j : Fin 3)
+    (V : Over (secondNormalCurveOpen r θ i j)) (a : SecondChartRing r θ) :
+    chartSection (secondNormalCurveChart r θ i j) V
+        (algebraMap (SecondChartRing r θ) (SecondNormalCurveRing r θ i j) a) =
+      chartSection (secondCoordinateChartIso r θ)
+        (Over.mk (homOfLE (V.hom.le.trans (secondNormalCurve_le_coordinate r θ i j)))) a := by
+  have h := principal_chartSection (CycleQ2GeometricAffineProjectiveCharts.secondAffineChart r θ)
+    (secondAffineCurveMap r θ (secondJacobian r θ i j)) V a
+  exact h.trans (congrArg (fun e => chartSection e
+    (Over.mk (homOfLE (V.hom.le.trans (secondNormalCurve_le_coordinate r θ i j)))) a)
+      (secondAffineChart_eq r θ))
+
+theorem firstNormalCurve_chartKaehlerSection (r θ : ℂ) (i : Fin 2) (j : Fin 3)
+    (V : Over (firstNormalCurveOpen r θ i j)) (ω : KaehlerDifferential ℂ (FirstChartRing r θ)) :
+    chartKaehlerSection (firstNormalCurveChart r θ i j) (projectiveToComplex r θ)
+        (firstNormalCurveChart_overComplex r θ i j) V
+        (KaehlerDifferential.map ℂ ℂ (FirstChartRing r θ) (FirstNormalCurveRing r θ i j) ω) =
+      chartKaehlerSection (firstCoordinateChartIso r θ) (projectiveToComplex r θ)
+        (firstCoordinateChartIso_overComplex r θ)
+        (Over.mk (homOfLE (V.hom.le.trans (firstNormalCurve_le_coordinate r θ i j)))) ω := by
+  have hf : (CycleQ2GeometricAffineProjectiveCharts.firstAffineChart r θ).inv ≫
+      (coordinateProjectivePatch r θ 1).ι ≫ projectiveToComplex r θ =
+      Spec.map (CommRingCat.ofHom (algebraMap ℂ (FirstChartRing r θ))) := by
+    rw [firstAffineChart_eq]
+    exact firstCoordinateChartIso_overComplex r θ
+  have h := principal_chartKaehlerSection
+    (CycleQ2GeometricAffineProjectiveCharts.firstAffineChart r θ)
+    (projectiveToComplex r θ) hf (firstAffineCurveMap r θ (firstJacobian r θ i j))
+    (firstNormalCurveChart_overComplex r θ i j) V ω
+  exact h.trans (sectionLift_congr
+    (congrArg (fun e => chartSection e
+      (Over.mk (homOfLE (V.hom.le.trans (firstNormalCurve_le_coordinate r θ i j)))))
+        (firstAffineChart_eq r θ)) ω)
+
+theorem secondNormalCurve_chartKaehlerSection (r θ : ℂ) (i : Fin 2) (j : Fin 3)
+    (V : Over (secondNormalCurveOpen r θ i j)) (ω : KaehlerDifferential ℂ (SecondChartRing r θ)) :
+    chartKaehlerSection (secondNormalCurveChart r θ i j) (projectiveToComplex r θ)
+        (secondNormalCurveChart_overComplex r θ i j) V
+        (KaehlerDifferential.map ℂ ℂ (SecondChartRing r θ) (SecondNormalCurveRing r θ i j) ω) =
+      chartKaehlerSection (secondCoordinateChartIso r θ) (projectiveToComplex r θ)
+        (secondCoordinateChartIso_overComplex r θ)
+        (Over.mk (homOfLE (V.hom.le.trans (secondNormalCurve_le_coordinate r θ i j)))) ω := by
+  have hf : (CycleQ2GeometricAffineProjectiveCharts.secondAffineChart r θ).inv ≫
+      (coordinateProjectivePatch r θ 2).ι ≫ projectiveToComplex r θ =
+      Spec.map (CommRingCat.ofHom (algebraMap ℂ (SecondChartRing r θ))) := by
+    rw [secondAffineChart_eq]
+    exact secondCoordinateChartIso_overComplex r θ
+  have h := principal_chartKaehlerSection
+    (CycleQ2GeometricAffineProjectiveCharts.secondAffineChart r θ)
+    (projectiveToComplex r θ) hf (secondAffineCurveMap r θ (secondJacobian r θ i j))
+    (secondNormalCurveChart_overComplex r θ i j) V ω
+  exact h.trans (sectionLift_congr
+    (congrArg (fun e => chartSection e
+      (Over.mk (homOfLE (V.hom.le.trans (secondNormalCurve_le_coordinate r θ i j)))))
+        (secondAffineChart_eq r θ)) ω)
+
+open CycleQ2CubicSheafCoefficients
+
+theorem firstCoefficient_subopen (r θ : ℂ) (σ : Poly)
+    (W : (projectiveCurve r θ).Opens) (hW : W ≤ coordinateProjectivePatch r θ 1) :
+    chartSection (firstCoordinateChartIso r θ) (Over.mk (homOfLE hW))
+        (firstChartMap r θ (firstDehomogenize σ)) =
+      (projectiveCurve r θ).presheaf.map (homOfLE hW).op (firstCoefficient r θ σ) := by
+  have ht := RingHom.congr_fun (CycleQ2GeometricProjectiveChartSections.first_chartSection_top r θ)
+    (firstChartMap r θ (firstDehomogenize σ))
+  have hn := chartSection_naturality (firstCoordinateChartIso r θ)
+    (toChartTop (Over.mk (homOfLE hW))) (firstChartMap r θ (firstDehomogenize σ))
+  exact hn.symm.trans (congrArg ((projectiveCurve r θ).presheaf.map (homOfLE hW).op) ht)
+
+theorem secondCoefficient_subopen (r θ : ℂ) (σ : Poly)
+    (W : (projectiveCurve r θ).Opens) (hW : W ≤ coordinateProjectivePatch r θ 2) :
+    chartSection (secondCoordinateChartIso r θ) (Over.mk (homOfLE hW))
+        (secondChartMap r θ (secondDehomogenize σ)) =
+      (projectiveCurve r θ).presheaf.map (homOfLE hW).op (secondCoefficient r θ σ) := by
+  have ht := RingHom.congr_fun (CycleQ2GeometricProjectiveChartSections.second_chartSection_top r θ)
+    (secondChartMap r θ (secondDehomogenize σ))
+  have hn := chartSection_naturality (secondCoordinateChartIso r θ)
+    (toChartTop (Over.mk (homOfLE hW))) (secondChartMap r θ (secondDehomogenize σ))
+  exact hn.symm.trans (congrArg ((projectiveCurve r θ).presheaf.map (homOfLE hW).op) ht)
+
+theorem firstCurveCoefficient_section (r θ : ℂ) (i : Fin 2) (j : Fin 3)
+    (V : Over (firstNormalCurveOpen r θ i j)) (p : MvPolynomial (Fin 5) ℂ) :
+    chartSection (firstNormalCurveChart r θ i j) V (firstCurveCoefficient r θ i j p) =
+      (projectiveCurve r θ).presheaf.map
+        (homOfLE (V.hom.le.trans (firstNormalCurve_le_coordinate r θ i j))).op
+        (firstCoefficient r θ (substitute p)) := by
+  rw [firstCurveCoefficient_eq, firstNormalCurve_chartSection]
+  exact firstCoefficient_subopen r θ (substitute p) V.left _
+
+theorem secondCurveCoefficient_section (r θ : ℂ) (i : Fin 2) (j : Fin 3)
+    (V : Over (secondNormalCurveOpen r θ i j)) (p : MvPolynomial (Fin 5) ℂ) :
+    chartSection (secondNormalCurveChart r θ i j) V (secondCurveCoefficient r θ i j p) =
+      (projectiveCurve r θ).presheaf.map
+        (homOfLE (V.hom.le.trans (secondNormalCurve_le_coordinate r θ i j))).op
+        (secondCoefficient r θ (substitute p)) := by
+  rw [secondCurveCoefficient_eq, secondNormalCurve_chartSection]
+  exact secondCoefficient_subopen r θ (substitute p) V.left _
+
+local instance differentialSectionModule (r θ : ℂ) (O : (projectiveCurve r θ).Opens) :
+    Module Γ(projectiveCurve r θ, O) ((projectiveDifferentialSheaf r θ).val.obj (op O)) :=
+  inferInstanceAs (Module ((ringSheaf (projectiveCurve r θ).sheaf).obj.obj (op O))
+    ((projectiveDifferentialSheaf r θ).val.obj (op O)))
+
+/-- The real local normal-first contraction lands in precisely the old
+canonical frame, with the first chart's negative curve orientation. -/
+theorem firstAdjunctionSection_eq (r θ : ℂ)
+    (h1 : jacobianIdeal (firstEquations r θ) = ⊤)
+    (h2 : jacobianIdeal (secondEquations r θ) = ⊤) (i : Fin 2) (j : Fin 3)
+    (V : Over (firstNormalCurveOpen r θ i j)) (hV : V.left ≤ firstProjectivePatch r θ)
+    (p : MvPolynomial (Fin 5) ℂ) :
+    chartKaehlerSection (firstNormalCurveChart r θ i j) (projectiveToComplex r θ)
+        (firstNormalCurveChart_overComplex r θ i j) V
+        (firstNormalAdjunction r θ i j (firstRestrictedPolynomialForm r θ i j p)) =
+      (projectiveCurve r θ).presheaf.map
+        (homOfLE (hV.trans (firstProjectivePatch_le_firstCoordinate r θ))).op
+        (firstCoefficient r θ (substitute p)) •
+      (projectiveDifferentialSheaf r θ).val.map (homOfLE hV).op
+        (firstDenominatorFrame r θ h1 h2) := by
+  have hform := firstNormalAdjunction_formula r θ i j h1 p
+  have hsm := sectionLift_smul (projectiveCurve r θ).sheaf (projectiveGlobalCoefficient r θ)
+    (projectiveDifferentialSheaf r θ) (projectiveUniversalDifferential r θ) V.left
+    (chartSection (firstNormalCurveChart r θ i j) V)
+    (chartSection_complex _ _ (firstNormalCurveChart_overComplex r θ i j) V)
+    (-(firstCurveCoefficient r θ i j p))
+    (KaehlerDifferential.map ℂ ℂ (FirstChartRing r θ) (FirstNormalCurveRing r θ i j)
+      (globalForm (firstEquations r θ) h1))
+  have h := (congrArg
+    (chartKaehlerSection (firstNormalCurveChart r θ i j) (projectiveToComplex r θ)
+      (firstNormalCurveChart_overComplex r θ i j) V) hform).trans hsm
+  let c : Γ(projectiveCurve r θ, V.left) :=
+    (projectiveCurve r θ).presheaf.map
+      (homOfLE (hV.trans (firstProjectivePatch_le_firstCoordinate r θ))).op
+      (firstCoefficient r θ (substitute p))
+  let ω : (projectiveDifferentialSheaf r θ).val.obj (op V.left) :=
+    chartKaehlerSection (firstCoordinateChartIso r θ) (projectiveToComplex r θ)
+      (firstCoordinateChartIso_overComplex r θ)
+      (Over.mk (homOfLE (hV.trans (firstProjectivePatch_le_firstCoordinate r θ))))
+      (globalForm (firstEquations r θ) h1)
+  have hc : chartSection (firstNormalCurveChart r θ i j) V
+      (-(firstCurveCoefficient r θ i j p)) = -c :=
+    (map_neg (chartSection (firstNormalCurveChart r θ i j) V) _).trans
+      (congrArg (fun z : Γ(projectiveCurve r θ, V.left) => -z)
+        (firstCurveCoefficient_section r θ i j V p))
+  have hω := firstNormalCurve_chartKaehlerSection r θ i j V
+    (globalForm (firstEquations r θ) h1)
+  have hpair := congrArg₂
+    (fun (a : Γ(projectiveCurve r θ, V.left))
+      (z : (projectiveDifferentialSheaf r θ).val.obj (op V.left)) => a • z) hc hω
+  have hf : (projectiveDifferentialSheaf r θ).val.map (homOfLE hV).op
+      (firstDenominatorFrame r θ h1 h2) = -ω :=
+    (firstDenominatorFrame_subopen r θ h1 h2 V.left hV).trans
+      (map_neg (chartKaehlerSection (firstCoordinateChartIso r θ) (projectiveToComplex r θ)
+        (firstCoordinateChartIso_overComplex r θ)
+        (Over.mk (homOfLE (hV.trans (firstProjectivePatch_le_firstCoordinate r θ))))) _)
+  exact h.trans (hpair.trans ((neg_smul c ω).trans
+    ((smul_neg c ω).symm.trans (congrArg (fun z => c • z) hf.symm))))
+
+/-- The second surface representative carries its fixed minus sign;
+contraction consequently lands in the positive second curve frame. -/
+theorem secondAdjunctionSection_eq (r θ : ℂ)
+    (h1 : jacobianIdeal (firstEquations r θ) = ⊤)
+    (h2 : jacobianIdeal (secondEquations r θ) = ⊤) (i : Fin 2) (j : Fin 3)
+    (V : Over (secondNormalCurveOpen r θ i j)) (hV : V.left ≤ secondProjectivePatch r θ)
+    (p : MvPolynomial (Fin 5) ℂ) :
+    chartKaehlerSection (secondNormalCurveChart r θ i j) (projectiveToComplex r θ)
+        (secondNormalCurveChart_overComplex r θ i j) V
+        (secondNormalAdjunction r θ i j (-(secondRestrictedPolynomialForm r θ i j p))) =
+      (projectiveCurve r θ).presheaf.map
+        (homOfLE (hV.trans (secondProjectivePatch_le_secondCoordinate r θ))).op
+        (secondCoefficient r θ (substitute p)) •
+      (projectiveDifferentialSheaf r θ).val.map (homOfLE hV).op
+        (secondDenominatorFrame r θ h1 h2) := by
+  have hform := secondNormalAdjunction_oriented r θ i j h2 p
+  have hsm := sectionLift_smul (projectiveCurve r θ).sheaf (projectiveGlobalCoefficient r θ)
+    (projectiveDifferentialSheaf r θ) (projectiveUniversalDifferential r θ) V.left
+    (chartSection (secondNormalCurveChart r θ i j) V)
+    (chartSection_complex _ _ (secondNormalCurveChart_overComplex r θ i j) V)
+    (secondCurveCoefficient r θ i j p)
+    (KaehlerDifferential.map ℂ ℂ (SecondChartRing r θ) (SecondNormalCurveRing r θ i j)
+      (globalForm (secondEquations r θ) h2))
+  have h := (congrArg
+    (chartKaehlerSection (secondNormalCurveChart r θ i j) (projectiveToComplex r θ)
+      (secondNormalCurveChart_overComplex r θ i j) V) hform).trans hsm
+  have hc := secondCurveCoefficient_section r θ i j V p
+  have hω := secondNormalCurve_chartKaehlerSection r θ i j V
+    (globalForm (secondEquations r θ) h2)
+  have hpair := congrArg₂
+    (fun (a : Γ(projectiveCurve r θ, V.left))
+      (z : (projectiveDifferentialSheaf r θ).val.obj (op V.left)) => a • z) hc hω
+  exact h.trans (hpair.trans (congrArg (fun z =>
+      (projectiveCurve r θ).presheaf.map
+        (homOfLE (hV.trans (secondProjectivePatch_le_secondCoordinate r θ))).op
+        (secondCoefficient r θ (substitute p)) • z)
+    (secondDenominatorFrame_subopen r θ h1 h2 V.left hV).symm))
+
+open CycleQ2IntrinsicNormalModel CycleQ2NormalVectorOnCurve CycleQ2CubicDifferentialMap
+  CycleQ2SurfaceCubicGluing
+
+/-- On every literal first Jacobian/quartic subopen, the original normal
+generator's actual cubic differential image is the genuine contraction
+of the original local representative of the glued cubic surface form. -/
+theorem literal_first_cubic_adjunction (p : WeightedCubic) (i : Fin 2) (j : Fin 3)
+    (V : Over (firstNormalCurveOpen (57 : ℂ) 1 i j))
+    (hV : V.left ≤ firstProjectivePatch 57 1) :
+    ((intrinsicNormalIso.hom ≫ literalModelCubicDifferential (substitute p.val)
+      (CycleQ2GeometricLiteralSurface.substitute_homogeneous p.property)).val.app (op V.left))
+        (firstVectorAt 57 1 i j V.left
+          (V.hom.le.trans (firstNormalOpen_preimage 57 1 i j).ge)) =
+      chartKaehlerSection (firstNormalCurveChart 57 1 i j) (projectiveToComplex 57 1)
+        (firstNormalCurveChart_overComplex 57 1 i j) V
+        (firstNormalAdjunction 57 1 i j (firstRestrictedPolynomialForm 57 1 i j p.val)) := by
+  have hc : firstNormalCoordinate 57 1 V.left hV
+      (intrinsicNormalIso.hom.val.app (op V.left)
+        (firstVectorAt 57 1 i j V.left
+          (V.hom.le.trans (firstNormalOpen_preimage 57 1 i j).ge))) = 1 :=
+    intrinsicNormalIso_first_vector (i,j) V.left hV _
+  have h := modelCubicDifferential_first_local 57 1 (by norm_num)
+    CycleQ2GeometricIncidenceJacobianCover.first_chart_jacobianIdeal_eq_top
+    CycleQ2GeometricIncidenceJacobianCover.second_chart_jacobianIdeal_eq_top
+    (substitute p.val) (CycleQ2GeometricLiteralSurface.substitute_homogeneous p.property)
+    V.left hV (intrinsicNormalIso.hom.val.app (op V.left)
+      (firstVectorAt 57 1 i j V.left
+        (V.hom.le.trans (firstNormalOpen_preimage 57 1 i j).ge)))
+  rw [hc, one_mul] at h
+  exact h.trans (firstAdjunctionSection_eq 57 1
+    CycleQ2GeometricIncidenceJacobianCover.first_chart_jacobianIdeal_eq_top
+    CycleQ2GeometricIncidenceJacobianCover.second_chart_jacobianIdeal_eq_top i j V hV p.val).symm
+
+/-- The second chart retains the negated surface representative and the
+same original normal generator, so no global sign is silently changed. -/
+theorem literal_second_cubic_adjunction (p : WeightedCubic) (i : Fin 2) (j : Fin 3)
+    (V : Over (secondNormalCurveOpen (57 : ℂ) 1 i j))
+    (hV : V.left ≤ secondProjectivePatch 57 1) :
+    ((intrinsicNormalIso.hom ≫ literalModelCubicDifferential (substitute p.val)
+      (CycleQ2GeometricLiteralSurface.substitute_homogeneous p.property)).val.app (op V.left))
+        (secondVectorAt 57 1 i j V.left
+          (V.hom.le.trans (secondNormalOpen_preimage 57 1 i j).ge)) =
+      chartKaehlerSection (secondNormalCurveChart 57 1 i j) (projectiveToComplex 57 1)
+        (secondNormalCurveChart_overComplex 57 1 i j) V
+        (secondNormalAdjunction 57 1 i j (-(secondRestrictedPolynomialForm 57 1 i j p.val))) := by
+  have hc : secondNormalCoordinate 57 1 V.left hV
+      (intrinsicNormalIso.hom.val.app (op V.left)
+        (secondVectorAt 57 1 i j V.left
+          (V.hom.le.trans (secondNormalOpen_preimage 57 1 i j).ge))) = 1 :=
+    intrinsicNormalIso_second_vector (i,j) V.left hV _
+  have h := modelCubicDifferential_second_local 57 1 (by norm_num)
+    CycleQ2GeometricIncidenceJacobianCover.first_chart_jacobianIdeal_eq_top
+    CycleQ2GeometricIncidenceJacobianCover.second_chart_jacobianIdeal_eq_top
+    (substitute p.val) (CycleQ2GeometricLiteralSurface.substitute_homogeneous p.property)
+    V.left hV (intrinsicNormalIso.hom.val.app (op V.left)
+      (secondVectorAt 57 1 i j V.left
+        (V.hom.le.trans (secondNormalOpen_preimage 57 1 i j).ge)))
+  rw [hc, one_mul] at h
+  exact h.trans (secondAdjunctionSection_eq 57 1
+    CycleQ2GeometricIncidenceJacobianCover.first_chart_jacobianIdeal_eq_top
+    CycleQ2GeometricIncidenceJacobianCover.second_chart_jacobianIdeal_eq_top i j V hV p.val).symm
+
+#print axioms literal_first_cubic_adjunction
+#print axioms literal_second_cubic_adjunction
+
+#print axioms firstChartEquiv_eq
+#print axioms firstAffineChart_eq
+#print axioms principal_chartKaehlerSection
+#print axioms firstSheafFrame_eq_chart
+
+end CycleQ2ActualCubicAdjunctionBinding
+end
+
+end CheckedGeometricCartierNormalConnectingV7Part1

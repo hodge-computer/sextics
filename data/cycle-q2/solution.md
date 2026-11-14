@@ -1,5 +1,487 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Canonical residue and the Cartier comparison — source draft, 14 November 2026
+
+At the contributor's request, compilation and independent kernel replay
+were stopped so that this continuation could concentrate on writing the
+next mathematical steps. The files in this section contain proposed
+proof bodies, with explicit source-only status. They have not been
+validated as a complete Lean dependency chain. The final admission in
+`Submission.missing_geometric_existence` is still present.
+
+### The original ideal and the actual differential sheaves
+
+Write \(j:C\hookrightarrow D\) for the original immersion at
+\((r,\theta)=(57,1)\), \(I=\ker(\mathcal O_D\to j_*\mathcal O_C)\),
+and \(K=\Omega_D^2\). The new residue construction uses
+\(\mathcal{H}om(I,K)\) as its pole-form sheaf. Its proposed sequence is
+\[
+0\longrightarrow K\longrightarrow\mathcal{H}om(I,K)
+\xrightarrow{\operatorname{res}}j_*\Omega_C^1\longrightarrow0.
+\]
+
+[GeometricCanonicalResidue.lean](GeometricCanonicalResidue.lean) constructs
+the residue of arbitrary ideal-valued two-forms on the actual localized
+rings and calculates its change under the original normalized frames.
+[GeometricCanonicalResidueBinding.lean](GeometricCanonicalResidueBinding.lean)
+binds reduction to the unchanged inverse-ideal map.
+[GeometricCanonicalResidueSheaf.lean](GeometricCanonicalResidueSheaf.lean)
+glues the actual local residue morphisms, with zero on the complement of
+the curve. [GeometricCanonicalResidueExact.lean](GeometricCanonicalResidueExact.lean)
+supplies proof bodies for exactness of both the module and additive
+sheaf sequences.
+
+Near the curve, the local comparison uses the actual exterior frame,
+the original Cartier reduction, and contraction into the original
+curve differential sheaf. Exactness is transported on the existing
+Cartier principal basis. Off the curve, the ideal is the structure
+sheaf, so the regular-to-pole map is an actual isomorphism and the
+residue target is zero. These are local component arguments; no
+surjectivity assertion over arbitrary open sets is used.
+
+The comparison depends on the new local-frame and contraction drafts:
+[GeometricExteriorLocalFrames.lean](GeometricExteriorLocalFrames.lean),
+[GeometricSurfaceExteriorFrameBinding.lean](GeometricSurfaceExteriorFrameBinding.lean),
+[GeometricCubicAdjunction.lean](GeometricCubicAdjunction.lean),
+[GeometricSurfaceCoefficientPullback.lean](GeometricSurfaceCoefficientPullback.lean),
+[GeometricCubicAdjunctionFrameBinding.lean](GeometricCubicAdjunctionFrameBinding.lean),
+and [GeometricCubicAdjunctionLocalIso.lean](GeometricCubicAdjunctionLocalIso.lean).
+The required recovered extension to
+[GeometricCartierNormalConnecting.lean](GeometricCartierNormalConnecting.lean)
+preserves the incoming file as an exact prefix; its appended source also
+remains unverified.
+
+### A constructed morphism of the two sequences
+
+[GeometricCanonicalResidueDiagram.lean](GeometricCanonicalResidueDiagram.lean)
+starts with any actual global section \(\sigma\in H^0(D,K)\).
+Multiplication by its restrictions defines
+\(\mu_\sigma:\mathcal O_D\to K\), and postcomposition defines
+\(\mathcal{H}om(I,\mu_\sigma)\). The original scalar map commutes
+with the actual regular-form inclusion. The residue therefore kills
+the scalar image. The cokernel property of the original Cartier
+reduction then constructs a unique map
+\[
+c_\sigma:N_{C/D}\longrightarrow j_*\Omega_C^1
+\]
+on the surface-side normal sheaf. This gives a morphism from the
+unchanged Cartier sequence to the proposed canonical residue sequence.
+
+Naturality of the original Ext connecting maps gives
+\[
+\delta_{\rm res}\bigl(H^1(c_\sigma)(n)\bigr)
+=H^2(\mu_\sigma)\bigl(\delta_{\rm Cartier}(n)\bigr)
+=H^2(\mu_\sigma)(B),
+\]
+where \(n=\texttt{literalNormalClassAtTop}\) and
+\(B=\texttt{literalDerivedClassAtTop}\) are the unchanged original
+classes. The draft retains their fixed sign. When a global form has the
+original cubic restrictions near the curve, local calculations and
+the same quotient property identify \(c_\sigma\) with the existing
+actual cubic adjunction map. The general theorem states that restriction
+hypothesis explicitly. The subsequent global cubic construction below
+supplies it for every original weighted cubic.
+
+### Global cubic forms on the complete surface
+
+The twelve existing normal residue patches lie in \(X_1\ne0\) or
+\(X_2\ne0\). They cover a neighborhood of \(C\), not all of \(D\).
+For example, choose \(\alpha^3=i-1\). The weighted point
+\([\alpha:0:0:1;-\alpha^2]\) satisfies the surface equations but
+has \(X_1=X_2=0\). Thus extending the cubic sections needs additional
+patches and their actual residue transitions.
+
+The new source drafts construct that extension explicitly.
+[GeometricFullSurfaceJacobianCover.lean](GeometricFullSurfaceJacobianCover.lean)
+uses the weighted Euler identities and the original characteristic-zero
+Jacobian certificate to show that all augmented coordinate minors
+generate the unit ideal in each of the three coordinate charts.
+[GeometricFullSurfaceResidueCover.lean](GeometricFullSurfaceResidueCover.lean)
+transports this to actual projective opens. Its family contains every
+augmented polynomial pair, so each of the former twelve normal patches
+is literally an index of the larger cover.
+
+[GeometricThirdSurfaceChart.lean](GeometricThirdSurfaceChart.lean)
+constructs the actual third chart, and
+[GeometricSurfaceCoordinateSections.lean](GeometricSurfaceCoordinateSections.lean)
+proves homogeneous coordinate change in the actual restricted section
+rings. For a weighted homogeneous polynomial \(p\) of degree \(n\),
+the identity is
+\[
+\left.\frac{p}{X_k^n}\right|_V
+=\left(\left.\frac{X_j}{X_k}\right|_V\right)^n
+ \left.\frac{p}{X_j^n}\right|_V.
+\]
+The maps in this identity are the existing chart section maps and sheaf
+restrictions. The proof goes through the original homogeneous
+localizations and their section isomorphisms.
+
+[GeometricCrossChartResidueSections.lean](GeometricCrossChartResidueSections.lean),
+[GeometricSurfaceFirstThirdAmbient.lean](GeometricSurfaceFirstThirdAmbient.lean),
+[GeometricSurfaceFirstThirdTransition.lean](GeometricSurfaceFirstThirdTransition.lean),
+and [GeometricSurfaceSecondThirdTransition.lean](GeometricSurfaceSecondThirdTransition.lean)
+give the actual differential and residue transitions. The ambient
+coordinate determinants are \(+c^{-6}\) and \(-c^{-6}\), respectively.
+Together with the degree-six and degree-three equation scalings, they
+give the raw residue changes \(\omega_3=c^3\omega_1\) and
+\(\omega_3=-c^3\omega_2\). The cubic coefficients scale by
+\(c^{-3}\), so the original orientations \((+,-,+)\) agree.
+
+[GeometricGlobalSurfaceCubics.lean](GeometricGlobalSurfaceCubics.lean)
+then gives full sheaf-gluing proof bodies for
+`CycleQ2GlobalSurfaceCubics.globalCubicSection`. Its restrictions equal
+the original `localSectionOn` and `gluedCubicSection`, rather than a
+newly normalized form. Finally,
+[GeometricCanonicalCubicDiagram.lean](GeometricCanonicalCubicDiagram.lean)
+specializes the actual Cartier/residue diagram to these constructed
+global forms. The resulting cubic connecting identity has no remaining
+global-extension premise. These are source constructions, still
+awaiting Lean verification.
+
+[GeometricSurfaceCoordinateFrames.lean](GeometricSurfaceCoordinateFrames.lean)
+supplies the source construction of a frame of the actual exterior sheaf
+on each entire coordinate chart. It glues the original raw determinant
+frames over the full augmented-minor cover, using the existing
+arbitrary-cover gluing theorem. Its component and generator formulas
+retain the original residue sections. The actual affine frames also give
+vanishing of canonical \(H^1\) on each of the three coordinate opens.
+[GeometricSurfaceCoordinateCubicFrames.lean](GeometricSurfaceCoordinateCubicFrames.lean)
+calculates the coefficient of each constructed global cubic on every
+subopen, with orientation \((+,-,+)\). Applying this to \(X_j^3\)
+determines the transition for arbitrary canonical-form sections.
+
+### The original class in canonical degree-two cohomology
+
+[GeometricCoordinateCechTrace.lean](GeometricCoordinateCechTrace.lean)
+defines a fixed coefficient functional on the original coordinate
+Čech quotient. On weight-three classes it detects the single remaining
+negative Laurent coefficient, and the original detector-cubic class
+has nonzero value. This is an algebraic coordinate calculation; the
+global forms alone would not identify it with canonical cohomology.
+
+[GeometricThreeOpenH2Naturality.lean](GeometricThreeOpenH2Naturality.lean)
+provides naturality for the original two Mayer–Vietoris connecting maps.
+[GeometricCanonicalCoordinateH2.lean](GeometricCanonicalCoordinateH2.lean)
+uses the existing retained projective descent to express the unchanged
+\(B\) as the connecting image of its original negative homogeneous
+coordinate representative, \(-q\). It then proves
+\[
+H^2(\mu_{\sigma_p})(B)
+=\delta_{\rm coord}\bigl(\sigma_p\,(-q)\bigr)
+\]
+for every constructed global cubic. The same theorem retains the fixed
+nonzero coefficient of the original detector cubic times \(q\).
+The local canonical \(H^1\) vanishing makes zero on the right equivalent
+to being an actual alternating boundary on the three pair intersections.
+
+[GeometricSurfaceSectionCoefficients.lean](GeometricSurfaceSectionCoefficients.lean)
+constructs the structure-section maps into the original ordinary
+coordinate localizations, using the actual homogeneous section
+isomorphisms. Their restriction identities and homogeneous numerator
+identities are proved in the draft.
+[GeometricCanonicalCoordinateCoefficients.lean](GeometricCanonicalCoordinateCoefficients.lean)
+composes these maps with the canonical frames and multiplies by
+\(\varepsilon_i X_i^3\). The actual frame transitions prove that
+this coefficient is independent of the chart, and actual naturality
+proves compatibility with the original localization restrictions. The
+two final identities send canonical pair-boundaries to ordinary
+coordinate boundaries and send \(\sigma_p q\) to the unchanged
+homogeneous numerator \(p q\). A full range theorem for weight-three
+fractions is unnecessary.
+
+[GeometricCanonicalResidueNonzero.lean](GeometricCanonicalResidueNonzero.lean)
+then supplies the closed source proof of
+`detector_cubicH2_ne_zero` and `canonicalResidueConnecting_ne_zero`.
+If \(H^2(\mu_{\sigma_{X_0^3}})(B)\) were zero, the retained
+section \(\sigma_{X_0^3}(-q)\) would be a canonical boundary.
+Its ordinary coordinate image would therefore have zero negative
+Laurent coefficient. That coefficient is the negative of the original
+proved nonzero coefficient of \(X_0^3 q\), a contradiction. Thus
+\[
+H^2(\mu_{\sigma_{X_0^3}})(B)\ne0,
+\qquad
+\delta_{\rm res}\bigl(H^1(c_{\sigma_{X_0^3}})(n)\bigr)\ne0.
+\]
+The detector \(X_0^3\) is kept distinct from the earlier selected
+cubic. The module also constructs a fixed `canonicalCechTrace` on the
+actual canonical three-open Čech quotient by proving that the same
+coefficient kills genuine boundaries. It does not choose a trace on
+the entire derived \(H^2\) group.
+
+[GeometricCanonicalResidueScalar.lean](GeometricCanonicalResidueScalar.lean)
+derives complex linearity of the actual residue connecting map from
+the original scalar endomorphism of the short complex and connecting
+map naturality. Its `canonicalOpenConnectingLinear` has exactly the
+existing additive connecting homomorphism as its underlying map.
+
+[GeometricCanonicalCurveImage.lean](GeometricCanonicalCurveImage.lean)
+uses the already fixed `literalCanonicalCoordinate` on
+\(H^1(C,\Omega_C^1)\). It proves that the original surface and curve
+scalar actions agree under the actual immersion. The curve boundary
+and the actual pushed boundary have the same kernel; together with
+scalar compatibility this constructs a linear injection
+\[
+\iota:H^1(C,\Omega_C^1)\longrightarrow
+H^1(D,j_*\Omega_C^1)
+\]
+which agrees with the actual pushed boundary on every original overlap
+section. The formula defining \(\iota\) uses the prescribed curve
+normalization and its actual pushed representative. It is therefore
+bound to the original maps, rather than selected from abstract
+nonvanishing. Each original cubic adjunction image is proved to lie
+in this concrete image, with its original negative normalization.
+No surjectivity assertion for all pushed \(H^1\) is required.
+
+The detector calculation makes \(\delta_{\rm res}\circ\iota\)
+nonzero. Complex linearity and the already proved one-dimensional curve
+cohomology then make this composite injective. The final source theorem
+`canonicalOpenConnecting_original_cubic_coordinate_zero_iff` identifies
+vanishing of the actual canonical connecting image with vanishing of
+the prescribed `literalCanonicalCoordinate` of the original cubic
+curve class. In particular,
+`original_selected_cubic_connecting_ne_zero` transports nonvanishing
+to the distinct original selected cubic through this proved injection.
+It does not identify the selected cubic with the detector, and it does
+not assert injectivity on arbitrary classes of pushed \(H^1\).
+
+The nonzero canonical connecting value above is established by the
+boundary/coefficient argument, not inferred from a nonzero cubic image
+in \(H^1(C,\Omega_C^1)\) alone. The moving-cycle construction, supported correspondence,
+and geometric passage to exactness of the protected rational form remain
+separate requirements. All of these new Lean bodies await verification;
+no completed certificate is claimed.
+
+### A shorter route through generic specialization
+
+[GeometricGenericPencilLift.lean](GeometricGenericPencilLift.lean)
+constructs a useful algebraic reduction of the later geometric argument.
+Use the protected coordinate order
+\((Z_0,Z_1,Z_2,Z_3,Z_4,Z_5)=(X_0,X_1,X_2,Y_0,Y_1,Y_2)\).
+On the pencil \(Z_5=\lambda Z_2\), put
+\((s_0,s_1,s_2,s_3,w)=(Z_0,Z_1,Z_3,Z_4,Z_2^2)\).
+The actual weighted quotient equation is
+\[
+G_\lambda=\sum_{i=0}^3s_i^6+(1+\lambda^6)w^3+
+\tfrac12\bigl(s_0^3s_1s_2s_3+
+\lambda s_1^3s_3w+\lambda s_0s_2w^2\bigr).
+\]
+For any member \(P\) of the full invariant weighted sextic family,
+set \(h=P-G_0\) and
+\[
+H(Z)=h(Z_0,Z_1,Z_3,Z_4,Z_2^2),\qquad F_\tau=F+\tau H.
+\]
+The new polynomial proofs preserve weighted degree, ordinary sextic
+degree after the lift, and the two original symmetries. Since the lift
+is independent of \(Z_5\), its restriction to every pencil member is
+the same \(h(s,w)\). The exact weighted quotient family is consequently
+\[
+\Phi(\tau,\lambda)=G_\lambda+\tau(P-G_0),\qquad
+\Phi(1,0)=P.
+\]
+
+This gives a way to use a geometric construction on a nonempty good open
+of the full invariant family. Choose \(P\) there with \(P\ne G_0\).
+A principal open neighborhood of \(P\) pulls back to a nonzero
+polynomial in \(\tau,\lambda\), because its value at \((1,0)\)
+is nonzero. It remains nonzero in \(\mathbb C(\tau)[\lambda]\).
+Thus the pencil of the generic deformation meets the good open. This
+avoids first proving a supported-projector specialization theorem for
+every smooth weighted sextic. It still requires an actual relative
+cycle construction and its cohomological action over the good open;
+unrelated cycles on individual complex fibers would not suffice.
+
+The helper also proves that the affine lift is a valid existing
+`CycleQ2GenericSpecialization.Direction`. A nonzero homogeneous lift
+stays nonzero on \(Z_0=1\), and has degree zero in \(Z_5\), whereas
+the protected affine equation has positive degree in \(Z_5\). The
+protected equation therefore cannot divide the lift.
+
+[GeometricGenericPencilOpen.lean](GeometricGenericPencilOpen.lean)
+supplies proof bodies for the avoidance argument itself. It constructs
+the actual two-parameter coefficient family over
+\(\mathbb C[\tau][\lambda]\), proves its specialization at every
+complex pair agrees with \(\Phi\), and proves that its evaluation at
+\((1,0)\) is the chosen full-family coefficient point. A coefficient
+polynomial nonzero at that point therefore has nonzero pullback. The
+injective map
+\(\mathbb C[\tau][\lambda]\to\mathbb C(\tau)[\lambda]\)
+preserves this nonvanishing. Finally, multiplying any nonzero
+principal-open equation by a coefficient separating the endpoint from
+\(G_0\) proves that a suitable endpoint with nonzero direction exists.
+Thus `exists_direction_and_generic_open` has no additional endpoint or
+direction-existence assumption. It still takes the nonzero equation of
+the proposed good open as input; it does not construct moving cycles.
+
+The remaining
+geometric conclusion for the constructed direction `d` is exactly
+
+```lean
+∃ u : Fin 4 → CycleQ2GenericSpecialization.RF,
+  ∑ j, CycleQ2GenericSpecialization.relativeTangent d j (u j) =
+    CycleQ2GenericSpecialization.genericDensity d CycleQ2AffineClearing.affineA
+```
+
+The existing
+`CycleQ2GenericSpecialization.protected_certificate_of_generic_relative_primitive`
+then gives the unchanged certificate, including when the primitive has
+Laurent poles in \(\tau\). The generic relative primitive itself is
+not supplied by the new lift.
+
+A further possible simplification is to use the supported cylinder
+directly. Over an affine parameter curve, a surjection of the actual
+curve-family local system onto the invariant third-cohomology system
+induces a surjection on degree-one cohomology when the next cohomology
+of its kernel vanishes. The cylinder then supports the relevant first
+Leray piece. Carrying this out would avoid the polynomial projector
+construction on that open, but still needs the actual Leray, finite-cover
+trace, and relative de Rham comparisons. This is a mathematical
+reduction of the remaining work, not a formalized existence theorem.
+
+### Verification boundary
+
+Every file newly described above is a source-only draft. No Lean
+compilation or replay was started after the request to defer them.
+The earlier successful checks listed in the following section remain
+historical results for their stated sources.
+
+[GeometricOffCurveResidue.lean](GeometricOffCurveResidue.lean), used in
+the off-curve part of exactness, completed compilation before that
+request (6.06 seconds, 4,051 MiB peak RSS); its independent replay was
+deferred. [GeometricChartSectionPullback.lean](GeometricChartSectionPullback.lean)
+completed both compilation and independent replay before the stop.
+The later residue and diagram drafts depend on additional unverified
+sources, so these earlier results do not validate the new chain.
+
+## The literal projective surface is smooth — 14 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains open.
+This continuation closes scheme smoothness of the actual seed surface at
+\((r,\theta)=(57,1)\), and supplies local sheaf constructions needed for
+the canonical residue sequence in the geometric argument.
+
+### From the exact Jacobian certificates to the actual scheme
+
+The new theorem in
+[GeometricLiteralSurfaceSmooth.lean](GeometricLiteralSurfaceSmooth.lean) is
+
+```lean
+theorem CycleQ2LiteralSurfaceSmooth.literal_surface_smooth :
+    AlgebraicGeometry.Smooth
+      (CycleQ2GeometricSurfaceCoefficients.projectiveToComplex
+        (57 : ℂ) (1 : ℂ))
+```
+
+The structure morphism is the existing morphism of the weighted projective
+surface defined by the two original seed equations. The theorem has no
+smoothness premise. Its input is the already proved characteristic-zero
+Jacobian-minor cover at every relevant prime of the literal equations.
+
+For each nonvanishing minor, the proof constructs a standard smooth
+presentation of the localized surface cone. The all-prime minor cover
+then proves smoothness of each weight-one coordinate localization. The
+actual dehomogenized coordinate algebra is an explicit
+\(\mathbb C\)-algebra retract of that localization. Formal smoothness
+descends through this retraction, and finite presentation upgrades it to
+smoothness. Finally, a direct calculation with the seed equations proves
+that the four weight-one charts cover the actual projective surface.
+Their existing comparisons over \(\mathbb C\) give the displayed scheme
+theorem by Zariski locality.
+
+This conclusion concerns the surface at the literal parameters
+\((57,1)\). It is separate from smoothness of the ambient threefold,
+smoothness of a parameter family, a relative-dimension statement, and a
+canonical trace comparison. The distinct sparse seed with \(r^3=2\) is
+not substituted for the literal parameter \(57\).
+
+### Preserving the original finite calculations
+
+Nine existing component bodies were extracted into seven helper modules:
+[GeometricSeedSurfaceSparseBase.lean](GeometricSeedSurfaceSparseBase.lean),
+[GeometricSeedSurfaceSparse1.lean](GeometricSeedSurfaceSparse1.lean),
+[GeometricSeedSurfaceSparse2.lean](GeometricSeedSurfaceSparse2.lean),
+[GeometricSeedSurfaceSparse3.lean](GeometricSeedSurfaceSparse3.lean),
+[GeometricSeedCubicGradient.lean](GeometricSeedCubicGradient.lean),
+[GeometricSeedCoordinateCover.lean](GeometricSeedCoordinateCover.lean), and
+[GeometricSeedSurfaceGradient.lean](GeometricSeedSurfaceGradient.lean).
+Every component body remains byte-for-byte identical to the incoming
+commit `ec078b996f8bd34dd1fbb22d30bc531abcd35f16`. The original component
+locations import the new helpers. This exposes the exact polynomial
+certificates to the scheme proof without importing the later solution
+assembly or creating an import cycle.
+
+### Local frames and the original regular-form inclusion
+
+[GeometricLocalSheafificationFrame.lean](GeometricLocalSheafificationFrame.lean)
+extends a prescribed presheaf frame through its original locally
+bijective sheafification map, also after restriction to an open. The
+inverse remains the original presheaf-frame inverse followed by the
+original presentation map.
+
+[GeometricLocalHomFrame.lean](GeometricLocalHomFrame.lean) applies a local
+target frame to the actual internal-Hom sheaf on every subopen. For the
+original immersion \(j:C\hookrightarrow D\), its ideal \(I\), and a
+coefficient sheaf \(K\), it constructs the actual regular inclusion
+
+\[
+K\longrightarrow\mathcal{H}om_{\mathcal O_D}(I,K),\qquad
+\omega\longmapsto(a\longmapsto a\omega).
+\]
+
+Under a local frame of \(K\), this map is exactly the original
+`inverseIdealScalar j`, with the original
+`kernel.ι (schemeStructureMap j)` retained. The result gives the first
+square needed for the Cartier/residue diagram and applies to arbitrary
+sections, including sections not presented by a chosen cubic.
+
+### Checks and remaining scope
+
+The following final module sources were compiled and independently
+replayed with `leanchecker`. The printed endpoint audits use only
+`propext`, `Classical.choice`, and `Quot.sound`.
+
+| Module | Compilation | Independent replay |
+| --- | ---: | ---: |
+| `GeometricSeedSurfaceSparseBase` | 3.02 s | 2.64 s |
+| `GeometricSeedSurfaceSparse1` | 7.07 s | 5.37 s |
+| `GeometricSeedSurfaceSparse2` | 7.08 s | 5.16 s |
+| `GeometricSeedSurfaceSparse3` | 6.96 s | 4.99 s |
+| `GeometricSeedCubicGradient` | 7.48 s | 2.62 s |
+| `GeometricSeedCoordinateCover` | 3.54 s | 2.42 s |
+| `GeometricSeedSurfaceGradient` | 12.19 s | 2.62 s |
+| `GeometricLocalSheafificationFrame` | 3.73 s | 3.02 s |
+| `GeometricLocalHomFrame` | 8.17 s | 4.36 s |
+| `GeometricChartSectionPullback` | 2.82 s | 6.57 s |
+| `GeometricLiteralSurfaceSmooth` | 5.76 s | 3.33 s |
+
+These checks use Lean 4.33.1 and the pinned Mathlib dependencies, with one
+worker, a 5,120 MiB managed-memory limit, a 6,144 MiB RSS ceiling, and a
+1,536 MiB available-memory reserve. Rebuilding the unchanged existing
+`GeometricCartierDerivedClass` dependency exceeded the initial managed
+limit; its bounded retry passed with a 6,144 MiB managed limit and a
+7,168 MiB RSS ceiling, peaking at 5,241 MiB. The retry changed no source.
+The unchanged `GeometricCartierCohomologyScalar` dependency subsequently
+also exceeded the initial managed limit. Its retry and the remaining
+recovery queue were stopped when verification was deferred; no successful
+retry is claimed for that dependency.
+
+The target, proof manifest, toolchain, and final admission are unchanged.
+The module-source gate still rejects the admission in `Solution.lean`.
+The incoming branch's policy change to 1,024 files is preserved;
+upstream's protected checker still uses 256, and the expanded proposal
+exceeds that upstream file count. No protected acceptance is claimed.
+
+The canonical residue map and its exactness now have the source drafts
+described above. Their validation, the global cubic and trace comparisons,
+and the moving-cycle, supported-projector, and de Rham arguments remain
+distinct obligations. In particular, surface smoothness does not prove
+that the protected rational four-form becomes exact on a nonempty
+principal open. That is still the existence statement required by the
+unchanged certificate constructor.
+
+The geometric strategy is due to Ben Diamond and the cited work of
+Claire Voisin. This continuation was prepared for `fqlx` with OpenAI
+ChatGPT assistance.
+
 ## Equality of the two original normal classes — 14 November 2026
 
 The final theorem `Submission.missing_geometric_existence` remains open.
@@ -8393,7 +8875,7 @@ support, and de Rham comparisons.
 | Actual Fermat Jacobian bases, socle trace, finite commutant | Proved; geometric Higgs comparison remains. |
 | Sparse seed quotient trace, degree-nine dimension and uniqueness, all 72 matrix entries | Proved; actual all-poles Čech comparison and vanishing equivalence now proved too. |
 | Actual curve chart cover and the theta-one nine-column residue functional | Proved on the actual curve; obstruction/Abel--Jacobi interpretation remains. |
-| Literal cubic, seed-curve, and seed-surface Jacobian conditions | Exact Gaussian-integer identities prove the cubic gradient condition and normal-minor covers at all relevant curve and surface primes. The seed-surface cover persists to the actual finite pointed trace surface through a proved coefficient open. A geometric smoothness interpretation remains separate. |
+| Literal cubic, seed-curve, and seed-surface Jacobian conditions | Exact Gaussian-integer identities prove the cubic gradient condition and normal-minor covers at all relevant curve and surface primes. The seed-surface cover persists to the actual finite pointed trace surface through a proved coefficient open. The literal surface at (57,1) now has a closed `AlgebraicGeometry.Smooth` theorem in `GeometricLiteralSurfaceSmooth`. The ambient, family, and relative-dimension conclusions remain separate. |
 | Actual seed conormal modules and normal matrix | Global genuine equation-class bases are proved over every algebra annihilating the curve ideal. The actual natural map and its dual agree with the computed normal matrix in those bases. No Jacobian-unit hypothesis is needed for these bases. |
 | Genuine chosen-curve ambient-test connecting class | Actual dual-conormal restrictions, local surjectivity, kernel trivializations, connecting-class comparison, independence of lifts, and nonvanishing against all localization boundaries are proved. The two denominator opens cover every relevant curve prime. Graded sheaf, semiregularity, and orbit-trace comparisons remain. |
 | Cubic Cartier matrix factorization and periodic quotient complex | Polynomial identities and genuine exactness proved; geometric base change remains. |
