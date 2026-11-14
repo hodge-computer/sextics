@@ -1,0 +1,1012 @@
+import Proposal.GeometricSeedSurfaceGradient
+import Proposal.GeometricNormalizedCartierClass
+import Proposal.SolutionSupport08Part04
+import Proposal.GeometricSeedNormalIdeals
+import Proposal.GeometricSeedConormalBases
+import Proposal.GeometricNormalConnecting
+
+/-! Components extracted from SolutionSupport08.lean, in their original order.
+See solution.md for the mathematical and verification status. -/
+
+set_option Elab.async false
+
+/- Component: continuation_20261112/SeedGlobalConormal.lean -/
+section
+/-! Global equation-class bases of the actual seed conormal modules.
+These use polynomial regularity and therefore need no Jacobian chart.
+-/
+
+noncomputable section
+open scoped BigOperators TensorProduct
+set_option maxHeartbeats 1000000
+set_option backward.isDefEq.respectTransparency false
+
+namespace CycleQ2SeedGlobalConormal
+open CycleQ2SeedTrace CycleQ2NormalConnecting CycleQ2ConormalJacobian
+  CycleQ2SeedRegularLeading CycleQ2NaturalNormalMap
+
+section ScalarExtension
+variable {S : Type*} [CommRing S] [Algebra WeightedPoly S]
+
+/-- Both sides of the natural dual cotangent map are now expressed in
+genuine global equation-class bases. -/
+theorem naturalNormalMap_in_global_equation_bases
+    [Algebra ℂ S] [IsScalarTower ℂ WeightedPoly S] (r θ : ℂ)
+    (hI : ∀ p ∈ ambientCurveIdeal r θ, algebraMap WeightedPoly S p=0)
+    (φ : S ⊗[WeightedPoly] (ambientCurveIdeal r θ).Cotangent →ₗ[S] S) :
+    ((surfaceConormalBasis r θ hI).constr S).symm (naturalNormalMap r θ φ) =
+      equationMap (algebraMap WeightedPoly S (originalG1 r))
+        (algebraMap WeightedPoly S originalG2) (algebraMap WeightedPoly S (thetaK θ))
+        (((seedConormalBasis r θ hI).constr S).symm φ) := by
+  change (fun j => naturalNormalMap r θ φ (surfaceConormalBasis r θ hI j)) =
+    equationMap _ _ _ (fun i => φ (seedConormalBasis r θ hI i))
+  simpa only [surfaceConormalBasis_apply,seedConormalBasis_apply] using
+    naturalNormalMap_equation_coordinates (S := S) r θ φ
+
+end ScalarExtension
+end CycleQ2SeedGlobalConormal
+
+#print axioms CycleQ2SeedGlobalConormal.seedConormalBasis
+#print axioms CycleQ2SeedGlobalConormal.surfaceConormalBasis
+#print axioms CycleQ2SeedGlobalConormal.naturalNormalMap_in_global_equation_bases
+end
+end
+
+
+/- Component: continuation_20261112/UniversalSurfaceRestrictions.lean -/
+section
+/-! # Canonical restriction maps and the actual coordinate Čech kernel -/
+
+noncomputable section
+set_option maxHeartbeats 2000000
+set_option maxRecDepth 20000
+set_option backward.isDefEq.respectTransparency false
+
+namespace CycleQ2UniversalSurfaceRestrictions
+
+open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2UniversalSurface
+  CycleQ2SeedQuotientFiniteFree
+  CycleQ2SeedCechThreeOpen CycleQ2SeedCechLocalization CycleQ2UniversalSurfaceLocalizedBasis
+
+variable (R : Type*) [CommRing R]
+
+
+
+
+
+
+
+
+/-- Every graded one-cocycle for the canonical three-coordinate localization
+complex of the actual universal normalized quotient is an actual coboundary. -/
+theorem coordinateCech_exact [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (g : LaurentGrade)
+    (p01 : SurfaceLocal R hcoeff Fcoeff {0, 1}) (p02 : SurfaceLocal R hcoeff Fcoeff {0, 2})
+    (p12 : SurfaceLocal R hcoeff Fcoeff {1, 2})
+    (hg01 : ∀ ab, HasGrade ab g (localizedCoordinates R hcoeff Fcoeff {0, 1} p01 ab))
+    (hg02 : ∀ ab, HasGrade ab g (localizedCoordinates R hcoeff Fcoeff {0, 2} p02 ab))
+    (hg12 : ∀ ab, HasGrade ab g (localizedCoordinates R hcoeff Fcoeff {1, 2} p12 ab))
+    (hc : restriction R hcoeff Fcoeff (show ({0, 1} : Finset (Fin 3)) ⊆ Finset.univ by decide) p01 -
+      restriction R hcoeff Fcoeff (show ({0, 2} : Finset (Fin 3)) ⊆ Finset.univ by decide) p02 +
+      restriction R hcoeff Fcoeff (show ({1, 2} : Finset (Fin 3)) ⊆ Finset.univ by decide) p12 = 0) :
+    ∃ (q0 : SurfaceLocal R hcoeff Fcoeff {0}) (q1 : SurfaceLocal R hcoeff Fcoeff {1})
+      (q2 : SurfaceLocal R hcoeff Fcoeff {2}),
+      (∀ ab, HasGrade ab g (localizedCoordinates R hcoeff Fcoeff {0} q0 ab)) ∧
+      (∀ ab, HasGrade ab g (localizedCoordinates R hcoeff Fcoeff {1} q1 ab)) ∧
+      (∀ ab, HasGrade ab g (localizedCoordinates R hcoeff Fcoeff {2} q2 ab)) ∧
+      p01 = restriction R hcoeff Fcoeff (show ({1} : Finset (Fin 3)) ⊆ {0, 1} by decide) q1 -
+        restriction R hcoeff Fcoeff (show ({0} : Finset (Fin 3)) ⊆ {0, 1} by decide) q0 ∧
+      p02 = restriction R hcoeff Fcoeff (show ({2} : Finset (Fin 3)) ⊆ {0, 2} by decide) q2 -
+        restriction R hcoeff Fcoeff (show ({0} : Finset (Fin 3)) ⊆ {0, 2} by decide) q0 ∧
+      p12 = restriction R hcoeff Fcoeff (show ({2} : Finset (Fin 3)) ⊆ {1, 2} by decide) q2 -
+        restriction R hcoeff Fcoeff (show ({1} : Finset (Fin 3)) ⊆ {1, 2} by decide) q1 := by
+  have hc' (ab : ShiftIndex) : localizedCoordinates R hcoeff Fcoeff {0, 1} p01 ab -
+      localizedCoordinates R hcoeff Fcoeff {0, 2} p02 ab +
+      localizedCoordinates R hcoeff Fcoeff {1, 2} p12 ab = 0 := by
+    have hh := congrArg (fun z ↦ localizedCoordinates R hcoeff Fcoeff Finset.univ z ab) hc
+    simpa only [map_add, map_sub, map_zero, Pi.add_apply, Pi.sub_apply, Pi.zero_apply,
+      coordinates_restriction] using hh
+  obtain ⟨q0, q1, q2, hg0, hg1, hg2, he01, he02, he12⟩ :=
+    localized_nineSummand_kernel R hcoeff Fcoeff g p01 p02 p12 hg01 hg02 hg12 hc'
+  refine ⟨q0, q1, q2, hg0, hg1, hg2, ?_, ?_, ?_⟩
+  · apply localizedCoordinates_injective R hcoeff Fcoeff {0, 1}
+    funext ab
+    simpa only [map_sub, Pi.sub_apply, coordinates_restriction] using he01 ab
+  · apply localizedCoordinates_injective R hcoeff Fcoeff {0, 2}
+    funext ab
+    simpa only [map_sub, Pi.sub_apply, coordinates_restriction] using he02 ab
+  · apply localizedCoordinates_injective R hcoeff Fcoeff {1, 2}
+    funext ab
+    simpa only [map_sub, Pi.sub_apply, coordinates_restriction] using he12 ab
+
+end CycleQ2UniversalSurfaceRestrictions
+
+#print axioms CycleQ2UniversalSurfaceRestrictions.coordinateCech_exact
+end
+end
+
+
+/- Source component moved verbatim to Proposal.GeometricSeedSurfaceGradient. -/
+
+/- Component: continuation_20261112/SeedActualNormalCech.lean -/
+section
+/-!
+# The genuine normal connecting class on the two actual seed opens
+
+The two coefficient rings and their overlap are the existing localizations
+of the actual curve, with the polynomial algebra structures supplied by
+w = -x2². Global equation-class conormal bases realize the local lift
+formulas as genuine normal homomorphisms. Their canonical Hom restrictions
+have equal target image, so their difference defines an actual kernel
+cochain. The kernel Cech quotient is identified with the scalar quotient
+by the two restriction images, and the connecting class corresponds to
+normalOverlapCoefficient.
+
+This is the ungraded two-open Cech module of the affine cone. Its graded
+pieces, projective sheaf interpretation, and Abel–Jacobi comparison are
+separate steps. The final residue theorem is an identity on the genuine
+connecting representative, using the previously constructed Laurent maps.
+-/
+
+noncomputable section
+open scoped TensorProduct
+set_option autoImplicit false
+set_option maxHeartbeats 50000
+set_option backward.isDefEq.respectTransparency false
+
+namespace CycleQ2ActualNormalCech
+
+open CycleQ2ConormalJacobian CycleQ2NaturalNormalMap CycleQ2NormalConnecting
+  CycleQ2SeedTrace CycleQ2GenuineNormalConnecting CycleQ2NormalRestriction
+  CycleQ2SeedGlobalConormal CycleQ2SeedCechTheta
+
+/-- Altering either local lift by an arbitrary actual kernel section
+changes the kernel cochain by a genuine two-open coboundary. -/
+theorem connectingClass_change_lifts (r θ : ℂ) (A L : P)
+    (a : FirstKernel r θ) (b : SecondKernel r θ) :
+    (Submodule.Quotient.mk (connectingRepresentative r θ A L +
+      firstKernelRestriction r θ a - secondKernelRestriction r θ b) : NormalCech r θ) =
+        connectingClass r θ A L := by
+  apply (Submodule.Quotient.eq (normalBoundaries r θ)).mpr
+  have ha : firstKernelRestriction r θ a ∈ normalBoundaries r θ :=
+    Submodule.mem_sup_left (show firstKernelRestriction r θ a ∈
+      LinearMap.range (firstKernelRestriction r θ) from ⟨a, rfl⟩)
+  have hb : secondKernelRestriction r θ b ∈ normalBoundaries r θ :=
+    Submodule.mem_sup_right (show secondKernelRestriction r θ b ∈
+      LinearMap.range (secondKernelRestriction r θ) from ⟨b, rfl⟩)
+  change connectingRepresentative r θ A L + firstKernelRestriction r θ a -
+    secondKernelRestriction r θ b - connectingRepresentative r θ A L ∈ _
+  convert (normalBoundaries r θ).sub_mem ha hb using 1 <;> abel
+
+/-- Scalar boundaries remain boundaries after multiplication by a function
+from the actual curve ring; this does not require choosing a polynomial lift. -/
+theorem scalarBoundaries_mul_base (r θ : ℂ) (z : Overlap r θ) (p : CurveRing r θ)
+    (hz : z ∈ scalarBoundaries r θ) :
+    z * algebraMap (CurveRing r θ) (Overlap r θ) p ∈ scalarBoundaries r θ := by
+  obtain ⟨x, ⟨a, rfl⟩, y, ⟨b, rfl⟩, hab⟩ := Submodule.mem_sup.mp hz
+  apply Submodule.mem_sup.mpr
+  refine ⟨firstRestrictionAlg r θ (a * algebraMap (CurveRing r θ) (FirstOpen r θ) p),
+    ⟨a * algebraMap (CurveRing r θ) (FirstOpen r θ) p, rfl⟩,
+    secondRestrictionAlg r θ (b * algebraMap (CurveRing r θ) (SecondOpen r θ) p),
+    ⟨b * algebraMap (CurveRing r θ) (SecondOpen r θ) p, rfl⟩, ?_⟩
+  change firstRestriction r θ (a * algebraMap (CurveRing r θ) (FirstOpen r θ) p) +
+    secondRestriction r θ (b * algebraMap (CurveRing r θ) (SecondOpen r θ) p) = _
+  simp only [map_mul, firstRestriction, secondRestriction,
+    IsLocalization.Away.awayToAwayRight_eq, IsLocalization.Away.awayToAwayLeft_eq]
+  rw [← add_mul]
+  exact congrArg (fun t : Overlap r θ => t * algebraMap (CurveRing r θ) (Overlap r θ) p) hab
+
+theorem coefficient_boundary_of_connectingClass_zero (r θ : ℂ) (A L : P)
+    (hz : connectingClass r θ A L = 0) :
+    normalOverlapCoefficient r θ A L ∈ scalarBoundaries r θ := by
+  have hh := congrArg (normalCechEquivalence r θ) hz
+  rw [connectingClass_eq_scalar, map_zero] at hh
+  exact (Submodule.Quotient.mk_eq_zero (scalarBoundaries r θ)).mp hh
+
+theorem paired_boundary_of_connectingClass_zero (r θ : ℂ) (p : CycleQ2SeedTrace.Poly)
+    (hz : connectingClass r θ derivativeA 0 = 0) :
+    pairedNormalOverlap r θ p ∈ scalarBoundaries r θ := by
+  exact scalarBoundaries_mul_base r θ _ (curveMap r θ p)
+    (coefficient_boundary_of_connectingClass_zero r θ derivativeA 0 hz)
+
+/-- Pair the genuine connecting representative with the actual cubic. The
+residue comparison here is on representatives, before graded descent. -/
+def pairedConnectingRepresentative (r θ : ℂ) (p : CycleQ2SeedTrace.Poly) : Overlap r θ :=
+  (overlapKernelEquivalence r θ).symm
+      (connectingRepresentative r θ CycleQ2NormalConnecting.derivativeA 0) *
+    algebraMap (CurveRing r θ) (Overlap r θ) (curveMap r θ p)
+
+theorem pairedConnectingRepresentative_eq (r θ : ℂ) (p : CycleQ2SeedTrace.Poly) :
+    pairedConnectingRepresentative r θ p = CycleQ2NormalConnecting.pairedNormalOverlap r θ p := by
+  rw [pairedConnectingRepresentative, connectingRepresentative_eq,
+    LinearEquiv.symm_apply_apply]
+  rfl
+
+/-- The already computed incidence trace is now evaluated on a genuine
+normal connecting representative, via the actual overlap localization. -/
+theorem connectingRepresentative_residue (r θ : ℂ) (hr : r ≠ 0)
+    (v : Fin 9 → ℂ) :
+    CycleQ2SeedCechTheta.endpointResidue r θ false
+        (overlapToLaurent r θ false hr
+          (pairedConnectingRepresentative r θ (cubicDeformation v))) -
+      CycleQ2SeedCechTheta.endpointResidue r θ true
+        (overlapToLaurent r θ true hr
+          (pairedConnectingRepresentative r θ (cubicDeformation v))) =
+      -(3 * r)⁻¹ * derivativeTrace θ v := by
+  simp only [pairedConnectingRepresentative_eq]
+  exact actual_overlap_trace_deformation r θ hr v
+
+end CycleQ2ActualNormalCech
+
+#print axioms CycleQ2ActualNormalCech.normalCechEquivalence
+#print axioms CycleQ2ActualNormalCech.connectingClass_eq_scalar
+#print axioms CycleQ2ActualNormalCech.connectingClass_change_lifts
+#print axioms CycleQ2ActualNormalCech.pairedConnectingRepresentative_eq
+
+#print axioms CycleQ2ActualNormalCech.connectingRepresentative_residue
+end
+end
+
+
+/- Component: continuation_20261112/UniversalSurfaceLinearCoordinates.lean -/
+section
+/-! # Scalar compatibility of the actual localized universal surface coordinates -/
+
+noncomputable section
+set_option maxHeartbeats 2000000
+set_option maxRecDepth 20000
+set_option backward.isDefEq.respectTransparency false
+
+namespace CycleQ2UniversalSurfaceLinearCoordinates
+
+open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2UniversalSurface
+  CycleQ2SeedQuotientFiniteFree
+  CycleQ2SeedCechThreeOpen CycleQ2SeedCechLocalization CycleQ2UniversalSurfaceLocalizedBasis
+  CycleQ2UniversalSurfaceRestrictions
+
+variable (R : Type*) [CommRing R]
+
+
+
+
+
+
+
+end CycleQ2UniversalSurfaceLinearCoordinates
+
+#print axioms CycleQ2UniversalSurfaceLinearCoordinates.linearCoordinates
+#print axioms CycleQ2UniversalSurfaceLinearCoordinates.restrictionLinear
+end
+end
+
+
+/- Source component moved verbatim to Proposal.GeometricSeedSurfaceGradient. -/
+
+/- Component: continuation_20261112/SeedNormalNonzero.lean -/
+section
+/-!
+# Nonvanishing of the genuine ambient-test normal connecting class
+
+A vanishing genuine kernel Cech class would make its cubic-paired scalar
+representative a sum of actual single-open sections. Localization clearing
+then gives an unrestricted polynomial boundary witness. Homogeneous
+projection produces a boundary in the already checked all-poles canonical
+Cech complex, contradicting the computed nonzero residue.
+
+The class here is the ambient test direction (A=x2*x3³*w,L=0). It is distinct
+from the vanishing normal obstruction of the fixed-sextic incidence family.
+The chosen curve is not itself invariant under the order-three action; an
+orbit trace comparison is not asserted here. The test polynomial has
+character one, the invariant cubic has character zero, and the ambient
+residue volume has character two. The corresponding Serre-dual surface
+cohomology component for the eventual comparison is character one.
+-/
+
+noncomputable section
+set_option autoImplicit false
+set_option maxHeartbeats 500000
+set_option backward.isDefEq.respectTransparency false
+
+namespace CycleQ2SeedNormalNonzero
+
+open CycleQ2NormalConnecting CycleQ2SeedCechTheta CycleQ2ActualNormalCech
+  CycleQ2SeedBoundaryProjection CycleQ2SeedLocalizationBoundary
+
+/-- A nonzero cubic trace detects the genuine ambient-test normal class in
+the actual two-open kernel quotient, including all ungraded boundaries. -/
+theorem ambient_test_connectingClass_ne_zero (r θ : ℂ) (hr : r ≠ 0)
+    (v : Fin 9 → ℂ) (hv : derivativeTrace θ v ≠ 0) :
+    connectingClass r θ derivativeA 0 ≠ 0 := by
+  intro hz
+  have hbd := paired_boundary_of_connectingClass_zero r θ (cubicDeformation v) hz
+  obtain ⟨x, ⟨a, rfl⟩, y, ⟨b, rfl⟩, hab⟩ := Submodule.mem_sup.mp hbd
+  change firstRestriction r θ a + secondRestriction r θ b =
+    pairedNormalOverlap r θ (cubicDeformation v) at hab
+  obtain ⟨N, M, q, s, hN, hM, hmem⟩ :=
+    paired_boundary_witness r θ hr (cubicDeformation v) a b hab.symm
+  exact no_unrestricted_boundary r θ hr v hv N M q s hN hM hmem
+
+/-- The existing explicit cubic detects this actual normal class for every
+nonzero seed parameter r and every theta. -/
+theorem ambient_test_nonzero (r θ : ℂ) (hr : r ≠ 0) :
+    connectingClass r θ derivativeA 0 ≠ 0 := by
+  apply ambient_test_connectingClass_ne_zero r θ hr selectedTangent
+  rw [selectedTangent_trace]
+  norm_num
+
+/-- In particular, the literal smooth incidence seed has a nonzero genuine
+ambient-test normal connecting class. -/
+theorem actual_seed_ambient_test_nonzero :
+    connectingClass 57 1 derivativeA 0 ≠ 0 :=
+  ambient_test_nonzero 57 1 (by norm_num)
+
+end CycleQ2SeedNormalNonzero
+
+#print axioms CycleQ2SeedNormalNonzero.ambient_test_connectingClass_ne_zero
+#print axioms CycleQ2SeedNormalNonzero.ambient_test_nonzero
+#print axioms CycleQ2SeedNormalNonzero.actual_seed_ambient_test_nonzero
+end
+end
+
+
+/- Component: continuation_20261112/MovingClassBridge.lean -/
+section Q2UncompiledNormalKoszulBridge
+
+/-!
+# The literal seed quotient maps to the genuine normal Cech module
+
+Development continuation; compilation status is recorded in solution.md.
+This extends `CycleQ2SeedNormalNonzero`.
+
+The map sends a polynomial numerator p to p/(g1*g2) on the actual curve
+overlap. Each of the five complete-intersection generators is killed:
+the three curve equations vanish already in the overlap, and each of the
+two remaining generators gives a single-open boundary. Consequently the
+map factors through the existing `CycleQ2SeedTrace.SeedAlgebra`.
+
+The target is the existing quotient of actual normal-kernel sections,
+identified with scalar sections by `normalCechEquivalence`. This fragment
+does not identify that ungraded quotient with projective sheaf cohomology,
+construct the surface semiregularity map, or assert a Serre trace comparison.
+-/
+
+section
+noncomputable section
+set_option autoImplicit false
+
+namespace CycleQ2NormalKoszulBridge
+
+open CycleQ2ConormalJacobian CycleQ2SeedTrace CycleQ2NormalConnecting
+  CycleQ2ActualNormalCech CycleQ2SeedNormalNonzero
+
+/-- The simple-pole numerator map in the actual overlap localization. -/
+def simplePoleRepresentative (r θ : ℂ) : P →ₗ[P] Overlap r θ where
+  toFun p := algebraMap P (Overlap r θ) p *
+    (↑((firstOverlapUnit r θ)⁻¹) : Overlap r θ) *
+    (↑((secondOverlapUnit r θ)⁻¹) : Overlap r θ)
+  map_add' p q := by
+    simp only [map_add, add_mul]
+  map_smul' a p := by
+    simp only [smul_eq_mul, Algebra.smul_def, map_mul, mul_assoc, RingHom.id_apply]
+
+@[simp] theorem simplePoleRepresentative_apply (r θ : ℂ) (p : P) :
+    simplePoleRepresentative r θ p = algebraMap P (Overlap r θ) p *
+      (↑((firstOverlapUnit r θ)⁻¹) : Overlap r θ) *
+      (↑((secondOverlapUnit r θ)⁻¹) : Overlap r θ) := rfl
+
+/-- The actual scalar Cech class of the simple-pole representative. -/
+def simplePoleClass (r θ : ℂ) : P →ₗ[P] ScalarCech r θ :=
+  (scalarBoundaries r θ).mkQ.comp (simplePoleRepresentative r θ)
+
+@[simp] theorem simplePoleClass_apply (r θ : ℂ) (p : P) :
+    simplePoleClass r θ p =
+      (Submodule.Quotient.mk (simplePoleRepresentative r θ p) : ScalarCech r θ) := rfl
+
+theorem simplePoleRepresentative_zero_of_curve (r θ : ℂ) (p : P)
+    (hp : p ∈ ambientCurveIdeal r θ) :
+    simplePoleRepresentative r θ p = 0 := by
+  rw [simplePoleRepresentative_apply, overlap_annihilates r θ p hp,
+    zero_mul, zero_mul]
+
+theorem simplePoleClass_zero_of_curve (r θ : ℂ) (p : P)
+    (hp : p ∈ ambientCurveIdeal r θ) : simplePoleClass r θ p = 0 := by
+  change (scalarBoundaries r θ).mkQ (simplePoleRepresentative r θ p) = 0
+  rw [simplePoleRepresentative_zero_of_curve r θ p hp, map_zero]
+
+theorem simplePoleClass_curveEquation (r θ : ℂ) (i : Fin 3) :
+    simplePoleClass r θ (curveEquations r θ i) = 0 :=
+  simplePoleClass_zero_of_curve r θ _ (curveEquation_mem r θ i)
+
+/-- Cancelling g1 leaves the inverse of g2, a section on the second open. -/
+theorem simplePoleRepresentative_g1 (r θ : ℂ) :
+    simplePoleRepresentative r θ (originalG1 r) =
+      secondRestriction r θ (↑((secondOpenUnit r θ)⁻¹) : SecondOpen r θ) := by
+  rw [simplePoleRepresentative_apply, ← firstOverlapUnit_value,
+    (firstOverlapUnit r θ).mul_inv, one_mul]
+  rfl
+
+/-- Cancelling g2 leaves the inverse of g1, a section on the first open. -/
+theorem simplePoleRepresentative_g2 (r θ : ℂ) :
+    simplePoleRepresentative r θ originalG2 =
+      firstRestriction r θ (↑((firstOpenUnit r θ)⁻¹) : FirstOpen r θ) := by
+  rw [simplePoleRepresentative_apply, ← secondOverlapUnit_value]
+  calc
+    (secondOverlapUnit r θ : Overlap r θ) *
+        (↑((firstOverlapUnit r θ)⁻¹) : Overlap r θ) *
+        (↑((secondOverlapUnit r θ)⁻¹) : Overlap r θ) =
+        (↑((firstOverlapUnit r θ)⁻¹) : Overlap r θ) *
+          ((secondOverlapUnit r θ : Overlap r θ) *
+            (↑((secondOverlapUnit r θ)⁻¹) : Overlap r θ)) := by ring
+    _ = (↑((firstOverlapUnit r θ)⁻¹) : Overlap r θ) := by
+      rw [(secondOverlapUnit r θ).mul_inv, mul_one]
+    _ = _ := rfl
+
+theorem simplePoleClass_g1 (r θ : ℂ) :
+    simplePoleClass r θ (originalG1 r) = 0 := by
+  rw [simplePoleClass_apply]
+  apply (Submodule.Quotient.mk_eq_zero (scalarBoundaries r θ)).mpr
+  rw [simplePoleRepresentative_g1]
+  exact Submodule.mem_sup_right
+    (show secondRestriction r θ (↑((secondOpenUnit r θ)⁻¹) : SecondOpen r θ) ∈
+      LinearMap.range (secondRestrictionAlg r θ).toLinearMap from
+        ⟨(↑((secondOpenUnit r θ)⁻¹) : SecondOpen r θ), rfl⟩)
+
+theorem simplePoleClass_g2 (r θ : ℂ) :
+    simplePoleClass r θ originalG2 = 0 := by
+  rw [simplePoleClass_apply]
+  apply (Submodule.Quotient.mk_eq_zero (scalarBoundaries r θ)).mpr
+  rw [simplePoleRepresentative_g2]
+  exact Submodule.mem_sup_left
+    (show firstRestriction r θ (↑((firstOpenUnit r θ)⁻¹) : FirstOpen r θ) ∈
+      LinearMap.range (firstRestrictionAlg r θ).toLinearMap from
+        ⟨(↑((firstOpenUnit r θ)⁻¹) : FirstOpen r θ), rfl⟩)
+
+/-- Every generator of the existing five-generator seed ideal maps to zero.
+No abstract quotient-pairing or geometric trace hypothesis is supplied. -/
+theorem originalIdeal_le_ker (r : ℂ) :
+    originalIdeal r ≤ LinearMap.ker (simplePoleClass r 0) := by
+  rw [originalIdeal, Ideal.span_le]
+  rintro _ ⟨i, rfl⟩
+  change simplePoleClass r 0 (originalRelations r i) = 0
+  fin_cases i
+  · simpa [originalRelations, curveEquations] using
+      simplePoleClass_curveEquation r 0 0
+  · simpa [originalRelations] using simplePoleClass_g1 r 0
+  · simpa [originalRelations, curveEquations] using
+      simplePoleClass_curveEquation r 0 1
+  · simpa [originalRelations] using simplePoleClass_g2 r 0
+  · simpa [originalRelations, curveEquations, thetaH] using
+      simplePoleClass_curveEquation r 0 2
+
+/-- The Koszul simple-pole boundary from the literal seed quotient to the
+existing scalar Cech module. The construction needs no smoothness premise. -/
+def seedScalarBoundary (r : ℂ) : SeedAlgebra r →ₗ[P] ScalarCech r 0 :=
+  (originalIdeal r).liftQ (simplePoleClass r 0) (originalIdeal_le_ker r)
+
+@[simp] theorem seedScalarBoundary_mk (r : ℂ) (p : P) :
+    seedScalarBoundary r (seedQuotient r p) = simplePoleClass r 0 p := rfl
+
+/-- The same actual boundary with values in genuine normal-kernel sections
+modulo the actual restriction boundaries. -/
+def seedNormalBoundary (r : ℂ) : SeedAlgebra r →ₗ[P] NormalCech r 0 :=
+  (normalCechEquivalence r 0).symm.toLinearMap.comp (seedScalarBoundary r)
+
+@[simp] theorem normalCechEquivalence_seedNormalBoundary (r : ℂ)
+    (x : SeedAlgebra r) :
+    normalCechEquivalence r 0 (seedNormalBoundary r x) = seedScalarBoundary r x := by
+  change normalCechEquivalence r 0
+      ((normalCechEquivalence r 0).symm (seedScalarBoundary r x)) = _
+  exact (normalCechEquivalence r 0).apply_symm_apply _
+
+/-- The actual normal lift difference has the simple-pole numerator kL-A. -/
+theorem normalOverlapCoefficient_eq_simplePole (r θ : ℂ) (A L : P) :
+    normalOverlapCoefficient r θ A L =
+      simplePoleRepresentative r θ (thetaK θ * L - A) := by
+  simp only [normalOverlapCoefficient, overlapCoefficient,
+    simplePoleRepresentative_apply, overlap_algebraMap, map_sub, map_mul]
+  ring
+
+theorem connectingClass_eq_simplePole (r θ : ℂ) (A L : P) :
+    connectingClass r θ A L =
+      (normalCechEquivalence r θ).symm
+        (simplePoleClass r θ (thetaK θ * L - A)) := by
+  apply (normalCechEquivalence r θ).injective
+  rw [connectingClass_eq_scalar, LinearEquiv.apply_symm_apply]
+  rw [simplePoleClass_apply, normalOverlapCoefficient_eq_simplePole]
+
+/-- The existing normal connecting class factors through the literal seed
+algebra. In particular, changing kL-A by any of the five ideal generators
+does not change the actual normal class. -/
+theorem connectingClass_eq_seedNormalBoundary (r : ℂ) (A L : P) :
+    connectingClass r 0 A L =
+      seedNormalBoundary r (seedQuotient r (originalK * L - A)) := by
+  rw [connectingClass_eq_simplePole]
+  change (normalCechEquivalence r 0).symm
+      (simplePoleClass r 0 (thetaK 0 * L - A)) =
+    (normalCechEquivalence r 0).symm
+      (simplePoleClass r 0 (originalK * L - A))
+  simp only [thetaK, map_zero, zero_mul, add_zero]
+
+/-- This is an actual nonzero value of the constructed quotient map,
+detected by the already proved localization-residue calculation. -/
+theorem seedNormalBoundary_test_ne_zero (r : ℂ) (hr : r ≠ 0) :
+    seedNormalBoundary r (seedQuotient r (-derivativeA)) ≠ 0 := by
+  have h := ambient_test_nonzero r 0 hr
+  rw [connectingClass_eq_seedNormalBoundary, mul_zero, zero_sub] at h
+  exact h
+
+theorem seedNormalBoundary_ne_zero (r : ℂ) (hr : r ≠ 0) :
+    seedNormalBoundary r ≠ 0 := by
+  intro hz
+  apply seedNormalBoundary_test_ne_zero r hr
+  rw [hz, LinearMap.zero_apply]
+
+section DegreeNine
+
+open MvPolynomial CycleQ2SeedCechTheta CycleQ2SeedBoundaryProjection
+  CycleQ2SeedLocalizationBoundary
+
+/-- The literal inclusion of the four unweighted coordinates into the
+five-variable weighted polynomial ring, before imposing w=-x2^2. -/
+def polynomialLift : Poly →ₐ[ℂ] P :=
+  MvPolynomial.aeval ![X 0, X 1, X 2, X 3]
+
+@[simp] theorem substitute_polynomialLift (p : Poly) :
+    substitute (polynomialLift p) = p := by
+  have hh : substitute.comp polynomialLift = AlgHom.id ℂ Poly := by
+    ext1 i
+    change substitute (polynomialLift (X i)) = X i
+    fin_cases i <;> simp [polynomialLift, substitute]
+  exact congrArg (fun f : Poly →ₐ[ℂ] Poly => f p) hh
+
+/-- Eliminating w and lifting back does not change the class in the literal
+five-variable seed algebra: the eliminated equation is one of its generators. -/
+theorem seedQuotient_polynomialLift_substitute (r : ℂ) (p : P) :
+    seedQuotient r (polynomialLift (substitute p)) = seedQuotient r p := by
+  have hf2 : seedQuotient r originalF2 = 0 := by
+    apply Ideal.Quotient.eq_zero_iff_mem.mpr
+    exact Ideal.subset_span ⟨2, rfl⟩
+  have hw : seedQuotient r (X 4) = -((seedQuotient r (X 2)) ^ 2) := by
+    rw [originalF2, map_add, map_pow] at hf2
+    exact eq_neg_of_add_eq_zero_left hf2
+  have hh : (seedQuotient r).comp (polynomialLift.comp substitute) = seedQuotient r := by
+    ext1 i
+    change seedQuotient r (polynomialLift (substitute (X i))) = seedQuotient r (X i)
+    fin_cases i <;> simp [polynomialLift, substitute, hw]
+  exact congrArg (fun f : P →ₐ[ℂ] SeedAlgebra r => f p) hh
+
+theorem simplePoleClass_substitute (r : ℂ) (p : P) :
+    simplePoleClass r 0 p = simplePoleClass r 0 (polynomialLift (substitute p)) := by
+  have hh := congrArg (seedScalarBoundary r) (seedQuotient_polynomialLift_substitute r p)
+  exact hh.symm
+
+private theorem lift_relation_zero (r : ℂ) :
+    polynomialLift (relation r 0) = originalF1 r := by
+  simp [polynomialLift, relation, originalF1]
+
+private theorem lift_relation_three (r : ℂ) :
+    polynomialLift (relation r 3) = originalH := by
+  simp [polynomialLift, relation, h, b, originalH, originalB]
+
+private theorem g1_lift_relation (r : ℂ) :
+    originalG1 r =
+      originalF1 r * (X 0 ^ 2 + C (2 * r) * X 1 * X 3) +
+        C (3 * r ^ 2) * polynomialLift (relation r 1) := by
+  simp [polynomialLift, relation, originalG1, originalF1, map_mul, map_pow]
+  simp only [map_ofNat]
+  ring
+
+private theorem g2_lift_relation (r : ℂ) :
+    originalG2 = originalF2 * (X 4 - 2 * X 2 ^ 2) +
+      C (3 : ℂ) * polynomialLift (relation r 2) := by
+  simp [polynomialLift, relation, originalG2, originalF2]
+  simp only [map_ofNat]
+  ring
+
+private theorem mem_of_constant_mul (I : Ideal P) (c : ℂ) (hc : c ≠ 0)
+    (p : P) (hp : C c * p ∈ I) : p ∈ I := by
+  have hh := I.mul_mem_left (C (c⁻¹)) hp
+  simpa only [← mul_assoc, ← map_mul, inv_mul_cancel₀ hc, map_one, one_mul] using hh
+
+/-- The four-variable relation ideal maps into the original five-variable
+ideal. The only divisions are by 3 and by 3*r^2, with r explicitly nonzero. -/
+theorem polynomialLift_relation_mem (r : ℂ) (hr : r ≠ 0) (i : Fin 4) :
+    polynomialLift (relation r i) ∈ originalIdeal r := by
+  have hg (j : Fin 5) : originalRelations r j ∈ originalIdeal r :=
+    Ideal.subset_span ⟨j, rfl⟩
+  have hf1 : originalF1 r ∈ originalIdeal r := hg 0
+  have hg1 : originalG1 r ∈ originalIdeal r := hg 1
+  have hf2 : originalF2 ∈ originalIdeal r := hg 2
+  have hg2 : originalG2 ∈ originalIdeal r := hg 3
+  fin_cases i
+  · change polynomialLift (relation r 0) ∈ originalIdeal r
+    rw [lift_relation_zero]
+    exact hf1
+  · apply mem_of_constant_mul (originalIdeal r) (3 * r ^ 2)
+      (mul_ne_zero (by norm_num) (pow_ne_zero _ hr))
+    have hh := (originalIdeal r).sub_mem hg1
+      ((originalIdeal r).mul_mem_right
+        (X 0 ^ 2 + C (2 * r) * X 1 * X 3) hf1)
+    rw [g1_lift_relation, add_sub_cancel_left] at hh
+    exact hh
+  · apply mem_of_constant_mul (originalIdeal r) (3 : ℂ) (by norm_num)
+    have hh := (originalIdeal r).sub_mem hg2
+      ((originalIdeal r).mul_mem_right (X 4 - 2 * X 2 ^ 2) hf2)
+    rw [g2_lift_relation r, add_sub_cancel_left] at hh
+    exact hh
+  · change polynomialLift (relation r 3) ∈ originalIdeal r
+    rw [lift_relation_three]
+    exact hg 4
+
+theorem polynomialLift_mem (r : ℂ) (hr : r ≠ 0) {p : Poly}
+    (hp : p ∈ reducedIdeal r) : polynomialLift p ∈ originalIdeal r := by
+  have hle : reducedIdeal r ≤ Ideal.comap polynomialLift.toRingHom (originalIdeal r) := by
+    rw [reducedIdeal, Ideal.span_le]
+    rintro _ ⟨i, rfl⟩
+    exact polynomialLift_relation_mem r hr i
+  exact hle hp
+
+/-- An explicit comparison between the two existing quotient algebras,
+used here as a complex-linear map. -/
+def reducedToSeed (r : ℂ) (hr : r ≠ 0) : ReducedAlgebra r →ₗ[ℂ] SeedAlgebra r :=
+  ((reducedIdeal r).restrictScalars ℂ).liftQ
+    ((seedQuotient r).toLinearMap.comp polynomialLift.toLinearMap) (by
+      intro p hp
+      change seedQuotient r (polynomialLift p) = 0
+      exact Ideal.Quotient.eq_zero_iff_mem.mpr (polynomialLift_mem r hr hp))
+
+@[simp] theorem reducedToSeed_mk (r : ℂ) (hr : r ≠ 0) (p : Poly) :
+    reducedToSeed r hr (reducedQuotient r p) = seedQuotient r (polynomialLift p) := rfl
+
+/-- The actual simple-pole class attached to the four-variable quotient. -/
+def reducedScalarBoundary (r : ℂ) (hr : r ≠ 0) :
+    ReducedAlgebra r →ₗ[ℂ] ScalarCech r 0 :=
+  ((seedScalarBoundary r).restrictScalars ℂ).comp (reducedToSeed r hr)
+
+@[simp] theorem reducedScalarBoundary_mk (r : ℂ) (hr : r ≠ 0) (p : Poly) :
+    reducedScalarBoundary r hr (reducedQuotient r p) =
+      simplePoleClass r 0 (polynomialLift p) := rfl
+
+/-- The image in the actual Cech module of the distinguished degree-nine
+normalization monomial. -/
+def normalizationCechClass (r : ℂ) (hr : r ≠ 0) : ScalarCech r 0 :=
+  reducedScalarBoundary r hr (normalizationClass r)
+
+/-- The existing quotient trace is the coefficient of the actual simple-pole
+class on the degree-nine image. This does not presuppose a Serre trace. -/
+theorem reducedScalarBoundary_degreeNine (r : ℂ) (hr : r ≠ 0)
+    (hcube : r ^ 3 = 2) {x : ReducedAlgebra r} (hx : x ∈ degreeNinePiece r) :
+    reducedScalarBoundary r hr x =
+      reducedTrace r hcube x • normalizationCechClass r hr := by
+  calc
+    reducedScalarBoundary r hr x = reducedScalarBoundary r hr
+        (reducedTrace r hcube x • normalizationClass r) :=
+      congrArg (reducedScalarBoundary r hr) (degreeNine_class_eq_trace_smul r hcube hx)
+    _ = _ := map_smul (reducedScalarBoundary r hr) _ _
+
+theorem simplePoleClass_degreeNine (r : ℂ) (hr : r ≠ 0) (hcube : r ^ 3 = 2)
+    (p : Poly) (hp : p.IsHomogeneous 9) :
+    simplePoleClass r 0 (polynomialLift p) =
+      traceLinear r p • normalizationCechClass r hr := by
+  simpa only [reducedScalarBoundary_mk, reducedTrace_mk] using
+    (reducedScalarBoundary_degreeNine r hr hcube
+      (x := reducedQuotient r p) ⟨p, hp, rfl⟩)
+
+/-- Pairing the ambient-test normal class with a cubic is exactly the
+simple-pole class of the lifted negative derivative numerator. -/
+theorem simplePoleRepresentative_lift_derivative (r θ : ℂ) (p : Poly) :
+    simplePoleRepresentative r θ (polynomialLift (-derivativeNumerator p)) =
+      pairedNormalOverlap r θ p := by
+  simp only [simplePoleRepresentative_apply, overlap_algebraMap, overlapAmbient,
+    ambientCurveMap, RingHom.comp_apply, substitute_polynomialLift,
+    pairedNormalOverlap, normalOverlapCoefficient, overlapCoefficient,
+    map_zero, mul_zero, zero_sub]
+  rw [← substitute_derivativeA p]
+  simp only [show ∀ x : Poly, substitute.toRingHom (polynomialLift x) = x from
+    substitute_polynomialLift]
+  simp only [map_neg, map_mul, AlgHom.toRingHom_eq_coe, AlgHom.coe_toRingHom]
+  ring
+
+/-- The same all-poles boundary argument used for the genuine normal class
+also detects the cubic-paired scalar class itself. -/
+theorem pairedScalarClass_ne_zero (r θ : ℂ) (hr : r ≠ 0)
+    (v : Fin 9 → ℂ) (hv : derivativeTrace θ v ≠ 0) :
+    (Submodule.Quotient.mk
+      (pairedNormalOverlap r θ (cubicDeformation v)) : ScalarCech r θ) ≠ 0 := by
+  intro hz
+  have hbd := (Submodule.Quotient.mk_eq_zero (scalarBoundaries r θ)).mp hz
+  obtain ⟨x, ⟨a, rfl⟩, y, ⟨b, rfl⟩, hab⟩ := Submodule.mem_sup.mp hbd
+  change firstRestriction r θ a + secondRestriction r θ b =
+    pairedNormalOverlap r θ (cubicDeformation v) at hab
+  obtain ⟨N, M, q, s, hN, hM, hmem⟩ :=
+    paired_boundary_witness r θ hr (cubicDeformation v) a b hab.symm
+  exact no_unrestricted_boundary r θ hr v hv N M q s hN hM hmem
+
+/-- The distinguished degree-nine image is nonzero in the actual ungraded
+Cech quotient, including boundaries with unrestricted pole orders. -/
+theorem normalizationCechClass_ne_zero (r : ℂ) (hr : r ≠ 0)
+    (hcube : r ^ 3 = 2) : normalizationCechClass r hr ≠ 0 := by
+  intro hz
+  have hv : derivativeTrace 0 selectedTangent ≠ 0 := by
+    rw [selectedTangent_trace]
+    norm_num
+  apply pairedScalarClass_ne_zero r 0 hr selectedTangent hv
+  rw [← simplePoleRepresentative_lift_derivative]
+  change simplePoleClass r 0
+    (polynomialLift (-derivativeNumerator (cubicDeformation selectedTangent))) = 0
+  rw [simplePoleClass_degreeNine r hr hcube _
+    (derivativeNumerator_homogeneous selectedTangent).neg, hz, smul_zero]
+
+/-- The existing finite trace detects vanishing of the genuine simple-pole
+class for every homogeneous degree-nine numerator, not just the saved matrix. -/
+theorem simplePoleClass_degreeNine_eq_zero_iff (r : ℂ) (hr : r ≠ 0)
+    (hcube : r ^ 3 = 2) (p : Poly) (hp : p.IsHomogeneous 9) :
+    simplePoleClass r 0 (polynomialLift p) = 0 ↔ traceLinear r p = 0 := by
+  rw [simplePoleClass_degreeNine r hr hcube p hp]
+  constructor
+  · intro hz
+    rcases smul_eq_zero.mp hz with hc | hnormalization
+    · exact hc
+    · exact False.elim ((normalizationCechClass_ne_zero r hr hcube) hnormalization)
+  · intro hc
+    rw [hc, zero_smul]
+
+/-- The existing five-variable seed trace is now the coefficient of a
+specific nonzero class in the genuine scalar Cech quotient. The degree
+condition is imposed on the actual eliminated numerator. -/
+theorem seedTrace_simplePoleClass (r : ℂ) (hr : r ≠ 0) (hcube : r ^ 3 = 2)
+    (p : P) (hp : (substitute p).IsHomogeneous 9) :
+    simplePoleClass r 0 p =
+      seedTrace r hcube (seedQuotient r p) • normalizationCechClass r hr := by
+  rw [simplePoleClass_substitute,
+    simplePoleClass_degreeNine r hr hcube (substitute p) hp, seedTrace_mk]
+
+/-- The finite quotient trace and the actual Cech class have exactly the
+same vanishing criterion on the canonical degree-nine numerators. -/
+theorem seedTrace_eq_zero_iff_simplePoleClass (r : ℂ) (hr : r ≠ 0)
+    (hcube : r ^ 3 = 2) (p : P) (hp : (substitute p).IsHomogeneous 9) :
+    seedTrace r hcube (seedQuotient r p) = 0 ↔ simplePoleClass r 0 p = 0 := by
+  rw [seedTrace_mk, simplePoleClass_substitute,
+    simplePoleClass_degreeNine_eq_zero_iff r hr hcube (substitute p) hp]
+
+end DegreeNine
+
+end CycleQ2NormalKoszulBridge
+end
+end
+
+end Q2UncompiledNormalKoszulBridge
+
+
+/- Component: continuation_20261112/UniversalSurfaceTopCech.lean -/
+section
+/-! # The seven-dimensional quotient of the actual universal normalized localization complex -/
+
+noncomputable section
+set_option maxHeartbeats 3000000
+set_option maxRecDepth 20000
+set_option backward.isDefEq.respectTransparency false
+
+namespace CycleQ2UniversalSurfaceTopCech
+
+open CycleQ2IncidenceNormalForm CycleQ2UniversalSurface CycleQ2SeedQuotientFiniteFree
+  CycleQ2SeedCechThreeOpen CycleQ2SeedCechLocalization CycleQ2UniversalSurfaceLocalizedBasis
+  CycleQ2UniversalSurfaceRestrictions CycleQ2UniversalSurfaceLinearCoordinates CycleQ2SeedCechTopCohomology
+
+variable (R : Type*) [CommRing R] [Nontrivial R]
+
+/-- Degree-zero, character-zero sections inside the actual coordinate localization. -/
+def gradedLocal (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) : Submodule R (SurfaceLocal R hcoeff Fcoeff s) :=
+  (gradedFamilies R).comap (linearCoordinates R hcoeff Fcoeff s)
+
+def gradedCoordinates (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
+    gradedLocal R hcoeff Fcoeff s →ₗ[R] gradedFamilies R where
+  toFun p := ⟨linearCoordinates R hcoeff Fcoeff s p.val, p.property⟩
+  map_add' p q := by apply Subtype.ext; exact map_add (linearCoordinates R hcoeff Fcoeff s) p.val q.val
+  map_smul' c p := by apply Subtype.ext; exact map_smul (linearCoordinates R hcoeff Fcoeff s) c p.val
+
+@[simp] theorem gradedCoordinates_apply (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3))
+    (p : gradedLocal R hcoeff Fcoeff s) :
+    (gradedCoordinates R hcoeff Fcoeff s p).val = localizedCoordinates R hcoeff Fcoeff s p.val := rfl
+
+theorem gradedCoordinates_injective (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
+    Function.Injective (gradedCoordinates R hcoeff Fcoeff s) := by
+  intro p q hpq
+  apply Subtype.ext
+  exact localizedCoordinates_injective R hcoeff Fcoeff s (congrArg Subtype.val hpq)
+
+theorem gradedCoordinates_range (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
+    LinearMap.range (gradedCoordinates R hcoeff Fcoeff s) = poleSubmodule R s := by
+  ext p
+  constructor
+  · rintro ⟨q, rfl⟩ ab
+    exact localizedCoordinates_hasPoles R hcoeff Fcoeff s q.val ab
+  · intro hp
+    obtain ⟨q, hq⟩ := (mem_range_localizedCoordinates R hcoeff Fcoeff s p.val).mpr hp
+    have hqg : q ∈ gradedLocal R hcoeff Fcoeff s := by
+      change linearCoordinates R hcoeff Fcoeff s q ∈ gradedFamilies R
+      rw [linearCoordinates_apply, hq]
+      exact p.property
+    refine ⟨⟨q, hqg⟩, ?_⟩
+    exact Subtype.ext hq
+
+def totalEquiv (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) : gradedLocal R hcoeff Fcoeff Finset.univ ≃ₗ[R] gradedFamilies R :=
+  LinearEquiv.ofBijective (gradedCoordinates R hcoeff Fcoeff Finset.univ)
+    ⟨gradedCoordinates_injective R hcoeff Fcoeff Finset.univ, by
+      intro p
+      have hp : p ∈ poleSubmodule R Finset.univ := by
+        intro ab e i hi _
+        exact False.elim (hi (Finset.mem_univ i))
+      rw [← gradedCoordinates_range R hcoeff Fcoeff Finset.univ] at hp
+      exact hp⟩
+
+@[simp] theorem totalEquiv_apply (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (p : gradedLocal R hcoeff Fcoeff Finset.univ) :
+    totalEquiv R hcoeff Fcoeff p = gradedCoordinates R hcoeff Fcoeff Finset.univ p := rfl
+
+def gradedRestriction (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) {s t : Finset (Fin 3)} (hst : s ⊆ t) :
+    gradedLocal R hcoeff Fcoeff s →ₗ[R] gradedLocal R hcoeff Fcoeff t where
+  toFun p := ⟨restrictionLinear R hcoeff Fcoeff hst p.val, by
+    intro ab
+    change HasGrade ab 0 (localizedCoordinates R hcoeff Fcoeff t (restriction R hcoeff Fcoeff hst p.val) ab)
+    rw [coordinates_restriction]
+    exact p.property ab⟩
+  map_add' p q := by apply Subtype.ext; exact map_add (restrictionLinear R hcoeff Fcoeff hst) p.val q.val
+  map_smul' c p := by apply Subtype.ext; exact map_smul (restrictionLinear R hcoeff Fcoeff hst) c p.val
+
+theorem gradedCoordinates_restriction (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
+    {s t : Finset (Fin 3)} (hst : s ⊆ t) :
+    (gradedCoordinates R hcoeff Fcoeff t).comp (gradedRestriction R hcoeff Fcoeff hst) =
+      gradedCoordinates R hcoeff Fcoeff s := by
+  ext p ab e
+  change (localizedCoordinates R hcoeff Fcoeff t (restriction R hcoeff Fcoeff hst p.val) ab).coeff e =
+    (localizedCoordinates R hcoeff Fcoeff s p.val ab).coeff e
+  rw [coordinates_restriction]
+
+/-- The boundary submodule is the sum of the images of the actual three
+canonical ring restrictions from pair-open sections. -/
+def actualBoundary (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) : Submodule R (gradedLocal R hcoeff Fcoeff Finset.univ) :=
+  LinearMap.range (gradedRestriction R hcoeff Fcoeff (show ({0, 1} : Finset (Fin 3)) ⊆ Finset.univ by decide)) ⊔
+  LinearMap.range (gradedRestriction R hcoeff Fcoeff (show ({0, 2} : Finset (Fin 3)) ⊆ Finset.univ by decide)) ⊔
+  LinearMap.range (gradedRestriction R hcoeff Fcoeff (show ({1, 2} : Finset (Fin 3)) ⊆ Finset.univ by decide))
+
+theorem map_actualBoundary (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) :
+    (actualBoundary R hcoeff Fcoeff).map (totalEquiv R hcoeff Fcoeff).toLinearMap = topBoundary R := by
+  change (actualBoundary R hcoeff Fcoeff).map (gradedCoordinates R hcoeff Fcoeff Finset.univ) = _
+  simp only [actualBoundary, Submodule.map_sup, ← LinearMap.range_comp,
+    gradedCoordinates_restriction, gradedCoordinates_range, topBoundary]
+
+abbrev ActualTopCechQuotient (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) :=
+  gradedLocal R hcoeff Fcoeff Finset.univ ⧸ actualBoundary R hcoeff Fcoeff
+
+def actualTopEquiv (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) : ActualTopCechQuotient R hcoeff Fcoeff ≃ₗ[R] TopCechQuotient R :=
+  Submodule.Quotient.equiv _ _ (totalEquiv R hcoeff Fcoeff) (map_actualBoundary R hcoeff Fcoeff)
+
+def actualTopBasis (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) : Module.Basis TopIndex R (ActualTopCechQuotient R hcoeff Fcoeff) :=
+  (topCechBasis R).map (actualTopEquiv R hcoeff Fcoeff).symm
+
+@[simp] theorem actualTopBasis_apply (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (q : TopIndex) :
+    actualTopEquiv R hcoeff Fcoeff (actualTopBasis R hcoeff Fcoeff q) =
+      Submodule.Quotient.mk (basisSection R q) := by
+  simp [actualTopBasis]
+
+theorem actualTop_rank_seven (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) :
+    Module.finrank R (ActualTopCechQuotient R hcoeff Fcoeff) = 7 := by
+  rw [Module.finrank_eq_card_basis (actualTopBasis R hcoeff Fcoeff), topIndex_count]
+
+end CycleQ2UniversalSurfaceTopCech
+
+#print axioms CycleQ2UniversalSurfaceTopCech.actualTop_rank_seven
+end
+end
+
+
+/- Component: continuation_20261112/UniversalSurfaceCharacterCech.lean -/
+section
+/-! # The actual universal localization complex in every character -/
+
+noncomputable section
+set_option maxHeartbeats 3000000
+set_option maxRecDepth 20000
+set_option backward.isDefEq.respectTransparency false
+
+namespace CycleQ2UniversalSurfaceCharacterCech
+
+open CycleQ2IncidenceNormalForm CycleQ2UniversalSurface CycleQ2SeedQuotientFiniteFree
+  CycleQ2SeedCechThreeOpen CycleQ2SeedCechLocalization CycleQ2UniversalSurfaceLocalizedBasis
+  CycleQ2UniversalSurfaceRestrictions CycleQ2UniversalSurfaceLinearCoordinates CycleQ2CharacterTopCech
+
+variable (R : Type*) [CommRing R] [Nontrivial R] (χ : ZMod 3)
+
+
+def gradedCoordinates (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
+    gradedLocal R χ hcoeff Fcoeff s →ₗ[R] gradedFamilies R χ where
+  toFun p := ⟨linearCoordinates R hcoeff Fcoeff s p.val, p.property⟩
+  map_add' p q := by apply Subtype.ext; exact map_add (linearCoordinates R hcoeff Fcoeff s) p.val q.val
+  map_smul' c p := by apply Subtype.ext; exact map_smul (linearCoordinates R hcoeff Fcoeff s) c p.val
+
+@[simp] theorem gradedCoordinates_apply (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3))
+    (p : gradedLocal R χ hcoeff Fcoeff s) :
+    (gradedCoordinates R χ hcoeff Fcoeff s p).val = localizedCoordinates R hcoeff Fcoeff s p.val := rfl
+
+theorem gradedCoordinates_injective (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
+    Function.Injective (gradedCoordinates R χ hcoeff Fcoeff s) := by
+  intro p q hpq
+  apply Subtype.ext
+  exact localizedCoordinates_injective R hcoeff Fcoeff s (congrArg Subtype.val hpq)
+
+theorem gradedCoordinates_range (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
+    LinearMap.range (gradedCoordinates R χ hcoeff Fcoeff s) = poleSubmodule R χ s := by
+  ext p
+  constructor
+  · rintro ⟨q, rfl⟩ ab
+    exact localizedCoordinates_hasPoles R hcoeff Fcoeff s q.val ab
+  · intro hp
+    obtain ⟨q, hq⟩ := (mem_range_localizedCoordinates R hcoeff Fcoeff s p.val).mpr hp
+    have hqg : q ∈ gradedLocal R χ hcoeff Fcoeff s := by
+      change linearCoordinates R hcoeff Fcoeff s q ∈ gradedFamilies R χ
+      rw [linearCoordinates_apply, hq]
+      exact p.property
+    refine ⟨⟨q, hqg⟩, ?_⟩
+    exact Subtype.ext hq
+
+def totalEquiv (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) : gradedLocal R χ hcoeff Fcoeff Finset.univ ≃ₗ[R] gradedFamilies R χ :=
+  LinearEquiv.ofBijective (gradedCoordinates R χ hcoeff Fcoeff Finset.univ)
+    ⟨gradedCoordinates_injective R χ hcoeff Fcoeff Finset.univ, by
+      intro p
+      have hp : p ∈ poleSubmodule R χ Finset.univ := by
+        intro ab e i hi _
+        exact False.elim (hi (Finset.mem_univ i))
+      rw [← gradedCoordinates_range R χ hcoeff Fcoeff Finset.univ] at hp
+      exact hp⟩
+
+@[simp] theorem totalEquiv_apply (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (p : gradedLocal R χ hcoeff Fcoeff Finset.univ) :
+    totalEquiv R χ hcoeff Fcoeff p = gradedCoordinates R χ hcoeff Fcoeff Finset.univ p := rfl
+
+
+theorem gradedCoordinates_restriction (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
+    {s t : Finset (Fin 3)} (hst : s ⊆ t) :
+    (gradedCoordinates R χ hcoeff Fcoeff t).comp (gradedRestriction R χ hcoeff Fcoeff hst) =
+      gradedCoordinates R χ hcoeff Fcoeff s := by
+  ext p ab e
+  change (localizedCoordinates R hcoeff Fcoeff t (restriction R hcoeff Fcoeff hst p.val) ab).coeff e =
+    (localizedCoordinates R hcoeff Fcoeff s p.val ab).coeff e
+  rw [coordinates_restriction]
+
+
+theorem map_actualBoundary (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) :
+    (actualBoundary R χ hcoeff Fcoeff).map (totalEquiv R χ hcoeff Fcoeff).toLinearMap = topBoundary R χ := by
+  change (actualBoundary R χ hcoeff Fcoeff).map (gradedCoordinates R χ hcoeff Fcoeff Finset.univ) = _
+  simp only [actualBoundary, Submodule.map_sup, ← LinearMap.range_comp,
+    gradedCoordinates_restriction, gradedCoordinates_range, topBoundary]
+
+
+def actualTopEquiv (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) : ActualTopCechQuotient R χ hcoeff Fcoeff ≃ₗ[R] TopCechQuotient R χ :=
+  Submodule.Quotient.equiv _ _ (totalEquiv R χ hcoeff Fcoeff) (map_actualBoundary R χ hcoeff Fcoeff)
+
+def actualTopBasis (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) : Module.Basis (TopIndex χ) R (ActualTopCechQuotient R χ hcoeff Fcoeff) :=
+  (topCechBasis R χ).map (actualTopEquiv R χ hcoeff Fcoeff).symm
+
+@[simp] theorem actualTopBasis_apply (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (q : (TopIndex χ)) :
+    actualTopEquiv R χ hcoeff Fcoeff (actualTopBasis R χ hcoeff Fcoeff q) =
+      Submodule.Quotient.mk (basisSection R χ q) := by
+  simp [actualTopBasis]
+
+theorem actualTop_rank (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) :
+    Module.finrank R (ActualTopCechQuotient R χ hcoeff Fcoeff) = if χ=0 then 7 else 8 := by
+  rw [Module.finrank_eq_card_basis (actualTopBasis R χ hcoeff Fcoeff), topIndex_count χ]
+
+theorem actualTop_rank_characterOne (hcoeff : FullCubicTailIndex → R)
+    (Fcoeff : FullSexticTailIndex → R) :
+    Module.finrank R (ActualTopCechQuotient R (1 : ZMod 3) hcoeff Fcoeff) = 8 := by
+  simpa using actualTop_rank R (1 : ZMod 3) hcoeff Fcoeff
+
+end CycleQ2UniversalSurfaceCharacterCech
+
+#print axioms CycleQ2UniversalSurfaceCharacterCech.actualTop_rank
+
+#print axioms CycleQ2UniversalSurfaceCharacterCech.actualTop_rank_characterOne
+end
+end
+
+
+/- Source component moved verbatim to Proposal.GeometricSeedSurfaceGradient. -/
+

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "mode": "live",
   "repository": "hodge-computer/sextics",
-  "maxFiles": 256,
+  "maxFiles": 1024,
   "maxBytes": 16777216,
   "timeoutSeconds": 3600,
   "memoryMb": 14336

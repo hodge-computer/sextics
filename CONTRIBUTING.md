@@ -118,7 +118,7 @@ Ordinary declarations and tactic proofs are accepted. Custom executable extensio
 
 The complete committed diff must consist solely of newly added permitted solution files in **one existing instance folder**. Edits to `instance.rec`, `why.md`, the leaderboard, the website, the verifier, workflows, or any other existing file fail validation.
 
-Limits are in `.github/solve-policy.json`: 256 files, 16 MiB of source, a 60-minute proof budget, and 14 GiB memory. The file count includes the manifest and explanation as well as Lean modules and any optional witness. Every submitted Lean module is compiled and independently replayed, so splitting a proof into more files does not extend its time budget. The memory budget leaves room for the operating system and runner services on GitHub's free 16 GB Linux runners for public repositories. The allowed axiom set is `propext`, `Classical.choice`, and `Quot.sound`.
+Limits are in `.github/solve-policy.json`: 1,024 files, 16 MiB of source, a 60-minute proof budget, and 14 GiB memory. The file count includes the manifest and explanation as well as Lean modules and any optional witness. Every submitted Lean module is compiled and independently replayed, so splitting a proof into more files does not extend its time budget. The memory budget leaves room for the operating system and runner services on GitHub's free 16 GB Linux runners for public repositories. The allowed axiom set is `propext`, `Classical.choice`, and `Quot.sound`.
 
 ### Mathematical explanation
 
