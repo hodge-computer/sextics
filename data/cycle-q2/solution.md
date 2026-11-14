@@ -108,6 +108,34 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
 ```
 
 
+### Seed fibers of the original projective coordinate opens
+
+[GeometricIncidenceProjectiveChartFiber.lean](GeometricIncidenceProjectiveChartFiber.lean)
+transports the canonical affine pullback comparison through the existing
+coordinate-chart isomorphism over the original base. Its pullback is
+formed from the actual open inclusion followed by `surfaceToBase`,
+along the unchanged `Spec.map seedMap`.
+
+The endpoint `projectiveChartSeedFiberIso` identifies that actual
+scheme-theoretic chart fiber with the spectrum of the original seed
+chart ring. Both projection maps are retained. In particular,
+`projectiveChartSeedFiberIso_inv_snd` identifies the map back to the
+original projective open as the spectrum of the precise chart
+specialization, followed by the inverse affine chart isomorphism.
+
+No global Proj base-change theorem or flatness premise is used.
+Independent review checked the pullback map, its isomorphism instance,
+and the directions of the inverse projection formulas.
+Static scans passed. **No elaboration, compilation, or kernel replay
+was run.** The deferred bounded command is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceProjectiveChartFiber.olean \
+  Proposal/GeometricIncidenceProjectiveChartFiber.lean
+```
+
+
 ## Specialized seed geometry continuation — source draft, 14 November 2026
 
 This continuation proceeds in bounded components. Every new Lean module
