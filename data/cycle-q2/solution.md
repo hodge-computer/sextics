@@ -1,5 +1,202 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Checked projective cohomology and whole-chart differentials — 14 November 2026
+
+The last admission, `Submission.missing_geometric_existence`, is still
+open. This continuation connects the previously checked Čech calculation
+to actual derived projective sheaf cohomology, proves nonsingularity at
+the same sparse parameter, and constructs a normalized Kähler differential
+on each entire affine curve chart. It also constructs the actual
+projective differential sheaf and its universal property. The remaining
+global canonical-sheaf, Serre, moving-cycle, and support comparisons are
+not asserted as hypotheses-free theorems.
+
+### A nonzero class in actual projective sheaf cohomology
+
+The projective construction has been separated into a small checked
+dependency chain. [GeometricProjectiveCharts.lean](GeometricProjectiveCharts.lean)
+constructs the same quotient grading, projective scheme, and two quartic
+denominator opens, and proves their cover directly from the curve
+equations. [GeometricProjectiveFrames.lean](GeometricProjectiveFrames.lean)
+constructs the actual degree-one frames and their transition unit.
+
+The generic sheaf and module constructions are now independently checked
+in [GeometricSheafHZero.lean](GeometricSheafHZero.lean),
+[GeometricTwistedSheaf.lean](GeometricTwistedSheaf.lean), and
+[GeometricTwistedModuleCore.lean](GeometricTwistedModuleCore.lean).
+Their specialization in [GeometricTwistedModule.lean](GeometricTwistedModule.lean)
+is a genuine sheaf of modules over the actual projective structure sheaf.
+Its linear frames cover every point when \(r\ne0\). Forgetting the module
+structure gives exactly the additive sheaf used for cohomology.
+
+[GeometricProjectiveCech.lean](GeometricProjectiveCech.lean) proves that the
+actual Mayer–Vietoris connecting map has precisely the image of the
+first-minus-second restriction map as its kernel. It therefore gives an
+injection
+\[
+\mathrm{DegreeOneCech}(r,\theta)
+\hookrightarrow
+H^1\bigl(\operatorname{Proj}R_{r,\theta},\mathcal L_{r,\theta}\bigr),
+\]
+where \(\mathcal L_{r,\theta}\) is the constructed degree-one additive
+sheaf and the group on the right is Mathlib's derived sheaf cohomology.
+The proof uses the genuine Mayer–Vietoris square and the natural
+identification of its degree-zero cohomology with sections. It does not
+assume affine acyclicity or assert surjectivity onto derived cohomology.
+
+[GeometricProjectiveNonzero.lean](GeometricProjectiveNonzero.lean) combines
+this injection with the checked all-poles trace calculation. For
+\(r^3=2\) and \(\theta=0\), the map
+\[
+c\longmapsto
+\delta\!\left[\frac{c\,x_0x_1^8}{g_1g_2}\right]
+\]
+into the actual projective \(H^1\) is injective, and its value at one is
+nonzero. For every homogeneous degree-nine numerator, the resulting
+derived class vanishes exactly when the existing finite trace vanishes.
+This uses the same cube-root parameter throughout; it does not substitute
+the literal complex number 57 for a cube root of two.
+
+### Nonsingularity at the compatible sparse parameter
+
+On the first chart \(x_1=1\), write \((a,b,c)=(x_0,x_2,x_3)\).
+The equations at \(\theta=0\) are
+\[
+a^2-rc=0,\qquad
+b^3+(a+1)bc+a+(1-i)c^3-i=0.
+\]
+When \(r^3=2\), eliminating \(c\) gives the trigonal equation
+\[
+2b^3+P_r(a)b+Q(a)=0,
+\quad
+P_r(a)=r^2a^2(a+1),\qquad
+Q(a)=(1-i)a^6+2a-2i.
+\]
+[GeometricSparseCurveSmooth.lean](GeometricSparseCurveSmooth.lean) uses
+its discriminant polynomial
+\[
+\begin{aligned}
+\Delta(a)={}&54ia^{12}-8a^9-24a^8
++(-132+108i)a^7+(100+108i)a^6\\
+&-108a^2+216ia+108.
+\end{aligned}
+\]
+The file supplies explicit integer Gaussian polynomials \(U,V\) and
+checks the exact identity
+\[
+U(a)\Delta(a)+V(a)\Delta'(a)
+=24896592594665052428858199326354844000.
+\]
+Ordinary kernel-checked polynomial normalization proves this identity.
+A common zero of the curve equation and its two partial derivatives
+would force both \(\Delta\) and \(\Delta'\) to vanish, contradicting the
+displayed nonzero constant. The second chart is handled by the actual
+cofactor transformation on the overlap and a direct nonzero-minor
+calculation where the overlap coordinate vanishes. Both conclusions
+hold over every characteristic-zero field with \(i^2=-1\) and \(r^3=2\).
+
+[GeometricSparseJacobianCover.lean](GeometricSparseJacobianCover.lean)
+then proves that the three signed minors generate the unit ideal in each
+literal affine quotient ring. If that ideal were proper, a maximal
+quotient field would contradict the field-valued theorem. This also
+gives the actual three Jacobian basic-open covers and shows that each
+chart prime lifts to a prime of one of the existing Jacobian localizations.
+No algebraic-closedness premise is required for the residue-field argument.
+
+### A differential frame on each entire affine chart
+
+For an arbitrary pair of affine equations \(v_0,v_1\),
+[GeometricChartKaehler.lean](GeometricChartKaehler.lean) constructs
+\[
+R^3/(R\,dv_0+R\,dv_1)\;\simeq\;\Omega^1_{R/\mathbb C},
+\qquad
+R=\mathbb C[a,b,c]/(v_0,v_1),
+\]
+using the actual presentation cotangent sequence. The image of each
+coordinate vector is its actual universal differential. This comparison
+holds before any Jacobian minor is inverted and does not require
+smoothness of the equation pair.
+
+Let \(c_0,c_1,c_2\) be the signed minors. When their ideal is the unit
+ideal, choose coefficients \(u_j\) with \(\sum_j u_jc_j=1\).
+[GeometricGlobalResidue.lean](GeometricGlobalResidue.lean) proves that
+\[
+\eta=\sum_j u_j\,dx_j,\qquad dx_j=c_j\eta
+\]
+is a global frame of the gradient cokernel. The proof sums the three
+polynomial Cramer identities. Its residue functional is an isomorphism
+to \(R\), and \(\eta\) is the unique element with residue coefficient
+one, so it is independent of the chosen Bezout coefficients. Combining
+this with the actual cotangent comparison and the proved unit Jacobian
+ideals gives genuine equivalences
+\(\Omega^1_{R/\mathbb C}\simeq R\) and normalized differentials on both
+entire sparse charts.
+
+[GeometricAffineOverlap.lean](GeometricAffineOverlap.lean) constructs the
+actual algebra equivalence on the coordinate overlap,
+\[
+(A,B,C)\longmapsto(a/b,1/b,c/b),
+\]
+and the induced map on universal Kähler differentials. It checks all
+three cofactor transformations and the normalized differential transition
+on the common middle-minor patch.
+[GeometricGlobalAdjunction.lean](GeometricGlobalAdjunction.lean) extends
+the cofactor-cokernel transition to the entire coordinate overlap: the
+actual coordinate Jacobian induces a map whose residue functional scales
+by \(-b\). The resulting whole-chart frames consequently transform by
+\(-b\), or by \(+b=x_2/x_1\) after the projective orientation signs.
+
+[GeometricCanonicalOverlap.lean](GeometricCanonicalOverlap.lean) proves
+the same transition for the genuine differentials constructed above,
+using the two actual homomorphisms from the original chart rings to the
+common overlap. The chain rule and the three transformed cofactors show
+that each second-chart minor annihilates the difference of the proposed
+forms. Transporting their Bezout combination proves that the difference
+is zero. Thus the actual whole-chart Kähler forms have the required
+transition on the full overlap, with no additional minor inverted.
+
+### The actual projective differential sheaf
+
+[GeometricDifferentialSheaf.lean](GeometricDifferentialSheaf.lean)
+constructs the sectionwise universal Kähler modules with their actual
+restriction maps, then sheafifies this presheaf as a sheaf of modules
+over the structure ring. It proves its universal property for
+sheaf-valued complex derivations, including existence and uniqueness of
+the induced sheaf morphism. The complex coefficient map on the actual
+projective curve is obtained from its genuine structure morphism to
+\(\operatorname{Spec}\mathbb C\).
+
+[GeometricProjectiveCoefficients.lean](GeometricProjectiveCoefficients.lean)
+proves that these global complex coefficients restrict, under the actual
+projective chart-section isomorphism, to the canonical coefficient map
+in the homogeneous localization. This holds on every positive-degree
+homogeneous basic open, including all coordinate charts. Thus the complex
+structure used for the differential sheaf agrees with the one in the
+literal chart constructions.
+
+This constructs the required differential-sheaf object. The global
+identification with the checked degree-one module sheaf, compatibility
+with the geometric Serre trace, and the subsequent moving-cycle and
+support argument remain further obligations.
+
+### Verification boundary
+
+Every helper named in this continuation has been compiled from its exact
+source bytes under the pinned Lean 4.33.1 and Mathlib revision
+`0df444a360eaa60ab8c11dca51a86af692955474`, and independently replayed with
+`leanchecker`. The audited endpoints depend only on `propext`,
+`Classical.choice`, and `Quot.sound`. Checks used one bounded compiler
+process at a time. The original cone and projective aggregate files now
+import the extracted checked constructions; their remaining older
+incidence dependencies have not been validated as a complete chain.
+
+The protected target, manifest, and final admission are unchanged. These
+results do not constitute a verified solve: the full proposal still
+fails source acceptance because of that admission. Earlier sections
+record the preceding stages and their verification boundaries. This
+continuation follows the Diamond argument credited below and was prepared
+for `fqlx` with OpenAI ChatGPT assistance.
+
 ## Checked local differentials and the actual Čech trace — 13 November 2026
 
 The final theorem `Submission.missing_geometric_existence` remains admitted.
