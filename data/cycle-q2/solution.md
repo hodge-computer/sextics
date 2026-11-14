@@ -1902,6 +1902,92 @@ timeout --signal=TERM --kill-after=5s 55s \
   Proposal/GeometricSeedChartModuleRestriction.lean
 ```
 
+### The projective degree-four square over the actual overlap ring — 14 November 2026
+
+After checkpoint `635988f61c23fe6b02c06bc9780233d81833b490`,
+[GeometricSeedOverlapSectionModels.lean](GeometricSeedOverlapSectionModels.lean)
+upgrades the native affine section models to equivalences over
+\(B_{ij}=\Gamma(U_i\cap U_j,\mathcal O_D)\).
+Each source retains its native affine-ring action and receives the
+\(B_{ij}\)-action through the actual `chartSectionIso`.
+The proved scalar tower and actual localization instance extend the
+linearity of the entire existing comparison. This avoids assigning an
+unproved action to the intermediate principal-open presentation.
+The four models and their naturality squares keep the same ordered
+projective overlap on both chart sides.
+
+[GeometricSeedProjectiveSheafSections.lean](GeometricSeedProjectiveSheafSections.lean)
+composes these models with `chartRestrictionEquiv`.
+Its four equivalences have as sources the native sections of the
+**existing** `projectiveImageSheaf` and `projectiveOrbitDualSheaf`
+on the actual chart preimages of the intersection. Their scalar
+actions come from the actual open inclusions. Their targets are the
+literal image and ideal-dual modules of `leftData` and `rightData`,
+and all four equivalences are \(B_{ij}\)-linear.
+
+The theorems `leftProjective_naturality` and
+`rightProjective_naturality` identify the original
+`projectiveImageDualIso` on every native overlap section with the
+literal image-to-dual map. The established matrix-image transition is
+then transported through these fixed comparisons, producing
+`imageSectionTransition`. The endpoint
+`projectiveImageDual_compatibility` proves
+\[
+E^{\mathrm{dual}}_j\!
+  \left(\Psi^{\mathrm{proj}}_j(T^{\mathrm{sec}}_{ij}s)\right)
+=t_{ij}^{4}
+ \left(E^{\mathrm{dual}}_i(\Psi^{\mathrm{proj}}_i(s))
+       \circ\iota_{ij}^{-1}\right)
+\]
+for every native left-chart image section. This is equality of entire
+functionals on the actual right overlap ideal; the unit is the original
+coordinate ratio \(t_{ij}=X_i/X_j\).
+
+**Precise remaining descent step.** The section transition above is not
+yet asserted to be a morphism of the restricted sheaves. On a principal
+subopen \(W=D_{U_i\cap U_j}(b)\), prove that the new comparisons satisfy
+\[
+E_W(\operatorname{res}_{U_i\cap U_j,W}s)
+=\operatorname{loc}_b(E_{U_i\cap U_j}(s)).
+\]
+The image and dual targets must use their established literal localization
+and Hom-localization maps. This restriction naturality on an affine
+principal-open basis is the next input for constructing native sheaf
+transitions, proving their triple-overlap coherence, and performing
+descent. Equality on the full overlap's sections alone is not being used
+as a gluing theorem.
+
+The ideal at this stage is the three-component **orbit ideal**:
+`orbitIdeal_eq_component_product` expresses it as the product of the
+three orbit-component ideals. Only the component with parameter one is
+identified with the original curve ideal. The global internal-Hom
+comparison must therefore retain the orbit ideal until the subsequent
+orbit/cycle argument explicitly relates it to the original curve.
+The specified global matrix-image identification and any required
+invertibility must also be bound to the descended objects. No final
+moving-cycle, Abel–Jacobi, support, or residue-exactness conclusion is
+asserted here.
+
+**Verification status.** Both new sources received independent
+mathematical/source review and bounded static checks. No Lean elaboration
+or kernel replay was run. Existing Lean proof bodies and the protected
+theorem, including its final admission, are unchanged. With the same
+pinned, already prepared dependency artifacts, the deferred checks are:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedOverlapSectionModels.olean \
+  Proposal/GeometricSeedOverlapSectionModels.lean
+```
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedProjectiveSheafSections.olean \
+  Proposal/GeometricSeedProjectiveSheafSections.lean
+```
+
 ### The original ideal and the actual differential sheaves
 
 Write \(j:C\hookrightarrow D\) for the original immersion at
