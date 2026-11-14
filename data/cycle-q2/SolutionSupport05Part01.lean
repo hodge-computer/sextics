@@ -19,7 +19,7 @@ import Proposal.GeometricTarget
 import Proposal.GeometricSeed
 import Proposal.GeometricFormalInputs
 import Proposal.Normalization09Part02
-import Proposal.SolutionSupport04
+import Proposal.SolutionSupport04Part02
 
 /-! Components extracted from SolutionSupport05.lean, in their original order.
 See solution.md for the mathematical and verification status. -/

@@ -1,3 +1,4 @@
+import Proposal.GeometricNormalizedCartierClass
 import Proposal.SolutionSupport08Part04
 import Proposal.GeometricSeedNormalIdeals
 import Proposal.GeometricSeedConormalBases
@@ -68,76 +69,12 @@ open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2UniversalSurface
 
 variable (R : Type*) [CommRing R]
 
-instance surfaceLocalAway (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
-    IsLocalization.Away (algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff) (baseProduct R s))
-      (SurfaceLocal R hcoeff Fcoeff s) := by
-  have hh : Algebra.algebraMapSubmonoid (SurfaceRing R hcoeff Fcoeff)
-      (Submonoid.powers (baseProduct R s)) =
-      Submonoid.powers (algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff) (baseProduct R s)) := by
-    exact Submonoid.map_powers _ _
-  rw [IsLocalization.Away, ← hh]
-  infer_instance
 
-theorem baseProduct_dvd {s t : Finset (Fin 3)} (hst : s ⊆ t) :
-    baseProduct R s ∣ baseProduct R t :=
-  Finset.prod_dvd_prod_of_subset s t (fun i ↦ X i) hst
 
-theorem surfaceProduct_isUnit (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) {s t : Finset (Fin 3)} (hst : s ⊆ t) :
-    IsUnit (algebraMap (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff t)
-      (algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff) (baseProduct R s))) := by
-  apply IsLocalization.Away.isUnit_of_dvd (S := SurfaceLocal R hcoeff Fcoeff t)
-    (algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff) (baseProduct R t))
-  exact map_dvd (algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff)) (baseProduct_dvd R hst)
 
-/-- The universal localization map, with no chosen Laurent inverse. -/
-def restriction (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) {s t : Finset (Fin 3)} (hst : s ⊆ t) :
-    SurfaceLocal R hcoeff Fcoeff s →+* SurfaceLocal R hcoeff Fcoeff t :=
-  IsLocalization.Away.lift
-    (S := SurfaceLocal R hcoeff Fcoeff s)
-    (P := SurfaceLocal R hcoeff Fcoeff t)
-    (g := algebraMap (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff t))
-    (algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff) (baseProduct R s))
-    (surfaceProduct_isUnit R hcoeff Fcoeff hst)
 
-@[simp] theorem restriction_algebraMap (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) {s t : Finset (Fin 3)} (hst : s ⊆ t)
-    (p : SurfaceRing R hcoeff Fcoeff) :
-    restriction R hcoeff Fcoeff hst (algebraMap (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff s) p) =
-      algebraMap (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff t) p :=
-  IsLocalization.Away.lift_eq (S := SurfaceLocal R hcoeff Fcoeff s)
-    (P := SurfaceLocal R hcoeff Fcoeff t) _ (surfaceProduct_isUnit R hcoeff Fcoeff hst) p
 
-theorem coordinates_mul_base [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3))
-    (p : SurfaceLocal R hcoeff Fcoeff s) (c : Base R) (ab : ShiftIndex) :
-    localizedCoordinates R hcoeff Fcoeff s
-      (p * algebraMap (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff s)
-        (algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff) c)) ab =
-      baseToLaurent R c * localizedCoordinates R hcoeff Fcoeff s p ab := by
-  rw [← IsScalarTower.algebraMap_apply (Base R) (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff s) c,
-    IsScalarTower.algebraMap_apply (Base R) (coordinateLocalization R s) (SurfaceLocal R hcoeff Fcoeff s) c,
-    mul_comm p, ← Algebra.smul_def]
-  rw [localizedCoordinates_smul, localizationToLaurent_algebraMap]
 
-/-- Canonical restriction becomes literal inclusion in common Laurent coordinates. -/
-theorem coordinates_restriction [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    {s t : Finset (Fin 3)} (hst : s ⊆ t) (z : SurfaceLocal R hcoeff Fcoeff s) (ab : ShiftIndex) :
-    localizedCoordinates R hcoeff Fcoeff t (restriction R hcoeff Fcoeff hst z) ab =
-      localizedCoordinates R hcoeff Fcoeff s z ab := by
-  obtain ⟨n, p, hp⟩ := IsLocalization.Away.surj
-    (algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff) (baseProduct R s)) z
-  have hp' : z * algebraMap (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff s)
-      (algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff) (baseProduct R s ^ n)) =
-      algebraMap (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff s) p := by
-    simpa only [map_pow] using hp
-  have hs := congrArg (fun z ↦ localizedCoordinates R hcoeff Fcoeff s z ab) hp'
-  simp only [coordinates_mul_base, localizedCoordinates_algebraMap] at hs
-  have ht := congrArg (restriction R hcoeff Fcoeff hst) hp'
-  simp only [map_mul, restriction_algebraMap] at ht
-  have ht' := congrArg (fun z ↦ localizedCoordinates R hcoeff Fcoeff t z ab) ht
-  simp only [coordinates_mul_base, localizedCoordinates_algebraMap] at ht'
-  have hu : IsUnit (baseToLaurent R (baseProduct R s ^ n)) := by
-    rw [map_pow, baseToLaurent_baseProduct]
-    exact (T_isUnit R _).pow n
-  exact hu.mul_right_injective (ht'.trans hs.symm)
 
 /-- Every graded one-cocycle for the canonical three-coordinate localization
 complex of the actual universal normalized quotient is an actual coboundary. -/
@@ -349,46 +286,11 @@ open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2UniversalSurface
 
 variable (R : Type*) [CommRing R]
 
-theorem base_C_surface (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (c : R) :
-    algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff) (C c) = algebraMap R (SurfaceRing R hcoeff Fcoeff) c := by
-  change Ideal.Quotient.mk _ (remainingInclusion R (C c)) = Ideal.Quotient.mk _ (C c)
-  simp [remainingInclusion]
 
-theorem localized_scalar_eq (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) (c : R)
-    (p : SurfaceLocal R hcoeff Fcoeff s) :
-    algebraMap (Base R) (coordinateLocalization R s) (C c) • p = c • p := by
-  simp only [Algebra.smul_def]
-  rw [← IsScalarTower.algebraMap_apply (Base R) (coordinateLocalization R s) (SurfaceLocal R hcoeff Fcoeff s),
-    IsScalarTower.algebraMap_apply (Base R) (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff s), base_C_surface,
-    ← IsScalarTower.algebraMap_apply R (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff s)]
 
-theorem localizedCoordinates_R_smul [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3))
-    (c : R) (p : SurfaceLocal R hcoeff Fcoeff s) :
-    localizedCoordinates R hcoeff Fcoeff s (c • p) = c • localizedCoordinates R hcoeff Fcoeff s p := by
-  funext ab
-  rw [← localized_scalar_eq R hcoeff Fcoeff s c p, localizedCoordinates_smul,
-    localizationToLaurent_algebraMap]
-  change baseToLaurent R (algebraMap R (Base R) c) * _ = c • _
-  rw [AlgHom.commutes, Algebra.smul_def]
 
-def linearCoordinates [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
-    SurfaceLocal R hcoeff Fcoeff s →ₗ[R] (ShiftIndex → Laurent (R := R)) where
-  __ := localizedCoordinates R hcoeff Fcoeff s
-  map_smul' c p := localizedCoordinates_R_smul R hcoeff Fcoeff s c p
 
-@[simp] theorem linearCoordinates_apply [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3))
-    (p : SurfaceLocal R hcoeff Fcoeff s) :
-    linearCoordinates R hcoeff Fcoeff s p = localizedCoordinates R hcoeff Fcoeff s p := rfl
 
-def restrictionLinear [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) {s t : Finset (Fin 3)} (hst : s ⊆ t) :
-    SurfaceLocal R hcoeff Fcoeff s →ₗ[R] SurfaceLocal R hcoeff Fcoeff t where
-  __ := (restriction R hcoeff Fcoeff hst).toAddMonoidHom
-  map_smul' c p := by
-    apply localizedCoordinates_injective R hcoeff Fcoeff t
-    funext ab
-    change localizedCoordinates R hcoeff Fcoeff t (restriction R hcoeff Fcoeff hst (c • p)) ab =
-      localizedCoordinates R hcoeff Fcoeff t (c • restriction R hcoeff Fcoeff hst p) ab
-    simp only [localizedCoordinates_R_smul, Pi.smul_apply, coordinates_restriction]
 
 end CycleQ2UniversalSurfaceLinearCoordinates
 
@@ -1169,9 +1071,6 @@ open CycleQ2IncidenceNormalForm CycleQ2UniversalSurface CycleQ2SeedQuotientFinit
 
 variable (R : Type*) [CommRing R] [Nontrivial R] (χ : ZMod 3)
 
-/-- Degree-zero sections of the explicitly specified character inside the actual coordinate localization. -/
-def gradedLocal (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) : Submodule R (SurfaceLocal R hcoeff Fcoeff s) :=
-  (gradedFamilies R χ).comap (linearCoordinates R hcoeff Fcoeff s)
 
 def gradedCoordinates (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
     gradedLocal R χ hcoeff Fcoeff s →ₗ[R] gradedFamilies R χ where
@@ -1217,15 +1116,6 @@ def totalEquiv (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex
 @[simp] theorem totalEquiv_apply (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (p : gradedLocal R χ hcoeff Fcoeff Finset.univ) :
     totalEquiv R χ hcoeff Fcoeff p = gradedCoordinates R χ hcoeff Fcoeff Finset.univ p := rfl
 
-def gradedRestriction (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) {s t : Finset (Fin 3)} (hst : s ⊆ t) :
-    gradedLocal R χ hcoeff Fcoeff s →ₗ[R] gradedLocal R χ hcoeff Fcoeff t where
-  toFun p := ⟨restrictionLinear R hcoeff Fcoeff hst p.val, by
-    intro ab
-    change HasGrade ab (0,χ) (localizedCoordinates R hcoeff Fcoeff t (restriction R hcoeff Fcoeff hst p.val) ab)
-    rw [coordinates_restriction]
-    exact p.property ab⟩
-  map_add' p q := by apply Subtype.ext; exact map_add (restrictionLinear R hcoeff Fcoeff hst) p.val q.val
-  map_smul' c p := by apply Subtype.ext; exact map_smul (restrictionLinear R hcoeff Fcoeff hst) c p.val
 
 theorem gradedCoordinates_restriction (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
     {s t : Finset (Fin 3)} (hst : s ⊆ t) :
@@ -1236,12 +1126,6 @@ theorem gradedCoordinates_restriction (hcoeff : FullCubicTailIndex → R) (Fcoef
     (localizedCoordinates R hcoeff Fcoeff s p.val ab).coeff e
   rw [coordinates_restriction]
 
-/-- The boundary submodule is the sum of the images of the actual three
-canonical ring restrictions from pair-open sections. -/
-def actualBoundary (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) : Submodule R (gradedLocal R χ hcoeff Fcoeff Finset.univ) :=
-  LinearMap.range (gradedRestriction R χ hcoeff Fcoeff (show ({0, 1} : Finset (Fin 3)) ⊆ Finset.univ by decide)) ⊔
-  LinearMap.range (gradedRestriction R χ hcoeff Fcoeff (show ({0, 2} : Finset (Fin 3)) ⊆ Finset.univ by decide)) ⊔
-  LinearMap.range (gradedRestriction R χ hcoeff Fcoeff (show ({1, 2} : Finset (Fin 3)) ⊆ Finset.univ by decide))
 
 theorem map_actualBoundary (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) :
     (actualBoundary R χ hcoeff Fcoeff).map (totalEquiv R χ hcoeff Fcoeff).toLinearMap = topBoundary R χ := by
@@ -1249,8 +1133,6 @@ theorem map_actualBoundary (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSex
   simp only [actualBoundary, Submodule.map_sup, ← LinearMap.range_comp,
     gradedCoordinates_restriction, gradedCoordinates_range, topBoundary]
 
-abbrev ActualTopCechQuotient (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) :=
-  gradedLocal R χ hcoeff Fcoeff Finset.univ ⧸ actualBoundary R χ hcoeff Fcoeff
 
 def actualTopEquiv (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) : ActualTopCechQuotient R χ hcoeff Fcoeff ≃ₗ[R] TopCechQuotient R χ :=
   Submodule.Quotient.equiv _ _ (totalEquiv R χ hcoeff Fcoeff) (map_actualBoundary R χ hcoeff Fcoeff)

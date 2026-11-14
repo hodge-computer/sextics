@@ -1,3 +1,4 @@
+import Proposal.GeometricNormalizedCartierClass
 import Mathlib.LinearAlgebra.Finsupp.LinearCombination
 import Mathlib.Tactic
 import Mathlib.RingTheory.Localization.Away.Basic
@@ -19,7 +20,7 @@ import Proposal.GeometricTarget
 import Proposal.GeometricSeed
 import Proposal.GeometricFormalInputs
 import Proposal.Normalization09Part02
-import Proposal.SolutionSupport07
+import Proposal.SolutionSupport07Part03
 import Proposal.GeometricNormalConnecting
 
 /-! Components extracted from SolutionSupport08.lean, in their original order.
@@ -73,82 +74,17 @@ open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2UniversalSurface
 
 variable (R : Type*) [CommRing R]
 
-abbrev SurfaceLocal (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :=
-  Localization (Algebra.algebraMapSubmonoid (SurfaceRing R hcoeff Fcoeff)
-    (Submonoid.powers (baseProduct R s)))
 
-instance surfaceLocalBaseAlgebra (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
-    Algebra (coordinateLocalization R s) (SurfaceLocal R hcoeff Fcoeff s) :=
-  localizationAlgebra (Rₘ := coordinateLocalization R s) (Sₘ := SurfaceLocal R hcoeff Fcoeff s)
-    (Submonoid.powers (baseProduct R s)) (SurfaceRing R hcoeff Fcoeff)
 
-instance surfaceLocalBaseTower (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
-    IsScalarTower (Base R) (coordinateLocalization R s) (SurfaceLocal R hcoeff Fcoeff s) :=
-  isScalarTower_localizationAlgebra (Rₘ := coordinateLocalization R s)
-    (Sₘ := SurfaceLocal R hcoeff Fcoeff s) (Submonoid.powers (baseProduct R s)) (SurfaceRing R hcoeff Fcoeff)
 
-def localizedBasis [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
-    Module.Basis ShiftIndex (coordinateLocalization R s) (SurfaceLocal R hcoeff Fcoeff s) :=
-  (surfaceBasis R hcoeff Fcoeff).localizationLocalization (coordinateLocalization R s)
-    (Submonoid.powers (baseProduct R s)) (SurfaceLocal R hcoeff Fcoeff s)
 
-@[simp] theorem localizedBasis_apply [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    (s : Finset (Fin 3)) (ab : ShiftIndex) :
-    localizedBasis R hcoeff Fcoeff s ab = algebraMap (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff s)
-      (surfaceBasis R hcoeff Fcoeff ab) := by
-  exact Module.Basis.localizationLocalization_apply _ _ _ _ _
 
-@[simp] theorem localizedBasis_repr_algebraMap [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    (s : Finset (Fin 3)) (p : SurfaceRing R hcoeff Fcoeff) (ab : ShiftIndex) :
-    (localizedBasis R hcoeff Fcoeff s).repr (algebraMap (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff s) p) ab =
-      algebraMap (Base R) (coordinateLocalization R s) ((surfaceBasis R hcoeff Fcoeff).repr p ab) := by
-  exact Module.Basis.localizationLocalization_repr_algebraMap _ _ _ _ _ _
 
-def localizedCoordinates [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
-    SurfaceLocal R hcoeff Fcoeff s →+ (ShiftIndex → Laurent (R := R)) where
-  toFun p ab := localizationToLaurent R s ((localizedBasis R hcoeff Fcoeff s).repr p ab)
-  map_zero' := by ext ab; simp
-  map_add' p q := by ext ab; simp
 
-theorem localizedCoordinates_injective [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3)) :
-    Function.Injective (localizedCoordinates R hcoeff Fcoeff s) := by
-  intro p q hpq
-  apply (localizedBasis R hcoeff Fcoeff s).repr.injective
-  ext ab
-  exact localizationToLaurent_injective R s (congrFun hpq ab)
 
-theorem localizedCoordinates_hasPoles [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3))
-    (p : SurfaceLocal R hcoeff Fcoeff s) (ab : ShiftIndex) :
-    HasPoles s (localizedCoordinates R hcoeff Fcoeff s p ab) :=
-  localizationToLaurent_hasPoles R s _
 
-theorem mem_range_localizedCoordinates [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) (s : Finset (Fin 3))
-    (p : ShiftIndex → Laurent (R := R)) :
-    p ∈ Set.range (localizedCoordinates R hcoeff Fcoeff s) ↔ ∀ ab, HasPoles s (p ab) := by
-  constructor
-  · rintro ⟨p, rfl⟩ ab
-    exact localizedCoordinates_hasPoles R hcoeff Fcoeff s p ab
-  · intro hp
-    choose a ha using fun ab ↦ (mem_range_localizationToLaurent R s (p ab)).mpr (hp ab)
-    refine ⟨(localizedBasis R hcoeff Fcoeff s).repr.symm (Finsupp.equivFunOnFinite.symm a), ?_⟩
-    funext ab
-    change localizationToLaurent R s
-      ((localizedBasis R hcoeff Fcoeff s).repr ((localizedBasis R hcoeff Fcoeff s).repr.symm
-        (Finsupp.equivFunOnFinite.symm a)) ab) = p ab
-    simpa using ha ab
 
-@[simp] theorem localizedCoordinates_algebraMap [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    (s : Finset (Fin 3)) (p : SurfaceRing R hcoeff Fcoeff) (ab : ShiftIndex) :
-    localizedCoordinates R hcoeff Fcoeff s (algebraMap (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff s) p) ab =
-      baseToLaurent R ((surfaceBasis R hcoeff Fcoeff).repr p ab) := by
-  simp [localizedCoordinates]
 
-@[simp] theorem localizedCoordinates_smul [Nontrivial R] (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    (s : Finset (Fin 3)) (a : coordinateLocalization R s) (p : SurfaceLocal R hcoeff Fcoeff s)
-    (ab : ShiftIndex) :
-    localizedCoordinates R hcoeff Fcoeff s (a • p) ab =
-      localizationToLaurent R s a * localizedCoordinates R hcoeff Fcoeff s p ab := by
-  simp [localizedCoordinates, Finsupp.smul_apply, smul_eq_mul]
 
 /-- Exactness of the three-open complex on actual localized universal surface rings,
 expressed through their injective common Laurent coordinates. -/

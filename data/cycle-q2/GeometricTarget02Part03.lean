@@ -1,3 +1,4 @@
+import Proposal.GeometricNormalizedCartierClass
 import Proposal.GeometricSurfaceBindings
 import Proposal.GeometricSurfaceCoordinates
 import Proposal.GeometricTarget02Part02
@@ -886,36 +887,15 @@ open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2IncidenceMonomials
   CycleQ2IncidenceEquations
 
 
-def leadingProduct (R : Type*) [CommRing R] : ParameterPolynomial R :=
-  X (Sum.inl fullCubicLeadingIndex) * X (Sum.inr (Sum.inl fullSexticLeadingIndex))
 
-theorem leadingProduct_ne_zero (R : Type*) [CommRing R] [IsDomain R] :
-    leadingProduct R ≠ 0 := mul_ne_zero (X_ne_zero _) (X_ne_zero _)
 
-abbrev ParameterRing (R : Type*) [CommRing R] := Localization.Away (leadingProduct R)
 
-instance parameterRingDomain (R : Type*) [CommRing R] [IsDomain R] :
-    IsDomain (ParameterRing R) := Localization.Away.isDomain (leadingProduct_ne_zero R)
 
 variable (R : Type*) [CommRing R] [IsDomain R]
 
-def cubicCoefficient (e : FullInvariantIndex 3) : ParameterRing R :=
-  algebraMap (ParameterPolynomial R) (ParameterRing R) (X (Sum.inl e))
 
-def sexticCoefficient (e : FullInvariantIndex 6) : ParameterRing R :=
-  algebraMap (ParameterPolynomial R) (ParameterRing R) (X (Sum.inr (Sum.inl e)))
 
-def matrixCoefficient (i j : Fin 3) (e : StandardIndex 14) : ParameterRing R :=
-  algebraMap (ParameterPolynomial R) (ParameterRing R) (X (Sum.inr (Sum.inr ((i, j), e))))
 
-theorem leading_coefficients_units :
-    IsUnit (cubicCoefficient R fullCubicLeadingIndex) ∧
-      IsUnit (sexticCoefficient R fullSexticLeadingIndex) := by
-  have hu := IsLocalization.Away.algebraMap_isUnit (S := ParameterRing R) (leadingProduct R)
-  have hp : IsUnit (cubicCoefficient R fullCubicLeadingIndex *
-      sexticCoefficient R fullSexticLeadingIndex) := by
-    simpa only [leadingProduct, map_mul, cubicCoefficient, sexticCoefficient] using hu
-  exact ⟨isUnit_of_mul_isUnit_left hp, isUnit_of_mul_isUnit_right hp⟩
 
 def equations (r : R) : EquationIndex → ParameterRing R :=
   incidenceEquations (cubicCoefficient R) (sexticCoefficient R)
@@ -927,61 +907,11 @@ section Specialization
 variable {R} {S : Type*} [CommRing S] [Algebra R S]
 
 
-theorem polynomialSpecialization_leadingProduct
-    (hcoeff : FullInvariantIndex 3 → S) (Fcoeff : FullInvariantIndex 6 → S)
-    (δ : Fin 3 → Fin 3 → StandardIndex 14 → S) :
-    polynomialSpecialization hcoeff Fcoeff δ (leadingProduct R) =
-      hcoeff fullCubicLeadingIndex * Fcoeff fullSexticLeadingIndex := by
-  simp [polynomialSpecialization, leadingProduct, coefficientPoint]
 
-/-- Every actual coefficient point in the two-leading-coefficient open has
-its canonical specialization from the universal localized coefficient ring. -/
-def specialization (hcoeff : FullInvariantIndex 3 → S)
-    (Fcoeff : FullInvariantIndex 6 → S)
-    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
-    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex))
-    (δ : Fin 3 → Fin 3 → StandardIndex 14 → S) : ParameterRing R →ₐ[R] S :=
-  IsLocalization.Away.liftAlgHom (leadingProduct R)
-    (f := polynomialSpecialization hcoeff Fcoeff δ)
-    (by rw [polynomialSpecialization_leadingProduct]; exact hu.mul Fu)
 
-@[simp] theorem specialization_polynomial
-    (hcoeff : FullInvariantIndex 3 → S) (Fcoeff : FullInvariantIndex 6 → S)
-    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
-    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex))
-    (δ : Fin 3 → Fin 3 → StandardIndex 14 → S) (p : ParameterPolynomial R) :
-    specialization hcoeff Fcoeff hu Fu δ
-      (algebraMap (ParameterPolynomial R) (ParameterRing R) p) =
-        polynomialSpecialization hcoeff Fcoeff δ p := by
-  simp [specialization, IsLocalization.Away.liftAlgHom_apply]
 
-@[simp] theorem specialization_cubicCoefficient
-    (hcoeff : FullInvariantIndex 3 → S) (Fcoeff : FullInvariantIndex 6 → S)
-    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
-    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex))
-    (δ : Fin 3 → Fin 3 → StandardIndex 14 → S) (e : FullInvariantIndex 3) :
-    specialization hcoeff Fcoeff hu Fu δ (cubicCoefficient R e) = hcoeff e := by
-  simp [specialization, cubicCoefficient, IsLocalization.Away.liftAlgHom_apply,
-    polynomialSpecialization, coefficientPoint]
 
-@[simp] theorem specialization_sexticCoefficient
-    (hcoeff : FullInvariantIndex 3 → S) (Fcoeff : FullInvariantIndex 6 → S)
-    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
-    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex))
-    (δ : Fin 3 → Fin 3 → StandardIndex 14 → S) (e : FullInvariantIndex 6) :
-    specialization hcoeff Fcoeff hu Fu δ (sexticCoefficient R e) = Fcoeff e := by
-  simp [specialization, sexticCoefficient, IsLocalization.Away.liftAlgHom_apply,
-    polynomialSpecialization, coefficientPoint]
 
-@[simp] theorem specialization_matrixCoefficient
-    (hcoeff : FullInvariantIndex 3 → S) (Fcoeff : FullInvariantIndex 6 → S)
-    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
-    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex))
-    (δ : Fin 3 → Fin 3 → StandardIndex 14 → S)
-    (i j : Fin 3) (e : StandardIndex 14) :
-    specialization hcoeff Fcoeff hu Fu δ (matrixCoefficient R i j e) = δ i j e := by
-  simp [specialization, matrixCoefficient, IsLocalization.Away.liftAlgHom_apply,
-    polynomialSpecialization, coefficientPoint]
 
 theorem specialization_equations [Nontrivial S]
     (hcoeff : FullInvariantIndex 3 → S) (Fcoeff : FullInvariantIndex 6 → S)
@@ -1013,11 +943,6 @@ theorem specialization_equations [Nontrivial S]
 
 end Specialization
 
-/-- The literal raw smooth seed is an actual point of the universal chart. -/
-def seedSpecialization (r ι : R) : ParameterRing R →ₐ[R] R :=
-  specialization (seedCubicCoefficients ι) (seedSexticCoefficients r ι)
-    (seedCubicCoefficients_unit ι) (seedSexticCoefficients_unit r ι)
-    (fun _ _ _ => 0)
 
 theorem seedSpecialization_equations (r ι : R) (q : EquationIndex) :
     seedSpecialization R r ι (equations R r q) = 0 := by

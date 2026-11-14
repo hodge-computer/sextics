@@ -1,5 +1,158 @@
 # A nonconstructive geometric route for cycle-q2
 
+## The original normalized class and first-order obstruction algebra — 14 November 2026
+
+This checkpoint binds the nonzero character-one Cartier descendant to the
+original normalized surface algebra, proves compatibility of character
+projection with the orbit of the original descendant, and identifies the
+literal original projective surface with the surface used in the Cartier
+calculation. It also supplies the square-zero algebra needed to construct
+the obstruction of the actual incidence-matrix image. The final
+`Submission.missing_geometric_existence` remains open. The actual moving
+family, geometric variation, supported correspondence, and de Rham
+comparison still require their stated constructions.
+
+### The same nonzero class in the original normalized surface
+
+[GeometricNormalizedCartierClass.lean](GeometricNormalizedCartierClass.lean)
+collects the original universal surface basis, normalization, localization,
+and coefficient-map constructions. Their quotient-ring maps send every
+polynomial to its original polynomial class. The rank-nine basis and its
+localized Laurent coordinates are therefore attached to the original
+defining equations. All restriction and coefficient-specialization maps
+are the maps induced by those equations.
+
+The new coordinate equivalence identifies the seed Cartier calculation
+with these original normalized coordinates. The character-and-degree
+projection is a linear map into the actual graded localized section
+module. It fixes sections already in that component and commutes with
+both restrictions and coefficient specialization.
+
+The closed theorem `literal_normalized_character_one_nonzero` retains
+the original Cartier cycle, its actual coordinate descent witnesses
+\(d,q\), and the equality
+\[
+q.\mathrm{val}=\operatorname{coordinateTopRepresentative}(d).
+\]
+It proves that the character-one projection of this same \(q\) is nonzero
+in the original normalized surface's top Čech quotient. The proof uses
+the previously checked strictly negative Laurent coefficient and the
+actual boundary criterion at unrestricted pole order. The theorem does
+not identify this class with an obstruction of a moving matrix merely
+from a dimension calculation; that comparison is a further obligation.
+
+### The orbit of the original descendant
+
+[GeometricCartierOrbitCompatibility.lean](GeometricCartierOrbitCompatibility.lean)
+upgrades the identity-on-polynomials seed-coordinate equivalence to a
+complex algebra equivalence. The actual character projections are complex
+linear, mutually orthogonal, and sum to the identity. Conjugating the
+original localized cyclic action through that fixed equivalence gives
+the same action used in the existing twisted orbit.
+
+For character projection \(\pi_1\), the original descendant \(q\), and
+\[
+T(q)=q+\zeta^2\gamma(q)+\zeta\gamma^2(q),
+\]
+the checked compatibility theorem proves
+\[
+\pi_1(T(q))=T(\pi_1(q))=3\pi_1(q).
+\]
+Thus projection can be applied to the orbit of the original section.
+`literal_original_twistedOrbit_negative` proves that this original,
+unprojected orbit retains a nonzero strictly negative coefficient, while
+keeping the original descent witnesses in the conclusion. This closes
+the distinction between the orbit of a projected section and the
+projection of the orbit. An identification with the automorphism's
+induced map on derived projective cohomology is still separate.
+
+### The literal original projective surface
+
+[GeometricLiteralProjectiveBinding.lean](GeometricLiteralProjectiveBinding.lean)
+proves that the original incidence surface at the literal complex seed
+\((57,i)\) and the Cartier surface at \((57,1)\) have isomorphic graded
+quotient rings. Both maps preserve the original polynomial classes, and
+their compositions are proved to be the identity.
+
+These actual graded maps induce an isomorphism of their projective
+spectra. The isomorphism preserves the coordinate basic opens and the
+structure-sheaf section maps. For each specified polynomial denominator,
+it also gives inverse maps of the actual homogeneous localizations.
+This binds the schemes and chart rings used in the two constructions;
+it does not replace the literal seed by a cube-root seed or assert a
+family comparison without a map.
+
+### Square-zero deformations and actual matrix images
+
+[GeometricSquareZeroProjectors.lean](GeometricSquareZeroProjectors.lean)
+starts with the concrete first-order algebra
+\[
+E=(R[\varepsilon]/(\varepsilon^2))/(f-\varepsilon a),
+\qquad C=R/(f).
+\]
+Under the stated regularity hypothesis on \(f\), its reduction kernel is
+proved to be exactly \(\varepsilon C\), with injective coefficient map,
+square-zero multiplication, and the required multiplication formulas.
+The application must still verify that hypothesis for its original
+family equations.
+
+For a matrix \(M\) with vanishing two-by-two minors and a certificate
+\(\sum_{i,j}w_{ij}M_{ij}=1\), the module is the actual range of
+`M.mulVecLin`. The certificate constructs an ambient retraction onto
+that range. Every endomorphism of this range is scalar multiplication,
+with its scalar recovered by an explicit finite formula in the matrix
+columns and certificate. The resulting projector lifts through a
+surjective ring map with square-zero kernel. These are constructions of
+the matrix image and its maps, not assumptions of a line-bundle model.
+
+The remaining algebra controls the defect
+\(e_i e_j e_k-e_i e_k\) of such lifted projectors. Extracting its actual
+epsilon coefficient gives a cocycle on the common image. Changing lifts
+changes it by an explicit Čech boundary. A prism identity compares two
+families of projectors onto the same image, so different retractions
+also have the stated boundary comparison. Entrywise matrix coefficients
+and their naturality are proved, including the scaled epsilon formula
+needed when a cyclic action rescales the deformation parameter.
+
+These generic hypotheses have not been silently supplied for the
+original incidence family. Its coordinate-open certificates, actual
+localized reduction kernels, degree-fourteen projective normalization,
+and identification with the original Cartier class remain explicit
+application steps. Likewise, the local obstruction formulas alone do
+not establish the moving-cycle or global support theorem.
+
+### Verification and source preservation
+
+All four exact combined proposal modules compiled and their emitted modules
+passed independent kernel replay. The checks retained the existing bounded
+single-worker configuration and proof budgets. The separate aggregate
+audit checked 77 distinct endpoints in 3.01 seconds;
+every dependency audit uses only `propext`, `Classical.choice`, and
+`Quot.sound`. The exact source receipts are:
+
+| Module | Lines | Compile (s) | Kernel replay (s) |
+| --- | ---: | ---: | ---: |
+| `GeometricNormalizedCartierClass` | 1,677 | 50.19 | 7.08 |
+| `GeometricSquareZeroProjectors` | 935 | 8.47 | 3.63 |
+| `GeometricCartierOrbitCompatibility` | 222 | 13.47 | 3.82 |
+| `GeometricLiteralProjectiveBinding` | 220 | 45.29 | 38.21 |
+
+
+The normalized helper faithfully moves 125 public declarations from
+seven existing files, preserving their statements and proof bodies.
+The five private supporting declarations and all surrounding scopes,
+variables, options, and unrelated declarations remain in their original
+files. Five declaration-free import facades are replaced by direct
+imports in their callers, keeping the proposal within its file limit.
+The incoming geometry changes are retained. The already checked
+`GeometricFormalInputs01` facade and its caller remain byte-for-byte
+unchanged; replacing the separate `SolutionSupport02` facade supplies
+the corresponding file slot.
+The protected target and the final theorem are unchanged. The source
+gate still reports the single existing `sorry` at `Solution.lean:138`;
+these checked helper modules do not constitute acceptance of the full
+proposal.
+
 ## Actual differential charts and preservation of the derived class — 14 November 2026
 
 The final theorem `Submission.missing_geometric_existence` remains open.

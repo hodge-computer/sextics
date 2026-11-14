@@ -1,3 +1,4 @@
+import Proposal.GeometricNormalizedCartierClass
 import Proposal.SolutionSupport08Part05
 
 /-! Components extracted from SolutionSupport08.lean, in their original order.
@@ -30,172 +31,22 @@ open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2IncidenceEquations
 
 variable {R S : Type*} [CommRing R] [CommRing S]
 
-theorem map_cubic (f : R →+* S) (hcoeff : FullCubicTailIndex → R) :
-    MvPolynomial.map f (normalizedFullCubic hcoeff) =
-      normalizedFullCubic (fun i => f (hcoeff i)) := by
-  simp [normalizedFullCubic]
 
-theorem map_sextic (f : R →+* S) (Fcoeff : FullSexticTailIndex → R) :
-    MvPolynomial.map f (normalizedFullSextic Fcoeff) =
-      normalizedFullSextic (fun i => f (Fcoeff i)) := by
-  simp [normalizedFullSextic]
 
-theorem map_mem_surfaceIdeal (f : R →+* S)
-    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    {p : Poly R} (hp : p ∈ surfaceIdeal R hcoeff Fcoeff) :
-    MvPolynomial.map f p ∈ surfaceIdeal S (fun i => f (hcoeff i))
-      (fun i => f (Fcoeff i)) := by
-  obtain ⟨a,b,hp⟩ := Ideal.mem_span_pair.mp hp
-  apply Ideal.mem_span_pair.mpr
-  refine ⟨MvPolynomial.map f a, MvPolynomial.map f b, ?_⟩
-  rw [← hp]
-  simp only [map_add, map_mul, map_cubic, map_sextic]
 
-def surfaceMap (f : R →+* S)
-    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R) :
-    SurfaceRing R hcoeff Fcoeff →+*
-      SurfaceRing S (fun i => f (hcoeff i)) (fun i => f (Fcoeff i)) :=
-  Ideal.quotientMap _ (MvPolynomial.map f) (by
-    intro p hp
-    exact map_mem_surfaceIdeal f hcoeff Fcoeff hp)
 
-@[simp] theorem surfaceMap_mk (f : R →+* S)
-    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    (p : Poly R) :
-    surfaceMap f hcoeff Fcoeff (Ideal.Quotient.mk (surfaceIdeal R hcoeff Fcoeff) p) =
-      Ideal.Quotient.mk _ (MvPolynomial.map f p) := rfl
 
-@[simp] theorem surfaceMap_base (f : R →+* S)
-    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    (p : Base R) :
-    surfaceMap f hcoeff Fcoeff (algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff) p) =
-      algebraMap (Base S) (SurfaceRing S (fun i => f (hcoeff i))
-        (fun i => f (Fcoeff i))) (MvPolynomial.map f p) := by
-  change Ideal.Quotient.mk _ (MvPolynomial.map f (remainingInclusion R p)) =
-    Ideal.Quotient.mk _ (remainingInclusion S (MvPolynomial.map f p))
-  rw [remainingInclusion, remainingInclusion, MvPolynomial.map_rename]
 
-@[simp] theorem surfaceMap_basis [Nontrivial R] [Nontrivial S] (f : R →+* S)
-    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    (ab : ShiftIndex) :
-    surfaceMap f hcoeff Fcoeff (surfaceBasis R hcoeff Fcoeff ab) =
-      surfaceBasis S (fun i => f (hcoeff i)) (fun i => f (Fcoeff i)) ab := by
-  simp only [surfaceBasis_apply, surfaceMap_mk, map_mul, map_pow,
-    MvPolynomial.map_X]
 
-theorem coordinates_surfaceMap [Nontrivial R] [Nontrivial S] (f : R →+* S)
-    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    (z : SurfaceRing R hcoeff Fcoeff) (ab : ShiftIndex) :
-    (surfaceBasis S (fun i => f (hcoeff i)) (fun i => f (Fcoeff i))).repr
-        (surfaceMap f hcoeff Fcoeff z) ab =
-      MvPolynomial.map f ((surfaceBasis R hcoeff Fcoeff).repr z ab) := by
-  classical
-  have hz := (surfaceBasis R hcoeff Fcoeff).sum_repr z
-  have hm := congrArg (surfaceMap f hcoeff Fcoeff) hz
-  simp only [map_sum, Algebra.smul_def, map_mul, surfaceMap_base,
-    surfaceMap_basis] at hm
-  rw [← hm]
-  change (surfaceBasis S (fun i => f (hcoeff i)) (fun i => f (Fcoeff i))).repr
-      (∑ i, MvPolynomial.map f ((surfaceBasis R hcoeff Fcoeff).repr z i) •
-        surfaceBasis S (fun i => f (hcoeff i)) (fun i => f (Fcoeff i)) i) ab = _
-  simp [Finsupp.single_apply]
 
-def laurentMap (f : R →+* S) : Laurent (R := R) →+* Laurent (R := S) :=
-  AddMonoidAlgebra.mapRingHom LaurentExponent f
 
-@[simp] theorem laurentMap_coeff (f : R →+* S) (z : Laurent (R := R))
-    (e : LaurentExponent) : (laurentMap f z).coeff e = f (z.coeff e) := by
-  exact AddMonoidAlgebra.coeff_mapRingHom f z e
 
-@[simp] theorem laurentMap_T (f : R →+* S) (e : LaurentExponent) :
-    laurentMap f (T R e) = T S e := by
-  simp [laurentMap, T]
 
-@[simp] theorem map_baseProduct (f : R →+* S) (s : Finset (Fin 3)) :
-    MvPolynomial.map f (baseProduct R s) = baseProduct S s := by
-  simp [baseProduct]
 
-@[simp] theorem laurentMap_baseToLaurent (f : R →+* S) (p : Base R) :
-    laurentMap f (baseToLaurent R p) = baseToLaurent S (MvPolynomial.map f p) := by
-  have he : (laurentMap f).comp (baseToLaurent R).toRingHom =
-      (baseToLaurent S).toRingHom.comp (MvPolynomial.map f) := by
-    apply MvPolynomial.ringHom_ext
-    · intro c
-      simp only [RingHom.comp_apply, MvPolynomial.map_C]
-      change laurentMap f (baseToLaurent R (monomial 0 c)) =
-        baseToLaurent S (monomial 0 (f c))
-      rw [baseToLaurent_monomial, baseToLaurent_monomial]
-      simp [laurentMap]
-    · intro i
-      simp
-  exact congrArg (fun g : Base R →+* Laurent (R := S) => g p) he
 
-def localMap (f : R →+* S)
-    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    (s : Finset (Fin 3)) :
-    SurfaceLocal R hcoeff Fcoeff s →+*
-      SurfaceLocal S (fun i => f (hcoeff i)) (fun i => f (Fcoeff i)) s :=
-  IsLocalization.Away.lift
-    (S := SurfaceLocal R hcoeff Fcoeff s)
-    (P := SurfaceLocal S (fun i => f (hcoeff i)) (fun i => f (Fcoeff i)) s)
-    (g := (algebraMap _ _).comp (surfaceMap f hcoeff Fcoeff))
-    (algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff) (baseProduct R s))
-    (by
-      simp only [RingHom.comp_apply, surfaceMap_base, map_baseProduct]
-      exact IsLocalization.Away.algebraMap_isUnit _)
 
-@[simp] theorem localMap_algebraMap (f : R →+* S)
-    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    (s : Finset (Fin 3)) (z : SurfaceRing R hcoeff Fcoeff) :
-    localMap f hcoeff Fcoeff s
-        (algebraMap (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff s) z) =
-      algebraMap _ _ (surfaceMap f hcoeff Fcoeff z) := by
-  exact IsLocalization.Away.lift_eq _ _ z
 
-theorem coordinates_localMap [Nontrivial R] [Nontrivial S] (f : R →+* S)
-    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    (s : Finset (Fin 3)) (z : SurfaceLocal R hcoeff Fcoeff s) (ab : ShiftIndex) :
-    localizedCoordinates S (fun i => f (hcoeff i)) (fun i => f (Fcoeff i)) s
-        (localMap f hcoeff Fcoeff s z) ab =
-      laurentMap f (localizedCoordinates R hcoeff Fcoeff s z ab) := by
-  obtain ⟨n,p,hp⟩ := IsLocalization.Away.surj
-    (algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff) (baseProduct R s)) z
-  have hp' : z * algebraMap (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff s)
-      (algebraMap (Base R) (SurfaceRing R hcoeff Fcoeff) (baseProduct R s ^ n)) =
-      algebraMap (SurfaceRing R hcoeff Fcoeff) (SurfaceLocal R hcoeff Fcoeff s) p := by
-    simpa only [map_pow] using hp
-  have hs := congrArg (fun z => localizedCoordinates R hcoeff Fcoeff s z ab) hp'
-  simp only [coordinates_mul_base, localizedCoordinates_algebraMap] at hs
-  have hs' := congrArg (laurentMap f) hs
-  simp only [map_mul, laurentMap_baseToLaurent, map_pow, map_baseProduct] at hs'
-  have ht := congrArg (localMap f hcoeff Fcoeff s) hp'
-  simp only [map_mul, localMap_algebraMap, surfaceMap_base] at ht
-  simp only [map_pow, map_baseProduct] at ht
-  have ht0 : localMap f hcoeff Fcoeff s z *
-      algebraMap _ _ (algebraMap (Base S)
-        (SurfaceRing S (fun i => f (hcoeff i)) (fun i => f (Fcoeff i)))
-        (baseProduct S s ^ n)) =
-      algebraMap _ _ (surfaceMap f hcoeff Fcoeff p) := by
-    simpa only [map_pow] using ht
-  have ht' := congrArg (fun z => localizedCoordinates S (fun i => f (hcoeff i))
-    (fun i => f (Fcoeff i)) s z ab) ht0
-  simp only [coordinates_mul_base, localizedCoordinates_algebraMap,
-    coordinates_surfaceMap] at ht'
-  have hu : IsUnit (baseToLaurent S (baseProduct S s ^ n)) := by
-    rw [map_pow, baseToLaurent_baseProduct]
-    exact (T_isUnit S _).pow n
-  apply hu.mul_right_injective
-  simpa only [map_pow] using ht'.trans hs'.symm
 
-theorem localMap_restriction [Nontrivial R] [Nontrivial S] (f : R →+* S)
-    (hcoeff : FullCubicTailIndex → R) (Fcoeff : FullSexticTailIndex → R)
-    {s t : Finset (Fin 3)} (hst : s ⊆ t) (z : SurfaceLocal R hcoeff Fcoeff s) :
-    localMap f hcoeff Fcoeff t (restriction R hcoeff Fcoeff hst z) =
-      restriction S (fun i => f (hcoeff i)) (fun i => f (Fcoeff i)) hst
-        (localMap f hcoeff Fcoeff s z) := by
-  apply localizedCoordinates_injective S (fun i => f (hcoeff i)) (fun i => f (Fcoeff i)) t
-  funext ab
-  simp only [coordinates_localMap, coordinates_restriction]
 
 end CycleQ2UniversalSurfaceCoefficientMap
 
@@ -482,110 +333,20 @@ open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2IncidenceEquations
 
 variable {R : Type*} [CommRing R]
 
-theorem equationsIdeal_unit_mul (u v : Rˣ) (h F : Poly R) :
-    equationsIdeal (C (u : R) * h) (C (v : R) * F) = equationsIdeal h F := by
-  ext p
-  constructor
-  · intro hp
-    obtain ⟨a,b,hab⟩ := Ideal.mem_span_pair.mp hp
-    have hp' : ∃ a b, p = a * (C (u : R) * h) + b * (C (v : R) * F) + 0 :=
-      ⟨a,b,by simpa using hab.symm⟩
-    obtain ⟨a,b,hab⟩ := (unit_scaled_representation_iff u v h F p 0).mpr hp'
-    exact Ideal.mem_span_pair.mpr ⟨a,b,by simpa using hab.symm⟩
-  · intro hp
-    obtain ⟨a,b,hab⟩ := Ideal.mem_span_pair.mp hp
-    have hp' : ∃ a b, p = a * h + b * F + 0 := ⟨a,b,by simpa using hab.symm⟩
-    obtain ⟨a,b,hab⟩ := (unit_scaled_representation_iff u v h F p 0).mp hp'
-    exact Ideal.mem_span_pair.mpr ⟨a,b,by simpa using hab.symm⟩
 
-def normalizedCubicTail (hcoeff : FullInvariantIndex 3 → R)
-    (hu : IsUnit (hcoeff fullCubicLeadingIndex)) : FullCubicTailIndex → R :=
-  fun e => (↑hu.unit⁻¹ : R) * hcoeff e.val
 
-def normalizedSexticTail (Fcoeff : FullInvariantIndex 6 → R)
-    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex)) : FullSexticTailIndex → R :=
-  fun e => (↑Fu.unit⁻¹ : R) * Fcoeff e.val
 
-theorem fullCubic_eq_unit_mul (hcoeff : FullInvariantIndex 3 → R)
-    (hu : IsUnit (hcoeff fullCubicLeadingIndex)) :
-    fullInvariantPolynomial 3 hcoeff =
-      C (hu.unit : R) * normalizedFullCubic (normalizedCubicTail hcoeff hu) := by
-  rw [fullInvariantPolynomial_cubic]
-  exact (congrArg (fun z => rawFullCubic z (fun e => hcoeff e.val))
-    hu.unit_spec.symm).trans (rawFullCubic_eq_unit_mul hu.unit _)
 
-theorem fullSextic_eq_unit_mul (Fcoeff : FullInvariantIndex 6 → R)
-    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex)) :
-    fullInvariantPolynomial 6 Fcoeff =
-      C (Fu.unit : R) * normalizedFullSextic (normalizedSexticTail Fcoeff Fu) := by
-  rw [fullInvariantPolynomial_sextic]
-  exact (congrArg (fun z => rawFullSextic z (fun e => Fcoeff e.val))
-    Fu.unit_spec.symm).trans (rawFullSextic_eq_unit_mul Fu.unit _)
 
-theorem fullIdeal_normalized (hcoeff : FullInvariantIndex 3 → R)
-    (Fcoeff : FullInvariantIndex 6 → R)
-    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
-    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex)) :
-    equationsIdeal (fullInvariantPolynomial 3 hcoeff) (fullInvariantPolynomial 6 Fcoeff) =
-      surfaceIdeal R (normalizedCubicTail hcoeff hu) (normalizedSexticTail Fcoeff Fu) := by
-  rw [fullCubic_eq_unit_mul hcoeff hu, fullSextic_eq_unit_mul Fcoeff Fu]
-  exact equationsIdeal_unit_mul hu.unit Fu.unit _ _
 
-/-- This equivalence is induced by the identity on the original five coordinates. -/
-def fullSurfaceEquiv (hcoeff : FullInvariantIndex 3 → R)
-    (Fcoeff : FullInvariantIndex 6 → R)
-    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
-    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex)) :
-    (Poly R ⧸ equationsIdeal (fullInvariantPolynomial 3 hcoeff)
-      (fullInvariantPolynomial 6 Fcoeff)) ≃ₐ[Base R]
-      SurfaceRing R (normalizedCubicTail hcoeff hu) (normalizedSexticTail Fcoeff Fu) :=
-  Ideal.quotientEquivAlgOfEq (Base R) (fullIdeal_normalized hcoeff Fcoeff hu Fu)
 
-@[simp] theorem fullSurfaceEquiv_mk (hcoeff : FullInvariantIndex 3 → R)
-    (Fcoeff : FullInvariantIndex 6 → R)
-    (hu : IsUnit (hcoeff fullCubicLeadingIndex))
-    (Fu : IsUnit (Fcoeff fullSexticLeadingIndex)) (p : Poly R) :
-    fullSurfaceEquiv hcoeff Fcoeff hu Fu (Ideal.Quotient.mk _ p) =
-      Ideal.Quotient.mk _ p := rfl
 
 variable (R) [IsDomain R]
 
-def universalCubicTail : FullCubicTailIndex → ParameterRing R :=
-  normalizedCubicTail (cubicCoefficient R) (leading_coefficients_units R).1
 
-def universalSexticTail : FullSexticTailIndex → ParameterRing R :=
-  normalizedSexticTail (sexticCoefficient R) (leading_coefficients_units R).2
 
-theorem universalIdeal_normalized :
-    equationsIdeal (fullInvariantPolynomial 3 (cubicCoefficient R))
-      (fullInvariantPolynomial 6 (sexticCoefficient R)) =
-      surfaceIdeal (ParameterRing R) (universalCubicTail R) (universalSexticTail R) :=
-  fullIdeal_normalized _ _ (leading_coefficients_units R).1
-    (leading_coefficients_units R).2
 
-/-- The equality of the actual surface ideals is compatible with every
-coefficient-ring map, including maps to a pointed generic trace field. -/
-theorem mapped_universalIdeal_normalized {S : Type*} [CommRing S]
-    (f : ParameterRing R →+* S) :
-    equationsIdeal (fullInvariantPolynomial 3 (fun i => f (cubicCoefficient R i)))
-      (fullInvariantPolynomial 6 (fun i => f (sexticCoefficient R i))) =
-      surfaceIdeal S (fun i => f (universalCubicTail R i))
-        (fun i => f (universalSexticTail R i)) := by
-  have h := congrArg (fun I : Ideal (Poly (ParameterRing R)) =>
-    I.map (MvPolynomial.map f)) (universalIdeal_normalized R)
-  simpa only [equationsIdeal, surfaceIdeal, Ideal.map_span, Set.image_insert_eq,
-    Set.image_singleton, map_fullInvariantPolynomial, map_cubic, map_sextic,
-    Function.comp_def] using h
 
-theorem seed_normalized_ideal (r ι : R) :
-    equationsIdeal (smoothH ι) (smoothF r ι) =
-      surfaceIdeal R
-        (fun i => seedSpecialization R r ι (universalCubicTail R i))
-        (fun i => seedSpecialization R r ι (universalSexticTail R i)) := by
-  have h := mapped_universalIdeal_normalized R (seedSpecialization R r ι).toRingHom
-  simpa only [seedSpecialization, specialization_cubicCoefficient,
-    specialization_sexticCoefficient, seedCubicCoefficients_polynomial,
-    seedSexticCoefficients_polynomial, AlgHom.toRingHom_eq_coe, RingHom.coe_coe] using h
 
 end CycleQ2UniversalSurfaceNormalization
 

@@ -1,3 +1,4 @@
+import Proposal.GeometricNormalizedCartierClass
 import Proposal.GeometricSurfaceBindings
 import Proposal.GeometricSurfaceCoordinates
 import Proposal.GeometricTarget01Part01
@@ -26,20 +27,6 @@ namespace CycleQ2IncidenceNormalForm
 
 variable {σ R : Type*} [CommRing R]
 
-theorem unit_scaled_representation_iff (u v : Rˣ) (h F p r : MvPolynomial σ R) :
-    (∃ a b, p = a * h + b * F + r) ↔
-      (∃ a b, p = a * (C (u : R) * h) + b * (C (v : R) * F) + r) := by
-  constructor
-  · rintro ⟨a, b, hp⟩
-    refine ⟨a * C (↑u⁻¹ : R), b * C (↑v⁻¹ : R), ?_⟩
-    have hcancel (z : Rˣ) (a q : MvPolynomial σ R) :
-        (a * C (↑z⁻¹ : R)) * (C (z : R) * q) = a * q := by
-      calc
-        _ = a * (C (↑z⁻¹ : R) * C (z : R)) * q := by ring
-        _ = a * q := by rw [← map_mul, Units.inv_mul, map_one, mul_one]
-    simpa only [hcancel] using hp
-  · rintro ⟨a, b, hp⟩
-    exact ⟨a * C (u : R), b * C (v : R), by simpa only [mul_assoc] using hp⟩
 
 /-- Reduction preserves every grading for which the two defining equations
 are homogeneous.  Taking the grading monoid to be `ℕ × ZMod 3` preserves the
@@ -339,15 +326,9 @@ noncomputable def fullAuxiliaryOrder : MonomialOrder (Fin 5) :=
   weightedOrder MonomialOrder.lex fullAuxiliaryWeight
 
 
-abbrev FullCubicTailIndex := {e : FullInvariantIndex 3 // (e.val 0).val < 3}
-abbrev FullSexticTailIndex := {e : FullInvariantIndex 6 // (e.val 4).val < 3}
 
 
-def normalizedFullCubic (c : FullCubicTailIndex → R) : MvPolynomial (Fin 5) R :=
-  monomial (Finsupp.single 0 3) 1 + ∑ e, monomial (fullExponentOf e.val.val) (c e)
 
-def normalizedFullSextic (c : FullSexticTailIndex → R) : MvPolynomial (Fin 5) R :=
-  monomial (Finsupp.single 4 3) 1 + ∑ e, monomial (fullExponentOf e.val.val) (c e)
 
 theorem normalizedFullCubic_leading_data [Nontrivial R] (c : FullCubicTailIndex → R) :
     fullAuxiliaryOrder.degree (normalizedFullCubic c) = Finsupp.single 0 3 ∧
@@ -435,111 +416,19 @@ theorem normalizedFullSextic_homogeneous (c : FullSexticTailIndex → R) :
     intro e _
     exact isWeightedHomogeneous_monomial fullGrading _ _ (fullGrading_of_invariant e.val)
 
-/-- The raw full families have all nine cubic and all forty-five sextic
-coefficients, including their leading coefficients. -/
-def rawFullCubic (a : R) (c : FullCubicTailIndex → R) : MvPolynomial (Fin 5) R :=
-  monomial (Finsupp.single 0 3) a + ∑ e, monomial (fullExponentOf e.val.val) (c e)
 
-def rawFullSextic (a : R) (c : FullSexticTailIndex → R) : MvPolynomial (Fin 5) R :=
-  monomial (Finsupp.single 4 3) a + ∑ e, monomial (fullExponentOf e.val.val) (c e)
 
-def fullCubicLeadingIndex : FullInvariantIndex 3 :=
-  ⟨![3, 0, 0, 0, 0], by decide⟩
 
-def fullSexticLeadingIndex : FullInvariantIndex 6 :=
-  ⟨![0, 0, 0, 0, 3], by decide⟩
 
-lemma fullCubic_tail_iff_ne (e : FullInvariantIndex 3) :
-    (e.val 0).val < 3 ↔ e ≠ fullCubicLeadingIndex := by
-  constructor
-  · intro he h
-    subst e
-    change (3 : ℕ) < 3 at he
-    omega
-  · intro he
-    by_contra h0
-    apply he
-    have hd := e.property.1
-    have hb := (e.val 0).isLt
-    simp only [fullDegree] at hd
-    apply Subtype.ext
-    funext i
-    apply Fin.ext
-    fin_cases i <;> simp [fullCubicLeadingIndex] <;> omega
 
-lemma fullSextic_tail_iff_ne (e : FullInvariantIndex 6) :
-    (e.val 4).val < 3 ↔ e ≠ fullSexticLeadingIndex := by
-  constructor
-  · intro he h
-    subst e
-    change (3 : ℕ) < 3 at he
-    omega
-  · intro he
-    by_contra h4
-    apply he
-    have hd := e.property.1
-    simp only [fullDegree] at hd
-    apply Subtype.ext
-    funext i
-    apply Fin.ext
-    fin_cases i <;> simp [fullSexticLeadingIndex] <;> omega
 
-noncomputable def fullCubicTailEquiv :
-    FullCubicTailIndex ≃ {e : FullInvariantIndex 3 // e ≠ fullCubicLeadingIndex} :=
-  Equiv.subtypeEquivRight fullCubic_tail_iff_ne
 
-noncomputable def fullSexticTailEquiv :
-    FullSexticTailIndex ≃ {e : FullInvariantIndex 6 // e ≠ fullSexticLeadingIndex} :=
-  Equiv.subtypeEquivRight fullSextic_tail_iff_ne
 
-@[simp] lemma fullCubicLeadingIndex_exponent :
-    fullExponentOf fullCubicLeadingIndex.val = Finsupp.single 0 3 := by
-  ext i
-  fin_cases i <;> simp [fullCubicLeadingIndex]
 
-@[simp] lemma fullSexticLeadingIndex_exponent :
-    fullExponentOf fullSexticLeadingIndex.val = Finsupp.single 4 3 := by
-  ext i
-  fin_cases i <;> simp [fullSexticLeadingIndex]
 
-/-- The complete invariant coefficient family, with one independent coefficient
-for every invariant monomial of weighted degree `d`. -/
 
-theorem fullInvariantPolynomial_cubic (c : FullInvariantIndex 3 → R) :
-    fullInvariantPolynomial 3 c =
-      rawFullCubic (c fullCubicLeadingIndex) (fun e ↦ c e.val) := by
-  classical
-  rw [fullInvariantPolynomial,
-    Fintype.sum_eq_add_sum_subtype_ne _ fullCubicLeadingIndex]
-  simp only [fullCubicLeadingIndex_exponent, rawFullCubic]
-  exact congrArg (fun q : MvPolynomial (Fin 5) R ↦
-    monomial (Finsupp.single 0 3) (c fullCubicLeadingIndex) + q)
-    (fullCubicTailEquiv.sum_comp
-      (fun e ↦ monomial (fullExponentOf e.val.val) (c e.val))).symm
 
-theorem fullInvariantPolynomial_sextic (c : FullInvariantIndex 6 → R) :
-    fullInvariantPolynomial 6 c =
-      rawFullSextic (c fullSexticLeadingIndex) (fun e ↦ c e.val) := by
-  classical
-  rw [fullInvariantPolynomial,
-    Fintype.sum_eq_add_sum_subtype_ne _ fullSexticLeadingIndex]
-  simp only [fullSexticLeadingIndex_exponent, rawFullSextic]
-  exact congrArg (fun q : MvPolynomial (Fin 5) R ↦
-    monomial (Finsupp.single 4 3) (c fullSexticLeadingIndex) + q)
-    (fullSexticTailEquiv.sum_comp
-      (fun e ↦ monomial (fullExponentOf e.val.val) (c e.val))).symm
 
-theorem rawFullCubic_eq_unit_mul (u : Rˣ) (c : FullCubicTailIndex → R) :
-    rawFullCubic (u : R) c =
-      C (u : R) * normalizedFullCubic (fun e ↦ (↑u⁻¹ : R) * c e) := by
-  simp [rawFullCubic, normalizedFullCubic, mul_add, Finset.mul_sum,
-    C_mul_monomial, ← mul_assoc]
-
-theorem rawFullSextic_eq_unit_mul (u : Rˣ) (c : FullSexticTailIndex → R) :
-    rawFullSextic (u : R) c =
-      C (u : R) * normalizedFullSextic (fun e ↦ (↑u⁻¹ : R) * c e) := by
-  simp [rawFullSextic, normalizedFullSextic, mul_add, Finset.mul_sum,
-    C_mul_monomial, ← mul_assoc]
 
 /-- This applies directly over the localized universal coefficient ring: the
 inverted leading coefficients are units, and no inverse equations are asserted

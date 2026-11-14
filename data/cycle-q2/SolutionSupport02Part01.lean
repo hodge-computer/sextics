@@ -20,7 +20,7 @@ import Proposal.GeometricTarget
 import Proposal.GeometricSeed
 import Proposal.GeometricFormalInputs
 import Proposal.Normalization09Part02
-import Proposal.SolutionSupport01
+import Proposal.SolutionSupport01Part07
 import Proposal.GeometricSeedNormalIdeals
 
 /-! Components extracted from SolutionSupport02.lean, in their original order.

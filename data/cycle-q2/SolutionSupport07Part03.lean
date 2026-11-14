@@ -1,3 +1,4 @@
+import Proposal.GeometricNormalizedCartierClass
 import Proposal.GeometricIncidenceCechTrace
 import Proposal.GeometricCurveCover
 import Proposal.SolutionSupport07Part02
@@ -461,208 +462,31 @@ open scoped MonomialOrder
 
 variable (R : Type*) [CommRing R]
 
-def selectedExponent (e : Fin 5 →₀ ℕ) : Fin 2 →₀ ℕ :=
-  Finsupp.single 0 (e 0) + Finsupp.single 1 (e 4)
 
-def remainingExponent (e : Fin 5 →₀ ℕ) : Fin 3 →₀ ℕ :=
-  Finsupp.single 0 (e 1) + Finsupp.single 1 (e 2) + Finsupp.single 2 (e 3)
 
-theorem regroup_monomial (e : Fin 5 →₀ ℕ) (c : R) :
-    regroup R (monomial e c) =
-      monomial (selectedExponent e) (monomial (remainingExponent e) c) := by
-  simp only [MvPolynomial.monomial_eq]
-  rw [Finsupp.prod_fintype _ _ (fun _ => pow_zero _)]
-  rw [Finsupp.prod_fintype _ _ (fun _ => pow_zero _)]
-  rw [Finsupp.prod_fintype _ _ (fun _ => pow_zero _)]
-  simp [Fin.prod_univ_succ, selectedExponent, remainingExponent, Fin.reduceSucc]
-  ring
 
-def nestedWeight : (Fin 2 →₀ ℕ) →+ ℕ where
-  toFun e := 3 * e 0 + 7 * e 1
-  map_zero' := by simp
-  map_add' a b := by simp only [Finsupp.add_apply]; omega
 
-def nestedOrder : MonomialOrder (Fin 2) :=
-  weightedOrder MonomialOrder.lex nestedWeight
 
-def nestedCubic (hcoeff : FullCubicTailIndex → R) : Nested R :=
-  monomial (Finsupp.single 0 3) 1 +
-    ∑ e, monomial (selectedExponent (fullExponentOf e.val.val))
-      (monomial (remainingExponent (fullExponentOf e.val.val)) (hcoeff e))
 
-def nestedSextic (Fcoeff : FullSexticTailIndex → R) : Nested R :=
-  monomial (Finsupp.single 1 3) 1 +
-    ∑ e, monomial (selectedExponent (fullExponentOf e.val.val))
-      (monomial (remainingExponent (fullExponentOf e.val.val)) (Fcoeff e))
 
-theorem regroup_cubic (hcoeff : FullCubicTailIndex → R) :
-    regroup R (normalizedFullCubic hcoeff) = nestedCubic R hcoeff := by
-  simp only [normalizedFullCubic, map_add, map_sum, regroup_monomial, nestedCubic]
-  congr 1
-  simp [selectedExponent, remainingExponent, Finsupp.single_apply]
 
-theorem regroup_sextic (Fcoeff : FullSexticTailIndex → R) :
-    regroup R (normalizedFullSextic Fcoeff) = nestedSextic R Fcoeff := by
-  simp only [normalizedFullSextic, map_add, map_sum, regroup_monomial, nestedSextic]
-  congr 1
-  simp [selectedExponent, remainingExponent, Finsupp.single_apply]
 
-theorem nestedCubic_leading [Nontrivial R] (hcoeff : FullCubicTailIndex → R) :
-    nestedOrder.degree (nestedCubic R hcoeff) = Finsupp.single 0 3 ∧
-      nestedOrder.Monic (nestedCubic R hcoeff) := by
-  apply degree_monic_add_sum nestedOrder
-  · apply weightedOrder_lt_of_weight_lt
-    norm_num [nestedWeight]
-  · intro e
-    apply weightedOrder_lt_of_weight_lt
-    have hd := e.val.property.1
-    have hc := e.val.property.2
-    have h0 := e.property
-    simp only [fullDegree, fullCharacter] at hd hc
-    simp only [nestedWeight, AddMonoidHom.coe_mk, ZeroHom.coe_mk,
-      selectedExponent, Finsupp.add_apply, Finsupp.single_apply,
-      fullExponentOf_apply]
-    norm_num
-    have h4 : (e.val.val 4).val ≤ 1 := by omega
-    rcases Nat.le_one_iff_eq_zero_or_eq_one.mp h4 with h4 | h4
-    · omega
-    · have hc_lt : 2 * (e.val.val 0).val + 2 * (e.val.val 1).val +
-          (e.val.val 2).val < 3 := by omega
-      rw [Nat.mod_eq_of_lt hc_lt] at hc
-      omega
 
-theorem nestedSextic_leading [Nontrivial R] (Fcoeff : FullSexticTailIndex → R) :
-    nestedOrder.degree (nestedSextic R Fcoeff) = Finsupp.single 1 3 ∧
-      nestedOrder.Monic (nestedSextic R Fcoeff) := by
-  apply degree_monic_add_sum nestedOrder
-  · apply weightedOrder_lt_of_weight_lt
-    norm_num [nestedWeight]
-  · intro e
-    apply weightedOrder_lt_of_weight_lt
-    have hd := e.val.property.1
-    have h4 := e.property
-    simp only [fullDegree] at hd
-    simp only [nestedWeight, AddMonoidHom.coe_mk, ZeroHom.coe_mk,
-      selectedExponent, Finsupp.add_apply, Finsupp.single_apply,
-      fullExponentOf_apply]
-    norm_num
-    omega
 
-def surfaceIdeal (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) : Ideal (Poly R) :=
-  equationsIdeal (normalizedFullCubic hcoeff) (normalizedFullSextic Fcoeff)
 
-abbrev SurfaceRing (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) := Poly R ⧸ surfaceIdeal R hcoeff Fcoeff
 
-instance surfaceModule (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) : Module (Base R) (SurfaceRing R hcoeff Fcoeff) :=
-  (inferInstance : Algebra (Base R) (SurfaceRing R hcoeff Fcoeff)).toModule
 
-def nestedIdeal (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) : Ideal (Nested R) :=
-  equationsIdeal (nestedCubic R hcoeff) (nestedSextic R Fcoeff)
 
-theorem nestedIdeal_map (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) :
-    nestedIdeal R hcoeff Fcoeff =
-      (surfaceIdeal R hcoeff Fcoeff).map (regroupOverBase R).toRingHom := by
-  simp only [nestedIdeal, surfaceIdeal, equationsIdeal, Ideal.map_span,
-    Set.image_insert_eq, Set.image_singleton]
-  change Ideal.span {nestedCubic R hcoeff, nestedSextic R Fcoeff} =
-    Ideal.span {regroup R (normalizedFullCubic hcoeff),
-      regroup R (normalizedFullSextic Fcoeff)}
-  rw [regroup_cubic, regroup_sextic]
 
-def quotientRegroup (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) :
-    SurfaceRing R hcoeff Fcoeff ≃ₐ[Base R]
-      (Nested R ⧸ nestedIdeal R hcoeff Fcoeff) :=
-  Ideal.quotientEquivAlg _ _ (regroupOverBase R) (nestedIdeal_map R hcoeff Fcoeff)
 
-theorem nested_coprime [Nontrivial R] (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) :
-    ∀ j, nestedOrder.degree (nestedCubic R hcoeff) j = 0 ∨
-      nestedOrder.degree (nestedSextic R Fcoeff) j = 0 := by
-  intro j
-  rw [(nestedCubic_leading R hcoeff).1, (nestedSextic_leading R Fcoeff).1]
-  fin_cases j <;> simp
 
-def nestedExponentEquiv [Nontrivial R] (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) :
-    reducedExponents nestedOrder (nestedCubic R hcoeff) (nestedSextic R Fcoeff) ≃
-      Fin 3 × Fin 3 where
-  toFun d :=
-    (⟨d.val 0, by
-      have hd := d.property.1
-      rw [(nestedCubic_leading R hcoeff).1, single_three_le_iff] at hd
-      omega⟩,
-     ⟨d.val 1, by
-      have hd := d.property.2
-      rw [(nestedSextic_leading R Fcoeff).1, single_three_le_iff] at hd
-      omega⟩)
-  invFun ij := ⟨Finsupp.single 0 ij.1.val + Finsupp.single 1 ij.2.val, by
-    constructor
-    · rw [(nestedCubic_leading R hcoeff).1, single_three_le_iff]
-      simpa using Nat.not_le_of_lt ij.1.isLt
-    · rw [(nestedSextic_leading R Fcoeff).1, single_three_le_iff]
-      simpa using Nat.not_le_of_lt ij.2.isLt⟩
-  left_inv d := by
-    apply Subtype.ext
-    ext j
-    fin_cases j <;> simp
-  right_inv ij := by
-    apply Prod.ext <;> apply Fin.ext <;> simp
 
-def nestedBasis [Nontrivial R] (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) :
-    Module.Basis (Fin 3 × Fin 3) (Base R) (Nested R ⧸ nestedIdeal R hcoeff Fcoeff) :=
-  (quotientBasis nestedOrder (nestedCubic R hcoeff) (nestedSextic R Fcoeff)
-    (nestedCubic_leading R hcoeff).2 (nestedSextic_leading R Fcoeff).2
-    (nested_coprime R hcoeff Fcoeff)).reindex
-      (nestedExponentEquiv R hcoeff Fcoeff)
 
-theorem nestedBasis_apply [Nontrivial R] (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) (ab : Fin 3 × Fin 3) :
-    nestedBasis R hcoeff Fcoeff ab = Ideal.Quotient.mk (nestedIdeal R hcoeff Fcoeff)
-      (X 0 ^ ab.1.val * X 1 ^ ab.2.val) := by
-  unfold nestedBasis
-  erw [Module.Basis.reindex_apply, quotientBasis_apply]
-  congr 1
-  change monomial (Finsupp.single 0 ab.1.val + Finsupp.single 1 ab.2.val) 1 = _
-  rw [MvPolynomial.monomial_single_add, ← MvPolynomial.X_pow_eq_monomial]
 
-def surfaceBasis [Nontrivial R] (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) :
-    Module.Basis (Fin 3 × Fin 3) (Base R) (SurfaceRing R hcoeff Fcoeff) :=
-  (nestedBasis R hcoeff Fcoeff).map (quotientRegroup R hcoeff Fcoeff).symm.toLinearEquiv
 
-theorem surfaceBasis_apply [Nontrivial R] (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) (ab : Fin 3 × Fin 3) :
-    surfaceBasis R hcoeff Fcoeff ab = Ideal.Quotient.mk (surfaceIdeal R hcoeff Fcoeff)
-      ((X 0 : Poly R) ^ ab.1.val * X 4 ^ ab.2.val) := by
-  apply (quotientRegroup R hcoeff Fcoeff).injective
-  simp only [surfaceBasis, Module.Basis.map_apply, AlgEquiv.toLinearEquiv_apply,
-    AlgEquiv.apply_symm_apply, nestedBasis_apply]
-  change Ideal.Quotient.mk _ (X 0 ^ ab.1.val * X 1 ^ ab.2.val) =
-    Ideal.Quotient.mk _ (regroup R ((X 0 : Poly R) ^ ab.1.val * X 4 ^ ab.2.val))
-  simp
 
-theorem surfaceQuotient_free [Nontrivial R] (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) :
-    Module.Free (Base R) (SurfaceRing R hcoeff Fcoeff) :=
-  Module.Free.of_basis (surfaceBasis R hcoeff Fcoeff)
 
-theorem surfaceQuotient_finite [Nontrivial R] (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) :
-    Module.Finite (Base R) (SurfaceRing R hcoeff Fcoeff) :=
-  Module.Finite.of_basis (surfaceBasis R hcoeff Fcoeff)
 
-theorem surfaceQuotient_rank_nine [Nontrivial R] (hcoeff : FullCubicTailIndex → R)
-    (Fcoeff : FullSexticTailIndex → R) :
-    Module.finrank (Base R) (SurfaceRing R hcoeff Fcoeff) = 9 := by
-  rw [Module.finrank_eq_card_basis (surfaceBasis R hcoeff Fcoeff)]
-  decide
 
 end CycleQ2UniversalSurface
 
@@ -751,15 +575,7 @@ end Indices
 
 variable (R : Type*) [CommRing R] (χ : ZMod 3)
 
-abbrev Family := ShiftIndex → Laurent (R := R)
 
-def gradedFamilies : Submodule R (Family R) where
-  carrier := {p | ∀ ab, HasGrade ab (0,χ) (p ab)}
-  zero_mem' := by intro ab e he; simp
-  add_mem' hp hq ab := hasGrade_add ab (0,χ) (hp ab) (hq ab)
-  smul_mem' c p hp ab := by
-    intro e he
-    simp [AddMonoidAlgebra.coeff_smul, Finsupp.smul_apply, hp ab e he]
 
 def topProjection : gradedFamilies R χ →ₗ[R] ((TopIndex χ) →₀ R) where
   toFun p := Finsupp.equivFunOnFinite.symm

@@ -1,3 +1,4 @@
+import Proposal.GeometricNormalizedCartierClass
 import Proposal.GeometricSurfaceBindings
 import Proposal.GeometricSurfaceCoordinates
 import Proposal.GeometricCurveCoordinates
@@ -612,19 +613,6 @@ exactly the published raw matrix.
 -/
 
 
-theorem smoothH_leading_coefficient (ι : R) :
-    (smoothH ι).coeff (Finsupp.single 0 3) = 1 := by
-  simp only [smoothH, smoothB, smoothA, coeff_sub, coeff_add, coeff_C_mul,
-    X_pow_eq_monomial]
-  simp only [X, monomial_mul, coeff_monomial]
-  have h3 : (Finsupp.single (3 : Fin 5) 3 : FullExponent) ≠ Finsupp.single 0 3 := by
-    intro he
-    have h0 := congrArg (fun e : FullExponent ↦ e 0) he
-    have h30 : (3 : Fin 5) ≠ 0 := by decide
-    rw [Finsupp.single_eq_of_ne' h30, Finsupp.single_eq_same] at h0
-    omega
-  simp only [if_neg h3]
-  norm_num [Finsupp.ext_iff, Fin.forall_fin_succ]
 
 private def wOnly : Fin 5 → ℕ := fun i ↦ if i = 4 then 1 else 0
 
@@ -649,33 +637,9 @@ private theorem wOnly_leading_ne :
     Finsupp.weight wOnly (Finsupp.single 4 3) ≠ 0 := by
   simp [Finsupp.weight_single, wOnly]
 
-theorem smoothF_leading_coefficient (r ι : R) :
-    (smoothF r ι).coeff (Finsupp.single 4 3) = 1 := by
-  have hprod : (smoothH ι * smoothK ι).IsWeightedHomogeneous wOnly 0 :=
-    (smoothB_no_w.sub (smoothA_no_w.C_mul ι)).mul
-      (smoothB_no_w.add (smoothA_no_w.C_mul ι))
-  have h0 := wOnly_X (R := R) 0 (by decide)
-  have h1 := wOnly_X (R := R) 1 (by decide)
-  have h2 := wOnly_X (R := R) 2 (by decide)
-  have h3 := wOnly_X (R := R) 3 (by decide)
-  have hpart : IsWeightedHomogeneous wOnly
-      ((X 0 : Poly R)^6 - (C r)^3 * X 1^3 * X 3^3 + X 2^6) 0 :=
-    ((h0.pow 6).sub ((((isWeightedHomogeneous_C wOnly r).pow 3).mul
-      (h1.pow 3)).mul (h3.pow 3))).add (h2.pow 6)
-  rw [smoothF, coeff_add, hprod.coeff_eq_zero _ wOnly_leading_ne, add_zero,
-    seedG, CycleQ2SegreSeed.seedG_expanded, coeff_add,
-    hpart.coeff_eq_zero _ wOnly_leading_ne, zero_add, coeff_X_pow, if_pos rfl]
 
 
-theorem seedCubicCoefficients_unit (ι : R) :
-    IsUnit (seedCubicCoefficients ι fullCubicLeadingIndex) := by
-  have he := fullCubicLeadingIndex_exponent
-  simpa only [seedCubicCoefficients, he, smoothH_leading_coefficient] using (isUnit_one : IsUnit (1 : R))
 
-theorem seedSexticCoefficients_unit (r ι : R) :
-    IsUnit (seedSexticCoefficients r ι fullSexticLeadingIndex) := by
-  have he := fullSexticLeadingIndex_exponent
-  simpa only [seedSexticCoefficients, he, smoothF_leading_coefficient] using (isUnit_one : IsUnit (1 : R))
 
 /-- The literal cofactor factorization supplies the actual seed incidence,
 without a numerical rank hypothesis or an assumed minor value. -/
