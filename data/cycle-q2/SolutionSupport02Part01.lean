@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceCoordinates
 import Mathlib.LinearAlgebra.Finsupp.LinearCombination
 import Mathlib.Tactic
 import Mathlib.RingTheory.Localization.Away.Basic
@@ -934,29 +935,6 @@ set_option maxRecDepth 20000
 namespace CycleQ2NormalConnecting
 
 open MvPolynomial CycleQ2SeedTrace CycleQ2SeedCechTheta
-
-/-- The literal incidence polynomial `seedG` has this factorization for
-all parameter values, without a Fermat specialization. -/
-theorem seedG_eq_factorization (r : ℂ) :
-    CycleQ2IncidenceEquations.seedG r =
-      originalF1 r*originalG1 r+originalF2*originalG2 := by
-  unfold CycleQ2IncidenceEquations.seedG
-  rw [CycleQ2SegreSeed.seedG_expanded]
-  unfold originalF1 originalG1 originalF2 originalG2
-  simp only [map_pow]
-  ring
-
-/-- At the smooth cubic seed, this is the actual hypersurface equation of
-the incidence system, including at `r = 57`. -/
-theorem actualSeedEquation_eq_smoothF (r : ℂ) :
-    actualSeedEquation r 1 = CycleQ2IncidenceEquations.smoothF r Complex.I := by
-  unfold actualSeedEquation CycleQ2IncidenceEquations.smoothF
-  rw [seedG_eq_factorization,smoothH_eq_thetaH]
-  have hk : CycleQ2IncidenceEquations.smoothK Complex.I = thetaK 1 := by
-    simp [CycleQ2IncidenceEquations.smoothK,CycleQ2IncidenceEquations.smoothB,
-      CycleQ2IncidenceEquations.smoothA,thetaK,originalK,originalB]
-    ring
-  rw [hk]
 
 /-- The older fixed-Fermat equation is recovered only at the specified
 cube-root parameter. -/

@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceCoordinates
 import Proposal.GeometricTarget01Part01
 import Proposal.GeometricSeedConormalBases
 
@@ -24,115 +25,6 @@ namespace CycleQ2IncidenceNormalForm
 
 variable {σ R : Type*} [CommRing R]
 
-lemma reduced_sub (m : MonomialOrder σ) {h F p q : MvPolynomial σ R}
-    (hp : Reduced m h F p) (hq : Reduced m h F q) :
-    Reduced m h F (p - q) := by
-  intro d hd
-  by_cases hpd : p.coeff d = 0
-  · have hqd : q.coeff d ≠ 0 := by
-      intro hqd
-      have := mem_support_iff.mp hd
-      simp [coeff_sub, hpd, hqd] at this
-    exact hq d (mem_support_iff.mpr hqd)
-  · exact hp d (mem_support_iff.mpr hpd)
-
-/-- The two-monic-polynomial product criterion, proved by dividing the first
-coefficient by the second equation.  Disjoint supports of the leading exponents
-prevent cancellation of the two remaining leading terms. -/
-theorem reduced_eq_zero_of_representation
-    (m : MonomialOrder σ) {h F p a b : MvPolynomial σ R}
-    (hh : m.Monic h) (hF : m.Monic F)
-    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0)
-    (hp : Reduced m h F p) (heq : p = a * h + b * F) : p = 0 := by
-  obtain ⟨q, r, ha, _, hr⟩ := m.div_single
-    (show IsUnit (m.leadingCoeff F) by rw [hF.leadingCoeff_eq_one]; exact isUnit_one) a
-  let s := b + q * h
-  have hp' : p = r * h + s * F := by
-    rw [heq, ha]
-    dsimp [s]
-    ring
-  by_contra hp0
-  have hpn := hp (m.degree p) (m.degree_mem_support hp0)
-  by_cases hr0 : r = 0
-  · have hs0 : s ≠ 0 := by
-      intro hs0
-      simp [hr0, hs0] at hp'
-      exact hp0 hp'
-    have hpd : m.degree p = m.degree s + m.degree F := by
-      rw [hp', hr0, zero_mul, zero_add, degree_mul_monic m hs0 hF]
-    apply hpn.2
-    rw [hpd]
-    intro i
-    simp only [Finsupp.add_apply]
-    omega
-  have hrd : m.degree (r * h) = m.degree r + m.degree h :=
-    degree_mul_monic m hr0 hh
-  have hrn : ¬ m.degree F ≤ m.degree (r * h) := by
-    intro hd
-    apply hr (m.degree r) (m.degree_mem_support hr0)
-    rw [hrd] at hd
-    intro i
-    rcases hcop i with hi | hi
-    · simpa only [Finsupp.add_apply, hi, add_zero] using hd i
-    · simp [hi]
-  have hhd : m.degree h ≤ m.degree (r * h) := by
-    rw [hrd]
-    intro i
-    simp only [Finsupp.add_apply]
-    omega
-  by_cases hs0 : s = 0
-  · have hpd : m.degree p = m.degree (r * h) := by
-      rw [hp', hs0, zero_mul, add_zero]
-    apply hpn.1
-    rw [hpd]
-    exact hhd
-  have hsd : m.degree (s * F) = m.degree s + m.degree F :=
-    degree_mul_monic m hs0 hF
-  have hFd : m.degree F ≤ m.degree (s * F) := by
-    rw [hsd]
-    intro i
-    simp only [Finsupp.add_apply]
-    omega
-  have hne : m.toSyn (m.degree (r * h)) ≠ m.toSyn (m.degree (s * F)) := by
-    intro hd
-    apply hrn
-    rwa [m.toSyn.injective hd]
-  rcases lt_or_gt_of_ne hne with hd | hd
-  · have hpd : m.degree p = m.degree (s * F) := by
-      rw [hp', m.degree_add_eq_right_of_lt hd]
-    apply hpn.2
-    rw [hpd]
-    exact hFd
-  · have hpd : m.degree p = m.degree (r * h) := by
-      rw [hp', m.degree_add_of_lt hd]
-    apply hpn.1
-    rw [hpd]
-    exact hhd
-
-/-- Uniqueness is an actual consequence of the two polynomial equations and the
-coprimality of their leading monomials, over an arbitrary coefficient ring. -/
-theorem reduced_unique
-    (m : MonomialOrder σ) {h F p r₁ r₂ a₁ a₂ b₁ b₂ : MvPolynomial σ R}
-    (hh : m.Monic h) (hF : m.Monic F)
-    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0)
-    (hr₁ : Reduced m h F r₁) (hr₂ : Reduced m h F r₂)
-    (hp₁ : p = a₁ * h + b₁ * F + r₁)
-    (hp₂ : p = a₂ * h + b₂ * F + r₂) : r₁ = r₂ := by
-  apply sub_eq_zero.mp
-  apply reduced_eq_zero_of_representation m hh hF hcop (reduced_sub m hr₁ hr₂)
-    (a := a₂ - a₁) (b := b₂ - b₁)
-  linear_combination hp₂ - hp₁
-
-theorem existsUnique_reduced_representative
-    (m : MonomialOrder σ) (h F p : MvPolynomial σ R)
-    (hh : m.Monic h) (hF : m.Monic F)
-    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0) :
-    ∃! r, Reduced m h F r ∧ ∃ a b, p = a * h + b * F + r := by
-  obtain ⟨a, b, r, hp, hr⟩ := exists_reduced_representation m h F p hh hF
-  refine ⟨r, ⟨hr, a, b, hp⟩, ?_⟩
-  rintro r' ⟨hr', a', b', hp'⟩
-  exact reduced_unique m hh hF hcop hr' hr hp' hp
-
 theorem unit_scaled_representation_iff (u v : Rˣ) (h F p r : MvPolynomial σ R) :
     (∃ a b, p = a * h + b * F + r) ↔
       (∃ a b, p = a * (C (u : R) * h) + b * (C (v : R) * F) + r) := by
@@ -147,86 +39,6 @@ theorem unit_scaled_representation_iff (u v : Rˣ) (h F p r : MvPolynomial σ R)
     simpa only [hcancel] using hp
   · rintro ⟨a, b, hp⟩
     exact ⟨a * C (u : R), b * C (v : R), by simpa only [mul_assoc] using hp⟩
-
-def equationsIdeal (h F : MvPolynomial σ R) : Ideal (MvPolynomial σ R) :=
-  Ideal.span {h, F}
-
-def reducedExponents (m : MonomialOrder σ) (h F : MvPolynomial σ R) :
-    Set (σ →₀ ℕ) :=
-  {d | ¬ m.degree h ≤ d ∧ ¬ m.degree F ≤ d}
-
-def reducedSubmodule (m : MonomialOrder σ) (h F : MvPolynomial σ R) :
-    Submodule R (MvPolynomial σ R) :=
-  MvPolynomial.restrictSupport R (reducedExponents m h F)
-
-lemma mem_reducedSubmodule (m : MonomialOrder σ) (h F p : MvPolynomial σ R) :
-    p ∈ reducedSubmodule m h F ↔ Reduced m h F p := Iff.rfl
-
-def reducedQuotientMap (m : MonomialOrder σ) (h F : MvPolynomial σ R) :
-    reducedSubmodule m h F →ₗ[R] MvPolynomial σ R ⧸ equationsIdeal h F :=
-  (Ideal.Quotient.mkₐ R (equationsIdeal h F)).toLinearMap.comp
-    (reducedSubmodule m h F).subtype
-
-theorem reducedQuotientMap_bijective
-    (m : MonomialOrder σ) (h F : MvPolynomial σ R)
-    (hh : m.Monic h) (hF : m.Monic F)
-    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0) :
-    Function.Bijective (reducedQuotientMap m h F) := by
-  constructor
-  · intro p q hpq
-    apply Subtype.ext
-    apply sub_eq_zero.mp
-    change Ideal.Quotient.mk (equationsIdeal h F) p.val =
-      Ideal.Quotient.mk (equationsIdeal h F) q.val at hpq
-    have hpq' := Ideal.Quotient.eq.mp hpq
-    obtain ⟨a, b, heq⟩ := Ideal.mem_span_pair.mp hpq'
-    exact reduced_eq_zero_of_representation m hh hF hcop
-      (reduced_sub m p.property q.property) heq.symm
-  · intro q
-    obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective q
-    obtain ⟨a, b, r, hp, hr⟩ := exists_reduced_representation m h F p hh hF
-    refine ⟨⟨r, hr⟩, ?_⟩
-    change Ideal.Quotient.mk (equationsIdeal h F) r =
-      Ideal.Quotient.mk (equationsIdeal h F) p
-    apply Ideal.Quotient.eq.mpr
-    apply Ideal.mem_span_pair.mpr
-    refine ⟨-a, -b, ?_⟩
-    rw [hp]
-    ring
-
-/-- The standard-monomial submodule is the whole quotient, with no unproved
-injectivity or flatness assumption. -/
-noncomputable def reducedQuotientEquiv
-    (m : MonomialOrder σ) (h F : MvPolynomial σ R)
-    (hh : m.Monic h) (hF : m.Monic F)
-    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0) :
-    reducedSubmodule m h F ≃ₗ[R] MvPolynomial σ R ⧸ equationsIdeal h F :=
-  LinearEquiv.ofBijective (reducedQuotientMap m h F)
-    (reducedQuotientMap_bijective m h F hh hF hcop)
-
-/-- The classes of standard monomials form a basis over the coefficient ring. -/
-noncomputable def quotientBasis
-    (m : MonomialOrder σ) (h F : MvPolynomial σ R)
-    (hh : m.Monic h) (hF : m.Monic F)
-    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0) :
-    Module.Basis (reducedExponents m h F) R (MvPolynomial σ R ⧸ equationsIdeal h F) :=
-  (MvPolynomial.basisRestrictSupport R (reducedExponents m h F)).map
-    (reducedQuotientEquiv m h F hh hF hcop)
-
-theorem quotientBasis_apply
-    (m : MonomialOrder σ) (h F : MvPolynomial σ R)
-    (hh : m.Monic h) (hF : m.Monic F)
-    (hcop : ∀ i, m.degree h i = 0 ∨ m.degree F i = 0)
-    (d : reducedExponents m h F) :
-    quotientBasis m h F hh hF hcop d =
-      Ideal.Quotient.mk (equationsIdeal h F) (monomial d.val 1) := by
-  change Ideal.Quotient.mk (equationsIdeal h F)
-    (AddMonoidAlgebra.ofCoeff
-      (((Finsupp.supportedEquivFinsupp (R := R) (reducedExponents m h F)).symm
-        (Finsupp.single d 1) : Finsupp.supported R R (reducedExponents m h F)) :
-        (σ →₀ ℕ) →₀ R)) = _
-  rw [Finsupp.supportedEquivFinsupp_symm_single]
-  rfl
 
 /-- Reduction preserves every grading for which the two defining equations
 are homogeneous.  Taking the grading monoid to be `ℕ × ZMod 3` preserves the
@@ -282,82 +94,6 @@ to prove the rank-nine freeness over that coefficient ring; the ordinary
 weighted degree and character gradings can subsequently be taken componentwise.
 -/
 
-abbrev Exponent := Fin 2 →₀ ℕ
-
-def auxiliaryWeight : Exponent →+ ℕ where
-  toFun d := 3 * d 0 + 7 * d 1
-  map_zero' := by simp
-  map_add' a b := by
-    simp only [Finsupp.add_apply]
-    omega
-
-/-- A separate type keeps the auxiliary order distinct from the divisibility
-order on exponent vectors. -/
-def AuxiliaryExponent := Exponent
-
-def toAuxiliary : Exponent ≃ AuxiliaryExponent := Equiv.refl _
-def ofAuxiliary : AuxiliaryExponent ≃ Exponent := Equiv.refl _
-
-noncomputable instance : AddCommMonoid AuxiliaryExponent := ofAuxiliary.addCommMonoid
-
-lemma ofAuxiliary_add (a b : AuxiliaryExponent) :
-    ofAuxiliary (a + b) = ofAuxiliary a + ofAuxiliary b := rfl
-
-def auxiliaryKey (a : AuxiliaryExponent) : Lex (ℕ × Lex Exponent) :=
-  toLex (auxiliaryWeight (ofAuxiliary a), toLex (ofAuxiliary a))
-
-lemma auxiliaryKey_injective : Function.Injective auxiliaryKey := by
-  intro a b hab
-  exact ofAuxiliary.injective (toLex.injective (Prod.mk.inj (toLex.injective hab)).2)
-
-noncomputable instance : LinearOrder AuxiliaryExponent :=
-  LinearOrder.lift' auxiliaryKey auxiliaryKey_injective
-
-lemma auxiliaryKey_add (a b : AuxiliaryExponent) :
-    auxiliaryKey (a + b) = auxiliaryKey a + auxiliaryKey b := by
-  change toLex (auxiliaryWeight (ofAuxiliary a + ofAuxiliary b),
-    toLex (ofAuxiliary a + ofAuxiliary b)) =
-    toLex (auxiliaryWeight (ofAuxiliary a) + auxiliaryWeight (ofAuxiliary b),
-      toLex (ofAuxiliary a) + toLex (ofAuxiliary b))
-  rw [map_add, toLex_add]
-
-noncomputable instance : IsOrderedCancelAddMonoid AuxiliaryExponent where
-  le_of_add_le_add_left a b c h := by
-    change auxiliaryKey b ≤ auxiliaryKey c
-    change auxiliaryKey (a + b) ≤ auxiliaryKey (a + c) at h
-    simpa only [auxiliaryKey, ofAuxiliary_add, map_add, toLex_add,
-      Prod.Lex.toLex_le_toLex, add_lt_add_iff_left, add_right_inj,
-      add_le_add_iff_left] using h
-  add_le_add_left a b h c := by
-    change auxiliaryKey a ≤ auxiliaryKey b at h
-    change auxiliaryKey (a + c) ≤ auxiliaryKey (b + c)
-    simpa only [auxiliaryKey, ofAuxiliary_add, map_add, toLex_add,
-      Prod.Lex.toLex_le_toLex, add_lt_add_iff_right, add_left_inj,
-      add_le_add_iff_right] using h
-
-noncomputable instance : WellFoundedLT AuxiliaryExponent :=
-  ⟨InvImage.wf auxiliaryKey wellFounded_lt⟩
-
-noncomputable def auxiliaryOrder : MonomialOrder (Fin 2) where
-  syn := AuxiliaryExponent
-  toSyn := { toEquiv := toAuxiliary, map_add' _ _ := rfl }
-  toSyn_monotone a b hab := by
-    change toLex (auxiliaryWeight a, toLex a) ≤ toLex (auxiliaryWeight b, toLex b)
-    rw [Prod.Lex.toLex_le_toLex]
-    have hw : auxiliaryWeight a ≤ auxiliaryWeight b := by
-      have h0 := hab 0
-      have h1 := hab 1
-      dsimp [auxiliaryWeight]
-      omega
-    rcases lt_or_eq_of_le hw with hw | hw
-    · exact Or.inl hw
-    · exact Or.inr ⟨hw, Finsupp.toLex_monotone hab⟩
-
-lemma auxiliaryOrder_lt_of_weight_lt {a b : Exponent}
-    (h : auxiliaryWeight a < auxiliaryWeight b) : a ≺[auxiliaryOrder] b := by
-  change toLex (auxiliaryWeight a, toLex a) < toLex (auxiliaryWeight b, toLex b)
-  exact Prod.Lex.toLex_lt_toLex.mpr (Or.inl h)
-
 def cubicTailExponent (i : Fin 4) : Exponent :=
   ![0, Finsupp.single 0 1, Finsupp.single 0 2, Finsupp.single 1 1] i
 
@@ -406,18 +142,6 @@ theorem normalizedSextic_leading_data [Nontrivial R] (c : SexticTailIndex → R)
 exponents strictly less than three. -/
 def Standard (p : MvPolynomial (Fin 2) R) : Prop :=
   ∀ d ∈ p.support, d 0 < 3 ∧ d 1 < 3
-
-lemma single_three_le_iff (i : σ) (d : σ →₀ ℕ) :
-    Finsupp.single i 3 ≤ d ↔ 3 ≤ d i := by
-  classical
-  constructor
-  · intro h
-    simpa using h i
-  · intro h j
-    by_cases hji : j = i
-    · subst j
-      simpa using h
-    · simp [Ne.symm hji]
 
 theorem reduced_iff_standard [Nontrivial R]
     (hcoeff : Fin 4 → R) (Fcoeff : SexticTailIndex → R)

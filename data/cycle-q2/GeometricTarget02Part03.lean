@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceCoordinates
 import Proposal.GeometricTarget02Part02
 
 /-! Continuation of GeometricTarget02.lean; complete source components and declarations. -/
@@ -787,22 +788,6 @@ theorem cofactor_seed_deformation (r ι : R) (H t : Poly R)
   rw [cofactor_quadratic, rawSeedMatrix_cofactor]
   unfold firstOrderResidual smoothF
   ring
-
-theorem smoothSeed_mem_iff_linkage {p : Poly R} (r ι : R) :
-    p ∈ equationsIdeal (smoothH ι) (smoothF r ι) ↔
-      ∃ a b : Poly R, a * smoothH ι + b * seedG r = p := by
-  rw [equationsIdeal, Ideal.mem_span_pair]
-  constructor
-  · rintro ⟨a, b, hab⟩
-    refine ⟨a + b * smoothK ι, b, ?_⟩
-    rw [← hab]
-    unfold smoothF
-    ring
-  · rintro ⟨a, b, hab⟩
-    refine ⟨a - b * smoothK ι, b, ?_⟩
-    rw [← hab]
-    unfold smoothF
-    ring
 
 theorem firstOrderResidual_vanishes_iff [Nontrivial R]
     (r ι : R) (H : Poly R) (N : Matrix (Fin 3) (Fin 3) (Poly R)) (i j : Fin 3) :

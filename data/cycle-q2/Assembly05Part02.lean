@@ -1,6 +1,6 @@
 import Proposal.Workspace
 import Proposal.GeometricTarget
-import Proposal.Assembly04
+import Proposal.Assembly04Part02
 import Proposal.Assembly05Part01
 
 /-! Source partition of Assembly05.lean; declarations and proofs are preserved. -/

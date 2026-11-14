@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceCoordinates
 import Proposal.GeometricCurveCoordinates
 import Proposal.GeometricTarget02Part01
 
@@ -323,7 +324,6 @@ open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2IncidenceMonomials
 
 variable {R : Type*} [CommRing R]
 
-abbrev Poly (R : Type*) [CommRing R] := MvPolynomial (Fin 5) R
 abbrev Grade := ℕ × ZMod 3
 abbrev HG (p : Poly R) (d : Grade) := p.IsWeightedHomogeneous fullGrading d
 
@@ -611,19 +611,6 @@ The parameter `ι` may be specialized to `Complex.I`.  The cubic used by the
 incidence chart contains the additional term `x0^3`; the raw matrix itself is
 exactly the published raw matrix.
 -/
-
-def smoothB : Poly R :=
-  X 3 ^ 3 + X 2 ^ 3 + X 1 * X 2 * X 3 + X 0 * X 2 * X 3 +
-    X 0 * X 1 ^ 2 + X 0 ^ 3
-
-def smoothA : Poly R := X 1 ^ 3 + X 3 ^ 3
-def smoothH (ι : R) : Poly R := smoothB - C ι * smoothA
-def smoothK (ι : R) : Poly R := smoothB + C ι * smoothA
-
-def seedG (r : R) : Poly R :=
-  CycleQ2SegreSeed.seedG (C r) (X 0) (X 1) (X 2) (X 3) (X 4)
-
-def smoothF (r ι : R) : Poly R := seedG r + smoothH ι * smoothK ι
 
 theorem smoothB_homogeneous : HG (smoothB : Poly R) (3, 0) :=
   (((((regrade (hx3.pow 3) (by decide)).add

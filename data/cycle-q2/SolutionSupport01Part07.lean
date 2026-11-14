@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceCoordinates
 import Proposal.GeometricCurveCoordinates
 import Proposal.SolutionSupport01Part06
 import Proposal.GeometricSeedNormalIdeals
@@ -351,11 +352,6 @@ theorem thetaEquation_decomposition (r θ : ℂ) (hr : r^3=2) :
   have hh := seedEquation_decomposition r hr
   unfold thetaEquation thetaH thetaK seedEquation originalH originalK at *
   linear_combination hh
-
-theorem smoothH_eq_thetaH : CycleQ2IncidenceEquations.smoothH Complex.I = thetaH 1 := by
-  simp [CycleQ2IncidenceEquations.smoothH, CycleQ2IncidenceEquations.smoothB,
-    CycleQ2IncidenceEquations.smoothA, thetaH, originalH, originalB]
-  ring
 
 theorem smoothF_eq_thetaEquation (r : ℂ) (hr : r^3=2) :
     CycleQ2IncidenceEquations.smoothF r Complex.I = thetaEquation 1 := by

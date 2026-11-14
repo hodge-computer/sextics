@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceCoordinates
 import Proposal.GeometricTarget08Part02
 
 /-! Continuation of GeometricTarget08.lean; complete source components and declarations. -/
@@ -143,7 +144,6 @@ open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2IncidenceEquations
 
 variable {R : Type*} [CommRing R]
 
-abbrev SeedRing (r ι : R) := Poly R ⧸ equationsIdeal (smoothH ι) (smoothF r ι)
 
 def seedQuotientMatrix (r ι : R) : Matrix (Fin 3) (Fin 3) (SeedRing r ι) :=
   (Ideal.Quotient.mk _).mapMatrix (rawSeedMatrix r)

@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceCoordinates
 import Proposal.Workspace
 import HodgeTarget
 import Mathlib.Analysis.Complex.Basic
@@ -92,7 +93,6 @@ open Matrix
 variable {R : Type*} [CommRing R]
 
 def linkageP (a b c d : R) : R := a * c + b * d
-def linkageG (a b c d : R) : R := a ^ 3 - b ^ 3 + c ^ 3 + d ^ 3
 
 def linkageE (a b c d : R) : Fin 5 → R :=
   ![a * c + b * d,
@@ -219,13 +219,6 @@ theorem core_product (a b c d u0 u1 v0 v1 v2 : R) :
   ring
 
 def seedP (r x0 x1 x2 x3 w : R) : R := linkageP (x0^2) (r*x1*x3) w (x2^2)
-def seedG (r x0 x1 x2 x3 w : R) : R := linkageG (x0^2) (r*x1*x3) w (x2^2)
-
-theorem seedG_expanded (r x0 x1 x2 x3 w : R) :
-    seedG r x0 x1 x2 x3 w = x0^6-r^3*x1^3*x3^3+x2^6+w^3 := by
-  unfold seedG linkageG
-  ring
-
 def leftCoeff0 (x0 x1 x2 x3 w : R) : Fin 3 → R :=
   ![-w ^ 2 * x1 * x3 + x1 ^ 2 * x2 ^ 4,
   -w * x1 ^ 4 + x0 ^ 2 * x2 ^ 4 + x1 * x2 ^ 3 * x3 ^ 2,
