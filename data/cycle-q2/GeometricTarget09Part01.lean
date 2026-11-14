@@ -118,7 +118,7 @@ import Mathlib.RingTheory.Localization.Basic
 import Mathlib.Tactic.Ring.Basic
 import Mathlib.Algebra.BigOperators.Fin
 import Mathlib.Analysis.SpecialFunctions.Pow.Complex
-import Proposal.GeometricFormalInputs
+import Proposal.GeometricFormalInputs04
 import Mathlib.LinearAlgebra.Projection
 import Mathlib.LinearAlgebra.Charpoly.Basic
 import Mathlib.Algebra.Polynomial.AlgebraMap

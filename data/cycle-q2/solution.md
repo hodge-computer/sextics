@@ -1,5 +1,155 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Actual cubic residue sections and canonical normal comparison — 14 November 2026
+
+This checkpoint constructs compatible cubic two-form sections on an actual
+open neighborhood of the literal seed curve. It also identifies the
+intrinsic normal sheaf with the existing direct-image normal sheaf and
+retains the canonical complex scalar action when passing to ordinary
+derived cohomology. The protected theorem
+`Submission.missing_geometric_existence` still contains its original
+`sorry`. Global adjunction and Serre compatibility, the moving-class
+comparison, supported correspondences, and the final de Rham argument
+remain separate obligations.
+
+### The same complex scalars in ordinary cohomology
+
+[GeometricCartierOrdinaryScalar.lean](GeometricCartierOrdinaryScalar.lean)
+defines the complex action on ordinary derived cohomology by applying
+`Sheaf.H.map` to the actual scalar multiplication endomorphism of the
+original sheaf. The terminal-source comparison from the already
+constructed H-prime groups is proved natural for every additive sheaf
+morphism. Specializing that naturality to scalar endomorphisms proves
+complex linearity for the intrinsic actions on both sides.
+
+The resulting surface comparison is therefore the original underlying
+cohomology map, now with its scalar compatibility proved. This does not
+define a scalar action by transporting it through a chosen vector-space
+equivalence.
+
+### The intrinsic source normal and its actual pushforward
+
+[GeometricNormalSheafComparison.lean](GeometricNormalSheafComparison.lean)
+uses the actual kernel ideal of the projective curve immersion. Its
+pullback is the intrinsic conormal on the curve, and the internal linear
+dual is the source normal sheaf. The genuine pullback/pushforward
+adjunction constructs a morphism from its pushforward to the existing
+normal sheaf on the surface.
+
+The local adjunction is proved on every open, including the structure
+sheaf coefficient action and the genuine restriction maps. The comparison
+is an isomorphism of module sheaves; its component on the top open is the
+same global adjunction map. The literal surface and curve maps and their
+affine normal charts are bound to the original defining equations.
+This checkpoint does not yet construct the global normal-adjunction
+pairing or its induced trace map on cohomology.
+
+### The residue is transported through actual differentials
+
+[GeometricSurfaceResidueFunctoriality.lean](GeometricSurfaceResidueFunctoriality.lean)
+expresses the local residue in the actual exterior square of Kähler
+differentials. The ambient wedge, conormal quotient, determinant
+normalization, and scalar-extension maps are connected by checked
+identities. The formally étale transport of the residue is the canonical
+map induced on differentials and their exterior powers. All lifts of the
+quotient differentials give the same residue, so the comparison does not
+depend on a chosen ambient representative.
+
+[GeometricSurfaceResidueOverlap.lean](GeometricSurfaceResidueOverlap.lean)
+then supplies the concrete coordinate and localization calculations. On
+the common first/second projective chart the actual coordinates change by
+
+\[
+(z,a,b,c)\longmapsto (z/b^2,a/b,1/b,c/b).
+\]
+
+The ambient four-form changes by \(-b^{-6}\), while the two original
+surface equations have factors \(b^{-6}\) and \(b^{-3}\). The quotient
+wedge calculation therefore proves the exact residue transition
+
+\[
+\eta_2=-b^3\eta_1.
+\]
+
+For every weighted homogeneous cubic \(p\), its actual dehomogenized
+coefficients satisfy \(p_2=b^{-3}p_1\). Thus the oriented local sections
+agree:
+
+\[
+p_1\eta_1=-p_2\eta_2.
+\]
+
+These are identities in the actual common localization and then in the
+genuine exterior differential sheaf. The common affine chart is proved to
+be precisely the intersection of the two projective opens. The section
+identity holds on every smaller open in that intersection. Two different
+Jacobian choices within the same projective chart are also compared in
+their actual product localization, giving independence of that choice.
+
+### Genuine sheaf gluing on a specified neighborhood
+
+The twelve opens indexed by the two projective charts, the two normal
+equations, and the three curve coordinates define a specific union
+\(U\) in the original surface. The genuine sheaf condition uniquely
+glues the compatible local cubic residues to a section of
+\(\bigwedge^2\Omega^1_S\) on \(U\). Its restrictions to every chart and
+every smaller open are proved to be the displayed local formulas. The
+construction is additive in the weighted cubic.
+
+For the literal seed \((r,\theta)=(57,1)\), the inverse image of \(U\)
+under the original curve immersion is the whole curve. Consequently this
+is a section on a neighborhood of the entire seed curve. The proof does
+not claim that these twelve opens cover the entire projective surface.
+Extending to a whole-surface canonical section, when needed by the global
+argument, requires its own proof.
+
+### Verification and remaining scope
+
+Each new public helper below was compiled to an object under the fixed
+resource limits, independently replayed by Lean's kernel checker, and
+then imported by a pure endpoint audit containing only `#print axioms`
+commands. The audit endpoints use only `propext`, `Classical.choice`, and
+`Quot.sound`.
+
+| Public helper | Object compilation | Independent replay | Audited endpoints |
+|---|---:|---:|---:|
+| `GeometricCartierOrdinaryScalar` | 240.42 s | 200.91 s | 12 |
+| `GeometricSurfaceResidueFunctoriality` | 84.64 s | 6.63 s | 67 |
+| `GeometricNormalSheafComparison` | 23.11 s | 6.48 s | 78 |
+| `GeometricSurfaceResidueOverlap` | 237.71 s | 83.17 s | 254 |
+
+The four new helpers account for **411 distinct audited
+endpoints**. Their assembled proof bodies retain the independently
+checked source bytes and scoped options. No new axiom, admission, unsafe
+evaluation, heartbeat limit, or recursion limit is introduced. The overlap
+helper has one harmless declaration-style warning: a proposition-valued
+partially specialized comparison is declared as a definition so that its
+elaboration and application can remain separate bounded commands.
+
+Six incoming geometry helpers were also freshly compiled, replayed, and
+audited in the dependency context used here: the intrinsic normal,
+surface differential charts, surface overlaps, surface normal charts,
+exterior sheaf, and surface bindings. They contribute 221 distinct audited
+endpoints. This is a bounded check of those modules and the four additions;
+it is not a full build of every proposal helper or an independent replay
+of the other incoming Cartier, family-deformation, and obstruction modules.
+
+Removing one of the import-only facades changes the direct import in the
+existing `GeometricFormalInputs02Part01` helper. That helper was separately
+rebuilt, independently replayed, and checked by a pure 26-endpoint audit.
+Its declaration bodies and all inherited proof options remain byte-for-byte
+unchanged. The other checked dependencies retain their exact source and
+object representations, apart from the separately replayed incoming
+intrinsic-normal update already identified above.
+
+Four import-only compatibility files are replaced by the four additions.
+Their callers directly import the same underlying modules, preserving
+every surviving transitive import closure and every existing declaration
+body. The proposal remains within the 256-file limit. The original
+protected target, source manifest, and final existence statement are
+unchanged. Earlier checkpoint explanations follow below, with links through
+the removed facades redirected to their surviving modules.
+
 ## Actual first-order families and Cartier transition defects — 14 November 2026
 
 This continuation constructs the first-order extension of the original
@@ -5623,7 +5773,7 @@ states that equivalent exterior-form assertion. The final theorem applies
 
     CycleQ2AffineExactness.protected_certificate_of_exact_residueSourceForm
 
-from [GeometricFormalInputs.lean](GeometricFormalInputs.lean).
+from [GeometricFormalInputs04.lean](GeometricFormalInputs04.lean).
 That implication has no assumed grading, regular lift, residue
 homomorphism, derivative compatibility, or desired defect identity:
 all of these have been proved for the actual target. It does not prove
@@ -5957,7 +6107,7 @@ For \(\omega^3=1,\ \omega\ne1\), use
 \beta:(X_2,Y_2)\mapsto(-X_2,-Y_2),\qquad
 \gamma=\operatorname{diag}(\omega^2,\omega^2,1,\omega,1,1).
 \]
-[GeometricTarget.lean](GeometricTarget.lean) proves that \(F\) is fixed
+[GeometricTarget11Part04.lean](GeometricTarget11Part04.lean) proves that \(F\) is fixed
 and that the determinant-weighted source is fixed. The numerator's
 \(\gamma\)-weight is \(10\equiv1\pmod3\), while the volume form's
 determinant weight is \(5\equiv2\pmod3\); their product is invariant.
@@ -7410,9 +7560,9 @@ and the first helper in a group imports the original prerequisite modules.
 
 | Compatibility module or entry point | Numbered helpers | Largest helper, lines | Mathematical scope |
 | --- | --- | ---: | --- |
-| [GeometricFormalInputs.lean](GeometricFormalInputs.lean) | `GeometricFormalInputs01`–`04` (4) | 4,758 | Affine residue/certificate bridge, foundational inputs, pole reduction, and exterior differentials. |
-| [GeometricTarget.lean](GeometricTarget.lean) | `GeometricTarget01`–`11` (11) | 4,795 | Target actions, finite descent, incidence and seed calculations, projectors, and finite top de Rham constructions. |
-| [Assembly.lean](Assembly.lean) | `Assembly01`–`10` (10) | 4,757 | Conditional assembly, restriction calculations, actual Gaussian-action data, and Cech components. |
+| [GeometricFormalInputs04.lean](GeometricFormalInputs04.lean) | `GeometricFormalInputs01`–`04` (4) | 4,758 | Affine residue/certificate bridge, foundational inputs, pole reduction, and exterior differentials. |
+| [GeometricTarget11Part04.lean](GeometricTarget11Part04.lean) | `GeometricTarget01`–`11` (11) | 4,795 | Target actions, finite descent, incidence and seed calculations, projectors, and finite top de Rham constructions. |
+| [Assembly10Part02.lean](Assembly10Part02.lean) | `Assembly01`–`10` (10) | 4,757 | Conditional assembly, restriction calculations, actual Gaussian-action data, and Cech components. |
 | [Normalization09Part02.lean](Normalization09Part02.lean) | `Normalization01`–`09` (9) | 4,621 | Radial normalization and the remaining modular-action and cubic literal data. |
 | [Solution.lean](Solution.lean) | `SolutionSupport01`–`09` (9) | 4,786 | Normal and conormal classes, residue and surface comparisons, character components, and orbit trace; the final obligation remains in `Solution.lean`. |
 

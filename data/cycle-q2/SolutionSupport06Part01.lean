@@ -15,9 +15,9 @@ import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.LinearAlgebra.TensorProduct.Basis
 import Mathlib.LinearAlgebra.Dual.Defs
 import HodgeTarget
-import Proposal.GeometricTarget
+import Proposal.GeometricTarget11Part04
 import Proposal.GeometricSeed
-import Proposal.GeometricFormalInputs
+import Proposal.GeometricFormalInputs04
 import Proposal.Normalization09Part02
 import Proposal.SolutionSupport05Part03
 

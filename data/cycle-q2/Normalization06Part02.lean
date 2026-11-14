@@ -1,4 +1,4 @@
-import Proposal.Assembly
+import Proposal.Assembly10Part02
 import Mathlib.RingTheory.MvPolynomial.EulerIdentity
 import Mathlib.RingTheory.Polynomial.UniqueFactorization
 import Proposal.Normalization05Part03
