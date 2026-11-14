@@ -2,7 +2,7 @@ import Proposal.GeometricIncidenceCechTrace
 import Proposal.GeometricSurfaceCoordinates
 import Proposal.Workspace
 import Proposal.GeometricTarget
-import Proposal.Assembly07
+import Proposal.Assembly07Part04
 
 /-! Source partition of Assembly08.lean; declarations and proofs are preserved. -/
 

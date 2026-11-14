@@ -1,5 +1,123 @@
 # A nonconstructive geometric route for cycle-q2
 
+## The original Cartier class on the coordinate cover — 14 November 2026
+
+The new [GeometricCartierCoordinateDescent.lean](GeometricCartierCoordinateDescent.lean)
+proves a degree-two comparison for the actual principal covers and applies
+it to the literal surface at \((r,\theta)=(57,1)\). It produces one coordinate
+two-cocycle \(d\) representing the original Cartier cocycle \(c\), with
+explicit common-refinement witnesses, and proves
+\[
+[d]\ne0,
+\qquad
+x_0^3[d]\ne0.
+\]
+The latter is multiplication of the same descended class by the fixed
+cubic from the original normal-pairing calculation. The helper also proves
+an exact all-poles criterion for boundaries in the original nine Laurent
+coordinates. The final theorem `Submission.missing_geometric_existence`
+still has its single admission; this checkpoint supplies the ordinary
+coordinate comparison needed for the subsequent homogeneous and character
+arguments.
+
+### Degree-two descent with the actual cochains
+
+The proof works with the actual tensor localizations on the mixed
+intersections of the two four-member principal covers. The coordinate
+cover is \(D(x_1),D(x_2),D(x_3),\varnothing\). On a mixed intersection,
+the radical equality proved in the preceding checkpoint gives a unit
+ideal for the other cover. The new degree-two affine exactness theorem,
+together with the previously checked degree-one exactness and gluing
+theorems, constructs the comparison staircase.
+
+With the first cover denoted by \(a\) and the second by \(b\), its witnesses
+\(x,y\) satisfy the actual cochain equations
+\[
+\delta_a x=\iota_b c,
+\qquad
+\delta_a y=\delta_bx,
+\qquad
+\iota_a d=\delta_by.
+\]
+These equations are retained in `BiSystem.SecondDescent` and then in
+`PrincipalSecondDescent`. The canonical tensor-to-scalar equivalences
+give `CartierCoordinateDescent`; all restriction maps and augmentations
+remain the original localization maps.
+
+If \(d\) were a boundary, its primitive could be subtracted from \(y\).
+Degree-one exactness in the second direction and degree-zero gluing then
+give an actual primitive for \(c\). This is the proved boundary-reflection
+statement, not an assumed comparison isomorphism. Applying it to the
+already checked original nonzero Cartier class gives
+`literal_cartier_coordinate_descent_nonzero`.
+
+### The fixed cubic survives the same comparison
+
+`cartierCycle_mul_inputs` proves that multiplying both original polynomial
+inputs by \(\sigma\) multiplies the original Cartier cocycle by the surface
+class of \(\sigma\). The comparison staircase also scales by that same
+element. For \(\sigma=x_0^3\), the original paired-normal nonvanishing
+calculation proves `literal_cubic_cartierClass_ne_zero`.
+
+Consequently **every** `CartierCoordinateDescent` of the literal original
+cocycle has a nonzero cubic multiple. This is
+`literal_descent_cubic_ne_zero`, and its hypotheses include the actual
+comparison witnesses. `literal_cartier_coordinate_cubic_nonzero` returns
+one such \(d\), together with nonvanishing of both \([d]\) and
+\(x_0^3[d]\).
+
+### The exact Laurent-coordinate detector
+
+The fixed surface quotient is free of rank nine over
+\(\mathbb C[x_1,x_2,x_3]\), with basis
+\(x_0^a w^b\) for \(0\le a,b<3\). The new `coordinateLaurent` map uses
+the existing quotient isomorphism and those original basis monomials;
+it is injective and commutes with every coordinate restriction.
+
+For the first triple component \(d_{012}\), the proved criterion is
+\[
+[d]=0
+\quad\Longleftrightarrow\quad
+\text{every coefficient of }x_0^a w^b
+x_1^{e_1}x_2^{e_2}x_3^{e_3}
+\text{ with }e_1,e_2,e_3<0\text{ is zero}.
+\]
+Both directions allow arbitrary pole orders. In the reverse direction,
+the coefficient filters separate terms into the three pair-open
+localizations and construct the actual boundary. The empty fourth open
+identifies this three-open criterion with the original four-member
+two-cocycle quotient. Thus the nonzero cubic multiple has a nonzero
+strictly negative coefficient in its own actual representative.
+
+The helper additionally proves that a strictly negative monomial of
+weight three can only have
+\[
+(a,b)=(2,2),\qquad(e_1,e_2,e_3)=(-1,-1,-1).
+\]
+Its character is one for the original weights
+\((2,2,1,0,0)\) modulo three. This is a conditional degree calculation:
+this checkpoint does not yet assert that the descended fraction has
+homogeneous degree zero or supply the character projection of that
+fraction. Those bindings, the derived-cohomology comparison, and the
+global geometric support argument remain separate work.
+
+### Validation of this checkpoint
+
+The exact combined helper compiled in 78.06 seconds and passed independent
+kernel replay in 14.54 seconds. All forty selected endpoint audits use only
+`propext`, `Classical.choice`, and `Quot.sound`. The assembly preserves the
+mathematical bodies of ten separately checked development modules. These
+are scoped checks of this helper and its checked prerequisite closure;
+they are not a complete-proposal acceptance check. The single final
+admission still prevents acceptance.
+
+The declaration-free `Assembly07` facade is replaced by direct imports of
+`Assembly07Part04` in its two callers. Its declaration and import closure
+is preserved, and the proposal remains within the 256-file limit. The
+protected instance, final theorem statement, and existing admission are
+unchanged. The geometric strategy continues to follow Ben Diamond's
+argument; this formal continuation was prepared with OpenAI assistance.
+
 
 ## Nonzero actual Cartier class and local surface adjunction — 14 November 2026
 
