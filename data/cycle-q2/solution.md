@@ -1,5 +1,218 @@
 # A nonconstructive geometric route for cycle-q2
 
+## The actual Cartier cocycle on the projective surface — 14 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains open.
+This continuation connects the actual inverse-ideal module, its four-open
+Čech complex, and a degree-zero cocycle in the structure sheaf of the
+actual projective surface. It retains the original ambient variation,
+literal parameter `(57,1)`, and signs throughout.
+
+The assembled helper proves `InverseFirstExact 57 1` and three
+unconditional nonboundary theorems for the same literal cocycle. Its
+compilation, independent kernel replay, and complete endpoint audit all
+pass. These results concern ordinary localizations, homogeneous
+degree-zero localizations, and actual projective structure-sheaf sections.
+
+### From the actual inverse ideal to the four-cover complex
+
+Write
+\[
+A=\operatorname{SurfaceRing}(r,\theta),\qquad
+I=\operatorname{curveIdealOnSurface}(r,\theta),\qquad
+M=\operatorname{Hom}_A(I,A).
+\]
+At `θ = 1`, the preceding
+[inverse-ideal construction](GeometricInverseIdealBasis.lean)
+supplies a genuine nine-element basis of `M` over
+`B = ℂ[x₁,x₂,x₃]`. This is freeness over the polynomial base; freeness over
+`A` is not needed. Its finite-presentation argument also identifies
+localized `M` with the actual Hom module of the localized ideal.
+
+[GeometricCartierCechNonboundary.lean](GeometricCartierCechNonboundary.lean)
+extends that comparison to canonical restrictions between localizations.
+For the four functions
+\[
+(d_0,d_1,d_2,d_3)=(g_1,g_2,f_1,f_2),
+\qquad A_J=A[(\prod_{j\in J}d_j)^{-1}],
+\]
+the coefficient module is precisely
+\[
+N_J=\operatorname{Hom}_{A_J}(IA_J,A_J).
+\]
+The restriction is determined by its values on original ideal elements:
+it carries `ν(x)` through the actual localization map. This construction
+uses invertibility of the source denominators in the target. It does not
+require an inclusion between the generally different powers submonoids.
+The evaluation and composition identities are proved.
+
+These equivalences identify `N_J` with sections of the actual module
+sheaf associated to `M` on the corresponding principal open of `Spec A`.
+The comparison commutes with restrictions. The earlier three-coordinate
+exactness theorem therefore becomes exactness for actual sheaf sections.
+The common-refinement argument then transfers it to the four functions,
+using the proved equality of radicals with `(x₁,x₂,x₃)`. Its local
+primitive construction clears finitely many denominators and uses powers
+of covering functions to obtain a partition of unity on the refinement
+patches.
+
+The resulting `inverseIdeal_four_cover_firstExact` holds for every
+`r ≠ 0` at `θ = 1`, with a closed literal specialization. This concerns
+the shared open subset of the affine cone; it does not assert that the
+coordinate opens cover the cone vertex. The final finite-index adapter
+converts its all-pairs cocycle formulation to the six ordered edges used
+by `InverseFirstExact`.
+
+### The signed lift and the correction argument
+
+The [actual Cartier lift](GeometricCartierNormalLift.lean) provides a
+homomorphism on the overlap ideal. Place it on edge `01` and put zero on
+the other five edges; call this inverse-ideal cochain `ν`. For a scalar
+`a ∈ A_J`, the map
+\[
+\mu_J(a):IA_J\longrightarrow A_J,\qquad x\longmapsto ax
+\]
+is an actual module homomorphism. These maps commute with restriction
+and hence with the alternating differentials.
+
+For an ambient variation `Δ` and cubic variation `L`, put
+`Q = kL − Δ`, where `k` is the image of `thetaK θ`. The scalar cochain
+`b = cartierBoundaryTwoCochain r θ Δ L` has faces
+\[
+b_{012}=\frac{Q}{g_1f_1},\qquad
+b_{013}=-\frac{Q}{g_2f_2},\qquad
+b_{023}=b_{123}=0.
+\]
+Its face values come from evaluating the same inverse-ideal lift on the
+invertible curve equations. With
+`(dc)ᵢⱼₖ = cⱼₖ − cᵢₖ + cᵢⱼ`, the checked identity is
+\[
+d\nu=\mu(b).
+\]
+Agreement of the two evaluations on the quadruple overlap proves `db=0`.
+At `(r,θ)=(57,1)`, `Δ=derivativeA=x₂x₃³w`, and `L=0`, the literal faces are
+\[
+b_{012}=-\frac{x_2x_3^3w}{g_1f_1},\qquad
+b_{013}=+\frac{x_2x_3^3w}{g_2f_2}.
+\]
+
+Suppose a scalar one-cochain `c` satisfied `dc=b`. Then
+\[
+d(\nu-\mu(c))=0.
+\]
+Under `InverseFirstExact`, there are four local inverse-ideal elements
+`qᵢ` with `ν−μ(c)=dq`. The contradiction reduces `q₀` and `q₁` along
+their actual curve opens. This reduction lands in the dual of the base-changed
+conormal module `I/I²`; it is additive and agrees with the existing
+normal-module equivalences on the defining equations.
+
+Multiplication homomorphisms reduce to zero because every element of
+`I` maps to zero on the curve. Restriction and reduction commute, and
+the reduction of the edge-`01` lift is exactly the previously fixed
+`connectingRepresentative`. Reducing the corrected primitive identity
+therefore writes that representative as the second local normal
+restriction minus the first. Its actual normal Čech class would vanish.
+This contradicts the checked
+`literal_normalConnectingClass_ne_zero` at the same literal parameter.
+Thus the generic `literal_cartierBoundary_not_boundary` proves scalar
+nonboundary from the exactness premise. The checked
+`CycleQ2ActualCartierNonboundary.literal_inverseFirstExact` now supplies
+that premise, giving the closed `literal_cartier_not_boundary`.
+No desired normal comparison or unresolved exactness is assumed in this
+closed statement.
+
+### Degree zero and genuine projective sections
+
+The homogeneous construction uses the actual weighted polynomial ring,
+with weights `(1,1,1,1,2)` on `(x₀,x₁,x₂,x₃,w)`. The surface equations
+have degrees `6` and `3`, so their ideal is homogeneous and induces a
+graded ring on the actual quotient `A`. The cover degrees are
+`(4,4,2,2)`, and `derivativeA` has degree `6`.
+
+On the first two triple intersections the construction uses
+\[
+\frac{-\Delta g_2}{g_1g_2f_1},\qquad
+\frac{+\Delta g_1}{g_1g_2f_2}.
+\]
+Both numerators and denominators have degree `10`. They are consequently
+elements of the genuine degree-zero homogeneous localization. Their
+values in the ordinary localizations are proved equal to the two literal
+faces above. The degree-zero restriction maps compose correctly, and
+forgetting homogeneity commutes with both Čech differentials. Hence the
+degree-zero cochain is closed, and a homogeneous boundary would give the
+already excluded scalar boundary. Applying the proved exactness gives
+the closed `literal_homogeneous_cartier_not_boundary`.
+
+Now let `X = Proj(surfaceGrade r θ)`. The theorem
+`projective_four_cover` proves that the four actual opens `D₊(dᵢ)` cover
+`X` whenever `r ≠ 0`. For each nonempty index set `J`, `coverChart` is
+the canonical affine isomorphism
+\[
+D_+(\prod_{j\in J}d_j)
+\simeq \operatorname{Spec}((A_J)_0).
+\]
+The ring equivalence `coverSectionsEquiv` identifies this degree-zero
+ring with actual structure-sheaf sections. Its naturality theorem
+identifies the localization maps with the structure-sheaf restrictions.
+
+Accordingly, `literalProjectiveCartierCochain` consists of sections of
+`𝒪_X` on the literal triple intersections. The two chain-map identities
+transport the degree-zero cocycle and its nonboundary statement to the
+actual projective section complex. The closed endpoint is
+`literal_projective_cartier_not_boundary`. In addition,
+`coverPatch_H_one_subsingleton` proves vanishing of ambient `H′¹` of the
+additive structure sheaf on every such intersection, using its actual
+affine chart and the previously checked affine vanishing theorem.
+
+### Validation and remaining geometric comparisons
+
+The authoritative assembled source has SHA-256
+`0e0364fa790c326580b684526be2b0ea7bb5df8421e923c3be68469052a9e402`.
+It compiled in the combined branch context in 74.10 seconds, with peak
+resident memory 4209.43 MiB. Independent kernel replay passed in 13.21
+seconds. A separate pure-import audit checked 65 public endpoints in
+2.82 seconds; all depend only on
+`propext`, `Classical.choice`, and `Quot.sound`. The three final
+nonboundary corollaries have no exactness hypothesis.
+
+The source-bound checkpoint preserves the original 32 checked objects
+and their 79-module context, together with the unchanged checked curve
+cover. It refreshes the extended incoming `GeometricCartierNormalLift`,
+the new helper, and the incoming `GeometricCartierCech`, giving a
+36-object, 83-module scope. The two incoming sources are retained
+byte-for-byte: their fresh compilations passed in 72.41 and 54.25 seconds,
+and their independent replays passed in 9.68 and 7.06 seconds,
+respectively. Three pure-import audits cover 16, 65, and 53 distinct
+endpoints, for 134 in total; all have only the allowed axioms.
+
+The gate checks the exact thirteen-body assembly, including scope
+wrappers that preserve each body's local options and instances. The new
+proofs use the default heartbeat and recursion limits; inherited options
+in retained dependencies are recorded separately. The declaration-free
+`GeometricTarget11` import cleanup affects three importers and preserves
+their proof bodies and dependency closures. The checkpoint also binds
+the rendered explanation and verifies the unchanged protected files,
+remaining admission, source limits, and previous immutable evidence.
+This bounded continuation is not a full build or acceptance of the
+complete proposal.
+
+The earlier 35-object, 82-module source and its evidence are retained in
+an immutable pre-integration checkpoint. The combined continuation also
+preserves the concurrent contribution's proofs and explanation, including
+its independent inverse-ideal basis and principal-cover descent. Its two
+empty `Assembly` facades and the local empty `GeometricTarget11` facade
+are replaced only by their sole imports. The resulting proposal has
+255 files, with the protected target and final admission unchanged.
+
+The three closed corollaries concern ordinary localization,
+degree-zero localization, and actual projective structure-sheaf
+cochains. A comparison carrying this Čech class into derived projective
+surface `H²`, with the required injectivity and boundary interpretation,
+is a further theorem. Geometric Serre trace and adjunction compatibility,
+the moving-cycle interpretation, and the support and algebraic de Rham
+passage to the protected residue remain separate obligations. The final
+`Solution.lean` admission is not discharged by this continuation.
+
 
 ## Actual inverse-ideal restrictions and principal-cover descent — 14 November 2026
 

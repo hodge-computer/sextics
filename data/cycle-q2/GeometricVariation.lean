@@ -3,7 +3,7 @@ import Mathlib.LinearAlgebra.Dual.Basis
 import Mathlib.LinearAlgebra.Dimension.Constructions
 import Mathlib.LinearAlgebra.Prod
 import Mathlib.LinearAlgebra.BilinearMap
-import Proposal.GeometricTarget11
+import Proposal.GeometricTarget11Part04
 
 /-!
 # The paired graded Higgs model at the actual Fermat quotient
