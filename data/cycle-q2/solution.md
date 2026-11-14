@@ -1,6 +1,182 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Checked projective cohomology and whole-chart differentials — 14 November 2026
+## Checked canonical differential sheaf and its nonzero class — 14 November 2026
+
+The final admission, `Submission.missing_geometric_existence`, remains
+open. The present continuation closes the canonical differential-sheaf
+comparison at the compatible sparse seed. For every complex number
+\(r\) with \(r^3=2\), it constructs an actual isomorphism of sheaves of
+structure-ring modules
+\[
+\Omega^1_{C_{r,0}/\mathbb C}\;\simeq\;\mathcal L_{r,0},
+\]
+where the left side is the previously constructed universal differential
+sheaf on the actual projective curve and the right side is the existing
+degree-one twisted sheaf. The proof has no extra chart, comparison,
+transition, or global-bijectivity hypotheses. It also transports the
+previously checked nonzero derived class into actual
+\(H^1(C_{r,0},\Omega^1_{C_{r,0}/\mathbb C})\).
+
+### Actual affine charts and their complex structure
+
+[GeometricProjectiveAffine.lean](GeometricProjectiveAffine.lean)
+identifies each coordinate homogeneous localization with the literal
+dehomogenized quotient ring. Its inverse identities hold on every
+homogeneous fraction, not only on coordinate generators. This supplies
+actual scheme isomorphisms for the first and second affine curve charts,
+their two-open cover when \(r\ne0\), and the inclusions from the original quartic
+denominator opens. Both parameters \(r,\theta\) are retained in these
+chart identifications.
+
+[GeometricProjectiveAffineCoefficients.lean](GeometricProjectiveAffineCoefficients.lean)
+proves that these scheme maps are over \(\mathbb C\), with exactly the
+coefficient map used by the differential sheaf.
+[GeometricProjectiveOverlap.lean](GeometricProjectiveOverlap.lean)
+identifies both affine localizations with the same actual projective
+overlap. Its change of coordinates is the previously constructed
+substitution \((a,b,c)\mapsto(a/b,1/b,c/b)\), and both restriction
+squares commute as scheme maps and as maps of actual section rings.
+[GeometricProjectiveTransition.lean](GeometricProjectiveTransition.lean)
+then proves that the unit \(x_2/x_1\) on this coordinate overlap
+restricts to exactly `projectiveTransitionUnit` on the original
+quartic overlap. This is an equality of units in the actual section ring.
+
+### Affine frames as genuine sheaf isomorphisms
+
+[GeometricLocalizedDifferentials.lean](GeometricLocalizedDifferentials.lean)
+extends an ordinary Kähler frame through an actual localization and
+proves its fraction formula, naturality, and compatibility with iterated
+localization. In particular the coefficient derivation satisfies
+\[
+\delta(a/b)=\frac{b\,\delta(a)-a\,\delta(b)}{b^2}.
+\]
+[GeometricAffineDifferentialSheaf.lean](GeometricAffineDifferentialSheaf.lean)
+uses this formula in prime localizations to differentiate genuine regular
+sections. The derivative is again locally a fraction. This gives a
+natural derivation on all affine opens, rather than a separately assumed
+sheaf derivation.
+
+The same file proves that a sheaf-valued derivation on an affine scheme
+is determined by its values on the global affine ring. Therefore an
+ordinary frame \(e:\Omega^1_{A/\mathbb C}\simeq_A A\) gives a genuine
+module-sheaf isomorphism on \(\operatorname{Spec}A\). Its inverse is
+multiplication by the image of \(e^{-1}(1)\) under the actual universal
+differential. Both inverse identities are proved.
+
+[GeometricDifferentialRestriction.lean](GeometricDifferentialRestriction.lean)
+proves that the projective differential sheaf restricted to the over-site
+of an open still has the universal property for complex derivations. The
+lift and its uniqueness come from the actual restriction/direct-image
+adjunction and the global universal differential.
+[GeometricAffineChartSections.lean](GeometricAffineChartSections.lean)
+constructs the equivalence between that over-site and the affine chart's
+open site, together with the natural isomorphism of actual section rings.
+[GeometricDerivationTransport.lean](GeometricDerivationTransport.lean)
+transports module-valued derivations through this data.
+
+[GeometricDifferentialChartTransport.lean](GeometricDifferentialChartTransport.lean)
+combines these constructions into `chartFrameIso`: a genuine isomorphism
+from the restricted projective differential sheaf to the structure module.
+It proves the inverse-one formula on the whole chart and on every
+subopen. [GeometricProjectiveChartSections.lean](GeometricProjectiveChartSections.lean)
+identifies the terminal section maps with the literal first and second
+chart-ring equivalences, so these frames use the same affine forms as
+the earlier cofactor calculation.
+
+### The global canonical comparison
+
+[GeometricSheafKaehlerMap.lean](GeometricSheafKaehlerMap.lean) constructs
+the ordinary Kähler lift into actual sheaf sections along a compatible
+ring map. Its restriction, scalar, coordinate-change, and module-morphism
+identities are proved on all Kähler forms.
+[GeometricProjectiveDifferentialForms.lean](GeometricProjectiveDifferentialForms.lean)
+uses these maps to carry the checked whole-overlap cofactor identity into
+the actual projective differential sheaf. With the negative orientation
+on the first affine frame and the positive orientation on the second,
+the resulting sections satisfy
+\[
+\eta_2\big|_{U_1\cap U_2}
+=\left(\frac{x_2}{x_1}\right)
+ \eta_1\big|_{U_1\cap U_2}.
+\]
+Their further restrictions to the original denominator cover have
+precisely the previously constructed transition unit.
+
+[GeometricSheafLocalIso.lean](GeometricSheafLocalIso.lean) proves actual
+two-open gluing of additive local isomorphisms from sheaf unique gluing.
+[GeometricModuleLocalIso.lean](GeometricModuleLocalIso.lean) proves
+scalar compatibility and obtains an isomorphism of module sheaves.
+[GeometricModuleOverFrame.lean](GeometricModuleOverFrame.lean) evaluates
+an over-site frame on every subopen, and
+[GeometricCanonicalGluing.lean](GeometricCanonicalGluing.lean) shows that
+the single overlap identity between frame generators glues to the
+existing twisted module sheaf. No global bijectivity is supplied as input.
+
+The final concrete assembly is
+[GeometricProjectiveCanonical.lean](GeometricProjectiveCanonical.lean):
+
+```lean
+projectiveCanonicalIso (r : ℂ) (hr : r ^ 3 = 2) :
+  projectiveDifferentialSheaf r 0 ≅ degreeOneModuleSheaf r 0
+```
+
+It identifies both local generators with the actual cofactor sections,
+uses their proved overlap identity, and applies the existing actual
+two-open cover. The isomorphism is in the category of sheaves of modules
+over the original projective structure sheaf.
+
+### The normalized class in differential-sheaf cohomology
+
+[GeometricProjectiveCanonicalH1.lean](GeometricProjectiveCanonicalH1.lean)
+applies Mathlib's actual cohomology functor to this sheaf isomorphism.
+Consequently the original Mayer–Vietoris injection now gives
+\[
+\mathrm{DegreeOneCech}(r,0)
+\hookrightarrow H^1(C_{r,0},\Omega^1_{C_{r,0}/\mathbb C}).
+\]
+The class of the normalization numerator \(x_0x_1^8\), with the original
+denominator \(g_1g_2\), is nonzero in this actual derived cohomology
+group. The map from its complex coefficient to the derived class is
+injective. For every homogeneous degree-nine numerator, the transported
+class is zero exactly when the already checked finite trace is zero.
+
+This does not assert surjectivity of the Čech comparison, an isomorphism
+from all derived cohomology to \(\mathbb C\), or identification with a
+geometric Serre trace. The current construction has only the additivity
+and injectivity that are explicitly proved.
+
+### Verification and the remaining obligation
+
+All nineteen new Lean modules in this continuation have been compiled
+from their final source and independently replayed by `leanchecker`.
+The audited public endpoints depend only on `propext`, `Classical.choice`,
+and `Quot.sound`. The new files contain no admissions, added axioms,
+unsafe evaluation, or executable extensions. The protected target,
+submission manifest, and existing final admission are unchanged.
+
+The whole proposal is still a draft: the final theorem retains its
+`sorry`, and the older aggregate incidence dependency chain has not
+passed a complete compilation. The local successful checks reported here
+do not claim full-proposal acceptance.
+
+The next cohomological gap is the actual first-cohomology vanishing on
+the two affine denominator opens, together with the required comparison
+between ambient-site `H'` and cohomology of a restricted sheaf. The
+existing Mayer–Vietoris sequence would then make the Čech injection
+surjective. The pinned Mathlib has the actual affine quasi-coherent
+equivalence, but that equivalence alone does not compute `Ext` in the
+category of all additive sheaves used by the current `H'` definition.
+
+After that seed-curve calculation, the nonconstructive existence route
+still requires the geometric trace and moving-cycle interpretation,
+the relevant variation and supported correspondence, and the regular
+algebraic de Rham comparison bound to the protected residue. These are
+substantive remaining constructions; the canonical-sheaf isomorphism
+does not itself prove exactness of the final rational residue form.
+The earlier checkpoint descriptions below record their status before
+this continuation.
+
+## Earlier checkpoint: projective cohomology and whole-chart differentials — 14 November 2026
 
 The last admission, `Submission.missing_geometric_existence`, is still
 open. This continuation connects the previously checked Čech calculation
