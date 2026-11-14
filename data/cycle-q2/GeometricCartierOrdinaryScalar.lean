@@ -1,4 +1,6 @@
 import Proposal.GeometricCartierCohomologyScalar
+import Proposal.GeometricSurfaceResidueFunctoriality
+import Proposal.GeometricNormalSheafComparison
 
 section
 
@@ -172,6 +174,182 @@ end Surface
 #print axioms surfaceOrdinaryComparisonLinear_injective
 
 end CycleQ2CechTwoOrdinaryScalar
+end
+
+end
+
+
+section
+
+/-! The same original normal classes and cubic maps in ordinary derived
+surface cohomology. The comparison is the canonical terminal-source
+isomorphism and is natural for the actual pushed-forward cubic morphism. -/
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2SurfaceNormalOrdinary
+
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace Topology Opposite
+  CycleQ2SurfaceNormalCohomology CycleQ2CartierProjectiveCover
+  CycleQ2ProjectiveCurveSurface CycleQ2GeometricProjectiveNormalClass
+  CycleQ2GeometricSheafCohomologyRestriction CycleQ2CechTwoOrdinaryScalar
+  CycleQ2GeometricLiteralDirection CycleQ2SeedTrace
+
+local instance surfaceHasExt (r θ : ℂ) :
+    HasExt.{1} (Sheaf (Opens.grothendieckTopology (projectiveSurface r θ)) AddCommGrpCat.{0}) :=
+  HasExt.standard _
+
+abbrev NormalOrdinaryH1 (r θ : ℂ) := (pushedNormalSheaf r θ).H 1
+
+def normalTerminalEquiv (r θ : ℂ) :
+    NormalH1OnSurface r θ ≃+ NormalOrdinaryH1 r θ :=
+  terminalCohomologyEquiv (Opens.grothendieckTopology (projectiveSurface r θ))
+    (pushedNormalSheaf r θ) ⊤ isTerminalTop 1
+
+def degreeOneTerminalEquiv (r θ : ℂ) :
+    (pushedDegreeOneSheaf r θ).H' 1 ⊤ ≃+ (pushedDegreeOneSheaf r θ).H 1 :=
+  terminalCohomologyEquiv (Opens.grothendieckTopology (projectiveSurface r θ))
+    (pushedDegreeOneSheaf r θ) ⊤ isTerminalTop 1
+
+def normalOrdinaryClass (r θ : ℂ) (hr : r ≠ 0)
+    (p : Poly) (hp : p.IsHomogeneous 6) : NormalOrdinaryH1 r θ :=
+  normalTerminalEquiv r θ (normalClassOnSurface r θ hr p hp)
+
+theorem normalOrdinaryClass_zero_iff (r θ : ℂ) (hr : r ≠ 0)
+    (p : Poly) (hp : p.IsHomogeneous 6) :
+    normalOrdinaryClass r θ hr p hp = 0 ↔ normalClass r θ hr p hp = 0 := by
+  change normalTerminalEquiv r θ (normalClassOnSurface r θ hr p hp) = 0 ↔ _
+  rw [map_eq_zero_iff _ (normalTerminalEquiv r θ).injective]
+  exact normalClassOnSurface_zero_iff r θ hr p hp
+
+def cubicOrdinaryMap (r θ : ℂ) (hr : r ≠ 0) (σ : Poly) (hσ : σ.IsHomogeneous 3) :
+    NormalOrdinaryH1 r θ →+ (pushedDegreeOneSheaf r θ).H 1 :=
+  Sheaf.H.map
+    ((TopCat.Sheaf.pushforward AddCommGrpCat.{0} (curveToSurface r θ).base).map
+      (cubicAdditiveMorphism r θ hr σ hσ)) 1
+
+theorem cubicOrdinaryMap_terminal (r θ : ℂ) (hr : r ≠ 0)
+    (σ : Poly) (hσ : σ.IsHomogeneous 3) (x : NormalH1OnSurface r θ) :
+    cubicOrdinaryMap r θ hr σ hσ (normalTerminalEquiv r θ x) =
+      degreeOneTerminalEquiv r θ (cubicH1OnSurface r θ hr σ hσ x) :=
+  (terminalCohomologyEquiv_naturality
+    ((TopCat.Sheaf.pushforward AddCommGrpCat.{0} (curveToSurface r θ).base).map
+      (cubicAdditiveMorphism r θ hr σ hσ)) 1 x).symm
+
+theorem cubicOrdinaryMap_normalClass_zero_iff (r θ : ℂ) (hr : r ≠ 0)
+    (p : Poly) (hp : p.IsHomogeneous 6) (σ : Poly) (hσ : σ.IsHomogeneous 3) :
+    cubicOrdinaryMap r θ hr σ hσ (normalOrdinaryClass r θ hr p hp) = 0 ↔
+      cubicH1Map r θ hr σ hσ (normalClass r θ hr p hp) = 0 := by
+  change cubicOrdinaryMap r θ hr σ hσ
+    (normalTerminalEquiv r θ (normalClassOnSurface r θ hr p hp)) = 0 ↔ _
+  rw [cubicOrdinaryMap_terminal, map_eq_zero_iff _ (degreeOneTerminalEquiv r θ).injective]
+  exact cubicH1OnSurface_normalClass_zero_iff r θ hr p hp σ hσ
+
+def literalOrdinaryNormalClass : NormalOrdinaryH1 57 1 :=
+  normalTerminalEquiv 57 1 literalNormalClassOnSurface
+
+theorem literalOrdinaryNormalClass_ne_zero : literalOrdinaryNormalClass ≠ 0 := by
+  intro hz
+  apply literalNormalClassOnSurface_ne_zero
+  exact (normalTerminalEquiv 57 1).injective (hz.trans (map_zero _).symm)
+
+theorem literal_ordinary_selected_cubic_image_ne_zero :
+    cubicOrdinaryMap 57 1 (by norm_num) selectedCubic selectedCubic_homogeneous
+      literalOrdinaryNormalClass ≠ 0 := by
+  intro hz
+  apply literal_selected_cubic_image_ne_zero
+  change cubicOrdinaryMap 57 1 (by norm_num) selectedCubic selectedCubic_homogeneous
+    (normalTerminalEquiv 57 1 literalNormalClassOnSurface) = 0 at hz
+  rw [cubicOrdinaryMap_terminal] at hz
+  exact (degreeOneTerminalEquiv 57 1).injective (hz.trans (map_zero _).symm)
+
+def selectedOrdinaryIncidenceNormalClass : NormalOrdinaryH1 57 1 :=
+  normalTerminalEquiv 57 1 selectedIncidenceNormalClassOnSurface
+
+theorem selectedOrdinaryIncidenceNormalClass_in_seven_kernels (j : Fin 7) :
+    cubicOrdinaryMap 57 1 (by norm_num) (testCubic j) (testCubic_homogeneous j)
+      selectedOrdinaryIncidenceNormalClass = 0 := by
+  change cubicOrdinaryMap 57 1 (by norm_num) (testCubic j) (testCubic_homogeneous j)
+    (normalTerminalEquiv 57 1 selectedIncidenceNormalClassOnSurface) = 0
+  rw [cubicOrdinaryMap_terminal, selectedIncidenceNormalClassOnSurface_in_seven_kernels, map_zero]
+
+end CycleQ2SurfaceNormalOrdinary
+end
+
+end
+
+
+section
+
+/-! The original selected normal class and incidence class in cohomology
+of the genuine intrinsic normal direct image of the original closed
+immersion. The concrete sheaf identification is proved at the literal
+seed, so no model-identification or smoothness premise remains here. -/
+
+set_option autoImplicit false
+set_option Elab.async false
+
+noncomputable section
+namespace CycleQ2IntrinsicSurfaceNormalCohomology
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite
+  CycleQ2SurfaceNormalCohomology CycleQ2SurfaceNormalTransport
+  CycleQ2IntrinsicNormalModel CycleQ2GeometricProjectiveNormalClass
+  CycleQ2GeometricLiteralDirection CycleQ2SeedTrace CycleQ2CartierProjectiveCover
+
+local instance surfaceHasExt :
+    HasExt.{1} (Sheaf (Opens.grothendieckTopology (projectiveSurface 57 1)) AddCommGrpCat.{0}) :=
+  HasExt.standard _
+
+def literalIntrinsicNormalClass : IntrinsicNormalH1 57 1 :=
+  intrinsicNormalClass 57 1 intrinsicNormalIso (by norm_num)
+    ambientNormalNumerator ambientNormalNumerator_homogeneous
+
+theorem literalIntrinsicNormalClass_ne_zero : literalIntrinsicNormalClass ≠ 0 := by
+  intro hz
+  apply literalNormalClass_ne_zero
+  exact (intrinsicNormalClass_zero_iff 57 1 intrinsicNormalIso (by norm_num)
+    ambientNormalNumerator ambientNormalNumerator_homogeneous).mp hz
+
+/-- This is an actual morphism out of the intrinsic surface-side normal
+sheaf; its coefficient is the original cubic under the proved normal frame. -/
+def literalIntrinsicCubicMorphism (σ : Poly) (hσ : σ.IsHomogeneous 3) :
+    intrinsicSurfaceNormalSheaf 57 1 ⟶ pushedDegreeOneSheaf 57 1 :=
+  intrinsicCubicMorphism 57 1 intrinsicNormalIso (by norm_num) σ hσ
+
+def literalIntrinsicCubicH1Map (σ : Poly) (hσ : σ.IsHomogeneous 3) :
+    IntrinsicNormalH1 57 1 →+ (pushedDegreeOneSheaf 57 1).H' 1 ⊤ :=
+  intrinsicCubicH1Map 57 1 intrinsicNormalIso (by norm_num) σ hσ
+
+theorem literalIntrinsicCubicH1Map_class (σ : Poly) (hσ : σ.IsHomogeneous 3) :
+    literalIntrinsicCubicH1Map σ hσ literalIntrinsicNormalClass =
+      cubicH1OnSurface 57 1 (by norm_num) σ hσ literalNormalClassOnSurface :=
+  intrinsicCubicH1Map_class 57 1 intrinsicNormalIso (by norm_num)
+    ambientNormalNumerator ambientNormalNumerator_homogeneous σ hσ
+
+theorem literal_intrinsic_selected_cubic_image_ne_zero :
+    literalIntrinsicCubicH1Map selectedCubic selectedCubic_homogeneous
+      literalIntrinsicNormalClass ≠ 0 := by
+  rw [literalIntrinsicCubicH1Map_class]
+  exact literal_selected_cubic_image_ne_zero
+
+def literalIntrinsicIncidenceClass : IntrinsicNormalH1 57 1 :=
+  intrinsicNormalClass 57 1 intrinsicNormalIso (by norm_num)
+    incidenceNormalNumerator incidenceNormalNumerator_homogeneous
+
+theorem literalIntrinsicIncidenceClass_in_seven_kernels (j : Fin 7) :
+    literalIntrinsicCubicH1Map (testCubic j) (testCubic_homogeneous j)
+      literalIntrinsicIncidenceClass = 0 :=
+  (intrinsicCubicH1Map_class 57 1 intrinsicNormalIso (by norm_num)
+    incidenceNormalNumerator incidenceNormalNumerator_homogeneous
+      (testCubic j) (testCubic_homogeneous j)).trans
+    (selectedIncidenceNormalClassOnSurface_in_seven_kernels j)
+
+end CycleQ2IntrinsicSurfaceNormalCohomology
 end
 
 end

@@ -8,6 +8,9 @@ import Proposal.GeometricExteriorSheaf
 import Proposal.GeometricSurfaceNormalCharts
 import Mathlib.Topology.Sheaves.SheafCondition.UniqueGluing
 import Mathlib.Algebra.Category.Grp.Limits
+import Proposal.GeometricLiteralCanonicalClass
+import Proposal.GeometricSurfaceCurveCharts
+import Mathlib.LinearAlgebra.Isomorphisms
 
 section
 
@@ -4282,6 +4285,880 @@ def gluedCubicAddHom (r θ : ℂ) :
   map_add' := gluedCubicSection_add r θ
 
 end CycleQ2SurfaceCubicGluing
+end
+
+end
+
+
+section
+
+/-! The glued cubic form respects complex scalars through the actual
+structure-sheaf coefficient map, without selecting a new target module. -/
+
+set_option autoImplicit false
+set_option Elab.async false
+
+noncomputable section
+namespace CycleQ2SurfaceCubicScalar
+
+open CategoryTheory Opposite AlgebraicGeometry MvPolynomial
+open CycleQ2SurfaceCubicGluing CycleQ2SurfaceResidueSheafOverlap
+open CycleQ2CartierProjectiveCover CycleQ2GeometricSurfaceAdjunction
+open CycleQ2GeometricSurfaceDehomogenizedCharts CycleQ2GeometricSurfaceCoefficients
+open CycleQ2GeometricAffineCurveCharts
+open CycleQ2SurfaceCommonOpen CycleQ2GeometricAffineChartSections CycleQ2GeometricExteriorSheaf
+
+local instance (r θ : ℂ) (O : (projectiveSurface r θ).Opens) :
+    Module Γ(projectiveSurface r θ, O) ((surfaceExteriorSheaf r θ).val.obj (op O)) :=
+  ((surfaceExteriorSheaf r θ).val.obj (op O)).isModule
+
+def complexCoefficient (r θ : ℂ) (O : (projectiveSurface r θ).Opens) :
+    ℂ →+* Γ(projectiveSurface r θ, O) :=
+  CycleQ2GeometricDifferentialSheaf.coefficientOn (projectiveSurface r θ).sheaf
+    (schemeCoefficient (projectiveToComplex r θ)) O
+
+theorem complexCoefficient_restrict (r θ c : ℂ)
+    {O P : (projectiveSurface r θ).Opens} (hPO : P ≤ O) :
+    (projectiveSurface r θ).presheaf.map (homOfLE hPO).op (complexCoefficient r θ O c) =
+      complexCoefficient r θ P c := by
+  have h := congrArg
+    (fun k : CommRingCat.of ℂ ⟶ Γ(projectiveSurface r θ, P) => k c)
+    ((CycleQ2GeometricDifferentialSheaf.coefficientMap (projectiveSurface r θ).sheaf
+      (schemeCoefficient (projectiveToComplex r θ))).naturality (homOfLE hPO).op)
+  exact h.symm
+
+theorem section_restrict_scalar (r θ c : ℂ)
+    {O P : (projectiveSurface r θ).Opens} (hPO : P ≤ O)
+    (s : (surfaceExteriorSheaf r θ).val.obj (op O)) :
+    (surfaceExteriorSheaf r θ).val.map (homOfLE hPO).op (complexCoefficient r θ O c • s) =
+      complexCoefficient r θ P c • (show (surfaceExteriorSheaf r θ).val.obj (op P) from
+        (surfaceExteriorSheaf r θ).val.map (homOfLE hPO).op s) :=
+  ((surfaceExteriorSheaf r θ).val.map_smul (homOfLE hPO).op (complexCoefficient r θ O c) s).trans
+    (congrArg (fun z : Γ(projectiveSurface r θ, P) =>
+      z • (show (surfaceExteriorSheaf r θ).val.obj (op P) from
+        (surfaceExteriorSheaf r θ).val.map (homOfLE hPO).op s))
+      (complexCoefficient_restrict r θ c hPO))
+
+section Chart
+
+variable {X : Scheme.{0}} {U : X.Opens}
+  (f : X ⟶ Spec (CommRingCat.of ℂ)) (v : Fin 2 → SurfacePoly) (n t : SurfacePoly)
+  (e : U.toScheme ≅ Spec (CommRingCat.of (AdjunctionPatch v n t)))
+  (h : e.inv ≫ U.ι ≫ f =
+    Spec.map (CommRingCat.ofHom (algebraMap ℂ (AdjunctionPatch v n t))))
+
+include h in
+private theorem chart_polynomial_scalar (dehom : CubicPolynomial →ₐ[ℂ] SurfacePoly)
+    (V : Over U) (c : ℂ) (p : CubicPolynomial) :
+    chartSection e V (algebraMap SurfacePoly (AdjunctionPatch v n t) (dehom (c • p))) =
+      (show Γ(X, V.left) from CycleQ2GeometricDifferentialSheaf.coefficientOn
+        X.sheaf (schemeCoefficient f) V.left c) *
+        chartSection e V (algebraMap SurfacePoly (AdjunctionPatch v n t) (dehom p)) := by
+  let φ : CubicPolynomial →ₐ[ℂ] AdjunctionPatch v n t :=
+    (IsScalarTower.toAlgHom ℂ SurfacePoly (AdjunctionPatch v n t)).comp dehom
+  have hs : algebraMap SurfacePoly (AdjunctionPatch v n t) (dehom (c • p)) =
+      algebraMap ℂ (AdjunctionPatch v n t) c *
+        algebraMap SurfacePoly (AdjunctionPatch v n t) (dehom p) :=
+    (φ.toLinearMap.map_smul c p).trans (Algebra.smul_def _ _)
+  exact (congrArg (chartSection e V) hs).trans
+    ((map_mul (chartSection e V) _ _).trans
+      (congrArg (fun z => z * chartSection e V
+        (algebraMap SurfacePoly (AdjunctionPatch v n t) (dehom p)))
+        (chartSection_complex e f h V c)))
+
+end Chart
+
+theorem localSectionOn_scalar (r θ c : ℂ) (p : CubicPolynomial) (k : PatchIndex)
+    (O : (projectiveSurface r θ).Opens) (hO : O ≤ patchOpen r θ k) :
+    localSectionOn r θ (c • p) k O hO =
+      complexCoefficient r θ O c • localSectionOn r θ p k O hO := by
+  rcases k with ⟨i, j⟩ | ⟨i, j⟩
+  · let n := normalPolynomial (firstQuadric r) i
+    let t := includeCurve (X j)
+    let V : Over (firstPatchOpen r θ n t) := Over.mk (homOfLE hO)
+    let η : (surfaceExteriorSheaf r θ).val.obj (op O) :=
+      chartResidueSheafSection (projectiveToComplex r θ) (firstEquations r θ) n t
+        (firstPatchChart r θ n t) (firstPatchChart_overComplex r θ n t) V
+    have hc := chart_polynomial_scalar (projectiveToComplex r θ) (firstEquations r θ) n t
+      (firstPatchChart r θ n t) (firstPatchChart_overComplex r θ n t)
+      firstSurfaceDehomogenize V c p
+    exact (congrArg (fun z : Γ(projectiveSurface r θ, O) => z • η) hc).trans
+      (mul_smul (complexCoefficient r θ O c) _ _)
+  · let n := normalPolynomial (secondQuadric r) i
+    let t := includeCurve (X j)
+    let V : Over (secondPatchOpen r θ n t) := Over.mk (homOfLE hO)
+    let η : (surfaceExteriorSheaf r θ).val.obj (op O) :=
+      chartResidueSheafSection (projectiveToComplex r θ) (secondEquations r θ) n t
+        (secondPatchChart r θ n t) (secondPatchChart_overComplex r θ n t) V
+    have hc := chart_polynomial_scalar (projectiveToComplex r θ) (secondEquations r θ) n t
+      (secondPatchChart r θ n t) (secondPatchChart_overComplex r θ n t)
+      secondSurfaceDehomogenize V c p
+    have he := (congrArg (fun z : Γ(projectiveSurface r θ, O) => z • η) hc).trans
+      (mul_smul (complexCoefficient r θ O c) _ _)
+    exact (congrArg Neg.neg he).trans (smul_neg _ _).symm
+
+/-- The scalar is the actual restricted complex coefficient in the structure sheaf. -/
+theorem gluedCubicSection_scalar (r θ c : ℂ) (p : WeightedCubic) :
+    gluedCubicSection r θ (c • p) =
+      (show Γ(projectiveSurface r θ, neighborhood r θ) from
+        CycleQ2GeometricDifferentialSheaf.coefficientOn (projectiveSurface r θ).sheaf
+          (schemeCoefficient (projectiveToComplex r θ)) (neighborhood r θ) c) •
+          gluedCubicSection r θ p := by
+  symm
+  apply gluedCubicSection_unique r θ (c • p)
+  intro k
+  exact (section_restrict_scalar r θ c (le_iSup (patchOpen r θ) k)
+      (gluedCubicSection r θ p)).trans
+    ((congrArg (fun s : (surfaceExteriorSheaf r θ).val.obj (op (patchOpen r θ k)) =>
+      complexCoefficient r θ (patchOpen r θ k) c • s)
+      (gluedCubicSection_restrict r θ p k)).trans
+      (localSectionOn_scalar r θ c p.val k _ le_rfl).symm)
+
+end CycleQ2SurfaceCubicScalar
+end
+
+end
+
+
+section
+
+/-! Weighted polynomial transition in actual structure-sheaf sections on
+all subopens of the two projective coordinate charts' overlap. -/
+
+set_option autoImplicit false
+set_option Elab.async false
+
+noncomputable section
+namespace CycleQ2SurfaceOverlapSections
+
+open CategoryTheory Opposite AlgebraicGeometry MvPolynomial
+open CycleQ2CartierProjectiveCover CycleQ2CartierSurfaceGrading
+open CycleQ2GeometricSurfaceAdjunction CycleQ2GeometricSurfaceDehomogenizedCharts
+open CycleQ2GeometricAffineChartSections CycleQ2GeometricSurfaceOverlap
+
+variable (r θ : ℂ) (V : (projectiveSurface r θ).Opens) (hV : V ≤ overlapPatch r θ)
+
+def coordinateSection : Γ(projectiveSurface r θ, V) :=
+  overlapSectionMap r θ V hV (coordinate (firstEquations r θ) (some 1))
+
+def inverseSection : Γ(projectiveSurface r θ, V) :=
+  overlapSectionMap r θ V hV (inverse (firstEquations r θ))
+
+theorem coordinateSection_mul_inverseSection :
+    coordinateSection r θ V hV * inverseSection r θ V hV = 1 :=
+  (map_mul (overlapSectionMap r θ V hV) _ _).symm.trans
+    ((congrArg (overlapSectionMap r θ V hV) (coordinate_mul_inverse (firstEquations r θ))).trans
+      (map_one _))
+
+theorem inverseSection_isUnit : IsUnit (inverseSection r θ V hV) :=
+  ⟨Units.mkOfMulEqOne (inverseSection r θ V hV) (coordinateSection r θ V hV)
+    ((mul_comm _ _).trans (coordinateSection_mul_inverseSection r θ V hV)), rfl⟩
+
+private theorem localized_polynomial_scaling (r θ : ℂ) (n : ℕ)
+    (p : MvPolynomial (Fin 5) ℂ) (hp : p.IsWeightedHomogeneous weight n) :
+    overlapEquiv r θ
+      (algebraMap (SurfaceChartRing (secondEquations r θ)) (SecondOverlap r θ)
+        (algebraMap SurfacePoly (SurfaceChartRing (secondEquations r θ))
+          (secondSurfaceDehomogenize p))) =
+      algebraMap (SurfaceChartRing (firstEquations r θ)) (FirstOverlap r θ)
+        (algebraMap SurfacePoly (SurfaceChartRing (firstEquations r θ))
+          (firstSurfaceDehomogenize p)) * inverse (firstEquations r θ) ^ n :=
+  overlapEquiv_dehomogenize r θ n p hp
+
+private theorem map_scaled {A B : Type} [CommRing A] [CommRing B]
+    (f : A →+* B) (x y t : A) (n : ℕ) (h : x = y * t ^ n) :
+    f x = f t ^ n * f y := by
+  rw [h, map_mul, map_pow, mul_comm]
+
+/-- The polynomial transition is evaluated in the actual projective structure
+sheaf, with no augmented-Jacobian choice or extra comparison premise. -/
+theorem weighted_polynomial_sections (n : ℕ) (p : MvPolynomial (Fin 5) ℂ)
+    (hp : p.IsWeightedHomogeneous weight n) :
+    (show Γ(projectiveSurface r θ, V) from chartSection (secondAffineChart r θ)
+        (Over.mk (homOfLE (hV.trans (overlap_le_second r θ))))
+        (algebraMap SurfacePoly (SurfaceChartRing (secondEquations r θ))
+          (secondSurfaceDehomogenize p))) =
+      inverseSection r θ V hV ^ n *
+        (show Γ(projectiveSurface r θ, V) from chartSection (firstAffineChart r θ)
+          (Over.mk (homOfLE (hV.trans (overlap_le_first r θ))))
+          (algebraMap SurfacePoly (SurfaceChartRing (firstEquations r θ))
+            (firstSurfaceDehomogenize p))) := by
+  have hfirst := overlapSectionMap_first r θ V hV
+    (algebraMap SurfacePoly (SurfaceChartRing (firstEquations r θ))
+      (firstSurfaceDehomogenize p))
+  have hsecond := overlapSectionMap_second r θ V hV
+    (algebraMap SurfacePoly (SurfaceChartRing (secondEquations r θ))
+      (secondSurfaceDehomogenize p))
+  have hs := map_scaled (overlapSectionMap r θ V hV) _ _ _ n
+    (localized_polynomial_scaling r θ n p hp)
+  exact hsecond.symm.trans (hs.trans
+    (congrArg (fun z : Γ(projectiveSurface r θ, V) => inverseSection r θ V hV ^ n * z) hfirst))
+
+
+end CycleQ2SurfaceOverlapSections
+end
+
+end
+
+
+section
+
+/-! Literal polynomial coefficients connect the actual surface exterior
+sheaf sections to the normal adjunction calculation. The restriction
+retains the pullback of surface differentials, before contraction to the
+curve differential module. -/
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2CubicAdjunctionBinding
+
+open CategoryTheory Opposite AlgebraicGeometry Module MvPolynomial
+  CycleQ2GeometricSurfaceAdjunction CycleQ2GeometricAffineCurveCharts
+  CycleQ2GeometricSparseJacobianCover
+  CycleQ2GeometricSurfaceDehomogenizedCharts CycleQ2GeometricSurfaceJacobianCharts
+  CycleQ2GeometricSurfaceCoefficients CycleQ2CartierProjectiveCover
+  CycleQ2GeometricAffineChartSections CycleQ2ChartExteriorBinding
+  CycleQ2SurfaceResidueSheafOverlap CycleQ2SurfaceCommonOpen
+
+/-- An arbitrary literal polynomial multiplies the normalized local residue. -/
+def polynomialSurfaceForm (v : Fin 2 → SurfacePoly) (n t p : SurfacePoly) :
+    ⋀[AdjunctionPatch v n t]^2 (KaehlerDifferential ℂ (AdjunctionPatch v n t)) :=
+  algebraMap SurfacePoly (AdjunctionPatch v n t) p • localSurfaceResidueForm v n t
+
+def restrictedPolynomialSurfaceForm (q h : AffinePoly) (g₁ g₂ k : SurfacePoly)
+    (i : Fin 2) (j : Fin 3) (p : SurfacePoly) :
+    ⋀[NormalCurvePatch q h g₁ g₂ k i j]^2
+      (RestrictedSurfaceDifferentials q h g₁ g₂ k i j) :=
+  determinantBaseChange (R := NormalCurvePatch q h g₁ g₂ k i j)
+    (localSurfaceKaehlerBasis ![surfaceEquation q h g₁ g₂ k, includeCurve h]
+      (normalPolynomial q i) (includeCurve (X j)))
+    (polynomialSurfaceForm ![surfaceEquation q h g₁ g₂ k, includeCurve h]
+      (normalPolynomial q i) (includeCurve (X j)) p)
+
+theorem restrictedPolynomialSurfaceForm_eq (q h : AffinePoly) (g₁ g₂ k : SurfacePoly)
+    (i : Fin 2) (j : Fin 3) (p : SurfacePoly) :
+    restrictedPolynomialSurfaceForm q h g₁ g₂ k i j p =
+      normalCoefficientMap q h g₁ g₂ k i j p •
+        restrictedSurfaceResidueForm q h g₁ g₂ k i j := by
+  let f := determinantBaseChange (R := NormalCurvePatch q h g₁ g₂ k i j)
+    (localSurfaceKaehlerBasis ![surfaceEquation q h g₁ g₂ k, includeCurve h]
+      (normalPolynomial q i) (includeCurve (X j)))
+  let s := algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k i j) p
+  let ω := localSurfaceResidueForm ![surfaceEquation q h g₁ g₂ k, includeCurve h]
+    (normalPolynomial q i) (includeCurve (X j))
+  change f (s • ω) = normalCoefficientMap q h g₁ g₂ k i j p • f ω
+  exact (f.map_smulₛₗ s ω).trans
+    (congrArg (fun a : NormalCurvePatch q h g₁ g₂ k i j => a • f ω)
+      (normalAlgebraMap_polynomial q h g₁ g₂ k i j p))
+
+private theorem linearMap_scaled_negative {R M N : Type*} [CommRing R]
+    [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+    (f : M →ₗ[R] N) (x y : M) (a : R) (z : N)
+    (hx : x = a • y) (hy : f y = -z) : f x = (-a) • z := by
+  rw [hx, map_smul, hy, smul_neg, neg_smul]
+
+/-- Contraction has the actual restricted coefficient and the fixed negative
+curve orientation, for every polynomial coefficient. -/
+theorem normalAdjunction_polynomial_eq_chartForm
+    (q h : AffinePoly) (g₁ g₂ k : SurfacePoly) (i : Fin 2) (j : Fin 3)
+    (hJ : jacobianIdeal ![q,h] = ⊤) (p : SurfacePoly) :
+    normalAdjunction q h g₁ g₂ k i j (normalVector q h g₁ g₂ k i j)
+        (restrictedPolynomialSurfaceForm q h g₁ g₂ k i j p) =
+      -(normalCoefficientMap q h g₁ g₂ k i j p) •
+        KaehlerDifferential.map ℂ ℂ (ChartRing ![q,h]) (NormalCurvePatch q h g₁ g₂ k i j)
+          (CycleQ2GeometricChartKaehler.globalForm ![q,h] hJ) :=
+  linearMap_scaled_negative
+    (normalAdjunction q h g₁ g₂ k i j (normalVector q h g₁ g₂ k i j))
+    (restrictedPolynomialSurfaceForm q h g₁ g₂ k i j p)
+    (restrictedSurfaceResidueForm q h g₁ g₂ k i j)
+    (normalCoefficientMap q h g₁ g₂ k i j p)
+    (KaehlerDifferential.map ℂ ℂ (ChartRing ![q,h]) (NormalCurvePatch q h g₁ g₂ k i j)
+      (CycleQ2GeometricChartKaehler.globalForm ![q,h] hJ))
+    (restrictedPolynomialSurfaceForm_eq q h g₁ g₂ k i j p)
+    (normalAdjunction_eq_chartForm q h g₁ g₂ k i j hJ)
+
+theorem polynomialSurfaceForm_originalCubic (q h : AffinePoly) (g₁ g₂ k : SurfacePoly)
+    (i : Fin 2) (j : Fin 3) :
+    polynomialSurfaceForm ![surfaceEquation q h g₁ g₂ k, includeCurve h]
+        (normalPolynomial q i) (includeCurve (X j)) (includeCurve (X 0 ^ 3)) =
+      localCubicSurfaceForm q h g₁ g₂ k i j := rfl
+
+theorem restrictedPolynomialSurfaceForm_originalCubic
+    (q h : AffinePoly) (g₁ g₂ k : SurfacePoly) (i : Fin 2) (j : Fin 3) :
+    restrictedPolynomialSurfaceForm q h g₁ g₂ k i j (includeCurve (X 0 ^ 3)) =
+      restrictedCubicSurfaceForm q h g₁ g₂ k i j := rfl
+
+section SheafSections
+
+variable (r θ : ℂ)
+
+theorem firstCubicSection_eq_polynomialForm (n t : SurfacePoly)
+    (p : MvPolynomial (Fin 5) ℂ) (V : Over (firstPatchOpen r θ n t)) :
+    firstCubicSection r θ n t p V =
+      chartExteriorSheafSection (firstPatchChart r θ n t)
+        (CycleQ2GeometricSurfaceCoefficients.projectiveToComplex r θ)
+        (firstPatchChart_overComplex r θ n t) 2 V
+        (polynomialSurfaceForm (firstEquations r θ) n t (firstSurfaceDehomogenize p)) := by
+  unfold firstCubicSection polynomialSurfaceForm
+  rw [map_smulₛₗ, chartResidueSheafSection_eq_canonical]
+
+theorem secondCubicSection_eq_polynomialForm (n t : SurfacePoly)
+    (p : MvPolynomial (Fin 5) ℂ) (V : Over (secondPatchOpen r θ n t)) :
+    secondCubicSection r θ n t p V =
+      -(chartExteriorSheafSection (secondPatchChart r θ n t)
+        (CycleQ2GeometricSurfaceCoefficients.projectiveToComplex r θ)
+        (secondPatchChart_overComplex r θ n t) 2 V
+        (polynomialSurfaceForm (secondEquations r θ) n t (secondSurfaceDehomogenize p))) := by
+  unfold secondCubicSection polynomialSurfaceForm
+  rw [map_smulₛₗ, chartResidueSheafSection_eq_canonical]
+
+end SheafSections
+
+def x0Cube : MvPolynomial (Fin 5) ℂ := X 0 ^ 3
+
+theorem x0Cube_homogeneous :
+    x0Cube.IsWeightedHomogeneous CycleQ2CartierSurfaceGrading.weight 3 :=
+  (show (X 0 : MvPolynomial (Fin 5) ℂ).IsWeightedHomogeneous
+    CycleQ2CartierSurfaceGrading.weight 1 from
+      isWeightedHomogeneous_X ℂ CycleQ2CartierSurfaceGrading.weight 0).pow 3
+
+def weightedX0Cube : ↥(weightedHomogeneousSubmodule ℂ CycleQ2CartierSurfaceGrading.weight 3) :=
+  ⟨x0Cube, x0Cube_homogeneous⟩
+
+@[simp] theorem firstSurfaceDehomogenize_x0Cube :
+    firstSurfaceDehomogenize x0Cube = includeCurve (X 0 ^ 3) := by
+  simp [x0Cube, firstSurfaceDehomogenize, includeCurve]
+
+@[simp] theorem secondSurfaceDehomogenize_x0Cube :
+    secondSurfaceDehomogenize x0Cube = includeCurve (X 0 ^ 3) := by
+  simp [x0Cube, secondSurfaceDehomogenize, includeCurve]
+
+end CycleQ2CubicAdjunctionBinding
+end
+
+end
+
+
+section
+
+/-! The genuine glued surface section restricts to the exact polynomial
+determinants used by adjunction. The original selected cubic and seven
+test cubics are admitted to this construction by their actual weights. -/
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GluedCubicAdjunction
+
+open CategoryTheory Opposite AlgebraicGeometry Module MvPolynomial
+  CycleQ2GeometricSurfaceAdjunction CycleQ2GeometricAffineCurveCharts
+  CycleQ2GeometricSurfaceDehomogenizedCharts CycleQ2GeometricSurfaceJacobianCharts
+  CycleQ2CartierProjectiveCover CycleQ2ChartExteriorBinding
+  CycleQ2SurfaceResidueSheafOverlap CycleQ2SurfaceCubicGluing
+  CycleQ2CubicAdjunctionBinding CycleQ2GeometricLiteralDirection
+
+def firstLocalPolynomialForm (r θ : ℂ) (i : Fin 2) (j : Fin 3)
+    (p : CubicPolynomial) :
+    ⋀[FirstNormalRing r θ i j]^2 (KaehlerDifferential ℂ (FirstNormalRing r θ i j)) :=
+  polynomialSurfaceForm (firstEquations r θ) (normalPolynomial (firstQuadric r) i)
+    (includeCurve (X j)) (firstSurfaceDehomogenize p)
+
+def secondLocalPolynomialForm (r θ : ℂ) (i : Fin 2) (j : Fin 3)
+    (p : CubicPolynomial) :
+    ⋀[SecondNormalRing r θ i j]^2 (KaehlerDifferential ℂ (SecondNormalRing r θ i j)) :=
+  polynomialSurfaceForm (secondEquations r θ) (normalPolynomial (secondQuadric r) i)
+    (includeCurve (X j)) (secondSurfaceDehomogenize p)
+
+/-- The glued section has the literal first-chart polynomial determinant
+on every smaller open of the actual normal chart. -/
+theorem gluedCubicSection_first_polynomialForm (r θ : ℂ) (p : WeightedCubic)
+    (i : Fin 2) (j : Fin 3) (O : (projectiveSurface r θ).Opens)
+    (hO : O ≤ firstNormalOpen r θ i j) :
+    (surfaceExteriorSheaf r θ).val.map
+        (homOfLE (hO.trans (le_iSup (patchOpen r θ) (.inl (i,j))))).op
+        (gluedCubicSection r θ p) =
+      chartExteriorSheafSection (firstNormalChart r θ i j)
+        (CycleQ2GeometricSurfaceCoefficients.projectiveToComplex r θ)
+        (firstNormalChart_overComplex r θ i j) 2 (Over.mk (homOfLE hO))
+        (firstLocalPolynomialForm r θ i j p.val) :=
+  (gluedCubicSection_subopen r θ p (.inl (i,j)) O hO).trans
+    (firstCubicSection_eq_polynomialForm r θ (normalPolynomial (firstQuadric r) i)
+      (includeCurve (X j)) p.val (Over.mk (homOfLE hO)))
+
+/-- The second chart retains the orientation already proved in gluing. -/
+theorem gluedCubicSection_second_polynomialForm (r θ : ℂ) (p : WeightedCubic)
+    (i : Fin 2) (j : Fin 3) (O : (projectiveSurface r θ).Opens)
+    (hO : O ≤ secondNormalOpen r θ i j) :
+    (surfaceExteriorSheaf r θ).val.map
+        (homOfLE (hO.trans (le_iSup (patchOpen r θ) (.inr (i,j))))).op
+        (gluedCubicSection r θ p) =
+      -(chartExteriorSheafSection (secondNormalChart r θ i j)
+        (CycleQ2GeometricSurfaceCoefficients.projectiveToComplex r θ)
+        (secondNormalChart_overComplex r θ i j) 2 (Over.mk (homOfLE hO))
+        (secondLocalPolynomialForm r θ i j p.val)) :=
+  (gluedCubicSection_subopen r θ p (.inr (i,j)) O hO).trans
+    (secondCubicSection_eq_polynomialForm r θ (normalPolynomial (secondQuadric r) i)
+      (includeCurve (X j)) p.val (Over.mk (homOfLE hO)))
+
+private theorem x0h : (X (0 : Fin 5) : CubicPolynomial).IsWeightedHomogeneous
+    CycleQ2CartierSurfaceGrading.weight 1 :=
+  isWeightedHomogeneous_X ℂ CycleQ2CartierSurfaceGrading.weight 0
+
+private theorem x1h : (X (1 : Fin 5) : CubicPolynomial).IsWeightedHomogeneous
+    CycleQ2CartierSurfaceGrading.weight 1 :=
+  isWeightedHomogeneous_X ℂ CycleQ2CartierSurfaceGrading.weight 1
+
+private theorem x2h : (X (2 : Fin 5) : CubicPolynomial).IsWeightedHomogeneous
+    CycleQ2CartierSurfaceGrading.weight 1 :=
+  isWeightedHomogeneous_X ℂ CycleQ2CartierSurfaceGrading.weight 2
+
+private theorem x3h : (X (3 : Fin 5) : CubicPolynomial).IsWeightedHomogeneous
+    CycleQ2CartierSurfaceGrading.weight 1 :=
+  isWeightedHomogeneous_X ℂ CycleQ2CartierSurfaceGrading.weight 3
+
+private theorem x4h : (X (4 : Fin 5) : CubicPolynomial).IsWeightedHomogeneous
+    CycleQ2CartierSurfaceGrading.weight 2 :=
+  isWeightedHomogeneous_X ℂ CycleQ2CartierSurfaceGrading.weight 4
+
+theorem weightedSelectedCubic_homogeneous :
+    weightedSelectedCubic.IsWeightedHomogeneous CycleQ2CartierSurfaceGrading.weight 3 := by
+  simpa [weightedSelectedCubic, chosenCubic, mul_assoc] using
+    (((x0h.pow 2).mul x1h).C_mul Complex.I).add
+      ((x0h.pow 3).C_mul (Complex.I - 1))
+
+theorem weightedTestCubic_homogeneous (j : Fin 7) :
+    (weightedTestCubic j).IsWeightedHomogeneous CycleQ2CartierSurfaceGrading.weight 3 := by
+  fin_cases j
+  · exact x2h.mul x4h
+  · exact x2h.mul (x3h.pow 2)
+  · exact x1h.mul (x2h.pow 2)
+  · exact (x1h.pow 2).mul x3h
+  · exact x0h.mul (x2h.pow 2)
+  · exact (x0h.mul x1h).mul x3h
+  · exact (x0h.pow 2).mul x3h
+
+def originalSelectedCubic : WeightedCubic :=
+  ⟨weightedSelectedCubic, weightedSelectedCubic_homogeneous⟩
+
+def originalTestCubic (j : Fin 7) : WeightedCubic :=
+  ⟨weightedTestCubic j, weightedTestCubic_homogeneous j⟩
+
+theorem originalSelectedCubic_substitute :
+    CycleQ2SeedTrace.substitute originalSelectedCubic.val = selectedCubic :=
+  substitute_weightedSelectedCubic
+
+theorem originalTestCubic_substitute (j : Fin 7) :
+    CycleQ2SeedTrace.substitute (originalTestCubic j).val = testCubic j :=
+  substitute_weightedTestCubic j
+
+end CycleQ2GluedCubicAdjunction
+end
+
+end
+
+
+section
+
+/-! The actual surface cubic coefficients restrict to the original curve
+polynomials. Contraction by the genuine normal vector has the fixed curve
+orientation, with smoothness discharged at the literal seed. -/
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2CurveCubicCoefficients
+
+open MvPolynomial Module CycleQ2SeedTrace CycleQ2NormalConnecting
+  CycleQ2GeometricSurfaceAdjunction CycleQ2GeometricAffineCurveCharts
+  CycleQ2GeometricSurfacePrincipalCurveCharts CycleQ2GeometricSurfaceCurveCharts
+  CycleQ2GeometricSparseJacobianCover CycleQ2CubicAdjunctionBinding
+  CycleQ2GeometricLiteralDirection CycleQ2GluedCubicAdjunction
+
+variable (r θ : ℂ) (i : Fin 2) (j : Fin 3)
+
+def firstCurveCoefficient : WeightedPoly →ₐ[ℂ] FirstNormalCurveRing r θ i j :=
+  (normalCoefficientMap (firstQuadric r) (firstCubic θ)
+    (firstSurfaceDehomogenize (originalG1 r)) (firstSurfaceDehomogenize originalG2)
+    (firstSurfaceDehomogenize (thetaK θ)) i j).comp firstSurfaceDehomogenize
+
+def secondCurveCoefficient : WeightedPoly →ₐ[ℂ] SecondNormalCurveRing r θ i j :=
+  (normalCoefficientMap (secondQuadric r) (secondCubic θ)
+    (secondSurfaceDehomogenize (originalG1 r)) (secondSurfaceDehomogenize originalG2)
+    (secondSurfaceDehomogenize (thetaK θ)) i j).comp secondSurfaceDehomogenize
+
+theorem firstCurveCoefficient_eq (p : WeightedPoly) :
+    firstCurveCoefficient r θ i j p =
+      algebraMap (ChartRing ![firstQuadric r, firstCubic θ]) (FirstNormalCurveRing r θ i j)
+        (Ideal.Quotient.mk (chartIdeal ![firstQuadric r, firstCubic θ])
+          (firstDehomogenize (substitute p))) := by
+  change algebraMap (ChartRing ![firstQuadric r, firstCubic θ]) (FirstNormalCurveRing r θ i j)
+      (polynomialToCurve (firstQuadric r) (firstCubic θ) (firstSurfaceDehomogenize p)) = _
+  exact congrArg (algebraMap (ChartRing ![firstQuadric r, firstCubic θ])
+    (FirstNormalCurveRing r θ i j)) (firstPolynomialToCurve_dehomogenize r θ p)
+
+theorem secondCurveCoefficient_eq (p : WeightedPoly) :
+    secondCurveCoefficient r θ i j p =
+      algebraMap (ChartRing ![secondQuadric r, secondCubic θ]) (SecondNormalCurveRing r θ i j)
+        (Ideal.Quotient.mk (chartIdeal ![secondQuadric r, secondCubic θ])
+          (secondDehomogenize (substitute p))) := by
+  change algebraMap (ChartRing ![secondQuadric r, secondCubic θ]) (SecondNormalCurveRing r θ i j)
+      (polynomialToCurve (secondQuadric r) (secondCubic θ) (secondSurfaceDehomogenize p)) = _
+  exact congrArg (algebraMap (ChartRing ![secondQuadric r, secondCubic θ])
+    (SecondNormalCurveRing r θ i j)) (secondPolynomialToCurve_dehomogenize r θ p)
+
+theorem firstCurveCoefficient_selected :
+    firstCurveCoefficient r θ i j originalSelectedCubic.val =
+      algebraMap (ChartRing ![firstQuadric r, firstCubic θ]) (FirstNormalCurveRing r θ i j)
+        (Ideal.Quotient.mk (chartIdeal ![firstQuadric r, firstCubic θ])
+          (firstDehomogenize selectedCubic)) := by
+  rw [firstCurveCoefficient_eq, originalSelectedCubic_substitute]
+
+theorem secondCurveCoefficient_selected :
+    secondCurveCoefficient r θ i j originalSelectedCubic.val =
+      algebraMap (ChartRing ![secondQuadric r, secondCubic θ]) (SecondNormalCurveRing r θ i j)
+        (Ideal.Quotient.mk (chartIdeal ![secondQuadric r, secondCubic θ])
+          (secondDehomogenize selectedCubic)) := by
+  rw [secondCurveCoefficient_eq, originalSelectedCubic_substitute]
+
+theorem firstCurveCoefficient_test (a : Fin 7) :
+    firstCurveCoefficient r θ i j (originalTestCubic a).val =
+      algebraMap (ChartRing ![firstQuadric r, firstCubic θ]) (FirstNormalCurveRing r θ i j)
+        (Ideal.Quotient.mk (chartIdeal ![firstQuadric r, firstCubic θ])
+          (firstDehomogenize (testCubic a))) := by
+  rw [firstCurveCoefficient_eq, originalTestCubic_substitute]
+
+theorem secondCurveCoefficient_test (a : Fin 7) :
+    secondCurveCoefficient r θ i j (originalTestCubic a).val =
+      algebraMap (ChartRing ![secondQuadric r, secondCubic θ]) (SecondNormalCurveRing r θ i j)
+        (Ideal.Quotient.mk (chartIdeal ![secondQuadric r, secondCubic θ])
+          (secondDehomogenize (testCubic a))) := by
+  rw [secondCurveCoefficient_eq, originalTestCubic_substitute]
+
+def firstRestrictedPolynomialForm (p : WeightedPoly) :=
+  restrictedPolynomialSurfaceForm (firstQuadric r) (firstCubic θ)
+    (firstSurfaceDehomogenize (originalG1 r)) (firstSurfaceDehomogenize originalG2)
+    (firstSurfaceDehomogenize (thetaK θ)) i j (firstSurfaceDehomogenize p)
+
+def secondRestrictedPolynomialForm (p : WeightedPoly) :=
+  restrictedPolynomialSurfaceForm (secondQuadric r) (secondCubic θ)
+    (secondSurfaceDehomogenize (originalG1 r)) (secondSurfaceDehomogenize originalG2)
+    (secondSurfaceDehomogenize (thetaK θ)) i j (secondSurfaceDehomogenize p)
+
+def firstNormalAdjunction :=
+  normalAdjunction (firstQuadric r) (firstCubic θ)
+    (firstSurfaceDehomogenize (originalG1 r)) (firstSurfaceDehomogenize originalG2)
+    (firstSurfaceDehomogenize (thetaK θ)) i j
+    (normalVector (firstQuadric r) (firstCubic θ)
+      (firstSurfaceDehomogenize (originalG1 r)) (firstSurfaceDehomogenize originalG2)
+      (firstSurfaceDehomogenize (thetaK θ)) i j)
+
+def secondNormalAdjunction :=
+  normalAdjunction (secondQuadric r) (secondCubic θ)
+    (secondSurfaceDehomogenize (originalG1 r)) (secondSurfaceDehomogenize originalG2)
+    (secondSurfaceDehomogenize (thetaK θ)) i j
+    (normalVector (secondQuadric r) (secondCubic θ)
+      (secondSurfaceDehomogenize (originalG1 r)) (secondSurfaceDehomogenize originalG2)
+      (secondSurfaceDehomogenize (thetaK θ)) i j)
+
+theorem firstNormalAdjunction_formula
+    (hJ : jacobianIdeal ![firstQuadric r, firstCubic θ] = ⊤) (p : WeightedPoly) :
+    firstNormalAdjunction r θ i j (firstRestrictedPolynomialForm r θ i j p) =
+      -(firstCurveCoefficient r θ i j p) •
+        KaehlerDifferential.map ℂ ℂ (ChartRing ![firstQuadric r, firstCubic θ])
+          (FirstNormalCurveRing r θ i j)
+          (CycleQ2GeometricChartKaehler.globalForm ![firstQuadric r, firstCubic θ] hJ) :=
+  normalAdjunction_polynomial_eq_chartForm (firstQuadric r) (firstCubic θ)
+    (firstSurfaceDehomogenize (originalG1 r)) (firstSurfaceDehomogenize originalG2)
+    (firstSurfaceDehomogenize (thetaK θ)) i j hJ (firstSurfaceDehomogenize p)
+
+theorem secondNormalAdjunction_formula
+    (hJ : jacobianIdeal ![secondQuadric r, secondCubic θ] = ⊤) (p : WeightedPoly) :
+    secondNormalAdjunction r θ i j (secondRestrictedPolynomialForm r θ i j p) =
+      -(secondCurveCoefficient r θ i j p) •
+        KaehlerDifferential.map ℂ ℂ (ChartRing ![secondQuadric r, secondCubic θ])
+          (SecondNormalCurveRing r θ i j)
+          (CycleQ2GeometricChartKaehler.globalForm ![secondQuadric r, secondCubic θ] hJ) :=
+  normalAdjunction_polynomial_eq_chartForm (secondQuadric r) (secondCubic θ)
+    (secondSurfaceDehomogenize (originalG1 r)) (secondSurfaceDehomogenize originalG2)
+    (secondSurfaceDehomogenize (thetaK θ)) i j hJ (secondSurfaceDehomogenize p)
+
+private theorem linearMap_neg_of_scaled_negative {R M N : Type*} [CommRing R]
+    [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+    (f : M →ₗ[R] N) (x : M) (a : R) (z : N) (h : f x = (-a) • z) :
+    f (-x) = a • z := by
+  rw [map_neg, h, neg_smul, neg_neg]
+
+theorem secondNormalAdjunction_oriented
+    (hJ : jacobianIdeal ![secondQuadric r, secondCubic θ] = ⊤) (p : WeightedPoly) :
+    secondNormalAdjunction r θ i j (-(secondRestrictedPolynomialForm r θ i j p)) =
+      secondCurveCoefficient r θ i j p •
+        KaehlerDifferential.map ℂ ℂ (ChartRing ![secondQuadric r, secondCubic θ])
+          (SecondNormalCurveRing r θ i j)
+          (CycleQ2GeometricChartKaehler.globalForm ![secondQuadric r, secondCubic θ] hJ) :=
+  linearMap_neg_of_scaled_negative (secondNormalAdjunction r θ i j)
+    (secondRestrictedPolynomialForm r θ i j p) (secondCurveCoefficient r θ i j p)
+    (KaehlerDifferential.map ℂ ℂ (ChartRing ![secondQuadric r, secondCubic θ])
+      (SecondNormalCurveRing r θ i j)
+      (CycleQ2GeometricChartKaehler.globalForm ![secondQuadric r, secondCubic θ] hJ))
+    (secondNormalAdjunction_formula r θ i j hJ p)
+
+theorem literal_first_normalAdjunction (p : WeightedPoly) :
+    firstNormalAdjunction 57 1 i j (firstRestrictedPolynomialForm 57 1 i j p) =
+      -(firstCurveCoefficient 57 1 i j p) •
+        KaehlerDifferential.map ℂ ℂ (ChartRing ![firstQuadric 57, firstCubic 1])
+          (FirstNormalCurveRing 57 1 i j)
+          (CycleQ2GeometricChartKaehler.globalForm ![firstQuadric 57, firstCubic 1]
+            CycleQ2GeometricIncidenceJacobianCover.first_chart_jacobianIdeal_eq_top) :=
+  firstNormalAdjunction_formula 57 1 i j
+    CycleQ2GeometricIncidenceJacobianCover.first_chart_jacobianIdeal_eq_top p
+
+theorem literal_second_normalAdjunction (p : WeightedPoly) :
+    secondNormalAdjunction 57 1 i j (-(secondRestrictedPolynomialForm 57 1 i j p)) =
+      secondCurveCoefficient 57 1 i j p •
+        KaehlerDifferential.map ℂ ℂ (ChartRing ![secondQuadric 57, secondCubic 1])
+          (SecondNormalCurveRing 57 1 i j)
+          (CycleQ2GeometricChartKaehler.globalForm ![secondQuadric 57, secondCubic 1]
+            CycleQ2GeometricIncidenceJacobianCover.second_chart_jacobianIdeal_eq_top) :=
+  secondNormalAdjunction_oriented 57 1 i j
+    CycleQ2GeometricIncidenceJacobianCover.second_chart_jacobianIdeal_eq_top p
+
+end CycleQ2CurveCubicCoefficients
+end
+
+end
+
+
+section
+
+/-! The glued cubic construction is complex linear for the canonical
+structure-sheaf coefficient action. Section restrictions use that same
+action and are complex linear. -/
+
+set_option autoImplicit false
+set_option Elab.async false
+
+noncomputable section
+namespace CycleQ2CubicLinearMap
+
+open CategoryTheory Opposite AlgebraicGeometry
+  CycleQ2CartierProjectiveCover CycleQ2SurfaceResidueSheafOverlap
+  CycleQ2SurfaceCubicGluing CycleQ2SurfaceCubicScalar
+
+abbrev SurfaceSections (r θ : ℂ) (O : (projectiveSurface r θ).Opens) :=
+  (surfaceExteriorSheaf r θ).val.obj (op O)
+
+local instance (r θ : ℂ) (O : (projectiveSurface r θ).Opens) :
+    Module Γ(projectiveSurface r θ, O) (SurfaceSections r θ O) :=
+  (SurfaceSections r θ O).isModule
+
+@[instance_reducible] def complexModule (r θ : ℂ) (O : (projectiveSurface r θ).Opens) :
+    Module ℂ (SurfaceSections r θ O) :=
+  Module.compHom (SurfaceSections r θ O) (complexCoefficient r θ O)
+
+theorem complexModule_smul (r θ c : ℂ) (O : (projectiveSurface r θ).Opens)
+    (s : SurfaceSections r θ O) :
+    letI := complexModule r θ O
+    c • s = complexCoefficient r θ O c • s := rfl
+
+def restrictionLinearMap (r θ : ℂ) {O P : (projectiveSurface r θ).Opens} (hPO : P ≤ O) :
+    letI := complexModule r θ O
+    letI := complexModule r θ P
+    SurfaceSections r θ O →ₗ[ℂ] SurfaceSections r θ P := by
+  letI := complexModule r θ O
+  letI := complexModule r θ P
+  exact
+    { toFun := (surfaceExteriorSheaf r θ).val.map (homOfLE hPO).op
+      map_add' := fun x y => map_add ((surfaceExteriorSheaf r θ).val.map (homOfLE hPO).op).hom x y
+      map_smul' := fun c s => section_restrict_scalar r θ c hPO s }
+
+@[simp] theorem restrictionLinearMap_apply (r θ : ℂ)
+    {O P : (projectiveSurface r θ).Opens} (hPO : P ≤ O) (s : SurfaceSections r θ O) :
+    restrictionLinearMap r θ hPO s = (surfaceExteriorSheaf r θ).val.map (homOfLE hPO).op s := rfl
+
+/-- The intrinsic complex coefficient action makes actual residue gluing
+a linear map from the genuine weighted cubic submodule. -/
+def gluedCubicLinearMap (r θ : ℂ) :
+    letI := complexModule r θ (neighborhood r θ)
+    WeightedCubic →ₗ[ℂ] SurfaceSections r θ (neighborhood r θ) := by
+  letI := complexModule r θ (neighborhood r θ)
+  exact
+    { toFun := gluedCubicSection r θ
+      map_add' := gluedCubicSection_add r θ
+      map_smul' := gluedCubicSection_scalar r θ }
+
+@[simp] theorem gluedCubicLinearMap_apply (r θ : ℂ) (p : WeightedCubic) :
+    gluedCubicLinearMap r θ p = gluedCubicSection r θ p := rfl
+
+theorem restrictionLinearMap_glued (r θ : ℂ) (p : WeightedCubic) (k : PatchIndex)
+    (O : (projectiveSurface r θ).Opens) (hO : O ≤ patchOpen r θ k) :
+    restrictionLinearMap r θ (hO.trans (le_iSup (patchOpen r θ) k))
+        (gluedCubicLinearMap r θ p) = localSectionOn r θ p.val k O hO :=
+  gluedCubicSection_subopen r θ p k O hO
+
+end CycleQ2CubicLinearMap
+end
+
+end
+
+
+section
+
+/-! Cubic residue gluing factors through the actual degree-three piece
+of the original surface quotient. Vanishing is proved in the concrete
+dehomogenized rings before descent through the linear quotient. -/
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2SurfaceCubicQuotient
+
+open CategoryTheory Opposite AlgebraicGeometry MvPolynomial
+  CycleQ2SeedTrace CycleQ2NormalConnecting CycleQ2ConormalJacobian
+  CycleQ2GeometricCartierNormalLift CycleQ2CartierSurfaceGrading
+  CycleQ2CartierProjectiveCover CycleQ2GeometricSurfaceAdjunction
+  CycleQ2GeometricSurfaceDehomogenizedCharts CycleQ2GeometricAffineCurveCharts
+  CycleQ2GeometricAffineChartSections CycleQ2SurfaceCommonOpen
+  CycleQ2SurfaceResidueSheafOverlap CycleQ2SurfaceCubicGluing
+  CycleQ2CubicLinearMap
+
+variable (r θ : ℂ)
+
+abbrev SurfaceCubics := ↥(surfaceGrade r θ 3)
+
+/-- The original polynomial quotient, restricted to its genuine cubic grade. -/
+def cubicQuotient : WeightedCubic →ₗ[ℂ] SurfaceCubics r θ where
+  toFun p := ⟨surfaceQuotient r θ p.val, surfaceQuotient_mem_grade r θ p.property⟩
+  map_add' p q := Subtype.ext ((surfaceQuotient r θ).map_add p.val q.val)
+  map_smul' c p := Subtype.ext
+    ((CycleQ2GeometricLiteralSurface.quotient r θ).toLinearMap.map_smul c p.val)
+
+theorem cubicQuotient_surjective : Function.Surjective (cubicQuotient r θ) := by
+  intro a
+  obtain ⟨p, hp, ha⟩ := a.property
+  exact ⟨⟨p,hp⟩, Subtype.ext ha⟩
+
+theorem firstPatchCoefficient_zero (n t : SurfacePoly) (p : WeightedPoly)
+    (hp : surfaceQuotient r θ p = 0) :
+    algebraMap SurfacePoly (AdjunctionPatch (firstEquations r θ) n t)
+      (firstSurfaceDehomogenize p) = 0 := by
+  have h := congrArg (surfaceToDehomogenized r θ 1) hp
+  rw [surfaceToDehomogenized_surfaceQuotient, map_zero] at h
+  have hm : dehomogenize 1 p ∈ surfaceChartIdeal (dehomogenizedEquations r θ 1) :=
+    Ideal.Quotient.eq_zero_iff_mem.mp h
+  have hq : Ideal.Quotient.mk (surfaceChartIdeal (firstEquations r θ))
+      (firstSurfaceDehomogenize p) = 0 := by
+    apply Ideal.Quotient.eq_zero_iff_mem.mpr
+    simpa only [dehomogenizedEquations_one, dehomogenize_one] using hm
+  change algebraMap (SurfaceChartRing (firstEquations r θ))
+    (AdjunctionPatch (firstEquations r θ) n t)
+    (Ideal.Quotient.mk (surfaceChartIdeal (firstEquations r θ))
+      (firstSurfaceDehomogenize p)) = 0
+  exact (congrArg (algebraMap (SurfaceChartRing (firstEquations r θ))
+    (AdjunctionPatch (firstEquations r θ) n t)) hq).trans (map_zero _)
+
+theorem secondPatchCoefficient_zero (n t : SurfacePoly) (p : WeightedPoly)
+    (hp : surfaceQuotient r θ p = 0) :
+    algebraMap SurfacePoly (AdjunctionPatch (secondEquations r θ) n t)
+      (secondSurfaceDehomogenize p) = 0 := by
+  have h := congrArg (surfaceToDehomogenized r θ 2) hp
+  rw [surfaceToDehomogenized_surfaceQuotient, map_zero] at h
+  have hm : dehomogenize 2 p ∈ surfaceChartIdeal (dehomogenizedEquations r θ 2) :=
+    Ideal.Quotient.eq_zero_iff_mem.mp h
+  have hq : Ideal.Quotient.mk (surfaceChartIdeal (secondEquations r θ))
+      (secondSurfaceDehomogenize p) = 0 := by
+    apply Ideal.Quotient.eq_zero_iff_mem.mpr
+    simpa only [dehomogenizedEquations_two, dehomogenize_two] using hm
+  change algebraMap (SurfaceChartRing (secondEquations r θ))
+    (AdjunctionPatch (secondEquations r θ) n t)
+    (Ideal.Quotient.mk (surfaceChartIdeal (secondEquations r θ))
+      (secondSurfaceDehomogenize p)) = 0
+  exact (congrArg (algebraMap (SurfaceChartRing (secondEquations r θ))
+    (AdjunctionPatch (secondEquations r θ) n t)) hq).trans (map_zero _)
+
+local instance (O : (projectiveSurface r θ).Opens) :
+    Module Γ(projectiveSurface r θ, O) (SurfaceSections r θ O) :=
+  (SurfaceSections r θ O).isModule
+
+theorem firstCubicSection_zero (n t : SurfacePoly) (p : WeightedPoly)
+    (hp : surfaceQuotient r θ p = 0) (V : Over (firstPatchOpen r θ n t)) :
+    firstCubicSection r θ n t p V = 0 := by
+  unfold firstCubicSection
+  rw [firstPatchCoefficient_zero r θ n t p hp, map_zero]
+  exact zero_smul Γ(projectiveSurface r θ, V.left) _
+
+theorem secondCubicSection_zero (n t : SurfacePoly) (p : WeightedPoly)
+    (hp : surfaceQuotient r θ p = 0) (V : Over (secondPatchOpen r θ n t)) :
+    secondCubicSection r θ n t p V = 0 := by
+  unfold secondCubicSection
+  rw [secondPatchCoefficient_zero r θ n t p hp, map_zero,
+    zero_smul Γ(projectiveSurface r θ, V.left), neg_zero]
+
+theorem localSection_zero (p : WeightedPoly) (hp : surfaceQuotient r θ p = 0)
+    (k : PatchIndex) : localSection r θ p k = 0 := by
+  rcases k with ⟨i,j⟩ | ⟨i,j⟩
+  · exact firstCubicSection_zero r θ (normalPolynomial (firstQuadric r) i)
+      (includeCurve (X j)) p hp _
+  · exact secondCubicSection_zero r θ (normalPolynomial (secondQuadric r) i)
+      (includeCurve (X j)) p hp _
+
+theorem gluedCubicSection_zero_of_quotient (p : WeightedCubic)
+    (hp : surfaceQuotient r θ p.val = 0) : gluedCubicSection r θ p = 0 := by
+  symm
+  apply gluedCubicSection_unique r θ p 0
+  intro k
+  exact (map_zero ((surfaceExteriorSheaf r θ).val.map
+    (homOfLE (le_iSup (patchOpen r θ) k)).op).hom).trans (localSection_zero r θ p.val hp k).symm
+
+theorem cubicQuotient_ker_le :
+    letI := complexModule r θ (neighborhood r θ)
+    LinearMap.ker (cubicQuotient r θ) ≤ LinearMap.ker (gluedCubicLinearMap r θ) := by
+  let := complexModule r θ (neighborhood r θ)
+  intro p hp
+  have h : cubicQuotient r θ p = 0 := hp
+  have hq : surfaceQuotient r θ p.val = 0 := congrArg Subtype.val h
+  exact gluedCubicSection_zero_of_quotient r θ p hq
+
+/-- Descent is through the kernel of the actual quotient map, using the
+proved vanishing of its entire kernel. -/
+def surfaceCubicLinearMap :
+    letI := complexModule r θ (neighborhood r θ)
+    SurfaceCubics r θ →ₗ[ℂ] SurfaceSections r θ (neighborhood r θ) := by
+  letI := complexModule r θ (neighborhood r θ)
+  exact ((LinearMap.ker (cubicQuotient r θ)).liftQ (gluedCubicLinearMap r θ)
+    (cubicQuotient_ker_le r θ)).comp
+      ((cubicQuotient r θ).quotKerEquivOfSurjective (cubicQuotient_surjective r θ)).symm.toLinearMap
+
+@[simp] theorem surfaceCubicLinearMap_quotient (p : WeightedCubic) :
+    surfaceCubicLinearMap r θ (cubicQuotient r θ p) = gluedCubicSection r θ p := by
+  let := complexModule r θ (neighborhood r θ)
+  change (LinearMap.ker (cubicQuotient r θ)).liftQ (gluedCubicLinearMap r θ)
+      (cubicQuotient_ker_le r θ)
+      (((cubicQuotient r θ).quotKerEquivOfSurjective
+        (cubicQuotient_surjective r θ)).symm (cubicQuotient r θ p)) = _
+  rw [LinearMap.quotKerEquivOfSurjective_symm_apply, Submodule.liftQ_apply]
+  rfl
+
+theorem gluedCubicSection_eq_of_quotient (p q : WeightedCubic)
+    (hpq : surfaceQuotient r θ p.val = surfaceQuotient r θ q.val) :
+    gluedCubicSection r θ p = gluedCubicSection r θ q := by
+  have h : cubicQuotient r θ p = cubicQuotient r θ q := Subtype.ext hpq
+  exact (surfaceCubicLinearMap_quotient r θ p).symm.trans
+    ((congrArg (surfaceCubicLinearMap r θ) h).trans (surfaceCubicLinearMap_quotient r θ q))
+
+end CycleQ2SurfaceCubicQuotient
 end
 
 end

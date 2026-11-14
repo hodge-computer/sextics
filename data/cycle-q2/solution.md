@@ -1,5 +1,190 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Intrinsic normal frames and the original surface cohomology classes — 14 November 2026
+
+This continuation proves the global identification of the intrinsic normal
+sheaf of the original curve with the previously constructed normal line
+sheaf. It then places the original selected class and the seven incidence
+kernel identities in the cohomology of the actual normal direct image on
+the original surface. The normal identification has no additional
+smoothness or comparison hypothesis at the literal parameters
+\((r,\theta)=(57,1)\).
+
+The original existence theorem in [Solution.lean](Solution.lean) remains
+open. The incoming continuation proves the Cartier boundary formula for
+its explicit positive-01 normal cocycle and the original nonzero surface
+class. Comparing that cocycle with the normalized intrinsic-model class
+constructed here remains separate from this checkpoint. The global
+contraction/Serre comparison, moving-class and supported-correspondence
+constructions, and final de Rham argument also remain to be completed.
+The incoming connecting-class calculation and its original representatives,
+described below, are retained in full.
+
+### A normalized isomorphism of the genuine normal sheaves
+
+Let \(j:C\hookrightarrow S\) be the original projective curve immersion,
+and let \(I\) be the kernel of its structure-sheaf map. The source normal
+sheaf is the actual internal linear dual
+
+\[
+N_{C/S}=\mathcal{H}om_{\mathcal O_C}(j^*I,\mathcal O_C).
+\]
+
+[GeometricNormalSheafComparison.lean](GeometricNormalSheafComparison.lean)
+now proves
+
+\[
+N_{C/S}\simeq N_{\mathrm{model}}
+\]
+
+for the original degree-minus-two normal model at the literal seed. The
+map is fixed by its values on the original equation-normal vectors.
+On every smaller open in each matching normal-chart and quartic-chart
+refinement, the forward isomorphism sends the original vector to
+coefficient \(1\). Thus the construction records its normalization rather
+than merely establishing that two line sheaves are abstractly isomorphic.
+
+The proof first identifies intrinsic normal sections on affine opens with
+the genuine ideal/conormal dual. It proves evaluation and restriction
+naturality, including arbitrary smaller opens. It then transports the
+affine normal frames through the actual Cartesian chart squares. Six
+normal-chart opens cover each of the two curve coordinate patches; the
+sheaf condition glues their frames. On the overlap, the original normal
+vectors satisfy precisely the already specified transition
+
+\[
+\nu_2=t^{-2}\nu_1,
+\]
+
+where \(t\) is the original projective transition unit. This is the
+transition of the existing normal model. The global isomorphism follows
+by gluing the compatible normalized frames. All cover and Jacobian
+hypotheses used in the literal theorem are discharged by the existing
+proved seed identities.
+
+The generic ingredients include source-normal restriction, evaluation
+under base change, and gluing of locally free rank-one frames. The final
+literal declaration is
+`CycleQ2IntrinsicNormalModel.intrinsicNormalIso`; its two vector theorems
+record the normalization on both projective coordinate families.
+
+### The original classes on the actual surface
+
+[GeometricSurfaceResidueFunctoriality.lean](GeometricSurfaceResidueFunctoriality.lean)
+constructs the surface-side Mayer–Vietoris boundary for the original normal
+class. For a closed embedding, each curve open is the inverse image of a
+specified surface open, obtained by removing the image of its closed
+complement. This construction preserves the unions and intersections
+needed for the cover square. Sections of the pushed-forward sheaf are
+identified with the original curve sections by the actual restriction
+maps.
+
+The kernel of the resulting surface boundary is proved directly from
+Mayer–Vietoris exactness: an overlap section has zero boundary exactly
+when it is the difference of sections on the two opens. Naturality is
+proved for genuine sheaf morphisms. These results preserve the original
+nonzero normal class, its nonzero image under the selected cubic, and the
+vanishing of the seven test-cubic images of the incidence class.
+
+The intrinsic normal comparison then uses the actual adjunction
+isomorphism
+
+\[
+j_*N_{C/S}\simeq
+\mathcal{H}om_{\mathcal O_S}(I,j_*\mathcal O_C)
+\]
+
+and the newly proved normalized normal-model isomorphism. The resulting
+class lies in the genuine surface cohomology of
+\(\mathcal{H}om(I,j_*\mathcal O_C)\), the third sheaf of the incoming
+Cartier short exact sequence. The selected cubic gives an actual additive
+sheaf morphism from that intrinsic normal direct image. Its induced
+cohomology map has the original selected nonzero image. The seven
+incidence equations likewise hold in this intrinsic surface cohomology.
+
+The declarations
+`literalIntrinsicNormalClass_ne_zero`,
+`literal_intrinsic_selected_cubic_image_ne_zero`, and
+`literalIntrinsicIncidenceClass_in_seven_kernels` in
+[GeometricCartierOrdinaryScalar.lean](GeometricCartierOrdinaryScalar.lean)
+are the literal specializations with no remaining normal-isomorphism
+premise. The same helper also compares the pushed-forward model classes
+with ordinary derived cohomology through the canonical terminal-source
+comparison. Its morphism naturality preserves the same nonvanishing and
+seven-kernel conclusions; it does not choose a new cohomology map to force
+those identities.
+
+### Cubic residue sections retain their coefficients and orientation
+
+[GeometricSurfaceResidueOverlap.lean](GeometricSurfaceResidueOverlap.lean)
+extends the existing neighborhood residue construction by proving its
+complex linearity and descent through the actual degree-three part of
+the surface coordinate ring. If two weighted homogeneous cubics have
+the same image in the original surface quotient, their glued two-form
+sections agree. This follows from vanishing of every quotient-kernel
+coefficient in the concrete dehomogenized local rings and then uniqueness
+of sheaf gluing.
+
+The restrictions of these glued sections are the original polynomial
+determinant forms on every normal-chart subopen. Their coefficients on
+the curve are exactly the original substituted cubic polynomials. The
+selected cubic and all seven test cubics satisfy the required actual
+weighted homogeneity conditions. The local normal-adjunction formulas
+keep the orientation already fixed by the residue transition; the second
+chart uses the proved negative orientation of its surface residue.
+
+The helper also proves the coefficient action and the actual restriction
+maps for these sections. These results concern the specified neighborhood
+of the whole seed curve. They do not assert that its twelve opens cover
+the whole surface.
+
+### Verification scope
+
+The four extended public helpers are compiled under the existing resource
+caps, independently replayed by Lean's kernel checker, and imported by
+pure axiom audits. The audit files contain only imports and
+`#print axioms` commands. All audited endpoints use only `propext`,
+`Classical.choice`, and `Quot.sound`. The original proof bodies and their
+scoped options are preserved byte for byte, and no proof budget is raised.
+
+| Public helper | Compilation (s) | Kernel replay (s) | Pure audit (s) | Audited declarations |
+|---|---:|---:|---:|---:|
+| [GeometricNormalSheafComparison.lean](GeometricNormalSheafComparison.lean) | 308.91 | 201.88 | 3.29 | 327 |
+| [GeometricSurfaceResidueFunctoriality.lean](GeometricSurfaceResidueFunctoriality.lean) | 241.08 | 73.90 | 12.40 | 195 |
+| [GeometricSurfaceResidueOverlap.lean](GeometricSurfaceResidueOverlap.lean) | 304.05 | 108.45 | 3.25 | 321 |
+| [GeometricCartierOrdinaryScalar.lean](GeometricCartierOrdinaryScalar.lean) | 292.80 | 271.11 | 3.22 | 33 |
+
+The four pure audits cover **876 distinct declarations**. The overlap
+helper retains one existing `defProp` style warning; the other three
+source compilations and all four replays and pure audits are clean.
+
+The eight dependency-context replays and pure audits additionally check
+338 declarations. Their compiled objects are checked in the combined
+context, with exact source-compilation provenance retained.
+
+The earlier dependency update consolidated three declaration-bearing helpers into
+their existing callers and extended the intrinsic-normal source. The
+three replaced dependency objects used by these four helpers are bound
+to their exact source compilation receipts, then independently replayed
+in the combined dependency context.
+Five direct or semantic consumers are also replayed to check the changed
+imports and canonical-class comparisons. The retained dependencies keep
+their previously checked source/object pairs. This is a bounded check of
+the stated modules and their dependency context, not a full proposal
+build.
+
+The proposal remains within the 256-file limit. The protected data,
+generated target, and final existence statement are unchanged. The only
+remaining admission is the existing `sorry` in
+`Submission.missing_geometric_existence`.
+
+
+The subsequent connecting-class update changes three helpers outside the
+98-module dependency context checked here. All 98 dependency sources are
+identical before and after that update, so this checkpoint retains the
+same successful compiled objects, kernel replays, and pure audits. The
+incoming three helper bodies and their explanation are preserved.
+
 ## The actual connecting class and first-order Cartier defect — 14 November 2026
 
 The final theorem `Submission.missing_geometric_existence` remains open.
