@@ -1,5 +1,121 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Equality of the two original normal classes — 14 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains open.
+This continuation identifies the two original degree-one normal classes
+themselves, including their fixed sign, and transfers the existing cubic
+calculation to the original reduced inverse-ideal cochain.
+
+Write \(n\) for
+`CycleQ2GeometricIntrinsicCartierCohomology.literalNormalClassAtTop`
+and \(m\) for
+`CycleQ2IntrinsicSurfaceNormalCohomology.literalIntrinsicNormalClass`.
+Both lie in the cohomology of the actual intrinsic normal direct image
+on the original surface at \((r,\theta)=(57,1)\). The new theorem is
+\[
+n=-m.
+\]
+The preceding checkpoint already proves the respective Cartier images
+\(\partial n=B\) and \(\partial m=-B\), where
+\(B=\texttt{literalDerivedClassAtTop}\ne0\). Those image formulas
+alone would leave the possible kernel of \(\partial\) unresolved.
+The new proof compares the actual degree-one constructions directly.
+
+### Retaining the same injective descent
+
+The two four-open Čech-to-derived constructions each use a single
+injective presentation of the actual coefficient sheaf. A descent
+consists of an injective degree-zero primitive, its differential
+identity, a global section of the quotient sheaf, and the equality of
+that section's restrictions with the projected primitive.
+
+The new generic `retainedOneDescent` transfers exactly those four fields
+from `CycleQ2CechOneConnecting.OneDescent` to
+`CycleQ2FourOpenHOne.OneDescent`. The existing independence theorem
+identifies the resulting degree-one classes. Thus
+`cechOneClass_eq_original` does not require the two noncomputable
+choices of descent to be definitionally equal.
+
+Specializing to the original `literalNormalCocycle` and the original
+four-open surface cover gives
+`literalNormalClassAtTop_eq_negative_model` in
+[GeometricCartierNormalBinding.lean](GeometricCartierNormalBinding.lean).
+Its other input is the closed `literalReducedCocycle_class` theorem
+from the preceding checkpoint. That theorem retains the actual
+inverse-ideal reduction, `ambientNormalNumerator`, the normalized
+normal-sheaf isomorphism, and the supported four-to-two refinement.
+The latter supplies the negative sign from the fixed Čech and
+Mayer--Vietoris differences. No scalar is selected after passing to
+cohomology, and no comparison premise remains in the new theorem.
+
+### Ordinary cohomology, connecting maps, and cubic images
+
+The same file records the equality through the canonical terminal-open
+comparison in ordinary derived sheaf cohomology. Applying the existing
+Cartier connecting map recovers
+\[
+\partial m=-B\ne0
+\]
+from the original cochain theorem, before and after the canonical
+terminal-open comparison with ordinary derived cohomology.
+
+For every homogeneous cubic \(\sigma\), the actual cubic morphism
+acts on the original class by
+\[
+\operatorname{cubic}_{\sigma}(n)
+=-\operatorname{cubic}_{\sigma}(m).
+\]
+The right-hand side is also identified with the unchanged original
+normal-model calculation on the surface. In particular,
+`literalNormalClassAtTop_selected_cubic_image_ne_zero` proves that the
+selected cubic image of the original reduced cochain class is nonzero.
+The proof uses the original selected cubic and normal numerator.
+The separate incidence normal class and its seven vanishing tests are
+unchanged.
+
+### Verification of the assembled continuation
+
+The complete extended repository module was compiled from its exact
+current source bytes and independently replayed with `leanchecker`.
+Its prior non-import body is preserved. The reported theorem
+audits use only `propext`, `Classical.choice`, and `Quot.sound`.
+
+| Module | Lines | Compilation | Independent replay |
+| --- | ---: | ---: | ---: |
+| `GeometricCartierNormalBinding` | 1,428 | 165.82 s | 148.45 s |
+
+The checks use Lean 4.33.1 with pinned Mathlib, one worker, a 5,120 MiB
+managed-memory limit, a 6,144 MiB RSS ceiling, a 1,536 MiB memory reserve,
+and a 360-second module deadline. The assembled file is checked after
+removing the scratch imports, so its published dependency context and
+scope boundaries are included. The 117 dependency-module sources match
+the current repository exactly. The two incoming Čech and normal
+connecting helpers were also independently replayed in this consumer
+context before checking the extension.
+
+The helper source/import policy passes, and the proposal remains within
+the 256-file and 16 MiB limits. The full source gate still rejects the
+unchanged final admission in `Solution.lean`. This is a checked
+continuation, not a completed certificate or a claim that the entire
+original proposal has passed a fresh end-to-end build.
+
+### What remains
+
+This closes the comparison between the two original normal classes.
+It does not prove exactness of the protected rational four-form. The
+canonical residue sequence and geometric contraction, cup, and trace
+comparisons must still connect the curve calculation to the required
+moving-cycle correspondence. The supported-projector and global de Rham
+arguments must then show that the unchanged residue class vanishes on
+a nonempty principal open. That vanishing is the input needed by the
+existing residue-to-certificate bridge.
+
+The protected target, manifest, and final admission are unchanged.
+The previously checked normal-boundary helpers are retained in full.
+This continuation follows the mathematical attribution recorded below
+and was prepared for `fqlx` with OpenAI ChatGPT assistance.
+
 ## The original normal class has the actual Cartier boundary — 14 November 2026
 
 This continuation closes the comparison left open in the preceding

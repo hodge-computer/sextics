@@ -1266,3 +1266,163 @@ end CycleQ2OriginalCartierConnecting
 end
 
 end CheckedCartierNormalPart08
+
+section CheckedGeometricCartierNormalBindingV6Part1
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2OriginalNormalClassIdentification
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Abelian
+  Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2InjectiveCech CycleQ2CechTwoToDerived
+  CycleQ2CartierProjectiveCover CycleQ2ProjectiveInverseIdeal
+  CycleQ2GeometricIntrinsicCartierCohomology
+  CycleQ2IntrinsicSurfaceNormalCohomology
+
+variable {X : TopCat.{0}}
+local instance sheafHasExt : HasExt.{1} (AbSheaf X) := HasExt.standard _
+variable {F : AbSheaf X} (U : Fin 4 → Opens X)
+
+/-- Both checked four-open comparisons retain exactly the same injective
+presentation primitive and global quotient section. -/
+def retainedOneDescent {c : One F U} (d : CycleQ2CechOneConnecting.OneDescent U c) :
+    CycleQ2FourOpenHOne.OneDescent U c where
+  primitive := d.primitive
+  differential := d.differential
+  globalSection := d.globalSection
+  global_restriction := d.global_restriction
+
+/-- Independence of the retained descent identifies the two existing
+canonical comparisons, without equating their noncomputable choices. -/
+theorem cechOneClass_eq_original (hcover : (⨆ i, U i) = ⊤)
+    (c : One F U) (hc : d1 F U c = 0) :
+    CycleQ2FourOpenHOne.cechOneClass U hcover c hc =
+      CycleQ2CechOneConnecting.cechOneClass U hcover c hc := by
+  let d := Classical.choice (CycleQ2CechOneConnecting.oneDescent_nonempty U hcover c hc)
+  exact (CycleQ2FourOpenHOne.cechOneClass_eq_oneDescentClass U hcover c hc
+    (retainedOneDescent U d)).trans rfl
+
+/-- The genuine intrinsic normal class of the original inverse-ideal lift
+is the negative of the unchanged original normal-model class transported
+through the actual normal-sheaf isomorphism. -/
+theorem literalNormalClassAtTop_eq_negative_model :
+    literalNormalClassAtTop = -literalIntrinsicNormalClass := by
+  exact (cechOneClass_eq_original (coverFamily 57 1)
+    CycleQ2ProjectiveCartierIntersections.literal_cover literalNormalCocycle
+    literalNormalCocycle_closed).trans
+      CycleQ2OriginalCartierConnecting.literalReducedCocycle_class
+
+end CycleQ2OriginalNormalClassIdentification
+
+#print axioms CycleQ2OriginalNormalClassIdentification.cechOneClass_eq_original
+#print axioms CycleQ2OriginalNormalClassIdentification.literalNormalClassAtTop_eq_negative_model
+
+end
+
+end CheckedGeometricCartierNormalBindingV6Part1
+
+section CheckedGeometricCartierNormalBindingV6Part2
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicCartierCohomology
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Abelian
+  Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2InjectiveCech CycleQ2CechTwoToDerived CycleQ2CartierProjectiveCover
+  CycleQ2ProjectiveInverseIdeal CycleQ2IntrinsicNormalModel
+  CycleQ2SurfaceNormalTransport CycleQ2SurfaceNormalCohomology
+  CycleQ2IntrinsicSurfaceNormalCohomology CycleQ2GeometricProjectiveNormalClass
+  CycleQ2GeometricLiteralDirection CycleQ2SeedTrace
+  CycleQ2GeometricSheafCohomologyRestriction
+
+open CycleQ2ProjectiveCartierDerived
+  (literalDerivedClassAtTop literalDerivedClassAtTop_ne_zero
+   literalDerivedClass literalDerivedClass_ne_zero)
+
+local instance originalNormalClassHasExt {T : Type} [TopologicalSpace T] :
+    HasExt.{1} (Sheaf (Opens.grothendieckTopology T) AddCommGrpCat.{0}) :=
+  HasExt.standard _
+
+/-- The original inverse-ideal normal class is the negative of the
+unchanged original model class under the actual normal-sheaf isomorphism.
+The sign is the fixed four-open Cech/Mayer--Vietoris convention. -/
+theorem literalNormalClassAtTop_eq_negative_original :
+    literalNormalClassAtTop = -literalIntrinsicNormalClass :=
+  CycleQ2OriginalNormalClassIdentification.literalNormalClassAtTop_eq_negative_model
+
+/-- The same normalization holds in ordinary derived sheaf cohomology,
+through the original terminal-source comparison. -/
+theorem literalNormalClass_eq_negative_original :
+    CycleQ2GeometricIntrinsicCartierCohomology.literalNormalClass =
+      -(terminalCohomologyEquiv
+        (Opens.grothendieckTopology (projectiveSurface 57 1)) literalSequence.X₃
+        ⊤ isTerminalTop 1 literalIntrinsicNormalClass) := by
+  change terminalCohomologyEquiv _ _ _ _ _ literalNormalClassAtTop = _
+  rw [literalNormalClassAtTop_eq_negative_original, map_neg]
+
+/-- The genuine Cartier boundary of the unchanged original normal class
+is the negative of the original nonzero projective Cartier class. -/
+theorem literalOpenConnecting_originalNormalClass :
+    literalOpenConnecting ⊤ literalIntrinsicNormalClass = -literalDerivedClassAtTop := by
+  have h := literalOpenConnecting_normalClass
+  rw [literalNormalClassAtTop_eq_negative_original, map_neg] at h
+  exact neg_eq_iff_eq_neg.mp h
+
+theorem literalOpenConnecting_originalNormalClass_ne_zero :
+    literalOpenConnecting ⊤ literalIntrinsicNormalClass ≠ 0 := by
+  rw [literalOpenConnecting_originalNormalClass]
+  exact neg_ne_zero.mpr literalDerivedClassAtTop_ne_zero
+
+/-- Its ordinary derived connecting map has the same original class
+and sign; no alternate surface class is substituted. -/
+theorem literalConnecting_originalNormalClass :
+    literalConnecting (terminalCohomologyEquiv
+      (Opens.grothendieckTopology (projectiveSurface 57 1)) literalSequence.X₃
+      ⊤ isTerminalTop 1 literalIntrinsicNormalClass) = -literalDerivedClass := by
+  have h := literalConnecting_normalClass
+  rw [literalNormalClass_eq_negative_original, map_neg] at h
+  exact neg_eq_iff_eq_neg.mp h
+
+theorem literalConnecting_originalNormalClass_ne_zero :
+    literalConnecting (terminalCohomologyEquiv
+      (Opens.grothendieckTopology (projectiveSurface 57 1)) literalSequence.X₃
+      ⊤ isTerminalTop 1 literalIntrinsicNormalClass) ≠ 0 := by
+  rw [literalConnecting_originalNormalClass]
+  exact neg_ne_zero.mpr literalDerivedClass_ne_zero
+
+/-- Every actual cubic normal morphism acts on the original reduced
+cochain class through its unchanged original normal numerator. -/
+theorem literalNormalClassAtTop_cubic_image (σ : Poly) (hσ : σ.IsHomogeneous 3) :
+    literalIntrinsicCubicH1Map σ hσ literalNormalClassAtTop =
+      -(cubicH1OnSurface 57 1 (by norm_num) σ hσ literalNormalClassOnSurface) := by
+  rw [literalNormalClassAtTop_eq_negative_original, map_neg,
+    literalIntrinsicCubicH1Map_class]
+
+theorem literalNormalClassAtTop_selected_cubic_image_ne_zero :
+    literalIntrinsicCubicH1Map selectedCubic selectedCubic_homogeneous
+      literalNormalClassAtTop ≠ 0 := by
+  rw [literalNormalClassAtTop_eq_negative_original, map_neg]
+  exact neg_ne_zero.mpr literal_intrinsic_selected_cubic_image_ne_zero
+
+end CycleQ2GeometricIntrinsicCartierCohomology
+
+#print axioms CycleQ2GeometricIntrinsicCartierCohomology.literalNormalClassAtTop_eq_negative_original
+#print axioms CycleQ2GeometricIntrinsicCartierCohomology.literalNormalClass_eq_negative_original
+#print axioms CycleQ2GeometricIntrinsicCartierCohomology.literalOpenConnecting_originalNormalClass
+#print axioms CycleQ2GeometricIntrinsicCartierCohomology.literalConnecting_originalNormalClass
+#print axioms CycleQ2GeometricIntrinsicCartierCohomology.literalNormalClassAtTop_cubic_image
+#print axioms CycleQ2GeometricIntrinsicCartierCohomology.literalNormalClassAtTop_selected_cubic_image_ne_zero
+
+end
+
+end CheckedGeometricCartierNormalBindingV6Part2
