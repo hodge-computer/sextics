@@ -258,6 +258,42 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
 ```
 
 
+### The whole actual seed fiber lies in the smooth open
+
+[GeometricIncidenceSeedFiberCover.lean](GeometricIncidenceSeedFiberCover.lean)
+defines `seedBasePoint` using the original `seedParameterMorphism`
+and proves
+`CycleQ2IncidenceSeedFiberCover.seedFiber_mem_goodOpen`:
+\[
+ f(x)=\mathrm{seedBasePoint}\quad\Longrightarrow\quad
+ x\in\mathrm{goodOpen}(\mathrm{incidencePoint}).
+\]
+There is no remaining coordinate-cover or smoothness premise.
+
+For an actual source point over the seed, the coefficient-prime formula
+puts the seed coefficient kernel in its homogeneous prime. Contracting
+through the original surface quotient gives a polynomial prime containing
+the original equations and satisfying relevance by the five-coordinate
+cover. The prime-specialization argument therefore supplies a weight-one
+coordinate outside that prime. This is exactly membership in an original
+coordinate open, where the canonical affine fiber comparison and minor
+cover establish membership in `goodOpen`.
+
+Thus the whole underlying point fiber of the original morphism is covered
+by the constructed relative smooth scheme opens, without a global Proj
+base-change isomorphism. This is the exact containment needed by the
+proper-neighborhood construction. Independent review checked all
+coefficient, equation, relevance, and chart identifications.
+Static scans passed. **No elaboration, compilation, or kernel replay
+was run.** Deferred bounded check:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceSeedFiberCover.olean \
+  Proposal/GeometricIncidenceSeedFiberCover.lean
+```
+
+
 ## Specialized seed geometry continuation — source draft, 14 November 2026
 
 This continuation proceeds in bounded components. Every new Lean module
