@@ -1,5 +1,175 @@
 # A nonconstructive geometric route for cycle-q2
 
+## The actual inverse ideal has nine free coordinates — 14 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains open.
+This continuation supplies the previously missing freeness input for the
+actual inverse ideal on the containing surface at `θ = 1`. It proves a
+nine-element basis over the literal polynomial base, applies the existing
+coordinate Čech exactness theorem to that module, and proves that its
+localization is the actual Hom module of the localized curve ideal. No
+freeness, finite-presentation, or separability assertion is added as a
+geometric hypothesis.
+
+### An actual two-stage cubic presentation
+
+[GeometricInverseIdealBasis.lean](GeometricInverseIdealBasis.lean) works
+over
+\[
+B=\mathbb C[x_1,x_2,x_3],\qquad
+\alpha=x_1^2+x_2x_3,\qquad
+\beta=x_3^3+x_2^3+x_1x_2x_3-i(x_1^3+x_3^3).
+\]
+Put
+\[
+C_0=B[u]/(u^3+\alpha u+\beta),\qquad
+q=x_2^2,\qquad d=r x_1x_3,\qquad
+f=u^2-d,\qquad g=u^4+du^2+d^2.
+\]
+The actual surface ring `SurfaceRing r 1` is proved isomorphic to
+\[
+A=C_0[v]/(v^3-3qv^2+3q^2v+fg).
+\]
+The forward and inverse quotient maps are constructed and proved inverse.
+The coordinates are fixed by the original polynomials: `u` is the image
+of `x₀`, and `v` is the image of `originalF2 = w+x₂²`. The base map is the
+literal polynomial map in `x₁,x₂,x₃`. Both cubic equations are monic, so
+`(1,u,u²)` and `(1,v,v²)` give genuine bases over the respective coefficient
+rings. These results hold for every complex `r`; they do not require the
+cover hypothesis `r ≠ 0`.
+
+The element `f` is regular in `C₀`. Writing `c=α+d`, the proof verifies
+\[
+(cu^2-\beta u+c^2)f=\beta^2-dc^2.
+\]
+The right side is a nonzero element of `B`: evaluation at
+`(x₁,x₂,x₃)=(0,0,1)` gives `−2i`. Multiplication by this scalar is injective
+on the free `B`-module `C₀`, which proves the required regularity of `f`.
+The proof does not assume that either cubic extension is unramified.
+
+### Bases of the curve ideal and its actual inverse ideal
+
+The helper proves the exact ideal identity
+\[
+I=\operatorname{curveIdealOnSurface}(r,1)=(f,v)\subset A.
+\]
+A general cubic lemma then gives the `C₀`-basis `(f,v,v²)` of this actual
+ideal. For a ring with basis `(1,x,x²)` and relation
+\[
+x^3+ex^2+ax+fg=0,
+\]
+the lemma explicitly rewrites every element of `(f,x)` in the three
+coordinates `(f,x,x²)` and uses regularity of `f` to prove uniqueness.
+Thus `actualCurveIdealBasis` proves freeness; it does not take it as an
+input. Combining with the inner cubic basis gives
+`actualCurveIdealBaseBasis`, a nine-element `B`-basis of `I`.
+
+To pass to the inverse ideal, let `λ` be the coefficient of `x²` in the
+ambient cubic basis. The multiplication pairing `λ(yz)` has matrix
+\[
+\begin{pmatrix}
+0&0&1\\
+0&1&-e\\
+1&-e&e^2-a
+\end{pmatrix},
+\qquad \det=-1.
+\]
+The source proves the pairing perfect over the coefficient ring, with an
+explicit inverse coordinate formula. This is the coefficient functional;
+ordinary algebra trace and separability are not used.
+
+For every actual `A`-module `M`, composition with `λ` is proved to give a
+linear equivalence
+\[
+\operatorname{Hom}_A(M,A)
+ \simeq_{C_0}\operatorname{Hom}_{C_0}(M,C_0).
+\]
+The inverse is constructed from the perfect coefficient pairing, and its
+`A`-linearity is proved. Applying this to the already free ideal `I` and
+its dual basis gives `actualInverseIdealBasis`. Finally,
+`actualInverseIdealBaseBasis` is a genuine nine-element `B`-basis of
+\[
+I^{-1}:=\operatorname{Hom}_A(I,A).
+\]
+The notation denotes the actual linear-Hom module. No freeness over the
+surface ring `A` is asserted. The natural quotient action of `B` and the
+composed action through `C₀` are compared through the literal base map,
+so the nine-coordinate result uses the same scalars as the coordinate
+Čech construction.
+
+### Coordinate Čech exactness and localization of Hom
+
+Let `M=Hom_A(I,A)` with this proved `B`-basis. Write `(z₀,z₁,z₂)=(x₁,x₂,x₃)`. For a subset
+`J` of `{0,1,2}`, set
+\[
+M_J=B\bigl[(\prod_{j\in J}z_j)^{-1}\bigr]\otimes_B M.
+\]
+The helper applies `GeometricFreeCoordinateCech.firstCech_exact` to its
+nine-element basis. Every triple `(p₀₁,p₀₂,p₁₂)` of actual localized
+module elements satisfying the cocycle equation on the triple
+intersection has actual primitives `(q₀,q₁,q₂)`, with
+\[
+p_{ij}=q_j|_{ij}-q_i|_{ij}.
+\]
+This closes the supplied-basis premise of the earlier coordinate
+exactness theorem for the genuine inverse ideal. The result is stated
+in the tensor-localization coordinate complex; the further comparison
+with sheaf sections and the four Cartier opens is separate.
+
+The same helper also proves a closed localization comparison. The actual
+surface ring is noetherian, and its actual curve ideal is finitely
+presented, for every `r, θ`. The pinned finite-presentation theorem and
+the canonical ideal-localization map give
+\[
+S^{-1}\operatorname{Hom}_A(I,A)
+ \simeq_A\operatorname{Hom}_{S^{-1}A}(S^{-1}I,S^{-1}A).
+\]
+The localization map is fixed by evaluation: the image of a global
+homomorphism `ν`, evaluated on the image of `x∈I`, equals the image of
+`ν(x)`. The helper proves that local Hom maps are determined by these
+original ideal elements. Its canonical restrictions for nested
+multiplicative submonoids compose correctly. These statements concern
+the actual ideal and its actual Hom module, before reduction to the
+relative conormal dual.
+
+### Verification and remaining comparison
+
+The local checked scope contains thirty-two proposal objects in a
+seventy-nine-module dependency closure. The prior thirty objects and
+their seventy-seven-module context retain their exact archived sources
+and compiled objects. The unchanged published
+`GeometricSurfaceCoordinates` and the new assembled
+`GeometricInverseIdealBasis` receive fresh source-bound compilation,
+independent kernel replay, and separate pure-import endpoint audits.
+The new helper preserves the four checked namespace bodies and removes
+only their scratch imports when assembling the permitted flat module.
+All audited endpoints use only `propext`, `Classical.choice`, and
+`Quot.sound`.
+
+The new proof bodies retain the default heartbeat and recursion limits.
+The incoming `GeometricSurfaceCoordinates` is checked byte for byte as
+published, including its inherited heartbeat settings up to 4,000,000
+and recursion limit 20,000. Runtime and memory caps remain unchanged;
+this continuation introduces no larger proof budget.
+
+The declaration-free facade `GeometricTarget10` is flattened into its
+sole importer by replacing the import with `GeometricTarget10Part03`.
+No proof-body bytes change, surviving dependency reachability is
+preserved, and the proposal remains at exactly 256 files. The final
+audit binds the staged source tree, the reconstructed four-body assembly,
+the fresh receipts, the preserved contexts, protected files, and the
+rendered explanation. This is local development evidence, not a full
+build or acceptance of the older aggregate proposal.
+
+The only admission remains `Solution.lean:138`. In particular, this
+checkpoint does not assert nonvanishing of the Cartier second-cohomology
+class. The remaining local comparison must carry coordinate exactness
+to the four-cover inverse-ideal complex and identify the reduction of
+its primitives with the actual normal Čech coboundary. Projective and
+derived second-cohomology comparisons, the geometric trace and
+moving-cycle argument, and the global support and algebraic de Rham
+passage to the protected residue remain additional obligations.
+
 ## Literal canonical cohomology and projective normal classes — 14 November 2026
 
 The final theorem `Submission.missing_geometric_existence` remains open.
