@@ -1,3 +1,4 @@
+import Proposal.GeometricCartierCech
 import Proposal.GeometricLiteralSurface
 import Proposal.GeometricCoordinateH2
 import Proposal.GeometricCartierNormalLift
@@ -2749,3 +2750,827 @@ end CycleQ2GeometricIntrinsicCartierSequence
 
 end -- component noncomputable section
 end LiteralCartierShortExactness
+
+
+section CheckedProjectiveInverseIdealV5
+
+/-!
+# The original inverse-ideal lift on the actual projective Cartier cover
+
+The ordinary localized ideal Hom is contracted to the actual homogeneous
+curve-map kernel, and its output is projected to degree zero. Canonical
+affine and open-base-change equivalences extend that same functional to
+the genuine inverse-ideal sheaf. The original two scalar boundary formulas
+are verified on original ideal elements that become units on the faces.
+
+The resulting six-edge cochain has precisely the original actual Cartier
+cocycle as its scalar coboundary, with positive sign. No character
+projection or trace-matched class is used in this construction.
+-/
+section ProjectiveInverseIdealCore
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+noncomputable section
+
+namespace CycleQ2ProjectiveInverseIdeal
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  HomogeneousLocalization CycleQ2GradedLocalizationProjection
+  CycleQ2GeometricIntrinsicNormal CycleQ2GeometricIntrinsicCartierSequence
+
+section GradedHom
+
+variable {R σ : Type*} [CommRing R] [SetLike σ R] [AddSubgroupClass σ R]
+  (𝒜 : ℕ → σ) [GradedRing 𝒜] {f : R} {d : ℕ} (hf : f ∈ 𝒜 d)
+
+/-- The literal inclusion of the contracted ideal into the ordinary localization. -/
+def contractedIdealVal (I : Ideal (Localization.Away f)) :
+    I.comap (algebraMap (Away 𝒜 f) (Localization.Away f)) →ₛₗ[
+      algebraMap (Away 𝒜 f) (Localization.Away f)] I where
+  toFun x := ⟨(x : Away 𝒜 f).val, x.property⟩
+  map_add' x y := Subtype.ext (HomogeneousLocalization.val_add x.val y.val)
+  map_smul' a x := Subtype.ext (HomogeneousLocalization.val_mul a x.val)
+
+/-- Project the output of the original Hom map to weight zero and contract
+its input along the actual homogeneous-localization inclusion. -/
+def contractHom (I : Ideal (Localization.Away f))
+    (φ : I →ₗ[Localization.Away f] Localization.Away f) :
+    I.comap (algebraMap (Away 𝒜 f) (Localization.Away f)) →ₗ[Away 𝒜 f] Away 𝒜 f where
+  toFun x := degreeZero 𝒜 hf (φ (contractedIdealVal 𝒜 I x))
+  map_add' x y := by rw [map_add, map_add, degreeZero_add]
+  map_smul' a x := by
+    rw [map_smulₛₗ, map_smul]
+    exact degreeZero_mul_homogeneous 𝒜 hf a _
+
+@[simp] theorem contractHom_scalar (I : Ideal (Localization.Away f))
+    (a : Away 𝒜 f) :
+    contractHom 𝒜 hf I (a.val • I.subtype) =
+      a • (I.comap (algebraMap (Away 𝒜 f) (Localization.Away f))).subtype := by
+  apply LinearMap.ext
+  intro x
+  change degreeZero 𝒜 hf (a.val * (x : Away 𝒜 f).val) = a * (x : Away 𝒜 f)
+  rw [degreeZero_mul_homogeneous, degreeZero_val]
+
+@[simp] theorem contractHom_zero (I : Ideal (Localization.Away f)) :
+    contractHom 𝒜 hf I 0 = 0 := by
+  apply LinearMap.ext
+  intro x
+  exact degreeZero_zero 𝒜 hf
+
+include hf in
+/-- A degree-zero element that becomes a unit in the ordinary localization
+is already a unit in the projective chart ring. Its inverse is the weight-zero
+part of the same ordinary inverse. -/
+theorem isUnit_of_isUnit_val (a : Away 𝒜 f) (ha : IsUnit a.val) : IsUnit a := by
+  obtain ⟨b, hb⟩ := isUnit_iff_exists_inv.mp ha
+  apply isUnit_iff_exists_inv.mpr
+  refine ⟨degreeZero 𝒜 hf b, ?_⟩
+  have h := congrArg (degreeZero 𝒜 hf) hb
+  rw [degreeZero_mul_homogeneous] at h
+  exact h.trans (by simpa only [HomogeneousLocalization.val_one] using (degreeZero_val 𝒜 hf (1 : Away 𝒜 f)))
+
+end GradedHom
+
+section ActualCurveHom
+
+open CycleQ2GeometricSeedNormalIdeals CycleQ2GeometricCartierNormalLift
+  CycleQ2GeometricCartierCech CycleQ2CartierSurfaceGrading
+  CycleQ2CartierHomogeneousCech CycleQ2ProjectiveCartierIdeal
+open CycleQ2GeometricLiteralSurface (curveGradedMap)
+
+abbrev HomogeneousCurveIdeal (r θ : ℂ) (s : Finset (Fin 4)) :=
+  RingHom.ker (Away.map (curveGradedMap r θ) (coverProduct r θ s))
+
+/-- The kernel of the original homogeneous curve map is the contraction of
+the original localized surface ideal. -/
+def homogeneousCurveIdealToContracted (r θ : ℂ) (s : Finset (Fin 4)) :
+    HomogeneousCurveIdeal r θ s →ₗ[HomogeneousCoverLocal r θ s]
+      (IdealHomLocalization.LocalIdeal (curveIdealOnSurface r θ) (coverProduct r θ s)).comap
+        (algebraMap (HomogeneousCoverLocal r θ s) (CoverLocal r θ s)) where
+  toFun x := ⟨x.val, (le_of_eq (curveChartKernel_eq_comap r θ (coverProduct r θ s)
+    (coverProduct_mem_grade r θ s))) x.property⟩
+  map_add' _x _y := rfl
+  map_smul' _a _x := rfl
+
+/-- This is the weight-zero contraction of the supplied original local
+inverse-ideal functional, with the actual homogeneous curve-map kernel. -/
+def projectLocalInverseIdeal (r θ : ℂ) (s : Finset (Fin 4))
+    (φ : LocalInverseIdeal r θ s) :
+    HomogeneousCurveIdeal r θ s →ₗ[HomogeneousCoverLocal r θ s]
+      HomogeneousCoverLocal r θ s :=
+  (contractHom (surfaceGrade r θ) (coverProduct_mem_grade r θ s)
+    (IdealHomLocalization.LocalIdeal (curveIdealOnSurface r θ) (coverProduct r θ s)) φ).comp
+      (homogeneousCurveIdealToContracted r θ s)
+
+@[simp] theorem projectLocalInverseIdeal_scalar (r θ : ℂ) (s : Finset (Fin 4))
+    (a : HomogeneousCoverLocal r θ s) :
+    projectLocalInverseIdeal r θ s (scalarApp r θ s a.val) =
+      a • (HomogeneousCurveIdeal r θ s).subtype := by
+  apply LinearMap.ext
+  intro x
+  change degreeZero (surfaceGrade r θ) (coverProduct_mem_grade r θ s)
+    (a.val * x.val.val) = a * x.val
+  rw [degreeZero_mul_homogeneous, degreeZero_val]
+
+/-- The original fixed edge01 inverse-ideal lift, projected by its actual
+weight-zero operation. No inverse image is selected from a cohomology class. -/
+def literalProjectedConnectingLift :
+    HomogeneousCurveIdeal 57 1 {0,1} →ₗ[HomogeneousCoverLocal 57 1 {0,1}]
+      HomogeneousCoverLocal 57 1 {0,1} :=
+  projectLocalInverseIdeal 57 1 {0,1}
+    (inverseIdealConnectingLift 57 1 CycleQ2NormalConnecting.derivativeA 0)
+
+end ActualCurveHom
+
+section AffineHom
+
+variable {A B : CommRingCat.{0}} (φ : A ⟶ B)
+
+def affineScalarSectionSemilinearEquiv (A : CommRingCat.{0}) :
+    Γ(Spec A, ⊤) ≃ₛₗ[(specTopRingEquiv A).toRingHom] A where
+  __ := (specTopRingEquiv A).toAddEquiv
+  map_smul' a b := map_mul (specTopRingEquiv A) a b
+
+/-- The actual affine inverse-ideal sections are the original algebraic
+kernel functionals, with the canonical affine section-ring normalization. -/
+def affineInverseIdealAlgebraEquiv :
+    (inverseIdealSheaf (Spec.map φ)).val.obj (op ⊤) ≃ₛₗ[(specTopRingEquiv A).toRingHom]
+      (RingHom.ker φ.hom →ₗ[A] A) :=
+  (affineInverseIdealSectionLinearEquiv φ).trans
+    ((affineKernelSectionSemilinearEquiv φ).arrowCongr (affineScalarSectionSemilinearEquiv A))
+
+@[simp] theorem affineInverseIdealAlgebraEquiv_apply
+    (f : (inverseIdealSheaf (Spec.map φ)).val.obj (op ⊤)) (a : RingHom.ker φ.hom) :
+    affineInverseIdealAlgebraEquiv φ f a =
+      specTopRingEquiv A (inverseIdealSectionEvaluate (Spec.map φ) ⊤ f
+        ((affineKernelSectionSemilinearEquiv φ).symm a)) := rfl
+
+@[simp] theorem affineInverseIdealAlgebraEquiv_symm_evaluate
+    (l : RingHom.ker φ.hom →ₗ[A] A) (a : RingHom.ker φ.hom) :
+    specTopRingEquiv A (inverseIdealSectionEvaluate (Spec.map φ) ⊤
+      ((affineInverseIdealAlgebraEquiv φ).symm l)
+        ((affineKernelSectionSemilinearEquiv φ).symm a)) = l a := by
+  exact congrArg (fun k : RingHom.ker φ.hom →ₗ[A] A => k a)
+    ((affineInverseIdealAlgebraEquiv φ).apply_symm_apply l)
+
+end AffineHom
+
+end CycleQ2ProjectiveInverseIdeal
+
+#print axioms CycleQ2ProjectiveInverseIdeal.contractHom
+#print axioms CycleQ2ProjectiveInverseIdeal.projectLocalInverseIdeal_scalar
+#print axioms CycleQ2ProjectiveInverseIdeal.literalProjectedConnectingLift
+#print axioms CycleQ2ProjectiveInverseIdeal.affineInverseIdealAlgebraEquiv_symm_evaluate
+
+end -- component noncomputable section
+end ProjectiveInverseIdealCore
+
+section ProjectiveInverseIdealSections
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+noncomputable section
+
+namespace CycleQ2ProjectiveInverseIdeal
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  HomogeneousLocalization CycleQ2GradedLocalizationProjection
+  CycleQ2GeometricIntrinsicNormal CycleQ2GeometricIntrinsicCartierSequence
+  CycleQ2GeometricDifferentialSheaf
+
+section Evaluation
+variable {X Y : Scheme.{0}} (j : X ⟶ Y)
+
+def inverseIdealSectionCongr {U V : Y.Opens} (h : U = V) :
+    (inverseIdealSheaf j).val.obj (op U) ≃ (inverseIdealSheaf j).val.obj (op V) :=
+  Equiv.cast (congrArg (fun W : Y.Opens => ((inverseIdealSheaf j).val.obj (op W) : Type)) h)
+
+theorem inverseIdealSectionCongr_eq_map {U V : Y.Opens} (h : U = V)
+    (f : (inverseIdealSheaf j).val.obj (op U)) :
+    inverseIdealSectionCongr j h f = (inverseIdealSheaf j).val.map (eqToHom h.symm).op f := by
+  subst V
+  simp [inverseIdealSectionCongr]
+
+theorem inverseIdealSectionCongr_restrict_back {U V W : Y.Opens}
+    (hUV : U = V) (hWU : W = U) (g : W ⟶ V)
+    (f : (inverseIdealSheaf j).val.obj (op U)) :
+    (inverseIdealSheaf j).val.map (eqToHom hWU.symm).op
+      ((inverseIdealSheaf j).val.map g.op (inverseIdealSectionCongr j hUV f)) = f := by
+  subst V
+  subst W
+  have hg : g = 𝟙 U := Subsingleton.elim _ _
+  subst g
+  simp [inverseIdealSectionCongr]
+
+theorem inverseIdealSectionEvaluate_restrict {U V : Y.Opens} (h : V ⟶ U)
+    (f : (inverseIdealSheaf j).val.obj (op U))
+    (a : RingHom.ker (j.app U).hom) :
+    inverseIdealSectionEvaluate j V ((inverseIdealSheaf j).val.map h.op f)
+      (kernelSectionRestrict j h a) =
+    Y.presheaf.map h.op (inverseIdealSectionEvaluate j U f a) := by
+  have hn := localLinearHomEvaluate_restrict Y.sheaf (kernelIdealSheaf j)
+    (SheafOfModules.unit (ringSheaf Y.sheaf)) h f ((kernelIdealSectionEquiv j U).symm a)
+  have he := (kernelIdealSectionEquiv j V).symm_apply_apply
+    ((kernelIdealSheaf j).val.map h.op ((kernelIdealSectionEquiv j U).symm a))
+  exact (congrArg
+    (localLinearHomEvaluate Y.sheaf (kernelIdealSheaf j)
+      (SheafOfModules.unit (ringSheaf Y.sheaf)) V
+      (restrictLocalLinearHom Y.sheaf (kernelIdealSheaf j)
+        (SheafOfModules.unit (ringSheaf Y.sheaf)) h.op f)) he).trans hn
+
+end Evaluation
+
+section AffineOpen
+variable {X Y : Scheme.{0}} {A B : CommRingCat.{0}}
+  (φ : A ⟶ B) (j : X ⟶ Y) (i : Spec A ⟶ Y) (k : Spec B ⟶ X)
+  [IsOpenImmersion i] [IsOpenImmersion k]
+  (H : IsPullback (Spec.map φ) k i j)
+
+def openInverseIdealAlgebraEquiv :
+    (inverseIdealSheaf j).val.obj (op i.opensRange) ≃ (RingHom.ker φ.hom →ₗ[A] A) :=
+  (inverseIdealSectionOpenBaseChangeEquiv j i k (Spec.map φ) H).trans
+    (affineInverseIdealAlgebraEquiv φ).toEquiv
+
+theorem openInverseIdealAlgebraEquiv_evaluate
+    (f : (inverseIdealSheaf j).val.obj (op i.opensRange)) (a : RingHom.ker φ.hom) :
+    (i.appIso ⊤).inv ((Scheme.ΓSpecIso A).inv (openInverseIdealAlgebraEquiv φ j i k H f a)) =
+      inverseIdealSectionEvaluate j (i ''ᵁ ⊤)
+        ((inverseIdealSheaf j).val.map (homOfLE (i.image_le_opensRange ⊤)).op f)
+        (normalOpenIdealPullback j i k (Spec.map φ) H ⊤
+          ((affineKernelSectionSemilinearEquiv φ).symm a)) := by
+  change (i.appIso ⊤).inv ((Scheme.ΓSpecIso A).inv
+      (specTopRingEquiv A (inverseIdealSectionEvaluate (Spec.map φ) ⊤
+        (inverseIdealSectionOpenBaseChangeEquiv j i k (Spec.map φ) H f)
+        ((affineKernelSectionSemilinearEquiv φ).symm a)))) = _
+  rw [inverseIdealSectionOpenBaseChangeEquiv_evaluate]
+  rw [show ∀ x : Γ(Spec A, ⊤),
+      (Scheme.ΓSpecIso A).inv (specTopRingEquiv A x) = x from
+    fun x => ConcreteCategory.congr_hom (Scheme.ΓSpecIso A).hom_inv_id x]
+  exact ConcreteCategory.congr_hom (i.appIso ⊤).hom_inv_id _
+
+def openInverseIdealAlgebraEquivOn (U : Y.Opens) (hU : i.opensRange = U) :
+    (inverseIdealSheaf j).val.obj (op U) ≃ (RingHom.ker φ.hom →ₗ[A] A) :=
+  (inverseIdealSectionCongr j hU.symm).trans
+    (openInverseIdealAlgebraEquiv φ j i k H)
+
+def openAlgebraIdealOn (U : Y.Opens) (hU : i ''ᵁ ⊤ = U) (a : RingHom.ker φ.hom) :
+    RingHom.ker (j.app U).hom :=
+  kernelSectionRestrict j (eqToHom hU.symm)
+    (normalOpenIdealPullback j i k (Spec.map φ) H ⊤
+      ((affineKernelSectionSemilinearEquiv φ).symm a))
+
+theorem openAlgebraIdealOn_coe (U : Y.Opens) (hU : i ''ᵁ ⊤ = U)
+    (a : RingHom.ker φ.hom) :
+    (openAlgebraIdealOn φ j i k H U hU a : Γ(Y, U)) =
+      Y.presheaf.map (eqToHom hU.symm).op
+        ((i.appIso ⊤).inv ((Scheme.ΓSpecIso A).inv a)) :=
+  (kernelSectionRestrict_coe j (eqToHom hU.symm)
+    (normalOpenIdealPullback j i k (Spec.map φ) H ⊤
+      ((affineKernelSectionSemilinearEquiv φ).symm a))).trans
+    (congrArg (Y.presheaf.map (eqToHom hU.symm).op)
+      (normalOpenAlgebraIdeal_coe φ j i k H a))
+
+/-- Symbolic chart normalization, before instantiating any literal Proj data. -/
+theorem openInverseIdealAlgebraEquivOn_evaluate (U : Y.Opens)
+    (hrange : i.opensRange = U) (himage : i ''ᵁ ⊤ = U)
+    (e : A ≃+* Γ(Y, U))
+    (he : ∀ a : A, Y.presheaf.map (eqToHom himage.symm).op
+      ((i.appIso ⊤).inv ((Scheme.ΓSpecIso A).inv a)) = e a)
+    (f : (inverseIdealSheaf j).val.obj (op U)) (a : RingHom.ker φ.hom) :
+    inverseIdealSectionEvaluate j U f (openAlgebraIdealOn φ j i k H U himage a) =
+      e (openInverseIdealAlgebraEquivOn φ j i k H U hrange f a) := by
+  let f' := inverseIdealSectionCongr j hrange.symm f
+  let a' := normalOpenIdealPullback j i k (Spec.map φ) H ⊤
+    ((affineKernelSectionSemilinearEquiv φ).symm a)
+  have h := congrArg (Y.presheaf.map (eqToHom himage.symm).op)
+    (openInverseIdealAlgebraEquiv_evaluate φ j i k H f' a)
+  have hc := he (openInverseIdealAlgebraEquiv φ j i k H f' a)
+  have hres := inverseIdealSectionEvaluate_restrict j (eqToHom himage.symm)
+    ((inverseIdealSheaf j).val.map (homOfLE (i.image_le_opensRange ⊤)).op f') a'
+  have hf := inverseIdealSectionCongr_restrict_back j hrange.symm himage
+    (homOfLE (i.image_le_opensRange ⊤)) f
+  have ht := congrArg (fun q => inverseIdealSectionEvaluate j U q
+    (openAlgebraIdealOn φ j i k H U himage a)) hf
+  exact (hc.symm.trans (h.trans (hres.symm.trans ht))).symm
+
+theorem openInverseIdealSection_ext (U : Y.Opens)
+    (hrange : i.opensRange = U) (himage : i ''ᵁ ⊤ = U)
+    (e : A ≃+* Γ(Y, U))
+    (he : ∀ a : A, Y.presheaf.map (eqToHom himage.symm).op
+      ((i.appIso ⊤).inv ((Scheme.ΓSpecIso A).inv a)) = e a)
+    (f g : (inverseIdealSheaf j).val.obj (op U))
+    (hfg : ∀ a : RingHom.ker φ.hom,
+      inverseIdealSectionEvaluate j U f (openAlgebraIdealOn φ j i k H U himage a) =
+      inverseIdealSectionEvaluate j U g (openAlgebraIdealOn φ j i k H U himage a)) : f = g := by
+  apply (openInverseIdealAlgebraEquivOn φ j i k H U hrange).injective
+  apply LinearMap.ext
+  intro a
+  apply e.injective
+  exact (openInverseIdealAlgebraEquivOn_evaluate φ j i k H U hrange himage e he f a).symm.trans
+    ((hfg a).trans (openInverseIdealAlgebraEquivOn_evaluate φ j i k H U hrange himage e he g a))
+
+/-- The unique section is prescribed on every original algebraic ideal element. -/
+theorem openInverseIdealSection_existsUnique (U : Y.Opens)
+    (hrange : i.opensRange = U) (himage : i ''ᵁ ⊤ = U)
+    (e : A ≃+* Γ(Y, U))
+    (he : ∀ a : A, Y.presheaf.map (eqToHom himage.symm).op
+      ((i.appIso ⊤).inv ((Scheme.ΓSpecIso A).inv a)) = e a)
+    (l : RingHom.ker φ.hom →ₗ[A] A) :
+    ∃! f : (inverseIdealSheaf j).val.obj (op U), ∀ a : RingHom.ker φ.hom,
+      inverseIdealSectionEvaluate j U f (openAlgebraIdealOn φ j i k H U himage a) = e (l a) := by
+  let E := openInverseIdealAlgebraEquivOn φ j i k H U hrange
+  have hv (a : RingHom.ker φ.hom) :
+      inverseIdealSectionEvaluate j U (E.symm l)
+        (openAlgebraIdealOn φ j i k H U himage a) = e (l a) :=
+    (openInverseIdealAlgebraEquivOn_evaluate φ j i k H U hrange himage e he (E.symm l) a).trans
+      (congrArg (fun m : RingHom.ker φ.hom →ₗ[A] A => e (m a)) (E.apply_symm_apply l))
+  refine ⟨E.symm l, hv, ?_⟩
+  intro f hf
+  exact openInverseIdealSection_ext φ j i k H U hrange himage e he f (E.symm l)
+    (fun a => (hf a).trans (hv a).symm)
+
+end AffineOpen
+
+section ActualCharts
+
+open CycleQ2GeometricSeedNormalIdeals CycleQ2GeometricCartierNormalLift
+  CycleQ2CartierSurfaceGrading CycleQ2CartierHomogeneousCech
+  CycleQ2CartierProjectiveCover
+open CycleQ2GeometricProjectiveCurve (curveGrade projectiveCurve)
+open CycleQ2GeometricLiteralSurface (curveGradedMap curveToSurface curve_irrelevant_le
+  curveToSurface_chart_ker)
+
+abbrev HomogeneousCurveLocal (r θ : ℂ) (s : Finset (Fin 4)) :=
+  Away (curveGrade r θ) (curveGradedMap r θ (coverProduct r θ s))
+
+def coverCurveRingMap (r θ : ℂ) (s : Finset (Fin 4)) :
+    HomogeneousCoverLocal r θ s →+* HomogeneousCurveLocal r θ s :=
+  Away.map (curveGradedMap r θ) (coverProduct r θ s)
+
+def coverSurfaceImmersion (r θ : ℂ) (s : Finset (Fin 4)) (hs : s.Nonempty) :
+    Spec (CommRingCat.of (HomogeneousCoverLocal r θ s)) ⟶ projectiveSurface r θ :=
+  Proj.awayι (surfaceGrade r θ) (coverProduct r θ s)
+    (coverProduct_mem_grade r θ s) (coverProductDegree_pos hs)
+
+def coverCurveImmersion (r θ : ℂ) (s : Finset (Fin 4)) (hs : s.Nonempty) :
+    Spec (CommRingCat.of (HomogeneousCurveLocal r θ s)) ⟶ projectiveCurve r θ :=
+  Proj.awayι (curveGrade r θ) (curveGradedMap r θ (coverProduct r θ s))
+    ((curveGradedMap r θ).2 (coverProduct_mem_grade r θ s)) (coverProductDegree_pos hs)
+
+instance (r θ : ℂ) (s : Finset (Fin 4)) (hs : s.Nonempty) :
+    IsOpenImmersion (coverSurfaceImmersion r θ s hs) := by
+  unfold coverSurfaceImmersion
+  infer_instance
+
+instance (r θ : ℂ) (s : Finset (Fin 4)) (hs : s.Nonempty) :
+    IsOpenImmersion (coverCurveImmersion r θ s hs) := by
+  unfold coverCurveImmersion
+  infer_instance
+
+theorem coverSurfaceImmersion_range (r θ : ℂ) (s : Finset (Fin 4)) (hs : s.Nonempty) :
+    (coverSurfaceImmersion r θ s hs).opensRange = coverPatch r θ s :=
+  Proj.opensRange_awayι (surfaceGrade r θ) (coverProduct r θ s)
+    (coverProduct_mem_grade r θ s) (coverProductDegree_pos hs)
+
+theorem coverSurfaceImmersion_image_top (r θ : ℂ) (s : Finset (Fin 4))
+    (hs : s.Nonempty) :
+    coverSurfaceImmersion r θ s hs ''ᵁ ⊤ = coverPatch r θ s := by
+  rw [Scheme.Hom.image_top_eq_opensRange, coverSurfaceImmersion_range]
+
+theorem coverChart_isPullback (r θ : ℂ) (s : Finset (Fin 4)) (hs : s.Nonempty) :
+    IsPullback (Spec.map (CommRingCat.ofHom (coverCurveRingMap r θ s)))
+      (coverCurveImmersion r θ s hs) (coverSurfaceImmersion r θ s hs)
+      (curveToSurface r θ) := by
+  apply IsOpenImmersion.isPullback
+  · exact Proj.awayι_comp_map (curveGradedMap r θ) (curve_irrelevant_le r θ)
+      (coverProductDegree_pos hs) (coverProduct r θ s) (coverProduct_mem_grade r θ s)
+  · rw [coverSurfaceImmersion_range]
+    exact (Proj.opensRange_awayι (curveGrade r θ)
+      (curveGradedMap r θ (coverProduct r θ s))
+      ((curveGradedMap r θ).2 (coverProduct_mem_grade r θ s)) (coverProductDegree_pos hs)).symm
+
+theorem coverSurfaceImmersion_section (r θ : ℂ) (s : Finset (Fin 4)) (hs : s.Nonempty)
+    (a : HomogeneousCoverLocal r θ s) :
+    (projectiveSurface r θ).presheaf.map
+      (eqToHom (coverSurfaceImmersion_image_top r θ s hs).symm).op
+      (((coverSurfaceImmersion r θ s hs).appIso ⊤).inv
+        ((Scheme.ΓSpecIso (CommRingCat.of (HomogeneousCoverLocal r θ s))).inv a)) =
+      coverSectionsEquiv r θ s hs a := by
+  have he := CycleQ2GeometricProjectiveChartModules.chartImmersion_appIso_inv
+    (coverPatch r θ s) (coverChart r θ s hs)
+  have hc : (Scheme.ΓSpecIso (CommRingCat.of (HomogeneousCoverLocal r θ s))).inv ≫
+      (coverChart r θ s hs).hom.appTop ≫ (coverPatch r θ s).topIso.hom =
+        CommRingCat.ofHom (coverSectionsEquiv r θ s hs).toRingHom := by
+    rw [show (coverChart r θ s hs).hom.appTop =
+      (Scheme.ΓSpecIso _).hom ≫ Proj.awayToSection (surfaceGrade r θ) (coverProduct r θ s) ≫
+        (coverPatch r θ s).topIso.inv from Proj.basicOpenToSpec_app_top _ _]
+    simp only [Category.assoc, Iso.inv_hom_id_assoc, Iso.inv_hom_id, Category.comp_id]
+    rfl
+  have h := congrArg
+    (fun f : Γ(Spec (CommRingCat.of (HomogeneousCoverLocal r θ s)), ⊤) ⟶
+      Γ(projectiveSurface r θ, coverPatch r θ s) =>
+      (Scheme.ΓSpecIso (CommRingCat.of (HomogeneousCoverLocal r θ s))).inv ≫ f) he
+  exact ConcreteCategory.congr_hom (h.trans hc) a
+
+def projectiveInverseIdealAlgebraEquiv (r θ : ℂ) (s : Finset (Fin 4)) (hs : s.Nonempty) :
+    (inverseIdealSheaf (curveToSurface r θ)).val.obj (op (coverPatch r θ s)) ≃
+      (HomogeneousCurveIdeal r θ s →ₗ[HomogeneousCoverLocal r θ s] HomogeneousCoverLocal r θ s) :=
+  openInverseIdealAlgebraEquivOn (CommRingCat.ofHom (coverCurveRingMap r θ s))
+    (curveToSurface r θ) (coverSurfaceImmersion r θ s hs) (coverCurveImmersion r θ s hs)
+    (coverChart_isPullback r θ s hs) (coverPatch r θ s) (coverSurfaceImmersion_range r θ s hs)
+
+def coverIdealSection (r θ : ℂ) (s : Finset (Fin 4)) (hs : s.Nonempty)
+    (a : HomogeneousCurveIdeal r θ s) :
+    RingHom.ker ((curveToSurface r θ).app (coverPatch r θ s)).hom :=
+  openAlgebraIdealOn (CommRingCat.ofHom (coverCurveRingMap r θ s))
+    (curveToSurface r θ) (coverSurfaceImmersion r θ s hs) (coverCurveImmersion r θ s hs)
+    (coverChart_isPullback r θ s hs) (coverPatch r θ s)
+    (coverSurfaceImmersion_image_top r θ s hs) a
+
+/-- The canonical ideal pullback is exactly the original chart coefficient. -/
+theorem coverIdealSection_coe (r θ : ℂ) (s : Finset (Fin 4)) (hs : s.Nonempty)
+    (a : HomogeneousCurveIdeal r θ s) :
+    (coverIdealSection r θ s hs a : Γ(projectiveSurface r θ, coverPatch r θ s)) =
+      coverSectionsEquiv r θ s hs a :=
+  (openAlgebraIdealOn_coe (CommRingCat.ofHom (coverCurveRingMap r θ s))
+    (curveToSurface r θ) (coverSurfaceImmersion r θ s hs) (coverCurveImmersion r θ s hs)
+    (coverChart_isPullback r θ s hs) (coverPatch r θ s)
+    (coverSurfaceImmersion_image_top r θ s hs) a).trans
+    (coverSurfaceImmersion_section r θ s hs a)
+
+theorem projectiveInverseIdealSection_existsUnique (r θ : ℂ) (s : Finset (Fin 4))
+    (hs : s.Nonempty)
+    (l : HomogeneousCurveIdeal r θ s →ₗ[HomogeneousCoverLocal r θ s]
+      HomogeneousCoverLocal r θ s) :
+    ∃! f : (inverseIdealSheaf (curveToSurface r θ)).val.obj (op (coverPatch r θ s)),
+      ∀ a : HomogeneousCurveIdeal r θ s,
+        inverseIdealSectionEvaluate (curveToSurface r θ) (coverPatch r θ s) f
+          (coverIdealSection r θ s hs a) = coverSectionsEquiv r θ s hs (l a) :=
+  openInverseIdealSection_existsUnique (CommRingCat.ofHom (coverCurveRingMap r θ s))
+    (curveToSurface r θ) (coverSurfaceImmersion r θ s hs) (coverCurveImmersion r θ s hs)
+    (coverChart_isPullback r θ s hs) (coverPatch r θ s) (coverSurfaceImmersion_range r θ s hs)
+    (coverSurfaceImmersion_image_top r θ s hs) (coverSectionsEquiv r θ s hs)
+    (coverSurfaceImmersion_section r θ s hs) l
+
+def projectiveInverseIdealSection (r θ : ℂ) (s : Finset (Fin 4)) (hs : s.Nonempty)
+    (l : HomogeneousCurveIdeal r θ s →ₗ[HomogeneousCoverLocal r θ s]
+      HomogeneousCoverLocal r θ s) :
+    (inverseIdealSheaf (curveToSurface r θ)).val.obj (op (coverPatch r θ s)) :=
+  Classical.choose (projectiveInverseIdealSection_existsUnique r θ s hs l).exists
+
+theorem projectiveInverseIdealSection_evaluate (r θ : ℂ) (s : Finset (Fin 4))
+    (hs : s.Nonempty)
+    (l : HomogeneousCurveIdeal r θ s →ₗ[HomogeneousCoverLocal r θ s]
+      HomogeneousCoverLocal r θ s) (a : HomogeneousCurveIdeal r θ s) :
+    inverseIdealSectionEvaluate (curveToSurface r θ) (coverPatch r θ s)
+      (projectiveInverseIdealSection r θ s hs l) (coverIdealSection r θ s hs a) =
+      coverSectionsEquiv r θ s hs (l a) :=
+  Classical.choose_spec (projectiveInverseIdealSection_existsUnique r θ s hs l).exists a
+
+theorem projectiveInverseIdealSection_ext_elements (r θ : ℂ) (s : Finset (Fin 4))
+    (hs : s.Nonempty)
+    (f g : (inverseIdealSheaf (curveToSurface r θ)).val.obj (op (coverPatch r θ s)))
+    (hfg : ∀ a : HomogeneousCurveIdeal r θ s,
+      inverseIdealSectionEvaluate (curveToSurface r θ) (coverPatch r θ s) f
+        (coverIdealSection r θ s hs a) =
+      inverseIdealSectionEvaluate (curveToSurface r θ) (coverPatch r θ s) g
+        (coverIdealSection r θ s hs a)) : f = g :=
+  openInverseIdealSection_ext (CommRingCat.ofHom (coverCurveRingMap r θ s))
+    (curveToSurface r θ) (coverSurfaceImmersion r θ s hs) (coverCurveImmersion r θ s hs)
+    (coverChart_isPullback r θ s hs) (coverPatch r θ s) (coverSurfaceImmersion_range r θ s hs)
+    (coverSurfaceImmersion_image_top r θ s hs) (coverSectionsEquiv r θ s hs)
+    (coverSurfaceImmersion_section r θ s hs) f g hfg
+
+end ActualCharts
+
+end CycleQ2ProjectiveInverseIdeal
+
+#print axioms CycleQ2ProjectiveInverseIdeal.coverChart_isPullback
+#print axioms CycleQ2ProjectiveInverseIdeal.coverSurfaceImmersion_section
+
+end -- component noncomputable section
+end ProjectiveInverseIdealSections
+
+section ProjectiveInverseIdealBoundary
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+noncomputable section
+
+namespace CycleQ2ProjectiveInverseIdeal
+
+open HomogeneousLocalization CycleQ2GradedLocalizationProjection
+  CycleQ2GeometricSeedNormalIdeals CycleQ2GeometricCartierNormalLift
+  CycleQ2CartierSurfaceGrading CycleQ2CartierHomogeneousCech
+  CycleQ2GeometricCartierCech CycleQ2SeedTrace CycleQ2NormalConnecting
+open CycleQ2GeometricLiteralSurface (curveChartMap_mk_eq_zero_iff curveGradedMap)
+
+theorem homogeneousRestriction_degreeZero (r θ : ℂ) {s t : Finset (Fin 4)}
+    (hst : s ⊆ t) (z : CoverLocal r θ s) :
+    homogeneousCoverRestriction r θ hst
+      (degreeZero (surfaceGrade r θ) (coverProduct_mem_grade r θ s) z) =
+    degreeZero (surfaceGrade r θ) (coverProduct_mem_grade r θ t)
+      (coverRestriction r θ hst z) :=
+  (degreeZero_naturality (surfaceGrade r θ) (coverProduct_mem_grade r θ s)
+    (coverProduct_mem_grade r θ (t \ s)) (coverProduct_factor r θ hst)
+    (coverProduct_mem_grade r θ t) (coverRestriction r θ hst) z).symm
+
+theorem literalProjectedConnectingLift_eval012 (x : HomogeneousCurveIdeal 57 1 {0,1}) :
+    homogeneousCoverRestriction 57 1
+        (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,2} by simp)
+        (literalProjectedConnectingLift x) =
+      literalHomogeneousBoundary012 * homogeneousCoverRestriction 57 1
+        (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,2} by simp) x.val := by
+  let x' : overlapCurveIdeal 57 1 :=
+    contractedIdealVal (surfaceGrade 57 1) _ (homogeneousCurveIdealToContracted 57 1 {0,1} x)
+  change homogeneousCoverRestriction 57 1 _
+    (degreeZero (surfaceGrade 57 1) (coverProduct_mem_grade 57 1 {0,1})
+      (inverseIdealConnectingLift 57 1 CycleQ2NormalConnecting.derivativeA 0 x')) = _
+  rw [homogeneousRestriction_degreeZero, boundary012_evaluation]
+  change degreeZero (surfaceGrade 57 1) (coverProduct_mem_grade 57 1 {0,1,2})
+    (boundary012 57 1 derivativeA 0 * coverRestriction 57 1
+      (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,2} by simp) x.val.val) = _
+  rw [← literalHomogeneousBoundary012_val, ← homogeneousCoverRestriction_val]
+  rw [degreeZero_mul_homogeneous, degreeZero_val]
+
+theorem literalProjectedConnectingLift_eval013 (x : HomogeneousCurveIdeal 57 1 {0,1}) :
+    homogeneousCoverRestriction 57 1
+        (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,3} by simp)
+        (literalProjectedConnectingLift x) =
+      literalHomogeneousBoundary013 * homogeneousCoverRestriction 57 1
+        (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,3} by simp) x.val := by
+  let x' : overlapCurveIdeal 57 1 :=
+    contractedIdealVal (surfaceGrade 57 1) _ (homogeneousCurveIdealToContracted 57 1 {0,1} x)
+  change homogeneousCoverRestriction 57 1 _
+    (degreeZero (surfaceGrade 57 1) (coverProduct_mem_grade 57 1 {0,1})
+      (inverseIdealConnectingLift 57 1 CycleQ2NormalConnecting.derivativeA 0 x')) = _
+  rw [homogeneousRestriction_degreeZero, boundary013_evaluation]
+  change degreeZero (surfaceGrade 57 1) (coverProduct_mem_grade 57 1 {0,1,3})
+    (boundary013 57 1 derivativeA 0 * coverRestriction 57 1
+      (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,3} by simp) x.val.val) = _
+  rw [← literalHomogeneousBoundary013_val, ← homogeneousCoverRestriction_val]
+  rw [degreeZero_mul_homogeneous, degreeZero_val]
+
+section TestElement
+variable (r θ : ℂ) (q : SurfaceRing r θ)
+  (hq : q ∈ surfaceGrade r θ 2) (hI : q ∈ curveIdealOnSurface r θ)
+
+/-- The original ideal element q⁴/(g₁g₂), of degree zero on edge01. -/
+def homogeneousTestElement : HomogeneousCurveIdeal r θ {0,1} :=
+  ⟨Away.mk (surfaceGrade r θ) (coverProduct_mem_grade r θ {0,1}) 1 (q^4)
+    (by simpa [coverProductDegree, coverDegree] using SetLike.pow_mem_graded 4 hq), by
+      apply (curveChartMap_mk_eq_zero_iff r θ (coverProduct r θ {0,1})
+        (coverProduct_mem_grade r θ {0,1}) 1 (q^4) _).mpr
+      refine ⟨0, ?_⟩
+      simpa only [pow_zero, one_mul] using Ideal.pow_mem_of_mem (curveIdealOnSurface r θ) hI 4 (by omega)⟩
+
+theorem homogeneousTestElement_val_mul :
+    (homogeneousTestElement r θ q hq hI).val.val *
+      algebraMap (SurfaceRing r θ) (CoverLocal r θ {0,1}) (coverProduct r θ {0,1}) =
+        algebraMap (SurfaceRing r θ) (CoverLocal r θ {0,1}) (q^4) := by
+  have h := IsLocalization.mk'_spec (CoverLocal r θ {0,1})
+    (q^4) (powerDenominator (coverProduct r θ {0,1}) 1)
+  simpa only [homogeneousTestElement, Away.val_mk, Localization.mk_eq_mk',
+    powerDenominator, pow_one] using h
+
+theorem homogeneousTestElement_restriction_isUnit {t : Finset (Fin 4)}
+    (hst : ({0,1} : Finset (Fin 4)) ⊆ t)
+    (hu : IsUnit (algebraMap (SurfaceRing r θ) (CoverLocal r θ t) q)) :
+    IsUnit (homogeneousCoverRestriction r θ hst
+      (homogeneousTestElement r θ q hq hI).val) := by
+  apply isUnit_of_isUnit_val (surfaceGrade r θ) (coverProduct_mem_grade r θ t)
+  rw [homogeneousCoverRestriction_val]
+  have h := congrArg (coverRestriction r θ hst)
+    (homogeneousTestElement_val_mul r θ q hq hI)
+  rw [map_mul, (coverRestriction r θ hst).commutes,
+    (coverRestriction r θ hst).commutes, map_pow] at h
+  exact isUnit_of_mul_isUnit_left (h.symm ▸ hu.pow 4)
+
+end TestElement
+
+theorem surfaceEquation_mem_curveIdeal (r θ : ℂ) (i : Fin 3) :
+    surfaceQuotient r θ (curveEquations r θ i) ∈ curveIdealOnSurface r θ :=
+  Ideal.mem_map_of_mem _ (curveEquation_mem r θ i)
+
+def literalTest012 : HomogeneousCurveIdeal 57 1 {0,1} :=
+  homogeneousTestElement 57 1 (surfaceQuotient 57 1 (originalF1 57))
+    (surfaceQuotient_mem_grade 57 1 (originalF1_homogeneous 57))
+    (surfaceEquation_mem_curveIdeal 57 1 0)
+
+def literalTest013 : HomogeneousCurveIdeal 57 1 {0,1} :=
+  homogeneousTestElement 57 1 (surfaceQuotient 57 1 originalF2)
+    (surfaceQuotient_mem_grade 57 1 originalF2_homogeneous)
+    (surfaceEquation_mem_curveIdeal 57 1 1)
+
+theorem literalTest012_restriction_isUnit :
+    IsUnit (homogeneousCoverRestriction 57 1
+      (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,2} by simp) literalTest012.val) := by
+  apply homogeneousTestElement_restriction_isUnit
+  have h := (coverUnit 57 1 {0,1,2} 2 (by simp)).isUnit
+  rw [coverUnit_value] at h
+  exact h
+
+theorem literalTest013_restriction_isUnit :
+    IsUnit (homogeneousCoverRestriction 57 1
+      (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,3} by simp) literalTest013.val) := by
+  apply homogeneousTestElement_restriction_isUnit
+  have h := (coverUnit 57 1 {0,1,3} 3 (by simp)).isUnit
+  rw [coverUnit_value] at h
+  exact h
+
+section UnitTest
+variable {R : Type*} [CommRing R] (I : Ideal R)
+
+/-- Evaluation at an actual unit of the ideal determines its whole Hom functional. -/
+theorem idealHom_ext_of_unit (u : I) (hu : IsUnit (u : R))
+    (f g : I →ₗ[R] R) (hfg : f u = g u) : f = g := by
+  apply LinearMap.ext
+  intro x
+  apply hu.mul_left_cancel
+  calc
+    (u : R) * f x = f ((u : R) • x) := (f.map_smul _ _).symm
+    _ = f ((x : R) • u) := congrArg f (Subtype.ext (mul_comm _ _))
+    _ = (x : R) * f u := f.map_smul _ _
+    _ = (x : R) * g u := by rw [hfg]
+    _ = g ((x : R) • u) := (g.map_smul _ _).symm
+    _ = g ((u : R) • x) := congrArg g (Subtype.ext (mul_comm _ _))
+    _ = (u : R) * g x := g.map_smul _ _
+
+end UnitTest
+
+end CycleQ2ProjectiveInverseIdeal
+
+#print axioms CycleQ2ProjectiveInverseIdeal.literalProjectedConnectingLift_eval012
+#print axioms CycleQ2ProjectiveInverseIdeal.homogeneousTestElement_restriction_isUnit
+
+end -- component noncomputable section
+end ProjectiveInverseIdealBoundary
+
+section ProjectiveInverseIdealCochain
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+noncomputable section
+
+namespace CycleQ2ProjectiveInverseIdeal
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricIntrinsicNormal CycleQ2GeometricIntrinsicCartierSequence
+  CycleQ2CartierHomogeneousCech CycleQ2CartierProjectiveCover
+open CycleQ2GeometricLiteralSurface (curveToSurface)
+
+theorem projectiveInverseIdealSection_ext (r θ : ℂ) (s : Finset (Fin 4))
+    (hs : s.Nonempty)
+    (f g : (inverseIdealSheaf (curveToSurface r θ)).val.obj (op (coverPatch r θ s)))
+    (he : inverseIdealSectionEvaluate (curveToSurface r θ) (coverPatch r θ s) f =
+      inverseIdealSectionEvaluate (curveToSurface r θ) (coverPatch r θ s) g) : f = g := by
+  exact projectiveInverseIdealSection_ext_elements r θ s hs f g
+    (fun a => congrArg (fun l => l (coverIdealSection r θ s hs a)) he)
+
+/-- A unit coming from the original ideal determines the actual restricted
+inverse-ideal section. Both its source and its scalar target are fixed. -/
+theorem projectiveInverseIdealRestriction_eq_scalar_of_unit (r θ : ℂ)
+    {s t : Finset (Fin 4)} (hs : s.Nonempty) (ht : t.Nonempty) (hst : s ⊆ t)
+    (l : HomogeneousCurveIdeal r θ s →ₗ[HomogeneousCoverLocal r θ s]
+      HomogeneousCoverLocal r θ s) (x : HomogeneousCurveIdeal r θ s)
+    (c : HomogeneousCoverLocal r θ t)
+    (hu : IsUnit (homogeneousCoverRestriction r θ hst x.val))
+    (he : homogeneousCoverRestriction r θ hst (l x) =
+      c * homogeneousCoverRestriction r θ hst x.val) :
+    (inverseIdealSheaf (curveToSurface r θ)).val.map
+      (homOfLE (coverPatch_mono r θ hst)).op
+      (projectiveInverseIdealSection r θ s hs l) =
+    (inverseIdealScalar (curveToSurface r θ)).val.app (op (coverPatch r θ t))
+      (coverSectionsEquiv r θ t ht c) := by
+  let u := kernelSectionRestrict (curveToSurface r θ)
+    (homOfLE (coverPatch_mono r θ hst)) (coverIdealSection r θ s hs x)
+  have hu_coe : (u : Γ(projectiveSurface r θ, coverPatch r θ t)) =
+      coverSectionsEquiv r θ t ht (homogeneousCoverRestriction r θ hst x.val) :=
+    (kernelSectionRestrict_coe (curveToSurface r θ) (homOfLE (coverPatch_mono r θ hst))
+      (coverIdealSection r θ s hs x)).trans
+      ((congrArg ((projectiveSurface r θ).presheaf.map
+        (homOfLE (coverPatch_mono r θ hst)).op) (coverIdealSection_coe r θ s hs x)).trans
+        (coverSectionsEquiv_restrict r θ hs ht hst x.val))
+  have hu' : IsUnit (u : Γ(projectiveSurface r θ, coverPatch r θ t)) := by
+    rw [hu_coe]
+    exact hu.map (coverSectionsEquiv r θ t ht).toRingHom
+  apply projectiveInverseIdealSection_ext r θ t ht
+  apply idealHom_ext_of_unit _ u hu'
+  calc
+    _ = (projectiveSurface r θ).presheaf.map (homOfLE (coverPatch_mono r θ hst)).op
+        (inverseIdealSectionEvaluate (curveToSurface r θ) (coverPatch r θ s)
+          (projectiveInverseIdealSection r θ s hs l) (coverIdealSection r θ s hs x)) :=
+      inverseIdealSectionEvaluate_restrict (curveToSurface r θ)
+        (homOfLE (coverPatch_mono r θ hst)) (projectiveInverseIdealSection r θ s hs l)
+        (coverIdealSection r θ s hs x)
+    _ = (projectiveSurface r θ).presheaf.map (homOfLE (coverPatch_mono r θ hst)).op
+        (coverSectionsEquiv r θ s hs (l x)) := congrArg
+      ((projectiveSurface r θ).presheaf.map (homOfLE (coverPatch_mono r θ hst)).op)
+      (projectiveInverseIdealSection_evaluate r θ s hs l x)
+    _ = coverSectionsEquiv r θ t ht (homogeneousCoverRestriction r θ hst (l x)) :=
+      coverSectionsEquiv_restrict r θ hs ht hst (l x)
+    _ = coverSectionsEquiv r θ t ht c * (u : Γ(projectiveSurface r θ, coverPatch r θ t)) := by
+      rw [he, map_mul, hu_coe]
+    _ = _ := (inverseIdealScalar_evaluate (curveToSurface r θ) (coverPatch r θ t)
+      (coverSectionsEquiv r θ t ht c) u).symm
+
+/-- The original fixed edge01 lift, contracted in weight zero and extended
+through the actual affine kernel-Hom equivalence. -/
+def literalConnectingEdge :
+    (inverseIdealSheaf (curveToSurface 57 1)).val.obj (op (coverPatch 57 1 {0,1})) :=
+  projectiveInverseIdealSection 57 1 {0,1} (by simp) literalProjectedConnectingLift
+
+theorem literalConnectingEdge_restrict012 :
+    (inverseIdealSheaf (curveToSurface 57 1)).val.map
+      (homOfLE (coverPatch_mono 57 1
+        (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,2} by simp))).op literalConnectingEdge =
+    (inverseIdealScalar (curveToSurface 57 1)).val.app (op (coverPatch 57 1 {0,1,2}))
+      (coverSectionsEquiv 57 1 {0,1,2} (by simp) literalHomogeneousBoundary012) :=
+  projectiveInverseIdealRestriction_eq_scalar_of_unit 57 1 (by simp) (by simp) (by simp)
+    literalProjectedConnectingLift literalTest012 literalHomogeneousBoundary012
+    literalTest012_restriction_isUnit (literalProjectedConnectingLift_eval012 literalTest012)
+
+theorem literalConnectingEdge_restrict013 :
+    (inverseIdealSheaf (curveToSurface 57 1)).val.map
+      (homOfLE (coverPatch_mono 57 1
+        (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,3} by simp))).op literalConnectingEdge =
+    (inverseIdealScalar (curveToSurface 57 1)).val.app (op (coverPatch 57 1 {0,1,3}))
+      (coverSectionsEquiv 57 1 {0,1,3} (by simp) literalHomogeneousBoundary013) :=
+  projectiveInverseIdealRestriction_eq_scalar_of_unit 57 1 (by simp) (by simp) (by simp)
+    literalProjectedConnectingLift literalTest013 literalHomogeneousBoundary013
+    literalTest013_restriction_isUnit (literalProjectedConnectingLift_eval013 literalTest013)
+
+section ActualFourOpenCochain
+
+open CycleQ2GeometricSheafLocalIso CycleQ2CechTwoToDerived
+  CycleQ2ProjectiveCartierIntersections CycleQ2ProjectiveCartierDerived
+
+abbrev literalSequence := literalInverseIdealAdditiveComplex 57 1
+
+/-- The unchanged original edge01 lift on the actual four projective opens.
+The other five edges are zero, exactly as in the original localized cochain. -/
+def literalConnectingOne : One literalSequence.X₂ (coverFamily 57 1) :=
+  ⟨sectionEquivOfOpenEq literalSequence.X₂ (coverPatch_pair 57 1 0 1) literalConnectingEdge,
+    0, 0, 0, 0, 0⟩
+
+theorem literalConnectingOne_face (k : Fin 4)
+    (c : Γ(projectiveSurface 57 1, coverPatch 57 1 {0,1,k}))
+    (he : (inverseIdealSheaf (curveToSurface 57 1)).val.map
+      (homOfLE (coverPatch_mono 57 1
+        (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,k} by simp))).op literalConnectingEdge =
+      (inverseIdealScalar (curveToSurface 57 1)).val.app
+        (op (coverPatch 57 1 {0,1,k})) c) :
+    res literalSequence.X₂
+      (show (coverFamily 57 1 0 ⊓ coverFamily 57 1 1) ⊓ coverFamily 57 1 k ≤
+        coverFamily 57 1 0 ⊓ coverFamily 57 1 1 from inf_le_left) literalConnectingOne.1 =
+      app literalSequence.f ((coverFamily 57 1 0 ⊓ coverFamily 57 1 1) ⊓ coverFamily 57 1 k)
+        (tripleSectionsEquiv 57 1 0 1 k c) := by
+  change res literalSequence.X₂ inf_le_left
+      (sectionEquivOfOpenEq literalSequence.X₂ (coverPatch_pair 57 1 0 1)
+        literalConnectingEdge) = _
+  have hres := sectionEquivOfOpenEq_restrict literalSequence.X₂
+    (coverPatch_pair 57 1 0 1) (coverPatch_triple 57 1 0 1 k)
+    (coverPatch_mono 57 1 (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,k} by simp))
+    inf_le_left literalConnectingEdge
+  exact hres.symm.trans ((congrArg
+    (sectionEquivOfOpenEq literalSequence.X₂ (coverPatch_triple 57 1 0 1 k)) he).trans
+      (app_res literalSequence.f (coverPatch_triple 57 1 0 1 k).ge c).symm)
+
+/-- The scalar coboundary is the original actual projective Cartier cocycle.
+This fixes its sign and every face before passing to any cohomology class. -/
+theorem literalConnectingOne_boundary :
+    d1 literalSequence.X₂ (coverFamily 57 1) literalConnectingOne =
+      mapTwo (coverFamily 57 1) literalSequence.f literalCocycle := by
+  apply Prod.ext
+  · simp only [d1, literalConnectingOne, map_zero, sub_zero, zero_add, mapTwo,
+      literalCocycle, toTwo, CycleQ2ProjectiveCartierCochain.literalProjectiveCartierCochain]
+    exact literalConnectingOne_face 2 _ literalConnectingEdge_restrict012
+  apply Prod.ext
+  · simp only [d1, literalConnectingOne, map_zero, sub_zero, zero_add, mapTwo,
+      literalCocycle, toTwo, CycleQ2ProjectiveCartierCochain.literalProjectiveCartierCochain]
+    exact literalConnectingOne_face 3 _ literalConnectingEdge_restrict013
+  apply Prod.ext
+  all_goals simp only [d1, literalConnectingOne, map_zero, sub_zero, zero_add, mapTwo,
+    literalCocycle, toTwo, CycleQ2ProjectiveCartierCochain.literalProjectiveCartierCochain]
+
+end ActualFourOpenCochain
+
+end CycleQ2ProjectiveInverseIdeal
+
+#print axioms CycleQ2ProjectiveInverseIdeal.literalConnectingEdge_restrict012
+#print axioms CycleQ2ProjectiveInverseIdeal.literalConnectingEdge_restrict013
+#print axioms CycleQ2ProjectiveInverseIdeal.literalConnectingOne_boundary
+
+end -- component noncomputable section
+end ProjectiveInverseIdealCochain
+
+end CheckedProjectiveInverseIdealV5

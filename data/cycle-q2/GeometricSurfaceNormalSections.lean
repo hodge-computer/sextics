@@ -2164,3 +2164,1003 @@ end CycleQ2GeometricNormalCharts
 end
 
 end NormalSectionsNormalCoordinateTransitionPart
+
+
+section OriginalIntrinsicNormalChartFrame
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option maxRecDepth 2048
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2GeometricNormalCharts
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricIntrinsicNormal CycleQ2GeometricAffineCurveCharts
+  CycleQ2GeometricSurfaceAdjunction
+
+section Coefficients
+
+variable {X Y : Scheme.{0}} {A B : CommRingCat.{0}} (φ : A ⟶ B)
+  (j : X ⟶ Y) (i : Spec A ⟶ Y) (k : Spec B ⟶ X)
+  [IsOpenImmersion i] [IsOpenImmersion k]
+  (H : IsPullback (Spec.map φ) k i j)
+
+/-- The actual curve-section coefficient read in the original affine curve ring. -/
+def normalChartCoefficientMap : Γ(X, j ⁻¹ᵁ i.opensRange) →+* B :=
+  (specTopRingEquiv B).toRingHom.comp
+    ((baseChangeStructureSectionIso j i k (Spec.map φ) H ⊤).hom.hom.comp
+      (X.presheaf.map
+        ((Opens.map j.base).map (homOfLE (i.image_le_opensRange ⊤))).op).hom)
+
+theorem normalOpenIdealValue_imageScalar
+    (a : Γ(X, j ⁻¹ᵁ i.opensRange))
+    (f : (normalDirectImageSheaf j).val.obj (op i.opensRange))
+    (x : RingHom.ker φ.hom) :
+    normalOpenIdealValue φ j i k H
+      (normalImageScalar j i.opensRange a f) x =
+      normalChartCoefficientMap φ j i k H a * normalOpenIdealValue φ j i k H f x := by
+  unfold normalOpenIdealValue
+  rw [normalImageScalar_restrict, normalImageScalar_evaluate, map_mul, map_mul]
+  rfl
+
+end Coefficients
+
+section ActualNormalFrame
+
+variable (q h : AffinePoly) (g₁ g₂ k : SurfacePoly) (n : Fin 2) (t : Fin 3)
+
+def normalVectorScalar : NormalCurvePatch q h g₁ g₂ k n t →ₗ[
+    NormalCurvePatch q h g₁ g₂ k n t]
+    (NormalConormal q h g₁ g₂ k n t →ₗ[NormalCurvePatch q h g₁ g₂ k n t]
+      NormalCurvePatch q h g₁ g₂ k n t) where
+  toFun a := a • normalVector q h g₁ g₂ k n t
+  map_add' a b := add_smul a b _
+  map_smul' a b := mul_smul a b _
+
+/-- The original normal vector is a basis vector, since its original cofactor
+is a unit on the genuine Jacobian patch. -/
+theorem normalVectorScalar_bijective :
+    Function.Bijective (normalVectorScalar q h g₁ g₂ k n t) := by
+  obtain ⟨u, hu⟩ := (normalMultiplier_isUnit q h g₁ g₂ k n t).neg
+  constructor
+  · intro a b hab
+    have hv := congrArg
+      (fun f : NormalConormal q h g₁ g₂ k n t →ₗ[
+          NormalCurvePatch q h g₁ g₂ k n t] NormalCurvePatch q h g₁ g₂ k n t =>
+        f (normalEquationClass q h g₁ g₂ k n t n)) hab
+    change a * normalVector q h g₁ g₂ k n t (normalEquationClass q h g₁ g₂ k n t n) =
+      b * normalVector q h g₁ g₂ k n t (normalEquationClass q h g₁ g₂ k n t n) at hv
+    rw [normalVector_selected, ← hu] at hv
+    have hz := congrArg (fun z : NormalCurvePatch q h g₁ g₂ k n t => z * (↑(u⁻¹))) hv
+    simpa only [mul_assoc, Units.mul_inv, mul_one] using hz
+  · intro f
+    refine ⟨normalDualEquiv q h g₁ g₂ k n t f * (↑(u⁻¹)), ?_⟩
+    apply (normalDualEquiv q h g₁ g₂ k n t).injective
+    change (normalDualEquiv q h g₁ g₂ k n t f * (↑(u⁻¹))) *
+      normalVector q h g₁ g₂ k n t (normalEquationClass q h g₁ g₂ k n t n) =
+      normalDualEquiv q h g₁ g₂ k n t f
+    rw [normalVector_selected, ← hu, mul_assoc, Units.inv_mul, mul_one]
+
+def normalVectorLinearEquiv : NormalCurvePatch q h g₁ g₂ k n t ≃ₗ[
+    NormalCurvePatch q h g₁ g₂ k n t]
+    (NormalConormal q h g₁ g₂ k n t →ₗ[NormalCurvePatch q h g₁ g₂ k n t]
+      NormalCurvePatch q h g₁ g₂ k n t) :=
+  LinearEquiv.ofBijective (normalVectorScalar q h g₁ g₂ k n t)
+    (normalVectorScalar_bijective q h g₁ g₂ k n t)
+
+@[simp] theorem normalVectorLinearEquiv_apply
+    (a : NormalCurvePatch q h g₁ g₂ k n t) :
+    normalVectorLinearEquiv q h g₁ g₂ k n t a =
+      a • normalVector q h g₁ g₂ k n t := rfl
+
+variable {X Y : Scheme.{0}} (j : X ⟶ Y)
+  (iS : Spec (CommRingCat.of (NormalSurfacePatch q h g₁ g₂ k n t)) ⟶ Y)
+  (iC : Spec (CommRingCat.of (NormalCurvePatch q h g₁ g₂ k n t)) ⟶ X)
+  [IsOpenImmersion iS] [IsOpenImmersion iC]
+  (H : IsPullback (Spec.map (CommRingCat.ofHom (normalChartMap q h g₁ g₂ k n t).toRingHom))
+    iC iS j)
+
+/-- Every intrinsic normal section on the actual chart has a unique coefficient
+in the original normal-vector frame. -/
+def normalChartVectorFrameEquiv : NormalCurvePatch q h g₁ g₂ k n t ≃
+    (normalDirectImageSheaf j).val.obj (op iS.opensRange) :=
+  (normalVectorLinearEquiv q h g₁ g₂ k n t).toEquiv.trans
+    (normalChartIntrinsicEquiv q h g₁ g₂ k n t j iS iC H).symm
+
+theorem normalChartVectorFrameEquiv_apply
+    (a : NormalCurvePatch q h g₁ g₂ k n t) :
+    normalChartVectorFrameEquiv q h g₁ g₂ k n t j iS iC H a =
+      (normalChartIntrinsicEquiv q h g₁ g₂ k n t j iS iC H).symm
+        (a • normalVector q h g₁ g₂ k n t) := rfl
+
+theorem normalChartVectorFrameEquiv_equation
+    (a : NormalCurvePatch q h g₁ g₂ k n t) (b : Fin 2) :
+    normalChartEquationValue q h g₁ g₂ k n t j iS iC H
+      (normalChartVectorFrameEquiv q h g₁ g₂ k n t j iS iC H a) b =
+      a * ![normalCoefficientMap q h g₁ g₂ k n t g₂,
+        -normalCoefficientMap q h g₁ g₂ k n t g₁] b := by
+  rw [normalChartVectorFrameEquiv_apply, ← normalChartIntrinsicEquiv_equation,
+    Equiv.apply_symm_apply, LinearMap.smul_apply, normalVector_equation]
+  rfl
+
+theorem normalChartVectorFrameEquiv_one :
+    normalChartVectorFrameEquiv q h g₁ g₂ k n t j iS iC H 1 =
+      normalChartVectorSection q h g₁ g₂ k n t j iS iC H := by
+  rw [normalChartVectorFrameEquiv_apply, one_smul]
+  rfl
+
+end ActualNormalFrame
+
+end CycleQ2GeometricNormalCharts
+
+#print axioms CycleQ2GeometricNormalCharts.normalOpenIdealValue_imageScalar
+#print axioms CycleQ2GeometricNormalCharts.normalVectorScalar_bijective
+#print axioms CycleQ2GeometricNormalCharts.normalChartVectorFrameEquiv
+#print axioms CycleQ2GeometricNormalCharts.normalChartVectorFrameEquiv_equation
+#print axioms CycleQ2GeometricNormalCharts.normalChartVectorFrameEquiv_one
+
+end
+
+end OriginalIntrinsicNormalChartFrame
+
+
+section OriginalIntrinsicNormalCurveScalars
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option maxRecDepth 2048
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricNormalCharts
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricIntrinsicNormal CycleQ2GeometricAffineCurveCharts
+  CycleQ2GeometricSurfaceAdjunction
+
+section CoefficientEquiv
+variable {X Y : Scheme.{0}} {A B : CommRingCat.{0}} (φ : A ⟶ B)
+  (j : X ⟶ Y) (i : Spec A ⟶ Y) (k : Spec B ⟶ X)
+  [IsOpenImmersion i] [IsOpenImmersion k]
+  (H : IsPullback (Spec.map φ) k i j)
+
+theorem normalChartCoefficientMap_bijective :
+    Function.Bijective (normalChartCoefficientMap φ j i k H) := by
+  have he : homOfLE (i.image_le_opensRange ⊤) =
+      (eqToIso i.image_top_eq_opensRange).hom := Subsingleton.elim _ _
+  let : IsIso (homOfLE (i.image_le_opensRange ⊤)) := by
+    rw [he]
+    infer_instance
+  exact (specTopRingEquiv B).bijective.comp
+    ((ConcreteCategory.bijective_of_isIso
+      (baseChangeStructureSectionIso j i k (Spec.map φ) H ⊤).hom).comp
+      (ConcreteCategory.bijective_of_isIso
+        (X.presheaf.map
+          ((Opens.map j.base).map (homOfLE (i.image_le_opensRange ⊤))).op)))
+
+/-- The coefficient ring is the actual structure-section ring of the curve
+preimage, canonically identified with the original affine chart ring. -/
+def normalChartCoefficientEquiv : Γ(X, j ⁻¹ᵁ i.opensRange) ≃+* B :=
+  RingEquiv.ofBijective (normalChartCoefficientMap φ j i k H)
+    (normalChartCoefficientMap_bijective φ j i k H)
+
+@[simp] theorem normalChartCoefficientEquiv_apply
+    (a : Γ(X, j ⁻¹ᵁ i.opensRange)) :
+    normalChartCoefficientEquiv φ j i k H a =
+      normalChartCoefficientMap φ j i k H a := rfl
+
+end CoefficientEquiv
+
+section ActualNormalFrame
+variable (q h : AffinePoly) (g₁ g₂ k : SurfacePoly) (n : Fin 2) (t : Fin 3)
+variable {X Y : Scheme.{0}} (j : X ⟶ Y)
+  (iS : Spec (CommRingCat.of (NormalSurfacePatch q h g₁ g₂ k n t)) ⟶ Y)
+  (iC : Spec (CommRingCat.of (NormalCurvePatch q h g₁ g₂ k n t)) ⟶ X)
+  [IsOpenImmersion iS] [IsOpenImmersion iC]
+  (H : IsPullback (Spec.map (CommRingCat.ofHom (normalChartMap q h g₁ g₂ k n t).toRingHom))
+    iC iS j)
+
+theorem normalChartIntrinsicEquiv_imageScalar
+    (a : Γ(X, j ⁻¹ᵁ iS.opensRange))
+    (f : (normalDirectImageSheaf j).val.obj (op iS.opensRange)) :
+    normalChartIntrinsicEquiv q h g₁ g₂ k n t j iS iC H
+      (normalImageScalar j iS.opensRange a f) =
+      normalChartCoefficientMap
+        (CommRingCat.ofHom (normalChartMap q h g₁ g₂ k n t).toRingHom)
+        j iS iC H a • normalChartIntrinsicEquiv q h g₁ g₂ k n t j iS iC H f := by
+  apply LinearMap.ext_on (normalEquationClasses_span q h g₁ g₂ k n t)
+  rintro x ⟨b, rfl⟩
+  rw [LinearMap.smul_apply, normalChartIntrinsicEquiv_equation,
+    normalChartIntrinsicEquiv_equation]
+  exact normalOpenIdealValue_imageScalar
+    (CommRingCat.ofHom (normalChartMap q h g₁ g₂ k n t).toRingHom)
+    j iS iC H a f (normalChartIdealEquation q h g₁ g₂ k n t b)
+
+theorem normalChartVectorFrameEquiv_imageScalar
+    (a : Γ(X, j ⁻¹ᵁ iS.opensRange)) (b : NormalCurvePatch q h g₁ g₂ k n t) :
+    normalImageScalar j iS.opensRange a
+      (normalChartVectorFrameEquiv q h g₁ g₂ k n t j iS iC H b) =
+    normalChartVectorFrameEquiv q h g₁ g₂ k n t j iS iC H
+      (normalChartCoefficientMap
+        (CommRingCat.ofHom (normalChartMap q h g₁ g₂ k n t).toRingHom)
+        j iS iC H a * b) := by
+  apply (normalChartIntrinsicEquiv q h g₁ g₂ k n t j iS iC H).injective
+  rw [normalChartIntrinsicEquiv_imageScalar, normalChartVectorFrameEquiv_apply,
+    Equiv.apply_symm_apply, normalChartVectorFrameEquiv_apply, Equiv.apply_symm_apply,
+    smul_smul]
+
+local instance normalChartImageModule :
+    Module Γ(X, j ⁻¹ᵁ iS.opensRange)
+      ((normalDirectImageSheaf j).val.obj (op iS.opensRange)) :=
+  normalImageModule j iS.opensRange
+
+theorem normalChartImageFrame_apply (a : Γ(X, j ⁻¹ᵁ iS.opensRange)) :
+    normalImageFrameLinearMap j iS.opensRange
+      (normalChartVectorSection q h g₁ g₂ k n t j iS iC H) a =
+      normalChartVectorFrameEquiv q h g₁ g₂ k n t j iS iC H
+        (normalChartCoefficientMap
+          (CommRingCat.ofHom (normalChartMap q h g₁ g₂ k n t).toRingHom)
+          j iS iC H a) := by
+  change normalImageScalar j iS.opensRange a
+      (normalChartVectorSection q h g₁ g₂ k n t j iS iC H) = _
+  rw [← normalChartVectorFrameEquiv_one, normalChartVectorFrameEquiv_imageScalar, mul_one]
+
+theorem normalChartImageFrame_bijective :
+    Function.Bijective (normalImageFrameLinearMap j iS.opensRange
+      (normalChartVectorSection q h g₁ g₂ k n t j iS iC H)) := by
+  let e := normalChartVectorFrameEquiv q h g₁ g₂ k n t j iS iC H
+  let c := normalChartCoefficientEquiv
+    (CommRingCat.ofHom (normalChartMap q h g₁ g₂ k n t).toRingHom) j iS iC H
+  have hf (a : Γ(X, j ⁻¹ᵁ iS.opensRange)) :
+      normalImageFrameLinearMap j iS.opensRange
+        (normalChartVectorSection q h g₁ g₂ k n t j iS iC H) a = e (c a) :=
+    normalChartImageFrame_apply q h g₁ g₂ k n t j iS iC H a
+  constructor
+  · intro a b hab
+    apply c.injective
+    apply e.injective
+    rw [← hf, ← hf]
+    exact hab
+  · intro f
+    obtain ⟨b, hb⟩ := e.surjective f
+    obtain ⟨a, ha⟩ := c.surjective b
+    refine ⟨a, ?_⟩
+    rw [hf, ha, hb]
+
+def normalChartImageFrameLinearMap : Γ(X, j ⁻¹ᵁ iS.opensRange) →ₗ[
+    Γ(X, j ⁻¹ᵁ iS.opensRange)]
+    ((normalDirectImageSheaf j).val.obj (op iS.opensRange)) where
+  toFun a := normalImageScalar j iS.opensRange a
+    (normalChartVectorSection q h g₁ g₂ k n t j iS iC H)
+  map_add' a b := normalImageScalar_add j iS.opensRange a b _
+  map_smul' a b := normalImageScalar_mul j iS.opensRange a b _
+
+/-- A genuine local frame over the actual curve section ring, with the
+canonical image-structure action and the original normal vector. -/
+def normalChartImageFrameLinearEquiv : Γ(X, j ⁻¹ᵁ iS.opensRange) ≃ₗ[
+    Γ(X, j ⁻¹ᵁ iS.opensRange)]
+    ((normalDirectImageSheaf j).val.obj (op iS.opensRange)) :=
+  LinearEquiv.ofBijective
+    (normalChartImageFrameLinearMap q h g₁ g₂ k n t j iS iC H)
+    (normalChartImageFrame_bijective q h g₁ g₂ k n t j iS iC H)
+
+end ActualNormalFrame
+end CycleQ2GeometricNormalCharts
+
+#print axioms CycleQ2GeometricNormalCharts.normalChartCoefficientEquiv
+#print axioms CycleQ2GeometricNormalCharts.normalChartIntrinsicEquiv_imageScalar
+#print axioms CycleQ2GeometricNormalCharts.normalChartVectorFrameEquiv_imageScalar
+#print axioms CycleQ2GeometricNormalCharts.normalChartImageFrame_bijective
+#print axioms CycleQ2GeometricNormalCharts.normalChartImageFrameLinearEquiv
+end
+
+end OriginalIntrinsicNormalCurveScalars
+
+
+section CheckedNormalSheafFramesV5Part1
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option maxRecDepth 2048
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+
+variable {X Y : Scheme.{0}} (j : X ⟶ Y) (U : Y.Opens)
+
+theorem normalPair_values_relation
+    (u v : RingHom.ker (j.app U).hom) (a b : Γ(Y,U))
+    (hr : a • u + b • v = 0)
+    (f : (normalDirectImageSheaf j).val.obj (op U)) :
+    j.app U a * (show Γ(X, j ⁻¹ᵁ U) from normalSectionEvaluate j U f u) +
+      j.app U b * (show Γ(X, j ⁻¹ᵁ U) from normalSectionEvaluate j U f v) = 0 := by
+  have h := congrArg (normalSectionEvaluate j U f) hr
+  simpa only [map_add, normalSectionEvaluate_smul_ideal, map_zero] using h
+
+/-- The original two equations and their actual relation give a normal
+frame whenever its selected evaluation and the other relation coefficient
+are units. This criterion also applies on nonaffine subopens. -/
+theorem normalImageFrame_bijective_of_pair
+    (u v : RingHom.ker (j.app U).hom) (a b : Γ(Y,U))
+    (hr : a • u + b • v = 0)
+    (hext : ∀ f g : (normalDirectImageSheaf j).val.obj (op U),
+      normalSectionEvaluate j U f u = normalSectionEvaluate j U g u →
+      normalSectionEvaluate j U f v = normalSectionEvaluate j U g v → f = g)
+    (ν : (normalDirectImageSheaf j).val.obj (op U))
+    (hν : IsUnit (show Γ(X, j ⁻¹ᵁ U) from normalSectionEvaluate j U ν u))
+    (hb : IsUnit (j.app U b)) :
+    Function.Bijective (normalImageFrameLinearMap j U ν) := by
+  obtain ⟨w, hw⟩ := hν
+  constructor
+  · intro c d hcd
+    have h := congrArg (fun f => normalSectionEvaluate j U f u) hcd
+    change normalSectionEvaluate j U (normalImageScalar j U c ν) u =
+      normalSectionEvaluate j U (normalImageScalar j U d ν) u at h
+    rw [normalImageScalar_evaluate, normalImageScalar_evaluate, ← hw] at h
+    exact w.isUnit.mul_right_cancel h
+  · intro f
+    let c : Γ(X, j ⁻¹ᵁ U) :=
+      (show Γ(X, j ⁻¹ᵁ U) from normalSectionEvaluate j U f u) * (↑(w⁻¹) : Γ(X, j ⁻¹ᵁ U))
+    have hu : normalSectionEvaluate j U (normalImageScalar j U c ν) u =
+        normalSectionEvaluate j U f u := by
+      rw [normalImageScalar_evaluate, ← hw]
+      change ((show Γ(X, j ⁻¹ᵁ U) from normalSectionEvaluate j U f u) *
+        (↑(w⁻¹) : Γ(X, j ⁻¹ᵁ U))) * (↑w : Γ(X, j ⁻¹ᵁ U)) = _
+      rw [mul_assoc, Units.inv_mul, mul_one]
+    refine ⟨c, hext _ _ hu ?_⟩
+    apply hb.mul_left_cancel
+    have hg := normalPair_values_relation j U u v a b hr (normalImageScalar j U c ν)
+    have hf := normalPair_values_relation j U u v a b hr f
+    rw [hu] at hg
+    exact add_left_cancel (hg.trans hf.symm)
+
+/-- Restrict the actual ideal relation through the original structure
+presheaf; no separate relation is assumed on a smaller open. -/
+theorem normalPair_relation_restrict {V : Y.Opens} (h : V ⟶ U)
+    (u v : RingHom.ker (j.app U).hom) (a b : Γ(Y,U))
+    (hr : a • u + b • v = 0) :
+    Y.presheaf.map h.op a • kernelSectionRestrict j h u +
+      Y.presheaf.map h.op b • kernelSectionRestrict j h v = 0 := by
+  apply Subtype.ext
+  have hr' : a * (u : Γ(Y,U)) + b * (v : Γ(Y,U)) = 0 := congrArg Subtype.val hr
+  have hv := congrArg (Y.presheaf.map h.op) hr'
+  simpa only [map_add, map_mul, map_zero, Submodule.coe_add, Submodule.coe_smul,
+    kernelSectionRestrict_coe, smul_eq_mul, ZeroMemClass.coe_zero] using hv
+
+end CycleQ2GeometricIntrinsicNormal
+#print axioms CycleQ2GeometricIntrinsicNormal.normalImageFrame_bijective_of_pair
+#print axioms CycleQ2GeometricIntrinsicNormal.normalPair_relation_restrict
+end
+
+end CheckedNormalSheafFramesV5Part1
+
+
+section CheckedNormalSheafFramesV5Part2
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option maxRecDepth 2048
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
+
+/-- Either of the two original equation values can serve as the local
+frame coefficient, with the original signed relation retained. -/
+theorem normalImageFrame_bijective_of_pair_index
+    {X Y : Scheme.{0}} (j : X ⟶ Y) (U : Y.Opens)
+    (u : Fin 2 → RingHom.ker (j.app U).hom) (a b : Γ(Y,U))
+    (hr : a • u 0 + b • u 1 = 0)
+    (hext : ∀ f g : (normalDirectImageSheaf j).val.obj (op U),
+      normalSectionEvaluate j U f (u 0) = normalSectionEvaluate j U g (u 0) →
+      normalSectionEvaluate j U f (u 1) = normalSectionEvaluate j U g (u 1) → f = g)
+    (ν : (normalDirectImageSheaf j).val.obj (op U)) (n : Fin 2)
+    (hν : IsUnit (show Γ(X, j ⁻¹ᵁ U) from normalSectionEvaluate j U ν (u n)))
+    (hb : IsUnit (![-j.app U b, j.app U a] n)) :
+    Function.Bijective (normalImageFrameLinearMap j U ν) := by
+  fin_cases n
+  · change IsUnit (-j.app U b) at hb
+    have hb' : IsUnit (j.app U b) := by
+      simpa only [neg_neg] using hb.neg
+    exact normalImageFrame_bijective_of_pair j U (u 0) (u 1) a b hr hext ν hν hb'
+  · change IsUnit (j.app U a) at hb
+    exact normalImageFrame_bijective_of_pair j U (u 1) (u 0) b a
+      (by simpa only [add_comm] using hr)
+      (fun f g h₁ h₀ => hext f g h₀ h₁) ν hν hb
+
+end CycleQ2GeometricIntrinsicNormal
+
+namespace CycleQ2GeometricNormalCharts
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricIntrinsicNormal CycleQ2GeometricAffineCurveCharts
+  CycleQ2GeometricSurfaceAdjunction CycleQ2GeometricAffineChartSections
+
+section Coefficients
+variable {X Y : Scheme.{0}} {A B : CommRingCat.{0}} (φ : A ⟶ B)
+  (j : X ⟶ Y) (i : Spec A ⟶ Y) (k : Spec B ⟶ X)
+  [IsOpenImmersion i] [IsOpenImmersion k]
+  (H : IsPullback (Spec.map φ) k i j)
+  (e : i.opensRange.toScheme ≅ Spec A) (hi : e.inv ≫ i.opensRange.ι = i)
+
+include hi in
+theorem normalChartCoefficientMap_app_chartSection (a : A) :
+    normalChartCoefficientMap φ j i k H
+      (j.app i.opensRange (chartSection e (Over.mk (𝟙 i.opensRange)) a)) = φ a := by
+  let E := baseChangeStructureSectionIso j i k (Spec.map φ) H ⊤
+  have hn := ConcreteCategory.congr_hom
+    (j.naturality (homOfLE i.image_top_eq_opensRange.le).op)
+      (chartSection e (Over.mk (𝟙 i.opensRange)) a)
+  change j.app (i ''ᵁ ⊤)
+      (Y.presheaf.map (homOfLE i.image_top_eq_opensRange.le).op
+        (chartSection e (Over.mk (𝟙 i.opensRange)) a)) =
+    X.presheaf.map ((Opens.map j.base).map
+      (homOfLE i.image_top_eq_opensRange.le)).op
+      (j.app i.opensRange (chartSection e (Over.mk (𝟙 i.opensRange)) a)) at hn
+  change specTopRingEquiv B (E.hom
+    (X.presheaf.map ((Opens.map j.base).map
+      (homOfLE i.image_top_eq_opensRange.le)).op
+      (j.app i.opensRange (chartSection e (Over.mk (𝟙 i.opensRange)) a)))) = φ a
+  have hr := hn.symm.trans
+    (congrArg (j.app (i ''ᵁ ⊤))
+      (chartSection_restrict_imageTop i.opensRange e i hi i.image_top_eq_opensRange a))
+  have hc := congrArg (fun z : Γ(X, j ⁻¹ᵁ (i ''ᵁ ⊤)) =>
+    specTopRingEquiv B (E.hom z)) hr
+  have he := ConcreteCategory.congr_hom
+    (baseChangeStructureSectionIso_app j i k (Spec.map φ) H ⊤)
+      ((Scheme.ΓSpecIso A).inv a)
+  exact hc.trans ((congrArg (specTopRingEquiv B) he).trans
+    ((affineSectionMap_normalization φ ((Scheme.ΓSpecIso A).inv a)).trans
+      (congrArg φ ((specTopRingEquiv A).apply_symm_apply a))))
+
+end Coefficients
+
+section Chart
+variable (q h : AffinePoly) (g₁ g₂ k : SurfacePoly) (n : Fin 2) (t : Fin 3)
+  {X Y : Scheme.{0}} (j : X ⟶ Y)
+  (iS : Spec (CommRingCat.of (NormalSurfacePatch q h g₁ g₂ k n t)) ⟶ Y)
+  (iC : Spec (CommRingCat.of (NormalCurvePatch q h g₁ g₂ k n t)) ⟶ X)
+  [IsOpenImmersion iS] [IsOpenImmersion iC]
+  (H : IsPullback (Spec.map (CommRingCat.ofHom (normalChartMap q h g₁ g₂ k n t).toRingHom))
+    iC iS j)
+  (e : iS.opensRange.toScheme ≅ Spec (CommRingCat.of (NormalSurfacePatch q h g₁ g₂ k n t)))
+  (hi : e.inv ≫ iS.opensRange.ι = iS)
+
+def normalChartActualEquation (a : Fin 2) : RingHom.ker (j.app iS.opensRange).hom :=
+  ⟨chartSection e (Over.mk (𝟙 iS.opensRange)) (normalChartIdealEquation q h g₁ g₂ k n t a), by
+    apply (normalChartCoefficientEquiv
+      (CommRingCat.ofHom (normalChartMap q h g₁ g₂ k n t).toRingHom) j iS iC H).injective
+    rw [map_zero, normalChartCoefficientEquiv_apply,
+      normalChartCoefficientMap_app_chartSection _ j iS iC H e hi]
+    exact (normalChartIdealEquation q h g₁ g₂ k n t a).property⟩
+
+theorem normalChartActualEquation_relation :
+    chartSection e (Over.mk (𝟙 iS.opensRange))
+        (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t) g₁) •
+      normalChartActualEquation q h g₁ g₂ k n t j iS iC H e hi 0 +
+    chartSection e (Over.mk (𝟙 iS.opensRange))
+        (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t) g₂) •
+      normalChartActualEquation q h g₁ g₂ k n t j iS iC H e hi 1 = 0 := by
+  apply Subtype.ext
+  change chartSection e (Over.mk (𝟙 iS.opensRange))
+        (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t) g₁) *
+      chartSection e (Over.mk (𝟙 iS.opensRange))
+        (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t) (includeCurve q)) +
+    chartSection e (Over.mk (𝟙 iS.opensRange))
+        (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t) g₂) *
+      chartSection e (Over.mk (𝟙 iS.opensRange))
+        (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t) (MvPolynomial.X none)) = 0
+  have hr := congrArg (chartSection e (Over.mk (𝟙 iS.opensRange)))
+    (normalSurface_equation_relation q h g₁ g₂ k n t)
+  simpa only [map_add, map_mul, map_zero] using hr
+
+include H hi in
+theorem normalChartActualMultiplier_isUnit :
+    IsUnit (j.app iS.opensRange
+      (chartSection e (Over.mk (𝟙 iS.opensRange))
+        (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t)
+          (normalMultiplier g₁ g₂ n)))) := by
+  let c := normalChartCoefficientEquiv
+    (CommRingCat.ofHom (normalChartMap q h g₁ g₂ k n t).toRingHom) j iS iC H
+  have hu : IsUnit (c (j.app iS.opensRange
+      (chartSection e (Over.mk (𝟙 iS.opensRange))
+        (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t)
+          (normalMultiplier g₁ g₂ n))))) := by
+    change IsUnit (normalChartCoefficientMap
+      (CommRingCat.ofHom (normalChartMap q h g₁ g₂ k n t).toRingHom) j iS iC H _)
+    rw [normalChartCoefficientMap_app_chartSection _ j iS iC H e hi]
+    change IsUnit (algebraMap (NormalSurfacePatch q h g₁ g₂ k n t)
+      (NormalCurvePatch q h g₁ g₂ k n t)
+      (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t)
+        (normalMultiplier g₁ g₂ n)))
+    rw [normalAlgebraMap_polynomial]
+    exact normalMultiplier_isUnit q h g₁ g₂ k n t
+  have hu' := hu.map c.symm.toRingHom
+  change IsUnit (c.symm (c (j.app iS.opensRange
+    (chartSection e (Over.mk (𝟙 iS.opensRange))
+      (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t)
+        (normalMultiplier g₁ g₂ n)))))) at hu'
+  rw [RingEquiv.symm_apply_apply] at hu'
+  exact hu'
+
+theorem normalChartActualVector_selected_isUnit :
+    IsUnit (show Γ(X, j ⁻¹ᵁ iS.opensRange) from
+      normalSectionEvaluate j iS.opensRange
+        (normalChartVectorSection q h g₁ g₂ k n t j iS iC H)
+        (normalChartActualEquation q h g₁ g₂ k n t j iS iC H e hi n)) := by
+  rw [normalChartVectorSection_evaluate_chart q h g₁ g₂ k n t j iS iC H e hi
+    (normalChartActualEquation q h g₁ g₂ k n t j iS iC H e hi) (fun _ => rfl)]
+  have hn : ![g₂, -g₁] n = -normalMultiplier g₁ g₂ n := by
+    fin_cases n <;> simp [normalMultiplier]
+  rw [hn, map_neg, map_neg, map_neg]
+  exact (normalChartActualMultiplier_isUnit q h g₁ g₂ k n t j iS iC H e hi).neg
+
+
+private theorem map_pair {R S : Type*} [CommRing R] [CommRing S]
+    (f : R →+* S) (a b : R) (n : Fin 2) :
+    f (![a,b] n) = ![f a, f b] n := by
+  fin_cases n <;> rfl
+
+include hi in
+/-- The fixed intrinsic normal vector is a frame on every ambient subopen
+of its Jacobian chart, including subopens that are not affine. -/
+theorem normalChart_subopen_frame_bijective (V : Y.Opens) (hV : V ≤ iS.opensRange) :
+    Function.Bijective (normalImageFrameLinearMap j V
+      ((normalDirectImageSheaf j).val.map (homOfLE hV).op
+        (normalChartVectorSection q h g₁ g₂ k n t j iS iC H))) := by
+  let u := normalChartActualEquation q h g₁ g₂ k n t j iS iC H e hi
+  let a := chartSection e (Over.mk (𝟙 iS.opensRange))
+    (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t) g₁)
+  let b := chartSection e (Over.mk (𝟙 iS.opensRange))
+    (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t) g₂)
+  let ν := normalChartVectorSection q h g₁ g₂ k n t j iS iC H
+  have hr : a • u 0 + b • u 1 = 0 :=
+    normalChartActualEquation_relation q h g₁ g₂ k n t j iS iC H e hi
+  have hext (f g : (normalDirectImageSheaf j).val.obj (op V))
+      (h₀ : normalSectionEvaluate j V f (kernelSectionRestrict j (homOfLE hV) (u 0)) =
+        normalSectionEvaluate j V g (kernelSectionRestrict j (homOfLE hV) (u 0)))
+      (h₁ : normalSectionEvaluate j V f (kernelSectionRestrict j (homOfLE hV) (u 1)) =
+        normalSectionEvaluate j V g (kernelSectionRestrict j (homOfLE hV) (u 1))) : f = g := by
+    apply normalChart_subopen_ext q h g₁ g₂ k n t j iS iC H e hi u
+      (fun _ => rfl) V hV f g
+    intro m
+    fin_cases m
+    · exact h₀
+    · exact h₁
+  have hu : IsUnit (show Γ(X, j ⁻¹ᵁ V) from
+      normalSectionEvaluate j V
+        ((normalDirectImageSheaf j).val.map (homOfLE hV).op ν)
+        (kernelSectionRestrict j (homOfLE hV) (u n))) := by
+    rw [normalSectionEvaluate_restrict]
+    exact (normalChartActualVector_selected_isUnit q h g₁ g₂ k n t j iS iC H e hi).map
+      (X.presheaf.map ((Opens.map j.base).map (homOfLE hV)).op).hom
+  have hc : IsUnit (![-j.app V (Y.presheaf.map (homOfLE hV).op b),
+      j.app V (Y.presheaf.map (homOfLE hV).op a)] n) := by
+    have hc := (normalChartActualMultiplier_isUnit q h g₁ g₂ k n t j iS iC H e hi).map
+      (X.presheaf.map ((Opens.map j.base).map (homOfLE hV)).op).hom
+    have hn := ConcreteCategory.congr_hom (j.naturality (homOfLE hV).op)
+      (chartSection e (Over.mk (𝟙 iS.opensRange))
+        (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t)
+          (normalMultiplier g₁ g₂ n)))
+    have hc' : IsUnit (j.app V (Y.presheaf.map (homOfLE hV).op
+        (chartSection e (Over.mk (𝟙 iS.opensRange))
+          (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t)
+            (normalMultiplier g₁ g₂ n))))) :=
+      (congrArg IsUnit hn).mpr hc
+    let f : SurfacePoly →+* Γ(X, j ⁻¹ᵁ V) :=
+      (j.app V).hom.comp ((Y.presheaf.map (homOfLE hV).op).hom.comp
+        ((chartSection e (Over.mk (𝟙 iS.opensRange))).comp
+          (algebraMap SurfacePoly (NormalSurfacePatch q h g₁ g₂ k n t))))
+    change IsUnit (f (normalMultiplier g₁ g₂ n)) at hc'
+    rw [normalMultiplier, map_pair, map_neg] at hc'
+    exact hc'
+  exact normalImageFrame_bijective_of_pair_index j V
+    (fun m => kernelSectionRestrict j (homOfLE hV) (u m))
+    (Y.presheaf.map (homOfLE hV).op a) (Y.presheaf.map (homOfLE hV).op b)
+    (normalPair_relation_restrict j iS.opensRange (homOfLE hV) (u 0) (u 1) a b hr)
+    hext ((normalDirectImageSheaf j).val.map (homOfLE hV).op ν) n hu hc
+
+end Chart
+end CycleQ2GeometricNormalCharts
+
+#print axioms CycleQ2GeometricNormalCharts.normalChart_subopen_frame_bijective
+#print axioms CycleQ2GeometricNormalCharts.normalChartCoefficientMap_app_chartSection
+#print axioms CycleQ2GeometricNormalCharts.normalChartActualEquation_relation
+#print axioms CycleQ2GeometricNormalCharts.normalChartActualMultiplier_isUnit
+#print axioms CycleQ2GeometricNormalCharts.normalChartActualVector_selected_isUnit
+end
+
+end CheckedNormalSheafFramesV5Part2
+
+
+section CheckedNormalSheafFramesV5Part3
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+variable {X Y : Scheme.{0}} (j : X ⟶ Y)
+
+/-- An actual normal section determines a morphism from the actual
+direct-image structure module on every subopen of its domain. -/
+def normalImageFrameMorphism (U : Y.Opens)
+    (ν : (normalDirectImageSheaf j).val.obj (op U)) :
+    (imageStructureModule j).over U ⟶ (normalDirectImageSheaf j).over U where
+  val :=
+    { app V := ModuleCat.ofHom
+        (normalImageFrameLinearMap j V.unop.left
+          ((normalDirectImageSheaf j).val.map V.unop.hom.op ν))
+      naturality {V W} h := by
+        apply ModuleCat.hom_ext
+        apply LinearMap.ext
+        intro a
+        change normalImageScalar j W.unop.left
+            (X.presheaf.map ((Opens.map j.base).map h.unop.left).op a)
+            ((normalDirectImageSheaf j).val.map W.unop.hom.op ν) =
+          (normalDirectImageSheaf j).val.map h.unop.left.op
+            (normalImageScalar j V.unop.left a
+              ((normalDirectImageSheaf j).val.map V.unop.hom.op ν))
+        rw [normalImageScalar_restrict]
+        apply congrArg (normalImageScalar j W.unop.left
+          (X.presheaf.map ((Opens.map j.base).map h.unop.left).op a))
+        have hc : V.unop.hom.op ≫ h.unop.left.op = W.unop.hom.op :=
+          Subsingleton.elim _ _
+        calc
+          (normalDirectImageSheaf j).val.map W.unop.hom.op ν =
+              (normalDirectImageSheaf j).val.map
+                (V.unop.hom.op ≫ h.unop.left.op) ν :=
+            (normalDirectImageSheaf j).val.congr_map_apply hc.symm ν
+          _ = _ := (normalDirectImageSheaf j).val.map_comp_apply
+            V.unop.hom.op h.unop.left.op ν }
+
+@[simp] theorem normalImageFrameMorphism_app (U : Y.Opens)
+    (ν : (normalDirectImageSheaf j).val.obj (op U)) (V : Over U)
+    (a : Γ(X, j ⁻¹ᵁ V.left)) :
+    (normalImageFrameMorphism j U ν).val.app (op V) a =
+      normalImageScalar j V.left a ((normalDirectImageSheaf j).val.map V.hom.op ν) := rfl
+
+/-- If multiplication by the restricted frame is bijective on every
+subopen, these very component maps assemble into a sheaf isomorphism. -/
+def normalImageFrameIso (U : Y.Opens)
+    (ν : (normalDirectImageSheaf j).val.obj (op U))
+    (hbij : ∀ V : Over U, Function.Bijective
+      (normalImageFrameLinearMap j V.left
+        ((normalDirectImageSheaf j).val.map V.hom.op ν))) :
+    (imageStructureModule j).over U ≅ (normalDirectImageSheaf j).over U := by
+  let f := normalImageFrameMorphism j U ν
+  letI (V : (Over U)ᵒᵖ) : IsIso (f.val.app V) :=
+    (ConcreteCategory.isIso_iff_bijective (f.val.app V)).mpr (hbij V.unop)
+  exact (SheafOfModules.fullyFaithfulForget _).preimageIso
+    (PresheafOfModules.isoMk (fun V => asIso (f.val.app V))
+      (fun {_ _} h => f.val.naturality h))
+
+@[simp] theorem normalImageFrameIso_hom (U : Y.Opens)
+    (ν : (normalDirectImageSheaf j).val.obj (op U))
+    (hbij : ∀ V : Over U, Function.Bijective
+      (normalImageFrameLinearMap j V.left
+        ((normalDirectImageSheaf j).val.map V.hom.op ν))) :
+    (normalImageFrameIso j U ν hbij).hom = normalImageFrameMorphism j U ν := by
+  apply SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro V
+  rfl
+
+theorem normalImageFrameMorphism_isIso (U : Y.Opens)
+    (ν : (normalDirectImageSheaf j).val.obj (op U))
+    (hbij : ∀ V : Over U, Function.Bijective
+      (normalImageFrameLinearMap j V.left
+        ((normalDirectImageSheaf j).val.map V.hom.op ν))) :
+    IsIso (normalImageFrameMorphism j U ν) := by
+  rw [← normalImageFrameIso_hom j U ν hbij]
+  infer_instance
+
+/-- The same criterion in the usual order-theoretic subopen form. -/
+theorem normalImageFrameMorphism_isIso_of_subopens (U : Y.Opens)
+    (ν : (normalDirectImageSheaf j).val.obj (op U))
+    (hbij : ∀ (V : Y.Opens) (h : V ≤ U), Function.Bijective
+      (normalImageFrameLinearMap j V
+        ((normalDirectImageSheaf j).val.map (homOfLE h).op ν))) :
+    IsIso (normalImageFrameMorphism j U ν) := by
+  apply normalImageFrameMorphism_isIso
+  intro V
+  exact hbij V.left (leOfHom V.hom)
+
+end CycleQ2GeometricIntrinsicNormal
+
+#print axioms CycleQ2GeometricIntrinsicNormal.normalImageFrameMorphism
+#print axioms CycleQ2GeometricIntrinsicNormal.normalImageFrameIso
+#print axioms CycleQ2GeometricIntrinsicNormal.normalImageFrameIso_hom
+#print axioms CycleQ2GeometricIntrinsicNormal.normalImageFrameMorphism_isIso_of_subopens
+
+end
+
+end CheckedNormalSheafFramesV5Part3
+
+
+section CheckedNormalSheafFramesV5Part4
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option maxRecDepth 2048
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricNormalCharts
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricIntrinsicNormal CycleQ2GeometricAffineCurveCharts
+  CycleQ2GeometricSurfaceAdjunction
+
+section Symbolic
+variable (q h : AffinePoly) (g₁ g₂ k : SurfacePoly) (n : Fin 2) (t : Fin 3)
+  {X Y : Scheme.{0}} (j : X ⟶ Y)
+  (iS : Spec (CommRingCat.of (NormalSurfacePatch q h g₁ g₂ k n t)) ⟶ Y)
+  (iC : Spec (CommRingCat.of (NormalCurvePatch q h g₁ g₂ k n t)) ⟶ X)
+  [IsOpenImmersion iS] [IsOpenImmersion iC]
+  (H : IsPullback (Spec.map (CommRingCat.ofHom (normalChartMap q h g₁ g₂ k n t).toRingHom))
+    iC iS j)
+  (e : iS.opensRange.toScheme ≅ Spec (CommRingCat.of (NormalSurfacePatch q h g₁ g₂ k n t)))
+  (hi : e.inv ≫ iS.opensRange.ι = iS)
+
+/-- The actual normal vector trivializes the genuine intrinsic normal
+module sheaf over its actual curve-section module on the full chart site. -/
+def normalChartImageFrameIso :
+    (imageStructureModule j).over iS.opensRange ≅
+      (normalDirectImageSheaf j).over iS.opensRange :=
+  normalImageFrameIso j iS.opensRange
+    (normalChartVectorSection q h g₁ g₂ k n t j iS iC H)
+    (fun V => normalChart_subopen_frame_bijective q h g₁ g₂ k n t j iS iC H e hi
+      V.left (leOfHom V.hom))
+
+theorem normalChartImageFrameIso_hom :
+    (normalChartImageFrameIso q h g₁ g₂ k n t j iS iC H e hi).hom =
+      normalImageFrameMorphism j iS.opensRange
+        (normalChartVectorSection q h g₁ g₂ k n t j iS iC H) :=
+  normalImageFrameIso_hom _ _ _ _
+
+end Symbolic
+
+open CycleQ2GeometricLiteralSurface CycleQ2GeometricSurfaceCurveCharts
+  CycleQ2GeometricProjectiveCurve CycleQ2GeometricSurfaceDehomogenizedCharts
+  CycleQ2SeedTrace CycleQ2SeedCechTheta CycleQ2NormalConnecting
+  CycleQ2GeometricSeedNormalIdeals CycleQ2GeometricSurfaceJacobianCharts
+  CycleQ2GeometricSurfacePrincipalCurveCharts
+
+/-- The actual first-coordinate Jacobian chart has the original normal
+vector as a sheaf frame, with no coefficient-surjectivity premise. -/
+def firstNormalImageFrameIso (r θ : ℂ) (i : Fin 2) (j : Fin 3) :
+    (imageStructureModule (curveToSurface r θ)).over (firstNormalOpen r θ i j) ≅
+      (normalDirectImageSheaf (curveToSurface r θ)).over (firstNormalOpen r θ i j) :=
+  normalChartImageFrameIso (firstQuadric r) (firstCubic θ)
+    (firstSurfaceDehomogenize (originalG1 r)) (firstSurfaceDehomogenize originalG2)
+    (firstSurfaceDehomogenize (thetaK θ)) i j
+    (curveToSurface r θ) (firstNormalSurfaceImmersion r θ i j)
+    (firstNormalCurveImmersion r θ i j) (firstNormalCurve_isPullback r θ i j)
+    (firstNormalChart r θ i j)
+    (principalChart_inv_ι (firstAffineChart r θ) (firstJacobian r θ i j))
+
+/-- The same actual sheaf frame on each second-coordinate Jacobian chart. -/
+def secondNormalImageFrameIso (r θ : ℂ) (i : Fin 2) (j : Fin 3) :
+    (imageStructureModule (curveToSurface r θ)).over (secondNormalOpen r θ i j) ≅
+      (normalDirectImageSheaf (curveToSurface r θ)).over (secondNormalOpen r θ i j) :=
+  normalChartImageFrameIso (secondQuadric r) (secondCubic θ)
+    (secondSurfaceDehomogenize (originalG1 r)) (secondSurfaceDehomogenize originalG2)
+    (secondSurfaceDehomogenize (thetaK θ)) i j
+    (curveToSurface r θ) (secondNormalSurfaceImmersion r θ i j)
+    (secondNormalCurveImmersion r θ i j) (secondNormalCurve_isPullback r θ i j)
+    (secondNormalChart r θ i j)
+    (principalChart_inv_ι (secondAffineChart r θ) (secondJacobian r θ i j))
+
+@[simp] theorem firstNormalImageFrameIso_hom (r θ : ℂ) (i : Fin 2) (j : Fin 3) :
+    (firstNormalImageFrameIso r θ i j).hom =
+      normalImageFrameMorphism (curveToSurface r θ) (firstNormalOpen r θ i j)
+        (firstNormalVectorSection r θ i j) :=
+  normalChartImageFrameIso_hom _ _ _ _ _ _ _ _ _ _ _ _ _
+
+@[simp] theorem secondNormalImageFrameIso_hom (r θ : ℂ) (i : Fin 2) (j : Fin 3) :
+    (secondNormalImageFrameIso r θ i j).hom =
+      normalImageFrameMorphism (curveToSurface r θ) (secondNormalOpen r θ i j)
+        (secondNormalVectorSection r θ i j) :=
+  normalChartImageFrameIso_hom _ _ _ _ _ _ _ _ _ _ _ _ _
+
+end CycleQ2GeometricNormalCharts
+#print axioms CycleQ2GeometricNormalCharts.normalChartImageFrameIso
+#print axioms CycleQ2GeometricNormalCharts.firstNormalImageFrameIso
+#print axioms CycleQ2GeometricNormalCharts.secondNormalImageFrameIso
+#print axioms CycleQ2GeometricNormalCharts.firstNormalImageFrameIso_hom
+#print axioms CycleQ2GeometricNormalCharts.secondNormalImageFrameIso_hom
+end
+
+end CheckedNormalSheafFramesV5Part4
+
+
+section CheckedNormalSheafFramesV5Part5
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+variable {X Y : Scheme.{0}} (j : X ⟶ Y)
+
+def imageSectionRestrict {U V : Y.Opens} (h : V ≤ U)
+    (a : Γ(X, j ⁻¹ᵁ U)) : Γ(X, j ⁻¹ᵁ V) :=
+  X.presheaf.map ((Opens.map j.base).map (homOfLE h)).op a
+
+theorem normalSectionRestrict_twice {U V W : Y.Opens}
+    (h : V ≤ U) (k : W ≤ V)
+    (ν : (normalDirectImageSheaf j).val.obj (op U)) :
+    normalSectionRestrict j k (normalSectionRestrict j h ν) =
+      normalSectionRestrict j (k.trans h) ν :=
+  ((normalDirectImageSheaf j).val.map_comp_apply (homOfLE h).op (homOfLE k).op ν).symm
+
+theorem normalImageScalar_restrict_typed {U V : Y.Opens} (h : V ≤ U)
+    (a : Γ(X, j ⁻¹ᵁ U)) (ν : (normalDirectImageSheaf j).val.obj (op U)) :
+    normalSectionRestrict j h (normalImageScalar j U a ν) =
+      normalImageScalar j V (imageSectionRestrict j h a) (normalSectionRestrict j h ν) :=
+  normalImageScalar_restrict j (homOfLE h) a ν
+
+section Closed
+variable [IsClosedImmersion j]
+
+/-- Actual normal sections are determined by a cover of their curve
+preimage. The cited gluing theorem includes the ambient closed-image complement. -/
+theorem normalSections_eq_of_preimage_cover {ι : Type}
+    (U : Y.Opens) (V : ι → Y.Opens) (hVU : ∀ i, V i ≤ U)
+    (hcover : j ⁻¹ᵁ U ≤ ⨆ i, j ⁻¹ᵁ V i)
+    (f g : (normalDirectImageSheaf j).val.obj (op U))
+    (hfg : ∀ i, normalSectionRestrict j (hVU i) f =
+      normalSectionRestrict j (hVU i) g) : f = g := by
+  let s := fun i => normalSectionRestrict j (hVU i) f
+  have hs : ∀ a b,
+      normalSectionRestrict j (show V a ⊓ V b ≤ V a from inf_le_left) (s a) =
+      normalSectionRestrict j (show V a ⊓ V b ≤ V b from inf_le_right) (s b) := by
+    intro a b
+    dsimp only [s]
+    rw [normalSectionRestrict_twice, normalSectionRestrict_twice]
+  obtain ⟨t, ht, hu⟩ := existsUnique_normalGluing_typed j U V hVU hcover s hs
+  exact (hu f (fun _ => rfl)).trans (hu g (fun i => (hfg i).symm)).symm
+
+/-- Bijective frame coefficients glue through the actual curve structure
+sheaf. Local bijectivity is required on all subopens of the covering opens. -/
+theorem normalImageFrame_bijective_of_preimage_cover {ι : Type}
+    (U : Y.Opens) (V : ι → Y.Opens) (hVU : ∀ i, V i ≤ U)
+    (hcover : j ⁻¹ᵁ U ≤ ⨆ i, j ⁻¹ᵁ V i)
+    (ν : (normalDirectImageSheaf j).val.obj (op U))
+    (hlocal : ∀ (i : ι) (W : Y.Opens) (hW : W ≤ V i), Function.Bijective
+      (normalImageFrameLinearMap j W
+        (normalSectionRestrict j (hW.trans (hVU i)) ν))) :
+    Function.Bijective (normalImageFrameLinearMap j U ν) := by
+  constructor
+  · intro a b hab
+    apply X.sheaf.eq_of_locally_eq' (fun i => j ⁻¹ᵁ V i) (j ⁻¹ᵁ U)
+      (fun i => (Opens.map j.base).map (homOfLE (hVU i))) hcover a b
+    intro i
+    apply (hlocal i (V i) le_rfl).1
+    have he := congrArg (normalSectionRestrict j (hVU i)) hab
+    change normalSectionRestrict j (hVU i) (normalImageScalar j U a ν) =
+      normalSectionRestrict j (hVU i) (normalImageScalar j U b ν) at he
+    rw [normalImageScalar_restrict_typed, normalImageScalar_restrict_typed] at he
+    exact he
+  · intro f
+    have hex : ∀ i, ∃ a : Γ(X, j ⁻¹ᵁ V i),
+        normalImageScalar j (V i) a (normalSectionRestrict j (hVU i) ν) =
+          normalSectionRestrict j (hVU i) f := fun i =>
+      (hlocal i (V i) le_rfl).2 (normalSectionRestrict j (hVU i) f)
+    choose a ha using hex
+    have hcompat : TopCat.Presheaf.IsCompatible X.presheaf (fun i => j ⁻¹ᵁ V i) a := by
+      intro i k
+      change imageSectionRestrict j (show V i ⊓ V k ≤ V i from inf_le_left) (a i) =
+        imageSectionRestrict j (show V i ⊓ V k ≤ V k from inf_le_right) (a k)
+      apply (hlocal i (V i ⊓ V k) inf_le_left).1
+      have hi := congrArg
+        (normalSectionRestrict j (show V i ⊓ V k ≤ V i from inf_le_left)) (ha i)
+      have hk := congrArg
+        (normalSectionRestrict j (show V i ⊓ V k ≤ V k from inf_le_right)) (ha k)
+      rw [normalImageScalar_restrict_typed, normalSectionRestrict_twice,
+        normalSectionRestrict_twice] at hi hk
+      exact hi.trans hk.symm
+    obtain ⟨aU, haU, _⟩ := X.sheaf.existsUnique_gluing' (fun i => j ⁻¹ᵁ V i)
+      (j ⁻¹ᵁ U) (fun i => (Opens.map j.base).map (homOfLE (hVU i)))
+      hcover a hcompat
+    refine ⟨aU, ?_⟩
+    apply normalSections_eq_of_preimage_cover j U V hVU hcover
+    intro i
+    change normalSectionRestrict j (hVU i) (normalImageScalar j U aU ν) = _
+    rw [normalImageScalar_restrict_typed]
+    exact (congrArg (fun z => normalImageScalar j (V i) z
+      (normalSectionRestrict j (hVU i) ν)) (haU i)).trans (ha i)
+
+end Closed
+
+end CycleQ2GeometricIntrinsicNormal
+
+#print axioms CycleQ2GeometricIntrinsicNormal.normalSections_eq_of_preimage_cover
+#print axioms CycleQ2GeometricIntrinsicNormal.normalImageFrame_bijective_of_preimage_cover
+
+end
+
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+variable {X Y : Scheme.{0}} (j : X ⟶ Y)
+
+/-- An actual sheaf frame is bijective on every subopen, by the genuine
+evaluation functor on the open site. -/
+theorem normalImageFrame_bijective_of_isIso (U : Y.Opens)
+    (ν : (normalDirectImageSheaf j).val.obj (op U))
+    (hiso : IsIso (normalImageFrameMorphism j U ν))
+    (W : Y.Opens) (hW : W ≤ U) :
+    Function.Bijective (normalImageFrameLinearMap j W (normalSectionRestrict j hW ν)) := by
+  have := hiso
+  let T : Over U := Over.mk (homOfLE hW)
+  let E := SheafOfModules.evaluation (R := (ringSheaf Y.sheaf).over U) (op T)
+  change Function.Bijective (E.map (normalImageFrameMorphism j U ν))
+  exact (ConcreteCategory.isIso_iff_bijective _).mp inferInstance
+
+/-- A normal frame is a sheaf isomorphism when it is one on a family
+covering the curve preimage. Outside the closed image, both sheaves vanish;
+this is accounted for by the support-aware uniqueness used in the proof. -/
+theorem normalImageFrameMorphism_isIso_of_preimage_cover [IsClosedImmersion j]
+    {ι : Type} (U : Y.Opens) (V : ι → Y.Opens) (hVU : ∀ i, V i ≤ U)
+    (hcover : j ⁻¹ᵁ U ≤ ⨆ i, j ⁻¹ᵁ V i)
+    (ν : (normalDirectImageSheaf j).val.obj (op U))
+    (hiso : ∀ i, IsIso (normalImageFrameMorphism j (V i)
+      (normalSectionRestrict j (hVU i) ν))) :
+    IsIso (normalImageFrameMorphism j U ν) := by
+  apply normalImageFrameMorphism_isIso_of_subopens
+  intro W hWU
+  let VW : ι → Y.Opens := fun i => W ⊓ V i
+  have hVW : ∀ i, VW i ≤ W := fun _ => inf_le_left
+  have hcoverW : j ⁻¹ᵁ W ≤ ⨆ i, j ⁻¹ᵁ VW i := by
+    intro x hx
+    obtain ⟨i, hi⟩ := Opens.mem_iSup.mp (hcover (hWU hx))
+    exact Opens.mem_iSup.mpr ⟨i, hx, hi⟩
+  apply normalImageFrame_bijective_of_preimage_cover j W VW hVW hcoverW
+  intro i T hT
+  have h := normalImageFrame_bijective_of_isIso j (V i)
+    (normalSectionRestrict j (hVU i) ν) (hiso i) T (hT.trans inf_le_right)
+  change Function.Bijective (normalImageFrameLinearMap j T
+    (normalSectionRestrict j (hT.trans (hVW i)) (normalSectionRestrict j hWU ν)))
+  rw [normalSectionRestrict_twice]
+  simpa only [normalSectionRestrict_twice] using h
+
+end CycleQ2GeometricIntrinsicNormal
+
+#print axioms CycleQ2GeometricIntrinsicNormal.normalImageFrame_bijective_of_isIso
+#print axioms CycleQ2GeometricIntrinsicNormal.normalImageFrameMorphism_isIso_of_preimage_cover
+
+end
+
+end CheckedNormalSheafFramesV5Part5

@@ -1,5 +1,234 @@
 # A nonconstructive geometric route for cycle-q2
 
+## The actual connecting class and first-order Cartier defect — 14 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains open.
+This continuation identifies the connecting image of the original
+inverse-ideal lift with the original nonzero projective Cartier class.
+It also binds the first-order transition defect to the original localized
+Cartier cocycle and derives the cyclic coefficients from the actual
+first-order deformation ring. The normal frames now retain their unique
+coefficients over the actual curve section rings. These are geometric
+comparison results; the moving-cycle correspondence and de Rham
+vanishing argument are still separate obligations.
+
+### The original inverse-ideal lift on the four projective opens
+
+The continuation in
+[GeometricGradedCechDescent.lean](GeometricGradedCechDescent.lean) starts
+with the existing localized inverse-ideal homomorphism on the original
+\(01\) overlap. Degree-zero contraction gives its projective grading.
+The proof constructs the actual affine cartesian square for every
+nonempty intersection of the original four projective opens and uses
+the genuine affine kernel-Hom equivalence to turn that homomorphism into
+an inverse-ideal sheaf section. Its value on each actual ideal element
+is expressed through the original `Proj.awayToSection` normalization.
+More precisely, the affine equivalence proves existence and uniqueness
+of the section with these prescribed evaluations, and classical choice
+selects that unique extension. No inverse image of a desired cohomology
+class is selected. This formulation also keeps the concrete projective
+normalization within the bounded kernel-checking limits.
+
+On the \(012\) and \(013\) faces, the proof evaluates that same section
+on an original ideal element whose restriction is a unit. Such an
+element determines the whole localized homomorphism. The original
+boundary formulas therefore give equality of the actual sheaf sections,
+with their scalar maps fixed. The other five edge components are zero.
+
+For the resulting actual six-edge cochain \(b\),
+`literalConnectingOne_boundary` proves
+\[
+\delta b=\iota(c_{\mathrm{Cartier}}),
+\]
+where \(c_{\mathrm{Cartier}}\) is the unchanged original four-face
+projective cocycle and \(\iota\) is multiplication into the actual
+inverse-ideal sheaf. This fixes the positive sign before passing to
+cohomology. The degree-zero operation here is projective grading; it is
+not a cyclic-character selection.
+
+### The actual derived connecting map and its original value
+
+[GeometricCartierDeformation.lean](GeometricCartierDeformation.lean)
+constructs the actual additive connecting maps of the previously proved
+short exact sequence
+\[
+0\longrightarrow\mathcal O_D\longrightarrow
+\mathcal Hom(I,\mathcal O_D)\longrightarrow
+\mathcal Hom(I,j_*\mathcal O_C)\longrightarrow0.
+\]
+It includes ordinary cohomology, cohomology on every open, naturality,
+restriction compatibility, and compatibility with the terminal-open
+identification. The genuine complex scalar actions commute with the
+connecting maps. The proof uses scalar endomorphisms of the actual
+short exact sequence and naturality of its extension class.
+
+A four-open degree-one Čech comparison is constructed using an actual
+injective presentation. It is independent of the chosen lifts, natural
+in sheaf morphisms, and kills Čech boundaries. A second comparison uses
+a morphism from the given short exact sequence to the injective
+presentation. If \(\delta b=\iota(c)\), it proves
+\[
+\partial[\pi(b)]=[c].
+\]
+No local acyclicity assumption is inserted into this comparison.
+
+The convention is also compared directly with the actual
+Mayer--Vietoris sequence. On the union of the first two opens,
+the four-open class of a one-cocycle \(u\) restricts to
+\(\delta_{\mathrm{MV}}(-u_{01})\). In the literal application
+\(u=\pi(b)\), so this is the negative reduced normal edge. A genuine morphism of
+short exact complexes proves this sign: the Čech differential is
+second restriction minus first, whereas the Mayer--Vietoris map uses
+first minus second. This convention does not change the positive
+Cartier connecting-map identity below.
+
+Reducing the original \(b\) through the actual normal-sheaf morphism
+therefore defines the actual normal cocycle and its derived class
+\(n\). `literalConnecting_normalClass` proves
+\[
+\partial n=\texttt{literalDerivedClass}\ne0
+\quad\text{in }H^2(D,\mathcal O_D).
+\]
+Both the top-open and ordinary versions are retained. In particular,
+the original normal class and the actual connecting map are nonzero.
+Combined with the preceding checkpoint, this is the same surface class
+whose retained coordinate descendant is the negative of the original
+second-descent endpoint.
+
+### The actual first-order transition defect and cyclic weights
+
+The same module specializes the genuine first-order family to the
+literal cubic quotient and the equation \(F-\varepsilon A\). The closed
+fiber is identified with the original seed surface by maps that preserve
+the polynomial coordinates. The principal-localization comparisons
+retain the original denominator identities and map the reduced units
+to the original polynomial factors.
+
+The actual \(012\) and \(013\) transition defects are the negatives of
+the corresponding original localized Cartier faces. The resulting
+class in `ActualSecondCech 57 1`, formed from the ordinary localizations,
+satisfies
+\[
+[\mathrm{defect}]=-[c_{\mathrm{Cartier}}]\ne0.
+\]
+This sign belongs to the original first-order transition calculation;
+the preceding connecting-map comparison retains its own positive sign.
+
+For \(\zeta^3=1\), the actual diagonal polynomial action fixes the cubic
+and \(F\), while carrying \(A\) to \(\zeta A\). Sending
+\(\varepsilon\) to \(\zeta^2\varepsilon\) therefore fixes the actual
+relation \(F-\varepsilon A\). The resulting map descends to the genuine
+first-order deformation ring and induces the existing cyclic action
+on the closed fiber. On the actual square-zero kernel, its canonical
+coefficient map satisfies
+\[
+\operatorname{coeff}(\widetilde\gamma z)
+=\zeta^2\gamma(\operatorname{coeff}z).
+\]
+Consequently the three actual kernel terms have coefficient
+\[
+q+\zeta^2\gamma(q)+\zeta\gamma^2(q).
+\]
+These weights come from the deformation map itself. This calculation
+does not yet construct the moving-cycle correspondence or its action
+on de Rham cohomology.
+
+The unit-defect calculation also respects tensor products of actual
+transition units. For supplied lifted units satisfying the exact
+cocycle identity, tensoring leaves the computed local defect unchanged.
+This is the local zero-defect criterion needed for an ambient twist
+once its actual lifted transition system has been constructed; this
+lemma alone does not identify a specific ambient line bundle.
+
+### Frames with the actual curve-section scalar action
+
+[GeometricSurfaceNormalSections.lean](GeometricSurfaceNormalSections.lean)
+now proves that the original normal vector is a basis on every actual
+Jacobian chart. Its selected cofactor is a unit in the original curve
+chart ring. Evaluation on the original conormal equation therefore
+gives injectivity and supplies the unique coefficient of any intrinsic
+normal section.
+
+The proof identifies the curve-section ring on the chart preimage with
+the original affine curve ring through the actual cartesian square.
+It proves that intrinsic normal evaluation and its affine comparison
+respect the canonical curve-section scalar action. The resulting
+linear equivalence uses this genuine curve-section module structure.
+The frame at coefficient one is exactly the previously constructed
+normal vector, and the two defining-equation values retain their
+original \((G_2,-G_1)\) normalization.
+
+The argument then extends to every subopen of each Jacobian chart,
+including nonaffine subopens. The two original ideal generators, their
+original relation, and the invertible selected cofactor restrict to
+these opens. Evaluation on those generators determines an intrinsic
+normal section and supplies its unique coefficient. No additional
+surjectivity or principality assumption is introduced.
+
+These component maps form a genuine morphism of module sheaves. The
+restriction calculation proves its naturality, and bijectivity on
+every subopen makes it an isomorphism. `firstNormalImageFrameIso` and
+`secondNormalImageFrameIso` give the twelve original Jacobian-chart
+isomorphisms. Their underlying morphisms are precisely multiplication
+by the existing normal vectors, with the canonical curve-section
+scalar action.
+
+A support-aware gluing criterion is also proved. For a closed
+immersion, it is enough that the preimages of a family of ambient opens
+cover the relevant curve open. The proof glues the unique coefficients
+in the actual structure sheaf of the curve and uses normal-section
+uniqueness on that preimage cover. The latter includes the ambient
+complement of the closed image, where the relevant sheaves vanish.
+It therefore does not assume that the Jacobian opens themselves cover
+the whole ambient surface.
+
+### Verification of the assembled continuation
+
+The following complete repository modules were compiled from their exact
+current source bytes and independently replayed with `leanchecker`.
+Their prior non-import bodies are preserved. The reported theorem
+audits use only `propext`, `Classical.choice`, and `Quot.sound`.
+
+| Module | Lines | Compilation | Independent replay |
+| --- | ---: | ---: | ---: |
+| `GeometricGradedCechDescent` | 3,576 | 171.55 s | 77.80 s |
+| `GeometricCartierDeformation` | 2,075 | 256.09 s | 172.09 s |
+| `GeometricSurfaceNormalSections` | 3,166 | 122.06 s | 55.58 s |
+
+The checks use Lean 4.33.1 with pinned Mathlib, one worker, a 5,120 MiB
+managed-memory limit, a 6,144 MiB RSS ceiling, a 1,536 MiB memory reserve,
+and a 360-second module deadline. The assembled files are checked again
+after removing the scratch imports, so their published dependency
+contexts and scope boundaries are included in the verification.
+
+The helper source/import policy passes, and the proposal remains within
+the 256-file and 16 MiB limits. The full source gate still rejects the
+unchanged final admission in `Solution.lean`. This is a checked
+continuation, not a completed certificate or a claim that the entire
+original proposal has passed a fresh end-to-end build.
+
+### What remains
+
+The connecting-map equality does not supply the final de Rham primitive.
+The intrinsic normal class must still be identified with the
+twisted-model/Mayer--Vietoris class used in the cubic pairing
+calculations. These are respectively
+`CycleQ2GeometricIntrinsicCartierCohomology.literalNormalClass` and
+`CycleQ2GeometricProjectiveNormalClass.literalNormalClass`; the comparison
+must use the actual sheaf identifications and the checked sign above.
+The normal and exterior sheaf maps must be compared with
+the intended geometric cup and trace maps. The original matrix
+line and its first-order variation must be realized by a moving-cycle
+correspondence with the required comparison. The supported-projector
+and global de Rham arguments must then show that the protected residue
+class vanishes on a nonempty principal open. Only that last conclusion
+feeds the existing residue-to-certificate bridge.
+
+The protected target, manifest, and original final admission are
+unchanged. No additional axiom or replacement target has been introduced.
+This continuation follows the mathematical argument and attribution
+recorded below and was prepared for `fqlx` with OpenAI ChatGPT assistance.
+
 ## The original projective class and the actual Cartier short exact sequence — 14 November 2026
 
 The final theorem `Submission.missing_geometric_existence` remains open.
