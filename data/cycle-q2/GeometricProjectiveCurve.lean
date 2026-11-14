@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceBindings
 import Proposal.GeometricIncidenceCechTrace
 import Proposal.GeometricProjectiveCech
 import Proposal.GeometricTraceBoundary
@@ -369,70 +370,7 @@ attribute [local instance] MvPolynomial.weightedGradedAlgebra
 
 /-! ## The actual homogeneous incidence surface -/
 
-def geometricWeight : Fin 5 → ℕ := ![1, 1, 1, 1, 2]
-
-theorem geometricWeight_weight (e : FullExponent) :
-    Finsupp.weight geometricWeight e = fullDegree e := by
-  rw [Finsupp.weight_eq_sum]
-  simp [geometricWeight, fullDegree, Fin.sum_univ_succ, nsmul_eq_mul] <;> ring
-
-theorem homogeneous_of_character {S : Type*} [CommRing S]
-    {p : MvPolynomial (Fin 5) S} {d : ℕ} {χ : ZMod 3}
-    (hp : p.IsWeightedHomogeneous fullGrading (d, χ)) :
-    p.IsWeightedHomogeneous geometricWeight d := by
-  intro e he
-  rw [geometricWeight_weight]
-  have hd := congrArg Prod.fst (hp he)
-  simpa only [fullGrading_weight] using hd
-
-abbrev PolynomialGrade (S : Type) [CommRing S] (d : ℕ) :
-    Submodule S (MvPolynomial (Fin 5) S) :=
-  weightedHomogeneousSubmodule S geometricWeight d
-
 variable {S : Type} [CommRing S] [Algebra ℂ S]
-
-def pointEquationH (y : ParameterIndex → S) : MvPolynomial (Fin 5) S :=
-  map (pointMap y) CycleQ2IncidenceBasepointOpen.familyH
-
-def pointEquationF (y : ParameterIndex → S) : MvPolynomial (Fin 5) S :=
-  map (pointMap y) CycleQ2IncidenceBasepointOpen.familyF
-
-def pointEquations (y : ParameterIndex → S) : Ideal (MvPolynomial (Fin 5) S) :=
-  equationsIdeal (pointEquationH y) (pointEquationF y)
-
-theorem pointEquationH_homogeneous (y : ParameterIndex → S) :
-    pointEquationH y ∈ PolynomialGrade S 3 := by
-  rw [pointEquationH, pointMap_familyH]
-  exact homogeneous_of_character (fullInvariantPolynomial_homogeneous 3 (pointCubic y))
-
-theorem pointEquationF_homogeneous (y : ParameterIndex → S) :
-    pointEquationF y ∈ PolynomialGrade S 6 := by
-  rw [pointEquationF, pointMap_familyF]
-  exact homogeneous_of_character (fullInvariantPolynomial_homogeneous 6 (pointSextic y))
-
-theorem pointEquations_homogeneous (y : ParameterIndex → S) :
-    (pointEquations y).IsHomogeneous (PolynomialGrade S) := by
-  apply Ideal.homogeneous_span
-  intro p hp
-  simp only [Set.mem_insert_iff, Set.mem_singleton_iff] at hp
-  rcases hp with rfl | rfl
-  · exact ⟨3, pointEquationH_homogeneous y⟩
-  · exact ⟨6, pointEquationF_homogeneous y⟩
-
-/-- This is a grading on the existing literal `PointSurface y` quotient. -/
-abbrev surfaceGrade (y : ParameterIndex → S) (d : ℕ) :
-    Submodule S (PointSurface y) :=
-  CycleQ2GeometricProjectiveCurve.HomogeneousQuotient.grade
-    (PolynomialGrade S) (pointEquations y) d
-
-instance surfaceGradedRing (y : ParameterIndex → S) : GradedRing (surfaceGrade y) :=
-  CycleQ2GeometricProjectiveCurve.HomogeneousQuotient.gradedRing
-    (PolynomialGrade S) (pointEquations y) (pointEquations_homogeneous y)
-
-/-- The projective scheme of the literal weighted cubic/sextic quotient. -/
-def surface (y : ParameterIndex → S) : Scheme := Proj (surfaceGrade y)
-
-def weightedAmbient (S : Type) [CommRing S] : Scheme := Proj (PolynomialGrade S)
 
 def surfaceCoefficient (y : ParameterIndex → S) : S →+* surfaceGrade y 0 :=
   algebraMap S (surfaceGrade y 0)

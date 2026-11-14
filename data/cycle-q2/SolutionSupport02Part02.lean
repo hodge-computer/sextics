@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceBindings
 import Proposal.SolutionSupport02Part01
 
 /-! Components extracted from SolutionSupport02.lean, in their original order.
@@ -935,15 +936,9 @@ open MvPolynomial Matrix CycleQ2IncidenceNormalForm CycleQ2IncidenceMonomials
   CycleQ2HomogeneousIdealArithmetic
 open CycleQ2SegreComplexBasepoint (generatorDegree generatorDegree_le coordinatePower)
 
-abbrev Coeff := ParameterPolynomial ℂ
-
-def rawCubicCoefficient (e : FullInvariantIndex 3) : Coeff := X (Sum.inl e)
-def rawSexticCoefficient (e : FullInvariantIndex 6) : Coeff := X (Sum.inr (Sum.inl e))
 def rawMatrixCoefficient (i j : Fin 3) (e : StandardIndex 14) : Coeff :=
   X (Sum.inr (Sum.inr ((i,j),e)))
 
-def familyH : Poly Coeff := fullInvariantPolynomial 3 rawCubicCoefficient
-def familyF : Poly Coeff := fullInvariantPolynomial 6 rawSexticCoefficient
 def familyMatrix : Matrix (Fin 3) (Fin 3) (Poly Coeff) :=
   incidenceMatrix 57 rawMatrixCoefficient
 
@@ -1115,7 +1110,6 @@ section SpecializedQuotient
 
 variable {S : Type} [CommRing S] (g : Coeff →+* S)
 
-abbrev CurveRing := Poly S ⧸ equationsIdeal (map g familyH) (map g familyF)
 def curveQuotient : Poly S →+* CurveRing g := Ideal.Quotient.mk _
 def curveCoordinate (j : Fin 5) : CurveRing g := curveQuotient g (X j)
 def curveMatrix : Matrix (Fin 3) (Fin 3) (CurveRing g) :=

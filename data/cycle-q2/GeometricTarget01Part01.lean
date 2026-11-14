@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceBindings
 import Proposal.Workspace
 import HodgeTarget
 import Mathlib.Analysis.Complex.Basic
@@ -1650,18 +1651,6 @@ cardinality calculations use the ordinary kernel decision procedure.
 
 namespace CycleQ2IncidenceMonomials
 
-abbrev RawIndex (d xBound wBound : ℕ) :=
-  (Fin xBound × Fin wBound) × (Fin (d + 1) × Fin (d + 1))
-
-def Allowed (d xBound wBound : ℕ) (q : RawIndex d xBound wBound) : Prop :=
-  q.1.1.val + q.2.1.val + q.2.2.val + 2 * q.1.2.val ≤ d ∧
-    (2 * q.1.1.val + 2 * q.2.1.val + q.2.2.val) % 3 = 0
-
-instance (d xBound wBound : ℕ) (q : RawIndex d xBound wBound) :
-    Decidable (Allowed d xBound wBound q) := inferInstanceAs (Decidable (_ ∧ _))
-
-abbrev Index (d xBound wBound : ℕ) :=
-  {q : RawIndex d xBound wBound // Allowed d xBound wBound q}
 
 def coordinates {d xBound wBound : ℕ} (q : Index d xBound wBound) : Fin 5 → ℕ :=
   ![q.val.1.1.val, q.val.2.1.val, q.val.2.2.val,
@@ -1707,7 +1696,6 @@ def exponentEquiv (d xBound wBound : ℕ) :
       omega
     · rfl
 
-abbrev StandardIndex (d : ℕ) := Index d 3 3
 abbrev FullIndex (d : ℕ) := Index d (d + 1) (d / 2 + 1)
 
 set_option maxRecDepth 100000 in

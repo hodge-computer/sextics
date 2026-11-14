@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceBindings
 import Proposal.GeometricIncidenceCechTrace
 import Proposal.GeometricSurfaceCoordinates
 import Proposal.Workspace
@@ -1206,8 +1207,6 @@ def dualSextic (r ι : R) (j : ParameterIndex) : FullInvariantIndex 6 → Dual R
 def dualMatrix (j : ParameterIndex) : Fin 3 → Fin 3 → StandardIndex 14 → Dual R :=
   fun i k e => epsilon R*matrixDirection (Dual R) j i k e
 
-def seedPoint (r ι : R) : ParameterIndex → R :=
-  coefficientPoint (seedCubicCoefficients ι) (seedSexticCoefficients r ι) (fun _ _ _ => 0)
 
 theorem dualCoefficientPoint (r ι : R) (j : ParameterIndex) :
     coefficientPoint (dualCubic r ι j) (dualSextic r ι j) (dualMatrix (R := R) j)=

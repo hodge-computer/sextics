@@ -1,5 +1,91 @@
 # A nonconstructive geometric route for cycle-q2
 
+## The original projective surface and its normal vector — 14 November 2026
+
+[GeometricSurfaceBindings.lean](GeometricSurfaceBindings.lean) now binds the
+local surface adjunction construction to the original incidence surface,
+its actual weighted projective coordinate charts, and the original
+relative-normal connecting map. This is a checked local geometric step.
+The final `Submission.missing_geometric_existence` remains open, and the
+global support and de Rham comparison are still separate obligations.
+
+### The same incidence-point quotient
+
+At the literal parameter `seedPoint 57 Complex.I`,
+`literalPointSurface_ideal` proves equality between the original
+`PointSurface` defining ideal and the surface ideal used in the Cartier
+construction. The resulting `literalPointSurfaceEquiv` sends each
+original polynomial class to the class of that same polynomial. The
+original parameter, coefficient, quotient-grading, and `Proj` definitions
+are retained under their existing names.
+
+The helper constructs the four genuine projective coordinate patches
+\(D_+(x_i)\), for \(0\leq i<4\), and their structure-sheaf section rings.
+It proves that their degree-zero homogeneous localizations are the
+corresponding four-variable dehomogenized equation quotients. Both
+directions of the ring equivalence are proved on actual weighted
+fractions. In particular, the ratio of a variable of weight one is
+\(x_j/x_i\), while the ratio for the weight-two variable is \(w/x_i^2\).
+The equivalences preserve the actual complex coefficient map.
+
+`literalFirstSurfaceCoordinateEquiv_fraction` and
+`literalSecondSurfaceCoordinateEquiv_fraction` identify the two specific
+charts used in the existing residue calculation with these original
+projective charts. Their formulas retain the actual numerator and
+denominator; a free choice of a ring isomorphism is not used to identify
+the residue calculation.
+
+### The actual conormal comparison and its sign
+
+The cone-to-chart ring maps induce maps on the genuine ideal cotangent
+modules. These maps send each original equation class to its actual
+dehomogenized equation class. Composing the constructed local surface
+normal vector with this conormal map produces `coneNormalVector` on the
+original cone-relative conormal module.
+
+Its values are proved explicitly:
+\[
+\nu([f_1])=G_2,\qquad
+\nu([f_2])=-G_1,\qquad
+\nu([h])=0.
+\]
+The theorem `coneNormalVector_toAmbient` then identifies this vector
+with the existing `genuineKernelGenerator`. It uses equality on the
+three original equation classes and the actual conormal basis. Thus the
+normal vector appearing in the local adjunction calculation has the
+same normalization and sign as the vector used by the original normal
+connecting cochain and its Cartier lift.
+
+This checkpoint supplies those concrete chart and normal identifications.
+The global gluing of the surface differential, the geometric family
+variation argument, and the supported-correspondence/de Rham endpoint
+are not asserted by this helper.
+
+### Verification and source preservation
+
+The exact 1,522-line helper, SHA-256
+`63d2f0ea9436d7cd169fd71f25df38b7a9663d648565525fd96c718b18e0814b`,
+compiled in 31.77 seconds. Independent kernel replay of its emitted
+module passed in 10.11 seconds, and 23 selected endpoint axiom audits
+passed in 2.01 seconds. Each audit uses only `propext`,
+`Classical.choice`, and `Quot.sound`. The checks used the existing
+bounded single-worker Lean environment, with no increase in proof
+budgets. The protected target remains unchanged and retains its one
+`sorry` at `Solution.lean:138`.
+
+The helper combines six independently checked units. Public declarations
+extracted from the older aggregate modules keep their original names,
+statements, and proof bodies; the older modules now import their new
+location. Private support proofs and the original variable scopes needed
+by the remaining declarations are retained. Removing the declaration-free
+`GeometricTarget03.lean` import facade and using its direct target in its
+caller keeps the proposal at 256 files with the same import closure. The
+concurrent `89f87858` derived-Cartier/normal-chart checkpoint is preserved
+in full; its six new helpers retain their own verification account below.
+These checks validate the stated helper and extraction. They do not claim
+acceptance of the full source chain or removal of the final admission.
+
+
 ## Actual derived Cartier cohomology and intrinsic normal geometry — 14 November 2026
 
 The final theorem `Submission.missing_geometric_existence` is still open.

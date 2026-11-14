@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceBindings
 import Proposal.GeometricSurfaceCoordinates
 import Proposal.GeometricTarget01Part01
 import Proposal.GeometricSeedConormalBases
@@ -326,7 +327,6 @@ noncomputable def invariantIncidenceBasis [Nontrivial R]
 
 /-! ## Full-variable weighted order and invariant polynomial family -/
 
-abbrev FullExponent := Fin 5 →₀ ℕ
 
 def fullAuxiliaryWeight : FullExponent →+ ℕ where
   toFun e := 3 * e 0 + e 1 + e 2 + e 3 + 7 * e 4
@@ -338,25 +338,10 @@ def fullAuxiliaryWeight : FullExponent →+ ℕ where
 noncomputable def fullAuxiliaryOrder : MonomialOrder (Fin 5) :=
   weightedOrder MonomialOrder.lex fullAuxiliaryWeight
 
-def fullDegree (e : Fin 5 → ℕ) : ℕ := e 0 + e 1 + e 2 + e 3 + 2 * e 4
-def fullCharacter (e : Fin 5 → ℕ) : ℕ := (2 * e 0 + 2 * e 1 + e 2) % 3
-
-/-- All invariant monomials of the stated weighted degree; no search-selected
-subset of the coefficients is used. -/
-abbrev FullInvariantIndex (d : ℕ) :=
-  {e : Fin 5 → Fin (d + 1) //
-    fullDegree (fun i ↦ (e i).val) = d ∧ fullCharacter (fun i ↦ (e i).val) = 0}
 
 abbrev FullCubicTailIndex := {e : FullInvariantIndex 3 // (e.val 0).val < 3}
 abbrev FullSexticTailIndex := {e : FullInvariantIndex 6 // (e.val 4).val < 3}
 
-def fullExponentOf {d : ℕ} (e : Fin 5 → Fin (d + 1)) : FullExponent :=
-  ∑ i, Finsupp.single i (e i).val
-
-@[simp] lemma fullExponentOf_apply {d : ℕ} (e : Fin 5 → Fin (d + 1)) (i : Fin 5) :
-    fullExponentOf e i = (e i).val := by
-  classical
-  simp [fullExponentOf, Finsupp.single_apply]
 
 def normalizedFullCubic (c : FullCubicTailIndex → R) : MvPolynomial (Fin 5) R :=
   monomial (Finsupp.single 0 3) 1 + ∑ e, monomial (fullExponentOf e.val.val) (c e)
@@ -429,58 +414,6 @@ theorem existsUnique_full_standard_representative [Nontrivial R]
       (normalizedFullCubic_leading_data hcoeff).2 (normalizedFullSextic_leading_data Fcoeff).2
       (full_coprime hcoeff Fcoeff)
 
-def fullGrading : Fin 5 → ℕ × ZMod 3 :=
-  ![(1, 2), (1, 2), (1, 1), (1, 0), (2, 0)]
-
-theorem fullGrading_weight (e : FullExponent) :
-    Finsupp.weight fullGrading e =
-      (fullDegree e, ((2 * e 0 + 2 * e 1 + e 2 : ℕ) : ZMod 3)) := by
-  rw [Finsupp.weight_eq_sum]
-  apply Prod.ext <;>
-    simp [fullGrading, fullDegree, Fin.sum_univ_succ, nsmul_eq_mul] <;> ring
-
-theorem fullGrading_eq_iff (e : FullExponent) (d : ℕ) :
-    Finsupp.weight fullGrading e = (d, 0) ↔ fullDegree e = d ∧ fullCharacter e = 0 := by
-  rw [fullGrading_weight, Prod.mk.injEq]
-  simp only [fullCharacter, ZMod.natCast_eq_zero_iff, Nat.dvd_iff_mod_eq_zero]
-
-def fullIndexOf {d : ℕ} (e : FullExponent)
-    (he : Finsupp.weight fullGrading e = (d, 0)) : FullInvariantIndex d := by
-  have hh := (fullGrading_eq_iff e d).mp he
-  have hb : ∀ i, e i < d + 1 := by
-    intro i
-    have hd := hh.1
-    simp only [fullDegree] at hd
-    fin_cases i
-    · change e 0 < d + 1
-      omega
-    · change e 1 < d + 1
-      omega
-    · change e 2 < d + 1
-      omega
-    · change e 3 < d + 1
-      omega
-    · change e 4 < d + 1
-      omega
-  exact ⟨fun i ↦ ⟨e i, hb i⟩, hh⟩
-
-@[simp] lemma fullIndexOf_apply {d : ℕ} (e : FullExponent)
-    (he : Finsupp.weight fullGrading e = (d, 0)) (i : Fin 5) :
-    ((fullIndexOf e he).val i).val = e i := rfl
-
-@[simp] lemma fullIndexOf_exponent {d : ℕ} (e : FullExponent)
-    (he : Finsupp.weight fullGrading e = (d, 0)) :
-    fullExponentOf (fullIndexOf e he).val = e := by
-  ext i
-  simp
-
-theorem fullGrading_of_invariant {d : ℕ} (e : FullInvariantIndex d) :
-    Finsupp.weight fullGrading (fullExponentOf e.val) = (d, 0) := by
-  rw [fullGrading_weight]
-  apply Prod.ext
-  · simpa only [fullDegree, fullExponentOf_apply] using e.property.1
-  · have hc := congrArg (fun n : ℕ ↦ (n : ZMod 3)) e.property.2
-    simpa [fullCharacter] using hc
 
 theorem normalizedFullCubic_homogeneous (c : FullCubicTailIndex → R) :
     (normalizedFullCubic c).IsWeightedHomogeneous fullGrading (3, 0) := by
@@ -571,61 +504,6 @@ noncomputable def fullSexticTailEquiv :
 
 /-- The complete invariant coefficient family, with one independent coefficient
 for every invariant monomial of weighted degree `d`. -/
-def fullInvariantPolynomial (d : ℕ) (c : FullInvariantIndex d → R) :
-    MvPolynomial (Fin 5) R :=
-  ∑ e, monomial (fullExponentOf e.val) (c e)
-
-lemma fullExponentOf_injective {d : ℕ} :
-    Function.Injective (fullExponentOf (d := d)) := by
-  intro e f h
-  funext i
-  apply Fin.ext
-  simpa only [fullExponentOf_apply] using congrArg (fun s : FullExponent ↦ s i) h
-
-theorem fullInvariantPolynomial_coeff (d : ℕ) (c : FullInvariantIndex d → R)
-    (e : FullInvariantIndex d) :
-    (fullInvariantPolynomial d c).coeff (fullExponentOf e.val) = c e := by
-  classical
-  have heq (f : FullInvariantIndex d) :
-      fullExponentOf f.val = fullExponentOf e.val ↔ f = e := by
-    constructor
-    · intro h
-      exact Subtype.ext (fullExponentOf_injective h)
-    · rintro rfl
-      rfl
-  simp [fullInvariantPolynomial, coeff_sum, coeff_monomial, heq]
-
-/-- Every homogeneous invariant polynomial is exactly a member of the full
-coefficient family, with its own monomial coefficients. -/
-theorem fullInvariantPolynomial_of_homogeneous {d : ℕ} {p : MvPolynomial (Fin 5) R}
-    (hp : p.IsWeightedHomogeneous fullGrading (d, 0)) :
-    fullInvariantPolynomial d (fun e ↦ p.coeff (fullExponentOf e.val)) = p := by
-  classical
-  ext s
-  by_cases hs : ∃ e : FullInvariantIndex d, fullExponentOf e.val = s
-  · obtain ⟨e, rfl⟩ := hs
-    exact fullInvariantPolynomial_coeff d _ e
-  · have hp0 : p.coeff s = 0 := by
-      by_contra hp0
-      exact hs ⟨fullIndexOf s (hp hp0), fullIndexOf_exponent s (hp hp0)⟩
-    rw [hp0]
-    simp only [fullInvariantPolynomial, coeff_sum, coeff_monomial]
-    apply Finset.sum_eq_zero
-    intro e _
-    have he : fullExponentOf e.val ≠ s := fun he ↦ hs ⟨e, he⟩
-    simp [he]
-
-theorem fullInvariantPolynomial_homogeneous (d : ℕ) (c : FullInvariantIndex d → R) :
-    (fullInvariantPolynomial d c).IsWeightedHomogeneous fullGrading (d, 0) := by
-  apply (weightedHomogeneousSubmodule R fullGrading (d, 0)).sum_mem
-  intro e _
-  exact isWeightedHomogeneous_monomial fullGrading _ _ (fullGrading_of_invariant e)
-
-@[simp] theorem map_fullInvariantPolynomial {S : Type*} [CommRing S]
-    (φ : R →+* S) (d : ℕ) (c : FullInvariantIndex d → R) :
-    MvPolynomial.map φ (fullInvariantPolynomial d c) =
-      fullInvariantPolynomial d (φ ∘ c) := by
-  simp [fullInvariantPolynomial]
 
 theorem fullInvariantPolynomial_cubic (c : FullInvariantIndex 3 → R) :
     fullInvariantPolynomial 3 c =

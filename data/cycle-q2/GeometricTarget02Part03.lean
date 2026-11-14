@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceBindings
 import Proposal.GeometricSurfaceCoordinates
 import Proposal.GeometricTarget02Part02
 
@@ -884,9 +885,6 @@ namespace CycleQ2IncidenceUniversalChart
 open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2IncidenceMonomials
   CycleQ2IncidenceEquations
 
-abbrev MatrixParameter := (Fin 3 × Fin 3) × StandardIndex 14
-abbrev ParameterIndex := FullInvariantIndex 3 ⊕ (FullInvariantIndex 6 ⊕ MatrixParameter)
-abbrev ParameterPolynomial (R : Type*) [CommRing R] := MvPolynomial ParameterIndex R
 
 def leadingProduct (R : Type*) [CommRing R] : ParameterPolynomial R :=
   X (Sum.inl fullCubicLeadingIndex) * X (Sum.inr (Sum.inl fullSexticLeadingIndex))
@@ -928,15 +926,6 @@ section Specialization
 
 variable {R} {S : Type*} [CommRing S] [Algebra R S]
 
-def coefficientPoint (hcoeff : FullInvariantIndex 3 → S)
-    (Fcoeff : FullInvariantIndex 6 → S)
-    (δ : Fin 3 → Fin 3 → StandardIndex 14 → S) : ParameterIndex → S :=
-  Sum.elim hcoeff (Sum.elim Fcoeff (fun q => δ q.1.1 q.1.2 q.2))
-
-def polynomialSpecialization (hcoeff : FullInvariantIndex 3 → S)
-    (Fcoeff : FullInvariantIndex 6 → S)
-    (δ : Fin 3 → Fin 3 → StandardIndex 14 → S) : ParameterPolynomial R →ₐ[R] S :=
-  aeval (coefficientPoint hcoeff Fcoeff δ)
 
 theorem polynomialSpecialization_leadingProduct
     (hcoeff : FullInvariantIndex 3 → S) (Fcoeff : FullInvariantIndex 6 → S)

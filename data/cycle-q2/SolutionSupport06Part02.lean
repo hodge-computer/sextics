@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceBindings
 import Proposal.SolutionSupport06Part01
 
 /-! Components extracted from SolutionSupport06.lean, in their original order.
@@ -1119,11 +1120,6 @@ open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2IncidenceMonomials
 
 variable {S : Type*} [CommRing S]
 
-def pointCubic (y : ParameterIndex → S) : FullInvariantIndex 3 → S :=
-  fun j => y (Sum.inl j)
-
-def pointSextic (y : ParameterIndex → S) : FullInvariantIndex 6 → S :=
-  fun j => y (Sum.inr (Sum.inl j))
 
 def pointMatrix (y : ParameterIndex → S) : Fin 3 → Fin 3 → StandardIndex 14 → S :=
   fun i j q => y (Sum.inr (Sum.inr ((i,j),q)))
@@ -1393,23 +1389,6 @@ open MvPolynomial Matrix CycleQ2IncidenceNormalForm CycleQ2IncidenceMonomials
 
 variable {S : Type} [CommRing S] [Algebra ℂ S]
 
-def pointMap (y : ParameterIndex → S) : Coeff →+* S := (aeval y).toRingHom
-
-theorem pointMap_familyH (y : ParameterIndex → S) :
-    map (pointMap y) familyH=fullInvariantPolynomial 3 (pointCubic y) := by
-  rw [familyH,map_fullInvariantPolynomial]
-  congr 1
-  funext j
-  simp only [Function.comp_apply,pointMap,rawCubicCoefficient,AlgHom.toRingHom_eq_coe,
-    RingHom.coe_coe,aeval_X,pointCubic]
-
-theorem pointMap_familyF (y : ParameterIndex → S) :
-    map (pointMap y) familyF=fullInvariantPolynomial 6 (pointSextic y) := by
-  rw [familyF,map_fullInvariantPolynomial]
-  congr 1
-  funext j
-  simp only [Function.comp_apply,pointMap,rawSexticCoefficient,AlgHom.toRingHom_eq_coe,
-    RingHom.coe_coe,aeval_X,pointSextic]
 
 theorem pointMap_familyMatrix (y : ParameterIndex → S) :
     familyMatrix.map (MvPolynomial.map (pointMap y))=
@@ -1458,7 +1437,6 @@ theorem curveMatrix_cofactors [Nontrivial S] (y : ParameterIndex → S)
   funext i j
   exact Ideal.Quotient.eq_zero_iff_mem.mpr (cofactor_memberships y he hu i j)
 
-abbrev PointSurface (y : ParameterIndex → S) := CurveRing (pointMap y)
 abbrev PointPrimeRing (y : ParameterIndex → S) (P : Ideal (PointSurface y)) [P.IsPrime] :=
   Localization.AtPrime P
 

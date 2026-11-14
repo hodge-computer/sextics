@@ -1,3 +1,4 @@
+import Proposal.GeometricSurfaceBindings
 import Proposal.GeometricSurfaceCoordinates
 import Proposal.GeometricCurveCoordinates
 import Proposal.GeometricTarget02Part01
@@ -324,8 +325,6 @@ open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2IncidenceMonomials
 
 variable {R : Type*} [CommRing R]
 
-abbrev Grade := ℕ × ZMod 3
-abbrev HG (p : Poly R) (d : Grade) := p.IsWeightedHomogeneous fullGrading d
 
 private lemma regrade {p : Poly R} {a b : Grade} (hp : HG p a) (h : a = b) : HG p b := h ▸ hp
 
@@ -612,33 +611,6 @@ incidence chart contains the additional term `x0^3`; the raw matrix itself is
 exactly the published raw matrix.
 -/
 
-theorem smoothB_homogeneous : HG (smoothB : Poly R) (3, 0) :=
-  (((((regrade (hx3.pow 3) (by decide)).add
-    (regrade (hx2.pow 3) (by decide))).add
-    (regrade ((hx1.mul hx2).mul hx3) (by decide))).add
-    (regrade ((hx0.mul hx2).mul hx3) (by decide))).add
-    (regrade (hx0.mul (hx1.pow 2)) (by decide))).add
-    (regrade (hx0.pow 3) (by decide))
-
-theorem smoothA_homogeneous : HG (smoothA : Poly R) (3, 0) :=
-  (regrade (hx1.pow 3) (by decide)).add (regrade (hx3.pow 3) (by decide))
-
-theorem smoothH_homogeneous (ι : R) : HG (smoothH ι) (3, 0) :=
-  smoothB_homogeneous.sub (smoothA_homogeneous.C_mul ι)
-
-theorem smoothK_homogeneous (ι : R) : HG (smoothK ι) (3, 0) :=
-  smoothB_homogeneous.add (smoothA_homogeneous.C_mul ι)
-
-theorem seedG_homogeneous (r : R) : HG (seedG r) (6, 0) := by
-  rw [seedG, CycleQ2SegreSeed.seedG_expanded]
-  exact (((regrade (hx0.pow 6) (by decide)).sub
-    (regrade ((((isWeightedHomogeneous_C fullGrading r).pow 3).mul
-      (hx1.pow 3)).mul (hx3.pow 3)) (by decide))).add
-    (regrade (hx2.pow 6) (by decide))).add (regrade (hw.pow 3) (by decide))
-
-theorem smoothF_homogeneous (r ι : R) : HG (smoothF r ι) (6, 0) :=
-  (seedG_homogeneous r).add
-    (regrade ((smoothH_homogeneous ι).mul (smoothK_homogeneous ι)) (by decide))
 
 theorem smoothH_leading_coefficient (ι : R) :
     (smoothH ι).coeff (Finsupp.single 0 3) = 1 := by
@@ -694,19 +666,6 @@ theorem smoothF_leading_coefficient (r ι : R) :
     seedG, CycleQ2SegreSeed.seedG_expanded, coeff_add,
     hpart.coeff_eq_zero _ wOnly_leading_ne, zero_add, coeff_X_pow, if_pos rfl]
 
-def seedCubicCoefficients (ι : R) (e : FullInvariantIndex 3) : R :=
-  (smoothH ι).coeff (fullExponentOf e.val)
-
-def seedSexticCoefficients (r ι : R) (e : FullInvariantIndex 6) : R :=
-  (smoothF r ι).coeff (fullExponentOf e.val)
-
-theorem seedCubicCoefficients_polynomial (ι : R) :
-    fullInvariantPolynomial 3 (seedCubicCoefficients ι) = smoothH ι :=
-  fullInvariantPolynomial_of_homogeneous (smoothH_homogeneous ι)
-
-theorem seedSexticCoefficients_polynomial (r ι : R) :
-    fullInvariantPolynomial 6 (seedSexticCoefficients r ι) = smoothF r ι :=
-  fullInvariantPolynomial_of_homogeneous (smoothF_homogeneous r ι)
 
 theorem seedCubicCoefficients_unit (ι : R) :
     IsUnit (seedCubicCoefficients ι fullCubicLeadingIndex) := by
