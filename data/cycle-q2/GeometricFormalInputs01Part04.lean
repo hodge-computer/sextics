@@ -1,5 +1,6 @@
 import Proposal.GeometricCurveCoordinates
 import Proposal.GeometricFormalInputs01Part03
+import Proposal.GeometricSeedNormalIdeals
 
 /-! Continuation of GeometricFormalInputs01.lean; complete source components and declarations. -/
 
@@ -167,14 +168,6 @@ noncomputable section
 namespace CycleQ2SeedTrace
 open MvPolynomial
 
-
-def originalB : WeightedPoly :=
-  X 3 ^ 3 + X 2 ^ 3 + X 1 * X 2 * X 3 + X 0 * X 2 * X 3 + X 0 * X 1 ^ 2
-def originalH : WeightedPoly := originalB - C Complex.I * (X 1 ^ 3 + X 3 ^ 3)
-def originalK : WeightedPoly := originalB + C Complex.I * (X 1 ^ 3 + X 3 ^ 3)
-def originalF1 (r : ℂ) : WeightedPoly := X 0 ^ 2 - C r * X 1 * X 3
-
-def originalF2 : WeightedPoly := X 4 + X 2 ^ 2
 
 def seedEquation : WeightedPoly :=
   X 0 ^ 6 + X 1 ^ 6 + X 2 ^ 6 + X 3 ^ 6 + X 4 ^ 3 + originalB ^ 2

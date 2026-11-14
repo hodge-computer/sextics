@@ -1,4 +1,5 @@
 import Proposal.GeometricTarget01Part01
+import Proposal.GeometricSeedConormalBases
 
 /-! Continuation of GeometricTarget01.lean; complete source components and declarations. -/
 
@@ -22,16 +23,6 @@ open scoped MonomialOrder
 namespace CycleQ2IncidenceNormalForm
 
 variable {σ R : Type*} [CommRing R]
-
-/-- No monomial of `p` is divisible by either distinguished leading monomial. -/
-def Reduced (m : MonomialOrder σ) (h F p : MvPolynomial σ R) : Prop :=
-  ∀ d ∈ p.support, ¬ m.degree h ≤ d ∧ ¬ m.degree F ≤ d
-
-lemma degree_mul_monic (m : MonomialOrder σ) {p q : MvPolynomial σ R}
-    (hp : p ≠ 0) (hq : m.Monic q) :
-    m.degree (p * q) = m.degree p + m.degree q := by
-  apply m.degree_mul_of_mul_leadingCoeff_ne_zero
-  simpa [hq.leadingCoeff_eq_one] using m.leadingCoeff_ne_zero_iff.mpr hp
 
 lemma reduced_sub (m : MonomialOrder σ) {h F p q : MvPolynomial σ R}
     (hp : Reduced m h F p) (hq : Reduced m h F q) :
@@ -131,29 +122,6 @@ theorem reduced_unique
   apply reduced_eq_zero_of_representation m hh hF hcop (reduced_sub m hr₁ hr₂)
     (a := a₂ - a₁) (b := b₂ - b₁)
   linear_combination hp₂ - hp₁
-
-/-- Existence of a reduced representative uses the library's ordinary
-multivariate division theorem. -/
-theorem exists_reduced_representation
-    (m : MonomialOrder σ) (h F p : MvPolynomial σ R)
-    (hh : m.Monic h) (hF : m.Monic F) :
-    ∃ a b r, p = a * h + b * F + r ∧ Reduced m h F r := by
-  let equations : Fin 2 → MvPolynomial σ R := ![h, F]
-  have he : ∀ i, IsUnit (m.leadingCoeff (equations i)) := by
-    intro i
-    fin_cases i
-    · change IsUnit (m.leadingCoeff h)
-      rw [hh.leadingCoeff_eq_one]
-      exact isUnit_one
-    · change IsUnit (m.leadingCoeff F)
-      rw [hF.leadingCoeff_eq_one]
-      exact isUnit_one
-  obtain ⟨q, r, hp, _, hr⟩ := m.div he p
-  refine ⟨q 0, q 1, r, ?_, ?_⟩
-  · simpa [Finsupp.linearCombination_apply, Finsupp.sum_fintype, equations,
-      Fin.sum_univ_two, smul_eq_mul] using hp
-  · intro d hd
-    exact ⟨hr d hd 0, hr d hd 1⟩
 
 theorem existsUnique_reduced_representative
     (m : MonomialOrder σ) (h F p : MvPolynomial σ R)
@@ -389,25 +357,6 @@ lemma auxiliaryOrder_lt_of_weight_lt {a b : Exponent}
     (h : auxiliaryWeight a < auxiliaryWeight b) : a ≺[auxiliaryOrder] b := by
   change toLex (auxiliaryWeight a, toLex a) < toLex (auxiliaryWeight b, toLex b)
   exact Prod.Lex.toLex_lt_toLex.mpr (Or.inl h)
-
-lemma degree_monic_add_sum [Nontrivial R] {ι : Type*} [Fintype ι]
-    (m : MonomialOrder σ) (d : σ →₀ ℕ) (e : ι → σ →₀ ℕ) (c : ι → R)
-    (hd : 0 ≺[m] d) (he : ∀ i, e i ≺[m] d) :
-    m.degree (monomial d 1 + ∑ i, monomial (e i) (c i)) = d ∧
-      m.Monic (monomial d 1 + ∑ i, monomial (e i) (c i)) := by
-  classical
-  have htail : m.degree (∑ i, monomial (e i) (c i)) ≺[m] d := by
-    apply lt_of_le_of_lt m.degree_sum_le
-    apply (Finset.sup_lt_iff (by simpa using hd)).mpr
-    intro i _
-    exact lt_of_le_of_lt (m.degree_monomial_le _) (he i)
-  have hlead : m.degree (monomial d (1 : R)) = d := by
-    rw [m.degree_monomial, if_neg one_ne_zero]
-  have htail' : m.degree (∑ i, monomial (e i) (c i)) ≺[m]
-      m.degree (monomial d (1 : R)) := by
-    rwa [hlead]
-  exact ⟨(m.degree_add_of_lt htail').trans hlead,
-    m.monic_monomial_one.add_of_lt htail'⟩
 
 def cubicTailExponent (i : Fin 4) : Exponent :=
   ![0, Finsupp.single 0 1, Finsupp.single 0 2, Finsupp.single 1 1] i
@@ -652,74 +601,6 @@ noncomputable def invariantIncidenceBasis [Nontrivial R]
   incidenceBasis (invariantCubicTailCoefficients hcoeff) Fcoeff
 
 /-! ## Full-variable weighted order and invariant polynomial family -/
-
-/-- Adding an additive natural-valued weight in front of a monomial order gives
-another monomial order.  The old order breaks ties, so zero weights are allowed. -/
-def WeightedExponent (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) := σ →₀ ℕ
-
-def toWeighted (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
-    (σ →₀ ℕ) ≃ WeightedExponent m W := Equiv.refl _
-def ofWeighted (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
-    WeightedExponent m W ≃ (σ →₀ ℕ) := Equiv.refl _
-
-noncomputable instance (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
-    AddCommMonoid (WeightedExponent m W) := (ofWeighted m W).addCommMonoid
-
-lemma ofWeighted_add (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ)
-    (a b : WeightedExponent m W) :
-    ofWeighted m W (a + b) = ofWeighted m W a + ofWeighted m W b := rfl
-
-def weightedKey (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ)
-    (a : WeightedExponent m W) : Lex (ℕ × m.syn) :=
-  toLex (W (ofWeighted m W a), m.toSyn (ofWeighted m W a))
-
-lemma weightedKey_injective (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
-    Function.Injective (weightedKey m W) := by
-  intro a b hab
-  exact (ofWeighted m W).injective (m.toSyn.injective (Prod.mk.inj (toLex.injective hab)).2)
-
-noncomputable instance (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
-    LinearOrder (WeightedExponent m W) :=
-  LinearOrder.lift' (weightedKey m W) (weightedKey_injective m W)
-
-noncomputable instance (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
-    IsOrderedCancelAddMonoid (WeightedExponent m W) where
-  le_of_add_le_add_left a b c h := by
-    change weightedKey m W b ≤ weightedKey m W c
-    change weightedKey m W (a + b) ≤ weightedKey m W (a + c) at h
-    simpa only [weightedKey, ofWeighted_add, map_add,
-      Prod.Lex.toLex_le_toLex, add_lt_add_iff_left, add_right_inj,
-      add_le_add_iff_left] using h
-  add_le_add_left a b h c := by
-    change weightedKey m W a ≤ weightedKey m W b at h
-    change weightedKey m W (a + c) ≤ weightedKey m W (b + c)
-    simpa only [weightedKey, ofWeighted_add, map_add,
-      Prod.Lex.toLex_le_toLex, add_lt_add_iff_right, add_left_inj,
-      add_le_add_iff_right] using h
-
-noncomputable instance (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
-    WellFoundedLT (WeightedExponent m W) :=
-  ⟨InvImage.wf (weightedKey m W) wellFounded_lt⟩
-
-noncomputable def weightedOrder (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) :
-    MonomialOrder σ where
-  syn := WeightedExponent m W
-  toSyn := { toEquiv := toWeighted m W, map_add' _ _ := rfl }
-  toSyn_monotone a b hab := by
-    change toLex (W a, m.toSyn a) ≤ toLex (W b, m.toSyn b)
-    rw [Prod.Lex.toLex_le_toLex]
-    have hw : W a ≤ W b := by
-      rw [← add_tsub_cancel_of_le hab, map_add]
-      exact Nat.le_add_right _ _
-    rcases lt_or_eq_of_le hw with hw | hw
-    · exact Or.inl hw
-    · exact Or.inr ⟨hw, m.toSyn_monotone hab⟩
-
-lemma weightedOrder_lt_of_weight_lt
-    (m : MonomialOrder σ) (W : (σ →₀ ℕ) →+ ℕ) {a b : σ →₀ ℕ}
-    (h : W a < W b) : a ≺[weightedOrder m W] b := by
-  change toLex (W a, m.toSyn a) < toLex (W b, m.toSyn b)
-  exact Prod.Lex.toLex_lt_toLex.mpr (Or.inl h)
 
 abbrev FullExponent := Fin 5 →₀ ℕ
 

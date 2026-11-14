@@ -20,6 +20,7 @@ import Proposal.GeometricSeed
 import Proposal.GeometricFormalInputs
 import Proposal.Normalization
 import Proposal.SolutionSupport01
+import Proposal.GeometricSeedNormalIdeals
 
 /-! Components extracted from SolutionSupport02.lean, in their original order.
 See solution.md for the mathematical and verification status. -/
@@ -934,11 +935,6 @@ namespace CycleQ2NormalConnecting
 
 open MvPolynomial CycleQ2SeedTrace CycleQ2SeedCechTheta
 
-/-- The parameter-dependent hypersurface equation actually used by the
-Segre incidence presentation. -/
-def actualSeedEquation (r θ : ℂ) : WeightedPoly :=
-  originalF1 r*originalG1 r+originalF2*originalG2+thetaH θ*thetaK θ
-
 /-- The literal incidence polynomial `seedG` has this factorization for
 all parameter values, without a Fermat specialization. -/
 theorem seedG_eq_factorization (r : ℂ) :
@@ -976,34 +972,6 @@ theorem actualSeedEquation_eq_thetaEquation (r θ : ℂ) (hr : r^3=2) :
     ambientCurveMap r 1 (CycleQ2IncidenceEquations.smoothF r Complex.I)=0 := by
   rw [← actualSeedEquation_eq_smoothF]
   exact ambientCurveMap_actualSeedEquation r 1
-
-/-- Literal ideal membership for the parameter-dependent equation. -/
-theorem actualSeedEquation_mem (r θ : ℂ) :
-    actualSeedEquation r θ ∈ ambientCurveIdeal r θ := by
-  exact Ideal.add_mem _ (Ideal.add_mem _
-    (Ideal.mul_mem_right _ _ (curveEquation_mem r θ 0))
-    (Ideal.mul_mem_right _ _ (curveEquation_mem r θ 1)))
-    (Ideal.mul_mem_right _ _ (curveEquation_mem r θ 2))
-
-/-- The actual normal equation is the class of the actual incidence
-hypersurface in the curve ideal modulo its square. -/
-theorem actual_conormal_relation (r θ : ℂ) :
-    (ambientCurveIdeal r θ).toCotangent
-        ⟨actualSeedEquation r θ,actualSeedEquation_mem r θ⟩ =
-      originalG1 r • conormalGenerator r θ 0+
-      originalG2 • conormalGenerator r θ 1+thetaK θ • conormalGenerator r θ 2 := by
-  have hh :
-      (⟨actualSeedEquation r θ,actualSeedEquation_mem r θ⟩ : ambientCurveIdeal r θ) =
-      originalG1 r • ⟨curveEquations r θ 0,curveEquation_mem r θ 0⟩+
-      originalG2 • ⟨curveEquations r θ 1,curveEquation_mem r θ 1⟩+
-      thetaK θ • ⟨curveEquations r θ 2,curveEquation_mem r θ 2⟩ := by
-    apply Subtype.ext
-    change actualSeedEquation r θ = originalG1 r*originalF1 r+originalG2*originalF2+
-      thetaK θ*thetaH θ
-    unfold actualSeedEquation
-    ring
-  rw [hh,map_add,map_add,map_smul,map_smul,map_smul]
-  rfl
 
 theorem smoothF_mem_curveIdeal (r : ℂ) :
     CycleQ2IncidenceEquations.smoothF r Complex.I ∈ ambientCurveIdeal r 1 := by

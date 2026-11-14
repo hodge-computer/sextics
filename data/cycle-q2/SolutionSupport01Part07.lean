@@ -1,5 +1,7 @@
 import Proposal.GeometricCurveCoordinates
 import Proposal.SolutionSupport01Part06
+import Proposal.GeometricSeedNormalIdeals
+import Proposal.GeometricNormalConnecting
 
 /-! Components extracted from SolutionSupport01.lean, in their original order.
 See solution.md for the mathematical and verification status. -/
@@ -332,87 +334,7 @@ set_option backward.isDefEq.respectTransparency false
 
 namespace CycleQ2NormalConnecting
 
-section EquationMap
 
-variable {R : Type*} [CommRing R]
-
-def equationMap (g₁ g₂ k : R) : (Fin 3 → R) →ₗ[R] (Fin 2 → R) where
-  toFun u := ![g₁*u 0+g₂*u 1+k*u 2, u 2]
-  map_add' u v := by ext i; fin_cases i <;> simp <;> ring
-  map_smul' c u := by ext i; fin_cases i <;> simp [smul_eq_mul] <;> ring
-
-def kernelVector (g₁ g₂ : R) : Fin 3 → R := ![g₂,-g₁,0]
-
-theorem equationMap_kernelVector (g₁ g₂ k : R) :
-    equationMap g₁ g₂ k (kernelVector g₁ g₂) = 0 := by
-  ext i
-  fin_cases i <;> simp [equationMap, kernelVector] <;> ring
-
-def firstLift (g₁ : Rˣ) (k A L : R) : Fin 3 → R :=
-  ![(k*L-A)*(↑(g₁⁻¹) : R),0,-L]
-
-def secondLift (g₂ : Rˣ) (k A L : R) : Fin 3 → R :=
-  ![0,(k*L-A)*(↑(g₂⁻¹) : R),-L]
-
-theorem equationMap_firstLift (g₁ : Rˣ) (g₂ k A L : R) :
-    equationMap (g₁ : R) g₂ k (firstLift g₁ k A L) = ![-A,-L] := by
-  ext i
-  fin_cases i
-  · change (g₁ : R)*((k*L-A)*(↑(g₁⁻¹) : R))+g₂*0+k*(-L)= -A
-    linear_combination (k*L-A)*g₁.mul_inv
-  · rfl
-
-theorem equationMap_secondLift (g₂ : Rˣ) (g₁ k A L : R) :
-    equationMap g₁ (g₂ : R) k (secondLift g₂ k A L) = ![-A,-L] := by
-  ext i
-  fin_cases i
-  · change g₁*0+(g₂ : R)*((k*L-A)*(↑(g₂⁻¹) : R))+k*(-L)= -A
-    linear_combination (k*L-A)*g₂.mul_inv
-  · rfl
-
-/-- Exactness on a first-denominator chart, without a field hypothesis. -/
-theorem equationMap_kernel_first (g₁ : Rˣ) (g₂ k : R) (u : Fin 3 → R) :
-    equationMap (g₁ : R) g₂ k u = 0 ↔
-      ∃ c : R, u = c • kernelVector (g₁ : R) g₂ := by
-  constructor
-  · intro hu
-    have h₀ := congrFun hu 0
-    have h₂ := congrFun hu 1
-    change g₁*u 0+g₂*u 1+k*u 2=0 at h₀
-    change u 2=0 at h₂
-    refine ⟨-(u 1*(↑(g₁⁻¹) : R)), ?_⟩
-    ext i
-    fin_cases i
-    · change u 0 = -(u 1*(↑(g₁⁻¹) : R))*g₂
-      rw [h₂] at h₀
-      linear_combination (↑(g₁⁻¹) : R)*h₀-u 0*g₁.inv_mul
-    · simp [kernelVector, smul_eq_mul, mul_assoc]
-    · simpa [kernelVector] using h₂
-  · rintro ⟨c,rfl⟩
-    rw [map_smul, equationMap_kernelVector, smul_zero]
-
-def overlapCoefficient (g₁ g₂ : Rˣ) (k A L : R) : R :=
-  (k*L-A)*(↑(g₁⁻¹) : R)*(↑(g₂⁻¹) : R)
-
-/-- The two actual lift formulas differ by the kernel generator with this
-literal scalar.  This is the equation-normal Čech connecting expression. -/
-theorem local_lift_difference (g₁ g₂ : Rˣ) (k A L : R) :
-    firstLift g₁ k A L-secondLift g₂ k A L =
-      overlapCoefficient g₁ g₂ k A L • kernelVector (g₁ : R) (g₂ : R) := by
-  ext i
-  fin_cases i
-  · simp only [Pi.sub_apply, firstLift, secondLift, Pi.smul_apply, kernelVector,
-      overlapCoefficient, Matrix.cons_val_zero', Matrix.cons_val_succ', Matrix.head_cons, Matrix.tail_cons, sub_zero, smul_eq_mul]
-    rw [mul_assoc _ _ (g₂ : R), g₂.inv_mul, mul_one]
-  · simp only [Pi.sub_apply, firstLift, secondLift, Pi.smul_apply, kernelVector,
-      overlapCoefficient, Matrix.cons_val_zero', Matrix.cons_val_succ', Matrix.head_cons, Matrix.tail_cons, zero_sub, smul_eq_mul]
-    calc
-      _ = -((k*L-A)*(↑(g₂⁻¹) : R)*
-          ((↑(g₁⁻¹) : R)*(g₁ : R))) := by rw [g₁.inv_mul]; ring
-      _ = _ := by ring
-  · simp [firstLift, secondLift, kernelVector]
-
-end EquationMap
 
 section Seed
 
@@ -420,8 +342,6 @@ open MvPolynomial CycleQ2SeedTrace
 open CycleQ2SeedCechTheta
 open CycleQ2SeedCech (curveA curveB)
 
-def thetaH (θ : ℂ) : WeightedPoly := originalH+C θ*X 0^3
-def thetaK (θ : ℂ) : WeightedPoly := originalK+C θ*X 0^3
 def thetaEquation (θ : ℂ) : WeightedPoly :=
   X 0^6+X 1^6+X 2^6+X 3^6+X 4^3+(originalB+C θ*X 0^3)^2
 
@@ -454,23 +374,6 @@ theorem smoothF_eq_thetaEquation (r : ℂ) (hr : r^3=2) :
   simp only [map_pow]
   ring
 
-theorem substitute_thetaH (θ : ℂ) : substitute (thetaH θ) = curveH θ := by
-  simp [thetaH, curveH, originalH, originalB, h, b, substitute]
-
-
-@[simp] theorem ambientCurveMap_f1 (r θ : ℂ) : ambientCurveMap r θ (originalF1 r)=0 := by
-  change curveMap r θ (substitute (originalF1 r))=0
-  have hh : substitute (originalF1 r)=relation r 0 := by
-    simpa only [originalRelations, Matrix.cons_val_zero] using substitute_relations r 0
-  rw [hh, curveMap_f1]
-
-@[simp] theorem ambientCurveMap_f2 (r θ : ℂ) : ambientCurveMap r θ originalF2=0 := by
-  simp [ambientCurveMap, originalF2, substitute]
-
-@[simp] theorem ambientCurveMap_h (r θ : ℂ) : ambientCurveMap r θ (thetaH θ)=0 := by
-  change curveMap r θ (substitute (thetaH θ))=0
-  rw [substitute_thetaH, curveMap_h]
-
 @[simp] theorem ambientCurveMap_F (r θ : ℂ) (hr : r^3=2) :
     ambientCurveMap r θ (thetaEquation θ)=0 := by
   rw [thetaEquation_decomposition r θ hr]
@@ -482,8 +385,6 @@ def seedEquationMap (r θ : ℂ) :
     (Fin 3 → CurveRing r θ) →ₗ[CurveRing r θ] (Fin 2 → CurveRing r θ) :=
   equationMap (ambientCurveMap r θ (originalG1 r))
     (ambientCurveMap r θ originalG2) (ambientCurveMap r θ (thetaK θ))
-
-def derivativeA : WeightedPoly := X 2*X 3^3*X 4
 
 theorem substitute_derivativeA (p : Poly) :
     substitute derivativeA*p=derivativeNumerator p := by
@@ -498,15 +399,6 @@ theorem fixed_h_paired_numerator (p : Poly) :
     -(substitute derivativeA)*p= -derivativeNumerator p := by
   rw [neg_mul, substitute_derivativeA]
 
-def curveEquations (r θ : ℂ) : Fin 3 → WeightedPoly :=
-  ![originalF1 r, originalF2, thetaH θ]
-
-def ambientCurveIdeal (r θ : ℂ) : Ideal WeightedPoly :=
-  Ideal.span (Set.range (curveEquations r θ))
-
-theorem curveEquation_mem (r θ : ℂ) (i : Fin 3) :
-    curveEquations r θ i ∈ ambientCurveIdeal r θ := Ideal.subset_span ⟨i,rfl⟩
-
 theorem thetaEquation_mem (r θ : ℂ) (hr : r^3=2) :
     thetaEquation θ ∈ ambientCurveIdeal r θ := by
   rw [thetaEquation_decomposition r θ hr]
@@ -514,9 +406,6 @@ theorem thetaEquation_mem (r θ : ℂ) (hr : r^3=2) :
     (Ideal.mul_mem_right _ _ (curveEquation_mem r θ 0))
     (Ideal.mul_mem_right _ _ (curveEquation_mem r θ 1)))
     (Ideal.mul_mem_right _ _ (curveEquation_mem r θ 2))
-
-def conormalGenerator (r θ : ℂ) (i : Fin 3) : (ambientCurveIdeal r θ).Cotangent :=
-  (ambientCurveIdeal r θ).toCotangent ⟨curveEquations r θ i,curveEquation_mem r θ i⟩
 
 /-- The equation map uses the literal class of F in the actual ideal modulo
 its square.  No abstract normal-bundle presentation is supplied as a premise. -/
@@ -536,106 +425,6 @@ theorem conormal_relation (r θ : ℂ) (hr : r^3=2) :
   rw [hh, map_add, map_add, map_smul, map_smul, map_smul]
   rfl
 
-
-def firstOpenUnit (r θ : ℂ) : (FirstOpen r θ)ˣ :=
-  (IsLocalization.Away.algebraMap_isUnit (S := FirstOpen r θ) (curveG1 r θ)).unit
-def secondOpenUnit (r θ : ℂ) : (SecondOpen r θ)ˣ :=
-  (IsLocalization.Away.algebraMap_isUnit (S := SecondOpen r θ) (curveG2 r θ)).unit
-
-
-def firstOverlapUnit (r θ : ℂ) : (Overlap r θ)ˣ :=
-  Units.map (firstRestriction r θ).toMonoidHom (firstOpenUnit r θ)
-def secondOverlapUnit (r θ : ℂ) : (Overlap r θ)ˣ :=
-  Units.map (secondRestriction r θ).toMonoidHom (secondOpenUnit r θ)
-
-@[simp] theorem coe_firstOverlapUnit (r θ : ℂ) :
-    (firstOverlapUnit r θ : Overlap r θ)=algebraMap (CurveRing r θ) (Overlap r θ) (curveG1 r θ) := by
-  change firstRestriction r θ (firstOpenUnit r θ : FirstOpen r θ)=_
-  rw [show (firstOpenUnit r θ : FirstOpen r θ)=
-    algebraMap (CurveRing r θ) (FirstOpen r θ) (curveG1 r θ) from IsUnit.unit_spec _]
-  exact IsLocalization.Away.awayToAwayRight_eq _ _ _
-
-@[simp] theorem coe_secondOverlapUnit (r θ : ℂ) :
-    (secondOverlapUnit r θ : Overlap r θ)=algebraMap (CurveRing r θ) (Overlap r θ) (curveG2 r θ) := by
-  change secondRestriction r θ (secondOpenUnit r θ : SecondOpen r θ)=_
-  rw [show (secondOpenUnit r θ : SecondOpen r θ)=
-    algebraMap (CurveRing r θ) (SecondOpen r θ) (curveG2 r θ) from IsUnit.unit_spec _]
-  exact IsLocalization.Away.awayToAwayLeft_eq _ _ _
-
-def overlapAmbient (r θ : ℂ) : WeightedPoly →+* Overlap r θ :=
-  (algebraMap (CurveRing r θ) (Overlap r θ)).comp (ambientCurveMap r θ)
-
-def firstOpenAmbient (r θ : ℂ) : WeightedPoly →+* FirstOpen r θ :=
-  (algebraMap (CurveRing r θ) (FirstOpen r θ)).comp (ambientCurveMap r θ)
-def secondOpenAmbient (r θ : ℂ) : WeightedPoly →+* SecondOpen r θ :=
-  (algebraMap (CurveRing r θ) (SecondOpen r θ)).comp (ambientCurveMap r θ)
-
-def firstNormalLift (r θ : ℂ) (A L : WeightedPoly) : Fin 3 → FirstOpen r θ :=
-  firstLift (firstOpenUnit r θ) (firstOpenAmbient r θ (thetaK θ))
-    (firstOpenAmbient r θ A) (firstOpenAmbient r θ L)
-def secondNormalLift (r θ : ℂ) (A L : WeightedPoly) : Fin 3 → SecondOpen r θ :=
-  secondLift (secondOpenUnit r θ) (secondOpenAmbient r θ (thetaK θ))
-    (secondOpenAmbient r θ A) (secondOpenAmbient r θ L)
-
-theorem firstNormalLift_equations (r θ : ℂ) (A L : WeightedPoly) :
-    equationMap (firstOpenAmbient r θ (originalG1 r)) (firstOpenAmbient r θ originalG2)
-      (firstOpenAmbient r θ (thetaK θ)) (firstNormalLift r θ A L)=
-        ![-firstOpenAmbient r θ A,-firstOpenAmbient r θ L] := by
-  have hu : (firstOpenUnit r θ : FirstOpen r θ)=firstOpenAmbient r θ (originalG1 r) :=
-    IsUnit.unit_spec _
-  rw [← hu]
-  exact equationMap_firstLift _ _ _ _ _
-
-theorem secondNormalLift_equations (r θ : ℂ) (A L : WeightedPoly) :
-    equationMap (secondOpenAmbient r θ (originalG1 r)) (secondOpenAmbient r θ originalG2)
-      (secondOpenAmbient r θ (thetaK θ)) (secondNormalLift r θ A L)=
-        ![-secondOpenAmbient r θ A,-secondOpenAmbient r θ L] := by
-  have hu : (secondOpenUnit r θ : SecondOpen r θ)=secondOpenAmbient r θ originalG2 :=
-    IsUnit.unit_spec _
-  rw [← hu]
-  exact equationMap_secondLift _ _ _ _ _
-
-theorem firstNormalLift_restriction (r θ : ℂ) (A L : WeightedPoly) :
-    (fun i => firstRestriction r θ (firstNormalLift r θ A L i))=
-      firstLift (firstOverlapUnit r θ) (overlapAmbient r θ (thetaK θ))
-        (overlapAmbient r θ A) (overlapAmbient r θ L) := by
-  ext i
-  fin_cases i <;>
-    simp [firstNormalLift, firstLift, firstOpenAmbient, overlapAmbient, firstOverlapUnit,
-      firstRestriction, IsLocalization.Away.awayToAwayRight_eq, Units.coe_map_inv]
-
-theorem secondNormalLift_restriction (r θ : ℂ) (A L : WeightedPoly) :
-    (fun i => secondRestriction r θ (secondNormalLift r θ A L i))=
-      secondLift (secondOverlapUnit r θ) (overlapAmbient r θ (thetaK θ))
-        (overlapAmbient r θ A) (overlapAmbient r θ L) := by
-  ext i
-  fin_cases i <;>
-    simp [secondNormalLift, secondLift, secondOpenAmbient, overlapAmbient, secondOverlapUnit,
-      secondRestriction, IsLocalization.Away.awayToAwayLeft_eq, Units.coe_map_inv]
-
-/-- The connecting coefficient is now an element of the actual overlap
-localization, with both inverses constructed from the two chart restrictions. -/
-def normalOverlapCoefficient (r θ : ℂ) (A L : WeightedPoly) : Overlap r θ :=
-  overlapCoefficient (firstOverlapUnit r θ) (secondOverlapUnit r θ)
-    (overlapAmbient r θ (thetaK θ)) (overlapAmbient r θ A) (overlapAmbient r θ L)
-
-theorem actual_overlap_lift_difference (r θ : ℂ) (A L : WeightedPoly) :
-    firstLift (firstOverlapUnit r θ) (overlapAmbient r θ (thetaK θ))
-        (overlapAmbient r θ A) (overlapAmbient r θ L)-
-      secondLift (secondOverlapUnit r θ) (overlapAmbient r θ (thetaK θ))
-        (overlapAmbient r θ A) (overlapAmbient r θ L)=
-      normalOverlapCoefficient r θ A L •
-        kernelVector (overlapAmbient r θ (originalG1 r)) (overlapAmbient r θ originalG2) := by
-  rw [local_lift_difference]
-  simp only [normalOverlapCoefficient, coe_firstOverlapUnit, coe_secondOverlapUnit,
-    curveG1, curveG2, overlapAmbient, RingHom.comp_apply]
-
-theorem restricted_local_lifts_difference (r θ : ℂ) (A L : WeightedPoly) :
-    (fun i => firstRestriction r θ (firstNormalLift r θ A L i))-
-      (fun i => secondRestriction r θ (secondNormalLift r θ A L i))=
-      normalOverlapCoefficient r θ A L •
-        kernelVector (overlapAmbient r θ (originalG1 r)) (overlapAmbient r θ originalG2) := by
-  rw [firstNormalLift_restriction, secondNormalLift_restriction, actual_overlap_lift_difference]
 
 end Seed
 

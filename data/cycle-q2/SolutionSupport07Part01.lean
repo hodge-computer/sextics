@@ -21,6 +21,7 @@ import Proposal.GeometricSeed
 import Proposal.GeometricFormalInputs
 import Proposal.Normalization
 import Proposal.SolutionSupport06
+import Proposal.GeometricSeedConormalBases
 
 /-! Components extracted from SolutionSupport07.lean, in their original order.
 See solution.md for the mathematical and verification status. -/
@@ -261,47 +262,6 @@ def conormalDerivative (d : Derivation k R S) : S ⊗[R] I.Cotangent →ₗ[S] S
 
 variable {ι : Type*} [Fintype ι] [DecidableEq ι]
 variable (f : ι → R) (hf : Ideal.span (Set.range f)=I)
-
-def generator (i : ι) : S ⊗[R] I.Cotangent :=
-  1 ⊗ₜ[R] I.toCotangent ⟨f i, hf ▸ Ideal.subset_span ⟨i,rfl⟩⟩
-
-theorem generators_span :
-    Submodule.span S (Set.range (generator (S := S) I f hf))=⊤ := by
-  apply top_unique
-  intro z hzTop
-  clear hzTop
-  induction z using TensorProduct.induction_on with
-  | zero => exact Submodule.zero_mem _
-  | add z w hz hw => exact Submodule.add_mem _ hz hw
-  | tmul s m =>
-    obtain ⟨x,rfl⟩ := I.toCotangent_surjective m
-    suffices hx : (1:S) ⊗ₜ[R] I.toCotangent x ∈
-        Submodule.span S (Set.range (generator (S := S) I f hf)) by
-      simpa only [TensorProduct.smul_tmul',smul_eq_mul,mul_one] using
-        Submodule.smul_mem _ s hx
-    have hgen : ∀ y (hy : y∈Ideal.span (Set.range f)),
-        (1:S) ⊗ₜ[R] I.toCotangent ⟨y,hf ▸ hy⟩ ∈
-          Submodule.span S (Set.range (generator (S := S) I f hf)) := by
-      intro y hy
-      induction hy using Submodule.span_induction with
-      | mem y hy =>
-        obtain ⟨i,rfl⟩ := hy
-        exact Submodule.subset_span ⟨i,rfl⟩
-      | zero =>
-        change (1:S) ⊗ₜ[R] I.toCotangent (0:I) ∈ _
-        rw [map_zero,TensorProduct.tmul_zero]
-        exact Submodule.zero_mem _
-      | add a b ha hb iha ihb =>
-        change (1:S) ⊗ₜ[R] I.toCotangent
-          ((⟨a,hf ▸ ha⟩ : I)+⟨b,hf ▸ hb⟩) ∈ _
-        rw [map_add,TensorProduct.tmul_add]
-        exact Submodule.add_mem _ iha ihb
-      | smul c a ha iha =>
-        change (1:S) ⊗ₜ[R] I.toCotangent (c • (⟨a,hf ▸ ha⟩ : I)) ∈ _
-        rw [map_smul,TensorProduct.tmul_smul]
-        simpa only [algebraMap_smul] using
-          Submodule.smul_mem _ (algebraMap R S c) iha
-    exact hgen x.val (hf.symm ▸ x.property)
 
 include hI in
 theorem generators_independent

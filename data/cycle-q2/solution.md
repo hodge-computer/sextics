@@ -1,5 +1,94 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Actual relative conormal modules and the normal connecting cochain — 14 November 2026
+
+The final admission, `Submission.missing_geometric_existence`, remains
+open. This continuation identifies the existing normal obstruction with
+the normal module of the curve inside its actual containing surface.
+It preserves the original local lifts and their difference, including
+the sign of the ambient-test coefficient. The concurrent canonical
+differential-sheaf comparison in the next section is retained.
+
+### The actual quotient ideal and its conormal dual
+
+Let \(P\) be the original polynomial ring in the five weighted variables,
+\(I=(f_1,f_2,h)\) the curve ideal, and \(J=(F,h)\) the surface ideal, where
+\[
+F=f_1g_1+f_2g_2+hk.
+\]
+The identity proves \(J\subseteq I\). Write \(A=P/J\) and let
+\(K=I A\) be the actual ideal of the curve in this surface ring.
+
+[GeometricRelativeConormal.lean](GeometricRelativeConormal.lean)
+constructs the canonical surjection \(I/I^2\to K/K^2\), proves that its
+kernel is the image of \(J/J^2\), and retains this exactness after scalar
+extension. Dualizing gives an actual linear equivalence
+\[
+\operatorname{Hom}_S\!\left(S\otimes_A K/K^2,S\right)
+\;\simeq_S\;
+\ker\!\left(
+\operatorname{Hom}_S(S\otimes_P I/I^2,S)
+\longrightarrow
+\operatorname{Hom}_S(S\otimes_P J/J^2,S)
+\right).
+\]
+This uses the quotient ideal and the natural conormal map. No regularity
+or smoothness premise is required for this comparison. An evaluation
+theorem identifies its inverse on every literal ideal class.
+
+[GeometricSeedNormalIdeals.lean](GeometricSeedNormalIdeals.lean)
+specializes the construction to the original equations, with both
+parameters \(r,\theta\) retained. The actual curve coefficient maps on
+the \(g_1\)-open, \(g_2\)-open, and their intersection factor through
+\(P/(F,h)\). The file constructs these algebra actions and their scalar
+towers. Its `normalModuleEquiv` identifies the relative normal module
+with the kernel of the existing `naturalNormalMap`, preserving the values
+on \(f_1,f_2,h\). The literal \((r,\theta)=(57,1)\) specialization is
+stated explicitly.
+
+### The existing connecting representative retains its geometric values
+
+[GeometricSeedConormalBases.lean](GeometricSeedConormalBases.lean)
+extracts the original monic-regularity arguments and conormal bases into
+an independently checked helper. The original polynomial definitions,
+monomial orders, regular sequences, basis vectors, and theorem names are
+preserved.
+[GeometricNormalConnecting.lean](GeometricNormalConnecting.lean)
+similarly contains the original genuine normal lifts, their natural
+restriction maps, the normal-kernel trivializations, and the actual
+two-open Čech quotient. These declarations keep their original namespaces
+and are imported by the old aggregate modules.
+
+The new `relativeConnectingRepresentative` applies the proved quotient
+comparison to the existing difference of local lifts. Its image under
+that comparison is exactly `connectingRepresentative`, and its values
+on the three equation classes are
+\[
+\frac{kL-A}{g_1g_2}\,(g_2,-g_1,0).
+\]
+For the original ambient test with fixed cubic, \(L=0\), the coefficient
+is \(-A/(g_1g_2)\), with the actual localization units. The theorem
+`literal_ambient_test_comparison` binds this same representative at
+\((57,1)\); it does not replace this parameter by a cube root of two.
+
+### Verification and next comparison
+
+The four helpers above were compiled from their exact final source and
+independently replayed with `leanchecker`. Their audited endpoints use
+only `propext`, `Classical.choice`, and `Quot.sound`. The old aggregate
+modules import the extracted declarations. The moved proof of
+`ambientCurveMap_f1` now proves the same substitution identity directly,
+removing its dependency on an unrelated relation-list lemma; its statement
+and maps are unchanged. This continuation does not claim a complete build
+of the older aggregate dependency chain.
+
+The next step constructs the inverse-ideal extension on the surface and
+its actual boundary cochain, then compares that cochain with the existing
+character-one surface Čech quotient. The normal-module equivalence alone
+does not supply this boundary map, its nonvanishing, or a geometric trace.
+The moving-cycle, variation, supported-correspondence, and algebraic de
+Rham comparisons remain further obligations of the nonconstructive route.
+
 ## Checked canonical differential sheaf and its nonzero class — 14 November 2026
 
 The final admission, `Submission.missing_geometric_existence`, remains
