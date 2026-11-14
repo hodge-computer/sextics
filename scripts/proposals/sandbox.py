@@ -10,6 +10,7 @@ import time
 import uuid
 
 from check import command, require, target_source, witness_source
+from resources import host_memory_capacity_mb, memory_budget
 
 
 def verify(root, files, instance, metadata, order, imports, policy, output, *, prepared=False):
@@ -29,12 +30,19 @@ def verify(root, files, instance, metadata, order, imports, policy, output, *, p
     require('version 4.33.1,' in version, 'Wrong Lean version')
     system = platform.system()
     require(system in ('Darwin','Linux'), 'Supported verification hosts are macOS and Linux')
+    capacity_mb = host_memory_capacity_mb()
     if system == 'Darwin':
         require(Path('/usr/bin/sandbox-exec').is_file(), 'OS sandbox unavailable; refusing unisolated verification')
     else:
         require(shutil.which('docker'), 'Docker is required on Linux; refusing unisolated verification')
         require(os.getuid() != 0, 'Run the verifier as a non-root user')
         command(['docker','pull','ubuntu:24.04'],timeout=180)
+        docker_memory_mb = int(command(['docker','info','--format','{{.MemTotal}}'],timeout=30)) // (1024 * 1024)
+        require(docker_memory_mb > 0, 'Docker did not report its memory capacity')
+        capacity_mb = min(capacity_mb, docker_memory_mb)
+    memory_mb = memory_budget(policy['memoryMb'], capacity_mb)
+    print(f'Proof memory: requested {policy["memoryMb"]} MiB; '
+          f'effective {memory_mb} MiB; host capacity {capacity_mb} MiB', flush=True)
     deadline = time.monotonic()+policy['timeoutSeconds']
     with tempfile.TemporaryDirectory(prefix='hodge-proof-') as temp:
         tmp = Path(temp).resolve(); tmp.chmod(0o755)
@@ -73,7 +81,7 @@ def verify(root, files, instance, metadata, order, imports, policy, output, *, p
             else:
                 container_name = 'hodge-proof-'+uuid.uuid4().hex
                 command_line = ['docker','run','--rm','--name',container_name,'--network','none','--read-only','--cap-drop','ALL',
-                    '--security-opt','no-new-privileges','--pids-limit','128','--memory',f'{policy["memoryMb"]}m',
+                    '--security-opt','no-new-privileges','--pids-limit','128','--memory',f'{memory_mb}m',
                     '--cpus','2','--user',f'{os.getuid()}:{os.getgid()}',
                     '--tmpfs','/tmp:rw,noexec,nosuid,size=64m']
                 for p in (root,prefix,sources,artifacts,protected,checked):
@@ -99,7 +107,7 @@ def verify(root, files, instance, metadata, order, imports, policy, output, *, p
         for file in sequence:
             destination = protected if file in protected_names else checked if file=='HodgeChecked.lean' else artifacts
             relative = 'Proposal/'+file if destination==artifacts else file
-            run([str(lean),'-j','2','-M',str(policy['memoryMb']),'-o',str(destination/relative.replace('.lean','.olean')),
+            run([str(lean),'-j','2','-M',str(memory_mb),'-o',str(destination/relative.replace('.lean','.olean')),
                  relative], 'compile-'+file.removesuffix('.lean'),destination)
         # Reject compiler outputs that could shadow a protected module or load native code.
         for directory,names in ((protected,protected_names),(checked,['HodgeChecked.lean']),(artifacts,['Proposal/'+f for f in order])):
@@ -117,10 +125,11 @@ def verify(root, files, instance, metadata, order, imports, policy, output, *, p
             stem = file.removesuffix('.lean')
             module = stem if file in protected_names or file == 'HodgeChecked.lean' else 'Proposal.'+stem
             run([str(checker),'--verbose',module], 'kernel-'+stem)
-        run([str(lean),'--run',str(root/'scripts/proposals/Audit.lean'),*(['witness'] if has_witness else [])], 'theorem-audit')
+        run([str(lean),'-M',str(memory_mb),'--run',str(root/'scripts/proposals/Audit.lean'),*(['witness'] if has_witness else [])], 'theorem-audit')
         audit = json.loads((output/'theorem-audit.log').read_text())
         require(audit['theorem']=='HodgeSubmission.checked', 'Missing trusted theorem audit')
         require(audit['witnessChecked'] == has_witness, 'Missing witness binding audit')
         return {'leanVersion':version,'kernelReplay':True,'axioms':audit['axioms'],'witnessChecked':has_witness,
+                'requestedMemoryMb':policy['memoryMb'],'effectiveMemoryMb':memory_mb,'hostMemoryMb':capacity_mb,
                 'theorem':metadata['theorem'],'sandbox':'sandbox-exec' if system=='Darwin' else 'docker-no-network',
                 'toolchain':(lean_root/'lean-toolchain').read_text().strip()}

@@ -58,6 +58,42 @@ Candidate code receives no networking, credentials, or repository write access. 
 
 The CI report records base/head commits, the PR author, theorem, witness binding, toolchain, kernel replay, and axiom audit. The workflow posts `solve/lean` on the submitted commit and rejects a result if either PR commit changed during checking. For solve PRs, a green check means the proof passed. On maintenance PRs, that status only reports that there is no new solve; Repository build validates the release and rechecks affected accepted proofs. CI does not request approval or inspect GitHub reviews.
 
+### Memory and runner sizing
+
+The policy's `memoryMb` is a maximum of 28 GiB. Before compiling a proposal,
+the verifier measures physical memory and applicable Linux cgroup limits, then
+also bounds that capacity by the Docker daemon's reported memory on Linux.
+It reserves the larger of 2 GiB and one eighth of the measured capacity and
+uses the smaller of the remaining capacity and the policy maximum. This same
+effective allowance configures Lean's `-M` option and the Linux container's
+`--memory` limit, including the containers used for independent kernel replay.
+On macOS, `-M` limits Lean compilation and the theorem audit; `sandbox-exec`
+does not impose a process memory ceiling on `leanchecker`.
+
+The default protected runner remains `ubuntu-24.04`. To enable the larger
+allowance, a repository administrator must provision a GitHub-hosted Linux
+runner with at least 32 GB RAM, make it available to this repository, and set
+the repository Actions variable `SOLVE_RUNNER` to that runner's actual name.
+The protected workflow uses that variable as its `runs-on` label. It does not
+create a runner or assume a particular larger-runner name. Larger GitHub-hosted
+runners incur compute charges, including for public repositories. Use an
+ephemeral runner suitable for checking untrusted submissions.
+
+After merging this maintenance change, dispatch a fresh protected check and
+inspect its `Proof memory` log line and the report's `requestedMemoryMb`,
+`effectiveMemoryMb`, and `hostMemoryMb` fields. A nominal 32 GiB host permits
+28 GiB; the default nominal 16 GiB host remains limited to at most 14 GiB.
+Actual operating-system or container capacity can reduce these figures.
+Memory detection uses capacity, not current free memory: the reserve does not
+guarantee availability on a busy shared machine. Keep verification hosts
+dedicated to their job. The two-CPU setting, sequential replay, one-hour proof
+deadline, and 85-minute workflow timeout remain in force. The ordinary
+repository regression jobs continue to use their existing runners.
+
+Changing a solve branch's policy does not alter protected verification:
+the workflow and policy must be merged into upstream `main` first. Keep
+infrastructure changes in a maintenance PR separate from the solve proposal.
+
 ### Merge permissions
 
 GitHub repository access controls who can push and merge. `benediamond` is the only
