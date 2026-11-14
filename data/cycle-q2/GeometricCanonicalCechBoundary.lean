@@ -1,5 +1,6 @@
 import Proposal.GeometricProjectiveCanonicalH1
 import Proposal.GeometricNormalConnecting
+import Proposal.GeometricCanonicalSheaf
 
 /-!
 # The explicit residue section and its genuine cohomology boundary
@@ -399,6 +400,306 @@ theorem ambientNormalCanonicalBoundary_ne_zero (r : ℂ) (hr : r ^ 3 = 2) :
     norm_num at hre
   exact (div_ne_zero hc (by norm_num : (6 : ℂ) ≠ 0)) htrace
 
+local instance incidenceBoundarySheavesHasExt :
+    HasExt.{1} (Sheaf (Opens.grothendieckTopology (projectiveCurve 57 1)) AddCommGrpCat.{0}) :=
+  HasExt.standard _
+
+/-! ## The same actual boundary on the literal incidence member -/
+
+open CycleQ2GeometricCanonicalSheaf
+
+/-- The normalized, negatively oriented first-chart canonical generator,
+restricted through the actual differential-sheaf map to the denominator overlap. -/
+def incidenceCanonicalOverlapGenerator :
+    (projectiveDifferentialSheaf 57 1).val.obj (op (overlapProjectivePatch 57 1)) :=
+  (projectiveDifferentialSheaf 57 1).val.map
+    (homOfLE ((overlapProjectivePatch_eq 57 1).le.trans inf_le_left)).op
+    (CycleQ2GeometricProjectiveFrameRestriction.firstDenominatorFrame 57 1
+      CycleQ2GeometricIncidenceJacobianCover.first_chart_jacobianIdeal_eq_top
+      CycleQ2GeometricIncidenceJacobianCover.second_chart_jacobianIdeal_eq_top)
+
+/-- This uses the proved literal-incidence sheaf morphism, with its fixed
+coefficient normalization, on the actual homogeneous overlap section. -/
+def incidenceCanonicalOverlapSection (z : OverlapDegreeOne 57 1) :
+    (projectiveDifferentialSheaf 57 1).val.obj (op (overlapProjectivePatch 57 1)) :=
+  incidenceCanonicalSheafMap.val.app (op (overlapProjectivePatch 57 1))
+    (overlapDegreeOneSectionsEquiv 57 1 z)
+
+theorem incidenceCanonicalOverlapSection_eq (z : OverlapDegreeOne 57 1) :
+    incidenceCanonicalOverlapSection z =
+      degreeOneSectionCoefficient 57 1 z • incidenceCanonicalOverlapGenerator := by
+  have h := canonicalSheafMap_first_local 57 1 (by norm_num)
+    CycleQ2GeometricIncidenceJacobianCover.first_chart_jacobianIdeal_eq_top
+    CycleQ2GeometricIncidenceJacobianCover.second_chart_jacobianIdeal_eq_top
+    (overlapProjectivePatch 57 1)
+    ((overlapProjectivePatch_eq 57 1).le.trans inf_le_left)
+    (overlapDegreeOneSectionsEquiv 57 1 z)
+  change incidenceCanonicalOverlapSection z =
+    overlapSheafFrame 57 1 (overlapDegreeOneSectionsEquiv 57 1 z) •
+      incidenceCanonicalOverlapGenerator at h
+  rw [overlapDegreeOneSectionsEquiv_coordinate] at h
+  exact h
+
+def incidenceCanonicalMayerVietorisBoundary :
+    (projectiveDifferentialSheaf 57 1).val.obj (op (overlapProjectivePatch 57 1)) →+
+      DifferentialSheafH1 57 1 :=
+  ((projectiveMayerVietoris 57 1 (by norm_num)).δ
+    (differentialAdditiveSheaf 57 1) 0 1 rfl).hom.comp
+      (sectionsEquiv (differentialAdditiveSheaf 57 1)
+        (overlapProjectivePatch 57 1)).symm.toAddMonoidHom
+
+theorem incidenceCanonicalH1Equiv_apply (x : ProjectiveSheafH1 57 1) :
+    incidenceCanonicalH1Equiv x =
+      ((Sheaf.cohomologyPresheafFunctor
+        (Opens.grothendieckTopology (projectiveCurve 57 1)) 1).map
+          incidenceCanonicalAdditiveIso.hom).app (op ⊤) x := rfl
+
+theorem incidenceCanonicalH1Equiv_connecting (z : OverlapDegreeOne 57 1) :
+    incidenceCanonicalH1Equiv (degreeOneConnecting 57 1 (by norm_num) z) =
+      incidenceCanonicalMayerVietorisBoundary (incidenceCanonicalOverlapSection z) := by
+  rw [incidenceCanonicalH1Equiv_apply]
+  change ((Sheaf.cohomologyPresheafFunctor
+      (Opens.grothendieckTopology (projectiveCurve 57 1)) 1).map
+        incidenceCanonicalAdditiveIso.hom).app (op ⊤)
+      ((projectiveMayerVietoris 57 1 (by norm_num)).δ (degreeOneSheaf 57 1) 0 1 rfl
+        ((sectionsEquiv (degreeOneSheaf 57 1) (overlapProjectivePatch 57 1)).symm
+          (overlapDegreeOneSectionsEquiv 57 1 z))) = _
+  have hnat := mayerVietoris_delta_naturality incidenceCanonicalAdditiveIso.hom
+    (projectiveMayerVietoris 57 1 (by norm_num)) 0 1 rfl
+    ((sectionsEquiv (degreeOneSheaf 57 1) (overlapProjectivePatch 57 1)).symm
+      (overlapDegreeOneSectionsEquiv 57 1 z))
+  have hzero := sectionsEquiv_symm_map incidenceCanonicalAdditiveIso.hom
+    (overlapProjectivePatch 57 1) (overlapDegreeOneSectionsEquiv 57 1 z)
+  exact hnat.trans (congrArg
+    (fun x : (differentialAdditiveSheaf 57 1).H' 0 (overlapProjectivePatch 57 1) =>
+      (projectiveMayerVietoris 57 1 (by norm_num)).δ
+        (differentialAdditiveSheaf 57 1) 0 1 rfl x) hzero)
+
+theorem incidenceDegreeNineClass_eq_boundary (p : Poly) (hp : p.IsHomogeneous 9) :
+    incidenceDegreeOneToCanonicalH1 (degreeNineCechClass 57 1 p hp) =
+      incidenceCanonicalMayerVietorisBoundary
+        (degreeOneSectionCoefficient 57 1 (degreeNineRepresentative 57 1 p hp) •
+          incidenceCanonicalOverlapGenerator) := by
+  change incidenceCanonicalH1Equiv
+      (degreeOneConnecting 57 1 (by norm_num) (degreeNineRepresentative 57 1 p hp)) = _
+  rw [incidenceCanonicalH1Equiv_connecting, incidenceCanonicalOverlapSection_eq]
+
+/-- The actual relative-normal equation coefficient, paired with the
+specified homogeneous cubic, then sent through the genuine connecting map. -/
+def incidenceRelativeNormalCanonicalBoundary (A L : WeightedPoly) (σ : Poly)
+    (hp : (pairedNormalNumerator 1 A L σ).IsHomogeneous 9) : DifferentialSheafH1 57 1 :=
+  incidenceCanonicalMayerVietorisBoundary
+    (incidenceCanonicalOverlapSection (pairedRelativeNormalSection 57 1 A L σ hp))
+
+theorem incidenceRelativeNormalCanonicalBoundary_eq (A L : WeightedPoly) (σ : Poly)
+    (hp : (pairedNormalNumerator 1 A L σ).IsHomogeneous 9) :
+    incidenceRelativeNormalCanonicalBoundary A L σ hp =
+      incidenceDegreeOneToCanonicalH1
+        (degreeNineCechClass 57 1 (pairedNormalNumerator 1 A L σ) hp) := by
+  rw [incidenceRelativeNormalCanonicalBoundary, pairedRelativeNormalSection_eq,
+    incidenceCanonicalOverlapSection_eq, incidenceDegreeNineClass_eq_boundary]
+
+open CycleQ2SeedCechTheta CycleQ2SeedBoundaryProjection
+
+theorem pairedNormalNumerator_ambient (θ : ℂ) (σ : Poly) :
+    pairedNormalNumerator θ derivativeA 0 σ = -derivativeNumerator σ := by
+  have hs : substitute derivativeA = -(X 2 ^ 3 * X 3 ^ 3) := by
+    simp [derivativeA, substitute] <;> ring
+  simp only [pairedNormalNumerator, mul_zero, zero_sub, map_neg, hs, derivativeNumerator]
+  ring
+
+theorem incidencePairedNumerator_homogeneous (v : Fin 9 → ℂ) :
+    (pairedNormalNumerator 1 derivativeA 0 (cubicDeformation v)).IsHomogeneous 9 := by
+  rw [pairedNormalNumerator_ambient]
+  exact (derivativeNumerator_homogeneous v).neg
+
+/-- This input is the actual nine-parameter cubic family used in the
+incidence calculation; the ambient normal cochain and its sign are retained. -/
+def incidencePairedNormalBoundary (v : Fin 9 → ℂ) : DifferentialSheafH1 57 1 :=
+  incidenceRelativeNormalCanonicalBoundary derivativeA 0 (cubicDeformation v)
+    (incidencePairedNumerator_homogeneous v)
+
+theorem incidencePairedNormalBoundary_eq (v : Fin 9 → ℂ) :
+    incidencePairedNormalBoundary v = incidencePairedCanonicalClass v := by
+  rw [incidencePairedNormalBoundary, incidenceRelativeNormalCanonicalBoundary_eq]
+  congr 2
+  exact pairedNormalNumerator_ambient 1 (cubicDeformation v)
+
+/-- The fixed computed derivative row detects this genuine boundary of
+the actual relative-normal cochain on the same literal incidence member. -/
+theorem incidencePairedNormalBoundary_eq_zero_iff (v : Fin 9 → ℂ) :
+    incidencePairedNormalBoundary v = 0 ↔ derivativeTrace 1 v = 0 := by
+  rw [incidencePairedNormalBoundary_eq,
+    incidencePairedCanonicalClass_eq_zero_iff_derivativeTrace_zero]
+
+theorem incidenceAmbientCubic :
+    cubicDeformation (Pi.single (8 : Fin 9) (1 : ℂ)) = X 0 ^ 3 := by
+  simp [cubicDeformation, cubicColumn, mon, Fin.sum_univ_succ,
+    Pi.single_apply, Matrix.cons_val_zero, Matrix.cons_val_succ]
+
+/-- A specific actual normal-cochain boundary is nonzero. This is an
+ambient test; no claim that this vector is a fixed-sextic incidence tangent
+or that the cubic is already a global surface canonical section is made. -/
+theorem incidenceAmbientNormalBoundary_ne_zero :
+    incidencePairedNormalBoundary (Pi.single (8 : Fin 9) (1 : ℂ)) ≠ 0 := by
+  intro h
+  have ht := (incidencePairedNormalBoundary_eq_zero_iff _).mp h
+  rw [smooth_derivativeTrace_explicit] at ht
+  have hc : (1 + Complex.I : ℂ) ≠ 0 := by
+    intro hz
+    have hre := congrArg Complex.re hz
+    norm_num at hre
+  apply (div_ne_zero (neg_ne_zero.mpr hc) (by norm_num : (6 : ℂ) ≠ 0))
+  simpa [Pi.single_apply] using ht
+
+/-! ## The actual unrestricted scalar Čech obstruction -/
+
+open CycleQ2GeometricKoszulTrace CycleQ2SeedCechTheta
+
+/-- The all-poles numerator kernel is the same actual four-generator
+ideal, now with both regularity hypotheses proved for every r ≠ 0. No
+homogeneity or projective comparison is needed for this statement. -/
+theorem scalarBoundary_eq_zero_iff_fourGeneratorIdeal (r θ : ℂ) (hr : r ≠ 0) (p : Poly) :
+    CycleQ2GeometricKoszulKernel.boundary (curveG1 r θ) (curveG2 r θ)
+      (curveMap r θ p) = 0 ↔ p ∈ fourGeneratorIdeal r θ := by
+  have hg₁ : IsSMulRegular (CurveRing r θ) (curveMap r θ (firstQuartic r)) := by
+    rw [curveMap_firstQuartic]
+    exact CycleQ2GeometricCurveRegularPairTheta.curveG1_regular r θ hr
+  have hg₂ : IsSMulRegular (CurveRing r θ ⧸ Ideal.span {curveMap r θ (firstQuartic r)})
+      (curveMap r θ secondQuartic) := by
+    rw [curveMap_firstQuartic, curveMap_secondQuartic]
+    exact CycleQ2GeometricCurveRegularPairTheta.curveG2_regular_mod_curveG1 r θ hr
+  have h := CycleQ2GeometricHomogeneousBoundary.quotient_boundary_eq_zero_iff
+    (relation r 0) (curveH θ) (firstQuartic r) secondQuartic p hg₁ hg₂
+  change CycleQ2GeometricKoszulKernel.boundary
+      (curveMap r θ (firstQuartic r)) (curveMap r θ secondQuartic)
+      (curveMap r θ p) = 0 ↔ p ∈ fourGeneratorIdeal r θ at h
+  rwa [curveMap_firstQuartic, curveMap_secondQuartic] at h
+
+/-- The converse to forgetting a homogeneous boundary follows from
+the common proved ideal kernel, rather than an assumed injectivity of
+the complete forgetful map between the two Čech spaces. -/
+theorem scalarBoundary_eq_zero_iff_degreeNineCechClass (r θ : ℂ) (hr : r ≠ 0)
+    (p : Poly) (hp : p.IsHomogeneous 9) :
+    CycleQ2GeometricKoszulKernel.boundary (curveG1 r θ) (curveG2 r θ)
+      (curveMap r θ p) = 0 ↔ degreeNineCechClass r θ p hp = 0 :=
+  (scalarBoundary_eq_zero_iff_fourGeneratorIdeal r θ hr p).trans
+    (CycleQ2GeometricCurveRegularPairTheta.degreeNineCechClass_zero_iff_fourGeneratorIdeal
+      r θ hr p hp).symm
+
+/-- The ordinary scalar Čech class of the actual relative-normal
+coefficient multiplied by the literal polynomial σ. Both chart boundaries
+allow arbitrary pole orders. -/
+def scalarRelativeNormalCechClass (r θ : ℂ) (A L : WeightedPoly) (σ : Poly) :
+    CycleQ2GeometricKoszulKernel.Cech (curveG1 r θ) (curveG2 r θ) :=
+  (CycleQ2GeometricKoszulKernel.boundaries (curveG1 r θ) (curveG2 r θ)).mkQ
+    (pairedRelativeNormalCoefficient r θ A L σ)
+
+theorem scalarRelativeNormalCechClass_eq (r θ : ℂ) (A L : WeightedPoly) (σ : Poly)
+    (hp : (pairedNormalNumerator θ A L σ).IsHomogeneous 9) :
+    scalarRelativeNormalCechClass r θ A L σ =
+      CycleQ2GeometricKoszulKernel.boundary (curveG1 r θ) (curveG2 r θ)
+        (curveMap r θ (pairedNormalNumerator θ A L σ)) := by
+  change (CycleQ2GeometricKoszulKernel.boundaries (curveG1 r θ) (curveG2 r θ)).mkQ
+    (pairedRelativeNormalCoefficient r θ A L σ) = _
+  rw [← degreeNineRepresentative_relativeNormal r θ A L σ hp,
+    degreeNineRepresentative_coe]
+  rfl
+
+open CycleQ2SeedCechTheta CycleQ2SeedBoundaryProjection
+
+private theorem scalarPairedNumerator_eq (v : Fin 9 → ℂ) :
+    pairedNormalNumerator 1 derivativeA 0 (cubicDeformation v) =
+      -derivativeNumerator (cubicDeformation v) := by
+  have hs : substitute derivativeA = -(X 2 ^ 3 * X 3 ^ 3) := by
+    simp [derivativeA, substitute] <;> ring
+  simp only [pairedNormalNumerator, mul_zero, zero_sub, map_neg, hs, derivativeNumerator]
+  ring
+
+theorem incidenceScalarRelativeNormalCechClass_eq_zero_iff (v : Fin 9 → ℂ) :
+    scalarRelativeNormalCechClass 57 1 derivativeA 0 (cubicDeformation v) = 0 ↔
+      derivativeTrace 1 v = 0 := by
+  have hp : (pairedNormalNumerator 1 derivativeA 0 (cubicDeformation v)).IsHomogeneous 9 := by
+    rw [scalarPairedNumerator_eq]
+    exact (derivativeNumerator_homogeneous v).neg
+  rw [scalarRelativeNormalCechClass_eq 57 1 derivativeA 0 (cubicDeformation v) hp,
+    scalarBoundary_eq_zero_iff_degreeNineCechClass 57 1 (by norm_num) _ hp]
+  have he : degreeNineCechClass 57 1
+      (pairedNormalNumerator 1 derivativeA 0 (cubicDeformation v)) hp =
+        pairedDegreeOneClass 57 1 v := by
+    simp only [pairedDegreeOneClass, scalarPairedNumerator_eq]
+  rw [he]
+  exact CycleQ2GeometricIncidenceCechTrace.pairedDegreeOneClass_eq_zero_iff_derivativeTrace_zero v
+
+/-- A nonzero derivative coordinate cannot be killed by unrestricted
+scalar chart sections; this is the genuine punctured-cone obstruction. -/
+theorem incidenceScalarRelativeNormalCechClass_ne_zero (v : Fin 9 → ℂ)
+    (hv : derivativeTrace 1 v ≠ 0) :
+    scalarRelativeNormalCechClass 57 1 derivativeA 0 (cubicDeformation v) ≠ 0 :=
+  fun h => hv ((incidenceScalarRelativeNormalCechClass_eq_zero_iff v).mp h)
+
+theorem incidenceScalarAmbientNormalCechClass_ne_zero :
+    scalarRelativeNormalCechClass 57 1 derivativeA 0
+      (cubicDeformation (Pi.single (8 : Fin 9) (1 : ℂ))) ≠ 0 := by
+  apply incidenceScalarRelativeNormalCechClass_ne_zero
+  rw [smooth_derivativeTrace_explicit]
+  have hc : (1 + Complex.I : ℂ) ≠ 0 := by
+    intro hz
+    have hre := congrArg Complex.re hz
+    norm_num at hre
+  simpa [Pi.single_apply] using
+    (div_ne_zero (neg_ne_zero.mpr hc) (by norm_num : (6 : ℂ) ≠ 0))
+
 end CycleQ2GeometricCanonicalCechBoundary
+
+namespace CycleQ2GeometricCartierCech
+
+open CycleQ2GeometricCanonicalCechBoundary CycleQ2ActualNormalCech
+  CycleQ2GeometricProjectiveCurve CycleQ2NormalConnecting CycleQ2SeedTrace
+  CycleQ2SeedBoundaryProjection CycleQ2SeedCechTheta
+
+/-- A true normal coboundary stays a scalar coboundary after pairing
+with the literal polynomial. This uses the original normal restrictions,
+not a choice of an abstract trace coordinate. -/
+theorem scalarPair_zero_of_normalClass_zero (r θ : ℂ)
+    (A L : WeightedPoly) (σ : Poly)
+    (hz : connectingClass r θ A L = 0) :
+    scalarRelativeNormalCechClass r θ A L σ = 0 := by
+  have hs := congrArg (normalCechEquivalence r θ) hz
+  rw [connectingClass_eq_scalar, map_zero] at hs
+  have hm : normalOverlapCoefficient r θ A L ∈ scalarBoundaries r θ :=
+    (Submodule.Quotient.mk_eq_zero _).mp hs
+  have hm' : normalOverlapCoefficient r θ A L ∈
+      CycleQ2GeometricKoszulKernel.boundaries (curveG1 r θ) (curveG2 r θ) := by
+    rcases Submodule.mem_sup.mp hm with ⟨a,⟨u,hu⟩,b,⟨v,hv⟩,hab⟩
+    rw [← hab, ← hu, ← hv]
+    exact Submodule.add_mem _
+      (Submodule.mem_sup_left ⟨u,rfl⟩) (Submodule.mem_sup_right ⟨v,rfl⟩)
+  apply (Submodule.Quotient.mk_eq_zero _).mpr
+  change pairedRelativeNormalCoefficient r θ A L σ ∈
+    CycleQ2GeometricKoszulKernel.boundaries (curveG1 r θ) (curveG2 r θ)
+  have hp := (CycleQ2GeometricKoszulKernel.boundaries
+    (curveG1 r θ) (curveG2 r θ)).smul_mem (curveMap r θ σ) hm'
+  have hsmul (a : CurveRing r θ) (z : Overlap r θ) :
+      a • z = algebraMap (CurveRing r θ) (Overlap r θ) a * z :=
+    Algebra.smul_def a z
+  rw [hsmul] at hp
+  have hprod : pairedRelativeNormalCoefficient r θ A L σ =
+      algebraMap (CurveRing r θ) (Overlap r θ) (curveMap r θ σ) *
+        normalOverlapCoefficient r θ A L := by
+    rw [pairedRelativeNormalCoefficient_eq]
+    exact mul_comm _ _
+  rw [hprod]
+  exact hp
+
+/-- Nonvanishing is now a statement about the actual normal connecting
+class on the literal incidence curve. -/
+theorem literal_normal_connecting_ne_zero : connectingClass 57 1 derivativeA 0 ≠ 0 := by
+  intro hz
+  exact incidenceScalarAmbientNormalCechClass_ne_zero
+    (scalarPair_zero_of_normalClass_zero 57 1 derivativeA 0
+      (cubicDeformation (Pi.single (8 : Fin 9) (1 : ℂ))) hz)
+
+end CycleQ2GeometricCartierCech
 
 end

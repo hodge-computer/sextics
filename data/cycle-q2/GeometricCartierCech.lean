@@ -1,4 +1,5 @@
 import Proposal.GeometricCartierNormalLift
+import Proposal.GeometricCanonicalCechBoundary
 import Mathlib.LinearAlgebra.Quotient.Defs
 import Mathlib.Algebra.Module.LocalizedModule.Away
 import Mathlib.LinearAlgebra.Prod
@@ -14,8 +15,9 @@ quotient. Affine exactness and unique gluing are proved from localization
 and an explicit unit-open contraction. The change-of-cover theorem uses
 actual tensor-localized common refinements and their canonical maps.
 These constructions preserve the original surface equations and cochains.
-The nonvanishing application and the final geometric existence theorem
-are separate obligations.
+Actual inverse-ideal degree-one exactness and the original normal reduction
+prove nonvanishing of the literal Cartier class. The final geometric
+existence theorem remains a separate obligation.
 -/
 
 set_option Elab.async false
@@ -1848,3 +1850,349 @@ theorem withEmptyFourth_span (a : Fin 3 → R) :
 
 end CycleQ2GeometricLocalizedCech
 
+
+
+/-! ## Actual inverse-ideal primitives and literal Cartier nonvanishing -/
+
+section
+set_option autoImplicit false
+
+namespace CycleQ2GeometricCartierCech
+
+open scoped TensorProduct
+open CycleQ2ConormalJacobian CycleQ2GeometricSeedNormalIdeals
+  CycleQ2GeometricCartierNormalLift CycleQ2GeometricSurfaceCoordinates
+  CycleQ2GeometricFourOpenCech CycleQ2GeometricLocalizedCech
+
+abbrev GlobalInverseIdeal (r θ : ℂ) :=
+  (curveIdealOnSurface r θ) →ₗ[SurfaceRing r θ] SurfaceRing r θ
+
+def coordinateCover (r : ℂ) : Fin 4 → SurfaceRing r 1 :=
+  withEmptyFourth (coordinateElement r 1)
+
+def coordinateTensorEquiv (r : ℂ) (s : Finset (Fin 3)) :
+    ModuleAt (GlobalInverseIdeal r 1) (coordinateElement r 1) s
+      ≃ₗ[SurfaceRing r 1] CoordinateInverseIdeal.HomModule r s :=
+  (IdealHomLocalization.tensorEquiv (curveIdealOnSurface r 1)
+    (coordinateProduct r 1 s)).restrictScalars (SurfaceRing r 1)
+
+theorem coordinateTensorEquiv_restriction (r : ℂ) {s t : Finset (Fin 3)}
+    (h : s ⊆ t) (p : ModuleAt (GlobalInverseIdeal r 1) (coordinateElement r 1) s) :
+    CoordinateInverseIdeal.restriction r h (coordinateTensorEquiv r s p) =
+      coordinateTensorEquiv r t
+        (moduleRestriction (GlobalInverseIdeal r 1) (coordinateElement r 1) h p) :=
+  IdealHomLocalization.tensorEquiv_restriction (curveIdealOnSurface r 1)
+    (coordinateRestriction r 1 h) p
+
+/-- The three actual coordinate primitives also solve the first three
+components of the actual four-open tensor diagram. -/
+theorem coordinate_firstThree_exact (r : ℂ) :
+    FirstThreeExact (moduleSystem (GlobalInverseIdeal r 1) (coordinateCover r)) := by
+  intro p01 p02 p12 hc
+  let M := GlobalInverseIdeal r 1
+  let a := coordinateElement r 1
+  change moduleRestriction M a (show ({1,2} : Finset (Fin 3)) ⊆ Finset.univ by simp) p12 -
+    moduleRestriction M a (show ({0,2} : Finset (Fin 3)) ⊆ Finset.univ by simp) p02 +
+    moduleRestriction M a (show ({0,1} : Finset (Fin 3)) ⊆ Finset.univ by simp) p01 = 0 at hc
+  have hc' :
+      moduleRestriction M a (show ({0,1} : Finset (Fin 3)) ⊆ Finset.univ by simp) p01 -
+        moduleRestriction M a (show ({0,2} : Finset (Fin 3)) ⊆ Finset.univ by simp) p02 +
+        moduleRestriction M a (show ({1,2} : Finset (Fin 3)) ⊆ Finset.univ by simp) p12 = 0 := by
+    calc
+      _ = moduleRestriction M a (show ({1,2} : Finset (Fin 3)) ⊆ Finset.univ by simp) p12 -
+          moduleRestriction M a (show ({0,2} : Finset (Fin 3)) ⊆ Finset.univ by simp) p02 +
+          moduleRestriction M a (show ({0,1} : Finset (Fin 3)) ⊆ Finset.univ by simp) p01 := by abel
+      _ = 0 := hc
+  have hh := congrArg (coordinateTensorEquiv r Finset.univ) hc'
+  simp only [map_add, map_sub, map_zero] at hh
+  dsimp only [M, a] at hh
+  rw [← coordinateTensorEquiv_restriction r
+        (show ({0,1} : Finset (Fin 3)) ⊆ Finset.univ by simp) p01,
+      ← coordinateTensorEquiv_restriction r
+        (show ({0,2} : Finset (Fin 3)) ⊆ Finset.univ by simp) p02,
+      ← coordinateTensorEquiv_restriction r
+        (show ({1,2} : Finset (Fin 3)) ⊆ Finset.univ by simp) p12] at hh
+  obtain ⟨q0,q1,q2,h01,h02,h12⟩ := CoordinateInverseIdeal.firstCech_exact r
+    (coordinateTensorEquiv r {0,1} p01) (coordinateTensorEquiv r {0,2} p02)
+    (coordinateTensorEquiv r {1,2} p12) hh
+  refine ⟨(coordinateTensorEquiv r {0}).symm q0,
+    (coordinateTensorEquiv r {1}).symm q1, (coordinateTensorEquiv r {2}).symm q2, ?_, ?_, ?_⟩
+  · change p01 =
+      moduleRestriction (GlobalInverseIdeal r 1) (coordinateElement r 1)
+        (show ({1} : Finset (Fin 3)) ⊆ {0,1} by decide)
+        ((coordinateTensorEquiv r {1}).symm q1) -
+      moduleRestriction (GlobalInverseIdeal r 1) (coordinateElement r 1)
+        (show ({0} : Finset (Fin 3)) ⊆ {0,1} by decide)
+        ((coordinateTensorEquiv r {0}).symm q0)
+    apply (coordinateTensorEquiv r {0,1}).injective
+    rw [map_sub,
+      ← coordinateTensorEquiv_restriction r
+        (show ({1} : Finset (Fin 3)) ⊆ {0,1} by decide)
+        ((coordinateTensorEquiv r {1}).symm q1),
+      ← coordinateTensorEquiv_restriction r
+        (show ({0} : Finset (Fin 3)) ⊆ {0,1} by decide)
+        ((coordinateTensorEquiv r {0}).symm q0),
+      LinearEquiv.apply_symm_apply, LinearEquiv.apply_symm_apply]
+    exact h01
+  · change p02 =
+      moduleRestriction (GlobalInverseIdeal r 1) (coordinateElement r 1)
+        (show ({2} : Finset (Fin 3)) ⊆ {0,2} by decide)
+        ((coordinateTensorEquiv r {2}).symm q2) -
+      moduleRestriction (GlobalInverseIdeal r 1) (coordinateElement r 1)
+        (show ({0} : Finset (Fin 3)) ⊆ {0,2} by decide)
+        ((coordinateTensorEquiv r {0}).symm q0)
+    apply (coordinateTensorEquiv r {0,2}).injective
+    rw [map_sub,
+      ← coordinateTensorEquiv_restriction r
+        (show ({2} : Finset (Fin 3)) ⊆ {0,2} by decide)
+        ((coordinateTensorEquiv r {2}).symm q2),
+      ← coordinateTensorEquiv_restriction r
+        (show ({0} : Finset (Fin 3)) ⊆ {0,2} by decide)
+        ((coordinateTensorEquiv r {0}).symm q0),
+      LinearEquiv.apply_symm_apply, LinearEquiv.apply_symm_apply]
+    exact h02
+  · change p12 =
+      moduleRestriction (GlobalInverseIdeal r 1) (coordinateElement r 1)
+        (show ({2} : Finset (Fin 3)) ⊆ {1,2} by decide)
+        ((coordinateTensorEquiv r {2}).symm q2) -
+      moduleRestriction (GlobalInverseIdeal r 1) (coordinateElement r 1)
+        (show ({1} : Finset (Fin 3)) ⊆ {1,2} by decide)
+        ((coordinateTensorEquiv r {1}).symm q1)
+    apply (coordinateTensorEquiv r {1,2}).injective
+    rw [map_sub,
+      ← coordinateTensorEquiv_restriction r
+        (show ({2} : Finset (Fin 3)) ⊆ {1,2} by decide)
+        ((coordinateTensorEquiv r {2}).symm q2),
+      ← coordinateTensorEquiv_restriction r
+        (show ({1} : Finset (Fin 3)) ⊆ {1,2} by decide)
+        ((coordinateTensorEquiv r {1}).symm q1),
+      LinearEquiv.apply_symm_apply, LinearEquiv.apply_symm_apply]
+    exact h12
+
+theorem coordinate_tensor_first_exact (r : ℂ) :
+    Function.Exact (d0 (moduleSystem (GlobalInverseIdeal r 1) (coordinateCover r)))
+      (d1 (moduleSystem (GlobalInverseIdeal r 1) (coordinateCover r))) :=
+  first_exact_of_zero_fourth (GlobalInverseIdeal r 1) (coordinateCover r) rfl
+    (coordinate_firstThree_exact r)
+
+theorem coordinateCover_span (r : ℂ) :
+    Ideal.span (Set.range (coordinateCover r)) = surfaceCoordinateIdeal r 1 := by
+  rw [coordinateCover, withEmptyFourth_span]
+  change Ideal.span (Set.range (coordinateElement r 1)) =
+    Ideal.span ({surfaceQuotient r 1 (MvPolynomial.X 1),
+      surfaceQuotient r 1 (MvPolynomial.X 2),
+      surfaceQuotient r 1 (MvPolynomial.X 3)} : Set (SurfaceRing r 1))
+  congr 1
+  ext x
+  simp only [Set.mem_range, Set.mem_insert_iff, Set.mem_singleton_iff]
+  constructor
+  · rintro ⟨i,rfl⟩
+    fin_cases i
+    · exact Or.inl rfl
+    · exact Or.inr (Or.inl rfl)
+    · exact Or.inr (Or.inr rfl)
+  · rintro (h | h | h)
+    · exact ⟨0,h.symm⟩
+    · exact ⟨1,h.symm⟩
+    · exact ⟨2,h.symm⟩
+
+/-- Actual inverse-ideal tensor cochains are exact in degree one on the
+Cartier cover. The coordinate vanishing is transferred through the
+proved common-refinement construction and literal radical equality. -/
+theorem inverseIdeal_tensor_first_exact (r : ℂ) (hr : r ≠ 0) :
+    Function.Exact (d0 (moduleSystem (GlobalInverseIdeal r 1) (coverElement r 1)))
+      (d1 (moduleSystem (GlobalInverseIdeal r 1) (coverElement r 1))) := by
+  apply first_exact_of_radical_eq (GlobalInverseIdeal r 1)
+    (coverElement r 1) (coordinateCover r)
+  · rw [coordinateCover_span]
+    exact cover_radical_eq_coordinate_radical r 1 hr one_ne_zero
+  · exact coordinate_tensor_first_exact r
+
+abbrev LocalInverseIdeal (r θ : ℂ) (s : Finset (Fin 4)) :=
+  IdealHomLocalization.LocalHom (curveIdealOnSurface r θ)
+    (CycleQ2GeometricCartierNormalLift.coverProduct r θ s)
+
+def inverseIdealSystem (r θ : ℂ) :
+    RestrictionSystem (SurfaceRing r θ) (LocalInverseIdeal r θ) where
+  res h := IdealHomLocalization.restriction (curveIdealOnSurface r θ) (coverRestriction r θ h)
+  res_id s := by
+    have h : coverRestriction r θ (s := s) (t := s) (by rfl) = AlgHom.id _ _ := by
+      apply IsLocalization.algHom_ext
+        (Submonoid.powers (CycleQ2GeometricCartierNormalLift.coverProduct r θ s))
+      ext
+    rw [h]
+    exact IdealHomLocalization.restriction_id _ _
+  res_comp hs ht := by
+    rw [IdealHomLocalization.restriction_comp]
+    congr 1
+    exact AlgHom.ext (fun x => coverRestriction_comp_apply r θ hs ht x)
+
+/-- Canonical tensor localization is identified with the genuine local
+ideal Hom, and the identification preserves the actual restrictions. -/
+def inverseIdealTensorMorphism (r θ : ℂ) :
+    SystemMorphism (moduleSystem (GlobalInverseIdeal r θ) (coverElement r θ))
+      (inverseIdealSystem r θ) where
+  app s := ((IdealHomLocalization.tensorEquiv (curveIdealOnSurface r θ)
+    (CycleQ2GeometricCartierNormalLift.coverProduct r θ s)).restrictScalars
+      (SurfaceRing r θ)).toLinearMap
+  naturality h := by
+    apply LinearMap.ext
+    intro p
+    exact (IdealHomLocalization.tensorEquiv_restriction (curveIdealOnSurface r θ)
+      (coverRestriction r θ h) p).symm
+
+/-- Every genuine inverse-ideal one-cocycle on the actual Cartier cover
+has genuine local-Hom primitives. No vanishing hypothesis remains. -/
+theorem inverseIdeal_first_exact (r : ℂ) (hr : r ≠ 0) :
+    Function.Exact (d0 (inverseIdealSystem r 1)) (d1 (inverseIdealSystem r 1)) := by
+  apply ((inverseIdealTensorMorphism r 1).first_exact_iff_of_bijective
+    (fun s => (IdealHomLocalization.tensorEquiv (curveIdealOnSurface r 1)
+      (CycleQ2GeometricCartierNormalLift.coverProduct r 1 s)).bijective)).mp
+  exact inverseIdeal_tensor_first_exact r hr
+
+end CycleQ2GeometricCartierCech
+
+namespace CycleQ2GeometricCartierCech
+
+open CycleQ2ConormalJacobian CycleQ2GeometricSeedNormalIdeals
+  CycleQ2GeometricCartierNormalLift CycleQ2GeometricFourOpenCech
+  CycleQ2ActualNormalCech CycleQ2SeedTrace CycleQ2NormalConnecting
+
+/-- Scalars act on the actual localized curve ideal by multiplication. -/
+def scalarApp (r θ : ℂ) (s : Finset (Fin 4)) :
+    CoverLocal r θ s →ₗ[SurfaceRing r θ] LocalInverseIdeal r θ s where
+  toFun a := a • (IdealHomLocalization.LocalIdeal (curveIdealOnSurface r θ)
+    (CycleQ2GeometricCartierNormalLift.coverProduct r θ s)).subtype
+  map_add' a b := add_smul a b _
+  map_smul' a b := smul_assoc a b _
+
+/-- The actual scalar inclusion is a morphism of the actual localization
+Cech systems, by the proved Hom restriction/evaluation compatibility. -/
+def scalarMorphism (r θ : ℂ) :
+    SystemMorphism (surfaceSystem r θ) (inverseIdealSystem r θ) where
+  app s := scalarApp r θ s
+  naturality h := by
+    apply LinearMap.ext
+    intro a
+    exact (IdealHomLocalization.restriction_scalar (curveIdealOnSurface r θ)
+      (coverRestriction r θ h) a).symm
+
+/-- The fixed inverse-ideal connecting lift is placed in its actual edge01.
+The other five edges carry the zero section. -/
+def inverseIdealConnectingCochain (r θ : ℂ) (A L : P) :
+    OneCochain (LocalInverseIdeal r θ) :=
+  ((inverseIdealConnectingLift r θ A L,0,0),(0,0,0))
+
+theorem inverseIdealConnectingLift_restrict012 (r θ : ℂ) (A L : P) :
+    IdealHomLocalization.restriction (curveIdealOnSurface r θ)
+        (coverRestriction r θ (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,2} by simp))
+        (inverseIdealConnectingLift r θ A L) =
+      scalarApp r θ {0,1,2} (boundary012 r θ A L) := by
+  let φ : LocalInverseIdeal r θ {0,1} := inverseIdealConnectingLift r θ A L
+  change IdealHomLocalization.restriction (curveIdealOnSurface r θ)
+    (coverRestriction r θ (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,2} by simp)) φ = _
+  apply (IsLocalizedModule.isBaseChange
+    (Submonoid.powers (CycleQ2GeometricCartierNormalLift.coverProduct r θ {0,1,2}))
+    (CoverLocal r θ {0,1,2})
+    (Algebra.idealMap (CoverLocal r θ {0,1,2}) (curveIdealOnSurface r θ))).algHom_ext
+  intro x
+  rw [IdealHomLocalization.restriction_evaluation_base]
+  change coverRestriction r θ (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,2} by simp)
+      (φ
+        (Algebra.idealMap (SurfaceOverlap r θ) (curveIdealOnSurface r θ) x)) =
+    boundary012 r θ A L * algebraMap (SurfaceRing r θ) (CoverLocal r θ {0,1,2}) (x : SurfaceRing r θ)
+  have h := boundary012_evaluation r θ A L
+    (Algebra.idealMap (SurfaceOverlap r θ) (curveIdealOnSurface r θ) x)
+  change coverRestriction r θ (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,2} by simp)
+      (φ
+        (Algebra.idealMap (SurfaceOverlap r θ) (curveIdealOnSurface r θ) x)) =
+    boundary012 r θ A L *
+      coverRestriction r θ (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,2} by simp)
+        (algebraMap (SurfaceRing r θ) (SurfaceOverlap r θ) (x : SurfaceRing r θ)) at h
+  rw [(coverRestriction r θ (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,2} by simp)).commutes] at h
+  exact h
+
+theorem inverseIdealConnectingLift_restrict013 (r θ : ℂ) (A L : P) :
+    IdealHomLocalization.restriction (curveIdealOnSurface r θ)
+        (coverRestriction r θ (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,3} by simp))
+        (inverseIdealConnectingLift r θ A L) =
+      scalarApp r θ {0,1,3} (boundary013 r θ A L) := by
+  let φ : LocalInverseIdeal r θ {0,1} := inverseIdealConnectingLift r θ A L
+  change IdealHomLocalization.restriction (curveIdealOnSurface r θ)
+    (coverRestriction r θ (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,3} by simp)) φ = _
+  apply (IsLocalizedModule.isBaseChange
+    (Submonoid.powers (CycleQ2GeometricCartierNormalLift.coverProduct r θ {0,1,3}))
+    (CoverLocal r θ {0,1,3})
+    (Algebra.idealMap (CoverLocal r θ {0,1,3}) (curveIdealOnSurface r θ))).algHom_ext
+  intro x
+  rw [IdealHomLocalization.restriction_evaluation_base]
+  change coverRestriction r θ (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,3} by simp)
+      (φ
+        (Algebra.idealMap (SurfaceOverlap r θ) (curveIdealOnSurface r θ) x)) =
+    boundary013 r θ A L * algebraMap (SurfaceRing r θ) (CoverLocal r θ {0,1,3}) (x : SurfaceRing r θ)
+  have h := boundary013_evaluation r θ A L
+    (Algebra.idealMap (SurfaceOverlap r θ) (curveIdealOnSurface r θ) x)
+  change coverRestriction r θ (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,3} by simp)
+      (φ
+        (Algebra.idealMap (SurfaceOverlap r θ) (curveIdealOnSurface r θ) x)) =
+    boundary013 r θ A L *
+      coverRestriction r θ (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,3} by simp)
+        (algebraMap (SurfaceRing r θ) (SurfaceOverlap r θ) (x : SurfaceRing r θ)) at h
+  rw [(coverRestriction r θ (show ({0,1} : Finset (Fin 4)) ⊆ {0,1,3} by simp)).commutes] at h
+  exact h
+
+/-- The original scalar Cartier two-cocycle is exactly the differential of
+the fixed inverse-ideal lift under the actual scalar inclusion. -/
+theorem inverseIdealConnectingCochain_boundary (r θ : ℂ) (A L : P) :
+    d1 (inverseIdealSystem r θ) (inverseIdealConnectingCochain r θ A L) =
+      (scalarMorphism r θ).map2 (cartierCycle r θ A L).val := by
+  let φ : LocalInverseIdeal r θ {0,1} := inverseIdealConnectingLift r θ A L
+  change d1 (inverseIdealSystem r θ) ((φ, 0, 0), (0, 0, 0)) =
+    (scalarMorphism r θ).map2 (cartierCycle r θ A L).val
+  simp only [d1, SystemMorphism.map2, scalarMorphism, cartierCycle,
+    LinearMap.coe_mk, AddHom.coe_mk, LinearMap.prodMap_apply,
+    map_zero, sub_zero, zero_add]
+  exact Prod.ext (Prod.ext (inverseIdealConnectingLift_restrict012 r θ A L)
+    (inverseIdealConnectingLift_restrict013 r θ A L)) (Prod.ext rfl rfl)
+
+/-- Vanishing of the actual surface Cartier class would make the original
+normal connecting class vanish. The inverse-ideal H1 exactness has already
+been proved for the literal surface at theta=1, so it is not a premise. -/
+theorem normalClass_zero_of_cartierClass_zero (r : ℂ) (hr : r ≠ 0) (A L : P)
+    (hz : cartierClass r 1 A L=0) : connectingClass r 1 A L=0 := by
+  obtain ⟨q,hq⟩ := (cartierClass_eq_zero_iff r 1 A L).mp hz
+  have hq' : d1 (surfaceSystem r 1) q=(cartierCycle r 1 A L).val := hq
+  have hc : d1 (inverseIdealSystem r 1)
+      (inverseIdealConnectingCochain r 1 A L-(scalarMorphism r 1).map1 q)=0 := by
+    rw [map_sub,inverseIdealConnectingCochain_boundary,
+      ← (scalarMorphism r 1).map2_d1 q,hq',sub_self]
+  obtain ⟨v,hv⟩ := (inverseIdeal_first_exact r hr
+    (inverseIdealConnectingCochain r 1 A L-(scalarMorphism r 1).map1 q)).mp hc
+  have he := congrArg (fun p : OneCochain (LocalInverseIdeal r 1) => p.1.1) hv
+  let φ : LocalInverseIdeal r 1 {0,1} := inverseIdealConnectingLift r 1 A L
+  change
+    IdealHomLocalization.restriction (curveIdealOnSurface r 1)
+        (coverRestriction r 1 (show ({1} : Finset (Fin 4)) ⊆ {0,1} by simp)) v.1.2 -
+      IdealHomLocalization.restriction (curveIdealOnSurface r 1)
+        (coverRestriction r 1 (show ({0} : Finset (Fin 4)) ⊆ {0,1} by simp)) v.1.1 =
+    φ -
+      scalarApp r 1 {0,1} q.1.1 at he
+  apply NormalReduction.connectingClass_zero_of_coboundary r 1 A L v.1.1 v.1.2 q.1.1
+  change φ =
+    IdealHomLocalization.restriction (curveIdealOnSurface r 1)
+        (coverRestriction r 1 (show ({1} : Finset (Fin 4)) ⊆ {0,1} by simp)) v.1.2 -
+      IdealHomLocalization.restriction (curveIdealOnSurface r 1)
+        (coverRestriction r 1 (show ({0} : Finset (Fin 4)) ⊆ {0,1} by simp)) v.1.1 +
+      scalarApp r 1 {0,1} q.1.1
+  exact sub_eq_iff_eq_add.mp he.symm
+
+/-- Nonvanishing of the fixed actual scalar surface Cech class on the same
+literal (57,1) surface as the incidence calculation. -/
+theorem literal_cartierClass_ne_zero : cartierClass 57 1 derivativeA 0 ≠ 0 := by
+  intro hz
+  exact literal_normal_connecting_ne_zero
+    (normalClass_zero_of_cartierClass_zero 57 (by norm_num) derivativeA 0 hz)
+
+end CycleQ2GeometricCartierCech
+
+end

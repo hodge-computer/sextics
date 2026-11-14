@@ -1,5 +1,198 @@
 # A nonconstructive geometric route for cycle-q2
 
+
+## Nonzero actual Cartier class and local surface adjunction — 14 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains open.
+This continuation closes the actual four-open inverse-ideal exactness and
+Cartier nonvanishing argument. In the original scalar Čech complex of the
+literal surface, the theorem is
+\[
+\operatorname{cartierClass}(57,1,\operatorname{derivativeA},0)\ne0.
+\]
+The class is the original two-cocycle produced by the fixed inverse-ideal
+lift. It is not a newly selected vector in a comparison space. A separate
+helper constructs the actual local surface-normal adjunction and computes
+the contraction with the fixed cubic. The remaining global comparisons
+are distinguished below.
+
+### Actual inverse-ideal primitives on the Cartier cover
+
+Let \(A=\operatorname{SurfaceRing}(r,1)\),
+\(I=\operatorname{curveIdealOnSurface}(r,1)\), and
+\(M=\operatorname{Hom}_A(I,A)\), with \(r\ne0\).
+The coordinate Hom primitives from the preceding checkpoint live on
+\(D(x_1),D(x_2),D(x_3)\). The theorem
+`coordinate_firstThree_exact` identifies their canonical tensor
+localizations with the first three components of a four-member cover
+whose last open is empty. The actual comparison respects every
+restriction map. `coordinate_tensor_first_exact` then gives exactness of
+that four-member tensor complex.
+
+The actual radical equality between the coordinate ideal and
+\((g_1,g_2,f_1,f_2)\) permits application of the proved common-refinement
+theorem. Thus `inverseIdeal_tensor_first_exact` gives degree-one
+exactness for tensor localizations on the original Cartier cover.
+`inverseIdealTensorMorphism` identifies this complex with the genuine
+local Hom modules
+\[
+\operatorname{Hom}_{A[a_J^{-1}]}
+ (I A[a_J^{-1}],A[a_J^{-1}]),
+\qquad (a_0,a_1,a_2,a_3)=(g_1,g_2,f_1,f_2).
+\]
+Its naturality is the already proved localization/evaluation identity.
+The resulting theorem `inverseIdeal_first_exact` has no vanishing
+premise: every actual inverse-ideal one-cocycle has actual local-Hom
+primitives. The argument uses the proved nine-element basis over
+\(\mathbb C[x_1,x_2,x_3]\), not an assumption that the inverse ideal is
+free over the surface ring.
+
+### The original Cartier class is nonzero
+
+The scalar inclusion acts by multiplication on the actual localized curve
+ideal. `scalarMorphism` proves that these inclusions commute with the
+actual restriction maps, so they form a morphism of the two Čech complexes.
+Write this morphism as \(i\).
+
+The cochain `inverseIdealConnectingCochain` has the fixed original
+inverse-ideal connecting lift in edge \(01\), and zero in its other five
+edges. The previously proved evaluation identities are upgraded to
+identities of the actual Hom maps on the triple intersections. They give
+\[
+d_1\widetilde\nu=i(c),
+\qquad
+c=\biggl(\frac{kL-A_0}{g_1f_1},
+              -\frac{kL-A_0}{g_2f_2},0,0\biggr),
+\]
+where the four displayed components are ordered \(012,013,023,123\).
+Here \(A_0\) denotes the polynomial input, while \(A\) denotes the surface
+ring. This is precisely `cartierCycle r 1 A₀ L`, with the original
+numerators, signs, localizations, and equation relation.
+
+Suppose this actual scalar class vanished. Its definition as a quotient
+would supply a scalar one-cochain \(q\) with \(d_1q=c\). Then
+\[
+d_1(\widetilde\nu-i(q))=0.
+\]
+The newly closed inverse-ideal exactness theorem supplies a zero-cochain
+\(v\) with \(d_0v=\widetilde\nu-i(q)\). Its \(01\) component is
+\[
+\widetilde\nu=v_1|_{01}-v_0|_{01}+q_{01}\,\mathrm{id}_I.
+\]
+The proved `NormalReduction` maps kill the scalar term and preserve the
+original normal restriction maps. Consequently the original normal
+connecting class would vanish. This proves
+`normalClass_zero_of_cartierClass_zero` for every \(r\ne0\), with no
+remaining inverse-ideal exactness hypothesis.
+
+At \((r,\theta)=(57,1)\), take
+\(A_0=x_2x_3^3w\) and \(L=0\). The extended
+[GeometricCanonicalCechBoundary.lean](GeometricCanonicalCechBoundary.lean)
+proves that the original normal connecting class is nonzero. Its test is
+the original paired coefficient with the literal cubic \(x_0^3\), allowing
+arbitrary poles on both curve charts. The all-poles boundary criterion is
+identified with the previously computed degree-nine obstruction, and the
+literal derivative coordinate is nonzero. This fixes the normalization
+through the original polynomial and cochain maps; a geometric Serre trace
+is not assumed.
+
+The contradiction above now proves `literal_cartierClass_ne_zero` in
+[GeometricCartierCech.lean](GeometricCartierCech.lean). This is a closed
+nonvanishing theorem for the actual scalar localization Čech class.
+It does not yet identify that class with a projective derived cohomology
+class or with a particular group-character component.
+
+### Actual local surface-normal adjunction and its sign
+
+[GeometricSurfaceAdjunction.lean](GeometricSurfaceAdjunction.lean)
+constructs the surface and curve differential modules on the displayed
+Jacobian localizations. It proves the actual conormal exact sequence,
+the conormal generator, the kernel of restriction to curve differentials,
+and the corresponding quotient isomorphism. From these data it builds an
+actual linear equivalence
+\[
+\operatorname{Hom}(I/I^2,\mathcal O_C)
+ \otimes_{\mathcal O_C}
+ \bigwedge^2(\Omega^1_S|_C)
+\simeq_{\mathcal O_C}\Omega^1_C
+\]
+on each constructed local patch. Neither adjunction nor the exactness of
+this sequence is supplied as a hypothesis.
+
+The intrinsic contraction is characterized on genuine wedges by
+\[
+\operatorname{Adj}(\varphi)(j(q)\wedge m)
+ =\varphi(q)\,\operatorname{res}(m).
+\]
+Its uniqueness is proved from the actual conormal and surface bases. The
+fixed normal vector has literal equation values
+\(\nu(f_1)=g_2\) and \(\nu(f_2)=-g_1\).
+The surface determinant restricts to \(+g_1J\) on the \(f_2\) normal chart
+and to \(-g_2J\) on the \(f_1\) chart, where \(J\) is the chosen curve
+Jacobian minor. The two signs therefore give the same contraction:
+\[
+\operatorname{Adj}(\nu)(\omega_S)=-J^{-1}\,dt.
+\]
+For the actual local cubic surface form, the checked formula is exactly
+\(-x_0^3J^{-1}dt\). The coefficient and sign are calculated from the fixed
+normal vector and actual determinant; they are not chosen by a later
+nonvanishing argument.
+
+This is a local adjunction construction. The original cone-normal maps,
+the original projective incidence surface, and the projective transition
+and gluing maps still require their explicit bindings before this formula
+can be used as the global surface-normal pairing.
+
+### Verification of the integrated proofs
+
+The exact 2,198-line `GeometricCartierCech`, the extended canonical-boundary
+helper, and the exact 1,854-line `GeometricSurfaceAdjunction` have each
+passed complete source compilation and independent kernel replay.
+Separate pure-import audits check 35, 42, and 20 named endpoints,
+respectively. Every audited endpoint uses only `propext`,
+`Classical.choice`, and `Quot.sound`. The component-to-module assembly
+preserves the checked proof bodies; it changes only their scratch import
+layout and adds the actual canonical-boundary import.
+
+The preceding canonical dependency refresh is complete, so these checks
+are tied to the current integrated sources and their actual dependency
+objects. Local runtime and memory caps are unchanged. New proofs retain
+the default heartbeat budget; the two local adjunction elaboration
+bottlenecks were resolved by explicit linear-map and determinant-line
+lemmas. These are helper-scoped development checks, not a full build or
+acceptance of the older aggregate proposal.
+
+The concurrent `8bfaf750` checkpoint is preserved in full, including its
+actual degree-zero and projective structure-sheaf nonboundary construction
+in `GeometricCartierCechNonboundary`, and its explanation below. The three
+newly checked helper sources above are unchanged by that integration.
+The incoming helper is outside this local replay scope; its own recorded
+validation is retained with its exact source. The declaration-free
+`GeometricTarget11` facade removal and its three direct-import substitutions
+are also preserved.
+
+### Scope of this checkpoint
+
+The proposal contains 256 permitted files. It retains the exact protected
+statement and all protected repository files. Its sole admission remains
+`Solution.lean:138`. The new nonvanishing proof does not remove that final
+existence obligation.
+
+The next cohomological step carries this same Cartier class through the
+actual principal common refinement to the coordinate Čech quotient.
+The original curve is moved by the finite group action, so the character
+projection must be made on the stable coordinate model after the relevant
+comparisons. Projective and derived degree-two comparison, global normal
+adjunction, the geometric trace and moving-cycle identification, and the
+support and algebraic de Rham passage to the protected residue remain
+further mathematical obligations.
+
+This continuation follows Ben Diamond's nonconstructive geometric route,
+preserves the prior shared-branch work, and was developed with OpenAI
+assistant support. Earlier checkpoint descriptions below record their
+scope at the time of publication.
+
+
 ## The actual Cartier cocycle on the projective surface — 14 November 2026
 
 The final theorem `Submission.missing_geometric_existence` remains open.
