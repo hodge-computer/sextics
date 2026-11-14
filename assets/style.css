@@ -22,6 +22,8 @@ body {
   color: var(--ink);
   font-family: var(--sans);
   font-size: 14px;
+  /* Symbols such as ✳ and ↗ are typography here, never colour emoji. */
+  font-variant-emoji: text;
 }
 body {
   overflow: hidden;
