@@ -1,5 +1,157 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Intrinsic complex-linear surface cohomology — 14 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains open.
+This continuation equips the actual four-open Čech quotient and the
+actual derived cohomology groups with their intrinsic complex scalar
+actions. It proves that the already constructed comparison is
+\(\mathbb C\)-linear and injective into the terminal-open model
+\(H'^2(\mathcal O)(S)\). The underlying map, cover, structure sheaf,
+and previously proved nonzero class are unchanged.
+
+The source at commit `89f8785843d474e7248413986951942aa91cf621` is
+preserved, including the intrinsic normal sheaf, the actual closed
+immersions, and the surface and curve chart comparisons. This checkpoint
+also independently validates those five incoming modules and two
+previously uncached chart prerequisites, seven modules in total, as
+specified in the verification table below.
+
+The later shared commit
+`6a1bc21e60aecd636e0f4a778b6abd1d80555541` is also preserved in full.
+Its [GeometricSurfaceBindings.lean](GeometricSurfaceBindings.lean)
+connects the original seed `PointSurface`, its weighted projective
+charts, and the original normal-kernel vector to the newer local
+constructions. Its source changes do not enter the 94-module dependency
+context checked here. That helper remains outside this checkpoint's
+independent replay scope; the scalar results do not depend on it.
+
+### Scalar multiplication comes from the original sheaf
+
+[GeometricCartierCohomologyScalar.lean](GeometricCartierCohomologyScalar.lean)
+starts with a sheaf of commutative rings \(R\), an actual
+\(R\)-module sheaf \(M\), and a ring homomorphism
+\(c:\mathbb C\longrightarrow\Gamma(X,R)\). Each scalar
+\(z\in\mathbb C\) gives a genuine additive-sheaf endomorphism
+\(m_z:M\longrightarrow M\): on an open \(U\), it multiplies a
+section by the restriction \(c(z)|_U\). The restriction identities
+are inherited from the original module sheaf.
+
+The induced map on the four-open Čech complex is therefore ordinary
+componentwise multiplication by these restricted sections. It preserves
+cycles and boundaries and induces a complex module structure on their
+quotient. In the derived group, scalar multiplication is the previously
+constructed cohomology functor applied to the same endomorphism
+\(m_z\). Both actions are determined directly by the sheaf and its
+coefficient map.
+
+Write \(\kappa\) for the already proved additive comparison. Its
+naturality with respect to genuine sheaf morphisms gives
+\[
+\kappa(z\cdot[\alpha])
+  =H'^2(m_z)(\kappa([\alpha]))
+  =z\cdot\kappa([\alpha]).
+\]
+The construction `comparisonLinear` packages this equality as a linear
+map. `comparisonLinear_apply` proves exact agreement with the original
+additive comparison. Its injectivity follows from the earlier comparison
+theorem under the same covering and local degree-one vanishing
+hypotheses; no new geometric hypothesis is introduced.
+
+### Specialization to the literal weighted projective surface
+
+For the actual surface \(S_{r,\theta}\), the coefficient map is
+obtained from its canonical structure morphism
+\[
+S_{r,\theta}\longrightarrow\operatorname{Spec}\mathbb C.
+\]
+The construction uses `Proj.toSpecZero` and the actual degree-zero
+coefficient homomorphism. The module sheaf is the rank-one structure
+module, whose additive sheaf is exactly the structure sheaf already used
+by the Cartier calculation. The four opens are the original
+`coverFamily r θ`.
+
+The declarations `surfaceCechModule`, `surfaceCohomologyModule`, and
+`surfaceComparisonLinear` thus refer to these specific objects. For
+every \(r\ne0\) and every \(\theta\), the proved affine-open
+vanishing and the actual four-open cover give an injective map
+\[
+\kappa_{r,\theta}:
+\check H^2(\{U_i\},\mathcal O_{S_{r,\theta}})
+\hookrightarrow
+H'^2(\mathcal O_{S_{r,\theta}})(S_{r,\theta})
+\]
+of complex vector spaces. Here \(\check H^2\) denotes the explicit
+cycle/boundary quotient for this fixed four-open complex. Only
+injectivity is asserted. The proof does not require a general Čech
+comparison isomorphism in all degrees.
+
+### Verification and exact scope
+
+The exact public sources passed the following bounded checks. Times are in seconds.
+
+| Public helper | Compilation | Independent replay | Pure audit | Audited declarations |
+|---|---:|---:|---:|---:|
+| [GeometricLiteralSurface](GeometricLiteralSurface.lean) | 24.07 | 13.40 | 2.94 | 13 |
+| [GeometricIntrinsicNormal](GeometricIntrinsicNormal.lean) | 49.29 | 9.24 | 3.21 | 82 |
+| [GeometricSurfaceDehomogenizedCharts](GeometricSurfaceDehomogenizedCharts.lean) | 88.04 | 4.83 | 6.55 | 15 |
+| [GeometricSurfaceProjectiveCoefficients](GeometricSurfaceProjectiveCoefficients.lean) | 60.20 | 25.93 | 2.82 | 14 |
+| [GeometricDehomogenizedCharts](GeometricDehomogenizedCharts.lean) | 10.89 | 3.82 | 8.33 | 7 |
+| [GeometricAffineProjectiveCharts](GeometricAffineProjectiveCharts.lean) | 3.01 | 3.04 | 2.41 | 6 |
+| [GeometricSurfaceCurveCharts](GeometricSurfaceCurveCharts.lean) | 18.55 | 19.01 | 3.01 | 18 |
+| [GeometricCartierCohomologyScalar](GeometricCartierCohomologyScalar.lean) | 127.40 | 137.74 | 3.25 | 19 |
+
+All 174 freshly audited declarations use only `propext`, `Classical.choice`,
+and `Quot.sound`, or a subset of those axioms. The eight fresh public module
+checks extend the retained 39-module replay scope to 47 modules within a
+94-module source-and-object-bound local dependency closure. The remaining
+closure objects retain their earlier checked source/artifact bindings.
+These counts describe the stated development scope, not a complete build
+of every submitted helper or an audit of a closed final certificate.
+
+The generic and surface scalar proof bodies are preserved byte for byte.
+Their scratch imports are replaced by the corresponding public helper
+imports, and an outer section isolates each body's original options and
+local instances. Existing elaboration options are retained within those
+sections. No heartbeat, recursion, heap, or wall-clock limit is increased.
+
+The separate ordinary-cohomology linearity continuation remains in
+scratch. Its source-only checks passed, but its public object-emitting
+builds reached the fixed 5120 MiB compiler heap limit at the terminal
+linear-equivalence construction. The unfinished ordinary helper is
+excluded from this publication and from every verification count here.
+The earlier additive terminal comparison and its nonzero ordinary
+\(H^2\) class remain as previously published.
+
+The proposal remains at its file-count limit by flattening
+`Normalization05`, which contains an import and a comment only. Its
+three callers now import the same final split module directly. A complete
+import-graph check proves equality of every surviving transitive
+dependency closure after removing that empty facade vertex. No
+declaration body in those callers changes.
+
+The previously checked derived-class helper has the same source bytes as
+the file published in `89f8785`. Its refreshed compilation against the
+integrated dependencies took 242.09 seconds, its independent replay took
+210.03 seconds, and its separate 85-endpoint audit took 3.02 seconds.
+These checks are preserved by source and object hashes. The earlier
+238.09/182.48-second figures below describe the earlier dependency
+context. The intermediate tree `21e4f06` was never published: the shared
+branch had already published the same helper before that tree could be
+pushed, and the branch-head check detected that advancement.
+
+This is a development checkpoint, not a successful whole-proposal solve.
+The final admission in [Solution.lean](Solution.lean) is unchanged.
+The linear comparison and the intrinsic normal/chart constructions do
+not yet identify the relevant class with the actual global Cartier
+connecting class or finish global surface adjunction, the moving
+Abel--Jacobi argument, support, and algebraic de Rham comparison needed
+to produce the protected rational exterior primitive.
+
+The geometric strategy remains the one credited to Ben Diamond in the
+earlier sections. These formal comparisons and validation work were
+developed with OpenAI ChatGPT assistance for `fqlx`.
+
 ## The original projective surface and its normal vector — 14 November 2026
 
 [GeometricSurfaceBindings.lean](GeometricSurfaceBindings.lean) now binds the
