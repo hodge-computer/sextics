@@ -1,5 +1,177 @@
 # A nonconstructive geometric route for cycle-q2
 
+## The original normal class has the actual Cartier boundary — 14 November 2026
+
+This continuation closes the comparison left open in the preceding
+checkpoint. The original normalized intrinsic normal class now has its
+proved image under the original Cartier connecting map, including the
+sign. The final theorem has no remaining normalization, section-reduction,
+or comparison hypothesis.
+
+Write \(j:C\hookrightarrow S\) for the original curve immersion at
+\((r,\theta)=(57,1)\), \(I\) for its actual ideal sheaf, and
+\(N=\mathcal{H}om_{\mathcal O_S}(I,j_*\mathcal O_C)\).
+The previously proved Cartier sequence is
+
+\[
+0\longrightarrow\mathcal O_S
+\xrightarrow{\iota}\mathcal{H}om_{\mathcal O_S}(I,\mathcal O_S)
+\xrightarrow{\rho}N\longrightarrow0.
+\]
+
+Let \(n\) denote the unchanged class
+`literalIntrinsicNormalClass`, obtained from the original degree-six
+normal numerator through the normalized normal-sheaf isomorphism. Let
+\(B\) denote the unchanged, already proved nonzero class
+`literalDerivedClassAtTop`. The new closed theorem is
+
+\[
+\partial_{\mathrm{Cartier}}(n)=-B\ne0.
+\]
+
+The declaration
+`CycleQ2OriginalCartierConnecting.literalOpenConnecting_originalClass`
+in [GeometricCartierNormalBinding.lean](GeometricCartierNormalBinding.lean)
+uses the existing extension-class connecting homomorphism
+`literalOpenConnecting`. The companion
+`literalConnecting_originalClass` proves the same signed identity in
+ordinary derived sheaf cohomology through the existing canonical
+terminal-source comparison. The surface class is retained before any
+character projection.
+
+The existence theorem in [Solution.lean](Solution.lean) is still open.
+This comparison supplies an actual geometric link in its intended route;
+it does not establish the supported correspondence or the final rational
+de Rham primitive.
+
+### Identifying the actual reduction with the original section
+
+The incoming inverse-ideal cochain \(b\) is supported on the positive
+\(01\) edge of the original four-open projective cover. Its previously
+proved differential is
+
+\[
+d b=\iota(c),
+\]
+
+where \(c\) is the original Cartier two-cocycle representing \(B\).
+The substantive new section equality identifies \(\rho(b_{01})\)
+with the restriction of the original intrinsic normal overlap section.
+
+The proof retains the original scheme maps throughout. It evaluates the
+inverse-ideal lift on the actual defining-equation sections on the product
+patch. On its further coordinate refinement, the actual normalized first
+normal vector has the corresponding prescribed equation values. A
+multiplier whose pullback to the curve is a unit permits cancellation in
+the normal evaluations. The refinement has the same curve preimage, which
+makes restriction injective for the normal direct-image sheaf. This use
+of injectivity is specific to that supported sheaf.
+
+The resulting coefficient is then pulled back through the actual
+projective section-ring map. The homogeneous fraction calculation
+identifies it exactly with the original `normalOverlapCoordinate` for
+`ambientNormalNumerator`. Separately, the proved normalized isomorphism
+`intrinsicNormalIso` sends the original equation-normal vector to
+coefficient one. Its inverse therefore expresses the original overlap
+section as that same coefficient times the same intrinsic frame. The
+normal adjunction is proved linear over the full curve section ring, so
+this equality survives passage to the actual surface direct image.
+
+These two calculations meet in
+`CycleQ2ProjectiveInverseIdealBinding.connectingLift_reduction`.
+No inverse image of a desired cohomology class is chosen in this
+comparison: the lift, its reduction, the normal section, and all
+restriction maps are the specified original objects.
+
+### The sign comes from the actual cover refinement
+
+The original class \(n\) is a Mayer–Vietoris boundary for the two curve
+opens. The closed-embedding construction extends those opens to the
+surface. The original four-open surface cover refines this extended
+two-open cover; its last two opens have empty curve preimage, where
+sections of the normal direct image vanish.
+
+For the positive \(01\) normal cocycle, the proved refinement comparison
+gives
+
+\[
+[\rho(b)]_{\check C}=-n.
+\]
+
+The coefficient-boundary theorem for a short exact sequence of additive
+sheaves gives
+
+\[
+\partial_{\mathrm{Cartier}}([\rho(b)]_{\check C})=[c]=B.
+\]
+
+Additivity yields the stated negative sign. Both identities use the
+actual Čech-to-derived constructions. Their auxiliary injective descents
+are proved independent of choices, and the Mayer–Vietoris comparison uses
+the genuine sheaf restriction and boundary maps.
+
+The formal proof separates the coefficient argument from the geometric
+section calculation to keep kernel checking within the unchanged memory
+cap. The intermediate core takes the precise section equality as a
+premise. The final theorem supplies that premise with the proved
+`connectingLift_reduction`; it has no such premise itself.
+
+### Verification and file organization
+
+Thirteen separately checked proof bodies are assembled, without changing
+their declarations or proofs, into three public helpers. The generic
+coefficient boundary is in
+[GeometricCartierCechConnecting.lean](GeometricCartierCechConnecting.lean).
+The actual cover refinement and intermediate coefficient argument are in
+[GeometricCartierNormalConnecting.lean](GeometricCartierNormalConnecting.lean).
+The original section calculation and closed endpoint are in
+[GeometricCartierNormalBinding.lean](GeometricCartierNormalBinding.lean).
+Each retained body has its own section. A previous single-file assembly
+hit the unchanged kernel memory limit; keeping these module boundaries
+allowed the same proof bodies to be checked under that limit.
+
+The earlier cube-root seed construction is consolidated into its sole
+consumer, [GeometricDiamondRank.lean](GeometricDiamondRank.lean). Its
+separate rank-retraction dependency remains unchanged. The existing
+cofactor-to-Kähler comparison and residue transition construction are
+consolidated with the canonical cohomology calculation in
+[GeometricLiteralHOne.lean](GeometricLiteralHOne.lean). All five original
+declaration-bearing bodies in these two consolidations are preserved
+verbatim. The original open noncomputable sections are closed explicitly.
+The proposal remains within the 256-file limit.
+
+| Public helper | Compilation (s) | Kernel replay (s) | Pure audit (s) | Audited declarations |
+|---|---:|---:|---:|---:|
+| [GeometricCartierCechConnecting.lean](GeometricCartierCechConnecting.lean) | 53.52 | 44.70 | 2.61 | 7 |
+| [GeometricCartierNormalConnecting.lean](GeometricCartierNormalConnecting.lean) | 160.65 | 123.19 | 2.83 | 21 |
+| [GeometricCartierNormalBinding.lean](GeometricCartierNormalBinding.lean) | 90.25 | 59.46 | 3.01 | 52 |
+| [GeometricDiamondRank.lean](GeometricDiamondRank.lean) | 4.04 | 6.02 | 2.22 | 19 |
+| [GeometricLiteralHOne.lean](GeometricLiteralHOne.lean) | 174.25 | 135.15 | 3.03 | 78 |
+
+All 177 public audit endpoints use only `propext`, `Classical.choice`, and
+`Quot.sound`. These source compilations, kernel replays, and pure audits
+are clean. No proof budget is increased. The three incoming dependency
+roots have additionally been replayed in the current consumer context,
+and their shared pure audit checks 189 declarations. Exact source and
+object provenance is retained for that context.
+
+These are checks of the stated helpers and their bound dependencies,
+not a full successful build of the proposal or its final certificate.
+The protected input and final existence statement are unchanged. The
+existing `sorry` in `Submission.missing_geometric_existence` remains the
+only admission, and the protected certificate still depends on it.
+
+### The next geometric comparison
+
+The next step is the canonical residue sequence on the proved smooth
+neighborhood of the entire curve, with the actual surface two-form sheaf
+and the actual curve differential sheaf. It must identify its coefficient
+diagram with the cubic contraction just constructed in the local charts.
+This neighborhood is kept distinct from the whole surface. The global
+trace and duality comparisons, moving-class construction, supported
+correspondences, and final de Rham vanishing remain subsequent tasks.
+
+
 ## Intrinsic normal frames and the original surface cohomology classes — 14 November 2026
 
 This continuation proves the global identification of the intrinsic normal
@@ -3960,7 +4132,7 @@ Jacobian localization. The equivalence is proved to be the quotient map
 sending coordinate-vector classes to their universal differentials. Its
 normalized residue generator is the free-coordinate differential divided
 by the actual inverted Jacobian minor. The independent comparison in
-[GeometricCofactorKaehler.lean](GeometricCofactorKaehler.lean) is retained.
+[GeometricLiteralHOne.lean](GeometricLiteralHOne.lean) is retained.
 
 [GeometricProjectiveResidueTransition.lean](GeometricProjectiveResidueTransition.lean)
 works in the actual degree-zero homogeneous localization at \(x_1x_2\),
@@ -4204,7 +4376,7 @@ actual algebra equivalence on the coordinate overlap,
 and the induced map on universal Kähler differentials. It checks all
 three cofactor transformations and the normalized differential transition
 on the common middle-minor patch.
-[GeometricGlobalAdjunction.lean](GeometricGlobalAdjunction.lean) extends
+[GeometricLiteralHOne.lean](GeometricLiteralHOne.lean) extends
 the cofactor-cokernel transition to the entire coordinate overlap: the
 actual coordinate Jacobian induces a map whose residue functional scales
 by \(-b\). The resulting whole-chart frames consequently transform by
@@ -4273,7 +4445,7 @@ by the final theorem.
 
 ### The cofactor quotient maps isomorphically to actual differentials
 
-[GeometricCofactorKaehler.lean](GeometricCofactorKaehler.lean) works with the
+[GeometricLiteralHOne.lean](GeometricLiteralHOne.lean) works with the
 literal affine chart ring localized at a Jacobian minor. For an arbitrary
 ordering \(e\) of the three coordinates, it constructs the linear map
 \[
@@ -4451,7 +4623,7 @@ thereby been validated.
 
 ### A characteristic-zero seed from the modular calculation
 
-[GeometricDiamondSeed.lean](GeometricDiamondSeed.lean) uses the actual maps
+[GeometricDiamondRank.lean](GeometricDiamondRank.lean) uses the actual maps
 \(\mathbb Z[i]\to\mathbb F_{109}\), with \(i\mapsto33\), and
 \(\mathbb Z[i]\hookrightarrow\mathbb C\). It proves
 \[
