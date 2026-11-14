@@ -1,5 +1,44 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Relative smooth neighborhood continuation — source draft, 14 November 2026
+
+This continuation connects the constructed chart rings to actual scheme
+opens and scheme-theoretic seed fibers. All additions in this section
+are source-only proof drafts. The protected statement and final admission
+in `Solution.lean` remain unchanged.
+
+
+### Exact specialization of the normalized minors
+
+[GeometricIncidenceSeedMinorSpecialization.lean](GeometricIncidenceSeedMinorSpecialization.lean)
+proves that coefficient specialization preserves the original ordered
+\((F,h)\) equations, their geometric Jacobian minors, and the normalized
+minor sections on the actual affine charts. Its endpoint is
+`CycleQ2IncidenceSeedMinorSpecialization.seedChartFiberEquiv_normalizedMinor`:
+\[
+ e_i(1\otimes\bar\Delta_{jk})=\bar\Delta^{\,\mathrm{seed}}_{jk}.
+\]
+Here \(e_i\) is the already constructed exact chart tensor equivalence,
+and the seed is the original \(\mathrm{seedPoint}(57,\mathrm I)\).
+
+This compatibility will transfer the existing seed minor cover through
+the affine scheme fiber comparison. It supplies no new geometric
+hypothesis and does not assert that the entire projective fiber is
+already covered. Independent source review and static scans passed.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+With Lean 4.33.1, pinned Mathlib
+`0df444a360eaa60ab8c11dca51a86af692955474`, the verifier-prepared
+protected target and Proposal layout, compiled imports, and the
+corresponding `LEAN_PATH`, the deferred bounded check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceSeedMinorSpecialization.olean \
+  Proposal/GeometricIncidenceSeedMinorSpecialization.lean
+```
+
+
 ## Specialized seed geometry continuation — source draft, 14 November 2026
 
 This continuation proceeds in bounded components. Every new Lean module
