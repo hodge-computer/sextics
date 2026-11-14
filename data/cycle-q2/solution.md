@@ -39,6 +39,42 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
 ```
 
 
+### The canonical affine scheme pullback
+
+[GeometricIncidenceChartFiberScheme.lean](GeometricIncidenceChartFiberScheme.lean)
+identifies the actual pullback
+\[
+ \operatorname{Spec}\mathbb C
+ \mathbin{\times}_{\operatorname{Spec}\mathrm{ParameterAlgebra}}
+ \operatorname{Spec}D_{\mathrm{incidencePoint},i}
+ \;\simeq\;
+ \operatorname{Spec}D_{\mathrm{seedPoint}(57,\mathrm I),i}.
+\]
+The theorem `affineChartSeedFiberIso` uses Mathlib's canonical
+spectrum/tensor pullback equivalence followed by the proved chart
+tensor equivalence. The retained coefficient action on \(\mathbb C\)
+is the original `seedMap`, installed only locally.
+
+Both projections are identified. The projection to the original affine
+chart is the spectrum of `seedChartSpecialization`; the projection to
+\(\operatorname{Spec}\mathbb C\) is its canonical coefficient morphism.
+The specialization map preserves the affine variables and applies
+`seedMap` to coefficients. This is an actual scheme-theoretic affine
+fiber comparison, without a flatness assumption.
+
+The full projective fiber identification and whole-fiber cover are not
+asserted in this component. Independent source review checked the tensor
+order, contravariance, local scalar action, and both projections.
+Static scans passed. **No elaboration, compilation, or kernel replay
+was run.** With the prerequisites above, the deferred command is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceChartFiberScheme.olean \
+  Proposal/GeometricIncidenceChartFiberScheme.lean
+```
+
+
 ## Specialized seed geometry continuation — source draft, 14 November 2026
 
 This continuation proceeds in bounded components. Every new Lean module
