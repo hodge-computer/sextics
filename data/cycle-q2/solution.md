@@ -1,5 +1,150 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Homogeneous chart comparisons and the literal seed cover — 14 November 2026
+
+The single admission in `Submission.missing_geometric_existence` remains
+open. This continuation connects the affine equations and differential
+calculations to the actual homogeneous localization rings of the projective
+curve. It also proves the Jacobian cover at the literal incidence seed
+\((r,\theta)=(57,1)\). The concurrently developed projective cohomology,
+sparse-seed smoothness, and whole-chart canonical-frame results below are
+preserved, with a shared set of projective and sheaf definitions.
+
+### The projective coordinate opens have the stated affine equations
+
+[GeometricDehomogenizedCharts.lean](GeometricDehomogenizedCharts.lean)
+constructs mutually inverse ring homomorphisms between the degree-zero
+homogeneous localization at a coordinate and the quotient by the two
+dehomogenized curve equations. One map substitutes the inverted coordinate
+as one. Its inverse evaluates the remaining coordinates at their actual
+homogeneous ratios. Homogeneity proves the inverse identity on every
+homogeneous fraction, without a domain or smoothness hypothesis.
+
+The first and second specializations are exactly the previously defined
+`ChartRing ![firstQuadric r, firstCubic theta]` and its second-chart
+counterpart. Constants and coordinate generators are bound explicitly.
+[GeometricAffineProjectiveCharts.lean](GeometricAffineProjectiveCharts.lean)
+composes these equivalences with Mathlib's `Proj.basicOpenIsoSpec` and
+`Proj.basicOpenIsoAway`. It obtains isomorphisms of the actual coordinate
+open schemes with the spectra of these equation rings, and equivalences
+of their actual rings of structure-sheaf sections.
+
+[GeometricCurveCover.lean](GeometricCurveCover.lean) extracts the original
+`CycleQ2SeedTwoOpenCover` calculation from `SolutionSupport07Part03`.
+The original support module imports the same public declarations. This
+retains the homogeneous relevant-prime cover used by the older cone
+construction; the projective scheme also has the independently proved
+cover in [GeometricProjectiveCharts.lean](GeometricProjectiveCharts.lean).
+
+### Actual differentials on actual projective minor intersections
+
+[GeometricKaehlerResidue.lean](GeometricKaehlerResidue.lean) identifies the
+actual gradient-row quotient with the universal Kähler module on the same
+Jacobian localization. The equivalence is proved to be the quotient map
+sending coordinate-vector classes to their universal differentials. Its
+normalized residue generator is the free-coordinate differential divided
+by the actual inverted Jacobian minor. The independent comparison in
+[GeometricCofactorKaehler.lean](GeometricCofactorKaehler.lean) is retained.
+
+[GeometricProjectiveResidueTransition.lean](GeometricProjectiveResidueTransition.lean)
+works in the actual degree-zero homogeneous localization at \(x_1x_2\),
+for arbitrary complex \(r,\theta\). Its two affine maps are the proved
+chart inverses followed by genuine homogeneous-localization restrictions.
+With
+\[
+(a,b,c)=(x_0/x_1,x_2/x_1,x_3/x_1),\qquad
+(A,B,C)=(a/b,1/b,c/b),
+\]
+it constructs the unit \(b=x_2/x_1\), the actual quotient map induced by
+the coordinate Jacobian, and its compatibility with universal differentials.
+The raw residue coefficient transforms by \(-b\); the projective deletion
+signs give the oriented factor \(+b\). These coefficient and differential
+identities use the actual equation gradients and their vanishing
+relations. The normalized formula in this module requires the selected
+minors to be units in the comparison ring.
+
+[GeometricMinorResidueTransition.lean](GeometricMinorResidueTransition.lean)
+places the normalized identity on its actual domain. It localizes that
+homogeneous overlap at the product of an arbitrary first-chart minor and
+an arbitrary second-chart minor, constructs both unit witnesses there,
+and transports universal differentials using `KaehlerDifferential.map`.
+The oriented normalized differentials then differ by the actual ratio
+\(x_2/x_1\), with no extra unit or smoothness premise. This is an equality
+in the Kähler module of the specified localized ring; global
+canonical-sheaf gluing is a further step.
+
+This construction is complementary to the full-overlap sparse-seed
+identity in [GeometricCanonicalOverlap.lean](GeometricCanonicalOverlap.lean):
+it uses the homogeneous projective overlap directly and retains both
+parameters, including the literal incidence seed.
+
+### Jacobian presentations cover both literal-seed affine charts
+
+[GeometricSeedCurveGradientArithmetic.lean](GeometricSeedCurveGradientArithmetic.lean)
+contains the original exact integral certificate, extracted unchanged
+from `SolutionSupport07Part01`. Its coefficients, namespace, identities,
+and existing proof budgets are retained.
+[GeometricAffineJacobianCover.lean](GeometricAffineJacobianCover.lean)
+uses its first- and second-coordinate certificates at the explicit
+parameters \((57,1)\). Euler identities eliminate the minors involving
+the deleted homogeneous coordinate. In each actual affine quotient, the
+two defining equations vanish, and the certificate puts a nonzero complex
+integer in the ideal of the remaining Jacobian minors. The ideal is
+therefore the unit ideal in each of the two chart rings.
+
+The theorems `first_prime_presentation_cover` and
+`second_prime_presentation_cover` make the connection to the existing
+presentations precise: every prime avoids
+`(chartPresentation v e).jacobian` for some ordering \(e\) of the three
+coordinates. Thus the actual Jacobian basic opens cover both affine
+charts; nonsingularity is not supplied as a premise. This literal seed
+is distinct from the \(r^3=2,\theta=0\) seed used for the trace and
+whole-chart canonical-frame calculations below.
+
+### Verification of this continuation
+
+Each of the eight new helpers linked in this section was compiled from its
+final source bytes under Lean 4.33.1 and Mathlib revision
+`0df444a360eaa60ab8c11dca51a86af692955474`, and its compiled module was
+independently replayed with `leanchecker`. The named endpoints were
+separately audited and use only `propext`, `Classical.choice`, and
+`Quot.sound`. Checks used one bounded compiler process at a time, with
+unchanged memory, time, and proof budgets.
+
+The two original support modules now import the extracted components.
+Their namespace bodies were checked byte for byte against the originals;
+the arithmetic constants and proof statements are unchanged. The common
+projective and sheaf constructions share the reconciled definitions
+described in the next section.
+The older incidence and cone dependencies have not been validated as a
+complete build in this continuation. The full proposal still fails source
+acceptance at the single admission in `Solution.lean`.
+
+This continuation follows the Diamond argument credited below and was
+prepared for `fqlx` with OpenAI ChatGPT assistance.
+
+### Remaining geometric comparison
+
+These additions leave the final existential statement unchanged. The
+next comparison for the moving-cycle argument must construct the
+actual effective-Cartier boundary
+\[
+H^1(C,N_{C/D})\longrightarrow H^2(D,\mathcal O_D),
+\]
+bind the ambient-test normal obstruction to the computed surface Čech
+pairing, and prove naturality on the pointed incidence component.
+The character-one projection and twisted orbit trace must be retained.
+The existing persistence theorem cannot supply this class by choosing an
+arbitrary nonzero vector.
+
+The projective differential-sheaf identification, geometric Serre trace,
+moving-cycle construction, geometric variation and supported projector,
+and actual Leray and algebraic de Rham comparisons still require proofs.
+The normal operator \(g^{-1}\partial_0\) is not a primitive construction:
+it sends the defining equation to one and does not descend to the
+function field. The final certificate continues to depend on the single
+admitted existence theorem.
+
 ## Checked projective cohomology and whole-chart differentials — 14 November 2026
 
 The last admission, `Submission.missing_geometric_existence`, is still
