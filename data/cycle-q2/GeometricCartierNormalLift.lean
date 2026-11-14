@@ -1,6 +1,14 @@
 import Proposal.GeometricNormalConnecting
 import Proposal.GeometricCurveCover
 import Mathlib.Algebra.Regular.SMul
+import Proposal.GeometricSurfaceCoordinates
+import Mathlib.Algebra.BigOperators.Fin
+import Mathlib.Algebra.Algebra.Bilinear
+import Mathlib.LinearAlgebra.Dual.Basis
+import Mathlib.Algebra.Module.FinitePresentation
+import Mathlib.RingTheory.Polynomial.Basic
+import Mathlib.RingTheory.Ideal.Quotient.Noetherian
+import Mathlib.RingTheory.Localization.Algebra
 
 /-!
 # Actual Cartier generators and normal lifts on the containing surface
@@ -13,6 +21,13 @@ the ambient polynomial ring, rather than assumed from smoothness.
 These are the actual local ideal modules used for an inverse-ideal lift
 of the normal connecting cochain.  Surface cohomology and its coordinate
 cover comparison are not identified by a choice of a trace-matched vector.
+
+At theta=1 the actual curve ideal and its A-linear inverse ideal are proved
+free of rank nine over the three-coordinate polynomial ring.  The inverse
+ideal comparison uses the literal coefficient of x0^2*w^2 in
+multiplication.  Its Hom modules are canonically localized on every principal open,
+with evaluation and scalar-inclusion compatibility; the final theorem gives
+actual inverse-ideal primitives for every coordinate Cech one-cocycle.
 -/
 
 set_option autoImplicit false
@@ -1106,5 +1121,1373 @@ theorem cover_radical_eq_coordinate_radical (r θ : ℂ) (hr : r ≠ 0) (hθ : �
 theorem literal_cover_radical_eq_coordinate_radical :
     (fourCoverIdeal 57 1).radical = (surfaceCoordinateIdeal 57 1).radical :=
   cover_radical_eq_coordinate_radical 57 1 (by norm_num) (by norm_num)
+
+/-! ## The actual finite-free inverse ideal and its coordinate Cech complex -/
+
+namespace RankNineIdeal
+
+variable {R A : Type*} [CommRing R] [CommRing A] [Algebra R A]
+
+def ideal (x w : A) (t d : R) : Ideal A :=
+  Ideal.span ({x^2-algebraMap R A t,w+algebraMap R A d} : Set A)
+
+def vector (x w : A) (t d : R) (ij : Fin 3 × Fin 3) : A :=
+  x^ij.1.val * ![x^2-algebraMap R A t,w+algebraMap R A d,
+    w*(w+algebraMap R A d)] ij.2
+
+def span (x w : A) (t d : R) : Submodule R A :=
+  Submodule.span R (Set.range (vector x w t d))
+
+theorem vector_mem_span (x w : A) (t d : R) (i j : Fin 3) :
+    vector x w t d (i,j) ∈ span x w t d :=
+  Submodule.subset_span ⟨(i,j),rfl⟩
+
+theorem vector_mem_ideal (x w : A) (t d : R) (ij : Fin 3 × Fin 3) :
+    vector x w t d ij ∈ ideal x w t d := by
+  apply (ideal x w t d).mul_mem_left
+  rcases ij with ⟨i,j⟩
+  fin_cases j
+  · exact Ideal.subset_span (by simp [ideal])
+  · exact Ideal.subset_span (by simp [ideal])
+  · exact (ideal x w t d).mul_mem_left w (Ideal.subset_span (by simp [ideal]))
+
+theorem x_mul_mem (x w : A) (c₀ c₁ t d : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    {y : A} (hy : y ∈ span x w t d) : x*y ∈ span x w t d := by
+  induction hy using Submodule.span_induction with
+  | mem y hy =>
+    obtain ⟨⟨i,j⟩,rfl⟩ := hy
+    fin_cases i
+    · simpa [vector,pow_succ,mul_assoc] using vector_mem_span x w t d 1 j
+    · simpa [vector,pow_succ,mul_assoc] using vector_mem_span x w t d 2 j
+    · have h := (span x w t d).neg_mem ((span x w t d).add_mem
+        ((span x w t d).smul_mem c₁ (vector_mem_span x w t d 1 j))
+        ((span x w t d).smul_mem c₀ (vector_mem_span x w t d 0 j)))
+      have he : x*vector x w t d (2,j) =
+          -(c₁ • vector x w t d (1,j)+c₀ • vector x w t d (0,j)) := by
+        simp [vector,Algebra.smul_def]
+        linear_combination
+          (![x^2-algebraMap R A t,w+algebraMap R A d,
+            w*(w+algebraMap R A d)] j)*hx
+      exact he.symm ▸ h
+  | zero => simpa using (span x w t d).zero_mem
+  | add y z _ _ hy hz => simpa [mul_add] using (span x w t d).add_mem hy hz
+  | smul a y _ hy =>
+    simpa only [Algebra.smul_def,mul_left_comm] using (span x w t d).smul_mem a hy
+
+theorem x_pow_mul_mem (x w : A) (c₀ c₁ t d : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (n : ℕ) {y : A} (hy : y ∈ span x w t d) :
+    x^n*y ∈ span x w t d := by
+  induction n with
+  | zero => simpa using hy
+  | succ n ih =>
+      simpa [pow_succ,mul_assoc,mul_left_comm] using (x_mul_mem x w c₀ c₁ t d hx ih)
+
+theorem w_mul_mem (x w : A) (c₀ c₁ t d : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A (d^3-t^3)=0)
+    {y : A} (hy : y ∈ span x w t d) : w*y ∈ span x w t d := by
+  induction hy using Submodule.span_induction with
+  | mem y hy =>
+    obtain ⟨⟨i,j⟩,rfl⟩ := hy
+    fin_cases j
+    · have h := (span x w t d).sub_mem
+        ((span x w t d).sub_mem
+          (x_pow_mul_mem x w c₀ c₁ t d hx 2 (vector_mem_span x w t d i 1))
+          ((span x w t d).smul_mem t (vector_mem_span x w t d i 1)))
+        ((span x w t d).smul_mem d (vector_mem_span x w t d i 0))
+      have he : w*vector x w t d (i,0) =
+          x^2*vector x w t d (i,1)-t • vector x w t d (i,1)-
+          d • vector x w t d (i,0) := by simp [vector,Algebra.smul_def]; ring
+      exact he.symm ▸ h
+    · simpa [vector,mul_left_comm]
+        using vector_mem_span x w t d i 2
+    · have h := (span x w t d).sub_mem
+        ((span x w t d).sub_mem
+          ((span x w t d).smul_mem d (vector_mem_span x w t d i 2))
+          ((span x w t d).smul_mem (d^2) (vector_mem_span x w t d i 1)))
+        ((span x w t d).add_mem
+          ((span x w t d).add_mem
+            (x_pow_mul_mem x w c₀ c₁ t d hx 4 (vector_mem_span x w t d i 0))
+            ((span x w t d).smul_mem t
+              (x_pow_mul_mem x w c₀ c₁ t d hx 2 (vector_mem_span x w t d i 0))))
+          ((span x w t d).smul_mem (t^2) (vector_mem_span x w t d i 0)))
+      have he : w*vector x w t d (i,2) =
+          d • vector x w t d (i,2)-(d^2) • vector x w t d (i,1)-
+          (x^4*vector x w t d (i,0)+t • (x^2*vector x w t d (i,0))+
+            (t^2) • vector x w t d (i,0)) := by
+        simp [vector,Algebra.smul_def]
+        simp only [map_sub,map_pow] at hw
+        linear_combination x^i.val*hw
+      exact he.symm ▸ h
+  | zero => simpa using (span x w t d).zero_mem
+  | add y z _ _ hy hz => simpa [mul_add] using (span x w t d).add_mem hy hz
+  | smul a y _ hy =>
+    simpa only [Algebra.smul_def,mul_left_comm] using (span x w t d).smul_mem a hy
+
+theorem w_pow_mul_mem (x w : A) (c₀ c₁ t d : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A (d^3-t^3)=0)
+    (n : ℕ) {y : A} (hy : y ∈ span x w t d) :
+    w^n*y ∈ span x w t d := by
+  induction n with
+  | zero => simpa using hy
+  | succ n ih =>
+      simpa [pow_succ,mul_assoc,mul_left_comm] using (w_mul_mem x w c₀ c₁ t d hx hw ih)
+
+theorem mul_mem (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ t d : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A (d^3-t^3)=0)
+    (a : A) {y : A} (hy : y ∈ span x w t d) : a*y ∈ span x w t d := by
+  rw [← b.sum_equivFun a,Finset.sum_mul]
+  apply (span x w t d).sum_mem
+  intro ij _
+  simpa only [hb,Algebra.smul_def,mul_assoc] using
+    (span x w t d).smul_mem (b.equivFun a ij)
+      (x_pow_mul_mem x w c₀ c₁ t d hx ij.1.val
+        (w_pow_mul_mem x w c₀ c₁ t d hx hw ij.2.val hy))
+
+theorem span_eq_ideal (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ t d : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A (d^3-t^3)=0) :
+    span x w t d = (ideal x w t d).restrictScalars R := by
+  apply le_antisymm
+  · apply Submodule.span_le.mpr
+    rintro y ⟨ij,rfl⟩
+    exact vector_mem_ideal x w t d ij
+  · intro y hy
+    induction hy using Submodule.span_induction with
+    | mem y hy =>
+      rcases hy with rfl | hy
+      · simpa [vector] using vector_mem_span x w t d 0 0
+      · rcases hy with rfl
+        simpa [vector] using vector_mem_span x w t d 0 1
+    | zero => exact (span x w t d).zero_mem
+    | add y z _ _ hy hz => exact (span x w t d).add_mem hy hz
+    | smul a y _ hy => exact mul_mem b x w hb c₀ c₁ t d hx hw a hy
+
+def coefficients (c₀ c₁ t d : R) (a : Fin 3 × Fin 3 → R) : Fin 3 × Fin 3 → R :=
+  fun ij => !![-t*a (0,0)-c₀*a (1,0)+d*a (0,1),a (0,1)+d*a (0,2),a (0,2);
+    -(t+c₁)*a (1,0)-c₀*a (2,0)+d*a (1,1),a (1,1)+d*a (1,2),a (1,2);
+    a (0,0)-(t+c₁)*a (2,0)+d*a (2,1),a (2,1)+d*a (2,2),a (2,2)] ij.1 ij.2
+
+theorem sum_coefficients (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ t d : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (a : Fin 3 × Fin 3 → R) :
+    ∑ ij, a ij • vector x w t d ij = ∑ ij, coefficients c₀ c₁ t d a ij • b ij := by
+  simp [Fintype.sum_prod_type,Fin.sum_univ_three,vector,coefficients,hb,
+    Matrix.cons_val_zero,Matrix.cons_val_one,Matrix.cons_val_two,Algebra.smul_def,
+    map_add,map_sub,map_mul,map_neg]
+  linear_combination
+    (algebraMap R A (a (1,0))+algebraMap R A (a (2,0))*x)*hx
+
+theorem coefficients_zero [NoZeroDivisors R] (c₀ c₁ t d : R)
+    (hn : c₀^2-t*(t+c₁)^2 ≠ 0) (a : Fin 3 × Fin 3 → R)
+    (ha : ∀ ij, coefficients c₀ c₁ t d a ij=0) : ∀ ij, a ij=0 := by
+  have h₂ : ∀ i : Fin 3, a (i,2)=0 := by
+    intro i
+    have h := ha (i,2)
+    fin_cases i <;> simpa [coefficients] using h
+  have h₁ : ∀ i : Fin 3, a (i,1)=0 := by
+    intro i
+    have h := ha (i,1)
+    fin_cases i <;> simpa [coefficients,h₂] using h
+  have h₀₀ : -t*a (0,0)-c₀*a (1,0)=0 := by simpa [coefficients,h₁] using ha (0,0)
+  have h₁₀ : -(t+c₁)*a (1,0)-c₀*a (2,0)=0 := by simpa [coefficients,h₁] using ha (1,0)
+  have h₂₀ : a (0,0)-(t+c₁)*a (2,0)=0 := by simpa [coefficients,h₁] using ha (2,0)
+  have hlast : (c₀^2-t*(t+c₁)^2)*a (2,0)=0 := by
+    linear_combination (t+c₁)*h₀₀-c₀*h₁₀+t*(t+c₁)*h₂₀
+  have hlast' : a (2,0)=0 := (mul_eq_zero.mp hlast).resolve_left hn
+  have hmid : (c₀^2-t*(t+c₁)^2)*a (1,0)=0 := by
+    linear_combination -c₀*h₀₀+t*(t+c₁)*h₁₀-t*c₀*h₂₀
+  have hmid' : a (1,0)=0 := (mul_eq_zero.mp hmid).resolve_left hn
+  have hfirst : a (0,0)=0 := by simpa [hlast'] using h₂₀
+  rintro ⟨i,j⟩
+  fin_cases j
+  · fin_cases i <;> assumption
+  · exact h₁ i
+  · exact h₂ i
+
+theorem linearIndependent [NoZeroDivisors R]
+    (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ t d : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hn : c₀^2-t*(t+c₁)^2 ≠ 0) : LinearIndependent R (vector x w t d) := by
+  apply Fintype.linearIndependent_iff.mpr
+  intro a ha
+  apply coefficients_zero c₀ c₁ t d hn a
+  apply Fintype.linearIndependent_iff.mp b.linearIndependent
+  rw [← sum_coefficients b x w hb c₀ c₁ t d hx a]
+  exact ha
+
+def idealBasis [NoZeroDivisors R]
+    (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ t d : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A (d^3-t^3)=0)
+    (hn : c₀^2-t*(t+c₁)^2 ≠ 0) :
+    Module.Basis (Fin 3 × Fin 3) R (ideal x w t d) :=
+  (Module.Basis.span (linearIndependent b x w hb c₀ c₁ t d hx hn)).map
+    (LinearEquiv.ofEq (span x w t d) ((ideal x w t d).restrictScalars R)
+      (span_eq_ideal b x w hb c₀ c₁ t d hx hw))
+
+@[simp] theorem idealBasis_value [NoZeroDivisors R]
+    (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ t d : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A (d^3-t^3)=0)
+    (hn : c₀^2-t*(t+c₁)^2 ≠ 0) (ij : Fin 3 × Fin 3) :
+    (idealBasis b x w hb c₀ c₁ t d hx hw hn ij : A)=vector x w t d ij := by
+  change ((Module.Basis.span (linearIndependent b x w hb c₀ c₁ t d hx hn)) ij : A) = _
+  exact congrArg (fun z : span x w t d => (z : A))
+    (Module.Basis.span_apply (linearIndependent b x w hb c₀ c₁ t d hx hn) ij)
+
+end RankNineIdeal
+
+namespace SurfaceIdeal
+
+open MvPolynomial CycleQ2SeedTrace CycleQ2NormalConnecting CycleQ2ConormalJacobian
+  CycleQ2GeometricSeedNormalIdeals CycleQ2SeedQuotientFiniteFree
+  CycleQ2GeometricSurfaceCoordinates
+
+def x (r : ℂ) : SurfaceRing r 1 := surfaceQuotient r 1 (X 0)
+def w (r : ℂ) : SurfaceRing r 1 := surfaceQuotient r 1 (X 4)
+def t (r : ℂ) : Base ℂ := C r*X 0*X 2
+def d : Base ℂ := X 1^2
+
+theorem baseMap (r : ℂ) (p : Base ℂ) :
+    algebraMap (Base ℂ) (SurfaceRing r 1) p =
+      surfaceQuotient r 1 (remainingInclusion ℂ p) := rfl
+
+theorem firstEquation (r : ℂ) :
+    x r^2-algebraMap (Base ℂ) (SurfaceRing r 1) (t r) =
+      surfaceQuotient r 1 (originalF1 r) := by
+  rw [baseMap]
+  simp [x,t,originalF1,remainingInclusion,remainingIndex]
+
+theorem secondEquation (r : ℂ) :
+    w r+algebraMap (Base ℂ) (SurfaceRing r 1) d =
+      surfaceQuotient r 1 originalF2 := by
+  rw [baseMap]
+  simp [w,d,originalF2,remainingInclusion,remainingIndex]
+
+theorem x_relation (r : ℂ) :
+    x r^3+algebraMap (Base ℂ) (SurfaceRing r 1) (cubicLinear ℂ)*x r+
+      algebraMap (Base ℂ) (SurfaceRing r 1) (cubicConstant ℂ Complex.I)=0 := by
+  have he : thetaH 1 = (X 0 : P)^3+
+      remainingInclusion ℂ (cubicLinear ℂ)*X 0+
+      remainingInclusion ℂ (cubicConstant ℂ Complex.I) := by
+    simp [thetaH,originalH,originalB,cubicLinear,cubicConstant,
+      remainingInclusion,remainingIndex]
+    ring
+  have h := surfaceQuotient_h r 1
+  rw [he,map_add,map_add,map_mul,map_pow] at h
+  simpa only [x,baseMap] using h
+
+theorem w_relation (r : ℂ) :
+    w r^3+x r^6+algebraMap (Base ℂ) (SurfaceRing r 1) (d^3-(t r)^3)=0 := by
+  have he : actualSeedEquation r 1 = (X 4 : P)^3+X 0^6+
+      remainingInclusion ℂ (d^3-(t r)^3)+thetaH 1*thetaK 1 := by
+    simp only [actualSeedEquation,originalF1,originalF2,originalG1,originalG2,
+      d,t,map_sub,map_pow,map_mul,remainingInclusion,rename_X,rename_C,
+      remainingIndex,Matrix.cons_val_zero,Matrix.cons_val_one,Matrix.cons_val_two,
+      Matrix.head_cons,Matrix.tail_cons]
+    ring
+  have h := surfaceQuotient_F r 1
+  rw [he,map_add,map_add,map_add,map_mul,surfaceQuotient_h,zero_mul,add_zero,
+    map_pow,map_pow] at h
+  simpa only [x,w,baseMap] using h
+
+theorem norm_ne_zero (r : ℂ) :
+    (cubicConstant ℂ Complex.I)^2-t r*(t r+cubicLinear ℂ)^2 ≠ 0 := by
+  intro h
+  have he := congrArg (MvPolynomial.eval ![(0:ℂ),1,0]) h
+  norm_num [cubicConstant,cubicLinear,t,Matrix.cons_val_two,Matrix.head_cons,Matrix.tail_cons] at he
+
+theorem monomialBasis_value (r : ℂ) (ij : Fin 3 × Fin 3) :
+    surfaceBasis r ij=x r^ij.1.val*w r^ij.2.val := by
+  simp only [surfaceBasis_apply,x,w,quotientMap,surfaceQuotient,map_mul,map_pow]
+
+theorem ideal_eq (r : ℂ) :
+    RankNineIdeal.ideal (x r) (w r) (t r) d = curveIdealOnSurface r 1 := by
+  rw [RankNineIdeal.ideal,firstEquation,secondEquation]
+  apply le_antisymm
+  · apply Ideal.span_le.mpr
+    rintro z (rfl | hz)
+    · exact Ideal.mem_map_of_mem (surfaceQuotient r 1) (curveEquation_mem r 1 0)
+    · rcases hz with rfl
+      exact Ideal.mem_map_of_mem (surfaceQuotient r 1) (curveEquation_mem r 1 1)
+  · change (ambientCurveIdeal r 1).map (surfaceQuotient r 1) ≤ _
+    apply Ideal.map_le_iff_le_comap.mpr
+    apply Ideal.span_le.mpr
+    rintro z ⟨i,rfl⟩
+    change surfaceQuotient r 1 (curveEquations r 1 i) ∈
+      Ideal.span ({surfaceQuotient r 1 (originalF1 r),surfaceQuotient r 1 originalF2} :
+        Set (SurfaceRing r 1))
+    fin_cases i
+    · exact Ideal.subset_span (by simp [curveEquations])
+    · exact Ideal.subset_span (by simp [curveEquations])
+    · change surfaceQuotient r 1 (thetaH 1) ∈
+        Ideal.span ({surfaceQuotient r 1 (originalF1 r),surfaceQuotient r 1 originalF2} :
+          Set (SurfaceRing r 1))
+      rw [surfaceQuotient_h]
+      exact Ideal.zero_mem _
+
+end SurfaceIdeal
+
+open CycleQ2ConormalJacobian CycleQ2GeometricSeedNormalIdeals
+  CycleQ2SeedQuotientFiniteFree CycleQ2GeometricSurfaceCoordinates
+
+/-- The actual curve ideal on the actual theta=1 surface is free of rank nine
+over C[x1,x2,x3]. No smoothness, trace, or Cartier-comparison premise is used. -/
+def surfaceIdealBasis (r : ℂ) :
+    Module.Basis (Fin 3 × Fin 3) (Base ℂ) (curveIdealOnSurface r 1) :=
+  (RankNineIdeal.idealBasis (surfaceBasis r) (SurfaceIdeal.x r) (SurfaceIdeal.w r)
+    (SurfaceIdeal.monomialBasis_value r) (cubicConstant ℂ Complex.I) (cubicLinear ℂ)
+    (SurfaceIdeal.t r) SurfaceIdeal.d (SurfaceIdeal.x_relation r) (SurfaceIdeal.w_relation r)
+    (SurfaceIdeal.norm_ne_zero r)).map
+    ((LinearEquiv.ofEq _ _ (SurfaceIdeal.ideal_eq r)).restrictScalars (Base ℂ))
+
+theorem surfaceIdealBasis_value (r : ℂ) (ij : Fin 3 × Fin 3) :
+    (surfaceIdealBasis r ij : SurfaceRing r 1) =
+      (SurfaceIdeal.x r)^ij.1.val *
+        ![surfaceQuotient r 1 (CycleQ2SeedTrace.originalF1 r),
+          surfaceQuotient r 1 CycleQ2SeedTrace.originalF2,
+          SurfaceIdeal.w r*surfaceQuotient r 1 CycleQ2SeedTrace.originalF2] ij.2 := by
+  change ((RankNineIdeal.idealBasis (surfaceBasis r) (SurfaceIdeal.x r) (SurfaceIdeal.w r)
+    (SurfaceIdeal.monomialBasis_value r) (cubicConstant ℂ Complex.I) (cubicLinear ℂ)
+    (SurfaceIdeal.t r) SurfaceIdeal.d (SurfaceIdeal.x_relation r) (SurfaceIdeal.w_relation r)
+    (SurfaceIdeal.norm_ne_zero r)) ij : SurfaceRing r 1)=_
+  rw [RankNineIdeal.idealBasis_value]
+  simp only [RankNineIdeal.vector,SurfaceIdeal.firstEquation,SurfaceIdeal.secondEquation]
+
+theorem surfaceIdeal_free (r : ℂ) : Module.Free (Base ℂ) (curveIdealOnSurface r 1) :=
+  Module.Free.of_basis (surfaceIdealBasis r)
+
+theorem surfaceIdeal_finite (r : ℂ) : Module.Finite (Base ℂ) (curveIdealOnSurface r 1) :=
+  Module.Finite.of_basis (surfaceIdealBasis r)
+
+namespace RankNineFrobenius
+
+variable {R A : Type*} [CommRing R] [CommRing A] [Algebra R A]
+
+def topCoefficient (b : Module.Basis (Fin 3 × Fin 3) R A) : A →ₗ[R] R :=
+  b.coord (2,2)
+
+theorem topCoefficient_low (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (i j : Fin 3) :
+    topCoefficient b (x^i.val*w^j.val) = if (i,j)=(2,2) then 1 else 0 := by
+  rw [← hb (i,j)]
+  simp [topCoefficient,Module.Basis.coord_apply,Finsupp.single_apply,eq_comm]
+
+theorem topCoefficient_map_mul (b : Module.Basis (Fin 3 × Fin 3) R A)
+    (a : R) (z : A) :
+    topCoefficient b (algebraMap R A a*z)=a*topCoefficient b z := by
+  rw [← Algebra.smul_def,map_smul,smul_eq_mul]
+
+theorem topCoefficient_lower_w (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (n j : ℕ) (hj : j<2) : topCoefficient b (x^n*w^j)=0 := by
+  induction n using Nat.strong_induction_on with
+  | h n ih =>
+    by_cases hn : n<3
+    · have hk : ((⟨n,hn⟩,⟨j,by omega⟩) : Fin 3 × Fin 3) ≠ (2,2) := by
+        intro he
+        have he' := congrArg (fun p : Fin 3 × Fin 3 => p.2.val) he
+        change j=2 at he'
+        omega
+      simpa only [hk,if_false] using
+        topCoefficient_low b x w hb ⟨n,hn⟩ ⟨j,by omega⟩
+    · let m := n-3
+      have hm : m+3=n := by dsimp [m]; omega
+      have hm₀ : m<n := by dsimp [m]; omega
+      have hm₁ : m+1<n := by dsimp [m]; omega
+      have he : x^n*w^j =
+          -(algebraMap R A c₁*(x^(m+1)*w^j)+algebraMap R A c₀*(x^m*w^j)) := by
+        rw [← hm]
+        simp only [pow_add,pow_one]
+        linear_combination x^m*w^j*hx
+      rw [he,map_neg,map_add,topCoefficient_map_mul,topCoefficient_map_mul,
+        ih (m+1) hm₁,ih m hm₀]
+      simp
+
+theorem topCoefficient_w_three (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ e : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A e=0) (n : ℕ) :
+    topCoefficient b (x^n*w^3)=0 := by
+  have he : x^n*w^3 = -(x^(n+6)+algebraMap R A e*x^n) := by
+    rw [pow_add]
+    linear_combination x^n*hw
+  have h₀ (k : ℕ) : topCoefficient b (x^k)=0 := by
+    simpa using topCoefficient_lower_w b x w hb c₀ c₁ hx k 0 (by decide)
+  rw [he,map_neg,map_add,topCoefficient_map_mul,h₀,h₀]
+  simp
+
+theorem topCoefficient_w_four (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ e : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A e=0) (n : ℕ) :
+    topCoefficient b (x^n*w^4)=0 := by
+  have he : x^n*w^4 = -(x^(n+6)*w+algebraMap R A e*(x^n*w)) := by
+    rw [pow_add]
+    linear_combination x^n*w*hw
+  have h₁ (k : ℕ) : topCoefficient b (x^k*w)=0 := by
+    simpa using topCoefficient_lower_w b x w hb c₀ c₁ hx k 1 (by decide)
+  rw [he,map_neg,map_add,topCoefficient_map_mul,h₁,h₁]
+  simp
+
+theorem topCoefficient_monomial (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ e : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A e=0) (n m : Fin 5) :
+    topCoefficient b (x^n.val*w^m.val) =
+      if m=2 then (if n=2 then 1 else if n=4 then -c₁ else 0) else 0 := by
+  fin_cases m
+  · simpa using topCoefficient_lower_w b x w hb c₀ c₁ hx n.val 0 (by decide)
+  · simpa using topCoefficient_lower_w b x w hb c₀ c₁ hx n.val 1 (by decide)
+  · fin_cases n
+    · simpa using topCoefficient_low b x w hb 0 2
+    · simpa using topCoefficient_low b x w hb 1 2
+    · simpa using topCoefficient_low b x w hb 2 2
+    · change topCoefficient b (x^3*w^2)=0
+      have he : x^3*w^2 =
+          -(algebraMap R A c₁*(x*w^2)+algebraMap R A c₀*w^2) := by
+        linear_combination w^2*hx
+      have h₀ : topCoefficient b (w^2)=0 := by
+        simpa using topCoefficient_low b x w hb 0 2
+      have h₁ : topCoefficient b (x*w^2)=0 := by
+        simpa using topCoefficient_low b x w hb 1 2
+      rw [he,map_neg,map_add,topCoefficient_map_mul,topCoefficient_map_mul,h₀,h₁]
+      simp
+    · change topCoefficient b (x^4*w^2) = -c₁
+      have he : x^4*w^2 =
+          -(algebraMap R A c₁*(x^2*w^2)+algebraMap R A c₀*(x*w^2)) := by
+        linear_combination x*w^2*hx
+      have h₁ : topCoefficient b (x*w^2)=0 := by
+        simpa using topCoefficient_low b x w hb 1 2
+      have h₂ : topCoefficient b (x^2*w^2)=1 := by
+        simpa using topCoefficient_low b x w hb 2 2
+      simp only [he,map_neg,map_add,topCoefficient_map_mul,h₁,h₂,
+        mul_zero,mul_one,add_zero]
+  · simpa using topCoefficient_w_three b x w hb c₀ c₁ e hx hw n.val
+  · simpa using topCoefficient_w_four b x w hb c₀ c₁ e hx hw n.val
+
+theorem topCoefficient_monomial_nat (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ e : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A e=0) (n m : ℕ) (hn : n<5) (hm : m<5) :
+    topCoefficient b (x^n*w^m) =
+      if m=2 then (if n=2 then 1 else if n=4 then -c₁ else 0) else 0 := by
+  simpa only [Fin.ext_iff, show ((2 : Fin 5) : ℕ)=2 from rfl,
+    show ((4 : Fin 5) : ℕ)=4 from rfl] using
+    topCoefficient_monomial b x w hb c₀ c₁ e hx hw ⟨n,hn⟩ ⟨m,hm⟩
+
+def dualVector (x w : A) (c₁ : R) (ij : Fin 3 × Fin 3) : A :=
+  ![x^2+algebraMap R A c₁,x,1] ij.1 * ![w^2,w,1] ij.2
+
+theorem dualVector_mul (x w : A) (c₁ : R) (ij kl : Fin 3 × Fin 3) :
+    dualVector x w c₁ ij*(x^kl.1.val*w^kl.2.val) =
+      ![x^(kl.1.val+2)*w^(kl.2.val+(2-ij.2.val))+
+          algebraMap R A c₁*(x^kl.1.val*w^(kl.2.val+(2-ij.2.val))),
+        x^(kl.1.val+1)*w^(kl.2.val+(2-ij.2.val)),
+        x^kl.1.val*w^(kl.2.val+(2-ij.2.val))] ij.1 := by
+  rcases ij with ⟨i,j⟩
+  fin_cases i <;> fin_cases j <;>
+    simp [dualVector,pow_add] <;> ring
+
+def pairing (b : Module.Basis (Fin 3 × Fin 3) R A) : A →ₗ[R] Module.Dual R A :=
+  (LinearMap.mul R A).compr₂ (topCoefficient b)
+
+theorem pairing_apply (b : Module.Basis (Fin 3 × Fin 3) R A) (a z : A) :
+    pairing b a z=topCoefficient b (a*z) := rfl
+
+theorem pairing_dualVector (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ e : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A e=0) (ij : Fin 3 × Fin 3) :
+    pairing b (dualVector x w c₁ ij)=b.coord ij := by
+  apply b.ext
+  rintro ⟨k,l⟩
+  simp only [Module.Basis.coord_apply,Module.Basis.repr_self,Finsupp.single_apply]
+  rw [pairing_apply,hb,dualVector_mul]
+  rcases ij with ⟨i,j⟩
+  fin_cases i <;> fin_cases j <;> fin_cases k <;> fin_cases l <;>
+    simp [map_add,topCoefficient_map_mul,
+      topCoefficient_monomial_nat b x w hb c₀ c₁ e hx hw,
+      -pow_zero,-pow_one,-one_mul,-mul_one] <;> ring
+
+theorem pairing_injective (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ e : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A e=0) : Function.Injective (pairing b) := by
+  intro a a' h
+  apply b.ext_elem_iff.mpr
+  intro ij
+  have hi := congrArg (fun f : Module.Dual R A => f (dualVector x w c₁ ij)) h
+  have hd := pairing_dualVector b x w hb c₀ c₁ e hx hw ij
+  change b.coord ij a=b.coord ij a'
+  rw [← hd]
+  simpa only [pairing_apply,mul_comm] using hi
+
+theorem pairing_surjective (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ e : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A e=0) : Function.Surjective (pairing b) := by
+  intro f
+  refine ⟨∑ ij, f (b ij) • dualVector x w c₁ ij,?_⟩
+  rw [map_sum]
+  simp_rw [map_smul,pairing_dualVector b x w hb c₀ c₁ e hx hw]
+  exact b.sum_dual_apply_smul_coord f
+
+/-- The Frobenius pairing is the literal coefficient of x^2 w^2 in multiplication.
+Its inverse is constructed from the explicit dual monomials, without a field or
+separability premise. -/
+def equiv (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ e : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A e=0) : A ≃ₗ[R] Module.Dual R A :=
+  LinearEquiv.ofBijective (pairing b)
+    ⟨pairing_injective b x w hb c₀ c₁ e hx hw,
+      pairing_surjective b x w hb c₀ c₁ e hx hw⟩
+
+@[simp] theorem equiv_apply (b : Module.Basis (Fin 3 × Fin 3) R A) (x w : A)
+    (hb : ∀ ij, b ij=x^ij.1.val*w^ij.2.val) (c₀ c₁ e : R)
+    (hx : x^3+algebraMap R A c₁*x+algebraMap R A c₀=0)
+    (hw : w^3+x^6+algebraMap R A e=0) (a z : A) :
+    equiv b x w hb c₀ c₁ e hx hw a z=topCoefficient b (a*z) := rfl
+
+end RankNineFrobenius
+
+namespace FrobeniusHom
+
+variable {R A M : Type*} [CommRing R] [CommRing A] [Algebra R A]
+  [AddCommGroup M] [Module R M] [Module A M] [IsScalarTower R A M]
+
+def coefficientFunctional (ψ : M →ₗ[R] R) (m : M) : Module.Dual R A :=
+  ψ.comp ((LinearMap.toSpanSingleton A M m).restrictScalars R)
+
+@[simp] theorem coefficientFunctional_apply (ψ : M →ₗ[R] R) (m : M) (a : A) :
+    coefficientFunctional ψ m a=ψ (a • m) := rfl
+
+def forward (ℓ : A →ₗ[R] R) : (M →ₗ[A] A) →ₗ[R] (M →ₗ[R] R) where
+  toFun φ := ℓ.comp (φ.restrictScalars R)
+  map_add' φ χ := by ext m; exact map_add ℓ (φ m) (χ m)
+  map_smul' a φ := by ext m; exact ℓ.map_smul a (φ m)
+
+def inverse (ℓ : A →ₗ[R] R) (e : A ≃ₗ[R] Module.Dual R A)
+    (he : ∀ a z, e a z=ℓ (a*z)) (ψ : M →ₗ[R] R) : M →ₗ[A] A where
+  toFun m := e.symm (coefficientFunctional ψ m)
+  map_add' m n := by
+    apply e.injective
+    simp only [map_add,e.apply_symm_apply]
+    ext a
+    simp [smul_add]
+  map_smul' a m := by
+    apply e.injective
+    ext z
+    rw [e.apply_symm_apply]
+    change ψ (z • (a • m))=e (a*e.symm (coefficientFunctional ψ m)) z
+    rw [he]
+    have h := congrArg (fun f : Module.Dual R A => f (z*a))
+      (e.apply_symm_apply (coefficientFunctional ψ m))
+    rw [he,coefficientFunctional_apply] at h
+    simpa only [smul_smul,mul_assoc,mul_left_comm,mul_comm] using h.symm
+
+theorem inverse_forward (ℓ : A →ₗ[R] R) (e : A ≃ₗ[R] Module.Dual R A)
+    (he : ∀ a z, e a z=ℓ (a*z)) (φ : M →ₗ[A] A) :
+    inverse ℓ e he (forward ℓ φ)=φ := by
+  ext m
+  apply e.injective
+  rw [show inverse ℓ e he (forward ℓ φ) m=
+    e.symm (coefficientFunctional (forward ℓ φ) m) from rfl,e.apply_symm_apply]
+  ext a
+  change ℓ (φ (a • m))=e (φ m) a
+  rw [he,φ.map_smul]
+  change ℓ (a*φ m)=ℓ (φ m*a)
+  rw [mul_comm]
+
+theorem forward_inverse (ℓ : A →ₗ[R] R) (e : A ≃ₗ[R] Module.Dual R A)
+    (he : ∀ a z, e a z=ℓ (a*z)) (ψ : M →ₗ[R] R) :
+    forward ℓ (inverse ℓ e he ψ)=ψ := by
+  ext m
+  have h := congrArg (fun f : Module.Dual R A => f 1)
+    (e.apply_symm_apply (coefficientFunctional ψ m))
+  rw [he,coefficientFunctional_apply,mul_one,one_smul] at h
+  exact h
+
+/-- Frobenius adjunction for the actual A-linear Hom module. It uses the
+multiplication pairing, not an arbitrary equivalence with an R-dual. -/
+def equiv (ℓ : A →ₗ[R] R) (e : A ≃ₗ[R] Module.Dual R A)
+    (he : ∀ a z, e a z=ℓ (a*z)) : (M →ₗ[A] A) ≃ₗ[R] (M →ₗ[R] R) :=
+  { forward ℓ with
+    invFun := inverse ℓ e he
+    left_inv := inverse_forward ℓ e he
+    right_inv := forward_inverse ℓ e he }
+
+@[simp] theorem equiv_apply (ℓ : A →ₗ[R] R) (e : A ≃ₗ[R] Module.Dual R A)
+    (he : ∀ a z, e a z=ℓ (a*z)) (φ : M →ₗ[A] A) (m : M) :
+    equiv ℓ e he φ m=ℓ (φ m) := rfl
+
+end FrobeniusHom
+
+open CycleQ2ConormalJacobian CycleQ2GeometricSeedNormalIdeals
+  CycleQ2SeedQuotientFiniteFree CycleQ2GeometricSurfaceCoordinates
+
+/-- Frobenius duality for the literal theta=1 surface, defined by the coefficient
+of x0^2 w^2 in the actual rank-nine monomial basis. -/
+def surfaceFrobenius (r : ℂ) :
+    SurfaceRing r 1 ≃ₗ[Base ℂ] Module.Dual (Base ℂ) (SurfaceRing r 1) :=
+  RankNineFrobenius.equiv (surfaceBasis r) (SurfaceIdeal.x r) (SurfaceIdeal.w r)
+    (SurfaceIdeal.monomialBasis_value r) (cubicConstant ℂ Complex.I) (cubicLinear ℂ)
+    (SurfaceIdeal.d^3-(SurfaceIdeal.t r)^3)
+    (SurfaceIdeal.x_relation r) (SurfaceIdeal.w_relation r)
+
+@[simp] theorem surfaceFrobenius_apply (r : ℂ) (a z : SurfaceRing r 1) :
+    surfaceFrobenius r a z=(surfaceBasis r).coord (2,2) (a*z) := rfl
+
+/-- The actual A-linear inverse-ideal Hom is the R-dual of the actual curve ideal,
+where A is the literal theta=1 surface and R=C[x1,x2,x3]. -/
+def surfaceInverseIdealEquiv (r : ℂ) :
+    ((curveIdealOnSurface r 1) →ₗ[SurfaceRing r 1] SurfaceRing r 1) ≃ₗ[Base ℂ]
+      Module.Dual (Base ℂ) (curveIdealOnSurface r 1) :=
+  FrobeniusHom.equiv ((surfaceBasis r).coord (2,2)) (surfaceFrobenius r)
+    (surfaceFrobenius_apply r)
+
+@[simp] theorem surfaceInverseIdealEquiv_apply (r : ℂ)
+    (φ : (curveIdealOnSurface r 1) →ₗ[SurfaceRing r 1] SurfaceRing r 1)
+    (z : curveIdealOnSurface r 1) :
+    surfaceInverseIdealEquiv r φ z=(surfaceBasis r).coord (2,2) (φ z) := rfl
+
+/-- The inverse ideal has an actual finite free basis over the three-coordinate
+polynomial ring; this is the input for coordinate Cech H1 exactness. -/
+def surfaceInverseIdealBasis (r : ℂ) :
+    Module.Basis (Fin 3 × Fin 3) (Base ℂ)
+      ((curveIdealOnSurface r 1) →ₗ[SurfaceRing r 1] SurfaceRing r 1) :=
+  (surfaceIdealBasis r).dualBasis.map (surfaceInverseIdealEquiv r).symm
+
+theorem surfaceInverseIdealBasis_pairing (r : ℂ) (ij : Fin 3 × Fin 3)
+    (z : curveIdealOnSurface r 1) :
+    (surfaceBasis r).coord (2,2) (surfaceInverseIdealBasis r ij z)=
+      (surfaceIdealBasis r).coord ij z := by
+  change surfaceInverseIdealEquiv r (surfaceInverseIdealBasis r ij) z=_
+  simp only [surfaceInverseIdealBasis,Module.Basis.map_apply,
+    LinearEquiv.apply_symm_apply,Module.Basis.dualBasis_apply,Module.Basis.coord_apply]
+
+theorem surfaceInverseIdeal_free (r : ℂ) :
+    Module.Free (Base ℂ)
+      ((curveIdealOnSurface r 1) →ₗ[SurfaceRing r 1] SurfaceRing r 1) :=
+  Module.Free.of_basis (surfaceInverseIdealBasis r)
+
+theorem surfaceInverseIdeal_finite (r : ℂ) :
+    Module.Finite (Base ℂ)
+      ((curveIdealOnSurface r 1) →ₗ[SurfaceRing r 1] SurfaceRing r 1) :=
+  Module.Finite.of_basis (surfaceInverseIdealBasis r)
+
+namespace IdealHomLocalization
+
+variable {A : Type*} [CommRing A] (I : Ideal A) [Module.FinitePresentation A I]
+
+abbrev LocalRing (g : A) := Localization.Away g
+abbrev LocalIdeal (g : A) := I.map (algebraMap A (LocalRing g))
+abbrev LocalHom (g : A) := LocalIdeal I g →ₗ[LocalRing g] LocalRing g
+
+/-- The standard localization map of actual ideal Hom modules. -/
+def map (g : A) : (I →ₗ[A] A) →ₗ[A] LocalHom I g :=
+  IsLocalizedModule.mapExtendScalars (Submonoid.powers g)
+    (Algebra.idealMap (LocalRing g) I) (Algebra.linearMap A (LocalRing g)) (LocalRing g)
+
+@[simp] theorem map_apply (g : A) (φ : I →ₗ[A] A) (x : I) :
+    map I g φ (Algebra.idealMap (LocalRing g) I x)=algebraMap A (LocalRing g) (φ x) := by
+  simp only [map,IsLocalizedModule.mapExtendScalars_apply_apply,IsLocalizedModule.map_apply,
+    Algebra.linearMap_apply]
+
+instance map_isLocalized (g : A) : IsLocalizedModule (Submonoid.powers g) (map I g) :=
+  Module.FinitePresentation.isLocalizedModule_mapExtendScalars _ _ _ _
+
+theorem isBaseChange (g : A) : IsBaseChange (LocalRing g) (map I g) :=
+  IsLocalizedModule.isBaseChange (Submonoid.powers g) _ _
+
+def tensorEquiv (g : A) :
+    LocalRing g ⊗[A] (I →ₗ[A] A) ≃ₗ[LocalRing g] LocalHom I g :=
+  (isBaseChange I g).equiv
+
+theorem tensorEquiv_tmul (g : A) (a : LocalRing g) (φ : I →ₗ[A] A) (x : I) :
+    tensorEquiv I g (a ⊗ₜ[A] φ) (Algebra.idealMap (LocalRing g) I x)=
+      a*algebraMap A (LocalRing g) (φ x) := by
+  rw [tensorEquiv,IsBaseChange.equiv_tmul]
+  simp only [LinearMap.smul_apply,map_apply,smul_eq_mul]
+
+theorem restrictionUnit {g h : A} (ρ : LocalRing g →ₐ[A] LocalRing h)
+    (u : Submonoid.powers g) : IsUnit (algebraMap A (LocalRing h) (u : A)) := by
+  have hu := (IsLocalization.map_units (LocalRing g) u).map ρ.toRingHom
+  change IsUnit (ρ (algebraMap A (LocalRing g) (u : A))) at hu
+  rw [ρ.commutes] at hu
+  exact hu
+
+theorem restrictionModuleUnit {g h : A} (ρ : LocalRing g →ₐ[A] LocalRing h)
+    (N : Type*) [AddCommGroup N] [Module A N] [Module (LocalRing h) N]
+    [IsScalarTower A (LocalRing h) N] (u : Submonoid.powers g) :
+    IsUnit (algebraMap A (Module.End A N) (u : A)) := by
+  rw [← (Algebra.lsmul A (A := LocalRing h) A N).commutes]
+  exact (restrictionUnit ρ u).map _
+
+/-- The actual Hom restriction is the universal localization extension. -/
+def restriction {g h : A} (ρ : LocalRing g →ₐ[A] LocalRing h) :
+    LocalHom I g →ₗ[A] LocalHom I h :=
+  IsLocalizedModule.lift (Submonoid.powers g) (map I g) (map I h)
+    (restrictionModuleUnit ρ (LocalHom I h))
+
+@[simp] theorem restriction_map {g h : A} (ρ : LocalRing g →ₐ[A] LocalRing h)
+    (φ : I →ₗ[A] A) : restriction I ρ (map I g φ)=map I h φ :=
+  IsLocalizedModule.lift_apply _ _ _ _ _
+
+def idealRestriction {g h : A} (ρ : LocalRing g →ₐ[A] LocalRing h) :
+    LocalIdeal I g →ₗ[A] LocalIdeal I h where
+  toFun y := ⟨ρ (y : LocalRing g),by
+    have hmap : (LocalIdeal I g).map ρ.toRingHom=LocalIdeal I h := by
+      rw [LocalIdeal,Ideal.map_map]
+      congr 1
+      exact RingHom.ext (fun a => ρ.commutes a)
+    have hy := Ideal.mem_map_of_mem ρ.toRingHom y.property
+    change ρ (y : LocalRing g) ∈ (LocalIdeal I g).map ρ.toRingHom at hy
+    rw [hmap] at hy
+    exact hy⟩
+  map_add' y z := by
+    apply Subtype.ext
+    exact map_add ρ (y : LocalRing g) (z : LocalRing g)
+  map_smul' a y := by
+    apply Subtype.ext
+    exact ρ.toLinearMap.map_smul a (y : LocalRing g)
+
+@[simp] theorem idealRestriction_base {g h : A} (ρ : LocalRing g →ₐ[A] LocalRing h)
+    (x : I) : idealRestriction I ρ (Algebra.idealMap (LocalRing g) I x)=
+      Algebra.idealMap (LocalRing h) I x :=
+  Subtype.ext (ρ.commutes (x : A))
+
+def evaluation (g : A) (x : LocalIdeal I g) : LocalHom I g →ₗ[A] LocalRing g where
+  toFun φ := φ x
+  map_add' φ ψ := rfl
+  map_smul' a φ := rfl
+
+theorem restriction_evaluation_base {g h : A} (ρ : LocalRing g →ₐ[A] LocalRing h)
+    (φ : LocalHom I g) (x : I) :
+    restriction I ρ φ (Algebra.idealMap (LocalRing h) I x)=
+      ρ (φ (Algebra.idealMap (LocalRing g) I x)) := by
+  let F := (evaluation I h (Algebra.idealMap (LocalRing h) I x)).comp (restriction I ρ)
+  let G := ρ.toLinearMap.comp (evaluation I g (Algebra.idealMap (LocalRing g) I x))
+  have hc : F.comp (map I g)=G.comp (map I g) := by
+    ext ψ
+    change restriction I ρ (map I g ψ) (Algebra.idealMap (LocalRing h) I x)=
+      ρ (map I g ψ (Algebra.idealMap (LocalRing g) I x))
+    rw [restriction_map,map_apply,map_apply,ρ.commutes]
+  have he : F=G := IsLocalizedModule.ext (Submonoid.powers g) (map I g)
+    (restrictionModuleUnit ρ (LocalRing h)) hc
+  exact LinearMap.congr_fun he φ
+
+/-- Naturality holds on every actual localized ideal element. -/
+theorem restriction_evaluation {g h : A} (ρ : LocalRing g →ₐ[A] LocalRing h)
+    (φ : LocalHom I g) (x : LocalIdeal I g) :
+    restriction I ρ φ (idealRestriction I ρ x)=ρ (φ x) := by
+  let F := ((restriction I ρ φ).restrictScalars A).comp (idealRestriction I ρ)
+  let G := ρ.toLinearMap.comp (φ.restrictScalars A)
+  have hc : F.comp (Algebra.idealMap (LocalRing g) I)=
+      G.comp (Algebra.idealMap (LocalRing g) I) := by
+    ext y
+    change restriction I ρ φ (idealRestriction I ρ (Algebra.idealMap (LocalRing g) I y))=_
+    rw [idealRestriction_base,restriction_evaluation_base]
+    rfl
+  have he : F=G := IsLocalizedModule.ext (Submonoid.powers g)
+    (Algebra.idealMap (LocalRing g) I) (restrictionModuleUnit ρ (LocalRing h)) hc
+  exact LinearMap.congr_fun he x
+
+theorem restriction_smul {g h : A} (ρ : LocalRing g →ₐ[A] LocalRing h)
+    (a : LocalRing g) (φ : LocalHom I g) :
+    restriction I ρ (a • φ)=ρ a • restriction I ρ φ := by
+  apply (IsLocalizedModule.isBaseChange (Submonoid.powers h) (LocalRing h)
+    (Algebra.idealMap (LocalRing h) I)).algHom_ext
+  intro x
+  simp only [restriction_evaluation_base,LinearMap.smul_apply,smul_eq_mul,map_mul]
+
+theorem restriction_comp {g h k : A}
+    (ρ : LocalRing g →ₐ[A] LocalRing h) (σ : LocalRing h →ₐ[A] LocalRing k) :
+    (restriction I σ).comp (restriction I ρ)=restriction I (σ.comp ρ) := by
+  apply IsLocalizedModule.ext (Submonoid.powers g) (map I g)
+    (restrictionModuleUnit (σ.comp ρ) (LocalHom I k))
+  ext φ
+  simp only [LinearMap.comp_apply,restriction_map]
+
+theorem restriction_id (g : A) : restriction I (AlgHom.id A (LocalRing g))=LinearMap.id := by
+  apply IsLocalizedModule.ext (Submonoid.powers g) (map I g)
+    (restrictionModuleUnit (AlgHom.id A (LocalRing g)) (LocalHom I g))
+  ext φ
+  simp only [LinearMap.comp_apply,restriction_map,LinearMap.id_apply]
+
+theorem tensorEquiv_restriction {g h : A} (ρ : LocalRing g →ₐ[A] LocalRing h)
+    (p : LocalRing g ⊗[A] (I →ₗ[A] A)) :
+    restriction I ρ (tensorEquiv I g p)=
+      tensorEquiv I h (TensorProduct.map ρ.toLinearMap LinearMap.id p) := by
+  induction p using TensorProduct.induction_on with
+  | zero => simp
+  | add p q hp hq => simp only [map_add,hp,hq]
+  | tmul a φ =>
+    simp only [tensorEquiv,IsBaseChange.equiv_tmul,TensorProduct.map_tmul,
+      AlgHom.toLinearMap_apply,LinearMap.id_apply,restriction_smul,restriction_map]
+
+/-- The localization of the literal ideal inclusion is the literal localized
+ideal inclusion. This fixes the scalar submodule inside the inverse ideal. -/
+theorem map_subtype (g : A) : map I g I.subtype=(LocalIdeal I g).subtype := by
+  apply (IsLocalizedModule.isBaseChange (Submonoid.powers g) (LocalRing g)
+    (Algebra.idealMap (LocalRing g) I)).algHom_ext
+  intro x
+  rw [map_apply]
+  rfl
+
+theorem restriction_subtype {g h : A} (ρ : LocalRing g →ₐ[A] LocalRing h) :
+    restriction I ρ (LocalIdeal I g).subtype=(LocalIdeal I h).subtype := by
+  rw [← map_subtype I g,restriction_map,map_subtype]
+
+/-- Scalar cochains embed by actual multiplication on the actual local ideal;
+these embeddings commute with every actual principal-open restriction. -/
+theorem restriction_scalar {g h : A} (ρ : LocalRing g →ₐ[A] LocalRing h)
+    (a : LocalRing g) :
+    restriction I ρ (a • (LocalIdeal I g).subtype)=ρ a • (LocalIdeal I h).subtype := by
+  rw [restriction_smul,restriction_subtype]
+
+end IdealHomLocalization
+
+open CycleQ2ConormalJacobian CycleQ2GeometricSeedNormalIdeals
+
+/-- The actual surface ideal has finite presentation over its actual surface
+ring. This uses polynomial Noetherianity, and makes no smoothness assertion. -/
+instance surfaceCurveIdeal_finitePresentation (r θ : ℂ) :
+    Module.FinitePresentation (SurfaceRing r θ) (curveIdealOnSurface r θ) := by
+  letI : IsNoetherianRing (SurfaceRing r θ) := inferInstance
+  letI : Module.Finite (SurfaceRing r θ) (curveIdealOnSurface r θ) :=
+    Module.Finite.of_fg (IsNoetherian.noetherian _)
+  exact Module.finitePresentation_of_finite _ _
+
+namespace CoordinateInverseIdeal
+
+open CycleQ2ConormalJacobian CycleQ2GeometricSeedNormalIdeals
+  CycleQ2SeedQuotientFiniteFree CycleQ2GeometricSurfaceCoordinates
+  CycleQ2SeedCechLocalization
+open scoped TensorProduct
+
+instance coordinate_isBaseLocalization (r : ℂ) (s : Finset (Fin 3)) :
+    IsLocalization
+      (Algebra.algebraMapSubmonoid (SurfaceRing r 1) (Submonoid.powers (baseProduct ℂ s)))
+      (CoordinateLocal r 1 s) := by
+  have h : coordinateProduct r 1 s=
+      algebraMap (Base ℂ) (SurfaceRing r 1) (baseProduct ℂ s) :=
+    coordinateProduct_eq r 1 s
+  rw [Algebra.algebraMapSubmonoid_powers,← h]
+  infer_instance
+
+instance coordinateBaseAlgebra (r : ℂ) (s : Finset (Fin 3)) :
+    Algebra (coordinateLocalization ℂ s) (CoordinateLocal r 1 s) :=
+  localizationAlgebra (Rₘ := coordinateLocalization ℂ s) (Sₘ := CoordinateLocal r 1 s)
+    (Submonoid.powers (baseProduct ℂ s)) (SurfaceRing r 1)
+
+instance coordinateBaseTower (r : ℂ) (s : Finset (Fin 3)) :
+    IsScalarTower (Base ℂ) (coordinateLocalization ℂ s) (CoordinateLocal r 1 s) :=
+  isScalarTower_localizationAlgebra (Rₘ := coordinateLocalization ℂ s)
+    (Sₘ := CoordinateLocal r 1 s) (Submonoid.powers (baseProduct ℂ s)) (SurfaceRing r 1)
+
+abbrev IdealModule (r : ℂ) (s : Finset (Fin 3)) :=
+  (curveIdealOnSurface r 1).map (algebraMap (SurfaceRing r 1) (CoordinateLocal r 1 s))
+
+abbrev HomModule (r : ℂ) (s : Finset (Fin 3)) :=
+  IdealModule r s →ₗ[CoordinateLocal r 1 s] CoordinateLocal r 1 s
+
+def idealMap (r : ℂ) (s : Finset (Fin 3)) :
+    (curveIdealOnSurface r 1) →ₗ[Base ℂ] IdealModule r s :=
+  (Algebra.idealMap (CoordinateLocal r 1 s) (curveIdealOnSurface r 1)).restrictScalars (Base ℂ)
+
+def homMap (r : ℂ) (s : Finset (Fin 3)) :
+    ((curveIdealOnSurface r 1) →ₗ[SurfaceRing r 1] SurfaceRing r 1) →ₗ[Base ℂ]
+      HomModule r s :=
+  (IdealHomLocalization.map (curveIdealOnSurface r 1) (coordinateProduct r 1 s)).restrictScalars
+    (Base ℂ)
+
+@[simp] theorem homMap_apply (r : ℂ) (s : Finset (Fin 3))
+    (φ : (curveIdealOnSurface r 1) →ₗ[SurfaceRing r 1] SurfaceRing r 1)
+    (z : curveIdealOnSurface r 1) :
+    homMap r s φ (idealMap r s z)=
+      algebraMap (SurfaceRing r 1) (CoordinateLocal r 1 s) (φ z) :=
+  IdealHomLocalization.map_apply _ _ φ z
+
+instance homMap_isLocalized (r : ℂ) (s : Finset (Fin 3)) :
+    IsLocalizedModule (Submonoid.powers (baseProduct ℂ s)) (homMap r s) := by
+  let f := IdealHomLocalization.map (curveIdealOnSurface r 1) (coordinateProduct r 1 s)
+  have he : coordinateProduct r 1 s=
+      algebraMap (Base ℂ) (SurfaceRing r 1) (baseProduct ℂ s) := coordinateProduct_eq r 1 s
+  letI : IsLocalizedModule
+      (Submonoid.powers (algebraMap (Base ℂ) (SurfaceRing r 1) (baseProduct ℂ s))) f := by
+    rw [← he]
+    exact IdealHomLocalization.map_isLocalized _ _
+  exact IsLocalizedModule.restrictScalars_powers (baseProduct ℂ s) f
+
+theorem hom_isBaseChange (r : ℂ) (s : Finset (Fin 3)) :
+    IsBaseChange (coordinateLocalization ℂ s) (homMap r s) :=
+  IsLocalizedModule.isBaseChange (Submonoid.powers (baseProduct ℂ s)) _ _
+
+/-- The actual inverse ideal on a coordinate open is the localization of the
+actual global inverse-ideal module over the three-coordinate base. -/
+def localizationEquiv (r : ℂ) (s : Finset (Fin 3)) :
+    coordinateLocalization ℂ s ⊗[Base ℂ]
+      ((curveIdealOnSurface r 1) →ₗ[SurfaceRing r 1] SurfaceRing r 1) ≃ₗ[coordinateLocalization ℂ s]
+      HomModule r s :=
+  (hom_isBaseChange r s).equiv
+
+theorem localizationEquiv_tmul (r : ℂ) (s : Finset (Fin 3))
+    (a : coordinateLocalization ℂ s)
+    (φ : (curveIdealOnSurface r 1) →ₗ[SurfaceRing r 1] SurfaceRing r 1)
+    (z : curveIdealOnSurface r 1) :
+    localizationEquiv r s (a ⊗ₜ[Base ℂ] φ) (idealMap r s z)=
+      algebraMap (coordinateLocalization ℂ s) (CoordinateLocal r 1 s) a*
+        algebraMap (SurfaceRing r 1) (CoordinateLocal r 1 s) (φ z) := by
+  rw [localizationEquiv,IsBaseChange.equiv_tmul]
+  simp only [LinearMap.smul_apply,homMap_apply,Algebra.smul_def]
+
+theorem restriction_baseScalar (r : ℂ) {s t : Finset (Fin 3)} (hst : s ⊆ t)
+    (a : coordinateLocalization ℂ s) :
+    coordinateRestriction r 1 hst
+        (algebraMap (coordinateLocalization ℂ s) (CoordinateLocal r 1 s) a)=
+      algebraMap (coordinateLocalization ℂ t) (CoordinateLocal r 1 t)
+        (CycleQ2GeometricFreeCoordinateCech.baseRestriction ℂ hst a) := by
+  have h : (coordinateRestriction r 1 hst).toRingHom.comp
+        (algebraMap (coordinateLocalization ℂ s) (CoordinateLocal r 1 s)) =
+      (algebraMap (coordinateLocalization ℂ t) (CoordinateLocal r 1 t)).comp
+        (CycleQ2GeometricFreeCoordinateCech.baseRestriction ℂ hst).toRingHom := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers (baseProduct ℂ s))
+    apply RingHom.ext
+    intro p
+    change coordinateRestriction r 1 hst
+        (algebraMap (coordinateLocalization ℂ s) (CoordinateLocal r 1 s)
+          (algebraMap (Base ℂ) (coordinateLocalization ℂ s) p)) =
+      algebraMap (coordinateLocalization ℂ t) (CoordinateLocal r 1 t)
+        (CycleQ2GeometricFreeCoordinateCech.baseRestriction ℂ hst
+          (algebraMap (Base ℂ) (coordinateLocalization ℂ s) p))
+    rw [CycleQ2GeometricFreeCoordinateCech.baseRestriction_base,
+      ← IsScalarTower.algebraMap_apply (Base ℂ) (coordinateLocalization ℂ s)
+        (CoordinateLocal r 1 s),
+      ← IsScalarTower.algebraMap_apply (Base ℂ) (coordinateLocalization ℂ t)
+        (CoordinateLocal r 1 t)]
+    exact ((coordinateRestriction r 1 hst).restrictScalars (Base ℂ)).commutes p
+  exact RingHom.congr_fun h a
+
+def idealRestriction (r : ℂ) {s t : Finset (Fin 3)} (hst : s ⊆ t) :
+    IdealModule r s →ₗ[Base ℂ] IdealModule r t :=
+  (IdealHomLocalization.idealRestriction (curveIdealOnSurface r 1)
+    (coordinateRestriction r 1 hst)).restrictScalars (Base ℂ)
+
+@[simp] theorem idealRestriction_base (r : ℂ) {s t : Finset (Fin 3)} (hst : s ⊆ t)
+    (z : curveIdealOnSurface r 1) :
+    idealRestriction r hst (idealMap r s z)=idealMap r t z :=
+  IdealHomLocalization.idealRestriction_base _ _ z
+
+def restriction (r : ℂ) {s t : Finset (Fin 3)} (hst : s ⊆ t) :
+    HomModule r s →ₗ[Base ℂ] HomModule r t :=
+  (IdealHomLocalization.restriction (curveIdealOnSurface r 1)
+    (coordinateRestriction r 1 hst)).restrictScalars (Base ℂ)
+
+theorem restriction_evaluation_base (r : ℂ) {s t : Finset (Fin 3)} (hst : s ⊆ t)
+    (φ : HomModule r s) (z : curveIdealOnSurface r 1) :
+    restriction r hst φ (idealMap r t z)=
+      coordinateRestriction r 1 hst (φ (idealMap r s z)) :=
+  IdealHomLocalization.restriction_evaluation_base _ _ φ z
+
+/-- Restriction is literal evaluation on every actual localized ideal element. -/
+theorem restriction_evaluation (r : ℂ) {s t : Finset (Fin 3)} (hst : s ⊆ t)
+    (φ : HomModule r s) (y : IdealModule r s) :
+    restriction r hst φ (idealRestriction r hst y)=
+      coordinateRestriction r 1 hst (φ y) :=
+  IdealHomLocalization.restriction_evaluation _ _ φ y
+
+/-- The actual Hom restriction agrees with the coordinate tensor restriction
+used by the checked finite-free Cech contraction. -/
+theorem localizationEquiv_restriction (r : ℂ) {s t : Finset (Fin 3)} (hst : s ⊆ t)
+    (p : coordinateLocalization ℂ s ⊗[Base ℂ]
+      ((curveIdealOnSurface r 1) →ₗ[SurfaceRing r 1] SurfaceRing r 1)) :
+    restriction r hst (localizationEquiv r s p)=
+      localizationEquiv r t
+        (TensorProduct.map (CycleQ2GeometricFreeCoordinateCech.baseRestriction ℂ hst).toLinearMap
+          LinearMap.id p) := by
+  induction p using TensorProduct.induction_on with
+  | zero => simp
+  | add p q hp hq => simp only [map_add,hp,hq]
+  | tmul a φ =>
+    apply (IsLocalizedModule.isBaseChange
+      (Submonoid.powers (coordinateProduct r 1 t)) (CoordinateLocal r 1 t)
+      (Algebra.idealMap (CoordinateLocal r 1 t) (curveIdealOnSurface r 1))).algHom_ext
+    intro z
+    rw [TensorProduct.map_tmul]
+    change restriction r hst (localizationEquiv r s (a ⊗ₜ[Base ℂ] φ)) (idealMap r t z)=
+      localizationEquiv r t
+        ((CycleQ2GeometricFreeCoordinateCech.baseRestriction ℂ hst a) ⊗ₜ[Base ℂ] φ)
+        (idealMap r t z)
+    rw [restriction_evaluation_base,localizationEquiv_tmul,localizationEquiv_tmul]
+    simp only [AlgHom.toLinearMap_apply,LinearMap.id_apply,map_mul,
+      restriction_baseScalar,coordinateRestriction_base]
+
+end CoordinateInverseIdeal
+
+namespace CoordinateInverseIdeal
+
+open CycleQ2ConormalJacobian CycleQ2GeometricSeedNormalIdeals
+  CycleQ2SeedQuotientFiniteFree CycleQ2GeometricSurfaceCoordinates
+
+/-- Every actual inverse-ideal one-cocycle on the three coordinate opens has
+actual local-Hom primitives. This is the finite-free contraction transported
+through the proved, evaluation-preserving localization equivalences. -/
+theorem firstCech_exact (r : ℂ)
+    (p01 : HomModule r {0,1}) (p02 : HomModule r {0,2}) (p12 : HomModule r {1,2})
+    (hc : restriction r (show ({0,1} : Finset (Fin 3)) ⊆ Finset.univ by simp) p01 -
+      restriction r (show ({0,2} : Finset (Fin 3)) ⊆ Finset.univ by simp) p02 +
+      restriction r (show ({1,2} : Finset (Fin 3)) ⊆ Finset.univ by simp) p12 = 0) :
+    ∃ (q0 : HomModule r {0}) (q1 : HomModule r {1}) (q2 : HomModule r {2}),
+      p01 = restriction r (show ({1} : Finset (Fin 3)) ⊆ {0,1} by decide) q1 -
+        restriction r (show ({0} : Finset (Fin 3)) ⊆ {0,1} by decide) q0 ∧
+      p02 = restriction r (show ({2} : Finset (Fin 3)) ⊆ {0,2} by decide) q2 -
+        restriction r (show ({0} : Finset (Fin 3)) ⊆ {0,2} by decide) q0 ∧
+      p12 = restriction r (show ({2} : Finset (Fin 3)) ⊆ {1,2} by decide) q2 -
+        restriction r (show ({1} : Finset (Fin 3)) ⊆ {1,2} by decide) q1 := by
+  let M := (curveIdealOnSurface r 1) →ₗ[SurfaceRing r 1] SurfaceRing r 1
+  have hc' :
+      CycleQ2GeometricFreeCoordinateCech.restriction ℂ M
+          (show ({0,1} : Finset (Fin 3)) ⊆ Finset.univ by simp)
+          ((localizationEquiv r {0,1}).symm p01) -
+        CycleQ2GeometricFreeCoordinateCech.restriction ℂ M
+          (show ({0,2} : Finset (Fin 3)) ⊆ Finset.univ by simp)
+          ((localizationEquiv r {0,2}).symm p02) +
+        CycleQ2GeometricFreeCoordinateCech.restriction ℂ M
+          (show ({1,2} : Finset (Fin 3)) ⊆ Finset.univ by simp)
+          ((localizationEquiv r {1,2}).symm p12) = 0 := by
+    apply (localizationEquiv r Finset.univ).injective
+    simp only [map_add,map_sub,map_zero,CycleQ2GeometricFreeCoordinateCech.restriction]
+    rw [← localizationEquiv_restriction r
+        (show ({0,1} : Finset (Fin 3)) ⊆ Finset.univ by simp)
+        ((localizationEquiv r {0,1}).symm p01),
+      ← localizationEquiv_restriction r
+        (show ({0,2} : Finset (Fin 3)) ⊆ Finset.univ by simp)
+        ((localizationEquiv r {0,2}).symm p02),
+      ← localizationEquiv_restriction r
+        (show ({1,2} : Finset (Fin 3)) ⊆ Finset.univ by simp)
+        ((localizationEquiv r {1,2}).symm p12)]
+    simpa only [LinearEquiv.apply_symm_apply] using hc
+  obtain ⟨q0,q1,q2,h01,h02,h12⟩ :=
+    CycleQ2GeometricFreeCoordinateCech.firstCech_exact (surfaceInverseIdealBasis r)
+      ((localizationEquiv r {0,1}).symm p01)
+      ((localizationEquiv r {0,2}).symm p02)
+      ((localizationEquiv r {1,2}).symm p12) hc'
+  refine ⟨localizationEquiv r {0} q0,localizationEquiv r {1} q1,
+    localizationEquiv r {2} q2,?_,?_,?_⟩
+  · simpa only [map_sub,CycleQ2GeometricFreeCoordinateCech.restriction,
+      ← localizationEquiv_restriction,LinearEquiv.apply_symm_apply] using
+      congrArg (localizationEquiv r {0,1}) h01
+  · simpa only [map_sub,CycleQ2GeometricFreeCoordinateCech.restriction,
+      ← localizationEquiv_restriction,LinearEquiv.apply_symm_apply] using
+      congrArg (localizationEquiv r {0,2}) h02
+  · simpa only [map_sub,CycleQ2GeometricFreeCoordinateCech.restriction,
+      ← localizationEquiv_restriction,LinearEquiv.apply_symm_apply] using
+      congrArg (localizationEquiv r {1,2}) h12
+
+end CoordinateInverseIdeal
+
+/-! ## Canonical normal reduction and the original connecting class -/
+
+namespace NormalReduction
+
+section General
+variable {R U V : Type*} [CommRing R] [CommRing U] [CommRing V]
+  [Algebra R U] [Algebra R V]
+
+theorem cotangentDual_ext (I : Ideal R)
+    {φ ψ : V ⊗[R] I.Cotangent →ₗ[V] V}
+    (h : ∀ x : I, φ ((1 : V) ⊗ₜ[R] I.toCotangent x)=
+      ψ ((1 : V) ⊗ₜ[R] I.toCotangent x)) : φ=ψ := by
+  apply LinearMap.ext
+  intro z
+  induction z using TensorProduct.induction_on with
+  | zero => simp
+  | add z w hz hw => simp only [map_add,hz,hw]
+  | tmul a y =>
+    obtain ⟨x,rfl⟩ := I.toCotangent_surjective y
+    have he : a ⊗ₜ[R] I.toCotangent x =
+        a • ((1 : V) ⊗ₜ[R] I.toCotangent x) := by
+      rw [TensorProduct.smul_tmul',smul_eq_mul,mul_one]
+    rw [he,map_smul,map_smul,h]
+
+/-- Reduction is additive on genuine inverse-ideal functionals. -/
+def reductionAddHom (I : Ideal R) (ρ : U →ₐ[R] V)
+    (hI : ∀ x ∈ I, algebraMap R V x=0) :
+    (I.map (algebraMap R U) →ₗ[U] U) →+ (V ⊗[R] I.Cotangent →ₗ[V] V) where
+  toFun := inverseIdealReduction I ρ hI
+  map_zero' := by
+    apply cotangentDual_ext I
+    intro x
+    rw [inverseIdealReduction_equation]
+    simp
+  map_add' φ ψ := by
+    apply cotangentDual_ext I
+    intro x
+    simp only [LinearMap.add_apply,inverseIdealReduction_equation,map_add]
+
+@[simp] theorem reductionAddHom_equation (I : Ideal R) (ρ : U →ₐ[R] V)
+    (hI : ∀ x ∈ I, algebraMap R V x=0)
+    (φ : I.map (algebraMap R U) →ₗ[U] U) (x : I) :
+    reductionAddHom I ρ hI φ ((1 : V) ⊗ₜ[R] I.toCotangent x)=
+      ρ (φ (Algebra.idealMap U I x)) :=
+  inverseIdealReduction_equation I ρ hI φ x
+
+/-- Actual multiplication maps reduce to zero because the actual coefficient
+map kills the actual ideal. No normal-bundle comparison is assumed. -/
+theorem scalar (I : Ideal R) (ρ : U →ₐ[R] V)
+    (hI : ∀ x ∈ I, algebraMap R V x=0) (a : U) :
+    reductionAddHom I ρ hI (a • (I.map (algebraMap R U)).subtype)=0 := by
+  apply cotangentDual_ext I
+  intro x
+  rw [reductionAddHom_equation]
+  change ρ (a * algebraMap R U (x : R))=0
+  rw [map_mul,ρ.commutes,hI _ x.property,mul_zero]
+
+end General
+
+open CycleQ2ConormalJacobian CycleQ2NaturalNormalMap CycleQ2NormalConnecting
+  CycleQ2SeedTrace CycleQ2ActualNormalCech CycleQ2GeometricSeedNormalIdeals
+  CycleQ2GenuineNormalConnecting CycleQ2NormalRestriction CycleQ2SeedCechTheta
+
+abbrev SurfaceHom (r θ : ℂ) (s : Finset (Fin 4)) :=
+  IdealHomLocalization.LocalHom (curveIdealOnSurface r θ) (coverProduct r θ s)
+
+def equationElement (r θ : ℂ) (i : Fin 3) : curveIdealOnSurface r θ :=
+  ⟨surfaceQuotient r θ (curveEquations r θ i),
+    Ideal.mem_map_of_mem _ (curveEquation_mem r θ i)⟩
+
+/-- The actual first surface cover open maps to the already fixed first curve open. -/
+def firstToCurve (r θ : ℂ) :
+    CoverLocal r θ {0} →ₐ[SurfaceRing r θ] FirstOpen r θ where
+  __ := IsLocalization.Away.lift (S := CoverLocal r θ {0})
+    (g := algebraMap (SurfaceRing r θ) (FirstOpen r θ)) (coverProduct r θ {0}) (by
+      simp only [coverProduct,Finset.prod_singleton]
+      change IsUnit (algebraMap P (FirstOpen r θ) (originalG1 r))
+      rw [← firstUnit_value]
+      exact (firstOpenUnit r θ).isUnit)
+  commutes' x := IsLocalization.Away.lift_eq _ _ x
+
+def secondToCurve (r θ : ℂ) :
+    CoverLocal r θ {1} →ₐ[SurfaceRing r θ] SecondOpen r θ where
+  __ := IsLocalization.Away.lift (S := CoverLocal r θ {1})
+    (g := algebraMap (SurfaceRing r θ) (SecondOpen r θ)) (coverProduct r θ {1}) (by
+      simp only [coverProduct,Finset.prod_singleton]
+      change IsUnit (algebraMap P (SecondOpen r θ) originalG2)
+      rw [← secondUnit_value]
+      exact (secondOpenUnit r θ).isUnit)
+  commutes' x := IsLocalization.Away.lift_eq _ _ x
+
+theorem first_annihilation (r θ : ℂ) :
+    ∀ x ∈ curveIdealOnSurface r θ, algebraMap (SurfaceRing r θ) (FirstOpen r θ) x=0 := by
+  have h : curveIdealOnSurface r θ ≤
+      RingHom.ker (algebraMap (SurfaceRing r θ) (FirstOpen r θ)) := by
+    apply Ideal.map_le_iff_le_comap.mpr
+    intro p hp
+    exact CycleQ2ActualNormalCech.first_annihilates r θ p hp
+  exact fun x hx => h hx
+
+theorem second_annihilation (r θ : ℂ) :
+    ∀ x ∈ curveIdealOnSurface r θ, algebraMap (SurfaceRing r θ) (SecondOpen r θ) x=0 := by
+  have h : curveIdealOnSurface r θ ≤
+      RingHom.ker (algebraMap (SurfaceRing r θ) (SecondOpen r θ)) := by
+    apply Ideal.map_le_iff_le_comap.mpr
+    intro p hp
+    exact CycleQ2ActualNormalCech.second_annihilates r θ p hp
+  exact fun x hx => h hx
+
+/-- The original curve restrictions also respect the actual surface action,
+because that action is induced by a surjective quotient of the ambient ring. -/
+def firstCurveRestriction (r θ : ℂ) :
+    FirstOpen r θ →ₐ[SurfaceRing r θ] Overlap r θ :=
+  (firstRestrictionAlg r θ).extendScalarsOfSurjective
+    (show Function.Surjective (algebraMap P (SurfaceRing r θ)) from
+      Ideal.Quotient.mk_surjective)
+
+def secondCurveRestriction (r θ : ℂ) :
+    SecondOpen r θ →ₐ[SurfaceRing r θ] Overlap r θ :=
+  (secondRestrictionAlg r θ).extendScalarsOfSurjective
+    (show Function.Surjective (algebraMap P (SurfaceRing r θ)) from
+      Ideal.Quotient.mk_surjective)
+
+@[simp] theorem firstCurveRestriction_apply (r θ : ℂ) (x : FirstOpen r θ) :
+    firstCurveRestriction r θ x=firstRestriction r θ x := rfl
+@[simp] theorem secondCurveRestriction_apply (r θ : ℂ) (x : SecondOpen r θ) :
+    secondCurveRestriction r θ x=secondRestriction r θ x := rfl
+
+/-- Restriction commutes on every element of the actual first surface localization. -/
+theorem first_square (r θ : ℂ) (x : CoverLocal r θ {0}) :
+    overlapToCurve r θ (coverRestriction r θ (show ({0} : Finset (Fin 4)) ⊆ {0,1} by simp) x)=
+      firstRestriction r θ (firstToCurve r θ x) := by
+  letI : Subsingleton (CoverLocal r θ {0} →ₐ[SurfaceRing r θ] Overlap r θ) :=
+    IsLocalization.algHom_subsingleton (Submonoid.powers (coverProduct r θ {0}))
+  have hh : (overlapToCurve r θ).comp
+        (coverRestriction r θ (show ({0} : Finset (Fin 4)) ⊆ {0,1} by simp)) =
+      (firstCurveRestriction r θ).comp (firstToCurve r θ) := Subsingleton.elim _ _
+  simpa only [AlgHom.comp_apply,firstCurveRestriction_apply] using AlgHom.congr_fun hh x
+
+theorem second_square (r θ : ℂ) (x : CoverLocal r θ {1}) :
+    overlapToCurve r θ (coverRestriction r θ (show ({1} : Finset (Fin 4)) ⊆ {0,1} by simp) x)=
+      secondRestriction r θ (secondToCurve r θ x) := by
+  letI : Subsingleton (CoverLocal r θ {1} →ₐ[SurfaceRing r θ] Overlap r θ) :=
+    IsLocalization.algHom_subsingleton (Submonoid.powers (coverProduct r θ {1}))
+  have hh : (overlapToCurve r θ).comp
+        (coverRestriction r θ (show ({1} : Finset (Fin 4)) ⊆ {0,1} by simp)) =
+      (secondCurveRestriction r θ).comp (secondToCurve r θ) := Subsingleton.elim _ _
+  simpa only [AlgHom.comp_apply,secondCurveRestriction_apply] using AlgHom.congr_fun hh x
+
+/-- The three maps use the canonical conormal reduction followed by the
+already proved actual surface-relative-normal/ambient-kernel comparison. -/
+def first (r θ : ℂ) : SurfaceHom r θ {0} →+ FirstKernel r θ :=
+  (firstNormalModuleEquiv r θ).toAddMonoidHom.comp
+    (reductionAddHom (curveIdealOnSurface r θ) (firstToCurve r θ) (first_annihilation r θ))
+
+def second (r θ : ℂ) : SurfaceHom r θ {1} →+ SecondKernel r θ :=
+  (secondNormalModuleEquiv r θ).toAddMonoidHom.comp
+    (reductionAddHom (curveIdealOnSurface r θ) (secondToCurve r θ) (second_annihilation r θ))
+
+def overlap (r θ : ℂ) : SurfaceHom r θ {0,1} →+ OverlapKernel r θ :=
+  (overlapNormalModuleEquiv r θ).toAddMonoidHom.comp
+    (reductionAddHom (curveIdealOnSurface r θ) (overlapToCurve r θ)
+      (surfaceCurveIdeal_annihilates r θ))
+
+@[simp] theorem first_scalar (r θ : ℂ) (a : CoverLocal r θ {0}) :
+    first r θ (a • (IdealHomLocalization.LocalIdeal (curveIdealOnSurface r θ)
+      (coverProduct r θ {0})).subtype)=0 := by
+  change firstNormalModuleEquiv r θ
+    (reductionAddHom (curveIdealOnSurface r θ) (firstToCurve r θ)
+      (first_annihilation r θ) (a • _))=0
+  rw [scalar,map_zero]
+
+@[simp] theorem second_scalar (r θ : ℂ) (a : CoverLocal r θ {1}) :
+    second r θ (a • (IdealHomLocalization.LocalIdeal (curveIdealOnSurface r θ)
+      (coverProduct r θ {1})).subtype)=0 := by
+  change secondNormalModuleEquiv r θ
+    (reductionAddHom (curveIdealOnSurface r θ) (secondToCurve r θ)
+      (second_annihilation r θ) (a • _))=0
+  rw [scalar,map_zero]
+
+@[simp] theorem overlap_scalar (r θ : ℂ) (a : SurfaceOverlap r θ) :
+    overlap r θ (a • (overlapCurveIdeal r θ).subtype)=0 := by
+  have hs := scalar (R := SurfaceRing r θ) (U := SurfaceOverlap r θ) (V := Overlap r θ)
+    (curveIdealOnSurface r θ) (overlapToCurve r θ) (surfaceCurveIdeal_annihilates r θ) a
+  exact (congrArg (overlapNormalModuleEquiv r θ) hs).trans (map_zero _)
+
+section EquationComparison
+variable (r θ : ℂ) (S : Type*) [CommRing S] [Algebra P S]
+  [Algebra (SurfaceRing r θ) S] [IsScalarTower P (SurfaceRing r θ) S]
+
+theorem normal_equation (φ : RelativeNormal r θ S) (i : Fin 3) :
+    (normalModuleEquiv r θ S φ).val ((1 : S) ⊗ₜ[P] conormalGenerator r θ i)=
+      φ (relativeEquationClass r θ S i) := by
+  simpa only [LinearEquiv.symm_apply_apply] using
+    (normalModuleEquiv_symm_equation r θ S (normalModuleEquiv r θ S φ) i).symm
+
+end EquationComparison
+
+@[simp] theorem first_equation (r θ : ℂ) (φ : SurfaceHom r θ {0}) (i : Fin 3) :
+    (first r θ φ).val (curveClass r θ i)=
+      firstToCurve r θ (φ (Algebra.idealMap (CoverLocal r θ {0})
+        (curveIdealOnSurface r θ) (equationElement r θ i))) := by
+  change (normalModuleEquiv r θ (FirstOpen r θ)
+    (reductionAddHom (curveIdealOnSurface r θ) (firstToCurve r θ)
+      (first_annihilation r θ) φ)).val ((1 : FirstOpen r θ) ⊗ₜ[P] conormalGenerator r θ i)=_
+  rw [normal_equation]
+  exact reductionAddHom_equation _ _ _ φ (equationElement r θ i)
+
+@[simp] theorem second_equation (r θ : ℂ) (φ : SurfaceHom r θ {1}) (i : Fin 3) :
+    (second r θ φ).val (curveClass r θ i)=
+      secondToCurve r θ (φ (Algebra.idealMap (CoverLocal r θ {1})
+        (curveIdealOnSurface r θ) (equationElement r θ i))) := by
+  change (normalModuleEquiv r θ (SecondOpen r θ)
+    (reductionAddHom (curveIdealOnSurface r θ) (secondToCurve r θ)
+      (second_annihilation r θ) φ)).val ((1 : SecondOpen r θ) ⊗ₜ[P] conormalGenerator r θ i)=_
+  rw [normal_equation]
+  exact reductionAddHom_equation _ _ _ φ (equationElement r θ i)
+
+@[simp] theorem overlap_equation (r θ : ℂ) (φ : SurfaceHom r θ {0,1}) (i : Fin 3) :
+    (overlap r θ φ).val (curveClass r θ i)=
+      overlapToCurve r θ (φ (Algebra.idealMap (SurfaceOverlap r θ)
+        (curveIdealOnSurface r θ) (equationElement r θ i))) := by
+  change (normalModuleEquiv r θ (Overlap r θ)
+    (reductionAddHom (curveIdealOnSurface r θ) (overlapToCurve r θ)
+      (surfaceCurveIdeal_annihilates r θ) φ)).val
+        ((1 : Overlap r θ) ⊗ₜ[P] conormalGenerator r θ i)=_
+  rw [normal_equation]
+  exact reductionAddHom_equation _ _ _ φ (equationElement r θ i)
+
+/-- Restricting a genuine inverse-ideal section and then reducing agrees
+with the already fixed first normal-kernel restriction. -/
+theorem first_restriction (r θ : ℂ) (φ : SurfaceHom r θ {0}) :
+    firstKernelRestriction r θ (first r θ φ)=
+      overlap r θ (IdealHomLocalization.restriction (curveIdealOnSurface r θ)
+        (coverRestriction r θ (show ({0} : Finset (Fin 4)) ⊆ {0,1} by simp)) φ) := by
+  apply Subtype.ext
+  change curveRestriction r θ (firstRestrictionAlg r θ) (first r θ φ).val=_
+  apply curveNormal_ext r θ
+  intro i
+  rw [curveRestriction_class,first_equation,overlap_equation,
+    IdealHomLocalization.restriction_evaluation_base]
+  exact (first_square r θ (φ (Algebra.idealMap (CoverLocal r θ {0})
+    (curveIdealOnSurface r θ) (equationElement r θ i)))).symm
+
+theorem second_restriction (r θ : ℂ) (φ : SurfaceHom r θ {1}) :
+    secondKernelRestriction r θ (second r θ φ)=
+      overlap r θ (IdealHomLocalization.restriction (curveIdealOnSurface r θ)
+        (coverRestriction r θ (show ({1} : Finset (Fin 4)) ⊆ {0,1} by simp)) φ) := by
+  apply Subtype.ext
+  change curveRestriction r θ (secondRestrictionAlg r θ) (second r θ φ).val=_
+  apply curveNormal_ext r θ
+  intro i
+  rw [curveRestriction_class,second_equation,overlap_equation,
+    IdealHomLocalization.restriction_evaluation_base]
+  exact (second_square r θ (φ (Algebra.idealMap (CoverLocal r θ {1})
+    (curveIdealOnSurface r θ) (equationElement r θ i)))).symm
+
+/-- The same fixed inverse-ideal overlap cochain reduces to the original
+normal connecting representative, with no replacement of either class. -/
+theorem overlap_connectingLift (r θ : ℂ) (A L : P) :
+    overlap r θ (inverseIdealConnectingLift r θ A L)=connectingRepresentative r θ A L := by
+  change overlapNormalModuleEquiv r θ (reducedInverseIdealConnectingLift r θ A L)=_
+  rw [reducedInverseIdealConnectingLift_eq]
+  exact CycleQ2GeometricRelativeNormalConnecting.relativeConnectingRepresentative_comparison r θ A L
+
+/-- An actual inverse-ideal coboundary, up to an actual scalar cochain,
+forces the already defined normal connecting class to vanish. -/
+theorem connectingClass_zero_of_coboundary (r θ : ℂ) (A L : P)
+    (φ0 : SurfaceHom r θ {0}) (φ1 : SurfaceHom r θ {1}) (a : SurfaceOverlap r θ)
+    (h : (inverseIdealConnectingLift r θ A L : SurfaceHom r θ {0,1}) =
+      IdealHomLocalization.restriction (curveIdealOnSurface r θ)
+          (coverRestriction r θ (show ({1} : Finset (Fin 4)) ⊆ {0,1} by simp)) φ1 -
+        IdealHomLocalization.restriction (curveIdealOnSurface r θ)
+          (coverRestriction r θ (show ({0} : Finset (Fin 4)) ⊆ {0,1} by simp)) φ0 +
+        (show SurfaceHom r θ {0,1} from a • (overlapCurveIdeal r θ).subtype)) :
+    connectingClass r θ A L=0 := by
+  have he := congrArg (overlap r θ) h
+  rw [overlap_connectingLift,map_add,map_sub,overlap_scalar,add_zero,
+    ← second_restriction,← first_restriction] at he
+  apply (Submodule.Quotient.mk_eq_zero (normalBoundaries r θ)).mpr
+  change connectingRepresentative r θ A L ∈ normalBoundaries r θ
+  rw [he]
+  apply (normalBoundaries r θ).sub_mem
+  · exact Submodule.mem_sup_right (show secondKernelRestriction r θ (second r θ φ1) ∈
+      LinearMap.range (secondKernelRestriction r θ) from ⟨second r θ φ1,rfl⟩)
+  · exact Submodule.mem_sup_left (show firstKernelRestriction r θ (first r θ φ0) ∈
+      LinearMap.range (firstKernelRestriction r θ) from ⟨first r θ φ0,rfl⟩)
+
+end NormalReduction
 
 end CycleQ2GeometricCartierNormalLift

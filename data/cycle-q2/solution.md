@@ -1,5 +1,151 @@
 # A nonconstructive geometric route for cycle-q2
 
+
+## Actual inverse-ideal restrictions and principal-cover descent — 14 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains open.
+This checkpoint supplies actual inverse-ideal restriction maps, their
+reduction to the original normal Čech complex, and the degree-one
+change-of-cover theorem needed for the Cartier boundary argument. The
+original scalar Cartier two-cocycle is placed in its actual cohomology
+quotient. Nonvanishing of that quotient class is the next application;
+it is not asserted by this checkpoint.
+
+### The actual inverse ideal and its restrictions
+
+[GeometricCartierNormalLift.lean](GeometricCartierNormalLift.lean) now proves
+that the actual module
+\[
+M=\operatorname{Hom}_{A}(I,A),\qquad
+A=\operatorname{SurfaceRing}(r,1),\quad
+I=\operatorname{curveIdealOnSurface}(r,1),
+\]
+has nine free coordinates over \(R=\mathbb C[x_1,x_2,x_3]\).
+The construction uses the original quotient ring and original curve ideal.
+It provides the bases of the actual surface and ideal, a perfect
+coefficient pairing, and the induced Hom equivalence. The coefficient
+functional is the coefficient of \(x_0^2w^2\); its dual basis is constructed
+explicitly. Freeness is over \(R\). No projectivity or freeness over the
+surface ring is assumed.
+
+This is an independent presentation of the inverse-ideal freeness also
+proved in the preceding shared-branch contribution
+[GeometricInverseIdealBasis.lean](GeometricInverseIdealBasis.lean). The
+present continuation uses its own actual quotient-ring basis to establish
+the restrictions and reduction maps needed by the four-open Cartier
+construction. Both developments are preserved.
+
+For every principal denominator \(g\), the actual ideal is finitely
+presented, and the canonical tensor-localization comparison is proved:
+\[
+A[g^{-1}]\otimes_A\operatorname{Hom}_A(I,A)
+\simeq_A
+\operatorname{Hom}_{A[g^{-1}]}
+ (I A[g^{-1}],A[g^{-1}]).
+\]
+`IdealHomLocalization.tensorEquiv` is fixed by evaluation on the original
+ideal. `tensorEquiv_restriction` proves its compatibility with the actual
+restriction homomorphisms. The restriction/evaluation identity holds on
+all localized ideal elements, not only on a selected basis. Identity,
+composition, and restriction of scalar multiplication are proved.
+
+`CoordinateInverseIdeal.firstCech_exact` supplies actual local-Hom
+primitives on the three coordinate opens. Its proof combines the proved
+nine-element basis, coordinate Čech exactness, the actual localization
+comparisons, and their naturality. Thus its input cocycle and output
+primitives live in the genuine localized ideal Hom modules.
+
+The `NormalReduction` construction then reduces local inverse-ideal
+homomorphisms to the existing `FirstKernel`, `SecondKernel`, and
+`OverlapKernel`. These maps commute with the original normal restriction
+maps; scalar ideal inclusions reduce to zero. The fixed inverse-ideal
+connecting lift reduces to the original connecting representative. In
+particular, `connectingClass_zero_of_coboundary` proves that an equality
+\[
+\widetilde\nu=\varphi_1|_{01}-\varphi_0|_{01}+a\,\mathrm{id}_I
+\]
+in the actual overlap Hom module forces the original normal connecting
+class to vanish. This is an explicit comparison of the original classes.
+It requires no unproved sheaf identification.
+
+### Actual Čech cochains and the principal-cover comparison
+
+[GeometricCartierCech.lean](GeometricCartierCech.lean) defines the four-open
+Čech complex for a restriction system with its original linear maps.
+The differentials have the usual alternating signs, and both consecutive
+composites are proved zero. Its second cohomology is the quotient of the
+actual two-cocycles by the actual one-cochain boundaries.
+
+For the original Cartier cover
+\[
+D(g_1),\ D(g_2),\ D(f_1),\ D(f_2),
+\]
+`cartierCycle` is precisely the previously constructed scalar cocycle:
+its only nonzero faces are `boundary012` and `boundary013`.
+`cartierClass_eq_zero_iff` states that its quotient class vanishes exactly
+when this fixed cocycle has an actual scalar one-cochain primitive.
+
+The affine lemmas are proved from principal localization. When one cover
+member is a unit, an explicit contraction supplies degree-one primitives
+and unique degree-zero gluing. Localization of the finite cochain
+products and the local criterion for exactness then establish these
+results for every four-element principal cover generating the unit ideal.
+The proof also treats arbitrary scalar extension through its actual
+tensor maps.
+
+For two principal covers whose generated ideals have the same radical,
+the common refinement is the actual module
+\[
+R[b_J^{-1}]\otimes_R
+  \bigl(R[a_I^{-1}]\otimes_R M\bigr).
+\]
+The two restriction directions commute by their tensor formulas. On a
+nonempty overlap of either cover, the other cover generates the unit
+ideal; this is proved directly from the radical relation and the inverted
+coordinate. The double-complex chase uses the resulting affine
+exactness and gluing to construct primitives on the first cover from
+primitives on the second. The theorem
+`first_exact_of_radical_eq` therefore transfers degree-one exactness
+between the actual localization complexes. A cover comparison is proved,
+not supplied as a hypothesis.
+
+The helper also proves the precise reduction from a three-member cover
+to a four-member cover with an empty fourth open. This keeps the original
+three-coordinate calculation compatible with the four-open Cartier
+complex and its fixed signs.
+
+### Verification and the remaining application
+
+The exact 2,493-line `GeometricCartierNormalLift` source and the exact
+1,850-line `GeometricCartierCech` source have each passed compilation and
+independent kernel replay under the unchanged local resource limits.
+Separate pure-import audits cover 38 and 27 named endpoints, respectively;
+all use only `propext`, `Classical.choice`, and `Quot.sound`. These objects
+have no dependency on the geometry files changed by the concurrent
+canonical-cohomology contributions, so their source-bound checks remain
+current after those contributions are integrated.
+
+The declaration-free facades `Assembly05` and `Assembly06` are replaced in
+their importers by their respective sole imports. Their proof bodies are
+empty; surviving declarations and dependency reachability are preserved.
+This checkpoint contains 255 proposal files. All protected files and the
+protected target remain unchanged. The local checks reported here concern
+the specified helper objects and their dependencies; they do not assert a
+full build or acceptance of the older aggregate proposal.
+
+The next step binds the proved coordinate Hom primitives to the Cartier
+cover through `first_exact_of_radical_eq`, then combines the resulting
+inverse-ideal primitive with `NormalReduction` and the literal nonzero
+normal class. The current checkpoint does not yet contain that assembled
+nonvanishing theorem. Projective and derived degree-two comparisons,
+normal adjunction, the geometric trace and moving-cycle argument, and the
+global support and algebraic de Rham passage remain further obligations.
+The only admission is still `Solution.lean:138`.
+
+The continuation follows Ben Diamond's nonconstructive geometric route
+and preserves the prior shared-branch contributions. The new proof
+construction and Lean work were developed with OpenAI assistant support.
+
 ## The actual inverse ideal has nine free coordinates — 14 November 2026
 
 The final theorem `Submission.missing_geometric_existence` remains open.
