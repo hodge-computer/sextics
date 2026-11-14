@@ -1,0 +1,1219 @@
+import Proposal.GeometricDifferentialSheaf
+import Mathlib.Algebra.Category.ModuleCat.Sheaf.PushforwardContinuous
+import Mathlib.Algebra.Category.ModuleCat.Sheaf.Limits
+import Mathlib.Algebra.Category.ModuleCat.Kernels
+import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Kernels
+import Mathlib.CategoryTheory.Sites.SheafHom
+import Mathlib.CategoryTheory.Sites.Subsheaf
+import Mathlib.RingTheory.Ideal.Cotangent
+import Mathlib.RingTheory.TensorProduct.Basic
+import Proposal.GeometricLiteralSurface
+import Mathlib.AlgebraicGeometry.Modules.Tilde
+import Mathlib.Algebra.Module.LocalizedModule.Submodule
+
+/-!
+# The actual kernel ideal sheaf of a scheme morphism
+
+This construction uses the literal morphism of structure sheaves. Its
+sections are identified with the kernel of the actual section-ring map,
+including restriction compatibility. It provides the ideal-sheaf input
+for an intrinsic normal sheaf; no normal-frame identification is assumed.
+-/
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2GeometricIntrinsicNormal
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+variable {X Y : Scheme.{0}} (j : X ⟶ Y)
+
+/-- The actual scheme section maps bundled as a morphism of ring sheaves. -/
+def schemeRingMap :
+    ringSheaf Y.sheaf ⟶
+      ((Opens.map j.base).sheafPushforwardContinuous RingCat.{0}
+        (Opens.grothendieckTopology Y) (Opens.grothendieckTopology X)).obj
+          (ringSheaf X.sheaf) where
+  hom :=
+    { app U := RingCat.ofHom (j.app U.unop).hom
+      naturality {U V} f := by
+        ext a
+        exact congrArg (fun g : Γ(Y, U.unop) ⟶ Γ(X, j ⁻¹ᵁ V.unop) => g a)
+          (j.naturality f) }
+
+/-- The direct image of the actual structure module of the source scheme. -/
+def imageStructureModule : SheafOfModules.{0} (ringSheaf Y.sheaf) :=
+  (SheafOfModules.pushforward (F := Opens.map j.base) (schemeRingMap j)).obj
+    (SheafOfModules.unit (ringSheaf X.sheaf))
+
+/-- The actual structure homomorphism as a map of module sheaves. -/
+def schemeStructureMap :
+    SheafOfModules.unit (ringSheaf Y.sheaf) ⟶ imageStructureModule j where
+  val.app U := ModuleCat.homMk
+    ((forget₂ RingCat AddCommGrpCat).map ((schemeRingMap j).hom.app U))
+      (fun r ↦ by
+        ext m
+        exact (((schemeRingMap j).hom.app U).hom.map_mul r m).symm)
+  val.naturality {U V} f := by
+    apply ModuleCat.hom_ext
+    apply LinearMap.ext
+    intro a
+    exact congrArg (fun g : Γ(Y, U.unop) ⟶ Γ(X, j ⁻¹ᵁ V.unop) => g a)
+      (j.naturality f)
+
+@[simp] theorem schemeStructureMap_app (U : Y.Opens) (a : Γ(Y, U)) :
+    (schemeStructureMap j).val.app (op U) a = j.app U a := rfl
+
+/-- The actual ideal subsheaf cut out by the scheme morphism. -/
+def kernelIdealSheaf : SheafOfModules.{0} (ringSheaf Y.sheaf) :=
+  kernel (schemeStructureMap j)
+
+/-- Evaluation of the categorical kernel is the literal kernel ideal of
+the corresponding ring map on sections. -/
+def kernelIdealSectionIso (U : Y.Opens) :
+    (kernelIdealSheaf j).val.obj (op U) ≅
+      ModuleCat.of Γ(Y, U) (RingHom.ker (j.app U).hom) := by
+  letI : (SheafOfModules.evaluation (ringSheaf Y.sheaf) (op U)).Additive := by
+    dsimp [SheafOfModules.evaluation]
+    infer_instance
+  exact PreservesKernel.iso (SheafOfModules.evaluation (ringSheaf Y.sheaf) (op U))
+      (schemeStructureMap j) ≪≫
+    ModuleCat.kernelIsoKer ((schemeStructureMap j).val.app (op U))
+
+def kernelIdealSectionEquiv (U : Y.Opens) :
+    (kernelIdealSheaf j).val.obj (op U) ≃ₗ[Γ(Y, U)] RingHom.ker (j.app U).hom :=
+  (kernelIdealSectionIso j U).toLinearEquiv
+
+theorem kernelIdealSectionIso_hom_subtype (U : Y.Opens) :
+    (kernelIdealSectionIso j U).hom ≫
+      ModuleCat.ofHom (RingHom.ker (j.app U).hom).subtype =
+      (kernel.ι (schemeStructureMap j)).val.app (op U) := by
+  let : (SheafOfModules.evaluation (ringSheaf Y.sheaf) (op U)).Additive := by
+    dsimp [SheafOfModules.evaluation]
+    infer_instance
+  change ((PreservesKernel.iso
+      (SheafOfModules.evaluation (ringSheaf Y.sheaf) (op U))
+      (schemeStructureMap j)).hom ≫
+      (ModuleCat.kernelIsoKer ((schemeStructureMap j).val.app (op U))).hom) ≫ _ = _
+  rw [Category.assoc]
+  exact (congrArg
+    (fun k => (PreservesKernel.iso
+      (SheafOfModules.evaluation (ringSheaf Y.sheaf) (op U))
+      (schemeStructureMap j)).hom ≫ k)
+    (ModuleCat.kernelIsoKer_hom_ker_subtype ((schemeStructureMap j).val.app (op U)))).trans
+    (kernelComparison_comp_ι (schemeStructureMap j)
+      (SheafOfModules.evaluation (ringSheaf Y.sheaf) (op U)))
+
+@[simp] theorem kernelIdealSectionEquiv_coe (U : Y.Opens)
+    (a : (kernelIdealSheaf j).val.obj (op U)) :
+    (kernelIdealSectionEquiv j U a : Γ(Y, U)) =
+      (kernel.ι (schemeStructureMap j)).val.app (op U) a := by
+  exact ConcreteCategory.congr_hom (kernelIdealSectionIso_hom_subtype j U) a
+
+theorem kernelIdealSectionEquiv_restrict {U V : Y.Opens} (h : V ⟶ U)
+    (a : (kernelIdealSheaf j).val.obj (op U)) :
+    (kernelIdealSectionEquiv j V ((kernelIdealSheaf j).val.map h.op a) : Γ(Y, V)) =
+      Y.presheaf.map h.op (kernelIdealSectionEquiv j U a) := by
+  simp only [kernelIdealSectionEquiv_coe]
+  exact PresheafOfModules.naturality_apply (kernel.ι (schemeStructureMap j)).val h.op a
+
+#print axioms kernelIdealSectionIso
+
+end CycleQ2GeometricIntrinsicNormal
+end
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+variable {T : TopCat.{0}} (R : T.Sheaf CommRingCat.{0})
+  (M N : SheafOfModules.{0} (ringSheaf R))
+
+local instance overModule (U : Opens T) (V : Over U) :
+    Module ((ringSheaf R).obj.obj (op V.left))
+      (((Over.forget U).op ⋙ N.val.presheaf).obj (op V)) := by
+  change Module ((ringSheaf R).obj.obj (op V.left)) (N.val.obj (op V.left))
+  infer_instance
+
+/-- The subsheaf of local additive natural transformations which are linear
+over every local section ring. -/
+def linearHomSubfunctor : Subfunctor (presheafHom M.val.presheaf N.val.presheaf) where
+  obj U := { f | ∀ (V : Over U.unop)
+    (r : (ringSheaf R).obj.obj (op V.left)) (m : M.val.obj (op V.left)),
+    f.app (op V) (r • m) = r • f.app (op V) m }
+  map {U V} h f hf := by
+    intro W r m
+    exact hf ((Over.map h.unop).obj W) r m
+
+theorem moduleUnderlying_isSheaf :
+    Presieve.IsSheaf (Opens.grothendieckTopology T)
+      (N.val.presheaf ⋙ forget AddCommGrpCat.{0}) :=
+  (isSheaf_iff_isSheaf_of_type _ _).mp
+    (Presheaf.isSheaf_comp_of_isSheaf _ _ (forget AddCommGrpCat.{0}) N.isSheaf)
+
+theorem linearHomSubfunctor_isSheaf :
+    Presieve.IsSheaf (Opens.grothendieckTopology T)
+      (linearHomSubfunctor R M N).toFunctor := by
+  apply ((linearHomSubfunctor R M N).isSheaf_iff
+    ((isSheaf_iff_isSheaf_of_type _ _).mp
+      (Presheaf.IsSheaf.hom M.val.presheaf N.val.presheaf N.isSheaf))).mpr
+  intro U f hf V r m
+  let S := (linearHomSubfunctor R M N).sieveOfSection f
+  apply ((moduleUnderlying_isSheaf R N) (S.pullback V.hom)
+    ((Opens.grothendieckTopology T).pullback_stable V.hom hf)).isSeparatedFor.ext
+  intro W h hh
+  have hlin := hh (Over.mk (𝟙 W))
+    ((ringSheaf R).obj.map h.op r) (M.val.map h.op m)
+  have hnat (x : M.val.obj (op V.left)) :
+      f.app (op (Over.mk (h ≫ V.hom))) (M.val.map h.op x) =
+        N.val.map h.op (f.app (op V) x) :=
+    ConcreteCategory.congr_hom
+      (f.naturality (Over.homMk h : Over.mk (h ≫ V.hom) ⟶ V).op) x
+  change N.val.map h.op (f.app (op V) (r • m)) =
+    N.val.map h.op (r • f.app (op V) m)
+  rw [← hnat, M.val.map_smul, N.val.map_smul, ← hnat]
+  have e := presheafHom_map_app_op_mk_id
+    (F := M.val.presheaf) (G := N.val.presheaf) (h ≫ V.hom) f
+  exact (ConcreteCategory.congr_hom e _).symm.trans
+    (hlin.trans (congrArg
+      (fun z : N.val.obj (op W) => (ringSheaf R).obj.map h.op r • z)
+      (ConcreteCategory.congr_hom e _)))
+
+/-- Actual sheaf of local module morphisms, with no chosen affine frame. -/
+def moduleHomTypeSheaf : T.Sheaf (Type 0) :=
+  ⟨(linearHomSubfunctor R M N).toFunctor,
+    (isSheaf_iff_isSheaf_of_type _ _).mpr (linearHomSubfunctor_isSheaf R M N)⟩
+
+#print axioms linearHomSubfunctor_isSheaf
+
+end CycleQ2GeometricIntrinsicNormal
+end
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+variable {T : TopCat.{0}} (R : T.Sheaf CommRingCat.{0})
+  (M N : SheafOfModules.{0} (ringSheaf R))
+
+local instance overHomRingModule (U : Opens T) (V : (Over U)ᵒᵖ) :
+    Module ((ringSheaf R).obj.obj (op V.unop.left))
+      (((Over.forget U).op ⋙ N.val.presheaf).obj V) := by
+  change Module ((ringSheaf R).obj.obj (op V.unop.left)) (N.val.obj (op V.unop.left))
+  infer_instance
+
+local instance overHomCommModule (U : Opens T) (V : (Over U)ᵒᵖ) :
+    Module (R.obj.obj (op V.unop.left))
+      (((Over.forget U).op ⋙ N.val.presheaf).obj V) := by
+  change Module (R.obj.obj (op V.unop.left)) (N.val.obj (op V.unop.left))
+  infer_instance
+
+local instance overHomRingModuleMk (U : Opens T) (V : Over U) :
+    Module ((ringSheaf R).obj.obj (op V.left))
+      (((Over.forget U).op ⋙ N.val.presheaf).obj (op V)) := by
+  change Module ((ringSheaf R).obj.obj (op V.left)) (N.val.obj (op V.left))
+  infer_instance
+
+local instance overHomCommModuleMk (U : Opens T) (V : Over U) :
+    Module (R.obj.obj (op V.left))
+      (((Over.forget U).op ⋙ N.val.presheaf).obj (op V)) := by
+  change Module (R.obj.obj (op V.left)) (N.val.obj (op V.left))
+  infer_instance
+
+local instance sectionCommRing (U : (Opens T)ᵒᵖ) :
+    CommRing ((ringSheaf R).obj.obj U) :=
+  inferInstanceAs (CommRing (R.obj.obj U))
+
+local instance localAdditiveGroup (U : Opens T) :
+    AddCommGroup ((presheafHom M.val.presheaf N.val.presheaf).obj (op U)) :=
+  inferInstanceAs (AddCommGroup
+    ((Over.forget U).op ⋙ M.val.presheaf ⟶ (Over.forget U).op ⋙ N.val.presheaf))
+
+def localLinearHomAddSubgroup (U : Opens T) :
+    AddSubgroup ((presheafHom M.val.presheaf N.val.presheaf).obj (op U)) where
+  carrier := (linearHomSubfunctor R M N).obj (op U)
+  zero_mem' := by
+    intro V r m
+    change (0 : N.val.obj (op V.left)) = r • 0
+    exact (smul_zero r).symm
+  add_mem' := by
+    intro f g hf hg V r m
+    change f.app (op V) (r • m) + g.app (op V) (r • m) =
+      r • (f.app (op V) m + g.app (op V) m)
+    rw [hf V r m, hg V r m, smul_add]
+  neg_mem' := by
+    intro f hf V r m
+    change -(f.app (op V) (r • m)) = r • -(f.app (op V) m)
+    rw [hf V r m, smul_neg]
+
+abbrev LocalLinearHom (U : Opens T) := localLinearHomAddSubgroup R M N U
+
+def scaleLocalAdditiveHom (U : Opens T) (r : R.obj.obj (op U))
+    (f : (presheafHom M.val.presheaf N.val.presheaf).obj (op U)) :
+    (presheafHom M.val.presheaf N.val.presheaf).obj (op U) where
+  app V := AddCommGrpCat.ofHom
+    { toFun := fun x => R.obj.map V.unop.hom.op r •
+        (show N.val.obj (op V.unop.left) from f.app V x)
+      map_zero' := by
+        exact (congrArg (fun z : N.val.obj (op V.unop.left) =>
+          R.obj.map V.unop.hom.op r • z) (f.app V).hom.map_zero).trans (smul_zero _)
+      map_add' x y := by
+        exact (congrArg (fun z : N.val.obj (op V.unop.left) =>
+          R.obj.map V.unop.hom.op r • z) ((f.app V).hom.map_add x y)).trans
+          (smul_add _ _ _) }
+  naturality {V W} h := by
+    apply ConcreteCategory.hom_ext
+    intro x
+    change R.obj.map W.unop.hom.op r •
+      f.app W (M.val.map h.unop.left.op x) =
+      N.val.map h.unop.left.op (R.obj.map V.unop.hom.op r • f.app V x)
+    rw [N.val.map_smul]
+    have hr : R.obj.map h.unop.left.op (R.obj.map V.unop.hom.op r) =
+        R.obj.map W.unop.hom.op r := by
+      change (R.obj.map V.unop.hom.op ≫ R.obj.map h.unop.left.op) r = _
+      rw [← R.obj.map_comp, ← op_comp, Over.w h.unop]
+    exact (congrArg (fun z : N.val.obj (op W.unop.left) =>
+      R.obj.map W.unop.hom.op r • z)
+      (ConcreteCategory.congr_hom (f.naturality h) x)).trans
+        (congrArg (fun a : R.obj.obj (op W.unop.left) =>
+          a • N.val.map h.unop.left.op (f.app V x)) hr.symm)
+
+def scaleLocalLinearHom (U : Opens T) (r : R.obj.obj (op U))
+    (f : LocalLinearHom R M N U) : LocalLinearHom R M N U :=
+  ⟨scaleLocalAdditiveHom R M N U r f.val, by
+    intro V a m
+    change R.obj.map V.hom.op r • (f.val.app (op V) (a • m)) =
+      a • (R.obj.map V.hom.op r • f.val.app (op V) m)
+    rw [f.property V a m]
+    change R.obj.map V.hom.op r • ((a : R.obj.obj (op V.left)) •
+      (f.val.app (op V) m : N.val.obj (op V.left))) =
+      (a : R.obj.obj (op V.left)) • (R.obj.map V.hom.op r •
+        (f.val.app (op V) m : N.val.obj (op V.left)))
+    exact @smul_comm (R.obj.obj (op V.left)) (R.obj.obj (op V.left))
+      (N.val.obj (op V.left)) _ _ _ (R.obj.map V.hom.op r) a
+        (f.val.app (op V) m)⟩
+
+instance localLinearHomSMul (U : Opens T) :
+    SMul (R.obj.obj (op U)) (LocalLinearHom R M N U) :=
+  ⟨scaleLocalLinearHom R M N U⟩
+
+@[simp] theorem localLinearHom_smul_app (U : Opens T)
+    (r : R.obj.obj (op U)) (f : LocalLinearHom R M N U) (V : Over U)
+    (m : M.val.obj (op V.left)) :
+    (r • f).val.app (op V) m =
+      R.obj.map V.hom.op r • f.val.app (op V) m := rfl
+
+@[ext] theorem localLinearHom_ext {U : Opens T} {f g : LocalLinearHom R M N U}
+    (h : ∀ (V : Over U) (m : M.val.obj (op V.left)),
+      f.val.app (op V) m = g.val.app (op V) m) : f = g := by
+  apply Subtype.ext
+  apply NatTrans.ext
+  funext V
+  apply ConcreteCategory.hom_ext
+  exact h V.unop
+
+instance localLinearHomModule (U : Opens T) :
+    Module (R.obj.obj (op U)) (LocalLinearHom R M N U) where
+  one_smul f := by
+    apply localLinearHom_ext
+    intro V m
+    change R.obj.map V.hom.op 1 • f.val.app (op V) m = _
+    rw [map_one, one_smul]
+  mul_smul r s f := by
+    apply localLinearHom_ext
+    intro V m
+    change R.obj.map V.hom.op (r * s) • f.val.app (op V) m =
+      R.obj.map V.hom.op r • (R.obj.map V.hom.op s • f.val.app (op V) m)
+    rw [map_mul, mul_smul]
+  smul_zero r := by
+    apply localLinearHom_ext
+    intro V m
+    change R.obj.map V.hom.op r • (0 : N.val.obj (op V.left)) = 0
+    exact smul_zero _
+  smul_add r f g := by
+    apply localLinearHom_ext
+    intro V m
+    change R.obj.map V.hom.op r • (f.val.app (op V) m + g.val.app (op V) m) =
+      R.obj.map V.hom.op r • f.val.app (op V) m +
+        R.obj.map V.hom.op r • g.val.app (op V) m
+    exact smul_add _ _ _
+  add_smul r s f := by
+    apply localLinearHom_ext
+    intro V m
+    change R.obj.map V.hom.op (r + s) • f.val.app (op V) m =
+      R.obj.map V.hom.op r • f.val.app (op V) m +
+        R.obj.map V.hom.op s • f.val.app (op V) m
+    rw [map_add, add_smul]
+  zero_smul f := by
+    apply localLinearHom_ext
+    intro V m
+    change R.obj.map V.hom.op 0 • f.val.app (op V) m = 0
+    rw [map_zero, zero_smul]
+
+end CycleQ2GeometricIntrinsicNormal
+end
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+section LocalHom
+
+variable {T : TopCat.{0}} (R : T.Sheaf CommRingCat.{0})
+  (M N : SheafOfModules.{0} (ringSheaf R))
+
+def restrictLocalLinearHom {U V : (Opens T)ᵒᵖ} (h : U ⟶ V) :
+    LocalLinearHom R M N U.unop →+ LocalLinearHom R M N V.unop where
+  toFun f := ⟨(presheafHom M.val.presheaf N.val.presheaf).map h f.val,
+    (linearHomSubfunctor R M N).map h f.property⟩
+  map_zero' := by
+    apply Subtype.ext
+    rfl
+  map_add' f g := by
+    apply Subtype.ext
+    rfl
+
+def moduleHomAdditivePresheaf : T.Presheaf AddCommGrpCat.{0} where
+  obj U := AddCommGrpCat.of (LocalLinearHom R M N U.unop)
+  map h := AddCommGrpCat.ofHom (restrictLocalLinearHom R M N h)
+  map_id U := by
+    apply ConcreteCategory.hom_ext
+    intro f
+    apply Subtype.ext
+    exact ConcreteCategory.congr_hom
+      ((presheafHom M.val.presheaf N.val.presheaf).map_id U) f.val
+  map_comp h k := by
+    apply ConcreteCategory.hom_ext
+    intro f
+    apply Subtype.ext
+    exact ConcreteCategory.congr_hom
+      ((presheafHom M.val.presheaf N.val.presheaf).map_comp h k) f.val
+
+local instance localLinearRingModule (U : (Opens T)ᵒᵖ) :
+    Module ((ringSheaf R).obj.obj U) (LocalLinearHom R M N U.unop) := by
+  change Module (R.obj.obj (op U.unop)) (LocalLinearHom R M N U.unop)
+  infer_instance
+
+local instance moduleHomObjModule (U : (Opens T)ᵒᵖ) :
+    Module ((ringSheaf R).obj.obj U) ((moduleHomAdditivePresheaf R M N).obj U) := by
+  change Module ((ringSheaf R).obj.obj U) (LocalLinearHom R M N U.unop)
+  infer_instance
+
+theorem restrictLocalLinearHom_smul {U V : (Opens T)ᵒᵖ} (h : U ⟶ V)
+    (r : (ringSheaf R).obj.obj U) (f : LocalLinearHom R M N U.unop) :
+    restrictLocalLinearHom R M N h (r • f) =
+      (ringSheaf R).obj.map h r • restrictLocalLinearHom R M N h f := by
+  apply localLinearHom_ext
+  intro W m
+  let n : N.val.obj (op W.left) := f.val.app (op ((Over.map h.unop).obj W)) m
+  change R.obj.map (W.hom ≫ h.unop).op r • n =
+    R.obj.map W.hom.op (R.obj.map h r) • n
+  exact congrArg (fun a : R.obj.obj (op W.left) =>
+    a • n)
+    (ConcreteCategory.congr_hom (R.obj.map_comp h W.hom.op) r)
+
+def moduleHomPresheaf : PresheafOfModules.{0} (ringSheaf R).obj :=
+  PresheafOfModules.ofPresheaf (moduleHomAdditivePresheaf R M N)
+    (fun {_ _} h r f => restrictLocalLinearHom_smul R M N h r f)
+
+theorem moduleHomPresheaf_isSheaf :
+    Presheaf.IsSheaf (Opens.grothendieckTopology T)
+      (moduleHomPresheaf R M N).presheaf := by
+  apply Presheaf.isSheaf_of_isSheaf_comp _ _ (forget AddCommGrpCat.{0})
+  change Presheaf.IsSheaf (Opens.grothendieckTopology T)
+    (linearHomSubfunctor R M N).toFunctor
+  exact (isSheaf_iff_isSheaf_of_type _ _).mpr (linearHomSubfunctor_isSheaf R M N)
+
+/-- The intrinsic internal Hom module sheaf, defined by linear morphisms on
+all subopens. No trivialization or local freeness enters the construction. -/
+def moduleHomSheaf : SheafOfModules.{0} (ringSheaf R) :=
+  ⟨moduleHomPresheaf R M N, moduleHomPresheaf_isSheaf R M N⟩
+
+/-- Evaluation of a local morphism at the entire open. -/
+def localLinearHomEvaluate (U : Opens T) (f : LocalLinearHom R M N U) :
+    M.val.obj (op U) →ₗ[R.obj.obj (op U)] N.val.obj (op U) where
+  toFun := f.val.app (op (Over.mk (𝟙 U)))
+  map_add' a b := (f.val.app (op (Over.mk (𝟙 U)))).hom.map_add a b
+  map_smul' r m := f.property (Over.mk (𝟙 U)) r m
+
+end LocalHom
+
+section Normal
+
+variable {X Y : Scheme.{0}} (j : X ⟶ Y)
+
+/-- The direct-image normal module sheaf intrinsic to the actual ideal of
+the scheme morphism: Hom(I, j_* O_X). -/
+def normalDirectImageSheaf : SheafOfModules.{0} (ringSheaf Y.sheaf) :=
+  moduleHomSheaf Y.sheaf (kernelIdealSheaf j) (imageStructureModule j)
+
+def normalSectionEvaluate (U : Y.Opens)
+    (f : (normalDirectImageSheaf j).val.obj (op U)) :
+    RingHom.ker (j.app U).hom →ₗ[Γ(Y, U)] (imageStructureModule j).val.obj (op U) :=
+  (localLinearHomEvaluate Y.sheaf (kernelIdealSheaf j) (imageStructureModule j) U f).comp
+    (kernelIdealSectionEquiv j U).symm.toLinearMap
+
+end Normal
+
+#print axioms moduleHomPresheaf_isSheaf
+#print axioms normalSectionEvaluate
+
+end CycleQ2GeometricIntrinsicNormal
+end
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+section LocalHom
+
+variable {T : TopCat.{0}} (R : T.Sheaf CommRingCat.{0})
+  (M N : SheafOfModules.{0} (ringSheaf R))
+
+/-- Local linear natural transformations are exactly morphisms between the
+restricted module sheaves. -/
+def localLinearHomEquiv (U : Opens T) :
+    LocalLinearHom R M N U ≃ (M.over U ⟶ N.over U) where
+  toFun f := ⟨PresheafOfModules.homMk f.val (fun V r m => f.property V.unop r m)⟩
+  invFun f :=
+    ⟨(PresheafOfModules.toPresheaf ((ringSheaf R).over U).obj).map f.val,
+      fun V r m => (f.val.app (op V)).hom.map_smul r m⟩
+  left_inv f := by
+    apply Subtype.ext
+    rfl
+  right_inv f := by
+    apply SheafOfModules.hom_ext
+    apply PresheafOfModules.hom_ext
+    intro V
+    apply ModuleCat.hom_ext
+    rfl
+
+theorem localLinearHomEvaluate_restrict {U V : Opens T} (h : V ⟶ U)
+    (f : LocalLinearHom R M N U) (m : M.val.obj (op U)) :
+    localLinearHomEvaluate R M N V (restrictLocalLinearHom R M N h.op f)
+      (M.val.map h.op m) =
+    N.val.map h.op (localLinearHomEvaluate R M N U f m) := by
+  have e := presheafHom_map_app_op_mk_id
+    (F := M.val.presheaf) (G := N.val.presheaf) h f.val
+  have hn := ConcreteCategory.congr_hom
+    (f.val.naturality (Over.homMk h : Over.mk h ⟶ Over.mk (𝟙 U)).op) m
+  exact (ConcreteCategory.congr_hom e _).trans hn
+
+end LocalHom
+
+section Normal
+
+variable {X Y : Scheme.{0}} (j : X ⟶ Y)
+
+/-- Restriction in the intrinsic ideal sheaf, expressed on the literal
+kernel ideals of the maps of section rings. -/
+def kernelSectionRestrict {U V : Y.Opens} (h : V ⟶ U)
+    (a : RingHom.ker (j.app U).hom) : RingHom.ker (j.app V).hom :=
+  kernelIdealSectionEquiv j V ((kernelIdealSheaf j).val.map h.op
+    ((kernelIdealSectionEquiv j U).symm a))
+
+@[simp] theorem kernelSectionRestrict_coe {U V : Y.Opens} (h : V ⟶ U)
+    (a : RingHom.ker (j.app U).hom) :
+    (kernelSectionRestrict j h a : Γ(Y, V)) = Y.presheaf.map h.op a := by
+  change (kernelIdealSectionEquiv j V ((kernelIdealSheaf j).val.map h.op
+    ((kernelIdealSectionEquiv j U).symm a)) : Γ(Y, V)) = _
+  rw [kernelIdealSectionEquiv_restrict]
+  exact congrArg (fun b : RingHom.ker (j.app U).hom => Y.presheaf.map h.op b)
+    ((kernelIdealSectionEquiv j U).apply_symm_apply a)
+
+/-- The canonical map on the actual conormal quotients induced by restriction
+of the scheme's section rings. -/
+def kernelCotangentRestriction {U V : Y.Opens} (h : V ⟶ U) :
+    (RingHom.ker (j.app U).hom).Cotangent →ₗ[ℤ]
+      (RingHom.ker (j.app V).hom).Cotangent :=
+  Ideal.mapCotangent (RingHom.ker (j.app U).hom) (RingHom.ker (j.app V).hom)
+    (Y.presheaf.map h.op).hom.toIntAlgHom (by
+      intro a ha
+      change Y.presheaf.map h.op a ∈ RingHom.ker (j.app V).hom
+      exact (congrArg (fun b : Γ(Y, V) => b ∈ RingHom.ker (j.app V).hom)
+        (kernelSectionRestrict_coe j h ⟨a, ha⟩)).mp
+        (kernelSectionRestrict j h ⟨a, ha⟩).property)
+
+@[simp] theorem kernelCotangentRestriction_toCotangent {U V : Y.Opens}
+    (h : V ⟶ U) (a : RingHom.ker (j.app U).hom) :
+    kernelCotangentRestriction j h ((RingHom.ker (j.app U).hom).toCotangent a) =
+      (RingHom.ker (j.app V).hom).toCotangent (kernelSectionRestrict j h a) := by
+  exact congrArg (RingHom.ker (j.app V).hom).toCotangent
+    (Subtype.ext (kernelSectionRestrict_coe j h a).symm)
+
+theorem normalSectionEvaluate_restrict {U V : Y.Opens} (h : V ⟶ U)
+    (f : (normalDirectImageSheaf j).val.obj (op U))
+    (a : RingHom.ker (j.app U).hom) :
+    normalSectionEvaluate j V ((normalDirectImageSheaf j).val.map h.op f)
+      (kernelSectionRestrict j h a) =
+    (imageStructureModule j).val.map h.op (normalSectionEvaluate j U f a) := by
+  have hn := localLinearHomEvaluate_restrict Y.sheaf (kernelIdealSheaf j)
+    (imageStructureModule j) h f ((kernelIdealSectionEquiv j U).symm a)
+  have he := (kernelIdealSectionEquiv j V).symm_apply_apply
+    ((kernelIdealSheaf j).val.map h.op ((kernelIdealSectionEquiv j U).symm a))
+  exact (congrArg
+    (localLinearHomEvaluate Y.sheaf (kernelIdealSheaf j) (imageStructureModule j) V
+      (restrictLocalLinearHom Y.sheaf (kernelIdealSheaf j) (imageStructureModule j) h.op f))
+    he).trans hn
+
+/-- An intrinsic normal functional annihilates products in the actual ideal.
+Thus the construction is the dual conormal, rather than a free frame model. -/
+theorem normalSectionEvaluate_product (U : Y.Opens)
+    (f : (normalDirectImageSheaf j).val.obj (op U))
+    (a b : RingHom.ker (j.app U).hom) :
+    normalSectionEvaluate j U f (a * b) = 0 := by
+  have h := (normalSectionEvaluate j U f).map_smul (a : Γ(Y, U)) b
+  let n : Γ(X, j ⁻¹ᵁ U) := normalSectionEvaluate j U f b
+  change normalSectionEvaluate j U f (a * b) =
+    (j.app U (a : Γ(Y, U))) * n at h
+  have ha : j.app U (a : Γ(Y, U)) = 0 := a.property
+  exact h.trans ((congrArg (fun x : Γ(X, j ⁻¹ᵁ U) =>
+    x * n) ha).trans (zero_mul _))
+
+/-- Evaluation factors canonically through the actual quotient I/I². -/
+def normalSectionCotangent (U : Y.Opens)
+    (f : (normalDirectImageSheaf j).val.obj (op U)) :
+    (RingHom.ker (j.app U).hom).Cotangent →ₗ[Γ(Y, U)]
+      (imageStructureModule j).val.obj (op U) :=
+  Ideal.Cotangent.lift (normalSectionEvaluate j U f)
+    (normalSectionEvaluate_product j U f)
+
+@[simp] theorem normalSectionCotangent_toCotangent (U : Y.Opens)
+    (f : (normalDirectImageSheaf j).val.obj (op U))
+    (a : RingHom.ker (j.app U).hom) :
+    normalSectionCotangent j U f ((RingHom.ker (j.app U).hom).toCotangent a) =
+      normalSectionEvaluate j U f a := rfl
+
+theorem normalSectionCotangent_unique (U : Y.Opens)
+    (f : (normalDirectImageSheaf j).val.obj (op U))
+    (g : (RingHom.ker (j.app U).hom).Cotangent →ₗ[Γ(Y, U)]
+      (imageStructureModule j).val.obj (op U))
+    (hg : ∀ a, g ((RingHom.ker (j.app U).hom).toCotangent a) =
+      normalSectionEvaluate j U f a) :
+    g = normalSectionCotangent j U f := by
+  apply LinearMap.ext
+  intro a
+  obtain ⟨b, rfl⟩ := (RingHom.ker (j.app U).hom).toCotangent_surjective a
+  exact hg b
+
+/-- The factorization through I/I² commutes with restriction on every open. -/
+theorem normalSectionCotangent_restrict {U V : Y.Opens} (h : V ⟶ U)
+    (f : (normalDirectImageSheaf j).val.obj (op U))
+    (a : (RingHom.ker (j.app U).hom).Cotangent) :
+    normalSectionCotangent j V ((normalDirectImageSheaf j).val.map h.op f)
+      (kernelCotangentRestriction j h a) =
+    (imageStructureModule j).val.map h.op (normalSectionCotangent j U f a) := by
+  obtain ⟨b, rfl⟩ := (RingHom.ker (j.app U).hom).toCotangent_surjective a
+  exact (congrArg
+    (normalSectionCotangent j V ((normalDirectImageSheaf j).val.map h.op f))
+    (kernelCotangentRestriction_toCotangent j h b)).trans
+      (normalSectionEvaluate_restrict j h f b)
+
+end Normal
+
+def literalNormalDirectImageSheaf (r θ : ℂ) :
+    SheafOfModules.{0}
+      (ringSheaf (CycleQ2GeometricLiteralSurface.surface r θ).sheaf) :=
+  normalDirectImageSheaf (CycleQ2GeometricLiteralSurface.curveToSurface r θ)
+
+#print axioms normalSectionEvaluate_restrict
+#print axioms normalSectionCotangent
+#print axioms literalNormalDirectImageSheaf
+
+end CycleQ2GeometricIntrinsicNormal
+end
+
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+noncomputable section
+open scoped TensorProduct
+namespace CycleQ2GeometricIntrinsicNormal
+
+section NormalFunctional
+variable {A B : Type*} [CommRing A] [CommRing B] [Algebra A B]
+variable (I : Ideal A) (hI : ∀ a ∈ I, algebraMap A B a=0)
+
+include hI in
+theorem idealFunctional_product (φ : I →ₗ[A] B) (a b : I) : φ (a*b)=0 := by
+  have h := φ.map_smul (a:A) b
+  have hab : (a:A) • b=a*b := Subtype.ext rfl
+  rw [hab,Algebra.smul_def,hI a a.property,zero_mul] at h
+  exact h
+
+/-- Every functional into the actual curve algebra kills I², so the
+conormal quotient changes no such functional. -/
+def idealCotangentHomEquiv : (I →ₗ[A] B) ≃ₗ[B] (I.Cotangent →ₗ[A] B) where
+  toFun φ := Ideal.Cotangent.lift φ (idealFunctional_product I hI φ)
+  invFun ψ := ψ.comp I.toCotangent
+  left_inv φ := by
+    ext a
+    rfl
+  right_inv ψ := by
+    ext a
+    obtain ⟨b,rfl⟩ := I.toCotangent_surjective a
+    rfl
+  map_add' φ ψ := by
+    ext a
+    obtain ⟨b,rfl⟩ := I.toCotangent_surjective a
+    rfl
+  map_smul' c φ := by
+    ext a
+    obtain ⟨b,rfl⟩ := I.toCotangent_surjective a
+    rfl
+
+@[simp] theorem idealCotangentHomEquiv_toCotangent (φ : I →ₗ[A] B) (a : I) :
+    idealCotangentHomEquiv I hI φ (I.toCotangent a)=φ a := rfl
+
+@[simp] theorem idealCotangentHomEquiv_symm_apply (φ : I.Cotangent →ₗ[A] B) (a : I) :
+    (idealCotangentHomEquiv I hI).symm φ a=φ (I.toCotangent a) := rfl
+
+/-- The algebraic ideal functional and the base-changed conormal dual
+are canonically equivalent; both maps are fixed on actual ideal elements. -/
+def normalFunctionalEquiv :
+    (I →ₗ[A] B) ≃ₗ[B] (B ⊗[A] I.Cotangent →ₗ[B] B) :=
+  (idealCotangentHomEquiv I hI).trans (LinearMap.liftBaseChangeEquiv B)
+
+@[simp] theorem normalFunctionalEquiv_tmul (φ : I →ₗ[A] B) (b : B) (a : I) :
+    normalFunctionalEquiv I hI φ (b ⊗ₜ[A] I.toCotangent a)=b*φ a := rfl
+
+@[simp] theorem normalFunctionalEquiv_symm_apply
+    (φ : B ⊗[A] I.Cotangent →ₗ[B] B) (a : I) :
+    (normalFunctionalEquiv I hI).symm φ a=φ ((1:B) ⊗ₜ[A] I.toCotangent a) := rfl
+
+theorem normalFunctionalEquiv_unique (φ : I →ₗ[A] B)
+    (ψ : B ⊗[A] I.Cotangent →ₗ[B] B)
+    (hψ : ∀ a : I, ψ ((1:B) ⊗ₜ[A] I.toCotangent a)=φ a) :
+    ψ=normalFunctionalEquiv I hI φ := by
+  apply (normalFunctionalEquiv I hI).symm.injective
+  ext a
+  change ψ ((1:B) ⊗ₜ[A] I.toCotangent a)=_
+  rw [LinearEquiv.symm_apply_apply]
+  exact hψ a
+
+variable {C : Type*} [CommRing C] [Algebra A C]
+variable (ρ : B →ₐ[A] C) (hC : ∀ a ∈ I, algebraMap A C a=0)
+
+/-- Scalar extension carries the same functional values through the actual
+coefficient map, including the normalization at 1 tensor [a]. -/
+theorem normalFunctionalEquiv_coefficientMap (φ : I →ₗ[A] B) (c : C) (a : I) :
+    normalFunctionalEquiv I hC (ρ.toLinearMap.comp φ) (c ⊗ₜ[A] I.toCotangent a)=
+      c * ρ (normalFunctionalEquiv I hI φ ((1:B) ⊗ₜ[A] I.toCotangent a)) := by
+  simp only [normalFunctionalEquiv_tmul,LinearMap.comp_apply,AlgHom.toLinearMap_apply,one_mul]
+
+end NormalFunctional
+
+#print axioms normalFunctionalEquiv
+#print axioms normalFunctionalEquiv_coefficientMap
+end CycleQ2GeometricIntrinsicNormal
+end
+
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+
+section Algebra
+
+variable {A B : Type} [CommRing A] [CommRing B] [Algebra A B]
+  (S : Submonoid A) [IsLocalization S B]
+  {M N ML NL : Type} [AddCommGroup M] [AddCommGroup N]
+  [AddCommGroup ML] [AddCommGroup NL]
+  [Module A M] [Module A N] [Module A ML] [Module A NL]
+  [Module B ML] [Module B NL] [IsScalarTower A B ML] [IsScalarTower A B NL]
+  (a : M →ₗ[A] ML) (b : N →ₗ[A] NL)
+  [IsLocalizedModule S a] [IsLocalizedModule S b]
+  (f : M →ₗ[A] N) (g : ML →ₗ[A] NL) (h : g.comp a = b.comp f)
+
+def kernelSquareMap : f.ker →ₗ[A] g.ker :=
+  a.restrict (fun m hm => by
+    change g (a m) = 0
+    have he := LinearMap.congr_fun h m
+    exact he.trans ((congrArg b (LinearMap.mem_ker.mp hm)).trans b.map_zero))
+
+include B in
+theorem kernelSquareMap_isLocalized : IsLocalizedModule S (kernelSquareMap a b f g h) := by
+  have hg : g = IsLocalizedModule.map S a b f := by
+    apply IsLocalizedModule.ext S a (IsLocalizedModule.map_units b)
+    exact h.trans (IsLocalizedModule.map_comp S a b f).symm
+  subst g
+  exact LinearMap.toKerLocalized_isLocalizedModule B S a b f
+
+end Algebra
+
+section Tilde
+
+variable (A : CommRingCat.{0})
+
+def affineEvaluation (U : (Spec A).Opens) : (Spec A).Modules ⥤ ModuleCat A :=
+  modulesSpecToSheaf ⋙ TopCat.Sheaf.forget _ _ ⋙ (evaluation _ _).obj (op U)
+
+instance affineEvaluation_additive (U : (Spec A).Opens) :
+    (affineEvaluation A U).Additive where
+  map_add := by intros; rfl
+
+instance affineEvaluation_preservesFiniteLimits (U : (Spec A).Opens) :
+    PreservesFiniteLimits (affineEvaluation A U) where
+  preservesFiniteLimits J _ _ := by
+    letI : PreservesLimitsOfShape J
+        (affineEvaluation A U ⋙ forget₂ (ModuleCat A) AddCommGrpCat) := by
+      change PreservesLimitsOfShape J
+        (SheafOfModules.evaluation (Spec A).ringCatSheaf (op U) ⋙
+          forget₂ (ModuleCat Γ(Spec A, U)) AddCommGrpCat)
+      infer_instance
+    exact preservesLimitsOfShape_of_reflects_of_preserves (affineEvaluation A U)
+      (forget₂ (ModuleCat A) AddCommGrpCat)
+
+variable {A} {M N : (Spec A).Modules} (f : M ⟶ N)
+
+def affineKernelSectionIso (U : (Spec A).Opens) :
+    (affineEvaluation A U).obj (kernel f) ≅
+      ModuleCat.of A ((affineEvaluation A U).map f).hom.ker :=
+  PreservesKernel.iso (affineEvaluation A U) f ≪≫
+    ModuleCat.kernelIsoKer ((affineEvaluation A U).map f)
+
+def affineKernelSectionEquiv (U : (Spec A).Opens) :
+    (affineEvaluation A U).obj (kernel f) ≃ₗ[A]
+      ((affineEvaluation A U).map f).hom.ker :=
+  (affineKernelSectionIso f U).toLinearEquiv
+
+theorem affineKernelSectionEquiv_coe (U : (Spec A).Opens)
+    (a : (affineEvaluation A U).obj (kernel f)) :
+    (affineKernelSectionEquiv f U a : (affineEvaluation A U).obj M) =
+      (affineEvaluation A U).map (kernel.ι f) a := by
+  have h : (affineKernelSectionIso f U).hom ≫
+      ModuleCat.ofHom ((affineEvaluation A U).map f).hom.ker.subtype =
+        (affineEvaluation A U).map (kernel.ι f) := by
+    change ((PreservesKernel.iso (affineEvaluation A U) f).hom ≫
+      (ModuleCat.kernelIsoKer ((affineEvaluation A U).map f)).hom) ≫ _ = _
+    rw [Category.assoc]
+    exact (congrArg ((PreservesKernel.iso (affineEvaluation A U) f).hom ≫ ·)
+      (ModuleCat.kernelIsoKer_hom_ker_subtype ((affineEvaluation A U).map f))).trans
+      (kernelComparison_comp_ι f (affineEvaluation A U))
+  exact ConcreteCategory.congr_hom h a
+
+theorem affineKernelSectionEquiv_restrict {U V : (Spec A).Opens} (h : V ⟶ U)
+    (a : (affineEvaluation A U).obj (kernel f)) :
+    (affineKernelSectionEquiv f V
+      ((modulesSpecToSheaf.obj (kernel f)).obj.map h.op a) :
+        (affineEvaluation A V).obj M) =
+      (modulesSpecToSheaf.obj M).obj.map h.op (affineKernelSectionEquiv f U a).val := by
+  rw [affineKernelSectionEquiv_coe, affineKernelSectionEquiv_coe]
+  exact ConcreteCategory.congr_hom
+    ((modulesSpecToSheaf.map (kernel.ι f)).hom.naturality h.op) a
+
+theorem kernel_isLocalizing
+    (hM : IsLocalizing (modulesSpecToSheaf.obj M))
+    (hN : IsLocalizing (modulesSpecToSheaf.obj N)) :
+    IsLocalizing (modulesSpecToSheaf.obj (kernel f)) := by
+  intro r
+  let U : (Spec A).Opens := PrimeSpectrum.basicOpen r
+  let a := ((modulesSpecToSheaf.obj M).obj.map U.leTop.op).hom
+  let b := ((modulesSpecToSheaf.obj N).obj.map U.leTop.op).hom
+  let k := ((modulesSpecToSheaf.obj (kernel f)).obj.map U.leTop.op).hom
+  let f₀ := ((affineEvaluation A ⊤).map f).hom
+  let f₁ := ((affineEvaluation A U).map f).hom
+  let e₀ := affineKernelSectionEquiv f ⊤
+  let e₁ := affineKernelSectionEquiv f U
+  have h : f₁.comp a = b.comp f₀ :=
+    congrArg ModuleCat.Hom.hom ((modulesSpecToSheaf.map f).hom.naturality U.leTop.op)
+  letI : IsLocalizedModule (Submonoid.powers r) a := hM r
+  letI : IsLocalizedModule (Submonoid.powers r) b := hN r
+  letI : Module Γ(Spec A, U) ((modulesSpecToSheaf.obj M).obj.obj (op U)) :=
+    inferInstanceAs (Module Γ(Spec A, U) Γ(M, U))
+  letI : Module Γ(Spec A, U) ((modulesSpecToSheaf.obj N).obj.obj (op U)) :=
+    inferInstanceAs (Module Γ(Spec A, U) Γ(N, U))
+  letI : IsScalarTower A Γ(Spec A, U) ((modulesSpecToSheaf.obj M).obj.obj (op U)) :=
+    inferInstanceAs (IsScalarTower A Γ(Spec A, U) Γ(M, U))
+  letI : IsScalarTower A Γ(Spec A, U) ((modulesSpecToSheaf.obj N).obj.obj (op U)) :=
+    inferInstanceAs (IsScalarTower A Γ(Spec A, U) Γ(N, U))
+  have hk : IsLocalizedModule (Submonoid.powers r) (kernelSquareMap a b f₀ f₁ h) :=
+    kernelSquareMap_isLocalized (B := Γ(Spec A, U)) (Submonoid.powers r) a b f₀ f₁ h
+  have he : e₁.toLinearMap.comp k = (kernelSquareMap a b f₀ f₁ h).comp e₀.toLinearMap := by
+    apply LinearMap.ext
+    intro x
+    apply Subtype.ext
+    exact affineKernelSectionEquiv_restrict f U.leTop x
+  apply (IsLocalizedModule.comp_iff_of_bijective_left (Submonoid.powers r)
+    e₁.toLinearMap e₁.bijective).mp
+  change IsLocalizedModule (Submonoid.powers r) (e₁.toLinearMap.comp k)
+  rw [he]
+  exact (IsLocalizedModule.comp_iff_of_bijective_right (Submonoid.powers r)
+    e₀.toLinearMap e₀.bijective).mpr hk
+
+end Tilde
+end CycleQ2GeometricIntrinsicNormal
+end
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+section GlobalHom
+
+variable {T : TopCat.{0}} (R : T.Sheaf CommRingCat.{0})
+  (M N : SheafOfModules.{0} (ringSheaf R))
+
+def localLinearHomTopEquiv :
+    LocalLinearHom R M N ⊤ ≃ (M ⟶ N) where
+  toFun f :=
+    ⟨PresheafOfModules.homMk
+      { app U := f.val.app (op (Over.mk (homOfLE (show U.unop ≤ ⊤ from le_top))))
+        naturality {U V} h := f.val.naturality
+          (Over.homMk h.unop :
+            Over.mk (homOfLE (show V.unop ≤ ⊤ from le_top)) ⟶
+              Over.mk (homOfLE (show U.unop ≤ ⊤ from le_top))).op }
+      (fun U r m => f.property (Over.mk (homOfLE le_top)) r m)⟩
+  invFun f :=
+    ⟨Functor.whiskerLeft (Over.forget (⊤ : Opens T)).op
+      ((PresheafOfModules.toPresheaf (ringSheaf R).obj).map f.val),
+      fun U r m => (f.val.app (op U.left)).hom.map_smul r m⟩
+  left_inv f := by
+    apply Subtype.ext
+    rfl
+  right_inv f := by
+    apply SheafOfModules.hom_ext
+    apply PresheafOfModules.hom_ext
+    intro U
+    apply ModuleCat.hom_ext
+    rfl
+
+@[simp] theorem localLinearHomTopEquiv_app
+    (f : LocalLinearHom R M N ⊤) (U : Opens T) (m : M.val.obj (op U)) :
+    (localLinearHomTopEquiv R M N f).val.app (op U) m =
+      f.val.app (op (Over.mk (homOfLE (show U ≤ ⊤ from le_top)))) m := rfl
+
+end GlobalHom
+
+section Affine
+
+variable {A B : CommRingCat.{0}} (φ : A ⟶ B)
+
+theorem imageStructureModule_eq_pushforward :
+    imageStructureModule (Spec.map φ) =
+      (Scheme.Modules.pushforward (Spec.map φ)).obj
+        (SheafOfModules.unit (Spec B).ringCatSheaf) := rfl
+
+theorem affineIdeal_isLocalizing :
+    IsLocalizing (modulesSpecToSheaf.obj
+      (show (Spec A).Modules from kernelIdealSheaf (Spec.map φ))) := by
+  apply kernel_isLocalizing (f := schemeStructureMap (Spec.map φ))
+  · exact (isIso_fromTildeΓ_iff_isLocalizing
+      (SheafOfModules.unit (Spec A).ringCatSheaf)).mp inferInstance
+  · have h := isIso_fromTildeΓ_pushforward φ (SheafOfModules.unit (Spec B).ringCatSheaf)
+    exact (isIso_fromTildeΓ_iff_isLocalizing
+      ((Scheme.Modules.pushforward (Spec.map φ)).obj
+        (SheafOfModules.unit (Spec B).ringCatSheaf))).mp h
+
+instance affineIdeal_fromTildeΓ_isIso :
+    IsIso ((show (Spec A).Modules from kernelIdealSheaf (Spec.map φ)).fromTildeΓ) :=
+  (isIso_fromTildeΓ_iff_isLocalizing _).mpr (affineIdeal_isLocalizing φ)
+
+variable (M N : (Spec A).Modules) [IsIso M.fromTildeΓ]
+
+/-- Every map of global modules extends uniquely from a quasicoherent affine
+source. This equivalence is the tilde--Gamma adjunction, not a chosen extension. -/
+def affineModuleHomEquiv :
+    (M ⟶ N) ≃ ((affineEvaluation A ⊤).obj M ⟶ (affineEvaluation A ⊤).obj N) :=
+  (Iso.homCongr (asIso M.fromTildeΓ).symm (Iso.refl N)).trans
+    (tilde.adjunction.homEquiv _ _)
+
+theorem affineModuleHomEquiv_apply (f : M ⟶ N) :
+    affineModuleHomEquiv M N f = (affineEvaluation A ⊤).map f := by
+  change tilde.adjunction.homEquiv _ _ (M.fromTildeΓ ≫ f ≫ 𝟙 N) = _
+  rw [Category.comp_id, tilde.adjunction.homEquiv_naturality_right]
+  have he : tilde.adjunction.homEquiv _ _ M.fromTildeΓ = 𝟙 _ :=
+    (congrArg (tilde.adjunction.homEquiv _ _)
+      (tilde.adjunction.homEquiv_symm_id M).symm).trans
+      ((tilde.adjunction.homEquiv _ _).apply_symm_apply (𝟙 _))
+  rw [he, Category.id_comp]
+  rfl
+
+end Affine
+
+#print axioms affineIdeal_isLocalizing
+#print axioms affineModuleHomEquiv
+#print axioms affineModuleHomEquiv_apply
+
+end CycleQ2GeometricIntrinsicNormal
+end
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+section ModuleHom
+
+variable {A : CommRingCat.{0}} (M N : (Spec A).Modules) [IsIso M.fromTildeΓ]
+
+local instance affineTopModule : Module A (M.val.obj (op ⊤)) :=
+  inferInstanceAs (Module A Γ(M, ⊤))
+
+local instance affineTopTower : IsScalarTower A Γ(Spec A, ⊤) (M.val.obj (op ⊤)) :=
+  inferInstanceAs (IsScalarTower A Γ(Spec A, ⊤) Γ(M, ⊤))
+
+local instance affineTopCompatible :
+    LinearMap.CompatibleSMul (M.val.obj (op ⊤)) (N.val.obj (op ⊤)) A
+      ((Spec A).ringCatSheaf.obj.obj (op ⊤)) :=
+  inferInstanceAs (LinearMap.CompatibleSMul Γ(M, ⊤) Γ(N, ⊤) A Γ(Spec A, ⊤))
+
+theorem affineModule_top_app_bijective :
+    Function.Bijective (fun f : M ⟶ N => (f.val.app (op ⊤)).hom) := by
+  constructor
+  · intro f g h
+    apply (affineModuleHomEquiv M N).injective
+    rw [affineModuleHomEquiv_apply, affineModuleHomEquiv_apply]
+    apply ModuleCat.hom_ext
+    apply LinearMap.ext
+    intro x
+    exact LinearMap.congr_fun h x
+  · intro f
+    let g : (affineEvaluation A ⊤).obj M ⟶ (affineEvaluation A ⊤).obj N :=
+      ModuleCat.ofHom (X := (affineEvaluation A ⊤).obj M)
+        (Y := (affineEvaluation A ⊤).obj N) (f.restrictScalars A)
+    let F := (affineModuleHomEquiv M N).symm g
+    refine ⟨F, ?_⟩
+    have h : (affineEvaluation A ⊤).map F = g :=
+      (affineModuleHomEquiv_apply M N F).symm.trans
+        ((affineModuleHomEquiv M N).apply_symm_apply g)
+    apply LinearMap.ext
+    intro x
+    exact ConcreteCategory.congr_hom h x
+
+/-- Evaluation at the whole affine scheme is an equivalence for a
+quasicoherent source, retaining the full actual section-ring linearity. -/
+def affineTopLinearMapEquiv :
+    (M ⟶ N) ≃ (M.val.obj (op ⊤) →ₗ[Γ(Spec A, ⊤)] N.val.obj (op ⊤)) :=
+  Equiv.ofBijective (fun f => (f.val.app (op ⊤)).hom)
+    (affineModule_top_app_bijective M N)
+
+@[simp] theorem affineTopLinearMapEquiv_apply (f : M ⟶ N) :
+    affineTopLinearMapEquiv M N f = (f.val.app (op ⊤)).hom := rfl
+
+end ModuleHom
+
+section EvaluationLinearity
+
+variable {X Y : Scheme.{0}} (j : X ⟶ Y)
+
+def normalSectionEvaluationLinearMap (U : Y.Opens) :
+    (normalDirectImageSheaf j).val.obj (op U) →ₗ[Γ(Y, U)]
+      (RingHom.ker (j.app U).hom →ₗ[Γ(Y, U)] (imageStructureModule j).val.obj (op U)) where
+  toFun := normalSectionEvaluate j U
+  map_add' f g := by
+    apply LinearMap.ext
+    intro a
+    rfl
+  map_smul' r f := by
+    apply LinearMap.ext
+    intro a
+    let v : (imageStructureModule j).val.obj (op U) := normalSectionEvaluate j U f a
+    change Y.presheaf.map (𝟙 (op U)) r • v = r • v
+    exact congrArg (fun s : Γ(Y, U) => s • v)
+      (ConcreteCategory.congr_hom (Y.presheaf.map_id (op U)) r)
+
+end EvaluationLinearity
+
+section Normal
+
+variable {A B : CommRingCat.{0}} (φ : A ⟶ B)
+
+/-- Actual normal sheaf sections on an affine scheme are exactly the
+algebraic functionals on the actual ideal of the section-ring map. -/
+def affineNormalSectionEquiv :
+    (normalDirectImageSheaf (Spec.map φ)).val.obj (op ⊤) ≃
+      (RingHom.ker ((Spec.map φ).app ⊤).hom →ₗ[Γ(Spec A, ⊤)]
+        (imageStructureModule (Spec.map φ)).val.obj (op ⊤)) :=
+  (localLinearHomTopEquiv (Spec A).sheaf (kernelIdealSheaf (Spec.map φ))
+      (imageStructureModule (Spec.map φ))).trans
+    ((affineTopLinearMapEquiv
+      (show (Spec A).Modules from kernelIdealSheaf (Spec.map φ))
+      (show (Spec A).Modules from imageStructureModule (Spec.map φ))).trans
+        ((kernelIdealSectionEquiv (Spec.map φ) ⊤).arrowCongr
+          (LinearEquiv.refl Γ(Spec A, ⊤)
+            ((imageStructureModule (Spec.map φ)).val.obj (op ⊤)))).toEquiv)
+
+@[simp] theorem affineNormalSectionEquiv_apply
+    (f : (normalDirectImageSheaf (Spec.map φ)).val.obj (op ⊤)) :
+    affineNormalSectionEquiv φ f = normalSectionEvaluate (Spec.map φ) ⊤ f := rfl
+
+theorem affineNormalSectionEvaluate_bijective :
+    Function.Bijective (normalSectionEvaluate (Spec.map φ) ⊤) :=
+  (affineNormalSectionEquiv φ).bijective
+
+/-- The affine comparison also retains the actual O_Y(⊤)-module structure. -/
+def affineNormalSectionLinearEquiv :
+    (normalDirectImageSheaf (Spec.map φ)).val.obj (op ⊤) ≃ₗ[Γ(Spec A, ⊤)]
+      (RingHom.ker ((Spec.map φ).app ⊤).hom →ₗ[Γ(Spec A, ⊤)]
+        (imageStructureModule (Spec.map φ)).val.obj (op ⊤)) where
+  __ := affineNormalSectionEquiv φ
+  map_add' := (normalSectionEvaluationLinearMap (Spec.map φ) ⊤).map_add
+  map_smul' r f := (normalSectionEvaluationLinearMap (Spec.map φ) ⊤).map_smul r f
+
+/-- Every algebraic ideal functional extends uniquely to a section of the
+actual intrinsic normal sheaf over the entire affine scheme. -/
+theorem affineNormalSection_existsUnique
+    (l : RingHom.ker ((Spec.map φ).app ⊤).hom →ₗ[Γ(Spec A, ⊤)]
+      (imageStructureModule (Spec.map φ)).val.obj (op ⊤)) :
+    ∃! f : (normalDirectImageSheaf (Spec.map φ)).val.obj (op ⊤),
+      normalSectionEvaluate (Spec.map φ) ⊤ f = l :=
+  (affineNormalSectionEvaluate_bijective φ).existsUnique l
+
+end Normal
+
+#print axioms affineModule_top_app_bijective
+#print axioms affineNormalSectionEquiv
+#print axioms affineNormalSectionLinearEquiv
+#print axioms affineNormalSection_existsUnique
+
+end CycleQ2GeometricIntrinsicNormal
+end
+
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+open scoped TensorProduct
+
+section SectionConormal
+
+variable {X Y : Scheme.{0}} (j : X ⟶ Y)
+
+/-- The algebra structure induced by the literal morphism on sections. -/
+@[instance_reducible] def normalSectionAlgebra (U : Y.Opens) :
+    Algebra Γ(Y, U) Γ(X, j ⁻¹ᵁ U) :=
+  (j.app U).hom.toAlgebra
+
+attribute [local instance] normalSectionAlgebra
+
+/-- The actual conormal module, extended to the actual source section ring. -/
+abbrev sectionConormal (U : Y.Opens) :=
+  Γ(X, j ⁻¹ᵁ U) ⊗[Γ(Y, U)] (RingHom.ker (j.app U).hom).Cotangent
+
+/-- An intrinsic normal section acts on the actual base-changed conormal
+module, with no choice of a frame or normalization. -/
+def normalSectionBaseChangeMap (U : Y.Opens) :
+    (normalDirectImageSheaf j).val.obj (op U) →ₗ[Γ(Y, U)]
+      (sectionConormal j U →ₗ[Γ(X, j ⁻¹ᵁ U)] Γ(X, j ⁻¹ᵁ U)) :=
+  ((normalFunctionalEquiv (RingHom.ker (j.app U).hom)
+    (fun a ha => ha)).restrictScalars Γ(Y, U)).toLinearMap.comp
+      (normalSectionEvaluationLinearMap j U)
+
+@[simp] theorem normalSectionBaseChangeMap_tmul (U : Y.Opens)
+    (f : (normalDirectImageSheaf j).val.obj (op U))
+    (b : Γ(X, j ⁻¹ᵁ U)) (a : RingHom.ker (j.app U).hom) :
+    normalSectionBaseChangeMap j U f
+      (b ⊗ₜ[Γ(Y, U)] (RingHom.ker (j.app U).hom).toCotangent a) =
+      b * (show Γ(X, j ⁻¹ᵁ U) from normalSectionEvaluate j U f a) := rfl
+
+end SectionConormal
+
+section AffineConormal
+
+variable {A B : CommRingCat.{0}} (φ : A ⟶ B)
+
+attribute [local instance] normalSectionAlgebra
+
+/-- On an affine scheme, the intrinsic normal sections are canonically the
+dual of the actual base-changed conormal module. -/
+def affineNormalConormalEquiv :
+    (normalDirectImageSheaf (Spec.map φ)).val.obj (op ⊤) ≃ₗ[Γ(Spec A, ⊤)]
+      (sectionConormal (Spec.map φ) ⊤ →ₗ[Γ(Spec B, (Spec.map φ) ⁻¹ᵁ ⊤)]
+        Γ(Spec B, (Spec.map φ) ⁻¹ᵁ ⊤)) :=
+  (affineNormalSectionLinearEquiv φ).trans
+    ((normalFunctionalEquiv (RingHom.ker ((Spec.map φ).app ⊤).hom)
+      (fun a ha => ha)).restrictScalars Γ(Spec A, ⊤))
+
+@[simp] theorem affineNormalConormalEquiv_apply
+    (f : (normalDirectImageSheaf (Spec.map φ)).val.obj (op ⊤)) :
+    affineNormalConormalEquiv φ f = normalSectionBaseChangeMap (Spec.map φ) ⊤ f := rfl
+
+@[simp] theorem affineNormalConormalEquiv_tmul
+    (f : (normalDirectImageSheaf (Spec.map φ)).val.obj (op ⊤))
+    (b : Γ(Spec B, (Spec.map φ) ⁻¹ᵁ ⊤))
+    (a : RingHom.ker ((Spec.map φ).app ⊤).hom) :
+    affineNormalConormalEquiv φ f
+      (b ⊗ₜ[Γ(Spec A, ⊤)] (RingHom.ker ((Spec.map φ).app ⊤).hom).toCotangent a) =
+      b * (show Γ(Spec B, (Spec.map φ) ⁻¹ᵁ ⊤) from
+        normalSectionEvaluate (Spec.map φ) ⊤ f a) := rfl
+
+@[simp] theorem affineNormalConormalEquiv_symm_evaluate
+    (f : sectionConormal (Spec.map φ) ⊤ →ₗ[Γ(Spec B, (Spec.map φ) ⁻¹ᵁ ⊤)]
+      Γ(Spec B, (Spec.map φ) ⁻¹ᵁ ⊤))
+    (a : RingHom.ker ((Spec.map φ).app ⊤).hom) :
+    normalSectionEvaluate (Spec.map φ) ⊤ ((affineNormalConormalEquiv φ).symm f) a =
+      f ((1 : Γ(Spec B, (Spec.map φ) ⁻¹ᵁ ⊤)) ⊗ₜ[Γ(Spec A, ⊤)]
+        (RingHom.ker ((Spec.map φ).app ⊤).hom).toCotangent a) := by
+  have h := LinearMap.congr_fun
+    ((affineNormalConormalEquiv φ).apply_symm_apply f)
+    ((1 : Γ(Spec B, (Spec.map φ) ⁻¹ᵁ ⊤)) ⊗ₜ[Γ(Spec A, ⊤)]
+      (RingHom.ker ((Spec.map φ).app ⊤).hom).toCotangent a)
+  simpa only [affineNormalConormalEquiv_tmul, one_mul] using h
+
+end AffineConormal
+
+#print axioms normalSectionBaseChangeMap
+#print axioms affineNormalConormalEquiv
+#print axioms affineNormalConormalEquiv_symm_evaluate
+
+end CycleQ2GeometricIntrinsicNormal
+end

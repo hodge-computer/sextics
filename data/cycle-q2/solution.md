@@ -1,5 +1,228 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Actual derived Cartier cohomology and intrinsic normal geometry — 14 November 2026
+
+The final theorem `Submission.missing_geometric_existence` is still open.
+This continuation constructs a nonzero class in the actual derived
+\(H^2\) of the literal projective surface, the actual closed immersion of
+the seed curve, the surface's affine equation charts over
+\(\mathbb C\), and its intrinsic normal sheaf. On affine schemes, that
+normal sheaf is now canonically identified with the dual of the actual
+base-changed conormal module. These are proved geometric comparisons;
+they do not supply the remaining global adjunction, moving-class, support,
+or de Rham arguments.
+
+The incoming `efd7240d` coordinate-descent checkpoint is preserved in
+full. Its actual localization representative and common-refinement
+witnesses are distinct from the derived-sheaf comparison described here.
+Compatibility between those two comparisons remains a separate proof
+obligation at this checkpoint.
+
+### The original class in genuine derived surface cohomology
+
+[GeometricCartierDerivedClass.lean](GeometricCartierDerivedClass.lean)
+constructs an additive comparison from the four-open Čech quotient to
+Mathlib's derived sheaf cohomology. The construction uses the actual
+sections and restriction maps, two successive injective presentations,
+and the corresponding cohomology connecting maps.
+
+An injective sheaf admits extensions of sections from an open subset.
+Finite gluing and those extensions give actual degree-one and degree-two
+Čech primitives on the four-member cover. Starting with a two-cocycle of
+the original sheaf, the two injective presentations therefore produce a
+global section of the second cokernel. Two connecting maps send this
+section to derived \(H^2\). The proof shows that changes in the chosen
+primitives do not change that class, that a Čech boundary maps to zero,
+and that the construction is additive and natural in the sheaf.
+
+If the derived class vanishes, the connecting exact sequences and
+vanishing of \(H^1\) on the individual covering opens construct a Čech
+boundary for the original cocycle. This proves injectivity of the
+comparison. For the literal structure sheaf, each of the four opens is
+the already constructed affine homogeneous-localization chart, so the
+required degree-one vanishing is proved for this sheaf and these opens.
+
+The adapters `toOne` and `toTwo` transport the original projective Cartier
+cochains into this construction. They preserve the actual differential
+and retain the original face order and signs. Consequently
+`literalDerivedClass_ne_zero` proves
+\[
+c_{\mathrm{der}}\ne0
+\quad\text{in}\quad H^2(S_{57,1},\mathcal O_{S_{57,1}}).
+\]
+`literalOrdinaryComparison_class` identifies this same element with the
+image of the original Čech quotient class. Thus the nonzero element is
+fixed by the original residue cocycle; the proof does not merely choose
+an unspecified nonzero vector in a cohomology group.
+
+### The actual curve, surface, and closed immersion
+
+[GeometricLiteralSurface.lean](GeometricLiteralSurface.lean) uses the
+existing weighted quotient grading and the same projective surface as
+the Cartier calculation. The map to the seed curve is induced by the
+original substitution \(w=-x_2^2\). The proof supplies homogeneous
+preimages in every graded degree and proves that the actual quotient-map
+kernel is `curveIdealOnSurface`.
+
+A general chart argument proves that a graded map with those homogeneous
+preimages induces a closed immersion on projective spectra. Applied to
+the actual quotient maps, it proves that the surface embeds in the
+weighted projective ambient scheme and that the curve embeds in the
+surface. The construction also identifies the kernel on actual
+projective structure-sheaf sections with the kernel of the corresponding
+degree-zero localization map.
+
+This kernel comparison retains arbitrary denominators. A homogeneous
+fraction belongs to the local curve ideal exactly when a power of its
+actual chart denominator carries its numerator into the original curve
+ideal. No bounded-pole membership test is substituted for the localized
+ideal.
+
+### Affine surface equations, constants, and curve restriction
+
+[GeometricSurfaceDehomogenizedCharts.lean](GeometricSurfaceDehomogenizedCharts.lean)
+identifies the degree-zero localization on each weight-one coordinate
+open with its actual dehomogenized equation ring. In the chart
+\(x_i\ne0\), the normal coordinate is
+\[
+z=\frac{w+x_2^2}{x_i^2}.
+\]
+The first and second chart equivalences use precisely the equation
+vectors in the local surface-adjunction calculation. They identify both
+the actual affine schemes and their structure-sheaf section rings.
+Their action on every homogeneous fraction is proved, including the
+normal fraction \((w+x_2^2)/x_i^2\).
+
+[GeometricSurfaceProjectiveCoefficients.lean](GeometricSurfaceProjectiveCoefficients.lean)
+constructs the canonical structure morphism to
+\(\operatorname{Spec}\mathbb C\) through `Proj.toSpecZero`. Its global
+coefficient map restricts to the actual degree-zero constant fractions.
+The chart and section-ring equivalences are then upgraded to
+\(\mathbb C\)-algebra equivalences for those scalars, and the actual chart
+scheme isomorphisms are proved to commute with the structure morphism.
+
+[GeometricSurfaceCurveCharts.lean](GeometricSurfaceCurveCharts.lean)
+connects the closed immersion to the local adjunction equations. Setting
+the normal coordinate to zero after surface dehomogenization agrees with
+the original substitution followed by curve dehomogenization. The
+resulting square is proved for arbitrary homogeneous fractions, then for
+actual projective structure-sheaf sections. In particular, transporting
+the actual curve ideal through either surface section-ring equivalence
+gives exactly the kernel of the affine `surfaceToCurve` map used in
+`GeometricSurfaceAdjunction`. The identification includes the section
+maps themselves and their kernels, not just isomorphic abstract rings.
+The scheme-level squares also commute: conjugating the restricted closed
+immersion by the first or second actual chart isomorphisms gives
+`Spec.map` of precisely that affine quotient map. The chart square is
+proved to be a pullback using the equality of the actual inverse-image
+opens. Thus it can be used to transport the intrinsic ideal and normal
+sheaves to the affine adjunction calculation.
+
+### The intrinsic ideal and normal sheaves
+
+[GeometricIntrinsicNormal.lean](GeometricIntrinsicNormal.lean) starts
+from an actual scheme morphism \(j:C\to S\). It constructs the
+structure-module map
+\[
+\mathcal O_S\longrightarrow j_*\mathcal O_C
+\]
+and defines its kernel \(\mathcal I\) categorically. Evaluation on any
+open \(U\) is proved to identify \(\mathcal I(U)\) with the kernel of
+the literal ring map
+\(\mathcal O_S(U)\to\mathcal O_C(j^{-1}U)\). This identification
+commutes with restriction.
+
+The normal sheaf is the actual internal Hom sheaf
+\[
+\mathcal N_j=
+\mathcal{H}om_{\mathcal O_S}(\mathcal I,j_*\mathcal O_C).
+\]
+Its sections are local natural transformations which are linear on
+every subopen. The construction proves their sheaf property and gives
+their actual evaluation maps on the kernel ideal. Evaluation kills
+products of two ideal elements, hence factors uniquely through
+\(\mathcal I(U)/\mathcal I(U)^2\). Both the evaluation and this
+factorization commute with the original restrictions.
+
+For a ring map \(A\to B\), consider its actual affine scheme morphism
+and write
+\[
+R=\Gamma(\operatorname{Spec}A,\top),\qquad
+T=\Gamma(\operatorname{Spec}B,j^{-1}\top),\qquad
+I=\ker(R\to T).
+\]
+The affine kernel ideal is proved quasicoherent using the localization
+criterion: localization of the actual kernel section map is identified
+with the kernel of the localized map. Mathlib's tilde–global-sections
+equivalence then proves that every \(R\)-linear map \(I\to T\)
+extends to exactly one section of \(\mathcal N_j\). This yields the
+proved equivalence
+\[
+\Gamma(\operatorname{Spec}A,\mathcal N_j)
+\simeq_R
+\operatorname{Hom}_T\bigl(T\otimes_R(I/I^2),T\bigr).
+\]
+The forward map has the fixed formula
+\[
+b\otimes[a]\longmapsto b\,\varphi(a),
+\]
+and its inverse evaluates at \(1\otimes[a]\). These are the actual
+evaluation maps of the constructed sheaf. The equivalence assumes no
+normal-frame identification, local freeness, or comparison theorem.
+
+### Verification of the adopted geometry
+
+The six helper sources above have successful exact-source compilation and
+independent kernel-replay receipts. Their checked sources, artifacts, and
+receipts are matched by SHA-256. The derived-class source is reused
+unchanged from its checked concurrent contribution; the integrated
+intrinsic-normal and surface/curve-chart modules are compiled and replayed
+after assembly in this checkout.
+
+| Helper | Source lines | Compile time | Kernel replay |
+| --- | ---: | ---: | ---: |
+| `GeometricCartierDerivedClass` | 2,116 | 238.09 s | 182.48 s |
+| `GeometricLiteralSurface` | 413 | 23.65 s | 30.76 s |
+| `GeometricIntrinsicNormal` | 1,219 | 51.78 s | 8.46 s |
+| `GeometricSurfaceDehomogenizedCharts` | 518 | 15.06 s | 16.73 s |
+| `GeometricSurfaceProjectiveCoefficients` | 277 | 30.09 s | 25.11 s |
+| `GeometricSurfaceCurveCharts` | 524 | 22.41 s | 11.91 s |
+
+The checks use Lean 4.33.1 and the pinned Mathlib commit
+`0df444a360eaa60ab8c11dca51a86af692955474`. The audited endpoints use only
+`propext`, `Classical.choice`, and `Quot.sound`. These are scoped checks of
+the stated helpers and their checked dependencies; they are not a fresh
+build or acceptance of the complete older proposal.
+
+Six declaration-free import facades, `Assembly08`–`Assembly10` and
+`Normalization07`–`Normalization09`, are replaced by direct imports of
+their unchanged final part modules. All declaration bodies and dependency
+closures are retained. Together with the incoming checkpoint's facade
+removal, this keeps the proposal at 256 permitted files and below the
+16 MiB source limit. The helper-only source-policy and import-graph checks
+pass; the complete source-policy check still rejects the final admission
+in `Solution.lean`. Explanation links and displayed mathematics are
+checked with the repository renderer.
+
+### Remaining geometric obligations
+
+The local adjunction theorem from the preceding checkpoint still needs
+its complete global sheaf and overlap binding. The derived comparison
+must also be related to the specific coordinate descent and its
+homogeneous and character components. Genuine projective trace,
+moving-class and Abel–Jacobi comparisons, supported correspondences,
+and the de Rham comparison leading to the protected rational primitive
+remain further obligations. None is inferred solely from the new
+nonvanishing or affine normal-sheaf results.
+
+The protected instance and final theorem statement are unchanged. The
+sole explicit admission remains `Solution.lean:138`; the final
+certificate still depends on that admission. The geometric strategy
+continues to follow Ben Diamond's argument. This formal continuation
+was prepared with OpenAI assistance and incorporates the concurrent
+checked Cartier work without changing its cochains or nonvanishing
+results.
+
 ## The original Cartier class on the coordinate cover — 14 November 2026
 
 The new [GeometricCartierCoordinateDescent.lean](GeometricCartierCoordinateDescent.lean)
