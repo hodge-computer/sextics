@@ -196,6 +196,39 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
 ```
 
 
+### Exact coefficient membership on the actual surface
+
+[GeometricIncidenceFiberCoefficients.lean](GeometricIncidenceFiberCoefficients.lean)
+computes the map on prime ideals for the unchanged `surfaceToBase`.
+The theorem `coefficient_mem_iff` states
+\[
+ a\in f(x)
+ \quad\Longleftrightarrow\quad
+ \operatorname{algebraMap}(a)\in x,
+\]
+where the right side uses the original homogeneous prime in
+`PointSurface y`. The proof follows the actual structure morphism
+through the canonical degree-zero map and the \(D_+(1)\) construction.
+
+The endpoint `seed_kernel_mem_of_over_seed` shows that every actual
+surface point over the original seed contains the images of all
+coefficients killed by `seedMap`. It accepts an explicit point of
+\(\operatorname{Spec}\mathbb C\). This discharges the coefficient
+condition needed by the polynomial-prime transport without assuming
+a global Proj fiber isomorphism or a coordinate cover.
+
+Independent source review checked the exact pinned Proj definitions,
+numerator-membership formula, and coefficient maps. Static scans passed.
+**No elaboration, compilation, or kernel replay was run.**
+Deferred bounded check:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceFiberCoefficients.olean \
+  Proposal/GeometricIncidenceFiberCoefficients.lean
+```
+
+
 ## Specialized seed geometry continuation — source draft, 14 November 2026
 
 This continuation proceeds in bounded components. Every new Lean module
