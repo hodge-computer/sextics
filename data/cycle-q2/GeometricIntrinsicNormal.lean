@@ -9,6 +9,8 @@ import Mathlib.RingTheory.Ideal.Cotangent
 import Mathlib.RingTheory.TensorProduct.Basic
 import Proposal.GeometricLiteralSurface
 import Mathlib.AlgebraicGeometry.Modules.Tilde
+import Mathlib.AlgebraicGeometry.Modules.Sheaf
+import Mathlib.CategoryTheory.Limits.Preserves.FunctorCategory
 import Mathlib.Algebra.Module.LocalizedModule.Submodule
 
 /-!
@@ -796,7 +798,7 @@ instance affineEvaluation_additive (U : (Spec A).Opens) :
 instance affineEvaluation_preservesFiniteLimits (U : (Spec A).Opens) :
     PreservesFiniteLimits (affineEvaluation A U) where
   preservesFiniteLimits J _ _ := by
-    letI : PreservesLimitsOfShape J
+    let : PreservesLimitsOfShape J
         (affineEvaluation A U ⋙ forget₂ (ModuleCat A) AddCommGrpCat) := by
       change PreservesLimitsOfShape J
         (SheafOfModules.evaluation (Spec A).ringCatSheaf (op U) ⋙
@@ -858,15 +860,15 @@ theorem kernel_isLocalizing
   let e₁ := affineKernelSectionEquiv f U
   have h : f₁.comp a = b.comp f₀ :=
     congrArg ModuleCat.Hom.hom ((modulesSpecToSheaf.map f).hom.naturality U.leTop.op)
-  letI : IsLocalizedModule (Submonoid.powers r) a := hM r
-  letI : IsLocalizedModule (Submonoid.powers r) b := hN r
-  letI : Module Γ(Spec A, U) ((modulesSpecToSheaf.obj M).obj.obj (op U)) :=
+  let : IsLocalizedModule (Submonoid.powers r) a := hM r
+  let : IsLocalizedModule (Submonoid.powers r) b := hN r
+  let : Module Γ(Spec A, U) ((modulesSpecToSheaf.obj M).obj.obj (op U)) :=
     inferInstanceAs (Module Γ(Spec A, U) Γ(M, U))
-  letI : Module Γ(Spec A, U) ((modulesSpecToSheaf.obj N).obj.obj (op U)) :=
+  let : Module Γ(Spec A, U) ((modulesSpecToSheaf.obj N).obj.obj (op U)) :=
     inferInstanceAs (Module Γ(Spec A, U) Γ(N, U))
-  letI : IsScalarTower A Γ(Spec A, U) ((modulesSpecToSheaf.obj M).obj.obj (op U)) :=
+  let : IsScalarTower A Γ(Spec A, U) ((modulesSpecToSheaf.obj M).obj.obj (op U)) :=
     inferInstanceAs (IsScalarTower A Γ(Spec A, U) Γ(M, U))
-  letI : IsScalarTower A Γ(Spec A, U) ((modulesSpecToSheaf.obj N).obj.obj (op U)) :=
+  let : IsScalarTower A Γ(Spec A, U) ((modulesSpecToSheaf.obj N).obj.obj (op U)) :=
     inferInstanceAs (IsScalarTower A Γ(Spec A, U) Γ(N, U))
   have hk : IsLocalizedModule (Submonoid.powers r) (kernelSquareMap a b f₀ f₁ h) :=
     kernelSquareMap_isLocalized (B := Γ(Spec A, U)) (Submonoid.powers r) a b f₀ f₁ h
@@ -1155,7 +1157,7 @@ def normalSectionBaseChangeMap (U : Y.Opens) :
     (normalDirectImageSheaf j).val.obj (op U) →ₗ[Γ(Y, U)]
       (sectionConormal j U →ₗ[Γ(X, j ⁻¹ᵁ U)] Γ(X, j ⁻¹ᵁ U)) :=
   ((normalFunctionalEquiv (RingHom.ker (j.app U).hom)
-    (fun a ha => ha)).restrictScalars Γ(Y, U)).toLinearMap.comp
+    (fun _a ha => ha)).restrictScalars Γ(Y, U)).toLinearMap.comp
       (normalSectionEvaluationLinearMap j U)
 
 @[simp] theorem normalSectionBaseChangeMap_tmul (U : Y.Opens)
@@ -1181,7 +1183,7 @@ def affineNormalConormalEquiv :
         Γ(Spec B, (Spec.map φ) ⁻¹ᵁ ⊤)) :=
   (affineNormalSectionLinearEquiv φ).trans
     ((normalFunctionalEquiv (RingHom.ker ((Spec.map φ).app ⊤).hom)
-      (fun a ha => ha)).restrictScalars Γ(Spec A, ⊤))
+      (fun _a ha => ha)).restrictScalars Γ(Spec A, ⊤))
 
 @[simp] theorem affineNormalConormalEquiv_apply
     (f : (normalDirectImageSheaf (Spec.map φ)).val.obj (op ⊤)) :
@@ -1215,5 +1217,734 @@ end AffineConormal
 #print axioms affineNormalConormalEquiv
 #print axioms affineNormalConormalEquiv_symm_evaluate
 
+end CycleQ2GeometricIntrinsicNormal
+end
+
+
+/-!
+# Intrinsic normal sections on actual affine charts
+
+Restriction and cartesian open base change transport the actual kernel ideal
+and its normal functionals. The final equivalence uses the original affine
+coordinate rings, and the generator formulas fix both coefficient maps.
+-/
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+variable {Y : Scheme.{0}} (M N : Y.Modules)
+
+/-- Local linear Hom sections agree with actual morphisms of module sheaves
+on the corresponding open subscheme. -/
+def localLinearHomRestrictEquiv (U : Y.Opens) :
+    LocalLinearHom Y.sheaf M N U ≃ (M.restrict U.ι ⟶ N.restrict U.ι) :=
+  (localLinearHomEquiv Y.sheaf M N U).trans
+    ((Scheme.Modules.overEquiv U).fullyFaithfulFunctor.homEquiv.trans
+      (Iso.homCongr ((Scheme.Modules.overFunctorEquiv U).app M)
+        ((Scheme.Modules.overFunctorEquiv U).app N)))
+
+@[simp] theorem localLinearHomRestrictEquiv_app (U : Y.Opens)
+    (f : LocalLinearHom Y.sheaf M N U) (V : U.toScheme.Opens)
+    (x : M.val.obj (op (U.ι ''ᵁ V))) :
+    (localLinearHomRestrictEquiv M N U f).val.app (op V) x =
+      f.val.app (op (Over.mk (homOfLE (U.ι_image_le V)))) x := rfl
+
+section MorphismRestriction
+
+variable {X : Scheme.{0}} (j : X ⟶ Y)
+
+instance restrictFunctor_preservesFiniteLimits (i : X ⟶ Y) [IsOpenImmersion i] :
+    PreservesFiniteLimits (Scheme.Modules.restrictFunctor i) where
+  preservesFiniteLimits J _ _ := by
+    letI : PreservesLimitsOfShape J
+        (Scheme.Modules.restrictFunctor i ⋙ Scheme.Modules.toPresheaf X) := by
+      change PreservesLimitsOfShape J
+        (Scheme.Modules.toPresheaf Y ⋙
+          (Functor.whiskeringLeft _ _ AddCommGrpCat).obj i.opensFunctor.op)
+      haveI : PreservesLimitsOfShape J (Scheme.Modules.toPresheaf Y) := by infer_instance
+      haveI : PreservesLimitsOfShape J
+          ((Functor.whiskeringLeft _ _ AddCommGrpCat).obj i.opensFunctor.op) := by
+        infer_instance
+      infer_instance
+    exact preservesLimitsOfShape_of_reflects_of_preserves
+      (Scheme.Modules.restrictFunctor i) (Scheme.Modules.toPresheaf X)
+
+instance restrictFunctor_additive (i : X ⟶ Y) [IsOpenImmersion i] :
+    (Scheme.Modules.restrictFunctor i).Additive where
+  map_add := by intros; rfl
+
+/-- Restricting the actual direct-image structure module to an open scheme
+agrees with the direct-image structure module of the restricted morphism. -/
+def imageStructureRestrictIso (U : Y.Opens) :
+    (show Y.Modules from imageStructureModule j).restrict U.ι ≅
+      (show U.toScheme.Modules from imageStructureModule (j ∣_ U)) := by
+  refine (SheafOfModules.fullyFaithfulForget _).preimageIso
+    (PresheafOfModules.isoMk (fun V => ?_) ?_)
+  · let e := X.presheaf.mapIso (eqToIso (image_morphismRestrict_preimage j U V.unop)).op
+    refine ModuleCat.isoMk
+      ((forget₂ CommRingCat RingCat ⋙ forget₂ RingCat AddCommGrpCat).mapIso e) ?_
+    intro r
+    ext x
+    let x' : Γ(X, j ⁻¹ᵁ (U.ι ''ᵁ V.unop)) := x
+    let y : Γ(X, (j ⁻¹ᵁ U).ι ''ᵁ ((j ∣_ U) ⁻¹ᵁ V.unop)) :=
+      (j ∣_ U).app V.unop r
+    change y * e.hom x' =
+      e.hom (j.app (U.ι ''ᵁ V.unop) ((U.ι.appIso V.unop).inv r) * x')
+    have hr₀ : (U.ι.appIso V.unop).inv r = r := by
+      rw [Scheme.Opens.ι_appIso]
+      rfl
+    rw [hr₀]
+    rw [map_mul]
+    have hr : y = e.hom (j.app (U.ι ''ᵁ V.unop) r) :=
+      ConcreteCategory.congr_hom (morphismRestrict_app j U V.unop) r
+    rw [hr]
+  · intro V W h
+    apply ModuleCat.hom_ext
+    apply LinearMap.ext
+    intro x
+    change X.presheaf.map _ (X.presheaf.map _ x) =
+      X.presheaf.map _ (X.presheaf.map _ x)
+    let h₁ := (Opens.map j.base).map (U.ι.opensFunctor.map h.unop)
+    let h₂ := (j ⁻¹ᵁ U).ι.opensFunctor.map ((Opens.map (j ∣_ U).base).map h.unop)
+    have hn : X.presheaf.map h₁.op ≫
+        X.presheaf.map (eqToHom (image_morphismRestrict_preimage j U W.unop)).op =
+      X.presheaf.map (eqToHom (image_morphismRestrict_preimage j U V.unop)).op ≫
+        X.presheaf.map h₂.op := by
+      rw [← Functor.map_comp, ← Functor.map_comp]
+      rfl
+    exact ConcreteCategory.congr_hom hn x
+
+theorem schemeStructureMap_restrict (U : Y.Opens) :
+    (Scheme.Modules.restrictFunctor U.ι).map (schemeStructureMap j) ≫
+      (imageStructureRestrictIso j U).hom =
+    (Scheme.Modules.restrictUnitIso U.ι).hom ≫ schemeStructureMap (j ∣_ U) := by
+  apply SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro V
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro a
+  change X.presheaf.map (eqToHom (image_morphismRestrict_preimage j U V.unop)).op
+      (j.app (U.ι ''ᵁ V.unop) a) =
+    (j ∣_ U).app V.unop ((U.ι.appIso V.unop).hom a)
+  have ha : (U.ι.appIso V.unop).hom a = a := by
+    rw [Scheme.Opens.ι_appIso]
+    rfl
+  rw [ha]
+  exact (ConcreteCategory.congr_hom (morphismRestrict_app j U V.unop) a).symm
+
+/-- The intrinsic kernel ideal restricts to the actual ideal sheaf of the
+restricted scheme morphism. -/
+def kernelIdealRestrictIso (U : Y.Opens) :
+    (show Y.Modules from kernelIdealSheaf j).restrict U.ι ≅
+      (show U.toScheme.Modules from kernelIdealSheaf (j ∣_ U)) :=
+  PreservesKernel.iso (Scheme.Modules.restrictFunctor U.ι) (schemeStructureMap j) ≪≫
+    kernel.mapIso _ (schemeStructureMap (j ∣_ U))
+      (Scheme.Modules.restrictUnitIso U.ι) (imageStructureRestrictIso j U)
+      (schemeStructureMap_restrict j U)
+
+/-- Actual normal sections on an open set agree with global intrinsic
+normal sections for the restricted immersion of schemes. -/
+def normalSectionRestrictEquiv (U : Y.Opens) :
+    (normalDirectImageSheaf j).val.obj (op U) ≃
+      (normalDirectImageSheaf (j ∣_ U)).val.obj (op ⊤) :=
+  (localLinearHomRestrictEquiv
+      (show Y.Modules from kernelIdealSheaf j)
+      (show Y.Modules from imageStructureModule j) U).trans
+    ((Iso.homCongr (kernelIdealRestrictIso j U) (imageStructureRestrictIso j U)).trans
+      (localLinearHomTopEquiv U.toScheme.sheaf (kernelIdealSheaf (j ∣_ U))
+        (imageStructureModule (j ∣_ U))).symm)
+
+end MorphismRestriction
+
+#print axioms localLinearHomRestrictEquiv
+#print axioms imageStructureRestrictIso
+#print axioms kernelIdealRestrictIso
+#print axioms normalSectionRestrictEquiv
+
+end CycleQ2GeometricIntrinsicNormal
+end
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+section ModuleEquivalence
+
+variable {X Y : Scheme.{0}}
+
+/-- Restriction along a scheme isomorphism is an equivalence of actual
+categories of structure-module sheaves. -/
+def moduleRestrictEquivalence (e : X ≅ Y) : Y.Modules ≌ X.Modules :=
+  CategoryTheory.Equivalence.mk (Scheme.Modules.restrictFunctor e.hom)
+    (Scheme.Modules.restrictFunctor e.inv)
+    (Scheme.Modules.restrictFunctorId.symm ≪≫
+      (Scheme.Modules.restrictFunctorCongr e.inv_hom_id).symm ≪≫
+        Scheme.Modules.restrictFunctorComp e.inv e.hom)
+    ((Scheme.Modules.restrictFunctorComp e.hom e.inv).symm ≪≫
+      Scheme.Modules.restrictFunctorCongr e.hom_inv_id ≪≫
+        Scheme.Modules.restrictFunctorId)
+
+variable (i : X ⟶ Y) [IsOpenImmersion i] (M N : Y.Modules)
+
+/-- Local linear maps on the range of an open immersion are exactly actual
+module morphisms on its source scheme. -/
+def localLinearHomOpenImmersionEquiv :
+    LocalLinearHom Y.sheaf M N i.opensRange ≃ (M.restrict i ⟶ N.restrict i) := by
+  let e := i.isoOpensRange
+  let q : Scheme.Modules.restrictFunctor i.opensRange.ι ⋙
+      Scheme.Modules.restrictFunctor e.hom ≅ Scheme.Modules.restrictFunctor i :=
+    (Scheme.Modules.restrictFunctorComp e.hom i.opensRange.ι).symm ≪≫
+      Scheme.Modules.restrictFunctorCongr i.isoOpensRange_hom_ι
+  exact (localLinearHomRestrictEquiv M N i.opensRange).trans
+    ((moduleRestrictEquivalence e).fullyFaithfulFunctor.homEquiv.trans
+      (Iso.homCongr (q.app M) (q.app N)))
+
+end ModuleEquivalence
+
+section OpenBaseChange
+
+variable {X Y X' Y' : Scheme.{0}}
+  (j : X ⟶ Y) (i : Y' ⟶ Y) (k : X' ⟶ X) (j' : X' ⟶ Y')
+  [IsOpenImmersion i] [IsOpenImmersion k]
+  (H : IsPullback j' k i j)
+
+/-- The actual section-ring isomorphism in an open cartesian square. -/
+def baseChangeStructureSectionIso (V : Y'.Opens) :
+    Γ(X, j ⁻¹ᵁ (i ''ᵁ V)) ≅ Γ(X', j' ⁻¹ᵁ V) := by
+  have he := IsOpenImmersion.image_preimage_eq_preimage_image_of_isPullback H V
+  have hW : j ⁻¹ᵁ (i ''ᵁ V) ≤ k.opensRange :=
+    he.symm.le.trans (k.image_le_opensRange _)
+  letI : IsIso (k.app (j ⁻¹ᵁ (i ''ᵁ V))) := k.isIso_app _ hW
+  exact asIso (k.app (j ⁻¹ᵁ (i ''ᵁ V))) ≪≫
+    X'.presheaf.mapIso (eqToIso
+      (IsOpenImmersion.app_eq_invApp_app_of_comp_eq_aux j' i (k ≫ j) H.w.symm V)).op
+
+@[simp] theorem baseChangeStructureSectionIso_hom (V : Y'.Opens) :
+    (baseChangeStructureSectionIso j i k j' H V).hom =
+      k.appLE (j ⁻¹ᵁ (i ''ᵁ V)) (j' ⁻¹ᵁ V)
+        (IsOpenImmersion.app_eq_invApp_app_of_comp_eq_aux j' i (k ≫ j) H.w.symm V).le := rfl
+
+/-- The cartesian comparison uses the literal morphism on section rings. -/
+theorem baseChangeStructureSectionIso_app (V : Y'.Opens) :
+    (i.appIso V).inv ≫ j.app (i ''ᵁ V) ≫
+      (baseChangeStructureSectionIso j i k j' H V).hom = j'.app V := by
+  change (i.appIso V).inv ≫ j.app (i ''ᵁ V) ≫ k.app (j ⁻¹ᵁ (i ''ᵁ V)) ≫
+    X'.presheaf.map (eqToHom
+      (IsOpenImmersion.app_eq_invApp_app_of_comp_eq_aux j' i (k ≫ j) H.w.symm V)).op =
+    j'.app V
+  simpa only [Scheme.Hom.comp_app, Category.assoc] using
+      (IsOpenImmersion.app_eq_appIso_inv_app_of_comp_eq
+        j' i (k ≫ j) H.w.symm V).symm
+
+theorem baseChangeStructureSectionIso_naturality {V W : Y'.Opens} (h : V ⟶ W) :
+    X.presheaf.map ((Opens.map j.base).map (i.opensFunctor.map h)).op ≫
+      (baseChangeStructureSectionIso j i k j' H V).hom =
+    (baseChangeStructureSectionIso j i k j' H W).hom ≫
+      X'.presheaf.map ((Opens.map j'.base).map h).op := by
+  simp only [baseChangeStructureSectionIso_hom, Scheme.Hom.map_appLE, Scheme.Hom.appLE_map]
+
+/-- Open base change for the actual direct image of the structure module. -/
+def imageStructureOpenBaseChangeIso :
+    (show Y.Modules from imageStructureModule j).restrict i ≅
+      (show Y'.Modules from imageStructureModule j') := by
+  refine (SheafOfModules.fullyFaithfulForget _).preimageIso
+    (PresheafOfModules.isoMk (fun V => ?_) ?_)
+  · let e := baseChangeStructureSectionIso j i k j' H V.unop
+    refine ModuleCat.isoMk
+      ((forget₂ CommRingCat RingCat ⋙ forget₂ RingCat AddCommGrpCat).mapIso e) ?_
+    intro r
+    ext x
+    let x' : Γ(X, j ⁻¹ᵁ (i ''ᵁ V.unop)) := x
+    let y : Γ(X', j' ⁻¹ᵁ V.unop) := j'.app V.unop r
+    change y * e.hom x' =
+      e.hom (j.app (i ''ᵁ V.unop) ((i.appIso V.unop).inv r) * x')
+    rw [map_mul]
+    have hr : e.hom (j.app (i ''ᵁ V.unop) ((i.appIso V.unop).inv r)) = y :=
+      ConcreteCategory.congr_hom (baseChangeStructureSectionIso_app j i k j' H V.unop) r
+    rw [hr]
+  · intro V W h
+    apply ModuleCat.hom_ext
+    apply LinearMap.ext
+    intro x
+    exact ConcreteCategory.congr_hom
+      (baseChangeStructureSectionIso_naturality j i k j' H h.unop) x
+
+theorem schemeStructureMap_openBaseChange :
+    (Scheme.Modules.restrictFunctor i).map (schemeStructureMap j) ≫
+      (imageStructureOpenBaseChangeIso j i k j' H).hom =
+    (Scheme.Modules.restrictUnitIso i).hom ≫ schemeStructureMap j' := by
+  apply SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro V
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro a
+  change (baseChangeStructureSectionIso j i k j' H V.unop).hom
+      (j.app (i ''ᵁ V.unop) a) =
+    j'.app V.unop ((i.appIso V.unop).hom a)
+  have h := ConcreteCategory.congr_hom
+    (baseChangeStructureSectionIso_app j i k j' H V.unop) ((i.appIso V.unop).hom a)
+  have ha := ConcreteCategory.congr_hom (i.appIso V.unop).hom_inv_id a
+  change (i.appIso V.unop).inv ((i.appIso V.unop).hom a) = a at ha
+  simpa only [CommRingCat.comp_apply, ha] using h
+
+/-- The actual ideal module respects open cartesian base change. -/
+def kernelIdealOpenBaseChangeIso :
+    (show Y.Modules from kernelIdealSheaf j).restrict i ≅
+      (show Y'.Modules from kernelIdealSheaf j') :=
+  PreservesKernel.iso (Scheme.Modules.restrictFunctor i) (schemeStructureMap j) ≪≫
+    kernel.mapIso _ (schemeStructureMap j') (Scheme.Modules.restrictUnitIso i)
+      (imageStructureOpenBaseChangeIso j i k j' H)
+      (schemeStructureMap_openBaseChange j i k j' H)
+
+/-- Intrinsic normal sections on a coordinate chart identify with the actual
+normal sheaf of the induced affine morphism, through an open cartesian square. -/
+def normalSectionOpenBaseChangeEquiv :
+    (normalDirectImageSheaf j).val.obj (op i.opensRange) ≃
+      (normalDirectImageSheaf j').val.obj (op ⊤) :=
+  (localLinearHomOpenImmersionEquiv i
+      (show Y.Modules from kernelIdealSheaf j)
+      (show Y.Modules from imageStructureModule j)).trans
+    ((Iso.homCongr (kernelIdealOpenBaseChangeIso j i k j' H)
+      (imageStructureOpenBaseChangeIso j i k j' H)).trans
+      (localLinearHomTopEquiv Y'.sheaf (kernelIdealSheaf j')
+        (imageStructureModule j')).symm)
+
+end OpenBaseChange
+
+#print axioms moduleRestrictEquivalence
+#print axioms localLinearHomOpenImmersionEquiv
+#print axioms baseChangeStructureSectionIso
+#print axioms imageStructureOpenBaseChangeIso
+#print axioms kernelIdealOpenBaseChangeIso
+#print axioms normalSectionOpenBaseChangeEquiv
+
+end CycleQ2GeometricIntrinsicNormal
+end
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+variable {X Y : Scheme.{0}} (i : X ⟶ Y) [IsOpenImmersion i] (M N : Y.Modules)
+
+/-- The cartesian chart comparison evaluates the same local linear map. -/
+theorem localLinearHomOpenImmersionEquiv_app
+    (f : LocalLinearHom Y.sheaf M N i.opensRange) (V : X.Opens)
+    (x : M.val.obj (op (i ''ᵁ V))) :
+    (localLinearHomOpenImmersionEquiv i M N f).val.app (op V) x =
+      f.val.app (op (Over.mk (homOfLE (i.image_le_opensRange V)))) x := by
+  let e := i.isoOpensRange
+  have hc : i.opensRange.ι ''ᵁ (e.hom ''ᵁ V) = i ''ᵁ V := by
+    simpa only [e, Scheme.Hom.isoOpensRange_hom_ι] using
+      (Scheme.Hom.comp_image e.hom i.opensRange.ι V).symm
+  let q : Scheme.Modules.restrictFunctor i.opensRange.ι ⋙
+      Scheme.Modules.restrictFunctor e.hom ≅ Scheme.Modules.restrictFunctor i :=
+    (Scheme.Modules.restrictFunctorComp e.hom i.opensRange.ι).symm ≪≫
+      Scheme.Modules.restrictFunctorCongr i.isoOpensRange_hom_ι
+  have hqh (P : Y.Modules) :
+      (q.app P).hom.app V = P.presheaf.map (eqToHom hc.symm).op := by
+    dsimp [q]
+    change P.presheaf.map _ ≫ P.presheaf.map _ = P.presheaf.map (eqToHom hc.symm).op
+    rw [← Functor.map_comp]
+    rfl
+  have hqi (P : Y.Modules) :
+      (q.app P).inv.app V = P.presheaf.map (eqToHom hc).op := by
+    dsimp [q]
+    change P.presheaf.map _ ≫ P.presheaf.map _ = P.presheaf.map (eqToHom hc).op
+    rw [← Functor.map_comp]
+    rfl
+  change (q.app N).hom.app V
+    (((Scheme.Modules.restrictFunctor e.hom).map
+      (localLinearHomRestrictEquiv M N i.opensRange f)).app V
+      ((q.app M).inv.app V x)) = _
+  rw [hqh, hqi]
+  change N.val.map (eqToHom hc.symm).op
+      (f.val.app (op (Over.mk (homOfLE (i.opensRange.ι_image_le (e.hom ''ᵁ V)))))
+        (M.val.map (eqToHom hc).op x)) = _
+  have hn := ConcreteCategory.congr_hom
+    (f.val.naturality
+      (Over.homMk (eqToHom hc) :
+        Over.mk (homOfLE (i.opensRange.ι_image_le (e.hom ''ᵁ V))) ⟶
+          Over.mk (homOfLE (i.image_le_opensRange V))).op) x
+  change f.val.app (op (Over.mk (homOfLE (i.opensRange.ι_image_le (e.hom ''ᵁ V)))))
+      (M.val.map (eqToHom hc).op x) =
+    N.val.map (eqToHom hc).op
+      (f.val.app (op (Over.mk (homOfLE (i.image_le_opensRange V)))) x) at hn
+  have he : N.presheaf.map (eqToHom hc).op ≫
+      N.presheaf.map (eqToHom hc.symm).op = 𝟙 _ := by
+    rw [← Functor.map_comp]
+    simp
+  exact (congrArg (fun y => N.val.map (eqToHom hc.symm).op y) hn).trans
+    (ConcreteCategory.congr_hom he
+      (f.val.app (op (Over.mk (homOfLE (i.image_le_opensRange V)))) x))
+
+#print axioms localLinearHomOpenImmersionEquiv_app
+end CycleQ2GeometricIntrinsicNormal
+end
+
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+variable {X Y X' Y' : Scheme.{0}}
+  (j : X ⟶ Y) (i : Y' ⟶ Y) (k : X' ⟶ X) (j' : X' ⟶ Y')
+  [IsOpenImmersion i] [IsOpenImmersion k]
+  (H : IsPullback j' k i j)
+
+/-- The kernel comparison has the expected actual inclusion into the
+restricted structure sheaf. -/
+theorem kernelIdealOpenBaseChangeIso_hom_ι :
+    (kernelIdealOpenBaseChangeIso j i k j' H).hom ≫
+      kernel.ι (schemeStructureMap j') =
+    (Scheme.Modules.restrictFunctor i).map (kernel.ι (schemeStructureMap j)) ≫
+      (Scheme.Modules.restrictUnitIso i).hom := by
+  letI : (Scheme.Modules.restrictFunctor i).Additive := restrictFunctor_additive i
+  letI : (Scheme.Modules.restrictFunctor i).PreservesZeroMorphisms := by infer_instance
+  dsimp [kernelIdealOpenBaseChangeIso, kernel.mapIso]
+  rw [Category.assoc, kernel.lift_ι, ← Category.assoc]
+  exact congrArg (fun f => f ≫ (Scheme.Modules.restrictUnitIso i).hom)
+    (kernelComparison_comp_ι (schemeStructureMap j) (Scheme.Modules.restrictFunctor i))
+
+/-- On literal ideal sections, open base change is the actual coordinate
+section-ring isomorphism. -/
+theorem kernelIdealOpenBaseChangeIso_hom_section (V : Y'.Opens)
+    (a : (kernelIdealSheaf j).val.obj (op (i ''ᵁ V))) :
+    (kernelIdealSectionEquiv j' V
+      ((kernelIdealOpenBaseChangeIso j i k j' H).hom.val.app (op V) a) : Γ(Y', V)) =
+      (i.appIso V).hom (kernelIdealSectionEquiv j (i ''ᵁ V) a) := by
+  rw [kernelIdealSectionEquiv_coe, kernelIdealSectionEquiv_coe]
+  have h := congrArg (fun f => f.val.app (op V))
+    (kernelIdealOpenBaseChangeIso_hom_ι j i k j' H)
+  exact ConcreteCategory.congr_hom h a
+
+/-- The inverse kernel comparison is normalized by the same actual ring
+isomorphism; it therefore transports the given equation, not a chosen generator. -/
+theorem kernelIdealOpenBaseChangeIso_inv_section (V : Y'.Opens)
+    (a : (kernelIdealSheaf j').val.obj (op V)) :
+    (kernelIdealSectionEquiv j (i ''ᵁ V)
+      ((kernelIdealOpenBaseChangeIso j i k j' H).inv.val.app (op V) a) : Γ(Y, i ''ᵁ V)) =
+      (i.appIso V).inv (kernelIdealSectionEquiv j' V a) := by
+  have h := kernelIdealOpenBaseChangeIso_hom_section j i k j' H V
+    ((kernelIdealOpenBaseChangeIso j i k j' H).inv.val.app (op V) a)
+  have hi := ConcreteCategory.congr_hom
+    (congrArg (fun f => f.val.app (op V))
+      (kernelIdealOpenBaseChangeIso j i k j' H).inv_hom_id) a
+  change (kernelIdealOpenBaseChangeIso j i k j' H).hom.val.app (op V)
+    ((kernelIdealOpenBaseChangeIso j i k j' H).inv.val.app (op V) a) = a at hi
+  rw [hi] at h
+  apply (i.appIso V).commRingCatIsoToRingEquiv.injective
+  exact h.symm.trans
+    (ConcreteCategory.congr_hom (i.appIso V).inv_hom_id
+      (kernelIdealSectionEquiv j' V a)).symm
+
+/-- Pull a literal local ideal element back to the actual ambient section
+ideal through the open cartesian square. -/
+def normalOpenIdealPullback (V : Y'.Opens)
+    (a : RingHom.ker (j'.app V).hom) : RingHom.ker (j.app (i ''ᵁ V)).hom :=
+  kernelIdealSectionEquiv j (i ''ᵁ V)
+    ((kernelIdealOpenBaseChangeIso j i k j' H).inv.val.app (op V)
+      ((kernelIdealSectionEquiv j' V).symm a))
+
+@[simp] theorem normalOpenIdealPullback_coe (V : Y'.Opens)
+    (a : RingHom.ker (j'.app V).hom) :
+    (normalOpenIdealPullback j i k j' H V a : Γ(Y, i ''ᵁ V)) =
+      (i.appIso V).inv a := by
+  simpa only [normalOpenIdealPullback, LinearEquiv.apply_symm_apply] using
+    kernelIdealOpenBaseChangeIso_inv_section j i k j' H V
+      ((kernelIdealSectionEquiv j' V).symm a)
+
+#print axioms kernelIdealOpenBaseChangeIso_hom_section
+#print axioms kernelIdealOpenBaseChangeIso_inv_section
+#print axioms normalOpenIdealPullback_coe
+end CycleQ2GeometricIntrinsicNormal
+end
+
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+
+variable {X Y X' Y' : Scheme.{0}}
+  (j : X ⟶ Y) (i : Y' ⟶ Y) (k : X' ⟶ X) (j' : X' ⟶ Y')
+  [IsOpenImmersion i] [IsOpenImmersion k]
+  (H : IsPullback j' k i j)
+
+/-- The intrinsic chart comparison evaluates the original local ideal
+functional, through the actual coordinate maps on both schemes. -/
+theorem normalSectionOpenBaseChangeEquiv_evaluate
+    (f : (normalDirectImageSheaf j).val.obj (op i.opensRange))
+    (a : RingHom.ker (j'.app ⊤).hom) :
+    normalSectionEvaluate j' ⊤ (normalSectionOpenBaseChangeEquiv j i k j' H f) a =
+      (baseChangeStructureSectionIso j i k j' H ⊤).hom
+        (normalSectionEvaluate j (i ''ᵁ ⊤)
+          ((normalDirectImageSheaf j).val.map
+            (homOfLE (i.image_le_opensRange ⊤)).op f)
+          (normalOpenIdealPullback j i k j' H ⊤ a)) := by
+  let K := kernelIdealOpenBaseChangeIso j i k j' H
+  let x : (kernelIdealSheaf j).val.obj (op (i ''ᵁ ⊤)) :=
+    K.inv.val.app (op ⊤) ((kernelIdealSectionEquiv j' ⊤).symm a)
+  let F := localLinearHomOpenImmersionEquiv i
+    (show Y.Modules from kernelIdealSheaf j)
+    (show Y.Modules from imageStructureModule j) f
+  let e := baseChangeStructureSectionIso j i k j' H ⊤
+  calc
+    _ = e.hom (f.val.app (op (Over.mk (homOfLE (i.image_le_opensRange ⊤)))) x) := by
+      change e.hom (F.val.app (op ⊤) x) = _
+      exact congrArg e.hom (localLinearHomOpenImmersionEquiv_app i
+        (show Y.Modules from kernelIdealSheaf j)
+        (show Y.Modules from imageStructureModule j) f ⊤ x)
+    _ = _ := by
+      apply congrArg e.hom
+      change f.val.app (op (Over.mk (homOfLE (i.image_le_opensRange ⊤)))) x =
+        localLinearHomEvaluate Y.sheaf (kernelIdealSheaf j) (imageStructureModule j)
+          (i ''ᵁ ⊤)
+          ((normalDirectImageSheaf j).val.map
+            (homOfLE (i.image_le_opensRange ⊤)).op f)
+          ((kernelIdealSectionEquiv j (i ''ᵁ ⊤)).symm
+            (kernelIdealSectionEquiv j (i ''ᵁ ⊤) x))
+      rw [LinearEquiv.symm_apply_apply]
+      have h := presheafHom_map_app_op_mk_id
+        (F := (kernelIdealSheaf j).val.presheaf)
+        (G := (imageStructureModule j).val.presheaf)
+        (homOfLE (i.image_le_opensRange ⊤)) f.val
+      exact (ConcreteCategory.congr_hom h x).symm
+
+#print axioms normalSectionOpenBaseChangeEquiv_evaluate
+end CycleQ2GeometricIntrinsicNormal
+end
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+open scoped TensorProduct
+
+variable {A B : CommRingCat.{0}} (φ : A ⟶ B)
+
+/-- The canonical global-section ring equivalence for an affine scheme. -/
+abbrev specTopRingEquiv (A : CommRingCat.{0}) : Γ(Spec A, ⊤) ≃+* A :=
+  (Scheme.ΓSpecIso A).commRingCatIsoToRingEquiv
+
+instance specTopRingHomInvPair (A : CommRingCat.{0}) :
+    RingHomInvPair (specTopRingEquiv A).toRingHom (specTopRingEquiv A).symm.toRingHom :=
+  RingHomInvPair.of_ringEquiv (specTopRingEquiv A)
+
+instance specTopRingHomInvPair_symm (A : CommRingCat.{0}) :
+    RingHomInvPair (specTopRingEquiv A).symm.toRingHom (specTopRingEquiv A).toRingHom :=
+  RingHomInvPair.of_ringEquiv_symm (specTopRingEquiv A)
+
+@[simp] theorem affineSectionMap_normalization (a : Γ(Spec A, ⊤)) :
+    specTopRingEquiv B ((Spec.map φ).app ⊤ a) = φ (specTopRingEquiv A a) :=
+  ConcreteCategory.congr_hom (Scheme.ΓSpecIso_naturality φ) a
+
+/-- The actual ideal of the affine section-ring map is the original kernel,
+with the canonical semilinearity induced by Γ(Spec A) ≃ A. -/
+def affineKernelSectionSemilinearEquiv :
+    RingHom.ker ((Spec.map φ).app ⊤).hom ≃ₛₗ[(specTopRingEquiv A).toRingHom]
+      RingHom.ker φ.hom where
+  toFun a := ⟨specTopRingEquiv A a, by
+    change φ (specTopRingEquiv A a) = 0
+    rw [← affineSectionMap_normalization]
+    exact (congrArg (specTopRingEquiv B) a.property).trans (map_zero _)⟩
+  invFun a := ⟨(specTopRingEquiv A).symm a, by
+    change (Spec.map φ).app ⊤ ((specTopRingEquiv A).symm a) = 0
+    apply (specTopRingEquiv B).injective
+    rw [affineSectionMap_normalization, (specTopRingEquiv A).apply_symm_apply, map_zero]
+    exact a.property⟩
+  left_inv a := Subtype.ext ((specTopRingEquiv A).symm_apply_apply a)
+  right_inv a := Subtype.ext ((specTopRingEquiv A).apply_symm_apply a)
+  map_add' a b := Subtype.ext
+    (map_add (specTopRingEquiv A) (a : Γ(Spec A, ⊤)) (b : Γ(Spec A, ⊤)))
+  map_smul' r a := Subtype.ext
+    (map_mul (specTopRingEquiv A) r (a : Γ(Spec A, ⊤)))
+
+@[simp] theorem affineKernelSectionSemilinearEquiv_coe
+    (a : RingHom.ker ((Spec.map φ).app ⊤).hom) :
+    (affineKernelSectionSemilinearEquiv φ a : A) = specTopRingEquiv A a := rfl
+
+@[simp] theorem affineKernelSectionSemilinearEquiv_symm_coe
+    (a : RingHom.ker φ.hom) :
+    ((affineKernelSectionSemilinearEquiv φ).symm a : Γ(Spec A, ⊤)) =
+      (specTopRingEquiv A).symm a := rfl
+
+/-- The coefficient module of the actual affine normal sheaf is the original
+curve algebra, under the canonical global-section equivalence. -/
+def affineImageSectionSemilinearEquiv :
+    letI : Algebra A B := φ.hom.toAlgebra
+    (imageStructureModule (Spec.map φ)).val.obj (op ⊤) ≃ₛₗ[(specTopRingEquiv A).toRingHom] B := by
+  letI : Algebra A B := φ.hom.toAlgebra
+  refine
+    { __ := (specTopRingEquiv B).toAddEquiv
+      map_smul' := ?_ }
+  intro r b
+  let b' : Γ(Spec B, ⊤) := b
+  let s : Γ(Spec B, ⊤) := (Spec.map φ).app ⊤ r
+  change specTopRingEquiv B (s * b') =
+    φ (specTopRingEquiv A r) * specTopRingEquiv B b'
+  have hs : specTopRingEquiv B s = φ (specTopRingEquiv A r) :=
+    affineSectionMap_normalization φ r
+  rw [map_mul, hs]
+
+/-- Affine normal sections are functionals on the original algebraic ideal,
+with no chosen functional or frame. -/
+def affineNormalAlgebraEquiv :
+    letI : Algebra A B := φ.hom.toAlgebra
+    (normalDirectImageSheaf (Spec.map φ)).val.obj (op ⊤) ≃ₛₗ[(specTopRingEquiv A).toRingHom]
+      (RingHom.ker φ.hom →ₗ[A] B) := by
+  letI : Algebra A B := φ.hom.toAlgebra
+  exact (affineNormalSectionLinearEquiv φ).trans
+    ((affineKernelSectionSemilinearEquiv φ).arrowCongr
+      (affineImageSectionSemilinearEquiv φ))
+
+@[simp] theorem affineNormalAlgebraEquiv_apply
+    (f : (normalDirectImageSheaf (Spec.map φ)).val.obj (op ⊤)) (a : RingHom.ker φ.hom) :
+    letI : Algebra A B := φ.hom.toAlgebra
+    affineNormalAlgebraEquiv φ f a =
+      specTopRingEquiv B (normalSectionEvaluate (Spec.map φ) ⊤ f
+        ((affineKernelSectionSemilinearEquiv φ).symm a)) := rfl
+
+/-- The actual affine intrinsic normal sections identify with the dual of
+B ⊗[A] (ker φ)/(ker φ)² over the original coordinate algebras. -/
+def affineNormalAlgebraConormalEquiv :
+    letI : Algebra A B := φ.hom.toAlgebra
+    (normalDirectImageSheaf (Spec.map φ)).val.obj (op ⊤) ≃ₛₗ[(specTopRingEquiv A).toRingHom]
+      (B ⊗[A] (RingHom.ker φ.hom).Cotangent →ₗ[B] B) := by
+  letI : Algebra A B := φ.hom.toAlgebra
+  exact (affineNormalAlgebraEquiv φ).trans
+    ((normalFunctionalEquiv (RingHom.ker φ.hom) (fun _ ha => ha)).restrictScalars A)
+
+@[simp] theorem affineNormalAlgebraConormalEquiv_tmul
+    (f : (normalDirectImageSheaf (Spec.map φ)).val.obj (op ⊤)) (b : B)
+    (a : RingHom.ker φ.hom) :
+    letI : Algebra A B := φ.hom.toAlgebra
+    affineNormalAlgebraConormalEquiv φ f
+      (b ⊗ₜ[A] (RingHom.ker φ.hom).toCotangent a) =
+        b * specTopRingEquiv B (normalSectionEvaluate (Spec.map φ) ⊤ f
+          ((affineKernelSectionSemilinearEquiv φ).symm a)) := rfl
+
+@[simp] theorem affineNormalAlgebraConormalEquiv_symm_evaluate
+    (a : RingHom.ker φ.hom) :
+    letI : Algebra A B := φ.hom.toAlgebra
+    ∀ g : B ⊗[A] (RingHom.ker φ.hom).Cotangent →ₗ[B] B,
+      specTopRingEquiv B (normalSectionEvaluate (Spec.map φ) ⊤
+        ((affineNormalAlgebraConormalEquiv φ).symm g)
+        ((affineKernelSectionSemilinearEquiv φ).symm a)) =
+      g ((1 : B) ⊗ₜ[A] (RingHom.ker φ.hom).toCotangent a) := by
+  letI : Algebra A B := φ.hom.toAlgebra
+  intro g
+  have h := LinearMap.congr_fun
+    ((affineNormalAlgebraConormalEquiv φ).apply_symm_apply g)
+    ((1 : B) ⊗ₜ[A] (RingHom.ker φ.hom).toCotangent a)
+  simpa only [affineNormalAlgebraConormalEquiv_tmul, one_mul] using h
+
+#print axioms affineKernelSectionSemilinearEquiv
+#print axioms affineImageSectionSemilinearEquiv
+#print axioms affineNormalAlgebraEquiv
+#print axioms affineNormalAlgebraConormalEquiv
+#print axioms affineNormalAlgebraConormalEquiv_symm_evaluate
+
+end CycleQ2GeometricIntrinsicNormal
+end
+
+set_option autoImplicit false
+set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2GeometricIntrinsicNormal
+open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricDifferentialSheaf
+open scoped TensorProduct
+
+variable {X Y : Scheme.{0}} {A B : CommRingCat.{0}} (φ : A ⟶ B)
+  (j : X ⟶ Y) (i : Spec A ⟶ Y) (k : Spec B ⟶ X)
+  [IsOpenImmersion i] [IsOpenImmersion k]
+  (H : IsPullback (Spec.map φ) k i j)
+
+/-- On an actual affine cartesian chart, intrinsic normal sections are the
+dual of the algebraic conormal module in the original coordinate rings. -/
+def normalOpenAlgebraConormalEquiv :
+    letI : Algebra A B := φ.hom.toAlgebra
+    (normalDirectImageSheaf j).val.obj (op i.opensRange) ≃
+      (B ⊗[A] (RingHom.ker φ.hom).Cotangent →ₗ[B] B) := by
+  letI : Algebra A B := φ.hom.toAlgebra
+  exact (normalSectionOpenBaseChangeEquiv j i k (Spec.map φ) H).trans
+    (affineNormalAlgebraConormalEquiv φ).toEquiv
+
+/-- The transported ideal element is exactly the section represented by the
+original coordinate-ring element through the actual affine chart. -/
+@[simp] theorem normalOpenAlgebraIdeal_coe (a : RingHom.ker φ.hom) :
+    (normalOpenIdealPullback j i k (Spec.map φ) H ⊤
+      ((affineKernelSectionSemilinearEquiv φ).symm a) : Γ(Y, i ''ᵁ ⊤)) =
+      (i.appIso ⊤).inv ((Scheme.ΓSpecIso A).inv a) := by
+  rw [normalOpenIdealPullback_coe]
+  rfl
+
+/-- The normal comparison is fixed on every actual ideal element and every
+coefficient; it carries the same functional used by the local adjunction. -/
+@[simp] theorem normalOpenAlgebraConormalEquiv_tmul
+    (f : (normalDirectImageSheaf j).val.obj (op i.opensRange)) (b : B)
+    (a : RingHom.ker φ.hom) :
+    letI : Algebra A B := φ.hom.toAlgebra
+    normalOpenAlgebraConormalEquiv φ j i k H f
+      (b ⊗ₜ[A] (RingHom.ker φ.hom).toCotangent a) =
+    b * specTopRingEquiv B
+      ((baseChangeStructureSectionIso j i k (Spec.map φ) H ⊤).hom
+        (normalSectionEvaluate j (i ''ᵁ ⊤)
+          ((normalDirectImageSheaf j).val.map
+            (homOfLE (i.image_le_opensRange ⊤)).op f)
+          (normalOpenIdealPullback j i k (Spec.map φ) H ⊤
+            ((affineKernelSectionSemilinearEquiv φ).symm a)))) := by
+  letI : Algebra A B := φ.hom.toAlgebra
+  change affineNormalAlgebraConormalEquiv φ
+      (normalSectionOpenBaseChangeEquiv j i k (Spec.map φ) H f)
+      (b ⊗ₜ[A] (RingHom.ker φ.hom).toCotangent a) = _
+  rw [affineNormalAlgebraConormalEquiv_tmul]
+  exact congrArg (fun z : Γ(Spec B, ⊤) => b * specTopRingEquiv B z)
+    (normalSectionOpenBaseChangeEquiv_evaluate j i k (Spec.map φ) H f
+      ((affineKernelSectionSemilinearEquiv φ).symm a))
+
+#print axioms normalOpenAlgebraConormalEquiv
+#print axioms normalOpenAlgebraConormalEquiv_tmul
 end CycleQ2GeometricIntrinsicNormal
 end

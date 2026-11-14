@@ -18,7 +18,7 @@ import HodgeTarget
 import Proposal.GeometricTarget
 import Proposal.GeometricSeed
 import Proposal.GeometricFormalInputs
-import Proposal.Normalization
+import Proposal.Normalization09Part02
 import Proposal.SolutionSupport05
 
 /-! Components extracted from SolutionSupport06.lean, in their original order.

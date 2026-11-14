@@ -1,5 +1,261 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Actual differential charts and preservation of the derived class — 14 November 2026
+
+The final theorem `Submission.missing_geometric_existence` remains open.
+This continuation proves the comparison of the original derived Cartier
+class with its actual common refinement, constructs the genuine surface
+and curve differential frames on the Jacobian opens, and extends the
+intrinsic normal comparison to open cartesian squares. It preserves the
+original incidence surface and the literal parameter \(r=57,\theta=1\).
+The moving-class argument, supported correspondence, and protected de
+Rham exactness theorem are still separate obligations.
+
+### The same derived class, with the staircase sign retained
+
+[GeometricCechRefinement.lean](GeometricCechRefinement.lean) extends the
+existing four-open comparison to finite covers, including repeated
+indices and arbitrary refinement maps. Its construction uses actual
+sections of injective sheaves and their actual restriction maps. It
+proves that refinements preserve the derived class and that changing the
+chosen injective primitives does not change it. An explicit alternating
+adapter identifies the four named faces with the all-triples finite
+Čech convention.
+
+Applying this comparison to the literal surface gives
+`literalCommonRefinementClass_eq`: the class on the common refinement
+is the original `literalDerivedClass`. Consequently the refined class
+is nonzero. This is an equality of the constructed classes, not a
+selection of a new class with a matching scalar observable.
+
+The incoming coordinate descent uses a particular bicomplex staircase
+`SecondDescent c d`. The new `secondDescent_diagonal_primitive` keeps
+its original two primitives and proves the exact diagonal equation
+\[
+\delta b=\operatorname{res}(c)+\operatorname{res}(d).
+\]
+Thus the ordinary alternating Čech convention identifies \(c\) with
+\(-d\). This sign does not affect nonvanishing, but it must be retained
+when comparing normalized pairings. The next helper constructs the
+homogeneous projection of the whole original staircase, keeping this
+sign and its original primitives.
+
+### Canonical homogeneous projection of the original descent
+
+[GeometricGradedCechDescent.lean](GeometricGradedCechDescent.lean)
+constructs the degree-zero projection of an ordinary homogeneous
+principal localization. If \(f\) has degree \(e\), its formula is
+\[
+\frac{a}{f^n}\longmapsto
+\frac{\operatorname{proj}_{ne}(a)}{f^n}.
+\]
+Clearing denominators proves that this is independent of the chosen
+fraction presentation, including when the ring has zero divisors. The
+projection commutes with the actual principal restriction maps and
+fixes genuine homogeneous degree-zero fractions.
+
+The canonical tensor-localization equivalences transport this map to
+the original mixed Čech modules. `principalSecondDescent_project`
+applies it to every entry of the original staircase, including both
+primitives. The literal Cartier cocycle is fixed, so
+`literal_weightZero_coordinate_descent` retains the original coordinate
+descendant and proves the same descent relation for its canonical
+weight-zero projection. Both the projected coordinate class and its
+multiple by the unchanged detector cubic are nonzero. The transformed
+diagonal primitive still compares the original Cartier cocycle with
+the negative of the projected coordinate cocycle.
+
+The independent continuation described in the next section supplies a
+homogeneous descent, actual Laurent-weight support, and a nonzero class
+via coordinate-cover connecting maps. The canonical projection here
+applies to any original staircase. Identifying its coordinate-cover
+derived image with the original Cartier derived class, with the negative
+sign above, remains a separate comparison.
+
+### Differential frames on the actual scheme charts
+
+[GeometricSurfaceDifferentialCharts.lean](GeometricSurfaceDifferentialCharts.lean)
+uses the original affine charts and the actual augmented Jacobians to
+construct open immersions into the projective surface. Their inverse
+images on the projective curve form actual cartesian squares. Both the
+surface and curve chart maps preserve their original morphisms to
+\(\operatorname{Spec}\mathbb C\).
+
+The surface differential module is identified on each such chart with
+two copies of its structure module. On every subopen, the construction
+identifies the algebraic Kähler basis with the basis of actual
+differential-sheaf sections. The corresponding curve differential
+module is identified with one copy of its structure module, and
+`firstNormalCurveDifferentialIso_inv_one` and its second-chart analogue
+prove that the inverse frame sends \(1\) to the actual differential
+\(D(t)\) of the selected coordinate.
+
+The exterior-square comparison is fixed by its formula on wedges:
+\[
+\omega\wedge\eta\longmapsto
+\operatorname{sectionLift}(\omega)\wedge
+\operatorname{sectionLift}(\eta).
+\]
+The proof also shows that this map is independent of the chosen
+rank-two basis. `chartResidueCoordinate_wedge` identifies its residue
+coordinate with the same augmented determinant used in the original
+affine calculation. In particular, `chartResidueSection_normalization`
+sends the actual local residue form to \(1\).
+
+These statements concern actual exterior powers of the local
+differential-section modules. The exterior module sheaf is constructed
+below. Agreement and gluing of the oriented residue sections still
+require the further restriction and overlap comparisons; they are not
+inferred from a list of local normalizations.
+
+### The actual weighted overlap and the residue sign
+
+[GeometricSurfaceOverlap.lean](GeometricSurfaceOverlap.lean) constructs
+the isomorphism between the two actual localized equation rings and
+identifies their overlap with the intersection of the original
+projective coordinate opens. It proves the maps on arbitrary
+homogeneous fractions and on structure-sheaf sections of every subopen,
+including the further Jacobian principal opens.
+
+Writing \(b=x_2/x_1\), the weight-two coordinate changes by
+\(z\mapsto z/b^2\). Its actual differential therefore satisfies
+\[
+D(z/b^2)=b^{-2}D(z)-2zb^{-3}D(b).
+\]
+The ambient determinant calculation retains this second term. The
+coordinate Jacobian determinant is \(-b^{-6}\); the two defining
+equation rows scale by \(b^{-6}\) and \(b^{-3}\). The resulting
+`mixedJacobian_transition` gives the raw residue factor \(-b^3\).
+Multiplication by a homogeneous cubic leaves a minus sign, as proved
+by `rawCubic_transition_scalar`. Thus the projective Euler
+orientation must be included before asserting agreement of the
+cubic residue sections.
+
+The same module proves the determinant formula for arbitrary pairs
+of polynomial differentials, and identifies the algebraic maps used
+in this calculation with the actual scheme section maps. The
+agreement and gluing of the resulting oriented exterior-sheaf
+sections remains a further step.
+
+### Intrinsic normal sections under open base change
+
+The continuation of
+[GeometricIntrinsicNormal.lean](GeometricIntrinsicNormal.lean) starts
+with the existing sheaf
+\(\mathcal{H}om_{\mathcal O_D}(\mathcal I,j_*\mathcal O_C)\), where
+\(\mathcal I\) is the kernel of the actual structure-sheaf morphism.
+It proves that this sheaf restricts to the intrinsic normal sheaf of
+the restricted scheme morphism, and establishes the corresponding
+comparison for an actual open cartesian square.
+
+For a cartesian affine chart defined by \(\varphi:A\to B\), the
+resulting equivalence is
+\[
+\Gamma(U,\mathcal{H}om(\mathcal I,j_*\mathcal O_C))
+\;\simeq\;
+\operatorname{Hom}_B
+\bigl(B\otimes_A(\ker\varphi)/(\ker\varphi)^2,B\bigr).
+\]
+`normalOpenAlgebraConormalEquiv_tmul` proves its evaluation formula on
+every elementary tensor. The coefficient and ideal elements are
+transported through the actual chart section isomorphisms. This fixes
+the normalization needed to compare local equation values; no
+arbitrary conormal isomorphism is substituted.
+
+### The literal normal charts and the correct gluing cover
+
+[GeometricSurfaceNormalCharts.lean](GeometricSurfaceNormalCharts.lean)
+instantiates that comparison on both actual projective coordinate
+charts and their Jacobian principal opens. The canonical bijections
+`firstNormalSectionEquiv` and `secondNormalSectionEquiv` take
+intrinsic normal sections to the exact conormal dual used in local
+adjunction. Their values on both original equation classes are proved.
+The inverse images of the original vector \((G_2,-G_1)\) are actual
+local normal sections, uniquely characterized by those equation values.
+At this stage the open-chart comparisons are packaged as bijections;
+the global module-sheaf isomorphism with the existing
+`normalModuleSheaf`, and its inverse-square transition, is still to
+be established.
+
+The same helper proves that the twelve literal Jacobian curve opens
+cover the entire projective curve at \(r=57,\theta=1\). Each curve
+open is the actual inverse image of its corresponding surface open.
+The proof retains both factors of the augmented minor: the relevant
+\(G_1\) or \(G_2\) factor and the curve Jacobian minor. It uses their
+already proved prime-cover statements and then transports the cover
+through the actual affine chart isomorphisms.
+
+This is a cover of the curve, which does not by itself cover the
+surface. The new
+`existsUnique_normalGluing_of_preimage_cover` supplies the precise
+gluing theorem needed here. For a closed immersion, compatible
+intrinsic normal sections glue uniquely on a surface open whenever
+their inverse images cover its curve preimage. Its proof adds the
+open complement of the closed image and proves that normal sections
+there are uniquely zero, then uses the genuine sheaf gluing theorem.
+Compatibility of the specific local normal vectors remains an input
+to that theorem.
+
+Finally, `literalCurveDifferentialMap` is the actual morphism
+\(\Omega_D\to j_*\Omega_C\) induced by the original complex scheme
+morphism. Its formula on differentials, its vanishing on ideal
+equations, and its compatibility with affine section lifts are proved
+from the universal derivation.
+
+### A genuine exterior module sheaf
+
+[GeometricExteriorSheaf.lean](GeometricExteriorSheaf.lean) constructs
+the exterior powers of the actual local section modules. The
+restriction maps are induced by the original semilinear module
+restrictions; their wedge formulas, identities, and compositions are
+proved before sheafification. Sheafification then gives an actual
+structure-module sheaf, its canonical section map, and the
+corresponding universal morphism property.
+
+`chartResidueSheafSection` sends each previously constructed local
+residue through that canonical map into the exterior square of the
+actual differential sheaf. `wedgeSection_restrict` proves the
+literal restriction formula, while
+`chartExteriorSection_wedge_in_sheaf` identifies the image of an
+affine wedge with the wedge of its two actual lifted differential
+sections. No injectivity of the sheafification unit or global
+agreement of the residue sections is assumed.
+
+### Verification of the exact continuation modules
+
+The following exact repository sources compiled and independently
+passed `leanchecker` replay under pinned Lean 4.33.1 and Mathlib
+`0df444a360eaa60ab8c11dca51a86af692955474`. Their audited declarations
+depend only on `propext`, `Classical.choice`, and `Quot.sound`.
+
+| Module | Source lines | Compile | Independent replay |
+| --- | ---: | ---: | ---: |
+| `GeometricIntrinsicNormal` | 1,950 | 71.67 s | 26.16 s |
+| `GeometricSurfaceDifferentialCharts` | 1,295 | 85.46 s | 53.47 s |
+| `GeometricCechRefinement` | 1,738 | 237.83 s | 85.88 s |
+| `GeometricSurfaceOverlap` | 1,445 | 82.17 s | 31.18 s |
+| `GeometricSurfaceNormalCharts` | 977 | 40.68 s | 11.52 s |
+| `GeometricExteriorSheaf` | 214 | 24.50 s | 6.81 s |
+| `GeometricGradedCechDescent` | 1,145 | 143.73 s | 8.91 s |
+
+The checks used the existing single-worker compiler lock and bounded
+memory. The source hashes and emitted-module hashes were matched before
+recording each replay. The declaration-free import facades
+`Normalization02`, `Normalization03`, `Normalization04`, `Normalization06`,
+`GeometricFormalInputs01`, and `Normalization` are replaced in their
+callers by the same final part modules, making room for the six new
+helpers without changing their previous declaration closure.
+This checkpoint preserves both the scalar-linearity contribution at
+`545ca58d11418d3faf2d1b2012ee3263360c7c48` and the homogeneous descent and
+global-cohomology contribution at
+`f4d5f373cca6ecc3641aed20a1acc5f746d52c2d`, described below.
+
+The original protected target and its one admission are unchanged.
+These helper checks do not constitute acceptance of the full proposal:
+the complete source-policy check still rejects that final admission.
+This continuation follows the Diamond argument credited below and was
+prepared for `fqlx` with OpenAI ChatGPT assistance.
+
 ## The character-one Cartier class in actual global cohomology — 14 November 2026
 
 This checkpoint proves that the original Cartier cocycle has a genuine
@@ -6863,7 +7119,7 @@ and the first helper in a group imports the original prerequisite modules.
 | [GeometricFormalInputs.lean](GeometricFormalInputs.lean) | `GeometricFormalInputs01`–`04` (4) | 4,758 | Affine residue/certificate bridge, foundational inputs, pole reduction, and exterior differentials. |
 | [GeometricTarget.lean](GeometricTarget.lean) | `GeometricTarget01`–`11` (11) | 4,795 | Target actions, finite descent, incidence and seed calculations, projectors, and finite top de Rham constructions. |
 | [Assembly.lean](Assembly.lean) | `Assembly01`–`10` (10) | 4,757 | Conditional assembly, restriction calculations, actual Gaussian-action data, and Cech components. |
-| [Normalization.lean](Normalization.lean) | `Normalization01`–`09` (9) | 4,621 | Radial normalization and the remaining modular-action and cubic literal data. |
+| [Normalization09Part02.lean](Normalization09Part02.lean) | `Normalization01`–`09` (9) | 4,621 | Radial normalization and the remaining modular-action and cubic literal data. |
 | [Solution.lean](Solution.lean) | `SolutionSupport01`–`09` (9) | 4,786 | Normal and conormal classes, residue and surface comparisons, character components, and orbit trace; the final obligation remains in `Solution.lean`. |
 
 The large basepoint, Gaussian-action, and cubic-data components are split

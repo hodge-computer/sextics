@@ -1,7 +1,7 @@
 import Proposal.Assembly
 import Mathlib.RingTheory.MvPolynomial.EulerIdentity
 import Mathlib.RingTheory.Polynomial.UniqueFactorization
-import Proposal.Normalization02
+import Proposal.Normalization02Part02
 
 /-! Source partition of Normalization03.lean; declarations and proofs are preserved. -/
 

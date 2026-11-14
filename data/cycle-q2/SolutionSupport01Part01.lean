@@ -21,7 +21,7 @@ import Proposal.GeometricTarget
 import Proposal.GeometricSeed
 import Proposal.GeometricRankRetraction
 import Proposal.GeometricFormalInputs
-import Proposal.Normalization
+import Proposal.Normalization09Part02
 
 /-! Components extracted from SolutionSupport01.lean, in their original order.
 See solution.md for the mathematical and verification status. -/
