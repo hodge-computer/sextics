@@ -1,3 +1,4 @@
+import Proposal.GeometricCartierOrbit
 import Proposal.SolutionSupport01Part05
 
 /-! Components extracted from SolutionSupport01.lean, in their original order.
@@ -1203,27 +1204,6 @@ open MvPolynomial CycleQ2SegreTangentLocal CycleQ2SeedQuotientFiniteFree
   CycleQ2SeedCechThreeOpen CycleQ2SeedCechLocalization CycleQ2SeedCechLocalizedBasis
 
 variable (R : Type*) [CommRing R]
-
-instance seedLocalAway (r ι : R) (s : Finset (Fin 3)) :
-    IsLocalization.Away (algebraMap (Base R) (SeedRing r ι) (baseProduct R s))
-      (SeedLocal R r ι s) := by
-  have hh : Algebra.algebraMapSubmonoid (SeedRing r ι)
-      (Submonoid.powers (baseProduct R s)) =
-      Submonoid.powers (algebraMap (Base R) (SeedRing r ι) (baseProduct R s)) := by
-    exact Submonoid.map_powers _ _
-  rw [IsLocalization.Away, ← hh]
-  infer_instance
-
-theorem baseProduct_dvd {s t : Finset (Fin 3)} (hst : s ⊆ t) :
-    baseProduct R s ∣ baseProduct R t :=
-  Finset.prod_dvd_prod_of_subset s t (fun i ↦ X i) hst
-
-theorem seedProduct_isUnit (r ι : R) {s t : Finset (Fin 3)} (hst : s ⊆ t) :
-    IsUnit (algebraMap (SeedRing r ι) (SeedLocal R r ι t)
-      (algebraMap (Base R) (SeedRing r ι) (baseProduct R s))) := by
-  apply IsLocalization.Away.isUnit_of_dvd (S := SeedLocal R r ι t)
-    (algebraMap (Base R) (SeedRing r ι) (baseProduct R t))
-  exact map_dvd (algebraMap (Base R) (SeedRing r ι)) (baseProduct_dvd R hst)
 
 /-- The universal localization map, with no chosen Laurent inverse. -/
 def restriction (r ι : R) {s t : Finset (Fin 3)} (hst : s ⊆ t) :

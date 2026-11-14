@@ -1,3 +1,4 @@
+import Proposal.GeometricCartierOrbit
 import Mathlib.LinearAlgebra.Finsupp.LinearCombination
 import Mathlib.Tactic
 import Mathlib.RingTheory.Localization.Away.Basic
@@ -138,53 +139,6 @@ set_option backward.isDefEq.respectTransparency false
 
 namespace CycleQ2OrbitTraceBridge
 
-section LinearOrbit
-
-variable {R V : Type*} [CommRing R] [AddCommGroup V] [Module R V]
-
-/-- For a fixed ambient test of character `zeta`, the three responses use
-the inverse characters: `v + zeta^2 g(v) + zeta g^2(v)`. -/
-def twistedOrbit (ζ : R) (g : V →ₗ[R] V) (v : V) : V :=
-  v + ζ ^ 2 • g v + ζ • g (g v)
-
-/-- On the character-one eigenspace, the correctly twisted orbit is three
-times the class. An untwisted orbit does not have this property. -/
-theorem twistedOrbit_eq_three_smul (ζ : R) (hζ : ζ ^ 3 = 1)
-    (g : V →ₗ[R] V) (v : V) (hv : g v = ζ • v) :
-    twistedOrbit ζ g v = (3 : R) • v := by
-  have hc : 1 + ζ ^ 2 * ζ + ζ * (ζ * ζ) = (3 : R) := by
-    linear_combination 2 * hζ
-  unfold twistedOrbit
-  simp only [hv, map_smul]
-  calc
-    v + ζ ^ 2 • (ζ • v) + ζ • (ζ • (ζ • v)) =
-        (1 + ζ ^ 2 * ζ + ζ * (ζ * ζ)) • v := by
-      simp only [add_smul, smul_smul, one_smul]
-    _ = (3 : R) • v := by rw [hc]
-
-/-- The dual character is sufficient: the original class need not itself
-already lie in the character-one eigenspace. -/
-theorem pairing_twistedOrbit (ζ : R) (hζ : ζ ^ 3 = 1)
-    (g : V →ₗ[R] V) (φ : V →ₗ[R] R)
-    (hφ : ∀ v, φ (g v) = ζ * φ v) (v : V) :
-    φ (twistedOrbit ζ g v) = 3 * φ v := by
-  simp only [twistedOrbit, map_add, map_smul, hφ, smul_eq_mul]
-  linear_combination (2 * φ v) * hζ
-
-/-- The inverse-character factor is necessary: the ordinary orbit kills
-a character-one vector for a primitive cube root. -/
-theorem untwistedOrbit_eq_zero (ζ : R) (hζ : ζ ^ 2 + ζ + 1 = 0)
-    (g : V →ₗ[R] V) (v : V) (hv : g v = ζ • v) :
-    v + g v + g (g v) = 0 := by
-  have hc : 1 + ζ + ζ * ζ = 0 := by
-    linear_combination hζ
-  simp only [hv, map_smul]
-  calc
-    v + ζ • v + ζ • (ζ • v) = (1 + ζ + ζ * ζ) • v := by
-      simp only [add_smul, smul_smul, one_smul]
-    _ = 0 := by rw [hc, zero_smul]
-
-end LinearOrbit
 
 section DualCharacter
 
@@ -244,42 +198,6 @@ open CycleQ2SeedQuotientGrading CycleQ2SeedCyclicAction
 open CycleQ2SeedCyclicLocalization
 
 variable {R : Type*} [CommRing R]
-
-/-- The actual localization action fixes the coefficient ring. -/
-theorem localAction_scalar (ζ : R) (hζ : ζ ^ 3 = 1) (r ι : R)
-    (s : Finset (Fin 3)) (c : R) :
-    localAction ζ hζ r ι s (algebraMap R (SeedLocal R r ι s) c) =
-      algebraMap R (SeedLocal R r ι s) c := by
-  rw [IsScalarTower.algebraMap_apply R (SeedRing r ι) (SeedLocal R r ι s)]
-  change localAction ζ hζ r ι s
-      (algebraMap (SeedRing r ι) (SeedLocal R r ι s)
-        (Ideal.Quotient.mk (equationsIdeal (smoothH ι) (smoothF r ι)) (C c))) =
-    algebraMap (SeedRing r ι) (SeedLocal R r ι s)
-      (Ideal.Quotient.mk (equationsIdeal (smoothH ι) (smoothF r ι)) (C c))
-  rw [localAction_mk, polynomialAction_C]
-
-/-- The existing ring action, with its proved coefficient linearity. -/
-def localLinearAction (ζ : R) (hζ : ζ ^ 3 = 1) (r ι : R)
-    (s : Finset (Fin 3)) : SeedLocal R r ι s →ₗ[R] SeedLocal R r ι s where
-  __ := (localAction ζ hζ r ι s).toAddMonoidHom
-  map_smul' c q := by
-    simp only [RingHom.id_apply, Algebra.smul_def]
-    change localAction ζ hζ r ι s (algebraMap R (SeedLocal R r ι s) c * q) =
-      algebraMap R (SeedLocal R r ι s) c * localAction ζ hζ r ι s q
-    rw [map_mul, localAction_scalar]
-
-@[simp] theorem localLinearAction_apply (ζ : R) (hζ : ζ ^ 3 = 1) (r ι : R)
-    (s : Finset (Fin 3)) (q : SeedLocal R r ι s) :
-    localLinearAction ζ hζ r ι s q = localAction ζ hζ r ι s q := rfl
-
-/-- The triple-open denominator is `x1*x2*x3`, of trivial character. -/
-theorem baseFactor_univ (ζ : R) (hζ : ζ ^ 3 = 1) :
-    baseFactor ζ (Finset.univ : Finset (Fin 3)) = 1 := by
-  calc
-    baseFactor ζ (Finset.univ : Finset (Fin 3)) = ζ ^ 2 * ζ := by
-      simp [baseFactor, baseScalars, Fin.prod_univ_succ]
-    _ = ζ ^ 3 := by ring
-    _ = 1 := hζ
 
 /-- Arbitrary powers of that denominator add no character to a fraction. -/
 theorem tripleDenominator_character (n : ℕ) :

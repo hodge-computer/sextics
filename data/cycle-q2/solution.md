@@ -1,5 +1,162 @@
 # A nonconstructive geometric route for cycle-q2
 
+## The character-one Cartier class in actual global cohomology — 14 November 2026
+
+This checkpoint proves that the original Cartier cocycle has a genuine
+homogeneous descendant on the coordinate cover, that the character-one
+projection of this descendant is nonzero, and that its correctly twisted
+orbit gives a nonzero element of the actual derived surface cohomology
+\(H^2(S_{57,1},\mathcal O_{S_{57,1}})\). The constructions retain the
+original cocycle, common-refinement witnesses, localized fractions, and
+connecting maps. The final `Submission.missing_geometric_existence` is
+still open: this supplies the seed cohomology step, while the actual
+family variation, supported-correspondence argument, and de Rham endpoint
+remain obligations.
+
+### Homogeneous descent of the same Cartier cocycle
+
+[GeometricHomogeneousCartierDescent.lean](GeometricHomogeneousCartierDescent.lean)
+constructs the two-cover descent inside the actual degree-zero
+homogeneous localizations. It identifies the tensor-product refinement
+with localization at the product of the two cover denominators and
+proves that these identifications commute with every restriction and
+both augmented endpoints. The required degree-zero, degree-one, and
+degree-two row exactness is proved on the affine homogeneous charts.
+
+Forgetting the homogeneous grading therefore gives precisely the
+earlier ordinary `CartierCoordinateDescent`, with the original Cartier
+cycle as its input. The closed theorem
+`literal_homogeneous_coordinate_cubic_nonzero` produces an ordinary
+coordinate two-cocycle \(d\), a homogeneous triple-open section \(q\),
+and the actual descent witnesses, with
+\[
+q.\mathrm{val}=\operatorname{coordinateTopRepresentative}(d).
+\]
+Its proof retains the nonzero cubic detector on this same descendant.
+The general comparison also proves that a change of descent choices
+changes the result by an actual coordinate boundary.
+
+### A nonzero projection in the correct character
+
+[GeometricCartierCharacter.lean](GeometricCartierCharacter.lean) works
+with the actual quotient basis and its injective Laurent-coordinate
+map. Polynomial normal forms preserve weighted degree and character;
+the proof uses the unique standard representative in the original
+rank-nine quotient, including its mixed defining relations. Clearing
+arbitrary denominator powers transfers these facts to the localized
+fractions.
+
+The character projection is defined within the proved range of that
+coordinate map. It is additive, preserves allowed poles, commutes with
+restrictions, and is represented by the corresponding character part
+of a cleared polynomial numerator. It also lifts to the actual
+degree-zero homogeneous localization and commutes with multiplication
+by the invariant detector \(\sigma=x_0^3\).
+
+For a homogeneous section of weighted degree zero, the strictly
+negative Laurent coefficients of \(\sigma q\) can occur only at the
+basis index \((2,2)\) and exponent \((-1,-1,-1)\). This coefficient has
+character one and is the original nonzero cubic coefficient. Projection
+onto character one therefore retains it. If the projected section had
+all negative coefficients zero, it would be an actual three-open
+boundary at unrestricted pole order, and multiplication by \(\sigma\)
+would still be a boundary. This contradicts the retained coefficient.
+
+`literal_homogeneous_character_one_nonzero` closes this argument for
+the original descent witnesses. In particular, its nonzero class is
+obtained by projecting the named Cartier descendant; it is not supplied
+by choosing another vector in a cohomology space of the same dimension.
+
+### The original localized action and its twisted orbit
+
+[GeometricCartierOrbit.lean](GeometricCartierOrbit.lean) uses the
+original substitution
+\[
+\gamma(x_0,x_1,x_2,x_3,w)
+  =(\zeta^2x_0,\zeta^2x_1,\zeta x_2,x_3,w),
+\qquad \zeta^3=1.
+\]
+The defining equations are invariant, so this gives the original
+quotient-ring action and its extension to every coordinate localization.
+The coefficient ring is fixed, and the triple denominator
+\(x_1x_2x_3\) has trivial character. Clearing that actual denominator
+proves the eigenvalue on the projected section itself.
+
+For \(q_1\), the character-one projection of the original descendant,
+the correct orbit is
+\[
+T(q_1)=q_1+\zeta^2\gamma(q_1)+\zeta\gamma^2(q_1)=3q_1.
+\]
+The theorem is first proved in the original seed localization, then
+transported through the fixed identity-on-polynomials coordinate
+equivalence. Every Laurent coefficient is multiplied by three, and the
+proved nonzero negative coefficient survives. Consequently this orbit
+cannot be the boundary of any three actual pair-open sections, at any
+pole order. The character projection is taken only after descent to
+the stable coordinate cover; the original Cartier cover need not be
+fixed by the cyclic action.
+
+### From the actual cover to derived sheaf cohomology
+
+[GeometricThreeOpenH2.lean](GeometricThreeOpenH2.lean) constructs the
+comparison for a three-open cover using two actual Mayer–Vietoris
+connecting maps. It proves their compatibility with restriction and
+identifies the composite's kernel with the image of the three-open
+Čech boundary when the sheaf has vanishing degree-one cohomology on
+the individual opens. The comparison is proved both for degree-zero
+cohomology and for the actual sheaf sections, with their existing
+section-to-cohomology equivalence and restriction maps.
+
+[GeometricCoordinateH2.lean](GeometricCoordinateH2.lean) supplies all
+these inputs for the literal surface. The three projective coordinate
+opens cover it, their intersections have their actual homogeneous
+localization charts, and the required degree-one vanishing follows
+from affineness. The proof identifies the genuine section boundary
+with the homogeneous-localization boundary and then with the ordinary
+coordinate boundary used by the Laurent detector.
+
+The closed theorem `literal_global_H_two_nonzero` applies that comparison
+to the same homogeneous character-one section. Its orbit version,
+`literal_twisted_globalConnecting_ne_zero`, uses the exact homogeneous
+lift \(3q_1\) of the original localized twisted orbit. Additivity of the
+genuine connecting maps proves the factor-three identity in derived
+cohomology as well. This step constructs a global cohomology element
+and proves it nonzero; a separate comparison with the projective
+automorphism's induced action is still needed for the full family
+argument. Compatibility with the independent four-open injective
+comparison is also not asserted here.
+
+### Verification and preservation
+
+All five exact combined proposal modules compiled and their emitted modules
+passed independent kernel replay. The checks retained the existing bounded
+single-worker configuration and proof budgets. The separate aggregate
+audit checked 78 distinct endpoints in 5.67 seconds;
+every dependency audit uses only `propext`, `Classical.choice`, and
+`Quot.sound`. The exact source receipts are:
+
+| Module | Lines | Compile (s) | Kernel replay (s) |
+| --- | ---: | ---: | ---: |
+| `GeometricHomogeneousCartierDescent` | 1,493 | 63.77 | 15.19 |
+| `GeometricCartierCharacter` | 1,131 | 17.91 | 4.27 |
+| `GeometricCartierOrbit` | 551 | 15.47 | 4.23 |
+| `GeometricThreeOpenH2` | 467 | 258.74 | 292.59 |
+| `GeometricCoordinateH2` | 498 | 65.27 | 49.23 |
+
+
+The five modules combine 25 individually checked units. Each original
+body retains its declarations, proof terms, local instances, and option
+scopes inside an isolated source section. The original cyclic-action
+and orbit declarations moved out of four aggregate modules keep their
+names, statements, and proof bodies; those modules import the new
+location and retain their surrounding variable and namespace scopes.
+Five declaration-free import facades were replaced by their direct
+imports, keeping the proposal within its 256-file limit. The protected
+target is unchanged and the sole admission remains at
+`Solution.lean:138`. The checked helper results do not constitute
+acceptance of the still-incomplete full proposal.
+
+
 ## Intrinsic complex-linear surface cohomology — 14 November 2026
 
 The final theorem `Submission.missing_geometric_existence` remains open.

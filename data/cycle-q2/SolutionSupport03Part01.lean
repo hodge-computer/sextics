@@ -1,3 +1,4 @@
+import Proposal.GeometricCartierOrbit
 import Mathlib.LinearAlgebra.Finsupp.LinearCombination
 import Mathlib.Tactic
 import Mathlib.RingTheory.Localization.Away.Basic
@@ -1100,51 +1101,6 @@ open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2IncidenceEquations
 
 variable {R : Type*} [CommRing R]
 
-def actionValues (ζ : R) : Fin 5 → Poly R :=
-  ![C (ζ^2)*X 0,C (ζ^2)*X 1,C ζ*X 2,X 3,X 4]
-
-def polynomialAction (ζ : R) : Poly R →ₐ[R] Poly R := aeval (actionValues ζ)
-
-@[simp] theorem polynomialAction_X (ζ : R) (i : Fin 5) :
-    polynomialAction ζ (X i)=actionValues ζ i := aeval_X _ _
-
-@[simp] theorem polynomialAction_C (ζ c : R) : polynomialAction ζ (C c)=C c := aeval_C _ _
-
-def characterExponent (e : FullExponent) : ℕ := 2*e 0+2*e 1+e 2
-
-theorem polynomialAction_monomial (ζ : R) (e : FullExponent) (c : R) :
-    polynomialAction ζ (monomial e c)=C (ζ^characterExponent e)*monomial e c := by
-  rw [polynomialAction,aeval_monomial,monomial_eq]
-  rw [Finsupp.prod_fintype _ _ (fun _ => pow_zero _),
-    Finsupp.prod_fintype _ _ (fun _ => pow_zero _)]
-  simp only [actionValues,characterExponent,Fin.prod_univ_succ,Fin.prod_univ_zero,
-    Matrix.cons_val_zero,Matrix.cons_val_succ,Fin.reduceSucc,Matrix.head_cons,Matrix.tail_cons,
-    mul_one,MvPolynomial.algebraMap_eq,map_pow,map_mul,mul_pow,pow_add,pow_mul]
-  ring
-
-theorem pow_eq_mod_three (ζ : R) (hζ : ζ^3=1) (n : ℕ) : ζ^n=ζ^(n%3) := by
-  calc
-    ζ^n=ζ^(n%3+3*(n/3)) := congrArg (fun k : ℕ => ζ^k) (Nat.mod_add_div n 3).symm
-    _=ζ^(n%3) := by rw [pow_add,pow_mul,hζ,one_pow,mul_one]
-
-theorem polynomialAction_homogeneous (ζ : R) (hζ : ζ^3=1)
-    (p : Poly R) (d : ℕ) (ch : ZMod 3) (hp : HG p (d,ch)) :
-    polynomialAction ζ p=C (ζ^ch.val)*p := by
-  classical
-  conv_lhs => rw [p.as_sum]
-  rw [map_sum]
-  conv_rhs => rw [p.as_sum]
-  rw [Finset.mul_sum]
-  apply Finset.sum_congr rfl
-  intro e he
-  rw [polynomialAction_monomial]
-  have hg := hp (mem_support_iff.mp he)
-  rw [fullGrading_weight] at hg
-  have hc : characterExponent e%3=ch.val := by
-    simpa only [characterExponent,ZMod.val_natCast] using
-      congrArg (fun g : ℕ × ZMod 3 => g.2.val) hg
-  rw [pow_eq_mod_three ζ hζ,hc]
-
 theorem polynomialAction_signedHomogeneous (ζ : R) (hζ : ζ^3=1)
     (p : Poly R) (g : CycleQ2SeedCechThreeOpen.LaurentGrade)
     (hp : SignedHomogeneous R p g) : polynomialAction ζ p=C (ζ^g.2.val)*p := by
@@ -1159,30 +1115,6 @@ theorem polynomialAction_signedHomogeneous (ζ : R) (hζ : ζ^3=1)
       (Finsupp.weight fullGrading e).1 (Finsupp.weight fullGrading e).2 hh
     have hch : (Finsupp.weight fullGrading e).2=g.2 := congrArg Prod.snd hg
     simpa only [hch] using hact
-
-theorem polynomialAction_smoothH (ζ : R) (hζ : ζ^3=1) (ι : R) :
-    polynomialAction ζ (smoothH ι)=smoothH ι := by
-  simpa using polynomialAction_homogeneous ζ hζ (smoothH ι) 3 0 (smoothH_homogeneous ι)
-
-theorem polynomialAction_smoothF (ζ : R) (hζ : ζ^3=1) (r ι : R) :
-    polynomialAction ζ (smoothF r ι)=smoothF r ι := by
-  simpa using polynomialAction_homogeneous ζ hζ (smoothF r ι) 6 0 (smoothF_homogeneous r ι)
-
-def seedAction (ζ : R) (hζ : ζ^3=1) (r ι : R) : SeedRing r ι →ₐ[R] SeedRing r ι :=
-  Ideal.quotientMapₐ (equationsIdeal (smoothH ι) (smoothF r ι)) (polynomialAction ζ) (by
-    apply Ideal.span_le.mpr
-    intro p hp
-    rcases hp with rfl | ⟨rfl⟩
-    · change polynomialAction ζ (smoothH ι) ∈ equationsIdeal (smoothH ι) (smoothF r ι)
-      rw [polynomialAction_smoothH ζ hζ]
-      exact Ideal.subset_span (by simp [equationsIdeal])
-    · change polynomialAction ζ (smoothF r ι) ∈ equationsIdeal (smoothH ι) (smoothF r ι)
-      rw [polynomialAction_smoothF ζ hζ]
-      exact Ideal.subset_span (by simp [equationsIdeal]))
-
-@[simp] theorem seedAction_mk (ζ : R) (hζ : ζ^3=1) (r ι : R) (p : Poly R) :
-    seedAction ζ hζ r ι (Ideal.Quotient.mk (equationsIdeal (smoothH ι) (smoothF r ι)) p)=
-      Ideal.Quotient.mk (equationsIdeal (smoothH ι) (smoothF r ι)) (polynomialAction ζ p) := rfl
 
 end CycleQ2SeedCyclicAction
 

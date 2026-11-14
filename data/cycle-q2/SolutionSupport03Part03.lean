@@ -1,3 +1,4 @@
+import Proposal.GeometricCartierOrbit
 import Proposal.SolutionSupport03Part02
 
 /-! Components extracted from SolutionSupport03.lean, in their original order.
@@ -363,87 +364,6 @@ open MvPolynomial CycleQ2IncidenceNormalForm CycleQ2IncidenceEquations
   CycleQ2SeedQuotientGrading CycleQ2SeedCyclicAction
 
 variable {R : Type*} [CommRing R]
-
-def baseScalars (ζ : R) : Fin 3 → R := ![ζ^2,ζ,1]
-def baseFactor (ζ : R) (s : Finset (Fin 3)) : R := ∏ i∈s, baseScalars ζ i
-def baseProductPoly (s : Finset (Fin 3)) : Poly R := remainingInclusion R (baseProduct R s)
-
-theorem cube_root_isUnit (ζ : R) (hζ : ζ^3=1) : IsUnit ζ := by
-  apply IsUnit.of_mul_eq_one (ζ^2)
-  calc
-    ζ*ζ^2=ζ^3 := by ring
-    _=1 := hζ
-
-theorem baseFactor_isUnit (ζ : R) (hζ : ζ^3=1) (s : Finset (Fin 3)) : IsUnit (baseFactor ζ s) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simp [baseFactor]
-  | @insert i s hi ih =>
-    rw [baseFactor,Finset.prod_insert hi]
-    apply IsUnit.mul _ ih
-    fin_cases i
-    · exact (cube_root_isUnit ζ hζ).pow 2
-    · exact cube_root_isUnit ζ hζ
-    · exact isUnit_one
-
-theorem actionValues_remaining (ζ : R) (i : Fin 3) :
-    actionValues ζ (remainingIndex i)=C (baseScalars ζ i)*X (remainingIndex i) := by
-  fin_cases i <;> simp [actionValues,remainingIndex,baseScalars]
-
-theorem polynomialAction_baseProduct (ζ : R) (s : Finset (Fin 3)) :
-    polynomialAction ζ (baseProductPoly (R:=R) s)=C (baseFactor ζ s)*baseProductPoly s := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simp [baseProductPoly,baseProduct,baseFactor]
-  | @insert i s hi ih =>
-    have hp : baseProductPoly (R:=R) (insert i s)=X (remainingIndex i)*baseProductPoly s := by
-      simp [baseProductPoly,baseProduct,hi,remainingInclusion]
-    have hf : baseFactor ζ (insert i s)=baseScalars ζ i*baseFactor ζ s := by
-      simp [baseFactor,hi]
-    rw [hp,map_mul,polynomialAction_X,actionValues_remaining,ih,hf,map_mul]
-    ring
-
-theorem seedAction_baseProduct (ζ : R) (hζ : ζ^3=1) (r ι : R) (s : Finset (Fin 3)) :
-    seedAction ζ hζ r ι (algebraMap (Base R) (SeedRing r ι) (baseProduct R s))=
-      Ideal.Quotient.mk (equationsIdeal (smoothH ι) (smoothF r ι)) (C (baseFactor ζ s))*
-        algebraMap (Base R) (SeedRing r ι) (baseProduct R s) := by
-  change seedAction ζ hζ r ι
-    (Ideal.Quotient.mk (equationsIdeal (smoothH ι) (smoothF r ι)) (baseProductPoly s))=_
-  rw [seedAction_mk,polynomialAction_baseProduct,map_mul]
-  rfl
-
-theorem acted_baseProduct_isUnit (ζ : R) (hζ : ζ^3=1) (r ι : R) (s : Finset (Fin 3)) :
-    IsUnit (algebraMap (SeedRing r ι) (SeedLocal R r ι s)
-      (seedAction ζ hζ r ι (algebraMap (Base R) (SeedRing r ι) (baseProduct R s)))) := by
-  rw [seedAction_baseProduct,map_mul]
-  apply IsUnit.mul
-  · exact (baseFactor_isUnit ζ hζ s).map
-      (((algebraMap (SeedRing r ι) (SeedLocal R r ι s)).comp
-        (Ideal.Quotient.mk (equationsIdeal (smoothH ι) (smoothF r ι)))).comp C)
-  · exact seedProduct_isUnit R r ι (Finset.Subset.refl s)
-
-def localAction (ζ : R) (hζ : ζ^3=1) (r ι : R) (s : Finset (Fin 3)) :
-    SeedLocal R r ι s →+* SeedLocal R r ι s :=
-  IsLocalization.Away.lift
-    (S:=SeedLocal R r ι s) (P:=SeedLocal R r ι s)
-    (g:=(algebraMap (SeedRing r ι) (SeedLocal R r ι s)).comp (seedAction ζ hζ r ι).toRingHom)
-    (algebraMap (Base R) (SeedRing r ι) (baseProduct R s))
-    (acted_baseProduct_isUnit ζ hζ r ι s)
-
-@[simp] theorem localAction_algebraMap (ζ : R) (hζ : ζ^3=1) (r ι : R)
-    (s : Finset (Fin 3)) (q : SeedRing r ι) :
-    localAction ζ hζ r ι s (algebraMap (SeedRing r ι) (SeedLocal R r ι s) q)=
-      algebraMap (SeedRing r ι) (SeedLocal R r ι s) (seedAction ζ hζ r ι q) :=
-  IsLocalization.Away.lift_eq _ (acted_baseProduct_isUnit ζ hζ r ι s) q
-
-@[simp] theorem localAction_mk (ζ : R) (hζ : ζ^3=1) (r ι : R)
-    (s : Finset (Fin 3)) (p : Poly R) :
-    localAction ζ hζ r ι s
-      (algebraMap (SeedRing r ι) (SeedLocal R r ι s)
-        (Ideal.Quotient.mk (equationsIdeal (smoothH ι) (smoothF r ι)) p))=
-      algebraMap (SeedRing r ι) (SeedLocal R r ι s)
-        (Ideal.Quotient.mk (equationsIdeal (smoothH ι) (smoothF r ι)) (polynomialAction ζ p)) := by
-  rw [localAction_algebraMap,seedAction_mk]
 
 theorem homogeneous_mem_of_action_mem [Nontrivial R] (ζ : R) (hζ : ζ^3=1)
     (r ι : R) (s : Finset (Fin 3)) (q : SeedLocal R r ι s) (g : LaurentGrade)

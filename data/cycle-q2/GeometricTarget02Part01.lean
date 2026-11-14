@@ -120,7 +120,7 @@ import Proposal.GeometricFormalInputs
 import Mathlib.LinearAlgebra.Projection
 import Mathlib.LinearAlgebra.Charpoly.Basic
 import Mathlib.Algebra.Polynomial.AlgebraMap
-import Proposal.GeometricTarget01
+import Proposal.GeometricTarget01Part03
 
 /-! Source partition of GeometricTarget.lean. See solution.md for verification status. -/
 

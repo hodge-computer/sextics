@@ -1,4 +1,4 @@
-import Proposal.GeometricTarget02
+import Proposal.GeometricTarget02Part03
 import Mathlib.RingTheory.Ideal.Quotient.Operations
 import Mathlib.RingTheory.Smooth.Basic
 import Mathlib.RingTheory.Flat.Basic

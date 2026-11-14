@@ -59,7 +59,7 @@ import Mathlib.LinearAlgebra.FreeModule.Basic
 import HodgeComputer.Constructions.PolynomialCurves.ArithmeticLifting
 import HodgeComputer.Constructions.HoldoutCover.GenericIncidence
 import Mathlib.RingTheory.Smooth.AdicCompletion
-import Proposal.GeometricFormalInputs03
+import Proposal.GeometricFormalInputs03Part03
 
 /-! Source partition of GeometricFormalInputs.lean. See solution.md for verification status. -/
 
