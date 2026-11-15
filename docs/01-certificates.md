@@ -580,7 +580,7 @@ Let \(v\) be a certificate over \(k(C)\), and put \(\beta =-\iota _v\Omega /F^{q
 a_{0}\cdot \Omega /F-(\omega _A-d\beta )=d(\beta -\psi ).
 \]
 
-Here \(\omega _A-d\beta \) is regular along the generic member, and \(\beta -\psi \) has a pole of order at most \(q\) along it. The pole-order lemma holds for algebraic forms over \(k(C)\). On the affine complement of \(V(G)\) and of the denominator of \(v\), it shows that the left side is the differential of a logarithmic form. Residues commute with \(d\), and a regular form has zero residue. So \(\rho \) is exact on a nonempty open subset of the generic member. By the lemma, \(\rho _c=d\sigma _c\) for a rational form \(\sigma _c\) on \(X_c\).
+Here \(\omega _A-d\beta \) is regular along the generic member, and \(\beta -\psi \) has a pole of order at most \(q\) along it. The generic member is smooth, because \(V(F_c)\) is, and the pole-order lemma holds for algebraic forms over \(k(C)\). On the affine complement of \(V(G)\) and of the denominator of \(v\), it shows that the left side is the differential of a logarithmic form. Residues commute with \(d\), and a regular form has zero residue. So \(\rho \) is exact on a nonempty open subset of the generic member. By the lemma, \(\rho _c=d\sigma _c\) for a rational form \(\sigma _c\) on \(X_c\).
 
 Let \(D\) be a homogeneous polynomial, coprime to \(F_c\), that vanishes on \(X_c\cap V(G_c)\) and on the poles of \(\sigma _c\). On \(X_c\setminus V(D)\) the residue of \(\omega _{A_c}\) is the class of \(\rho _c=d\sigma _c\), which is zero. The prescribed-support theorem gives a complex certificate with poles confined to \(V(D)\), and coefficient descent gives one over \(k\). ∎
 
