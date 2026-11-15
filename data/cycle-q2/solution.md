@@ -1,5 +1,146 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Formalization checkpoint: smooth weighted projective Fermat seed
+
+At the user's request, this continuation writes Lean proof source and
+defers all elaboration, compilation, and kernel replay. It formalizes
+the passage from the actual cone localizations to the actual weighted
+projective Fermat seed. The final protected residue-exactness admission
+is still present; this checkpoint does not claim that the complete
+classical argument has been formalized.
+
+### New geometric endpoint
+
+The source now contains the following theorem:
+
+```lean
+theorem CycleQ2SeedFermatProjSmooth.exists_threefold_smooth :
+    ∃ r : ℂ, r ^ 3 = 2 ∧
+      AlgebraicGeometry.Smooth
+        (CycleQ2SeedFermatProj.threefoldToComplex r)
+```
+
+The scheme in this statement is the native projective spectrum of the
+inherited weighted grading on the original quotient
+\[
+ A_r=\mathbb C[z_0,z_1,z_2,z_3,w]/(\mathrm{seedFamily}(r,0)),
+ \qquad \mathrm{wt}(z_j)=1,\quad \mathrm{wt}(w)=2.
+\]
+For the selected root \(r^3=2\), its equation is exactly
+\[
+ z_0^6+z_1^6+z_2^6+z_3^6+w^3=0.
+\]
+The structural morphism is the native map from Proj to the spectrum of
+its degree-zero part, followed by the original complex coefficient map.
+The cube-root parameter is supplied by Mathlib's algebraic closedness
+of the complex numbers; the existential theorem has no supplied root
+or smoothness hypothesis.
+
+### The chart retraction
+
+For each weight-one coordinate \(f=z_i\), put
+\[
+ B_i=(A_r)_{(f)},\qquad L_i=(A_r)_f.
+\]
+Here \(B_i\) is the native degree-zero homogeneous localization, and
+\(L_i\) is the full localization already constructed in the Fermat-cone
+helper. The new source defines complex algebra maps
+\[
+ \iota_i:B_i\longrightarrow L_i,\qquad
+ \rho_i:L_i\longrightarrow B_i.
+\]
+The first is the native inclusion. The second normalizes each coordinate:
+\[
+ z_j\longmapsto z_j/f^{\mathrm{wt}(z_j)}.
+\]
+It sends \(f\) to one. Weighted homogeneity proves that a polynomial of
+degree \(n\) maps to its fraction \(p/f^n\), so normalization kills the
+original homogeneous defining equation and factors through the actual
+cone quotient. Inverting \(f\) extends it to \(L_i\).
+Every native degree-zero homogeneous fraction satisfies
+\[
+ \rho_i\circ\iota_i=\mathrm{id}_{B_i}.
+\]
+The source proves this identity using homogeneous-fraction surjectivity,
+with the original quotient grading and the exact complex coefficient map.
+
+A split algebra surjection from a formally smooth algebra gives the
+infinitesimal splitting needed for formal smoothness of its retract.
+Over a Noetherian base, finite type of the retract also gives finite
+presentation. Thus smoothness of the existing \(L_i/\mathbb C\) proves
+smoothness of \(B_i/\mathbb C\).
+
+Finally, the four weight-one basic opens cover the native projective
+spectrum. A projective prime containing all four \(z_i\) would contain
+\(w^3\) by the Fermat relation, then \(w\) by primality, and hence the
+entire irrelevant ideal. This contradicts the definition of a projective
+point. The native Proj chart isomorphisms preserve the structural
+coefficient maps, so source-locality of smoothness proves smoothness of
+the whole projective scheme.
+
+### Files and interfaces
+
+| File | Construction |
+| --- | --- |
+| [GeometricSmoothRetract.lean](GeometricSmoothRetract.lean) | Formal smoothness and smoothness descend along a proved algebra retraction; finite presentation is derived over a Noetherian base. |
+| [GeometricSeedFermatProj.lean](GeometricSeedFermatProj.lean) | The actual inherited quotient grading, native Proj scheme, complex structure morphism, coordinate degrees, and Fermat relation. |
+| [GeometricSeedFermatChartRetract.lean](GeometricSeedFermatChartRetract.lean) | The concrete normalization and inclusion maps, their retraction identity, and smoothness of the native chart rings. |
+| [GeometricSeedFermatProjSmooth.lean](GeometricSeedFermatProjSmooth.lean) | The four-open cover, compatibility of native chart structure maps, global scheme smoothness, and existence of the root parameter. |
+
+The coordinate-ring smoothness is imported from the existing
+[GeometricSeedFermatCone.lean](GeometricSeedFermatCone.lean). The quotient
+grading reuses the existing homogeneous-quotient construction and the
+project's actual geometric weights.
+
+The principal interfaces are
+CycleQ2SeedFermatChartRetract.chartRetraction_comp_chartInclusion,
+CycleQ2SeedFermatChartRetract.chartRing_smooth,
+CycleQ2SeedFermatProjSmooth.coordinateOpens_cover, and
+CycleQ2SeedFermatProjSmooth.threefold_smooth.
+Every new declaration has a proof body or a concrete definition;
+no admission or replacement geometric hypothesis is added.
+
+### Verification scope and later compilation
+
+This is an uncompiled source checkpoint. The proof terms and API
+signatures were reviewed against Mathlib revision
+0df444a360eaa60ab8c11dca51a86af692955474. This included the
+infinitesimal splitting criterion, finite-presentation criterion,
+native homogeneous localization and its algebra lift, projective
+basic-open isomorphisms, source-local smoothness, and the complex
+cube-root existence theorem.
+
+No Lean, Lake, full build, kernel replay, or symbolic computation was
+run. Static checks cover the new files' permitted imports, absence of
+admissions and custom axioms, whitespace, and the preservation of the
+protected source. These checks do not establish Lean elaboration.
+
+The earlier Fermat-cone module also remains uncompiled, as recorded below.
+
+When compatible imported artifacts are available, the new files can
+be checked individually in this order: GeometricSmoothRetract,
+GeometricSeedFermatProj, GeometricSeedFermatChartRetract,
+GeometricSeedFermatProjSmooth. The prerequisites include the existing
+Fermat-cone and geometric-surface binding modules, plus the pinned
+Mathlib cache. Use Lean 4.33.1 and the verifier-style Proposal layout.
+For one selected module, the bounded command is:
+
+```sh
+timeout --signal=TERM --kill-after=3s 45s \
+  lake env lean -M4096 Proposal/GeometricSeedFermatProjSmooth.lean
+```
+
+This is a recorded command for later use, not an executed verification.
+The original residue-exactness theorem still needs the actual moving-cycle,
+Hodge-variation, supported-class, and de Rham comparison constructions.
+The new theorem settles one necessary smooth-seed construction in source;
+it does not provide those remaining geometric conclusions.
+
+The protected Solution.lean and its theorem statement are unchanged.
+The earlier mathematical proof and all previous compilation records remain
+below with their original scopes. Prepared for `fqlx` with OpenAI ChatGPT
+assistance, following Ben Diamond and the project's geometric argument.
+
 ## Formalization checkpoint: the actual punctured Fermat cone
 
 The final admission in
