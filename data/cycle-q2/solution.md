@@ -1,5 +1,112 @@
 # A nonconstructive geometric route for cycle-q2
 
+## One construction: smooth affine opens of the Fermat seed
+
+[GeometricSeedFermatCone.lean](GeometricSeedFermatCone.lean) supplies one
+concrete geometric construction from the audited proof: the five smooth
+coordinate opens of the zero-cubic seed cone. The new source is complete
+as proof text, but has not been elaborated or compiled. It does not change
+the protected theorem or its remaining admission.
+
+For \(r\in\mathbb C\) satisfying \(r^3=2\), the existing identity
+`seedFamily_zero_of_cube_two` identifies the exact seed equation with
+\[
+ F_0=z_0^6+z_1^6+z_2^6+z_3^6+w^3.
+\]
+The construction retains the original equation in the quotient:
+\[
+ R_r=\mathbb C[z_0,z_1,z_2,z_3,w]/(\mathrm{seedFamily}(r,0)),
+ \qquad B_{r,j}=(R_r)_{\bar z_j},\quad 0\le j<5,
+\]
+where \(z_4=w\). These are the actual coordinate localizations, not new
+rings specified only by abstract smoothness hypotheses.
+
+### The theorem and its proof
+
+In namespace `CycleQ2SeedFermatCone`, the principal geometric endpoint is
+
+~~~lean
+theorem coordinatePatch_smooth
+    (r : ℂ) (hr : r ^ 3 = 2) (j : Fin 5) :
+    AlgebraicGeometry.Smooth (toComplex r j)
+~~~
+
+Here `coordinatePatch r j` is \(\operatorname{Spec}B_{r,j}\), and
+`toComplex r j` is induced by its actual complex algebra structure.
+The module also supplies
+
+~~~lean
+coordinateRing_standardSmooth
+coordinateRing_standardSmooth_dimension
+coordinateRing_smooth
+~~~
+
+The dimension statement is
+\(\mathrm{Algebra.IsStandardSmoothOfRelativeDimension}\;4\;\mathbb C\;B_{r,j}\).
+The number four is the dimension of the affine cone patch; the weighted
+projective hypersurface has dimension three and is a subsequent
+construction.
+
+The derivative in the inverted coordinate is
+\[
+ \partial_jF_0=d_jz_j^{d_j-1},
+ \qquad
+ d_j=
+ \begin{cases}
+ 6,&j<4,\\
+ 3,&j=4.
+ \end{cases}
+\]
+The constants \(6\) and \(3\) are units over \(\mathbb C\), and \(\bar z_j\)
+is a unit by localization. Thus the actual derivative class is a unit.
+
+Start with the five-generator, one-relation presentation of \(R_r\).
+Adjoining the inverse of \(\bar z_j\) adds one generator and one relation.
+The composed presentation's Jacobian is
+\[
+ (\partial_jF_0)\bar z_j=d_j\bar z_j^{d_j},
+\]
+a proved unit. This gives a genuine submersive presentation with six
+generators and two relations. Mathlib's standard-smoothness theorems then
+give smoothness and relative dimension \(6-2=4\); its affine scheme
+criterion gives the displayed geometric endpoint.
+
+### Verification and remaining boundary
+
+The presentation, Jacobian, scalar-tower and scheme-smoothness arguments
+were reviewed against Mathlib revision
+`0df444a360eaa60ab8c11dca51a86af692955474`.
+The new module passed the static admission/import check and whitespace
+review. It contains no admission, custom axiom, or unchecked native
+decision procedure. The existing protected source and all earlier Lean
+modules are unchanged.
+
+**No Lean elaboration, build, or kernel replay was run.** Lean and Lake
+are unavailable in this workspace. With Lean 4.33.1, the pinned Mathlib,
+the verifier-prepared `Proposal` layout and protected target, matching
+compiled imports, and the corresponding `LEAN_PATH`, the deferred
+single-module check is:
+
+~~~sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricSeedFermatCone.olean \
+  Proposal/GeometricSeedFermatCone.lean
+~~~
+
+This command presupposes compiled dependencies; it does not request a
+dependency build. The source includes axiom-print commands for its
+derivative calculation, relative-dimension theorem, and scheme-smoothness
+theorem.
+
+The next geometric step is to connect these localizations to the weighted
+projective seed charts. Smoothness of a nonempty parameter open, its
+intersection with the rank open, the moving-cycle comparison, and the
+protected residue exactness remain later formalization obligations.
+
+The seed construction follows Ben Diamond's surface-section argument.
+Prepared for `fqlx` with OpenAI ChatGPT assistance.
+
+
 ## Truth before formalization — mathematical audit, 15 November 2026
 
 **Conclusion:** the exact affine-residue existence statement has a valid
