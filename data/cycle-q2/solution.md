@@ -106,6 +106,33 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeConstantCurveFiber.lean
 ```
 
+### The actual relative projective zero locus
+
+[GeometricRelativeConstantCurve.lean](GeometricRelativeConstantCurve.lean)
+takes Proj of the homogeneous quotient by the fixed-vector rows and
+constructs its original map into the original incidence surface.
+The map is a genuine closed immersion: on the standard homogeneous
+affine cover its coordinate maps are the surjective graded-localization
+maps induced by the original quotient.
+
+On every original matrix-pivot open, the actual structure-sheaf kernel
+is compared with the degree-zero contraction of the localized three-row
+ideal. The section-ring equivalences and displayed equation sections are
+the canonical ones, and regularity transfers through those equivalences.
+
+Principality, a simultaneous regular vector, curve flatness, and
+nonemptiness are not supplied by this component. Independent source
+review checked the Proj morphism and localization APIs against pinned
+Mathlib. Static scans passed. **No compilation or kernel replay was run.**
+
+With the toolchain and prepared-import prerequisites above, the deferred bounded check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeConstantCurve.olean \
+  Proposal/GeometricRelativeConstantCurve.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
