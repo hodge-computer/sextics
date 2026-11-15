@@ -775,6 +775,29 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricGradedAwaySpecialization.lean
 ```
 
+### The canonical global map has the computed chart restrictions
+
+[GeometricRelativeCurveSeedChart.lean](GeometricRelativeCurveSeedChart.lean)
+proves that the canonical graded seed map, in the actual degree-zero
+coordinate rings, is exactly curveChartSpecialization after the two
+established chart equivalences. It proves the actual coordinate-open
+preimage identity and the resulting scheme chart square for the
+single global seedCurveToRelative morphism.
+
+This is the compatibility needed to assemble the local fiber
+identifications. It does not infer gluing solely from independent
+local isomorphisms. Fraction and Spec-composition calculations received
+source review.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeCurveSeedChart.olean \
+  Proposal/GeometricRelativeCurveSeedChart.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
