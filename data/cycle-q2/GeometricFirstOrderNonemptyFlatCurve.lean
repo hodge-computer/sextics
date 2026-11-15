@@ -30,10 +30,34 @@ Artifact ZIP SHA-256:
 6f6b130b9873ebccca963c2a0021233382b177a2e93f3b27d1c46d9b670c3732
 
 The total batch deadline interrupted GeometricSurfaceAdjunction before
-an object or Lean error was produced. The remaining dependency chain,
-seed_specializedCurve_nonempty, and this module are NOT thereby checked.
-The original protected existence admission remains unchanged. This
-checkpoint note changes no definition, theorem statement, or proof body.
+an object or Lean error was produced. A separate bounded continuation
+then reused all 16 source-and-object-hash-matched dependencies and compiled
+that unchanged module successfully: exit 0, 88.597 seconds, peak sampled
+resident memory 3157612 KiB, no memory-guard stop. It emitted the actual
+GeometricSurfaceAdjunction.olean. All 17 successful source and object
+hashes were checked against the downloaded continuation receipt.
+
+Continuation run: https://github.com/fqlx/sextics/actions/runs/43748269711
+Checked commit: b25a5fd1fdd822bc667c5032bbfb9df986475327
+Artifact: 14175013789, q2-dependency-rebuild-43748269711, retained 30 days.
+Artifact ZIP SHA-256:
+98784a7c1e2bfab4bfef79d08b04c25ec2f5fe9cbebd0b999e4dec63d45a470c
+Surface-adjunction source SHA-256:
+00acf5c0ffb3107422834a0ce5ec02fa6a2c90897c86df2d4c60c0e9834ed3a3
+Surface-adjunction object SHA-256:
+c49570d30e9ac7fb57731bfbb8facffbd8672d4eb142e33d18c5a8c098254f42
+
+The continuation stopped normally at its one-new-module bound; the next
+unchecked module was GeometricSeedConormalBases. The selected dependency
+closure contains 327 modules; 17 successes are not a complete build.
+SurfaceAdjunction contains no printed theorem-level axiom audit; the 33
+audits above concern the first 16 modules only. No independent kernel
+replay or protected acceptance run was performed.
+
+The remaining dependency chain, seed_specializedCurve_nonempty, and this
+module are NOT thereby checked. The original protected existence
+admission remains unchanged. These checkpoint notes change no definition,
+theorem statement, or proof body.
 -/
 
 set_option autoImplicit false
