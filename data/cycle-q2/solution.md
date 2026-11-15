@@ -268,6 +268,32 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeCurveNeighborhood.lean
 ```
 
+### The actual dimension-two open contains the original good open
+
+[GeometricIncidenceDimensionOpen.lean](GeometricIncidenceDimensionOpen.lean)
+takes the union of the genuine four-variable Jacobian patch spectra
+inside the original projective surface. Source-local descent proves
+smoothness of relative dimension two on that actual union.
+
+The uniform minor-ideal comparison gives
+`goodOpen_le_dimensionOpen` for every coefficient algebra and
+parameter point. The proof follows the actual localization points and
+the canonical affine-chart preimage identities. Thus it compares the
+previously constructed scheme open with this new dimension-two open,
+rather than asserting equality of unrelated ring presentations.
+
+Independent source reviews checked the scheme inclusions and the
+source-local relative-dimension descent. Static scans passed.
+**No compilation or kernel replay was run.**
+
+With the toolchain and prepared-import prerequisites above, the deferred bounded check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceDimensionOpen.olean \
+  Proposal/GeometricIncidenceDimensionOpen.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
