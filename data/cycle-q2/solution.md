@@ -820,6 +820,32 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeCurveSeedFiberCover.lean
 ```
 
+### The original specialized curve is the actual global seed fiber
+
+[GeometricRelativeCurveSeedFiberIso.lean](GeometricRelativeCurveSeedFiberIso.lean)
+proves that seedCurveToFiber is an isomorphism. On every actual target
+coordinate open, its restriction equals the composite of the original
+specialized chart isomorphism, the explicit chart-fiber isomorphism,
+and the actual target-open pullback isomorphism. Compatibility is
+proved using both pullback projections. Target locality of isomorphisms
+then applies to the proved whole-fiber cover.
+
+The resulting seedCurveFiberIso has the existing literal specializedCurve
+as source and the actual pullback of the original relativeCurveToBase
+along the original seed map as target. Both original projection formulas
+are retained. No regularity, flatness, or nonemptiness premise is required
+for this identification. Independent source review and pinned-API checks
+found no concrete defect; this does not replace Lean validation.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeCurveSeedFiberIso.olean \
+  Proposal/GeometricRelativeCurveSeedFiberIso.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
