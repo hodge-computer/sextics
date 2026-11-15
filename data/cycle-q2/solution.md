@@ -2513,6 +2513,87 @@ timeout --signal=TERM --kill-after=5s 55s \
   Proposal/GeometricSeedProjectiveOverlapComparisons.lean
 ```
 
+### Native pairwise transitions with exact section recovery — 15 November 2026
+
+Continuing from `4b6c718f1c4fa1eb3e74a0f4a748ef1c3bffc04c`,
+[GeometricSeedProjectiveSheafTransitions.lean](GeometricSeedProjectiveSheafTransitions.lean)
+constructs the image and dual transition isomorphisms between the
+**original restricted projective sheaves** on the canonical affine model
+of each ordered pair overlap. Each is the associated-sheaf transition
+conjugated through the previously fixed canonical comparison isomorphisms.
+
+The theorem `nativeSheaf_square` proves
+\[
+\Psi_j^{\mathrm{ov}}\circ T_{ij}^{I}
+ = T_{ij}^{D}\circ\Psi_i^{\mathrm{ov}}.
+\]
+Both vertical maps are restrictions of the original
+`projectiveImageDualIso`. The proof transports the established model
+square using the two comparison naturality squares and cancellation of
+isomorphisms. The resulting maps are native module-sheaf isomorphisms;
+`imageOverlapTransition_restrict` and `dualOverlapTransition_restrict`
+state their compatibility with every open restriction inside that fixed
+overlap spectrum.
+
+[GeometricSeedAffineComparisonSections.lean](GeometricSeedAffineComparisonSections.lean)
+proves that this reconstruction preserves the **specified** top-section
+map. A comparison \(C_M:M\cong\widetilde E\) induces
+\(\Gamma(C_M)=\eta_E\circ e_M\), with the canonical tilde unit \(\eta_E\).
+Unit naturality and cancellation show that a conjugated transition has
+exactly the prescribed module map between the two fixed models.
+
+[GeometricSeedProjectiveTransitionSections.lean](GeometricSeedProjectiveTransitionSections.lean)
+applies that result to the actual image and dual transitions. For every
+native global section, its image model is multiplied by \(t_{ij}^{14}\),
+and its dual model is transformed by
+\[
+\varphi\longmapsto t_{ij}^{4}
+ (\varphi\circ\iota_{ij}^{-1}).
+\]
+The latter is equality of entire functionals on the actual overlap ideal.
+`originalSectionTransition_recovered` further identifies the new image
+sheaf map with the earlier `imageSectionTransition` after the canonical
+top-section transport. Thus these are the same prescribed transitions
+throughout the section and sheaf constructions.
+
+**Remaining coherence and identification.** Restriction naturality inside
+one pair overlap is now supplied by native sheaf maps. Comparing the
+separately constructed pair maps after transport to a common triple
+overlap, proving their cocycle, and descending them remain separate.
+The descended image must still be identified with the specified global
+homogeneous matrix image. The dual must still be identified with the
+genuine internal Hom of the three-component orbit ideal, with its
+degree-four twist. Required invertibility and the final geometric
+existence implication are also still open; the protected admission is
+unchanged.
+
+**Verification status.** All three sources received mathematical/source
+review and bounded static checks. No Lean elaboration, full build, or
+kernel replay was run. The following separate commands are deferred
+until the pinned submission layout and checked dependency artifacts are
+available; the last command requires both preceding outputs:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedAffineComparisonSections.olean \
+  Proposal/GeometricSeedAffineComparisonSections.lean
+```
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedProjectiveSheafTransitions.olean \
+  Proposal/GeometricSeedProjectiveSheafTransitions.lean
+```
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedProjectiveTransitionSections.olean \
+  Proposal/GeometricSeedProjectiveTransitionSections.lean
+```
+
 ### The original ideal and the actual differential sheaves
 
 Write \(j:C\hookrightarrow D\) for the original immersion at
