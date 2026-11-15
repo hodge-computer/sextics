@@ -76,6 +76,36 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricIncidenceChartDimension.lean
 ```
 
+### The exact seed tensor fiber of the relative quotient
+
+[GeometricRelativeConstantCurveFiber.lean](GeometricRelativeConstantCurveFiber.lean)
+proves an algebra equivalence
+\[
+ \mathbb C\otimes_{\mathrm{ParameterAlgebra}}
+   \mathrm{RelativeCurveRing}(\mathrm{incidencePoint},t)
+ \;\simeq\;
+   \mathrm{SpecializedCurveRing}(\mathrm{seedPoint}(57,\mathrm I),t).
+\]
+It uses the existing exact surface tensor fiber, the tensor/quotient
+comparison, and the proved image of the original three-row ideal.
+The coefficient action on \(\mathbb C\) is exactly the retained seed map,
+installed only locally. Pure tensors, geometric coordinates, and
+coefficient elements have explicit comparison formulas.
+
+This is the actual algebraic fiber, without a flatness assumption.
+A global projective scheme fiber identification, nonemptiness, and
+parameter flatness remain separate. Independent source review checked
+tensor order and both quotient equivalence directions; static scans
+passed. **No Lean elaboration, compilation, or kernel replay was run.**
+
+With the toolchain and prepared-import prerequisites above, the deferred bounded check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeConstantCurveFiber.olean \
+  Proposal/GeometricRelativeConstantCurveFiber.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
