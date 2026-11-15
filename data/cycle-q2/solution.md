@@ -798,6 +798,28 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeCurveSeedChart.lean
 ```
 
+### The computed charts cover the whole actual seed fiber
+
+[GeometricRelativeCurveSeedFiberCover.lean](GeometricRelativeCurveSeedFiberCover.lean)
+defines the four coordinate opens in the actual scheme-theoretic curve
+fiber. Pullback restriction and pasting identify each with the previously
+computed chart fiber, retaining both projection identities.
+Their union is the entire fiber: the original surface image lies over
+the retained seed, where the already established weight-one cover applies.
+
+The canonical seed curve map's preimages are the existing specialized
+curve coordinate opens. Source review checked the pullback ordering
+and the actual whole-fiber cover.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeCurveSeedFiberCover.olean \
+  Proposal/GeometricRelativeCurveSeedFiberCover.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
