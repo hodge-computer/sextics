@@ -2709,6 +2709,85 @@ timeout --signal=TERM --kill-after=5s 55s \
   Proposal/GeometricSeedProjectiveTransitionSections.lean
 ```
 
+### Literal image embeddings and uniqueness of the pair transition — 15 November 2026
+
+After checkpoint `8ed159a80a83a09788b48303d2e5c658678a6921`,
+[GeometricSeedImageSheafEmbedding.lean](GeometricSeedImageSheafEmbedding.lean)
+establishes injectivity on every open of the associated-sheaf map of an
+injective module map. It compares section values at each prime and uses
+injectivity of the corresponding localized module map. The resulting
+monomorphism proof tests against arbitrary module sheaves; it does not
+presuppose an additional exactness theorem for tilde.
+
+Applied to the literal subtype inclusion of the original matrix range,
+this embeds its associated sheaf into the associated rank-three sheaf.
+The original matrix factors through that same range inclusion, before
+and after applying tilde. The actual overlap transition satisfies
+\[
+e_j\circ\widetilde T_{ij}
+ = (t_{ij}^{14}\cdot -)\circ e_i
+\]
+for the literal embeddings of `leftData` and `rightData` over the actual
+overlap ring.
+
+[GeometricSeedImageInclusionSections.lean](GeometricSeedImageInclusionSections.lean)
+binds this inclusion to the original principal-open section map.
+Localizing the original subtype inclusion gives exactly the subtype
+inclusion of the localized matrix image into the localized three
+coordinates. The native principal-section normalization therefore sends
+the original sheaf inclusion of every image section to the underlying
+vector of its fixed localized-image model. This argument requires no
+finite-presentation premise, no injectivity of the coefficient map, and
+no extra regularity of the denominator.
+
+[GeometricSeedOverlapImageMonomorphism.lean](GeometricSeedOverlapImageMonomorphism.lean)
+uses the already fixed canonical comparison isomorphisms to obtain
+monomorphisms of the original overlap image sheaves into the same
+rank-three model. `nativeOverlap_embedding` proves their degree-fourteen
+square. `imageOverlapTransition_unique` proves that this square determines
+the native transition uniquely. The two global-section formulas retain
+the canonical tilde unit on the free target and identify the embeddings
+with the fixed literal image vectors.
+
+**Precise cocycle boundary.** These common rank-three targets are currently
+specified separately for each ordered pair overlap. To use uniqueness
+across different pairs, bind them and their embeddings to restrictions of
+one global free or appropriately twisted free sheaf. The established
+principal-section inclusion square is an input to that binding.
+After transporting to a common triple overlap, the existing
+`transitionUnit_power_cocycle 14` will identify the two ambient scalar
+maps, and a common monomorphism will permit cancellation. Neither this
+cross-pair binding nor the triple-overlap cocycle is asserted by the new
+files. The global matrix-image identification, orbit-ideal internal Hom,
+invertibility, and final protected existence statement remain separate.
+
+**Verification status.** The three new files received independent
+mathematical/source review and bounded static checks. No Lean elaboration
+or kernel replay was run; the protected `Solution.lean` is unchanged.
+With the same pinned and already prepared dependency artifacts, the
+deferred commands are:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedImageSheafEmbedding.olean \
+  Proposal/GeometricSeedImageSheafEmbedding.lean
+```
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedImageInclusionSections.olean \
+  Proposal/GeometricSeedImageInclusionSections.lean
+```
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedOverlapImageMonomorphism.olean \
+  Proposal/GeometricSeedOverlapImageMonomorphism.lean
+```
+
 ### The original ideal and the actual differential sheaves
 
 Write \(j:C\hookrightarrow D\) for the original immersion at
