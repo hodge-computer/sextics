@@ -323,6 +323,36 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricIncidenceSurfaceNeighborhood.lean
 ```
 
+### One actual regular principal cover on total space and old seed
+
+[GeometricRelativeCartierFamily.lean](GeometricRelativeCartierFamily.lean)
+bundles the established assertions in a transparent
+`HasRegularPrincipalCover`: actual closed immersion, actual affine
+cover, regular actual structure-sheaf generators, and equality of their
+principal ideals with the actual structure-map kernels.
+
+The no-premise endpoint
+`exists_incidence_and_seed_cartier` gives one nonzero
+\(t\in\mathbb C^3\) with such covers both for the relative curve over
+the original incidence surface and for the existing
+`specializedCurveToSurface` of the literal seed and the same vector.
+All incidence equations, leading units and basepoint conditions are
+discharged by the original trace-point and seed identities.
+
+This is an actual total-space/seed Cartier construction. The zero locus
+may still be empty, and flatness of the curve over the parameter base
+and its divisor class remain unproved. The bundle introduces no assumed
+geometric input and changes no protected statement. Source review and
+static scans passed. **No compilation or kernel replay was run.**
+
+With the toolchain and prepared-import prerequisites above, the deferred bounded check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeCartierFamily.olean \
+  Proposal/GeometricRelativeCartierFamily.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
