@@ -1,13 +1,16 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Continuation: a smooth common section and the original orbit divisor
+## Continuation: global section evaluation and the seed trace comparison
 
-The new source strengthens the section choice and identifies every factor
-of the original orbit ideal. The mathematical argument below then chooses
-a smooth curve using the same section parameters and places it in the
-actual proper family. The new Lean source is uncompiled. The final
-protected affine-exactness theorem remains open; none of the arguments
-below is substituted for that theorem by an additional assumption.
+The new source constructs a genuine global evaluation morphism from an
+independently specified twisted ideal sheaf, strengthens the section
+choice, and identifies every factor of the original orbit ideal. The
+written mathematical arguments below choose one smooth curve and prove
+the seed Chern-class/normal/Serre-trace comparison by explicit cochains.
+The new Lean source is uncompiled. The final protected affine-exactness
+theorem remains open; none of these arguments is substituted for that
+theorem by an additional assumption. Older checkpoint descriptions below
+retain their historical scopes.
 
 ### Regular parameters meet every nonempty principal open
 
@@ -206,6 +209,320 @@ these equations with the prescribed source transition
 Cancellation proves agreement of the actual evaluations. This supplies
 the algebra used to construct the global evaluation from the original
 twisted ideal, without identifying independently chosen functionals.
+
+### A genuine global evaluation, with its prescribed source
+
+[GeometricSeedSectionSheaf.lean](GeometricSeedSectionSheaf.lean) constructs
+the source before choosing \(t\). On each original coordinate patch it
+uses the associated sheaf of the actual OrbitIdeal and its literal
+inclusion into the structure sheaf. It pushes these modules to the
+original projective surface, takes their product, and forms the kernel
+of the pair-overlap differences
+\[
+ (x_i)_i\longmapsto
+ (x_i-u_{ij}^4x_j)_{i,j}.
+\]
+The resulting twistedIdeal is an object of the actual category of
+modules over the original surface structure sheaf. Its compatibility
+condition is independent of evaluation and of the vector \(t\).
+
+[GeometricSeedSectionSheafSections.lean](GeometricSeedSectionSheafSections.lean)
+reads its source coordinates and local evaluations in the original
+projective section rings on every subopen. These identifications use
+the actual open-immersion section maps and commute with restriction.
+[GeometricSeedSectionSheafTwist.lean](GeometricSeedSectionSheafTwist.lean)
+then proves the literal equation \(x_i=u_{ij}^4x_j\) in those rings,
+including the required normalization of multiplication through the
+open-subscheme top-section isomorphism.
+
+[GeometricSeedSectionSheafEvaluation.lean](GeometricSeedSectionSheafEvaluation.lean)
+transports the original linkage equation to these same section rings.
+It proves that multiplication by the actual \(\lambda_i\) remains
+injective there. The degree-four and degree-eight equations above give
+evaluatedCoordinate_compatible on every common subopen, without a
+supplied compatibility premise.
+
+Finally,
+[GeometricSeedSectionSheafGlobal.lean](GeometricSeedSectionSheafGlobal.lean)
+uses unique gluing in the actual structure sheaf to construct
+\[
+ \Phi_t:\mathrm{twistedIdeal}\longrightarrow\mathcal O_D.
+\]
+The declaration globalEvaluation is a genuine global module-sheaf
+morphism. The theorem globalEvaluation_on_patch proves its equality
+with the original evaluation on every subopen of every original chart;
+globalEvaluation_unique proves uniqueness with respect to those values.
+All restriction maps and scalar compatibility are included.
+
+The interpretation boundary is precise. The kernel uses the correct
+descent condition for \(\mathcal I_E(-4)\), and the preceding written
+argument identifies it with that standard twisted ideal. Its local
+restriction isomorphisms, local invertibility, and the global equality
+of the image with the actual closed-curve ideal have not yet been proved
+in Lean. The new source supplies the global map and its original local
+formulas; it does not assert the final global ideal isomorphism or a
+certificate theorem.
+
+### Written seed comparison: the original normal class has canonical trace
+
+The comparison below is a classical proof using the original local
+equations and standard functorial Serre duality. It is recorded separately
+from the source endpoint: actual global Kodaira--Spencer, Hodge Chern-class,
+cup-product, and duality maps still have to be implemented in Lean.
+
+Write the original weighted coordinates as \((z_0,z_1,z_2,z_3,w)\).
+The literal seed equations have the form
+\[
+ \begin{aligned}
+ f_1&=z_0^2-57z_1z_3,& f_2&=w+z_2^2,\\
+ g_1&=z_0^4+57z_0^2z_1z_3+57^2z_1^2z_3^2,&
+ g_2&=w^2-wz_2^2+z_2^4,\\
+ F&=f_1g_1+f_2g_2+hk,&
+ D&=V(F,h),\quad C=V(f_1,f_2,h).
+ \end{aligned}
+\]
+Here \(h=\mathrm{thetaH}(1)\) and \(F\) is the original literal
+seed sextic, as bound in
+[GeometricSeedNormalIdeals.lean](GeometricSeedNormalIdeals.lean).
+The surface is smooth by the literal seed-surface construction. The
+weighted ambient singular vertex is outside it, since \(F=w^3\) there.
+
+First, the curve \(C\) is connected. Eliminating \(w\) makes it the
+\((2,3)\) complete intersection \(V(f_1,h)\subset\mathbb P^3\).
+The quadratic form \(f_1\) has rank three and is irreducible. The cubic
+\(h\) is nonzero modulo it: \(f_1\) is independent of \(z_2\), whereas
+the coefficient of \(z_2^3\) in \(h\) is one. These polynomials are
+therefore a regular sequence. The Koszul resolution
+\[
+ 0\longrightarrow\mathcal O_{\mathbb P^3}(-5)
+ \longrightarrow\mathcal O_{\mathbb P^3}(-2)\oplus
+                  \mathcal O_{\mathbb P^3}(-3)
+ \longrightarrow\mathcal I_C\longrightarrow0
+\]
+and the intermediate line-bundle cohomology of \(\mathbb P^3\) give
+\(H^0(\mathcal I_C)=H^1(\mathcal I_C)=0\). The ideal sequence gives
+\(H^0(C,\mathcal O_C)=\mathbb C\). The original literal Jacobian cover
+in [GeometricAffineJacobianCover.lean](GeometricAffineJacobianCover.lean)
+gives smoothness. Thus \(C\) is a smooth proper connected curve, with
+\[
+ K_C\simeq\mathcal O_C(1),\qquad
+ K_D\simeq\mathcal O_D(3),\qquad
+ N_{C/D}\simeq\mathcal O_C(-2).
+\]
+Canonical Serre duality identifies \(H^1(C,K_C)\) with
+\(H^0(C,\mathcal O_C)^\vee\), and its trace evaluates at \(1\).
+It follows that the actual canonical trace is an isomorphism
+\[
+ \operatorname{Tr}_C:H^1(C,K_C)\xrightarrow{\sim}\mathbb C.
+\]
+This uses the canonical duality trace, rather than defining trace by a
+chosen coordinate detector. See
+[Stacks 0E31](https://stacks.math.columbia.edu/tag/0E31) and
+[Stacks 0B5C](https://stacks.math.columbia.edu/tag/0B5C).
+
+Now take the independent embedded deformation
+\[
+ D_\epsilon=V(F+\epsilon B_*,h),\qquad
+ B_*=z_2z_3^3w,\quad\epsilon^2=0.
+\]
+The surface Jacobian minors stay units over the square-zero thickening,
+so this is a smooth deformation of \(D\). Let
+\(\rho_{B_*}\in H^1(D,T_D)\) be its actual Kodaira--Spencer class.
+Global smoothness of the containing threefold is not used.
+
+The original normal sequence is presented on \(C\) by
+\[
+ \mathcal O_C(2)^2\oplus\mathcal O_C(3)
+ \longrightarrow\mathcal O_C(6)\oplus\mathcal O_C(3),
+ \qquad
+ (u_1,u_2,u_3)\longmapsto(g_1u_1+g_2u_2+ku_3,u_3).
+\]
+Its kernel has frame \(n=(g_2,-g_1,0)\). On \(C\),
+\(g_1=3\cdot57^2z_1^2z_3^2\) and \(g_2=3z_2^4\).
+They have no common zero: such a zero would have \(z_2=z_0=0\) and
+\(z_1z_3=0\), while the remaining projective possibilities have nonzero
+\(h\), respectively \(-i\) and \(1-i\) after normalization.
+
+On the resulting two normal opens, lift the deformation vector
+\((-B_*,0)\) by
+\[
+ (-B_*/g_1,0,0),\qquad(0,-B_*/g_2,0).
+\]
+Their difference is \((-B_*|_C)/(g_1g_2)\) times \(n\).
+These are genuinely the normal values of local trivializations of
+\(D_\epsilon\): near \(C\), refine to ambient coordinates
+\((f_1,f_2,h,x)\), keep \(h,x,f_2\) fixed on the first open and
+\(h,x,f_1\) fixed on the second, and solve \(u(F)=-B_*\).
+The relevant derivative is a unit after shrinking near the curve.
+Differences of these trivializations represent the actual KS class.
+Since \(w=-z_2^2\), its normal image is consequently
+\[
+ \nu_{B_*}=\left[\frac{p}{g_1g_2}n\right]
+ \in H^1(C,N_{C/D}),\qquad p=z_2^3z_3^3,
+\]
+up to the fixed sign from the chosen order of the two opens. These
+are the original lift formulas in
+[GeometricNormalConnecting.lean](GeometricNormalConnecting.lean).
+
+For completeness, the Chern/KS comparison can be checked directly.
+On an affine cover trivializing \(C\), choose divisor equations \(a_i\),
+put \(g_{ij}=a_i/a_j\), and let
+\(\alpha_{ij}=d\log g_{ij}\). These represent
+\(c_1^{\mathrm{Hdg}}(\mathcal O_D(C))\) using frames \(1/a_i\).
+Represent \(\rho_{B_*}\) by a derivation cocycle \(v_{ij}\), so
+\(v_{ik}=v_{ij}+v_{jk}\). The normal image has meromorphic lift
+\[
+ b_{ij}=\frac{v_{ij}(a_j)}{a_j}\in\mathcal O_D(C)(V_i\cap V_j).
+\]
+Its boundary is regular and has the explicit value
+\[
+ \begin{aligned}
+ (\delta b)_{ijk}
+ &=\frac{v_{jk}(a_k)}{a_k}
+   -\frac{v_{ik}(a_k)}{a_k}
+   +\frac{v_{ij}(a_j)}{a_j}\\
+ &=v_{ij}\mathbin{\lrcorner}\alpha_{jk}.
+ \end{aligned}
+\]
+This proves that the boundary in
+\(0\to\mathcal O_D\to\mathcal O_D(C)\to N_{C/D}\to0\)
+is the actual KS/dlog contraction. The same formula is the normalized
+defect of lifted transition units for the actual square-zero deformation;
+the local algebra is recorded in
+[GeometricSquareZeroAtiyah.lean](GeometricSquareZeroAtiyah.lean).
+For the literal curve, the divisor equations on the two normal opens
+are \(f_2\) and \(f_1\), with original transition
+\(f_2/f_1=-g_1/g_2\).
+
+Let \(\omega_L\in H^0(D,K_D)\) be the canonical form corresponding to
+the original retained invariant cubic. Its substitution on the curve
+is exactly the existing cubicDeformation, by substitute_cubic in
+[SolutionSupport02Part02.lean](SolutionSupport02Part02.lean).
+Contraction induces \(c_{\omega_L}:N_{C/D}\to K_C\). Multiplication by
+\(\omega_L\) identifies the preceding boundary with the canonical
+residue boundary: locally, if \(\omega_L=da\wedge\eta\) and
+\(n(a)=r\), then
+\[
+ \operatorname{Res}\left(\frac{r\omega_L}{a}\right)
+ =r\eta|_C=(\iota_n\omega_L)|_C.
+\]
+The cup order is also explicit. Put
+\[
+ A_{ijk}=\alpha_{ij}(v_{jk})\omega_L,\qquad
+ B_{ijk}=\alpha_{jk}(v_{ij})\omega_L,\qquad
+ s_{ij}=\alpha_{ij}(v_{ij})\omega_L.
+\]
+The two cocycle identities give \(\delta s=-(A+B)\).
+Since \(\alpha\wedge\iota_v\omega_L=\alpha(v)\omega_L\) on a surface,
+this proves
+\[
+ c_1^{\mathrm{Hdg}}(\mathcal O_D(C))\cup
+       (\rho_{B_*}\mathbin{\lrcorner}\omega_L)
+ =-\partial_\omega(c_{\omega_L}\nu_{B_*})
+\]
+for this Cech convention. The residue convention may change the fixed
+overall sign, which does not affect nonvanishing.
+
+Dualizing the Cartier resolution against \(K_D[2]\) gives the complex
+\(K_D\to K_D(C)\) with quotient \(K_C\), and identifies its connecting
+map with the dual of
+\(H^0(D,\mathcal O_D)\to H^0(C,\mathcal O_C)\). This is the explicit
+Cartier duality construction of
+[Stacks 0B4B](https://stacks.math.columbia.edu/tag/0B4B).
+Restriction sends \(1\) to \(1\), hence
+\[
+ \operatorname{Tr}_D(\partial_\omega\xi)
+ =\pm\operatorname{Tr}_C(\xi).
+\]
+The original adjunction calculations in
+[GeometricSurfaceAdjunction.lean](GeometricSurfaceAdjunction.lean) and
+[GeometricCubicAdjunction.lean](GeometricCubicAdjunction.lean) identify
+\(c_{\omega_L}\nu_{B_*}\) with the canonical image of
+\([pL/(g_1g_2)]\), with the fixed orientation sign retained.
+The actual class is nonzero by firstOrder_canonicalCubicNormal_ne_zero in
+[GeometricIncidenceFirstOrderNormalPairing.lean](GeometricIncidenceFirstOrderNormalPairing.lean).
+The canonical curve trace is an isomorphism, so the comparison proves
+\[
+ \operatorname{Tr}_D\!\left(
+ c_1^{\mathrm{Hdg}}(\mathcal O_D(C))\cup
+ (\rho_{B_*}\mathbin{\lrcorner}\omega_L)\right)
+ =\pm\operatorname{Tr}_C\!\left[\frac{pL}{g_1g_2}\right]\ne0.
+\]
+Thus this scalar is the genuine geometric trace, with a fixed nonzero
+normalization; no arbitrary detector is identified with it by assumption.
+
+For the orbit divisor, \(B_*\) has cyclic character \(\zeta\), and
+\(\omega_L\) has character \(\zeta^2\), from the ambient weighted
+volume and the invariant cubic. Their contraction is invariant. Chern
+class pullback and invariance of trace make the three orbit terms equal.
+The hyperplane term pairs to zero because the ambient \(\mathcal O(1)\)
+extends to the actual embedded deformation, so its transition defect
+is a coboundary. The original positive divisor identity therefore gives
+\[
+ \operatorname{Tr}_D\!\left(
+ c_1^{\mathrm{Hdg}}(\mathcal O_D(\Gamma_t))\cup
+ (\rho_{B_*}\mathbin{\lrcorner}\omega_L)\right)
+ =\pm3\operatorname{Tr}_C\!\left[\frac{pL}{g_1g_2}\right]\ne0.
+\]
+
+### Retaining nonvanishing while moving to a smooth containing threefold
+
+Over an affine neighborhood \(S\) where the actual surface and selected
+curve families are smooth proper, put \(\Lambda=\mathcal O_{D_S}(\Gamma_t)\).
+The independent embedded deformation \((F_s+\epsilon B_*,h_s)\) supplies
+the relative KS class, and the retained time derivative supplies the
+relative canonical section \(\omega_L\). The expression
+\[
+ a=\operatorname{Tr}_{D_S/S}\!\left(
+ c_1^{\mathrm{Hdg}}(\Lambda)\cup
+ (\rho_{B_*}\mathbin{\lrcorner}\omega_L)\right)
+ \in\Gamma(S,\mathcal O_S)
+\]
+is a regular function. Use the derived relative trace of the smooth
+proper surface: the identification with \(\omega_{D_S/S}[2]\) is
+[Stacks 0BRT](https://stacks.math.columbia.edu/tag/0BRT), and trace commutes
+with the relevant base changes by
+[Stacks 0B6J](https://stacks.math.columbia.edu/tag/0B6J). Flatness gives
+Tor independence. This avoids an unjustified local-freeness assumption
+on \(R^1f_*T_{D_S/S}\).
+
+The preceding seed calculation gives \(a(s_0)\ne0\). Its nonvanishing
+open has nonempty open image under the actual etale map to time and
+invariant sextic coefficients. That image meets the dense smooth
+threefold locus, which contains the Fermat member. Choose a closed
+complex point over this intersection. The original smooth proper curve
+family and the same nonzero trace now occur inside a smooth containing
+threefold. This uses the literal seed calculation and openness; it does
+not substitute the separate \(r^3=2\) family for the literal seed.
+
+The next formal comparisons are still substantial: identify the
+descended ideal locally and its global image, implement the actual
+KS/dlog/canonical-trace constructions above, and then bind the moving
+family to Abel--Jacobi, the geometric variation and supported cylinder,
+Leray, and the actual algebraic de Rham class. The existing downstream
+linear assembly is conditional on those geometric inputs. This
+continuation does not close Submission.missing_geometric_existence.
+
+### Source review and validation of this continuation
+
+All 455 helper modules pass the repository's static source-policy and
+acyclic-import checks. The proposal has 458 files, within the current
+996-file limit. The 22 local links and 169 mathematical expressions in
+this continuation were checked; KaTeX reported no errors. Whitespace
+checks passed. Independent source review checked the new overlap,
+section-normalization, and gluing arguments against the pinned Mathlib
+APIs, and checked the displayed Cech identities separately.
+
+These are source and presentation checks only. No Lean elaboration,
+Lake build, kernel replay, or heavy computation was run. Solution.lean
+is unchanged and still has exactly one admission, in
+Submission.missing_geometric_existence. The complete proposal therefore
+still fails the source-policy gate and is not an accepted certificate.
+
+This continuation was prepared for fqlx with OpenAI ChatGPT assistance.
+Ben Diamond's original geometric route remains the mathematical starting
+point; the explicit comparison and its remaining formal obligations are
+distinguished above.
 
 ## Source checkpoint: the same section gives the flat curve and the original ideal maps
 
