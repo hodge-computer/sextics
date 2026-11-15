@@ -689,6 +689,28 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricSectionUnitCech.lean
 ```
 
+### Canonical graded specialization to the existing seed curve
+
+[GeometricRelativeCurveSeedMap.lean](GeometricRelativeCurveSeedMap.lean)
+constructs the original coefficient-specialization maps of the surface
+and fixed-section curve, with the existing SpecializedCurveRing as target.
+Complex coefficient lifting proves degree-preserving surjectivity and
+the required irrelevant-ideal containment. The quotient square and
+coefficient and coordinate identities are exact.
+
+This supplies one canonical graded map, rather than merely an abstract
+fiber-ring equivalence. Source review checked homogeneity, quotient
+kernels, and the irrelevant-ideal argument.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeCurveSeedMap.olean \
+  Proposal/GeometricRelativeCurveSeedMap.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
