@@ -1,5 +1,174 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Source checkpoint: the same section gives the flat curve and the original ideal maps
+
+This increment supplies the direct local maps needed for the divisor
+comparison. It uses the existing linkage functional for the original
+matrix section, identifies its image with the original three-row ideal,
+and proves injectivity from the original regular-row condition. One
+nonzero complex vector satisfies these conditions and the earlier
+first-order flatness conditions simultaneously. The new helper is
+[GeometricSeedSectionIdealComparison.lean](GeometricSeedSectionIdealComparison.lean).
+It is source-only: no Lean elaboration, compilation, or kernel replay
+has been performed. The protected residue-exactness admission is unchanged.
+
+### The exact map and its image
+
+Let \(R\) be an original affine linkage chart ring, let
+\(I\subset R\) be its original left ideal, and write \(a_0,a_1,a_2\)
+for the existing left generators. For the same coefficient vector
+\(t\), the already constructed linkage pairing gives
+\[
+ \varphi_t:I\longrightarrow R,
+ \qquad \varphi_t(a_j)=(Mt)_j.
+\]
+Put \(J_t=((Mt)_0,(Mt)_1,(Mt)_2)\). Since the \(a_j\) generate
+\(I\), every value of \(\varphi_t\) is a combination of the three
+rows. Conversely, each row is the value on its actual left generator.
+Thus
+\[
+ \operatorname{im}\varphi_t=J_t.
+\]
+This is an equality with the literal defining ideal, rather than an
+identification with an independently chosen rank-one module. The source
+theorems sectionFunctional_range and refined_rowIdeal_eq_map retain
+this equality under the original pivot localizations.
+
+For every linear map from an ideal to its ambient ring, commutativity
+gives the balance identity
+\[
+ x\,\varphi_t(a)=a\,\varphi_t(x)\qquad(x,a\in I).
+\]
+If one actual row \(\varphi_t(a_j)\) is a nonzerodivisor and
+\(\varphi_t(x)=0\), this identity forces \(x=0\). The new
+sectionFunctional_injective_of_regular_row and sectionIdealEquiv
+therefore give the explicit equivalence
+\[
+ I\xrightarrow[\ \varphi_t\ ]{\ \sim\ }J_t
+\]
+on each selected regular pivot chart. No domain assumption is used.
+The endpoint records the value of the equivalence on every ideal
+element, so its map is not hidden behind an arbitrary existence claim.
+
+### One coefficient vector for all required charts
+
+The flat first-order curve construction uses 36 affine refinements:
+four coordinate charts times nine matrix pivots. The original linkage
+ideal uses 27 refinements: three coordinate charts times nine pivots.
+The new proof applies the existing simultaneous regular-section lemma
+once to their disjoint union. In each ring, one coefficient of the
+selected row is the inverted matrix pivot and hence is a unit.
+Finite associated-prime avoidance produces a single \(t\ne0\)
+regular on all 63 refinements.
+
+That same vector is passed to the original first-order curve, the
+original seed-fiber isomorphism, the existing nonemptiness theorem,
+and every new ideal equivalence. The closed source-level endpoint is
+exists_nonempty_flat_curve_with_section_ideal_comparisons. It retains
+properness, flatness, nonempty seed fibers, all 63 original regularity
+conditions, and the 27 explicit linkage-to-row ideal equivalences.
+It introduces no new geometric premise and does not exchange two
+independently chosen existential witnesses.
+
+### Direct global divisor comparison: written proof
+
+Here is the resulting mathematical gluing argument. Its global
+module-sheaf construction is not yet a Lean theorem in the new helper.
+Let \(D\) be the original literal surface at \((r,\theta)=(57,1)\).
+Let \(\mathcal I_E\) denote the ideal sheaf of the original homogeneous
+left linkage ideal, and let \(\Gamma_t\) be the original zero scheme
+of \(Mt\). The existing polynomial and chart comparisons identify
+the latter's ideal with the sheaf of the row ideals \(J_t\).
+The original seedPrime_coordinate_cover supplies the three coordinate
+opens, and FactorData.entries_generate supplies their matrix-pivot
+covers. Thus the refinements used here cover the actual surface.
+
+On a common coordinate open put \(u=X_i/X_j\). The original normalized
+left generators and rows satisfy
+\[
+ a^{(j)}_b=u^{10}a^{(i)}_b,
+ \qquad (M^{(j)}t)_b=u^{14}(M^{(i)}t)_b.
+\]
+The normalized generators span the same ideal on the overlap, because
+\(u\) is a unit. Evaluation on these generators shows
+\[
+ \varphi_{j,t}=u^4\varphi_{i,t}
+\]
+after the identity identification of the embedded ideals. Localization
+preserves these linear maps; equality on generators proves equality
+on every further affine restriction. The existing transition units
+satisfy restriction and triple-overlap identities in the actual
+structure sheaf.
+
+Use the local frame \(X_i^{-4}\) for \(\mathcal O_D(-4)\).
+On the overlap, \(X_j^{-4}=u^4X_i^{-4}\), so source coordinates in
+\(\mathcal I_E(-4)\) change by \(x_j=u^{-4}x_i\). Consequently
+\[
+ \varphi_{j,t}(x_j)=u^4\varphi_{i,t}(u^{-4}x_i)
+   =\varphi_{i,t}(x_i).
+\]
+The new sectionFunctional_twisted_transition proves exactly this
+identity. The local evaluations therefore glue to a morphism
+\[
+ \Phi_t:\mathcal I_E(-4)\longrightarrow\mathcal O_D.
+\]
+Its image is \(\mathcal I_{\Gamma_t}\), since this is true on the
+actual affine refinements. Its kernel is zero by the regular-row
+argument on the covering pivot charts. Corestricting to its image gives
+\[
+ \boxed{\mathcal I_E(-4)\simeq\mathcal I_{\Gamma_t}}.
+\]
+
+For completeness, the existing rank-one identities give, on the open
+\(D(M_{ab})\) where the pivot is a unit,
+\[
+ (Mt)_k=\frac{M_{kb}}{M_{ab}}(Mt)_a.
+\]
+Thus \(J_t=((Mt)_a)\), and its generator is regular. It follows that
+\(\mathcal I_{\Gamma_t}\), and then \(\mathcal I_E\), is invertible.
+In particular both closed subschemes are effective Cartier divisors.
+Dualizing the displayed isomorphism gives
+\[
+ \boxed{\mathcal O_D(\Gamma_t)\simeq\mathcal I_E^\vee(4)}.
+\]
+These are the usual ideal-sheaf and line-bundle conventions for
+[effective Cartier divisors](https://stacks.math.columbia.edu/tag/01WQ)
+and their
+[associated invertible sheaves](https://stacks.math.columbia.edu/tag/0C4S).
+The direct construction only glues the evaluation maps. It does not
+require a prior global construction of the matrix image-line sheaf.
+
+### Scope and the next geometric step
+
+The source now gives the original maps, their exact local images,
+injectivity, twist compatibility, and a single witness compatible with
+first-order flatness. The global sheaf morphism and its isomorphism
+above remain to be implemented in Lean. The orbit-divisor comparison
+must still bind the known component-product identities to the actual
+projective orbit curves with their multiplicities.
+
+Neither the new source endpoint nor the written divisor argument
+asserts that the selected curve is smooth or that an Abel--Jacobi
+derivative is nonzero. A future smoothness argument must choose a
+single vector in the intersection of the regular-section open and
+the smooth-section open; an arbitrary existing regular vector cannot
+silently be declared smooth. Likewise smoothness of the literal
+surface does not prove that its containing threefold is globally
+smooth. GeometricSeedFamilySmoothNeighborhood concerns the separate
+\(r^3=2\) family and cannot supply that assertion for literal \(r=57\).
+The seed trace, the actual moving-cycle comparison, supported
+correspondences, and the final affine residue vanishing remain
+separate obligations.
+
+Bounded checks passed for the helper source/import policy, acyclic
+imports, whitespace, the new explanation's local links, and its
+43 formulas rendered with the bundled KaTeX. The complete certificate
+still fails acceptance because its original admission remains.
+No Lean, Lake, build, or kernel replay was run. Solution.lean and the
+exact protected target are preserved. Prepared for `fqlx` with
+OpenAI ChatGPT assistance, following Ben Diamond and the project
+collaborators credited below.
+
 ## Formalization checkpoint: the retained incidence cubic pairs the original normal class
 
 This increment identifies the exact cohomology class that the geometric
