@@ -1,5 +1,98 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Formalization checkpoint: actual first-order curve and tensor charts
+
+This increment binds the original fixed-section curve to the retained
+first-order incidence deformation. It constructs the actual curve over
+\(\mathbb C[\varepsilon]/(\varepsilon^2)\), proves properness, and identifies
+its four affine coordinate charts with the original tensor quotient
+rings used in the equation calculations. All new source is uncompiled.
+The protected residue-exactness admission is unchanged.
+
+### Actual pullback of the original curve
+
+[GeometricFirstOrderCurve.lean](GeometricFirstOrderCurve.lean) defines
+firstOrderCurve t as the pullback of the original closed immersion
+relativeCurveToSurface incidencePoint t along the actual
+firstOrderSurfaceToSurface. Pasting the ambient pullback square proves
+
+```lean
+IsPullback (firstOrderCurveToOriginalCurve t)
+  (firstOrderCurveToBase t)
+  (relativeCurveToBase incidencePoint t) firstOrderParameterPoint
+```
+
+Thus the construction uses the same original parameter algebra, the same
+fixed complex section vector, and the original pointed derivation into
+the dual numbers. Its map into the first-order surface is a closed
+immersion. Since that surface is proper over the dual numbers,
+firstOrderCurveToBase_proper establishes properness of this actual curve
+for every section vector. No nonempty-fiber assertion is made.
+
+### Exact affine chart base change and ambient flatness
+
+[GeometricFirstOrderChartFlatness.lean](GeometricFirstOrderChartFlatness.lean)
+constructs the actual pullback of an original affine chart and identifies
+it with the spectrum of its tensor algebra along firstOrderMap. Both
+projections and the open image are computed. For an open chart
+\(e:\operatorname{Spec}(R)\to X\) and the original first-order pullback
+\(p:X_\varepsilon\to X\), its image is exactly
+\(p^{-1}(\operatorname{im}(e))\).
+
+Applied to the original surface charts, this proves the unconditional
+source-level theorem
+
+```lean
+theorem firstOrderSurfaceChart_flat (i : Fin 4) :
+    Module.Flat (DualNumber ℂ) (FirstOrderSurfaceChart i)
+```
+
+The proof uses flatness of the already constructed first-order surface.
+It does not assume flatness of the unrestricted original chart over the
+full incidence parameter algebra.
+
+[GeometricFirstOrderCurveCharts.lean](GeometricFirstOrderCurveCharts.lean)
+applies the same construction to the actual three-row curve quotient.
+Its four open images cover the whole first-order curve: every point of
+the dual-number spectrum maps to the retained literal seed, and the
+previous prime-ideal argument supplies a nonvanishing weight-one
+coordinate. The exact structural map of each tensor chart is retained.
+The theorem firstOrderCurveToBase_flat_of_affineCharts proves source
+descent from flatness of these four particular tensor quotients.
+At this checkpoint that quotient-flatness premise remains to be proved
+by the local regular-equation calculation.
+
+### Scope, review, and deferred compilation
+
+The original incidence family varies full invariant sextic coefficients.
+The auxiliary family seedFamily r 0 plus the square of a varying cubic
+has a different parameter base. This increment makes no identification
+between those bases and remains at the original first-order incidence
+point with literal parameter \(r=57\).
+
+Independent source review checked the pullback pasting, affine tensor
+identification, opposite-functor directions, original coefficient maps,
+open images, full point coverage, and source-local flatness APIs against
+Mathlib revision 0df444a360eaa60ab8c11dca51a86af692955474. Static checks
+cover imports, admission tokens, whitespace, explanation links, and
+preservation of Solution.lean. No Lean, Lake, build, or kernel replay
+was run. Source review does not establish successful elaboration.
+
+For later execution, with Lean 4.33.1, the pinned Mathlib cache, the
+verifier-style Proposal layout, and compatible compiled imports:
+
+```sh
+timeout --signal=TERM --kill-after=3s 45s \
+  lake env lean -M4096 Proposal/GeometricFirstOrderCurveCharts.lean
+```
+
+The next local obligation is quotient flatness for one nonzero original
+complex section vector on a proved cover. Nonempty curves, the geometric
+Abel--Jacobi comparison, global Hodge/support arguments, and vanishing of
+the specified residue remain separate obligations. Prepared for `fqlx`
+with OpenAI ChatGPT assistance, following Ben Diamond and the project
+collaborators. Earlier proof and verification records retain their scopes.
+
 ## Formalization checkpoint: a smooth proper family neighborhood retaining zero
 
 This increment constructs a genuine open neighborhood of zero in the full
