@@ -659,6 +659,36 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricSpecializedCurveNonemptyCriterion.lean
 ```
 
+### Actual empty fixed-section curves give exact logarithmic boundaries
+
+[GeometricSectionUnitCech.lean](GeometricSectionUnitCech.lean)
+constructs maps from the actual homogeneous pivot charts to a common
+overlap algebra. Their original fixed-section equations satisfy the
+existing transition identity. When these equations are units, the
+transition is their exact unit ratio, and its logarithmic differential
+is the explicit difference of their logarithmic differentials.
+The last theorem supplies the units from genuine emptiness of the
+original specializedCurve, using the preceding criterion.
+
+The coordinate normalization retains the full degree-fourteen factor.
+The separate image-versus-original-orbit-ideal comparison retains
+the positive O(4) twist. These identities do not identify the image-line
+dlog class with the previously nonzero scalar normal-connecting H2
+class. Such a class comparison, with the orbit ideal and twist included,
+or a direct nonunit equation, is still required for nonemptiness.
+The current identities are in the actual Kahler module of each common
+overlap algebra; a global sheaf Cech comparison is not assumed.
+Source review found no concrete mathematical defect.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricSectionUnitCech.olean \
+  Proposal/GeometricSectionUnitCech.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
