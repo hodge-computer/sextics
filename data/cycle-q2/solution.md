@@ -1,5 +1,256 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Formalization checkpoint: the retained incidence cubic pairs the original normal class
+
+This increment identifies the exact cohomology class that the geometric
+Abel--Jacobi comparison must use. It keeps the original incidence tangent,
+the original literal curve at \(r=57,\theta=1\), and the original ambient
+test polynomial. The new source introduces no existence, nonvanishing,
+or comparison assumption. Compilation is deferred. The protected
+residue-exactness admission remains unchanged.
+
+The branch already contains the newer
+[nonempty first-order curve endpoint](GeometricFirstOrderNonemptyFlatCurve.lean).
+It applies nonemptiness to the same vector chosen in the proper-flat
+construction. The older checkpoints below retain their original, more
+limited scopes; their earlier nonemptiness warning does not describe
+the current source endpoint.
+
+### The exact class equality
+
+[GeometricIncidenceFirstOrderNormalPairing.lean](GeometricIncidenceFirstOrderNormalPairing.lean)
+connects the existing normal-frame cubic multiplication map to the
+cohomology class of the retained first-order tangent. Put
+\[
+ L=\operatorname{cubicDeformation}(\operatorname{firstOrderCubicDirection}),
+ \qquad p=X_2^3X_3^3.
+\]
+For every cubic coefficient vector \(v\), the helper proves
+pairedProjectiveClass_eq_cubicNormal: the existing projective image of
+pairedDegreeOneClass 57 1 v is exactly cubicH1Map applied to the existing
+literalNormalClass and cubicDeformation v. Specializing to the retained
+vector and applying the existing canonical-sheaf isomorphism gives
+\[
+ \operatorname{firstOrderDifferentialClass}
+ =\operatorname{literalCanonicalH1Equiv}
+   \bigl(\operatorname{cubicH1Map}(L)(\operatorname{literalNormalClass})\bigr)
+ \ne0.
+\]
+This is equality of the actual existing derived-cohomology classes, not
+an identification based only on their both being nonzero.
+
+The proof is short because
+[cubicH1Map_normalClass](GeometricProjectiveNormalClass.lean) already
+computes multiplication for every homogeneous cubic. The quotient map
+degreeOneToProjectiveH1 is the lift of degreeOneConnecting, and both
+sides have the same degree-nine numerator. The helper proves that
+numerator identity explicitly before using it in cohomology.
+
+The later
+[normal-sheaf comparison](GeometricNormalSheafComparison.lean) and
+[Cartier binding](GeometricCartierNormalBinding.lean) already identify
+the constructed normal-frame sheaf with the original intrinsic normal
+sheaf. They also bind the original normal class to its Cartier boundary.
+Those identifications are existing results, despite the narrower scope
+described in the earlier normal-frame module's header. The new helper
+uses their curve-to-surface comparison to obtain nonvanishing for the
+same retained cubic on the intrinsic normal class. It preserves the
+existing sign
+\[
+ \operatorname{literalNormalClassAtTop}
+ =-\operatorname{literalIntrinsicNormalClass}.
+\]
+The intrinsic cubic map lands in the cohomology of the pushed-forward
+degree-one sheaf on the surface. The curve-to-surface comparison must
+be used; that target is not definitionally the curve's cohomology group.
+
+### The sign and the two deformation directions
+
+The test polynomial is
+\[
+ B_*=z_2z_3^3w.
+\]
+On the original curve, \(w=-z_2^2\), so the existing
+substitute_ambientTest identity gives
+\[
+ B_*|_C=-X_2^3X_3^3=-p.
+\]
+For a pair deformation \((F+\epsilon A,h+\epsilon L')\), the retained
+normal-lift difference has coefficient
+\[
+ \frac{kL'-A}{g_1g_2}.
+\]
+The test direction \((A,L')=(B_*,0)\) therefore gives
+\(-B_*|_C/(g_1g_2)=p/(g_1g_2)\). Multiplication by the actual incidence
+cubic \(L\) gives precisely
+\[
+ \left[\frac{pL}{g_1g_2}\right].
+\]
+This is the positive class retained in firstOrderDifferentialClass.
+The helper does not replace the actual incidence tangent by the earlier
+selectedCubic or introduce a new witness.
+
+The distinction between directions is essential. The actual curve
+extends along its incidence deformation \((0,L)\), so its divisor line
+has zero Atiyah obstruction in that direction. The nonzero pairing
+uses the independent test deformation \((B_*,0)\) together with the
+actual cubic \(L\). A proof that equates the existing nonzero class with
+the same-direction obstruction of an extending divisor would be wrong.
+
+### The divisor comparison supplied by the local matrix identities
+
+Write \(I_E\) for the actual original left linkage ideal, and let
+\[
+ M:\mathcal O_D^3\longrightarrow\mathcal O_D(14)^3,
+ \qquad \mathcal L_+=\operatorname{im}M.
+\]
+The rank-one identities and original pivot cover make \(\mathcal L_+\)
+an invertible sheaf. On the pivot \(M_{ab}\ne0\), the original column
+\(b\) is a frame; after trivializing \(\mathcal O_D(14)\) by
+\(M_{ab}\), its \(a\)-th coordinate is one. Every other column is a
+multiple of it by the vanishing two-by-two minors.
+
+The original linkage ideal is also locally invertible. In a pivot
+localization the linkage identities have the form
+\(a_ab_b=cu\), where \(c\) is regular and \(u\) is a unit, and
+\(IJ\subseteq(c)\). Thus \(b_b\) is regular. For \(x\in I\), write
+\(xb_b=cq\). Then
+\(b_b(ux-a_aq)=0\), whence \(x=a_au^{-1}q\).
+The element \(a_a\) is regular by the same argument, so \(I=(a_a)\)
+is a Cartier ideal. These are the actual FactorData inputs, including
+regularity of the linkage element; duality alone is not being used to
+infer invertibility.
+
+On a coordinate overlap, the normalized matrix scales by \(u^{14}\)
+and the normalized left generators by \(u^{10}\). The existing
+image-dual map is characterized by evaluating on those left generators.
+Its overlap formula therefore scales by \(u^4\), giving the comparison
+\[
+ \mathcal L_+\simeq\mathcal I_E^\vee(4).
+\]
+The actual overlap identities are in
+[GeometricSeedProjectiveImageTwist.lean](GeometricSeedProjectiveImageTwist.lean)
+and
+[GeometricSeedProjectiveImageCocycle.lean](GeometricSeedProjectiveImageCocycle.lean).
+The degree-fourteen ambient twist must be retained.
+
+For the original section \(s_t=Mt\), let
+\(f_p=(Mt)_a/M_{ab}\) and let \(\ell_p\) be its positive image-line
+frame. The original unit transitions satisfy
+\[
+ s_t=f_p\ell_p,\qquad
+ f_q=\tau_{pq}f_p,\qquad
+ \ell_q=\tau_{pq}^{-1}\ell_p,\qquad
+ \ell_q^\vee=\tau_{pq}\ell_p^\vee.
+\]
+Evaluation on \(s_t\) sends \(r\ell_p^\vee\) to \(rf_p\).
+For a regular original section this is injective, with image the actual
+principal ideal of its zero scheme. The displayed transitions show
+that these local maps agree. Consequently
+\[
+ \mathcal I_{\Gamma_t}\simeq\mathcal L_+^\vee
+   \simeq\mathcal I_E(-4),\qquad
+ \mathcal O_D(\Gamma_t)\simeq\mathcal I_E^\vee(4).
+\]
+This is the usual regular-section/Cartier-divisor correspondence
+([Stacks, Lemma 31.15.10](https://stacks.math.columbia.edu/tag/0C4S)),
+applied to the original matrix section with its actual local equations.
+
+The argument is valid for every section with these regularity
+properties. Its future Lean implementation must apply to the same
+vector selected by the first-order construction. Two unrelated
+existential choices of a vector cannot be interchanged. The global
+module-sheaf descent and ideal comparison above have not been added by
+this checkpoint. Also, identifying the Cartier divisor of the original
+left ideal with the named sum of three orbit curves requires a
+scheme-theoretic comparison including multiplicities. The name
+OrbitIdeal alone does not provide that comparison.
+
+### The precise remaining Abel--Jacobi comparison
+
+Here is the geometric calculation to bind to the formal classes. Suppose
+the ambient threefold and containing surface are smooth, the compatible
+test pair deformation supplies
+\(\rho_{B_*}\in H^1(D,T_D)\) lifting \(\kappa_{B_*}|_D\), and the
+required divisor/orbit comparison has been established. Locally write
+\(\Omega_T=dh\wedge\sigma\). Then
+\[
+ \eta_{B_*}|_D
+ =\iota_{\rho_{B_*}}\Omega_T
+ =-dh\wedge\iota_{\rho_{B_*}}\sigma.
+\]
+This gives an explicit conormal lift for this particular test class.
+Since the actual curve motion satisfies \(dh(v_\Gamma)=-L\), contraction
+and restriction give
+\[
+ (\iota_{v_\Gamma}\eta_{B_*})|_\Gamma
+ =(\iota_{\rho_{B_*}}\omega_L)|_\Gamma,
+ \qquad \omega_L=L\sigma.
+\]
+Trace/Gysin compatibility then expresses the infinitesimal pairing as
+\[
+ \operatorname{Tr}_D\bigl(
+ c_1(\mathcal O_D(\Gamma))\cup
+ (\rho_{B_*}\mathbin{\lrcorner}\omega_L)\bigr).
+\]
+For a smooth curve this is the conventional infinitesimal Abel--Jacobi
+pairing. The relation between infinitesimal Abel--Jacobi, duality, and
+semiregularity is treated in
+[Buchweitz--Flenner, Sections 5.3--5.5](https://arxiv.org/abs/math/9907004).
+Their smooth-cycle identification must not be applied silently to a
+possibly singular curve. The current Cartier curve requires the
+appropriate local-complete-intersection dualizing/Gysin formulation,
+or a separate proof that a suitable smooth member can be chosen.
+
+If \(E=\sum_{j=0}^2\vartheta^jC\) with the correct multiplicities,
+the divisor comparison reduces this trace to orbit terms and \(4H\).
+The hyperplane term vanishes because \(\mathcal O(1)\) extends over
+the test deformation. Contraction on \(C\) kills tangent vectors to
+\(C\) and factors through its normal class; adjunction gives exactly
+the cubic map used by the new helper. The character identities
+\(\vartheta^*B_*=\zeta B_*\),
+\(\vartheta^*\Omega_T=\zeta^2\Omega_T\), and
+\(\vartheta^*L=L\) make the paired class invariant. Once these
+equivariant comparisons are bound to the actual maps, the three orbit
+traces agree, rather than canceling. The target comparison is therefore
+the trace of three copies of the class \([pL/(g_1g_2)]\), with the
+fixed sign and trace normalization tracked through the original maps.
+
+This is a description of the remaining geometric comparison, not a new
+Lean theorem asserting it. In particular a nonzero cohomology class
+does not become a nonzero scalar under an unspecified map. The actual
+canonical trace and its injectivity in this case must be supplied.
+Likewise a first-order curve over dual numbers does not by itself
+produce an integrated normal function. Integration, the moving-curve
+comparison, Hodge/support constructions, and the final affine residue
+vanishing remain obligations of the protected certificate.
+
+### Verification and deferred compilation
+
+The new helper was reviewed against the exact existing definitions,
+including the test-polynomial sign, quotient representative, retained
+tangent, and curve-to-surface target. Static checks cover the new
+imports, absence of new admission tokens, whitespace, explanation
+links, and preservation of Solution.lean. No Lean, Lake, build, or
+kernel replay was run in this increment. In particular, the dependent
+congruence step in the new representative equality still awaits
+elaboration, as do its imported source-only dependencies.
+
+For later compilation, prepare Lean 4.33.1, Mathlib revision
+0df444a360eaa60ab8c11dca51a86af692955474, the verifier-style Proposal
+layout, and compatible compiled imports. Compile this helper only
+after its dependencies are available:
+
+```sh
+timeout --signal=TERM --kill-after=3s 45s \
+  lake env lean -M4096 Proposal/GeometricIncidenceFirstOrderNormalPairing.lean
+```
+
+This command was recorded, not run. Prepared for `fqlx` with OpenAI
+ChatGPT assistance, following Ben Diamond and the project collaborators.
+Earlier verification records are preserved below with their original
+scopes.
+
 ## Formalization checkpoint: proper flat first-order curve with the original seed fiber
 
 The local quotient-flatness obligation from the preceding checkpoint is
