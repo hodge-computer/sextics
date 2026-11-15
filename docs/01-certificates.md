@@ -454,6 +454,142 @@ There is a useful exponent description when \(F\) contains all six pure sixth po
 
 For a full-support \(Y\)-even sextic, \(L(F)\) is exactly the lattice of vectors of total sum zero and even \(Y\)-sum. One inclusion follows from parity. Conversely, exponent differences realize all within-\(X\) and within-\(Y\) coordinate transfers, and also \(2(e_{X_{i}}-e_{Y_{j}})\); these generate that lattice. Hence all \(Y\)-odd targets of one degree belong to a single coset. Fine target-character decompositions are a property of structured \(F\), not an available simplification for general \(F\).
 
+## Pencils and specialization
+
+Two operations relate certificates across a family of hypersurfaces. A certificate on the generic member of a pencil of hyperplane sections lifts to the hypersurface, and a certificate on the generic member of a family specializes to every smooth member. Both are statements about rational forms of top degree. Neither parametrizes a support, and neither uses an algebraic correspondence.
+
+In this section \(X=V(F)\subset \mathbb P^{n}\) is a smooth hypersurface of degree \(d\ge 2\) over \(k\), with \(n\ge 2\). As in [Chapter 2](#technical-information/explicit-constructions), the notation
+
+\[
+K_q(F,A;v)=A-q\cdot v(F)+F\cdot \operatorname{div}(v)
+\]
+
+records the equation on which the key expression depends.
+
+### Certificates on a pencil
+
+Write the coordinates as \((x,s,t)\) with \(x=(x_{0},\ldots ,x_{n-2})\), let \(\lambda =t/s\), and put
+
+\[
+F_\lambda (x,s)=F(x,s,\lambda s),\qquad A_\lambda (x,s)=A(x,s,\lambda s).
+\]
+
+These are polynomials in the \(n\) variables \((x,s)\) over \(k(\lambda )\), and \(V(F_\lambda )\subset \mathbb P^{n-1}\) is the generic member of the pencil of hyperplane sections \(t=\lambda s\) of \(X\). A certificate on it is defined by the key equation in those variables: its components have degree \(d\cdot q-(n-1)\), and its target has degree \(d\cdot (q+1)-n\).
+
+**Pencil lemma.** Let \(w=(w_{0},\ldots ,w_{n-1})\) be a certificate for \((F_\lambda ,q,s\cdot A_\lambda )\) over \(k(\lambda )\). Substitute \(\lambda =t/s\) in its components and put
+
+\[
+v=\frac{1}{s}\left(w_{0},\ \ldots ,\ w_{n-1},\ \frac{t}{s}\cdot w_{n-1}\right).
+\]
+
+Then \(v\) is a certificate for \((F,q,A)\), and after the same substitution
+
+\[
+K_q(F,A;v)=\frac{1}{s}\cdot K_q(F_\lambda ,s\cdot A_\lambda ;w).
+\]
+
+*Proof.* For a function \(g(x,s,\lambda )\) write \(\widetilde g(x,s,t)=g(x,s,t/s)\). The chain rule gives
+
+\[
+\partial _{x_i}\widetilde g=\widetilde{\partial _{x_i}g},\qquad
+\partial _s\widetilde g=\widetilde{\partial _sg}-\frac{t}{s^{2}}\cdot \widetilde{\partial _\lambda g},\qquad
+\partial _t\widetilde g=\frac{1}{s}\cdot \widetilde{\partial _\lambda g}.
+\]
+
+Let \(V=s\cdot v\). Its last two components are \(\widetilde w_{n-1}\) and \((t/s)\cdot \widetilde w_{n-1}\), so the terms containing a derivative in \(\lambda \) cancel in \(V(\widetilde g)\), for every \(g\). Since \(F=\widetilde F_\lambda \), this gives \(V(F)=\widetilde{w(F_\lambda )}\). The same cancellation occurs in the divergence, apart from the derivative of the factor \(t/s\):
+
+\[
+\operatorname{div}(V)=\widetilde{\operatorname{div}(w)}+\frac{\widetilde w_{n-1}}{s}.
+\]
+
+Hence \(v(F)=\widetilde{w(F_\lambda )}/s\) and \(\operatorname{div}(v)=\operatorname{div}(V)/s-V(s)/s^{2}=\widetilde{\operatorname{div}(w)}/s\). With \(A=\widetilde A_\lambda \) this is the displayed identity.
+
+The substitution preserves degrees, because \(t/s\) has degree zero. The components of \(v\) are therefore homogeneous of degree \(d\cdot q-n\). It remains to check the denominators. Let \(D(x,s,\lambda )\) be a polynomial coprime to \(F_\lambda \) over \(k(\lambda )\), and choose \(m\) so that \(s^{m}\cdot \widetilde D\) is a polynomial. If \(F\) divided it, substituting \(t=\lambda s\) would show that \(F_\lambda \) divides \(s^{m}\cdot D\), and hence \(s^{m}\). Then \(F\) would be a form in \(s\) and \(t\) alone, and \(X\) would be singular. So the denominators of \(v\) and of the quotient \(K_q(F,A;v)/F^{q+1}\) are coprime to \(F\). ∎
+
+The factor \(s\) in the target comes from the volume form. On the chart \(x_{0}=1\) one has \(ds\wedge dt=s\cdot ds\wedge d\lambda \), so \(\omega _A\) is the wedge product with \(d\lambda \) of the Griffiths form of numerator \(s\cdot A_\lambda \) on the hyperplane \(t=\lambda s\). An automorphism of \(X\) that fixes \(\lambda \) therefore acts on the two forms through the same character.
+
+The lemma is the certificate form of a general fact. Let \(k\subset E\subset L\) be function fields, and let \(\eta \) be a nonzero form of top degree of \(E\) over \(k\). Wedging with \(\eta \) annihilates the forms of \(L\) that vanish relative to \(E\), so \(\rho \wedge \eta \) is defined for a relative form \(\rho \) of \(L\) over \(E\). Every top form of \(L\) over \(k\) is such a product, with \(\rho \) of top relative degree. Since \(d\eta =0\),
+
+\[
+d(\sigma \wedge \eta )=d_{L/E}\sigma \wedge \eta .
+\]
+
+A relative primitive of \(\rho \) thus gives a primitive of \(\rho \wedge \eta \). The [polynomial integration of Chapter 2, §2.7](#technical-information/explicit-constructions/polynomial-integration-on-a-finite-parameterization) is the case of relative dimension one.
+
+**Corollary.** Let \(n\ge 3\) and \(1\le q\le n-2\), and let \(\lambda _{0}\in \mathbb C\) be transcendental over \(k\), with \(V(F_{\lambda _{0}})\) smooth. Suppose that the residue of the Griffiths form of numerator \(s\cdot A_{\lambda _{0}}\) and pole order \(q+1\) along \(V(F_{\lambda _{0}})\) vanishes off a divisor of that hypersurface. Then \((F,q,A)\) has a certificate.
+
+*Proof.* The prescribed-support theorem, applied in \(\mathbb P^{n-1}\), gives a complex certificate for \((F_{\lambda _{0}},q,s\cdot A_{\lambda _{0}})\). These data are defined over \(k(\lambda _{0})\), so coefficient descent gives a certificate over that field. It is isomorphic to \(k(\lambda )\) by \(\lambda _{0}\mapsto \lambda \), and the lemma applies. ∎
+
+A support theorem valid at every smooth member of the pencil applies in particular at such a \(\lambda _{0}\). The corollary supports the class of one residue at a time.
+
+### Specialization
+
+Let \(C\) be a smooth curve over \(k\), with a point \(c\in C(k)\) and a local parameter \(\pi \) at \(c\). Let \(p:\mathcal X\to C\) be a dominant morphism from an irreducible variety, and let \(X_c\) be an irreducible component of \(p^{-1}(c)\), of dimension \(m\). Suppose that the local ring \(\mathcal O\) of \(\mathcal X\) at the generic point of \(X_c\) is a discrete valuation ring with uniformizer \(\pi \); this holds when \(\mathcal X\) is smooth along \(X_c\) and the fiber is reduced there. Its residue field is \(K_c=k(X_c)\). Its fraction field \(L=k(\mathcal X)\) is the function field of the generic fiber over \(E=k(C)\).
+
+**Specialization lemma.** Let \(x_{1},\ldots ,x_{m}\in \mathcal O\) restrict to a transcendence basis of \(K_c\) over \(k\), and let \(r\in \mathcal O\). If \(r\cdot dx_{1}\wedge \cdots \wedge dx_{m}\) is exact in the de Rham complex of \(L\) over \(E\), then its restriction \(\overline r\cdot d\overline x_{1}\wedge \cdots \wedge d\overline x_{m}\) is exact in the de Rham complex of \(K_c\) over \(k\).
+
+The primitive on the generic fiber may have a pole of any order along \(X_c\).
+
+*Proof.* The \(x_i\) are algebraically independent over \(E\): a polynomial relation whose coefficients are regular at \(c\), and not all divisible by \(\pi \), would restrict to a relation among the \(\overline x_i\). Since \(L\) has transcendence degree \(m\) over \(E\), it is finite over \(E(x_{1},\ldots ,x_{m})\).
+
+Let \(\widehat{\mathcal O}\) be the completion of \(\mathcal O\). The field \(k(x_{1},\ldots ,x_{m})\) lies in \(\mathcal O\), because a nonzero polynomial in the \(x_i\) has nonzero restriction and is a unit. Every element of \(K_c\) is a simple root of a polynomial over \(k(\overline x_{1},\ldots ,\overline x_{m})\). By Hensel's lemma it lifts uniquely to a root in \(\widehat{\mathcal O}\) of the same polynomial over \(k(x_{1},\ldots ,x_{m})\). The lifts form a field \(K_c'\) that maps isomorphically onto \(K_c\), and \(\widehat{\mathcal O}=K_c'[[\pi ]]\). The local ring of \(C\) at \(c\) has residue field \(k\), so it lies in \(k[[\pi ]]\), and \(E\subset k((\pi ))\).
+
+Let \(\partial _i\) be the derivations of \(K_c'\) over \(k\) with \(\partial _ix_j=\delta _{ij}\), and extend them to \(K_c'((\pi ))\) coefficientwise. The extensions vanish on \(k((\pi ))\), hence on \(E\), and they satisfy \(\partial _ix_j=\delta _{ij}\). A derivation of \(E(x_{1},\ldots ,x_{m})\) into a field containing \(L\) extends uniquely to the finite extension \(L\). On \(L\) the coefficientwise derivations are therefore the derivations of \(L\) over \(E\) dual to \(dx_{1},\ldots ,dx_{m}\).
+
+A relative form of degree \(m-1\) is
+
+\[
+\sigma =\sum _i(-1)^{i-1}s_i\cdot dx_{1}\wedge \cdots \wedge \widehat{dx_i}\wedge \cdots \wedge dx_{m},\qquad s_i\in L,
+\]
+
+and \(d\sigma =\left(\sum _i\partial _is_i\right)\cdot dx_{1}\wedge \cdots \wedge dx_{m}\). If \(d\sigma \) is the given form, then \(\sum _i\partial _is_i=r\) in \(K_c'((\pi ))\). The coefficients of \(\pi ^{0}\) give
+
+\[
+\sum _i\partial _i\bigl((s_i)_{0}\bigr)=r_{0},
+\]
+
+where \(r_{0}\in K_c'\) corresponds to \(\overline r\). Under \(K_c'\simeq K_c\) the \(\partial _i\) are the derivations dual to the \(d\overline x_i\). The form with coefficients \((s_i)_{0}\) is therefore a primitive of the restriction. ∎
+
+**Specialization theorem.** Let \(F\) and \(A\) be homogeneous polynomials in \(Z_{0},\ldots ,Z_{n}\), of degrees \(d\) and \(d\cdot (q+1)-(n+1)\) with \(1\le q\le n-1\), whose coefficients are regular functions on \(C\). Suppose that \(V(F_c)\) is smooth. If \((F,q,A)\) has a certificate over \(k(C)\), then \((F_c,q,A_c)\) has a certificate over \(k\).
+
+*Proof.* Put \(G=\partial _nF\). The partial derivatives of \(F_c\) have no common zero on \(V(F_c)\), so the coordinates can be chosen with \(G_c\) not divisible by \(F_c\). Let \(a_q=A\) and
+
+\[
+a_{h-1}=\partial _n\left(\frac{a_h}{h\cdot G}\right)\qquad (h=q,\ldots ,1).
+\]
+
+The field with the single component \(a_h/(h\cdot G)\), in the direction of \(Z_n\), has key expression \(F\cdot a_{h-1}\) for the target \(a_h\) at pole parameter \(h\). By the differential identity of the key equation, \(a_h\cdot \Omega /F^{h+1}\) and \(a_{h-1}\cdot \Omega /F^{h}\) differ by the differential of a form with a pole of order \(h\) along \(V(F)\). Hence, away from \(V(G)\),
+
+\[
+\omega _A=d\psi +a_{0}\cdot \Omega /F,
+\]
+
+where \(\psi \) has a pole of order at most \(q\). This is the reduction described after the proof of the prescribed-support theorem, with \(G\) in place of \(D_{\mathrm{red}}\). On the chart \(Z_{0}=1\), with \(x_i=Z_i/Z_{0}\), the Poincaré residue of \(a_{0}\cdot \Omega /F\) is the restriction to \(V(F)\) of
+
+\[
+\rho =\pm \frac{a_{0}}{G}\cdot dx_{1}\wedge \cdots \wedge dx_{n-1}.
+\]
+
+These formulas have coefficients in the functions regular at \(c\). They commute with restriction to \(c\) and with passage to the generic point of \(C\).
+
+Let \(\mathcal X=V(F)\subset \mathbb P^{n}\times C\). It is smooth along \(X_c=V(F_c)\), which is an irreducible and reduced fiber. The functions \(x_{1},\ldots ,x_{n-1}\) restrict to a transcendence basis of \(k(X_c)\), and \(a_{0}/G\) is regular at the generic point of \(X_c\), because \(G_c\) does not vanish identically there. So the lemma applies to \(\rho \).
+
+Let \(v\) be a certificate over \(k(C)\), and put \(\beta =-\iota _v\Omega /F^{q}\). Then
+
+\[
+a_{0}\cdot \Omega /F-(\omega _A-d\beta )=d(\beta -\psi ).
+\]
+
+Here \(\omega _A-d\beta \) is regular along the generic member, and \(\beta -\psi \) has a pole of order at most \(q\) along it. The pole-order lemma holds for algebraic forms over \(k(C)\). On the affine complement of \(V(G)\) and of the denominator of \(v\), it shows that the left side is the differential of a logarithmic form. Residues commute with \(d\), and a regular form has zero residue. So \(\rho \) is exact on a nonempty open subset of the generic member. By the lemma, \(\rho _c=d\sigma _c\) for a rational form \(\sigma _c\) on \(X_c\).
+
+Let \(D\) be a homogeneous polynomial, coprime to \(F_c\), that vanishes on \(X_c\cap V(G_c)\) and on the poles of \(\sigma _c\). On \(X_c\setminus V(D)\) the residue of \(\omega _{A_c}\) is the class of \(\rho _c=d\sigma _c\), which is zero. The prescribed-support theorem gives a complex certificate with poles confined to \(V(D)\), and coefficient descent gives one over \(k\). ∎
+
+**Corollary.** Let \(B\) be an irreducible variety over \(k\), and let the coefficients of \(F\) and \(A\) be regular functions on \(B\). If \((F,q,A)\) has a certificate over \(k(B)\), then \((F_b,q,A_b)\) has a certificate over \(k\) for every \(b\in B(k)\) with \(V(F_b)\) smooth. A certificate at one complex point of \(B\) lying on no proper closed subvariety defined over \(k\) gives a certificate over \(k(B)\).
+
+*Proof.* By coefficient descent we may replace \(k\) by its algebraic closure in \(\mathbb C\), and \(B\) by a component through \(b\). A certificate over \(k(B)\) restricts to a certificate at every point of a dense open subset \(B^{\circ}\): its coefficients are regular there, and legality of its denominator is an open condition. Join \(b\) to a point of \(B^{\circ}\) by an irreducible curve and normalize it. The certificates on \(B^{\circ}\) restrict to a certificate over the function field of this curve, and the theorem applies at a point above \(b\). For the last statement, evaluation at such a complex point embeds \(k(B)\) in \(\mathbb C\), the data at that point are defined over the image, and coefficient descent applies. ∎
+
+For the class of a residue, the theorem and the corollary of the pencil lemma give by algebra what [Chapter 3, §3.6](#technical-information/geometric-support/36-supported-projectors-in-families) obtains for supported projectors: specialization from a very general member, and passage from the fibers of a pencil to its total space. The lemmas there concern correspondences, and they apply to every class of the sector on which a projector acts.
+
 ## Jacobian reduction and exact verification
 
 Let \(J(F)=(\partial _{0}F,\ldots ,\partial _{5}F)\). If \(A=\sum _{i}G_{i}\partial _{i}F\), taking \(v=G/q\) gives

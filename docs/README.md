@@ -10,7 +10,7 @@ The intended reader knows basic algebraic geometry, differential forms and Hodge
 
 | Chapter | Subject |
 | --- | --- |
-| [1. From invariant cohomology to rational certificates](#technical-information/certificates) | The key equation, normalization, prescribed support, trace and coefficient descent |
+| [1. From invariant cohomology to rational certificates](#technical-information/certificates) | The key equation, normalization, prescribed support, trace and coefficient descent, pencils and specialization |
 | [2. Algebraic constructions and residue transport](#technical-information/explicit-constructions) | Cofactor transport, cyclic suspension, closed currents and variation of rational primitives |
 | [2A. Binary sextics and torsion contacts](#technical-information/binary-blocks) | Genus-two three-torsion, Wronskian spanning theorems and a binary-block construction |
 | [3. Geometric support](#technical-information/geometric-support) | Gysin maps, normal-bundle trace pairings, finite quotients, Fano and surface fibrations, and supported projectors |

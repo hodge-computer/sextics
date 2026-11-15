@@ -373,6 +373,8 @@ This inducts to \(q\le4\) without enlarging the supporting divisor. Thus an all-
 
 The curve and surface arguments above construct support on a total space. A third input is a fiberwise algebraic projector with a representative supported on the square of a divisor. Two lemmas explain how such representatives specialize and spread. Fiberwise coniveau alone does not provide these conclusions: the projector and its support must be parametrized together, and the relative argument below uses concentration in one cohomological degree.
 
+For the class of a single residue on a hypersurface, both conclusions have an algebraic form that uses no projector. The [pencil lemma and the specialization theorem of Chapter 1](#technical-information/certificates/pencils-and-specialization) lift a certificate from the generic member of a pencil and specialize one from the generic member of a family; a certificate over the generic member exists as soon as one very general member has divisor support. The lemmas below give supported correspondences instead, and they apply to every class of the sector on which the projector acts.
+
 ### Specialization
 
 **Supported-projector specialization.** Let \(p:\mathcal X\to B\) be a smooth projective family of \(n\)-folds over a smooth connected complex algebraic base. Let \(P\) be a relative rational algebraic correspondence of codimension \(n\), whose restrictions are projectors. Suppose that, at a very general \(b\), its cohomology class has a representative \(Z_b\) supported on \(D_b\times D_b\), for a divisor \(D_b\subset X_b\). Then such a representative exists at every \(b\in B\).
