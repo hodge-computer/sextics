@@ -1,5 +1,111 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Formalization checkpoint: the actual punctured Fermat cone
+
+The final admission in
+\(\mathrm{Submission.missing\_geometric\_existence}\) remains open in Lean.
+The classical proof below has not yet been translated into a complete
+machine-checked geometric argument. This checkpoint supplies one concrete
+geometric construction and does not replace the endpoint by an assumption.
+
+[GeometricSeedPuncturedCone.lean](GeometricSeedPuncturedCone.lean) assembles
+the coordinate patches from
+[GeometricSeedFermatCone.lean](GeometricSeedFermatCone.lean) into the actual
+punctured affine cone. Let
+\[
+ A_r=\mathbb C[z_0,z_1,z_2,z_3,w]/
+       (\mathrm{seedFamily}(r,0)),\qquad
+ U_r=\bigcup_{j=0}^{4}D(\bar z_j)\subset\operatorname{Spec}(A_r),
+ \qquad z_4=w.
+\]
+When \(r^3=2\), the defining equation is the weighted Fermat equation
+\[
+ z_0^6+z_1^6+z_2^6+z_3^6+w^3=0.
+\]
+The new endpoint is the following source-level theorem:
+
+```lean
+theorem CycleQ2SeedPuncturedCone.puncturedCone_smooth
+    (r : ℂ) (hr : r ^ 3 = 2) :
+    AlgebraicGeometry.Smooth
+      (CycleQ2SeedPuncturedCone.puncturedToComplex r)
+```
+
+The proof uses the native isomorphism between a principal open of
+\(\operatorname{Spec}(A_r)\) and
+\(\operatorname{Spec}(A_r[1/\bar z_j])\). It proves that this identification
+commutes with the original structural maps to \(\operatorname{Spec}(\mathbb C)\).
+It then pulls the five coordinate opens back along the inclusion of \(U_r\),
+proves their supremum is the entire open subscheme, and applies smoothness
+local on the source. The cover and the local smoothness proofs are constructed;
+neither is an extra hypothesis.
+
+This conclusion is smoothness of the punctured affine cone. Smoothness of
+the weighted projective quotient and the geometry over the full cubic
+parameter space still require their own constructions.
+
+### The exact remaining endpoint
+
+The source audit at revision
+[98c10a81931ee128081822c9899b600616584570](https://github.com/fqlx/sextics/commit/98c10a81931ee128081822c9899b600616584570)
+confirmed that the genuine regular differential complexes, restriction maps,
+and finite-denominator spreading are already available.
+The theorem in [Solution.lean](Solution.lean) named
+CycleQ2Nonconstructive.exact_form_iff_regular_zero reduces the goal to:
+
+```lean
+∃ s : CycleQ2GeometricRegularDeRham.OpenRing,
+  s ≠ 0 ∧ CycleQ2GeometricRegularDeRham.residueClass s = 0
+```
+
+No existing inspected declaration constructs this existential.
+In [GeometricExistence.lean](GeometricExistence.lean),
+CycleQ2GeometricExistence.exact_of_regular_open_comparison still takes an
+injective map from the actual regular top de Rham quotient to a complex
+module and a proof that the specified residue maps to zero. Constructing
+the actual geometric comparison and proving this vanishing remain work.
+
+The moving-curve branch has actual projective schemes, a nonzero projective
+sheaf-cohomology class, regular section equations, and a proper relative
+curve morphism. Its needed fiber geometry and divisor-class identification,
+the geometric Abel--Jacobi interpretation, the actual variation of Hodge
+structure, and the supported residue comparison have not all been supplied.
+The new cone theorem does not imply these results by itself.
+
+### Verification and a bounded next compile
+
+The new helper contains no admission, custom axiom, or unchecked native
+decision procedure. Its sole import is the preceding Fermat-cone helper.
+The canonical basic-open isomorphism, its structural-map identity,
+the restriction compatibility, and source-locality were checked against
+Mathlib revision 0df444a360eaa60ab8c11dca51a86af692955474.
+Source review also checked the composition directions and the actual
+open-cover argument.
+
+No Lean, Lake, build, or kernel replay was run. No Lean/Lake executable or
+compatible cache was found in the checked environment locations.
+The preceding Fermat-cone helper is itself still recorded as uncompiled.
+All earlier compilation records retain their original, narrower scopes.
+
+For a later bounded check, use the prepared verifier-style proposal workspace
+with Lean 4.33.1, the pinned Mathlib revision, and already-built compatible
+imports, including Proposal.GeometricSeedFermatCone. The single-file command
+is:
+
+```sh
+timeout --signal=TERM --kill-after=3s 45s \
+  lake env lean -M4096 Proposal/GeometricSeedPuncturedCone.lean
+```
+
+This command is recorded, not executed. Missing or incompatible imported
+artifacts must be handled separately; this is not an instruction to run a
+full dependency build in this session.
+
+Only the new helper and this explanation are changed. The protected
+Solution.lean, its exact statement, and its existing admission are unchanged.
+Prepared for fqlx with OpenAI ChatGPT assistance, following Ben Diamond
+and the project's geometric argument.
+
 ## Written proof of the protected residue exactness
 
 This section presents the ordinary mathematical proof as a continuous argument,
