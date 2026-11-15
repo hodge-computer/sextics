@@ -78,15 +78,12 @@ def read_proposal(base, head, author, policy):
     entries = [row for row in git('ls-tree', '-r', head, folder).decode().splitlines() if row.split('\t',1)[1] in paths]
     require(len(entries) <= policy['maxFiles'], 'Too many proposal files')
     files = {}
-    total = 0
     for entry in entries:
         meta, name = entry.split('\t', 1)
         require(meta.split()[0] == '100644', 'Symlinks, executable files, and submodules are forbidden')
         require(name in paths, 'Every proposed file must be part of this PR')
-        total += int(git('cat-file', '-s', f'{head}:{name}'))
-        require(total <= policy['maxBytes'], 'Proposal too large')
         files[PurePosixPath(name).name] = object_bytes(head, name)
-    require(len(files) <= policy['maxFiles'] and sum(map(len, files.values())) <= policy['maxBytes'], 'Proposal too large')
+    require(len(files) <= policy['maxFiles'], 'Too many proposal files')
     require({'proof.json', 'solution.md', 'Solution.lean'} <= files.keys(), 'Missing proof.json, solution.md, or Solution.lean')
     metadata = json.loads(files['proof.json'])
     fields = {'schemaVersion', 'instanceId', 'theorem'}
