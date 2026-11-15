@@ -2342,6 +2342,92 @@ timeout --signal=TERM --kill-after=5s 55s \
   Proposal/GeometricSeedOverlapTransitionModels.lean
 ```
 
+### Original sheaves on the canonical affine overlap — 15 November 2026
+
+After checkpoint `1cca3128aa495e7a62282c3a55994c3027e2093b`,
+[GeometricSeedAffineOpenSections.lean](GeometricSeedAffineOpenSections.lean)
+proves the scalar normalization needed for affine reconstruction.
+For an actual affine open \(V\subseteq U\subseteq X\), let
+\(B=\Gamma(X,V)\) and let
+\(f:\operatorname{Spec}B\to U\) be the canonical affine chart followed
+by the inclusion of \(V\) into \(U\).
+The comparison
+\[
+\Gamma(\operatorname{Spec}B,M|_f)
+ \cong_B \Gamma(U\cap V,M)
+\]
+retains the native affine \(B\)-module action on the source and the
+action through `U.ι.app V` on the target. The notation on the right
+means the inverse image of the ambient open \(V\) in the scheme \(U\).
+
+The coefficient identity is explicit: `overlapMap_appLE` identifies
+pullback to the affine source with `ΓSpecIso.inv`;
+`overlapMap_coefficient` composes with the inverse open-immersion section
+isomorphism and transports the image open. The resulting coefficient map
+is exactly `U.ι.app V`. `topSectionIso_smul` then supplies the scalar law
+for `topSectionEquiv`. Its naturality theorem uses the native
+global-section map of the restricted original sheaf morphism.
+These are unconditional constructions for an affine open inside a chart;
+no quasi-coherence is needed for this section comparison itself.
+
+[GeometricSeedProjectiveAffineOverlap.lean](GeometricSeedProjectiveAffineOverlap.lean)
+discharges the geometric inputs for the actual pair overlap. The
+degree-two homogeneity of `pairDen` proves that `OverlapOpen i j` is
+affine. Its canonical `isoSpec` has coefficient ring exactly
+\(B_{ij}=\Gamma(U_i\cap U_j,\mathcal O_D)\).
+The four overlap sheaves are restrictions of the existing projective
+image and orbit-dual sheaves through the two actual chart inclusions.
+Their quasi-coherence follows from the original tilde construction and
+restriction along open immersions. Both vertical duality isomorphisms
+are restrictions of the existing `projectiveImageDualIso`.
+
+[GeometricSeedProjectiveOverlapComparisons.lean](GeometricSeedProjectiveOverlapComparisons.lean)
+composes the normalized top-section comparison with each of the four
+previously fixed projective section models. This gives native
+\(B_{ij}\)-linear equivalences from the four global-section modules to
+the literal overlap image and ideal-dual modules. Canonical affine
+reconstruction turns them into four sheaf isomorphisms. The theorems
+`leftComparison_naturality` and `rightComparison_naturality` prove that
+the original restricted vertical dualities correspond to the associated
+sheaves of the literal image-to-dual maps. Thus the comparison now holds
+as an equality of native module-sheaf morphisms on the entire affine
+overlap, with the scalar normalization proved explicitly.
+
+**Remaining construction.** Conjugate the two associated-sheaf
+transitions through these four comparisons, and use the two naturality
+squares to obtain the pairwise transition square for the original
+restricted sheaves. Triple-overlap coherence and the specified global
+matrix-image, orbit-ideal internal-Hom, and invertibility bindings still
+require separate proofs. This checkpoint does not establish the final
+geometric existence or residue-exactness theorem.
+
+**Verification status.** These three files received independent
+mathematical/source review and bounded static checks. No Lean elaboration
+or kernel replay was run. The protected theorem and existing source proof
+bodies remain unchanged. With the same pinned, prepared dependency
+artifacts, including the preceding checkpoint, the deferred commands are:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedAffineOpenSections.olean \
+  Proposal/GeometricSeedAffineOpenSections.lean
+```
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedProjectiveAffineOverlap.olean \
+  Proposal/GeometricSeedProjectiveAffineOverlap.lean
+```
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedProjectiveOverlapComparisons.olean \
+  Proposal/GeometricSeedProjectiveOverlapComparisons.lean
+```
+
 ### The original ideal and the actual differential sheaves
 
 Write \(j:C\hookrightarrow D\) for the original immersion at
