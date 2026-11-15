@@ -1,5 +1,49 @@
 # A nonconstructive geometric route for cycle-q2
 
+
+## Relative constant curve continuation — source draft, 14 November 2026
+
+This continuation retains the original incidence family, the original
+seed map, and the original section equations. All new Lean components
+are source-only drafts; the protected theorem and its final admission
+remain unchanged. The new work is prepared for `fqlx` with OpenAI
+ChatGPT assistance, following the geometric strategy credited to Ben
+Diamond and the collaborators in the existing explanation.
+
+
+### The fixed complex section over the actual incidence family
+
+[GeometricRelativeConstantSection.lean](GeometricRelativeConstantSection.lean)
+defines the original rows \(M_y t\), for one vector \(t\in\mathbb C^3\),
+over an arbitrary complex coefficient algebra. The relative equations
+are homogeneous of degree fourteen. Their ideal is the literal
+evaluation of the existing universal section ideal at the same vector,
+rather than an independently chosen replacement zero locus.
+
+The normalized fractions on the original matrix-pivot charts satisfy
+the exact numerator identity, and ordinary regularity transfers through
+the injective degree-zero inclusion. Specialization by the original
+\(\mathrm{seedMap}\) preserves the matrix and the three row polynomials.
+Over \(\mathbb C\), these are the existing constant equations and
+projective fractions.
+
+This supplies the relative homogeneous ideal and its faithful seed
+specialization. It does not yet assert regularity on the relative
+total space, flatness over parameters, or a nonempty curve. Independent
+source review and a static forbidden-declaration scan found no issue.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+With Lean 4.33.1, pinned Mathlib
+`0df444a360eaa60ab8c11dca51a86af692955474`,
+the verifier-prepared protected target and Proposal layout, matching
+compiled imports, and the corresponding `LEAN_PATH`, the deferred check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeConstantSection.olean \
+  Proposal/GeometricRelativeConstantSection.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
