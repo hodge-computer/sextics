@@ -468,6 +468,31 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeCurveChartFiberScheme.lean
 ```
 
+### The original seed and time derivation define an actual first-order path
+
+[GeometricIncidenceFirstOrder.lean](GeometricIncidenceFirstOrder.lean)
+constructs the complex algebra map
+`a ↦ (seedMap(a), seedMap(D a))`
+from the original parameter algebra to the dual numbers. Its time parameter
+is epsilon, its sextic coefficients are constant, its closed point is
+the original seed morphism, and all original incidence equations and
+both retained open conditions hold.
+
+The coefficient algebra is explicit rather than a competing global instance.
+Independent source review checked the original derivation identities,
+seed specialization, polynomial evaluation, and contravariant Spec composition.
+This constructs the actual infinitesimal parameter point; it does not
+yet assert curve flatness or identify a moving-cycle class.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceFirstOrder.olean \
+  Proposal/GeometricIncidenceFirstOrder.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
