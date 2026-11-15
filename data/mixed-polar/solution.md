@@ -6,7 +6,7 @@ $A=X_0X_1X_2Y_0Y_1Y_2$. It uses a finite algebraic extension, polynomial
 integration, normalized trace, and homogeneous clearing. It does not output
 explicit denominator or numerator polynomials.
 
-Prepared for `benediamond` with OpenAI Codex assistance. The proof uses the
+The proof uses the
 maintained `TransitiveCubic`, `PolynomialCurves`, `ResidueTransport`, and
 `HoldoutCover` libraries. Their attribution to `fqlx`,
 `hodgepodgeconjecture`, `HeadOfNaps`, and the Lean/mathlib contributors is
