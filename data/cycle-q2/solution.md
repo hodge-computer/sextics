@@ -401,6 +401,28 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeCurveChart.lean
 ```
 
+### Exact seed tensor fibers of the affine curve charts
+
+[GeometricRelativeCurveChartFiber.lean](GeometricRelativeCurveChartFiber.lean)
+shows that the existing surface-chart seed equivalence preserves all
+three fixed-vector affine section rows. Tensoring their quotient along
+the original seed map therefore gives precisely the literal-seed
+three-row chart quotient for the same vector.
+
+The construction includes the exact chart specialization map and
+formulas for pure tensors, variables and coefficients. The seed algebra
+structure remains local. No flatness assumption is needed. Source review
+checked the quotient map and scalar compatibility; static scans passed.
+**No compilation or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeCurveChartFiber.olean \
+  Proposal/GeometricRelativeCurveChartFiber.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
