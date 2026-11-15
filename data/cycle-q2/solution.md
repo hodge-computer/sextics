@@ -2153,6 +2153,92 @@ timeout --signal=TERM --kill-after=5s 55s \
   Proposal/GeometricSeedProjectiveSheafSections.lean
 ```
 
+### Restriction naturality and native affine reconstruction — 15 November 2026
+
+Continuing from `5f3469f04fa99cdb0858530043c4dcb674910c24`,
+[GeometricSeedChartRestrictionNaturality.lean](GeometricSeedChartRestrictionNaturality.lean)
+supplies the restriction square for the actual chart-section comparison.
+For every inclusion of chart subopens, `chartRestrictionEquiv_restriction`
+uses the native restriction maps on both sides of the existing over-site
+equivalence. The coefficient square is the naturality of the actual
+`chartSectionsIso`. The two semilinearity lemmas identify the scalar map
+with the ambient structure-sheaf restriction. These statements require
+no additional localization or geometric premise.
+
+The pinned Mathlib also provides a shorter way to construct the eventual
+sheaf transitions, without separately constructing their components on
+each principal open.
+[GeometricSeedAffineReconstruction.lean](GeometricSeedAffineReconstruction.lean)
+uses the native tilde–global-sections adjunction on an affine scheme.
+For a quasi-coherent source \(M\), a module map
+\(f:\Gamma(M)\to\Gamma(N)\) has the canonical lift
+\[
+\epsilon_N\circ\widetilde f\circ\epsilon_M^{-1}:M\longrightarrow N.
+\]
+The right triangle identity proves that its global-section map is
+exactly \(f\). Counit naturality proves uniqueness, identity and
+composition compatibility, and recovery of existing sheaf maps.
+Only the source needs quasi-coherence for this map construction;
+both endpoints need it to lift an isomorphism.
+The same module defines `comparisonIso` for a fixed identification
+\(\Gamma(M)\cong E\), and proves that a commuting square of global-section
+maps yields the corresponding square with \(M\cong\widetilde E\).
+Restriction naturality is part of these native sheaf morphisms.
+
+[GeometricSeedOverlapTransitionModels.lean](GeometricSeedOverlapTransitionModels.lean)
+packages the already established whole-functional identity as a square
+of module isomorphisms over the **actual** overlap ring \(B_{ij}\).
+Its dual transition is explicitly
+\[
+\varphi\longmapsto t_{ij}^{4}
+ (\varphi\circ\iota_{ij}^{-1}),
+\qquad t_{ij}=X_i/X_j,
+\]
+where \(\iota_{ij}\) is the identity-valued identification of the actual
+extended orbit ideals. The inverse exists because both the ideal
+identification and multiplication by the unit \(t_{ij}^{4}\) are
+invertible. Applying the native associated-sheaf functor gives
+`modelTransition_square` on \(\operatorname{Spec}B_{ij}\).
+
+**Boundary of this checkpoint.** The last square concerns associated
+sheaves of the literal overlap module models. Applying affine
+reconstruction to the original projective sheaves still requires the
+specific affine model of the pair overlap, the exact scalar normalization
+of its top sections, and the binding to the previous four section
+equivalences. No sheaf comparison is being inferred from a mere additive
+identification. Triple-overlap coherence, the global matrix-image and
+orbit-ideal internal-Hom identifications, required invertibility, and the
+final geometric existence theorem remain open obligations.
+
+**Verification status.** The three new files received mathematical/source
+review and bounded static checks. No Lean elaboration or kernel replay
+was run; the source proofs are not represented as compiled results.
+The protected `Solution.lean` and its final admission remain unchanged.
+In a prepared submission layout with Lean 4.33.1, pinned Mathlib
+`0df444a360eaa60ab8c11dca51a86af692955474`, and already checked imported
+`Proposal` artifacts, the separate deferred checks are:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedChartRestrictionNaturality.olean \
+  Proposal/GeometricSeedChartRestrictionNaturality.lean
+```
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedAffineReconstruction.olean \
+  Proposal/GeometricSeedAffineReconstruction.lean
+```
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedOverlapTransitionModels.olean \
+  Proposal/GeometricSeedOverlapTransitionModels.lean
+```
+
 ### The original ideal and the actual differential sheaves
 
 Write \(j:C\hookrightarrow D\) for the original immersion at
