@@ -634,6 +634,31 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricIncidenceFirstOrderCohomology.lean
 ```
 
+### A nonunit original projective equation gives an actual curve point
+
+[GeometricSpecializedCurveNonemptyCriterion.lean](GeometricSpecializedCurveNonemptyCriterion.lean)
+uses the exact kernel of the original homogeneous chart quotient.
+A nonunit defining equation makes its target chart ring nontrivial;
+a prime of that ring maps into the original specializedCurve through
+its actual Proj chart. The criterion requires no chart-surjectivity
+or cover premise.
+
+Contrapositively, genuine emptiness of the original curve makes each
+original projective equation a unit, and the file constructs those
+unit witnesses. The literal seed supplies its original cofactor
+hypotheses internally. A nonunit equation for the chosen regular
+section has not yet been established, so unconditional nonemptiness
+is not claimed. The argument and pinned ideal and Proj APIs were reviewed.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricSpecializedCurveNonemptyCriterion.olean \
+  Proposal/GeometricSpecializedCurveNonemptyCriterion.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
