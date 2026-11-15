@@ -562,6 +562,29 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricFirstOrderNeighborhood.lean
 ```
 
+### The actual first-order ambient surface is proper, flat, and two-dimensional
+
+[GeometricFirstOrderSurface.lean](GeometricFirstOrderSurface.lean)
+base changes the same retained smooth surface family along the preceding
+factorization. Pasting the actual pullback squares proves that the
+result is also the base change of the original incidence surface along
+the original dual-number point. Its relative dimension is two, and
+the morphism is smooth, flat, and proper.
+
+These properties are proved for the actual ambient surface; curve
+flatness still requires matching the actual base-changed chart's
+special-fiber equation to the retained regular equation. The pullback
+orientations and pinned base-change APIs were checked at source level.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricFirstOrderSurface.olean \
+  Proposal/GeometricFirstOrderSurface.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
