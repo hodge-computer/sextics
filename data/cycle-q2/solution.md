@@ -294,6 +294,35 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricIncidenceDimensionOpen.lean
 ```
 
+### Relative dimension two for the same retained surface neighborhood
+
+[GeometricIncidenceSurfaceNeighborhood.lean](GeometricIncidenceSurfaceNeighborhood.lean)
+strengthens the exact saved `seedSmoothFamily`:
+`seedSmoothFamily_smoothOfRelativeDimension` proves
+`SmoothOfRelativeDimension 2 seedSmoothFamily`.
+
+The full source restriction already lies in the original good open,
+hence in the actual dimension-two open. Its inclusion factors through
+that open by an open immersion. The property then descends along the
+base-open inclusion to the genuine target restriction. The pinned
+base-change-stability lemma is installed explicitly for this step.
+
+The endpoint `exists_seed_surface_neighborhood` supplies an open
+containing the original seed where the original surface morphism is
+proper, flat, and smooth of relative dimension two, with no geometric
+premise. This closes the dimension gap recorded earlier in this
+continuation. It does not establish the dimension or flatness of a
+curve cut out inside it. Independent source review and static scans
+passed. **No Lean compilation or kernel replay was run.**
+
+With the toolchain and prepared-import prerequisites above, the deferred bounded check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceSurfaceNeighborhood.olean \
+  Proposal/GeometricIncidenceSurfaceNeighborhood.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
