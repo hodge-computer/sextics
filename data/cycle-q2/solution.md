@@ -610,6 +610,30 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricIncidenceFirstOrderTrace.lean
 ```
 
+### The same pointed direction remains nonzero in actual differential H1
+
+[GeometricIncidenceFirstOrderCohomology.lean](GeometricIncidenceFirstOrderCohomology.lean)
+sends that exact paired class through the existing Mayer--Vietoris
+injection into derived projective H1 and then through the existing
+literal canonical-sheaf isomorphism. Both images are nonzero.
+The target is the actual differential-sheaf cohomology of the original
+literal r=57, theta=1 projective curve.
+
+No replacement cohomology group or nonvanishing premise is introduced.
+Independent source review checked the existing additive maps, their
+directions, and the injectivity arguments. Identifying this class with
+the moving curve's Abel--Jacobi derivative, then proving support and
+the protected affine residue exactness, remains separate work.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceFirstOrderCohomology.olean \
+  Proposal/GeometricIncidenceFirstOrderCohomology.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
