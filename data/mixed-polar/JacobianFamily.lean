@@ -6,14 +6,15 @@ A generic polynomial conic and a polynomial normal on the mixed-polar
 Jacobian. Arithmetic lifting is provided by the shared library. The
 full-coefficient linear algebra is the method used in the accepted
 ternary-deformation construction, with all target-specific data bound here.
-Adapted from the accepted cyclic and transitive constructions of hodgepodgeconjecture and fqlx; this mixed-polar specialization was prepared for benediamond with OpenAI Codex assistance.
+Adapted from the accepted constructions of fqlx and hodgepodgeconjecture.
+Prepared for benediamond with OpenAI Codex assistance.
 -/
 noncomputable section
-set_option maxRecDepth 8192
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 1000000
-namespace CycleJacobianFamily
-open HoldoutConstruction CycleJacobianIncidence CycleJacobianLifting Polynomial
+set_option maxRecDepth 10000
+namespace MixedPolarJacobianFamily
+open HoldoutConstruction MixedPolarJacobianIncidence MixedPolarJacobianLifting Polynomial
 open scoped BigOperators
 
 abbrev GenericIncidence := SquareGenericAlgebra ComplexParameterField genericEquations
@@ -66,7 +67,7 @@ theorem conic_equation :
       (MvPolynomial.eval₂Hom (algebraMap ParameterRing CoefficientField) coefficients))
       (H (cp (parameter 0)) (cp (parameter 1)) X (curve endpoints)) = _
     convert
-      (CycleJacobianIncidence.H_map
+      (MixedPolarJacobianIncidence.H_map
         (Polynomial.mapRingHom
           (MvPolynomial.eval₂Hom (algebraMap ParameterRing CoefficientField) coefficients))
         (cp (parameter 0)) (cp (parameter 1)) X (curve endpoints)) using 1
@@ -102,12 +103,40 @@ lemma conic_jacobian_unit : IsUnit conicJacobian.det := by
   rw [hm,Matrix.det_transpose] at h
   exact h
 
+/-- Full-coefficient version of the shared polynomial-normal linear algebra. -/
+theorem full_polynomial_combination_one {R : Type*} [CommRing R] {n : ℕ} (hn : 0<n)
+    (Q : Fin n → Polynomial R) (bound : ∀ j, (Q j).natDegree < n)
+    (hunit : IsUnit (Matrix.det (fun i j : Fin n => (Q j).coeff i.val))) :
+    ∃ u : Fin n → R, ∑ j, C (u j)*Q j=1 := by
+  let J : Matrix (Fin n) (Fin n) R := fun i j => (Q j).coeff i.val
+  let e : Fin n → R := Pi.single ⟨0,hn⟩ 1
+  let u := J⁻¹.mulVec e
+  have hu : J.mulVec u=e := by
+    dsimp [u]
+    rw [Matrix.mulVec_mulVec,Matrix.mul_nonsing_inv J hunit,Matrix.one_mulVec]
+  refine ⟨u,?_⟩
+  apply Polynomial.ext
+  intro k
+  by_cases hk : k<n
+  · have h := congrFun hu ⟨k,hk⟩
+    simp only [Matrix.mulVec,dotProduct,J,e,Pi.single_apply] at h
+    rw [show (∑ j, (Q j).coeff k*u j) = ∑ j, u j*(Q j).coeff k by
+      apply Finset.sum_congr rfl
+      intro j _
+      ring] at h
+    simpa [Polynomial.finsetSum_coeff,Polynomial.coeff_C_mul,Polynomial.coeff_one,
+      Fin.ext_iff] using h
+  · have hQ (j : Fin n) : (Q j).coeff k=0 :=
+      coeff_eq_zero_of_natDegree_lt (lt_of_lt_of_le (bound j) (Nat.le_of_not_gt hk))
+    have hk0 : k ≠ 0 := by omega
+    simp [Polynomial.finsetSum_coeff,Polynomial.coeff_C_mul,hQ,Polynomial.coeff_one,hk0]
+
 lemma conicGradient_column_bound (j : Fin 13) :
     (conicGradient (slotCoordinate j)*X^slotDegree j).natDegree < 13 := by
   unfold conicGradient conicCurve
   rw [curveEval_eq_valueCurve]
   fin_cases j <;> dsimp [slotCoordinate,slotDegree,gradient,a8r,b256r,
-    CycleJacobian.a8,valueCurve]
+    MixedPolarJacobian.a8,MixedPolarJacobian.a432,valueCurve]
   all_goals compute_degree <;> norm_num
 
 theorem conicNormal_exists : ∃ N : Fin 3 → Polynomial CoefficientField,
@@ -152,4 +181,4 @@ lemma conicNormal_constant_nonzero : (conicNormal 2).coeff 0 ≠ 0 := by
 #print axioms conic_equation
 #print axioms conicNormal_pairing
 #print axioms conicNormal_constant_nonzero
-end CycleJacobianFamily
+end MixedPolarJacobianFamily

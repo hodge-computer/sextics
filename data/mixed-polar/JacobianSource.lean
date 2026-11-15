@@ -1,27 +1,29 @@
 import Proposal.JacobianResidue
 
-/-! The exact mixed-polar polynomial source on the Jacobian hypersurface.
-The generic residue primitive applies to this source before its physical transport.
-The incidence and trace architecture follows the accepted cyclic and transitive
-constructions of hodgepodgeconjecture and fqlx. This specialization was prepared
-for benediamond with OpenAI Codex assistance. -/
+/-! The polynomial numerator obtained from the balanced xyz variation of
+the exact mixed-polar cubic. The polynomial-family residue theorem applies
+to this source without imposing a denominator bound. Prepared with Codex
+assistance, using the shared constructions credited in JacobianResidue. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
-namespace CycleJacobianSource
-open HoldoutConstruction CycleJacobianHypersurface CycleJacobianEmbedding CycleJacobianResidue
-open Polynomial
+namespace MixedPolarJacobianSource
+open HoldoutConstruction MixedPolarJacobianHypersurface
+  MixedPolarJacobianEmbedding MixedPolarJacobianResidue
 local notation "v" => (MvPolynomial.X : Fin 6 → Ambient)
-/-- The coefficient of the Weierstrass X-coordinate in the source. -/
-def P4 : Ambient :=
-  (v 4+v 3^6*v 1)*(MvPolynomial.C (9/2 : ℂ)*(v 4+v 1)*(v 4+v 2^6*v 1)-
-    MvPolynomial.C (1/12 : ℂ)*v 2^4*v 4*v 1)
-/-- The constant coefficient of the source. -/
-def P6 : Ambient :=
-  MvPolynomial.C (1/8 : ℂ)*v 2^3*v 3^2*v 4^2*v 1*(v 4+v 1)*(v 4+v 3^6*v 1)
-def source : Ambient :=
-  MvPolynomial.C (1/144 : ℂ)*v 2*v 3*(P4*v 5+P6)
-/-- Every polynomial source, in particular this exact source, has a primitive. -/
+
+/-- Ambient coordinate order is Y,T,c1,c2,R,X. -/
+def sourceNumerator : Ambient :=
+  v 2*v 3*(v 4+v 3^6*v 1)*
+    ((108*(v 4+v 1)*(v 4+v 2^6*v 1)-2*v 2^4*v 4*v 1)*v 5+
+      3*v 2^3*v 3^2*v 4^2*(v 4+v 1)*v 1)
+def source : Ambient := MvPolynomial.C (1/3456 : ℂ)*sourceNumerator
+
+lemma source_normal : MvPolynomial.pderiv 0 source=0 := by
+  have h2 : MvPolynomial.pderiv 0 (2 : Ambient)=0 := (MvPolynomial.pderiv 0).map_natCast 2
+  have h3 : MvPolynomial.pderiv 0 (3 : Ambient)=0 := (MvPolynomial.pderiv 0).map_natCast 3
+  have h108 : MvPolynomial.pderiv 0 (108 : Ambient)=0 := (MvPolynomial.pderiv 0).map_natCast 108
+  norm_num [source,sourceNumerator,MvPolynomial.pderiv_mul,MvPolynomial.pderiv_pow,
+    MvPolynomial.pderiv_X,Pi.single_apply,Fin.ext_iff,h2,h3,h108]
+
 theorem source_residue_solution :
     ∃ w : Fin 5 → TargetField,
       residueDivergence tangent (residueMap (MvPolynomial.pderiv 0 hypersurface)) w=
@@ -29,5 +31,6 @@ theorem source_residue_solution :
           residueMap source*residueMap (MvPolynomial.pderiv 0 (MvPolynomial.pderiv 0 hypersurface))/
             (residueMap (MvPolynomial.pderiv 0 hypersurface))^2) :=
   target_residue_solution source
-#print axioms source_residue_solution
-end CycleJacobianSource
+
+end MixedPolarJacobianSource
+#print axioms MixedPolarJacobianSource.source_residue_solution

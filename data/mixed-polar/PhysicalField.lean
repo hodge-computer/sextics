@@ -1,20 +1,22 @@
 import HodgeComputer.Constructions.HoldoutCover.HomogeneousCertificate
 import HodgeComputer.Constructions.HoldoutCover.ResidueDerivatives
 import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
+import HodgeComputer.Constructions.HoldoutCover.ResidueClearing
+import HodgeComputer.Constructions.HoldoutCover.ResiduePiolaPullback
 import Mathlib.Analysis.Complex.Polynomial.Basic
+import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
 
-/-! The immutable mixed-polar equation, its residue field and normal chart.
-The Eisenstein specialization and quotient construction adapt the shared
-HoldoutCover proofs credited to fqlx and the project collaborators. The two chain
-couplings have coefficient one half and the reversed-edge
-coupling has coefficient one third.
-Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeconjecture.
-Adapted to mixed-polar for benediamond with OpenAI Codex assistance. -/
+/-! Target-specific mixed-polar physical field audit. Adapted from the accepted
+mixed-biweight PhysicalField of fqlx and hodgepodgeconjecture, using the shared
+HoldoutCover irreducibility and homogeneous-certificate machinery. Prepared
+with Codex assistance. This proves domain and closure conditional on normalized
+data; it does not claim such data have yet been constructed. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 1000000
-namespace CyclePhysical
+namespace MixedPolarPhysical
 open HoldoutConstruction Polynomial
+open scoped BigOperators
 abbrev Ambient := MvPolynomial (Fin 6) ℂ
 abbrev Coeff := MvPolynomial (Fin 5) ℂ
 local notation "v" => (MvPolynomial.X : Fin 6 → Ambient)
@@ -23,7 +25,7 @@ local notation "w" => (MvPolynomial.X : Fin 5 → Coeff)
 def sextic : Ambient :=
   v 0^6+v 1^6+v 2^6+v 3^6+v 4^6+v 5^6+
     MvPolynomial.C (1/2)*(v 0^3*v 1*v 3*v 4+
-      v 1^3*v 2*v 4*v 5)+MvPolynomial.C (1/3)*(v 4^3*v 0*v 1*v 3)
+      v 1^3*v 2*v 4*v 5)+MvPolynomial.C (1/3)*(v 0*v 1*v 3*v 4^3)
 def source : Ambient := v 0*v 1*v 2*v 3*v 4*v 5
 def equation : Polynomial Coeff :=
   X^6+(C (MvPolynomial.C (1/2)*w 0*w 2*w 3)*X^3+
@@ -130,16 +132,28 @@ lemma sextic_homogeneous : sextic.IsHomogeneous 6 := by
     (((MvPolynomial.isHomogeneous_X_pow i 3).mul (MvPolynomial.isHomogeneous_X ℂ j)).mul
       (MvPolynomial.isHomogeneous_X ℂ k)).mul (MvPolynomial.isHomogeneous_X ℂ l)
   have hdiag := (((((hp 0).add (hp 1)).add (hp 2)).add (hp 3)).add (hp 4)).add (hp 5)
+  have hreverse : (v 0*v 1*v 3*v 4^3).IsHomogeneous 6 := by
+    rw [show v 0*v 1*v 3*v 4^3=v 4^3*v 0*v 1*v 3 by ring]
+    exact hc 4 0 1 3
   exact (hdiag.add ((MvPolynomial.isHomogeneous_C (Fin 6) (1/2 : ℂ)).mul
       ((hc 0 1 3 4).add (hc 1 2 4 5)))).add
-      ((MvPolynomial.isHomogeneous_C (Fin 6) (1/3 : ℂ)).mul (hc 4 0 1 3))
-lemma source_homogeneous : source.IsHomogeneous 6 :=
-  (((((MvPolynomial.isHomogeneous_X ℂ (0:Fin 6)).mul
+      ((MvPolynomial.isHomogeneous_C (Fin 6) (1/3 : ℂ)).mul hreverse)
+lemma source_homogeneous : source.IsHomogeneous 6 := by
+  exact (((((MvPolynomial.isHomogeneous_X ℂ (0:Fin 6)).mul
     (MvPolynomial.isHomogeneous_X ℂ (1:Fin 6))).mul
     (MvPolynomial.isHomogeneous_X ℂ (2:Fin 6))).mul
     (MvPolynomial.isHomogeneous_X ℂ (3:Fin 6))).mul
     (MvPolynomial.isHomogeneous_X ℂ (4:Fin 6))).mul
     (MvPolynomial.isHomogeneous_X ℂ (5:Fin 6))
+
+lemma ambient_coordinate_ne_zero (i : Fin 6) :
+    residueMap (MvPolynomial.X i) ≠ 0 := by
+  intro hz
+  have hd := (residueMap_kernel _).mp hz
+  have hb := MvPolynomial.totalDegree_le_of_dvd_of_isDomain hd (MvPolynomial.X_ne_zero i)
+  rw [sextic_homogeneous.totalDegree sextic_irreducible.ne_zero,
+    MvPolynomial.totalDegree_X] at hb
+  norm_num at hb
 
 /-- Homogeneity and denominator legality create no additional obstruction
 once the two normalized identities on this exact physical equation are proved. -/
@@ -152,6 +166,47 @@ theorem certificate_of_normalized
   hasCertificate_of_normalized sextic source D N Q sextic_homogeneous source_homogeneous
     sextic_irreducible.prime legal normal divergence 0 normal_legal
 
-end CyclePhysical
-#print axioms CyclePhysical.sextic_irreducible
-#print axioms CyclePhysical.certificate_of_normalized
+/-- Shared residue clearing followed by the legal homogeneous closure. -/
+theorem certificate_of_residue_solution
+    (vector : Fin 5 → FunctionField)
+    (hw : residueDivergence tangent (residueMap (MvPolynomial.pderiv 0 sextic)) vector =
+      -(residueMap (MvPolynomial.pderiv 0 source)/residueMap (MvPolynomial.pderiv 0 sextic)-
+        residueMap source*residueMap (MvPolynomial.pderiv 0 (MvPolynomial.pderiv 0 sextic))/
+          (residueMap (MvPolynomial.pderiv 0 sextic))^2)) :
+    HodgeComputer.HasCertificate sextic 1 source := by
+  have hd : residueDivergence tangent (residueMap (MvPolynomial.pderiv 0 sextic)) vector =
+      ∑ i,(tangent i (vector i)-vector i*tangent i (residueMap (MvPolynomial.pderiv 0 sextic))/
+        residueMap (MvPolynomial.pderiv 0 sextic)) := by
+    simp only [residueDivergence,fieldDivergence,Finset.sum_sub_distrib,Finset.sum_div]
+  obtain ⟨D,N₀,N,Q,hD,hlegal,hnormal,hdiv,_⟩ :=
+    residue_solution_clearing residueMap (integerPartial 0)
+      (fun i : Fin 5 => integerPartial i.succ) tangent sextic source vector
+      sextic_irreducible residueMap_kernel normal_ne_zero
+      (fun i => integerPartial_commute i.succ 0 sextic) tangent_apply
+      (residue_common_representatives projection projection_surjective vector) (by
+        rw [hd] at hw
+        simp only [integerPartial_apply]
+        rw [hw]
+        have hn : residueMap (MvPolynomial.pderiv 0 sextic) ≠ 0 := normal_ne_zero
+        field_simp
+        ring)
+  apply certificate_of_normalized D (Fin.cases N₀ N) Q hlegal
+  · simpa only [HodgeTestbed.directional,Fin.sum_univ_succ,Fin.cases_zero,
+      Fin.cases_succ,integerPartial_apply,mul_comm] using hnormal
+  · simpa only [HodgeTestbed.divergenceNumerator,HodgeTestbed.divergence,
+      HodgeTestbed.directional,residueDivNum,Fin.sum_univ_succ,Fin.cases_zero,
+      Fin.cases_succ,integerPartial_apply,mul_comm] using hdiv
+
+
+end MixedPolarPhysical
+#print axioms MixedPolarPhysical.sextic_irreducible
+#print axioms MixedPolarPhysical.certificate_of_normalized
+#print axioms MixedPolarPhysical.coordinate_domain
+#print axioms MixedPolarPhysical.residueMap_kernel
+#print axioms MixedPolarPhysical.normal_legal
+#print axioms MixedPolarPhysical.normal_ne_zero
+#print axioms MixedPolarPhysical.sextic_homogeneous
+#print axioms MixedPolarPhysical.source_homogeneous
+#print axioms MixedPolarPhysical.ambient_coordinate_ne_zero
+
+#print axioms MixedPolarPhysical.certificate_of_residue_solution
