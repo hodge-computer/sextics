@@ -518,6 +518,28 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricDualNumberFlatness.lean
 ```
 
+### A regular special-fiber equation gives an actual flat quotient
+
+[GeometricDualNumberRegularQuotient.lean](GeometricDualNumberRegularQuotient.lean)
+proves that a flat dual-number algebra remains flat after quotienting by
+one equation whose reduction modulo epsilon is a non-zero-divisor.
+The proof writes an epsilon-annihilated quotient representative as
+epsilon times another representative, using the preceding criterion.
+
+The ambient flatness and special-fiber regularity are explicit hypotheses
+of this general lemma. They are not silently asserted for the original
+curve: the actual chart and equation comparisons remain necessary.
+The argument and the pinned regularity and quotient APIs were inspected.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricDualNumberRegularQuotient.olean \
+  Proposal/GeometricDualNumberRegularQuotient.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
