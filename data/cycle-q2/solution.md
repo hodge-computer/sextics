@@ -1,5 +1,169 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Formalization checkpoint: a smooth proper family neighborhood retaining zero
+
+This increment constructs a genuine open neighborhood of zero in the full
+invariant-cubic parameter scheme. The original projective family restricted
+to that neighborhood is proper, flat, and smooth of relative dimension
+three. It proves coverage of the entire actual zero fiber by explicit
+relative Jacobian opens and uses properness to retain zero when shrinking
+the base. All new proof source remains uncompiled at the user's request.
+The protected residue-exactness admission is unchanged.
+
+### Closed existence statement
+
+[GeometricSeedFamilySmoothNeighborhood.lean](GeometricSeedFamilySmoothNeighborhood.lean)
+contains the following closed source-level endpoint, using the names in
+CycleQ2SeedProjectiveFamily and CycleQ2SeedFamilySmoothNeighborhood:
+
+```lean
+theorem exists_smooth_proper_family_neighborhood :
+    ∃ r : ℂ, ∃ V : parameterScheme.Opens,
+      r ^ 3 = 2 ∧ zeroBasePoint ∈ V ∧
+      AlgebraicGeometry.SmoothOfRelativeDimension 3
+        ((familyToParameters r) ∣_ V) ∧
+      AlgebraicGeometry.Flat ((familyToParameters r) ∣_ V) ∧
+      AlgebraicGeometry.IsProper ((familyToParameters r) ∣_ V)
+```
+
+The parameter ring, universal equation, native Proj scheme, and structure
+morphism are those of the preceding full-family checkpoint. The retained
+point is the actual zero-coefficient morphism applied to the point of
+\(\operatorname{Spec}(\mathbb C)\). No smoothness, flatness, covering, or
+shrinking premise is supplied to this existence statement.
+
+### Native charts and relative Jacobian patches
+
+Write \(B\) for the full cubic coefficient ring and \(H_r\) for the
+existing universal equation. For each weight-one coordinate \(z_i\), form
+the literal normalized ring
+\[
+ N_{r,i}=B[z_0,z_1,z_2,z_3,w]/(H_r,z_i-1).
+\]
+The new source constructs a \(B\)-algebra isomorphism between this ring
+and the native degree-zero homogeneous localization for \(D_+(z_i)\).
+Its affine scheme maps by an actual open immersion into the original
+family, and the structure map is exactly the original parameter map.
+
+For every \(j\ne i\), let
+\[
+ \delta_{ij}=[\partial_jH_r]\in N_{r,i}.
+\]
+The original two relations \(H_r,z_i-1\) have Jacobian determinant
+\(\delta_{ij}\) for the selected derivatives \(\partial_j,\partial_i\).
+Localizing at \(\delta_{ij}\) gives a six-generator, three-relation
+submersive presentation. Its composed determinant is the square of the
+now invertible derivative. Thus each actual patch is standard smooth of
+relative dimension \(6-3=3\) over \(B\).
+
+The source defines \(U_r\) as the union of these patches' actual open
+images in the projective family. Source locality proves smoothness of
+relative dimension three on \(U_r\). This construction holds for every
+\(r\); no assertion that these patches cover the whole family is used.
+
+### Coverage of every point above zero
+
+[GeometricSeedFamilyZeroCover.lean](GeometricSeedFamilyZeroCover.lean)
+proves the precise additional statement
+
+```lean
+theorem CycleQ2SeedFamilyZeroCover.zeroFiber_mem_smoothOpen
+    (r : ℂ) (hr : r ^ 3 = 2)
+    (s : Spec (CommRingCat.of ℂ)) (x : family r)
+    (hx : familyToParameters r x = zeroParameterMorphism s) :
+    x ∈ smoothOpen r
+```
+
+The coefficient-prime calculation uses the native Proj structure map.
+Any actual family point above zero contains the coefficient-evaluation
+kernel. For a polynomial prime with that property, zero specialization
+followed by the original coefficient inclusion equals the original
+polynomial modulo the prime. Contraction along coefficient inclusion
+therefore transports the defining equation and its actual relative
+derivatives to a prime of the complex seed polynomial ring.
+
+At \(r^3=2\), the specialized equation is Fermat. Its relation first
+forces a nonvanishing weight-one coordinate, placing the point in one
+of the constructed normalized charts. In that chart, \(z_i=1\).
+If every remaining relative derivative lay in the prime, the specialized
+Fermat derivatives would force every other coordinate to vanish: the
+scalar coefficients \(6\) and \(3\) map to units in the prime quotient.
+The Fermat equation would then give \(1=0\), a contradiction. Hence an
+actual relative derivative is nonzero, placing the original point in
+\(U_r\).
+
+This argument applies to all prime points of the actual zero fiber.
+No residue field is identified with \(\mathbb C\), and no global fiber
+isomorphism or implication from smoothness of a special fiber is assumed.
+
+### Shrinking the actual parameter scheme
+
+Let \(p_r\) be the existing proper projective family morphism. Define
+\[
+ V_r=\operatorname{Spec}(B)\setminus p_r
+       \bigl(\operatorname{Proj}(R_r)\setminus U_r\bigr).
+\]
+Properness makes the removed image closed. Coverage of the entire zero
+fiber proves \(0\in V_r\), and the definition gives
+\(p_r^{-1}(V_r)\subseteq U_r\). The source inclusion factors through
+\(U_r\), giving relative dimension three on the full preimage. The
+property then descends to the genuine target restriction
+\(p_r|_{V_r}\). Flatness follows from the constructed smoothness, and
+properness is retained under this open base change.
+
+The generic proper-base-neighborhood construction is reused from the
+earlier incidence development. All of its hypotheses are discharged for
+the actual one-equation cubic family; in particular, the full-fiber
+containment above is proved rather than left as an input.
+
+### Files and verification scope
+
+| File | Construction |
+| --- | --- |
+| [GeometricSeedFamilyNormalized.lean](GeometricSeedFamilyNormalized.lean) | Literal normalized rings over the full coefficient base. |
+| [GeometricSeedFamilyChartAlgebra.lean](GeometricSeedFamilyChartAlgebra.lean) | Native homogeneous-localization algebras and weighted evaluation. |
+| [GeometricSeedFamilyChart.lean](GeometricSeedFamilyChart.lean) | Actual normalized chart isomorphisms, open immersions, coefficient compatibility, and point lifting. |
+| [GeometricSeedFamilyJacobian.lean](GeometricSeedFamilyJacobian.lean) | Relative derivative localizations, explicit submersive presentations, and their smooth dimension-three open union. |
+| [GeometricSeedFamilyZeroCoefficients.lean](GeometricSeedFamilyZeroCoefficients.lean) | Native coefficient-prime membership and exact polynomial/derivative specialization modulo the relevant prime. |
+| [GeometricSeedFamilyZeroCover.lean](GeometricSeedFamilyZeroCover.lean) | Coverage of the entire actual zero fiber by the relative Jacobian open. |
+| [GeometricSeedFamilySmoothNeighborhood.lean](GeometricSeedFamilySmoothNeighborhood.lean) | The retained base neighborhood and the proper, flat, smooth dimension-three restriction of the original family. |
+
+Independent source review checked the algebra and scheme isomorphism
+directions, the coefficient structures, determinant and dimension counts,
+prime contraction, full-fiber coverage, proper-image shrinking, and target
+restriction APIs against Mathlib revision
+0df444a360eaa60ab8c11dca51a86af692955474. The chart-opposite-isomorphism
+direction was checked directly against the pinned Iso.op definition.
+Static checks cover imports, the new dependency graph, admission tokens,
+whitespace, explanation links, and preservation of the protected source.
+No Lean, Lake, build, kernel replay, or symbolic computation was run.
+These source checks do not establish successful Lean elaboration.
+
+Later compilation requires Lean 4.33.1, the pinned Mathlib cache, the
+verifier-style Proposal layout, and compatible compiled imports. The
+dependency order is the normalized and chart-algebra modules, then the
+chart module, then the Jacobian module; the zero-coefficient module is
+independent of these. The zero-cover module imports both chains, and the
+smooth-neighborhood module is last. With all imports of the selected
+module already available, a bounded command is:
+
+```sh
+timeout --signal=TERM --kill-after=3s 45s \
+  lake env lean -M4096 Proposal/GeometricSeedFamilySmoothNeighborhood.lean
+```
+
+This command is recorded for later execution and was not run.
+
+The remaining geometric work concerns the actual moving-cycle family,
+its Abel--Jacobi interpretation, geometric Hodge variation and supported
+correspondences, and the de Rham comparison that gives vanishing of the
+specific residue class on a nonempty affine open. This smooth-family
+construction supplies geometric prerequisites; it does not supply that
+residue vanishing. Solution.lean and the exact protected statement are
+unchanged. Prepared for `fqlx` with OpenAI ChatGPT assistance, following
+Ben Diamond and the project's geometric argument. Earlier proof and
+verification records are preserved below with their original scopes.
+
 ## Formalization checkpoint: full cubic family and zero specialization
 
 This increment constructs the actual projective hypersurface family over
