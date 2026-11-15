@@ -1,5 +1,65 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Classical proof established before the next Lean continuation
+
+The complete ordinary mathematical argument is given in
+[Written proof of the protected residue exactness](#written-proof-of-the-protected-residue-exactness)
+below. The present mathematical review checks the three substantive
+comparisons together: the actual Abel--Jacobi derivative, an algebraic
+correspondence supporting the entire invariant third cohomology, and
+support of the full protected fourth-cohomology residue through the
+exact pencil. It then obtains a regular primitive on a nonempty affine
+principal open and localizes it to the original function field.
+
+The conclusion is the exact existential
+\[
+ \exists\,\eta\in\Omega^3_{K/\mathbb C},\qquad
+ d\eta=\mathrm{residueSourceForm}(\mathrm{affineA}).
+\]
+This is a classical proof using standard complex algebraic geometry and
+Hodge theory, together with the two finite inputs specified in that
+section. It is not a claim that the corresponding analytic, cycle-class,
+or derived comparison constructions have been implemented in Lean.
+No Lean source is changed in this continuation; the remaining admission
+and the protected theorem are unchanged.
+
+The proof keeps the two seed constructions distinct. Its small rank
+certificate is lifted from \(r=57\) modulo \(109\) to a complex
+\(r\) satisfying \(r^3=2\). It does not identify that complex
+\(r\) with the literal complex number \(57\) used by the newer
+incidence-source construction. The classical curve is a sufficiently
+positive member of \(|E+mH|\); it is not identified with the
+newer fixed-vector curve of class \(E+4H\). Either construction can
+supply the moving-cycle input, but their seed parameters and curves must
+not be mixed. The proof below uses the cubic-root seed throughout, then
+specializes the full algebraic projector to the exact protected pencil.
+
+Three details are now made explicit in the continuous proof. First, the
+cubic Abel--Jacobi formula is proved by conormal contraction, with the
+fixed-threefold moving direction and independent ambient test kept
+separate. Second, one actual relative supported cycle gives a dominant
+proper flag-Hilbert parameter space; this replaces the earlier countable
+parameter-space selection. Third, the relative cycle acts on the derived
+pushforward and hence on Leray. Subtracting the actual global hyperplane
+class before applying it controls the full fourth-cohomology class.
+
+For reproducibility, a fresh bounded replay invoked only seed_divisor
+and higgs_field from the unchanged
+[finite verifier](https://github.com/hodge-computer/sextics/blob/34993b6d1ad0b0a4b6b4f1c1eb75954e963c2e44/scripts/verify-hodge-locus-span.py).
+The seed algebra has length 96 and socle degree 9; the obstruction and
+augmented ranks are 7 and 8. The Higgs calculation has dimension 33,
+35 directions, and one scalar solution parameter. The run took 0.126
+seconds, with peak resident memory 26,696 KiB, under a 512 MiB
+address-space limit and a 10-second CPU limit. No fourfold calculation,
+Lean compilation, or kernel replay was run. The verifier source SHA-256
+was 9d673eff17a53fee04eb2677615db689833cf33b5fa23fe16ad42467d22a40a9.
+
+The mathematical strategy is Ben Diamond's moving-class and support
+argument, building on Voisin's method. This review and the explicit
+comparison and specialization details were prepared for `fqlx` with
+OpenAI ChatGPT assistance. Formalization remains separate from the
+classical existence conclusion.
+
 ## Continuation: effective descent and the actual curve ideal
 
 The previously constructed global evaluation now has its actual local
@@ -2450,12 +2510,12 @@ with respect to \(x_0\).
  \frac{a_{00}}{g^3}
  -\frac{3a_0g_0+ag_{00}}{g^4}
  +\frac{3ag_0^2}{g^5}\right)\nu
- \tag{1}
+ \qquad\text{(1)}
 \]
 has a primitive:
 \[
  \exists\,\eta\in\Omega^3_{K/\mathbb C},\qquad d\eta=\rho .
- \tag{2}
+ \qquad\text{(2)}
 \]
 Formula (1), including its positive sign and ordered volume form, is the
 residueSourceForm affineA in the protected statement. The meromorphic
@@ -2491,7 +2551,7 @@ fix \(F\). They satisfy
 Consequently the full residue class
 \[
  \alpha=\operatorname{Res}_X(A\Omega/F^3)\in H^4(X,\mathbb C)
- \tag{3}
+ \qquad\text{(3)}
 \]
 is invariant under both symmetries. We will prove that this entire class
 vanishes off a proper divisor. We do not assume that it is rational or
@@ -2517,7 +2577,7 @@ numbers \((0,33,33,0)\). The other fiber cohomology is
 \[
  H^{2k}(T,\mathbb Q)=\mathbb Q h^k\ (0\le k\le3),\qquad
  H^1(T)=H^5(T)=0,\qquad \int_T h^3=3.
- \tag{4}
+ \qquad\text{(4)}
 \]
 These follow from weighted residue theory and weak Lefschetz. They can
 also be checked at Fermat using its smooth ordinary double cover and
@@ -2543,7 +2603,7 @@ Then
 \[
  F_b=\sum_{j=0}^3z_j^6+w^3+b^2
      =f_1g_1+f_2g_2+h_0k.
- \tag{5}
+ \qquad\text{(5)}
 \]
 Write
 \[
@@ -2565,7 +2625,7 @@ The quotient has Hilbert function
 \[
  (1,4,9,15,19,19,15,9,4,1,0)
  \quad\text{in degrees }0,\ldots,10.
- \tag{6}
+ \qquad\text{(6)}
 \]
 Eliminating \(w\) shows it is generated in degree one; thus all later
 pieces vanish. It is an Artinian complete intersection of length \(96\)
@@ -2594,7 +2654,7 @@ The entries \(M_{\sigma,L}=\tau(kL\sigma)\) and
  94&91&0&0&0&47&0&0&0
  \end{pmatrix},\qquad
  v=(0,21,0,0,0,0,0,0,70).
- \tag{7}
+ \qquad\text{(7)}
 \]
 The first seven columns of \(M\) have determinant \(80\); the first
 eight columns of \(\binom Mv\) have determinant \(76\), modulo \(109\).
@@ -2620,6 +2680,17 @@ lift to units, so the corresponding complex ranks are seven and eight.
 This gives a nonempty rank-open in the affine space of invariant cubics.
 The displayed modular vector is not being asserted to be a complex
 kernel vector.
+
+The flatness claim can be seen degree by degree. The five special-fiber
+generators have height five in the polynomial ring, so they form a
+regular sequence. Over the local unramified DVR, the uniformizer followed
+by their lifts is a regular sequence; permutation of this sequence makes
+the uniformizer a nonzerodivisor on the quotient. Each graded piece is
+therefore finite and torsion-free over the DVR, hence free. The relation
+\(f_2=w+z_2^2\) makes the quotient generated in degree one, and the
+vanishing degree-ten special-fiber piece gives vanishing in degree ten
+over the DVR by Nakayama, then in all higher degrees. This justifies the
+finite free socle line and the simultaneous transfer of the two minors.
 
 The geometric conditions hold on nonempty opens in the same irreducible
 space. The threefold is smooth at \(b=0\). The surface \(D\) is a general
@@ -2652,7 +2723,7 @@ character one. Put \(s=(4,4,4,4,1)\). For \(m\in\mathcal T\), define
  H_m(a,b)=
  \begin{cases}1&a+b+m=s,\\0&\text{otherwise},\end{cases}
  \qquad a,b\in\mathcal E .
- \tag{8}
+ \qquad\text{(8)}
 \]
 These are the actual polarized Higgs forms, up to one common nonzero
 normalization. Indeed, for a defining weighted sextic \(G\), the ordinary
@@ -2670,7 +2741,7 @@ The exact entry-identification certificate proves
 \[
  \{P\in\operatorname{Mat}_{33}(\mathbb C):
        P^tH_m=H_mP\text{ for every }m\in\mathcal T\}=\mathbb C I.
- \tag{9}
+ \qquad\text{(9)}
 \]
 For completeness, the verification rule is particularly simple. Put
 \(\operatorname{partner}_m(a)=s-m-a\) if this belongs to \(\mathcal E\).
@@ -2698,13 +2769,13 @@ give
 \[
  K_T=\mathcal O_T,\quad K_D=N_{D/T}=\mathcal O_D(3),\quad
  K_C=\mathcal O_C(1),\quad N_{C/D}=\mathcal O_C(-2).
- \tag{10}
+ \qquad\text{(10)}
 \]
 The complete-intersection coordinate rings are Cohen--Macaulay, so
 \[
  H^0(D,\mathcal O_D)=\mathbb C,\qquad
  H^1(D,\mathcal O_D)=H^1(D,K_D)=0.
- \tag{11}
+ \qquad\text{(11)}
 \]
 The sections \(g_1,g_2\) have no common zero on \(C\): such a zero would
 make the differentials of \(F_b,h_0\) dependent and \(D\) singular.
@@ -2721,7 +2792,7 @@ global sections. The boundary therefore induces an isomorphism
 \[
  \mathcal A_9\simeq H^1(C,K_C),\qquad
  p\longmapsto [p/(g_1g_2)].
- \tag{12}
+ \qquad\text{(12)}
 \]
 The geometric trace is consequently a fixed nonzero scalar multiple
 of \(\tau\).
@@ -2745,7 +2816,7 @@ with multiplication by \(\sigma\). Using (12), we obtain
 \[
  \langle\overline\nabla_{(B',L)}[C],\omega_\sigma\rangle
      =c_0\tau((B'-kL)\sigma),\qquad c_0\ne0,
- \tag{13}
+ \qquad\text{(13)}
 \]
 up to a uniform choice of sign.
 
@@ -2757,7 +2828,7 @@ Hodge-obstruction map for \(\lambda\) has rank seven. The augmented
 rank in (7) supplies a cubic direction \(L\) such that
 \[
  NL_\lambda(L)=0,\qquad \tau(B_*L)\ne0.
- \tag{14}
+ \qquad\text{(14)}
 \]
 Both linear maps kill \(h_0\), so this is a genuine nonzero direction in
 the projective space of cubic sections. Although \(B_*\) is not invariant,
@@ -2785,7 +2856,7 @@ relative holomorphic line bundle \(\mathcal L\) with Chern class
 relative projective bundle, with smooth curve members
 \[
  \Gamma\subset D,\qquad [\Gamma]=\lambda+mh.
- \tag{15}
+ \qquad\text{(15)}
 \]
 This constructs an actual analytic family of algebraic curves. It does
 not require the original individual curves \(C\) to deform.
@@ -2797,7 +2868,7 @@ bounding chain gives, for \(\eta\in H^{2,1}(T)\),
 \[
  \langle d\mathcal N(L),\eta\rangle
      =\operatorname{Tr}_\Gamma(v_\Gamma\mathbin{\lrcorner}\eta).
- \tag{16}
+ \qquad\text{(16)}
 \]
 Use the conormal sequence
 \[
@@ -2811,13 +2882,13 @@ form \(dh_0\wedge\theta\). Since
 \[
  \langle d\mathcal N(L),\eta\rangle
        =\pm\operatorname{Tr}_D([\Gamma]\cup L\widetilde\eta).
- \tag{17}
+ \qquad\text{(17)}
 \]
 
 Take \(\eta_{B_*}=\kappa_{B_*}\mathbin{\lrcorner}\Omega_T\).
 The pair deformation \((F_b+\epsilon B_*,h_0)\) supplies a surface
 Kodaira--Spencer lift \(\rho_{B_*}\). Writing
-\(\Omega_T=dh_0\wedge\sigma\), contraction shows
+\(\Omega_T=dh_0\wedge\sigma\) locally along \(D\), contraction shows
 \[
  \rho_{B_*}\mathbin{\lrcorner}\Omega_T
        =-dh_0\wedge(\rho_{B_*}\mathbin{\lrcorner}\sigma),\qquad
@@ -2830,7 +2901,7 @@ lift pairs to zero by \(NL_\lambda(L)=0\). Equations (13)--(17) now give
 \[
  \langle d\mathcal N(L),\eta_{B_*}\rangle
        =c\,3\tau(B_*L)\ne0
- \tag{18}
+ \qquad\text{(18)}
 \]
 for \(c\ne0\). This proves the derivative comparison for the actual cubic
 surface used here. It agrees with the mechanism of equation (2.8) and
@@ -2838,6 +2909,31 @@ Lemma 7 in
 [Voisin's paper](https://www.cmls.polytechnique.fr/perso/voisin/Articlesweb/griffithsgroup.pdf);
 it does not invoke her sufficiently ample surface identifications
 without checking the cubic case.
+
+Here the distinction between the two tangent directions is essential.
+The actual curve moves with \(F_b\) fixed, along the invariant cubic
+\(L\). The polynomial \(B_*\), of character \(\zeta\), is an
+independent ambient test; it need not be tangent to the invariant
+threefold parameter space. The volume has character \(\zeta^2\),
+so \(\eta_{B_*}\) is invariant. The form \(\omega_L\) has
+character \(\zeta^2\), and its contraction with \(\rho_{B_*}\)
+is invariant as well. This is why the three ordinary orbit-divisor
+contributions are equal.
+
+For a direct sign check, the actual normal field satisfies
+\(dh_0(v_\Gamma)=-L\). The distinguished conormal lift supplied
+by the pair deformation is locally
+\(-\rho_{B_*}\mathbin{\lrcorner}\sigma\), because contraction
+with a vector tangent to \(D\) sends
+\(dh_0\wedge\sigma\) to
+\(-dh_0\wedge(\rho_{B_*}\mathbin{\lrcorner}\sigma)\).
+The two signs cancel in the swept-chain derivative. Gysin compatibility
+then changes integration on \(\Gamma\) into cup product with its
+actual divisor class on \(D\). A different conormal lift has the same
+image in \(H^1(\Omega_T^2|_D)\); restriction and contraction with
+the existing normal field therefore give the same value. Thus no lift
+ambiguity, unconstructed normal field, or additional nonvanishing
+assumption is hidden in (18).
 
 **Algebraization and spreading.** Use the flag Hilbert scheme of
 \(\Gamma\subset D\subset T\), pulled back to the invariant pair
@@ -2871,7 +2967,7 @@ remains nonzero. Its averaged cylinder map is a nonzero
 morphism of rational variations of Hodge structure
 \[
  R^1p_{\Lambda *}\mathbb Q(-1)\longrightarrow V.
- \tag{19}
+ \qquad\text{(19)}
 \]
 Indeed, on each retained parameter curve the correspondence-induced map
 on Jacobians has differential equal to the averaged Abel--Jacobi
@@ -2884,7 +2980,7 @@ The scalar-kernel property (9) holds on a nonempty Zariski open:
 the relevant linear equations have algebraic coefficients, their kernel
 always contains scalars, and maximal rank is open.
 
-Let \(W\subset V\) be a rational sub-variation on any finite étale cover
+Let \(W\subset V\) be a rational sub-variation on any connected finite étale cover
 of a dense open in the full base. Polarization supplies a flat,
 self-adjoint projector onto \(W\). It has Hodge blocks \(P,P^t\) in
 dual \(H^{2,1},H^{1,2}\) bases. Flatness implies compatibility with the
@@ -2903,35 +2999,61 @@ of the restriction to the special pencil used later.
 
 ### 5. A supported representative of a fixed projector
 
-Fix a fiber where the surjective cylinder has been constructed. Insert
-the algebraic projector \(\pi_1^\Lambda\) onto \(H^1(\Lambda)\) and the
+Work over the connected finite etale cover \(B'\) of a dense base open
+where the surjective relative cylinder has been constructed. Choose a
+relative ample divisor class \(\xi\) on the parameter-curve family
+\(\Lambda\), of constant fiber degree \(d_\Lambda>0\). The relative
+cycle
+\[
+ \pi_1^\Lambda=\Delta_\Lambda-
+  \frac{\operatorname{pr}_1^*\xi+\operatorname{pr}_2^*\xi}
+       {d_\Lambda}
+\]
+acts on every fiber as the projector onto \(H^1(\Lambda)\).
+This construction needs a rational divisor class of degree one, not a
+section of the parameter-curve family. Insert this projector and the
 group average
 \[
  \pi_\vartheta=\tfrac13(\Delta+\operatorname{Graph}\vartheta+
                               \operatorname{Graph}\vartheta^2).
 \]
-Call the resulting correspondence \(G\). Its only nonzero cohomological
-map is the surjection \(H^1(\Lambda)(-1)\to V\). Its target support has
-dimension at most two; enlarge it to a divisor \(Z\subset T\).
+Call the resulting relative correspondence \(G\). On each fiber its
+only nonzero cohomological map is the surjection
+\(A:H^1(\Lambda)(-1)\to V\). The union of the curves in this
+one-dimensional parameter family has dimension at most two. Enlarge its
+group-averaged target support to a relative divisor \(Z'\), after
+shrinking the base if necessary.
 
 The correspondence \(M=G\,{}^tG\) is invertible on \(V\).
-Indeed all \(H^3(T)\) is primitive, since \(H^1(T)=0\), and the
-polarization identifies the transpose with the adjoint up to a fixed
-nonzero sign. Surjectivity then makes \(GG^\dagger\) positive definite
-for the Hodge Hermitian metric. On every other cohomological sector
-\(M\) is zero.
+Here is an argument that avoids a polarization sign choice. The
+transpose correspondence is the adjoint for the Poincare pairings, by
+the projection formula. The kernel of \(A\) is a rational sub-Hodge
+structure of the polarized curve cohomology, so its pairing is
+nondegenerate. Hence
+\[
+ H^1(\Lambda)=\ker A\oplus(\ker A)^\perp,
+ \qquad\operatorname{im}({}^tA)=(\ker A)^\perp.
+\]
+Nondegeneracy on \(V\) and surjectivity of \(A\) make
+\({}^tA\) injective. Thus \(A\,{}^tA\) is invertible on
+\(V\). On every other cohomological sector \(M\) is zero:
+the curve projector kills the degree-zero and degree-two source parts,
+and the group average kills the non-invariant part of \(H^3(T)\).
 
-Let \(q\) be the characteristic polynomial of \(M|_V\), with
-\(q(0)\ne0\), and put \(p(t)=1-q(t)/q(0)\). Then \(p(0)=0\), and
-\(p(M)\) is the identity on \(V\) and zero on all other cohomology.
-All its terms are positive powers of \(M\). Composition with supports,
-using refined intersection, therefore gives a representative supported
-on \(Z\times Z\). Its full cohomology class equals that of
+The map \(M|_V\) is a horizontal rational endomorphism, so its
+characteristic polynomial \(q\) is constant on connected \(B'\),
+and \(q(0)\ne0\). Put \(p(t)=1-q(t)/q(0)\). Then \(p(0)=0\),
+and Cayley--Hamilton makes \(p(M)\) the identity on \(V\) and zero
+on all other cohomology. Its coefficients are rational and fixed over
+the base. All its terms are positive powers of \(M\). Refined
+intersection and proper pushforward therefore represent it by a relative
+rational cycle supported on \(Z'\times_{B'}Z'\). Its full fiber
+cohomology class equals that of
 the fixed algebraic correspondence
 \[
  P=\pi_\vartheta-\frac13\sum_{k=0}^{3}
        \operatorname{pr}_1^*h^{3-k}\operatorname{pr}_2^*h^k .
- \tag{20}
+ \qquad\text{(20)}
 \]
 The equality is in the full \(H^6(T\times T,\mathbb Q)\):
 (4), Künneth, and Poincaré duality identify a correspondence class with
@@ -2940,28 +3062,53 @@ a relative rational algebraic correspondence over all of \(\mathscr B\),
 using the global \(\mathcal O(1)\) and the relative graphs of \(\vartheta\).
 Its fiber class is a flat section of the cohomology local system.
 
-**Specialization to every smooth member.** Clear denominators and
-parameterize a supporting subscheme of dimension two together with the
-individual signed cycle components in its square by relative flag
-Hilbert schemes with fixed Hilbert polynomials. These parameter spaces
-are proper over \(\mathscr B\), and there are countably many choices.
+The resulting rational cycle is idempotent on cohomology. No assertion
+that it is idempotent modulo rational equivalence is needed.
 
-The universal flat cycles give flat cohomology sections. Consequently,
-on a connected component, equality of their sum with \(N[P]\) at one
-point implies equality throughout that component. This is a flat-section
-argument, not an assertion that an arbitrary Hodge-class condition is an
-algebraic closed equation. The selected connected components remain
-proper. The needed properness and closed incidence are
+**One proper parameter space reaches every smooth member.** First push
+this relative cycle from the finite etale cover \(B'\) to its base
+open \(B_0\), and divide by the cover degree. Each fiber is the
+average of cycles all having class (20), so the pushed cycle has that
+same full class. Its support lies in \(Z_0\times_{B_0}Z_0\), where
+\(Z_0\) is the finite image of \(Z'\).
+
+Choose a finite signed representative, clear its rational coefficients,
+and apply [generic flatness](https://stacks.math.columbia.edu/tag/052B)
+simultaneously to its component subschemes
+and to \(Z_0\). After shrinking \(B_0\), their Hilbert polynomials
+are fixed. They determine a section over \(B_0\) of one relative
+flag-Hilbert parameter space \(\mathcal H\to\mathscr B\): it
+records a two-dimensional supporting subscheme and the signed
+three-dimensional cycle components inside its square. Fixed-polynomial
+Hilbert spaces are proper, and containment in that square is a closed
+incidence condition; see
 [Stacks, Lemmas 108.7.5 and 108.7.7](https://stacks.math.columbia.edu/tag/0DM5).
 
-Choose a very general point outside the countably many images of
-nondominating components. The construction above supplies a
-representative there, so one selected component dominates the base.
-Properness makes its image all of \(\mathscr B\). Thus every smooth
-fiber receives a supported representative of the full class (20).
-The supporting Hilbert polynomial still has degree two, so its
-specialization cannot become the whole threefold. No Hodge conjecture
-is used: (20) is already an explicit algebraic projector.
+Let \(\overline B_0\) be the reduced closure of this section in
+\(\mathcal H\). It is proper over \(\mathscr B\), and its image
+contains the dense open \(B_0\), so the image is all of \(\mathscr B\).
+On \(\overline B_0\), the universal flat cycle components give
+locally constant classes in the pullback of the ambient smooth proper
+cohomology local system. Their signed sum equals \(N[P]\) on the
+original open, so it equals \(N[P]\) everywhere.
+
+For an explicit specialization justification, connect a point of the
+irreducible closure to that dense open by an algebraic curve, and
+normalize the curve. Pullback retains flatness of the universal cycle
+subschemes and smooth properness of the ambient product. The cycle-class
+specialization identity makes their fiber classes parallel along this
+smooth curve; for the flat-cycle specialization statement, see
+[Stacks, section 62.4](https://stacks.math.columbia.edu/tag/0H4H).
+The class of the global correspondence (20) is parallel
+as well, so equality persists at the selected special point. This is
+specialization of an already algebraic cycle class, not a Hodge-conjecture
+assertion or specialization of a sub-variation across a singular locus.
+
+Thus every smooth member has a supported representative of the full
+class (20), through this one proper parameter space. The support's fixed
+Hilbert polynomial has degree two, so no specialized support is the
+whole threefold. No countability or very-general-point selection is
+required.
 
 ### 6. The exact pencil gives support of the entire class \(\alpha\)
 
@@ -2975,12 +3122,18 @@ does not change the fiber.
 
 Delete the finitely many singular fibers, infinity, and the roots of
 \(1+t^6\). This leaves a nonempty smooth affine curve \(U\).
+In fact \(t=0\) is explicitly a smooth fiber: its ordinary sextic
+equation is the sum of five sixth powers plus
+\(\tfrac12X_0^3X_1Y_0Y_1\). At a nonzero critical point the largest
+coordinate would give a pure derivative of modulus \(6M^5\), while
+the mixed-term derivative has modulus at most \(\tfrac32M^5\).
+This is impossible, and \(1+0^6=1\), so the retained open is nonempty.
 With \((s_0,s_1,s_2,s_3)=(X_0,X_1,Y_0,Y_1)\), the quotient by
 \(\beta:u\mapsto-u\), using \(w=u^2\), is the weighted threefold
 \[
  G_t=\sum_{j=0}^3s_j^6+(1+t^6)w^3+
  \tfrac12(s_0^3s_1s_2s_3+t s_1^3s_3w+t s_0s_2w^2)=0.
- \tag{21}
+ \qquad\text{(21)}
 \]
 It avoids the weighted vertex. A critical point of its affine cone
 would lift, under \(w=u^2\), to a critical point of the ordinary cone,
@@ -3016,14 +3169,14 @@ has no degree at least two. Leray gives
  \longrightarrow H^4(\mathcal T,\mathbb C)
  \longrightarrow H^0(U,R^4p_*\mathbb C)\longrightarrow0,
  \qquad L^2H^4=0.
- \tag{22}
+ \qquad\text{(22)}
 \]
 The square \(h^2\) of the global hyperplane class lifts the generator
 of \(R^4\), so
 \[
  \alpha'=c h^2+\alpha'',\qquad
  \alpha''\in H^1(U,V_{\mathbb C}).
- \tag{23}
+ \qquad\text{(23)}
 \]
 Relative pullback, cup product with the cycle class, and proper
 pushforward make \(Z_{\rm rel}\) act compatibly with the Leray
@@ -3035,6 +3188,18 @@ the identity. Since \(L^2=0\), it follows that
 Its target support implies that \(\alpha''\) vanishes off
 \(D_{\rm rel}\). The class \(h^2\) vanishes off a hyperplane section,
 where the defining section trivializes \(\mathcal O(1)\).
+
+The filtration compatibility here comes from an actual derived
+endomorphism. If \(p_1,p_2\) are the projections from the relative
+product, pullback along \(p_1\), cup product with the global
+degree-six cycle class, and relative integration along the smooth
+proper three-dimensional fibers of \(p_2\) define an endomorphism
+of \(Rp_*\mathbb Q\). Its action on each cohomology sheaf is the
+fiberwise correspondence action. Functoriality of the canonical
+truncation filtration therefore gives its action on Leray, and on
+\(E_2^{1,3}\) this is precisely the induced map on
+\(H^1(U,R^3p_*\mathbb Q)\). This supplies the comparison needed
+to use the fiberwise identity on the actual class \(\alpha''\).
 
 There is a genuine possible off-diagonal action from \(H^0(R^4)\) to
 \(H^1(R^3)\). The argument does not discard it: it subtracts the actual
@@ -3048,7 +3213,7 @@ dimension at most three. Enlarge the image to a proper divisor \(Z_X\).
 Outside it the blowup is an isomorphism, and therefore
 \[
  \alpha|_{X\setminus Z_X}=0.
- \tag{24}
+ \qquad\text{(24)}
 \]
 
 ### 7. Recover the literal residue and its primitive
@@ -3065,7 +3230,7 @@ Direct differentiation gives
 \[
  \frac{a\,dx_0\wedge\nu}{f^3}-d\psi
    =\frac12D_t^2b_0\,\frac{df}{f}\wedge\nu.
- \tag{25}
+ \qquad\text{(25)}
 \]
 Expanding \(D_t^2b_0/2\) gives exactly the coefficient in (1). With
 \(\operatorname{Res}((df/f)\wedge\nu)=\nu\), formula (25) identifies
@@ -3117,7 +3282,7 @@ The product rule yields the identity
  a+f\,\operatorname{div}U-2U(f)
    =f^2g\left(c'-\sum_{j=1}^4E_j\widetilde u_j\right)
    \in f^3R_{(f)}.
- \tag{26}
+ \qquad\text{(26)}
 \]
 Choose a common polynomial denominator \(d\ne0\) with \(f\nmid d\),
 and put \(n_i=dU_i\). Since \(f\) is prime,
@@ -3127,7 +3292,7 @@ and put \(n_i=dU_i\). Since \(f\) is prime,
  ad^2-2d\sum_{i=0}^4n_if_i+
  f\left(d\sum_{i=0}^4\partial_i n_i-
               \sum_{i=0}^4n_i\partial_i d\right)=f^3q_0.
- \tag{27}
+ \qquad\text{(27)}
 \]
 
 Choose
@@ -3143,7 +3308,7 @@ Homogenize \(d\) to degree \(m\), \(n_i\) to degree \(m+7\), and
  AD^2-2D\sum_{i=0}^{5}N_i\partial_iF+
  F\left(D\sum_{i=0}^{5}\partial_iN_i-
               \sum_{i=0}^{5}N_i\partial_iD\right)=F^3Q.
- \tag{28}
+ \qquad\text{(28)}
 \]
 Here \(D\ne0\), every \(N_i\) has the required homogeneous degree, and
 \(F\mid D\) would imply \(f\mid d\). Thus \(D\) is coprime to \(F\),
@@ -3155,9 +3320,9 @@ for these polynomials has not been computed.
 The ordinary proof reaches (2) and (28) with no remaining mathematical
 assumption specific to the protected example. Its two finite inputs
 are (6)--(9); their data, exact verification procedure, and full Higgs
-forest remain in this document. The most recent bounded replay of the
-pinned seed and Higgs routines is recorded in the audit history below:
-about \(0.10\) seconds and \(26{,}800\) KiB peak RSS. No larger fourfold
+forest remain in this document. The fresh bounded replay of the
+pinned seed and Higgs routines is recorded at the start of this file:
+\(0.126\) seconds and \(26{,}696\) KiB peak RSS. No larger fourfold
 computation is used.
 
 The present checkpoint rechecked the characteristic-zero transfer,
@@ -3166,6 +3331,12 @@ the full projector class, specialization to the exact pencil, the
 Leray extension issue, the literal residue, and the clearing identity.
 It adds a continuous mathematical exposition, not another numerical
 experiment.
+
+The new opening section and the continuous proof have 405 mathematical
+expressions, all accepted by the bundled KaTeX checker with strict
+parsing. Equation labels retain their numbers using the checker's
+supported syntax. Whitespace validation passed, and the source-boundary
+check confirms that this explanation is the only changed file.
 
 No Lean, Lake, full build, or kernel replay was run for this checkpoint.
 Existing compilation records below retain their original scopes.
