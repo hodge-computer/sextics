@@ -165,6 +165,35 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeRegularSection.lean
 ```
 
+### Principal kernels of the actual relative closed immersion
+
+[GeometricRelativeSectionIdeal.lean](GeometricRelativeSectionIdeal.lean)
+evaluates the existing matrix-section ideal at the fixed complex vector.
+On each original matrix pivot, the retained cofactor identities reduce
+the three rows to one. Division by the invertible homogeneous pivot and
+the established degree-zero contraction theorem identify the exact
+projective chart ideal with the normalized row equation.
+
+The theorem `relativeSectionKernel_principal` identifies the
+kernel of the actual structure-sheaf component of the original closed
+immersion with the principal ideal of its actual equation section.
+The original basepoint-unit condition also gives a cover of the entire
+surface by these same pivot opens.
+
+The generic incidence, leading-unit and basepoint hypotheses are stated
+where needed; they will be discharged at the original incidence point
+in the assembly component. Principality alone supplies neither
+regularity nor quotient flatness or nonemptiness. Independent source
+review and static scans passed. **No compilation or kernel replay was run.**
+
+With the toolchain and prepared-import prerequisites above, the deferred bounded check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeSectionIdeal.olean \
+  Proposal/GeometricRelativeSectionIdeal.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
