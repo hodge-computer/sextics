@@ -846,6 +846,29 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeCurveSeedFiberIso.lean
 ```
 
+### Exact epsilon reduction for the original first-order coefficient map
+
+[GeometricFirstOrderTensorReduction.lean](GeometricFirstOrderTensorReduction.lean)
+proves that reduction of the original first-order tensor base change
+modulo epsilon is the original seed tensor base change. The equivalence
+preserves every element from the second factor. Its construction uses
+the actual first-order closed-point kernel and tensor-quotient equivalence.
+
+The resulting principal-quotient flatness corollary explicitly requires
+ambient flatness over ParameterAlgebra and regularity of the original
+seed equation. It is not an unconditional flatness assertion about an
+arbitrary unshrunk surface chart. Exact quotient and tensor formulas
+were inspected at source level.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricFirstOrderTensorReduction.olean \
+  Proposal/GeometricFirstOrderTensorReduction.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
