@@ -44,6 +44,38 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeConstantSection.lean
 ```
 
+### Dimension two on the actual affine Jacobian patches
+
+[GeometricIncidenceChartDimension.lean](GeometricIncidenceChartDimension.lean)
+constructs a submersive presentation of each actual four-variable
+dehomogenized equation ring localized at one of its two-by-two Jacobian
+minors. The localization adds one variable and one relation, so the
+presentation has relative dimension \(5-3=2\). The presentation proves
+the genuine standard smoothness property and, for a nontrivial patch
+ring, rank two of its relative Kähler differentials.
+
+The induced open immersion into the original projective surface has its
+original coefficient morphism as composite to the base. The theorem
+`patchToSurface_smoothOfRelativeDimension` establishes
+`SmoothOfRelativeDimension 2` for that actual composite.
+
+These minors differentiate the shifted dehomogenized equations. The
+comparison with the normalized five-variable minors defining the prior
+`goodOpen`, and hence dimension two on the whole saved smooth
+neighborhood, remains a separate obligation at this checkpoint. No
+dimension conclusion is inferred merely from the earlier retract
+smoothness argument. Independent source review checked the determinant
+orientation, exact pinned relative-dimension APIs, and the base map.
+Static scans passed. **No compilation or kernel replay was run.**
+
+With the prerequisites above, the deferred bounded check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceChartDimension.olean \
+  Proposal/GeometricIncidenceChartDimension.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
