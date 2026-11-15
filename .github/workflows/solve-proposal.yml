@@ -24,7 +24,8 @@ jobs:
     if: github.event_name == 'workflow_dispatch' || github.event.pull_request.draft == false
     name: Protected proposal verification
     runs-on: ubuntu-24.04
-    timeout-minutes: 85
+    # GitHub ends a hosted job at six hours. The proof budget in solve-policy.json is 330 minutes.
+    timeout-minutes: 355
     steps:
       - name: Resolve current immutable PR commits
         id: context
