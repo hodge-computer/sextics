@@ -493,6 +493,31 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricIncidenceFirstOrder.lean
 ```
 
+### Flatness over dual numbers from the exact epsilon-kernel criterion
+
+[GeometricDualNumberFlatness.lean](GeometricDualNumberFlatness.lean)
+proves, for an arbitrary module over the dual numbers of a field,
+that flatness is equivalent to every element annihilated by epsilon
+being an epsilon multiple. No finite-generation assumption is made.
+
+The forward implication applies the equational flatness criterion to
+one relation. The reverse implication uses the full ideal-tensor
+criterion and the exact three-ideal classification of the dual numbers.
+Every tensor over the epsilon ideal has the required pure-tensor form.
+The pinned Mathlib signatures for both flatness criteria, ideal
+trichotomy, and tensor balancing were checked; the mathematical proof
+received source review. This is an algebraic criterion, not a claim
+that an as-yet-unidentified curve chart is flat.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricDualNumberFlatness.olean \
+  Proposal/GeometricDualNumberFlatness.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
