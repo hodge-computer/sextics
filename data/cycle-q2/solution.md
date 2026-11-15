@@ -133,6 +133,38 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeConstantCurve.lean
 ```
 
+### One vector regular on the total space and on the seed
+
+[GeometricRelativeRegularSection.lean](GeometricRelativeRegularSection.lean)
+applies the existing associated-prime avoidance theorem to the disjoint
+union of the nine relative incidence pivot rings and nine literal seed
+pivot rings. Each ring is Noetherian and each chosen matrix row contains
+its invertible pivot. The actual parameter ring is Noetherian because
+it is finite type over the finite polynomial trace ring.
+
+The resulting single \(t\in\mathbb C^3\setminus\{0\}\) has regular
+normalized equations on all eighteen true degree-zero pivot rings.
+The endpoint `exists_incidence_and_seed_regular` supplies its
+geometric regularity internally. It does not transfer regularity through
+specialization; the common vector is chosen to satisfy both collections
+at once.
+
+This proves total-space regularity and seed regularity for the same
+section. It does not imply quotient flatness over the parameter base or
+nonemptiness of the projective zero locus: regular equations may be units.
+Independent source review checked the dependent finite family and scalar
+actions. The pinned finite-type/Noetherian API and the actual etale
+finite-presentation instance were inspected. Static scans passed.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+With the toolchain and prepared-import prerequisites above, the deferred bounded check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeRegularSection.olean \
+  Proposal/GeometricRelativeRegularSection.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
