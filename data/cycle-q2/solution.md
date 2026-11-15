@@ -585,6 +585,31 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricFirstOrderSurface.lean
 ```
 
+### The exact pointed cubic direction has a nonzero paired Cech class
+
+[GeometricIncidenceFirstOrderTrace.lean](GeometricIncidenceFirstOrderTrace.lean)
+takes the epsilon coefficient of the actual first-order incidence point.
+Its sextic component is zero. The original invertible relative trace
+remains a unit under the original seed map, so its cubic component
+cannot be a scalar rescaling of the original seed cubic.
+
+In the original checked nine-column order, this trace is exactly the
+existing derivativeTrace at theta one. The existing literal r=57,
+theta=1 paired-class theorem then proves nonvanishing of the paired
+homogeneous Cech class for this exact direction. Independent source
+review checked both trace formulas, the seed trace value, the unit
+specialization, and the class theorem. This is not yet the
+Abel--Jacobi comparison for the moving fixed-section curve.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceFirstOrderTrace.olean \
+  Proposal/GeometricIncidenceFirstOrderTrace.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
