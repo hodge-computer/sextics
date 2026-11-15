@@ -423,6 +423,27 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeCurveChartFiber.lean
 ```
 
+### Original projective curve opens as affine schemes over the base
+
+[GeometricRelativeCurveChartScheme.lean](GeometricRelativeCurveChartScheme.lean)
+promotes the chart-ring equivalence to an isomorphism from the actual
+projective curve coordinate open to the spectrum of its three-row
+quotient. The map to the parameter scheme is proved to be the original
+curve-to-surface-to-base morphism and the canonical coefficient map of
+that affine quotient.
+
+This retains the actual scheme open and the actual base square.
+Source review checked Proj contravariance and the coefficient algebra;
+static scans passed. **No compilation or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeCurveChartScheme.olean \
+  Proposal/GeometricRelativeCurveChartScheme.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
