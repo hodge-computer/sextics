@@ -444,6 +444,30 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeCurveChartScheme.lean
 ```
 
+### The actual scheme pullbacks of the projective curve charts
+
+[GeometricRelativeCurveChartFiberScheme.lean](GeometricRelativeCurveChartFiberScheme.lean)
+identifies the pullback of each actual projective curve coordinate open
+along the original seed morphism with the spectrum of the literal seed
+three-row chart quotient. It uses the canonical spectrum/tensor pullback
+and the proved chart isomorphism over the original base.
+
+Both projections are computed: the original-chart projection is the
+spectrum of the exact chart specialization followed by the inverse
+original chart isomorphism; the other projection is the canonical complex
+coefficient map. These are local scheme fiber comparisons. A single
+global projective fiber isomorphism still requires a canonical global
+morphism and proved compatibility of these restrictions. Source review
+and static scans passed. **No compilation or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeCurveChartFiberScheme.olean \
+  Proposal/GeometricRelativeCurveChartFiberScheme.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
