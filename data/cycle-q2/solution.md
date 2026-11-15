@@ -1,5 +1,128 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Formalization checkpoint: a nonempty smooth proper projective seed
+
+This continuation adds Lean proof source for one geometric construction:
+the actual weighted projective zero-cubic seed is nonempty and proper,
+and these conclusions are assembled with its existing smoothness source.
+At the user's request, all Lean elaboration, compilation, and kernel
+replay remain deferred. The protected residue-exactness admission is
+unchanged; this is not a completed certificate.
+
+### Combined endpoint
+
+[GeometricSeedFermatGeometry.lean](GeometricSeedFermatGeometry.lean)
+contains the closed source-level statement
+
+```lean
+theorem CycleQ2SeedFermatGeometry.exists_nonempty_smooth_proper :
+    ∃ r : ℂ, r ^ 3 = 2 ∧
+      Nonempty (CycleQ2SeedFermatProj.threefold r) ∧
+      AlgebraicGeometry.Smooth
+        (CycleQ2SeedFermatProj.threefoldToComplex r) ∧
+      AlgebraicGeometry.IsProper
+        (CycleQ2SeedFermatProj.threefoldToComplex r)
+```
+
+The scheme and morphism are the original native Proj construction, with
+the inherited grading of weights \((1,1,1,1,2)\) on
+\[
+ A_r=\mathbb C[z_0,z_1,z_2,z_3,w]/
+       (\mathrm{seedFamily}(r,0)).
+\]
+For \(r^3=2\), its equation is
+\[
+ z_0^6+z_1^6+z_2^6+z_3^6+w^3=0.
+\]
+The parameter witness comes from the existing root-existence theorem over
+\(\mathbb C\). No root, point, smoothness, or properness hypothesis is
+left as an input to this closed existence statement.
+
+### An actual complex-valued point
+
+[GeometricSeedFermatPoint.lean](GeometricSeedFermatPoint.lean) constructs
+the point \([1:0:0:0:-1]\). Polynomial evaluation at
+\((1,0,0,0,-1)\) kills the literal defining equation because
+\(1+(-1)^3=0\). It therefore descends to \(A_r\). Since the image of
+\(z_0\) is one, evaluation extends to \(A_r[1/z_0]\), then restricts
+to the native degree-zero homogeneous localization defining the first
+projective chart.
+
+The native chart isomorphism produces the actual scheme morphism
+\[
+ s_r:\operatorname{Spec}(\mathbb C)\longrightarrow
+     \operatorname{Proj}(A_r).
+\]
+The theorem CycleQ2SeedFermatPoint.seedPoint_overComplex proves
+\(p_r\circ s_r=\mathrm{id}_{\operatorname{Spec}(\mathbb C)}\), where
+\(p_r\) is the existing structure map. Its exact Lean statement is
+
+```lean
+seedPoint r hr ≫ threefoldToComplex r =
+  𝟙 (Spec (CommRingCat.of ℂ))
+```
+
+Thus the point is compatible with the original complex coefficient map.
+The same file proves the prescribed values of every normalized coordinate
+ratio and obtains Nonempty (threefold r) from this point.
+
+### Properness of the original structure map
+
+[GeometricSeedFermatProper.lean](GeometricSeedFermatProper.lean) proves
+properness for every \(r\), without the Fermat or smoothness condition.
+It reuses the existing positive-weight lemma
+CycleQ2IncidenceProjectiveProper.polynomialGrade_zero_eq_C: a polynomial
+of weighted degree zero is constant. Consequently the original coefficient
+map \(\mathbb C\to(A_r)_0\) is surjective, so its map on spectra is a
+closed immersion and is proper.
+
+The cone quotient is finite type over \(\mathbb C\), hence over its
+native degree-zero subring by the explicit scalar tower. Mathlib's
+properness theorem for Proj.toSpecZero applies. Composing it with the
+coefficient spectrum map gives properness of the unchanged
+threefoldToComplex. The file also proves properness after every actual
+scheme-theoretic base change of this morphism.
+
+### Verification scope and next obligation
+
+The three new helper files have concrete definitions and proof bodies,
+with no new admissions, custom axioms, or unchecked decision procedures.
+Independent source review checked the quotient and localization maps,
+the direction of the contravariant spectrum compositions, the native
+Proj properness hypotheses, and the exact coefficient structures against
+Mathlib revision 0df444a360eaa60ab8c11dca51a86af692955474.
+Static checks cover the new imports, whitespace, allowed file boundary,
+and preservation of the protected source. None of these checks establishes
+that the proof terms elaborate. No Lean, Lake, build, kernel replay, or
+symbolic computation was run for this checkpoint.
+
+Later compilation requires Lean 4.33.1, the pinned Mathlib cache, a
+verifier-style Proposal workspace, and compatible compiled artifacts for
+all imported modules. After those prerequisites are prepared, check
+GeometricSeedFermatProper and GeometricSeedFermatPoint before the combined
+GeometricSeedFermatGeometry module. A bounded command for one selected
+module, with its imports already available, is:
+
+```sh
+timeout --signal=TERM --kill-after=3s 45s \
+  lake env lean -M4096 Proposal/GeometricSeedFermatGeometry.lean
+```
+
+This command is recorded for later use and was not executed.
+
+The next seed-specific component is an explicit normalized hypersurface
+chart isomorphism and a proof of relative dimension three. The word
+threefold in the existing definition name does not itself supply that
+dimension theorem. The already constructed incidence-surface theorem
+has relative dimension two and is a different result. The moving-cycle,
+geometric Hodge-variation, supported-class, and de Rham comparison
+constructions required by the final residue-exactness theorem also remain.
+
+Solution.lean, the protected target, and all earlier verified results are
+unchanged. Prepared for `fqlx` with OpenAI ChatGPT assistance, following
+Ben Diamond and the project's geometric argument. The previous proof
+and verification records are preserved below with their original scopes.
+
 ## Formalization checkpoint: smooth weighted projective Fermat seed
 
 At the user's request, this continuation writes Lean proof source and
