@@ -376,6 +376,31 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricGradedIdealContraction.lean
 ```
 
+### The actual weight-one curve chart quotients
+
+[GeometricRelativeCurveChart.lean](GeometricRelativeCurveChart.lean)
+normalizes each original degree-fourteen row by the fourteenth power of
+the chosen weight-one coordinate. In the ordinary localization, these
+fractions generate the same ideal as the original rows. Exact
+degree-zero contraction identifies their span with the actual
+homogeneous quotient's coordinate-chart kernel.
+
+The canonical surface chart equivalence sends those fractions to the
+literal shifted dehomogenized rows. The resulting
+`curveCoordinateChartEquiv` is an algebra equivalence over the
+original coefficient ring, preserving the original chart quotient map.
+It assumes no regularity or flatness. Source review corrected an
+explicit owner-namespace reference and checked both quotient-equivalence
+directions. Static scans passed. **No compilation or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeCurveChart.olean \
+  Proposal/GeometricRelativeCurveChart.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
