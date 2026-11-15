@@ -1,5 +1,176 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Formalization checkpoint: full cubic family and zero specialization
+
+This increment constructs the actual projective hypersurface family over
+the full invariant-cubic coefficient space and the canonical map from
+the existing seed into its genuine zero fiber. It proves properness of
+the family and constructs a complex-valued point on that fiber. The
+source remains uncompiled at the user's request. The protected
+residue-exactness admission is unchanged.
+
+### The full coefficient family
+
+Let \(I\) be the existing FullInvariantIndex 3, comprising every monomial
+of weighted degree three and character zero. Set
+\[
+ B=\mathbb C[t_e:e\in I],\qquad
+ b_{\mathrm{univ}}=\sum_{e\in I}t_e z^e,
+ \qquad
+ H_r=\mathrm{seedFamily}(r,0)+b_{\mathrm{univ}}^2,
+\]
+where the fixed polynomial is extended from \(\mathbb C\) to \(B\)
+using the original coefficient map.
+
+[GeometricSeedCubicFamily.lean](GeometricSeedCubicFamily.lean) proves
+that evaluating the variables \(t_e\) at the actual coefficients of any
+invariant cubic \(b\) gives exactly \(\mathrm{seedFamily}(r,b)\).
+The existing fullInvariantPolynomial_of_homogeneous theorem supplies
+completeness of the coefficient parameterization. Zero coefficients are
+included; no leading coefficient has been normalized to one.
+
+Two specializations are bound explicitly to the earlier source:
+
+```lean
+CycleQ2SeedCubicFamily.specialize_zero
+CycleQ2SeedCubicFamily.specialize_incidence
+```
+
+The first recovers seedFamily r 0. For \(r^3=2\), this is the already
+constructed Fermat equation. The second evaluates at coefficients of
+smoothB and recovers the exact incidence equation smoothF r Complex.I.
+The distinction between smoothB and smoothH is retained: smoothH includes
+the subtraction of \(i\,\mathrm{smoothA}\), and its existing section
+coefficients would specify a different value of the varying cubic.
+
+This is a polynomial binding for each fixed \(r\). It does not transport
+the earlier nonzero incidence class stated at the literal complex
+parameter \(57\) to a cube-root-of-two parameter. The corresponding
+geometric class comparison remains a separate obligation.
+
+### The actual proper projective family
+
+[GeometricSeedProjectiveFamily.lean](GeometricSeedProjectiveFamily.lean)
+forms the native projective spectrum of the inherited weighted grading on
+\[
+ R_r=B[z_0,z_1,z_2,z_3,w]/(H_r).
+\]
+Its structure morphism
+\[
+ p_r:\operatorname{Proj}(R_r)\longrightarrow\operatorname{Spec}(B)
+\]
+uses the original parameter coefficients. The equation has weighted
+degree six, proved from the degree-six fixed equation and the square of
+the degree-three universal cubic.
+
+[GeometricSeedProjectiveFamilyProper.lean](GeometricSeedProjectiveFamilyProper.lean)
+proves
+
+```lean
+theorem CycleQ2SeedProjectiveFamilyProper.familyToParameters_proper
+    (r : ℂ) :
+    AlgebraicGeometry.IsProper
+      (CycleQ2SeedProjectiveFamily.familyToParameters r)
+```
+
+All geometric weights are positive, so every degree-zero class comes from
+an original coefficient. The coefficient spectrum map is a closed
+immersion. The cone quotient is finite type over its coefficient ring
+and hence over its degree-zero subring, so native Proj properness applies.
+Their composition is the original structure map. The theorem holds for
+every \(r\), and the file also proves properness after base change.
+
+### Global specialization and the genuine zero fiber
+
+[GeometricSeedProjectiveSpecialization.lean](GeometricSeedProjectiveSpecialization.lean)
+constructs zero evaluation on the actual quotient rings. It preserves
+weighted degree, and every target homogeneous class has a homogeneous
+lift of the same degree. This proves the irrelevant-ideal condition
+required by native Proj.map.
+
+The resulting global scheme morphism seedToFamily satisfies the exact
+base compatibility
+
+```lean
+seedToFamily r ≫ familyToParameters r =
+  threefoldToComplex r ≫ zeroParameterMorphism
+```
+
+The zero fiber is defined as the actual scheme-theoretic pullback
+
+```lean
+ZeroFiber r = pullback zeroParameterMorphism (familyToParameters r)
+```
+
+The map seedToZeroFiber is constructed by the pullback universal property,
+and both its projection identities are proved. This is a canonical map
+into the fiber. An isomorphism with the entire fiber is not asserted in
+this checkpoint.
+
+[GeometricSeedFamilyFiber.lean](GeometricSeedFamilyFiber.lean) proves
+properness of the fiber's projection to \(\operatorname{Spec}(\mathbb C)\)
+by base change. It maps the explicit seed point \([1:0:0:0:-1]\) into the
+fiber and proves that this complex-valued point is a section of that
+projection. Its map to the total family is also tracked exactly. Thus
+the genuine zero fiber is nonempty, and the source contains the closed
+existence statement
+
+```lean
+theorem CycleQ2SeedFamilyFiber.exists_nonempty_proper_zeroFiber :
+    ∃ r : ℂ, r ^ 3 = 2 ∧
+      AlgebraicGeometry.IsProper
+        (CycleQ2SeedProjectiveFamily.familyToParameters r) ∧
+      Nonempty (CycleQ2SeedProjectiveSpecialization.ZeroFiber r) ∧
+      AlgebraicGeometry.IsProper
+        (CycleQ2SeedFamilyFiber.zeroFiberToComplex r)
+```
+
+### Verification and the next geometric implication
+
+The five new helper files have concrete definitions and proof bodies,
+with no new admission, custom axiom, or unchecked decision procedure.
+Independent source review checked the full coefficient parameterization,
+the distinction between smoothB and smoothH, homogeneous specialization,
+the native projective-map condition, coefficient compatibility, properness,
+and both pullback projections against Mathlib revision
+0df444a360eaa60ab8c11dca51a86af692955474. Static checks cover imports,
+whitespace, the new dependency graph, and preservation of protected source.
+No Lean, Lake, build, kernel replay, or symbolic computation was run.
+These reviews do not establish elaboration of the new proof terms.
+
+Later compilation requires Lean 4.33.1, the pinned Mathlib cache, the
+verifier-style Proposal layout, and compatible compiled imports. The
+dependency order is GeometricSeedCubicFamily, GeometricSeedProjectiveFamily,
+then GeometricSeedProjectiveFamilyProper and GeometricSeedProjectiveSpecialization,
+then GeometricSeedFamilyFiber. With the selected module's imports already
+available, a bounded command is:
+
+```sh
+timeout --signal=TERM --kill-after=3s 45s \
+  lake env lean -M4096 Proposal/GeometricSeedFamilyFiber.lean
+```
+
+This command is recorded for later use and was not executed.
+
+The next geometric implication is a smooth neighborhood of zero in this
+actual parameter family. Properness together with a map from a smooth
+seed does not establish that implication. A direct route is to extract
+coefficient-kernel containment at points above zero, transport their
+polynomial primes to the literal seed, and prove that relative Jacobian
+opens cover all such points. Removing the proper image of the closed
+complement can then produce a parameter open retaining zero. The existing
+incidence coefficient-fiber and prime-transport constructions provide
+patterns for this next step; the relevant assertions have not yet been
+proved for the new hypersurface family.
+
+The actual moving-cycle, Abel--Jacobi, geometric Hodge-variation,
+supported-correspondence, and affine de Rham comparison constructions
+needed for the final residue-class vanishing remain. Solution.lean and
+the exact protected statement are unchanged. Prepared for `fqlx` with
+OpenAI ChatGPT assistance, following Ben Diamond and the project's
+geometric argument. All earlier proof and verification records remain
+below with their original scopes.
+
 ## Formalization checkpoint: relative dimension three of the actual seed
 
 This increment writes the relative-dimension-three construction for the
