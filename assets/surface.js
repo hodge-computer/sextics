@@ -39,13 +39,23 @@
       if (usingTilt)
         send({ type: 'input', target: 'view', name: 'parallax', properties: { x: 0, y: 0 } });
     }
-    const size = () => ({
-      width: canvas.clientWidth,
-      height: canvas.clientHeight,
-      innerWidth,
-      innerHeight,
-      devicePixelRatio: devicePixelRatio || 1
-    });
+    // The page owns the drawing-buffer size. Safari keeps showing frames at the
+    // placeholder's pre-transfer size, so that size must already be the final one.
+    const size = () => {
+      const width = Math.max(1, canvas.clientWidth),
+        height = Math.max(1, canvas.clientHeight),
+        budget = innerWidth < 760 ? 1_500_000 : 3_000_000,
+        dpr = Math.min(devicePixelRatio || 1, 2, Math.sqrt(budget / (width * height)));
+      return {
+        width,
+        height,
+        pixelWidth: Math.max(1, Math.floor(width * dpr)),
+        pixelHeight: Math.max(1, Math.floor(height * dpr)),
+        innerWidth,
+        innerHeight,
+        devicePixelRatio: devicePixelRatio || 1
+      };
+    };
     function release() {
       clearInterval(watchdog);
       worker?.terminate();
@@ -185,12 +195,15 @@
         current.onmessageerror = () => {
           if (worker === current) stop('The 3D view could not communicate with the page.');
         };
+        const initial = size();
+        canvas.width = initial.pixelWidth;
+        canvas.height = initial.pixelHeight;
         const offscreen = canvas.transferControlToOffscreen();
         current.postMessage(
           {
             type: 'init',
             canvas: offscreen,
-            size: size(),
+            size: initial,
             hidden: document.hidden,
             reducedMotion: motionPreference.matches
           },

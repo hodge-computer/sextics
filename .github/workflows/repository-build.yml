@@ -6,6 +6,11 @@ on:
 permissions:
   contents: read
 
+# A new push to a pull request cancels that pull request's earlier runs, queued or running.
+concurrency:
+  group: repository-build-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -103,7 +108,8 @@ jobs:
     needs: [build, lean-build]
     if: needs.build.outputs.lean == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    # A recheck may use the whole proof budget of solve-policy.json, inside GitHub's six-hour job limit.
+    timeout-minutes: 355
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.build.outputs.matrix) }}

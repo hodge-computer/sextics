@@ -58,6 +58,10 @@ Candidate code receives no networking, credentials, or repository write access. 
 
 The CI report records base/head commits, the PR author, theorem, witness binding, toolchain, kernel replay, and axiom audit. The workflow posts `solve/lean` on the submitted commit and rejects a result if either PR commit changed during checking. For solve PRs, a green check means the proof passed. On maintenance PRs, that status only reports that there is no new solve; Repository build validates the release and rechecks affected accepted proofs. CI does not request approval or inspect GitHub reviews.
 
+### Proposal limits
+
+The limits in `.github/solve-policy.json` follow constraints of the hosting platform. GitHub lists at most 1,000 entries of one directory and shows at most 1,000 files of one pull request; `maxFiles` is 996 because an instance folder also holds `instance.rec`, `why.md`, `provenance.json`, and `acceptance.json`. GitHub ends a hosted job at six hours; `timeoutSeconds` is 330 minutes, and the verification jobs of `solve-proposal.yml` and `repository-build.yml` time out at 355, which leaves 25 minutes for preparation and reporting. The free Linux runner for public repositories has 16 GB of memory, and `memoryMb` leaves 2 GiB of it to the system. There is no limit on total source size: GitHub refuses any single file over 100 MB at push, and the size of what enters the repository is decided at merge.
+
 ### Merge permissions
 
 GitHub repository access controls who can push and merge. `benediamond` is the only
