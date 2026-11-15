@@ -915,6 +915,31 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricIdealFunctionalInverse.lean
 ```
 
+### Negative-degree compatible sections on the original seed charts vanish
+
+[GeometricSeedNegativeSections.lean](GeometricSeedNegativeSections.lean)
+combines the existing homogeneous polynomial gluing theorem with the
+nonnegative original polynomial grading. Every compatible negative-degree
+family in the original three SeedLocal rings is zero, for every cubic
+character. The degree minus four case is supplied explicitly.
+
+This provides a potential nonemptiness endpoint without an unproved
+intersection-number or Chern-class comparison. A nowhere-vanishing
+section of the image line would need to yield the actual compatible
+inverse family of degree minus four, with the positive O(4) image/dual
+twist accounted for. Constructing that family from actual emptiness
+remains separate; this file does not postulate it.
+The original signed grading and gluing theorem were checked at source level.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricSeedNegativeSections.olean \
+  Proposal/GeometricSeedNegativeSections.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
