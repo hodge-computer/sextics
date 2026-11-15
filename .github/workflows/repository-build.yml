@@ -6,6 +6,11 @@ on:
 permissions:
   contents: read
 
+# A new push to a pull request cancels that pull request's earlier runs, queued or running.
+concurrency:
+  group: repository-build-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-24.04
