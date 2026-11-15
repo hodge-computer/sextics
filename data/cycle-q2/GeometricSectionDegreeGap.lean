@@ -1,5 +1,5 @@
 import Mathlib.RingTheory.MvPolynomial.WeightedHomogeneous
-import Mathlib.Tactic
+import Mathlib.RingTheory.Ideal.Quotient.Defs
 
 /-!
 # A lower-degree class cannot be a multiple of a higher-degree class
@@ -41,18 +41,23 @@ theorem coeff_mul_eq_zero_below (w : σ → ℕ) (f p : MvPolynomial σ R)
     have hadd : Finsupp.weight w ab.1 + Finsupp.weight w ab.2 =
         Finsupp.weight w d := by
       rw [← map_add, he]
-    omega
+    have hle : m ≤ Finsupp.weight w d := by
+      rw [← hadd, hweight]
+      exact Nat.le_add_right m _
+    exact (not_le_of_gt hd hle).elim
 
 /-- No nonnegative-degree multiplier can create a lower weighted component. -/
 theorem component_mul_eq_zero_below (w : σ → ℕ) (f p : MvPolynomial σ R)
     (m n : ℕ) (hf : f.IsWeightedHomogeneous w m) (hn : n < m) :
     weightedHomogeneousComponent w n (f * p) = 0 := by
   classical
-  ext d
+  apply MvPolynomial.ext
+  intro d
   rw [coeff_weightedHomogeneousComponent, coeff_zero]
-  split_ifs with hd
-  · exact coeff_mul_eq_zero_below w f p m hf d (by simpa only [hd] using hn)
-  · rfl
+  by_cases hd : Finsupp.weight w d = n
+  · rw [if_pos hd]
+    exact coeff_mul_eq_zero_below w f p m hf d (by simpa only [hd] using hn)
+  · rw [if_neg hd]
 
 /-- In a homogeneous quotient, an equation `f*p = l` with `deg l < deg f`
 forces the class of `l` to vanish. The multiplier is completely unrestricted. -/
