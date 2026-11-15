@@ -641,6 +641,8 @@ void main() {
   }
 
   const SCRIPT_BASE = new URL('.', location.href);
+  // Jet operations per fragment above which a divisor is not drawn.
+  const MAX_DIVISOR_OPERATIONS = 512;
   function create(canvas, options = {}) {
     // In production this core runs only in a dedicated worker, drawing into a
     // worker-owned OffscreenCanvas. The host forwards sizes and input and
@@ -817,9 +819,18 @@ void main() {
       activeVao = vao;
       activeBuffers = [vbo, ebo];
       activeCount = meta.triangleCount * 3;
-      const hasD =
-        selected.formalStatus === 'proved' &&
-        !!(selected.render?.divisorTerms?.length || selected.render?.divisorProgram);
+      const r = selected.render || {};
+      let pixel = HodgeDivisor.fragment(null, meta.phaseSigns),
+        hasD = false;
+      if (selected.formalStatus === 'proved' && (r.divisorTerms?.length || r.divisorProgram)) {
+        // The divisor is evaluated per pixel, in every transparency layer. Larger
+        // expressions saturate phone GPUs, so such slices are shown without it.
+        const divisor = HodgeDivisor.fragment(r.divisorProgram || r.divisorTerms, meta.phaseSigns);
+        if (divisor.operations <= MAX_DIVISOR_OPERATIONS) {
+          pixel = divisor;
+          hasD = true;
+        }
+      }
       const whole = meta.samplingMode === 'sphere' && meta.projectionBox === 0,
         projectionBox = whole ? 0 : 10;
       activeMeta = {
@@ -836,11 +847,6 @@ void main() {
           ? 'The compact real slice, stereographically projected without a box cutoff.'
           : 'A real two-dimensional section of X, on a fixed phase-rotated real four-plane; stereographic projection in [−10, 10]³.'
       };
-      const r = selected.render || {},
-        pixel = HodgeDivisor.fragment(
-          hasD ? r.divisorProgram || r.divisorTerms : null,
-          meta.phaseSigns
-        );
       pixel.source += '\n' + HodgeDivisor.surface(selected.F, meta.phaseSigns).source;
       useDivisorShader(pixel);
       gl.uniform3fv(U.OriginalCenter, new Float32Array(meta.centerOriginal));
