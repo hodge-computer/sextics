@@ -108,4 +108,3 @@ theorem fermatRelation (r : ℂ) (hr : r ^ 3 = 2) :
 end CycleQ2SeedFermatProj
 
 end
-
