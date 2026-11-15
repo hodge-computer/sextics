@@ -3009,6 +3009,92 @@ timeout --signal=TERM --kill-after=5s 55s \
   Proposal/GeometricSeedOverlapImageMonomorphism.lean
 ```
 
+### Canonical comparison with the genuine orbit-ideal internal Hom — 15 November 2026
+
+Continuing from `b94b11d2b34c816df1d083f0c1736b100d2e7788`,
+[GeometricSeedAffineHomEvaluation.lean](GeometricSeedAffineHomEvaluation.lean)
+uses the existing genuine internal-Hom wrapper `moduleHomSheaf`.
+Its sections are linear natural transformations on all subopens, so the
+construction retains actual local sheaf morphisms. For any module
+\(P\) over an affine ring \(A\), and any target module sheaf \(N\),
+the tilde–global-sections adjunction gives a native \(A\)-linear
+equivalence
+\[
+\Gamma\!\left(\mathcal{H}om(\widetilde P,N)\right)
+ \cong_A \operatorname{Hom}_A(P,\Gamma(N)).
+\]
+The source scalar action and evaluation map are checked explicitly.
+No quasi-coherence or finite-presentation condition is imposed on \(N\).
+
+For the actual chart orbit ideal, `structureTopEquiv` normalizes the
+structure module by `ΓSpecIso`. The resulting `orbitHomTopEquiv` identifies
+native global sections of
+\[
+H_i=\mathcal{H}om(\widetilde{I_i},\mathcal O)
+\]
+with the existing `OrbitDual i`, and retains evaluation on every original
+\(x\in I_i\). Here \(I_i\) is the **three-component orbit ideal**;
+this construction makes no identification with the ideal of the original
+single curve.
+
+[GeometricSeedOrbitHomComparison.lean](GeometricSeedOrbitHomComparison.lean)
+then constructs an unconditional native sheaf morphism
+\[
+c_i:\widetilde{\operatorname{Hom}_{A_i}(I_i,A_i)}
+ \longrightarrow H_i.
+\]
+It applies tilde to the inverse global-section equivalence, then composes
+with the canonical counit of \(H_i\). On every open, the image of an
+original dual element is the restriction of its actual global local
+morphism. At the whole affine chart, evaluation on an original ideal
+element is exactly its original functional value transported by
+`ΓSpecIso.inv`. The target's quasi-coherence is not assumed to construct
+this morphism or prove these formulas.
+
+The theorem `orbitHomComparison_isIso_iff_isLocalizing` isolates the
+remaining condition exactly:
+\[
+\operatorname{IsIso}(c_i)
+ \quad\Longleftrightarrow\quad
+\operatorname{IsLocalizing}(H_i).
+\]
+The right side requires each **actual restriction map** from global
+sections to sections on \(D(a)\) to be a module localization at the powers
+of \(a\). It is not merely the existence of an abstract isomorphism of
+the section modules. No instance proving this remaining condition is
+asserted here.
+
+**Next exact internal-Hom obligation.** Identify evaluation on every
+affine principal open with the Hom of the actual localized ideal and
+structure modules; prove that restriction of the local sheaf morphism
+is the canonical `IsLocalizedModule.mapExtendScalars`. The already proved
+finite presentation of the actual orbit ideal then supplies the Hom
+localization theorem. Transporting that theorem through the evaluation
+equivalences will prove `IsLocalizing` and make the concrete \(c_i\)
+invertible. The global orbit-ideal binding, degree-four gluing, triple
+cocycle, required invertibility, and final protected geometric existence
+still require their remaining proofs.
+
+**Verification status.** Both files received independent
+mathematical/source review and bounded static checks. No Lean elaboration
+or kernel replay was run. The protected statement, existing source proofs,
+and final admission remain unchanged. With the pinned submission layout
+and already checked imports, the deferred commands are:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedAffineHomEvaluation.olean \
+  Proposal/GeometricSeedAffineHomEvaluation.lean
+```
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s \
+  lake env lean -M4096 \
+  -o .lake/build/lib/lean/Proposal/GeometricSeedOrbitHomComparison.olean \
+  Proposal/GeometricSeedOrbitHomComparison.lean
+```
+
 ### The original ideal and the actual differential sheaves
 
 Write \(j:C\hookrightarrow D\) for the original immersion at
