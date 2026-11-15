@@ -1,5 +1,162 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Formalization checkpoint: proper flat first-order curve with the original seed fiber
+
+The local quotient-flatness obligation from the preceding checkpoint is
+now discharged in source. One nonzero original complex section vector
+defines a proper, flat subscheme of the actual first-order incidence
+surface over \(D=\mathbb C[\varepsilon]/(\varepsilon^2)\). Its closed fiber
+is isomorphic to the existing specialized projective zero locus for the
+same vector. The construction stays at the original literal incidence
+seed \(r=57\); it uses no identification with the auxiliary cubic-square
+parameter family. All new source remains uncompiled. The protected
+residue-exactness admission is unchanged.
+
+### Closed source-level endpoint
+
+[GeometricFirstOrderFlatCurve.lean](GeometricFirstOrderFlatCurve.lean)
+contains the following theorem, using the actual first-order curve and
+seed-fiber definitions from the indicated helpers:
+
+```lean
+theorem exists_proper_flat_firstOrderCurve :
+    ∃ t : Fin 3 → ℂ, t ≠ 0 ∧
+      AlgebraicGeometry.Flat (firstOrderCurveToBase t) ∧
+      IsProper (firstOrderCurveToBase t) ∧
+      Nonempty (specializedCurve (seedPoint (57 : ℂ) Complex.I) t ≅
+        FirstOrderCurveSeedFiber t)
+```
+
+Every flatness, regularity, and covering premise is supplied by the
+construction. The last conjunct is the existence of an isomorphism; it
+does not assert that either scheme has a point. No nonempty-curve,
+smooth-curve, or relative-dimension-one conclusion is included.
+
+### The actual row ideal on the actual affine refinements
+
+Let \(R_i\) be an original dehomogenized surface chart and let
+\(B_i=D\otimes_A R_i\), where \(A\) is the original incidence parameter
+algebra and its map to \(D\) is firstOrderMap. The preceding actual
+pullback comparison proves that \(B_i\) is flat over \(D\).
+
+The original curve chart is the quotient by its three normalized rows.
+After first-order base change its ideal is the literal image of that
+same row ideal in \(B_i\). For a matrix entry indexed by \(p=(a,b)\),
+let \(m_{i,p}\) be its image in \(B_i\). In
+\(B_i[1/m_{i,p}]\), the established cofactor relations give the exact
+ideal equality
+\[
+ (f_{i,t,0},f_{i,t,1},f_{i,t,2})=(f_{i,t,a}).
+\]
+This is obtained by mapping the earlier original principal-ideal
+identity through the actual chart and localization maps.
+
+[GeometricFirstOrderCurveChartFlat.lean](GeometricFirstOrderCurveChartFlat.lean)
+constructs a \(D\)-algebra equivalence between this localized ambient
+quotient and the principal localization of the existing
+FirstOrderCurveChart t i. The localization element on the curve is
+proved to be the image of the original matrix entry by
+quotientTensorCurveEquiv_pivot. Neither the defining ideal nor the
+denominator is replaced by an unrelated presentation.
+
+### One section vector and the first-order flatness calculation
+
+[GeometricFirstOrderLocalizedReduction.lean](GeometricFirstOrderLocalizedReduction.lean)
+identifies reduction modulo epsilon of each actual localization with
+the corresponding localization of its seed ring. The comparison retains
+every original numerator. In particular, refinedReductionEquiv_equation
+sends the actual first-order row equation to the actual seed row equation.
+
+There are four coordinate charts and nine matrix pivots, giving 36 seed
+refinements. Each ring is a Noetherian localization of a finite
+polynomial quotient over \(\mathbb C\). On the refinement indexed by
+\((a,b)\), coefficient \(b\) of row \(a\) is a unit because that very
+matrix entry has been inverted. The existing finite associated-prime
+avoidance theorem therefore chooses one nonzero \(t\in\mathbb C^3\)
+whose row equation is a nonzerodivisor on every seed refinement.
+The choice allows zero rings and does not assume that any refinement
+has a point.
+
+The regular-quotient argument is elementary. Write \(B\) for a flat
+\(D\)-algebra on one refinement and \(f\) for the chosen equation.
+If \(\varepsilon[b]=0\) in \(B/(f)\), then
+\(\varepsilon b=fc\) for some \(c\in B\). Reduction modulo epsilon
+and regularity of \(\bar f\) give \(c=\varepsilon d\). Consequently
+\(\varepsilon(b-fd)=0\). Flatness of \(B\) gives
+\(b-fd=\varepsilon e\), so \([b]=\varepsilon[e]\) in \(B/(f)\).
+Thus the epsilon kernel in the quotient is its epsilon image, and the
+proved dual-number flatness criterion applies. The actual algebra
+equivalences transport this conclusion to RefinedCurveChart t i p.
+The theorem exists_nonzero_flat_refined_curves supplies one vector
+working on all refinements with no remaining regularity premise.
+
+### Coverage and descent to the actual global curve
+
+[GeometricFirstOrderCurvePivotCover.lean](GeometricFirstOrderCurvePivotCover.lean)
+proves that the nine actual curvePivot elements generate the unit ideal
+on each FirstOrderCurveChart. For an arbitrary prime, contract along
+the original surface map into the tensor curve chart. The normalized
+coordinate maps to one, so the contracted prime is relevant. The
+existing incidence basepoint certificate supplies a matrix pivot
+outside it. This proves the cover for all prime points.
+
+Module.flat_of_isLocalized_span descends \(D\)-flatness from those
+localizations to each complete coordinate chart. The four actual open
+images constructed in
+[GeometricFirstOrderCurveCharts.lean](GeometricFirstOrderCurveCharts.lean)
+then cover the actual first-order curve. Source locality proves flatness
+of firstOrderCurveToBase for the same selected vector. Properness is the
+already constructed closed immersion into the proper first-order surface.
+
+### The same original closed fiber
+
+[GeometricFirstOrderCurveSeedFiber.lean](GeometricFirstOrderCurveSeedFiber.lean)
+forms the actual pullback of firstOrderCurveToBase along the original
+closed point \(\operatorname{Spec}(\mathbb C)\to\operatorname{Spec}(D)\).
+Pullback pasting and firstOrderParameterPoint_at_seed identify this with
+the original relative curve's seed fiber. The earlier global
+seedCurveFiberIso then gives firstOrderCurveSeedFiberIso.
+
+Both projections are proved. In particular, the map into the first-order
+curve is independently lifted from the old seedCurveToRelative map; its
+projection back to the original relative curve is exactly that old map.
+The identification preserves the same vector \(t\) and literal seed.
+
+### Review, deferred compilation, and remaining boundary
+
+Independent source review checked the actual scheme pullbacks, scalar
+towers, tensor/quotient equivalence, explicit localization denominator,
+epsilon reduction, regular-vector choice, arbitrary-prime pivot cover,
+local flatness descent, and closed-fiber identification against Mathlib
+revision 0df444a360eaa60ab8c11dca51a86af692955474. The review added an
+explicit quotient scalar tower and an explicit denominator image lemma.
+Static checks cover imports and dependency cycles, admission tokens,
+whitespace, explanation links, and protected-source preservation.
+No Lean, Lake, compilation, or kernel replay was run. The source remains
+subject to elaboration and kernel validation.
+
+For later compilation, prepare Lean 4.33.1, the pinned Mathlib cache, the
+verifier-style Proposal layout, and compatible compiled imports. After
+the three preceding chart-binding helpers, the new dependency order is
+LocalizedReduction, CurveChartFlat, CurvePivotCover, and FlatCurve, with
+CurveSeedFiber compiled before FlatCurve as a separate branch. With the
+selected module's imports already available, a bounded command is:
+
+```sh
+timeout --signal=TERM --kill-after=3s 45s \
+  lake env lean -M4096 Proposal/GeometricFirstOrderFlatCurve.lean
+```
+
+This is a first-order construction. A nonzero section vector does not
+prove that its zero locus is nonempty. Integration to the required
+moving algebraic curves over a reduced parameter base, the divisor-class
+and Abel--Jacobi comparisons, global Hodge variation and supported
+correspondences, and vanishing of the specified residue remain separate
+obligations. Solution.lean and its exact protected statement are
+unchanged. Prepared for `fqlx` with OpenAI ChatGPT assistance, following
+Ben Diamond and the project collaborators. Earlier verification records
+are preserved below with their original scopes.
+
 ## Formalization checkpoint: actual first-order curve and tensor charts
 
 This increment binds the original fixed-section curve to the retained
