@@ -733,6 +733,27 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeCurveSeedProj.lean
 ```
 
+### Actual coordinate charts of the original specialized curve
+
+[GeometricSpecializedCurveCoordinateChart.lean](GeometricSpecializedCurveCoordinateChart.lean)
+identifies the old and new complex section ideals. The original
+specializedCurve's degree-zero coordinate ring is then proved isomorphic
+to the same explicit three-row affine quotient used in the relative
+fiber calculation. The exact kernel, surjectivity, actual open
+subscheme isomorphism, and original coefficient-base map are retained.
+
+The target is the original specialized curve throughout. Source review
+checked the general ideal contraction and homogeneous chart formulas.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricSpecializedCurveCoordinateChart.olean \
+  Proposal/GeometricSpecializedCurveCoordinateChart.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
