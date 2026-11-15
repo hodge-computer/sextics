@@ -869,6 +869,28 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricFirstOrderTensorReduction.lean
 ```
 
+### The actual first-order chart rows reduce to the retained seed rows
+
+[GeometricFirstOrderChartReduction.lean](GeometricFirstOrderChartReduction.lean)
+binds the tensor reduction to the actual dehomogenized incidence surface
+charts and actual three-row curve quotient charts. Every fixed-section
+row reduces to the same original seed row, with the same complex vector.
+The curve quotient also reduces to the already identified seed quotient.
+
+This supplies exact equations for the next flatness step. The ambient
+flatness and regularity conditions still need to be discharged on
+genuine principal refinements; full-parameter curve flatness is not
+claimed. Source review checked all original specialization maps.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricFirstOrderChartReduction.olean \
+  Proposal/GeometricFirstOrderChartReduction.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
