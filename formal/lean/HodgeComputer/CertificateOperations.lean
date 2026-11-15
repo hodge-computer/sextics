@@ -2,8 +2,8 @@ import HodgeComputer.Verify
 import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
 
 /-!Addition of certificates with different denominators, including nonzero
-quotient remainders. Extracted from fqlx's holdout-bundle construction
-(PR #161), which credits the addition formula in the accepted one-reflection
+quotient remainders. Extracted from fqlx's holdout-bundle construction,
+which credits the addition formula in the accepted one-reflection
 proof. The common-denominator identities apply at every pole parameter.
 -/
 

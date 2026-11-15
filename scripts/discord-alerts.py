@@ -62,12 +62,10 @@ def payload(kind, number, record, site):
     if kind == 'solve':
         full = json.loads((site / record['path']).read_text())
         login = full['credit']['githubLogin']
-        pr = full['pullRequest']
-        if not re.fullmatch(r'[A-Za-z0-9-]+', login) or pr['url'] != f'{REPO}/pull/{int(pr["number"])}':
-            raise ValueError('Invalid solve attribution or PR link')
+        if not re.fullmatch(r'[A-Za-z0-9-]+', login):
+            raise ValueError('Invalid solve attribution')
         embed['fields'] = [
-            {'name': 'Contributor', 'value': f'[`{login}`](https://github.com/{login})', 'inline': True},
-            {'name': 'Accepted proof', 'value': f'[PR #{pr["number"]}]({pr["url"]})', 'inline': True}]
+            {'name': 'Contributor', 'value': f'[`{login}`](https://github.com/{login})', 'inline': True}]
     else:
         embed['fields'] = [{'name': 'Open target', 'value': f'[Explore and discuss]({SITE}/#case/{rid}/discussion)'}]
     return {'embeds': [embed], 'allowed_mentions': {'parse': []}}

@@ -4,7 +4,7 @@ import HodgeComputer.Constructions.EllipticCompanions.Contraction
 /-!
 Target-specific product and weighted descent for split-ternary-q2, conditional
 on two supplied companion scalar primitives. The algebraic assembly adapts the
-accepted crossed-ternary construction of 1337isnot1337 (PR #149), whose generic
+accepted crossed-ternary construction of 1337isnot1337, whose generic
 elliptic contraction is imported from the maintained library.
 Prepared with OpenAI Codex assistance for contributor fqlx.
 No primitive existence is asserted by this conditional assembly.

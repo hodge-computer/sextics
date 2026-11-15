@@ -35,8 +35,8 @@ class CreditRecording(unittest.TestCase):
         self.call()
         path = self.folder/'acceptance.json'
         original = path.read_text()
-        self.assertEqual(json.loads(original), {'schemaVersion': 2, 'githubLogin': 'contributor',
-                         'acceptedAt': self.pr['merged_at'], 'pullRequest': {'number': 12, 'url': self.pr['html_url']}})
+        self.assertEqual(json.loads(original), {'schemaVersion': 3, 'githubLogin': 'contributor',
+                         'acceptedAt': self.pr['merged_at']})
         (self.folder/'Solution.lean').write_text('-- maintained proof source\n')
         self.call()
         self.assertEqual(path.read_text(), original)
@@ -52,9 +52,9 @@ class CreditRecording(unittest.TestCase):
         self.call()
         self.assertFalse((self.folder/'acceptance.json').exists())
 
-    def test_retry_does_not_replace_another_original_pr(self):
+    def test_retry_does_not_replace_another_contributor(self):
         path = self.folder/'acceptance.json'
-        path.write_text(json.dumps({'pullRequest': {'number': 11}}))
+        path.write_text(json.dumps({'githubLogin': 'someone-else'}))
         original = path.read_text()
         with self.assertRaises(ValueError):
             self.call()

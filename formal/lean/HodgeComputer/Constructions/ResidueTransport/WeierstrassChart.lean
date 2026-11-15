@@ -12,7 +12,7 @@ identities over an arbitrary field; an application proves that its own
 coordinate matrix has this form.
 
 Extracted from `hodgepodgeconjecture`'s accepted cyclic cubic construction,
-`data/cycle-three/PhysicalJacobianCoordinates.lean` (PR #165), prepared with
+`data/cycle-three/PhysicalJacobianCoordinates.lean`, prepared with
 OpenAI Codex assistance.
 -/
 

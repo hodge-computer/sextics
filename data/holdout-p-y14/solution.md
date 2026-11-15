@@ -1,6 +1,6 @@
 # A Fermat-cover certificate for \(X_{2} Y_{1}^{4} Y_{2}\)
 
-This proof specializes `fqlx`'s [accepted Fermat-cover and moving-conic construction](https://github.com/hodge-computer/sextics/pull/128) to the fixed target in [this instance](instance.rec). The geometric family is the same; the quotient source and the character removed by trace are computed for this particular target.
+This proof specializes `fqlx`'s [accepted Fermat-cover and moving-conic construction](../holdout/solution.md) to the fixed target in [this instance](instance.rec). The geometric family is the same; the quotient source and the character removed by trace are computed for this particular target.
 
 ## The exact statement
 

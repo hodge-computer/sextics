@@ -3,7 +3,7 @@ import Mathlib.FieldTheory.IsAlgClosed.Basic
 import Mathlib.Analysis.Complex.Polynomial.Basic
 
 /-!
-Extracted from hodgepodgeconjecture's PR #151. The declaration namespace
+Extracted from hodgepodgeconjecture's holdout-ternary-deformation proof. The declaration namespace
 is retained for compatibility; this theorem applies to any integral square system.
 
 Lift the exact mod-five point to characteristic zero using the shared

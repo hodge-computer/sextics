@@ -2320,11 +2320,6 @@ dialog.solution-dialog {
   display: block;
   margin-bottom: 5px;
 }
-.solver-github-link {
-  font: 11px var(--sans);
-  color: #bdc9dc;
-  white-space: nowrap;
-}
 .solution-body {
   padding-top: 9px;
 }
@@ -2678,10 +2673,6 @@ dialog.solution-dialog {
   .solution-contributor {
     align-items: flex-start;
     gap: 12px;
-  }
-  .solver-github-link {
-    font-size: 10px;
-    margin-top: 20px;
   }
   .solver-leaderboard-link {
     gap: 10px;
@@ -3530,9 +3521,6 @@ dialog.participate-dialog {
     right: 20px;
   }
 }
-.solver-github-link {
-  text-align: right;
-}
 .surface-loading {
   position: fixed;
   top: 55%;
@@ -3787,7 +3775,6 @@ dialog.participate-dialog {
   .solution-footer p {
     font-size: 12px;
   }
-  .solver-github-link,
   .solver-leaderboard-link .account-handle {
     font-size: 13px;
   }

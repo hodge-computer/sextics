@@ -494,7 +494,7 @@ polynomial witness.
   construction. The explicit field averaging here follows the same
   principle as the accepted
   [`family-sylvester-norm` solution][sylvester-solution], contributed by
-  **benediamond** in [PR #30][sylvester-pr]. In particular, it is essential
+  **benediamond** in [the family-sylvester-norm proof][sylvester-pr]. In particular, it is essential
   to average the rational fields with their denominators, rather than
   average the numerators alone.
 - The geometric interpretation rests on **Phillip Griffiths's** residue
@@ -514,5 +514,5 @@ polynomial witness.
 [constructions]: https://github.com/hodge-computer/sextics/blob/main/docs/02-explicit-constructions.md
 [geometry]: https://github.com/hodge-computer/sextics/blob/main/docs/03-geometric-support.md
 [sylvester-solution]: https://github.com/hodge-computer/sextics/blob/main/data/family-sylvester-norm/solution.md
-[sylvester-pr]: https://github.com/hodge-computer/sextics/pull/30
+[sylvester-pr]: ../family-sylvester-norm/solution.md
 [diamond]: https://arxiv.org/html/2603.29157#S2

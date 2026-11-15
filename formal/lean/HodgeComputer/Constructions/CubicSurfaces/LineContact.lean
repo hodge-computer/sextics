@@ -5,7 +5,7 @@ import Mathlib.Tactic.FinCases
 import Mathlib.Tactic.NormNum
 import Mathlib.Tactic.Ring
 
-/-! Extracted from `HeadOfNaps`’s holdout-q2 proof (#124).
+/-! Extracted from `HeadOfNaps`’s holdout-q2 proof.
 The coefficient and denominator hypotheses remain explicit. -/
 
 /-! The elementary line primitive for the holdout cubic. Coordinate order is

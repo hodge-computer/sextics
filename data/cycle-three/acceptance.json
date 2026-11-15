@@ -1,9 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "githubLogin": "hodgepodgeconjecture",
-  "acceptedAt": "2026-10-21T01:22:13Z",
-  "pullRequest": {
-    "number": 165,
-    "url": "https://github.com/hodge-computer/sextics/pull/165"
-  }
+  "acceptedAt": "2026-10-21T01:22:13Z"
 }

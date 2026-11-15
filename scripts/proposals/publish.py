@@ -29,16 +29,15 @@ def publish(number):
                  if (m := re.fullmatch(r'data/([A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)/proof\.json', name))]
     for rid in instances:
         path = ROOT/'data'/rid/'acceptance.json'
-        record = {'schemaVersion': 2, 'githubLogin': pr['user']['login'],
-                  'acceptedAt': pr['merged_at'],
-                  'pullRequest': {'number': number, 'url': pr['html_url']}}
+        record = {'schemaVersion': 3, 'githubLogin': pr['user']['login'],
+                  'acceptedAt': pr['merged_at']}
         if path.exists():
             # Retrying publication never overwrites existing attribution.
-            if json.loads(path.read_text())['pullRequest']['number'] != number:
-                raise ValueError(f'{rid} already has credit for another pull request')
+            if json.loads(path.read_text())['githubLogin'] != record['githubLogin']:
+                raise ValueError(f'{rid} already credits another contributor')
         else:
             path.write_text(json.dumps(record, indent=2)+'\n')
-        print(f'Recorded {rid}: {pr["user"]["login"]}, PR #{number}.')
+        print(f'Recorded {rid}: {pr["user"]["login"]}.')
     if not instances:
         print('No new solve in this merge.')
 

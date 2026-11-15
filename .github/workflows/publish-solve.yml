@@ -83,7 +83,7 @@ jobs:
           set -euo pipefail
           git add data
           if git diff --cached --quiet; then exit 0; fi
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "Record accepted solution from PR #$PR"
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "Record an accepted solution"
           auth=$(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)
           # A concurrent change causes a safe rejection; rerun publication from current main.
           git -c "http.https://github.com/.extraheader=AUTHORIZATION: basic $auth" push origin HEAD:main

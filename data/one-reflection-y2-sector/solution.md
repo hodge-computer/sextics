@@ -11,7 +11,7 @@ A=X_0^3Y_0Y_1Y_2,\qquad q=1 .
 Nonconstructive existence was already known from the reflection theorem of the book (the sextic
 is even in \(Y_2\) and the target is odd in it). What is supplied here is a finite algebraic
 existence proof checked by Lean, obtained by adapting the accepted
-[holdout solution](../holdout/solution.md) of `fqlx` (hodge-computer/sextics PR #128).
+[holdout solution](../holdout/solution.md) of `fqlx`.
 
 ## 1. The same cover, a specialised quotient
 
@@ -29,7 +29,7 @@ quotient is
 H=X_0^6+X_1^6+X_2^6+\alpha P\,(X_0^3X_1+X_1^3X_2)+S^3-3SP^2,
 \]
 
-that is, the holdout quotient \(H(\alpha,\beta)\) of PR #128 with both coupling coefficients equal
+that is, the holdout quotient \(H(\alpha,\beta)\) of the holdout proof with both coupling coefficients equal
 to \(\alpha\). In the Lean sources this is expressed by using `weightedHypersurface alpha alpha`
 and `commonCoverPolynomial alpha alpha` on the quotient and cover sides; the coefficient field is
 still the function field of the Fermat curve, because the cover coordinate \(\beta\) is needed
@@ -53,7 +53,7 @@ which has a root in \((-13,-12)\) by the intermediate value theorem
 (\(g(-13)=35869443\), \(g(-12)=-35000185\)). For \(r<-12\) the auxiliary quantities
 \(m,R,M,a,b\) are positive, \(1-r\) is positive, and both Jacobian polynomials
 \(g_{\rm even},g_{\rm odd}\) of the accepted proof are negative, each being minus a polynomial in
-\(-12-r\) with positive coefficients. Thus the seed is nonsingular exactly as in PR #128
+\(-12-r\) with positive coefficients. Thus the seed is nonsingular exactly as in the holdout proof
 (`gEven_neg`, `gOdd_neg`, `seedJacobian_nonsingular`). The cover coordinate \(\beta\) at the seed
 is any sixth root of \(1-\alpha_c^6\) (`Seed.baseBeta`), which puts the seed on the Fermat curve
 (`Seed.base_relation`); the curve identity on \(H(\alpha_c,\alpha_c)\) is `Seed.curve`, obtained
@@ -97,9 +97,9 @@ with only the permitted axioms `propext`, `Classical.choice`, and `Quot.sound`.
 ## 5. Context and attribution
 
 - **`fqlx`** constructed the Fermat cover, the moving conic, the finite-algebra residue solution,
-  and the complete Lean development in [PR #128](https://github.com/hodge-computer/sextics/pull/128)
+  and the complete Lean development in [the holdout proof](../holdout/solution.md)
   with disclosed **OpenAI ChatGPT** assistance; that proof credits `HeadOfNaps`'s
-  fraction-derivation construction ([PR #122](https://github.com/hodge-computer/sextics/pull/122)).
+  fraction-derivation construction.
   The conic family and the two Jacobian polynomials used for the new seed are fqlx's.
 - `fringewidth` identified the hidden reflections of this sextic in the
   [one-reflection discussion](https://github.com/hodge-computer/sextics/discussions/54), and the

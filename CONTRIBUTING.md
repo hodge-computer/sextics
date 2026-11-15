@@ -60,7 +60,7 @@ The manifest has exactly these fields when no JSON witness is submitted:
 
 With `witness.json`, add exactly one further field: `"witnessTheorem": "Submission.witness"`.
 
-The trusted publisher adds `acceptance.json` and derives the rendered content, the atlas status, and leaderboard credit **after** an eligible merge. Do not submit these files or manually edit generated JSON/HTML. Attribution, PR URLs, and acceptance dates are recorded from the merged GitHub PR, separately from mathematical instance definitions. After merging, the PR's separate `solve/publication` check reports whether acceptance and leaderboard updates were recorded, with a link to any failure. Website deployment follows successful publication.
+The trusted publisher adds `acceptance.json` and derives the rendered content, the atlas status, and leaderboard credit **after** an eligible merge. Do not submit these files or manually edit generated JSON/HTML. Attribution and acceptance dates are recorded from the merged GitHub PR, separately from mathematical instance definitions. After merging, the PR's separate `solve/publication` check reports whether acceptance and leaderboard updates were recorded, with a link to any failure. Website deployment follows successful publication.
 
 ### Protected Lean statement
 
@@ -186,7 +186,7 @@ This checks the proof against the checkout's target and exports logs, without co
 
 The protected workflow compiles in an OS sandbox, replays every submitted module with `leanchecker`, and audits the exact theorem and transitive axioms. Proposal code receives no network access, repository write access, or GitHub credentials. A green `solve/lean` status means verification passed and the PR is ready for the owner to merge. Merge authorization is controlled by GitHub repository permissions, independently of CI. Do not request a separate GitHub approving review or workflow sign-off; the owner's merge is the final sign-off. An updated PR commit or changed base requires fresh checks before merging.
 
-The owner merges the checked change. The publication workflow records the PR author, original PR link, and merge date in `acceptance.json`. The website derives status and credit from the current files on main. If recording credit fails, rerun publication for that PR. See [verification and owner sign-off](MAINTAINING.md#verification-sign-off-and-publication).
+The owner merges the checked change. The publication workflow records the PR author and merge date in `acceptance.json`. The website derives status and credit from the current files on main. If recording credit fails, rerun publication for that PR. See [verification and owner sign-off](MAINTAINING.md#verification-sign-off-and-publication).
 
 ## Discuss an instance
 

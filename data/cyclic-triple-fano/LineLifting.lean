@@ -3,7 +3,7 @@ import Proposal.LineFamily
 import HodgeComputer.Constructions.PolynomialCurves.ArithmeticLifting
 
 /-! A finite algebraic family over the generic endpoint, lifted from rbajaj5's line.
-The nonsingular-incidence/flatness argument is due to fqlx's PR #150. -/
+The nonsingular-incidence/flatness argument is due to fqlx's reflection-coupled-fano proof. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency true
 set_option maxHeartbeats 1000000

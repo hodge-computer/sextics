@@ -15,7 +15,7 @@ The statement is a field identity with specified tangent derivatives; it
 requires neither a hypersurface presentation nor characteristic zero.
 
 The residue-normal transport architecture follows `hodgepodgeconjecture`'s
-accepted cyclic cubic construction (PR #165), building on `fqlx` and the
+accepted cyclic cubic construction, building on `fqlx` and the
 Hodge Computer collaborators' residue framework. This balanced-source
 identity was prepared for `benediamond` with OpenAI ChatGPT and Codex
 assistance for the mixed-polar construction. Applications supply their

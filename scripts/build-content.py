@@ -79,7 +79,6 @@ for rid in catalogue['instanceIds']:
     emit(ATLAS / rid / 'why.html', render(prose(local_path(record['rationale'], folder)), root=ROOT, source_path=local_path(record['rationale'], folder)))
     if (folder / 'acceptance.json').is_file():
         receipt = json.loads((folder / 'acceptance.json').read_text())
-        record['pullRequest'] = receipt['pullRequest']
         record['formalStatus'] = 'proved'
         record['evidenceKind'] = 'existence-proof'
         if (folder / 'witness.json').is_file():

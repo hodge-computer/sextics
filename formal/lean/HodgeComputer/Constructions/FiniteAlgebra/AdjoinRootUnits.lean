@@ -2,7 +2,7 @@ import HodgeComputer.Constructions.FiniteAlgebra.AdjoinRootSpecialization
 import HodgeComputer.Constructions.FiniteAlgebra.FiniteAlgebraInverse
 
 /-! Reusable finite-algebra and contact calculus extracted from `HeadOfNaps`’
-accepted quadric-contact-broken (#122) and holdout-q2 (#124) proofs.
+accepted quadric-contact-broken and holdout-q2 proofs.
 See this directory’s README for hypotheses, entry points, and attribution. -/
 
 namespace AdjoinRootSpecialization

@@ -9,7 +9,7 @@ import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
 /-!
 Physical chart for the exact split-ternary-q2 target.
 The coordinate, derivation, and Jacobian arguments adapt the accepted
-crossed-ternary-asymmetric construction of 1337isnot1337 (PR #149), which builds
+crossed-ternary-asymmetric construction of 1337isnot1337, which builds
 on the fqlx and HeadOfNaps finite-field/derivation constructions credited there.
 The chart, exact target, and pole-two field here are target-specific.
 Prepared with OpenAI Codex assistance for contributor fqlx.

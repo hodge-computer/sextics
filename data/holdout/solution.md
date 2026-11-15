@@ -639,5 +639,5 @@ Clearing the nonzero denominators in (8) shows that \(f(r)=0\) implies the base 
 [diamond]: https://arxiv.org/html/2603.29157#S2
 [hidden-reflections]: https://github.com/hodge-computer/sextics/discussions/54#discussioncomment-18986773
 [one-reflection]: https://github.com/hodge-computer/sextics/blob/main/data/one-reflection/solution.md
-[quadric-pr]: https://github.com/hodge-computer/sextics/pull/122
+[quadric-pr]: ../quadric-contact-broken/solution.md
 [fraction-derivation]: https://github.com/hodge-computer/sextics/blob/main/data/quadric-contact-broken/FractionDerivation.lean

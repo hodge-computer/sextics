@@ -1,9 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "githubLogin": "fqlx",
-  "acceptedAt": "2026-10-21T11:40:04Z",
-  "pullRequest": {
-    "number": 170,
-    "url": "https://github.com/hodge-computer/sextics/pull/170"
-  }
+  "acceptedAt": "2026-10-21T11:40:04Z"
 }

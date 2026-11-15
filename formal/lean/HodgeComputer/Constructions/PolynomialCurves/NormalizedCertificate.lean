@@ -4,7 +4,7 @@ import HodgeComputer.Constructions.HoldoutCover.FiniteResidueClearing
 import HodgeComputer.Constructions.HoldoutCover.HomogeneousCertificate
 
 /-!
-Extracted from fqlx's accepted PR #150. The original declaration namespace
+Extracted from fqlx's accepted reflection-coupled-fano proof. The original declaration namespace
 is retained for compatibility; the hypotheses are independent of its target.
 
 Algebraic closure of a polynomial curve family on a six-variable hypersurface. This file assembles the existing polynomial integration,

@@ -2,7 +2,7 @@ import HodgeComputer.Sextic
 import HodgeTarget
 import HodgeComputer.Constructions.HoldoutCover.GeneralizedCover
 
-/- Target specialization of fqlx's accepted PR #128, with Codex assistance
+/- Target specialization of fqlx's accepted holdout proof, with Codex assistance
 for benediamond. The shared construction and its attribution are retained. -/
 noncomputable section
 set_option maxRecDepth 10000

@@ -71,7 +71,7 @@ There is no CI approval gate for solve or maintenance PRs and no approval-dispat
 step. The post-merge publisher relies on GitHub merge permissions too.
 `.github/solve-policy.json` contains verification limits and publication mode.
 
-If credit recording for an already merged solve failed, rerun **Publish accepted solve** with its PR number. Publication reads the merged PR and records its author, original link, and merge date. CI and repository write permissions govern what may enter main.
+If credit recording for an already merged solve failed, rerun **Publish accepted solve** with its PR number. Publication reads the merged PR and records its author and merge date. CI and repository write permissions govern what may enter main.
 
 ### Publication and maintained proofs
 
@@ -79,14 +79,13 @@ If credit recording for an already merged solve failed, rerun **Publish accepted
 
 ```json
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "githubLogin": "contributor",
-  "acceptedAt": "merge timestamp",
-  "pullRequest": {"number": 123, "url": "original PR URL"}
+  "acceptedAt": "merge timestamp"
 }
 ```
 
-These files record attribution. They contain no source hashes, verifier versions, workflow receipts, or stored claims of verification. The publication step does not inspect CI artifacts or require particular merge parents. Retries preserve existing attribution. The PR's `solve/publication` status reports whether recording credit succeeded; website deployment follows.
+These files record attribution. They contain no PR links, source hashes, verifier versions, workflow receipts, or stored claims of verification. The publication step does not inspect CI artifacts or require particular merge parents. Retries preserve existing attribution. The PR's `solve/publication` status reports whether recording credit succeeded; website deployment follows.
 
 Accepted proof sources are maintained in ordinary maintenance PRs. `scripts/check-library.py` rechecks changed proofs, changed witnesses or targets, and applications affected by shared verifier or library changes. Keep the original contributor, PR, and acceptance date when maintaining a solve. Editorial changes to `solution.md` require content checks but no Lean run. Git retains the earlier revisions.
 

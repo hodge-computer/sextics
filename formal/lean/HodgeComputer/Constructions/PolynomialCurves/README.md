@@ -1,15 +1,15 @@
 # Polynomial curves, arithmetic lifting and certificates
 
 These modules extract target-independent steps from the constructions of
-`fqlx` ([PR #150](https://github.com/hodge-computer/sextics/pull/150)) and
-`hodgepodgeconjecture` ([PR #151](https://github.com/hodge-computer/sextics/pull/151)).
+`fqlx` and
+`hodgepodgeconjecture`.
 They build on the maintained
 [HoldoutCover library](../HoldoutCover/README.md), with its attribution to
 `fqlx`, `HeadOfNaps`, and the Lean/mathlib contributors. The original submissions
 disclose AI assistance; this extraction was prepared with Codex assistance for
 `benediamond`.
 
-The original namespaces and attribution are retained. The reflection-coupled and deformed-conic applications import these helpers directly; their incidence data and target binding remain in the instance folders. `WeierstrassConic` is extracted from `hodgepodgeconjecture`'s cyclic cubic construction ([PR #165](https://github.com/hodge-computer/sextics/pull/165)), prepared with OpenAI Codex assistance; the four cubic applications import it.
+The original namespaces and attribution are retained. The reflection-coupled and deformed-conic applications import these helpers directly; their incidence data and target binding remain in the instance folders. `WeierstrassConic` is extracted from `hodgepodgeconjecture`'s cyclic cubic construction, prepared with OpenAI Codex assistance; the four cubic applications import it.
 
 | Module | Interface | Application obligation |
 | --- | --- | --- |

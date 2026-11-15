@@ -1,9 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "githubLogin": "benediamond",
-  "acceptedAt": "2026-10-15T18:42:02Z",
-  "pullRequest": {
-    "number": 10,
-    "url": "https://github.com/hodge-computer/sextics/pull/10"
-  }
+  "acceptedAt": "2026-10-15T18:42:02Z"
 }

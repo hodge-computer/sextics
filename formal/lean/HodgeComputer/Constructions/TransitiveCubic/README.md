@@ -31,6 +31,6 @@ An application still constructs the relevant Jacobian family, a primitive on it,
 
 ## Attribution and applications
 
-Extracted from `fqlx`'s accepted [mixed-biweight construction](https://github.com/hodge-computer/sextics/pull/170), which adapts the cubic machinery and polynomial encodings of `hodgepodgeconjecture`'s [cyclic construction](https://github.com/hodge-computer/sextics/pull/165). The classical covariant normalization follows Tom Fisher and SageMath, as credited in those constructions. Both submissions were prepared with OpenAI Codex assistance. The shared copy uses `Transitive…` namespaces to distinguish this family from the directed cyclic family.
+Extracted from `fqlx`'s accepted [mixed-biweight construction](../../../../../data/mixed-biweight/solution.md), which adapts the cubic machinery and polynomial encodings of `hodgepodgeconjecture`'s [cyclic construction](../../../../../data/cycle-three/solution.md). The classical covariant normalization follows Tom Fisher and SageMath, as credited in those constructions. Both submissions were prepared with OpenAI Codex assistance. The shared copy uses `Transitive…` namespaces to distinguish this family from the directed cyclic family.
 
 The accepted mixed-biweight application imports these modules directly. Its physical equation, incidence construction, coefficient specializations, and certificate closure remain in `data/mixed-biweight/`.
