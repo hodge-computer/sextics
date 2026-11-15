@@ -1,5 +1,162 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Formalization checkpoint: relative dimension three of the actual seed
+
+This increment writes the relative-dimension-three construction for the
+same weighted projective seed as the preceding checkpoints. All new
+declarations have concrete definitions or proof bodies. At the user's
+request, elaboration, compilation, and kernel replay remain deferred.
+The final protected residue-exactness admission is unchanged.
+
+### New endpoint and exact geometric object
+
+[GeometricSeedFermatDimension.lean](GeometricSeedFermatDimension.lean)
+contains
+
+```lean
+theorem CycleQ2SeedFermatDimension.threefold_smoothOfRelativeDimension
+    (r : ℂ) (hr : r ^ 3 = 2) :
+    AlgebraicGeometry.SmoothOfRelativeDimension 3
+      (CycleQ2SeedFermatProj.threefoldToComplex r)
+```
+
+It also assembles the previously constructed point and properness into
+the closed source-level existence statement
+
+```lean
+theorem CycleQ2SeedFermatDimension.exists_nonempty_smoothOfRelativeDimension_proper :
+    ∃ r : ℂ, r ^ 3 = 2 ∧
+      Nonempty (CycleQ2SeedFermatProj.threefold r) ∧
+      AlgebraicGeometry.SmoothOfRelativeDimension 3
+        (CycleQ2SeedFermatProj.threefoldToComplex r) ∧
+      AlgebraicGeometry.IsProper
+        (CycleQ2SeedFermatProj.threefoldToComplex r)
+```
+
+These statements concern the original graded quotient, its native Proj
+scheme, and its original complex structure map. The dimension is now
+supplied by explicit local presentations, rather than inferred from the
+name of the scheme.
+
+### Literal normalized charts
+
+Write
+\[
+ A_r=\mathbb C[z_0,z_1,z_2,z_3,w]/
+       (\mathrm{seedFamily}(r,0)),\qquad z_4=w.
+\]
+For a weight-one coordinate \(z_i\), the new normalized ring is exactly
+\[
+ N_{r,i}=\mathbb C[z_0,z_1,z_2,z_3,w]/
+   (\mathrm{seedFamily}(r,0),z_i-1).
+\]
+All five original generators are retained, so the presentation has five
+variables and two explicit equations.
+
+The file
+[GeometricSeedFermatNormalizedChart.lean](GeometricSeedFermatNormalizedChart.lean)
+constructs an actual complex-algebra isomorphism
+\[
+ N_{r,i}\simeq_{\mathbb C}(A_r[1/z_i])_0.
+\]
+The forward map sends each variable to its weighted coordinate ratio.
+The reverse map factors through the original cone quotient and extends
+across the localization because the image of \(z_i\) is one. The two
+inverse identities are proved on quotient representatives and homogeneous
+fractions. This chart identification uses homogeneity and holds for every
+\(r\); it requires no smoothness or cube-root hypothesis.
+
+### A proved cover by presentations of dimension three
+
+Assume \(r^3=2\), so the defining equation is
+\[
+ F=z_0^6+z_1^6+z_2^6+z_3^6+w^3.
+\]
+The four opens \(D(z_j)\), for \(j\ne i\), cover
+\(\operatorname{Spec}(N_{r,i})\). Otherwise a prime quotient would have
+\(z_i=1\) and every other coordinate zero, and the actual Fermat relation
+would imply \(1=0\). The source constructs this cover directly.
+
+For each such \(j\), the two relations \(F,z_i-1\) and the selected
+derivatives \(\partial_j,\partial_i\) give the Jacobian matrix
+\[
+ \begin{pmatrix}
+  \partial_jF & 0\\
+  \partial_iF & 1
+ \end{pmatrix}.
+\]
+Its determinant is \(\partial_jF\). On \(D(z_j)\), this determinant
+is a unit: it is \(6z_j^5\) for a weight-one coordinate or \(3w^2\)
+for the weight-two coordinate. The constants are units over the original
+complex field.
+
+Adjoining the inverse of \(z_j\) adds one generator and one relation.
+The actual localized ring therefore has a submersive presentation with
+six generators and three relations. The source proves its relative
+dimension is \(6-3=3\). Native basic-open isomorphisms and source locality
+give relative dimension three on each entire normalized spectrum.
+
+Finally, the constructed complex-algebra chart isomorphisms preserve the
+coefficient maps. They transfer this result to the native Proj charts.
+The existing four-chart cover then proves relative dimension three of
+the original projective structure morphism.
+
+### Files and verification scope
+
+| File | Construction |
+| --- | --- |
+| [GeometricSeedFermatNormalized.lean](GeometricSeedFermatNormalized.lean) | The literal two-relation quotient, its coordinate normalization, and its Fermat equation. |
+| [GeometricSeedFermatNormalizedChart.lean](GeometricSeedFermatNormalizedChart.lean) | The actual complex-algebra isomorphism with the native homogeneous-localization chart, including both inverse identities. |
+| [GeometricSeedFermatNormalizedDimension.lean](GeometricSeedFermatNormalizedDimension.lean) | The derivative units, explicit submersive presentations, proved four-open cover, and dimension-three theorem on each normalized spectrum. |
+| [GeometricSeedFermatDimension.lean](GeometricSeedFermatDimension.lean) | Transfer to the original native Proj charts, global relative dimension three, and closed nonempty smooth proper existence. |
+
+Independent source review checked the determinant orientation, presentation
+dimension, prime-quotient cover argument, coefficient maps, and native
+spectrum and localization APIs against Mathlib revision
+0df444a360eaa60ab8c11dca51a86af692955474. Static checks cover new imports,
+admission tokens, whitespace, and preservation of the protected source.
+No Lean, Lake, build, kernel replay, or symbolic computation was run.
+Source review does not establish successful elaboration.
+
+Later compilation requires Lean 4.33.1, the pinned Mathlib cache, the
+verifier-style Proposal layout, and compatible compiled artifacts for all
+imported modules. The new dependency order is GeometricSeedFermatNormalized,
+then GeometricSeedFermatNormalizedChart and GeometricSeedFermatNormalizedDimension,
+then GeometricSeedFermatDimension. With the selected module's imports
+already available, the bounded command is:
+
+```sh
+timeout --signal=TERM --kill-after=3s 45s \
+  lake env lean -M4096 Proposal/GeometricSeedFermatDimension.lean
+```
+
+This is a recorded command for later execution, not an executed check.
+
+### What still removes the final admission
+
+The precise remaining target is still the existing equivalence in
+Solution.lean, CycleQ2Nonconstructive.exact_form_iff_regular_zero:
+construct a nonzero element \(s\) of the actual OpenRing for which the
+actual regular residueClass s vanishes. The established restriction and
+denominator-clearing continuation then gives the protected rational
+primitive and certificate.
+
+In [GeometricExistence.lean](GeometricExistence.lean), the theorem
+CycleQ2GeometricExistence.exact_of_regular_open_comparison still takes
+the actual comparison map, its injectivity, and vanishing of the residue's
+comparison image as hypotheses. Its Betti parameter is still an arbitrary
+complex module. Those geometric hypotheses must be constructed and
+discharged. The written route requires the actual moving cycles and their
+Abel--Jacobi interpretation, geometric Hodge variation and supported
+correspondences, and the de Rham comparison on the chosen affine open.
+
+This increment supplies the dimension-three seed geometry for that route.
+It introduces no new assumption in place of the missing constructions.
+Solution.lean, the protected statement, and all previous verified results
+are unchanged. Prepared for `fqlx` with OpenAI ChatGPT assistance, following
+Ben Diamond and the project's geometric argument. Earlier proof and
+verification records are preserved below with their original scopes.
+
 ## Formalization checkpoint: a nonempty smooth proper projective seed
 
 This continuation adds Lean proof source for one geometric construction:
