@@ -1,5 +1,231 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Truth before formalization — mathematical audit, 15 November 2026
+
+**Conclusion:** the exact affine-residue existence statement has a valid
+classical, nonconstructive proof. The final Lean admission remains. This
+checkpoint audits the mathematics and records a fresh replay of its small
+finite inputs; it adds no Lean declarations and claims no new compilation.
+
+The protected target is still
+
+~~~lean
+Submission.missing_geometric_existence :
+  CycleQ2Nonconstructive.AffineResidueFormExact
+~~~
+
+The audit used branch revision
+[f8ed3c415c88065f6b3c51ff464dcf50ee29ffbb](https://github.com/fqlx/sextics/commit/f8ed3c415c88065f6b3c51ff464dcf50ee29ffbb).
+The complete ordinary proof already appears below under
+[Complete classical proof and finite certificates](#complete-classical-proof-and-finite-certificates).
+The relevant upstream primary sources, read at the pinned revision
+`01b48136366f28affae56762c42d707642baa0d5`, are
+[Chapter 3D, especially §§3D.1–3D.5](https://github.com/hodge-computer/sextics/blob/01b48136366f28affae56762c42d707642baa0d5/docs/03d-hodge-loci.md)
+and
+[Chapter 3, §3.6](https://github.com/hodge-computer/sextics/blob/01b48136366f28affae56762c42d707642baa0d5/docs/03-geometric-support.md).
+The final example of §3D.5 specifies the exact coefficient-\(1/2\)
+cycle-q2 polynomial and the exact numerator, not merely a nearby family.
+
+### Mathematical implications checked
+
+The audit checked the following chain rather than inferring geometric
+existence from the finite ranks alone.
+
+1. **The finite trace is the geometric trace.** The complete-intersection
+   presentation and the Koszul sequence
+   \(0\to\mathcal O_C(1)\to\mathcal O_C(5)^2\to\mathcal O_C(9)\to0\)
+   identify the degree-nine socle with \(H^1(C,K_C)\).
+   Serre trace is consequently one fixed nonzero multiple of the computed
+   functional. The normal connecting fraction
+   \((kL-B)/(g_1g_2)\) gives the stated Hodge-obstruction pairing.
+   The group characters make the three orbit contributions add.
+
+2. **The tangent direction produces an actual moving curve family.**
+   Rank seven makes the invariant Hodge locus smooth and submersive over
+   the full invariant sextic base; its fixed-threefold fiber has dimension
+   one. The exponential sequence over a contractible Stein neighborhood
+   supplies the relative line bundle of the transported integral class.
+   A sufficiently positive twist supplies smooth effective curves.
+   The original small curve need not be unobstructed. The conormal-sequence
+   calculation, using \(H^1(K_D)=0\), proves that the actual Abel–Jacobi
+   derivative is a nonzero multiple of \(3\tau(BL)\).
+   This does not apply a sufficiently ample surface theorem to a cubic
+   surface without checking its hypotheses.
+
+3. **The family is algebraic and reaches the whole invariant sector.**
+   The flag Hilbert scheme is pulled back to the invariant pair-parameter
+   space. Its tangent upper bound equals the dimension of the analytic
+   family of linear systems, proving smoothness and dominance.
+   Relative ample cuts, completion, resolution, and shrinking give
+   projective parameter curves while preserving a nonzero Abel–Jacobi
+   derivative on a retained fiber. Their averaged cylinder image is a
+   nonzero rational subvariation. The scalar Higgs equations make that
+   image all of the invariant \(H^3\), including after the finite étale
+   base changes used in spreading.
+
+4. **A supported projector exists and specializes correctly.**
+   Insert the curve \(H^1\)-projector and group averaging in the
+   correspondence. Its composition with its transpose is invertible on
+   the image: this uses the positive Hodge metrics and the fact that
+   \(H^3\) is primitive, not a positivity claim about an arbitrary
+   indefinite bilinear form. A rational polynomial with zero constant
+   term gives the projector, represented on a divisor square.
+   Fixed-Hilbert-polynomial flag spaces preserve the support dimension;
+   a supporting subscheme cannot become an entire threefold fiber.
+   Flat cycle classes preserve the cohomological equality on connected
+   components. Countability and properness give a component surjecting
+   onto the entire smooth invariant base.
+
+5. **The fixed pencil is included, even if it misses the initial good open.**
+   Pull back that proper component to the pencil, take a finite
+   multisection, and descend its supported cycle by normalized trace.
+   For the affine base curve, \(L^2H^4=0\); hence fiberwise identity on the
+   invariant \(R^3\) gives identity on the actual
+   \(H^1(U,(R^3p_*\mathbb Q)^g)\) subgroup, not just on a graded quotient.
+   The remaining \(H^0(U,R^4)\) class is a hyperplane square and has
+   divisorial support separately.
+
+These checks establish the ordinary geometric input. They do not use the
+Hodge conjecture or assume that every level-one Hodge structure has
+algebraic support. The optional Fano-fourfold route in §3D.4 is unnecessary.
+For the optional primitive normalization \(E-2H\), the numerical
+calculation first gives zero rational Gysin class; multiply by a
+torsion-killing integer if integral zero is needed. The direct family of
+differences of curves already consists of integrally homologous cycles.
+
+### Fresh bounded finite replay
+
+The inspected primary script was
+[verify-hodge-locus-span.py at 520a2a29c40cc40e1df2b1c41980552f25d08e65](https://github.com/hodge-computer/sextics/blob/520a2a29c40cc40e1df2b1c41980552f25d08e65/scripts/verify-hodge-locus-span.py),
+SHA-256
+
+~~~text
+9d673eff17a53fee04eb2677615db689833cf33b5fa23fe16ad42467d22a40a9
+~~~
+
+Only `seed_divisor()` and `higgs_field()` were called. The script's main
+entry point and its larger alternative-fourfold computations were not run.
+The source hash was checked byte for byte. The exact results were:
+
+| Check | Result |
+|---|---:|
+| Prime and seed residues | \(109;\ r=57,\ i=33\) |
+| Complete-intersection length / socle degree | \(96 / 9\) |
+| Noether–Lefschetz matrix rank | \(7\) |
+| Rank after adjoining the derivative row | \(8\) |
+| Displayed \(7\times7\) / \(8\times8\) minors modulo \(109\) | \(80 / 76\) |
+| Kernel witness | \(M\ell=0,\ v\ell=1\) |
+| Upper Hodge dimension / tangent monomials | \(33 / 35\) |
+| Simultaneous Higgs solution space | Exactly the scalar matrices |
+
+The minors and kernel witness were also checked with a separate elementary
+integer modular elimination routine. The Higgs calculation is an exact
+entry-identification graph, not a floating-point or probabilistic rank.
+The bounded replay used a 25-second wall deadline, 20-second CPU limit,
+and 1 GiB address-space limit; its measured calculation took 0.0996 seconds
+and 26,800 KiB peak RSS. No heavy process ran concurrently.
+
+The characteristic-zero seed has \(r^3=2\) and \(i^2=-1\).
+The numbers \(57,33\) are residues modulo \(109\).
+Flatness of the complete-intersection model transfers the nonzero minors
+to characteristic zero. The rank open and the separately established
+smoothness/disjointness opens meet in the irreducible cubic parameter
+space. This argument does not identify the residue \(57\) with a complex
+cube root of two.
+
+For reproduction, place the pinned source in the current directory with
+its original filename; Python 3 and NumPy are the only prerequisites:
+
+~~~sh
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 \
+timeout --signal=TERM --kill-after=2s 25s python3 - <<'PY'
+import hashlib, importlib.util, json, resource
+from pathlib import Path
+resource.setrlimit(resource.RLIMIT_AS, (1024**3, 1024**3))
+resource.setrlimit(resource.RLIMIT_CPU, (20, 20))
+source = Path("verify-hodge-locus-span.py")
+assert hashlib.sha256(source.read_bytes()).hexdigest() == (
+    "9d673eff17a53fee04eb2677615db689833cf33b5fa23fe16ad42467d22a40a9")
+spec = importlib.util.spec_from_file_location("chapter3d_audit", source)
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+seed, _ = module.seed_divisor()
+print(json.dumps({"seed": seed, "higgs": module.higgs_field()}, indent=2))
+PY
+~~~
+
+### Exact target and final implication
+
+For the protected \(F,A\), the maximum-coordinate-modulus argument gives
+smoothness: a vanishing gradient would force either \(6M^5\le2M^5\) or
+\(6M^5\le M^5\). The equation is fixed by
+\(\beta=\operatorname{diag}(1,1,-1,1,1,-1)\) and
+\(\gamma=\operatorname{diag}(\zeta^2,\zeta^2,1,\zeta,1,1)\).
+The numerator has \(\gamma\)-character \(\zeta\), while the homogeneous
+volume has character \(\zeta^2\). Thus the full residue
+\(\alpha=\operatorname{Res}(A\Omega/F^3)\) is invariant.
+
+The audited geometric result gives a proper divisor \(Z\) such that
+\(\alpha|_{X\setminus Z}=0\). No rationality assumption on the individual
+complex residue class is required: the rational invariant projector
+extends to complex coefficients.
+
+On \(X_0=1\), put \(g=\partial_0 f\), \(a=A(1,x)\), and
+\(\nu=dx_1\wedge dx_2\wedge dx_3\wedge dx_4\). The literal residue is
+
+\[
+ \rho=\frac12\left(
+ \frac{a_{00}}{g^3}
+ -\frac{3a_0g_0+a g_{00}}{g^4}
+ +\frac{3a g_0^2}{g^5}\right)\nu .
+\]
+
+The formula was checked against the literal definitions, including the
+positive sign and volume order:
+[residueSourceForm and normalDensity](https://github.com/fqlx/sextics/blob/f8ed3c415c88065f6b3c51ff464dcf50ee29ffbb/data/cycle-q2/GeometricFormalInputs03Part02.lean),
+[affineNormalSource, coordinateDifferential, and volume](https://github.com/fqlx/sextics/blob/f8ed3c415c88065f6b3c51ff464dcf50ee29ffbb/data/cycle-q2/GeometricFormalInputs03Part01.lean),
+and the upstream
+[normalSourceTwo](https://github.com/hodge-computer/sextics/blob/01b48136366f28affae56762c42d707642baa0d5/formal/lean/HodgeComputer/Constructions/HigherResidues/HigherResidue.lean).
+The extra division by \(g\) in the source form gives exactly the powers
+\(g^{-3},g^{-4},g^{-5}\) above.
+
+The elementary pole reduction with \(D_t=g^{-1}\partial_0\) and \(b=a/g\)
+identifies this form with the restricted full residue class:
+\[
+ \frac{a\,dx_0\wedge\nu}{f^3}
+ -d\left[\left(-\frac b{2f^2}-\frac{D_tb}{2f}\right)\nu\right]
+ =\frac12 D_t^2b\,\frac{df}{f}\wedge\nu .
+\]
+This ambient normal derivation does not descend to the hypersurface;
+the identity identifies the residue and is not, by itself, a primitive
+for it.
+
+Choose a nonzero function \(h\) vanishing on the affine part of \(Z\).
+Then \(W=D(gh)\) is a nonempty smooth affine fourfold, and \(\rho\) is
+regular there with zero cohomology class. By
+[Grothendieck's algebraic de Rham theorem, Theorem 1 and equation (4)](https://www.numdam.org/item/PMIHES_1966__29__95_0.pdf),
+there is a global regular three-form \(\eta_W\) on \(W\) with
+\(d\eta_W=\rho\). Restriction to
+\(K=\operatorname{Frac}(\mathbb C[x_0,\ldots,x_4]/(f))\) gives exactly
+\(\eta\in\Omega^3_{K/\mathbb C}\), \(d\eta=\rho\), as required.
+
+### Boundary of this checkpoint
+
+The mathematical existence conclusion is established by the argument
+above and the complete proof below; it is no longer being treated as an
+unproved geometric conjecture. The remaining task is a substantial Lean
+formalization of that proof, including its classical geometric theorems.
+This audit does not claim that the current source-only helper modules
+already implement every comparison, nor that they all compile.
+
+No Lean files, axioms, theorem hypotheses, or protected statements were
+changed. No Lean elaboration, build, or kernel replay was run. The final
+`sorry` remains, and the protected certificate is still incomplete in
+Lean.
+
+Prepared for `fqlx` with OpenAI ChatGPT assistance; the geometric route
+remains credited to Ben Diamond and the collaborators cited below.
+
 
 ## Relative constant curve continuation — source draft, 14 November 2026
 
