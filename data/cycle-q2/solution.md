@@ -540,6 +540,28 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricDualNumberRegularQuotient.lean
 ```
 
+### The actual infinitesimal point lies in the retained base open
+
+[GeometricFirstOrderNeighborhood.lean](GeometricFirstOrderNeighborhood.lean)
+proves that every prime of the dual numbers is the epsilon ideal.
+Consequently the entire topological image of the original first-order
+parameter map is the original seed base point. The open-immersion
+lifting property produces its exact factorization through the existing
+seedSmoothBase, with the original map recovered after the inclusion.
+
+This uses the original neighborhood and seed; it adds no neighborhood
+or factorization assumption. Prime-spectrum, open-immersion, and
+specialization identities were inspected at source level.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricFirstOrderNeighborhood.olean \
+  Proposal/GeometricFirstOrderNeighborhood.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
