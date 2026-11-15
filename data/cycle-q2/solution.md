@@ -711,6 +711,28 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeCurveSeedMap.lean
 ```
 
+### One canonical global seed-curve morphism into the actual fiber
+
+[GeometricRelativeCurveSeedProj.lean](GeometricRelativeCurveSeedProj.lean)
+applies Proj to the preceding canonical graded map. Its square with the
+original surface inclusions commutes, and it lies over the original
+seed parameter map. The pullback universal property therefore gives
+seedCurveToFiber from the existing specializedCurve into the actual
+scheme-theoretic seed fiber, with both projections specified.
+
+This file constructs the map but does not by itself assert that it is
+an isomorphism. The coefficient and actual Proj-chart arguments were
+inspected at source level.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeCurveSeedProj.olean \
+  Proposal/GeometricRelativeCurveSeedProj.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
