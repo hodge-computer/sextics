@@ -218,6 +218,32 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricIncidenceChartDerivatives.lean
 ```
 
+### Eliminating the omitted column by weighted Euler
+
+[GeometricIncidenceChartMinorCover.lean](GeometricIncidenceChartMinorCover.lean)
+uses the weighted Euler identities for the original ordered equations
+\((F,h)\), of degrees six and three. In the actual surface quotient both
+weighted gradient sums vanish. The omitted coordinate has weight one
+and equals one, so its column is an explicit linear combination of the
+four retained columns.
+
+It follows that every normalized cone minor lies in the ideal generated
+by genuine affine Jacobian minors. An original minor outside any ideal
+therefore supplies an affine minor outside the same ideal; a repeated
+column would give zero, so the extracted pair is injective. This
+comparison needs neither a prime ideal nor a field or smoothness
+hypothesis. Independent review checked the exact weighted Euler API,
+finite-sum identity and ideal-containment argument. Static scans passed.
+**No compilation or kernel replay was run.**
+
+With the toolchain and prepared-import prerequisites above, the deferred bounded check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceChartMinorCover.olean \
+  Proposal/GeometricIncidenceChartMinorCover.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
