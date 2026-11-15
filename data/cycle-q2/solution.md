@@ -891,6 +891,30 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricFirstOrderChartReduction.lean
 ```
 
+### A unit-value ideal functional has a unique actual inverse section
+
+[GeometricIdealFunctionalInverse.lean](GeometricIdealFunctionalInverse.lean)
+proves an elementary commutative-ring fact: an R-linear functional
+from an ideal I to R taking an element q to one is already an isomorphism.
+Linearity forces x = q times phi(x), giving injectivity, surjectivity,
+uniqueness of q, the explicit inverse, and I = span(q).
+No domain or preexisting local-freeness assumption is needed.
+
+This is a tool for the image/dual-orbit-ideal comparison. It does not
+assume or establish the required unit-value witness for the original
+section. Independent source review corrected the orientation of the
+principal-ideal divisibility witness; pinned ideal and linear-equivalence
+APIs were inspected.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIdealFunctionalInverse.olean \
+  Proposal/GeometricIdealFunctionalInverse.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
