@@ -1,6 +1,6 @@
 import Proposal.PhysicalCubicVolume
 import Proposal.PhysicalCubicJets
-import Proposal.PhysicalJacobianGeometry
+import HodgeComputer.Constructions.ResidueTransport.WeierstrassChart
 import Proposal.PhysicalJacobianCalculus
 import Proposal.PhysicalJacobianVolumeIdentity
 import HodgeComputer.Constructions.ResidueTransport.CoordinateIndependence
@@ -16,7 +16,7 @@ set_option maxRecDepth 10000
 namespace MixedPolarPhysicalJacobianCoordinates
 open HoldoutConstruction MixedPolarPhysical MixedPolarPhysicalCoordinates
 open MixedPolarPhysicalShear MixedPolarPhysicalTangent MixedPolarPhysicalCubicJets
-open MixedPolarExtendedVolume MixedPolarJacobianGeometry
+open MixedPolarExtendedVolume WeierstrassChart
 open scoped BigOperators
 local instance : Algebra ℤ Extension := Ring.toIntAlgebra _
 def liftedCoordinate (i : Fin 6) : Extension := ι (coordinate i)

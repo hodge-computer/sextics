@@ -1,4 +1,4 @@
-import Proposal.PhysicalJacobianGeometry
+import HodgeComputer.Constructions.ResidueTransport.WeierstrassChart
 
 /-! The determinant-to-volume identity is calculated over an abstract field,
 so normalization of the concrete algebraic extension does not enlarge this
@@ -7,7 +7,7 @@ noncomputable section
 set_option maxHeartbeats 1000000
 namespace MixedPolarJacobianVolumeIdentity
 open scoped BigOperators
-open MixedPolarJacobianGeometry
+open WeierstrassChart
 variable {K : Type*} [Field K] [CharZero K]
 
 def weight (p : Fin 6 → K) : K := p 3^3/(4*p 0^5*p 1^2*p 2^2)

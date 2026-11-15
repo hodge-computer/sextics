@@ -10,7 +10,7 @@ noncomputable section
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 3000000
 namespace MixedPolarCubicSourceJets
-open TransitiveCovariants MixedPolarCubicJetCalculus TrivSqZeroExt
+open TransitiveCovariants ResidueFirstJets MixedPolarCubicJetCalculus TrivSqZeroExt
 variable {K : Type*} [Field K] [CharZero K]
 
 @[simp] lemma derivation_numeral (D : Derivation ℤ K K) (n : ℕ) [n.AtLeastTwo] :

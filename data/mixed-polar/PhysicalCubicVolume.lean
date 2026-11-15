@@ -73,20 +73,10 @@ lemma volume_direction (z : FunctionField) :
     Matrix.head_cons,Matrix.tail_cons]
   ring
 
-section ProductRule
-variable {K ι : Type*} [Field K] [Fintype ι]
-lemma divergence_product (Ds : ι → Derivation ℤ K K) (g s : K) (w : ι → K) :
-    residueDivergence Ds g (fun i => s*w i)=
-      s*residueDivergence Ds g w+∑ i,w i*Ds i s := by
-  simp only [residueDivergence,fieldDivergence,Derivation.leibniz,smul_eq_mul,
-    Finset.sum_add_distrib,mul_assoc,← Finset.mul_sum]
-  ring
-end ProductRule
-
 theorem correction_divergence (z : FunctionField) :
     residueDivergence tangent (gradient 0) (fun i => (z/3)*volumeVector i)=
       ratio^3*cubicNormal/3*derivative z := by
-  rw [divergence_product,volume_divergence,mul_zero,zero_add]
+  rw [HoldoutConstruction.residueDivergence_smul,volume_divergence,mul_zero,zero_add]
   have hd (i : Fin 5) : tangent i (z/3)=tangent i z/3 := by
     rw [Derivation.leibniz_div]
     simp [smul_eq_mul]
@@ -178,7 +168,7 @@ lemma balanced_direction (z : Extension) :
 theorem correction_divergence (z : Extension) :
     residueDivergence liftedTangent (ι (gradient 0)) (fun i => (z/3)*balancedVector i)=
       ι MixedPolarPhysicalNormalTransport.sourceFactor*normal/3*extendedDerivative z := by
-  rw [MixedPolarPhysicalCubicVolume.divergence_product,balanced_divergence,mul_zero,zero_add]
+  rw [HoldoutConstruction.residueDivergence_smul,balanced_divergence,mul_zero,zero_add]
   have hd (i : Fin 5) : liftedTangent i (z/3)=liftedTangent i z/3 := by
     rw [Derivation.leibniz_div]
     simp [smul_eq_mul]

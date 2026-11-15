@@ -1,4 +1,4 @@
-import Proposal.PhysicalJacobianGeometry
+import HodgeComputer.Constructions.ResidueTransport.WeierstrassChart
 import Mathlib.RingTheory.Derivation.Basic
 
 /-! Generic derivative calculation before specializing the coefficient field.
@@ -8,7 +8,7 @@ noncomputable section
 set_option maxHeartbeats 3000000
 set_option maxRecDepth 10000
 namespace MixedPolarJacobianCalculus
-open MixedPolarJacobianGeometry
+open WeierstrassChart
 variable {K : Type*} [Field K]
 local instance : Algebra ℤ K := Ring.toIntAlgebra _
 

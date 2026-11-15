@@ -1,3 +1,4 @@
+import HodgeComputer.Constructions.PolynomialCurves.WeierstrassConic
 import Mathlib.Algebra.Polynomial.Basic
 import Mathlib.Algebra.Polynomial.Coeff
 import Mathlib.Data.ZMod.Basic
@@ -15,6 +16,7 @@ set_option maxHeartbeats 8000000
 noncomputable section
 namespace MixedPolarSeed
 open Polynomial
+open WeierstrassConic (slotCoordinate slotDegree)
 abbrev K := ZMod 5
 section Ring
 variable {R : Type*} [CommRing R]
@@ -81,8 +83,6 @@ lemma gradient_seed : gradient 1 3 r X x y=![g0,g1,g2] := by
   · exact g2_eq
 
 
-def slotCoordinate : Fin 13 → Fin 3 := ![0,0,1,1,1,1,2,2,2,2,2,2,2]
-def slotDegree : Fin 13 → ℕ := ![1,2,1,2,3,4,0,1,2,3,4,5,6]
 def coefficientJacobian : Matrix (Fin 13) (Fin 13) K := fun i j =>
   ((gradient 1 3 r X x y (slotCoordinate j))*X^(slotDegree j)).coeff i.val
 def seedMatrix : Matrix (Fin 13) (Fin 13) K := ![
