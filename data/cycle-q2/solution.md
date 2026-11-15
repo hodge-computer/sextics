@@ -754,6 +754,27 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricSpecializedCurveCoordinateChart.lean
 ```
 
+### Denominator-safe homogeneous chart specialization
+
+[GeometricGradedAwaySpecialization.lean](GeometricGradedAwaySpecialization.lean)
+constructs homogeneous Away maps when the image of the original
+denominator is propositionally equal to the literal target denominator.
+The fraction formula and actual Proj chart naturality square follow
+by substituting this equality. This avoids hiding the needed chart
+comparison in a dependent denominator cast.
+
+Pinned Mathlib fraction and Proj naturality signatures were checked,
+and the short helper received source review.
+**No Lean elaboration, compilation, or kernel replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricGradedAwaySpecialization.olean \
+  Proposal/GeometricGradedAwaySpecialization.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
