@@ -244,6 +244,30 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricIncidenceChartMinorCover.lean
 ```
 
+### The actual proper curve over the retained smooth neighborhood
+
+[GeometricRelativeCurveNeighborhood.lean](GeometricRelativeCurveNeighborhood.lean)
+restricts the original relative curve morphism to the existing
+`seedSmoothBase`. Its map into `seedSmoothSource` is the actual
+target restriction of the original closed immersion. The base
+composition, original inclusions and both pullback squares are explicit.
+
+For every fixed complex vector the original relative curve and this
+restricted curve are proper over their respective original bases.
+The property uses the existing surface properness and the original
+closed immersion. No curve-flatness, nonempty-fiber, relative-dimension-one
+or divisor-class assertion is made. Source review checked the exact
+restriction and pullback APIs; static scans passed. **No Lean compilation
+or kernel replay was run.**
+
+With the toolchain and prepared-import prerequisites above, the deferred bounded check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricRelativeCurveNeighborhood.olean \
+  Proposal/GeometricRelativeCurveNeighborhood.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
