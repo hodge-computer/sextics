@@ -353,6 +353,29 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeCartierFamily.lean
 ```
 
+### Exact contraction for all degree-zero generated ideals
+
+[GeometricGradedIdealContraction.lean](GeometricGradedIdealContraction.lean)
+uses the existing degree-zero projection of an ordinary homogeneous
+localization as a linear retraction. Span induction proves that
+extending any ideal of the true degree-zero ring and contracting it
+along the canonical inclusion recovers the same ideal.
+
+The proof permits arbitrary generator sets and zero divisors. This
+extends the earlier principal-ideal argument and allows the actual
+three section rows to be handled on weight-one coordinate charts.
+Source review checked the strengthened induction predicate and exact
+span-induction API. Static scans passed. **No compilation or kernel
+replay was run.**
+
+Deferred single-module check (not run):
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricGradedIdealContraction.olean \
+  Proposal/GeometricGradedIdealContraction.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
