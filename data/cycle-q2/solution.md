@@ -1,5 +1,212 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Continuation: a smooth common section and the original orbit divisor
+
+The new source strengthens the section choice and identifies every factor
+of the original orbit ideal. The mathematical argument below then chooses
+a smooth curve using the same section parameters and places it in the
+actual proper family. The new Lean source is uncompiled. The final
+protected affine-exactness theorem remains open; none of the arguments
+below is substituted for that theorem by an additional assumption.
+
+### Regular parameters meet every nonempty principal open
+
+[GeometricSeedSectionDensity.lean](GeometricSeedSectionDensity.lean)
+proves the following strengthening of the previous existential endpoint.
+For every nonzero polynomial \(P\in\mathbb C[t_0,t_1,t_2]\), there is one
+\(t\ne0\) with \(P(t)\ne0\) satisfying all 36 original first-order
+regularity conditions and all 27 original linkage-chart conditions.
+The theorem exists_nonempty_flat_curve_in_principal_open packages this
+same \(t\) with the original proper flat nonempty first-order curve,
+its original seed-fiber isomorphism, and all original local ideal maps.
+It does not assume a different parameter for each property.
+
+Here is the density argument. Let \(V=\mathbb C^3\). Pulling back each
+associated prime along its actual coefficient-combination map gives a
+proper linear subspace of \(V\). Include the zero subspace as well.
+There are finitely many forbidden subspaces, since all 63 chart rings
+are Noetherian. Choose a vector \(v\) outside all of them using the
+previous regular-section theorem. A nonzero polynomial \(P\) has some
+\(w\) with \(P(w)\ne0\), because the ground field is infinite.
+
+For each forbidden subspace \(W\), the line \(w+av\) meets \(W\) at
+most once: two distinct intersection parameters would give
+\((a-b)v\in W\), hence \(v\in W\). Moreover
+\[
+ Q(a)=P(w+av)
+\]
+is a nonzero one-variable polynomial, since \(Q(0)=P(w)\ne0\).
+Its roots and all forbidden intersection parameters form a finite set.
+Any scalar outside that set gives the required common vector. The new
+source constructs this restriction polynomial and proves both finiteness
+statements. Thus the common regular vectors meet every nonempty Zariski
+open, since such an open contains a nonempty principal open.
+
+### The same parameter can give a smooth nonempty curve
+
+This paragraph is a written geometric proof, not a claim that generic
+smoothness has already been formalized in the new helper.
+
+Let \(D\) be the literal seed surface at \(r=57,\theta=1\), and let
+\(\mathscr G\subset D\times\mathbb A^3_t\) be the original universal
+zero scheme of the three rows of \(Mt\). The original matrix-pivot
+opens cover \(D\). On \(D(M_{ab})\), the rank-one relations give
+\[
+ (Mt)_k=\frac{M_{kb}}{M_{ab}}(Mt)_a.
+\]
+The coefficient of \(t_b\) in \((Mt)_a\) is the unit \(M_{ab}\).
+Eliminating \(t_b\) therefore identifies this actual universal curve
+chart over the surface chart with a polynomial algebra in the other
+two parameters. This is the algebra of sectionQuotientEquiv in
+[GeometricIncidenceSection.lean](GeometricIncidenceSection.lean).
+The normalized projective pivot and the original homogeneous pivot
+differ by a unit on these charts, so they define the same equation
+ideal after taking degree-zero fractions.
+
+The surface \(D\) is smooth, using the literal seed-surface results in
+[GeometricIncidenceSurfaceNeighborhood.lean](GeometricIncidenceSurfaceNeighborhood.lean).
+Consequently \(\mathscr G\) is smooth over \(\mathbb C\): locally it is
+the product of a smooth surface chart with \(\mathbb A^2\).
+Its projection \(\pi:\mathscr G\to\mathbb A^3_t\) is proper, since
+\(D\) is projective and \(\mathscr G\) is closed in its product with
+the parameter space. The original projective properness theorem is
+genericCurveToBase_proper in
+[GeometricIncidenceProjectiveProper.lean](GeometricIncidenceProjectiveProper.lean).
+
+Characteristic-zero generic smoothness now gives a dense open
+\(U_{\mathrm{sm}}\subset\mathbb A^3\) over which \(\pi\) is smooth.
+If the source has several components, apply the theorem to its finitely
+many smooth components and intersect the resulting target opens.
+The version used is generic smoothness on the target, which requires
+the source to be smooth; see Theorem 3.3 of
+[Vakil's classes 51--52](https://math.stanford.edu/~vakil/0506-216/216Cjun2807.pdf).
+Equivalently, the generic fiber is regular over the characteristic-zero
+function field, and properness lets one remove the image of the closed
+nonsmooth locus. Nonemptiness causes no additional restriction:
+seed_specializedCurve_nonempty in
+[GeometricSeedSectionNonempty.lean](GeometricSeedSectionNonempty.lean)
+applies to every complex vector \(t\).
+
+Choose a nonzero polynomial \(P\) with
+\(D(P)\subset U_{\mathrm{sm}}\). The density theorem gives one vector
+in \(D(P)\) satisfying all 63 original regularity conditions. For this
+vector, \(\Gamma_t\) is smooth and nonempty. Its local ideal is
+generated by a regular row, so it is an effective Cartier divisor in
+the smooth surface; its nonempty components have dimension one.
+This strengthens the existential choice. It does not assign smoothness
+to a previously chosen arbitrary regular vector.
+
+### The actual family is smooth near the whole seed fiber
+
+Let \(S\) be the original etale incidence parameter scheme, restricted
+to the existing neighborhood where its relative surface \(D_S\to S\)
+is smooth of relative dimension two. Keep the single vector \(t\)
+chosen above constant over \(S\). The original relative curve is
+defined by the unchanged rows \(M_s t\).
+
+On every original pivot open, its scheme-theoretic ideal has the
+single equation supplied by relativeSectionKernel_principal in
+[GeometricRelativeSectionIdeal.lean](GeometricRelativeSectionIdeal.lean).
+At each point of the smooth regular seed curve, this equation has
+nonzero differential in the relative cotangent space of the surface.
+The relative Jacobian criterion therefore makes the actual curve
+morphism smooth of relative dimension one near that point. This is
+also a proof of flatness there. It uses the one-equation presentation
+inside the relative smooth surface, rather than inferring higher-order
+flatness from the earlier dual-number calculation. The relevant local
+criterion is [Stacks 01V4](https://stacks.math.columbia.edu/tag/01V4).
+
+The relative curve is proper by the original projective construction
+and base change. The closed complement of its locus of smoothness of
+relative dimension one has closed image in \(S\), and that image misses
+the seed. Removing it leaves an open neighborhood on which the entire
+original curve family is smooth and proper of relative dimension one.
+Its image is open because the morphism is smooth, and contains the seed.
+Restricting the base to that image retains nonempty fibers throughout.
+
+The original map from \(S\) to the time coordinate and invariant sextic
+coefficients is etale, by parameterToBase_etale in
+[GeometricIncidenceEtaleParameter.lean](GeometricIncidenceEtaleParameter.lean).
+Fixing the sextic coefficients gives an actual smooth algebraic curve
+etale over the time line. The existing time derivation kills those
+coefficients and takes the time coordinate to one, so it is the retained
+tangent on this fixed-sextic curve. This constructs an algebraic moving
+family directly from the original incidence equations. It makes no
+claim that the entire containing literal threefold is smooth.
+
+### Every orbit component is a translate of the original curve
+
+[GeometricSeedOrbitDivisor.lean](GeometricSeedOrbitDivisor.lean) maps the
+full original homogeneous curve ideal through the literal cyclic action
+before applying the actual projective dehomogenization. The theorem
+originalCurveTranslateIdeal_eq_component identifies each such image
+with the corresponding original linkage component, for every cube root
+of unity. The endpoint orbitIdeal_eq_originalCurveTranslate_product gives,
+on each actual covering chart,
+\[
+ I_E=I_C I_{gC}I_{g^2C}.
+\]
+Mapping equations through \(g^*\) gives inverse-image translates; the
+product over the entire order-three orbit is the same in either convention.
+The global ideal equality follows by checking on this cover.
+
+Together with the previous written Cartier comparison, this yields
+\[
+ E=C+gC+g^2C,\qquad
+ \mathcal O_D(\Gamma_t)\simeq
+ \mathcal O_D(C+gC+g^2C+4H).
+\]
+Each orbit component occurs once. Accordingly, the Hodge first Chern
+class has the relation
+\[
+ c_1(\mathcal O_D(\Gamma_t))=
+ \sum_{j=0}^2 c_1(\mathcal O_D(g^jC))+4c_1(\mathcal O_D(1)).
+\]
+The later factor of three belongs to an equivariant scalar trace
+calculation, not to this divisor identity. In particular the twisted
+obstruction representative
+\(q+\zeta^2\gamma(q)+\zeta\gamma^2(q)\) must not be read as a divisor
+sum with weighted cycle coefficients.
+
+The standard divisor convention is recorded in
+[Stacks 0C4S](https://stacks.math.columbia.edu/tag/0C4S).
+The Hodge Chern class is defined by \(d\log\), is additive under tensor
+product, and is compatible with pullback; see
+[Stacks 0FLE](https://stacks.math.columbia.edu/tag/0FLE).
+These written geometric identifications do not construct the missing
+global Chern-class, Kodaira--Spencer, or Abel--Jacobi comparison in Lean.
+
+### The original linkage relation controls evaluation on overlaps
+
+[GeometricSeedSectionBalance.lean](GeometricSeedSectionBalance.lean)
+proves the actual functional identity
+\[
+ \lambda\varphi_t(x)=x\sum_b t_b b_b
+\]
+for every element of the original left ideal. Equality on its original
+generators follows from \(\lambda M_{ab}=a_a b_b\), and the original
+generator-extensionality theorem extends it to the whole ideal. The
+same identity is proved after applying the associated-sheaf functor,
+on every actual affine subopen. Multiplication by \(\lambda\) remains
+injective there, using its original regularity and localization.
+
+For the actual projective sections, the new source retains
+\[
+ \lambda_j=u^4\lambda_i,\qquad
+ b_{j,t}=u^8b_{i,t},\qquad b_{i,t}=\sum_b t_b b_{i,b}.
+\]
+The complex coefficient vector is the same on both charts. Combining
+these equations with the prescribed source transition
+\(x_i=u^4x_j\) gives
+\[
+ \lambda_i\varphi_{i,t}(x_i)
+ =x_i b_{i,t}
+ =\lambda_i\varphi_{j,t}(x_j).
+\]
+Cancellation proves agreement of the actual evaluations. This supplies
+the algebra used to construct the global evaluation from the original
+twisted ideal, without identifying independently chosen functionals.
+
 ## Source checkpoint: the same section gives the flat curve and the original ideal maps
 
 This increment supplies the direct local maps needed for the divisor
