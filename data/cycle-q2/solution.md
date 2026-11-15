@@ -194,6 +194,30 @@ timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
   Proposal/GeometricRelativeSectionIdeal.lean
 ```
 
+### The actual shifted-coordinate derivative comparison
+
+[GeometricIncidenceChartDerivatives.lean](GeometricIncidenceChartDerivatives.lean)
+proves the chain rule for the actual dehomogenization substitution, by
+polynomial induction. The normal chart coordinate is \(X_4+X_2^2\)
+after the selected weight-one coordinate is set to one. The inverse
+triangular derivative transformation is included explicitly.
+
+Every normalized cone minor on the retained four columns is expressed
+as a sum of three genuine affine Jacobian minors with the exact shift
+coefficients. This accounts for the shift rather than treating the
+dehomogenization as an unshifted coordinate deletion. The remaining
+omitted column is handled by weighted Euler in the next component.
+Independent source review checked the signs and determinant expansion.
+Static scans passed. **No compilation or kernel replay was run.**
+
+With the toolchain and prepared-import prerequisites above, the deferred bounded check is:
+
+```sh
+timeout --signal=TERM --kill-after=5s 55s lean -M4096 -DmaxHeartbeats=800000 \
+  -o Proposal/GeometricIncidenceChartDerivatives.olean \
+  Proposal/GeometricIncidenceChartDerivatives.lean
+```
+
 ## Relative smooth neighborhood continuation — source draft, 14 November 2026
 
 This continuation connects the constructed chart rings to actual scheme
