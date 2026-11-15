@@ -9,55 +9,88 @@ in particular to the vector already chosen for the first-order flatness
 construction. The existing seed-fiber isomorphism transports an actual
 point. No replacement vector or auxiliary parameter family is used.
 
-Source-only draft. Not elaborated, compiled, or kernel-replayed.
-This does not assert an Abel--Jacobi or protected residue comparison.
-Prepared for fqlx with OpenAI ChatGPT assistance, 15 November 2026.
+This endpoint remains source-only: its complete dependency chain and this
+file have not finished compilation. It does not assert an Abel--Jacobi
+or protected residue comparison. Prepared for fqlx with OpenAI ChatGPT
+assistance, 15 November 2026.
 
-## Bounded dependency compilation checkpoint, 15 November 2026
+## Actual bounded dependency compilation receipt, 15 November 2026
 
-CI run 43747495934 at d02d69db5a896d6030430ce2d445006fbd18cbd0
-compiled 16 actual dependency modules, through GeometricChartKaehler,
-with Lean 4.33.1 and Mathlib 0df444a360eaa60ab8c11dca51a86af692955474.
-The 33 printed theorem-level axiom audits contain only propext,
-Classical.choice, and Quot.sound. This is not independent kernel replay.
-All 16 successful source hashes and all 16 emitted object hashes were
-checked against the downloaded receipt. Unlike the old source-only
-checkpoint, this artifact retains the actual compiled objects.
+Source baseline: 2ec547c6da661aeb281db6ed4775ba38336b47f3.
+Latest checked CI commit: 254a27089f855b048a4cf1794fcba6f21e3c9189.
+Lean 4.33.1; Mathlib 0df444a360eaa60ab8c11dca51a86af692955474.
 
-Run: https://github.com/fqlx/sextics/actions/runs/43747495934
-Artifact: 14175415801, q2-dependency-rebuild-43747495934, retained 30 days.
-Artifact ZIP SHA-256:
+54 actual modules in this endpoint's 327-module dependency closure have
+compiled successfully: 34 Proposal modules and 20 shared/generated modules.
+The latest receipt reuses 39 hash-matched successes and records 15 new ones.
+All 54 successful source hashes and emitted object hashes were verified
+against the downloaded artifact. The actual .olean files are retained,
+not merely their names or historical build claims.
+
+These successes include GeometricSurfaceAdjunction, GeometricSeed,
+GeometricSurfaceBindings, all four GeometricFormalInputs01 parts,
+GeometricIncidenceTraceData, HigherResidue, the generated HodgeTarget,
+and the unchanged shared HodgeComputer.Verify module. Compiling the
+checker and target is not verification of Submission.certificate.
+
+Last compiled module: Proposal.GeometricIncidenceTraceData.
+Next unchecked module: Proposal.GeometricFormalInputs02Part01.
+The last batch stopped normally at its configured bound, before starting
+the next module. A green bounded-CI run is not a completed proposal build.
+
+The accumulated 135 printed theorem-level axiom audits contain only
+propext, Classical.choice, and Quot.sound; none contains sorryAx.
+They cover the endpoints actually printed, not every declaration. There
+was no independent leanchecker replay or protected acceptance run.
+
+## Reproducible runs and retained binary artifacts
+
+Run https://github.com/fqlx/sextics/actions/runs/43747495934:
+16 successful dependencies, followed by a total-batch interruption.
+Artifact 14175415801; ZIP SHA-256:
 6f6b130b9873ebccca963c2a0021233382b177a2e93f3b27d1c46d9b670c3732
 
-The total batch deadline interrupted GeometricSurfaceAdjunction before
-an object or Lean error was produced. A separate bounded continuation
-then reused all 16 source-and-object-hash-matched dependencies and compiled
-that unchanged module successfully: exit 0, 88.597 seconds, peak sampled
-resident memory 3157612 KiB, no memory-guard stop. It emitted the actual
-GeometricSurfaceAdjunction.olean. All 17 successful source and object
-hashes were checked against the downloaded continuation receipt.
-
-Continuation run: https://github.com/fqlx/sextics/actions/runs/43748269711
-Checked commit: b25a5fd1fdd822bc667c5032bbfb9df986475327
-Artifact: 14175013789, q2-dependency-rebuild-43748269711, retained 30 days.
-Artifact ZIP SHA-256:
+Run https://github.com/fqlx/sextics/actions/runs/43748269711:
+the 16 successes were reused, then unchanged GeometricSurfaceAdjunction
+compiled successfully in 88.597 seconds, with sampled peak RSS 3157612 KiB.
+Artifact 14175013789; ZIP SHA-256:
 98784a7c1e2bfab4bfef79d08b04c25ec2f5fe9cbebd0b999e4dec63d45a470c
-Surface-adjunction source SHA-256:
-00acf5c0ffb3107422834a0ce5ec02fa6a2c90897c86df2d4c60c0e9834ed3a3
-Surface-adjunction object SHA-256:
-c49570d30e9ac7fb57731bfbb8facffbd8672d4eb142e33d18c5a8c098254f42
 
-The continuation stopped normally at its one-new-module bound; the next
-unchecked module was GeometricSeedConormalBases. The selected dependency
-closure contains 327 modules; 17 successes are not a complete build.
-SurfaceAdjunction contains no printed theorem-level axiom audit; the 33
-audits above concern the first 16 modules only. No independent kernel
-replay or protected acceptance run was performed.
+Run https://github.com/fqlx/sextics/actions/runs/43748815087:
+22 more modules compiled, giving 39. HigherResidue reached a default
+heartbeat limit because the direct runner omitted the existing Lake
+maxHeartbeats=0 setting. That attempt is not counted as a success.
+Artifact 14175715953; ZIP SHA-256:
+2839315959e00e5097e5e00af3e685fd0adf85ae15a4d51f053ee9b16a764e71
 
-The remaining dependency chain, seed_specializedCurve_nonempty, and this
-module are NOT thereby checked. The original protected existence
-admission remains unchanged. These checkpoint notes change no definition,
-theorem statement, or proof body.
+Run https://github.com/fqlx/sextics/actions/runs/43749434573:
+the invocation was corrected to honor the existing Lake option; the
+shared proof source was not changed. HigherResidue then passed in 31.383
+seconds, followed by 14 more modules. All 54 objects are in this artifact.
+Artifact 14176355553, q2-dependency-rebuild-43749434573, retained 30 days.
+ZIP SHA-256:
+f56889b0567227f3c4281ce142aaa781ec5f4b18bcb1e7a6251b103916591804
+
+The isolated CI branch fqlx/q2-dependency-rebuild-20261115 contains the
+resumable driver. It checks source and recursive dependency signatures,
+compiler identity, and every cached artifact hash before reuse. Proof
+compilations ran sequentially with one worker, a 5120 MiB Lean-managed
+memory budget, a 6144 MiB resident-memory ceiling, and a 1536 MiB reserve.
+The largest observed sampled RSS was 4892260 KiB. No memory guard fired.
+The adjunction continuation had a 360-second module deadline; the later
+batches used 180-second module deadlines and a 600-second batch bound.
+
+## Exact remaining boundary
+
+seed_specializedCurve_nonempty and this module are NOT thereby checked.
+The supported-correspondence and protected residue-exactness formalizations
+are not supplied by these dependency compilation results. The original
+Submission.missing_geometric_existence admission remains unchanged.
+Protected Solution.lean blob: 3422e79fc263c2b098c61ce9a9577e303aefc009.
+
+No theorem statement, definition, or proof body was changed for this
+checkpoint. Workflow and runner changes remain on the isolated CI branch,
+not in the solve proposal. No full-project build or kernel replay ran.
 -/
 
 set_option autoImplicit false
