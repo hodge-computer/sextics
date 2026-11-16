@@ -21,8 +21,7 @@ actual mapped cubic coefficients cannot all come from a scalar rescaling.
 There is no supplied derivation, generic coefficient point, or
 non-rescaling premise.
 
-Status: source-only proof draft. Compilation and independent kernel replay
-are deferred at the user's request. The geometric strategy is due to Ben
+The geometric strategy is due to Ben
 Diamond and the cited work of Claire Voisin. Prepared for fqlx with OpenAI
 ChatGPT assistance.
 -/
@@ -42,26 +41,37 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceMonomials
   CycleQ2IncidenceProjectiveTrace CycleQ2PolynomialProjectiveTrace
   CycleQ2IncidenceTraceFamily CycleQ2IncidenceTraceDerivative
   CycleQ2IncidenceEtaleParameter CycleQ2IncidenceTimeCurve
+  CycleQ2SegreModularDetectorMatrixBinding
 open scoped TensorProduct
 
+attribute [local instance] CycleQ2IncidenceTimeCurve.timeParameterCommRing
+  CycleQ2IncidenceTimeCurve.parameter_sexticModule
+  CycleQ2IncidenceTimeCurve.genericSexticModule
+
+local instance parameterComplexModule : Module ℂ ParameterAlgebra := Algebra.toModule
+local instance sexticComplexModule : Module ℂ SexticRing := Algebra.toModule
+local instance complexSexticSMul : SMul ℂ SexticRing := sexticComplexModule.toSMul
+local instance sexticParameterSMul : SMul SexticRing ParameterAlgebra :=
+  CycleQ2IncidenceTimeCurve.parameter_sexticModule.toSMul
+local instance complexParameterSMul : SMul ℂ ParameterAlgebra := parameterComplexModule.toSMul
+local instance genericTimeCommRing : CommRing GenericTimeAlgebra := inferInstance
+
 /-! ## The actual scalar maps -/
+
+private theorem sexticToTrace_C (c : ℂ) : sexticToTrace (C c) = C c :=
+  MvPolynomial.rename_C _ _
+
+@[simp] theorem sexticToParameter_C (c : ℂ) :
+    sexticToParameter (C c) = algebraMap ℂ ParameterAlgebra c :=
+  (congrArg (algebraMap TraceRing ParameterAlgebra) (sexticToTrace_C c)).trans
+    (IsScalarTower.algebraMap_apply ℂ TraceRing ParameterAlgebra c).symm
 
 /-- The inclusion of sextic coefficients preserves the original complex
 scalar structure on the unchanged parameter algebra. -/
 instance parameter_complex_sextic_tower :
-    IsScalarTower ℂ SexticRing ParameterAlgebra := by
-  apply IsScalarTower.of_algebraMap_eq
-  intro c
-  change algebraMap ℂ ParameterAlgebra c =
-    algebraMap TraceRing ParameterAlgebra
-      (MvPolynomial.rename
-        (Sum.inr : FullInvariantIndex 6 → Unit ⊕ FullInvariantIndex 6) (C c))
-  rw [rename_C]
-  exact IsScalarTower.algebraMap_apply ℂ TraceRing ParameterAlgebra c
-
-@[simp] theorem sexticToParameter_C (c : ℂ) :
-    sexticToParameter (C c) = algebraMap ℂ ParameterAlgebra c :=
-  (IsScalarTower.algebraMap_apply ℂ SexticRing ParameterAlgebra c).symm
+    IsScalarTower ℂ SexticRing ParameterAlgebra :=
+  IsScalarTower.of_algebraMap_eq (R := ℂ) (S := SexticRing) (A := ParameterAlgebra)
+    (fun c => (sexticToParameter_C c).symm)
 
 /-- This is exactly the ring map whose spectrum is
 `genericTimeCurveToParameters`. -/
@@ -70,6 +80,9 @@ def parameterToGeneric : ParameterAlgebra →+* GenericTimeAlgebra :=
     ParameterAlgebra →ₐ[SexticRing] GenericTimeAlgebra).toRingHom
 
 attribute [local instance] Algebra.TensorProduct.rightAlgebra
+
+local instance genericTimeFieldModule : Module GenericSexticField GenericTimeAlgebra :=
+  Algebra.toModule
 
 local instance genericTime_complex_parameter_tower :
     IsScalarTower ℂ ParameterAlgebra GenericTimeAlgebra := by
@@ -85,10 +98,11 @@ local instance genericTime_complex_parameter_tower :
 
 local instance genericTime_sextic_field_tower :
     IsScalarTower SexticRing GenericSexticField GenericTimeAlgebra := by
-  apply IsScalarTower.of_algebraMap_eq
-  intro p
-  simp only [Algebra.TensorProduct.algebraMap_apply,
-    Algebra.algebraMap_self, RingHom.id_apply]
+  exact IsScalarTower.of_algebraMap_eq
+    (R := SexticRing) (S := GenericSexticField) (A := GenericTimeAlgebra)
+    (fun p => by
+      simp only [Algebra.TensorProduct.algebraMap_apply,
+        Algebra.algebraMap_self, RingHom.id_apply])
 
 @[simp] theorem parameterToGeneric_complex (c : ℂ) :
     parameterToGeneric (algebraMap ℂ ParameterAlgebra c) =
@@ -168,7 +182,7 @@ theorem complexTimeDerivation_genericField (a : GenericSexticField) :
       using (IsLocalization.map_units GenericSexticField q).map
         (algebraMap GenericSexticField GenericTimeAlgebra)
   apply hunit.mul_left_cancel
-  simpa only [mul_zero] using hderivative
+  simpa only [mul_zero, zero_add] using hderivative
 
 /-- The same regular vector field, now correctly linear over the full
 generic sextic field. -/
@@ -276,6 +290,44 @@ theorem genericProjectiveTraceNumerator_isUnit : IsUnit genericProjectiveTraceNu
   rw [genericProjectiveTraceNumerator_eq]
   exact incidence_projectiveTraceNumerator_isUnit.map parameterToGeneric
 
+private theorem no_rescale_after_map {A B : Type*} [CommRing A] [CommRing B] [Nontrivial B]
+    (φ : A →+* B) (x₀ x₁ x₈ dx₀ dx₁ dx₈ b c : A)
+    (hu : IsUnit (x₀ * (b * dx₁ + c * dx₈) - (b * x₁ + c * x₈) * dx₀))
+    (a : B) (h₀ : φ dx₀ = a * φ x₀) (h₁ : φ dx₁ = a * φ x₁)
+    (h₈ : φ dx₈ = a * φ x₈) : False := by
+  apply (hu.map φ).ne_zero
+  simp only [map_sub, map_mul, map_add]
+  rw [h₀, h₁, h₈]
+  ring
+
+private theorem source_sparse_numerator_isUnit :
+    IsUnit (incidencePoint (Sum.inl fullCubicLeadingIndex) *
+      (algebraMap ℂ ParameterAlgebra (Complex.I / 6) *
+          CycleQ2IncidenceEtaleParameter.timeDerivation (incidencePoint (Sum.inl (cubicIndex 1))) +
+        algebraMap ℂ ParameterAlgebra (-(1 + Complex.I) / 6) *
+          CycleQ2IncidenceEtaleParameter.timeDerivation (incidencePoint (Sum.inl (cubicIndex 8)))) -
+      (algebraMap ℂ ParameterAlgebra (Complex.I / 6) * incidencePoint (Sum.inl (cubicIndex 1)) +
+        algebraMap ℂ ParameterAlgebra (-(1 + Complex.I) / 6) * incidencePoint (Sum.inl (cubicIndex 8))) *
+        CycleQ2IncidenceEtaleParameter.timeDerivation (incidencePoint (Sum.inl fullCubicLeadingIndex))) := by
+  have h := incidence_projectiveTraceNumerator_isUnit
+  rw [derivation_linear_value] at h
+  simpa only [mapped_traceWeights_formula] using h
+
+private theorem mapped_cubic_not_rescaling :
+    ¬ ∃ a : GenericTimeAlgebra, ∀ j : FullInvariantIndex 3,
+      parameterToGeneric (CycleQ2IncidenceEtaleParameter.timeDerivation (incidencePoint (Sum.inl j))) =
+        a * parameterToGeneric (incidencePoint (Sum.inl j)) := by
+  rintro ⟨a, ha⟩
+  exact no_rescale_after_map parameterToGeneric
+    (incidencePoint (Sum.inl fullCubicLeadingIndex))
+    (incidencePoint (Sum.inl (cubicIndex 1))) (incidencePoint (Sum.inl (cubicIndex 8)))
+    (CycleQ2IncidenceEtaleParameter.timeDerivation (incidencePoint (Sum.inl fullCubicLeadingIndex)))
+    (CycleQ2IncidenceEtaleParameter.timeDerivation (incidencePoint (Sum.inl (cubicIndex 1))))
+    (CycleQ2IncidenceEtaleParameter.timeDerivation (incidencePoint (Sum.inl (cubicIndex 8))))
+    (algebraMap ℂ ParameterAlgebra (Complex.I / 6))
+    (algebraMap ℂ ParameterAlgebra (-(1 + Complex.I) / 6))
+    source_sparse_numerator_isUnit a (ha _) (ha _) (ha _)
+
 /-- The cubic retains projective motion over the
 generic sextic field: no scalar in the actual parameter algebra accounts
 for all of its coefficient derivatives. -/
@@ -284,18 +336,8 @@ theorem generic_cubic_derivative_not_rescaling :
       genericTimeDerivation (genericIncidencePoint (Sum.inl j)) =
         a * genericIncidencePoint (Sum.inl j) := by
   rintro ⟨a, ha⟩
-  apply genericProjectiveTraceNumerator_isUnit.ne_zero
-  change ∀ j : FullInvariantIndex 3,
-    complexTimeDerivation (genericIncidencePoint (Sum.inl j)) =
-      a * genericIncidencePoint (Sum.inl j) at ha
-  change genericIncidencePoint (Sum.inl fullCubicLeadingIndex) *
-      complexTimeDerivation
-        ((algebraMap ℂ GenericTimeAlgebra ∘ traceWeights) ⬝ᵥ genericIncidencePoint) -
-    ((algebraMap ℂ GenericTimeAlgebra ∘ traceWeights) ⬝ᵥ genericIncidencePoint) *
-      complexTimeDerivation (genericIncidencePoint (Sum.inl fullCubicLeadingIndex)) = 0
-  rw [derivation_linear_value, mapped_traceWeights_formula, mapped_traceWeights_formula,
-    ha _, ha _, ha _]
-  ring
+  exact mapped_cubic_not_rescaling ⟨a, fun j =>
+    (genericIncidencePoint_derivative (Sum.inl j)).symm.trans (ha j)⟩
 
 end CycleQ2GenericTimeDerivation
 
