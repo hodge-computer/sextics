@@ -19,8 +19,7 @@ Composing these two proper maps proves properness of the original
 
 No smoothness, fiber-dimension, or properness premise is supplied. The
 theorem holds for the full section-parameter family, including singular
-fibers. Status: source-only proof draft; verification is deferred at the
-user's request.
+fibers.
 -/
 
 set_option autoImplicit false
@@ -49,18 +48,45 @@ theorem polynomialGrade_zero_eq_C {R : Type} [CommRing R]
     have hw : Finsupp.weight geometricWeight e = 0 := hp hn
     rw [geometricWeight_weight] at hw
     have heq : e = 0 := by
-      ext i
-      simp only [Finsupp.zero_apply]
-      simp only [fullDegree] at hw
-      fin_cases i <;> omega
+      change e 0 + e 1 + e 2 + e 3 + 2 * e 4 = 0 at hw
+      have h0 : e (0 : Fin 5) = 0 := by omega
+      have h1 : e (1 : Fin 5) = 0 := by omega
+      have h2 : e (2 : Fin 5) = 0 := by omega
+      have h3 : e (3 : Fin 5) = 0 := by omega
+      have h4 : e (4 : Fin 5) = 0 := by omega
+      apply Finsupp.ext
+      intro i
+      fin_cases i
+      · exact h0
+      · exact h1
+      · exact h2
+      · exact h3
+      · exact h4
     exact he heq
   ext e
   by_cases he : e = 0
   · subst e
     simp
-  · simp [coeff_C, he, hcoeff e he]
+  · simp [coeff_C, Ne.symm he, hcoeff e he]
 
 variable {S : Type} [CommRing S] [Algebra ℂ S]
+
+local instance curveCommRing (y : ParameterIndex → S) : CommRing (GenericCurveRing y) :=
+  inferInstance
+local instance zeroCommRing (y : ParameterIndex → S) : CommRing (genericCurveGrade y 0) :=
+  inferInstance
+local instance coefficientModule (y : ParameterIndex → S) :
+    Module (SectionBase S) (GenericCurveRing y) := Algebra.toModule
+local instance degreeZeroModule (y : ParameterIndex → S) :
+    Module (genericCurveGrade y 0) (GenericCurveRing y) := Algebra.toModule
+local instance coefficientZeroModule (y : ParameterIndex → S) :
+    Module (SectionBase S) (genericCurveGrade y 0) := Algebra.toModule
+local instance coefficientSMul (y : ParameterIndex → S) :
+    SMul (SectionBase S) (GenericCurveRing y) := (coefficientModule y).toSMul
+local instance degreeZeroSMul (y : ParameterIndex → S) :
+    SMul (genericCurveGrade y 0) (GenericCurveRing y) := (degreeZeroModule y).toSMul
+local instance coefficientZeroSMul (y : ParameterIndex → S) :
+    SMul (SectionBase S) (genericCurveGrade y 0) := (coefficientZeroModule y).toSMul
 
 /-- This is exactly the coefficient map appearing in
 `genericCurveToBase`; no new map or grading is chosen. -/
@@ -86,11 +112,13 @@ theorem genericCurveZeroHom_surjective (y : ParameterIndex → S) :
     (polynomialGrade_zero_eq_C p hp).symm
 
 theorem genericCurveZeroHom_spec_closedImmersion (y : ParameterIndex → S) :
-    IsClosedImmersion (Spec.map (CommRingCat.ofHom (genericCurveZeroHom y))) :=
+    IsClosedImmersion (Spec.map (CommRingCat.ofHom
+      (R := SectionBase S) (S := genericCurveGrade y 0) (genericCurveZeroHom y))) :=
   IsClosedImmersion.spec_of_surjective _ (genericCurveZeroHom_surjective y)
 
 theorem genericCurveZeroHom_spec_proper (y : ParameterIndex → S) :
-    IsProper (Spec.map (CommRingCat.ofHom (genericCurveZeroHom y))) := by
+    IsProper (Spec.map (CommRingCat.ofHom
+      (R := SectionBase S) (S := genericCurveGrade y 0) (genericCurveZeroHom y))) := by
   letI := genericCurveZeroHom_spec_closedImmersion y
   infer_instance
 
@@ -105,7 +133,8 @@ the finite set of polynomial generators. -/
 theorem genericCurve_finiteType_zero (y : ParameterIndex → S) :
     Algebra.FiniteType (genericCurveGrade y 0) (GenericCurveRing y) := by
   letI : IsScalarTower (SectionBase S) (genericCurveGrade y 0) (GenericCurveRing y) :=
-    IsScalarTower.of_algebraMap_eq' rfl
+    IsScalarTower.of_algebraMap_eq' (R := SectionBase S)
+      (S := genericCurveGrade y 0) (A := GenericCurveRing y) rfl
   letI := genericCurve_finiteType_coefficients y
   exact Algebra.FiniteType.of_restrictScalars_finiteType
     (SectionBase S) (genericCurveGrade y 0) (GenericCurveRing y)
@@ -124,7 +153,8 @@ theorem genericCurveToBase_proper (y : ParameterIndex → S) :
   letI := genericCurve_toSpecZero_proper y
   letI := genericCurveZeroHom_spec_proper y
   change IsProper (Proj.toSpecZero (genericCurveGrade y) ≫
-    Spec.map (CommRingCat.ofHom (genericCurveZeroHom y)))
+    Spec.map (CommRingCat.ofHom (R := SectionBase S)
+      (S := genericCurveGrade y 0) (genericCurveZeroHom y)))
   infer_instance
 
 /-- Every actual base change of this family is proper, in particular
