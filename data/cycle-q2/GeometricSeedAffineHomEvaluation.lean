@@ -16,7 +16,6 @@ with the existing `OrbitDual`. No condition is imposed on an arbitrary
 target, and no identification with the original single curve is used.
 The localization assertion on proper basic opens remains a separate step.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -137,9 +136,14 @@ def structureTopEquiv (A : CommRingCat.{0}) :
     rw [Scheme.Modules.smul_Spec_def]
     have hi : (⊤ : (Spec A).Opens).leTop.op =
         𝟙 (op (⊤ : (Spec A).Opens)) := Subsingleton.elim _ _
-    rw [hi, Functor.map_id]
-    change (Scheme.ΓSpecIso A).hom ((Scheme.ΓSpecIso A).inv r * s) =
-      r * (Scheme.ΓSpecIso A).hom s
+    change (Scheme.ΓSpecIso A).hom
+        ((Spec A).presheaf.map (⊤ : (Spec A).Opens).leTop.op
+          ((Scheme.ΓSpecIso A).inv r) * (show Γ(Spec A, ⊤) from s)) =
+      r * (Scheme.ΓSpecIso A).hom (show Γ(Spec A, ⊤) from s)
+    rw [hi, CategoryTheory.Functor.map_id]
+    change (Scheme.ΓSpecIso A).hom
+        ((Scheme.ΓSpecIso A).inv r * (show Γ(Spec A, ⊤) from s)) =
+      r * (Scheme.ΓSpecIso A).hom (show Γ(Spec A, ⊤) from s)
     rw [map_mul, Iso.inv_hom_id_apply]
 
 /-- The genuine internal Hom of the actual three-component orbit ideal. -/
@@ -152,10 +156,26 @@ existing algebraic orbit dual, with no additional chart hypotheses. -/
 def orbitHomTopEquiv (i : Fin 3) :
     (moduleSpecΓFunctor (R := CommRingCat.of (AffineRing i))).obj (orbitHomSheaf i)
       ≃ₗ[AffineRing i] OrbitDual i :=
-  (topHomEquiv (ModuleCat.of (AffineRing i) (OrbitIdeal i))
-    (structureModule (CommRingCat.of (AffineRing i)))).trans
-      ((LinearEquiv.refl (AffineRing i) (OrbitIdeal i)).arrowCongr
-        (structureTopEquiv (CommRingCat.of (AffineRing i))))
+  let e : (moduleSpecΓFunctor (R := CommRingCat.of (AffineRing i))).obj (orbitHomSheaf i)
+      ≃ₗ[AffineRing i] (OrbitIdeal i →ₗ[AffineRing i]
+        (moduleSpecΓFunctor (R := CommRingCat.of (AffineRing i))).obj
+          (structureModule (CommRingCat.of (AffineRing i)))) :=
+    topHomEquiv (A := CommRingCat.of (AffineRing i)) (ModuleCat.of (AffineRing i) (OrbitIdeal i))
+      (structureModule (CommRingCat.of (AffineRing i)))
+  let k : (moduleSpecΓFunctor (R := CommRingCat.of (AffineRing i))).obj
+      (structureModule (CommRingCat.of (AffineRing i))) ≃ₗ[AffineRing i] AffineRing i :=
+    structureTopEquiv (CommRingCat.of (AffineRing i))
+  let f : (OrbitIdeal i →ₗ[AffineRing i]
+      (moduleSpecΓFunctor (R := CommRingCat.of (AffineRing i))).obj
+        (structureModule (CommRingCat.of (AffineRing i)))) ≃ₗ[AffineRing i] OrbitDual i :=
+    (LinearEquiv.refl (AffineRing i) (OrbitIdeal i)).arrowCongr k
+  e.trans f
+
+/-- The actual tilde image of an original ideal element in the native section carrier. -/
+def orbitElementSection (i : Fin 3) (x : OrbitIdeal i) :
+    (tilde (R := CommRingCat.of (AffineRing i)) (ModuleCat.of (AffineRing i) (OrbitIdeal i))).val.obj (op ⊤) :=
+  (tilde.toOpen (R := CommRingCat.of (AffineRing i)) (ModuleCat.of (AffineRing i) (OrbitIdeal i)) ⊤).hom
+    (show ModuleCat.of (AffineRing i) (OrbitIdeal i) from x)
 
 theorem orbitHomTopEquiv_evaluate (i : Fin 3)
     (H : (moduleSpecΓFunctor (R := CommRingCat.of (AffineRing i))).obj (orbitHomSheaf i))
@@ -163,18 +183,18 @@ theorem orbitHomTopEquiv_evaluate (i : Fin 3)
     orbitHomTopEquiv i H x =
       (Scheme.ΓSpecIso (CommRingCat.of (AffineRing i))).hom
         (localLinearHomEvaluate (Spec (CommRingCat.of (AffineRing i))).sheaf
-          (tilde (ModuleCat.of (AffineRing i) (OrbitIdeal i)))
+          (tilde (R := CommRingCat.of (AffineRing i)) (ModuleCat.of (AffineRing i) (OrbitIdeal i)))
           (structureModule (CommRingCat.of (AffineRing i))) ⊤ H
-          ((tilde.toOpen (ModuleCat.of (AffineRing i) (OrbitIdeal i)) ⊤).hom x)) := rfl
+          (orbitElementSection i x)) := rfl
 
 /-- Every original orbit functional has a unique actual local-sheaf
 morphism on the full affine chart, retaining its original evaluations. -/
 theorem orbitHomTopEquiv_symm_evaluate (i : Fin 3) (φ : OrbitDual i) (x : OrbitIdeal i) :
     localLinearHomEvaluate (Spec (CommRingCat.of (AffineRing i))).sheaf
-        (tilde (ModuleCat.of (AffineRing i) (OrbitIdeal i)))
+        (tilde (R := CommRingCat.of (AffineRing i)) (ModuleCat.of (AffineRing i) (OrbitIdeal i)))
         (structureModule (CommRingCat.of (AffineRing i))) ⊤
         ((orbitHomTopEquiv i).symm φ)
-        ((tilde.toOpen (ModuleCat.of (AffineRing i) (OrbitIdeal i)) ⊤).hom x) =
+        (orbitElementSection i x) =
       (Scheme.ΓSpecIso (CommRingCat.of (AffineRing i))).inv (φ x) := by
   have hx := LinearMap.congr_fun ((orbitHomTopEquiv i).apply_symm_apply φ) x
   have h := congrArg (fun a : AffineRing i =>

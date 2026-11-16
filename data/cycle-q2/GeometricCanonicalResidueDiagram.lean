@@ -4,9 +4,6 @@ import Proposal.GeometricCartierNormalBinding
 /-!
 # The actual Cartier-to-canonical residue diagram
 
-Status: source-only proof draft. Compilation and independent kernel replay
-are deferred at the user's request. No new axioms or admissions are used.
-
 For any actual global two-form on the literal surface, multiplication
 gives a morphism from the unchanged Cartier inverse-ideal sequence to the
 actual canonical residue sequence. The right vertical map is constructed
@@ -37,7 +34,7 @@ open CycleQ2GeometricDifferentialSheaf CycleQ2GeometricIntrinsicNormal
   CycleQ2GeometricCanonicalGluing CycleQ2LocalHomFrame
   CycleQ2CanonicalResidueSheaf CycleQ2GeometricSheafLocalExactness
   CycleQ2SurfaceExteriorFrameBinding CycleQ2NormalPushforwardIso
-  CycleQ2GeometricIntrinsicCartierCohomology
+  CycleQ2GeometricIntrinsicCartierCohomology CycleQ2GeometricModuleLocalIso
 
 attribute [local instance] CycleQ2GeometricIntrinsicNormal.overHomCommModuleMk
   CycleQ2GeometricIntrinsicNormal.localLinearRingModule
@@ -45,6 +42,10 @@ attribute [local instance] CycleQ2GeometricIntrinsicNormal.overHomCommModuleMk
 
 abbrev GlobalForm := CanonicalForms.val.obj (op (⊤ : Surface.Opens))
 abbrev StructureModule := SheafOfModules.unit (ringSheaf Surface.sheaf)
+
+local instance canonicalSectionModule (O : Surface.Opens) :
+    Module Γ(Surface,O) (CanonicalForms.val.obj (op O)) :=
+  (CanonicalForms.val.obj (op O)).isModule
 
 /-- Restriction of an actual global form, in the existing exterior sheaf. -/
 def formRestriction (σ : GlobalForm) (O : Surface.Opens) :
@@ -94,18 +95,23 @@ theorem scalar_regular_square (σ : GlobalForm) :
   intro r
   apply localLinearHom_ext
   intro V x
-  change
-    ((Surface.presheaf.map V.hom.op (show Γ(Surface, O.unop) from r)) *
-      inclusionCoefficient Surface.sheaf IdealSheaf
-        (kernel.ι (schemeStructureMap immersion)) V.left x) •
-      formRestriction σ V.left =
-    inclusionCoefficient Surface.sheaf IdealSheaf
-      (kernel.ι (schemeStructureMap immersion)) V.left x •
-      CanonicalForms.val.map V.hom.op
-        ((show Γ(Surface, O.unop) from r) • formRestriction σ O.unop)
-  rw [CanonicalForms.val.map_smul, formRestriction_restrict, smul_smul]
-  exact congrArg (fun a : Γ(Surface, V.left) => a • formRestriction σ V.left)
-    (mul_comm _ _)
+  let rV : Γ(Surface,V.left) := Surface.presheaf.map V.hom.op
+    (show Γ(Surface,O.unop) from r)
+  let c : Γ(Surface,V.left) := inclusionCoefficient Surface.sheaf IdealSheaf
+    (kernel.ι (schemeStructureMap immersion)) V.left x
+  change (rV * c) • formRestriction σ V.left =
+    c • CanonicalForms.val.map V.hom.op
+      ((show Γ(Surface,O.unop) from r) • formRestriction σ O.unop)
+  have hres : CanonicalForms.val.map V.hom.op
+      ((show Γ(Surface,O.unop) from r) • formRestriction σ O.unop) =
+      rV • formRestriction σ V.left :=
+    (CanonicalForms.val.map_smul V.hom.op
+      (show Γ(Surface,O.unop) from r) (formRestriction σ O.unop)).trans
+      (congrArg (fun z : CanonicalForms.val.obj (op V.left) => rV • z)
+        (formRestriction_restrict σ V.hom.le))
+  exact (congrArg (fun z : Γ(Surface,V.left) => z • formRestriction σ V.left)
+    (mul_comm rV c)).trans ((smul_smul c rV (formRestriction σ V.left)).symm.trans
+      (congrArg (fun z : CanonicalForms.val.obj (op V.left) => c • z) hres.symm))
 
 /-- The pole/residue composite kills the unchanged scalar inclusion. -/
 theorem scalar_pole_residue_zero (σ : GlobalForm) :
@@ -114,6 +120,9 @@ theorem scalar_pole_residue_zero (σ : GlobalForm) :
     canonicalResidue_regular, comp_zero]
 
 local instance originalReduction_epi : Epi (inverseIdealReduction immersion) :=
+  literalInverseIdealComplex_shortExact.epi_g
+
+local instance originalComplexReduction_epi : Epi (literalInverseIdealComplex (57 : ℂ) 1).g :=
   literalInverseIdealComplex_shortExact.epi_g
 
 /-- Contraction by the global form is uniquely induced by the original
@@ -147,26 +156,18 @@ theorem internalHomFrame_poleMultiplication (σ : GlobalForm)
       frameCoordinate (exteriorFrame 57 1 a) O hO (formRestriction σ O) • f := by
   apply localLinearHom_ext
   intro V x
-  change (exteriorFrame 57 1 a).app V.left (V.hom.le.trans hO)
-      ((f.val.app (op V) x : Γ(Surface, V.left)) • formRestriction σ V.left) =
-    Surface.presheaf.map V.hom.op
-      (frameCoordinate (exteriorFrame 57 1 a) O hO (formRestriction σ O)) •
-      (f.val.app (op V) x : Γ(Surface, V.left))
-  rw [map_smul]
+  let e : CanonicalForms.val.obj (op V.left) ≃ₗ[Γ(Surface,V.left)] Γ(Surface,V.left) :=
+    (exteriorFrame 57 1 a).app V.left (V.hom.le.trans hO)
+  let c : Γ(Surface,V.left) := f.val.app (op V) x
+  let q : Γ(Surface,V.left) := Surface.presheaf.map V.hom.op
+    (frameCoordinate (exteriorFrame 57 1 a) O hO (formRestriction σ O))
+  change e (c • formRestriction σ V.left) = q * c
   have he := (exteriorFrame 57 1 a).naturality V.hom.le hO (formRestriction σ O)
-  rw [formRestriction_restrict] at he
-  change Surface.presheaf.map V.hom.op
-      (frameCoordinate (exteriorFrame 57 1 a) O hO (formRestriction σ O)) =
-    (exteriorFrame 57 1 a).app V.left (V.hom.le.trans hO) (formRestriction σ V.left)
-    at he
-  rw [← he]
-  change (f.val.app (op V) x : Γ(Surface, V.left)) *
-      Surface.presheaf.map V.hom.op
-        (frameCoordinate (exteriorFrame 57 1 a) O hO (formRestriction σ O)) =
-    Surface.presheaf.map V.hom.op
-        (frameCoordinate (exteriorFrame 57 1 a) O hO (formRestriction σ O)) *
-      (f.val.app (op V) x : Γ(Surface, V.left))
-  exact mul_comm _ _
+  change q = e (CanonicalForms.val.map V.hom.op (formRestriction σ O)) at he
+  have hcoord : q = e (formRestriction σ V.left) :=
+    he.trans (congrArg e (formRestriction_restrict σ V.hom.le))
+  exact (e.map_smul c (formRestriction σ V.left)).trans
+    ((congrArg (fun z : Γ(Surface,V.left) => c * z) hcoord.symm).trans (mul_comm c q))
 
 /-- The residue of a multiplied inverse-ideal section is computed in the
 same actual frame and by the unchanged Cartier reduction. -/
@@ -191,6 +192,8 @@ variable (σ : GlobalForm) (p : CycleQ2SurfaceCubicGluing.WeightedCubic)
     formRestriction σ O = CycleQ2SurfaceCubicGluing.localSectionOn 57 1 p.val a O
       (hO.trans (refinedPatch_le a)))
 
+include hσ
+
 /-- A global form with the indicated actual cubic restrictions has exactly
 the original cubic contraction. Only a neighborhood of the curve is used
 in this identification; existence of the global form is not asserted. -/
@@ -213,10 +216,12 @@ theorem pole_residue_eq_cubic :
     ResidueTarget.val.map
       (homOfLE (show O.unop ⊓ residueCover a ≤ O.unop from inf_le_left)).op
       ((normalContraction p).val.app O ((inverseIdealReduction immersion).val.app O f))
-  rw [← PresheafOfModules.naturality_apply,
-    ← PresheafOfModules.naturality_apply,
-    ← PresheafOfModules.naturality_apply,
-    ← PresheafOfModules.naturality_apply]
+  let g := (homOfLE (show O.unop ⊓ residueCover a ≤ O.unop from inf_le_left)).op
+  refine (PresheafOfModules.naturality_apply
+    (poleMultiplication σ ≫ canonicalResidue).val g f).symm.trans ?_
+  refine Eq.trans ?_ (PresheafOfModules.naturality_apply
+    (inverseIdealReduction immersion ≫ normalContraction p).val g f)
+
   cases a with
   | none =>
       haveI := target_empty_of_le
@@ -230,7 +235,7 @@ theorem pole_residue_eq_cubic :
           ((poleMultiplication σ).val.app (op P) fP) =
         (normalContraction p).val.app (op P)
           ((inverseIdealReduction immersion).val.app (op P) fP)
-      rw [pole_residue_local σ a P inf_le_right, hσ]
+      rw [pole_residue_local σ a P inf_le_right, hσ a P inf_le_right]
       let n := (actualNormalPushforwardIso 57 1).inv.val.app (op P)
         ((inverseIdealReduction immersion).val.app (op P) fP)
       change immersion.app P
@@ -256,12 +261,16 @@ theorem normalContractionOfGlobal_eq_cubic :
 
 end CubicIdentification
 
+set_option maxHeartbeats 1000000 in
 /-- The concrete commutative diagram of the two actual module sequences. -/
 def globalFormDiagram (σ : GlobalForm) :
     literalInverseIdealComplex (57 : ℂ) 1 ⟶ canonicalResidueComplex where
-  τ₁ := formMultiplication σ
-  τ₂ := poleMultiplication σ
-  τ₃ := normalContractionOfGlobal σ
+  τ₁ := (show (literalInverseIdealComplex (57 : ℂ) 1).X₁ ⟶ canonicalResidueComplex.X₁ from
+    formMultiplication σ)
+  τ₂ := (show (literalInverseIdealComplex (57 : ℂ) 1).X₂ ⟶ canonicalResidueComplex.X₂ from
+    poleMultiplication σ)
+  τ₃ := (show (literalInverseIdealComplex (57 : ℂ) 1).X₃ ⟶ canonicalResidueComplex.X₃ from
+    normalContractionOfGlobal σ)
   comm₁₂ := (scalar_regular_square σ).symm
   comm₂₃ := (reduction_contraction σ).symm
 
@@ -275,8 +284,8 @@ def globalFormAdditiveDiagram (σ : GlobalForm) :
   (SheafOfModules.toSheaf.{0} (ringSheaf Surface.sheaf)).mapShortComplex.map
     (globalFormDiagram σ)
 
-local instance sheafHasExt :
-    HasExt.{1} (TopCat.Sheaf AddCommGrpCat.{0} Surface) := HasExt.standard _
+local instance sheafHasExt {T : Type} [TopologicalSpace T] :
+    HasExt.{1} (Sheaf (Opens.grothendieckTopology T) AddCommGrpCat.{0}) := HasExt.standard _
 
 /-- The connecting map of the constructed canonical residue sequence. -/
 def canonicalOpenConnecting (U : Surface.Opens) :
@@ -326,6 +335,8 @@ variable (σ : GlobalForm) (p : CycleQ2SurfaceCubicGluing.WeightedCubic)
   (hσ : ∀ (a : PatchIndex) (O : Surface.Opens) (hO : O ≤ refinedPatch a),
     formRestriction σ O = CycleQ2SurfaceCubicGluing.localSectionOn 57 1 p.val a O
       (hO.trans (refinedPatch_le a)))
+
+include hσ
 
 theorem formContractionH1_eq_cubic
     (x : (literalInverseIdealAdditiveComplex (57 : ℂ) 1).X₃.H' 1 ⊤) :
