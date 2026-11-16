@@ -1353,6 +1353,30 @@ theorem unionGlobalEquiv_restriction (r θ : ℂ) (hθ : θ ≠ 0)
           coordinateOpen r θ 2 ≤ ⊤ from le_top)).op x)) = _
   rw [coverIso_restriction _ _ (coordinate_three_cover r θ hθ)]
 
+/-- The finite coordinate class is already the three-open connecting
+image in the native top-open cohomology group. -/
+theorem finite_coordinate_top_eq (r : ℂ)
+    (hcover : (⨆ i, coordinateFamily r i) = ⊤)
+    (c : Two (structureAdditiveSheaf (projectiveSurface r 1)) (coordinateFamily r))
+    (hn : NormalizedTwo _ _ c) (hc : IsTwoCocycle _ _ c)
+    (q : HomogeneousCoordinateTop r)
+    (hq : selectedTriple (coordinateFamily r) c 0 1 2 = tripleSections r 1 q) :
+    CycleQ2FiniteCechDescent.cechTwoClass (coordinateFamily r) hcover c hn hc =
+      ((structureAdditiveSheaf (projectiveSurface r 1)).cohomologyPresheaf 2).map
+        (eqToIso (coordinate_three_cover r 1 one_ne_zero).symm).op.hom
+          (coordinateConnecting r 1 q) := by
+  have h := mv_eq_finiteClass_restriction (coordinateFamily r) hcover c hn hc 0 1 2
+  rw [hq] at h
+  let F := structureAdditiveSheaf (projectiveSurface r 1)
+  let U := (coordinateOpen r 1 0 ⊔ coordinateOpen r 1 1) ⊔ coordinateOpen r 1 2
+  let e := ((F.cohomologyPresheaf 2).mapIso
+    (eqToIso (coordinate_three_cover r 1 one_ne_zero).symm).op).addCommGroupIsoToAddEquiv
+  change coordinateConnecting r 1 q =
+    (F.cohomologyPresheaf 2).map (homOfLE (show U ≤ ⊤ from le_top)).op
+      (CycleQ2FiniteCechDescent.cechTwoClass (coordinateFamily r) hcover c hn hc) at h
+  exact ((congrArg e h).trans (coverIso_restriction F U
+    (coordinate_three_cover r 1 one_ne_zero) _)).symm
+
 /-- The exact finite injective class of a coordinate cocycle equals the
 actual global Mayer--Vietoris image of its same homogeneous top section. -/
 theorem finite_coordinate_global_eq (r : ℂ)
