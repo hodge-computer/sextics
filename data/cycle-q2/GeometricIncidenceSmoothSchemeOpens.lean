@@ -5,8 +5,6 @@ import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 /-!
 # Actual smooth scheme opens of the original incidence surface family
 
-Status: source-only proof draft. No elaboration or kernel replay was run.
-
 The spectrum of each normalized-minor chart localization maps into the
 original projective surface through its existing affine chart. This map
 is an open immersion, and its composition with surfaceToBase is exactly
@@ -90,8 +88,12 @@ theorem minorOpen_eq_image (y : ParameterIndex → S) (i : Fin 4) (j k : Fin 5) 
     minorOpen y i j k =
       affineChartToSurface y i ''ᵁ PrimeSpectrum.basicOpen (normalizedMinor y i j k) := by
   change (minorToAffine y i j k ≫ affineChartToSurface y i).opensRange = _
-  rw [Scheme.Hom.opensRange_comp, minorToAffine,
-    Scheme.Hom.opensRange_localizationAway]
+  have hminor : (minorToAffine y i j k).opensRange =
+      PrimeSpectrum.basicOpen (normalizedMinor y i j k) :=
+    Scheme.Hom.opensRange_localizationAway
+      (R := CommRingCat.of (DehomogenizedRing y i)) (normalizedMinor y i j k)
+  rw [Scheme.Hom.opensRange_comp]
+  rw [hminor]
 
 /-- Its preimage is the native principal open of the original normalized minor. -/
 theorem affineChartToSurface_preimage_minorOpen (y : ParameterIndex → S)

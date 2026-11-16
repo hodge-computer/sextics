@@ -15,8 +15,7 @@ duality under its actual restriction map. No coefficient-map, regularity,
 or rescaling premise remains in these specialized endpoints.
 
 The identification with restricted associated-module/internal-Hom sheaves,
-and subsequent global gluing, remain separate. Source-only draft: no Lean
-elaboration or kernel replay has been run. Prepared for fqlx with OpenAI
+and subsequent global gluing, remain separate. Prepared for fqlx with OpenAI
 ChatGPT assistance; the geometric route is credited in solution.md.
 -/
 
@@ -62,7 +61,9 @@ def idealIdentification (i j : Fin 3) :
     (leftData i j) (rightData i j) (ratioUnit i j) (data_left_change i j)
 
 theorem idealIdentification_val (i j : Fin 3) (x : (leftData i j).leftIdeal) :
-    (idealIdentification i j x : Γ(Surface, OverlapOpen i j)) = x.val := rfl
+    (idealIdentification i j x : Γ(Surface, OverlapOpen i j)) = x.val :=
+  CycleQ2SeedImageTwistedDuality.idealEquiv_val
+    (leftData i j) (rightData i j) (ratioUnit i j) (data_left_change i j) x
 
 def imageTransition (i j : Fin 3) :
     Regrading.Image (leftData i j) ≃ₗ[Γ(Surface, OverlapOpen i j)]

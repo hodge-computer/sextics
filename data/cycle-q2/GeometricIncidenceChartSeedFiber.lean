@@ -6,8 +6,6 @@ import Mathlib.RingTheory.TensorProduct.MvPolynomial
 /-!
 # Exact seed base change of the actual incidence-surface affine charts
 
-Status: source-only proof draft. No elaboration or kernel replay was run.
-
 Each affine ring is the shifted dehomogenized equation ring already
 identified with an actual weight-one chart of the original projective
 surface over its coefficient base. Tensoring that ring along seedMap
@@ -46,8 +44,8 @@ attribute [local instance] CycleQ2IncidenceSeedFiber.seedAlgebra
     MvPolynomial.map f (linearCoordinate (S := R) i j) =
       linearCoordinate (S := T) i j := by
   rcases Fin.eq_self_or_eq_succAbove i j with rfl | ⟨k, rfl⟩
-  · simp only [linearCoordinate_self, map_one]
-  · simp only [linearCoordinate_succAbove, MvPolynomial.map_X]
+  · simp [linearCoordinate]
+  · simp [linearCoordinate]
 
 /-- Coefficient maps commute with the exact shifted coordinate
 substitution, including X4 ↦ X none - linearCoordinate i 2 ^ 2. -/
@@ -64,11 +62,15 @@ theorem map_dehomogenize {R T : Type} [CommRing R] [CommRing T]
     · intro j
       induction j using Fin.lastCases with
       | last =>
-        simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, AlgHom.coe_toRingHom,
-          MvPolynomial.map_X, dehomogenize_last, map_sub, map_pow, map_linearCoordinate]
+        change MvPolynomial.map f (dehomogenize (S := R) i (X (Fin.last 4))) =
+          dehomogenize (S := T) i (MvPolynomial.map f (X (Fin.last 4)))
+        simp only [MvPolynomial.map_X, dehomogenize, aeval_X, Fin.lastCases_last,
+          map_sub, map_pow, map_linearCoordinate]
       | cast j =>
-        simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, AlgHom.coe_toRingHom,
-          MvPolynomial.map_X, dehomogenize_castSucc, map_linearCoordinate]
+        change MvPolynomial.map f (dehomogenize (S := R) i (X j.castSucc)) =
+          dehomogenize (S := T) i (MvPolynomial.map f (X j.castSucc))
+        simp only [MvPolynomial.map_X, dehomogenize, aeval_X, Fin.lastCases_castSucc,
+          map_linearCoordinate]
   exact RingHom.congr_fun h p
 
 theorem literal_pointEquationF :
@@ -117,6 +119,12 @@ abbrev SeedTensorChartPolynomial := ℂ ⊗[ParameterAlgebra] IncidenceChartPoly
 abbrev SeedChartFiber (i : Fin 4) :=
   ℂ ⊗[ParameterAlgebra] DehomogenizedRing incidencePoint i
 
+local instance seedTensorChartCommRing : CommRing SeedTensorChartPolynomial := inferInstance
+local instance seedChartCommRing : CommRing SeedChartPolynomial := inferInstance
+local instance seedChartFiberCommRing (i : Fin 4) : CommRing (SeedChartFiber i) := inferInstance
+local instance seedDehomogenizedCommRing (i : Fin 4) :
+    CommRing (DehomogenizedRing (seedPoint (57 : ℂ) Complex.I) i) := inferInstance
+
 def seedChartPolynomialEquiv :
     SeedTensorChartPolynomial ≃ₐ[ℂ] SeedChartPolynomial :=
   MvPolynomial.algebraTensorAlgEquiv ParameterAlgebra ℂ
@@ -143,8 +151,12 @@ theorem tensorChartIdeal_map (i : Fin 4) :
     (tensorChartIdeal i).map seedChartPolynomialEquiv.toRingHom =
       chartIdeal (dehomogenizedEquations (seedPoint (57 : ℂ) Complex.I) i) := by
   unfold tensorChartIdeal
-  rw [Ideal.map_map, seedChartPolynomialEquiv_includeRight]
-  exact chartIdeal_seed i
+  exact (Ideal.map_map (I := chartIdeal (dehomogenizedEquations incidencePoint i))
+    (Algebra.TensorProduct.includeRight (R := ParameterAlgebra) (A := ℂ)
+      (B := IncidenceChartPolynomial)).toRingHom seedChartPolynomialEquiv.toRingHom).trans
+      ((congrArg (fun f : IncidenceChartPolynomial →+* SeedChartPolynomial =>
+        (chartIdeal (dehomogenizedEquations incidencePoint i)).map f)
+          seedChartPolynomialEquiv_includeRight).trans (chartIdeal_seed i))
 
 /-- Exact base change between the affine rings already bound to the
 actual relative chart and the actual literal seed chart. -/
@@ -166,12 +178,19 @@ def seedChartFiberEquiv (i : Fin 4) :
       c • Ideal.Quotient.mk
         (chartIdeal (dehomogenizedEquations (seedPoint (57 : ℂ) Complex.I) i))
         (MvPolynomial.map seedMap p)
-  rw [seedChartFiberEquiv, AlgEquiv.trans_apply,
-    Algebra.TensorProduct.tensorQuotientEquiv_apply_tmul,
-    Ideal.quotientEquivAlg_mk, seedChartPolynomialEquiv_tmul]
-  exact (Ideal.Quotient.mkₐ ℂ
-    (chartIdeal (dehomogenizedEquations (seedPoint (57 : ℂ) Complex.I) i))).map_smul
-      c (MvPolynomial.map seedMap p)
+  calc
+    _ = Ideal.Quotient.mk
+        (chartIdeal (dehomogenizedEquations (seedPoint (57 : ℂ) Complex.I) i))
+        (seedChartPolynomialEquiv (c ⊗ₜ[ParameterAlgebra] p)) := rfl
+    _ = Ideal.Quotient.mk
+        (chartIdeal (dehomogenizedEquations (seedPoint (57 : ℂ) Complex.I) i))
+        (c • MvPolynomial.map seedMap p) :=
+      congrArg (Ideal.Quotient.mk
+        (chartIdeal (dehomogenizedEquations (seedPoint (57 : ℂ) Complex.I) i)))
+          (seedChartPolynomialEquiv_tmul c p)
+    _ = _ := (Ideal.Quotient.mkₐ ℂ
+      (chartIdeal (dehomogenizedEquations (seedPoint (57 : ℂ) Complex.I) i))).toLinearMap.map_smul
+        c (MvPolynomial.map seedMap p)
 
 @[simp] theorem seedChartFiberEquiv_variable (i : Fin 4) (j : Option (Fin 3)) :
     seedChartFiberEquiv i

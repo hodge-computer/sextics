@@ -15,7 +15,6 @@ presentation, injectivity of the coefficient map, or extra regularity of
 the localizing element is required. Transport to a common projective free
 sheaf and compatibility between different charts remain separate steps.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -72,14 +71,14 @@ the literal inclusion of the localized image, on the entire section module. -/
 theorem principalImageInclusion_square :
     (sectionsEquiv (R := CommRingCat.of A)
         (ModuleCat.of A (Fin 3 → A)) r (coordinateMap B)).toLinearMap.comp
-      (sectionsMap (ModuleCat.ofHom (Regrading.Image F).subtype) r) =
+      (sectionsMap (R := CommRingCat.of A) (ModuleCat.ofHom (R := A) (Regrading.Image F).subtype) r) =
     (((Regrading.Image (localizedFactorData F (Submonoid.powers r) B)).subtype).restrictScalars A).comp
       (sectionsEquiv (R := CommRingCat.of A)
         (ModuleCat.of A (Regrading.Image F)) r
         (imageLocalizationMap F (Submonoid.powers r) B)).toLinearMap := by
   rw [← localizedImageInclusion_eq F (Submonoid.powers r) B]
   exact sectionsEquiv_naturality (R := CommRingCat.of A)
-    (ModuleCat.ofHom (Regrading.Image F).subtype) r
+    (ModuleCat.ofHom (R := A) (Regrading.Image F).subtype) r
     (imageLocalizationMap F (Submonoid.powers r) B) (coordinateMap B)
 
 /-- Every native principal-open image section has exactly its normalized
@@ -89,7 +88,7 @@ theorem principalImageInclusion_apply
       (ModuleCat.of A (Regrading.Image F)) r) :
     sectionsEquiv (R := CommRingCat.of A)
         (ModuleCat.of A (Fin 3 → A)) r (coordinateMap B)
-        (sectionsMap (ModuleCat.ofHom (Regrading.Image F).subtype) r s) =
+        (sectionsMap (R := CommRingCat.of A) (ModuleCat.ofHom (R := A) (Regrading.Image F).subtype) r s) =
       (sectionsEquiv (R := CommRingCat.of A)
         (ModuleCat.of A (Regrading.Image F)) r
         (imageLocalizationMap F (Submonoid.powers r) B) s).val :=

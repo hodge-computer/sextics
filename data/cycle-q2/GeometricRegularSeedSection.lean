@@ -42,6 +42,8 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceEquations CycleQ2IncidenceUniver
 
 variable (y : ParameterIndex → ℂ)
 
+local instance pointCommRing : CommRing (PointSurface y) := inferInstance
+
 theorem basePivot_eq_quotient (p : CycleQ2SegreCech.Chart) :
     basePivot y p = Ideal.Quotient.mk (pointEquations y)
       (pointMatrixPolynomial y p.1 p.2) := by

@@ -15,7 +15,6 @@ global instances. No regularity or distinctness hypothesis is required
 for the coordinate being inverted. Module and internal-Hom comparisons
 are separate from this ring-localization statement.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -34,6 +33,7 @@ open CycleQ2SeedTrace CycleQ2CartierSurfaceGrading CycleQ2CartierProjectiveCover
   CycleQ2GeometricSurfaceDehomogenizedCharts CycleQ2GeometricSurfaceOverlap
   CycleQ2SurfaceCoordinateSections CycleQ2SeedProjectiveImageChart
   CycleQ2SeedProjectiveImageCocycle CycleQ2SeedProjectiveImageRestriction
+  CycleQ2GeometricSeedNormalIdeals
 
 /-- The equation cutting out the complementary chart divisor on chart `i`. -/
 def overlapCoordinate (i j : Fin 3) : AffineRing i :=
