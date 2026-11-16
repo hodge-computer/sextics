@@ -17,8 +17,7 @@ The preceding chart retraction theorem proves that exact complex algebra
 smooth. Zariski locality therefore proves smoothness of the actual weighted
 projective structure morphism, with no smoothness hypothesis on the scheme.
 
-Status: source-only proof draft; no Lean elaboration or kernel replay was run
-in this session. Prepared for `fqlx` with OpenAI ChatGPT assistance.
+Prepared for `fqlx` with OpenAI ChatGPT assistance.
 -/
 
 set_option autoImplicit false
@@ -70,8 +69,12 @@ theorem exists_weightOne_not_mem (r : ℂ) (hr : r ^ 3 = 2) (q : threefold r) :
   have hz (i : Fin 4) : Ideal.Quotient.mk P (coordinateClass r i.castSucc) = 0 :=
     Ideal.Quotient.eq_zero_iff_mem.mpr (h i)
   have hw3 : Ideal.Quotient.mk P (coordinateClass r 4) ^ 3 = 0 := by
+    have h0 : Ideal.Quotient.mk P (coordinateClass r 0) = 0 := hz 0
+    have h1 : Ideal.Quotient.mk P (coordinateClass r 1) = 0 := hz 1
+    have h2 : Ideal.Quotient.mk P (coordinateClass r 2) = 0 := hz 2
+    have h3 : Ideal.Quotient.mk P (coordinateClass r 3) = 0 := hz 3
     have hF := congrArg (Ideal.Quotient.mk P) (fermatRelation r hr)
-    simpa only [map_add, map_pow, map_zero, hz 0, hz 1, hz 2, hz 3,
+    simpa only [map_add, map_pow, map_zero, h0, h1, h2, h3,
       zero_pow (by decide : (6 : ℕ) ≠ 0), zero_add] using hF
   have hw : coordinateClass r 4 ∈ P :=
     Ideal.Quotient.eq_zero_iff_mem.mp (eq_zero_of_pow_eq_zero hw3)

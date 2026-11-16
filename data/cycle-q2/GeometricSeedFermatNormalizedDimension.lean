@@ -17,8 +17,7 @@ relation, so the resulting submersive presentation has relative dimension
 `6 - 3 = 3`. The native basic-open/localization isomorphisms and source
 locality prove relative dimension three on the entire normalized spectrum.
 
-Status: source-only proof draft. No Lean elaboration, compilation, or
-kernel replay has been run. The geometric seed follows Ben Diamond's
+The geometric seed follows Ben Diamond's
 surface-section argument. Prepared for `fqlx` with OpenAI ChatGPT assistance.
 -/
 
@@ -86,7 +85,7 @@ theorem partial_isUnit (r : ℂ) (hr : r ^ 3 = 2) (i : Fin 4)
   have hc : IsUnit (CycleQ2SeedFermatCone.coordinateDegree j.1 : ℂ) := by
     apply isUnit_iff_ne_zero.mpr
     rcases j with ⟨j, hj⟩
-    fin_cases j <;> norm_num [CycleQ2SeedFermatCone.coordinateDegree]
+    fin_cases j <;> norm_num [CycleQ2SeedFermatCone.coordinateDegree, Fin.ext_iff]
   have hc' := hc.map (algebraMap ℂ (CoordinateRing r i j))
   rw [CycleQ2SeedFermatCone.zeroCubic_pderiv r hr j.1]
   simp only [map_mul, map_pow]
@@ -167,7 +166,7 @@ theorem exists_otherCoordinate_not_mem (r : ℂ) (hr : r ^ 3 = 2) (i : Fin 4)
         Ideal.Quotient.eq_zero_iff_mem.mpr (h ⟨j, hj⟩)
   have hF := congrArg (Ideal.Quotient.mk q.asIdeal) (normalizedFermatRelation r hr i)
   simp only [map_add, map_pow, map_zero, hz] at hF
-  fin_cases i <;> norm_num at hF
+  fin_cases i <;> norm_num [Fin.ext_iff] at hF
 
 def coordinateOpen (r : ℂ) (i : Fin 4) (j : OtherCoordinate i) :
     (normalizedScheme r i).Opens :=
@@ -207,8 +206,6 @@ theorem coordinatePatchToNormalized_comp_toComplex (r : ℂ) (i : Fin 4)
   unfold coordinatePatchToNormalized normalizedToComplex coordinatePatchToComplex
   rw [← Spec.map_comp]
   congr 1
-  ext c
-  exact (IsScalarTower.algebraMap_apply ℂ (NormalizedRing r i) (CoordinateRing r i j) c).symm
 
 /-- This is the native basic-open/localization isomorphism. -/
 def coordinateOpenIsoPatch (r : ℂ) (i : Fin 4) (j : OtherCoordinate i) :

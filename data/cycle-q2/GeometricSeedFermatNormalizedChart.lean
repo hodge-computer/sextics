@@ -14,8 +14,7 @@ The inverse identities are checked on actual quotient representatives and
 actual homogeneous fractions. This identification uses homogeneity alone
 and does not assume either smoothness or the relation `r ^ 3 = 2`.
 
-Source-only draft: no Lean elaboration, compilation, or kernel replay has
-been run. Prepared for `fqlx` with OpenAI ChatGPT assistance, following
+Prepared for `fqlx` with OpenAI ChatGPT assistance, following
 Ben Diamond's geometric seed construction.
 -/
 
@@ -92,8 +91,12 @@ def localizationToNormalized (r : ℂ) (i : Fin 4) :
     (a : ConeRing r) :
     localizationToNormalized r i
         (algebraMap (ConeRing r) (CoordinateRing r i.castSucc) a) =
-      coneToNormalized r i a :=
-  IsLocalization.Away.lift_eq (coordinateClass r i.castSucc) _ a
+      coneToNormalized r i a := by
+  dsimp only [localizationToNormalized]
+  have hunit : IsUnit (coneToNormalized r i (coordinateClass r i.castSucc)) := by
+    rw [coneToNormalized_coordinate, normalizedCoordinate_self]
+    exact isUnit_one
+  exact IsLocalization.Away.lift_eq (coordinateClass r i.castSucc) hunit a
 
 @[simp] theorem localizationToNormalized_invSelf (r : ℂ) (i : Fin 4) :
     localizationToNormalized r i
@@ -129,11 +132,10 @@ theorem chartToNormalized_projectiveEvaluate (r : ℂ) (i : Fin 4)
       normalizedQuotient r i := by
     apply MvPolynomial.ringHom_ext
     · intro c
-      change chartToNormalized r i (chartCoefficient r i c) =
-        normalizedQuotient r i (C c)
+      simp only [RingHom.comp_apply, projectiveEvaluate, eval₂Hom_C]
       exact (chartToNormalized r i).commutes c
     · intro j
-      change chartToNormalized r i (coordinateRatio r i j) = normalizedCoordinate r i j
+      simp only [RingHom.comp_apply, projectiveEvaluate, eval₂Hom_X']
       exact chartToNormalized_coordinateRatio r i j
   exact RingHom.congr_fun h p
 

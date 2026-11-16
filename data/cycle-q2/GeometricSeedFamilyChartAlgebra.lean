@@ -10,8 +10,7 @@ coordinate at its corresponding homogeneous ratio and kills the actual
 degree-six family equation.
 
 These constructions use homogeneity alone. They assume neither a smooth
-fiber nor a smooth total family. Source-only draft: no Lean elaboration,
-compilation, or kernel replay was run. Prepared for `fqlx` with OpenAI
+fiber nor a smooth total family. Prepared for `fqlx` with OpenAI
 ChatGPT assistance, following Ben Diamond's geometric seed construction.
 -/
 
@@ -26,6 +25,9 @@ namespace CycleQ2SeedFamilyChart
 
 open MvPolynomial CycleQ2SeedCubicFamily CycleQ2SeedProjectiveFamily
 open CycleQ2GeometricIncidenceProj
+
+local instance familyRingCommRing (r : ℂ) : CommRing (FamilyRing r) :=
+  Ideal.Quotient.commRing (familyIdeal r)
 
 /-- The full cone localization at one of the four weight-one coordinates. -/
 abbrev CoordinateRing (r : ℂ) (i : Fin 4) :=
