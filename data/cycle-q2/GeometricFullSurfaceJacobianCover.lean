@@ -81,6 +81,7 @@ def gradientLift (i : Fin 3) : Matrix (Fin 5) (Fin 4) SurfacePoly :=
 
 def equationDegree (a : Fin 2) : ℕ := ![6,3] a
 
+set_option maxHeartbeats 4000000 in
 /-- Explicit weighted Euler and chain-rule identity before taking the quotient.
 The finite reductions use exactly the original equations at (57,1). -/
 theorem gradientLift_polynomial (i : Fin 3) (a : Fin 2) (j : Fin 5) :
@@ -122,9 +123,10 @@ theorem minors_linearCombination {ι : Type*} [Fintype ι]
   apply sub_eq_zero.mpr
   calc
     _ = ∑ a, ∑ b, (c a * d b) * (u a * v b) := by
-      simp only [Finset.sum_mul, Finset.mul_sum]
+      rw [Finset.sum_mul]
       apply Finset.sum_congr rfl
       intro a _
+      rw [Finset.mul_sum]
       apply Finset.sum_congr rfl
       intro b _
       ring
@@ -135,10 +137,10 @@ theorem minors_linearCombination {ι : Type*} [Fintype ι]
       intro b _
       rw [sub_eq_zero.mp (h a b)]
     _ = _ := by
-      rw [Finset.sum_comm]
-      simp only [Finset.sum_mul, Finset.mul_sum]
+      rw [Finset.sum_comm, Finset.sum_mul]
       apply Finset.sum_congr rfl
       intro b _
+      rw [Finset.mul_sum]
       apply Finset.sum_congr rfl
       intro a _
       ring
@@ -169,8 +171,9 @@ theorem minors_zero_of_augmented (v : Fin 2 → SurfacePoly)
     Matrix.submatrix_apply, Fin.sum_univ_succ, succAbove_four,
     augmentedPolynomialRows, finSuccEquiv_eq, variableIndex,
     pderiv_X, Pi.single_apply] at h01 h02 h03 h12 h13 h23
+  norm_num at h01 h02 h03 h12 h13 h23
   fin_cases a <;> fin_cases b <;>
-    simp only [variableIndex, Matrix.cons_val_zero, Matrix.cons_val_one] <;>
+    norm_num [variableIndex] <;>
     first
     | ring
     | linear_combination h01
@@ -228,9 +231,11 @@ theorem field_augmented_cover (i : Fin 3) {K : Type*} [Field K]
     simp [Φ]
   obtain ⟨a,b,hu⟩ := CycleQ2SeedSurfaceGradient.actual_field_normal_cover Φ hF hh hx
   apply (isUnit_iff_ne_zero.mp hu)
+  have hzero := hcone a b
+  change Φ (pderiv a (actualSeedEquation 57 1)) * Φ (pderiv b (thetaH 1)) -
+    Φ (pderiv b (actualSeedEquation 57 1)) * Φ (pderiv a (thetaH 1)) = 0 at hzero
   simpa only [CycleQ2SeedSurfaceGradient.actualNormalMinor, Matrix.det_fin_two,
-    Matrix.cons_val_zero, Matrix.cons_val_one, map_sub, map_mul, Φ,
-    RingHom.comp_apply, coneGradient, surfaceEquations] using hcone a b
+    Matrix.cons_val_zero, Matrix.cons_val_one, map_sub, map_mul] using hzero
 
 def augmentedCoordinateIdeal (i : Fin 3) : Ideal (Chart i) :=
   Ideal.span (Set.range (fun ab : Fin 4 × Fin 4 =>
@@ -243,7 +248,7 @@ theorem augmentedCoordinateIdeal_eq_top (i : Fin 3) :
   by_contra h
   obtain ⟨M,hM,hle⟩ := Ideal.exists_le_maximal (augmentedCoordinateIdeal i) h
   letI : M.IsMaximal := hM
-  obtain ⟨a,b,hab⟩ := field_augmented_cover i (Ideal.Quotient.mk M)
+  obtain ⟨a,b,hab⟩ := field_augmented_cover (K := Chart i ⧸ M) i (Ideal.Quotient.mk M)
   apply hab
   apply Ideal.Quotient.eq_zero_iff_mem.mpr
   apply hle
