@@ -15,8 +15,6 @@ trace-family sextic is the original universal sextic, independent of the
 incidence-solving coordinates and the section parameters. None of these
 statements asserts smoothness, flatness, dimension, or a cycle-class map.
 
-Status: source-only proof draft. Verification is deferred at the user's
-request. No new axioms or admissions are used.
 -/
 
 set_option autoImplicit false
@@ -35,6 +33,11 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceUniversalChart
 
 attribute [local instance] MvPolynomial.weightedGradedAlgebra
 
+local instance pointSurfaceCommRing {S : Type} [CommRing S] [Algebra ℂ S]
+    (y : ParameterIndex → S) : CommRing (PointSurface y) := inferInstance
+local instance genericCurveCommRing {S : Type} [CommRing S] [Algebra ℂ S]
+    (y : ParameterIndex → S) : CommRing (GenericCurveRing y) := inferInstance
+
 section ProjectiveCoefficientNaturality
 
 variable {A B σ τ : Type} [CommRing A] [CommRing B]
@@ -51,8 +54,10 @@ theorem awayMap_fromZero (f : 𝒜 →+*ᵍ ℬ) (s : A) (a : 𝒜 0) :
     HomogeneousLocalization.mk ⟨0,f.gradedZeroRingHom a,1,by simp⟩
   rw [HomogeneousLocalization.map_mk]
   apply congrArg HomogeneousLocalization.mk
-  apply HomogeneousLocalization.NumDenSameDeg.ext _ rfl rfl
-  exact map_one f
+  refine HomogeneousLocalization.NumDenSameDeg.ext _ ?_ ?_ ?_
+  · rfl
+  · rfl
+  · exact map_one f
 
 /-- Naturality of the actual map to the degree-zero affine base. -/
 theorem projectiveMap_toSpecZero (f : 𝒜 →+*ᵍ ℬ)
@@ -66,8 +71,17 @@ theorem projectiveMap_toSpecZero (f : 𝒜 →+*ᵍ ℬ)
     Proj.awayι_toSpecZero, Proj.awayι_toSpecZero_assoc,
     ← Spec.map_comp, ← Spec.map_comp]
   congr 1
-  ext a
+  apply CommRingCat.hom_ext
+  apply RingHom.ext
+  intro a
   exact awayMap_fromZero f s.2 a
+
+theorem projectiveMap_congr (f g : 𝒜 →+*ᵍ ℬ)
+    (hf : HomogeneousIdeal.irrelevant ℬ ≤ (HomogeneousIdeal.irrelevant 𝒜).map f)
+    (hg : HomogeneousIdeal.irrelevant ℬ ≤ (HomogeneousIdeal.irrelevant 𝒜).map g)
+    (h : f = g) : Proj.map f hf = Proj.map g hg := by
+  subst g
+  rfl
 
 theorem projectiveMap_coefficientBase {R : Type} [CommRing R]
     (f : 𝒜 →+*ᵍ ℬ)
@@ -124,7 +138,7 @@ def polynomialCoefficientMap (φ : R →+* S) : PolynomialGrade R →+*ᵍ Polyn
 theorem irrelevant_le_map_polynomialCoefficientMap (φ : R →+* S) :
     HomogeneousIdeal.irrelevant (PolynomialGrade S) ≤
       (HomogeneousIdeal.irrelevant (PolynomialGrade R)).map (polynomialCoefficientMap φ) := by
-  apply HomogeneousIdeal.toIdeal_le_toIdeal_iff.mp
+  apply toIdeal_le_toIdeal_iff.mp
   apply (HomogeneousIdeal.toIdeal_irrelevant_le (PolynomialGrade S)).mpr
   intro n hn p hp
   have hvars : Ideal.span (Set.range (X : Fin 5 → MvPolynomial (Fin 5) S)) ≤
@@ -132,10 +146,16 @@ theorem irrelevant_le_map_polynomialCoefficientMap (φ : R →+* S) :
         (polynomialCoefficientMap φ)).toIdeal := by
     apply Ideal.span_le.mpr
     rintro _ ⟨i, rfl⟩
+    change X i ∈ ((HomogeneousIdeal.irrelevant (PolynomialGrade R)).map
+      (polynomialCoefficientMap φ)).toIdeal
     have hX := Ideal.mem_map_of_mem (polynomialCoefficientMap φ)
       (HomogeneousIdeal.mem_irrelevant_of_mem (PolynomialGrade R)
         (geometricWeight_pos i) (isWeightedHomogeneous_X R geometricWeight i))
-    simpa only [polynomialCoefficientMap, map_X] using hX
+    change (MvPolynomial.map φ) (X i) ∈
+      ((HomogeneousIdeal.irrelevant (PolynomialGrade R)).map
+        (polynomialCoefficientMap φ)).toIdeal at hX
+    rw [← MvPolynomial.map_X φ i]
+    exact hX
   exact hvars (homogeneous_mem_variableIdeal hn hp)
 
 /-- The actual weighted projective morphism induced by changing only
@@ -211,7 +231,7 @@ def surfaceThreefoldRingMap (y : ParameterIndex → S) : sexticGrade y →+*ᵍ 
 theorem irrelevant_le_map_surfaceThreefoldRingMap (y : ParameterIndex → S) :
     HomogeneousIdeal.irrelevant (surfaceGrade y) ≤
       (HomogeneousIdeal.irrelevant (sexticGrade y)).map (surfaceThreefoldRingMap y) := by
-  apply HomogeneousIdeal.toIdeal_le_toIdeal_iff.mp
+  apply toIdeal_le_toIdeal_iff.mp
   apply (HomogeneousIdeal.toIdeal_irrelevant_le (surfaceGrade y)).mpr
   intro n hn q hq
   obtain ⟨p, hp, rfl⟩ := hq
@@ -234,14 +254,15 @@ theorem surfaceToThreefold_toAmbient (y : ParameterIndex → S) :
         (PolynomialGrade S) (pointEquations y) := by
     ext p
     rfl
-  rw [h]
+  exact projectiveMap_congr _ _ _ _ h
 
 theorem surfaceToThreefold_toBase (y : ParameterIndex → S) :
     surfaceToThreefold y ≫ weightedThreefoldToBase y = surfaceToBase y := by
   apply projectiveMap_coefficientBase (surfaceThreefoldRingMap y)
     (irrelevant_le_map_surfaceThreefoldRingMap y)
     (algebraMap S (sexticGrade y 0)) (surfaceCoefficient y)
-  ext c
+  apply RingHom.ext
+  intro c
   apply Subtype.ext
   rfl
 
@@ -298,7 +319,7 @@ def surfaceSectionRingMap (y : ParameterIndex → S) :
 theorem irrelevant_le_map_surfaceSectionRingMap (y : ParameterIndex → S) :
     HomogeneousIdeal.irrelevant (surfaceGrade (sectionPoint y)) ≤
       (HomogeneousIdeal.irrelevant (surfaceGrade y)).map (surfaceSectionRingMap y) := by
-  apply HomogeneousIdeal.toIdeal_le_toIdeal_iff.mp
+  apply toIdeal_le_toIdeal_iff.mp
   apply (HomogeneousIdeal.toIdeal_irrelevant_le (surfaceGrade (sectionPoint y))).mpr
   intro n hn q hq
   obtain ⟨p, hp, rfl⟩ := hq
@@ -308,13 +329,16 @@ theorem irrelevant_le_map_surfaceSectionRingMap (y : ParameterIndex → S) :
           (Ideal.Quotient.mk (pointEquations (sectionPoint y))) := by
     apply Ideal.span_le.mpr
     rintro _ ⟨i, rfl⟩
-    change Ideal.Quotient.mk (pointEquations (sectionPoint y)) (X i) ∈ _
+    change (show PointSurface (sectionPoint y) from
+      Ideal.Quotient.mk (pointEquations (sectionPoint y)) (X i)) ∈
+      ((HomogeneousIdeal.irrelevant (surfaceGrade y)).map (surfaceSectionRingMap y)).toIdeal
     have hX := Ideal.mem_map_of_mem (surfaceSectionRingMap y)
       (HomogeneousIdeal.mem_irrelevant_of_mem (surfaceGrade y) (geometricWeight_pos i)
         (show Ideal.Quotient.mk (pointEquations y) (X i) ∈
           surfaceGrade y (geometricWeight i) from
             ⟨X i, isWeightedHomogeneous_X S geometricWeight i, rfl⟩))
-    simpa only [surfaceSectionRingMap_polynomial, map_X] using hX
+    simpa only [HomogeneousIdeal.toIdeal_map, surfaceSectionRingMap_polynomial,
+      MvPolynomial.map_X] using hX
   exact hvars (homogeneous_mem_variableIdeal hn hp)
 
 /-- Forget the section parameters on the actual incidence surface. -/
@@ -335,7 +359,7 @@ theorem surfaceForgetSections_toAmbient (y : ParameterIndex → S) :
           (polynomialCoefficientMap (C : S →+* SectionBase S)) := by
     ext p
     rfl
-  rw [h]
+  exact projectiveMap_congr _ _ _ _ h
 
 theorem surfaceForgetSections_toBase (y : ParameterIndex → S) :
     surfaceForgetSections y ≫ surfaceToBase y =
@@ -343,13 +367,21 @@ theorem surfaceForgetSections_toBase (y : ParameterIndex → S) :
   have h := projectiveMap_coefficientBase (surfaceSectionRingMap y)
     (irrelevant_le_map_surfaceSectionRingMap y) (surfaceCoefficient y)
     ((surfaceCoefficient (sectionPoint y)).comp (C : S →+* SectionBase S)) (by
-      ext c
+      apply RingHom.ext
+      intro c
       apply Subtype.ext
       change Ideal.Quotient.mk (pointEquations (sectionPoint y))
           (MvPolynomial.map (C : S →+* SectionBase S) (C c)) =
         Ideal.Quotient.mk (pointEquations (sectionPoint y)) (C (C c))
       rw [map_C])
-  simpa only [surfaceForgetSections, surfaceToBase, Category.assoc, ← Spec.map_comp] using h
+  change surfaceForgetSections y ≫ surfaceToBase y =
+    Proj.toSpecZero (surfaceGrade (sectionPoint y)) ≫
+      Spec.map (CommRingCat.ofHom
+        ((surfaceCoefficient (sectionPoint y)).comp (C : S →+* SectionBase S))) at h
+  exact h.trans (by
+    unfold surfaceToBase
+    rw [Category.assoc, ← Spec.map_comp]
+    rfl)
 
 theorem genericCurveToSurface_toAmbient (y : ParameterIndex → S) :
     genericCurveToSurface y ≫ surfaceToAmbient (sectionPoint y) = genericCurveToAmbient y := by
@@ -362,15 +394,19 @@ theorem genericCurveToSurface_toAmbient (y : ParameterIndex → S) :
         (PolynomialGrade (SectionBase S)) (genericCurveIdeal y) := by
     ext p
     rfl
-  rw [h]
+  exact projectiveMap_congr _ _ _ _ h
 
+set_option maxHeartbeats 1000000 in
 theorem genericCurveToSurface_toBase (y : ParameterIndex → S) :
     genericCurveToSurface y ≫ surfaceToBase (sectionPoint y) = genericCurveToBase y := by
-  apply projectiveMap_coefficientBase (genericCurveSurfaceRingMap y)
+  apply projectiveMap_coefficientBase (R := SectionBase S)
+    (𝒜 := surfaceGrade (sectionPoint y)) (ℬ := genericCurveGrade y)
+    (genericCurveSurfaceRingMap y)
     (irrelevant_le_map_genericCurveSurfaceRingMap y)
     (surfaceCoefficient (sectionPoint y))
     (algebraMap (SectionBase S) (genericCurveGrade y 0))
-  ext c
+  apply RingHom.ext
+  intro c
   apply Subtype.ext
   rfl
 
@@ -397,12 +433,14 @@ theorem genericCurveToThreefold_toBase (y : ParameterIndex → S) :
 @[simp] theorem genericCurve_cubic_zero (y : ParameterIndex → S) :
     Ideal.Quotient.mk (genericCurveIdeal y) (pointEquationH (sectionPoint y)) = 0 :=
   Ideal.Quotient.eq_zero_iff_mem.mpr
-    (le_sup_left (Ideal.subset_span (by simp [pointEquations, equationsIdeal])))
+    (pointEquations_le_genericCurveIdeal y
+      (Ideal.subset_span (by simp [pointEquations, equationsIdeal])))
 
 @[simp] theorem genericCurve_sextic_zero (y : ParameterIndex → S) :
     Ideal.Quotient.mk (genericCurveIdeal y) (pointEquationF (sectionPoint y)) = 0 :=
   Ideal.Quotient.eq_zero_iff_mem.mpr
-    (le_sup_left (Ideal.subset_span (by simp [pointEquations, equationsIdeal])))
+    (pointEquations_le_genericCurveIdeal y
+      (Ideal.subset_span (by simp [pointEquations, equationsIdeal])))
 
 /-- The defining equations vanish in the actual generic-curve ring,
 with their original cubic, sextic and degree-fourteen section entries. -/
@@ -443,7 +481,7 @@ theorem tracePoint_sectionEquationF (B : Matrix FixedSexticParameters SquareInde
     pointEquationF (sectionPoint (tracePointValue B z)) =
       MvPolynomial.map ((C : S →+* SectionBase S).comp (algebraMap TraceRing S))
         universalSextic := by
-  rw [pointEquationF_sectionPoint, tracePoint_equationF, map_map]
+  rw [pointEquationF_sectionPoint, tracePoint_equationF, MvPolynomial.map_map]
 
 /-- The universal sextic vanishes on the original projective-family cone
 through the actual coefficient map, not a newly substituted equation. -/
