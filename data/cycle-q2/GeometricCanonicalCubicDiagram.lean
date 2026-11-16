@@ -4,8 +4,7 @@ import Proposal.GeometricCanonicalResidueDiagram
 /-!
 # The canonical residue diagram for the actual global cubic forms
 
-Source-only draft; compilation and replay are deferred at the user's
-request. The global forms are constructed over the full surface cover,
+The global forms are constructed over the full surface cover,
 and their unchanged normal-neighborhood restrictions discharge the local
 identification hypothesis in the general residue diagram. The statements
 below therefore have no global-cubic extension premise.
@@ -31,11 +30,11 @@ open CycleQ2GeometricIntrinsicCartierSequence CycleQ2GeometricIntrinsicCartierCo
 
 abbrev WeightedCubic := CycleQ2SurfaceCubicGluing.WeightedCubic
 
-local instance sheafHasExt :
-    HasExt.{1} (TopCat.Sheaf AddCommGrpCat.{0} Surface) := HasExt.standard _
+local instance sheafHasExt {T : Type} [TopologicalSpace T] :
+    HasExt.{1} (Sheaf (Opens.grothendieckTopology T) AddCommGrpCat.{0}) := HasExt.standard _
 
 theorem globalCubic_restrict (p : WeightedCubic) (a : PatchIndex)
-    (O : Surface.Opens) (hO : O ≤ refinedPatch a) :
+    (O : CycleQ2CanonicalResidueSheaf.Surface.Opens) (hO : O ≤ refinedPatch a) :
     formRestriction (CycleQ2GlobalSurfaceCubics.globalCubicSection p) O =
       CycleQ2SurfaceCubicGluing.localSectionOn 57 1 p.val a O
         (hO.trans (refinedPatch_le a)) :=

@@ -14,7 +14,6 @@ retains evaluation on every original orbit-ideal element. Invertibility
 of this concrete comparison is equivalent to the precise remaining
 localization condition on the genuine internal-Hom sheaf.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -32,46 +31,72 @@ open CategoryTheory Opposite AlgebraicGeometry
 open CycleQ2GeometricIntrinsicNormal CycleQ2SeedProjectiveImageChart
 open CycleQ2SeedAffineHomEvaluation
 
+private theorem tilde_counit_toOpen {A : CommRingCat.{0}} {P : ModuleCat A}
+    (N : (Spec A).Modules)
+    (f : P ⟶ (moduleSpecΓFunctor (R := A)).obj N) (U : (Spec A).Opens) :
+    tilde.toOpen (R := A) P U ≫
+        ((modulesSpecToSheaf (R := A)).map
+          ((tilde.functor A).map f ≫ Scheme.Modules.fromTildeΓ (R := A) N)).1.app (op U) =
+      f ≫ ((modulesSpecToSheaf (R := A)).obj N).1.map (homOfLE le_top).op := by
+  rw [CategoryTheory.Functor.map_comp]
+  change tilde.toOpen (R := A) P U ≫
+      ((modulesSpecToSheaf (R := A)).map (tilde.map f)).1.app (op U) ≫
+      ((modulesSpecToSheaf (R := A)).map N.fromTildeΓ).1.app (op U) = _
+  rw [tilde.toOpen_map_app_assoc]
+  exact congrArg (fun k => f ≫ k) (Scheme.Modules.toOpen_fromTildeΓ_app (R := A) N U)
+
+/-- The previously proved global functional identification in the native module carrier. -/
+def orbitHomGlobalIso (i : Fin 3) :
+    ModuleCat.of (AffineRing i) (OrbitDual i) ≅
+      (moduleSpecΓFunctor (R := CommRingCat.of (AffineRing i))).obj (orbitHomSheaf i) :=
+  (orbitHomTopEquiv i).symm.toModuleIso
+    (X₁ := ModuleCat.of (AffineRing i) (OrbitDual i))
+    (X₂ := (moduleSpecΓFunctor (R := CommRingCat.of (AffineRing i))).obj (orbitHomSheaf i))
+
 /-- The unconditional sheaf morphism induced by the actual normalized
 global orbit-dual functional and the canonical counit. -/
 def orbitHomComparison (i : Fin 3) : affineOrbitDualSheaf i ⟶ orbitHomSheaf i :=
   (tilde.functor (CommRingCat.of (AffineRing i))).map
-      (orbitHomTopEquiv i).symm.toModuleIso.hom ≫
-    (orbitHomSheaf i).fromTildeΓ
+      (orbitHomGlobalIso i).hom ≫
+    Scheme.Modules.fromTildeΓ (R := CommRingCat.of (AffineRing i)) (orbitHomSheaf i)
 
 /-- The comparison sends each original dual element to the restriction
 of its actual global local-sheaf morphism, on every open. -/
 theorem orbitHomComparison_toOpen (i : Fin 3)
     (U : (Spec (CommRingCat.of (AffineRing i))).Opens) :
-    tilde.toOpen (ModuleCat.of (AffineRing i) (OrbitDual i)) U ≫
-        (modulesSpecToSheaf.map (orbitHomComparison i)).1.app (op U) =
-      (orbitHomTopEquiv i).symm.toModuleIso.hom ≫
-        (modulesSpecToSheaf.obj (orbitHomSheaf i)).1.map (homOfLE le_top).op := by
-  rw [orbitHomComparison, Functor.map_comp]
-  change tilde.toOpen (ModuleCat.of (AffineRing i) (OrbitDual i)) U ≫
-      (modulesSpecToSheaf.map
-        (tilde.map (orbitHomTopEquiv i).symm.toModuleIso.hom)).1.app (op U) ≫
-      (modulesSpecToSheaf.map (orbitHomSheaf i).fromTildeΓ).1.app (op U) = _
-  rw [tilde.toOpen_map_app_assoc, Scheme.Modules.toOpen_fromTildeΓ_app]
+    tilde.toOpen (R := CommRingCat.of (AffineRing i))
+        (ModuleCat.of (AffineRing i) (OrbitDual i)) U ≫
+        ((modulesSpecToSheaf (R := CommRingCat.of (AffineRing i))).map
+          (orbitHomComparison i)).1.app (op U) =
+      (orbitHomGlobalIso i).hom ≫
+        ((modulesSpecToSheaf (R := CommRingCat.of (AffineRing i))).obj
+          (orbitHomSheaf i)).1.map (homOfLE le_top).op :=
+  tilde_counit_toOpen (orbitHomSheaf i) (orbitHomGlobalIso i).hom U
 
 /-- Native global sections recover exactly the previously proved
 inverse of orbitHomTopEquiv. -/
 theorem orbitHomComparison_top (i : Fin 3) :
-    tilde.toOpen (ModuleCat.of (AffineRing i) (OrbitDual i)) ⊤ ≫
+    tilde.toOpen (R := CommRingCat.of (AffineRing i))
+        (ModuleCat.of (AffineRing i) (OrbitDual i)) ⊤ ≫
         (moduleSpecΓFunctor (R := CommRingCat.of (AffineRing i))).map
           (orbitHomComparison i) =
-      (orbitHomTopEquiv i).symm.toModuleIso.hom := by
+      (orbitHomGlobalIso i).hom := by
   have h := orbitHomComparison_toOpen i ⊤
   have hi : (homOfLE (show (⊤ : (Spec (CommRingCat.of (AffineRing i))).Opens) ≤ ⊤
       from le_top)).op =
         𝟙 (op (⊤ : (Spec (CommRingCat.of (AffineRing i))).Opens)) :=
     Subsingleton.elim _ _
-  simpa only [hi, Functor.map_id, Category.comp_id] using h
+  have hres : ((modulesSpecToSheaf (R := CommRingCat.of (AffineRing i))).obj
+      (orbitHomSheaf i)).1.map (homOfLE le_top).op = 𝟙 _ := by
+    rw [hi, CategoryTheory.Functor.map_id]
+  exact h.trans ((congrArg (fun k => (orbitHomGlobalIso i).hom ≫ k) hres).trans
+    (Category.comp_id _))
 
 theorem orbitHomComparison_top_apply (i : Fin 3) (φ : OrbitDual i) :
     ((moduleSpecΓFunctor (R := CommRingCat.of (AffineRing i))).map
         (orbitHomComparison i)).hom
-      ((tilde.toOpen (ModuleCat.of (AffineRing i) (OrbitDual i)) ⊤).hom φ) =
+      ((tilde.toOpen (R := CommRingCat.of (AffineRing i))
+        (ModuleCat.of (AffineRing i) (OrbitDual i)) ⊤).hom φ) =
       (orbitHomTopEquiv i).symm φ :=
   congrArg (fun k : ModuleCat.of (AffineRing i) (OrbitDual i) ⟶
     (moduleSpecΓFunctor (R := CommRingCat.of (AffineRing i))).obj (orbitHomSheaf i) =>
@@ -81,12 +106,13 @@ theorem orbitHomComparison_top_apply (i : Fin 3) (φ : OrbitDual i) :
 with the canonical affine section-ring normalization. -/
 theorem orbitHomComparison_evaluate (i : Fin 3) (φ : OrbitDual i) (x : OrbitIdeal i) :
     localLinearHomEvaluate (Spec (CommRingCat.of (AffineRing i))).sheaf
-        (tilde (ModuleCat.of (AffineRing i) (OrbitIdeal i)))
+        (tilde (R := CommRingCat.of (AffineRing i)) (ModuleCat.of (AffineRing i) (OrbitIdeal i)))
         (structureModule (CommRingCat.of (AffineRing i))) ⊤
         (((moduleSpecΓFunctor (R := CommRingCat.of (AffineRing i))).map
           (orbitHomComparison i)).hom
-            ((tilde.toOpen (ModuleCat.of (AffineRing i) (OrbitDual i)) ⊤).hom φ))
-        ((tilde.toOpen (ModuleCat.of (AffineRing i) (OrbitIdeal i)) ⊤).hom x) =
+            ((tilde.toOpen (R := CommRingCat.of (AffineRing i))
+              (ModuleCat.of (AffineRing i) (OrbitDual i)) ⊤).hom φ))
+        (orbitElementSection i x) =
       (Scheme.ΓSpecIso (CommRingCat.of (AffineRing i))).inv (φ x) := by
   rw [orbitHomComparison_top_apply]
   exact orbitHomTopEquiv_symm_evaluate i φ x

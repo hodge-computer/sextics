@@ -19,7 +19,6 @@ isomorphism induced by the original image-dual map. Identifying the canonical
 localized modules below with the explicit projective-overlap modules is
 still required before gluing that comparison globally.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. The geometric route and
 remaining protected certificate obligation are recorded in solution.md.
 -/
@@ -35,6 +34,13 @@ namespace CycleQ2SeedImageDualSheafInputs
 
 open CategoryTheory Opposite AlgebraicGeometry
 open CycleQ2SeedProjectiveImageChart
+
+local instance affineCommRing (i : Fin 3) : CommRing (AffineRing i) := inferInstance
+local instance orbitIdealAddCommGroup (i : Fin 3) : AddCommGroup (OrbitIdeal i) := inferInstance
+local instance localizedOrbitAddCommGroup (i : Fin 3) (S : Submonoid (AffineRing i)) :
+    AddCommGroup (LocalizedModule S (OrbitIdeal i)) := inferInstance
+local instance localizedAffineCommRing (i : Fin 3) (S : Submonoid (AffineRing i)) :
+    CommRing (Localization S) := inferInstance
 
 instance affineRing_noetherian (i : Fin 3) : IsNoetherianRing (AffineRing i) := by
   infer_instance
@@ -58,6 +64,11 @@ instance imageModule_finitePresentation (i : Fin 3) :
 abbrev LocalizedOrbitDual (i : Fin 3) (S : Submonoid (AffineRing i)) :=
   LocalizedModule S (OrbitIdeal i) →ₗ[Localization S] Localization S
 
+local instance localizedCoefficient_isLocalized (i : Fin 3) (S : Submonoid (AffineRing i)) :
+    IsLocalizedModule S (Algebra.linearMap (AffineRing i) (Localization S)) :=
+  (isLocalizedModule_iff_isLocalization' S (Localization S)).mpr
+    (Localization.isLocalization (M := S))
+
 /-- The canonical extension of the original ideal functional to the
 localized ideal, with values in the actual localized coefficient ring. -/
 def orbitDualLocalizationMap (i : Fin 3) (S : Submonoid (AffineRing i)) :
@@ -66,12 +77,17 @@ def orbitDualLocalizationMap (i : Fin 3) (S : Submonoid (AffineRing i)) :
     (LocalizedModule.mkLinearMap S (OrbitIdeal i))
     (Algebra.linearMap (AffineRing i) (Localization S)) (Localization S)
 
+set_option maxHeartbeats 1000000 in
 /-- The required Hom-localization hypothesis is discharged for the
 original orbit ideal by its proved finite presentation. -/
 instance orbitDualLocalizationMap_isLocalized (i : Fin 3) (S : Submonoid (AffineRing i)) :
     IsLocalizedModule S (orbitDualLocalizationMap i S) := by
   unfold orbitDualLocalizationMap
-  infer_instance
+  exact Module.FinitePresentation.isLocalizedModule_mapExtendScalars
+    (R := AffineRing i) (M := OrbitIdeal i) (N := AffineRing i)
+    (M' := LocalizedModule S (OrbitIdeal i)) (N' := Localization S) S
+    (LocalizedModule.mkLinearMap S (OrbitIdeal i))
+    (Algebra.linearMap (AffineRing i) (Localization S)) (Localization S)
 
 theorem orbitDualLocalizationMap_original (i : Fin 3) (S : Submonoid (AffineRing i))
     (φ : OrbitDual i) (x : OrbitIdeal i) :
@@ -100,11 +116,14 @@ theorem orbitDualLocalizationEquiv_original (i : Fin 3) (S : Submonoid (AffineRi
 as its original module map, under the actual maps to sheaf sections. -/
 theorem affineImageDualIso_section_naturality (i : Fin 3)
     (U : (Spec (CommRingCat.of (AffineRing i))).Opens) :
-    tilde.toOpen (ModuleCat.of (AffineRing i) (ImageModule i)) U ≫
+    tilde.toOpen (R := CommRingCat.of (AffineRing i))
+        (ModuleCat.of (AffineRing i) (ImageModule i)) U ≫
         (modulesSpecToSheaf.map (affineImageDualIso i).hom).1.app (op U) =
       (imageDualEquiv i).toModuleIso.hom ≫
-        tilde.toOpen (ModuleCat.of (AffineRing i) (OrbitDual i)) U :=
-  tilde.toOpen_map_app ((imageDualEquiv i).toModuleIso.hom) U
+        tilde.toOpen (R := CommRingCat.of (AffineRing i))
+          (ModuleCat.of (AffineRing i) (OrbitDual i)) U :=
+  tilde.toOpen_map_app (R := CommRingCat.of (AffineRing i))
+    ((imageDualEquiv i).toModuleIso.hom) U
 
 #print axioms orbitIdeal_finitePresentation
 #print axioms imageModule_finitePresentation
