@@ -15,7 +15,6 @@ through the chart isomorphism supplies an action of the actual projective
 section ring, and the two actions form a scalar tower. All extra structures
 are explicit definitions or local bindings, not competing global instances.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the remaining certificate gap.
 -/
@@ -34,6 +33,10 @@ open CycleQ2GeometricAffineChartSections
 
 variable {X : Scheme.{0}} {U : X.Opens} {A : Type} [CommRing A]
 variable (e : U.toScheme ≅ Spec (CommRingCat.of A)) (V : Over U)
+
+local instance nativeSectionAlgebra (W : (Spec (CommRingCat.of A)).Opens) :
+    Algebra A Γ(Spec (CommRingCat.of A), W) :=
+  inferInstanceAs (Algebra A ((Spec.structureSheaf A).obj.obj (op W)))
 
 /-- The coefficient algebra uses the existing chart section map exactly. -/
 def chartSectionAlgebra : Algebra A Γ(X, V.left) :=
@@ -57,6 +60,15 @@ theorem chartSectionAlgEquiv_apply (b : Γ(X, V.left)) :
     chartSectionAlgEquiv e V b = (chartSectionIso e V).hom b := rfl
 
 variable (M : (Spec (CommRingCat.of A)).Modules)
+
+local instance nativeSectionsModule (W : (Spec (CommRingCat.of A)).Opens) :
+    Module A Γ(M, W) :=
+  inferInstanceAs (Module A
+    (((modulesSpecToSheaf (R := CommRingCat.of A)).obj M).obj.obj (op W)))
+
+local instance nativeSectionsScalarTower (W : (Spec (CommRingCat.of A)).Opens) :
+    IsScalarTower A Γ(Spec (CommRingCat.of A), W) Γ(M, W) :=
+  IsScalarTower.of_compHom A Γ(Spec (CommRingCat.of A), W) Γ(M, W)
 
 /-- Pull back the intrinsic native section-ring action along the actual
 chart section-ring map. The existing native A-action is not replaced. -/

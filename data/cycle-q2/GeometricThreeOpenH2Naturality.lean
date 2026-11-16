@@ -4,7 +4,6 @@ import Proposal.GeometricCanonicalCechBoundary
 /-!
 # Naturality of the actual three-open degree-two connecting map
 
-Status: source-only proof draft; verification is deferred at the user's request.
 The maps below are the original two Mayer--Vietoris boundaries, followed only
 by the isomorphism induced by the proved equality of the union with the top
 open. Naturality follows from the existing Ext-composition naturality and
@@ -41,18 +40,25 @@ theorem connecting_naturality (f : F ⟶ G) (U V W : Opens X)
         (CycleQ2ThreeOpenSectionH2.connecting F U V W s) =
       CycleQ2ThreeOpenSectionH2.connecting G U V W
         (f.hom.app (op (TripleOpen U V W)) s) := by
-  unfold cohomologyMap CycleQ2ThreeOpenSectionH2.connecting
-    CycleQ2ThreeOpenCechH2.connecting
-  simp only [AddMonoidHom.comp_apply]
-  rw [mayerVietoris_delta_naturality, mayerVietoris_delta_naturality,
-    sectionsEquiv_symm_map]
+  let S := outerSquare U V W
+  let T := Opens.mayerVietorisSquare (U ⊓ W) (V ⊓ W)
+  let x := (sectionsEquiv F (TripleOpen U V W)).symm s
+  change (((Sheaf.cohomologyPresheafFunctor (Opens.grothendieckTopology X) 2).map f).app
+      (op S.X₄)) (S.δ F 1 2 rfl (T.δ F 0 1 rfl x)) =
+    S.δ G 1 2 rfl (T.δ G 0 1 rfl
+      ((sectionsEquiv G (TripleOpen U V W)).symm
+        (f.hom.app (op (TripleOpen U V W)) s)))
+  exact (mayerVietoris_delta_naturality f S 1 2 rfl _).trans
+    (congrArg (S.δ G 1 2 rfl)
+      ((mayerVietoris_delta_naturality f T 0 1 rfl x).trans
+        (congrArg (T.δ G 0 1 rfl) (sectionsEquiv_symm_map f _ s))))
 
 /-- The top-open comparison uses the given equality of actual opens. -/
 def connectingAtTop (F : Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{0})
     (U V W : Opens X) (hcover : (U ⊔ V) ⊔ W = ⊤) :
     F.obj.obj (op (TripleOpen U V W)) →+ F.H' 2 ⊤ :=
-  (((F.cohomologyPresheaf 2).mapIso (eqToIso hcover.symm).op)
-    .addCommGroupIsoToAddEquiv).toAddMonoidHom.comp
+  (((F.cohomologyPresheaf 2).mapIso
+    (eqToIso hcover.symm).op).addCommGroupIsoToAddEquiv).toAddMonoidHom.comp
       (CycleQ2ThreeOpenSectionH2.connecting F U V W)
 
 /-- Naturality persists after the same proved cover equality is applied
@@ -85,8 +91,8 @@ theorem connectingAtTop_eq_zero_iff
       ∃ (a : F.obj.obj (op (U ⊓ V))) (b : F.obj.obj (op (U ⊓ W)))
         (c : F.obj.obj (op (V ⊓ W))),
         CycleQ2ThreeOpenSectionH2.boundary F U V W (a,b,c) = s := by
-  let e := ((F.cohomologyPresheaf 2).mapIso (eqToIso hcover.symm).op)
-    .addCommGroupIsoToAddEquiv
+  let e := ((F.cohomologyPresheaf 2).mapIso
+    (eqToIso hcover.symm).op).addCommGroupIsoToAddEquiv
   have he : connectingAtTop F U V W hcover s = 0 ↔
       CycleQ2ThreeOpenSectionH2.connecting F U V W s = 0 := by
     constructor
