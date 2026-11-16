@@ -56,8 +56,10 @@ theorem map_inv_fromTildeΓ (M : (Spec R).Modules) [M.IsQuasicoherent] :
 
 /-- Lift a specified global-section map by the canonical counit. -/
 def liftΓHom (M N : (Spec R).Modules) [M.IsQuasicoherent]
-    (f : globalSections M ⟶ globalSections N) : M ⟶ N :=
-  inv M.fromTildeΓ ≫ (tilde.functor R).map f ≫ N.fromTildeΓ
+    (f : globalSections M ⟶ globalSections N) : M ⟶ N := by
+  letI : IsIso M.fromTildeΓ :=
+    Scheme.Modules.isIso_fromTildeΓ_of_isQuasicoherent (R := R) M
+  exact inv M.fromTildeΓ ≫ (tilde.functor R).map f ≫ N.fromTildeΓ
 
 /-- Reconstruction recovers exactly the supplied native global-section map. -/
 theorem map_liftΓHom (M N : (Spec R).Modules) [M.IsQuasicoherent]
@@ -95,7 +97,7 @@ theorem liftΓHom_map (M N : (Spec R).Modules) [M.IsQuasicoherent] (f : M ⟶ N)
 theorem liftΓHom_id (M : (Spec R).Modules) [M.IsQuasicoherent] :
     liftΓHom M M (𝟙 (globalSections M)) = 𝟙 M := by
   apply hom_ext_of_globalSections
-  rw [map_liftΓHom, Functor.map_id]
+  rw [map_liftΓHom, CategoryTheory.Functor.map_id]
 
 theorem liftΓHom_comp (M N P : (Spec R).Modules)
     [M.IsQuasicoherent] [N.IsQuasicoherent]
@@ -107,8 +109,12 @@ theorem liftΓHom_comp (M N P : (Spec R).Modules)
 
 /-- Lift an isomorphism of native global-section modules to a sheaf isomorphism. -/
 def liftΓIso (M N : (Spec R).Modules) [M.IsQuasicoherent] [N.IsQuasicoherent]
-    (e : globalSections M ≅ globalSections N) : M ≅ N :=
-  (asIso M.fromTildeΓ).symm ≪≫ (tilde.functor R).mapIso e ≪≫ asIso N.fromTildeΓ
+    (e : globalSections M ≅ globalSections N) : M ≅ N := by
+  letI : IsIso M.fromTildeΓ :=
+    Scheme.Modules.isIso_fromTildeΓ_of_isQuasicoherent (R := R) M
+  letI : IsIso N.fromTildeΓ :=
+    Scheme.Modules.isIso_fromTildeΓ_of_isQuasicoherent (R := R) N
+  exact (asIso M.fromTildeΓ).symm ≪≫ (tilde.functor R).mapIso e ≪≫ asIso N.fromTildeΓ
 
 theorem liftΓIso_hom (M N : (Spec R).Modules) [M.IsQuasicoherent] [N.IsQuasicoherent]
     (e : globalSections M ≅ globalSections N) :

@@ -32,9 +32,9 @@ namespace CycleQ2DualNumberRegularQuotient
 open scoped DualNumber
 open CycleQ2DualNumberFlatness
 
-variable {k B : Type} [Field k] [CommRing B] [Algebra k[ε] B]
+variable {k B : Type*} [Field k] [CommRing B] [Algebra k[ε] B]
 
-def epsilonIdeal (B : Type) [CommRing B] [Algebra k[ε] B] : Ideal B :=
+def epsilonIdeal (B : Type*) [CommRing B] [Algebra k[ε] B] : Ideal B :=
   Ideal.span {algebraMap k[ε] B ε}
 
 theorem quotient_epsilon_zero :
@@ -63,7 +63,7 @@ theorem quotient_flat [Module.Flat k[ε] B] (f : B)
   obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective x
   have hprod : q (e * b) = 0 := by
     rw [map_mul, heq]
-    simpa only [Algebra.smul_def] using hx
+    simpa only [Algebra.smul_def (R := k[ε]) (A := B ⧸ J), q] using hx
   have hmem : e * b ∈ J := Ideal.Quotient.eq_zero_iff_mem.mp hprod
   obtain ⟨c, hc⟩ := Ideal.mem_span_singleton.mp hmem
   have hc₀ : q₀ c = 0 := by
@@ -79,11 +79,14 @@ theorem quotient_flat [Module.Flat k[ε] B] (f : B)
   obtain ⟨v, hv⟩ := eps_smul_eq_zero_of_flat (k := k) (M := B) (b - f * d)
     (by simpa only [Algebra.smul_def] using hzero)
   refine ⟨q v, ?_⟩
-  rw [Algebra.smul_def]
+  rw [Algebra.smul_def (R := k[ε]) (A := B ⧸ J)]
   change q b = algebraMap k[ε] (B ⧸ J) ε * q v
   rw [Algebra.smul_def] at hv
   have hquot := congrArg q hv
-  simpa only [map_sub, map_mul, hf, zero_mul, sub_zero, heq] using hquot
+  simp only [map_sub, map_mul, hf, zero_mul, sub_zero] at hquot
+  change q b = q e * q v at hquot
+  rw [heq] at hquot
+  exact hquot
 
 end CycleQ2DualNumberRegularQuotient
 

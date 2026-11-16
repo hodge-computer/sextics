@@ -30,7 +30,7 @@ namespace CycleQ2DualNumberFlatness
 open scoped DualNumber TensorProduct
 open TensorProduct
 
-variable {k : Type} [Field k]
+variable {k : Type*} [Field k]
 
 theorem eps_mul_eq_zero_iff (a : k[ε]) :
     (ε : k[ε]) * a = 0 ↔ ∃ b : k[ε], a = ε * b := by
@@ -54,7 +54,7 @@ theorem eps_smul_epsIdealElement : (ε : k[ε]) • (epsIdealElement : EpsIdeal 
   apply Subtype.ext
   exact DualNumber.eps_mul_eps
 
-variable {M : Type} [AddCommGroup M] [Module k[ε] M]
+variable {M : Type*} [AddCommGroup M] [Module k[ε] M]
 
 /-- The one generator of the epsilon ideal also generates its tensor
 product in the first variable. -/
@@ -77,7 +77,7 @@ theorem exists_eps_tmul (z : EpsIdeal k ⊗[k[ε]] M) :
 
 /-- Flatness supplies exactness at multiplication by epsilon. -/
 theorem eps_smul_eq_zero_of_flat [Module.Flat k[ε] M] (m : M)
-    (hm : (ε : k[ε]) • m = 0) : ∃ n : M, m = ε • n := by
+    (hm : (ε : k[ε]) • m = 0) : ∃ n : M, m = (ε : k[ε]) • n := by
   have hrel : ∑ _ : Unit, (ε : k[ε]) • m = 0 := by simpa using hm
   obtain ⟨n, a, z, ha, hz⟩ :=
     Module.Flat.isTrivialRelation_of_sum_smul_eq_zero
@@ -91,11 +91,11 @@ theorem eps_smul_eq_zero_of_flat [Module.Flat k[ε] M] (m : M)
   calc
     m = ∑ j, a () j • z j := ha ()
     _ = ∑ j, (ε : k[ε]) • (b j • z j) := by simp only [hb, mul_smul]
-    _ = (ε : k[ε]) • ∑ j, b j • z j := (Finset.smul_sum _ _ _).symm
+    _ = (ε : k[ε]) • ∑ j, b j • z j := by rw [Finset.smul_sum]
 
 /-- The epsilon-kernel condition suffices for actual module flatness. -/
 theorem flat_of_eps_smul
-    (h : ∀ m : M, (ε : k[ε]) • m = 0 → ∃ n : M, m = ε • n) :
+    (h : ∀ m : M, (ε : k[ε]) • m = 0 → ∃ n : M, m = (ε : k[ε]) • n) :
     Module.Flat k[ε] M := by
   apply Module.Flat.iff_rTensor_injective'.mpr
   intro I
@@ -119,7 +119,7 @@ theorem flat_of_eps_smul
 
 theorem flat_iff_eps_smul :
     Module.Flat k[ε] M ↔
-      ∀ m : M, (ε : k[ε]) • m = 0 → ∃ n : M, m = ε • n := by
+      ∀ m : M, (ε : k[ε]) • m = 0 → ∃ n : M, m = (ε : k[ε]) • n := by
   constructor
   · intro h
     letI := h

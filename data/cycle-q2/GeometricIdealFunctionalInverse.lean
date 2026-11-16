@@ -39,6 +39,8 @@ theorem mul_apply_comm (x y : I) :
 
 variable (q : I) (hq : phi q = 1)
 
+include phi q hq
+
 theorem val_eq_generator_mul (x : I) : (x : R) = (q : R) * phi x := by
   simpa only [hq, mul_one] using mul_apply_comm phi x q
 
@@ -75,7 +77,7 @@ theorem ideal_eq_span_generator : I = Ideal.span {(q : R)} := by
   · intro x hx
     exact Ideal.mem_span_singleton.mpr
       ⟨phi ⟨x, hx⟩, val_eq_generator_mul phi q hq ⟨x, hx⟩⟩
-  · exact Ideal.span_singleton_le_iff_mem.mpr q.property
+  · exact (Ideal.span_singleton_le_iff_mem I).mpr q.property
 
 #print axioms functionalEquiv
 #print axioms unitValue_unique

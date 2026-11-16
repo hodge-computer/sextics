@@ -50,7 +50,8 @@ theorem overlapMap_comp_ι (hV : IsAffineOpen V) (h : V ≤ U) :
 
 theorem overlapMap_image_top (hV : IsAffineOpen V) (h : V ≤ U) :
     overlapMap hV h ''ᵁ ⊤ = U.ι ⁻¹ᵁ V := by
-  rw [Scheme.Hom.image_top_eq_opensRange, overlapMap,
+  change (hV.isoSpec.inv ≫ X.homOfLE h) ''ᵁ ⊤ = U.ι ⁻¹ᵁ V
+  rw [Scheme.Hom.image_top_eq_opensRange,
     Scheme.Hom.opensRange_comp_of_isIso, Scheme.opensRange_homOfLE]
 
 theorem overlapMap_preimage (hV : IsAffineOpen V) (h : V ≤ U) :
@@ -64,7 +65,7 @@ private theorem fromSpec_appLE_self (hV : IsAffineOpen V)
     ← Functor.map_comp]
   have hi : (eqToHom hV.fromSpec_preimage_self).op ≫ (homOfLE e).op =
       𝟙 (op (⊤ : (Spec Γ(X, V)).Opens)) := Subsingleton.elim _ _
-  rw [hi, Functor.map_id, Category.comp_id]
+  rw [hi, CategoryTheory.Functor.map_id, Category.comp_id]
 
 /-- Pulling an ambient section to the affine source has the canonical
 `ΓSpecIso` normalization, including the open-equality transport. -/
@@ -72,8 +73,14 @@ theorem overlapMap_appLE (hV : IsAffineOpen V) (h : V ≤ U) :
     U.ι.app V ≫ (overlapMap hV h).appLE (U.ι ⁻¹ᵁ V) ⊤
         (overlapMap_preimage hV h).ge =
       (Scheme.ΓSpecIso Γ(X, V)).inv := by
-  rw [← Scheme.Hom.comp_appLE, overlapMap_comp_ι hV h]
-  exact fromSpec_appLE_self hV _
+  have he : ∀ (f : Spec Γ(X, V) ⟶ X), f = hV.fromSpec →
+      ∀ e : ⊤ ≤ f ⁻¹ᵁ V,
+        f.appLE V ⊤ e = (Scheme.ΓSpecIso Γ(X, V)).inv := by
+    intro f hf e
+    subst f
+    exact fromSpec_appLE_self hV e
+  rw [← Scheme.Hom.comp_appLE]
+  exact he _ (overlapMap_comp_ι hV h) _
 
 /-- The coefficient map for restricted native affine sections is exactly
 the actual ambient restriction map. -/
@@ -116,7 +123,7 @@ theorem topSectionIso_smul (hV : IsAffineOpen V) (h : V ≤ U)
   rw [Scheme.Modules.smul_Spec_def]
   have hi : (⊤ : (Spec Γ(X, V)).Opens).leTop.op =
       𝟙 (op (⊤ : (Spec Γ(X, V)).Opens)) := Subsingleton.elim _ _
-  rw [hi, Functor.map_id]
+  rw [hi, CategoryTheory.Functor.map_id]
   change M.presheaf.map (eqToHom (overlapMap_image_top hV h).symm).op
       ((M.restrictAppIso (overlapMap hV h) ⊤).hom
         ((Scheme.ΓSpecIso Γ(X, V)).inv b • s)) =

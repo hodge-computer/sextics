@@ -36,7 +36,8 @@ abbrev LocalizedQuotient (I : Ideal R) (g : R) :=
 
 instance localizedQuotient_isLocalization (I : Ideal R) (g : R) :
     IsLocalization.Away (Ideal.Quotient.mk I g) (LocalizedQuotient I g) := by
-  simpa only [Algebra.algebraMapSubmonoid, Submonoid.map_powers] using
+  simpa only [Algebra.algebraMapSubmonoid, Submonoid.map_powers,
+    Ideal.Quotient.algebraMap_eq] using
     (inferInstance : IsLocalization
       (Algebra.algebraMapSubmonoid (R ⧸ I) (Submonoid.powers g))
       (LocalizedQuotient I g))
@@ -49,7 +50,10 @@ def quotientAwayEquiv (I : Ideal R) (g : R) (e : (R ⧸ I) ≃+* R')
   IsLocalization.ringEquivOfRingEquiv
     (M := Submonoid.powers (Ideal.Quotient.mk I g))
     (T := Submonoid.powers g')
-    (LocalizedQuotient I g) _ e (by rw [Submonoid.map_powers, hg])
+    (LocalizedQuotient I g) _ e (by
+      rw [Submonoid.map_powers]
+      change Submonoid.powers (e (Ideal.Quotient.mk I g)) = Submonoid.powers g'
+      rw [hg])
 
 @[simp] theorem quotientAwayEquiv_mk (I : Ideal R) (g a : R)
     (e : (R ⧸ I) ≃+* R') (g' : R') (hg : e (Ideal.Quotient.mk I g) = g') :
@@ -78,7 +82,10 @@ def quotientAwayAlgEquiv {A : Type*} [CommRing A]
   exact IsLocalization.algEquivOfAlgEquiv
     (M := Submonoid.powers (Ideal.Quotient.mk I g))
     (T := Submonoid.powers g')
-    (LocalizedQuotient I g) _ e (by rw [Submonoid.map_powers, hg])
+    (LocalizedQuotient I g) _ e (by
+      rw [Submonoid.map_powers]
+      change Submonoid.powers (e (Ideal.Quotient.mk I g)) = Submonoid.powers g'
+      rw [hg])
 
 end QuotientLocalization
 
@@ -111,8 +118,11 @@ def localizedReductionEquiv (g : B)
           (algebraMap B (Localization.Away g) a)) =
       algebraMap B₀ (Localization.Away g₀)
         (e (Ideal.Quotient.mk (epsilonIdeal (k := k) B) a)) := by
-  rw [localizedReductionEquiv, RingEquiv.trans_apply,
-    Ideal.quotientEquivAlgOfEq_mk, quotientAwayEquiv_mk]
+  change quotientAwayEquiv (epsilonIdeal (k := k) B) g e g₀ hg
+      (Ideal.Quotient.mk ((epsilonIdeal (k := k) B).map
+        (algebraMap B (Localization.Away g)))
+        (algebraMap B (Localization.Away g) a)) = _
+  exact quotientAwayEquiv_mk (epsilonIdeal (k := k) B) g a e g₀ hg
 
 end Epsilon
 

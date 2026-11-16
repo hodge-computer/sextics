@@ -67,7 +67,7 @@ theorem conjugatedTransition_map (M N : (Spec R).Modules)
           ((comparisonIso M eM).hom ≫ (tilde.functor R).map t.hom) := by
       rw [← Functor.map_comp]
       simp only [Iso.trans_hom, Iso.symm_hom, Category.assoc,
-        Iso.inv_hom_id, Category.comp_id]
+        Iso.inv_hom_id, Category.comp_id, CategoryTheory.Functor.mapIso_hom]
     _ = (eM.hom ≫ (tilde.isoTop E).hom) ≫
           (moduleSpecΓFunctor (R := R)).map ((tilde.functor R).map t.hom) := by
       rw [Functor.map_comp, comparisonIso_map]

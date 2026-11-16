@@ -25,7 +25,9 @@ namespace CycleQ2GradedAwaySpecialization
 
 open CategoryTheory AlgebraicGeometry HomogeneousLocalization
 
-variable {A B σ τ : Type*}
+universe u
+
+variable {A B σ τ : Type u}
 variable [CommRing A] [SetLike σ A] [AddSubgroupClass σ A]
 variable [CommRing B] [SetLike τ B] [AddSubgroupClass τ B]
 variable {𝒜 : ℕ → σ} {ℬ : ℕ → τ} [GradedRing 𝒜] [GradedRing ℬ]
