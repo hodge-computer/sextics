@@ -10,8 +10,7 @@ are constructed on the original quotient and homogeneous fractions.
 The induced affine chart is an actual open immersion into the family,
 and its structure map is the original parameter-algebra map.
 
-Source-only draft: no Lean elaboration, compilation, or kernel replay
-was run. Prepared for `fqlx` with OpenAI ChatGPT assistance, following
+Prepared for `fqlx` with OpenAI ChatGPT assistance, following
 Ben Diamond's geometric seed construction.
 -/
 
@@ -27,6 +26,12 @@ namespace CycleQ2SeedFamilyChart
 open CategoryTheory AlgebraicGeometry MvPolynomial
 open CycleQ2SeedCubicFamily CycleQ2SeedProjectiveFamily
   CycleQ2SeedFamilyNormalized CycleQ2GeometricIncidenceProj
+
+local instance normalizedFamilyRingCommRing (r : ℂ) : CommRing (FamilyRing r) :=
+  Ideal.Quotient.commRing (familyIdeal r)
+
+local instance normalizedRingCommRing (r : ℂ) (i : Fin 4) :
+    CommRing (NormalizedRing r i) := Ideal.Quotient.commRing (normalizedIdeal r i)
 
 theorem normalizedIdeal_le_chart_kernel (r : ℂ) (i : Fin 4) :
     normalizedIdeal r i ≤ RingHom.ker (projectiveEvaluate r i) := by
@@ -72,7 +77,8 @@ def familyRingToNormalized (r : ℂ) (i : Fin 4) :
 
 def localizationToNormalized (r : ℂ) (i : Fin 4) :
     CoordinateRing r i →ₐ[ParameterRing] NormalizedRing r i :=
-  IsLocalization.Away.liftAlgHom (S := CoordinateRing r i)
+  IsLocalization.Away.liftAlgHom (A := ParameterRing) (R := FamilyRing r)
+    (P := NormalizedRing r i) (S := CoordinateRing r i)
     (f := familyRingToNormalized r i) (familyCoordinate r i.castSucc) (by
       change IsUnit (normalizedCoordinate r i i.castSucc)
       rw [normalizedCoordinate_self]
@@ -80,8 +86,13 @@ def localizationToNormalized (r : ℂ) (i : Fin 4) :
 
 @[simp] theorem localizationToNormalized_algebraMap (r : ℂ) (i : Fin 4) (a : FamilyRing r) :
     localizationToNormalized r i (algebraMap (FamilyRing r) (CoordinateRing r i) a) =
-      familyRingToNormalized r i a :=
-  IsLocalization.Away.lift_eq (familyCoordinate r i.castSucc) _ a
+      familyRingToNormalized r i a := by
+  dsimp only [localizationToNormalized]
+  have hunit : IsUnit (familyRingToNormalized r i (familyCoordinate r i.castSucc)) := by
+    rw [familyRingToNormalized_coordinate, normalizedCoordinate_self]
+    exact isUnit_one
+  exact IsLocalization.Away.lift_eq (g := (familyRingToNormalized r i).toRingHom)
+    (familyCoordinate r i.castSucc) hunit a
 
 @[simp] theorem localizationToNormalized_invSelf (r : ℂ) (i : Fin 4) :
     localizationToNormalized r i
@@ -114,10 +125,10 @@ theorem chartToNormalized_projectiveEvaluate (r : ℂ) (i : Fin 4) (p : FamilyPo
       normalizedQuotient r i := by
     apply MvPolynomial.ringHom_ext
     · intro c
-      change chartToNormalized r i (chartCoefficient r i c) = normalizedQuotient r i (C c)
+      simp only [RingHom.comp_apply, projectiveEvaluate, eval₂Hom_C]
       exact (chartToNormalized r i).commutes c
     · intro j
-      change chartToNormalized r i (coordinateRatio r i j) = normalizedCoordinate r i j
+      simp only [RingHom.comp_apply, projectiveEvaluate, eval₂Hom_X']
       exact chartToNormalized_coordinateRatio r i j
   exact RingHom.congr_fun h p
 
@@ -196,7 +207,9 @@ theorem normalizedChartToFamily_overParameters (r : ℂ) (i : Fin 4) :
   simp only [normalizedChartToFamily, normalizedAffineChart_hom, Category.assoc]
   rw [coordinateChart_overParameters, ← Spec.map_comp]
   apply congrArg Spec.map
-  ext c
+  apply CommRingCat.hom_ext
+  apply RingHom.ext
+  intro c
   exact (normalizedChartEquiv r i).symm.commutes c
 
 /-- Every point of the coordinate open has a point in the actual normalized chart. -/

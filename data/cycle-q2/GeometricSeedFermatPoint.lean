@@ -10,8 +10,7 @@ localization and restricts to the native degree-zero chart ring. The
 corresponding scheme morphism is a section of the original structure
 morphism to `Spec ℂ`, and in particular proves nonemptiness.
 
-Source-only draft: no Lean elaboration, compilation, or kernel replay has
-been run in this session. Prepared for `fqlx` with OpenAI ChatGPT assistance,
+Prepared for `fqlx` with OpenAI ChatGPT assistance,
 following the geometric seed in Ben Diamond's surface-section argument.
 -/
 
@@ -84,8 +83,13 @@ def localizedEvaluation (r : ℂ) (hr : r ^ 3 = 2) :
 @[simp] theorem localizedEvaluation_algebraMap (r : ℂ) (hr : r ^ 3 = 2)
     (a : ConeRing r) :
     localizedEvaluation r hr (algebraMap (ConeRing r) (CoordinateRing r 0) a) =
-      coneEvaluation r hr a :=
-  IsLocalization.Away.lift_eq (coordinateClass r 0) _ a
+      coneEvaluation r hr a := by
+  dsimp only [localizedEvaluation]
+  have hunit : IsUnit (coneEvaluationAlgHom r hr (coordinateClass r 0)) := by
+    change IsUnit (coneEvaluation r hr (coordinateClass r 0))
+    rw [coneEvaluation_coordinate]
+    exact isUnit_one
+  exact IsLocalization.Away.lift_eq (coordinateClass r 0) hunit a
 
 @[simp] theorem localizedEvaluation_invSelf (r : ℂ) (hr : r ^ 3 = 2) :
     localizedEvaluation r hr (IsLocalization.Away.invSelf (coordinateClass r 0)) = 1 := by
@@ -101,8 +105,12 @@ def chartEvaluation (r : ℂ) (hr : r ^ 3 = 2) : ChartRing r 0 →ₐ[ℂ] ℂ :
 theorem chartEvaluation_coordinateRatio (r : ℂ) (hr : r ^ 3 = 2) (j : Fin 5) :
     chartEvaluation r hr (coordinateRatio r 0 j) = pointCoordinates j := by
   change localizedEvaluation r hr ((coordinateRatio r 0 j).val) = pointCoordinates j
-  rw [coordinateRatio_val, map_mul, map_pow, localizedEvaluation_algebraMap,
-    localizedEvaluation_invSelf, one_pow, mul_one]
+  rw [coordinateRatio_val, map_mul, map_pow]
+  change localizedEvaluation r hr
+      (algebraMap (ConeRing r) (CoordinateRing r 0) (coneQuotient r (X j))) *
+      localizedEvaluation r hr (IsLocalization.Away.invSelf (coordinateClass r 0)) ^
+        CycleQ2GeometricIncidenceProj.geometricWeight j = pointCoordinates j
+  rw [localizedEvaluation_algebraMap, localizedEvaluation_invSelf, one_pow, mul_one]
   exact coneEvaluation_coordinate r hr j
 
 /-- The complex point first lands in the native `z₀` affine chart. -/
