@@ -5,11 +5,6 @@ import Proposal.GeometricSurfaceDifferentialCharts
 /-!
 # The chart residue uses the original Cartier reduction map
 
-Status: source-only proof draft; compilation and independent kernel replay
-are deferred at the user's request. Its raw-residue prerequisite was
-corrected after an earlier failed elaboration and remains unverified.
-No new axioms or admissions are used.
-
 The affine comparison below identifies the existing sheaf morphism
 `inverseIdealReduction` with reduction of the original coordinate-algebra
 functional.  The resulting square uses actual inverse-ideal sheaf sections,
@@ -98,8 +93,10 @@ theorem chart_residue_sequence_square
           ((inverseIdealReduction (Spec.map (chartMap q h g₁ g₂ k i j))).val.app
             (op ⊤) s))
         (restrictForm q h g₁ g₂ k i j ω) := by
-  rw [residue_smulRight, affine_conormal_reduction]
-  rfl
+  exact (residue_smulRight q h g₁ g₂ k i j _ ω).trans
+    (congrArg (fun φ => normalAdjunction q h g₁ g₂ k i j φ
+      (restrictForm q h g₁ g₂ k i j ω))
+      (affine_conormal_reduction (chartMap q h g₁ g₂ k i j) s).symm)
 
 end NormalChart
 

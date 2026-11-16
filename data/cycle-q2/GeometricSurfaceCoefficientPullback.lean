@@ -1,9 +1,3 @@
-/-
-SOURCE-ONLY DRAFT: unverified.
-Compilation and independent kernel replay were deferred at the user's request.
-The proof terms below have not been accepted as a checked certificate.
--/
-
 import Proposal.GeometricChartSectionPullback
 import Proposal.GeometricSurfaceResidueOverlap
 
@@ -44,9 +38,10 @@ private theorem first_chart_square (r θ : ℂ) (i : Fin 2) (j : Fin 3) :
     _ = Spec.map (CommRingCat.ofHom (firstNormalCurveMap r θ i j).toRingHom) ≫
         principalImmersion (firstAffineChart r θ) (firstJacobian r θ i j) :=
       (firstNormalCurve_isPullback r θ i j).w.symm
-    _ = _ := by
-      change _ = _ ≫ (principalChart (firstAffineChart r θ) (firstJacobian r θ i j)).inv ≫ _
-      rw [Category.assoc, principalChart_inv_ι]
+    _ = _ := congrArg
+      (fun g : Spec (CommRingCat.of (FirstNormalRing r θ i j)) ⟶ projectiveSurface r θ =>
+        Spec.map (CommRingCat.ofHom (firstNormalCurveMap r θ i j).toRingHom) ≫ g)
+      (principalChart_inv_ι (firstAffineChart r θ) (firstJacobian r θ i j)).symm
 
 private theorem second_chart_square (r θ : ℂ) (i : Fin 2) (j : Fin 3) :
     (secondNormalCurveChart r θ i j).inv ≫ (secondNormalCurveOpen r θ i j).ι ≫
@@ -59,9 +54,10 @@ private theorem second_chart_square (r θ : ℂ) (i : Fin 2) (j : Fin 3) :
     _ = Spec.map (CommRingCat.ofHom (secondNormalCurveMap r θ i j).toRingHom) ≫
         principalImmersion (secondAffineChart r θ) (secondJacobian r θ i j) :=
       (secondNormalCurve_isPullback r θ i j).w.symm
-    _ = _ := by
-      change _ = _ ≫ (principalChart (secondAffineChart r θ) (secondJacobian r θ i j)).inv ≫ _
-      rw [Category.assoc, principalChart_inv_ι]
+    _ = _ := congrArg
+      (fun g : Spec (CommRingCat.of (SecondNormalRing r θ i j)) ⟶ projectiveSurface r θ =>
+        Spec.map (CommRingCat.ofHom (secondNormalCurveMap r θ i j).toRingHom) ≫ g)
+      (principalChart_inv_ι (secondAffineChart r θ) (secondJacobian r θ i j)).symm
 
 theorem first_coefficient_pullback (r θ : ℂ) (i : Fin 2) (j : Fin 3)
     (p : MvPolynomial (Fin 5) ℂ)

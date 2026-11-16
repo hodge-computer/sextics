@@ -10,7 +10,6 @@ ordinary localization. No Laurent range or extension hypothesis is used.
 Their naturality and homogeneous numerator identity are sufficient to map
 canonical two-form boundaries to the original coordinate Čech boundaries.
 
-Status: source-only proof draft. Verification is deferred at the user's request.
 -/
 
 set_option autoImplicit false
@@ -27,6 +26,7 @@ open CycleQ2SeedTrace CycleQ2GeometricSeedNormalIdeals
 open CycleQ2GeometricSurfaceCoordinates CycleQ2CartierSurfaceGrading CycleQ2CartierProjectiveCover
 open CycleQ2ProjectiveCoordinateCohomology CycleQ2ProjectiveCoordinateH2
 open CycleQ2GeometricSurfaceDehomogenizedCharts CycleQ2SurfaceCoordinateSections
+open CycleQ2GeometricCartierNormalLift
 
 /-- The literal section isomorphism followed by the canonical homogeneous
 localization inclusion. -/
@@ -51,7 +51,7 @@ theorem sectionCoefficient_restrict (r θ : ℂ) {s t : Finset (Fin 3)}
       CycleQ2GeometricSurfaceCoordinates.coordinateRestriction r θ hst
         (sectionCoefficient r θ s hs a) := by
   obtain ⟨q,rfl⟩ := (coordinateSections r θ s hs).surjective a
-  rw [coordinateSections_restrict, sectionCoefficient_sections,
+  rw [coordinateSections_restrict r θ hs ht hst, sectionCoefficient_sections,
     sectionCoefficient_sections, coordinateHomogeneousRestriction_val]
 
 /-- The same map on an identified open, for the original pair/triple
@@ -131,8 +131,9 @@ def chartOrdinaryRestriction (r θ : ℂ) {s : Finset (Fin 3)}
     (i : Fin 3) (hi : i ∈ s) (a : SurfaceRing r θ) :
     chartOrdinaryRestriction r θ i hi
         (algebraMap (SurfaceRing r θ) (CoordinateLocalization r θ (chartIndex i)) a) =
-      algebraMap (SurfaceRing r θ) (CoordinateLocal r θ s) a :=
-  IsLocalization.Away.lift_eq _ _ a
+      algebraMap (SurfaceRing r θ) (CoordinateLocal r θ s) a := by
+  dsimp only [chartOrdinaryRestriction]
+  exact IsLocalization.Away.lift_eq _ _ a
 
 theorem chartHomogeneousRestriction_val (r θ : ℂ) {s : Finset (Fin 3)}
     (i : Fin 3) (hi : i ∈ s) (q : CoordinateRing r θ (chartIndex i)) :

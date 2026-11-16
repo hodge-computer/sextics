@@ -1,9 +1,3 @@
-/-
-SOURCE-ONLY DRAFT: unverified.
-Compilation and independent kernel replay were deferred at the user's request.
-The proof terms below have not been accepted as a checked certificate.
--/
-
 import Proposal.GeometricExteriorLocalFrames
 import Proposal.GeometricSurfaceResidueOverlap
 
@@ -71,7 +65,7 @@ theorem first_localSection_coordinate (p : CubicPolynomial) (i : Fin 2) (j : Fin
         (Over.mk (homOfLE hO))) = _
   rw [← chartResidueLocalFrame_generator]
   change (firstExteriorFrame r θ i j).app O hO
-    (_ • ((firstExteriorFrame r θ i j).app O hO).symm 1) = _
+    (_ • ((firstExteriorFrame r θ i j).app O hO).symm (1 : Γ(projectiveSurface r θ,O))) = _
   rw [map_smul, LinearEquiv.apply_symm_apply, smul_eq_mul, mul_one]
 
 theorem second_localSection_coordinate (p : CubicPolynomial) (i : Fin 2) (j : Fin 3)
@@ -87,9 +81,10 @@ theorem second_localSection_coordinate (p : CubicPolynomial) (i : Fin 2) (j : Fi
         (normalPolynomial (secondQuadric r) i) (includeCurve (X j))
         (secondNormalChart r θ i j) (secondNormalChart_overComplex r θ i j)
         (Over.mk (homOfLE hO)))) = _
-  rw [map_neg, ← chartResidueLocalFrame_generator]
+  rw [map_neg ((secondExteriorFrame r θ i j).app O hO),
+    ← chartResidueLocalFrame_generator]
   change -((secondExteriorFrame r θ i j).app O hO
-    (_ • ((secondExteriorFrame r θ i j).app O hO).symm 1)) = _
+    (_ • ((secondExteriorFrame r θ i j).app O hO).symm (1 : Γ(projectiveSurface r θ,O)))) = _
   rw [map_smul, LinearEquiv.apply_symm_apply, smul_eq_mul, mul_one]
 
 def firstFrameCubic : WeightedCubic :=
@@ -115,9 +110,12 @@ theorem first_frameCubic_generator (i : Fin 2) (j : Fin 3)
   apply ((firstExteriorFrame r θ i j).app O hO).injective
   change frameCoordinate (firstExteriorFrame r θ i j) O hO
       (localSectionOn r θ firstFrameCubic.val (.inl (i,j)) O hO) =
-    (firstExteriorFrame r θ i j).app O hO (((firstExteriorFrame r θ i j).app O hO).symm 1)
+    (firstExteriorFrame r θ i j).app O hO (((firstExteriorFrame r θ i j).app O hO).symm (1 : Γ(projectiveSurface r θ,O)))
   rw [first_localSection_coordinate, LinearEquiv.apply_symm_apply]
   simp [firstFrameCubic, firstSurfaceDehomogenize]
+  change chartSection (firstNormalChart r θ i j) (Over.mk (homOfLE hO)) 1 =
+    (1 : Γ(projectiveSurface r θ,O))
+  exact map_one _
 
 theorem second_frameCubic_generator (i : Fin 2) (j : Fin 3)
     (O : (projectiveSurface r θ).Opens) (hO : O ≤ secondNormalOpen r θ i j) :
@@ -126,9 +124,12 @@ theorem second_frameCubic_generator (i : Fin 2) (j : Fin 3)
   apply ((secondExteriorFrame r θ i j).app O hO).injective
   change frameCoordinate (secondExteriorFrame r θ i j) O hO
       (localSectionOn r θ secondFrameCubic.val (.inr (i,j)) O hO) =
-    (secondExteriorFrame r θ i j).app O hO (((secondExteriorFrame r θ i j).app O hO).symm 1)
+    (secondExteriorFrame r θ i j).app O hO (((secondExteriorFrame r θ i j).app O hO).symm (1 : Γ(projectiveSurface r θ,O)))
   rw [second_localSection_coordinate, LinearEquiv.apply_symm_apply]
   simp [secondFrameCubic, secondSurfaceDehomogenize]
+  change -(chartSection (secondNormalChart r θ i j) (Over.mk (homOfLE hO))) (-1) =
+    (1 : Γ(projectiveSurface r θ,O))
+  simp only [map_neg, map_one, neg_neg]
 
 theorem frameCubic_generator (k : PatchIndex)
     (O : (projectiveSurface r θ).Opens) (hO : O ≤ patchOpen r θ k) :

@@ -4,8 +4,7 @@ import Proposal.GeometricThirdSurfaceChart
 /-!
 # A full residue-chart cover of the literal projective surface
 
-Source-only draft: compilation and replay are deferred at the user's
-request. The three actual coordinate charts are covered by all augmented
+The three actual coordinate charts are covered by all augmented
 Jacobian pairs. The original twelve normal patches occur literally in
 this larger family. In particular, no assertion that those twelve patches
 cover the whole surface enters the construction.
@@ -55,7 +54,10 @@ private theorem firstCoordinateMinorIdeal_top :
   change Ideal.span (Set.range (fun ab : Fin 4 × Fin 4 =>
     augmentedJacobian (dehomogenizedEquations (57 : ℂ) 1 1)
       (X (variableIndex ab.1)) (X (variableIndex ab.2)))) = ⊤ at h
-  simpa only [dehomogenizedEquations_one] using h
+  exact (congrArg (fun v : Fin 2 → SurfacePoly =>
+    Ideal.span (Set.range (fun ab : Fin 4 × Fin 4 =>
+      augmentedJacobian v (X (variableIndex ab.1)) (X (variableIndex ab.2)))) = ⊤)
+    (dehomogenizedEquations_one (57 : ℂ) 1)).mp h
 
 private theorem secondCoordinateMinorIdeal_top :
     Ideal.span (Set.range (fun ab : Fin 4 × Fin 4 =>
@@ -65,7 +67,10 @@ private theorem secondCoordinateMinorIdeal_top :
   change Ideal.span (Set.range (fun ab : Fin 4 × Fin 4 =>
     augmentedJacobian (dehomogenizedEquations (57 : ℂ) 1 2)
       (X (variableIndex ab.1)) (X (variableIndex ab.2)))) = ⊤ at h
-  simpa only [dehomogenizedEquations_two] using h
+  exact (congrArg (fun v : Fin 2 → SurfacePoly =>
+    Ideal.span (Set.range (fun ab : Fin 4 × Fin 4 =>
+      augmentedJacobian v (X (variableIndex ab.1)) (X (variableIndex ab.2)))) = ⊤)
+    (dehomogenizedEquations_two (57 : ℂ) 1)).mp h
 
 theorem first_coordinate_minor_cover :
     (⨆ a : Fin 4, ⨆ b : Fin 4,
@@ -88,9 +93,12 @@ theorem third_coordinate_minor_cover :
       thirdPatchOpen (57 : ℂ) 1 (X (variableIndex a)) (X (variableIndex b))) =
         coordinateOpen 2 := by
   apply principalOpen_cover_two (thirdAffineChart (57 : ℂ) 1)
-  have h := PrimeSpectrum.iSup_basicOpen_eq_top_iff.mpr
-    (augmentedCoordinateIdeal_eq_top 2)
-  simpa only [augmentedCoordinateIdeal, equations, projectiveIndex, iSup_prod] using h
+  have htop : Ideal.span (Set.range (fun ab : Fin 4 × Fin 4 =>
+      augmentedJacobian (thirdEquations (57 : ℂ) 1)
+        (X (variableIndex ab.1)) (X (variableIndex ab.2)))) = ⊤ :=
+    augmentedCoordinateIdeal_eq_top 2
+  have h := PrimeSpectrum.iSup_basicOpen_eq_top_iff.mpr htop
+  simpa only [iSup_prod] using h
 
 theorem coordinate_minor_cover (i : Fin 3) :
     (⨆ a : Fin 4, ⨆ b : Fin 4,

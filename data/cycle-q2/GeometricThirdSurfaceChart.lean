@@ -9,11 +9,12 @@ The raw determinant residue has positive projective orientation on this chart.
 All objects below are the existing literal projective surface, its original
 coefficient morphism, and its actual exterior differential sheaf.
 
-This is source-only work: verification was explicitly deferred by the user.
 -/
 
 set_option autoImplicit false
 set_option Elab.async false
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
 
 noncomputable section
 
@@ -37,13 +38,7 @@ theorem thirdDehomogenize_eq :
         X none - X (some 2) ^ 2] := by
   apply MvPolynomial.algHom_ext
   intro j
-  induction j using Fin.lastCases with
-  | last =>
-      rw [thirdDehomogenize, dehomogenize_last]
-      simp [linearCoordinate, Fin.insertNth, Fin.succAboveCases]
-  | cast j =>
-      rw [thirdDehomogenize, dehomogenize_castSucc]
-      fin_cases j <;> simp [linearCoordinate, Fin.insertNth, Fin.succAboveCases]
+  fin_cases j <;> simp only [thirdDehomogenize, dehomogenize, aeval_X] <;> rfl
 
 abbrev thirdEquations (r θ : ℂ) : Fin 2 → SurfacePoly :=
   dehomogenizedEquations r θ 3

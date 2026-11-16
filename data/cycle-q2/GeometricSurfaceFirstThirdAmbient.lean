@@ -4,7 +4,6 @@ import Proposal.GeometricSurfaceResidueSections
 /-!
 # The actual first-to-third ambient coordinate change
 
-Status: source-only proof draft; verification is deferred at the user's request.
 The substitution is (z,a,b,c) ↦ (z/c²,a/c,1/c,b/c). Its Jacobian determinant
 is positive c⁻⁶. Differentiating the original weighted equations before
 passing to a quotient gives their conormal factors c⁻⁶ and c⁻³. The mixed
@@ -57,6 +56,7 @@ theorem ambientPartial_base (j : Option (Fin 3)) (p : SurfacePoly) :
       (algebraMap SurfacePoly AmbientOverlap p) = _
   rw [CycleQ2GeometricFunctionalDifferentials.localizedDerivation_algebraMap]
   simp only [Basis.coord_apply, KaehlerDifferential.mvPolynomialBasis_repr_apply]
+  rfl
 
 theorem ambientPartial_coordinate (j k : Option (Fin 3)) :
     ambientPartial j (ambientCoordinate k) = if k = j then 1 else 0 := by
@@ -106,7 +106,7 @@ private theorem dehomogenize_scaling {R : Type*} [CommRing R] [Algebra ℂ R]
     · simp [weight]
     · simp [weight, mul_comm]
     · simpa [weight, mul_comm] using ht.symm
-    · simp only [weight, Matrix.cons_val_succ, Matrix.cons_val_zero]
+    · change z*t^2-(b*t)^2 = t^2*(z-b^2)
       ring
   rw [hv]
   exact weighted_homogeneous_eval_scale (algebraMap ℂ R) ![a,1,b,c,z-b^2] t p n hp
