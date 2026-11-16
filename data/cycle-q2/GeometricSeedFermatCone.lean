@@ -5,9 +5,6 @@ import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
 /-!
 # Smooth coordinate opens of the actual zero-cubic seed cone
 
-Source-only draft: this module has not been elaborated or compiled in this
-session. It constructs one geometric ingredient of the written proof.
-
 The coordinate rings below are the five principal localizations of the
 literal quotient by `seedFamily r 0`. When `r ^ 3 = 2`, the existing
 polynomial identity identifies that equation with the weighted Fermat
@@ -58,8 +55,9 @@ theorem zeroCubic_pderiv (r : ℂ) (hr : r ^ 3 = 2) (j : Fin 5) :
       C (coordinateDegree j : ℂ) * X j ^ (coordinateDegree j - 1) := by
   rw [seedFamily_zero_of_cube_two r hr]
   fin_cases j <;>
-    norm_num [coordinateDegree, map_add, pderiv_pow, Pi.single_apply, Fin.ext_iff] <;>
-    ring
+    norm_num [coordinateDegree, map_add, pderiv_pow, Pi.single_apply, Fin.ext_iff,
+      map_ofNat] <;>
+    ring <;> rfl
 
 /-- The chosen derivative is a proved unit in the actual coordinate open. -/
 theorem partial_isUnit (r : ℂ) (hr : r ^ 3 = 2) (j : Fin 5) :
@@ -67,7 +65,8 @@ theorem partial_isUnit (r : ℂ) (hr : r ^ 3 = 2) (j : Fin 5) :
       (coneQuotient r (pderiv j (seedFamily r 0)))) := by
   have hc : IsUnit (coordinateDegree j : ℂ) := by
     apply isUnit_iff_ne_zero.mpr
-    fin_cases j <;> norm_num [coordinateDegree]
+    unfold coordinateDegree
+    split_ifs <;> norm_num
   have hc' := hc.map (algebraMap ℂ (CoordinateRing r j))
   rw [zeroCubic_pderiv r hr j]
   simp only [map_mul, map_pow]
