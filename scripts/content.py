@@ -99,6 +99,14 @@ class Renderer(mistune.HTMLRenderer):
         identifier = slug(html.unescape(re.sub('<[^>]*>', '', text)))
         return f'<h{level} id="{html.escape(identifier)}">{text}</h{level}>\n'
 
+    def text(self, text):
+        # An escaped \$ arrives as its own "$" token; any other dollar is unrendered mathematics.
+        if '$' in text and text != '$':
+            raise ValueError(f'{self.source_path or "Markdown"}: "{text.strip()[:60]}" contains a "$" '
+                             'that is not mathematics; write inline mathematics as \\(...\\), display '
+                             'mathematics as $$...$$, and a literal dollar as \\$')
+        return super().text(text)
+
     def inline_math(self, text):
         return f'<span class="inline-math" data-math>{html.escape(text)}</span>'
 
@@ -112,6 +120,7 @@ def render(source, *, root=None, source_path=None, extra_files=()):
             raise ValueError(f'{source_path}: "{cited[0]}" cites a pull request; '
                              'cite the solve, instance or book section instead')
     renderer = Renderer(escape=True)
+    renderer.source_path = source_path
     renderer.resolve_link = link_resolver(root, source_path, extra_files) if source_path else lambda link: link
     markdown = mistune.create_markdown(renderer=renderer, plugins=['table', 'strikethrough', math_plugin])
     return markdown(source)
