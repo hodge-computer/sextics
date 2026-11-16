@@ -16,7 +16,6 @@ Their original-element formulas bind them to the existing literal
 `localizedLeft` and `localizedImage` maps. Identifying the coefficient
 map with a particular projective restriction is separate.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 No axioms or admissions are introduced. Prepared for fqlx with OpenAI
 ChatGPT assistance; the geometric route is credited in solution.md.
 -/
@@ -100,7 +99,9 @@ theorem localizedMatrix_eq :
       (localizedFactorData F S B).matrix.mulVecLin := by
   apply LinearMap.restrictScalars_injective A
   apply IsLocalizedModule.linearMap_ext S (coordinateMap B) (coordinateMap B)
-  ext v a
+  apply LinearMap.ext
+  intro v
+  funext a
   change IsLocalizedModule.map S (coordinateMap B) (coordinateMap B) F.matrix.mulVecLin
       (coordinateMap B v) a =
     (localizedFactorData F S B).matrix.mulVecLin (coordinateMap B v) a

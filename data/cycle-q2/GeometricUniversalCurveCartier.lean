@@ -6,9 +6,6 @@ import Mathlib.RingTheory.MvPolynomial.Localization
 /-!
 # Cartier charts of the actual universal incidence curve
 
-Status: source-only proof draft. Compilation and independent kernel replay
-are deferred at the user's request. No new axioms or admissions are used.
-
 The nine original matrix entries define projective opens of the original
 surface over `S[T0,T1,T2]`. On each such open, the equation is the actual
 degree-zero fraction `(M*T)i / Mij`. The ordinary localization is compared
@@ -43,6 +40,9 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceEquations
 attribute [local instance] MvPolynomial.algebraMvPolynomial
 
 variable {S : Type} [CommRing S] [Algebra ℂ S]
+
+local instance pointCommRing (y : ParameterIndex → S) : CommRing (PointSurface y) := inferInstance
+local instance curveCommRing (y : ParameterIndex → S) : CommRing (GenericCurveRing y) := inferInstance
 
 /-! ## The unchanged surface before imposing the section equation -/
 
@@ -127,13 +127,16 @@ private theorem to_from_surface_polynomial (y : ParameterIndex → S)
       RingHom.id (SectionPolynomial y) := by
     apply MvPolynomial.ringHom_ext
     · intro a
-      obtain ⟨q, rfl⟩ := Ideal.Quotient.mk_surjective a
-      change toSurfacePolynomial y (fromSurfacePolynomial y (C _)) = _
+      obtain ⟨q, rfl⟩ := Ideal.Quotient.mk_surjective (I := pointEquations y) a
+      change toSurfacePolynomial y (fromSurfacePolynomial y
+        (C (Ideal.Quotient.mk (pointEquations y) q))) = _
       rw [fromSurfacePolynomial_C, surfaceCoefficientExtension_mk,
         toSurfacePolynomial_mk, toSectionPolynomial_map]
+      rfl
     · intro j
       change toSurfacePolynomial y (fromSurfacePolynomial y (X j)) = _
       rw [fromSurfacePolynomial_X, toSurfacePolynomial_mk, toSectionPolynomial_parameter]
+      rfl
   exact RingHom.congr_fun h p
 
 /-- Polynomial extension of the actual surface quotient, retaining the
@@ -202,6 +205,13 @@ abbrev OrdinaryPivot (y : ParameterIndex → S) (p : CycleQ2SegreCech.Chart) :=
 abbrev ProjectivePivot (y : ParameterIndex → S) (p : CycleQ2SegreCech.Chart) :=
   HomogeneousLocalization.Away (surfaceGrade (sectionPoint y)) (pivot y p)
 
+local instance coefficientPivotCommRing (y : ParameterIndex → S) (p : CycleQ2SegreCech.Chart) :
+    CommRing (CoefficientPivot y p) := inferInstance
+local instance ordinaryPivotCommRing (y : ParameterIndex → S) (p : CycleQ2SegreCech.Chart) :
+    CommRing (OrdinaryPivot y p) := inferInstance
+local instance projectivePivotCommRing (y : ParameterIndex → S) (p : CycleQ2SegreCech.Chart) :
+    CommRing (ProjectivePivot y p) := inferInstance
+
 /-- The genuine ordinary pivot localization is polynomial in the unchanged
 three section variables over the corresponding surface localization. -/
 def pivotLocalizationEquiv (y : ParameterIndex → S) (p : CycleQ2SegreCech.Chart) :
@@ -211,8 +221,9 @@ def pivotLocalizationEquiv (y : ParameterIndex → S) (p : CycleQ2SegreCech.Char
     (T := (Submonoid.powers (basePivot y p)).map
       (C : PointSurface y →+* SectionPolynomial y))
     (OrdinaryPivot y p) (MvPolynomial (Fin 3) (CoefficientPivot y p))
-    (surfacePolynomialEquiv y) (by simp only [Submonoid.map_powers,
-      surfacePolynomialEquiv_pivot])
+    (surfacePolynomialEquiv y) (by
+      simp only [Submonoid.map_powers]
+      exact congrArg Submonoid.powers (surfacePolynomialEquiv_pivot y p))
 
 @[simp] theorem pivotLocalizationEquiv_algebraMap (y : ParameterIndex → S)
     (p : CycleQ2SegreCech.Chart) (a : PointSurface (sectionPoint y)) :
@@ -303,10 +314,13 @@ theorem surfaceSectionKernel_map (y : ParameterIndex → S) :
         (surfacePolynomialEquiv y).toRingHom := by
     ext a
     change genericCurveSurfaceRingMap y a = 0 ↔
-      surfacePolynomialEquiv y a ∈ _
+      surfacePolynomialEquiv y a ∈
+        sectionIdeal (CycleQ2IncidenceBasepointOpen.curveMatrix (pointMap y))
     rw [← (genericCurveRingEquiv y).map_eq_zero_iff,
       surfacePolynomialEquiv_curve, Ideal.Quotient.eq_zero_iff_mem]
-  rw [hk, Ideal.map_comap_of_surjective _ (surfacePolynomialEquiv y).surjective]
+  rw [hk]
+  exact Ideal.map_comap_of_surjective (surfacePolynomialEquiv y).toRingHom
+    (surfacePolynomialEquiv y).surjective _
 
 theorem ordinaryKernel_map (y : ParameterIndex → S) (p : CycleQ2SegreCech.Chart) :
     ((surfaceSectionKernel y).map (algebraMap _ (OrdinaryPivot y p))).map
@@ -317,7 +331,8 @@ theorem ordinaryKernel_map (y : ParameterIndex → S) (p : CycleQ2SegreCech.Char
       (algebraMap _ (OrdinaryPivot y p)) =
         (MvPolynomial.map (algebraMap (PointSurface y) (CoefficientPivot y p))).comp
           (surfacePolynomialEquiv y).toRingHom := by
-    ext a
+    apply RingHom.ext
+    intro a
     exact pivotLocalizationEquiv_algebraMap y p a
   rw [hcomp, ← Ideal.map_map, surfaceSectionKernel_map,
     sectionIdeal, Ideal.map_span]
@@ -339,8 +354,11 @@ theorem ordinaryKernel_principal [Nontrivial S] (y : ParameterIndex → S)
       (pivotLocalizationEquiv y p).toRingHom =
     (Ideal.span {algebraMap _ (OrdinaryPivot y p) (equation y p.1)}).map
       (pivotLocalizationEquiv y p).toRingHom
-  rw [ordinaryKernel_map, Ideal.map_span, Set.image_singleton,
-    pivotLocalizationEquiv_equation]
+  rw [ordinaryKernel_map, Ideal.map_span, Set.image_singleton]
+  change sectionIdeal (localizedMatrix y p) =
+    Ideal.span {pivotLocalizationEquiv y p
+      (algebraMap _ (OrdinaryPivot y p) (equation y p.1))}
+  rw [pivotLocalizationEquiv_equation]
   obtain ⟨u, hu'⟩ := localizedMatrix_pivot_isUnit y p
   have hc := @CycleQ2SegreCech.cofactors_map_zero
     (PointSurface y) (inferInstance : CommRing (PointSurface y))
@@ -393,7 +411,8 @@ theorem gradedAwayMap_ker (s : A) {d : ℕ} (hs : s ∈ 𝒜 d) :
   ext z
   obtain ⟨n, a, ha, rfl⟩ := Away.mk_surjective 𝒜 hs z
   change Away.map f s (Away.mk 𝒜 hs n a ha) = 0 ↔
-    (Away.mk 𝒜 hs n a ha).val ∈ _
+    (Away.mk 𝒜 hs n a ha).val ∈
+      (RingHom.ker f).map (algebraMap A (Localization.Away s))
   rw [gradedAwayMap_mk_eq_zero_iff, Away.val_mk, Localization.mk_eq_mk',
     IsLocalization.mk'_mem_map_algebraMap_iff]
   constructor
@@ -412,7 +431,9 @@ theorem projectiveKernel_principal [Nontrivial S] (y : ParameterIndex → S)
     (hu : IsUnit (aeval y (leadingProduct ℂ))) (p : CycleQ2SegreCech.Chart) :
     RingHom.ker (Away.map (genericCurveSurfaceRingMap y) (pivot y p)) =
       Ideal.span {projectiveEquation y p} := by
-  rw [gradedAwayMap_ker (surfaceGrade (sectionPoint y)) (genericCurveGrade y)
+  rw [gradedAwayMap_ker (R := SectionBase S)
+    (A := PointSurface (sectionPoint y)) (B := GenericCurveRing y)
+    (surfaceGrade (sectionPoint y)) (genericCurveGrade y)
     (genericCurveSurfaceRingMap y) (pivot y p) (pivot_homogeneous y p)]
   change ((surfaceSectionKernel y).map (algebraMap _ (OrdinaryPivot y p))).comap
     (algebraMap (ProjectivePivot y p) (OrdinaryPivot y p)) = _
@@ -453,18 +474,21 @@ private theorem projectiveMap_closedImmersion : IsClosedImmersion (Proj.map f hf
   intro i
   have he : (Proj.map f hf ∣_ Proj.basicOpen 𝒜 (i.2 : A)) =
       (Proj.basicOpenIsoSpec ℬ (f i.2) (f.2 i.2.2) i.1.2).hom ≫
-        Spec.map (CommRingCat.ofHom (Away.map f i.2)) ≫
-          (Proj.basicOpenIsoSpec 𝒜 i.2 i.2.2 i.1.2).inv := by
+        Spec.map (CommRingCat.ofHom (R := Away 𝒜 (i.2 : A))
+          (S := Away ℬ (f i.2)) (Away.map f i.2)) ≫
+          (Proj.basicOpenIsoSpec 𝒜 (i.2 : A) i.2.2 i.1.2).inv := by
     have hcomm := Proj.awayι_comp_map f hf i.1.2 (i.2 : A) i.2.2
     apply (cancel_mono (Proj.basicOpen 𝒜 (i.2 : A)).ι).mp
     rw [morphismRestrict_ι]
     change (Proj.basicOpen ℬ (f i.2)).ι ≫ Proj.map f hf =
       (Proj.basicOpenIsoSpec ℬ (f i.2) (f.2 i.2.2) i.1.2).hom ≫
-        (Spec.map (CommRingCat.ofHom (Away.map f i.2)) ≫
-          Proj.awayι 𝒜 i.2 i.2.2 i.1.2)
+        (Spec.map (CommRingCat.ofHom (R := Away 𝒜 (i.2 : A))
+          (S := Away ℬ (f i.2)) (Away.map f i.2)) ≫
+          Proj.awayι 𝒜 (i.2 : A) i.2.2 i.1.2)
     rw [← hcomm]
     simp only [Proj.awayι, Category.assoc, Iso.hom_inv_id_assoc]
-  have : IsClosedImmersion (Spec.map (CommRingCat.ofHom (Away.map f i.2))) :=
+  have : IsClosedImmersion (Spec.map (CommRingCat.ofHom
+      (R := Away 𝒜 (i.2 : A)) (S := Away ℬ (f i.2)) (Away.map f i.2))) :=
     IsClosedImmersion.spec_of_surjective _
       (gradedAwayMap_surjective 𝒜 ℬ f hsur i.2 i.2.2)
   rw [he]
@@ -476,7 +500,9 @@ end ClosedProjectiveMap
 be a closed immersion. No incidence equation or smoothness is assumed. -/
 instance genericCurveToSurface_isClosedImmersion (y : ParameterIndex → S) :
     IsClosedImmersion (genericCurveToSurface y) := by
-  apply projectiveMap_closedImmersion (surfaceGrade (sectionPoint y))
+  apply projectiveMap_closedImmersion (R := SectionBase S)
+    (A := PointSurface (sectionPoint y)) (B := GenericCurveRing y)
+    (surfaceGrade (sectionPoint y))
     (genericCurveGrade y) (genericCurveSurfaceRingMap y)
     (irrelevant_le_map_genericCurveSurfaceRingMap y)
   rintro n b ⟨q, hq, rfl⟩
@@ -587,7 +613,7 @@ theorem surface_coordinate_exists (y : ParameterIndex → S) (x : surface y) :
   by_contra hn
   push_neg at hn
   apply x.not_irrelevant_le
-  apply HomogeneousIdeal.toIdeal_le_toIdeal_iff.mp
+  apply toIdeal_le_toIdeal_iff.mp
   apply (surface_irrelevant_le_coordinateIdeal y).trans
   apply Ideal.span_le.mpr
   rintro _ ⟨j, rfl⟩

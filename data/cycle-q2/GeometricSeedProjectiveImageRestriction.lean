@@ -16,7 +16,6 @@ by a caller. Comparing the two intersection isomorphisms with the degree-four
 twist, and identifying their module models with the restricted dual sheaves,
 are separate steps.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the remaining certificate gap.
 -/
@@ -36,6 +35,7 @@ open CycleQ2SeedTrace CycleQ2CartierSurfaceGrading CycleQ2CartierProjectiveCover
   CycleQ2SurfaceCoordinateSections CycleQ2SeedProjectiveImageChart
   CycleQ2SeedProjectiveImageTwist CycleQ2SeedProjectiveImageCocycle
   CycleQ2SeedImageLocalization CycleQ2SegreFactorSequence
+  CycleQ2GeometricSeedNormalIdeals
 
 abbrev OverlapRing (i j : Fin 3) := PairRing 57 1 i.succ j.succ
 abbrev OverlapOpen (i j : Fin 3) := pairOpen 57 1 i.succ j.succ
@@ -79,7 +79,8 @@ theorem pairSection_top (i j : Fin 3) (a : OverlapRing i j) :
     pairSection 57 1 i.succ j.succ (OverlapOpen i j) le_rfl a = sectionsEquiv i j a := by
   change (Surface.presheaf.map (𝟙 (op (OverlapOpen i j))))
       ((pairSectionsIso 57 1 i.succ j.succ).hom a) = _
-  simp only [Functor.map_id]
+  simp only [CategoryTheory.Functor.map_id]
+  rfl
 
 /-- The left coefficient map is the actual structure-sheaf restriction. -/
 theorem leftCoefficient_toSections (i j : Fin 3) (a : AffineRing i) :
@@ -88,8 +89,11 @@ theorem leftCoefficient_toSections (i j : Fin 3) (a : AffineRing i) :
   have h := pairSection_left 57 1 i.succ j.succ (OverlapOpen i j) le_rfl
     ((coordinateChartEquiv 57 1 i.succ).symm a)
   rw [pairSection_top] at h
-  simpa only [chartSectionMap, coordinate_chartSection_subopen, coordinateSectionsEquiv,
-    leftCoefficient, coefficient, RingHom.comp_apply] using h
+  change sectionsEquiv i j (leftCoefficient i j a) =
+    CycleQ2GeometricAffineChartSections.chartSection (coordinateAffineChart 57 1 i.succ)
+      (Over.mk (homOfLE (pair_le_left 57 1 i.succ j.succ))) a
+  rw [CycleQ2SurfaceCoordinateSections.coordinate_chartSection_subopen]
+  exact h
 
 /-- The right coefficient map is the actual structure-sheaf restriction. -/
 theorem rightCoefficient_toSections (i j : Fin 3) (a : AffineRing j) :
@@ -98,8 +102,11 @@ theorem rightCoefficient_toSections (i j : Fin 3) (a : AffineRing j) :
   have h := pairSection_right 57 1 i.succ j.succ (OverlapOpen i j) le_rfl
     ((coordinateChartEquiv 57 1 j.succ).symm a)
   rw [pairSection_top] at h
-  simpa only [chartSectionMap, coordinate_chartSection_subopen, coordinateSectionsEquiv,
-    rightCoefficient, coefficient, RingHom.comp_apply] using h
+  change sectionsEquiv i j (rightCoefficient i j a) =
+    CycleQ2GeometricAffineChartSections.chartSection (coordinateAffineChart 57 1 j.succ)
+      (Over.mk (homOfLE (pair_le_right 57 1 i.succ j.succ))) a
+  rw [CycleQ2SurfaceCoordinateSections.coordinate_chartSection_subopen]
+  exact h
 
 theorem leftSection_linkage_regular (i j : Fin 3) :
     Function.Injective (fun z : Γ(Surface, OverlapOpen i j) =>
@@ -110,7 +117,8 @@ theorem leftSection_linkage_regular (i j : Fin 3) :
   apply coefficient_linkage_regular i j (pairDen 57 1 i.succ j.succ) rfl
   simp only [← leftCoefficient_toSections] at hab
   have h := congrArg (sectionsEquiv i j).symm hab
-  simpa only [map_mul, RingEquiv.symm_apply_apply] using h
+  simp only [map_mul, RingEquiv.symm_apply_apply] at h
+  exact h
 
 theorem rightSection_linkage_regular (i j : Fin 3) :
     Function.Injective (fun z : Γ(Surface, OverlapOpen i j) =>
@@ -121,7 +129,8 @@ theorem rightSection_linkage_regular (i j : Fin 3) :
   apply coefficient_linkage_regular j i (pairDen 57 1 i.succ j.succ) (mul_comm _ _)
   simp only [← rightCoefficient_toSections] at hab
   have h := congrArg (sectionsEquiv i j).symm hab
-  simpa only [map_mul, RingEquiv.symm_apply_apply] using h
+  simp only [map_mul, RingEquiv.symm_apply_apply] at h
+  exact h
 
 def leftData (i j : Fin 3) : FactorData Γ(Surface, OverlapOpen i j) :=
   mapFactorData (chartFactorData i)

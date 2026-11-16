@@ -5,9 +5,6 @@ import Mathlib.RingTheory.TensorProduct.MvPolynomial
 /-!
 # The actual incidence-surface coordinate ring after seed base change
 
-Status: source-only proof draft, 14 November 2026. No Lean elaboration or
-independent kernel replay has been run for this module.
-
 The original surface coordinate ring is tensored along the actual seed
 map out of ParameterAlgebra. The resulting algebra is identified with
 the literal five-variable quotient by smoothH I and smoothF 57 I.
@@ -54,7 +51,7 @@ def seedAlgHom : ParameterAlgebra →ₐ[ℂ] ℂ where
 
 /-- This specialization is installed only locally in this module. It
 does not change global coefficient-algebra inference in other modules. -/
-def seedAlgebra : Algebra ParameterAlgebra ℂ := seedMap.toAlgebra
+@[instance_reducible] def seedAlgebra : Algebra ParameterAlgebra ℂ := seedMap.toAlgebra
 
 attribute [local instance] seedAlgebra
 
@@ -71,6 +68,10 @@ point or a specialization of a function field. -/
 abbrev SeedFiber := ℂ ⊗[ParameterAlgebra] PointSurface incidencePoint
 
 abbrev SeedTensorPolynomial := ℂ ⊗[ParameterAlgebra] SurfacePolynomial
+
+local instance seedFiberCommRing : CommRing SeedFiber := inferInstance
+local instance seedTensorCommRing : CommRing SeedTensorPolynomial := inferInstance
+local instance seedSurfaceCommRing : CommRing SeedSurfaceRing := inferInstance
 
 /-- Exact equality of the two original defining equations after taking
 their coefficient images at the literal seed. -/
@@ -107,8 +108,12 @@ theorem seedPolynomialEquiv_includeRight :
 theorem tensorEquationIdeal_map :
     tensorEquationIdeal.map seedPolynomialEquiv.toRingHom = seedIdeal := by
   unfold tensorEquationIdeal
-  rw [Ideal.map_map, seedPolynomialEquiv_includeRight]
-  exact seed_pointEquations
+  exact (Ideal.map_map (I := pointEquations incidencePoint)
+    (Algebra.TensorProduct.includeRight (R := ParameterAlgebra) (A := ℂ)
+      (B := SurfacePolynomial)).toRingHom seedPolynomialEquiv.toRingHom).trans
+      ((congrArg (fun f : SurfacePolynomial →+* SeedPolynomial =>
+        (pointEquations incidencePoint).map f) seedPolynomialEquiv_includeRight).trans
+          seed_pointEquations)
 
 /-- The actual tensor-product fiber of the surface coordinate ring is
 the original full-incidence seed quotient, as a complex algebra. -/
@@ -124,10 +129,12 @@ retained by the actual fiber equivalence. -/
     seedFiberEquiv
       (c ⊗ₜ[ParameterAlgebra] Ideal.Quotient.mk (pointEquations incidencePoint) p) =
         c • Ideal.Quotient.mk seedIdeal (MvPolynomial.map seedMap p) := by
-  rw [seedFiberEquiv, AlgEquiv.trans_apply,
-    Algebra.TensorProduct.tensorQuotientEquiv_apply_tmul,
-    Ideal.quotientEquivAlg_mk, seedPolynomialEquiv_tmul]
-  exact (Ideal.Quotient.mkₐ ℂ seedIdeal).map_smul c (MvPolynomial.map seedMap p)
+  calc
+    _ = Ideal.Quotient.mk seedIdeal
+        (seedPolynomialEquiv (c ⊗ₜ[ParameterAlgebra] p)) := rfl
+    _ = Ideal.Quotient.mk seedIdeal (c • MvPolynomial.map seedMap p) :=
+      congrArg (Ideal.Quotient.mk seedIdeal) (seedPolynomialEquiv_tmul c p)
+    _ = _ := (Ideal.Quotient.mkₐ ℂ seedIdeal).toLinearMap.map_smul c (MvPolynomial.map seedMap p)
 
 @[simp] theorem seedFiberEquiv_coordinate (j : Fin 5) :
     seedFiberEquiv
