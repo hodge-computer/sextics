@@ -1,6 +1,6 @@
 # 2A. Binary sextics and torsion contacts
 
-[Previous: explicit constructions](#technical-information/explicit-constructions) · [Contents](#technical-information/introduction) · [Next: geometric support](#technical-information/geometric-support)
+[Previous: explicit constructions](02-explicit-constructions.md) · [Contents](README.md) · [Next: geometric support](03-geometric-support.md)
 
 Cubic-square presentations of a binary sextic give a concrete example of contact geometry. Their finite parameter space is the nonzero three-torsion of a genus-two Jacobian, modulo sign. Two spanning theorems for the associated Wronskians turn these contacts into rational fields. The resulting construction is useful independently of the two-reflection support theorem: it identifies the fields and explains why their targets span.
 
@@ -10,7 +10,7 @@ Cubic-square presentations of a binary sextic give a concrete example of contact
 F=P_0(X_0,X_1)+P_1(Y_0,Y_1)+P_2(X_2^2,Y_2^2),
 \]
 
-where \(P_0,P_1\) are binary sextics and \(P_2\) is a binary cubic over a characteristic-zero field. Suppose \(F=0\) is smooth. Separate reflection in \(X_2\) and \(Y_2\) places this family under the [two-reflection support theorem](#technical-information/weighted-threefolds), giving certificate existence at every positive pole order. It also admits the following explicit construction.
+where \(P_0,P_1\) are binary sextics and \(P_2\) is a binary cubic over a characteristic-zero field. Suppose \(F=0\) is smooth. Separate reflection in \(X_2\) and \(Y_2\) places this family under the [two-reflection support theorem](03b-weighted-threefolds.md), giving certificate existence at every positive pole order. It also admits the following explicit construction.
 
 **Binary-block construction theorem.** For \(q=1,2\) and every \(Y\)-odd \(A\) of degree \(6q\), there is a rational field satisfying
 \[
@@ -49,7 +49,7 @@ All these numerators are polynomial after multiplication by their displayed Jaco
 
 ### An elliptic differential behind the two-contact field
 
-The product \(J_iJ_j\) also has a useful interpretation through the moving-point current of [Chapter 2, §2.8](#technical-information/explicit-constructions). Dehomogenize two binary contacts as
+The product \(J_iJ_j\) also has a useful interpretation through the moving-point current of [Chapter 2, §2.8](02-explicit-constructions.md). Dehomogenize two binary contacts as
 
 \[
 f(r)=C(r)^3+R(r)^2,\qquad

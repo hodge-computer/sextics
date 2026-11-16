@@ -1,6 +1,6 @@
 # 3D. Hodge loci of surface sections
 
-[Previous: quadratic nets and pair correspondences](#technical-information/quadratic-nets) · [Contents](#technical-information/introduction) · [Next: families, representations and deformation](#technical-information/known-locus)
+[Previous: quadratic nets and pair correspondences](03c-quadratic-nets.md) · [Contents](README.md) · [Next: families, representations and deformation](04-known-locus-and-frontier.md)
 
 A divisor class on a surface section of a Calabi–Yau threefold stays algebraic along a locus of sections. When a symmetry moves the holomorphic three-form, the invariant part of this locus has positive expected dimension. Curves in the class then move on the threefold, and the derivative of their Abel–Jacobi images is a trace on an Artinian algebra. If the invariant variation of Hodge structure has no proper sub-variation, one nonzero derivative supports the whole invariant sector of the third cohomology on a divisor.
 
@@ -171,7 +171,7 @@ H^3(T,\mathbb Q)^g\subset N^1H^3(T,\mathbb Q).
 
 More precisely, the projector of \(H^*(T,\mathbb Q)\) onto \(H^3(T,\mathbb Q)^g\), zero in the other degrees and on the other eigenspaces, is cohomologous to a rational algebraic cycle supported on \(Z\times Z\) for some divisor \(Z\subset T\).
 
-As in [Chapter 3B, §3B.1](#technical-information/weighted-threefolds), \(T\) avoids the weighted vertex and is a smooth Calabi–Yau threefold with \(h^{2,1}=103\). Here \(\delta=\omega^5=\omega^2\). The Jacobian ring gives the Hodge numbers of the three eigenspaces:
+As in [Chapter 3B, §3B.1](03b-weighted-threefolds.md), \(T\) avoids the weighted vertex and is a smooth Calabi–Yau threefold with \(h^{2,1}=103\). Here \(\delta=\omega^5=\omega^2\). The Jacobian ring gives the Hodge numbers of the three eigenspaces:
 
 | Eigenvalue of \(g\) | \((h^{3,0},h^{2,1},h^{1,2},h^{0,3})\) |
 | --- | --- |
@@ -209,7 +209,7 @@ The polynomials \(f_1\) and \(f_2\) are not eigenvectors of \(g\), while \(h\) i
 
 For general \(b\) the threefold \(T_b\), the surface \(D\) and the curve \(C\) are smooth, and the three translates of \(C\) are disjoint. Indeed \(T_0\) is the Fermat member. The surface \(D\) is the section \(h=0\) of \(\{x_0^6+x_2^6+w^3=2x_1^3x_3^3\}\), whose only singular points are the two points where \(x_1\) or \(x_3\) is the only nonzero coordinate. The invariant cubics have no common zero on that threefold, so a general \(h\) avoids the two points and cuts a smooth surface. After elimination of \(w\), the curve \(C\) is the intersection of a quadric cone and a cubic in \(\mathbb P^3\), and it is smooth for the same reason. Two translates can meet only at the same two points.
 
-**Finite results.** The verifier `scripts/verify-hodge-locus-span.py`, in the repository's [reproduction scripts](https://github.com/hodge-computer/sextics/tree/main/scripts), reconstructs the algebra \(\mathcal A\), its trace and the pairings of §3D.2 modulo \(109\), with \(r=57\), \(i=33\) and
+**Finite results.** The verifier [`scripts/verify-hodge-locus-span.py`](../scripts/verify-hodge-locus-span.py) reconstructs the algebra \(\mathcal A\), its trace and the pairings of §3D.2 modulo \(109\), with \(r=57\), \(i=33\) and
 
 \[
 b=5x_0^3+10x_0^2x_1+25x_0x_1^2+20x_0x_2x_3+30x_1^3+25x_1x_2x_3-25x_2^3-20x_3^3+10x_3w ,
@@ -246,7 +246,7 @@ shows that \(m=4\) suffices in the integration lemma: the higher cohomology of \
 \pi_g\circ\Gamma\circ\pi_1^\Lambda .
 \]
 
-Its image is still contained in \(Z\). The second projector is needed here: unlike the anti-projector of [§3B.6](#technical-information/weighted-threefolds), \(\pi_g\) fixes the even cohomology of \(T\), on which a curve correspondence acts through \(H^0(\Lambda)\) and \(H^2(\Lambda)\). Now \(\Gamma_*\) vanishes outside \(H^1(\Lambda)\) and maps it onto \(H^3(T)^g\). As in §3B.6, the transpose is the adjoint for the polarizations up to a sign, so \(\Gamma\circ{}^t\Gamma\) is invertible on \(H^3(T)^g\). It is zero on the rest of the cohomology, and a polynomial in it without constant term represents the projector by a cycle supported on \(Z\times Z\).
+Its image is still contained in \(Z\). The second projector is needed here: unlike the anti-projector of [§3B.6](03b-weighted-threefolds.md), \(\pi_g\) fixes the even cohomology of \(T\), on which a curve correspondence acts through \(H^0(\Lambda)\) and \(H^2(\Lambda)\). Now \(\Gamma_*\) vanishes outside \(H^1(\Lambda)\) and maps it onto \(H^3(T)^g\). As in §3B.6, the transpose is the adjoint for the polarizations up to a sign, so \(\Gamma\circ{}^t\Gamma\) is invertible on \(H^3(T)^g\). It is zero on the rest of the cohomology, and a polynomial in it without constant term represents the projector by a cycle supported on \(Z\times Z\).
 
 Weighted weak Lefschetz gives \(H^{2k}(T)=\mathbb QH^k\) and \(H^3=3\). The projector is thus the class of the relative algebraic cycle
 
@@ -255,11 +255,11 @@ Weighted weak Lefschetz gives \(H^{2k}(T)=\mathbb QH^k\) and \(H^3=3\). The proj
 \pi_{2k}=\tfrac13\,\mathrm{pr}_1^*H^{3-k}\cdot\mathrm{pr}_2^*H^k,
 \]
 
-over the connected family of all smooth invariant sextics. The supported-projector specialization lemma of [Chapter 3, §3.6](#technical-information/geometric-support) extends the supported representative from \(\mathcal U\) to every member. ∎
+over the connected family of all smooth invariant sextics. The supported-projector specialization lemma of [Chapter 3, §3.6](03-geometric-support.md) extends the supported representative from \(\mathcal U\) to every member. ∎
 
 **Remark: the same theorem through a Fano fourfold.** The moving curves can also be obtained from Hodge classes on a fourfold containing \(T\), as in [Voisin, Proposition 2.1](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf). The proof above does not use this route. It is sketched here.
 
-*The extension.* Give \(t\) weight three and trivial character. For an invariant cubic \(a\), the sextic \(\widetilde F=F+ta+t^2\) defines a fourfold \(Y\subset\mathbb P(1,1,1,1,2,3)\) with \(T=Y\cap\{t=0\}\). It is the double cover of \(\mathbb P(1,1,1,1,2)\) branched along \(a^2=4F\). Neither singular point of the ambient space lies on \(Y\), so a quasismooth \(Y\) is a smooth del Pezzo fourfold of degree one. Its rational Hodge classes of degree four are algebraic by the [corollary of Chapter 3, §3.2](#technical-information/geometric-support), and \(H^3(Y)=0\). With \(R=R(\widetilde F)\), residues give \(H^{4-p,p}(Y)_{\mathrm{prim}}\simeq R_{6p-3}\), and the invariant classes have numerators of character \(\omega\). The invariant Hodge numbers are \((h^{3,1},h^{2,2}_{\mathrm{prim}},h^{1,3})=(7,52,7)\).
+*The extension.* Give \(t\) weight three and trivial character. For an invariant cubic \(a\), the sextic \(\widetilde F=F+ta+t^2\) defines a fourfold \(Y\subset\mathbb P(1,1,1,1,2,3)\) with \(T=Y\cap\{t=0\}\). It is the double cover of \(\mathbb P(1,1,1,1,2)\) branched along \(a^2=4F\). Neither singular point of the ambient space lies on \(Y\), so a quasismooth \(Y\) is a smooth del Pezzo fourfold of degree one. Its rational Hodge classes of degree four are algebraic by the [corollary of Chapter 3, §3.2](03-geometric-support.md), and \(H^3(Y)=0\). With \(R=R(\widetilde F)\), residues give \(H^{4-p,p}(Y)_{\mathrm{prim}}\simeq R_{6p-3}\), and the invariant classes have numerators of character \(\omega\). The invariant Hodge numbers are \((h^{3,1},h^{2,2}_{\mathrm{prim}},h^{1,3})=(7,52,7)\).
 
 *Hodge loci.* The fourfolds through \(T\) are deformed by \(\widetilde F+\varepsilon tK\), with \(K\) an invariant cubic in \((x,w,t)\). A class whose \((2,2)\)-part is represented by \(Q\in R_9^{[\omega]}\) stays of type \((2,2)\) to first order when \(K\) lies in the kernel of
 
@@ -293,7 +293,7 @@ The count \(9-7\) is the fourfold counterpart of the count of §3D.1, and it als
 
 ## 3D.5 Sextic fourfolds with a paired sign and an order-three symmetry
 
-The passage to a fourfold uses the relative support lemma for an invariant sector in [Chapter 3, §3.6](#technical-information/geometric-support).
+The passage to a fourfold uses the relative support lemma for an invariant sector in [Chapter 3, §3.6](03-geometric-support.md).
 
 **Theorem.** Let \(X=(F=0)\subset\mathbb P^5\) be a smooth sextic with coordinates \((x_0,x_1,x_2,x_3,u,v)\). Suppose \(F\) is invariant under
 
@@ -311,7 +311,7 @@ H^4(X,\mathbb Q)^{\langle\beta,\gamma\rangle}\subset N^1H^4(X,\mathbb Q).
 
 The determinant of \(\gamma\) is \(\omega^2\), so \(H^{4,0}(X)\) is not invariant and the statement is consistent with coniveau. The invariant sextics form an 85-coefficient linear system.
 
-**Proof.** Follow the proof of the two-reflection theorem in [§3B.7](#technical-information/weighted-threefolds) with the pencil \(\lambda=v/u\). The base surface \(X\cap\{u=v=0\}\) is smooth: there \(\partial_uF\) and \(\partial_vF\) vanish because they are odd in \((u,v)\), so a singular point of the surface would be singular on \(X\). The restriction \(F(0,u,v)\) is not identically zero. Otherwise \(X\) would contain the line \(x=0\), along which the four core derivatives vanish, being coefficients of monomials of odd degree in \((u,v)\). Blow up the base surface. For \(\lambda\) in a nonempty open \(U\subset\mathbb P^1\), the fiber \(V_\lambda=X\cap\{v=\lambda u\}\) is smooth, \(\beta\) acts on it as the reflection \(u\mapsto-u\), and with \(w=u^2\) the quotient
+**Proof.** Follow the proof of the two-reflection theorem in [§3B.7](03b-weighted-threefolds.md) with the pencil \(\lambda=v/u\). The base surface \(X\cap\{u=v=0\}\) is smooth: there \(\partial_uF\) and \(\partial_vF\) vanish because they are odd in \((u,v)\), so a singular point of the surface would be singular on \(X\). The restriction \(F(0,u,v)\) is not identically zero. Otherwise \(X\) would contain the line \(x=0\), along which the four core derivatives vanish, being coefficients of monomials of odd degree in \((u,v)\). Blow up the base surface. For \(\lambda\) in a nonempty open \(U\subset\mathbb P^1\), the fiber \(V_\lambda=X\cap\{v=\lambda u\}\) is smooth, \(\beta\) acts on it as the reflection \(u\mapsto-u\), and with \(w=u^2\) the quotient
 
 \[
 T_\lambda=V_\lambda/\beta\subset\mathbb P(1,1,1,1,2)
@@ -330,9 +330,9 @@ In the coordinates of this book, take \((u,v)=(X_2,Y_2)\) and \((x_0,x_1,x_2,x_3
 \quad\text{on}\quad(X_0,X_1,X_2,Y_0,Y_1,Y_2).
 \]
 
-Of the 85 invariant monomials, 45 are \(Y\)-even. A \(Y\)-odd numerator \(A\) is served when its residue is invariant, that is, when \(A\) is even in \((X_2,Y_2)\) and \(\gamma^*A=\omega A\). The support-to-certificate equivalence of [Chapter 1](#technical-information/certificates) then gives a certificate for pole orders \(1\le q\le4\). The reduction of [Chapter 3, §3.5](#technical-information/geometric-support) extends this to larger pole orders once its auxiliary field is averaged over \(\langle\beta,\gamma\rangle\), which keeps the reduced target in the invariant sector.
+Of the 85 invariant monomials, 45 are \(Y\)-even. A \(Y\)-odd numerator \(A\) is served when its residue is invariant, that is, when \(A\) is even in \((X_2,Y_2)\) and \(\gamma^*A=\omega A\). The support-to-certificate equivalence of [Chapter 1](01-certificates.md) then gives a certificate for pole orders \(1\le q\le4\). The reduction of [Chapter 3, §3.5](03-geometric-support.md) extends this to larger pole orders once its auxiliary field is averaged over \(\langle\beta,\gamma\rangle\), which keeps the reduced target in the invariant sector.
 
-**Example: three cyclic links.** Let \(\rho\) permute the three pairs \((X_i,Y_i)\) cyclically. The conjugates \(\gamma_i=\rho^i\gamma\rho^{-i}\) and the paired signs \(s_i\) generate, with \(\tau\), a diagonal group of projective order 72. It contains the element \(h\) of [Chapter 4, §4.2](#technical-information/known-locus). Its invariant sextics are
+**Example: three cyclic links.** Let \(\rho\) permute the three pairs \((X_i,Y_i)\) cyclically. The conjugates \(\gamma_i=\rho^i\gamma\rho^{-i}\) and the paired signs \(s_i\) generate, with \(\tau\), a diagonal group of projective order 72. It contains the element \(h\) of [Chapter 4, §4.2](04-known-locus-and-frontier.md). Its invariant sextics are
 
 \[
 F=\sum_i\bigl(a_iX_i^6+b_iY_i^6\bigr)
@@ -344,8 +344,8 @@ with indices modulo three. For a smooth member, the \(Y\)-even primitive cohomol
 
 | Characters | Hodge numbers | Support |
 | --- | --- | --- |
-| Nontrivial on the paired signs | \((150,636,150)\) | [Paired signs, §3B.9](#technical-information/weighted-threefolds) |
-| Trivial on the paired signs and on \(h^2\) | \((22,74,22)\) | [Paired-sign sector theorem, §4.2](#technical-information/known-locus), when its surface is smooth |
+| Nontrivial on the paired signs | \((150,636,150)\) | [Paired signs, §3B.9](03b-weighted-threefolds.md) |
+| Trivial on the paired signs and on \(h^2\) | \((22,74,22)\) | [Paired-sign sector theorem, §4.2](04-known-locus-and-frontier.md), when its surface is smooth |
 | Trivial on some \(s_i\) and on \(\gamma_{i+1}\) | \((36,156,36)\) | The theorem above, applied to the three pairs \((s_i,\gamma_{i+1})\) |
 
 Here \(\gamma_{i+1}\) is the conjugate acting trivially on \((X_i,Y_i)\). The three rows exhaust the characters. The last row consists of six characters of type \((6,26,6)\): two for each cyclic conjugate. Thus, when the surface of §4.2 is smooth, all of \(H^4(X,\mathbb Q)^\tau\) is supported on a divisor, although none of the three mechanisms reaches it alone. The member \(a_i=b_i=1\), \(c_i=\tfrac12\), \(e_i=0\) is smooth. Indeed, at a nonzero point where the gradient vanishes, let \(M>0\) be the largest modulus of a coordinate. If \(X_i\) attains it, then

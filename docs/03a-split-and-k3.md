@@ -1,6 +1,6 @@
 # 3A. Split sextics, elliptic contraction and the K3 remainder
 
-[Previous: geometric support](#technical-information/geometric-support) · [Contents](#technical-information/introduction) · [Next: weighted threefolds and two-reflection sextics](#technical-information/weighted-threefolds)
+[Previous: geometric support](03-geometric-support.md) · [Contents](README.md) · [Next: weighted threefolds and two-reflection sextics](03b-weighted-threefolds.md)
 
 The Fano machinery of Chapter 3 applies to arbitrary ternary sextics through an elliptic companion. This proves the complete block-sign case \(F=f(X)+g(Y)\), including \(f=g\). When the involution exchanges two equal blocks instead, the same construction supports most classes and isolates an exterior square of K3 cohomology. We prove the quotient maps, support transfer, character calculations and remaining Kuga–Satake criterion here.
 
@@ -101,11 +101,11 @@ H^{4}(T_f\times T_g)^{\operatorname{diag} \mu _{3}} = \mathbb Q(-2)^{3} \oplus  
 
 The Tate terms are algebraic and the preceding contraction supports the tensor term. Transfer first to a smooth model of the quotient, then back to \(X/\tau \) and \(X\). This supports all \(H^{4}(X)^\tau \) and proves the split theorem. The support-to-certificate theorem and higher-pole reduction of Chapter 3 then give legal certificates at every positive pole order. No Hodge conjecture for abelian varieties enters this proof. ∎
 
-The [quadratic-net theorem](#technical-information/quadratic-nets) has different coefficient hypotheses. A ternary sextic expressible as a cubic in three quadratic forms belongs to a family of dimension at most \(9+10=19\): nine parameters for their span in \(\operatorname{Gr}(3,6)\), and ten for the cubic. All ternary sextics form a 28-dimensional space. The split theorem therefore covers general pairs \(f,g\) outside both orientations of the quadratic-net family.
+The [quadratic-net theorem](03c-quadratic-nets.md) has different coefficient hypotheses. A ternary sextic expressible as a cubic in three quadratic forms belongs to a family of dimension at most \(9+10=19\): nine parameters for their span in \(\operatorname{Gr}(3,6)\), and ten for the cubic. All ternary sextics form a 28-dimensional space. The split theorem therefore covers general pairs \(f,g\) outside both orientations of the quadratic-net family.
 
 ### Involution-stable ternary decompositions
 
-The same theorem holds whenever \(F=p(U)+q(V)\) for complementary three-dimensional subspaces \(U,V\) preserved by \(\tau \). If all three negative eigendirections lie in one summand, this is the theorem just proved. Otherwise their multiplicities are one and two, after exchange of the summands. The normal form is \(p(X_{0},X_{1},Y_{0})+q(X_{2},Y_{1},Y_{2})\). Global invariance forces \(p\) to be even in \(Y_{0}\) and, by its even total degree, \(q\) to be even in \(X_{2}\). Divisor support is therefore a direct corollary of the [two-reflection theorem](#technical-information/weighted-threefolds).
+The same theorem holds whenever \(F=p(U)+q(V)\) for complementary three-dimensional subspaces \(U,V\) preserved by \(\tau \). If all three negative eigendirections lie in one summand, this is the theorem just proved. Otherwise their multiplicities are one and two, after exchange of the summands. The normal form is \(p(X_{0},X_{1},Y_{0})+q(X_{2},Y_{1},Y_{2})\). Global invariance forces \(p\) to be even in \(Y_{0}\) and, by its even total degree, \(q\) to be even in \(X_{2}\). Divisor support is therefore a direct corollary of the [two-reflection theorem](03b-weighted-threefolds.md).
 
 ## 3A.4 When the involution swaps the blocks
 

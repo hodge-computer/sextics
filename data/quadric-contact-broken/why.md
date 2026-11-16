@@ -1,4 +1,4 @@
-This is a deliberately obstructed deformation of [Two reflections · quadric polar](#case/two-reflection-cubic-surface-d2). Let \(F_*\) denote that entry's sextic, and retain its target
+This is a deliberately obstructed deformation of [Two reflections · quadric polar](../two-reflection-cubic-surface-d2/why.md). Let \(F_*\) denote that entry's sextic, and retain its target
 
 \[
 A=X_1^2\cdot X_0\cdot Y_0\cdot(X_0^2-Y_0^2).

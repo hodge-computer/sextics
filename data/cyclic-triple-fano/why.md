@@ -1,6 +1,6 @@
 This is a cyclic-cover version of the Fano construction, with a different symmetry from the reflection examples. Writing \(Z=X_2^3\), the sextic becomes \(G=Z^2+t\cdot Z\cdot C+H\), where \(C\) and \(H\) are the displayed cubic and sextic in the other five variables. The order-three automorphism \(X_2\mapsto\zeta_3\cdot X_2\) survives the couplings.
 
-**Nonconstructive existence is known**, by the weighted-Fano density theorem in [Chapter 3, §3.4](#technical-information/geometric-support). The finite map
+**Nonconstructive existence is known**, by the weighted-Fano density theorem in [Chapter 3, §3.4](../../docs/03-geometric-support.md). The finite map
 
 \[
 \Phi=(X_0,X_1,X_2^3,Y_0,Y_1,Y_2),\qquad \det(d\Phi)=3\cdot X_2^2

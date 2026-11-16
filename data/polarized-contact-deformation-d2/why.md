@@ -1,4 +1,4 @@
-Take [the coupled polarized-contact instance](#case/polarized-contact-coupled-d2) as a starting point, and add
+Take [the coupled polarized-contact instance](../polarized-contact-coupled-d2/why.md) as a starting point, and add
 \[
 101000303\cdot(X_2^2-Y_2^2)\cdot Y_1^4
 \]
@@ -10,4 +10,4 @@ The quadratic factor \(X_2^2-Y_2^2\) is the product of the two polarized contact
 
 The coefficient is \(101\cdot1000003\), preserving two useful finite-field comparisons with the starting example. Those comparisons provide a way to control the specialization without appealing to a vague assertion that a large perturbation is “close” to the original equation. A separate Hessian calculation still excludes a hidden linear block decomposition.
 
-This entry tests a deformation principle rather than an unrelated new isolated formula. Its value is to identify a family of changes under which mathematical information can be carried forward, while being explicit about the fact that the target moves. [The coupled quartic-cofactor example](#case/coupled-pair-rational-d4-strict) gives a smaller comparison with the same distinction. Neither instance asserts persistence of every target under arbitrary deformations.
+This entry tests a deformation principle rather than an unrelated new isolated formula. Its value is to identify a family of changes under which mathematical information can be carried forward, while being explicit about the fact that the target moves. [The coupled quartic-cofactor example](../coupled-pair-rational-d4-strict/why.md) gives a smaller comparison with the same distinction. Neither instance asserts persistence of every target under arbitrary deformations.

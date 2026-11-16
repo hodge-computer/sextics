@@ -6,7 +6,7 @@ F=P(X_0,X_1,Y_0)+R(X_2,Y_1,Y_2).
 
 Each three-dimensional summand is preserved by the global sign involution, but their negative eigenspace dimensions are one and two. This differs from the usual block-sign example in which all three \(Y\) coordinates form one summand. The target \(A=X_0^4\cdot X_1\cdot Y_1\) has block degrees \((5,1)\).
 
-**Nonconstructive existence is known**, by “Involution-stable ternary decompositions” in [Chapter 3A, §3A.3](#technical-information/split-and-k3). To see which part of that theorem matters, let \(r\) negate \(Y_0\), let \(s\) negate \(X_2\), and let \(\rho\) negate the entire second ternary block. The prescribed involution is \(\tau=\rho\cdot r\cdot s\). Our numerator is even under both individual reflections, so its residue is anti-invariant under each. It lies instead in the \(\rho\)-invariant sector, which is supported by the split theorem and its elliptic contraction.
+**Nonconstructive existence is known**, by “Involution-stable ternary decompositions” in [Chapter 3A, §3A.3](../../docs/03a-split-and-k3.md). To see which part of that theorem matters, let \(r\) negate \(Y_0\), let \(s\) negate \(X_2\), and let \(\rho\) negate the entire second ternary block. The prescribed involution is \(\tau=\rho\cdot r\cdot s\). Our numerator is even under both individual reflections, so its residue is anti-invariant under each. It lies instead in the \(\rho\)-invariant sector, which is supported by the split theorem and its elliptic contraction.
 
 Thus simply noticing two coordinate reflections is not enough: they support the wrong residue characters for this target. Nor does the immediate split Euler identity apply, since neither block degree is three.
 

@@ -1,6 +1,6 @@
 # The holdout Fermat cover
 
-This library extracts the 58 helper modules from `fqlx`'s accepted [PR #128](https://github.com/hodge-computer/sextics/pull/128), retaining their construction and attribution. Their import paths begin with `HodgeComputer.Constructions.HoldoutCover` instead of the submission-local `Proposal` namespace. The instance sources under `data/holdout/` and the shared modules are maintained against the current verifier.
+This library extracts the 58 helper modules from `fqlx`'s accepted [holdout proof](../../../../../data/holdout/solution.md), retaining their construction and attribution. Their import paths begin with `HodgeComputer.Constructions.HoldoutCover` instead of the submission-local `Proposal` namespace. The instance sources under `data/holdout/` and the shared modules are maintained against the current verifier.
 
 The fixed physical equation is
 

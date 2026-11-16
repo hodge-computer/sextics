@@ -1,6 +1,6 @@
 # 1. From invariant cohomology to rational certificates
 
-[Contents](#technical-information/introduction) · [Next: explicit constructions](#technical-information/explicit-constructions)
+[Contents](README.md) · [Next: explicit constructions](02-explicit-constructions.md)
 
 The geometric objective is to support the involution-invariant part of \(H^{4}\) of a smooth sextic fourfold on a divisor. The certificate equation translates this objective into an exact identity involving rational functions. Its advantage is that a proposed solution can be verified independently of the argument or numerical experiment that produced it. Its difficulty is concentrated in constructing the denominator.
 
@@ -162,7 +162,7 @@ which is precisely the expression already required to lie in \((F^q)\). Degrees 
 
 For fixed \(D\), both equations are linear in the coefficients of \(N\). One can compare coefficients after reducing \(E_{2}\) modulo \(F^q\), or introduce a quotient polynomial and impose an exact identity. Thus the unrestricted fixed-denominator question is finite linear algebra. Restricting \(N\) to a convenient smaller space changes that question and requires a separate completeness argument.
 
-A certificate is **strict** when \(K_A(v)=0\) as a rational function. In normalized form this means \(E_{1}\) holds and \(E_{2}\) vanishes identically, rather than merely modulo \(F^q\). Strictness distinguishes individual witnesses. Ordinary and strict certificates have the same existence problem when the denominator is unrestricted, by the normal-form theorem in [§5.3](#technical-information/computation). That conversion may change the support and denominator degree, so the fixed-\(D\) system must retain the full \(E_2\) quotient.
+A certificate is **strict** when \(K_A(v)=0\) as a rational function. In normalized form this means \(E_{1}\) holds and \(E_{2}\) vanishes identically, rather than merely modulo \(F^q\). Strictness distinguishes individual witnesses. Ordinary and strict certificates have the same existence problem when the denominator is unrestricted, by the normal-form theorem in [§5.3](05-computation.md). That conversion may change the support and denominator degree, so the fixed-\(D\) system must retain the full \(E_2\) quotient.
 
 ## Euler freedom and denominator gauges
 
@@ -458,7 +458,7 @@ For a full-support \(Y\)-even sextic, \(L(F)\) is exactly the lattice of vectors
 
 Two operations relate certificates across a family of hypersurfaces. A certificate on the generic member of a pencil of hyperplane sections lifts to the hypersurface, and a certificate on the generic member of a family specializes to every smooth member. Both are statements about rational forms of top degree. Neither parametrizes a support, and neither uses an algebraic correspondence.
 
-In this section \(X=V(F)\subset \mathbb P^{n}\) is a smooth hypersurface of degree \(d\ge 2\) over \(k\), with \(n\ge 2\). As in [Chapter 2](#technical-information/explicit-constructions), the notation
+In this section \(X=V(F)\subset \mathbb P^{n}\) is a smooth hypersurface of degree \(d\ge 2\) over \(k\), with \(n\ge 2\). As in [Chapter 2](02-explicit-constructions.md), the notation
 
 \[
 K_q(F,A;v)=A-q\cdot v(F)+F\cdot \operatorname{div}(v)
@@ -514,7 +514,7 @@ The lemma is the certificate form of a general fact. Let \(k\subset E\subset L\)
 d(\sigma \wedge \eta )=d_{L/E}\sigma \wedge \eta .
 \]
 
-A relative primitive of \(\rho \) thus gives a primitive of \(\rho \wedge \eta \). The [polynomial integration of Chapter 2, §2.7](#technical-information/explicit-constructions/polynomial-integration-on-a-finite-parameterization) is the case of relative dimension one.
+A relative primitive of \(\rho \) thus gives a primitive of \(\rho \wedge \eta \). The [polynomial integration of Chapter 2, §2.7](02-explicit-constructions.md#polynomial-integration-on-a-finite-parameterization) is the case of relative dimension one.
 
 **Corollary.** Let \(n\ge 3\) and \(1\le q\le n-2\), and let \(\lambda _{0}\in \mathbb C\) be transcendental over \(k\), with \(V(F_{\lambda _{0}})\) smooth. Suppose that the residue of the Griffiths form of numerator \(s\cdot A_{\lambda _{0}}\) and pole order \(q+1\) along \(V(F_{\lambda _{0}})\) vanishes off a divisor of that hypersurface. Then \((F,q,A)\) has a certificate.
 
@@ -588,7 +588,7 @@ Let \(D\) be a homogeneous polynomial, coprime to \(F_c\), that vanishes on \(X_
 
 *Proof.* By coefficient descent we may replace \(k\) by its algebraic closure in \(\mathbb C\), and \(B\) by a component through \(b\). A certificate over \(k(B)\) restricts to a certificate at every point of a dense open subset \(B^{\circ}\): its coefficients are regular there, and legality of its denominator is an open condition. Join \(b\) to a point of \(B^{\circ}\) by an irreducible curve and normalize it. The certificates on \(B^{\circ}\) restrict to a certificate over the function field of this curve, and the theorem applies at a point above \(b\). For the last statement, evaluation at such a complex point embeds \(k(B)\) in \(\mathbb C\), the data at that point are defined over the image, and coefficient descent applies. ∎
 
-For the class of a residue, the theorem and the corollary of the pencil lemma give by algebra what [Chapter 3, §3.6](#technical-information/geometric-support/36-supported-projectors-in-families) obtains for supported projectors: specialization from a very general member, and passage from the fibers of a pencil to its total space. The lemmas there concern correspondences, and they apply to every class of the sector on which a projector acts.
+For the class of a residue, the theorem and the corollary of the pencil lemma give by algebra what [Chapter 3, §3.6](03-geometric-support.md#36-supported-projectors-in-families) obtains for supported projectors: specialization from a very general member, and passage from the fibers of a pencil to its total space. The lemmas there concern correspondences, and they apply to every class of the sector on which a projector acts.
 
 ## Jacobian reduction and exact verification
 
@@ -612,4 +612,4 @@ A=6\cdot X_{0}^{6}\cdot X_{1}^{3}\cdot X_{2}^{2}\cdot Y_{0},       G_{0}=X_{0}\c
 
 Then \(A=\sum G_{i}\partial _{i}F\) is \(Y\)-odd and belongs to \(J(F)\), but one reduction gives the \(q=1\) numerator \(X_{1}^{3}\cdot X_{2}^{2}\cdot Y_{0}/2\). All of its exponents are at most four, so it is nonzero in the Fermat Jacobian ring \(\mathbb C[Z]/(Z_{0}^{5},\ldots ,Z_{5}^{5})\). Griffiths's graded isomorphism makes its (3,1) class nonzero. Thus the original \(q=2\) residue is nonzero, despite Jacobian membership. A complete reduction algorithm must retain this lower-pole target.
 
-For an explicit field, clearing denominators reduces verification to polynomial identities and the homogeneity and coprimality conditions. A nonzero remainder divisible by \(F^{q+1}\) is valid. [Chapter 5](#technical-information/computation) gives the complete polynomial criterion and proves equivalence with strict existence when the denominator may change.
+For an explicit field, clearing denominators reduces verification to polynomial identities and the homogeneity and coprimality conditions. A nonzero remainder divisible by \(F^{q+1}\) is valid. [Chapter 5](05-computation.md) gives the complete polynomial criterion and proves equivalence with strict existence when the denominator may change.
