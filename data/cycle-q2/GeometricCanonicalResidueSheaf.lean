@@ -4,9 +4,6 @@ import Proposal.GeometricLocalHomFrame
 /-!
 # The actual canonical residue morphism
 
-Status: source-only proof draft; compilation and independent kernel replay
-are deferred at the user's request. No new axioms or admissions are used.
-
 On a Jacobian/quartic surface patch, the actual exterior frame identifies
 `Hom(I, Ω²)` with the original inverse-ideal sheaf. Reduction by the original
 Cartier map followed by contraction with that frame defines the local
@@ -70,14 +67,18 @@ theorem preimage_refinedPatch (a : PatchIndex) :
   | inl a =>
       change immersion ⁻¹ᵁ (surfacePatch (.inl a) ⊓
         CycleQ2CartierProjectiveCover.coverFamily 57 1 0) = _
-      rw [Scheme.Hom.preimage_inf,
-        CycleQ2ProjectiveCurveSurface.curveToSurface_preimage_cover_zero]
+      rw [Scheme.Hom.preimage_inf]
+      have hcover : immersion ⁻¹ᵁ CycleQ2CartierProjectiveCover.coverFamily 57 1 0 =
+          CycleQ2GeometricProjectiveCurve.firstProjectivePatch 57 1 := by rfl
+      rw [hcover]
       rfl
   | inr a =>
       change immersion ⁻¹ᵁ (surfacePatch (.inr a) ⊓
         CycleQ2CartierProjectiveCover.coverFamily 57 1 1) = _
-      rw [Scheme.Hom.preimage_inf,
-        CycleQ2ProjectiveCurveSurface.curveToSurface_preimage_cover_one]
+      rw [Scheme.Hom.preimage_inf]
+      have hcover : immersion ⁻¹ᵁ CycleQ2CartierProjectiveCover.coverFamily 57 1 1 =
+          CycleQ2GeometricProjectiveCurve.secondProjectivePatch 57 1 := by rfl
+      rw [hcover]
       rfl
 
 /-- The actual open complement of the original closed curve. -/
@@ -146,13 +147,13 @@ theorem localResidue_restrict (a : PatchIndex) {O P : Surface.Opens}
     (hPO : P ≤ O) (hO : O ≤ refinedPatch a) (H : PoleForms.val.obj (op O)) :
     ResidueTarget.val.map (homOfLE hPO).op (localResidue a O hO H) =
       localResidue a P (hPO.trans hO) (PoleForms.val.map (homOfLE hPO).op H) := by
-  change ResidueTarget.val.map (homOfLE hPO).op
-    ((reducedContraction (frameCubic a)).val.app (op O)
-      ((internalHomFrame Surface.sheaf IdealSheaf (exteriorFrame 57 1 a)).app
-        O (hO.trans (refinedPatch_le a)) H)) = _
-  rw [← PresheafOfModules.naturality_apply,
-    (internalHomFrame Surface.sheaf IdealSheaf (exteriorFrame 57 1 a)).naturality]
-  rfl
+  let F := reducedContraction (frameCubic a)
+  let E := internalHomFrame Surface.sheaf IdealSheaf (exteriorFrame 57 1 a)
+  have hn := (PresheafOfModules.naturality_apply F.val (homOfLE hPO).op
+    (E.app O (hO.trans (refinedPatch_le a)) H)).symm
+  exact hn.trans (congrArg
+    (fun z : (inverseIdealSheaf immersion).val.obj (op P) => F.val.app (op P) z)
+    (E.naturality hPO (hO.trans (refinedPatch_le a)) H))
 
 private theorem frameTransition (a b : PatchIndex) (O : Surface.Opens)
     (ha : O ≤ surfacePatch a) (hb : O ≤ surfacePatch b)
@@ -176,13 +177,25 @@ private theorem frameTransition (a b : PatchIndex) (O : Surface.Opens)
       (H.val.app (op V) x) =
     Surface.presheaf.map V.hom.op α •
       (exteriorFrame 57 1 b).app V.left (V.hom.le.trans hb) (H.val.app (op V) x)
-  have hg := congrArg (CanonicalForms.val.map V.hom.op) hgen
-  rw [frameGenerator_naturality, CanonicalForms.val.map_smul,
-    frameGenerator_naturality] at hg
-  exact coordinates_of_generator_relation
-    ((exteriorFrame 57 1 a).app V.left (V.hom.le.trans ha))
-    ((exteriorFrame 57 1 b).app V.left (V.hom.le.trans hb))
-    (Surface.presheaf.map V.hom.op α) hg (H.val.app (op V) x)
+  have hga := frameGenerator_naturality (exteriorFrame 57 1 a) V.hom.le ha
+  have hgb := frameGenerator_naturality (exteriorFrame 57 1 b) V.hom.le hb
+  have hsm := CanonicalForms.val.map_smul V.hom.op α
+    (frameGenerator (exteriorFrame 57 1 a) O ha)
+  have hg : frameGenerator (exteriorFrame 57 1 b) V.left (V.hom.le.trans hb) =
+      (show Γ(Surface,V.left) from Surface.presheaf.map V.hom.op α) •
+        frameGenerator (exteriorFrame 57 1 a) V.left (V.hom.le.trans ha) :=
+    hgb.symm.trans ((congrArg (CanonicalForms.val.map V.hom.op) hgen).trans
+      (hsm.trans (congrArg
+        (fun z : CanonicalForms.val.obj (op V.left) =>
+          (show Γ(Surface,V.left) from Surface.presheaf.map V.hom.op α) • z) hga)))
+  let ea : CanonicalForms.val.obj (op V.left) ≃ₗ[Γ(Surface,V.left)] Γ(Surface,V.left) :=
+    (exteriorFrame 57 1 a).app V.left (V.hom.le.trans ha)
+  let eb : CanonicalForms.val.obj (op V.left) ≃ₗ[Γ(Surface,V.left)] Γ(Surface,V.left) :=
+    (exteriorFrame 57 1 b).app V.left (V.hom.le.trans hb)
+  change ea (H.val.app (op V) x) =
+    (show Γ(Surface,V.left) from Surface.presheaf.map V.hom.op α) * eb (H.val.app (op V) x)
+  exact coordinates_of_generator_relation ea eb
+    (show Γ(Surface,V.left) from Surface.presheaf.map V.hom.op α) hg (H.val.app (op V) x)
 
 theorem localResidue_overlap (a b : PatchIndex) (O : Surface.Opens)
     (ha : O ≤ refinedPatch a) (hb : O ≤ refinedPatch b)
@@ -242,13 +255,13 @@ theorem coverResidue_compatible :
   intro V H
   cases a with
   | none =>
-      haveI := target_empty_of_le (V.hom.le.trans inf_le_left)
-      exact Subsingleton.elim _ _
+      exact @Subsingleton.elim (ResidueTarget.val.obj (op V.left))
+        (target_empty_of_le (V.hom.le.trans inf_le_left)) _ _
   | some a =>
       cases b with
       | none =>
-          haveI := target_empty_of_le (V.hom.le.trans inf_le_right)
-          exact Subsingleton.elim _ _
+          exact @Subsingleton.elim (ResidueTarget.val.obj (op V.left))
+            (target_empty_of_le (V.hom.le.trans inf_le_right)) _ _
       | some b =>
           exact localResidue_overlap a b V.left
             (V.hom.le.trans inf_le_left) (V.hom.le.trans inf_le_right) H
@@ -256,8 +269,11 @@ theorem coverResidue_compatible :
 theorem residueSection_existsUnique :
     ∃! H : LocalLinearHom Surface.sheaf PoleForms ResidueTarget ⊤, ∀ a,
       restrictLocalLinearHom Surface.sheaf PoleForms ResidueTarget
-        (homOfLE (le_top : residueCover a ≤ ⊤)).op H = coverResidue a :=
-  (addSheaf (moduleHomSheaf Surface.sheaf PoleForms ResidueTarget)).existsUnique_gluing'
+        (homOfLE (le_top : residueCover a ≤ ⊤)).op H = coverResidue a := by
+  change ∃! H : (addSheaf (moduleHomSheaf Surface.sheaf PoleForms ResidueTarget)).obj.obj (op ⊤), ∀ a,
+    (addSheaf (moduleHomSheaf Surface.sheaf PoleForms ResidueTarget)).obj.map
+      (homOfLE (le_top : residueCover a ≤ ⊤)).op H = coverResidue a
+  exact (addSheaf (moduleHomSheaf Surface.sheaf PoleForms ResidueTarget)).existsUnique_gluing'
     residueCover ⊤ (fun _ => homOfLE le_top) residueCover_top.ge coverResidue
     coverResidue_compatible
 
@@ -340,14 +356,29 @@ theorem canonicalResidue_regular_section (O : Surface.Opens)
     (canonicalResidue.val.app (op O)
       ((idealRegularInclusion immersion CanonicalForms).val.app (op O) s)) =
     ResidueTarget.val.map (homOfLE (show O ⊓ residueCover a ≤ O from inf_le_left)).op 0
-  rw [map_zero, ← PresheafOfModules.naturality_apply,
-    ← PresheafOfModules.naturality_apply]
+  rw [map_zero]
+  refine (PresheafOfModules.naturality_apply canonicalResidue.val
+    (homOfLE (show O ⊓ residueCover a ≤ O from inf_le_left)).op
+    ((idealRegularInclusion immersion CanonicalForms).val.app (op O) s)).symm.trans ?_
+  refine (congrArg
+    (fun z : PoleForms.val.obj (op (O ⊓ residueCover a)) =>
+      canonicalResidue.val.app (op (O ⊓ residueCover a)) z)
+    (PresheafOfModules.naturality_apply
+      (idealRegularInclusion immersion CanonicalForms).val
+      (homOfLE (show O ⊓ residueCover a ≤ O from inf_le_left)).op s).symm).trans ?_
+
   cases a with
   | none =>
       haveI := target_empty_of_le (show O ⊓ residueCover none ≤ offCurve from inf_le_right)
       exact Subsingleton.elim _ _
   | some a =>
-      rw [canonicalResidue_local a _ inf_le_right, localResidue_regular]
+      exact (canonicalResidue_local a (O ⊓ refinedPatch a) inf_le_right
+        ((idealRegularInclusion immersion CanonicalForms).val.app (op (O ⊓ refinedPatch a))
+          (CanonicalForms.val.map
+            (homOfLE (show O ⊓ refinedPatch a ≤ O from inf_le_left)).op s))).trans
+        (localResidue_regular a (O ⊓ refinedPatch a) inf_le_right
+          (CanonicalForms.val.map
+            (homOfLE (show O ⊓ refinedPatch a ≤ O from inf_le_left)).op s))
 
 /-- The original regular inclusion followed by the actual residue is zero. -/
 theorem canonicalResidue_regular :

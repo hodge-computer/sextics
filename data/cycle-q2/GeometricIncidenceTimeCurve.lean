@@ -6,9 +6,6 @@ import Mathlib.RingTheory.RingHom.LocallyStandardSmooth
 /-!
 # A nonempty smooth parameter curve over the generic sextic field
 
-Status: source-only proof draft. Compilation and independent kernel replay
-are deferred at the user's request.
-
 The parameter algebra constructed in GeometricIncidenceEtaleParameter is
 étale over C[time, sextic coefficients]. The actual inclusion of the sextic
 coefficient ring is identified here with the coefficient inclusion in a
@@ -42,9 +39,12 @@ abbrev SexticRing := MvPolynomial (FullInvariantIndex 6) ℂ
 abbrev TimeLineRing := MvPolynomial Unit SexticRing
 abbrev GenericSexticField := FractionRing SexticRing
 
+local instance timeParameterCommRing : CommRing ParameterAlgebra := inferInstance
+
 /-- This inclusion preserves each original independent sextic coefficient. -/
 def sexticToTrace : SexticRing →+* TraceRing :=
-  MvPolynomial.rename (Sum.inr : FullInvariantIndex 6 → Unit ⊕ FullInvariantIndex 6)
+  (MvPolynomial.rename (Sum.inr : FullInvariantIndex 6 → Unit ⊕ FullInvariantIndex 6) :
+    SexticRing →ₐ[ℂ] TraceRing).toRingHom
 
 def traceAsTimeLine : TraceRing ≃+* TimeLineRing :=
   MvPolynomial.sumRingEquiv ℂ Unit (FullInvariantIndex 6)
@@ -59,7 +59,8 @@ theorem traceAsTimeLine_comp_sextic :
 
 theorem sexticToTrace_eq :
     sexticToTrace = traceAsTimeLine.symm.toRingHom.comp (C : SexticRing →+* TimeLineRing) := by
-  ext p
+  apply RingHom.ext
+  intro p
   apply traceAsTimeLine.injective
   change traceAsTimeLine (sexticToTrace p) =
     traceAsTimeLine (traceAsTimeLine.symm (C p))
@@ -89,7 +90,7 @@ private def timeLinePrePresentation :
 private theorem timeLinePrePresentation_jacobian :
     timeLinePrePresentation.jacobian = 1 := by
   rw [Algebra.PreSubmersivePresentation.jacobian_eq_jacobiMatrix_det]
-  simp
+  rw [Matrix.det_isEmpty (R := timeLinePrePresentation.Ring) (n := Empty), map_one]
 
 private def timeLinePresentation :
     Algebra.SubmersivePresentation SexticRing TimeLineRing Unit Empty where
@@ -108,8 +109,7 @@ theorem sexticToTrace_standardSmooth :
       (C : SexticRing →+* TimeLineRing) :=
     (RingHom.isStandardSmoothOfRelativeDimension_algebraMap 1).mpr timeLine_standardSmooth
   rw [sexticToTrace_eq]
-  simpa only [Nat.zero_add] using
-    (RingHom.IsStandardSmoothOfRelativeDimension.equiv traceAsTimeLine.symm).comp hc
+  exact (RingHom.IsStandardSmoothOfRelativeDimension.equiv traceAsTimeLine.symm).comp hc
 
 def sexticToParameter : SexticRing →+* ParameterAlgebra :=
   (algebraMap TraceRing ParameterAlgebra).comp sexticToTrace
@@ -125,14 +125,20 @@ theorem sexticToParameter_standardSmooth :
       (algebraMap TraceRing ParameterAlgebra) :=
     RingHom.etale_iff_isStandardSmoothOfRelativeDimension_zero.mp
       (RingHom.etale_algebraMap.mpr parameter_etale)
-  simpa only [Nat.zero_add] using he.comp sexticToTrace_standardSmooth
+  exact he.comp sexticToTrace_standardSmooth
 
 instance parameter_sexticAlgebra : Algebra SexticRing ParameterAlgebra :=
   sexticToParameter.toAlgebra
 
+local instance parameter_sexticModule : Module SexticRing ParameterAlgebra := Algebra.toModule
+
+local instance genericSexticModule : Module SexticRing GenericSexticField := Algebra.toModule
+
 instance parameter_standardSmooth :
-    Algebra.IsStandardSmoothOfRelativeDimension 1 SexticRing ParameterAlgebra :=
-  sexticToParameter_standardSmooth
+    Algebra.IsStandardSmoothOfRelativeDimension 1 SexticRing ParameterAlgebra := by
+  apply (RingHom.isStandardSmoothOfRelativeDimension_algebraMap 1).mp
+  change RingHom.IsStandardSmoothOfRelativeDimension 1 sexticToParameter
+  exact sexticToParameter_standardSmooth
 
 instance parameter_standardSmooth_ungraded :
     Algebra.IsStandardSmooth SexticRing ParameterAlgebra :=
@@ -183,20 +189,24 @@ def genericTimeCurveToParameters : genericTimeCurve ⟶ parameterScheme :=
   Spec.map (CommRingCat.ofHom
     (Algebra.TensorProduct.includeRight : ParameterAlgebra →ₐ[SexticRing] GenericTimeAlgebra).toRingHom)
 
+def genericFieldToSextics : Spec (CommRingCat.of GenericSexticField) ⟶ sexticBase :=
+  Spec.map (CommRingCat.ofHom (algebraMap SexticRing GenericSexticField))
+
 theorem genericTimeCurve_overSextics :
-    genericTimeCurveToParameters ≫ parameterToSextics =
-      genericTimeCurveToField ≫ Spec.map
-        (CommRingCat.ofHom (algebraMap SexticRing GenericSexticField)) := by
-  rw [genericTimeCurveToParameters, parameterToSextics, genericTimeCurveToField,
+    (show genericTimeCurve ⟶ sexticBase from genericTimeCurveToParameters ≫ parameterToSextics) =
+      (show genericTimeCurve ⟶ sexticBase from genericTimeCurveToField ≫ genericFieldToSextics) := by
+  rw [genericTimeCurveToParameters, parameterToSextics, genericTimeCurveToField, genericFieldToSextics,
     ← Spec.map_comp, ← Spec.map_comp]
   congr 1
+  apply congrArg Spec.map
   apply CommRingCat.hom_ext
-  ext p
+  apply RingHom.ext
+  intro p
   change Algebra.TensorProduct.includeRight
       (algebraMap SexticRing ParameterAlgebra p) =
     algebraMap GenericSexticField GenericTimeAlgebra (algebraMap SexticRing GenericSexticField p)
   rw [AlgHom.commutes]
-  exact IsScalarTower.algebraMap_apply SexticRing GenericSexticField GenericTimeAlgebra p
+  rfl
 
 end CycleQ2IncidenceTimeCurve
 
