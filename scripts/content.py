@@ -9,17 +9,41 @@ from mistune.scanner import Matcher
 from public_files import is_public
 
 
+SITE_ROUTE = re.compile(r'(?:case|technical-information|leaderboard)(?:[/?]|$)')
+PULL_REQUEST = re.compile(r'/hodge-computer/sextics/pulls?(?:/|$)', re.I)
+REPOSITORY_FILE = re.compile(r'/hodge-computer/sextics/(?:blob|tree)/', re.I)
+PULL_REQUEST_TEXT = re.compile(r'\b(?:PRs?|pull requests?) ?#\d+', re.I)
+
+
 def link_resolver(root, source_path, extra_files=()):
     root = Path(root).resolve()
     source_path = Path(source_path)
     source = (root / source_path).resolve()
     extra_files = {(root / path).resolve() for path in extra_files}
+    explanation = source_path.name == 'solution.md'
+
+    def check_reference(link, url):
+        # Solution explanations cite papers, the book, instances, other solves,
+        # discussion comments and repository files. They link within the
+        # repository; the site maps those links to its own pages.
+        if url.netloc.lower() in {'hodge.computer', 'www.hodge.computer'} or (
+                not url.scheme and not url.path and SITE_ROUTE.match(url.fragment)):
+            raise ValueError(f'{source_path}: link {link} addresses the website; '
+                             'link to the repository file instead')
+        if url.netloc.lower() == 'github.com' and PULL_REQUEST.match(url.path):
+            raise ValueError(f'{source_path}: link {link} cites a pull request; '
+                             'cite the solve, instance or book section instead')
+        if url.netloc.lower() == 'github.com' and REPOSITORY_FILE.match(url.path):
+            raise ValueError(f'{source_path}: link {link} addresses a repository file by URL; '
+                             'use a path relative to solution.md, which the checks can verify')
 
     def exists(path):
         return path.is_relative_to(root) and (path.is_file() or path in extra_files)
 
     def resolve(link):
         url = urlsplit(link)
+        if explanation:
+            check_reference(link, url)
         if url.scheme or url.netloc or not url.path:
             return link
         path = unquote(url.path)
@@ -85,6 +109,11 @@ class Renderer(mistune.HTMLRenderer):
         return f'<div class="page-equation" data-math data-display>{html.escape(text)}</div>\n'
 
 def render(source, *, root=None, source_path=None, extra_files=()):
+    if source_path and Path(source_path).name == 'solution.md':
+        cited = PULL_REQUEST_TEXT.search(source)
+        if cited:
+            raise ValueError(f'{source_path}: "{cited[0]}" cites a pull request; '
+                             'cite the solve, instance or book section instead')
     renderer = Renderer(escape=True)
     renderer.resolve_link = link_resolver(root, source_path, extra_files) if source_path else lambda link: link
     markdown = mistune.create_markdown(renderer=renderer, plugins=['table', 'strikethrough', math_plugin])

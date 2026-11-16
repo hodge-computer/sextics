@@ -554,7 +554,7 @@ pd=p,\qquad pe=gp,\qquad pr=\tau p,
 \]
 where the physical diagonal automorphism \(g\) has weights \((0,0,0,5,1,5)\) modulo six. These identities hold in the displayed coordinates and hence on the projective models.
 
-The automorphism \(g\) fixes \(F\). At a fixed point with only \(Y_0,Y_2\) nonzero and \(Y_0^6+Y_2^6=0\), its tangent weights are \((1,1,1,2)/6\), of age \(5/6\). The finite-quotient theorem in [Chapter 3, §3.3][support] therefore supports the \(g\)-invariant fourth cohomology. The two supported quotients now satisfy [the deck/exchange descent criterion](#technical-information/geometric-support/descent-through-a-deck-action-and-an-exchange). Consequently
+The automorphism \(g\) fixes \(F\). At a fixed point with only \(Y_0,Y_2\) nonzero and \(Y_0^6+Y_2^6=0\), its tangent weights are \((1,1,1,2)/6\), of age \(5/6\). The finite-quotient theorem in [Chapter 3, §3.3][support] therefore supports the \(g\)-invariant fourth cohomology. The two supported quotients now satisfy [the deck/exchange descent criterion](../../docs/03-geometric-support.md#descent-through-a-deck-action-and-an-exchange). Consequently
 \[
 H^4(X,\mathbb Q)^\tau\subseteq N^1H^4(X,\mathbb Q).
 \]
@@ -594,7 +594,7 @@ The polynomial-source construction on the complementary quotient in [Chapter 2, 
 
 These counts concern the displayed source maps. Coordinate transport supplies further polynomial presentations: \(F\) is unchanged by exchanging \(X_2,Y_2\), which carries \(X_2Y_0^2Y_2^3\) to the cover-served \(X_2^3Y_0^2Y_2\). The same exchange serves \(X_iY_0Y_2^4\) and \(X_iY_0^3Y_2^2\), for \(i=0,1\). The constructions and their exchanged copies therefore span at least 201 primitive basis directions. A fiber pole in one presentation is not an obstruction to all finite-algebraic constructions.
 
-The [character-separating bundle](#case/holdout-bundle), formalized by `fqlx`, combines the cover source \(X_0^3Y_0^3\) with the complementary polynomial source \(X_0^3Y_0Y_1^2\). These concrete certificates and the geometric all-target theorem have different scopes; neither asserts an expanded common denominator. The theorem is for the fixed sextic (1), and supplies no family dominating the space of all even sextics.
+The [character-separating bundle](../holdout-bundle/why.md), formalized by `fqlx`, combines the cover source \(X_0^3Y_0^3\) with the complementary polynomial source \(X_0^3Y_0Y_1^2\). These concrete certificates and the geometric all-target theorem have different scopes; neither asserts an expanded common denominator. The theorem is for the fixed sextic (1), and supplies no family dominating the space of all even sextics.
 
 ## 12. Context and attribution
 
@@ -629,15 +629,15 @@ f(r)={}&r^{23}-14r^{22}+86r^{21}-290r^{20}+520r^{19}-199r^{18}\\
 
 Clearing the nonzero denominators in (8) shows that \(f(r)=0\) implies the base relation used in (9). The proof only needs a root in \((7,8)\); it does not require an assertion that this polynomial is irreducible.
 
-[formal-contract]: https://github.com/hodge-computer/sextics/blob/main/formal/README.md
-[contributing]: https://github.com/hodge-computer/sextics/blob/main/CONTRIBUTING.md
+[formal-contract]: ../../formal/README.md
+[contributing]: ../../CONTRIBUTING.md
 [discussion]: https://github.com/hodge-computer/sextics/discussions/44
-[certificates]: https://github.com/hodge-computer/sextics/blob/main/docs/01-certificates.md
-[constructions]: https://github.com/hodge-computer/sextics/blob/main/docs/02-explicit-constructions.md
-[support]: https://github.com/hodge-computer/sextics/blob/main/docs/03-geometric-support.md
-[frontier]: https://github.com/hodge-computer/sextics/blob/main/docs/04-known-locus-and-frontier.md
+[certificates]: ../../docs/01-certificates.md
+[constructions]: ../../docs/02-explicit-constructions.md
+[support]: ../../docs/03-geometric-support.md
+[frontier]: ../../docs/04-known-locus-and-frontier.md
 [diamond]: https://arxiv.org/html/2603.29157#S2
 [hidden-reflections]: https://github.com/hodge-computer/sextics/discussions/54#discussioncomment-18986773
-[one-reflection]: https://github.com/hodge-computer/sextics/blob/main/data/one-reflection/solution.md
+[one-reflection]: ../one-reflection/solution.md
 [quadric-pr]: ../quadric-contact-broken/solution.md
-[fraction-derivation]: https://github.com/hodge-computer/sextics/blob/main/data/quadric-contact-broken/FractionDerivation.lean
+[fraction-derivation]: ../../formal/lean/HodgeComputer/Constructions/FiniteAlgebra/FractionDerivation.lean

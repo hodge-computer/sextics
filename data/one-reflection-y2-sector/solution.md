@@ -29,7 +29,7 @@ quotient is
 H=X_0^6+X_1^6+X_2^6+\alpha P\,(X_0^3X_1+X_1^3X_2)+S^3-3SP^2,
 \]
 
-that is, the holdout quotient \(H(\alpha,\beta)\) of the holdout proof with both coupling coefficients equal
+that is, the holdout quotient \(H(\alpha,\beta)\) of the [holdout proof](../holdout/solution.md) with both coupling coefficients equal
 to \(\alpha\). In the Lean sources this is expressed by using `weightedHypersurface alpha alpha`
 and `commonCoverPolynomial alpha alpha` on the quotient and cover sides; the coefficient field is
 still the function field of the Fermat curve, because the cover coordinate \(\beta\) is needed
@@ -53,7 +53,7 @@ which has a root in \((-13,-12)\) by the intermediate value theorem
 (\(g(-13)=35869443\), \(g(-12)=-35000185\)). For \(r<-12\) the auxiliary quantities
 \(m,R,M,a,b\) are positive, \(1-r\) is positive, and both Jacobian polynomials
 \(g_{\rm even},g_{\rm odd}\) of the accepted proof are negative, each being minus a polynomial in
-\(-12-r\) with positive coefficients. Thus the seed is nonsingular exactly as in the holdout proof
+\(-12-r\) with positive coefficients. Thus the seed is nonsingular exactly as in the [holdout proof](../holdout/solution.md)
 (`gEven_neg`, `gOdd_neg`, `seedJacobian_nonsingular`). The cover coordinate \(\beta\) at the seed
 is any sixth root of \(1-\alpha_c^6\) (`Seed.baseBeta`), which puts the seed on the Fermat curve
 (`Seed.base_relation`); the curve identity on \(H(\alpha_c,\alpha_c)\) is `Seed.curve`, obtained
@@ -99,7 +99,7 @@ with only the permitted axioms `propext`, `Classical.choice`, and `Quot.sound`.
 - **`fqlx`** constructed the Fermat cover, the moving conic, the finite-algebra residue solution,
   and the complete Lean development in [the holdout proof](../holdout/solution.md)
   with disclosed **OpenAI ChatGPT** assistance; that proof credits `HeadOfNaps`'s
-  fraction-derivation construction.
+  [fraction-derivation construction](../quadric-contact-broken/solution.md).
   The conic family and the two Jacobian polynomials used for the new seed are fqlx's.
 - `fringewidth` identified the hidden reflections of this sextic in the
   [one-reflection discussion](https://github.com/hodge-computer/sextics/discussions/54), and the

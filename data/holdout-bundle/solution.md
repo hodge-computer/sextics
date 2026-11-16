@@ -364,7 +364,7 @@ physical transport for the missing summand.
 
 Geometric existence for both summands was already known, as recorded in
 the repository authors' Chapter 4, Section 4.6 and the instance's
-[mathematical context](#case/holdout-bundle). The contribution here is the closed Lean
+[mathematical context](why.md). The contribution here is the closed Lean
 certificate for this fixed bundle.
 
 The protected workflow checks the exact existential statement by compiling the submitted modules, replaying their declarations with `leanchecker`, and auditing their axiom dependencies. The accepted theorem uses only `propext`, `Classical.choice`, and `Quot.sound`. No expanded polynomial witness is supplied; the result establishes existence over complex coefficients with unrestricted finite denominator degree and a general quotient remainder.

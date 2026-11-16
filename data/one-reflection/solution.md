@@ -510,9 +510,9 @@ polynomial witness.
   for a contribution through GitHub account **fqlx**.
 
 [hidden-reflections]: https://github.com/hodge-computer/sextics/discussions/54#discussioncomment-18986773
-[certificates]: https://github.com/hodge-computer/sextics/blob/main/docs/01-certificates.md
-[constructions]: https://github.com/hodge-computer/sextics/blob/main/docs/02-explicit-constructions.md
-[geometry]: https://github.com/hodge-computer/sextics/blob/main/docs/03-geometric-support.md
-[sylvester-solution]: https://github.com/hodge-computer/sextics/blob/main/data/family-sylvester-norm/solution.md
+[certificates]: ../../docs/01-certificates.md
+[constructions]: ../../docs/02-explicit-constructions.md
+[geometry]: ../../docs/03-geometric-support.md
+[sylvester-solution]: ../family-sylvester-norm/solution.md
 [sylvester-pr]: ../family-sylvester-norm/solution.md
 [diamond]: https://arxiv.org/html/2603.29157#S2

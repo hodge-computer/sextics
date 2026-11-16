@@ -306,7 +306,7 @@ Finally, [Solution.lean](Solution.lean) identifies the polynomial definitions wi
 
 ## Prior work and assistance
 
-The companion and translated elliptic contraction strategy comes from the sextics project's [Chapter 3A, §§3A.2–3A.3](https://github.com/hodge-computer/sextics/blob/main/docs/03a-split-and-k3.md), including its discussion of involution-stable ternary decompositions. That geometric argument explains why the crossed target should be accessible. The present proof establishes the needed algebraic identities and existence constructions directly.
+The companion and translated elliptic contraction strategy comes from the sextics project's [Chapter 3A, §§3A.2–3A.3](../../docs/03a-split-and-k3.md), including its discussion of involution-stable ternary decompositions. That geometric argument explains why the crossed target should be accessible. The present proof establishes the needed algebraic identities and existence constructions directly.
 
 Ben Burns, GitHub `fqlx`, developed the accepted moving-conic/Fermat-cover [holdout proof](../holdout/solution.md). Benjamin Diamond, GitHub `benediamond`, extracted its reusable machinery into the shared library. This submission imports that maintained library for generic incidence and field-factor arguments, polynomial normal vectors, finite derivation extension and trace, polynomial-family residue transport, and homogeneous certificate normalization. Its underlying notices also credit the earlier accepted `quadric-contact-broken` contribution for the quotient-rule construction. The target-specific family, scalar conversion, elliptic residue contraction with its infinity correction, and physical transport are supplied here; no complete accepted proof package is copied into this folder.
 
