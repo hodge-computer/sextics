@@ -5,9 +5,6 @@ import Mathlib.AlgebraicGeometry.Morphisms.Etale
 /-!
 # The actual étale parameter space of the moving incidence
 
-Status: source-only proof draft. Compilation and independent kernel replay
-are deferred at the user's request.
-
 The finite trace field was constructed from a Jacobian-localized square
 system. Here that same algebra is retained before passage to its generic
 fiber. Its universal coordinates satisfy every original incidence equation,
@@ -221,8 +218,9 @@ theorem retainedOpen_seed :
       (splitting.T₀.map (C : ℂ →+* TraceRing)) relations
       (splitting.V.map (C : ℂ →+* TraceRing)) mapped_seed_complement,
     mul_one, totalOpen, map_mul,
-    protectedOpen_seed splitting.P _ full_seed_jacobian, eval_coefficientMap,
-    CycleQ2IncidenceBasepointOpen.seed_basepointPolynomial, one_mul]
+    protectedOpen_seed splitting.P _ full_seed_jacobian, eval_coefficientMap]
+  change 1 * CycleQ2IncidenceBasepointOpen.seedEvaluation basepointPolynomial = 1
+  rw [CycleQ2IncidenceBasepointOpen.seed_basepointPolynomial, one_mul]
 
 def augmentedSeed : Unit ⊕ SquareIndex → ℂ :=
   CycleQ2OpenSquareLifting.extendedPoint (0 : SquareIndex → ℂ) 1
@@ -295,7 +293,8 @@ theorem incidence_isPointedTracePoint :
     change seedMap (eval₂Hom (algebraMap TraceRing ParameterAlgebra) incidencePoint p) = _
     rw [map_eval₂Hom]
     have hcoeff : seedMap.comp (algebraMap TraceRing ParameterAlgebra) = seedEvaluation := by
-      ext r
+      apply RingHom.ext
+      intro r
       exact seedMap_algebraMap r
     have hpoint : seedMap ∘ incidencePoint = seedEvaluation ∘ centre := by
       rw [centre_seed]
@@ -304,6 +303,7 @@ theorem incidence_isPointedTracePoint :
     change eval₂Hom (seedMap.comp (algebraMap TraceRing ParameterAlgebra))
       (seedMap ∘ incidencePoint) p = _
     rw [hcoeff, hpoint]
+  change aeval incidencePoint p = 0 at hp
   rw [← heval, hp, map_zero]
 
 /-! ## A regular time vector field with fixed sextic coefficients -/
@@ -366,7 +366,8 @@ theorem seedPointMorphism_overBase :
   rw [seedPointMorphism, parameterToBase, ← Spec.map_comp]
   congr 1
   apply CommRingCat.hom_ext
-  ext r
+  apply RingHom.ext
+  intro r
   exact seedMap_algebraMap r
 
 end CycleQ2IncidenceEtaleParameter

@@ -1,9 +1,3 @@
-/-
-SOURCE-ONLY DRAFT: unverified.
-Compilation and independent kernel replay were deferred at the user's request.
-The proof terms below have not been accepted as a checked certificate.
--/
-
 import Proposal.GeometricCubicAdjunction
 import Proposal.GeometricSurfaceExteriorFrameBinding
 import Proposal.GeometricSurfaceCoefficientPullback
@@ -27,6 +21,7 @@ noncomputable section
 namespace CycleQ2CubicAdjunctionFrameBinding
 
 open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry MvPolynomial
+open CycleQ2GeometricAffineCurveCharts (ChartRing)
 open CycleQ2GeometricLiteralSurface CycleQ2CartierProjectiveCover
   CycleQ2GeometricProjectiveCurve CycleQ2GeometricSurfaceAdjunction
   CycleQ2GeometricSurfaceJacobianCharts CycleQ2GeometricSurfacePrincipalCurveCharts
@@ -51,9 +46,36 @@ private theorem firstAdjunction_factor (p : WeightedCubic) (i : Fin 2) (j : Fin 
         firstNormalAdjunction 57 1 i j
           (firstRestrictedPolynomialForm 57 1 i j firstFrameCubic.val) := by
   have hframe : firstCurveCoefficient 57 1 i j firstFrameCubic.val = 1 := by
-    simp [firstCurveCoefficient, firstFrameCubic, firstSurfaceDehomogenize]
-  rw [literal_first_normalAdjunction, literal_first_normalAdjunction, hframe]
-  simp only [neg_smul, one_smul, smul_neg]
+    have hpoly : firstSurfaceDehomogenize firstFrameCubic.val = 1 := by
+      simp only [firstFrameCubic, map_pow, firstSurfaceDehomogenize, aeval_X,
+        Matrix.cons_val_one, Matrix.cons_val_zero, one_pow]
+    change normalCoefficientMap (CycleQ2GeometricAffineCurveCharts.firstQuadric 57)
+      (CycleQ2GeometricAffineCurveCharts.firstCubic 1)
+      (firstSurfaceDehomogenize (CycleQ2SeedTrace.originalG1 57))
+      (firstSurfaceDehomogenize CycleQ2SeedTrace.originalG2)
+      (firstSurfaceDehomogenize (CycleQ2NormalConnecting.thetaK 1)) i j
+      (firstSurfaceDehomogenize firstFrameCubic.val) = 1
+    rw [hpoly, map_one]
+  let c := firstCurveCoefficient 57 1 i j p.val
+  let ω := KaehlerDifferential.map ℂ ℂ
+    (ChartRing ![CycleQ2GeometricAffineCurveCharts.firstQuadric 57,
+      CycleQ2GeometricAffineCurveCharts.firstCubic 1]) (FirstNormalCurveRing 57 1 i j)
+    (CycleQ2GeometricChartKaehler.globalForm
+      ![CycleQ2GeometricAffineCurveCharts.firstQuadric 57,
+        CycleQ2GeometricAffineCurveCharts.firstCubic 1]
+      CycleQ2GeometricIncidenceJacobianCover.first_chart_jacobianIdeal_eq_top)
+  have hf : firstNormalAdjunction 57 1 i j
+      (firstRestrictedPolynomialForm 57 1 i j firstFrameCubic.val) = -ω :=
+    (literal_first_normalAdjunction i j firstFrameCubic.val).trans
+      ((congrArg (fun z : FirstNormalCurveRing 57 1 i j => -z • ω) hframe).trans
+        (neg_one_smul (FirstNormalCurveRing 57 1 i j) ω))
+  calc
+    firstNormalAdjunction 57 1 i j (firstRestrictedPolynomialForm 57 1 i j p.val) =
+        -c • ω := literal_first_normalAdjunction i j p.val
+    _ = c • (-ω) := (neg_smul c ω).trans (smul_neg c ω).symm
+    _ = c • firstNormalAdjunction 57 1 i j
+        (firstRestrictedPolynomialForm 57 1 i j firstFrameCubic.val) :=
+      congrArg (fun v : KaehlerDifferential ℂ (FirstNormalCurveRing 57 1 i j) => c • v) hf.symm
 
 private theorem secondAdjunction_factor (p : WeightedCubic) (i : Fin 2) (j : Fin 3) :
     secondNormalAdjunction 57 1 i j (-(secondRestrictedPolynomialForm 57 1 i j p.val)) =
@@ -61,9 +83,38 @@ private theorem secondAdjunction_factor (p : WeightedCubic) (i : Fin 2) (j : Fin
         secondNormalAdjunction 57 1 i j
           (-(secondRestrictedPolynomialForm 57 1 i j secondFrameCubic.val)) := by
   have hframe : secondCurveCoefficient 57 1 i j secondFrameCubic.val = -1 := by
-    simp [secondCurveCoefficient, secondFrameCubic, secondSurfaceDehomogenize]
-  rw [literal_second_normalAdjunction, literal_second_normalAdjunction, hframe]
-  simp only [neg_smul, one_smul, smul_neg, neg_neg]
+    have hpoly : secondSurfaceDehomogenize secondFrameCubic.val = -1 := by
+      simp only [secondFrameCubic, map_neg, map_pow, secondSurfaceDehomogenize,
+        aeval_X]
+      change -(1 : SurfacePoly) ^ 3 = -1
+      rw [one_pow]
+    change normalCoefficientMap (CycleQ2GeometricAffineCurveCharts.secondQuadric 57)
+      (CycleQ2GeometricAffineCurveCharts.secondCubic 1)
+      (secondSurfaceDehomogenize (CycleQ2SeedTrace.originalG1 57))
+      (secondSurfaceDehomogenize CycleQ2SeedTrace.originalG2)
+      (secondSurfaceDehomogenize (CycleQ2NormalConnecting.thetaK 1)) i j
+      (secondSurfaceDehomogenize secondFrameCubic.val) = -1
+    rw [hpoly, map_neg, map_one]
+  let c := secondCurveCoefficient 57 1 i j p.val
+  let ω := KaehlerDifferential.map ℂ ℂ
+    (ChartRing ![CycleQ2GeometricAffineCurveCharts.secondQuadric 57,
+      CycleQ2GeometricAffineCurveCharts.secondCubic 1]) (SecondNormalCurveRing 57 1 i j)
+    (CycleQ2GeometricChartKaehler.globalForm
+      ![CycleQ2GeometricAffineCurveCharts.secondQuadric 57,
+        CycleQ2GeometricAffineCurveCharts.secondCubic 1]
+      CycleQ2GeometricIncidenceJacobianCover.second_chart_jacobianIdeal_eq_top)
+  have hf : secondNormalAdjunction 57 1 i j
+      (-(secondRestrictedPolynomialForm 57 1 i j secondFrameCubic.val)) = -ω :=
+    (literal_second_normalAdjunction i j secondFrameCubic.val).trans
+      ((congrArg (fun z : SecondNormalCurveRing 57 1 i j => z • ω) hframe).trans
+        (neg_one_smul (SecondNormalCurveRing 57 1 i j) ω))
+  calc
+    secondNormalAdjunction 57 1 i j (-(secondRestrictedPolynomialForm 57 1 i j p.val)) =
+        c • ω := literal_second_normalAdjunction i j p.val
+    _ = (-c) • (-ω) := (neg_smul_neg c ω).symm
+    _ = (-c) • secondNormalAdjunction 57 1 i j
+        (-(secondRestrictedPolynomialForm 57 1 i j secondFrameCubic.val)) :=
+      congrArg (fun v : KaehlerDifferential ℂ (SecondNormalCurveRing 57 1 i j) => (-c) • v) hf.symm
 
 def curveCoefficient (p : WeightedCubic) (a : CycleQ2GlobalCubicAdjunction.PatchIndex)
     (W : Curve.Opens) (hW : W ≤ CycleQ2GlobalCubicAdjunction.patchOpen a) : Γ(Curve, W) :=
@@ -89,7 +140,7 @@ theorem patchForm_factor (p : WeightedCubic) (a : CycleQ2GlobalCubicAdjunction.P
         Over.mk (homOfLE ((hW.trans inf_le_left).trans
           (firstNormalOpen_preimage 57 1 a.1 a.2).le))
       change chartKaehlerSection (firstNormalCurveChart 57 1 a.1 a.2)
-        (CycleQ2GeometricProjectiveCurve.projectiveToComplex 57 1)
+        (CycleQ2GeometricDifferentialSheaf.projectiveToComplex 57 1)
         (firstNormalCurveChart_overComplex 57 1 a.1 a.2) V
         (firstNormalAdjunction 57 1 a.1 a.2
           (firstRestrictedPolynomialForm 57 1 a.1 a.2 p.val)) = _
@@ -106,7 +157,7 @@ theorem patchForm_factor (p : WeightedCubic) (a : CycleQ2GlobalCubicAdjunction.P
         Over.mk (homOfLE ((hW.trans inf_le_left).trans
           (secondNormalOpen_preimage 57 1 a.1 a.2).le))
       change chartKaehlerSection (secondNormalCurveChart 57 1 a.1 a.2)
-        (CycleQ2GeometricProjectiveCurve.projectiveToComplex 57 1)
+        (CycleQ2GeometricDifferentialSheaf.projectiveToComplex 57 1)
         (secondNormalCurveChart_overComplex 57 1 a.1 a.2) V
         (secondNormalAdjunction 57 1 a.1 a.2
           (-(secondRestrictedPolynomialForm 57 1 a.1 a.2 p.val))) = _
@@ -118,7 +169,28 @@ theorem patchForm_factor (p : WeightedCubic) (a : CycleQ2GlobalCubicAdjunction.P
         (-(secondCurveCoefficient 57 1 a.1 a.2 p.val))
         (secondNormalAdjunction 57 1 a.1 a.2
           (-(secondRestrictedPolynomialForm 57 1 a.1 a.2 secondFrameCubic.val)))
-      simpa only [map_neg] using h
+      change chartKaehlerSection (secondNormalCurveChart 57 1 a.1 a.2)
+          (CycleQ2GeometricDifferentialSheaf.projectiveToComplex 57 1)
+          (secondNormalCurveChart_overComplex 57 1 a.1 a.2) V
+          (-(secondCurveCoefficient 57 1 a.1 a.2 p.val) •
+            secondNormalAdjunction 57 1 a.1 a.2
+              (-(secondRestrictedPolynomialForm 57 1 a.1 a.2 secondFrameCubic.val))) =
+        (chartSection (secondNormalCurveChart 57 1 a.1 a.2) V)
+          (-(secondCurveCoefficient 57 1 a.1 a.2 p.val)) •
+          chartKaehlerSection (secondNormalCurveChart 57 1 a.1 a.2)
+            (CycleQ2GeometricDifferentialSheaf.projectiveToComplex 57 1)
+            (secondNormalCurveChart_overComplex 57 1 a.1 a.2) V
+            (secondNormalAdjunction 57 1 a.1 a.2
+              (-(secondRestrictedPolynomialForm 57 1 a.1 a.2 secondFrameCubic.val))) at h
+      let ω : Differentials.val.obj (op W) :=
+        chartKaehlerSection (secondNormalCurveChart 57 1 a.1 a.2)
+          (CycleQ2GeometricDifferentialSheaf.projectiveToComplex 57 1)
+          (secondNormalCurveChart_overComplex 57 1 a.1 a.2) V
+          (secondNormalAdjunction 57 1 a.1 a.2
+            (-(secondRestrictedPolynomialForm 57 1 a.1 a.2 secondFrameCubic.val)))
+      exact h.trans (congrArg (fun z : Γ(Curve,W) => z • ω)
+        ((chartSection (secondNormalCurveChart 57 1 a.1 a.2) V).map_neg
+          (secondCurveCoefficient 57 1 a.1 a.2 p.val)))
 
 theorem surfaceCoordinate_pullback (p : WeightedCubic)
     (a : CycleQ2GlobalCubicAdjunction.PatchIndex)
@@ -163,8 +235,14 @@ theorem contraction_formula (p : WeightedCubic)
           (localSectionOn 57 1 p.val a O hO)) •
         (literalCubicAdjunction (frameCubic a)).val.app (op W) s := by
   rw [literalCubicAdjunction_on_patch p a W hW,
-    literalCubicAdjunction_on_patch (frameCubic a) a W hW,
-    patchForm_factor, surfaceCoordinate_pullback p a O hO W hW hWO]
+    literalCubicAdjunction_on_patch (frameCubic a) a W hW]
+  change (show Γ(Curve,W) from (patchFrame a).app W hW s) • patchForm p a W hW =
+    (show Γ(Curve,W) from (curveToSurface (57 : ℂ) 1).appLE O W hWO
+      (frameCoordinate (exteriorFrame 57 1 a) O hO
+        (localSectionOn 57 1 p.val a O hO))) •
+      ((show Γ(Curve,W) from (patchFrame a).app W hW s) •
+        patchForm (frameCubic a) a W hW)
+  rw [patchForm_factor, surfaceCoordinate_pullback p a O hO W hW hWO]
   exact smul_comm _ _ _
 
 #print axioms patchForm_factor

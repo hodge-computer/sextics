@@ -16,8 +16,7 @@ This file constructs that canonical fiber morphism and both projections;
 it does not assert that the fiber morphism is an isomorphism. Such an
 identification still requires the chartwise base-change comparison.
 
-Status: source-only proof draft; no Lean elaboration, compilation, or
-kernel replay has been run. Prepared for `fqlx` with OpenAI ChatGPT
+Prepared for `fqlx` with OpenAI ChatGPT
 assistance, following Ben Diamond's geometric seed construction and the
 earlier canonical incidence-specialization constructions in this project.
 -/
@@ -36,6 +35,12 @@ open HomogeneousLocalization
 open CycleQ2GeometricSeedSmooth CycleQ2GeometricIncidenceProj
   CycleQ2SeedFermatCone CycleQ2SeedFermatProj
   CycleQ2SeedCubicFamily CycleQ2SeedProjectiveFamily
+
+local instance specializationFamilyCommRing (r : ℂ) : CommRing (FamilyRing r) :=
+  Ideal.Quotient.commRing (familyIdeal r)
+
+local instance specializationConeCommRing (r : ℂ) : CommRing (ConeRing r) :=
+  Ideal.Quotient.commRing (Ideal.span {seedFamily r 0})
 
 /-- The origin of the full invariant-cubic coefficient space. -/
 def zeroCoefficientMap : ParameterRing →+* ℂ :=
@@ -100,13 +105,14 @@ theorem seedRingSpecialization_homogeneous (r : ℂ) {n : ℕ} {a : FamilyRing r
     (ha : a ∈ familyGrade r n) :
     seedRingSpecialization r a ∈ coneGrade r n := by
   obtain ⟨p, hp, rfl⟩ := ha
+  change seedRingSpecialization r (familyQuotient r p) ∈ coneGrade r n
   rw [seedRingSpecialization_quotient]
   exact ⟨MvPolynomial.map zeroCoefficientMap p,
     weightedHomogeneous_map zeroCoefficientMap hp, rfl⟩
 
 def seedGradedMap (r : ℂ) : familyGrade r →+*ᵍ coneGrade r where
   toRingHom := seedRingSpecialization r
-  map_mem := fun _ _ ha => seedRingSpecialization_homogeneous r ha
+  map_mem := fun ha => seedRingSpecialization_homogeneous r ha
 
 /-- Lift each coefficient through the original complex algebra structure. -/
 def coefficientLift : SeedPolynomial →+* FamilyPolynomial :=
@@ -125,11 +131,12 @@ theorem seedGradedMap_homogeneous_surjective (r : ℂ) (n : ℕ)
     ⟨_, weightedHomogeneous_map (algebraMap ℂ ParameterRing) hp, rfl⟩, ?_⟩
   change seedRingSpecialization r (familyQuotient r (coefficientLift p)) = _
   rw [seedRingSpecialization_quotient, zeroPolynomialSpecialization_coefficientLift]
+  rfl
 
 theorem irrelevant_le_map_seedGradedMap (r : ℂ) :
     HomogeneousIdeal.irrelevant (coneGrade r) ≤
       (HomogeneousIdeal.irrelevant (familyGrade r)).map (seedGradedMap r) := by
-  apply HomogeneousIdeal.toIdeal_le_toIdeal_iff.mp
+  apply toIdeal_le_toIdeal_iff.mp
   apply (HomogeneousIdeal.toIdeal_irrelevant_le _).mpr
   intro n hn b hb
   obtain ⟨a, ha, rfl⟩ := seedGradedMap_homogeneous_surjective r n b hb
@@ -143,32 +150,73 @@ def seedToFamily (r : ℂ) : threefold r ⟶ family r :=
 def zeroParameterMorphism : Spec (CommRingCat.of ℂ) ⟶ parameterScheme :=
   Spec.map (CommRingCat.ofHom zeroCoefficientMap)
 
-private theorem seedAway_coefficient (r : ℂ) (s : FamilyRing r) (a : ParameterRing) :
-    Away.map (seedGradedMap r) s
-        (fromZeroRingHom (familyGrade r) (Submonoid.powers s)
-          (parameterCoefficient r a)) =
-      fromZeroRingHom (coneGrade r) (Submonoid.powers (seedGradedMap r s))
-        (coefficient r (zeroCoefficientMap a)) := by
-  apply HomogeneousLocalization.val_injective
-  simp only [Away.map, fromZeroRingHom, HomogeneousLocalization.map_mk,
-    HomogeneousLocalization.val_mk, seedGradedMap, parameterCoefficient_coe,
-    coefficient_coe, map_one, seedRingSpecialization_coefficient]
+section ProjectiveCoefficientNaturality
+
+variable {A B σ τ : Type} [CommRing A] [CommRing B]
+  [SetLike σ A] [SetLike τ B] [AddSubgroupClass σ A] [AddSubgroupClass τ B]
+  {𝒜 : ℕ → σ} {ℬ : ℕ → τ} [GradedRing 𝒜] [GradedRing ℬ]
+
+private theorem awayMap_fromZero (f : 𝒜 →+*ᵍ ℬ) (s : A) (a : 𝒜 0) :
+    HomogeneousLocalization.Away.map f s
+        (HomogeneousLocalization.fromZeroRingHom 𝒜 (Submonoid.powers s) a) =
+      HomogeneousLocalization.fromZeroRingHom ℬ (Submonoid.powers (f s))
+        (f.gradedZeroRingHom a) := by
+  change HomogeneousLocalization.map f _
+      (HomogeneousLocalization.mk ⟨0,a,1,by simp⟩) =
+    HomogeneousLocalization.mk ⟨0,f.gradedZeroRingHom a,1,by simp⟩
+  rw [HomogeneousLocalization.map_mk]
+  apply congrArg HomogeneousLocalization.mk
+  apply HomogeneousLocalization.NumDenSameDeg.ext
+  · rfl
+  · rfl
+  · exact map_one f
+
+/-- Naturality of the actual map to the degree-zero affine base. -/
+private theorem projectiveMap_toSpecZero (f : 𝒜 →+*ᵍ ℬ)
+    (hf : HomogeneousIdeal.irrelevant ℬ ≤ (HomogeneousIdeal.irrelevant 𝒜).map f) :
+    Proj.map f hf ≫ Proj.toSpecZero 𝒜 =
+      Proj.toSpecZero ℬ ≫ Spec.map (CommRingCat.ofHom f.gradedZeroRingHom) := by
+  refine (Proj.mapAffineOpenCover f hf).openCover.hom_ext _ _ fun s => ?_
+  simp only [Scheme.AffineOpenCover.openCover_f, Proj.mapAffineOpenCover_f,
+    Category.assoc]
+  rw [Proj.awayι_comp_map_assoc f hf s.1.2 _ s.2.2,
+    Proj.awayι_toSpecZero, Proj.awayι_toSpecZero_assoc,
+    ← Spec.map_comp, ← Spec.map_comp]
+  congr 1
+  apply CommRingCat.hom_ext
+  apply RingHom.ext
+  intro a
+  exact awayMap_fromZero f s.2 a
+
+private theorem projectiveMap_overBase {R S : Type} [CommRing R] [CommRing S]
+    (f : 𝒜 →+*ᵍ ℬ)
+    (hf : HomogeneousIdeal.irrelevant ℬ ≤ (HomogeneousIdeal.irrelevant 𝒜).map f)
+    (cA : R →+* 𝒜 0) (cB : S →+* ℬ 0) (c : R →+* S)
+    (hc : ∀ a, f.gradedZeroRingHom (cA a) = cB (c a)) :
+    Proj.map f hf ≫ (Proj.toSpecZero 𝒜 ≫ Spec.map (CommRingCat.ofHom cA)) =
+      (Proj.toSpecZero ℬ ≫ Spec.map (CommRingCat.ofHom cB)) ≫
+        Spec.map (CommRingCat.ofHom c) := by
+  rw [← Category.assoc, projectiveMap_toSpecZero]
+  simp only [Category.assoc]
+  rw [← Spec.map_comp, ← Spec.map_comp]
+  congr 1
+  apply congrArg Spec.map
+  apply CommRingCat.hom_ext
+  apply RingHom.ext
+  exact hc
+
+end ProjectiveCoefficientNaturality
 
 /-- The canonical global specialization respects the original parameter map. -/
 theorem seedToFamily_overBase (r : ℂ) :
     seedToFamily r ≫ familyToParameters r =
       threefoldToComplex r ≫ zeroParameterMorphism := by
-  refine (Proj.mapAffineOpenCover (seedGradedMap r)
-    (irrelevant_le_map_seedGradedMap r)).openCover.hom_ext _ _ fun s => ?_
-  simp only [Scheme.AffineOpenCover.openCover_f, Proj.mapAffineOpenCover_f,
-    seedToFamily, familyToParameters, threefoldToComplex, Category.assoc,
-    Proj.awayι_comp_map_assoc, Proj.awayι_toSpecZero_assoc, Proj.awayι_toSpecZero,
-    zeroParameterMorphism, ← Spec.map_comp]
-  apply congrArg Spec.map
-  apply CommRingCat.hom_ext
-  apply RingHom.ext
+  dsimp only [seedToFamily, familyToParameters, threefoldToComplex, zeroParameterMorphism]
+  apply projectiveMap_overBase (seedGradedMap r) (irrelevant_le_map_seedGradedMap r)
+    (parameterCoefficient r) (coefficient r) zeroCoefficientMap
   intro a
-  exact seedAway_coefficient r (s.2 : FamilyRing r) a
+  apply Subtype.ext
+  exact seedRingSpecialization_coefficient r a
 
 /-- The genuine scheme-theoretic fiber over zero cubic coefficients. -/
 abbrev ZeroFiber (r : ℂ) := pullback zeroParameterMorphism (familyToParameters r)
