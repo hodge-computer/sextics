@@ -6,11 +6,6 @@ import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 /-!
 # Full coordinate-minor cover of the three literal surface charts
 
-SOURCE-ONLY DRAFT. No compilation or replay has been run, at the user's
-request. All proposed declarations below have proof bodies; no new axiom,
-admission, or global-extension hypothesis is introduced. The finite
-polynomial reductions and elaboration remain to be checked in a later turn.
-
 The old twelve normal patches need not cover D. This file instead uses
 all augmented coordinate pairs on each of X1, X2, X3. The key polynomial
 identity is the weighted Euler identity after the genuine shifted
@@ -81,7 +76,23 @@ def gradientLift (i : Fin 3) : Matrix (Fin 5) (Fin 4) SurfacePoly :=
 
 def equationDegree (a : Fin 2) : ℕ := ![6,3] a
 
+private def chartVariables (i : Fin 3) : Fin 5 → SurfacePoly :=
+  ![![X (some 0), 1, X (some 1), X (some 2), X none - X (some 1) ^ 2],
+    ![X (some 0), X (some 1), 1, X (some 2), X none - 1],
+    ![X (some 0), X (some 1), X (some 2), 1, X none - X (some 2) ^ 2]] i
+
+private theorem dehomogenize_eq_chartVariables (i : Fin 3) :
+    dehomogenize (projectiveIndex i) = aeval (chartVariables i) := by
+  apply MvPolynomial.algHom_ext
+  intro j
+  fin_cases i <;> fin_cases j <;>
+    simp only [projectiveIndex, dehomogenize, aeval_X, chartVariables]
+  all_goals first
+    | rfl
+    | (change X none - (1 : SurfacePoly) ^ 2 = X none - 1; rw [one_pow])
+
 set_option maxHeartbeats 4000000 in
+set_option maxRecDepth 4000 in
 /-- Explicit weighted Euler and chain-rule identity before taking the quotient.
 The finite reductions use exactly the original equations at (57,1). -/
 theorem gradientLift_polynomial (i : Fin 3) (a : Fin 2) (j : Fin 5) :
@@ -90,13 +101,22 @@ theorem gradientLift_polynomial (i : Fin 3) (a : Fin 2) (j : Fin 5) :
         pderiv (variableIndex k) (equations i a)) +
       if j = (projectiveIndex i).castSucc then
         (equationDegree a : SurfacePoly) * equations i a else 0 := by
+  have h57W (k : Fin 5) : pderiv k (57 : WeightedPoly) = 0 := by
+    have hc : (C (57 : ℂ) : WeightedPoly) = 57 := map_ofNat _ _
+    rw [← hc]
+    exact pderiv_C
+  have h57S (k : Option (Fin 3)) : pderiv k (57 : SurfacePoly) = 0 := by
+    have hc : (C (57 : ℂ) : SurfacePoly) = 57 := map_ofNat _ _
+    rw [← hc]
+    exact pderiv_C
+  simp only [equations, dehomogenizedEquations, dehomogenize_eq_chartVariables]
   fin_cases i <;> fin_cases a <;> fin_cases j <;>
-    simp [gradientLift, equationDegree, equations, projectiveIndex, variableIndex,
-      surfaceEquations, dehomogenizedEquations, dehomogenize, linearCoordinate,
-      Fin.insertNth, Fin.succAboveCases, Fin.sum_univ_succ,
+    simp [gradientLift, equationDegree, chartVariables, projectiveIndex, variableIndex,
+      surfaceEquations, Fin.sum_univ_succ,
       actualSeedEquation_eq_smoothF, smoothF, seedG,
       CycleQ2SegreSeed.seedG_expanded, smoothH, smoothK, smoothB, smoothA,
-      thetaH, originalH, originalB, Derivation.leibniz, Pi.single_apply] <;> ring
+      thetaH, originalH, originalB, Derivation.leibniz, Pi.single_apply,
+      map_ofNat, h57W, h57S] <;> ring
 
 /-- In the actual chart quotient, the equation term in Euler vanishes. -/
 theorem coneGradient_eq_sum (i : Fin 3) (a : Fin 2) (j : Fin 5) :
@@ -106,8 +126,9 @@ theorem coneGradient_eq_sum (i : Fin 3) (a : Fin 2) (j : Fin 5) :
           chartGradient i a k := by
   have h := congrArg (dehomogenizedMap 57 1 (projectiveIndex i))
     (gradientLift_polynomial i a j)
-  simpa [coneGradient, chartGradient, equations, map_sum,
-    dehomogenizedMap_equation] using h
+  split_ifs at h <;>
+    simpa [coneGradient, chartGradient, equations, map_sum,
+      dehomogenizedMap_equation] using h
 
 section LinearAlgebra
 
@@ -248,6 +269,7 @@ theorem augmentedCoordinateIdeal_eq_top (i : Fin 3) :
   by_contra h
   obtain ⟨M,hM,hle⟩ := Ideal.exists_le_maximal (augmentedCoordinateIdeal i) h
   letI : M.IsMaximal := hM
+  letI : Field (Chart i ⧸ M) := Ideal.Quotient.field M
   obtain ⟨a,b,hab⟩ := field_augmented_cover (K := Chart i ⧸ M) i (Ideal.Quotient.mk M)
   apply hab
   apply Ideal.Quotient.eq_zero_iff_mem.mpr
