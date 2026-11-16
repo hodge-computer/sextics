@@ -11,8 +11,6 @@ The x₂-chart coordinates `(z,a,b,c)` pull the x₃-chart coordinates back to
 the two conormal rows have factors `c⁻⁶,c⁻³`. Thus the raw determinant
 residue has factor `-c³`, and projective cubic orientations `(-,+)` agree.
 
-All statements have explicit proof bodies. This source has not been compiled;
-the user requested that validation be deferred to a subsequent turn.
 -/
 
 set_option autoImplicit false
@@ -60,8 +58,7 @@ theorem dehomogenize_scaling (z a b c t : R) (ht : c * t = 1)
     · simp [weight, mul_comm]
     · simp [weight]
     · simpa [weight, mul_comm] using ht.symm
-    · simp only [weight, Matrix.cons_val_zero, Matrix.cons_val_one,
-        Matrix.cons_val_succ, pow_one]
+    · change z*t^2-t^2 = t^2*(z-1)
       ring
   rw [hv]
   exact weighted_homogeneous_eval_scale (algebraMap ℂ R)
@@ -336,7 +333,9 @@ theorem pulledGradient_eq_sum (p : SurfacePoly) (j : Fin 4) :
   change (∑ k : Fin 4,
     (fun k : Option (Fin 3) => φ (ambientChangeEvaluate (pderiv k p)) *
       φ (ambientJacobian k (_root_.finSuccEquiv 3 j))) (_root_.finSuccEquiv 3 k)) = _
-  refine (Equiv.sum_comp (_root_.finSuccEquiv 3) _).trans ?_
+  refine (Equiv.sum_comp (_root_.finSuccEquiv 3)
+    (fun k : Option (Fin 3) => φ (ambientChangeEvaluate (pderiv k p)) *
+      φ (ambientJacobian k (_root_.finSuccEquiv 3 j)))).trans ?_
   apply Finset.sum_congr rfl
   intro k hk
   exact (map_mul φ _ _).symm
@@ -476,7 +475,10 @@ theorem cubic_scalar_balance (p : MvPolynomial (Fin 5) ℂ)
   calc
     _ = -(sourcePolynomialMap φ (secondSurfaceDehomogenize p)) *
         ((φ ambientInverse)^3 * (φ (ambientCoordinate (some 2)))^3) := by
-      simp only [sourcePolynomialMap, RingHom.comp_apply, AlgHom.coe_toRingHom]
+      change φ ambientInverse ^ 3 * φ (polynomialMap (secondSurfaceDehomogenize p)) *
+          -(φ (ambientCoordinate (some 2)) ^ 3) =
+        -(φ (polynomialMap (secondSurfaceDehomogenize p))) *
+          (φ ambientInverse ^ 3 * φ (ambientCoordinate (some 2)) ^ 3)
       ring
     _ = _ := by rw [h3, mul_one]
 
@@ -652,9 +654,10 @@ theorem actual_mixed_determinant (p q : SurfacePoly) :
         (secondPatchChart r θ n₂ t₂) (Over.mk (homOfLE h₂)) 1,
       pulledGradient φ p, pulledGradient φ q] =
       -((φ (ambientCoordinate (some 2)))^3) *
+        (show Γ(projectiveSurface r θ,V) from
         chartSurfaceSectionMap (thirdEquations r θ) n₃ t₃
           (thirdPatchChart r θ n₃ t₃) (Over.mk (homOfLE h₃))
-          (augmentedJacobian (thirdEquations r θ) p q) := by
+          (augmentedJacobian (thirdEquations r θ) p q)) := by
   have hF : sourcePolynomialMap φ (secondEquations r θ 0) = 0 :=
     (hsource _).trans (secondPolynomialSection_equation r θ n₂ t₂ V h₂ 0)
   have hh : sourcePolynomialMap φ (secondEquations r θ 1) = 0 :=
@@ -669,8 +672,6 @@ theorem actual_mixed_determinant (p q : SurfacePoly) :
     fin_cases i <;> simp only [mixedGradientMatrix, Matrix.cons_val_zero', Matrix.cons_val_succ']
     · exact ((hsource _).trans (secondPolynomialSection_base r θ n₂ t₂ V h₂ _)).symm
     · exact ((hsource _).trans (secondPolynomialSection_base r θ n₂ t₂ V h₂ _)).symm
-    · rfl
-    · rfl
   have hright : (changedGradientMatrix φ r θ p q).det =
       chartSurfaceSectionMap (thirdEquations r θ) n₃ t₃
         (thirdPatchChart r θ n₃ t₃) (Over.mk (homOfLE h₃))
@@ -681,9 +682,9 @@ theorem actual_mixed_determinant (p q : SurfacePoly) :
     exact (htarget _).trans (thirdPolynomialSection_base r θ n₃ t₃ V h₃ _)
   rw [hleft, mixedJacobian_transition φ r θ hF hh p q, hright]
 
+include hsource htarget in
 /-- The determinant calculation is now an equality of the genuine
 exterior-sheaf sections on the actual projective overlap. -/
-include hsource htarget in
 theorem residueSheafSection_transition_of_maps :
     chartResidueSheafSection
         (CycleQ2GeometricSurfaceCoefficients.projectiveToComplex r θ)
@@ -706,19 +707,37 @@ theorem residueSheafSection_transition_of_maps :
 include hsource htarget in
 theorem orientedCubicSections_agree_of_maps (p : MvPolynomial (Fin 5) ℂ)
     (hp : p.IsWeightedHomogeneous weight 3) :
-    secondCubicSection r θ n₂ t₂ p (Over.mk (homOfLE h₂)) =
-      thirdCubicSection r θ n₃ t₃ p (Over.mk (homOfLE h₃)) := by
+    (show (surfaceExteriorSheaf r θ).val.obj (op V) from
+      secondCubicSection r θ n₂ t₂ p (Over.mk (homOfLE h₂))) =
+      (show (surfaceExteriorSheaf r θ).val.obj (op V) from
+        thirdCubicSection r θ n₃ t₃ p (Over.mk (homOfLE h₃))) := by
   have hcoeff : thirdPolynomialSection r θ n₃ t₃ V h₃ (thirdDehomogenize p) *
       -((φ (ambientCoordinate (some 2)))^3) =
       -(secondPolynomialSection r θ n₂ t₂ V h₂ (secondSurfaceDehomogenize p)) := by
     rw [← htarget, ← hsource]
     exact cubic_scalar_balance φ p hp
-  unfold secondCubicSection thirdCubicSection
-  rw [residueSheafSection_transition_of_maps r θ n₂ t₂ n₃ t₃ V h₂ h₃ φ hsource htarget,
-    ← mul_smul]
-  change -(secondPolynomialSection r θ n₂ t₂ V h₂ (secondSurfaceDehomogenize p) • _) =
-    (thirdPolynomialSection r θ n₃ t₃ V h₃ (thirdDehomogenize p) * _) • _
-  rw [hcoeff, neg_smul]
+  let a : Γ(projectiveSurface r θ,V) :=
+    secondPolynomialSection r θ n₂ t₂ V h₂ (secondSurfaceDehomogenize p)
+  let b : Γ(projectiveSurface r θ,V) :=
+    thirdPolynomialSection r θ n₃ t₃ V h₃ (thirdDehomogenize p)
+  let c : Γ(projectiveSurface r θ,V) := -((φ (ambientCoordinate (some 2)))^3)
+  let u : (surfaceExteriorSheaf r θ).val.obj (op V) :=
+    chartResidueSheafSection (CycleQ2GeometricSurfaceCoefficients.projectiveToComplex r θ) (secondEquations r θ) n₂ t₂
+      (secondPatchChart r θ n₂ t₂) (secondPatchChart_overComplex r θ n₂ t₂)
+      (Over.mk (homOfLE h₂))
+  let v : (surfaceExteriorSheaf r θ).val.obj (op V) :=
+    chartResidueSheafSection (CycleQ2GeometricSurfaceCoefficients.projectiveToComplex r θ) (thirdEquations r θ) n₃ t₃
+      (thirdPatchChart r θ n₃ t₃) (thirdPatchChart_overComplex r θ n₃ t₃)
+      (Over.mk (homOfLE h₃))
+  have hv : v = c • u :=
+    residueSheafSection_transition_of_maps r θ n₂ t₂ n₃ t₃ V h₂ h₃ φ hsource htarget
+  have hab : b*c = -a := hcoeff
+  change -(a • u) = b • v
+  calc
+    _ = (-a) • u := (neg_smul a u).symm
+    _ = (b*c) • u := congrArg (fun s : Γ(projectiveSurface r θ,V) => s • u) hab.symm
+    _ = b • (c • u) := mul_smul b c u
+    _ = b • v := congrArg (fun w : (surfaceExteriorSheaf r θ).val.obj (op V) => b • w) hv.symm
 
 end ActualSections
 
@@ -793,26 +812,44 @@ theorem homogeneous_section_change (n : ℕ) (p : MvPolynomial (Fin 5) ℂ)
   have h := coordinatePolynomialSection_change r θ 2 3 V
     (h₂.trans (secondPatchOpen_le r θ n₂ t₂))
     (h₃.trans (thirdPatchOpen_le r θ n₃ t₃)) n p hp
+  change coordinatePolynomialSection r θ 3 V
+      (h₃.trans (thirdPatchOpen_le r θ n₃ t₃)) p =
+    coordinatePolynomialSection r θ 3 V (h₃.trans (thirdPatchOpen_le r θ n₃ t₃))
+      (X (2 : Fin 5)) ^ n *
+    coordinatePolynomialSection r θ 2 V (h₂.trans (secondPatchOpen_le r θ n₂ t₂)) p at h
   rw [← thirdPolynomialSection_weighted r θ n₃ t₃ V h₃ p,
     ← thirdPolynomialSection_weighted r θ n₃ t₃ V h₃ (X (2 : Fin 5)),
     ← secondPolynomialSection_homogeneous r θ n₂ t₂ V h₂ n p hp] at h
-  simpa only [thirdDehomogenize_eq, aeval_X, Matrix.cons_val_zero,
-    Matrix.cons_val_one, Matrix.cons_val_succ] using h
+  have hX : thirdDehomogenize (X (2 : Fin 5)) = X (some 2) := by
+    rw [thirdDehomogenize_eq, aeval_X]
+    rfl
+  rw [hX] at h
+  exact h
 
 theorem literal_ratio_inverse :
     secondPolynomialSection r θ n₂ t₂ V h₂ (X (some 2)) *
       thirdPolynomialSection r θ n₃ t₃ V h₃ (X (some 2)) = 1 := by
   have hX : (X (3 : Fin 5) : MvPolynomial (Fin 5) ℂ).IsWeightedHomogeneous weight 1 := by
-    simpa only [weight_castSucc] using
-      isWeightedHomogeneous_X ℂ weight (3 : Fin 4).castSucc
+    exact isWeightedHomogeneous_X ℂ weight (3 : Fin 5)
   have h := coordinateRatio_inverse r θ 2 3 V
     (h₂.trans (secondPatchOpen_le r θ n₂ t₂))
     (h₃.trans (thirdPatchOpen_le r θ n₃ t₃))
+  change coordinatePolynomialSection r θ 2 V
+      (h₂.trans (secondPatchOpen_le r θ n₂ t₂)) (X (3 : Fin 5)) *
+    coordinatePolynomialSection r θ 3 V
+      (h₃.trans (thirdPatchOpen_le r θ n₃ t₃)) (X (2 : Fin 5)) = 1 at h
   rw [← secondPolynomialSection_homogeneous r θ n₂ t₂ V h₂ 1 (X (3 : Fin 5)) hX,
     ← thirdPolynomialSection_weighted r θ n₃ t₃ V h₃ (X (2 : Fin 5))] at h
-  simpa only [secondSurfaceDehomogenize, thirdDehomogenize_eq, aeval_X,
-    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_succ] using h
+  have hsecond : secondSurfaceDehomogenize (X (3 : Fin 5)) = X (some 2) := by
+    rw [secondSurfaceDehomogenize, aeval_X]
+    rfl
+  have hthird : thirdDehomogenize (X (2 : Fin 5)) = X (some 2) := by
+    rw [thirdDehomogenize_eq, aeval_X]
+    rfl
+  rw [hsecond, hthird] at h
+  exact h
 
+include h₃ in
 theorem source_last_isUnit :
     IsUnit (secondPolynomialSection r θ n₂ t₂ V h₂ (X (some 2))) :=
   isUnit_iff_exists_inv.mpr ⟨thirdPolynomialSection r θ n₃ t₃ V h₃ (X (some 2)),
@@ -854,8 +891,11 @@ theorem literalAmbientSectionMap_target (p : SurfacePoly) :
       change literalAmbientSectionMap r θ n₂ t₂ n₃ t₃ V h₂ h₃
         (ambientChangeEvaluate (C c)) = _
       rw [hC, literalAmbientSectionMap_source]
-      simpa only [thirdDehomogenize, dehomogenize, secondSurfaceDehomogenize,
-        aeval_C, pow_zero, one_mul] using h.symm
+      simp only [thirdDehomogenize, dehomogenize, secondSurfaceDehomogenize,
+        aeval_C, pow_zero, one_mul] at h
+      change thirdPolynomialSection r θ n₃ t₃ V h₃ (C c) =
+        secondPolynomialSection r θ n₂ t₂ V h₂ (C c) at h
+      exact h.symm
     · intro j
       change literalAmbientSectionMap r θ n₂ t₂ n₃ t₃ V h₂ h₃
         (ambientChangeEvaluate (X j)) = _
@@ -872,28 +912,31 @@ theorem literalAmbientSectionMap_target (p : SurfacePoly) :
       | some j =>
           fin_cases j
           · have hX : (X (0 : Fin 5) : MvPolynomial (Fin 5) ℂ).IsWeightedHomogeneous weight 1 := by
-              simpa only [weight_castSucc] using
-                isWeightedHomogeneous_X ℂ weight (0 : Fin 4).castSucc
+              exact isWeightedHomogeneous_X ℂ weight (0 : Fin 5)
             have h := homogeneous_section_change r θ n₂ t₂ n₃ t₃ V h₂ h₃ 1 (X (0 : Fin 5)) hX
             simp only [thirdDehomogenize_eq, secondSurfaceDehomogenize, aeval_X,
               Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_succ, pow_one] at h
-            simp only [ambientChangeEvaluate, aeval_X, ambientChangeCoordinate,
-              Matrix.cons_val_zero, map_mul, literalAmbientSectionMap_inverse, ambientCoordinate,
-              literalAmbientSectionMap_source]
+            rw [ambientChangeEvaluate, aeval_X]
+            change literalAmbientSectionMap r θ n₂ t₂ n₃ t₃ V h₂ h₃
+              (polynomialMap (X (some 0)) * ambientInverse) =
+                thirdPolynomialSection r θ n₃ t₃ V h₃ (X (some 0))
+            rw [map_mul, literalAmbientSectionMap_source, literalAmbientSectionMap_inverse]
             exact (mul_comm _ _).trans h.symm
           · have hX : (X (1 : Fin 5) : MvPolynomial (Fin 5) ℂ).IsWeightedHomogeneous weight 1 := by
-              simpa only [weight_castSucc] using
-                isWeightedHomogeneous_X ℂ weight (1 : Fin 4).castSucc
+              exact isWeightedHomogeneous_X ℂ weight (1 : Fin 5)
             have h := homogeneous_section_change r θ n₂ t₂ n₃ t₃ V h₂ h₃ 1 (X (1 : Fin 5)) hX
             simp only [thirdDehomogenize_eq, secondSurfaceDehomogenize, aeval_X,
               Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_succ, pow_one] at h
-            simp only [ambientChangeEvaluate, aeval_X, ambientChangeCoordinate,
-              Matrix.cons_val_zero, Matrix.cons_val_one, map_mul, literalAmbientSectionMap_inverse,
-              ambientCoordinate, literalAmbientSectionMap_source]
+            rw [ambientChangeEvaluate, aeval_X]
+            change literalAmbientSectionMap r θ n₂ t₂ n₃ t₃ V h₂ h₃
+              (polynomialMap (X (some 1)) * ambientInverse) =
+                thirdPolynomialSection r θ n₃ t₃ V h₃ (X (some 1))
+            rw [map_mul, literalAmbientSectionMap_source, literalAmbientSectionMap_inverse]
             exact (mul_comm _ _).trans h.symm
-          · simpa only [ambientChangeEvaluate, aeval_X, ambientChangeCoordinate,
-              Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_succ] using
-              literalAmbientSectionMap_inverse r θ n₂ t₂ n₃ t₃ V h₂ h₃
+          · rw [ambientChangeEvaluate, aeval_X]
+            change literalAmbientSectionMap r θ n₂ t₂ n₃ t₃ V h₂ h₃ ambientInverse =
+              thirdPolynomialSection r θ n₃ t₃ V h₃ (X (some 2))
+            exact literalAmbientSectionMap_inverse r θ n₂ t₂ n₃ t₃ V h₂ h₃
   exact RingHom.congr_fun hmaps p
 
 /-- The raw determinant frame comparison on every actual common subopen.
@@ -919,8 +962,10 @@ theorem literal_residueSheafSection_transition :
 There is no supplied extension or residue compatibility premise. -/
 theorem orientedCubicSections_agree_on_open (p : MvPolynomial (Fin 5) ℂ)
     (hp : p.IsWeightedHomogeneous weight 3) :
-    secondCubicSection r θ n₂ t₂ p (Over.mk (homOfLE h₂)) =
-      thirdCubicSection r θ n₃ t₃ p (Over.mk (homOfLE h₃)) :=
+    (show (surfaceExteriorSheaf r θ).val.obj (op V) from
+      secondCubicSection r θ n₂ t₂ p (Over.mk (homOfLE h₂))) =
+      (show (surfaceExteriorSheaf r θ).val.obj (op V) from
+        thirdCubicSection r θ n₃ t₃ p (Over.mk (homOfLE h₃))) :=
   orientedCubicSections_agree_of_maps r θ n₂ t₂ n₃ t₃ V h₂ h₃
     (literalAmbientSectionMap r θ n₂ t₂ n₃ t₃ V h₂ h₃)
     (literalAmbientSectionMap_source r θ n₂ t₂ n₃ t₃ V h₂ h₃)
@@ -949,11 +994,29 @@ chart carries the existing minus orientation and the third the plus orientation.
 theorem orientedCubicSections_agree (p : MvPolynomial (Fin 5) ℂ)
     (hp : p.IsWeightedHomogeneous weight 3)
     (V : Over (secondPatchOpen r θ n₂ t₂ ⊓ thirdPatchOpen r θ n₃ t₃)) :
-    secondCubicSection r θ n₂ t₂ p (secondCommonSubopen r θ n₂ t₂ n₃ t₃ V) =
-      thirdCubicSection r θ n₃ t₃ p (thirdCommonSubopen r θ n₂ t₂ n₃ t₃ V) := by
-  simpa only [secondCommonSubopen, thirdCommonSubopen, homOfLE_comp] using
-    orientedCubicSections_agree_on_open r θ n₂ t₂ n₃ t₃ V.left
-      ((leOfHom V.hom).trans inf_le_left) ((leOfHom V.hom).trans inf_le_right) p hp
+    (show (surfaceExteriorSheaf r θ).val.obj (op V.left) from
+      secondCubicSection r θ n₂ t₂ p (secondCommonSubopen r θ n₂ t₂ n₃ t₃ V)) =
+      (show (surfaceExteriorSheaf r θ).val.obj (op V.left) from
+        thirdCubicSection r θ n₃ t₃ p (thirdCommonSubopen r θ n₂ t₂ n₃ t₃ V)) := by
+  have eleft : V.hom ≫ homOfLE inf_le_left =
+      homOfLE ((leOfHom V.hom).trans inf_le_left) := Subsingleton.elim _ _
+  have eright : V.hom ≫ homOfLE inf_le_right =
+      homOfLE ((leOfHom V.hom).trans inf_le_right) := Subsingleton.elim _ _
+  calc
+    _ = (show (surfaceExteriorSheaf r θ).val.obj (op V.left) from
+        secondCubicSection r θ n₂ t₂ p
+          (Over.mk (homOfLE ((leOfHom V.hom).trans inf_le_left)))) :=
+      congrArg (fun f : V.left ⟶ secondPatchOpen r θ n₂ t₂ =>
+        (show (surfaceExteriorSheaf r θ).val.obj (op V.left) from
+          secondCubicSection r θ n₂ t₂ p (Over.mk f))) eleft
+    _ = (show (surfaceExteriorSheaf r θ).val.obj (op V.left) from
+        thirdCubicSection r θ n₃ t₃ p
+          (Over.mk (homOfLE ((leOfHom V.hom).trans inf_le_right)))) :=
+      orientedCubicSections_agree_on_open r θ n₂ t₂ n₃ t₃ V.left
+        ((leOfHom V.hom).trans inf_le_left) ((leOfHom V.hom).trans inf_le_right) p hp
+    _ = _ := congrArg (fun f : V.left ⟶ thirdPatchOpen r θ n₃ t₃ =>
+      (show (surfaceExteriorSheaf r θ).val.obj (op V.left) from
+        thirdCubicSection r θ n₃ t₃ p (Over.mk f))) eright.symm
 
 #print axioms orientedCubicSections_agree
 
