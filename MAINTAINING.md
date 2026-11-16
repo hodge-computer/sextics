@@ -147,26 +147,7 @@ Check finite values, normals, index bounds, projected extent, edge lengths, and 
 
 A solve can prove the existential contract without the optional `witness.json` export. Such a proof still earns credit; its denominator must be extracted separately before it can be highlighted. A maintenance change may add `slices/divisors/<id>.json`, citing the relevant definitions and supplying an exact polynomial program. This presentation file does not modify the accepted proof, acceptance record, witness, or credit. It must not describe an arbitrary geometric curve as the certificate divisor.
 
-Quadric contact · broken reflections uses the exact rational norm exported by
-`scripts/export-quadric-contact-divisor.py`; its construction is explained in
-`slices/divisors/quadric-contact-broken.md`. It replaces the former numerical
-line factors. Its `sliceRestriction` records the saved plane and coordinate
-phases: the content builder rejects reuse on a different section. The exact
-formula describes the ideal rational-ratio section; the saved plane and mesh
-are its floating-point realization. Rendering uses the same polynomial compiler
-and divisor shader as every other atlas entry.
-
-The pole-two holdout uses the exact norm exported by
-`scripts/export-holdout-q2-divisor.py`, with its derivation in
-`slices/divisors/holdout-q2.md`. Its coefficients are rational numbers and
-`sqrt(-3)`, evaluated by the shared complex polynomial compiler. Both exact-norm
-exporters use `scripts/norm_divisor.py` for characteristic-polynomial interpolation
-and compact expressions. The twelve central holdout targets share the section
-`Y0/X0 = 23i/20`, `Y1/X1 = 3i/4` and one camera. Only the pole-two target has a
-recovered display denominator; it is not a denominator for the other targets.
-The saved plane is a floating-point realization of those exact ratios, and
-`sliceRestriction` prevents applying the formula to a different saved section.
-The obsolete numerical line-factor export has been removed.
+Quadric contact · broken reflections and the pole-two holdout have no display divisor. Their recovered denominators are exact norms too large to evaluate per pixel on phones, and slices chosen to simplify them did not make them cheap enough. Their derivations and exporters remain in Git history.
 
 All displayed denominators use per-pixel evaluation. Literal polynomials are compiled into multivariate Horner expressions; compact programs retain their arithmetic structure. The fragment shader evaluates each factor and its six ambient derivatives after the inverse stereographic map. Homogeneous coordinate rescaling, including a common scale for quadratic inputs of higher-degree expressions, reduces underflow; dividing by the gradient norm and using pixel derivatives gives curves a consistent antialiased width. Products and powers are displayed as the union of their factors' zero sets, without multiplicity. There is no vertex-sampling fallback. Generated expressions have a 4,096-node budget and run inside the existing visualization worker; context-loss handling and graphics timeouts remain active. Large formulas may still cost more on slower hardware.
 
