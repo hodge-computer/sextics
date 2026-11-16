@@ -3,7 +3,7 @@ import Mathlib.RingTheory.MvPolynomial.Homogeneous
 import Mathlib.Tactic.FinCases
 import Mathlib.Tactic.NormNum
 
-/-! Extracted from `HeadOfNaps`’s holdout-q2 proof (#124).
+/-! Extracted from `HeadOfNaps`’s holdout-q2 proof.
 The coefficient and denominator hypotheses remain explicit. -/
 
 /-!

@@ -5,7 +5,7 @@ import HodgeComputer.Constructions.HoldoutCover.CoverCertificate
 
 /-!
 The unchanged holdout-bundle target and certificate addition.  The first
-summand is supplied by fqlx's accepted Fermat-cover construction (PR #128).
+summand is supplied by fqlx's accepted Fermat-cover construction.
 The short addition lemmas follow the exact non-strict construction in the
 accepted one-reflection proof; both quotient remainders are retained.
 

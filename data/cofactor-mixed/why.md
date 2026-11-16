@@ -1,4 +1,4 @@
-This companion to [the coupled-X cofactor example](#case/cofactor-eight) moves all three odd coordinates into the quadratic–cubic presentation. The sextic is organized as
+This companion to [the coupled-X cofactor example](../cofactor-eight/why.md) moves all three odd coordinates into the quadratic–cubic presentation. The sextic is organized as
 \[
 F=H(C,X_1,Y_1,Y_2)+4\cdot r^2+X_2^6,
 \]
@@ -13,4 +13,4 @@ Its determinant factor records the volume change of the quadratic–cubic map. T
 
 The mathematical issue is whether being passive is a property of a coordinate block or a property of the chosen derivation. The latter is more flexible: a function may involve several \(Y\) variables yet remain fixed by a field acting in adapted coordinates. On the other hand, arbitrary extra dependence cannot simply be declared passive; the invariant quantities must actually be preserved.
 
-The example was designed to extend a cofactor family after its simpler diagonal presentation had been understood. Its role is to test that extension when the parity blocks and the active/passive division no longer coincide. It also provides a smaller target packet than the eight-direction companion, making the dependence on the available passive variables visible. [Chapter 2](#technical-information/explicit-constructions) explains the transport framework. The aim is a mechanism whose hypotheses can be checked in the original equation, even when its expansion hides the adapted structure.
+The example was designed to extend a cofactor family after its simpler diagonal presentation had been understood. Its role is to test that extension when the parity blocks and the active/passive division no longer coincide. It also provides a smaller target packet than the eight-direction companion, making the dependence on the available passive variables visible. [Chapter 2](../../docs/02-explicit-constructions.md) explains the transport framework. The aim is a mechanism whose hypotheses can be checked in the original equation, even when its expansion hides the adapted structure.

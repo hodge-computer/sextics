@@ -39,8 +39,7 @@
       if (usingTilt)
         send({ type: 'input', target: 'view', name: 'parallax', properties: { x: 0, y: 0 } });
     }
-    // The page owns the drawing-buffer size. Safari keeps showing frames at the
-    // placeholder's pre-transfer size, so that size must already be the final one.
+    // The page owns the drawing-buffer size; the worker draws at exactly this size.
     const size = () => {
       const width = Math.max(1, canvas.clientWidth),
         height = Math.max(1, canvas.clientHeight),
@@ -130,7 +129,12 @@
       }
     };
     // Older browsers keep the atlas usable instead of falling back to blocking GL.
-    if (typeof Worker === 'undefined' || !canvas.transferControlToOffscreen) {
+    if (
+      typeof Worker === 'undefined' ||
+      typeof OffscreenCanvas === 'undefined' ||
+      typeof OffscreenCanvas.prototype.transferToImageBitmap !== 'function' ||
+      typeof ImageBitmapRenderingContext === 'undefined'
+    ) {
       stop('This browser cannot run the 3D view separately from the page.', false);
       return api;
     }
@@ -168,10 +172,26 @@
         const current = new Worker(workerURL);
         worker = current;
         let booted = false;
+        // Frames arrive as ImageBitmaps and are shown with a bitmap renderer, a
+        // 2D copy without GL. Each frame carries its own size.
+        const display = canvas.getContext('bitmaprenderer');
+        if (!display) throw new Error('This browser cannot display the 3D view.');
         current.onmessage = ({ data }) => {
-          if (worker !== current || destroyed) return;
+          if (worker !== current || destroyed) {
+            if (data.type === 'frame') data.value.close();
+            return;
+          }
           lastPulse = performance.now();
           booted = true;
+          if (data.type === 'frame') {
+            const frame = data.value;
+            if (canvas.width !== frame.width || canvas.height !== frame.height) {
+              canvas.width = frame.width;
+              canvas.height = frame.height;
+            }
+            display.transferFromImageBitmap(frame);
+            return;
+          }
           if (data.type === 'fatal') {
             stop(data.value);
             return;
@@ -195,20 +215,12 @@
         current.onmessageerror = () => {
           if (worker === current) stop('The 3D view could not communicate with the page.');
         };
-        const initial = size();
-        canvas.width = initial.pixelWidth;
-        canvas.height = initial.pixelHeight;
-        const offscreen = canvas.transferControlToOffscreen();
-        current.postMessage(
-          {
-            type: 'init',
-            canvas: offscreen,
-            size: initial,
-            hidden: document.hidden,
-            reducedMotion: motionPreference.matches
-          },
-          [offscreen]
-        );
+        current.postMessage({
+          type: 'init',
+          size: size(),
+          hidden: document.hidden,
+          reducedMotion: motionPreference.matches
+        });
         if (record) send({ type: 'case', record });
         canvas.classList.toggle('free-camera', mode === 'free');
         canvas.style.touchAction = mode === 'free' ? 'none' : 'auto';

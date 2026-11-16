@@ -4,7 +4,7 @@ This target isolates the obstruction that distinguishes a **block swap** from a 
 F=\frac{1}{2}\cdot\bigl(f(U)+f(V)\bigr),\qquad \tau(U,V)=(V,U).
 \]
 
-The equation is linearly split, but its involution exchanges the summands. The all-target block-sign theorem therefore does not apply. [Chapter 3A, §§3A.4–3A.6](#technical-information/split-and-k3) separates the supported joining and elliptic pieces from a remaining exterior square of the primitive cohomology of the K3 double plane \(w^2=f\).
+The equation is linearly split, but its involution exchanges the summands. The all-target block-sign theorem therefore does not apply. [Chapter 3A, §§3A.4–3A.6](../../docs/03a-split-and-k3.md) separates the supported joining and elliptic pieces from a remaining exterior square of the primitive cohomology of the K3 double plane \(w^2=f\).
 
 This particular target actually reaches that remaining sector. At \(q=1\), the book's projector retains the two pure-block terms, with
 

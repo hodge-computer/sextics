@@ -2,7 +2,7 @@
 
 These modules justify the finite encodings by which a large polynomial identity is checked coefficient by coefficient. They do not depend on a cubic family or on a target.
 
-They come from `hodgepodgeconjecture`'s [cyclic construction](https://github.com/hodge-computer/sextics/pull/165). `BivariateDifferentiation` was added in `fqlx`'s [mixed-biweight construction](https://github.com/hodge-computer/sextics/pull/170). Both were prepared with OpenAI Codex assistance.
+They come from `hodgepodgeconjecture`'s [cyclic construction](../../../../../data/cycle-three/solution.md). `BivariateDifferentiation` was added in `fqlx`'s [mixed-biweight construction](../../../../../data/mixed-biweight/solution.md). Both were prepared with OpenAI Codex assistance.
 
 Import the individual modules. Declarations lie in the namespaces `PolynomialEncoding.SignedExpressions`, `PolynomialEncoding.BivariateExpressions` and `PolynomialEncoding.PolynomialDigits`.
 

@@ -4,7 +4,7 @@ This equation is a controlled departure from the all-target split theorem:
 F=f(X)+g(Y)+t\cdot L(X)^2\cdot M(Y),\qquad t=\frac57.
 \]
 
-The entire mixed component has block bidegree \((4,2)\) and tensor rank one. There is no \((2,4)\) component. At \(t=0\), the elliptic-companion theorem of [Chapter 3A](#technical-information/split-and-k3) supplies every allowed certificate. The nonzero coupling preserves global parity while removing the product decomposition on which that theorem relies.
+The entire mixed component has block bidegree \((4,2)\) and tensor rank one. There is no \((2,4)\) component. At \(t=0\), the elliptic-companion theorem of [Chapter 3A](../../docs/03a-split-and-k3.md) supplies every allowed certificate. The nonzero coupling preserves global parity while removing the product decomposition on which that theorem relies.
 
 The quotient geometry gives a precise way to study what changed. Over \(\mathbb P^2_X\times\mathbb P^2_Y\), use the squared relative block scale to write the fiber equation as the binary cubic
 

@@ -16,7 +16,7 @@ F=\sum_{i=0}^{2}(X_i^6+Y_i^6)
 
 It has independent \(S_3\) symmetries in the two coordinate blocks. Although \(A\) is symmetric, a transposition negates the residue volume. The residue therefore has the sign character in each factor. The elementary-symmetric quotient's Jacobian density \(\Delta_X\Delta_Y\) serves a different character.
 
-The [two-reflection theorem of Chapter 3B](#technical-information/weighted-threefolds) reaches this residual class. Make the rational coordinate change
+The [two-reflection theorem of Chapter 3B](../../docs/03b-weighted-threefolds.md) reaches this residual class. Make the rational coordinate change
 
 \[
 (X_0,X_1,X_2)=(a+s,a-s,b),
@@ -31,4 +31,4 @@ The independent transpositions become \(s\mapsto-s\) and \(t\mapsto-t\), one in 
 
 Thus the target lies in the two-reflection residual sector supplied by the chapter's weighted-threefold correspondence. Reduction of the original equation modulo five is Fermat, proving smoothness. All hypotheses of the theorem hold for the exact protected equation, and the support-to-certificate theorem establishes rational certificate existence.
 
-The example shows how independent block symmetries supply support beyond their individual invariant quotients. One transposition in each parity block gives the two reflections required by the theorem, which serves their joint negative residue character. [The simultaneous-permutation example](#case/diagonal-permutation) has a different group action and does not supply these independent reflections.
+The example shows how independent block symmetries supply support beyond their individual invariant quotients. One transposition in each parity block gives the two reflections required by the theorem, which serves their joint negative residue character. [The simultaneous-permutation example](../diagonal-permutation/why.md) has a different group action and does not supply these independent reflections.

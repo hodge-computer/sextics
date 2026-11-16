@@ -1,6 +1,6 @@
 # Finite-algebra contact certificates
 
-These tools come from `HeadOfNaps`’s accepted [quadric-contact-broken](../../../../../data/quadric-contact-broken/solution.md) ([#122](https://github.com/hodge-computer/sextics/pull/122)) and [holdout-q2](../../../../../data/holdout-q2/solution.md) ([#124](https://github.com/hodge-computer/sextics/pull/124)) constructions. Both applications now import one implementation. Their explanations retain the original mathematical credit and disclosed AI assistance; this extraction was prepared for `benediamond` with Codex assistance.
+These tools come from `HeadOfNaps`’s accepted [quadric-contact-broken](../../../../../data/quadric-contact-broken/solution.md) and [holdout-q2](../../../../../data/holdout-q2/solution.md) constructions. Both applications now import one implementation. Their explanations retain the original mathematical credit and disclosed AI assistance; this extraction was prepared for `benediamond` with Codex assistance.
 
 Import individual modules, or `HodgeComputer.Constructions.FiniteAlgebra` for the whole package. The original declaration namespaces (`QuadricContact`, `QuadricContactMatrixBezout`, `FiniteAlgebraInverse`, and `CheckedPolynomialLists`) are retained.
 

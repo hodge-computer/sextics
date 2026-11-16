@@ -2,8 +2,8 @@ import HodgeComputer.CertificateOperations
 
 /-!
 Coordinate changes for certificate constructions. The sign-involution formulas
-come from `fqlx`'s one-reflection proof (#123); permutation transport comes from
-`benediamond`'s cyclic-triple-fano proof (#153). Both now apply in every ambient
+come from `fqlx`'s one-reflection proof; permutation transport comes from
+`benediamond`'s cyclic-triple-fano proof. Both now apply in every ambient
 dimension. The field components transform as well as the polynomials.
 -/
 noncomputable section

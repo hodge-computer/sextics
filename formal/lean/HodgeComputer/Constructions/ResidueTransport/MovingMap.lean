@@ -8,7 +8,7 @@ moving-map correction. The jet version works at a fixed parameter value;
 it does not assume a parameter derivation on a specialized function field.
 Applications supply the curve, tangent, and first-variation identities.
 
-Extracted from hodgepodgeconjecture's cycle-three construction (PR #165),
+Extracted from hodgepodgeconjecture's cycle-three construction,
 prepared with OpenAI Codex assistance. The residue framework builds on
 fqlx and the Hodge Computer collaborators. Original declaration namespaces
 are retained; do not import the accepted copy alongside this module. -/

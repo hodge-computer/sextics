@@ -1,6 +1,6 @@
 # 5. Computing and checking certificates
 
-[Previous: families, representations and deformation](#technical-information/known-locus) · [Contents](#technical-information/introduction)
+[Previous: families, representations and deformation](04-known-locus-and-frontier.md) · [Contents](README.md)
 
 The certificate formulation turns a support problem into polynomial identities. Computation can verify an explicit construction, expose an unexpected solution, or test a proposed mechanism. This chapter develops complete coefficient systems, normal forms and strictification, exact incidence lifting, rational integration on algebraic curves, and a scalar reduction for cubic currents. It ends with the polynomial criterion for a rational certificate.
 

@@ -1,7 +1,7 @@
 import Mathlib.Tactic.Ring
 
 /-! Six-coefficient cyclic cubic invariants, from `hodgepodgeconjecture`’s
-cycle-three proof (#165). Classical normalization follows Tom Fisher and
+cycle-three proof. Classical normalization follows Tom Fisher and
 SageMath, as credited in the application explanation. -/
 namespace CycleCubic
 variable {K : Type*} [CommRing K]

@@ -1,4 +1,4 @@
-A cover can create a reflection that the original equation does not possess. For the [central holdout](#case/holdout), adjoining \(T^6=Y_0^6+Y_2^6\) and writing \(Y_0=\alpha\cdot T\), \(Y_2=\beta\cdot T\), \(y=Y_1\) makes the equation symmetric under \(y\leftrightarrow T\). The fixed coefficient curve \(\alpha^6+\beta^6=1\) and a moving conic on the quotient then support the cover-and-trace construction.
+A cover can create a reflection that the original equation does not possess. For the [central holdout](../holdout/why.md), adjoining \(T^6=Y_0^6+Y_2^6\) and writing \(Y_0=\alpha\cdot T\), \(Y_2=\beta\cdot T\), \(y=Y_1\) makes the equation symmetric under \(y\leftrightarrow T\). The fixed coefficient curve \(\alpha^6+\beta^6=1\) and a moving conic on the quotient then support the cover-and-trace construction.
 
 This instance adds just
 
@@ -24,11 +24,11 @@ The coefficient curve now varies with an active coordinate. The derivative compa
 
 The complementary diagonal quotient does not avoid this change. Its weights \((5,1,5)\) on \(Y\) give the perturbation weight two modulo six, so it no longer preserves the equation. The two chain constructions fail at their geometric input, before a choice of polynomial source or curve seed.
 
-A solution would therefore test whether a cover-and-trace argument can accommodate moving branch data. Possible approaches include a different auxiliary cover, a transport calculation that incorporates the varying coefficient relation, or a new family of rational curves. The [deformed-ternary companion](#case/holdout-ternary-deformation) demonstrates the different situation in which a replacement conic and its nonsingular incidence suffice because the original cover symmetry and coefficient curve remain available. The shared lifting theorem does not restore a symmetry absent from the changed equation.
+A solution would therefore test whether a cover-and-trace argument can accommodate moving branch data. Possible approaches include a different auxiliary cover, a transport calculation that incorporates the varying coefficient relation, or a new family of rational curves. The [deformed-ternary companion](../holdout-ternary-deformation/why.md) demonstrates the different situation in which a replacement conic and its nonsingular incidence suffice because the original cover symmetry and coefficient curve remain available. The shared lifting theorem does not restore a symmetry absent from the changed equation.
 
-Exact checks establish smoothness and rule out linear direct-sum decompositions, coordinate-reflection formulas, and the target-fixing junior diagonal quotients screened in [Chapter 4](#technical-information/known-locus). These are boundaries of specified constructions, not a claim that every possible method has been excluded. No certificate or general existence conclusion for this perturbed target is supplied here.
+Exact checks establish smoothness and rule out linear direct-sum decompositions, coordinate-reflection formulas, and the target-fixing junior diagonal quotients screened in [Chapter 4](../../docs/04-known-locus-and-frontier.md). These are boundaries of specified constructions, not a claim that every possible method has been excluded. No certificate or general existence conclusion for this perturbed target is supplied here.
 
-Paired signs provide a more direct alternative. Put \(r=X_2^2\), \(v=Y_0/X_0\), \(c_i=(Y_i/X_i)/v\), and normalize the three squares by \(r\). The cubic is the same six-coefficient transitive family used by [Mixed biweight](#case/mixed-biweight), with
+Paired signs provide a more direct alternative. Put \(r=X_2^2\), \(v=Y_0/X_0\), \(c_i=(Y_i/X_i)/v\), and normalize the three squares by \(r\). The cubic is the same six-coefficient transitive family used by [Mixed biweight](../mixed-biweight/why.md), with
 \[
 (a,b,c)=(1+v^6,1+c_1^6\cdot v^6,1+c_2^6\cdot v^6),\qquad
 (d,e,f)=(c_1\cdot v^2,c_1\cdot c_2\cdot v^2,\tfrac17\cdot c_2^2\cdot v^4).

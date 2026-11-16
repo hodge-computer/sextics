@@ -6,7 +6,7 @@ The density factor g/h and the coordinate determinant are both retained.
 Applications supply an invertible coordinate matrix, the chain rule, mixed
 partial compatibility, and nonzero normal derivatives.
 
-Extracted from hodgepodgeconjecture's cycle-three construction (PR #165),
+Extracted from hodgepodgeconjecture's cycle-three construction,
 prepared with OpenAI Codex assistance. Piola transport is the shared
 construction of fqlx and the Hodge Computer collaborators. Original
 namespaces are retained; do not import the accepted copy alongside this

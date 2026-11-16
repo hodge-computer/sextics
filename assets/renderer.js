@@ -642,13 +642,16 @@ void main() {
 
   const SCRIPT_BASE = new URL('.', location.href);
   function create(canvas, options = {}) {
-    // In production this core runs only in a dedicated worker. The host forwards
-    // sizes and input; no graphics API is called by the page's UI thread.
+    // In production this core runs only in a dedicated worker, drawing into a
+    // worker-owned OffscreenCanvas. The host forwards sizes and input and
+    // presents finished frames; no graphics API is called by the page's UI thread.
     const { view: window, page: document, reducedMotion: reduced } = options.host;
     const assetBase = SCRIPT_BASE;
     const onStatus = typeof options.onStatus === 'function' ? options.onStatus : () => {};
     const onModeChange =
       typeof options.onModeChange === 'function' ? options.onModeChange : () => {};
+    // Called after each completed frame, so the host can present it.
+    const onFrame = typeof options.onFrame === 'function' ? options.onFrame : () => {};
     const gl = canvas.getContext('webgl2', {
       alpha: true,
       antialias: true,
@@ -1198,6 +1201,7 @@ void main() {
           gl.bindFramebuffer(gl.FRAMEBUFFER, null);
           gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
           needsDraw = false;
+          onFrame();
         }
         return;
       }
@@ -1312,6 +1316,7 @@ void main() {
       }
       gl.flush();
       needsDraw = false;
+      onFrame();
     }
     frameId = requestAnimationFrame(frame);
     return {

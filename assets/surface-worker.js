@@ -11,6 +11,11 @@ function fatal(message) {
 function dispatch(target, name, properties = {}) {
   target.dispatchEvent(Object.assign(new Event(name, {cancelable:true}), properties));
 }
+function present() {
+  if (stopped) return;
+  const frame = canvas.transferToImageBitmap();
+  postMessage({type:'frame', value:frame}, [frame]);
+}
 function resize(size) {
   Object.assign(view, size);
   canvas.clientWidth = size.width; canvas.clientHeight = size.height;
@@ -26,7 +31,9 @@ function handleMessage({data}) {
   try {
     switch (data.type) {
       case 'init':
-        canvas = data.canvas;
+        // A worker-owned canvas, not a transferred placeholder: iOS Safari showed
+        // a transferred canvas at low resolution and with distorted proportions.
+        canvas = new OffscreenCanvas(data.size.pixelWidth, data.size.pixelHeight);
         page.hidden = data.hidden;
         resize(data.size);
         renderer = HodgeSurfaceCore.create(canvas, {
@@ -34,7 +41,8 @@ function handleMessage({data}) {
           onStatus:value => send('status', value),
           onModeChange:value => send('mode', value),
           onLabel:value => send('label', value),
-          onFatal:fatal
+          onFatal:fatal,
+          onFrame:present
         });
         send('initialized');
         break;

@@ -3,7 +3,7 @@ import HodgeComputer.Constructions.HoldoutCover.ConicResidue
 import HodgeComputer.Constructions.HoldoutCover.CoverCertificate
 
 /-!
-Target-linear extension of fqlx's accepted Fermat-cover construction (PR #128).
+Target-linear extension of fqlx's accepted Fermat-cover construction.
 The geometric family, finite traces, and legal homogeneous clearing are unchanged.
 This module separates the two target identities from that shared construction.
 Prepared with OpenAI Codex assistance for benediamond, crediting fqlx and the

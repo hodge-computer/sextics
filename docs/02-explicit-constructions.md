@@ -1,10 +1,10 @@
 # 2. Algebraic constructions and residue transport
 
-[Previous: certificates](#technical-information/certificates) · [Contents](#technical-information/introduction) · [Next: binary sextics and torsion contacts](#technical-information/binary-blocks)
+[Previous: certificates](01-certificates.md) · [Contents](README.md) · [Next: binary sextics and torsion contacts](02a-binary-blocks.md)
 
 A transport identity relates rational primitives on different equations. A change of variables converts \(F\) into an equation with accessible geometry; a rational field on that equation is pulled back by cofactors. Its Jacobian determines the target. Algebraic cycle classes can then prove that the resulting targets span the required space.
 
-We first work at \(q=1\). An Euler-normalized strict certificate satisfies \(v(F)=A\) and \(\operatorname{div} v=0\). After writing \(v=N/D\), these are \(N(F)=A\cdot D\) and \(D\cdot \operatorname{div} N-N(D)=0\). The residue constructions in §§2.7–2.9 also permit a nonzero quotient in the cleared certificate equation. Every construction requires the homogeneity, involution parity, and denominator legality of [Chapter 1](#technical-information/certificates). Finite sums and normalized field traces preserve the identities.
+We first work at \(q=1\). An Euler-normalized strict certificate satisfies \(v(F)=A\) and \(\operatorname{div} v=0\). After writing \(v=N/D\), these are \(N(F)=A\cdot D\) and \(D\cdot \operatorname{div} N-N(D)=0\). The residue constructions in §§2.7–2.9 also permit a nonzero quotient in the cleared certificate equation. Every construction requires the homogeneity, involution parity, and denominator legality of [Chapter 1](01-certificates.md). Finite sums and normalized field traces preserve the identities.
 
 ## 2.1 Cofactor transport
 
@@ -45,7 +45,7 @@ Indeed, cofactor transport gives \(N(F)=\Delta\cdot b(\Phi )\cdot w(G)(\Phi )=A\
 
 There is also a homogeneous nilpotent branch. If \(w\) has weighted degree \(e, w^{2}(G)=0\) and \(\operatorname{div}(b\cdot w)=0\), the same calculation gives \(N(F)=A\cdot D\) and \(\operatorname{div} N=N(D)=0\). Its denominator has degree \(6+e\) and numerator degree \(7+e\). When \(e\ne 0\), a constant-spectrum quadratic equation for \(w\) on \(G\) can have only the nilpotent form: its three terms have distinct weights unless their nonhomogeneous coefficients vanish.
 
-These spectral hypotheses are sufficient conditions for explicit fields. They are not a characterization of certificates. For nonlinear polynomial \(\Phi \), the determinant-density targets have a broader finite weighted-Fano interpretation without a spectral condition, proved in [Chapter 3](#technical-information/geometric-support/34-nonlinear-polynomial-piola-maps-are-finite-fano-maps). Rational maps can introduce additional boundary terms. The scope and necessity questions belong to [Chapter 4](#technical-information/known-locus).
+These spectral hypotheses are sufficient conditions for explicit fields. They are not a characterization of certificates. For nonlinear polynomial \(\Phi \), the determinant-density targets have a broader finite weighted-Fano interpretation without a spectral condition, proved in [Chapter 3](03-geometric-support.md#34-nonlinear-polynomial-piola-maps-are-finite-fano-maps). Rational maps can introduce additional boundary terms. The scope and necessity questions belong to [Chapter 4](04-known-locus-and-frontier.md).
 
 ## 2.2 Euler and Nambu fields
 
@@ -200,7 +200,7 @@ A complete target map downstairs need not reach every target upstairs. Suppose a
 \det(d\Phi)(\rho Z)=\det(\rho)^{-1}\det(d\Phi)(Z).
 \]
 
-Thus every target \(\det(d\Phi)B(\Phi)\) has this same character. For a reflection it is odd. This restriction follows from the differential-form density, even when the auxiliary equation has no restriction on its targets. The averaging criterion in [Chapter 3](#technical-information/geometric-support) describes how the images of several such maps combine.
+Thus every target \(\det(d\Phi)B(\Phi)\) has this same character. For a reflection it is odd. This restriction follows from the differential-form density, even when the auxiliary equation has no restriction on its targets. The averaging criterion in [Chapter 3](03-geometric-support.md) describes how the images of several such maps combine.
 
 First integrals provide another general operation. If \(qv(F)=A\), \(\operatorname{div}v=0\), and \(v(r_j)=0\), then for any rational function \(h(r)\),
 
@@ -212,7 +212,7 @@ q(hv)(F)=hA,\qquad
 When the \(r_j\) have degree zero, multiplication by \(h\) preserves the component degree. To obtain a polynomial target, \(hA\) must be polynomial of the required degree and character, and the additional poles must be coprime to \(F\).
 
 As an example of a weighted density map, take
-\(\Phi=(Q_1,Q_2,Q_3,Q_4,r,s)\), with four quadratic and two linear coordinates. A smooth sextic \(F=H(\Phi)\) has an auxiliary equation of weights \((2,2,2,2,1,1)\). The determinant has degree four, so a density of weight \(6q-4\) gives a target of degree \(6q\). This is an instance of the finite weighted-Fano theorem in [Chapter 3](#technical-information/geometric-support/34-nonlinear-polynomial-piola-maps-are-finite-fano-maps). The determinant records precisely which targets come from this presentation.
+\(\Phi=(Q_1,Q_2,Q_3,Q_4,r,s)\), with four quadratic and two linear coordinates. A smooth sextic \(F=H(\Phi)\) has an auxiliary equation of weights \((2,2,2,2,1,1)\). The determinant has degree four, so a density of weight \(6q-4\) gives a target of degree \(6q\). This is an instance of the finite weighted-Fano theorem in [Chapter 3](03-geometric-support.md#34-nonlinear-polynomial-piola-maps-are-finite-fano-maps). The determinant records precisely which targets come from this presentation.
 
 ### Example: two reflections and a cubic surface
 
@@ -234,7 +234,7 @@ when \(a=0\), also \(b=0\), and joint evenness makes both derivatives vanish. Th
 
 Apply §2.4 to \(G,B\), append zero components in the passive directions, and pull the field back by \(\operatorname{adj}(d\Psi)\). Then \(qv(F)=A\) and \(\operatorname{div}v=0\); homogeneity gives component degree \(6q-5\). On the ratio chart, the square map restricts to a dominant finite map from \(F=0\) to \(G=0\), so a denominator coprime to \(G\) remains legal. Passive coefficient poles and the two chart boundaries also cannot contain \(F=0\). Clearing these poles and averaging for parity therefore gives a strict certificate at every positive \(q\).
 
-The torsion-contact construction of [Chapter 2A](#technical-information/binary-blocks) uses this cubic-surface sector together with other contact densities to cover a whole binary-block family.
+The torsion-contact construction of [Chapter 2A](02a-binary-blocks.md) uses this cubic-surface sector together with other contact densities to cover a whole binary-block family.
 
 ## 2.6 Coefficient differentiation
 
@@ -297,7 +297,7 @@ H=f(X)+P\bigl(\alpha L_0(X)+\beta L_2(X)\bigr)
   +S^3-3SP^2.
 \]
 
-Its coordinate weights are \((1,1,1,2,2)\). For smooth \(F\), invariant divisor support follows from the full cyclic-six family theorem in [Chapter 4, §4.2](#technical-information/known-locus). The calculation here gives an additional algebraic description of the cover and its source trace; the integration principle below specifies what a rational parameterization must supply to produce a literal primitive.
+Its coordinate weights are \((1,1,1,2,2)\). For smooth \(F\), invariant divisor support follows from the full cyclic-six family theorem in [Chapter 4, §4.2](04-known-locus-and-frontier.md). The calculation here gives an additional algebraic description of the cover and its source trace; the integration principle below specifies what a rational parameterization must supply to produce a literal primitive.
 
 ### Polynomial integration on a finite parameterization
 
@@ -558,7 +558,7 @@ The same statement holds for a finite étale algebra, with \(n\) its rank. Algeb
 
 This supplies the exact input for the suspension bridge after the required coordinate and density transport. Finite sums with constant coefficients preserve closedness; a more general multiplier must satisfy \(d(f\eta)=0\). A pointwise span of the three source coefficients over \(K\) alone does not supply this compatibility.
 
-Closed forms pulled back from a positive-genus parameter curve give a useful source of \(\eta\); they need not be exact or logarithmic. The [norm-contact residue construction](#technical-information/weighted-threefolds/3b3-normal-obstructions-and-residue-forms) supplies canonically normalized examples, and [§2A.1](#technical-information/binary-blocks) gives an elementary elliptic specialization.
+Closed forms pulled back from a positive-genus parameter curve give a useful source of \(\eta\); they need not be exact or logarithmic. The [norm-contact residue construction](03b-weighted-threefolds.md#3b3-normal-obstructions-and-residue-forms) supplies canonically normalized examples, and [§2A.1](02a-binary-blocks.md) gives an elementary elliptic specialization.
 
 The distinction from cohomological support remains essential. A cylinder correspondence may cover a Hodge subspace without its composition with pullback being the identity. Moreover the affine current must be compared across projective charts before identifying its source with that compact correspondence. For example, under \(t'=1/t\), \(\alpha'=1/\alpha\), \(w'=w/t^2\), \(\beta'=\beta/\alpha^2\),
 
