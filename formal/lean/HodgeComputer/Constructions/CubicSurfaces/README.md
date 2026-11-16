@@ -1,6 +1,6 @@
 # Cubic-surface contact and pole reduction
 
-These coefficient-parameterized constructions are extracted from `HeadOfNaps`’s [holdout-q2 proof](../../../../../data/holdout-q2/solution.md) ([#124](https://github.com/hodge-computer/sextics/pull/124)), with its original mathematical credit and AI-assistance disclosure. The public namespace is `HodgeComputer.CubicSurfaces`.
+These coefficient-parameterized constructions are extracted from `HeadOfNaps`’s [holdout-q2 proof](../../../../../data/holdout-q2/solution.md), with its original mathematical credit and AI-assistance disclosure. The public namespace is `HodgeComputer.CubicSurfaces`.
 
 | Module | Interface | Scope |
 | --- | --- | --- |

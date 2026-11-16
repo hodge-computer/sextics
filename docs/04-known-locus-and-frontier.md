@@ -1,6 +1,6 @@
 # 4. Families, representations and deformation
 
-[Previous: Hodge loci of surface sections](#technical-information/hodge-loci) · [Contents](#technical-information/introduction) · [Next: computation](#technical-information/computation)
+[Previous: Hodge loci of surface sections](03d-hodge-loci.md) · [Contents](README.md) · [Next: computation](05-computation.md)
 
 Support theorems have two kinds of hypotheses: restrictions on the coefficient family and restrictions on the cohomological representation. This chapter computes the dimensions of coefficient families, applies finite quotients and deck/exchange descent, and proves a criterion propagating one nonzero supported class over a dominant deformation family. The final section analyzes the representations of natural quotients and a dimension obstruction to an ordinary Fano-extension argument.
 
@@ -42,7 +42,7 @@ Each family in the following table has \(H^4(X)^\tau\subset N^1H^4(X)\) througho
 | Block-sign split \(f(X)+g(Y)\) | Elliptic companions and contraction | 55 | 38 |
 | Polarized split \(f(X+Y)+f(X-Y)\), with the order-three plane family | Algebraic Kuga–Satake correspondence | 24 | 7 |
 
-The order-three family is \(f(z_0,z_1,z_2)=g_6(z_0,z_1)+z_2^3g_3(z_0,z_1)+a z_2^6\). The two-reflection theorem also applies to additive splittings and coordinate symmetries that give these reflections after a block-linear coordinate change, as described in [Chapter 3B](#technical-information/weighted-threefolds).
+The order-three family is \(f(z_0,z_1,z_2)=g_6(z_0,z_1)+z_2^3g_3(z_0,z_1)+a z_2^6\). The two-reflection theorem also applies to additive splittings and coordinate symmetries that give these reflections after a block-linear coordinate change, as described in [Chapter 3B](03b-weighted-threefolds.md).
 
 ### Quadratic nets and recovery from the equation
 
@@ -108,11 +108,11 @@ These are dimensions of presentation loci. The support theorem in Chapter 3C use
 
 A finite quotient transfers the image of its averaging projector. Divisor support for the quotient therefore need not support every cohomology class of the covering fourfold. For a polynomial map \(\Phi\), the weighted-Fano theorem of Chapter 3 identifies its residue image by the density condition \(A=\det(d\Phi)b(\Phi)\). The group-algebra formulation in §3.1 describes the corresponding restriction for finite symmetries.
 
-For arbitrary smooth ternary \(f\), the polarized split decomposition of [Chapter 3A](#technical-information/split-and-k3) illustrates this distinction. It supports a rank-1073 substructure, including the ambient class, with primitive Hodge numbers \((189,694,189)\). The complementary rank-210 piece has Hodge numbers \((19,172,19)\) and is an exterior square of primitive K3 cohomology. Supporting this piece by the Kuga–Satake criterion requires algebraicity of that correspondence. The order-three family in §4.1 satisfies this additional hypothesis.
+For arbitrary smooth ternary \(f\), the polarized split decomposition of [Chapter 3A](03a-split-and-k3.md) illustrates this distinction. It supports a rank-1073 substructure, including the ambient class, with primitive Hodge numbers \((189,694,189)\). The complementary rank-210 piece has Hodge numbers \((19,172,19)\) and is an exterior square of primitive K3 cohomology. Supporting this piece by the Kuga–Satake criterion requires algebraicity of that correspondence. The order-three family in §4.1 satisfies this additional hypothesis.
 
 ### A cyclic-six family and complementary quotients
 
-The deck/exchange criterion of [Chapter 3, §3.1](#technical-information/geometric-support) can support an entire involution-invariant Hodge structure even when neither quotient alone supplies it. Let \(\zeta\) be a primitive sixth root and write the coordinates as \((X_0,X_1,X_2,y,z_0,z_1)\), with \(y,z_0,z_1\) the globally odd coordinates. Set
+The deck/exchange criterion of [Chapter 3, §3.1](03-geometric-support.md) can support an entire involution-invariant Hodge structure even when neither quotient alone supplies it. Let \(\zeta\) be a primitive sixth root and write the coordinates as \((X_0,X_1,X_2,y,z_0,z_1)\), with \(y,z_0,z_1\) the globally odd coordinates. Set
 
 \[
 g(X,y,z_0,z_1)=(X,\zeta y,\zeta^{-1}z_0,\zeta^{-1}z_1),
@@ -415,7 +415,7 @@ A certificate over the algebraic closure of the universal coefficient field uses
 
 for an odd sextic \(A\). Then the invariant primitive fourth cohomology of the geometric generic even sextic is divisor-supported.
 
-**Proof.** The normal pairing is the curve-family two-form of [Chapter 3, §3.2](#technical-information/geometric-support). Close the family in the relative Hilbert scheme, choose a geometric generic component after finite base change if necessary, resolve, and take relative surface sections. Shrinking the base gives a smooth projective surface family with its universal curve correspondence. Nonvanishing of the pairing on a smooth chart is an open condition, so it holds generically on the dominating component. Average the correspondence under \(\tau\) and project away from the ambient hyperplane-square class. Since \(A\) represents an invariant \((3,1)\) class, the resulting primitive image is nonzero. This image is a polarizable subvariation, so the theorem makes it the whole invariant primitive variation. The correspondence is divisor-supported by Chapter 3. ∎
+**Proof.** The normal pairing is the curve-family two-form of [Chapter 3, §3.2](03-geometric-support.md). Close the family in the relative Hilbert scheme, choose a geometric generic component after finite base change if necessary, resolve, and take relative surface sections. Shrinking the base gives a smooth projective surface family with its universal curve correspondence. Nonvanishing of the pairing on a smooth chart is an open condition, so it holds generically on the dominating component. Average the correspondence under \(\tau\) and project away from the ambient hyperplane-square class. Since \(A\) represents an invariant \((3,1)\) class, the resulting primitive image is nonzero. This image is a polarizable subvariation, so the theorem makes it the whole invariant primitive variation. The correspondence is divisor-supported by Chapter 3. ∎
 
 If \(T\) is the resulting smooth projective parameter surface, strictness gives \(h^{2,0}(T)\ge208\). The same argument requires at least 126 holomorphic two-forms for a parameter surface whose correspondence serves the residual variation in the one-reflection criterion below. These bounds concern a construction dominating the specified coefficient family; a surface with fewer two-forms may still detect classes on special fourfolds.
 
@@ -468,7 +468,7 @@ The coefficient dimension of this family is 158, by counting even-\(Y\), even-\(
 
 ## 4.5 Coefficient variation and pole order
 
-The coefficient-raising identity of [Chapter 2](#technical-information/explicit-constructions) gives a second propagation argument over the generic coefficient field. Differentiating in an even sextic direction \(C\) takes a certificate for \((q,A)\) to one for \((q+1,AC)\), preserving the reduced denominator support.
+The coefficient-raising identity of [Chapter 2](02-explicit-constructions.md) gives a second propagation argument over the generic coefficient field. Differentiating in an even sextic direction \(C\) takes a certificate for \((q,A)\) to one for \((q+1,AC)\), preserving the reduced denominator support.
 
 Over the universal coefficient field, the direction \(\dot{F}=C\) is a derivation. It extends uniquely to every finite separable coefficient extension in characteristic zero. Applying the identity there and then the normalized trace of Chapter 1 produces a certificate over the original field. Thus an analytic choice of solutions is unnecessary, but a generic family is necessary.
 
@@ -589,4 +589,4 @@ The last column counts degree-ten monomials with each exponent at most four and 
 
 Consequently this fixed-section sixfold construction cannot provide the full invariant Hodge-bundle submersion used to obtain dense rational middle Hodge classes in the Voisin argument. The dimension bound concerns that density map: it gives no obstruction to divisor support from independently supplied cycles, smaller subvariations or different ambient geometry.
 
-The same comparison of dimensions can be favorable for the threefold fibers of a pencil. For a weighted Calabi–Yau threefold with a symmetry moving its holomorphic form, [Chapter 3D](#technical-information/hodge-loci) computes the count for a divisor class on an invariant surface section and proves support of the invariant sector when the count is positive, one such class moves with nonzero Abel–Jacobi derivative, and the Higgs field admits only scalar symmetries.
+The same comparison of dimensions can be favorable for the threefold fibers of a pencil. For a weighted Calabi–Yau threefold with a symmetry moving its holomorphic form, [Chapter 3D](03d-hodge-loci.md) computes the count for a divisor class on an invariant surface section and proves support of the invariant sector when the count is positive, one such class moves with nonzero Abel–Jacobi derivative, and the Higgs field admits only scalar symmetries.

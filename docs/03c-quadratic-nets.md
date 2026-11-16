@@ -1,10 +1,10 @@
 # 3C. Quadratic nets and pair correspondences
 
-[Previous: weighted threefolds and two-reflection sextics](#technical-information/weighted-threefolds) · [Contents](#technical-information/introduction) · [Next: Hodge loci of surface sections](#technical-information/hodge-loci)
+[Previous: weighted threefolds and two-reflection sextics](03b-weighted-threefolds.md) · [Contents](README.md) · [Next: Hodge loci of surface sections](03d-hodge-loci.md)
 
 A basepoint-free net of ternary quadrics defines a four-to-one map of projective planes. The six unordered pairs in a general fiber are parametrized by the component lines of singular conics in the net. For sextics obtained by substitution through the net, this pair cover becomes a fourfold fibered in Fano threefolds. Its incidence with the original cover supplies the invariant fourth cohomology.
 
-We work over \(\mathbb C\) with rational cohomology. The support and boundary arguments are those of [Chapter 3, §§3.1–3.2](#technical-information/geometric-support).
+We work over \(\mathbb C\) with rational cohomology. The support and boundary arguments are those of [Chapter 3, §§3.1–3.2](03-geometric-support.md).
 
 ## 3C.1 The quadratic-net theorem
 
@@ -20,7 +20,7 @@ H^4(V,\mathbb Q)^\tau\subseteq N^1H^4(V,\mathbb Q).
 \]
 One divisor therefore supports the entire invariant fourth cohomology. The conclusion holds for every smooth factorization of this form, including nets with singular or reducible discriminant. No additional linear symmetry is assumed.
 
-The theorem also applies after interchanging the two coordinate blocks: their sign involutions agree projectively. By [Chapter 3, §3.5](#technical-information/geometric-support), the cohomological statement gives certificate existence for every allowed numerator at every positive pole order.
+The theorem also applies after interchanging the two coordinate blocks: their sign involutions agree projectively. By [Chapter 3, §3.5](03-geometric-support.md), the cohomological statement gives certificate existence for every allowed numerator at every positive pole order.
 
 ## 3C.2 Transfer through unordered pairs
 
@@ -206,7 +206,7 @@ Apply the pair-transfer proposition with \(K=\langle\tau\rangle\), \(n=4\), and 
 
 ## 3C.5 Scope of the construction
 
-The diagonal net \(\langle Y_0^2,Y_1^2,Y_2^2\rangle\) gives sextics even in each \(Y_i\); arbitrary nets allow the same conclusion without requiring three coordinate reflections. Every basepoint-free net has smooth members: a general pullback \(g_3(Q(Y))\) is a smooth plane sextic by Bertini, and its sum with a smooth plane sextic in \(X\) is smooth by the affine-cone gradient criterion. The parameter space and its dimension are described in [Chapter 4](#technical-information/known-locus).
+The diagonal net \(\langle Y_0^2,Y_1^2,Y_2^2\rangle\) gives sextics even in each \(Y_i\); arbitrary nets allow the same conclusion without requiring three coordinate reflections. Every basepoint-free net has smooth members: a general pullback \(g_3(Q(Y))\) is a smooth plane sextic by Bertini, and its sum with a smooth plane sextic in \(X\) is smooth by the affine-cone gradient criterion. The parameter space and its dimension are described in [Chapter 4](04-known-locus-and-frontier.md).
 
 The pair identity also identifies a limitation of this particular transfer. For \(n=2\), it becomes \(A^tA=J_2\) and annihilates the trace-free part. This occurs for the quadratic space
 \[

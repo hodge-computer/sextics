@@ -10,8 +10,8 @@ The endpoint has a useful algebraic simplification: its coupling \(X_1^3\cdot Y_
 \]
 This relation organizes the endpoint's symmetric coordinates and their double cover. It does not by itself supply a primitive as the other coordinates vary. The exchange \(X_2\leftrightarrow Y_2\) fixes \(A\) but reverses the residue volume, so the target occupies the sector missed by that reflection quotient. It is also one of the ten paired-sign directions outside the span of the direct finite-quotient support calculations.
 
-The [central holdout construction](#case/holdout) gives a second approach: its Fermat cover combines \(Y_0,Y_2\), exposes an exchange with \(Y_1\), and provides a moving-conic primitive for polynomial sources on the quotient. The geometry retains both links of the chain. It is thus a stronger starting point than solving the symmetric endpoint equation on one fixed fiber.
+The [central holdout construction](../holdout/why.md) gives a second approach: its Fermat cover combines \(Y_0,Y_2\), exposes an exchange with \(Y_1\), and provides a moving-conic primitive for polynomial sources on the quotient. The geometry retains both links of the chain. It is thus a stronger starting point than solving the symmetric endpoint equation on one fixed fiber.
 
 Extending that construction requires a source selecting \(X_2^3\cdot Y_2^3\), with a compatible normal derivative and a deck trace that recovers precisely this target. The endpoint factors enter the coefficient curve differently from the initial factors. That distinction is the reason a relabeling of the central proof is insufficient.
 
-Compare [\(p\cdot Y_1^4\)](#case/holdout-p-y14), which retains the endpoint product while placing four degrees in the middle coordinate. Together they test how far one supporting geometry can serve different densities on the same sextic.
+Compare [\(p\cdot Y_1^4\)](../holdout-p-y14/why.md), which retains the endpoint product while placing four degrees in the middle coordinate. Together they test how far one supporting geometry can serve different densities on the same sextic.

@@ -9,8 +9,8 @@ The target
 \[
 A=X_2^3\cdot Y_1^3-\frac53\cdot X_2\cdot Y_1\cdot Y_2^4
 \]
-is confined to the second block. Its two terms mirror the compatible direction in [the single-tie instance](#case/f3-block-x0-quartic-strict). That deliberate choice isolates the effect of changing the complementary geometry, rather than changing the sextic and the type of target simultaneously.
+is confined to the second block. Its two terms mirror the compatible direction in [the single-tie instance](../f3-block-x0-quartic-strict/why.md). That deliberate choice isolates the effect of changing the complementary geometry, rather than changing the sextic and the type of target simultaneously.
 
 The useful question is exactly what “passive” means. A block can be passive for a particular derivation even when its own polynomial is far from diagonal. If a field differentiates only the second block, the first may be invisible to its derivative equation; the denominator and divergence still have to respect that separation. This makes the example a test of transport and extension, not merely a relabeling of variables.
 
-The single-tie construction provides a concrete starting point. The question is which of its hypotheses survive replacing the complementary diagonal terms by a second Hesse block, and how that replacement changes the rational-field identity. [The cross-block target on this same sextic](#case/twoties-crossblock-hesse-cofactor-d4-rational) then moves a multiplier into the other block. Comparing those two targets separates true locality of a construction from assumptions that only happen to hold for one numerator.
+The single-tie construction provides a concrete starting point. The question is which of its hypotheses survive replacing the complementary diagonal terms by a second Hesse block, and how that replacement changes the rational-field identity. [The cross-block target on this same sextic](../twoties-crossblock-hesse-cofactor-d4-rational/why.md) then moves a multiplier into the other block. Comparing those two targets separates true locality of a construction from assumptions that only happen to hold for one numerator.

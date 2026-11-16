@@ -122,10 +122,11 @@ for page in doc_index['pages']:
     source = prose(local_path(page['source']))
     # The page shell supplies the title; retain all other chapter content.
     source = re.sub(r'^# [^\n]+\n', '', source, count=1)
-    emit(local_path(page['content']), render(source))
+    emit(local_path(page['content']), render(source, root=ROOT, source_path=page['source']))
 
 if doc_index.get('overview'):
-    emit(local_path(doc_index['overview']['content']), render(prose(local_path(doc_index['overview']['source']))))
+    overview = doc_index['overview']['source']
+    emit(local_path(doc_index['overview']['content']), render(prose(local_path(overview)), root=ROOT, source_path=overview))
 
 # Delete only known generated exports, after every source has passed the build.
 # Removing a solution must also retire its old downloadable explanation.

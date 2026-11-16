@@ -1,6 +1,6 @@
 # 3B. Weighted threefolds and two-reflection sextics
 
-[Previous: split sextics and K3 correspondences](#technical-information/split-and-k3) · [Contents](#technical-information/introduction) · [Next: quadratic nets and pair correspondences](#technical-information/quadratic-nets)
+[Previous: split sextics and K3 correspondences](03a-split-and-k3.md) · [Contents](README.md) · [Next: quadratic nets and pair correspondences](03c-quadratic-nets.md)
 
 A smooth even sextic with one additional reflection in an \(X\)-coordinate and one in a \(Y\)-coordinate has its entire invariant fourth cohomology supported on a divisor. The individual reflection quotients are Fano and supply the sectors where either reflection acts positively. The remaining simultaneous negative sector comes from a family of weighted Calabi–Yau threefolds. This chapter proves the required threefold theorem and the passage from its fibers to the fourfold.
 
@@ -138,7 +138,7 @@ Q_2(1,r,t,st)=0,\qquad
 (A+B)(1,r,t,st)=0,\qquad u=-Q_1(1,r,t,st).
 \]
 
-There are 27 equations in the 26 parameters and \(t\), over \(\mathbb C(r,s)\). Dominance, rather than this equation count alone, makes the resulting component generically finite; in characteristic zero it is generically étale. This supplies a finite algebraic moving-point field for the differential and trace constructions of [Chapter 2, §2.8](#technical-information/explicit-constructions). The closed forms needed there come from the next section.
+There are 27 equations in the 26 parameters and \(t\), over \(\mathbb C(r,s)\). Dominance, rather than this equation count alone, makes the resulting component generically finite; in characteristic zero it is generically étale. This supplies a finite algebraic moving-point field for the differential and trace constructions of [Chapter 2, §2.8](02-explicit-constructions.md). The closed forms needed there come from the next section.
 
 ## 3B.3 Normal obstructions and residue forms
 
@@ -319,7 +319,7 @@ g_2&=\frac{H(S_x,Q_x,T_0,Q_y)-H(S_x,Q_x,T_0,V_0)}{Q_y-V_0}.
 
 The two divided differences are polynomials, of weighted degree four. These forms satisfy \(G=f_1g_1+f_2g_2+A^2-B^2\) over the number field, with the required characters. The equation \(G\) itself remains the displayed rational polynomial.
 
-The exact verifier `scripts/verify-norm-contact-span.py`, in the repository's [reproduction scripts](https://github.com/hodge-computer/sextics/tree/main/scripts), reconstructs this presentation, its coefficient matrices, tangent direction and formal coefficients from the defining equations. It reads no witness data. It uses lexicographically ordered weighted monomials and exact arithmetic in \(\mathbb F_{37}\). Run it with Python and NumPy:
+The exact verifier [`scripts/verify-norm-contact-span.py`](../scripts/verify-norm-contact-span.py) reconstructs this presentation, its coefficient matrices, tangent direction and formal coefficients from the defining equations. It reads no witness data. It uses lexicographically ordered weighted monomials and exact arithmetic in \(\mathbb F_{37}\). Run it with Python and NumPy:
 
 ```sh
 python3 scripts/verify-norm-contact-span.py
@@ -375,7 +375,7 @@ For every member of \(\mathcal U\), each selected presentation lies on an actual
 
 ## 3B.6 Supported projectors and specialization
 
-To apply the supported-projector specialization lemma of [Chapter 3, §3.6](#technical-information/geometric-support), we first produce the required cycle on the square of a divisor. The anti-projector acts on the single primitive degree \(H^3(T)^-\), and the preceding curve correspondences surject onto that degree on a nonempty Zariski open of the parameter space. Its transpose supplies the polarization adjoint.
+To apply the supported-projector specialization lemma of [Chapter 3, §3.6](03-geometric-support.md), we first produce the required cycle on the square of a divisor. The anti-projector acts on the single primitive degree \(H^3(T)^-\), and the preceding curve correspondences surject onto that degree on a nonempty Zariski open of the parameter space. Its transpose supplies the polarization adjoint.
 
 In this case, replace \(\Gamma\) by \(P^-\circ\Gamma\), choose a \(\sigma\)-stable divisor \(D\) containing its image, and set \(S=\Gamma\circ{}^t\Gamma\). The polarization on \(H^1(\Lambda)(-1)\) and the primitive polarization on \(H^3(T)\) make \({}^t\Gamma\) the adjoint up to a fixed nonzero sign. Surjectivity makes \(S|_{H^3(T)^-}\) invertible. On all other cohomology it is zero. If its rational characteristic polynomial is \(t^m+a_{m-1}t^{m-1}+\cdots+a_0\), then \(a_0\ne0\) and
 
@@ -401,7 +401,7 @@ r_s:s\mapsto-s,\qquad r_t:t\mapsto-t.
 
 Then \(H^4(X,\mathbb Q)^\tau\subset N^1H^4(X,\mathbb Q)\).
 
-**Proof.** The reflection theorem of [§3.3](#technical-information/geometric-support/33-reflection-quotients) supports \(H^4(X)^{r_s=+}\) and \(H^4(X)^{r_t=+}\): each quotient is a smooth Fano sextic in \(\mathbb P(1^5,2)\). Its weighted vertex is absent because the relevant pure sixth-power coefficient is nonzero; otherwise the corresponding coordinate-axis point would be singular on \(X\). The branch divisor is smooth and the quotient action is a reflection in its normal direction.
+**Proof.** The reflection theorem of [§3.3](03-geometric-support.md#33-reflection-quotients) supports \(H^4(X)^{r_s=+}\) and \(H^4(X)^{r_t=+}\): each quotient is a smooth Fano sextic in \(\mathbb P(1^5,2)\). Its weighted vertex is absent because the relevant pure sixth-power coefficient is nonzero; otherwise the corresponding coordinate-axis point would be singular on \(X\). The branch divisor is smooth and the quotient action is a reflection in its normal direction.
 
 It remains to support the simultaneous character
 
@@ -435,7 +435,7 @@ h_6(x)+w h_4(x,\lambda)+w^2h_2(x,\lambda)+w^3h_0(\lambda)=0
 
 Each core coefficient is invariant under \(\sigma\). The binary restriction \(F(0,s,t)\) is nonzero and squarefree: separate evenness forces every core monomial degree to be even, so all core first derivatives vanish on the binary line; a zero restriction or a multiple root would make \(X\) singular. Excluding its roots makes \(h_0(\lambda)\ne0\), so the weighted vertex is absent. The only remaining fixed locus of \(\beta\) in a fiber is the smooth branch surface \(s=0\), where it is a reflection. Thus, after removing finitely many parameters and one affine-chart boundary, the quotients form a smooth projective family \(p:\mathcal T\to U\) of the weighted threefolds just treated.
 
-The relative support lemma of [Chapter 3, §3.6](#technical-information/geometric-support) now applies. Its two requirements are
+The relative support lemma of [Chapter 3, §3.6](03-geometric-support.md) now applies. Its two requirements are
 
 \[
 (R^jp_*\mathbb Q)^-=0\quad(j\ne3),
@@ -463,9 +463,9 @@ The theorem covers the entire smooth locus of a 104-coefficient linear family, o
 44+2\cdot19+3\cdot6+4\cdot1=104.
 \]
 
-The coordinate orbit and comparison with other supported families are discussed in [Chapter 4](#technical-information/known-locus). The Fano quotient results remain part of the theorem: they supply the sectors with either reflection positive, while the weighted family supplies the simultaneous negative sector.
+The coordinate orbit and comparison with other supported families are discussed in [Chapter 4](04-known-locus-and-frontier.md). The Fano quotient results remain part of the theorem: they supply the sectors with either reflection positive, while the weighted family supplies the simultaneous negative sector.
 
-The two-reflection and [quadratic-net families](#technical-information/quadratic-nets) are incomparable, even after block-linear changes. In the bidegree-\((4,2)\) part of a general two-reflection equation, the quadrics appearing as coefficients of \(X\)-quartics span the four-dimensional space
+The two-reflection and [quadratic-net families](03c-quadratic-nets.md) are incomparable, even after block-linear changes. In the bidegree-\((4,2)\) part of a general two-reflection equation, the quadrics appearing as coefficients of \(X\)-quartics span the four-dimensional space
 \[
 \langle Y_0^2,Y_0Y_1,Y_1^2,t^2\rangle.
 \]
@@ -473,10 +473,10 @@ A presentation through three \(Y\)-quadrics would bound this rank by three; the 
 
 Two immediate applications illustrate the coefficient scope.
 
-- If \(F=h(X_0,X_1,Y_0,Y_1)+b(s,t)\), with \(h\) even in \((Y_0,Y_1)\) and \(b\) even in \(t\), homogeneity makes \(b\) even in \(s\). Thus every smooth member of this \(4+2\) split family is covered, including a sum of two arbitrary same-parity binary sextics and a separately even binary sextic. That binary-block subfamily also admits the torsion-contact construction of [Chapter 2A](#technical-information/binary-blocks), which gives explicit fields through two general Wronskian spanning theorems.
+- If \(F=h(X_0,X_1,Y_0,Y_1)+b(s,t)\), with \(h\) even in \((Y_0,Y_1)\) and \(b\) even in \(t\), homogeneity makes \(b\) even in \(s\). Thus every smooth member of this \(4+2\) split family is covered, including a sum of two arbitrary same-parity binary sextics and a separately even binary sextic. That binary-block subfamily also admits the torsion-contact construction of [Chapter 2A](02a-binary-blocks.md), which gives explicit fields through two general Wronskian spanning theorems.
 - If an even sextic is invariant under an \(X\)-coordinate transposition and an independent \(Y\)-coordinate transposition, their sums and differences diagonalize them over \(\mathbb Q\) to the required reflections. Block-symmetric even sextics therefore satisfy the theorem after such a coordinate change.
 
-Over a characteristic-zero field, the support-to-certificate equivalence and coefficient descent of [Chapter 1](#technical-information/certificates), followed by the higher-pole reduction of [Chapter 3, §3.5](#technical-information/geometric-support), give legal certificates at every positive pole order.
+Over a characteristic-zero field, the support-to-certificate equivalence and coefficient descent of [Chapter 1](01-certificates.md), followed by the higher-pole reduction of [Chapter 3, §3.5](03-geometric-support.md), give legal certificates at every positive pole order.
 
 The two extra reflections are essential hypotheses of this proof. Global \(Y\)-evenness alone does not provide either the weighted quotient fibers or their two-minus core involution.
 
@@ -498,4 +498,4 @@ The proof of the two-reflection theorem uses the two reflections only through th
 
 The weighted threefold theorem and the relative support lemma apply as before. ∎
 
-No further involution is assumed, and \(H^{4,0}(X)\) is \(P\)-invariant. When the planes are the pairs \((X_i,Y_i)\), the \(Y\)-even invariant sextics form the 74-coefficient family of [Chapter 4, §4.6](#technical-information/known-locus). On its smooth members the proposition supports the part of type \((150,636,150)\) of the \(Y\)-even primitive cohomology, and leaves the \(P\)-invariant part, of type \((58,230,58)\). A \(Y\)-odd numerator is served when it has odd degree in at least one pair \((X_i,Y_i)\). [Chapter 3D](#technical-information/hodge-loci) supports part of the remaining sector in the presence of an order-three symmetry.
+No further involution is assumed, and \(H^{4,0}(X)\) is \(P\)-invariant. When the planes are the pairs \((X_i,Y_i)\), the \(Y\)-even invariant sextics form the 74-coefficient family of [Chapter 4, §4.6](04-known-locus-and-frontier.md). On its smooth members the proposition supports the part of type \((150,636,150)\) of the \(Y\)-even primitive cohomology, and leaves the \(P\)-invariant part, of type \((58,230,58)\). A \(Y\)-odd numerator is served when it has odd degree in at least one pair \((X_i,Y_i)\). [Chapter 3D](03d-hodge-loci.md) supports part of the remaining sector in the presence of an order-three symmetry.

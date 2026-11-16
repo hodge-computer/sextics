@@ -37,6 +37,9 @@ pages={p['id']:p for p in index['pages']}
 files=list((ROOT/'assets/atlas').glob('*/*.html'))+list((ROOT/'docs').glob('*.html'))+[ROOT/'index.html']
 if args.explanation:
     files.append(args.explanation.resolve())
+REPOSITORY='https://github.com/hodge-computer/sextics/blob/main/'
+shown={p['source']:ROOT/p['content'] for p in index['pages']}
+shown.update({f'data/{s.parent.name}/solution.md':s for s in (ROOT/'assets/atlas').glob('*/solution.html')})
 contents={}
 for p in files:
     c=Content(p);c.feed(p.read_text());contents[p]=c
@@ -44,13 +47,14 @@ errors=[];math=[]
 for p,c in contents.items():
     math.extend(c.math)
     for link in c.links:
-        if p.parent == ROOT/'docs' and link and not link.startswith('#'):
-            url = urlsplit(link)
-            suffix = Path(unquote(url.path)).suffix.lower()
-            if (not url.scheme or url.hostname == 'raw.githubusercontent.com'
-                    or suffix in {'.md', '.markdown', '.rst', '.txt', '.py', '.lean', '.rec', '.json', '.zip'}):
-                errors.append(f'{p.name}: raw file link {link}; use a rendered chapter route or a published reference')
-                continue
+        if link.startswith(REPOSITORY):
+            # The website shows these sources on its own pages; their anchors
+            # must name headings there as well as on GitHub.
+            source,_,anchor=unquote(link[len(REPOSITORY):]).partition('#')
+            page=shown.get(source)
+            if anchor and page is not None and page in contents and anchor not in contents[page].ids:
+                errors.append(f'{label(p)}: missing heading #{anchor} in {source}')
+            continue
         if link.startswith(('http://','https://','mailto:')):continue
         if link.startswith('#technical-information/'):
             parts=link[1:].split('/');page=pages.get(parts[1])

@@ -1,6 +1,6 @@
 # Rational vector fields and residue corrections
 
-These modules are extracted from `benediamond`’s [dense two-ternary Hessian construction](../../../../../data/two-ternary-dense-two-odd-hessian-d48/solution.md) ([#41](https://github.com/hodge-computer/sextics/pull/41)). The application explanation retains its mathematical attribution and assistance disclosure. Declaration names remain in `HodgeTestbed.Conic`.
+These modules are extracted from `benediamond`’s [dense two-ternary Hessian construction](../../../../../data/two-ternary-dense-two-odd-hessian-d48/solution.md). The application explanation retains its mathematical attribution and assistance disclosure. Declaration names remain in `HodgeTestbed.Conic`.
 
 | Module | Entry point | Required input |
 | --- | --- | --- |
