@@ -6,9 +6,6 @@ import Mathlib.RingTheory.Smooth.Flat
 /-!
 # The actual universal incidence quotient and its surface pivot charts
 
-Status: source-only proof draft. Compilation and independent kernel replay
-are deferred at the user's request. No new axioms or admissions are used.
-
 The homogeneous ring of the existing `genericCurve` is identified with
 the quotient by the existing three `sectionVector` equations over the
 original surface ring. Both directions are actual polynomial quotient
@@ -46,6 +43,11 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceEquations
   CycleQ2SegreGenericSection CycleQ2GenericLinearSection
 
 variable {S : Type} [CommRing S] [Algebra ℂ S]
+
+local instance pointSurfaceCommRing (y : ParameterIndex → S) : CommRing (PointSurface y) :=
+  inferInstance
+local instance genericCurveCommRing (y : ParameterIndex → S) : CommRing (GenericCurveRing y) :=
+  inferInstance
 
 abbrev SectionPolynomial (y : ParameterIndex → S) :=
   MvPolynomial (Fin 3) (PointSurface y)
@@ -110,13 +112,26 @@ theorem fromSectionPolynomial_equation (y : ParameterIndex → S) (i : Fin 3) :
       (sectionVector (CycleQ2IncidenceBasepointOpen.curveMatrix (pointMap y)) i) = 0 := by
   have h := genericCurve_equation_zero y i
   simp only [genericSectionEquation, map_sum, map_mul] at h
-  simpa only [sectionVector, linearForm, map_sum, map_mul,
-    fromSectionPolynomial_C, fromSectionPolynomial_X, coefficientToCurve_matrix,
-    mul_comm] using h
+  calc
+    _ = ∑ j : Fin 3,
+        Ideal.Quotient.mk (genericCurveIdeal y) (pointMatrixPolynomial (sectionPoint y) i j) *
+          Ideal.Quotient.mk (genericCurveIdeal y) (C (X j : SectionBase S)) := by
+      simp only [sectionVector, linearForm, map_sum, map_mul,
+        fromSectionPolynomial_C, fromSectionPolynomial_X, coefficientToCurve_matrix]
+    _ = ∑ j : Fin 3,
+        Ideal.Quotient.mk (genericCurveIdeal y) (C (X j : SectionBase S)) *
+          Ideal.Quotient.mk (genericCurveIdeal y) (pointMatrixPolynomial (sectionPoint y) i j) :=
+      Finset.sum_congr rfl (fun j _ => mul_comm
+        (Ideal.Quotient.mk (genericCurveIdeal y) (pointMatrixPolynomial (sectionPoint y) i j))
+        (Ideal.Quotient.mk (genericCurveIdeal y) (C (X j : SectionBase S))))
+    _ = 0 := h
 
 /-- Reverse map out of the literal section-ideal quotient. -/
 def modelToCurve (y : ParameterIndex → S) : SectionQuotient y →+* GenericCurveRing y :=
   Ideal.Quotient.lift _ (fromSectionPolynomial y) (by
+    change Ideal.span (Set.range (sectionVector
+      (CycleQ2IncidenceBasepointOpen.curveMatrix (pointMap y)))) ≤
+        RingHom.ker (fromSectionPolynomial y)
     apply Ideal.span_le.mpr
     rintro _ ⟨i, rfl⟩
     exact fromSectionPolynomial_equation y i)
@@ -177,10 +192,12 @@ theorem to_from_polynomial (y : ParameterIndex → S) (p : SectionPolynomial y) 
         (CycleQ2IncidenceBasepointOpen.curveMatrix (pointMap y))) := by
     apply MvPolynomial.ringHom_ext
     · intro a
-      obtain ⟨q, rfl⟩ := Ideal.Quotient.mk_surjective a
-      change curveToModel y (fromSectionPolynomial y (C _)) = _
+      obtain ⟨q, rfl⟩ := Ideal.Quotient.mk_surjective (I := pointEquations y) a
+      change curveToModel y (fromSectionPolynomial y
+        (C (Ideal.Quotient.mk (pointEquations y) q))) = _
       rw [fromSectionPolynomial_C, coefficientToCurve_mk, curveToModel_mk,
         toSectionPolynomial_map]
+      rfl
     · intro j
       change curveToModel y (fromSectionPolynomial y (X j)) = _
       rw [fromSectionPolynomial_X, curveToModel_mk, toSectionPolynomial_parameter]
@@ -228,7 +245,9 @@ theorem toSectionPolynomial_constants (y : ParameterIndex → S) (p : SectionBas
   induction p using MvPolynomial.induction_on with
   | C a =>
       have h := toSectionPolynomial_map y (C a)
-      simpa only [MvPolynomial.map_C] using h
+      have hc : CycleQ2IncidenceBasepointOpen.curveQuotient (pointMap y) (C a) =
+          algebraMap S (PointSurface y) a := rfl
+      simpa only [MvPolynomial.map_C, hc] using h
   | add p q hp hq => simp only [map_add, hp, hq]
   | mul_X p j hp =>
       simp only [map_mul, hp, toSectionPolynomial_parameter, MvPolynomial.map_X]
@@ -248,6 +267,9 @@ variable {R : Type} [CommRing R]
 abbrev MatrixSectionQuotient (M : Matrix (Fin 3) (Fin 3) R) :=
   MvPolynomial (Fin 3) R ⧸ sectionIdeal M
 
+local instance matrixSectionModule (M : Matrix (Fin 3) (Fin 3) R) :
+    Module R (MatrixSectionQuotient M) := Algebra.toModule
+
 private def pivotRelations (M : Matrix (Fin 3) (Fin 3) R)
     (p : CycleQ2SegreCech.Chart) : Fin 1 → MvPolynomial (Fin 3) R :=
   fun _ => localEquation M p
@@ -265,14 +287,14 @@ private def pivotPrePresentation (M : Matrix (Fin 3) (Fin 3) R)
 theorem pderiv_linearForm (a : Fin 3 → R) (j : Fin 3) :
     pderiv j (linearForm a) = C (a j) := by
   classical
-  simp [linearForm, pderiv_C_mul, pderiv_X]
+  simp [linearForm, pderiv_X, Pi.single_apply]
 
 private theorem pivotPrePresentation_jacobian
     (M : Matrix (Fin 3) (Fin 3) R) (p : CycleQ2SegreCech.Chart) :
     (pivotPrePresentation M p).jacobian =
       algebraMap R (PivotQuotient M p) (M p.1 p.2) := by
   rw [Algebra.PreSubmersivePresentation.jacobian_eq_jacobiMatrix_det,
-    Matrix.det_fin_one]
+    Matrix.det_fin_one, Algebra.PreSubmersivePresentation.jacobiMatrix_apply]
   change algebraMap (MvPolynomial (Fin 3) R) (PivotQuotient M p)
       (pderiv p.2 (linearForm (M p.1))) = _
   rw [pderiv_linearForm]
@@ -292,7 +314,9 @@ private theorem pivotRelations_ideal (M : Matrix (Fin 3) (Fin 3) R)
     Ideal.span (Set.range (pivotRelations M p)) = sectionIdeal M := by
   obtain ⟨u, hu⟩ := hu
   rw [sectionIdeal_principal M hM p u hu]
-  simp only [pivotRelations, Set.range_const]
+  apply congrArg Ideal.span
+  change Set.range (fun _ : Fin 1 => localEquation M p) = {localEquation M p}
+  exact Set.range_const
 
 /-- An actual submersive presentation of the original three-equation
 quotient. Its only pivot hypothesis is discharged below on the actual
@@ -356,7 +380,8 @@ theorem point_section_flat [Nontrivial S] (y : ParameterIndex → S)
   letI : Algebra.IsStandardSmooth (PointPrimeRing y P)
       (MatrixSectionQuotient (primeMatrix y P)) :=
     Algebra.IsStandardSmoothOfRelativeDimension.isStandardSmooth 2
-  infer_instance
+  exact Algebra.Smooth.flat (PointPrimeRing y P)
+    (MatrixSectionQuotient (primeMatrix y P))
 
 section TracePoint
 
