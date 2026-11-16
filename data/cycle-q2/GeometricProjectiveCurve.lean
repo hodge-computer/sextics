@@ -17,7 +17,6 @@ import Proposal.GeometricConeCech
 
 The projective charts, homogeneous frames, twisted additive sheaf, and
 Mayer--Vietoris injection are checked in the small imported helper modules.
-The remaining cone and incidence continuation in this file is source-only.
 
 The existing normal calculation uses the sparse cubic
 `CycleQ2SeedCechTheta.curveH θ`.  We construct the genuine projective spectrum
@@ -79,9 +78,9 @@ theorem degreeOneBoundaries_toScalar_zero (r θ : ℂ) :
   rw [firstDegreeOneRestriction_coe, secondDegreeOneRestriction_coe]
   apply (Submodule.Quotient.mk_eq_zero (scalarBoundaries r θ)).mpr
   exact Submodule.sub_mem _
-    (le_sup_left (show firstRestriction r θ a ∈
+    (Submodule.mem_sup_left (show firstRestriction r θ a ∈
       LinearMap.range (firstRestrictionAlg r θ).toLinearMap from ⟨a, rfl⟩))
-    (le_sup_right (show secondRestriction r θ b ∈
+    (Submodule.mem_sup_right (show secondRestriction r θ b ∈
       LinearMap.range (secondRestrictionAlg r θ).toLinearMap from ⟨b, rfl⟩))
 
 /-- Forgetting degree respects the genuine single-chart coboundaries. -/
@@ -113,6 +112,9 @@ theorem simplePoleRepresentative_eq_fraction (r θ : ℂ) (p : Poly) :
       algebraMap (CurveRing r θ) (Overlap r θ) (curveMap r θ p) := by
     simp only [overlapAmbient, ambientCurveMap, RingHom.comp_apply,
       substitute_polynomialLift]
+    change algebraMap (CurveRing r θ) (Overlap r θ)
+      (curveMap r θ (substitute (polynomialLift p))) = _
+    rw [substitute_polynomialLift]
   rw [hbase, ← coe_firstOverlapUnit, ← coe_secondOverlapUnit]
   calc
     algebraMap (CurveRing r θ) (Overlap r θ) (curveMap r θ p) *
@@ -185,8 +187,7 @@ def coneProjectivePoint (r θ : ℂ)
     (q : CycleQ2GeometricConeCech.puncturedOpen r θ) :
     ProjectiveSpectrum (curveGrade r θ) where
   asHomogeneousIdeal := q.1.asIdeal.homogeneousCore (curveGrade r θ)
-  isPrime := Ideal.IsPrime.homogeneousCore _
-    (inferInstance : q.1.asIdeal.IsPrime)
+  isPrime := Ideal.IsPrime.homogeneousCore (inferInstance : q.1.asIdeal.IsPrime)
   not_irrelevant_le := by
     intro h
     obtain ⟨j, hj⟩ := TopologicalSpace.Opens.mem_iSup.mp q.property
@@ -299,7 +300,7 @@ elements. Thus the irrelevant ideal condition for `Proj.map` is proved. -/
 theorem irrelevant_le_map_quotientMap [GradedRing (grade 𝒜 I)] :
     HomogeneousIdeal.irrelevant (grade 𝒜 I) ≤
       (HomogeneousIdeal.irrelevant 𝒜).map (quotientMap 𝒜 I) := by
-  apply HomogeneousIdeal.toIdeal_le_toIdeal_iff.mp
+  apply toIdeal_le_toIdeal_iff.mp
   apply (HomogeneousIdeal.toIdeal_irrelevant_le (grade 𝒜 I)).mpr
   intro n hn a ha
   obtain ⟨p, hp, rfl⟩ := ha
@@ -372,6 +373,8 @@ attribute [local instance] MvPolynomial.weightedGradedAlgebra
 
 variable {S : Type} [CommRing S] [Algebra ℂ S]
 
+attribute [local instance] surfaceGradedRing
+
 def surfaceCoefficient (y : ParameterIndex → S) : S →+* surfaceGrade y 0 :=
   algebraMap S (surfaceGrade y 0)
 
@@ -387,8 +390,9 @@ def surfaceToBase (y : ParameterIndex → S) :
 
 /-- The actual morphism induced by the homogeneous quotient map. -/
 def surfaceToAmbient (y : ParameterIndex → S) :
-    surface y ⟶ weightedAmbient S :=
-  Proj.map
+    surface y ⟶ weightedAmbient S := by
+  letI : GradedRing (surfaceGrade y) := surfaceGradedRing y
+  exact Proj.map
     (CycleQ2GeometricProjectiveCurve.HomogeneousQuotient.quotientMap
       (PolynomialGrade S) (pointEquations y))
     (CycleQ2GeometricProjectiveCurve.HomogeneousQuotient.irrelevant_le_map_quotientMap
@@ -397,8 +401,11 @@ def surfaceToAmbient (y : ParameterIndex → S) :
 @[simp] theorem surfaceToAmbient_preimage_basicOpen
     (y : ParameterIndex → S) (p : MvPolynomial (Fin 5) S) :
     surfaceToAmbient y ⁻¹ᵁ Proj.basicOpen (PolynomialGrade S) p =
-      Proj.basicOpen (surfaceGrade y) (Ideal.Quotient.mk (pointEquations y) p) :=
-  Proj.map_preimage_basicOpen _ _ p
+      (letI : GradedRing (surfaceGrade y) := surfaceGradedRing y
+       Proj.basicOpen (surfaceGrade y) (Ideal.Quotient.mk (pointEquations y) p)) :=
+  by
+    letI : GradedRing (surfaceGrade y) := surfaceGradedRing y
+    exact Proj.map_preimage_basicOpen _ _ p
 
 /-! ## The literal matrix and the three generic section equations -/
 
@@ -433,8 +440,10 @@ theorem pointMatrixPolynomial_sectionPoint (y : ParameterIndex → S) (i j : Fin
       map (C : S →+* SectionBase S) (pointMatrixPolynomial y i j) := by
   have h := congrArg (fun M => M i j)
     (map_incidenceMatrix (C : S →+* SectionBase S) (57 : S) (pointMatrix y))
-  simpa only [pointMatrixPolynomial, RingHom.mapMatrix_apply, map_ofNat,
-    pointMatrix, sectionPoint] using h.symm
+  change incidenceMatrix 57 (pointMatrix (sectionPoint y)) i j = _
+  have hm : (fun a b q => C (pointMatrix y a b q)) = pointMatrix (sectionPoint y) := rfl
+  simpa only [pointMatrixPolynomial, RingHom.mapMatrix_apply, Matrix.map_apply,
+    map_ofNat, hm] using h.symm
 
 /-- The `i`th entry of `M*T`.  The independent variables `Tj` belong to
 the coefficient ring and therefore have geometric degree zero. -/
@@ -510,7 +519,7 @@ theorem irrelevant_le_map_genericCurveSurfaceRingMap (y : ParameterIndex → S) 
     HomogeneousIdeal.irrelevant (genericCurveGrade y) ≤
       (HomogeneousIdeal.irrelevant (surfaceGrade (sectionPoint y))).map
         (genericCurveSurfaceRingMap y) := by
-  apply HomogeneousIdeal.toIdeal_le_toIdeal_iff.mp
+  apply toIdeal_le_toIdeal_iff.mp
   apply (HomogeneousIdeal.toIdeal_irrelevant_le (genericCurveGrade y)).mpr
   intro d hd q hq
   obtain ⟨p, hp, rfl⟩ := hq
@@ -529,7 +538,7 @@ def genericCurveToSurface (y : ParameterIndex → S) :
 @[simp] theorem genericCurve_equation_zero (y : ParameterIndex → S) (i : Fin 3) :
     Ideal.Quotient.mk (genericCurveIdeal y) (genericSectionEquation y i) = 0 :=
   Ideal.Quotient.eq_zero_iff_mem.mpr
-    (le_sup_right (Ideal.subset_span (Set.mem_range_self i)))
+    (Ideal.mem_sup_right (Ideal.subset_span (Set.mem_range_self i)))
 
 /-! ## Binding to the existing generic-section ideal
 

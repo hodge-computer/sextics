@@ -13,8 +13,7 @@ equation and derivatives used in the subsequent Jacobian-cover argument.
 
 No identification of the global scheme fiber is assumed. These are
 coefficient and prime-transport statements for the original family.
-Source-only draft: no Lean elaboration, compilation, or kernel replay
-has been run. Prepared for `fqlx` with OpenAI ChatGPT assistance, following
+Prepared for `fqlx` with OpenAI ChatGPT assistance, following
 Ben Diamond's geometric route and the earlier incidence-prime arguments.
 -/
 
@@ -30,6 +29,9 @@ namespace CycleQ2SeedFamilyZeroCoefficients
 open CategoryTheory AlgebraicGeometry MvPolynomial HomogeneousLocalization
 open CycleQ2GeometricSeedSmooth CycleQ2SeedCubicFamily
   CycleQ2SeedProjectiveFamily CycleQ2SeedProjectiveSpecialization
+
+local instance zeroFamilyCommRing (r : ℂ) : CommRing (FamilyRing r) :=
+  Ideal.Quotient.commRing (familyIdeal r)
 
 private theorem basicOpenToSpec_toLRSHom (r : ℂ) (f : FamilyRing r) :
     (Proj.basicOpenToSpec (familyGrade r) f).toLRSHom =
@@ -48,10 +50,11 @@ theorem coefficient_mem_iff (r : ℂ) (x : family r) (a : ParameterRing) :
     ((Scheme.topIso (family r)).inv ≫
       (Scheme.isoOfEq (family r) (Proj.basicOpen_one (familyGrade r))).inv) x
   have hx₁ : x₁.1 = x := by
-    change ((Scheme.topIso (family r)).inv ≫
-      (Scheme.isoOfEq (family r) (Proj.basicOpen_one (familyGrade r))).inv ≫
-        (Proj.basicOpen (familyGrade r) (1 : FamilyRing r)).ι) x = x
-    simp only [Scheme.isoOfEq_inv_ι, Scheme.toIso_inv_ι]
+    have h := congrArg
+      (fun f : (⊤ : (family r).Opens).toScheme ⟶ family r => (Scheme.topIso (family r)).inv ≫ f)
+      (Scheme.isoOfEq_inv_ι (family r) (Proj.basicOpen_one (familyGrade r)))
+    exact congrArg (fun f : family r ⟶ family r => f x)
+      (h.trans (Scheme.toIso_inv_ι (family r)))
   change fromZeroRingHom (familyGrade r) (Submonoid.powers (1 : FamilyRing r))
       (parameterCoefficient r a) ∈
         ((Proj.basicOpenToSpec (familyGrade r) (1 : FamilyRing r)).toLRSHom.base
@@ -63,7 +66,8 @@ theorem coefficient_mem_iff (r : ℂ) (x : family r) (a : ParameterRing) :
         ((ProjectiveSpectrum.Proj.toSpec (familyGrade r) (1 : FamilyRing r)).base
           x₁).asIdeal ↔ _
   rw [ProjectiveSpectrum.Proj.mk_mem_toSpec_base_apply]
-  simpa only [parameterCoefficient_coe, hx₁]
+  rw [parameterCoefficient_coe, hx₁]
+  rfl
 
 /-- Every actual point over zero contains every zero-evaluation coefficient. -/
 theorem zero_kernel_mem_of_over_zero (r : ℂ) (x : family r)
