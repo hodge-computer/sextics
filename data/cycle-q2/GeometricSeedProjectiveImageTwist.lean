@@ -4,8 +4,6 @@ import Mathlib.Tactic.Group
 /-!
 # The degree-four transition of the actual seed image line
 
-Source-only proof draft. No elaboration or kernel replay has been run.
-
 On the original coordinate cone overlap, the actual projective matrix is
 `M/Xi^14`, and its left generators are `L/Xi^10`. The unique image-to-dual
 map recovering vector entries on these left generators therefore changes
@@ -51,6 +49,7 @@ theorem imageDual_selected (z : Image F) (a : Fin 3) :
 theorem leftIdeal_eq_span : F.leftIdeal = Ideal.span (Set.range F.left) := by
   apply le_antisymm
   · intro x hx
+    change (⟨x, hx⟩ : F.leftIdeal).val ∈ Ideal.span (Set.range F.left)
     rw [left_reconstruction F ⟨x, hx⟩]
     apply Ideal.sum_mem
     intro q _
@@ -105,12 +104,23 @@ theorem normalizedImageDual_transition (u v : Rˣ) (z : Image F) :
       ((u / v : Rˣ) : R) ^ 4 • normalizedImageDual F u z := by
   rw [normalizedImageDual_apply, normalizedImageDual_apply, map_smul, smul_smul, smul_smul]
   congr 1
-  have h : v ^ 10 * (u / v) ^ 14 = (u / v) ^ 4 * u ^ 10 := by group
+  have h : v ^ 10 * (u / v) ^ 14 = (u / v) ^ 4 * u ^ 10 := by
+    calc
+      _ = (u / v) ^ 14 * v ^ 10 := mul_comm _ _
+      _ = ((u / v) ^ 4 * (u / v) ^ 10) * v ^ 10 := by rw [← pow_add]
+      _ = (u / v) ^ 4 * ((u / v) * v) ^ 10 := by rw [mul_pow, mul_assoc]
+      _ = _ := by rw [div_mul_cancel]
   exact congrArg (fun w : Rˣ => (w : R)) h
 
 end Regrading
 
 open CycleQ2SegreFactorChartExact CycleQ2SegreFactorRestrictions
+
+local instance overlapCommRing (s : Finset (Fin 3)) : CommRing (Chart s) := inferInstance
+local instance overlapSelfModule (s : Finset (Fin 3)) : Module (Chart s) (Chart s) :=
+  Algebra.toModule
+local instance overlapDualModule (s : Finset (Fin 3)) (hs : s.Nonempty) :
+    Module (Chart s) ((factorData s hs).leftIdeal →ₗ[Chart s] Chart s) := inferInstance
 
 def overlapPolynomial (s : Finset (Fin 3)) : WeightedPoly →+* Chart s :=
   (chartMap s).comp (CycleQ2SeedLinkagePrincipal.quotientMap (57 : ℂ) Complex.I)
@@ -141,8 +151,17 @@ theorem overlapCoefficient_homogeneous (s : Finset (Fin 3)) (i : Fin 3) (hi : i 
       (coordinateUnit s i hi : Chart s) ^ n = overlapPolynomial s p := by
   have h := congrArg (res (Finset.singleton_subset_iff.mpr hi))
     (affineCoefficient_homogeneous i n p hp)
-  simpa only [map_mul, map_pow, restrict_conePolynomial, coordinateUnit_val,
-    overlapCoefficient, RingHom.comp_apply] using h
+  have h0 : res (Finset.singleton_subset_iff.mpr hi)
+        (affineCoefficient i (affinePolynomial i p)) *
+      res (Finset.singleton_subset_iff.mpr hi) (conePolynomial i (X i.succ.castSucc)) ^ n =
+      res (Finset.singleton_subset_iff.mpr hi) (conePolynomial i p) := by
+    simpa only [map_mul, map_pow] using h
+  have hX : res (Finset.singleton_subset_iff.mpr hi)
+      (conePolynomial i (X i.succ.castSucc)) = (coordinateUnit s i hi : Chart s) :=
+    (restrict_conePolynomial s i hi _).trans (coordinateUnit_val s i hi).symm
+  exact (congrArg (fun x : Chart s =>
+    overlapCoefficient s i hi (affinePolynomial i p) * x ^ n) hX.symm).trans
+      (h0.trans (restrict_conePolynomial s i hi p))
 
 theorem overlapCoefficient_normalized (s : Finset (Fin 3)) (i : Fin 3) (hi : i ∈ s)
     (n : ℕ) (p : WeightedPoly) (hp : p.IsWeightedHomogeneous weight n) :
@@ -157,7 +176,7 @@ theorem overlapCoefficient_normalized (s : Finset (Fin 3)) (i : Fin 3) (hi : i �
         ((u⁻¹ : (Chart s)ˣ) : Chart s) ^ n := by
       rw [mul_assoc, ← mul_pow, Units.mul_inv, one_pow, mul_one]
     _ = overlapPolynomial s p * ((u⁻¹ : (Chart s)ˣ) : Chart s) ^ n := by rw [h]
-    _ = _ := mul_comm _ _
+    _ = _ := mul_comm (overlapPolynomial s p) (((u⁻¹ : (Chart s)ˣ) : Chart s) ^ n)
 
 def overlapMatrix (s : Finset (Fin 3)) (i : Fin 3) (hi : i ∈ s) :
     Matrix (Fin 3) (Fin 3) (Chart s) :=
@@ -191,6 +210,7 @@ the original literal orbit ideal, not a newly chosen rank-one module. -/
 theorem overlap_orbitIdeal (s : Finset (Fin 3)) (hs : s.Nonempty)
     (i : Fin 3) (hi : i ∈ s) :
     (OrbitIdeal i).map (overlapCoefficient s i hi) = (factorData s hs).leftIdeal := by
+  change (chartFactorData i).leftIdeal.map (overlapCoefficient s i hi) = _
   rw [Regrading.leftIdeal_eq_span (chartFactorData i), Ideal.map_span, ← Set.range_comp]
   apply le_antisymm
   · apply Ideal.span_le.mpr
@@ -217,6 +237,7 @@ def overlapImageEquiv (s : Finset (Fin 3)) (hs : s.Nonempty)
     (i : Fin 3) (hi : i ∈ s) :
     OverlapImage s i hi ≃ₗ[Chart s] Regrading.Image (factorData s hs) :=
   LinearEquiv.ofEq _ _ (by
+    change LinearMap.range (overlapMatrix s i hi).mulVecLin = _
     rw [overlapMatrix_eq s hs i hi]
     exact Regrading.normalized_matrix_range (factorData s hs) (coordinateUnit s i hi))
 
