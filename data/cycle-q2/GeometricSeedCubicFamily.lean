@@ -15,8 +15,7 @@ This is the full unnormalized cubic space. The incidence specialization
 uses coefficients of `smoothB`, not the existing cubic-section coefficients
 of `smoothH`. The latter include the additional subtraction of `i * smoothA`.
 
-Source-only draft: no Lean elaboration, compilation, or kernel replay has
-been run. Prepared for `fqlx` with OpenAI ChatGPT assistance, following
+Prepared for `fqlx` with OpenAI ChatGPT assistance, following
 Ben Diamond's invariant surface-section construction.
 -/
 
@@ -90,7 +89,8 @@ theorem specialize_familyEquation (r : ℂ) (c : CubicIndex → ℂ) :
     map (coefficientEvaluation c) (familyEquation r) =
       seedFamily r (fullInvariantPolynomial 3 c) := by
   rw [familyEquation, map_add, map_pow, coefficientEvaluation_constantPolynomial,
-    coefficientEvaluation_universalCubic, seedFamily_eq_zero_add_square]
+    coefficientEvaluation_universalCubic,
+    seedFamily_eq_zero_add_square r (fullInvariantPolynomial 3 c)]
 
 /-- Zero coefficients recover the exact existing zero-cubic equation. -/
 theorem specialize_zero (r : ℂ) :

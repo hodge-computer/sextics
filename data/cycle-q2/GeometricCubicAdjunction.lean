@@ -1,9 +1,3 @@
-/-
-SOURCE-ONLY DRAFT: unverified.
-Compilation and independent kernel replay were deferred at the user's request.
-The proof terms below have not been accepted as a checked certificate.
--/
-
 import Proposal.GeometricCartierNormalConnecting
 import Proposal.GeometricCartierNormalBinding
 
@@ -132,7 +126,8 @@ original normal frame on this subopen. -/
 def patchContraction (p : WeightedCubic) (a : PatchIndex) (W : Curve.Opens)
     (hW : W ≤ patchOpen a) :
     Normal.val.obj (op W) →ₗ[Γ(Curve, W)] Differentials.val.obj (op W) :=
-  ((patchFrame a).app W hW).toLinearMap.smulRight (patchForm p a W hW)
+  (show Normal.val.obj (op W) →ₗ[Γ(Curve, W)] Γ(Curve, W) from
+    ((patchFrame a).app W hW).toLinearMap).smulRight (patchForm p a W hW)
 
 @[simp] theorem patchContraction_apply (p : WeightedCubic) (a : PatchIndex)
     (W : Curve.Opens) (hW : W ≤ patchOpen a) (s : Normal.val.obj (op W)) :
@@ -145,7 +140,9 @@ theorem patchContraction_generator (p : WeightedCubic) (a : PatchIndex)
     (W : Curve.Opens) (hW : W ≤ patchOpen a) :
     patchContraction p a W hW (frameGenerator (patchFrame a) W hW) =
       patchForm p a W hW := by
-  change (patchFrame a).app W hW (((patchFrame a).app W hW).symm 1) • _ = _
+  change (show Γ(Curve,W) from (patchFrame a).app W hW
+    (((patchFrame a).app W hW).symm (1 : Γ(Curve,W)))) • patchForm p a W hW =
+      patchForm p a W hW
   rw [LinearEquiv.apply_symm_apply, one_smul]
 
 /-- The existing morphism is retained only as the comparison object. -/
@@ -187,8 +184,9 @@ section, by the already proved local frame equivalence. -/
 theorem patchContraction_eq_original (p : WeightedCubic) (a : PatchIndex)
     (W : Curve.Opens) (hW : W ≤ patchOpen a) (s : Normal.val.obj (op W)) :
     patchContraction p a W hW s = (originalCubicMorphism p).val.app (op W) s := by
-  let e := (patchFrame a).app W hW
-  let f := ((originalCubicMorphism p).val.app (op W)).hom
+  let e : Normal.val.obj (op W) ≃ₗ[Γ(Curve,W)] Γ(Curve,W) := (patchFrame a).app W hW
+  let f : Normal.val.obj (op W) →ₗ[Γ(Curve,W)] Differentials.val.obj (op W) :=
+    ((originalCubicMorphism p).val.app (op W)).hom
   calc
     patchContraction p a W hW s = e s • f (e.symm 1) := by
       exact congrArg (fun z => e s • z)
@@ -245,8 +243,11 @@ theorem contractionSection_existsUnique (p : WeightedCubic) (O : Curve.Opens)
     (s : Normal.val.obj (op O)) :
     ∃! t : Differentials.val.obj (op O), ∀ a,
       res (addSheaf Differentials) (show O ⊓ patchOpen a ≤ O from inf_le_left) t =
-        patchValue p O s a :=
-  (addSheaf Differentials).existsUnique_gluing' (fun a => O ⊓ patchOpen a) O
+        patchValue p O s a := by
+  change ∃! t : (addSheaf Differentials).obj.obj (op O), ∀ a,
+    (addSheaf Differentials).obj.map (homOfLE (show O ⊓ patchOpen a ≤ O from inf_le_left)).op t =
+      patchValue p O s a
+  exact (addSheaf Differentials).existsUnique_gluing' (fun a => O ⊓ patchOpen a) O
     (fun _ => homOfLE inf_le_left) (cover_on O) (patchValue p O s)
     (patchValue_compatible p O s)
 
@@ -277,12 +278,17 @@ def contractionSectionLinearMap (p : WeightedCubic) (O : Curve.Opens) :
       contractionSection_eq_original, map_add]
   map_smul' a s := by
     rw [contractionSection_eq_original, contractionSection_eq_original, map_smul]
+    rfl
 
 /-- The independently glued contraction morphism of the actual intrinsic
 normal sheaf into the actual curve differential sheaf. -/
 def literalCubicAdjunction (p : WeightedCubic) : Normal ⟶ Differentials where
   val :=
-    { app O := ModuleCat.ofHom (contractionSectionLinearMap p O.unop)
+    { app O := ModuleCat.homMk
+        (AddCommGrpCat.ofHom (contractionSectionLinearMap p O.unop).toAddMonoidHom)
+        (fun r => by
+          ext s
+          exact ((contractionSectionLinearMap p O.unop).map_smul r s).symm)
       naturality {O P} f := by
         apply ModuleCat.hom_ext
         apply LinearMap.ext

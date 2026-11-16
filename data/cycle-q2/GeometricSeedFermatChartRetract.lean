@@ -16,8 +16,7 @@ therefore descends to the actual homogeneous-localization chart. Its
 complex algebra structure is the native map through degree zero used
 by `Proj.toSpecZero`, so no change of coefficients is implicit.
 
-Source-only draft: this module has not been elaborated or compiled in
-this session. Prepared for `fqlx` with OpenAI ChatGPT assistance.
+Prepared for `fqlx` with OpenAI ChatGPT assistance.
 -/
 
 set_option autoImplicit false
@@ -185,8 +184,12 @@ def chartRetraction (r : ℂ) (i : Fin 4) :
 
 @[simp] theorem chartRetraction_algebraMap (r : ℂ) (i : Fin 4) (a : ConeRing r) :
     chartRetraction r i (algebraMap (ConeRing r) (CoordinateRing r i.castSucc) a) =
-      coneNormalization r i a :=
-  IsLocalization.Away.lift_eq (coordinateClass r i.castSucc) _ a
+      coneNormalization r i a := by
+  dsimp only [chartRetraction]
+  have hunit : IsUnit (coneNormalization r i (coordinateClass r i.castSucc)) := by
+    rw [coneNormalization_self]
+    exact isUnit_one
+  exact IsLocalization.Away.lift_eq (coordinateClass r i.castSucc) hunit a
 
 @[simp] theorem chartRetraction_invSelf (r : ℂ) (i : Fin 4) :
     chartRetraction r i (IsLocalization.Away.invSelf (coordinateClass r i.castSucc)) = 1 := by
