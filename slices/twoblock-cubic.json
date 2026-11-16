@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-twoblock-cubic.json",
   "seed": 3092227259,
-  "resolution": 176,
   "phaseSigns": [
     -1,
     1,
@@ -48,8 +46,13 @@
       0.23877593181221435
     ]
   ],
-  "triangleCount": 76044,
-  "validated": true,
+  "centerOriginal": [
+    0.46847633626421475,
+    -0.5832841143129296,
+    0.15457975969721013
+  ],
+  "displayScale": 4.913236552269775,
+  "complexScale": 0.2880833221615395,
   "camera": {
     "distance": 3.01763,
     "center": [
@@ -63,6 +66,5 @@
       0.47901089457981244,
       0.07336140815974854
     ]
-  },
-  "bakedHome": false
+  }
 }

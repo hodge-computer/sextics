@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/atlas192-three-block-rational-d4-strict.json",
   "seed": 3524774545,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.42526648185623106
     ]
   ],
-  "triangleCount": 54156,
-  "validated": true,
+  "centerOriginal": [
+    -1.3206828473315047,
+    -0.21753289011462704,
+    -0.1443669378999879
+  ],
+  "displayScale": 4.788028325906547,
+  "complexScale": 0.31117912164106126,
   "camera": {
     "orientation": [
       0.4663227140001119,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

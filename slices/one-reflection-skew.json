@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-one-reflection-skew.json",
   "seed": 32494081,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.1261721234897236
     ]
   ],
-  "triangleCount": 67956,
-  "validated": true,
+  "centerOriginal": [
+    -0.3071297277711633,
+    0.49774450317627966,
+    -0.07145041986549322
+  ],
+  "displayScale": 3.176002801576516,
+  "complexScale": 0.36259908628399,
   "camera": {
     "distance": 2.84594,
     "center": [
@@ -63,6 +66,5 @@
       0.316102876240532,
       -0.1391141590071362
     ]
-  },
-  "bakedHome": false
+  }
 }

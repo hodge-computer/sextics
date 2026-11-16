@@ -861,6 +861,33 @@ void main() {
       awaitingFirstFrame = true;
     }
     const meshes = HodgeMeshes.create(assetBase, usable);
+    let generated = null;
+    async function generate(selected, id) {
+      if (generated?.id === selected.id) return generated.mesh;
+      status('loading', 'Generating the slice…');
+      const r = selected.render;
+      // Yield between grid rows so input and the worker heartbeat stay live.
+      let deadline = performance.now() + 16;
+      const mesh = await HodgeSliceMesh.build(
+        {
+          terms: selected.F,
+          planeMatrix: r.planeMatrix,
+          phaseSigns: r.phaseSigns,
+          centerOriginal: r.centerOriginal,
+          displayScale: r.displayScale,
+          complexScale: r.complexScale
+        },
+        async () => {
+          if (id !== job || !usable()) throw new Error('Cancelled');
+          if (performance.now() < deadline) return;
+          await new Promise((resolve) => setTimeout(resolve, 0));
+          if (id !== job || !usable()) throw new Error('Cancelled');
+          deadline = performance.now() + 16;
+        }
+      );
+      generated = { id: selected.id, mesh };
+      return mesh;
+    }
     async function setCase(selected) {
       if (!usable()) return;
       cancel();
@@ -890,8 +917,8 @@ void main() {
           throw new Error('Invalid saved camera orientation.');
         homeOrientation = ScreenTrackball.normalize(saved.orientation);
         resetCamera();
-        if (!r.mesh) throw new Error('This instance has no saved slice.');
-        const mesh = await meshes.load(r.mesh);
+        // The homepage ships a curated mesh; atlas slices are generated here.
+        const mesh = r.mesh ? await meshes.load(r.mesh) : await generate(selected, id);
         if (id !== job || !usable()) return;
         upload(mesh, selected);
       } catch (error) {

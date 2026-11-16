@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-cofactor-eight.json",
   "seed": 1136848188,
-  "resolution": 176,
   "phaseSigns": [
     -1,
     -1,
@@ -48,8 +46,13 @@
       0.30122428347904195
     ]
   ],
-  "triangleCount": 39428,
-  "validated": true,
+  "centerOriginal": [
+    0.3529626274285056,
+    -0.09071459363347077,
+    1.869018599634787
+  ],
+  "displayScale": 4.195113236872376,
+  "complexScale": 0.23987079160610186,
   "camera": {
     "distance": 3.2239,
     "center": [
@@ -63,6 +66,5 @@
       0.6738374121715955,
       -0.5950712634840922
     ]
-  },
-  "bakedHome": false
+  }
 }

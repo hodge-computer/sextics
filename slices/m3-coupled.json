@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-m3-coupled-refined.json",
   "seed": 2487342529,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.33109757411644375
     ]
   ],
-  "triangleCount": 105896,
-  "validated": true,
+  "centerOriginal": [
+    -0.45219967699579894,
+    1.1846592890772363,
+    -0.13008789067533086
+  ],
+  "displayScale": 4.286523695921429,
+  "complexScale": 0.34094635078762325,
   "camera": {
     "orientation": [
       -0.30470051110440444,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

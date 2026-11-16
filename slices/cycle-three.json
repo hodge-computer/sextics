@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-cycle-three.json",
   "seed": 1387442936,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.3036481843958279
     ]
   ],
-  "triangleCount": 48230,
-  "validated": true,
+  "centerOriginal": [
+    -0.32300644711723897,
+    0.1968956775616444,
+    0.22599183058080236
+  ],
+  "displayScale": 2.99602948241399,
+  "complexScale": 0.41271301332235655,
   "camera": {
     "orientation": [
       0.222638149968931,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

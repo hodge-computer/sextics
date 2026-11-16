@@ -1,6 +1,5 @@
 {
   "seed": 211035,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       -0.1404716678687872
     ]
   ],
-  "mesh": "meshes/adaptive176-eight-plane-configuration.json",
-  "triangleCount": 72476,
-  "validated": true,
+  "centerOriginal": [
+    0.023238406590950608,
+    0.01907443955207043,
+    0.1076813421894239
+  ],
+  "displayScale": 2.4022151745614666,
+  "complexScale": 0.39419547681223843,
   "camera": {
     "distance": 3.2264,
     "center": [
@@ -63,6 +66,5 @@
       0.2710571860722968,
       -0.6287838244090849
     ]
-  },
-  "bakedHome": false
+  }
 }

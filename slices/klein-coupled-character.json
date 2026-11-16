@@ -1,6 +1,5 @@
 {
   "seed": 4188474553,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       -0.22320773030221328
     ]
   ],
-  "mesh": "meshes/adaptive192-klein-coupled-character.json",
-  "triangleCount": 49966,
-  "validated": true,
+  "centerOriginal": [
+    -1.6819231481470098,
+    0.2537766490181285,
+    -0.10206479978883284
+  ],
+  "displayScale": 3.8117860939102575,
+  "complexScale": 0.331951007436014,
   "camera": {
     "orientation": [
       -0.9951880602746084,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

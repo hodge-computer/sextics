@@ -1,6 +1,5 @@
 {
   "seed": 2953005828,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       0.11901060495776837
     ]
   ],
-  "mesh": "meshes/adaptive176-short-power-presentation.json",
-  "triangleCount": 71742,
-  "validated": true,
+  "centerOriginal": [
+    -0.12443536661341521,
+    -0.12695120751213895,
+    0.13213225760916883
+  ],
+  "displayScale": 2.7310791333154505,
+  "complexScale": 0.4197269880673614,
   "camera": {
     "distance": 2.90545,
     "center": [
@@ -63,6 +66,5 @@
       0.20168585514016016,
       0.3681237490892901
     ]
-  },
-  "bakedHome": false
+  }
 }

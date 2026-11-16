@@ -1,6 +1,5 @@
 {
   "seed": 2932061191,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -47,8 +46,13 @@
       0.10385462169882574
     ]
   ],
-  "triangleCount": 157006,
-  "bakedHome": false,
+  "centerOriginal": [
+    -0.35103262181744677,
+    0.6264392961882822,
+    -0.3973429280128991
+  ],
+  "displayScale": 4.397810145611503,
+  "complexScale": 0.3222397705533113,
   "camera": {
     "orientation": [
       -0.17051331825167734,
@@ -62,7 +66,5 @@
       0,
       0
     ]
-  },
-  "mesh": "meshes/atlas192-contact46006.json",
-  "validated": true
+  }
 }

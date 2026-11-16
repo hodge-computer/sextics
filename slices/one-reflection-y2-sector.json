@@ -1,6 +1,5 @@
 {
   "seed": 100084,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -9,7 +8,6 @@
     -1,
     -1
   ],
-  "mesh": "meshes/adaptive176-one-reflection-y2-sector.json",
   "planeMatrix": [
     [
       -0.592310218200353,
@@ -48,8 +46,13 @@
       -0.03274760403630823
     ]
   ],
-  "triangleCount": 63440,
-  "validated": true,
+  "centerOriginal": [
+    0.035934476200185604,
+    -0.07568807094973931,
+    0.010812683385814923
+  ],
+  "displayScale": 2.495827162074842,
+  "complexScale": 0.432368262229286,
   "camera": {
     "orientation": [
       -0.9656549718535368,
@@ -63,6 +66,5 @@
       0
     ],
     "distance": 3.25589
-  },
-  "bakedHome": false
+  }
 }

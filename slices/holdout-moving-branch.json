@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-holdout-moving-branch.json",
   "seed": 1525099090,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.9586652565296142
     ]
   ],
-  "triangleCount": 66142,
-  "validated": true,
+  "centerOriginal": [
+    -0.11070203278168901,
+    -0.0844218414879181,
+    0.03417238136555805
+  ],
+  "displayScale": 2.5748676953494325,
+  "complexScale": 0.4066368854463484,
   "camera": {
     "distance": 2.79486,
     "center": [
@@ -63,6 +66,5 @@
       0.3888013759100625,
       0.48356332583276207
     ]
-  },
-  "bakedHome": false
+  }
 }

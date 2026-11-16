@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-ternary-collision-cb-d2.json",
   "seed": 3174571967,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.8230749772835156
     ]
   ],
-  "triangleCount": 34350,
-  "validated": true,
+  "centerOriginal": [
+    0.5731108608659503,
+    -2.0771908421416323,
+    -0.008551040487093563
+  ],
+  "displayScale": 3.021366274345962,
+  "complexScale": 0.30276421707076107,
   "camera": {
     "distance": 2.21706,
     "center": [
@@ -63,6 +66,5 @@
       0.5552788719705211,
       -0.29011269248887717
     ]
-  },
-  "bakedHome": false
+  }
 }

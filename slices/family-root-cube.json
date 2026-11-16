@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-family-root-cube.json",
   "seed": 499323135,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.18397473387986432
     ]
   ],
-  "triangleCount": 39030,
-  "validated": true,
+  "centerOriginal": [
+    -3.1284833129364986,
+    -1.248270209593621,
+    -0.42394348037907126
+  ],
+  "displayScale": 5.512183455493305,
+  "complexScale": 0.3157064088532435,
   "camera": {
     "distance": 2.0902,
     "center": [
@@ -63,6 +66,5 @@
       0.8032732304026515,
       -0.07247149314377807
     ]
-  },
-  "bakedHome": false
+  }
 }

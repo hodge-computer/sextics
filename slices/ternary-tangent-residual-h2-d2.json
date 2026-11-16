@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/atlas192-ternary-tangent-residual-h2-d2.json",
   "seed": 283113765,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.35512423584889186
     ]
   ],
-  "triangleCount": 67334,
-  "validated": true,
+  "centerOriginal": [
+    0.516790811634967,
+    0.918216821808699,
+    0.446457230971359
+  ],
+  "displayScale": 5.5649110108863304,
+  "complexScale": 0.27525798891324843,
   "camera": {
     "orientation": [
       0.7787654194597416,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

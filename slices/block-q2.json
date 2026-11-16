@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-block-q2.json",
   "seed": 1702073034,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.4817697868770069
     ]
   ],
-  "triangleCount": 62780,
-  "validated": true,
+  "centerOriginal": [
+    0.0013793474584971447,
+    0.4452919841631953,
+    -0.07213602590333765
+  ],
+  "displayScale": 3.2090441169055577,
+  "complexScale": 0.40031828350896137,
   "camera": {
     "distance": 2.99956,
     "center": [
@@ -63,6 +66,5 @@
       -0.4588501774120192,
       0.7252285947816445
     ]
-  },
-  "bakedHome": false
+  }
 }

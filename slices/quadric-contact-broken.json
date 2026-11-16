@@ -1,6 +1,5 @@
 {
   "seed": 2582113920,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       0.036474131979250375
     ]
   ],
-  "mesh": "meshes/adaptive176-quadric-contact-broken-detailed.json",
-  "triangleCount": 233362,
-  "validated": true,
+  "centerOriginal": [
+    -0.41052952971497947,
+    -0.09521218594324135,
+    -0.2606243879696848
+  ],
+  "displayScale": 3.751935220645392,
+  "complexScale": 0.4176058626710313,
   "camera": {
     "distance": 2.29312,
     "center": [
@@ -63,6 +66,5 @@
       0.5145962457484788,
       0.6971542420403858
     ]
-  },
-  "bakedHome": false
+  }
 }

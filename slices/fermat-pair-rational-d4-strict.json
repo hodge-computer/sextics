@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-fermat-pair-rational-d4-strict.json",
   "seed": 1811460086,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.15202364828508316
     ]
   ],
-  "triangleCount": 62986,
-  "validated": true,
+  "centerOriginal": [
+    0.29834740978617774,
+    0.3682869237044505,
+    0.2186392471410105
+  ],
+  "displayScale": 3.0376479070456637,
+  "complexScale": 0.3988821929291864,
   "camera": {
     "distance": 2.76529,
     "center": [
@@ -63,6 +66,5 @@
       -0.2356613329271294,
       0.28100486857527707
     ]
-  },
-  "bakedHome": false
+  }
 }

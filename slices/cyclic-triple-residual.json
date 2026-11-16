@@ -1,6 +1,5 @@
 {
   "seed": 100103,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       -0.24759967564774507
     ]
   ],
-  "mesh": "meshes/adaptive176-cyclic-triple-fano.json",
-  "triangleCount": 61650,
-  "validated": true,
+  "centerOriginal": [
+    -0.0859062858747023,
+    -0.09138955594662308,
+    -0.14206695167244923
+  ],
+  "displayScale": 2.67578037405399,
+  "complexScale": 0.41530035863623066,
   "camera": {
     "orientation": [
       -0.3967948508895073,
@@ -63,6 +66,5 @@
       0
     ],
     "distance": 3.09971
-  },
-  "bakedHome": false
+  }
 }

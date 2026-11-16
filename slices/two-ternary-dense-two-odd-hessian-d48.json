@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-two-ternary-dense-two-odd-hessian-d48-detailed.json",
   "seed": 1383291179,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.15789109957891742
     ]
   ],
-  "triangleCount": 215682,
-  "validated": true,
+  "centerOriginal": [
+    0.6034332022661777,
+    0.5136722255650448,
+    0.3959395896477779
+  ],
+  "displayScale": 4.6821699271056,
+  "complexScale": 0.2988223179551054,
   "camera": {
     "distance": 2.84285,
     "center": [
@@ -63,6 +66,5 @@
       -0.3265715480904811,
       0.6659712386015281
     ]
-  },
-  "bakedHome": false
+  }
 }

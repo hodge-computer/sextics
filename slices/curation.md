@@ -1,6 +1,6 @@
 # Saved real slices and cameras
 
-Each `slices/<instance-id>.json` records the phase choices, orthonormal real four-plane, mesh, and camera used to visualize that instance. This is the sole source of those settings; the content builder copies them into browser records. The saved plane must match the selected mesh manifest. The projected box is fixed at ±10, and x-ray reach is 2.0.
+Each `slices/<instance-id>.json` records the phase choices, orthonormal real four-plane, display transform, colour normalization, and camera used to visualize that instance. This is the sole source of those settings; the content builder copies them into browser records, and the browser generates the mesh from them and `F`. The projected box is fixed at ±10, and x-ray reach is 2.0.
 
 A camera has three fields: a unit quaternion `orientation` in `[x,y,z,w]` order, a `distance`, and a three-coordinate `center`. The quaternion maps the camera's right/up/back axes into world coordinates and is the sole saved orientation. Exploration and background parallax apply rotations directly to it; reset restores the saved pose.
 
@@ -8,12 +8,13 @@ Normalize a new saved camera by measuring the projected triangle silhouette in a
 320×200 viewport with the renderer's field of view. Choose the distance for 32%
 coverage, or a farther distance if needed to keep every projected vertex within
 90% of the viewport extent; then increase that distance by 10%. Preserve the
-chosen quaternion and center. Coarsen replacement meshes with the adaptive
-procedure in MAINTAINING.md and inspect the result before selecting it.
+chosen quaternion and center.
+
+A new slice needs `centerOriginal` and `displayScale`, the map `p = (q − centerOriginal) / displayScale` from stereographic to display coordinates, chosen so the surface inside the box lies within `|p| ≤ 1`; and `complexScale`, which normalizes the colour observable. The camera is expressed in these display coordinates, so changing them moves the view.
 
 Meshes sample the real section obtained by intersecting the chosen four-plane with the unit sphere and the sextic, then stereographically projecting into three dimensions. Their positions and normals are floating-point presentation data. They do not prove smoothness, topology, or certificate validity.
 
-Validate finite values, normals, coordinate and index bounds, edge lengths, and polynomial residuals when replacing a mesh. `scripts/validate-records.py` checks consistency between the current records, saved slices, and mesh manifests. A finite grid can miss sufficiently thin features. Camera and slice choices are aesthetic decisions, independent of the mathematical target.
+`scripts/validate-records.py` checks consistency between the current records and saved slices. Inspect a new slice in the browser. The generator's finite grid can miss sufficiently thin features. Camera and slice choices are aesthetic decisions, independent of the mathematical target.
 
 Denominators are evaluated directly at each pixel, independently of the geometric mesh. Compact formulas and slice-specific factorizations can be supplied through `slices/divisors/<id>.json`; see MAINTAINING.md. A factorization restricted to a saved plane must be regenerated if that plane or its coordinate phases change. Open instances have no displayed denominator.
 

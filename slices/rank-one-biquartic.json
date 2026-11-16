@@ -1,6 +1,5 @@
 {
   "seed": 2519678199,
-  "resolution": 96,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       0.4813634788178045
     ]
   ],
-  "mesh": "meshes/adaptive-rank-one-biquartic.json",
-  "triangleCount": 48436,
-  "validated": true,
+  "centerOriginal": [
+    -0.5381683645045723,
+    -0.5334638034163222,
+    -0.5351788059052915
+  ],
+  "displayScale": 3.611894865680004,
+  "complexScale": 0.3486679124225795,
   "camera": {
     "orientation": [
       -0.7559806405287174,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-coupled-pair-rational-d4-strict.json",
   "seed": 3064774704,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.2436316687185493
     ]
   ],
-  "triangleCount": 55984,
-  "validated": true,
+  "centerOriginal": [
+    0.4561283389002243,
+    -0.29814160381914245,
+    0.16338081878693445
+  ],
+  "displayScale": 3.2841247277771473,
+  "complexScale": 0.3809730765208977,
   "camera": {
     "distance": 2.72009,
     "center": [
@@ -63,6 +66,5 @@
       0.8032732304026515,
       -0.07247149314377807
     ]
-  },
-  "bakedHome": false
+  }
 }

@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-ytype-companion-231-d4-strict-rational.json",
   "seed": 1184852777,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.03048456498484914
     ]
   ],
-  "triangleCount": 64741,
-  "validated": true,
+  "centerOriginal": [
+    0.30268858848756053,
+    -0.21184217103874772,
+    0.6794649716289108
+  ],
+  "displayScale": 3.752504574640153,
+  "complexScale": 0.3815870116782195,
   "camera": {
     "orientation": [
       0.39643636441779956,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

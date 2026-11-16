@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-ytype-companion-fiberA-d4-strict-rational.json",
   "seed": 3691352013,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.6475630934574479
     ]
   ],
-  "triangleCount": 52572,
-  "validated": true,
+  "centerOriginal": [
+    0.18338805777454725,
+    0.004841149319541027,
+    -0.26697122309544424
+  ],
+  "displayScale": 3.2542596007751343,
+  "complexScale": 0.35385474431231145,
   "camera": {
     "orientation": [
       0.5803174182589436,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

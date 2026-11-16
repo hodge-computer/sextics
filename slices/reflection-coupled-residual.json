@@ -1,6 +1,5 @@
 {
   "seed": 393253142,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       -0.07008964017576574
     ]
   ],
-  "mesh": "meshes/atlas192-reflection-coupled-fano.json",
-  "triangleCount": 51682,
-  "validated": true,
+  "centerOriginal": [
+    1.641441036439959,
+    -0.1311829140724835,
+    2.5481287378364637
+  ],
+  "displayScale": 6.690736812710131,
+  "complexScale": 0.2766263985758703,
   "camera": {
     "orientation": [
       -0.4342467358633861,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

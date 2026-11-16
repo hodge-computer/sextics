@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/atlas192-family-passive-contact.json",
   "seed": 4285927149,
-  "resolution": 192,
   "phaseSigns": [
     -1,
     1,
@@ -48,8 +46,13 @@
       0.05471431559915583
     ]
   ],
-  "triangleCount": 65102,
-  "validated": true,
+  "centerOriginal": [
+    -0.07551148511892522,
+    0.06327722965283382,
+    0.9719248374233229
+  ],
+  "displayScale": 2.3210695860966375,
+  "complexScale": 0.32246766291250584,
   "camera": {
     "orientation": [
       0.792989870760497,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

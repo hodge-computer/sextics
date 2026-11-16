@@ -1,6 +1,5 @@
 {
   "seed": 170035074,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       -0.05430198864134135
     ]
   ],
-  "mesh": "meshes/adaptive176-four-plus-two-residual.json",
-  "triangleCount": 68854,
-  "validated": true,
+  "centerOriginal": [
+    -0.49449639272996543,
+    -0.31372357417644625,
+    1.397888293969617
+  ],
+  "displayScale": 4.656827329824815,
+  "complexScale": 0.3149517426922114,
   "camera": {
     "distance": 2.50116,
     "center": [
@@ -63,6 +66,5 @@
       0.3589147373374456,
       0.2510249881094026
     ]
-  },
-  "bakedHome": false
+  }
 }

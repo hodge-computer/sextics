@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/atlas192-hesse-radial-hesse-cofactor-d4-rational.json",
   "seed": 4046651222,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.6523667335746944
     ]
   ],
-  "triangleCount": 85348,
-  "validated": true,
+  "centerOriginal": [
+    0.002270813454276087,
+    -0.12366858467461718,
+    0.49791570120544304
+  ],
+  "displayScale": 3.648551957185166,
+  "complexScale": 0.39488880592906217,
   "camera": {
     "orientation": [
       0.3265583938114912,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

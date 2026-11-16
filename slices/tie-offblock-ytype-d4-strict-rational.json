@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/atlas192-tie-singleton-3odd-strict.json",
   "seed": 2558813213,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.3257234395304928
     ]
   ],
-  "triangleCount": 65388,
-  "validated": true,
+  "centerOriginal": [
+    -0.4557151994884776,
+    -0.16083458384935614,
+    -0.0932453368090187
+  ],
+  "displayScale": 2.980336640612537,
+  "complexScale": 0.4024716333826703,
   "camera": {
     "orientation": [
       -0.36095124271430734,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

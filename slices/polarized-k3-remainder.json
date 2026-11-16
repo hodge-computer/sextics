@@ -1,6 +1,5 @@
 {
   "seed": 170030481,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       0.42936794972186476
     ]
   ],
-  "mesh": "meshes/adaptive176-polarized-k3-remainder.json",
-  "triangleCount": 116672,
-  "validated": true,
+  "centerOriginal": [
+    0.15711753745461982,
+    -0.014203506956601383,
+    0.011962997234112246
+  ],
+  "displayScale": 6.435233568637812,
+  "complexScale": 0.3547674507701461,
   "camera": {
     "distance": 3.35368,
     "center": [
@@ -63,6 +66,5 @@
       -0.22165117336215276,
       -0.5312412400499452
     ]
-  },
-  "bakedHome": false
+  }
 }

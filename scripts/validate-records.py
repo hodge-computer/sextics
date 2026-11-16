@@ -132,25 +132,20 @@ def main():
         require(
             len(phases) == 1, f"{rid}: phase choice does not yield a real polynomial up to scalar"
         )
-        mesh_relative = render.get("mesh")
-        require(mesh_relative, f"{rid}: missing mesh reference")
-        mesh_path = (ROOT / "assets" / mesh_relative).resolve()
+        # Atlas meshes are generated in the browser from F and the saved section.
+        require("mesh" not in render, f"{rid}: atlas slices are generated, not saved meshes")
+        center = render.get("centerOriginal")
         require(
-            mesh_path.is_relative_to(ROOT / "assets/meshes") and mesh_path.exists(),
-            f"{rid}: missing local mesh",
+            isinstance(center, list) and len(center) == 3
+            and all(isinstance(v, (int, float)) and math.isfinite(v) for v in center),
+            f"{rid}: invalid display center",
         )
-        mesh = json.loads(mesh_path.read_text())
-        require(
-            mesh.get("meta", {}).get("planeMatrix") == plane,
-            f"{rid}: mesh does not match the saved plane",
-        )
-        require(
-            mesh.get("projectionBox", mesh.get("meta", {}).get("projectionBox")) == 10,
-            f"{rid}: incorrect box",
-        )
-        for value in mesh.values():
-            if isinstance(value, str) and value.endswith(".gz"):
-                require((mesh_path.parent / value).exists(), f"{rid}: missing binary mesh asset")
+        for key in ("displayScale", "complexScale"):
+            value = render.get(key)
+            require(
+                isinstance(value, (int, float)) and math.isfinite(value) and value > 0,
+                f"{rid}: invalid {key}",
+            )
         require(
             summary.get("formalStatus") == record["formalStatus"],
             f"{rid}: index formal status mismatch",

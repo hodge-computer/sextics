@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-f3-block-x0-quartic-strict.json",
   "seed": 2825414312,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.2790633916667438
     ]
   ],
-  "triangleCount": 63026,
-  "validated": true,
+  "centerOriginal": [
+    -0.8809650119723006,
+    1.1000755123835018,
+    0.4373085485903076
+  ],
+  "displayScale": 6.561891132444022,
+  "complexScale": 0.2742723597666377,
   "camera": {
     "distance": 2.41948,
     "center": [
@@ -63,6 +66,5 @@
       0.014234316078976093,
       0.32500879615649975
     ]
-  },
-  "bakedHome": false
+  }
 }

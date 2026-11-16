@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-passive-quadratic-d4-strict-rational.json",
   "seed": 2198817003,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.4450405328604137
     ]
   ],
-  "triangleCount": 57610,
-  "validated": true,
+  "centerOriginal": [
+    -0.09217345378724286,
+    0.7349938318610956,
+    0.45619442744479405
+  ],
+  "displayScale": 4.6533845077614036,
+  "complexScale": 0.27028966288596795,
   "camera": {
     "distance": 2.58019,
     "center": [
@@ -63,6 +66,5 @@
       0.014234316078976093,
       0.32500879615649975
     ]
-  },
-  "bakedHome": false
+  }
 }

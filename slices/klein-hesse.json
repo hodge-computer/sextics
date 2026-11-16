@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-klein-hesse.json",
   "seed": 541985820,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.12626511269933183
     ]
   ],
-  "triangleCount": 60826,
-  "validated": true,
+  "centerOriginal": [
+    -0.11142587653654254,
+    0.35367941406448833,
+    0.0007217159856173962
+  ],
+  "displayScale": 2.780773592739432,
+  "complexScale": 0.3664597206661837,
   "camera": {
     "distance": 3.06248,
     "center": [
@@ -63,6 +66,5 @@
       0.001878564610310076,
       0.7701708496571859
     ]
-  },
-  "bakedHome": false
+  }
 }

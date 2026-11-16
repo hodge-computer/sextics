@@ -1,6 +1,5 @@
 {
   "seed": 4017115667,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       0.08930386177627485
     ]
   ],
-  "mesh": "meshes/adaptive176-diagonal-permutation.json",
-  "triangleCount": 62097,
-  "validated": true,
+  "centerOriginal": [
+    0.19888822277335655,
+    0.21430237576749778,
+    0.26362347262016506
+  ],
+  "displayScale": 2.971731324376062,
+  "complexScale": 0.3884438128299186,
   "camera": {
     "distance": 2.69106,
     "center": [
@@ -63,6 +66,5 @@
       0.4424697465449344,
       0.4682463505236035
     ]
-  },
-  "bakedHome": false
+  }
 }
