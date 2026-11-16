@@ -5,9 +5,6 @@ import Mathlib.AlgebraicGeometry.Modules.Tilde
 /-!
 # The actual Segre image and orbit-ideal dual on projective charts
 
-Source-only proof draft. Elaboration and kernel replay are intentionally
-deferred at the user's request.
-
 The coordinate rings below are the actual affine charts of the surface at
 `(r, theta) = (57, 1)`. The comparison with the incidence seed at `(57, I)`
 uses `seedRingEquiv`, which is the identity on the five polynomial
@@ -41,6 +38,15 @@ open CycleQ2SeedTrace CycleQ2NormalConnecting CycleQ2ConormalJacobian
   CycleQ2GeometricSurfaceDehomogenizedCharts CycleQ2SegreTangentLocal
   CycleQ2SeedQuotientFiniteFree CycleQ2SeedCechLocalization
   CycleQ2SegreFactorSequence CycleQ2SegreLinkageDuality CycleQ2SegreLinkageImage
+
+local instance imageSeedCommRing : CommRing (SeedRing (57 : ℂ) Complex.I) :=
+  Ideal.Quotient.commRing
+    (CycleQ2IncidenceNormalForm.equationsIdeal
+      (CycleQ2IncidenceEquations.smoothH Complex.I)
+      (CycleQ2IncidenceEquations.smoothF (57 : ℂ) Complex.I))
+
+local instance imageSurfaceCommRing : CommRing (SurfaceRing 57 1) :=
+  Ideal.Quotient.commRing (surfaceIdeal 57 1)
 
 section BaseChange
 
@@ -107,6 +113,13 @@ abbrev ConeRing (i : Fin 3) := CycleQ2SegreFactorChartExact.Chart {i}
 def localizingCoordinate (i : Fin 3) : SeedRing (57 : ℂ) Complex.I :=
   algebraMap (Base ℂ) (SeedRing (57 : ℂ) Complex.I) (baseProduct ℂ {i})
 
+local instance cone_isLocalization (i : Fin 3) :
+    IsLocalization.Away (localizingCoordinate i) (ConeRing i) := by
+  change IsLocalization (Submonoid.powers (localizingCoordinate i)) (ConeRing i)
+  dsimp only [localizingCoordinate]
+  rw [← Submonoid.map_powers]
+  infer_instance
+
 theorem remainingIndex_eq (i : Fin 3) : remainingIndex i = i.succ.castSucc := by
   fin_cases i <;> rfl
 
@@ -155,6 +168,13 @@ def affinePolynomial (i : Fin 3) : WeightedPoly →+* AffineRing i :=
   rw [AlgEquiv.symm_apply_apply]
   rfl
 
+private theorem coordinateSubmonoid_map (i : Fin 3) :
+    (Submonoid.powers (surfaceQuotient 57 1 (X i.succ.castSucc))).map
+        (seedRingEquiv 57).toRingEquiv.toMonoidHom =
+      Submonoid.powers (localizingCoordinate i) := by
+  rw [Submonoid.map_powers]
+  exact congrArg Submonoid.powers (localizingCoordinate_eq i).symm
+
 /-- The full coordinate localization agrees with the original seed
 localization, before taking its homogeneous degree-zero subring. -/
 def coneCoordinateEquiv (i : Fin 3) :
@@ -164,8 +184,7 @@ def coneCoordinateEquiv (i : Fin 3) :
     (T := Submonoid.powers (localizingCoordinate i))
     (CoordinateLocalization 57 1 i.succ) (ConeRing i)
     (seedRingEquiv 57).toRingEquiv
-    (by rw [Submonoid.map_powers];
-        exact congrArg Submonoid.powers (localizingCoordinate_eq i).symm)
+    (coordinateSubmonoid_map i)
 
 @[simp] theorem coneCoordinateEquiv_base (i : Fin 3) (x : SurfaceRing 57 1) :
     coneCoordinateEquiv i
@@ -306,7 +325,9 @@ theorem chartDuality_original (i : Fin 3)
         (coneToChart i) (chart_linkage_regular i) x) =
       coneToChart i (CycleQ2SegreSeedLinkageDuality.actualDuality {i}
         (Finset.singleton_nonempty i) y x) :=
-  mapFactorData_pairing _ _ _ x y
+  mapFactorData_pairing
+    (CycleQ2SegreFactorChartExact.factorData {i} (Finset.singleton_nonempty i))
+    (coneToChart i) (chart_linkage_regular i) x y
 
 def affineComponentIdeal (i : Fin 3) (z : ℂ) : Ideal (AffineRing i) :=
   (CycleQ2SeedLinkageComponents.localComponent .left (57 : ℂ) Complex.I {i} z).map
@@ -326,7 +347,10 @@ theorem orbitIdeal_eq_component_product (i : Fin 3) :
     .left (57 : ℂ) Complex.I (by norm_num) Complex.I_ne_zero hI
     {i} (Finset.singleton_nonempty i)
   have hm := congrArg (Ideal.map (coneToChart i)) h
-  simpa only [Ideal.map_mul] using hm
+  rw [Ideal.map_mul, Ideal.map_mul] at hm
+  change ((CycleQ2SeedLinkageComponents.localLinkageIdeal
+      .left (57 : ℂ) Complex.I {i}).map (coneToChart i)) = _
+  exact hm
 
 section LiteralCurve
 

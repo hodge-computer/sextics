@@ -19,8 +19,7 @@ relative dimension three over the original parameter scheme. No assertion
 that the patches cover the entire family is made, and no smoothness or
 nonemptiness premise is supplied.
 
-Status: source-only proof draft. No elaboration, compilation, or kernel
-replay has been run. Prepared for `fqlx` with OpenAI ChatGPT assistance,
+Prepared for `fqlx` with OpenAI ChatGPT assistance,
 following Ben Diamond and the project's geometric argument.
 -/
 
@@ -36,6 +35,9 @@ namespace CycleQ2SeedFamilyJacobian
 open MvPolynomial CategoryTheory AlgebraicGeometry TopologicalSpace
 open CycleQ2SeedCubicFamily CycleQ2SeedProjectiveFamily
   CycleQ2SeedFamilyNormalized CycleQ2SeedFamilyChart
+
+local instance jacobianNormalizedCommRing (r : ℂ) (i : Fin 4) :
+    CommRing (NormalizedRing r i) := Ideal.Quotient.commRing (normalizedIdeal r i)
 
 abbrev OtherCoordinate (i : Fin 4) := {j : Fin 5 // j ≠ i.castSucc}
 
@@ -168,8 +170,11 @@ theorem jacobianOpen_eq_image (r : ℂ) (i : Fin 4) (j : OtherCoordinate i) :
     jacobianOpen r i j =
       normalizedChartToFamily r i ''ᵁ PrimeSpectrum.basicOpen (normalizedDerivative r i j.1) := by
   change (patchToNormalized r i j ≫ normalizedChartToFamily r i).opensRange = _
-  rw [Scheme.Hom.opensRange_comp, patchToNormalized,
-    Scheme.Hom.opensRange_localizationAway]
+  rw [Scheme.Hom.opensRange_comp]
+  exact congrArg (fun W : (normalizedScheme r i).Opens =>
+    normalizedChartToFamily r i ''ᵁ W)
+      (Scheme.Hom.opensRange_localizationAway (R := CommRingCat.of (NormalizedRing r i))
+        (normalizedDerivative r i j.1))
 
 theorem normalizedChartToFamily_preimage_jacobianOpen (r : ℂ) (i : Fin 4)
     (j : OtherCoordinate i) :
