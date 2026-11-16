@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive192-klein-rational-4273856520.json",
   "seed": 4273856520,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.3988617199379981
     ]
   ],
-  "triangleCount": 72132,
-  "validated": true,
+  "centerOriginal": [
+    -0.07205529262155887,
+    -0.04533100275290353,
+    -0.276503703460977
+  ],
+  "displayScale": 4.956604970682913,
+  "complexScale": 0.34315629546697496,
   "camera": {
     "orientation": [
       -0.5498137431828767,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

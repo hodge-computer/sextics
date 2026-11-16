@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-dense-rational.json",
   "seed": 2038919402,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.4519970000821844
     ]
   ],
-  "triangleCount": 45180,
-  "validated": true,
+  "centerOriginal": [
+    0.41633224199442237,
+    -0.5268019312803975,
+    1.8583037359298114
+  ],
+  "displayScale": 6.151480781532843,
+  "complexScale": 0.2617580584592076,
   "camera": {
     "orientation": [
       -0.37052816935827065,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

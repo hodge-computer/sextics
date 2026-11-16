@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive-polarized-contact-deformation-d2.json",
   "seed": 691639697,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.3873668298911581
     ]
   ],
-  "triangleCount": 76672,
-  "validated": true,
+  "centerOriginal": [
+    -0.09163216192903527,
+    -0.2363802558971396,
+    0.42636852765399424
+  ],
+  "displayScale": 3.288825529339418,
+  "complexScale": 0.3681021898245168,
   "camera": {
     "orientation": [
       0.8810296059311006,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

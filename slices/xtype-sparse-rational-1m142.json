@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-xtype-sparse-rational-1m142.json",
   "seed": 151748401,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.03814839027445234
     ]
   ],
-  "triangleCount": 64094,
-  "validated": true,
+  "centerOriginal": [
+    0.014843215992320809,
+    -1.7943880996103594,
+    0.379346913042925
+  ],
+  "displayScale": 6.421003345886487,
+  "complexScale": 0.2673244205213562,
   "camera": {
     "orientation": [
       0.49428221918633963,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

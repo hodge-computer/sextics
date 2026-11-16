@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive-polarized-contact-coupled-d2.json",
   "seed": 1546296803,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.03280528112650182
     ]
   ],
-  "triangleCount": 67542,
-  "validated": true,
+  "centerOriginal": [
+    -0.16972977906960385,
+    -0.3816244935244615,
+    -1.4064131742478865
+  ],
+  "displayScale": 6.303005557663867,
+  "complexScale": 0.2851360317817774,
   "camera": {
     "orientation": [
       0.27223497428309335,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

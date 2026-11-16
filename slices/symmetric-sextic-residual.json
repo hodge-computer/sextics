@@ -1,6 +1,5 @@
 {
   "seed": 2408322075,
-  "resolution": 96,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       0.4817133941156127
     ]
   ],
-  "mesh": "meshes/adaptive-symmetric-sextic-residual.json",
-  "triangleCount": 35324,
-  "validated": true,
+  "centerOriginal": [
+    -0.22548384830350748,
+    0.06830746971199406,
+    -0.41761789243831515
+  ],
+  "displayScale": 3.2500473321195282,
+  "complexScale": 0.3516188274865631,
   "camera": {
     "orientation": [
       -0.7761922210726149,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

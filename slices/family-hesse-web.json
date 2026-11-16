@@ -1,6 +1,5 @@
 {
   "seed": 216025,
-  "resolution": 176,
   "phaseSigns": [
     1,
     -1,
@@ -47,9 +46,13 @@
       -0.1432844948309879
     ]
   ],
-  "mesh": "meshes/adaptive176-family-hesse-web.json",
-  "triangleCount": 67146,
-  "validated": true,
+  "centerOriginal": [
+    0.0037871055866298,
+    0.1335429014881286,
+    -0.19477594183055175
+  ],
+  "displayScale": 2.2087373096312484,
+  "complexScale": 0.43132656812363035,
   "camera": {
     "distance": 3.16158,
     "center": [
@@ -63,6 +66,5 @@
       0.17441846510401837,
       0.24392152898838584
     ]
-  },
-  "bakedHome": false
+  }
 }

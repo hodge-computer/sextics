@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-two-reflection-cubic-surface-d2.json",
   "seed": 3352728673,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.5133608939729597
     ]
   ],
-  "triangleCount": 85756,
-  "validated": true,
+  "centerOriginal": [
+    0.20549388207470196,
+    0.3467965525400371,
+    -0.6016811328067748
+  ],
+  "displayScale": 5.929256997029447,
+  "complexScale": 0.36481709612625923,
   "camera": {
     "distance": 2.42191,
     "center": [
@@ -63,6 +66,5 @@
       -0.5982887900918302,
       0.7515875577627582
     ]
-  },
-  "bakedHome": false
+  }
 }

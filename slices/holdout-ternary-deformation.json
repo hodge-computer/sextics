@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-holdout-ternary-deformation.json",
   "seed": 1822989059,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.34002846073172716
     ]
   ],
-  "triangleCount": 69074,
-  "validated": true,
+  "centerOriginal": [
+    -0.3616247914851714,
+    -0.004448521428423547,
+    -0.25994624481618733
+  ],
+  "displayScale": 3.0230378134308915,
+  "complexScale": 0.385801388842034,
   "camera": {
     "distance": 3.05259,
     "center": [
@@ -63,6 +66,5 @@
       0.6109073706682722,
       -0.19325563386026756
     ]
-  },
-  "bakedHome": false
+  }
 }

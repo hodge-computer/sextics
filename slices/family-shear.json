@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/atlas192-family-shear.json",
   "seed": 1498238246,
-  "resolution": 192,
   "phaseSigns": [
     1,
     -1,
@@ -48,8 +46,13 @@
       -0.3832329336202202
     ]
   ],
-  "triangleCount": 85354,
-  "validated": true,
+  "centerOriginal": [
+    0.07353506006905089,
+    -0.6002050631747406,
+    0.6036214388225146
+  ],
+  "displayScale": 4.172333324321492,
+  "complexScale": 0.292655073808221,
   "camera": {
     "orientation": [
       -0.4943526096796119,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

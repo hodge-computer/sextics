@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/atlas192-family-trace-zero.json",
   "seed": 272984508,
-  "resolution": 192,
   "phaseSigns": [
     -1,
     -1,
@@ -48,8 +46,13 @@
       0.3976265194745219
     ]
   ],
-  "triangleCount": 50902,
-  "validated": true,
+  "centerOriginal": [
+    1.536403748519834,
+    2.0579197695758196,
+    -1.4664474525265816
+  ],
+  "displayScale": 7.110654498905995,
+  "complexScale": 0.29713240095531773,
   "camera": {
     "orientation": [
       0.7940119725030996,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

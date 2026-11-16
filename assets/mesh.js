@@ -1,4 +1,5 @@
-/* Saved mesh decoding and validation, independent of GPU resource lifetime. */
+/* Decoding and validation of the homepage's saved mesh, independent of GPU resource lifetime.
+   Atlas meshes are generated locally by slice-mesh.js. */
 ((root) => {
   async function validateMesh(buffer, indexBuffer, meta, checkpoint) {
     const STRIDE = 9;
@@ -146,11 +147,6 @@
         }
         buffer = data.buffer;
         indexBuffer = parts[3];
-      } else if (manifest.encoding === 'float32-p3-n3-phase2-d1') {
-        [buffer, indexBuffer] = await Promise.all([
-          bytes(manifest.vertices),
-          bytes(manifest.indices)
-        ]);
       } else throw new Error('Unrecognized mesh encoding.');
       check();
       await validateMesh(buffer, indexBuffer, manifest.meta, checkpoint);

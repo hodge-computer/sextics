@@ -1,6 +1,5 @@
 {
   "seed": 3233369580,
-  "resolution": 192,
   "phaseSigns": [
     1,
     -1,
@@ -47,9 +46,13 @@
       -0.019612712437500582
     ]
   ],
-  "mesh": "meshes/atlas192-family-block-cube.json",
-  "triangleCount": 62264,
-  "validated": true,
+  "centerOriginal": [
+    -0.7408282499576946,
+    0.4560664624547574,
+    0.4209525833623536
+  ],
+  "displayScale": 5.3360075049452576,
+  "complexScale": 0.3030525127896324,
   "camera": {
     "orientation": [
       0.16051983670646686,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

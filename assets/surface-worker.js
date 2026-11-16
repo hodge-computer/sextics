@@ -67,7 +67,7 @@ function handleMessage({data}) {
 const pending = [];
 onmessage = event => pending.push(event);
 send('booting');
-Promise.all([import('./divisor.js'), import('./mesh.js'), import('./renderer.js')]).then(() => {
+Promise.all([import('./divisor.js'), import('./mesh.js'), import('./slice-mesh.js'), import('./renderer.js')]).then(() => {
   if (stopped) return;
   onmessage = handleMessage;
   for (const event of pending) {

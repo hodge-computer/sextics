@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-family-sylvester-norm.json",
   "seed": 2897855580,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.4582282568993149
     ]
   ],
-  "triangleCount": 52232,
-  "validated": true,
+  "centerOriginal": [
+    -0.3336278446959058,
+    0.35696263063355965,
+    -0.06666158601216762
+  ],
+  "displayScale": 3.4944816887748815,
+  "complexScale": 0.3739773995115899,
   "camera": {
     "distance": 2.09706,
     "center": [
@@ -63,6 +66,5 @@
       0.3131848119033671,
       0.8511258858670981
     ]
-  },
-  "bakedHome": false
+  }
 }

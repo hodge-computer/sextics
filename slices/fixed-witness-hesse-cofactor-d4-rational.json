@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/atlas192-fixed-witness-hesse-cofactor-d4-rational.json",
   "seed": 2041616101,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.8822682751225709
     ]
   ],
-  "triangleCount": 136604,
-  "validated": true,
+  "centerOriginal": [
+    0.694026191533872,
+    -0.08128523364755386,
+    -0.18010472934603383
+  ],
+  "displayScale": 3.6719589567041173,
+  "complexScale": 0.4122109579479053,
   "camera": {
     "orientation": [
       -0.5033215950515602,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

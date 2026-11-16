@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-mixed-polar.json",
   "seed": 1329253007,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.25062383428752283
     ]
   ],
-  "triangleCount": 75252,
-  "validated": true,
+  "centerOriginal": [
+    0.20148669152621726,
+    -0.5067935063256094,
+    0.580136167963426
+  ],
+  "displayScale": 4.326708044737922,
+  "complexScale": 0.34157514715283044,
   "camera": {
     "distance": 3.27028,
     "center": [
@@ -63,6 +66,5 @@
       0.12461063610890948,
       0.9093495663456256
     ]
-  },
-  "bakedHome": false
+  }
 }

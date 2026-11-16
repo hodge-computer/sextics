@@ -1,6 +1,5 @@
 {
   "seed": 213075,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       0.9200465623430978
     ]
   ],
-  "mesh": "meshes/adaptive176-quadratic-cubic-pullback.json",
-  "triangleCount": 71292,
-  "validated": true,
+  "centerOriginal": [
+    -0.29134285239896196,
+    -0.09144726530045368,
+    0.09229873262093646
+  ],
+  "displayScale": 2.8018593934756453,
+  "complexScale": 0.41133502517793447,
   "camera": {
     "distance": 2.87167,
     "center": [
@@ -63,6 +66,5 @@
       -0.5230684714981881,
       0.08400229065001463
     ]
-  },
-  "bakedHome": false
+  }
 }

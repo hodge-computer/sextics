@@ -1,6 +1,5 @@
 {
   "seed": 170028222,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       -0.759308556287164
     ]
   ],
-  "mesh": "meshes/adaptive176-split-ternary-q2.json",
-  "triangleCount": 70822,
-  "validated": true,
+  "centerOriginal": [
+    -0.6736699004255926,
+    0.7817734195765811,
+    0.058649830104971164
+  ],
+  "displayScale": 5.440074371764281,
+  "complexScale": 0.3269396309771842,
   "camera": {
     "distance": 3.01333,
     "center": [
@@ -63,6 +66,5 @@
       0.19642640691448116,
       0.19642640691448118
     ]
-  },
-  "bakedHome": false
+  }
 }

@@ -1,6 +1,5 @@
 {
   "seed": 100130,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -47,9 +46,13 @@
       0.18849381327010284
     ]
   ],
-  "mesh": "meshes/adaptive176-crossed-ternary-asymmetric.json",
-  "triangleCount": 77478,
-  "validated": true,
+  "centerOriginal": [
+    0.10436069416822594,
+    0.2561382131636523,
+    -0.014556749074945237
+  ],
+  "displayScale": 2.5759547865843873,
+  "complexScale": 0.4480283649645815,
   "camera": {
     "orientation": [
       0.37647868170377774,
@@ -63,6 +66,5 @@
       0
     ],
     "distance": 3.19114
-  },
-  "bakedHome": false
+  }
 }

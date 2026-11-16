@@ -42,7 +42,7 @@ def checked_file(root, name):
 
 
 def selected_meshes(site):
-    """Only manifests selected by the UI and their binary streams are deployed."""
+    """Only saved manifests selected by the UI and their binary streams are deployed."""
     selected = set()
     records = json.loads(checked_file(site, "assets/atlas/index.json").read_text())["records"]
     renders = [
@@ -51,6 +51,8 @@ def selected_meshes(site):
     ]
     renders.append(json.loads(checked_file(site, "assets/home-scene.json").read_text()))
     for render in renders:
+        if "mesh" not in render:
+            continue  # generated in the browser
         name = PurePosixPath("assets") / render["mesh"]
         if name.parts[:2] != ("assets", "meshes") or not is_public(str(name)):
             raise ValueError(f"Unsafe mesh path: {name}")

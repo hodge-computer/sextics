@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-completed-square-nambu-holdout.json",
   "seed": 3537889969,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.29784865206766237
     ]
   ],
-  "triangleCount": 61526,
-  "validated": true,
+  "centerOriginal": [
+    0.9208759634167433,
+    0.11008095495327812,
+    0.5469357570176655
+  ],
+  "displayScale": 3.7548337725446994,
+  "complexScale": 0.3645561749977634,
   "camera": {
     "distance": 2.19842,
     "center": [
@@ -63,6 +66,5 @@
       -0.09994474425643307,
       0.40928113576796604
     ]
-  },
-  "bakedHome": false
+  }
 }

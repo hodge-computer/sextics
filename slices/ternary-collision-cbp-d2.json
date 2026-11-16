@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/atlas192-ternary-collision-cbp-d2.json",
   "seed": 30012552,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       0.15464694292231737
     ]
   ],
-  "triangleCount": 47080,
-  "validated": true,
+  "centerOriginal": [
+    0.06794640421521277,
+    -2.093037654783352,
+    0.015951779266938814
+  ],
+  "displayScale": 3.9490792524274454,
+  "complexScale": 0.34163488868773456,
   "camera": {
     "orientation": [
       0.18948112658362154,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

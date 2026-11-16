@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/atlas192-twoties-tie2-x2-quartic-strict.json",
   "seed": 3779484629,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.04542496740127269
     ]
   ],
-  "triangleCount": 61444,
-  "validated": true,
+  "centerOriginal": [
+    0.11338925740599334,
+    0.05809549760907457,
+    -0.004129911024405959
+  ],
+  "displayScale": 2.8299813644017897,
+  "complexScale": 0.4565354155295521,
   "camera": {
     "orientation": [
       -0.7541051592978546,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

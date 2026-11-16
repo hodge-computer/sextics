@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-one-reflection.json",
   "seed": 561751697,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.4064576485362736
     ]
   ],
-  "triangleCount": 55482,
-  "validated": true,
+  "centerOriginal": [
+    0.6376622964157321,
+    0.826823022337131,
+    -0.9483555414345326
+  ],
+  "displayScale": 5.281178453563169,
+  "complexScale": 0.3137511275514689,
   "camera": {
     "distance": 2.20238,
     "center": [
@@ -63,6 +66,5 @@
       -0.22598962846019766,
       0.7834296529757827
     ]
-  },
-  "bakedHome": false
+  }
 }

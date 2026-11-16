@@ -1,6 +1,5 @@
 {
   "seed": 3417927671,
-  "resolution": 192,
   "phaseSigns": [
     1,
     1,
@@ -9,7 +8,6 @@
     -1,
     -1
   ],
-  "mesh": "meshes/adaptive-holdout.json",
   "planeMatrix": [
     [
       0.1283756685100487,
@@ -48,8 +46,13 @@
       -0.27224438424101355
     ]
   ],
-  "triangleCount": 60750,
-  "validated": true,
+  "centerOriginal": [
+    0.33580024043020557,
+    0.03263076111122608,
+    -0.33339668917858106
+  ],
+  "displayScale": 3.6765737918052017,
+  "complexScale": 0.31612418382268964,
   "camera": {
     "orientation": [
       0.3212020355925617,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

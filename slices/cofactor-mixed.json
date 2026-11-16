@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/atlas192-cofactor-mixed.json",
   "seed": 708507901,
-  "resolution": 192,
   "phaseSigns": [
     -1,
     -1,
@@ -48,8 +46,13 @@
       0.17953633541987785
     ]
   ],
-  "triangleCount": 86584,
-  "validated": true,
+  "centerOriginal": [
+    0.1066905746888649,
+    -0.09490963134515787,
+    -0.6021535202921025
+  ],
+  "displayScale": 3.5572904818018505,
+  "complexScale": 0.40624089305215777,
   "camera": {
     "orientation": [
       -0.10195525612072961,
@@ -63,6 +66,5 @@
       0,
       0
     ]
-  },
-  "bakedHome": false
+  }
 }

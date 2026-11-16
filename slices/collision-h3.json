@@ -1,7 +1,5 @@
 {
-  "mesh": "meshes/adaptive176-collision-h3.json",
   "seed": 2294399669,
-  "resolution": 176,
   "phaseSigns": [
     1,
     1,
@@ -48,8 +46,13 @@
       -0.679003030647818
     ]
   ],
-  "triangleCount": 43518,
-  "validated": true,
+  "centerOriginal": [
+    -0.6325134621509149,
+    -0.4645801658782132,
+    -0.4528505165801743
+  ],
+  "displayScale": 3.1683614087225482,
+  "complexScale": 0.39847315426576596,
   "camera": {
     "distance": 1.9052,
     "center": [
@@ -63,6 +66,5 @@
       0.727134139914936,
       0.2806705231586784
     ]
-  },
-  "bakedHome": false
+  }
 }
