@@ -1,4 +1,5 @@
 import Proposal.GeometricThreeOpenH2
+import Proposal.GeometricProjectiveDescent
 import Proposal.GeometricCanonicalCechBoundary
 
 /-!
@@ -109,5 +110,137 @@ theorem connectingAtTop_eq_zero_iff
 #print axioms connectingAtTop_eq_zero_iff
 
 end CycleQ2ThreeOpenH2Naturality
+
+end
+
+/-! The native coordinate comparison is checked before specializing the
+incidence parameter. Keeping this comparison behind an imported theorem
+also avoids repeating derived-cohomology reductions at the literal seed. -/
+
+noncomputable section
+
+namespace CycleQ2CoordinateTopDescent
+
+open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
+open CycleQ2GeometricProjectiveHOne CycleQ2CartierProjectiveCover
+  CycleQ2CartierSurfaceGrading CycleQ2GeometricSurfaceCoordinates
+  CycleQ2GeometricCartierCech CycleQ2GeometricCartierNormalLift
+  CycleQ2ProjectiveCoordinateCohomology CycleQ2ProjectiveCoordinateH2
+  CycleQ2GeometricFourOpenCech CycleQ2GeometricHomogeneousPrincipal
+  CycleQ2ProjectiveMixedSections CycleQ2ThreeOpenH2Naturality
+  CycleQ2GeometricHomogeneousWeight
+
+local instance surfaceHasExt {T : Type} [TopologicalSpace T] :
+    HasExt.{1} (Sheaf (Opens.grothendieckTopology T) AddCommGrpCat.{0}) := HasExt.standard _
+
+private theorem connectingAtTop_apply {X : TopCat.{0}}
+    (F : Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{0})
+    (U V W : Opens X) (h : (U ⊔ V) ⊔ W = ⊤)
+    (s : F.obj.obj (op (CycleQ2ThreeOpenCechH2.TripleOpen U V W))) :
+    connectingAtTop F U V W h s =
+      (F.cohomologyPresheaf 2).map (eqToIso h.symm).op.hom
+        (CycleQ2ThreeOpenSectionH2.connecting F U V W s) := rfl
+
+private theorem coordinateConnecting_apply (r θ : ℂ)
+    (q : HomogeneousCoordinateLocal r θ Finset.univ) :
+    coordinateConnecting r θ q =
+      CycleQ2ThreeOpenSectionH2.connecting (structureAdditiveSheaf (projectiveSurface r θ))
+        (coordinateOpen r θ 0) (coordinateOpen r θ 1) (coordinateOpen r θ 2)
+        (tripleSections r θ q) := rfl
+
+private theorem rightFiniteClass_eq_coordinateMap (r : ℂ)
+    (hcover : (⨆ i, family (surfaceGrade r 1) (CycleQ2GeometricCartierCech.coordinateCover r) i) = ⊤)
+    (d : TwoCocycles ((homogeneousBiSystem (surfaceGrade r 1)
+      (coverElement r 1) coverDegree (coverElement_mem_grade r 1)
+      (CycleQ2GeometricCartierCech.coordinateCover r) (fun _ => 1) (coordinateCover_mem_grade r)).right ∅))
+    (dH : TwoCocycles (homogeneousCoordinateSystem r))
+    (hR : (homogeneousRightEmpty (surfaceGrade r 1)
+      (coverElement r 1) coverDegree (coverElement_mem_grade r 1)
+      (CycleQ2GeometricCartierCech.coordinateCover r) (fun _ => 1) (coordinateCover_mem_grade r)).mapCycle d = dH) :
+    rightFiniteClass (surfaceGrade r 1)
+      (coverElement r 1) coverDegree (coverElement_mem_grade r 1)
+      (CycleQ2GeometricCartierCech.coordinateCover r) (fun _ => 1) (coordinateCover_mem_grade r) hcover d =
+      ((structureAdditiveSheaf (projectiveSurface r 1)).cohomologyPresheaf 2).map
+        (eqToIso (coordinate_three_cover r 1 one_ne_zero).symm).op.hom
+          (coordinateConnecting r 1 (homogeneousCoordinateRepresentative r dH)) := by
+  exact CycleQ2CoordinateMVBinding.finite_coordinate_top_eq r hcover _
+    (rightFinite_normalized (surfaceGrade r 1) (coverElement r 1) (CycleQ2GeometricCartierCech.coordinateCover r) d.val)
+    (rightFinite_closed (surfaceGrade r 1)
+      (coverElement r 1) coverDegree (coverElement_mem_grade r 1)
+      (CycleQ2GeometricCartierCech.coordinateCover r) (fun _ => 1) (coordinateCover_mem_grade r) hcover d)
+    (homogeneousCoordinateRepresentative r dH)
+    (CycleQ2CoordinateMVBinding.selectedTriple_rightFinite r d dH hR)
+
+private theorem rightFiniteClass_eq_coordinateTop (r : ℂ)
+    (hcover : (⨆ i, family (surfaceGrade r 1) (CycleQ2GeometricCartierCech.coordinateCover r) i) = ⊤)
+    (d : TwoCocycles ((homogeneousBiSystem (surfaceGrade r 1)
+      (coverElement r 1) coverDegree (coverElement_mem_grade r 1)
+      (CycleQ2GeometricCartierCech.coordinateCover r) (fun _ => 1) (coordinateCover_mem_grade r)).right ∅))
+    (dH : TwoCocycles (homogeneousCoordinateSystem r))
+    (hR : (homogeneousRightEmpty (surfaceGrade r 1)
+      (coverElement r 1) coverDegree (coverElement_mem_grade r 1)
+      (CycleQ2GeometricCartierCech.coordinateCover r) (fun _ => 1) (coordinateCover_mem_grade r)).mapCycle d = dH) :
+    rightFiniteClass (surfaceGrade r 1)
+      (coverElement r 1) coverDegree (coverElement_mem_grade r 1)
+      (CycleQ2GeometricCartierCech.coordinateCover r) (fun _ => 1)
+      (coordinateCover_mem_grade r) hcover d =
+      connectingAtTop (X := (show TopCat from projectiveSurface r 1))
+        (structureAdditiveSheaf (projectiveSurface r 1))
+        (coordinateOpen r 1 0) (coordinateOpen r 1 1) (coordinateOpen r 1 2)
+        (coordinate_three_cover r 1 one_ne_zero)
+        (tripleSections r 1 (homogeneousCoordinateRepresentative r dH)) := by
+  have h := congrArg
+    (fun z : (structureAdditiveSheaf (projectiveSurface r 1)).H' 2
+        ((coordinateOpen r 1 0 ⊔ coordinateOpen r 1 1) ⊔ coordinateOpen r 1 2) =>
+      ((structureAdditiveSheaf (projectiveSurface r 1)).cohomologyPresheaf 2).map
+        (eqToIso (coordinate_three_cover r 1 one_ne_zero).symm).op.hom z)
+    (coordinateConnecting_apply r 1 (homogeneousCoordinateRepresentative r dH))
+  exact (rightFiniteClass_eq_coordinateMap r hcover d dH hR).trans
+    (h.trans (connectingAtTop_apply (X := (show TopCat from projectiveSurface r 1))
+      (structureAdditiveSheaf (projectiveSurface r 1))
+      (coordinateOpen r 1 0) (coordinateOpen r 1 1) (coordinateOpen r 1 2)
+      (coordinate_three_cover r 1 one_ne_zero)
+      (tripleSections r 1 (homogeneousCoordinateRepresentative r dH))).symm)
+
+private theorem homogeneousCoordinateRepresentative_neg (r : ℂ)
+    (dH : TwoCocycles (homogeneousCoordinateSystem r)) :
+    homogeneousCoordinateRepresentative r (-dH) =
+      -homogeneousCoordinateRepresentative r dH := rfl
+
+theorem rightFiniteClass_neg_eq_coordinateTop (r : ℂ)
+    (hcover : (⨆ i, family (surfaceGrade r 1) (CycleQ2GeometricCartierCech.coordinateCover r) i) = ⊤)
+    (d : TwoCocycles ((homogeneousBiSystem (surfaceGrade r 1)
+      (coverElement r 1) coverDegree (coverElement_mem_grade r 1)
+      (CycleQ2GeometricCartierCech.coordinateCover r) (fun _ => 1) (coordinateCover_mem_grade r)).right ∅))
+    (dH : TwoCocycles (homogeneousCoordinateSystem r))
+    (hR : (homogeneousRightEmpty (surfaceGrade r 1)
+      (coverElement r 1) coverDegree (coverElement_mem_grade r 1)
+      (CycleQ2GeometricCartierCech.coordinateCover r) (fun _ => 1) (coordinateCover_mem_grade r)).mapCycle d = dH) :
+    rightFiniteClass (surfaceGrade r 1)
+      (coverElement r 1) coverDegree (coverElement_mem_grade r 1)
+      (CycleQ2GeometricCartierCech.coordinateCover r) (fun _ => 1)
+      (coordinateCover_mem_grade r) hcover (-d) =
+      connectingAtTop (X := (show TopCat from projectiveSurface r 1))
+        (structureAdditiveSheaf (projectiveSurface r 1))
+        (coordinateOpen r 1 0) (coordinateOpen r 1 1) (coordinateOpen r 1 2)
+        (coordinate_three_cover r 1 one_ne_zero)
+        (tripleSections r 1 (-homogeneousCoordinateRepresentative r dH)) := by
+  let f := (homogeneousRightEmpty (surfaceGrade r 1)
+    (coverElement r 1) coverDegree (coverElement_mem_grade r 1)
+    (CycleQ2GeometricCartierCech.coordinateCover r) (fun _ => 1)
+    (coordinateCover_mem_grade r)).mapCycle
+  have hneg : f (-d) = -dH := (_root_.map_neg f d).trans
+    (congrArg (fun z : TwoCocycles (homogeneousCoordinateSystem r) => -z) hR)
+  have h := rightFiniteClass_eq_coordinateTop r hcover (-d) (-dH) hneg
+  exact h.trans (congrArg (fun q : HomogeneousCoordinateTop r =>
+    connectingAtTop (X := (show TopCat from projectiveSurface r 1))
+      (structureAdditiveSheaf (projectiveSurface r 1))
+      (coordinateOpen r 1 0) (coordinateOpen r 1 1) (coordinateOpen r 1 2)
+      (coordinate_three_cover r 1 one_ne_zero) (tripleSections r 1 q))
+    (homogeneousCoordinateRepresentative_neg r dH))
+
+#print axioms rightFiniteClass_neg_eq_coordinateTop
+
+end CycleQ2CoordinateTopDescent
 
 end
