@@ -17,7 +17,7 @@ polynomial that the curve is to satisfy.
 The coefficient-incidence method follows `fqlx`'s shared constructions and the
 accepted ternary-deformation proof. This curve shape is extracted from
 `hodgepodgeconjecture`'s accepted cyclic cubic construction,
-`data/cycle-three/JacobianIncidence.lean` (PR #165), prepared with OpenAI
+`data/cycle-three/JacobianIncidence.lean`, prepared with OpenAI
 Codex assistance.
 -/
 

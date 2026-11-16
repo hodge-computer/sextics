@@ -5,7 +5,7 @@ import Mathlib.Tactic
 import Mathlib.Topology.Order.IntermediateValue
 
 /- Adapted for the instance `one-reflection-y2-sector` from the accepted holdout proof by `fqlx`
-(hodge-computer/sextics PR #128, prepared with OpenAI ChatGPT assistance). The conic family,
+(prepared with OpenAI ChatGPT assistance). The conic family,
 its coefficient relations and the two Jacobian polynomials are fqlx's; only the seed parameter
 changes: the quotient of the one-reflection sextic is the holdout quotient with both coupling
 coefficients equal, which selects the members of fqlx's conic family with beta = alpha. These

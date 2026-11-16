@@ -8,8 +8,8 @@ import Mathlib.Tactic
 
 /-!
 Exact replacement conic for holdout-ternary-deformation, with coefficient 1/14.
-The coefficient-incidence method follows fqlx's accepted holdout construction
-(PR #128). The mod-five approach also draws on 1337isnot1337's PR #149.
+The coefficient-incidence method follows fqlx's accepted holdout construction.
+The mod-five approach also draws on 1337isnot1337's crossed-ternary-asymmetric proof.
 This new seed and its formalization were prepared with OpenAI Codex assistance
 for hodgepodgeconjecture. This module alone asserts no HasCertificate theorem.
 -/

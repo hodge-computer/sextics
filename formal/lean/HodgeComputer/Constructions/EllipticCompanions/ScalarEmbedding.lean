@@ -3,7 +3,7 @@ import HodgeComputer.Constructions.HoldoutCover.AlgebraicFields
 
 /-!
 Parameter-dependent version of the monic cubic/elliptic embedding in
-1337isnot1337's accepted crossed-ternary proof (PR #149). The polynomial
+1337isnot1337's accepted crossed-ternary proof. The polynomial
 on the two ordinary affine coordinates is an argument, not a fixed sextic.
 The application must supply irreducibility of its companion cubic.
 Prepared with OpenAI Codex assistance for fqlx; original mathematical credit

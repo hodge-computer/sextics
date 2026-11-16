@@ -3,7 +3,7 @@ import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.Algebra.MvPolynomial.CommRing
 
 /-! Reusable finite-algebra and contact calculus extracted from `HeadOfNaps`’
-accepted quadric-contact-broken (#122) and holdout-q2 (#124) proofs.
+accepted quadric-contact-broken and holdout-q2 proofs.
 See this directory’s README for hypotheses, entry points, and attribution. -/
 
 /-! Coefficients regular at a known good parameter value.

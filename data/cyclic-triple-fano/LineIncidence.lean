@@ -8,7 +8,7 @@ import Mathlib.Tactic.Ring
 /-!
 Weighted-line incidence for the cyclic triple-cover quotient, in order
 Y0,Y1,X0,X1,Y2,Z. The seed curve is due to rbajaj5 (discussion #112).
-The incidence, normal, and descent architecture is adapted from fqlx's PR #150.
+The incidence, normal, and descent architecture is adapted from fqlx's reflection-coupled-fano proof.
 This module fixes six positive coefficients, with Y1 advancing at unit speed.
 -/
 
