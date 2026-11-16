@@ -12,8 +12,7 @@ are specializations of the original relative derivatives, so every actual
 point over zero lies in the already constructed relative Jacobian open.
 No global fiber isomorphism or fiberwise smoothness implication is assumed.
 
-Source-only draft: no Lean elaboration, compilation, or kernel replay has
-been run. Prepared for `fqlx` with OpenAI ChatGPT assistance, following
+Prepared for `fqlx` with OpenAI ChatGPT assistance, following
 Ben Diamond's geometric route and the project's incidence-prime method.
 -/
 
@@ -96,7 +95,11 @@ theorem exists_weightOne_of_over_zero (r : ℂ) (hr : r ^ 3 = 2)
   have hFzero := Ideal.Quotient.eq_zero_iff_mem.mpr hFseed
   rw [seedFamily_zero_of_cube_two r hr] at hFzero
   have hw3 : Ideal.Quotient.mk J (X (4 : Fin 5)) ^ 3 = 0 := by
-    simpa only [map_add, map_pow, hz 0, hz 1, hz 2, hz 3,
+    have h0 : Ideal.Quotient.mk J (X (0 : Fin 5)) = 0 := hz 0
+    have h1 : Ideal.Quotient.mk J (X (1 : Fin 5)) = 0 := hz 1
+    have h2 : Ideal.Quotient.mk J (X (2 : Fin 5)) = 0 := hz 2
+    have h3 : Ideal.Quotient.mk J (X (3 : Fin 5)) = 0 := hz 3
+    simpa only [map_add, map_pow, h0, h1, h2, h3,
       zero_pow (by decide : (6 : ℕ) ≠ 0), zero_add] using hFzero
   have hw : (X (4 : Fin 5) : FamilyPolynomial) ∈ P :=
     (coordinate_mem_specializedPrime_iff P 4).mp
@@ -122,7 +125,7 @@ private theorem exists_seedDerivative_not_mem (r : ℂ) (hr : r ^ 3 = 2)
     have hc : IsUnit (CycleQ2SeedFermatCone.coordinateDegree j.1 : ℂ) := by
       apply isUnit_iff_ne_zero.mpr
       rcases j with ⟨j, hj⟩
-      fin_cases j <;> norm_num [CycleQ2SeedFermatCone.coordinateDegree]
+      fin_cases j <;> norm_num [CycleQ2SeedFermatCone.coordinateDegree, Fin.ext_iff]
     have hc' : IsUnit (Ideal.Quotient.mk J
         (C (CycleQ2SeedFermatCone.coordinateDegree j.1 : ℂ))) :=
       hc.map ((Ideal.Quotient.mk J).comp MvPolynomial.C)
@@ -135,12 +138,12 @@ private theorem exists_seedDerivative_not_mem (r : ℂ) (hr : r ^ 3 = 2)
       Ideal.Quotient.mk J (X j) = if j = i.castSucc then 1 else 0 := by
     by_cases hj : j = i.castSucc
     · subst j
-      simpa only [if_pos rfl] using hi'
+      exact hi'.trans (if_pos rfl).symm
     · simpa only [if_neg hj] using hz ⟨j, hj⟩
   have hFzero := Ideal.Quotient.eq_zero_iff_mem.mpr hF
   rw [seedFamily_zero_of_cube_two r hr] at hFzero
   simp only [map_add, map_pow, hcoord] at hFzero
-  fin_cases i <;> norm_num at hFzero
+  fin_cases i <;> norm_num [Fin.ext_iff] at hFzero
 
 /-- At a normalized chart point over zero, one of the actual relative
 derivatives is nonzero in its prime quotient. -/
