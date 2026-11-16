@@ -5,8 +5,6 @@ import Mathlib.RingTheory.Smooth.Flat
 /-!
 # Smoothness of the original incidence-surface cone minor patches
 
-Status: source-only proof draft. No elaboration or kernel replay was run.
-
 The standard-smooth Jacobian presentation uses the ordered equations F,h.
 Their span is exactly the existing pointEquations ideal, and the quotient
 equivalence preserves every polynomial and coefficient. The induced
@@ -43,7 +41,7 @@ theorem equationIdeal_eq (y : ParameterIndex → S) :
   ext a
   constructor
   · rintro ⟨j, rfl⟩
-    fin_cases j <;> simp [equations]
+    fin_cases j <;> simp [CycleQ2IncidenceDehomogenizedChart.equations]
   · simp only [Set.mem_insert_iff, Set.mem_singleton_iff]
     rintro (rfl | rfl)
     · exact ⟨1, rfl⟩

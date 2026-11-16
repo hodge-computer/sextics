@@ -14,8 +14,7 @@ orbit ideal. This is the algebraic comparison needed on principal
 projective overlaps; identifying those overlap rings and their sheaf
 maps remains a separate geometric binding.
 
-Source-only draft. No elaboration or kernel replay has been run. The
-protected certificate and its existing admission are unchanged.
+The protected certificate and its existing admission are unchanged.
 Prepared for fqlx with OpenAI ChatGPT assistance; the geometric route is
 credited in solution.md.
 -/
@@ -112,6 +111,8 @@ section Localization
 
 variable {A : Type*} [CommRing A] (F : FactorData A)
 variable (M : Submonoid A) (B : Type*) [CommRing B] [Algebra A B] [IsLocalization M B]
+
+include M
 
 /-- Localization preserves regularity even when the coefficient
 map is not injective or some localization denominators are zero divisors. -/
