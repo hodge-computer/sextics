@@ -13,8 +13,7 @@ the actual punctured-cone structural morphism.
 This construction does not assert smoothness of a weighted projective
 quotient or of a family over the cubic parameter space.
 
-Source-only draft: no Lean elaboration, compilation, or kernel replay
-has been run. Prepared for fqlx with OpenAI ChatGPT assistance, following
+Prepared for fqlx with OpenAI ChatGPT assistance, following
 the geometric seed in Ben Diamond's surface-section argument.
 -/
 
@@ -52,8 +51,6 @@ theorem coordinatePatchToCone_comp_toComplex (r : ℂ) (j : Fin 5) :
   unfold coordinatePatchToCone coneToComplex toComplex
   rw [← Spec.map_comp]
   congr 1
-  ext c
-  exact (IsScalarTower.algebraMap_apply ℂ (ConeRing r) (CoordinateRing r j) c).symm
 
 /-- The canonical geometric identification with the proved affine patch. -/
 def coordinateOpenIsoPatch (r : ℂ) (j : Fin 5) :

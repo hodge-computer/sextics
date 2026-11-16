@@ -11,8 +11,7 @@ map and structural morphism use the same complex algebra structure as the
 affine cone. The four degree-one coordinate classes and the Fermat relation
 are exported for the chart retraction and global smoothness construction.
 
-Source-only draft: no Lean elaboration, compilation, or kernel replay has
-been run. Prepared for `fqlx` with OpenAI ChatGPT assistance, following the
+Prepared for `fqlx` with OpenAI ChatGPT assistance, following the
 geometric seed in Ben Diamond's surface-section argument.
 -/
 
@@ -96,8 +95,8 @@ theorem fermatRelation (r : ℂ) (hr : r ^ 3 = 2) :
     coordinateClass r 0 ^ 6 + coordinateClass r 1 ^ 6 +
       coordinateClass r 2 ^ 6 + coordinateClass r 3 ^ 6 +
       coordinateClass r 4 ^ 3 = 0 := by
-  have h := coneEquation r
-  rw [seedFamily_zero_of_cube_two r hr] at h
+  have h := (congrArg (coneQuotient r) (seedFamily_zero_of_cube_two r hr)).symm.trans
+    (coneEquation r)
   simpa only [map_add, map_pow, coordinateClass] using h
 
 #print axioms seedEquation_homogeneous

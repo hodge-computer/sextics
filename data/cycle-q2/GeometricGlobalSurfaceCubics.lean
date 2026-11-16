@@ -5,8 +5,7 @@ import Proposal.GeometricSurfaceSecondThirdTransition
 /-!
 # Global cubic two-forms on the actual literal projective surface
 
-Source-only draft: compilation and independent kernel replay were
-deferred at the user's request. Cubic residue sections are glued over
+Cubic residue sections are glued over
 the complete three-coordinate augmented-Jacobian cover. Their restrictions
 are the original normal-neighborhood sections, with the same orientation.
 There is no global-section extension hypothesis in the construction.
@@ -58,17 +57,23 @@ private theorem thirdCubicSection_restrict (n t : SurfacePoly) (p : WeightedPoly
           (thirdEquations 57 1) n t (thirdPatchChart 57 1 n t)
           (thirdPatchChart_overComplex 57 1 n t) V).symm)
   unfold thirdCubicSection
-  rw [CanonicalForms.val.map_smul, chartSection_naturality, hres]
+  rw [CanonicalForms.val.map_smul, hres]
+  change (Surface.presheaf.map k.left.op
+      (chartSection (thirdPatchChart 57 1 n t) W
+        (algebraMap SurfacePoly (AdjunctionPatch (thirdEquations 57 1) n t)
+          (thirdDehomogenize p)))) • _ = _
+  exact congrArg (fun a : Γ(Surface,V.left) => a •
+    chartResidueSheafSection (projectiveToComplex 57 1) (thirdEquations 57 1) n t
+      (thirdPatchChart 57 1 n t) (thirdPatchChart_overComplex 57 1 n t) V)
+    (chartSection_naturality (thirdPatchChart 57 1 n t) k _)
 
 /-- The original first and second sections, with the positive third-chart
 residue added on every augmented Jacobian pair. -/
-def localSectionOn (p : WeightedPoly) (a : PatchIndex) (O : Surface.Opens)
-    (hO : O ≤ patchOpen a) : CanonicalForms.val.obj (op O) := by
-  rcases a with ⟨i,n,t⟩
-  fin_cases i
-  · exact firstCubicSection 57 1 n t p (Over.mk (homOfLE hO))
-  · exact secondCubicSection 57 1 n t p (Over.mk (homOfLE hO))
-  · exact thirdCubicSection 57 1 n t p (Over.mk (homOfLE hO))
+def localSectionOn (p : WeightedPoly) : (a : PatchIndex) → (O : Surface.Opens) →
+    O ≤ patchOpen a → CanonicalForms.val.obj (op O)
+  | (0,n,t), O, hO => firstCubicSection 57 1 n t p (Over.mk (homOfLE hO))
+  | (1,n,t), O, hO => secondCubicSection 57 1 n t p (Over.mk (homOfLE hO))
+  | (2,n,t), O, hO => thirdCubicSection 57 1 n t p (Over.mk (homOfLE hO))
 
 def localSection (p : WeightedPoly) (a : PatchIndex) :=
   localSectionOn p a (patchOpen a) le_rfl
@@ -101,19 +106,19 @@ theorem localSectionOn_pairwise (p : WeightedCubic)
       (firstSurfaceDehomogenize p.val) (Over.mk (homOfLE (le_inf ha hb)))).symm
   · exact CycleQ2SurfaceResidueSheafOverlap.orientedCubicSections_agree
       57 1 n₁ t₁ n₂ t₂ p.val p.property (Over.mk (homOfLE (le_inf ha hb)))
-  · exact CycleQ2SurfaceFirstThirdTransition.orientedCubicSections_agree
-      57 1 n₁ t₁ n₂ t₂ p.val p.property (Over.mk (homOfLE (le_inf ha hb)))
+  · exact CycleQ2SurfaceFirstThirdTransition.orientedCubicSections_agree_on_open
+      57 1 n₁ t₁ n₂ t₂ O ha hb p.val p.property
   · exact (CycleQ2SurfaceResidueSheafOverlap.orientedCubicSections_agree
       57 1 n₂ t₂ n₁ t₁ p.val p.property (Over.mk (homOfLE (le_inf hb ha)))).symm
   · exact congrArg (fun s : CanonicalForms.val.obj (op O) => -s)
       (second_coefficient_section_independent 57 1 n₁ t₁ n₂ t₂
         (secondSurfaceDehomogenize p.val) (Over.mk (homOfLE (le_inf ha hb)))).symm
-  · exact CycleQ2SurfaceSecondThirdTransition.orientedCubicSections_agree
-      57 1 n₁ t₁ n₂ t₂ p.val p.property (Over.mk (homOfLE (le_inf ha hb)))
-  · exact (CycleQ2SurfaceFirstThirdTransition.orientedCubicSections_agree
-      57 1 n₂ t₂ n₁ t₁ p.val p.property (Over.mk (homOfLE (le_inf hb ha)))).symm
-  · exact (CycleQ2SurfaceSecondThirdTransition.orientedCubicSections_agree
-      57 1 n₂ t₂ n₁ t₁ p.val p.property (Over.mk (homOfLE (le_inf hb ha)))).symm
+  · exact CycleQ2SurfaceSecondThirdTransition.orientedCubicSections_agree_on_open
+      57 1 n₁ t₁ n₂ t₂ O ha hb p.val p.property
+  · exact (CycleQ2SurfaceFirstThirdTransition.orientedCubicSections_agree_on_open
+      57 1 n₂ t₂ n₁ t₁ O hb ha p.val p.property).symm
+  · exact (CycleQ2SurfaceSecondThirdTransition.orientedCubicSections_agree_on_open
+      57 1 n₂ t₂ n₁ t₁ O hb ha p.val p.property).symm
   · exact (coefficient_section_independent (thirdEquations 57 1) n₁ t₁ n₂ t₂
       (thirdAffineChart 57 1) (projectiveToComplex 57 1) (thirdAffineChart_overComplex 57 1)
       (Over.mk (homOfLE (le_inf ha hb))) (thirdDehomogenize p.val)).symm
@@ -129,8 +134,11 @@ theorem localSections_compatible (p : WeightedCubic) :
 theorem existsUnique_globalCubicSection (p : WeightedCubic) :
     ∃! s : CanonicalForms.val.obj (op (⊤ : Surface.Opens)), ∀ a : PatchIndex,
       CanonicalForms.val.map (homOfLE (show patchOpen a ≤ ⊤ from le_top)).op s =
-        localSection p.val a :=
-  AdditiveForms.existsUnique_gluing' patchOpen ⊤ (fun _ => homOfLE le_top)
+        localSection p.val a := by
+  change ∃! s : AdditiveForms.obj.obj (op (⊤ : Surface.Opens)), ∀ a : PatchIndex,
+    AdditiveForms.obj.map (homOfLE (show patchOpen a ≤ ⊤ from le_top)).op s =
+      localSection p.val a
+  exact AdditiveForms.existsUnique_gluing' patchOpen ⊤ (fun _ => homOfLE le_top)
     patchOpen_cover.ge (localSection p.val) (localSections_compatible p)
 
 def globalCubicSection (p : WeightedCubic) : CanonicalForms.val.obj (op (⊤ : Surface.Opens)) :=
