@@ -1,20 +1,15 @@
-import HodgeTarget
+import Proposal.TargetBinding
 import Proposal.PhysicalPrimitive
 
-/-! Binding the mixed-polar construction to the protected immutable target. -/
+/-! Bind the compact quadratic-shear construction to the immutable target. -/
 noncomputable section
 namespace Submission
 
 theorem certificate :
     HodgeComputer.HasCertificate HodgeSubmission.F HodgeSubmission.q HodgeSubmission.A := by
-  have hF : HodgeSubmission.F = CyclePhysical.sextic := by
-    unfold HodgeSubmission.F CyclePhysical.sextic
-    ring
-  have hA : HodgeSubmission.A = CyclePhysical.source := by
-    unfold HodgeSubmission.A CyclePhysical.source
-    ring
-  rw [hF, hA]
-  exact CyclePhysicalPrimitive.certificate
+  rw [MixedPolarTargetBinding.equation,MixedPolarTargetBinding.source,
+    MixedPolarTargetBinding.pole_order]
+  exact MixedPolarPhysicalPrimitive.certificate
 
 end Submission
 #print axioms Submission.certificate

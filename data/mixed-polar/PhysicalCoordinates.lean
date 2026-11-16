@@ -1,20 +1,24 @@
 import Proposal.PhysicalField
-import Proposal.PolarCubicCovariants
 import Mathlib.Tactic.LinearCombination
 import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
 
-/-! The paired-sign and ratio coordinates inside the exact physical residue
-field. The submitted equation has alpha fixed to one, two chain terms of coefficient
-one half, and the reversed-edge term of coefficient one third. All coordinate denominators used here are proved
-nonzero. Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeconjecture.
-Adapted to mixed-polar for benediamond with OpenAI Codex assistance. -/
+/-! The exact mixed-polar paired-sign coordinates. Adapted from the accepted
+mixed-biweight coordinates with attribution to fqlx and hodgepodgeconjecture.
+The reverse edge is xy^2, and the physical source is balanced. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 2000000
-namespace CyclePhysicalCoordinates
-open CyclePhysical
+namespace MixedPolarPhysicalCoordinates
+open MixedPolarPhysical
 def coordinate (i : Fin 6) : FunctionField := residueMap (MvPolynomial.X i)
 local notation "p" => coordinate
+
+instance physical_charZero : CharZero FunctionField :=
+  charZero_of_injective_ringHom (f := residueMap.comp MvPolynomial.C)
+    (residueMap.comp MvPolynomial.C).injective
+
+def cubic {K : Type*} [CommRing K] (a b c d e f x y z : K) : K :=
+  a*x^3+b*y^3+c*z^3+d*x^2*y+e*y^2*z+f*x*y^2
 
 lemma coordinate_ne_zero (i : Fin 6) : p i ≠ 0 := by
   intro hz
@@ -26,7 +30,7 @@ lemma coordinate_ne_zero (i : Fin 6) : p i ≠ 0 := by
 
 lemma equation_zero :
     p 0^6+p 1^6+p 2^6+p 3^6+p 4^6+p 5^6+
-      (1/2)*(p 0^3*p 1*p 3*p 4+p 1^3*p 2*p 4*p 5)+(1/3)*(p 4^3*p 0*p 1*p 3)=0 := by
+      (1/2)*(p 0^3*p 1*p 3*p 4+p 1^3*p 2*p 4*p 5)+(1/3)*(p 0*p 1*p 3*p 4^3)=0 := by
   have hh : residueMap (MvPolynomial.C (1/2:ℂ))=(1/2:FunctionField) := by
     change (residueMap.comp MvPolynomial.C) (1/2:ℂ)=_
     rw [map_div₀,map_one,map_ofNat]
@@ -56,16 +60,61 @@ lemma ratio_ne_zero : ratio ≠ 0 := div_ne_zero (coordinate_ne_zero 3) (coordin
 lemma t_ne_zero : t ≠ 0 := pow_ne_zero _ ratio_ne_zero
 
 lemma cubic_equation :
-    PolarCubic.cubic coeffA coeffB coeffC coeffD coeffE coeffF x y 1=0 := by
+    cubic coeffA coeffB coeffC coeffD coeffE coeffF x y 1=0 := by
   have h0 := coordinate_ne_zero 0
   have h1 := coordinate_ne_zero 1
   have h2 := coordinate_ne_zero 2
   have h3 := coordinate_ne_zero 3
   have he := equation_zero
-  simp only [PolarCubic.cubic,coeffA,coeffB,coeffC,coeffD,coeffE,coeffF,
+  simp only [cubic,coeffA,coeffB,coeffC,coeffD,coeffE,coeffF,
     x,y,radial,t,cOne,cTwo,ratio]
   field_simp
-  linear_combination he
+  linear_combination 6*he
 
-end CyclePhysicalCoordinates
-#print axioms CyclePhysicalCoordinates.cubic_equation
+lemma coordinate_X (i : Fin 6) : residueMap (MvPolynomial.X i)=p i := rfl
+lemma field_half : residueMap (MvPolynomial.C (1/2:ℂ))=(1/2:FunctionField) := by
+  change (residueMap.comp MvPolynomial.C) (1/2:ℂ)=_
+  rw [map_div₀,map_one,map_ofNat]
+lemma field_third : residueMap (MvPolynomial.C (1/3:ℂ))=(1/3:FunctionField) := by
+  change (residueMap.comp MvPolynomial.C) (1/3:ℂ)=_
+  rw [map_div₀,map_one,map_ofNat]
+def gradient (i : Fin 6) : FunctionField := residueMap (MvPolynomial.pderiv i sextic)
+def hessian (i j : Fin 6) : FunctionField :=
+  residueMap (MvPolynomial.pderiv i (MvPolynomial.pderiv j sextic))
+def pairedGradient : FunctionField := p 0*gradient 0+p 3*gradient 3
+def pairedHessian : FunctionField :=
+  p 0^2*hessian 0 0+2*p 0*p 3*hessian 0 3+p 3^2*hessian 3 3
+def cubicNormal : FunctionField := 3*coeffA*x^2+2*coeffD*x*y+coeffF*y^2
+def cubicSecondNormal : FunctionField := 6*coeffA*x+2*coeffD*y
+
+lemma paired_gradient_identity : pairedGradient=2*radial^3*x*cubicNormal := by
+  have h0 := coordinate_ne_zero 0
+  have h1 := coordinate_ne_zero 1
+  have h2 := coordinate_ne_zero 2
+  have h3 := coordinate_ne_zero 3
+  simp only [pairedGradient,gradient,sextic,MvPolynomial.pderiv_mul,
+    MvPolynomial.pderiv_pow,map_add,map_mul,map_pow,MvPolynomial.pderiv_C,
+    MvPolynomial.pderiv_X,Pi.single_apply]
+  norm_num [Fin.ext_iff,coordinate_X,map_ofNat,field_half,field_third]
+  simp only [cubicNormal,coeffA,coeffD,coeffF,radial,x,y,t,cOne,cTwo,ratio]
+  field_simp
+  ring
+
+lemma paired_hessian_identity :
+    pairedHessian-pairedGradient=4*radial^3*x^2*cubicSecondNormal := by
+  have h0 := coordinate_ne_zero 0
+  have h1 := coordinate_ne_zero 1
+  have h2 := coordinate_ne_zero 2
+  have h3 := coordinate_ne_zero 3
+  simp only [pairedHessian,pairedGradient,hessian,gradient,sextic,
+    MvPolynomial.pderiv_mul,MvPolynomial.pderiv_pow,map_add,map_mul,map_pow,
+    MvPolynomial.pderiv_C,MvPolynomial.pderiv_X,Pi.single_apply,
+    Derivation.map_natCast]
+  norm_num [Fin.ext_iff,coordinate_X,map_ofNat,field_half,field_third]
+  simp only [cubicSecondNormal,coeffA,coeffD,coeffF,radial,x,y,t,cOne,cTwo,ratio]
+  field_simp
+  ring
+
+
+end MixedPolarPhysicalCoordinates
+#print axioms MixedPolarPhysicalCoordinates.cubic_equation

@@ -6,13 +6,14 @@ import Mathlib.Analysis.Complex.Polynomial.Basic
 Arithmetic lifting of the mixed-polar conic with all four independent
 parameters retained. The characteristic-changing step uses the shared
 square-system theorem of fqlx, not a continuity claim about the modular seed.
-Adapted from the accepted cyclic and transitive constructions of hodgepodgeconjecture and fqlx; this mixed-polar specialization was prepared for benediamond with OpenAI Codex assistance.
+Adapted from the accepted constructions of fqlx and hodgepodgeconjecture.
+Prepared for benediamond with OpenAI Codex assistance.
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 1000000
-namespace CycleJacobianLifting
-open HoldoutConstruction CycleJacobianIncidence CycleJacobianSeedBinding
+namespace MixedPolarJacobianLifting
+open HoldoutConstruction MixedPolarJacobianIncidence MixedPolarJacobianSeedBinding
 local instance : Fact (Nat.Prime 5) := ⟨by decide⟩
 
 abbrev ParameterRing := MvPolynomial (Fin 4) ℤ
@@ -22,14 +23,14 @@ def genericEquations : Fin 13 → MvPolynomial (Fin 13) ParameterRing :=
   equations (parameter 0) (parameter 1) endpoints
 
 def seedMap : ParameterRing →+* ZMod 5 :=
-  MvPolynomial.eval₂Hom (Int.castRingHom (ZMod 5)) ![2,1,1,3]
-lemma seedMap_parameter (i : Fin 4) : seedMap (parameter i)=(![2,1,1,3] : Fin 4 → ZMod 5) i := by
+  MvPolynomial.eval₂Hom (Int.castRingHom (ZMod 5)) ![1,3,1,4]
+lemma seedMap_parameter (i : Fin 4) : seedMap (parameter i)=(![1,3,1,4] : Fin 4 → ZMod 5) i := by
   simp [seedMap,parameter]
 lemma seed_curve_binding : curveEval endpoints seedMap seed=seedCurve := by
   rw [curveEval_eq_valueCurve,← curveEval_seed,curveEval_eq_valueCurve]
   congr 1
   funext i
-  fin_cases i <;> simp [endpoints,seedMap_parameter,CycleJacobianSeedBinding.endpoints]
+  fin_cases i <;> simp [endpoints,seedMap_parameter,MixedPolarJacobianSeedBinding.endpoints]
 
 section Seed
 local instance : Algebra ParameterRing (ZMod 5) := seedMap.toAlgebra
@@ -97,4 +98,4 @@ theorem complex_generic_factor_exists :
 
 #print axioms generic_lift
 #print axioms complex_generic_factor_exists
-end CycleJacobianLifting
+end MixedPolarJacobianLifting

@@ -1,17 +1,13 @@
-import Proposal.PhysicalNormalTransport
-import Proposal.PolarCubicFunctorial
+import Proposal.PhysicalShear
 
-/-! The relative cubic derivation on the actual sextic function field.
-All four passive parameters are fixed and y has derivative one. This supplies
-the derivation required by the cubic covariant differential identity; it does
-not posit an auxiliary parameter derivation on a specialized field.
-Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeconjecture.
-Adapted to mixed-polar for benediamond with OpenAI Codex assistance. -/
+/-! The actual relative cubic derivation on the mixed-polar residue field.
+Adapted from the accepted tangent construction of hodgepodgeconjecture and
+fqlx. Its finite extension fixes the actual algebraic shear coefficient. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 2000000
-namespace CyclePhysicalCubicTangent
-open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates CyclePhysicalNormalTransport
+namespace MixedPolarPhysicalTangent
+open HoldoutConstruction MixedPolarPhysical MixedPolarPhysicalCoordinates
 open scoped BigOperators
 local notation "p" => coordinate
 local instance : Algebra ℤ FunctionField := Ring.toIntAlgebra _
@@ -103,7 +99,44 @@ lemma derivative_x : derivative x= -cubicYNormal/cubicNormal := by
   have hg := cubic_normal_ne_zero
   field_simp
 
-end CyclePhysicalCubicTangent
-#print axioms CyclePhysicalCubicTangent.derivative_coordinate
-#print axioms CyclePhysicalCubicTangent.passive_parameters
-#print axioms CyclePhysicalCubicTangent.derivative_x
+open MixedPolarPhysicalShear
+
+def extendedDerivative : Derivation ℤ Extension Extension :=
+  extendFiniteDerivation derivative
+lemma extended_on_base (value : FunctionField) :
+    extendedDerivative (ι value)=ι (derivative value) :=
+  extendFiniteDerivation_apply derivative value
+
+lemma sheared_coefficient_constants :
+    extendedDerivative a=0 ∧ extendedDerivative b=0 ∧ extendedDerivative c=0 ∧
+      extendedDerivative d=0 ∧ extendedDerivative e=0 ∧ extendedDerivative k=0 := by
+  obtain ⟨ha,hb,hc,hd,he,hf⟩ := coefficient_constants
+  have hk : extendedDerivative k=0 :=
+    MixedPolarShear.shear_constant FunctionField coeffA coeffD coeffF derivative ha hd hf
+  have h3 : extendedDerivative (3:Extension)=0 := extendedDerivative.map_natCast 3
+  repeat' apply And.intro
+  all_goals simp [a,b,c,d,e,Derivation.leibniz,Derivation.leibniz_pow,map_add,
+    extended_on_base,ha,hb,hc,hd,he,hf,hk,h3,smul_eq_mul,nsmul_eq_mul]
+
+lemma extended_y : extendedDerivative MixedPolarPhysicalShear.y=1 := by
+  rw [MixedPolarPhysicalShear.y,extended_on_base,passive_parameters.2.2.2.2.1,map_one]
+
+lemma extended_X : extendedDerivative X= -yNormal/normal := by
+  obtain ⟨ha,hb,hc,hd,he,hk⟩ := sheared_coefficient_constants
+  have h := congrArg extendedDerivative MixedPolarPhysicalShear.cubic_equation
+  have hone : extendedDerivative (1:Extension)=0 := extendedDerivative.map_one_eq_zero
+  simp only [TransitiveCubic.cubic,map_add,Derivation.leibniz,Derivation.leibniz_pow,
+    smul_eq_mul,nsmul_eq_mul,ha,hb,hc,hd,he,extended_y,map_zero,hone,
+    zero_mul,mul_zero,zero_add,add_zero,pow_one,one_pow,mul_one] at h
+  norm_num at h
+  apply (eq_div_iff MixedPolarPhysicalShear.normal_ne_zero).mpr
+  unfold normal yNormal
+  linear_combination h
+
+end MixedPolarPhysicalTangent
+#print axioms MixedPolarPhysicalTangent.derivative_coordinate
+#print axioms MixedPolarPhysicalTangent.passive_parameters
+#print axioms MixedPolarPhysicalTangent.derivative_x
+
+#print axioms MixedPolarPhysicalTangent.sheared_coefficient_constants
+#print axioms MixedPolarPhysicalTangent.extended_X

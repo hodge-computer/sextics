@@ -4,12 +4,13 @@ import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
 
 /-! Independent complex parameters and their extended derivations.
 Uses the shared localization and finite-extension derivation constructions.
-Adapted from the accepted cyclic and transitive constructions of hodgepodgeconjecture and fqlx; this mixed-polar specialization was prepared for benediamond with OpenAI Codex assistance. -/
+Adapted from the accepted constructions of fqlx and hodgepodgeconjecture.
+Prepared for benediamond with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 100000
-namespace CycleJacobianParameters
-open HoldoutConstruction CycleJacobianIncidence CycleJacobianLifting CycleJacobianFamily Polynomial
+namespace MixedPolarJacobianParameters
+open HoldoutConstruction MixedPolarJacobianIncidence MixedPolarJacobianLifting MixedPolarJacobianFamily Polynomial
 local instance : Algebra ℤ ComplexParameterField := Ring.toIntAlgebra _
 local instance : Algebra ℤ CoefficientField := Ring.toIntAlgebra _
 
@@ -87,4 +88,4 @@ lemma polynomialDerivations_commute (i j : Fin 5) :
 
 #print axioms parameterMap_injective
 #print axioms coefficientDerivations_commute
-end CycleJacobianParameters
+end MixedPolarJacobianParameters

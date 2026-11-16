@@ -8,15 +8,15 @@ HoldoutCover contributors. Prepared with OpenAI Codex assistance.
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-namespace CycleJacobianDomain
+namespace MixedPolarJacobianDomain
 open Polynomial
 abbrev Coeff := MvPolynomial (Fin 5) ℂ
 /-- Coefficient coordinates T,c1,c2,R,X, with outer variable Y. -/
 def rhs : Coeff :=
   MvPolynomial.X 4^3+
-  MvPolynomial.C (1/8 : ℂ)*CycleJacobian.a8
+  MvPolynomial.C (1/432 : ℂ)*MixedPolarJacobian.a8
     (MvPolynomial.X 1) (MvPolynomial.X 2) 1 (MvPolynomial.X 3) (MvPolynomial.X 0)*MvPolynomial.X 4+
-  MvPolynomial.C (1/432 : ℂ)*CycleJacobian.b256
+  MvPolynomial.C (1/432 : ℂ)*MixedPolarJacobian.b256
     (MvPolynomial.X 1) (MvPolynomial.X 2) 1 (MvPolynomial.X 3) (MvPolynomial.X 0)
 def equation : Polynomial Coeff := X^2-C rhs
 lemma equation_monic : equation.Monic := monic_X_pow_sub_C _ (by decide)
@@ -34,7 +34,7 @@ lemma equation_specialization : equation.map specialization=X^2+C eisensteinCons
       calc
         _ = C ((2916 : ℂ)*(1/432)) := by congr 1; norm_num
         _ = _ := by simp only [map_mul,map_ofNat]
-    simp [rhs,specialization,CycleJacobian.a8,CycleJacobian.b256,eisensteinConstant]
+    simp [rhs,specialization,MixedPolarJacobian.a8,MixedPolarJacobian.a432,MixedPolarJacobian.b256,MixedPolarJacobian.b432,eisensteinConstant]
     rw [hrat]
     simp only [map_ofNat,one_div] at h432 ⊢
     linear_combination -27*(1+X)*h432
@@ -49,19 +49,19 @@ instance equation_domain : IsDomain (AdjoinRoot equation) :=
 
 lemma integral_scaling {S : Type*} [CommRing S] (f : ℂ →+* S)
     (c₁ c₂ r t x y : S) :
-    432*(y^2-x^3-f (1/8)*CycleJacobian.a8 c₁ c₂ 1 r t*x-
-      f (1/432)*CycleJacobian.b256 c₁ c₂ 1 r t)=
-      CycleJacobian.equation c₁ c₂ 1 r t x y := by
-  have h8 : (8 : S)*f (1/8)=1 := by
+    432*(y^2-x^3-f (1/432)*MixedPolarJacobian.a8 c₁ c₂ 1 r t*x-
+      f (1/432)*MixedPolarJacobian.b256 c₁ c₂ 1 r t)=
+      MixedPolarJacobian.equation c₁ c₂ 1 r t x y := by
+  have h432 : (432 : S)*f (1/432)=1 := by
     calc
-      _ = f ((8 : ℂ)*(1/8)) := by simp only [map_mul,map_ofNat]
+      _ = f ((432 : ℂ)*(1/432)) := by simp only [map_mul,map_ofNat]
       _ = 1 := by norm_num
   have h432 : (432 : S)*f (1/432)=1 := by
     calc
       _ = f ((432 : ℂ)*(1/432)) := by simp only [map_mul,map_ofNat]
       _ = 1 := by norm_num
-  unfold CycleJacobian.equation
-  linear_combination (-54*CycleJacobian.a8 c₁ c₂ 1 r t*x)*h8 +
-    (-CycleJacobian.b256 c₁ c₂ 1 r t)*h432
+  unfold MixedPolarJacobian.equation
+  linear_combination (-MixedPolarJacobian.a8 c₁ c₂ 1 r t*x)*h432 +
+    (-MixedPolarJacobian.b256 c₁ c₂ 1 r t)*h432
 #print axioms equation_irreducible
-end CycleJacobianDomain
+end MixedPolarJacobianDomain

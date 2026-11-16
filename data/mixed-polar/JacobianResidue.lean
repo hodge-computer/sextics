@@ -5,16 +5,16 @@ import HodgeComputer.Constructions.HoldoutCover.FiniteTrace
 /-! Polynomial residue exactness on the mixed-polar Jacobian, via the checked
 conic, polynomial integration, and normalized finite trace. This specializes
 fqlx's shared polynomial-family bridge and finite-trace theorems; the physical
-certificate is assembled separately in PhysicalPrimitive. Adapted from the accepted
-cyclic and transitive constructions of hodgepodgeconjecture and fqlx; this mixed-polar
-specialization was prepared for benediamond with OpenAI Codex assistance. -/
+certificate is assembled separately in PhysicalPrimitive. Adapted from the
+accepted constructions of fqlx and hodgepodgeconjecture. Prepared for
+benediamond with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 1000000
 set_option maxRecDepth 10000
-namespace CycleJacobianResidue
-open HoldoutConstruction CycleJacobianFamily CycleJacobianParameters CycleJacobianEmbedding
-  CycleJacobianHypersurface CycleJacobianNormal Polynomial
+namespace MixedPolarJacobianResidue
+open HoldoutConstruction MixedPolarJacobianFamily MixedPolarJacobianParameters MixedPolarJacobianEmbedding
+  MixedPolarJacobianHypersurface MixedPolarJacobianNormal Polynomial
 open scoped BigOperators
 local instance : Algebra ℤ CoefficientField := Ring.toIntAlgebra _
 local instance : Algebra ℤ FunctionField := Ring.toIntAlgebra _
@@ -51,7 +51,7 @@ lemma finite_evaluation (p : Ambient) :
         rw [MvPolynomial.finSuccEquiv_X_succ]
         change AdjoinRoot.lift _ _ _ (AdjoinRoot.of _ (MvPolynomial.X j))=_
         rw [AdjoinRoot.lift_of]
-        simp [fieldCoefficientMap,CycleJacobianGeometry.coefficientMap_X,fieldCoordinate]
+        simp [fieldCoefficientMap,MixedPolarJacobianGeometry.coefficientMap_X,fieldCoordinate]
   exact congrArg (fun f : Ambient →+* FunctionField => f p) h
 
 def sourceDerivation (i : Fin 5) : Derivation ℤ FunctionField FunctionField :=
@@ -163,4 +163,4 @@ theorem target_residue_solution (A : Ambient) :
   simp only [map_neg,map_sub,map_div₀,map_mul,map_pow]
   exact hw
 #print axioms target_residue_solution
-end CycleJacobianResidue
+end MixedPolarJacobianResidue

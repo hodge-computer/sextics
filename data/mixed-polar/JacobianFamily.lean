@@ -6,14 +6,15 @@ A generic polynomial conic and a polynomial normal on the mixed-polar
 Jacobian. Arithmetic lifting is provided by the shared library. The
 full-coefficient linear algebra is the method used in the accepted
 ternary-deformation construction, with all target-specific data bound here.
-Adapted from the accepted cyclic and transitive constructions of hodgepodgeconjecture and fqlx; this mixed-polar specialization was prepared for benediamond with OpenAI Codex assistance.
+Adapted from the accepted constructions of fqlx and hodgepodgeconjecture.
+Prepared for benediamond with OpenAI Codex assistance.
 -/
 noncomputable section
-set_option maxRecDepth 8192
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 1000000
-namespace CycleJacobianFamily
-open HoldoutConstruction CycleJacobianIncidence CycleJacobianLifting Polynomial
+set_option maxRecDepth 10000
+namespace MixedPolarJacobianFamily
+open HoldoutConstruction MixedPolarJacobianIncidence MixedPolarJacobianLifting Polynomial
 open scoped BigOperators
 
 abbrev GenericIncidence := SquareGenericAlgebra ComplexParameterField genericEquations
@@ -66,7 +67,7 @@ theorem conic_equation :
       (MvPolynomial.eval₂Hom (algebraMap ParameterRing CoefficientField) coefficients))
       (H (cp (parameter 0)) (cp (parameter 1)) X (curve endpoints)) = _
     convert
-      (CycleJacobianIncidence.H_map
+      (MixedPolarJacobianIncidence.H_map
         (Polynomial.mapRingHom
           (MvPolynomial.eval₂Hom (algebraMap ParameterRing CoefficientField) coefficients))
         (cp (parameter 0)) (cp (parameter 1)) X (curve endpoints)) using 1
@@ -107,7 +108,7 @@ lemma conicGradient_column_bound (j : Fin 13) :
   unfold conicGradient conicCurve
   rw [curveEval_eq_valueCurve]
   fin_cases j <;> dsimp [slotCoordinate,slotDegree,gradient,a8r,b256r,
-    CycleJacobian.a8,valueCurve]
+    MixedPolarJacobian.a8,MixedPolarJacobian.a432,valueCurve]
   all_goals compute_degree <;> norm_num
 
 theorem conicNormal_exists : ∃ N : Fin 3 → Polynomial CoefficientField,
@@ -152,4 +153,4 @@ lemma conicNormal_constant_nonzero : (conicNormal 2).coeff 0 ≠ 0 := by
 #print axioms conic_equation
 #print axioms conicNormal_pairing
 #print axioms conicNormal_constant_nonzero
-end CycleJacobianFamily
+end MixedPolarJacobianFamily

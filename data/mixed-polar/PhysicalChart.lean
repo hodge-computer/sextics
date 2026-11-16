@@ -1,18 +1,14 @@
-import Proposal.CubicPoint
-import Proposal.PolarCubicFunctorial
+import Proposal.PhysicalNonzero
 import Mathlib.RingTheory.Localization.Away.Basic
 
-/-! A localization lets an exact point certify nonvanishing of the covariants
-in the physical function field. Only X0,X1,X2,Y0 are inverted. The argument
-does not evaluate arbitrary rational functions at a point: it first works in
-this explicitly specified open chart and uses the kernel (F).
-Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeconjecture.
-Adapted to mixed-polar for benediamond with OpenAI Codex assistance. -/
+/-! Explicit coordinate localization and its honest point map. Adapted from
+fqlx's accepted mixed-biweight chart and the cyclic chart of
+hodgepodgeconjecture. No covariant formula or root-point evaluation is assumed. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
 set_option maxHeartbeats 2000000
-namespace CyclePhysicalChart
-open CyclePhysical CyclePhysicalCoordinates PolarCovariants
+namespace MixedPolarPhysicalChart
+open MixedPolarPhysical MixedPolarPhysicalCoordinates
 local notation "X" => (MvPolynomial.X : Fin 6 → Ambient)
 def denominator : Ambient := X 0*X 1*X 2*X 3
 abbrev Chart := Localization.Away denominator
@@ -44,9 +40,9 @@ lemma denominator_residue_ne_zero : residueMap denominator ≠ 0 := by
   simpa only [denominator,map_mul,coordinate] using
     mul_ne_zero (mul_ne_zero (mul_ne_zero (coordinate_ne_zero 0)
       (coordinate_ne_zero 1)) (coordinate_ne_zero 2)) (coordinate_ne_zero 3)
-lemma denominator_point_ne_zero : CycleCubicPoint.value denominator ≠ 0 := by
-  have h := CycleCubicPoint.denominators_nonzero
-  simpa [denominator,CycleCubicPoint.value,Matrix.cons_val,Fin.castSucc_mk] using
+lemma denominator_point_ne_zero : MixedPolarPhysicalCoordinates.pointValue denominator ≠ 0 := by
+  have h := MixedPolarPhysicalCoordinates.testPoint_denominators_nonzero
+  simpa [denominator,MixedPolarPhysicalCoordinates.pointValue,Matrix.cons_val,Fin.castSucc_mk] using
     mul_ne_zero (mul_ne_zero (mul_ne_zero (h 0) (h 1)) (h 2)) (h 3)
 
 def toField : Chart →+* FunctionField := IsLocalization.Away.lift denominator
@@ -56,7 +52,7 @@ def toPoint : Chart →+* ℂ := IsLocalization.Away.lift denominator
 
 lemma field_polynomial (p : Ambient) : toField (ofPolynomial p)=residueMap p :=
   IsLocalization.Away.lift_eq _ _ _
-lemma point_polynomial (p : Ambient) : toPoint (ofPolynomial p)=CycleCubicPoint.value p :=
+lemma point_polynomial (p : Ambient) : toPoint (ofPolynomial p)=MixedPolarPhysicalCoordinates.pointValue p :=
   IsLocalization.Away.lift_eq _ _ _
 
 lemma nonzero_of_point (z : Chart) (hz : toPoint z ≠ 0) : toField z ≠ 0 := by
@@ -66,22 +62,22 @@ lemma nonzero_of_point (z : Chart) (hz : toPoint z ≠ 0) : toField z ≠ 0 := b
   simp only [map_mul,map_pow,show algebraMap Ambient Chart=ofPolynomial from rfl,
     field_polynomial,hf,zero_mul] at hr
   obtain ⟨q,hq⟩ := (residueMap_kernel p).mp hr.symm
-  have he : CycleCubicPoint.value p=0 := by
-    rw [hq,map_mul,CycleCubicPoint.on_sextic,zero_mul]
+  have he : MixedPolarPhysicalCoordinates.pointValue p=0 := by
+    rw [hq,map_mul,MixedPolarPhysicalCoordinates.point_on_sextic,zero_mul]
   have ht := congrArg toPoint hp
   simp only [map_mul,map_pow,show algebraMap Ambient Chart=ofPolynomial from rfl,
     point_polynomial,he] at ht
   exact hz ((mul_eq_zero.mp ht).resolve_right (pow_ne_zero _ denominator_point_ne_zero))
 
 lemma field_coordinate (i : Fin 6) : toField (coord i)=coordinate i := field_polynomial _
-lemma point_coordinate (i : Fin 6) : toPoint (coord i)=CycleCubicPoint.point i := by
+lemma point_coordinate (i : Fin 6) : toPoint (coord i)=MixedPolarPhysicalCoordinates.testPoint i := by
   rw [coord,point_polynomial]
-  simp [CycleCubicPoint.value]
+  simp [MixedPolarPhysicalCoordinates.pointValue]
 lemma field_inverse (i : Fin 4) : toField (inverse i)=(coordinate i.castSucc.castSucc)⁻¹ := by
   have h := congrArg toField (inverse_spec i)
   rw [map_mul,map_one,field_coordinate] at h
   exact eq_inv_of_mul_eq_one_right h
-lemma point_inverse (i : Fin 4) : toPoint (inverse i)=(CycleCubicPoint.point i.castSucc.castSucc)⁻¹ := by
+lemma point_inverse (i : Fin 4) : toPoint (inverse i)=(MixedPolarPhysicalCoordinates.testPoint i.castSucc.castSucc)⁻¹ := by
   have h := congrArg toPoint (inverse_spec i)
   rw [map_mul,map_one,point_coordinate] at h
   exact eq_inv_of_mul_eq_one_right h
@@ -99,12 +95,9 @@ def d : Chart := ratio^2*cOne*half
 def e : Chart := ratio^2*cOne*cTwo*half
 def third : Chart := ofPolynomial (MvPolynomial.C (1/3:ℂ))
 def f : Chart := ratio^4*cOne^3*third
-def hessian : Chart := H a b c d e f x y 1
-def jacobian : Chart := J a b c d e f x y 1
-
 lemma point_half : toPoint half=(1/2:ℂ) := by
   rw [half,point_polynomial]
-  simp [CycleCubicPoint.value]
+  simp [MixedPolarPhysicalCoordinates.pointValue]
 lemma field_half : toField half=(1/2:FunctionField) := by
   rw [half,field_polynomial]
   change (residueMap.comp MvPolynomial.C) (1/2:ℂ)=_
@@ -112,7 +105,7 @@ lemma field_half : toField half=(1/2:FunctionField) := by
 
 lemma point_third : toPoint third=(1/3:ℂ) := by
   rw [third,point_polynomial]
-  simp [CycleCubicPoint.value]
+  simp [MixedPolarPhysicalCoordinates.pointValue]
 lemma field_third : toField third=(1/3:FunctionField) := by
   rw [third,field_polynomial]
   change (residueMap.comp MvPolynomial.C) (1/3:ℂ)=_
@@ -122,12 +115,12 @@ lemma cast_0 : (Fin.castSucc (Fin.castSucc (0:Fin 4)) : Fin 6)=0 := rfl
 lemma cast_1 : (Fin.castSucc (Fin.castSucc (1:Fin 4)) : Fin 6)=1 := rfl
 lemma cast_2 : (Fin.castSucc (Fin.castSucc (2:Fin 4)) : Fin 6)=2 := rfl
 lemma cast_3 : (Fin.castSucc (Fin.castSucc (3:Fin 4)) : Fin 6)=3 := rfl
-lemma point_0 : CycleCubicPoint.point 0=2 := rfl
-lemma point_1 : CycleCubicPoint.point 1=2*Complex.I := rfl
-lemma point_2 : CycleCubicPoint.point 2=1-Complex.I := rfl
-lemma point_3 : CycleCubicPoint.point 3=1+Complex.I := rfl
-lemma point_4 : CycleCubicPoint.point 4=0 := rfl
-lemma point_5 : CycleCubicPoint.point 5=0 := rfl
+lemma point_0 : MixedPolarPhysicalCoordinates.testPoint 0=2 := rfl
+lemma point_1 : MixedPolarPhysicalCoordinates.testPoint 1=2*Complex.I := rfl
+lemma point_2 : MixedPolarPhysicalCoordinates.testPoint 2=1-Complex.I := rfl
+lemma point_3 : MixedPolarPhysicalCoordinates.testPoint 3=1+Complex.I := rfl
+lemma point_4 : MixedPolarPhysicalCoordinates.testPoint 4=0 := rfl
+lemma point_5 : MixedPolarPhysicalCoordinates.testPoint 5=0 := rfl
 
 lemma point_values :
     toPoint a=1-Complex.I/8 ∧ toPoint b=1 ∧ toPoint c=1 ∧
@@ -140,65 +133,22 @@ lemma point_values :
   all_goals apply Complex.ext <;>
     norm_num [pow_succ,Complex.mul_re,Complex.mul_im,Complex.inv_re,Complex.inv_im,Complex.normSq]
 
-lemma hessian_at_point : toPoint hessian≠0 := by
-  obtain ⟨ha,hb,hc,hd,he,hf,hx,hy⟩ := point_values
-  unfold hessian
-  rw [map_H,map_one,ha,hb,hc,hd,he,hf,hx,hy]
-  exact CycleCubicPoint.H_nonzero
-lemma jacobian_at_point : toPoint jacobian≠0 := by
-  obtain ⟨ha,hb,hc,hd,he,hf,hx,hy⟩ := point_values
-  unfold jacobian
-  rw [map_J,map_one,ha,hb,hc,hd,he,hf,hx,hy]
-  exact CycleCubicPoint.J_nonzero
-
-lemma hessian_in_field : toField hessian≠0 := nonzero_of_point hessian hessian_at_point
-lemma jacobian_in_field : toField jacobian≠0 := nonzero_of_point jacobian jacobian_at_point
-
 lemma field_values :
     toField a=coeffA ∧ toField b=coeffB ∧ toField c=coeffC ∧
     toField d=coeffD ∧ toField e=coeffE ∧ toField f=coeffF ∧
-    toField x=CyclePhysicalCoordinates.x ∧ toField y=CyclePhysicalCoordinates.y := by
+    toField x=MixedPolarPhysicalCoordinates.x ∧ toField y=MixedPolarPhysicalCoordinates.y := by
   simp only [a,b,c,d,e,f,ratio,cOne,cTwo,x,y,map_add,map_mul,map_pow,map_one,
     field_half,field_third,field_coordinate,field_inverse,coeffA,coeffB,coeffC,coeffD,coeffE,coeffF,
-    CyclePhysicalCoordinates.x,CyclePhysicalCoordinates.y,CyclePhysicalCoordinates.radial,
-    CyclePhysicalCoordinates.t,CyclePhysicalCoordinates.ratio,
-    CyclePhysicalCoordinates.cOne,CyclePhysicalCoordinates.cTwo,
+    MixedPolarPhysicalCoordinates.x,MixedPolarPhysicalCoordinates.y,MixedPolarPhysicalCoordinates.radial,
+    MixedPolarPhysicalCoordinates.t,MixedPolarPhysicalCoordinates.ratio,
+    MixedPolarPhysicalCoordinates.cOne,MixedPolarPhysicalCoordinates.cTwo,
     div_eq_mul_inv,mul_inv_rev,inv_inv,inv_pow,cast_0,cast_1,cast_2,cast_3]
   repeat' apply And.intro
   all_goals first | trivial | ring
 
-lemma physical_hessian_ne_zero :
-    H coeffA coeffB coeffC coeffD coeffE coeffF
-      CyclePhysicalCoordinates.x CyclePhysicalCoordinates.y 1 ≠ 0 := by
-  have h := hessian_in_field
-  obtain ⟨ha,hb,hc,hd,he,hf,hx,hy⟩ := field_values
-  unfold hessian at h
-  rw [map_H,map_one,ha,hb,hc,hd,he,hf,hx,hy] at h
-  exact h
-lemma physical_jacobian_ne_zero :
-    J coeffA coeffB coeffC coeffD coeffE coeffF
-      CyclePhysicalCoordinates.x CyclePhysicalCoordinates.y 1 ≠ 0 := by
-  have h := jacobian_in_field
-  obtain ⟨ha,hb,hc,hd,he,hf,hx,hy⟩ := field_values
-  unfold jacobian at h
-  rw [map_J,map_one,ha,hb,hc,hd,he,hf,hx,hy] at h
-  exact h
 
-def normal : Chart := 3*a*x^2+2*d*x*y+f*y^2
-lemma normal_at_point : toPoint normal ≠ 0 := by
-  obtain ⟨ha,hb,hc,hd,he,hf,hx,hy⟩ := point_values
-  simpa only [normal,map_add,map_mul,map_pow,map_ofNat,ha,hd,hf,hx,hy,
-    mul_zero,zero_mul,add_zero] using CycleCubicPoint.normal_nonzero
-lemma physical_normal_ne_zero :
-    3*coeffA*CyclePhysicalCoordinates.x^2+
-      2*coeffD*CyclePhysicalCoordinates.x*CyclePhysicalCoordinates.y+coeffF*CyclePhysicalCoordinates.y^2 ≠ 0 := by
-  have h := nonzero_of_point normal normal_at_point
-  obtain ⟨ha,hb,hc,hd,he,hf,hx,hy⟩ := field_values
-  simpa only [normal,map_add,map_mul,map_pow,map_ofNat,ha,hd,hf,hx,hy] using h
+end MixedPolarPhysicalChart
 
-end CyclePhysicalChart
-#print axioms CyclePhysicalChart.hessian_in_field
-#print axioms CyclePhysicalChart.jacobian_in_field
-
-#print axioms CyclePhysicalChart.physical_jacobian_ne_zero
-#print axioms CyclePhysicalChart.physical_normal_ne_zero
+#print axioms MixedPolarPhysicalChart.nonzero_of_point
+#print axioms MixedPolarPhysicalChart.field_values
+#print axioms MixedPolarPhysicalChart.point_values
