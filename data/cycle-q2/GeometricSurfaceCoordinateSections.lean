@@ -3,8 +3,7 @@ import Proposal.GeometricSurfaceOverlap
 /-!
 # Homogeneous coordinate changes in the actual surface section rings
 
-Source-only draft; compilation and replay are deferred at the user's
-request. The coordinate maps below are the existing projective chart
+The coordinate maps below are the existing projective chart
 maps followed by the actual structure-sheaf restrictions. The transition
 identity is proved in the original homogeneous localizations and then
 transported through their existing section isomorphisms.
@@ -24,7 +23,7 @@ open CycleQ2SeedTrace CycleQ2NormalConnecting CycleQ2ConormalJacobian
   CycleQ2CartierSurfaceGrading CycleQ2CartierProjectiveCover
   CycleQ2GeometricSurfaceAdjunction CycleQ2GeometricSurfaceDehomogenizedCharts
   CycleQ2GeometricSurfaceOverlap CycleQ2GeometricAffineChartSections
-  CycleQ2GeometricDifferentialChartTransport
+  CycleQ2GeometricDifferentialChartTransport CycleQ2GeometricSeedNormalIdeals
 
 variable (r θ : ℂ)
 

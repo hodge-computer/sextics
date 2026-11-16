@@ -4,9 +4,6 @@ import Mathlib.LinearAlgebra.Quotient.Basic
 /-!
 # A fixed coefficient trace on the actual surface coordinate Čech quotient
 
-Status: source-only proof draft. Compilation and independent kernel replay
-are deferred at the user's request. No new axioms or admissions are used.
-
 The functional is fixed before any class is considered: it extracts the
 coefficient of x₀²w²/(x₁x₂x₃) in the original rank-nine Laurent coordinates.
 Every actual Čech boundary has zero such coefficient. Among homogeneous
@@ -47,6 +44,8 @@ def seedCoordinateAlgEquiv (r : ℂ) (s : Finset (Fin 3)) :
     CoordinateLocal r 1 s ≃ₐ[ℂ] SeedLocal ℂ r Complex.I s where
   __ := seedCoordinateEquiv r s
   commutes' c := by
+    change seedCoordinateEquiv r s (algebraMap ℂ (CoordinateLocal r 1 s) c) =
+      algebraMap ℂ (SeedLocal ℂ r Complex.I s) c
     rw [IsScalarTower.algebraMap_apply ℂ (SurfaceRing r 1) (CoordinateLocal r 1 s),
       seedCoordinateEquiv_base, (seedRingEquiv r).commutes,
       ← IsScalarTower.algebraMap_apply ℂ (SeedRing r Complex.I)

@@ -1,9 +1,3 @@
-/-
-SOURCE-ONLY DRAFT: unverified.
-Compilation and independent kernel replay were deferred at the user's request.
-The proof terms below have not been accepted as a checked certificate.
--/
-
 import Proposal.GeometricLocalSheafificationFrame
 import Proposal.GeometricExteriorSheaf
 import Proposal.GeometricProjectiveCanonical
@@ -102,14 +96,27 @@ def exteriorPresheafOverIso :
 /-- The same coordinates on arbitrary sections of the genuine exterior sheaf. -/
 def exteriorSheafOverIso :
     (exteriorSheaf R M n).over U ≅ SheafOfModules.unit ((ringSheaf R).over U) :=
-  overIsoOfPresentation U (toExteriorSheaf R M n)
+  @overIsoOfPresentation T (ringSheaf R) (exteriorPresheaf R.obj M n) U
+    (exteriorSheaf R M n) (toExteriorSheaf R M n)
+    (exteriorPresentation_locallyInjective R M n)
+    (exteriorPresentation_locallySurjective R M n)
+    (SheafOfModules.unit ((ringSheaf R).over U))
     (exteriorPresheafOverIso R M n U c hc)
 
 theorem exteriorSheafOverIso_exteriorSection (V : Over U)
     (ω : ⋀[R.obj.obj (op V.left)]^n (M.obj (op V.left))) :
     (exteriorSheafOverIso R M n U c hc).hom.val.app (op V)
-      (exteriorSection R M n V.left ω) = c V ω :=
-  isoOfPresentation_hom (overPresentation U (toExteriorSheaf R M n))
+      (exteriorSection R M n V.left ω) = c V ω := by
+  let hI := @overPresentation_locallyInjective T (ringSheaf R)
+    (exteriorPresheaf R.obj M n) U (exteriorSheaf R M n) (toExteriorSheaf R M n)
+    (exteriorPresentation_locallyInjective R M n)
+  let hS := @overPresentation_locallySurjective T (ringSheaf R)
+    (exteriorPresheaf R.obj M n) U (exteriorSheaf R M n) (toExteriorSheaf R M n)
+    (exteriorPresentation_locallySurjective R M n)
+  exact @isoOfPresentation_hom (Over U) _ ((Opens.grothendieckTopology T).over U)
+    ((ringSheaf R).over U) (overPresheaf (ringSheaf R) (exteriorPresheaf R.obj M n) U)
+    ((exteriorSheaf R M n).over U) (SheafOfModules.unit ((ringSheaf R).over U))
+    (overPresentation U (toExteriorSheaf R M n)) _ hI hS
     (exteriorPresheafOverIso R M n U c hc) (op V) ω
 
 theorem exteriorSheafOverIso_inv (V : Over U) (a : R.obj.obj (op V.left)) :
@@ -142,6 +149,7 @@ variable (v : Fin 2 → SurfacePoly) (n t : SurfacePoly)
   (hR : eR.inv ≫ U.ι ≫ f =
     Spec.map (CommRingCat.ofHom (algebraMap ℂ (AdjunctionPatch v n t))))
 
+set_option maxHeartbeats 1000000 in
 theorem chartResidueCoordinate_restrict {V W : Over U} (a : V ⟶ W)
     (ω : ⋀[Γ(X,W.left)]^2 ((ChartDifferentialModule f).val.obj (op W))) :
     chartResidueCoordinate f v n t eR hR V
@@ -197,8 +205,10 @@ theorem chartResidueLocalFrame_reconstruction (O : X.Opens) (hO : O ≤ U)
   rw [← chartResidueLocalFrame_generator]
   apply ((chartResidueLocalFrame f v n t eR hR).app O hO).injective
   rw [map_smul]
-  change _ = _ * ((chartResidueLocalFrame f v n t eR hR).app O hO
-    (((chartResidueLocalFrame f v n t eR hR).app O hO).symm 1))
+  change _ = (show Γ(X,O) from
+      frameCoordinate (chartResidueLocalFrame f v n t eR hR) O hO s) *
+    (show Γ(X,O) from (chartResidueLocalFrame f v n t eR hR).app O hO
+      (((chartResidueLocalFrame f v n t eR hR).app O hO).symm (1 : Γ(X,O))))
   simp only [LinearEquiv.apply_symm_apply, mul_one, frameCoordinate]
 
 end SurfaceChart

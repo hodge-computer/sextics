@@ -3,7 +3,6 @@ import Proposal.GeometricSurfaceResidueSections
 /-!
 # Transport of actual residue sections from a coordinate determinant
 
-Status: source-only proof draft; verification is deferred at the user's request.
 The two forms below are the original normalized determinant residues in the
 actual differential sheaf. A proved differential expansion and its mixed
 Jacobian determinant give their transition on an arbitrary common subopen.
@@ -41,8 +40,11 @@ variable {X : Scheme.{0}} {U₁ U₂ : X.Opens}
     Matrix.det ![chartEquationGradient v₁ n₁ t₁ e₁ (Over.mk (homOfLE hV₁)) 0,
       chartEquationGradient v₁ n₁ t₁ e₁ (Over.mk (homOfLE hV₁)) 1,
       pulled p, pulled q] =
-    factor * chartSurfaceSectionMap v₂ n₂ t₂ e₂ (Over.mk (homOfLE hV₂))
-      (augmentedJacobian v₂ p q))
+    factor * (show Γ(X,V) from
+      chartSurfaceSectionMap v₂ n₂ t₂ e₂ (Over.mk (homOfLE hV₂))
+        (augmentedJacobian v₂ p q)))
+
+include hD hdet
 
 /-- The actual normalized residue transition follows from the actual
 coordinate differential expansion and its mixed determinant. -/
@@ -50,7 +52,9 @@ theorem residueSection_transition :
     chartResidueSection_common f v₂ n₂ t₂ e₂ he₂ (Over.mk (homOfLE hV₂)) =
       factor • chartResidueSection_common f v₁ n₁ t₁ e₁ he₁
         (Over.mk (homOfLE hV₁)) := by
-  let E := chartResidueCoordinate_common f v₁ n₁ t₁ e₁ he₁
+  let E : (⋀[Γ(X,V)]^2
+      ((differentialSheaf X.sheaf (schemeCoefficient f)).val.obj (op V))) ≃ₗ[Γ(X,V)] Γ(X,V) :=
+    chartResidueCoordinate_common f v₁ n₁ t₁ e₁ he₁
     (Over.mk (homOfLE hV₁))
   let J : Γ(X,V) := chartSurfaceSectionMap v₂ n₂ t₂ e₂
     (Over.mk (homOfLE hV₂)) (augmentedJacobian v₂ n₂ t₂)
@@ -60,7 +64,11 @@ theorem residueSection_transition :
   have hp : E
       (J • chartResidueSection_common f v₂ n₂ t₂ e₂ he₂
         (Over.mk (homOfLE hV₂))) = factor * J := by
-    rw [chartJacobian_smul_residue_common, hD n₂, hD t₂]
+    change E (chartSection e₂ (Over.mk (homOfLE hV₂))
+      (algebraMap (SurfaceChartRing v₂) (AdjunctionPatch v₂ n₂ t₂)
+        (augmentedJacobian v₂ n₂ t₂)) •
+          chartResidueSection_common f v₂ n₂ t₂ e₂ he₂ (Over.mk (homOfLE hV₂))) = _
+    rw [chartJacobian_smul_residue_common f v₂ n₂ t₂ e₂ he₂ _, hD n₂, hD t₂]
     exact (chartResidueCoordinate_ambient_pair f v₁ n₁ t₁ e₁ he₁
       (Over.mk (homOfLE hV₁)) (pulled n₂) (pulled t₂)).trans (hdet n₂ t₂)
   apply E.injective
@@ -81,7 +89,13 @@ theorem residueSheafSection_transition :
     (exteriorSection X.sheaf (differentialSheaf X.sheaf (schemeCoefficient f)).val 2 V)
     (residueSection_transition f v₁ v₂ n₁ t₁ n₂ t₂ e₁ e₂ he₁ he₂
       V hV₁ hV₂ pulled factor hD hdet)
-  simpa only [map_smul, chartResidueSheafSection, chartResidueSection_common] using h
+  change exteriorSection X.sheaf (differentialSheaf X.sheaf (schemeCoefficient f)).val 2 V
+      (chartResidueSection_common f v₂ n₂ t₂ e₂ he₂ (Over.mk (homOfLE hV₂))) =
+    factor • exteriorSection X.sheaf (differentialSheaf X.sheaf (schemeCoefficient f)).val 2 V
+      (chartResidueSection_common f v₁ n₁ t₁ e₁ he₁ (Over.mk (homOfLE hV₁)))
+  exact h.trans
+    ((exteriorSection X.sheaf (differentialSheaf X.sheaf (schemeCoefficient f)).val 2 V).map_smul
+      factor (chartResidueSection_common f v₁ n₁ t₁ e₁ he₁ (Over.mk (homOfLE hV₁))))
 
 #print axioms residueSection_transition
 #print axioms residueSheafSection_transition

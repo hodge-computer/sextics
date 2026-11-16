@@ -4,11 +4,6 @@ import Proposal.GeometricIntrinsicNormal
 /-!
 # Residue of an arbitrary inverse-ideal-valued determinant on an actual chart
 
-Status: source-only proof draft. An earlier version produced elaboration
-errors and deterministic timeouts. The source corrections below have not
-been compiled or independently replayed; verification is deferred at the
-user's request. No new axioms or admissions are used.
-
 The domain below is the actual module `Hom(I, Λ² Ω_A)` for the existing
 localized surface-to-curve map `A → B`.  The residue is built from the
 original conormal inclusion and universal differential quotient.  In
@@ -175,7 +170,11 @@ def residue : InverseIdealForms q h g₁ g₂ k i j →ₛₗ[
   map_smul' a H := by
     change normalAdjunction q h g₁ g₂ k i j (normalCoordinate q h g₁ g₂ k i j)
       (restrictForm q h g₁ g₂ k i j (a • H (selectedEquation q h g₁ g₂ k i j))) = _
-    rw [restrictForm_smul, normalAdjunction_form_smul]
+    exact (congrArg
+      (normalAdjunction q h g₁ g₂ k i j (normalCoordinate q h g₁ g₂ k i j))
+      (restrictForm_smul q h g₁ g₂ k i j a
+        (H (selectedEquation q h g₁ g₂ k i j)))).trans
+      (normalAdjunction_form_smul q h g₁ g₂ k i j _ _ _)
 
 /-- This is the local second square of the Cartier/residue diagram:
 multiply an inverse-ideal functional by an arbitrary surface two-form,
@@ -191,8 +190,23 @@ theorem residue_smulRight
   change normalAdjunction q h g₁ g₂ k i j (normalCoordinate q h g₁ g₂ k i j)
     (restrictForm q h g₁ g₂ k i j
       (f (selectedEquation q h g₁ g₂ k i j) • ω)) = _
-  rw [restrictForm_smul, normalAdjunction_form_smul,
-    reduceFunctional_eq, normalAdjunction_smul]
+  calc
+    _ = algebraMap (SurfaceRing q h g₁ g₂ k i j) (CurveRing q h g₁ g₂ k i j)
+        (f (selectedEquation q h g₁ g₂ k i j)) •
+        normalAdjunction q h g₁ g₂ k i j (normalCoordinate q h g₁ g₂ k i j)
+          (restrictForm q h g₁ g₂ k i j ω) :=
+      (congrArg
+        (normalAdjunction q h g₁ g₂ k i j (normalCoordinate q h g₁ g₂ k i j))
+        (restrictForm_smul q h g₁ g₂ k i j _ ω)).trans
+        (normalAdjunction_form_smul q h g₁ g₂ k i j _ _ _)
+    _ = normalAdjunction q h g₁ g₂ k i j
+        (algebraMap (SurfaceRing q h g₁ g₂ k i j) (CurveRing q h g₁ g₂ k i j)
+          (f (selectedEquation q h g₁ g₂ k i j)) • normalCoordinate q h g₁ g₂ k i j)
+        (restrictForm q h g₁ g₂ k i j ω) :=
+      (normalAdjunction_smul q h g₁ g₂ k i j _ _ _).symm
+    _ = _ := congrArg
+      (fun φ => normalAdjunction q h g₁ g₂ k i j φ (restrictForm q h g₁ g₂ k i j ω))
+      (reduceFunctional_eq q h g₁ g₂ k i j f).symm
 
 /-- A regular two-form has zero residue after the canonical inclusion
 `ω ↦ (a ↦ a • ω)`. -/
@@ -202,11 +216,27 @@ theorem residue_regular (ω : SurfaceForms q h g₁ g₂ k i j) :
   change normalAdjunction q h g₁ g₂ k i j (normalCoordinate q h g₁ g₂ k i j)
     (restrictForm q h g₁ g₂ k i j
       ((selectedEquation q h g₁ g₂ k i j : SurfaceRing q h g₁ g₂ k i j) • ω)) = 0
-  rw [restrictForm_smul]
   have hz : algebraMap (SurfaceRing q h g₁ g₂ k i j) (CurveRing q h g₁ g₂ k i j)
       (selectedEquation q h g₁ g₂ k i j) = 0 :=
     (selectedEquation q h g₁ g₂ k i j).property
-  rw [hz, zero_smul, map_zero]
+  calc
+    _ = normalAdjunction q h g₁ g₂ k i j (normalCoordinate q h g₁ g₂ k i j)
+        (algebraMap (SurfaceRing q h g₁ g₂ k i j) (CurveRing q h g₁ g₂ k i j)
+          (selectedEquation q h g₁ g₂ k i j) • restrictForm q h g₁ g₂ k i j ω) :=
+      congrArg
+        (normalAdjunction q h g₁ g₂ k i j (normalCoordinate q h g₁ g₂ k i j))
+        (restrictForm_smul q h g₁ g₂ k i j _ ω)
+    _ = normalAdjunction q h g₁ g₂ k i j (normalCoordinate q h g₁ g₂ k i j)
+        (0 • restrictForm q h g₁ g₂ k i j ω) :=
+      congrArg (fun b : CurveRing q h g₁ g₂ k i j =>
+        normalAdjunction q h g₁ g₂ k i j (normalCoordinate q h g₁ g₂ k i j)
+          (b • restrictForm q h g₁ g₂ k i j ω)) hz
+    _ = 0 :=
+      (congrArg
+        (normalAdjunction q h g₁ g₂ k i j (normalCoordinate q h g₁ g₂ k i j))
+        (zero_smul (CurveRing q h g₁ g₂ k i j)
+          (restrictForm q h g₁ g₂ k i j ω))).trans
+        (map_zero (normalAdjunction q h g₁ g₂ k i j (normalCoordinate q h g₁ g₂ k i j)))
 
 /-- Evaluation in any determinant frame followed by reconstruction returns
 the original homomorphism, including inputs not represented by cubics. -/
@@ -277,13 +307,16 @@ theorem reducedHom_toCotangent (H : InverseIdealForms q h g₁ g₂ k i j)
       ((1 : CurveRing q h g₁ g₂ k i j) ⊗ₜ[SurfaceRing q h g₁ g₂ k i j]
         (CurveIdeal q h g₁ g₂ k i j).toCotangent a) •
       restrictForm q h g₁ g₂ k i j ((surfaceCoordinate q h g₁ g₂ k i j).symm 1) = _
-  rw [reduceFunctional_toCotangent]
-  exact (restrictForm_smul q h g₁ g₂ k i j
+  exact (congrArg
+    (fun b : CurveRing q h g₁ g₂ k i j =>
+      b • restrictForm q h g₁ g₂ k i j ((surfaceCoordinate q h g₁ g₂ k i j).symm 1))
+    (reduceFunctional_toCotangent q h g₁ g₂ k i j _ a)).trans
+    ((restrictForm_smul q h g₁ g₂ k i j
     (surfaceCoordinate q h g₁ g₂ k i j (H a))
     ((surfaceCoordinate q h g₁ g₂ k i j).symm 1)).symm.trans
       (congrArg (restrictForm q h g₁ g₂ k i j)
         (LinearMap.congr_fun
-          (reconstruct_in_frame q h g₁ g₂ k i j (surfaceCoordinate q h g₁ g₂ k i j) H) a))
+          (reconstruct_in_frame q h g₁ g₂ k i j (surfaceCoordinate q h g₁ g₂ k i j) H) a)))
 
 /-- The value on actual ideal classes uniquely determines the descended
 map on the entire conormal, since the original selected equation spans it. -/
@@ -331,10 +364,12 @@ theorem reducedHom_eq_with_frame
       ((1 : CurveRing q h g₁ g₂ k i j) ⊗ₜ[SurfaceRing q h g₁ g₂ k i j]
         (CurveIdeal q h g₁ g₂ k i j).toCotangent a) •
       restrictForm q h g₁ g₂ k i j (e.symm 1) = _
-  rw [reduceFunctional_toCotangent]
-  exact (restrictForm_smul q h g₁ g₂ k i j (e (H a)) (e.symm 1)).symm.trans
+  exact (congrArg
+    (fun b : CurveRing q h g₁ g₂ k i j => b • restrictForm q h g₁ g₂ k i j (e.symm 1))
+    (reduceFunctional_toCotangent q h g₁ g₂ k i j _ a)).trans
+    ((restrictForm_smul q h g₁ g₂ k i j (e (H a)) (e.symm 1)).symm.trans
     (congrArg (restrictForm q h g₁ g₂ k i j)
-      (LinearMap.congr_fun (reconstruct_in_frame q h g₁ g₂ k i j e H) a))
+      (LinearMap.congr_fun (reconstruct_in_frame q h g₁ g₂ k i j e H) a)))
 
 /-- Contraction of a conormal-valued determinant; the next theorem
 proves independence of the normalized generator used in this expression. -/
@@ -369,9 +404,20 @@ theorem conormal_generator_independent
       _ = φ x := (φ.map_smul _ _).symm.trans
         (congrArg φ (normalConormal_reconstruct q h g₁ g₂ k i j x))
       _ = 1 := hφ
-  rw [hx, normalFunctional_eq_coordinate q h g₁ g₂ k i j φ,
-    normalAdjunction_smul, normalAdjunction_form_smul, smul_smul, hone, one_smul]
-  rfl
+  calc
+    _ = normalAdjunction q h g₁ g₂ k i j
+        (φ (normalEquationClass q h g₁ g₂ k i j i) • normalCoordinate q h g₁ g₂ k i j)
+        (normalConormalEquiv q h g₁ g₂ k i j x •
+          F (normalEquationClass q h g₁ g₂ k i j i)) :=
+      congrArg₂ (fun φ ω => normalAdjunction q h g₁ g₂ k i j φ ω)
+        (normalFunctional_eq_coordinate q h g₁ g₂ k i j φ) hx
+    _ = φ (normalEquationClass q h g₁ g₂ k i j i) •
+        (normalConormalEquiv q h g₁ g₂ k i j x •
+          conormalResidue q h g₁ g₂ k i j F) :=
+      (normalAdjunction_smul q h g₁ g₂ k i j _ _ _).trans
+        (congrArg (fun z => φ (normalEquationClass q h g₁ g₂ k i j i) • z)
+          (normalAdjunction_form_smul q h g₁ g₂ k i j _ _ _))
+    _ = _ := by rw [smul_smul, hone, one_smul]
 
 theorem residue_eq_conormal (H : InverseIdealForms q h g₁ g₂ k i j) :
     residue q h g₁ g₂ k i j H =

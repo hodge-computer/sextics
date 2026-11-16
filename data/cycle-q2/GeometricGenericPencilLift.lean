@@ -6,9 +6,6 @@ import Mathlib.Algebra.MvPolynomial.Funext
 /-!
 # Lifting the full invariant weighted family to a protected deformation
 
-Status: source-only proof draft. Compilation and independent kernel replay
-are deferred at the user's request. No new axioms or admissions are used.
-
 The original homogeneous coordinates are (Z0,Z1,Z2,Z3,Z4,Z5). The weighted
 quotient coordinates are (s0,s1,s2,s3,w) = (Z0,Z1,Z3,Z4,Z2^2), and the pencil
 parameter is lambda = Z5/Z2. Thus h(s,w) lifts to a polynomial independent of
@@ -59,8 +56,11 @@ def quotientCoordinates (z : Fin 6 → ℂ) : Fin 5 → ℂ :=
 theorem eval_weightedLift (p : WeightedPoly) (z : Fin 6 → ℂ) :
     eval z (weightedLift p) = eval (quotientCoordinates z) p := by
   have h : (eval z).comp weightedLift.toRingHom = eval (quotientCoordinates z) := by
-    ext i
-    fin_cases i <;> simp [weightedLift, liftValues, quotientCoordinates]
+    apply MvPolynomial.ringHom_ext
+    · intro c
+      simp [weightedLift]
+    · intro i
+      fin_cases i <;> simp [weightedLift, liftValues, quotientCoordinates]
   exact RingHom.congr_fun h p
 
 theorem weightedLift_injective : Function.Injective weightedLift := by
@@ -124,16 +124,22 @@ theorem eval_betaAction (p : HomogeneousPoly) (z : Fin 6 → ℂ) :
     eval z (betaAction p) = eval (CycleQ2GeometricTarget.beta z) p := by
   have h : (eval z).comp betaAction.toRingHom =
       eval (CycleQ2GeometricTarget.beta z) := by
-    ext i
-    fin_cases i <;> simp [betaAction, CycleQ2GeometricTarget.beta]
+    apply MvPolynomial.ringHom_ext
+    · intro c
+      simp [betaAction]
+    · intro i
+      fin_cases i <;> simp [betaAction, CycleQ2GeometricTarget.beta]
   exact RingHom.congr_fun h p
 
 theorem eval_gammaAction (ω : ℂ) (p : HomogeneousPoly) (z : Fin 6 → ℂ) :
     eval z (gammaAction ω p) = eval (CycleQ2GeometricTarget.gamma ω z) p := by
   have h : (eval z).comp (gammaAction ω).toRingHom =
       eval (CycleQ2GeometricTarget.gamma ω z) := by
-    ext i
-    fin_cases i <;> simp [gammaAction, CycleQ2GeometricTarget.gamma]
+    apply MvPolynomial.ringHom_ext
+    · intro c
+      simp [gammaAction]
+    · intro i
+      fin_cases i <;> simp [gammaAction, CycleQ2GeometricTarget.gamma]
   exact RingHom.congr_fun h p
 
 theorem weightedLift_beta (p : WeightedPoly) (z : Fin 6 → ℂ) :
@@ -171,7 +177,7 @@ def weightedPencil (lambda : ℂ) : WeightedPoly :=
 
 theorem pencilRestriction_protected_F (lambda : ℂ) :
     pencilRestriction lambda HodgeSubmission.F = doubleCover (weightedPencil lambda) := by
-  norm_num [pencilRestriction, HodgeSubmission.F, doubleCover, weightedPencil]
+  simp [pencilRestriction, HodgeSubmission.F, doubleCover, weightedPencil]
   ring
 
 theorem weightedPencil_homogeneous (lambda : ℂ) :
@@ -187,24 +193,24 @@ theorem weightedPencil_homogeneous (lambda : ℂ) :
   have h4 : (X 4 : WeightedPoly).IsWeightedHomogeneous fullGrading (2, 0) :=
     isWeightedHomogeneous_X ℂ fullGrading 4
   have hs0 : (X 0 ^ 6 : WeightedPoly).IsWeightedHomogeneous fullGrading (6, 0) := by
-    convert h0.pow 6 using 1 <;> norm_num
+    convert h0.pow 6 using 1 <;> decide
   have hs1 : (X 1 ^ 6 : WeightedPoly).IsWeightedHomogeneous fullGrading (6, 0) := by
-    convert h1.pow 6 using 1 <;> norm_num
+    convert h1.pow 6 using 1 <;> decide
   have hs2 : (X 2 ^ 6 : WeightedPoly).IsWeightedHomogeneous fullGrading (6, 0) := by
-    convert h2.pow 6 using 1 <;> norm_num
+    convert h2.pow 6 using 1 <;> decide
   have hs3 : (X 3 ^ 6 : WeightedPoly).IsWeightedHomogeneous fullGrading (6, 0) := by
-    convert h3.pow 6 using 1 <;> norm_num
+    convert h3.pow 6 using 1 <;> decide
   have hw : (X 4 ^ 3 : WeightedPoly).IsWeightedHomogeneous fullGrading (6, 0) := by
-    convert h4.pow 3 using 1 <;> norm_num
-  have hm0 : (X 0 ^ 3 * X 1 * X 2 * X 3 : WeightedPoly).
-      IsWeightedHomogeneous fullGrading (6, 0) := by
-    convert (((h0.pow 3).mul h1).mul h2).mul h3 using 1 <;> norm_num
-  have hm1 : (X 1 ^ 3 * X 3 * X 4 : WeightedPoly).
-      IsWeightedHomogeneous fullGrading (6, 0) := by
-    convert ((h1.pow 3).mul h3).mul h4 using 1 <;> norm_num
-  have hm2 : (X 0 * X 2 * X 4 ^ 2 : WeightedPoly).
-      IsWeightedHomogeneous fullGrading (6, 0) := by
-    convert (h0.mul h2).mul (h4.pow 2) using 1 <;> norm_num
+    convert h4.pow 3 using 1 <;> decide
+  have hm0 : (X 0 ^ 3 * X 1 * X 2 * X 3 : WeightedPoly).IsWeightedHomogeneous
+      fullGrading (6, 0) := by
+    convert (((h0.pow 3).mul h1).mul h2).mul h3 using 1 <;> decide
+  have hm1 : (X 1 ^ 3 * X 3 * X 4 : WeightedPoly).IsWeightedHomogeneous
+      fullGrading (6, 0) := by
+    convert ((h1.pow 3).mul h3).mul h4 using 1 <;> decide
+  have hm2 : (X 0 * X 2 * X 4 ^ 2 : WeightedPoly).IsWeightedHomogeneous
+      fullGrading (6, 0) := by
+    convert (h0.mul h2).mul (h4.pow 2) using 1 <;> decide
   simpa only [weightedPencil, mul_assoc] using
     ((((hs0.add hs1).add hs2).add hs3).add (hw.C_mul (1 + lambda ^ 6))).add
       (((hm0.add (hm1.C_mul lambda)).add (hm2.C_mul lambda)).C_mul (1 / 2 : ℂ))
@@ -259,9 +265,10 @@ def affineLift : WeightedPoly →ₐ[ℂ] AmbientPoly 4 :=
   CycleQ2AffineChart.dehomogenize.comp weightedLift
 
 theorem affineLift_eq : affineLift = aeval ![1, X 0, X 2, X 3, X 1 ^ 2] := by
-  ext i
+  apply MvPolynomial.algHom_ext
+  intro i
   fin_cases i <;>
-    simp [affineLift, CycleQ2AffineChart.dehomogenize, weightedLift, liftValues]
+    simp [affineLift, CycleQ2AffineChart.dehomogenize, weightedLift, liftValues] <;> rfl
 
 theorem affineLift_ne_zero {d : ℕ} {h : WeightedPoly}
     (hh : h.IsWeightedHomogeneous geometricWeight d) (h0 : h ≠ 0) :
@@ -280,9 +287,9 @@ private theorem affineLift_X_degree_last (i : Fin 5) :
   rw [affineLift_eq, aeval_X]
   fin_cases i
   · exact degreeOf_one 4
-  · norm_num [degreeOf_X]
-  · norm_num [degreeOf_X]
-  · norm_num [degreeOf_X]
+  · exact degreeOf_X_of_ne (by decide)
+  · exact degreeOf_X_of_ne (by decide)
+  · exact degreeOf_X_of_ne (by decide)
   · exact degreeOf_X_pow_of_ne 2 (by decide)
 
 /-- The affine lift is independent of the original Z5. -/
@@ -297,7 +304,8 @@ theorem affineLift_degree_last (h : WeightedPoly) :
   | mul_X p i hp =>
       rw [map_mul]
       apply Nat.eq_zero_of_le_zero
-      simpa only [hp, affineLift_X_degree_last, add_zero] using
+      have hi := affineLift_X_degree_last i
+      simpa only [hp, hi, add_zero] using
         degreeOf_mul_le 4 (affineLift p) (affineLift (X i))
 
 private theorem affineF_degree_last_pos :
@@ -317,7 +325,7 @@ private theorem affineF_degree_last_pos :
     · rfl
     · rfl
     · exact (hnot hi).elim
-  norm_num [CycleQ2AffineGeometry.affineF_formula] at he
+  simp [CycleQ2AffineGeometry.affineF_formula] at he
 
 theorem affineF_not_dvd_affineLift {d : ℕ} {h : WeightedPoly}
     (hh : h.IsWeightedHomogeneous geometricWeight d) (h0 : h ≠ 0) :
