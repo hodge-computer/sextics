@@ -13,7 +13,7 @@ parameter value; they require no parameter derivation on the specialized
 function field.
 
 Extracted from `hodgepodgeconjecture`'s accepted cyclic cubic construction,
-`data/cycle-three/CubicJetCalculus.lean` (PR #165). Its polynomial chain rule
+`data/cycle-three/CubicJetCalculus.lean`. Its polynomial chain rule
 extends the construction of `fqlx` and the Hodge Computer collaborators.
 The original construction and this extraction acknowledge OpenAI Codex
 assistance. Cubic-family equations and their nonvanishing proofs remain

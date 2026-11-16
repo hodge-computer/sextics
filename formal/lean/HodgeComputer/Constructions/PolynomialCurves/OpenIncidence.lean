@@ -1,7 +1,7 @@
 import HodgeComputer.Constructions.PolynomialCurves.ArithmeticLifting
 
 /-!
-Extracted from fqlx's accepted PR #150. The original declaration namespace
+Extracted from fqlx's accepted reflection-coupled-fano proof. The original declaration namespace
 is retained for compatibility; the hypotheses are independent of its target.
 
 The square incidence restricted to a nonzero distinguished coefficient.

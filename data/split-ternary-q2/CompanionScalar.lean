@@ -8,7 +8,7 @@ Scalar conversion for an arbitrary affine ternary p and the rational source
 -7*h*S/(6*T^2). Only supplied ambient primitive/jet data are consumed; existence
 of such data is not assumed from an arbitrary affine source replacement.
 The first-jet identity is imported from the accepted crossed-ternary proof of
-1337isnot1337 (PR #149), through its maintained generic library.
+1337isnot1337, through its maintained generic library.
 Prepared with OpenAI Codex assistance for contributor fqlx.
 -/
 

@@ -6,8 +6,8 @@ import Mathlib.Analysis.Complex.Polynomial.Basic
 /-!
 Homogeneous compatible fractions and legal strict certificate clearing for the
 split-ternary-q2 chart. The compatibility argument adapts the accepted crossed
-ternary construction of 1337isnot1337 (PR #149); homogeneous common-denominator
-bookkeeping adapts the accepted holdout-q2 construction of HeadOfNaps (PR #124).
+ternary construction of 1337isnot1337; homogeneous common-denominator
+bookkeeping adapts the accepted holdout-q2 construction of HeadOfNaps.
 Prepared with OpenAI Codex assistance for contributor fqlx.
 -/
 

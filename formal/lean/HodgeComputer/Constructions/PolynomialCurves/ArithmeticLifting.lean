@@ -2,7 +2,7 @@ import HodgeComputer.Constructions.HoldoutCover.GenericIncidence
 import HodgeComputer.Constructions.HoldoutCover.PolynomialFieldMap
 
 /-!
-Extracted from fqlx's accepted PR #150. The original declaration namespace
+Extracted from fqlx's accepted reflection-coupled-fano proof. The original declaration namespace
 is retained for compatibility; the hypotheses are independent of its target.
 
 Arithmetic lifting and anchored dominance for polynomial curve constructions.

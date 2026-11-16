@@ -1,7 +1,7 @@
 import HodgeTestbed.Algebra
 import Mathlib.RingTheory.MvPolynomial.EulerIdentity
 
-/-! Extracted from `HeadOfNaps`’s holdout-q2 proof (#124).
+/-! Extracted from `HeadOfNaps`’s holdout-q2 proof.
 The coefficient and denominator hypotheses remain explicit. -/
 
 /-!
