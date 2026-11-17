@@ -4,9 +4,6 @@ import Proposal.GeometricCanonicalCurveImage
 /-!
 # The actual seed tangent and its original canonical curve class
 
-Status: source-only proof draft. Compilation and independent kernel replay
-are deferred at the user's request.
-
 The regular time vector field on the constructed parameter algebra is
 specialized at its actual complex seed. Differentiating the original
 incidence equations and using the retained identity Jacobian shows that
@@ -39,7 +36,7 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceMonomials
   CycleQ2PolynomialAffineSlice CycleQ2IncidenceTraceFamily
   CycleQ2IncidenceTraceDirection CycleQ2IncidenceTraceDerivative
   CycleQ2IncidenceTraceGeometry CycleQ2IncidenceCompatibleGenericPoint
-  CycleQ2IncidenceEtaleParameter
+  CycleQ2IncidenceEtaleParameter CycleQ2SegreModularDetectorMatrixBinding
 
 @[simp] theorem seedMap_complex (a : ℂ) :
     seedMap (algebraMap ℂ ParameterAlgebra a) = a := by
@@ -93,7 +90,7 @@ theorem seedVelocity_kernel :
   change (∑ j, eval (seedPoint (57 : ℂ) Complex.I)
     (pderiv j ((presentation ℂ 57).equation q)) * seedVelocity j) = 0
   simpa only [jacobian, Matrix.mulVec, dotProduct, map_sum, map_mul,
-    map_zero, Pi.zero_apply, seedMap_polynomial, seedVelocity] using hq
+    map_zero, Pi.zero_apply, ← aeval_eq_eval₂Hom, seedMap_polynomial, seedVelocity] using hq
 
 /-- The actual chosen finite splitting has identity retained Jacobian at
 the literal seed, including the unchanged fixed-sextic embedding. -/

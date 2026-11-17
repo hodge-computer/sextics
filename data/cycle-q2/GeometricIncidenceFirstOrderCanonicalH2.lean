@@ -18,8 +18,7 @@ This is the original tangent's canonical boundary. It does not identify
 that class with the moving section curve's Chern or Abel--Jacobi class,
 construct a supported correspondence, or prove protected residue exactness.
 
-Source-only proof draft: no Lean elaboration, compilation, or kernel replay
-has been run. Prepared for fqlx with OpenAI ChatGPT assistance; the geometric
+Prepared for fqlx with OpenAI ChatGPT assistance; the geometric
 strategy and attribution are recorded in solution.md.
 -/
 
@@ -34,7 +33,7 @@ namespace CycleQ2IncidenceFirstOrderCanonicalH2
 
 open CategoryTheory TopologicalSpace MvPolynomial
 open CycleQ2IncidenceNormalForm CycleQ2GeometricIncidenceProj
-  CycleQ2SeedCechTheta CycleQ2NormalConnecting
+  CycleQ2SeedTrace CycleQ2SeedCechTheta CycleQ2NormalConnecting
   CycleQ2IncidenceFirstOrderTrace CycleQ2IncidenceFirstOrderNormalPairing
   CycleQ2GeometricIntrinsicCartierCohomology
   CycleQ2GlobalCubicAdjunctionCohomology CycleQ2CanonicalResidueDiagram
@@ -58,9 +57,11 @@ the same firstOrderDirection, with no scalar renormalization. -/
 theorem firstOrderWeightedCubic_substitute :
     substitute firstOrderWeightedCubic.val =
       cubicDeformation firstOrderCubicDirection := by
-  simpa only [firstOrderWeightedCubic, firstOrderCubicDirection] using
-    CycleQ2IncidenceCubicCechTrace.substitute_cubic
-      (fun j => firstOrderDirection (Sum.inl j))
+  change substitute (fullInvariantPolynomial 3 (fun j => firstOrderDirection (Sum.inl j))) =
+    cubicDeformation (fun j => firstOrderDirection
+      (Sum.inl (CycleQ2SegreModularDetectorMatrixBinding.cubicIndex j)))
+  exact CycleQ2IncidenceCubicCechTrace.substitute_cubic
+    (fun j => firstOrderDirection (Sum.inl j))
 
 /-- The actual surface adjunction preserves the already proved nonzero
 intrinsic cubic image of the original Cartier-normal class. -/

@@ -16,7 +16,6 @@ first-order surface proves flatness of every actual first-order affine
 chart over the dual numbers. No flatness of the original chart over the
 full incidence parameter algebra is assumed or inferred.
 
-Source-only draft: no elaboration, compilation, or kernel replay was run.
 Prepared for fqlx with OpenAI ChatGPT assistance, following Ben Diamond
 and the geometric strategy credited in solution.md.
 -/
@@ -37,7 +36,22 @@ open CycleQ2IncidenceEtaleParameter CycleQ2IncidenceFirstOrder
   CycleQ2FirstOrderSurface CycleQ2IncidenceDehomogenizedChart
   CycleQ2GeometricIncidenceProj
 
-attribute [local instance] firstOrderAlgebra
+attribute [local instance] CycleQ2FirstOrderTensorReduction.parameterFirstOrderAlgebra
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderModule
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderSMul
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderTower
+  CycleQ2FirstOrderTensorReduction.firstOrderTensorCommRing
+
+local instance incidenceChartCommRing (i : Fin 4) :
+    CommRing (DehomogenizedRing incidencePoint i) := inferInstance
+
+local instance firstOrderTensorModule (B : Type) [CommRing B] [Algebra ParameterAlgebra B] :
+    Module (DualNumber ℂ) (FirstOrderTensor B) :=
+  (inferInstance : Algebra (DualNumber ℂ) (FirstOrderTensor B)).toModule
+
+local instance firstOrderTensorSMul (B : Type) [CommRing B] [Algebra ParameterAlgebra B] :
+    SMul (DualNumber ℂ) (FirstOrderTensor B) :=
+  (inferInstance : Algebra (DualNumber ℂ) (FirstOrderTensor B)).toSMul
 
 section ActualAffineBaseChange
 
@@ -52,6 +66,7 @@ variable (f : X ⟶ Spec (CommRingCat.of ParameterAlgebra))
 /-- The original affine chart pulled back to the actual first-order scheme. -/
 abbrev ChartPullback := pullback e p
 
+include h he in
 /-- The outer square identifies the same source as an affine base change. -/
 theorem chartPullback_isPullback :
     IsPullback (pullback.snd e p ≫ q) (pullback.fst e p)
@@ -128,14 +143,18 @@ theorem tensorChartToSource_isPullback :
 
 theorem tensorChartToSource_opensRange [IsOpenImmersion e] :
     (tensorChartToSource B f p q h e he).opensRange = p ⁻¹ᵁ e.opensRange := by
-  rw [tensorChartToSource, Scheme.Hom.opensRange_comp_of_isIso,
+  dsimp only [tensorChartToSource]
+  rw [Scheme.Hom.opensRange_comp_of_isIso,
     Scheme.Hom.opensRange_pullbackSnd]
 
+include h he in
 /-- Flatness is used only on the actual first-order scheme over the dual numbers. -/
 theorem tensorChart_flat [IsOpenImmersion e] [AlgebraicGeometry.Flat q] :
     Module.Flat (DualNumber ℂ) (FirstOrderTensor B) := by
   apply RingHom.flat_algebraMap_iff.mp
-  apply (HasRingHomProperty.Spec_iff (P := @AlgebraicGeometry.Flat)).mp
+  apply (HasRingHomProperty.Spec_iff (P := @AlgebraicGeometry.Flat)
+    (φ := CommRingCat.ofHom (R := DualNumber ℂ) (S := FirstOrderTensor B)
+      (algebraMap (DualNumber ℂ) (FirstOrderTensor B)))).mp
   change AlgebraicGeometry.Flat (tensorChartToBase B)
   rw [← tensorChartToSource_overBase B f p q h e he]
   infer_instance
@@ -162,7 +181,8 @@ theorem originalSurfaceChart_overBase (i : Fin 4) :
 
 theorem originalSurfaceChart_opensRange (i : Fin 4) :
     (originalSurfaceChart i).opensRange = familyCoordinatePatch incidencePoint i := by
-  rw [originalSurfaceChart, Scheme.Hom.opensRange_comp_of_isIso]
+  dsimp only [originalSurfaceChart]
+  rw [Scheme.Hom.opensRange_comp_of_isIso]
   exact (familyCoordinatePatch incidencePoint i).opensRange_ι
 
 /-- The actual first-order coordinate chart maps openly into the retained surface. -/
@@ -188,7 +208,8 @@ instance firstOrderChartToSurface_isOpenImmersion (i : Fin 4) :
 theorem firstOrderChartToSurface_opensRange (i : Fin 4) :
     (firstOrderChartToSurface i).opensRange =
       firstOrderSurfaceToSurface ⁻¹ᵁ familyCoordinatePatch incidencePoint i := by
-  rw [firstOrderChartToSurface, tensorChartToSource_opensRange,
+  dsimp only [firstOrderChartToSurface]
+  rw [tensorChartToSource_opensRange,
     originalSurfaceChart_opensRange]
 
 /-- Unconditional ambient flatness of the actual tensor chart along the retained tangent. -/
