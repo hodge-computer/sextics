@@ -1,6 +1,65 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Checked continuation: the canonical cotangent sheaf on the native affine charts
+## The Chern class has a nonzero cotangent boundary
+
+Let \(D\) be the original complex projective surface at \(r=57,\theta=1\), let
+\(C\) be its original Cartier curve, and let \(i:D\hookrightarrow\mathcal D\)
+be the closed fibre of the independent first-order deformation given by
+\(F_{57,1}-\epsilon B_*\). For this deformation the connecting map sends
+the Chern class represented by the transition functions of \(\mathcal O_D(C)\)
+to the previously computed projected Cartier class.
+\[
+  \partial_{\mathrm{cot}}\bigl(c_1^{\mathrm{dlog}}(\mathcal O_D(C))\bigr)
+    = \texttt{projectedDerivedClass}\ne 0
+    \quad\text{in }H^2(D,\mathcal O_D).
+\]
+Consequently no class in \(H^1(D,i^*\Omega^1_{\mathcal D/\mathbb C})\)
+maps to this Chern class. This projected class is the connecting image of the original intrinsic normal class and equals the negative of `literalDerivedClassAtTop`. Applying the retained first-order cubic to the cotangent boundary gives a nonzero class in \(H^2(D,K_D)\). The statements in Lean include
+`chernDerivedClass_connecting_eq_original`, `chernDerivedClass_connecting_ne_zero`,
+and `chernDerivedClass_has_no_lift`. [Connecting theorem](GeometricLiteralCotangentConnecting.lean)
+
+**The two arrows.** The sequence defining this boundary is
+\[
+  0\longrightarrow \mathcal O_D
+    \xrightarrow{\;a\mapsto a\,d\epsilon\;}
+    i^*\Omega^1_{\mathcal D/\mathbb C}
+    \xrightarrow{\;q\;} \Omega^1_{D/\mathbb C}
+    \longrightarrow 0 .
+\]
+On a nonempty native intersection with thick ring \(B\), closed ring \(A\),
+and reduction \(\rho:B\to A\), the first map is multiplication by
+\(1\otimes d\epsilon\). The second sends \(a\otimes db\) to
+\(a\,d(\rho(b))\). Both identifications use the pullback of the original
+scheme maps. The chosen local splittings split this sequence on each of
+the twelve covering charts. Descent proves short exactness of the module
+sheaves and their underlying additive sheaves.
+[Epsilon comparison](GeometricLiteralCotangentEpsilonMap.lean) ·
+[Reduction comparison](GeometricLiteralCotangentReduction.lean) ·
+[Global exactness](GeometricLiteralCotangentShortExact.lean)
+
+**The sign.** Write \(T_{uv}\) for the inverse-ideal transition and \(s_u\)
+for the cotangent splitting at vertex \(u\). Lift \(d\log T_{uv}\) by
+\(s_u\) on increasing edges, extend by negation on reversed edges, and use
+zero on the diagonal. For \(u<v<w\), the Čech differential of that lift
+is
+\[
+  (s_v-s_u)(d\log T_{vw})
+   =\kappa_{uv}(d\log T_{vw})\,d\epsilon .
+\]
+The equality holds with the alternating signs on all permutations and with
+zero on repeated vertices. The map from the native tensor module to sections
+of the restricted cotangent sheaf respects restrictions, reduction and
+\(d\epsilon\). The finite-cover connecting theorem therefore identifies
+the boundary of the original Chern class with the ordered cup in derived
+cohomology. [Ordered lifts](GeometricLiteralCotangentOrderedLift.lean) ·
+[Realization as sheaf sections](GeometricLiteralCotangentRestriction.lean)
+
+The Abel–Jacobi comparison still requires the moving family in a smooth fixed threefold and the Serre trace of the corresponding orbit-class pairing. The computation above uses the single curve \(C\) and the independent ambient test direction. The cylinder and
+supported variation, specialization to the protected pencil, and the
+source-specific de Rham argument still have to yield the rational
+primitive required by `Submission.missing_geometric_existence`.
+
+## Earlier checkpoint on the canonical cotangent sheaf on the native affine charts
 
 **17 November 2026. The protected certificate remains incomplete.**
 The canonical global restricted cotangent sheaf is now identified, on
