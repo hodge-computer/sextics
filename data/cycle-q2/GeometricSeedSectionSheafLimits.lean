@@ -12,7 +12,6 @@ sections with compatible families of original chart-ideal sections.
 The construction uses the native categorical limits; it does not replace
 the source by a chosen compatible-family model.
 
-Source-only draft: no Lean elaboration or kernel replay was run.
 Prepared for fqlx with OpenAI ChatGPT assistance; see solution.md.
 -/
 
@@ -37,7 +36,10 @@ def sectionFunctor (X : Scheme.{0}) (V : X.Opens) : X.Modules ⥤ Ab :=
 
 instance (V : X.Opens) : PreservesLimits (sectionFunctor X V) := by
   dsimp only [sectionFunctor]
-  infer_instance
+  haveI : PreservesLimits ((evaluation X.Opensᵒᵖ Ab).obj (op V)) :=
+    evaluationPreservesLimits (op V)
+  exact comp_preservesLimits (Scheme.Modules.toPresheaf X)
+    ((evaluation X.Opensᵒᵖ Ab).obj (op V))
 
 instance (V : X.Opens) : (sectionFunctor X V).Additive where
   map_add := by intros; rfl
@@ -55,8 +57,8 @@ def sectionFanIsLimit {ι : Type} (M : ι → X.Modules) (V : X.Opens) :
   Fan.IsLimit.mk _
     (fun s => AddCommGrpCat.ofHom
       { toFun := fun x i => s.proj i x
-        map_zero' := by funext i; exact map_zero (s.proj i)
-        map_add' := by intro x y; funext i; exact map_add (s.proj i) x y })
+        map_zero' := by funext i; exact map_zero (s.proj i).hom
+        map_add' := by intro x y; funext i; exact map_add (s.proj i).hom x y })
     (by intro s i; rfl)
     (by
       intro s m hm
@@ -95,11 +97,13 @@ def sectionKernelEquiv {M N : X.Modules} (f : M ⟶ N) (V : X.Opens) :
 theorem sectionKernelEquiv_val {M N : X.Modules} (f : M ⟶ N) (V : X.Opens)
     (s : Γ(kernel f, V)) :
     (sectionKernelEquiv f V s).val = (kernel.ι f).app V s := by
-  change ((PreservesKernel.iso (sectionFunctor X V) f).hom ≫
-    (AddCommGrpCat.kernelIsoKer ((sectionFunctor X V).map f)).hom ≫
-      AddCommGrpCat.ofHom (AddSubgroup.subtype ((f.app V).hom.ker))) s = _
-  rw [AddCommGrpCat.kernelIsoKer_hom_comp_subtype,
-    PreservesKernel.iso_hom, kernelComparison_comp_ι] <;> rfl
+  have h : (PreservesKernel.iso (sectionFunctor X V) f).hom ≫
+      (AddCommGrpCat.kernelIsoKer ((sectionFunctor X V).map f)).hom ≫
+        AddCommGrpCat.ofHom (AddSubgroup.subtype (((sectionFunctor X V).map f).hom.ker)) =
+      (sectionFunctor X V).map (kernel.ι f) := by
+    rw [AddCommGrpCat.kernelIsoKer_hom_comp_subtype,
+      PreservesKernel.iso_hom, kernelComparison_comp_ι]
+  exact ConcreteCategory.congr_hom h s
 
 theorem sectionKernelEquiv_symm_val {M N : X.Modules} (f : M ⟶ N)
     (V : X.Opens) (s : (f.app V).hom.ker) :
@@ -118,8 +122,8 @@ def FamilyCompatible (V : Surface.Opens) (s : ∀ i, Γ(idealPatch i, V)) : Prop
 def sourceFamily (V : Surface.Opens) :
     Γ(twistedIdeal, V) →+ (∀ i, Γ(idealPatch i, V)) where
   toFun s i := (chartProjection i).app V s
-  map_zero' := by funext i; exact map_zero ((chartProjection i).app V)
-  map_add' := by intro s t; funext i; exact map_add ((chartProjection i).app V) s t
+  map_zero' := by funext i; exact map_zero ((chartProjection i).app V).hom
+  map_add' := by intro s t; funext i; exact map_add ((chartProjection i).app V).hom s t
 
 theorem sourceFamily_compatible (V : Surface.Opens) (s : Γ(twistedIdeal, V)) :
     FamilyCompatible V (sourceFamily V s) := by
