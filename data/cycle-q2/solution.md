@@ -16,6 +16,119 @@ actual exterior derivative on a nonempty principal open. Passing that regular
 three-form to the function field gives the requested primitive. Showing that
 this particular germ vanishes remains the open step. [Generic-germ equivalence](GeometricLiteralResidueExactness.lean)
 
+## The fixed threefold and its moving curves
+
+The curve calculation takes place on the cubic section \(D\) of the weighted
+sextic threefold \(T\) at \((r,\theta)=(57,1)\). Smoothness matters here
+because the residue of the ambient volume is used on this very fiber.
+With coordinates \((a,b,c,d,w)\) of weights \((1,1,1,1,2)\), put
+\(B=d^3+c^3+bcd+acd+ab^2+a^3\). The equation of \(T\) is
+\[
+ w^3+a^6+b^6+c^6+d^6+(2-57^3)b^3d^3+B^2=0.
+\]
+A common zero of the gradient has \(w=0\). The four remaining
+quintics have only the origin as a common zero when \(b=0\).
+When \(b\ne0\), normalize \(b=1\), put \(u=a\) and \(k=B\), and eliminate
+\(cd,d^3,c^3\). The gradient equations force two integer polynomials in
+\(u\) of degrees 40 and 49 to vanish at the same point. Their degrees survive
+reduction modulo 13, where a Bézout identity proves they are coprime.
+This excludes a common root in characteristic zero. The resulting scheme
+is smooth of relative dimension three and proper over \(\mathbb C\).
+The original surface carrying the Cartier class embeds in it.
+[Smoothness of the threefold](GeometricLiteralAmbientSmooth.lean) and
+[closed immersion of the surface](GeometricLiteralAmbientSurface.lean)
+
+The normalized surface trace \(H^2(D,K_D)\to\mathbb C\) takes the
+coefficient of \(x_0^2w^2/(x_1x_2x_3)\) on the triple coordinate overlap.
+The sections with coefficient zero are exactly the Čech boundaries, and
+the indicated monomial has coefficient one. This identifies the full
+cohomology group with \(\mathbb C\). It evaluates nontrivially on the
+cubic times the cotangent boundary of the original curve \(C\).
+[Normalized trace](GeometricLiteralCotangentTrace.lean)
+
+For a section vector \(t\) regular on the linkage charts, the ideal of
+the actual moving curve \(\Gamma_t\) has transition functions whose
+logarithmic Chern class satisfies
+\[
+ c_1(\Gamma_t)=c_1(C)+c_1(a^*C)+c_1((a^2)^*C)+4c_1(\mathcal O_D(1)),
+\]
+where \(a\) denotes the cyclic automorphism. Thus the three translates
+and the hyperplane term refer to the same moving curve.
+[Class of the moving divisor](GeometricLiteralMovingDivisorOrbitComparison.lean)
+
+Choose a vector \(t\in\mathbb C^3\) algebraically independent over
+\(\mathbb Q\) and regular on the linkage charts. The Jacobian minor
+calculation gives a smooth seed curve, and the fixed-sextic time curve
+has an open neighborhood of the seed on which the family of curves is
+smooth, proper and surjective. The relative dimension of this projection
+is one, and its total space is smooth of dimension two over
+\(\mathbb C\). Pulling back by the marked dual-number tangent gives the
+original first-order curve, on which the normal to the cubic equation is
+\(-L\) and is nonzero on one chart. The second projection goes to the
+fixed sextic and agrees on the pointed germ with the original incidence
+projection. [Simultaneous choice of section](GeometricLiteralAbelJacobiChartRegular.lean),
+[family over the time curve](GeometricLiteralAbelJacobiTimeFamily.lean) and
+[projection to the fixed threefold](GeometricLiteralAbelJacobiTimeProjection.lean)
+
+To evaluate the moving divisor, let \(\partial\) be the cotangent
+connecting map for the independent test deformation
+\(F_{57,1}-\epsilon B_*\), and use \(L\) for the cubic of the
+fixed-threefold time tangent. The cyclic action scales \(\epsilon\) as
+well as the functions on the surface. With this action on the normal
+term, the three terms have the same normalized residue after multiplication
+by \(L\). The fourth hyperplane twist lifts to the test deformation and its
+boundary vanishes. Since the normalized trace identifies
+\(H^2(D,K_D)\) with \(\mathbb C\), this gives the cohomological identity
+\[
+ L\,\partial c_1(\Gamma_t)=3\,L\,\partial c_1(C)\ne0
+ \qquad\text{in } H^2(D,K_D).
+\]
+[Orbit action and cubic pairing](GeometricLiteralOrbitChernResidue.lean) and
+[moving divisor pairing](GeometricLiteralMovingChernTrace.lean)
+
+## From the moving divisor to a differential on the moving curve
+
+Let \(\rho_B\) be the surface Kodaira–Spencer class of the ambient
+test, let \(\omega_L\) be the canonical surface form supplied by the
+cubic, and set \(\beta=\rho_B\mathbin{\lrcorner}\omega_L\).
+On the common refinement where the ideal of \(\Gamma_t\) has local
+equation \(e_j\), take the pole lift of the differential edge
+\(\beta_{ij}\) using the equation at its second vertex, giving
+\[
+ z_{ij}=\frac{de_j}{e_j}\wedge\beta_{ij}.
+\]
+For \(e_j=T_{jk}e_k\), its Čech boundary is the regular form
+\(d\log(T_{jk})\wedge\beta_{ij}\). The sheaf calculation verifies this
+after multiplying by \(e_k\) in the local pole frame, so it holds on
+opens meeting the divisor. The same regular face is \(L\) times the
+boundary of a lift of the moving Chern cocycle in the cotangent sequence.
+Comparing the two lifts in derived cohomology gives
+\[
+ \delta_{\rm res}\bigl([\operatorname{res}(z)]\bigr)
+     =L\,\partial c_1(\Gamma_t).
+\]
+The right side has the nonzero normalized trace computed above.
+[Boundary of the pole lifts](GeometricLiteralMovingResidueBoundary.lean) and
+[comparison in derived cohomology](GeometricLiteralMovingResidueConnecting.lean)
+
+The morphism from differentials on the surface to this residue quotient
+factors through the ordinary differential sheaf of the actual curve.
+Cohomology of the closed direct image agrees with cohomology on the
+curve. Thus the restriction of \(\rho_B\mathbin{\lrcorner}\omega_L\)
+gives a class in \(H^1(\Gamma_t,\Omega^1_{\Gamma_t})\) on the same
+moving section. Its normalized trace is the trace of
+\(L\,\partial c_1(\Gamma_t)\), which proves that this intrinsic curve
+class is nonzero.
+[Factorization through the curve](GeometricLiteralMovingResidueCurve.lean) and
+[nonvanishing on the curve](GeometricLiteralMovingCurveDifferentialNonzero.lean)
+
+To obtain the protected rational primitive from these computations, the
+class on the curve must detect the pullback of the ambient threefold
+test along the moving family. The remaining argument must spread the
+supported correspondence, specialize its action to the given pencil,
+and show that the prescribed four-form on the fourfold vanishes at its
+generic point in de Rham cohomology.
+
 ## Canonical cohomology on the three coordinate opens
 
 Every class in \(H^2(D,K_D)\) is the image of a section on the triple
@@ -45,8 +158,8 @@ closed surface. Exactness gives
   \partial_{\mathrm{cot}}\bigl(c_1^{\mathrm{dlog}}(\mathcal O_D(k))\bigr)=0 .
 \]
 In particular, the fourth hyperplane twist contributes zero to the
-moving divisor's boundary. The three translated curves still have to be
-accounted for. [Hyperplane lift and connecting theorem](GeometricLiteralHyperplaneCotangent.lean)
+moving divisor's boundary. The orbit calculation above gives the contribution
+of the three translated curves after multiplication by the cubic. [Hyperplane lift and connecting theorem](GeometricLiteralHyperplaneCotangent.lean)
 
 The finite Čech class in degree one is additive in the cocycle and is preserved
 under refinement. These properties let the three sets of transition functions
@@ -107,10 +220,10 @@ the boundary of the original Chern class with the ordered cup in derived
 cohomology. [Ordered lifts](GeometricLiteralCotangentOrderedLift.lean) ·
 [Realization as sheaf sections](GeometricLiteralCotangentRestriction.lean)
 
-The Abel–Jacobi comparison still requires the moving family in a smooth fixed threefold and the Serre trace of the corresponding orbit-class pairing. The computation above uses the single curve \(C\) and the independent ambient test direction. The cylinder and
-supported variation, specialization to the protected pencil, and the
-source-specific de Rham argument still have to yield the rational
-primitive required by `Submission.missing_geometric_existence`.
+The curve calculation here supplies the single summand \(C\) in the moving
+divisor pairing above. The derivation of the rational primitive still
+needs the supported correspondence and its comparison with the protected
+fourfold residue.
 
 ## Earlier checkpoint on the canonical cotangent sheaf on the native affine charts
 

@@ -31,14 +31,15 @@ variable {X : TopCat.{0}} {ι : Type} [Fintype ι]
 local instance sheafHasExt : HasExt.{1} (AbSheaf X) := HasExt.standard _
 variable (U : ι → Opens X)
 
-theorem cechOneClass_connecting {S : ShortComplex (AbSheaf X)} (hS : S.ShortExact)
+/-- A lift realizes the Ext boundary by descent on its raw scalar two-cochain. -/
+theorem exists_descent_of_lift {S : ShortComplex (AbSheaf X)} (hS : S.ShortExact)
     (hcover : (⨆ i, U i) = ⊤) (b : One S.X₂ U) (c : Two S.X₁ U)
-    (hn : NormalizedTwo S.X₁ U c) (hc : IsTwoCocycle S.X₁ U c)
     (hb : ∀ i j k W hi hj hk,
       boundaryValue S.X₂ U b i j k W hi hj hk =
         app S.f W (faceValue S.X₁ U c i j k W hi hj hk)) :
-    (cechOneClass U hcover (mapOne U S.g b) (primitive_image_closed U S c b hb)).comp
-      hS.extClass rfl = cechTwoClass U hcover c hn hc := by
+    ∃ d : TwoDescent U c,
+      (cechOneClass U hcover (mapOne U S.g b) (primitive_image_closed U S c b hb)).comp
+        hS.extClass rfl = descentClass U d := by
   let m := coefficientPresentationMap hS
   let u := mapOne U S.g b
   have hu : IsOneCocycle S.X₃ U u := primitive_image_closed U S c b hb
@@ -78,6 +79,7 @@ theorem cechOneClass_connecting {S : ShortComplex (AbSheaf X)} (hS : S.ShortExac
       ((cechOneClass U hcover u hu).comp (Ext.mk₀ m.τ₃) (Nat.add_zero 1)).comp
         (presentation_shortExact S.X₁).extClass rfl := by
     simpa only [m,coefficientPresentationMap_left,Ext.comp_mk₀_id] using hnat
+  refine ⟨dd, ?_⟩
   change (cechOneClass U hcover u hu).comp hS.extClass rfl = _
   calc
     _ = ((cechOneClass U hcover u hu).comp (Ext.mk₀ m.τ₃) (Nat.add_zero 1)).comp
@@ -89,7 +91,17 @@ theorem cechOneClass_connecting {S : ShortComplex (AbSheaf X)} (hS : S.ShortExac
       congrArg (fun x => x.comp (presentation_shortExact S.X₁).extClass rfl)
         (cechOneClass_eq_descentClass U hcover v hvclosed d)
     _ = descentClass U dd := rfl
-    _ = _ := (cechTwoClass_eq_descentClass U hcover c hn hc dd).symm
+
+theorem cechOneClass_connecting {S : ShortComplex (AbSheaf X)} (hS : S.ShortExact)
+    (hcover : (⨆ i, U i) = ⊤) (b : One S.X₂ U) (c : Two S.X₁ U)
+    (hn : NormalizedTwo S.X₁ U c) (hc : IsTwoCocycle S.X₁ U c)
+    (hb : ∀ i j k W hi hj hk,
+      boundaryValue S.X₂ U b i j k W hi hj hk =
+        app S.f W (faceValue S.X₁ U c i j k W hi hj hk)) :
+    (cechOneClass U hcover (mapOne U S.g b) (primitive_image_closed U S c b hb)).comp
+      hS.extClass rfl = cechTwoClass U hcover c hn hc := by
+  obtain ⟨d, hd⟩ := exists_descent_of_lift U hS hcover b c hb
+  exact hd.trans (cechTwoClass_eq_descentClass U hcover c hn hc d).symm
 
 end CycleQ2FiniteCechConnecting
 
