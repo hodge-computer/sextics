@@ -17,7 +17,6 @@ minor avoids an ideal, an injective pair of genuine affine derivative
 columns also has its determinant outside the same ideal. No field,
 prime-ideal, smoothness, or seed-specialization premise is needed.
 
-Source-only draft: no elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -69,7 +68,8 @@ theorem weighted_derivative_sum (y : ParameterIndex → S) (i : Fin 4) (e : Fin 
   have h := congrArg (fun p => dehomogenizedMap y i (dehomogenize i p))
     he.sum_weight_X_mul_pderiv
   simpa only [map_sum, map_nsmul, map_mul, hz, nsmul_zero,
-    normalizedDerivative, weightedCoordinate, nsmul_eq_mul, mul_assoc] using h
+    normalizedDerivative, weightedCoordinate, nsmul_eq_mul, map_natCast,
+    mul_zero, mul_assoc] using h
 
 theorem normalizedMinor_eq_derivatives (y : ParameterIndex → S) (i : Fin 4)
     (j k : Fin 5) :
@@ -77,7 +77,8 @@ theorem normalizedMinor_eq_derivatives (y : ParameterIndex → S) (i : Fin 4)
       normalizedDerivative y i 0 j * normalizedDerivative y i 1 k -
         normalizedDerivative y i 0 k * normalizedDerivative y i 1 j := by
   simp only [normalizedMinor, surfaceMinor_eq, normalizedDerivative,
-    equations, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_fin_one,
+    CycleQ2IncidenceDehomogenizedChart.equations,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_fin_one,
     map_sub, map_mul]
 
 theorem normalizedMinor_self (y : ParameterIndex → S) (i : Fin 4) (j : Fin 5) :
@@ -95,10 +96,10 @@ theorem weighted_minor_sum (y : ParameterIndex → S) (i : Fin 4) (k : Fin 5) :
   simp only [normalizedMinor_eq_derivatives]
   calc
     _ = ∑ j : Fin 5,
-        (weightedCoordinate y i j * normalizedDerivative y i 0 j) *
+        ((weightedCoordinate y i j * normalizedDerivative y i 0 j) *
             normalizedDerivative y i 1 k -
           normalizedDerivative y i 0 k *
-            (weightedCoordinate y i j * normalizedDerivative y i 1 j) := by
+            (weightedCoordinate y i j * normalizedDerivative y i 1 j)) := by
       apply Finset.sum_congr rfl
       intro j _
       ring

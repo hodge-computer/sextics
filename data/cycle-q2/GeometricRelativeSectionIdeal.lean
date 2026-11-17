@@ -14,7 +14,6 @@ Regularity is supplied separately by simultaneous associated-prime
 avoidance. Neither flatness over parameters nor nonemptiness is inferred
 from principality.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric strategy and the protected certificate gap.
 -/
@@ -49,7 +48,10 @@ theorem relativePivotEvaluation_sectionVector (p : CycleQ2SegreCech.Chart) (i : 
       algebraMap (PointSurface y) (CoefficientPivot y p) (relativeEquation y t i) := by
   rw [relativeEquation_localize_row]
   simp only [relativePivotEvaluation, sectionVector, linearForm, map_sum, map_mul,
-    MvPolynomial.eval_C, MvPolynomial.eval_X, Algebra.smul_def, mul_comm]
+    MvPolynomial.eval_C, MvPolynomial.eval_X]
+  apply Finset.sum_congr rfl
+  intro j _
+  exact (mul_comm _ _).trans (Algebra.smul_def (t j) (localizedMatrix y p i j)).symm
 
 theorem relativeSectionIdeal_localize (p : CycleQ2SegreCech.Chart) :
     (relativeSectionIdeal y t).map

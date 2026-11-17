@@ -17,7 +17,6 @@ projective sheaf maps. Naturality of transitions on smaller opens,
 their triple-overlap descent, and the global internal-Hom identification
 remain separate obligations.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -38,6 +37,9 @@ open CycleQ2GeometricSurfaceDehomogenizedCharts
   CycleQ2SeedProjectiveImageCompatibility CycleQ2SeedProjectiveLocalizedDuality
   CycleQ2SeedProjectiveChartOverlaps CycleQ2SeedChartSectionScalars
   CycleQ2SeedChartModuleRestriction CycleQ2SeedOverlapSectionModels
+
+local instance overlapCommRing (i j : Fin 3) : CommRing (OverlapSections i j) :=
+  inferInstance
 
 def leftImageSectionModule (i j : Fin 3) :
     Module (OverlapSections i j) Γ(projectiveImageSheaf i, leftNativeOverlap i j) :=
@@ -64,40 +66,56 @@ def leftProjectiveImageEquiv (i j : Fin 3) :
     Γ(projectiveImageSheaf i, leftNativeOverlap i j) ≃ₗ[OverlapSections i j]
       Regrading.Image (leftData i j) := by
   letI := leftImageSectionModule i j
-  letI := chartSectionsModule (coordinateAffineChart 57 1 i.succ)
-    (leftChartOver i j) (affineImageSheaf i)
-  exact (chartRestrictionEquiv (coordinateAffineChart 57 1 i.succ)
-    (leftChartOver i j) (affineImageSheaf i)).trans (leftImageModel i j)
+  letI : Module (OverlapSections i j) Γ(affineImageSheaf i, leftChartOpen i j) :=
+    chartSectionsModule (coordinateAffineChart 57 1 i.succ)
+      (leftChartOver i j) (affineImageSheaf i)
+  let e : Γ(projectiveImageSheaf i, leftNativeOverlap i j) ≃ₗ[OverlapSections i j]
+      Γ(affineImageSheaf i, leftChartOpen i j) :=
+    chartRestrictionEquiv (coordinateAffineChart 57 1 i.succ)
+      (leftChartOver i j) (affineImageSheaf i)
+  exact e.trans (leftImageModel i j)
 
 def leftProjectiveDualEquiv (i j : Fin 3) :
     letI := leftDualSectionModule i j
     Γ(projectiveOrbitDualSheaf i, leftNativeOverlap i j) ≃ₗ[OverlapSections i j]
       LeftOverlapDual i j := by
   letI := leftDualSectionModule i j
-  letI := chartSectionsModule (coordinateAffineChart 57 1 i.succ)
-    (leftChartOver i j) (affineOrbitDualSheaf i)
-  exact (chartRestrictionEquiv (coordinateAffineChart 57 1 i.succ)
-    (leftChartOver i j) (affineOrbitDualSheaf i)).trans (leftDualModel i j)
+  letI : Module (OverlapSections i j) Γ(affineOrbitDualSheaf i, leftChartOpen i j) :=
+    chartSectionsModule (coordinateAffineChart 57 1 i.succ)
+      (leftChartOver i j) (affineOrbitDualSheaf i)
+  let e : Γ(projectiveOrbitDualSheaf i, leftNativeOverlap i j) ≃ₗ[OverlapSections i j]
+      Γ(affineOrbitDualSheaf i, leftChartOpen i j) :=
+    chartRestrictionEquiv (coordinateAffineChart 57 1 i.succ)
+      (leftChartOver i j) (affineOrbitDualSheaf i)
+  exact e.trans (leftDualModel i j)
 
 def rightProjectiveImageEquiv (i j : Fin 3) :
     letI := rightImageSectionModule i j
     Γ(projectiveImageSheaf j, rightNativeOverlap i j) ≃ₗ[OverlapSections i j]
       Regrading.Image (rightData i j) := by
   letI := rightImageSectionModule i j
-  letI := chartSectionsModule (coordinateAffineChart 57 1 j.succ)
-    (rightChartOver i j) (affineImageSheaf j)
-  exact (chartRestrictionEquiv (coordinateAffineChart 57 1 j.succ)
-    (rightChartOver i j) (affineImageSheaf j)).trans (rightImageModel i j)
+  letI : Module (OverlapSections i j) Γ(affineImageSheaf j, rightChartOpen i j) :=
+    chartSectionsModule (coordinateAffineChart 57 1 j.succ)
+      (rightChartOver i j) (affineImageSheaf j)
+  let e : Γ(projectiveImageSheaf j, rightNativeOverlap i j) ≃ₗ[OverlapSections i j]
+      Γ(affineImageSheaf j, rightChartOpen i j) :=
+    chartRestrictionEquiv (coordinateAffineChart 57 1 j.succ)
+      (rightChartOver i j) (affineImageSheaf j)
+  exact e.trans (rightImageModel i j)
 
 def rightProjectiveDualEquiv (i j : Fin 3) :
     letI := rightDualSectionModule i j
     Γ(projectiveOrbitDualSheaf j, rightNativeOverlap i j) ≃ₗ[OverlapSections i j]
       RightOverlapDual i j := by
   letI := rightDualSectionModule i j
-  letI := chartSectionsModule (coordinateAffineChart 57 1 j.succ)
-    (rightChartOver i j) (affineOrbitDualSheaf j)
-  exact (chartRestrictionEquiv (coordinateAffineChart 57 1 j.succ)
-    (rightChartOver i j) (affineOrbitDualSheaf j)).trans (rightDualModel i j)
+  letI : Module (OverlapSections i j) Γ(affineOrbitDualSheaf j, rightChartOpen i j) :=
+    chartSectionsModule (coordinateAffineChart 57 1 j.succ)
+      (rightChartOver i j) (affineOrbitDualSheaf j)
+  let e : Γ(projectiveOrbitDualSheaf j, rightNativeOverlap i j) ≃ₗ[OverlapSections i j]
+      Γ(affineOrbitDualSheaf j, rightChartOpen i j) :=
+    chartRestrictionEquiv (coordinateAffineChart 57 1 j.succ)
+      (rightChartOver i j) (affineOrbitDualSheaf j)
+  exact e.trans (rightDualModel i j)
 
 /-- The actual left projective sheaf isomorphism has the proved literal
 overlap duality as its model, on every native overlap section. -/
@@ -106,16 +124,11 @@ theorem leftProjective_naturality (i j : Fin 3)
     leftProjectiveDualEquiv i j
         ((projectiveImageDualIso i).hom.app (leftNativeOverlap i j) s) =
       Regrading.imageDual (leftData i j) (leftProjectiveImageEquiv i j s) := by
-  change leftDualModel i j
-      (chartRestrictionEquiv (coordinateAffineChart 57 1 i.succ)
-        (leftChartOver i j) (affineOrbitDualSheaf i)
-        (((Scheme.Modules.restrictFunctor (coordinateAffineChart 57 1 i.succ).hom).map
-          (affineImageDualIso i).hom).app (leftNativeOverlap i j) s)) =
-    Regrading.imageDual (leftData i j)
-      (leftImageModel i j (chartRestrictionEquiv (coordinateAffineChart 57 1 i.succ)
-        (leftChartOver i j) (affineImageSheaf i) s))
-  rw [chartRestrictionEquiv_naturality]
-  exact leftModel_naturality i j _
+  have h := chartRestrictionEquiv_naturality
+    (coordinateAffineChart 57 1 i.succ) (leftChartOver i j) (affineImageDualIso i).hom s
+  exact (congrArg (leftDualModel i j) h).trans
+    (leftModel_naturality i j (chartRestrictionEquiv
+      (coordinateAffineChart 57 1 i.succ) (leftChartOver i j) (affineImageSheaf i) s))
 
 /-- The corresponding right-chart square uses the same ordered intersection. -/
 theorem rightProjective_naturality (i j : Fin 3)
@@ -123,16 +136,11 @@ theorem rightProjective_naturality (i j : Fin 3)
     rightProjectiveDualEquiv i j
         ((projectiveImageDualIso j).hom.app (rightNativeOverlap i j) s) =
       Regrading.imageDual (rightData i j) (rightProjectiveImageEquiv i j s) := by
-  change rightDualModel i j
-      (chartRestrictionEquiv (coordinateAffineChart 57 1 j.succ)
-        (rightChartOver i j) (affineOrbitDualSheaf j)
-        (((Scheme.Modules.restrictFunctor (coordinateAffineChart 57 1 j.succ).hom).map
-          (affineImageDualIso j).hom).app (rightNativeOverlap i j) s)) =
-    Regrading.imageDual (rightData i j)
-      (rightImageModel i j (chartRestrictionEquiv (coordinateAffineChart 57 1 j.succ)
-        (rightChartOver i j) (affineImageSheaf j) s))
-  rw [chartRestrictionEquiv_naturality]
-  exact rightModel_naturality i j _
+  have h := chartRestrictionEquiv_naturality
+    (coordinateAffineChart 57 1 j.succ) (rightChartOver i j) (affineImageDualIso j).hom s
+  exact (congrArg (rightDualModel i j) h).trans
+    (rightModel_naturality i j (chartRestrictionEquiv
+      (coordinateAffineChart 57 1 j.succ) (rightChartOver i j) (affineImageSheaf j) s))
 
 /-- Transport the established matrix-image transition to native projective
 sections. No sheaf descent or triple-overlap compatibility is asserted here. -/

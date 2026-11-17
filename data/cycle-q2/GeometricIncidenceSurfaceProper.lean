@@ -4,8 +4,6 @@ import Proposal.GeometricSpecializedProjectiveCurve
 /-!
 # Properness of the original incidence surface family
 
-Status: source-only proof draft. No elaboration or kernel replay was run.
-
 The original weighted surface quotient is finite type over its coefficient
 ring. Its degree-zero part is a quotient of that same coefficient ring,
 because all five weights are positive. Consequently the existing
@@ -68,7 +66,9 @@ theorem surface_finiteType_coefficients (y : ParameterIndex → S) :
 theorem surface_finiteType_zero (y : ParameterIndex → S) :
     Algebra.FiniteType (surfaceGrade y 0) (PointSurface y) := by
   letI : IsScalarTower S (surfaceGrade y 0) (PointSurface y) :=
-    IsScalarTower.of_algebraMap_eq' rfl
+    ⟨fun a b c => by
+      change (a • (b : PointSurface y)) * c = a • ((b : PointSurface y) * c)
+      exact smul_mul_assoc a (b : PointSurface y) c⟩
   letI := surface_finiteType_coefficients y
   exact Algebra.FiniteType.of_restrictScalars_finiteType
     S (surfaceGrade y 0) (PointSurface y)

@@ -62,7 +62,8 @@ def cubicH2 (p : WeightedCubic) :
     (CycleQ2GeometricProjectiveHOne.structureAdditiveSheaf
       CycleQ2CanonicalResidueSheaf.Surface).H' 2 ⊤ →+
       canonicalResidueAdditiveComplex.X₁.H' 2 ⊤ :=
-  formMultiplicationH2 (CycleQ2GlobalSurfaceCubics.globalCubicSection p) ⊤
+  CycleQ2ThreeOpenH2Naturality.cohomologyMap
+    (globalFormAdditiveDiagram (CycleQ2GlobalSurfaceCubics.globalCubicSection p)).τ₁ 2 ⊤
 
 /-- The actual cubic connecting identity for the original reduced normal
 class and its original Cartier boundary, with the established sign. -/

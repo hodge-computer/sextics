@@ -13,7 +13,6 @@ projective equations is a unit. This gives local units for a subsequent
 transition-cocycle argument. No nonunit equation is supplied here, so the
 nonemptiness of the chosen regular seed curve remains unresolved.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric strategy and the protected certificate gap.
 -/
@@ -39,6 +38,14 @@ variable (y : ParameterIndex → ℂ) (t : Fin 3 → ℂ)
 variable (he : ∀ q, aeval y ((presentation ℂ 57).equation q) = 0)
 variable (hu : IsUnit (aeval y (leadingProduct ℂ)))
 
+include he hu
+
+local instance pointSurfaceCommRing : CommRing (CycleQ2IncidenceImageLine.PointSurface y) :=
+  inferInstance
+local instance specializedCurveCommRing : CommRing (SpecializedCurveRing y t) := inferInstance
+local instance pivotCommRing (p : CycleQ2SegreCech.Chart) :
+    CommRing (ConstantProjectivePivot y p) := inferInstance
+
 /-- The target of the actual chart quotient is nonzero as soon as its
 actual principal kernel has a nonunit generator. -/
 theorem nonempty_of_equation_not_isUnit (p : CycleQ2SegreCech.Chart)
@@ -46,14 +53,18 @@ theorem nonempty_of_equation_not_isUnit (p : CycleQ2SegreCech.Chart)
     Nonempty (specializedCurve y t) := by
   let B := Away (specializedCurveGrade y t)
     (specializedCurveRingMap y t (basePivot y p))
+  let f : ConstantProjectivePivot y p →+* B :=
+    Away.map (specializedCurveRingMap y t) (basePivot y p)
+  have hker : RingHom.ker f = Ideal.span {constantProjectiveEquation y t p} :=
+    specializedAwayMap_ker_principal y t he hu p
   have h10 : (1 : B) ≠ 0 := by
     intro hzero
     apply hn
     apply Ideal.span_singleton_eq_top.mp
     apply (Ideal.eq_top_iff_one _).mpr
-    rw [← specializedAwayMap_ker_principal y t he hu p]
-    change Away.map (specializedCurveRingMap y t) (basePivot y p) 1 = 0
-    simpa only [map_one] using hzero
+    have hmem : (1 : ConstantProjectivePivot y p) ∈ RingHom.ker f :=
+      show f 1 = 0 from (map_one f).trans hzero
+    exact hker ▸ hmem
   letI : Nontrivial B := ⟨1, 0, h10⟩
   obtain ⟨x⟩ := (inferInstance : Nonempty (PrimeSpectrum B))
   exact ⟨(Proj.awayι (specializedCurveGrade y t)
@@ -78,6 +89,8 @@ def emptyEquationUnit [IsEmpty (specializedCurve y t)]
     (emptyEquationUnit y t he hu p : ConstantProjectivePivot y p) =
       constantProjectiveEquation y t p :=
   Classical.choose_spec (equation_isUnit_of_isEmpty y t he hu p)
+
+omit he hu
 
 theorem seed_nonempty_of_equation_not_isUnit (t : Fin 3 → ℂ)
     (p : CycleQ2SegreCech.Chart)

@@ -14,7 +14,6 @@ dehomogenized rows. Quotienting therefore identifies the actual curve
 chart ring, over its original coefficient algebra, with that explicit
 affine three-row quotient.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 No flatness, nonemptiness, or global projective fiber assertion is made.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
@@ -38,6 +37,13 @@ open CycleQ2IncidenceUniversalChart CycleQ2IncidenceImageLine
 variable {S : Type} [CommRing S] [Algebra ℂ S]
 variable (y : ParameterIndex → S) (t : Fin 3 → ℂ) (i : Fin 4)
 
+local instance pointSurfaceCommRing : CommRing (PointSurface y) := inferInstance
+local instance relativeCurveCommRing : CommRing (RelativeCurveRing y t) := inferInstance
+local instance coordinateRingCommRing : CommRing (CoordinateRing y i) := inferInstance
+local instance coordinateLocalizationCommRing : CommRing (CoordinateLocalization y i) :=
+  inferInstance
+local instance dehomogenizedCommRing : CommRing (DehomogenizedRing y i) := inferInstance
+
 def normalizedSection (j : Fin 3) : CoordinateRing y i :=
   homogeneousFraction y i 14 (relativeSectionPolynomial y t j)
     (relativeSectionPolynomial_homogeneous y t j)
@@ -60,9 +66,10 @@ theorem normalizedSection_val_mul (j : Fin 3) :
       algebraMap (PointSurface y) (CoordinateLocalization y i) (relativeEquation y t j) := by
   have hs := IsLocalization.mk'_spec (CoordinateLocalization y i)
     (relativeEquation y t j) (powerDenominator (surfaceQuotient y (X i.castSucc)) 14)
-  simpa only [normalizedSection, homogeneousFraction, relativeEquation,
+  simp only [normalizedSection, homogeneousFraction, relativeEquation,
     surfaceQuotient, HomogeneousLocalization.Away.val_mk, Localization.mk_eq_mk',
-    powerDenominator, map_pow] using hs
+    powerDenominator, map_pow] at hs ⊢
+  exact hs
 
 /-- Inverting the coordinate makes the homogeneous rows and their
 degree-zero normalized fractions generate the same ordinary ideal. -/
@@ -72,7 +79,7 @@ theorem relativeSectionIdeal_localize_coordinate :
       (normalizedSectionIdeal y t i).map
         (algebraMap (CoordinateRing y i) (CoordinateLocalization y i)) := by
   simp only [relativeSectionIdeal, normalizedSectionIdeal, Ideal.map_span,
-    Set.image_range, Ideal.span_range_eq_iSup]
+    ← Set.range_comp, Ideal.span_range_eq_iSup, Ideal.map_iSup, Set.image_singleton]
   apply iSup_congr
   intro j
   change Ideal.span {algebraMap (PointSurface y) (CoordinateLocalization y i)
@@ -84,6 +91,8 @@ theorem relativeSectionIdeal_localize_coordinate :
 abbrev CurveCoordinateRing :=
   Away (relativeCurveGrade y t)
     (relativeCurveRingMap y t (surfaceQuotient y (X i.castSucc)))
+
+local instance curveCoordinateCommRing : CommRing (CurveCoordinateRing y t i) := inferInstance
 
 /-- Coefficients are induced through the original surface chart map. -/
 instance curveCoordinateAlgebra : Algebra S (CurveCoordinateRing y t i) :=
@@ -103,6 +112,7 @@ theorem coordinateCurveMap_surjective : Function.Surjective (coordinateCurveMap 
   change Away.map (relativeCurveRingMap y t) (surfaceQuotient y (X i.castSucc))
     (Away.mk (surfaceGrade y) (coordinate_mem_grade y i) n a ha) = _
   simp only [Away.map_mk]
+  rfl
 
 /-- The actual coordinate-chart map has exactly the three normalized
 rows as its kernel, for every parameter point and every fixed vector. -/
@@ -124,7 +134,7 @@ theorem coordinateCurveMap_ker :
 theorem normalizedSectionIdeal_map :
     (normalizedSectionIdeal y t i).map (familyCoordinateChartEquiv y i).toRingHom =
       affineSectionIdeal y t i := by
-  simp only [normalizedSectionIdeal, affineSectionIdeal, Ideal.map_span, Set.image_range]
+  simp only [normalizedSectionIdeal, affineSectionIdeal, Ideal.map_span, ← Set.range_comp]
   apply congrArg (fun g : Fin 3 → DehomogenizedRing y i => Ideal.span (Set.range g))
   funext j
   exact chartEquiv_normalizedSection y t i j
@@ -132,7 +142,8 @@ theorem normalizedSectionIdeal_map :
 def coordinateQuotientEquiv :
     (CoordinateRing y i ⧸ normalizedSectionIdeal y t i) ≃ₐ[S] CurveCoordinateRing y t i :=
   (Ideal.quotientEquivAlgOfEq S (coordinateCurveMap_ker y t i).symm).trans
-    (Ideal.quotientKerAlgEquivOfSurjective (coordinateCurveMap_surjective y t i))
+    (Ideal.quotientKerAlgEquivOfSurjective (f := coordinateCurveMap y t i)
+      (coordinateCurveMap_surjective y t i))
 
 @[simp] theorem coordinateQuotientEquiv_mk (a : CoordinateRing y i) :
     coordinateQuotientEquiv y t i (Ideal.Quotient.mk (normalizedSectionIdeal y t i) a) =

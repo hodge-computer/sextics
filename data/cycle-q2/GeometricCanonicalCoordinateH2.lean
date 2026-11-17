@@ -7,7 +7,6 @@ import Proposal.GeometricCoordinateCechTrace
 /-!
 # The original cubic image on the actual three-coordinate cover
 
-Status: source-only proof draft; verification is deferred at the user's request.
 The unchanged Cartier class is identified with its retained negative coordinate
 representative by the existing projective descent. Naturality then identifies
 its image under multiplication by every actual global cubic two-form with the
@@ -48,8 +47,8 @@ abbrev TripleOpen : Surface.Opens :=
 abbrev WeightedCubic := CycleQ2SurfaceCubicGluing.WeightedCubic
 
 local instance surfaceHasExt :
-    HasExt.{1} (Sheaf (Opens.grothendieckTopology Surface) AddCommGrpCat.{0}) :=
-  HasExt.standard _
+    HasExt.{1} (Sheaf (Opens.grothendieckTopology (show TopCat from Surface))
+      AddCommGrpCat.{0}) := CycleQ2CoordinateTopDescent.coordinateSurfaceHasExt 57 1
 
 theorem coordinateCover :
     (CoordinateOpen 0 ⊔ CoordinateOpen 1) ⊔ CoordinateOpen 2 = ⊤ :=
@@ -59,8 +58,15 @@ theorem coordinateCover :
 coordinate cover used by the original Laurent computation. -/
 theorem canonicalCoordinateHOne_subsingleton (i : Fin 3) :
     Subsingleton (CanonicalSheaf.H' 1 (CoordinateOpen i)) := by
-  have h := CycleQ2SurfaceCoordinateFrames.coordinateCanonicalHOne_subsingleton i
-  fin_cases i <;> exact h
+  have hi : CycleQ2SeedQuotientFiniteFree.remainingIndex i = i.succ.castSucc := by
+    fin_cases i <;> rfl
+  have hO : CoordinateOpen i = CycleQ2FullSurfaceResidueCover.coordinateOpen i :=
+    congrArg (fun j : Fin 5 => Proj.basicOpen (surfaceGrade 57 1)
+      (surfaceQuotient 57 1 (MvPolynomial.X j))) hi
+  change Subsingleton
+    (CycleQ2SurfaceCoordinateFrames.canonicalAdditiveSheaf.H' 1 (CoordinateOpen i))
+  rw [hO]
+  exact CycleQ2SurfaceCoordinateFrames.coordinateCanonicalHOne_subsingleton i
 
 /-- The actual canonical three-open map, with its union identified with
 the top open by the already proved coordinate cover. -/
@@ -103,6 +109,7 @@ theorem cubicH2_coordinateConnecting (p : WeightedCubic) (q : HomogeneousCoordin
     (CoordinateOpen 0) (CoordinateOpen 1) (CoordinateOpen 2) coordinateCover
     (tripleSections 57 1 q)
 
+set_option maxHeartbeats 600000 in
 /-- The exact sign of the retained original Cartier descent is preserved
 when its actual global cubic image is expressed on the coordinate cover. -/
 theorem original_cubicH2_eq_coordinate
@@ -114,13 +121,9 @@ theorem original_cubicH2_eq_coordinate
     (hcd : literalSystem.SecondDescent c.val d.val) :
     cubicH2 p literalDerivedClassAtTop =
       canonicalConnecting (cubicTripleSection p (-homogeneousCoordinateRepresentative 57 dH)) := by
-  have hB : literalDerivedClassAtTop = connectingAtTop (structureAdditiveSheaf Surface)
-      (CoordinateOpen 0) (CoordinateOpen 1) (CoordinateOpen 2) coordinateCover
-      (tripleSections 57 1 (-homogeneousCoordinateRepresentative 57 dH)) := by
-    apply literalTerminalCohomologyEquiv.injective
-    exact literalDerivedClass_eq_signed_coordinate dH c d hL hR hcd
-  rw [hB]
-  exact cubicH2_coordinateConnecting p (-homogeneousCoordinateRepresentative 57 dH)
+  exact CycleQ2CoordinateTopDescent.map_literalDerivedClassAtTop_eq
+    (cubicH2 p) (fun q => canonicalConnecting (cubicTripleSection p q))
+    (cubicH2_coordinateConnecting p) dH c d hL hR hcd
 
 /-- A single original homogeneous descendant supplies the exact canonical
 multiplication identity for every cubic and the fixed nonzero algebraic

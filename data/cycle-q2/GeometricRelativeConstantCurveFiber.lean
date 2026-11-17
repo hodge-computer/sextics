@@ -14,7 +14,6 @@ This is a tensor-product fiber theorem, not only a specialization map.
 It does not yet identify the projective scheme fiber, prove nonemptiness,
 or prove that the curve morphism is flat over the incidence parameters.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -43,6 +42,14 @@ open CycleQ2SeedTrace CycleQ2NormalConnecting CycleQ2GeometricSeedNormalIdeals
 
 attribute [local instance] CycleQ2IncidenceSeedFiber.seedAlgebra
 
+local instance incidenceSurfaceCommRing : CommRing (PointSurface incidencePoint) := inferInstance
+local instance seedSurfaceCommRing : CommRing (PointSurface (seedPoint (57 : ℂ) Complex.I)) :=
+  inferInstance
+local instance relativeCurveCommRing (t : Fin 3 → ℂ) :
+    CommRing (RelativeCurveRing incidencePoint t) := inferInstance
+local instance specializedCurveCommRing (t : Fin 3 → ℂ) :
+    CommRing (SpecializedCurveRing (seedPoint (57 : ℂ) Complex.I) t) := inferInstance
+
 /-- The old full-polynomial seed ideal is the equation ideal of the
 literal parameter point used by the regular seed-section construction. -/
 theorem seedIdeal_eq_pointEquations :
@@ -66,6 +73,7 @@ def literalSurfaceFiberEquiv :
           (MvPolynomial.map seedMap p) := by
   rw [literalSurfaceFiberEquiv, AlgEquiv.trans_apply, seedFiberEquiv_tmul,
     map_smul, Ideal.quotientEquivAlgOfEq_mk]
+  rfl
 
 def seedSurfaceSpecialization :
     PointSurface incidencePoint →+* PointSurface (seedPoint (57 : ℂ) Complex.I) :=
@@ -106,7 +114,7 @@ theorem relativeSectionIdeal_seed (t : Fin 3 → ℂ) :
 
 def tensorRelativeSectionIdeal (t : Fin 3 → ℂ) : Ideal SeedFiber :=
   (relativeSectionIdeal incidencePoint t).map
-    (Algebra.TensorProduct.includeRight (R := ParameterAlgebra) (A := ℂ))
+    (Algebra.TensorProduct.includeRight (R := ParameterAlgebra) (A := ℂ)).toRingHom
 
 theorem tensorRelativeSectionIdeal_map (t : Fin 3 → ℂ) :
     (tensorRelativeSectionIdeal t).map literalSurfaceFiberEquiv.toRingHom =
@@ -116,6 +124,9 @@ theorem tensorRelativeSectionIdeal_map (t : Fin 3 → ℂ) :
 
 abbrev RelativeCurveSeedFiber (t : Fin 3 → ℂ) :=
   ℂ ⊗[ParameterAlgebra] RelativeCurveRing incidencePoint t
+
+local instance relativeCurveSeedFiberCommRing (t : Fin 3 → ℂ) :
+    CommRing (RelativeCurveSeedFiber t) := inferInstance
 
 /-- The actual tensor-product fiber of the relative quotient is the
 existing specialized curve ring of the same literal seed and vector. -/
@@ -137,11 +148,11 @@ def relativeCurveSeedFiberEquiv (t : Fin 3 → ℂ) :
           (seedSurfaceSpecialization a) := by
   obtain ⟨p, rfl⟩ := Ideal.Quotient.mk_surjective a
   rw [relativeCurveSeedFiberEquiv, AlgEquiv.trans_apply,
-    Algebra.TensorProduct.tensorQuotientEquiv_apply_tmul,
-    Ideal.quotientEquivAlg_mk, literalSurfaceFiberEquiv_tmul,
-    seedSurfaceSpecialization_mk]
+    Algebra.TensorProduct.tensorQuotientEquiv_apply_tmul]
+  erw [Ideal.quotientEquivAlg_mk]
+  erw [literalSurfaceFiberEquiv_tmul, seedSurfaceSpecialization_mk]
   exact (Ideal.Quotient.mkₐ ℂ
-    (specializedSectionIdeal (seedPoint (57 : ℂ) Complex.I) t)).map_smul c _
+    (specializedSectionIdeal (seedPoint (57 : ℂ) Complex.I) t)).toLinearMap.map_smul c _
 
 @[simp] theorem relativeCurveSeedFiberEquiv_coordinate
     (t : Fin 3 → ℂ) (j : Fin 5) :
