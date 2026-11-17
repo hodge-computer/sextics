@@ -13,7 +13,6 @@ free module.  It reads the already constructed global kernel source in
 the ordinary projective section rings where its transition equations and
 the section-functional balance are expressed.
 
-Source-only draft: no elaboration or kernel replay was run.
 -/
 
 set_option autoImplicit false
@@ -27,6 +26,10 @@ namespace CycleQ2SeedSectionSheafSections
 
 open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
 open CycleQ2SeedProjectiveImageCocycle CycleQ2SeedSectionSheaf
+
+local instance patchSectionsCommRing (U V : Surface.Opens) :
+    CommRing Γ(patchStructure U, V) :=
+  inferInstanceAs (CommRing Γ(U.toScheme, U.ι ⁻¹ᵁ V))
 
 private theorem patch_app_isIso (U V : Surface.Opens) (hV : V ≤ U) :
     IsIso (U.ι.app V) :=
@@ -45,7 +48,8 @@ def patchSectionsEquiv (U V : Surface.Opens) (hV : V ≤ U) :
 theorem patchSectionsEquiv_smul (U V : Surface.Opens) (hV : V ≤ U)
     (a : Γ(Surface, V)) (s : Γ(patchStructure U, V)) :
     patchSectionsEquiv U V hV (a • s) = a * patchSectionsEquiv U V hV s := by
-  change patchSectionsEquiv U V hV (U.ι.app V a * s) = _
+  change patchSectionsEquiv U V hV
+    ((show Γ(patchStructure U, V) from U.ι.app V a) * s) = _
   rw [map_mul]
   change patchSectionsEquiv U V hV ((patchSectionsEquiv U V hV).symm a) * _ = _
   rw [RingEquiv.apply_symm_apply]
@@ -75,13 +79,20 @@ theorem patchSectionsEquiv_patchRestriction {U V W : Surface.Opens}
       patchSectionsEquiv U W (hWV.trans hVU) s := by
   obtain ⟨a, ha⟩ := (patchSectionsEquiv U W (hWV.trans hVU)).symm.surjective s
   subst s
-  have h := congrArg (fun f => f.app W a) (structureMap_patchRestriction hVU)
-  change (patchStructureRestriction hVU).app W (U.ι.app W a) = V.ι.app W a at h
-  rw [patchSectionsEquiv_symm_apply, h]
+  have h := congrArg
+    (fun f : structureModule Surface ⟶ patchStructure V => f.app W a)
+      (structureMap_patchRestriction hVU)
+  simp only [Scheme.Modules.Hom.comp_app, ConcreteCategory.comp_apply] at h
+  have h' :=
+    (congrArg (fun z : Γ(patchStructure U, W) => (patchStructureRestriction hVU).app W z)
+      (openStructureMap_app U.ι W a)).symm.trans
+        (h.trans (openStructureMap_app V.ι W a))
+  rw [patchSectionsEquiv_symm_apply U W (hWV.trans hVU), h']
   change patchSectionsEquiv V W hWV ((patchSectionsEquiv V W hWV).symm a) =
     patchSectionsEquiv U W (hWV.trans hVU)
       ((patchSectionsEquiv U W (hWV.trans hVU)).symm a)
-  rw [RingEquiv.apply_symm_apply, RingEquiv.apply_symm_apply]
+  exact (RingEquiv.apply_symm_apply (patchSectionsEquiv V W hWV) a).trans
+    (RingEquiv.apply_symm_apply (patchSectionsEquiv U W (hWV.trans hVU)) a).symm
 
 section Morphism
 

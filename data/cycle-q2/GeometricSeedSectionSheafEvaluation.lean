@@ -10,7 +10,6 @@ original affine chart isomorphism, retaining its actual coefficient map.
 This gives the linkage balance for the evaluation morphisms of the fixed
 global twisted source, before using it to glue their outputs.
 
-Source-only draft: no elaboration or kernel replay was run.
 -/
 
 set_option autoImplicit false
@@ -26,6 +25,9 @@ open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
 open CycleQ2SeedProjectiveImageChart CycleQ2SeedProjectiveImageCocycle
   CycleQ2GeometricSurfaceDehomogenizedCharts CycleQ2GeometricAffineChartSections
   CycleQ2SeedSectionSheaf CycleQ2SeedSectionSheafSections CycleQ2SeedSectionBalance
+
+attribute [local instance] CycleQ2SeedSectionSheafSections.patchSectionsCommRing
+  CycleQ2SeedSectionSheaf.ringCatSectionsCommRing
 
 section ScalarTransport
 
@@ -48,14 +50,20 @@ theorem iso_app_injective {X : Scheme.{0}} {M N : X.Modules} (e : M ≅ N)
 /-- Associated-sheaf multiplication has the actual affine coefficient
 given by ΓSpecIso, including on nonprincipal opens. -/
 theorem tilde_scalarMap_structure (a : R) :
-    tilde.map (scalarMap a) =
+    tilde.map (R := CommRingCat.of (R))
+      (M := ModuleCat.of (R) (R)) (N := ModuleCat.of (R) (R)) (scalarMap a) =
       structureScalar (Spec (CommRingCat.of R))
         ((Scheme.ΓSpecIso (CommRingCat.of R)).inv a) := by
   apply Scheme.Modules.hom_ext
   intro U
   apply ConcreteCategory.hom_ext
   intro s
-  rw [tilde_scalarMap_app, structureScalar_app, Scheme.Modules.smul_Spec_def] <;> rfl
+  rw [tilde_scalarMap_app]
+  erw [structureScalar_app (Spec (CommRingCat.of R))
+    ((Scheme.ΓSpecIso (CommRingCat.of R)).inv a) U
+      (show Γ(Spec (CommRingCat.of R), U) from s)]
+  erw [Scheme.Modules.smul_Spec_def]
+  rfl
 
 /-- The actual open-immersion structure-module isomorphism intertwines
 multiplication with the ordinary pullback of the global coefficient. -/
@@ -69,9 +77,10 @@ theorem restrict_structureScalar {X Y : Scheme.{0}} (f : X ⟶ Y)
   apply ConcreteCategory.hom_ext
   intro s
   change (f.appIso U).hom
-      (Y.presheaf.map (homOfLE (show f ''ᵁ U ≤ ⊤ from le_top)).op a * s) =
+      (Y.presheaf.map (homOfLE (show f ''ᵁ U ≤ ⊤ from le_top)).op a *
+        (show Γ(Y, f ''ᵁ U) from s)) =
     X.presheaf.map (homOfLE (show U ≤ ⊤ from le_top)).op (f.appTop a) *
-      (f.appIso U).hom s
+      (f.appIso U).hom (show Γ(Y, f ''ᵁ U) from s)
   rw [map_mul]
   congr 1
   have h : Y.presheaf.map (homOfLE (show f ''ᵁ U ≤ ⊤ from le_top)).op ≫
@@ -102,7 +111,8 @@ theorem chartSectionMap_restrict (i : Fin 3) (V W : Surface.Opens)
     Surface.presheaf.map (homOfLE hWV).op (chartSectionMap i V hi a) =
       chartSectionMap i W (hWV.trans hi) a := by
   exact chartSection_naturality (coordinateAffineChart 57 1 i.succ)
-    (Over.homMk (homOfLE hWV)) a
+    (V := Over.mk (homOfLE (hWV.trans hi))) (W := Over.mk (homOfLE hi))
+    (Over.homMk (show W ⟶ V from homOfLE hWV)) a
 
 def chartScalar (i : Fin 3) (a : AffineRing i) :
     structureModule (Patch i).toScheme ⟶ structureModule (Patch i).toScheme :=
@@ -110,7 +120,8 @@ def chartScalar (i : Fin 3) (a : AffineRing i) :
 
 theorem chartScalar_square (i : Fin 3) (a : AffineRing i) :
     (Scheme.Modules.restrictFunctor (coordinateAffineChart 57 1 i.succ).hom).map
-        (tilde.map (scalarMap a)) ≫
+        (tilde.map (R := CommRingCat.of (AffineRing i))
+      (M := ModuleCat.of (AffineRing i) (AffineRing i)) (N := ModuleCat.of (AffineRing i) (AffineRing i)) (scalarMap a)) ≫
         (Scheme.Modules.restrictUnitIso (coordinateAffineChart 57 1 i.succ).hom).hom =
       (Scheme.Modules.restrictUnitIso (coordinateAffineChart 57 1 i.succ).hom).hom ≫
         chartScalar i a := by
@@ -121,21 +132,56 @@ def patchScalar (i : Fin 3) (a : AffineRing i) :
     patchStructure (Patch i) ⟶ patchStructure (Patch i) :=
   (Scheme.Modules.pushforward (Patch i).ι).map (chartScalar i a)
 
+private theorem transportScalarBalance {C D : Type*} [Category C] [Category D]
+    (T : C ⥤ D) {I R : C} {O : D}
+    (φ j : I ⟶ R) (L Q : R ⟶ R) (u : T.obj R ⟶ O) (l q : O ⟶ O)
+    (hb : φ ≫ L = j ≫ Q)
+    (hL : T.map L ≫ u = u ≫ l) (hQ : T.map Q ≫ u = u ≫ q) :
+    (T.map φ ≫ u) ≫ l = (T.map j ≫ u) ≫ q := by
+  have h := (T.map_comp φ L).symm.trans
+    ((congrArg T.map hb).trans (T.map_comp j Q))
+  calc
+    _ = T.map φ ≫ (u ≫ l) := Category.assoc _ _ _
+    _ = T.map φ ≫ (T.map L ≫ u) := congrArg (fun k => T.map φ ≫ k) hL.symm
+    _ = (T.map φ ≫ T.map L) ≫ u := (Category.assoc _ _ _).symm
+    _ = (T.map j ≫ T.map Q) ≫ u := congrArg (fun k => k ≫ u) h
+    _ = T.map j ≫ (T.map Q ≫ u) := Category.assoc _ _ _
+    _ = T.map j ≫ (u ≫ q) := congrArg (fun k => T.map j ≫ k) hQ
+    _ = _ := (Category.assoc _ _ _).symm
+
+set_option maxHeartbeats 400000 in
 /-- The balance remains an equality of genuine chart sheaf morphisms. -/
 theorem chartEvaluation_balance (t : Fin 3 → ℂ) (i : Fin 3) :
     chartEvaluation t i ≫ chartScalar i (chartFactorData i).linkage =
       chartInclusion i ≫ chartScalar i
         (∑ b, algebraMap ℂ (AffineRing i) (t b) * (chartFactorData i).right b) := by
+  let F := chartFactorData i
+  let v : Fin 3 → AffineRing i := fun b => algebraMap ℂ (AffineRing i) (t b)
   let T := Scheme.Modules.restrictFunctor (coordinateAffineChart 57 1 i.succ).hom
   let u := (Scheme.Modules.restrictUnitIso (coordinateAffineChart 57 1 i.succ).hom).hom
-  change (T.map (tilde.map (functionalMap (chartFactorData i)
-      (fun b => algebraMap ℂ (AffineRing i) (t b)))) ≫ u) ≫
-      chartScalar i (chartFactorData i).linkage =
-    (T.map (tilde.map (idealInclusion (chartFactorData i))) ≫ u) ≫
-      chartScalar i (∑ b, algebraMap ℂ (AffineRing i) (t b) * (chartFactorData i).right b)
-  rw [Category.assoc, ← chartScalar_square, ← Category.assoc,
-    ← Functor.map_comp, tilde_balance, Functor.map_comp, Category.assoc,
-    chartScalar_square, ← Category.assoc]
+  let φ := tilde.map (R := CommRingCat.of (AffineRing i))
+    (M := ModuleCat.of (AffineRing i) F.leftIdeal)
+    (N := ModuleCat.of (AffineRing i) (AffineRing i)) (functionalMap F v)
+  let j := tilde.map (R := CommRingCat.of (AffineRing i))
+    (M := ModuleCat.of (AffineRing i) F.leftIdeal)
+    (N := ModuleCat.of (AffineRing i) (AffineRing i)) (idealInclusion F)
+  let L := tilde.map (R := CommRingCat.of (AffineRing i))
+    (M := ModuleCat.of (AffineRing i) (AffineRing i))
+    (N := ModuleCat.of (AffineRing i) (AffineRing i)) (scalarMap F.linkage)
+  let Q := tilde.map (R := CommRingCat.of (AffineRing i))
+    (M := ModuleCat.of (AffineRing i) (AffineRing i))
+    (N := ModuleCat.of (AffineRing i) (AffineRing i)) (scalarMap (∑ b, v b * F.right b))
+  have hL : T.map L ≫ u = u ≫ chartScalar i F.linkage := chartScalar_square i F.linkage
+  have hQ : T.map Q ≫ u = u ≫ chartScalar i (∑ b, v b * F.right b) :=
+    chartScalar_square i (∑ b, v b * F.right b)
+  change (T.map φ ≫ u) ≫ chartScalar i F.linkage =
+    (T.map j ≫ u) ≫ chartScalar i (∑ b, v b * F.right b)
+  exact transportScalarBalance T
+    (I := tilde (R := CommRingCat.of (AffineRing i)) (ModuleCat.of (AffineRing i) F.leftIdeal))
+    (R := tilde (R := CommRingCat.of (AffineRing i)) (ModuleCat.of (AffineRing i) (AffineRing i)))
+    (O := structureModule (Patch i).toScheme) φ j L Q u
+    (chartScalar i F.linkage) (chartScalar i (∑ b, v b * F.right b))
+    (tilde_balance F v) hL hQ
 
 theorem patchEvaluation_balance (t : Fin 3 → ℂ) (i : Fin 3) :
     patchEvaluation t i ≫ patchScalar i (chartFactorData i).linkage =
@@ -157,18 +203,22 @@ theorem chartScalar_linkage_app_injective (i : Fin 3) (U : (Patch i).toScheme.Op
     (chartScalar_square i (chartFactorData i).linkage)
   change e.hom.app U
       (((Scheme.Modules.restrictFunctor (coordinateAffineChart 57 1 i.succ).hom).map
-        (tilde.map (scalarMap (chartFactorData i).linkage))).app U (e.inv.app U s)) =
+        (tilde.map (R := CommRingCat.of (AffineRing i))
+      (M := ModuleCat.of (AffineRing i) (AffineRing i)) (N := ModuleCat.of (AffineRing i) (AffineRing i)) (scalarMap (chartFactorData i).linkage))).app U (e.inv.app U s)) =
     (chartScalar i (chartFactorData i).linkage).app U (e.hom.app U (e.inv.app U s)) at hs
   change e.hom.app U
       (((Scheme.Modules.restrictFunctor (coordinateAffineChart 57 1 i.succ).hom).map
-        (tilde.map (scalarMap (chartFactorData i).linkage))).app U (e.inv.app U t)) =
+        (tilde.map (R := CommRingCat.of (AffineRing i))
+      (M := ModuleCat.of (AffineRing i) (AffineRing i)) (N := ModuleCat.of (AffineRing i) (AffineRing i)) (scalarMap (chartFactorData i).linkage))).app U (e.inv.app U t)) =
     (chartScalar i (chartFactorData i).linkage).app U (e.hom.app U (e.inv.app U t)) at ht
   rw [iso_app_inv_hom] at hs ht
   have hc :
       ((Scheme.Modules.restrictFunctor (coordinateAffineChart 57 1 i.succ).hom).map
-          (tilde.map (scalarMap (chartFactorData i).linkage))).app U (e.inv.app U s) =
+          (tilde.map (R := CommRingCat.of (AffineRing i))
+      (M := ModuleCat.of (AffineRing i) (AffineRing i)) (N := ModuleCat.of (AffineRing i) (AffineRing i)) (scalarMap (chartFactorData i).linkage))).app U (e.inv.app U s) =
       ((Scheme.Modules.restrictFunctor (coordinateAffineChart 57 1 i.succ).hom).map
-          (tilde.map (scalarMap (chartFactorData i).linkage))).app U (e.inv.app U t) := by
+          (tilde.map (R := CommRingCat.of (AffineRing i))
+      (M := ModuleCat.of (AffineRing i) (AffineRing i)) (N := ModuleCat.of (AffineRing i) (AffineRing i)) (scalarMap (chartFactorData i).linkage))).app U (e.inv.app U t) := by
     apply iso_app_injective e U
     exact hs.trans (hst.trans ht.symm)
   exact tilde_linkage_app_injective (chartFactorData i)

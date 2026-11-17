@@ -11,7 +11,6 @@ not replaced by an unrelated scalar action on a chart model.
 
 The resulting source-coordinate equation is independent of the curve
 parameter and retains the negative fourth-power transition of I_E(-4).
-Source-only draft: no Lean elaboration or kernel replay has been run.
 -/
 
 set_option autoImplicit false
@@ -26,6 +25,8 @@ namespace CycleQ2SeedSectionSheafTwist
 open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
 open CycleQ2SeedProjectiveImageCocycle CycleQ2SeedSectionSheaf
   CycleQ2SeedSectionSheafSections
+
+attribute [local instance] CycleQ2SeedSectionSheafSections.patchSectionsCommRing
 
 section OpenSections
 
@@ -70,8 +71,10 @@ theorem patchSectionsEquiv_scalar (U V : Surface.Opens) (hV : V ≤ U)
     (a : Γ(Surface, U)) (y : Γ(patchStructure U, V)) :
     patchSectionsEquiv U V hV ((patchScalar U a).app V y) =
       Surface.presheaf.map (homOfLE hV).op a * patchSectionsEquiv U V hV y := by
-  rw [patchScalar, Scheme.Modules.pushforward_map_app, structureScalar_app,
-    topIso_inv_restrict U V hV a, map_mul]
+  rw [patchScalar, Scheme.Modules.pushforward_map_app]
+  erw [structureScalar_app U.toScheme (U.topIso.inv a) (U.ι ⁻¹ᵁ V)
+    (show Γ(U.toScheme, U.ι ⁻¹ᵁ V) from y)]
+  rw [topIso_inv_restrict U V hV a, map_mul]
   change patchSectionsEquiv U V hV
       ((patchSectionsEquiv U V hV).symm
         (Surface.presheaf.map (homOfLE hV).op a)) * _ = _
