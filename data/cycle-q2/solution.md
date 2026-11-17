@@ -1,6 +1,86 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Checked continuation: the original reduced cotangent sequence and derived one-classes
+## Checked continuation: the canonical cotangent sheaf on the native affine charts
+
+**17 November 2026. The protected certificate remains incomplete.**
+The canonical global restricted cotangent sheaf is now identified, on
+each original nonempty finite intersection chart, with the tilde of the
+original reduced cotangent tensor module. If \(j_S\) denotes the actual
+closed affine Proj chart and \(i\) the original `closedFiber`, the checked
+isomorphism is
+\[
+ j_S^*i^*\Omega^1_{\mathcal D/\mathbb C}
+ \simeq
+ \widetilde{A_S\otimes_{B_S}\Omega^1_{B_S/\mathbb C}}.
+\]
+Here \(B_S\), \(A_S\), their complex structures, and their reduction
+are exactly the original native intersection rings. The proof uses the
+actual commuting Proj square and the genuine scheme-module pullback
+functors. No chartwise cotangent comparison is assumed.
+
+[GeometricAffineKahlerSheaf.lean](GeometricAffineKahlerSheaf.lean)
+proves, for every complex algebra \(B\), that the actual sheafified
+differential module on \(\operatorname{Spec}B\) is
+\(\widetilde{\Omega^1_{B/\mathbb C}}\). Localizing the universal
+Kähler differential gives the literal fraction rule
+\[
+ d(a/s)=\frac{s\,da-a\,ds}{s^2}
+ \quad\text{in }(\Omega^1_{B/\mathbb C})_{\mathfrak p}.
+\]
+This proves regularity on every open and compatibility with the actual
+restrictions. The differential universal property and the tilde--global
+sections adjunction give inverse sheaf maps. No rank, freeness,
+smoothness, or reducedness premise is needed. Quasi-coherence of this
+actual affine differential sheaf follows from the proved isomorphism.
+
+[GeometricAffineModulePullback.lean](GeometricAffineModulePullback.lean)
+identifies the genuine global sections of pushforward along
+\(\operatorname{Spec}(\rho)\) with restriction of scalars through the
+original ring homomorphism \(\rho:B\to A\). The compatibility of
+the actual `GammaSpec` maps proves the scalar square. Taking mates
+under the two genuine composite adjunctions proves
+\[
+ \operatorname{Spec}(\rho)^*\widetilde M
+ \simeq\widetilde{A\otimes_B M}.
+\]
+`pullbackTilde_unit_apply` fixes the normalization on every original
+module element: the actual pullback unit maps to the actual tensor unit
+\(m\mapsto1\otimes m\), followed by the original tilde section map.
+
+[GeometricOpenDifferentialSheaf.lean](GeometricOpenDifferentialSheaf.lean)
+proves that restricting the actual differential sheaf through an open
+immersion preserves its universal property. The inverse section-ring
+isomorphisms define the original restricted derivation on every open.
+The actual restriction/pushforward adjunction constructs the lift and
+proves its factorization and uniqueness. The resulting pullback
+isomorphism has precisely the original canonical scheme differential
+map as its adjunct; its normalization is not supplied as a premise.
+
+[GeometricLiteralAffineCotangent.lean](GeometricLiteralAffineCotangent.lean)
+applies these three comparisons to the original thick and closed
+native affine Proj maps. Their actual complex coefficient squares give
+`thickDifferentialIso` and `closedDifferentialIso`. The original
+`nativeReduction_scheme_square`, actual pullback composition, and
+the tensor comparison give `nativeCotangentIso` for every nonempty
+finite native intersection. The final tensor object is the literal
+earlier `NativeCotangent`, with its original scalar structure.
+
+All 575 local development compilation units pass (554 proposal Lean
+modules, 20 shared modules, and the generated target). All 216 helpers
+changed since commit `37537c2` have matching independent kernel-replay
+receipts for their current sources and objects. The four new helper
+endpoint reports use only `propext`, `Classical.choice`, and `Quot.sound`.
+
+The next step must carry the original canonical reduction and global
+epsilon differential through these chart isomorphisms, prove the global
+short exact sequence, and assemble the normalized ordered lifts.
+The checked object isomorphisms alone do not assert these map
+comparisons or global exactness. The actual Chern connecting equality,
+Abel--Jacobi/cylinder comparison, supported variation, global de Rham
+comparison, and original `missing_geometric_existence` remain open.
+Protected `solve/lean` verification has not passed.
+
+## Earlier checkpoint: the original reduced cotangent sequence and derived one-classes
 
 **17 November 2026. The protected certificate remains incomplete.**
 The original native first-order rings now have a proved reduced
