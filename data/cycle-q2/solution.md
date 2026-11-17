@@ -1,6 +1,120 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Checked continuation: actual Cartier-cover splitting differences
+## Checked continuation: the correction coboundary and its projective image
+
+**17 November 2026. The protected certificate remains incomplete.**
+The correction-cochain assembly is now proved on the original Cartier
+cone cover. Its canonical degree-zero image has a nonzero class in the
+actual projective structure-sheaf cohomology and equals the original
+intrinsic normal boundary. The exact protected instance, manifest, and
+`Submission.missing_geometric_existence` remain unchanged.
+
+[GeometricLiteralCartierCochainNaturality.lean](GeometricLiteralCartierCochainNaturality.lean)
+proves that the original polynomial maps and polynomial-preserving
+closed-ring comparisons commute with their actual restriction maps.
+The same is true of normalized transition units and their actual
+epsilon correction coefficients, using the same four chosen singleton
+splittings throughout.
+
+[GeometricLiteralCartierLiftedTransitions.lean](GeometricLiteralCartierLiftedTransitions.lean)
+constructs the six actual lifted pair transitions
+\[
+ \widetilde t_{01}=-g_1/g_2,\qquad
+ \widetilde t_{02}=\widetilde t_{03}=f_2,\qquad
+ \widetilde t_{12}=\widetilde t_{13}=f_1,\qquad
+ \widetilde t_{23}=1.
+\]
+Each expression belongs to its own original localized deformation
+ring. The extra unit on the 02 or 13 pair is proved from the actual
+square-zero deformation relation. The displayed equalities between
+different pairs mean equality after the actual further restrictions.
+Their reductions satisfy the multiplicative cocycle identities on
+all four triple intersections.
+
+[GeometricLiteralCartierCorrectionCochain.lean](GeometricLiteralCartierCorrectionCochain.lean)
+constructs the original six-entry scalar cochain \(c\), with
+\[
+ c_{ij}=\operatorname{coeff}_{\epsilon}
+ \bigl(\widetilde t_{ij}\sigma_i(\bar t_{ij}^{-1})-1\bigr).
+\]
+All entries are transported through the original closed-ring
+equivalences into the original `CoverLocal` rings. The theorem
+`correctionOne_boundary` verifies all four faces of its actual Cech
+coboundary. The 012 and 013 faces are precisely the previously checked
+unit-correction combinations; the 023 and 123 faces vanish.
+
+[GeometricLiteralCartierCupClass.lean](GeometricLiteralCartierCupClass.lean)
+independently defines every face of \(K\) by the actual splitting
+derivation applied to the actual universal logarithmic differential
+of the restricted reduced pair transition:
+\[
+ K_{ijk}=\kappa_{ij}\mathbin{\lrcorner}d\log(\bar t_{jk}).
+\]
+The two zero faces are proved zero using \(\widetilde t_{23}=1\).
+The theorem `defect_eq_coboundary_add_cup` proves, inside the original
+four-open cone complex,
+\[
+ \operatorname{defectRepresentative}=d_1c+K.
+\]
+It follows that \(K\) is closed and its actual cone Cech class is
+\[
+ [K]=-[\operatorname{cartierCycle}(57,1,B^*,0)]\ne0.
+\]
+Here \(B^*\) is the unchanged original `derivativeA`; the cup was
+defined from the actual derivations and units before proving this
+class equality.
+
+[GeometricLiteralCartierProjectedCup.lean](GeometricLiteralCartierProjectedCup.lean)
+constructs the next comparison using the existing canonical degree-zero
+additive projection. On every nonempty original principal intersection,
+it projects an ordinary localization element into its homogeneous
+localization and then applies the actual projective chart-section
+equivalence. `projectSection_restrict` proves that these maps commute
+with the original native structure-sheaf restrictions. `projectTwo_d1`
+proves that they carry the actual correction coboundary to the
+coboundary of the projected native section cochain.
+
+The projection fixes the original homogeneous Cartier cocycle. Thus
+the projected cup is a closed cochain in the genuine native projective
+Cech complex. Passing it through the already constructed actual
+Cech-to-derived comparison gives
+\[
+ \operatorname{projectedDerivedClass}
+ =-\operatorname{literalDerivedClassAtTop}
+ =\operatorname{literalOpenConnecting}
+   (\operatorname{literalIntrinsicNormalClass})\ne0.
+\]
+The equality with the original intrinsic normal boundary is the closed
+theorem `projectedDerivedClass_eq_originalNormalBoundary`. Its target
+is the actual \(H'^2(\mathcal O_D)\) of the original projective
+surface, with the original cohomology, normal class, and sign.
+
+The projection is an additive cochain map. The next comparison must
+identify its scalar cup image with the contraction of the actual
+projective Kodaira--Spencer class and the actual Chern class of the
+original inverse ideal. That requires normalized native transition
+units and their splitting/gauge compatibility on the existing common
+refinement. The Abel--Jacobi/cylinder, supported correspondence, and
+protected affine de Rham steps also remain unproved. The independent
+ambient perturbation \(F-\epsilon B^*\), the moving-section time
+direction, the literal complex \(r=57\) seed, and the separate
+\(r^3=2\) Fermat seed retain their distinct roles.
+
+All five new helpers pass local compilation and independent
+`leanchecker` replay, with endpoint axiom reports containing only
+`propext`, `Classical.choice`, and `Quot.sound`. All 515 local
+development units pass: 494 proposal Lean modules, 20 shared
+dependencies, and the generated target. All 156 helpers changed since
+the start of the compilation continuation have matching independent
+replay receipts for their current source and object hashes. The
+certificate still depends on `sorryAx`; independent replay of every
+proposal module and protected `solve/lean` verification remain pending.
+
+Prepared for `fqlx` with OpenAI ChatGPT assistance, following the
+geometric strategy and sources credited below. Earlier checkpoints
+retain their original counts and scope.
+
+## Earlier checkpoint: actual Cartier-cover splitting differences
 
 **17 November 2026. The protected certificate remains incomplete.**
 `Submission.missing_geometric_existence`, the exact instance, and the
