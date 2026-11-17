@@ -1,6 +1,126 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Checked continuation: the actual differential and tangent sheaf cocycles
+## Checked continuation: the original reduced cotangent sequence and derived one-classes
+
+**17 November 2026. The protected certificate remains incomplete.**
+The original native first-order rings now have a proved reduced
+cotangent sequence, with the actual epsilon differential as its
+faithful first map. For a native intersection let \(B_S\) be its
+original thick ring, \(A_S\) its original reduced ring, and
+\(\rho_S:B_S\to A_S\) its actual reduction. The constructed module is
+the genuine tensor product
+\[
+ E_S=A_S\otimes_{B_S}\Omega^1_{B_S/\mathbb C}.
+\]
+The same original singleton splitting gives an explicit isomorphism
+\[
+ E_S\simeq\Omega^1_{A_S/\mathbb C}\oplus A_S\,d\varepsilon.
+\]
+The map \(a\mapsto a\otimes d\varepsilon\) is proved injective; the
+reduction onto \(\Omega^1_{A_S/\mathbb C}\) is proved surjective; and
+its kernel is exactly that epsilon image. The original splitting-change
+derivation controls the cotangent splitting with its positive sign.
+Actual derived one-classes of the original Chern and tangent cocycles
+are also constructed, together with a finite-cover connecting theorem.
+The exact instance, manifest, public entry point, and original existence
+obligation remain unchanged.
+
+[GeometricFiniteCechHOne.lean](GeometricFiniteCechHOne.lean)
+constructs the actual derived \(H^1\) class of a one-cocycle on any
+finite open cover. The existing injective presentation supplies a
+primitive, and its quotient sections glue in the original sheaf.
+The actual Ext boundary of that global quotient section is independent
+of the primitive and is natural for genuine sheaf morphisms.
+[GeometricFiniteCechConnecting.lean](GeometricFiniteCechConnecting.lean)
+proves that lifting a one-cocycle through an actual short exact sheaf
+sequence computes its derived connecting image by the scalar Čech
+boundary of that lift. It uses the original Ext classes and the
+existing Čech-to-derived map; it requires no affine acyclicity premise.
+[GeometricLiteralSheafOneClasses.lean](GeometricLiteralSheafOneClasses.lean)
+applies the construction to the original twelve-open differential and
+tangent cocycles, giving `chernDerivedClass` and
+`kodairaSpencerDerivedClass` in the actual original sheaves.
+
+[GeometricSquareZeroCoefficientDerivation.lean](GeometricSquareZeroCoefficientDerivation.lean)
+uses a genuine faithful epsilon kernel and an actual algebra splitting
+\(\sigma\) to construct a derivation \(c_\sigma:B\to A\) satisfying
+\[
+ \varepsilon c_\sigma(b)=b-\sigma(\rho b),\qquad
+ c_\sigma(\varepsilon a)=a.
+\]
+In particular its actual Kähler lift sends the original
+\(d\varepsilon\) to one. Faithfulness of this differential is therefore
+proved by a retraction, rather than assumed. Changing the splitting
+gives exactly the already normalized derivation
+\(\kappa_{ij}=\operatorname{coeff}_\varepsilon(\sigma_j-\sigma_i)\).
+
+[GeometricSquareZeroReducedCotangent.lean](GeometricSquareZeroReducedCotangent.lean)
+constructs the genuine reduced cotangent tensor module, its reduction
+map, epsilon inclusion, coefficient retraction, and splitting lift.
+The explicit reconstruction identity proves the displayed direct-sum
+isomorphism and the local exactness statements. No differential-rank
+or cotangent-injectivity hypothesis is supplied.
+[GeometricSquareZeroCotangentChange.lean](GeometricSquareZeroCotangentChange.lean)
+proves the precise transition identities
+\[
+ s_j-s_i=\iota\circ\kappa_{ij},\qquad
+ p_i-p_j=\kappa_{ij}\circ q.
+\]
+Here \(s_i\) is the induced cotangent lift, \(p_i\) its coefficient
+retraction, and \(q\) the actual cotangent reduction. In pair coordinates
+the transition from splitting \(i\) to splitting \(j\) is
+\((\omega,a)\mapsto(\omega,a-\kappa_{ij}(\omega))\).
+
+[GeometricLiteralNativeCotangent.lean](GeometricLiteralNativeCotangent.lean)
+binds every term to the original actual native intersection rings,
+their original complex coefficients and reduction, the original
+epsilon generator, and the same original singleton splitting choices.
+The theorems `nativeEpsilonInclusion_injective` and
+`nativeCotangentReduction_kernel` give the genuine local cotangent
+exactness. `nativeCotangentSplitting_change` identifies its change with
+the earlier native KS derivation. For the original transition lift
+\(\beta_{ij}=s_i(d\log T_{ij})\),
+`nativeCotangentTransitionLift_boundary` proves
+\[
+ \beta_{jk}-\beta_{ik}+\beta_{ij}
+ =\iota\bigl(\kappa_{ij}(d\log T_{jk})\bigr).
+\]
+This is a local tensor-module identity on every actual common
+intersection. Its increasing triples give precisely the positive
+epsilon image of the earlier native scalar cup. Alternating
+normalization and global sheaf restriction comparisons must still
+be retained when assembling a global lifted cochain.
+
+[GeometricLiteralProjectiveCotangent.lean](GeometricLiteralProjectiveCotangent.lean)
+constructs the canonical global sheaf
+\(i^*\Omega^1_{\mathcal D/\mathbb C}\) through the actual scheme-module
+pullback along the original `closedFiber`. The total differential sheaf
+uses the original deformation's complex structure. The already checked
+`closedFiber_overComplex` proves the coefficient square. The genuine
+scheme differential map and pullback/pushforward adjunction construct
+the canonical reduction to the original surface differential sheaf.
+Its direct-image map has the original differential formula on every
+open and annihilates differentials of actual closed-fiber ideal elements.
+
+All 571 local development compilation units pass (550 proposal Lean
+modules, 20 shared modules, and the generated target). All 212 helpers
+changed since commit `37537c2` have matching successful independent
+kernel-replay receipts for their current sources and objects. The eight
+new helper endpoint reports use only `propext`, `Classical.choice`, and
+`Quot.sound`.
+
+The next comparison must identify the canonical global restricted
+cotangent sheaf and reduction map with these original local tensor
+modules and maps, prove the global epsilon inclusion and short exactness,
+and assemble the normalized ordered lifts. The finite connecting theorem
+can then identify the actual Chern one-class's connecting image with
+the already checked nonzero scalar class. A general derived cup library
+is not needed before this concrete comparison. The Abel--Jacobi/cylinder,
+supported variation, and source-specific global de Rham comparisons
+remain open. The final residue-exactness theorem still depends on
+`sorryAx`; protected `solve/lean` verification has not passed.
+
+## Earlier checkpoint: the actual differential and tangent sheaf cocycles
 
 **17 November 2026. The protected certificate remains incomplete.**
 The original normalized Cartier transitions now give a one-cocycle in
