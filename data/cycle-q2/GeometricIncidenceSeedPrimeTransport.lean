@@ -4,8 +4,6 @@ import Proposal.GeometricSeedSurfaceGradient
 /-!
 # Transport of a polynomial prime over the original seed
 
-Status: source-only proof draft. No elaboration or kernel replay was run.
-
 A prime containing the source equations and the seed coefficient kernel
 induces a complex polynomial prime by contraction along the canonical
 complex coefficient inclusion. Modulo the original prime, specializing
@@ -104,9 +102,15 @@ theorem seed_fiber_prime_coordinate_cover
     exact ⟨j, by simpa only [coordinate_mem_specializedPrime_iff] using hj⟩
   rcases CycleQ2SeedCoordinateCover.seedPrime_coordinate_cover
       (57 : ℂ) Complex.I (specializedPrime P) hHseed hFseed hxseed with h₁ | h₂ | h₃
-  · exact ⟨1, by simpa only [coordinate_mem_specializedPrime_iff] using h₁⟩
-  · exact ⟨2, by simpa only [coordinate_mem_specializedPrime_iff] using h₂⟩
-  · exact ⟨3, by simpa only [coordinate_mem_specializedPrime_iff] using h₃⟩
+  · refine ⟨1, ?_⟩
+    change (X (1 : Fin 5) : Poly ParameterAlgebra) ∉ P
+    exact (not_congr (coordinate_mem_specializedPrime_iff P 1)).mp h₁
+  · refine ⟨2, ?_⟩
+    change (X (2 : Fin 5) : Poly ParameterAlgebra) ∉ P
+    exact (not_congr (coordinate_mem_specializedPrime_iff P 2)).mp h₂
+  · refine ⟨3, ?_⟩
+    change (X (3 : Fin 5) : Poly ParameterAlgebra) ∉ P
+    exact (not_congr (coordinate_mem_specializedPrime_iff P 3)).mp h₃
 
 end CycleQ2IncidenceSeedPrimeTransport
 

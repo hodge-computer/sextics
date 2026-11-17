@@ -1,3 +1,4 @@
+import Proposal.GeometricThreeOpenH2Naturality
 import Proposal.GeometricGlobalSurfaceCubics
 import Proposal.GeometricCanonicalResidueDiagram
 
@@ -30,8 +31,10 @@ open CycleQ2GeometricIntrinsicCartierSequence CycleQ2GeometricIntrinsicCartierCo
 
 abbrev WeightedCubic := CycleQ2SurfaceCubicGluing.WeightedCubic
 
-local instance sheafHasExt {T : Type} [TopologicalSpace T] :
-    HasExt.{1} (Sheaf (Opens.grothendieckTopology T) AddCommGrpCat.{0}) := HasExt.standard _
+local instance sheafHasExt :
+    HasExt.{1} (Sheaf (Opens.grothendieckTopology
+      (show TopCat from CycleQ2CanonicalResidueSheaf.Surface)) AddCommGrpCat.{0}) :=
+  CycleQ2CoordinateTopDescent.coordinateSurfaceHasExt 57 1
 
 theorem globalCubic_restrict (p : WeightedCubic) (a : PatchIndex)
     (O : CycleQ2CanonicalResidueSheaf.Surface.Opens) (hO : O ≤ refinedPatch a) :
@@ -56,7 +59,8 @@ theorem cubicDiagram_right (p : WeightedCubic) :
     (cubicDiagram p).τ₃ = normalContraction p := globalCubic_normalContraction p
 
 def cubicH2 (p : WeightedCubic) :
-    (literalInverseIdealAdditiveComplex (57 : ℂ) 1).X₁.H' 2 ⊤ →+
+    (CycleQ2GeometricProjectiveHOne.structureAdditiveSheaf
+      CycleQ2CanonicalResidueSheaf.Surface).H' 2 ⊤ →+
       canonicalResidueAdditiveComplex.X₁.H' 2 ⊤ :=
   formMultiplicationH2 (CycleQ2GlobalSurfaceCubics.globalCubicSection p) ⊤
 

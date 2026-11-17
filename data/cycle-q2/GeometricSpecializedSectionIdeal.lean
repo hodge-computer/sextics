@@ -3,9 +3,6 @@ import Proposal.GeometricRegularSeedSection
 /-!
 # The actual specialized section ideal on the seed projective charts
 
-Status: source-only proof draft. No Lean elaboration or independent kernel
-replay has been run for this module.
-
 Evaluation of the original universal section ideal preserves the literal
 three rows of `M*T`. On every matrix-pivot chart, the already proved
 cofactor identities make the specialized ideal principal. Its contraction
@@ -43,6 +40,10 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceEquations
   CycleQ2UniversalCurveCartier CycleQ2RegularSeedSection
 
 variable (y : ParameterIndex → ℂ)
+
+local instance pointCommRing : CommRing (PointSurface y) := inferInstance
+local instance coefficientPivotCommRing (p : CycleQ2SegreCech.Chart) :
+    CommRing (CoefficientPivot y p) := inferInstance
 
 /-- The ideal of the same three rows after fixing the section coefficients. -/
 def specializedSectionIdeal (t : Fin 3 → ℂ) : Ideal (PointSurface y) :=
@@ -90,7 +91,10 @@ theorem pivotEvaluation_sectionVector (t : Fin 3 → ℂ)
       algebraMap (PointSurface y) (CoefficientPivot y p) (constantEquation y t i) := by
   rw [constantEquation_localize_row]
   simp only [pivotEvaluation, sectionVector, linearForm, map_sum, map_mul,
-    MvPolynomial.eval_C, MvPolynomial.eval_X, Algebra.smul_def, mul_comm]
+    MvPolynomial.eval_C, MvPolynomial.eval_X]
+  apply Finset.sum_congr rfl
+  intro j _
+  exact (mul_comm _ _).trans (Algebra.smul_def (t j) (localizedMatrix y p i j)).symm
 
 theorem specializedSectionIdeal_localize (t : Fin 3 → ℂ)
     (p : CycleQ2SegreCech.Chart) :
@@ -219,17 +223,19 @@ private theorem seedMap_polynomial (p : ParameterPolynomial ℂ) :
 theorem seed_original_equations (q : ColumnIndex) :
     aeval (seedPoint (57 : ℂ) Complex.I) ((presentation ℂ 57).equation q) = 0 := by
   change eval (seedPoint (57 : ℂ) Complex.I) ((presentation ℂ 57).equation q) = 0
-  have he := tracePoint_original_equations splitting.P splitting.B _ sliceCoordinate
-    incidence_isTracePoint q
-  rw [← seedMap_polynomial, he, map_zero]
+  have he : aeval incidencePoint ((presentation ℂ 57).equation q) = 0 :=
+    tracePoint_original_equations splitting.P splitting.B _ sliceCoordinate
+      incidence_isTracePoint q
+  exact (seedMap_polynomial _).symm.trans
+    ((congrArg seedMap he).trans (map_zero seedMap))
 
 theorem seed_leading_unit :
     IsUnit (aeval (seedPoint (57 : ℂ) Complex.I) (leadingProduct ℂ)) := by
   change IsUnit (eval (seedPoint (57 : ℂ) Complex.I) (leadingProduct ℂ))
   have h := (tracePoint_leading_unit splitting.P splitting.B _ sliceCoordinate
     incidence_isTracePoint).map seedMap
-  rw [seedMap_polynomial] at h
-  exact h
+  change IsUnit (seedMap (aeval incidencePoint (leadingProduct ℂ))) at h
+  exact (seedMap_polynomial _) ▸ h
 
 theorem seed_basepoint_unit :
     IsUnit (aeval (seedPoint (57 : ℂ) Complex.I)
@@ -238,8 +244,9 @@ theorem seed_basepoint_unit :
     CycleQ2IncidenceBasepointOpen.basepointPolynomial)
   have h := (tracePoint_extra_unit splitting.P splitting.B _ sliceCoordinate
     incidence_isTracePoint).map seedMap
-  rw [seedMap_polynomial] at h
-  exact h
+  change IsUnit (seedMap (aeval incidencePoint
+    CycleQ2IncidenceBasepointOpen.basepointPolynomial)) at h
+  exact (seedMap_polynomial _) ▸ h
 
 /-- On the original seed surface, one shared nonzero coefficient vector
 gives regular principal ideals on a covering by its nine original pivot

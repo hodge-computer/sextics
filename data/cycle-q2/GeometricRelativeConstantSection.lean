@@ -14,7 +14,6 @@ constant equations used by the regular seed-section construction.
 This constructs the relative homogeneous section ideal. No regularity or
 flatness away from the seed, and no nonempty curve, is asserted here.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -36,6 +35,8 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceEquations
   CycleQ2IncidenceEtaleParameter CycleQ2IncidencePolynomialJacobianBinding
 
 variable {S : Type} [CommRing S] [Algebra ℂ S]
+
+local instance pointCommRing (y : ParameterIndex → S) : CommRing (PointSurface y) := inferInstance
 
 /-- The section coefficients are fixed complex numbers, while the
 original incidence point is allowed to vary over its coefficient ring. -/
@@ -218,8 +219,9 @@ theorem pointMatrixPolynomial_seed (i j : Fin 3) :
       pointMatrixPolynomial (seedPoint (57 : ℂ) Complex.I) i j := by
   have h := congrArg (fun M => M i j)
     (map_incidenceMatrix seedMap (57 : ParameterAlgebra) (pointMatrix incidencePoint))
-  simpa only [pointMatrixPolynomial, RingHom.mapMatrix_apply, map_ofNat,
-    pointMatrix, seedMap_incidencePoint] using h
+  simp only [pointMatrixPolynomial, RingHom.mapMatrix_apply, map_ofNat,
+    pointMatrix, seedMap_incidencePoint] at h
+  exact h
 
 theorem relativeSectionPolynomial_seed (t : Fin 3 → ℂ) (i : Fin 3) :
     MvPolynomial.map seedMap (relativeSectionPolynomial incidencePoint t i) =

@@ -7,8 +7,6 @@ import Mathlib.AlgebraicGeometry.PullbackCarrier
 /-!
 # Points of the actual seed fiber in a coordinate chart lie in the good open
 
-Status: source-only proof draft. No elaboration or kernel replay was run.
-
 A point of an actual incidence chart lying over the original seed lifts
 to its scheme pullback with Spec complex. The exact affine fiber
 isomorphism turns the lift into a prime of the original seed chart.
@@ -42,6 +40,11 @@ open CycleQ2IncidencePolynomialJacobianBinding CycleQ2IncidenceEtaleParameter
 
 attribute [local instance] CycleQ2IncidenceSeedFiber.seedAlgebra
 
+local instance incidenceChartCommRing (i : Fin 4) :
+    CommRing (DehomogenizedRing incidencePoint i) := inferInstance
+local instance seedChartCommRing (i : Fin 4) :
+    CommRing (DehomogenizedRing (seedPoint (57 : ℂ) Complex.I) i) := inferInstance
+
 /-- The exact specialization appearing in the scheme projection
 preserves each original normalized minor. -/
 theorem seedChartSpecialization_normalizedMinor (i : Fin 4) (j k : Fin 5) :
@@ -63,23 +66,27 @@ theorem affine_mem_goodOpen_of_seed (i : Fin 4)
   let p : Spec (CommRingCat.of
       (DehomogenizedRing (seedPoint (57 : ℂ) Complex.I) i)) :=
     (affineChartSeedFiberIso i).hom z
-  have hpmap : Spec.map (CommRingCat.ofHom (seedChartSpecialization i)) p = a := by
+  have hpmap : Spec.map (CommRingCat.ofHom (R := DehomogenizedRing incidencePoint i)
+      (S := DehomogenizedRing (seedPoint (57 : ℂ) Complex.I) i) (seedChartSpecialization i)) p = a := by
     have h := congrArg
       (fun f : AffineChartSeedFiber i ⟶
         Spec (CommRingCat.of (DehomogenizedRing incidencePoint i)) => f z)
       (affineChartSeedFiberIso_hom_snd i)
-    change Spec.map (CommRingCat.ofHom (seedChartSpecialization i)) p =
+    change Spec.map (CommRingCat.ofHom (R := DehomogenizedRing incidencePoint i)
+      (S := DehomogenizedRing (seedPoint (57 : ℂ) Complex.I) i) (seedChartSpecialization i)) p =
       pullback.snd seedParameterMorphism (relativeChartToParameters i) z at h
     exact h.trans hza
   letI : p.asIdeal.IsPrime := p.isPrime
   obtain ⟨j, k, hjk, hp⟩ := seed_prime_normalizedMinor_cover i p.asIdeal
   have haMinor : normalizedMinor incidencePoint i j k ∉ a.asIdeal := by
     have h : normalizedMinor incidencePoint i j k ∉
-        (Spec.map (CommRingCat.ofHom (seedChartSpecialization i)) p).asIdeal := by
-      change seedChartSpecialization i (normalizedMinor incidencePoint i j k) ∉ p.asIdeal
-      rw [seedChartSpecialization_normalizedMinor]
-      exact hp
-    rwa [hpmap] at h
+        (Spec.map (CommRingCat.ofHom (R := DehomogenizedRing incidencePoint i)
+      (S := DehomogenizedRing (seedPoint (57 : ℂ) Complex.I) i) (seedChartSpecialization i)) p).asIdeal := by
+      rw [Spec.map_apply, PrimeSpectrum.comap_asIdeal]
+      simp only [CommRingCat.hom_ofHom, Ideal.mem_comap]
+      intro hm
+      exact hp ((seedChartSpecialization_normalizedMinor i j k) ▸ hm)
+    exact hpmap ▸ h
   have hminor : affineChartToSurface incidencePoint i a ∈
       minorOpen incidencePoint i j k := by
     change a ∈ affineChartToSurface incidencePoint i ⁻¹ᵁ

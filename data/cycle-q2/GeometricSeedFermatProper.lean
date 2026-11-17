@@ -19,8 +19,7 @@ applies. Composing these two morphisms proves properness of the existing
 map. This result holds for every parameter `r`; the Fermat specialization
 and its smoothness are not needed for properness.
 
-Status: source-only proof draft. No Lean elaboration, compilation, or
-kernel replay has been run. The geometric seed follows Ben Diamond's
+The geometric seed follows Ben Diamond's
 surface-section argument. Prepared for `fqlx` with OpenAI ChatGPT
 assistance, reusing the earlier incidence-family properness construction.
 -/
@@ -71,7 +70,8 @@ degree-zero subring. -/
 theorem cone_finiteType_zero (r : ℂ) :
     Algebra.FiniteType (coneGrade r 0) (ConeRing r) := by
   letI : IsScalarTower ℂ (coneGrade r 0) (ConeRing r) :=
-    IsScalarTower.of_algebraMap_eq' rfl
+    IsScalarTower.of_algebraMap_eq' (R := ℂ)
+      (S := coneGrade r 0) (A := ConeRing r) rfl
   letI := cone_finiteType_coefficients r
   exact Algebra.FiniteType.of_restrictScalars_finiteType
     ℂ (coneGrade r 0) (ConeRing r)

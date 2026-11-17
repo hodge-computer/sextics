@@ -18,7 +18,6 @@ used in goodOpen. Comparing their covers, and hence extending this
 dimension statement to the entire previously constructed neighborhood,
 is a separate obligation.
 
-Source-only draft: no elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric strategy and the protected certificate gap.
 -/
@@ -66,7 +65,6 @@ theorem prePresentation_jacobian (y : ParameterIndex → S) (i : Fin 4)
         pderiv (q 0) (dehomogenizedEquations y i 1) *
           pderiv (q 1) (dehomogenizedEquations y i 0)) = _
   apply congrArg (dehomogenizedMap y i)
-  dsimp only [chartMinor]
   rw [mul_comm (pderiv (q 0) (dehomogenizedEquations y i 1))
     (pderiv (q 1) (dehomogenizedEquations y i 0))]
 

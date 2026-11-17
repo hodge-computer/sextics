@@ -21,8 +21,7 @@ therefore proves properness of the unchanged `familyToParameters`.
 
 The theorem applies to every value of `r` and to all scheme-theoretic
 base changes. It does not assume or assert smoothness of every fiber.
-Status: source-only proof draft. No Lean elaboration, compilation, or
-kernel replay has been run. Prepared for `fqlx` with OpenAI ChatGPT
+Prepared for `fqlx` with OpenAI ChatGPT
 assistance, following Ben Diamond's invariant-cubic geometric family
 and reusing the project's incidence-family properness construction.
 -/
@@ -39,6 +38,15 @@ namespace CycleQ2SeedProjectiveFamilyProper
 open CategoryTheory AlgebraicGeometry MvPolynomial
 open CycleQ2SeedCubicFamily CycleQ2SeedProjectiveFamily
 
+private theorem finiteType_over_zero {R A : Type} [CommSemiring R] [CommSemiring A]
+    [Algebra R A] (𝒜 : ℕ → Submodule R A) [GradedRing 𝒜]
+    [Algebra.FiniteType R A] : Algebra.FiniteType (𝒜 0) A := by
+  letI : IsScalarTower R (𝒜 0) A :=
+    ⟨fun a b c => by
+      change (a • (b : A)) * c = a • ((b : A) * c)
+      exact smul_mul_assoc a (b : A) c⟩
+  exact Algebra.FiniteType.of_restrictScalars_finiteType R (𝒜 0) A
+
 /-- Every degree-zero element of the actual family quotient comes from
 the original full cubic-parameter coefficient ring. -/
 theorem parameterCoefficient_surjective (r : ℂ) :
@@ -53,11 +61,11 @@ theorem parameterCoefficient_surjective (r : ℂ) :
     (CycleQ2IncidenceProjectiveProper.polynomialGrade_zero_eq_C p hp).symm
 
 theorem parameterCoefficient_spec_closedImmersion (r : ℂ) :
-    IsClosedImmersion (Spec.map (CommRingCat.ofHom (parameterCoefficient r))) :=
+    IsClosedImmersion (Spec.map (CommRingCat.ofHom (R := ParameterRing) (S := familyGrade r 0) (parameterCoefficient r))) :=
   IsClosedImmersion.spec_of_surjective _ (parameterCoefficient_surjective r)
 
 theorem parameterCoefficient_spec_proper (r : ℂ) :
-    IsProper (Spec.map (CommRingCat.ofHom (parameterCoefficient r))) := by
+    IsProper (Spec.map (CommRingCat.ofHom (R := ParameterRing) (S := familyGrade r 0) (parameterCoefficient r))) := by
   letI := parameterCoefficient_spec_closedImmersion r
   infer_instance
 
@@ -71,11 +79,9 @@ theorem familyRing_finiteType_parameters (r : ℂ) :
 finite geometric generators. -/
 theorem familyRing_finiteType_zero (r : ℂ) :
     Algebra.FiniteType (familyGrade r 0) (FamilyRing r) := by
-  letI : IsScalarTower ParameterRing (familyGrade r 0) (FamilyRing r) :=
-    IsScalarTower.of_algebraMap_eq' rfl
   letI := familyRing_finiteType_parameters r
-  exact Algebra.FiniteType.of_restrictScalars_finiteType
-    ParameterRing (familyGrade r 0) (FamilyRing r)
+  exact finiteType_over_zero (R := ParameterRing) (A := FamilyRing r) (familyGrade r)
+
 
 theorem family_toSpecZero_proper (r : ℂ) :
     IsProper (Proj.toSpecZero (familyGrade r)) := by
@@ -89,7 +95,7 @@ theorem familyToParameters_proper (r : ℂ) :
   letI := family_toSpecZero_proper r
   letI := parameterCoefficient_spec_proper r
   change IsProper (Proj.toSpecZero (familyGrade r) ≫
-    Spec.map (CommRingCat.ofHom (parameterCoefficient r)))
+    Spec.map (CommRingCat.ofHom (R := ParameterRing) (S := familyGrade r 0) (parameterCoefficient r)))
   infer_instance
 
 /-- Every actual base change of the projective family remains proper,

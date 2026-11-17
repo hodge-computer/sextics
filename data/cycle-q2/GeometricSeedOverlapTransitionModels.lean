@@ -15,7 +15,6 @@ These sheaves are the literal overlap module models on the spectrum of
 the actual overlap section ring. Binding them to the original restricted
 projective sheaves and proving triple-overlap descent are further steps.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -35,21 +34,9 @@ open CycleQ2SeedProjectiveImageTwist CycleQ2SeedProjectiveImageRestriction
 
 /-- The dual of the actual identity-valued identification of overlap ideals. -/
 def dualIdealIdentification (i j : Fin 3) :
-    LeftOverlapDual i j ≃ₗ[OverlapSections i j] RightOverlapDual i j where
-  toFun φ := φ.comp (idealIdentification i j).symm.toLinearMap
-  invFun ψ := ψ.comp (idealIdentification i j).toLinearMap
-  left_inv φ := by
-    ext x
-    exact congrArg φ ((idealIdentification i j).symm_apply_apply x)
-  right_inv ψ := by
-    ext x
-    exact congrArg ψ ((idealIdentification i j).apply_symm_apply x)
-  map_add' φ ψ := by
-    ext x
-    rfl
-  map_smul' a φ := by
-    ext x
-    rfl
+    LeftOverlapDual i j ≃ₗ[OverlapSections i j] RightOverlapDual i j :=
+  (idealIdentification i j).arrowCongr
+    (LinearEquiv.refl (OverlapSections i j) (OverlapSections i j))
 
 /-- The dual transition retains the positive degree-four multiplier. -/
 def dualTransition (i j : Fin 3) :
@@ -59,7 +46,13 @@ def dualTransition (i j : Fin 3) :
 theorem dualTransition_apply (i j : Fin 3) (φ : LeftOverlapDual i j) :
     dualTransition i j φ =
       (ratioUnit i j : OverlapSections i j) ^ 4 •
-        φ.comp (idealIdentification i j).symm.toLinearMap := rfl
+        φ.comp (idealIdentification i j).symm.toLinearMap := by
+  apply LinearMap.ext
+  intro x
+  simp only [dualTransition, dualIdealIdentification, LinearEquiv.trans_apply,
+    LinearEquiv.arrowCongr_apply, LinearEquiv.refl_apply,
+    LinearMap.smul_apply, LinearMap.comp_apply]
+  rfl
 
 /-- The established pointwise square is an equality of module morphisms. -/
 theorem moduleTransition_square (i j : Fin 3) :
@@ -68,7 +61,12 @@ theorem moduleTransition_square (i j : Fin 3) :
       (Regrading.imageDual (leftData i j)).toModuleIso.hom ≫
         (dualTransition i j).toModuleIso.hom := by
   apply ModuleCat.hom_ext
-  exact LinearMap.ext (fun z => imageDual_compatibility i j z)
+  apply LinearMap.ext
+  intro z
+  change Regrading.imageDual (rightData i j) (imageTransition i j z) =
+    dualTransition i j (Regrading.imageDual (leftData i j) z)
+  rw [dualTransition_apply]
+  exact imageDual_compatibility i j z
 
 abbrev leftImageModelSheaf (i j : Fin 3) :=
   tilde (ModuleCat.of (OverlapSections i j) (Regrading.Image (leftData i j)))

@@ -16,7 +16,6 @@ through the projective chart isomorphism, with its structure-sheaf scalar
 actions, is still needed before asserting a projective sheaf comparison.
 The global internal-Hom and sheaf-gluing obligations also remain.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -56,7 +55,9 @@ def leftImageSectionsEquiv (i j : Fin 3) :
     ImagePrincipalSections i j ≃ₗ[AffineRing i] Regrading.Image (leftData i j) := by
   letI := leftSectionAlgebra i j
   letI := leftSection_isLocalization i j
-  exact sectionsEquiv (R := CommRingCat.of (AffineRing i))
+  letI := imageLocalizationMap_isLocalized (chartFactorData i)
+    (overlapPowers i j) (OverlapSections i j)
+  exact CycleQ2SeedPrincipalSections.sectionsEquiv (R := CommRingCat.of (AffineRing i))
     (ModuleCat.of (AffineRing i) (ImageModule i)) (overlapCoordinate i j)
     (imageLocalizationMap (chartFactorData i) (overlapPowers i j) (OverlapSections i j))
 
@@ -65,7 +66,9 @@ def leftDualSectionsEquiv (i j : Fin 3) :
     DualPrincipalSections i j ≃ₗ[AffineRing i] LeftOverlapDual i j := by
   letI := leftSectionAlgebra i j
   letI := leftSection_isLocalization i j
-  exact sectionsEquiv (R := CommRingCat.of (AffineRing i))
+  letI := dualLocalizationMap_isLocalized (chartFactorData i)
+    (overlapPowers i j) (OverlapSections i j)
+  exact CycleQ2SeedPrincipalSections.sectionsEquiv (R := CommRingCat.of (AffineRing i))
     (ModuleCat.of (AffineRing i) (OrbitDual i)) (overlapCoordinate i j)
     (dualLocalizationMap (chartFactorData i) (overlapPowers i j) (OverlapSections i j))
 
@@ -74,7 +77,9 @@ def rightImageSectionsEquiv (i j : Fin 3) :
     ImagePrincipalSections j i ≃ₗ[AffineRing j] Regrading.Image (rightData i j) := by
   letI := rightSectionAlgebra i j
   letI := rightSection_isLocalization i j
-  exact sectionsEquiv (R := CommRingCat.of (AffineRing j))
+  letI := imageLocalizationMap_isLocalized (chartFactorData j)
+    (overlapPowers j i) (OverlapSections i j)
+  exact CycleQ2SeedPrincipalSections.sectionsEquiv (R := CommRingCat.of (AffineRing j))
     (ModuleCat.of (AffineRing j) (ImageModule j)) (overlapCoordinate j i)
     (imageLocalizationMap (chartFactorData j) (overlapPowers j i) (OverlapSections i j))
 
@@ -83,7 +88,9 @@ def rightDualSectionsEquiv (i j : Fin 3) :
     DualPrincipalSections j i ≃ₗ[AffineRing j] RightOverlapDual i j := by
   letI := rightSectionAlgebra i j
   letI := rightSection_isLocalization i j
-  exact sectionsEquiv (R := CommRingCat.of (AffineRing j))
+  letI := dualLocalizationMap_isLocalized (chartFactorData j)
+    (overlapPowers j i) (OverlapSections i j)
+  exact CycleQ2SeedPrincipalSections.sectionsEquiv (R := CommRingCat.of (AffineRing j))
     (ModuleCat.of (AffineRing j) (OrbitDual j)) (overlapCoordinate j i)
     (dualLocalizationMap (chartFactorData j) (overlapPowers j i) (OverlapSections i j))
 
@@ -96,6 +103,10 @@ theorem leftSections_naturality (i j : Fin 3) :
         (leftImageSectionsEquiv i j).toLinearMap := by
   letI := leftSectionAlgebra i j
   letI := leftSection_isLocalization i j
+  letI := imageLocalizationMap_isLocalized (chartFactorData i)
+    (overlapPowers i j) (OverlapSections i j)
+  letI := dualLocalizationMap_isLocalized (chartFactorData i)
+    (overlapPowers i j) (OverlapSections i j)
   rw [← leftLocalizedImageDualEquiv_eq]
   exact sectionsEquiv_naturality (R := CommRingCat.of (AffineRing i))
     (imageDualEquiv i).toModuleIso.hom (overlapCoordinate i j)
@@ -110,6 +121,10 @@ theorem rightSections_naturality (i j : Fin 3) :
         (rightImageSectionsEquiv i j).toLinearMap := by
   letI := rightSectionAlgebra i j
   letI := rightSection_isLocalization i j
+  letI := imageLocalizationMap_isLocalized (chartFactorData j)
+    (overlapPowers j i) (OverlapSections i j)
+  letI := dualLocalizationMap_isLocalized (chartFactorData j)
+    (overlapPowers j i) (OverlapSections i j)
   rw [← rightLocalizedImageDualEquiv_eq]
   exact sectionsEquiv_naturality (R := CommRingCat.of (AffineRing j))
     (imageDualEquiv j).toModuleIso.hom (overlapCoordinate j i)

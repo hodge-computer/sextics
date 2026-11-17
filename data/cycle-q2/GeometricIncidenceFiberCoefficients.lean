@@ -3,8 +3,6 @@ import Proposal.GeometricIncidenceChartFiberScheme
 /-!
 # Coefficient primes of the actual incidence surface
 
-Status: source-only proof draft. No elaboration or kernel replay was run.
-
 The original surfaceToBase is defined through Proj.toSpecZero and the
 canonical coefficient map into degree zero. This component computes its
 map on points: a coefficient belongs to the base prime exactly when its
@@ -62,7 +60,8 @@ theorem coefficient_mem_iff (y : ParameterIndex → S) (x : surface y) (a : S) :
     change ((Scheme.topIso (surface y)).inv ≫
       (Scheme.isoOfEq (surface y) (Proj.basicOpen_one (surfaceGrade y))).inv ≫
         (Proj.basicOpen (surfaceGrade y) (1 : PointSurface y)).ι) x = x
-    simp only [Scheme.isoOfEq_inv_ι, Scheme.toIso_inv_ι]
+    erw [Scheme.isoOfEq_inv_ι, Scheme.toIso_inv_ι]
+    rfl
   change fromZeroRingHom (surfaceGrade y) (Submonoid.powers (1 : PointSurface y))
       (surfaceCoefficient y a) ∈
         ((Proj.basicOpenToSpec (surfaceGrade y) (1 : PointSurface y)).toLRSHom.base
@@ -74,7 +73,10 @@ theorem coefficient_mem_iff (y : ParameterIndex → S) (x : surface y) (a : S) :
         ((ProjectiveSpectrum.Proj.toSpec (surfaceGrade y) (1 : PointSurface y)).base
           x₁).asIdeal ↔ _
   rw [ProjectiveSpectrum.Proj.mk_mem_toSpec_base_apply]
-  simpa only [surfaceCoefficient_val, hx₁]
+  simp only [surfaceCoefficient_val]
+  change algebraMap S (PointSurface y) a ∈ x₁.1.asHomogeneousIdeal.toIdeal ↔
+    algebraMap S (PointSurface y) a ∈ x.asHomogeneousIdeal.toIdeal
+  rw [hx₁]
 
 /-- Every coefficient killed by the original seed map belongs to the
 homogeneous prime of every actual surface point over that seed point.

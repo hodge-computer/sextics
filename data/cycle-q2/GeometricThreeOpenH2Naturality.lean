@@ -148,6 +148,12 @@ private theorem coordinateConnecting_apply (r θ : ℂ)
         (coordinateOpen r θ 0) (coordinateOpen r θ 1) (coordinateOpen r θ 2)
         (tripleSections r θ q) := rfl
 
+theorem coordinateSurfaceHasExt (r θ : ℂ) :
+    HasExt.{1} (Sheaf (Opens.grothendieckTopology (show TopCat from projectiveSurface r θ))
+      AddCommGrpCat.{0}) := HasExt.standard _
+
+attribute [local instance] coordinateSurfaceHasExt
+
 private theorem rightFiniteClass_eq_coordinateMap (r : ℂ)
     (hcover : (⨆ i, family (surfaceGrade r 1) (CycleQ2GeometricCartierCech.coordinateCover r) i) = ⊤)
     (d : TwoCocycles ((homogeneousBiSystem (surfaceGrade r 1)
@@ -239,7 +245,23 @@ theorem rightFiniteClass_neg_eq_coordinateTop (r : ℂ)
       (coordinate_three_cover r 1 one_ne_zero) (tripleSections r 1 q))
     (homogeneousCoordinateRepresentative_neg r dH))
 
+open CycleQ2LiteralProjectiveDescent
+
+/-- Specialize the signed native comparison before using the cubic map. -/
+theorem literalRightClass_neg_eq_coordinateTop
+    (d : TwoCocycles (literalSystem.right ∅))
+    (dH : TwoCocycles (homogeneousCoordinateSystem 57))
+    (hR : literalRightEmpty.mapCycle d = dH) :
+    literalRightClass (-d) =
+      connectingAtTop (X := (show TopCat from projectiveSurface 57 1))
+        (structureAdditiveSheaf (projectiveSurface 57 1))
+        (coordinateOpen 57 1 0) (coordinateOpen 57 1 1) (coordinateOpen 57 1 2)
+        (coordinate_three_cover 57 1 one_ne_zero)
+        (tripleSections 57 1 (-homogeneousCoordinateRepresentative 57 dH)) :=
+  rightFiniteClass_neg_eq_coordinateTop 57 literalCoordinateCover d dH hR
+
 #print axioms rightFiniteClass_neg_eq_coordinateTop
+#print axioms literalRightClass_neg_eq_coordinateTop
 
 end CycleQ2CoordinateTopDescent
 

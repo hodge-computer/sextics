@@ -18,7 +18,6 @@ regular. These are explicit hypotheses of the general algebra lemma;
 this file makes no flatness assertion for an arbitrary surface chart or
 for the curve over the full parameter base.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -36,7 +35,20 @@ open scoped DualNumber TensorProduct
 open CycleQ2IncidenceEtaleParameter CycleQ2IncidenceFirstOrder
   CycleQ2DualNumberRegularQuotient
 
-attribute [local instance] firstOrderAlgebra CycleQ2IncidenceSeedFiber.seedAlgebra
+attribute [local instance] CycleQ2IncidenceSeedFiber.seedAlgebra
+
+local instance parameterFirstOrderAlgebra : Algebra ParameterAlgebra ℂ[ε] :=
+  firstOrderMap.toRingHom.toAlgebra
+
+local instance parameterFirstOrderModule : Module ParameterAlgebra ℂ[ε] :=
+  parameterFirstOrderAlgebra.toModule
+local instance parameterFirstOrderSMul : SMul ParameterAlgebra ℂ[ε] :=
+  parameterFirstOrderAlgebra.toSMul
+
+local instance parameterFirstOrderTower : IsScalarTower ParameterAlgebra ParameterAlgebra ℂ[ε] :=
+  ⟨fun a b c => by
+    change firstOrderMap (a * b) * c = firstOrderMap a * (firstOrderMap b * c)
+    rw [map_mul, mul_assoc]⟩
 
 /-- The closed-point map is linear for the actual two parameter actions. -/
 def firstOrderFst : ℂ[ε] →ₐ[ParameterAlgebra] ℂ where
@@ -53,9 +65,9 @@ theorem firstOrderFst_ker :
   rw [Ideal.mem_span_singleton, DualNumber.fst_eq_zero_iff_eps_dvd]
 
 def epsilonQuotientEquiv :
-    (ℂ[ε] ⧸ Ideal.span {ε}) ≃ₐ[ParameterAlgebra] ℂ :=
+    (ℂ[ε] ⧸ (Ideal.span {ε} : Ideal ℂ[ε])) ≃ₐ[ParameterAlgebra] ℂ :=
   (Ideal.quotientEquivAlgOfEq ParameterAlgebra firstOrderFst_ker.symm).trans
-    (Ideal.quotientKerAlgEquivOfSurjective firstOrderFst_surjective)
+    (Ideal.quotientKerAlgEquivOfSurjective (f := firstOrderFst) firstOrderFst_surjective)
 
 @[simp] theorem epsilonQuotientEquiv_mk (a : ℂ[ε]) :
     epsilonQuotientEquiv (Ideal.Quotient.mk (Ideal.span {ε}) a) = a.fst := by
@@ -67,6 +79,9 @@ variable (B : Type) [CommRing B] [Algebra ParameterAlgebra B]
 
 abbrev FirstOrderTensor := ℂ[ε] ⊗[ParameterAlgebra] B
 abbrev SeedTensor := ℂ ⊗[ParameterAlgebra] B
+
+local instance firstOrderTensorCommRing : CommRing (FirstOrderTensor B) := inferInstance
+local instance seedTensorCommRing : CommRing (SeedTensor B) := inferInstance
 
 theorem epsilonIdeal_eq_map :
     (Ideal.span {ε} : Ideal ℂ[ε]).map (algebraMap ℂ[ε] (FirstOrderTensor B)) =
@@ -89,25 +104,24 @@ def epsilonReductionEquiv :
         (a ⊗ₜ[ParameterAlgebra] b)) = a.fst ⊗ₜ[ParameterAlgebra] b := by
   rw [epsilonReductionEquiv, AlgEquiv.trans_apply, Ideal.quotientEquivAlgOfEq_mk,
     AlgEquiv.trans_apply, Algebra.TensorProduct.quotientTensorEquiv_symm_apply_tmul,
-    Algebra.TensorProduct.congr_apply, Algebra.TensorProduct.map_tmul,
-    epsilonQuotientEquiv_mk]
-  rfl
+    Algebra.TensorProduct.congr_apply, Algebra.TensorProduct.map_tmul]
+  exact congrArg (fun c : ℂ => c ⊗ₜ[ParameterAlgebra] b) (epsilonQuotientEquiv_mk a)
 
 /-- A seed-regular equation in a flat ambient algebra defines a flat
 quotient along the specific original first-order parameter path. -/
 theorem firstOrder_principalQuotient_flat [Module.Flat ParameterAlgebra B] (f : B)
-    (hreg : IsSMulRegular (SeedTensor B) (1 ⊗ₜ[ParameterAlgebra] f)) :
-    Module.Flat ℂ[ε] (FirstOrderTensor B ⧸ Ideal.span {1 ⊗ₜ[ParameterAlgebra] f}) := by
+    (hreg : IsSMulRegular (SeedTensor B) ((1 : ℂ) ⊗ₜ[ParameterAlgebra] f)) :
+    Module.Flat ℂ[ε] (FirstOrderTensor B ⧸ Ideal.span {(1 : ℂ[ε]) ⊗ₜ[ParameterAlgebra] f}) := by
   letI : Module.Flat ℂ[ε] (FirstOrderTensor B) := inferInstance
-  apply quotient_flat
+  apply quotient_flat (k := ℂ) (B := FirstOrderTensor B) ((1 : ℂ[ε]) ⊗ₜ[ParameterAlgebra] f)
   apply IsSMulRegular.of_right_eq_zero_of_smul
   intro a ha
   apply (epsilonReductionEquiv B).injective
   rw [map_zero]
   apply hreg.right_eq_zero_of_smul
-  change (1 ⊗ₜ[ParameterAlgebra] f) * epsilonReductionEquiv B a = 0
+  change ((1 : ℂ) ⊗ₜ[ParameterAlgebra] f) * epsilonReductionEquiv B a = 0
   change Ideal.Quotient.mk (epsilonIdeal (k := ℂ) (FirstOrderTensor B))
-    (1 ⊗ₜ[ParameterAlgebra] f) * a = 0 at ha
+    ((1 : ℂ[ε]) ⊗ₜ[ParameterAlgebra] f) * a = 0 at ha
   have h := congrArg (epsilonReductionEquiv B) ha
   simpa only [map_mul, map_zero, epsilonReductionEquiv_tmul,
     TrivSqZeroExt.fst_one] using h
