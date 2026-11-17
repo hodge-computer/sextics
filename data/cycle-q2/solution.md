@@ -1,6 +1,94 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Checked continuation: the original coordinate frame-gauge identity
+## Checked continuation: the native scalar cup has the original nonzero global class
+
+**17 November 2026. The protected certificate remains incomplete.**
+The actual native scalar cup now descends to a nonzero class in the
+original additive structure sheaf cohomology. Its increasing-face values
+are the native splitting-difference derivations evaluated on the
+universal logarithmic differentials of the original inverse-ideal
+transitions. The proved global comparison is
+\[
+ [K^{\mathrm{native}}]
+ =\operatorname{projectedDerivedClass}\ne0
+ \quad\text{in }H^2(D,\mathcal O_D).
+\]
+This uses the existing Čech-to-derived construction, the actual
+twelve-open cover, and the explicit frame gauge. The exact instance,
+manifest, and original existence obligation remain unchanged.
+
+[GeometricLiteralCartierIntersectionFactor.lean](GeometricLiteralCartierIntersectionFactor.lean)
+chooses one coordinate witness for each admissible old Cartier index.
+The chosen vertices are distinct because their first coordinates differ.
+Their denominator product is the old Cartier product times their
+coordinate product. The remaining actual intersection factors give a
+genuine homogeneous complement, proving
+\[
+ Q_S=\operatorname{coverProduct}(T)\,G_{S,T}
+\]
+without cancellation or a regularity assumption on a denominator.
+[GeometricLiteralCartierProjectionBinding.lean](GeometricLiteralCartierProjectionBinding.lean)
+uses this complement to identify the two ordinary localization maps and
+the actual native homogeneous restriction. Projection after the original
+closed transport is proved equal to restriction of the earlier original
+`projectSection`, through the genuine Proj structure-sheaf maps.
+
+[GeometricLiteralNativeGaugeSections.lean](GeometricLiteralNativeGaugeSections.lean)
+uses the original twelve opens indexed by \((a,l)\), ordered by
+\(3a+l\). The actual local frame gauge gives a section-valued edge
+cochain on increasing pairs, extended with alternating signs and zero
+diagonal. Its actual Čech boundary is normalized and closed. No
+antisymmetry of the raw native cup is assumed.
+[GeometricLiteralGaugeAdjustedCohomology.lean](GeometricLiteralGaugeAdjustedCohomology.lean)
+restricts the earlier projected cup to this actual cover and subtracts
+that explicit boundary. The existing finite-cover refinement and
+boundary comparison identify the resulting derived class with the
+earlier `projectedDerivedClass`.
+
+[GeometricLiteralNativeCupSectionValues.lean](GeometricLiteralNativeCupSectionValues.lean)
+evaluates the actual native cup, transported cone cup, and frame gauge
+as sections on arbitrary common opens. The original native restriction
+laws identify the pair gauge sections with the local gauge on the
+triple intersection. On increasing triples, the constructed Čech
+boundary is exactly the local `frameGaugeBoundary`.
+[GeometricLiteralNativeConeSectionFaces.lean](GeometricLiteralNativeConeSectionFaces.lean)
+binds the transported cone cup values to the four original projective
+faces. Repeated original Cartier indices give the appropriate zero cone
+entries. The comparison holds whenever the three original Cartier
+indices are nondecreasing, which includes every increasing refined
+triple in the stated order.
+
+[GeometricLiteralNativeCupDerivedClass.lean](GeometricLiteralNativeCupDerivedClass.lean)
+defines `nativeCupCocycle` directly from the actual native contraction
+on increasing vertices, its six alternating extensions, and zero
+repeated vertices. `gaugeAdjustedCup_increasing` binds all its increasing
+face values to the actual contraction. The theorem
+`nativeCupCocycle_eq_gaugeAdjusted` proves the full section-valued
+cochain equality. Thus this direct native cochain is normalized and
+closed, and the existing Čech-to-derived map gives
+`nativeCupDerivedClass`. The theorems
+`nativeCupDerivedClass_eq_original` and `nativeCupDerivedClass_ne_zero`
+prove the displayed comparison and nonvanishing. In combination with
+the earlier checked original-class identity, it is the same intrinsic
+normal-boundary scalar class.
+
+All 553 local development compilation units pass (532 proposal Lean
+modules, 20 shared modules, and the generated target). All 194 helpers
+changed since commit `37537c2` have matching successful independent
+kernel-replay receipts for their current sources and objects. The seven
+new helper endpoint reports use only `propext`, `Classical.choice`, and
+`Quot.sound`.
+
+The next factor comparison must identify the actual transition dlog and
+native splitting derivations with cocycles of the original projective
+differential and tangent sheaves, then bind their sheaf-cohomology cup
+to this now-checked nonzero native scalar class. The
+Abel--Jacobi/cylinder comparison, supported geometric variation, and
+source-specific global de Rham comparison also remain open. The
+protected certificate still depends on `sorryAx`; protected `solve/lean`
+verification has not passed.
+
+## Earlier checkpoint: the original coordinate frame-gauge identity
 
 **17 November 2026. The protected certificate remains incomplete.**
 The native splitting derivations, actual normalized Cartier transitions,
