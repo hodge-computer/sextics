@@ -1,5 +1,103 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Checked continuation: actual Cartier-cover splitting differences
+
+**17 November 2026. The protected certificate remains incomplete.**
+`Submission.missing_geometric_existence`, the exact instance, and the
+public entry point remain unchanged. This continuation constructs the
+local algebra splittings and checks the two original Cartier defect
+faces against actual splitting differences and universal differentials.
+It does not yet construct the global projective Chern/KS comparison.
+
+[GeometricLiteralCartierSplittings.lean](GeometricLiteralCartierSplittings.lean)
+uses the literal complex parameter \(r=57\) and the original four
+Cartier functions \((g_1,g_2,f_1,f_2)\). Every nonempty intersection of
+their cone principal opens avoids the vertex. The existing literal
+Jacobian certificate therefore proves that each actual closed
+localization is smooth over \(\mathbb C\). The polynomial-preserving
+comparison identifies it with the actual closed localization of
+\(F-\epsilon B^*\), where \(B^*\) is the unchanged `derivativeA`.
+Formal smoothness and the original square-zero reduction kernel then
+construct a complex-algebra splitting on every such intersection.
+
+[GeometricLiteralCartierOverlapSplittings.lean](GeometricLiteralCartierOverlapSplittings.lean)
+extends each chosen singleton splitting to all intersections containing
+it. The maps are the actual localization restrictions on both sides of
+the deformation. New denominators are units because their reductions
+are units and the genuine reduction kernel is square zero. The
+extensions split the actual reduction and commute with further
+restriction.
+
+[GeometricLiteralCartierKodairaSpencer.lean](GeometricLiteralCartierKodairaSpencer.lean)
+uses those same four singleton choices throughout. If \(\sigma_i\)
+denotes their extended splittings and \(\varepsilon_s\) is the
+original faithful kernel identification on an intersection, it defines
+an actual complex derivation \(\kappa_{ij}\) by
+\[
+ \varepsilon_s(\kappa_{ij}(x))=\sigma_j(x)-\sigma_i(x).
+\]
+The theorem `epsilon_restriction` retains the canonical epsilon
+normalization under restriction. `kodairaSpencer_restrict` proves that
+the derivations commute with the actual closed-ring restrictions, and
+`kodairaSpencer_trans` proves
+\(\kappa_{ik}=\kappa_{ij}+\kappa_{jk}\). These are constructed
+cone-ring representatives, with their sign fixed by the displayed
+equality.
+
+[GeometricLiteralCartierAtiyahFaces.lean](GeometricLiteralCartierAtiyahFaces.lean)
+constructs the actual units \(f_1,f_2,g_1,g_2\) on each of the original
+012 and 013 intersections. The additional unit on each face follows
+from the genuine relation
+\[
+ f_1g_1+f_2g_2=\varepsilon_s(B^*).
+\]
+Put \(u_{01}=-g_1/g_2\). With bars denoting reduction, the actual
+transition defect is the epsilon coefficient of
+\(u_{01}f_1f_2^{-1}-1\). If \(c_\sigma(v)\) is the epsilon
+coefficient of the normalized unit
+\(v\sigma(\bar v^{-1})-1\), the checked source-specific identity is
+\[
+ \operatorname{defect}_s=
+ c_{\sigma_1}(f_1)-c_{\sigma_0}(f_2)+c_{\sigma_0}(u_{01})
+ +\kappa_{01}\mathbin{\lrcorner}d\log(\bar f_1).
+\]
+Here contraction is the actual derivation's universal Kähler linear
+map. `atiyah_face012` and `atiyah_face013` transport this sum through
+the original polynomial-preserving closed-ring equivalences and prove
+that it is respectively the negative of the unchanged original
+`boundary012 57 1 derivativeA 0` and
+`boundary013 57 1 derivativeA 0`. Thus the calculation is bound to the
+original perturbation, original coordinates, and original boundary
+signs, using constructed splittings rather than assumed comparison
+data.
+
+The correction terms have not yet been assembled and proved to be the
+coboundary of a global correction cochain. The mixed raw-cone
+transitions also require coordinate normalization and a common
+projective refinement before they give the original projective
+\(H^1(\Omega^1)\) Chern class and its KS cup product in
+\(H^2(\mathcal O)\). The Abel--Jacobi/cylinder, supported
+correspondence, and protected affine de Rham comparisons remain
+unproved. This ambient perturbation remains independent of the time
+direction of the moving section curve; the separate \(r^3=2\) Fermat
+seed is not used in these literal \(r=57\) results.
+
+The four new helpers pass local compilation and independent
+`leanchecker` replay, with endpoint axiom reports containing only
+`propext`, `Classical.choice`, and `Quot.sound`. The full local
+development build passes all 510 units: 489 proposal Lean modules,
+20 shared dependencies, and the generated protected target. All 151
+helpers changed since the start of the compilation continuation have
+matching successful independent replay receipts for their current
+source and object hashes. This is a development checkpoint; replay
+of every proposal module remains pending and protected `solve/lean`
+verification has not passed. The certificate still depends on
+`sorryAx`.
+
+Prepared for `fqlx` with OpenAI ChatGPT assistance, following the
+geometric strategy and sources credited below. Earlier checkpoints
+retain their original counts and scope.
+
 ## Checked continuation: invertibility and the actual divisor transitions
 
 **17 November 2026. The protected certificate remains incomplete.** The
