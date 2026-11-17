@@ -15,7 +15,6 @@ contained in the image of the original source irrelevant ideal.
 These are the canonical ring maps needed to define one global Proj map;
 no gluing or projective base-change result is asserted in this file.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -37,6 +36,14 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceUniversalChart
   CycleQ2SpecializedProjectiveCurve CycleQ2RelativeConstantSection
   CycleQ2RelativeConstantCurve CycleQ2RelativeConstantCurveFiber
 
+local instance incidenceSurfaceCommRing : CommRing (PointSurface incidencePoint) := inferInstance
+local instance seedSurfaceCommRing : CommRing (PointSurface (seedPoint (57 : ℂ) Complex.I)) :=
+  inferInstance
+local instance relativeCurveCommRing (t : Fin 3 → ℂ) :
+    CommRing (RelativeCurveRing incidencePoint t) := inferInstance
+local instance specializedCurveCommRing (t : Fin 3 → ℂ) :
+    CommRing (SpecializedCurveRing (seedPoint (57 : ℂ) Complex.I) t) := inferInstance
+
 private theorem weightedHomogeneous_map {R T : Type} [CommRing R] [CommRing T]
     (f : R →+* T) {p : MvPolynomial (Fin 5) R} {n : ℕ}
     (hp : p.IsWeightedHomogeneous geometricWeight n) :
@@ -51,13 +58,16 @@ theorem seedSurfaceSpecialization_homogeneous {n : ℕ} {a : PointSurface incide
     (ha : a ∈ surfaceGrade incidencePoint n) :
     seedSurfaceSpecialization a ∈ surfaceGrade (seedPoint (57 : ℂ) Complex.I) n := by
   obtain ⟨p, hp, rfl⟩ := ha
+  change seedSurfaceSpecialization (Ideal.Quotient.mk (pointEquations incidencePoint) p) ∈ _
   rw [seedSurfaceSpecialization_mk]
   exact ⟨MvPolynomial.map seedMap p, weightedHomogeneous_map seedMap hp, rfl⟩
 
 def seedSurfaceGradedMap :
     surfaceGrade incidencePoint →+*ᵍ surfaceGrade (seedPoint (57 : ℂ) Complex.I) where
   toRingHom := seedSurfaceSpecialization
-  map_mem := fun _ _ ha => seedSurfaceSpecialization_homogeneous ha
+  map_mem := by
+    intro n a ha
+    exact seedSurfaceSpecialization_homogeneous ha
 
 theorem seedMap_coefficientLift (p : MvPolynomial (Fin 5) ℂ) :
     MvPolynomial.map seedMap
@@ -80,11 +90,12 @@ theorem seedSurfaceGradedMap_homogeneous_surjective (n : ℕ)
   change seedSurfaceSpecialization (Ideal.Quotient.mk (pointEquations incidencePoint)
     (MvPolynomial.map (algebraMap ℂ ParameterAlgebra) p)) = _
   rw [seedSurfaceSpecialization_mk, seedMap_coefficientLift]
+  rfl
 
 theorem irrelevant_le_map_seedSurfaceGradedMap :
     HomogeneousIdeal.irrelevant (surfaceGrade (seedPoint (57 : ℂ) Complex.I)) ≤
       (HomogeneousIdeal.irrelevant (surfaceGrade incidencePoint)).map seedSurfaceGradedMap := by
-  apply HomogeneousIdeal.toIdeal_le_toIdeal_iff.mp
+  apply toIdeal_le_toIdeal_iff.mp
   apply (HomogeneousIdeal.toIdeal_irrelevant_le _).mpr
   intro n hn b hb
   obtain ⟨a, ha, rfl⟩ := seedSurfaceGradedMap_homogeneous_surjective n b hb
@@ -136,7 +147,7 @@ theorem irrelevant_le_map_seedCurveGradedMap (t : Fin 3 → ℂ) :
     HomogeneousIdeal.irrelevant (specializedCurveGrade (seedPoint (57 : ℂ) Complex.I) t) ≤
       (HomogeneousIdeal.irrelevant (relativeCurveGrade incidencePoint t)).map
         (seedCurveGradedMap t) := by
-  apply HomogeneousIdeal.toIdeal_le_toIdeal_iff.mp
+  apply toIdeal_le_toIdeal_iff.mp
   apply (HomogeneousIdeal.toIdeal_irrelevant_le _).mpr
   intro n hn b hb
   obtain ⟨a, ha, rfl⟩ := seedCurveGradedMap_homogeneous_surjective t n b hb

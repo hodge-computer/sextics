@@ -16,7 +16,6 @@ Binding their rank-three targets and their maps to one global free sheaf
 is still required before using this uniqueness on different pair overlaps.
 No triple-overlap cocycle is asserted here.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -31,7 +30,7 @@ noncomputable section
 namespace CycleQ2SeedOverlapImageMonomorphism
 
 open CategoryTheory AlgebraicGeometry
-open CycleQ2SeedProjectiveImageRestriction CycleQ2SeedProjectiveImageCompatibility
+open CycleQ2SeedProjectiveImageTwist CycleQ2SeedProjectiveImageRestriction CycleQ2SeedProjectiveImageCompatibility
   CycleQ2SeedProjectiveLocalizedDuality CycleQ2SeedAffineComparisonSections
   CycleQ2SeedProjectiveAffineOverlap CycleQ2SeedOverlapTransitionModels
   CycleQ2SeedProjectiveOverlapComparisons CycleQ2SeedProjectiveSheafTransitions
@@ -82,9 +81,15 @@ theorem leftOverlapEmbedding_global (i j : Fin 3) :
           (Fin 3 → OverlapSections i j))).hom := by
   change (moduleSpecΓFunctor (R := OverlapSections i j)).map
       ((leftImageComparison i j).hom ≫ tilde.map (imageInclusion (leftData i j))) = _
-  rw [Functor.map_comp, comparisonIso_map, Category.assoc]
+  rw [Functor.map_comp]
+  dsimp only [leftImageComparison]
+  erw [comparisonIso_map (R := CommRingCat.of (OverlapSections i j))]
+  rw [Category.assoc]
   exact congrArg (fun k => (leftImageGlobalEquiv i j).toModuleIso.hom ≫ k)
-    (tilde.toOpen_map_app (imageInclusion (leftData i j)) ⊤)
+    (tilde.toOpen_map_app (R := CommRingCat.of (OverlapSections i j))
+      (M := ModuleCat.of (OverlapSections i j) (Regrading.Image (leftData i j)))
+      (N := ModuleCat.of (OverlapSections i j) (Fin 3 → OverlapSections i j))
+      (imageInclusion (leftData i j)) ⊤)
 
 /-- The right embedding uses the same rank-three overlap model and literal vector. -/
 theorem rightOverlapEmbedding_global (i j : Fin 3) :
@@ -94,9 +99,15 @@ theorem rightOverlapEmbedding_global (i j : Fin 3) :
           (Fin 3 → OverlapSections i j))).hom := by
   change (moduleSpecΓFunctor (R := OverlapSections i j)).map
       ((rightImageComparison i j).hom ≫ tilde.map (imageInclusion (rightData i j))) = _
-  rw [Functor.map_comp, comparisonIso_map, Category.assoc]
+  rw [Functor.map_comp]
+  dsimp only [rightImageComparison]
+  erw [comparisonIso_map (R := CommRingCat.of (OverlapSections i j))]
+  rw [Category.assoc]
   exact congrArg (fun k => (rightImageGlobalEquiv i j).toModuleIso.hom ≫ k)
-    (tilde.toOpen_map_app (imageInclusion (rightData i j)) ⊤)
+    (tilde.toOpen_map_app (R := CommRingCat.of (OverlapSections i j))
+      (M := ModuleCat.of (OverlapSections i j) (Regrading.Image (rightData i j)))
+      (N := ModuleCat.of (OverlapSections i j) (Fin 3 → OverlapSections i j))
+      (imageInclusion (rightData i j)) ⊤)
 
 #print axioms leftOverlapEmbedding_mono
 #print axioms rightOverlapEmbedding_mono

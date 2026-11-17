@@ -12,7 +12,6 @@ Those equations and the unit row ideals force compatibility under the
 original restriction maps. The existing augmented H0 theorem then glues
 these elements in the original seed quotient, with no grading premise.
 
-Source-only draft. Not elaborated, compiled, or kernel-replayed.
 Prepared for fqlx with OpenAI ChatGPT assistance, 15 November 2026.
 -/
 
@@ -34,13 +33,17 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceEquations CycleQ2IncidenceMonomi
   CycleQ2UniversalCurveCartier CycleQ2SpecializedProjectiveCurve
   CycleQ2SpecializedSectionIdeal
   CycleQ2SegreTangentLocal CycleQ2SeedQuotientFiniteFree
-  CycleQ2SeedCechLocalizedBasis CycleQ2SegreFactorSequence
+  CycleQ2SeedCechLocalizedBasis CycleQ2SegreFactorSequence CycleQ2SegreLinkageDuality
   CycleQ2SegreFactorChartExact CycleQ2SeedFactorHomogeneous
   CycleQ2SeedSectionInverse
 
 abbrev seed : ParameterIndex → ℂ := seedPoint (57 : ℂ) Complex.I
 abbrev A := SeedRing (57 : ℂ) Complex.I
 abbrev P := MvPolynomial (Fin 5) ℂ
+
+local instance pointSurfaceCommRing : CommRing (PointSurface seed) := inferInstance
+local instance seedCommRing : CommRing A := inferInstance
+local instance chartCommRing (s : Finset (Fin 3)) : CommRing (Chart s) := inferInstance
 
 def quotient : P →ₐ[ℂ] A :=
   Ideal.Quotient.mkₐ ℂ (equationsIdeal (smoothH Complex.I) (smoothF 57 Complex.I))
@@ -51,9 +54,8 @@ def literalToSeed : PointSurface seed ≃ₐ[ℂ] A :=
 
 @[simp] theorem literalToSeed_polynomial (p : P) :
     literalToSeed (Ideal.Quotient.mk (pointEquations seed) p) = quotient p := by
-  rw [literalToSeed, AlgEquiv.trans_apply,
-    literalPointSurfaceEquiv_polynomial, seedRingEquiv_quotient]
-  rfl
+  rw [literalToSeed, AlgEquiv.trans_apply]
+  erw [literalPointSurfaceEquiv_polynomial, seedRingEquiv_quotient]
 
 /-- At the retained seed every matrix perturbation coefficient is zero. -/
 theorem pointMatrixPolynomial_seed (a b : Fin 3) :
@@ -97,7 +99,7 @@ theorem matrixRow_eq (t : Fin 3 → ℂ) (s : Finset (Fin 3)) (hs : s.Nonempty)
   intro j _
   change (factorData s hs).matrix a j * algebraMap ℂ (Chart s) (t j) =
     algebraMap ℂ (Chart s) (t j) * (factorData s hs).matrix a j
-  exact mul_comm _ _
+  exact mul_comm ((factorData s hs).matrix a j) (algebraMap ℂ (Chart s) (t j))
 
 theorem toCone_equation (t : Fin 3 → ℂ) (s : Finset (Fin 3))
     (hs : s.Nonempty) (a : Fin 3) :
@@ -108,7 +110,7 @@ theorem toCone_equation (t : Fin 3 → ℂ) (s : Finset (Fin 3))
   simp only [Matrix.mulVec, dotProduct, Algebra.smul_def]
   apply Finset.sum_congr rfl
   intro j _
-  exact mul_comm _ _
+  exact mul_comm (algebraMap ℂ (Chart s) (t j)) ((factorData s hs).matrix a j)
 
 theorem left_eq_polynomial (s : Finset (Fin 3)) (hs : s.Nonempty) (a : Fin 3) :
     (factorData s hs).left a = polynomialToCone s (polynomialLeft (57 : ℂ) a) := rfl
@@ -132,7 +134,7 @@ variable (t : Fin 3 → ℂ) [IsEmpty (specializedCurve seed t)]
 emptiness forces a Bezout identity on each original cone coordinate chart. -/
 theorem row_span (s : Finset (Fin 3)) (hs : s.Nonempty) :
     Ideal.span (Set.range (row t s)) = ⊤ := by
-  have h := CycleQ2EmptySectionRows.row_span_of_isEmpty seed t
+  have h := CycleQ2EmptySectionRows.row_span_of_isEmpty (R := Chart s) seed t
     seed_original_equations seed_leading_unit (toCone s) (by
       simpa only [toCone_pivot s hs] using (factorData s hs).entries_generate)
   simpa only [toCone_equation t s hs] using h
@@ -196,6 +198,7 @@ def inverseSections : CycleQ2SeedCechGlobalGluing.Sections ℂ (57 : ℂ) Comple
 theorem inverseSections_compatible :
     CycleQ2SeedCechGlobalGluing.Compatible ℂ (57 : ℂ) Complex.I (inverseSections t) := by
   intro i j
+  dsimp only [inverseSections]
   change restrict (show ({i} : Finset (Fin 3)) ⊆ {i,j} by simp) _ =
     restrict (show ({j} : Finset (Fin 3)) ⊆ {i,j} by simp) _
   rw [coneInverse_restrict t (Finset.singleton_nonempty i) (by simp),

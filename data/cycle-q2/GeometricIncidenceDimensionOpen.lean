@@ -12,7 +12,6 @@ cone-minor open belongs to this dimension-two open.
 All assertions hold for an arbitrary coefficient algebra and incidence
 point. No covering premise or fiber-smoothness premise is assumed.
 
-Source-only draft: no elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -43,8 +42,10 @@ theorem jacobianOpen_eq_image (y : ParameterIndex → S) (i : Fin 4)
     jacobianOpen y i q =
       affineChartToSurface y i ''ᵁ PrimeSpectrum.basicOpen (chartMinor y i q) := by
   change (patchToAffine y i q q.injective ≫ affineChartToSurface y i).opensRange = _
-  rw [Scheme.Hom.opensRange_comp, patchToAffine,
-    Scheme.Hom.opensRange_localizationAway, prePresentation_jacobian]
+  rw [Scheme.Hom.opensRange_comp]
+  dsimp only [patchToAffine]
+  erw [Scheme.Hom.opensRange_localizationAway (R := CommRingCat.of (DehomogenizedRing y i))]
+  rw [prePresentation_jacobian]
 
 theorem affineChartToSurface_preimage_jacobianOpen (y : ParameterIndex → S)
     (i : Fin 4) (q : Fin 2 ↪ Option (Fin 3)) :

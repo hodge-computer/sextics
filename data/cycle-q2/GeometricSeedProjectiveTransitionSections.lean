@@ -14,7 +14,6 @@ imageSectionTransition on the original native projective sections.
 These identities concern one fixed ordered pair overlap; they do not
 supply the triple-overlap descent or a global internal-Hom comparison.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -38,34 +37,40 @@ open CycleQ2SurfaceCoordinateSections CycleQ2SeedProjectiveImageChart
   CycleQ2SeedProjectiveOverlapComparisons CycleQ2SeedProjectiveSheafTransitions
 
 theorem imageOverlapTransition_model (i j : Fin 3)
-    (s : globalSections (leftImageOverlap i j)) :
+    (s : globalSections (R := CommRingCat.of (OverlapSections i j)) (leftImageOverlap i j)) :
     rightImageGlobalEquiv i j
         (((moduleSpecΓFunctor (R := OverlapSections i j)).map
           (imageOverlapTransition i j).hom).hom s) =
       imageTransition i j (leftImageGlobalEquiv i j s) := by
-  exact congrArg
-    (fun k : globalSections (leftImageOverlap i j) ⟶
-      ModuleCat.of (OverlapSections i j) (Regrading.Image (rightData i j)) => k.hom s)
-    (conjugatedTransition_map (leftImageOverlap i j) (rightImageOverlap i j)
+  letI := leftImageOverlap_isQuasicoherent i j
+  letI := rightImageOverlap_isQuasicoherent i j
+  have h := conjugatedTransition_map (R := CommRingCat.of (OverlapSections i j))
+      (E := ModuleCat.of (OverlapSections i j) (Regrading.Image (leftData i j)))
+      (F := ModuleCat.of (OverlapSections i j) (Regrading.Image (rightData i j)))
+      (leftImageOverlap i j) (rightImageOverlap i j)
       (leftImageGlobalEquiv i j).toModuleIso (rightImageGlobalEquiv i j).toModuleIso
-      (imageTransition i j).toModuleIso)
+      (imageTransition i j).toModuleIso
+  exact ConcreteCategory.congr_hom h s
 
 theorem dualOverlapTransition_model (i j : Fin 3)
-    (s : globalSections (leftDualOverlap i j)) :
+    (s : globalSections (R := CommRingCat.of (OverlapSections i j)) (leftDualOverlap i j)) :
     rightDualGlobalEquiv i j
         (((moduleSpecΓFunctor (R := OverlapSections i j)).map
           (dualOverlapTransition i j).hom).hom s) =
       dualTransition i j (leftDualGlobalEquiv i j s) := by
-  exact congrArg
-    (fun k : globalSections (leftDualOverlap i j) ⟶
-      ModuleCat.of (OverlapSections i j) (RightOverlapDual i j) => k.hom s)
-    (conjugatedTransition_map (leftDualOverlap i j) (rightDualOverlap i j)
+  letI := leftDualOverlap_isQuasicoherent i j
+  letI := rightDualOverlap_isQuasicoherent i j
+  have h := conjugatedTransition_map (R := CommRingCat.of (OverlapSections i j))
+      (E := ModuleCat.of (OverlapSections i j) (LeftOverlapDual i j))
+      (F := ModuleCat.of (OverlapSections i j) (RightOverlapDual i j))
+      (leftDualOverlap i j) (rightDualOverlap i j)
       (leftDualGlobalEquiv i j).toModuleIso (rightDualGlobalEquiv i j).toModuleIso
-      (dualTransition i j).toModuleIso)
+      (dualTransition i j).toModuleIso
+  exact ConcreteCategory.congr_hom h s
 
 /-- The native image transition keeps the literal degree-fourteen vector change. -/
 theorem imageOverlapTransition_val (i j : Fin 3)
-    (s : globalSections (leftImageOverlap i j)) :
+    (s : globalSections (R := CommRingCat.of (OverlapSections i j)) (leftImageOverlap i j)) :
     (rightImageGlobalEquiv i j
       (((moduleSpecΓFunctor (R := OverlapSections i j)).map
         (imageOverlapTransition i j).hom).hom s)).val =
@@ -74,7 +79,7 @@ theorem imageOverlapTransition_val (i j : Fin 3)
 
 /-- The native dual transition keeps the full functional and its positive twist. -/
 theorem dualOverlapTransition_twist (i j : Fin 3)
-    (s : globalSections (leftDualOverlap i j)) :
+    (s : globalSections (R := CommRingCat.of (OverlapSections i j)) (leftDualOverlap i j)) :
     rightDualGlobalEquiv i j
         (((moduleSpecΓFunctor (R := OverlapSections i j)).map
           (dualOverlapTransition i j).hom).hom s) =
@@ -84,7 +89,7 @@ theorem dualOverlapTransition_twist (i j : Fin 3)
 
 /-- The sheaf transition induces the existing transition on original chart sections. -/
 theorem originalSectionTransition_recovered (i j : Fin 3)
-    (s : globalSections (leftImageOverlap i j)) :
+    (s : globalSections (R := CommRingCat.of (OverlapSections i j)) (leftImageOverlap i j)) :
     topSectionEquiv (overlap_isAffineOpen i j)
         (pair_le_right 57 1 i.succ j.succ) (projectiveImageSheaf j)
         (((moduleSpecΓFunctor (R := OverlapSections i j)).map
