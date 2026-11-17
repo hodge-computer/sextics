@@ -59,10 +59,15 @@ private theorem class_congr {F : AbSheaf Surface} {b b' : One F cover}
   cases e
   rfl
 
-/-- The connecting image of the actual derived Chern class is the alternating
-native Kodaira--Spencer cup on the original twelve-open cover. -/
-theorem chernDerivedClass_connecting_native :
-    chernDerivedClass.comp cotangentAdditiveShortExact.extClass rfl = nativeCupDerivedClass := by
+/-- An ordered cotangent lift of the Cartier cocycle and its actual boundary
+on every subopen of a triple intersection. -/
+theorem exists_chernOne_nativeLift :
+    ∃ b : One cotangentAdditiveComplex.X₂ cover,
+      mapOne cover cotangentAdditiveComplex.g b = chernOne ∧
+      ∀ u v w W hu hv hw,
+        boundaryValue cotangentAdditiveComplex.X₂ cover b u v w W hu hv hw =
+          app cotangentAdditiveComplex.f W
+            (faceValue coefficientSheaf cover nativeCupCocycle u v w W hu hv hw) := by
   let M : AbSheaf Surface := cotangentAdditiveComplex.X₂
   let b : One M cover := fun u v => res M (common_le_pair u v (cover u ⊓ cover v)
     inf_le_left inf_le_right) (nativeTensorToSheaf {u,v} (by simp) (orderedLift {u,v} u v (by simp) (by simp)))
@@ -115,6 +120,13 @@ theorem chernDerivedClass_connecting_native :
       nativeTensorToSheaf_reduce {u,v} (by simp) z
     rw [app_res, hq, orderedLift_reduce]
     rfl
+  exact ⟨b, he, hb⟩
+
+/-- The connecting image of the actual derived Chern class is the alternating
+native Kodaira--Spencer cup on the original twelve-open cover. -/
+theorem chernDerivedClass_connecting_native :
+    chernDerivedClass.comp cotangentAdditiveShortExact.extClass rfl = nativeCupDerivedClass := by
+  obtain ⟨b, he, hb⟩ := exists_chernOne_nativeLift
   have hd := cechOneClass_connecting cover cotangentAdditiveShortExact cover_covers b nativeCupCocycle
     nativeCupCocycle_normalized nativeCupCocycle_closed hb
   have hc := class_congr (primitive_image_closed cover cotangentAdditiveComplex nativeCupCocycle b hb)
