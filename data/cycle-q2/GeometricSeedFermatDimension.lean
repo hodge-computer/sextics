@@ -13,9 +13,8 @@ cover then gives the same relative dimension for the original projective
 structure morphism.
 
 The final existence statement retains the previously constructed explicit
-point and properness. No geometric premise replaces a proof. Status:
-source-only draft; no Lean elaboration, compilation, or kernel replay has
-been run. The protected residue-exactness theorem remains open.
+point and properness. No geometric premise replaces a proof.
+The protected residue-exactness theorem remains open.
 Prepared for `fqlx` with OpenAI ChatGPT assistance, following Ben Diamond's
 geometric seed construction.
 -/
@@ -52,7 +51,7 @@ theorem chart_smoothOfRelativeDimension (r : ℂ) (hr : r ^ 3 = 2) (i : Fin 4) :
     rw [← Spec.map_comp]
     apply congrArg Spec.map
     ext c
-    exact e.commutes c
+    exact congrArg HomogeneousLocalization.val (e.commutes c)
   rw [← hmap]
   exact (MorphismProperty.cancel_left_of_respectsIso
     (P := @SmoothOfRelativeDimension 3) g

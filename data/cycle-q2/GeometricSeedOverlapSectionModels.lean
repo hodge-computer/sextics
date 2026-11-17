@@ -14,7 +14,6 @@ comparisons to equivalences over the actual projective overlap section ring.
 The whole-section squares use the existing affine sheaf isomorphisms.
 Transport of the projective restricted sheaves is a separate component.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -64,6 +63,31 @@ abbrev leftChartOpen (i j : Fin 3) :=
 abbrev rightChartOpen (i j : Fin 3) :=
   (chartOpensEquiv (coordinateAffineChart 57 1 j.succ)).functor.obj (rightChartOver i j)
 
+local instance nativeSectionsModule {A : Type u} [CommRing A]
+    (M : (Spec (CommRingCat.of A)).Modules) (U : (Spec (CommRingCat.of A)).Opens) :
+    Module A Γ(M, U) :=
+  inferInstanceAs (Module A ((modulesSpecToSheaf.obj M).presheaf.obj (op U)))
+
+local instance leftImageOverlapModule (i j : Fin 3) :
+    Module (OverlapSections i j) Γ(affineImageSheaf i, leftChartOpen i j) :=
+  chartSectionsModule (coordinateAffineChart 57 1 i.succ)
+    (leftChartOver i j) (affineImageSheaf i)
+
+local instance leftDualOverlapModule (i j : Fin 3) :
+    Module (OverlapSections i j) Γ(affineOrbitDualSheaf i, leftChartOpen i j) :=
+  chartSectionsModule (coordinateAffineChart 57 1 i.succ)
+    (leftChartOver i j) (affineOrbitDualSheaf i)
+
+local instance rightImageOverlapModule (i j : Fin 3) :
+    Module (OverlapSections i j) Γ(affineImageSheaf j, rightChartOpen i j) :=
+  chartSectionsModule (coordinateAffineChart 57 1 j.succ)
+    (rightChartOver i j) (affineImageSheaf j)
+
+local instance rightDualOverlapModule (i j : Fin 3) :
+    Module (OverlapSections i j) Γ(affineOrbitDualSheaf j, rightChartOpen i j) :=
+  chartSectionsModule (coordinateAffineChart 57 1 j.succ)
+    (rightChartOver i j) (affineOrbitDualSheaf j)
+
 def leftImageModel (i j : Fin 3) :
     letI := chartSectionsModule (coordinateAffineChart 57 1 i.succ)
       (leftChartOver i j) (affineImageSheaf i)
@@ -73,8 +97,10 @@ def leftImageModel (i j : Fin 3) :
   letI := leftSection_isLocalization i j
   letI := chartSectionsModule (coordinateAffineChart 57 1 i.succ)
     (leftChartOver i j) (affineImageSheaf i)
-  letI := chartSections_isScalarTower (coordinateAffineChart 57 1 i.succ)
-    (leftChartOver i j) (affineImageSheaf i)
+  letI : IsScalarTower (AffineRing i) (OverlapSections i j)
+      Γ(affineImageSheaf i, leftChartOpen i j) :=
+    chartSections_isScalarTower (coordinateAffineChart 57 1 i.succ)
+      (leftChartOver i j) (affineImageSheaf i)
   exact ((nativeOpenEquiv (affineImageSheaf i) (chartOpensEquiv_left i j)).trans
     (leftImageSectionsEquiv i j)).extendScalarsOfIsLocalization
       (overlapPowers i j) (OverlapSections i j)
@@ -88,8 +114,10 @@ def leftDualModel (i j : Fin 3) :
   letI := leftSection_isLocalization i j
   letI := chartSectionsModule (coordinateAffineChart 57 1 i.succ)
     (leftChartOver i j) (affineOrbitDualSheaf i)
-  letI := chartSections_isScalarTower (coordinateAffineChart 57 1 i.succ)
-    (leftChartOver i j) (affineOrbitDualSheaf i)
+  letI : IsScalarTower (AffineRing i) (OverlapSections i j)
+      Γ(affineOrbitDualSheaf i, leftChartOpen i j) :=
+    chartSections_isScalarTower (coordinateAffineChart 57 1 i.succ)
+      (leftChartOver i j) (affineOrbitDualSheaf i)
   exact ((nativeOpenEquiv (affineOrbitDualSheaf i) (chartOpensEquiv_left i j)).trans
     (leftDualSectionsEquiv i j)).extendScalarsOfIsLocalization
       (overlapPowers i j) (OverlapSections i j)
@@ -103,8 +131,10 @@ def rightImageModel (i j : Fin 3) :
   letI := rightSection_isLocalization i j
   letI := chartSectionsModule (coordinateAffineChart 57 1 j.succ)
     (rightChartOver i j) (affineImageSheaf j)
-  letI := chartSections_isScalarTower (coordinateAffineChart 57 1 j.succ)
-    (rightChartOver i j) (affineImageSheaf j)
+  letI : IsScalarTower (AffineRing j) (OverlapSections i j)
+      Γ(affineImageSheaf j, rightChartOpen i j) :=
+    chartSections_isScalarTower (coordinateAffineChart 57 1 j.succ)
+      (rightChartOver i j) (affineImageSheaf j)
   exact ((nativeOpenEquiv (affineImageSheaf j) (chartOpensEquiv_right i j)).trans
     (rightImageSectionsEquiv i j)).extendScalarsOfIsLocalization
       (overlapPowers j i) (OverlapSections i j)
@@ -118,8 +148,10 @@ def rightDualModel (i j : Fin 3) :
   letI := rightSection_isLocalization i j
   letI := chartSectionsModule (coordinateAffineChart 57 1 j.succ)
     (rightChartOver i j) (affineOrbitDualSheaf j)
-  letI := chartSections_isScalarTower (coordinateAffineChart 57 1 j.succ)
-    (rightChartOver i j) (affineOrbitDualSheaf j)
+  letI : IsScalarTower (AffineRing j) (OverlapSections i j)
+      Γ(affineOrbitDualSheaf j, rightChartOpen i j) :=
+    chartSections_isScalarTower (coordinateAffineChart 57 1 j.succ)
+      (rightChartOver i j) (affineOrbitDualSheaf j)
   exact ((nativeOpenEquiv (affineOrbitDualSheaf j) (chartOpensEquiv_right i j)).trans
     (rightDualSectionsEquiv i j)).extendScalarsOfIsLocalization
       (overlapPowers j i) (OverlapSections i j)

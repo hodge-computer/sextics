@@ -13,7 +13,6 @@ These are actual scheme maps and their actual structure-sheaf sections.
 Principality, regularity for a chosen vector, parameter flatness, and
 nonemptiness are separate statements.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -34,6 +33,9 @@ open CycleQ2IncidenceUniversalChart CycleQ2IncidenceImageLine
 
 variable {S : Type} [CommRing S] [Algebra ℂ S]
 variable (y : ParameterIndex → S) (t : Fin 3 → ℂ)
+
+local instance nativePointSurfaceCommRing : CommRing (PointSurface y) := inferInstance
+local instance nativeRelativeCurveCommRing : CommRing (RelativeCurveRing y t) := inferInstance
 
 abbrev relativeCurveGrade (d : ℕ) : Submodule S (RelativeCurveRing y t) :=
   CycleQ2GeometricProjectiveCurve.HomogeneousQuotient.grade
@@ -85,6 +87,7 @@ private theorem relativeAwayMap_surjective (a : PointSurface y)
   obtain ⟨c, hc, rfl⟩ := hb
   refine ⟨Away.mk (surfaceGrade y) ha n c hc, ?_⟩
   simp only [Away.map_mk]
+  rfl
 
 instance relativeCurveToSurface_isClosedImmersion :
     IsClosedImmersion (relativeCurveToSurface y t) := by
@@ -104,7 +107,7 @@ instance relativeCurveToSurface_isClosedImmersion :
       (Proj.basicOpenIsoSpec (relativeCurveGrade y t)
         (relativeCurveRingMap y t i.2) ((relativeCurveRingMap y t).2 i.2.2) i.1.2).hom ≫
         Spec.map (CommRingCat.ofHom (Away.map (relativeCurveRingMap y t) i.2)) ≫
-          (Proj.basicOpenIsoSpec (surfaceGrade y) i.2 i.2.2 i.1.2).inv := by
+          (Proj.basicOpenIsoSpec (surfaceGrade y) (i.2 : PointSurface y) i.2.2 i.1.2).inv := by
     have hcomm := Proj.awayι_comp_map (relativeCurveRingMap y t)
       (irrelevant_le_map_relativeCurveRingMap y t) i.1.2 (i.2 : PointSurface y) i.2.2
     apply (cancel_mono (Proj.basicOpen (surfaceGrade y) (i.2 : PointSurface y)).ι).mp
@@ -114,9 +117,10 @@ instance relativeCurveToSurface_isClosedImmersion :
       (Proj.basicOpenIsoSpec (relativeCurveGrade y t)
         (relativeCurveRingMap y t i.2) ((relativeCurveRingMap y t).2 i.2.2) i.1.2).hom ≫
         (Spec.map (CommRingCat.ofHom (Away.map (relativeCurveRingMap y t) i.2)) ≫
-          Proj.awayι (surfaceGrade y) i.2 i.2.2 i.1.2)
+          Proj.awayι (surfaceGrade y) (i.2 : PointSurface y) i.2.2 i.1.2)
     rw [← hcomm]
     simp only [Proj.awayι, Category.assoc, Iso.hom_inv_id_assoc]
+    rfl
   have : IsClosedImmersion
       (Spec.map (CommRingCat.ofHom (Away.map (relativeCurveRingMap y t) i.2))) :=
     IsClosedImmersion.spec_of_surjective _ (relativeAwayMap_surjective y t i.2 i.2.2)

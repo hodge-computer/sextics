@@ -14,7 +14,6 @@ polynomial. They compare the genuine dehomogenized Jacobian minors with
 the normalized cone minors on these retained columns. Eliminating the
 fifth cone column by weighted Euler is a separate step.
 
-Source-only draft: no elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -64,15 +63,36 @@ theorem pderiv_dehomogenize_X (i : Fin 4) (a : Option (Fin 3)) (j : Fin 5) :
     pderiv a (dehomogenize (S := S) i (X j)) =
       dehomogenize i (pderiv (chartIndex i a) (X j)) -
         shiftDerivative i a * dehomogenize i (pderiv (Fin.last 4) (X j)) := by
-  cases a with
-  | none =>
-    fin_cases i <;> fin_cases j <;>
-      simp [dehomogenize, linearCoordinate, chartIndex, shiftDerivative,
-        pderiv_C, pderiv_one, pderiv_pow, Pi.single_apply]
-  | some a =>
-    fin_cases i <;> fin_cases a <;> fin_cases j <;>
-      simp [dehomogenize, linearCoordinate, chartIndex, shiftDerivative,
-        pderiv_C, pderiv_one, pderiv_pow, Pi.single_apply]
+  have hnone (b : Fin 4) : pderiv none (linearCoordinate (S := S) i b) = 0 := by
+    refine Fin.succAboveCases i ?_ (fun c => ?_) b <;> simp
+  refine Fin.lastCases ?_ (fun j => ?_) j
+  · rw [dehomogenize_last]
+    cases a with
+    | none => simp [Pi.single_apply, chartIndex, shiftDerivative, pderiv_pow, hnone]
+    | some a =>
+      have hne : (4 : Fin 5) ≠ (i.succAbove a).castSucc :=
+        (Fin.ne_of_lt (i.succAbove a).castSucc_lt_last).symm
+      simp [Pi.single_apply, chartIndex, shiftDerivative, hne]
+  · rw [dehomogenize_castSucc]
+    refine Fin.succAboveCases i ?_ (fun b => ?_) j
+    · cases a with
+      | none =>
+        have hne : i.castSucc ≠ (4 : Fin 5) := Fin.ne_of_lt i.castSucc_lt_last
+        simp [Pi.single_apply, chartIndex, shiftDerivative, hne]
+      | some a =>
+        have hne : i.castSucc ≠ (i.succAbove a).castSucc := by
+          exact fun h => Fin.succAbove_ne i a (Fin.castSucc_inj.mp h).symm
+        have hlast : i.castSucc ≠ (4 : Fin 5) := Fin.ne_of_lt i.castSucc_lt_last
+        simp [Pi.single_apply, chartIndex, shiftDerivative, hne, hlast]
+    · cases a with
+      | none =>
+        have hne : (i.succAbove b).castSucc ≠ (4 : Fin 5) :=
+          Fin.ne_of_lt (i.succAbove b).castSucc_lt_last
+        simp [Pi.single_apply, chartIndex, shiftDerivative, hne]
+      | some a =>
+        have hne : (i.succAbove b).castSucc ≠ (4 : Fin 5) :=
+          Fin.ne_of_lt (i.succAbove b).castSucc_lt_last
+        simp [Pi.single_apply, chartIndex, shiftDerivative, hne]
 
 /-- The polynomial chain rule includes the actual shift by X2^2. -/
 theorem pderiv_dehomogenize (i : Fin 4) (a : Option (Fin 3))

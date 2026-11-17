@@ -6,8 +6,6 @@ import Proposal.GeometricIncidenceSeedFiberGoodOpen
 /-!
 # The whole actual seed fiber lies in the relative smooth good open
 
-Status: source-only proof draft. No elaboration or kernel replay was run.
-
 For a point of the original projective incidence surface over the actual
 seed base point, its homogeneous prime contains the seed coefficient
 kernel. Contraction to the original polynomial ring preserves primality,
@@ -51,7 +49,7 @@ theorem exists_weightOne_of_over_seed (x : surface incidencePoint)
     (hx : surfaceToBase incidencePoint x = seedBasePoint) :
     ∃ i : Fin 4, x ∈ familyCoordinatePatch incidencePoint i := by
   letI : x.asHomogeneousIdeal.toIdeal.IsPrime := x.isPrime
-  let P : Ideal (Poly ParameterAlgebra) :=
+  let P : Ideal (MvPolynomial (Fin 5) ParameterAlgebra) :=
     Ideal.comap (surfaceQuotient incidencePoint) x.asHomogeneousIdeal.toIdeal
   letI : P.IsPrime := inferInstance
   have hcoeff : ∀ a : ParameterAlgebra, seedMap a = 0 → C a ∈ P := by
@@ -73,7 +71,7 @@ theorem exists_weightOne_of_over_seed (x : surface incidencePoint)
       surfaceQuotient_equation incidencePoint 0
     rw [hz]
     exact x.asHomogeneousIdeal.toIdeal.zero_mem
-  have hrelevant : ∃ j : Fin 5, (X j : Poly ParameterAlgebra) ∉ P := by
+  have hrelevant : ∃ j : Fin 5, (X j : MvPolynomial (Fin 5) ParameterAlgebra) ∉ P := by
     obtain ⟨j, hj⟩ := exists_coordinate_not_mem incidencePoint x
     exact ⟨j, hj⟩
   obtain ⟨i, hi⟩ := seed_fiber_prime_coordinate_cover P hcoeff hH hF hrelevant

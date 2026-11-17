@@ -260,8 +260,44 @@ theorem literalRightClass_neg_eq_coordinateTop
         (tripleSections 57 1 (-homogeneousCoordinateRepresentative 57 dH)) :=
   rightFiniteClass_neg_eq_coordinateTop 57 literalCoordinateCover d dH hR
 
+/-- The retained original class has the same signed native representative. -/
+theorem literalDerivedClassAtTop_eq_coordinateTop
+    (dH : TwoCocycles (homogeneousCoordinateSystem 57))
+    (c : TwoCocycles (literalSystem.left ∅)) (d : TwoCocycles (literalSystem.right ∅))
+    (hL : literalLeftEmpty.mapCycle c = literalHomogeneousCartierCycle)
+    (hR : literalRightEmpty.mapCycle d = dH)
+    (hcd : literalSystem.SecondDescent c.val d.val) :
+    CycleQ2ProjectiveCartierDerived.literalDerivedClassAtTop =
+      connectingAtTop (X := (show TopCat from projectiveSurface 57 1))
+        (structureAdditiveSheaf (projectiveSurface 57 1))
+        (coordinateOpen 57 1 0) (coordinateOpen 57 1 1) (coordinateOpen 57 1 2)
+        (coordinate_three_cover 57 1 one_ne_zero)
+        (tripleSections 57 1 (-homogeneousCoordinateRepresentative 57 dH)) :=
+  (literal_secondDescent_class c d hL hcd).trans
+    (literalRightClass_neg_eq_coordinateTop d dH hR)
+
+/-- Apply a coordinate-compatible map to the retained original class. -/
+theorem map_literalDerivedClassAtTop_eq {M : Type*}
+    (f : (structureAdditiveSheaf (projectiveSurface (57 : ℂ) 1)).H' 2 ⊤ → M)
+    (g : HomogeneousCoordinateTop 57 → M)
+    (hfg : ∀ q, f (connectingAtTop (X := (show TopCat from projectiveSurface 57 1))
+      (structureAdditiveSheaf (projectiveSurface 57 1))
+      (coordinateOpen 57 1 0) (coordinateOpen 57 1 1) (coordinateOpen 57 1 2)
+      (coordinate_three_cover 57 1 one_ne_zero) (tripleSections 57 1 q)) = g q)
+    (dH : TwoCocycles (homogeneousCoordinateSystem 57))
+    (c : TwoCocycles (literalSystem.left ∅)) (d : TwoCocycles (literalSystem.right ∅))
+    (hL : literalLeftEmpty.mapCycle c = literalHomogeneousCartierCycle)
+    (hR : literalRightEmpty.mapCycle d = dH)
+    (hcd : literalSystem.SecondDescent c.val d.val) :
+    f CycleQ2ProjectiveCartierDerived.literalDerivedClassAtTop =
+      g (-homogeneousCoordinateRepresentative 57 dH) := by
+  exact (congrArg f (literalDerivedClassAtTop_eq_coordinateTop dH c d hL hR hcd)).trans
+    (hfg (-homogeneousCoordinateRepresentative 57 dH))
+
 #print axioms rightFiniteClass_neg_eq_coordinateTop
 #print axioms literalRightClass_neg_eq_coordinateTop
+#print axioms literalDerivedClassAtTop_eq_coordinateTop
+#print axioms map_literalDerivedClassAtTop_eq
 
 end CycleQ2CoordinateTopDescent
 

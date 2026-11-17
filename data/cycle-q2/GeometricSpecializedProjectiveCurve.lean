@@ -3,9 +3,6 @@ import Proposal.GeometricSpecializedSectionIdeal
 /-!
 # The specialized projective zero locus and its regular chart kernels
 
-Status: source-only proof draft. No Lean elaboration or independent kernel
-replay has been run for this module.
-
 The source is the Proj of the actual original surface ring modulo the
 three specialized rows. Its grading comes from the proved homogeneity of
 that ideal. Its map to the existing surface is a genuine closed immersion.
@@ -42,7 +39,12 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceEquations
 
 variable (y : ParameterIndex → ℂ) (t : Fin 3 → ℂ)
 
+local instance nativePointSurfaceCommRing : CommRing (PointSurface y) := inferInstance
+
 abbrev SpecializedCurveRing := PointSurface y ⧸ specializedSectionIdeal y t
+
+local instance nativeSpecializedCurveCommRing : CommRing (SpecializedCurveRing y t) :=
+  inferInstance
 
 abbrev specializedCurveGrade (d : ℕ) : Submodule ℂ (SpecializedCurveRing y t) :=
   CycleQ2GeometricProjectiveCurve.HomogeneousQuotient.grade
@@ -98,6 +100,7 @@ private theorem specializedAwayMap_surjective (a : PointSurface y)
   obtain ⟨c, hc, rfl⟩ := hb
   refine ⟨Away.mk (surfaceGrade y) ha n c hc, ?_⟩
   simp only [Away.map_mk]
+  rfl
 
 instance specializedCurveToSurface_isClosedImmersion :
     IsClosedImmersion (specializedCurveToSurface y t) := by
@@ -117,7 +120,7 @@ instance specializedCurveToSurface_isClosedImmersion :
       (Proj.basicOpenIsoSpec (specializedCurveGrade y t)
         (specializedCurveRingMap y t i.2) ((specializedCurveRingMap y t).2 i.2.2) i.1.2).hom ≫
         Spec.map (CommRingCat.ofHom (Away.map (specializedCurveRingMap y t) i.2)) ≫
-          (Proj.basicOpenIsoSpec (surfaceGrade y) i.2 i.2.2 i.1.2).inv := by
+          (Proj.basicOpenIsoSpec (surfaceGrade y) (i.2 : PointSurface y) i.2.2 i.1.2).inv := by
     have hcomm := Proj.awayι_comp_map (specializedCurveRingMap y t)
       (irrelevant_le_map_specializedCurveRingMap y t) i.1.2 (i.2 : PointSurface y) i.2.2
     apply (cancel_mono (Proj.basicOpen (surfaceGrade y) (i.2 : PointSurface y)).ι).mp
@@ -127,9 +130,10 @@ instance specializedCurveToSurface_isClosedImmersion :
       (Proj.basicOpenIsoSpec (specializedCurveGrade y t)
         (specializedCurveRingMap y t i.2) ((specializedCurveRingMap y t).2 i.2.2) i.1.2).hom ≫
         (Spec.map (CommRingCat.ofHom (Away.map (specializedCurveRingMap y t) i.2)) ≫
-          Proj.awayι (surfaceGrade y) i.2 i.2.2 i.1.2)
+          Proj.awayι (surfaceGrade y) (i.2 : PointSurface y) i.2.2 i.1.2)
     rw [← hcomm]
     simp only [Proj.awayι, Category.assoc, Iso.hom_inv_id_assoc]
+    rfl
   have : IsClosedImmersion
       (Spec.map (CommRingCat.ofHom (Away.map (specializedCurveRingMap y t) i.2))) :=
     IsClosedImmersion.spec_of_surjective _

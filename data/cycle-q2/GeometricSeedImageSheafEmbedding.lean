@@ -14,7 +14,6 @@ The original matrix still factors through the same range inclusion.
 Identification with a common global free sheaf and triple-overlap descent
 are subsequent steps.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -90,10 +89,14 @@ def imageEmbedding (F : FactorData R) :
 theorem imageEmbedding_app_injective (F : FactorData R)
     (U : (Spec (CommRingCat.of R)).Opens) :
     Function.Injective ((imageEmbedding F).app U) :=
-  tilde_map_app_injective (imageInclusion F) Subtype.val_injective U
+  tilde_map_app_injective (R := CommRingCat.of R)
+    (M := ModuleCat.of R (Regrading.Image F)) (N := ModuleCat.of R (Fin 3 → R))
+    (imageInclusion F) (fun _ _ h => Subtype.ext h) U
 
 instance imageEmbedding_mono (F : FactorData R) : Mono (imageEmbedding F) :=
-  tilde_map_mono (imageInclusion F) Subtype.val_injective
+  tilde_map_mono (R := CommRingCat.of R)
+    (M := ModuleCat.of R (Regrading.Image F)) (N := ModuleCat.of R (Fin 3 → R))
+    (imageInclusion F) (fun _ _ h => Subtype.ext h)
 
 theorem matrixToImage_embedding (F : FactorData R) :
     tilde.map (matrixToImage F) ≫ imageEmbedding F =
