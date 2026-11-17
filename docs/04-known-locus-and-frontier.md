@@ -590,3 +590,31 @@ The last column counts degree-ten monomials with each exponent at most four and 
 Consequently this fixed-section sixfold construction cannot provide the full invariant Hodge-bundle submersion used to obtain dense rational middle Hodge classes in the Voisin argument. The dimension bound concerns that density map: it gives no obstruction to divisor support from independently supplied cycles, smaller subvariations or different ambient geometry.
 
 The same comparison of dimensions can be favorable for the threefold fibers of a pencil. For a weighted Calabi–Yau threefold with a symmetry moving its holomorphic form, [Chapter 3D](03d-hodge-loci.md) computes the count for a divisor class on an invariant surface section and proves support of the invariant sector when the count is positive, one such class moves with nonzero Abel–Jacobi derivative, and the Higgs field admits only scalar symmetries.
+
+### A dimension count for surface sections of the fourfold
+
+The count of Chapter 3D can also be made on the fourfold itself, and there it is unfavorable. Let \(h_1,h_2\) be forms of degrees \(e_1\le e_2\) and \(Y\)-parities \(\kappa_1,\kappa_2\), cutting a smooth surface \(D=X\cap\{h_1=h_2=0\}\) on a smooth even sextic. Then \(N_{D/X}=\mathcal O_D(e_1)\oplus\mathcal O_D(e_2)\) and \(K_D=\mathcal O_D(e_1+e_2)\). Put \(A=\mathbb C[Z]/(F,h_1,h_2)\). The motions of \(D\) through \(\tau\)-stable sections of the fixed fourfold, and the \(\tau\)-invariant two-forms, are
+
+\[
+A_{e_1}^{\kappa_1}\oplus A_{e_2}^{\kappa_2}
+\qquad\text{and}\qquad
+H^{2,0}(D)^\tau\simeq A_{e_1+e_2}^{-\kappa_1\kappa_2}.
+\]
+
+The second identification is through the residues of \(\sigma\,\Omega/(Fh_1h_2)\), and its sign is the action of \(\tau\) on \(\Omega\). A \(\tau\)-invariant divisor class on \(D\) stays of type \((1,1)\) to first order along the kernel of a map from the first space to the dual of the second. Where the locus of pairs \((X,D)\) carrying the class is cut out transversally, its fibers over the even sextics have dimension equal to the difference of the two dimensions, and it does not dominate the even sextics when the difference is negative.
+
+Curves of one class on \(D\) form a linear system, which carries no two-forms. A parameter surface for the curve-family corollary of §4.4 therefore needs two independent motions of \(D\), so the difference must be at least two. The parity-graded Hilbert series of \(A\) is
+
+\[
+\frac{(1-t^6)(1-s^{a_1}t^{e_1})(1-s^{a_2}t^{e_2})}{(1-t)^3(1-st)^3},
+\]
+
+where \(s\) marks odd degree in \(Y\) and \(a_i\) is \(0\) or \(1\) as \(h_i\) is \(Y\)-even or \(Y\)-odd. The difference is negative for all \(e_1\le e_2\le4\). Its largest value over the parities is:
+
+| \((e_1,e_2)\) | \((1,1)\) | \((1,2)\) | \((1,3)\) | \((1,4)\) | \((2,2)\) | \((2,3)\) | \((2,4)\) | \((3,3)\) | \((3,4)\) | \((4,4)\) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Motions minus invariant two-forms | \(-1\) | \(-6\) | \(-12\) | \(-24\) | \(-22\) | \(-54\) | \(-93\) | \(-118\) | \(-216\) | \(-379\) |
+
+The best case is two linear forms of the same parity: two motions against three invariant two-forms. For linear sections that are not \(\tau\)-stable, \(h^0(N_{D/X})=8\) and \(p_g(D)=10\). The command `python3 scripts/verify-extension-dimensions.py` reconstructs the table.
+
+This count concerns classes whose locus is cut out transversally, on complete-intersection surfaces of these degrees. It gives no obstruction to loci of excess dimension, to surfaces that are not complete intersections, or to curve families constructed directly as in [Chapter 3B](03b-weighted-threefolds.md).

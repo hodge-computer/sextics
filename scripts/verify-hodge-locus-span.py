@@ -62,6 +62,25 @@ characters (2, 2, 1, 0; 0) modulo three.
    A -> tau(A*L).  Here A runs over the sextic monomials of character one, soc
    is the socle form of R(F0 + b^2), and L spans the kernel of the
    Noether-Lefschetz map modulo h.
+
+5. A symmetry that fixes the three-form.  Here g = (1, omega, omega, omega; 1),
+   with characters (0, 1, 1, 1; 0), and the sector is the part of the third
+   cohomology on which g has no invariants.  With l = x1 + x2,
+
+       f1 = x0 - i*x1,   g1 = sum_j i^j * x0^(5-j) * x1^j,
+       f2 = w + x2^2,    g2 = w^2 - w*x2^2 + x2^4,
+       h  = x3 - l,      k  = sum_j x3^(5-j) * l^j,
+
+   and f1*g1 + f2*g2 + h*k = x0^6 + x1^6 + x2^6 + x3^6 + w^3 - l^6.  The script
+   recomputes the algebra A = S/(f1, f2, g1, g2, h) from its generators, of
+   length 20 with socle in degree seven, and checks that
+
+       tau(k*x1*x0) = tau(k*x2*x0) = 60*i*tau(x0^2*x1^2*x2^2*(x1 - x2)) != 0.
+
+   It counts the standard monomials of each character, and on the 63 of
+   degree six and nonzero character it checks that the matrices P with
+   P^T H_m = H_m P, for the 40 invariant standard monomials m of degree six,
+   are the scalars.
 """
 import argparse
 import json
@@ -258,14 +277,15 @@ def seed_divisor():
                      'factors': (f1, g1, f2, g2), 'tau': tau, 'kernel': kernel}
 
 
-def higgs_field():
-    def standard(character):
-        return [m for m in monomials(6, character) if max(m[:4]) <= 4 and m[4] <= 1]
+def scalar_symmetries(E, directions):
+    """Check that the matrices P on the span of E with P^T H_m = H_m P for all m are the scalars.
 
-    E, directions = standard(1), standard(0)
+    E and the directions are standard monomials of degree six in
+    Q[x, w]/(x_i^5, w^2), and H_m(a, b) is one if a*b*m is the socle monomial
+    and zero otherwise.
+    """
     socle = (4, 4, 4, 4, 1)
     n = len(E)
-    assert (n, len(directions)) == (33, 35)
     position = {m: i for i, m in enumerate(E)}
     zero = n*n                       # an extra node standing for the value zero
     parent = list(range(n*n + 1))
@@ -296,6 +316,15 @@ def higgs_field():
     assert len(free) == 1
     assert sorted(next(iter(free.values()))) == [i*n + i for i in range(n)]
     return {'dimension': n, 'directions': len(directions), 'solutionDimension': len(free)}
+
+
+def higgs_field():
+    def standard(character):
+        return [m for m in monomials(6, character) if max(m[:4]) <= 4 and m[4] <= 1]
+
+    E, directions = standard(1), standard(0)
+    assert (len(E), len(directions)) == (33, 35)
+    return scalar_symmetries(E, directions)
 
 
 def normal_function(Ft, Q):
@@ -404,6 +433,92 @@ def seed_fourfold(seed):
             'kernel': len(kernel), 'sextics': len(sextics), 'rankOfBothFunctionals': 1}
 
 
+def sector_character(exponents):
+    """Character for g = (1, omega, omega, omega; 1)."""
+    return (exponents[1] + exponents[2] + exponents[3]) % 3
+
+
+def sector_seed():
+    im = I_SQUARE_ROOT_OF_MINUS_ONE
+    x0, x1, x2, x3, w = ({tuple(int(j == i) for j in range(5)): 1} for i in range(5))
+
+    def power(q, n):
+        r = {(0, 0, 0, 0, 0): 1}
+        for _ in range(n):
+            r = mul(r, q)
+        return r
+
+    def scale(q, c):
+        return poly({e: c*v for e, v in q.items()})
+
+    def geometric(a, b):
+        """a^5 + a^4*b + ... + b^5, so that (a - b) times it is a^6 - b^6."""
+        r = {}
+        for j in range(6):
+            r = add(r, mul(power(a, 5 - j), power(b, j)))
+        return r
+
+    ell = add(x1, x2)
+    f1, g1 = add(x0, scale(x1, im), -1), geometric(x0, scale(x1, im))
+    f2 = add(w, power(x2, 2))
+    g2 = add(add(power(w, 2), mul(w, power(x2, 2)), -1), power(x2, 4))
+    h, k = add(x3, ell, -1), geometric(x3, ell)
+    F = add(add(mul(f1, g1), mul(f2, g2)), mul(h, k))
+    fermat = {}
+    for q, n in ((x0, 6), (x1, 6), (x2, 6), (x3, 6), (w, 3)):
+        fermat = add(fermat, power(q, n))
+    assert F == add(fermat, power(ell, 6), -1)
+    assert all(sector_character(e) == 0 for e in F)
+    assert all(sector_character(e) == 1 for e in h)
+    assert len({sector_character(e) for e in f1}) == 2      # f1 is not an eigenvector
+    # The Artinian algebra A = S/(f1, f2, g1, g2, h): Hilbert function and socle.
+    generators = (f1, f2, g1, g2, h)
+    hilbert = []
+    trace = None
+    for degree in range(10):
+        columns = monomials(degree)
+        rows = [mul({m: 1}, q) for q in generators if degree_of(q) <= degree
+                for m in monomials(degree - degree_of(q))]
+        M = matrix_of(rows, columns)
+        if degree == 7:
+            kernel = nullspace(M)
+            assert len(kernel) == 1
+            trace = dict(zip(columns, kernel[0]))
+        rank, _ = eliminate(M)
+        hilbert.append(len(columns) - rank)
+    assert hilbert == [1, 2, 3, 4, 4, 3, 2, 1, 0, 0]
+
+    def tau(q):
+        return sum(trace[e]*c for e, c in q.items()) % P
+
+    # The only two-form of nonzero character has numerator x0.
+    pairing = [tau(mul(mul(k, L), x0)) for L in (x1, x2, x3)]
+    assert tau(mul(mul(k, h), x0)) == 0
+    L0 = add(x1, x2, -1)
+    A0 = {(2, 2, 2, 0, 0): 1}
+    assert sector_character(next(iter(A0))) == 1
+    derivative = tau(mul(A0, L0))
+    assert derivative != 0 and tau(mul(mul(k, L0), x0)) == 0
+    assert pairing[0] == pairing[1] == 60*im*derivative % P
+    return {'prime': P, 'i': im, 'hilbertFunction': hilbert[:8], 'length': sum(hilbert),
+            'socleDegree': 7, 'pairingOverDerivative': '60*i', 'kernel': 'x1 - x2'}
+
+
+def sector_higgs():
+    def standard(degree):
+        return [m for m in monomials(degree) if max(m[:4]) <= 4 and m[4] <= 1]
+
+    hodge = {c: [sum(sector_character(m) == c for m in standard(d)) for d in (0, 6, 12, 18)]
+             for c in range(3)}
+    assert hodge == {0: [1, 40, 40, 1], 1: [0, 33, 30, 0], 2: [0, 30, 33, 0]}
+    E = [m for m in standard(6) if sector_character(m)]
+    directions = [m for m in standard(6) if not sector_character(m)]
+    assert (len(E), len(directions)) == (63, 40)
+    receipt = scalar_symmetries(E, directions)
+    receipt['hodgeNumbersByCharacter'] = hodge
+    return receipt
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -429,11 +544,20 @@ def main():
           f"{fourfold['rankMu']}; the classes vanish on dFt/dt and on h - k, and on the further "
           f"kernel direction the class is proportional to A -> tau(A*L) on the "
           f"{fourfold['sextics']} sextics.")
+    sector = sector_seed()
+    print(f"Sector seed modulo {sector['prime']}: the algebra has length {sector['length']} and "
+          f"socle degree {sector['socleDegree']}; tau(k*x1*x0) = tau(k*x2*x0) is nonzero and equals "
+          f"{sector['pairingOverDerivative']} times tau(x0^2*x1^2*x2^2*(x1 - x2)).", flush=True)
+    sector_field = sector_higgs()
+    print(f"Sector Higgs field at the Fermat member: on the {sector_field['dimension']}-dimensional "
+          f"space, the matrices P with P^T H_m = H_m P for all {sector_field['directions']} "
+          f"monomial directions are the scalars.")
     print(f'All Hodge-locus checks passed in {time.time() - start:.0f}s.')
     if args.output:
         with open(args.output, 'w') as handle:
             json.dump({'seedDivisor': seed, 'higgsField': higgs, 'fermatFourfold': fermat,
-                       'seedFourfold': fourfold}, handle, indent=2)
+                       'seedFourfold': fourfold, 'sectorSeed': sector,
+                       'sectorHiggsField': sector_field}, handle, indent=2)
             handle.write('\n')
 
 

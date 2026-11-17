@@ -4,7 +4,7 @@
 
 A divisor class on a surface section of a Calabi–Yau threefold stays algebraic along a locus of sections. When a symmetry moves the holomorphic three-form, the invariant part of this locus has positive expected dimension. Curves in the class then move on the threefold, and the derivative of their Abel–Jacobi images is a trace on an Artinian algebra. If the invariant variation of Hodge structure has no proper sub-variation, one nonzero derivative supports the whole invariant sector of the third cohomology on a divisor.
 
-Moving cycles along Hodge loci is the strategy of [Voisin, Proposition 2.1](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf), and the loci of surface sections of a Calabi–Yau threefold are studied in [Voisin, §2](https://www.cmls.polytechnique.fr/perso/voisin/Articlesweb/griffithsgroup.pdf). Chapter 3B follows the same strategy with explicitly constructed curves. This chapter applies it to weighted sextic threefolds with an order-three symmetry that moves the holomorphic three-form, and then to sextic fourfolds with a paired sign and such a symmetry.
+Moving cycles along Hodge loci is the strategy of [Voisin, Proposition 2.1](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf), and the loci of surface sections of a Calabi–Yau threefold are studied in [Voisin, §2](https://www.cmls.polytechnique.fr/perso/voisin/Articlesweb/griffithsgroup.pdf). Chapter 3B follows the same strategy with explicitly constructed curves. This chapter applies it to weighted sextic threefolds with an order-three symmetry that moves the holomorphic three-form, and then to sextic fourfolds with a paired sign and such a symmetry. The last section counts sections and classes of other characters, and applies the method to an order-three symmetry that fixes the three-form.
 
 ## 3D.1 Invariant sections and the dimension count
 
@@ -42,7 +42,7 @@ Modulo rescaling of \(h\), the expected dimension of the locus of invariant sect
 n-c=\dim S_e^G-1-\dim(S_e/\mathbb Ch)^{[\delta^{-1}]} .
 \]
 
-For \(\delta=1\) the two spaces coincide and the count is zero. This is necessary: the invariant part of \(H^3(T)\) then contains \(H^{3,0}(T)\), and for a general member of a family with irreducible invariant variation no nonzero part of it is supported on a divisor. For \(\delta\ne1\) the count is \(\dim S_e^G-1-\dim S_e^{[\delta^{-1}]}\). A positive count requires a symmetry that moves the holomorphic three-form.
+For \(\delta=1\) the two spaces coincide and the count is zero. This is necessary: the invariant part of \(H^3(T)\) then contains \(H^{3,0}(T)\), and for a general member of a family with irreducible invariant variation no nonzero part of it is supported on a divisor. For \(\delta\ne1\) the count is \(\dim S_e^G-1-\dim S_e^{[\delta^{-1}]}\). For invariant classes on invariant sections, a positive count therefore requires a symmetry that moves the holomorphic three-form. §3D.6 counts sections and classes of other characters, where it does not.
 
 **Integration lemma.** Suppose \(\operatorname{NL}_\lambda\) is surjective. Near \((F,h)\), the pairs \((F',h')\) of invariant polynomials for which \(\lambda\) remains of type \((1,1)\) form a smooth family. It is submersive over the invariant \(F'\), with fibers of dimension \(n-c\) modulo rescaling. On it \(\lambda\) is the class of a unique line bundle \(\mathcal L'\), which is \(G\)-invariant, and for large \(m\) the curves of \(|\mathcal L'(m)|\) form a projective bundle over it. This bundle is an open subset, in the classical topology, of the relative Hilbert scheme of curves in the surfaces \(D'\), and that scheme is smooth along it.
 
@@ -113,6 +113,8 @@ Since \(H^1(K_D)=0\), the restriction of \(\eta\) to \(D\) lifts to a class \(\w
 \[
 0\longrightarrow N_{D/T}^*\otimes\Omega_D^1\longrightarrow\Omega_T^2|_D\longrightarrow K_D\longrightarrow0 .
 \]
+
+The lift is unique up to the image of \(H^0(K_D)\) under the connecting map. That map is contraction with the extension class of the conormal sequence, so the image of a two-form \(\omega\) changes \(L\,\widetilde\eta\) by \(\pm\rho_L\mathbin{\lrcorner}\omega\), where \(\rho_L\) is the Kodaira–Spencer class of the motion \(L\). The integral below then changes by \(\pm\langle\overline\nabla_L[\Gamma],\omega\rangle\), which is zero because the class of \(\Gamma\) stays of type \((1,1)\) along \(h_s\). So the integral does not depend on the lift.
 
 For a local section \(dh\wedge\beta\) of the subbundle, \((v\mathbin{\lrcorner}(dh\wedge\beta))|_\Gamma=L\,\beta|_\Gamma\), because \(dh\) vanishes on the tangent directions of \(\Gamma\). Hence
 
@@ -363,3 +365,191 @@ has modulus \(6M^5\) on the left and at most \(2M^5\) on the right. If \(Y_i\) a
 has modulus \(6M^5\) on the left and at most \(M^5\) on the right. Both are impossible.
 
 This member illustrates the last row: at pole order two, the numerator \(A=X_0^2X_1^2X_2^3Y_0^2Y_1^2Y_2\) has its residue there, invariant under \(s_2\) and \(\gamma\).
+
+## 3D.6 Other sectors and a symmetry that fixes the three-form
+
+The count of §3D.1 concerns invariant classes on invariant sections. Neither restriction is needed. Without them, a symmetry that fixes the holomorphic three-form can also give a positive count, for the part of the cohomology on which it has no invariants.
+
+**Sectors.** Let \(G\) act as in §3D.1, by pullback on cohomology. Let \(\Psi\) be a set of characters of \(G\) that contains \(\psi^a\) whenever it contains \(\psi\) and \(a\) is prime to \(|G|\). Then
+
+\[
+\pi_\Psi=\frac1{|G|}\sum_{\psi\in\Psi}\sum_{\gamma\in G}\psi(\gamma)^{-1}\gamma
+\]
+
+is an idempotent of \(\mathbb Q[G]\). For a rational Hodge structure \(H\) with an action of \(G\), write \(H_\Psi=\pi_\Psi H\). Over \(\mathbb C\) it is the sum of the eigenspaces with characters in \(\Psi\). By §3D.1,
+
+\[
+H^{3,0}(T)_\Psi=0\iff\delta\notin\Psi,
+\qquad
+H^{2,1}(T)_\Psi\simeq\bigoplus_{\psi\in\Psi}R(F)_d^{[\psi\delta^{-1}]} .
+\]
+
+Let \(h\in S_e\), with \(0<e<d\), have character \(\kappa\) and cut a smooth surface \(D\). Then \(D\) is \(G\)-stable, and so are the surfaces cut by \(h+\varepsilon L\) for \(L\in S_e^{[\kappa]}\). The residue of \(\sigma\,\Omega/(Fh)\) has character \(\chi(\sigma)\delta\kappa^{-1}\), so
+
+\[
+H^{2,0}(D)_\Psi\simeq\bigoplus_{\psi\in\Psi}(S_e/\mathbb Ch)^{[\psi\kappa\delta^{-1}]} .
+\]
+
+Let \(\lambda\) be a divisor class on \(D\) with \(\pi_\Psi\lambda=\lambda\). Its flat transport along these sections stays in the image of \(\pi_\Psi\). Eigenspaces pair to zero unless their characters are inverse to each other, and \(\Psi\) is stable under inversion, so the \((0,2)\)-part of the transport pairs to zero with every two-form outside \(H^{2,0}(D)_\Psi\). The first-order condition is thus the kernel of
+
+\[
+\operatorname{NL}_\lambda:S_e^{[\kappa]}\longrightarrow\bigl(H^{2,0}(D)_\Psi\bigr)^\vee,
+\]
+
+and the expected dimension, modulo rescaling of \(h\), is
+
+\[
+n-c=\dim S_e^{[\kappa]}-1-\sum_{\psi\in\Psi}\dim(S_e/\mathbb Ch)^{[\psi\kappa\delta^{-1}]} .
+\]
+
+For \(\Psi=\{1\}\) and \(\kappa=1\) this is the count of §3D.1.
+
+**The criterion for a sector.** Suppose \(\delta\notin\Psi\). The integration lemma holds for the pairs \((F',h')\) with \(F'\) invariant and \(h'\) of character \(\kappa\), for a class with \(\pi_\Psi\lambda=\lambda\), and with \(H^{0,2}(D')_\Psi\) in place of \(H^{0,2}(D')^G\). Its line bundle need not be invariant, and no later step uses that. The moving-class criterion holds with \(h\) of character \(\kappa\), with \(\pi_\Psi\lambda=\lambda\), with \(A\in S_d\) of a character in \(\Psi\delta^{-1}\), and with \(\mathbb V=(R^3p_*\mathbb Q)_\Psi\) and \(\pi_\Psi\) in place of the invariant variation and \(\pi_G\). Its conclusion is
+
+\[
+\Gamma_*H^1(\Lambda,\mathbb Q)\supset H^3(T,\mathbb Q)_\Psi .
+\]
+
+The forms of its second hypothesis are \(H_A(B,B')=\operatorname{soc}(ABB')\) on \(\bigoplus_{\psi\in\Psi}R(F)_d^{[\psi\delta^{-1}]}\), for the \(A\in R(F)_d^G\) tangent to \(\mathcal B\). The proofs are those of §3D.1 and §3D.3. They used \(\delta\ne1\) only to exclude a \((3,0)\)-part, and \(\delta\notin\Psi\) does the same.
+
+**Translates.** In the setting of §3D.2, let \(a=\sum_\gamma a_\gamma\gamma\in\mathbb Q[G]\) and \(\lambda=\sum_\gamma a_\gamma[\gamma C]\). For a character \(\psi\) put \(\psi(a)=\sum_\gamma a_\gamma\psi(\gamma)\). Let \(L\) have character \(\kappa\).
+
+- If the two-form of numerator \(\sigma\) has character \(\psi\), then \(\operatorname{NL}_\lambda(L)(\sigma)\) is a nonzero multiple of \(\psi(a)\,\tau(kL\sigma)\).
+- If \(\eta_A\) has character \(\psi\), then the pairing of the derivative lemma is a nonzero multiple of \(\psi(a)\,\tau(AL)\).
+
+Indeed, \(\gamma^{-1}\) carries \(\gamma C\) to \(C\). It preserves the surfaces \(V(F,h+\varepsilon L)\), and it carries \(V(F+\varepsilon A,h)\) to \(V(F+\varepsilon\chi(A)(\gamma)A,h)\). The obstruction of \([\gamma C]\) is therefore the pullback by \(\gamma^{-1}\) of the obstruction of \([C]\), multiplied by \(\chi(A)(\gamma)\) in the second case. Its pairing with a two-form \(\omega\) is the pairing of the obstruction of \([C]\) with \(\gamma^*\omega\). In the first case \(\gamma^*\omega=\psi(\gamma)\omega\). In the second \(\omega\) has numerator \(L\) and \(\gamma^*\omega=\delta(\gamma)\omega\), while \(\chi(A)\delta\) is the character of \(\eta_A\). For \(a=\sum_\gamma\gamma\) these are the orbit sums of §3D.2.
+
+**An order-three symmetry that fixes the three-form.** Let
+
+\[
+g=(1,\omega,\omega,\omega;1)
+\]
+
+act on \(\mathbb P(1,1,1,1,2)\), and let \(\Psi\) consist of the two nontrivial characters of \(\langle g\rangle\). Then \(\delta=1\notin\Psi\) and \(\pi_\Psi=1-\pi_g\), with \(\pi_g=(1+g+g^2)/3\).
+
+**Order-three sector theorem.** Let \(T\subset\mathbb P(1,1,1,1,2)\) be a quasismooth sextic with \(g\)-invariant equation. Then
+
+\[
+(1-\pi_g)\,H^3(T,\mathbb Q)\subset N^1H^3(T,\mathbb Q).
+\]
+
+More precisely, the correspondence \(1-\pi_g\), which acts on \(H^*(T,\mathbb Q)\) as the projector onto \((1-\pi_g)H^3(T,\mathbb Q)\), is cohomologous to a rational algebraic cycle supported on \(Z\times Z\) for some divisor \(Z\subset T\).
+
+The invariant sextics are the polynomials in \(x_0\), \(w\) and the forms of degree divisible by three in \((x_1,x_2,x_3)\). They have 52 coefficients. As in §3D.4, \(T\) is a smooth Calabi–Yau threefold with \(h^{2,1}=103\), and the Jacobian ring gives the Hodge numbers of the three eigenspaces:
+
+| Eigenvalue of \(g\) | \((h^{3,0},h^{2,1},h^{1,2},h^{0,3})\) |
+| --- | --- |
+| \(1\) | \((1,40,40,1)\) |
+| \(\omega\) | \((0,33,30,0)\) |
+| \(\omega^2\) | \((0,30,33,0)\) |
+
+The theorem concerns the last two rows together, a rational Hodge structure of type \((0,63,63,0)\). The first row contains \(H^{3,0}(T)\), and its count in §3D.1 is zero.
+
+**The count.** Take linear sections of character \(\omega\), so \(e=1\), \(\kappa=\omega\) and \(S_1^{[\omega]}=\langle x_1,x_2,x_3\rangle\). For \(\psi\in\Psi\) the characters \(\psi\kappa\) are \(\omega^2\) and \(1\). No linear form has character \(\omega^2\), and only \(x_0\) has character \(1\). Hence
+
+\[
+n-c=3-1-1=1 .
+\]
+
+**A seed.** Let \(i^2=-1\) and \(\ell=x_1+x_2\), and set
+
+\[
+\begin{aligned}
+f_1&=x_0-i\,x_1,&g_1&=\sum_{j=0}^5i^j\,x_0^{5-j}x_1^j,\\
+f_2&=w+x_2^2,&g_2&=w^2-w\,x_2^2+x_2^4,\\
+h&=x_3-\ell,&k&=\sum_{j=0}^5x_3^{5-j}\ell^j .
+\end{aligned}
+\]
+
+Then
+
+\[
+F=f_1g_1+f_2g_2+hk=x_0^6+x_1^6+x_2^6+x_3^6+w^3-\ell^6
+\]
+
+is invariant, \(h\) has character \(\omega\), and \(f_1\) is not an eigenvector of \(g\). Put
+
+\[
+D=V(F,h),\qquad C=V(f_1,f_2,h),\qquad\lambda=[C]-[gC] .
+\]
+
+Then \(\pi_g\lambda=0\). The threefold is quasismooth. Indeed \(F=x_0^6+w^3+x_3^6+b(x_1,x_2)\) with \(b=x_1^6+x_2^6-(x_1+x_2)^6=-x_1x_2\,q\) and
+
+\[
+q=6x_1^4+15x_1^3x_2+20x_1^2x_2^2+15x_1x_2^3+6x_2^4=x_1^2x_2^2\,(6u^2+15u+8),
+\qquad u=\frac{x_1}{x_2}+\frac{x_2}{x_1}.
+\]
+
+The two roots of \(6u^2+15u+8\) are distinct and different from \(\pm2\), so \(b\) has six distinct roots and the partial derivatives of \(F\) have no common zero. Eliminating \(x_3\) identifies \(D\) with the Fermat surface \(x_0^6+x_1^6+x_2^6+w^3=0\) in \(\mathbb P(1,1,1,2)\), which is smooth, and \(C\) with the line \(x_0=i\,x_1\), \(w=-x_2^2\) on it.
+
+Eliminating \(x_0\), \(x_3\) and \(w\) through \(f_1\), \(h\) and \(f_2\) sends \(g_1\) to \(6i\,x_1^5\) and \(g_2\) to \(3x_2^4\). Thus
+
+\[
+\mathcal A\simeq\mathbb C[x_1,x_2]/(x_1^5,x_2^4),
+\]
+
+of length \(20\), with socle spanned by \(x_1^4x_2^3\) in degree seven. Let \(\tau\) be the coefficient of \(x_1^4x_2^3\). In \(\mathcal A\) we have \(k=6\ell^5\) and \(x_0=i\,x_1\), so
+
+\[
+\tau(k\,x_1x_0)=\tau(k\,x_2x_0)=6i\binom52=60\,i .
+\]
+
+The only two-form of \(H^{2,0}(D)_\Psi\) has numerator \(x_0\) and character \(\omega^2\). By the formulas for translates with \(a=1-g\), the map \(\operatorname{NL}_\lambda\) is a nonzero multiple of \(L\mapsto\tau(kLx_0)\). It is surjective, and its kernel modulo \(h\) is spanned by \(L_0=x_1-x_2\). For \(A=x_0^2x_1^2x_2^2\), of character \(\omega\),
+
+\[
+\tau(AL_0)=\tau\bigl(-x_1^4x_2^2(x_1-x_2)\bigr)=1 ,
+\]
+
+so the pairing of the derivative lemma is nonzero.
+
+**Finite results.** The verifier of §3D.4 also recomputes this seed from its generators modulo \(109\), with \(i=33\), and the Higgs forms at the Fermat member \(F_0\).
+
+| Calculation | Result |
+| --- | --- |
+| Standard monomials of degrees \(0,6,12,18\), by character | the table above |
+| Length and socle degree of \(\mathcal A\) | \(20\) and \(7\) |
+| \(\tau(kx_1x_0)\), \(\tau(kx_2x_0)\) and \(60\,i\,\tau(AL_0)\) | equal and nonzero |
+| Matrices \(P\) with \(P^{\mathsf T}H_m=H_mP\) for the \(40\) invariant monomials \(m\) at \(F_0\) | the scalars |
+
+For the last line, \(P\) acts on the span of the 63 standard monomials of degree six and nonzero character, and the relations are found by merging entries as in §3D.4.
+
+**Proof of the theorem.** The seed and the finite results verify the hypotheses of the criterion for a sector, for the family of all smooth invariant sextics, with \(\lambda=[C]-[gC]\), \(L=L_0\) and \(A=x_0^2x_1^2x_2^2\). The criterion gives a nonempty Zariski-open set \(\mathcal U\) of invariant sextics and, for \(T\in\mathcal U\), a smooth projective curve \(\Lambda\), possibly disconnected, and a correspondence \(\Gamma\) with \(\Gamma_*H^1(\Lambda,\mathbb Q)\supset(1-\pi_g)H^3(T,\mathbb Q)\). Let \(Z\) be a \(g\)-stable divisor containing its image, and replace \(\Gamma\) by \((1-\pi_g)\circ\Gamma\). Its image is still contained in \(Z\). Since \(g\) acts trivially on \(H^{2k}(T)=\mathbb QH^k\), the new \(\Gamma_*\) vanishes on \(H^0(\Lambda)\) and \(H^2(\Lambda)\), and it maps \(H^1(\Lambda)\) onto \((1-\pi_g)H^3(T)\). No projector on \(\Lambda\) is needed, as for the anti-projector of [§3B.6](03b-weighted-threefolds.md). As there, \(\Gamma\circ{}^t\Gamma\) is invertible on \((1-\pi_g)H^3(T)\) and zero on the rest of the cohomology, and a polynomial in it without constant term represents \(1-\pi_g\) by a cycle supported on \(Z\times Z\). The correspondence \(1-\pi_g\) is a relative algebraic cycle over the connected family of all smooth invariant sextics. The supported-projector specialization lemma of [Chapter 3, §3.6](03-geometric-support.md) extends the supported representative from \(\mathcal U\) to every member. ∎
+
+**Fourfolds.** The passage of §3D.5 applies to this sector.
+
+**Theorem.** Let \(X=(F=0)\subset\mathbb P^5\) be a smooth sextic with coordinates \((x_0,x_1,x_2,x_3,u,v)\). Suppose \(F\) is invariant under
+
+\[
+\beta:(u,v)\mapsto(-u,-v),
+\qquad
+\gamma=\operatorname{diag}(1,\omega,\omega,\omega,1,1),
+\]
+
+and put \(\pi_\gamma=(1+\gamma+\gamma^2)/3\). Then
+
+\[
+(1-\pi_\gamma)\,H^4(X,\mathbb Q)^{\beta}\subset N^1H^4(X,\mathbb Q).
+\]
+
+The determinant of \(\gamma\) is one, so \(H^{4,0}(X)\) is \(\gamma\)-invariant and the statement is consistent with coniveau. The invariant sextics form an 84-coefficient linear system, and the supported part of the primitive cohomology has type \((156,612,156)\).
+
+**Proof.** The construction in the proof in §3D.5 uses only \(\beta\). It gives the pencil \(\lambda=v/u\) and, over a nonempty open \(U\subset\mathbb P^1\), the family \(p:\mathcal T\to U\) of quasismooth sextics \(T_\lambda=V_\lambda/\beta\) avoiding the vertex. Their equations are invariant under \(g\), the action of \(\gamma\). By the order-three sector theorem, \(1-\pi_g\) has a supported representative at every fiber. The proof of the relative support lemma for an invariant sector uses the sector only through its projector. With \(V=(1-\pi_g)R^3p_*\mathbb Q\) it supplies, after removing finitely many points of \(U\), a divisor of \(\mathcal T\) supporting \(H^1(U,V)\).
+
+Let \(\alpha\) be a \(\beta\)-invariant class with \(\pi_\gamma\alpha=0\). Its pullback to the blowup, restricted over \(U\), is the pullback of a class \(\alpha'\) on \(\mathcal T\) with \(\pi_g\alpha'=0\). The image of \(\alpha'\) in \(H^0(U,R^4p_*\mathbb Q)\) vanishes, because \(g\) acts trivially on \(R^4p_*\mathbb Q=\mathbb QH^2\). Hence \(\alpha'\in H^1(U,V)\), and it vanishes off a divisor. Adding the omitted fibers and the exceptional divisor and pushing forward supports \(\alpha\) on \(X\). ∎
+
+In the coordinates of this book, take \((u,v)=(X_2,Y_2)\) and \((x_0,x_1,x_2,x_3)=(X_0,X_1,Y_0,Y_1)\). Then \(\beta\) is the paired sign \(s_2\) and
+
+\[
+\gamma=\operatorname{diag}(1,\omega,1,\omega,\omega,1)
+\quad\text{on}\quad(X_0,X_1,X_2,Y_0,Y_1,Y_2).
+\]
+
+Of the 84 invariant monomials, 44 are \(Y\)-even. On a smooth \(Y\)-even member, the \(Y\)-even primitive cohomology, of type \((208,866,208)\), splits into three parts:
+
+| Part | Hodge numbers | Support |
+| --- | --- | --- |
+| \(s_2\)-invariant, without \(\gamma\)-invariants | \((74,298,74)\) | The theorem above |
+| \(s_2\)-invariant and \(\gamma\)-invariant | \((34,144,34)\) | Not given by this theorem |
+| \(s_2\)-anti-invariant | \((100,424,100)\) | Not given by this theorem |
+
+A \(Y\)-odd numerator \(A\) has its residue in the first part when it is even in \((X_2,Y_2)\) and none of its monomials has degree divisible by three in \((X_1,Y_0,Y_1)\). The support-to-certificate equivalence of [Chapter 1](01-certificates.md) then gives a certificate for pole orders \(1\le q\le4\).
