@@ -1,6 +1,107 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Checked continuation: the native scalar cup has the original nonzero global class
+## Checked continuation: the actual differential and tangent sheaf cocycles
+
+**17 November 2026. The protected certificate remains incomplete.**
+The original normalized Cartier transitions now give a one-cocycle in
+the actual projective differential sheaf. The original faithfully
+normalized splitting differences now give a one-cocycle in the actual
+tangent sheaf
+\(\mathcal H om_{\mathcal O_D}(\Omega^1_{D/\mathbb C},\mathcal O_D)\).
+On every common open of the original twelve-open cover, their genuine
+evaluation is the previously checked native scalar contraction. The
+ordered alternating Čech product therefore satisfies
+\[
+ \left[\langle\kappa,d\log T\rangle_{\mathrm{ord}}\right]
+ =\operatorname{projectedDerivedClass}\ne0
+ \quad\text{in }H^2(D,\mathcal O_D).
+\]
+The left side means the actual ordered Čech evaluation cochain followed
+by the existing Čech-to-derived map. Both factors and their restrictions
+are constructed from the original sheaves and original local data.
+The literal complex seed remains \(r=57\), and the splitting differences
+come from the independent ambient deformation \(F-\varepsilon B_*\).
+The exact instance, manifest, public entry point, and original existence
+obligation remain unchanged.
+
+[GeometricLiteralNativeDifferentialSections.lean](GeometricLiteralNativeDifferentialSections.lean)
+proves that the native intersection/section equivalence preserves the
+original complex coefficients. The ordinary universal Kähler map,
+followed by the actual sheafification unit, defines `nativeFormToSheaf`.
+It is additive, semilinear over the original section-ring equivalence,
+and compatible with the genuine scheme restrictions. It sends the
+native logarithmic differential of a unit to the actual sheaf-valued
+logarithmic derivative of that same section unit.
+[GeometricLiteralNativeChernCocycle.lean](GeometricLiteralNativeChernCocycle.lean)
+applies this to the original inverse-ideal transitions. Their proved
+multiplicative cocycle yields the actual differential-sheaf cocycle
+`chernOne`, with the additive identity on every common subopen.
+
+[GeometricLocalizedDerivations.lean](GeometricLocalizedDerivations.lean)
+extends an arbitrary complex derivation to genuine localization rings
+using localization of Kähler modules. Its values on original elements
+and its literal fraction rule are proved without a differential-frame
+or rank hypothesis. [GeometricAffineDerivations.lean](GeometricAffineDerivations.lean)
+uses that fraction rule to prove regularity of the pointwise derivative
+of every actual affine section, on every open. This constructs a
+genuine structure-sheaf derivation with the original restriction maps.
+[GeometricChartTangentMaps.lean](GeometricChartTangentMaps.lean)
+transports it through an actual affine chart and applies the proved
+restricted universal property of the differential sheaf. The result
+is an actual local morphism from the original differential sheaf to
+the original structure sheaf. Its value on an original affine Kähler
+form is the original derivation's contraction.
+
+[GeometricLiteralNativeTangentEvaluation.lean](GeometricLiteralNativeTangentEvaluation.lean)
+binds those chart maps to every actual native degree-zero intersection.
+The chart section map equals the earlier native section equivalence;
+its universal differential lift equals `nativeFormToSheaf`. Consequently
+`nativeKodairaSpencer_evaluate_chern` proves the displayed local
+contraction identity in the original sheaves.
+[GeometricLiteralNativeRestrictionLocalization.lean](GeometricLiteralNativeRestrictionLocalization.lean)
+proves that every further native intersection restriction is the
+actual localization at its standard degree-zero homogeneous fraction.
+The localization theorem for Kähler modules detects equality of linear
+contractions from their values on differentials of the source ring.
+
+[GeometricLiteralNativeTangentNaturality.lean](GeometricLiteralNativeTangentNaturality.lean)
+uses the actual affine-chart derivation uniqueness and restricted
+universal property to detect equality of tangent sections. The
+localization comparison then proves `nativeTangent_restrict`: compatible
+native derivations give the same restricted local tangent morphism on
+all subopens and all differential-sheaf sections.
+[GeometricLiteralNativeKodairaSpencerCocycle.lean](GeometricLiteralNativeKodairaSpencerCocycle.lean)
+applies this to the original native splitting differences. Their
+original restriction and additive identities give `kodairaSpencerOne`,
+an actual tangent-sheaf one-cocycle on the twelve-open cover.
+
+[GeometricLiteralSheafChernKodairaSpencerCup.lean](GeometricLiteralSheafChernKodairaSpencerCup.lean)
+defines `sheafCupValue` by genuine evaluation of these two sheaf-valued
+cocycles on arbitrary common opens. `sheafCupValue_eq_native` identifies
+it with the earlier native scalar cup there. The ordered alternating
+extension uses increasing vertex triples, their six signed extensions,
+and zero repeated vertices. `sheafCupCocycle_eq_native` proves full
+cochain equality. The existing Čech-to-derived map therefore defines
+`sheafCupDerivedClass`; `sheafCupDerivedClass_eq_original` and
+`sheafCupDerivedClass_ne_zero` prove the stated original-class comparison
+and nonvanishing. No alternation of raw evaluation values on arbitrary
+vertex permutations is assumed.
+
+All 563 local development compilation units pass (542 proposal Lean
+modules, 20 shared modules, and the generated target). All 204 helpers
+changed since commit `37537c2` have matching successful independent
+kernel-replay receipts for their current sources and objects. The ten
+new helper endpoint reports use only `propext`, `Classical.choice`, and
+`Quot.sound`.
+
+The checked product is the ordered Čech product followed by its derived
+scalar-class map. An abstract derived-category cup-product comparison,
+the Abel--Jacobi/cylinder comparison, supported geometric variation,
+and the source-specific global de Rham comparison remain further
+obligations. The protected residue-exactness theorem still depends on
+`sorryAx`; protected `solve/lean` verification has not passed.
+
+## Earlier checkpoint: the native scalar cup has the original nonzero global class
 
 **17 November 2026. The protected certificate remains incomplete.**
 The actual native scalar cup now descends to a nonzero class in the
@@ -79,10 +180,11 @@ kernel-replay receipts for their current sources and objects. The seven
 new helper endpoint reports use only `propext`, `Classical.choice`, and
 `Quot.sound`.
 
-The next factor comparison must identify the actual transition dlog and
-native splitting derivations with cocycles of the original projective
-differential and tangent sheaves, then bind their sheaf-cohomology cup
-to this now-checked nonzero native scalar class. The
+At this checkpoint the next comparison was to identify the actual
+transition dlog and native splitting derivations with cocycles of the
+original projective differential and tangent sheaves, then bind their
+ordered Čech evaluation product to this nonzero native scalar class.
+The continuation above proves that comparison. The
 Abel--Jacobi/cylinder comparison, supported geometric variation, and
 source-specific global de Rham comparison also remain open. The
 protected certificate still depends on `sorryAx`; protected `solve/lean`
