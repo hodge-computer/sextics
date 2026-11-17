@@ -11,7 +11,6 @@ with the explicit affine quotient already used in the relative fiber
 calculation. The target remains the existing SpecializedCurveRing and
 specializedCurve, rather than a replacement projective scheme.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -34,6 +33,11 @@ open CycleQ2IncidenceUniversalChart CycleQ2IncidenceImageLine
 
 variable (y : ParameterIndex → ℂ) (t : Fin 3 → ℂ) (i : Fin 4)
 
+local instance pointSurfaceCommRing : CommRing (PointSurface y) := inferInstance
+local instance specializedCurveCommRing : CommRing (SpecializedCurveRing y t) := inferInstance
+local instance coordinateRingCommRing : CommRing (CoordinateRing y i) := inferInstance
+local instance affineCurveChartCommRing : CommRing (AffineCurveChart y t i) := inferInstance
+
 theorem relativeSectionIdeal_eq_specialized :
     relativeSectionIdeal y t = specializedSectionIdeal y t := by
   unfold relativeSectionIdeal specializedSectionIdeal
@@ -44,6 +48,9 @@ theorem relativeSectionIdeal_eq_specialized :
 abbrev SpecializedCoordinateRing :=
   Away (specializedCurveGrade y t)
     (specializedCurveRingMap y t (surfaceQuotient y (X i.castSucc)))
+
+local instance specializedCoordinateCommRing :
+    CommRing (SpecializedCoordinateRing y t i) := inferInstance
 
 instance specializedCoordinateAlgebra : Algebra ℂ (SpecializedCoordinateRing y t i) :=
   ((Away.map (specializedCurveRingMap y t) (surfaceQuotient y (X i.castSucc))).comp
@@ -63,6 +70,7 @@ theorem specializedCoordinateMap_surjective :
   change Away.map (specializedCurveRingMap y t) (surfaceQuotient y (X i.castSucc))
     (Away.mk (surfaceGrade y) (coordinate_mem_grade y i) n a ha) = _
   simp only [Away.map_mk]
+  rfl
 
 theorem specializedCoordinateMap_ker :
     RingHom.ker (specializedCoordinateMap y t i) = normalizedSectionIdeal y t i := by
@@ -79,7 +87,8 @@ def specializedCoordinateQuotientEquiv :
     (CoordinateRing y i ⧸ normalizedSectionIdeal y t i) ≃ₐ[ℂ]
       SpecializedCoordinateRing y t i :=
   (Ideal.quotientEquivAlgOfEq ℂ (specializedCoordinateMap_ker y t i).symm).trans
-    (Ideal.quotientKerAlgEquivOfSurjective (specializedCoordinateMap_surjective y t i))
+    (Ideal.quotientKerAlgEquivOfSurjective (f := specializedCoordinateMap y t i)
+      (specializedCoordinateMap_surjective y t i))
 
 @[simp] theorem specializedCoordinateQuotientEquiv_mk (a : CoordinateRing y i) :
     specializedCoordinateQuotientEquiv y t i
@@ -148,6 +157,7 @@ theorem specializedCoordinateAffineChart_overBase :
         (specializedCurveRingMap y t (surfaceQuotient y (X i.castSucc)))
         ((specializedCurveRingMap y t).2 (coordinate_mem_grade y i)) (by decide)).inv) ≫
       (specializedCoordinatePatch y t i).ι ≫ specializedCurveToBase y t = _
+  dsimp only [specializedCoordinatePatch]
   rw [Category.assoc, Proj.basicOpenIsoSpec_inv_ι_assoc,
     specializedAwayToBase, ← Spec.map_comp]
   apply congrArg Spec.map

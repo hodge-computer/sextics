@@ -12,7 +12,6 @@ chosen. Functoriality transports the equation to every section module of
 the actual associated sheaves. Regularity of the linkage element also
 survives on those section modules.
 
-Source-only draft. No Lean elaboration or kernel replay has been run.
 -/
 
 set_option autoImplicit false
@@ -32,6 +31,14 @@ open CycleQ2SegreFactorSequence CycleQ2SegreLinkageDuality
   CycleQ2SeedImageSheafEmbedding
 
 variable {R : Type u} [CommRing R]
+
+local instance (priority := 10) nativeSectionAlgebra (U : (Spec (CommRingCat.of R)).Opens) :
+    Algebra R Γ(Spec (CommRingCat.of R), U) :=
+  inferInstanceAs (Algebra R ((Spec.structureSheaf R).obj.obj (Opposite.op U)))
+
+local instance (priority := 10) nativeSectionsModule (M : (Spec (CommRingCat.of R)).Modules)
+    (U : (Spec (CommRingCat.of R)).Opens) : Module R Γ(M, U) :=
+  inferInstanceAs (Module R ((modulesSpecToSheaf.obj M).presheaf.obj (Opposite.op U)))
 
 theorem sectionFunctional_balance_linear (F : FactorData R) (t : Fin 3 → R) :
     F.linkage • sectionFunctional F t =
@@ -83,7 +90,7 @@ def idealInclusion (F : FactorData R) :
 
 theorem functionalMap_balance (F : FactorData R) (t : Fin 3 → R) :
     functionalMap F t ≫ scalarMap F.linkage =
-      idealInclusion F ≫ scalarMap (∑ b, t b * F.right b) := by
+      idealInclusion F ≫ scalarMap (R := R) (∑ b, t b * F.right b) := by
   apply ModuleCat.hom_ext
   apply LinearMap.ext
   intro x
@@ -91,36 +98,47 @@ theorem functionalMap_balance (F : FactorData R) (t : Fin 3 → R) :
 
 /-- Balance in the category of actual sheaves on Spec R. -/
 theorem tilde_balance (F : FactorData R) (t : Fin 3 → R) :
-    tilde.map (functionalMap F t) ≫ tilde.map (scalarMap F.linkage) =
-      tilde.map (idealInclusion F) ≫ tilde.map (scalarMap (∑ b, t b * F.right b)) := by
+    tilde.map (R := CommRingCat.of R)
+      (M := ModuleCat.of R F.leftIdeal) (N := ModuleCat.of R R) (functionalMap F t) ≫ tilde.map (R := CommRingCat.of R)
+      (M := ModuleCat.of R R) (N := ModuleCat.of R R) (scalarMap F.linkage) =
+      tilde.map (R := CommRingCat.of R)
+      (M := ModuleCat.of R F.leftIdeal) (N := ModuleCat.of R R) (idealInclusion F) ≫ tilde.map (R := CommRingCat.of R)
+      (M := ModuleCat.of R R) (N := ModuleCat.of R R) (scalarMap (R := R) (∑ b, t b * F.right b)) := by
   rw [← tilde.map_comp, ← tilde.map_comp, functionalMap_balance]
 
 /-- The same identity on every actual open, including nonprincipal opens. -/
 theorem tilde_balance_app (F : FactorData R) (t : Fin 3 → R)
     (U : (Spec (CommRingCat.of R)).Opens)
-    (s : Γ(tilde (ModuleCat.of R F.leftIdeal), U)) :
-    (tilde.map (scalarMap F.linkage)).app U
-        ((tilde.map (functionalMap F t)).app U s) =
-      (tilde.map (scalarMap (∑ b, t b * F.right b))).app U
-        ((tilde.map (idealInclusion F)).app U s) := by
-  exact congrArg (fun f : tilde (ModuleCat.of R F.leftIdeal) ⟶
-    tilde (ModuleCat.of R R) => f.app U s) (tilde_balance F t)
+    (s : Γ(tilde (R := CommRingCat.of R) (ModuleCat.of R F.leftIdeal), U)) :
+    (tilde.map (R := CommRingCat.of R)
+      (M := ModuleCat.of R R) (N := ModuleCat.of R R) (scalarMap F.linkage)).app U
+        ((tilde.map (R := CommRingCat.of R)
+      (M := ModuleCat.of R F.leftIdeal) (N := ModuleCat.of R R) (functionalMap F t)).app U s) =
+      (tilde.map (R := CommRingCat.of R)
+      (M := ModuleCat.of R R) (N := ModuleCat.of R R) (scalarMap (R := R) (∑ b, t b * F.right b))).app U
+        ((tilde.map (R := CommRingCat.of R)
+      (M := ModuleCat.of R F.leftIdeal) (N := ModuleCat.of R R) (idealInclusion F)).app U s) := by
+  exact congrArg (fun f : tilde (R := CommRingCat.of R) (ModuleCat.of R F.leftIdeal) ⟶
+    tilde (R := CommRingCat.of R) (ModuleCat.of R R) => f.app U s) (tilde_balance F t)
 
 /-- Multiplication by the original regular linkage element stays
 injective on every actual associated-sheaf section module. -/
 theorem tilde_linkage_app_injective (F : FactorData R)
     (U : (Spec (CommRingCat.of R)).Opens) :
-    Function.Injective ((tilde.map (scalarMap F.linkage)).app U) :=
-  tilde_map_app_injective (scalarMap F.linkage) F.regular U
+    Function.Injective ((tilde.map (R := CommRingCat.of R)
+      (M := ModuleCat.of R R) (N := ModuleCat.of R R) (scalarMap F.linkage)).app U) :=
+  tilde_map_app_injective (R := CommRingCat.of R)
+    (M := ModuleCat.of R R) (N := ModuleCat.of R R) (scalarMap F.linkage) F.regular U
 
 /-- The associated-sheaf map of multiplication is the canonical scalar
 action on sections. The comparison iso is needed because the two native
 R-module presentations of these sections are not definitionally equal. -/
 theorem tilde_scalarMap_app (a : R)
     (U : (Spec (CommRingCat.of R)).Opens)
-    (s : Γ(tilde (ModuleCat.of R R), U)) :
-    (tilde.map (scalarMap a)).app U s = a • s := by
-  let e := ((tilde.modulesSpecToSheafIso (ModuleCat.of R R)).app
+    (s : Γ(tilde (R := CommRingCat.of R) (ModuleCat.of R R), U)) :
+    (tilde.map (R := CommRingCat.of R)
+      (M := ModuleCat.of R R) (N := ModuleCat.of R R) (scalarMap a)).app U s = a • s := by
+  let e := ((tilde.modulesSpecToSheafIso (R := CommRingCat.of R) (ModuleCat.of R R)).app
     (Opposite.op U)).toLinearEquiv
   apply e.injective
   rw [e.map_smul]
@@ -137,7 +155,7 @@ theorem tilde_scalarMap_app (a : R)
 actual associated-sheaf section module. -/
 theorem tilde_linkage_isSMulRegular (F : FactorData R)
     (U : (Spec (CommRingCat.of R)).Opens) :
-    IsSMulRegular Γ(tilde (ModuleCat.of R R), U) F.linkage := by
+    IsSMulRegular Γ(tilde (R := CommRingCat.of R) (ModuleCat.of R R), U) F.linkage := by
   intro s t h
   apply tilde_linkage_app_injective F U
   simpa only [tilde_scalarMap_app] using h
@@ -146,9 +164,11 @@ theorem tilde_linkage_isSMulRegular (F : FactorData R)
 structure-sheaf multiplication comparison `Scheme.Modules.smul_Spec_def`. -/
 theorem tilde_balance_smul (F : FactorData R) (t : Fin 3 → R)
     (U : (Spec (CommRingCat.of R)).Opens)
-    (s : Γ(tilde (ModuleCat.of R F.leftIdeal), U)) :
-    F.linkage • ((tilde.map (functionalMap F t)).app U s) =
-      (∑ b, t b * F.right b) • ((tilde.map (idealInclusion F)).app U s) := by
+    (s : Γ(tilde (R := CommRingCat.of R) (ModuleCat.of R F.leftIdeal), U)) :
+    F.linkage • ((tilde.map (R := CommRingCat.of R)
+      (M := ModuleCat.of R F.leftIdeal) (N := ModuleCat.of R R) (functionalMap F t)).app U s) =
+      (∑ b, t b * F.right b) • ((tilde.map (R := CommRingCat.of R)
+      (M := ModuleCat.of R F.leftIdeal) (N := ModuleCat.of R R) (idealInclusion F)).app U s) := by
   simpa only [tilde_scalarMap_app] using tilde_balance_app F t U s
 
 /-! ## The same linkage equation in actual projective sections -/

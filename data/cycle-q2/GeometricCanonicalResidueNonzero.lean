@@ -4,7 +4,6 @@ import Proposal.GeometricCanonicalCoordinateCoefficients
 /-!
 # Nonvanishing of the original cubic canonical connecting image
 
-Status: source-only proof draft; verification is deferred at the user's request.
 The detector here is the fixed cubic X₀³ from the original coordinate Laurent
 calculation. It is distinct from the selected cubic used by the incidence
 normal-class computation. The exact negative sign of the retained Cartier
@@ -32,23 +31,30 @@ open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry MvPolynomial
 open CycleQ2SeedTrace CycleQ2CartierSurfaceGrading
   CycleQ2GeometricCartierCech CycleQ2GeometricLaurentTop
   CycleQ2GeometricSurfaceCoordinates CycleQ2GeometricSeedNormalIdeals
+  CycleQ2GeometricCartierNormalLift
   CycleQ2CoordinateCechTrace CycleQ2CanonicalCoordinateH2
   CycleQ2CanonicalCoordinateCoefficients CycleQ2CanonicalCubicDiagram
   CycleQ2CanonicalResidueDiagram CycleQ2ProjectiveCartierDerived
   CycleQ2GeometricIntrinsicCartierCohomology CycleQ2GlobalCubicAdjunctionCohomology
 
+private abbrev WeightedCubic := CycleQ2CanonicalCoordinateH2.WeightedCubic
+private abbrev CanonicalSheaf := CycleQ2CanonicalCoordinateH2.CanonicalSheaf
+private abbrev CoordinateOpen := CycleQ2CanonicalCoordinateH2.CoordinateOpen
+private abbrev TripleOpen := CycleQ2CanonicalCoordinateH2.TripleOpen
+
 local instance surfaceHasExt :
     HasExt.{1} (Sheaf
-      (Opens.grothendieckTopology CycleQ2CanonicalCoordinateH2.Surface)
-      AddCommGrpCat.{0}) := HasExt.standard _
+      (Opens.grothendieckTopology (show TopCat from CycleQ2CanonicalCoordinateH2.Surface))
+      AddCommGrpCat.{0}) := CycleQ2CoordinateTopDescent.coordinateSurfaceHasExt 57 1
 
 /-- The original algebraic detector, with its proved weighted degree. -/
 def detectorWeightedCubic : WeightedCubic :=
   ⟨detectorCubic, by
+    change detectorCubic.IsWeightedHomogeneous weight 3
     have hX : (X (0 : Fin 5) : WeightedPoly).IsWeightedHomogeneous weight 1 := by
-      simpa only [weight_castSucc] using
-        isWeightedHomogeneous_X ℂ weight (0 : Fin 4).castSucc
-    simpa only [detectorCubic] using hX.pow 3⟩
+      change (X (0 : Fin 5) : WeightedPoly).IsWeightedHomogeneous weight (weight 0)
+      exact isWeightedHomogeneous_X ℂ weight (0 : Fin 5)
+    simpa only [detectorCubic, nsmul_eq_mul, Nat.cast_id, mul_one] using hX.pow 3⟩
 
 /-- The coefficient fixed in the original coordinate trace annihilates
 every ordinary pair-boundary, with arbitrary localization pole orders. -/
@@ -126,8 +132,22 @@ theorem detector_cubicH2_ne_zero :
   rw [canonicalCoefficient_cubicTripleSection] at ht
   have ht' : -(localCoefficient 57 Finset.univ (2,2) (fun _ => -1)
       (surfaceQuotient 57 1 detectorCubic • q.val)) = 0 := by
-    simpa only [detectorWeightedCubic, HomogeneousLocalization.val_neg, smul_neg,
-      map_neg] using ht
+    simp only [detectorWeightedCubic, HomogeneousLocalization.val_neg] at ht
+    have hn : surfaceQuotient 57 1 detectorCubic • (-q.val) =
+        -(surfaceQuotient 57 1 detectorCubic • q.val) := by
+      calc
+        _ = algebraMap (SurfaceRing 57 1) (CoordinateLocal 57 1 Finset.univ)
+            (surfaceQuotient 57 1 detectorCubic) * (-q.val) :=
+          Algebra.smul_def (surfaceQuotient 57 1 detectorCubic) (-q.val)
+        _ = -(algebraMap (SurfaceRing 57 1) (CoordinateLocal 57 1 Finset.univ)
+            (surfaceQuotient 57 1 detectorCubic) * q.val) := mul_neg _ _
+        _ = -(surfaceQuotient 57 1 detectorCubic • q.val) :=
+          congrArg (fun z : CoordinateLocal 57 1 Finset.univ => -z)
+            (Algebra.smul_def (surfaceQuotient 57 1 detectorCubic) q.val).symm
+    have htrace := (congrArg (localCoefficient 57 Finset.univ (2,2) (fun _ => -1)) hn).trans
+      (_root_.map_neg (localCoefficient 57 Finset.univ (2,2) (fun _ => -1))
+        (surfaceQuotient 57 1 detectorCubic • q.val))
+    exact htrace.symm.trans ht
   exact hcoefficient (neg_eq_zero.mp ht')
 
 /-- The original Cartier/canonical diagram now has a proved nonzero

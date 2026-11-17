@@ -8,7 +8,6 @@ units. The target algebra is arbitrary; only the original matrix entries
 must span the unit ideal there. A maximal-ideal quotient selects a unit
 pivot, where the existing projective equation would be both zero and a unit.
 
-Source-only draft. Not elaborated, compiled, or kernel-replayed.
 Prepared for fqlx with OpenAI ChatGPT assistance, 15 November 2026.
 -/
 
@@ -60,7 +59,7 @@ theorem row_span_of_isEmpty [IsEmpty (specializedCurve y t)]
       rintro _ ⟨p, rfl⟩
       exact hall p
     have htop : (⊤ : Ideal R) ≤ m := hentries ▸ hspan
-    exact (inferInstance : m.IsPrime).one_not_mem (htop (show (1 : R) ∈ (⊤ : Ideal R) from
+    exact (inferInstance : m.IsPrime).one_notMem (htop (show (1 : R) ∈ (⊤ : Ideal R) from
       Submodule.mem_top))
   obtain ⟨p, hp⟩ := hpivot
   let g : PointSurface y →ₐ[ℂ] (R ⧸ m) := (Ideal.Quotient.mkₐ ℂ m).comp f

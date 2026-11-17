@@ -18,8 +18,6 @@ cubic maps to multiplication by that same polynomial in the original
 coordinate ring. These are representative-level statements; no inverse,
 Laurent range, abstract trace, or extension hypothesis is needed.
 
-Status: source-only proof draft. Compilation and independent kernel replay
-are deferred at the user's request. No new axioms or admissions are used.
 -/
 
 set_option autoImplicit false
@@ -33,6 +31,7 @@ namespace CycleQ2CanonicalCoordinateCoefficients
 
 open CategoryTheory Opposite AlgebraicGeometry MvPolynomial
 open CycleQ2GeometricSurfaceCoordinates CycleQ2CartierSurfaceGrading
+  CycleQ2GeometricCartierNormalLift
   CycleQ2CartierProjectiveCover CycleQ2GeometricSeedNormalIdeals
   CycleQ2ProjectiveCoordinateCohomology CycleQ2ProjectiveCoordinateH2
   CycleQ2SurfaceSectionCoefficients CycleQ2SurfaceCoordinateSections
@@ -79,7 +78,8 @@ theorem coefficientInChart_independent (s : Finset (Fin 3)) (hs : s.Nonempty)
       algebraMap (SurfaceRing 57 1) (CoordinateLocal 57 1 s) ((coordinateElement 57 1 j)^3) := by
     have h := sectionCoefficient_homogeneous 57 1 hs i hi 3
       (coordinateCube j).val (coordinateCube j).property
-    simpa only [ratio, coordinateCube, map_pow, coordinateElement_eq] using h
+    simpa only [ratio, coordinateCube, map_pow, coordinateElement_eq,
+      CycleQ2FullSurfaceJacobianCover.projectiveIndex, chartIndex] using h
   have htransition := congrArg (sectionCoefficient 57 1 s hs)
     (coordinateExteriorFrame_transition i j (coordinateIntersection 57 1 s)
       (intersection_le_chart 57 1 i hi) (intersection_le_chart 57 1 j hj) ω)
@@ -119,9 +119,9 @@ theorem coefficientInChart_restrict {s t : Finset (Fin 3)}
       sectionCoefficient 57 1 t ht
         ((coordinateExteriorFrame i).app _ (intersection_le_chart 57 1 i (hst hi))
           (CanonicalForms.val.map (homOfLE (coordinateIntersection_mono 57 1 hst)).op ω)) = _
-  rw [← (coordinateExteriorFrame i).naturality
-    (coordinateIntersection_mono 57 1 hst) (intersection_le_chart 57 1 i hi) ω,
-    sectionCoefficient_restrict]
+  erw [← (coordinateExteriorFrame i).naturality
+    (coordinateIntersection_mono 57 1 hst) (intersection_le_chart 57 1 i hi) ω]
+  erw [sectionCoefficient_restrict]
   change _ = CycleQ2GeometricSurfaceCoordinates.coordinateRestriction 57 1 hst
     ((orientation i : CoordinateLocal 57 1 s) *
       algebraMap (SurfaceRing 57 1) (CoordinateLocal 57 1 s) ((coordinateElement 57 1 i)^3) *
@@ -186,7 +186,18 @@ theorem coefficientInChart_cubic_smul (s : Finset (Fin 3)) (hs : s.Nonempty)
         ((coordinateExteriorFrame i).app _ (intersection_le_chart 57 1 i hi)
           (a • CanonicalForms.val.map (homOfLE (show coordinateIntersection 57 1 s ≤ ⊤ from le_top)).op
             (CycleQ2GlobalSurfaceCubics.globalCubicSection p))) = _
-  rw [map_smul, coordinateExteriorFrame_globalCubic, smul_eq_mul]
+  have hf := coordinateExteriorFrame_globalCubic p i (coordinateIntersection 57 1 s)
+    (intersection_le_chart 57 1 i hi)
+  change (coordinateExteriorFrame i).app (coordinateIntersection 57 1 s)
+      (intersection_le_chart 57 1 i hi)
+      (CanonicalForms.val.map (homOfLE le_top).op
+        (CycleQ2GlobalSurfaceCubics.globalCubicSection p)) =
+    (orientation i : Γ(Surface, coordinateIntersection 57 1 s)) *
+      coordinatePolynomialSection 57 1 (chartIndex i) (coordinateIntersection 57 1 s)
+        (intersection_le_chart 57 1 i hi) p.val at hf
+  rw [map_smul]
+  erw [hf]
+  rw [smul_eq_mul]
   simp only [map_mul, map_intCast]
   calc
     _ = sectionCoefficient 57 1 s hs a *
@@ -264,11 +275,13 @@ theorem canonicalCoefficient_boundary
     (inf_le_inf (inf_le_left : CoordinateOpen 0 ⊓ CoordinateOpen 2 ≤ CoordinateOpen 0)
       (inf_le_left : CoordinateOpen 1 ⊓ CoordinateOpen 2 ≤ CoordinateOpen 1)) a
   change canonicalCoefficient
-    (CanonicalForms.val.map (homOfLE inf_le_right).op c -
-      CanonicalForms.val.map (homOfLE inf_le_left).op b +
-      CanonicalForms.val.map (homOfLE
+    ((show CanonicalSheaf.obj.obj (op TripleOpen) from
+        CanonicalForms.val.map (homOfLE inf_le_right).op c) -
+      (show CanonicalSheaf.obj.obj (op TripleOpen) from
+        CanonicalForms.val.map (homOfLE inf_le_left).op b) +
+      (show CanonicalSheaf.obj.obj (op TripleOpen) from CanonicalForms.val.map (homOfLE
         (inf_le_inf (inf_le_left : CoordinateOpen 0 ⊓ CoordinateOpen 2 ≤ CoordinateOpen 0)
-          (inf_le_left : CoordinateOpen 1 ⊓ CoordinateOpen 2 ≤ CoordinateOpen 1))).op a) = _
+          (inf_le_left : CoordinateOpen 1 ⊓ CoordinateOpen 2 ≤ CoordinateOpen 1))).op a)) = _
   rw [map_add, map_sub]
   exact congrArg₂ (· + ·) (congrArg₂ (· - ·) h12 h02) h01
 
@@ -290,8 +303,8 @@ theorem canonicalCoefficient_cubicTripleSection (p : WeightedCubic)
       (coordinateIntersection_univ 57 1).symm
       (sectionsAt 57 1 Finset.univ (by simp) TripleOpen
         (coordinateIntersection_univ 57 1).symm q) * _ = _
-  rw [sectionCoefficientAt_sectionsAt, Algebra.smul_def]
-  exact mul_comm _ _
+  rw [sectionCoefficientAt_sectionsAt]
+  exact (mul_comm _ _).trans (Algebra.smul_def (surfaceQuotient 57 1 p.val) q.val).symm
 
 #print axioms canonicalCoefficient_boundary
 #print axioms canonicalCoefficient_cubicTripleSection

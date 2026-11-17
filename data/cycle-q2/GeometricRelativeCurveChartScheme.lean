@@ -9,7 +9,6 @@ structure morphism is the original closed immersion followed by the
 original surface structure morphism. Its affine expression is proved
 to be the canonical coefficient map of the displayed chart quotient.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -24,12 +23,17 @@ noncomputable section
 namespace CycleQ2RelativeCurveChartScheme
 
 open CategoryTheory AlgebraicGeometry MvPolynomial
-open CycleQ2IncidenceUniversalChart CycleQ2GeometricIncidenceProj
+open CycleQ2IncidenceUniversalChart CycleQ2IncidenceImageLine CycleQ2GeometricIncidenceProj
   CycleQ2IncidenceDehomogenizedChart CycleQ2RelativeConstantCurve
   CycleQ2RelativeCurveChart
 
 variable {S : Type} [CommRing S] [Algebra ℂ S]
 variable (y : ParameterIndex → S) (t : Fin 3 → ℂ) (i : Fin 4)
+
+local instance relativeCurveCommRing :
+    CommRing (CycleQ2RelativeConstantSection.RelativeCurveRing y t) := inferInstance
+local instance curveCoordinateCommRing : CommRing (CurveCoordinateRing y t i) := inferInstance
+local instance affineCurveChartCommRing : CommRing (AffineCurveChart y t i) := inferInstance
 
 def curveCoordinatePatch : (relativeCurve y t).Opens :=
   Proj.basicOpen (relativeCurveGrade y t)
@@ -60,7 +64,8 @@ theorem curveAwayToBase :
         (relativeCurveRingMap y t (surfaceQuotient y (X i.castSucc)))
         ((relativeCurveRingMap y t).2 (coordinate_mem_grade y i)) (by decide) ≫
       relativeCurveToBase y t =
-        Spec.map (CommRingCat.ofHom (algebraMap S (CurveCoordinateRing y t i))) := by
+        Spec.map (CommRingCat.ofHom (R := S) (S := CurveCoordinateRing y t i)
+          (algebraMap S (CurveCoordinateRing y t i))) := by
   rw [relativeCurveToBase, relativeCurveToSurface, ← Category.assoc]
   have hcomm := Proj.awayι_comp_map (relativeCurveRingMap y t)
     (irrelevant_le_map_relativeCurveRingMap y t) (by decide : 0 < (1 : ℕ))
@@ -73,12 +78,14 @@ including its canonical coefficient map. -/
 theorem curveCoordinateAffineChart_overBase :
     (curveCoordinateAffineChart y t i).inv ≫
         (curveCoordinatePatch y t i).ι ≫ relativeCurveToBase y t =
-      Spec.map (CommRingCat.ofHom (algebraMap S (AffineCurveChart y t i))) := by
+      Spec.map (CommRingCat.ofHom (R := S) (S := AffineCurveChart y t i)
+        (algebraMap S (AffineCurveChart y t i))) := by
   change (Spec.map (CommRingCat.ofHom (curveCoordinateChartEquiv y t i).toRingHom) ≫
       (Proj.basicOpenIsoSpec (relativeCurveGrade y t)
         (relativeCurveRingMap y t (surfaceQuotient y (X i.castSucc)))
         ((relativeCurveRingMap y t).2 (coordinate_mem_grade y i)) (by decide)).inv) ≫
       (curveCoordinatePatch y t i).ι ≫ relativeCurveToBase y t = _
+  dsimp only [curveCoordinatePatch]
   rw [Category.assoc, Proj.basicOpenIsoSpec_inv_ι_assoc,
     curveAwayToBase, ← Spec.map_comp]
   apply congrArg Spec.map
