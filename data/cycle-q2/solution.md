@@ -106,17 +106,33 @@ charts cover all of \(\operatorname{Proj}E\). The theorem
 commutes with the original structure morphisms to
 \(\operatorname{Spec}\mathbb C\), by the actual affine chart squares.
 
-The current local development build checks all 524 compilation units
-(503 proposal Lean modules, 20 shared modules, and the generated target).
-The nine new helper endpoint reports use only `propext`,
-`Classical.choice`, and `Quot.sound`. All 165 helpers changed since
+[GeometricLiteralProjectiveDualFamily.lean](GeometricLiteralProjectiveDualFamily.lean)
+binds the original degree-zero epsilon to the actual dual-number base
+\(\mathbb C[\epsilon]/(\epsilon^2)\). The map on every native chart
+sends the base epsilon to the original `chartEpsilon`. Its already
+proved annihilator/kernel identity supplies the exact epsilon condition
+in `CycleQ2DualNumberFlatness.flat_of_eps_smul`, proving actual module
+flatness of every chart ring. The proved twelve-open cover then gives
+`firstOrderStructure_flat` for the actual morphism
+\[
+ \operatorname{Proj}E\longrightarrow
+ \operatorname{Spec}\bigl(\mathbb C[\epsilon]/(\epsilon^2)\bigr).
+\]
+The theorem `firstOrderStructure_overComplex` proves that forgetting the
+epsilon parameter recovers the same complex structure morphism. This
+uses the original ambient perturbation throughout.
+
+The current local development build checks all 525 compilation units
+(504 proposal Lean modules, 20 shared modules, and the generated target).
+The ten new helper endpoint reports use only `propext`,
+`Classical.choice`, and `Quot.sound`. All 166 helpers changed since
 commit `37537c2` have matching successful independent kernel-replay
 receipts for their current sources and objects.
 
 The native chart splittings now preserve the actual complex coefficients.
 Their compatibility on all intersections, together with the normalized
-inverse-ideal frame gauges, remains necessary for identifying the earlier projected scalar cup with the
-actual projective Chern/Kodaira--Spencer contraction. The derived scalar
+inverse-ideal frame gauges, remains necessary for identifying the earlier projected scalar cup
+with the actual projective Chern/Kodaira--Spencer contraction. The derived scalar
 class equality established below does not by itself identify those
 factors. The Abel--Jacobi/cylinder comparison, supported geometric
 variation, and source-specific global de Rham comparison remain open.
