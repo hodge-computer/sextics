@@ -1,6 +1,112 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Checked continuation: the correction coboundary and its projective image
+## Checked continuation: the actual graded projective deformation
+
+**17 November 2026. The protected certificate remains incomplete.**
+The original independent ambient-test deformation now has an actual
+weighted graded presentation. Its projectivization, closed-fibre map,
+twelve native chart reductions, faithful epsilon kernels, and projected
+ring splittings are constructed and checked. The exact instance,
+manifest, and `Submission.missing_geometric_existence` remain unchanged.
+
+[GeometricLiteralGradedDeformation.lean](GeometricLiteralGradedDeformation.lean)
+constructs the specific graded complex algebra
+\[
+ E=\mathbb C[x_0,x_1,x_2,x_3,x_4,\epsilon]/
+   (h_1,F_{57,1}-\epsilon B^*,\epsilon^2).
+\]
+The five original coordinate weights are \((1,1,1,1,2)\), and
+\(\epsilon\) has weight zero. The actual three relations are
+homogeneous, of degrees \(3,6,0\). Here \(B^*\) is the original
+`derivativeA`, and \(F_{57,1}\) is the original literal complex
+`actualSeedEquation 57 1`.
+[GeometricLiteralGradedDeformationEquiv.lean](GeometricLiteralGradedDeformationEquiv.lean)
+constructs inverse complex-algebra maps between this quotient and the
+already defined original `ThickBase`. They preserve every original
+polynomial coordinate and the original epsilon element.
+
+[GeometricLiteralGradedReduction.lean](GeometricLiteralGradedReduction.lean)
+constructs the actual graded reduction \(\rho:E\to C\), where
+\(C\) is the unchanged `SurfaceRing 57 1`. It agrees with the original
+reduction through the fixed-coordinate equivalence and is surjective
+on every homogeneous component. Transport of the already proved
+regular-equation calculation gives a faithful map
+\(\eta:C\to E\), preserving degree, with
+\[
+ \ker\rho=\eta(C)=(\epsilon),\qquad
+ \eta(\rho(z)x)=z\eta(x),\qquad
+ \eta(\rho(z))=\epsilon z.
+\]
+In particular \(\epsilon z=0\) if and only if \(\rho(z)=0\),
+and the actual kernel is square zero.
+
+[GeometricLiteralProjectiveDeformation.lean](GeometricLiteralProjectiveDeformation.lean)
+constructs \(\operatorname{Proj}E\). The actual graded reduction
+induces a closed immersion of the original projective surface into
+this scheme. On the existing twelve Cartier-by-coordinate opens,
+indexed by \((a,l)\in\{0,1,2,3\}\times\{0,1,2\}\), the deformed
+denominator is the original lifted Cartier polynomial multiplied by
+\(x_{l+1}\). Its reduction is exactly the existing
+`refinedDenominator 57 1 a l`. The induced maps on homogeneous
+localizations target the exact existing `RefinedRing` types, are
+surjective, and commute with the actual affine Proj chart maps.
+
+[GeometricLiteralProjectiveKernel.lean](GeometricLiteralProjectiveKernel.lean)
+identifies the kernel of each of those native chart reductions. If
+\(E_{(a,l)}\to C_{(a,l)}\) denotes that map and
+\(\epsilon_{a,l}\) the original degree-zero epsilon, then
+\[
+ \ker\rho_{a,l}=(\epsilon_{a,l}),\qquad
+ \operatorname{Ann}(\epsilon_{a,l})=\ker\rho_{a,l},\qquad
+ C_{(a,l)}\simeq_{E_{(a,l)}}\ker\rho_{a,l}.
+\]
+The coefficient equivalence uses the original reduced multiplication
+action. Both kernel calculations retain possible localization torsion;
+no regularity of the chart denominator is assumed.
+
+[GeometricLiteralProjectiveProjection.lean](GeometricLiteralProjectiveProjection.lean)
+proves that the ordinary localized reduction and native chart reduction
+commute with their genuine degree-zero projections. It also identifies
+the ordinary localized kernel as the original square-zero epsilon ideal.
+For an ordinary lift \(z\) of a native degree-zero function,
+\(z-\pi_E(z)\) lies in that kernel. The product of two such remainders
+is zero, while the projection is linear over native homogeneous
+fractions. These identities prove multiplicativity of \(\pi_E\) on
+these lifts.
+
+[GeometricLiteralProjectiveSplittings.lean](GeometricLiteralProjectiveSplittings.lean)
+retains each previously chosen singleton cone splitting. Its deformed
+side is transported through the original fixed-coordinate equivalence
+and then localized at the additional coordinate. Units lift because the
+actual reduction is surjective with square-zero kernel, so this extends
+to an ordinary splitting \(\sigma_{a,l}\). The formula
+\[
+ \sigma^0_{a,l}(f)=\pi_E\bigl(\sigma_{a,l}(f)\bigr),
+ \qquad f\in C_{(a,l)},
+\]
+defines a ring homomorphism into the actual native deformation chart,
+and `projectiveSplitting_reduction` proves
+\(\rho_{a,l}\sigma^0_{a,l}=\operatorname{id}\).
+
+The current local development build checks all 522 compilation units
+(501 proposal Lean modules, 20 shared modules, and the generated target).
+The seven new helper endpoint reports use only `propext`,
+`Classical.choice`, and `Quot.sound`. All 163 helpers changed since
+commit `37537c2` have matching successful independent kernel-replay
+receipts for their current sources and objects.
+
+The chart splittings above are proved as ring homomorphisms. Their
+complex-algebra comparison and compatibility on all intersections,
+together with the normalized inverse-ideal frame gauges, are the next
+obligations for identifying the earlier projected scalar cup with the
+actual projective Chern/Kodaira--Spencer contraction. The derived scalar
+class equality established below does not by itself identify those
+factors. The Abel--Jacobi/cylinder comparison, supported geometric
+variation, and source-specific global de Rham comparison remain open.
+The unchanged protected certificate still depends on `sorryAx`;
+protected `solve/lean` verification has not passed.
+
+## Earlier checkpoint: the correction coboundary and its projective image
 
 **17 November 2026. The protected certificate remains incomplete.**
 The correction-cochain assembly is now proved on the original Cartier
