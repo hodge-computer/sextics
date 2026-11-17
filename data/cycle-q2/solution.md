@@ -1,6 +1,121 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Checked continuation: the actual graded projective deformation
+## Checked continuation: native splitting differences on all chart intersections
+
+**17 November 2026. The protected certificate remains incomplete.**
+The original projective splittings now extend compatibly to every finite
+intersection of the twelve actual Cartier-by-coordinate charts. Their
+faithfully normalized differences are complex derivations of the genuine
+native projective intersection rings. Reduction, epsilon coefficients,
+and the chosen splittings commute with the actual restrictions. The exact
+instance, manifest, and `Submission.missing_geometric_existence` remain
+unchanged.
+
+Write a vertex as \(v=(a,l)\in\operatorname{Fin}(4)\times
+\operatorname{Fin}(3)\), and let \(q_v\) be the already constructed
+original deformed chart denominator. For a finite set \(S\) of vertices,
+[GeometricLiteralProjectiveIntersections.lean](GeometricLiteralProjectiveIntersections.lean)
+uses the actual product
+\[
+ Q_S=\prod_{v\in S}q_v,\qquad
+ \deg Q_S=\sum_{(a,l)\in S}(\operatorname{coverDegree}(a)+1).
+\]
+Its reduction is exactly the product of the original closed denominators.
+The two native rings are the degree-zero homogeneous localizations of
+those original rings at those products. Their basic opens are proved
+equal to the actual intersections of the original chart opens. On every
+nonempty finite set the product has positive degree. The actual original
+graded reduction gives a surjective map between the native rings and its
+affine square commutes with the original closed-fibre morphism.
+
+[GeometricLiteralProjectiveIntersectionKernel.lean](GeometricLiteralProjectiveIntersectionKernel.lean)
+proves, for each of these actual reductions \(\rho_S:E_{(Q_S)}\to
+C_{(\bar Q_S)}\),
+\[
+ \ker\rho_S=(\epsilon_S),\qquad
+ \operatorname{Ann}(\epsilon_S)=\ker\rho_S,\qquad
+ C_{(\bar Q_S)}\simeq_{E_{(Q_S)}}\ker\rho_S.
+\]
+The coefficient map retains the genuine reduced scalar action and all
+possible localization torsion. No regularity of these denominators is
+assumed.
+[GeometricLiteralProjectiveIntersectionProjection.lean](GeometricLiteralProjectiveIntersectionProjection.lean)
+proves that the corresponding ordinary reduction commutes with the actual
+degree-zero projections. Its ordinary kernel is the same original
+square-zero epsilon ideal. Projection is consequently multiplicative on
+lifts of native functions, using the already proved homogeneous-fraction
+linearity.
+
+[GeometricLiteralProjectiveIntersectionRestrictions.lean](GeometricLiteralProjectiveIntersectionRestrictions.lean)
+constructs the actual ordinary and native restriction maps whenever
+\(S\subseteq T\), from the original factorization
+\(Q_T=Q_SQ_{T\setminus S}\). Reduction, both degree-zero projections,
+and the faithful epsilon coefficient maps commute with those
+restrictions. Composition is proved. The native rings are identified
+with the actual scheme section rings on the finite intersection opens,
+and `thickSectionsEquiv_restrict` and `closedSectionsEquiv_restrict`
+prove that their maps are the genuine structure-sheaf restrictions.
+
+A Cartier index \(a\) is admissible for \(S\) when some \((a,l)\)
+belongs to \(S\).
+[GeometricLiteralProjectiveIntersectionSplittings.lean](GeometricLiteralProjectiveIntersectionSplittings.lean)
+extends the same already chosen original singleton \(\sigma_a\) to the
+ordinary product localization, then projects on native inputs.
+`ordinarySplitting_restrict` is proved first by uniqueness of ordinary
+localization extensions. Degree-zero naturality then proves
+`projectiveSplitting_restrict`. The coordinate witness in admissibility
+does not change the chosen singleton map.
+
+[GeometricLiteralProjectiveIntersectionComplex.lean](GeometricLiteralProjectiveIntersectionComplex.lean)
+binds the coefficients to the actual complex structure morphisms on
+both projective schemes. The native reductions, restrictions, and
+splittings preserve those coefficients, so the section and restriction
+identities hold for genuine complex-algebra maps. The reduced scalar
+action is fixed explicitly in the compatible scalar tower.
+[GeometricLiteralProjectiveVertexRestrictions.lean](GeometricLiteralProjectiveVertexRestrictions.lean)
+compares these maps with the exact previously constructed twelve chart
+rings and splittings. `epsilonCoefficient_vertex` preserves the original
+faithful epsilon normalization, and `projectiveSplitting_vertex` proves
+that restriction of the old native chart splitting is the same new
+common-intersection map.
+
+[GeometricLiteralNativeKodairaSpencer.lean](GeometricLiteralNativeKodairaSpencer.lean)
+constructs on every admissible intersection the genuine complex derivation
+\[
+ \kappa_{ab,S}(f)
+ =\operatorname{coeff}_{\epsilon}
+   \bigl(\sigma_{b,S}(f)-\sigma_{a,S}(f)\bigr).
+\]
+The theorem `epsilon_kodairaSpencer` binds it to this actual difference.
+`kodairaSpencer_restrict` proves compatibility with the native structure
+restrictions, and `kodairaSpencer_trans` proves the cocycle identity
+\[
+ \kappa_{ac,S}=\kappa_{ab,S}+\kappa_{bc,S}.
+\]
+`vertexKodairaSpencer_sameCartier` proves that two different coordinate
+charts with the same original Cartier index give zero splitting
+difference. The actual contraction with universal logarithmic
+differentials is also computed in the native complex differential module.
+
+All 533 local development compilation units pass (512 proposal Lean
+modules, 20 shared modules, and the generated target). All 174 helpers
+changed since commit `37537c2` have matching successful independent
+kernel-replay receipts for their current sources and objects. The eight
+new helper endpoint reports use only `propext`, `Classical.choice`, and
+`Quot.sound`.
+
+The next comparison must bind the normalized transition units to the
+actual inverse-ideal frames, then identify these native derivations and
+logarithmic differentials through the genuine differential-sheaf maps.
+The frame-normalization correction must be retained on mixed-coordinate
+triples, including repeated original Cartier indices. These steps are
+needed to identify the native Chern/Kodaira--Spencer cup with the earlier
+projected scalar cup class. The Abel--Jacobi/cylinder comparison,
+supported geometric variation, and source-specific global de Rham
+comparison also remain open. The protected certificate still depends on
+`sorryAx`; protected `solve/lean` verification has not passed.
+
+## Earlier checkpoint: the actual graded projective deformation
 
 **17 November 2026. The protected certificate remains incomplete.**
 The original independent ambient-test deformation now has an actual
