@@ -14,7 +14,6 @@ unit. Consequently the two literal ideal inclusions have the same range
 on every common projective subopen. Together with their injectivity this
 provides the unique overlap transport needed for the fixed twisted source.
 
-Source-only draft: no Lean elaboration or kernel replay was run.
 Prepared for fqlx with OpenAI ChatGPT assistance; see solution.md.
 -/
 
@@ -33,6 +32,9 @@ open CycleQ2SegreFactorSequence CycleQ2SegreLinkageDuality
   CycleQ2GeometricSurfaceDehomogenizedCharts CycleQ2SeedSectionBalance
   CycleQ2SeedSectionSheaf CycleQ2SeedSectionSheafSections
   CycleQ2SeedSectionSheafEvaluation CycleQ2SeedSectionSheafMono
+
+attribute [local instance] CycleQ2SeedSectionSheafSections.patchSectionsCommRing
+  CycleQ2SeedSectionSheaf.ringCatSectionsCommRing
 
 section Frame
 
@@ -59,6 +61,20 @@ theorem leftGeneratorMap_inclusion (F : FactorData R) (a : Fin 3) :
   change r * F.left a = F.left a * r
   exact mul_comm _ _
 
+theorem tilde_leftGeneratorMap_inclusion (F : FactorData R) (a : Fin 3) :
+    tilde.map (R := CommRingCat.of R)
+        (M := ModuleCat.of R R) (N := ModuleCat.of R F.leftIdeal) (leftGeneratorMap F a) ≫
+      tilde.map (R := CommRingCat.of R)
+        (M := ModuleCat.of R F.leftIdeal) (N := ModuleCat.of R R) (idealInclusion F) =
+      tilde.map (R := CommRingCat.of R)
+        (M := ModuleCat.of R R) (N := ModuleCat.of R R) (scalarMap (F.left a)) := by
+  exact (tilde.map_comp (R := CommRingCat.of R)
+    (M := ModuleCat.of R R) (N := ModuleCat.of R F.leftIdeal) (P := ModuleCat.of R R)
+    (leftGeneratorMap F a) (idealInclusion F)).symm.trans
+      (congrArg (fun f : ModuleCat.of R R ⟶ ModuleCat.of R R =>
+        tilde.map (R := CommRingCat.of R) (M := ModuleCat.of R R) (N := ModuleCat.of R R) f)
+        (leftGeneratorMap_inclusion F a))
+
 /-- Reconstruction is an equality of the original inclusion morphisms. -/
 theorem idealInclusion_frame (F : FactorData R) :
     idealInclusion F =
@@ -75,13 +91,33 @@ theorem idealInclusion_frame (F : FactorData R) :
   intro q _
   exact mul_comm _ _
 
+local instance tilde_additive : (tilde.functor (CommRingCat.of R)).Additive where
+  map_add := by
+    intro M N f g
+    exact tilde.map_add (R := CommRingCat.of R) (M := M) (N := N) f g
+
 theorem tilde_idealInclusion_frame (F : FactorData R) :
-    tilde.map (idealInclusion F) =
+    tilde.map (R := CommRingCat.of R)
+      (M := ModuleCat.of R F.leftIdeal) (N := ModuleCat.of R R) (idealInclusion F) =
       ∑ q : Fin 3 × Fin 3,
-        tilde.map (frameMap F q) ≫ tilde.map (scalarMap (F.left q.1)) := by
+        tilde.map (R := CommRingCat.of R)
+          (M := ModuleCat.of R F.leftIdeal) (N := ModuleCat.of R R) (frameMap F q) ≫
+        tilde.map (R := CommRingCat.of R)
+          (M := ModuleCat.of R R) (N := ModuleCat.of R R) (scalarMap (F.left q.1)) := by
   have h := congrArg (tilde.functor (CommRingCat.of R)).map (idealInclusion_frame F)
   rw [Functor.map_sum] at h
-  simpa only [tilde.functor, tilde.map_comp] using h
+  have hc (q : Fin 3 × Fin 3) :
+      tilde.map (R := CommRingCat.of R)
+          (M := ModuleCat.of R F.leftIdeal) (N := ModuleCat.of R R)
+          (frameMap F q ≫ scalarMap (F.left q.1)) =
+        tilde.map (R := CommRingCat.of R)
+            (M := ModuleCat.of R F.leftIdeal) (N := ModuleCat.of R R) (frameMap F q) ≫
+          tilde.map (R := CommRingCat.of R)
+            (M := ModuleCat.of R R) (N := ModuleCat.of R R) (scalarMap (F.left q.1)) :=
+    tilde.map_comp (R := CommRingCat.of R)
+      (M := ModuleCat.of R F.leftIdeal) (N := ModuleCat.of R R) (P := ModuleCat.of R R)
+      (frameMap F q) (scalarMap (F.left q.1))
+  simpa only [tilde.functor, hc] using h
 
 end Frame
 
@@ -97,28 +133,70 @@ private theorem restrict_additive {X Y : Scheme.{0}} (f : X ⟶ Y)
 def chartFrameCoefficient (i : Fin 3) (q : Fin 3 × Fin 3) :
     chartIdeal i ⟶ structureModule (Patch i).toScheme :=
   (Scheme.Modules.restrictFunctor (coordinateAffineChart 57 1 i.succ).hom).map
-      (tilde.map (frameMap (chartFactorData i) q)) ≫
+      (tilde.map (R := CommRingCat.of (AffineRing i))
+        (M := ModuleCat.of (AffineRing i) (OrbitIdeal i))
+        (N := ModuleCat.of (AffineRing i) (AffineRing i)) (frameMap (chartFactorData i) q)) ≫
     (Scheme.Modules.restrictUnitIso (coordinateAffineChart 57 1 i.succ).hom).hom
 
 def patchFrameCoefficient (i : Fin 3) (q : Fin 3 × Fin 3) :
     idealPatch i ⟶ patchStructure (Patch i) :=
   (Scheme.Modules.pushforward (Patch i).ι).map (chartFrameCoefficient i q)
 
+private theorem transportFrame {C D : Type*} [Category C] [Category D]
+    [Preadditive C] [Preadditive D] (T : C ⥤ D) [T.Additive]
+    {I R : C} {O : D} {ι : Type*} [Fintype ι]
+    (j : I ⟶ R) (c : ι → (I ⟶ R)) (L : ι → (R ⟶ R))
+    (u : T.obj R ⟶ O) (l : ι → (O ⟶ O))
+    (hj : j = ∑ q, c q ≫ L q)
+    (hL : ∀ q, T.map (L q) ≫ u = u ≫ l q) :
+    T.map j ≫ u = ∑ q, (T.map (c q) ≫ u) ≫ l q := by
+  rw [hj, T.map_sum, Preadditive.sum_comp]
+  apply Finset.sum_congr rfl
+  intro q _
+  calc
+    _ = (T.map (c q) ≫ T.map (L q)) ≫ u :=
+      congrArg (fun k => k ≫ u) (T.map_comp (c q) (L q))
+    _ = T.map (c q) ≫ (T.map (L q) ≫ u) := Category.assoc _ _ _
+    _ = T.map (c q) ≫ (u ≫ l q) := congrArg (fun k => T.map (c q) ≫ k) (hL q)
+    _ = _ := (Category.assoc _ _ _).symm
+
+set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency.types true in
 /-- The finite reconstruction survives the actual affine chart isomorphism. -/
 theorem chartInclusion_frame (i : Fin 3) :
     chartInclusion i = ∑ q : Fin 3 × Fin 3,
       chartFrameCoefficient i q ≫ chartScalar i ((chartFactorData i).left q.1) := by
+  let F := chartFactorData i
   let T := Scheme.Modules.restrictFunctor (coordinateAffineChart 57 1 i.succ).hom
-  let e := Scheme.Modules.restrictUnitIso (coordinateAffineChart 57 1 i.succ).hom
-  letI : T.Additive := restrict_additive _
-  change T.map (tilde.map (idealInclusion (chartFactorData i))) ≫ e.hom =
-    ∑ q : Fin 3 × Fin 3,
-      (T.map (tilde.map (frameMap (chartFactorData i) q)) ≫ e.hom) ≫
-        chartScalar i ((chartFactorData i).left q.1)
-  rw [tilde_idealInclusion_frame, Functor.map_sum, Preadditive.sum_comp]
+  let u := (Scheme.Modules.restrictUnitIso (coordinateAffineChart 57 1 i.succ).hom).hom
+  haveI : T.Additive := restrict_additive
+    (X := (Patch i).toScheme) (Y := Spec (CommRingCat.of (AffineRing i)))
+    (coordinateAffineChart 57 1 i.succ).hom
+  let j : affineIdeal i ⟶ structureModule (Spec (CommRingCat.of (AffineRing i))) :=
+    tilde.map (R := CommRingCat.of (AffineRing i))
+    (M := ModuleCat.of (AffineRing i) F.leftIdeal)
+    (N := ModuleCat.of (AffineRing i) (AffineRing i)) (idealInclusion F)
+  let c (q : Fin 3 × Fin 3) :
+      affineIdeal i ⟶ structureModule (Spec (CommRingCat.of (AffineRing i))) :=
+    tilde.map (R := CommRingCat.of (AffineRing i))
+    (M := ModuleCat.of (AffineRing i) F.leftIdeal)
+    (N := ModuleCat.of (AffineRing i) (AffineRing i)) (frameMap F q)
+  let L (q : Fin 3 × Fin 3) :
+      structureModule (Spec (CommRingCat.of (AffineRing i))) ⟶
+        structureModule (Spec (CommRingCat.of (AffineRing i))) :=
+    tilde.map (R := CommRingCat.of (AffineRing i))
+    (M := ModuleCat.of (AffineRing i) (AffineRing i))
+    (N := ModuleCat.of (AffineRing i) (AffineRing i)) (scalarMap (F.left q.1))
+  have h := transportFrame T
+    (I := affineIdeal i) (R := structureModule (Spec (CommRingCat.of (AffineRing i))))
+    (O := structureModule (Patch i).toScheme) j c L u (fun q => chartScalar i (F.left q.1))
+    (tilde_idealInclusion_frame F) (fun q => chartScalar_square i (F.left q.1))
+  have h₁ : chartInclusion i = T.map j ≫ u := by rfl
+  apply h₁.trans
+  apply h.trans
   apply Finset.sum_congr rfl
   intro q _
-  rw [Functor.map_comp, Category.assoc, chartScalar_square, ← Category.assoc]
+  rfl
 
 theorem idealPatchInclusion_frame (i : Fin 3) :
     idealPatchInclusion i = ∑ q : Fin 3 × Fin 3,
@@ -131,26 +209,51 @@ def chartLeftGenerator (i : Fin 3) (a : Fin 3) :
     structureModule (Patch i).toScheme ⟶ chartIdeal i :=
   (Scheme.Modules.restrictUnitIso (coordinateAffineChart 57 1 i.succ).hom).inv ≫
     (Scheme.Modules.restrictFunctor (coordinateAffineChart 57 1 i.succ).hom).map
-      (tilde.map (leftGeneratorMap (chartFactorData i) a))
+      (tilde.map (R := CommRingCat.of (AffineRing i))
+        (M := ModuleCat.of (AffineRing i) (AffineRing i))
+        (N := ModuleCat.of (AffineRing i) (OrbitIdeal i)) (leftGeneratorMap (chartFactorData i) a))
 
+private theorem transportGenerator {C D : Type*} [Category C] [Category D]
+    (T : C ⥤ D) {R I : C} {O : D}
+    (g : R ⟶ I) (j : I ⟶ R) (L : R ⟶ R) (e : T.obj R ≅ O) (l : O ⟶ O)
+    (hgj : g ≫ j = L) (hL : T.map L ≫ e.hom = e.hom ≫ l) :
+    (e.inv ≫ T.map g) ≫ (T.map j ≫ e.hom) = l := by
+  calc
+    _ = e.inv ≫ (T.map g ≫ T.map j) ≫ e.hom := by simp only [Category.assoc]
+    _ = e.inv ≫ T.map (g ≫ j) ≫ e.hom := by rw [T.map_comp]
+    _ = e.inv ≫ T.map L ≫ e.hom := by rw [hgj]
+    _ = e.inv ≫ (e.hom ≫ l) := congrArg (fun k => e.inv ≫ k) hL
+    _ = _ := by rw [← Category.assoc, e.inv_hom_id, Category.id_comp]
+
+set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency.types true in
 theorem chartLeftGenerator_inclusion (i : Fin 3) (a : Fin 3) :
     chartLeftGenerator i a ≫ chartInclusion i =
       chartScalar i ((chartFactorData i).left a) := by
+  let F := chartFactorData i
   let T := Scheme.Modules.restrictFunctor (coordinateAffineChart 57 1 i.succ).hom
   let e := Scheme.Modules.restrictUnitIso (coordinateAffineChart 57 1 i.succ).hom
-  change (e.inv ≫ T.map (tilde.map (leftGeneratorMap (chartFactorData i) a))) ≫
-      (T.map (tilde.map (idealInclusion (chartFactorData i))) ≫ e.hom) = _
-  calc
-    _ = e.inv ≫ T.map (tilde.map
-        (leftGeneratorMap (chartFactorData i) a ≫ idealInclusion (chartFactorData i))) ≫
-          e.hom := by
-      rw [tilde.map_comp, Functor.map_comp]
-      simp only [Category.assoc]
-    _ = e.inv ≫ T.map (tilde.map (scalarMap ((chartFactorData i).left a))) ≫
-        e.hom := by rw [leftGeneratorMap_inclusion]
-    _ = e.inv ≫ (e.hom ≫ chartScalar i ((chartFactorData i).left a)) := by
-      rw [chartScalar_square]
-    _ = _ := by rw [← Category.assoc, e.inv_hom_id, Category.id_comp]
+  let g : structureModule (Spec (CommRingCat.of (AffineRing i))) ⟶ affineIdeal i :=
+    tilde.map (R := CommRingCat.of (AffineRing i))
+      (M := ModuleCat.of (AffineRing i) (AffineRing i))
+      (N := ModuleCat.of (AffineRing i) F.leftIdeal) (leftGeneratorMap F a)
+  let j : affineIdeal i ⟶ structureModule (Spec (CommRingCat.of (AffineRing i))) :=
+    tilde.map (R := CommRingCat.of (AffineRing i))
+      (M := ModuleCat.of (AffineRing i) F.leftIdeal)
+      (N := ModuleCat.of (AffineRing i) (AffineRing i)) (idealInclusion F)
+  let L : structureModule (Spec (CommRingCat.of (AffineRing i))) ⟶
+      structureModule (Spec (CommRingCat.of (AffineRing i))) :=
+    tilde.map (R := CommRingCat.of (AffineRing i))
+      (M := ModuleCat.of (AffineRing i) (AffineRing i))
+      (N := ModuleCat.of (AffineRing i) (AffineRing i)) (scalarMap (F.left a))
+  have h := transportGenerator T
+    (R := structureModule (Spec (CommRingCat.of (AffineRing i))))
+    (I := affineIdeal i) (O := structureModule (Patch i).toScheme)
+    g j L e (chartScalar i (F.left a))
+    (tilde_leftGeneratorMap_inclusion F a) (chartScalar_square i (F.left a))
+  have h₁ : chartLeftGenerator i a ≫ chartInclusion i =
+      (e.inv ≫ T.map g) ≫ (T.map j ≫ e.hom) := by rfl
+  exact h₁.trans h
 
 def patchLeftGenerator (i : Fin 3) (a : Fin 3) :
     patchStructure (Patch i) ⟶ idealPatch i :=
