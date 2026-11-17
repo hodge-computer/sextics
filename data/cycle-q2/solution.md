@@ -1,6 +1,92 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Checked continuation: native splitting differences on all chart intersections
+## Checked continuation: original Cartier transitions on the native intersections
+
+**17 November 2026. The protected certificate remains incomplete.**
+The six original lifted cone transitions now have actual degree-zero
+projective unit lifts with the required original coordinate factors.
+Their oriented extensions reduce to units carrying the original
+restricted Cartier generators to each other. The multiplicative cocycle,
+self and reversal identities, and compatibility with the actual native
+restrictions are proved, including repeated original Cartier indices.
+The exact instance, manifest, and original existence obligation remain
+unchanged.
+
+[GeometricLiteralConeIntersectionTransport.lean](GeometricLiteralConeIntersectionTransport.lean)
+maps each original Cartier cone localization into the ordinary product
+localization of an actual native chart intersection whenever all source
+Cartier indices occur among its factors. These maps preserve the
+original polynomial coordinates. Reduction and both source and target
+restrictions commute with them. The unit images of the actual Cartier
+denominators justify the localization extensions.
+
+[GeometricLiteralNativeHomogeneousFractions.lean](GeometricLiteralNativeHomogeneousFractions.lean)
+constructs the genuine native fraction \(p/X_l^k\) for an original
+homogeneous element \(p\) of degree \(k\). If \(v=(a,l)\in S\),
+the exact factorization
+\[
+ Q_S=X_l\bigl(a_aQ_{S\setminus\{v\}}\bigr)
+\]
+provides its homogeneous numerator over \(Q_S^k\). The value identity,
+unit property, and restriction law hold in the actual localizations,
+retaining possible torsion. Here \(a_a\) denotes the original Cartier
+polynomial at index \(a\).
+
+[GeometricLiteralNativeTransitionUnits.lean](GeometricLiteralNativeTransitionUnits.lean)
+uses these fractions and the original lifted cone units to construct the
+six native forward transitions. With \(d=(2,2,0,0)\), their ordinary
+values satisfy the original frame-normalization formula
+\[
+ \widetilde T_{(a,l),(b,m)}X_l^{d_a}
+ =\widetilde t_{ab}X_m^{d_b}.
+\]
+The two complementary quadratic units are transported from the units
+already deduced from the actual equation \(F-\epsilon B^*\).
+No new invertibility condition is introduced. The same-index
+transitions for indices zero and one are \((X_m/X_l)^2\); for indices
+two and three they are one. Reversed transitions use inverses.
+
+[GeometricLiteralNativeCartierFrames.lean](GeometricLiteralNativeCartierFrames.lean)
+defines \(\gamma_{v,S}\) by restriction of the original
+`refinedGenerator 57 1` to the actual intersection ring. Its values are
+\(f_2/X_l^2\), \(f_1/X_l^2\), or one on the respective original
+Cartier opens. The original cofactor torsion bounds prove that each
+\(\gamma_{v,S}\) is regular, even on these product localizations.
+Reduction of the corresponding native homogeneous fractions gives
+exactly these restricted original generators.
+
+[GeometricLiteralNativeCartierTransitions.lean](GeometricLiteralNativeCartierTransitions.lean)
+constructs every oriented native lift and proves that its reduction
+\(T_{vw,S}\) obeys
+\[
+ T_{vw,S}\gamma_{w,S}=\gamma_{v,S},\qquad
+ T_{vw,S}T_{wz,S}=T_{vz,S}.
+\]
+The first identity fixes the original inverse-ideal frame convention;
+the second follows by regularity of the same original generators.
+[GeometricLiteralNativeTransitionNaturality.lean](GeometricLiteralNativeTransitionNaturality.lean)
+proves that the native lifts, their reductions, and those generators
+commute with actual restriction. It also proves the closed self and
+reversal identities. These statements hold for every triple of vertices,
+including distinct coordinates with a repeated original Cartier index.
+
+All 539 local development compilation units pass (518 proposal Lean
+modules, 20 shared modules, and the generated target). All 180 helpers
+changed since commit `37537c2` have matching successful independent
+kernel-replay receipts for their current sources and objects. The six
+new helper endpoint reports use only `propext`, `Classical.choice`, and
+`Quot.sound`.
+
+The native differential-sheaf comparison and the coordinate frame-gauge
+correction still have to identify the resulting Chern/Kodaira--Spencer
+cup with the earlier projected scalar cup class. The transition
+identities alone do not prove that derived sheaf cup equality. The
+Abel--Jacobi/cylinder comparison, supported geometric variation, and
+source-specific global de Rham comparison also remain open. The
+protected certificate still depends on `sorryAx`; protected `solve/lean`
+verification has not passed.
+
+## Earlier checkpoint: native splitting differences on all chart intersections
 
 **17 November 2026. The protected certificate remains incomplete.**
 The original projective splittings now extend compatibly to every finite
