@@ -64,7 +64,7 @@
       "number": "3b",
       "title": "3B. Weighted threefolds and two-reflection sextics",
       "shortTitle": "Weighted threefolds",
-      "description": "Norm-contact curves, Abel–Jacobi residues, finite-jet spanning, and two-reflection support.",
+      "description": "Norm-contact curves, Abel–Jacobi residues, finite-jet spanning, two-reflection support, and sextics with a binary summand.",
       "source": "docs/03b-weighted-threefolds.md",
       "content": "docs/weighted-threefolds.html"
     },
