@@ -16,7 +16,6 @@ original three-chart cover, giving an isomorphism of actual global
 structure-module sheaves, with hom equal to the original evaluation
 factor. No replacement curve or separately chosen ideal is introduced.
 
-Source-only draft: no Lean elaboration or kernel replay was run.
 Prepared for fqlx with OpenAI ChatGPT assistance; see solution.md.
 -/
 
@@ -95,7 +94,10 @@ instance twistedIdealAffine_isQuasicoherent (i : Fin 3) :
     (twistedIdealAffineIso i).symm inferInstance
 
 instance twistedIdealAffine_fromTildeΓ_isIso (i : Fin 3) :
-    IsIso (twistedIdeal.restrict (patchAffineMap i)).fromTildeΓ := inferInstance
+    IsIso (Scheme.Modules.fromTildeΓ (R := Γ(Surface, Patch i))
+      (twistedIdeal.restrict (patchAffineMap i))) :=
+  Scheme.Modules.isIso_fromTildeΓ_of_isQuasicoherent (R := Γ(Surface, Patch i))
+    (twistedIdeal.restrict (patchAffineMap i))
 
 /-- The native kernel ideal on this affine chart is the kernel of the
 literal original curve structure map on the original patch sections. -/
@@ -108,9 +110,11 @@ def curveIdealAffineIso (t : Fin 3 → ℂ) (i : Fin 3) :
     (curveAffineSquare t i)
 
 instance curveIdealAffine_fromTildeΓ_isIso (t : Fin 3 → ℂ) (i : Fin 3) :
-    IsIso ((curveIdeal t).restrict (patchAffineMap i)).fromTildeΓ :=
-  (isIso_fromTildeΓ_iff_isLocalizing _).mpr
-    (isLocalizing_of_iso (modulesSpecToSheaf.mapIso (curveIdealAffineIso t i).symm)
+    IsIso (Scheme.Modules.fromTildeΓ (R := Γ(Surface, Patch i))
+      ((curveIdeal t).restrict (patchAffineMap i))) :=
+  (isIso_fromTildeΓ_iff_isLocalizing (R := Γ(Surface, Patch i)) _).mpr
+    (isLocalizing_of_iso
+      ((modulesSpecToSheaf (R := Γ(Surface, Patch i))).mapIso (curveIdealAffineIso t i).symm)
       (affineIdeal_isLocalizing ((curveToSurface t).app (Patch i))))
 
 /-- This is the restriction of the already defined canonical factor. -/
@@ -134,12 +138,14 @@ both exact affine sheaves have proved native reconstruction counits. -/
 theorem affineEvaluationToCurveIdeal_isIso (t : Fin 3 → ℂ)
     (hreg : ∀ i : Fin 3, ChartRegular t i) (i : Fin 3) :
     IsIso (affineEvaluationToCurveIdeal t i) := by
-  rw [← isIso_iff_of_reflects_iso _ modulesSpecToSheaf]
+  rw [← isIso_iff_of_reflects_iso _ (modulesSpecToSheaf (R := Γ(Surface, Patch i)))]
   apply isLocalizing_of_isIso_app_top
   · apply (ConcreteCategory.isIso_iff_bijective _).mpr
     exact affineEvaluationToCurveIdeal_top_bijective t hreg i
-  · exact (isIso_fromTildeΓ_iff_isLocalizing _).mp inferInstance
-  · exact (isIso_fromTildeΓ_iff_isLocalizing _).mp inferInstance
+  · exact (isIso_fromTildeΓ_iff_isLocalizing (R := Γ(Surface, Patch i))
+      (twistedIdeal.restrict (patchAffineMap i))).mp inferInstance
+  · exact (isIso_fromTildeΓ_iff_isLocalizing (R := Γ(Surface, Patch i))
+      ((curveIdeal t).restrict (patchAffineMap i))).mp inferInstance
 
 /-! ## Actual chart subopens and global source gluing -/
 
@@ -155,7 +161,8 @@ theorem evaluationToCurveIdeal_app_bijective_on_patch (t : Fin 3 → ℂ)
   have hV : patchAffineMap i ''ᵁ (patchAffineMap i ⁻¹ᵁ V) = V := by
     rw [Scheme.Hom.image_preimage_eq_opensRange_inf,
       IsAffineOpen.opensRange_fromSpec, inf_eq_right.mpr hi]
-  simpa only [hV] using h
+  exact Eq.mp (congrArg (fun U : Surface.Opens =>
+    Function.Bijective ((evaluationToCurveIdeal t).app U)) hV) h
 
 /-- Every actual kernel section lifts globally: its unique lifts on
 the original chart intersections agree by the proved injectivity. -/

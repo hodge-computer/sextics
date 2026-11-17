@@ -18,7 +18,6 @@ an actual linear equivalence there. Upgrading those chart section
 equivalences to a sheaf isomorphism also requires the affine comparison;
 it is not inferred from global sections of arbitrary sheaves.
 
-Source-only draft: no Lean elaboration or kernel replay was run.
 Prepared for fqlx with OpenAI ChatGPT assistance; see solution.md.
 -/
 
@@ -133,6 +132,7 @@ theorem evaluationToCurveIdeal_app_injective (t : Fin 3 → ℂ)
     Function.Injective ((evaluationToCurveIdeal t).app V) := by
   intro s r h
   apply globalEvaluation_app_injective t hreg V
+  change globalEvaluationLinear t V s = globalEvaluationLinear t V r
   have hc := congrArg
     (fun a => (kernelIdealSectionEquiv (curveToSurface t) V a : Γ(Surface, V))) h
   simpa only [evaluationToCurveIdeal_coordinate] using hc

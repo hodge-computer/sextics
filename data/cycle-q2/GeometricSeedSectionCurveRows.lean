@@ -12,7 +12,6 @@ are exactly the rows already obtained as the global evaluation image.
 
 Both the projective surface isomorphism and the specialized curve are the
 previously defined objects. No second curve or surface model is introduced.
-Source-only draft: no Lean elaboration or kernel replay was run.
 Prepared for fqlx with OpenAI ChatGPT assistance; see solution.md.
 -/
 
@@ -41,17 +40,25 @@ theorem literalCartierLocalizationEquiv_fraction (i : Fin 4) (n : ℕ)
     literalCartierLocalizationEquiv (X i.castSucc)
         (CycleQ2IncidenceDehomogenizedChart.homogeneousFraction seed i n p hp) =
       CycleQ2GeometricSurfaceDehomogenizedCharts.homogeneousFraction 57 1 i n p hp := by
+  have hpoly (q : WeightedPoly) :
+      literalToCartierGraded (CycleQ2IncidenceDehomogenizedChart.surfaceQuotient seed q) =
+        CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1 q :=
+    literalToCartierGraded_polynomial q
   apply HomogeneousLocalization.val_injective _
   change Localization.mk
       (literalToCartierGraded
         (CycleQ2IncidenceDehomogenizedChart.surfaceQuotient seed p))
-      ⟨literalToCartierGraded
+      (⟨literalToCartierGraded
         ((CycleQ2IncidenceDehomogenizedChart.surfaceQuotient seed (X i.castSucc)) ^ n),
-        ⟨n, by simp only [map_pow, literalToCartierGraded_polynomial]⟩⟩ =
+        ⟨n, by simp only [map_pow, hpoly]⟩⟩ :
+        Submonoid.powers (CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1
+          (X i.castSucc))) =
     Localization.mk (CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1 p)
-      ⟨(CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1
-        (X i.castSucc)) ^ n, ⟨n, rfl⟩⟩
-  simp only [map_pow, literalToCartierGraded_polynomial]
+      (⟨(CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1
+        (X i.castSucc)) ^ n, ⟨n, rfl⟩⟩ :
+        Submonoid.powers (CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1
+          (X i.castSucc)))
+  simp only [map_pow, hpoly]
 
 /-- The unchanged original affine matrix evaluates the same specialized
 row polynomial as the already defined curve quotient. -/
@@ -103,14 +110,16 @@ theorem seedCoordinateSectionsEquiv_normalizedSection
   rw [literalCartierLocalizationEquiv_fraction, sectionRows_polynomial]
   have h := coordinatePolynomialSection_fraction 57 1 i.succ (Patch i) le_rfl 14
     (relativeSectionPolynomial seed t a) (relativeSectionPolynomial_homogeneous seed t a)
-  simpa only [homOfLE_refl, op_id, Functor.map_id, ConcreteCategory.id_apply] using h.symm
+  simpa only [homOfLE_refl, op_id, Surface.presheaf.map_id,
+    ConcreteCategory.id_apply, polynomialSection, chartSectionMap,
+    affinePolynomial, coordinatePolynomialSection] using h.symm
 
 /-- The kernel generators of the actual specialized quotient map become
 exactly the original row-image ideal in the actual surface section ring. -/
 theorem normalizedSectionIdeal_map_to_sections (t : Fin 3 → ℂ) (i : Fin 3) :
     (normalizedSectionIdeal seed t i.succ).map (seedCoordinateSectionsEquiv i).toRingHom =
       Ideal.span (Set.range (sectionRows t i (Patch i) le_rfl)) := by
-  rw [normalizedSectionIdeal, Ideal.map_span, Set.image_range]
+  rw [normalizedSectionIdeal, Ideal.map_span, ← Set.range_comp]
   apply congrArg Ideal.span
   apply congrArg Set.range
   funext a

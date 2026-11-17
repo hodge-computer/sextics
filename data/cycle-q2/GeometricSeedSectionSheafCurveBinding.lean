@@ -12,7 +12,6 @@ structure map commute on each unchanged coordinate chart.
 
 The resulting chart kernel is the same original row ideal as the image
 of globalEvaluation. No replacement zero locus is defined.
-Source-only draft: no Lean elaboration or kernel replay was run.
 Prepared for fqlx with OpenAI ChatGPT assistance; see solution.md.
 -/
 
@@ -31,6 +30,9 @@ open CycleQ2GeometricSurfaceAdjunction CycleQ2SeedProjectiveImageCocycle
   CycleQ2SpecializedProjectiveCurve CycleQ2SpecializedCurveCoordinateChart
   CycleQ2RelativeCurveChart
 
+attribute [local instance] CycleQ2SpecializedProjectiveCurve.nativePointSurfaceCommRing
+  CycleQ2SpecializedProjectiveCurve.nativeSpecializedCurveCommRing
+
 /-- The existing specialized curve, with its existing target transported
 through the original identity-on-polynomials projective isomorphism. -/
 def curveToSurface (t : Fin 3 → ℂ) : specializedCurve seed t ⟶ Surface :=
@@ -48,7 +50,9 @@ def curveGradedMap (t : Fin 3 → ℂ) :
 theorem curveGradedMap_irrelevant (t : Fin 3 → ℂ) :
     HomogeneousIdeal.irrelevant (specializedCurveGrade seed t) ≤
       (HomogeneousIdeal.irrelevant LiteralCartierGrade).map (curveGradedMap t) :=
-  HomogeneousIdeal.irrelevant_le_map_comp literalOriginal_irrelevant_le_map
+  HomogeneousIdeal.irrelevant_le_map_comp
+    (f := literalFromCartierGraded) (g := specializedCurveRingMap seed t)
+    literalOriginal_irrelevant_le_map
     (irrelevant_le_map_specializedCurveRingMap seed t)
 
 theorem curveToSurface_eq_map (t : Fin 3 → ℂ) :
@@ -92,12 +96,41 @@ theorem curveCoordinateMap_factor (t : Fin 3 → ℂ) (i : Fin 3) :
         (literalCartierLocalizationEquiv (X i.succ.castSucc)).symm.toRingHom := by
   apply RingHom.ext
   intro z
-  change HomogeneousLocalization.map
-      ((specializedCurveRingMap seed t).comp literalFromCartierGraded) _ z =
-    HomogeneousLocalization.map (specializedCurveRingMap seed t) _
-      (HomogeneousLocalization.map literalFromCartierGraded _ z)
-  exact (HomogeneousLocalization.map_map (f := literalFromCartierGraded)
-    (g := specializedCurveRingMap seed t) _ _ z).symm
+  have hpoly : literalFromCartierGraded
+      (CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1 (X i.succ.castSucc)) =
+      CycleQ2IncidenceDehomogenizedChart.surfaceQuotient seed (X i.succ.castSucc) :=
+    literalFromCartierGraded_polynomial (X i.succ.castSucc)
+  have hfrom : Submonoid.powers
+      (CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1 (X i.succ.castSucc)) ≤
+      (Submonoid.powers
+        (CycleQ2IncidenceDehomogenizedChart.surfaceQuotient seed (X i.succ.castSucc))).comap
+          literalFromCartierGraded := by
+    rintro _ ⟨n, rfl⟩
+    refine ⟨n, ?_⟩
+    change (CycleQ2IncidenceDehomogenizedChart.surfaceQuotient seed (X i.succ.castSucc)) ^ n =
+      literalFromCartierGraded
+        ((CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1 (X i.succ.castSucc)) ^ n)
+    rw [map_pow, hpoly]
+  have hcurve : Submonoid.powers
+      (CycleQ2IncidenceDehomogenizedChart.surfaceQuotient seed (X i.succ.castSucc)) ≤
+      (Submonoid.powers (specializedCurveRingMap seed t
+        (CycleQ2IncidenceDehomogenizedChart.surfaceQuotient seed (X i.succ.castSucc)))).comap
+          (specializedCurveRingMap seed t) := by
+    rintro _ ⟨n, rfl⟩
+    refine ⟨n, ?_⟩
+    exact (map_pow (specializedCurveRingMap seed t) _ n).symm
+  change HomogeneousLocalization.map (𝒜 := LiteralCartierGrade)
+      (ℬ := specializedCurveGrade seed t)
+      ((specializedCurveRingMap seed t).comp literalFromCartierGraded)
+      (hfrom.trans (Submonoid.monotone_comap hcurve)) z =
+    HomogeneousLocalization.map (𝒜 := LiteralOriginalGrade)
+      (ℬ := specializedCurveGrade seed t) (specializedCurveRingMap seed t) hcurve
+      (HomogeneousLocalization.map (𝒜 := LiteralCartierGrade) (ℬ := LiteralOriginalGrade)
+        literalFromCartierGraded hfrom z)
+  exact (HomogeneousLocalization.map_map
+    (𝒜 := LiteralCartierGrade) (ℬ := LiteralOriginalGrade) (𝒞 := specializedCurveGrade seed t)
+    (f := literalFromCartierGraded)
+    (g := specializedCurveRingMap seed t) hfrom hcurve z).symm
 
 def curveCoordinateSectionsEquiv (t : Fin 3 → ℂ) (i : Fin 3) :
     SpecializedCoordinateRing seed t i.succ ≃+*
@@ -130,12 +163,15 @@ theorem curveChartSectionMap_coordinate (t : Fin 3 → ℂ) (i : Fin 3)
       (curveGradedMap_coordinate t i)
       (CycleQ2GeometricSurfaceDehomogenizedCharts.coordinate_mem_grade 57 1 i.succ))
     (literalCartierLocalizationEquiv (X i.succ.castSucc) z)
-  rw [← curveToSurface_eq_map] at h
+  simp only [← curveToSurface_eq_map] at h
   change curveChartSectionMap t i (seedCoordinateSectionsEquiv i z) =
     curveCoordinateSectionsEquiv t i (curveCoordinateMap t i
       (literalCartierLocalizationEquiv (X i.succ.castSucc) z)) at h
   rw [curveCoordinateMap_factor] at h
-  simpa only [RingHom.comp_apply, RingEquiv.symm_apply_apply] using h
+  exact h.trans (congrArg
+    (fun w : CycleQ2IncidenceDehomogenizedChart.CoordinateRing seed i.succ =>
+      curveCoordinateSectionsEquiv t i (specializedCoordinateMap seed t i.succ w))
+    ((literalCartierLocalizationEquiv (X i.succ.castSucc)).symm_apply_apply z))
 
 /-- Renaming the actual preimage open does not change the structure-map kernel. -/
 theorem curveChartSectionMap_ker_eq (t : Fin 3 → ℂ) (i : Fin 3) :
