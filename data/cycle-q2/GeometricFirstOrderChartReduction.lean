@@ -11,7 +11,6 @@ the coefficient map and the equations needed by the infinitesimal
 regular-quotient criterion; regularity on principal chart refinements
 and flatness of their ambient algebras are separate obligations.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -33,7 +32,22 @@ open CycleQ2IncidenceUniversalChart CycleQ2IncidenceEtaleParameter
   CycleQ2DualNumberRegularQuotient CycleQ2RelativeCurveChart
   CycleQ2RelativeCurveChartFiber
 
-attribute [local instance] firstOrderAlgebra CycleQ2IncidenceSeedFiber.seedAlgebra
+attribute [local instance] CycleQ2IncidenceSeedFiber.seedAlgebra
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderAlgebra
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderModule
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderSMul
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderTower
+
+local instance incidenceChartCommRing (i : Fin 4) :
+    CommRing (DehomogenizedRing incidencePoint i) := inferInstance
+local instance seedChartCommRing (i : Fin 4) :
+    CommRing (DehomogenizedRing (seedPoint (57 : ℂ) Complex.I) i) := inferInstance
+local instance incidenceCurveChartCommRing (t : Fin 3 → ℂ) (i : Fin 4) :
+    CommRing (AffineCurveChart incidencePoint t i) := inferInstance
+local instance seedCurveChartCommRing (t : Fin 3 → ℂ) (i : Fin 4) :
+    CommRing (AffineCurveChart (seedPoint (57 : ℂ) Complex.I) t i) := inferInstance
+local instance curveChartSeedFiberCommRing (t : Fin 3 → ℂ) (i : Fin 4) :
+    CommRing (CurveChartSeedFiber t i) := inferInstance
 
 abbrev FirstOrderSurfaceChart (i : Fin 4) :=
   FirstOrderTensor (DehomogenizedRing incidencePoint i)

@@ -16,7 +16,6 @@ This avoids asserting that an arbitrary inverse is character-homogeneous.
 The only grading argument takes place in the original polynomial quotient.
 No target polynomial, residue statement, or certificate is changed.
 
-Source-only draft. Not elaborated, compiled, or kernel-replayed.
 Prepared for fqlx with OpenAI ChatGPT assistance, 15 November 2026.
 -/
 
@@ -106,9 +105,7 @@ theorem no_empty_specializedCurve (t : Fin 3 → ℂ)
     change (factorData s hs).left a = 0
     exact hlocal a
   have hz : (coneInverse t s hs : Chart s) = 0 := by
-    have hmem := (coneInverse t s hs).property
-    rw [hideal] at hmem
-    exact hmem
+    simpa only [hideal, Submodule.mem_bot] using (coneInverse t s hs).property
   have hinverse : coneInverse t s hs = 0 := Subtype.ext hz
   have hone := coneInverse_spec t s hs
   rw [hinverse, map_zero] at hone

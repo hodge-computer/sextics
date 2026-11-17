@@ -14,7 +14,6 @@ This constructs and binds the global morphism. Its being an isomorphism
 requires the subsequent comparison on a covering by actual coordinate
 opens; it is not inferred from the separate chart isomorphisms here.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -35,6 +34,10 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceImageLine CycleQ2GeometricIncide
   CycleQ2RelativeConstantCurveFiber CycleQ2RelativeCurveSeedMap
   CycleQ2SpecializedProjectiveCurve
 
+local instance incidenceSurfaceCommRing : CommRing (PointSurface incidencePoint) := inferInstance
+local instance seedSurfaceCommRing : CommRing (PointSurface (seedPoint (57 : ℂ) Complex.I)) :=
+  inferInstance
+
 def seedSurfaceToIncidence :
     surface (seedPoint (57 : ℂ) Complex.I) ⟶ surface incidencePoint :=
   Proj.map seedSurfaceGradedMap irrelevant_le_map_seedSurfaceGradedMap
@@ -48,9 +51,23 @@ private theorem seedSurfaceAway_coefficient (s : PointSurface incidencePoint)
         (Submonoid.powers (seedSurfaceGradedMap s))
         (surfaceCoefficient (seedPoint (57 : ℂ) Complex.I) (seedMap a)) := by
   apply HomogeneousLocalization.val_injective
-  simp only [Away.map, fromZeroRingHom, HomogeneousLocalization.map_mk,
-    HomogeneousLocalization.val_mk, seedSurfaceGradedMap, surfaceCoefficient_val,
-    map_one, seedSurfaceSpecialization_coefficient]
+  change (HomogeneousLocalization.map seedSurfaceGradedMap _
+    (HomogeneousLocalization.mk ⟨0, surfaceCoefficient incidencePoint a, 1, one_mem _⟩)).val =
+      (HomogeneousLocalization.mk ⟨0,
+        surfaceCoefficient (seedPoint (57 : ℂ) Complex.I) (seedMap a), 1, one_mem _⟩).val
+  rw [HomogeneousLocalization.map_mk]
+  have hcoeff : seedSurfaceGradedMap
+      (algebraMap ParameterAlgebra (PointSurface incidencePoint) a) =
+        algebraMap ℂ (PointSurface (seedPoint (57 : ℂ) Complex.I)) (seedMap a) :=
+    seedSurfaceSpecialization_coefficient a
+  have hone : seedSurfaceGradedMap
+      ((1 : surfaceGrade incidencePoint 0) : PointSurface incidencePoint) =
+        ((1 : surfaceGrade (seedPoint (57 : ℂ) Complex.I) 0) :
+          PointSurface (seedPoint (57 : ℂ) Complex.I)) := by
+    change seedSurfaceGradedMap (1 : PointSurface incidencePoint) = 1
+    exact map_one seedSurfaceGradedMap
+  simp only [HomogeneousLocalization.val_mk, surfaceCoefficient_val,
+    hcoeff, hone]
 
 /-- The Proj specialization is over the original retained seed map. -/
 theorem seedSurfaceToIncidence_overBase :
@@ -59,9 +76,12 @@ theorem seedSurfaceToIncidence_overBase :
   refine (Proj.mapAffineOpenCover seedSurfaceGradedMap
     irrelevant_le_map_seedSurfaceGradedMap).openCover.hom_ext _ _ fun s => ?_
   simp only [Scheme.AffineOpenCover.openCover_f, Proj.mapAffineOpenCover_f,
-    seedSurfaceToIncidence, surfaceToBase, Category.assoc,
-    Proj.awayι_comp_map_assoc, Proj.awayι_toSpecZero_assoc, Proj.awayι_toSpecZero,
-    seedParameterMorphism, ← Spec.map_comp]
+    seedSurfaceToIncidence, surfaceToBase, Category.assoc, seedParameterMorphism]
+  erw [Proj.awayι_comp_map_assoc seedSurfaceGradedMap
+    irrelevant_le_map_seedSurfaceGradedMap s.1.2
+      (s.2 : PointSurface incidencePoint) s.2.2]
+  simp only [Category.assoc, Proj.awayι_toSpecZero_assoc,
+    ← Spec.map_comp]
   apply congrArg Spec.map
   apply CommRingCat.hom_ext
   apply RingHom.ext
@@ -76,8 +96,8 @@ theorem seedCurveToRelative_surface_square (t : Fin 3 → ℂ) :
     seedCurveToRelative t ≫ relativeCurveToSurface incidencePoint t =
       specializedCurveToSurface (seedPoint (57 : ℂ) Complex.I) t ≫ seedSurfaceToIncidence := by
   rw [seedCurveToRelative, relativeCurveToSurface, specializedCurveToSurface,
-    seedSurfaceToIncidence, ← Proj.map_comp, ← Proj.map_comp,
-    seedCurveGradedMap_surface_square]
+    seedSurfaceToIncidence, ← Proj.map_comp, ← Proj.map_comp]
+  simp only [seedCurveGradedMap_surface_square]
 
 theorem seedCurveToRelative_overBase (t : Fin 3 → ℂ) :
     seedCurveToRelative t ≫ relativeCurveToBase incidencePoint t =

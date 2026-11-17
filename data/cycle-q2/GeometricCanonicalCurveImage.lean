@@ -6,9 +6,6 @@ import Proposal.GeometricCanonicalResidueNonzero
 /-!
 # The actual curve H¹ image inside the pushed canonical sheaf
 
-Status: source-only proof draft. Compilation and independent kernel replay
-are deferred at the user's request. No new axioms or admissions are used.
-
 The original two-quartic Mayer--Vietoris boundary on the curve and the
 actual closed-pushforward boundary have the same kernel. Their scalar
 actions agree by the proved complex-coefficient square of the original
@@ -45,6 +42,8 @@ open CycleQ2GeometricDifferentialSheaf CycleQ2GeometricSheafCohomologyScalar
   CycleQ2GeometricProjectiveNormalClass CycleQ2SurfaceCechTwoScalar
   CycleQ2SeedTrace CycleQ2SurfaceCubicGluing
 
+private abbrev immersion := CycleQ2CanonicalResidueSheaf.immersion
+
 local instance curveHasExt :
     HasExt.{1} (Sheaf (Opens.grothendieckTopology Curve) AddCommGrpCat.{0}) :=
   HasExt.standard _
@@ -61,6 +60,20 @@ abbrev OverlapForms := CurveAdditive.obj.obj (op Overlap)
 
 local instance overlapModule : Module Γ(Curve, Overlap) OverlapForms :=
   (CurveForms.val.obj (op Overlap)).isModule
+
+local instance overlapScalarAction :
+    SMul (Curve.sheaf.obj.obj (op Overlap)) OverlapForms :=
+  (CurveForms.val.obj (op Overlap)).isModule.toSMul
+
+local instance pushedCurveScalarAction (O : (Opens Surface)ᵒᵖ) :
+    SMul (Curve.sheaf.obj.obj (op (immersion ⁻¹ᵁ O.unop)))
+      ((additiveSheaf Surface.sheaf ResidueTarget).obj.obj O) :=
+  (CurveForms.val.obj (op (immersion ⁻¹ᵁ O.unop))).isModule.toSMul
+
+local instance pushedCurveSectionsModule (O : (Opens Surface)ᵒᵖ) :
+    Module Γ(Curve, immersion ⁻¹ᵁ O.unop)
+      ((additiveSheaf Surface.sheaf ResidueTarget).obj.obj O) :=
+  (CurveForms.val.obj (op (immersion ⁻¹ᵁ O.unop))).isModule
 
 /-- The original two-quartic square, with its original boundary sign. -/
 def sourceSquare : (Opens.grothendieckTopology Curve).MayerVietorisSquare :=
@@ -93,7 +106,7 @@ theorem pushed_scalarEnd (c : ℂ) :
       (coefficientOn Surface.sheaf (surfaceGlobalCoefficient 57 1) O.unop c) • x =
     coefficientOn Curve.sheaf (projectiveGlobalCoefficient 57 1)
       (immersion ⁻¹ᵁ O.unop) c • x
-  rw [CycleQ2GeometricSurfaceComplexRestriction.curveToSurface_coefficient_app]
+  erw [CycleQ2GeometricSurfaceComplexRestriction.curveToSurface_coefficient_app]
 
 theorem sourceBoundary_scalar (c : ℂ) (z : OverlapForms) :
     sourceBoundary
@@ -122,9 +135,12 @@ def normalizationSection : OverlapForms :=
     (overlapDegreeOneSectionsEquiv 57 1
       (degreeNineRepresentative 57 1 (mon 0 0 0 9) (mon_homogeneous 0 0 0 9)))
 
+set_option maxRecDepth 2048 in
 theorem sourceBoundary_normalization :
     sourceBoundary normalizationSection = literalCanonicalNormalization := by
-  have h := sectionBoundary_map literalCanonicalAdditiveIso.inv sourceSquare
+  have h := sectionBoundary_map (X := (show TopCat from Curve))
+    (F := degreeOneSheaf 57 1) (G := CurveAdditive)
+    literalCanonicalAdditiveIso.inv sourceSquare
     (overlapDegreeOneSectionsEquiv 57 1
       (degreeNineRepresentative 57 1 (mon 0 0 0 9) (mon_homogeneous 0 0 0 9)))
   exact h.symm

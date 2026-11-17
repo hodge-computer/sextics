@@ -15,7 +15,6 @@ This is a local scheme fiber comparison on actual projective opens.
 Global gluing, flatness of the curve family, and nonemptiness are not
 asserted here.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -38,15 +37,23 @@ attribute [local instance] CycleQ2IncidenceSeedFiber.seedAlgebra
 
 variable (t : Fin 3 → ℂ) (i : Fin 4)
 
+local instance incidenceCurveChartCommRing :
+    CommRing (AffineCurveChart incidencePoint t i) := inferInstance
+local instance seedCurveChartCommRing :
+    CommRing (AffineCurveChart (seedPoint (57 : ℂ) Complex.I) t i) := inferInstance
+local instance curveChartSeedFiberCommRing : CommRing (CurveChartSeedFiber t i) := inferInstance
+
 def affineCurveChartToParameters :
     Spec (CommRingCat.of (AffineCurveChart incidencePoint t i)) ⟶
       Spec (CommRingCat.of ParameterAlgebra) :=
-  Spec.map (CommRingCat.ofHom (algebraMap ParameterAlgebra (AffineCurveChart incidencePoint t i)))
+  Spec.map (CommRingCat.ofHom (R := ParameterAlgebra) (S := AffineCurveChart incidencePoint t i)
+    (algebraMap ParameterAlgebra (AffineCurveChart incidencePoint t i)))
 
 def seedAffineCurveChartToComplex :
     Spec (CommRingCat.of (AffineCurveChart (seedPoint (57 : ℂ) Complex.I) t i)) ⟶
       Spec (CommRingCat.of ℂ) :=
-  Spec.map (CommRingCat.ofHom
+  Spec.map (CommRingCat.ofHom (R := ℂ)
+    (S := AffineCurveChart (seedPoint (57 : ℂ) Complex.I) t i)
     (algebraMap ℂ (AffineCurveChart (seedPoint (57 : ℂ) Complex.I) t i)))
 
 abbrev AffineCurveChartSeedFiberScheme :=
