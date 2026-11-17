@@ -1,5 +1,25 @@
 # A nonconstructive geometric route for cycle-q2
 
+## The hyperplane twist has zero cotangent boundary
+
+On an overlap of the original projective charts, the unit \(X_v/X_u\)
+already exists on the first-order deformation \(F_{57,1}-\epsilon B_*\).
+For each \(k\geq 0\), the sections
+\(1\otimes d\log((X_v/X_u)^k)\) therefore form a cocycle in the restricted
+cotangent sheaf. Reduction sends it to the logarithmic Chern cocycle on the
+closed surface. Exactness gives
+\[
+  \partial_{\mathrm{cot}}\bigl(c_1^{\mathrm{dlog}}(\mathcal O_D(k))\bigr)=0 .
+\]
+In particular, the fourth hyperplane twist contributes zero to the
+moving divisor's boundary. The three translated curves still have to be
+accounted for. [Hyperplane lift and connecting theorem](GeometricLiteralHyperplaneCotangent.lean)
+
+The finite Čech class in degree one is additive in the cocycle and is preserved
+under refinement. These properties let the three sets of transition functions
+be compared on a common cover. [Additivity](GeometricFiniteCechOneAdditivity.lean)
+and [refinement](GeometricFiniteCechHOneRefinement.lean)
+
 ## The Chern class has a nonzero cotangent boundary
 
 Let \(D\) be the original complex projective surface at \(r=57,\theta=1\), let
