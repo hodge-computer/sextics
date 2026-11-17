@@ -88,17 +88,34 @@ defines a ring homomorphism into the actual native deformation chart,
 and `projectiveSplitting_reduction` proves
 \(\rho_{a,l}\sigma^0_{a,l}=\operatorname{id}\).
 
-The current local development build checks all 522 compilation units
-(501 proposal Lean modules, 20 shared modules, and the generated target).
-The seven new helper endpoint reports use only `propext`,
-`Classical.choice`, and `Quot.sound`. All 163 helpers changed since
+[GeometricLiteralProjectiveComplexSplittings.lean](GeometricLiteralProjectiveComplexSplittings.lean)
+identifies the native complex coefficients with those induced by the
+actual Proj structure morphisms through the two degree-zero rings.
+The previously chosen cone splittings, ordinary extensions, and native
+projective projections preserve these coefficients. Thus
+`projectiveSplittingAlgHom` is a genuine complex-algebra splitting of
+`chartReductionAlgHom`, with the same section identity.
+
+[GeometricLiteralProjectiveDeformationCover.lean](GeometricLiteralProjectiveDeformationCover.lean)
+proves that every relevant homogeneous prime of the actual deformation
+contains its original epsilon kernel and descends to a relevant
+homogeneous prime of the original surface. Consequently the actual
+closed-fibre map is surjective on points, and the same twelve deformed
+charts cover all of \(\operatorname{Proj}E\). The theorem
+`closedFiber_overComplex` proves that the global closed-fibre map
+commutes with the original structure morphisms to
+\(\operatorname{Spec}\mathbb C\), by the actual affine chart squares.
+
+The current local development build checks all 524 compilation units
+(503 proposal Lean modules, 20 shared modules, and the generated target).
+The nine new helper endpoint reports use only `propext`,
+`Classical.choice`, and `Quot.sound`. All 165 helpers changed since
 commit `37537c2` have matching successful independent kernel-replay
 receipts for their current sources and objects.
 
-The chart splittings above are proved as ring homomorphisms. Their
-complex-algebra comparison and compatibility on all intersections,
-together with the normalized inverse-ideal frame gauges, are the next
-obligations for identifying the earlier projected scalar cup with the
+The native chart splittings now preserve the actual complex coefficients.
+Their compatibility on all intersections, together with the normalized
+inverse-ideal frame gauges, remains necessary for identifying the earlier projected scalar cup with the
 actual projective Chern/Kodaira--Spencer contraction. The derived scalar
 class equality established below does not by itself identify those
 factors. The Abel--Jacobi/cylinder comparison, supported geometric
