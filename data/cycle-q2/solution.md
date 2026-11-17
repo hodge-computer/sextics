@@ -1,5 +1,86 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Checked continuation: invertibility and the actual divisor transitions
+
+**17 November 2026. The protected certificate remains incomplete.** The
+original admission in `Submission.missing_geometric_existence` is unchanged.
+The following continuation proves local rank-one trivializations and
+transition identities for the actual constructed sheaves. It does not
+construct a global Chern-class map, a Kodaira--Spencer/Chern comparison,
+an Abel--Jacobi derivative, or a primitive for the protected residue.
+Older verification statements below describe their historical checkpoints.
+
+[GeometricSeedSectionDivisorFrames.lean](GeometricSeedSectionDivisorFrames.lean)
+lifts each literal degree-ten left generator through the existing inverse
+chart projection into the independently defined global kernel. On any
+original chart subopen where the matrix entry \(M_{ab}\) is a unit, scalar
+multiplication by this generator is a linear equivalence from the actual
+structure-sheaf section ring to the actual source section module. The
+proof of injectivity evaluates at the original constant basis vector
+\(t=e_b\), obtaining the unit \(M_{ab}\). Surjectivity uses the original
+finite ideal generators and their matrix row ratios. Evaluation at any
+original vector \(t\) sends the frame to the unchanged row \((M t)_a\).
+For the same regular vector as before, the canonical map to the native
+curve ideal gives a frame of that actual ideal, and this row is a
+non-zero-divisor on every unit-pivot subopen.
+
+[GeometricSeedSectionInvertible.lean](GeometricSeedSectionInvertible.lean)
+proves that the actual pivot basic opens cover the original projective
+surface. The original matrix entries generate the unit ideal; their
+images in each local stalk therefore include a unit. The compatible
+kernel generators define native sheaf morphisms from the structure
+module on these opens. They are isomorphisms on sections of every
+subopen, hence are sheaf isomorphisms. Consequently the fixed twisted
+source has a rank-one local trivialization around every surface point.
+Transport through the existing global ideal isomorphism proves the same
+statement for the original regular curve's native kernel ideal.
+
+[GeometricSeedSectionDivisorTransitions.lean](GeometricSeedSectionDivisorTransitions.lean)
+computes the transitions of those same frames. On a common original
+subopen, put \(u=X_i/X_j\), and let \(p,q\) be the two chosen unit
+matrix pivots. The original matrix on chart \(i\) gives the unit ratio
+\[
+ r_{pq}=M_i(q_1,p_2)\,M_i(p_1,p_2)^{-1}.
+\]
+The matrix cofactor equations provide its actual inverse. The original
+orbit-ideal generator transition and actual source/curve-ideal frame
+transition are respectively
+\[
+ a_{ij}=u^{10}r_{pq},\qquad
+ g_{ij}=u^{14}r_{pq}=u^4a_{ij}.
+\]
+The theorem `generator_transition` proves this inside the native global
+kernel. `curveGenerator_transition` transports it through the canonical
+factor into the actual curve ideal, with the same \(t\). Frame
+injectivity proves uniqueness and the multiplicative cocycle law.
+`divisorTransition_restrict` proves compatibility with the original
+structure-sheaf restrictions. These units are independent of \(t\).
+
+With the actual projective complex coefficient map, the universal
+Kähler differential identities retain the fourth-power twist and the
+dual-frame orientation:
+\[
+ d\log(g_{ij})=d\log(a_{ij})+4\,d\log(u),\qquad
+ d\log(g_{ij}^{-1})=d\log(a_{ij}^{-1})+4\,d\log(u^{-1}).
+\]
+These are proved identities of genuine local transition data. Passing
+them to the original geometric Chern class and contracting with the
+independent ambient-test Kodaira--Spencer class remain further steps.
+In particular this degree-one differential cocycle is not identified
+with the existing degree-two Cartier obstruction by definition. The
+time direction of the moving surface section and the independent
+ambient perturbation remain distinct, as do the literal complex
+\(r=57\) seed and the separate \(r^3=2\) Fermat seed.
+
+The continuation was prepared for `fqlx` with OpenAI ChatGPT assistance,
+following the moving-class strategy of Ben Diamond and the sources
+credited below. The three new helpers passed local compilation and
+independent `leanchecker` replay with only `propext`, `Classical.choice`,
+and `Quot.sound`. The development checkpoint contains 485 proposal Lean
+modules; together with 20 shared dependencies and the generated target,
+all 506 compilation units pass. The unchanged certificate still depends
+on `sorryAx`; protected `solve/lean` verification has not passed.
+
 ## Classical proof established before the next Lean continuation
 
 The complete ordinary mathematical argument is given in
