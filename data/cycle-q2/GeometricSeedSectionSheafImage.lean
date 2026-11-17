@@ -16,7 +16,6 @@ curve parameter remains the same complex vector throughout.
 
 Comparison with the structure-map kernel of the already defined
 specialized projective curve is a subsequent, distinct step.
-Source-only draft: no Lean elaboration or kernel replay was run.
 Prepared for fqlx with OpenAI ChatGPT assistance; see solution.md.
 -/
 
@@ -39,6 +38,8 @@ open CycleQ2SegreFactorSequence CycleQ2SegreLinkageDuality
   CycleQ2SeedSectionSheafIdealOverlap CycleQ2SeedSectionSheafLocal
   CycleQ2SeedSectionSheafGlobal
 
+attribute [local instance] CycleQ2SeedSectionSheafSections.patchSectionsCommRing
+
 /-- The literal original matrix rows, with the original complex vector. -/
 def sectionRows (t : Fin 3 → ℂ) (i : Fin 3) (V : Surface.Opens)
     (hi : V ≤ Patch i) : Fin 3 → Γ(Surface, V) :=
@@ -53,13 +54,14 @@ theorem sectionRows_eq_mulVec (t : Fin 3 → ℂ) (i : Fin 3)
   funext a
   simp only [sectionRows, Matrix.mulVec, dotProduct, map_sum, map_mul,
     sectionMatrix, sectionConstant, RingHom.mapMatrix_apply]
+  rfl
 
 theorem sectionRows_span_eq_map (t : Fin 3 → ℂ) (i : Fin 3)
     (V : Surface.Opens) (hi : V ≤ Patch i) :
     Ideal.span (Set.range (sectionRows t i V hi)) =
       (rowIdeal (chartFactorData i)
         (fun b => algebraMap ℂ (AffineRing i) (t b))).map (chartSectionMap i V hi) := by
-  rw [rowIdeal, Ideal.map_span, Set.image_range] <;> rfl
+  rw [rowIdeal, Ideal.map_span, ← Set.range_comp] <;> rfl
 
 section Generator
 
@@ -73,28 +75,65 @@ theorem leftGeneratorMap_functional (F : FactorData R) (t : Fin 3 → R) (a : Fi
   change sectionFunctional F t (r • leftElement F a) = (F.matrix *ᵥ t) a * r
   rw [map_smul, sectionFunctional_left, smul_eq_mul, mul_comm]
 
+theorem tilde_leftGeneratorMap_functional (F : FactorData R) (t : Fin 3 → R) (a : Fin 3) :
+    tilde.map (R := CommRingCat.of R)
+        (M := ModuleCat.of R R) (N := ModuleCat.of R F.leftIdeal) (leftGeneratorMap F a) ≫
+      tilde.map (R := CommRingCat.of R)
+        (M := ModuleCat.of R F.leftIdeal) (N := ModuleCat.of R R) (functionalMap F t) =
+      tilde.map (R := CommRingCat.of R)
+        (M := ModuleCat.of R R) (N := ModuleCat.of R R) (scalarMap ((F.matrix *ᵥ t) a)) := by
+  exact (tilde.map_comp (R := CommRingCat.of R)
+    (M := ModuleCat.of R R) (N := ModuleCat.of R F.leftIdeal) (P := ModuleCat.of R R)
+    (leftGeneratorMap F a) (functionalMap F t)).symm.trans
+      (congrArg (fun f : ModuleCat.of R R ⟶ ModuleCat.of R R =>
+        tilde.map (R := CommRingCat.of R) (M := ModuleCat.of R R) (N := ModuleCat.of R R) f)
+        (leftGeneratorMap_functional F t a))
+
 end Generator
 
+private theorem transportGenerator {C D : Type*} [Category C] [Category D]
+    (T : C ⥤ D) {R I : C} {O : D}
+    (g : R ⟶ I) (j : I ⟶ R) (L : R ⟶ R) (e : T.obj R ≅ O) (l : O ⟶ O)
+    (hgj : g ≫ j = L) (hL : T.map L ≫ e.hom = e.hom ≫ l) :
+    (e.inv ≫ T.map g) ≫ (T.map j ≫ e.hom) = l := by
+  calc
+    _ = e.inv ≫ (T.map g ≫ T.map j) ≫ e.hom := by simp only [Category.assoc]
+    _ = e.inv ≫ T.map (g ≫ j) ≫ e.hom := by rw [T.map_comp]
+    _ = e.inv ≫ T.map L ≫ e.hom := by rw [hgj]
+    _ = e.inv ≫ (e.hom ≫ l) := congrArg (fun k => e.inv ≫ k) hL
+    _ = _ := by rw [← Category.assoc, e.inv_hom_id, Category.id_comp]
+
+set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency.types true in
 theorem chartLeftGenerator_evaluation (t : Fin 3 → ℂ) (i : Fin 3) (a : Fin 3) :
     chartLeftGenerator i a ≫ chartEvaluation t i =
       chartScalar i (((chartFactorData i).matrix *ᵥ
         (fun b => algebraMap ℂ (AffineRing i) (t b))) a) := by
+  let F := chartFactorData i
   let T := Scheme.Modules.restrictFunctor (coordinateAffineChart 57 1 i.succ).hom
   let e := Scheme.Modules.restrictUnitIso (coordinateAffineChart 57 1 i.succ).hom
   let v : Fin 3 → AffineRing i := fun b => algebraMap ℂ (AffineRing i) (t b)
-  change (e.inv ≫ T.map (tilde.map (leftGeneratorMap (chartFactorData i) a))) ≫
-      (T.map (tilde.map (functionalMap (chartFactorData i) v)) ≫ e.hom) = _
-  calc
-    _ = e.inv ≫ T.map (tilde.map
-        (leftGeneratorMap (chartFactorData i) a ≫ functionalMap (chartFactorData i) v)) ≫
-          e.hom := by
-      rw [tilde.map_comp, Functor.map_comp]
-      simp only [Category.assoc]
-    _ = e.inv ≫ T.map (tilde.map (scalarMap (((chartFactorData i).matrix *ᵥ v) a))) ≫
-        e.hom := by rw [leftGeneratorMap_functional]
-    _ = e.inv ≫ (e.hom ≫ chartScalar i (((chartFactorData i).matrix *ᵥ v) a)) := by
-      rw [chartScalar_square]
-    _ = _ := by rw [← Category.assoc, e.inv_hom_id, Category.id_comp]
+  let g : structureModule (Spec (CommRingCat.of (AffineRing i))) ⟶ affineIdeal i :=
+    tilde.map (R := CommRingCat.of (AffineRing i))
+      (M := ModuleCat.of (AffineRing i) (AffineRing i))
+      (N := ModuleCat.of (AffineRing i) F.leftIdeal) (leftGeneratorMap F a)
+  let j : affineIdeal i ⟶ structureModule (Spec (CommRingCat.of (AffineRing i))) :=
+    tilde.map (R := CommRingCat.of (AffineRing i))
+      (M := ModuleCat.of (AffineRing i) F.leftIdeal)
+      (N := ModuleCat.of (AffineRing i) (AffineRing i)) (functionalMap F v)
+  let L : structureModule (Spec (CommRingCat.of (AffineRing i))) ⟶
+      structureModule (Spec (CommRingCat.of (AffineRing i))) :=
+    tilde.map (R := CommRingCat.of (AffineRing i))
+      (M := ModuleCat.of (AffineRing i) (AffineRing i))
+      (N := ModuleCat.of (AffineRing i) (AffineRing i)) (scalarMap ((F.matrix *ᵥ v) a))
+  have h := transportGenerator T
+    (R := structureModule (Spec (CommRingCat.of (AffineRing i))))
+    (I := affineIdeal i) (O := structureModule (Patch i).toScheme)
+    g j L e (chartScalar i ((F.matrix *ᵥ v) a))
+    (tilde_leftGeneratorMap_functional F v a) (chartScalar_square i ((F.matrix *ᵥ v) a))
+  have h₁ : chartLeftGenerator i a ≫ chartEvaluation t i =
+      (e.inv ≫ T.map g) ≫ (T.map j ≫ e.hom) := by rfl
+  exact h₁.trans h
 
 theorem patchLeftGenerator_evaluation (t : Fin 3 → ℂ) (i : Fin 3) (a : Fin 3) :
     patchLeftGenerator i a ≫ patchEvaluation t i =

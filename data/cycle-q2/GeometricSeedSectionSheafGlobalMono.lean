@@ -16,8 +16,7 @@ The final endpoint chooses this same vector inside any prescribed
 nonempty principal parameter open and retains the original proper flat
 nonempty first-order curve and its literal seed-fiber isomorphism.
 
-Source-only draft: no Lean elaboration, Lake build, or kernel replay was
-run. Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md
 for attribution and the separate remaining residue-exactness theorem.
 -/
 
@@ -40,6 +39,8 @@ functional composed with the original source projection. -/
 theorem globalEvaluation_app_injective_on_patch (t : Fin 3 → ℂ)
     (i : Fin 3) (hreg : ChartRegular t i) (V : Surface.Opens)
     (hi : V ≤ Patch i) : Function.Injective ((globalEvaluation t).app V) := by
+  letI : CommRing Γ(patchStructure (Patch i), V) :=
+    CycleQ2SeedSectionSheafSections.patchSectionsCommRing (Patch i) V
   intro s r h
   apply chartProjection_app_injective i V hi
   apply patchEvaluation_app_injective t i hreg V
