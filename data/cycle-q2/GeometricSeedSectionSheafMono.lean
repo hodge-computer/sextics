@@ -9,7 +9,6 @@ original affine chart isomorphisms, then through the actual open-patch
 pushforwards and section normalization. No affineness assumption on the
 open set is required.
 
-Source-only draft: no Lean elaboration or kernel replay was run.
 Prepared for fqlx with OpenAI ChatGPT assistance; see solution.md.
 -/
 
@@ -26,6 +25,8 @@ open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
 open CycleQ2SeedProjectiveImageChart CycleQ2SeedProjectiveImageCocycle
   CycleQ2GeometricSurfaceDehomogenizedCharts CycleQ2SeedSectionSheaf
   CycleQ2SeedSectionSheafSections CycleQ2SeedSectionSheafEvaluation
+
+attribute [local instance] CycleQ2SeedSectionSheafSections.patchSectionsCommRing
 
 theorem affineInclusion_app_injective (i : Fin 3)
     (U : (Spec (CommRingCat.of (AffineRing i))).Opens) :

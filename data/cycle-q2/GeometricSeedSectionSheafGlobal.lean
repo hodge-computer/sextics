@@ -16,8 +16,7 @@ No existence, compatibility, or gluing hypothesis is supplied by a caller.
 
 Identifying the image with the actual closed-curve kernel, and proving the
 local chart identifications of the descended source, remain separate.
-This is not an affine residue-exactness theorem.  Source-only draft:
-no Lean elaboration or kernel replay was run. Prepared for fqlx with
+This is not an affine residue-exactness theorem. Prepared for fqlx with
 OpenAI ChatGPT assistance; see solution.md for attribution and status.
 -/
 
@@ -187,8 +186,10 @@ with the unchanged original functional on every original chart subopen. -/
 theorem globalEvaluation_on_patch (t : Fin 3 → ℂ) (i : Fin 3)
     (V : Surface.Opens) (hi : V ≤ Patch i) (s : Γ(twistedIdeal, V)) :
     (globalEvaluation t).app V s = evaluatedCoordinate t i V hi s := by
+  change gluedSection t V s = evaluatedCoordinate t i V hi s
   have h := gluedSection_restrict_patch t (le_refl V) i hi s
-  simpa only [targetRes, sourceRes, homOfLE_refl, op_id, Functor.map_id,
+  simpa only [targetRes, sourceRes, homOfLE_refl, op_id,
+    Surface.presheaf.map_id, twistedIdeal.presheaf.map_id,
     ConcreteCategory.id_apply] using h
 
 /-- Uniqueness is with respect to the actual original local evaluations. -/

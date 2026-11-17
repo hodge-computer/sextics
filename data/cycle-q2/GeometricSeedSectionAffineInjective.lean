@@ -15,8 +15,7 @@ target. Its value is the original functional. Injectivity is transported
 to every associated-sheaf section, every original projective chart, and
 the actual pushed-forward evaluation morphisms.
 
-Source-only draft: no Lean elaboration, Lake build, or kernel replay was
-run. Prepared for fqlx with OpenAI ChatGPT assistance; see solution.md
+Prepared for fqlx with OpenAI ChatGPT assistance; see solution.md
 for the geometric route, attribution, and remaining exactness obligation.
 -/
 
@@ -63,6 +62,7 @@ theorem eq_zero_of_away_cover {ι : Type*} (p : ι → R)
     obtain ⟨s, hs⟩ := (IsLocalization.map_eq_zero_iff
       (Submonoid.powers (p i)) (Localization.Away (p i)) x).mp (hx i)
     obtain ⟨n, hn⟩ := s.property
+    change p i ^ n = (s : R) at hn
     refine ⟨n, ?_⟩
     change p i ^ n * x = 0
     rw [hn]
