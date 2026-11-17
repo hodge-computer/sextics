@@ -1,5 +1,38 @@
 # A nonconstructive geometric route for cycle-q2
 
+## The protected form at the generic point
+
+Let \(J\) be the Jacobian chart on which the protected four-form is regular.
+Use its volume frame to write the exterior derivative from three-forms to
+four-forms as a map of additive sheaves. Let \(s\) be the image of the
+protected four-form in the cokernel sheaf. Lean proves
+\[
+  (\exists\eta\in\Omega^3_{\mathbb C(J)/\mathbb C},\ d\eta=\rho)
+  \quad\Longleftrightarrow\quad s_{\mathrm{gen}}=0 .
+\]
+Indeed, a rational primitive extends to a nonempty principal open. Conversely,
+if the cokernel germ vanishes, the section has a local preimage under the
+actual exterior derivative on a nonempty principal open. Passing that regular
+three-form to the function field gives the requested primitive. Showing that
+this particular germ vanishes remains the open step. [Generic-germ equivalence](GeometricLiteralResidueExactness.lean)
+
+## Canonical cohomology on the three coordinate opens
+
+Every class in \(H^2(D,K_D)\) is the image of a section on the triple
+coordinate overlap. To prove surjectivity, trivialize \(K_D\) on each of
+the three coordinate opens and use two Mayer–Vietoris sequences. The proof
+uses degree-two vanishing on the individual affine charts and degree-one
+vanishing on their pairwise intersections.
+[Triple-overlap representatives](GeometricLiteralCanonicalH2Surjective.lean)
+and [affine degree-two vanishing](GeometricAffineHTwo.lean)
+
+For the literal cyclic projective automorphism \(a\), the product of the
+three original Cartier transition systems has derived Chern class
+\(c_1(C)+c_1(a^*C)+c_1((a^2)^*C)\). All three transitions are evaluated
+on the common refinement, where the logarithmic differential of their
+product is the sum of the logarithmic differentials.
+[Orbit Chern class](GeometricLiteralOrbitChern.lean)
+
 ## The hyperplane twist has zero cotangent boundary
 
 On an overlap of the original projective charts, the unit \(X_v/X_u\)
