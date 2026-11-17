@@ -1,6 +1,115 @@
 # A nonconstructive geometric route for cycle-q2
 
-## Checked continuation: original Cartier transitions on the native intersections
+## Checked continuation: the original coordinate frame-gauge identity
+
+**17 November 2026. The protected certificate remains incomplete.**
+The native splitting derivations, actual normalized Cartier transitions,
+and their universal logarithmic differentials now satisfy the local
+frame-gauge comparison
+\[
+ K^{\mathrm{native}}_{uvw,S}
+ =\pi_0 K^{\mathrm{cone}}_{uvw,S}-(\delta H)_{uvw,S}.
+\]
+Every entry is defined from the original rings, epsilon normalization,
+chosen splittings, and lifted transitions. The correction, gauge, and
+both cup representatives commute with the actual structure-ring
+restrictions. The exact instance, manifest, and original existence
+obligation remain unchanged.
+
+[GeometricLiteralIntersectionEpsilonTransport.lean](GeometricLiteralIntersectionEpsilonTransport.lean)
+constructs the faithful epsilon coefficient equivalence on the ordinary
+product localization of each actual intersection. Its reduced module
+action is induced by the original reduction. The genuine degree-zero
+projection preserves this coefficient map. `transported_epsilon` proves
+that transport of the original cone coefficient map has precisely the
+same normalization, retaining all localization torsion.
+
+[GeometricLiteralIntersectionSplittingTransport.lean](GeometricLiteralIntersectionSplittingTransport.lean)
+proves that the transported original overlap splitting equals the
+ordinary intersection splitting. Both extend the same already chosen
+original singleton map. The proof first fixes their values on original
+numerators, then uses localization uniqueness. The transported
+splitting-difference derivation is the ordinary intersection derivation,
+and its degree-zero projection on native inputs equals the existing
+native complex derivation.
+
+[GeometricLiteralIntersectionCorrectionTransport.lean](GeometricLiteralIntersectionCorrectionTransport.lean)
+compares the actual transition-correction coefficients. Transport of an
+original cone correction is the ordinary correction of the transported
+unit. If \(U\) is a native unit, then
+\[
+ c^{\mathrm{native}}_a(U)
+ =\pi_0 c^{\mathrm{ordinary}}_a(U^{\mathrm{val}}).
+\]
+The proof uses homogeneous-fraction linearity of projection; it does
+not assume that the chosen ordinary splitting preserves degrees.
+
+For \(d=(2,2,0,0)\) and original vertices \(v=(a,l)\),
+\(w=(b,m)\),
+[GeometricLiteralNativeFrameGauge.lean](GeometricLiteralNativeFrameGauge.lean)
+proves the original coordinate-power identity on all sixteen oriented
+pairs. Define the actual coordinate error and one-cochain by
+\[
+ A_{a,S}^{v}=\pi_0 c^{\mathrm{ordinary}}_a(\widetilde X_v),
+ \qquad H_{vw,S}=d_b A_{a,S}^{w}-d_a A_{a,S}^{v}.
+\]
+Here \(\widetilde X_v\) is the original invertible coordinate unit
+in that actual product localization. The theorem
+`nativeCorrection_frameGauge` proves
+\[
+ c^{\mathrm{native}}_{v,S}(\widetilde T_{vw,S})
+ =\pi_0 c^{\mathrm{ordinary}}_{v,S}(\widetilde t_{vw,S})+H_{vw,S}.
+\]
+The difference of two coordinate errors is also identified with
+projection of the ordinary splitting-difference contraction on the
+universal logarithmic differential of that original coordinate.
+
+[GeometricLiteralNativeCupFrameGauge.lean](GeometricLiteralNativeCupFrameGauge.lean)
+defines the native scalar cup from the existing native complex
+derivation and the universal logarithmic differential of the actual
+inverse-ideal transition. It proves the displayed cup comparison, with
+\[
+ (\delta H)_{uvw,S}=H_{vw,S}-H_{uw,S}+H_{uv,S}.
+\]
+For the repeated-index triple \((0,l),(1,m),(1,n)\), the original
+cone last transition is one, but the native cup is proved equal to
+\[
+ 2\bigl((A_0^{(1,n)}-A_1^{(1,n)})
+       -(A_0^{(1,m)}-A_1^{(1,m)})\bigr).
+\]
+This term is retained by the frame-gauge coboundary. No vanishing of
+these mixed-coordinate native cups is asserted.
+
+[GeometricLiteralNativeGaugeNaturality.lean](GeometricLiteralNativeGaugeNaturality.lean)
+proves compatibility of the ordinary and native corrections, coordinate
+errors, original cone transitions, frame gauge, both scalar cups, and
+gauge coboundary with the actual native structure-sheaf restrictions.
+[GeometricLiteralNativeCupOriginalFaces.lean](GeometricLiteralNativeCupOriginalFaces.lean)
+binds the transported cone contraction to the existing original
+`contractionOn`. On the actual refined 012 and 013 faces its projection
+is exactly the image of the previously checked original face
+representative, using the original restricted `lifted12` and `lifted13`.
+The 023 and 123 entries are proved zero.
+
+All 546 local development compilation units pass (525 proposal Lean
+modules, 20 shared modules, and the generated target). All 187 helpers
+changed since commit `37537c2` have matching successful independent
+kernel-replay receipts for their current sources and objects. The seven
+new helper endpoint reports use only `propext`, `Classical.choice`, and
+`Quot.sound`.
+
+The next descent step must compare projection after the actual closed
+transport with restriction of the earlier original projective section
+projection. The natural cup and frame gauge can then be assembled in
+the existing refined Čech complex and compared with the earlier nonzero
+derived scalar class. Identifying the actual differential-sheaf Chern
+and Kodaira--Spencer classes remains a further obligation. The
+Abel--Jacobi/cylinder comparison, supported geometric variation, and
+source-specific global de Rham comparison also remain open. The
+protected certificate still depends on `sorryAx`; protected `solve/lean`
+verification has not passed.
+
+## Earlier checkpoint: original Cartier transitions on the native intersections
 
 **17 November 2026. The protected certificate remains incomplete.**
 The six original lifted cone transitions now have actual degree-zero
