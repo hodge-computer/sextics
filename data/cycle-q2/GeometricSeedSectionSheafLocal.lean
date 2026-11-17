@@ -13,7 +13,6 @@ the prescribed negative-fourth-power transfers. Their original unit
 cocycle constructs an inverse section in the native kernel, and hence an
 actual isomorphism from the restricted source to each original chart ideal.
 
-Source-only draft: no Lean elaboration or kernel replay was run.
 Prepared for fqlx with OpenAI ChatGPT assistance; see solution.md.
 -/
 
@@ -48,7 +47,7 @@ theorem moduleRes_comp (M : X.Modules) {U V W : X.Opens}
 @[simp] theorem moduleRes_refl (M : X.Modules) (V : X.Opens) (s : Γ(M, V)) :
     moduleRes M (le_refl V) s = s := by
   change M.presheaf.map (𝟙 (op V)) s = s
-  simp only [Functor.map_id, ConcreteCategory.id_apply]
+  simp only [M.presheaf.map_id, ConcreteCategory.id_apply]
 
 theorem moduleRes_app {M N : X.Modules} (f : M ⟶ N)
     {V W : X.Opens} (h : W ≤ V) (s : Γ(M, V)) :
@@ -97,6 +96,39 @@ theorem pushforwardInfEquiv_symm_restrict_subopen (U : X.Opens)
 
 end Restrictions
 
+def idealPatchInfEquiv (i : Fin 3) (V : Surface.Opens) :
+    Γ(idealPatch i, V) ≃+ Γ(idealPatch i, V ⊓ Patch i) :=
+  pushforwardInfEquiv (X := Surface) (Patch i) (chartIdeal i) V
+
+theorem idealPatchInfEquiv_apply (i : Fin 3) (V : Surface.Opens)
+    (s : Γ(idealPatch i, V)) :
+    idealPatchInfEquiv i V s =
+      moduleRes (X := Surface) (idealPatch i) (show V ⊓ Patch i ≤ V from inf_le_left) s :=
+  pushforwardInfEquiv_apply (X := Surface) (Patch i) (chartIdeal i) V s
+
+theorem idealPatchInfEquiv_symm_restrict_subopen (i : Fin 3)
+    (V W : Surface.Opens) (hWV : W ≤ V) (hWi : W ≤ Patch i)
+    (s : Γ(idealPatch i, V ⊓ Patch i)) :
+    moduleRes (X := Surface) (idealPatch i) hWV ((idealPatchInfEquiv i V).symm s) =
+      moduleRes (X := Surface) (idealPatch i) (le_inf hWV hWi) s :=
+  pushforwardInfEquiv_symm_restrict_subopen (X := Surface)
+    (Patch i) (chartIdeal i) V W hWV hWi s
+
+def pairPatchInfEquiv (i j : Fin 3) (V : Surface.Opens) :
+    Γ(patchStructure (PairPatch i j), V) ≃+
+      Γ(patchStructure (PairPatch i j), V ⊓ PairPatch i j) :=
+  pushforwardInfEquiv (X := Surface) (PairPatch i j)
+    (structureModule (PairPatch i j).toScheme) V
+
+theorem pairPatchInfEquiv_apply (i j : Fin 3) (V : Surface.Opens)
+    (s : Γ(patchStructure (PairPatch i j), V)) :
+    pairPatchInfEquiv i j V s = moduleRes (X := Surface) (patchStructure (PairPatch i j))
+      (show V ⊓ PairPatch i j ≤ V from inf_le_left) s :=
+  pushforwardInfEquiv_apply (X := Surface) (PairPatch i j)
+    (structureModule (PairPatch i j).toScheme) V s
+
+set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency.types true in
 /-- On each original chart, its projection already detects every section
 of the independent global source.  The other coordinates are forced by
 the original transition equation and the literal ideal embeddings. -/
@@ -106,23 +138,24 @@ theorem chartProjection_app_injective (i : Fin 3) (V : Surface.Opens)
   apply sourceFamily_injective V
   funext j
   change (chartProjection j).app V s = (chartProjection j).app V t
-  apply (pushforwardInfEquiv (Patch j) (chartIdeal j) V).injective
-  rw [pushforwardInfEquiv_apply, pushforwardInfEquiv_apply]
+  apply (idealPatchInfEquiv j V).injective
+  rw [idealPatchInfEquiv_apply, idealPatchInfEquiv_apply]
   apply idealCoordinate_injective j (V ⊓ Patch j) inf_le_right
-  rw [moduleRes_app, moduleRes_app]
+  rw [moduleRes_app (X := Surface) (M := twistedIdeal) (N := idealPatch j) (chartProjection j),
+    moduleRes_app (X := Surface) (M := twistedIdeal) (N := idealPatch j) (chartProjection j)]
   change sourceCoordinate j (V ⊓ Patch j) inf_le_right
-      (moduleRes twistedIdeal inf_le_left s) =
+      (moduleRes (X := Surface) twistedIdeal inf_le_left s) =
     sourceCoordinate j (V ⊓ Patch j) inf_le_right
-      (moduleRes twistedIdeal inf_le_left t)
+      (moduleRes (X := Surface) twistedIdeal inf_le_left t)
   have hc : sourceCoordinate i V hi s = sourceCoordinate i V hi t :=
     congrArg (idealCoordinate i V hi) hst
   have hr := congrArg (Surface.presheaf.map
     (homOfLE (show V ⊓ Patch j ≤ V from inf_le_left)).op) hc
   rw [sourceCoordinate_restrict, sourceCoordinate_restrict] at hr
   rw [sourceCoordinate_transition j i (V ⊓ Patch j) inf_le_right
-      (inf_le_left.trans hi) (moduleRes twistedIdeal inf_le_left s),
+      (inf_le_left.trans hi) (moduleRes (X := Surface) twistedIdeal inf_le_left s),
     sourceCoordinate_transition j i (V ⊓ Patch j) inf_le_right
-      (inf_le_left.trans hi) (moduleRes twistedIdeal inf_le_left t)]
+      (inf_le_left.trans hi) (moduleRes (X := Surface) twistedIdeal inf_le_left t)]
   exact congrArg (fun a =>
     (transitionUnit j i (V ⊓ Patch j) inf_le_right (inf_le_left.trans hi) :
       Γ(Surface, V ⊓ Patch j)) ^ 4 * a) hr
@@ -163,9 +196,9 @@ theorem overlapTransfer_self (i : Fin 3) (V : Surface.Opens)
 theorem overlapTransfer_restrict (i j : Fin 3) {V W : Surface.Opens}
     (hWV : W ≤ V) (hi : V ≤ Patch i) (hj : V ≤ Patch j)
     (x : Γ(idealPatch i, V)) :
-    moduleRes (idealPatch j) hWV (overlapTransfer i j V hi hj x) =
+    moduleRes (X := Surface) (idealPatch j) hWV (overlapTransfer i j V hi hj x) =
       overlapTransfer i j W (hWV.trans hi) (hWV.trans hj)
-        (moduleRes (idealPatch i) hWV x) := by
+        (moduleRes (X := Surface) (idealPatch i) hWV x) := by
   apply idealCoordinate_injective j W (hWV.trans hj)
   have hu := congrArg (fun u : Γ(Surface, W)ˣ => (u : Γ(Surface, W)))
     (transitionUnit_restrict j i V W hWV hj hi)
@@ -180,32 +213,37 @@ theorem overlapTransfer_restrict (i j : Fin 3) {V W : Surface.Opens}
         ((transitionUnit j i V hj hi : Γ(Surface, V)) ^ 4 *
           idealCoordinate i V hi x) := by rw [overlapTransfer_coordinate]
     _ = (transitionUnit j i W (hWV.trans hj) (hWV.trans hi) : Γ(Surface, W)) ^ 4 *
-        idealCoordinate i W (hWV.trans hi) (moduleRes (idealPatch i) hWV x) := by
+        idealCoordinate i W (hWV.trans hi) (moduleRes (X := Surface) (idealPatch i) hWV x) := by
       rw [map_mul, map_pow, hu, idealCoordinate_restrict]
+      rfl
     _ = _ := (overlapTransfer_coordinate i j W (hWV.trans hi) (hWV.trans hj) _).symm
 
 /-- Starting with one original chart-ideal section, the other components
 are its prescribed negative-fourth-power transfers on the real overlaps. -/
 def chartFamily (i : Fin 3) (V : Surface.Opens) (hi : V ≤ Patch i)
     (x : Γ(idealPatch i, V)) (j : Fin 3) : Γ(idealPatch j, V) :=
-  (pushforwardInfEquiv (Patch j) (chartIdeal j) V).symm
+  (idealPatchInfEquiv j V).symm
     (overlapTransfer i j (V ⊓ Patch j) (inf_le_left.trans hi) inf_le_right
-      (moduleRes (idealPatch i) inf_le_left x))
+      (moduleRes (X := Surface) (idealPatch i) inf_le_left x))
 
+set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency.types true in
 theorem chartFamily_restrict (i j : Fin 3) (V W : Surface.Opens)
     (hi : V ≤ Patch i) (hWV : W ≤ V) (hj : W ≤ Patch j)
     (x : Γ(idealPatch i, V)) :
-    moduleRes (idealPatch j) hWV (chartFamily i V hi x j) =
-      overlapTransfer i j W (hWV.trans hi) hj (moduleRes (idealPatch i) hWV x) := by
+    moduleRes (X := Surface) (idealPatch j) hWV (chartFamily i V hi x j) =
+      overlapTransfer i j W (hWV.trans hi) hj (moduleRes (X := Surface) (idealPatch i) hWV x) := by
   unfold chartFamily
-  rw [pushforwardInfEquiv_symm_restrict_subopen (Patch j) (chartIdeal j) V W hWV hj,
-    overlapTransfer_restrict, moduleRes_comp]
+  rw [idealPatchInfEquiv_symm_restrict_subopen j V W hWV hj,
+    overlapTransfer_restrict, moduleRes_comp (X := Surface)]
 
 theorem chartFamily_self (i : Fin 3) (V : Surface.Opens)
     (hi : V ≤ Patch i) (x : Γ(idealPatch i, V)) : chartFamily i V hi x i = x := by
   have h := chartFamily_restrict i i V V hi (le_refl V) hi x
-  simpa only [moduleRes_refl, overlapTransfer_self] using h
+  simpa only [moduleRes_refl (X := Surface), overlapTransfer_self] using h
 
+set_option backward.isDefEq.respectTransparency true in
+set_option backward.isDefEq.respectTransparency.types true in
 theorem chartFamily_compatible (i : Fin 3) (V : Surface.Opens)
     (hi : V ≤ Patch i) (x : Γ(idealPatch i, V)) :
     FamilyCompatible V (chartFamily i V hi x) := by
@@ -215,34 +253,39 @@ theorem chartFamily_compatible (i : Fin 3) (V : Surface.Opens)
   have hWj : W ≤ Patch j := inf_le_right.trans inf_le_left
   have hWk : W ≤ Patch k := inf_le_right.trans inf_le_right
   have hWi : W ≤ Patch i := hWV.trans hi
-  apply (pushforwardInfEquiv (PairPatch j k)
-    (structureModule (PairPatch j k).toScheme) V).injective
-  rw [pushforwardInfEquiv_apply, pushforwardInfEquiv_apply]
-  rw [moduleRes_app (leftIdealToPair j k), moduleRes_app (pairTwist j k),
-    moduleRes_app (rightIdealToPair j k)]
+  letI : CommRing Γ(patchStructure (PairPatch j k), W) :=
+    CycleQ2SeedSectionSheafSections.patchSectionsCommRing (PairPatch j k) W
+  apply (pairPatchInfEquiv j k V).injective
+  rw [pairPatchInfEquiv_apply, pairPatchInfEquiv_apply]
+  rw [moduleRes_app (X := Surface) (M := idealPatch j)
+      (N := patchStructure (PairPatch j k)) (leftIdealToPair j k),
+    moduleRes_app (X := Surface) (M := patchStructure (PairPatch j k))
+      (N := patchStructure (PairPatch j k)) (pairTwist j k),
+    moduleRes_app (X := Surface) (M := idealPatch k)
+      (N := patchStructure (PairPatch j k)) (rightIdealToPair j k)]
   change (leftIdealToPair j k).app W
-      (moduleRes (idealPatch j) hWV (chartFamily i V hi x j)) =
+      (moduleRes (X := Surface) (idealPatch j) hWV (chartFamily i V hi x j)) =
     (pairTwist j k).app W ((rightIdealToPair j k).app W
-      (moduleRes (idealPatch k) hWV (chartFamily i V hi x k)))
+      (moduleRes (X := Surface) (idealPatch k) hWV (chartFamily i V hi x k)))
   rw [chartFamily_restrict i j V W hi hWV hWj,
     chartFamily_restrict i k V W hi hWV hWk]
   apply (patchSectionsEquiv (PairPatch j k) W (le_inf hWj hWk)).injective
   change patchSectionsEquiv (PairPatch j k) W (le_inf hWj hWk)
       ((patchStructureRestriction (show PairPatch j k ≤ Patch j from inf_le_left)).app W
         ((idealPatchInclusion j).app W
-          (overlapTransfer i j W hWi hWj (moduleRes (idealPatch i) hWV x)))) =
+          (overlapTransfer i j W hWi hWj (moduleRes (X := Surface) (idealPatch i) hWV x)))) =
     patchSectionsEquiv (PairPatch j k) W (le_inf hWj hWk)
       ((pairTwist j k).app W
         ((patchStructureRestriction (show PairPatch j k ≤ Patch k from inf_le_right)).app W
           ((idealPatchInclusion k).app W
-            (overlapTransfer i k W hWi hWk (moduleRes (idealPatch i) hWV x)))))
+            (overlapTransfer i k W hWi hWk (moduleRes (X := Surface) (idealPatch i) hWV x)))))
   rw [patchSectionsEquiv_patchRestriction, pairTwist_coordinate,
     patchSectionsEquiv_patchRestriction]
   change idealCoordinate j W hWj
-      (overlapTransfer i j W hWi hWj (moduleRes (idealPatch i) hWV x)) =
+      (overlapTransfer i j W hWi hWj (moduleRes (X := Surface) (idealPatch i) hWV x)) =
     (transitionUnit j k W hWj hWk : Γ(Surface, W)) ^ 4 *
       idealCoordinate k W hWk
-        (overlapTransfer i k W hWi hWk (moduleRes (idealPatch i) hWV x))
+        (overlapTransfer i k W hWi hWk (moduleRes (X := Surface) (idealPatch i) hWV x))
   rw [overlapTransfer_coordinate, overlapTransfer_coordinate]
   have hu' := congrArg (fun u : Γ(Surface, W)ˣ => (u : Γ(Surface, W)))
     (transitionUnit_cocycle j k i W hWj hWk hWi)
