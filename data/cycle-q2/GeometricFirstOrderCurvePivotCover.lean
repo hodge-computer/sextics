@@ -16,7 +16,6 @@ entire coordinate chart. The final existence theorem retains the same
 nonzero complex section vector on all four coordinate charts. No
 nonempty curve or flatness over the full parameter base is asserted.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for `fqlx` with OpenAI ChatGPT assistance, following Ben Diamond
 and the collaborators credited in solution.md.
 -/
@@ -39,7 +38,16 @@ open CycleQ2IncidenceUniversalChart CycleQ2IncidenceEtaleParameter
   CycleQ2IncidenceFirstOrder CycleQ2FirstOrderChartReduction
   CycleQ2FirstOrderCurveChartFlat
 
-attribute [local instance] firstOrderAlgebra
+attribute [local instance] CycleQ2FirstOrderTensorReduction.parameterFirstOrderAlgebra
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderModule
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderSMul
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderTower
+  CycleQ2FirstOrderTensorReduction.firstOrderTensorCommRing
+  CycleQ2FirstOrderChartFlatness.firstOrderTensorModule
+  CycleQ2FirstOrderChartFlatness.firstOrderTensorSMul
+  CycleQ2RelativeCurveChart.pointSurfaceCommRing
+  CycleQ2RelativeCurveChart.dehomogenizedCommRing
+  CycleQ2RelativeCurveChartFiber.incidenceCurveChartCommRing
 
 /-- The original surface coordinates, followed by the actual curve
 quotient and the actual first-order coefficient extension. -/
@@ -72,7 +80,7 @@ theorem exists_curvePivot_not_mem (t : Fin 3 → ℂ) (i : Fin 4)
     change surfaceToFirstOrderCurveChart t i
       (surfaceQuotient incidencePoint (X i.castSucc)) ∉ x.asIdeal
     rw [surfaceToFirstOrderCurveChart_self]
-    exact x.isPrime.one_not_mem
+    exact x.isPrime.one_notMem
   have hbasepoint : IsUnit
       (aeval incidencePoint CycleQ2IncidenceBasepointOpen.basepointPolynomial) :=
     tracePoint_extra_unit splitting.P splitting.B _ sliceCoordinate incidence_isTracePoint
@@ -90,6 +98,7 @@ theorem curvePivot_span (t : Fin 3 → ℂ) (i : Fin 4) :
   obtain ⟨m, hm, hle⟩ := Ideal.exists_le_maximal
     (Ideal.span (Set.range (curvePivot t i))) hproper
   letI : m.IsMaximal := hm
+  letI : m.IsPrime := hm.isPrime
   obtain ⟨p, hp⟩ := exists_curvePivot_not_mem t i ⟨m, inferInstance⟩
   exact hp (hle (Ideal.subset_span ⟨p, rfl⟩))
 

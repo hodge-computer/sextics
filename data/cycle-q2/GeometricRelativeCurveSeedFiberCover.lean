@@ -12,7 +12,6 @@ with the already computed projective curve chart fiber. Both projection
 identities are retained. The canonical global seed map pulls these
 opens back to the existing specialized curve coordinate opens.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -63,6 +62,7 @@ def fiberCoordinatePatchIso :
       (curveCoordinatePatch incidencePoint t i)).hom) ≫
       (fiberCoordinatePatch t i).ι ≫
         pullback.fst seedParameterMorphism (relativeCurveToBase incidencePoint t) = _
+  dsimp only [fiberCoordinatePatch, projectiveCurveChartToParameters]
   simp only [Category.assoc, pullbackRestrictIsoRestrict_hom_ι_assoc,
     pullbackLeftPullbackSndIso_inv_fst]
 
@@ -78,6 +78,7 @@ def fiberCoordinatePatchIso :
       (curveCoordinatePatch incidencePoint t i)).hom) ≫
       (fiberCoordinatePatch t i).ι ≫
         pullback.snd seedParameterMorphism (relativeCurveToBase incidencePoint t) = _
+  dsimp only [fiberCoordinatePatch, projectiveCurveChartToParameters]
   simp only [Category.assoc, pullbackRestrictIsoRestrict_hom_ι_assoc,
     pullbackLeftPullbackSndIso_inv_fst_snd]
 

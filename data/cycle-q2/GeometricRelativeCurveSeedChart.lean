@@ -15,7 +15,6 @@ weight-one coordinate open. This supplies compatibility of the local
 fiber comparisons with the global map, rather than inferring gluing
 from independent local isomorphisms.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md for
 attribution of the geometric route and the protected certificate gap.
 -/
@@ -39,6 +38,18 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceUniversalChart CycleQ2IncidenceI
   CycleQ2RelativeCurveChartFiber CycleQ2RelativeCurveSeedMap
   CycleQ2RelativeCurveSeedProj CycleQ2SpecializedProjectiveCurve
   CycleQ2SpecializedCurveCoordinateChart CycleQ2GradedAwaySpecialization
+
+attribute [local instance] CycleQ2RelativeCurveSeedMap.incidenceSurfaceCommRing
+  CycleQ2RelativeCurveSeedMap.seedSurfaceCommRing
+  CycleQ2RelativeCurveSeedMap.relativeCurveCommRing
+  CycleQ2RelativeCurveSeedMap.specializedCurveCommRing
+  CycleQ2RelativeCurveChartScheme.curveCoordinateCommRing
+  CycleQ2RelativeCurveChart.coordinateRingCommRing
+  CycleQ2RelativeCurveChart.coordinateLocalizationCommRing
+  CycleQ2RelativeCurveChart.dehomogenizedCommRing
+  CycleQ2SpecializedCurveCoordinateChart.specializedCoordinateCommRing
+  CycleQ2RelativeCurveChartFiber.incidenceCurveChartCommRing
+  CycleQ2RelativeCurveChartFiber.seedCurveChartCommRing
 
 private theorem seedPolynomial_homogeneous {p : MvPolynomial (Fin 5) ParameterAlgebra}
     {n : ℕ} (hp : p.IsWeightedHomogeneous geometricWeight n) :
@@ -66,6 +77,15 @@ theorem seedCurveCoordinateSpecialization_fraction (t : Fin 3 → ℂ) (i : Fin 
       specializedCoordinateMap (seedPoint (57 : ℂ) Complex.I) t i
         (homogeneousFraction (seedPoint (57 : ℂ) Complex.I) i n
           (MvPolynomial.map seedMap p) (seedPolynomial_homogeneous hp)) := by
+  have hpSource : surfaceQuotient incidencePoint p ∈ surfaceGrade incidencePoint (n • (1 : ℕ)) := by
+    simpa only [smul_eq_mul, mul_one] using
+      (show surfaceQuotient incidencePoint p ∈ surfaceGrade incidencePoint n from ⟨p, hp, rfl⟩)
+  have hpTarget : surfaceQuotient (seedPoint (57 : ℂ) Complex.I) (MvPolynomial.map seedMap p) ∈
+      surfaceGrade (seedPoint (57 : ℂ) Complex.I) (n • (1 : ℕ)) := by
+    simpa only [smul_eq_mul, mul_one] using
+      (show surfaceQuotient (seedPoint (57 : ℂ) Complex.I) (MvPolynomial.map seedMap p) ∈
+        surfaceGrade (seedPoint (57 : ℂ) Complex.I) n from
+          ⟨MvPolynomial.map seedMap p, seedPolynomial_homogeneous hp, rfl⟩)
   change awayMapOfEq (seedCurveGradedMap t) _ _ _
     (Away.map (relativeCurveRingMap incidencePoint t) _
       (Away.mk (surfaceGrade incidencePoint) (coordinate_mem_grade incidencePoint i)
@@ -74,10 +94,28 @@ theorem seedCurveCoordinateSpecialization_fraction (t : Fin 3 → ℂ) (i : Fin 
       (Away.mk (surfaceGrade (seedPoint (57 : ℂ) Complex.I))
         (coordinate_mem_grade (seedPoint (57 : ℂ) Complex.I) i)
         n (surfaceQuotient (seedPoint (57 : ℂ) Complex.I) (MvPolynomial.map seedMap p)) _)
-  rw [Away.map_mk, awayMapOfEq_mk (seedCurveGradedMap t) _ _ _
+  have hsource := Away.map_mk (relativeCurveRingMap incidencePoint t)
+    (surfaceQuotient incidencePoint (X i.castSucc)) (coordinate_mem_grade incidencePoint i)
+      n (surfaceQuotient incidencePoint p) hpSource
+  refine (congrArg (awayMapOfEq (seedCurveGradedMap t)
+    (relativeCurveRingMap incidencePoint t (surfaceQuotient incidencePoint (X i.castSucc)))
+    (specializedCurveRingMap (seedPoint (57 : ℂ) Complex.I) t
+      (surfaceQuotient (seedPoint (57 : ℂ) Complex.I) (X i.castSucc)))
+    (seedCurveGradedMap_coordinate t i.castSucc)) hsource).trans ?_
+  refine (awayMapOfEq_mk (seedCurveGradedMap t)
+    (relativeCurveRingMap incidencePoint t (surfaceQuotient incidencePoint (X i.castSucc)))
+    (specializedCurveRingMap (seedPoint (57 : ℂ) Complex.I) t
+      (surfaceQuotient (seedPoint (57 : ℂ) Complex.I) (X i.castSucc)))
+    (seedCurveGradedMap_coordinate t i.castSucc)
     ((relativeCurveRingMap incidencePoint t).2 (coordinate_mem_grade incidencePoint i))
     ((specializedCurveRingMap (seedPoint (57 : ℂ) Complex.I) t).2
-      (coordinate_mem_grade (seedPoint (57 : ℂ) Complex.I) i)), Away.map_mk]
+      (coordinate_mem_grade (seedPoint (57 : ℂ) Complex.I) i))
+    n (relativeCurveRingMap incidencePoint t (surfaceQuotient incidencePoint p))
+      ((relativeCurveRingMap incidencePoint t).2 hpSource)).trans ?_
+  refine Eq.trans ?_ (Away.map_mk (specializedCurveRingMap (seedPoint (57 : ℂ) Complex.I) t)
+    (surfaceQuotient (seedPoint (57 : ℂ) Complex.I) (X i.castSucc))
+    (coordinate_mem_grade (seedPoint (57 : ℂ) Complex.I) i)
+      n (surfaceQuotient (seedPoint (57 : ℂ) Complex.I) (MvPolynomial.map seedMap p)) hpTarget).symm
   have hnum : seedCurveGradedMap t (relativeCurveRingMap incidencePoint t
         (surfaceQuotient incidencePoint p)) =
       specializedCurveRingMap (seedPoint (57 : ℂ) Complex.I) t
@@ -87,7 +125,8 @@ theorem seedCurveCoordinateSpecialization_fraction (t : Fin 3 → ℂ) (i : Fin 
         (Ideal.Quotient.mk (pointEquations incidencePoint) p)) = _
     rw [seedCurveRingSpecialization_mk, seedSurfaceSpecialization_mk]
     rfl
-  rw [hnum]
+  apply HomogeneousLocalization.val_injective
+  simp only [Away.val_mk, hnum]
 
 /-- The canonical global graded specialization is the already computed
 affine quotient specialization in the exact original chart coordinates. -/
@@ -114,8 +153,8 @@ theorem seedCurveCoordinateSpecialization_chart (t : Fin 3 → ℂ) (i : Fin 4)
 theorem seedCurveToRelative_preimage_coordinatePatch (t : Fin 3 → ℂ) (i : Fin 4) :
     seedCurveToRelative t ⁻¹ᵁ curveCoordinatePatch incidencePoint t i =
       specializedCoordinatePatch (seedPoint (57 : ℂ) Complex.I) t i := by
-  rw [curveCoordinatePatch, seedCurveToRelative, Proj.map_preimage_basicOpen,
-    seedCurveGradedMap_coordinate]
+  rw [curveCoordinatePatch, seedCurveToRelative, Proj.map_preimage_basicOpen]
+  erw [seedCurveGradedMap_coordinate]
   rfl
 
 @[reassoc] theorem seedCurveCoordinateSpecialization_awayι (t : Fin 3 → ℂ) (i : Fin 4) :
@@ -172,9 +211,18 @@ used in projectiveCurveChartSeedFiberIso. -/
           (relativeCurveRingMap incidencePoint t (surfaceQuotient incidencePoint (X i.castSucc)))
           ((relativeCurveRingMap incidencePoint t).2 (coordinate_mem_grade incidencePoint i))
           (by decide)).inv) ≫ (curveCoordinatePatch incidencePoint t i).ι
+  dsimp only [specializedCoordinatePatch, curveCoordinatePatch]
   simp only [Category.assoc, Proj.basicOpenIsoSpec_inv_ι_assoc,
     Proj.basicOpenIsoSpec_inv_ι]
-  rw [seedCurveCoordinateSpecialization_awayι, ← Category.assoc, hspec, Category.assoc]
+  rw [seedCurveCoordinateSpecialization_awayι t i]
+  have h := congrArg
+    (fun f : Spec (CommRingCat.of (AffineCurveChart (seedPoint (57 : ℂ) Complex.I) t i)) ⟶
+      Spec (CommRingCat.of (CurveCoordinateRing incidencePoint t i)) =>
+        f ≫ Proj.awayι (relativeCurveGrade incidencePoint t)
+          (relativeCurveRingMap incidencePoint t (surfaceQuotient incidencePoint (X i.castSucc)))
+          ((relativeCurveRingMap incidencePoint t).2 (coordinate_mem_grade incidencePoint i))
+          (by decide)) hspec
+  simpa only [Category.assoc] using h
 
 #print axioms seedCurveCoordinateSpecialization_fraction
 #print axioms seedCurveCoordinateSpecialization_chart

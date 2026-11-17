@@ -17,7 +17,6 @@ has already been proved for all prime points. Flatness on the displayed
 tensor algebras therefore implies flatness of this actual curve morphism.
 Supplying that algebraic flatness is a separate local equation obligation.
 
-Source-only draft: no elaboration, compilation, or kernel replay was run.
 Prepared for `fqlx` with OpenAI ChatGPT assistance, following Ben Diamond
 and the geometric strategy credited in solution.md.
 -/
@@ -64,7 +63,8 @@ theorem originalCurveChart_overBase :
 
 theorem originalCurveChart_opensRange :
     (originalCurveChart t i).opensRange = curveCoordinatePatch incidencePoint t i := by
-  rw [originalCurveChart, Scheme.Hom.opensRange_comp_of_isIso]
+  dsimp only [originalCurveChart]
+  rw [Scheme.Hom.opensRange_comp_of_isIso]
   exact (curveCoordinatePatch incidencePoint t i).opensRange_ι
 
 /-- The exact tensor chart of the original curve maps into its actual base change. -/
@@ -101,7 +101,8 @@ instance firstOrderChartToCurve_isOpenImmersion :
 theorem firstOrderChartToCurve_opensRange :
     (firstOrderChartToCurve t i).opensRange =
       firstOrderCurveToOriginalCurve t ⁻¹ᵁ curveCoordinatePatch incidencePoint t i := by
-  rw [firstOrderChartToCurve, tensorChartToSource_opensRange,
+  dsimp only [firstOrderChartToCurve]
+  rw [tensorChartToSource_opensRange,
     originalCurveChart_opensRange]
 
 def firstOrderCurveCoordinateOpen : (firstOrderCurve t).Opens :=

@@ -16,7 +16,6 @@ criterion then give flatness of these actual curve localizations.
 
 This is a first-order flatness assertion. It does not assert nonempty
 or smooth curves, full-parameter flatness, or an Abel--Jacobi comparison.
-Source-only draft: compilation and kernel replay are deferred.
 Prepared for fqlx with OpenAI ChatGPT assistance, following the geometric
 strategy credited to Ben Diamond and the project in solution.md.
 -/
@@ -44,7 +43,17 @@ open CycleQ2IncidenceNormalForm CycleQ2IncidenceEquations
   CycleQ2UniversalCurveCartier CycleQ2RelativeConstantSection
   CycleQ2RelativeSectionIdeal CycleQ2RelativeCurveChart
 
-attribute [local instance] firstOrderAlgebra CycleQ2IncidenceSeedFiber.seedAlgebra
+attribute [local instance] CycleQ2IncidenceSeedFiber.seedAlgebra
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderAlgebra
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderModule
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderSMul
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderTower
+  CycleQ2FirstOrderTensorReduction.firstOrderTensorCommRing
+  CycleQ2FirstOrderChartFlatness.firstOrderTensorModule
+  CycleQ2FirstOrderChartFlatness.firstOrderTensorSMul
+  CycleQ2RelativeCurveChart.pointSurfaceCommRing
+  CycleQ2RelativeCurveChart.dehomogenizedCommRing
+  CycleQ2RelativeCurveChartFiber.incidenceCurveChartCommRing
 
 section OriginalRows
 
@@ -70,7 +79,7 @@ def dehomogenizedSurfaceMap (y : ParameterIndex → S) (i : Fin 4) :
   toRingHom := surfaceToDehomogenized y i
   commutes' a := by
     change dehomogenizedMap y i (dehomogenize i (C a)) = _
-    rw [AlgHom.commutes]
+    rw [MvPolynomial.algHom_C]
     rfl
 
 theorem affineSectionEquation_eq_sum (y : ParameterIndex → S) (t : Fin 3 → ℂ)
@@ -100,7 +109,7 @@ theorem image_rows_principal [Nontrivial S] (y : ParameterIndex → S)
     IsLocalization.Away.lift_comp (basePivot y p) hp
   have h := congrArg (Ideal.map g) (ordinaryRelativeIdeal_principal y t he hu p)
   simpa only [Ideal.map_map, hcomp, relativeSectionIdeal, Ideal.map_span,
-    Set.image_range, Set.image_singleton, g, Localization.awayLift,
+    ← Set.range_comp, Function.comp_def, Set.image_singleton, g, Localization.awayLift,
     IsLocalization.Away.lift_eq] using h
 
 end OriginalRows
@@ -126,6 +135,11 @@ abbrev RefinedCurveChart (t : Fin 3 → ℂ) (i : Fin 4)
     (p : CycleQ2SegreCech.Chart) :=
   Localization.Away (curvePivot t i p)
 
+local instance refinedSurfaceCommRing (i : Fin 4) (p : CycleQ2SegreCech.Chart) :
+    CommRing (RefinedSurfaceChart i p) := inferInstance
+local instance refinedCurveCommRing (t : Fin 3 → ℂ) (i : Fin 4) (p : CycleQ2SegreCech.Chart) :
+    CommRing (RefinedCurveChart t i p) := inferInstance
+
 def firstOrderRowIdeal (t : Fin 3 → ℂ) (i : Fin 4) :
     Ideal (FirstOrderSurfaceChart i) :=
   (affineSectionIdeal incidencePoint t i).map
@@ -134,7 +148,7 @@ def firstOrderRowIdeal (t : Fin 3 → ℂ) (i : Fin 4) :
 
 theorem firstOrderRowIdeal_eq (t : Fin 3 → ℂ) (i : Fin 4) :
     firstOrderRowIdeal t i = Ideal.span (Set.range (firstOrderSectionRow t i)) := by
-  simp only [firstOrderRowIdeal, affineSectionIdeal, Ideal.map_span, Set.image_range]
+  simp only [firstOrderRowIdeal, affineSectionIdeal, Ideal.map_span, ← Set.range_comp]
   rfl
 
 def firstOrderRefinedEquation (t : Fin 3 → ℂ) (i : Fin 4)
@@ -152,7 +166,7 @@ theorem refinedRowIdeal_principal (t : Fin 3 → ℂ) (i : Fin 4)
       ((Algebra.TensorProduct.includeRight (R := ParameterAlgebra) (A := ℂ[ε])
         (B := DehomogenizedRing incidencePoint i)).toRingHom.comp
           (surfaceToDehomogenized incidencePoint i))
-  rw [firstOrderRowIdeal_eq, Ideal.map_span, Set.image_range]
+  rw [firstOrderRowIdeal_eq, Ideal.map_span, ← Set.range_comp]
   change Ideal.span (Set.range (fun j => f (relativeEquation incidencePoint t j))) =
     Ideal.span {f (relativeEquation incidencePoint t p.1)}
   apply image_rows_principal incidencePoint t
@@ -183,7 +197,8 @@ def quotientTensorCurveEquiv (t : Fin 3 → ℂ) (i : Fin 4) :
     quotientTensorCurveEquiv t i
       (Ideal.Quotient.mk (firstOrderRowIdeal t i) (firstOrderPivot i p)) =
         curvePivot t i p := by
-  rw [firstOrderPivot, quotientTensorCurveEquiv_mk_tmul]
+  dsimp only [firstOrderPivot]
+  rw [quotientTensorCurveEquiv_mk_tmul]
   rfl
 
 /-- Quotienting the actual localized ambient ring gives the actual
@@ -203,6 +218,9 @@ def seedPivot (i : Fin 4) (p : CycleQ2SegreCech.Chart) :
 
 abbrev SeedRefinement (i : Fin 4) (p : CycleQ2SegreCech.Chart) :=
   Localization.Away (seedPivot i p)
+
+local instance seedRefinementCommRing (i : Fin 4) (p : CycleQ2SegreCech.Chart) :
+    CommRing (SeedRefinement i p) := inferInstance
 
 def seedRefinedCoefficient (i : Fin 4) (p : CycleQ2SegreCech.Chart) (j : Fin 3) :
     SeedRefinement i p :=
@@ -236,7 +254,8 @@ theorem firstOrderPivot_reduction (i : Fin 4) (p : CycleQ2SegreCech.Chart) :
     surfaceChartReductionEquiv i
         (Ideal.Quotient.mk (epsilonIdeal (k := ℂ) (FirstOrderSurfaceChart i))
           (firstOrderPivot i p)) = seedPivot i p := by
-  rw [firstOrderPivot, surfaceChartReductionEquiv_includeRight,
+  dsimp only [firstOrderPivot]
+  rw [surfaceChartReductionEquiv_includeRight,
     seedChartSpecialization_affineMatrixEntry]
 
 def refinedReductionEquiv (i : Fin 4) (p : CycleQ2SegreCech.Chart) :
