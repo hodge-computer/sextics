@@ -16,7 +16,6 @@ The local ideals are the original OrbitIdeal modules, transported along
 the original affine chart isomorphisms and pushed forward to the original
 surface.  All objects and morphisms live in Surface.Modules.
 
-Source-only draft: no Lean elaboration or kernel replay has been run.
 The global evaluation and comparison with the closed-curve ideal are
 subsequent constructions; no certificate exactness is asserted here.
 Prepared for fqlx with OpenAI ChatGPT assistance; see solution.md for the
@@ -39,6 +38,10 @@ open CycleQ2SeedProjectiveImageChart CycleQ2SeedProjectiveImageCocycle
 abbrev structureModule (X : Scheme.{0}) : X.Modules :=
   SheafOfModules.unit X.ringCatSheaf
 
+local instance ringCatSectionsCommRing (X : Scheme.{0}) (O : (Opens X)ᵒᵖ) :
+    CommRing (X.ringCatSheaf.obj.obj O) :=
+  inferInstanceAs (CommRing (X.presheaf.obj O))
+
 section StructureMaps
 
 variable {X Y : Scheme.{0}}
@@ -55,12 +58,12 @@ def openStructureMap (f : X ⟶ Y) [IsOpenImmersion f] :
     (openStructureMap f).app U a = f.app U a := by
   change (f.appIso (f ⁻¹ᵁ U)).hom
       (Y.presheaf.map (homOfLE (f.image_preimage_le U)).op a) = f.app U a
-  have h := congrArg (fun k => k ≫ (f.appIso (f ⁻¹ᵁ U)).hom)
-    (f.app_appIso_inv U)
-  simpa only [Category.assoc, Iso.inv_hom_id, Category.comp_id] using
-    (ConcreteCategory.congr_hom h a).symm
+  have h : f.app U = Y.presheaf.map (homOfLE (f.image_preimage_le U)).op ≫
+      (f.appIso (f ⁻¹ᵁ U)).hom :=
+    (Iso.comp_inv_eq _).mp (f.app_appIso_inv U)
+  simpa only [ConcreteCategory.comp_apply] using (ConcreteCategory.congr_hom h a).symm
 
-theorem openStructureMap_comp {Z : Scheme.{0}} (f : X ⟶ Y) (g : Y ⟶ Z)
+@[reassoc] theorem openStructureMap_comp {Z : Scheme.{0}} (f : X ⟶ Y) (g : Y ⟶ Z)
     [IsOpenImmersion f] [IsOpenImmersion g] :
     openStructureMap g ≫ (Scheme.Modules.pushforward g).map (openStructureMap f) ≫
         (Scheme.Modules.pushforwardComp f g).hom.app (structureModule X) =
@@ -71,7 +74,9 @@ theorem openStructureMap_comp {Z : Scheme.{0}} (f : X ⟶ Y) (g : Y ⟶ Z)
   intro a
   simp only [Scheme.Modules.Hom.comp_app, ConcreteCategory.comp_apply,
     Scheme.Modules.pushforward_map_app, Scheme.Modules.pushforwardComp_hom_app_app,
-    openStructureMap_app] <;> rfl
+    openStructureMap_app]
+  erw [openStructureMap_app f]
+  exact (ConcreteCategory.congr_hom (Scheme.Hom.comp_app f g U) a).symm
 
 theorem openStructureMap_congr {f g : X ⟶ Y} (h : f = g)
     [IsOpenImmersion f] [IsOpenImmersion g] :
@@ -81,14 +86,22 @@ theorem openStructureMap_congr {f g : X ⟶ Y} (h : f = g)
   apply Scheme.Modules.hom_ext
   intro U
   simp only [Scheme.Modules.Hom.comp_app,
-    Scheme.Modules.pushforwardCongr_hom_app_app, eqToHom_refl, op_id,
-    Functor.map_id, Category.comp_id]
+    Scheme.Modules.pushforwardCongr_hom_app_app, eqToHom_refl, op_id]
+  apply ConcreteCategory.hom_ext
+  intro a
+  change X.presheaf.map (𝟙 (op (f ⁻¹ᵁ U))) ((openStructureMap f).app U a) =
+    (openStructureMap f).app U a
+  erw [X.presheaf.map_id (op (f ⁻¹ᵁ U))]
+  rfl
 
 /-- Multiplication by one actual global regular function on every open. -/
 def structureScalar (X : Scheme.{0}) (a : Γ(X, ⊤)) :
     structureModule X ⟶ structureModule X where
-  val.app O := ModuleCat.ofHom
-    { toFun := fun b => X.presheaf.map (homOfLE (show O.unop ≤ ⊤ from le_top)).op a * b
+  val.app O := ModuleCat.ofHom (R := X.ringCatSheaf.obj.obj O)
+    { toFun := fun b =>
+        (show X.ringCatSheaf.obj.obj O from
+          X.presheaf.map (homOfLE (show O.unop ≤ ⊤ from le_top)).op a) *
+            (show X.ringCatSheaf.obj.obj O from b)
       map_add' := by intro b c; exact mul_add _ _ _
       map_smul' := by
         intro b c
@@ -98,10 +111,13 @@ def structureScalar (X : Scheme.{0}) (a : Γ(X, ⊤)) :
     apply ModuleCat.hom_ext
     apply LinearMap.ext
     intro b
-    change X.presheaf.map (homOfLE (show P.unop ≤ ⊤ from le_top)).op a *
-        X.presheaf.map f b =
+    change (show Γ(X, P.unop) from
+        X.presheaf.map (homOfLE (show P.unop ≤ ⊤ from le_top)).op a) *
+        (show Γ(X, P.unop) from X.presheaf.map f b) =
       X.presheaf.map f
-        (X.presheaf.map (homOfLE (show O.unop ≤ ⊤ from le_top)).op a * b)
+        ((show Γ(X, O.unop) from
+          X.presheaf.map (homOfLE (show O.unop ≤ ⊤ from le_top)).op a) *
+            (show Γ(X, O.unop) from b))
     rw [map_mul]
     congr 1
     change X.presheaf.map _ a =
@@ -132,8 +148,9 @@ def patchStructureRestriction {U V : Surface.Opens} (h : V ≤ U) :
 
 theorem structureMap_patchRestriction {U V : Surface.Opens} (h : V ≤ U) :
     openStructureMap U.ι ≫ patchStructureRestriction h = openStructureMap V.ι := by
-  rw [patchStructureRestriction, ← Category.assoc, ← Category.assoc,
-    openStructureMap_comp, openStructureMap_congr]
+  dsimp only [patchStructureRestriction, patchStructure]
+  erw [openStructureMap_comp_assoc (Surface.homOfLE h) U.ι]
+  exact openStructureMap_congr (by simp)
 
 end StructureMaps
 

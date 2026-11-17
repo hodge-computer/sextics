@@ -20,8 +20,7 @@ all the original local ideal comparisons, with no additional premise.
 
 The global sheaf morphism and its ideal-sheaf identification remain to be
 constructed. No global divisor, Abel--Jacobi, or residue-exactness theorem
-is asserted here. Source-only draft: no elaboration or kernel replay was
-run. Prepared for fqlx with OpenAI ChatGPT assistance; the geometric route
+is asserted here. Prepared for fqlx with OpenAI ChatGPT assistance; the geometric route
 and attribution to Ben Diamond are recorded in solution.md.
 -/
 
@@ -148,11 +147,11 @@ theorem refined_rowIdeal_eq_map (t : Fin 3 → ℂ) (i : Fin 3) (p : Pivot) :
       (rowIdeal (chartFactorData i)
         (fun j => algebraMap ℂ (AffineRing i) (t j))).map
           (algebraMap (AffineRing i) (LinkageRefinement i p)) := by
-  rw [rowIdeal, rowIdeal, Ideal.map_span, Set.image_range]
+  rw [rowIdeal, rowIdeal, Ideal.map_span, ← Set.range_comp]
   apply congrArg Ideal.span
   apply congrArg Set.range
   funext a
-  simp only [Matrix.mulVec, dotProduct, map_sum, map_mul]
+  simp only [Function.comp_apply, Matrix.mulVec, dotProduct, map_sum, map_mul]
   apply Finset.sum_congr rfl
   intro j _
   change algebraMap (AffineRing i) (LinkageRefinement i p)
@@ -197,6 +196,7 @@ theorem regularityCoefficient_hasUnit (a : RegularityIndex) :
     ∃ j, IsUnit (regularityCoefficient a j) := by
   cases a with
   | inl a =>
+    change ∃ j, IsUnit (seedRefinedCoefficient a.1 a.2 j)
     exact ⟨a.2.2, IsLocalization.Away.algebraMap_isUnit (seedPivot a.1 a.2)⟩
   | inr a =>
     exact ⟨a.2.2, refinedFactorData_pivot_isUnit a.1 a.2⟩

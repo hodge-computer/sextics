@@ -16,7 +16,6 @@ The proof moves along an affine line in one already regular direction.
 Each associated-prime obstruction excludes at most one scalar, while a
 nonzero polynomial on the line has only finitely many roots.
 
-Source-only draft: no Lean compilation or kernel replay has been run.
 Prepared for fqlx with OpenAI ChatGPT assistance; see solution.md for
 attribution and the unchanged protected exactness obligation.
 -/
@@ -64,7 +63,10 @@ theorem linePolynomial_eval {σ : Type v} (P : MvPolynomial σ k)
   rw [hC]
   apply congrArg (fun z : σ → k => MvPolynomial.eval₂Hom (RingHom.id k) z P)
   funext j
-  simp [Pi.add_apply, Pi.smul_apply, smul_eq_mul, mul_comm]
+  change (Polynomial.C (w j) + Polynomial.C (v j) * Polynomial.X).eval a =
+    w j + a * v j
+  rw [Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_C,
+    Polynomial.eval_C, Polynomial.eval_X, mul_comm (v j) a]
 
 /-- Avoid finitely many subspaces and a prescribed polynomial zero set,
 using one direction already outside every subspace. -/
@@ -120,7 +122,7 @@ theorem exists_nonzero_simultaneous_regular_avoiding_polynomial [Infinite k]
     ∃ t : Fin 3 → k, MvPolynomial.eval t P ≠ 0 ∧ t ≠ 0 ∧
       ∀ i, IsSMulRegular (R i) (∑ j, t j • c i j) := by
   classical
-  obtain ⟨v, hv, hreg⟩ := exists_nonzero_simultaneous_regular R c hunit
+  obtain ⟨v, hv, hreg⟩ := exists_nonzero_simultaneous_regular (k := k) R c hunit
   letI : Fintype ι := Fintype.ofFinite ι
   letI : ∀ i, Fintype (associatedPrimes (R i) (R i)) :=
     fun i => (associatedPrimes.finite (R i) (R i)).fintype
@@ -166,7 +168,14 @@ open CycleQ2SeedSectionIdealComparison CycleQ2SeedSectionInverse
   CycleQ2FirstOrderCurveSeedFiber CycleQ2SpecializedProjectiveCurve
   CycleQ2SeedSectionNonempty CycleQ2IncidencePolynomialJacobianBinding
 
-attribute [local instance] CycleQ2IncidenceFirstOrder.firstOrderAlgebra
+attribute [local instance] CycleQ2FirstOrderTensorReduction.parameterFirstOrderAlgebra
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderModule
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderSMul
+  CycleQ2FirstOrderTensorReduction.parameterFirstOrderTower
+  CycleQ2FirstOrderTensorReduction.firstOrderTensorCommRing
+  CycleQ2FirstOrderChartFlatness.firstOrderTensorModule
+  CycleQ2FirstOrderChartFlatness.firstOrderTensorSMul
+  CycleQ2RelativeCurveChartFiber.incidenceCurveChartCommRing
 
 /-- The actual 63 regularity conditions meet any nonzero polynomial
 condition; no independent section vector is substituted. -/
