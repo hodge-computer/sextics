@@ -39,10 +39,11 @@ Each family in the following table has \(H^4(X)^\tau\subset N^1H^4(X)\) througho
 | \(G(X,Q_0(Y),Q_1(Y),Q_2(Y))\), or its \(X/Y\) mirror | Quadratic-net pair correspondence | 127 | 110 |
 | One extra \(X\) reflection and one extra \(Y\) reflection | Fano quotients and weighted threefolds | 111 | 94 |
 | Cyclic-six family of §4.2 | Deck/exchange descent | 91 | 74 |
+| Additive \(4+2\) splitting | Binary summand theorem | 60 | 43 |
 | Block-sign split \(f(X)+g(Y)\) | Elliptic companions and contraction | 55 | 38 |
 | Polarized split \(f(X+Y)+f(X-Y)\), with the order-three plane family | Algebraic Kuga–Satake correspondence | 24 | 7 |
 
-The order-three family is \(f(z_0,z_1,z_2)=g_6(z_0,z_1)+z_2^3g_3(z_0,z_1)+a z_2^6\). The two-reflection theorem also applies to additive splittings and coordinate symmetries that give these reflections after a block-linear coordinate change, as described in [Chapter 3B](03b-weighted-threefolds.md).
+The order-three family is \(f(z_0,z_1,z_2)=g_6(z_0,z_1)+z_2^3g_3(z_0,z_1)+a z_2^6\).
 
 ### Quadratic nets and recovery from the equation
 
@@ -65,6 +66,8 @@ This is the dimension of the image, rather than only of its presentations. On th
 For the two-reflection family, take the reflected coordinates to be \(X_2,Y_2\). Chapter 3B counts 104 coefficients. The preserving subgroup \(GL_2(X_0,X_1)\times G_m(X_2)\times GL_2(Y_0,Y_1)\times G_m(Y_2)\) has dimension ten. Exactly eight Fermat orbit derivatives mix a reflected coordinate with an unreflected coordinate in the same block, and lie outside the coefficient family. Thus its saturated cone has dimension \(104+8=112\), proving the projective dimensions \((103,111,94)\).
 
 The cyclic-six family has 88 coefficients. Its preserving subgroup \(GL_3(X)\times GL_1(y)\times GL_2(z_0,z_1)\) has dimension fourteen. At Fermat, the four orbit monomials mixing \(y\) with \(z_0,z_1\) lie outside its invariant coefficient space. Its projective normal form therefore has dimension 87, its saturation dimension \(88+4-1=91\), and its quotient dimension 74.
+
+For the [binary summand theorem](03b-weighted-threefolds.md#3b10-sextics-with-a-binary-summand), put both binary variables in the same parity block first. There are seven binary coefficients and \(28+15+6+1=50\) core coefficients, counted by the exponent of the lone core variable in that parity block. Varying the complementary line and plane in this three-space adds four dimensions. At Fermat the four orbit derivatives mixing the line and plane lie outside the coefficient space, giving projective dimension \(57+4-1=60\). When the binary variables have opposite parities, there are four binary coefficients and \(7+15+15+7=44\) core coefficients. Each parity block now has a line and a complementary plane. The eight mixing derivatives at Fermat give eight independent directions outside the coefficient space, so this stratum has projective dimension \(48+8-1=55\). It lies in the two-reflection family.
 
 The block-sign split family has \(28+28=56\) coefficients and is already \(G\)-stable, giving projective dimension 55 and quotient dimension 38.
 

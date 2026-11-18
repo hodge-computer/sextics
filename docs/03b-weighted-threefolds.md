@@ -471,14 +471,9 @@ The two-reflection and [quadratic-net families](03c-quadratic-nets.md) are incom
 \]
 A presentation through three \(Y\)-quadrics would bound this rank by three; the mirrored bidegree-\((2,4)\) calculation excludes an \(X\)-quadric presentation. Conversely, the 127-dimensional saturated net family cannot be contained in the 111-dimensional saturated two-reflection family. These dimensions are proved in Chapter 4.
 
-Two immediate applications illustrate the coefficient scope.
+For example, suppose two \(X\)-coordinates can be transposed and two \(Y\)-coordinates can be transposed independently. Passing to sums and differences in each pair gives the two reflections over \(\mathbb Q\).
 
-- If \(F=h(X_0,X_1,Y_0,Y_1)+b(s,t)\), with \(h\) even in \((Y_0,Y_1)\) and \(b\) even in \(t\), homogeneity makes \(b\) even in \(s\). Thus every smooth member of this \(4+2\) split family is covered, including a sum of two arbitrary same-parity binary sextics and a separately even binary sextic. That binary-block subfamily also admits the torsion-contact construction of [Chapter 2A](02a-binary-blocks.md), which gives explicit fields through two general Wronskian spanning theorems.
-- If an even sextic is invariant under an \(X\)-coordinate transposition and an independent \(Y\)-coordinate transposition, their sums and differences diagonalize them over \(\mathbb Q\) to the required reflections. Block-symmetric even sextics therefore satisfy the theorem after such a coordinate change.
-
-Over a characteristic-zero field, the support-to-certificate equivalence and coefficient descent of [Chapter 1](01-certificates.md), followed by the higher-pole reduction of [Chapter 3, §3.5](03-geometric-support.md), give legal certificates at every positive pole order.
-
-The two extra reflections are essential hypotheses of this proof. Global \(Y\)-evenness alone does not provide either the weighted quotient fibers or their two-minus core involution.
+Over a characteristic-zero field, the support-to-certificate equivalence and coefficient descent of [Chapter 1](01-certificates.md), together with the higher-pole reduction of [§3.5](03-geometric-support.md#35-from-divisor-support-to-every-pole-order), give certificates for the admissible numerators at every positive pole order.
 
 ## 3B.9 Paired signs
 
@@ -499,3 +494,27 @@ The proof of the two-reflection theorem uses the two reflections only through th
 The weighted threefold theorem and the relative support lemma apply as before. ∎
 
 No further involution is assumed, and \(H^{4,0}(X)\) is \(P\)-invariant. When the planes are the pairs \((X_i,Y_i)\), the \(Y\)-even invariant sextics form the 74-coefficient family of [Chapter 4, §4.6](04-known-locus-and-frontier.md). On its smooth members the proposition supports the part of type \((150,636,150)\) of the \(Y\)-even primitive cohomology, and leaves the \(P\)-invariant part, of type \((58,230,58)\). A \(Y\)-odd numerator is served when it has odd degree in at least one pair \((X_i,Y_i)\). [Chapter 3D](03d-hodge-loci.md) supports part of the remaining sector in the presence of an order-three symmetry.
+
+## 3B.10 Sextics with a binary summand
+
+**Binary summand theorem.** Let \(X\subset\mathbb P^5\) be a smooth sextic whose equation in some linear coordinates is
+\[
+F=H(x_0,x_1,x_2,x_3)+B(s,t).
+\]
+For the binary sign \(\beta(x,s,t)=(x,-s,-t)\), one has \(H^4(X)^{\beta=-1}\subset N^1H^4(X)\). If the equation is invariant under an involution \(\tau\) of signature \((3,3)\), then \(H^4(X)^\tau\subset N^1H^4(X)\).
+
+**Proof.** Let \(g\) multiply \((s,t)\) by \(\zeta=\exp(2\pi i/6)\). On the \(\beta\)-negative part its eigenvalues are \(\zeta,\zeta^3,\zeta^5\). The \(\zeta^3\)-eigenspace is fixed by \(g^2\). Along the surface \(s=t=H(x)=0\), the tangent eigenvalues of \(g^2\) are \(1,1,\zeta^2,\zeta^2\). Its age is \(2/3\), so the [quotient criterion of §3.3](03-geometric-support.md#finite-quotients-beyond-reflections) gives divisor support for this eigenspace.
+
+For the other two eigenvalues use the factorization \(R_F=R_H\otimes R_B\) of the Jacobian ring. Smoothness makes \(B\) squarefree, so \(R_B\) is a complete intersection of two quintics with socle degree eight. A numerator of binary degree \(b\) has residue eigenvalue \(\zeta^{b+2}\), including the determinant on the binary variables. Thus the relevant degrees are \(b=3\) for \(\zeta^5\) and \(b=5\) for \(\zeta\).
+
+For each presentation \(B=C^3+r^2\) by a quadratic and a cubic, put \(J=C_s r_t-C_t r_s\). The map \((x,s,t)\mapsto(x,C,r)\) has Jacobian determinant \(J\) and takes \(X\) to the sextic \(H(x)+u^3+v^2=0\) in \(\mathbb P(1,1,1,1,2,3)\). The [weighted Fano theorem of §3.4](03-geometric-support.md#34-nonlinear-polynomial-piola-maps-are-finite-fano-maps) supports the pullbacks of residues with numerators \(M(x)\) and \(M(x)u\) of the required weights. Their upstairs numerators are \(MJ\) and \(MCJ\). As the presentation varies, the [cubic](02a-binary-blocks.md#2a3-raw-wronskians-span-every-cubic) and [quintic](02a-binary-blocks.md#2a4-the-quintic-moment-theorem) Wronskian theorems give all of \((R_B)_3\) and \((R_B)_5\), respectively, as the spans of \(J\) and \(CJ\). Varying \(M\) spans the required graded pieces of \(R_H\). The leading classes of these supported residues therefore span every Hodge graded piece of the two eigenspaces. Induction on the filtration gives support for their whole sum. The sum is rational, as is the \(\zeta^3\)-eigenspace. This proves the binary-sign assertion.
+
+To treat \(\tau\), we may choose a \(\tau\)-stable splitting of dimensions four and two. Indeed, let \(p\) be projection onto the binary plane along the given core and set \(p'=\tau p\tau^{-1}\). For the multilinear polarization \(T\) of \(F\), each projection can be moved from any argument to any other because its splitting has no mixed terms. Moving the two projections through three arguments gives
+\[
+T(pp'a,b,c,\ldots)=T(p'a,pb,c,\ldots)=T(a,pb,p'c,\ldots)=T(p'pa,b,c,\ldots).
+\]
+The radical of \(T\) vanishes by smoothness, so \(p\) and \(p'\) commute. Their simultaneous eigenspaces split \(F\) into summands, and \(\tau\) exchanges the two eigenvalue labels. Let \(k\) be the dimension of the intersection \(\operatorname{im}p\cap\operatorname{im}p'\). For \(k=2\) this image is a stable plane. For \(k=1\) the \((1,0)\) and \((0,1)\) eigenspaces together form a stable plane. For \(k=0\) their common kernel is a stable plane. In each case the remaining eigenspaces give its stable complement.
+
+If the binary plane has one coordinate of each sign, \(\tau\)-invariance and the even degree of \(B\) make \(B\) even in each coordinate separately. The two-reflection theorem applies. If the two signs agree, replace \(\tau\) by its projectively identical negative if necessary so that both are negative. The core then has just one negative coordinate \(y\). Reflection \(r_y\) preserves \(H\), and \(\tau=\beta r_y\). In \(H^4(X)^\tau\), the \(r_y\)-positive part is supported by the [reflection quotient](03-geometric-support.md#33-reflection-quotients), and the \(r_y\)-negative part is \(\beta\)-negative. ∎
+
+Consequently an even sextic with a binary summand admits certificates for every odd numerator at every positive pole order by [§3.5](03-geometric-support.md#35-from-divisor-support-to-every-pole-order) and the coefficient descent of [Chapter 1](01-certificates.md).
