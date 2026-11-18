@@ -129,6 +129,55 @@ supported correspondence, specialize its action to the given pencil,
 and show that the prescribed four-form on the fourfold vanishes at its
 generic point in de Rham cohomology.
 
+## The ambient test class and the swept surface
+
+Let \(q:Y\to T\) be the second projection of the smooth time family.
+To construct the ambient test class, lift each of the four coordinate
+charts of \(T\) to the deformation \(F_{57,1}-\epsilon B_*\).
+On an overlap, the difference of the two lifts is a tangent vector field.
+Contracting it with the residue volume of \(T\) gives a regular two-form.
+After transporting the three lifts to common coordinates, their
+differences add. The six overlap forms therefore satisfy the four
+Čech face equations and define a class
+\[
+  \eta_{B_*}\in H^1(T,\Omega^2_{T/\mathbb C}).
+\]
+Applying the differential of \(q\) to these same six forms computes
+\(q^*\eta_{B_*}\) in the ordinary sheaf cohomology of \(Y\).
+[Ambient test cocycle](GeometricLiteralThreefoldTestClass.lean) and
+[pullback on the moving family](GeometricLiteralAbelJacobiQTest.lean)
+
+The closure of the correspondence in the product of the completed time
+curve and \(T\) gives a proper scheme \(Z\) with a map \(\bar q:Z\to T\).
+Its scheme-theoretic image \(S\) equals the swept image of \(q\).
+The family has dimension two and the containing threefold has dimension
+three. The image of \(Z\) is a proper closed subset of \(T\).
+For the maps \(a:Y\to Z\), \(b:Y\to S\) and \(i:S\hookrightarrow T\),
+the equalities of scheme maps give equalities of actual cohomology classes
+\[
+   a^*(\bar q^*\eta_{B_*})=q^*\eta_{B_*}
+       =b^*(i^*\eta_{B_*}).
+\]
+These equalities put the ambient class on both geometric models. To obtain
+a nonzero supported correspondence one still needs the comparison of
+its evaluation on the marked moving curve with the nonzero intrinsic
+curve class calculated above.
+[Proper swept image](GeometricLiteralProperSweptSupport.lean) and
+[cohomological factorizations](GeometricLiteralCompletedHodgePullback.lean)
+
+Writing \(i:S\hookrightarrow T\) for this closed immersion, the differential
+of \(i\) gives a map of coefficient sheaves
+\(\Omega_T^2\to i_*\Omega_S^2\). Applying it to \(\eta_{B_*}\) gives a class
+in \(H^1(T,i_*\Omega_S^2)\) whose pullback to the family still equals
+\(q^*\eta_{B_*}\). For every module extension
+\(e\in\operatorname{Ext}^2_T(i_*\Omega_S^2,K_T)\), pulling back the
+extension along the coefficient map gives zero on \(T\setminus S\).
+Pairing this extension with the original test gives the same element
+of \(H^3(T,K_T)\) as pairing \(e\) with the class with coefficients in
+\(i_*\Omega_S^2\). This identifies the module and the pairing in which
+a particular nonzero extension would have to be constructed.
+[Restriction and pairing for supported coefficients](GeometricLiteralSweptExtSupport.lean)
+
 ## Canonical cohomology on the three coordinate opens
 
 Every class in \(H^2(D,K_D)\) is the image of a section on the triple

@@ -117,7 +117,8 @@ private theorem gradedAwayMap_surjective (s : A) {d : ℕ} (hs : s ∈ 𝒜 d) :
   simp only [Away.map_mk]
 
 include hsur in
-private theorem projectiveMap_closedImmersion : IsClosedImmersion (Proj.map f hf) := by
+/-- Surjectivity on each homogeneous degree suffices over different coefficient rings. -/
+theorem projectiveMap_closedImmersion : IsClosedImmersion (Proj.map f hf) := by
   have hc : (⨆ i : Σ n : PNat, 𝒜 n, Proj.basicOpen 𝒜 (i.2 : A)) = ⊤ := by
     have hh := (Proj.affineOpenCover 𝒜).openCover.iSup_opensRange
     change (⨆ i : Σ n : PNat, 𝒜 n,
