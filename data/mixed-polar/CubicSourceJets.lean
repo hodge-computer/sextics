@@ -91,7 +91,7 @@ lemma gJet_dot (p : Data K) (hd : p.d ≠ 0) (hg : normal p ≠ 0) :
     (gJet p).snd=normalDot p := by
   have hh := MixedPolarBalancedShear.second_normal_source_unchanged p.a p.d p.k p.x p.y (normal p) hd hg rfl
   have hh' : (-3*p.a*p.x/p.d-modifiedSource p*secondNormal p/normal p)=normalDot p := by
-    apply (div_left_inj' hg).mp
+    apply (div_left_inj₀ hg).mp
     exact hh
   simp [gJet,aJet,dJet,fJet,xJet,yJet,smul_eq_mul,op_smul_eq_smul]
   rw [← hh']

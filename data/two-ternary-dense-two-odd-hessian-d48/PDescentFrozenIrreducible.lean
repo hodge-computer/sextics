@@ -69,7 +69,7 @@ theorem integerFiber_irreducible : Irreducible integerFiber := by
   · intro n hn
     rw [integerFiber_degree] at hn
     have hn6 : n ≠ 6 := by exact ne_of_lt (WithBot.coe_lt_coe.mp hn)
-    simp only [integerFiber, coeff_add, coeff_C_mul, coeff_X_pow, if_neg hn6, mul_zero,
+    simp only [integerFiber, coeff_add, coeff_C_mul, coeff_X_pow, ite_eq_right hn6, mul_zero,
       zero_add, coeff_C, Ideal.mem_span_singleton]
     split_ifs <;> simp
   · rw [integerFiber_degree]

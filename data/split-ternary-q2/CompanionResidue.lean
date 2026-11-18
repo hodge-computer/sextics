@@ -199,7 +199,7 @@ lemma two_step_evaluation_det {R : Type*} [CommRing R]
     exact he i j
   rw [hi,Matrix.det_one,mul_one]
   change P 0 0*P 1 1=4
-  rw [h0,if_pos rfl,h11,one_mul]
+  rw [h0,ite_eq_left rfl,h11,one_mul]
 
 def polynomialMatrix (which : Bool) : Matrix (Fin 5) (Fin 5) (Polynomial (CoefficientField which)) :=
   fun i => Fin.cases (conicNormal which i) (fun j => polynomialDerivation which j (conicCurve which i))
@@ -226,7 +226,7 @@ lemma rowProduct_first (which : Bool) (j : Fin 5) :
   refine Fin.cases ?_ (fun j => ?_) j
   · simp only [polynomialMatrix_normal,ite_true]
     have h := congrArg (fun p : Polynomial (CoefficientField which) => p.coeff 0) (conicNormal_pairing which)
-    simpa only [polynomialPairing,Polynomial.coeff_one_zero] using h
+    simpa only [polynomialPairing,AddMonoidAlgebra.coeff_one_zero] using h
   · simp only [polynomialMatrix_tangent,Fin.succ_ne_zero,ite_false]
     have h := gradient_derivation_pairing (polynomialDerivation which j) which (conicCurve which) (conicCurve_equation which)
     have hc := congrArg (fun p : Polynomial (CoefficientField which) => p.coeff 0) h
@@ -356,13 +356,15 @@ lemma bridgeMatrix_det_ne_zero (which : Bool) : (bridgeMatrix which).det≠0 := 
   simp [coordinateSwap,Equiv.Perm.sign_swap,show (0 : Fin 5)≠1 by decide]
 lemma gradient_normal_pairing (which : Bool) :
     (∑ j,fieldEval which (MvPolynomial.pderiv j (SplitCompanionDomain.hypersurface which))*normalField which j)=1 := by
-  simp only [gradient_evaluation,normalField,← map_mul,← map_sum]
   have h := conicNormal_pairing which
   change (∑ j,conicGradient which j*conicNormal which j)=1 at h
   have he : (∑ j,conicGradient which (coordinateSwap j)*conicNormal which (coordinateSwap j))=
       ∑ j,conicGradient which j*conicNormal which j :=
     Equiv.sum_comp coordinateSwap (fun j => conicGradient which j*conicNormal which j)
-  rw [he,h,map_one]
+  rw [← he] at h
+  simp only [Fin.sum_univ_five] at h ⊢
+  simp only [gradient_evaluation,normalField,← RingHom.map_mul,← RingHom.map_add]
+  rw [h,RingHom.map_one]
 
 def targetDerivation (which : Bool) (j : Fin 4) : Derivation ℤ (ConicFunctionField which) (ConicFunctionField which) :=
   extendFiniteDerivation (L:=ConicFunctionField which) (SplitCompanionDomain.tangent which j)

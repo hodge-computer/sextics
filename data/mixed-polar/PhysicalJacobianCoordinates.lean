@@ -114,7 +114,7 @@ def coordinateDerivation (j : Fin 5) : Derivation ℤ Extension Extension :=
 lemma coordinateDerivation_apply (j : Fin 5) (z : Extension) :
     coordinateDerivation j z=∑ k,inverse k j*liftedTangent k z := by
   simp only [coordinateDerivation,Fin.sum_univ_succ,Finset.univ_eq_empty,Finset.sum_empty,
-    Derivation.add_apply,Derivation.smul_apply,smul_eq_mul,Derivation.coe_zero,Pi.zero_apply,add_zero]
+    add_apply,smul_apply,smul_eq_mul,FunLike.coe_zero,Pi.zero_apply,add_zero]
 lemma coordinateDerivation_passive (j i : Fin 5) :
     coordinateDerivation j (passive i)=if i=j then 1 else 0 := by
   rw [coordinateDerivation_apply]

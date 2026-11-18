@@ -19,7 +19,8 @@ theorem denominator_eval₂ (ρ : E →ₐ[K] Matrix n n K) (x y : E)
   simp [matrixPole, ConcreteLine.pole, polynomialMatrixMap_X, polynomialMatrixMap_C,
     Matrix.map_apply, Matrix.sub_apply, Matrix.smul_apply, Matrix.mul_smul,
     Matrix.mul_one, smul_eq_mul, map_ofNat]
-  by_cases hab : a = b <;> simp [Matrix.one_apply, hab]
+  by_cases hab : a = b <;>
+    simp [← coe_eval₂Hom, Matrix.one_apply, hab]
 
 /-- The fiber S=2t², B=C=1 turns the pole into the norm pencil for x+y. -/
 theorem denominator_norm_fiber (ρ : E →ₐ[K] Matrix n n K) (x y : E)

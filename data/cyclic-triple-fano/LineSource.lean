@@ -25,7 +25,7 @@ theorem endpoint_evaluation_det_six {R : Type*} [CommRing R]
       M i.succ.succ j.succ.succ = if i = j then 1 else 0) :
     Matrix.det M = g*k := by
   have hc (i : Fin 5) : M i.succ 0 = 0 := by
-    rw [hnormal, if_neg (Fin.succ_ne_zero i)]
+    rw [hnormal, ite_eq_right (Fin.succ_ne_zero i)]
   rw [det_single_first_column M hc]
   have hr (j : Fin 4) : (M.submatrix Fin.succ Fin.succ) 0 j.succ = 0 :=
     hmiddle j
@@ -36,7 +36,7 @@ theorem endpoint_evaluation_det_six {R : Type*} [CommRing R]
     exact hendpoints i j
   rw [hi, Matrix.det_one, mul_one]
   change M 0 0 * M 1 1 = g*k
-  rw [hnormal, if_pos rfl, htime]
+  rw [hnormal, ite_eq_left rfl, htime]
 
 namespace LineFamily
 

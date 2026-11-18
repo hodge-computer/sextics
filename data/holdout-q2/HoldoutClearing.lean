@@ -1,6 +1,6 @@
 import HodgeComputer.Constructions.RationalFields.CommonDenominatorSubstitution
 import HodgeComputer.Constructions.FiniteAlgebra.RegularSpecialization
-import Mathlib.Data.Complex.Basic
+import Mathlib.Basic.Complex.Basic
 import Mathlib.RingTheory.Localization.Integer
 import Mathlib.RingTheory.Localization.FractionRing
 import Mathlib.RingTheory.MvPolynomial.Homogeneous

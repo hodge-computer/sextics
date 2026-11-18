@@ -44,7 +44,7 @@ theorem curveRemainingCoefficientMap_constant :
       algebraMap EndpointField CoefficientField
         (algebraMap GenericEndpoint EndpointField (endpointParameter genericA genericB j))
     have hj : ![baseFamily.curve 2,baseFamily.curve 3,baseFamily.curve 4] j=
-        baseFamily.curve j.succ.succ := by fin_cases j <;> rfl
+        baseFamily.curve j.succ.succ := by fin_cases j <;> simp
     rw [hj,baseFamily.curve_endpoint,conicEndpoint_parameter]
 
 def curveTargetCoefficientMap :
@@ -75,7 +75,7 @@ theorem curveTargetCoefficientMap_X (j : Fin 4) :
     change Polynomial.eval₂ curveRemainingCoefficientMap (C 1*X) (C (MvPolynomial.X i))=_
     rw [Polynomial.eval₂_C]
     simp only [curveRemainingCoefficientMap,MvPolynomial.eval₂Hom_X']
-    fin_cases i <;> rfl
+    fin_cases i <;> simp
 
 def conicFieldCoordinate (j : Fin 5) : ConicFunctionField :=
   algebraMap (Polynomial CoefficientField) ConicFunctionField (baseFamily.curve j)

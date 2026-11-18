@@ -116,7 +116,7 @@ theorem tangent_root (j : Fin 4) :
   simp only [m.residue_X_zero, m.residue_X_succ,
     physicalDiagonalTangent_coordinate, Fin.castSucc_inj] at h
   simp only [mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ,
-    if_true] at h
+    ite_true] at h
   apply (eq_div_iff m.residue_normal_ne_zero).mpr
   simp only [integerPartial_apply]
   linear_combination -h

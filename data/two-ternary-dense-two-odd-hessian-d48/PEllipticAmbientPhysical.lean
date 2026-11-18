@@ -24,8 +24,8 @@ def physicalPartial : Fin 5 → Derivation ℚ K K :=
 theorem physicalPartial_coordinates (i j : Fin 5) :
     physicalPartial i (physicalCoordinates j) = if i = j then 1 else 0 := by
   fin_cases i <;> fin_cases j <;>
-    norm_num [physicalPartial, physicalCoordinates, Matrix.cons_val_succ, Matrix.cons_val_two, Fin.ext_iff, Derivation.sub_apply,
-      Derivation.smul_apply, Derivation.leibniz, smul_eq_mul, lambda, partial_coord]
+    norm_num [physicalPartial, physicalCoordinates, Matrix.cons_val_succ, Matrix.cons_val_two, Fin.ext_iff, sub_apply,
+      smul_apply, Derivation.leibniz, smul_eq_mul, lambda, partial_coord]
   all_goals try field_simp [coord_ne_zero]
   all_goals ring
 
@@ -78,7 +78,7 @@ theorem physicalPartial_commute (i j : Fin 5) :
     simp [Derivation.commutator_apply, physicalPartial_coordinates, apply_ite]
   intro f
   have hf := Derivation.congr_fun hh f
-  simpa only [Derivation.commutator_apply, Derivation.zero_apply, sub_eq_zero] using hf
+  simpa only [Derivation.commutator_apply, zero_apply, sub_eq_zero] using hf
 
 /-- Actual physical polynomial substitution into the split chart. -/
 def physicalSubstitution : Poly 5 →ₐ[ℚ] K := MvPolynomial.aeval physicalCoordinates
@@ -110,9 +110,8 @@ theorem physical_action (v : Fin 4 → K) (vnormal f : K) :
     fieldAction physicalPartial (physicalField v vnormal) f =
       ambientAction basePartial normalPartial v vnormal f := by
   simp only [fieldAction_apply, ambientAction, Fin.sum_univ_succ]
-  norm_num [physicalField, physicalPartial, Matrix.cons_val_succ, Matrix.cons_val_two, Fin.ext_iff, Derivation.sub_apply,
-    Derivation.smul_apply, smul_eq_mul]
-  simp only [show Fin.succ (2 : Fin 3) = (3 : Fin 4) from rfl]
+  norm_num [physicalField, physicalPartial, Matrix.cons_val_succ, Matrix.cons_val_two, Fin.ext_iff, sub_apply,
+    smul_apply, smul_eq_mul]
   field_simp [lambda_ne_zero]
   <;> ring
 
@@ -122,9 +121,8 @@ theorem physical_divergence (v : Fin 4 → K) (vnormal : K) :
       volumeDivergence basePartial normalPartial density v vnormal := by
   simp only [fieldDivergence, volumeDivergence, Fin.sum_univ_succ]
   norm_num [physicalField, physicalPartial, density, Matrix.cons_val_succ, Matrix.cons_val_two, Fin.ext_iff,
-    Derivation.sub_apply, Derivation.smul_apply, Derivation.leibniz,
+    sub_apply, smul_apply, Derivation.leibniz,
     Derivation.leibniz_pow, smul_eq_mul, base_lambda, normal_lambda, partial_coord]
-  simp only [show Fin.succ (2 : Fin 3) = (3 : Fin 4) from rfl]
   field_simp [lambda_ne_zero]
   <;> ring
 

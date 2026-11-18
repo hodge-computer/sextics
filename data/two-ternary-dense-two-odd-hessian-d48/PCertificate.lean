@@ -82,9 +82,9 @@ theorem Certificate.scale {F A D C H : SexticPoly} {d e : ℕ}
   numerator_parity i := by
     have hi := h.numerator_parity i
     split_ifs with hlt
-    · rw [if_pos hlt] at hi
+    · rw [ite_eq_left hlt] at hi
       exact hEven.mul_odd hi
-    · rw [if_neg hlt] at hi
+    · rw [ite_eq_right hlt] at hi
       exact hEven.mul hi
   denominator_legal := hLegal.mul_right h.denominator_legal
 

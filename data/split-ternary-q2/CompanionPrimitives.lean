@@ -187,8 +187,9 @@ lemma rawPolynomialMap_X (i : Fin 4) : rawPolynomialMap (MvPolynomial.X i)=
   fin_cases i <;> simp [rawPolynomialMap,coordinate,MvPolynomial.finSuccEquiv_apply,hv,Equiv.swap_apply_def]
 def polynomialCoefficientMap : SplitCompanionDomain.Coeff →+* Polynomial AffineField :=
   rawPolynomialMap.comp CrossedWeightedRadial.monomialMap
-lemma polynomialCoefficientMap_injective : Function.Injective polynomialCoefficientMap :=
-  rawPolynomialMap_injective.comp (CrossedWeightedRadial.monomialMap_injective (R:=ℂ))
+lemma polynomialCoefficientMap_injective : Function.Injective polynomialCoefficientMap := by
+  rw [polynomialCoefficientMap,RingHom.coe_comp]
+  exact rawPolynomialMap_injective.comp (CrossedWeightedRadial.monomialMap_injective (R:=ℂ))
 def coneCoefficientMap : SplitCompanionDomain.Coeff →+* RadialField :=
   (algebraMap (Polynomial AffineField) RadialField).comp polynomialCoefficientMap
 lemma coneCoefficientMap_injective : Function.Injective coneCoefficientMap :=
@@ -316,7 +317,12 @@ lemma equation_zero : evaluation clearedAffineEquation=0 := by
       (![MvPolynomial.X 1,MvPolynomial.X 0,1,MvPolynomial.X 2,MvPolynomial.X 3] i))=
       ![coordinate 0,normal,1,coordinate 1,coordinate 2] := by
     funext i
-    fin_cases i <;> first | exact evaluation_X_succ 0 | exact evaluation_X_zero | exact map_one _ | exact evaluation_X_succ 1 | exact evaluation_X_succ 2
+    fin_cases i
+    · exact evaluation_X_succ 0
+    · exact evaluation_X_zero
+    · exact map_one _
+    · exact evaluation_X_succ 1
+    · exact evaluation_X_succ 2
   rw [hv]
   exact cleared_equation
 lemma equation_partial : integerPartial 0 clearedAffineEquation=

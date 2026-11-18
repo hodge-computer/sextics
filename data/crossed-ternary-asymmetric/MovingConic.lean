@@ -8,7 +8,7 @@ import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
 import HodgeComputer.Constructions.HoldoutCover.PolynomialFamilyBridge
 import HodgeComputer.Constructions.HoldoutCover.PolynomialFieldMap
 import HodgeComputer.Constructions.HoldoutCover.PolynomialNormal
-import Mathlib.Data.Complex.Basic
+import Mathlib.Basic.Complex.Basic
 
 /- Prepared with OpenAI Codex assistance for contributor 1337isnot1337.
 See solution.md for the construction, provenance, and prior-work credit. -/
@@ -253,8 +253,7 @@ lemma conicCurve_constant (i : Fin 5) : (conicCurve i).coeff 0 =
   curveEval_constant _ _ _ i
 
 lemma conicCurve_equation : H conicCurve=0 := by
-  apply Polynomial.ext
-  intro n
+  ext n
   by_cases hn : n<13
   · have h := coefficients_equations ⟨n,hn⟩
     change MvPolynomial.eval₂Hom (algebraMap ParamRing CoefficientField) coefficients
@@ -644,7 +643,7 @@ lemma rowProduct_first (j : Fin 5) :
   refine Fin.cases ?_ (fun j => ?_) j
   · simp only [polynomialMatrix_normal,ite_true]
     have h := congrArg (fun p : Polynomial CoefficientField => p.coeff 0) conicNormal_pairing
-    simpa only [polynomialPairing,Polynomial.coeff_one_zero] using h
+    simpa only [polynomialPairing,AddMonoidAlgebra.coeff_one_zero] using h
   · simp only [polynomialMatrix_tangent,Fin.succ_ne_zero,ite_false]
     have h := gradient_derivation_pairing (polynomialDerivation j) conicCurve conicCurve_equation
     have hc := congrArg (fun p : Polynomial CoefficientField => p.coeff 0) h

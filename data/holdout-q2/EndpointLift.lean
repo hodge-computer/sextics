@@ -131,7 +131,7 @@ theorem eval₂_pderiv {K R S : Type*} [CommRing K] [CommRing R] [CommRing S]
   | C r => simp [hc]
   | add p q hp hq => simp only [map_add,hp,hq,mul_add]
   | mul_X p j hp =>
-      simp only [pderiv_mul,map_add,map_mul,eval₂Hom_X,Derivation.leibniz,
+      simp only [pderiv_mul,map_add,map_mul,eval₂Hom_X',Derivation.leibniz,
         smul_eq_mul,hp,pderiv_X,Pi.single_apply,apply_ite,map_one,map_zero,hv]
       by_cases h : j=i
       · subst j; simp [hv]; ring

@@ -204,8 +204,7 @@ lemma conicCurve_constant (which : Bool) (i : Fin 5) : (conicCurve which i).coef
     ![0,coefficients which 0,scalarParameter which 0,scalarParameter which 1,scalarParameter which 2] i :=
   curveEval_constant _ _ _ i
 lemma conicCurve_equation (which : Bool) : H which 0 (conicCurve which)=0 := by
-  apply Polynomial.ext
-  intro n
+  ext n
   by_cases hn : n<13
   · have h := coefficients_equations which ⟨n,hn⟩
     change MvPolynomial.eval₂Hom (algebraMap ParamRing (CoefficientField which)) (coefficients which)

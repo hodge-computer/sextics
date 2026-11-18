@@ -162,7 +162,8 @@ theorem evaluated_eq : evaluated = explicit := by
   simp only [evaluated, columns_expanded]
   fin_cases i <;> fin_cases j <;>
     norm_num [expandedColumns, explicit, Polynomial.coeff_add, Polynomial.coeff_mul,
-      Polynomial.coeff_X_pow, Polynomial.coeff_ofNat_zero, Polynomial.coeff_ofNat_succ, Polynomial.coeff_X] <;> decide
+      Polynomial.coeff_X_pow, Polynomial.coeff_ofNat_zero, Polynomial.coeff_ofNat_succ, Polynomial.coeff_X,
+      Finsupp.single_apply] <;> decide
 theorem right_inverse : explicit * right = 1 := by decide
 theorem evaluated_right_inverse : evaluated * right = 1 := by
   rw [evaluated_eq, right_inverse]
@@ -263,9 +264,9 @@ lemma column_coeff (j : Fin 14) (n : ℕ) :
     (columns j).coeff n = if h : n<12 then explicit ⟨n,h⟩ j else 0 := by
   classical
   by_cases hn : n<12
-  · rw [dif_pos hn,← evaluated_eq]
+  · rw [dite_eq_left hn,← evaluated_eq]
     rfl
-  · rw [dif_neg hn]
+  · rw [dite_eq_right hn]
     exact coeff_eq_zero_of_natDegree_lt (lt_of_le_of_lt (columns_degree j) (by omega))
 
 end CrossedConicSeed

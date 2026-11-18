@@ -59,7 +59,6 @@ lemma axisMap_normal (d a b : R) :
     axisMap (integerPartial 0 (weightedEquation d a b))=6*X^5 := by
   norm_num [axisMap,weightedEquation,integerPartial,MvPolynomial.pderiv_pow,
     MvPolynomial.pderiv_mul,Polynomial.C_ofNat,Pi.single_apply,Fin.ext_iff]
-  simp [Matrix.cons_val]
 
 lemma weightedEquation_not_dvd_normal [CharZero R] (d a b : R) :
     ¬ weightedEquation d a b ∣ integerPartial 0 (weightedEquation d a b) := by

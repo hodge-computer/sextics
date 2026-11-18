@@ -67,7 +67,7 @@ lemma volume_direction (z : FunctionField) :
   simp only [volume_vector_identity,Fin.sum_univ_succ,velocity,
     Matrix.cons_val_zero,Matrix.cons_val_succ,Fin.reduceSucc,
     Finset.univ_eq_empty,Finset.sum_empty,zero_mul,mul_zero,add_zero,
-    derivative,Derivation.add_apply,Derivation.smul_apply,smul_eq_mul]
+    derivative,add_apply,smul_apply,smul_eq_mul]
   norm_num [velocity,Matrix.cons_val_two,Matrix.cons_val_three,Matrix.cons_val_four,
     Matrix.head_cons,Matrix.tail_cons]
   ring
@@ -108,13 +108,13 @@ lemma extended_derivative_eq : extendedDerivative=weightedDerivative := by
   · exact extended_on_base
   · intro z
     change weightedDerivative (ι z)=ι (derivative z)
-    simp only [weightedDerivative,Derivation.add_apply,Derivation.smul_apply,
+    simp only [weightedDerivative,add_apply,smul_apply,
       smul_eq_mul,lifted_on_base,derivative,map_add,map_mul]
 
 lemma extended_derivative_formula (z : Extension) :
     extendedDerivative z=∑ i : Fin 5,ι (velocity i.succ)*liftedTangent i z := by
   rw [extended_derivative_eq]
-  simp only [weightedDerivative,Derivation.add_apply,Derivation.smul_apply,smul_eq_mul,
+  simp only [weightedDerivative,add_apply,smul_apply,smul_eq_mul,
     Fin.sum_univ_succ,Fin.reduceSucc,Finset.univ_eq_empty,Finset.sum_empty,
     show velocity (2:Fin 6)=0 from rfl,show velocity (5:Fin 6)=0 from rfl,
     map_zero,zero_mul,add_zero]

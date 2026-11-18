@@ -24,8 +24,7 @@ theorem full_polynomial_combination_one {R : Type*} [CommRing R] {n : ℕ} (hn :
     dsimp [u]
     rw [Matrix.mulVec_mulVec,Matrix.mul_nonsing_inv J hunit,Matrix.one_mulVec]
   refine ⟨u,?_⟩
-  apply Polynomial.ext
-  intro k
+  ext k
   by_cases hk : k<n
   · have h := congrFun hu ⟨k,hk⟩
     simp only [Matrix.mulVec,dotProduct,J,e,Pi.single_apply] at h

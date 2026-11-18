@@ -80,6 +80,10 @@ instance conicCoefficientField_charZero (p : HoldoutConic.Seed) :
 noncomputable instance conicCoefficientField_baseAlgebra (p : HoldoutConic.Seed) :
     Algebra FermatBaseField (ConicCoefficientField p) := inferInstance
 
+/-- Stated directly so that instance search does not have to rediscover it. -/
+instance conicCoefficientField_baseSMul (p : HoldoutConic.Seed) :
+    SMul FermatBaseField (ConicCoefficientField p) := Algebra.toSMul
+
 instance conicCoefficientField_baseTower (p : HoldoutConic.Seed) :
     IsScalarTower FermatBaseField FermatEndpointField (ConicCoefficientField p) := inferInstance
 

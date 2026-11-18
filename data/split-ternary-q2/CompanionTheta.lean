@@ -45,7 +45,7 @@ lemma coneDerivations_coordinate (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 �
   have h2 (i : Fin 3) : baseCoefficient (D i) (2 : RatFunc K)=0 :=
     (baseCoefficient (D i)).map_natCast 2
   fin_cases i <;> fin_cases j <;>
-    simp [coneDerivations,independentCoordinates,Derivation.sub_apply,Derivation.smul_apply,
+    simp [coneDerivations,independentCoordinates,sub_apply,smul_apply,
       Derivation.leibniz,Derivation.leibniz_pow,smul_eq_mul,
       baseTime_X,baseTime_C,baseCoefficient_X,baseCoefficient_C,hc,h2] <;>
     field_simp <;> ring
@@ -53,7 +53,7 @@ lemma coneDerivations_coordinate (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 �
 lemma coneDerivations_constant (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 → K)
     (a : K) (ha : ∀ i,D i a=0) (i : Fin 4) :
     coneDerivations D c i (RatFunc.C a)=0 := by
-  fin_cases i <;> simp [coneDerivations,Derivation.sub_apply,Derivation.smul_apply,
+  fin_cases i <;> simp [coneDerivations,sub_apply,smul_apply,
     baseTime_C,baseCoefficient_C,ha]
 
 lemma radial_divergence_identity (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 → K)
@@ -66,7 +66,7 @@ lemma radial_divergence_identity (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 �
   have h2 (i : Fin 3) : baseCoefficient (D i) (2 : RatFunc K)=0 :=
     (baseCoefficient (D i)).map_natCast 2
   simp [residueDivergence,fieldDivergence,coneDerivations,projectedField,
-    Fin.sum_univ_succ,Derivation.sub_apply,Derivation.smul_apply,Derivation.leibniz,
+    Fin.sum_univ_succ,sub_apply,smul_apply,Derivation.leibniz,
     Derivation.leibniz_div,Derivation.leibniz_pow,Derivation.leibniz_inv,
     smul_eq_mul,Algebra.smul_def,Algebra.algebraMap_self,RingHom.id_apply,
     baseTime_X,baseTime_C,baseCoefficient_X,baseCoefficient_C,hc,h2]
@@ -296,8 +296,9 @@ lemma rawPolynomialMap_X (i : Fin 4) : rawPolynomialMap (MvPolynomial.X i)=
 
 def coneCoefficientMap : ConeCoeff →+* RadialField :=
   (algebraMap (Polynomial AffineField) RadialField).comp (rawPolynomialMap.comp radialMonomialMap)
-lemma coneCoefficientMap_injective : Function.Injective coneCoefficientMap :=
-  (IsFractionRing.injective (Polynomial AffineField) RadialField).comp
+lemma coneCoefficientMap_injective : Function.Injective coneCoefficientMap := by
+  rw [coneCoefficientMap,RingHom.coe_comp,RingHom.coe_comp]
+  exact (IsFractionRing.injective (Polynomial AffineField) RadialField).comp
     (rawPolynomialMap_injective.comp radialMonomialMap_injective)
 lemma coneCoefficientMap_C (c : ℂ) : coneCoefficientMap (MvPolynomial.C c)=algebraMap ℂ RadialField c := by
   rw [coneCoefficientMap,RingHom.comp_apply,RingHom.comp_apply,radialMonomialMap_C,rawPolynomialMap_C]

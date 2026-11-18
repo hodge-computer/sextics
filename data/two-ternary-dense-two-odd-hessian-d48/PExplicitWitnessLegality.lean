@@ -1,6 +1,7 @@
 import Proposal.PExplicitWitnessDefinitions
 import Proposal.PDescentFrozenIrreducible
 import Mathlib.Tactic.ComputeDegree
+import Mathlib.Algebra.MvPolynomial.CommRing
 
 /-! Denominator legality through an actual QQ polynomial specialization. -/
 set_option autoImplicit false

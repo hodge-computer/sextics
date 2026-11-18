@@ -29,9 +29,9 @@ theorem fourQ_cubic : fourQ = Cubic.f qc := by
   ring
 
 @[simp] theorem EP_coord (i : Fin 4) : EP (coord i) = if i.val < 2 then coord i else 0 := by
-  fin_cases i <;> norm_num [EP, Derivation.add_apply, Derivation.smul_apply, smul_eq_mul, partial_coord, Fin.ext_iff]
+  fin_cases i <;> norm_num [EP, add_apply, smul_apply, smul_eq_mul, partial_coord, Fin.ext_iff]
 @[simp] theorem EQ_coord (i : Fin 4) : EQ (coord i) = if 2 ≤ i.val then coord i else 0 := by
-  fin_cases i <;> norm_num [EQ, Derivation.add_apply, Derivation.smul_apply, smul_eq_mul, partial_coord, Fin.ext_iff]
+  fin_cases i <;> norm_num [EQ, add_apply, smul_apply, smul_eq_mul, partial_coord, Fin.ext_iff]
   all_goals rfl
 
 theorem pc_weights : Cubic.Weights EP pc := by
@@ -71,17 +71,15 @@ def actualT : Fin 4 → K4 :=
 
 theorem actualT_action (g : K4) : fieldAction rationalPartial actualT g = actualNP*EP g + actualNQ*EQ g := by
   simp only [fieldAction_apply, Fin.sum_univ_succ]
-  norm_num [actualT, EP, EQ, Derivation.add_apply, Derivation.smul_apply,
+  norm_num [actualT, EP, EQ, add_apply, smul_apply,
     smul_eq_mul, Matrix.cons_val_succ, Matrix.cons_val_two]
-  simp only [show Fin.succ (2 : Fin 3) = (3 : Fin 4) from rfl]
   ring
 
 theorem actualT_divergence : fieldDivergence rationalPartial actualT =
     EP actualNP + EQ actualNQ + 2*actualNP + 2*actualNQ := by
   simp only [fieldDivergence, Fin.sum_univ_succ]
-  norm_num [actualT, EP, EQ, Derivation.add_apply, Derivation.smul_apply,
+  norm_num [actualT, EP, EQ, add_apply, smul_apply,
     Derivation.leibniz, smul_eq_mul, Matrix.cons_val_succ, Matrix.cons_val_two, partial_coord, Fin.ext_iff]
-  simp only [show Fin.succ (2 : Fin 3) = (3 : Fin 4) from rfl, if_pos rfl]
   ring
 
 theorem actual_radial_derivatives :

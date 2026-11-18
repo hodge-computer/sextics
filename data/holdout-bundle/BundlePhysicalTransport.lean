@@ -122,7 +122,7 @@ theorem physicalDiagonalTangent_lambda (j : Fin 4) :
     physicalDiagonalTangent j.castSucc physicalLambda = 0 := by
   have h := physicalDiagonalTangent_coordinate j.castSucc (Fin.last 4)
   have hj : (Fin.last 4 : Fin 5) ≠ j.castSucc := (Fin.castSucc_ne_last j).symm
-  rw [show physicalQuotientTail (Fin.last 4) = physicalLambda by rfl, if_neg hj] at h
+  rw [show physicalQuotientTail (Fin.last 4) = physicalLambda by rfl, ite_eq_right hj] at h
   exact h
 
 def physicalDiagonalDensity : HoldoutFunctionField :=

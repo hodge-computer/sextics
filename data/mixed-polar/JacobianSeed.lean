@@ -117,7 +117,8 @@ theorem actual_coefficient_matrix : coefficientJacobian=seedMatrix := by
   funext i j
   simp only [coefficientJacobian,gradient_seed]
   fin_cases i <;> fin_cases j <;>
-    norm_num [seedMatrix,slotCoordinate,slotDegree,g0,g1,g2,Polynomial.coeff_mul_X_pow',Matrix.cons_val_two,Matrix.vecHead,Matrix.vecTail,Polynomial.coeff_one,Polynomial.coeff_X]
+    norm_num [seedMatrix,slotCoordinate,slotDegree,g0,g1,g2,Polynomial.coeff_mul_X_pow',Matrix.cons_val_two,Matrix.vecHead,Matrix.vecTail,Polynomial.coeff_one,Polynomial.coeff_X,
+      Finsupp.single_apply]
 
 theorem inverse_product : coefficientJacobian*inverseJacobian=1 := by
   rw [actual_coefficient_matrix]

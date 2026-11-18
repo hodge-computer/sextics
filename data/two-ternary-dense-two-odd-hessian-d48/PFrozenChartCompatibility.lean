@@ -48,6 +48,6 @@ theorem rationalPartial_commute {n : ℕ} (i j : Fin n) :
     simp [Derivation.commutator_apply, partial_coord, apply_ite]
   intro z
   have hz := Derivation.congr_fun hh z
-  simpa only [Derivation.commutator_apply, Derivation.zero_apply, sub_eq_zero] using hz
+  simpa only [Derivation.commutator_apply, zero_apply, sub_eq_zero] using hz
 
 end HodgeTestbed.FrozenChart

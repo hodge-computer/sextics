@@ -229,6 +229,13 @@ def conicTargetFieldMap (p : HoldoutConic.Seed) : ConicTargetField →+* ConicFu
 noncomputable instance conicFunctionField_targetAlgebra (p : HoldoutConic.Seed) :
     Algebra ConicTargetField (ConicFunctionField p) := (conicTargetFieldMap p).toAlgebra
 
+/-- Stated directly so that instance search does not have to rediscover them. -/
+instance conicFunctionField_targetSMul (p : HoldoutConic.Seed) :
+    SMul ConicTargetField (ConicFunctionField p) := Algebra.toSMul
+
+noncomputable instance conicFunctionField_targetModule (p : HoldoutConic.Seed) :
+    Module ConicTargetField (ConicFunctionField p) := Algebra.toModule
+
 instance conicFunctionField_baseTower (p : HoldoutConic.Seed) :
     IsScalarTower FermatBaseField ConicTargetField (ConicFunctionField p) :=
   IsScalarTower.of_algebraMap_eq (R := FermatBaseField) (S := ConicTargetField)

@@ -59,7 +59,7 @@ lemma recover_coefficient (a b s t u : ℕ)
 lemma code_injective_on_grade (w : Grade) (hw : w.1<38 ∧ w.2.1<38 ∧ w.2.2<38) :
     Set.InjOn code {m : Exponent | Finsupp.weight weights m=w} := by
   intro m hm n hn he
-  rw [Set.mem_setOf_eq,weight_formula] at hm hn
+  rw [Set.mem_ofPred_eq,weight_formula] at hm hn
   have hm0 := congrArg Prod.fst hm
   have hm1 := congrArg (fun z : Grade => z.2.1) hm
   have hm2 := congrArg (fun z : Grade => z.2.2) hm
@@ -91,13 +91,13 @@ lemma encode_monomial (m : Exponent) (r : R) :
     Fin.prod_univ_succ,code,pow_add,pow_mul,mul_assoc,mul_comm,mul_left_comm]
 
 lemma encode_finsupp (p : MvPolynomial (Fin 6) R) :
-    (encode p).toFinsupp.coeff=Finsupp.mapDomain code (AddMonoidAlgebra.coeff p) := by
+    (encode p).coeff=Finsupp.mapDomain code p.coeff := by
   induction p using MvPolynomial.induction_on' with
   | monomial m r =>
     rw [encode_monomial]
-    simp [Polynomial.toFinsupp_monomial,MvPolynomial.monomial,Finsupp.mapDomain_single]
+    simp [Polynomial.coeff_monomial,MvPolynomial.monomial,Finsupp.mapDomain_single]
   | add p q hp hq =>
-    simp only [map_add,Polynomial.toFinsupp_add,AddMonoidAlgebra.coeff_add,
+    simp only [map_add,AddMonoidAlgebra.coeff_add,
       Finsupp.mapDomain_add,hp,hq]
 
 theorem encode_injective_on_grade (w : Grade) (hw : w.1<38 ∧ w.2.1<38 ∧ w.2.2<38)
@@ -108,17 +108,17 @@ theorem encode_injective_on_grade (w : Grade) (hw : w.1<38 ∧ w.2.1<38 ∧ w.2.
   let S : Set Exponent := {m | Finsupp.weight weights m=w}
   have hsP : (p.support : Set Exponent)⊆S := fun m hm => hp (mem_support_iff.mp hm)
   have hsQ : (q.support : Set Exponent)⊆S := fun m hm => hq (mem_support_iff.mp hm)
-  have heF := congrArg (fun r : Polynomial R => r.toFinsupp.coeff) he
+  have heF := congrArg (fun r : Polynomial R => r.coeff) he
   rw [encode_finsupp,encode_finsupp] at heF
   ext m
   by_cases hm : m∈S
   · have h := congrArg (fun f : ℕ →₀ R => f (code m)) heF
-    rw [Finsupp.mapDomain_apply' S (AddMonoidAlgebra.coeff p) hsP (code_injective_on_grade w hw) hm,
-      Finsupp.mapDomain_apply' S (AddMonoidAlgebra.coeff q) hsQ (code_injective_on_grade w hw) hm] at h
+    rw [Finsupp.mapDomain_apply' S p.coeff hsP (code_injective_on_grade w hw) hm,
+      Finsupp.mapDomain_apply' S q.coeff hsQ (code_injective_on_grade w hw) hm] at h
     exact h
-  · have hp0 : coeff m p=0 := by
+  · have hp0 : p.coeff m=0 := by
       by_contra h; exact hm (hp h)
-    have hq0 : coeff m q=0 := by
+    have hq0 : q.coeff m=0 := by
       by_contra h; exact hm (hq h)
     rw [hp0,hq0]
 

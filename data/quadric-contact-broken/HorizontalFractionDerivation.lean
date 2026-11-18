@@ -40,8 +40,8 @@ theorem horizontal_parameter_X (k : Fin 4) (j : Fin 2) :
     horizontal k (parameterMap (X j)) = 0 := by
   fin_cases k <;> fin_cases j <;>
     simp [parameterMap, Derivation.leibniz_div, coordinate, horizontal_map,
-      polynomialHorizontal, Derivation.sub_apply, Derivation.add_apply,
-      Derivation.smul_apply, pderiv_X, Pi.single_apply, smul_eq_mul] <;> ring
+      polynomialHorizontal, sub_apply, add_apply,
+      smul_apply, pderiv_X, Pi.single_apply, smul_eq_mul] <;> ring
 
 theorem horizontal_parameter (k : Fin 4) (P : Parameters) :
     horizontal k (parameterMap P) = 0 := by
@@ -83,8 +83,8 @@ theorem horizontal_active (k j : Fin 4) :
     horizontal k (active j) = if j = k then scale k else 0 := by
   fin_cases k <;> fin_cases j <;>
     simp [active, scale, coordinate, Derivation.leibniz_pow, Derivation.leibniz,
-      horizontal_map, polynomialHorizontal, Derivation.sub_apply, Derivation.add_apply,
-      Derivation.smul_apply, pderiv_X, Pi.single_apply, smul_eq_mul,
+      horizontal_map, polynomialHorizontal, sub_apply, add_apply,
+      smul_apply, pderiv_X, Pi.single_apply, smul_eq_mul,
       horizontal_two, horizontal_four] <;> ring_nf <;> simp
 
 def activeMap : MvPolynomial (Fin 4) Coeff →+* FunctionField :=

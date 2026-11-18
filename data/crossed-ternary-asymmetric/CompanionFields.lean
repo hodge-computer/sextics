@@ -353,7 +353,7 @@ lemma two_step_evaluation_det {R : Type*} [CommRing R]
     exact he i j
   rw [hi,Matrix.det_one,mul_one]
   change P 0 0*P 1 1=4
-  rw [h0,if_pos rfl,h11,one_mul]
+  rw [h0,ite_eq_left rfl,h11,one_mul]
 
 end CrossedConicIncidence
 end

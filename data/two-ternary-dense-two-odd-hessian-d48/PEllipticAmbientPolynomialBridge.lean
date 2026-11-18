@@ -44,6 +44,6 @@ theorem equations_of_rational_field (A C : Poly 6) (hD : D ≠ 0) (v : Fin 6 →
     exact (div_eq_iff hd).mp hfirst
   · apply embed_injective
     rw [map_mul]
-    exact (div_left_inj' (pow_ne_zero 2 hd)).mp hdiv
+    exact (div_left_inj₀ (pow_ne_zero 2 hd)).mp hdiv
 
 end HodgeTestbed.EllipticAmbient

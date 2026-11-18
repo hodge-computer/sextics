@@ -52,8 +52,7 @@ theorem polynomial_linear_combination_one
         ring]
     rw [h, add_neg_cancel]
   refine ⟨u, ?_⟩
-  apply Polynomial.ext
-  intro n
+  ext n
   by_cases hn : n = 0
   · subst n
     simp [constant_B, constant_Q]
@@ -62,7 +61,7 @@ theorem polynomial_linear_combination_one
     · obtain ⟨i, hi⟩ := covers n hnpos hb
       subst n
       simpa only [coeff_add, finsetSum_coeff, coeff_C_mul, coeff_one,
-        if_neg hn] using hrow i
+        ite_eq_right hn] using hrow i
     · have hB : B.coeff n = 0 := coeff_eq_zero_of_natDegree_lt (lt_of_le_of_lt bound_B
         (Nat.lt_of_not_ge hb))
       have hQ (j : ι) : (Q j).coeff n = 0 := coeff_eq_zero_of_natDegree_lt

@@ -32,7 +32,7 @@ theorem source_homogeneous : physicalSource.IsHomogeneous 6 :=
 
 theorem source_pullback : X 5^2*cubeLast quotientSource = physicalSource := by
   simp only [quotientSource, physicalSource, map_mul, map_pow, cubeVariable_X]
-  simp only [show (0 : Fin 6) ≠ 5 by decide, show (2 : Fin 6) ≠ 5 by decide, if_false]
+  simp only [show (0 : Fin 6) ≠ 5 by decide, show (2 : Fin 6) ≠ 5 by decide, ite_false]
   ring
 
 theorem quotient_certificate_data :

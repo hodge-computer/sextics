@@ -109,7 +109,7 @@ lemma equations_eval {S : Type*} [CommRing S] (c₁ c₂ : R) (k : Fin 2 → R)
       (H (C (f c₁)) (C (f c₂)) X (curveEval k f v)).coeff i.val := by
   change (MvPolynomial.eval₂Hom f v) ((H (cp c₁) (cp c₂) X (curve k)).coeff i.val) = _
   rw [← Polynomial.coeff_map]
-  congr 1
+  congr 2
   change (Polynomial.mapRingHom (MvPolynomial.eval₂Hom f v)) (H (cp c₁) (cp c₂) X (curve k)) = _
   rw [H_map]
   simp only [Polynomial.coe_mapRingHom,cp,Polynomial.map_C,
@@ -120,7 +120,7 @@ lemma equations_pderiv_eval {S : Type*} [CommRing S] (c₁ c₂ : R) (k : Fin 2 
     MvPolynomial.eval₂Hom f v (MvPolynomial.pderiv j (equations c₁ c₂ k i))=
       (gradient (C (f c₁)) (C (f c₂)) X (curveEval k f v) (slotCoordinate j)*X^slotDegree j).coeff i.val := by
   rw [equations_pderiv,← Polynomial.coeff_map,Polynomial.map_mul,Polynomial.map_pow,Polynomial.map_X]
-  congr 2
+  congr 3
   change (Polynomial.mapRingHom (MvPolynomial.eval₂Hom f v))
     (gradient (cp c₁) (cp c₂) X (curve k) (slotCoordinate j)) = _
   rw [gradient_map]
