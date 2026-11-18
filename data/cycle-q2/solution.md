@@ -426,10 +426,40 @@ Every actual class of the ambient Euler kernel comes from a global
 section through this connecting map.
 [Ordinary Euler connecting map](GeometricHodgeCotangentEulerCohomology.lean)
 
-It remains to prove short exactness of the conormal complex on the
-original smooth fiber and identify the induced one-form cocycle with
-the hyperplane dlog cocycle, with its actual scalar normalization and
-boundary lifts. The complete unfiltered total complex and its comparison,
+The conormal complex is now proved short exact on the original fixed
+smooth fiber:
+\[
+ 0\longrightarrow\mathcal O_T(-6)\longrightarrow B
+   \longrightarrow\Omega_T^1\longrightarrow0.
+\]
+The four-coordinate Kähler presentation stays exact after every
+localization of the actual hypersurface quotient. On each principal
+subopen of an original chart, its coefficient map is the original
+localization map into the structure sheaf. The ordinary Kähler module
+there maps bijectively to sections of the actual cotangent sheaf.
+The negative-twist coefficient frames identify these maps with the
+global conormal complex. The original fixed-sextic Jacobian certificate
+makes the gradient ideal the unit ideal, giving injectivity of the
+conormal map. A basis-local sheaf criterion then proves short exactness.
+[Localized coordinate presentation](GeometricHodgeCotangentLocalization.lean),
+[actual coefficient frames](GeometricHodgeCotangentSectionFrames.lean),
+[actual principal-open localization](GeometricHodgeCotangentAffineSections.lean),
+[local conormal exactness](GeometricHodgeCotangentConormalLocal.lean),
+[fixed-fiber Jacobian ideals](GeometricHodgeThreefoldLiteralGradient.lean), and
+[global conormal short exactness](GeometricHodgeCotangentConormalExact.lean)
+
+Since \(H^2(T,\mathcal O_T(-6))=0\), the actual cohomology map
+\(H^1(T,B)\to H^1(T,\Omega_T^1)\) is surjective. Composing it with the
+Euler connecting map shows that every intrinsic cotangent degree-one
+class comes from a global \(\mathcal O_T(0)\) section. The checked
+Laurent calculation parametrizes this source by \(\mathbb C\) as an
+additive group, giving a surjective additive map into intrinsic
+cotangent degree-one cohomology.
+[Intrinsic cotangent cohomology](GeometricHodgeCotangentCohomology.lean)
+
+It remains to identify this induced Euler class with the hyperplane
+dlog cocycle, with its actual scalar normalization and Čech boundary
+lifts. The complete unfiltered total complex and its comparison,
 invariant Gysin spanning, specialization, and protected primitive remain
 open. No full unfiltered nonvanishing or protected primitive is claimed.
 
