@@ -283,6 +283,58 @@ the complete protected de Rham class remain open.
 [Signed class equality](GeometricLiteralThreefoldCurvePairing.lean) and
 [nonvanishing and strict support](GeometricLiteralNonzeroSweptRestriction.lean)
 
+## The corrected filtered Cech three-cocycle
+
+Retain the first-order variation \(a_i\) of the relative residue
+three-form on each of the four original charts. Cartan's identity on
+the common gradient opens gives
+\[
+ d\eta_{ij}=a_i|_{ij}-a_j|_{ij}.
+\]
+The same volume frame generates every ordinary three-form on the full
+chart intersection. Its sixteen common gradient restrictions jointly
+detect equality, so the displayed identity holds before localization to
+a chosen gradient component. The exterior derivative on two-forms is
+constructed on the original rings and commutes with restriction.
+[Deformed volume and Cartan identity](GeometricLiteralThreefoldDeformedCocycle.lean),
+[derivative on the full intersection](GeometricLiteralThreefoldDeformedEdgeDerivative.lean),
+and [native exterior differentiation](GeometricLiteralThreefoldExteriorDescentNative.lean)
+
+Use the total differential whose pair component is
+\(\delta a-d\eta\). Then \((-a_i,\eta_{ij})\), keeping the six increasing
+pairs, is a closed degree-three cochain. The triple component is the
+original Cech face identity; the vertex four-form component vanishes
+because the cotangent rank is three.
+[Total cocycle and signs](GeometricLiteralThreefoldDeRhamTestClass.lean)
+
+In filtration two, a degree-two cochain consists of four vertex
+two-forms \(v_i\). Its boundary is
+\[
+ (dv_i,\ v_j|_{ij}-v_i|_{ij}).
+\]
+These boundaries lie in the kernel of the total degree-three
+differential. The quotient by their image defines
+`FilteredCechHThree`. Sending a total cycle to the ordinary sheaf class
+of its edge two-forms kills every such boundary, giving a homomorphism
+\[
+ \operatorname{FilteredCechHThree}\longrightarrow H^1(T,\Omega_T^2)
+\]
+that takes `testClass` to \(\eta_{B_*}\).
+[Boundary quotient and Hodge projection](GeometricLiteralThreefoldFilteredCechQuotient.lean)
+
+Composing this projection with pullback to the moving family, evaluation
+on its marked curve, and the normalized curve trace gives the negative
+trace of `curveClass`. It is nonzero. Thus `testClass` is nonzero in this
+filtered Cech quotient, and no four vertex two-forms have the total test
+as their boundary.
+[Trace detector and filtered nonvanishing](GeometricLiteralThreefoldFilteredNonzero.lean)
+
+This quotient retains the three-form corrections missing from the
+ordinary Hodge class alone. Survival after adjoining the lower
+filtration terms, and comparison with full unfiltered de Rham
+cohomology, remain unproved here. The invariant Gysin spanning theorem,
+specialization, and protected rational primitive remain open.
+
 ## An exact rational correction on the genus-ten chart
 
 In the normal coordinates \(T,h\), the explicitly defined rational
