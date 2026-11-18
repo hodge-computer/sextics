@@ -5,7 +5,6 @@ import HodgeComputer.Constructions.PolynomialCurves.ArithmeticLifting
 /-! A finite algebraic family over the generic endpoint, lifted from rbajaj5's line.
 The nonsingular-incidence/flatness argument is due to fqlx's reflection-coupled-fano proof. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency true
 namespace CyclicTriple.Lifting
 open Polynomial HoldoutConstruction
 
@@ -53,7 +52,6 @@ theorem seed_solution (i : Index) :
   rw [← equations_specialize, MvPolynomial.eval₂Hom_map_hom, RingHom.id_comp] at h
   exact h
 
-set_option backward.isDefEq.respectTransparency false in
 theorem seed_jacobian :
     IsUnit (Matrix.det (fun i j : Index => MvPolynomial.eval₂Hom seedBaseMap
       seedCoefficients (MvPolynomial.pderiv i (familyEquations j)))) := by
@@ -66,8 +64,8 @@ theorem seed_jacobian :
       (MvPolynomial.pderiv i (equations coupling seedEndpoint j))
     rw [← equations_specialize, MvPolynomial.pderiv_map,
       MvPolynomial.eval₂Hom_map_hom, RingHom.id_comp]
-  rw [hm, Matrix.det_transpose]
-  exact seedJacobian_unit
+  rw [hm]
+  exact (congrArg IsUnit (Matrix.det_transpose _)).mpr seedJacobian_unit
 
 theorem exists_field :
     ∃ I : Ideal Incidence, I.IsMaximal ∧ Module.Finite GenericEndpoint (Incidence ⧸ I) ∧
@@ -123,7 +121,6 @@ theorem coefficients_equations (I : Ideal Incidence) [I.IsMaximal] (i : Index) :
   rw [← equations_map_to_field, MvPolynomial.eval₂Hom_map_hom, RingHom.id_comp]
   exact squareGeneric_solution familyEquations I i
 
-set_option backward.isDefEq.respectTransparency false in
 theorem coefficients_jacobian (I : Ideal Incidence) [I.IsMaximal] :
     IsUnit (Matrix.det (fun i j : Index =>
       MvPolynomial.eval₂Hom (RingHom.id (CoefficientField I)) (coefficients I)
@@ -141,9 +138,8 @@ theorem coefficients_jacobian (I : Ideal Incidence) [I.IsMaximal] :
     rfl
   simp_rw [he]
   rw [show (fun i j => MvPolynomial.aeval (coefficients I) (MvPolynomial.pderiv j (familyEquations i))) =
-    Matrix.transpose (fun i j => MvPolynomial.aeval (coefficients I) (MvPolynomial.pderiv i (familyEquations j))) from rfl,
-    Matrix.det_transpose]
-  exact squareGeneric_jacobian familyEquations I
+    Matrix.transpose (fun i j => MvPolynomial.aeval (coefficients I) (MvPolynomial.pderiv i (familyEquations j))) from rfl]
+  exact (congrArg IsUnit (Matrix.det_transpose _)).mpr (squareGeneric_jacobian familyEquations I)
 
 def family (I : Ideal Incidence) [I.IsMaximal] : LineFamily coupling (CoefficientField I) where
   coefficients := coefficients I

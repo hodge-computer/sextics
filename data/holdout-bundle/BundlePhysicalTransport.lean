@@ -12,7 +12,6 @@ Prepared with OpenAI ChatGPT collaborating-agent assistance.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle
 

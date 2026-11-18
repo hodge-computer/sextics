@@ -10,7 +10,6 @@ one half, and the transitive term of coefficient one third. All coordinate denom
 nonzero. Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 Adapted to mixed-biweight for fqlx with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalCoordinates
 open CyclePhysical
 def coordinate (i : Fin 6) : FunctionField := residueMap (MvPolynomial.X i)

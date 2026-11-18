@@ -18,7 +18,6 @@ The complementary quotient, seed and adaptation were developed with OpenAI
 ChatGPT assistance. This module alone asserts no certificate.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace HoldoutBundle
 open Polynomial
 variable {R : Type*} [CommRing R]

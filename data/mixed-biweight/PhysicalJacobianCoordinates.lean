@@ -8,7 +8,6 @@ import HodgeComputer.Constructions.ResidueTransport.WeierstrassChart
 Original cycle-three construction prepared with OpenAI Codex assistance.
 Adapted to mixed-biweight for fqlx with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalJacobianCoordinates
 export WeierstrassChart (rawMatrix raw_determinant)
 open scoped BigOperators

@@ -6,7 +6,6 @@ import HodgeComputer.Constructions.TransitiveCubic.Cubic
 This applies the generic algebraic extension to proved nonzero physical
 coefficients; no extension or coefficient hypothesis is postulated. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace MixedPolarPhysicalShear
 open MixedPolarPhysical MixedPolarPhysicalCoordinates
 abbrev Extension := MixedPolarShear.Extension FunctionField coeffA coeffD coeffF

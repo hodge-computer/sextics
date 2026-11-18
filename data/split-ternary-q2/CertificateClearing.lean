@@ -12,7 +12,6 @@ Prepared with OpenAI Codex assistance for contributor fqlx.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace SplitCompatibleHomogeneous
 open MvPolynomial
 open scoped BigOperators

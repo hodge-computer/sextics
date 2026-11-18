@@ -5,7 +5,6 @@ import Proposal.JacobianScaling
 to the polynomial family model. All algebraic shear coefficients disappear
 from these identities before the polynomial-family primitive is used. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace MixedPolarPhysicalJacobianCoefficients
 open MixedPolarPhysicalCoordinates MixedPolarPhysicalShear MixedPolarPhysicalCubicJets
 

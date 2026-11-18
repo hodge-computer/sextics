@@ -11,7 +11,6 @@ source. The maintained generic algebra retains its original attribution.
 Prepared with OpenAI Codex assistance for fqlx.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 open scoped BigOperators
 
 namespace SplitGCompanion
@@ -327,7 +326,10 @@ lemma equation_zero : evaluation clearedAffineEquation=0 := by
   exact cleared_equation
 lemma equation_partial : integerPartial 0 clearedAffineEquation=
     42*MvPolynomial.X 0^5+5*(2*MvPolynomial.X 1^5+2*MvPolynomial.X 1^3+15*MvPolynomial.X 0^4) := by
-  rw [clearedAffineEquation,SplitCompanion.H_derivation (integerPartial 0) false 0 (map_zero _)]
+  have h (z : Fin 5 → Poly) : integerPartial 0 (SplitCompanion.H false 0 z)=
+      ∑ i,SplitCompanion.gradient false 0 z i*integerPartial 0 (z i) :=
+    SplitCompanion.H_derivation (integerPartial 0) false 0 (map_zero _) z
+  rw [clearedAffineEquation,h]
   simp [SplitCompanion.gradient,Fin.sum_univ_succ]
   ring
 lemma equation_hessian : integerPartial 0 (integerPartial 0 clearedAffineEquation)=
@@ -473,11 +475,11 @@ theorem source_data : ∃ D N₀ : Poly,∃ N : Fin 3 → Poly,
   obtain ⟨w,hw⟩ := affine_residue_solution
   apply CrossedAffinePrimitiveData.ambient_data evaluation (integerPartial 0)
     (fun i : Fin 3 => integerPartial i.succ) tangent clearedAffineEquation source w
-  · rw [normal_evaluation]; exact clearNormal_ne_zero
+  · exact normal_evaluation.trans_ne clearNormal_ne_zero
   · intro i; exact integerPartial_commute i.succ 0 clearedAffineEquation
   · exact tangent_formula
   · exact residue_common_representatives projection (CrossedMonicHypersurface.projection_surjective equation) w
-  · rw [normal_evaluation,hessian_evaluation,source_partial_value,source_value]
+  · rw [← normal_evaluation,← hessian_evaluation,← source_partial_value,← source_value] at hw
     exact hw
 
 end SplitGCompanion

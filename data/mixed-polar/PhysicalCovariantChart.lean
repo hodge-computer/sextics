@@ -9,7 +9,6 @@ diagonal specialization through either quadratic shear root, using only the
 explicit localization chart. The quadratic polynomial need not be
 irreducible over the physical function field. Prepared with Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace MixedPolarPhysicalCovariantChart
 open Polynomial MixedPolarPhysical MixedPolarPhysicalChart TransitiveCovariants
 

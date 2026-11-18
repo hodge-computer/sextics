@@ -10,7 +10,6 @@ inside this theorem.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace ReflectionCoupledFano.Arithmetic
 open HoldoutConstruction
 

@@ -8,7 +8,6 @@ Prepared with OpenAI Codex assistance for hodgepodgeconjecture. -/
 noncomputable section
 namespace CycleCovariants
 open MvPolynomial
-set_option backward.isDefEq.respectTransparency false
 variable {K : Type*} [CommRing K]
 abbrev Affine (K : Type*) [CommRing K] := MvPolynomial (Fin 2) K
 local notation "x" => (X (R := K) (0:Fin 2))

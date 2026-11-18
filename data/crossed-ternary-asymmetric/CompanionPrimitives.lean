@@ -13,7 +13,6 @@ See solution.md for the construction, provenance, and prior-work credit. -/
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFanoRadial
 open HoldoutConstruction CrossedRadialResidue CrossedConicIncidence
 open scoped BigOperators
@@ -195,7 +194,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFanoAffineData
 open Polynomial HoldoutConstruction CrossedConicIncidence
 open scoped BigOperators
@@ -249,7 +247,9 @@ lemma equation_zero : evaluation equation=0 := by
 lemma equation_partial : integerPartial 0 equation=
     42*MvPolynomial.X 0^5+5*(MvPolynomial.X 1^5+MvPolynomial.X 1^3+
       MvPolynomial.X 1+10*MvPolynomial.X 1*MvPolynomial.X 0^4) := by
-  rw [equation,H_derivation]
+  rw [equation]
+  refine (H_derivation (integerPartial 0) _).trans ?_
+  change ∑ i,_*integerPartial 0 _=_
   simp [gradient,Fin.sum_univ_succ]
 
 lemma normal_evaluation : evaluation (integerPartial 0 equation)=CrossedFanoRadial.clearNormal := by
@@ -297,14 +297,15 @@ theorem data_of_residue_solution (A : Poly) (w : Fin 3 → K)
       evaluation (residueDivNum (integerPartial 0) (fun i : Fin 3 => integerPartial i.succ) D N₀ N)=0 := by
   apply CrossedAffinePrimitiveData.ambient_data evaluation (integerPartial 0)
     (fun i : Fin 3 => integerPartial i.succ) CrossedFanoAffine.tangent equation A w
-  · rw [normal_evaluation]; exact CrossedFanoRadial.clearNormal_ne_zero
+  · change evaluation (integerPartial 0 equation)≠0
+    rw [normal_evaluation]; exact CrossedFanoRadial.clearNormal_ne_zero
   · intro i; exact integerPartial_commute i.succ 0 equation
   · exact tangent_formula
   · rw [evaluation_residue]
     exact residue_common_representatives
       (CrossedMonicHypersurface.projection CrossedFanoAffine.equation)
       (CrossedMonicHypersurface.projection_surjective CrossedFanoAffine.equation) w
-  · rw [normal_evaluation,hessian_evaluation]
+  · rw [← normal_evaluation,← hessian_evaluation] at hw
     exact hw
 
 def firstSource : Poly := 7*MvPolynomial.X 1^4*MvPolynomial.X 0
@@ -402,7 +403,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFanoElliptic
 open Polynomial HoldoutConstruction CrossedElliptic
 variable {K : Type*} [Field K] [CharZero K]

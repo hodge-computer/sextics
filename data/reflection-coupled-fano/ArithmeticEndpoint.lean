@@ -9,7 +9,6 @@ and passage to the generic complex endpoint.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace ReflectionCoupledFano.Arithmetic
 open Polynomial
 

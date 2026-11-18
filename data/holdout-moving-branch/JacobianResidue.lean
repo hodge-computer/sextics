@@ -8,7 +8,6 @@ fqlx's shared polynomial-family bridge and finite-trace theorems; the physical
 certificate is assembled separately in PhysicalPrimitive. Prepared with OpenAI Codex
 assistance for hodgepodgeconjecture; transitive cubic adaptation by fqlx, specialized here for benediamond with Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CycleJacobianResidue
 open HoldoutConstruction CycleJacobianFamily CycleJacobianParameters CycleJacobianEmbedding
   CycleJacobianHypersurface CycleJacobianNormal Polynomial

@@ -91,7 +91,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedPhysicalChart
 open MvPolynomial Polynomial HoldoutConstruction
 open scoped BigOperators
@@ -175,7 +174,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedPhysicalChart
 open MvPolynomial CrossedCompatibleFractions
 
@@ -233,7 +231,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedPhysicalChart
 open CrossedCompatibleFractions
 
@@ -302,7 +299,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedCompatibleFractions
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators
@@ -376,7 +372,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedPhysicalChart
 open HoldoutConstruction CrossedCompatibleFractions
 

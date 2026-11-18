@@ -8,7 +8,6 @@ the earlier exact algebraic research packet, with classical cubic invariant
 credit to Tom Fisher and the sources cited there. Prepared with OpenAI Codex
 assistance for hodgepodgeconjecture. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CycleJacobianSource
 open HoldoutConstruction CycleJacobianHypersurface CycleJacobianEmbedding CycleJacobianResidue
 open Polynomial

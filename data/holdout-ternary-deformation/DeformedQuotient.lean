@@ -11,7 +11,6 @@ The added ternary terms are retained in the equation and every derivative.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace DeformedGeometry
 open Polynomial HoldoutConstruction
 variable {R : Type*} [CommRing R]

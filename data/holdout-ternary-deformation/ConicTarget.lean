@@ -7,7 +7,6 @@ algebra structure. Uses fqlx's shared monic-root embedding theorem.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace DeformedConic
 open HoldoutConstruction Polynomial
 

@@ -11,7 +11,6 @@ application was prepared with OpenAI Codex assistance for fqlx.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 open scoped BigOperators TensorProduct
 
 namespace SplitCompanion

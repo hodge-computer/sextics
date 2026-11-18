@@ -74,7 +74,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 set_option profiler true
 set_option profiler.threshold 100
 open scoped TensorProduct
@@ -233,7 +232,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 open CrossedConicIncidence (H gradient)
@@ -321,7 +319,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 
@@ -413,7 +410,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 
@@ -506,7 +502,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 
@@ -606,7 +601,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction CrossedConicIncidence
 open scoped BigOperators
@@ -647,7 +641,8 @@ lemma rowProduct_first (j : Fin 5) :
   · simp only [polynomialMatrix_tangent,Fin.succ_ne_zero,ite_false]
     have h := gradient_derivation_pairing (polynomialDerivation j) conicCurve conicCurve_equation
     have hc := congrArg (fun p : Polynomial CoefficientField => p.coeff 0) h
-    simpa only [conicGradient,Polynomial.coeff_zero] using hc
+    simp only [conicGradient,Polynomial.coeff_zero] at hc ⊢
+    exact hc
 
 lemma rowProduct_succ (i : Fin 4) (j : Fin 5) :
     (rowMatrix*constantMatrix) i.succ j=(polynomialMatrix (independentCoordinate i) j).coeff 0 := by
@@ -716,7 +711,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 open scoped BigOperators

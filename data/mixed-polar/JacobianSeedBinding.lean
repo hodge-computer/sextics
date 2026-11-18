@@ -9,7 +9,6 @@ Adapted from the coefficient-Jacobian verification pattern of fqlx and
 hodgepodgeconjecture. Prepared for benediamond with OpenAI Codex assistance.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace MixedPolarJacobianSeedBinding
 open Polynomial MixedPolarJacobianIncidence
 abbrev K := ZMod 5

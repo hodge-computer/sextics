@@ -6,7 +6,6 @@ rational function, without expanding that function's covariants.
 Original cycle-three construction prepared with OpenAI Codex assistance.
 Adapted to mixed-biweight for fqlx with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalCubicVolume
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open CyclePhysicalNormalTransport CyclePhysicalCubicTangent

@@ -10,7 +10,6 @@ partial derivative. Uses fqlx's generic quotient/fraction derivations.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace DeformedCover
 open HoldoutConstruction Polynomial
 local instance physicalModel_local_1 : Algebra ℤ PhysicalField := Ring.toIntAlgebra _

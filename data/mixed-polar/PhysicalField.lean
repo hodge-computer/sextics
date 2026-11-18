@@ -12,7 +12,6 @@ HoldoutCover irreducibility and homogeneous-certificate machinery. Prepared
 with Codex assistance. This proves domain and closure conditional on normalized
 data; it does not claim such data have yet been constructed. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace MixedPolarPhysical
 open HoldoutConstruction Polynomial
 open scoped BigOperators
@@ -184,17 +183,23 @@ theorem certificate_of_residue_solution
       (fun i => integerPartial_commute i.succ 0 sextic) tangent_apply
       (residue_common_representatives projection projection_surjective vector) (by
         rw [hd] at hw
-        simp only [integerPartial_apply]
+        change (residueMap (MvPolynomial.pderiv 0 source)*residueMap (MvPolynomial.pderiv 0 sextic)-
+          residueMap source*residueMap (MvPolynomial.pderiv 0 (MvPolynomial.pderiv 0 sextic)))/
+            (residueMap (MvPolynomial.pderiv 0 sextic))^2+
+          ∑ i,(tangent i (vector i)-vector i*tangent i (residueMap (MvPolynomial.pderiv 0 sextic))/
+            residueMap (MvPolynomial.pderiv 0 sextic))=0
         rw [hw]
         have hn : residueMap (MvPolynomial.pderiv 0 sextic) ≠ 0 := normal_ne_zero
         field_simp
         ring)
   apply certificate_of_normalized D (Fin.cases N₀ N) Q hlegal
-  · simpa only [HodgeTestbed.directional,Fin.sum_univ_succ,Fin.cases_zero,
-      Fin.cases_succ,integerPartial_apply,mul_comm] using hnormal
-  · simpa only [HodgeTestbed.divergenceNumerator,HodgeTestbed.divergence,
+  · simp only [HodgeTestbed.directional,Fin.sum_univ_succ,Fin.cases_zero,
+      Fin.cases_succ,mul_comm] at hnormal ⊢
+    exact hnormal
+  · simp only [HodgeTestbed.divergenceNumerator,HodgeTestbed.divergence,
       HodgeTestbed.directional,residueDivNum,Fin.sum_univ_succ,Fin.cases_zero,
-      Fin.cases_succ,integerPartial_apply,mul_comm] using hdiv
+      Fin.cases_succ,mul_comm] at hdiv ⊢
+    exact hdiv
 
 
 end MixedPolarPhysical

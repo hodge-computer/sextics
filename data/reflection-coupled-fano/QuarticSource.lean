@@ -10,7 +10,6 @@ the transverse curve coefficient divided by the endpoint normal gradient.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace ReflectionCoupledFano
 open Polynomial HoldoutConstruction
 

@@ -4,7 +4,6 @@ import Proposal.CompanionThetaBridge
 uses the maintained generic construction from the accepted proof by
 1337isnot1337. Prepared with OpenAI Codex assistance for fqlx. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 open scoped BigOperators
 namespace SplitFElliptic
 open Polynomial HoldoutConstruction CrossedElliptic SplitFCompanion

@@ -9,7 +9,6 @@ not posit an auxiliary parameter derivation on a specialized field.
 Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 Adapted to mixed-biweight for fqlx with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalCubicTangent
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates CyclePhysicalNormalTransport
 open scoped BigOperators

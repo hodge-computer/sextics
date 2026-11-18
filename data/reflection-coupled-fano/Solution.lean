@@ -16,7 +16,6 @@ assistance. See solution.md for the construction, limits, and prior credit.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency true
 
 namespace Submission
 open ReflectionCoupledFano

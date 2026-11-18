@@ -10,7 +10,6 @@ volume, source, and certificate-clearing obligation from those values.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle
 

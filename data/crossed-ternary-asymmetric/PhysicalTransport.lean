@@ -12,7 +12,6 @@ See solution.md for the construction, provenance, and prior-work credit. -/
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedPhysicalChart
 open MvPolynomial HoldoutConstruction
 
@@ -109,7 +108,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedPhysicalChart
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators
@@ -238,7 +236,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedPhysicalChart
 open MvPolynomial Polynomial HoldoutConstruction
 
@@ -340,7 +337,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedPhysicalChart
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators
@@ -388,7 +384,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedPhysicalChart
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators

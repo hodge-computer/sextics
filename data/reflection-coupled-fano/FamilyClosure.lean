@@ -15,7 +15,6 @@ pole-order-one certificate for the physical sextic.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace ReflectionCoupledFano
 open Polynomial HoldoutConstruction

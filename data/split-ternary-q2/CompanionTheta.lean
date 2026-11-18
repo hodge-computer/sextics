@@ -12,7 +12,6 @@ extraction compatible with the affine residue divergence.
 Prepared with OpenAI Codex assistance for contributor fqlx.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 open scoped BigOperators
 
 namespace SplitThetaRadial
@@ -455,9 +454,15 @@ theorem source_data_of_affine_residue
     ring
   obtain ⟨D,N₀,N,hD,hn,hdiv⟩ := SplitRationalAmbient.ambient_data evaluation (integerPartial 0)
     (fun i : Fin 3 => integerPartial i.succ) originalTangent clearedAffineEquation numerator denominator w'
-    (by rw [normal_evaluation]; exact clearNormal_ne_zero) denominator_ne_zero
+    (normal_evaluation.trans_ne clearNormal_ne_zero) denominator_ne_zero
     (fun i => integerPartial_commute i.succ 0 clearedAffineEquation) tangent_formula
     (residue_common_representatives projection (CrossedMonicHypersurface.projection_surjective equation) w') (by
+      change residueDivergence originalTangent (evaluation (integerPartial 0 clearedAffineEquation)) w'=
+        -(evaluation (integerPartial 0 numerator)/(evaluation denominator*evaluation (integerPartial 0 clearedAffineEquation))-
+          evaluation numerator*evaluation (integerPartial 0 denominator)/
+            (evaluation denominator^2*evaluation (integerPartial 0 clearedAffineEquation))-
+          evaluation numerator*evaluation (integerPartial 0 (integerPartial 0 clearedAffineEquation))/
+            (evaluation denominator*evaluation (integerPartial 0 clearedAffineEquation)^2))
       rw [normal_evaluation,hessian_polynomial,numerator_partial,map_zero,denominator_partial,
         map_mul,map_ofNat,CrossedMonicHypersurface.residueMap_X_zero,
         numerator_evaluation,denominator_evaluation,hwp]
@@ -470,7 +475,8 @@ theorem source_data_of_affine_residue
       ring)
   refine ⟨D,Fin.cases N₀ N,hD,?_,?_⟩
   · rw [Fin.sum_univ_succ]
-    simpa only [Fin.cases_zero,Fin.cases_succ] using hn
+    simp only [Fin.cases_zero,Fin.cases_succ]
+    exact hn
   · convert hdiv using 1 <;> congr 1 <;>
       simp only [residueDivNum,Fin.sum_univ_four,Fin.sum_univ_three,Fin.cases_zero,Fin.cases_succ] <;> ring
 end SplitFCompanion

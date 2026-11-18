@@ -9,7 +9,6 @@ certificate denominator is imposed. Developed with ChatGPT assistance.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle
 open Polynomial HoldoutConstruction

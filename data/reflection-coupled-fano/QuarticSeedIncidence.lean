@@ -2,7 +2,6 @@ import Proposal.QuarticGradient
 import Proposal.QuarticIncidence
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace ReflectionCoupledFano
 open Polynomial CoupledFanoQuarticSeed
 variable {K : Type*} [Field K] [CharP K 5]

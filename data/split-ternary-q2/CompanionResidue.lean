@@ -10,7 +10,6 @@ maintained constructions, with their original attribution to fqlx, HeadOfNaps,
 the Sextics contributors, Lean and mathlib. Prepared with Codex assistance for fqlx.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 open scoped BigOperators
 
 namespace SplitCompanionDomain
@@ -50,7 +49,10 @@ lemma hypersurface_partial (which : Bool) (j : Fin 5) : integerPartial j (hypers
     SplitCompanion.gradient which 0
       ![MvPolynomial.X 1,MvPolynomial.X 0,MvPolynomial.X 2,MvPolynomial.X 3,MvPolynomial.X 4]
       (coordinateSwap j) := by
-  rw [hypersurface,SplitCompanion.H_derivation (integerPartial j) which 0 (map_zero _)]
+  have h (z : Fin 5 → MvPolynomial (Fin 5) ℂ) : integerPartial j (SplitCompanion.H which 0 z)=
+      ∑ i,SplitCompanion.gradient which 0 z i*integerPartial j (z i) :=
+    SplitCompanion.H_derivation (integerPartial j) which 0 (map_zero _) z
+  rw [hypersurface,h]
   fin_cases j <;>
     simp [SplitCompanion.gradient,Fin.sum_univ_succ,coordinateSwap,Equiv.swap_apply_def,integerPartial_X_of_ne]
 
@@ -230,7 +232,8 @@ lemma rowProduct_first (which : Bool) (j : Fin 5) :
   · simp only [polynomialMatrix_tangent,Fin.succ_ne_zero,ite_false]
     have h := gradient_derivation_pairing (polynomialDerivation which j) which (conicCurve which) (conicCurve_equation which)
     have hc := congrArg (fun p : Polynomial (CoefficientField which) => p.coeff 0) h
-    simpa only [conicGradient,Polynomial.coeff_zero] using hc
+    simp only [conicGradient,Polynomial.coeff_zero] at hc ⊢
+    exact hc
 lemma rowProduct_succ (which : Bool) (i : Fin 4) (j : Fin 5) :
     (rowMatrix which*constantMatrix which) i.succ j=(polynomialMatrix which (independentCoordinate i) j).coeff 0 := by
   simp [Matrix.mul_apply,rowMatrix,constantMatrix]

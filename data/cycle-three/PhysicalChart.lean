@@ -9,7 +9,6 @@ does not evaluate arbitrary rational functions at a point: it first works in
 this explicitly specified open chart and uses the kernel (F).
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalChart
 open CyclePhysical CyclePhysicalCoordinates CycleCovariants
 local notation "X" => (MvPolynomial.X : Fin 6 → Ambient)

@@ -3,7 +3,6 @@ import Proposal.BundleFields
 /-! The Laurent coefficient base and its honest complex specialization. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle
 

@@ -7,7 +7,6 @@ endpoint. No inversion of a rational-function denominator occurs before
 the five parameter coordinates have been proved algebraically independent. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle
 open HoldoutConstruction

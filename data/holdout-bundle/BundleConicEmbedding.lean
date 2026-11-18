@@ -7,7 +7,6 @@ The independent endpoint parameters and the exact coordinate X1=t prove
 injectivity before the target-field algebra structure is introduced. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle
 open Polynomial HoldoutConstruction

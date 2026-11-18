@@ -7,7 +7,6 @@ normal coordinate. The coordinate ring and finite family are the previously
 proved ones; only the coordinate order changes. Prepared with OpenAI Codex
 assistance for fqlx. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace SplitCompanionPoleTwo
 open HoldoutConstruction
 open scoped BigOperators
@@ -62,7 +61,10 @@ lemma hypersurfaceT_explicit (which : Bool) : hypersurfaceT which=
 
 lemma normal_polynomial (which : Bool) : integerPartial 0 (hypersurfaceT which)=
     21*MvPolynomial.X 0^2 := by
-  rw [hypersurfaceT_explicit,SplitCompanion.H_derivation (integerPartial 0) which 0 (map_zero _)]
+  have h (z : Fin 5 → P5) : integerPartial 0 (SplitCompanion.H which 0 z)=
+      ∑ i,SplitCompanion.gradient which 0 z i*integerPartial 0 (z i) :=
+    SplitCompanion.H_derivation (integerPartial 0) which 0 (map_zero _) z
+  rw [hypersurfaceT_explicit,h]
   cases which <;> simp [SplitCompanion.gradient,Fin.sum_univ_succ,integerPartial_X_of_ne] <;> ring
 
 lemma T_ne_zero (which : Bool) : residueMapT which (MvPolynomial.X 0)≠0 := by

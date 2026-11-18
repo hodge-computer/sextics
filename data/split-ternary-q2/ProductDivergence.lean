@@ -11,7 +11,6 @@ No primitive existence is asserted by this conditional assembly.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace SplitTernaryProduct
 open Polynomial HoldoutConstruction CrossedElliptic
 open scoped BigOperators
@@ -113,7 +112,6 @@ end SplitTernaryProduct
 end
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace SplitTernaryProduct
 open Polynomial HoldoutConstruction CrossedElliptic
 open scoped BigOperators
@@ -232,7 +230,6 @@ end SplitTernaryProduct
 end
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace SplitTernaryProduct
 open Polynomial HoldoutConstruction CrossedElliptic
 open scoped BigOperators

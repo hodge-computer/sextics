@@ -8,7 +8,6 @@ are constructed on the actual finite field. The time derivative and all
 three endpoint directions preserve polynomial dependence on time. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle.ConicFamily
 open Polynomial HoldoutConstruction

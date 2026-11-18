@@ -10,7 +10,6 @@ homogeneous certificate theorems to the new physical model. Prepared
 with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace DeformedCover
 open HoldoutConstruction MvPolynomial
 open scoped BigOperators
@@ -107,15 +106,15 @@ theorem hasCertificate_of_cover_residue
   apply hasCertificate_of_normalized HodgeSubmission.F HodgeSubmission.A D (Fin.cases N₀ N) Q
     protected_isHomogeneous protected_source_isHomogeneous protected_irreducible.prime hlegal
     ?_ ?_ 0 protected_not_dvd_normal
-  · set_option backward.isDefEq.respectTransparency false in
-    simpa only [HodgeTestbed.directional, Fin.sum_univ_succ,
+  · simp only [HodgeTestbed.directional, Fin.sum_univ_succ,
       Fin.cases_zero, Fin.cases_succ, integerPartial, Derivation.restrictScalars_apply,
-      Derivation.coeFn_coe, mul_comm] using hnormal
-  · set_option backward.isDefEq.respectTransparency false in
-    simpa only [HodgeTestbed.divergenceNumerator, HodgeTestbed.divergence,
+      Derivation.coeFn_coe, mul_comm] at hnormal ⊢
+    exact hnormal
+  · simp only [HodgeTestbed.divergenceNumerator, HodgeTestbed.divergence,
       HodgeTestbed.directional, residueDivNum, Fin.sum_univ_succ,
       Fin.cases_zero, Fin.cases_succ, integerPartial, Derivation.restrictScalars_apply,
-      Derivation.coeFn_coe, mul_comm] using hdiv
+      Derivation.coeFn_coe, mul_comm] at hdiv ⊢
+    exact hdiv
 
 end DeformedCover
 #print axioms DeformedCover.hasCertificate_of_cover_residue

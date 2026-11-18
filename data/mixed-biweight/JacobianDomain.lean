@@ -7,7 +7,6 @@ specialization. The shared Eisenstein lemma is due to the credited
 HoldoutCover contributors. Prepared with OpenAI Codex assistance.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CycleJacobianDomain
 open Polynomial
 abbrev Coeff := MvPolynomial (Fin 5) ℂ

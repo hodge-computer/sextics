@@ -9,7 +9,6 @@ the shared HoldoutCover constructions, credited to fqlx and collaborators.
 Original cycle-three construction prepared with OpenAI Codex assistance.
 Adapted to mixed-biweight for fqlx with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalJacobianMap
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open CyclePhysicalJacobianCoordinates CyclePhysicalCubicJets

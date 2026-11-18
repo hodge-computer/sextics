@@ -9,7 +9,6 @@ the shared HoldoutCover constructions, credited to fqlx and collaborators.
 Adapted to the actual mixed-polar quadratic extension with Codex assistance.
 Every coefficient and source is bound to the exact fixed target. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace MixedPolarPhysicalJacobianMap
 open HoldoutConstruction MixedPolarPhysical MixedPolarPhysicalCoordinates
 open MixedPolarPhysicalJacobianCoordinates MixedPolarPhysicalCubicJets

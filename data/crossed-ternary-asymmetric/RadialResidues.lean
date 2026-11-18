@@ -21,7 +21,6 @@ See solution.md for the construction, provenance, and prior-work credit. -/
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFanoRadial
 open HoldoutConstruction CrossedRadialResidue
 local instance : Algebra ℤ CrossedFano.FunctionField := Ring.toIntAlgebra _

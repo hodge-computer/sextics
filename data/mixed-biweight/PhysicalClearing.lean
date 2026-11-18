@@ -9,7 +9,6 @@ of fqlx and project collaborators. The final primitive module supplies its resid
 Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 Adapted to mixed-biweight for fqlx with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysical
 open HoldoutConstruction
 open scoped BigOperators
@@ -33,17 +32,23 @@ theorem certificate_of_residue_solution
       (fun i => integerPartial_commute i.succ 0 sextic) tangent_apply
       (residue_common_representatives projection projection_surjective w) (by
         rw [hd] at hw
-        simp only [integerPartial_apply]
+        change (residueMap (MvPolynomial.pderiv 0 source)*residueMap (MvPolynomial.pderiv 0 sextic)-
+          residueMap source*residueMap (MvPolynomial.pderiv 0 (MvPolynomial.pderiv 0 sextic)))/
+            (residueMap (MvPolynomial.pderiv 0 sextic))^2+
+          ∑ i,(tangent i (w i)-w i*tangent i (residueMap (MvPolynomial.pderiv 0 sextic))/
+            residueMap (MvPolynomial.pderiv 0 sextic))=0
         rw [hw]
         have hn : residueMap (MvPolynomial.pderiv 0 sextic) ≠ 0 := normal_ne_zero
         field_simp
         ring)
   apply certificate_of_normalized D (Fin.cases N₀ N) Q hlegal
-  · simpa only [HodgeTestbed.directional,Fin.sum_univ_succ,Fin.cases_zero,
-      Fin.cases_succ,integerPartial_apply,mul_comm] using hnormal
-  · simpa only [HodgeTestbed.divergenceNumerator,HodgeTestbed.divergence,
+  · simp only [HodgeTestbed.directional,Fin.sum_univ_succ,Fin.cases_zero,
+      Fin.cases_succ,mul_comm] at hnormal ⊢
+    exact hnormal
+  · simp only [HodgeTestbed.divergenceNumerator,HodgeTestbed.divergence,
       HodgeTestbed.directional,residueDivNum,Fin.sum_univ_succ,Fin.cases_zero,
-      Fin.cases_succ,integerPartial_apply,mul_comm] using hdiv
+      Fin.cases_succ,mul_comm] at hdiv ⊢
+    exact hdiv
 
 end CyclePhysical
 #print axioms CyclePhysical.certificate_of_residue_solution

@@ -8,7 +8,6 @@ The incidence pattern builds on fqlx and hodgepodgeconjecture's accepted proofs.
 Prepared with OpenAI ChatGPT assistance.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace HoldoutBundle
 open Polynomial
 abbrev SeedField := ZMod 5

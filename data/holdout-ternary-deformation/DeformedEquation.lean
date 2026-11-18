@@ -14,7 +14,6 @@ This new seed and its formalization were prepared with OpenAI Codex assistance
 for hodgepodgeconjecture. This module alone asserts no HasCertificate theorem.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 set_option profiler true
 set_option profiler.threshold 100
 namespace DeformedConic

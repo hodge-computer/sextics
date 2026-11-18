@@ -363,7 +363,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFanoAffine
 open Polynomial HoldoutConstruction
 
@@ -414,7 +413,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFanoRadial
 open Polynomial HoldoutConstruction
 abbrev AffineField := CrossedFanoAffine.FunctionField
@@ -554,7 +552,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFano
 open Polynomial HoldoutConstruction
 
@@ -594,7 +591,9 @@ lemma hypersurface_partial (j : Fin 5) : integerPartial j hypersurface=
     CrossedConicIncidence.gradient
       ![MvPolynomial.X 1,MvPolynomial.X 0,MvPolynomial.X 2,MvPolynomial.X 3,MvPolynomial.X 4]
       (Equiv.swap (0 : Fin 5) 1 j) := by
-  rw [hypersurface,CrossedConicIncidence.H_derivation]
+  rw [hypersurface]
+  refine (CrossedConicIncidence.H_derivation (integerPartial j) _).trans ?_
+  change ∑ i,_*integerPartial j _=_
   fin_cases j <;>
     simp [CrossedConicIncidence.gradient,Fin.sum_univ_succ,Equiv.swap_apply_def,
       integerPartial_X_of_ne]

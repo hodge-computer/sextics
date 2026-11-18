@@ -1,7 +1,6 @@
 import Proposal.DeformedEquation
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 set_option profiler true
 set_option profiler.threshold 100
 namespace DeformedConic

@@ -25,7 +25,6 @@ nonsingular seed exists and does not assert a Hodge certificate.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace ReflectionCoupledFano
 

@@ -8,7 +8,6 @@ our deformed equation and its actual residue derivations throughout.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace DeformedCover
 open HoldoutConstruction
 open DeformedConic (BaseField TargetField targetProjection targetResidueMap targetTangent quotientEquation)

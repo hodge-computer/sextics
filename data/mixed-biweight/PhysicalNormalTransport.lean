@@ -9,7 +9,6 @@ interface is the shared construction credited to fqlx and collaborators.
 Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 Adapted to mixed-biweight for fqlx with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalNormalTransport
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open scoped BigOperators

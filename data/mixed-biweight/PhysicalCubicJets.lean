@@ -11,7 +11,6 @@ the specialized function field is postulated.
 Original cycle-three construction prepared with OpenAI Codex assistance.
 Adapted to mixed-biweight for fqlx with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalCubicJets
 open CyclePhysical CyclePhysicalCoordinates CyclePhysicalNormalTransport
 open CyclePhysicalCubicTangent CycleCubicFieldDifferential.Physical
@@ -67,12 +66,11 @@ lemma jet_equation : TransitiveCubic.cubic aJet bJet cJet dJet eJet fJet xJet yJ
 lemma coefficient_derivatives :
     D aJet=0 ∧ D bJet=0 ∧ D cJet=0 ∧ D dJet=0 ∧ D eJet=0 ∧ D fJet=0 := by
   obtain ⟨ha,hb,hc,hd,he,hf⟩ := coefficient_constants
-  repeat' apply And.intro
-  all_goals apply TrivSqZeroExt.ext <;>
-    simp [D,jetDerivation,aJet,bJet,cJet,dJet,eJet,fJet,ha,hb,hc,hd,he,hf]
-lemma yJet_derivative : D yJet=1 := by
-  apply TrivSqZeroExt.ext <;>
-    simp [D,jetDerivation,yJet,passive_parameters.2.2.2.2.1]
+  exact ⟨TrivSqZeroExt.ext ha derivative.map_one_eq_zero,TrivSqZeroExt.ext hb (map_zero _),
+    TrivSqZeroExt.ext hc (map_zero _),TrivSqZeroExt.ext hd (map_zero _),
+    TrivSqZeroExt.ext he (map_zero _),TrivSqZeroExt.ext hf (map_zero _)⟩
+lemma yJet_derivative : D yJet=1 :=
+  TrivSqZeroExt.ext passive_parameters.2.2.2.2.1 (map_zero _)
 lemma jet_differential : gJet*D xiJet=6*etaJet := by
   obtain ⟨ha,hb,hc,hd,he,hf⟩ := coefficient_derivatives
   have hc := cleared_differential D aJet bJet cJet dJet eJet fJet xJet yJet
@@ -100,15 +98,15 @@ lemma etaJet_value : etaJet.fst=eta := by
   simp only [etaJet,fst_mul,fst_neg,fst_pow,fst_inv,jJet_value,hJet_value,half,fst_inl,eta]
   ring
 lemma sJet_value : sJet.fst=aWeierstrass := by
-  simp [sJet,TransitiveCubic.s4,TransitiveCubic.s4Numerator,aJet,bJet,cJet,dJet,eJet,fJet,aWeierstrass] <;> ring
+  simp [sJet,TransitiveCubic.s4,TransitiveCubic.s4Numerator,aJet,bJet,cJet,dJet,eJet,fJet,aWeierstrass,jet_mk] <;> ring
 lemma bWeierstrassJet_value : bWeierstrassJet.fst=bWeierstrass := by
-  simp [bWeierstrassJet,half,tJet,TransitiveCubic.s6,TransitiveCubic.s6Numerator,aJet,bJet,cJet,dJet,eJet,fJet,bWeierstrass]
+  simp [bWeierstrassJet,half,tJet,TransitiveCubic.s6,TransitiveCubic.s6Numerator,aJet,bJet,cJet,dJet,eJet,fJet,bWeierstrass,jet_mk]
   ring
 lemma gJet_value : gJet.fst=cubicNormal := by
-  simp [gJet,aJet,dJet,fJet,xJet,yJet,cubicNormal]
+  simp [gJet,aJet,dJet,fJet,xJet,yJet,cubicNormal,jet_mk]
 lemma gJet_dot : gJet.snd=cubicNormalJet := by
   simp [gJet,aJet,dJet,fJet,xJet,yJet,cubicNormalJet,cubicSecondNormal,
-    smul_eq_mul,op_smul_eq_smul]
+    smul_eq_mul,op_smul_eq_smul,jet_mk]
   ring
 
 lemma curve : eta^2=xi^3+aWeierstrass*xi+bWeierstrass := by
@@ -130,11 +128,11 @@ lemma differential_jet :
 
 lemma aDot_formula : aDot=0 := by
   simp [aDot,sJet,TransitiveCubic.s4Numerator,aJet,bJet,cJet,dJet,eJet,fJet,
-    smul_eq_mul,op_smul_eq_smul]
+    smul_eq_mul,op_smul_eq_smul,jet_mk]
 lemma bDot_formula : bDot=
     -(54*coeffA*coeffB^2*coeffC^2+8*coeffA*coeffC*coeffE^3)/4 := by
   simp [bDot,bWeierstrassJet,tJet,half,TransitiveCubic.s6Numerator,
-    aJet,bJet,cJet,dJet,eJet,fJet,smul_eq_mul,op_smul_eq_smul]
+    aJet,bJet,cJet,dJet,eJet,fJet,smul_eq_mul,op_smul_eq_smul,jet_mk]
   ring
 lemma weierstrass_constants : derivative aWeierstrass=0 ∧ derivative bWeierstrass=0 := by
   obtain ⟨ha,hb,hc,hd,he,hf⟩ := coefficient_constants

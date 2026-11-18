@@ -17,7 +17,6 @@ No certificate existence is asserted without the weighted-divergence input.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace SplitTernaryPhysical
 open MvPolynomial HoldoutConstruction
 
@@ -119,7 +118,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace SplitTernaryPhysical
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators
@@ -189,7 +187,6 @@ end
 
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace SplitTernaryPhysical
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators

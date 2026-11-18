@@ -14,7 +14,6 @@ independent coordinate by the constant-coefficient injectivity theorem.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutConicIncidence
 
@@ -120,7 +119,6 @@ proved before any algebra structure or finite-extension instance is used.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutConicIncidence
 

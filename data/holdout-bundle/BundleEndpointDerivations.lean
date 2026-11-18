@@ -11,7 +11,6 @@ This is the explicit application of fqlx's shared quotient-derivation API.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle
 open Polynomial HoldoutConstruction

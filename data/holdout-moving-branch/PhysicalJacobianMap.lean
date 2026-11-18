@@ -9,7 +9,6 @@ the shared HoldoutCover constructions, credited to fqlx and collaborators.
 Original cycle-three construction prepared with OpenAI Codex assistance.
 The transitive-cubic adaptation is due to fqlx. Adapted here to holdout-moving-branch for benediamond with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalJacobianMap
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open CyclePhysicalJacobianCoordinates CyclePhysicalCubicJets

@@ -13,7 +13,6 @@ arguments until the concrete field construction is inserted.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle.ConicFamily
 open Polynomial HoldoutConstruction MvPolynomial

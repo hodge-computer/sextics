@@ -11,7 +11,6 @@ This instantiates the accepted machinery of fqlx and hodgepodgeconjecture;
 prepared with OpenAI ChatGPT assistance.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace HoldoutBundle
 open HoldoutConstruction Polynomial
 

@@ -9,7 +9,6 @@ construction credited to fqlx and the Hodge Computer collaborators.
 Original cycle-three construction prepared with OpenAI Codex assistance.
 Adapted to mixed-biweight for fqlx with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalPrimitive
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open CyclePhysicalNormalTransport CyclePhysicalCubicTangent

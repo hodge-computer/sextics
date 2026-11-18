@@ -12,7 +12,6 @@ account fqlx.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutConstruction
 
@@ -55,7 +54,9 @@ private theorem commonCoverBaseChange_of_C
     norm_num [physicalCoverCoefficientMap, Fin.ext_iff,
       commonCoverBaseChange_of_C, coverCoefficient, coverAlpha, coverBeta,
       -MvPolynomial.eval₂Hom_C_eq_bind₁] <;>
-    rfl
+    first
+      | rfl
+      | exact (map_mul (algebraMap (GenericCommonCoverRing ℂ) CommonCoverFunctionField) _ _).trans rfl
 
 @[simp] theorem quotientCoverFieldMap_root :
     quotientCoverFieldMap (algebraMap GenericQuotientRing GenericQuotientField

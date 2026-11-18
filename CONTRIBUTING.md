@@ -120,7 +120,7 @@ The complete committed diff must consist solely of newly added permitted solutio
 
 Limits are in `.github/solve-policy.json`: 996 files, a five-and-a-half-hour proof budget, and 14 GiB memory. The file count includes the manifest and explanation as well as Lean modules and any optional witness. With the four record files of an instance, it keeps the folder within the 1,000 entries that GitHub lists for one directory and shows in one pull request. Every submitted Lean module is compiled and independently replayed, so splitting a proof into more files does not extend its time budget. That budget sits inside GitHub's six-hour limit on a hosted job, with room for preparation and reporting. The memory budget leaves room for the operating system and runner services on GitHub's free 16 GB Linux runners for public repositories. The allowed axiom set is `propext`, `Classical.choice`, and `Quot.sound`.
 
-Solve modules are compiled with the Lean options of the shared package in `formal/lean/lakefile.toml`: no heartbeat limit and no recursion-depth limit. Do not set `maxHeartbeats` or `maxRecDepth` in a module; the proof budget bounds elaboration.
+Solve modules are compiled with the Lean options of the shared package in `formal/lean/lakefile.toml`: no heartbeat limit and no recursion-depth limit. Do not set `maxHeartbeats`, `maxRecDepth`, or any `backward` option in a module; the proof budget bounds elaboration.
 
 ### Mathematical explanation
 

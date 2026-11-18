@@ -9,7 +9,6 @@ Prepared with OpenAI Codex assistance for hodgepodgeconjecture, following the
 coefficient-Jacobian verification pattern of the credited shared construction.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CycleJacobianSeedBinding
 open Polynomial CycleJacobianIncidence
 abbrev K := ZMod 5

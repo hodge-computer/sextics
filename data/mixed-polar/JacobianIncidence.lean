@@ -16,7 +16,6 @@ Adapted from the accepted constructions of fqlx and hodgepodgeconjecture.
 Prepared for benediamond with OpenAI Codex assistance.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace MixedPolarJacobianIncidence
 open Polynomial
 export WeierstrassConic (Coeff CurvePoly cv cp curve coefficientDeriv coefficientDeriv_coeff coefficientDeriv_C

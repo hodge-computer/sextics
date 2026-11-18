@@ -16,7 +16,6 @@ here; no certificate or specialization theorem is asserted by these lemmas.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace SplitCompanion
 open Polynomial
@@ -123,8 +122,11 @@ lemma H_coefficientDeriv {R : Type*} [CommRing R]
     (which : Bool) (s : R) (k : Fin 3 → R) (j : Fin 13) :
     coefficientDeriv j (H which (constPoly s) (curve k))=
       gradient which (constPoly s) (curve k) (slotCoordinate j)*X^slotDegree j := by
-  rw [H_derivation (coefficientDeriv j) which (constPoly s)
-    (by simp [constPoly])]
+  have h (z : Fin 5 → CurvePoly R) : coefficientDeriv j (H which (constPoly s) z)=
+      ∑ i,gradient which (constPoly s) z i*coefficientDeriv j (z i) :=
+    H_derivation (coefficientDeriv j) which (constPoly s)
+      (show coefficientDeriv j (constPoly s)=0 by simp [constPoly]) z
+  rw [h]
   simp only [curve_coefficientDeriv]
   rw [Finset.sum_eq_single (slotCoordinate j)]
   · simp

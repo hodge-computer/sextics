@@ -10,7 +10,6 @@ the resulting equations, invertible Jacobian, and transversality.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace ReflectionCoupledFano
 open Polynomial HoldoutConstruction
 
@@ -46,7 +45,6 @@ theorem familyEndpoint_normal : gradient (algebraMap R E c) (familyEndpoint c E)
     ← IsScalarTower.algebraMap_apply R (Endpoint.Field c) E] at h
   exact h
 
-set_option backward.isDefEq.respectTransparency true in
 structure QuarticFamily where
   coefficients : Index → E
   equations : ∀ i : Index,

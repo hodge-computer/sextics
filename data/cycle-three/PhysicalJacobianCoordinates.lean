@@ -7,7 +7,6 @@ import HodgeComputer.Constructions.ResidueTransport.WeierstrassChart
 /-! The direct Jacobian of the physical-to-Weierstrass coordinates.
 Prepared with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalJacobianCoordinates
 export WeierstrassChart (rawMatrix raw_determinant)
 open scoped BigOperators

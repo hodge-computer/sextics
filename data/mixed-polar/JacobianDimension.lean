@@ -5,7 +5,6 @@ degrees and essential finite generation. Uses the shared dimension lemmas.
 Adapted from the accepted constructions of fqlx and hodgepodgeconjecture.
 Prepared for benediamond with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace MixedPolarJacobianDimension
 open HoldoutConstruction MixedPolarJacobianLifting MixedPolarJacobianFamily MixedPolarJacobianEmbedding Algebra
 lemma parameterField_trdeg : trdeg ℂ ComplexParameterField=4 := by

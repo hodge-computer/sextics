@@ -8,7 +8,6 @@ covariants. It retains the fixed sextic and target. The residue-divergence
 interface is the shared construction credited to fqlx and collaborators.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalNormalTransport
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open scoped BigOperators

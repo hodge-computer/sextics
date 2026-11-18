@@ -4,7 +4,6 @@ import HodgeComputer.Verify
 import Mathlib.Analysis.Complex.Polynomial.Basic
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace ReflectionCoupledFano
 open MvPolynomial
 open scoped BigOperators

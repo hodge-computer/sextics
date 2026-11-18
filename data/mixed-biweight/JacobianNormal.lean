@@ -4,7 +4,6 @@ import Proposal.JacobianHypersurface
 incidence system was formulated for 5832 times this equation, so its normal is
 scaled by 5832 here. Prepared with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CycleJacobianNormal
 open HoldoutConstruction CycleJacobianIncidence CycleJacobianLifting CycleJacobianFamily
   CycleJacobianParameters CycleJacobianGeometry CycleJacobianEmbedding CycleJacobianHypersurface Polynomial

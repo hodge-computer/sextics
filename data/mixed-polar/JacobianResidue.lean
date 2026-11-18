@@ -9,7 +9,6 @@ certificate is assembled separately in PhysicalPrimitive. Adapted from the
 accepted constructions of fqlx and hodgepodgeconjecture. Prepared for
 benediamond with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace MixedPolarJacobianResidue
 open HoldoutConstruction MixedPolarJacobianFamily MixedPolarJacobianParameters MixedPolarJacobianEmbedding
   MixedPolarJacobianHypersurface MixedPolarJacobianNormal Polynomial

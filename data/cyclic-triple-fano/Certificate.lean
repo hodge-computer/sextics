@@ -7,7 +7,6 @@ import Proposal.CoordinateOrder
 /-! Assembly of the weighted-line family, polynomial integration, cubic pullback,
 and homogeneous extraction. No explicit coefficient list for D is claimed. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclicTriple
 open MvPolynomial HoldoutConstruction
 

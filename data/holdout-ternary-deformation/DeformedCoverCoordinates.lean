@@ -9,7 +9,6 @@ CoverCoordinates construction. Prepared with OpenAI Codex assistance
 for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace DeformedCover
 open HoldoutConstruction Polynomial
 open DeformedConic (BaseField FermatRing baseFieldAlpha baseFieldBeta TargetRing TargetField)

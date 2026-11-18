@@ -7,7 +7,6 @@ function field. The monic-root embedding and derivation compatibility are
 the shared HoldoutCover constructions, credited to fqlx and collaborators.
 Prepared with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalJacobianMap
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open CyclePhysicalJacobianCoordinates CyclePhysicalCubicJets

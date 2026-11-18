@@ -10,7 +10,6 @@ CoverScalars/CoverSourceBinding construction. Prepared with OpenAI Codex
 assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace DeformedCover
 open HoldoutConstruction MvPolynomial
 open DeformedConic (BaseField baseFieldAlpha baseFieldBeta targetResidueMap quotientEquation)

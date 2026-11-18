@@ -17,7 +17,6 @@ specialization (X2,Y0,Y1,u)=(0,0,1,T-1).
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace ReflectionCoupledFano.Endpoint
 

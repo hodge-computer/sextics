@@ -15,7 +15,6 @@ new weighted Jacobian equation; it does not assert the protected certificate.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture; adapted by fqlx with Codex assistance.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CycleJacobianIncidence
 open Polynomial
 export WeierstrassConic (Coeff CurvePoly cv cp curve coefficientDeriv coefficientDeriv_coeff coefficientDeriv_C

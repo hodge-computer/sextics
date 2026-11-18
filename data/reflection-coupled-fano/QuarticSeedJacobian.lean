@@ -3,7 +3,6 @@ import Proposal.QuarticGradientCoefficients
 import Proposal.QuarticSeedIncidence
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace ReflectionCoupledFano
 open Polynomial CoupledFanoQuarticSeed
 variable {K : Type*} [Field K] [CharP K 5]
@@ -92,7 +91,6 @@ lemma modJacobian_polynomial_det_isUnit {j : K} (hj : j^2=2) :
     IsUnit (MvPolynomial.eval₂Hom (RingHom.id K) (modCoefficients j)
       (Matrix.det (fun i k : Index => MvPolynomial.pderiv k
         (equations 0 (modEndpoint j) i)))) := by
-  rw [RingHom.map_det]
-  exact modJacobian_det_isUnit hj
+  exact (congrArg IsUnit (RingHom.map_det _ _)).mpr (modJacobian_det_isUnit hj)
 
 end ReflectionCoupledFano

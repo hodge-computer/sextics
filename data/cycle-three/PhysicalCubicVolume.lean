@@ -5,7 +5,6 @@ volume. This supplies the exact moving-map correction for an arbitrary
 rational function, without expanding that function's covariants.
 Prepared with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalCubicVolume
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open CyclePhysicalNormalTransport CyclePhysicalCubicTangent

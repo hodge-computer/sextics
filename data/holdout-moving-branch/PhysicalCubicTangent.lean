@@ -8,7 +8,6 @@ not posit an auxiliary parameter derivation on a specialized field.
 Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 The transitive-cubic adaptation is due to fqlx. Adapted here to holdout-moving-branch for benediamond with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalCubicTangent
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates CyclePhysicalNormalTransport
 open scoped BigOperators

@@ -8,7 +8,6 @@ lemma, as also used in 1337isnot1337's accepted crossed-ternary construction.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace DeformedConic
 open Polynomial HoldoutConstruction
 open scoped BigOperators

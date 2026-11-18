@@ -12,7 +12,6 @@ Laurent coordinate ring before passing to a function field.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle
 

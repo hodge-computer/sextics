@@ -11,7 +11,6 @@ from the proved finite incidence construction.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle
 open HoldoutConstruction

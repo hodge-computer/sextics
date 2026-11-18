@@ -10,7 +10,6 @@ Uses fqlx's shared coefficient injections and dimension theorems.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace DeformedCover
 open HoldoutConstruction Polynomial Algebra
 open DeformedConic (FermatRing BaseField baseFieldAlpha baseFieldBeta TargetRing TargetField)

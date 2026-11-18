@@ -7,7 +7,6 @@ incidence lift. This supplies the remaining endpoint and constant-field
 obligations of the polynomial integration theorem. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle
 open Polynomial HoldoutConstruction

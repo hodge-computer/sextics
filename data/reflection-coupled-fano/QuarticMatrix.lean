@@ -1,7 +1,6 @@
 import Proposal.QuarticSeed
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CoupledFanoQuarticSeed
 open Matrix
 variable {K : Type*} [Field K] [CharP K 5]

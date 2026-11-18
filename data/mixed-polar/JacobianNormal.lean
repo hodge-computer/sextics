@@ -4,7 +4,6 @@ import Proposal.JacobianHypersurface
 incidence system was formulated for 432 times this equation, so its normal is
 scaled by 432 here. Prepared with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace MixedPolarJacobianNormal
 open HoldoutConstruction MixedPolarJacobianIncidence MixedPolarJacobianLifting MixedPolarJacobianFamily
   MixedPolarJacobianParameters MixedPolarJacobianGeometry MixedPolarJacobianEmbedding MixedPolarJacobianHypersurface Polynomial

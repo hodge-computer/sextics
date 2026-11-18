@@ -7,7 +7,6 @@ Uses the shared localization and finite-extension derivation constructions.
 Adapted from the accepted constructions of fqlx and hodgepodgeconjecture.
 Prepared for benediamond with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace MixedPolarJacobianParameters
 open HoldoutConstruction MixedPolarJacobianIncidence MixedPolarJacobianLifting MixedPolarJacobianFamily Polynomial
 local instance : Algebra ℤ ComplexParameterField := Ring.toIntAlgebra _
@@ -44,7 +43,9 @@ def coefficientDerivation (i : Fin 4) : Derivation ℤ CoefficientField Coeffici
 lemma coefficientDerivation_parameterMap (i : Fin 4) (p : ComplexParameterRing) :
     coefficientDerivation i (parameterMap p)=parameterMap (integerPartial i p) := by
   simp only [parameterMap,RingHom.comp_apply,coefficientDerivation,extendFiniteDerivation_apply,
-    parameterDerivation,extendRingDerivation_apply]
+    parameterDerivation]
+  exact congrArg _ (extendRingDerivation_apply (L := ComplexParameterField)
+    (integerPartial (R := ℂ) i) p)
 lemma coefficientDerivation_parameter (i j : Fin 4) :
     coefficientDerivation i (scalarParameter j)=if j=i then 1 else 0 := by
   rw [← parameterMap_X,coefficientDerivation_parameterMap]

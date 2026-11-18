@@ -10,7 +10,6 @@ invariance proof and field action for the exact deformed cover.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace DeformedCover
 open HoldoutConstruction Polynomial
 open DeformedConic (BaseField)

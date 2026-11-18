@@ -6,7 +6,6 @@ import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
 mixed-biweight coordinates with attribution to fqlx and hodgepodgeconjecture.
 The reverse edge is xy^2, and the physical source is balanced. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace MixedPolarPhysicalCoordinates
 open MixedPolarPhysical
 def coordinate (i : Fin 6) : FunctionField := residueMap (MvPolynomial.X i)
