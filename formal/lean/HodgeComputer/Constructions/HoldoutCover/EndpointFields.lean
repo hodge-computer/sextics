@@ -81,9 +81,7 @@ def endpointSeedEval : EndpointRing R →+* R :=
     (MvPolynomial.eval₂Hom (RingHom.id R) ![0,-1,0]) 1 (by
       simp only [endpointPolynomial, Polynomial.eval₂_add, Polynomial.eval₂_pow,
         Polynomial.eval₂_X, Polynomial.eval₂_C]
-      norm_num [Matrix.cons_val]
-      change (3 : R)*0^2 = 0
-      ring)
+      norm_num [Matrix.cons_val])
 
 @[simp] theorem endpointSeedEval_root : endpointSeedEval (endpointRoot (R := R)) = 1 := by
   simp [endpointSeedEval, endpointRoot]

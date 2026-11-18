@@ -14,7 +14,7 @@ import HodgeComputer.Constructions.HoldoutCover.ResiduePiolaPullback
 import Mathlib.Algebra.MonoidAlgebra.MapDomain
 import Mathlib.Algebra.MvPolynomial.PDeriv
 import Mathlib.Algebra.MvPolynomial.Rename
-import Mathlib.Data.Complex.Basic
+import Mathlib.Basic.Complex.Basic
 import Mathlib.LinearAlgebra.Matrix.Notation
 import Mathlib.RingTheory.AdjoinRoot
 import Mathlib.RingTheory.Derivation.MapCoeffs
@@ -398,8 +398,7 @@ theorem full_linear_combination_one {n : ℕ} (hn : 0<n)
     dsimp [u]
     rw [Matrix.mulVec_mulVec,Matrix.mul_nonsing_inv J hunit,Matrix.one_mulVec]
   refine ⟨u,?_⟩
-  apply Polynomial.ext
-  intro k
+  ext k
   by_cases hk : k<n
   · have h := congrFun hu ⟨k,hk⟩
     simp only [Matrix.mulVec,dotProduct,J,e,Pi.single_apply] at h
@@ -412,7 +411,7 @@ theorem full_linear_combination_one {n : ℕ} (hn : 0<n)
   · have hQ (j : Fin n) : (Q j).coeff k=0 :=
       coeff_eq_zero_of_natDegree_lt (lt_of_lt_of_le (bound j) (Nat.le_of_not_gt hk))
     have hk0 : k ≠ 0 := by omega
-    simp [Polynomial.finsetSum_coeff,Polynomial.coeff_C_mul,hQ,Polynomial.coeff_one,hk0]
+    simp [Polynomial.coeff_C_mul,hQ,Polynomial.coeff_one,hk0]
 
 theorem exists_full_polynomial_normal {n : ℕ} (hn : 0<n)
     {κ : Type*} [Fintype κ] [DecidableEq κ]

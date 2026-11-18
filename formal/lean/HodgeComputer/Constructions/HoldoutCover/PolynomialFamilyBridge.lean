@@ -53,10 +53,7 @@ def derivationLinearCombination (D : ι → Derivation ℤ L L) (a : ι → L) :
 theorem derivationLinearCombination_apply (D : ι → Derivation ℤ L L)
     (a : ι → L) (x : L) :
     derivationLinearCombination D a x = ∑ i, a i*D i x := by
-  change Derivation.coeFnAddMonoidHom (∑ i, a i • D i) x = _
-  rw [map_sum]
-  simp only [Finset.sum_apply, Derivation.coeFnAddMonoidHom_apply,
-    Derivation.smul_apply, smul_eq_mul]
+  simp only [derivationLinearCombination, sum_apply, smul_apply, smul_eq_mul]
 
 end DerivationCombination
 

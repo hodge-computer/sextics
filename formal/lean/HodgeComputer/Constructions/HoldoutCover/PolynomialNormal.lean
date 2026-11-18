@@ -53,8 +53,7 @@ theorem polynomial_linear_combination_one
         ring]
     rw [h, add_neg_cancel]
   refine ⟨u, ?_⟩
-  apply Polynomial.ext
-  intro n
+  ext n
   by_cases hn : n = 0
   · subst n
     simp [constant_B, constant_Q]
@@ -63,7 +62,7 @@ theorem polynomial_linear_combination_one
     · obtain ⟨i, hi⟩ := covers n hnpos hb
       subst n
       simpa only [coeff_add, finsetSum_coeff, coeff_C_mul, coeff_one,
-        if_neg hn] using hrow i
+        ite_eq_right hn] using hrow i
     · have hB : B.coeff n = 0 := coeff_eq_zero_of_natDegree_lt (lt_of_le_of_lt bound_B
         (Nat.lt_of_not_ge hb))
       have hQ (j : ι) : (Q j).coeff n = 0 := coeff_eq_zero_of_natDegree_lt
@@ -85,8 +84,7 @@ theorem full_polynomial_combination_one {n : ℕ} (hn : 0 < n)
     dsimp [u]
     rw [Matrix.mulVec_mulVec, Matrix.mul_nonsing_inv J hunit, Matrix.one_mulVec]
   refine ⟨u, ?_⟩
-  apply Polynomial.ext
-  intro k
+  ext k
   by_cases hk : k < n
   · have h := congrFun hu ⟨k, hk⟩
     simp only [Matrix.mulVec, dotProduct, J, e, Pi.single_apply] at h
@@ -99,7 +97,7 @@ theorem full_polynomial_combination_one {n : ℕ} (hn : 0 < n)
   · have hQ (j : Fin n) : (Q j).coeff k = 0 :=
       coeff_eq_zero_of_natDegree_lt (lt_of_lt_of_le (bound j) (Nat.le_of_not_gt hk))
     have hk0 : k ≠ 0 := by omega
-    simp [Polynomial.finsetSum_coeff, Polynomial.coeff_C_mul, hQ, Polynomial.coeff_one, hk0]
+    simp [Polynomial.coeff_C_mul, hQ, Polynomial.coeff_one, hk0]
 
 section Vectors
 

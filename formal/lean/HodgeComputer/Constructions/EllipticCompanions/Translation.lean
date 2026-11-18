@@ -506,7 +506,7 @@ lemma second_coefficient (D : Derivation ℤ K K) (f : E K) :
 lemma delta_rational (f : RatFunc K) :
     delta (K:=K) (algebraMap (RatFunc K) (E K) f)=
       (-y K/3)*algebraMap (RatFunc K) (E K) (baseTime f) := by
-  rw [delta,Derivation.smul_apply,time_base]
+  rw [delta,smul_apply,time_base]
   rfl
 
 lemma delta_basis_expansion (f : E K) :

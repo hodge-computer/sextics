@@ -18,7 +18,7 @@ lemma pderiv_degree_lt (p : MvPolynomial σ k) (i : σ) (hp : 0<p.totalDegree) :
   classical
   rw [totalDegree,Finset.sup_lt_iff hp]
   intro m hm
-  have hcoeff : coeff (m+Finsupp.single i 1) p≠0 := by
+  have hcoeff : p.coeff (m+Finsupp.single i 1)≠0 := by
     have h := mem_support_iff.mp hm
     rw [coeff_pderiv] at h
     exact (mul_ne_zero_iff.mp h).1
@@ -32,19 +32,19 @@ lemma pderiv_degree_lt (p : MvPolynomial σ k) (i : σ) (hp : 0<p.totalDegree) :
   omega
 
 lemma constant_of_partials_zero (p : MvPolynomial σ k)
-    (h : ∀ i,pderiv i p=0) : p=C (coeff 0 p) := by
+    (h : ∀ i,pderiv i p=0) : p=C (p.coeff 0) := by
   classical
   ext m
   by_cases hm : m=0
   · subst m; simp
-  · rw [coeff_C,if_neg (Ne.symm hm)]
+  · rw [coeff_C,ite_eq_right (Ne.symm hm)]
     obtain ⟨i,hi⟩ : ∃ i,m i≠0 := by
       by_contra! hn
       exact hm (Finsupp.ext hn)
     have hs : m-Finsupp.single i 1+Finsupp.single i 1=m :=
       Finsupp.sub_add_single_one_cancel hi
-    have hc := congrArg (coeff (m-Finsupp.single i 1)) (h i)
-    rw [coeff_pderiv,hs,coeff_zero] at hc
+    have hc := congrArg (·.coeff (m-Finsupp.single i 1)) (h i)
+    rw [coeff_pderiv,hs,AddMonoidAlgebra.coeff_zero,Finsupp.zero_apply] at hc
     have hz : (((m-Finsupp.single i 1 : σ →₀ ℕ) i):k)+1≠0 := by
       exact Nat.cast_add_one_ne_zero _
     exact (mul_eq_zero.mp hc).resolve_right hz
@@ -59,9 +59,9 @@ theorem injective_of_compatible
   have hz : ∀ p : MvPolynomial σ k,ρ p=0 → p=0 := by
     intro p
     induction hn : p.totalDegree using Nat.strong_induction_on generalizing p with
-    | h n ih =>
+    | ind n ih =>
       intro hzero
-      have hconst : p=C (coeff 0 p) := by
+      have hconst : p=C (p.coeff 0) := by
         by_cases hn0 : n=0
         · exact totalDegree_eq_zero_iff_eq_C.mp (hn.trans hn0)
         · apply constant_of_partials_zero
@@ -72,7 +72,7 @@ theorem injective_of_compatible
           · rfl
           · rw [← compatible,hzero,map_zero]
       rw [hconst,hC] at hzero
-      have hc : coeff 0 p=0 := φ.injective (by simpa using hzero)
+      have hc : p.coeff 0=0 := φ.injective (by simpa using hzero)
       rw [hconst,hc,map_zero]
   exact (injective_iff_map_eq_zero ρ).mpr hz
 

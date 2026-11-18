@@ -22,10 +22,7 @@ def fieldAction (δ : ι → Derivation k R R) (v : ι → R) : Derivation k R R
 
 @[simp] theorem fieldAction_apply (δ : ι → Derivation k R R) (v : ι → R) (f : R) :
     fieldAction δ v f = ∑ i, v i * δ i f := by
-  have hh := congrFun (map_sum (Derivation.coeFnAddMonoidHom (R := k) (A := R) (M := R))
-    (fun i => v i • δ i) Finset.univ) f
-  simpa only [fieldAction, Derivation.coeFnAddMonoidHom_apply, Finset.sum_apply,
-    Derivation.smul_apply, smul_eq_mul] using hh
+  simp only [fieldAction, sum_apply, smul_apply, smul_eq_mul]
 
 /-- Coordinate divergence. -/
 def fieldDivergence (δ : ι → Derivation k R R) (v : ι → R) : R := ∑ i, δ i (v i)

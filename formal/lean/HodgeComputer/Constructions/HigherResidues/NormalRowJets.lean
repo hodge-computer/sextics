@@ -106,7 +106,7 @@ theorem actual_polynomial_normal_row_jet
         rw [(hessian_symm π F).apply j k]
         ring
       simp only [Pi.add_apply,Pi.smul_apply,Matrix.vecMul,dotProduct,
-        normalVariation,Fin.cases_succ,Pi.single_apply,Fin.succ_ne_zero,if_false,smul_eq_mul,mul_zero]
+        normalVariation,Fin.cases_succ,Pi.single_apply,Fin.succ_ne_zero,ite_false,smul_eq_mul,mul_zero]
       rw [hh,hn]
       ring
   · funext j
@@ -117,7 +117,7 @@ theorem actual_polynomial_normal_row_jet
     | succ i =>
       have ha := normalQuadraticJet_derivative π F ψ (D i) (fun j => M j i.succ) (hD i)
       simp only [Pi.add_apply,Pi.smul_apply,Matrix.vecMul,dotProduct,
-        normalVariation,Fin.cases_succ,Pi.single_apply,Fin.succ_ne_zero,if_false,smul_eq_mul,mul_zero,zero_add]
+        normalVariation,Fin.cases_succ,Pi.single_apply,Fin.succ_ne_zero,ite_false,smul_eq_mul,mul_zero,zero_add]
       exact ha.symm
 
 end SplitHigherResidue

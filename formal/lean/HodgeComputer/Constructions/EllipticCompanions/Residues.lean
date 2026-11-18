@@ -269,7 +269,7 @@ lemma residue_derivation_term (a c k : K) (n : ℕ)
   rw [he,map_sub,residue_term]
   have hzero := residue_term a (c*(n+1)*k) (n+1)
   rw [show n+1+1=n+2 by omega] at hzero
-  rw [hzero,if_neg (by omega : n+1 ≠ 0),sub_zero,residue_term]
+  rw [hzero,ite_eq_right (by omega : n+1 ≠ 0),sub_zero,residue_term]
   by_cases hn : n=0 <;> simp [hn]
 
 /-- Residues commute with a base derivation even when the pole moves.
@@ -407,7 +407,7 @@ lemma infinityCoefficient_polynomial (P : K[X]) :
     rw [he]
     have h := residue_term (0 : K) c (n+1)
     rw [show n+1+1=n+2 by omega] at h
-    simpa only [uniformizer_zero,if_neg (by omega : n+1 ≠ 0)] using h
+    simpa only [uniformizer_zero,ite_eq_right (by omega : n+1 ≠ 0)] using h
 
 lemma reciprocal_uniformizer (a : K) :
     reciprocal (uniformizer a) =
@@ -443,7 +443,7 @@ lemma infinityCoefficient_term (a c : K) (n : ℕ) :
         (RatFunc.C (c*a)/(1-RatFunc.C a*RatFunc.X)) := by
       exact ⟨C (c*a),1-C a*X,by simp,by simp⟩
     rw [hr.residue_eq_zero,add_zero]
-    simpa only [uniformizer_zero,zero_add,pow_one,if_pos rfl] using residue_term (0 : K) c 0
+    simpa only [uniformizer_zero,zero_add,pow_one,ite_eq_left rfl] using residue_term (0 : K) c 0
   | succ n =>
     have he : (RatFunc.X^2)⁻¹ *
         reciprocal (RatFunc.C c*((uniformizer a)^(n+1+1))⁻¹) =
@@ -491,6 +491,10 @@ lemma equation_eq : equation K = X^2-C ((RatFunc.X : RatFunc K)^3-432) := by
 
 lemma equation_monic : (equation K).Monic := by
   exact (WeierstrassCurve.Affine.monic_polynomial (W := W K)).map _
+
+-- The equation is used through `equation_eq`, `equation_monic`, and `equation_irreducible`.
+-- Sealing it keeps definitional comparisons between instances of `E` cheap.
+attribute [irreducible] equation
 
 instance : FiniteDimensional (RatFunc K) (E K) :=
   Module.Finite.of_basis (AdjoinRoot.powerBasis' (equation_monic K)).basis
@@ -822,7 +826,7 @@ lemma differentialTrace_delta (f : E K) :
       (Algebra.trace (RatFunc K) (E K) f) := by
   rw [differentialTrace_apply]
   have he : (-3/y K)*delta (K := K) f = time (K := K) f := by
-    simp only [delta,Derivation.smul_apply,smul_eq_mul]
+    simp only [delta,smul_apply,smul_eq_mul]
     field_simp [y_ne_zero (K := K)]
   rw [he]
   exact trace_derivation_finite (baseTime (K := K)) (time (K := K)) time_base f
@@ -1066,7 +1070,7 @@ lemma coneDerivations_coordinate (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 �
   have h2 (i : Fin 3) : baseCoefficient (D i) (2 : RatFunc K)=0 :=
     (baseCoefficient (D i)).map_natCast 2
   fin_cases i <;> fin_cases j <;>
-    simp [coneDerivations,independentCoordinates,Derivation.sub_apply,Derivation.smul_apply,
+    simp [coneDerivations,independentCoordinates,sub_apply,smul_apply,
       Derivation.leibniz,Derivation.leibniz_pow,smul_eq_mul,
       baseTime_X,baseTime_C,baseCoefficient_X,baseCoefficient_C,hc] <;>
     field_simp <;> ring
@@ -1075,7 +1079,7 @@ omit [CharZero K] in
 lemma coneDerivations_constant (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 → K)
     (a : K) (ha : ∀ i,D i a=0) (i : Fin 4) :
     coneDerivations D c i (RatFunc.C a)=0 := by
-  fin_cases i <;> simp [coneDerivations,Derivation.sub_apply,Derivation.smul_apply,
+  fin_cases i <;> simp [coneDerivations,sub_apply,smul_apply,
     baseTime_C,baseCoefficient_C,ha]
 
 omit [CharZero K] in
@@ -1089,7 +1093,7 @@ lemma radial_divergence_identity (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 �
   have h2 (i : Fin 3) : baseCoefficient (D i) (2 : RatFunc K)=0 :=
     (baseCoefficient (D i)).map_natCast 2
   simp [residueDivergence,fieldDivergence,coneDerivations,projectedField,
-    Fin.sum_univ_succ,Derivation.sub_apply,Derivation.smul_apply,Derivation.leibniz,
+    Fin.sum_univ_succ,sub_apply,smul_apply,Derivation.leibniz,
     Derivation.leibniz_div,Derivation.leibniz_pow,
     smul_eq_mul,
     baseTime_X,baseTime_C,baseCoefficient_X,baseCoefficient_C,hc,h2]

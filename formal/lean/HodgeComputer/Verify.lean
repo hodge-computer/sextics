@@ -19,7 +19,7 @@ def defect {n : ℕ} (F A D : AmbientPoly n) (q : ℕ)
 
 /-- Homogeneity with an integer degree. Negative degrees permit only zero. -/
 def Homogeneous {σ : Type*} (P : MvPolynomial σ ℂ) (k : ℤ) : Prop :=
-  ∀ ⦃m : σ →₀ ℕ⦄, coeff m P ≠ 0 → (m.degree : ℤ) = k
+  ∀ ⦃m : σ →₀ ℕ⦄, P.coeff m ≠ 0 → (m.degree : ℤ) = k
 
 theorem Homogeneous.of_isHomogeneous {σ : Type*} {P : MvPolynomial σ ℂ} {k : ℕ}
     (h : P.IsHomogeneous k) : Homogeneous P (k : ℤ) := by
@@ -37,14 +37,14 @@ theorem Homogeneous.isHomogeneous {σ : Type*} {P : MvPolynomial σ ℂ} {k : �
 theorem Homogeneous.eq_zero_of_neg {σ : Type*} {P : MvPolynomial σ ℂ} {k : ℤ}
     (h : Homogeneous P k) (hk : k < 0) : P = 0 := by
   ext m
-  rw [coeff_zero]
+  change P.coeff m = 0
   by_contra hm
   have hd := h hm
   omega
 
 theorem homogeneous_zero {σ : Type*} (k : ℤ) : Homogeneous (0 : MvPolynomial σ ℂ) k := by
   intro m hm
-  exact False.elim (hm (coeff_zero m))
+  exact False.elim (hm rfl)
 
 theorem Homogeneous.add {σ : Type*} {P Q : MvPolynomial σ ℂ} {k : ℤ}
     (hP : Homogeneous P k) (hQ : Homogeneous Q k) : Homogeneous (P + Q) k := by

@@ -166,7 +166,7 @@ theorem gradient_expansion (a b c d : R) (i : Fin 4) :
     norm_num [Fin.ext_iff] <;>
     simp only [gradientCoefficients, quadraticMonomials, Fin.sum_univ_succ,
       Fin.sum_univ_zero, add_zero, Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_succ,
-      Matrix.cons_val_zero', Matrix.cons_val_succ', Matrix.cons_val_one,
+      Matrix.cons_val_one, Matrix.cons_val,
       map_mul, map_neg, map_ofNat, map_zero] <;>
     ring
 
