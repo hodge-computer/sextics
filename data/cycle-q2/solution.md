@@ -522,13 +522,45 @@ multiple of a logarithmic unit differential is killed on every open.
 [actual Jacobian atlas](GeometricLiteralThreefoldGradientAtlas.lean), and
 [global first exterior differential](GeometricLiteralThreefoldFirstDifferential.lean)
 
-The remaining lower-filtration step must transport the normalized-model
-one-form primitive through the actual fiber isomorphism and assemble its
-compatibility with the global first exterior differential and the original
-filtered test cochains. The complete unfiltered total complex and its
-comparison, invariant Gysin spanning, specialization, and protected
-primitive remain open. No full unfiltered nonvanishing or protected
-primitive is claimed.
+The canonical scheme differential map under an isomorphism is bijective
+on sections over every original open. This follows from the actual
+open-immersion differential isomorphism and its adjunction: the unit is
+restriction to the image of the preimage, which is the same open for an
+isomorphism. The resulting section bijections commute with the original
+restrictions and carry universal function differentials to their actual
+pullbacks. [Differential section transport](GeometricIsoDifferentialSections.lean)
+
+This transports the one-form primitive to the original incidence fiber
+and its original four opens. Each logarithmic remainder is a canonical
+constant times the logarithmic differential of an actual original
+section-ring unit, obtained by the inverse section-ring isomorphism.
+Applying the global first exterior differential therefore gives, for
+any closed original one-form cochain \(u\), actual vertex two-forms
+\(q_i\) with
+\[
+ q_k-q_i=d u_{ik}
+\]
+on every common subopen.
+[Original-cover one-form primitives](GeometricLiteralThreefoldOneFormPrimitives.lean)
+
+The three lower equations of a hypothetical total boundary can now be
+erased on the original cover. Write its components as vertex two-forms
+\(v\), edge one-forms \(u\), and face functions \(f\), with
+\(\delta f=0\), \(\delta u+df=0\), and \(\delta v-du=\eta\).
+The checked function primitive gives \(f=\delta g\), so \(u+dg\) is
+closed. The original-cover one-form result gives \(d(u+dg)=\delta q\).
+Since \(d^2g=0\), one obtains \(\eta=\delta(v-q)\), so its actual
+derived two-form class is zero. These equations are therefore impossible
+for the original nonzero ambient test cocycle. The statement retains
+arbitrary function and one-form components; it does not use a vertex
+three-form equation.
+[Lower total-boundary obstruction](GeometricLiteralThreefoldLowerBoundaryObstruction.lean)
+
+The next step must realize these necessary equations in the complete
+unfiltered total complex and bind that realization to the original
+filtered test cochains. The full unfiltered comparison, invariant Gysin
+spanning, specialization, and protected primitive remain open. No full
+unfiltered de Rham theorem or protected primitive is claimed.
 
 ## An exact rational correction on the genus-ten chart
 
