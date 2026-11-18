@@ -457,11 +457,30 @@ additive group, giving a surjective additive map into intrinsic
 cotangent degree-one cohomology.
 [Intrinsic cotangent cohomology](GeometricHodgeCotangentCohomology.lean)
 
-It remains to identify this induced Euler class with the hyperplane
-dlog cocycle, with its actual scalar normalization and Čech boundary
-lifts. The complete unfiltered total complex and its comparison,
-invariant Gysin spanning, specialization, and protected primitive remain
-open. No full unfiltered nonvanishing or protected primitive is claimed.
+The logarithmic representative and its derived comparison are now
+checked as well. A local lift of a zero-twist section occupies only the
+chosen weight-one slot. The difference of the lifts at anchors \(i,k\)
+is a section of the actual Euler kernel. On every common subopen its
+image in the intrinsic cotangent sheaf is
+\[
+ s_i\,d\log(X_k/X_i),
+\]
+where \(s_i\) is the zero-twist frame coefficient of that same section.
+The lifts and their differences commute with the original restrictions.
+Their differences form an actual one-cocycle, and its derived class is
+the original Euler connecting class. Naturality of the genuine cohomology
+map identifies its cotangent image with the logarithmic cocycle above.
+Every intrinsic degree-one cotangent class on the fixed fiber has such
+a representative.
+[Actual Euler lifts and ordinary dlog identity](GeometricHodgeCotangentEulerDlog.lean) and
+[Čech cocycle and derived connecting comparison](GeometricHodgeCotangentEulerCech.lean)
+
+It remains to identify these zero-twist frame coefficients with their
+canonically normalized scalar and extract actual Čech boundary lifts for
+arbitrary original closed one-form cochains. The complete unfiltered
+total complex and its comparison, invariant Gysin spanning,
+specialization, and protected primitive remain open. No full unfiltered
+nonvanishing or protected primitive is claimed.
 
 ## An exact rational correction on the genus-ten chart
 
