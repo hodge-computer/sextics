@@ -335,6 +335,59 @@ filtration terms, and comparison with full unfiltered de Rham
 cohomology, remain unproved here. The invariant Gysin spanning theorem,
 specialization, and protected rational primitive remain open.
 
+## Removing the function component of a possible boundary
+
+On the original fixed threefold and its original four weight-one opens,
+ordinary structure-sheaf cohomology satisfies
+\(H^1(T,\mathcal O_T)=H^2(T,\mathcal O_T)=0\). The proof uses the actual
+monic cubic normal form in the weight-two coordinate, Laurent expansions
+on the actual chart intersections, and finite Laurent primitives. The
+same calculation proves degree-one and degree-two vanishing for every
+integral twist on the monic weighted sextic. The scheme isomorphism to
+the original fiber carries the structure-sheaf calculation to that fiber.
+[Actual twist cohomology](GeometricHodgeTwistTorusChart.lean),
+[structure-sheaf vanishing on the fixed fiber](GeometricLiteralThreefoldStructureVanishing.lean)
+
+Consequently every closed function-valued two-cochain on the four
+original triple intersections has a primitive on the six original pair
+intersections. This is an existence theorem for actual structure-sheaf
+sections, with no additional vanishing hypothesis.
+[Six-edge function primitive](GeometricLiteralThreefoldFunctionPrimitives.lean)
+
+In a possible full total boundary with components
+\((v,u,f)\in C^0(\Omega_T^2)\oplus C^1(\Omega_T^1)\oplus C^2(\mathcal O_T)\),
+the lower equations are \(\delta u+df=0\) and \(\delta f=0\).
+The checked primitive gives \(f=\delta g\). Thus \(u+dg\) is a closed
+one-form cochain, with the same exterior derivative as \(u\).
+This last sentence describes the cochain reduction; the complete full
+total complex and its comparison have not yet been formalized.
+
+The next needed assertion is that every such closed one-form cochain
+is a constant multiple of the hyperplane cocycle
+\(d\log(X_j/X_i)\), plus a one-form boundary. Its Euler/conormal
+reduction requires the actual cotangent maps and their compatibility.
+The weighted change-of-anchor identity is checked: the discrepancy of
+a differential tuple is its weighted radial coefficient times
+\(-d\log(X_j/X_i)\), and therefore vanishes on the Euler kernel, including
+the factor two in the original quadratic slot.
+[Weighted cotangent chart identity](GeometricHodgeCotangentEulerTransition.lean)
+On each normalized weighted chart, the actual Kähler module is the
+quotient of four coefficient slots by the gradient of the chart equation.
+The inverse comes from a polynomial derivation descended through the
+actual equation ideal. The weighted Euler kernel maps onto this Kähler
+module, and its kernel is exactly the multiples of the original full
+gradient. Its map is the ordinary sum of coefficient times coordinate
+differential appearing in the anchor-change identity.
+[Actual cotangent presentation](GeometricHodgeCotangentChartPresentation.lean)
+and [Euler-kernel map and exactness](GeometricHodgeCotangentEulerChart.lean)
+
+These chart statements still need the global differential-sheaf maps,
+restriction comparisons, and the resulting one-form cocycle reduction.
+In particular the additive computation of degree-zero global sections
+has not yet been identified with the canonical scalar inclusion required
+by that reduction. No full unfiltered nonvanishing or protected primitive
+is claimed.
+
 ## An exact rational correction on the genus-ten chart
 
 In the normal coordinates \(T,h\), the explicitly defined rational
