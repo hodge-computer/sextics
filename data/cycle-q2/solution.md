@@ -16,6 +16,41 @@ actual exterior derivative on a nonempty principal open. Passing that regular
 three-form to the function field gives the requested primitive. Showing that
 this particular germ vanishes remains the open step. [Generic-germ equivalence](GeometricLiteralResidueExactness.lean)
 
+## Specialization from a weighted threefold to the protected fourfold
+
+Let \(f\) be a nonzero polynomial in the 44 coefficients of a monic invariant
+weighted sextic. One can choose a complex endpoint \(c\) with \(f(c)\ne0\)
+such that the direction from the original pencil to \(c\) is nonzero. On
+that deformed pencil the leading coefficient \(L\) is nonzero. Dividing each
+of its other coefficients by \(L\) gives a point \(a\) with \(f(a)\ne0\).
+The deformed equation is \(L\) times the monic equation with coefficients \(a\).
+This allows a primitive defined over a principal open of the coefficient
+space to be tested on an actual deformation of the protected equation.
+[Choice of a pencil in a prescribed monic open](GeometricGenericWeightedMonicOpen.lean)
+
+Write \(u=z_1\), \(v=z_4\), \(\lambda=v/u\), and \(w=u^2\) in the
+function field of the deformation. With the deformation parameter and
+\(\lambda\) fixed, let \(D_0,D_1,D_2\) denote the coordinate derivations
+in \(z_2,z_3,w\). The weighted numerator on this chart is
+\(b=z_0^2z_2^2z_3^2w^2\). Its residue density \(\rho_b\) satisfies
+\(\rho_A=\lambda\rho_b\) for the protected numerator \(A\). This follows
+from the product identity for the two numerators and its first two normal
+derivatives. [Coordinate derivations](GeometricGenericWeightedCoordinates.lean)
+and [comparison of the two densities](GeometricGenericWeightedSource.lean)
+
+It now suffices to find three rational functions \(v_0,v_1,v_2\) on
+one such deformation satisfying
+\[
+    D_0(v_0)+D_1(v_1)+D_2(v_2)=\rho_b .
+\]
+The change of variables carries this divergence to the four-coordinate
+divergence for the protected numerator. Laurent coefficient extraction in
+the deformation parameter then gives a rational three-form \(\eta\) with
+\(d\eta=\rho\) on the original fourfold, even when the primitive has a pole
+at the specialization. The existence of the three rational functions in the
+displayed identity remains open.
+[Divergence and specialization to the protected certificate](GeometricGenericWeightedTransfer.lean)
+
 ## The fixed threefold and its moving curves
 
 The curve calculation takes place on the cubic section \(D\) of the weighted
