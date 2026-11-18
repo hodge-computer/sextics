@@ -469,6 +469,112 @@ Retain the \(Y_{2}\) reflection \(r\) as well as \(\tau\). The residual sector h
 
 The coefficient dimension of this family is 158, by counting even-\(Y\), even-\(Y_{2}\) sextics. The preserving subgroup \(GL_{3}(X)\times GL_{2}(Y_{0},Y_{1})\times G_{m}(Y_{2})\) has dimension fourteen. Four outside Fermat orbit monomials, \(Y_{2}^{5}\cdot Y_{0},Y_{2}^{5}\cdot Y_{1},Y_{1}^{5}\cdot Y_{2},Y_{0}^{5}\cdot Y_{2}\), attain the upper bound \(158+18-14=162\). Its projective normal-form, saturated and quotient dimensions are therefore \((157,161,144)\). The two-reflection theorem of Chapter 3B concerns a proper sublocus with an additional \(X\) reflection. Neither that support family nor the 127-dimensional quadratic-net family dominates this 161-dimensional one-reflection locus, so neither supplies the hypothesis of this corollary.
 
+### Strict growth and sectors
+
+The zero-or-full alternative of the theorem has a second form. Hodge symmetry replaces the Hodge metric, the hypothesis is a matching condition on monomials, and the conclusion concerns the real sub-variations of one sector at a time. It applies to weighted threefolds as well as to fourfolds.
+
+**Strict-growth lemma.** Let \(A\) and \(B\) be vector spaces of the same finite dimension, with bases \((a_i)_{i\in I}\) and \((b_j)_{j\in J}\) indexed by totally ordered sets. Let \(M_1,\ldots,M_r:A\to B\) be linear maps, each sending every \(a_i\) either to zero or to a nonzero multiple of a basis vector \(b_{\phi_m(i)}\), where the partial map \(\phi_m\) is strictly increasing. Join \(i\in I\) to \(j\in J\) when \(j=\phi_m(i)\) for some \(m\), and let \(N(S)\subset J\) be the set of neighbours of \(S\subset I\). Suppose
+
+\[
+|N(S)|>|S|\qquad\text{for every nonempty proper }S\subset I.
+\]
+
+If subspaces \(W\subset A\) and \(W'\subset B\) satisfy \(M_m(W)\subset W'\) for all \(m\), and \(0<\dim W<\dim A\), then \(\dim W'>\dim W\).
+
+**Proof.** For a subspace \(W\), let \(P(W)\) be the set of indices that occur as the largest index of a nonzero coordinate of a nonzero vector of \(W\). Row reduction gives \(|P(W)|=\dim W\). Let \(w\in W\) have largest index \(i\), and suppose \(\phi_m(i)\) is defined. The term of \(w\) at \(i\) goes to a nonzero multiple of \(b_{\phi_m(i)}\). Every other term goes to zero or to a multiple of a basis vector of smaller index, because \(\phi_m\) is increasing. Hence \(M_mw\) has largest index \(\phi_m(i)\), so \(N(P(W))\subset P(W')\). The hypothesis gives \(\dim W'\ge|N(P(W))|>|P(W)|=\dim W\). ∎
+
+One matching verifies the hypothesis. Suppose the graph has a perfect matching \(\mu:I\to J\), and draw an arrow \(i\to i'\) on \(I\) whenever \(i\) is joined to \(\mu(i')\). If this directed graph is strongly connected, the hypothesis holds: \(\mu(S)\) consists of \(|S|\) neighbours of \(S\), and if \(S\) had no other neighbour, no arrow would leave \(S\). When \(I=J\) and the relation is symmetric, a closed path of odd length through every vertex exactly once is such a certificate. Take \(\mu\) to be its successor map. The arrows then include the two-step translation along the path, which is transitive because the length is odd.
+
+**Sectors at the Fermat member.** Let \(P\) be \(\mathbb P^5\) or \(\mathbb P(1,1,1,1,2)\), with coordinates \(z_i\) of weights \(w_i\), and let \(F_0=\sum_iz_i^{6/w_i}\). Call a monomial *reduced* if no exponent exceeds four and the exponent of a variable of weight two is at most one. The reduced monomials are a basis of the Jacobian ring of \(F_0\), and in the lexicographic order of exponents multiplication by a monomial is strictly increasing.
+
+Let \(G\) be a finite group of diagonal matrices fixing \(F_0\), let \(\mathcal B_G\) be the family of smooth \(G\)-invariant sextics, and let \(\chi:G\to\{\pm1\}\) be a character. Write \(V_\chi\) for the part of the primitive middle cohomology of the members on which \(G\) acts through \(\chi\). It is a rational sub-variation over \(\mathcal B_G\). Let \(\delta\) be the character of the product of the coordinates. By the character formulas of [Chapter 3, §3.3](03-geometric-support.md#finite-quotients-beyond-reflections) and [Chapter 3D, §3D.1](03d-hodge-loci.md#3d1-invariant-sections-and-the-dimension-count), the residue of a monomial numerator lies in \(V_\chi\) exactly when the monomial has character \(\chi\delta^{-1}\). Let \(\mathcal U_k\) be the set of reduced monomials of weighted degree \(k\) with this character, and let \(\mathcal T\) be the set of reduced \(G\)-invariant monomials of degree six.
+
+At \(F_0\) the Hodge pieces of \(V_\chi\) have the bases \(\mathcal U_0,\mathcal U_6,\mathcal U_{12},\ldots\), in order of decreasing first Hodge index. The two extreme pieces are nonzero only when \(\chi=\delta\): one is spanned by the constant monomial, the other by the socle monomial, whose character is \(\delta^{-2}\), and \(\chi\) is its own inverse. The remaining pieces have types \((2,1),(1,2)\) for a threefold and \((3,1),(2,2),(1,3)\) for a fourfold. Call the first of them the upper piece and the last the lower piece. Their bases are \(\mathcal U_6\) and, respectively, \(\mathcal U_{12}\) or \(\mathcal U_{18}\), and division into the socle monomial is a bijection between the two. The Higgs maps of \(\mathcal B_G\) at \(F_0\) are spanned by the multiplications by the monomials of \(\mathcal T\), up to nonzero scalars, a product that is not reduced being zero.
+
+**Sector alternative.** Suppose \(\chi\ne\delta\). For a threefold, join \(u\in\mathcal U_6\) to \(u\cdot t\in\mathcal U_{12}\) for each \(t\in\mathcal T\). For a fourfold, join \(u\in\mathcal U_6\) to \(u\cdot t\cdot t'\in\mathcal U_{18}\) for all \(t,t'\in\mathcal T\), and suppose in addition that every monomial of \(\mathcal U_{12}\) is a product \(u\cdot t\) with \(u\in\mathcal U_6\) and \(t\in\mathcal T\), and has a reduced product with some element of \(\mathcal T\). If the graph satisfies the hypothesis of the strict-growth lemma, then over every smooth connected variety with a dominant morphism to \(\mathcal B_G\), the pullback of \(V_\chi\) has no real sub-variation other than zero and itself.
+
+**Proof.** The Hodge pieces of \(V_\chi\) are the parts of character \(\chi\delta^{-1}\) of graded pieces of the Jacobian rings. They form algebraic vector bundles over \(\mathcal B_G\), and the Higgs maps are the multiplication maps. Let \(n=|\mathcal U_6|\), the rank of the upper and of the lower piece. For \(0<r<n\), consider the members at which some \(r\)-dimensional subspaces \(W\) of the upper piece and \(W'\) of the lower piece satisfy \(M(W)\subset W'\) for every Higgs map \(M\), in the case of a threefold, or for every composite \(M\) of two Higgs maps, in the case of a fourfold. They form a closed subset, the image of a closed subset of a product of two Grassmannian bundles. By the lemma it does not contain \(F_0\). For a fourfold, the members at which the Higgs maps fail to carry the \((3,1)\) piece onto the \((2,2)\) piece, or have a common kernel in the \((2,2)\) piece, form two further closed subsets. Neither contains \(F_0\). The first assumption on \(\mathcal U_{12}\) is the surjectivity. For the second, the reduced products of distinct monomials with a given \(t\) are distinct, so a vector killed by every \(t\) involves only monomials without a reduced product. All these conditions therefore hold on a nonempty Zariski-open subset \(\mathcal O\subset\mathcal B_G\).
+
+Let \(U\) be a real sub-variation of the pullback along \(\phi:B'\to\mathcal B_G\). Since \(\phi\) is dominant, there is a point \(b'\) at which it is submersive, with \(\phi(b')\in\mathcal O\). The Higgs maps of the pullback at \(b'\) are those of \(\mathcal B_G\) at \(\phi(b')\), in all directions, and they preserve \(U\). Complex conjugation exchanges the upper and the lower piece of \(U\), so they have the same dimension, and they form a pair \(W,W'\) as above. Hence both are zero or both are everything. For a threefold this proves that \(U\) is zero or everything at \(b'\). For a fourfold, if both are everything, the \((2,2)\) piece of \(U\) contains the images of the \((3,1)\) piece and is everything. If both are zero, every Higgs map vanishes on the \((2,2)\) piece of \(U\), which is therefore zero. The ranks of the Hodge pieces of \(U\) are constant on \(B'\). ∎
+
+The following sectors satisfy the hypotheses. Here \(\tau\) is the global involution, \(r\) the reflection of \(Y_2\), and \(s_i\) the paired sign of \((X_i,Y_i)\).
+
+| Ambient space | Generators of \(G\) | \(\chi\) on the generators | Hodge numbers of \(V_\chi\) | \(\lvert\mathcal T\rvert\) |
+| --- | --- | --- | --- | ---: |
+| \(\mathbb P(1,1,1,1,2)\) | \(\sigma=(1,1,-1,-1;1)\) | \(-1\) | \((48,48)\) | 55 |
+| \(\mathbb P(1,1,1,1,2)\) | \(g=(\omega^2,\omega^2,\omega,1;1)\) | \(1\) | \((33,33)\) | 35 |
+| \(\mathbb P^5\) | \(\tau\) | \(1\) | \((208,866,208)\) | 218 |
+| \(\mathbb P^5\) | \(\tau,\ r\) | \(1,\ -1\) | \((126,492,126)\) | 144 |
+| \(\mathbb P^5\) | \(\tau,\ s_0,\ s_1,\ s_2\) | \(1,\ 1,\ 1,\ 1\) | \((58,230,58)\) | 68 |
+| \(\mathbb P^5\) | \(\tau,\ s_2\) | \(1,\ -1\) | \((100,424,100)\) | 118 |
+| \(\mathbb P^5\) | \(\tau,\ s_2\) | \(1,\ 1\) | \((108,442,108)\) | 118 |
+
+The first two rows are the sectors of the weighted threefold theorem of [Chapter 3B](03b-weighted-threefolds.md#3b1-the-weighted-threefold-theorem) and of the order-three theorem of [Chapter 3D, §3D.4](03d-hodge-loci.md#3d4-order-three-weighted-sextics). For the second, the alternative gives the conclusion of the [Higgs lemma of §3D.3](03d-hodge-loci.md#3d3-one-moving-class-and-the-higgs-field). The third and fourth rows are the sectors of the theorem and of the one-reflection corollary above. The fifth is the part of the \(Y\)-even cohomology that the paired-sign proposition of [§3B.9](03b-weighted-threefolds.md#3b9-paired-signs) leaves. The last two rows together make up \(H^4(X)^\tau\) for an even sextic that is also even in the pair \((X_2,Y_2)\).
+
+The script below checks the matching, the strong connectivity, the two further conditions for fourfolds, and the counts in the table. The arguments of `sector` are the weights, the largest reduced exponents, the conditions defining \(\mathcal U_k\) and \(\mathcal T\), and the number of Higgs maps composed.
+
+```python
+from itertools import product
+
+def sector(weights, caps, kappa, invariant, steps):
+    def monomials(k, test):
+        return [e for e in product(*(range(c + 1) for c in caps))
+                if sum(w * x for w, x in zip(weights, e)) == k and test(e)]
+    mul = lambda a, b: tuple(x + y for x, y in zip(a, b))
+    reduced = lambda e: all(x <= c for x, c in zip(e, caps))
+    T = monomials(6, invariant)
+    U = {k: monomials(k, kappa) for k in (6, 12, 18)}
+    maps = set(T) if steps == 1 else {mul(s, t) for s in T for t in T}
+    J = {u: j for j, u in enumerate(U[6 * steps + 6])}
+    joined = [sorted({J[mul(u, m)] for m in maps if mul(u, m) in J}) for u in U[6]]
+    n, mate = len(joined), {}
+    def augment(i, seen):
+        for j in joined[i]:
+            if j not in seen:
+                seen.add(j)
+                if j not in mate or augment(mate[j], seen):
+                    mate[j] = i
+                    return True
+        return False
+    assert len(J) == n and all(augment(i, set()) for i in range(n))
+    arrows = [{mate[j] for j in joined[i]} for i in range(n)]
+    reverse = [{i for i in range(n) if k in arrows[i]} for k in range(n)]
+    for graph in (arrows, reverse):
+        seen, stack = {0}, [0]
+        while stack:
+            for k in graph[stack.pop()] - seen:
+                seen.add(k)
+                stack.append(k)
+        assert len(seen) == n
+    if steps == 2:
+        assert set(U[12]) <= {mul(u, t) for u in U[6] for t in T}
+        assert all(any(reduced(mul(u, t)) for t in T) for u in U[12])
+    return n, len(U[12]), len(T)
+
+odd = lambda *index: lambda e: sum(e[i] for i in index) % 2 == 1
+even = lambda *index: lambda e: sum(e[i] for i in index) % 2 == 0
+both = lambda *tests: lambda e: all(test(e) for test in tests)
+cubic = lambda c: lambda e: (2 * e[0] + 2 * e[1] + e[2]) % 3 == c
+
+threefold = ((1, 1, 1, 1, 2), (4, 4, 4, 4, 1))
+assert sector(*threefold, odd(2, 3), even(2, 3), 1) == (48, 48, 55)
+assert sector(*threefold, cubic(1), cubic(0), 1) == (33, 33, 35)
+
+fourfold = ((1,) * 6, (4,) * 6)
+Y, pairs = (3, 4, 5), both(even(0, 3), even(1, 4), even(2, 5))
+assert sector(*fourfold, odd(*Y), even(*Y), 2) == (208, 866, 218)
+assert sector(*fourfold, both(odd(*Y), even(5)), both(even(*Y), even(5)), 2) == (126, 492, 144)
+assert sector(*fourfold, both(odd(*Y), pairs), both(even(*Y), pairs), 2) == (58, 230, 68)
+assert sector(*fourfold, both(odd(*Y), odd(2, 5)), both(even(*Y), even(2, 5)), 2) == (100, 424, 118)
+assert sector(*fourfold, both(odd(*Y), even(2, 5)), both(even(*Y), even(2, 5)), 2) == (108, 442, 118)
+```
+
+**Corollary.** Let \(G\) and \(\chi\) be as in a row of the table for \(\mathbb P^5\). A finite-type family of divisor supports dominating \(\mathcal B_G\) and stable under \(G\), whose Gysin image contains a nonzero class of \(V_\chi\) at the geometric generic point, supports all of \(V_\chi\) there.
+
+**Proof.** As in the geometric step of the theorem, resolve the support family and shrink its base. The image of the component Gysin maps is a rational sub-variation over a dominant base change, and it is stable under \(G\). The averaging projector of \(\chi\) carries it onto its intersection with \(V_\chi\), a rational sub-variation of the pullback of \(V_\chi\), which is nonzero by assumption. The sector alternative makes it everything. ∎
+
+A family of supports becomes \(G\)-stable on adjoining its translates. As after the theorem, a certificate over the generic member of \(\mathcal B_G\), for one target whose residue has a nonzero component in \(V_\chi\), supplies such a family.
+
 ## 4.5 Coefficient variation and pole order
 
 The coefficient-raising identity of [Chapter 2](02-explicit-constructions.md) gives a second propagation argument over the generic coefficient field. Differentiating in an even sextic direction \(C\) takes a certificate for \((q,A)\) to one for \((q+1,AC)\), preserving the reduced denominator support.

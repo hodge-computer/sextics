@@ -138,6 +138,8 @@ are the scalars. Then on every finite étale cover of a dense open subset of \(B
 
 **Proof.** The condition fails only on a proper closed analytic subset, so it holds at some point of the given open subset. A rational sub-variation has an orthogonal complement for the polarization, and the projector onto it is flat, self-adjoint and of type \((0,0)\). Flatness makes it commute with every \(\overline\nabla_v\). Self-adjointness makes its action on \(V^{1,2}\) the transpose of its action \(P\) on \(V^{2,1}\). Hence \(P^{\mathsf T}H_v=H_vP\), so \(P\) is a scalar idempotent: zero or the identity. By conjugation the same holds on \(V^{1,2}\). ∎
 
+For a sector at a Fermat member, the [sector alternative of Chapter 4, §4.4](04-known-locus-and-frontier.md#strict-growth-and-sectors) gives the same conclusion from a matching condition on monomials, with Hodge symmetry in place of the polarization.
+
 **Moving-class criterion.** Let \(\mathcal B\) be an irreducible family of invariant polynomials \(F\) as in §3D.1, with \(\delta\ne1\), all defining smooth threefolds. Suppose that
 
 1. at one member there are an invariant section \(h\) and an invariant divisor class \(\lambda\) on \(D\) with \(\operatorname{NL}_\lambda\) surjective, together with \(L\in\ker\operatorname{NL}_\lambda\) and \(A\in S_d^{[\delta^{-1}]}\) for which the pairing of the derivative lemma is nonzero;
