@@ -157,12 +157,13 @@ class is nonzero.
 [Factorization through the curve](GeometricLiteralMovingResidueCurve.lean) and
 [nonvanishing on the curve](GeometricLiteralMovingCurveDifferentialNonzero.lean)
 
-To obtain the protected rational primitive from these computations, the
-class on the curve must detect the pullback of the ambient threefold
-test along the moving family. The remaining argument must spread the
-supported correspondence, specialize its action to the given pencil,
-and show that the prescribed four-form on the fourfold vanishes at its
-generic point in de Rham cohomology.
+The signed comparison below shows that this class on the curve detects
+the pullback of the ambient threefold test along the moving family.
+To obtain the protected rational primitive, the remaining argument must
+prove that the supported correspondences span the full invariant third
+cohomology over the coefficient family, specialize their action to the
+given pencil, and show that the prescribed four-form on the fourfold
+vanishes at its generic point in de Rham cohomology.
 
 ## The ambient test class and the swept surface
 
@@ -193,11 +194,13 @@ the equalities of scheme maps give equalities of actual cohomology classes
    a^*(\bar q^*\eta_{B_*})=q^*\eta_{B_*}
        =b^*(i^*\eta_{B_*}).
 \]
-These equalities put the ambient class on both geometric models. To obtain
-a nonzero supported correspondence one still needs the comparison of
-its evaluation on the marked moving curve with the nonzero intrinsic
-curve class calculated above.
-[Proper swept image](GeometricLiteralProperSweptSupport.lean) and
+The signed comparison with the intrinsic curve class proves that
+\(q^*\eta_{B_*}\ne0\). The displayed factorizations therefore show
+that both \(\bar q^*\eta_{B_*}\) and \(i^*\eta_{B_*}\) are nonzero.
+Thus one actual proper correspondence, with strict swept image, detects
+the fixed ambient test in ordinary two-form cohomology.
+[Nonzero restrictions on the two models](GeometricLiteralNonzeroSweptRestriction.lean),
+[proper swept image](GeometricLiteralProperSweptSupport.lean), and
 [cohomological factorizations](GeometricLiteralCompletedHodgePullback.lean)
 
 Writing \(i:S\hookrightarrow T\) for this closed immersion, the differential
@@ -233,10 +236,70 @@ Consequently
  \frac{1}{3}\bigl(q^*+(g\circ q)^*+(g^2\circ q)^*\bigr)\eta_{B_*}
    = q^*\eta_{B_*}.
 \]
-The remaining marked-curve calculation must show that evaluating
-this specific pullback gives the previously computed nonzero curve class,
-with the sign fixed by the order of contraction.
+Evaluation at the marked curve takes this specific pullback to the
+negative of the previously computed intrinsic curve class. Its nonzero
+trace therefore detects the normalized average as well.
 [Cyclic average of the three pullbacks](GeometricLiteralThreefoldOrbitCylinderTest.lean)
+
+## Signed evaluation on the original moving curve
+
+The normalized time tangent gives a morphism from two-forms on the
+moving surface to one-forms on its marked curve. The chart morphisms
+agree on overlaps by the Cartan formula, so they induce a map on ordinary
+sheaf cohomology. Pulling the original ambient test through the actual
+family and then applying this map gives its native curve cocycle.
+[Global evaluation](GeometricLiteralAbelJacobiEvaluationGlobal.lean),
+[map on cohomology](GeometricLiteralAbelJacobiEvaluationDerived.lean), and
+[native representative](GeometricLiteralThreefoldCurveEvaluationRefinement.lean)
+
+On each of the twelve native vertices choose a local lift of the
+normalized parameter-one time tangent. Comparing this lift with the surface lift
+produces a one-form \(\gamma_u\). On an ordered pair of vertices, the
+actual evaluated edge \(c_{uv}\) satisfies
+\[
+ c_{uv}+\gamma_v=\gamma_u-\beta_{uv},
+\]
+where \(\beta\) represents the intrinsic moving curve class. The
+identity includes pairs in the same weight chart. On each Jacobian patch,
+the native tangent agrees with the Jacobian tangent on every ambient
+function, and the actual velocity differentiates the cubic to the
+negative of its retained first-order coefficient. Signed cubic adjunction
+then gives the displayed minus sign.
+[Adapted tangent](GeometricLiteralThreefoldCurveAdaptedValue.lean),
+[signed adjunction](GeometricLiteralThreefoldCurveAdjunction.lean), and
+[edge identity](GeometricLiteralThreefoldCurveSignedEdges.lean)
+
+The vertex corrections show that \(c+\beta\) is a Cech coboundary.
+Consequently the equality holds in ordinary curve cohomology
+\[
+ \operatorname{ev}_t(q^*\eta_{B_*})=-\operatorname{curveClass}_t.
+\]
+The normalized trace of the right side is nonzero. This proves the
+nonvanishing of the ambient test, its pullback to the moving family, its
+restrictions on the proper completion and strict swept image, and its
+normalized cyclic pullback. These statements concern the fixed test
+class. The full invariant Gysin spanning theorem and the comparison with
+the complete protected de Rham class remain open.
+[Signed class equality](GeometricLiteralThreefoldCurvePairing.lean) and
+[nonvanishing and strict support](GeometricLiteralNonzeroSweptRestriction.lean)
+
+## An exact rational correction on the genus-ten chart
+
+In the normal coordinates \(T,h\), the explicitly defined rational
+one-forms \(\eta\) and its Euler transport \(G\) satisfy
+\[
+ \eta-G=dR,
+\]
+where \(R\) is the twenty-term Laurent polynomial given in
+`CycleQ2GenusTenEulerPrimitive.primitive`. The identity holds over any
+field of characteristic zero with \(T\ne0\) and \(h\ne0\), and
+is checked against an arbitrary derivation, so both differential
+coefficients are included. The same module proves the parameter
+transport and quasi-Euler identities on the explicit two-modulus
+quartic. This supplies an exact chart correction. The remaining mixed
+current has not been canceled and no rational primitive of the protected
+form is obtained by this identity alone.
+[Exact Euler correction and quartic identities](GeometricGenusTenEulerPrimitive.lean)
 
 ## Canonical cohomology on the three coordinate opens
 
