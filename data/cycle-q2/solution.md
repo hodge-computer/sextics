@@ -475,12 +475,60 @@ a representative.
 [Actual Euler lifts and ordinary dlog identity](GeometricHodgeCotangentEulerDlog.lean) and
 [Čech cocycle and derived connecting comparison](GeometricHodgeCotangentEulerCech.lean)
 
-It remains to identify these zero-twist frame coefficients with their
-canonically normalized scalar and extract actual Čech boundary lifts for
-arbitrary original closed one-form cochains. The complete unfiltered
-total complex and its comparison, invariant Gysin spanning,
-specialization, and protected primitive remain open. No full unfiltered
-nonvanishing or protected primitive is claimed.
+The zero-twist scalar normalization and the actual one-form boundary
+lifts are now checked. The zero-twist frame coefficients agree on every
+overlap and glue in the original structure sheaf to one global function.
+Canonical constancy of that function identifies every frame coefficient
+with the same scalar from the original structure morphism. Independently,
+a finite-cover one-cocycle with zero derived class has an actual primitive
+on that same cover: its injective-descent quotient section lifts globally,
+and subtracting the lift from the local primitives gives sections of the
+original sheaf. This also gives boundary lifts for the difference of any
+two one-cocycles with equal derived class.
+[Canonical zero-twist scalar](GeometricHodgeZeroTwistScalars.lean) and
+[actual degree-one boundary lifts](GeometricFiniteCechOneBoundaryLifts.lean)
+
+Combining these results gives the precise one-form statement on the four
+weight-one opens of the normalized model of the fixed fiber. For every
+closed one-form cochain \(u\), there are \(c\in\mathbb C\) and actual
+vertex one-forms \(p_i\) such that, on every common subopen,
+\[
+ p_k-p_i=u_{ik}-c\,d\log(X_k/X_i).
+\]
+The scalar acts through the original structure morphism, and every term
+is a section of the actual intrinsic cotangent sheaf.
+[One-form primitive modulo the hyperplane cocycle](GeometricHodgeCotangentOneFormPrimitives.lean)
+
+Exterior differentiation of one-forms is also constructed. In an exact
+three-coordinate Kähler frame, differentiating coefficients gives an
+additive operator with \(d(df)=0\), \(d(c\,d\log v)=0\), and compatibility
+with every complex algebra pullback between exact frames. The next
+exterior differential kills its image. On every affine subopen of an
+actual exact-frame chart, the ordinary-to-sheaf map and the actual section
+basis give the exact Kähler basis of its original function ring.
+[Exact-frame exterior differential](GeometricThreefoldExteriorOneFrame.lean),
+[actual section bases](GeometricLiteralThreefoldDifferentialFrame.lean), and
+[affine subopen Kähler frames](GeometricAffineExactCotangentFrames.lean)
+
+On the original incidence threefold, affine subopens of the sixteen
+Jacobian opens form a basis. Transporting the ordinary operator to genuine
+one-form sections and then through the canonical exterior-sheaf unit
+commutes with every original restriction, including between different
+Jacobian frames. Extension from this basis gives a global additive sheaf
+morphism \(d:\Omega_T^1\to\Omega_T^2\). Its composition with the original
+universal differential of functions is zero. Every canonical constant
+multiple of a logarithmic unit differential is killed on every open.
+[Ordinary exterior sections and restrictions](GeometricOrdinaryExteriorSections.lean),
+[actual Jacobian atlas](GeometricLiteralThreefoldGradientAtlas.lean), and
+[global first exterior differential](GeometricLiteralThreefoldFirstDifferential.lean)
+
+The remaining lower-filtration step must transport the normalized-model
+one-form primitive through the actual fiber isomorphism and assemble its
+compatibility with the global first exterior differential and the original
+filtered test cochains. The complete unfiltered total complex and its
+comparison, invariant Gysin spanning, specialization, and protected
+primitive remain open. No full unfiltered nonvanishing or protected
+primitive is claimed.
 
 ## An exact rational correction on the genus-ten chart
 
