@@ -178,6 +178,31 @@ of \(H^3(T,K_T)\) as pairing \(e\) with the class with coefficients in
 a particular nonzero extension would have to be constructed.
 [Restriction and pairing for supported coefficients](GeometricLiteralSweptExtSupport.lean)
 
+## The cyclic average on the moving family
+
+Let \(g\) be the original order-three automorphism of the fixed threefold
+and let \(q\) be the second projection of the moving curve family.
+On the four standard opens, compare the local splittings used to define
+the ambient test \(\eta_{B_*}\) with their transforms under \(g\).
+Their differences give an explicit two-form on each open. On each
+overlap the difference of those two-forms is the difference between
+the transformed test cocycle and the original cocycle. They therefore
+give the same class in \(H^1(T,\Omega_T^2)\).
+[Invariance of the ambient test](GeometricLiteralThreefoldOrbitInvariance.lean)
+
+The three projections \(q\), \(g\circ q\), and \(g^2\circ q\)
+all have the original moving family as source. Functoriality of the
+pullback gives the same class on that family for each projection.
+Consequently
+\[
+ \frac{1}{3}\bigl(q^*+(g\circ q)^*+(g^2\circ q)^*\bigr)\eta_{B_*}
+   = q^*\eta_{B_*}.
+\]
+The remaining marked-curve calculation must show that evaluating
+this specific pullback gives the previously computed nonzero curve class,
+with the sign fixed by the order of contraction.
+[Cyclic average of the three pullbacks](GeometricLiteralThreefoldOrbitCylinderTest.lean)
+
 ## Canonical cohomology on the three coordinate opens
 
 Every class in \(H^2(D,K_D)\) is the image of a section on the triple
