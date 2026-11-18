@@ -4,7 +4,7 @@
 
 A divisor class on a surface section of a Calabi–Yau threefold stays algebraic along a locus of sections. When a symmetry moves the holomorphic three-form, the invariant part of this locus has positive expected dimension. Curves in the class then move on the threefold, and the derivative of their Abel–Jacobi images is a trace on an Artinian algebra. If the invariant variation of Hodge structure has no proper sub-variation, one nonzero derivative supports the whole invariant sector of the third cohomology on a divisor.
 
-Moving cycles along Hodge loci is the strategy of [Voisin, Proposition 2.1](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf), and the loci of surface sections of a Calabi–Yau threefold are studied in [Voisin, §2](https://www.cmls.polytechnique.fr/perso/voisin/Articlesweb/griffithsgroup.pdf). Chapter 3B follows the same strategy with explicitly constructed curves. This chapter applies it to weighted sextic threefolds with an order-three symmetry that moves the holomorphic three-form, and then to sextic fourfolds with a paired sign and such a symmetry. The last section counts sections and classes of other characters, and applies the method to an order-three symmetry that fixes the three-form.
+Moving cycles along Hodge loci is the strategy of [Voisin, Proposition 2.1](https://www.numdam.org/item/ASNSP_1992_4_19_4_473_0.pdf), and the loci of surface sections of a Calabi–Yau threefold are studied in [Voisin, §2](https://www.cmls.polytechnique.fr/perso/voisin/Articlesweb/griffithsgroup.pdf). Chapter 3B follows the same strategy with explicitly constructed curves. This chapter applies it to weighted sextic threefolds with an order-three symmetry that moves the holomorphic three-form, and then to sextic fourfolds with a paired sign and such a symmetry. §3D.6 counts sections and classes of other characters, and applies the method to an order-three symmetry that fixes the three-form. §3D.7 proves the criterion and the theorem of §3D.4 again, using Hodge theory only for the first cohomology of curves.
 
 ## 3D.1 Invariant sections and the dimension count
 
@@ -138,7 +138,7 @@ are the scalars. Then on every finite étale cover of a dense open subset of \(B
 
 **Proof.** The condition fails only on a proper closed analytic subset, so it holds at some point of the given open subset. A rational sub-variation has an orthogonal complement for the polarization, and the projector onto it is flat, self-adjoint and of type \((0,0)\). Flatness makes it commute with every \(\overline\nabla_v\). Self-adjointness makes its action on \(V^{1,2}\) the transpose of its action \(P\) on \(V^{2,1}\). Hence \(P^{\mathsf T}H_v=H_vP\), so \(P\) is a scalar idempotent: zero or the identity. By conjugation the same holds on \(V^{1,2}\). ∎
 
-For a sector at a Fermat member, the [sector alternative of Chapter 4, §4.4](04-known-locus-and-frontier.md#strict-growth-and-sectors) gives the same conclusion from a matching condition on monomials, with Hodge symmetry in place of the polarization.
+For a sector at a Fermat member, the [sector alternative of Chapter 4, §4.4](04-known-locus-and-frontier.md#strict-growth-and-sectors) gives the same conclusion from a matching condition on monomials, with Hodge symmetry in place of the polarization. §3D.7 proves the criterion below from that condition and the first cohomology of curves.
 
 **Moving-class criterion.** Let \(\mathcal B\) be an irreducible family of invariant polynomials \(F\) as in §3D.1, with \(\delta\ne1\), all defining smooth threefolds. Suppose that
 
@@ -555,3 +555,129 @@ Of the 84 invariant monomials, 44 are \(Y\)-even. On a smooth \(Y\)-even member,
 | \(s_2\)-anti-invariant | \((100,424,100)\) | Not given by this theorem |
 
 A \(Y\)-odd numerator \(A\) has its residue in the first part when it is even in \((X_2,Y_2)\) and none of its monomials has degree divisible by three in \((X_1,Y_0,Y_1)\). The support-to-certificate equivalence of [Chapter 1](01-certificates.md) then gives a certificate for pole orders \(1\le q\le4\).
+
+## 3D.7 The criterion from weight one
+
+The proofs above use the Hodge decomposition of the second cohomology of the surface sections, Griffiths's formula for the Abel–Jacobi map, and the polarization of the third cohomology of the threefold. This section proves the moving-class criterion and the order-three weighted threefold theorem of §3D.4 from one transcendental input: the complex conjugation that the comparison with singular cohomology puts on de Rham cohomology, and its positivity on the first cohomology of a curve. Everything else is deformation theory and the algebraic theory of de Rham cohomology. The hypothesis on the Higgs field changes. Strict growth, as in [Chapter 4, §4.4](04-known-locus-and-frontier.md#strict-growth-and-sectors), replaces the commutant condition of the Higgs lemma.
+
+**Conjugation.** For a smooth projective complex variety \(X\), let \(H^k(X)\) be the algebraic de Rham cohomology, with its cup product, its Hodge filtration \(F\), whose graded pieces are the groups \(H^q(X,\Omega^p_X)\), and the trace \(\operatorname{tr}_X\) on the top degree. The comparison isomorphism \(H^k(X)\simeq H^k(X^{\mathrm{an}},\mathbb Q)\otimes\mathbb C\) carries complex conjugation of the coefficients to an antilinear involution \(x\mapsto\bar x\) of \(H^k(X)\). Two of its properties are used.
+
+1. Conjugation commutes with pullbacks and cup products, and \(\overline{c_1(\mathcal L)}=-c_1(\mathcal L)\) for every line bundle \(\mathcal L\), because the de Rham Chern class is \(2\pi i\) times a rational class.
+2. On a smooth projective curve \(\Lambda\), the number \(\operatorname{tr}_\Lambda(\omega\cup\bar\omega)=(2\pi i)^{-1}\int_\Lambda\omega\wedge\bar\omega\) is real and nonzero for every nonzero \(\omega\in F^1H^1(\Lambda)=H^0(\Lambda,\Omega^1_\Lambda)\), and its sign depends neither on \(\omega\) nor on \(\Lambda\).
+
+The first property extends to pushforwards. On a connected \(X\) of dimension \(r\), the top cohomology is spanned by the \(r\)-th power of an ample class, whose trace is rational, so \(\operatorname{tr}_X(\bar z)=(-1)^r\,\overline{\operatorname{tr}_X(z)}\). Proper pushforwards are the adjoints of pullbacks for the trace pairings, and the class of a subvariety is the pushforward of the unit class of a resolution. Hence pushforwards, classes of algebraic cycles and actions of correspondences commute with conjugation up to signs that depend only on the dimensions.
+
+On a curve \(\Lambda\), the subspace \(F^1H^1(\Lambda)\) is isotropic for the cup product, because \(F^2H^2(\Lambda)=0\). If \(\omega\) and \(\bar\omega\) both lie in it, then \(\operatorname{tr}_\Lambda(\omega\cup\bar\omega)=0\), and \(\omega=0\) by the second property. Therefore
+
+\[
+H^1(\Lambda)=F^1H^1(\Lambda)\oplus\overline{F^1H^1(\Lambda)} .
+\]
+
+**Strict growth.** Let \(G\), \(\delta\ne1\) and \(\mathcal B\) be as in the moving-class criterion, with \(\mathcal B\) smooth. For a member \(T\) put \(V=H^3(T)^G\). Since \(\delta\ne1\), we have \(F^3V=0\) and \(F^1V=V\). Write \(V^{2,1}=F^2V\) and \(V^{1,2}=V/F^2V\). These spaces are dual to each other by Serre duality, of dimension \(N=\dim R(F)_d^{[\delta^{-1}]}\), and they form algebraic vector bundles over \(\mathcal B\). The Gauss–Manin connection induces the Higgs maps \(\overline\nabla_v:V^{2,1}\to V^{1,2}\), for \(v\) tangent to \(\mathcal B\). In Jacobian rings they are the multiplications \(R(F)_d^{[\delta^{-1}]}\to R(F)_{2d}^{[\delta^{-1}]}\) by the \(A\in R(F)_d^G\) tangent to \(\mathcal B\).
+
+Say that the Higgs maps of \(\mathcal B\) *grow strictly* at a member if the images \(\overline\nabla_vV^{2,1}\) span \(V^{1,2}\) and, for every subspace \(W\subset V^{2,1}\) with \(0<\dim W<N\), the images \(\overline\nabla_vW\) span a space of dimension greater than \(\dim W\). The members at which this fails form a closed subset of \(\mathcal B\), as in the proof of the sector alternative. For the family of all smooth \(G\)-invariant sextics in \(\mathbb P(1,1,1,1,2)\), the strict-growth lemma gives the condition at the Fermat member when the graph of the sector alternative has a perfect matching and satisfies the hypothesis of the lemma. The second row of the table of §4.4 is the case of §3D.4.
+
+**Weight-one alternative.** Suppose that the Higgs maps of \(\mathcal B\) grow strictly at one member. Let \(\phi:B'\to\mathcal B\) be a dominant morphism from a smooth connected variety, and let \(\Lambda\to B'\) be a smooth projective family of curves. Let \(\Gamma\) be a relative correspondence from \(\Lambda\) to the pulled-back family of threefolds: a cycle on their fiber product over \(B'\) whose components are flat over \(B'\), with fibers of dimension two. For \(b\in B'\) put
+
+\[
+\Theta_b=\pi_G\circ\Gamma_{b*}:H^1(\Lambda_b)\longrightarrow V_b=H^3(T_b)^G .
+\]
+
+Then either \(\Theta_b=0\) for every \(b\), or the following hold for every \(b\).
+
+1. The map \(\Theta_b\) is surjective.
+2. It maps \(F^1H^1(\Lambda_b)\) onto \(F^2V_b\), and \(V_b=F^2V_b\oplus\overline{F^2V_b}\).
+3. The cup product of \(H^1(\Lambda_b)\) is nondegenerate on \(\ker\Theta_b\), and \(\Theta_b\circ{}^t\Theta_b\) is invertible on \(V_b\), where \({}^t\Theta_b=\Gamma_b^*\circ\pi_G\).
+
+**Proof.** The class of \(\Gamma\) in the relative de Rham cohomology of the fiber product is horizontal for the Gauss–Manin connection, and pullbacks, cup products and proper pushforwards are horizontal. So \(\Theta\) is a horizontal map between bundles with integrable connections. Its rank is constant, and its image \(\mathcal U\) is a subbundle of the pullback of \(V\) that is stable under the connection. A correspondence of this dimension raises the Hodge filtration by one, so \(\Theta_b\) maps \(F^1=F^1H^1(\Lambda_b)\) into \(F^2V_b\). By the first property of conjugation, \(\Theta_b(\bar x)=\pm\overline{\Theta_b(x)}\), with a sign that does not depend on \(x\).
+
+Fix \(b\), and put \(U=\mathcal U_b\), \(a=\dim(U\cap F^2V_b)\) and \(a'=\dim U-a\). Since \(H^1(\Lambda_b)=F^1\oplus\overline{F^1}\),
+
+\[
+U=\Theta_b(F^1)+\overline{\Theta_b(F^1)},
+\qquad
+\dim U\le2\dim\Theta_b(F^1)\le2a .
+\]
+
+Hence \(a'\le a\).
+
+Now let \(b\) be a point at which \(\phi\) is submersive, the Higgs maps grow strictly at \(\phi(b)\), and \(\mathcal U\cap F^2\) has locally constant rank. Such points exist, because \(\phi\) is dominant and strict growth is an open condition. Let \(W=U\cap F^2V_b\), a subspace of \(V^{2,1}\), and let \(W'\) be the image of \(U\) in \(V^{1,2}\). Their dimensions are \(a\) and \(a'\). A vector of \(W\) extends to a local section of \(\mathcal U\cap F^2\), and the derivatives of that section are sections of \(\mathcal U\). Hence \(\overline\nabla_vW\subset W'\) for every \(v\) tangent to \(B'\) at \(b\), and these \(v\) map onto the tangent space of \(\mathcal B\). If \(0<a<N\), strict growth gives \(a'>a\), a contradiction. If \(a=0\), then \(a'=0\) and \(U=0\). If \(a=N\), then \(W'\) contains every \(\overline\nabla_vV^{2,1}\), so \(W'=V^{1,2}\) and \(U=V_b\). Since the rank of \(\Theta\) is constant, \(\Theta_b\) is zero for every \(b\) or surjective for every \(b\).
+
+Suppose that \(\Theta_b\) is surjective. Then \(V_b=\Theta_b(F^1)+\overline{\Theta_b(F^1)}\), where \(\Theta_b(F^1)\) lies in \(F^2V_b\), of dimension \(N\), and \(\dim V_b=2N\). So \(\Theta_b(F^1)=F^2V_b\) and the sum is direct. This is the second statement.
+
+Let \(K=\ker\Theta_b\). It is stable under conjugation. Let \(x=x'+\bar y'\in K\) with \(x',y'\in F^1\). Then \(\Theta_b(x')=\mp\overline{\Theta_b(y')}\) lies in \(F^2V_b\cap\overline{F^2V_b}=0\), so \(x'\) and \(y'\) lie in \(K\). Suppose in addition that \(x\) is orthogonal to \(K\). Then
+
+\[
+0=\operatorname{tr}(x\cup\bar x')=\operatorname{tr}(x'\cup\bar x')+\operatorname{tr}(\bar y'\cup\bar x'),
+\]
+
+and the last term is \(\pm\overline{\operatorname{tr}(y'\cup x')}=0\), because \(F^1\) is isotropic. By the second property of conjugation, \(x'=0\). Pairing with \(y'\) gives \(y'=0\) in the same way. So the cup product is nondegenerate on \(K\). The trace pairing of \(H^3(T_b)\) is \(G\)-invariant, hence nondegenerate on \(V_b\), and for these pairings \({}^t\Theta_b\) is the adjoint of \(\Theta_b\) up to a sign. So \({}^t\Theta_b\) is injective, and its image is the orthogonal complement of \(K\), which meets \(K\) in zero. Hence \(\Theta_b\circ{}^t\Theta_b\) is injective on \(V_b\). ∎
+
+The sector alternative of Chapter 4 applies to every real sub-variation and takes the Hodge decomposition of the sector as known. Here the sub-variation is the image of the first cohomology of curves, and the decomposition of \(V_b\) is a conclusion.
+
+**The integration lemma in coherent cohomology.** In the setting of §3D.1, let \(\rho_L\in H^1(D,T_D)\) be the Kodaira–Spencer class of \(V(F,\ h+\varepsilon L)\). Up to a fixed factor,
+
+\[
+\operatorname{NL}_\lambda(L)(\sigma)=\operatorname{tr}_D\bigl(\rho_L\cup c_1(\lambda)\cup\sigma\bigr),
+\qquad c_1(\lambda)\in H^1(D,\Omega^1_D),
+\]
+
+and \(\rho_L\cup c_1(\lambda)\in H^2(D,\mathcal O_D)\) is the obstruction to extending a line bundle of class \(\lambda\) to \(V(F,\ h+\varepsilon L)\). It vanishes for the class \(H\) of \(\mathcal O_D(1)\), which extends.
+
+Let \(\Sigma\subset D\) be a curve of class \(\lambda+mH\), with \(\lambda\) invariant under \(G\) and \(H^1(D,\mathcal O_D(\Sigma))=0\). Let \(\mathcal P\) be the space of pairs \((F',h')\) of invariant polynomials, with \(F'\in\mathcal B\), that define smooth surfaces \(D'\), and let \(\mathcal H\to\mathcal P\) be the relative Hilbert scheme of curves in these surfaces. Suppose that \(\operatorname{NL}_\lambda\) is surjective. Then \(\mathcal H\) is smooth at \([\Sigma]\), and so is the morphism \(\mathcal H\to\mathcal B\). The tangent vectors to its fiber at \([\Sigma]\) lie over \(\ker\operatorname{NL}_\lambda\), and every element of this kernel lies under one.
+
+**Proof.** Let \(\mathcal M=\mathcal O_D(\Sigma)\), and let \(R\) be the complete local ring of \(\mathcal P\) at \((F,h)\), with maximal ideal \(\mathfrak m\). For a local Artinian quotient \(A\) of \(R\), let \(D_A\) be the corresponding surface over \(A\). Since \(H^1(D,\mathcal O_D)=0\), a line bundle on \(D_A\) that restricts to \(\mathcal M\) is unique up to isomorphism, and the relative Picard scheme is unramified over \(\mathcal P\) at \(\mathcal M\). Its completion there is \(R/J\) for an ideal \(J\): the line bundle \(\mathcal M\) extends to \(D_A\) exactly when \(J\) maps to zero in \(A\).
+
+A curve \(\Sigma_A\subset D_A\) extending \(\Sigma\) gives the extension \(\mathcal O(\Sigma_A)\) of \(\mathcal M\). Conversely, let \(A'\to A\) be a small extension and suppose that \(\mathcal O(\Sigma_A)\) extends to \(D_{A'}\). Since \(H^1(D,\mathcal M)=0\), the section that cuts \(\Sigma_A\) lifts, and a lift cuts a curve in \(D_{A'}\) extending \(\Sigma_A\). So the completion of \(\mathcal H\) at \([\Sigma]\) is formally smooth over \(R/J\), of relative dimension \(h^0(\mathcal M)-1\).
+
+For a small extension \(A'\to A\) with kernel \(I\), the obstruction to extending a line bundle from \(D_A\) to \(D_{A'}\) lies in \(H^2(D,\mathcal O_D)\otimes I\). The group \(G\) acts on \(D_A\) and on \(D_{A'}\), because the equations are invariant. An extension of \(\mathcal M\) to \(D_A\) is isomorphic to its pullbacks under \(G\), by uniqueness and the invariance of the class. The obstruction is functorial, so it is \(G\)-invariant. The space \(H^2(D,\mathcal O_D)^G\) is dual to \(H^0(D,K_D)^G\) and has dimension \(c\).
+
+It follows that \(J\) is generated by at most \(c\) elements. Indeed, by the Artin–Rees lemma the extension \(R/(\mathfrak mJ+\mathfrak m^k)\to R/(J+\mathfrak m^k)\) has kernel \(J/\mathfrak mJ\) for large \(k\), and its obstruction is a linear map from the dual of \(H^2(D,\mathcal O_D)^G\) to \(J/\mathfrak mJ\). Let \(J'\supset\mathfrak mJ\) be an ideal with \(J'/\mathfrak mJ\) the image. The obstruction for \(R/(J'+\mathfrak m^k)\to R/(J+\mathfrak m^k)\) is then zero, so \(\mathcal M\) extends over \(R/(J'+\mathfrak m^k)\) and \(J\subset J'+\mathfrak m^k\). This holds for all large \(k\), so \(J=J'\).
+
+On first-order deformations the obstruction is \(\rho\cup c_1(\mathcal M)\), with \(\rho\) the Kodaira–Spencer class, and on the directions \(L\in S_e^G\) it is \(\operatorname{NL}_\lambda\). By hypothesis these directions already map onto \(H^2(D,\mathcal O_D)^G\). So the tangent space of \(R/J\) has codimension \(c\) in that of \(\mathcal P\), and it maps onto the tangent space of \(\mathcal B\). Hence \(R/J\) is regular, of codimension \(c\), and smooth over \(\mathcal B\). Its tangent vectors over a fixed \(F\) are the elements of \(\ker\operatorname{NL}_\lambda\). ∎
+
+No class of type \((1,1)\) is transported here: the line bundle is extended, and the count \(n-c\) of §3D.1 is the dimension of \(R/J\) over \(\mathcal B\), modulo rescaling of \(h\).
+
+**The trace formulas in coherent cohomology.** With \(\operatorname{NL}\) read as above, the first display in the proof of the obstruction lemma is, up to signs, the identity
+
+\[
+\operatorname{tr}_D\bigl(\rho\cup c_1(\mathcal O_D(C))\cup\omega\bigr)
+=\operatorname{tr}_D\bigl((\rho\mathbin{\lrcorner}\omega)\cup c_1(\mathcal O_D(C))\bigr)
+=\operatorname{tr}_C\bigl((\rho\mathbin{\lrcorner}\omega)|_C\bigr).
+\]
+
+The first equality holds because \((\xi\mathbin{\lrcorner}\omega)\wedge\alpha=-\alpha(\xi)\,\omega\) for a vector \(\xi\), a one-form \(\alpha\) and a two-form \(\omega\) on a surface. The second is the Gysin property of the class of \(C\). The rest of that proof is a Čech computation.
+
+In the derivative lemma, read \(\langle d\nu(L),\eta\rangle\) as the number
+
+\[
+\operatorname{tr}_\Sigma\bigl((v\mathbin{\lrcorner}\eta)|_\Sigma\bigr),
+\]
+
+for a smooth curve \(\Sigma\subset D\) of class \(\lambda+mH\) and a normal field \(v\in H^0(N_{\Sigma/T})\) over \(L|_\Sigma\). Here \(\eta\) acts through its image in \(H^1(T,\Omega^2_T)\). By the lemma above, such a field exists when \(L\in\ker\operatorname{NL}_\lambda\) and \(H^1(D,\mathcal O_D(\Sigma))=0\). The proof of the derivative lemma computes this number in coherent cohomology. It shows that the number is \(\operatorname{tr}_D(L\,\widetilde\eta\cup c_1(\mathcal O_D(\Sigma)))\), for any lift \(\widetilde\eta\), and so depends only on the class of \(\Sigma\). It uses the Abel–Jacobi map at one further place, to discard the part \(mH\). That part is the same number for a complete-intersection curve \(D\cap\{\ell=0\}\), with \(\ell\) of degree \(m\). By the next lemma, it is a value of a one-form on a smooth projective completion of the space of pairs \((h',\ell')\). That space is rational, so the form is zero.
+
+**Fiber integration.** Let \(T\) be a smooth projective threefold and \(S\) a smooth variety. Let \(\mathcal Z\subset S\times T\) be a family of curves, smooth and proper over \(S\), with projections \(p\) and \(q\). Let \(\bar S\) be a smooth projective completion of \(S\), and let \(\Gamma\) be the closure of \(\mathcal Z\) in \(\bar S\times T\). For \(\eta\in F^2H^3(T)\), the class \(\Gamma^*\eta\in F^1H^1(\bar S)\) is a one-form on \(\bar S\). Up to a fixed sign, its value on a tangent vector \(\xi\) at \(s\in S\) is
+
+\[
+\operatorname{tr}_{Z_s}\bigl((v_\xi\mathbin{\lrcorner}\eta)|_{Z_s}\bigr),
+\]
+
+where \(Z_s\) is the fiber and \(v_\xi\in H^0(N_{Z_s/T})\) is the normal field of \(\xi\).
+
+**Proof.** Resolve \(\Gamma\) by a morphism that is an isomorphism over \(\mathcal Z\), and extend \(p\) and \(q\) to the resolution. Then \(\Gamma^*=p_*q^*\). Proper pushforward commutes with restriction to \(S\). Along the smooth morphism \(p\), of relative dimension one, it is induced on Hodge cohomology by the quotient map \(\Omega^2_{\mathcal Z}\to p^*\Omega^1_S\otimes\Omega^1_{\mathcal Z/S}\) and the relative trace \(R^1p_*\Omega^1_{\mathcal Z/S}\to\mathcal O_S\). Evaluating at \(\xi\) contracts with a lift \(\widetilde\xi\) of \(\xi\) along \(Z_s\) and restricts to \(Z_s\). Finally \(\widetilde\xi\mathbin{\lrcorner}q^*\eta=q^*(dq(\widetilde\xi)\mathbin{\lrcorner}\eta)\), and \(dq(\widetilde\xi)\) lifts \(v_\xi\). ∎
+
+**The moving-class criterion from weight one.** Let \(\mathcal B\) be as in the moving-class criterion, and smooth. Suppose that its first hypothesis holds and that the Higgs maps of \(\mathcal B\) grow strictly at one member. Then for \(T\) in a nonempty Zariski-open subset of \(\mathcal B\) there are a smooth projective curve \(\Lambda\) and a correspondence \(\Gamma\) such that \(\Theta=\pi_G\circ\Gamma_*\) has the three properties of the weight-one alternative. In particular
+
+\[
+\Gamma_*H^1(\Lambda,\mathbb Q)\supset H^3(T,\mathbb Q)^G ,
+\]
+
+and \(\Theta\circ{}^t\Theta\) is invertible on \(H^3(T)^G\).
+
+**Proof.** Let \(m\) be large and let \(\Sigma\subset D\) be a smooth curve of class \(\lambda+mH\). Then \(H^1(D,\mathcal O_D(\Sigma))=0\). By the integration lemma in coherent cohomology, \(\mathcal H\) is smooth over \(\mathcal B\) at \([\Sigma]\), and \(L\) lies under a tangent vector \(\xi\) to its fiber. Choose a locally closed subvariety \(\mathcal C\subset\mathcal H\) through \([\Sigma]\) that is smooth over \(\mathcal B\) of relative dimension one there, with fiber tangent to \(\xi\). As in the proof of the moving-class criterion, pass to a finite étale cover \(B'\) of an open subset of \(\mathcal B\), and complete and normalize the parameter curves. The result is a smooth projective family of curves \(\Lambda\to B'\), with the closure \(\Gamma\) of the universal curve as a relative correspondence.
+
+Let \(\mathcal C^\circ\subset\mathcal C\) be the open subset on which \(\mathcal C\) is smooth over \(\mathcal B\) and the universal curve is smooth over \(\mathcal C\). It contains \([\Sigma]\), and its fibers are open subsets of the curves \(\Lambda_b\). By the fiber integration lemma, the forms \(\Gamma_b^*\eta_A\) restrict on \(\mathcal C^\circ\) to an algebraic relative one-form over \(\mathcal B\). Its value on \(\xi\) at \([\Sigma]\) is the pairing of the derivative lemma, which is nonzero. The component of \(\mathcal C^\circ\) through \([\Sigma]\) dominates \(\mathcal B\), so the relative form is nonzero at its general point. For general \(b\) the form \(\Gamma_b^*\eta_A\) is therefore nonzero. Hence \({}^t\Theta_b\ne0\) and \(\Theta_b\ne0\), and the weight-one alternative applies. The inclusion of rational spaces follows from the surjectivity over \(\mathbb C\). ∎
+
+**The order-three theorem.** In the proof of §3D.4, the first three finite results verify the first hypothesis, in the coherent reading of the two trace formulas. The second row of the table of §4.4 gives strict growth at \(F_0\), in place of the fourth finite result. The criterion above then supplies \(\mathcal U\), \(\Lambda\) and \(\Gamma\). After \(\Gamma\) is replaced by \(\pi_g\circ\Gamma\circ\pi_1^\Lambda\), the operator \(\Gamma\circ{}^t\Gamma\) is \(\Theta\circ{}^t\Theta\) on \(H^3(T)^g\), and it is invertible there by the third property. No polarization of \(H^3(T)\) enters. The remaining steps are algebraic. The Hodge numbers of the eigenspaces come from the residue theorems of §3D.1, and the even cohomology of \(T\) from weak Lefschetz, which has an algebraic proof. The specialization lemma uses relative Hilbert schemes and the horizontality of the classes of flat families of cycles.
+
+**Scope.** With the changes of §3D.6, the same proofs apply to the part of \(H^3(T)\) on which \(G\) acts through a character \(\chi\ne\delta\) with values \(\pm1\), with the projector of \(\chi\) in place of \(\pi_G\). They do not cover the sector of §3D.6. That sector is the sum of two eigenspaces exchanged by conjugation, and in each of them the pieces \(V^{2,1}\) and \(V^{1,2}\) have different dimensions, so the strict-growth lemma does not apply. On a fourfold, the classes supported on a divisor are images of the second cohomology of threefolds, and the argument would need the decomposition of that cohomology in place of the one for curves.
