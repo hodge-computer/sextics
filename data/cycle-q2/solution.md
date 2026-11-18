@@ -381,12 +381,57 @@ differential appearing in the anchor-change identity.
 [Actual cotangent presentation](GeometricHodgeCotangentChartPresentation.lean)
 and [Euler-kernel map and exactness](GeometricHodgeCotangentEulerChart.lean)
 
-These chart statements still need the global differential-sheaf maps,
-restriction comparisons, and the resulting one-form cocycle reduction.
-In particular the additive computation of degree-zero global sections
-has not yet been identified with the canonical scalar inclusion required
-by that reduction. No full unfiltered nonvanishing or protected primitive
-is claimed.
+The scalar normalization is now canonical: the original structure map
+\(\mathbb C\to\Gamma(T,\mathcal O_T)\) is an isomorphism of rings on
+the monic weighted model. Transport along the actual isomorphism over
+\(\mathbb C\) proves that every global function on the original fixed
+fiber is a canonical constant.
+[Canonical global constants](GeometricHodgeGlobalConstants.lean)
+
+Let \(E=\mathcal O_T(-1)^{\oplus4}\oplus\mathcal O_T(-2)\), with Euler
+row \(\epsilon(a)=\sum_r w_rX_ra_r\). The kernel \(B\) is constructed
+as the actual sheaf kernel. On every subopen of a weight-one chart the
+chosen slot lifts every \(\mathcal O_T(0)\) section. Consequently
+\[
+  0\longrightarrow B\longrightarrow E
+  \xrightarrow{\epsilon}\mathcal O_T(0)\longrightarrow0
+\]
+is a short exact sequence of the original sheaves.
+[Negative-twist Euler maps](GeometricHodgeCotangentEulerSheaf.lean)
+and [Euler short exactness](GeometricHodgeCotangentEulerExact.lean)
+
+For a section of \(B\), the sums \(\sum_r a_r\,d(X_r/X_i^{w_r})\)
+agree on every common subopen, even as ordinary Kähler forms before
+sheafification. Their images in the original differential sheaf commute
+with restriction. Genuine sheaf gluing gives one global module morphism
+\(B\to\Omega_T^1\), whose restriction to every chart subopen is exactly
+this formula.
+[Ordinary forms and restrictions](GeometricHodgeCotangentAtlasForms.lean)
+and [global cotangent map](GeometricHodgeCotangentGlobalMap.lean)
+
+The original gradient gives a morphism \(\mathcal O_T(-6)\to B\).
+Its composition with the global cotangent map is zero. This follows
+from the polynomial chain rule on the actual chart algebra, with its
+canonical scalar map: the original equation maps to zero and its
+partials map to the normalized gradient coefficients. Thus these
+original morphisms give a conormal complex.
+[Actual conormal complex](GeometricHodgeCotangentConormalComplex.lean)
+
+The five negative twists have vanishing ordinary degree-one cohomology.
+The Euler sequence therefore gives a surjective connecting map
+\[
+ \Gamma(T,\mathcal O_T(0))\longrightarrow H^1(T,B).
+\]
+Every actual class of the ambient Euler kernel comes from a global
+section through this connecting map.
+[Ordinary Euler connecting map](GeometricHodgeCotangentEulerCohomology.lean)
+
+It remains to prove short exactness of the conormal complex on the
+original smooth fiber and identify the induced one-form cocycle with
+the hyperplane dlog cocycle, with its actual scalar normalization and
+boundary lifts. The complete unfiltered total complex and its comparison,
+invariant Gysin spanning, specialization, and protected primitive remain
+open. No full unfiltered nonvanishing or protected primitive is claimed.
 
 ## An exact rational correction on the genus-ten chart
 
