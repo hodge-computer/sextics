@@ -8,7 +8,6 @@ no parameter derivation on the specialized physical field is assumed.
 The maintained TransitiveCubic supplies every covariant identity. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
 namespace MixedPolarCubicSourceJets
 open TransitiveCovariants ResidueFirstJets MixedPolarCubicJetCalculus TrivSqZeroExt
 variable {K : Type*} [Field K] [CharZero K]

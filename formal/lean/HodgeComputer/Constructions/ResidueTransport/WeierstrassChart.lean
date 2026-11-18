@@ -17,7 +17,6 @@ OpenAI Codex assistance.
 -/
 
 noncomputable section
-set_option maxRecDepth 10000
 namespace WeierstrassChart
 
 variable {K : Type*} [Field K]

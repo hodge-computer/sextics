@@ -7,7 +7,6 @@ Uses the shared localization and finite-extension derivation constructions.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 100000
 namespace CycleJacobianParameters
 open HoldoutConstruction CycleJacobianIncidence CycleJacobianLifting CycleJacobianFamily Polynomial
 local instance : Algebra ℤ ComplexParameterField := Ring.toIntAlgebra _

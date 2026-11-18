@@ -6,7 +6,6 @@ tangent derivation and the actual coefficients. All nonvanishing assumptions
 are supplied by the physical chart. Prepared with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace CycleCubicFieldDifferential
 open CycleCovariants MvPolynomial
 section Evaluation

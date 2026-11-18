@@ -11,7 +11,6 @@ The finite-type hypothesis in the transcendence-degree argument is explicit.
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1500000
 
 namespace ReflectionCoupledFano.Target
 

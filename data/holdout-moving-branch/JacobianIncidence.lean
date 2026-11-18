@@ -16,7 +16,6 @@ Prepared with OpenAI Codex assistance for hodgepodgeconjecture; transitive cubic
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 8000000
 namespace CycleJacobianIncidence
 open Polynomial
 export WeierstrassConic (Coeff CurvePoly cv cp curve coefficientDeriv coefficientDeriv_coeff coefficientDeriv_C

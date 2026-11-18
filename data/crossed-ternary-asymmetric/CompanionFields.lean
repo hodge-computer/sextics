@@ -22,7 +22,6 @@ See solution.md for the construction, provenance, and prior-work credit. -/
 section
 
 noncomputable section
-set_option maxHeartbeats 400000
 namespace CrossedFano
 open Polynomial
 abbrev Coeff := MvPolynomial (Fin 4) ℂ
@@ -188,8 +187,6 @@ section
    Coefficientwise differentiation follows the generic mechanism used in
    fqlx's accepted moving-conic proof, with the present equation and slots. -/
 noncomputable section
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 namespace CrossedConicIncidence
 open Polynomial
 abbrev Coeff := MvPolynomial (Fin 13) ℤ
@@ -418,7 +415,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 100000
 namespace CrossedFanoRadial
 open Polynomial HoldoutConstruction
 abbrev AffineField := CrossedFanoAffine.FunctionField
@@ -559,7 +555,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 100000
 namespace CrossedFano
 open Polynomial HoldoutConstruction
 

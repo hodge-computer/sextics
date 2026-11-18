@@ -10,7 +10,6 @@ for hodgepodgeconjecture.
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 namespace DeformedConic
 open HoldoutConstruction Polynomial
 local instance conicResidue_local_1 : Algebra ℤ TargetField := Ring.toIntAlgebra _

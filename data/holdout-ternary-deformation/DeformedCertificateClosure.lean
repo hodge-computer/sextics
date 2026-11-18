@@ -11,7 +11,6 @@ with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 500000
 namespace DeformedCover
 open HoldoutConstruction MvPolynomial
 open scoped BigOperators

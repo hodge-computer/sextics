@@ -4,8 +4,6 @@ import Proposal.ConcreteLine
 import Mathlib.RingTheory.AdjoinRoot
 
 noncomputable section
-set_option maxHeartbeats 0
-set_option maxRecDepth 100000
 namespace GenericSpecialization
 open Polynomial
 

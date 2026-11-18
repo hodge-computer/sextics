@@ -7,7 +7,6 @@ which credits hodgepodgeconjecture and the shared HoldoutCover machinery.
 Prepared with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
 namespace MixedPolarPhysicalCubicVolume
 open HoldoutConstruction MixedPolarPhysical MixedPolarPhysicalCoordinates
 open MixedPolarPhysicalNormalTransport MixedPolarPhysicalTangent

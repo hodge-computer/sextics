@@ -1,8 +1,6 @@
 import Proposal.NewSpecialization
 import HodgeComputer.Constructions.CubicSurfaces.LineContact
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
-set_option maxHeartbeats 0
-set_option maxRecDepth 100000
 noncomputable section
 namespace HoldoutQ2.NewSpecialization
 open Polynomial CheckedPolynomialLists

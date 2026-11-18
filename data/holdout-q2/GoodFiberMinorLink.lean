@@ -2,8 +2,6 @@ import Proposal.GoodFiberSources
 import HodgeComputer.Constructions.FiniteAlgebra.CheckedPolynomialListDegree
 
 noncomputable section
-set_option maxHeartbeats 0
-set_option maxRecDepth 100000
 namespace HoldoutQ2.NewSpecialization
 
 theorem sourceMinor_gradient (i : Fin 10) (j : Fin 4) :

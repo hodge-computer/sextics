@@ -11,7 +11,6 @@ the specialized function field is postulated.
 Prepared with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace CyclePhysicalCubicJets
 open CyclePhysical CyclePhysicalCoordinates CyclePhysicalNormalTransport
 open CyclePhysicalCubicTangent CycleCubicFieldDifferential.Physical

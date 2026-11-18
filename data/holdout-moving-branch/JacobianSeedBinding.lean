@@ -10,8 +10,6 @@ coefficient-Jacobian verification pattern of the credited shared construction.
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 8000000
-set_option maxRecDepth 100000
 namespace CycleJacobianSeedBinding
 open Polynomial CycleJacobianIncidence
 abbrev K := ZMod 5

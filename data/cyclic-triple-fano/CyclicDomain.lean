@@ -4,7 +4,6 @@ import Mathlib.Algebra.MvPolynomial.PDeriv
 import Mathlib.RingTheory.MvPolynomial.Homogeneous
 
 noncomputable section
-set_option maxHeartbeats 1500000
 namespace CyclicTriple
 open Polynomial
 

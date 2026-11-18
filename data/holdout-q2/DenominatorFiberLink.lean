@@ -9,8 +9,6 @@ import Proposal.SexticAssembly
 fiber. Matrix specialization and the determinant Bezout argument reuse the
 accepted finite-algebra infrastructure. -/
 noncomputable section
-set_option maxHeartbeats 0
-set_option maxRecDepth 1000000
 namespace HoldoutQ2.DenominatorFiberLink
 open Polynomial NewSpecialization
 open CheckedPolynomialLists

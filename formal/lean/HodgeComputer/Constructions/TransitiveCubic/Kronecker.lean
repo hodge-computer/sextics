@@ -9,7 +9,6 @@ exponents are below 19. Substitution a=b=c=1, d=X, e=X^19, f=X^361 is then
 injective on that homogeneous component. Prepared with OpenAI Codex assistance.
 -/
 noncomputable section
-set_option maxRecDepth 4096
 namespace TransitiveCubicKronecker
 open MvPolynomial
 open scoped BigOperators

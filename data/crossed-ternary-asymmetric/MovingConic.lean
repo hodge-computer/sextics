@@ -75,7 +75,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 20000
 set_option profiler true
 set_option profiler.threshold 100
 open scoped TensorProduct
@@ -183,7 +182,6 @@ end
 section
 
 noncomputable section
-set_option maxHeartbeats 3000000
 namespace CrossedFixedConic
 open Polynomial
 open CrossedConicIncidence (H gradient H_map gradient_map)
@@ -236,7 +234,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 20000
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 open CrossedConicIncidence (H gradient)
@@ -326,7 +323,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 50000
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 
@@ -419,7 +415,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 100000
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 
@@ -513,7 +508,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 50000
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 
@@ -614,7 +608,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 100000
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction CrossedConicIncidence
 open scoped BigOperators
@@ -725,7 +718,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 500000
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 open scoped BigOperators

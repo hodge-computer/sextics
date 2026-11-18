@@ -4,6 +4,7 @@ defaultTargets = ["HodgeTestbed", "HodgeComputer"]
 
 [leanOptions]
 maxHeartbeats = 0
+maxRecDepth = 131072
 
 [[require]]
 name = "mathlib"

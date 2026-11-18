@@ -4,7 +4,6 @@ import Proposal.BundleFields
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 800000
 
 namespace HoldoutBundle
 

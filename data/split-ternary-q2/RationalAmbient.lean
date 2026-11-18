@@ -5,7 +5,6 @@ import HodgeComputer.Constructions.HoldoutCover.Piola
 with OpenAI Codex assistance for fqlx. Every source denominator is required
 to be nonzero after hypersurface evaluation. -/
 noncomputable section
-set_option maxHeartbeats 3000000
 namespace SplitRationalAmbient
 open HoldoutConstruction
 open scoped BigOperators

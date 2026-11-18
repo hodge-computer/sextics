@@ -10,7 +10,6 @@ specialized physical function field is assumed.
 Prepared with OpenAI Codex assistance. Adapted from the accepted mixed-biweight calculus of fqlx and the Hodge Computer collaborators; maintained TransitiveCubic polynomial identities are imported, not copied. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace MixedPolarCubicJetCalculus
 open ResidueFirstJets
 open TransitiveCovariants MvPolynomial

@@ -8,7 +8,6 @@ Adapted from the accepted constructions of fqlx and hodgepodgeconjecture.
 Prepared for benediamond with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 100000
 namespace MixedPolarJacobianParameters
 open HoldoutConstruction MixedPolarJacobianIncidence MixedPolarJacobianLifting MixedPolarJacobianFamily Polynomial
 local instance : Algebra ℤ ComplexParameterField := Ring.toIntAlgebra _

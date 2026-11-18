@@ -10,7 +10,6 @@ Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace CycleJacobianFamily
 open HoldoutConstruction CycleJacobianIncidence CycleJacobianLifting Polynomial
 open scoped BigOperators

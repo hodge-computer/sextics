@@ -4,7 +4,6 @@ import HodgeComputer.Verify
 import Mathlib.Analysis.Complex.Polynomial.Basic
 
 noncomputable section
-set_option maxHeartbeats 2000000
 set_option backward.isDefEq.respectTransparency false
 namespace CyclicTriple
 open MvPolynomial

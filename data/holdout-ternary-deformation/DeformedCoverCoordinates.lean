@@ -10,7 +10,6 @@ for hodgepodgeconjecture.
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 300000
 namespace DeformedCover
 open HoldoutConstruction Polynomial
 open DeformedConic (BaseField FermatRing baseFieldAlpha baseFieldBeta TargetRing TargetField)

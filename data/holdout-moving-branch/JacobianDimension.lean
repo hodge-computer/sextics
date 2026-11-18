@@ -5,7 +5,6 @@ degrees and essential finite generation. Uses the shared dimension lemmas.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture; transitive cubic adaptation by fqlx, specialized here for benediamond with Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 namespace CycleJacobianDimension
 open HoldoutConstruction CycleJacobianLifting CycleJacobianFamily CycleJacobianEmbedding Algebra
 lemma parameterField_trdeg : trdeg ℂ ComplexParameterField=4 := by

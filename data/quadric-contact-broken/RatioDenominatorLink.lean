@@ -4,8 +4,6 @@ import Proposal.DenominatorAssembly
 import Mathlib.RingTheory.AdjoinRoot
 import Mathlib.LinearAlgebra.Matrix.ToLin
 
-set_option maxRecDepth 100000
-set_option maxHeartbeats 400000
 noncomputable section
 namespace QuadricContactRatioDenominator
 open Polynomial QuadricContactRatioInverse

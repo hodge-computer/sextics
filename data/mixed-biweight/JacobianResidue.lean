@@ -9,8 +9,6 @@ certificate is assembled separately in PhysicalPrimitive. Prepared with OpenAI C
 assistance for hodgepodgeconjecture; adapted by fqlx with Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
-set_option maxRecDepth 10000
 namespace CycleJacobianResidue
 open HoldoutConstruction CycleJacobianFamily CycleJacobianParameters CycleJacobianEmbedding
   CycleJacobianHypersurface CycleJacobianNormal Polynomial

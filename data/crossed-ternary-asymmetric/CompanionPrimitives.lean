@@ -196,7 +196,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 namespace CrossedFanoAffineData
 open Polynomial HoldoutConstruction CrossedConicIncidence
 open scoped BigOperators

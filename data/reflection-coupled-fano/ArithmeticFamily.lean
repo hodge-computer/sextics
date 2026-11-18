@@ -11,8 +11,6 @@ an unrelated deformation.
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency true
-set_option maxHeartbeats 300000
-set_option maxRecDepth 10000
 namespace ReflectionCoupledFano.Arithmetic
 open Polynomial HoldoutConstruction
 

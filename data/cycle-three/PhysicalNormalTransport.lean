@@ -9,7 +9,6 @@ interface is the shared construction credited to fqlx and collaborators.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace CyclePhysicalNormalTransport
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open scoped BigOperators

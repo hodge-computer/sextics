@@ -9,8 +9,6 @@ Original cycle-three construction prepared with OpenAI Codex assistance.
 The transitive-cubic adaptation is due to fqlx. Adapted here to holdout-moving-branch for benediamond with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 namespace CyclePhysicalJacobianCoordinates
 export WeierstrassChart (rawMatrix raw_determinant)
 open scoped BigOperators

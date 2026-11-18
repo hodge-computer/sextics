@@ -18,7 +18,6 @@ No certificate existence is asserted without the weighted-divergence input.
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 500000
 namespace SplitTernaryPhysical
 open MvPolynomial HoldoutConstruction
 
@@ -121,7 +120,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 600000
 namespace SplitTernaryPhysical
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators
@@ -192,7 +190,6 @@ end
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace SplitTernaryPhysical
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators

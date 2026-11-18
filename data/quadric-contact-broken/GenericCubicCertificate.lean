@@ -8,7 +8,6 @@ import Proposal.CubicDenominatorEvaluation
 regular at (alpha,beta)=(1,2). All eight functional constraints are proved from
 an exact specialized inverse and functorial quotient normal forms. -/
 noncomputable section
-set_option maxRecDepth 100000
 open scoped BigOperators
 namespace QuadricContact.GenericCubicCertificate
 open MvPolynomial

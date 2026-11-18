@@ -4,8 +4,6 @@ import Proposal.QuarticSeedIncidence
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxRecDepth 8192
-set_option maxHeartbeats 0
 namespace ReflectionCoupledFano
 open Polynomial CoupledFanoQuarticSeed
 variable {K : Type*} [Field K] [CharP K 5]

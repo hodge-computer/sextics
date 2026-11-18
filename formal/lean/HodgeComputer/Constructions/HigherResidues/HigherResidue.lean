@@ -10,7 +10,6 @@ Prepared with OpenAI Codex assistance for contributor fqlx.
 -/
 
 noncomputable section
-set_option maxRecDepth 100000
 namespace SplitHigherResidue
 open HoldoutConstruction Polynomial
 open scoped BigOperators

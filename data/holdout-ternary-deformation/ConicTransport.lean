@@ -9,7 +9,6 @@ building on fqlx's shared polynomial-family residue bridge.
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 namespace DeformedConic
 open HoldoutConstruction Polynomial
 open scoped BigOperators

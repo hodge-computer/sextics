@@ -1,8 +1,6 @@
 import Proposal.NewSpecialization
 import Proposal.NewLineChart
 import Mathlib.Tactic.Ring
-set_option maxHeartbeats 0
-set_option maxRecDepth 100000
 noncomputable section
 namespace HoldoutQ2.NewSpecialization
 open Polynomial CheckedPolynomialLists

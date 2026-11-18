@@ -17,8 +17,6 @@ section
    variables. Mathematical source: the explicit mod-5 conic in this work;
    coefficientwise differentiation follows the accepted fqlx construction. -/
 noncomputable section
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 namespace CrossedFixedConic
 open Polynomial
 open CrossedConicIncidence (H gradient)
@@ -87,8 +85,6 @@ end
 
 /- Source component: ConicSeedModFive. -/
 section
-set_option maxHeartbeats 8000000
-set_option maxRecDepth 100000
 noncomputable section
 namespace CrossedConicSeed
 open Polynomial
@@ -178,8 +174,6 @@ end
 section
 
 noncomputable section
-set_option maxHeartbeats 5000000
-set_option maxRecDepth 10000
 namespace CrossedConicIncidence
 open Polynomial
 abbrev K := ZMod 5
@@ -282,8 +276,6 @@ end
 section
 
 noncomputable section
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 namespace CrossedFixedConic
 open Polynomial
 open CrossedConicIncidence (H gradient H_map gradient_map)
@@ -367,8 +359,6 @@ end
 section
 
 noncomputable section
-set_option maxHeartbeats 4000000
-set_option maxRecDepth 100000
 namespace CrossedFixedConic
 open Polynomial
 open CrossedConicIncidence (gradient gradient_map)

@@ -14,8 +14,6 @@ Prepared with OpenAI ChatGPT collaborating-agent assistance.
 
 noncomputable section
 open HodgeComputer.Sextic
-set_option maxRecDepth 10000
-set_option maxHeartbeats 1000000
 
 namespace HoldoutBundle
 

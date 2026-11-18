@@ -11,7 +11,6 @@ character; they are algebraic coordinate identities, not a certificate.
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 800000
 
 namespace HoldoutBundle
 

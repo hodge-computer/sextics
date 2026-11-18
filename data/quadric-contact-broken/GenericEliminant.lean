@@ -1,8 +1,6 @@
 import Proposal.GenericLineChart
 import Proposal.Subresultant
 
-set_option maxHeartbeats 0
-set_option maxRecDepth 100000
 namespace GenericLineChart
 variable {K : Type*} [CommRing K]
 

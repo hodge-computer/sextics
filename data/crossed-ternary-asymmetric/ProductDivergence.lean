@@ -9,7 +9,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 400000
 namespace CrossedProductField
 open Polynomial HoldoutConstruction CrossedFanoElliptic CrossedElliptic
 open scoped BigOperators
@@ -127,7 +126,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 400000
 namespace CrossedProductField
 open Polynomial HoldoutConstruction CrossedFanoElliptic CrossedElliptic
 open scoped BigOperators
@@ -210,7 +208,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 300000
 namespace CrossedProductField
 open Polynomial HoldoutConstruction CrossedFanoElliptic CrossedElliptic
 open scoped BigOperators

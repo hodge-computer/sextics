@@ -5,7 +5,6 @@ Adapted from the accepted tangent construction of hodgepodgeconjecture and
 fqlx. Its finite extension fixes the actual algebraic shear coefficient. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace MixedPolarPhysicalTangent
 open HoldoutConstruction MixedPolarPhysical MixedPolarPhysicalCoordinates
 open scoped BigOperators

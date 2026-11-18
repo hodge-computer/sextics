@@ -10,7 +10,6 @@ Jacobian primitive architecture of fqlx and hodgepodgeconjecture, including
 both moving-map and normal-chart corrections. Prepared with Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace MixedPolarPhysicalPrimitive
 open HoldoutConstruction MixedPolarPhysical MixedPolarPhysicalCoordinates
 open MixedPolarPhysicalShear MixedPolarPhysicalTangent MixedPolarPhysicalCubicJets

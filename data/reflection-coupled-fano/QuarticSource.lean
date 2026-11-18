@@ -11,7 +11,6 @@ the transverse curve coefficient divided by the endpoint normal gradient.
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxRecDepth 10000
 namespace ReflectionCoupledFano
 open Polynomial HoldoutConstruction
 

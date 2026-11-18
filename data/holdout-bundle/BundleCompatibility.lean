@@ -11,8 +11,6 @@ volume, source, and certificate-clearing obligation from those values.
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxRecDepth 10000
-set_option maxHeartbeats 1000000
 
 namespace HoldoutBundle
 
@@ -70,7 +68,6 @@ def residue : MvPolynomial (Fin 5) BaseField →+* HoldoutFunctionField :=
 @[simp] theorem residue_X_succ (j : Fin 4) :
     m.residue (X j.succ)=physicalQuotientTail j.castSucc := m.parameter j
 
-set_option maxHeartbeats 100000 in
 @[simp] theorem residue_X (j : Fin 5) :
     m.residue (X j)=![physicalY 0,physicalY 1,physicalY 2,physicalP,physicalQ] j := by
   refine Fin.cases ?_ (fun k => ?_) j

@@ -19,8 +19,6 @@ ChatGPT assistance. This module alone asserts no certificate.
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 800000
-set_option maxRecDepth 100000
 namespace HoldoutBundle
 open Polynomial
 variable {R : Type*} [CommRing R]

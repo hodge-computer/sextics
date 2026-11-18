@@ -10,8 +10,6 @@ and passage to the generic complex endpoint.
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxRecDepth 4096
-set_option maxHeartbeats 2000000
 namespace ReflectionCoupledFano.Arithmetic
 open Polynomial
 

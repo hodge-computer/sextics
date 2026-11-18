@@ -17,8 +17,6 @@ here; no certificate or specialization theorem is asserted by these lemmas.
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 8000000
-set_option maxRecDepth 100000
 
 namespace SplitCompanion
 open Polynomial
@@ -174,8 +172,6 @@ end SplitCompanion
 
 /- Source component: ConicSeedModFive. -/
 section
-set_option maxHeartbeats 8000000
-set_option maxRecDepth 100000
 noncomputable section
 namespace SplitCompanionSeed
 open Polynomial

@@ -10,7 +10,6 @@ cyclic couplings are present with their prescribed coefficient one half.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace CyclePhysical
 open HoldoutConstruction Polynomial
 abbrev Ambient := MvPolynomial (Fin 6) ℂ

@@ -9,8 +9,6 @@ open Polynomial NewLineChart
 variable {K : Type*} [CommRing K]
 set_option linter.unusedVariables false
 set_option linter.unusedSimpArgs false
-set_option maxHeartbeats 0
-set_option maxRecDepth 100000
 
 def coefficient0 (a b c d : K) : K := (((((5832)*((a)^2))*((b)^9) + ((729)*((b)^8))*((c)^3)) - (((54)*((b)^4))*((c)^3))*((d)^6)) + ((c)^3)*((d)^12))
 def coefficient1 (a b c d : K) : K := (1)*(((((((-(729)))*(a))*((b)^8))*((c)^2) + ((((1134)*(a))*((b)^4))*((c)^2))*((d)^6)) - (((9)*(a))*((c)^2))*((d)^12)))

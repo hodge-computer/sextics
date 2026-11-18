@@ -10,7 +10,6 @@ explicit localization chart. The quadratic polynomial need not be
 irreducible over the physical function field. Prepared with Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace MixedPolarPhysicalCovariantChart
 open Polynomial MixedPolarPhysical MixedPolarPhysicalChart TransitiveCovariants
 

@@ -11,8 +11,6 @@ every passive derivative of the algebraic shear. Adapted from the accepted
 calculation of fqlx and hodgepodgeconjecture with Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 namespace MixedPolarPhysicalJacobianCoordinates
 open HoldoutConstruction MixedPolarPhysical MixedPolarPhysicalCoordinates
 open MixedPolarPhysicalShear MixedPolarPhysicalTangent MixedPolarPhysicalCubicJets

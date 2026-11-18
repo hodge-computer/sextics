@@ -94,8 +94,6 @@ def inverseJacobian : Matrix (Fin 13) (Fin 13) K := ![
 ![2,4,3,1,1,1,1,1,4,0,2,4,4]
 ]
 
-set_option maxRecDepth 100000 in
-set_option maxHeartbeats 8000000 in
 theorem inverse_product : coefficientJacobian * inverseJacobian = 1 := by
   decide
 

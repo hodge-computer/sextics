@@ -12,8 +12,6 @@ coefficient survive in that field factor.
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxRecDepth 4096
-set_option maxHeartbeats 2000000
 namespace ReflectionCoupledFano.Arithmetic
 open HoldoutConstruction
 

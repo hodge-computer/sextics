@@ -22,7 +22,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 500000
 namespace CrossedFanoRadial
 open HoldoutConstruction CrossedRadialResidue
 local instance : Algebra ℤ CrossedFano.FunctionField := Ring.toIntAlgebra _

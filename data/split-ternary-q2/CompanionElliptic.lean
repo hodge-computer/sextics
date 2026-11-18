@@ -7,8 +7,6 @@ argument of 1337isnot1337. Prepared with OpenAI Codex assistance for fqlx.
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 open scoped BigOperators
 
 namespace SplitGCompanion

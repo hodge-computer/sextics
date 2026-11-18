@@ -9,7 +9,6 @@ quadratic extension of the fixed mixed-polar residue field. Every source,
 normal, coefficient and derivative below is tied to that field. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
 namespace MixedPolarPhysicalCubicJets
 open TransitiveCovariants MixedPolarPhysicalShear MixedPolarPhysicalTangent
 local instance : Algebra ℤ Extension := Ring.toIntAlgebra _

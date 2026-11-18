@@ -8,8 +8,6 @@ import HodgeComputer.Constructions.ResidueTransport.WeierstrassChart
 Prepared with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 namespace CyclePhysicalJacobianCoordinates
 export WeierstrassChart (rawMatrix raw_determinant)
 open scoped BigOperators

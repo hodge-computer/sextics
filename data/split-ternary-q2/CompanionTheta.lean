@@ -13,8 +13,6 @@ Prepared with OpenAI Codex assistance for contributor fqlx.
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 700000
-set_option maxRecDepth 10000
 open scoped BigOperators
 
 namespace SplitThetaRadial

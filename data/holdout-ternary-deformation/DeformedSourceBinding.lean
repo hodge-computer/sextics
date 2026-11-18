@@ -11,7 +11,6 @@ assistance for hodgepodgeconjecture.
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 400000
 namespace DeformedCover
 open HoldoutConstruction MvPolynomial
 open DeformedConic (BaseField baseFieldAlpha baseFieldBeta targetResidueMap quotientEquation)

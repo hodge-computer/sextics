@@ -11,7 +11,6 @@ Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeco
 Adapted to mixed-biweight for fqlx with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace CyclePhysicalChart
 open CyclePhysical CyclePhysicalCoordinates TransitiveCovariants
 local notation "X" => (MvPolynomial.X : Fin 6 → Ambient)

@@ -2,8 +2,6 @@ import Proposal.CyclicCubicIdentityData
 import Proposal.CyclicCubicEncodingCheck
 namespace CycleCovariants.IdentityData
 open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions CycleCubicEncodingCheck
-set_option maxRecDepth 131072
-set_option maxHeartbeats 16000000
 theorem coefficient_9_6 {K : Type*} [CommRing K] (v : ℕ → K) :
     ringEval v Left_9_6=ringEval v Right_9_6 := by
   apply identity_of_encoding_context v Left_9_6 Right_9_6 (27,24,21) (2^42)

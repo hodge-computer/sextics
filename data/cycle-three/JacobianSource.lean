@@ -9,7 +9,6 @@ credit to Tom Fisher and the sources cited there. Prepared with OpenAI Codex
 assistance for hodgepodgeconjecture. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace CycleJacobianSource
 open HoldoutConstruction CycleJacobianHypersurface CycleJacobianEmbedding CycleJacobianResidue
 open Polynomial

@@ -13,7 +13,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 400000
 namespace CrossedFanoElliptic
 open HoldoutConstruction CrossedElliptic CrossedConicIncidence
 open scoped BigOperators
@@ -154,7 +153,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 600000
 namespace CrossedFanoElliptic
 open HoldoutConstruction CrossedElliptic CrossedEvaluatedJets CrossedScalarCompanionJet
 open scoped BigOperators

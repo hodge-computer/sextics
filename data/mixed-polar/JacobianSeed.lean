@@ -11,8 +11,6 @@ import Mathlib.Tactic.FinCases
 Generated from its exact paired-sign cubic; no certificate theorem is asserted.
 The incidence method credits the accepted constructions of fqlx and
 hodgepodgeconjecture. Prepared with OpenAI Codex assistance. -/
-set_option maxRecDepth 100000
-set_option maxHeartbeats 8000000
 noncomputable section
 namespace MixedPolarSeed
 open Polynomial

@@ -17,8 +17,6 @@ assistance. See solution.md for the construction, limits, and prior credit.
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency true
-set_option maxRecDepth 4096
-set_option maxHeartbeats 1000000
 
 namespace Submission
 open ReflectionCoupledFano

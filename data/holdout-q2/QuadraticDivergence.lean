@@ -36,7 +36,6 @@ def coefficients (a b c d : R) : Fin 10 → R :=
     -23328*a^7*c^3*d^5,
     -432*z^2*a^3*c^3*d^2]
 
-set_option maxHeartbeats 2000000
  theorem numerators_divergence (a b c d : R) :
     divergence (HodgeComputer.CubicSurfaces.QuinticReduction.numerators a b c d) =
       QuadraticSolver.quadratic (coefficients a b c d) := by

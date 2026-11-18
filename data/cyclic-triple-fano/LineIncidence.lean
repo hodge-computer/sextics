@@ -14,7 +14,6 @@ This module fixes six positive coefficients, with Y1 advancing at unit speed.
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 0
 
 namespace CyclicTriple
 

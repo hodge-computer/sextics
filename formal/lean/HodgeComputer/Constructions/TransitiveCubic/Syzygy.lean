@@ -10,7 +10,6 @@ import HodgeComputer.Constructions.TransitiveCubic.IdentityEvaluation
 namespace TransitiveCovariants.IdentityData
 open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 open TransitiveCovariants.Reflection
-set_option maxRecDepth 131072
 variable {K : Type*} [CommRing K]
 theorem data_identity (v : ℕ → K) (x y : K) :
   denote v x y LeftData=denote v x y RightData := by

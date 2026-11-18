@@ -8,7 +8,6 @@ import Proposal.CoordinateOrder
 and homogeneous extraction. No explicit coefficient list for D is claimed. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1500000
 namespace CyclicTriple
 open MvPolynomial HoldoutConstruction
 

@@ -11,7 +11,6 @@ Original cyclic construction by hodgepodgeconjecture; transitive adaptation for 
 noncomputable section
 namespace TransitiveCovariants
 open MvPolynomial
-set_option maxRecDepth 131072
 variable {K : Type*} [CommRing K]
 abbrev Affine (K : Type*) [CommRing K] := MvPolynomial (Fin 2) K
 local notation "x" => (X (R := K) (0:Fin 2))
@@ -35,7 +34,6 @@ namespace DifferentialData
 open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 open TransitiveCovariants.Reflection TransitiveCovariants.IdentityData
 open TransitiveCubicEncodingCheck
-set_option maxRecDepth 131072
 def Hx_2_0 : Expr := (.mul (.natCast 3) H_3_0)
 def Hx_1_1 : Expr := (.mul (.natCast 2) H_2_1)
 def Hx_1_0 : Expr := (.mul (.natCast 2) H_2_0)

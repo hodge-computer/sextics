@@ -6,7 +6,6 @@ formal multivariate gradient of the fixed reflection quotient equation. -/
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 0
 namespace ReflectionCoupledFano
 
 variable {R S : Type*} [CommRing R] [CommRing S]

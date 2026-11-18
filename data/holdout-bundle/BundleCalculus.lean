@@ -5,7 +5,6 @@ The sixth, parameter, direction is restored by the physical transport. -/
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 
 namespace HoldoutBundle
 variable {R S : Type*} [CommRing R] [CommRing S]

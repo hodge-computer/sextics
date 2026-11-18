@@ -11,7 +11,6 @@ Jacobian condition; transversality is not inferred from rank alone.
 -/
 
 noncomputable section
-set_option maxRecDepth 4096
 namespace ReflectionCoupledFano
 open HoldoutConstruction
 open scoped TensorProduct

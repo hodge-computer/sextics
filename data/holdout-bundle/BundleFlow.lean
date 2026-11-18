@@ -9,8 +9,6 @@ three endpoint directions preserve polynomial dependence on time. -/
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
-set_option maxRecDepth 10000
 
 namespace HoldoutBundle.ConicFamily
 open Polynomial HoldoutConstruction

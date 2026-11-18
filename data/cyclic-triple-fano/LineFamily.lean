@@ -11,8 +11,6 @@ the resulting equations, invertible Jacobian, and transversality.
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
-set_option maxRecDepth 10000
 namespace CyclicTriple
 open Polynomial HoldoutConstruction
 

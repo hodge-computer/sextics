@@ -11,7 +11,6 @@ Original cycle-three construction prepared with OpenAI Codex assistance.
 The transitive-cubic adaptation is due to fqlx. Adapted here to holdout-moving-branch for benediamond with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace CyclePhysicalCubicJets
 open CyclePhysical CyclePhysicalCoordinates CyclePhysicalNormalTransport
 open CyclePhysicalCubicTangent CycleCubicFieldDifferential.Physical

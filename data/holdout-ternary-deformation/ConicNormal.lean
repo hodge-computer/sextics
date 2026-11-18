@@ -43,7 +43,6 @@ theorem full_polynomial_combination_one {R : Type*} [CommRing R] {n : ℕ} (hn :
 def conicGradient : Fin 5 → Polynomial CoefficientField :=
   gradient (C conicAlpha) (C conicBeta) conicCurve
 
-set_option maxHeartbeats 1000000 in
 lemma conicGradient_column_bound (j : Fin 13) :
     (conicGradient (slotCoordinate j)*X^slotDegree j).natDegree < 13 := by
   unfold conicGradient conicCurve

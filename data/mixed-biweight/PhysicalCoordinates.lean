@@ -11,7 +11,6 @@ nonzero. Original cycle-three work prepared with OpenAI Codex assistance for hod
 Adapted to mixed-biweight for fqlx with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace CyclePhysicalCoordinates
 open CyclePhysical
 def coordinate (i : Fin 6) : FunctionField := residueMap (MvPolynomial.X i)

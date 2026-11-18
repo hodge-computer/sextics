@@ -9,7 +9,6 @@ import HodgeComputer.Constructions.HoldoutCover.ResidueClearing
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 
 namespace CyclicTriple.Endpoint
 

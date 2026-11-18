@@ -4,7 +4,6 @@ Original cyclic proof and encoding by hodgepodgeconjecture. Classical covariant
 normalization follows Tom Fisher and SageMath; our integral H,Theta,J are
 3,9,27 times their classical values, preserving both rational map coordinates. -/
 namespace TransitiveCovariants
-set_option maxRecDepth 8192
 variable {K : Type*} [CommRing K]
 def HCoeff300 (a _b _c _d e f : K) : K := ((0:K) * (a * (e * f)))
 def HCoeff210 (_a b _c d e f : K) : K := (((-(9:K)) * (b * (f^2))) + (((6:K) * d) * (e * f)))

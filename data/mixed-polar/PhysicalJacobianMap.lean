@@ -10,8 +10,6 @@ Adapted to the actual mixed-polar quadratic extension with Codex assistance.
 Every coefficient and source is bound to the exact fixed target. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 namespace MixedPolarPhysicalJacobianMap
 open HoldoutConstruction MixedPolarPhysical MixedPolarPhysicalCoordinates
 open MixedPolarPhysicalJacobianCoordinates MixedPolarPhysicalCubicJets

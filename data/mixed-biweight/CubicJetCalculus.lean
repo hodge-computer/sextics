@@ -8,7 +8,6 @@ specialized physical function field is assumed.
 Prepared with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace CycleCubicJetCalculus
 open ResidueFirstJets
 open TransitiveCovariants CycleCubicFieldDifferential MvPolynomial

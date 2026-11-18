@@ -10,7 +10,6 @@ not posit an auxiliary parameter derivation on a specialized field.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace CyclePhysicalCubicTangent
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates CyclePhysicalNormalTransport
 open scoped BigOperators

@@ -6,7 +6,6 @@ The coefficient embedding is anchored; the hypersurface extension uses the
 shared monic-root embedding theorem. Prepared with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 namespace MixedPolarJacobianEmbedding
 open HoldoutConstruction MixedPolarJacobianIncidence MixedPolarJacobianLifting MixedPolarJacobianFamily
   MixedPolarJacobianParameters MixedPolarJacobianGeometry Polynomial

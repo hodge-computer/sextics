@@ -6,7 +6,6 @@ rational function, without expanding that function's covariants.
 Prepared with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
 namespace CyclePhysicalCubicVolume
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open CyclePhysicalNormalTransport CyclePhysicalCubicTangent

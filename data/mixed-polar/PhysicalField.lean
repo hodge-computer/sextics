@@ -13,7 +13,6 @@ with Codex assistance. This proves domain and closure conditional on normalized
 data; it does not claim such data have yet been constructed. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace MixedPolarPhysical
 open HoldoutConstruction Polynomial
 open scoped BigOperators

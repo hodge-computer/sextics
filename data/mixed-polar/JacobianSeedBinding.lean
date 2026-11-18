@@ -10,8 +10,6 @@ hodgepodgeconjecture. Prepared for benediamond with OpenAI Codex assistance.
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 8000000
-set_option maxRecDepth 100000
 namespace MixedPolarJacobianSeedBinding
 open Polynomial MixedPolarJacobianIncidence
 abbrev K := ZMod 5

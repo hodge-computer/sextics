@@ -11,8 +11,6 @@ the Sextics contributors, Lean and mathlib. Prepared with Codex assistance for f
 -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 open scoped BigOperators
 
 namespace SplitCompanionDomain

@@ -12,7 +12,6 @@ Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeco
 Adapted to mixed-biweight for fqlx with OpenAI Codex assistance. -/
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace CyclePhysical
 open HoldoutConstruction Polynomial
 abbrev Ambient := MvPolynomial (Fin 6) ℂ

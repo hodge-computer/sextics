@@ -13,7 +13,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 500000
 namespace CrossedPhysicalChart
 open MvPolynomial HoldoutConstruction
 
@@ -111,7 +110,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 600000
 namespace CrossedPhysicalChart
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators
@@ -241,7 +239,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 500000
 namespace CrossedPhysicalChart
 open MvPolynomial Polynomial HoldoutConstruction
 
@@ -344,7 +341,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 700000
 namespace CrossedPhysicalChart
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators
@@ -393,7 +389,6 @@ section
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 500000
 namespace CrossedPhysicalChart
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators

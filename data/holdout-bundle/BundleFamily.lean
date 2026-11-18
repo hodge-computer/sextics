@@ -6,8 +6,6 @@ This packages the target-specific incidence without assuming a certificate. -/
 
 noncomputable section
 set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
-set_option maxRecDepth 100000
 
 namespace HoldoutBundle
 open Polynomial HoldoutConstruction
