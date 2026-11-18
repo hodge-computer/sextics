@@ -5,7 +5,7 @@ allowNonModules = true
 
 [leanOptions]
 maxHeartbeats = 0
-maxRecDepth = 131072
+maxRecDepth = 0
 
 [[require]]
 name = "mathlib"
