@@ -1974,3 +1974,227 @@ end CycleQ2NativeDoubleLocalization
 end
 
 end
+
+section
+
+/-!
+# The exact correction for changing a coefficient lift on top forms
+
+For a relative derivation, the contraction of the volume is the signed
+two-form with its coordinate velocities. Its ordinary differential is
+the Lie derivative of a top form. Consequently two coefficient lifts
+of the same base derivation differ on top forms by an explicit
+ordinary boundary.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2RelativeTopCartan
+
+open Module KaehlerDifferential
+open CycleQ2WeightedCoordinateExterior CycleQ2RelativeDerivationLift
+
+variable {k K A : Type} [CommRing k] [CommRing K] [CommRing A]
+  [Algebra k K] [Algebra K A] [Algebra k A] [IsScalarTower k K A]
+variable (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A)
+  (hu : ∀ i, b i = D K A (u i))
+
+variable (v : Derivation K A A)
+
+def contraction (a : A) : Form K A 2 :=
+  (twoBasis b).equivFun.symm (fun i => (-1 : A) ^ i.val * (a * v (u i)))
+
+theorem signedCoefficients_contraction (a : A) (i : Fin 3) :
+    signedCoefficients b (contraction b u v a) i = a * v (u i) := by
+  have he : (twoBasis b).repr (contraction b u v a) i = (-1 : A) ^ i.val * (a * v (u i)) :=
+    Basis.coord_equivFun_symm (twoBasis b) i _
+  rw [signedCoefficients, he, ← mul_assoc, ← pow_add,
+    show i.val + i.val = 2 * i.val by omega, pow_mul]
+  simp
+
+include hu in
+theorem relative_direction_decompose (a : A) :
+    v a = ∑ i, v (u i) * exactFrameDirection b i a := by
+  have h := congrArg v.liftKaehlerDifferential (b.sum_repr (D K A a))
+  simp only [map_sum, map_smul, hu, Derivation.liftKaehlerDifferential_comp_D, smul_eq_mul] at h
+  rw [← h]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [exactFrameDirection_apply, mul_comm]
+
+include hu in
+theorem derivative_contraction (a : A) :
+    exteriorD2 b (exactFrameDirection b) (contraction b u v a) =
+      (v a + a * ∑ i, exactFrameDirection b i (v (u i))) • volume b := by
+  rw [exteriorD2_divergence, relative_direction_decompose b u hu v a]
+  apply congrArg (fun z : A => z • volume b)
+  simp only [signedCoefficients_contraction, Derivation.leibniz, smul_eq_mul,
+    Finset.sum_add_distrib, ← Finset.mul_sum]
+  ac_rfl
+
+/-- Lie differentiation of a top form in an exact frame along a
+derivation lifting a coefficient derivation. -/
+def topLie (d : Derivation k A A) (a : A) : Form K A 3 :=
+  (d a + a * ∑ i, exactFrameDirection b i (d (u i))) • volume b
+
+theorem topLie_fixed_coordinates (d : Derivation k A A) (h : ∀ i, d (u i) = 0) (a : A) :
+    topLie b u d a = d a • volume b := by
+  simp [topLie,h]
+
+include hu in
+theorem difference_is_boundary (d e : Derivation k A A)
+    (h : ∀ x : K, d (algebraMap K A x) = e (algebraMap K A x)) (a : A) :
+    topLie b u d a - topLie b u e a =
+      exteriorD2 b (exactFrameDirection b)
+        (contraction b u (asRelative (d-e) (by intro x; change d _ - e _ = 0; rw [h,sub_self])) a) := by
+  rw [derivative_contraction b u hu]
+  unfold topLie
+  erw [← sub_smul]
+  apply congrArg (fun z : A => z • volume b)
+  change (d a + a * ∑ i, exactFrameDirection b i (d (u i))) -
+      (e a + a * ∑ i, exactFrameDirection b i (e (u i))) =
+    d a - e a + a * ∑ i, exactFrameDirection b i (d (u i) - e (u i))
+  simp only [map_sub, Finset.sum_sub_distrib, mul_sub]
+  ring
+
+end CycleQ2RelativeTopCartan
+
+#print axioms CycleQ2RelativeTopCartan.derivative_contraction
+#print axioms CycleQ2RelativeTopCartan.difference_is_boundary
+
+end
+
+section
+
+/-!
+# Functoriality and independence of the exact frame
+
+The cochain maps on affine de Rham complexes compose as their original
+algebra maps do. The identity algebra map gives the canonical comparison
+between two presentations by exact coordinates of the same ring.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2AffineDeRhamFunctorial
+
+open CategoryTheory Module
+open CycleQ2ExactFrameThreeDeRham CycleQ2AffineDeRhamComplex
+open CycleQ2GeometricExteriorSheaf
+open CycleQ2WeightedCoordinateExterior
+
+variable {K A B C : Type} [CommRing K] [CommRing A] [CommRing B] [CommRing C]
+  [Algebra K A] [Algebra K B] [Algebra K C]
+
+theorem onePullback_id (ω : Ω[A⁄K]) :
+    onePullback (AlgHom.id K A) ω = ω := by
+  have h : ω ∈ Submodule.span A (Set.range (KaehlerDifferential.D K A)) := by
+    rw [KaehlerDifferential.span_range_derivation]
+    trivial
+  induction h using Submodule.span_induction with
+  | mem ω h =>
+    obtain ⟨a,rfl⟩ := h
+    exact onePullback_d _ a
+  | zero => exact map_zero _
+  | add a b _ _ ha hb => rw [map_add,ha,hb]
+  | smul a ω _ h => rw [map_smulₛₗ,h]; rfl
+
+theorem onePullback_comp (f : A →ₐ[K] B) (g : B →ₐ[K] C) (ω : Ω[A⁄K]) :
+    onePullback (g.comp f) ω = onePullback g (onePullback f ω) := by
+  have h : ω ∈ Submodule.span A (Set.range (KaehlerDifferential.D K A)) := by
+    rw [KaehlerDifferential.span_range_derivation]
+    trivial
+  induction h using Submodule.span_induction with
+  | mem ω h =>
+    obtain ⟨a,rfl⟩ := h
+    rw [onePullback_d, onePullback_d, onePullback_d]
+    rfl
+  | zero => simp only [map_zero]
+  | add a b _ _ ha hb => simp only [map_add,ha,hb]
+  | smul a ω _ h => rw [map_smulₛₗ,map_smulₛₗ,map_smulₛₗ,h]; rfl
+
+theorem exteriorPullback_id (p : ℕ) (ω : Form K A p) :
+    exteriorPullback (AlgHom.id K A) p ω = ω :=
+  exteriorMap_identity _ _ (fun _ => rfl) onePullback_id p ω
+
+theorem exteriorPullback_comp (f : A →ₐ[K] B) (g : B →ₐ[K] C) (p : ℕ) (ω : Form K A p) :
+    exteriorPullback (g.comp f) p ω = exteriorPullback g p (exteriorPullback f p ω) :=
+  exteriorMap_composition _ _ _ _ _ _ (fun _ => rfl) (onePullback_comp f g) p ω
+
+theorem pullDegree_id : ∀ p, pullDegree (AlgHom.id K A) p = 𝟙 (degree K A p)
+  | 0 => rfl
+  | 1 => by
+    ext ω
+    exact onePullback_id ω
+  | 2 => by
+    ext ω
+    exact exteriorPullback_id 2 ω
+  | 3 => by
+    ext ω
+    exact exteriorPullback_id 3 ω
+  | _ + 4 => by
+    ext ω
+    change (_ : PUnit) = _
+    exact Subsingleton.elim _ _
+
+theorem pullDegree_comp (f : A →ₐ[K] B) (g : B →ₐ[K] C) :
+    ∀ p, pullDegree (g.comp f) p = pullDegree f p ≫ pullDegree g p
+  | 0 => rfl
+  | 1 => by
+    ext ω
+    exact onePullback_comp f g ω
+  | 2 => by
+    ext ω
+    exact exteriorPullback_comp f g 2 ω
+  | 3 => by
+    ext ω
+    exact exteriorPullback_comp f g 3 ω
+  | _ + 4 => by
+    ext ω
+    change (_ : PUnit) = _
+    exact Subsingleton.elim _ _
+
+variable (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A)
+  (hu : ∀ i, b i = KaehlerDifferential.D K A (u i))
+variable (c : Basis (Fin 3) B Ω[B⁄K]) (v : Fin 3 → B)
+  (hv : ∀ i, c i = KaehlerDifferential.D K B (v i))
+variable (d : Basis (Fin 3) C Ω[C⁄K]) (w : Fin 3 → C)
+  (hw : ∀ i, d i = KaehlerDifferential.D K C (w i))
+
+include hu in
+theorem pullComplex_id :
+    pullComplex b u hu (AlgHom.id K A) b u hu = 𝟙 (complex b u hu) := by
+  ext p : 1
+  exact pullDegree_id p
+
+include hu hv hw in
+theorem pullComplex_comp (f : A →ₐ[K] B) (g : B →ₐ[K] C) :
+    pullComplex b u hu (g.comp f) d w hw =
+      pullComplex b u hu f c v hv ≫ pullComplex c v hv g d w hw := by
+  ext p : 1
+  exact pullDegree_comp f g p
+
+variable (b' : Basis (Fin 3) A Ω[A⁄K]) (u' : Fin 3 → A)
+  (hu' : ∀ i, b' i = KaehlerDifferential.D K A (u' i))
+
+/-- Both directions are induced by the identity on the actual functions. -/
+def frameIso : complex b u hu ≅ complex b' u' hu' where
+  hom := pullComplex b u hu (AlgHom.id K A) b' u' hu'
+  inv := pullComplex b' u' hu' (AlgHom.id K A) b u hu
+  hom_inv_id := by
+    rw [← pullComplex_comp, AlgHom.comp_id, pullComplex_id]
+  inv_hom_id := by
+    rw [← pullComplex_comp, AlgHom.comp_id, pullComplex_id]
+
+end CycleQ2AffineDeRhamFunctorial
+
+#print axioms CycleQ2AffineDeRhamFunctorial.pullComplex_comp
+#print axioms CycleQ2AffineDeRhamFunctorial.frameIso
+
+end

@@ -61,6 +61,16 @@ import Mathlib.RingTheory.Unramified.LocalRing
 import Mathlib.AlgebraicGeometry.Morphisms.Proper
 import Mathlib.AlgebraicGeometry.SpreadingOut
 import Mathlib.RingTheory.DedekindDomain.Basic
+import Proposal.GeometricHodgeEuler
+import Proposal.GeometricHodgeEulerChartDerivations
+import Proposal.GeometricHodgeEulerContraction
+import Proposal.GeometricLiteralThreefoldResidueMinors
+import Proposal.GeometricHodgeThreefold
+import Mathlib.AlgebraicGeometry.Morphisms.Affine
+import Mathlib.Topology.Sheaves.SheafCondition.Sites
+import Mathlib.CategoryTheory.Sites.IsSheafFor
+import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Zero
+import Mathlib.Algebra.Homology.Embedding.Extend
 
 /-!
 # The proper graph has strict support in the native generic threefold
@@ -3922,5 +3932,1480 @@ end CycleQ2GenericSmoothCurveGraph
 #print axioms CycleQ2GenericSmoothCurveGraph.exists_smooth_curve_graph
 
 end
+
+end
+
+section
+
+/-!
+# The four derivatives generate the unit ideal on each affine sextic chart
+
+The homogeneous gradient contains a power of the chosen degree-one
+coordinate on the gradient minor open. This power becomes one on its
+normalized affine chart. The Euler relation eliminates the omitted
+partial since the corresponding radial coordinate is one.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+namespace CycleQ2GeometricHodgeThreefold
+
+open MvPolynomial CycleQ2GenericSexticGradient CycleQ2HodgeEuler
+
+variable {R : Type} [CommRing R] (φ : CoeffRing →+* R)
+  (hg : IsUnit (φ gradientOpen)) (i : Fin 4)
+
+include hg
+
+theorem chartGradient_span :
+    Ideal.span (Set.range (fun j : Fin 4 => chartMap φ i (pderiv j (F φ i)))) = ⊤ := by
+  let J := Ideal.span (Set.range (fun j : Fin 4 => chartMap φ i (pderiv j (F φ i))))
+  have hret (j : Fin 4) : conePartial φ i (i.castSucc.succAbove j) ∈ J := by
+    rw [partial_succAbove]
+    exact Ideal.subset_span (Set.mem_range_self j)
+  have he := radial_equation φ i
+  rw [Fin.sum_univ_succAbove _ i.castSucc, radial_self, mul_one] at he
+  have hall (j : Fin 5) : conePartial φ i j ∈ J := by
+    refine Fin.succAboveCases i.castSucc ?_ hret j
+    rw [eq_neg_of_add_eq_zero_left he]
+    exact J.neg_mem (J.sum_mem fun k _ => J.mul_mem_right _ (hret k))
+  let ρ := (chartMap φ i).toRingHom.comp (dehom (R := R) i).toRingHom
+  have hI : CycleQ2HomogeneousIdealArithmetic.generatorIdeal
+      (fun j => MvPolynomial.map φ (generators j)) ≤ J.comap ρ := by
+    apply Ideal.span_le.mpr
+    rintro _ ⟨j, rfl⟩
+    change ρ (MvPolynomial.map φ (X j * pderiv j universalF)) ∈ J
+    rw [map_mul, map_mul, ← pderiv_map]
+    exact J.mul_mem_left _ (hall j)
+  apply J.eq_top_iff_one.mpr
+  have h := hI (coordinate_power_mem φ hg i.castSucc)
+  change ρ ((X i.castSucc)^coordinatePower i.castSucc) ∈ J at h
+  simpa [ρ] using h
+
+theorem conePartial_span : Ideal.span (Set.range (conePartial φ i)) = ⊤ := by
+  apply top_le_iff.mp
+  rw [← chartGradient_span φ hg i]
+  apply Ideal.span_mono
+  rintro _ ⟨j, rfl⟩
+  exact ⟨i.castSucc.succAbove j, partial_succAbove φ i j⟩
+
+end CycleQ2GeometricHodgeThreefold
+end
+
+#print axioms CycleQ2GeometricHodgeThreefold.chartGradient_span
+
+end
+
+section
+
+/-!
+# Residue contraction on the principal gradient charts
+
+Inverting one partial derivative of a four-variable hypersurface gives a
+submersive presentation. Its three free Kähler coordinates are the other
+three coordinate differentials, in their original order. Dividing their
+signed wedge by the chosen partial gives the Poincaré residue. Contraction
+with this actual form identifies vector fields with two-forms. The
+normalization agrees whenever two partial derivatives are units.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+namespace CycleQ2HodgeEulerContractionCharts
+
+open MvPolynomial Module CycleQ2HodgeEulerChartDerivations CycleQ2HodgeEulerContraction
+open CycleQ2LiteralThreefoldResidueContraction CycleQ2LiteralThreefoldResidueMinors
+open scoped KaehlerDifferential
+
+variable {K : Type} [CommRing K]
+
+abbrev gradientEntry (q : Poly K) (j : Fin 4) := mk q (pderiv j q)
+abbrev Patch (q : Poly K) (j : Fin 4) := Localization.Away (gradientEntry q j)
+
+private def presentation (q : Poly K) (j : Fin 4) :
+    Algebra.PreSubmersivePresentation K (Hyp q) (Fin 4) Unit where
+  toPresentation :=
+    { toGenerators := Algebra.Generators.naive (I := Ideal.span ({q} : Set (Poly K)))
+      relation := fun _ => q
+      span_range_relation_eq_ker := by rw [Algebra.Generators.ker_naive, Set.range_const] }
+  map := fun _ => j
+  map_inj := fun _ _ _ => Subsingleton.elim _ _
+
+private theorem jacobian_eq (q : Poly K) (j : Fin 4) :
+    (presentation q j).jacobian = gradientEntry q j := by
+  rw [Algebra.PreSubmersivePresentation.jacobian_eq_jacobiMatrix_det, Matrix.det_unique,
+    Algebra.PreSubmersivePresentation.jacobiMatrix_apply]
+  rfl
+
+private def smoothPresentation (q : Poly K) (j : Fin 4) :
+    Algebra.SubmersivePresentation K (Patch q j) (Unit ⊕ Fin 4) (Unit ⊕ Unit) where
+  toPreSubmersivePresentation :=
+    (Algebra.PreSubmersivePresentation.localizationAway (Patch q j) (gradientEntry q j)).comp (presentation q j)
+  jacobian_isUnit := by
+    rw [Algebra.PreSubmersivePresentation.comp_jacobian_eq_jacobian_smul_jacobian, jacobian_eq,
+      Algebra.PreSubmersivePresentation.localizationAway_jacobian, Algebra.smul_def]
+    exact (IsLocalization.Away.algebraMap_isUnit (S := Patch q j) _).mul
+      (IsLocalization.Away.algebraMap_isUnit (S := Patch q j) _)
+
+theorem patch_standardSmooth (q : Poly K) (j : Fin 4) :
+    Algebra.IsStandardSmoothOfRelativeDimension 3 K (Patch q j) := by
+  apply (smoothPresentation q j).isStandardSmoothOfRelativeDimension
+  change Nat.card (Unit ⊕ Fin 4) - Nat.card (Unit ⊕ Unit) = 3
+  norm_num [Nat.card_eq_fintype_card]
+
+private def omitted (j : Fin 4) (a : Fin 3) : Unit ⊕ Fin 4 := Sum.inr (j.succAbove a)
+
+private theorem omitted_injective (j : Fin 4) : Function.Injective (omitted j) :=
+  Sum.inr_injective.comp j.succAbove_right_injective
+
+private theorem complement (q : Poly K) (j : Fin 4) :
+    IsCompl (Set.range (omitted j)) (Set.range (smoothPresentation q j).map) := by
+  classical
+  have hs : Set.range (smoothPresentation q j).map = {Sum.inl (), Sum.inr j} := by
+    ext x
+    change (∃ u : Unit ⊕ Unit, Sum.elim (fun _ => Sum.inl ()) (fun _ => Sum.inr j) u = x) ↔ _
+    simp [Sum.exists, eq_comm]
+  rw [hs]
+  apply IsCompl.of_eq
+  all_goals
+    ext x
+    cases x with
+    | inl u => simp [omitted]
+    | inr n =>
+        have h : (∃ k, j.succAbove k = n) ↔ n ≠ j := by
+          change n ∈ Set.range j.succAbove ↔ _
+          rw [Fin.range_succAbove]
+          rfl
+        simp [omitted, Set.mem_range, h] <;> exact em _
+
+def basis (q : Poly K) (j : Fin 4) :
+    Basis (Fin 3) (Patch q j) Ω[Patch q j⁄K] :=
+  (smoothPresentation q j).basisKaehlerOfIsCompl (omitted_injective j) (complement q j)
+
+def dx {S : Type} [CommRing S] [Algebra K S] (q : Poly K) (f : Hyp q →ₐ[K] S) (a : Fin 4) :
+    Ω[S⁄K] :=
+  KaehlerDifferential.D K S (f (mk q (X a)))
+
+abbrev patchMap (q : Poly K) (j : Fin 4) : Hyp q →ₐ[K] Patch q j :=
+  IsScalarTower.toAlgHom K (Hyp q) (Patch q j)
+
+theorem basis_apply (q : Poly K) (j : Fin 4) (a : Fin 3) :
+    basis q j a = dx q (patchMap q j) (j.succAbove a) := by
+  rw [basis, Algebra.SubmersivePresentation.basisKaehlerOfIsCompl_apply]
+  rfl
+
+section Residue
+variable {S : Type} [CommRing S] [Algebra K S] (q : Poly K) (f : Hyp q →ₐ[K] S)
+
+theorem gradient_relation : ∑ a : Fin 4, f (gradientEntry q a) • dx q f a = 0 := by
+  have h := CycleQ2PolynomialChainRule.apply (f.comp (mk q)) (KaehlerDifferential.D K S) q
+  change KaehlerDifferential.D K S (f (mk q q)) = _ at h
+  rw [mk_equation, map_zero, map_zero] at h
+  exact h.symm
+
+def residueAlong (j : Fin 4) (h : IsUnit (f (gradientEntry q j))) : ⋀[S]^3 Ω[S⁄K] :=
+  (↑h.unit⁻¹ : S) • signedOmitted S (dx q f) j
+
+theorem partial_smul_residueAlong (j : Fin 4) (h : IsUnit (f (gradientEntry q j))) :
+    f (gradientEntry q j) • residueAlong q f j h = signedOmitted S (dx q f) j := by
+  have hu : f (gradientEntry q j) * (↑h.unit⁻¹ : S) = 1 := by
+    simpa only [h.unit_spec] using h.unit.mul_inv
+  rw [residueAlong, smul_smul, hu, one_smul]
+
+/-- The signed residue agrees on the overlaps of any two gradient opens. -/
+theorem residueAlong_eq (j k : Fin 4) (hj : IsUnit (f (gradientEntry q j))) (hk : IsUnit (f (gradientEntry q k))) :
+    residueAlong q f j hj = residueAlong q f k hk := by
+  apply (IsUnit.smul_left_cancel hj).mp
+  apply (IsUnit.smul_left_cancel hk).mp
+  rw [partial_smul_residueAlong, smul_comm (f (gradientEntry q k)) (f (gradientEntry q j)), partial_smul_residueAlong]
+  exact signedOmitted_cross _ _ (gradient_relation q f) j k
+
+end Residue
+
+def patchUnit (q : Poly K) (j : Fin 4) : (Patch q j)ˣ :=
+  (IsLocalization.Away.algebraMap_isUnit (S := Patch q j) (gradientEntry q j)).unit
+
+def patchResidue (q : Poly K) (j : Fin 4) : ⋀[Patch q j]^3 Ω[Patch q j⁄K] :=
+  residueAlong q (patchMap q j) j (IsLocalization.Away.algebraMap_isUnit (S := Patch q j) (gradientEntry q j))
+
+theorem patchResidue_eq (q : Poly K) (j : Fin 4) :
+    patchResidue q j =
+      ((↑((patchUnit q j)⁻¹ * (-1 : (Patch q j)ˣ)^j.val) : Patch q j)) •
+        exteriorPower.ιMulti (Patch q j) 3 (basis q j) := by
+  have hb : dx q (patchMap q j) ∘ j.succAbove = basis q j :=
+    funext (fun a => (basis_apply q j a).symm)
+  simp only [patchResidue, residueAlong, signedOmitted, hb, Units.val_mul, Units.val_pow_eq_pow_val,
+    Units.val_neg, Units.val_one, patchUnit, mul_smul]
+  rfl
+
+def tangentToTwoForms (q : Poly K) (j : Fin 4) :
+    Derivation K (Patch q j) (Patch q j) ≃ₗ[Patch q j] (⋀[Patch q j]^2 Ω[Patch q j⁄K]) :=
+  (KaehlerDifferential.linearMapEquivDerivation K (Patch q j)).symm.trans
+    (unitContractionEquiv (basis q j) ((patchUnit q j)⁻¹ * (-1 : (Patch q j)ˣ)^j.val))
+
+theorem tangentToTwoForms_apply (q : Poly K) (j : Fin 4) (v : Derivation K (Patch q j) (Patch q j)) :
+    tangentToTwoForms q j v = interior 2 v.liftKaehlerDifferential (patchResidue q j) := by
+  rw [patchResidue_eq]
+  exact unitContractionEquiv_apply _ _ _
+
+/-- In the chart with the degree-one homogeneous coordinate number i set to one,
+the oriented Euler volume has the additional sign from omitting that coordinate. -/
+def projectiveResidue (q : Poly K) (i j : Fin 4) : ⋀[Patch q j]^3 Ω[Patch q j⁄K] :=
+  (-1 : Patch q j)^i.val • patchResidue q j
+
+theorem partial_smul_projectiveResidue (q : Poly K) (i j : Fin 4) :
+    patchMap q j (gradientEntry q j) • projectiveResidue q i j =
+      (-1 : Patch q j)^(i.val + j.val) • exteriorPower.ιMulti (Patch q j) 3 (basis q j) := by
+  have hb : dx q (patchMap q j) ∘ j.succAbove = basis q j :=
+    funext (fun a => (basis_apply q j a).symm)
+  have hc := partial_smul_residueAlong q (patchMap q j) j
+    (IsLocalization.Away.algebraMap_isUnit (S := Patch q j) (gradientEntry q j))
+  change patchMap q j (gradientEntry q j) • patchResidue q j =
+    (-1 : Patch q j)^j.val • exteriorPower.ιMulti (Patch q j) 3 (dx q (patchMap q j) ∘ j.succAbove) at hc
+  rw [hb] at hc
+  calc
+    _ = (-1 : Patch q j)^i.val • (patchMap q j (gradientEntry q j) • patchResidue q j) :=
+      smul_comm _ _ _
+    _ = (-1 : Patch q j)^i.val • ((-1 : Patch q j)^j.val • exteriorPower.ιMulti _ 3 (basis q j)) :=
+      congrArg (fun w : ⋀[Patch q j]^3 Ω[Patch q j⁄K] => (-1 : Patch q j)^i.val • w) hc
+    _ = _ := by rw [pow_add, mul_smul]
+
+def projectiveTangentToTwoForms (q : Poly K) (i j : Fin 4) :
+    Derivation K (Patch q j) (Patch q j) ≃ₗ[Patch q j] (⋀[Patch q j]^2 Ω[Patch q j⁄K]) :=
+  (tangentToTwoForms q j).trans (LinearEquiv.smulOfUnit ((-1 : (Patch q j)ˣ)^i.val))
+
+theorem projectiveTangentToTwoForms_apply (q : Poly K) (i j : Fin 4)
+    (v : Derivation K (Patch q j) (Patch q j)) :
+    projectiveTangentToTwoForms q i j v =
+      interior 2 v.liftKaehlerDifferential (projectiveResidue q i j) := by
+  change ((↑((-1 : (Patch q j)ˣ)^i.val) : Patch q j)) • tangentToTwoForms q j v = _
+  simp only [Units.val_pow_eq_pow_val, Units.val_neg, Units.val_one, tangentToTwoForms_apply,
+    projectiveResidue, map_smul]
+
+end CycleQ2HodgeEulerContractionCharts
+end
+
+#print axioms CycleQ2HodgeEulerContractionCharts.tangentToTwoForms_apply
+#print axioms CycleQ2HodgeEulerContractionCharts.residueAlong_eq
+
+end
+
+section
+
+/-!
+# The coefficient prime at a point of a weighted projective chart
+
+The original structure map is obtained from degree-zero localization
+at one. On points the resulting affine prime consists of the
+coefficients whose degree-zero classes lie in the homogeneous prime.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2ProjCoefficientPoint
+
+open AlgebraicGeometry CategoryTheory MvPolynomial
+open CycleQ2GeometricHodgeThreefold CycleQ2GenericSexticGradient
+
+variable {R : Type} [CommRing R] (φ : CoeffRing →+* R)
+
+theorem coefficient_mem (a : R) (q : threefold φ) :
+    (a ∈ (toBase φ q).asIdeal) ↔ quotient φ (C a) ∈ q.asHomogeneousIdeal.toIdeal := by
+  let W : (threefold φ).Opens := Proj.basicOpen (grade φ) 1
+  have hW : W = ⊤ := Proj.basicOpen_one (grade φ)
+  let e : threefold φ ⟶ W.toScheme :=
+    (Scheme.topIso (threefold φ)).inv ≫ (Scheme.isoOfEq (threefold φ) hW).inv
+  let x := e q
+  have hx : W.ι x = q := by
+    change W.ι (e q) = q
+    rw [← Scheme.Hom.comp_apply]
+    have he : e ≫ W.ι = 𝟙 _ := by
+      dsimp only [e]
+      rw [Category.assoc, Scheme.isoOfEq_inv_ι, ← Scheme.topIso_hom, Iso.inv_hom_id]
+    rw [he]
+    rfl
+  have hToSpec : Scheme.forgetToLocallyRingedSpace.map (Proj.basicOpenToSpec (grade φ) 1) =
+      ProjectiveSpectrum.Proj.toSpec (grade φ) 1 := by
+    refine Eq.trans ?_ (ΓSpec.locallyRingedSpaceAdjunction.homEquiv_apply _ _ _).symm
+    dsimp [Proj.basicOpenToSpec, Scheme.Opens.toSpecΓ]
+    simp only [Category.assoc, ← Spec.map_comp]
+    rfl
+  have hr : (Proj.basicOpenToSpec (grade φ) 1) x =
+      (ProjectiveSpectrum.Proj.toSpec (grade φ) 1).base x :=
+    congrArg (fun f => f.base x) hToSpec
+  change (a ∈ (Spec.map (CommRingCat.ofHom (coefficient φ))
+    (Spec.map (CommRingCat.ofHom (HomogeneousLocalization.fromZeroRingHom (grade φ) _))
+      ((Proj.basicOpenToSpec (grade φ) 1) x))).asIdeal) ↔ _
+  rw [hr]
+  change HomogeneousLocalization.fromZeroRingHom (grade φ) _ (coefficient φ a) ∈
+    ((ProjectiveSpectrum.Proj.toSpec (grade φ) 1).base x).asIdeal ↔ _
+  rw [← hx]
+  exact ProjectiveSpectrum.Proj.mk_mem_toSpec_base_apply (grade φ) x
+    ⟨0, coefficient φ a, 1, Submonoid.one_mem _⟩
+
+end CycleQ2ProjCoefficientPoint
+
+#print axioms CycleQ2ProjCoefficientPoint.coefficient_mem
+
+end
+
+section
+
+/-!
+# The monic generic projective model is smooth
+
+The Fermat specialization factors through the monic coefficients. The
+existing good-parameter determinant is one at this specialization,
+hence remains invertible over the generic monic coefficient field.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2MonicGenericSmooth
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry MvPolynomial
+open CycleQ2IncidenceNormalForm CycleQ2LiteralIncidenceNormalizedSlice
+open CycleQ2GenericSexticGradient CycleQ2GeometricHodgeThreefold
+open CycleQ2MonicGenericAmbientChart
+open CycleQ2HodgeEuler CycleQ2HodgeEulerChartBinding CycleQ2HodgeEulerContractionCharts
+
+theorem seed_vertex : seedEvaluation vertexCoefficient = 1 := by
+  rw [vertexCoefficient, seedEvaluation, eval_X, fermatCoefficients, fullSexticLeadingIndex_exponent]
+  simp [CycleQ2FermatJacobian.fermat, X_pow_eq_monomial, coeff_monomial, Finsupp.single_eq_single_iff]
+
+def fermatMonic : MonicRing →+* ℂ := eval (fun j : FullSexticTailIndex => fermatCoefficients j.val)
+
+theorem fermat_factor : fermatMonic.comp rawToMonic = seedEvaluation := by
+  apply MvPolynomial.ringHom_ext
+  · intro c
+    simp [fermatMonic, seedEvaluation]
+  · intro e
+    change fermatMonic (rawToMonic (X e)) = seedEvaluation (X e)
+    rw [rawToMonic_X]
+    by_cases h : (e.val 4).val < 3
+    · rw [rawCoordinate_tail (⟨e,h⟩ : FullSexticTailIndex)]
+      simp [fermatMonic, seedEvaluation]
+    · have he : e = fullSexticLeadingIndex := by
+        by_contra he
+        exact h ((fullSextic_tail_iff_ne e).mpr he)
+      subst e
+      rw [rawCoordinate_leading, map_one]
+      exact seed_vertex.symm
+
+private theorem rawPoint_identity : (rawPoint : CoeffRing →+* Raw) = RingHom.id _ := by
+  apply MvPolynomial.ringHom_ext
+  · intro c
+    change (aeval _ : CoeffRing →ₐ[ℂ] Raw) (C c) = C c
+    simp
+  · intro c
+    change (aeval _ : CoeffRing →ₐ[ℂ] Raw) (X c) = X c
+    rw [aeval_X]
+    rfl
+
+abbrev coeff : CoeffRing →+* K := genericCoeff.comp rawPoint
+
+theorem gradientOpen_unit : IsUnit (coeff gradientOpen) := by
+  apply isUnit_iff_ne_zero.mpr
+  intro h
+  change algebraMap MonicRing K (rawToMonic (rawPoint gradientOpen)) = 0 at h
+  have h₀ := (IsFractionRing.injective MonicRing K) (h.trans (map_zero (algebraMap MonicRing K)).symm)
+  have hz := congrArg fermatMonic h₀
+  rw [rawPoint_identity, RingHom.id_apply, ← RingHom.comp_apply, fermat_factor, gradientOpen_seed,
+    map_zero] at hz
+  exact one_ne_zero hz
+
+theorem chart_smooth (i : Fin 4) :
+    SmoothOfRelativeDimension 3 (Spec.map (CommRingCat.ofHom (algebraMap K (chart coeff i)))) := by
+  apply (HasRingHomProperty.Spec_iff (P := @SmoothOfRelativeDimension 3)).mpr
+  refine ⟨_, chartGradient_span coeff gradientOpen_unit i, ?_⟩
+  rintro _ ⟨j, rfl⟩
+  change RingHom.IsStandardSmoothOfRelativeDimension 3
+    ((algebraMap (chart coeff i) (Patch (F coeff i) j)).comp (algebraMap K (chart coeff i)))
+  rw [← IsScalarTower.algebraMap_eq K (chart coeff i) (Patch (F coeff i) j)]
+  exact (RingHom.isStandardSmoothOfRelativeDimension_algebraMap 3).mpr (patch_standardSmooth _ _)
+
+theorem explicit_projective_smooth : SmoothOfRelativeDimension 3 (toBase coeff) := by
+  have hloc : IsZariskiLocalAtSource (@SmoothOfRelativeDimension 3) :=
+    HasRingHomProperty.instIsZariskiLocalAtSource
+  apply @IsZariskiLocalAtSource.of_iSup_eq_top (@SmoothOfRelativeDimension 3) hloc _ _ _ _
+    (fun i : Fin 4 => coordinateOpen coeff i)
+    (coordinateOpens_cover coeff (by rw [genericCoeff_vertex]; exact isUnit_one))
+  intro i
+  let a := (affineChart coeff i).inv ≫ (coordinateOpen coeff i).ι ≫ toBase coeff
+  have ha : SmoothOfRelativeDimension 3 a := by
+    change SmoothOfRelativeDimension 3 ((affineChart coeff i).inv ≫ (coordinateOpen coeff i).ι ≫ toBase coeff)
+    rw [affineChart_overBase]
+    exact chart_smooth i
+  have h := smoothOfRelativeDimension_comp 0 3 (affineChart coeff i).hom a
+  change SmoothOfRelativeDimension 3 ((affineChart coeff i).hom ≫ (affineChart coeff i).inv ≫
+    (coordinateOpen coeff i).ι ≫ toBase coeff) at h
+  rwa [Iso.hom_inv_id_assoc] at h
+
+end CycleQ2MonicGenericSmooth
+
+#print axioms CycleQ2MonicGenericSmooth.explicit_projective_smooth
+
+end
+
+section
+
+/-!
+# Smoothness of the actual generic ambient fibre
+
+The four weight-one opens cover the native generic fibre. At a point
+of that fibre the vertex coefficient is one, so the original homogeneous
+prime cannot contain all four weight-one coordinates. Base change of each
+affine chart gives the native hypersurface chart, whose Jacobian opens
+are standard smooth of relative dimension three.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2NativeGenericSmooth
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry MvPolynomial TopologicalSpace
+open CycleQ2LiteralIncidenceNormalizedSlice CycleQ2MonicGenericAmbientChart
+open CycleQ2LiteralIncidenceRelativeCylinder CycleQ2MonicGenericAmbientChartBaseChange
+open CycleQ2LiteralIncidenceGenericCorrespondence CycleQ2LiteralIncidenceRelativeCorrespondence
+open CycleQ2IncidenceNormalForm CycleQ2GenericSexticGradient CycleQ2GeometricHodgeThreefold
+open CycleQ2HodgeEuler CycleQ2HodgeEulerChartBinding
+open scoped TensorProduct
+open CycleQ2LiteralIncidenceCylinderMap (universalPoint universalAmbientToBase)
+open CycleQ2GeometricHodgeThreefoldIncidence (nativeIso nativeIso_overBase)
+
+private theorem tail_support (e : FullSexticTailIndex) :
+    ∃ j : Fin 4, fullExponentOf e.val.val j.castSucc ≠ 0 := by
+  by_contra! h
+  have hd := e.val.property.1
+  have h4 := e.property
+  have h0 := h 0
+  have h1 := h 1
+  have h2 := h 2
+  have h3 := h 3
+  simp only [fullExponentOf_apply] at h0 h1 h2 h3
+  change ((e.val.val 0).val = 0) at h0
+  change ((e.val.val 1).val = 0) at h1
+  change ((e.val.val 2).val = 0) at h2
+  change ((e.val.val 3).val = 0) at h3
+  simp only [fullDegree, h0, h1, h2, h3, zero_add] at hd
+  omega
+
+/-- Outside the coefficient vertex hyperplane, the usual four weight-one
+charts cover the original projective scheme, also over a non-field ring. -/
+theorem weightOne_at_point {R : Type} [CommRing R] (φ : CoeffRing →+* R)
+    (q : threefold φ) (hq : φ vertexCoefficient ∉ (toBase φ q).asIdeal) :
+    ∃ i : Fin 4, q ∈ coordinateOpen φ i := by
+  by_contra! h
+  let P := q.asHomogeneousIdeal.toIdeal
+  letI : P.IsPrime := q.isPrime
+  let ρ := (Ideal.Quotient.mk P).comp (quotient φ)
+  have nz : ρ (C (φ vertexCoefficient)) ≠ 0 := by
+    intro he
+    exact hq ((CycleQ2ProjCoefficientPoint.coefficient_mem φ _ q).mpr
+      (Ideal.Quotient.eq_zero_iff_mem.mp he))
+  have hz (j : Fin 4) : ρ (X j.castSucc) = 0 := by
+    apply Ideal.Quotient.eq_zero_iff_mem.mpr
+    have hj := h j
+    change ¬(coord φ j.castSucc ∉ P) at hj
+    exact not_not.mp hj
+  have ht (e : FullSexticTailIndex) :
+      ρ (monomial (fullExponentOf e.val.val) (φ (X e.val))) = 0 := by
+    obtain ⟨j,hj⟩ := tail_support e
+    obtain ⟨p,hp⟩ := (MvPolynomial.X_dvd_monomial (r := φ (X e.val))).mpr (Or.inr hj)
+    rw [hp, map_mul, hz, zero_mul]
+  have he : ρ (equation φ) = 0 := by
+    change Ideal.Quotient.mk P (quotient φ (equation φ)) = 0
+    rw [equation_zero, map_zero]
+  have he' := (congrArg ρ (equation_raw φ)).symm.trans he
+  rw [map_add, map_sum, Finset.sum_eq_zero (fun e _ => ht e), add_zero] at he'
+  have hmul : ρ (C (φ vertexCoefficient)) * ρ (X (4 : Fin 5)) ^ 3 = 0 := by
+    rw [← map_pow, ← map_mul, X_pow_eq_monomial, C_mul_monomial, mul_one]
+    exact he'
+  have h4 : coord φ 4 ∈ P := Ideal.Quotient.eq_zero_iff_mem.mp
+    (eq_zero_of_pow_eq_zero ((mul_eq_zero.mp hmul).resolve_left nz))
+  apply q.not_irrelevant_le
+  refine (irrelevant_le_coordinateIdeal φ).trans (Ideal.span_le.mpr ?_)
+  rintro _ ⟨j,rfl⟩
+  fin_cases j
+  · exact Ideal.Quotient.eq_zero_iff_mem.mp (hz 0)
+  · exact Ideal.Quotient.eq_zero_iff_mem.mp (hz 1)
+  · exact Ideal.Quotient.eq_zero_iff_mem.mp (hz 2)
+  · exact Ideal.Quotient.eq_zero_iff_mem.mp (hz 3)
+  · exact h4
+
+private abbrev base := Spec.map (CommRingCat.ofHom genericCoeff)
+private abbrev rawP := toBase rawPoint
+
+abbrev Fibre := pullback base rawP
+
+abbrev toField : Fibre ⟶ Spec (CommRingCat.of K) := pullback.fst _ _
+
+private abbrev rawChart (i : Fin 4) : Spec (CommRingCat.of (chart rawPoint i)) ⟶ threefold rawPoint :=
+  (affineChart rawPoint i).inv ≫ (coordinateOpen rawPoint i).ι
+
+private theorem rawChart_over (i : Fin 4) :
+    rawChart i ≫ rawP = Spec.map (CommRingCat.ofHom (algebraMap Raw (chart rawPoint i))) :=
+  affineChart_overBase rawPoint i
+
+private local instance : Algebra Raw K := genericCoeff.toAlgebra
+
+private def chartIso (i : Fin 4) : Spec (CommRingCat.of (chart CycleQ2MonicGenericSmooth.coeff i)) ≅
+    pullback (pullback.snd base rawP) (rawChart i) :=
+  Scheme.Spec.mapIso (tensorChartEquiv (S := K) rawPoint i).toRingEquiv.toCommRingCatIso.op ≪≫
+    (pullbackSpecIso Raw K (chart rawPoint i)).symm ≪≫
+    pullback.congrHom (rfl : base = _) (rawChart_over i).symm ≪≫
+    (pullbackLeftPullbackSndIso base rawP (rawChart i)).symm
+
+/-- All four affine charts in the actual pullback, with their native coefficient algebra. -/
+def chartIn (i : Fin 4) : Spec (CommRingCat.of (chart CycleQ2MonicGenericSmooth.coeff i)) ⟶ Fibre :=
+  (chartIso i).hom ≫ pullback.fst _ _
+
+instance (i : Fin 4) : IsOpenImmersion (chartIn i) := by
+  unfold chartIn
+  infer_instance
+
+theorem chartIn_over (i : Fin 4) :
+    chartIn i ≫ toField =
+      Spec.map (CommRingCat.ofHom (algebraMap K (chart CycleQ2MonicGenericSmooth.coeff i))) := by
+  change Spec.map (CommRingCat.ofHom (tensorChartEquiv (S := K) rawPoint i).toRingHom) ≫
+    tensorInclusion (S := K) rawP (rawChart i) (rawChart_over i) ≫ toField = _
+  erw [tensorInclusion_overBase, ← Spec.map_comp]
+  apply congrArg Spec.map
+  apply CommRingCat.hom_ext
+  apply RingHom.ext
+  exact (tensorChartEquiv (S := K) rawPoint i).commutes
+
+theorem chartIn_cover : (⨆ i : Fin 4, (chartIn i).opensRange) = ⊤ := by
+  apply top_unique
+  intro z _
+  let q := pullback.snd base rawP z
+  have hq : rawP q = base (toField z) := by
+    exact congrArg (fun f : Fibre ⟶ Spec (CommRingCat.of Raw) => f z) pullback.condition.symm
+  have hne : rawPoint vertexCoefficient ∉ (rawP q).asIdeal := by
+    rw [hq]
+    change genericCoeff (rawPoint vertexCoefficient) ∉ (toField z).asIdeal
+    rw [show genericCoeff (rawPoint vertexCoefficient) = 1 from genericCoeff_vertex]
+    intro h
+    exact Ideal.IsPrime.ne_top (toField z).isPrime
+      ((Ideal.eq_top_iff_one _).mpr h)
+  obtain ⟨i, hi⟩ := weightOne_at_point rawPoint q hne
+  let a : (coordinateOpen rawPoint i).toScheme := ⟨q,hi⟩
+  let v := (affineChart rawPoint i).hom a
+  have hv₀ : (affineChart rawPoint i).hom ≫ rawChart i = (coordinateOpen rawPoint i).ι := by
+    change (affineChart rawPoint i).hom ≫ (affineChart rawPoint i).inv ≫
+      (coordinateOpen rawPoint i).ι = _
+    rw [Iso.hom_inv_id_assoc]
+  have hv : q = rawChart i v := (congrArg (fun h => h a) hv₀).symm
+  obtain ⟨s, hsz, _⟩ := Scheme.Pullback.exists_preimage_pullback
+    (f := pullback.snd base rawP) (g := rawChart i) z v hv
+  apply Opens.mem_iSup.mpr
+  refine ⟨i, (chartIn i).mem_opensRange.mpr ⟨(chartIso i).inv s, ?_⟩⟩
+  change ((chartIso i).inv ≫ chartIn i) s = z
+  rw [chartIn, Iso.inv_hom_id_assoc]
+  exact hsz
+
+private theorem opensRange_smooth (i : Fin 4) :
+    SmoothOfRelativeDimension 3 ((chartIn i).opensRange.ι ≫ toField) := by
+  have hs : SmoothOfRelativeDimension 3 (chartIn i ≫ toField) := by
+    rw [chartIn_over]
+    exact CycleQ2MonicGenericSmooth.chart_smooth i
+  let e := (chartIn i).isoOpensRange
+  have hc : e.inv ≫ chartIn i = (chartIn i).opensRange.ι := by
+    calc
+      _ = e.inv ≫ e.hom ≫ (chartIn i).opensRange.ι :=
+        congrArg (fun h => e.inv ≫ h) (Scheme.Hom.isoOpensRange_hom_ι (chartIn i)).symm
+      _ = _ := e.inv_hom_id_assoc _
+  have he := smoothOfRelativeDimension_comp 0 3 e.inv (chartIn i ≫ toField)
+  change SmoothOfRelativeDimension 3 (e.inv ≫ chartIn i ≫ toField) at he
+  rwa [← Category.assoc, hc] at he
+
+theorem fibre_smooth : SmoothOfRelativeDimension 3 toField := by
+  have hloc : IsZariskiLocalAtSource (@SmoothOfRelativeDimension 3) :=
+    HasRingHomProperty.instIsZariskiLocalAtSource
+  exact @IsZariskiLocalAtSource.of_iSup_eq_top (@SmoothOfRelativeDimension 3) hloc _ _ _ _
+    (fun i => (chartIn i).opensRange) chartIn_cover opensRange_smooth
+
+private theorem spec_eq : base = basePoint ≫ toRaw := by
+  change _ = Spec.map (CommRingCat.ofHom (algebraMap MonicRing K)) ≫
+    Spec.map (CommRingCat.ofHom rawToMonic)
+  rw [← Spec.map_comp]
+  rfl
+
+private theorem native_square :
+    IsPullback toField (pullback.snd base rawP ≫ (nativeIso universalPoint).hom)
+      (basePoint ≫ toRaw) universalAmbientToBase := by
+  have h : IsPullback rawP (nativeIso universalPoint).hom (𝟙 _) universalAmbientToBase := by
+    apply IsPullback.of_vert_isIso
+    exact ⟨(Category.comp_id _).trans (nativeIso_overBase universalPoint).symm⟩
+  have e : base ≫ 𝟙 _ = basePoint ≫ toRaw := (Category.comp_id _).trans spec_eq
+  exact e ▸ (IsPullback.of_hasPullback base rawP).paste_vert h
+
+/-- Identify the checked smooth pullback with the generic ambient scheme of the closed graph. -/
+def nativeComparison : Fibre ≅ genericAmbient :=
+  native_square.isoPullback ≪≫
+    (pullbackRightPullbackFstIso toRaw universalAmbientToBase basePoint).symm ≪≫
+    pullbackSymmetry genericPoint ambientStructure
+
+theorem nativeComparison_over :
+    nativeComparison.hom ≫ pullback.snd ambientStructure genericPoint = toField := by
+  have h : ((pullbackRightPullbackFstIso toRaw universalAmbientToBase basePoint).inv ≫
+      (pullbackSymmetry genericPoint ambientStructure).hom) ≫
+      pullback.snd ambientStructure genericPoint =
+        pullback.fst (basePoint ≫ toRaw) universalAmbientToBase := by
+    erw [Category.assoc, pullbackSymmetry_hom_comp_snd, pullbackRightPullbackFstIso_inv_fst]
+  exact (Category.assoc native_square.isoPullback.hom _ _).trans
+    ((congrArg (fun a => native_square.isoPullback.hom ≫ a) h).trans
+      native_square.isoPullback_hom_fst)
+
+theorem ambient_smooth :
+    SmoothOfRelativeDimension 3 (pullback.snd ambientStructure genericPoint) := by
+  have he := nativeComparison_over
+  have hs : SmoothOfRelativeDimension 3
+      (nativeComparison.hom ≫ pullback.snd ambientStructure genericPoint) := he.symm ▸ fibre_smooth
+  have h := smoothOfRelativeDimension_comp 0 3 nativeComparison.inv
+    (nativeComparison.hom ≫ pullback.snd ambientStructure genericPoint)
+  change SmoothOfRelativeDimension 3
+    (nativeComparison.inv ≫ nativeComparison.hom ≫ pullback.snd ambientStructure genericPoint) at h
+  rwa [Iso.inv_hom_id_assoc] at h
+
+end CycleQ2NativeGenericSmooth
+
+#print axioms CycleQ2NativeGenericSmooth.chartIn_cover
+#print axioms CycleQ2NativeGenericSmooth.ambient_smooth
+
+end
+
+section
+
+/-!
+# Finite exact affine covers with a prescribed chart
+
+Every point of a smooth scheme over a field has an affine exact frame.
+These opens form a basis. A compact scheme admits a finite such cover
+containing a prescribed exact affine chart. Every nonempty finite
+intersection on a separated scheme is affine and carries the restriction
+of an exact frame.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2FiniteExactAffineAtlas
+
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace Module
+open CycleQ2SmoothRelativeFrames CycleQ2RelativeAffineOverlap
+
+variable {K : Type} [Field K] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of K)) (n : ℕ)
+
+def HasFrame (U : X.Opens) : Prop :=
+  letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  ∃ (u : Fin n → Γ(X, U)) (b : Basis (Fin n) Γ(X, U) (KaehlerDifferential K Γ(X, U))),
+    ∀ i, b i = KaehlerDifferential.D K Γ(X, U) (u i)
+
+theorem hasFrame_of_affine_le {U V : X.Opens} (h : V ≤ U)
+    (hU : IsAffineOpen U) (hV : IsAffineOpen V) (hb : HasFrame f n U) :
+    HasFrame f n V := by
+  obtain ⟨u,b,hu⟩ := hb
+  obtain ⟨c,hc⟩ := exact_on_affine_subopen f h hU hV u b hu
+  exact ⟨fun i => restrict f h (u i), c, hc⟩
+
+theorem exists_frame_neighborhood [SmoothOfRelativeDimension n f] (x : X) :
+    ∃ U : X.Opens, IsAffineOpen U ∧ x ∈ U ∧ HasFrame f n U :=
+  exists_exact_affine_neighborhood f n x
+
+theorem isBasis [SmoothOfRelativeDimension n f] :
+    Opens.IsBasis ({U : X.Opens | IsAffineOpen U ∧ HasFrame f n U} : Set X.Opens) := by
+  rw [Opens.isBasis_iff_nbhd]
+  intro V x hx
+  obtain ⟨U,hU,hxU,hu⟩ := exists_frame_neighborhood f n x
+  have hx' : x ∈ U ⊓ V := ⟨hxU,hx⟩
+  obtain ⟨W,hW,hxW,hle⟩ := (Opens.isBasis_iff_nbhd.mp X.isBasis_affineOpens) hx'
+  exact ⟨W, ⟨hW, hasFrame_of_affine_le f n (hle.trans inf_le_left) hU hW hu⟩,
+    hxW, hle.trans inf_le_right⟩
+
+theorem exists_finite_cover [SmoothOfRelativeDimension n f] [CompactSpace X]
+    (V : X.Opens) (hV : IsAffineOpen V) (hv : HasFrame f n V) :
+    ∃ (ι : Type) (_ : Fintype ι) (U : ι → X.Opens) (j : ι),
+      U j = V ∧ (⨆ i, U i) = ⊤ ∧ ∀ i, IsAffineOpen (U i) ∧ HasFrame f n (U i) := by
+  classical
+  choose U hU hx hframe using exists_frame_neighborhood f n
+  have hcover : (Set.univ : Set X) ⊆ ⋃ i : X, (U i : Set X) := by
+    intro x _
+    exact Set.mem_iUnion.mpr ⟨x,hx x⟩
+  obtain ⟨s,hs⟩ := isCompact_univ.elim_finite_subcover (fun i => (U i : Set X))
+    (fun i => (U i).isOpen) hcover
+  let W : Option (↥s) → X.Opens := fun i => i.elim V (fun x => U x)
+  refine ⟨Option (↥s), inferInstance, W, none, rfl, ?_, ?_⟩
+  · apply top_unique
+    intro x _
+    have H := hs (Set.mem_univ x)
+    obtain ⟨i,hi⟩ := Set.mem_iUnion.mp H
+    obtain ⟨hiS,hix⟩ := Set.mem_iUnion.mp hi
+    exact Opens.mem_iSup.mpr ⟨some ⟨i,hiS⟩, hix⟩
+  · intro i
+    cases i with
+    | none => exact ⟨hV,hv⟩
+    | some i => exact ⟨hU i,hframe i⟩
+
+theorem frame_finite_intersection [X.IsSeparated] {ι : Type} [Finite ι] [Nonempty ι]
+    (U : ι → X.Opens) (hU : ∀ i, IsAffineOpen (U i) ∧ HasFrame f n (U i)) :
+    IsAffineOpen (⨅ i, U i) ∧ HasFrame f n (⨅ i, U i) := by
+  have ha := IsAffineOpen.iInf (fun i => (hU i).1)
+  let i := Classical.choice (inferInstance : Nonempty ι)
+  exact ⟨ha, hasFrame_of_affine_le f n (iInf_le U i) (hU i).1 ha (hU i).2⟩
+
+end CycleQ2FiniteExactAffineAtlas
+
+#print axioms CycleQ2FiniteExactAffineAtlas.isBasis
+#print axioms CycleQ2FiniteExactAffineAtlas.exists_finite_cover
+#print axioms CycleQ2FiniteExactAffineAtlas.frame_finite_intersection
+
+end
+
+section
+
+/-!
+# The coordinate algebra on the original affine open
+
+The coefficient map through a native affine chart is exactly the
+specified algebra map of its ordinary coordinate ring. Hence an
+exact differential frame of that coordinate ring transports to the
+original affine open and can be used as a distinguished vertex.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2AffineFrameBinding
+
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace Module
+open CycleQ2SmoothRelativeFrames CycleQ2RelativeAffineOverlap CycleQ2FiniteExactAffineAtlas
+
+variable {K A : Type} [Field K] [CommRing A] [Algebra K A] {X : Scheme.{0}}
+  (f : X ⟶ Spec (CommRingCat.of K)) (j : Spec (CommRingCat.of A) ⟶ X) [IsOpenImmersion j]
+  (hj : j ≫ f = Spec.map (CommRingCat.ofHom (algebraMap K A)))
+
+private abbrev U := j ''ᵁ ⊤
+
+private def ringIso : Γ(X, U j) ≅ CommRingCat.of A :=
+  j.appIso ⊤ ≪≫ Scheme.ΓSpecIso (CommRingCat.of A)
+
+include hj in
+theorem ringIso_coefficients (a : K) :
+    (ringIso j).hom (sectionCoefficients f (U j) a) = algebraMap K A a := by
+  let B := CommRingCat.ofHom (algebraMap K A)
+  have he : (Scheme.ΓSpecIso (CommRingCat.of K)).inv ≫ f.appLE ⊤ (U j)
+      (by rw [Scheme.Hom.preimage_top]; exact le_top) ≫ (ringIso j).hom = B := by
+    simp only [ringIso, Iso.trans_hom, ← Category.assoc]
+    rw [Category.assoc (Scheme.ΓSpecIso (CommRingCat.of K)).inv (f.appLE _ _ _)
+      (j.appIso ⊤).hom, Scheme.Hom.appIso_hom',
+      Scheme.Hom.appLE_comp_appLE]
+    have ha : (j ≫ f).appLE ⊤ ⊤ le_rfl = (j ≫ f).appTop :=
+      Scheme.Hom.appLE_eq_app (j ≫ f)
+    erw [ha, hj, ← Scheme.ΓSpecIso_inv_naturality B, Category.assoc, Iso.inv_hom_id, Category.comp_id]
+  exact congrArg (fun m => m a) he
+
+def sectionEquiv :
+    letI : Algebra K Γ(X, U j) := (sectionCoefficients f (U j)).toAlgebra
+    Γ(X, U j) ≃ₐ[K] A :=
+  letI : Algebra K Γ(X, U j) := (sectionCoefficients f (U j)).toAlgebra
+  AlgEquiv.ofRingEquiv (f := (ringIso j).commRingCatIsoToRingEquiv)
+    (ringIso_coefficients f j hj)
+
+include hj in
+theorem frame_of_chart {n : ℕ} (u : Fin n → A)
+    (b : Basis (Fin n) A (KaehlerDifferential K A))
+    (hb : ∀ i, b i = KaehlerDifferential.D K A (u i)) :
+    HasFrame f n (U j) := by
+  letI : Algebra K Γ(X, U j) := (sectionCoefficients f (U j)).toAlgebra
+  let e := (sectionEquiv f j hj).symm
+  letI : Algebra A Γ(X, U j) := e.toAlgHom.toRingHom.toAlgebra
+  letI : IsScalarTower K A Γ(X, U j) := IsScalarTower.of_algHom e.toAlgHom
+  letI : Algebra.Etale A Γ(X, U j) := (RingHom.Etale.of_bijective e.bijective).toAlgebra
+  exact ⟨fun i => e (u i), baseChangeFrame (B := Γ(X, U j)) b, baseChangeFrame_apply b u hb⟩
+
+end CycleQ2AffineFrameBinding
+
+#print axioms CycleQ2AffineFrameBinding.frame_of_chart
+
+end
+
+section
+
+/-!
+# A finite native affine cover retaining the weighted source vertex
+
+The actual generic threefold is smooth, proper and separated. Its
+ordinary de Rham cover can include the normal affine patch where the
+actual weighted source is regular and the swept graph is absent.
+Every nonempty finite intersection remains affine with an exact frame.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2NativeWeightedCover
+
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
+open CycleQ2LiteralIncidenceGenericCorrespondence CycleQ2LiteralIncidenceRelativeCorrespondence
+open CycleQ2LiteralIncidenceNormalizedSlice CycleQ2GenericProperGraphSupport
+open CycleQ2NormalWeightedCotangent CycleQ2NativeNormalResidue CycleQ2NativeResidueOffGraph
+open CycleQ2NativeNormalFunctionField CycleQ2FiniteExactAffineAtlas
+open CycleQ2WeightedStalkExactness (RepresentsSource exists_source_scalar_off_graph)
+open CycleQ2MonicGenericAmbientChart (K genericChartRing)
+open CycleQ2IncidenceEtaleParameter (parameterScheme)
+
+abbrev ambientToField : genericAmbient ⟶ Spec (CommRingCat.of K) :=
+  pullback.snd ambientStructure genericPoint
+
+theorem ambient_proper : IsProper ambientToField :=
+  IsProper.isStableUnderBaseChange.of_isPullback (IsPullback.of_hasPullback ambientStructure genericPoint)
+    (CycleQ2LiteralRelativeAmbientProper.ambient_proper toRaw)
+
+theorem ambient_separated : genericAmbient.IsSeparated := by
+  have := ambient_proper
+  let q := terminal.from (Spec (CommRingCat.of K))
+  have : IsSeparated q := inferInstanceAs (IsSeparated (terminal.from (Spec (CommRingCat.of K))))
+  have h : IsSeparated (ambientToField ≫ q) := inferInstance
+  refine ⟨?_⟩
+  rw [← terminal.comp_from ambientToField]
+  exact h
+
+/-- The coefficient algebra of the native patch is the one used by the
+weighted normal residue and its signed divergence. -/
+theorem patch_over (s : A) :
+    patchInclusion s ≫ ambientToField =
+      Spec.map (CommRingCat.ofHom (algebraMap K (Patch s))) := by
+  simp only [patchInclusion, inclusion, Category.assoc, ambientToField, chart_over, ← Spec.map_comp]
+  apply congrArg Spec.map
+  apply CommRingCat.hom_ext
+  apply RingHom.ext
+  intro x
+  change algebraMap A (Patch s) (algebraMap Cubic A (cubicIso (algebraMap K genericChartRing x))) =
+    algebraMap K (Patch s) x
+  rw [cubicIso.commutes, ← IsScalarTower.algebraMap_apply K Cubic A,
+    ← IsScalarTower.algebraMap_apply K A (Patch s)]
+
+theorem native_patch_frame (s : A) :
+    HasFrame ambientToField 3 ((patchInclusion s) ''ᵁ ⊤) :=
+  CycleQ2AffineFrameBinding.frame_of_chart ambientToField (patchInclusion s) (patch_over s)
+    (fun i => algebraMap A (Patch s) (coordinate i)) (liftedBasis (Patch s)) (liftedBasis_apply _)
+
+theorem exists_cover_with_weighted_source {V : parameterScheme.Opens} {t : Fin 3 → ℂ}
+    (hs : SmoothOfRelativeDimension 2 (CycleQ2GenericProperGraphOpen.surfaceStructure V t))
+    (hp : IsProper (CycleQ2GenericProperGraphOpen.graphStructure V t)) :
+    ∃ s : A, ∃ h₀ : s ≠ 0,
+      ∃ (ι : Type) (_ : Fintype ι) (U : ι → genericAmbient.Opens) (j : ι),
+        U j = (patchInclusion s) ''ᵁ ⊤ ∧ (⨆ i, U i) = ⊤ ∧
+        (∀ i, IsAffineOpen (U i) ∧ HasFrame ambientToField 3 (U i)) ∧
+        (∀ (I : Type) [Finite I] [Nonempty I] (z : I → ι),
+          IsAffineOpen (⨅ i, U (z i)) ∧ HasFrame ambientToField 3 (⨅ i, U (z i))) ∧
+        U j ≤ complement V t ∧
+        (letI : NeZero s := ⟨h₀⟩
+         ∃ a : Patch s, RepresentsSource s a) := by
+  obtain ⟨s,h₀,hc,ha⟩ := exists_source_scalar_off_graph hs hp
+  have : IsProper ambientToField := ambient_proper
+  have : CompactSpace genericAmbient := QuasiCompact.compactSpace_of_compactSpace ambientToField
+  have : genericAmbient.IsSeparated := ambient_separated
+  have : SmoothOfRelativeDimension 3 ambientToField := CycleQ2NativeGenericSmooth.ambient_smooth
+  have hA : IsAffineOpen ((patchInclusion s) ''ᵁ ⊤) := by
+    rw [(patchInclusion s).image_top_eq_opensRange]
+    exact isAffineOpen_opensRange _
+  obtain ⟨ι,hι,U,j,hj,hcov,hframes⟩ :=
+    exists_finite_cover ambientToField 3 ((patchInclusion s) ''ᵁ ⊤) hA (native_patch_frame s)
+  refine ⟨s,h₀,ι,hι,U,j,hj,hcov,hframes,?_,?_,ha⟩
+  · intro I _ _ z
+    exact frame_finite_intersection ambientToField 3 (fun i => U (z i)) (fun i => hframes (z i))
+  · rw [hj]
+    rintro _ ⟨x,_,rfl⟩
+    exact hc x
+
+end CycleQ2NativeWeightedCover
+
+#print axioms CycleQ2NativeWeightedCover.exists_cover_with_weighted_source
+
+end
+
+section
+
+/-!
+# The relative de Rham complex on the dense affine basis
+
+Choose exact frames on the dense basis of affine opens. The ordinary
+Kähler pullback powers define the cochain map on every restriction.
+Functoriality uses only the actual restriction maps, and an identity
+ring map compares any two frame choices. The differentials commute
+with restrictions without a separate overlap hypothesis.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2FramedAffineSite
+
+open AlgebraicGeometry CategoryTheory Opposite TopologicalSpace Module KaehlerDifferential
+open CycleQ2SmoothRelativeFrames CycleQ2FiniteExactAffineAtlas CycleQ2RelativeAffineOverlap
+open CycleQ2AffineDeRhamComplex CycleQ2AffineDeRhamFunctorial
+
+variable {K : Type} [Field K] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of K))
+
+abbrev FramedOpen := {U : X.Opens // IsAffineOpen U ∧ HasFrame f 3 U}
+
+def inclusion : FramedOpen f ⥤ X.Opens where
+  obj U := U.1
+  map g := homOfLE g.le
+
+instance : (inclusion f).Full where
+  map_surjective g := ⟨homOfLE g.le, Subsingleton.elim _ _⟩
+
+instance : (inclusion f).Faithful where
+  map_injective := fun _ => Subsingleton.elim _ _
+
+theorem cover_dense [SmoothOfRelativeDimension 3 f] :
+    (inclusion f).IsCoverDense (Opens.grothendieckTopology X) := by
+  apply (TopCat.Opens.coverDense_iff_isBasis _).mpr
+  have h : Set.range (inclusion f).obj = {U : X.Opens | IsAffineOpen U ∧ HasFrame f 3 U} := by
+    ext U
+    constructor
+    · rintro ⟨⟨W,hW⟩,rfl⟩
+      exact hW
+    · intro hU
+      exact ⟨⟨U,hU⟩,rfl⟩
+  rw [h]
+  exact CycleQ2FiniteExactAffineAtlas.isBasis f 3
+
+def functions (U : FramedOpen f) : Fin 3 → Γ(X, U.1) := U.2.2.choose
+
+def frame (U : FramedOpen f) :
+    letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+    Basis (Fin 3) Γ(X, U.1) Ω[Γ(X,U.1)⁄K] :=
+  U.2.2.choose_spec.choose
+
+theorem frame_apply (U : FramedOpen f) :
+    letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+    ∀ i, frame f U i = KaehlerDifferential.D K Γ(X, U.1) (functions f U i) :=
+  U.2.2.choose_spec.choose_spec
+
+abbrev chartComplex (U : FramedOpen f) : CochainComplex AddCommGrpCat.{0} ℕ :=
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  complex (frame f U) (functions f U) (frame_apply f U)
+
+def restriction {U V : FramedOpen f} (h : V ⟶ U) : chartComplex f U ⟶ chartComplex f V :=
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  pullComplex (frame f U) (functions f U) (frame_apply f U) (restrict f (show V.1 ≤ U.1 from h.le))
+    (frame f V) (functions f V) (frame_apply f V)
+
+theorem restrict_id (U : X.Opens) :
+    letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+    restrict f (le_rfl : U ≤ U) = AlgHom.id K Γ(X, U) := by
+  letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  ext a
+  change (X.presheaf.map (homOfLE (le_rfl : U ≤ U)).op) a = a
+  have h : (homOfLE (le_rfl : U ≤ U)).op = 𝟙 (op U) := Subsingleton.elim _ _
+  rw [h, CategoryTheory.Functor.map_id X.presheaf (op U)]
+  rfl
+
+theorem restrict_comp {U V W : X.Opens} (h : V ≤ U) (k : W ≤ V) :
+    letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+    letI : Algebra K Γ(X, V) := (sectionCoefficients f V).toAlgebra
+    letI : Algebra K Γ(X, W) := (sectionCoefficients f W).toAlgebra
+    restrict f (k.trans h) = (restrict f k).comp (restrict f h) := by
+  letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  letI : Algebra K Γ(X, V) := (sectionCoefficients f V).toAlgebra
+  letI : Algebra K Γ(X, W) := (sectionCoefficients f W).toAlgebra
+  ext a
+  change (X.presheaf.map (homOfLE (k.trans h)).op) a =
+    ((X.presheaf.map (homOfLE h).op) ≫ (X.presheaf.map (homOfLE k).op)) a
+  rw [← Functor.map_comp]
+  exact congrArg (fun x => (X.presheaf.map x) a) (Subsingleton.elim _ _)
+
+def deRham : (FramedOpen f)ᵒᵖ ⥤ CochainComplex AddCommGrpCat.{0} ℕ where
+  obj U := chartComplex f U.unop
+  map h := restriction f h.unop
+  map_id U := by
+    letI : Algebra K Γ(X, U.unop.1) := (sectionCoefficients f U.unop.1).toAlgebra
+    have h := restrict_id f U.unop.1
+    exact (congrArg (fun φ => pullComplex (frame f U.unop) (functions f U.unop)
+      (frame_apply f U.unop) φ (frame f U.unop) (functions f U.unop) (frame_apply f U.unop)) h).trans
+      (pullComplex_id (frame f U.unop) (functions f U.unop) (frame_apply f U.unop))
+  map_comp {U V W} h k := by
+    letI : Algebra K Γ(X, U.unop.1) := (sectionCoefficients f U.unop.1).toAlgebra
+    letI : Algebra K Γ(X, V.unop.1) := (sectionCoefficients f V.unop.1).toAlgebra
+    letI : Algebra K Γ(X, W.unop.1) := (sectionCoefficients f W.unop.1).toAlgebra
+    have e := restrict_comp f (show V.unop.1 ≤ U.unop.1 from h.unop.le)
+      (show W.unop.1 ≤ V.unop.1 from k.unop.le)
+    exact (congrArg (fun φ => pullComplex (frame f U.unop) (functions f U.unop)
+      (frame_apply f U.unop) φ (frame f W.unop) (functions f W.unop) (frame_apply f W.unop)) e).trans
+      (pullComplex_comp (frame f U.unop) (functions f U.unop) (frame_apply f U.unop)
+        (frame f V.unop) (functions f V.unop) (frame_apply f V.unop)
+        (frame f W.unop) (functions f W.unop) (frame_apply f W.unop) _ _)
+
+def forms (p : ℕ) : (FramedOpen f)ᵒᵖ ⥤ AddCommGrpCat.{0} :=
+  deRham f ⋙ HomologicalComplex.eval _ _ p
+
+def exterior (p : ℕ) : forms f p ⟶ forms f (p+1) where
+  app U := ((deRham f).obj U).d p (p+1)
+  naturality U V h := by
+    exact ((deRham f).map h).comm p (p+1)
+
+theorem exterior_square (p : ℕ) :
+    exterior f p ≫ exterior f (p+1) = 0 := by
+  apply NatTrans.ext
+  funext U
+  exact ((deRham f).obj U).d_comp_d _ _ _
+
+end CycleQ2FramedAffineSite
+
+#print axioms CycleQ2FramedAffineSite.cover_dense
+#print axioms CycleQ2FramedAffineSite.exterior_square
+
+end
+
+section
+
+/-!
+# Natural coordinates below a framed affine open
+
+Every affine subopen uses the restriction of the original exact frame.
+Kähler pullback sends its basis vectors to the same restricted
+coordinates, as it does for all exterior powers. The coefficients
+of a form thus restrict as ordinary functions on the same opens.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2FramedAffineCoordinates
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite Module
+open CycleQ2FiniteExactAffineAtlas CycleQ2SmoothRelativeFrames CycleQ2RelativeAffineOverlap
+open CycleQ2FramedAffineSite CycleQ2ExactFrameThreeDeRham CycleQ2WeightedCoordinateExterior
+
+section Algebra
+
+variable {A B I M N : Type} [CommRing A] [CommRing B] [Fintype I]
+  [AddCommGroup M] [AddCommGroup N] [Module A M] [Module B N]
+
+theorem coefficients_natural (φ : A →+* B) (r : M →ₛₗ[φ] N)
+    (b : Basis I A M) (c : Basis I B N) (hr : ∀ i, r (b i) = c i) (ω : M) (i : I) :
+    c.repr (r ω) i = φ (b.repr ω i) := by
+  classical
+  have h := congrArg r (b.sum_repr ω)
+  rw [← h]
+  simp only [map_sum, map_smulₛₗ, hr]
+  simp [Finsupp.single_apply]
+
+theorem exteriorBasis_natural (φ : A →+* B) (r : M →ₛₗ[φ] N)
+    (b : Basis (Fin 3) A M) (c : Basis (Fin 3) B N)
+    (hr : ∀ i, r (b i) = c i) (p : ℕ) (i : Set.powersetCard (Fin 3) p) :
+    CycleQ2GeometricExteriorSheaf.exteriorMap φ r p (b.exteriorPower p i) =
+      c.exteriorPower p i := by
+  rw [exteriorPower.basis_apply, exteriorPower.basis_apply]
+  unfold exteriorPower.ιMulti_family
+  rw [CycleQ2GeometricExteriorSheaf.exteriorMap_wedge]
+  congr 1
+  funext j
+  exact hr _
+
+end Algebra
+
+variable {K : Type} [Field K] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of K))
+variable {U V W : FramedOpen f}
+
+def transported (a : V ⟶ U) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    Basis (Fin 3) Γ(X, V.1) Ω[Γ(X,V.1)⁄K] :=
+  (exact_on_affine_subopen f a.le U.2.1 V.2.1 (functions f U) (frame f U) (frame_apply f U)).choose
+
+theorem transported_apply (a : V ⟶ U) (i : Fin 3) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    transported f a i = KaehlerDifferential.D K Γ(X, V.1) (restrict f a.le (functions f U i)) :=
+  (exact_on_affine_subopen f a.le U.2.1 V.2.1 (functions f U) (frame f U) (frame_apply f U)).choose_spec i
+
+theorem transported_natural (a : V ⟶ U) (g : W ⟶ V) (i : Fin 3) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+    onePullback (restrict f g.le) (transported f a i) = transported f (g ≫ a) i := by
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+  rw [transported_apply, onePullback_d, transported_apply]
+  apply congrArg (KaehlerDifferential.D K Γ(X,W.1))
+  exact (DFunLike.congr_fun (restrict_comp f a.le g.le) (functions f U i)).symm
+
+theorem oneCoordinates_natural (a : V ⟶ U) (g : W ⟶ V) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+    ∀ (ω : Ω[Γ(X,V.1)⁄K]) (i : Fin 3),
+      ((transported f (g ≫ a)).equivFun (onePullback (restrict f g.le) ω)) i =
+        restrict f g.le ((transported f a).equivFun ω i) := by
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+  intro ω i
+  exact coefficients_natural _ _ _ _ (transported_natural f a g) ω i
+
+theorem exteriorCoordinates_natural (a : V ⟶ U) (g : W ⟶ V) (p : ℕ) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+    ∀ (ω : Form K Γ(X,V.1) p) (i : Set.powersetCard (Fin 3) p),
+      ((transported f (g ≫ a)).exteriorPower p).equivFun (exteriorPullback (restrict f g.le) p ω) i =
+        restrict f g.le (((transported f a).exteriorPower p).equivFun ω i) := by
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+  intro ω i
+  classical
+  exact coefficients_natural _ _ _ _ (exteriorBasis_natural _ _ _ _ (transported_natural f a g) p) ω i
+
+end CycleQ2FramedAffineCoordinates
+
+#print axioms CycleQ2FramedAffineCoordinates.oneCoordinates_natural
+#print axioms CycleQ2FramedAffineCoordinates.exteriorCoordinates_natural
+
+end
+
+section
+
+/-!
+# Sheaf gluing in the coordinates of the target open
+
+If the restrictions of a presheaf over a fixed object admit compatible
+coordinates in a sheaf, glue each coordinate and return through the
+coordinate equivalence on that object. The coordinate choice can
+depend on the target open.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2SheafForLocalCoordinates
+
+open CategoryTheory Opposite Presieve
+
+variable {C : Type} [Category C] {U : C} {P Q : Cᵒᵖ ⥤ Type}
+  {I : Type} {S : Presieve U}
+  (e : ∀ {V : C}, (V ⟶ U) → P.obj (op V) ≃ (I → Q.obj (op V)))
+  (he : ∀ {V W : C} (a : V ⟶ U) (g : W ⟶ V) (x : P.obj (op V)) (i : I),
+    e (g ≫ a) (P.map g.op x) i = Q.map g.op (e a x i))
+
+include he in
+theorem isSheafFor (hQ : IsSheafFor Q S) : IsSheafFor P S := by
+  intro s hs
+  let a (i : I) : FamilyOfElements Q S := fun V f hf => e f (s f hf) i
+  have ha (i : I) : (a i).Compatible := by
+    intro V W Y g h f f' hf hf' hh
+    change Q.map g.op (e f (s f hf) i) = Q.map h.op (e f' (s f' hf') i)
+    rw [← he, ← he, hs g h hf hf' hh, hh]
+  let b : I → Q.obj (op U) := fun i => hQ.amalgamate (a i) (ha i)
+  let z := (e (𝟙 U)).symm b
+  have hz : s.IsAmalgamation z := by
+    intro V f hf
+    apply (e f).injective
+    funext i
+    have h := he (𝟙 U) f z i
+    rw [Category.comp_id] at h
+    change e f (P.map f.op z) i = e f (s f hf) i
+    rw [h]
+    change Q.map f.op (e (𝟙 U) ((e (𝟙 U)).symm b) i) = _
+    rw [Equiv.apply_symm_apply]
+    exact hQ.isAmalgamation (ha i) f hf
+  refine ⟨z,hz,?_⟩
+  intro y hy
+  apply (e (𝟙 U)).injective
+  funext i
+  change e (𝟙 U) y i = e (𝟙 U) ((e (𝟙 U)).symm b) i
+  rw [Equiv.apply_symm_apply]
+  apply hQ.isSeparatedFor (a i) _ _ _ (hQ.isAmalgamation (ha i))
+  intro V f hf
+  have h := he (𝟙 U) f y i
+  rw [Category.comp_id] at h
+  exact h.symm.trans (congrArg (fun t => e f t i) (hy f hf))
+
+end CycleQ2SheafForLocalCoordinates
+
+#print axioms CycleQ2SheafForLocalCoordinates.isSheafFor
+
+end
+
+section
+
+/-!
+# The relative differential sheaves from the native affine basis
+
+The ordinary Kähler and exterior sections satisfy the sheaf condition on
+the dense exact affine basis. Glue their coefficients in the frame of the
+target open and use their checked restriction formulas. The dense comparison
+equivalence gives actual sheaves on the original scheme.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2RelativeDeRhamSheaves
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite AlgebraicGeometry Module
+open CycleQ2FramedAffineSite CycleQ2FramedAffineCoordinates CycleQ2SmoothRelativeFrames
+open CycleQ2RelativeAffineOverlap CycleQ2WeightedCoordinateExterior
+
+variable {K : Type} [Field K] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of K))
+
+abbrev topology := (inclusion f).inducedTopology (Opens.grothendieckTopology X)
+
+private abbrev ringPresheaf : (FramedOpen f)ᵒᵖ ⥤ Type :=
+  (inclusion f).op ⋙ X.presheaf ⋙ forget CommRingCat
+
+private abbrev formsType (p : ℕ) : (FramedOpen f)ᵒᵖ ⥤ Type :=
+  forms f p ⋙ forget AddCommGrpCat
+
+private theorem ring_isSheaf [SmoothOfRelativeDimension 3 f] :
+    Presheaf.IsSheaf (topology f) (ringPresheaf f) := by
+  have : (inclusion f).IsCoverDense (Opens.grothendieckTopology X) := cover_dense f
+  have h : Presheaf.IsSheaf (topology f) ((inclusion f).op ⋙ X.presheaf) :=
+    Functor.op_comp_isSheaf _ _ _ X.sheaf
+  exact Presheaf.isSheaf_comp_of_isSheaf _ ((inclusion f).op ⋙ X.presheaf) (forget CommRingCat) h
+
+private def functionCoordinates (V : FramedOpen f) :
+    (formsType f 0).obj (op V) ≃ (Unit → (ringPresheaf f).obj (op V)) :=
+  { toFun := fun x _ => x
+    invFun := fun y => y ()
+    left_inv := fun _ => rfl
+    right_inv := fun _ => funext fun i => by cases i; rfl }
+
+private def oneCoordinates {U V : FramedOpen f} (a : V ⟶ U) :
+    (formsType f 1).obj (op V) ≃ (Fin 3 → (ringPresheaf f).obj (op V)) :=
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  (transported f a).equivFun.toEquiv
+
+private def twoCoordinates {U V : FramedOpen f} (a : V ⟶ U) :
+    (formsType f 2).obj (op V) ≃ (Set.powersetCard (Fin 3) 2 → (ringPresheaf f).obj (op V)) := by
+  classical
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  exact ((transported f a).exteriorPower 2).equivFun.toEquiv
+
+private def threeCoordinates {U V : FramedOpen f} (a : V ⟶ U) :
+    (formsType f 3).obj (op V) ≃ (Set.powersetCard (Fin 3) 3 → (ringPresheaf f).obj (op V)) := by
+  classical
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  exact ((transported f a).exteriorPower 3).equivFun.toEquiv
+
+private def trivialCoordinates (V : FramedOpen f) (p : ℕ) :
+    (formsType f (p+4)).obj (op V) ≃ (Empty → (ringPresheaf f).obj (op V)) :=
+  { toFun := fun _ i => i.elim
+    invFun := fun _ => PUnit.unit
+    left_inv := fun x => by change PUnit.unit = (x : PUnit); cases x; rfl
+    right_inv := fun _ => funext fun i => i.elim }
+
+private theorem formsType_isSheaf [SmoothOfRelativeDimension 3 f] (p : ℕ) :
+    Presheaf.IsSheaf (topology f) (formsType f p) := by
+  apply (isSheaf_iff_isSheaf_of_type _ _).mpr
+  intro U S hS
+  have h := (ring_isSheaf f).isSheafFor S hS
+  cases p with
+  | zero =>
+    exact CycleQ2SheafForLocalCoordinates.isSheafFor (fun {V} _ => functionCoordinates f V)
+      (fun a g x i => rfl) h
+  | succ p =>
+    cases p with
+    | zero =>
+      exact CycleQ2SheafForLocalCoordinates.isSheafFor (oneCoordinates f)
+        (fun a g x i => oneCoordinates_natural f a g x i) h
+    | succ p =>
+      cases p with
+      | zero =>
+        exact CycleQ2SheafForLocalCoordinates.isSheafFor (twoCoordinates f)
+          (fun a g x i => exteriorCoordinates_natural f a g 2 x i) h
+      | succ p =>
+        cases p with
+        | zero =>
+          exact CycleQ2SheafForLocalCoordinates.isSheafFor (threeCoordinates f)
+            (fun a g x i => exteriorCoordinates_natural f a g 3 x i) h
+        | succ p =>
+          exact CycleQ2SheafForLocalCoordinates.isSheafFor (fun {V} _ => trivialCoordinates f V p)
+            (fun a g x i => i.elim) h
+
+theorem forms_isSheaf [SmoothOfRelativeDimension 3 f] (p : ℕ) :
+    Presheaf.IsSheaf (topology f) (forms f p) :=
+  (Presheaf.isSheaf_iff_isSheaf_forget _ _ (forget AddCommGrpCat)).mpr (formsType_isSheaf f p)
+
+def basisForms [SmoothOfRelativeDimension 3 f] (p : ℕ) : Sheaf (topology f) AddCommGrpCat :=
+  ⟨forms f p, forms_isSheaf f p⟩
+
+def basisDifferential [SmoothOfRelativeDimension 3 f] (p : ℕ) :
+    basisForms f p ⟶ basisForms f (p+1) :=
+  ⟨exterior f p⟩
+
+def compare [SmoothOfRelativeDimension 3 f] :
+    Sheaf (topology f) AddCommGrpCat.{0} ≌ TopCat.Sheaf AddCommGrpCat.{0} X := by
+  have : (inclusion f).IsCoverDense (Opens.grothendieckTopology X) := cover_dense f
+  exact (inclusion f).sheafInducedTopologyEquivOfIsCoverDense _ _
+
+/-- The actual additive sheaves on the original Zariski opens. -/
+abbrev sheafForms [SmoothOfRelativeDimension 3 f] (p : ℕ) : TopCat.Sheaf AddCommGrpCat.{0} X :=
+  (compare f).functor.obj (basisForms f p)
+
+def differential [SmoothOfRelativeDimension 3 f] (p : ℕ) : sheafForms f p ⟶ sheafForms f (p+1) :=
+  (compare f).functor.map (basisDifferential f p)
+
+theorem differential_square [SmoothOfRelativeDimension 3 f] (p : ℕ) :
+    differential f p ≫ differential f (p+1) = 0 := by
+  unfold differential
+  rw [← Functor.map_comp]
+  have h : basisDifferential f p ≫ basisDifferential f (p+1) = 0 := by
+    apply (sheafToPresheaf (topology f) AddCommGrpCat).map_injective
+    exact exterior_square f p
+  letI : (compare f).functor.Full := (compare f).fullyFaithfulFunctor.full
+  rw [h, CategoryTheory.Functor.map_zero]
+
+def relativeDeRham [SmoothOfRelativeDimension 3 f] :
+    CochainComplex (TopCat.Sheaf AddCommGrpCat.{0} X) ℕ :=
+  CochainComplex.of (sheafForms f) (differential f) (differential_square f)
+
+/-- The relative forms on every original basis open are the ordinary forms
+over its actual function ring, compatibly with all restrictions. -/
+def onBasisIso [SmoothOfRelativeDimension 3 f] (p : ℕ) :
+    (inclusion f).op ⋙ (sheafForms f p).obj ≅ forms f p :=
+  (sheafToPresheaf (topology f) AddCommGrpCat).mapIso
+    (((compare f).unitIso.app (basisForms f p)).symm)
+
+theorem onBasisIso_d [SmoothOfRelativeDimension 3 f] (p : ℕ) (U : FramedOpen f) :
+    (differential f p).hom.app (op U.1) ≫ (onBasisIso f (p+1)).hom.app (op U) =
+      (onBasisIso f p).hom.app (op U) ≫ (exterior f p).app (op U) :=
+  congrArg (fun k => k.hom.app (op U)) ((compare f).unitIso.inv.naturality (basisDifferential f p))
+
+/-- The same native relative complex in integer degrees for the derived category. -/
+def relativeDeRhamInt [SmoothOfRelativeDimension 3 f] :
+    CochainComplex (TopCat.Sheaf AddCommGrpCat.{0} X) ℤ :=
+  (relativeDeRham f).extend (ComplexShape.embeddingUpIntGE 0)
+
+end CycleQ2RelativeDeRhamSheaves
+
+#print axioms CycleQ2RelativeDeRhamSheaves.forms_isSheaf
+#print axioms CycleQ2RelativeDeRhamSheaves.relativeDeRham
+#print axioms CycleQ2RelativeDeRhamSheaves.onBasisIso_d
+
+end
+
+section
+
+/-!
+# The weighted source vertex in the full native relative complex
+
+Use the glued relative de Rham complex on the actual generic ambient
+threefold. The ordinary representative on the exact weighted patch
+gives a section of its actual degree-three sheaf. Transporting it back
+to the function field recovers precisely the original weighted form.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2NativeWeightedDeRham
+
+open CategoryTheory AlgebraicGeometry Opposite TopologicalSpace
+open CycleQ2NativeWeightedCover CycleQ2RelativeDeRhamSheaves CycleQ2FramedAffineSite
+open CycleQ2LiteralIncidenceGenericCorrespondence (genericAmbient)
+open CycleQ2MonicGenericAmbientChart (K)
+open CycleQ2NormalWeightedCotangent (A)
+open CycleQ2NativeNormalResidue CycleQ2NativeResidueOffGraph
+open CycleQ2WeightedCoordinateExterior (Form)
+open CycleQ2ExactFrameThreeDeRham CycleQ2AffineDeRhamFunctorial
+open CycleQ2WeightedRationalRestriction (evaluate)
+open CycleQ2UniversalWeightedDeRham (sourceForm)
+open CycleQ2IncidenceEtaleParameter (parameterScheme)
+
+local instance : SmoothOfRelativeDimension 3 ambientToField :=
+  CycleQ2NativeGenericSmooth.ambient_smooth
+
+/-- The actual full sheaf complex over the universal monic function field. -/
+def complex : CochainComplex (TopCat.Sheaf AddCommGrpCat.{0} genericAmbient) ℤ :=
+  relativeDeRhamInt ambientToField
+
+def vertex (s : A) : FramedOpen ambientToField :=
+  ⟨(patchInclusion s) ''ᵁ ⊤,
+    by rw [(patchInclusion s).image_top_eq_opensRange]; exact isAffineOpen_opensRange _,
+    native_patch_frame s⟩
+
+def vertexRingIso (s : A) :
+    letI : Algebra K Γ(genericAmbient, (vertex s).1) :=
+      (CycleQ2SmoothRelativeFrames.sectionCoefficients ambientToField (vertex s).1).toAlgebra
+    Γ(genericAmbient, (vertex s).1) ≃ₐ[K] Patch s :=
+  CycleQ2AffineFrameBinding.sectionEquiv ambientToField (patchInclusion s) (patch_over s)
+
+abbrev VertexSections (s : A) := ((sheafForms ambientToField 3).obj.obj (op (vertex s).1))
+
+/-- Insert an ordinary form on the patch into the degree-three sheaf
+of the full relative de Rham complex. -/
+def asVertexSection (s : A) (ω : Form K (Patch s) 3) : VertexSections s :=
+  letI : Algebra K Γ(genericAmbient, (vertex s).1) :=
+    (CycleQ2SmoothRelativeFrames.sectionCoefficients ambientToField (vertex s).1).toAlgebra
+  (onBasisIso ambientToField 3).inv.app (op (vertex s))
+    (exteriorPullback (vertexRingIso s).symm.toAlgHom 3 ω)
+
+def asOrdinaryForm (s : A) (ω : VertexSections s) : Form K (Patch s) 3 :=
+  letI : Algebra K Γ(genericAmbient, (vertex s).1) :=
+    (CycleQ2SmoothRelativeFrames.sectionCoefficients ambientToField (vertex s).1).toAlgebra
+  exteriorPullback (vertexRingIso s).toAlgHom 3 ((onBasisIso ambientToField 3).hom.app (op (vertex s)) ω)
+
+theorem roundTrip (s : A) (ω : Form K (Patch s) 3) :
+    asOrdinaryForm s (asVertexSection s ω) = ω := by
+  letI : Algebra K Γ(genericAmbient, (vertex s).1) :=
+    (CycleQ2SmoothRelativeFrames.sectionCoefficients ambientToField (vertex s).1).toAlgebra
+  let e := (onBasisIso ambientToField 3).app (op (vertex s))
+  let a := vertexRingIso s
+  change exteriorPullback a.toAlgHom 3 (e.hom (e.inv (exteriorPullback a.symm.toAlgHom 3 ω))) = ω
+  let z := exteriorPullback a.symm.toAlgHom 3 ω
+  have he : e.hom (e.inv z) = z := Iso.inv_hom_id_apply e z
+  have ha : a.toAlgHom.comp a.symm.toAlgHom = AlgHom.id K (Patch s) := by
+    apply AlgHom.ext
+    exact a.apply_symm_apply
+  exact (congrArg (fun x => exteriorPullback a.toAlgHom 3 x) he).trans <|
+    (exteriorPullback_comp a.symm.toAlgHom a.toAlgHom 3 ω).symm.trans <| by
+      rw [ha, exteriorPullback_id]
+
+theorem exists_weighted_vertex {V : parameterScheme.Opens} {t : Fin 3 → ℂ}
+    (hs : SmoothOfRelativeDimension 2 (CycleQ2GenericProperGraphOpen.surfaceStructure V t))
+    (hp : IsProper (CycleQ2GenericProperGraphOpen.graphStructure V t)) :
+    ∃ (s : A) (h₀ : s ≠ 0) (ω : VertexSections s),
+      (vertex s).1 ≤ CycleQ2GenericProperGraphSupport.complement V t ∧
+      evaluate (evaluatePatch s h₀) 3 (asOrdinaryForm s ω) = sourceForm := by
+  obtain ⟨s,h₀,hc,ω,hω⟩ := exists_off_graph hs hp
+  refine ⟨s,h₀,asVertexSection s ω,?_,?_⟩
+  · rintro _ ⟨x,_,rfl⟩
+    exact hc x
+  · rw [roundTrip]
+    exact hω
+
+end CycleQ2NativeWeightedDeRham
+
+#print axioms CycleQ2NativeWeightedDeRham.exists_weighted_vertex
 
 end

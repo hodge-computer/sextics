@@ -131,6 +131,42 @@ restriction therefore supplies a rational primitive when its top form
 evaluates to the specified source.
 [Affine boundary and the protected exactness implication](GeometricWeightedPoleThree.lean)
 
+## The actual relative de Rham complex on the generic threefold
+
+The Fermat coefficient evaluation factors through the monic coefficient
+ring. The full gradient determinant is one there, so it is invertible
+over the universal coefficient field. In the original projective
+pullback the vertex coefficient is also one. A homogeneous prime
+containing all four weight-one coordinates would then contain the
+weight-two coordinate by the source equation, contrary to the
+irrelevant-ideal condition. Thus the four affine charts cover the
+actual same generic threefold used by the closed graph. On each
+chart the partial-derivative opens have standard smooth presentations
+of relative dimension three.
+
+The ambient generic scheme is proper and separated. There is a finite
+cover by exact affine frames with the off-graph weighted normal open
+as a distinguished chart. Its nonempty finite intersections are
+affine, and its regular weighted form uses the original coefficient
+field and differential. The affine cochain maps preserve composition
+of restrictions. Identity restriction compares any two exact frames
+of the same ring.
+
+The affine opens with exact frames form a dense basis. In the frame
+of any target open, an ordinary form on a smaller affine open has
+coordinates that restrict as its ordinary functions do. Gluing each
+coordinate proves the sheaf condition on this basis for every degree.
+The dense-site comparison supplies the actual additive sheaves on the
+threefold. The cochain maps assemble their relative de Rham
+differential, including its square-zero identity and their
+restriction to the original affine sections.
+The specified off-graph patch carries an actual section of the top
+sheaf of this complex. The affine section comparison and localization
+map send it to the original universal weighted source form. A global
+class represented by this section and coming from the closed support
+still has to be constructed.
+[Generic smoothness, exact affine cover and relative de Rham sheaves](GeometricMonicGenericSupport.lean)
+
 ## The fixed threefold and its moving curves
 
 The curve calculation takes place on the cubic section \(D\) of the weighted
