@@ -103,6 +103,42 @@ theorem class_eq_zero_iff (x : (differential U d e f).ker) :
   exact ⟨fun ⟨b, hb⟩ => ⟨b, congrArg Subtype.val hb⟩,
     fun ⟨b, hb⟩ => ⟨b, Subtype.ext hb⟩⟩
 
+/-- On a subopen of any one vertex, cohomology restricts to ordinary
+top-degree sections modulo the genuine exterior differential. -/
+abbrev LocalTop (V : Opens X) := Sections F₃ V ⧸ (app f V).range
+
+private def cyclesToLocal (i : Fin 4) (V : Opens X) (h : V ≤ U i) :
+    (differential U d e f).ker →+ LocalTop f V where
+  toFun x := QuotientAddGroup.mk (res F₃ h (x.val.1 i))
+  map_zero' := by
+    change (QuotientAddGroup.mk (res F₃ h 0) : LocalTop f V) = 0
+    rw [map_zero]
+    rfl
+  map_add' x y := by
+    change (QuotientAddGroup.mk (res F₃ h (x.val.1 i + y.val.1 i)) : LocalTop f V) =
+      QuotientAddGroup.mk (res F₃ h (x.val.1 i)) + QuotientAddGroup.mk (res F₃ h (y.val.1 i))
+    rw [map_add]
+    rfl
+
+def restrictVertex (i : Fin 4) (V : Opens X) (h : V ≤ U i) :
+    HThree U d e f hd he →+ LocalTop f V :=
+  QuotientAddGroup.lift _ (cyclesToLocal U d e f i V h) <| by
+    intro x hx
+    obtain ⟨b, rfl⟩ := hx
+    change (QuotientAddGroup.mk (res F₃ h (app f (U i) (b.1 i))) : LocalTop f V) = 0
+    rw [QuotientAddGroup.eq_zero_iff]
+    exact ⟨res F₂ h (b.1 i), app_res f h (b.1 i)⟩
+
+/-- A vanishing restriction of a total class supplies an actual local
+two-form primitive of its vertex component. -/
+theorem restrictVertex_eq_zero_iff (i : Fin 4) (V : Opens X) (h : V ≤ U i)
+    (x : (differential U d e f).ker) :
+    restrictVertex U d e f hd he i V h (QuotientAddGroup.mk x) = 0 ↔
+      ∃ a : Sections F₂ V, app f V a = res F₃ h (x.val.1 i) := by
+  change (QuotientAddGroup.mk (res F₃ h (x.val.1 i)) : LocalTop f V) = 0 ↔ _
+  rw [QuotientAddGroup.eq_zero_iff]
+  rfl
+
 end CycleQ2FourOpenDeRhamTotal
 
 #print axioms CycleQ2FourOpenDeRhamTotal.class_eq_zero_iff
@@ -285,3 +321,4 @@ theorem testClass_ne_zero : testClass ≠ 0 := by
 end CycleQ2LiteralThreefoldUnfilteredCech
 
 #print axioms CycleQ2LiteralThreefoldUnfilteredCech.testClass_ne_zero
+#print axioms CycleQ2FourOpenDeRhamTotal.restrictVertex_eq_zero_iff

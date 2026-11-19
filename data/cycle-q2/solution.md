@@ -113,7 +113,23 @@ The numerator \(N^2\varphi/2\) of the simple pole comes from the
 original localization away from \(n\). Its restriction to the
 hypersurface function field is exactly \(\rho_b\). This binds the
 specified pole-three numerator to the density in the universal
-divergence equation. [Normal pole reduction and evaluation](GeometricWeightedPoleThree.lean)
+divergence equation. The coefficient calculation also gives an identity
+of genuine ambient forms. In the ordered affine coordinates, let
+\(\xi=dx_1\wedge dx_2\wedge dx_3\). The difference between the normalized
+pole-three form and the simple-pole form with factor \(df/f\wedge\xi\)
+is \(d(-\varphi/(2f^2)-N\varphi/(2f))\wedge\xi\). The residue of the
+simple pole in genuine relative exterior forms is the specified universal
+source three-form. [Normal form reduction and residue](GeometricWeightedPoleThree.lean)
+
+On any affine \(K\)-algebra with an evaluation into the weighted function
+field, the canonical Kähler map induces an evaluation of its exterior
+powers. It commutes with the ordinary derivative
+\(d(a\,db\wedge dc)=da\wedge db\wedge dc\). The proof uses that wedges of
+exact differentials span the exterior square, and works without an
+affine coordinate basis. An actual two-form boundary on such an affine
+restriction therefore supplies a rational primitive when its top form
+evaluates to the specified source.
+[Affine boundary and the protected exactness implication](GeometricWeightedPoleThree.lean)
 
 ## The fixed threefold and its moving curves
 
@@ -636,7 +652,12 @@ corrections and the original six edges. A total boundary would give
 (delta f=0), (delta u+df=0), and (delta v-du=eta).
 The lower boundary obstruction rules this out, so the class of
 the test in degree three of this unfiltered total complex is
-nonzero. [Unfiltered class and nonvanishing](GeometricLiteralThreefoldUnfilteredCech.lean)
+nonzero. The general total complex also restricts to any subopen of
+one vertex. Its class there is the vertex three-form modulo
+\(d\Omega^2\), since the vertex component of a total boundary comes
+from the actual vertex two-form. Vanishing of that restriction gives
+a local two-form with exactly the restricted three-form as its derivative.
+[Unfiltered class and local restriction](GeometricLiteralThreefoldUnfilteredCech.lean)
 
 The comparison of this total complex with derived de Rham
 cohomology and the proper-support argument for the universal
