@@ -363,11 +363,9 @@ filtered Cech quotient, and no four vertex two-forms have the total test
 as their boundary.
 [Trace detector and filtered nonvanishing](GeometricLiteralThreefoldFilteredNonzero.lean)
 
-This quotient retains the three-form corrections missing from the
-ordinary Hodge class alone. Survival after adjoining the lower
-filtration terms, and comparison with full unfiltered de Rham
-cohomology, remain unproved here. The invariant Gysin spanning theorem,
-specialization, and protected rational primitive remain open.
+This quotient retains the three-form corrections. The unfiltered
+boundary calculation below extends the same nonvanishing to the
+original Čech–de Rham total complex.
 
 ## Removing the function component of a possible boundary
 
@@ -393,11 +391,8 @@ In a possible full total boundary with components
 the lower equations are \(\delta u+df=0\) and \(\delta f=0\).
 The checked primitive gives \(f=\delta g\). Thus \(u+dg\) is a closed
 one-form cochain, with the same exterior derivative as \(u\).
-This last sentence describes the cochain reduction; the complete full
-total complex and its comparison have not yet been formalized.
-
-The next needed assertion is that every such closed one-form cochain
-is a constant multiple of the hyperplane cocycle
+To complete the cochain reduction, write every such closed one-form
+cochain as a constant multiple of the hyperplane cocycle
 \(d\log(X_j/X_i)\), plus a one-form boundary. Its Euler/conormal
 reduction requires the actual cotangent maps and their compatibility.
 The weighted change-of-anchor identity is checked: the discrepancy of
@@ -590,11 +585,32 @@ arbitrary function and one-form components; it does not use a vertex
 three-form equation.
 [Lower total-boundary obstruction](GeometricLiteralThreefoldLowerBoundaryObstruction.lean)
 
-The next step must realize these necessary equations in the complete
-unfiltered total complex and bind that realization to the original
-filtered test cochains. The full unfiltered comparison, invariant Gysin
-spanning, specialization, and protected primitive remain open. No full
-unfiltered de Rham theorem or protected primitive is claimed.
+## The fixed test in the unfiltered Čech–de Rham complex
+
+On every subopen of an exact Kähler chart, the wedges of the actual
+one-form basis give a frame for the genuine exterior sheaf. The
+coordinate maps descend through sheafification and give an inverse
+to the ordinary exterior section map. On the original Jacobian
+atlas this identifies the genuine second exterior differential with
+ordinary differentiation in the exact frames. The global map
+(d:Omega_T^2	oOmega_T^3) kills the image of the first exterior
+differential and carries the original edge forms to the differences
+of the corrected vertex forms. The exterior sheaf in degree four
+has zero sections on every open. [Exterior sections and second differential](GeometricThreefoldDeRhamDifferential.lean)
+
+For the four original opens, the unfiltered total differential is
+(delta+(-1)^p d) in Čech degree (p). The two consecutive maps
+in total degrees two, three, and four compose to zero. The fixed
+test is the closed cochain ((-a,eta,0,0)) with the actual vertex
+corrections and the original six edges. A total boundary would give
+(delta f=0), (delta u+df=0), and (delta v-du=eta).
+The lower boundary obstruction rules this out, so the class of
+the test in degree three of this unfiltered total complex is
+nonzero. [Unfiltered class and nonvanishing](GeometricLiteralThreefoldUnfilteredCech.lean)
+
+The comparison of this total complex with derived de Rham
+cohomology and the proper-support argument for the universal
+protected source remain open.
 
 ## Strict growth of the Fermat Higgs maps
 
