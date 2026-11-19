@@ -12,9 +12,6 @@ extraction compatible with the affine residue divergence.
 Prepared with OpenAI Codex assistance for contributor fqlx.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 700000
-set_option maxRecDepth 10000
 open scoped BigOperators
 
 namespace SplitThetaRadial
@@ -47,7 +44,7 @@ lemma coneDerivations_coordinate (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 �
   have h2 (i : Fin 3) : baseCoefficient (D i) (2 : RatFunc K)=0 :=
     (baseCoefficient (D i)).map_natCast 2
   fin_cases i <;> fin_cases j <;>
-    simp [coneDerivations,independentCoordinates,Derivation.sub_apply,Derivation.smul_apply,
+    simp [coneDerivations,independentCoordinates,sub_apply,smul_apply,
       Derivation.leibniz,Derivation.leibniz_pow,smul_eq_mul,
       baseTime_X,baseTime_C,baseCoefficient_X,baseCoefficient_C,hc,h2] <;>
     field_simp <;> ring
@@ -55,7 +52,7 @@ lemma coneDerivations_coordinate (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 �
 lemma coneDerivations_constant (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 → K)
     (a : K) (ha : ∀ i,D i a=0) (i : Fin 4) :
     coneDerivations D c i (RatFunc.C a)=0 := by
-  fin_cases i <;> simp [coneDerivations,Derivation.sub_apply,Derivation.smul_apply,
+  fin_cases i <;> simp [coneDerivations,sub_apply,smul_apply,
     baseTime_C,baseCoefficient_C,ha]
 
 lemma radial_divergence_identity (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 → K)
@@ -68,7 +65,7 @@ lemma radial_divergence_identity (D : Fin 3 → Derivation ℤ K K) (c : Fin 3 �
   have h2 (i : Fin 3) : baseCoefficient (D i) (2 : RatFunc K)=0 :=
     (baseCoefficient (D i)).map_natCast 2
   simp [residueDivergence,fieldDivergence,coneDerivations,projectedField,
-    Fin.sum_univ_succ,Derivation.sub_apply,Derivation.smul_apply,Derivation.leibniz,
+    Fin.sum_univ_succ,sub_apply,smul_apply,Derivation.leibniz,
     Derivation.leibniz_div,Derivation.leibniz_pow,Derivation.leibniz_inv,
     smul_eq_mul,Algebra.smul_def,Algebra.algebraMap_self,RingHom.id_apply,
     baseTime_X,baseTime_C,baseCoefficient_X,baseCoefficient_C,hc,h2]
@@ -298,8 +295,9 @@ lemma rawPolynomialMap_X (i : Fin 4) : rawPolynomialMap (MvPolynomial.X i)=
 
 def coneCoefficientMap : ConeCoeff →+* RadialField :=
   (algebraMap (Polynomial AffineField) RadialField).comp (rawPolynomialMap.comp radialMonomialMap)
-lemma coneCoefficientMap_injective : Function.Injective coneCoefficientMap :=
-  (IsFractionRing.injective (Polynomial AffineField) RadialField).comp
+lemma coneCoefficientMap_injective : Function.Injective coneCoefficientMap := by
+  rw [coneCoefficientMap,RingHom.coe_comp,RingHom.coe_comp]
+  exact (IsFractionRing.injective (Polynomial AffineField) RadialField).comp
     (rawPolynomialMap_injective.comp radialMonomialMap_injective)
 lemma coneCoefficientMap_C (c : ℂ) : coneCoefficientMap (MvPolynomial.C c)=algebraMap ℂ RadialField c := by
   rw [coneCoefficientMap,RingHom.comp_apply,RingHom.comp_apply,radialMonomialMap_C,rawPolynomialMap_C]
@@ -456,9 +454,15 @@ theorem source_data_of_affine_residue
     ring
   obtain ⟨D,N₀,N,hD,hn,hdiv⟩ := SplitRationalAmbient.ambient_data evaluation (integerPartial 0)
     (fun i : Fin 3 => integerPartial i.succ) originalTangent clearedAffineEquation numerator denominator w'
-    (by rw [normal_evaluation]; exact clearNormal_ne_zero) denominator_ne_zero
+    (normal_evaluation.trans_ne clearNormal_ne_zero) denominator_ne_zero
     (fun i => integerPartial_commute i.succ 0 clearedAffineEquation) tangent_formula
     (residue_common_representatives projection (CrossedMonicHypersurface.projection_surjective equation) w') (by
+      change residueDivergence originalTangent (evaluation (integerPartial 0 clearedAffineEquation)) w'=
+        -(evaluation (integerPartial 0 numerator)/(evaluation denominator*evaluation (integerPartial 0 clearedAffineEquation))-
+          evaluation numerator*evaluation (integerPartial 0 denominator)/
+            (evaluation denominator^2*evaluation (integerPartial 0 clearedAffineEquation))-
+          evaluation numerator*evaluation (integerPartial 0 (integerPartial 0 clearedAffineEquation))/
+            (evaluation denominator*evaluation (integerPartial 0 clearedAffineEquation)^2))
       rw [normal_evaluation,hessian_polynomial,numerator_partial,map_zero,denominator_partial,
         map_mul,map_ofNat,CrossedMonicHypersurface.residueMap_X_zero,
         numerator_evaluation,denominator_evaluation,hwp]
@@ -471,7 +475,8 @@ theorem source_data_of_affine_residue
       ring)
   refine ⟨D,Fin.cases N₀ N,hD,?_,?_⟩
   · rw [Fin.sum_univ_succ]
-    simpa only [Fin.cases_zero,Fin.cases_succ] using hn
+    simp only [Fin.cases_zero,Fin.cases_succ]
+    exact hn
   · convert hdiv using 1 <;> congr 1 <;>
       simp only [residueDivNum,Fin.sum_univ_four,Fin.sum_univ_three,Fin.cases_zero,Fin.cases_succ] <;> ring
 end SplitFCompanion

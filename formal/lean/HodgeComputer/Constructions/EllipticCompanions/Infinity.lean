@@ -228,7 +228,7 @@ lemma time_reciprocal (f : RatFunc K) : reciprocal (baseTime f)=
     (fun c => by simp [reciprocal_C,baseTime_C])
     (by
       change (-(RatFunc.X : RatFunc K)^2 • baseTime) (reciprocal RatFunc.X)=reciprocal (baseTime RatFunc.X)
-      rw [reciprocal_X,Derivation.smul_apply,Derivation.leibniz_inv,baseTime_X]
+      rw [reciprocal_X,smul_apply,Derivation.leibniz_inv,baseTime_X]
       simp only [smul_eq_mul,mul_one,map_one]
       field_simp [X_ne_zero (K:=K)]) f
   exact he.symm
@@ -355,7 +355,7 @@ lemma infinity_theta_expression (f : E K) :
       residue (K:=K) 0 (-firstDensity*reciprocal (first K f)+forcing*reciprocal (second K f)) := by
   rw [theta_trace]
   change residue (K:=K) 0 _=_
-  congr 1
+  refine congrArg _ ?_
   rw [map_add,map_mul,map_mul,mul_add]
   have h0 := reciprocal_kernelZero (K:=K)
   have h1 := reciprocal_kernelOne (K:=K)
@@ -402,7 +402,9 @@ def boundary (h : RatFunc K) : E K →ₗ[K] K :=
 omit [CharZero K] in
 lemma boundary_apply (h : RatFunc K) (f : E K) : boundary h f=
     residue (K:=K) 0 (boundaryKernelZero h*reciprocal (first K f)+
-      boundaryKernelOne*reciprocal (second K f)) := rfl
+      boundaryKernelOne*reciprocal (second K f)) := by
+  simp only [boundary, LinearMap.comp_apply, LinearMap.add_apply, LinearMap.mulLeft_apply,
+    AlgHom.toLinearMap_apply, LinearMap.restrictScalars_apply]
 
 lemma boundary_one (h : RatFunc K) (hh : RegularAt 0 h) : boundary h (1 : E K)=0 := by
   rw [boundary_apply,first_one,second_one,map_one,map_zero,mul_one,mul_zero,add_zero]

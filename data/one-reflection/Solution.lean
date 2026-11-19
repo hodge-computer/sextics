@@ -103,8 +103,6 @@ end CertificateConstructionSection
 
 section OneReflectionDivergenceCoreSection
 
-set_option maxHeartbeats 12000000
-set_option maxRecDepth 6000
 noncomputable section
 
 namespace OneReflectionDivergenceCore
@@ -293,8 +291,6 @@ The only algebraic constant is the positive real square root of 3, cast to ℂ.
 The rational-coordinate and Sylvester trace derivation is recorded separately.
 -/
 
-set_option maxHeartbeats 8000000
-set_option maxRecDepth 4000
 noncomputable section
 namespace OneReflectionPhysical
 open MvPolynomial HodgeComputer HodgeTestbed
@@ -401,8 +397,6 @@ end OneReflectionDenominatorSection
 
 section OneReflectionDifferentiationSection
 
-set_option maxHeartbeats 4000000
-set_option maxRecDepth 4000
 noncomputable section
 namespace OneReflectionPhysical
 open MvPolynomial HodgeComputer HodgeTestbed
@@ -582,8 +576,6 @@ end OneReflectionDifferentiationSection
 
 section OneReflectionFirstIdentitySection
 
-set_option maxHeartbeats 8000000
-set_option maxRecDepth 4000
 noncomputable section
 
 namespace OneReflectionPhysical
@@ -879,8 +871,6 @@ end OneReflectionCertificateSection
 
 section OneReflectionSecondIdentitySection
 
-set_option maxHeartbeats 8000000
-set_option maxRecDepth 6000
 noncomputable section
 namespace OneReflectionPhysical
 open MvPolynomial HodgeComputer HodgeTestbed

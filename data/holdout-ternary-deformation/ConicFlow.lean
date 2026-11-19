@@ -11,8 +11,6 @@ and determinant lemmas. Prepared with OpenAI Codex assistance for
 hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 50000
 set_option profiler true
 set_option profiler.threshold 100
 namespace DeformedConic
@@ -31,8 +29,9 @@ lemma coefficientDerivation_parameterRing (j : Fin 3) (r : ParameterRing) :
     coefficientDerivation j (algebraMap ParameterRing CoefficientField r)=
       algebraMap ParameterRing CoefficientField (integerPartial j r) := by
   rw [IsScalarTower.algebraMap_apply ParameterRing ParameterField CoefficientField,
-    coefficientDerivation,extendFiniteDerivation_apply,parameterDerivation,
-    extendRingDerivation_apply,← IsScalarTower.algebraMap_apply]
+    coefficientDerivation,extendFiniteDerivation_apply,parameterDerivation]
+  exact congrArg (algebraMap ParameterField CoefficientField)
+    (extendRingDerivation_apply (L:=ParameterField) (integerPartial (R:=FermatRing) j) r)
 lemma coefficientDerivations_commute (i j : Fin 3) :
     Function.Commute (coefficientDerivation i) (coefficientDerivation j) :=
   extendFiniteDerivation_commute _ _

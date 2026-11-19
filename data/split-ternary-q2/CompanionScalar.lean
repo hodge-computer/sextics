@@ -13,8 +13,6 @@ Prepared with OpenAI Codex assistance for contributor fqlx.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace SplitCompanionScalar
 open CrossedElliptic CrossedScalarCompanionJet
 open scoped BigOperators

@@ -1,9 +1,7 @@
 import HodgeComputer.Sextic
 import HodgeComputer.Constructions.Explicit
 
-set_option maxHeartbeats 2000000
 
-set_option maxRecDepth 4000
 
 set_option linter.unusedTactic false
 

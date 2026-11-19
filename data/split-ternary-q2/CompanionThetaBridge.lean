@@ -4,9 +4,6 @@ import Proposal.CompanionPoleTwo
 /-! Compatible T-pivot cone and affine chart maps. Prepared with OpenAI
 Codex assistance for fqlx. The exact old coordinate ring is retained. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 open scoped BigOperators
 namespace SplitFCompanion
 open Polynomial HoldoutConstruction

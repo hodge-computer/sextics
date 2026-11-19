@@ -33,7 +33,7 @@ theorem coverQuotientTangent_beta (j : Fin 4) :
     coverQuotientTangent j.castSucc coverBeta = 0 := by
   have h := coverQuotientTangent_coordinate j.castSucc (Fin.last 4)
   have hj : (Fin.last 4 : Fin 5) ≠ j.castSucc := (Fin.castSucc_ne_last j).symm
-  rw [show coverQuotientCoordinate (Fin.last 4) = coverBeta by rfl, if_neg hj] at h
+  rw [show coverQuotientCoordinate (Fin.last 4) = coverBeta by rfl, ite_eq_right hj] at h
   exact h
 
 theorem coverQuotientTangent_alpha (j : Fin 4) :
@@ -109,7 +109,7 @@ theorem coverQuotientTangent_root (j : Fin 4) :
   simp only [coverQuotientResidueMap_X_zero, coverQuotientResidueMap_X_succ,
     coverQuotientTangent_coordinate, Fin.castSucc_inj] at h
   simp only [mul_ite, mul_one, mul_zero, Finset.sum_ite_eq', Finset.mem_univ,
-    if_true] at h
+    ite_true] at h
   apply (eq_div_iff coverQuotientResidueMap_normal_ne_zero).mpr
   simp only [integerPartial_apply]
   linear_combination -h

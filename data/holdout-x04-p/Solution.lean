@@ -5,8 +5,6 @@ import HodgeComputer.Constructions.HoldoutCover.GeneralizedCover
 /- Target specialization of fqlx's accepted holdout proof, with Codex assistance
 for benediamond. The shared construction and its attribution are retained. -/
 noncomputable section
-set_option maxRecDepth 10000
-set_option maxHeartbeats 1000000
 
 namespace Submission
 open HoldoutConstruction HoldoutGeneralization MvPolynomial

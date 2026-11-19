@@ -44,7 +44,6 @@ theorem isUnit_root : IsUnit root := by
     GenericSpecialization.r_bezout
   simpa [GenericSpecialization.r_factor] using h
 
-set_option maxHeartbeats 0 in
 theorem toSpecial_a : toSpecial a = AdjoinRoot.mk GenericSpecialization.P GenericSpecialization.a_factor := by
   rw [GenericSpecialization.a_factor_actual]
   simp only [a, GenericSpecialization.aActual, GenericSpecialization.kCoeff,
@@ -55,7 +54,6 @@ theorem toSpecial_a : toSpecial a = AdjoinRoot.mk GenericSpecialization.P Generi
     ParameterSpecialization.specialize_u, ParameterSpecialization.specialize_v,
     AdjoinRoot.mk_X, AdjoinRoot.mk_C, ← AdjoinRoot.algebraMap_eq]
 
-set_option maxHeartbeats 0 in
 theorem toSpecial_L : toSpecial lineL = AdjoinRoot.mk GenericSpecialization.P GenericSpecialization.L_factor := by
   rw [GenericSpecialization.L_factor_actual]
   simp only [lineL, a, b, c, d, e, f, GenericSpecialization.LActual,

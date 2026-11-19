@@ -22,7 +22,7 @@ variable {R σ : Type*} [CommRing R]
 /-- Every monomial has degree at least `n`; the zero polynomial satisfies
 this condition for every `n`. -/
 def HasOrder (n : ℕ) (p : MvPolynomial σ R) : Prop :=
-  ∀ m : σ →₀ ℕ, m.degree < n → coeff m p = 0
+  ∀ m : σ →₀ ℕ, m.degree < n → p.coeff m = 0
 
 theorem HasOrder.mono {n k : ℕ} {p : MvPolynomial σ R}
     (h : HasOrder n p) (hk : k ≤ n) : HasOrder k p :=
@@ -39,17 +39,17 @@ theorem hasOrder_zero_degree (p : MvPolynomial σ R) : HasOrder 0 p := by
 theorem HasOrder.add {n : ℕ} {p q : MvPolynomial σ R}
     (hp : HasOrder n p) (hq : HasOrder n q) : HasOrder n (p+q) := by
   intro m hm
-  simp [coeff_add, hp m hm, hq m hm]
+  simp [hp m hm, hq m hm]
 
 theorem HasOrder.sub {n : ℕ} {p q : MvPolynomial σ R}
     (hp : HasOrder n p) (hq : HasOrder n q) : HasOrder n (p-q) := by
   intro m hm
-  simp [coeff_sub, hp m hm, hq m hm]
+  simp [hp m hm, hq m hm]
 
 theorem HasOrder.neg {n : ℕ} {p : MvPolynomial σ R}
     (hp : HasOrder n p) : HasOrder n (-p) := by
   intro m hm
-  simp [coeff_neg, hp m hm]
+  simp [hp m hm]
 
 theorem HasOrder.sum {ι : Type*} (s : Finset ι) {n : ℕ}
     (p : ι → MvPolynomial σ R) (hp : ∀ i ∈ s, HasOrder n (p i)) :
@@ -105,7 +105,7 @@ theorem HasOrder.component_eq_zero {n : ℕ} {p : MvPolynomial σ R}
 theorem hasOrder_of_components_zero {n : ℕ} {p : MvPolynomial σ R}
     (hp : ∀ k < n, homogeneousComponent k p = 0) : HasOrder n p := by
   intro m hm
-  have h := congrArg (coeff m) (hp m.degree hm)
+  have h := congrArg (·.coeff m) (hp m.degree hm)
   simpa [coeff_homogeneousComponent] using h
 
 /-- Multiplication of the first possible homogeneous components. -/

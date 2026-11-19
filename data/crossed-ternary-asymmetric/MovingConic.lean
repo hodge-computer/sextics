@@ -8,7 +8,7 @@ import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
 import HodgeComputer.Constructions.HoldoutCover.PolynomialFamilyBridge
 import HodgeComputer.Constructions.HoldoutCover.PolynomialFieldMap
 import HodgeComputer.Constructions.HoldoutCover.PolynomialNormal
-import Mathlib.Data.Complex.Basic
+import Mathlib.Basic.Complex.Basic
 
 /- Prepared with OpenAI Codex assistance for contributor 1337isnot1337.
 See solution.md for the construction, provenance, and prior-work credit. -/
@@ -74,8 +74,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 20000
 set_option profiler true
 set_option profiler.threshold 100
 open scoped TensorProduct
@@ -183,7 +181,6 @@ end
 section
 
 noncomputable section
-set_option maxHeartbeats 3000000
 namespace CrossedFixedConic
 open Polynomial
 open CrossedConicIncidence (H gradient H_map gradient_map)
@@ -235,8 +232,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 20000
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 open CrossedConicIncidence (H gradient)
@@ -256,8 +251,7 @@ lemma conicCurve_constant (i : Fin 5) : (conicCurve i).coeff 0 =
   curveEval_constant _ _ _ i
 
 lemma conicCurve_equation : H conicCurve=0 := by
-  apply Polynomial.ext
-  intro n
+  ext n
   by_cases hn : n<13
   · have h := coefficients_equations ⟨n,hn⟩
     change MvPolynomial.eval₂Hom (algebraMap ParamRing CoefficientField) coefficients
@@ -325,8 +319,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 50000
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 
@@ -418,8 +410,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 100000
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 
@@ -512,8 +502,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 50000
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 
@@ -613,8 +601,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 100000
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction CrossedConicIncidence
 open scoped BigOperators
@@ -651,11 +637,12 @@ lemma rowProduct_first (j : Fin 5) :
   refine Fin.cases ?_ (fun j => ?_) j
   · simp only [polynomialMatrix_normal,ite_true]
     have h := congrArg (fun p : Polynomial CoefficientField => p.coeff 0) conicNormal_pairing
-    simpa only [polynomialPairing,Polynomial.coeff_one_zero] using h
+    simpa only [polynomialPairing,AddMonoidAlgebra.coeff_one_zero] using h
   · simp only [polynomialMatrix_tangent,Fin.succ_ne_zero,ite_false]
     have h := gradient_derivation_pairing (polynomialDerivation j) conicCurve conicCurve_equation
     have hc := congrArg (fun p : Polynomial CoefficientField => p.coeff 0) h
-    simpa only [conicGradient,Polynomial.coeff_zero] using hc
+    simp only [conicGradient,Polynomial.coeff_zero] at hc ⊢
+    exact hc
 
 lemma rowProduct_succ (i : Fin 4) (j : Fin 5) :
     (rowMatrix*constantMatrix) i.succ j=(polynomialMatrix (independentCoordinate i) j).coeff 0 := by
@@ -724,8 +711,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 500000
 namespace CrossedFixedConic
 open Polynomial HoldoutConstruction
 open scoped BigOperators

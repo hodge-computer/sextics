@@ -2,7 +2,6 @@ import HodgeComputer.Constructions.TransitiveCubic.IdentityProducts
 namespace TransitiveCovariants.IdentityData
 open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 open TransitiveCovariants.Reflection
-set_option maxRecDepth 131072
 variable {K : Type*} [CommRing K]
 lemma H_evaluation (a b c d e f x y : K) :
   denote (fun i => (context a b c d e f x y 1).get i) x y HData=H a b c d e f x y 1 := by

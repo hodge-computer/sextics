@@ -8,8 +8,6 @@ field. No equation is deformed: alpha is fixed to one and every cyclic term
 has coefficient one half. All coordinate denominators used here are proved
 nonzero. Prepared with OpenAI Codex assistance for hodgepodgeconjecture. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace CyclePhysicalCoordinates
 open CyclePhysical
 def coordinate (i : Fin 6) : FunctionField := residueMap (MvPolynomial.X i)

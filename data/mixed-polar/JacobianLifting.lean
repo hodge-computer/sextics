@@ -10,8 +10,6 @@ Adapted from the accepted constructions of fqlx and hodgepodgeconjecture.
 Prepared for benediamond with OpenAI Codex assistance.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace MixedPolarJacobianLifting
 open HoldoutConstruction MixedPolarJacobianIncidence MixedPolarJacobianSeedBinding
 local instance : Fact (Nat.Prime 5) := ⟨by decide⟩

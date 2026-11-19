@@ -9,9 +9,6 @@ Prepared with OpenAI ChatGPT collaborating-agent assistance.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxRecDepth 10000
-set_option maxHeartbeats 1000000
 
 namespace HoldoutBundle
 

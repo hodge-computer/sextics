@@ -8,8 +8,6 @@ import HodgeComputer.Constructions.HoldoutCover.ResidueClearing
 /-! The endpoint section Y1=0; adapted from fqlx's reflection-coupled-fano proof. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 
 namespace CyclicTriple.Endpoint
 

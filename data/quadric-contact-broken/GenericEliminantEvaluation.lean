@@ -86,8 +86,6 @@ theorem coefficient25_eq (p q s k u v : K) : coefficient25 p q s k u v =
 theorem coefficient26_eq (p q s k u v : K) : coefficient26 p q s k u v =
     GenericLineChart.eliminantCoeff26 p q s k u v := rfl
 
-set_option maxRecDepth 100000 in
-set_option maxHeartbeats 0 in
 theorem rawPolynomial_eval₂ (f : K →+* A) (r : A) (p q s k u v : K) :
     (rawPolynomial p q s k u v).eval₂ f r =
       GenericLineChart.eliminant r (f p) (f q) (f s) (f k) (f u) (f v) := by

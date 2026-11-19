@@ -9,8 +9,6 @@ family. This follows the incidence method of fqlx's accepted construction.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 100000
 set_option profiler true
 set_option profiler.threshold 100
 namespace DeformedConic

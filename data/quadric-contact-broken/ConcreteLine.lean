@@ -56,8 +56,6 @@ theorem numerator_homogeneous (k x y z w : R) (i : Fin 4) :
   · exact nb_homogeneous k x y z w
   · exact (minusNC_homogeneous k x y z w).neg
 
-set_option maxHeartbeats 4000000
-set_option maxRecDepth 4000
 
 theorem numerator_divergence (k x y z w : R) :
     divergence (numerator k x y z w) = 0 := by

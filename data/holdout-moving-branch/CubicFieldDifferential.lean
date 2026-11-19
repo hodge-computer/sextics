@@ -6,8 +6,6 @@ The universal polynomial identity is instantiated using the proved physical
 tangent derivation and the actual coefficients. All nonvanishing assumptions
 are supplied by the physical chart. Prepared with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace CycleCubicFieldDifferential
 open TransitiveCovariants MvPolynomial
 section Evaluation
@@ -69,14 +67,14 @@ theorem differential_of_constants (D : Derivation ℤ K K)
   let φ : R →+* K := (constants D).subtype
   let ρ : Affine R →+* K := MvPolynomial.eval₂Hom φ ![x,y]
   have hU : ρ (Upoly a' b' c' d' e' f')=0 := by
-    simpa [ρ,φ,Upoly,TransitiveCubic.cubic,a',b',c',d',e',f',Subring.subtype] using hu
+    simpa [ρ,φ,Upoly,TransitiveCubic.cubic,a',b',c',d',e',f'] using hu
   have hPx : ρ (pderiv 0 (Upoly a' b' c' d' e' f'))=3*a*x^2+2*d*x*y+2*f*x := by
     simp [ρ,φ,Upoly,a',b',c',d',e',f',MvPolynomial.pderiv_mul,MvPolynomial.pderiv_pow,
-      Pi.single_apply,Fin.ext_iff,Subring.subtype]
+      Pi.single_apply,Fin.ext_iff]
     ring
   have hPy : ρ (pderiv 1 (Upoly a' b' c' d' e' f'))=3*b*y^2+d*x^2+2*e*y := by
     simp [ρ,φ,Upoly,a',b',c',d',e',f',MvPolynomial.pderiv_mul,MvPolynomial.pderiv_pow,
-      Pi.single_apply,Fin.ext_iff,Subring.subtype]
+      Pi.single_apply,Fin.ext_iff]
     ring
   have hHmap : ρ (Hpoly a' b' c' d' e' f')=H a b c d e f x y 1 :=
     eval_Hpoly φ a' b' c' d' e' f' x y

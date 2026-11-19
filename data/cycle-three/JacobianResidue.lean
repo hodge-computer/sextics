@@ -8,9 +8,6 @@ fqlx's shared polynomial-family bridge and finite-trace theorems. It is not yet
 the protected certificate for the physical sextic. Prepared with OpenAI Codex
 assistance for hodgepodgeconjecture. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
-set_option maxRecDepth 10000
 namespace CycleJacobianResidue
 open HoldoutConstruction CycleJacobianFamily CycleJacobianParameters CycleJacobianEmbedding
   CycleJacobianHypersurface CycleJacobianNormal Polynomial

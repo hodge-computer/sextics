@@ -17,8 +17,6 @@ No certificate existence is asserted without the weighted-divergence input.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 500000
 namespace SplitTernaryPhysical
 open MvPolynomial HoldoutConstruction
 
@@ -89,7 +87,7 @@ lemma chartD_coordinate (i j : Fin 6) : chartD i (coordinate j)=if j=i then 1 el
   rw [coordinate,chartD_polynomial]
   by_cases h : j=i
   · subst j; simp
-  · rw [integerPartial_X_of_ne _ _ h,map_zero,if_neg h]
+  · rw [integerPartial_X_of_ne _ _ h,map_zero,ite_eq_right h]
 lemma coordinate_ne_zero (i : Fin 6) : coordinate i≠0 := by
   simpa only [coordinate,map_zero] using (IsFractionRing.injective Poly M).ne (MvPolynomial.X_ne_zero (R:=ℂ) i)
 lemma θ_C (c : ℂ) : θ (C c)=algebraMap Poly M (C c) := by rw [θ,RingHom.comp_apply,monomialMap_C]
@@ -120,8 +118,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 600000
 namespace SplitTernaryPhysical
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators
@@ -148,10 +144,10 @@ lemma chartD_baseValue_zero (k : Fin 6) (hk : ∀ i : Fin 4,baseIndex i≠k) (f 
   have he := derivation_intertwines_quotient_fraction (RingHom.id Base)
     Function.surjective_id baseValue (0 : Derivation ℤ BaseField BaseField) (chartD k)
     (by intro c; simp only [RingHom.id_apply,baseValue_polynomial,baseRingMap_C,chartD_C,
-          Derivation.coe_zero,Pi.zero_apply,map_zero])
+          FunLike.coe_zero,Pi.zero_apply,map_zero])
     (by intro i; simp only [RingHom.id_apply,baseValue_polynomial,baseRingMap_X,chartD_coordinate,
-          if_neg (hk i),Derivation.coe_zero,Pi.zero_apply,map_zero]) f
-  simpa only [Derivation.coe_zero,Pi.zero_apply,map_zero] using he
+          ite_eq_right (hk i),FunLike.coe_zero,Pi.zero_apply,map_zero]) f
+  simpa only [FunLike.coe_zero,Pi.zero_apply,map_zero] using he
 lemma chartD_lambda_base (f : BaseField) : chartD 4 (baseValue f)=0 := by
   apply chartD_baseValue_zero
   intro i; fin_cases i <;> simp [baseIndex]
@@ -191,8 +187,6 @@ end
 
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace SplitTernaryPhysical
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators

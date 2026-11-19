@@ -21,8 +21,8 @@ abbrev coefficientAlgebra (ρ : E →+* Matrix n n (MvPolynomial σ K)) :=
 instance coefficientAlgebra_comm (ρ : E →+* Matrix n n (MvPolynomial σ K)) :
     IsMulCommutative (coefficientAlgebra ρ) := by
   apply Algebra.isMulCommutative_adjoin
-  rintro _ ⟨a, rfl⟩ _ ⟨b, rfl⟩
-  rw [← map_mul, ← map_mul, mul_comm a b]
+  rintro _ ⟨a, rfl⟩ _ ⟨b, rfl⟩ _
+  exact (Commute.all a b).map ρ
 
  def coefficientLift (ρ : E →+* Matrix n n (MvPolynomial σ K)) :
     E →+* coefficientAlgebra ρ where

@@ -5,7 +5,6 @@ open Polynomial ParameterEliminant GenericLineChart
 
 noncomputable section
 
-set_option maxHeartbeats 0 in
 theorem toSpecial_M : toSpecial lineM = AdjoinRoot.mk GenericSpecialization.P GenericSpecialization.MActual := by
   simp only [lineM, a, b, c, d, e, g, GenericSpecialization.MActual,
     GenericSpecialization.aActual, GenericSpecialization.bActual, GenericSpecialization.cActual,
@@ -44,7 +43,6 @@ theorem z_mul_scale : z * (ke^3*root^3) = aa root pe qe se ke ue ve*x+ke^2*root*
   unfold z lineZ
   rw [mul_assoc, Ring.inverse_mul_cancel _ ((isUnit_ke.pow 3).mul (isUnit_root.pow 3)), mul_one]
 
-set_option maxHeartbeats 0 in
 theorem toSpecial_z : toSpecial z = AdjoinRoot.mk GenericSpecialization.P GenericSpecialization.line_z := by
   apply (((isUnit_ke.pow 3).mul (isUnit_root.pow 3)).map toSpecial).mul_left_inj.mp
   rw [← map_mul, z_mul_scale]
@@ -66,7 +64,6 @@ theorem w_sub_mul_scale : (w-root*z)*(ke*root) = hNum root ue ve := by
   change (root*z+hNum root ue ve*Ring.inverse (ke*root)-root*z)*(ke*root) = _
   rw [add_sub_cancel_left, mul_assoc, Ring.inverse_mul_cancel _ (isUnit_ke.mul isUnit_root), mul_one]
 
-set_option maxHeartbeats 0 in
 theorem toSpecial_w : toSpecial w = AdjoinRoot.mk GenericSpecialization.P GenericSpecialization.line_w := by
   apply ((isUnit_ke.mul isUnit_root).map toSpecial).mul_left_inj.mp
   have hw := congrArg toSpecial w_sub_mul_scale

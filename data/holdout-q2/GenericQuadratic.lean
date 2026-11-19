@@ -5,8 +5,6 @@ import Proposal.QuadraticSolver
 /-! An actual quadratic-source solver on the full four-parameter holdout cubic.
 All invertibility hypotheses are discharged at the exact rational good fiber. -/
 noncomputable section
-set_option maxHeartbeats 2000000
-set_option maxRecDepth 100000
 namespace HoldoutQ2.GenericQuadratic
 open MvPolynomial NewLineAlgebra
 

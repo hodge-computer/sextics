@@ -7,8 +7,6 @@ shears.  The six coefficient jets are explicitly (0,0,0,0,k,-3a/(2d));
 no parameter derivation on the specialized physical field is assumed.
 The maintained TransitiveCubic supplies every covariant identity. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
 namespace MixedPolarCubicSourceJets
 open TransitiveCovariants ResidueFirstJets MixedPolarCubicJetCalculus TrivSqZeroExt
 variable {K : Type*} [Field K] [CharZero K]
@@ -70,20 +68,20 @@ lemma etaJet_value (p : Data K) : (etaJet p).fst=eta p := by
   simp only [etaJet,fst_mul,fst_neg,fst_pow,fst_inv,jJet_value,hJet_value,half,fst_inl,eta]
   ring
 lemma sJet_value (p : Data K) : (sJet p).fst=aWeierstrass p := by
-  simp [sJet,TransitiveCubic.s4,TransitiveCubic.s4Numerator,aJet,bJet,cJet,dJet,eJet,fJet,aWeierstrass] <;> ring
+  simp [sJet,TransitiveCubic.s4,TransitiveCubic.s4Numerator,aJet,bJet,cJet,dJet,eJet,fJet,aWeierstrass,jet_mk] <;> ring
 lemma bJet_value (p : Data K) : (bWeierstrassJet p).fst=bWeierstrass p := by
-  simp [bWeierstrassJet,half,tJet,TransitiveCubic.s6,TransitiveCubic.s6Numerator,aJet,bJet,cJet,dJet,eJet,fJet,bWeierstrass]
+  simp [bWeierstrassJet,half,tJet,TransitiveCubic.s6,TransitiveCubic.s6Numerator,aJet,bJet,cJet,dJet,eJet,fJet,bWeierstrass,jet_mk]
   ring
 lemma gJet_value (p : Data K) : (gJet p).fst=normal p := by
-  simp [gJet,aJet,dJet,fJet,xJet,yJet,normal]
+  simp [gJet,aJet,dJet,fJet,xJet,yJet,normal,jet_mk]
 
 lemma jet_equation (p : Data K)
     (hu : TransitiveCubic.cubic p.a p.b p.c p.d p.e 0 p.x p.y 1=0)
     (hg : normal p ≠ 0) :
     TransitiveCubic.cubic (aJet p) (bJet p) (cJet p) (dJet p) (eJet p) (fJet p) (xJet p) (yJet p) (1:(Jet (K:=K)))=0 := by
   apply TrivSqZeroExt.ext
-  · simpa [TransitiveCubic.cubic,aJet,bJet,cJet,dJet,eJet,fJet,xJet,yJet] using hu
-  · simp [TransitiveCubic.cubic,aJet,bJet,cJet,dJet,eJet,fJet,xJet,yJet,smul_eq_mul,op_smul_eq_smul]
+  · simpa [TransitiveCubic.cubic,aJet,bJet,cJet,dJet,eJet,fJet,xJet,yJet,jet_mk] using hu
+  · simp [TransitiveCubic.cubic,aJet,bJet,cJet,dJet,eJet,fJet,xJet,yJet,jet_mk,smul_eq_mul,op_smul_eq_smul]
     have ht : (-modifiedSource p/normal p)*normal p = -modifiedSource p := div_mul_cancel₀ _ hg
     dsimp only [normal,modifiedSource] at ht ⊢
     linear_combination ht
@@ -92,21 +90,21 @@ lemma gJet_dot (p : Data K) (hd : p.d ≠ 0) (hg : normal p ≠ 0) :
     (gJet p).snd=normalDot p := by
   have hh := MixedPolarBalancedShear.second_normal_source_unchanged p.a p.d p.k p.x p.y (normal p) hd hg rfl
   have hh' : (-3*p.a*p.x/p.d-modifiedSource p*secondNormal p/normal p)=normalDot p := by
-    apply (div_left_inj' hg).mp
+    apply (div_left_inj₀ hg).mp
     exact hh
-  simp [gJet,aJet,dJet,fJet,xJet,yJet,smul_eq_mul,op_smul_eq_smul]
+  simp [gJet,aJet,dJet,fJet,xJet,yJet,jet_mk,smul_eq_mul,op_smul_eq_smul]
   rw [← hh']
   dsimp only [modifiedSource,secondNormal]
   ring
 
 lemma aDot_formula (p : Data K) (hd : p.d ≠ 0) :
     aDot p=p.c*p.d^2*p.k+(9/2:K)*p.a*p.b*p.c := by
-  simp [aDot,sJet,TransitiveCubic.s4Numerator,aJet,bJet,cJet,dJet,eJet,fJet,smul_eq_mul,op_smul_eq_smul]
+  simp [aDot,sJet,TransitiveCubic.s4Numerator,aJet,bJet,cJet,dJet,eJet,fJet,jet_mk,smul_eq_mul,op_smul_eq_smul]
   field_simp
   ring
 lemma bDot_formula (p : Data K) (hd : p.d ≠ 0) :
     bDot p=-(12*p.a^2*p.c*p.e^2*p.k-4*p.a*p.c*p.d*p.e^2)/4 := by
-  simp [bDot,bWeierstrassJet,tJet,half,TransitiveCubic.s6Numerator,aJet,bJet,cJet,dJet,eJet,fJet,smul_eq_mul,op_smul_eq_smul]
+  simp [bDot,bWeierstrassJet,tJet,half,TransitiveCubic.s6Numerator,aJet,bJet,cJet,dJet,eJet,fJet,jet_mk,smul_eq_mul,op_smul_eq_smul]
   field_simp
   ring
 
@@ -141,7 +139,7 @@ lemma coefficient_derivatives (p : Data K) (D : Derivation ℤ K K)
     jetDerivation D (eJet p)=0 ∧ jetDerivation D (fJet p)=0 := by
   repeat' apply And.intro
   all_goals apply TrivSqZeroExt.ext <;>
-    simp [jetDerivation,aJet,bJet,cJet,dJet,eJet,fJet,ha,hb,hc,hd,he,hk,
+    simp [jetDerivation_fst,jetDerivation_snd,aJet,bJet,cJet,dJet,eJet,fJet,jet_mk,ha,hb,hc,hd,he,hk,
       Derivation.leibniz_div,Derivation.leibniz,smul_eq_mul,D.map_natCast]
 
 lemma jet_differential (p : Data K) (D : Derivation ℤ K K)
@@ -152,8 +150,7 @@ lemma jet_differential (p : Data K) (D : Derivation ℤ K K)
     (hg : normal p ≠ 0) (hH : H p.a p.b p.c p.d p.e 0 p.x p.y 1 ≠ 0) :
     gJet p*jetDerivation D (xiJet p)=6*etaJet p := by
   obtain ⟨ha',hb',hc',hd',he',hf'⟩ := coefficient_derivatives p D ha hb hc hd he hk
-  have hy' : jetDerivation D (yJet p)=1 := by
-    apply TrivSqZeroExt.ext <;> simp [jetDerivation,yJet,hy]
+  have hy' : jetDerivation D (yJet p)=1 := TrivSqZeroExt.ext hy (map_zero D)
   have hc' := cleared_differential (jetDerivation D) (aJet p) (bJet p) (cJet p)
     (dJet p) (eJet p) (fJet p) (xJet p) (yJet p)
     ha' hb' hc' hd' he' hf' (jet_equation p hu hg) hy'

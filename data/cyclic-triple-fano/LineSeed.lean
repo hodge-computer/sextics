@@ -8,8 +8,6 @@ Its six positive-coefficient deformations have a nonsingular Jacobian.
 The exact argument, including the inverse matrix, is kernel checked.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace CyclicTriple
 open Polynomial
 

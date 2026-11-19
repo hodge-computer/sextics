@@ -6,8 +6,6 @@ physical sextic field. Its construction first proves injectivity on the
 polynomial parameter algebra, then localizes, then adjoins the monic root. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 
 namespace HoldoutBundle
 open HoldoutConstruction

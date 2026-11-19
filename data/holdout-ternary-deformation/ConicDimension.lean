@@ -8,8 +8,6 @@ algebra and injectivity hypothesis supplied by the preceding modules.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 namespace DeformedConic
 open HoldoutConstruction Algebra
 

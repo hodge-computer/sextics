@@ -24,7 +24,7 @@ theorem exists_active_homogeneous_representatives {ι : Type*} [Fintype ι]
       (∀ i, baseMap (N i) = baseMap D * activeImage k v (P i)) := by
   classical
   let I := Σ i : ι, ↥(P i).support
-  let z : I → Regular k := fun k => coeff k.2.val (P k.1)
+  let z : I → Regular k := fun k => (P k.1).coeff k.2.val
   obtain ⟨n, D, U, hD, hDgood, hU, hrep⟩ := exists_regular_homogeneous_representatives z
   let term (s : Fin 4 →₀ ℕ) : BasePoly := ∏ j ∈ s.support, v j ^ s j
   let N : ι → BasePoly := fun i => ∑ s : ↥(P i).support, U ⟨i,s⟩ * term s.val
@@ -46,7 +46,7 @@ theorem exists_active_homogeneous_representatives {ι : Type*} [Fintype ι]
     congr 1
     simp only [activeImage, coe_eval₂Hom, eval₂_eq, term, map_prod, map_pow, z]
     exact Finset.sum_coe_sort (P i).support
-      (fun s => regularParameterMap k (coeff s (P i)) * ∏ j ∈ s.support, baseMap (v j) ^ s j)
+      (fun s => regularParameterMap k ((P i).coeff s) * ∏ j ∈ s.support, baseMap (v j) ^ s j)
 
 def activeFibre (k : ℂ) (v : Fin 4 → BasePoly) : ActivePoly k →+* BasePoly :=
   eval₂Hom (C.comp (RegularSpecialization.specialize (goodParameters k))) (fun j => ratioBase k (v j))
@@ -62,7 +62,7 @@ theorem exists_active_representatives_with_fibre {ι : Type*} [Fintype ι]
       (∀ i, ratioBase k (N i) = C (goodParameters k q) * xa^n * activeFibre k v (P i)) := by
   classical
   let I := Σ i : ι, ↥(P i).support
-  let z : I → Regular k := fun k => coeff k.2.val (P k.1)
+  let z : I → Regular k := fun k => (P k.1).coeff k.2.val
   obtain ⟨n,q,D,U,hD,hq,hU,hfibre,hrep⟩ := exists_regular_representatives_with_fibre z
   let term (s : Fin 4 →₀ ℕ) : BasePoly := ∏ j ∈ s.support, v j ^ s j
   let N : ι → BasePoly := fun i => ∑ s : ↥(P i).support, U ⟨i,s⟩ * term s.val
@@ -84,7 +84,7 @@ theorem exists_active_representatives_with_fibre {ι : Type*} [Fintype ι]
     congr 1
     simp only [activeImage, coe_eval₂Hom, eval₂_eq, term, map_prod, map_pow, z]
     exact Finset.sum_coe_sort (P i).support
-      (fun s => regularParameterMap k (coeff s (P i)) * ∏ j ∈ s.support, baseMap (v j) ^ s j)
+      (fun s => regularParameterMap k ((P i).coeff s) * ∏ j ∈ s.support, baseMap (v j) ^ s j)
   · intro i
     change ratioBase k (∑ s : ↥(P i).support, U ⟨i,s⟩ * term s.val) = _
     simp only [map_sum, map_mul]
@@ -102,7 +102,7 @@ theorem exists_active_representatives_with_fibre {ι : Type*} [Fintype ι]
         simp only [activeFibre, coe_eval₂Hom, eval₂_eq, RingHom.comp_apply,
           term, map_prod, map_pow, z]
         exact Finset.sum_coe_sort (P i).support
-          (fun s => C (RegularSpecialization.specialize (goodParameters k) (coeff s (P i))) *
+          (fun s => C (RegularSpecialization.specialize (goodParameters k) ((P i).coeff s)) *
             ∏ j ∈ s.support, ratioBase k (v j) ^ s j)
 
 

@@ -1,11 +1,8 @@
 import Proposal.DeformedEquation
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 set_option profiler true
 set_option profiler.threshold 100
-set_option maxRecDepth 100000
 namespace DeformedConic
 open Polynomial
 

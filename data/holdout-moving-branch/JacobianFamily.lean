@@ -9,9 +9,6 @@ ternary-deformation construction, with all target-specific data bound here.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture; transitive cubic adaptation by fqlx, specialized here for benediamond with Codex assistance.
 -/
 noncomputable section
-set_option maxRecDepth 8192
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace CycleJacobianFamily
 open HoldoutConstruction CycleJacobianIncidence CycleJacobianLifting Polynomial
 open scoped BigOperators

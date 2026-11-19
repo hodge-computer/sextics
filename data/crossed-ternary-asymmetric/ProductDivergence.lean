@@ -8,8 +8,6 @@ See solution.md for the construction, provenance, and prior-work credit. -/
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 400000
 namespace CrossedProductField
 open Polynomial HoldoutConstruction CrossedFanoElliptic CrossedElliptic
 open scoped BigOperators
@@ -47,8 +45,8 @@ lemma D_C (i : Fin 4) (c : ℂ) : D i (inclusion (algebraMap Base F (MvPolynomia
 lemma D_coordinate (i j : Fin 4) : D i (coordinates j)=if j=i then 1 else 0 := by
   rw [coordinates,D_polynomial]
   by_cases he : j=i
-  · subst j; rw [integerPartial_X_self,map_one,map_one,if_pos rfl]
-  · rw [integerPartial_X_of_ne _ _ he,map_zero,map_zero,if_neg he]
+  · subst j; rw [integerPartial_X_self,map_one,map_one,ite_eq_left rfl]
+  · rw [integerPartial_X_of_ne _ _ he,map_zero,map_zero,ite_eq_right he]
 
 lemma firstIndex_injective : Function.Injective firstIndex := by intro i j h; fin_cases i <;> fin_cases j <;> simp_all [firstIndex]
 lemma secondIndex_injective : Function.Injective secondIndex := by intro i j h; fin_cases i <;> fin_cases j <;> simp_all [secondIndex]
@@ -126,8 +124,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 400000
 namespace CrossedProductField
 open Polynomial HoldoutConstruction CrossedFanoElliptic CrossedElliptic
 open scoped BigOperators
@@ -209,8 +205,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 300000
 namespace CrossedProductField
 open Polynomial HoldoutConstruction CrossedFanoElliptic CrossedElliptic
 open scoped BigOperators

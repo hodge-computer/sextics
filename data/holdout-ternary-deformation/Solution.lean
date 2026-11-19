@@ -16,8 +16,6 @@ proved in the local helpers. Prepared with OpenAI Codex assistance for
 hodgepodgeconjecture. See solution.md for the full mathematical argument.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 500000
 namespace DeformedCover
 open HoldoutConstruction
 open DeformedConic (BaseField TargetField targetResidueMap targetTangent quotientEquation)

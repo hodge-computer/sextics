@@ -10,9 +10,6 @@ maintained constructions, with their original attribution to fqlx, HeadOfNaps,
 the Sextics contributors, Lean and mathlib. Prepared with Codex assistance for fqlx.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 open scoped BigOperators
 
 namespace SplitCompanionDomain
@@ -52,7 +49,10 @@ lemma hypersurface_partial (which : Bool) (j : Fin 5) : integerPartial j (hypers
     SplitCompanion.gradient which 0
       ![MvPolynomial.X 1,MvPolynomial.X 0,MvPolynomial.X 2,MvPolynomial.X 3,MvPolynomial.X 4]
       (coordinateSwap j) := by
-  rw [hypersurface,SplitCompanion.H_derivation (integerPartial j) which 0 (map_zero _)]
+  have h (z : Fin 5 → MvPolynomial (Fin 5) ℂ) : integerPartial j (SplitCompanion.H which 0 z)=
+      ∑ i,SplitCompanion.gradient which 0 z i*integerPartial j (z i) :=
+    SplitCompanion.H_derivation (integerPartial j) which 0 (map_zero _) z
+  rw [hypersurface,h]
   fin_cases j <;>
     simp [SplitCompanion.gradient,Fin.sum_univ_succ,coordinateSwap,Equiv.swap_apply_def,integerPartial_X_of_ne]
 
@@ -201,7 +201,7 @@ lemma two_step_evaluation_det {R : Type*} [CommRing R]
     exact he i j
   rw [hi,Matrix.det_one,mul_one]
   change P 0 0*P 1 1=4
-  rw [h0,if_pos rfl,h11,one_mul]
+  rw [h0,ite_eq_left rfl,h11,one_mul]
 
 def polynomialMatrix (which : Bool) : Matrix (Fin 5) (Fin 5) (Polynomial (CoefficientField which)) :=
   fun i => Fin.cases (conicNormal which i) (fun j => polynomialDerivation which j (conicCurve which i))
@@ -228,11 +228,12 @@ lemma rowProduct_first (which : Bool) (j : Fin 5) :
   refine Fin.cases ?_ (fun j => ?_) j
   · simp only [polynomialMatrix_normal,ite_true]
     have h := congrArg (fun p : Polynomial (CoefficientField which) => p.coeff 0) (conicNormal_pairing which)
-    simpa only [polynomialPairing,Polynomial.coeff_one_zero] using h
+    simpa only [polynomialPairing,AddMonoidAlgebra.coeff_one_zero] using h
   · simp only [polynomialMatrix_tangent,Fin.succ_ne_zero,ite_false]
     have h := gradient_derivation_pairing (polynomialDerivation which j) which (conicCurve which) (conicCurve_equation which)
     have hc := congrArg (fun p : Polynomial (CoefficientField which) => p.coeff 0) h
-    simpa only [conicGradient,Polynomial.coeff_zero] using hc
+    simp only [conicGradient,Polynomial.coeff_zero] at hc ⊢
+    exact hc
 lemma rowProduct_succ (which : Bool) (i : Fin 4) (j : Fin 5) :
     (rowMatrix which*constantMatrix which) i.succ j=(polynomialMatrix which (independentCoordinate i) j).coeff 0 := by
   simp [Matrix.mul_apply,rowMatrix,constantMatrix]
@@ -358,13 +359,15 @@ lemma bridgeMatrix_det_ne_zero (which : Bool) : (bridgeMatrix which).det≠0 := 
   simp [coordinateSwap,Equiv.Perm.sign_swap,show (0 : Fin 5)≠1 by decide]
 lemma gradient_normal_pairing (which : Bool) :
     (∑ j,fieldEval which (MvPolynomial.pderiv j (SplitCompanionDomain.hypersurface which))*normalField which j)=1 := by
-  simp only [gradient_evaluation,normalField,← map_mul,← map_sum]
   have h := conicNormal_pairing which
   change (∑ j,conicGradient which j*conicNormal which j)=1 at h
   have he : (∑ j,conicGradient which (coordinateSwap j)*conicNormal which (coordinateSwap j))=
       ∑ j,conicGradient which j*conicNormal which j :=
     Equiv.sum_comp coordinateSwap (fun j => conicGradient which j*conicNormal which j)
-  rw [he,h,map_one]
+  rw [← he] at h
+  simp only [Fin.sum_univ_five] at h ⊢
+  simp only [gradient_evaluation,normalField,← RingHom.map_mul,← RingHom.map_add]
+  rw [h,RingHom.map_one]
 
 def targetDerivation (which : Bool) (j : Fin 4) : Derivation ℤ (ConicFunctionField which) (ConicFunctionField which) :=
   extendFiniteDerivation (L:=ConicFunctionField which) (SplitCompanionDomain.tangent which j)

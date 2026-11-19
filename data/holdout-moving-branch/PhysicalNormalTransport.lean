@@ -9,8 +9,6 @@ interface is the shared construction credited to fqlx and collaborators.
 Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 The transitive-cubic adaptation is due to fqlx. Adapted here to holdout-moving-branch for benediamond with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace CyclePhysicalNormalTransport
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open scoped BigOperators

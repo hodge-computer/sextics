@@ -6,7 +6,6 @@ The normal independence premise on B0 will be discharged for the explicit
 embedding QQ(x,y,r,z) → QQ(x,y,r,z,λ) in the following module.
 -/
 set_option autoImplicit false
-set_option maxHeartbeats 800000
 noncomputable section
 namespace HodgeTestbed.EllipticAmbient
 open HodgeTestbed.Conic HodgeTestbed.FrozenChart

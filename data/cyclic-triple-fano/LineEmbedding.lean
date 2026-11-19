@@ -10,8 +10,6 @@ The finite-type hypothesis in the transcendence-degree argument is explicit.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1500000
 
 namespace CyclicTriple.Target
 
@@ -101,7 +99,6 @@ variable (c : ℂ) (E : Type) [_root_.Field E]
 variable [Algebra (Endpoint.Field c) E] [Algebra ℂ E]
 variable [IsScalarTower ℂ (Endpoint.Field c) E]
 
-set_option backward.isDefEq.respectTransparency true in
 /-- Only these four facts about the constructed curve are used in dominance.
 The endpoint is generic on the transverse section, while the first moving
 coordinate has zero constant coefficient and is not the zero polynomial. -/

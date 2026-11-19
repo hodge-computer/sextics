@@ -9,8 +9,6 @@ square-system theorem of fqlx, not a continuity claim about the modular seed.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture; adapted by fqlx with Codex assistance.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace CycleJacobianLifting
 open HoldoutConstruction CycleJacobianIncidence CycleJacobianSeedBinding
 local instance : Fact (Nat.Prime 5) := ⟨by decide⟩

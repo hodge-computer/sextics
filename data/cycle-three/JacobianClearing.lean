@@ -8,7 +8,6 @@ Transport to that sextic remains a separate obligation. The clearing machinery
 is the shared construction credited to fqlx and collaborators.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CycleJacobianClearing
 open HoldoutConstruction CycleJacobianEmbedding CycleJacobianHypersurface CycleJacobianResidue
 open scoped BigOperators
@@ -37,7 +36,11 @@ theorem polynomial_clearing (A : Ambient) :
         residueMap (MvPolynomial.pderiv 0 hypersurface)) := by
     simp only [residueDivergence,fieldDivergence,Finset.sum_sub_distrib,Finset.sum_div]
   rw [hd] at hw
-  simp only [integerPartial_apply]
+  change (residueMap (MvPolynomial.pderiv 0 A)*residueMap (MvPolynomial.pderiv 0 hypersurface)-
+    residueMap A*residueMap (MvPolynomial.pderiv 0 (MvPolynomial.pderiv 0 hypersurface)))/
+      (residueMap (MvPolynomial.pderiv 0 hypersurface))^2+
+    ∑ i,(tangent i (w i)-w i*tangent i (residueMap (MvPolynomial.pderiv 0 hypersurface))/
+      residueMap (MvPolynomial.pderiv 0 hypersurface))=0
   rw [hw]
   have hn : residueMap (MvPolynomial.pderiv 0 hypersurface)≠0 := normal_ne_zero
   field_simp

@@ -7,8 +7,6 @@ import Proposal.CoordinateOrder
 /-! Assembly of the weighted-line family, polynomial integration, cubic pullback,
 and homogeneous extraction. No explicit coefficient list for D is claimed. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1500000
 namespace CyclicTriple
 open MvPolynomial HoldoutConstruction
 
@@ -33,7 +31,7 @@ theorem source_homogeneous : physicalSource.IsHomogeneous 6 :=
 
 theorem source_pullback : X 5^2*cubeLast quotientSource = physicalSource := by
   simp only [quotientSource, physicalSource, map_mul, map_pow, cubeVariable_X]
-  simp only [show (0 : Fin 6) ≠ 5 by decide, show (2 : Fin 6) ≠ 5 by decide, if_false]
+  simp only [show (0 : Fin 6) ≠ 5 by decide, show (2 : Fin 6) ≠ 5 by decide, ite_false]
   ring
 
 theorem quotient_certificate_data :

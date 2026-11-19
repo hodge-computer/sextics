@@ -11,7 +11,7 @@ theorem physicalEuler_coord (j : Fin 5) :
       (![coord 0, coord 1, 0, 0, lambda] : Fin 5 → K) j := by
   fin_cases j <;>
     norm_num [fieldAction_apply, Fin.sum_univ_succ, physicalPartial, physicalCoordinates,
-      Matrix.cons_val_succ, Matrix.cons_val_two, Matrix.cons_val_three, Matrix.cons_val_four, Derivation.sub_apply, Derivation.smul_apply,
+      Matrix.cons_val_succ, Matrix.cons_val_two, Matrix.cons_val_three, Matrix.cons_val_four, sub_apply, smul_apply,
       smul_eq_mul, partial_coord, lambda, Fin.ext_iff]
   all_goals field_simp [coord_ne_zero (4 : Fin 5)]
   all_goals ring
@@ -23,7 +23,7 @@ theorem homSplit_succ (i : Fin 5) (f : K) :
   intro j
   fin_cases i <;> fin_cases j <;>
     norm_num [homSplit_coord, homCoordinates, physicalPartial, basePartial, normalPartial,
-      Derivation.sub_apply, Derivation.smul_apply, Derivation.leibniz_div,
+      sub_apply, smul_apply, Derivation.leibniz_div,
       smul_eq_mul, partial_coord, lambda, Matrix.cons_val_succ, Matrix.cons_val_two, Matrix.cons_val_three, Matrix.cons_val_four,
       Fin.ext_iff, map_mul, map_div₀]
   all_goals field_simp [coord_ne_zero (0 : Fin 6), coord_ne_zero (4 : Fin 6)]

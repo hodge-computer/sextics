@@ -11,8 +11,6 @@ The added ternary terms are retained in the equation and every derivative.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 800000
 namespace DeformedGeometry
 open Polynomial HoldoutConstruction
 variable {R : Type*} [CommRing R]
@@ -60,7 +58,6 @@ lemma axisMap_normal (d a b : R) :
     axisMap (integerPartial 0 (weightedEquation d a b))=6*X^5 := by
   norm_num [axisMap,weightedEquation,integerPartial,MvPolynomial.pderiv_pow,
     MvPolynomial.pderiv_mul,Polynomial.C_ofNat,Pi.single_apply,Fin.ext_iff]
-  simp [Matrix.cons_val]
 
 lemma weightedEquation_not_dvd_normal [CharZero R] (d a b : R) :
     ¬ weightedEquation d a b ∣ integerPartial 0 (weightedEquation d a b) := by

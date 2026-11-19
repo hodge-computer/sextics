@@ -5,7 +5,6 @@ import Proposal.BundleCompatibility
 coordinate and coefficient value bound to the protected physical sextic. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle
 

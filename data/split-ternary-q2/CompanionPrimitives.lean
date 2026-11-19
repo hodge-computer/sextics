@@ -11,9 +11,6 @@ source. The maintained generic algebra retains its original attribution.
 Prepared with OpenAI Codex assistance for fqlx.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 open scoped BigOperators
 
 namespace SplitGCompanion
@@ -189,8 +186,9 @@ lemma rawPolynomialMap_X (i : Fin 4) : rawPolynomialMap (MvPolynomial.X i)=
   fin_cases i <;> simp [rawPolynomialMap,coordinate,MvPolynomial.finSuccEquiv_apply,hv,Equiv.swap_apply_def]
 def polynomialCoefficientMap : SplitCompanionDomain.Coeff →+* Polynomial AffineField :=
   rawPolynomialMap.comp CrossedWeightedRadial.monomialMap
-lemma polynomialCoefficientMap_injective : Function.Injective polynomialCoefficientMap :=
-  rawPolynomialMap_injective.comp (CrossedWeightedRadial.monomialMap_injective (R:=ℂ))
+lemma polynomialCoefficientMap_injective : Function.Injective polynomialCoefficientMap := by
+  rw [polynomialCoefficientMap,RingHom.coe_comp]
+  exact rawPolynomialMap_injective.comp (CrossedWeightedRadial.monomialMap_injective (R:=ℂ))
 def coneCoefficientMap : SplitCompanionDomain.Coeff →+* RadialField :=
   (algebraMap (Polynomial AffineField) RadialField).comp polynomialCoefficientMap
 lemma coneCoefficientMap_injective : Function.Injective coneCoefficientMap :=
@@ -318,12 +316,20 @@ lemma equation_zero : evaluation clearedAffineEquation=0 := by
       (![MvPolynomial.X 1,MvPolynomial.X 0,1,MvPolynomial.X 2,MvPolynomial.X 3] i))=
       ![coordinate 0,normal,1,coordinate 1,coordinate 2] := by
     funext i
-    fin_cases i <;> first | exact evaluation_X_succ 0 | exact evaluation_X_zero | exact map_one _ | exact evaluation_X_succ 1 | exact evaluation_X_succ 2
+    fin_cases i
+    · exact evaluation_X_succ 0
+    · exact evaluation_X_zero
+    · exact map_one _
+    · exact evaluation_X_succ 1
+    · exact evaluation_X_succ 2
   rw [hv]
   exact cleared_equation
 lemma equation_partial : integerPartial 0 clearedAffineEquation=
     42*MvPolynomial.X 0^5+5*(2*MvPolynomial.X 1^5+2*MvPolynomial.X 1^3+15*MvPolynomial.X 0^4) := by
-  rw [clearedAffineEquation,SplitCompanion.H_derivation (integerPartial 0) false 0 (map_zero _)]
+  have h (z : Fin 5 → Poly) : integerPartial 0 (SplitCompanion.H false 0 z)=
+      ∑ i,SplitCompanion.gradient false 0 z i*integerPartial 0 (z i) :=
+    SplitCompanion.H_derivation (integerPartial 0) false 0 (map_zero _) z
+  rw [clearedAffineEquation,h]
   simp [SplitCompanion.gradient,Fin.sum_univ_succ]
   ring
 lemma equation_hessian : integerPartial 0 (integerPartial 0 clearedAffineEquation)=
@@ -469,11 +475,11 @@ theorem source_data : ∃ D N₀ : Poly,∃ N : Fin 3 → Poly,
   obtain ⟨w,hw⟩ := affine_residue_solution
   apply CrossedAffinePrimitiveData.ambient_data evaluation (integerPartial 0)
     (fun i : Fin 3 => integerPartial i.succ) tangent clearedAffineEquation source w
-  · rw [normal_evaluation]; exact clearNormal_ne_zero
+  · exact normal_evaluation.trans_ne clearNormal_ne_zero
   · intro i; exact integerPartial_commute i.succ 0 clearedAffineEquation
   · exact tangent_formula
   · exact residue_common_representatives projection (CrossedMonicHypersurface.projection_surjective equation) w
-  · rw [normal_evaluation,hessian_evaluation,source_partial_value,source_value]
+  · rw [← normal_evaluation,← hessian_evaluation,← source_partial_value,← source_value] at hw
     exact hw
 
 end SplitGCompanion

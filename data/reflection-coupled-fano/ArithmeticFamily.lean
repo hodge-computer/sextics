@@ -10,9 +10,6 @@ an unrelated deformation.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency true
-set_option maxHeartbeats 300000
-set_option maxRecDepth 10000
 namespace ReflectionCoupledFano.Arithmetic
 open Polynomial HoldoutConstruction
 
@@ -90,7 +87,6 @@ theorem coefficients_derivative (I : Ideal GenericIncidence) [I.IsMaximal] (i j 
     MvPolynomial.eval₂Hom_map_hom, RingHom.id_comp]
   rfl
 
-set_option backward.isDefEq.respectTransparency false in
 theorem coefficients_jacobian (I : Ideal GenericIncidence) [I.IsMaximal] :
     IsUnit (Matrix.det (fun i j : Index =>
       MvPolynomial.eval₂Hom (RingHom.id (CoefficientField I)) (coefficients I)

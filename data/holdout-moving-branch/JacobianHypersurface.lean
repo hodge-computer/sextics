@@ -5,8 +5,6 @@ import HodgeComputer.Constructions.HoldoutCover.ResidueDerivatives
 normalized Jacobian hypersurface. The quotient/fraction-field descent follows
 fqlx's shared HoldoutCover constructions. Prepared with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace CycleJacobianHypersurface
 open HoldoutConstruction CycleJacobianEmbedding Polynomial
 open MvPolynomial

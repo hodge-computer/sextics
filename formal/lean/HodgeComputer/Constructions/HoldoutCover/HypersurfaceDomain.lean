@@ -66,11 +66,11 @@ theorem irreducible_power_add_constant (g : R[X])
     hm.isEisensteinAt_of_mem_of_notMem hP.ne_top (by
       intro k hk
       rw [natDegree_X_pow_add_C] at hk
-      simp only [coeff_add, coeff_X_pow, if_neg (Nat.ne_of_lt hk), zero_add, coeff_C]
+      simp only [coeff_add, coeff_X_pow, ite_eq_right (Nat.ne_of_lt hk), zero_add, coeff_C]
       split_ifs
       · exact Ideal.mem_span_singleton.mpr (Polynomial.X_dvd_iff.mpr h0)
       · exact Ideal.zero_mem P) (by
-      simp only [coeff_add, coeff_X_pow, if_neg (Nat.ne_of_lt hn), coeff_C_zero,
+      simp only [coeff_add, coeff_X_pow, ite_eq_right (Nat.ne_of_lt hn), coeff_C_zero,
         zero_add]
       intro hg
       have hd : (X : R[X])^2 ∣ g := by

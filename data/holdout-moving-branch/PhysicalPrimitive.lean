@@ -9,7 +9,6 @@ construction credited to fqlx and the Hodge Computer collaborators.
 Original cycle-three construction prepared with OpenAI Codex assistance.
 The transitive-cubic adaptation is due to fqlx. Adapted here to holdout-moving-branch for benediamond with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalPrimitive
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open CyclePhysicalNormalTransport CyclePhysicalCubicTangent

@@ -10,9 +10,6 @@ Adapted from the accepted constructions of fqlx and hodgepodgeconjecture.
 Prepared for benediamond with OpenAI Codex assistance.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
-set_option maxRecDepth 10000
 namespace MixedPolarJacobianFamily
 open HoldoutConstruction MixedPolarJacobianIncidence MixedPolarJacobianLifting Polynomial
 open scoped BigOperators

@@ -491,9 +491,9 @@ lemma map_killed (φ : K →+* L) (D : Derivation ℤ L L) (h : ∀ c,D (φ c)=0
     rw [polynomial_image_eval]
     have he := polynomial_intertwines RatFunc.C (map φ) (0 : Derivation ℤ (RatFunc K) (RatFunc K))
       (baseCoefficient D) RatFunc.X
-      (fun c => by simp only [map_C,baseCoefficient_C,h,Derivation.coe_zero,Pi.zero_apply,map_zero])
-      (by simp only [map_X,baseCoefficient_X,Derivation.coe_zero,Pi.zero_apply,map_zero]) P
-    simpa only [Derivation.coe_zero,Pi.zero_apply,map_zero] using he
+      (fun c => by simp only [map_C,baseCoefficient_C,h,FunLike.coe_zero,Pi.zero_apply,map_zero])
+      (by simp only [map_X,baseCoefficient_X,FunLike.coe_zero,Pi.zero_apply,map_zero]) P
+    simpa only [FunLike.coe_zero,Pi.zero_apply,map_zero] using he
   induction f using RatFunc.induction_on with
   | f P Q hQ =>
     simp only [map_div₀,Derivation.leibniz_div,hp,smul_zero,sub_self,smul_zero]

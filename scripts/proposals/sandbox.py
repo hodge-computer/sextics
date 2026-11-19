@@ -7,13 +7,22 @@ import shutil
 import subprocess
 import tempfile
 import time
+import tomllib
 import uuid
 
 from check import command, require, target_source, witness_source
 
 
+def lean_options(lean_root):
+    """The Lake package's Lean options, as flags for modules compiled outside Lake."""
+    options = tomllib.loads((lean_root/'lakefile.toml').read_text()).get('leanOptions', {})
+    return [f'-D{name}={str(value).lower() if isinstance(value, bool) else value}'
+            for name, value in options.items()]
+
+
 def verify(root, files, instance, metadata, order, imports, policy, output, *, prepared=False):
     lean_root = root/'formal/lean'
+    options = lean_options(lean_root)
     lake = shutil.which('lake')
     require(lake, 'Install the pinned Lean toolchain and Lake first')
     if not prepared:
@@ -26,7 +35,7 @@ def verify(root, files, instance, metadata, order, imports, policy, output, *, p
     lean = prefix/'bin/lean'; checker = prefix/'bin/leanchecker'
     require(checker.is_file(), 'The pinned toolchain must include leanchecker')
     version = command([str(lean),'--version']).decode().strip()
-    require('version 4.33.1,' in version, 'Wrong Lean version')
+    require('version 4.36.0,' in version, 'Wrong Lean version')
     system = platform.system()
     require(system in ('Darwin','Linux'), 'Supported verification hosts are macOS and Linux')
     if system == 'Darwin':
@@ -99,7 +108,8 @@ def verify(root, files, instance, metadata, order, imports, policy, output, *, p
         for file in sequence:
             destination = protected if file in protected_names else checked if file=='HodgeChecked.lean' else artifacts
             relative = 'Proposal/'+file if destination==artifacts else file
-            run([str(lean),'-j','2','-M',str(policy['memoryMb']),'-o',str(destination/relative.replace('.lean','.olean')),
+            run([str(lean),'-j','2','-M',str(policy['memoryMb']),*options,
+                 '-o',str(destination/relative.replace('.lean','.olean')),
                  relative], 'compile-'+file.removesuffix('.lean'),destination)
         # Reject compiler outputs that could shadow a protected module or load native code.
         for directory,names in ((protected,protected_names),(checked,['HodgeChecked.lean']),(artifacts,['Proposal/'+f for f in order])):

@@ -2,7 +2,6 @@ import HodgeComputer.Constructions.TransitiveCubic.IdentityData
 import HodgeComputer.Constructions.TransitiveCubic.EncodingCheck
 namespace TransitiveCovariants.IdentityData
 open TransitiveCubicEncodingCheck PolynomialEncoding.SignedExpressions
-set_option maxRecDepth 131072
 theorem coefficient_1_2 {K : Type*} [CommRing K] (v : ℕ → K) :
     ringEval v Left_1_2=ringEval v Right_1_2 := by
   apply identity_of_encoding_context v Left_1_2 Right_1_2 (19,20,33) (2^57)

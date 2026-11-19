@@ -67,7 +67,7 @@ theorem component_dvd_of_product {F C B : MvPolynomial σ R} {f c : ℕ}
     F ∣ homogeneousComponent n B := by
   classical
   induction n using Nat.strong_induction_on with
-  | h n ih =>
+  | ind n ih =>
     have htrunc : F ∣ truncateBelow n B := by
       apply Finset.dvd_sum
       intro k hk

@@ -62,7 +62,5 @@ def inverseJacobian : Matrix (Fin 13) (Fin 13) K := ![
 ![2,2,0,0,2,0,0,4,2,2,0,2,2],
 ![2,2,1,0,3,2,4,0,2,2,1,0,0]
 ]
-set_option maxRecDepth 100000 in
-set_option maxHeartbeats 8000000 in
 theorem inverse_product : coefficientJacobian*inverseJacobian=1 := by decide
 end CycleJacobianSeed

@@ -9,8 +9,6 @@ are represented by square-zero jets, so no parameter derivation on the
 specialized physical function field is assumed.
 Prepared with OpenAI Codex assistance. Adapted from the accepted mixed-biweight calculus of fqlx and the Hodge Computer collaborators; maintained TransitiveCubic polynomial identities are imported, not copied. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace MixedPolarCubicJetCalculus
 open ResidueFirstJets
 open TransitiveCovariants MvPolynomial
@@ -73,10 +71,10 @@ theorem cleared_differential (D : Derivation ℤ K K) (a b c d e f x y : K)
   let φ : R →+* K := R.subtype
   let ρ : Affine R →+* K := eval₂Hom φ ![x,y]
   have hU : ρ (Upoly a' b' c' d' e' f')=0 := by
-    simpa [ρ,φ,Upoly,TransitiveCubic.cubic,a',b',c',d',e',f',Subring.subtype] using hu
+    simpa [ρ,φ,Upoly,TransitiveCubic.cubic,a',b',c',d',e',f'] using hu
   have hPx : ρ (pderiv 0 (Upoly a' b' c' d' e' f'))=3*a*x^2+2*d*x*y+2*f*x := by
     simp [ρ,φ,Upoly,a',b',c',d',e',f',MvPolynomial.pderiv_mul,MvPolynomial.pderiv_pow,
-      Pi.single_apply,Fin.ext_iff,Subring.subtype]
+      Pi.single_apply,Fin.ext_iff]
     ring
   have hHmap : ρ (Hpoly a' b' c' d' e' f')=H a b c d e f x y 1 :=
     eval_Hpoly φ a' b' c' d' e' f' x y
@@ -109,8 +107,8 @@ lemma jet_cubic (a b c d e f x y : K)
     TransitiveCubic.cubic (K:=Jet (K:=K)) (a,1) (b,0) (c,0) (d,0) (e,0) (f,0)
       (x,-x^3/(3*a*x^2+2*d*x*y+2*f*x)) (y,0) (1 : Jet (K:=K))=0 := by
   apply TrivSqZeroExt.ext
-  · simpa [TransitiveCubic.cubic] using hu
-  · simp [TransitiveCubic.cubic,smul_eq_mul,op_smul_eq_smul]
+  · simpa [TransitiveCubic.cubic,jet_mk] using hu
+  · simp [TransitiveCubic.cubic,jet_mk,smul_eq_mul,op_smul_eq_smul]
     have ht : (-x^3/(3*a*x^2+2*d*x*y+2*f*x))*(3*a*x^2+2*d*x*y+2*f*x)= -x^3 :=
       div_mul_cancel₀ _ hg
     linear_combination ht

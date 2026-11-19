@@ -4,8 +4,6 @@ import Mathlib.Tactic.FinCases
 
 noncomputable section
 namespace GenericSpecialization
-set_option maxHeartbeats 0
-set_option maxRecDepth 100000
 open CheckedPolynomialLists
 
 def sourcePolyFamily : Fin 8 → Polynomial ℚ :=

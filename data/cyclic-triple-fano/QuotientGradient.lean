@@ -5,8 +5,6 @@ import Proposal.LineIncidence
 formal multivariate gradient of the fixed cyclic quotient equation. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 0
 namespace CyclicTriple
 
 variable {R S : Type*} [CommRing R] [CommRing S]

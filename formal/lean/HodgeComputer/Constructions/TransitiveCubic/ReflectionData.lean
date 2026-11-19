@@ -2,7 +2,6 @@ import HodgeComputer.Constructions.TransitiveCubic.Covariants
 import Mathlib.Algebra.Ring.GrindInstances
 namespace TransitiveCovariants.Reflection
 open Lean.Grind.CommRing
-set_option maxRecDepth 65536
 variable {K : Type*} [CommRing K]
 def context (a b c d e f x y z : K) : Context K := .branch 4 (.branch 2 (.branch 1 (.leaf a) (.leaf b)) (.branch 3 (.leaf c) (.leaf d))) (.branch 6 (.branch 5 (.leaf e) (.leaf f)) (.branch 7 (.leaf x) (.branch 8 (.leaf y) (.leaf z))))
 def HCoeff300Expr : Expr := (.mul (.num 0) (.mul (.var 0) (.mul (.var 4) (.var 5))))

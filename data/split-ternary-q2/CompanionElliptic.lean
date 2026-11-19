@@ -6,9 +6,6 @@ polynomial derivatives and degree-five source adapt the accepted scalar-jet
 argument of 1337isnot1337. Prepared with OpenAI Codex assistance for fqlx.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 open scoped BigOperators
 
 namespace SplitGCompanion
@@ -218,7 +215,9 @@ lemma divergence_reindex (D N₀ : P4) (N : Fin 3 → P4) :
     D*(∑ i,ambientD i (![N 0,N₀,N 1,N 2] i))-
       (∑ i,![N 0,N₀,N 1,N 2] i*ambientD i D)=
     residueDivNum (integerPartial 0) (fun i : Fin 3 => integerPartial i.succ) D N₀ N := by
-  simp [Fin.sum_univ_four,Fin.sum_univ_succ,ambientD,swap,residueDivNum]
+  change _=D*(integerPartial 0 N₀+∑ i : Fin 3,integerPartial i.succ (N i))-
+    (N₀*integerPartial 0 D+∑ i : Fin 3,N i*integerPartial i.succ D)
+  simp [Fin.sum_univ_four,Fin.sum_univ_succ,ambientD,swap]
   ring
 
 lemma delta_evaluation_chain (φ : P2 →+* K) (u : K) (hu : u^3=φ SplitGCompanion.p) (p : P4) :
@@ -292,11 +291,8 @@ theorem scalar_primitive_of_data (φ : P2 →+* K) (hφ : Function.Injective φ)
   have hv := normal_values ρ D A nn (fun i => ambientD i clearedAffineEquation) hd' hn'
   have hs := normal_jets ρ ambientD D A nn (fun i => ambientD i clearedAffineEquation) hd' hn' 2
   have ht := normal_jets ρ ambientD D A nn (fun i => ambientD i clearedAffineEquation) hd' hn' 3
-  have hdv := divergence_jets ρ ambientD D nn hd' (by
-    rw [show D*(∑ i,ambientD i (nn i))-(∑ i,nn i*ambientD i D)=
-      residueDivNum (integerPartial 0) (fun i : Fin 3 => integerPartial i.succ) D N₀ N
-      from divergence_reindex D N₀ N]
-    exact ellipticEvaluation_zero_of_old φ u hu _ hdiv)
+  have hdv := divergence_jets ρ ambientD D nn hd'
+    ((congrArg ρ (divergence_reindex D N₀ N)).trans (ellipticEvaluation_zero_of_old φ u hu _ hdiv))
   change (∑ i,jj i i)=0 at hdv
   have hg (i : Fin 4) : ρ (ambientD i clearedAffineEquation)=
       7*![px,py,3*uu^2*a (K:=K)^2,3*uu^2*b (K:=K)^2] i := evaluated_gradient φ u hu i
@@ -315,10 +311,10 @@ theorem scalar_primitive_of_data (φ : P2 →+* K) (hφ : Function.Injective φ)
     ![0,0,uu*b (K:=K)^2,-uu*a (K:=K)^2] (delta_evaluation_chain φ u hu) D nn hd' i
   have hx (i : Fin 4) := derivative_values ρ ambientD (coefficient Dx)
     ![1,0,px/(3*uu^2)*a (K:=K),px/(3*uu^2)*b (K:=K)]
-    (by simpa using coefficient_evaluation_chain φ u hu hu0 Dx 0 hcx hxx) D nn hd' i
+    (coefficient_evaluation_chain φ u hu hu0 Dx 0 hcx hxx) D nn hd' i
   have hy (i : Fin 4) := derivative_values ρ ambientD (coefficient Dy)
     ![0,1,py/(3*uu^2)*a (K:=K),py/(3*uu^2)*b (K:=K)]
-    (by simpa using coefficient_evaluation_chain φ u hu hu0 Dy 1 hcy hyy) D nn hd' i
+    (coefficient_evaluation_chain φ u hu hu0 Dy 1 hcy hyy) D nn hd' i
   change ∀ i,delta (vv i)=∑ j,jj i j*![0,0,uu*b (K:=K)^2,-uu*a (K:=K)^2] j at hδ
   change ∀ i,coefficient Dx (vv i)=∑ j,jj i j*![1,0,px/(3*uu^2)*a (K:=K),px/(3*uu^2)*b (K:=K)] j at hx
   change ∀ i,coefficient Dy (vv i)=∑ j,jj i j*![0,1,py/(3*uu^2)*a (K:=K),py/(3*uu^2)*b (K:=K)] j at hy

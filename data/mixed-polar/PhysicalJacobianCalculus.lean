@@ -5,8 +5,6 @@ import Mathlib.RingTheory.Derivation.Basic
 This keeps the physical quadratic extension opaque during the rational
 Jacobian calculation and retains an arbitrary last coordinate u. -/
 noncomputable section
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 namespace MixedPolarJacobianCalculus
 open WeierstrassChart
 variable {K : Type*} [Field K]

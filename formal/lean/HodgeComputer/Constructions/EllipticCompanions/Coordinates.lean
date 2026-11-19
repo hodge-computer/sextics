@@ -37,7 +37,7 @@ lemma fermat_relation : (a (K := K))^3+(b (K := K))^3+1=0 := by
 lemma delta_x : delta (K := K) (x K) = -y K/3 := by
   simp [delta,time_x]
 lemma delta_y : delta (K := K) (y K) = -(x K)^2/2 := by
-  simp only [delta,Derivation.smul_apply,smul_eq_mul,time_y]
+  simp only [delta,smul_apply,smul_eq_mul,time_y]
   field_simp [y_ne_zero (K := K)]
 
 lemma delta_a : delta (K := K) (a (K := K)) = (b (K := K))^2 := by
@@ -129,7 +129,7 @@ lemma trace_y : Algebra.trace (RatFunc K) (E K) (y K) = 0 := by
   rw [h]
   rw [Polynomial.nextCoeff,equation_natDegree]
   norm_num [equation_eq]
-  rw [← map_pow,Polynomial.coeff_C,if_neg (by decide)]
+  rw [← map_pow,Polynomial.coeff_C,ite_eq_right (by decide)]
 
 lemma trace_expansion (f : E K) : Algebra.trace (RatFunc K) (E K) f = 2*first K f := by
   conv_lhs => rw [first_second_expansion K f]

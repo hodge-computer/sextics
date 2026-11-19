@@ -4,9 +4,7 @@ import HodgeComputer.Constructions.Explicit
 -- Keep peak memory bounded while elaborating the independent certificate lemmas.
 set_option Elab.async false
 
-set_option maxHeartbeats 2000000
 
-set_option maxRecDepth 4000
 
 set_option linter.unusedTactic false
 

@@ -1,12 +1,9 @@
 import Proposal.QuarticSeed
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CoupledFanoQuarticSeed
 open Matrix
 variable {K : Type*} [Field K] [CharP K 5]
-set_option maxRecDepth 4096
-set_option maxHeartbeats 8000000
 
 lemma two_sub_j_ne_zero {j : K} (hj : j^2=2) : 2-j ≠ 0 := by
   intro h

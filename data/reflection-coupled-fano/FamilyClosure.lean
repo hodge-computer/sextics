@@ -15,9 +15,6 @@ pole-order-one certificate for the physical sextic.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxRecDepth 10000
-set_option maxHeartbeats 1500000
 
 namespace ReflectionCoupledFano
 open Polynomial HoldoutConstruction

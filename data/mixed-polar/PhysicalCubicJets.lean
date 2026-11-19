@@ -8,8 +8,6 @@ import Proposal.JacobianScaling
 quadratic extension of the fixed mixed-polar residue field. Every source,
 normal, coefficient and derivative below is tied to that field. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
 namespace MixedPolarPhysicalCubicJets
 open TransitiveCovariants MixedPolarPhysicalShear MixedPolarPhysicalTangent
 local instance : Algebra ℤ Extension := Ring.toIntAlgebra _
@@ -143,7 +141,8 @@ theorem source_transport :
     ha hb hc hd he hk extended_y cubic_equation d_ne_zero normal_ne_zero
     hessian_nonzero jacobian_nonzero
   rw [normal_dot_data,normal_data,normal_identity] at hh
-  simpa only [normal_identity,aDot,bDot,xi,eta,xiDot] using hh
+  simp only [normal_identity,aDot,bDot,xi,eta,xiDot]
+  exact hh
 
 end MixedPolarPhysicalCubicJets
 #print axioms MixedPolarPhysicalCubicJets.differential_value

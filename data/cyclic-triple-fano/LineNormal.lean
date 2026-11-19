@@ -9,7 +9,6 @@ No power-series or approximate normal vector is used.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclicTriple
 open Polynomial HoldoutConstruction
 open scoped BigOperators

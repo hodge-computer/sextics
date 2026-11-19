@@ -8,9 +8,6 @@ import HodgeComputer.Constructions.ResidueTransport.WeierstrassChart
 Original cycle-three construction prepared with OpenAI Codex assistance.
 The transitive-cubic adaptation is due to fqlx. Adapted here to holdout-moving-branch for benediamond with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 namespace CyclePhysicalJacobianCoordinates
 export WeierstrassChart (rawMatrix raw_determinant)
 open scoped BigOperators
@@ -102,7 +99,7 @@ def coordinateDerivation (j : Fin 5) : Derivation ℤ FunctionField FunctionFiel
 lemma coordinateDerivation_apply (j : Fin 5) (z : FunctionField) :
     coordinateDerivation j z=∑ k,inverse k j*tangent k z := by
   simp only [coordinateDerivation,Fin.sum_univ_succ,Finset.univ_eq_empty,Finset.sum_empty,
-    Derivation.add_apply,Derivation.smul_apply,smul_eq_mul,Derivation.coe_zero,Pi.zero_apply,add_zero]
+    add_apply,smul_apply,smul_eq_mul,FunLike.coe_zero,Pi.zero_apply,add_zero]
 lemma coordinateDerivation_passive (j i : Fin 5) :
     coordinateDerivation j (passive i)=if i=j then 1 else 0 := by
   rw [coordinateDerivation_apply]

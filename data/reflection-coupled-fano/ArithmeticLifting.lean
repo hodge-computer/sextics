@@ -11,9 +11,6 @@ coefficient survive in that field factor.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxRecDepth 4096
-set_option maxHeartbeats 2000000
 namespace ReflectionCoupledFano.Arithmetic
 open HoldoutConstruction
 
@@ -69,8 +66,8 @@ theorem integralSeed_jacobian (j : T) (hj : j^2 = 2)
           (MvPolynomial.pderiv k (equations 0 (modEndpoint j) i))) := by
     funext i k
     exact he k i
-  rw [hM, Matrix.det_transpose]
-  exact hunit
+  rw [hM]
+  exact (congrArg IsUnit (Matrix.det_transpose _)).mpr hunit
 
 theorem exists_generic_field_of_seed (j : T) (hj : j^2 = 2)
     (hunit : IsUnit (Matrix.det (fun i k : Index =>

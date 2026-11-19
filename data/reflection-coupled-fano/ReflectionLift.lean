@@ -4,8 +4,6 @@ import HodgeComputer.Verify
 import Mathlib.Analysis.Complex.Polynomial.Basic
 
 noncomputable section
-set_option maxHeartbeats 2000000
-set_option backward.isDefEq.respectTransparency false
 namespace ReflectionCoupledFano
 open MvPolynomial
 open scoped BigOperators
@@ -105,7 +103,7 @@ theorem squareLast_hypersurface (k : ℂ) :
   simp only [hypersurface, map_add, map_mul, map_pow, map_ofNat, squareVariable_C, squareVariable_X]
   simp only [show (0 : Fin 6) ≠ 5 by decide, show (1 : Fin 6) ≠ 5 by decide,
     show (2 : Fin 6) ≠ 5 by decide, show (3 : Fin 6) ≠ 5 by decide,
-    show (4 : Fin 6) ≠ 5 by decide, if_false, if_true]
+    show (4 : Fin 6) ≠ 5 by decide, ite_false, ite_true]
   ring
 
 
@@ -168,7 +166,7 @@ theorem reflection_normalized_identities
 theorem reflection_source :
     X 5*squareLast (quotientSource (R := ℂ)) = physicalSource := by
   simp only [quotientSource, physicalSource, map_mul, map_pow, squareVariable_X]
-  simp only [show (0 : Fin 6) ≠ 5 by decide, if_false, if_true]
+  simp only [show (0 : Fin 6) ≠ 5 by decide, ite_false, ite_true]
   ring
 
 theorem reflection_normalized_data

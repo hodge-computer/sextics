@@ -8,8 +8,6 @@ field. The submitted equation has alpha fixed to one, two chain terms of coeffic
 nonzero. Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 The transitive-cubic adaptation is due to fqlx. Adapted here to holdout-moving-branch for benediamond with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace CyclePhysicalCoordinates
 open CyclePhysical
 def coordinate (i : Fin 6) : FunctionField := residueMap (MvPolynomial.X i)

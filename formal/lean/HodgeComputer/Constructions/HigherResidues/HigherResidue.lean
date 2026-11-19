@@ -10,7 +10,6 @@ Prepared with OpenAI Codex assistance for contributor fqlx.
 -/
 
 noncomputable section
-set_option maxRecDepth 100000
 namespace SplitHigherResidue
 open HoldoutConstruction Polynomial
 open scoped BigOperators
@@ -261,9 +260,9 @@ theorem polynomial_normal_row_jet {K : Type*} [Field K] [CharZero K] {n : ℕ}
     map_add, map_mul, Pi.single_apply, apply_ite, map_one, map_zero] at hc₀ hc₁ hc₂ ⊢
   by_cases hj : j=0
   · subst j
-    simp only [if_true] at hc₀ hc₁ hc₂ ⊢
+    simp only [ite_true] at hc₀ hc₁ hc₂ ⊢
     linear_combination hc₀+(X : K[X])*hc₁+(X : K[X])^2*hc₂
-  · simp only [hj, if_false] at hc₀ hc₁ hc₂ ⊢
+  · simp only [hj, ite_false] at hc₀ hc₁ hc₂ ⊢
     linear_combination hc₀+(X : K[X])*hc₁+(X : K[X])^2*hc₂
 
 theorem determinant_updateRow_inverse {K : Type*} [Field K] {n : ℕ}
@@ -345,22 +344,14 @@ theorem quadratic_derivative {K ι : Type*} [Field K] [CharZero K] [Fintype ι]
     apply Finset.sum_congr rfl
     intro k hk
     rw [hH k j]
-  have he : (∑ j,∑ k,ψ k*ψ j*D (H j k)) = ∑ j,∑ k,D (H j k)*ψ j*ψ k := by
-    apply Finset.sum_congr rfl
-    intro j hj
-    apply Finset.sum_congr rfl
-    intro k hk
+  have hterm : ∀ j k,D (H j k*ψ j*ψ k) =
+      H j k*ψ j*D (ψ k)+H j k*ψ k*D (ψ j)+D (H j k)*ψ j*ψ k := by
+    intro j k
+    simp only [Derivation.leibniz,smul_eq_mul]
     ring
-  simp only [Derivation.leibniz,smul_eq_mul,hhalf,mul_zero,add_zero,map_sum,
-    mul_add,Finset.sum_add_distrib]
-  have hf : (∑ j,∑ k,ψ k*H j k*D (ψ j)) = ∑ j,∑ k,H j k*ψ k*D (ψ j) := by
-    apply Finset.sum_congr rfl
-    intro j hj
-    apply Finset.sum_congr rfl
-    intro k hk
-    ring
-  simp only [mul_assoc] at he hf
-  rw [hs,he,hf]
+  rw [Derivation.leibniz,hhalf,smul_zero,add_zero,smul_eq_mul]
+  simp only [map_sum,hterm,Finset.sum_add_distrib]
+  rw [hs]
   ring
 
 theorem quadratic_derivative_normal_jet {K ι : Type*} [Field K] [CharZero K] [Fintype ι]

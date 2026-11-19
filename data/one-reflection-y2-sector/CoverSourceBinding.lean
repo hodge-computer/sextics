@@ -16,9 +16,6 @@ injective maps of residue function fields.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
-set_option maxRecDepth 10000
-set_option maxHeartbeats 0
 
 namespace HoldoutConstruction
 
@@ -246,7 +243,7 @@ theorem cover_normal_source_binding :
         ((ρp (integerPartial 0 holdoutCompanion)*ρp (integerPartial 0 F)-
           ρp holdoutCompanion*ρp (integerPartial 0 (integerPartial 0 F))) /
             (ρp (integerPartial 0 F))^2) * (coverT^2)⁻¹ := by
-  simp only [map_div₀, map_sub, map_mul, map_pow]
+  simp only [map_div₀, RingHom.map_sub, RingHom.map_mul, RingHom.map_pow]
   rw [cover_normal_binding, cover_second_normal_binding,
     cover_quotient_source_partial_value, cover_quotient_source_value,
     cover_physical_source_partial_value, cover_physical_source_value,

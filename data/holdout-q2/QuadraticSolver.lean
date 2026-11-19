@@ -10,7 +10,6 @@ coordinate fields and six coefficient functionals on a degree-27 line algebra.
 The determinant and adjugate descent are reused from the accepted proof. -/
 noncomputable section
 open scoped BigOperators Matrix
-set_option maxHeartbeats 2000000
 namespace HoldoutQ2.QuadraticSolver
 open MvPolynomial HodgeTestbed HodgeComputer.CubicSurfaces.LineContact QuadricContact
 

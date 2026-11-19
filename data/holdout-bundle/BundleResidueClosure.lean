@@ -11,9 +11,6 @@ The parameter component may be zero while other components depend on it.
 -/
 
 noncomputable section
-set_option maxRecDepth 10000
-set_option maxHeartbeats 1000000
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutBundle
 
@@ -70,13 +67,15 @@ theorem physical_certificate_of_residue
   apply hasCertificate_of_normalized holdoutSextic A D (Fin.cases N₀ N) Q
     holdoutSextic_isHomogeneous hA (holdoutSextic_irreducible Complex.I hi).prime
     hlegal ?_ ?_ 0 holdoutSextic_not_dvd_pderiv_zero
-  · simpa only [HodgeTestbed.directional, Fin.sum_univ_succ,
+  · simp only [HodgeTestbed.directional, Fin.sum_univ_succ,
       Fin.cases_zero, Fin.cases_succ, integerPartial, Derivation.restrictScalars_apply,
-      Derivation.coeFn_coe, mul_comm] using hnormal
-  · simpa only [HodgeTestbed.divergenceNumerator, HodgeTestbed.divergence,
+      Derivation.coeFn_coe, mul_comm] at hnormal ⊢
+    exact hnormal
+  · simp only [HodgeTestbed.divergenceNumerator, HodgeTestbed.divergence,
       HodgeTestbed.directional, residueDivNum, Fin.sum_univ_succ,
       Fin.cases_zero, Fin.cases_succ, integerPartial, Derivation.restrictScalars_apply,
-      Derivation.coeFn_coe, mul_comm] using hdiv
+      Derivation.coeFn_coe, mul_comm] at hdiv ⊢
+    exact hdiv
 
 theorem residue_source_map_append_zero
     {R K : Type*} [Field R] [Field K] {n : ℕ}

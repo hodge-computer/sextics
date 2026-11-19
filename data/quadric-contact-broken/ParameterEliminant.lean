@@ -16,8 +16,6 @@ theorem P_monic : P.Monic :=
 theorem P_natDegree : P.natDegree = 27 :=
   GenericMonicPolynomial.monicPolynomial_natDegree p q s k u v isUnit_leadingCoefficient
 
-set_option maxRecDepth 100000 in
-set_option maxHeartbeats 0 in
 theorem P_specialize : P.map ParameterSpecialization.specialize = GenericSpecialization.P := by
   unfold P GenericMonicPolynomial.monicPolynomial
   simp only [Polynomial.map_add, Polynomial.map_pow, Polynomial.map_X,

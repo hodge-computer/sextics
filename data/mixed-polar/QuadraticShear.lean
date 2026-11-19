@@ -8,8 +8,6 @@ The vertical derivation fixes the adjoined shear whenever it fixes a,d,f.
 All physical derivations can instead be extended by the shared construction;
 their normalized trace is the existing finite-trace descent interface. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace MixedPolarShear
 open HoldoutConstruction IntermediateField
 universe u

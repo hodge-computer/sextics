@@ -8,7 +8,6 @@ import Proposal.CubicDenominatorEvaluation
 regular at (alpha,beta)=(1,2). All eight functional constraints are proved from
 an exact specialized inverse and functorial quotient normal forms. -/
 noncomputable section
-set_option maxRecDepth 100000
 open scoped BigOperators
 namespace QuadricContact.GenericCubicCertificate
 open MvPolynomial
@@ -98,21 +97,17 @@ def F : Poly := ConcreteLine.cubic ParameterSpecialization.p ParameterSpecializa
         ((representation (x+y)).map g).map (Polynomial.C : R →+* Polynomial R)).det :=
   CubicMatrixCertificate.denominator_norm_fiber representation x y g
 
-set_option backward.isDefEq.respectTransparency false in
 /-- The localization instance paths have the same coefficient predicate. -/
  theorem homogeneous_instance (P : Poly) (d : ℕ)
     (h : @MvPolynomial.IsHomogeneous (Fin 4) K
       (inferInstance : CommRing K).toCommSemiring P d) : P.IsHomogeneous d := by
-  simpa only [MvPolynomial.IsHomogeneous, MvPolynomial.IsWeightedHomogeneous,
-    MvPolynomial.coeff] using h
+  simpa only [MvPolynomial.IsHomogeneous, MvPolynomial.IsWeightedHomogeneous] using h
 
-set_option backward.isDefEq.respectTransparency false in
  theorem D_homogeneous : D.IsHomogeneous 27 := by
   apply homogeneous_instance
   simpa only [D, Fintype.card_fin] using
     CubicMatrixCertificate.denominator_homogeneous representation x y
 
-set_option backward.isDefEq.respectTransparency false in
  theorem N_homogeneous (i : Fin 4) : (N i).IsHomogeneous 27 := by
   apply homogeneous_instance
   simpa only [N, Fintype.card_fin] using

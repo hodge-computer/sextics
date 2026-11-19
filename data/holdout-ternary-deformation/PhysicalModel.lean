@@ -10,8 +10,6 @@ partial derivative. Uses fqlx's generic quotient/fraction derivations.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 namespace DeformedCover
 open HoldoutConstruction Polynomial
 local instance physicalModel_local_1 : Algebra ℤ PhysicalField := Ring.toIntAlgebra _
@@ -63,7 +61,6 @@ lemma protected_axis : physicalAxis HodgeSubmission.F=X^6 := by
 lemma protected_normal_axis : physicalAxis (integerPartial 0 HodgeSubmission.F)=6*X^5 := by
   norm_num [physicalAxis,HodgeSubmission.F,integerPartial,MvPolynomial.pderiv_pow,
     MvPolynomial.pderiv_mul,Polynomial.C_ofNat,Pi.single_apply,Fin.ext_iff]
-  simp [Matrix.cons_val]
 lemma protected_not_dvd_normal : ¬ HodgeSubmission.F ∣ integerPartial 0 HodgeSubmission.F := by
   intro hd
   have hm := map_dvd physicalAxis hd

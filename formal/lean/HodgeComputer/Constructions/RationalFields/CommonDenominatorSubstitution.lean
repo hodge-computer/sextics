@@ -32,7 +32,7 @@ variable {R σ τ S : Type*} [CommSemiring R] [CommSemiring S]
 def cleared (p : MvPolynomial σ R) (B : MvPolynomial τ R)
     (G : σ → MvPolynomial τ R) (L : ℕ) : MvPolynomial τ R :=
   ∑ a ∈ p.support,
-    C (coeff a p) * (∏ i ∈ a.support, G i ^ a i) *
+    C (p.coeff a) * (∏ i ∈ a.support, G i ^ a i) *
       B ^ (L - a.sum (fun _ e => e))
 
 /-- Equal homogeneous degrees make the denominator clearing homogeneous. -/
@@ -51,7 +51,7 @@ theorem cleared_homogeneous (p : MvPolynomial σ R) (B : MvPolynomial τ R)
     simpa only [Finsupp.sum, Finset.mul_sum] using
       IsHomogeneous.prod a.support (fun i => G i ^ a i) (fun i => k * a i)
         (fun i _ => (hG i).pow (a i))
-  convert (hprod.C_mul (coeff a p)).mul (hB.pow (L - a.sum (fun _ e => e))) using 1
+  convert (hprod.C_mul (p.coeff a)).mul (hB.pow (L - a.sum (fun _ e => e))) using 1
   rw [← Nat.mul_add, Nat.add_sub_of_le hdeg]
 
 /-- Polynomial pullback identity. It works even when `b = 0`, since no
@@ -66,7 +66,7 @@ theorem map_cleared (p : MvPolynomial σ R) (B : MvPolynomial τ R)
   classical
   rw [cleared, map_sum]
   change _ = b ^ L * (∑ a ∈ p.support,
-    φ (C (coeff a p)) * (∏ i ∈ a.support, y i ^ a i))
+    φ (C (p.coeff a)) * (∏ i ∈ a.support, y i ^ a i))
   rw [Finset.mul_sum]
   apply Finset.sum_congr rfl
   intro a ha
@@ -81,7 +81,7 @@ theorem map_cleared (p : MvPolynomial σ R) (B : MvPolynomial τ R)
     exact Nat.add_sub_of_le hdeg
   calc
     _ = (b ^ (∑ i ∈ a.support, a i) * b ^ (L - a.sum (fun _ e => e))) *
-        (φ (C (coeff a p)) * ∏ i ∈ a.support, y i ^ a i) := by ring
+        (φ (C (p.coeff a)) * ∏ i ∈ a.support, y i ^ a i) := by ring
     _ = _ := by rw [hpow]
 
 /-- A prime divisor on the pullback chart detects denominator legality of

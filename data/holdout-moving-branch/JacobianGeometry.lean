@@ -8,9 +8,6 @@ of the normal/tangent evaluation matrix for the generic conic family.
 The anchored-family and Laplace-expansion arguments reuse the credited shared
 construction. Prepared with OpenAI Codex assistance for hodgepodgeconjecture; transitive cubic adaptation by fqlx, specialized here for benediamond with Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
-set_option maxRecDepth 10000
 namespace CycleJacobianGeometry
 open HoldoutConstruction CycleJacobianIncidence CycleJacobianLifting
   CycleJacobianFamily CycleJacobianParameters Polynomial

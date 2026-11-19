@@ -213,12 +213,12 @@ theorem finite_derivations_commute
     apply finite_derivation_unique (0 : Derivation ℤ K K)
     · intro x
       simp only [Derivation.commutator_apply, compatible₁, compatible₂,
-        commute x, sub_self, Derivation.coe_zero, Pi.zero_apply, map_zero]
+        commute x, sub_self, FunLike.coe_zero, Pi.zero_apply, map_zero]
     · intro x
-      simp only [Derivation.coe_zero, Pi.zero_apply, map_zero]
+      simp only [FunLike.coe_zero, Pi.zero_apply, map_zero]
   intro x
   have h := congrArg (fun E : Derivation ℤ L L => E x) hbracket
-  simpa only [Derivation.commutator_apply, Derivation.coe_zero,
+  simpa only [Derivation.commutator_apply, FunLike.coe_zero,
     Pi.zero_apply, sub_eq_zero] using h
 
 theorem extendFiniteDerivation_commute (D₁ D₂ : Derivation ℤ K K)
@@ -269,10 +269,10 @@ theorem extendRingDerivation_commute (D E : Derivation ℤ P P)
     apply FieldValuedFraction.derivation_ext (P := P) (F := L)
     intro p
     simp only [Derivation.commutator_apply, extendRingDerivation_apply, h p,
-      sub_self, Derivation.coe_zero, Pi.zero_apply]
+      sub_self, FunLike.coe_zero, Pi.zero_apply]
   intro x
   have h := congrArg (fun δ : Derivation ℤ L L => δ x) hz
-  simpa only [Derivation.commutator_apply, Derivation.coe_zero, Pi.zero_apply,
+  simpa only [Derivation.commutator_apply, FunLike.coe_zero, Pi.zero_apply,
     sub_eq_zero] using h
 
 theorem extendRingDerivation_mem_range (D : Derivation ℤ P P) (x : L)
@@ -501,10 +501,10 @@ theorem derivations_ext_finite_quotient_fraction [CharZero K]
   have hz : D-E = 0 := by
     apply finite_derivation_unique (0 : Derivation ℤ K K)
     · intro x
-      simp only [Derivation.sub_apply, h x, sub_self, Derivation.coe_zero,
+      simp only [sub_apply, h x, sub_self, FunLike.coe_zero,
         Pi.zero_apply, map_zero]
     · intro x
-      simp only [Derivation.coe_zero, Pi.zero_apply, map_zero]
+      simp only [FunLike.coe_zero, Pi.zero_apply, map_zero]
   exact sub_eq_zero.mp hz
 
 end QuotientFraction

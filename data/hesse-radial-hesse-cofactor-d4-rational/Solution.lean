@@ -1,7 +1,5 @@
 import HodgeWitness
 import Proposal.Witness
-set_option maxHeartbeats 8000000
-set_option maxRecDepth 8000
 noncomputable section
 namespace Submission
 theorem witness : HodgeComputer.Verify HodgeSubmission.F HodgeSubmission.A HodgeSubmission.d HodgeSubmission.q HodgeWitness.D HodgeWitness.N HodgeWitness.Q := by

@@ -6,8 +6,6 @@ physical field. Adapted from fqlx's accepted mixed-biweight volume argument,
 which credits hodgepodgeconjecture and the shared HoldoutCover machinery.
 Prepared with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
 namespace MixedPolarPhysicalCubicVolume
 open HoldoutConstruction MixedPolarPhysical MixedPolarPhysicalCoordinates
 open MixedPolarPhysicalNormalTransport MixedPolarPhysicalTangent
@@ -68,7 +66,7 @@ lemma volume_direction (z : FunctionField) :
   simp only [volume_vector_identity,Fin.sum_univ_succ,velocity,
     Matrix.cons_val_zero,Matrix.cons_val_succ,Fin.reduceSucc,
     Finset.univ_eq_empty,Finset.sum_empty,zero_mul,mul_zero,add_zero,
-    derivative,Derivation.add_apply,Derivation.smul_apply,smul_eq_mul]
+    derivative,add_apply,smul_apply,smul_eq_mul]
   norm_num [velocity,Matrix.cons_val_two,Matrix.cons_val_three,Matrix.cons_val_four,
     Matrix.head_cons,Matrix.tail_cons]
   ring
@@ -109,13 +107,13 @@ lemma extended_derivative_eq : extendedDerivative=weightedDerivative := by
   · exact extended_on_base
   · intro z
     change weightedDerivative (ι z)=ι (derivative z)
-    simp only [weightedDerivative,Derivation.add_apply,Derivation.smul_apply,
+    simp only [weightedDerivative,add_apply,smul_apply,
       smul_eq_mul,lifted_on_base,derivative,map_add,map_mul]
 
 lemma extended_derivative_formula (z : Extension) :
     extendedDerivative z=∑ i : Fin 5,ι (velocity i.succ)*liftedTangent i z := by
   rw [extended_derivative_eq]
-  simp only [weightedDerivative,Derivation.add_apply,Derivation.smul_apply,smul_eq_mul,
+  simp only [weightedDerivative,add_apply,smul_apply,smul_eq_mul,
     Fin.sum_univ_succ,Fin.reduceSucc,Finset.univ_eq_empty,Finset.sum_empty,
     show velocity (2:Fin 6)=0 from rfl,show velocity (5:Fin 6)=0 from rfl,
     map_zero,zero_mul,add_zero]
@@ -162,16 +160,21 @@ lemma balanced_direction (z : Extension) :
   have h := (MixedPolarBalanced.balanced_volume_direction liftedTangent extendedDerivative
     (ι (gradient 0)) normal (ι ratio^3) (ι (cOne*cTwo)) volumeVector
     volume_divergence volume_direction passive_factor).2 z
-  simpa only [balancedVector,MixedPolarPhysicalNormalTransport.sourceFactor,
-    map_mul,map_pow] using h
+  simp only [balancedVector,MixedPolarPhysicalNormalTransport.sourceFactor,
+    map_mul,map_pow] at h ⊢
+  exact h
 
 theorem correction_divergence (z : Extension) :
     residueDivergence liftedTangent (ι (gradient 0)) (fun i => (z/3)*balancedVector i)=
       ι MixedPolarPhysicalNormalTransport.sourceFactor*normal/3*extendedDerivative z := by
-  rw [HoldoutConstruction.residueDivergence_smul,balanced_divergence,mul_zero,zero_add]
+  refine (HoldoutConstruction.residueDivergence_smul liftedTangent (ι (gradient 0)) (z/3)
+    balancedVector).trans ?_
+  rw [balanced_divergence,mul_zero,zero_add]
+  change ∑ i,balancedVector i*liftedTangent i (z/3)=_
   have hd (i : Fin 5) : liftedTangent i (z/3)=liftedTangent i z/3 := by
+    have h3 : liftedTangent i (3:Extension)=0 := (liftedTangent i).map_natCast 3
     rw [Derivation.leibniz_div]
-    simp [smul_eq_mul]
+    simp [smul_eq_mul,h3]
     ring
   simp only [hd,← mul_div_assoc,← Finset.sum_div]
   rw [balanced_direction]

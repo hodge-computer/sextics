@@ -2,8 +2,6 @@ import Proposal.CyclicCubicIdentityProducts
 namespace CycleCovariants.IdentityData
 open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 open CycleCovariants.Reflection
-set_option maxRecDepth 131072
-set_option maxHeartbeats 4000000
 variable {K : Type*} [CommRing K]
 lemma H_evaluation (a b c d e f x y : K) :
     denote (fun i => (context a b c d e f x y 1).get i) x y HData=

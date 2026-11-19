@@ -47,8 +47,8 @@ theorem coverField_divergence (δ : Fin 5 → Derivation ℚ R R)
   intro i _
   have htwo : θ i (2 : S) = 0 := (θ i).map_natCast 2
   by_cases hi : i = 3
-  · simp only [coverField, if_pos hi, hchain]
-  · simp only [coverField, if_neg hi, Derivation.leibniz, smul_eq_mul, htwo, ht,
+  · simp only [coverField, ite_eq_left hi, hchain]
+  · simp only [coverField, ite_eq_right hi, Derivation.leibniz, smul_eq_mul, htwo, ht,
       hchain, mul_zero, add_zero]
 
 /-- A quotient raw game field transfers to the physical cover with target 2t*A. -/

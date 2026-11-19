@@ -8,7 +8,6 @@ the normal-chart correction. The final clearing theorem is the shared
 construction credited to fqlx and the Hodge Computer collaborators.
 Prepared with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CyclePhysicalPrimitive
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open CyclePhysicalNormalTransport CyclePhysicalCubicTangent

@@ -15,7 +15,6 @@ trace then returns the primitive to the quotient's own function field.
 
 noncomputable section
 
-set_option backward.isDefEq.respectTransparency false
 
 namespace HoldoutConicIncidence
 
@@ -147,7 +146,7 @@ theorem conic_target_residue_solution (p : HoldoutConic.Seed)
     change conicTargetDerivation p j (algebraMap ConicTargetField (ConicFunctionField p)
       (quotientResidueMap genericAlpha genericBeta a)) = _
     rw [conicTargetDerivation_apply, quotientTangent_apply]
-    simp only [map_sub, map_div₀, map_mul, integerPartial_apply]
+    simp only [RingHom.map_sub, map_div₀, RingHom.map_mul, integerPartial_apply]
     rfl
   have hfamily : ∃ w : Fin 4 → ConicFunctionField p,
       residueDivergence (conicTargetDerivation p) (ρ (MvPolynomial.pderiv 0 f)) w =

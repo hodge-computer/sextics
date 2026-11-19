@@ -36,8 +36,8 @@ def horizontal (k : ℂ) (j : Fin 4) : Derivation ℚ FunctionField FunctionFiel
     horizontal k j (constant r)=0 := by
   rw [constant,horizontal_map]
   fin_cases j <;>
-    simp [polynomialHorizontal,Derivation.sub_apply,Derivation.add_apply,
-      Derivation.smul_apply,pderiv_C]
+    simp [polynomialHorizontal,sub_apply,add_apply,
+      smul_apply,pderiv_C]
 
 theorem horizontal_map_U (k : ℂ) (P : BasePoly) :
     horizontal k 0 (baseMap P)=baseMap (HoldoutEndpointLift.horizontalU P) := by
@@ -59,8 +59,8 @@ theorem horizontal_parameter (k : ℂ) (i : Fin 4) (j : Fin 2) :
     horizontal k i (parameter j)=0 := by
   fin_cases i <;> fin_cases j <;>
     simp [parameter,Derivation.leibniz_div,coordinate,horizontal_map,
-      polynomialHorizontal,Derivation.sub_apply,Derivation.add_apply,
-      Derivation.smul_apply,pderiv_X,Pi.single_apply,smul_eq_mul] <;> ring
+      polynomialHorizontal,sub_apply,add_apply,
+      smul_apply,pderiv_X,Pi.single_apply,smul_eq_mul] <;> ring
 
 def active (k : ℂ) (j : Fin 4) : FunctionField :=
   ![coordinate 0^2,coordinate 1^2,
@@ -82,7 +82,7 @@ theorem horizontal_active {k : ℂ} (hk : k^2+k+1=0) (i j : Fin 4) :
   fin_cases i <;> fin_cases j <;>
     simp [active,scale,Derivation.leibniz_pow,Derivation.leibniz,
       horizontal_constant,coordinate,horizontal_map,polynomialHorizontal,
-      Derivation.sub_apply,Derivation.add_apply,Derivation.smul_apply,
+      sub_apply,add_apply,smul_apply,
       pderiv_X,Pi.single_apply,smul_eq_mul,constant,map_pow,map_ofNat] <;>
     try ring <;> try simp only [true_or]
   · change _ = 0

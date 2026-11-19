@@ -1,8 +1,6 @@
 import Proposal.RatioMatrixInverse
 import Proposal.GenericSpecialization
 
-set_option maxRecDepth 100000
-set_option maxHeartbeats 12000000
 noncomputable section
 namespace QuadricContactRatioDataLink
 open Polynomial QuadricContactRatioInverse

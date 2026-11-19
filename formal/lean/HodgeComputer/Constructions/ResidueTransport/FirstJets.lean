@@ -129,6 +129,10 @@ variable {K : Type*} [Field K]
 abbrev Jet := TrivSqZeroExt K K
 open TrivSqZeroExt
 
+/-- A pair read as a jet is its value plus its first-order part. -/
+lemma jet_mk (r m : K) : (r,m)=(inl r+inr m : Jet (K:=K)) :=
+  TrivSqZeroExt.ext (add_zero r).symm (zero_add m).symm
+
 @[simp] lemma fst_numeral (n : ℕ) [n.AtLeastTwo] :
     (ofNat(n) : Jet (K:=K)).fst=(ofNat(n) : K) := rfl
 @[simp] lemma snd_numeral (n : ℕ) [n.AtLeastTwo] :

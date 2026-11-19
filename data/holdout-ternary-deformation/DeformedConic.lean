@@ -1,9 +1,6 @@
 import Proposal.ConicSeed
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 800000
-set_option maxRecDepth 100000
 set_option profiler true
 set_option profiler.threshold 100
 namespace DeformedConic
@@ -46,7 +43,6 @@ lemma seedJacobian_gradient : seedJacobian=gradientJacobian := by
   funext i j
   rw [equations_pderiv_eval,curveEval_seed]
   simp only [RingHom.id_apply,map_one,map_zero,seed_gradient]
-set_option maxHeartbeats 8000000 in
 lemma gradientJacobian_eq : gradientJacobian=explicitJacobian := by
   ext i j
   change (expandedGradient (slotCoordinate j)*X^slotDegree j).coeff i.val = _
@@ -59,7 +55,6 @@ lemma gradientJacobian_eq : gradientJacobian=explicitJacobian := by
       Polynomial.coeff_X_pow,Polynomial.coeff_one,Polynomial.coeff_ofNat_zero,Polynomial.coeff_ofNat_succ,Polynomial.coeff_X] <;> decide
 lemma seedJacobian_eq : seedJacobian=explicitJacobian :=
   seedJacobian_gradient.trans gradientJacobian_eq
-set_option maxHeartbeats 8000000 in
 lemma seedJacobian_inverse : explicitJacobian*inverseJacobian=1 := by decide
 lemma seed_jacobian_unit : IsUnit seedJacobian.det := by
   rw [seedJacobian_eq]

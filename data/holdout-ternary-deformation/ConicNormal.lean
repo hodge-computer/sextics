@@ -8,7 +8,6 @@ lemma, as also used in 1337isnot1337's accepted crossed-ternary construction.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace DeformedConic
 open Polynomial HoldoutConstruction
 open scoped BigOperators
@@ -24,8 +23,7 @@ theorem full_polynomial_combination_one {R : Type*} [CommRing R] {n : ℕ} (hn :
     dsimp [u]
     rw [Matrix.mulVec_mulVec,Matrix.mul_nonsing_inv J hunit,Matrix.one_mulVec]
   refine ⟨u,?_⟩
-  apply Polynomial.ext
-  intro k
+  ext k
   by_cases hk : k<n
   · have h := congrFun hu ⟨k,hk⟩
     simp only [Matrix.mulVec,dotProduct,J,e,Pi.single_apply] at h
@@ -43,7 +41,6 @@ theorem full_polynomial_combination_one {R : Type*} [CommRing R] {n : ℕ} (hn :
 def conicGradient : Fin 5 → Polynomial CoefficientField :=
   gradient (C conicAlpha) (C conicBeta) conicCurve
 
-set_option maxHeartbeats 1000000 in
 lemma conicGradient_column_bound (j : Fin 13) :
     (conicGradient (slotCoordinate j)*X^slotDegree j).natDegree < 13 := by
   unfold conicGradient conicCurve

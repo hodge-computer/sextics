@@ -17,7 +17,6 @@ OpenAI Codex assistance.
 -/
 
 noncomputable section
-set_option maxRecDepth 10000
 namespace WeierstrassChart
 
 variable {K : Type*} [Field K]
@@ -49,7 +48,7 @@ theorem raw_determinant (p f : Fin 6 → K) (z : Fin 5 → K) (u : K)
       Matrix.cons_val_four,Matrix.head_cons,Matrix.tail_cons]
   simp_rw [hrow]
   simp only [mul_ite,ite_mul,mul_zero,zero_mul,Finset.sum_ite_eq',
-    Finset.mem_univ,if_true]
+    Finset.mem_univ,ite_true]
   have hminor (A : Matrix (Fin 4) (Fin 4) K) :
       A.det=A 0 0*(A 1 1*A 2 2*A 3 3-A 1 1*A 2 3*A 3 2-A 1 2*A 2 1*A 3 3+
         A 1 2*A 2 3*A 3 1+A 1 3*A 2 1*A 3 2-A 1 3*A 2 2*A 3 1)-

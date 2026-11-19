@@ -12,8 +12,6 @@ Laurent coordinate ring before passing to a function field.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 800000
 
 namespace HoldoutBundle
 

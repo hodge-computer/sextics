@@ -4,8 +4,6 @@ noncomputable section
 namespace CoupledFanoQuarticSeed
 open Polynomial
 variable {K : Type*} [Field K] [CharP K 5]
-set_option maxRecDepth 4096
-set_option maxHeartbeats 4000000
 
 def seedGradient (j : K) : Fin 6 → K[X] :=
   ![-C j*(1+X^20), C (2-j)*(X^5+X^15), -C j*X^10,

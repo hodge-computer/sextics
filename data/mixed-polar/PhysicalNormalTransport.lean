@@ -6,8 +6,6 @@ the X0 normal to the paired radial normal. The correction uses the shared
 residue-divergence construction of fqlx and collaborators. Prepared with
 OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace MixedPolarPhysicalNormalTransport
 open HoldoutConstruction MixedPolarPhysical MixedPolarPhysicalCoordinates
 open scoped BigOperators

@@ -363,7 +363,7 @@ lemma field_intertwines {L : Type*} [Field L] (φ : E K →+* L)
     exact polynomial_intertwines (algebraMap (RatFunc K) (E K)) φ D E' (y K) hcoeff hY p
 
 lemma delta_base (c : K) : delta (K:=K) (algebraMap K (E K) c)=0 := by
-  rw [delta,Derivation.smul_apply,IsScalarTower.algebraMap_apply K (RatFunc K) (E K),time_base]
+  rw [delta,smul_apply,IsScalarTower.algebraMap_apply K (RatFunc K) (E K),time_base]
   change (-y K/3) • algebraMap (RatFunc K) (E K) (baseTime (RatFunc.C c))=0
   rw [baseTime_C,map_zero,smul_zero]
 

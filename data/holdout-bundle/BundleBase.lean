@@ -3,8 +3,6 @@ import Proposal.BundleFields
 /-! The Laurent coefficient base and its honest complex specialization. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 800000
 
 namespace HoldoutBundle
 
@@ -128,6 +126,10 @@ abbrev EndpointField := FractionRing GenericEndpoint
 abbrev QuotientRing := QuotientCoordinateRing genericA genericB
 abbrev QuotientField := FractionRing QuotientRing
 
+/-- Stated once so that instance search does not have to rediscover it. -/
+instance parameterRing_integrallyClosed : IsIntegrallyClosed (MvPolynomial (Fin 4) BaseField) :=
+  UniqueFactorizationMonoid.instIsIntegrallyClosed
+
 instance integralEndpoint_domain : IsDomain IntegralEndpoint :=
   endpoint_adjoinRoot_isDomain baseA baseB baseB_ne_zero
 
@@ -178,9 +180,7 @@ instance endpointGenericAlgebra : Algebra IntegralEndpoint EndpointField :=
 def integralEndpointSeedMap : IntegralEndpoint →+* ℂ :=
   AdjoinRoot.lift (f := endpointPolynomial baseA baseB)
     (MvPolynomial.eval₂Hom baseSeedMap ![1,4,1]) 1 (by
-      norm_num [endpointPolynomial,baseSeedMap_A,baseSeedMap_B]
-      change (1 : ℂ)+(1+-(2*1^3))=0
-      norm_num)
+      norm_num [endpointPolynomial,baseSeedMap_A,baseSeedMap_B])
 
 @[simp] theorem integralEndpointSeedMap_root :
     integralEndpointSeedMap (endpointRoot baseA baseB)=1 := by

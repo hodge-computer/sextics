@@ -7,8 +7,6 @@ endpoint. No inversion of a rational-function denominator occurs before
 the five parameter coordinates have been proved algebraically independent. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 
 namespace HoldoutBundle
 open HoldoutConstruction

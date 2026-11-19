@@ -10,9 +10,6 @@ extension. The arbitrary last row of the proved determinant formula retains
 every passive derivative of the algebraic shear. Adapted from the accepted
 calculation of fqlx and hodgepodgeconjecture with Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 namespace MixedPolarPhysicalJacobianCoordinates
 open HoldoutConstruction MixedPolarPhysical MixedPolarPhysicalCoordinates
 open MixedPolarPhysicalShear MixedPolarPhysicalTangent MixedPolarPhysicalCubicJets
@@ -115,8 +112,7 @@ def coordinateDerivation (j : Fin 5) : Derivation ℤ Extension Extension :=
   ∑ k,inverse k j • liftedTangent k
 lemma coordinateDerivation_apply (j : Fin 5) (z : Extension) :
     coordinateDerivation j z=∑ k,inverse k j*liftedTangent k z := by
-  simp only [coordinateDerivation,Fin.sum_univ_succ,Finset.univ_eq_empty,Finset.sum_empty,
-    Derivation.add_apply,Derivation.smul_apply,smul_eq_mul,Derivation.coe_zero,Pi.zero_apply,add_zero]
+  exact sum_apply Finset.univ (fun k => inverse k j • liftedTangent k) z
 lemma coordinateDerivation_passive (j i : Fin 5) :
     coordinateDerivation j (passive i)=if i=j then 1 else 0 := by
   rw [coordinateDerivation_apply]

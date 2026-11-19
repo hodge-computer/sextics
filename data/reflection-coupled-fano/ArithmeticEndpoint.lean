@@ -9,9 +9,6 @@ and passage to the generic complex endpoint.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxRecDepth 4096
-set_option maxHeartbeats 2000000
 namespace ReflectionCoupledFano.Arithmetic
 open Polynomial
 
@@ -59,7 +56,6 @@ theorem specialEndpoint_relation {j : T} (hj : j^2 = 2) :
   simp only [Endpoint.polynomial, Polynomial.eval₂_add, Polynomial.eval₂_mul,
     Polynomial.eval₂_pow, Polynomial.eval₂_X, Polynomial.eval₂_C]
   norm_num [specialCoefficientMap, hj6, Matrix.cons_val]
-  change (8 : T) + (1^6 + 1^3) = 0
   linear_combination 2*h5
 
 def specialEndpointMap (j : T) (hj : j^2 = 2) : EndpointBase →+* T :=

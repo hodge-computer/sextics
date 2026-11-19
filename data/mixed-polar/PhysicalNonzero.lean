@@ -6,8 +6,6 @@ evaluation followed by the proved kernel (F), never for arbitrary fractions.
 The point adapts the accepted cyclic/mixed-biweight chart of
 hodgepodgeconjecture and fqlx. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace MixedPolarPhysicalCoordinates
 open MixedPolarPhysical
 local notation "p" => coordinate

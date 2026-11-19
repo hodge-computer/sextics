@@ -14,11 +14,8 @@ This new seed and its formalization were prepared with OpenAI Codex assistance
 for hodgepodgeconjecture. This module alone asserts no HasCertificate theorem.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 800000
 set_option profiler true
 set_option profiler.threshold 100
-set_option maxRecDepth 100000
 namespace DeformedConic
 open Polynomial
 variable {R : Type*} [CommRing R]
@@ -116,7 +113,7 @@ lemma equations_eval {S : Type*} [CommRing S] (a b : R) (k : Fin 3 → R)
       (H (C (f a)) (C (f b)) (curveEval k f v)).coeff i.val := by
   change (MvPolynomial.eval₂Hom f v) ((H (cp a) (cp b) (curve k)).coeff i.val) = _
   rw [← Polynomial.coeff_map]
-  congr 1
+  congr 2
   change (Polynomial.mapRingHom (MvPolynomial.eval₂Hom f v)) (H (cp a) (cp b) (curve k)) = _
   rw [H_map]
   change H ((cp a).map (MvPolynomial.eval₂Hom f v))
@@ -127,7 +124,7 @@ lemma equations_pderiv_eval {S : Type*} [CommRing S] (a b : R) (k : Fin 3 → R)
     MvPolynomial.eval₂Hom f v (MvPolynomial.pderiv j (equations a b k i))=
       (gradient (C (f a)) (C (f b)) (curveEval k f v) (slotCoordinate j)*X^slotDegree j).coeff i.val := by
   rw [equations_pderiv,← Polynomial.coeff_map,Polynomial.map_mul,Polynomial.map_pow,Polynomial.map_X]
-  congr 2
+  congr 3
   change (Polynomial.mapRingHom (MvPolynomial.eval₂Hom f v))
     (gradient (cp a) (cp b) (curve k) (slotCoordinate j)) = _
   rw [gradient_map]

@@ -11,8 +11,6 @@ This is the explicit application of fqlx's shared quotient-derivation API.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 
 namespace HoldoutBundle
 open Polynomial HoldoutConstruction

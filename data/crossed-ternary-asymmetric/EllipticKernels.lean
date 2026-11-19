@@ -8,7 +8,6 @@ See solution.md for the construction, provenance, and prior-work credit. -/
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFanoElliptic
 open HoldoutConstruction CrossedElliptic CrossedFanoAffineData
 variable {K : Type*} [Field K] [CharZero K]

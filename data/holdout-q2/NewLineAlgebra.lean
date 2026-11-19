@@ -10,8 +10,6 @@ namespace HoldoutQ2.NewLineAlgebra
 open Polynomial NewLineChart NewEliminant
 noncomputable section
 set_option linter.unusedSimpArgs false
-set_option maxHeartbeats 0
-set_option maxRecDepth 100000
 
 abbrev PolynomialRing := MvPolynomial (Fin 4) ℚ
 def point : PolynomialRing →+* ℚ := MvPolynomial.eval₂Hom (RingHom.id ℚ) ![2,2,1,1]

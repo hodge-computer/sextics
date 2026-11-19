@@ -7,9 +7,6 @@ and SageMath's TernaryCubic implementation. The identities below are proved by
 Lean's ring tactic, not by trusting the external coefficient generator.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture. -/
 namespace CycleCovariants
-set_option maxRecDepth 4096
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 variable {K : Type*} [CommRing K]
 def HCoeff300 (a b c d e f : K) : K := -d^(2:ℕ)*f
 def HCoeff210 (a b c d e f : K) : K := (9:K)*a*b*f

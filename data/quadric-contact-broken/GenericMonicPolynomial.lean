@@ -8,8 +8,6 @@ open Polynomial
 variable {K : Type*} [CommRing K]
 set_option linter.unusedVariables false
 set_option linter.unusedSimpArgs false
-set_option maxRecDepth 100000
-set_option maxHeartbeats 0
 
 noncomputable def coefficient0 (p q s k u v : K) : K :=
   GenericLineChart.eliminantCoeff0 p q s k u v

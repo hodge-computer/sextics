@@ -22,7 +22,6 @@ See solution.md for the construction, provenance, and prior-work credit. -/
 section
 
 noncomputable section
-set_option maxHeartbeats 400000
 namespace CrossedFano
 open Polynomial
 abbrev Coeff := MvPolynomial (Fin 4) ℂ
@@ -188,8 +187,6 @@ section
    Coefficientwise differentiation follows the generic mechanism used in
    fqlx's accepted moving-conic proof, with the present equation and slots. -/
 noncomputable section
-set_option maxHeartbeats 3000000
-set_option maxRecDepth 10000
 namespace CrossedConicIncidence
 open Polynomial
 abbrev Coeff := MvPolynomial (Fin 13) ℤ
@@ -356,7 +353,7 @@ lemma two_step_evaluation_det {R : Type*} [CommRing R]
     exact he i j
   rw [hi,Matrix.det_one,mul_one]
   change P 0 0*P 1 1=4
-  rw [h0,if_pos rfl,h11,one_mul]
+  rw [h0,ite_eq_left rfl,h11,one_mul]
 
 end CrossedConicIncidence
 end
@@ -366,7 +363,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
 namespace CrossedFanoAffine
 open Polynomial HoldoutConstruction
 
@@ -417,8 +413,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 100000
 namespace CrossedFanoRadial
 open Polynomial HoldoutConstruction
 abbrev AffineField := CrossedFanoAffine.FunctionField
@@ -558,8 +552,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 100000
 namespace CrossedFano
 open Polynomial HoldoutConstruction
 
@@ -599,7 +591,9 @@ lemma hypersurface_partial (j : Fin 5) : integerPartial j hypersurface=
     CrossedConicIncidence.gradient
       ![MvPolynomial.X 1,MvPolynomial.X 0,MvPolynomial.X 2,MvPolynomial.X 3,MvPolynomial.X 4]
       (Equiv.swap (0 : Fin 5) 1 j) := by
-  rw [hypersurface,CrossedConicIncidence.H_derivation]
+  rw [hypersurface]
+  refine (CrossedConicIncidence.H_derivation (integerPartial j) _).trans ?_
+  change ∑ i,_*integerPartial j _=_
   fin_cases j <;>
     simp [CrossedConicIncidence.gradient,Fin.sum_univ_succ,Equiv.swap_apply_def,
       integerPartial_X_of_ne]

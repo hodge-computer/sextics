@@ -20,7 +20,7 @@ theorem fiber_ratioBase (N : BasePoly) : fiber (ratioBase N) = fiber N := by
   | add p q hp hq => simp only [map_add, hp, hq]
   | mul_X p j hp =>
       simp only [map_mul, hp]
-      congr 1
+      refine congrArg (fiber p * ·) ?_
       simp only [ratioBase, eval₂Hom_X', fiber_X]
       fin_cases j <;>
         norm_num [ratioValues, fiberValues, fiber, Matrix.cons_val, Fin.isValue, map_ofNat] <;> rfl

@@ -1,6 +1,5 @@
 import HodgeTarget
 import Proposal.PDenseP0
-set_option maxHeartbeats 8000000
 noncomputable section
 open HodgeComputer HodgeTestbed
 namespace Submission

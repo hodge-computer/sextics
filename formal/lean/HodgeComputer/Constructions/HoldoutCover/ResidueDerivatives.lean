@@ -223,7 +223,7 @@ theorem residue_derivations_commute_of_compatible
     exact sub_eq_zero.mpr (himage p)
   intro x
   have h := congrArg (fun D : Derivation ℤ K K => D x) hbracket
-  simpa only [Derivation.commutator_apply, Derivation.coe_zero,
+  simpa only [Derivation.commutator_apply, FunLike.coe_zero,
     Pi.zero_apply, sub_eq_zero] using h
 
 /-- The tangent derivations constructed by quotient descent and fraction

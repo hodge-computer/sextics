@@ -3,7 +3,7 @@ import HodgeComputer.Constructions.HoldoutCover.HomogeneousField
 import HodgeComputer.Constructions.HoldoutCover.HypersurfaceDomain
 import Mathlib.Algebra.MonoidAlgebra.MapDomain
 import Mathlib.Algebra.MvPolynomial.NoZeroDivisors
-import Mathlib.Data.Complex.Basic
+import Mathlib.Basic.Complex.Basic
 
 /- Prepared with OpenAI Codex assistance for contributor 1337isnot1337.
 See solution.md for the construction, provenance, and prior-work credit. -/
@@ -12,8 +12,6 @@ See solution.md for the construction, provenance, and prior-work credit. -/
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 500000
 namespace CrossedPhysicalChart
 open MvPolynomial HoldoutConstruction
 
@@ -78,7 +76,7 @@ lemma chartD_coordinate (i j : Fin 6) : chartD i (coordinate j)=if j=i then 1 el
   rw [coordinate,chartD_polynomial]
   by_cases h : j=i
   · subst j; simp
-  · rw [integerPartial_X_of_ne _ _ h,map_zero,if_neg h]
+  · rw [integerPartial_X_of_ne _ _ h,map_zero,ite_eq_right h]
 lemma coordinate_ne_zero (i : Fin 6) : coordinate i≠0 := by
   simpa only [coordinate,map_zero] using (IsFractionRing.injective Poly M).ne (MvPolynomial.X_ne_zero (R:=ℂ) i)
 lemma θ_C (c : ℂ) : θ (C c)=algebraMap Poly M (C c) := by rw [θ,RingHom.comp_apply,monomialMap_C]
@@ -110,8 +108,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 600000
 namespace CrossedPhysicalChart
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators
@@ -138,10 +134,10 @@ lemma chartD_baseValue_zero (k : Fin 6) (hk : ∀ i : Fin 4,baseIndex i≠k) (f 
   have he := derivation_intertwines_quotient_fraction (RingHom.id CrossedProductField.Base)
     Function.surjective_id baseValue (0 : Derivation ℤ CrossedProductField.F CrossedProductField.F) (chartD k)
     (by intro c; simp only [RingHom.id_apply,baseValue_polynomial,baseRingMap_C,chartD_C,
-          Derivation.coe_zero,Pi.zero_apply,map_zero])
+          FunLike.coe_zero,Pi.zero_apply,map_zero])
     (by intro i; simp only [RingHom.id_apply,baseValue_polynomial,baseRingMap_X,chartD_coordinate,
-          if_neg (hk i),Derivation.coe_zero,Pi.zero_apply,map_zero]) f
-  simpa only [Derivation.coe_zero,Pi.zero_apply,map_zero] using he
+          ite_eq_right (hk i),FunLike.coe_zero,Pi.zero_apply,map_zero]) f
+  simpa only [FunLike.coe_zero,Pi.zero_apply,map_zero] using he
 lemma chartD_lambda_base (f : CrossedProductField.F) : chartD 4 (baseValue f)=0 := by
   apply chartD_baseValue_zero
   intro i; fin_cases i <;> simp [baseIndex]
@@ -240,8 +236,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 500000
 namespace CrossedPhysicalChart
 open MvPolynomial Polynomial HoldoutConstruction
 
@@ -343,8 +337,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 700000
 namespace CrossedPhysicalChart
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators
@@ -392,8 +384,6 @@ end
 section
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 500000
 namespace CrossedPhysicalChart
 open MvPolynomial HoldoutConstruction
 open scoped BigOperators
@@ -444,7 +434,7 @@ lemma baseVector_derivative (W : Fin 4 → Field4) (i : Fin 4) :
         baseValue (W i)*baseValue (CrossedProductField.baseD i CrossedProductField.p) := by
   have h3 : chartD (baseIndex i) (3 : M)=0 := (chartD (baseIndex i)).map_natCast 3
   simp only [baseVector,Derivation.leibniz,Derivation.leibniz_div,map_neg,h3,
-    chartD_baseValue,chartD_coordinate,if_neg (Ne.symm (baseIndex_ne_lambda i)),smul_eq_mul]
+    chartD_baseValue,chartD_coordinate,ite_eq_right (Ne.symm (baseIndex_ne_lambda i)),smul_eq_mul]
   field_simp [baseValue_p_ne_zero]
   ring
 
@@ -456,7 +446,7 @@ lemma lambdaVector_divergence (W : Fin 4 → Field4) :
   have h3 : chartD 4 (3 : M)=0 := (chartD 4).map_natCast 3
   have h18 : chartD 4 (18 : M)=0 := (chartD 4).map_natCast 18
   simp only [lambdaVector,Derivation.leibniz,Derivation.leibniz_div,Derivation.leibniz_pow,
-    map_add,h3,h18,chartD_lambda_base,chartD_coordinate,if_pos rfl,smul_eq_mul,nsmul_eq_mul]
+    map_add,h3,h18,chartD_lambda_base,chartD_coordinate,ite_eq_left rfl,smul_eq_mul,nsmul_eq_mul]
   norm_num only
   simp only [ite_true,zero_mul,mul_zero,add_zero,zero_add,sub_zero,zero_sub]
   field_simp [baseValue_p_ne_zero,baseValue_q_ne_zero,coordinate_ne_zero 4]

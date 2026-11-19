@@ -11,9 +11,6 @@ the final certificate module.
 -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1500000
-set_option maxRecDepth 10000
 
 namespace HoldoutBundle
 open Polynomial MvPolynomial HoldoutConstruction

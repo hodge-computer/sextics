@@ -4,7 +4,6 @@ import Mathlib.Algebra.MvPolynomial.PDeriv
 import Mathlib.RingTheory.MvPolynomial.Homogeneous
 
 noncomputable section
-set_option maxHeartbeats 1500000
 namespace ReflectionCoupledFano
 open Polynomial
 
@@ -151,7 +150,6 @@ theorem axis_gradient (k : R) (n m : ℕ) :
     show (1 : Fin 6) ≠ 0 by decide, show (2 : Fin 6) ≠ 0 by decide,
     show (3 : Fin 6) ≠ 0 by decide, show (4 : Fin 6) ≠ 0 by decide,
     show (5 : Fin 6) ≠ 0 by decide]
-  simp only [show (![X, 0, 0, 0, 0, 0] : Fin 6 → R[X]) 4 = 0 by rfl, zero_mul, mul_zero]
 
 theorem hypersurface_not_dvd_pderiv_zero [CharZero R]
     (k : R) (n m : ℕ) (hn : 0 < n) :

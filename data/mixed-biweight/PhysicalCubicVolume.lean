@@ -6,8 +6,6 @@ rational function, without expanding that function's covariants.
 Original cycle-three construction prepared with OpenAI Codex assistance.
 Adapted to mixed-biweight for fqlx with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 3000000
 namespace CyclePhysicalCubicVolume
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates
 open CyclePhysicalNormalTransport CyclePhysicalCubicTangent
@@ -68,7 +66,7 @@ lemma volume_direction (z : FunctionField) :
   simp only [volume_vector_identity,Fin.sum_univ_succ,velocity,
     Matrix.cons_val_zero,Matrix.cons_val_succ,Fin.reduceSucc,
     Finset.univ_eq_empty,Finset.sum_empty,zero_mul,mul_zero,add_zero,
-    derivative,Derivation.add_apply,Derivation.smul_apply,smul_eq_mul]
+    derivative,add_apply,smul_apply,smul_eq_mul]
   norm_num [velocity,Matrix.cons_val_two,Matrix.cons_val_three,Matrix.cons_val_four,
     Matrix.head_cons,Matrix.tail_cons]
   ring

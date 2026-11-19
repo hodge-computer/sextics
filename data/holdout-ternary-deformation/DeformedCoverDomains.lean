@@ -10,8 +10,6 @@ Uses fqlx's shared specialization and coefficient-injectivity theorems.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 namespace DeformedGeometry
 open Polynomial HoldoutConstruction
 variable {R : Type*} [CommRing R]

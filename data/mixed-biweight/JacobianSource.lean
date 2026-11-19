@@ -7,8 +7,6 @@ Classical cubic invariant theory is credited to its authors, including Tom Fishe
 The accepted cyclic construction supplies the architecture; adapted by fqlx
 with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
 namespace CycleJacobianSource
 open HoldoutConstruction CycleJacobianHypersurface CycleJacobianEmbedding CycleJacobianResidue
 open Polynomial

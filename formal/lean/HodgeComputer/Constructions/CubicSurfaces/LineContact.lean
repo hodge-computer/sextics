@@ -67,7 +67,6 @@ theorem numerator_homogeneous (d e f g h : R) (i : Fin 4) :
   · exact ((nb_homogeneous d e f g h).C_mul g).sub
       ((minusNC_homogeneous e f g h).C_mul h)
 
-set_option maxRecDepth 4000
 
 theorem numerator_divergence (d e f g h : R) :
     divergence (numerator d e f g h) = 0 := by
@@ -167,7 +166,7 @@ theorem gradient_expansion (a b c d : R) (i : Fin 4) :
     norm_num [Fin.ext_iff] <;>
     simp only [gradientCoefficients, quadraticMonomials, Fin.sum_univ_succ,
       Fin.sum_univ_zero, add_zero, Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_succ,
-      Matrix.cons_val_zero', Matrix.cons_val_succ', Matrix.cons_val_one,
+      Matrix.cons_val_one, Matrix.cons_val,
       map_mul, map_neg, map_ofNat, map_zero] <;>
     ring
 

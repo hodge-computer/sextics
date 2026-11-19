@@ -3,8 +3,6 @@ import Proposal.NumericDenominatorLink
 import Proposal.GenericLineSpecialization
 import Proposal.CubicDenominatorEvaluation
 
-set_option maxRecDepth 100000
-set_option maxHeartbeats 2000000
 noncomputable section
 namespace QuadricContactGenericDenominator
 open Polynomial QuadricContactRatioInverse QuadricContactRatioDenominator

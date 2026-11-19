@@ -4,7 +4,6 @@ import HodgeComputer.Constructions.ResidueTransport.WeierstrassChart
 so normalization of the concrete algebraic extension does not enlarge this
 rational identity. The last row remains arbitrary. -/
 noncomputable section
-set_option maxHeartbeats 1000000
 namespace MixedPolarJacobianVolumeIdentity
 open scoped BigOperators
 open WeierstrassChart

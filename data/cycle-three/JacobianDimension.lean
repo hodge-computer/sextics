@@ -4,8 +4,6 @@ import Proposal.JacobianEmbedding
 degrees and essential finite generation. Uses the shared dimension lemmas.
 Prepared with OpenAI Codex assistance for hodgepodgeconjecture. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 200000
 namespace CycleJacobianDimension
 open HoldoutConstruction CycleJacobianLifting CycleJacobianFamily CycleJacobianEmbedding Algebra
 lemma parameterField_trdeg : trdeg ℂ ComplexParameterField=4 := by

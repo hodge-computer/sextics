@@ -10,7 +10,6 @@ section
 /-! Exact polynomial left-inverse certificates for the holdout conic Jacobian.
 These intermediate lemmas do not assert a Hodge certificate. -/
 
-set_option maxRecDepth 100000
 
 noncomputable section
 namespace HoldoutConicJacobian

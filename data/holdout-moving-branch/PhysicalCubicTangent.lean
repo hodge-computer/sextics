@@ -8,8 +8,6 @@ not posit an auxiliary parameter derivation on a specialized field.
 Original cycle-three work prepared with OpenAI Codex assistance for hodgepodgeconjecture.
 The transitive-cubic adaptation is due to fqlx. Adapted here to holdout-moving-branch for benediamond with OpenAI Codex assistance. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace CyclePhysicalCubicTangent
 open HoldoutConstruction CyclePhysical CyclePhysicalCoordinates CyclePhysicalNormalTransport
 open scoped BigOperators
@@ -41,7 +39,7 @@ lemma derivative_coordinate (j : Fin 6) : derivative (p j)=velocity j := by
   have he : pairedGradient=p 0*gradient 0+p 3*gradient 3 := rfl
   have hb : secondPairedGradient=p 1*gradient 1+p 4*gradient 4 := rfl
   fin_cases j <;>
-    simp only [derivative,Derivation.add_apply,Derivation.smul_apply,smul_eq_mul,
+    simp only [derivative,add_apply,smul_apply,smul_eq_mul,
       tangent_coordinate,velocity,Matrix.cons_val_zero,
       Matrix.cons_val_succ,Fin.reduceSucc,Matrix.cons_val_one,Matrix.cons_val,
       Finset.sum_const_zero,Finset.univ_eq_empty,Finset.sum_empty] <;>
@@ -49,7 +47,7 @@ lemma derivative_coordinate (j : Fin 6) : derivative (p j)=velocity j := by
     field_simp <;> simp only [pairedGradient,secondPairedGradient] <;> ring
 
 lemma derivative_constant (c : ℂ) : derivative (residueMap (MvPolynomial.C c))=0 := by
-  simp only [derivative,Derivation.add_apply,Derivation.smul_apply,smul_eq_mul,
+  simp only [derivative,add_apply,smul_apply,smul_eq_mul,
     tangent_apply,MvPolynomial.pderiv_C,map_zero,mul_zero,div_zero,sub_zero,
     Finset.sum_const_zero,add_zero]
 

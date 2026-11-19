@@ -5,8 +5,6 @@ import Mathlib.RingTheory.Localization.Away.Basic
 fqlx's accepted mixed-biweight chart and the cyclic chart of
 hodgepodgeconjecture. No covariant formula or root-point evaluation is assumed. -/
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 2000000
 namespace MixedPolarPhysicalChart
 open MixedPolarPhysical MixedPolarPhysicalCoordinates
 local notation "X" => (MvPolynomial.X : Fin 6 → Ambient)

@@ -5,16 +5,12 @@ equation, and its polynomial normal. The coefficient field is kept explicit.
 This packages the target-specific incidence without assuming a certificate. -/
 
 noncomputable section
-set_option backward.isDefEq.respectTransparency false
-set_option maxHeartbeats 1000000
-set_option maxRecDepth 100000
 
 namespace HoldoutBundle
 open Polynomial HoldoutConstruction
 
 variable {E : Type*} [Field E] [CharZero E]
 
-set_option backward.isDefEq.respectTransparency true in
 structure ConicFamily (a b : E) (k : Fin 4 → E) where
   coefficients : Fin 12 → E
   endpoint_relation : endpoint a b k = 0
