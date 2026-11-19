@@ -79,6 +79,14 @@ import Mathlib.Algebra.Category.Grp.FilteredColimits
 import Mathlib.Algebra.Homology.DerivedCategory.DerivabilityStructureInjectives
 import Mathlib.Algebra.Category.Grp.AB
 import Mathlib.Algebra.Homology.Embedding.HomEquiv
+import Mathlib.AlgebraicGeometry.Limits
+import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+import Proposal.GeometricSurfaceResidueFunctoriality
+import Proposal.GeometricAffineHTwo
+import Proposal.GeometricAffineHigherChartRestriction
+import Mathlib.Algebra.Homology.DerivedCategory.Ext.Basic
+import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
+import Mathlib.RingTheory.LocalProperties.Projective
 
 /-!
 # The proper graph has strict support in the native generic threefold
@@ -7411,5 +7419,1412 @@ end CycleQ2GenericSurfaceDerivedPull
 
 #print axioms CycleQ2GenericSurfaceDerivedPull.nativePull
 #print axioms CycleQ2GenericSurfaceDerivedPull.nativePullH3
+
+end
+
+section
+
+/-!
+# The actual two-chart projective line
+
+Glue two affine polynomial spectra along the Laurent spectrum using
+the inverse coordinate on the second chart. The two chart images
+cover the scheme, and their intersection is precisely the shared
+Laurent spectrum.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2LaurentProjectiveLine
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open Polynomial LaurentPolynomial
+
+variable (k : Type) [Field k]
+
+abbrev affineLine := Spec (CommRingCat.of k[X])
+
+abbrev torus := Spec (CommRingCat.of (LaurentPolynomial k))
+
+def zeroMap : torus k ⟶ affineLine k :=
+  Spec.map (CommRingCat.ofHom Polynomial.toLaurent)
+
+def inversion : torus k ⟶ torus k :=
+  Spec.map (CommRingCat.ofHom LaurentPolynomial.invert.toRingHom)
+
+instance : IsOpenImmersion (zeroMap k) :=
+  IsOpenImmersion.of_isLocalization (Polynomial.X : k[X])
+
+instance : IsIso (inversion k) := by
+  let a := (LaurentPolynomial.invert (R := k)).toRingEquiv.toCommRingCatIso
+  change IsIso (Scheme.Spec.map a.hom.op)
+  infer_instance
+
+def infinityMap : torus k ⟶ affineLine k := inversion k ≫ zeroMap k
+
+instance : IsOpenImmersion (infinityMap k) := by unfold infinityMap; infer_instance
+
+abbrev diagram := span (zeroMap k) (infinityMap k)
+
+abbrev line := colimit (diagram k)
+
+abbrev chartZero : affineLine k ⟶ line k := colimit.ι (diagram k) WalkingSpan.left
+abbrev chartInfinity : affineLine k ⟶ line k := colimit.ι (diagram k) WalkingSpan.right
+abbrev chartTorus : torus k ⟶ line k := colimit.ι (diagram k) WalkingSpan.zero
+
+instance : IsOpenImmersion (chartZero k) := inferInstanceAs
+  (IsOpenImmersion (colimit.ι (diagram k) WalkingSpan.left))
+
+instance : IsOpenImmersion (chartInfinity k) := inferInstanceAs
+  (IsOpenImmersion (colimit.ι (diagram k) WalkingSpan.right))
+
+instance : IsOpenImmersion (chartTorus k) := inferInstanceAs
+  (IsOpenImmersion (colimit.ι (diagram k) WalkingSpan.zero))
+
+theorem torus_zero : zeroMap k ≫ chartZero k = chartTorus k :=
+  colimit.w (diagram k) WalkingSpan.Hom.fst
+
+theorem torus_infinity : infinityMap k ≫ chartInfinity k = chartTorus k :=
+  colimit.w (diagram k) WalkingSpan.Hom.snd
+
+abbrev openZero := (chartZero k).opensRange
+abbrev openInfinity := (chartInfinity k).opensRange
+
+theorem cover : openZero k ⊔ openInfinity k = ⊤ := by
+  apply top_unique
+  intro x _
+  obtain ⟨i, y, rfl⟩ := Scheme.IsLocallyDirected.ι_jointly_surjective (diagram k) x
+  rcases i with (_ | (_ | _))
+  · exact Or.inl ⟨zeroMap k y, congrArg (fun f : torus k ⟶ line k => f y) (torus_zero k)⟩
+  · exact Or.inl ⟨y,rfl⟩
+  · exact Or.inr ⟨y,rfl⟩
+
+theorem overlap : openZero k ⊓ openInfinity k = (chartTorus k).opensRange := by
+  ext x
+  constructor
+  · rintro ⟨⟨y,rfl⟩,⟨z,hz⟩⟩
+    obtain ⟨i, il, ir, u, h₁,h₂⟩ := (Scheme.IsLocallyDirected.ι_eq_ι_iff (diagram k)).mp hz.symm
+    rcases i with (_ | (_ | _))
+    · have e : il = WalkingSpan.Hom.fst := Subsingleton.elim _ _
+      subst il
+      exact ⟨u, (congrArg (fun f : torus k ⟶ line k => f u) (torus_zero k)).symm.trans
+        (congrArg (chartZero k) h₁)⟩
+    · cases ir
+    · cases il
+  · rintro ⟨z,rfl⟩
+    exact ⟨⟨zeroMap k z, congrArg (fun f : torus k ⟶ line k => f z) (torus_zero k)⟩,
+      ⟨infinityMap k z, congrArg (fun f : torus k ⟶ line k => f z) (torus_infinity k)⟩⟩
+
+end CycleQ2LaurentProjectiveLine
+
+#print axioms CycleQ2LaurentProjectiveLine.cover
+#print axioms CycleQ2LaurentProjectiveLine.overlap
+
+end
+
+section
+
+/-!
+# The coefficient map and ordinary affine charts of the glued line
+
+The zero and infinity polynomial charts induce the same map to the
+coefficient field on the Laurent overlap. Their common structure
+map is smooth of relative dimension one.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2ProjectiveLineStructure
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2LaurentProjectiveLine
+open Polynomial
+
+variable (k : Type) [Field k]
+
+abbrev base := Spec (CommRingCat.of k)
+
+def affineStructure : affineLine k ⟶ base k :=
+  Spec.map (CommRingCat.ofHom (algebraMap k k[X]))
+
+def torusStructure : torus k ⟶ base k :=
+  Spec.map (CommRingCat.ofHom (algebraMap k (LaurentPolynomial k)))
+
+theorem zeroMap_over : zeroMap k ≫ affineStructure k = torusStructure k := by
+  rw [zeroMap, affineStructure, torusStructure, ← Spec.map_comp]
+  apply congrArg Spec.map
+  apply CommRingCat.hom_ext
+  apply RingHom.ext
+  exact (Polynomial.toLaurentAlg (R := k)).commutes
+
+theorem inversion_over : inversion k ≫ torusStructure k = torusStructure k := by
+  rw [inversion, torusStructure, ← Spec.map_comp]
+  apply congrArg Spec.map
+  apply CommRingCat.hom_ext
+  apply RingHom.ext
+  exact (LaurentPolynomial.invert (R := k)).commutes
+
+theorem infinityMap_over : infinityMap k ≫ affineStructure k = torusStructure k := by
+  rw [infinityMap, Category.assoc, zeroMap_over, inversion_over]
+
+/-- The actual induced morphism from the glued line to its coefficient field. -/
+def structureMap : line k ⟶ base k :=
+  pushout.desc (affineStructure k) (affineStructure k) ((zeroMap_over k).trans (infinityMap_over k).symm)
+
+theorem chartZero_over : chartZero k ≫ structureMap k = affineStructure k := by
+  unfold structureMap
+  exact pushout.inl_desc _ _ _
+
+theorem chartInfinity_over : chartInfinity k ≫ structureMap k = affineStructure k := by
+  unfold structureMap
+  exact pushout.inr_desc _ _ _
+
+theorem chartTorus_over : chartTorus k ≫ structureMap k = torusStructure k := by
+  rw [← torus_zero k, Category.assoc, chartZero_over, zeroMap_over]
+
+private theorem affine_smooth : SmoothOfRelativeDimension 1 (affineStructure k) := by
+  let P : Algebra.SubmersivePresentation k (MvPolynomial PUnit k) PUnit Empty :=
+    { toPreSubmersivePresentation :=
+        { toGenerators := Algebra.Generators.mvPolynomial k PUnit
+          relation := Empty.elim
+          span_range_relation_eq_ker := by rw [Algebra.Generators.ker_mvPolynomial]; simp
+          map := Empty.elim
+          map_inj := fun a => a.elim }
+      jacobian_isUnit := by
+        rw [Algebra.PreSubmersivePresentation.jacobian_eq_jacobiMatrix_det,
+          Matrix.det_isEmpty, map_one]
+        exact isUnit_one }
+  have hP : Algebra.IsStandardSmoothOfRelativeDimension 1 k (MvPolynomial PUnit k) :=
+    P.isStandardSmoothOfRelativeDimension (by
+      change Nat.card PUnit - Nat.card Empty = 1
+      simp [Nat.card_eq_fintype_card])
+  have h : SmoothOfRelativeDimension 1
+      (Spec.map (CommRingCat.ofHom (algebraMap k (MvPolynomial PUnit k)))) := by
+    apply (HasRingHomProperty.Spec_iff (P := @SmoothOfRelativeDimension 1)).mpr
+    exact RingHom.locally_of RingHom.isStandardSmoothOfRelativeDimension_respectsIso _
+      ((RingHom.isStandardSmoothOfRelativeDimension_algebraMap 1).mpr hP)
+  let e := (MvPolynomial.uniqueAlgEquiv k PUnit).toRingEquiv.toCommRingCatIso
+  let q := Spec.map e.hom
+  have hq : IsIso q := inferInstanceAs (IsIso (Scheme.Spec.map e.hom.op))
+  have ee : affineStructure k = q ≫ Spec.map (CommRingCat.ofHom (algebraMap k (MvPolynomial PUnit k))) := by
+    rw [affineStructure, ← Spec.map_comp]
+    apply congrArg Spec.map
+    apply CommRingCat.hom_ext
+    apply RingHom.ext
+    exact fun r => ((MvPolynomial.uniqueAlgEquiv k PUnit).commutes r).symm
+  rw [ee]
+  exact smoothOfRelativeDimension_comp 0 1 q _
+
+theorem smooth : SmoothOfRelativeDimension 1 (structureMap k) := by
+  apply (IsZariskiLocalAtSource.iff_of_openCover (P := @SmoothOfRelativeDimension 1)
+    (Scheme.IsLocallyDirected.openCover (diagram k))).mpr
+  intro i
+  rcases i with (_ | (_ | _))
+  · change SmoothOfRelativeDimension 1 (chartTorus k ≫ structureMap k)
+    rw [← torus_zero k, Category.assoc, chartZero_over]
+    have := affine_smooth k
+    exact smoothOfRelativeDimension_comp 0 1 (zeroMap k) (affineStructure k)
+  · change SmoothOfRelativeDimension 1 (chartZero k ≫ structureMap k)
+    rw [chartZero_over]
+    exact affine_smooth k
+  · change SmoothOfRelativeDimension 1 (chartInfinity k ≫ structureMap k)
+    rw [chartInfinity_over]
+    exact affine_smooth k
+
+end CycleQ2ProjectiveLineStructure
+
+#print axioms CycleQ2ProjectiveLineStructure.smooth
+
+end
+
+section
+
+/-!
+# The actual ordinary one-form sheaf on a smooth relative curve
+
+Regular Kähler one-forms glue in the inherited exact affine frame.
+The resulting sheaf has the ordinary derivation from the structure
+sheaf, with its actual restrictions on the original affine opens.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2RankOneDifferentialSheaf
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite Module KaehlerDifferential
+open CycleQ2FiniteExactAffineAtlas CycleQ2SmoothRelativeFrames CycleQ2RelativeAffineOverlap
+open CycleQ2FramedAffineSite (restrict_comp)
+open CycleQ2FramedAffineCoordinates (coefficients_natural)
+open CycleQ2ExactFrameThreeDeRham (onePullback onePullback_d)
+
+variable {k : Type} [Field k] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of k))
+
+abbrev Framed := {U : X.Opens // IsAffineOpen U ∧ HasFrame f 1 U}
+
+def inclusion : Framed f ⥤ X.Opens where
+  obj U := U.1
+  map h := homOfLE h.le
+
+instance : (inclusion f).Full where
+  map_surjective g := ⟨homOfLE g.le, Subsingleton.elim _ _⟩
+
+instance : (inclusion f).Faithful where
+  map_injective _ := Subsingleton.elim _ _
+
+local instance dense [SmoothOfRelativeDimension 1 f] :
+    (inclusion f).IsCoverDense (Opens.grothendieckTopology X) := by
+  apply (TopCat.Opens.coverDense_iff_isBasis _).mpr
+  have h : Set.range (inclusion f).obj = {U : X.Opens | IsAffineOpen U ∧ HasFrame f 1 U} := by
+    ext U
+    constructor
+    · rintro ⟨⟨W,hW⟩,rfl⟩
+      exact hW
+    · intro hU
+      exact ⟨⟨U,hU⟩,rfl⟩
+  rw [h]
+  exact CycleQ2FiniteExactAffineAtlas.isBasis f 1
+
+abbrev site := (inclusion f).inducedTopology (Opens.grothendieckTopology X)
+
+abbrev functions : TopCat.Sheaf AddCommGrpCat.{0} X :=
+  CycleQ2GeometricProjectiveHOne.structureAdditiveSheaf X
+
+private abbrev raw := CycleQ2RawRelativeForms.forms f 1
+
+private def coordinates {U V : Framed f} (a : V ⟶ U) :
+    letI : Algebra k Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    Basis (Fin 1) Γ(X, V.1) Ω[Γ(X,V.1)⁄k] :=
+  (exact_on_affine_subopen f a.le U.2.1 V.2.1 U.2.2.choose
+    U.2.2.choose_spec.choose U.2.2.choose_spec.choose_spec).choose
+
+private theorem coordinates_apply {U V : Framed f} (a : V ⟶ U) (i : Fin 1) :
+    letI : Algebra k Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    coordinates f a i = D k Γ(X,V.1) (restrict f a.le (U.2.2.choose i)) :=
+  (exact_on_affine_subopen f a.le U.2.1 V.2.1 U.2.2.choose
+    U.2.2.choose_spec.choose U.2.2.choose_spec.choose_spec).choose_spec i
+
+private theorem transported_natural {U V W : Framed f} (a : V ⟶ U) (b : W ⟶ V) (i : Fin 1) :
+    letI : Algebra k Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    letI : Algebra k Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+    onePullback (restrict f b.le) (coordinates f a i) = coordinates f (b ≫ a) i := by
+  letI : Algebra k Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  letI : Algebra k Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  letI : Algebra k Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+  rw [coordinates_apply, onePullback_d, coordinates_apply]
+  apply congrArg (D k Γ(X,W.1))
+  exact (DFunLike.congr_fun (restrict_comp f a.le b.le) (U.2.2.choose i)).symm
+
+private abbrev basisForms := (inclusion f).op ⋙ raw f
+
+private abbrev formsType := basisForms f ⋙ forget AddCommGrpCat
+
+private abbrev ringType := (inclusion f).op ⋙ X.presheaf ⋙ forget CommRingCat
+
+private def frameCoordinates {U V : Framed f} (a : V ⟶ U) :
+    (formsType f).obj (op V) ≃ (Fin 1 → (ringType f).obj (op V)) :=
+  letI : Algebra k Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  (coordinates f a).equivFun.toEquiv
+
+private theorem frameCoordinates_natural {U V W : Framed f} (a : V ⟶ U) (b : W ⟶ V)
+    (ω : (formsType f).obj (op V)) (i : Fin 1) :
+    frameCoordinates f (b ≫ a) ((formsType f).map b.op ω) i =
+      (ringType f).map b.op (frameCoordinates f a ω i) := by
+  letI : Algebra k Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  letI : Algebra k Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+  exact coefficients_natural _ _ _ _ (transported_natural f a b) ω i
+
+private theorem isSheaf [SmoothOfRelativeDimension 1 f] : Presheaf.IsSheaf (site f) (basisForms f) := by
+  apply (Presheaf.isSheaf_iff_isSheaf_forget _ _ (forget AddCommGrpCat)).mpr
+  apply (isSheaf_iff_isSheaf_of_type _ _).mpr
+  intro U S hS
+  have h : Presheaf.IsSheaf (site f) ((inclusion f).op ⋙ X.presheaf) :=
+    Functor.op_comp_isSheaf _ _ _ X.sheaf
+  have h' : Presheaf.IsSheaf (site f) (ringType f) :=
+    Presheaf.isSheaf_comp_of_isSheaf _ ((inclusion f).op ⋙ X.presheaf) (forget CommRingCat) h
+  exact CycleQ2SheafForLocalCoordinates.isSheafFor (frameCoordinates f)
+    (frameCoordinates_natural f) (h'.isSheafFor S hS)
+
+def basisSheaf [SmoothOfRelativeDimension 1 f] : Sheaf (site f) AddCommGrpCat :=
+  ⟨basisForms f, isSheaf f⟩
+
+def compare [SmoothOfRelativeDimension 1 f] :
+    Sheaf (site f) AddCommGrpCat.{0} ≌ TopCat.Sheaf AddCommGrpCat.{0} X :=
+  (inclusion f).sheafInducedTopologyEquivOfIsCoverDense _ _
+
+abbrev oneForms [SmoothOfRelativeDimension 1 f] : TopCat.Sheaf AddCommGrpCat.{0} X :=
+  (compare f).functor.obj (basisSheaf f)
+
+def onBasisIso [SmoothOfRelativeDimension 1 f] : (inclusion f).op ⋙ (oneForms f).obj ≅ basisForms f :=
+  (sheafToPresheaf (site f) AddCommGrpCat).mapIso (((compare f).unitIso.app (basisSheaf f)).symm)
+
+private def rawDeriv : (functions (X := X)).obj ⟶ raw f where
+  app W := letI : Algebra k Γ(X,W.unop) := (sectionCoefficients f W.unop).toAlgebra
+    AddCommGrpCat.ofHom (D k Γ(X,W.unop)).toLinearMap.toAddMonoidHom
+  naturality U V j := by
+    letI : Algebra k Γ(X,U.unop) := (sectionCoefficients f U.unop).toAlgebra
+    letI : Algebra k Γ(X,V.unop) := (sectionCoefficients f V.unop).toAlgebra
+    ext a
+    change Γ(X,U.unop) at a
+    exact (onePullback_d (restrict f j.unop.le) a).symm
+
+/-- The universal ordinary derivation into the actual one-form sheaf. -/
+def derivative [SmoothOfRelativeDimension 1 f] : functions (X := X) ⟶ oneForms f :=
+  ⟨Functor.IsCoverDense.sheafHom (G := inclusion f) (K := Opens.grothendieckTopology X)
+    (ℱ' := oneForms f) (Functor.whiskerLeft (inclusion f).op (rawDeriv f) ≫ (onBasisIso f).inv)⟩
+
+theorem derivative_on_basis [SmoothOfRelativeDimension 1 f] (U : Framed f) :
+    (derivative f).hom.app (op U.1) ≫ (onBasisIso f).hom.app (op U) =
+      (rawDeriv f).app (op U.1) := by
+  have h := Functor.IsCoverDense.sheafHom_restrict_eq
+    (G := inclusion f) (K := Opens.grothendieckTopology X) (ℱ' := oneForms f)
+    (Functor.whiskerLeft (inclusion f).op (rawDeriv f) ≫ (onBasisIso f).inv)
+  have e := NatTrans.congr_app h (op U)
+  change (derivative f).hom.app (op U.1) =
+    (rawDeriv f).app (op U.1) ≫ (onBasisIso f).inv.app (op U) at e
+  rw [e, Category.assoc, Iso.inv_hom_id_app]
+  exact Category.comp_id ((rawDeriv f).app (op U.1))
+
+end CycleQ2RankOneDifferentialSheaf
+
+#print axioms CycleQ2RankOneDifferentialSheaf.derivative_on_basis
+
+end
+
+section
+
+/-!
+# The original restriction between two explicit affine schemes
+
+When one affine chart factors through another, the restriction on
+their actual section rings is the original algebra map between
+their coordinate rings. The identification also holds for ordinary
+Kähler one-forms by functoriality.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2NativeChartRestriction
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2AffineFrameBinding (sectionEquiv)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (restrict)
+
+variable {k A B : Type} [Field k] [CommRing A] [CommRing B]
+  [Algebra k A] [Algebra k B] {X : Scheme.{0}}
+  (f : X ⟶ Spec (CommRingCat.of k))
+  (a : Spec (CommRingCat.of A) ⟶ X) (b : Spec (CommRingCat.of B) ⟶ X)
+  [IsOpenImmersion a] [IsOpenImmersion b]
+  (ha : a ≫ f = Spec.map (CommRingCat.ofHom (algebraMap k A)))
+  (hb : b ≫ f = Spec.map (CommRingCat.ofHom (algebraMap k B)))
+  (φ : A →ₐ[k] B) (h : Spec.map (CommRingCat.ofHom φ.toRingHom) ≫ a = b)
+  (hle : b ''ᵁ ⊤ ≤ a ''ᵁ ⊤)
+
+include h in
+theorem sections_restrict :
+    letI : Algebra k Γ(X, a ''ᵁ ⊤) := (sectionCoefficients f (a ''ᵁ ⊤)).toAlgebra
+    letI : Algebra k Γ(X, b ''ᵁ ⊤) := (sectionCoefficients f (b ''ᵁ ⊤)).toAlgebra
+    (sectionEquiv f b hb).toAlgHom.comp (restrict f hle) =
+      φ.comp (sectionEquiv f a ha).toAlgHom := by
+  letI : Algebra k Γ(X, a ''ᵁ ⊤) := (sectionCoefficients f (a ''ᵁ ⊤)).toAlgebra
+  letI : Algebra k Γ(X, b ''ᵁ ⊤) := (sectionCoefficients f (b ''ᵁ ⊤)).toAlgebra
+  let q := Spec.map (CommRingCat.ofHom φ.toRingHom)
+  let U := a ''ᵁ (⊤ : (Spec (CommRingCat.of A)).Opens)
+  let V := b ''ᵁ (⊤ : (Spec (CommRingCat.of B)).Opens)
+  have e₁ : ⊤ ≤ a ⁻¹ᵁ U := (Scheme.Hom.preimage_image_eq a ⊤).ge
+  have e₂ : ⊤ ≤ q ⁻¹ᵁ ⊤ := le_rfl
+  have e₃ : ⊤ ≤ b ⁻¹ᵁ V := (Scheme.Hom.preimage_image_eq b ⊤).ge
+  have e₄ : q.appLE ⊤ ⊤ e₂ = q.appTop := Scheme.Hom.appLE_eq_app q
+  have eq : X.presheaf.map (homOfLE hle).op ≫ (b.appIso ⊤).hom ≫ (Scheme.ΓSpecIso _).hom =
+      (a.appIso ⊤).hom ≫ (Scheme.ΓSpecIso _).hom ≫ CommRingCat.ofHom φ.toRingHom := by
+    rw [← Scheme.ΓSpecIso_naturality, ← Category.assoc (a.appIso ⊤).hom,
+      ← Category.assoc (X.presheaf.map (homOfLE hle).op)]
+    rw [Scheme.Hom.appIso_hom', Scheme.Hom.appIso_hom', Scheme.Hom.map_appLE, ← e₄,
+      Scheme.Hom.appLE_comp_appLE]
+    change q ≫ a = b at h
+    cases h
+    rfl
+  apply AlgHom.ext
+  intro x
+  exact congrArg (fun g : Γ(X,U) ⟶ CommRingCat.of B => g x) eq
+
+end CycleQ2NativeChartRestriction
+
+#print axioms CycleQ2NativeChartRestriction.sections_restrict
+
+end
+
+section
+
+/-!
+# Exact cotangent frames on the original projective-line charts
+
+The ordinary polynomial frame is dX. On the actual Laurent overlap,
+dT is a frame because T is a unit and dT/T is the logarithmic frame.
+The three frames are transported through the original chart rings.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2ProjectiveLineExactCharts
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite Module KaehlerDifferential
+open Polynomial LaurentPolynomial
+open CycleQ2LaurentProjectiveLine CycleQ2ProjectiveLineStructure
+open CycleQ2LaurentLogDerivative (L logCoordinates logDerivative_T)
+open CycleQ2LaurentKahlerResidue (logCoordinates_D)
+open CycleQ2RankOneDifferentialSheaf
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2AffineFrameBinding (frame_of_chart sectionEquiv)
+open CycleQ2ExactFrameThreeDeRham (onePullback onePullback_d)
+open CycleQ2AffineDeRhamFunctorial (onePullback_comp onePullback_id)
+
+variable (k : Type) [Field k]
+
+local instance : SmoothOfRelativeDimension 1 (structureMap k) := smooth k
+
+def polynomialFrame : Basis (Fin 1) k[X] Ω[k[X]⁄k] :=
+  (Basis.singleton (Fin 1) k[X]).map (polynomialEquiv k).symm
+
+theorem polynomialFrame_apply (i : Fin 1) :
+    polynomialFrame k i = D k k[X] X := by
+  rw [polynomialFrame, Basis.map_apply, Basis.singleton_apply, polynomialEquiv_symm, one_smul]
+
+private def torusUnit : (L k)ˣ := (isUnit_T (R := k) 1).unit
+
+def torusFrame : Basis (Fin 1) (L k) Ω[L k⁄k] :=
+  (Basis.singleton (Fin 1) (L k)).map
+    ((LinearEquiv.smulOfUnit (M := L k) (torusUnit k)).trans (logCoordinates k).symm)
+
+theorem torusFrame_apply (i : Fin 1) :
+    torusFrame k i = D k (L k) (T 1) := by
+  apply (logCoordinates k).injective
+  rw [torusFrame, Basis.map_apply, Basis.singleton_apply, LinearEquiv.trans_apply,
+    LinearEquiv.apply_symm_apply, logCoordinates_D, logDerivative_T, Int.cast_one]
+  change (torusUnit k : L k) * 1 = LaurentPolynomial.C (1 : k) * T 1
+  rw [mul_one, (LaurentPolynomial.C : k →+* L k).map_one, one_mul, torusUnit, IsUnit.unit_spec]
+
+private theorem affine_openRange {A : Type} [CommRing A]
+    (j : Spec (CommRingCat.of A) ⟶ line k) [IsOpenImmersion j] : IsAffineOpen (j ''ᵁ ⊤) := by
+  rw [j.image_top_eq_opensRange]
+  exact isAffineOpen_opensRange j
+
+def zeroFramed : Framed (structureMap k) :=
+  ⟨(chartZero k) ''ᵁ ⊤, affine_openRange k (chartZero k),
+    frame_of_chart (structureMap k) (chartZero k) (chartZero_over k)
+      (fun _ => X) (polynomialFrame k) (polynomialFrame_apply k)⟩
+
+def infinityFramed : Framed (structureMap k) :=
+  ⟨(chartInfinity k) ''ᵁ ⊤, affine_openRange k (chartInfinity k),
+    frame_of_chart (structureMap k) (chartInfinity k) (chartInfinity_over k)
+      (fun _ => X) (polynomialFrame k) (polynomialFrame_apply k)⟩
+
+def torusFramed : Framed (structureMap k) :=
+  ⟨(chartTorus k) ''ᵁ ⊤, affine_openRange k (chartTorus k),
+    frame_of_chart (structureMap k) (chartTorus k) (chartTorus_over k)
+      (fun _ => T 1) (torusFrame k) (torusFrame_apply k)⟩
+
+theorem cover_framed : (zeroFramed k).1 ⊔ (infinityFramed k).1 = ⊤ := by
+  change (chartZero k) ''ᵁ ⊤ ⊔ (chartInfinity k) ''ᵁ ⊤ = ⊤
+  rw [Scheme.Hom.image_top_eq_opensRange, Scheme.Hom.image_top_eq_opensRange]
+  exact cover k
+
+theorem overlap_framed : (torusFramed k).1 = (zeroFramed k).1 ⊓ (infinityFramed k).1 := by
+  change (chartTorus k) ''ᵁ ⊤ = ((chartZero k) ''ᵁ ⊤) ⊓ ((chartInfinity k) ''ᵁ ⊤)
+  simp only [Scheme.Hom.image_top_eq_opensRange]
+  exact (overlap k).symm
+
+private def pullEquiv {A B : Type} [CommRing A] [CommRing B] [Algebra k A] [Algebra k B]
+    (e : A ≃ₐ[k] B) : Ω[A⁄k] ≃+ Ω[B⁄k] where
+  toFun := onePullback e.toAlgHom
+  invFun := onePullback e.symm.toAlgHom
+  left_inv ω := by
+    rw [← onePullback_comp, show e.symm.toAlgHom.comp e.toAlgHom = AlgHom.id k A from
+      AlgHom.ext e.symm_apply_apply, onePullback_id]
+  right_inv ω := by
+    rw [← onePullback_comp, show e.toAlgHom.comp e.symm.toAlgHom = AlgHom.id k B from
+      AlgHom.ext e.apply_symm_apply, onePullback_id]
+  map_add' := (onePullback e.toAlgHom).map_add
+
+/-- Ordinary Kähler one-forms on the actual framed chart. -/
+def chartForms {A : Type} [CommRing A] [Algebra k A]
+    (j : Spec (CommRingCat.of A) ⟶ line k) [IsOpenImmersion j]
+    (hj : j ≫ structureMap k = Spec.map (CommRingCat.ofHom (algebraMap k A)))
+    (U : Framed (structureMap k)) (hU : U.1 = j ''ᵁ ⊤) :
+    (oneForms (structureMap k)).obj.obj (op U.1) ≃+ Ω[A⁄k] := by
+  rcases U with ⟨O,hO⟩
+  change O = j ''ᵁ ⊤ at hU
+  subst O
+  let V : Framed (structureMap k) := ⟨j ''ᵁ ⊤,hO⟩
+  let X := line k
+  letI : Algebra k Γ(X, j ''ᵁ ⊤) := (sectionCoefficients (structureMap k) (j ''ᵁ ⊤)).toAlgebra
+  let φ := sectionEquiv (structureMap k) j hj
+  let u : (oneForms (structureMap k)).obj.obj (op (j ''ᵁ ⊤)) ≃+ Ω[Γ(X,j ''ᵁ ⊤)⁄k] :=
+    ((onBasisIso (structureMap k)).app (op V)).addCommGroupIsoToAddEquiv
+  exact u.trans (pullEquiv k φ)
+
+theorem chartForms_apply {A : Type} [CommRing A] [Algebra k A]
+    (j : Spec (CommRingCat.of A) ⟶ line k) [IsOpenImmersion j]
+    (hj : j ≫ structureMap k = Spec.map (CommRingCat.ofHom (algebraMap k A)))
+    (hF : IsAffineOpen (j ''ᵁ ⊤) ∧ CycleQ2FiniteExactAffineAtlas.HasFrame (structureMap k) 1 (j ''ᵁ ⊤))
+    (ω : (oneForms (structureMap k)).obj.obj (op (j ''ᵁ ⊤))) :
+    letI : Algebra k Γ(line k, j ''ᵁ ⊤) := (sectionCoefficients (structureMap k) (j ''ᵁ ⊤)).toAlgebra
+    chartForms k j hj ⟨j ''ᵁ ⊤,hF⟩ rfl ω =
+      onePullback (sectionEquiv (structureMap k) j hj).toAlgHom
+        ((onBasisIso (structureMap k)).hom.app (op ⟨j ''ᵁ ⊤,hF⟩) ω) :=
+  rfl
+
+end CycleQ2ProjectiveLineExactCharts
+
+#print axioms CycleQ2ProjectiveLineExactCharts.overlap_framed
+#print axioms CycleQ2ProjectiveLineExactCharts.chartForms
+
+end
+
+section
+
+/-!
+# The two original restriction maps of projective-line one-forms
+
+The actual section-ring restrictions on the glued curve conjugate to
+the two polynomial-to-Laurent maps. Their Kähler maps therefore
+give the original maps on regular differential sections.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2ProjectiveLineFormRestrictions
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite Module KaehlerDifferential
+open Polynomial
+open CycleQ2LaurentProjectiveLine CycleQ2ProjectiveLineStructure CycleQ2ProjectiveLineExactCharts
+open CycleQ2LaurentKahlerResidue (zeroRingMap infinityRingMap)
+open CycleQ2LaurentLogDerivative (L)
+open CycleQ2RankOneDifferentialSheaf
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (restrict)
+open CycleQ2AffineFrameBinding (sectionEquiv)
+open CycleQ2ExactFrameThreeDeRham (onePullback)
+open CycleQ2AffineDeRhamFunctorial (onePullback_comp)
+open CycleQ2FiniteExactAffineAtlas (HasFrame)
+
+variable (k : Type) [Field k]
+
+local instance : SmoothOfRelativeDimension 1 (structureMap k) := smooth k
+
+private abbrev F := oneForms (structureMap k)
+
+private theorem chart_natural {A B : Type} [CommRing A] [CommRing B] [Algebra k A] [Algebra k B]
+    (a : Spec (CommRingCat.of A) ⟶ line k) (b : Spec (CommRingCat.of B) ⟶ line k)
+    [IsOpenImmersion a] [IsOpenImmersion b]
+    (ha : a ≫ structureMap k = Spec.map (CommRingCat.ofHom (algebraMap k A)))
+    (hb : b ≫ structureMap k = Spec.map (CommRingCat.ofHom (algebraMap k B)))
+    (hA : IsAffineOpen (a ''ᵁ ⊤) ∧ HasFrame (structureMap k) 1 (a ''ᵁ ⊤))
+    (hB : IsAffineOpen (b ''ᵁ ⊤) ∧ HasFrame (structureMap k) 1 (b ''ᵁ ⊤))
+    (φ : A →ₐ[k] B) (hφ : Spec.map (CommRingCat.ofHom φ.toRingHom) ≫ a = b)
+    (h : b ''ᵁ ⊤ ≤ a ''ᵁ ⊤)
+    (ω : (F k).obj.obj (op (a ''ᵁ ⊤))) :
+    chartForms k b hb ⟨b ''ᵁ ⊤,hB⟩ rfl ((F k).obj.map (homOfLE h).op ω) =
+      onePullback φ (chartForms k a ha ⟨a ''ᵁ ⊤,hA⟩ rfl ω) := by
+  let P : Framed (structureMap k) := ⟨a ''ᵁ ⊤,hA⟩
+  let Q : Framed (structureMap k) := ⟨b ''ᵁ ⊤,hB⟩
+  let e := (onBasisIso (structureMap k)).hom
+  let I : Q ⟶ P := homOfLE h
+  letI : Algebra k Γ(line k,a ''ᵁ ⊤) := (sectionCoefficients (structureMap k) (a ''ᵁ ⊤)).toAlgebra
+  letI : Algebra k Γ(line k,b ''ᵁ ⊤) := (sectionCoefficients (structureMap k) (b ''ᵁ ⊤)).toAlgebra
+  rw [chartForms_apply, chartForms_apply]
+  have eRes := NatTrans.naturality_apply e I.op ω
+  change e.app (op Q) ((F k).obj.map (homOfLE h).op ω) =
+    onePullback (restrict (structureMap k) h) (e.app (op P) ω) at eRes
+  rw [eRes, ← onePullback_comp, CycleQ2NativeChartRestriction.sections_restrict
+    (structureMap k) a b ha hb φ hφ h, onePullback_comp]
+
+abbrev atZero :=
+  chartForms k (chartZero k) (chartZero_over k) (zeroFramed k) rfl
+
+abbrev atInfinity :=
+  chartForms k (chartInfinity k) (chartInfinity_over k) (infinityFramed k) rfl
+
+abbrev atTorus :=
+  chartForms k (chartTorus k) (chartTorus_over k) (torusFramed k) rfl
+
+abbrev torusInZero : (torusFramed k).1 ≤ (zeroFramed k).1 :=
+  (overlap_framed k).le.trans inf_le_left
+
+abbrev torusInInfinity : (torusFramed k).1 ≤ (infinityFramed k).1 :=
+  (overlap_framed k).le.trans inf_le_right
+
+theorem restriction_zero (a : (F k).obj.obj (op (zeroFramed k).1)) :
+    atTorus k ((F k).obj.map (homOfLE (torusInZero k)).op a) =
+      onePullback (zeroRingMap k) (atZero k a) :=
+  chart_natural k (chartZero k) (chartTorus k) (chartZero_over k) (chartTorus_over k)
+    (zeroFramed k).2 (torusFramed k).2 (zeroRingMap k) (torus_zero k) (torusInZero k) a
+
+private theorem infinity_spec :
+    Spec.map (CommRingCat.ofHom (infinityRingMap k).toRingHom) = infinityMap k := by
+  rw [infinityMap, inversion, zeroMap, ← Spec.map_comp]
+  rfl
+
+theorem restriction_infinity (a : (F k).obj.obj (op (infinityFramed k).1)) :
+    atTorus k ((F k).obj.map (homOfLE (torusInInfinity k)).op a) =
+      onePullback (infinityRingMap k) (atInfinity k a) :=
+  chart_natural k (chartInfinity k) (chartTorus k) (chartInfinity_over k) (chartTorus_over k)
+    (infinityFramed k).2 (torusFramed k).2 (infinityRingMap k)
+    (by rw [infinity_spec, torus_infinity]) (torusInInfinity k) a
+
+end CycleQ2ProjectiveLineFormRestrictions
+
+#print axioms CycleQ2ProjectiveLineFormRestrictions.restriction_zero
+#print axioms CycleQ2ProjectiveLineFormRestrictions.restriction_infinity
+
+end
+
+section
+
+/-!
+# The residue class in actual H¹ of projective-line differentials
+
+The connecting map from the Laurent overlap has exactly the kernel
+of constant Laurent coefficient. In particular the normalized class
+of dT/T is nonzero in derived sheaf cohomology.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2ProjectiveLineCohomologyResidue
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open Module KaehlerDifferential LaurentPolynomial
+open CycleQ2LaurentProjectiveLine CycleQ2ProjectiveLineStructure
+open CycleQ2ProjectiveLineExactCharts CycleQ2ProjectiveLineFormRestrictions
+open CycleQ2LaurentLogDerivative CycleQ2LaurentCurveResidue CycleQ2LaurentKahlerResidue
+open CycleQ2RankOneDifferentialSheaf
+open CycleQ2ClosedSupportCohomology
+
+variable (k : Type) [Field k]
+
+local instance : SmoothOfRelativeDimension 1 (structureMap k) := smooth k
+
+local instance : HasExt.{1} (Sheaf (Opens.grothendieckTopology (line k)) AddCommGrpCat.{0}) :=
+  HasExt.standard _
+
+private abbrev F := oneForms (structureMap k)
+
+def square := coverSquare (zeroFramed k).1 (infinityFramed k).1 (torusFramed k).1
+  (overlap_framed k) (cover_framed k)
+
+/-- The actual connecting map from Kähler forms on the overlap. -/
+def boundary : Ω[L k⁄k] →+ (F k).H' 1 ⊤ :=
+  (sectionBoundary (F k) (square k)).comp (atTorus k).symm.toAddMonoidHom
+
+theorem boundary_zero_iff (ω : Ω[L k⁄k]) :
+    boundary k ω = 0 ↔ differentialResidue k ω = 0 := by
+  change sectionBoundary (F k) (square k) ((atTorus k).symm ω) = 0 ↔ _
+  rw [sectionBoundary_zero_iff]
+  change (∃ (a : (F k).obj.obj (op (zeroFramed k).1))
+      (b : (F k).obj.obj (op (infinityFramed k).1)),
+    (F k).obj.map (homOfLE (torusInZero k)).op a -
+    (F k).obj.map (homOfLE (torusInInfinity k)).op b = (atTorus k).symm ω) ↔ _
+  constructor
+  · rintro ⟨a,b,h⟩
+    have h' := congrArg (atTorus k) h
+    rw [map_sub, restriction_zero, restriction_infinity, AddEquiv.apply_symm_apply] at h'
+    rw [← h',map_sub,differentialResidue_zero_chart,differentialResidue_infinity_chart,sub_zero]
+  · intro h
+    change residue k (logCoordinates k ω) = 0 at h
+    obtain ⟨a,b,hab⟩ := (residue_zero_iff_boundary k _).mp h
+    refine ⟨(atZero k).symm ((polynomialEquiv k).symm a),
+      -(atInfinity k).symm ((polynomialEquiv k).symm b), ?_⟩
+    apply (atTorus k).injective
+    apply (logCoordinates k).injective
+    rw [map_sub, restriction_zero, restriction_infinity, map_neg, AddEquiv.apply_symm_apply,
+      AddEquiv.apply_symm_apply, map_neg, sub_neg_eq_add, map_add, chartZero_value,
+      chartInfinity_value, LinearEquiv.apply_symm_apply, LinearEquiv.apply_symm_apply]
+    simpa only [AddEquiv.apply_symm_apply] using hab.symm
+
+theorem logForm_residue : differentialResidue k (logForm k) = 1 := by
+  have hc : logCoordinates k (logForm k) = 1 := by
+    rw [logForm, map_smul, logCoordinates_D, logDerivative_T,
+      Int.cast_one, map_one, one_mul, smul_eq_mul, ← T_add]
+    rfl
+  change residue k (logCoordinates k (logForm k)) = 1
+  rw [hc]
+  have e : (1 : L k) = AddMonoidAlgebra.single (0 : ℤ) (1 : k) := rfl
+  rw [e]
+  change (Finsupp.single (0 : ℤ) (1 : k)) 0 = 1
+  exact Finsupp.single_eq_same
+
+theorem boundary_logForm_ne_zero : boundary k (logForm k) ≠ 0 := by
+  rw [ne_eq,boundary_zero_iff,logForm_residue]
+  exact one_ne_zero
+
+theorem boundary_exact (x : L k) : boundary k (D k (L k) x) = 0 :=
+  (boundary_zero_iff k _).2 (differentialResidue_exact k x)
+
+end CycleQ2ProjectiveLineCohomologyResidue
+
+#print axioms CycleQ2ProjectiveLineCohomologyResidue.boundary_zero_iff
+#print axioms CycleQ2ProjectiveLineCohomologyResidue.boundary_logForm_ne_zero
+#print axioms CycleQ2ProjectiveLineCohomologyResidue.boundary_exact
+
+end
+
+section
+
+/-!
+# The actual one-form sheaf is acyclic on an exact affine curve chart
+
+Every affine subopen inherits the exact one-coordinate frame. The
+coefficient isomorphisms on that dense subsite therefore extend to an
+isomorphism with the structure sheaf on all subopens of the chart.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2RankOneDenseOver
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite Module KaehlerDifferential
+open CycleQ2RankOneDifferentialSheaf
+open CycleQ2FiniteExactAffineAtlas (HasFrame)
+open CycleQ2RelativeAffineOverlap (restrict)
+open CycleQ2FramedAffineSite (restrict_comp)
+open CycleQ2FramedAffineCoordinates (coefficients_natural)
+open CycleQ2ExactFrameThreeDeRham (onePullback onePullback_d)
+open CycleQ2GeometricProjectiveHOne
+open CycleQ2GeometricAffineChartSections (chartOpensEquiv)
+
+variable {k : Type} [Field k] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of k))
+variable [SmoothOfRelativeDimension 1 f]
+
+private abbrev J := Opens.grothendieckTopology X
+
+def target (U : X.Opens) (W : {V : Framed f // V.1 ≤ U}) : Over U :=
+  Over.mk (homOfLE W.2)
+
+abbrev Dense (U : X.Opens) := InducedCategory (Over U) (target f U)
+
+abbrev inc (U : X.Opens) : Dense f U ⥤ Over U := inducedFunctor (target f U)
+
+instance (U : X.Opens) : (inc f U).IsCoverDense (J.over U) := by
+  constructor
+  intro V
+  rw [GrothendieckTopology.mem_over_iff]
+  intro x hx
+  obtain ⟨W,hW,hxW,hWV⟩ := Opens.isBasis_iff_nbhd.mp (CycleQ2FiniteExactAffineAtlas.isBasis f 1) hx
+  let P : Dense f U := ⟨⟨W,hW⟩, hWV.trans V.hom.le⟩
+  let i : (inc f U).obj P ⟶ V := Over.homMk (homOfLE hWV)
+  refine ⟨W,homOfLE hWV, ?_, hxW⟩
+  rw [Sieve.overEquiv_iff]
+  exact Presieve.in_coverByImage (inc f U) (Y := P) i
+
+
+end CycleQ2RankOneDenseOver
+
+end
+
+section
+
+/-!
+# The actual one-form sheaf is acyclic on an exact affine curve chart
+
+Every affine subopen inherits the exact one-coordinate frame. The
+coefficient isomorphisms on that dense subsite therefore extend to an
+isomorphism with the structure sheaf on all subopens of the chart.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2RankOneFrameAcyclic
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite Module KaehlerDifferential
+open CycleQ2RankOneDifferentialSheaf CycleQ2RankOneDenseOver
+open CycleQ2FiniteExactAffineAtlas (HasFrame)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (restrict exact_on_affine_subopen)
+open CycleQ2FramedAffineSite (restrict_comp)
+open CycleQ2FramedAffineCoordinates (coefficients_natural)
+open CycleQ2ExactFrameThreeDeRham (onePullback onePullback_d)
+open CycleQ2GeometricProjectiveHOne
+
+variable {k : Type} [Field k] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of k))
+variable [SmoothOfRelativeDimension 1 f]
+
+private abbrev J := Opens.grothendieckTopology X
+
+private def basisAt (U : Framed f) (W : Dense f U.1) :
+    letI : Algebra k Γ(X,W.1.1) := (sectionCoefficients f W.1.1).toAlgebra
+    Basis (Fin 1) Γ(X,W.1.1) Ω[Γ(X,W.1.1)⁄k] :=
+  (exact_on_affine_subopen f W.2 U.2.1 W.1.2.1 U.2.2.choose
+    U.2.2.choose_spec.choose U.2.2.choose_spec.choose_spec).choose
+
+private theorem basisAt_apply (U : Framed f) (W : Dense f U.1) (i : Fin 1) :
+    letI : Algebra k Γ(X,W.1.1) := (sectionCoefficients f W.1.1).toAlgebra
+    basisAt f U W i = D k Γ(X,W.1.1) (restrict f W.2 (U.2.2.choose i)) :=
+  (exact_on_affine_subopen f W.2 U.2.1 W.1.2.1 U.2.2.choose
+    U.2.2.choose_spec.choose U.2.2.choose_spec.choose_spec).choose_spec i
+
+private theorem basisAt_naturality (U : Framed f) {W V : Dense f U.1} (a : V ⟶ W) (i : Fin 1) :
+    letI : Algebra k Γ(X,W.1.1) := (sectionCoefficients f W.1.1).toAlgebra
+    letI : Algebra k Γ(X,V.1.1) := (sectionCoefficients f V.1.1).toAlgebra
+    onePullback (restrict f (show V.1.1 ≤ W.1.1 from a.hom.left.le)) (basisAt f U W i) = basisAt f U V i := by
+  letI : Algebra k Γ(X,U.1) := (sectionCoefficients f U.1).toAlgebra
+  letI : Algebra k Γ(X,W.1.1) := (sectionCoefficients f W.1.1).toAlgebra
+  letI : Algebra k Γ(X,V.1.1) := (sectionCoefficients f V.1.1).toAlgebra
+  rw [basisAt_apply, basisAt_apply, onePullback_d]
+  exact congrArg (D k Γ(X,V.1.1))
+    ((DFunLike.congr_fun (restrict_comp f W.2 (show V.1.1 ≤ W.1.1 from a.hom.left.le)) (U.2.2.choose i)).symm)
+
+private def coordinates (U : Framed f) (W : Dense f U.1) :
+    (oneForms f).obj.obj (op W.1.1) ≃+ Γ(X,W.1.1) :=
+  letI : Algebra k Γ(X,W.1.1) := (sectionCoefficients f W.1.1).toAlgebra
+  (((onBasisIso f).app (op W.1)).addCommGroupIsoToAddEquiv.trans
+    (basisAt f U W).equivFun.toAddEquiv).trans (AddEquiv.funUnique (Fin 1) Γ(X,W.1.1))
+
+private theorem coordinates_naturality (U : Framed f) {W V : Dense f U.1} (a : V ⟶ W)
+    (ω : (oneForms f).obj.obj (op W.1.1)) :
+    coordinates f U V ((oneForms f).obj.map (homOfLE (show V.1.1 ≤ W.1.1 from a.hom.left.le)).op ω) =
+      (restrict f (show V.1.1 ≤ W.1.1 from a.hom.left.le)) (coordinates f U W ω) := by
+  letI : Algebra k Γ(X,W.1.1) := (sectionCoefficients f W.1.1).toAlgebra
+  letI : Algebra k Γ(X,V.1.1) := (sectionCoefficients f V.1.1).toAlgebra
+  let j : V.1 ⟶ W.1 := homOfLE (show V.1.1 ≤ W.1.1 from a.hom.left.le)
+  let e := (onBasisIso f).hom
+  change (basisAt f U V).equivFun (e.app (op V.1)
+      ((oneForms f).obj.map (homOfLE (show V.1.1 ≤ W.1.1 from a.hom.left.le)).op ω)) 0 =
+    (restrict f (show V.1.1 ≤ W.1.1 from a.hom.left.le)) ((basisAt f U W).equivFun (e.app (op W.1) ω) 0)
+  have hr := NatTrans.naturality_apply e j.op ω
+  change e.app (op V.1) ((oneForms f).obj.map (homOfLE (show V.1.1 ≤ W.1.1 from a.hom.left.le)).op ω) =
+    onePullback (restrict f (show V.1.1 ≤ W.1.1 from a.hom.left.le)) (e.app (op W.1) ω) at hr
+  rw [hr]
+  exact coefficients_natural _ _ _ _ (basisAt_naturality f U a) _ _
+
+/-- On the whole chart, the actual differential sheaf is the free
+rank-one additive structure sheaf. -/
+def frameOver (U : Framed f) : (oneForms f).over U.1 ≅ (functions (X := X)).over U.1 := by
+  apply Functor.IsCoverDense.sheafIso (G := inc f U.1) (K := J.over U.1)
+  refine NatIso.ofComponents (fun W => (coordinates f U W.unop).toAddCommGrpIso) ?_
+  intro W V j
+  ext ω
+  exact coordinates_naturality f U j.unop ω
+
+local instance : HasExt.{1} (Sheaf (J (X := X)) AddCommGrpCat.{0}) := HasExt.standard _
+
+theorem affine_HOne_subsingleton (U : Framed f) :
+    Subsingleton ((oneForms f).H' 1 U.1) :=
+  affineFrameHOne_subsingleton U.2.1.isoSpec (oneForms f) (frameOver f U)
+
+end CycleQ2RankOneFrameAcyclic
+
+#print axioms CycleQ2RankOneFrameAcyclic.frameOver
+#print axioms CycleQ2RankOneFrameAcyclic.affine_HOne_subsingleton
+
+end
+
+section
+
+/-!
+# The structure sheaf of the actual projective line is acyclic
+
+In the native two-chart cover, a Laurent function is the sum of an
+ordinary polynomial and a polynomial in the inverse coordinate.
+This kills the genuine Mayer–Vietoris boundary. Higher cohomology
+vanishes by affine structure-sheaf acyclicity on the same opens.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2ProjectiveLineFunctions
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open scoped Polynomial
+open LaurentPolynomial
+open CycleQ2LaurentProjectiveLine CycleQ2ProjectiveLineStructure
+open CycleQ2ProjectiveLineExactCharts CycleQ2ProjectiveLineFormRestrictions
+open CycleQ2LaurentLogDerivative (L)
+open CycleQ2LaurentKahlerResidue (zeroRingMap infinityRingMap)
+open CycleQ2RankOneDifferentialSheaf (functions)
+open CycleQ2ClosedSupportCohomology
+open CycleQ2GeometricConeCech.HZero (sectionsEquiv)
+open CycleQ2GeometricProjectiveHOne (structureAdditiveSheaf affineFrameHOne_subsingleton affineFrameHTwo_subsingleton)
+open CycleQ2AffineFrameBinding (sectionEquiv)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (restrict)
+open CycleQ2ProjectiveLineCohomologyResidue (square)
+
+variable (k : Type) [Field k]
+
+local instance : HasExt.{1}
+    (Sheaf (Opens.grothendieckTopology (line k)) AddCommGrpCat.{0}) := HasExt.standard _
+
+abbrev O := functions (X := line k)
+
+private theorem polynomial_X (a : k) (n : ℕ) :
+    zeroRingMap k (Polynomial.monomial n a) = C a * T (n : ℤ) :=
+  Polynomial.toLaurent_C_mul_T n a
+
+private theorem inverse_polynomial_X (a : k) (n : ℕ) :
+    infinityRingMap k (Polynomial.monomial n a) = C a * T (-(n : ℤ)) := by
+  change invert (Polynomial.toLaurent (Polynomial.monomial n a)) = _
+  rw [Polynomial.toLaurent_C_mul_T, map_mul, invert_C, invert_T]
+
+theorem laurent_decompose (z : L k) :
+    ∃ a b : k[X], z = zeroRingMap k a - infinityRingMap k b := by
+  induction z using LaurentPolynomial.induction_on' with
+  | add z w hz hw =>
+    obtain ⟨a,b,hab⟩ := hz
+    obtain ⟨c,d,hcd⟩ := hw
+    exact ⟨a+c,b+d, by rw [hab,hcd,map_add,map_add]; abel⟩
+  | C_mul_T n a =>
+    by_cases hn : 0 ≤ n
+    · refine ⟨Polynomial.monomial n.toNat a,0,?_⟩
+      rw [map_zero,sub_zero,polynomial_X,Int.toNat_of_nonneg hn]
+    · refine ⟨0,-Polynomial.monomial (-n).toNat a,?_⟩
+      rw [map_zero,map_neg,sub_neg_eq_add,zero_add,inverse_polynomial_X,
+        Int.toNat_of_nonneg (by omega), neg_neg]
+
+def zeroSections : Γ(line k,(zeroFramed k).1) ≃+* k[X] :=
+  letI : Algebra k Γ(line k, (chartZero k) ''ᵁ ⊤) :=
+    (sectionCoefficients (structureMap k) ((chartZero k) ''ᵁ ⊤)).toAlgebra
+  (sectionEquiv (structureMap k) (chartZero k) (chartZero_over k)).toRingEquiv
+
+def infinitySections : Γ(line k,(infinityFramed k).1) ≃+* k[X] :=
+  letI : Algebra k Γ(line k, (chartInfinity k) ''ᵁ ⊤) :=
+    (sectionCoefficients (structureMap k) ((chartInfinity k) ''ᵁ ⊤)).toAlgebra
+  (sectionEquiv (structureMap k) (chartInfinity k) (chartInfinity_over k)).toRingEquiv
+
+def torusSections : Γ(line k,(torusFramed k).1) ≃+* L k :=
+  letI : Algebra k Γ(line k, (chartTorus k) ''ᵁ ⊤) :=
+    (sectionCoefficients (structureMap k) ((chartTorus k) ''ᵁ ⊤)).toAlgebra
+  (sectionEquiv (structureMap k) (chartTorus k) (chartTorus_over k)).toRingEquiv
+
+private theorem ring_zero (a : Γ(line k,(zeroFramed k).1)) :
+    torusSections k ((O k).obj.map (homOfLE (torusInZero k)).op a) =
+      zeroRingMap k (zeroSections k a) :=
+  DFunLike.congr_fun (CycleQ2NativeChartRestriction.sections_restrict (structureMap k)
+    (chartZero k) (chartTorus k) (chartZero_over k) (chartTorus_over k)
+    (zeroRingMap k) (torus_zero k) (torusInZero k)) a
+
+private theorem ring_infinity (a : Γ(line k,(infinityFramed k).1)) :
+    torusSections k ((O k).obj.map (homOfLE (torusInInfinity k)).op a) =
+      infinityRingMap k (infinitySections k a) := by
+  have h : Spec.map (CommRingCat.ofHom (infinityRingMap k).toRingHom) ≫ chartInfinity k =
+      chartTorus k := by
+    rw [← torus_infinity]
+    congr 1
+    rw [infinityMap,inversion,zeroMap,← Spec.map_comp]
+    rfl
+  exact DFunLike.congr_fun (CycleQ2NativeChartRestriction.sections_restrict (structureMap k)
+    (chartInfinity k) (chartTorus k) (chartInfinity_over k) (chartTorus_over k)
+    (infinityRingMap k) h (torusInInfinity k)) a
+
+theorem sectionBoundary_eq_zero (z : (O k).obj.obj (op (torusFramed k).1)) :
+    sectionBoundary (O k) (square k) z = 0 := by
+  obtain ⟨a,b,hab⟩ := laurent_decompose k (torusSections k z)
+  apply (sectionBoundary_zero_iff (O k) (square k) z).2
+  refine ⟨(zeroSections k).symm a,(infinitySections k).symm b,?_⟩
+  apply (torusSections k).injective
+  change torusSections k (((O k).obj.map (homOfLE (torusInZero k)).op ((zeroSections k).symm a)) -
+    ((O k).obj.map (homOfLE (torusInInfinity k)).op ((infinitySections k).symm b))) = torusSections k z
+  rw [map_sub,ring_zero,ring_infinity,RingEquiv.apply_symm_apply,RingEquiv.apply_symm_apply]
+  exact hab.symm
+
+/-- If degree-one cohomology vanishes on the two patches, every
+degree-one global class is the connecting class of a section. -/
+theorem boundary_surjective {Y : TopCat.{0}}
+    [HasExt.{1} (Sheaf (Opens.grothendieckTopology Y) AddCommGrpCat.{0})]
+    (F : Y.Sheaf AddCommGrpCat.{0}) (S : (Opens.grothendieckTopology Y).MayerVietorisSquare)
+    [Subsingleton (F.H' 1 S.X₂)] [Subsingleton (F.H' 1 S.X₃)] :
+    Function.Surjective (sectionBoundary F S) := by
+  intro x
+  have hz : S.toBiprod F 1 x = 0 := by
+    apply (AddCommGrpCat.biprodIsoProd _ _).addCommGroupIsoToAddEquiv.injective
+    exact Subsingleton.elim _ _
+  obtain ⟨z,hz⟩ := (ShortComplex.ab_exact_iff _).mp ((S.sequence_exact F 0 1 rfl).exact 2) x hz
+  refine ⟨sectionsEquiv F S.X₁ z,?_⟩
+  change S.δ F 0 1 rfl ((sectionsEquiv F S.X₁).symm (sectionsEquiv F S.X₁ z)) = x
+  rw [AddEquiv.symm_apply_apply]
+  exact hz
+
+private theorem affine_HOne {Y : Scheme.{0}} {U : Y.Opens} (hU : IsAffineOpen U)
+    [HasExt.{1} (Sheaf (Opens.grothendieckTopology Y) AddCommGrpCat.{0})] :
+    Subsingleton ((structureAdditiveSheaf Y).H' 1 U) :=
+  affineFrameHOne_subsingleton hU.isoSpec (structureAdditiveSheaf Y) (Iso.refl _)
+
+private theorem affine_HTwo {Y : Scheme.{0}} {U : Y.Opens} (hU : IsAffineOpen U)
+    [HasExt.{1} (Sheaf (Opens.grothendieckTopology Y) AddCommGrpCat.{0})] :
+    Subsingleton ((structureAdditiveSheaf Y).H' 2 U) :=
+  affineFrameHTwo_subsingleton hU.isoSpec (structureAdditiveSheaf Y) (Iso.refl _)
+    (CycleQ2GeometricAffineHTwo.affine_H_two_subsingleton Γ(Y,U))
+
+theorem functions_HOne : Subsingleton ((O k).H' 1 ⊤) := by
+  let S := square k
+  letI : Subsingleton ((O k).H' 1 S.X₂) := affine_HOne (zeroFramed k).2.1
+  letI : Subsingleton ((O k).H' 1 S.X₃) := affine_HOne (infinityFramed k).2.1
+  have hb := boundary_surjective (O k) S
+  apply subsingleton_of_forall_eq 0
+  intro x
+  obtain ⟨z,rfl⟩ := hb x
+  exact sectionBoundary_eq_zero k z
+
+theorem functions_HTwo : Subsingleton ((O k).H' 2 ⊤) := by
+  let S := square k
+  let F := O k
+  letI : Subsingleton (F.H' 1 S.X₁) := affine_HOne (torusFramed k).2.1
+  letI : Subsingleton (F.H' 2 S.X₂) := affine_HTwo (zeroFramed k).2.1
+  letI : Subsingleton (F.H' 2 S.X₃) := affine_HTwo (infinityFramed k).2.1
+  apply subsingleton_of_forall_eq 0
+  intro x
+  have hz : S.toBiprod F 2 x = 0 := by
+    apply (AddCommGrpCat.biprodIsoProd _ _).addCommGroupIsoToAddEquiv.injective
+    exact Subsingleton.elim _ _
+  obtain ⟨y,hy⟩ := (ShortComplex.ab_exact_iff _).mp
+    ((S.sequence_exact F 1 2 rfl).exact 2) x hz
+  change F.H' 1 S.X₁ at y
+  have e : y = 0 := Subsingleton.elim _ _
+  rw [e,map_zero] at hy
+  exact hy.symm
+
+end CycleQ2ProjectiveLineFunctions
+
+#print axioms CycleQ2ProjectiveLineFunctions.functions_HOne
+#print axioms CycleQ2ProjectiveLineFunctions.functions_HTwo
+
+end
+
+section
+
+/-!
+# Degree-two hypercohomology of an actual two-term complex
+
+If first and second cohomology of the function term vanish, then first
+cohomology of the one-form term is precisely degree-two cohomology of
+the two-term complex. This is the actual map of the shifted mapping
+cone, with the standard triangle signs.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2TwoTermTopComparison
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Abelian
+open CategoryTheory.Pretriangulated
+
+variable {C : Type*} [Category C] [Abelian C] [HasExt.{1} C] [HasDerivedCategory.{1} C]
+
+variable {A B : C} (d : A ⟶ B)
+
+private abbrev C₀ := CochainComplex.singleFunctor C 0
+
+private abbrev baseTriangle :=
+  DerivedCategory.Q.mapTriangle.obj (CochainComplex.mappingCone.triangle ((C₀ (C := C)).map d))
+
+abbrev shiftedTriangle :=
+  (Triangle.shiftFunctor (DerivedCategory C) (1 : ℤ)).obj (baseTriangle d)
+
+variable (X : C)
+
+private abbrev E := DerivedCategory.singleFunctor C 0
+
+abbrev topGroup := (E.obj X ⟶ (shiftedTriangle d).obj₃)
+
+private theorem distinguished : shiftedTriangle d ∈ distTriang (DerivedCategory C) :=
+  Triangle.shift_distinguished _ (DerivedCategory.mappingCone_triangle_distinguished _) _
+
+/-- The actual map from first cohomology of the second term into the shifted cone. -/
+def topMap : Ext X B 1 →+ topGroup d X where
+  toFun x := x.hom ≫ (shiftedTriangle d).mor₂
+  map_zero' := by simp
+  map_add' x y := by rw [Ext.add_hom, Preadditive.add_comp]
+
+variable (h₁ : Subsingleton (Ext.{1} X A 1)) (h₂ : Subsingleton (Ext.{1} X A 2))
+
+include h₁ in
+theorem topMap_injective : Function.Injective (topMap d X) := by
+  apply (injective_iff_map_eq_zero _).2
+  intro x hx
+  change x.hom ≫ (shiftedTriangle d).mor₂ = 0 at hx
+  obtain ⟨g,hg⟩ := Triangle.coyoneda_exact₂ _ (distinguished d) x.hom hx
+  haveI : Subsingleton (E.obj X ⟶ (shiftedTriangle d).obj₁) :=
+    Function.Injective.subsingleton
+      (Ext.homEquiv (X := X) (Y := A) (n := 1)).symm.injective
+  have hz : g = 0 := Subsingleton.elim _ _
+  apply Ext.homEquiv.injective
+  change x.hom = (0 : Ext X B 1).hom
+  rw [hg,hz,zero_comp]
+  exact (Ext.zero_hom (X := X) (Y := B) (n := 1)).symm
+
+include h₂ in
+theorem topMap_surjective : Function.Surjective (topMap d X) := by
+  intro x
+  let T := shiftedTriangle d
+  let e := ((shiftFunctorAdd' (DerivedCategory C) (1 : ℤ) 1 2 (by decide)).app (E.obj A))
+  haveI : Subsingleton (E.obj X ⟶ (E.obj A)⟦(2 : ℤ)⟧) :=
+    Function.Injective.subsingleton
+      (Ext.homEquiv (X := X) (Y := A) (n := 2)).symm.injective
+  have hz : x ≫ T.mor₃ = 0 := by
+    apply (cancel_mono e.inv).mp
+    exact Subsingleton.elim _ _
+  obtain ⟨y,hy⟩ := Triangle.coyoneda_exact₃ T (distinguished d) x hz
+  refine ⟨Ext.homEquiv.symm y,?_⟩
+  change Ext.homEquiv (Ext.homEquiv.symm y) ≫ T.mor₂ = x
+  rw [Equiv.apply_symm_apply]
+  exact hy.symm
+
+/-- Under the two vanishings this is the canonical upper-term comparison. -/
+def topEquiv : Ext X B 1 ≃+ topGroup d X :=
+  AddEquiv.ofBijective (topMap d X) ⟨topMap_injective d X h₁, topMap_surjective d X h₂⟩
+
+end CycleQ2TwoTermTopComparison
+
+#print axioms CycleQ2TwoTermTopComparison.topMap_injective
+#print axioms CycleQ2TwoTermTopComparison.topMap_surjective
+
+end
+
+section
+
+/-!
+# The normalized Laurent class in actual degree-two de Rham cohomology
+
+The ordinary two-term complex of native functions and Kähler forms
+has no contribution from the first and second structure-sheaf
+cohomology groups. The Laurent connecting map therefore retains its
+exact residue kernel in degree-two derived de Rham cohomology.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2ProjectiveLineDeRhamTrace
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open Module KaehlerDifferential LaurentPolynomial
+open CycleQ2LaurentProjectiveLine CycleQ2ProjectiveLineStructure
+open CycleQ2LaurentLogDerivative CycleQ2LaurentKahlerResidue
+open CycleQ2RankOneDifferentialSheaf
+open CycleQ2ProjectiveLineCohomologyResidue (boundary boundary_zero_iff logForm_residue square)
+open CycleQ2ProjectiveLineFunctions (functions_HOne functions_HTwo boundary_surjective)
+open CycleQ2ProjectiveLineExactCharts (zeroFramed infinityFramed torusFramed)
+open CycleQ2ProjectiveLineFormRestrictions (atTorus)
+open CycleQ2ClosedSupportCohomology (sectionBoundary)
+open CycleQ2RankOneFrameAcyclic (affine_HOne_subsingleton)
+open CycleQ2InjectiveCech (AbSheaf freeOpen)
+open CycleQ2TwoTermTopComparison (topGroup topEquiv)
+
+variable (k : Type) [Field k]
+
+private abbrev Sheaves := AbSheaf (show TopCat from line k)
+local instance : HasExt.{1} (Sheaves k) := HasExt.standard _
+local instance : HasDerivedCategory.{1} (Sheaves k) := HasDerivedCategory.standard _
+local instance : SmoothOfRelativeDimension 1 (structureMap k) := smooth k
+
+abbrev TopDeRham := topGroup (C := Sheaves k)
+  (derivative (structureMap k)) (freeOpen (⊤ : (line k).Opens))
+
+/-- The genuine upper-term inclusion, which is an isomorphism here. -/
+def coherentComparison : (oneForms (structureMap k)).H' 1 ⊤ ≃+ TopDeRham k :=
+  topEquiv (C := Sheaves k) (derivative (structureMap k)) (freeOpen (⊤ : (line k).Opens))
+    (functions_HOne k) (functions_HTwo k)
+
+/-- The actual derived class of a regular Laurent differential on the overlap. -/
+def derivedBoundary : Ω[L k⁄k] →+ TopDeRham k :=
+  (coherentComparison k).toAddMonoidHom.comp (boundary k)
+
+theorem derivedBoundary_zero_iff (ω : Ω[L k⁄k]) :
+    derivedBoundary k ω = 0 ↔ differentialResidue k ω = 0 := by
+  change coherentComparison k (boundary k ω) = 0 ↔ _
+  rw [← map_zero (coherentComparison k), (coherentComparison k).injective.eq_iff,
+    boundary_zero_iff]
+
+theorem derivedLogForm_ne_zero : derivedBoundary k (logForm k) ≠ 0 := by
+  rw [ne_eq,derivedBoundary_zero_iff,logForm_residue]
+  exact one_ne_zero
+
+/-- A normalized multiple of the original logarithmic differential. -/
+def constantLog : k →+ Ω[L k⁄k] where
+  toFun c := c • logForm k
+  map_zero' := zero_smul k _
+  map_add' a b := add_smul a b _
+
+theorem constantLog_residue (c : k) : differentialResidue k (constantLog k c) = c := by
+  change differentialResidue k (c • logForm k) = c
+  rw [map_smul,logForm_residue,smul_eq_mul,mul_one]
+
+/-- The normalized scalar class in actual H² of the de Rham complex. -/
+def fromScalar : k →+ TopDeRham k := (derivedBoundary k).comp (constantLog k)
+
+theorem fromScalar_injective : Function.Injective (fromScalar k) :=
+  (injective_iff_map_eq_zero _).2 (fun c h => by
+    change derivedBoundary k (constantLog k c) = 0 at h
+    rw [derivedBoundary_zero_iff,constantLog_residue] at h
+    exact h)
+
+theorem derivedBoundary_eq_scalar (ω : Ω[L k⁄k]) :
+    derivedBoundary k ω = fromScalar k (differentialResidue k ω) := by
+  change derivedBoundary k ω = derivedBoundary k (constantLog k (differentialResidue k ω))
+  rw [← sub_eq_zero,← map_sub,derivedBoundary_zero_iff,map_sub,constantLog_residue,sub_self]
+
+theorem derivedBoundary_surjective : Function.Surjective (derivedBoundary k) := by
+  let F := oneForms (structureMap k)
+  let I := square k
+  letI : Subsingleton (F.H' 1 I.X₂) := affine_HOne_subsingleton (structureMap k) (zeroFramed k)
+  letI : Subsingleton (F.H' 1 I.X₃) := affine_HOne_subsingleton (structureMap k) (infinityFramed k)
+  intro x
+  obtain ⟨h,rfl⟩ := (coherentComparison k).surjective x
+  obtain ⟨z,rfl⟩ := boundary_surjective F I h
+  refine ⟨atTorus k z,?_⟩
+  change coherentComparison k (sectionBoundary F I ((atTorus k).symm (atTorus k z))) = _
+  rw [AddEquiv.symm_apply_apply]
+
+theorem fromScalar_surjective : Function.Surjective (fromScalar k) := by
+  intro x
+  obtain ⟨ω,rfl⟩ := derivedBoundary_surjective k x
+  exact ⟨differentialResidue k ω,(derivedBoundary_eq_scalar k ω).symm⟩
+
+/-- The normalized trace on the full actual degree-two de Rham group. -/
+def trace : TopDeRham k ≃+ k :=
+  (AddEquiv.ofBijective (fromScalar k) ⟨fromScalar_injective k,fromScalar_surjective k⟩).symm
+
+theorem trace_derivedBoundary (ω : Ω[L k⁄k]) :
+    trace k (derivedBoundary k ω) = differentialResidue k ω := by
+  rw [derivedBoundary_eq_scalar]
+  exact (trace k).apply_symm_apply (differentialResidue k ω)
+
+theorem trace_logForm : trace k (derivedBoundary k (logForm k)) = 1 := by
+  rw [trace_derivedBoundary,logForm_residue]
+
+end CycleQ2ProjectiveLineDeRhamTrace
+
+#print axioms CycleQ2ProjectiveLineDeRhamTrace.coherentComparison
+#print axioms CycleQ2ProjectiveLineDeRhamTrace.derivedLogForm_ne_zero
+#print axioms CycleQ2ProjectiveLineDeRhamTrace.derivedBoundary_eq_scalar
+
+#print axioms CycleQ2ProjectiveLineDeRhamTrace.trace_derivedBoundary
+
+end
+
+section
+
+/-!
+# Ordinary cotangent frames at the points of a normal affine curve
+
+A normal finite-type curve over a characteristic-zero field is smooth.
+The actual Kähler module at a closed point is free over its local
+ring and has the same rank as the cotangent module of its fraction
+field. Its residue field is finite separable over the original field.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2NormalCurveLocalFrames
+
+open Algebra KaehlerDifferential IsLocalRing
+
+variable {k A K : Type} [Field k] [CharZero k] [CommRing A] [IsDedekindDomain A]
+  [Algebra k A] [Algebra.FiniteType k A] [Field K]
+  [Algebra k K] [Algebra A K] [IsScalarTower k A K] [IsFractionRing A K]
+
+variable (q : Ideal A) [q.IsMaximal]
+
+local instance : q.IsPrime := Ideal.IsMaximal.isPrime inferInstance
+
+abbrev R := Localization.AtPrime q
+
+/-- It suffices to normalize the rank once, at the generic function field. -/
+def localFrame [Algebra (R q) K] [IsScalarTower A (R q) K] [IsScalarTower k (R q) K]
+    (hrank : Module.finrank K Ω[K⁄k] = 1) : Ω[R q⁄k] ≃ₗ[R q] R q := by
+  letI : Algebra.Smooth k A := CycleQ2NormalCurveSmooth.smooth_of_isDedekindDomain
+  letI : Algebra.FormallySmooth A (R q) :=
+    Algebra.FormallySmooth.of_isLocalization (Rₘ := R q) q.primeCompl
+  letI : Algebra.FormallySmooth k (R q) := Algebra.FormallySmooth.comp k A (R q)
+  letI : Algebra.EssFiniteType A (R q) := Algebra.EssFiniteType.of_isLocalization _ q.primeCompl
+  letI : Algebra.EssFiniteType k (R q) := Algebra.EssFiniteType.comp _ A _
+  letI : Module.Free (R q) Ω[R q⁄k] := Module.free_of_flat_of_isLocalRing
+  letI : IsFractionRing (R q) K :=
+    IsFractionRing.isFractionRing_of_isDomain_of_isLocalization q.primeCompl (R q) K
+  letI : IsLocalizedModule (nonZeroDivisors (R q)) (KaehlerDifferential.map k k (R q) K) :=
+    KaehlerDifferential.isLocalizedModule_map _ _ _ (nonZeroDivisors (R q))
+  have he := Module.finrank_of_isLocalizedModule_of_free K
+    (nonZeroDivisors (R q)) (KaehlerDifferential.map k k (R q) K)
+  exact (Module.nonempty_linearEquiv_of_finrank_eq_one (he.symm.trans hrank)).some.symm
+
+theorem residue_finite : Module.Finite k (ResidueField (R q)) := by
+  letI := Ideal.Quotient.field q
+  letI : Module.Finite k (A ⧸ q) := finite_of_finite_type_of_isJacobsonRing k (A ⧸ q)
+  letI : Module.Finite (A ⧸ q) q.ResidueField := Module.Finite.of_surjective
+    (Algebra.linearMap (A ⧸ q) q.ResidueField) q.bijective_algebraMap_quotient_residueField.2
+  exact Module.Finite.trans (R := k) (A ⧸ q) q.ResidueField
+
+theorem residue_separable : Algebra.IsSeparable k (ResidueField (R q)) := by
+  letI : Module.Finite k (ResidueField (R q)) := residue_finite q
+  infer_instance
+
+end CycleQ2NormalCurveLocalFrames
+
+#print axioms CycleQ2NormalCurveLocalFrames.localFrame
+#print axioms CycleQ2NormalCurveLocalFrames.residue_separable
 
 end

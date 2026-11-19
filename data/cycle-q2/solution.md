@@ -238,6 +238,43 @@ primitive. The class with that value and vanishing restriction is still
 to be constructed.
 [Derived localization and the protected form](GeometricMonicGenericSupport.lean)
 
+## The projective-line de Rham trace and smooth valuation coordinates
+
+Glue two ordinary affine lines along their Laurent overlap, with the
+inverse coordinate on the second chart. The structural map of this
+actual scheme is smooth of relative dimension one. The two stated
+polynomial-to-Laurent maps are the original restriction maps on both
+functions and Kähler one-forms.
+
+The overlap Laurent coefficient induces the normalized trace on all
+of degree-two de Rham hypercohomology. The genuine Mayer–Vietoris
+connecting map in coherent one-form cohomology kills exactly the
+residue-zero forms and is surjective by affine vanishing on the two
+charts. First and second cohomology of the structure sheaf vanish by
+the same affine cover and the decomposition of Laurent functions.
+The shifted two-term cone therefore identifies the resulting coherent
+group with the actual degree-two hypercohomology. The class of \(dT/T\)
+has trace one.
+[Projective-line construction and trace](GeometricMonicGenericSupport.lean)
+
+For a smooth valuation with separable residue field, the differential
+of an irreducible uniformizer is a basis of the rank-one Kähler module.
+The conormal quotient proves that its coefficient in any regular frame
+is a unit. Localizing that frame computes the actual field
+differential and detects exactly whether it comes from the original
+valuation ring. The coefficient computation for a local ramified map
+of valuation rings now proves regularity descent for the actual
+rational one-forms. For finite separable fields, the trace commutes
+with the ordinary derivative, composes in towers, and multiplies
+a pulled-back trace by the extra degree. These identities use the
+actual embedding pullbacks and étale cotangent base change.
+[Field and valuation comparisons](GeometricUniversalWeightedDeRham.lean)
+
+The local comparisons and the projective-line trace provide the inputs
+for the finite trace on the moving proper curve. Its global attachment
+to the marked class and to the proper correspondence still requires
+proof.
+
 ## Field trace, Laurent residue and the local two-equation lift
 
 Étale cotangent base change defines the ordinary one-form trace over
@@ -249,21 +286,21 @@ the sum of the ordinary pullbacks by all field automorphisms.
 In characteristic zero the derivative of a polar function in a discrete
 valuation ring has one more order of pole. The pullback of a polar
 differential along a ramified valuation remains polar. If a base
-uniformizer maps to a unit times the ((e+1))-st power of a target
-uniformizer, a pole of differential order (m+1) gives order
-((e+1)m+1) on the target. These facts give the local regularity
+uniformizer maps to a unit times the \(e+1\)-st power of a target
+uniformizer, a pole of differential order \(m+1\) gives order
+\((e+1)m+1\) on the target. These facts give the local regularity
 tests needed to descend a trace. The descent on the entire proper
 curve remains to be constructed.
 
-The ordinary Laurent cotangent module has frame (dT/T). In this
+The ordinary Laurent cotangent module has frame \(dT/T\). In this
 frame the two polynomial-chart restrictions have strictly positive
 and strictly negative powers, respectively, and the infinity chart
-has the sign from (Tmapsto T^{-1}). The residue is the constant
+has the sign from \(T\mapsto T^{-1}\). The residue is the constant
 coefficient. It kills exact differentials and identifies the quotient
 by the two chart images.
 
 On a two-equation affine intersection, wedging a one-form with
-(dlog fwedge dlog g) defines a class modulo forms from either
+\(d\log f\wedge d\log g\) defines a class modulo forms from either
 single localization. Multiplication by one of the equations moves
 the lift into the opposite single localization. The conormal
 differentials themselves vanish by alternation. The map therefore

@@ -28,6 +28,9 @@ import Mathlib.RingTheory.Kaehler.Polynomial
 import Mathlib.RingTheory.DiscreteValuationRing.Basic
 import Mathlib.RingTheory.Etale.Field
 import Mathlib.LinearAlgebra.TensorProduct.Associator
+import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+import Mathlib.RingTheory.Unramified.Field
+import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
 
 /-!
 # Relative exterior forms on the universal weighted function field
@@ -5967,5 +5970,463 @@ theorem commutes_with_D (a : intersectionRing f g) :
 end CycleQ2DoubleGysinCochain
 
 #print axioms CycleQ2DoubleGysinCochain.commutes_with_D
+
+end
+
+section
+
+/-!
+# A differential frame at a closed smooth curve point
+
+At a discrete valuation ring with separable residue field, the
+conormal sequence forces the differential of a uniformizer to be
+a basis whenever the ordinary cotangent module is free of rank one.
+The same argument fixes the normalization of the local derivation.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2CurveUniformizerFrame
+
+open Algebra IsLocalRing IsDiscreteValuationRing KaehlerDifferential
+open CycleQ2IdealCotangentQuotient
+
+variable {k R : Type} [Field k] [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+  [Algebra k R] [Algebra.IsSeparable k (ResidueField R)]
+
+local instance : Algebra.FormallyUnramified k (ResidueField R) :=
+  Algebra.FormallyUnramified.of_isSeparable k (ResidueField R)
+
+theorem coefficient_isUnit (e : Ω[R⁄k] ≃ₗ[R] R) {π : R} (hπ : Irreducible π) :
+    IsUnit (e (D k R π)) := by
+  let I := maximalIdeal R
+  have hspan : I = Ideal.span {π} := hπ.maximalIdeal_eq
+  have hπI : π ∈ I := hspan.symm ▸ Ideal.subset_span (Set.mem_singleton _)
+  have htop : conormal (k := k) I = ⊤ := by
+    apply top_unique
+    intro ω _
+    apply (Submodule.Quotient.mk_eq_zero _).mp
+    apply (cotangentEquiv (k := k) I).injective
+    haveI : Subsingleton Ω[(R ⧸ I)⁄k] := by
+      change Subsingleton Ω[ResidueField R⁄k]
+      infer_instance
+    exact Subsingleton.elim _ _
+  by_contra h
+  have hb : e (D k R π) ∈ I := (mem_maximalIdeal _).mpr (mem_nonunits_iff.mpr h)
+  have hconormal : conormal (k := k) I ≤ Submodule.comap e.toLinearMap (I : Submodule R R) := by
+    rw [conormal, sup_le_iff, Submodule.span_le]
+    constructor
+    · intro ω hω
+      refine Submodule.smul_induction_on hω ?_ ?_
+      · intro a ha b _
+        change e (a • b) ∈ I
+        rw [map_smul, smul_eq_mul]
+        exact I.mul_mem_right (e b) ha
+      · exact fun _ _ => Submodule.add_mem _
+    · rintro _ ⟨a,ha,rfl⟩
+      change a ∈ I at ha
+      rw [hspan, Ideal.mem_span_singleton] at ha
+      obtain ⟨v,rfl⟩ := ha
+      change e (D k R (π * v)) ∈ I
+      rw [Derivation.leibniz, map_add, map_smul, map_smul, smul_eq_mul, smul_eq_mul]
+      exact I.add_mem (I.mul_mem_right _ hπI) (I.mul_mem_left _ hb)
+  have h1 : e (e.symm 1) ∈ I := hconormal (htop.symm ▸ Submodule.mem_top)
+  rw [LinearEquiv.apply_symm_apply] at h1
+  exact (Ideal.ne_top_iff_one _).mp (maximalIdeal.isMaximal R).ne_top h1
+
+def coordinates (e : Ω[R⁄k] ≃ₗ[R] R) {π : R} (hπ : Irreducible π) :
+    Ω[R⁄k] ≃ₗ[R] R :=
+  e.trans (LinearEquiv.smulOfUnit ((coefficient_isUnit e hπ).unit⁻¹))
+
+theorem coordinates_uniformizer (e : Ω[R⁄k] ≃ₗ[R] R) {π : R} (hπ : Irreducible π) :
+    coordinates e hπ (D k R π) = 1 := by
+  change (↑((coefficient_isUnit e hπ).unit⁻¹) : R) * e (D k R π) = 1
+  let u := (coefficient_isUnit e hπ).unit
+  have hu : (u : R) = e (D k R π) := (coefficient_isUnit e hπ).unit_spec
+  change (↑u⁻¹ : R) * e (D k R π) = 1
+  rw [← hu, ← Units.val_mul, inv_mul_cancel, Units.val_one]
+
+def uniformizerDerivative (e : Ω[R⁄k] ≃ₗ[R] R) {π : R} (hπ : Irreducible π) :
+    Derivation k R R :=
+  (KaehlerDifferential.linearMapEquivDerivation k R) (coordinates e hπ).toLinearMap
+
+theorem uniformizerDerivative_apply (e : Ω[R⁄k] ≃ₗ[R] R) {π : R} (hπ : Irreducible π) (z : R) :
+    uniformizerDerivative e hπ z = coordinates e hπ (D k R z) := rfl
+
+theorem uniformizerDerivative_one (e : Ω[R⁄k] ≃ₗ[R] R) {π : R} (hπ : Irreducible π) :
+    uniformizerDerivative e hπ π = 1 :=
+  (uniformizerDerivative_apply e hπ π).trans (coordinates_uniformizer e hπ)
+
+end CycleQ2CurveUniformizerFrame
+
+#print axioms CycleQ2CurveUniformizerFrame.coefficient_isUnit
+#print axioms CycleQ2CurveUniformizerFrame.uniformizerDerivative_one
+
+end
+
+section
+
+/-!
+# Embedding formula for the canonical trace on finite separable one-forms
+
+The field trace on differentials and the ordinary field trace form a
+cochain map for every finite separable characteristic-zero extension.
+The proof sums the actual pullbacks over field embeddings and uses
+faithfully flat descent of Kähler differentials.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2DifferentialTraceEmbeddings
+
+open Algebra KaehlerDifferential TensorProduct
+open CycleQ2ExactFrameThreeDeRham (onePullback onePullback_d)
+open CycleQ2AffineDeRhamFunctorial (onePullback_comp)
+open CycleQ2FiniteFieldOneFormTrace (traceOne traceOne_smul)
+
+variable {k K L E : Type} [CommRing k] [Field K] [Field L] [Field E]
+  [Algebra k K] [Algebra k L] [Algebra k E] [Algebra K L] [Algebra K E]
+  [IsScalarTower k K L] [IsScalarTower k K E]
+
+theorem onePullback_algebraMap (T : Type) [CommRing T] [Algebra k T] [Algebra K T]
+    [IsScalarTower k K T] (ω : Ω[K⁄k]) :
+    onePullback (IsScalarTower.toAlgHom k K T) ω = KaehlerDifferential.map k k K T ω := by
+  have h : ω ∈ Submodule.span K (Set.range (D k K)) := by
+    rw [span_range_derivation]
+    trivial
+  induction h using Submodule.span_induction with
+  | mem x hx =>
+    obtain ⟨a,rfl⟩ := hx
+    rw [onePullback_d, KaehlerDifferential.map_D]
+    rfl
+  | zero => simp only [map_zero]
+  | add a b _ _ ha hb => simp only [map_add, ha, hb]
+  | smul a b _ hb =>
+    rw [map_smulₛₗ, hb, map_smul]
+    exact IsScalarTower.algebraMap_smul T a _
+
+variable [FiniteDimensional K L] [Algebra.IsSeparable K L]
+
+local instance : Algebra.FormallyEtale K L := Algebra.FormallyEtale.of_isSeparable K L
+
+private theorem embedding_base (σ : L →ₐ[K] E) (ω : Ω[K⁄k]) :
+    onePullback (σ.restrictScalars k) (KaehlerDifferential.map k k K L ω) =
+      KaehlerDifferential.map k k K E ω := by
+  have h : (σ.restrictScalars k).comp (IsScalarTower.toAlgHom k K L) =
+      IsScalarTower.toAlgHom k K E := AlgHom.ext (fun a => σ.commutes a)
+  rw [← onePullback_algebraMap L, ← onePullback_algebraMap E, ← onePullback_comp, h]
+
+theorem traceOne_pullback_degree (ω : Ω[K⁄k]) :
+    traceOne (KaehlerDifferential.map k k K L ω) = Module.finrank K L • ω := by
+  have h := traceOne_smul (k := k) (1 : L) ω
+  rw [one_smul] at h
+  rw [← map_one (algebraMap K L), Algebra.trace_algebraMap,
+    nsmul_one, Nat.cast_smul_eq_nsmul] at h
+  exact h
+
+theorem trace_eq_sum_embeddings [IsAlgClosed E] (ω : Ω[L⁄k]) :
+    KaehlerDifferential.map k k K E (traceOne ω) =
+      ∑ σ : L →ₐ[K] E, onePullback (σ.restrictScalars k) ω := by
+  classical
+  obtain ⟨v,rfl⟩ := (tensorKaehlerEquivOfFormallyEtale k K L).surjective ω
+  induction v using TensorProduct.induction_on with
+  | zero => simp only [map_zero, Finset.sum_const_zero]
+  | add a b ha hb => simp only [map_add, ha, hb, Finset.sum_add_distrib]
+  | tmul a η =>
+    rw [tensorKaehlerEquivOfFormallyEtale_apply, mapBaseChange_tmul, traceOne_smul, map_smul,
+      ← IsScalarTower.algebraMap_smul E, _root_.trace_eq_sum_embeddings E]
+    rw [Finset.sum_smul]
+    apply Finset.sum_congr rfl
+    intro σ _
+    rw [map_smulₛₗ, embedding_base]
+    rfl
+
+theorem formallyEtale_pullback_injective [Algebra.FormallyEtale K E] :
+    Function.Injective (KaehlerDifferential.map k k K E) := by
+  apply (injective_iff_map_eq_zero _).2
+  intro ω h
+  apply (Module.FaithfullyFlat.one_tmul_eq_zero_iff K Ω[K⁄k] (A := E) ω).1
+  apply (tensorKaehlerEquivOfFormallyEtale k K E).injective
+  rw [tensorKaehlerEquivOfFormallyEtale_apply, mapBaseChange_tmul, one_smul, h, map_zero]
+
+theorem traceOne_D [CharZero K] (a : L) :
+    traceOne (D k L a) = D k K (Algebra.trace K L a) := by
+  classical
+  let E := AlgebraicClosure K
+  letI : Algebra.FormallyEtale K E := Algebra.FormallyEtale.of_isSeparable K E
+  apply formallyEtale_pullback_injective (E := E)
+  rw [trace_eq_sum_embeddings, KaehlerDifferential.map_D, _root_.trace_eq_sum_embeddings E,
+    map_sum]
+  exact Finset.sum_congr rfl (fun σ _ => onePullback_d (σ.restrictScalars k) a)
+
+end CycleQ2DifferentialTraceEmbeddings
+
+#print axioms CycleQ2DifferentialTraceEmbeddings.traceOne_pullback_degree
+#print axioms CycleQ2DifferentialTraceEmbeddings.trace_eq_sum_embeddings
+#print axioms CycleQ2DifferentialTraceEmbeddings.traceOne_D
+
+end
+
+section
+
+/-!
+# Transitivity and degree of the canonical differential trace
+
+The two trace maps in a finite tower compose to the original field
+trace. Pulling a differential up to any further finite separable
+extension multiplies the original trace by the extension degree.
+This lets one use a normal closure without discarding ramified places.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2DifferentialTraceTower
+
+open Algebra KaehlerDifferential TensorProduct
+open CycleQ2ExactFrameThreeDeRham (onePullback)
+open CycleQ2AffineDeRhamFunctorial (onePullback_comp)
+open CycleQ2FiniteFieldOneFormTrace (traceOne traceOne_smul)
+open CycleQ2DifferentialTraceEmbeddings (onePullback_algebraMap traceOne_pullback_degree)
+
+variable {k K L E : Type} [CommRing k] [Field K] [Field L] [Field E]
+  [Algebra k K] [Algebra k L] [Algebra k E]
+  [Algebra K L] [Algebra K E] [Algebra L E]
+  [IsScalarTower k K L] [IsScalarTower k K E] [IsScalarTower k L E]
+  [IsScalarTower K L E]
+
+theorem pullback_tower (ω : Ω[K⁄k]) :
+    KaehlerDifferential.map k k L E (KaehlerDifferential.map k k K L ω) =
+      KaehlerDifferential.map k k K E ω := by
+  have h : (IsScalarTower.toAlgHom k L E).comp (IsScalarTower.toAlgHom k K L) =
+      IsScalarTower.toAlgHom k K E :=
+    AlgHom.ext (fun x => (IsScalarTower.algebraMap_apply K L E x).symm)
+  rw [← onePullback_algebraMap (K := L) E (KaehlerDifferential.map k k K L ω),
+    ← onePullback_algebraMap (K := K) L ω, ← onePullback_comp, h,
+    onePullback_algebraMap (K := K) E ω]
+
+variable [FiniteDimensional K L] [Algebra.IsSeparable K L]
+  [FiniteDimensional L E] [Algebra.IsSeparable L E]
+  [FiniteDimensional K E] [Algebra.IsSeparable K E]
+
+local instance : Algebra.FormallyEtale K E := Algebra.FormallyEtale.of_isSeparable K E
+
+theorem trace_tower (ω : Ω[E⁄k]) :
+    traceOne (K := K) (L := E) ω = traceOne (K := K) (L := L) (traceOne (K := L) (L := E) ω) := by
+  obtain ⟨v,rfl⟩ := (tensorKaehlerEquivOfFormallyEtale k K E).surjective ω
+  induction v using TensorProduct.induction_on with
+  | zero => simp only [map_zero]
+  | add a b ha hb => simp only [map_add,ha,hb]
+  | tmul a η =>
+    rw [tensorKaehlerEquivOfFormallyEtale_apply,mapBaseChange_tmul,traceOne_smul,
+      ← pullback_tower (L := L) η,traceOne_smul,traceOne_smul,Algebra.trace_trace]
+
+theorem trace_of_further_pullback (ω : Ω[L⁄k]) :
+    traceOne (K := K) (L := E) (KaehlerDifferential.map k k L E ω) =
+      Module.finrank L E • traceOne (K := K) (L := L) ω := by
+  rw [trace_tower (L := L),traceOne_pullback_degree,map_nsmul]
+
+end CycleQ2DifferentialTraceTower
+
+#print axioms CycleQ2DifferentialTraceTower.trace_tower
+#print axioms CycleQ2DifferentialTraceTower.trace_of_further_pullback
+
+end
+
+section
+
+/-!
+# Fraction-field coordinates and the regular differential lattice
+
+The actual cotangent module of a fraction field is the localization
+of regular Kähler forms. A chosen regular frame gives the same
+coordinate after localization, so the regular lattice can be recovered
+as the coefficients in the original ring.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2FractionOneForms
+
+open Algebra KaehlerDifferential Module TensorProduct
+
+variable {k A K : Type} [CommRing k] [CommRing A] [IsDomain A] [Field K]
+  [Algebra k A] [Algebra k K] [Algebra A K] [IsScalarTower k A K] [IsFractionRing A K]
+
+local instance : Algebra.FormallyEtale A K :=
+  Algebra.FormallyEtale.of_isLocalization (Rₘ := K) (nonZeroDivisors A)
+
+abbrev mapRegular : Ω[A⁄k] →ₗ[A] Ω[K⁄k] := KaehlerDifferential.map k k A K
+
+variable (c : Ω[A⁄k] ≃ₗ[A] A)
+
+def fractionBasis : Basis (Fin 1) K Ω[K⁄k] :=
+  ((((Basis.singleton (Fin 1) A).map c.symm).baseChange K)).map
+    (tensorKaehlerEquivOfFormallyEtale k A K)
+
+theorem fractionBasis_apply (i : Fin 1) :
+    fractionBasis (K := K) c i = mapRegular (c.symm 1) := by
+  rw [fractionBasis, Basis.map_apply, Basis.baseChange_apply, Basis.map_apply, Basis.singleton_apply,
+    tensorKaehlerEquivOfFormallyEtale_apply, mapBaseChange_tmul, one_smul]
+
+def fractionCoordinates : Ω[K⁄k] ≃ₗ[K] K :=
+  (fractionBasis c).equivFun.trans (LinearEquiv.funUnique (Fin 1) K K)
+
+theorem fractionCoordinates_basis :
+    fractionCoordinates (K := K) c (mapRegular (c.symm 1)) = 1 := by
+  rw [← fractionBasis_apply c (0 : Fin 1)]
+  change (fractionBasis (K := K) c).equivFun (fractionBasis c (0 : Fin 1)) 0 = 1
+  rw [Basis.equivFun_self, if_pos rfl]
+
+theorem regular_coordinates (ω : Ω[A⁄k]) :
+    fractionCoordinates (K := K) c (mapRegular ω) = algebraMap A K (c ω) := by
+  have h : ω = (c ω) • c.symm 1 := by
+    apply c.injective
+    rw [map_smul, LinearEquiv.apply_symm_apply, smul_eq_mul, mul_one]
+  conv_lhs =>
+    enter [2, 2]
+    rw [h]
+  rw [map_smul, ← IsScalarTower.algebraMap_smul K, map_smul, fractionCoordinates_basis,
+    smul_eq_mul, mul_one]
+
+theorem regular_iff_coordinates (ω : Ω[K⁄k]) :
+    (∃ a : Ω[A⁄k], ω = mapRegular a) ↔
+      ∃ u : A, fractionCoordinates c ω = algebraMap A K u := by
+  constructor
+  · rintro ⟨a,rfl⟩
+    exact ⟨c a, regular_coordinates c a⟩
+  · rintro ⟨u,h⟩
+    refine ⟨c.symm u, (fractionCoordinates c).injective ?_⟩
+    rw [regular_coordinates, LinearEquiv.apply_symm_apply, h]
+
+theorem fraction_reconstruct (ω : Ω[K⁄k]) :
+    ω = (fractionCoordinates c ω) • mapRegular (c.symm 1) := by
+  apply (fractionCoordinates c).injective
+  rw [map_smul, fractionCoordinates_basis, smul_eq_mul, mul_one]
+
+end CycleQ2FractionOneForms
+
+#print axioms CycleQ2FractionOneForms.regular_iff_coordinates
+#print axioms CycleQ2FractionOneForms.fraction_reconstruct
+
+end
+
+section
+
+/-!
+# Regularity of actual rational one-forms descends at smooth valuations
+
+For a local map of discrete valuation rings, the fraction cotangent
+maps agree with the actual Kähler differential maps. Using the
+uniformizer coordinates identifies the pulled coefficient with the
+tame valuation formula, so regularity descends without a choice of a
+monogenic presentation.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2ValuationOneFormDescent
+
+open Algebra KaehlerDifferential IsLocalRing IsDiscreteValuationRing
+open CycleQ2ExactFrameThreeDeRham (onePullback onePullback_d)
+open CycleQ2FractionOneForms
+open CycleQ2CurveUniformizerFrame
+
+variable {k R S F E : Type} [Field k] [CharZero k]
+  [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+  [CommRing S] [IsDomain S] [IsDiscreteValuationRing S]
+  [Field F] [Field E] [Algebra k R] [Algebra k S] [Algebra k F] [Algebra k E]
+  [Algebra R F] [IsFractionRing R F] [IsScalarTower k R F]
+  [Algebra S E] [IsFractionRing S E] [IsScalarTower k S E]
+  [Algebra.IsSeparable k (ResidueField R)] [Algebra.IsSeparable k (ResidueField S)]
+
+variable (i : R →ₐ[k] S) (j : F →ₐ[k] E)
+  (hsq : ∀ x : R, j (algebraMap R F x) = algebraMap S E (i x))
+  [IsLocalHom i.toRingHom]
+
+private theorem ramification_positive {π : R} (hπ : Irreducible π) {σ : S} (hσ : Irreducible σ)
+    (hiπ : i π ≠ 0) : ∃ e : ℕ, ∃ u : Sˣ, i π = (u : S) * σ^(e+1) := by
+  obtain ⟨n,u,hu⟩ := eq_unit_mul_pow_irreducible hiπ hσ
+  cases n with
+  | zero =>
+    rw [pow_zero,mul_one] at hu
+    exfalso
+    apply hπ.not_isUnit
+    have he : IsUnit (i.toRingHom π) := by
+      change IsUnit (i π)
+      rw [hu]
+      exact u.isUnit
+    exact IsLocalHom.map_nonunit (f := i.toRingHom) π he
+  | succ e => exact ⟨e,u,hu⟩
+
+variable (r : Ω[R⁄k] ≃ₗ[R] R) (s : Ω[S⁄k] ≃ₗ[S] S)
+  {π : R} (hπ : Irreducible π) {σ : S} (hσ : Irreducible σ)
+
+private abbrev cR := coordinates r hπ
+private abbrev cS := coordinates s hσ
+
+private theorem source_frame :
+    (cR r hπ).symm 1 = D k R π :=
+  (LinearEquiv.symm_apply_eq _).2 (coordinates_uniformizer r hπ).symm
+
+include hsq in
+theorem coefficient_pullback (ω : Ω[F⁄k]) :
+    fractionCoordinates (K := E) (cS s hσ) (onePullback j ω) =
+      j (fractionCoordinates (K := F) (cR r hπ) ω) *
+        algebraMap S E (uniformizerDerivative s hσ (i π)) := by
+  let c := cR r hπ
+  let b := cS s hσ
+  let z := fractionCoordinates (K := F) c ω
+  have hω : ω = z • D k F (algebraMap R F π) := by
+    have h := fraction_reconstruct (K := F) c ω
+    rw [show c.symm 1 = D k R π from source_frame r hπ, KaehlerDifferential.map_D] at h
+    exact h
+  calc
+    fractionCoordinates b (onePullback j ω) =
+        fractionCoordinates b (onePullback j (z • D k F (algebraMap R F π))) :=
+      congrArg (fun v => fractionCoordinates b (onePullback j v)) hω
+    _ = _ := by
+      rw [map_smulₛₗ,onePullback_d]
+      change fractionCoordinates b (j z • D k E (j (algebraMap R F π))) = _
+      rw [hsq, ← KaehlerDifferential.map_D k k S E (i π), map_smul, regular_coordinates,
+        smul_eq_mul, uniformizerDerivative_apply]
+      try rfl
+
+include hsq r s hπ hσ in
+theorem regular_descends (ω : Ω[F⁄k]) (h : ∃ a : Ω[S⁄k], onePullback j ω = mapRegular a) :
+    ∃ a : Ω[R⁄k], ω = mapRegular a := by
+  have hF : algebraMap R F π ≠ 0 := by
+    simpa only [map_zero] using (IsFractionRing.injective R F).ne hπ.ne_zero
+  have hiπ : i π ≠ 0 := by
+    intro hi
+    apply (j.injective.ne hF)
+    change j (algebraMap R F π) = j 0
+    rw [hsq,hi,map_zero,map_zero]
+  obtain ⟨e,u,hu⟩ := ramification_positive i hπ hσ hiπ
+  apply (regular_iff_coordinates (cR r hπ) ω).2
+  apply CycleQ2TameCoefficientDescent.descends i.toRingHom j.toRingHom hsq π hπ σ hσ
+    (uniformizerDerivative s hσ) (uniformizerDerivative_one s hσ) e u hu
+  obtain ⟨a,ha⟩ := (regular_iff_coordinates (cS s hσ) (onePullback j ω)).1 h
+  rw [coefficient_pullback i j hsq r s hπ hσ] at ha
+  exact ⟨a,ha⟩
+
+end CycleQ2ValuationOneFormDescent
+
+#print axioms CycleQ2ValuationOneFormDescent.coefficient_pullback
+#print axioms CycleQ2ValuationOneFormDescent.regular_descends
 
 end
