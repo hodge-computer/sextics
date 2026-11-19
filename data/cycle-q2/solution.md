@@ -230,7 +230,10 @@ for any lift has the explicit primitive
 The correction for the triangular equation change is itself closed on
 the single open where both second equations are invertible. Its
 restriction therefore gives a boundary in the local Čech–de Rham total
-complex with zero exterior component on that single open.
+complex with zero exterior component on that single open. The two
+original cochains are pulled back from their actual double localizations,
+and the closed correction is pulled back from the single open along
+the map of those same localizations.
 
 These identities are local inputs to the Gauss–Manin comparison.
 The global supported action of the proper graph and its comparison

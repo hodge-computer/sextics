@@ -3632,3 +3632,107 @@ end CycleQ2ClosedGeneratorCorrection
 #print axioms CycleQ2ClosedGeneratorCorrection.closed
 
 end
+
+section
+
+/-!
+# The closed correction witnessing equality of the local cycle cochains
+
+The triangular change in the second equation has a closed correction
+on the single open D(gh). Its ordinary pullback to D(fgh) is exactly
+the difference of the two logarithmic cochains.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2ClosedGeneratorWitness
+
+open KaehlerDifferential Module
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+open CycleQ2DoubleLogarithmicClass CycleQ2LogarithmicGeneratorChange
+
+variable {K A T : Type} [CommRing K] [CommRing A] [CommRing T] [Algebra K A] [Algebra K T]
+  (φ : A →ₐ[K] T)
+  (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A) (hu : ∀ i, b i = D K A (u i))
+
+private theorem pull_exact_wedge (x y : A) :
+    exteriorPullback φ 2 (wedge (D K A x) (D K A y)) =
+      wedge (D K T (φ x)) (D K T (φ y)) := by
+  have l : (D K A ∘ ![x,y]) = ![D K A x,D K A y] := by
+    funext i
+    fin_cases i <;> rfl
+  have r : (D K T ∘ (φ ∘ ![x,y])) = ![D K T (φ x),D K T (φ y)] := by
+    funext i
+    fin_cases i <;> rfl
+  have e := exteriorPullback_d φ 2 ![x,y]
+  rw [l, r] at e
+  exact e
+
+include hu in
+theorem exists_closed_correction (f a : A) (g h : Aˣ) (F : Tˣ)
+    (hf : φ f = (F : T)) (he : (h : A) = (g : A) + a * f) :
+    ∃ η : Form K A 2,
+      exteriorD2 b (exactFrameDirection b) η = 0 ∧
+      exteriorPullback φ 2 η =
+        twoLog (K := K) F (Units.map φ.toRingHom h) - twoLog (K := K) F (Units.map φ.toRingHom g) := by
+  refine ⟨(↑h⁻¹ : A) • wedge (D K A f) (D K A a) -
+        (a * (↑g⁻¹ : A) * (↑h⁻¹ : A)) • wedge (D K A f) (D K A (g : A)),
+    CycleQ2ClosedGeneratorCorrection.closed b u hu f a g h he, ?_⟩
+  have hφ : ((Units.map φ.toRingHom h : Tˣ) : T) = ((Units.map φ.toRingHom g : Tˣ) : T) + φ a * (F : T) := by
+    change φ (h : A) = φ (g : A) + φ a * (F : T)
+    rw [he, map_add, map_mul, hf]
+  rw [twoLog_shear F _ _ (φ a) hφ, map_sub, map_smulₛₗ, map_smulₛₗ,
+    pull_exact_wedge, pull_exact_wedge, hf, map_mul, map_mul]
+  rfl
+
+end CycleQ2ClosedGeneratorWitness
+
+#print axioms CycleQ2ClosedGeneratorWitness.exists_closed_correction
+
+end
+
+section
+
+noncomputable section
+
+namespace CycleQ2NativeGeneratorChange
+
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+open CycleQ2NativeDoubleLocalization KaehlerDifferential Module
+open CycleQ2ClosedGeneratorWitness
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A] (f g h : A)
+
+/-- The two original cochains differ, on their common refinement, by the
+horizontal restriction of a closed two-form on the single open `D(gh)`.
+Its vertical contribution to the total differential is zero. -/
+theorem closed_correction_on_refinement (a : A) (he : h = g + a * f)
+    (b : Basis (Fin 3) (R g h) Ω[R g h⁄K])
+    (u : Fin 3 → R g h) (hu : ∀ i, b i = D K (R g h) (u i)) :
+    ∃ η : Form K (R g h) 2,
+      exteriorD2 b (exactFrameDirection b) η = 0 ∧
+      exteriorPullback (ψ (K := K) f g h) 2 η =
+        exteriorPullback (refinement (K := K) f g h h (dvd_mul_left h g)) 2 (cochain (K := K) f h) -
+        exteriorPullback (refinement (K := K) f g h g (dvd_mul_right g h)) 2 (cochain (K := K) f g) := by
+  have hrel : (hR g h : R g h) = (gR g h : R g h) +
+      algebraMap A (R g h) a * algebraMap A (R g h) f := by
+    rw [hR, gR, IsUnit.unit_spec, IsUnit.unit_spec, ← map_mul, ← map_add, ← he]
+  have hF : ψ (K := K) f g h (algebraMap A (R g h) f) = (F (K := K) f g h : S f g h) :=
+    (ψ_algebra f g h f).trans (F_val f g h).symm
+  obtain ⟨η, hη, hEq⟩ := exists_closed_correction (ψ (K := K) f g h) b u hu
+    (algebraMap A (R g h) f) (algebraMap A (R g h) a) (gR g h) (hR g h) (F (K := K) f g h) hF hrel
+  refine ⟨η,hη,?_⟩
+  rw [refine_cochain f g h h _ (H (K := K) f g h) (H_val f g h),
+    refine_cochain f g h g _ (G (K := K) f g h) (G_val f g h)]
+  exact hEq
+
+end CycleQ2NativeGeneratorChange
+
+#print axioms CycleQ2NativeGeneratorChange.closed_correction_on_refinement
+
+end
+
+end
