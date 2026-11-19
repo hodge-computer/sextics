@@ -238,6 +238,43 @@ primitive. The class with that value and vanishing restriction is still
 to be constructed.
 [Derived localization and the protected form](GeometricMonicGenericSupport.lean)
 
+## Field trace, Laurent residue and the local two-equation lift
+
+Étale cotangent base change defines the ordinary one-form trace over
+finite separable fields by applying the field trace to the scalar factor.
+It agrees after localization with the trace of every regular differential
+on a monic curve chart. In a finite Galois extension its pullback is
+the sum of the ordinary pullbacks by all field automorphisms.
+
+In characteristic zero the derivative of a polar function in a discrete
+valuation ring has one more order of pole. The pullback of a polar
+differential along a ramified valuation remains polar. If a base
+uniformizer maps to a unit times the ((e+1))-st power of a target
+uniformizer, a pole of differential order (m+1) gives order
+((e+1)m+1) on the target. These facts give the local regularity
+tests needed to descend a trace. The descent on the entire proper
+curve remains to be constructed.
+
+The ordinary Laurent cotangent module has frame (dT/T). In this
+frame the two polynomial-chart restrictions have strictly positive
+and strictly negative powers, respectively, and the infinity chart
+has the sign from (Tmapsto T^{-1}). The residue is the constant
+coefficient. It kills exact differentials and identifies the quotient
+by the two chart images.
+
+On a two-equation affine intersection, wedging a one-form with
+(dlog fwedge dlog g) defines a class modulo forms from either
+single localization. Multiplication by one of the equations moves
+the lift into the opposite single localization. The conormal
+differentials themselves vanish by alternation. The map therefore
+descends to the literal intersection's Kähler module. The function
+lift also descends to the literal quotient ring. In an exact
+rank-three frame the ordinary exterior derivative descends through
+the two single-localization images and the two lifts commute with
+the ordinary differential. Globalizing the local classes to the
+proper graph remains open.
+[Field trace and local Gysin calculation](GeometricUniversalWeightedDeRham.lean)
+
 ## Trace of regular differentials in a finite monic chart
 
 For a finite separable field extension with generator \(y\) and minimal

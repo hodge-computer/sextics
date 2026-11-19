@@ -22,6 +22,12 @@ import Mathlib.FieldTheory.Differential.Basic
 import HodgeComputer.Constructions.HoldoutCover.FiniteTrace
 import Mathlib.RingTheory.AdjoinRoot
 import Mathlib.RingTheory.Kaehler.Basic
+import Mathlib.Algebra.Polynomial.Laurent
+import Mathlib.LinearAlgebra.Finsupp.LSum
+import Mathlib.RingTheory.Kaehler.Polynomial
+import Mathlib.RingTheory.DiscreteValuationRing.Basic
+import Mathlib.RingTheory.Etale.Field
+import Mathlib.LinearAlgebra.TensorProduct.Associator
 
 /-!
 # Relative exterior forms on the universal weighted function field
@@ -4390,5 +4396,1576 @@ end CycleQ2ExactFrameFirstDifferential
 
 #print axioms CycleQ2ExactFrameFirstDifferential.onOne_D
 #print axioms CycleQ2ExactFrameFirstDifferential.onOne_natural
+
+end
+
+section
+
+/-!
+# The actual cotangent coordinate on a Laurent chart
+
+The logarithmic derivation multiplies each Laurent coefficient by its
+integer exponent. Its dual exact-normalized form is dT/T. Together they
+identify the full Kähler one-form module and isolate the constant
+coefficient that survives exterior differentiation.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2LaurentLogDerivative
+
+open scoped LaurentPolynomial
+open LaurentPolynomial KaehlerDifferential
+
+variable (k : Type) [Field k]
+
+abbrev L := LaurentPolynomial k
+
+def logDerivativeLinear : L k →ₗ[k] L k :=
+  (Finsupp.lsum k (fun n : ℤ =>
+    (n : k) • (AddMonoidAlgebra.lsingle n : k →ₗ[k] L k))).comp
+      (AddMonoidAlgebra.coeffLinearEquiv k).toLinearMap
+
+private theorem monomial_derivative (n : ℤ) (a : k) :
+    logDerivativeLinear k (C a * T n) = C ((n : k) * a) * T n := by
+  rw [← single_eq_C_mul_T, ← single_eq_C_mul_T]
+  change Finsupp.lsum k (fun i : ℤ =>
+    (i : k) • (AddMonoidAlgebra.lsingle i : k →ₗ[k] L k)) (Finsupp.single n a) = _
+  rw [Finsupp.lsum_single, LinearMap.smul_apply, AddMonoidAlgebra.lsingle_apply,
+    AddMonoidAlgebra.smul_single, smul_eq_mul]
+
+private theorem monomial_mul (n m : ℤ) (a b : k) :
+    (C a * T n : L k) * (C b * T m) = C (a * b) * T (n+m) := by
+  rw [T_add, map_mul]
+  ring
+
+private theorem monomial_add (n : ℤ) (a b : k) :
+    (C a * T n : L k) + (C b * T n) = C (a+b) * T n := by
+  rw [map_add, add_mul]
+
+private theorem logDerivative_leibniz (x y : L k) :
+    logDerivativeLinear k (x*y) = x * logDerivativeLinear k y + y * logDerivativeLinear k x := by
+  induction x using LaurentPolynomial.induction_on' with
+  | add a b ha hb =>
+      rw [add_mul, map_add, ha, hb, map_add]
+      ring
+  | C_mul_T n a =>
+      induction y using LaurentPolynomial.induction_on' with
+      | add b c hb hc =>
+          rw [mul_add, map_add, hb, hc, map_add]
+          ring
+      | C_mul_T m b =>
+          rw [monomial_mul, monomial_derivative, monomial_derivative, monomial_derivative,
+            monomial_mul, monomial_mul, add_comm m n, monomial_add]
+          have h : ((n + m : ℤ) : k) * (a * b) =
+              a * ((m : k) * b) + b * ((n : k) * a) := by
+            rw [Int.cast_add]
+            ring
+          rw [h]
+
+/-- The logarithmic coordinate derivation of the Laurent polynomial ring. -/
+def logDerivative : Derivation k (L k) (L k) :=
+  { toLinearMap := logDerivativeLinear k
+    map_one_eq_zero' := by
+      rw [← T_zero, ← one_mul (T (0 : ℤ) : L k), ← map_one (C : k →+* L k),
+        monomial_derivative]
+      simp
+    leibniz' := logDerivative_leibniz k }
+
+theorem logDerivative_monomial (n : ℤ) (a : k) :
+    logDerivative k (C a * T n) = C ((n : k) * a) * T n :=
+  monomial_derivative k n a
+
+theorem logDerivative_T (n : ℤ) :
+    logDerivative k (T n) = C (n : k) * T n := by
+  simpa only [map_one, one_mul, mul_one] using logDerivative_monomial k n 1
+
+def logForm : Ω[L k⁄k] := (T (-1) : L k) • D k (L k) (T 1)
+
+private theorem D_T (n : ℤ) :
+    D k (L k) (T n) = (C (n : k) * (T n : L k)) • logForm k := by
+  have h_add (m n : ℤ)
+      (hm : D k (L k) (T m) = (C (m : k) * T m) • logForm k)
+      (hn : D k (L k) (T n) = (C (n : k) * T n) • logForm k) :
+      D k (L k) (T (m+n)) = (C ((m+n : ℤ) : k) * T (m+n)) • logForm k := by
+    rw [T_add (R := k), Derivation.leibniz, hm, hn, smul_smul, smul_smul, ← add_smul,
+      Int.cast_add, map_add]
+    congr 1
+    ring
+  have h0 : D k (L k) (T 0) = (C ((0 : ℤ) : k) * T 0) • logForm k := by simp
+  have h1 : D k (L k) (T 1) = (C ((1 : ℤ) : k) * T 1) • logForm k := by
+    rw [logForm, Int.cast_one, (C : k →+* L k).map_one, one_mul, smul_smul, ← T_add (R := k)]
+    simp
+  have hneg : D k (L k) (T (-1)) = (C ((-1 : ℤ) : k) * T (-1)) • logForm k := by
+    have h := (D k (L k)).leibniz (T (-1)) (T 1)
+    rw [← T_add (R := k), show (-1 : ℤ) + 1 = 0 by decide, T_zero, Derivation.map_one_eq_zero] at h
+    have he : (T 1 : L k) • D k (L k) (T (-1)) = - logForm k :=
+      eq_neg_of_add_eq_zero_right h.symm
+    calc
+      D k (L k) (T (-1)) = (T (-1) : L k) • ((T 1 : L k) • D k (L k) (T (-1))) := by
+        rw [smul_smul, ← T_add (R := k), show (-1 : ℤ) + 1 = 0 by decide, T_zero, one_smul]
+      _ = _ := by rw [he, smul_neg, Int.cast_neg, Int.cast_one, map_neg, map_one, neg_mul,
+        one_mul, neg_smul]
+  change D k (L k) (T n) = (C (n : k) * T n) • logForm k
+  induction n using Int.induction_on with
+  | zero => exact h0
+  | succ n hn => exact h_add _ _ hn h1
+  | pred n hn => simpa only [Nat.cast_succ, neg_add, sub_eq_add_neg] using h_add (-(n : ℤ)) (-1) hn hneg
+
+/-- The actual Kähler differential is the Laurent derivation times dT/T. -/
+theorem D_eq (x : L k) :
+    D k (L k) x = logDerivative k x • logForm k := by
+  induction x using LaurentPolynomial.induction_on' with
+  | add a b ha hb => rw [map_add, map_add, ha, hb, add_smul]
+  | C_mul_T n a =>
+    have hC : D k (L k) (C a) = 0 := (D k (L k)).map_algebraMap a
+    rw [Derivation.leibniz, hC, smul_zero, add_zero, D_T k n,
+      logDerivative_monomial, smul_smul]
+    congr 1
+    change C a * (C (n : k) * T n) = C ((n : k) * a) * T n
+    rw [mul_comm (n : k) a, map_mul, mul_assoc]
+
+def logCoordinates : Ω[L k⁄k] ≃ₗ[L k] L k := by
+  let e := (logDerivative k).liftKaehlerDifferential
+  let i := LinearMap.toSpanSingleton (L k) _ (logForm k)
+  have h : e (logForm k) = 1 := by
+    change (logDerivative k).liftKaehlerDifferential ((T (-1) : L k) • D k (L k) (T 1)) = 1
+    rw [map_smul, Derivation.liftKaehlerDifferential_comp_D, logDerivative_T]
+    simp only [Int.cast_one, map_one, one_mul, smul_eq_mul, ← T_add]
+    rfl
+  have ei : e.comp i = LinearMap.id := by
+    apply LinearMap.ext
+    intro a
+    change e (a • logForm k) = a
+    rw [map_smul, h, smul_eq_mul, mul_one]
+  have ie : i.comp e = LinearMap.id := by
+    apply Derivation.liftKaehlerDifferential_unique
+    ext x
+    change (logDerivative k).liftKaehlerDifferential (D k (L k) x) • logForm k = D k (L k) x
+    rw [Derivation.liftKaehlerDifferential_comp_D]
+    exact (D_eq k x).symm
+  exact LinearEquiv.ofLinearMap e i ei ie
+
+end CycleQ2LaurentLogDerivative
+
+#print axioms CycleQ2LaurentLogDerivative.D_eq
+#print axioms CycleQ2LaurentLogDerivative.logCoordinates
+
+end
+
+section
+
+/-!
+# The normalized trace in the two-chart Laurent de Rham complex
+
+In the logarithmic frame the regular one-forms on the zero chart
+have strictly positive exponents. Those on the infinity chart have
+strictly negative exponents, with the sign from the change of
+coordinate. The constant coefficient vanishes on each image and on
+all ordinary derivatives, and is the complete quotient by these
+boundaries.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2LaurentCurveResidue
+
+open scoped Polynomial
+open LaurentPolynomial KaehlerDifferential
+open CycleQ2LaurentLogDerivative (L logDerivative logDerivative_monomial logForm logCoordinates D_eq)
+
+variable (k : Type) [Field k]
+
+/-- The two ordinary restriction maps in the frame dT/T. -/
+def zeroChart : k[X] →ₗ[k] L k :=
+  (LinearMap.mulLeft k (T 1)).comp (Polynomial.toLaurentAlg (R := k)).toLinearMap
+
+def infinityChart : k[X] →ₗ[k] L k :=
+  (LinearMap.mulLeft k (-T (-1))).comp
+    ((invert (R := k)).toLinearMap.comp (Polynomial.toLaurentAlg (R := k)).toLinearMap)
+
+def residue : L k →ₗ[k] k := (Finsupp.lapply 0).comp (AddMonoidAlgebra.coeffLinearEquiv k).toLinearMap
+
+private theorem residue_monomial (n : ℤ) (a : k) :
+    residue k (C a * T n) = if n = 0 then a else 0 := by
+  rw [← single_eq_C_mul_T]
+  exact Finsupp.single_apply
+
+theorem zeroChart_monomial (n : ℕ) (a : k) :
+    zeroChart k (Polynomial.monomial n a) = C a * T ((n : ℤ)+1) := by
+  change T 1 * Polynomial.toLaurent (Polynomial.monomial n a) = _
+  rw [Polynomial.toLaurent_C_mul_T, T_add]
+  ring
+
+theorem infinityChart_monomial (n : ℕ) (a : k) :
+    infinityChart k (Polynomial.monomial n a) = C (-a) * T (-((n : ℤ)+1)) := by
+  change -T (-1) * invert (Polynomial.toLaurent (Polynomial.monomial n a)) = _
+  rw [Polynomial.toLaurent_C_mul_T, map_mul, invert_C, invert_T, neg_add, T_add, map_neg]
+  ring
+
+theorem residue_zeroChart (p : k[X]) : residue k (zeroChart k p) = 0 := by
+  induction p using Polynomial.induction_on' with
+  | add p q hp hq => rw [map_add, map_add, hp, hq, add_zero]
+  | monomial n a => rw [zeroChart_monomial, residue_monomial, if_neg (by omega)]
+
+theorem residue_infinityChart (p : k[X]) : residue k (infinityChart k p) = 0 := by
+  induction p using Polynomial.induction_on' with
+  | add p q hp hq => rw [map_add, map_add, hp, hq, add_zero]
+  | monomial n a => rw [infinityChart_monomial, residue_monomial, if_neg (by omega)]
+
+theorem residue_derivative (p : L k) : residue k (logDerivative k p) = 0 := by
+  induction p using LaurentPolynomial.induction_on' with
+  | add a b ha hb => rw [map_add, map_add, ha, hb, add_zero]
+  | C_mul_T n a =>
+    rw [logDerivative_monomial, residue_monomial]
+    split
+    · subst n
+      simp
+    · rfl
+
+/-- Every Laurent one-form is its residue multiple of dT/T plus
+restrictions of two regular chart one-forms. -/
+theorem residue_decompose (p : L k) :
+    ∃ a b : k[X], p = C (residue k p) + zeroChart k a + infinityChart k b := by
+  induction p using LaurentPolynomial.induction_on' with
+  | add p q hp hq =>
+    obtain ⟨a,b,hab⟩ := hp
+    obtain ⟨c,d,hcd⟩ := hq
+    refine ⟨a+c,b+d,?_⟩
+    calc
+      p + q = (C (residue k p) + zeroChart k a + infinityChart k b) +
+          (C (residue k q) + zeroChart k c + infinityChart k d) := congrArg₂ (· + ·) hab hcd
+      _ = _ := by simp only [map_add]; abel
+  | C_mul_T n a =>
+    rcases lt_trichotomy n 0 with hneg | rfl | hpos
+    · let m := (-n-1).toNat
+      have hm : -((m : ℤ)+1) = n := by dsimp [m]; omega
+      refine ⟨0, Polynomial.monomial m (-a), ?_⟩
+      rw [residue_monomial, if_neg (by omega), map_zero, map_zero, add_zero,
+        zero_add, infinityChart_monomial, neg_neg, hm]
+    · have h := residue_monomial k 0 a
+      simp only [T_zero, mul_one, if_pos rfl] at h
+      exact ⟨0, 0, by simp [h]⟩
+    · let m := (n-1).toNat
+      have hm : (m : ℤ)+1 = n := by dsimp [m]; omega
+      refine ⟨Polynomial.monomial m a, 0, ?_⟩
+      simp only [residue_monomial, if_neg (by omega : n ≠ 0), map_zero, add_zero,
+        zero_add, zeroChart_monomial, hm]
+
+theorem residue_zero_iff_boundary (p : L k) :
+    residue k p = 0 ↔ ∃ a b : k[X], p = zeroChart k a + infinityChart k b := by
+  constructor
+  · intro h
+    obtain ⟨a,b,e⟩ := residue_decompose k p
+    exact ⟨a,b,by simpa only [h,map_zero,zero_add] using e⟩
+  · rintro ⟨a,b,rfl⟩
+    simp only [map_add, residue_zeroChart, residue_infinityChart, add_zero]
+
+end CycleQ2LaurentCurveResidue
+
+#print axioms CycleQ2LaurentCurveResidue.residue_derivative
+#print axioms CycleQ2LaurentCurveResidue.residue_zero_iff_boundary
+
+end
+
+section
+
+/-!
+# The Laurent residue on ordinary Kähler one-forms
+
+The two chart maps are the polynomial-to-Laurent map and its
+composition with inversion. The two ordinary Kähler pullbacks
+have the exact coefficients used by the two-chart residue quotient.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2LaurentKahlerResidue
+
+open scoped Polynomial
+open Polynomial LaurentPolynomial KaehlerDifferential
+open CycleQ2LaurentLogDerivative
+open CycleQ2LaurentCurveResidue
+open CycleQ2ExactFrameThreeDeRham (onePullback onePullback_d)
+
+variable (k : Type) [Field k]
+
+abbrev zeroRingMap : k[X] →ₐ[k] L k := Polynomial.toLaurentAlg
+
+abbrev infinityRingMap : k[X] →ₐ[k] L k :=
+  LaurentPolynomial.invert.toAlgHom.comp (zeroRingMap k)
+
+theorem logCoordinates_D (x : L k) :
+    logCoordinates k (D k (L k) x) = logDerivative k x :=
+  Derivation.liftKaehlerDifferential_comp_D _ _
+
+theorem chartZero_value (ω : Ω[k[X]⁄k]) :
+    logCoordinates k (onePullback (zeroRingMap k) ω) = zeroChart k (polynomialEquiv k ω) := by
+  obtain ⟨a,rfl⟩ := (polynomialEquiv k).symm.surjective ω
+  simp only [LinearEquiv.apply_symm_apply]
+  rw [polynomialEquiv_symm, map_smulₛₗ, onePullback_d, map_smul, logCoordinates_D]
+  have hx : zeroRingMap k (X : k[X]) = T 1 := Polynomial.toLaurent_X
+  rw [hx, logDerivative_T, Int.cast_one, map_one, one_mul]
+  change Polynomial.toLaurent a * T 1 = T 1 * Polynomial.toLaurent a
+  exact mul_comm _ _
+
+theorem chartInfinity_value (ω : Ω[k[X]⁄k]) :
+    logCoordinates k (onePullback (infinityRingMap k) ω) = infinityChart k (polynomialEquiv k ω) := by
+  obtain ⟨a,rfl⟩ := (polynomialEquiv k).symm.surjective ω
+  simp only [LinearEquiv.apply_symm_apply]
+  rw [polynomialEquiv_symm, map_smulₛₗ, onePullback_d, map_smul, logCoordinates_D]
+  have hx : infinityRingMap k (X : k[X]) = T (-1) := by
+    change invert (Polynomial.toLaurent X) = _
+    rw [Polynomial.toLaurent_X, invert_T]
+  rw [hx, logDerivative_T, Int.cast_neg, Int.cast_one, map_neg, map_one, neg_mul, one_mul]
+  change invert (Polynomial.toLaurent a) * (-T (-1)) = _
+  change invert (Polynomial.toLaurent a) * (-T (-1)) = -T (-1) * invert (Polynomial.toLaurent a)
+  exact mul_comm _ _
+
+/-- The ordinary Laurent residue, normalized by dT/T. -/
+def differentialResidue : Ω[L k⁄k] →ₗ[k] k :=
+  (residue k).comp ((logCoordinates k).toLinearMap.restrictScalars k)
+
+theorem differentialResidue_exact (x : L k) :
+    differentialResidue k (D k (L k) x) = 0 := by
+  change residue k (logCoordinates k (D k (L k) x)) = 0
+  rw [logCoordinates_D, residue_derivative]
+
+theorem differentialResidue_zero_chart (ω : Ω[k[X]⁄k]) :
+    differentialResidue k (onePullback (zeroRingMap k) ω) = 0 := by
+  change residue k (logCoordinates k (onePullback (zeroRingMap k) ω)) = 0
+  rw [chartZero_value, residue_zeroChart]
+
+theorem differentialResidue_infinity_chart (ω : Ω[k[X]⁄k]) :
+    differentialResidue k (onePullback (infinityRingMap k) ω) = 0 := by
+  change residue k (logCoordinates k (onePullback (infinityRingMap k) ω)) = 0
+  rw [chartInfinity_value, residue_infinityChart]
+
+end CycleQ2LaurentKahlerResidue
+
+#print axioms CycleQ2LaurentKahlerResidue.chartZero_value
+#print axioms CycleQ2LaurentKahlerResidue.chartInfinity_value
+#print axioms CycleQ2LaurentKahlerResidue.differentialResidue_exact
+
+end
+
+section
+
+/-!
+# A rational primitive of a regular differential has no pole
+
+At a smooth curve valuation in characteristic zero, differentiating
+a pole of positive order gives a pole of one higher order. The leading
+coefficient is a product of units, so there is no cancellation by
+regular terms. This is the local algebraic injectivity input for
+holomorphic differentials of a proper curve.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2CurvePrimitivePole
+
+open IsDiscreteValuationRing
+
+variable {k R F : Type*} [Field k] [CharZero k] [CommRing R] [IsDomain R] [Field F]
+  [Algebra k R] [Algebra k F] [Algebra R F] [IsFractionRing R F]
+  (d : Derivation k R R) (D : Derivation k F F)
+  (hD : ∀ r : R, D (algebraMap R F r) = algebraMap R F (d r))
+  (π : R) (hπ : ¬ IsUnit π) (hδ : d π = 1)
+
+private theorem cast_nat_isUnit (k₀ : Type*) [Field k₀] [CharZero k₀] [Algebra k₀ R]
+    (n : ℕ) (hn : n ≠ 0) : IsUnit (n : R) := by
+  have h : IsUnit (n : k₀) := isUnit_iff_ne_zero.mpr (Nat.cast_ne_zero.mpr hn)
+  simpa only [map_natCast] using h.map (algebraMap k₀ R)
+
+include hD hπ hδ in
+theorem derivative_not_regular_of_pole (m : ℕ) (u : Rˣ) (z : F)
+    (hz : (algebraMap R F π) ^ (m+1) * z = algebraMap R F ↑u) :
+    ¬ ∃ r : R, D z = algebraMap R F r := by
+  rintro ⟨r, hr⟩
+  let t := algebraMap R F π
+  have ht : D t = 1 := by simp only [t, hD, hδ, map_one]
+  have hp : D (t ^ (m+1)) = (m+1 : F) * t ^ m := by
+    rw [Derivation.leibniz_pow, ht, smul_eq_mul, mul_one]
+    simp only [Nat.add_sub_cancel, nsmul_eq_mul, Nat.cast_add, Nat.cast_one]
+  have he := congrArg D hz
+  change D (t ^ (m+1) * z) = D (algebraMap R F ↑u) at he
+  rw [Derivation.leibniz, hp, hr, hD] at he
+  simp only [smul_eq_mul] at he
+  have hf : ((m+1 : F) * algebraMap R F ↑u) =
+      t * (algebraMap R F (d ↑u) - t^(m+1) * algebraMap R F r) := by
+    have hm : t * (z * ((m+1 : F) * t ^ m)) = (m+1 : F) * algebraMap R F ↑u := by
+      rw [← hz, pow_succ]
+      change (algebraMap R F π) * _ = _
+      ring
+    rw [← hm, ← he]
+    ring
+  have hg : ((m+1 : R) * (u : R)) = π * (d ↑u - π^(m+1) * r) := by
+    apply IsFractionRing.injective R F
+    simpa only [t, map_mul, map_sub, map_pow, map_add, map_one, map_natCast] using hf
+  have hu : IsUnit ((m+1 : R) * (u : R)) := by
+    simpa only [Nat.cast_succ] using
+      (cast_nat_isUnit (R := R) k (m+1) (Nat.succ_ne_zero _)).mul u.isUnit
+  have hd : π ∣ ((m+1 : R) * (u : R)) := ⟨_, hg⟩
+  exact hπ (isUnit_iff_dvd_one.mpr (hd.trans (isUnit_iff_dvd_one.mp hu)))
+
+include hD hδ in
+/-- A derivation with a unit coordinate uniformizer detects every pole in
+the fraction field of a characteristic-zero curve local ring. -/
+theorem regular_of_derivative_regular [IsDiscreteValuationRing R] (hπ' : Irreducible π)
+    (z : F) (h : ∃ r : R, D z = algebraMap R F r) :
+    ∃ r : R, z = algebraMap R F r := by
+  by_cases hz : z = 0
+  · exact ⟨0, hz.trans (map_zero _).symm⟩
+  obtain ⟨n,u,hu⟩ := exists_units_eq_smul_zpow_of_irreducible (K := F) hπ' hz
+  cases n with
+  | ofNat n =>
+    refine ⟨(u : R) * π^n, ?_⟩
+    simpa only [Int.ofNat_eq_natCast, zpow_natCast, Units.smul_def, Algebra.smul_def, map_mul, map_pow] using hu
+  | negSucc m =>
+    exfalso
+    apply derivative_not_regular_of_pole d D hD π hπ'.not_isUnit hδ m u z _ h
+    have ht : algebraMap R F π ≠ 0 := by
+      simpa only [map_zero] using (IsFractionRing.injective R F).ne hπ'.ne_zero
+    rw [hu, zpow_negSucc]
+    simp only [Algebra.smul_def, Units.smul_def]
+    field_simp
+
+end CycleQ2CurvePrimitivePole
+
+#print axioms CycleQ2CurvePrimitivePole.regular_of_derivative_regular
+
+end
+
+section
+
+/-!
+# Regularity of a rational curve differential descends through ramification
+
+For a tame valuation map, a uniformizer maps to a unit times a
+positive power of the target uniformizer. The pullback of a pole
+of a differential still has a pole. This will allow descent of the
+sum of conjugate regular differentials along a finite map, including
+at ramified places.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2RamifiedCurveRegularity
+
+open IsDiscreteValuationRing
+
+section Local
+
+variable {k S : Type*} [Field k] [CharZero k] [CommRing S] [IsDomain S]
+  [IsLocalRing S] [Algebra k S] (δ : Derivation k S S)
+  (σ : S) (hσ : Irreducible σ) (hδ : δ σ = 1)
+
+private theorem constant_isUnit (k' : Type*) [Field k'] [CharZero k'] [Algebra k' S] (e : ℕ) :
+    IsUnit ((e+1 : ℕ) : S) := by
+  have h : IsUnit ((e+1 : ℕ) : k') :=
+    isUnit_iff_ne_zero.mpr (Nat.cast_ne_zero.mpr (Nat.succ_ne_zero e))
+  simpa only [map_natCast] using h.map (algebraMap k' S)
+
+include hσ in
+private theorem leading_isUnit (e : ℕ) (u : Sˣ) :
+    IsUnit ((((e+1 : ℕ) : S) * (u : S)) + σ * δ u) := by
+  let a : S := ((e+1 : ℕ) : S) * (u : S)
+  let b : S := σ * δ u
+  have ha : IsUnit a := (constant_isUnit k e).mul u.isUnit
+  have hb : ¬ IsUnit b := fun h => hσ.not_isUnit (isUnit_of_mul_isUnit_left h)
+  by_contra hn
+  have hc : IsUnit ((a+b) + -b) := by simpa using ha
+  rcases IsLocalRing.isUnit_or_isUnit_of_isUnit_add hc with h | h
+  · exact hn h
+  · exact hb (by simpa only [neg_neg] using h.neg)
+
+include hδ in
+theorem derivative_uniformizer_power (e : ℕ) (u : Sˣ) :
+    δ ((u : S) * σ^(e+1)) = σ^e * ((((e+1 : ℕ) : S) * (u : S)) + σ * δ u) := by
+  rw [Derivation.leibniz, Derivation.leibniz_pow, hδ]
+  simp only [smul_eq_mul, nsmul_eq_mul, Nat.add_sub_cancel, mul_one, pow_succ]
+  ring
+
+variable {E : Type*} [Field E] [Algebra S E] [IsFractionRing S E]
+
+include hσ hδ in
+/-- The coefficient obtained by pulling back a polar differential cannot
+be regular on the target valuation ring. -/
+theorem not_regular_pulled_coefficient (e m : ℕ) (u w : Sˣ) (z : E)
+    (hz : (algebraMap S E ((u : S) * σ^(e+1)))^(m+1) * z = algebraMap S E ↑w) :
+    ¬ ∃ r : S, z * algebraMap S E (δ ((u : S) * σ^(e+1))) = algebraMap S E r := by
+  rintro ⟨r, hr⟩
+  let l := ((e+1 : ℕ) : S) * (u : S) + σ * δ u
+  have hl : IsUnit l := leading_isUnit δ σ hσ e u
+  have he : algebraMap S E (((u : S) * σ^(e+1))^(m+1) * r) =
+      algebraMap S E ((w : S) * σ^e * l) := by
+    rw [map_mul, map_pow, ← hr, ← mul_assoc, hz, derivative_uniformizer_power δ σ hδ]
+    change algebraMap S E (w : S) * algebraMap S E (σ^e * l) = algebraMap S E ((w : S) * σ^e * l)
+    rw [map_mul, map_mul, map_mul, mul_assoc]
+  have hs := (IsFractionRing.injective S E) he
+  have hpow : (e+1)*(m+1) = e + ((e+1)*m + 1) := by ring
+  rw [mul_pow, ← pow_mul, hpow, pow_add] at hs
+  have hcancel :
+      σ^e * ((u : S)^(m+1) * σ^((e+1)*m + 1) * r) = σ^e * ((w : S) * l) := by
+    convert hs using 1 <;> ring
+  have hfinal := mul_left_cancel₀ (pow_ne_zero _ hσ.ne_zero) hcancel
+  have hdiv : σ ∣ (w : S) * l := by
+    rw [← hfinal, pow_succ]
+    exact ⟨(u : S)^(m+1) * σ^((e+1)*m) * r, by ring⟩
+  exact hσ.not_isUnit (isUnit_iff_dvd_one.mpr
+    (hdiv.trans (isUnit_iff_dvd_one.mp (w.isUnit.mul hl))))
+
+end Local
+
+end CycleQ2RamifiedCurveRegularity
+
+#print axioms CycleQ2RamifiedCurveRegularity.not_regular_pulled_coefficient
+
+end
+
+section
+
+/-!
+# Descent at the original ramified valuation
+
+In a commutative square of fraction fields and discrete valuation
+rings, a regular coefficient of the pulled differential forces a
+regular coefficient on the base. The proof treats every possible
+integer pole order of the base coefficient.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2TameCoefficientDescent
+
+open IsDiscreteValuationRing CycleQ2RamifiedCurveRegularity
+
+variable {k R S F E : Type*} [Field k] [CharZero k]
+  [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+  [CommRing S] [IsDomain S] [IsLocalRing S] [Algebra k S]
+  [Field F] [Field E] [Algebra R F] [IsFractionRing R F] [Algebra S E] [IsFractionRing S E]
+  (i : R →+* S) (j : F →+* E)
+  (hsq : ∀ r : R, j (algebraMap R F r) = algebraMap S E (i r))
+  (π : R) (hπ : Irreducible π)
+  (σ : S) (hσ : Irreducible σ)
+  (δ : Derivation k S S) (hδ : δ σ = 1)
+  (e : ℕ) (u : Sˣ) (hπσ : i π = (u : S) * σ^(e+1))
+
+include hsq hπ hσ hδ hπσ in
+theorem descends (z : F) (h : ∃ r : S, j z * algebraMap S E (δ (i π)) = algebraMap S E r) :
+    ∃ v : R, z = algebraMap R F v := by
+  by_cases hz : z = 0
+  · exact ⟨0, hz.trans (map_zero _).symm⟩
+  obtain ⟨n,w,hw⟩ := exists_units_eq_smul_zpow_of_irreducible (K := F) hπ hz
+  cases n with
+  | ofNat n =>
+    refine ⟨(w : R) * π^n, ?_⟩
+    simpa only [Int.ofNat_eq_natCast, zpow_natCast, Units.smul_def, Algebra.smul_def, map_mul, map_pow] using hw
+  | negSucc m =>
+    exfalso
+    have hπF : algebraMap R F π ≠ 0 := by
+      simpa only [map_zero] using (IsFractionRing.injective R F).ne hπ.ne_zero
+    have he : (algebraMap R F π)^(m+1) * z = algebraMap R F (w : R) := by
+      rw [hw, zpow_negSucc]
+      simp only [Units.smul_def, Algebra.smul_def]
+      field_simp
+    have hi := congrArg j he
+    rw [map_mul, map_pow, hsq, hsq, hπσ] at hi
+    have hp := not_regular_pulled_coefficient δ σ hσ hδ e m u (Units.map i.toMonoidHom w) (j z) hi
+    exact hp (by simpa only [hπσ] using h)
+
+end CycleQ2TameCoefficientDescent
+
+#print axioms CycleQ2TameCoefficientDescent.descends
+
+end
+
+section
+
+/-!
+# The canonical trace of Kähler one-forms over finite separable fields
+
+Étale cotangent base change identifies the extended cotangent space
+with a scalar extension. Applying the ordinary field trace to the
+scalar tensor factor defines the trace without a choice of a generator
+or of a cotangent coordinate.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2FiniteFieldOneFormTrace
+
+open Algebra KaehlerDifferential TensorProduct
+
+variable {k K L : Type*} [CommRing k] [Field K] [Field L]
+  [Algebra k K] [Algebra k L] [Algebra K L] [IsScalarTower k K L]
+  [FiniteDimensional K L] [Algebra.IsSeparable K L]
+
+local instance : Algebra.FormallyEtale K L := Algebra.FormallyEtale.of_isSeparable K L
+
+private abbrev cotangent := tensorKaehlerEquivOfFormallyEtale k K L
+
+def traceOne : Ω[L⁄k] →ₗ[K] Ω[K⁄k] :=
+  let e := ((cotangent (k := k) (K := K) (L := L)).symm.toLinearMap).restrictScalars K
+  let a : L ⊗[K] Ω[K⁄k] →ₗ[K] K ⊗[K] Ω[K⁄k] :=
+    TensorProduct.map (Algebra.trace K L) (LinearMap.id : Ω[K⁄k] →ₗ[K] Ω[K⁄k])
+  (TensorProduct.lid K Ω[K⁄k]).toLinearMap.comp (a.comp e)
+
+theorem traceOne_smul (a : L) (ω : Ω[K⁄k]) :
+    traceOne (k := k) (a • KaehlerDifferential.map k k K L ω) = Algebra.trace K L a • ω := by
+  have h : (cotangent (k := k) (K := K) (L := L)).symm (a • KaehlerDifferential.map k k K L ω)
+      = a ⊗ₜ[K] ω := by
+    rw [LinearEquiv.symm_apply_eq, tensorKaehlerEquivOfFormallyEtale_apply, mapBaseChange_tmul]
+  change TensorProduct.lid K Ω[K⁄k]
+    (TensorProduct.map (Algebra.trace K L) (LinearMap.id : Ω[K⁄k] →ₗ[K] Ω[K⁄k])
+      ((cotangent (k := k) (K := K) (L := L)).symm (a • KaehlerDifferential.map k k K L ω))) = _
+  rw [h, TensorProduct.map_tmul, LinearMap.id_apply, TensorProduct.lid_tmul]
+
+
+variable (dK : Derivation k K K) (dL : Derivation k L L)
+  (h : ∀ x : K, dL (algebraMap K L x) = algebraMap K L (dK x))
+
+include h in
+private theorem evaluate_base (ω : Ω[K⁄k]) :
+    dL.liftKaehlerDifferential (KaehlerDifferential.map k k K L ω) =
+      algebraMap K L (dK.liftKaehlerDifferential ω) := by
+  let f := (dL.liftKaehlerDifferential.restrictScalars K).comp (KaehlerDifferential.map k k K L)
+  let g := (Algebra.linearMap K L).comp dK.liftKaehlerDifferential
+  have e : f = g := by
+    apply Derivation.liftKaehlerDifferential_unique
+    ext x
+    change dL.liftKaehlerDifferential (KaehlerDifferential.map k k K L (D k K x)) =
+      algebraMap K L (dK.liftKaehlerDifferential (D k K x))
+    rw [KaehlerDifferential.map_D, Derivation.liftKaehlerDifferential_comp_D,
+      Derivation.liftKaehlerDifferential_comp_D]
+    exact h x
+  exact DFunLike.congr_fun e ω
+
+include h in
+/-- Applying a base cotangent functional after the canonical field trace
+is the same as tracing its unique lifted evaluation. -/
+theorem traceOne_evaluate (ω : Ω[L⁄k]) :
+    dK.liftKaehlerDifferential (traceOne (k := k) (K := K) ω) =
+      Algebra.trace K L (dL.liftKaehlerDifferential ω) := by
+  obtain ⟨v,rfl⟩ := (cotangent (k := k) (K := K) (L := L)).surjective ω
+  induction v using TensorProduct.induction_on with
+  | zero => simp
+  | add x y hx hy => simp only [map_add, hx, hy]
+  | tmul a η =>
+    rw [tensorKaehlerEquivOfFormallyEtale_apply, mapBaseChange_tmul,
+      traceOne_smul, map_smul, map_smul, evaluate_base dK dL h]
+    change Algebra.trace K L a * dK.liftKaehlerDifferential η =
+      Algebra.trace K L (a * algebraMap K L (dK.liftKaehlerDifferential η))
+    rw [mul_comm a, ← Algebra.smul_def, map_smul, smul_eq_mul, mul_comm]
+
+end CycleQ2FiniteFieldOneFormTrace
+
+#print axioms CycleQ2FiniteFieldOneFormTrace.traceOne_smul
+#print axioms CycleQ2FiniteFieldOneFormTrace.traceOne_evaluate
+
+end
+
+section
+
+/-!
+# Comparison of a regular monic chart trace with the canonical field trace
+
+After pulling into the fraction fields, the regular trace on a curve
+chart agrees with the canonical tensor trace. In particular its value
+is determined by the original differential and the finite field map,
+independently of the monic generator and of the chart coordinate.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2MonogenicTraceComparison
+
+open Algebra Polynomial Differential KaehlerDifferential
+open CycleQ2MonogenicIntegralTrace CycleQ2MonogenicTraceOneForms
+open CycleQ2ExactFrameThreeDeRham (onePullback onePullback_d)
+
+variable {k R K L : Type} [CommRing k] [CommRing R] [IsDomain R] [Field K] [Field L]
+  [Algebra k R] [Algebra k K] [Algebra k L] [Algebra R K] [Algebra R L] [Algebra K L]
+  [IsScalarTower k R K] [IsScalarTower k R L] [IsScalarTower k K L] [IsScalarTower R K L]
+  (b : PowerBasis K L) (f : R[X]) (hf : f.Monic)
+  (hmin : f.map (algebraMap R K) = minpoly K b.gen)
+  (dL : Derivation k L L)
+
+abbrev chartMap : Chart f →ₐ[k] L := (evaluate b f hmin).restrictScalars k
+
+abbrev baseMap : R →ₐ[k] K := IsScalarTower.toAlgHom k R K
+
+/-- The monogenic functional is exactly evaluation in the field, followed by field trace. -/
+theorem rational_eq_field_evaluation (ω : Ω[Chart f⁄k]) :
+    rationalFunctional b f hmin dL ω =
+      Algebra.trace K L (dL.liftKaehlerDifferential (onePullback (chartMap b f hmin) ω)) := by
+  let S := Chart f
+  have hw : ω ∈ Submodule.span S (Set.range (D k S)) := by
+    rw [span_range_derivation]
+    trivial
+  have hs (ω : Ω[S⁄k]) (hw : ω ∈ Submodule.span S (Set.range (D k S))) :
+      ∀ a : S, rationalFunctional b f hmin dL (a • ω) =
+        Algebra.trace K L (dL.liftKaehlerDifferential
+          (onePullback (chartMap b f hmin) (a • ω))) := by
+    induction hw using Submodule.span_induction with
+    | mem ω hω =>
+      obtain ⟨s,rfl⟩ := hω
+      intro a
+      rw [rationalFunctional_smul_D, map_smulₛₗ, onePullback_d, map_smul,
+        Derivation.liftKaehlerDifferential_comp_D]
+      rfl
+    | zero => intro a; simp only [smul_zero, map_zero]
+    | add x y _ _ hx hy =>
+      intro a
+      simp only [smul_add, map_add, hx a, hy a]
+    | smul a x _ hx =>
+      intro c
+      rw [smul_smul]
+      exact hx (c * a)
+  simpa only [one_smul] using hs ω hw 1
+
+variable [Differential R] [Differential L] [DifferentialAlgebra R L]
+  [FiniteDimensional K L] [Algebra.IsSeparable K L]
+  (hd : ∀ x, dL x = Differential.deriv x)
+  (hinj : Function.Injective (algebraMap R K))
+  (dK : Derivation k K K)
+  (hcompat : ∀ x, dL (algebraMap K L x) = algebraMap K L (dK x))
+
+include hcompat in
+/-- On the fraction chart the descended regular trace is the canonical
+trace of the regular differential, for any trivialization of the base line. -/
+theorem regularTrace_eq_fieldTrace
+    (η : Ω[R⁄k]) (hη : dK.liftKaehlerDifferential (onePullback (baseMap (k := k) (R := R) (K := K)) η) = 1)
+    (hcoord : Function.Injective dK.liftKaehlerDifferential) (ω : Ω[Chart f⁄k]) :
+    CycleQ2FiniteFieldOneFormTrace.traceOne (onePullback (chartMap b f hmin) ω) =
+      onePullback (baseMap (k := k) (R := R) (K := K))
+        (CycleQ2MonogenicCurveTrace.traceOne b f hf hmin dL hd hinj η ω) := by
+  apply hcoord
+  rw [CycleQ2FiniteFieldOneFormTrace.traceOne_evaluate dK dL hcompat,
+    ← rational_eq_field_evaluation b f hmin dL,
+    CycleQ2MonogenicCurveTrace.traceOne_apply, map_smulₛₗ, map_smul, hη, smul_eq_mul, mul_one]
+  exact (regularFunctional_apply b f hf hmin dL hd hinj ω).symm
+
+end CycleQ2MonogenicTraceComparison
+
+#print axioms CycleQ2MonogenicTraceComparison.regularTrace_eq_fieldTrace
+
+end
+
+section
+
+/-!
+# The differential trace is the sum of the Galois pullbacks
+
+For a finite Galois extension the canonical trace on actual Kähler
+one-forms becomes the sum of the pullbacks by all field automorphisms
+after scalar extension. This is the identity needed to prove
+regularity of the trace by descent through ramification.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2GaloisDifferentialTrace
+
+open Algebra KaehlerDifferential TensorProduct
+open CycleQ2ExactFrameThreeDeRham (onePullback onePullback_d)
+open CycleQ2FiniteFieldOneFormTrace (traceOne traceOne_smul)
+
+variable {k K L : Type} [CommRing k] [Field K] [Field L]
+  [Algebra k K] [Algebra k L] [Algebra K L] [IsScalarTower k K L]
+  [FiniteDimensional K L] [IsGalois K L]
+
+local instance : Algebra.FormallyEtale K L := Algebra.FormallyEtale.of_isSeparable K L
+
+private abbrev cotangentMap := KaehlerDifferential.map k k K L
+
+private abbrev act (σ : L ≃ₐ[K] L) :
+    Ω[L⁄k] →ₛₗ[σ.toRingHom] Ω[L⁄k] := onePullback (σ.toAlgHom.restrictScalars k)
+
+private theorem act_fixes_base (σ : L ≃ₐ[K] L) (ω : Ω[K⁄k]) :
+    act (k := k) σ (cotangentMap (k := k) (K := K) (L := L) ω) = cotangentMap ω := by
+  have h : ω ∈ Submodule.span K (Set.range (D k K)) := by
+    rw [span_range_derivation]
+    trivial
+  induction h using Submodule.span_induction with
+  | mem x hx =>
+    obtain ⟨a,rfl⟩ := hx
+    rw [KaehlerDifferential.map_D]
+    erw [onePullback_d]
+    exact congrArg (D k L) (σ.commutes a)
+  | zero => simp only [map_zero]
+  | add x y _ _ hx hy => simp only [map_add, hx, hy]
+  | smul a x _ hx =>
+    rw [map_smul, ← IsScalarTower.algebraMap_smul L, map_smulₛₗ, hx]
+    change σ (algebraMap K L a) • cotangentMap x = (algebraMap K L a) • cotangentMap x
+    rw [σ.commutes]
+
+theorem trace_eq_sum_pullbacks (ω : Ω[L⁄k]) :
+    cotangentMap (k := k) (K := K) (L := L) (traceOne ω) =
+      ∑ σ : L ≃ₐ[K] L, act (k := k) σ ω := by
+  classical
+  obtain ⟨v,rfl⟩ := (tensorKaehlerEquivOfFormallyEtale k K L).surjective ω
+  induction v using TensorProduct.induction_on with
+  | zero => simp only [map_zero, Finset.sum_const_zero]
+  | add x y hx hy => simp only [map_add, hx, hy, Finset.sum_add_distrib]
+  | tmul a η =>
+    rw [tensorKaehlerEquivOfFormallyEtale_apply, mapBaseChange_tmul, traceOne_smul, map_smul,
+      ← IsScalarTower.algebraMap_smul L, trace_eq_sum_automorphisms]
+    rw [Finset.sum_smul]
+    apply Finset.sum_congr rfl
+    intro σ _
+    rw [map_smulₛₗ, act_fixes_base]
+    rfl
+
+end CycleQ2GaloisDifferentialTrace
+
+#print axioms CycleQ2GaloisDifferentialTrace.trace_eq_sum_pullbacks
+
+end
+
+section
+
+/-!
+# Three exterior factors with separate insertion maps
+
+The maps below are the ordinary alternating exterior product. They
+give linear insertion in the third slot, scalar rules in the other
+slots, and the positive sign for cyclic permutation.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2TripleWedge
+
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+open CycleQ2GeometricExteriorSheaf (exteriorMap_wedge)
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A]
+
+def wedge (x y z : Ω[A⁄K]) : Form K A 3 := exteriorPower.ιMulti A 3 ![x,y,z]
+
+def insert (x y : Ω[A⁄K]) : Ω[A⁄K] →ₗ[A] Form K A 3 where
+  toFun z := wedge x y z
+  map_add' u v :=
+    (((exteriorPower.ιMulti A 3).curryLeft x).curryLeft y).map_vecCons_add ![] u v
+  map_smul' a u :=
+    (((exteriorPower.ιMulti A 3).curryLeft x).curryLeft y).map_vecCons_smul ![] a u
+
+@[simp]
+theorem smul_first (a : A) (x y z : Ω[A⁄K]) :
+    wedge (a • x) y z = a • wedge x y z :=
+  (exteriorPower.ιMulti A 3).map_vecCons_smul ![y,z] a x
+
+@[simp]
+theorem smul_second (a : A) (x y z : Ω[A⁄K]) :
+    wedge x (a • y) z = a • wedge x y z :=
+  ((exteriorPower.ιMulti A 3).curryLeft x).map_vecCons_smul ![z] a y
+
+@[simp]
+theorem smul_third (a : A) (x y z : Ω[A⁄K]) :
+    wedge x y (a • z) = a • wedge x y z :=
+  (insert x y).map_smul a z
+
+@[simp]
+theorem add_first (x y w z : Ω[A⁄K]) :
+    wedge (x + y) w z = wedge x w z + wedge y w z :=
+  (exteriorPower.ιMulti A 3).map_vecCons_add ![w,z] x y
+
+@[simp]
+theorem repeat_first (x y : Ω[A⁄K]) : wedge x y x = 0 :=
+  (exteriorPower.ιMulti A 3).map_eq_zero_of_eq ![x,y,x] (by rfl : ![x,y,x] (0 : Fin 3) = ![x,y,x] 2) (by decide)
+
+@[simp]
+theorem repeat_second (x y : Ω[A⁄K]) : wedge x y y = 0 :=
+  (exteriorPower.ιMulti A 3).map_eq_zero_of_eq ![x,y,y] (by rfl : ![x,y,y] (1 : Fin 3) = ![x,y,y] 2) (by decide)
+
+@[simp]
+theorem repeat_early (x y : Ω[A⁄K]) : wedge x x y = 0 :=
+  (exteriorPower.ιMulti A 3).map_eq_zero_of_eq ![x,x,y] (by rfl : ![x,x,y] (0 : Fin 3) = ![x,x,y] 1) (by decide)
+
+theorem swap_first_second (x y z : Ω[A⁄K]) : wedge y x z = -wedge x y z := by
+  have h : ![y,x,z] = ![x,y,z] ∘ Equiv.swap (0 : Fin 3) 1 := by funext i; fin_cases i <;> rfl
+  unfold wedge
+  rw [h, AlternatingMap.map_swap _ _ (by decide : (0 : Fin 3) ≠ 1)]
+
+theorem swap_second_third (x y z : Ω[A⁄K]) : wedge x z y = -wedge x y z := by
+  have h : ![x,z,y] = ![x,y,z] ∘ Equiv.swap (1 : Fin 3) 2 := by funext i; fin_cases i <;> rfl
+  unfold wedge
+  rw [h, AlternatingMap.map_swap _ _ (by decide : (1 : Fin 3) ≠ 2)]
+
+theorem cyclic (x y z : Ω[A⁄K]) : wedge z x y = wedge x y z := by
+  rw [swap_first_second x z y, swap_second_third x y z, neg_neg]
+
+variable {B : Type} [CommRing B] [Algebra K B]
+
+theorem natural (φ : A →ₐ[K] B) (x y z : Ω[A⁄K]) :
+    exteriorPullback φ 3 (wedge x y z) =
+      wedge (onePullback φ x) (onePullback φ y) (onePullback φ z) := by
+  unfold wedge exteriorPullback
+  rw [exteriorMap_wedge]
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+end CycleQ2TripleWedge
+
+#print axioms CycleQ2TripleWedge.natural
+#print axioms CycleQ2TripleWedge.cyclic
+
+end
+
+section
+
+/-!
+# The ordinary cotangent quotient for an arbitrary ideal
+
+The equation submodule and its exact differentials give precisely the
+relations needed for the Kähler module of the quotient. This version
+applies to two-equation complete intersections without choosing a
+generator for their ideal.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2IdealCotangentQuotient
+
+open Module KaehlerDifferential
+
+variable {k A : Type} [CommRing k] [CommRing A] [Algebra k A] (I : Ideal A)
+
+abbrev Q := A ⧸ I
+
+def conormal : Submodule A Ω[A⁄k] :=
+  I • ⊤ ⊔ Submodule.span A (D k A '' (I : Set A))
+
+abbrev M := Ω[A⁄k] ⧸ conormal (k := k) I
+
+private abbrev toQ := Ideal.Quotient.mk I
+private abbrev toM := (conormal (k := k) I).mkQ
+
+theorem smul_mem (a : A) (ha : a ∈ I) (ω : Ω[A⁄k]) : a • ω ∈ conormal (k := k) I :=
+  Submodule.mem_sup_left (Submodule.smul_mem_smul ha (Submodule.mem_top : ω ∈ ⊤))
+
+theorem differential_mem (a : A) (ha : a ∈ I) : D k A a ∈ conormal (k := k) I :=
+  Submodule.mem_sup_right (Submodule.subset_span ⟨a,ha,rfl⟩)
+
+private theorem torsion : Module.IsTorsionBySet A (M (k := k) I) I :=
+  (Module.isTorsionBySet_quotient_iff _ _).mpr (fun ω a ha => smul_mem I a ha ω)
+
+local instance : Module (Q I) (M (k := k) I) := (torsion (k := k) I).module
+local instance : IsScalarTower A (Q I) (M (k := k) I) := (torsion (k := k) I).isScalarTower
+local instance : IsScalarTower k (Q I) (M (k := k) I) := (torsion (k := k) I).isScalarTower
+
+private def derivationAdd : Q I →+ M (k := k) I :=
+  QuotientAddGroup.lift I.toAddSubgroup
+    ((toM (k := k) I).toAddMonoidHom.comp (D k A).toLinearMap.toAddMonoidHom) (by
+      intro a ha
+      exact (Submodule.Quotient.mk_eq_zero _).mpr (differential_mem I a ha))
+
+private theorem derivationAdd_mk (a : A) :
+    derivationAdd (k := k) I (toQ I a) = toM (k := k) I (D k A a) := rfl
+
+private def derivation : Derivation k (Q I) (M (k := k) I) where
+  toFun := derivationAdd I
+  map_add' := (derivationAdd I).map_add
+  map_one_eq_zero' := by
+    change derivationAdd (k := k) I (toQ I 1) = 0
+    rw [derivationAdd_mk, Derivation.map_one_eq_zero, map_zero]
+  map_smul' c x := by
+    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+    have h : c • toQ I a = toQ I (c • a) := ((Ideal.Quotient.mkₐ k I).toLinearMap.map_smul c a).symm
+    rw [RingHom.id_apply, h, derivationAdd_mk, derivationAdd_mk, (D k A).map_smul,
+      (toM (k := k) I).map_smul_of_tower]
+  leibniz' x y := by
+    obtain ⟨a,rfl⟩ := Ideal.Quotient.mk_surjective x
+    obtain ⟨b,rfl⟩ := Ideal.Quotient.mk_surjective y
+    change derivationAdd (k := k) I (toQ I a * toQ I b) =
+      a • derivationAdd (k := k) I (toQ I b) + b • derivationAdd (k := k) I (toQ I a)
+    rw [← map_mul, derivationAdd_mk, derivationAdd_mk, derivationAdd_mk, Derivation.leibniz,
+      map_add, map_smul, map_smul]
+
+private abbrev quotientMap : Ω[A⁄k] →ₗ[A] Ω[Q I⁄k] := KaehlerDifferential.map k k A (Q I)
+
+private theorem quotientMap_kills_conormal :
+    conormal (k := k) I ≤ LinearMap.ker (quotientMap (k := k) I) := by
+  rw [conormal, sup_le_iff, Submodule.span_le]
+  constructor
+  · intro ω hω
+    refine Submodule.smul_induction_on hω ?_ ?_
+    · intro a ha b _
+      have he : algebraMap A (Q I) a = 0 := (Ideal.Quotient.eq_zero_iff_mem).mpr ha
+      apply LinearMap.mem_ker.mpr
+      rw [map_smul, ← IsScalarTower.algebraMap_smul (Q I), he, zero_smul]
+    · exact fun _ _ => Submodule.add_mem _
+  · rintro _ ⟨a,ha,rfl⟩
+    have he : algebraMap A (Q I) a = 0 := (Ideal.Quotient.eq_zero_iff_mem).mpr ha
+    exact LinearMap.mem_ker.mpr (by rw [KaehlerDifferential.map_D, he, map_zero])
+
+private def inverse : Ω[Q I⁄k] →ₗ[A] M (k := k) I :=
+  (derivation (k := k) I).liftKaehlerDifferential.restrictScalars A
+
+private theorem inverse_comp :
+    (inverse (k := k) I).comp (quotientMap (k := k) I) = toM I := by
+  apply Derivation.liftKaehlerDifferential_unique
+  ext a
+  change inverse (k := k) I (quotientMap I (D k A a)) = _
+  rw [KaehlerDifferential.map_D]
+  change (derivation (k := k) I).liftKaehlerDifferential (D k (Q I) (toQ I a)) = _
+  rw [Derivation.liftKaehlerDifferential_comp_D]
+  rfl
+
+def cotangentEquiv : M (k := k) I ≃ₗ[A] Ω[Q I⁄k] := by
+  apply LinearEquiv.ofBijective ((conormal (k := k) I).liftQ (quotientMap I) (quotientMap_kills_conormal I))
+  constructor
+  · apply Function.LeftInverse.injective (g := inverse I)
+    intro x
+    obtain ⟨ω,rfl⟩ := (conormal (k := k) I).mkQ_surjective x
+    change (inverse I).comp (quotientMap I) ω = toM I ω
+    rw [inverse_comp]
+  · intro ω
+    obtain ⟨α,rfl⟩ := KaehlerDifferential.map_surjective_of_surjective k k A (Q I)
+      Ideal.Quotient.mk_surjective ω
+    exact ⟨toM I α,rfl⟩
+
+theorem cotangentEquiv_mk (ω : Ω[A⁄k]) :
+    cotangentEquiv (k := k) I (toM I ω) = quotientMap I ω := rfl
+
+end CycleQ2IdealCotangentQuotient
+
+#print axioms CycleQ2IdealCotangentQuotient.cotangentEquiv
+
+end
+
+section
+
+/-!
+# The logarithmic lift of one-forms on a two-equation affine piece
+
+The lift wedges an ordinary one-form with the two logarithmic
+differentials. Multiplication by either equation places its image in
+the other single localization. The conormal differentials themselves
+are killed by the alternating product.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2DoubleGysinOneForms
+
+open Algebra Module KaehlerDifferential
+open CycleQ2WeightedCoordinateExterior CycleQ2NativeDoubleLocalization
+open CycleQ2DoubleLogarithmicClass (onePullback_log)
+open CycleQ2ExactFrameThreeDeRham (onePullback exteriorPullback onePullback_d)
+open CycleQ2AffineDeRhamFunctorial (onePullback_comp)
+open CycleQ2PrincipalGysinFunctions (logarithm)
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A] (f g : A)
+
+private abbrev baseMap (S : Type) [CommRing S] [Algebra K S] [Algebra A S] [IsScalarTower K A S] :
+    A →ₐ[K] S := IsScalarTower.toAlgHom K A S
+
+private theorem fromU_coeff (a : A) :
+    fromU (K := K) f g (algebraMap A (U f) a) = algebraMap A (T f g) a := by
+  unfold fromU
+  exact IsLocalization.Away.lift_eq (S := U f) (g := algebraMap A (T f g)) f
+    (IsLocalization.Away.isUnit_of_dvd (f*g) (dvd_mul_right f g)) a
+
+private theorem fromV_coeff (a : A) :
+    fromV (K := K) f g (algebraMap A (V g) a) = algebraMap A (T f g) a := by
+  unfold fromV
+  exact IsLocalization.Away.lift_eq (S := V g) (g := algebraMap A (T f g)) g
+    (IsLocalization.Away.isUnit_of_dvd (f*g) (dvd_mul_left g f)) a
+
+/-- The actual single-to-double restriction viewed over the original ring. -/
+private def exteriorOver (S : Type) [CommRing S] [Algebra K S] [Algebra A S] [IsScalarTower K A S]
+    (φ : S →ₐ[K] T f g) (h : ∀ a, φ (algebraMap A S a) = algebraMap A (T f g) a) (p : ℕ) :
+    Form K S p →ₗ[A] Form K (T f g) p where
+  toFun := exteriorPullback φ p
+  map_add' := (exteriorPullback φ p).map_add
+  map_smul' a ω := by
+    rw [← IsScalarTower.algebraMap_smul S, map_smulₛₗ]
+    change φ (algebraMap A S a) • exteriorPullback φ p ω = a • exteriorPullback φ p ω
+    rw [h, IsScalarTower.algebraMap_smul]
+
+def singleU (p : ℕ) : Form K (U f) p →ₗ[A] Form K (T f g) p :=
+  exteriorOver f g (U f) (fromU f g) (fromU_coeff f g) p
+
+def singleV (p : ℕ) : Form K (V g) p →ₗ[A] Form K (T f g) p :=
+  exteriorOver f g (V g) (fromV f g) (fromV_coeff f g) p
+
+abbrev singleImages (p : ℕ) : Submodule A (Form K (T f g) p) :=
+  LinearMap.range (singleU (K := K) f g p) ⊔ LinearMap.range (singleV (K := K) f g p)
+
+abbrev poleForms (p : ℕ) := Form K (T f g) p ⧸ singleImages (K := K) f g p
+
+private abbrev Q (p : ℕ) := (singleImages (K := K) f g p).mkQ
+
+private def regular : Ω[A⁄K] →ₗ[A] Ω[T f g⁄K] where
+  toFun := onePullback (baseMap (T f g))
+  map_add' := (onePullback (baseMap (T f g))).map_add
+  map_smul' a ω := by
+    rw [map_smulₛₗ]
+    exact IsScalarTower.algebraMap_smul (T f g) a _
+
+private abbrev logF : Ω[T f g⁄K] := logarithm (K := K) (localizedF (K := K) f g)
+private abbrev logG : Ω[T f g⁄K] := logarithm (K := K) (localizedG (K := K) f g)
+
+/-- The ordinary two-log lift before taking the quotient by regular forms. -/
+def liftOne : Ω[A⁄K] →ₗ[A] Form K (T f g) 3 :=
+  ((CycleQ2TripleWedge.insert (logF (K := K) f g) (logG (K := K) f g)).restrictScalars A).comp
+    (regular f g)
+
+theorem liftOne_D (a : A) :
+    liftOne (K := K) f g (D K A a) =
+      CycleQ2TripleWedge.wedge (logF (K := K) f g) (logG (K := K) f g)
+        (D K (T f g) (algebraMap A (T f g) a)) := by
+  change CycleQ2TripleWedge.wedge (logF (K := K) f g) (logG (K := K) f g)
+    (onePullback (baseMap (K := K) (T f g)) (D K A a)) = _
+  rw [onePullback_d]
+  rfl
+
+def classOne : Ω[A⁄K] →ₗ[A] poleForms (K := K) f g 3 :=
+  (Q f g 3).comp (liftOne f g)
+
+private theorem times_logF :
+    f • logF (K := K) f g = D K (T f g) (algebraMap A (T f g) f) := by
+  let u := localizedF (K := K) f g
+  change f • ((↑u⁻¹ : T f g) • D K (T f g) (u : T f g)) = _
+  rw [← IsScalarTower.algebraMap_smul (T f g), ← localizedF_val (K := K) f g, smul_smul,
+    Units.mul_inv, one_smul]
+
+private theorem times_logG :
+    g • logG (K := K) f g = D K (T f g) (algebraMap A (T f g) g) := by
+  let u := localizedG (K := K) f g
+  change g • ((↑u⁻¹ : T f g) • D K (T f g) (u : T f g)) = _
+  rw [← IsScalarTower.algebraMap_smul (T f g), ← localizedG_val (K := K) f g, smul_smul,
+    Units.mul_inv, one_smul]
+
+private theorem classOne_apply (ω : Ω[A⁄K]) :
+    classOne (K := K) f g ω =
+      Q (K := K) f g 3 (CycleQ2TripleWedge.wedge
+        (logF (K := K) f g) (logG (K := K) f g) (regular (K := K) f g ω)) :=
+  rfl
+
+theorem classOne_df : classOne (K := K) f g (D K A f) = 0 := by
+  have h : regular (K := K) f g (D K A f) = f • logF (K := K) f g :=
+    (onePullback_d (baseMap (K := K) (T f g)) f).trans (times_logF (K := K) f g).symm
+  rw [classOne_apply, h, ← IsScalarTower.algebraMap_smul (T f g), CycleQ2TripleWedge.smul_third,
+    CycleQ2TripleWedge.repeat_first, smul_zero, map_zero]
+
+theorem classOne_dg : classOne (K := K) f g (D K A g) = 0 := by
+  have h : regular (K := K) f g (D K A g) = g • logG (K := K) f g :=
+    (onePullback_d (baseMap (K := K) (T f g)) g).trans (times_logG (K := K) f g).symm
+  rw [classOne_apply, h, ← IsScalarTower.algebraMap_smul (T f g), CycleQ2TripleWedge.smul_third,
+    CycleQ2TripleWedge.repeat_second, smul_zero, map_zero]
+
+private theorem pull_fromU (ω : Ω[A⁄K]) :
+    onePullback (fromU (K := K) f g) (onePullback (baseMap (K := K) (U f)) ω) =
+      regular (K := K) f g ω := by
+  have he : (fromU (K := K) f g).comp (baseMap (K := K) (U f)) = baseMap (K := K) (T f g) :=
+    AlgHom.ext (fromU_coeff (K := K) f g)
+  rw [← onePullback_comp, he]
+  rfl
+
+private theorem pull_fromV (ω : Ω[A⁄K]) :
+    onePullback (fromV (K := K) f g) (onePullback (baseMap (K := K) (V g)) ω) =
+      regular (K := K) f g ω := by
+  have he : (fromV (K := K) f g).comp (baseMap (K := K) (V g)) = baseMap (K := K) (T f g) :=
+    AlgHom.ext (fromV_coeff (K := K) f g)
+  rw [← onePullback_comp, he]
+  rfl
+
+private def unitU : (U f)ˣ := (IsLocalization.Away.algebraMap_isUnit f).unit
+private def unitV : (V g)ˣ := (IsLocalization.Away.algebraMap_isUnit g).unit
+
+private theorem pull_logF :
+    onePullback (fromU (K := K) f g) (logarithm (K := K) (unitU f)) = logF (K := K) f g :=
+  onePullback_log _ _
+
+private theorem pull_logG :
+    onePullback (fromV (K := K) f g) (logarithm (K := K) (unitV g)) = logG (K := K) f g :=
+  onePullback_log _ _
+
+/-- Multiplication by the first equation leaves a form from the second localization. -/
+theorem classOne_f_smul (ω : Ω[A⁄K]) : classOne (K := K) f g (f • ω) = 0 := by
+  let z := CycleQ2TripleWedge.wedge (D K (V g) (algebraMap A (V g) f))
+    (logarithm (K := K) (unitV g)) (onePullback (baseMap (K := K) (V g)) ω)
+  have h : singleV (K := K) f g 3 z = liftOne (K := K) f g (f • ω) := by
+    change exteriorPullback (fromV (K := K) f g) 3 z =
+      CycleQ2TripleWedge.wedge (logF (K := K) f g) (logG (K := K) f g) (regular (K := K) f g (f • ω))
+    dsimp only [z]
+    rw [CycleQ2TripleWedge.natural, onePullback_d, fromV_coeff, pull_logG, pull_fromV,
+      ← times_logF (K := K) f g, map_smul]
+    let α := logF (K := K) f g
+    let β := logG (K := K) f g
+    let γ := regular (K := K) f g ω
+    change CycleQ2TripleWedge.wedge (f • α) β γ = CycleQ2TripleWedge.wedge α β (f • γ)
+    rw [← IsScalarTower.algebraMap_smul (T f g) f α, ← IsScalarTower.algebraMap_smul (T f g) f γ,
+      CycleQ2TripleWedge.smul_first, CycleQ2TripleWedge.smul_third]
+  change Q (K := K) f g 3 (liftOne (K := K) f g (f • ω)) = 0
+  rw [← h]
+  exact (Submodule.Quotient.mk_eq_zero _).mpr
+    (Submodule.mem_sup_right (LinearMap.mem_range_self _ _))
+
+/-- Multiplication by the second equation leaves a form from the first localization. -/
+theorem classOne_g_smul (ω : Ω[A⁄K]) : classOne (K := K) f g (g • ω) = 0 := by
+  let z := CycleQ2TripleWedge.wedge (logarithm (K := K) (unitU f))
+    (D K (U f) (algebraMap A (U f) g)) (onePullback (baseMap (K := K) (U f)) ω)
+  have h : singleU (K := K) f g 3 z = liftOne (K := K) f g (g • ω) := by
+    change exteriorPullback (fromU (K := K) f g) 3 z =
+      CycleQ2TripleWedge.wedge (logF (K := K) f g) (logG (K := K) f g) (regular (K := K) f g (g • ω))
+    dsimp only [z]
+    rw [CycleQ2TripleWedge.natural, onePullback_d, fromU_coeff, pull_logF, pull_fromU,
+      ← times_logG (K := K) f g, map_smul]
+    let α := logF (K := K) f g
+    let β := logG (K := K) f g
+    let γ := regular (K := K) f g ω
+    change CycleQ2TripleWedge.wedge α (g • β) γ = CycleQ2TripleWedge.wedge α β (g • γ)
+    rw [← IsScalarTower.algebraMap_smul (T f g) g β, ← IsScalarTower.algebraMap_smul (T f g) g γ,
+      CycleQ2TripleWedge.smul_second, CycleQ2TripleWedge.smul_third]
+  change Q (K := K) f g 3 (liftOne (K := K) f g (g • ω)) = 0
+  rw [← h]
+  exact (Submodule.Quotient.mk_eq_zero _).mpr
+    (Submodule.mem_sup_left (LinearMap.mem_range_self _ _))
+
+/-- The degree-two logarithmic class weighted by a regular function. -/
+def classZero : A →ₗ[A] poleForms (K := K) f g 2 :=
+  (Q (K := K) f g 2).comp (LinearMap.toSpanSingleton A _ (cochain (K := K) f g))
+
+theorem classZero_apply (a : A) :
+    classZero (K := K) f g a = Q (K := K) f g 2 (a • cochain (K := K) f g) := rfl
+
+private theorem pull_two {S : Type} [CommRing S] [Algebra K S]
+    (φ : S →ₐ[K] T f g) (a b : Ω[S⁄K]) :
+    exteriorPullback φ 2 (CycleQ2ExactFrameThreeDeRham.wedge a b) =
+      CycleQ2ExactFrameThreeDeRham.wedge (onePullback φ a) (onePullback φ b) := by
+  unfold CycleQ2ExactFrameThreeDeRham.wedge exteriorPullback
+  rw [CycleQ2GeometricExteriorSheaf.exteriorMap_wedge]
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+theorem classZero_f : classZero (K := K) f g f = 0 := by
+  let z := CycleQ2ExactFrameThreeDeRham.wedge (D K (V g) (algebraMap A (V g) f))
+    (logarithm (K := K) (unitV g))
+  have h : singleV (K := K) f g 2 z = f • cochain (K := K) f g := by
+    change exteriorPullback (fromV (K := K) f g) 2 z = _
+    dsimp only [z]
+    rw [pull_two, onePullback_d, fromV_coeff, pull_logG, ← times_logF (K := K) f g]
+    change CycleQ2ExactFrameThreeDeRham.wedgeLeft (logG (K := K) f g) (f • logF (K := K) f g) =
+      f • CycleQ2ExactFrameThreeDeRham.wedgeLeft (logG (K := K) f g) (logF (K := K) f g)
+    rw [← IsScalarTower.algebraMap_smul (T f g) f (logF (K := K) f g), map_smul,
+      IsScalarTower.algebraMap_smul]
+  rw [classZero_apply, ← h]
+  exact (Submodule.Quotient.mk_eq_zero _).mpr
+    (Submodule.mem_sup_right (LinearMap.mem_range_self _ _))
+
+theorem classZero_g : classZero (K := K) f g g = 0 := by
+  let z := CycleQ2ExactFrameThreeDeRham.wedge (logarithm (K := K) (unitU f))
+    (D K (U f) (algebraMap A (U f) g))
+  have h : singleU (K := K) f g 2 z = g • cochain (K := K) f g := by
+    change exteriorPullback (fromU (K := K) f g) 2 z = _
+    dsimp only [z]
+    rw [pull_two, pull_logF, onePullback_d, fromU_coeff, ← times_logG (K := K) f g]
+    change CycleQ2ExactFrameThreeDeRham.wedgeRight (logF (K := K) f g) (g • logG (K := K) f g) =
+      g • CycleQ2ExactFrameThreeDeRham.wedgeRight (logF (K := K) f g) (logG (K := K) f g)
+    rw [← IsScalarTower.algebraMap_smul (T f g) g (logG (K := K) f g), map_smul,
+      IsScalarTower.algebraMap_smul]
+  rw [classZero_apply, ← h]
+  exact (Submodule.Quotient.mk_eq_zero _).mpr
+    (Submodule.mem_sup_left (LinearMap.mem_range_self _ _))
+
+end CycleQ2DoubleGysinOneForms
+
+#print axioms CycleQ2DoubleGysinOneForms.classOne_df
+#print axioms CycleQ2DoubleGysinOneForms.classOne_dg
+#print axioms CycleQ2DoubleGysinOneForms.classOne_f_smul
+#print axioms CycleQ2DoubleGysinOneForms.classOne_g_smul
+#print axioms CycleQ2DoubleGysinOneForms.classZero_f
+#print axioms CycleQ2DoubleGysinOneForms.classZero_g
+
+end
+
+section
+
+/-!
+# The actual Kähler source of a two-equation logarithmic Gysin lift
+
+The original ideal and all its conormal differentials are killed in
+the double-localization quotient. Thus the map is defined on the
+ordinary one-forms of the literal two-equation subscheme.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2DoubleGysinCotangent
+
+open CycleQ2DoubleGysinOneForms CycleQ2IdealCotangentQuotient KaehlerDifferential
+
+variable {k A : Type} [CommRing k] [CommRing A] [Algebra k A] (f g : A)
+
+abbrev ideal := Ideal.span ({f,g} : Set A)
+abbrev intersectionRing := A ⧸ ideal f g
+
+theorem classOne_kills_ideal (a : A) (ha : a ∈ ideal f g) (ω : Ω[A⁄k]) :
+    classOne (K := k) f g (a • ω) = 0 := by
+  obtain ⟨r,s,rfl⟩ := Ideal.mem_span_pair.mp ha
+  rw [add_smul, ← smul_smul, ← smul_smul, map_add,
+    (classOne (K := k) f g).map_smul r (f • ω), (classOne (K := k) f g).map_smul s (g • ω),
+    classOne_f_smul, classOne_g_smul, smul_zero, smul_zero, zero_add]
+
+theorem classOne_kills_exact_ideal (a : A) (ha : a ∈ ideal f g) :
+    classOne (K := k) f g (D k A a) = 0 := by
+  obtain ⟨r,s,rfl⟩ := Ideal.mem_span_pair.mp ha
+  rw [map_add, Derivation.leibniz, Derivation.leibniz, map_add, map_add, map_add,
+    classOne_kills_ideal f g f (Ideal.subset_span (by simp)),
+    classOne_kills_ideal f g g (Ideal.subset_span (by simp)),
+    map_smul, map_smul, classOne_df, classOne_dg, smul_zero, smul_zero]
+  simp only [zero_add]
+
+private theorem conormal_killed :
+    conormal (k := k) (ideal f g) ≤ LinearMap.ker (classOne (K := k) f g) := by
+  rw [conormal, sup_le_iff, Submodule.span_le]
+  constructor
+  · intro x h
+    refine Submodule.smul_induction_on h ?_ ?_
+    · intro a ha ω _
+      exact LinearMap.mem_ker.mpr (classOne_kills_ideal f g a ha ω)
+    · exact fun _ _ => Submodule.add_mem _
+  · rintro _ ⟨a,ha,rfl⟩
+    exact LinearMap.mem_ker.mpr (classOne_kills_exact_ideal f g a ha)
+
+/-- The ordinary intrinsic one-form lifts to the support quotient. -/
+def gysinOne : Ω[intersectionRing f g⁄k] →ₗ[A] poleForms (K := k) f g 3 :=
+  ((conormal (k := k) (ideal f g)).liftQ (classOne (K := k) f g) (conormal_killed f g)).comp
+    (cotangentEquiv (k := k) (ideal f g)).symm.toLinearMap
+
+theorem gysinOne_pullback (ω : Ω[A⁄k]) :
+    gysinOne (k := k) f g (KaehlerDifferential.map k k A (intersectionRing f g) ω) =
+      classOne (K := k) f g ω := by
+  rw [← cotangentEquiv_mk (k := k) (ideal f g) ω]
+  change (conormal (k := k) (ideal f g)).liftQ (classOne (K := k) f g)
+    (conormal_killed f g) ((cotangentEquiv (k := k) (ideal f g)).symm
+      (cotangentEquiv (k := k) (ideal f g) ((conormal (k := k) (ideal f g)).mkQ ω))) = _
+  rw [LinearEquiv.symm_apply_apply]
+  rfl
+
+theorem gysinOne_exact (a : A) :
+    gysinOne (k := k) f g (D k (intersectionRing f g) (Ideal.Quotient.mk (ideal f g) a)) =
+      classOne (K := k) f g (D k A a) := by
+  change gysinOne (k := k) f g (D k (intersectionRing f g) (algebraMap A (intersectionRing f g) a)) = _
+  rw [← KaehlerDifferential.map_D k k A (intersectionRing f g), gysinOne_pullback]
+
+end CycleQ2DoubleGysinCotangent
+
+#print axioms CycleQ2DoubleGysinCotangent.gysinOne_pullback
+#print axioms CycleQ2DoubleGysinCotangent.gysinOne_exact
+
+end
+
+section
+
+/-!
+# Ordinary derivative of the weighted double logarithmic lift
+
+In an actual exact rank-three frame, the derivative of a function
+times the two logarithmic differentials is the three-wedge with
+the ordinary differential of that function. Terms from differentiating
+the two invertible denominators vanish by alternation.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2DoubleLogDerivative
+
+open Module KaehlerDifferential
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+open CycleQ2PrincipalGysinFunctions (logarithm)
+open CycleQ2DoubleLogarithmicClass (twoLog closed)
+
+variable {K T : Type} [CommRing K] [CommRing T] [Algebra K T]
+  (b : Basis (Fin 3) T Ω[T⁄K]) (v : Fin 3 → T) (hv : ∀ i, b i = D K T (v i))
+
+private theorem twoLog_exact (f g : Tˣ) :
+    twoLog (K := K) f g = ((↑f⁻¹ : T) * (↑g⁻¹ : T)) •
+      exteriorPower.ιMulti T 2 (D K T ∘ ![(f : T),(g : T)]) := by
+  change wedgeLeft ((↑g⁻¹ : T) • D K T (g : T)) ((↑f⁻¹ : T) • D K T (f : T)) = _
+  rw [map_smul]
+  change (↑f⁻¹ : T) • wedgeRight (D K T (f : T)) ((↑g⁻¹ : T) • D K T (g : T)) = _
+  rw [map_smul, smul_smul]
+  rfl
+
+include hv in
+theorem differential (a : T) (f g : Tˣ) :
+    exteriorD2 b (exactFrameDirection b) (a • twoLog (K := K) f g) =
+      CycleQ2TripleWedge.wedge (logarithm (K := K) f) (logarithm (K := K) g) (D K T a) := by
+  let s : T := (↑f⁻¹ : T) * (↑g⁻¹ : T)
+  let x := D K T (f : T)
+  let y := D K T (g : T)
+  have hz := closed b v hv f g
+  rw [twoLog_exact, exteriorD2_exactFrame b v hv] at hz
+  change CycleQ2TripleWedge.wedge (D K T s) x y = 0 at hz
+  rw [twoLog_exact, smul_smul, exteriorD2_exactFrame b v hv]
+  change CycleQ2TripleWedge.wedge (D K T (a*s)) x y =
+    CycleQ2TripleWedge.wedge ((↑f⁻¹ : T) • x) ((↑g⁻¹ : T) • y) (D K T a)
+  rw [Derivation.leibniz, CycleQ2TripleWedge.add_first, CycleQ2TripleWedge.smul_first,
+    CycleQ2TripleWedge.smul_first, hz, smul_zero, zero_add, CycleQ2TripleWedge.smul_first,
+    CycleQ2TripleWedge.smul_second, smul_smul, CycleQ2TripleWedge.cyclic]
+
+end CycleQ2DoubleLogDerivative
+
+#print axioms CycleQ2DoubleLogDerivative.differential
+
+end
+
+section
+
+/-!
+# The first actual differential square for a two-equation Gysin class
+
+The differential descends through the two single-localization images.
+With the original ordinary functions and one-forms of the intersection,
+the logarithmic lift commutes with the two ordinary differentials.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2DoubleGysinCochain
+
+open Module KaehlerDifferential
+open CycleQ2DoubleGysinOneForms CycleQ2DoubleGysinCotangent
+open CycleQ2NativeDoubleLocalization (U V T cochain localizedF localizedG)
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+open CycleQ2RelativeAffineOverlap (baseChangeFrame baseChangeFrame_apply)
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A] (f g : A)
+
+abbrev Q (p : ℕ) := (singleImages (K := K) f g p).mkQ
+
+private theorem functions_killed (a : A) (ha : a ∈ ideal f g) :
+    classZero (K := K) f g a = 0 := by
+  obtain ⟨r,s,rfl⟩ := Ideal.mem_span_pair.mp ha
+  change classZero (K := K) f g (r • f + s • g) = 0
+  rw [map_add, map_smul, map_smul, classZero_f, classZero_g, smul_zero, smul_zero, add_zero]
+
+def gysinZero : intersectionRing f g →+ poleForms (K := K) f g 2 :=
+  QuotientAddGroup.lift (ideal f g).toAddSubgroup (classZero (K := K) f g).toAddMonoidHom
+    (functions_killed f g)
+
+theorem gysinZero_mk (a : A) :
+    gysinZero (K := K) f g (Ideal.Quotient.mk (ideal f g) a) = classZero (K := K) f g a :=
+  rfl
+
+local instance : Algebra.FormallyEtale A (U f) := Algebra.FormallyEtale.of_isLocalization (Submonoid.powers f)
+local instance : Algebra.FormallyEtale A (V g) := Algebra.FormallyEtale.of_isLocalization (Submonoid.powers g)
+local instance : Algebra.FormallyEtale A (T f g) := Algebra.FormallyEtale.of_isLocalization (Submonoid.powers (f*g))
+
+variable (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A) (hu : ∀ i, b i = D K A (u i))
+
+private abbrev dAt (S : Type) [CommRing S] [Algebra K S] [Algebra A S] [IsScalarTower K A S]
+    [Algebra.FormallyEtale A S] : Form K S 2 →+ Form K S 3 :=
+  (exteriorD2 (baseChangeFrame b) (exactFrameDirection (baseChangeFrame b))).toAddMonoidHom
+
+include hu in
+private theorem preserves_images (z : Form K (T f g) 2)
+    (hz : z ∈ singleImages (K := K) f g 2) :
+    dAt b (T f g) z ∈ singleImages (K := K) f g 3 := by
+  obtain ⟨x,hx,y,hy,rfl⟩ := Submodule.mem_sup.mp hz
+  obtain ⟨a,rfl⟩ := hx
+  obtain ⟨c,rfl⟩ := hy
+  rw [map_add]
+  apply Submodule.add_mem _
+  · apply Submodule.mem_sup_left
+    refine ⟨dAt b (U f) a, ?_⟩
+    exact topDifferential_natural (baseChangeFrame b) (fun i => algebraMap A (U f) (u i))
+      (baseChangeFrame_apply b u hu) (CycleQ2NativeDoubleLocalization.fromU f g)
+      (baseChangeFrame b) (fun i => algebraMap A (T f g) (u i))
+      (baseChangeFrame_apply b u hu) a
+  · apply Submodule.mem_sup_right
+    refine ⟨dAt b (V g) c, ?_⟩
+    exact topDifferential_natural (baseChangeFrame b) (fun i => algebraMap A (V g) (u i))
+      (baseChangeFrame_apply b u hu) (CycleQ2NativeDoubleLocalization.fromV f g)
+      (baseChangeFrame b) (fun i => algebraMap A (T f g) (u i))
+      (baseChangeFrame_apply b u hu) c
+
+def quotientD : poleForms (K := K) f g 2 →+ poleForms (K := K) f g 3 :=
+  QuotientAddGroup.lift (singleImages (K := K) f g 2).toAddSubgroup
+    ((Q (K := K) f g 3).toAddMonoidHom.comp (dAt b (T f g))) (by
+      intro z hz
+      exact (Submodule.Quotient.mk_eq_zero _).mpr (preserves_images f g b u hu z hz))
+
+theorem quotientD_mk (z : Form K (T f g) 2) :
+    quotientD f g b u hu (Q (K := K) f g 2 z) = Q (K := K) f g 3 (dAt b (T f g) z) := rfl
+
+include hu in
+theorem commutes_with_D (a : intersectionRing f g) :
+    quotientD f g b u hu (gysinZero (K := K) f g a) =
+      gysinOne (k := K) f g (D K (intersectionRing f g) a) := by
+  obtain ⟨r,rfl⟩ := Ideal.Quotient.mk_surjective a
+  rw [gysinZero_mk, classZero_apply, quotientD_mk, gysinOne_exact]
+  change Q (K := K) f g 3 (dAt b (T f g) (r • cochain (K := K) f g)) =
+    Q (K := K) f g 3 (liftOne (K := K) f g (D K A r))
+  rw [liftOne_D]
+  congr 1
+  have h := CycleQ2DoubleLogDerivative.differential (baseChangeFrame b)
+    (fun i => algebraMap A (T f g) (u i)) (baseChangeFrame_apply b u hu) (algebraMap A (T f g) r)
+    (localizedF (K := K) f g) (localizedG (K := K) f g)
+  rw [← IsScalarTower.algebraMap_smul (T f g) r (cochain (K := K) f g)]
+  exact h
+
+end CycleQ2DoubleGysinCochain
+
+#print axioms CycleQ2DoubleGysinCochain.commutes_with_D
 
 end
