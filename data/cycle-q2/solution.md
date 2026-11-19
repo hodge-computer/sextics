@@ -51,6 +51,40 @@ at the specialization. The existence of the three rational functions in the
 displayed identity remains open.
 [Divergence and specialization to the protected certificate](GeometricGenericWeightedTransfer.lean)
 
+### From a universal primitive to the protected form
+
+The normalized weighted chart is a monic cubic over the polynomial
+ring in 44 universal coefficients and three spatial coordinates. The
+quotient is integral. In its function field the spatial tangent
+derivations and weighted source density are defined by the actual
+normal derivative of the equation. It suffices to establish the
+following existence statement there:
+\[
+ \exists (v_0,v_1,v_2),\qquad \sum_{j=0}^{2} D_j(v_j)=\rho_b .
+\]
+[Universal chart and precise primitive condition](GeometricUniversalWeightedChart.lean)
+
+Given such a primitive, choose a common spatial denominator and a
+nonzero spatial polynomial multiple of it. One nonzero base
+coefficient of that polynomial defines a principal open on which
+the multiple survives specialization. The generic pencil of a
+suitable deformation meets that open. Its three spatial coordinates
+remain algebraically independent over the joint field of the
+deformation and pencil parameters, so the denominator remains
+nonzero. The actual derivations and source density agree with the
+normalized chart formulas under this specialization.
+[Coordinates of the normalized pencil](GeometricNormalizedPencilCoordinates.lean)
+
+The specialized cleared identity gives the relative divergence on
+the deformed pencil. Laurent coefficient extraction then gives
+exactness of the original protected four-form, and the existing
+clearing proof gives the certificate.
+[Universal primitive to protected exactness](GeometricUniversalWeightedClosure.lean)
+
+The input \(\exists (v_0,v_1,v_2)\) on the universal chart is still
+open. The checked transfer determines the exact existence statement
+that the geometric support argument must supply.
+
 ## The fixed threefold and its moving curves
 
 The curve calculation takes place on the cubic section \(D\) of the weighted
