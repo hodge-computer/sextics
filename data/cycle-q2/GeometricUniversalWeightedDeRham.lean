@@ -15,6 +15,13 @@ import Mathlib.Algebra.Homology.HomologicalComplex
 import Mathlib.RingTheory.Localization.Away.Basic
 import Mathlib.LinearAlgebra.Quotient.Basic
 import Mathlib.Algebra.Module.Torsion.Basic
+import Mathlib.RingTheory.Trace.Basic
+import Mathlib.Algebra.Polynomial.Div
+import Mathlib.RingTheory.PowerBasis
+import Mathlib.FieldTheory.Differential.Basic
+import HodgeComputer.Constructions.HoldoutCover.FiniteTrace
+import Mathlib.RingTheory.AdjoinRoot
+import Mathlib.RingTheory.Kaehler.Basic
 
 /-!
 # Relative exterior forms on the universal weighted function field
@@ -3734,5 +3741,654 @@ end CycleQ2NativeGeneratorChange
 #print axioms CycleQ2NativeGeneratorChange.closed_correction_on_refinement
 
 end
+
+end
+
+section
+
+/-!
+# The trace that removes a simple gradient denominator
+
+In a finite separable power basis, division by the derivative of the
+minimal polynomial pairs with its last power coordinate. For a monic
+presentation over a subring, this computes the trace by ordinary
+polynomial remainder and leaves a coefficient in that subring.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2MonogenicTrace
+
+open Polynomial Algebra Module
+
+variable {K L : Type*} [Field K] [Field L] [Algebra K L]
+  [FiniteDimensional K L] [Algebra.IsSeparable K L]
+
+/-- The index of the highest power in a nonempty power basis. -/
+def lastPower (b : PowerBasis K L) : Fin b.dim :=
+  ⟨b.dim - 1, Nat.sub_lt b.dim_pos (by decide)⟩
+
+theorem division_trace (b : PowerBasis K L) (z : L) :
+    Algebra.trace K L (z / aeval b.gen (derivative (minpoly K b.gen))) =
+      b.basis.repr z (lastPower b) := by
+  let j := lastPower b
+  have hx : IsIntegral K b.gen := b.isIntegral_gen
+  have hdegree : (minpolyDiv K b.gen).natDegree = j.val := by
+    rw [natDegree_minpolyDiv, b.natDegree_minpoly]
+    rfl
+  have hcoeff : (minpolyDiv K b.gen).coeff j.val = 1 :=
+    hdegree ▸ (minpolyDiv_monic hx).leadingCoeff
+  have hdual : b.basis.traceDual j = (aeval b.gen (derivative (minpoly K b.gen)))⁻¹ := by
+    rw [Basis.traceDual_powerBasis_eq, hcoeff, one_div]
+  have h := (b.basis.traceDual).traceDual_repr_apply z j
+  rw [Basis.traceDual_traceDual, traceForm_apply, hdual] at h
+  simpa only [div_eq_mul_inv] using h.symm
+
+section Polynomial
+
+variable {R : Type*} [CommRing R] [IsDomain R] [Algebra R K] [Algebra R L]
+  [IsScalarTower R K L]
+
+private theorem repr_aeval_small (b : PowerBasis K L) (p : R[X]) (hp : p.natDegree < b.dim)
+    (i : Fin b.dim) : b.basis.repr (aeval b.gen p) i = algebraMap R K (p.coeff i.val) := by
+  let s := fun j : Fin b.dim => algebraMap R K (p.coeff j.val) • b.basis j
+  have hpoly : p = ∑ j : Fin b.dim, C (p.coeff j.val) * X ^ j.val := by
+    rw [Fin.sum_univ_eq_sum_range (fun j => C (p.coeff j) * X ^ j)]
+    exact p.as_sum_range_C_mul_X_pow' hp
+  have he : aeval b.gen p = ∑ j, s j := by
+    rw [hpoly, map_sum]
+    apply Finset.sum_congr rfl
+    intro j _
+    simp only [s, map_mul, aeval_C, map_pow, aeval_X, b.basis_eq_pow, Algebra.smul_def,
+      IsScalarTower.algebraMap_apply R K L]
+  change (b.basis.coord i) (aeval b.gen p) = _
+  rw [he, map_sum, Finset.sum_eq_single i]
+  · dsimp only [s]
+    rw [map_smul, Basis.coord_apply, Basis.repr_self_apply, if_pos rfl, smul_eq_mul, mul_one]
+  · intro j _ hj
+    dsimp only [s]
+    rw [map_smul, Basis.coord_apply, Basis.repr_self_apply, if_neg hj, smul_zero]
+  · exact fun h => (h (Finset.mem_univ i)).elim
+
+/-- The trace of a regular coefficient divided once by the gradient is
+an explicit regular coefficient in the original ring. -/
+theorem integral_division_trace (b : PowerBasis K L) (f p : R[X]) (hf : f.Monic)
+    (hmin : f.map (algebraMap R K) = minpoly K b.gen) :
+    Algebra.trace K L (aeval b.gen p / aeval b.gen f.derivative) =
+      algebraMap R K ((p %ₘ f).coeff (lastPower b).val) := by
+  have hz : aeval b.gen f = 0 := by
+    rw [← aeval_map_algebraMap K b.gen f, hmin, minpoly.aeval]
+  have hp : aeval b.gen (p %ₘ f) = aeval b.gen p :=
+    eval₂_modByMonic_eq_self_of_root hz
+  have hdim : f.natDegree = b.dim := by
+    rw [← hf.natDegree_map (algebraMap R K), hmin, b.natDegree_minpoly]
+  have hn : f ≠ 1 := by
+    intro he
+    rw [he, natDegree_one] at hdim
+    exact (Nat.ne_of_gt b.dim_pos) hdim.symm
+  have hgrad : aeval b.gen f.derivative = aeval b.gen (minpoly K b.gen).derivative := by
+    rw [← aeval_map_algebraMap K b.gen f.derivative, ← derivative_map, hmin]
+  rw [hgrad, division_trace, ← hp]
+  exact repr_aeval_small b _ (hdim ▸ natDegree_modByMonic_lt p hf hn) _
+
+end Polynomial
+
+end CycleQ2MonogenicTrace
+
+#print axioms CycleQ2MonogenicTrace.integral_division_trace
+
+end
+
+section
+
+/-!
+# Ordinary trace of regular differentials through a finite chart
+
+The derivative of the integral generator has one gradient denominator.
+Taking the trace cancels it by polynomial remainder. This covers the
+ramified points of a monogenic chart as well as its étale locus.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2FiniteDifferentialTrace
+
+open Algebra Polynomial Differential
+open CycleQ2MonogenicTrace
+
+variable {R K L : Type*} [CommRing R] [IsDomain R] [Field K] [Field L]
+  [Algebra R K] [Algebra R L] [Algebra K L] [IsScalarTower R K L]
+  [FiniteDimensional K L] [Algebra.IsSeparable K L]
+  (b : PowerBasis K L) (f : R[X]) (hf : f.Monic)
+  (hmin : f.map (algebraMap R K) = minpoly K b.gen)
+
+include hmin in
+theorem generator_root : aeval b.gen f = 0 := by
+  rw [← aeval_map_algebraMap K b.gen f, hmin, minpoly.aeval]
+
+include hmin in
+theorem gradient_ne_zero : aeval b.gen f.derivative ≠ 0 := by
+  rw [← aeval_map_algebraMap K b.gen f.derivative, ← derivative_map, hmin]
+  exact (Algebra.IsSeparable.isSeparable K b.gen).aeval_derivative_ne_zero (minpoly.aeval K _)
+
+include hf hmin in
+/-- The trace of an ordinary regular coefficient from the finite chart. -/
+theorem trace_polynomial (p : R[X]) :
+    Algebra.trace K L (aeval b.gen p) =
+      algebraMap R K (((p * f.derivative) %ₘ f).coeff (lastPower b).val) := by
+  simpa only [map_mul, mul_div_cancel_right₀ _ (gradient_ne_zero b f hmin)] using
+    integral_division_trace b f (p * f.derivative) hf hmin
+
+section Differential
+
+variable [Differential R] [Differential K] [Differential L]
+  [drk : DifferentialAlgebra R K] [drl : DifferentialAlgebra R L] [dkl : DifferentialAlgebra K L]
+
+include hmin drl in
+omit [Differential K] drk dkl in
+/-- Differentiate the literal monic equation before taking the trace. -/
+theorem deriv_generator :
+    Differential.deriv b.gen = -aeval b.gen (Differential.mapCoeffs f) / aeval b.gen f.derivative := by
+  have h := deriv_aeval_eq b.gen f
+  rw [generator_root b f hmin, map_zero] at h
+  exact (eq_div_iff (gradient_ne_zero b f hmin)).mpr
+    (by simpa only [mul_comm] using eq_neg_of_add_eq_zero_right h.symm)
+
+include hf hmin drl in
+omit [Differential K] drk dkl in
+theorem trace_polynomial_deriv_generator (p : R[X]) :
+    Algebra.trace K L (aeval b.gen p * Differential.deriv b.gen) =
+      -(algebraMap R K (((p * Differential.mapCoeffs f) %ₘ f).coeff (lastPower b).val)) := by
+  rw [deriv_generator b f hmin, ← mul_div_assoc, mul_neg, neg_div, map_neg, ← map_mul]
+  exact congrArg Neg.neg (integral_division_trace b f (p * Differential.mapCoeffs f) hf hmin)
+
+private theorem trace_derivation_finite {F M : Type*} [Field F] [Field M] [CharZero F]
+    [Algebra F M] [FiniteDimensional F M]
+    (D : Derivation ℤ F F) (E : Derivation ℤ M M)
+    (h : ∀ a, E (algebraMap F M a) = algebraMap F M (D a)) (x : M) :
+    Algebra.trace F M (E x) = D (Algebra.trace F M x) := by
+  have hn : (Module.finrank F M : F) ≠ 0 :=
+    Nat.cast_ne_zero.mpr (ne_of_gt (Module.finrank_pos (R := F) (M := M)))
+  have ht := HoldoutConstruction.finiteNormalizedTrace_derivation D E h x
+  simp only [Algebra.normalizedTrace_eq_of_finiteDimensional_apply, smul_eq_mul] at ht
+  rw [D.leibniz, D.leibniz_inv, D.map_natCast, smul_zero] at ht
+  simp only [smul_eq_mul, mul_zero, add_zero] at ht
+  exact mul_left_cancel₀ (inv_ne_zero hn) ht
+
+include hf hmin drk dkl in
+/-- Differentiating a regular function and then taking its trace gives
+exactly the derivative of the regular coefficient trace. -/
+theorem trace_derivative_polynomial [CharZero K] (p : R[X]) :
+    Algebra.trace K L (Differential.deriv (aeval b.gen p)) =
+      algebraMap R K (Differential.deriv (((p * f.derivative) %ₘ f).coeff (lastPower b).val)) := by
+  rw [trace_derivation_finite (Differential.deriv : Derivation ℤ K K)
+    (Differential.deriv : Derivation ℤ L L) (fun a => deriv_algebraMap a),
+    trace_polynomial b f hf hmin, deriv_algebraMap]
+
+end Differential
+
+end CycleQ2FiniteDifferentialTrace
+
+#print axioms CycleQ2FiniteDifferentialTrace.trace_polynomial_deriv_generator
+#print axioms CycleQ2FiniteDifferentialTrace.trace_derivative_polynomial
+
+end
+
+section
+
+/-!
+# The integral coefficient trace on the actual monic quotient
+
+The polynomial trace formulas descend to the quotient without a
+choice of representatives. A regular function is traced by taking
+one coefficient of its product with the gradient. A generator-weighted
+one-form is traced by the corresponding coefficient of its product
+with the coefficient derivative of the equation.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2MonogenicIntegralTrace
+
+open Polynomial Algebra Differential
+open CycleQ2FiniteDifferentialTrace CycleQ2MonogenicTrace
+
+variable {R K L : Type*} [CommRing R] [IsDomain R] [Field K] [Field L]
+  [Algebra R K] [Algebra R L] [Algebra K L] [IsScalarTower R K L]
+  (b : PowerBasis K L) (f : R[X]) (hf : f.Monic)
+  (hmin : f.map (algebraMap R K) = minpoly K b.gen)
+
+abbrev Chart := AdjoinRoot f
+
+include hmin in
+/-- The actual evaluation map out of the original monic quotient. -/
+def evaluate : Chart f →ₐ[R] L :=
+  AdjoinRoot.liftAlgHom f (Algebra.ofId R L) b.gen (by
+    change aeval b.gen f = 0
+    rw [← aeval_map_algebraMap K b.gen f, hmin, minpoly.aeval])
+
+@[simp]
+theorem evaluate_mk (p : R[X]) : evaluate b f hmin (AdjoinRoot.mk f p) = aeval b.gen p := rfl
+
+@[simp]
+theorem evaluate_root : evaluate b f hmin (AdjoinRoot.root f) = b.gen :=
+  AdjoinRoot.liftAlgHom_root f _ _ _
+
+/-- A coefficient of the unique monic remainder on the ordinary quotient. -/
+def coefficient (n : ℕ) : Chart f →ₗ[R] R :=
+  (lcoeff R n).comp (AdjoinRoot.modByMonicHom hf)
+
+@[simp]
+theorem coefficient_mk (n : ℕ) (p : R[X]) :
+    coefficient f hf n (AdjoinRoot.mk f p) = (p %ₘ f).coeff n := rfl
+
+/-- The regular trace recording the product with the gradient. -/
+def valueTrace : Chart f →ₗ[R] R :=
+  (coefficient f hf (f.natDegree - 1)).comp
+    (LinearMap.mulRight R (AdjoinRoot.mk f f.derivative))
+
+include hf hmin in
+theorem trace_evaluate [FiniteDimensional K L] [Algebra.IsSeparable K L] (s : Chart f) :
+    Algebra.trace K L (evaluate b f hmin s) = algebraMap R K (valueTrace f hf s) := by
+  obtain ⟨p,rfl⟩ := AdjoinRoot.mk_surjective s
+  have hdeg : f.natDegree = b.dim := by
+    rw [← hf.natDegree_map (algebraMap R K), hmin, b.natDegree_minpoly]
+  rw [evaluate_mk, trace_polynomial b f hf hmin]
+  unfold valueTrace
+  rw [LinearMap.comp_apply, LinearMap.mulRight_apply, ← (AdjoinRoot.mk f).map_mul, coefficient_mk, hdeg]
+  rfl
+
+section Differential
+
+variable [Differential R] [Differential L] [drl : DifferentialAlgebra R L]
+
+/-- The coefficient trace of a regular function times the generator differential. -/
+def rootDerivativeTrace : Chart f →ₗ[R] R :=
+  -((coefficient f hf (f.natDegree - 1)).comp
+    (LinearMap.mulRight R (AdjoinRoot.mk f (Differential.mapCoeffs f))))
+
+include hf hmin drl in
+theorem trace_evaluate_rootDerivative [FiniteDimensional K L] [Algebra.IsSeparable K L] (s : Chart f) :
+    Algebra.trace K L (evaluate b f hmin s * Differential.deriv b.gen) =
+      algebraMap R K (rootDerivativeTrace f hf s) := by
+  obtain ⟨p,rfl⟩ := AdjoinRoot.mk_surjective s
+  have hdeg : f.natDegree = b.dim := by
+    rw [← hf.natDegree_map (algebraMap R K), hmin, b.natDegree_minpoly]
+  rw [evaluate_mk, trace_polynomial_deriv_generator b f hf hmin]
+  unfold rootDerivativeTrace
+  rw [LinearMap.neg_apply, map_neg, LinearMap.comp_apply, LinearMap.mulRight_apply,
+    ← (AdjoinRoot.mk f).map_mul, coefficient_mk, hdeg]
+  rfl
+
+include hf hmin drl in
+/-- Every product of a regular function with a differential of a regular
+function has regular trace, including over ramification. -/
+theorem trace_evaluate_derivative_regular [FiniteDimensional K L] [Algebra.IsSeparable K L]
+    (a s : Chart f) : ∃ r : R,
+      Algebra.trace K L (evaluate b f hmin a * Differential.deriv (evaluate b f hmin s)) =
+        algebraMap R K r := by
+  obtain ⟨p,rfl⟩ := AdjoinRoot.mk_surjective s
+  refine ⟨valueTrace f hf (a * AdjoinRoot.mk f (Differential.mapCoeffs p)) +
+    rootDerivativeTrace f hf (a * AdjoinRoot.mk f p.derivative), ?_⟩
+  rw [evaluate_mk b f hmin, deriv_aeval_eq, mul_add, (Algebra.trace K L).map_add,
+    (algebraMap R K).map_add, ← mul_assoc]
+  have h₁ := trace_evaluate b f hf hmin (a * AdjoinRoot.mk f (Differential.mapCoeffs p))
+  have h₂ := trace_evaluate_rootDerivative b f hf hmin (a * AdjoinRoot.mk f p.derivative)
+  have emul (q : R[X]) : evaluate b f hmin (a * AdjoinRoot.mk f q) =
+      evaluate b f hmin a * aeval b.gen q :=
+    (map_mul (evaluate b f hmin) a (AdjoinRoot.mk f q)).trans
+      (congrArg (fun z => evaluate b f hmin a * z) (evaluate_mk b f hmin q))
+  rw [← emul (Differential.mapCoeffs p), ← emul p.derivative]
+  exact congrArg₂ (· + ·) h₁ h₂
+
+end Differential
+
+end CycleQ2MonogenicIntegralTrace
+
+#print axioms CycleQ2MonogenicIntegralTrace.trace_evaluate_derivative_regular
+
+end
+
+section
+
+/-!
+# Tracing actual regular Kähler one-forms on a monic chart
+
+Evaluate a differential on a lifted coordinate derivation and take its
+field trace. The monogenic computation proves that this functional has
+values in the original ring on every regular one-form. It sends exact
+forms to the derivative of the regular function trace.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2MonogenicTraceOneForms
+
+open Algebra Polynomial Differential KaehlerDifferential
+open CycleQ2MonogenicIntegralTrace CycleQ2FiniteDifferentialTrace
+
+variable {k R K L : Type*} [CommRing k] [CommRing R] [IsDomain R] [Field K] [Field L]
+  [Algebra k R] [Algebra k L] [Algebra R K] [Algebra R L] [Algebra K L]
+  [IsScalarTower k R L] [IsScalarTower R K L]
+  (b : PowerBasis K L) (f : R[X]) (hf : f.Monic)
+  (hmin : f.map (algebraMap R K) = minpoly K b.gen)
+  (d : Derivation k L L)
+
+private def chartToField : Algebra (Chart f) L := (evaluate b f hmin).toRingHom.toAlgebra
+
+include hmin in
+private theorem chart_tower :
+    letI : Algebra (Chart f) L := chartToField b f hmin
+    IsScalarTower k (Chart f) L := by
+  letI : Algebra (Chart f) L := chartToField b f hmin
+  apply IsScalarTower.of_algebraMap_eq
+  intro a
+  rw [IsScalarTower.algebraMap_apply k R L, IsScalarTower.algebraMap_apply k R (Chart f)]
+  exact ((evaluate b f hmin).commutes (algebraMap k R a)).symm
+
+/-- The functional before descending its coefficients. -/
+def rationalFunctional : Ω[Chart f⁄k] →ₗ[R] K :=
+  letI : Algebra (Chart f) L := chartToField b f hmin
+  letI : IsScalarTower k (Chart f) L := chart_tower b f hmin
+  letI : IsScalarTower R (Chart f) L := IsScalarTower.of_algHom (evaluate b f hmin)
+  ((Algebra.trace K L).restrictScalars R).comp
+    ((d.compAlgebraMap (Chart f)).liftKaehlerDifferential.restrictScalars R)
+
+theorem rationalFunctional_smul_D (a s : Chart f) :
+    rationalFunctional b f hmin d (a • D k (Chart f) s) =
+      Algebra.trace K L (evaluate b f hmin a * d (evaluate b f hmin s)) := by
+  letI : Algebra (Chart f) L := chartToField b f hmin
+  letI : IsScalarTower k (Chart f) L := chart_tower b f hmin
+  letI : IsScalarTower R (Chart f) L := IsScalarTower.of_algHom (evaluate b f hmin)
+  change Algebra.trace K L ((d.compAlgebraMap (Chart f)).liftKaehlerDifferential
+    (a • D k (Chart f) s)) = _
+  rw [map_smul, Derivation.liftKaehlerDifferential_comp_D]
+  rfl
+
+section Regular
+
+variable [Differential R] [Differential L] [drl : DifferentialAlgebra R L]
+  [FiniteDimensional K L] [Algebra.IsSeparable K L]
+  (hd : ∀ x, d x = Differential.deriv x)
+
+include hf hd drl in
+private theorem lands_in_ring (ω : Ω[Chart f⁄k]) :
+    rationalFunctional b f hmin d ω ∈ (Algebra.linearMap R K).range := by
+  let S := Chart f
+  have hw : ω ∈ Submodule.span S (Set.range (D k S)) := by
+    rw [span_range_derivation]
+    trivial
+  have h (ω : Ω[S⁄k]) (hw : ω ∈ Submodule.span S (Set.range (D k S))) :
+      ∀ a : S, rationalFunctional b f hmin d (a • ω) ∈ (Algebra.linearMap R K).range := by
+    induction hw using Submodule.span_induction with
+    | mem ω hw =>
+      obtain ⟨s,rfl⟩ := hw
+      intro a
+      rw [rationalFunctional_smul_D, hd]
+      obtain ⟨r,hr⟩ := trace_evaluate_derivative_regular b f hf hmin a s
+      exact ⟨r, hr.symm⟩
+    | zero =>
+      intro a
+      rw [smul_zero, map_zero]
+      exact Submodule.zero_mem _
+    | add x y _ _ hx hy =>
+      intro a
+      rw [smul_add, map_add]
+      exact Submodule.add_mem _ (hx a) (hy a)
+    | smul a x _ hx =>
+      intro c
+      rw [smul_smul]
+      exact hx (c * a)
+  simpa only [one_smul] using h ω hw 1
+
+/-- The actual trace functional with values in the original regular ring. -/
+def regularFunctional (hinj : Function.Injective (algebraMap R K)) : Ω[Chart f⁄k] →ₗ[R] R :=
+  (LinearEquiv.ofInjective (Algebra.linearMap R K) hinj).symm.toLinearMap.comp
+    ((rationalFunctional b f hmin d).codRestrict _ (lands_in_ring b f hf hmin d hd))
+
+theorem regularFunctional_apply (hinj : Function.Injective (algebraMap R K)) (ω : Ω[Chart f⁄k]) :
+    algebraMap R K (regularFunctional b f hf hmin d hd hinj ω) =
+      rationalFunctional b f hmin d ω := by
+  exact congrArg Subtype.val (LinearEquiv.apply_symm_apply
+    (LinearEquiv.ofInjective (Algebra.linearMap R K) hinj) _)
+
+variable [Differential K] [DifferentialAlgebra R K] [DifferentialAlgebra K L] [CharZero K]
+
+theorem regularFunctional_D (hinj : Function.Injective (algebraMap R K)) (s : Chart f) :
+    regularFunctional b f hf hmin d hd hinj (D k (Chart f) s) =
+      Differential.deriv (valueTrace f hf s) := by
+  apply hinj
+  rw [regularFunctional_apply]
+  have he := rationalFunctional_smul_D b f hmin d 1 s
+  rw [one_smul, map_one, one_mul, hd] at he
+  rw [he]
+  obtain ⟨p,rfl⟩ := AdjoinRoot.mk_surjective s
+  rw [evaluate_mk b f hmin, trace_derivative_polynomial b f hf hmin]
+  have hdeg : f.natDegree = b.dim := by
+    rw [← hf.natDegree_map (algebraMap R K), hmin, b.natDegree_minpoly]
+  unfold valueTrace
+  rw [LinearMap.comp_apply, LinearMap.mulRight_apply, ← (AdjoinRoot.mk f).map_mul,
+    coefficient_mk, hdeg]
+  rfl
+
+end Regular
+
+end CycleQ2MonogenicTraceOneForms
+
+#print axioms CycleQ2MonogenicTraceOneForms.regularFunctional_D
+
+end
+
+section
+
+/-!
+# The trace morphism of de Rham complexes on a monogenic curve chart
+
+A rank-one cotangent coordinate converts the integral trace functional
+into an ordinary regular differential. The pointwise coefficient trace
+and this one-form trace commute with the exterior differential.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2MonogenicCurveTrace
+
+open Algebra Polynomial Differential KaehlerDifferential
+open CycleQ2MonogenicIntegralTrace CycleQ2MonogenicTraceOneForms
+
+variable {k R K L : Type*} [CommRing k] [CommRing R] [IsDomain R] [Field K] [Field L]
+  [Algebra k R] [Algebra k L] [Algebra R K] [Algebra R L] [Algebra K L]
+  [IsScalarTower k R L] [IsScalarTower R K L]
+  (b : PowerBasis K L) (f : R[X]) (hf : f.Monic)
+  (hmin : f.map (algebraMap R K) = minpoly K b.gen)
+  (d : Derivation k L L)
+  [Differential R] [Differential L] [DifferentialAlgebra R L]
+  [FiniteDimensional K L] [Algebra.IsSeparable K L]
+  (hd : ∀ x, d x = Differential.deriv x)
+  (hinj : Function.Injective (algebraMap R K))
+
+/-- The actual trace on regular one-forms, for a base curve with
+a trivialized cotangent line. -/
+def traceOne (η : Ω[R⁄k]) : Ω[Chart f⁄k] →ₗ[R] Ω[R⁄k] :=
+  (LinearMap.toSpanSingleton R _ η).comp (regularFunctional b f hf hmin d hd hinj)
+
+theorem traceOne_apply (η : Ω[R⁄k]) (ω : Ω[Chart f⁄k]) :
+    traceOne b f hf hmin d hd hinj η ω = regularFunctional b f hf hmin d hd hinj ω • η :=
+  rfl
+
+variable [Differential K] [DifferentialAlgebra R K] [DifferentialAlgebra K L] [CharZero K]
+
+theorem traceOne_D (η : Ω[R⁄k])
+    (hη : ∀ r : R, Differential.deriv r • η = D k R r) (s : Chart f) :
+    traceOne b f hf hmin d hd hinj η (D k (Chart f) s) = D k R (valueTrace f hf s) := by
+  rw [traceOne_apply, regularFunctional_D, hη]
+
+/-- The trace is a chain map between the actual two-term de Rham
+complexes of a finite curve chart and its base. -/
+theorem trace_chain_map (η : Ω[R⁄k])
+    (hη : ∀ r : R, Differential.deriv r • η = D k R r) :
+    (traceOne b f hf hmin d hd hinj η).toAddMonoidHom.comp
+      (D k (Chart f)).toLinearMap.toAddMonoidHom =
+    (D k R).toLinearMap.toAddMonoidHom.comp (valueTrace f hf).toAddMonoidHom := by
+  ext s
+  exact traceOne_D b f hf hmin d hd hinj η hη s
+
+end CycleQ2MonogenicCurveTrace
+
+#print axioms CycleQ2MonogenicCurveTrace.trace_chain_map
+
+end
+
+section
+
+/-!
+# Exterior differentiation of one-forms in exact frames of any rank
+
+The ordinary derivative sends a scalar times an exact differential to
+its exterior product with the scalar's differential. The proof uses
+commuting spatial partials and works also for curve and surface charts.
+The resulting map commutes with pullback between charts of different
+relative dimensions.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2ExactFrameFirstDifferential
+
+open Module KaehlerDifferential
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+
+variable {K A : Type} [Field K] [CharZero K] [CommRing A] [Algebra K A]
+  {n : ℕ} (b : Basis (Fin n) A Ω[A⁄K]) (u : Fin n → A)
+  (hu : ∀ i, b i = D K A (u i))
+
+/-- The derivation dual to one basis differential. -/
+def spatialDerivative (i : Fin n) : Derivation K A A :=
+  (linearMapEquivDerivation K A) (b.coord i)
+
+theorem partial_apply (i : Fin n) (a : A) : spatialDerivative b i a = b.coord i (D K A a) := rfl
+
+include hu in
+theorem partial_coordinate (i j : Fin n) : spatialDerivative b i (u j) = if j = i then 1 else 0 := by
+  rw [partial_apply, ← hu, Basis.coord_apply, Basis.repr_self_apply]
+
+include hu in
+theorem partials_commute (i j : Fin n) : Function.Commute (spatialDerivative b i) (spatialDerivative b j) := by
+  let v := ⁅spatialDerivative b i, spatialDerivative b j⁆
+  have hv : v.liftKaehlerDifferential = 0 := by
+    apply b.ext
+    intro k
+    rw [hu, Derivation.liftKaehlerDifferential_comp_D, LinearMap.zero_apply]
+    change spatialDerivative b i (spatialDerivative b j (u k)) - spatialDerivative b j (spatialDerivative b i (u k)) = 0
+    rw [partial_coordinate b u hu j k, partial_coordinate b u hu i k]
+    split <;> split <;> simp
+  intro a
+  apply sub_eq_zero.mp
+  change v a = 0
+  rw [← Derivation.liftKaehlerDifferential_comp_D v, hv, LinearMap.zero_apply]
+
+def onOne : Ω[A⁄K] →+ Form K A 2 :=
+  ∑ i : Fin n, (wedgeLeft (b i)).toAddMonoidHom.comp
+    ((D K A).toLinearMap.toAddMonoidHom.comp (b.coord i).toAddMonoidHom)
+
+theorem onOne_apply (ω : Ω[A⁄K]) :
+    onOne b ω = ∑ i, wedge (D K A (b.coord i ω)) (b i) := by
+  simp [onOne, wedgeLeft]
+  rfl
+
+private theorem derivative_expansion (a : A) : D K A a = ∑ i, spatialDerivative b i a • b i :=
+  (b.sum_repr _).symm
+
+include hu in
+/-- The first two exterior differentials have zero composition. -/
+theorem onOne_D (a : A) : onOne b (D K A a) = 0 := by
+  rw [onOne_apply]
+  change (∑ i, wedge (D K A (spatialDerivative b i a)) (b i)) = 0
+  simp_rw [derivative_expansion b]
+  change (∑ i, wedgeLeft (b i) (∑ j, spatialDerivative b j (spatialDerivative b i a) • b j)) = 0
+  simp only [map_sum, map_smul]
+  let v (i j : Fin n) := spatialDerivative b j (spatialDerivative b i a) • wedge (b j) (b i)
+  have h (i j : Fin n) : v j i = -v i j := by
+    change spatialDerivative b i (spatialDerivative b j a) • wedge (b i) (b j) = _
+    rw [partials_commute b u hu i j a, wedge_swap (b j) (b i), smul_neg]
+  let s := ∑ i, ∑ j, v i j
+  have hs : s = -s := by
+    calc
+      s = ∑ i, ∑ j, v j i := Finset.sum_comm
+      _ = -s := by
+        change (∑ i, ∑ j, v j i) = -(∑ i, ∑ j, v i j)
+        rw [← Finset.sum_neg_distrib]
+        apply Finset.sum_congr rfl
+        intro i _
+        rw [← Finset.sum_neg_distrib]
+        exact Finset.sum_congr rfl (fun j _ => h i j)
+  have hz : (2 : K) • s = 0 := by
+    simpa only [two_smul, neg_add_cancel] using congrArg (fun x => x + s) hs
+  exact (smul_eq_zero.mp hz).resolve_left (by norm_num)
+
+theorem onOne_smul (a : A) (ω : Ω[A⁄K]) :
+    onOne b (a • ω) = a • onOne b ω + wedge (D K A a) ω := by
+  rw [onOne_apply, onOne_apply]
+  simp only [map_smul, smul_eq_mul, Derivation.leibniz]
+  change (∑ i, wedgeLeft (b i) (a • D K A (b.coord i ω) + b.coord i ω • D K A a)) = _
+  simp only [map_add, map_smul, Finset.sum_add_distrib, ← Finset.smul_sum]
+  change a • (∑ i, wedge (D K A (b.coord i ω)) (b i)) +
+    (∑ i, b.coord i ω • wedgeRight (D K A a) (b i)) = _
+  simp only [← map_smul, ← map_sum]
+  rw [show (∑ i, b.coord i ω • b i) = ω from b.sum_repr ω]
+  rfl
+
+include hu in
+theorem onOne_symbol (a c : A) : onOne b (a • D K A c) = wedge (D K A a) (D K A c) := by
+  rw [onOne_smul, onOne_D b u hu, smul_zero, zero_add]
+
+variable {B : Type} [CommRing B] [Algebra K B] {m : ℕ}
+  (φ : A →ₐ[K] B) (c : Basis (Fin m) B Ω[B⁄K]) (v : Fin m → B)
+  (hv : ∀ j, c j = D K B (v j))
+
+private theorem pull_exact_wedge (a d : A) :
+    exteriorPullback φ 2 (wedge (D K A a) (D K A d)) = wedge (D K B (φ a)) (D K B (φ d)) := by
+  have h₁ : D K A ∘ ![a,d] = ![D K A a,D K A d] := by
+    funext i
+    fin_cases i <;> rfl
+  have h₂ : D K B ∘ (φ ∘ ![a,d]) = ![D K B (φ a),D K B (φ d)] := by
+    funext i
+    fin_cases i <;> rfl
+  have h := exteriorPullback_d φ 2 ![a,d]
+  rw [h₁, h₂] at h
+  exact h
+
+include hu hv in
+theorem onOne_natural (ω : Ω[A⁄K]) :
+    exteriorPullback φ 2 (onOne b ω) = onOne c (onePullback φ ω) := by
+  rw [← b.sum_repr ω]
+  simp only [map_sum]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [hu, onOne_symbol b u hu, map_smulₛₗ, onePullback_d, onOne_symbol c v hv]
+  exact pull_exact_wedge φ (b.repr ω i) (u i)
+
+end CycleQ2ExactFrameFirstDifferential
+
+#print axioms CycleQ2ExactFrameFirstDifferential.onOne_D
+#print axioms CycleQ2ExactFrameFirstDifferential.onOne_natural
 
 end

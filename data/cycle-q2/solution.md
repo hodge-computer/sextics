@@ -198,6 +198,35 @@ quotient. The formula uses the actual restriction maps from \(D(fg)\)
 and \(D(fh)\).
 [Triangular equation change](GeometricUniversalWeightedDeRham.lean)
 
+## Trace of regular differentials in a finite monic chart
+
+For a finite separable field extension with generator \(y\) and minimal
+polynomial \(f\) of degree \(n\), the trace of \(p(y)/f'(y)\) is the
+coefficient of \(y^{n-1}\) in the monic remainder of \(p\) modulo \(f\).
+The trace-dual power basis gives this formula. If the original
+coefficients lie in a domain over which the equation is monic, the
+remainder coefficient lies in that domain.
+
+In the literal monic quotient the trace of a regular function and the
+trace of its product with the derivative of the generator are
+well-defined linear maps. For a compatible coordinate derivation
+\(\delta\), implicit differentiation contributes the term
+\(-f^\delta(y)/f'(y)\). The remainder formula cancels the denominator
+under trace. This gives a regular trace functional on the whole
+Kähler one-form module, including along ramification, and sends
+exact one-forms to derivatives of the ordinary function trace.
+When the base cotangent line has the chosen coordinate, the two
+regular trace maps commute with the de Rham differential. Gluing
+these local maps on the proper curve and comparing the induced
+pairing with the marked class remain open.
+
+The first exterior differential in a finite exact frame also
+commutes with pullback between different ranks. Its composite
+with the universal derivation is zero by commutation of the
+coordinate derivations. This applies in ranks two and three
+for the generic surface and the ambient threefold.
+[Finite monic trace and exterior differentiation](GeometricUniversalWeightedDeRham.lean)
+
 ## Cartan comparison of affine coefficient lifts
 
 On every native framed affine open the coefficient algebra is formally
