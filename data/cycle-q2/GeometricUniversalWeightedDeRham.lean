@@ -2422,3 +2422,1213 @@ end CycleQ2NativeGeneratorChange
 #print axioms CycleQ2NativeGeneratorChange.same_class
 
 end
+
+section
+
+/-!
+# Frame-independent contraction on ordinary relative forms
+
+Contraction with a relative derivation is defined by the alternating
+universal property. Its two- and three-form values therefore commute
+with restriction and do not require any choice of coordinates.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2CartanContraction
+
+open KaehlerDifferential CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A]
+
+private abbrev M := Ω[A⁄K]
+variable (v : Derivation K A A)
+
+abbrev one : Ω[A⁄K] →ₗ[A] A := v.liftKaehlerDifferential
+
+private theorem wedge_add_left (x y z : Ω[A⁄K]) : wedge (x+y) z = wedge x z + wedge y z :=
+  (wedgeLeft z).map_add x y
+private theorem wedge_add_right (x y z : Ω[A⁄K]) : wedge x (y+z) = wedge x y + wedge x z :=
+  (wedgeRight x).map_add y z
+private theorem wedge_smul_left (a : A) (x y : Ω[A⁄K]) : wedge (a • x) y = a • wedge x y :=
+  (wedgeLeft y).map_smul a x
+private theorem wedge_smul_right (a : A) (x y : Ω[A⁄K]) : wedge x (a • y) = a • wedge x y :=
+  (wedgeRight x).map_smul a y
+
+private def twoAlt : (M (K := K) (A := A)) [⋀^Fin 2]→ₗ[A] M (K := K) (A := A) where
+  toFun t := one v (t 0) • t 1 - one v (t 1) • t 0
+  map_update_add' t i x y := by
+    fin_cases i <;>
+      simp [add_smul, smul_add] <;> abel
+  map_update_smul' t i a x := by
+    fin_cases i <;> simp [smul_sub, smul_smul, mul_comm]
+  map_eq_zero_of_eq' t i j hij hne := by
+    fin_cases i <;> fin_cases j
+    · exact (hne rfl).elim
+    · change t 0 = t 1 at hij
+      rw [hij, sub_self]
+    · change t 1 = t 0 at hij
+      rw [hij, sub_self]
+    · exact (hne rfl).elim
+
+def two : Form K A 2 →ₗ[A] Ω[A⁄K] := exteriorPower.alternatingMapLinearEquiv (twoAlt v)
+
+theorem two_wedge (x y : Ω[A⁄K]) : two v (wedge x y) = one v x • y - one v y • x := by
+  rw [wedge, two, exteriorPower.alternatingMapLinearEquiv_apply_ιMulti]
+  rfl
+
+private theorem three_values (i : Fin 3) : i = 0 ∨ i = 1 ∨ i = 2 := by
+  fin_cases i
+  · exact Or.inl rfl
+  · exact Or.inr (Or.inl rfl)
+  · exact Or.inr (Or.inr rfl)
+
+private def threeAlt : (M (K := K) (A := A)) [⋀^Fin 3]→ₗ[A] Form K A 2 where
+  toFun t := one v (t 0) • wedge (t 1) (t 2) - one v (t 1) • wedge (t 0) (t 2) +
+    one v (t 2) • wedge (t 0) (t 1)
+  map_update_add' t i x y := by
+    have h01 : (0 : Fin 3) ≠ 1 := by omega
+    have h02 : (0 : Fin 3) ≠ 2 := by omega
+    have h12 : (1 : Fin 3) ≠ 2 := by omega
+    obtain rfl | rfl | rfl := three_values i <;>
+      simp only [Function.update_self, Function.update_of_ne h01, Function.update_of_ne h01.symm,
+        Function.update_of_ne h02, Function.update_of_ne h02.symm,
+        Function.update_of_ne h12, Function.update_of_ne h12.symm,
+        map_add, add_smul, smul_add, wedge_add_left, wedge_add_right] <;> abel
+  map_update_smul' t i a x := by
+    have h01 : (0 : Fin 3) ≠ 1 := by omega
+    have h02 : (0 : Fin 3) ≠ 2 := by omega
+    have h12 : (1 : Fin 3) ≠ 2 := by omega
+    obtain rfl | rfl | rfl := three_values i <;>
+      simp only [Function.update_self, Function.update_of_ne h01, Function.update_of_ne h01.symm,
+        Function.update_of_ne h02, Function.update_of_ne h02.symm,
+        Function.update_of_ne h12, Function.update_of_ne h12.symm,
+        map_smul, smul_eq_mul, smul_sub, smul_add, smul_smul, mul_comm,
+        wedge_smul_left,wedge_smul_right]
+  map_eq_zero_of_eq' t i j hij hne := by
+    fin_cases i <;> fin_cases j
+    · exact (hne rfl).elim
+    · change t 0 = t 1 at hij
+      rw [hij, wedge_self, smul_zero, sub_self, add_zero]
+    · change t 0 = t 2 at hij
+      rw [hij, wedge_self, smul_zero, sub_zero, wedge_swap (t 1) (t 2), smul_neg, add_neg_cancel]
+    · change t 1 = t 0 at hij
+      rw [hij, wedge_self, smul_zero, sub_self, add_zero]
+    · exact (hne rfl).elim
+    · change t 1 = t 2 at hij
+      rw [hij, wedge_self, smul_zero, zero_sub, neg_add_cancel]
+    · change t 2 = t 0 at hij
+      rw [hij, wedge_self, smul_zero, sub_zero, wedge_swap (t 0) (t 1), smul_neg, neg_add_cancel]
+    · change t 2 = t 1 at hij
+      rw [hij, wedge_self, smul_zero, zero_sub, neg_add_cancel]
+    · exact (hne rfl).elim
+
+def three : Form K A 3 →ₗ[A] Form K A 2 := exteriorPower.alternatingMapLinearEquiv (threeAlt v)
+
+theorem three_wedge (x y z : Ω[A⁄K]) :
+    three v (exteriorPower.ιMulti A 3 ![x,y,z]) =
+      one v x • wedge y z - one v y • wedge x z + one v z • wedge x y := by
+  rw [three, exteriorPower.alternatingMapLinearEquiv_apply_ιMulti]
+  rfl
+
+end CycleQ2CartanContraction
+
+#print axioms CycleQ2CartanContraction.two_wedge
+#print axioms CycleQ2CartanContraction.three_wedge
+
+end
+
+section
+
+/-!
+# The Cartan homotopy in the ordinary affine complex
+
+The two lower Lie derivatives are computed on scalar multiples of
+exact wedges. These are the identities needed to compare changes of
+coefficient lifts on affine intersections.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2CartanHomotopy
+
+open KaehlerDifferential Module
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+open CycleQ2CartanContraction
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A]
+  (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A) (hu : ∀ i, b i = D K A (u i))
+  (v : Derivation K A A)
+
+local notation "d₀" => D K A
+local notation "d₁" => differential b
+local notation "d₂" => exteriorD2 b (exactFrameDirection b)
+
+def lieOne : Ω[A⁄K] →+ Ω[A⁄K] :=
+  (d₀).toLinearMap.toAddMonoidHom.comp (one v).toAddMonoidHom + (two v).toAddMonoidHom.comp d₁
+
+def lieTwo : Form K A 2 →+ Form K A 2 :=
+  (d₁).comp (two v).toAddMonoidHom + (three v).toAddMonoidHom.comp (d₂).toAddMonoidHom
+
+def lieThree : Form K A 3 →+ Form K A 3 :=
+  (d₂).toAddMonoidHom.comp (three v).toAddMonoidHom
+
+include hu in
+theorem lieOne_symbol (a c : A) :
+    lieOne b v (a • d₀ c) = v a • d₀ c + a • d₀ (v c) := by
+  change d₀ (one v (a • d₀ c)) + two v (d₁ (a • d₀ c)) = _
+  rw [map_smul, Derivation.liftKaehlerDifferential_comp_D, differential_symbol b u hu,
+    two_wedge, Derivation.liftKaehlerDifferential_comp_D, Derivation.liftKaehlerDifferential_comp_D]
+  change d₀ (a * v c) + (v a • d₀ c - v c • d₀ a) = _
+  rw [Derivation.leibniz]
+  abel
+
+private theorem wedge_add_left (x y z : Ω[A⁄K]) : wedge (x+y) z = wedge x z + wedge y z :=
+  (wedgeLeft z).map_add x y
+private theorem wedge_smul_left (a : A) (x y : Ω[A⁄K]) : wedge (a • x) y = a • wedge x y :=
+  (wedgeLeft y).map_smul a x
+
+include hu in
+theorem lieTwo_symbol (a c e : A) :
+    lieTwo b v (a • wedge (d₀ c) (d₀ e)) = v a • wedge (d₀ c) (d₀ e) +
+      a • wedge (d₀ (v c)) (d₀ e) + a • wedge (d₀ c) (d₀ (v e)) := by
+  have hex : d₂ (a • wedge (d₀ c) (d₀ e)) = exteriorPower.ιMulti A 3 ![d₀ a, d₀ c, d₀ e] :=
+    exteriorD2_exactFrame b u hu a c e
+  change d₁ (two v (a • wedge (d₀ c) (d₀ e))) + three v (d₂ (a • wedge (d₀ c) (d₀ e))) = _
+  rw [hex, map_smul, two_wedge, three_wedge]
+  simp only [Derivation.liftKaehlerDifferential_comp_D, smul_sub, smul_smul, map_sub,
+    differential_symbol b u hu, Derivation.leibniz, wedge_add_left, wedge_smul_left]
+  rw [wedge_swap (d₀ c) (d₀ (v e)), smul_neg]
+  abel
+
+include hu in
+theorem lieOne_d (a : A) : lieOne b v (d₀ a) = d₀ (v a) := by
+  simpa only [one_smul, Derivation.map_one_eq_zero, zero_smul, zero_add] using lieOne_symbol b u hu v 1 a
+
+include hu in
+theorem lieTwo_d (ω : Ω[A⁄K]) : lieTwo b v (d₁ ω) = d₁ (lieOne b v ω) := by
+  change d₁ (two v (d₁ ω)) + three v (d₂ (d₁ ω)) =
+    d₁ (d₀ (one v ω) + two v (d₁ ω))
+  rw [differential_two_one b u hu, map_zero, add_zero, map_add,
+    differential_D b u hu, zero_add]
+
+include hu in
+theorem lieThree_d (ω : Form K A 2) : lieThree b v (d₂ ω) = d₂ (lieTwo b v ω) := by
+  change d₂ (three v (d₂ ω)) = d₂ (d₁ (two v ω) + three v (d₂ ω))
+  rw [map_add, differential_two_one b u hu, zero_add]
+
+end CycleQ2CartanHomotopy
+
+#print axioms CycleQ2CartanHomotopy.lieOne_symbol
+#print axioms CycleQ2CartanHomotopy.lieTwo_symbol
+#print axioms CycleQ2CartanHomotopy.lieThree_d
+
+end
+
+section
+
+/-!
+# Restriction and additivity of the Cartan corrections
+
+Compatible relative derivations give the same contractions after
+restriction. Contraction is additive in the derivation in each of the
+three degrees, which supplies the triple-overlap identity for
+successive changes of a coefficient lift.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2CartanNaturality
+
+open KaehlerDifferential
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+open CycleQ2CartanContraction
+open CycleQ2GeometricExteriorSheaf (exteriorMap_wedge)
+
+variable {K A B : Type} [CommRing K] [CommRing A] [CommRing B] [Algebra K A] [Algebra K B]
+  (φ : A →ₐ[K] B) (v : Derivation K A A) (w : Derivation K B B)
+  (h : ∀ a, w (φ a) = φ (v a))
+
+include h in
+theorem one_natural (α : Ω[A⁄K]) : one w (onePullback φ α) = φ (one v α) := by
+  have ha : α ∈ Submodule.span A (Set.range (D K A)) := by
+    rw [span_range_derivation]
+    trivial
+  induction ha using Submodule.span_induction with
+  | mem α hα =>
+    obtain ⟨a,rfl⟩ := hα
+    rw [onePullback_d, Derivation.liftKaehlerDifferential_comp_D, Derivation.liftKaehlerDifferential_comp_D]
+    exact h a
+  | zero => simp only [map_zero]
+  | add x y _ _ hx hy => simp only [map_add, hx, hy]
+  | smul a x _ hx =>
+    rw [map_smulₛₗ, map_smul, map_smul]
+    change φ a * one w (onePullback φ x) = φ (a * one v x)
+    rw [hx, map_mul]
+
+private theorem wedge_natural (x y : Ω[A⁄K]) :
+    exteriorPullback φ 2 (wedge x y) = wedge (onePullback φ x) (onePullback φ y) := by
+  unfold exteriorPullback wedge
+  rw [exteriorMap_wedge]
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+private theorem triple_natural (x y z : Ω[A⁄K]) :
+    exteriorPullback φ 3 (exteriorPower.ιMulti A 3 ![x,y,z]) =
+      exteriorPower.ιMulti B 3 ![onePullback φ x, onePullback φ y, onePullback φ z] := by
+  unfold exteriorPullback
+  rw [exteriorMap_wedge]
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+include h in
+theorem two_natural (α : Form K A 2) :
+    two w (exteriorPullback φ 2 α) = onePullback φ (two v α) := by
+  have ha : α ∈ Submodule.span A (Set.range (exteriorPower.ιMulti A 2)) := by
+    rw [exteriorPower.ιMulti_span]
+    trivial
+  induction ha using Submodule.span_induction with
+  | mem α hα =>
+    obtain ⟨a,rfl⟩ := hα
+    have e : a = ![a 0,a 1] := by funext i; fin_cases i <;> rfl
+    rw [e]
+    change two w (exteriorPullback φ 2 (wedge (a 0) (a 1))) =
+      onePullback φ (two v (wedge (a 0) (a 1)))
+    rw [wedge_natural, two_wedge, two_wedge, map_sub, map_smulₛₗ, map_smulₛₗ,
+      one_natural φ v w h, one_natural φ v w h]
+    rfl
+  | zero => simp only [map_zero]
+  | add x y _ _ hx hy => simp only [map_add, hx, hy]
+  | smul a x _ hx => rw [map_smulₛₗ, map_smul, map_smul, map_smulₛₗ, hx]
+
+include h in
+theorem three_natural (α : Form K A 3) :
+    three w (exteriorPullback φ 3 α) = exteriorPullback φ 2 (three v α) := by
+  have ha : α ∈ Submodule.span A (Set.range (exteriorPower.ιMulti A 3)) := by
+    rw [exteriorPower.ιMulti_span]
+    trivial
+  induction ha using Submodule.span_induction with
+  | mem α hα =>
+    obtain ⟨a,rfl⟩ := hα
+    have e : a = ![a 0,a 1,a 2] := by funext i; fin_cases i <;> rfl
+    rw [e, triple_natural, three_wedge, three_wedge]
+    simp only [map_add, map_sub, map_smulₛₗ, wedge_natural, one_natural φ v w h]
+    rfl
+  | zero => simp only [map_zero]
+  | add x y _ _ hx hy => simp only [map_add, hx, hy]
+  | smul a x _ hx => rw [map_smulₛₗ, map_smul, map_smul, map_smulₛₗ, hx]
+
+variable (e : Derivation K A A)
+
+theorem one_add : one (v + e) = one v + one e := by
+  apply Derivation.liftKaehlerDifferential_unique
+  ext a
+  change one (v + e) (D K A a) = (one v + one e) (D K A a)
+  simp only [LinearMap.add_apply, Derivation.liftKaehlerDifferential_comp_D, Derivation.add_apply]
+
+theorem two_add : two (v + e) = two v + two e := by
+  apply exteriorPower.linearMap_ext
+  ext a : 1
+  have he : a = ![a 0,a 1] := by funext i; fin_cases i <;> rfl
+  rw [he]
+  change two (v + e) (wedge (a 0) (a 1)) = (two v + two e) (wedge (a 0) (a 1))
+  simp only [LinearMap.add_apply, two_wedge, one_add, add_smul]
+  abel
+
+theorem three_add : three (v + e) = three v + three e := by
+  apply exteriorPower.linearMap_ext
+  ext a : 1
+  have he : a = ![a 0,a 1,a 2] := by funext i; fin_cases i <;> rfl
+  rw [he]
+  change three (v + e) (exteriorPower.ιMulti A 3 ![a 0,a 1,a 2]) =
+    (three v + three e) (exteriorPower.ιMulti A 3 ![a 0,a 1,a 2])
+  simp only [LinearMap.add_apply, three_wedge, one_add, add_smul]
+  abel
+
+end CycleQ2CartanNaturality
+
+#print axioms CycleQ2CartanNaturality.three_natural
+#print axioms CycleQ2CartanNaturality.three_add
+
+end
+
+section
+
+/-!
+# The canonical contraction in the ordered exact volume frame
+
+The frame-independent alternating contraction agrees with the signed
+coordinate expression on the volume. Its Lie derivative has the
+coefficient Leibniz rule, as do the lower Cartan operators.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2CartanTopComparison
+
+open Module KaehlerDifferential
+open CycleQ2CartanContraction CycleQ2CartanHomotopy CycleQ2RelativeTopCartan
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A]
+  (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A) (hu : ∀ i, b i = D K A (u i))
+  (v : Derivation K A A)
+
+private theorem omittedBasis (i : Fin 3) : twoBasis b i = exteriorPower.ιMulti A 2 (i.removeNth b) := by
+  rw [twoBasis, Basis.reindex_apply, Equiv.symm_symm]
+  change b.exteriorPower 2 (⟨{i}ᶜ, by simp [Finset.card_compl]⟩ : Set.powersetCard (Fin 3) 2) = _
+  rw [exteriorPower.basis_apply]
+  unfold exteriorPower.ιMulti_family
+  congr 1
+  funext j
+  simp only [Function.comp_apply, Set.powersetCard.ofFinEmbEquiv_symm_apply,
+    Finset.orderEmbOfFin_compl_singleton_eq_succAboveOrderEmb, Fin.removeNth]
+  rfl
+
+include hu in
+theorem contraction_volume (a : A) : three v (a • volume b) = contraction b u v a := by
+  have hb : (b : Fin 3 → Ω[A⁄K]) = ![b 0,b 1,b 2] := by
+    funext i
+    fin_cases i <;> rfl
+  have h₀ : wedge (b 1) (b 2) = twoBasis b 0 := by rw [omittedBasis]; rfl
+  have h₁ : wedge (b 0) (b 2) = twoBasis b 1 := by rw [omittedBasis]; rfl
+  have h₂ : wedge (b 0) (b 1) = twoBasis b 2 := by rw [omittedBasis]; rfl
+  have hi (i : Fin 3) : one v (b i) = v (u i) := by rw [hu, Derivation.liftKaehlerDifferential_comp_D]
+  rw [map_smul, volume]
+  conv_lhs => rw [hb, three_wedge]
+  rw [h₀,h₁,h₂,hi,hi,hi]
+  apply (twoBasis b).repr.injective
+  ext i
+  have h : (twoBasis b).repr ((twoBasis b).equivFun.symm
+      (fun i => (-1 : A) ^ i.val * (a * v (u i)))) i = (-1 : A) ^ i.val * (a * v (u i)) :=
+    Basis.coord_equivFun_symm (twoBasis b) i _
+  change (twoBasis b).repr (a • _) i = (twoBasis b).repr ((twoBasis b).equivFun.symm _) i
+  rw [h]
+  fin_cases i <;>
+    simp [Finsupp.single_apply, smul_eq_mul]
+
+include hu in
+theorem lieThree_volume (a : A) : lieThree b v (a • volume b) =
+    (v a + a * ∑ i, exactFrameDirection b i (v (u i))) • volume b := by
+  change exteriorD2 b (exactFrameDirection b) (three v (a • volume b)) = _
+  rw [contraction_volume b u hu, derivative_contraction b u hu]
+
+include hu in
+theorem lieThree_smul (a : A) (ω : Form K A 3) :
+    lieThree b v (a • ω) = v a • ω + a • lieThree b v ω := by
+  obtain ⟨r,rfl⟩ := topForm_scalar b ω
+  simp only [smul_smul, lieThree_volume b u hu v, Derivation.leibniz, smul_eq_mul, ← add_smul]
+  congr 1
+  ring
+
+end CycleQ2CartanTopComparison
+
+#print axioms CycleQ2CartanTopComparison.contraction_volume
+#print axioms CycleQ2CartanTopComparison.lieThree_smul
+
+end
+
+section
+
+/-!
+# Extending a coefficient lift to an étale overlap
+
+Étale base change of the absolute Kähler module extends the derivation
+uniquely. The extension agrees on all original functions, including
+the exact coordinates and the ground-field coefficients.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2EtaleCoefficientTransport
+
+open KaehlerDifferential CycleQ2RelativeDerivationLift
+open scoped TensorProduct
+
+variable {k K A B : Type} [CommRing k] [CommRing K] [CommRing A] [CommRing B]
+  [Algebra k K] [Algebra K A] [Algebra K B] [Algebra k A] [Algebra k B] [Algebra A B]
+  [IsScalarTower k K A] [IsScalarTower k K B] [IsScalarTower K A B] [IsScalarTower k A B]
+  [Algebra.FormallyEtale A B]
+
+/-- The canonical extension along the actual étale restriction. -/
+def extend (d : Derivation k A A) : Derivation k B B :=
+  ((((Algebra.linearMap A B).comp d.liftKaehlerDifferential).liftBaseChange B).comp
+    (tensorKaehlerEquivOfFormallyEtale k A B).symm.toLinearMap).compDer (D k B)
+
+theorem extend_apply (d : Derivation k A A) (a : A) :
+    extend (B := B) d (algebraMap A B a) = algebraMap A B (d a) := by
+  change ((Algebra.linearMap A B).comp d.liftKaehlerDifferential).liftBaseChange B
+    ((tensorKaehlerEquivOfFormallyEtale k A B).symm (D k B (algebraMap A B a))) = _
+  rw [tensorKaehlerEquivOfFormallyEtale_symm_D_algebraMap, LinearMap.liftBaseChange_tmul,
+    one_smul, LinearMap.comp_apply, Derivation.liftKaehlerDifferential_comp_D]
+  rfl
+
+private theorem same_extension (d e : Derivation k B B)
+    (h : ∀ a : A, d (algebraMap A B a) = e (algebraMap A B a)) : d = e := by
+  let v := asRelative (K := A) (d-e) (by intro a; change d _ - e _ = 0; rw [h, sub_self])
+  have hz : v = 0 := by
+    ext b
+    have he : D A B b = 0 := Subsingleton.elim _ _
+    rw [← Derivation.liftKaehlerDifferential_comp_D v, he, map_zero, Derivation.zero_apply]
+  ext b
+  exact sub_eq_zero.mp (DFunLike.congr_fun hz b)
+
+theorem extend_unique (d : Derivation k A A) (e : Derivation k B B)
+    (h : ∀ a, e (algebraMap A B a) = algebraMap A B (d a)) : extend d = e :=
+  same_extension (extend d) e (fun a => (extend_apply d a).trans (h a).symm)
+
+theorem extend_coefficients (δ : Derivation k K K) (d : Derivation k A A)
+    (h : ∀ a, d (algebraMap K A a) = algebraMap K A (δ a)) (a : K) :
+    extend (B := B) d (algebraMap K B a) = algebraMap K B (δ a) := by
+  rw [IsScalarTower.algebraMap_apply K A B, extend_apply, h, ← IsScalarTower.algebraMap_apply K A B]
+
+theorem extend_fixes (d : Derivation k A A) (a : A) (h : d a = 0) :
+    extend (B := B) d (algebraMap A B a) = 0 := by rw [extend_apply, h, map_zero]
+
+end CycleQ2EtaleCoefficientTransport
+
+#print axioms CycleQ2EtaleCoefficientTransport.extend_unique
+#print axioms CycleQ2EtaleCoefficientTransport.extend_coefficients
+
+end
+
+section
+
+/-!
+# Lie differentiation for an arbitrary coefficient lift
+
+A lift of a fixed base derivation is a coordinate-fixing lift plus
+an ordinary relative derivation. Add its Cartan operator to the local
+coefficient derivative. The resulting operators have the intrinsic
+exact-symbol formulas and the correct change-of-lift homotopies.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2CoefficientLieLift
+
+open KaehlerDifferential Module
+open CycleQ2RelativeDerivationLift CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+open CycleQ2RelativeChartConnection CycleQ2CartanHomotopy CycleQ2CartanTopComparison
+
+variable {k K A : Type} [CommRing k] [CommRing K] [CommRing A]
+  [Algebra k K] [Algebra K A] [Algebra k A] [IsScalarTower k K A]
+  (δ : Derivation k K K) (d e : Derivation k A A)
+  (hd : ∀ a, d (algebraMap K A a) = algebraMap K A (δ a))
+  (he : ∀ a, e (algebraMap K A a) = algebraMap K A (δ a))
+  (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A) (hb : ∀ i, b i = D K A (u i))
+  (hfix : ∀ i, e (u i) = 0)
+
+abbrev correction : Derivation K A A :=
+  asRelative (d-e) (by intro x; change d _ - e _ = 0; rw [hd,he,sub_self])
+
+def onOne : Ω[A⁄K] →+ Ω[A⁄K] := onBasis e b + lieOne b (correction δ d e hd he)
+def onTwo : Form K A 2 →+ Form K A 2 := onBasis e (twoBasis b) + lieTwo b (correction δ d e hd he)
+def onThree : Form K A 3 →+ Form K A 3 := onBasis e (b.exteriorPower 3) + lieThree b (correction δ d e hd he)
+
+local notation "∂" => D K A
+
+include hb hfix in
+theorem onOne_symbol (a c : A) :
+    onOne δ d e hd he b (a • ∂ c) = d a • ∂ c + a • ∂ (d c) := by
+  let v := correction δ d e hd he
+  change onBasis e b (a • ∂ c) + lieOne b v (a • ∂ c) = _
+  rw [CycleQ2RelativeChartConnection.onOne_symbol δ e he b u hb hfix, lieOne_symbol b u hb]
+  change a • ∂ (e c) + e a • ∂ c + ((d a - e a) • ∂ c + a • ∂ (d c - e c)) = _
+  simp only [map_sub, sub_smul, smul_sub]
+  abel
+
+private theorem wedge_sub_left (x y z : Ω[A⁄K]) : wedge (x-y) z = wedge x z - wedge y z :=
+  (wedgeLeft z).map_sub x y
+private theorem wedge_sub_right (x y z : Ω[A⁄K]) : wedge x (y-z) = wedge x y - wedge x z :=
+  (wedgeRight x).map_sub y z
+
+include hb hfix in
+theorem onTwo_symbol (a c f : A) :
+    onTwo δ d e hd he b (a • wedge (∂ c) (∂ f)) = d a • wedge (∂ c) (∂ f) +
+      a • wedge (∂ (d c)) (∂ f) + a • wedge (∂ c) (∂ (d f)) := by
+  let v := correction δ d e hd he
+  change onBasis e (twoBasis b) (a • wedge (∂ c) (∂ f)) + lieTwo b v (a • wedge (∂ c) (∂ f)) = _
+  rw [onBasis_smul, onTwo_wedge, onOne_D δ e he b u hb hfix, onOne_D δ e he b u hb hfix,
+    lieTwo_symbol b u hb]
+  change a • (wedge (∂ (e c)) (∂ f) + wedge (∂ c) (∂ (e f))) + e a • wedge (∂ c) (∂ f) +
+    ((d a - e a) • wedge (∂ c) (∂ f) + a • wedge (∂ (d c - e c)) (∂ f) +
+      a • wedge (∂ c) (∂ (d f - e f))) = _
+  have hsub (x y : A) : ∂ (x-y) = ∂ x - ∂ y := map_sub (D K A) x y
+  rw [hsub, hsub, wedge_sub_left, wedge_sub_right]
+  simp only [sub_eq_add_neg, add_smul, neg_smul, smul_add, smul_neg]
+  abel
+
+private def fullIndex : Set.powersetCard (Fin 3) 3 := ⟨Finset.univ, by simp⟩
+
+private theorem volume_basis : b.exteriorPower 3 fullIndex = volume b := by
+  rw [exteriorPower.basis_apply]
+  unfold exteriorPower.ιMulti_family volume
+  congr 1
+  funext j
+  apply congrArg b
+  have h : (fun i : Fin 3 => i) = (Finset.univ : Finset (Fin 3)).orderEmbOfFin (by simp) :=
+    Finset.orderEmbOfFin_unique _ (fun _ => Finset.mem_univ _) strictMono_id
+  exact (congrFun h j).symm
+
+private theorem coefficient_on_volume (a : A) :
+    onBasis e (b.exteriorPower 3) (a • volume b) = e a • volume b := by
+  rw [← volume_basis, onBasis_smul]
+  suffices h : onBasis e (b.exteriorPower 3) (b.exteriorPower 3 fullIndex) = 0 by
+    rw [h, smul_zero, zero_add]
+  apply (b.exteriorPower 3).repr.injective
+  ext i
+  rw [onBasis_repr, Basis.repr_self, Finsupp.single_apply]
+  split <;> simp
+
+include hb hfix in
+theorem onTwo_d (ω : Ω[A⁄K]) :
+    onTwo δ d e hd he b (differential b ω) = differential b (onOne δ d e hd he b ω) := by
+  change onBasis e (twoBasis b) (differential b ω) + lieTwo b (correction δ d e hd he) (differential b ω) =
+    differential b (onBasis e b ω + lieOne b (correction δ d e hd he) ω)
+  rw [lieTwo_d b u hb, map_add, differential_onOne δ e he b u hb hfix]
+
+include hb hfix in
+theorem onThree_d (ω : Form K A 2) :
+    onThree δ d e hd he b (exteriorD2 b (exactFrameDirection b) ω) =
+      exteriorD2 b (exactFrameDirection b) (onTwo δ d e hd he b ω) := by
+  change onBasis e (b.exteriorPower 3) (exteriorD2 b (exactFrameDirection b) ω) +
+    lieThree b (correction δ d e hd he) (exteriorD2 b (exactFrameDirection b) ω) =
+    exteriorD2 b (exactFrameDirection b)
+      (onBasis e (twoBasis b) ω + lieTwo b (correction δ d e hd he) ω)
+  rw [lieThree_d b u hb, map_add, exteriorD2_onBasis δ e he b u hb hfix]
+  congr 1
+  rw [exteriorD2_divergence, coefficient_on_volume]
+  rfl
+
+include hb in
+theorem onThree_smul (a : A) (ω : Form K A 3) :
+    onThree δ d e hd he b (a • ω) = a • onThree δ d e hd he b ω + d a • ω := by
+  change onBasis e (b.exteriorPower 3) (a • ω) + lieThree b (correction δ d e hd he) (a • ω) =
+    a • (onBasis e (b.exteriorPower 3) ω + lieThree b (correction δ d e hd he) ω) + d a • ω
+  rw [onBasis_smul, lieThree_smul b u hb]
+  change a • onBasis e (b.exteriorPower 3) ω + e a • ω +
+    ((d a - e a) • ω + a • lieThree b (correction δ d e hd he) ω) = _
+  simp only [sub_eq_add_neg, add_smul, neg_smul, smul_add]
+  abel
+
+include hb hfix in
+/-- On a triple of exact forms, Lie differentiation substitutes the
+coefficient derivative in each slot. -/
+theorem onThree_symbol (a c f : A) :
+    onThree δ d e hd he b (exteriorPower.ιMulti A 3 ![∂ a, ∂ c, ∂ f]) =
+      exteriorPower.ιMulti A 3 ![∂ (d a), ∂ c, ∂ f] +
+      exteriorPower.ιMulti A 3 ![∂ a, ∂ (d c), ∂ f] +
+      exteriorPower.ιMulti A 3 ![∂ a, ∂ c, ∂ (d f)] := by
+  have h (x y z : A) : exteriorD2 b (exactFrameDirection b) (x • wedge (∂ y) (∂ z)) =
+      exteriorPower.ιMulti A 3 ![∂ x, ∂ y, ∂ z] := exteriorD2_exactFrame b u hb x y z
+  rw [← h a c f, onThree_d δ d e hd he b u hb hfix, onTwo_symbol δ d e hd he b u hb hfix,
+    map_add, map_add, h, h, h]
+
+end CycleQ2CoefficientLieLift
+
+#print axioms CycleQ2CoefficientLieLift.onOne_symbol
+#print axioms CycleQ2CoefficientLieLift.onThree_smul
+#print axioms CycleQ2CoefficientLieLift.onThree_symbol
+
+end
+
+section
+
+/-!
+# The intrinsic overlap correction for changing a coefficient lift
+
+In one common exact frame the difference of two local coefficient
+operators is the Cartan homotopy for their relative difference. The
+contractions add on triple overlaps and commute with restriction.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2CoefficientOverlapHomotopy
+
+open KaehlerDifferential Module
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+open CycleQ2CartanContraction CycleQ2CartanHomotopy CycleQ2CartanNaturality
+open CycleQ2CoefficientLieLift
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A]
+  (b : Basis (Fin 3) A Ω[A⁄K])
+
+private theorem lieOne_add (v w : Derivation K A A) :
+    lieOne b (v+w) = lieOne b v + lieOne b w := by
+  ext ω
+  change D K A (one (v+w) ω) + two (v+w) (differential b ω) =
+    (D K A (one v ω) + two v (differential b ω)) + (D K A (one w ω) + two w (differential b ω))
+  simp only [one_add, two_add, LinearMap.add_apply, map_add]
+  abel
+
+private theorem lieTwo_add (v w : Derivation K A A) :
+    lieTwo b (v+w) = lieTwo b v + lieTwo b w := by
+  ext ω : 1
+  change differential b (two (v+w) ω) + three (v+w) (exteriorD2 b (exactFrameDirection b) ω) =
+    (differential b (two v ω) + three v (exteriorD2 b (exactFrameDirection b) ω)) +
+      (differential b (two w ω) + three w (exteriorD2 b (exactFrameDirection b) ω))
+  simp only [two_add, three_add, LinearMap.add_apply, map_add]
+  abel
+
+private theorem lieThree_add (v w : Derivation K A A) :
+    lieThree b (v+w) = lieThree b v + lieThree b w := by
+  ext ω : 1
+  change exteriorD2 b (exactFrameDirection b) (three (v+w) ω) =
+    exteriorD2 b (exactFrameDirection b) (three v ω) + exteriorD2 b (exactFrameDirection b) (three w ω)
+  simp only [three_add, LinearMap.add_apply, map_add]
+
+variable {k : Type} [CommRing k] [Algebra k K] [Algebra k A] [IsScalarTower k K A]
+  (δ : Derivation k K K) (d₁ d₂ e : Derivation k A A)
+  (h₁ : ∀ a, d₁ (algebraMap K A a) = algebraMap K A (δ a))
+  (h₂ : ∀ a, d₂ (algebraMap K A a) = algebraMap K A (δ a))
+  (he : ∀ a, e (algebraMap K A a) = algebraMap K A (δ a))
+
+/-- At a triple overlap the three relative corrections add exactly. -/
+theorem correction_trans : correction δ d₁ e h₁ he =
+    correction δ d₁ d₂ h₁ h₂ + correction δ d₂ e h₂ he := by
+  ext a
+  change d₁ a - e a = (d₁ a - d₂ a) + (d₂ a - e a)
+  abel
+
+theorem onOne_difference : onOne δ d₁ e h₁ he b - onOne δ d₂ e h₂ he b =
+    lieOne b (correction δ d₁ d₂ h₁ h₂) := by
+  unfold onOne
+  rw [correction_trans δ d₁ d₂ e h₁ h₂ he, lieOne_add]
+  abel
+
+theorem onTwo_difference : onTwo δ d₁ e h₁ he b - onTwo δ d₂ e h₂ he b =
+    lieTwo b (correction δ d₁ d₂ h₁ h₂) := by
+  unfold onTwo
+  rw [correction_trans δ d₁ d₂ e h₁ h₂ he, lieTwo_add]
+  abel
+
+theorem onThree_difference : onThree δ d₁ e h₁ he b - onThree δ d₂ e h₂ he b =
+    lieThree b (correction δ d₁ d₂ h₁ h₂) := by
+  unfold onThree
+  rw [correction_trans δ d₁ d₂ e h₁ h₂ he, lieThree_add]
+  abel
+
+end CycleQ2CoefficientOverlapHomotopy
+
+#print axioms CycleQ2CoefficientOverlapHomotopy.correction_trans
+#print axioms CycleQ2CoefficientOverlapHomotopy.onThree_difference
+
+end
+
+section
+
+/-!
+# The arbitrary coefficient operators commute with ordinary pullback
+
+Each operator is characterized by its exact-wedge formula. A
+restriction that intertwines the chosen derivations therefore
+intertwines the induced operators in all positive degrees, even when
+its two charts use different exact coordinate frames.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2CoefficientLiftNaturality
+
+open KaehlerDifferential Module
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham CycleQ2CoefficientLieLift
+open CycleQ2GeometricExteriorSheaf (exteriorMap_wedge)
+
+variable {k K A B : Type} [CommRing k] [CommRing K] [CommRing A] [CommRing B]
+  [Algebra k K] [Algebra k A] [Algebra k B] [Algebra K A] [Algebra K B]
+  [IsScalarTower k K A] [IsScalarTower k K B]
+  (δ : Derivation k K K) (φ : A →ₐ[K] B)
+  (d e : Derivation k A A) (r s : Derivation k B B)
+  (hd : ∀ x, d (algebraMap K A x) = algebraMap K A (δ x))
+  (he : ∀ x, e (algebraMap K A x) = algebraMap K A (δ x))
+  (hr : ∀ x, r (algebraMap K B x) = algebraMap K B (δ x))
+  (hs : ∀ x, s (algebraMap K B x) = algebraMap K B (δ x))
+  (h : ∀ a, r (φ a) = φ (d a))
+  (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A) (hb : ∀ i, b i = D K A (u i))
+  (hu : ∀ i, e (u i) = 0)
+  (c : Basis (Fin 3) B Ω[B⁄K]) (v : Fin 3 → B) (hc : ∀ i, c i = D K B (v i))
+  (hv : ∀ i, s (v i) = 0)
+
+private abbrev A₁ := onOne δ d e hd he b
+private abbrev B₁ := onOne δ r s hr hs c
+private abbrev A₂ := onTwo δ d e hd he b
+private abbrev B₂ := onTwo δ r s hr hs c
+private abbrev A₃ := onThree δ d e hd he b
+private abbrev B₃ := onThree δ r s hr hs c
+
+include h hb hu hc hv in
+theorem one_natural (ω : Ω[A⁄K]) :
+    onePullback φ (A₁ δ d e hd he b ω) = B₁ δ r s hr hs c (onePullback φ ω) := by
+  rw [← b.sum_repr ω, map_sum, map_sum, map_sum, map_sum]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [hb, onOne_symbol δ d e hd he b u hb hu, map_add, map_smulₛₗ, map_smulₛₗ,
+    map_smulₛₗ, onePullback_d, onePullback_d]
+  change φ (d (b.repr ω i)) • D K B (φ (u i)) + φ (b.repr ω i) • D K B (φ (d (u i))) =
+    B₁ δ r s hr hs c (φ (b.repr ω i) • D K B (φ (u i)))
+  rw [onOne_symbol δ r s hr hs c v hc hv, h, h]
+
+private theorem wedge_natural (x y : Ω[A⁄K]) :
+    exteriorPullback φ 2 (wedge x y) = wedge (onePullback φ x) (onePullback φ y) := by
+  unfold exteriorPullback wedge
+  rw [exteriorMap_wedge]
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+include h hb hu hc hv in
+theorem two_natural (ω : Form K A 2) :
+    exteriorPullback φ 2 (A₂ δ d e hd he b ω) = B₂ δ r s hr hs c (exteriorPullback φ 2 ω) := by
+  let l := (exteriorPullback φ 2).toAddMonoidHom.comp (A₂ δ d e hd he b)
+  let t := (B₂ δ r s hr hs c).comp (exteriorPullback φ 2).toAddMonoidHom
+  have e₀ : l = t := by
+    apply twoFormMap_ext b u hb
+    intro a x y
+    change exteriorPullback φ 2 (A₂ δ d e hd he b (a • wedge (D K A x) (D K A y))) =
+      B₂ δ r s hr hs c (exteriorPullback φ 2 (a • wedge (D K A x) (D K A y)))
+    rw [onTwo_symbol δ d e hd he b u hb hu, map_add, map_add, map_smulₛₗ,
+      map_smulₛₗ, map_smulₛₗ, map_smulₛₗ]
+    simp only [wedge_natural, onePullback_d]
+    change φ (d a) • wedge (D K B (φ x)) (D K B (φ y)) +
+      φ a • wedge (D K B (φ (d x))) (D K B (φ y)) +
+      φ a • wedge (D K B (φ x)) (D K B (φ (d y))) =
+      B₂ δ r s hr hs c (φ a • wedge (D K B (φ x)) (D K B (φ y)))
+    rw [onTwo_symbol δ r s hr hs c v hc hv, h, h, h]
+  exact DFunLike.congr_fun e₀ ω
+
+private def triple {C : Type} [CommRing C] [Algebra K C] (x y z : C) : Form K C 3 :=
+  exteriorPower.ιMulti C 3 ![D K C x,D K C y,D K C z]
+
+private theorem triple_natural (x y z : A) :
+    exteriorPullback φ 3 (triple (K := K) x y z) = triple (K := K) (φ x) (φ y) (φ z) := by
+  unfold triple
+  rw [exteriorPullback, exteriorMap_wedge]
+  apply congrArg (exteriorPower.ιMulti B 3)
+  funext i
+  fin_cases i <;> apply onePullback_d
+
+include h hb hu hc hv in
+theorem three_natural (ω : Form K A 3) :
+    exteriorPullback φ 3 (A₃ δ d e hd he b ω) = B₃ δ r s hr hs c (exteriorPullback φ 3 ω) := by
+  obtain ⟨a,rfl⟩ := topForm_scalar b ω
+  have hvol : volume b = triple (K := K) (u 0) (u 1) (u 2) := by
+    unfold volume triple
+    apply congrArg (exteriorPower.ιMulti A 3)
+    funext i
+    fin_cases i <;> apply hb
+  have sy (x y z : A) : A₃ δ d e hd he b (triple (K := K) x y z) =
+      triple (K := K) (d x) y z + triple (K := K) x (d y) z + triple (K := K) x y (d z) :=
+    onThree_symbol δ d e hd he b u hb hu x y z
+  have sz (x y z : B) : B₃ δ r s hr hs c (triple (K := K) x y z) =
+      triple (K := K) (r x) y z + triple (K := K) x (r y) z + triple (K := K) x y (r z) :=
+    onThree_symbol δ r s hr hs c v hc hv x y z
+  rw [hvol, onThree_smul δ d e hd he b u hb, sy, map_add, map_smulₛₗ,
+    map_smulₛₗ, map_smulₛₗ, onThree_smul δ r s hr hs c v hc]
+  simp only [map_add, triple_natural, h, sz]
+  rw [show r (φ.toRingHom a) = φ.toRingHom (d a) from h a]
+
+end CycleQ2CoefficientLiftNaturality
+
+#print axioms CycleQ2CoefficientLiftNaturality.one_natural
+#print axioms CycleQ2CoefficientLiftNaturality.two_natural
+#print axioms CycleQ2CoefficientLiftNaturality.three_natural
+
+end
+
+section
+
+/-!
+# The Čech Cartan correction on local overlap equations
+
+Use the coefficient lift at the first vertex of an ordered face.
+The correction contracts the tail cochain with the difference of
+its first two lifts. With total differential δ + (-1)^p d, the pair
+and triple equations are preserved by the resulting signed terms.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2CechCartanCorrection
+
+open KaehlerDifferential Module
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+open CycleQ2CartanContraction CycleQ2CartanHomotopy CycleQ2CartanNaturality
+open CycleQ2CoefficientLieLift CycleQ2CoefficientOverlapHomotopy
+
+variable {k K A I : Type} [CommRing k] [CommRing K] [CommRing A]
+  [Algebra k K] [Algebra k A] [Algebra K A] [IsScalarTower k K A]
+  (δ : Derivation k K K) (l : I → Derivation k A A) (e : Derivation k A A)
+  (hl : ∀ i x, l i (algebraMap K A x) = algebraMap K A (δ x))
+  (he : ∀ x, e (algebraMap K A x) = algebraMap K A (δ x))
+  (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A) (hb : ∀ i, b i = D K A (u i))
+  (hu : ∀ i, e (u i) = 0)
+
+private abbrev L₁ (i : I) := onOne δ (l i) e (hl i) he b
+private abbrev L₂ (i : I) := onTwo δ (l i) e (hl i) he b
+private abbrev L₃ (i : I) := onThree δ (l i) e (hl i) he b
+private abbrev v (i j : I) := correction δ (l i) (l j) (hl i) (hl j)
+
+local notation "L₁[" i "]" => L₁ δ l e hl he b i
+local notation "L₂[" i "]" => L₂ δ l e hl he b i
+local notation "L₃[" i "]" => L₃ δ l e hl he b i
+local notation "v[" i "," j "]" => v δ l hl i j
+local notation "d₀" => D K A
+local notation "d₁" => differential b
+local notation "d₂" => exteriorD2 b (exactFrameDirection b)
+
+private theorem difference₃ (i j : I) (ω : Form K A 3) :
+    L₃[i] ω - L₃[j] ω = d₂ (three v[i,j] ω) :=
+  DFunLike.congr_fun (onThree_difference b δ (l i) (l j) e (hl i) (hl j) he) ω
+
+private theorem difference₂ (i j : I) (η : Form K A 2) :
+    L₂[i] η - L₂[j] η = d₁ (two v[i,j] η) + three v[i,j] (d₂ η) :=
+  DFunLike.congr_fun (onTwo_difference b δ (l i) (l j) e (hl i) (hl j) he) η
+
+private theorem difference₁ (i j : I) (θ : Ω[A⁄K]) :
+    L₁[i] θ - L₁[j] θ = d₀ (one v[i,j] θ) + two v[i,j] (d₁ θ) :=
+  DFunLike.congr_fun (onOne_difference b δ (l i) (l j) e (hl i) (hl j) he) θ
+
+private theorem one_trans (i j k : I) (θ : Ω[A⁄K]) :
+    one v[i,k] θ = one v[i,j] θ + one v[j,k] θ := by
+  unfold v
+  rw [correction_trans δ (l i) (l j) (l k) (hl i) (hl j) (hl k), one_add, LinearMap.add_apply]
+
+private theorem two_trans (i j k : I) (η : Form K A 2) :
+    two v[i,k] η = two v[i,j] η + two v[j,k] η := by
+  unfold v
+  rw [correction_trans δ (l i) (l j) (l k) (hl i) (hl j) (hl k), two_add, LinearMap.add_apply]
+
+private theorem three_trans (i j k : I) (ω : Form K A 3) :
+    three v[i,k] ω = three v[i,j] ω + three v[j,k] ω := by
+  unfold v
+  rw [correction_trans δ (l i) (l j) (l k) (hl i) (hl j) (hl k), three_add, LinearMap.add_apply]
+
+abbrev correctedEdge (i j : I) (ωj : Form K A 3) (ηij : Form K A 2) :=
+  L₂[i] ηij - three v[i,j] ωj
+
+abbrev correctedFace (i j : I) (ηjk : Form K A 2) (θijk : Ω[A⁄K]) :=
+  L₁[i] θijk + two v[i,j] ηjk
+
+abbrev correctedTetrahedron (i j : I) (θjkl : Ω[A⁄K]) (ζijkl : A) :=
+  l i ζijkl - one v[i,j] θjkl
+
+include hb hu in
+theorem pair (i j : I) (ωi ωj : Form K A 3) (ηij : Form K A 2) (hη : ωj - ωi = d₂ ηij) :
+    L₃[j] ωj - L₃[i] ωi = d₂ (correctedEdge δ l e hl he b i j ωj ηij) := by
+  calc
+    _ = (L₃[i] ωj - L₃[i] ωi) - (L₃[i] ωj - L₃[j] ωj) := by abel
+    _ = L₃[i] (ωj - ωi) - d₂ (three v[i,j] ωj) := by
+      rw [map_sub, difference₃ δ l e hl he b]
+    _ = _ := by
+      rw [hη, onThree_d δ (l i) e (hl i) he b u hb hu, correctedEdge, map_sub]
+
+include hb hu in
+theorem triple (i j k : I) (ωj ωk : Form K A 3)
+    (ηij ηik ηjk : Form K A 2) (θ : Ω[A⁄K])
+    (hη : ωk - ωj = d₂ ηjk) (hθ : ηjk - ηik + ηij + d₁ θ = 0) :
+    correctedEdge δ l e hl he b j k ωk ηjk - correctedEdge δ l e hl he b i k ωk ηik +
+      correctedEdge δ l e hl he b i j ωj ηij + d₁ (correctedFace δ l e hl he b i j ηjk θ) = 0 := by
+  have hL : L₂[j] ηjk = L₂[i] ηjk - (d₁ (two v[i,j] ηjk) + three v[i,j] (d₂ ηjk)) := by
+    rw [← difference₂ δ l e hl he b]
+    abel
+  have hC : three v[i,j] (d₂ ηjk) = three v[i,j] ωk - three v[i,j] ωj := by rw [← hη, map_sub]
+  have hD : d₁ (L₁[i] θ) = L₂[i] (d₁ θ) := (onTwo_d δ (l i) e (hl i) he b u hb hu θ).symm
+  calc
+    _ = L₂[i] (ηjk - ηik + ηij + d₁ θ) := by
+      unfold correctedEdge correctedFace
+      rw [map_add, hD, hL, hC, three_trans δ l hl i j k]
+      simp only [map_add, map_sub]
+      abel
+    _ = 0 := by rw [hθ, map_zero]
+
+include hb hu in
+theorem quadruple (i j k : I)
+    (ηjk ηjm ηkm : Form K A 2) (θjkm θikm θijm θijk : Ω[A⁄K]) (ζ : A)
+    (hθ : ηkm - ηjm + ηjk + d₁ θjkm = 0)
+    (hζ : θjkm - θikm + θijm - θijk - d₀ ζ = 0) :
+    correctedFace δ l e hl he b j k ηkm θjkm - correctedFace δ l e hl he b i k ηkm θikm +
+      correctedFace δ l e hl he b i j ηjm θijm - correctedFace δ l e hl he b i j ηjk θijk -
+      d₀ (correctedTetrahedron δ l hl i j θjkm ζ) = 0 := by
+  have hL : L₁[j] θjkm = L₁[i] θjkm - (d₀ (one v[i,j] θjkm) + two v[i,j] (d₁ θjkm)) := by
+    rw [← difference₁ δ l e hl he b]
+    abel
+  have E : d₁ θjkm = -(ηkm - ηjm + ηjk) := eq_neg_of_add_eq_zero_right hθ
+  have hD : L₁[i] (d₀ ζ) = d₀ (l i ζ) := by
+    simpa only [one_smul, Derivation.map_one_eq_zero, zero_smul, zero_add] using
+      onOne_symbol δ (l i) e (hl i) he b u hb hu 1 ζ
+  calc
+    _ = L₁[i] (θjkm - θikm + θijm - θijk - d₀ ζ) := by
+      unfold correctedFace correctedTetrahedron
+      rw [hL, E, two_trans δ l hl i j k]
+      simp only [map_sub, map_add, map_neg, hD]
+      abel
+    _ = 0 := by rw [hζ, map_zero]
+
+/-- The fifth-vertex equation has only function values in its target. -/
+theorem quintuple (i j k : I)
+    (θklm θjlm θjkm θjkl : Ω[A⁄K]) (ζjklm ζiklm ζijlm ζijkm ζijkl : A)
+    (hθ : θklm - θjlm + θjkm - θjkl = d₀ ζjklm)
+    (hζ : ζjklm - ζiklm + ζijlm - ζijkm + ζijkl = 0) :
+    correctedTetrahedron δ l hl j k θklm ζjklm - correctedTetrahedron δ l hl i k θklm ζiklm +
+      correctedTetrahedron δ l hl i j θjlm ζijlm - correctedTetrahedron δ l hl i j θjkm ζijkm +
+      correctedTetrahedron δ l hl i j θjkl ζijkl = 0 := by
+  have hV : v[i,j] ζjklm = one v[i,j] θklm - one v[i,j] θjlm +
+      one v[i,j] θjkm - one v[i,j] θjkl := by
+    calc
+      _ = one v[i,j] (d₀ ζjklm) := (Derivation.liftKaehlerDifferential_comp_D v[i,j] ζjklm).symm
+      _ = _ := by rw [← hθ, map_sub, map_add, map_sub]
+  have hL : l j ζjklm = l i ζjklm - v[i,j] ζjklm := by
+    change l j ζjklm = l i ζjklm - (l i ζjklm - l j ζjklm)
+    abel
+  calc
+    _ = l i (ζjklm - ζiklm + ζijlm - ζijkm + ζijkl) := by
+      unfold correctedTetrahedron
+      rw [hL, hV, one_trans δ l hl i j k]
+      simp only [map_sub, map_add]
+      abel
+    _ = 0 := by rw [hζ, map_zero]
+
+
+abbrev correctedEdgeTwo (i j : I) (αj : Form K A 2) (βij : Ω[A⁄K]) :=
+  L₁[i] βij - two v[i,j] αj
+
+abbrev correctedFaceTwo (i j : I) (βjk : Ω[A⁄K]) (γijk : A) :=
+  l i γijk + one v[i,j] βjk
+
+include hb hu in
+/-- The pair component commutes with taking the boundary of a degree-two cochain. -/
+theorem boundary_pair (i j : I) (αi αj : Form K A 2) (βij : Ω[A⁄K]) :
+    L₂[j] αj - L₂[i] αi - d₁ (correctedEdgeTwo δ l e hl he b i j αj βij) =
+      correctedEdge δ l e hl he b i j (d₂ αj) (αj - αi - d₁ βij) := by
+  have hL : L₂[j] αj = L₂[i] αj - (d₁ (two v[i,j] αj) + three v[i,j] (d₂ αj)) := by
+    rw [← difference₂ δ l e hl he b]
+    abel
+  have hD := onTwo_d δ (l i) e (hl i) he b u hb hu βij
+  unfold correctedEdgeTwo correctedEdge
+  rw [hL, map_sub]
+  simp only [map_sub, hD]
+  abel
+
+include hb hu in
+/-- The triple component commutes with taking the boundary of a degree-two cochain. -/
+theorem boundary_triple (i j k : I) (αj αk : Form K A 2) (βij βik βjk : Ω[A⁄K]) (γ : A) :
+    correctedEdgeTwo δ l e hl he b j k αk βjk - correctedEdgeTwo δ l e hl he b i k αk βik +
+      correctedEdgeTwo δ l e hl he b i j αj βij + d₀ (correctedFaceTwo δ l hl i j βjk γ) =
+    correctedFace δ l e hl he b i j (αk - αj - d₁ βjk) (βjk - βik + βij + d₀ γ) := by
+  have hL : L₁[j] βjk = L₁[i] βjk - (d₀ (one v[i,j] βjk) + two v[i,j] (d₁ βjk)) := by
+    rw [← difference₁ δ l e hl he b]
+    abel
+  have hD : L₁[i] (d₀ γ) = d₀ (l i γ) := by
+    simpa only [one_smul, Derivation.map_one_eq_zero, zero_smul, zero_add] using
+      onOne_symbol δ (l i) e (hl i) he b u hb hu 1 γ
+  unfold correctedEdgeTwo correctedFaceTwo correctedFace
+  rw [hL, two_trans δ l hl i j k]
+  simp only [map_sub, map_add, hD]
+  abel
+
+/-- The four-vertex component commutes with the degree-two boundary. -/
+theorem boundary_quadruple (i j k : I) (βjk βjm βkm : Ω[A⁄K])
+    (γjkm γikm γijm γijk : A) :
+    correctedFaceTwo δ l hl j k βkm γjkm - correctedFaceTwo δ l hl i k βkm γikm +
+      correctedFaceTwo δ l hl i j βjm γijm - correctedFaceTwo δ l hl i j βjk γijk =
+    correctedTetrahedron δ l hl i j (βkm - βjm + βjk + d₀ γjkm) (γjkm - γikm + γijm - γijk) := by
+  have hL : l j γjkm = l i γjkm - v[i,j] γjkm := by
+    change l j γjkm = l i γjkm - (l i γjkm - l j γjkm)
+    abel
+  have hD : one v[i,j] (d₀ γjkm) = v[i,j] γjkm :=
+    Derivation.liftKaehlerDifferential_comp_D v[i,j] γjkm
+  unfold correctedFaceTwo correctedTetrahedron
+  rw [hL, one_trans δ l hl i j k]
+  simp only [map_sub, map_add, hD]
+  abel
+
+end CycleQ2CechCartanCorrection
+
+#print axioms CycleQ2CechCartanCorrection.pair
+#print axioms CycleQ2CechCartanCorrection.triple
+#print axioms CycleQ2CechCartanCorrection.quadruple
+#print axioms CycleQ2CechCartanCorrection.quintuple
+#print axioms CycleQ2CechCartanCorrection.boundary_pair
+#print axioms CycleQ2CechCartanCorrection.boundary_triple
+#print axioms CycleQ2CechCartanCorrection.boundary_quadruple
+
+end
+
+section
+
+/-!
+# The local cycle class under an arbitrary coefficient lift
+
+A relative change in the lift contributes the Cartan contraction of
+the closed double logarithmic form. Together with the coordinate-fixing
+formula this gives an explicit primitive for the coefficient derivative
+for every lift on the actual double localization.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2LogarithmicLieNaturality
+
+open KaehlerDifferential Module
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+open CycleQ2PrincipalGysinFunctions CycleQ2DoubleLogarithmicClass
+open CycleQ2CartanContraction CycleQ2CartanHomotopy CycleQ2CoefficientLieLift
+open CycleQ2RelativeChartConnection (onBasis onTwo_logarithms)
+
+variable {k K A : Type} [CommRing k] [CommRing K] [CommRing A]
+  [Algebra k K] [Algebra K A] [Algebra k A] [IsScalarTower k K A]
+  (δ : Derivation k K K) (d e : Derivation k A A)
+  (hd : ∀ a, d (algebraMap K A a) = algebraMap K A (δ a))
+  (he : ∀ a, e (algebraMap K A a) = algebraMap K A (δ a))
+  (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A) (hb : ∀ i, b i = D K A (u i))
+  (hu : ∀ i, e (u i) = 0)
+
+private def logCorrection (d : Derivation k A A) (f g : Aˣ) : Ω[A⁄K] :=
+  ((↑f⁻¹ : A) * d (f : A)) • logarithm (K := K) g -
+    ((↑g⁻¹ : A) * d (g : A)) • logarithm (K := K) f
+
+include hb hu in
+theorem exact_lie_twoLog (f g : Aˣ) :
+    onTwo δ d e hd he b (twoLog (K := K) f g) = differential b (logCorrection (K := K) d f g) := by
+  let v := correction δ d e hd he
+  let ω := twoLog (K := K) f g
+  have he₂ : onBasis e (twoBasis b) ω = differential b (logCorrection (K := K) e f g) :=
+    onTwo_logarithms δ e he b u hb hu f g
+  have hv₂ : lieTwo b v ω = differential b (two v ω) := by
+    change differential b (two v ω) + three v (exteriorD2 b (exactFrameDirection b) ω) = _
+    rw [closed b u hb f g, map_zero, add_zero]
+  have contraction (a : Aˣ) : one v (logarithm (K := K) a) = (↑a⁻¹ : A) * (d (a : A) - e (a : A)) := by
+    unfold logarithm
+    rw [map_smul, Derivation.liftKaehlerDifferential_comp_D]
+    rfl
+  have hC : logCorrection (K := K) e f g + two v ω = logCorrection (K := K) d f g := by
+    change logCorrection (K := K) e f g + two v (wedge (logarithm (K := K) f) (logarithm (K := K) g)) = _
+    rw [two_wedge, contraction, contraction]
+    simp only [logCorrection, sub_eq_add_neg, mul_add, mul_neg, add_smul, neg_smul]
+    abel
+  change onBasis e (twoBasis b) ω + lieTwo b v ω = _
+  rw [he₂, hv₂, ← map_add, hC]
+
+end CycleQ2LogarithmicLieNaturality
+
+#print axioms CycleQ2LogarithmicLieNaturality.exact_lie_twoLog
+
+end
+
+section
+
+/-!
+# Closedness of the triangular Čech correction before further localization
+
+The correction for replacing g by g + af is already closed on the
+single open where the two second equations are invertible. Hence it is
+a correction in the Čech–de Rham total differential itself.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2ClosedGeneratorCorrection
+
+open KaehlerDifferential Module
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A]
+  (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A) (hu : ∀ i, b i = D K A (u i))
+
+local notation "∂" => D K A
+local notation "J" => exteriorPower.ιMulti A 3
+
+private def front (y z : Ω[A⁄K]) : Ω[A⁄K] →ₗ[A] Form K A 3 where
+  toFun x := J ![x,y,z]
+  map_add' x w := (J).map_vecCons_add ![y,z] x w
+  map_smul' a x := (J).map_vecCons_smul ![y,z] a x
+
+private theorem front_same₁ (y z : Ω[A⁄K]) : front y z y = 0 :=
+  (J).map_eq_zero_of_eq _ (by rfl : ![y,y,z] (0 : Fin 3) = ![y,y,z] 1) (by decide)
+private theorem front_same₂ (y z : Ω[A⁄K]) : front y z z = 0 :=
+  (J).map_eq_zero_of_eq _ (by rfl : ![z,y,z] (0 : Fin 3) = ![z,y,z] 2) (by decide)
+private theorem front_swap (x y z : Ω[A⁄K]) : front y z x = -front y x z := by
+  have h : ![x,y,z] = ![z,y,x] ∘ Equiv.swap (0 : Fin 3) 2 := by
+    funext i
+    fin_cases i <;> rfl
+  unfold front
+  change J ![x,y,z] = -J ![z,y,x]
+  rw [h, AlternatingMap.map_swap _ _ (by decide : (0 : Fin 3) ≠ 2)]
+
+include hu in
+theorem closed (f a : A) (g h : Aˣ) (he : (h : A) = (g : A) + a * f) :
+    exteriorD2 b (exactFrameDirection b)
+      ((↑h⁻¹ : A) • wedge (∂ f) (∂ a) -
+        (a * (↑g⁻¹ : A) * (↑h⁻¹ : A)) • wedge (∂ f) (∂ (g : A))) = 0 := by
+  have hdiff : ∂ (h : A) = ∂ (g : A) + (a • ∂ f + f • ∂ a) := by
+    rw [he, map_add, Derivation.leibniz]
+  have hinvH : ∂ (↑h⁻¹ : A) = -((↑h⁻¹ : A)^2) • ∂ (h : A) :=
+    (∂).leibniz_of_mul_eq_one (by simp)
+  have hinvG : ∂ (↑g⁻¹ : A) = -((↑g⁻¹ : A)^2) • ∂ (g : A) :=
+    (∂).leibniz_of_mul_eq_one (by simp)
+  have H (r x y : A) : exteriorD2 b (exactFrameDirection b) (r • wedge (∂ x) (∂ y)) =
+      front (∂ x) (∂ y) (∂ r) := exteriorD2_exactFrame b u hu r x y
+  rw [map_sub, H, H, hinvH, hdiff]
+  have hfirst : front (∂ f) (∂ a) (-((↑h⁻¹ : A)^2) • (∂ (g : A) + (a • ∂ f + f • ∂ a))) =
+      ((↑h⁻¹ : A)^2) • front (∂ f) (∂ (g : A)) (∂ a) := by
+    rw [map_smul, map_add, map_add, map_smul, map_smul, front_same₁, front_same₂,
+      smul_zero, smul_zero, add_zero, add_zero, front_swap]
+    simp only [neg_smul, smul_neg, neg_neg]
+  rw [hfirst]
+  have hsecond : front (∂ f) (∂ (g : A)) (∂ (a * (↑g⁻¹ : A) * (↑h⁻¹ : A))) =
+      ((↑g⁻¹ : A) * (↑h⁻¹ : A) - a * (↑g⁻¹ : A) * ((↑h⁻¹ : A)^2) * f) •
+        front (∂ f) (∂ (g : A)) (∂ a) := by
+    rw [Derivation.leibniz, Derivation.leibniz, hinvH, hinvG, hdiff]
+    simp only [map_add, map_smul, map_neg, front_same₁, front_same₂, smul_zero, add_zero, zero_add,
+      smul_neg, neg_zero, smul_smul, sub_eq_add_neg, add_smul, neg_smul]
+    module
+  rw [hsecond]
+  suffices hcoef : (↑g⁻¹ : A) * (↑h⁻¹ : A) - a * (↑g⁻¹ : A) * ((↑h⁻¹ : A)^2) * f = (↑h⁻¹ : A)^2 by
+    rw [hcoef, sub_self]
+  have h₁ : (↑h⁻¹ : A)^2 * (h : A) = (↑h⁻¹ : A) := by
+    rw [pow_two, mul_assoc, Units.inv_mul, mul_one]
+  have h₂ : (↑g⁻¹ : A) * (g : A) = 1 := Units.inv_mul g
+  linear_combination - (↑g⁻¹ : A) * h₁ + (↑g⁻¹ : A) * (↑h⁻¹ : A)^2 * he + (↑h⁻¹ : A)^2 * h₂
+
+end CycleQ2ClosedGeneratorCorrection
+
+#print axioms CycleQ2ClosedGeneratorCorrection.closed
+
+end

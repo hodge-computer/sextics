@@ -5860,3 +5860,92 @@ end CycleQ2NativeDerivedTop
 #print axioms CycleQ2NativeDerivedTop.protected_of_supported_source
 
 end
+
+section
+
+/-!
+# Coefficient lifts on the actual framed affine site
+
+On every framed affine open of a smooth scheme over a field the
+section algebra is smooth. A lift fixing the selected coordinates
+therefore exists. The actual section-ring restriction extends the
+lift uniquely to every framed affine subopen.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2NativeAffineCoefficientLifts
+
+open AlgebraicGeometry CategoryTheory TopologicalSpace Opposite
+open CycleQ2SmoothRelativeFrames CycleQ2RelativeAffineOverlap CycleQ2FramedAffineSite
+open CycleQ2RelativeDerivationLift CycleQ2EtaleCoefficientTransport
+
+variable {k K : Type} [CommRing k] [Field K] [Algebra k K] {X : Scheme.{0}}
+  (f : X ⟶ Spec (CommRingCat.of K))
+
+def groundAlgebra (U : X.Opens) : Algebra k Γ(X, U) :=
+  ((sectionCoefficients f U).comp (algebraMap k K)).toAlgebra
+
+/-- The coefficient map is smooth for the actual sections, using the
+canonical identification of functions on the base field's spectrum. -/
+theorem section_smooth [Smooth f] (U : X.Opens) (hU : IsAffineOpen U) :
+    (sectionCoefficients f U).FormallySmooth := by
+  let hle : U ≤ f ⁻¹ᵁ ⊤ := by rw [Scheme.Hom.preimage_top]; exact le_top
+  have h := f.smooth_appLE (isAffineOpen_top _) hU hle
+  have hr : ((Scheme.ΓSpecIso (CommRingCat.of K)).inv).hom.FormallySmooth :=
+    RingHom.FormallySmooth.of_bijective
+      (ConcreteCategory.bijective_of_isIso (Scheme.ΓSpecIso (CommRingCat.of K)).inv)
+  exact hr.comp h.formallySmooth
+
+/-- On each chosen native framed affine chart, the unique horizontal
+lift for that exact coordinate frame exists. -/
+theorem chartLift [Smooth f] (U : FramedOpen f) (δ : Derivation k K K) :
+    letI : Algebra k Γ(X, U.1) := groundAlgebra f U.1
+    letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+    ∃! d : Derivation k Γ(X, U.1) Γ(X, U.1),
+      (∀ a, d (algebraMap K Γ(X, U.1) a) = algebraMap K Γ(X, U.1) (δ a)) ∧
+      ∀ i, d (functions f U i) = 0 := by
+  letI : Algebra k Γ(X, U.1) := groundAlgebra f U.1
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  letI : IsScalarTower k K Γ(X, U.1) := IsScalarTower.of_algebraMap_eq' rfl
+  letI : Algebra.FormallySmooth K Γ(X, U.1) := (section_smooth f U.1 U.2.1).toAlgebra
+  exact exact_lift δ (frame f U) (functions f U) (frame_apply f U)
+
+/-- At any native affine subopen, the actual ring restriction determines
+the unique extension of a lift. Its coefficient values are unchanged. -/
+theorem overlapLift {U V : FramedOpen f} (j : V ⟶ U) (δ : Derivation k K K) :
+    letI : Algebra k Γ(X, U.1) := groundAlgebra f U.1
+    letI : Algebra k Γ(X, V.1) := groundAlgebra f V.1
+    letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    ∀ (d : Derivation k Γ(X, U.1) Γ(X, U.1)),
+      (∀ a, d (algebraMap K Γ(X, U.1) a) = algebraMap K Γ(X, U.1) (δ a)) →
+      ∃! e : Derivation k Γ(X, V.1) Γ(X, V.1),
+        (∀ a, e (restrict f j.le a) = restrict f j.le (d a)) ∧
+        (∀ a, e (algebraMap K Γ(X, V.1) a) = algebraMap K Γ(X, V.1) (δ a)) := by
+  letI : Algebra k Γ(X, U.1) := groundAlgebra f U.1
+  letI : Algebra k Γ(X, V.1) := groundAlgebra f V.1
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  let φ := restrict f j.le
+  letI : Algebra Γ(X, U.1) Γ(X, V.1) := φ.toRingHom.toAlgebra
+  letI : IsScalarTower K Γ(X, U.1) Γ(X, V.1) := IsScalarTower.of_algHom φ
+  letI : IsScalarTower k K Γ(X, U.1) := IsScalarTower.of_algebraMap_eq' rfl
+  letI : IsScalarTower k K Γ(X, V.1) := IsScalarTower.of_algebraMap_eq' rfl
+  letI : IsScalarTower k Γ(X, U.1) Γ(X, V.1) := IsScalarTower.of_algebraMap_eq (fun x =>
+    (φ.commutes (algebraMap k K x)).symm)
+  letI : Algebra.Etale Γ(X, U.1) Γ(X, V.1) := (restrict_etale j.le U.2.1 V.2.1).toAlgebra
+  intro d hd
+  refine ⟨extend d, ⟨extend_apply d, extend_coefficients δ d hd⟩, ?_⟩
+  intro e h
+  exact (extend_unique d e h.1).symm
+
+end CycleQ2NativeAffineCoefficientLifts
+
+#print axioms CycleQ2NativeAffineCoefficientLifts.chartLift
+#print axioms CycleQ2NativeAffineCoefficientLifts.overlapLift
+
+end

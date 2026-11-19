@@ -198,6 +198,45 @@ quotient. The formula uses the actual restriction maps from \(D(fg)\)
 and \(D(fh)\).
 [Triangular equation change](GeometricUniversalWeightedDeRham.lean)
 
+## Cartan comparison of affine coefficient lifts
+
+On every native framed affine open the coefficient algebra is formally
+smooth. A coefficient derivation has a unique lift that fixes the chosen
+exact coordinates. Restriction to a framed affine subopen is étale. The
+absolute cotangent base-change isomorphism extends the lift uniquely and
+retains its values on the coefficients. [Native affine coefficient lifts](GeometricMonicGenericSupport.lean)
+
+Contraction by a relative derivation is defined by the alternating
+universal property in degrees two and three. It is additive in the
+relative direction and commutes with restriction. Its top formula
+agrees with contraction in the ordered volume frame. Adding the Cartan
+operator for a relative change of lift gives the coefficient operator
+for an arbitrary lift. The exact-wedge formulas prove that the operator
+commutes with restriction, including when the charts use different
+frames. The difference of two lifts on a common chart is
+\(d\iota_v+\iota_vd\), where \(v\) is their relative difference.
+
+On an ordered Čech face use the lift at the first vertex. Add the
+contraction of the tail cochain with the difference of the first two
+lifts, with sign \((-1)^p\) in Čech degree \(p\). The resulting local
+formulas preserve all degree-three cocycle equations, through the
+five-vertex function equation. The parallel calculation proves
+commutation with the boundary of degree-two cochains. On the double
+localization, the derivative of the two-equation logarithmic cochain
+for any lift has the explicit primitive
+\[
+ \bigl(f^{-1}D(f)\bigr)d\log g-\bigl(g^{-1}D(g)\bigr)d\log f.
+\]
+The correction for the triangular equation change is itself closed on
+the single open where both second equations are invertible. Its
+restriction therefore gives a boundary in the local Čech–de Rham total
+complex with zero exterior component on that single open.
+
+These identities are local inputs to the Gauss–Manin comparison.
+The global supported action of the proper graph and its comparison
+with the nonzero marked test remain open.
+[Cartan homotopies, Čech equations and logarithmic primitive](GeometricUniversalWeightedDeRham.lean)
+
 ## The fixed threefold and its moving curves
 
 The curve calculation takes place on the cubic section \(D\) of the weighted
