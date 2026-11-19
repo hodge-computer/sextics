@@ -198,6 +198,25 @@ quotient. The formula uses the actual restriction maps from \(D(fg)\)
 and \(D(fh)\).
 [Triangular equation change](GeometricUniversalWeightedDeRham.lean)
 
+## Localization on the actual swept complement
+
+For an open immersion (j:U\hookrightarrow X), restriction followed by
+direct image evaluates sections on (V\cap U). For each injective
+additive sheaf the restriction map is an epimorphism. Its kernel has
+zero sections on every subopen of (U). Applying this degreewise to
+an injective resolution gives a short exact sequence of complexes and
+its distinguished triangle. A class killed by restriction on that
+resolution factors through the kernel complex. The kernel has zero
+derived stalk at each point of (U).
+
+The native relative de Rham complex has an injective replacement in
+nonnegative degrees. On the complement of the actual swept image, the
+localization argument shows that vanishing of an ambient derived class
+with the specified weighted top value gives the protected rational
+primitive. The class with that value and vanishing restriction is still
+to be constructed.
+[Derived localization and the protected form](GeometricMonicGenericSupport.lean)
+
 ## Trace of regular differentials in a finite monic chart
 
 For a finite separable field extension with generator \(y\) and minimal

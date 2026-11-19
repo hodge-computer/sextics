@@ -71,6 +71,13 @@ import Mathlib.Topology.Sheaves.SheafCondition.Sites
 import Mathlib.CategoryTheory.Sites.IsSheafFor
 import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Zero
 import Mathlib.Algebra.Homology.Embedding.Extend
+import Proposal.GeometricCartierDerivedClass
+import Mathlib.Topology.Sheaves.Over
+import Mathlib.Algebra.Homology.DerivedCategory.ShortExact
+import Mathlib.Algebra.Homology.HomologicalComplexAbelian
+import Mathlib.Algebra.Category.Grp.FilteredColimits
+import Mathlib.Algebra.Homology.DerivedCategory.DerivabilityStructureInjectives
+import Mathlib.Algebra.Category.Grp.AB
 
 /-!
 # The proper graph has strict support in the native generic threefold
@@ -5735,6 +5742,375 @@ end
 section
 
 /-!
+# Sections with support in the complement of an actual open subset
+
+On sections, restriction followed by direct image evaluates the
+original sheaf on the intersection with the chosen open. The unit
+on an injective additive sheaf is an epimorphism, and its kernel
+has zero stalks on the open.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2OpenRestrictionSupport
+
+open CategoryTheory CategoryTheory.Limits Topology TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf injective_restriction_surjective)
+open CycleQ2ClosedEmbeddingSheafExact (push)
+
+variable {X : TopCat.{0}} (U : Opens X)
+
+abbrev inclusion : TopCat.of U ⟶ X := TopCat.ofHom ⟨Subtype.val, continuous_subtype_val⟩
+
+abbrev imageOpen : Opens U ⥤ Opens X := U.isOpenEmbedding.isOpenMap.functor
+
+abbrev onIntersection : AbSheaf X ⥤ AbSheaf X :=
+  U.sheafRestrict (C := AddCommGrpCat.{0}) ⋙ push (inclusion U)
+
+instance : (onIntersection U).Additive where
+  map_add := rfl
+
+abbrev intersection (V : Opens X) : Opens X := (imageOpen U).obj ((Opens.map (inclusion U)).obj V)
+
+theorem intersection_eq (V : Opens X) : intersection U V = V ⊓ U := by
+  ext x
+  change (∃ y : U, (y : X) ∈ V ∧ (y : X) = x) ↔ x ∈ V ∧ x ∈ U
+  exact ⟨fun ⟨y,hy,hx⟩ => ⟨hx ▸ hy,hx ▸ y.property⟩,
+    fun ⟨hx,hU⟩ => ⟨⟨x,hU⟩,hx,rfl⟩⟩
+
+theorem intersection_le (V : Opens X) : intersection U V ≤ V := by
+  rw [intersection_eq]
+  exact inf_le_left
+
+/-- The unit for restriction to the open and direct image back to the ambient space. -/
+def unit : 𝟭 (AbSheaf X) ⟶ onIntersection U where
+  app F := ⟨{
+    app := fun V => F.obj.map (homOfLE (intersection_le U V.unop)).op
+    naturality := by
+      intro V W i
+      change F.obj.map i ≫ F.obj.map (homOfLE (intersection_le U W.unop)).op =
+        F.obj.map (homOfLE (intersection_le U V.unop)).op ≫
+          F.obj.map (((imageOpen U).map ((Opens.map (inclusion U)).map i.unop)).op)
+      rw [← Functor.map_comp, ← Functor.map_comp]
+      exact congrArg F.obj.map (Subsingleton.elim _ _)
+    }⟩
+  naturality F G f := by
+    apply Sheaf.hom_ext
+    apply NatTrans.ext
+    funext V
+    exact (f.hom.naturality (homOfLE (intersection_le U V.unop)).op).symm
+
+@[simp]
+theorem unit_app_section (F : AbSheaf X) (V : Opens X) (x : F.obj.obj (op V)) :
+    ((unit U).app F).hom.app (op V) x =
+      F.obj.map (homOfLE (intersection_le U V)).op x := rfl
+
+theorem epi_unit_of_injective (F : AbSheaf X) [Injective F] : Epi ((unit U).app F) := by
+  apply (TopCat.Sheaf.isLocallySurjective_iff_epi _).mp
+  apply (TopCat.Presheaf.isLocallySurjective_iff _).mpr
+  intro V t x hx
+  obtain ⟨s, hs⟩ := injective_restriction_surjective F (intersection_le U V) t
+  refine ⟨V, le_rfl, ⟨s, ?_⟩, hx⟩
+  refine (unit_app_section U F V s).trans (hs.trans ?_)
+  change t = ((onIntersection U).obj F).obj.map (homOfLE (le_rfl : V ≤ V)).op t
+  have h : (homOfLE (le_rfl : V ≤ V)).op = 𝟙 (op V) := Subsingleton.elim _ _
+  rw [h]
+  exact (ConcreteCategory.congr_hom (((onIntersection U).obj F).obj.map_id (op V)) t).symm
+
+theorem unit_app_iso_of_le (F : AbSheaf X) (V : Opens X) (h : V ≤ U) :
+    IsIso (((unit U).app F).hom.app (op V)) := by
+  let e : intersection U V = V := (intersection_eq U V).trans (inf_eq_left.mpr h)
+  change IsIso (F.obj.map (homOfLE (intersection_le U V)).op)
+  have he : (homOfLE (intersection_le U V)).op = eqToHom (congrArg op e.symm) := Subsingleton.elim _ _
+  rw [he]
+  infer_instance
+
+theorem kernel_sections_zero (F : AbSheaf X) (V : Opens X) (h : V ≤ U) :
+    Subsingleton ((kernel ((unit U).app F)).obj.obj (op V)) := by
+  let p := (unit U).app F
+  let E := sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat.{0} ⋙
+    (evaluation _ _).obj (op V)
+  have he : Mono (E.map (kernel.ι p)) := inferInstance
+  have hi : IsIso (E.map p) := unit_app_iso_of_le U F V h
+  have hzero : E.map (kernel.ι p) = 0 := by
+    apply (cancel_mono (E.map p)).mp
+    rw [← E.map_comp, kernel.condition, E.map_zero, zero_comp]
+  have hI : IsZero (E.obj (kernel p)) := (IsZero.iff_id_eq_zero _).mpr (by
+    apply (cancel_mono (E.map (kernel.ι p))).mp
+    rw [Category.id_comp, hzero, zero_comp])
+  exact AddCommGrpCat.isZero_iff_subsingleton.mp hI
+
+end CycleQ2OpenRestrictionSupport
+
+#print axioms CycleQ2OpenRestrictionSupport.epi_unit_of_injective
+#print axioms CycleQ2OpenRestrictionSupport.kernel_sections_zero
+
+end
+
+section
+
+/-!
+# The actual localization triangle for an injective complex of sheaves
+
+Degreewise sections with support in the closed complement form the
+kernel of restriction followed by direct image. Injectivity gives a
+short exact sequence of complexes. Its derived triangle lifts every
+class killed by the restriction map to the support complex.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2DerivedOpenSupport
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Pretriangulated TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf)
+open CycleQ2OpenRestrictionSupport
+
+attribute [local instance] HasDerivedCategory.standard
+
+variable {X : TopCat.{0}} (U : Opens X)
+
+abbrev Complex := CochainComplex (AbSheaf X) ℤ
+abbrev D := DerivedCategory (AbSheaf X)
+
+/-- The ordinary derived restriction target on an injective resolution. -/
+def openComplex (I : Complex (X := X)) : Complex (X := X) :=
+  ((onIntersection U).mapHomologicalComplex (ComplexShape.up ℤ)).obj I
+
+/-- The degreewise restriction map to the actual open. -/
+def restriction (I : Complex (X := X)) : I ⟶ openComplex U I where
+  f n := (unit U).app (I.X n)
+  comm' i j _ := ((unit U).naturality (I.d i j)).symm
+
+private abbrev degreeKernel (I : Complex (X := X)) (n : ℤ) : AbSheaf X :=
+  kernel ((unit U).app (I.X n))
+
+private abbrev degreeInclusion (I : Complex (X := X)) (n : ℤ) : degreeKernel U I n ⟶ I.X n :=
+  kernel.ι ((unit U).app (I.X n))
+
+private theorem termSquare (I : Complex (X := X)) (i j : ℤ) :
+    (degreeInclusion U I i ≫ I.d i j) ≫ (unit U).app (I.X j) = 0 := by
+  have h := (unit U).naturality (I.d i j)
+  change I.d i j ≫ (unit U).app (I.X j) =
+    (unit U).app (I.X i) ≫ (onIntersection U).map (I.d i j) at h
+  rw [Category.assoc, h, ← Category.assoc, kernel.condition, zero_comp]
+
+private def kernelDifferential (I : Complex (X := X)) (i j : ℤ) :
+    degreeKernel U I i ⟶ degreeKernel U I j :=
+  kernel.lift _ (degreeInclusion U I i ≫ I.d i j) (termSquare U I i j)
+
+@[reassoc]
+private theorem kernelDifferential_comm (I : Complex (X := X)) (i j : ℤ) :
+    kernelDifferential U I i j ≫ degreeInclusion U I j = degreeInclusion U I i ≫ I.d i j :=
+  kernel.lift_ι _ _ _
+
+/-- The degreewise kernel complex whose terms are sections with support. -/
+def supported (I : Complex (X := X)) : Complex (X := X) where
+  X := degreeKernel U I
+  d := kernelDifferential U I
+  shape i j h := by
+    apply (cancel_mono (degreeInclusion U I j)).mp
+    rw [kernelDifferential_comm, I.shape i j h, comp_zero, zero_comp]
+  d_comp_d' i j k _ _ := by
+    apply (cancel_mono (degreeInclusion U I k)).mp
+    rw [Category.assoc, kernelDifferential_comm, kernelDifferential_comm_assoc, I.d_comp_d,
+      comp_zero, zero_comp]
+
+def inclusionToComplex (I : Complex (X := X)) : supported U I ⟶ I where
+  f := degreeInclusion U I
+  comm' i j _ := (kernelDifferential_comm U I i j).symm
+
+private theorem in_support_of_restriction (I : Complex (X := X)) :
+    inclusionToComplex U I ≫ restriction U I = 0 := by
+  apply HomologicalComplex.Hom.ext
+  funext n
+  exact kernel.condition ((unit U).app (I.X n))
+
+def supportSequence (I : Complex (X := X)) : ShortComplex (Complex (X := X)) :=
+  ShortComplex.mk (inclusionToComplex U I) (restriction U I) (in_support_of_restriction U I)
+
+theorem supportSequence_exact (I : Complex (X := X)) (hi : ∀ n, Injective (I.X n)) :
+    (supportSequence U I).ShortExact := by
+  apply HomologicalComplex.shortExact_of_degreewise_shortExact
+  intro n
+  have := hi n
+  change (ShortComplex.mk (degreeInclusion U I n) ((unit U).app (I.X n))
+    (kernel.condition ((unit U).app (I.X n)))).ShortExact
+  refine ShortComplex.ShortExact.mk' (ShortComplex.exact_kernel ((unit U).app (I.X n))) ?_ ?_
+  · exact inferInstanceAs (Mono (degreeInclusion U I n))
+  · exact epi_unit_of_injective U (I.X n)
+
+def localizationTriangle (I : Complex (X := X)) (hi : ∀ n, Injective (I.X n)) : Triangle (D (X := X)) :=
+  DerivedCategory.triangleOfSES (supportSequence_exact U I hi)
+
+theorem localization_distinguished (I : Complex (X := X)) (hi : ∀ n, Injective (I.X n)) :
+    localizationTriangle U I hi ∈ distTriang (D (X := X)) :=
+  DerivedCategory.triangleOfSES_distinguished (supportSequence_exact U I hi)
+
+/-- A derived class killed on the open factors through the literal support kernel. -/
+theorem factor_of_restriction_zero (I : Complex (X := X)) (hi : ∀ n, Injective (I.X n))
+    {A : D (X := X)} (a : A ⟶ DerivedCategory.Q.obj I)
+    (ha : a ≫ DerivedCategory.Q.map (restriction U I) = 0) :
+    ∃ b : A ⟶ DerivedCategory.Q.obj (supported U I),
+      b ≫ DerivedCategory.Q.map (inclusionToComplex U I) = a := by
+  obtain ⟨b, hb⟩ := (localizationTriangle U I hi).coyoneda_exact₂
+    (localization_distinguished U I hi) a ha
+  exact ⟨b, hb.symm⟩
+
+/-- Every term of the support kernel has zero sections on a subopen of
+its defining complement. -/
+theorem support_sections_zero (I : Complex (X := X)) (n : ℤ)
+    (V : Opens X) (hV : V ≤ U) :
+    Subsingleton (((supported U I).X n).obj.obj (op V)) := by
+  exact kernel_sections_zero U (I.X n) V hV
+
+end CycleQ2DerivedOpenSupport
+
+#print axioms CycleQ2DerivedOpenSupport.factor_of_restriction_zero
+#print axioms CycleQ2DerivedOpenSupport.support_sections_zero
+
+end
+
+section
+
+/-!
+# Derived stalks of the localization support complex
+
+Every term of the explicit localization kernel is zero on the chosen
+open. Exactness of the ordinary stalk functor makes this a vanishing
+statement in the derived category, at each actual point of the open.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2DerivedSupportStalk
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
+open CycleQ2DerivedOpenSupport
+open CycleQ2InjectiveCech (AbSheaf)
+
+attribute [local instance] HasDerivedCategory.standard
+
+variable {X : TopCat.{0}} (U : Opens X)
+
+abbrev stalkAt (x : X) : AbSheaf X ⥤ AddCommGrpCat.{0} :=
+  TopCat.Sheaf.forget AddCommGrpCat.{0} X ⋙ TopCat.Presheaf.stalkFunctor AddCommGrpCat.{0} x
+
+local instance (x : X) : (stalkAt x).Additive :=
+  Functor.instAdditiveComp (TopCat.Sheaf.forget AddCommGrpCat.{0} X)
+    (TopCat.Presheaf.stalkFunctor AddCommGrpCat.{0} x)
+
+local instance (x : X) : PreservesFiniteLimits (stalkAt x) :=
+  TopCat.Sheaf.instPreservesFiniteLimitsCompPresheafForgetStalkFunctor x
+
+local instance (x : X) : PreservesFiniteColimits (stalkAt x) :=
+  PreservesColimits.preservesFiniteColimits
+    (TopCat.Sheaf.forget AddCommGrpCat.{0} X ⋙ TopCat.Presheaf.stalkFunctor AddCommGrpCat.{0} x)
+
+theorem support_term_stalk_zero (I : Complex (X := X)) (n : ℤ) {x : X} (hx : x ∈ U) :
+    IsZero ((stalkAt x).obj ((supported U I).X n)) := by
+  apply AddCommGrpCat.isZero_iff_subsingleton.mpr
+  let F := (supported U I).X n
+  have hzero (a : TopCat.Presheaf.stalk (C := AddCommGrpCat) F.obj x) : a = 0 := by
+    obtain ⟨V, hxV, s, rfl⟩ := TopCat.Presheaf.exists_germ_eq F.obj a
+    let W := V ⊓ U
+    have hWV : W ≤ V := inf_le_left
+    have hres := (support_sections_zero U I n W inf_le_right).elim
+      (F.obj.map (homOfLE hWV).op s) 0
+    rw [← TopCat.Presheaf.germ_res_apply F.obj (homOfLE hWV) x (show x ∈ W from ⟨hxV, hx⟩),
+      hres, map_zero]
+  exact ⟨fun a b => (hzero a).trans (hzero b).symm⟩
+
+theorem support_complex_stalk_zero (I : Complex (X := X)) {x : X} (hx : x ∈ U) :
+    IsZero (((stalkAt x).mapHomologicalComplex (ComplexShape.up ℤ)).obj (supported U I)) := by
+  apply (IsZero.iff_id_eq_zero _).mpr
+  apply HomologicalComplex.hom_ext
+  intro n
+  exact (support_term_stalk_zero U I n hx).eq_of_src _ _
+
+theorem support_derived_stalk_zero (I : Complex (X := X)) {x : X} (hx : x ∈ U) :
+    IsZero ((stalkAt x).mapDerivedCategory.obj (DerivedCategory.Q.obj (supported U I))) :=
+  ((stalkAt x).mapDerivedCategoryFactors.app (supported U I)).isZero_iff.mpr
+    (DerivedCategory.Q.map_isZero (support_complex_stalk_zero U I hx))
+
+/-- For a class on any complex, vanishing after the actual open restriction
+on an injective resolution implies vanishing in every derived stalk in that open. -/
+theorem germ_zero_of_restriction_zero {K I : Complex (X := X)}
+    (q : K ⟶ I) [QuasiIso q] (hi : ∀ n, Injective (I.X n))
+    {A : D (X := X)} (a : A ⟶ DerivedCategory.Q.obj K)
+    (ha : a ≫ DerivedCategory.Q.map q ≫ DerivedCategory.Q.map (restriction U I) = 0)
+    {x : X} (hx : x ∈ U) :
+    (stalkAt x).mapDerivedCategory.map a = 0 := by
+  let Q := DerivedCategory.Q (C := AbSheaf X)
+  let F := (stalkAt x).mapDerivedCategory
+  have hzero := support_derived_stalk_zero U I hx
+  obtain ⟨b, hb⟩ := factor_of_restriction_zero U I hi (a ≫ Q.map q) (by
+    rw [Category.assoc]
+    exact ha)
+  have h := congrArg F.map hb
+  rw [Functor.map_comp, Functor.map_comp, hzero.eq_of_tgt (F.map b) 0, zero_comp] at h
+  apply (cancel_mono (F.map (Q.map q))).mp
+  simpa only [zero_comp] using h.symm
+
+end CycleQ2DerivedSupportStalk
+
+#print axioms CycleQ2DerivedSupportStalk.germ_zero_of_restriction_zero
+
+end
+
+section
+
+/-!
+# Injective resolutions for the localization support triangle
+
+Every strictly bounded below complex of ordinary additive sheaves
+admits an injective replacement starting at the same lower degree.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2BoundedInjectiveSupport
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace
+open CycleQ2DerivedOpenSupport
+open CycleQ2InjectiveCech (AbSheaf)
+
+variable {X : TopCat.{0}}
+
+theorem exists_resolution (K : Complex (X := X)) (n : ℤ) [K.IsStrictlyGE n] :
+    ∃ (I : Complex (X := X)) (q : K ⟶ I),
+      QuasiIso q ∧ (∀ j, Injective (I.X j)) ∧ I.IsStrictlyGE n := by
+  haveI : EnoughInjectives (AbSheaf X) := by
+    change EnoughInjectives (TopCat.Sheaf AddCommGrpCat.{0} X)
+    infer_instance
+  let K' : CochainComplex.Plus (AbSheaf X) := ⟨K, n, inferInstance⟩
+  obtain ⟨L,hL,i,hi⟩ := CochainComplex.Plus.exists_quasiIso_injective K' n
+  let I := ((InjectiveObject.ι (AbSheaf X)).mapHomologicalComplex (.up ℤ)).obj L.obj
+  refine ⟨I, i.hom, ?_, fun j => inferInstanceAs (Injective ((InjectiveObject.ι (AbSheaf X)).obj (L.obj.X j))), ?_⟩
+  · exact hi
+  · rwa [CochainComplex.isStrictlyGE_mapHomologicalComplex_obj_iff]
+
+end CycleQ2BoundedInjectiveSupport
+
+#print axioms CycleQ2BoundedInjectiveSupport.exists_resolution
+
+end
+
+section
+
+/-!
 # The canonical top projection of the native relative de Rham complex
 
 The full integer-graded complex maps canonically to its top cokernel
@@ -5836,6 +6212,39 @@ private theorem stalkMap_zero (s : A) (hs : s ≠ 0) {P T : C} (g : P ⟶ T)
   apply (cancel_epi (J.hom.app P)).mp
   rw [← hn, h, zero_comp, comp_zero]
 
+/-- The native complex has an injective resolution in nonnegative degrees. -/
+theorem exists_injective_resolution :
+    ∃ (I : CochainComplex C ℤ) (q : complex ⟶ I),
+      QuasiIso q ∧ (∀ j, Injective (I.X j)) ∧ I.IsStrictlyGE 0 := by
+  have h : complex.IsStrictlyGE 0 := ⟨fun n hn =>
+    (relativeDeRham ambientToField).isZero_extend_X embedding n hn⟩
+  exact @CycleQ2BoundedInjectiveSupport.exists_resolution
+    (show TopCat from genericAmbient) complex 0 h
+
+/-- Vanishing of the specified ambient class on the actual swept
+complement implies the protected rational primitive. The restriction
+in the hypothesis is computed on any injective replacement. -/
+theorem protected_of_restricted_source {V : parameterScheme.Opens} {t : Fin 3 → ℂ}
+    (s : A) (hs : s ≠ 0) (ω : VertexSections s)
+    (hoff : (vertex s).1 ≤ complement V t)
+    (hω : evaluate (evaluatePatch s hs) 3 (asOrdinaryForm s ω) = sourceForm)
+    (I : CochainComplex C ℤ) (q : complex ⟶ I) [QuasiIso q]
+    (hi : ∀ n, Injective (I.X n))
+    (a : S.obj (freeOpen (U s)) ⟶ Q.obj complex)
+    (hr : a ≫ Q.map q ≫ Q.map (CycleQ2DerivedOpenSupport.restriction (complement V t) I) = 0)
+    (hc : a ≫ topProjection = S.map (vertexMap s ω ≫ cokernel.π topMap)) :
+    (∃ η : CycleQ2AffineExterior.Form 3, CycleQ2AffineExterior.exteriorD3 η =
+      CycleQ2AffineExactness.residueSourceForm CycleQ2AffineClearing.affineA) := by
+  let F := (stalkAt (x s hs)).mapDerivedCategory
+  have hzero : F.map a = 0 :=
+    @CycleQ2DerivedSupportStalk.germ_zero_of_restriction_zero
+      (show TopCat from genericAmbient) (complement V t) complex I q
+      (inferInstanceAs (QuasiIso q)) hi _ a hr (x s hs) (hoff (x_mem_vertex s hs))
+  have he : F.map (S.map (vertexMap s ω ≫ cokernel.π topMap)) = 0 := by
+    rw [← hc, Functor.map_comp, hzero, zero_comp]
+  exact protected_of_zero_topGerm s hs ω hω
+    (topGerm_zero_of_map_zero s hs ω (stalkMap_zero s hs _ he))
+
 /-- The remaining geometric input can now be stated for the actual
 full complex, the actual support, and its canonical top projection. -/
 theorem protected_of_supported_source {V : parameterScheme.Opens} {t : Fin 3 → ℂ}
@@ -5858,6 +6267,7 @@ theorem protected_of_supported_source {V : parameterScheme.Opens} {t : Fin 3 →
 end CycleQ2NativeDerivedTop
 
 #print axioms CycleQ2NativeDerivedTop.protected_of_supported_source
+#print axioms CycleQ2NativeDerivedTop.protected_of_restricted_source
 
 end
 
