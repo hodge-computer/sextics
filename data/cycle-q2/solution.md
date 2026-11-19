@@ -645,10 +645,24 @@ matrices with multiplication between the actual Jacobian pieces.
 [quotient multiplication](GeometricUniversalJacobianMultiplication.lean), and
 [dense-open strict growth](GeometricHiggsFamilyStrictGrowth.lean)
 
-Applying the result to the image of a curve correspondence still
-requires its weight-one dimension inequality, Gauss–Manin
-horizontality, and the comparison with the geometric Higgs field
-in Lean.
+### The weight-one dimension inequality
+
+Suppose the curve cohomology is the sum of its first filtration piece
+\(F^1\) and its conjugate. A filtered map \(\Theta\) that commutes with
+conjugation up to an invertible scalar has image equal to the sum of
+\(\Theta(F^1)\) and its conjugate. The latter has the same dimension as
+\(\Theta(F^1)\), and \(\Theta(F^1)\subset \operatorname{im}\Theta\cap F^2\).
+Rank-nullity then bounds the dimension of the image in the lower quotient
+by the dimension of \(\operatorname{im}\Theta\cap F^2\).
+When the geometric graded spaces are identified with the checked Jacobian
+pieces and the image is stable under their Higgs maps, strict growth gives
+\(\operatorname{im}\Theta=0\) or \(\operatorname{im}\Theta=V\).
+[Dimension bound and conditional spanning](GeometricHiggsCurveImage.lean)
+
+The geometric construction must supply this filtered map, its compatibility
+with conjugation, the comparison of its graded spaces, and Higgs stability
+from Gauss–Manin horizontality. The conditional theorem concerns any fiber
+of the checked dense open.
 
 ## An exact rational correction on the genus-ten chart
 
