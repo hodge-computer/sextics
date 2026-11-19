@@ -31,6 +31,9 @@ import Mathlib.LinearAlgebra.TensorProduct.Associator
 import Mathlib.RingTheory.LocalRing.ResidueField.Basic
 import Mathlib.RingTheory.Unramified.Field
 import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
+import Mathlib.RingTheory.Spectrum.Maximal.Localization
+import Mathlib.RingTheory.Localization.LocalizationLocalization
+import Mathlib.RingTheory.DedekindDomain.IntegralClosure
 
 /-!
 # Relative exterior forms on the universal weighted function field
@@ -6428,5 +6431,419 @@ end CycleQ2ValuationOneFormDescent
 
 #print axioms CycleQ2ValuationOneFormDescent.coefficient_pullback
 #print axioms CycleQ2ValuationOneFormDescent.regular_descends
+
+end
+
+section
+
+/-!
+# Functorial ordinary cotangent maps in a localization tower
+
+These maps identify the actual form on a ring, its local ring and its
+fraction field. There are no coordinate choices in the comparison.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2CotangentLocalizationTower
+
+open Algebra KaehlerDifferential
+open CycleQ2ExactFrameThreeDeRham (onePullback onePullback_d)
+open CycleQ2AffineDeRhamFunctorial (onePullback_comp)
+
+variable {k A B C : Type} [CommRing k] [CommRing A] [CommRing B] [CommRing C]
+  [Algebra k A] [Algebra k B] [Algebra k C]
+  [Algebra A B] [Algebra A C] [Algebra B C]
+  [IsScalarTower k A B] [IsScalarTower k B C] [IsScalarTower k A C] [IsScalarTower A B C]
+
+omit [Algebra k C] [Algebra A C] [Algebra B C]
+  [IsScalarTower k B C] [IsScalarTower k A C] [IsScalarTower A B C] in
+theorem pullback_algebraMap (ω : Ω[A⁄k]) :
+    onePullback (IsScalarTower.toAlgHom k A B) ω = KaehlerDifferential.map k k A B ω := by
+  have h : ω ∈ Submodule.span A (Set.range (D k A)) := by
+    rw [span_range_derivation]
+    trivial
+  induction h using Submodule.span_induction with
+  | mem x hx =>
+    obtain ⟨a,rfl⟩ := hx
+    rw [onePullback_d, KaehlerDifferential.map_D]
+    rfl
+  | zero => simp only [map_zero]
+  | add a b _ _ ha hb => simp only [map_add, ha, hb]
+  | smul a b _ hb =>
+    rw [map_smulₛₗ, hb, map_smul]
+    exact IsScalarTower.algebraMap_smul B a _
+
+theorem map_tower (ω : Ω[A⁄k]) :
+    KaehlerDifferential.map k k B C (KaehlerDifferential.map k k A B ω) =
+      KaehlerDifferential.map k k A C ω := by
+  have h : (IsScalarTower.toAlgHom k B C).comp (IsScalarTower.toAlgHom k A B) =
+      IsScalarTower.toAlgHom k A C :=
+    AlgHom.ext (fun x => (IsScalarTower.algebraMap_apply A B C x).symm)
+  rw [← pullback_algebraMap (A := B) (B := C) (KaehlerDifferential.map k k A B ω),
+    ← pullback_algebraMap (A := A) (B := B) ω, ← onePullback_comp, h,
+    pullback_algebraMap (A := A) (B := C) ω]
+
+end CycleQ2CotangentLocalizationTower
+
+#print axioms CycleQ2CotangentLocalizationTower.map_tower
+
+end
+
+section
+
+/-!
+# A rational one-form is regular exactly when it is regular at all closed points
+
+The chosen exact affine chart has a rank-one ordinary cotangent
+module. The coefficient of a form coming from a local ring lies in
+that same localization of the coefficient ring. Intersecting all
+closed localizations recovers the actual affine regular form.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2AffineCurveRegularity
+
+open Algebra KaehlerDifferential
+open CycleQ2CotangentLocalizationTower
+open CycleQ2FractionOneForms
+
+variable {k A K : Type} [CommRing k] [CommRing A] [IsDomain A] [Field K]
+  [Algebra k A] [Algebra k K] [Algebra A K] [IsScalarTower k A K] [IsFractionRing A K]
+
+def localFractionMap (K : Type) [Field K] [Algebra A K] [IsFractionRing A K]
+    (p : Ideal A) [p.IsPrime] : Localization.AtPrime p →ₐ[A] K :=
+  Localization.mapToFractionRing K p.primeCompl _ p.primeCompl_le_nonZeroDivisors
+
+def localFractionAlgebra (K : Type) [Field K] [Algebra A K] [IsFractionRing A K]
+    (p : Ideal A) [p.IsPrime] : Algebra (Localization.AtPrime p) K :=
+  (localFractionMap K p).toRingHom.toAlgebra
+
+theorem localFractionTower (p : Ideal A) [p.IsPrime] :
+    letI : Algebra (Localization.AtPrime p) K := localFractionAlgebra K p
+    IsScalarTower A (Localization.AtPrime p) K := by
+  letI : Algebra (Localization.AtPrime p) K := localFractionAlgebra K p
+  exact IsScalarTower.of_algebraMap_eq (fun x => ((localFractionMap K p).commutes x).symm)
+
+theorem localFractionBaseTower (p : Ideal A) [p.IsPrime] :
+    letI : Algebra (Localization.AtPrime p) K := localFractionAlgebra K p
+    IsScalarTower k (Localization.AtPrime p) K := by
+  letI : Algebra (Localization.AtPrime p) K := localFractionAlgebra K p
+  letI : IsScalarTower A (Localization.AtPrime p) K := localFractionTower p
+  exact IsScalarTower.to₁₃₄ k A (Localization.AtPrime p) K
+
+theorem localFractionField (p : Ideal A) [p.IsPrime] :
+    letI : Algebra (Localization.AtPrime p) K := localFractionAlgebra K p
+    IsFractionRing (Localization.AtPrime p) K := by
+  letI : Algebra (Localization.AtPrime p) K := localFractionAlgebra K p
+  letI : IsScalarTower A (Localization.AtPrime p) K := localFractionTower p
+  exact IsFractionRing.isFractionRing_of_isDomain_of_isLocalization p.primeCompl _ K
+
+/-- The actual rational one-form induced by an ordinary local-ring form. -/
+def localToRational (p : Ideal A) [p.IsPrime] : Ω[Localization.AtPrime p⁄k] →+ Ω[K⁄k] :=
+  letI : Algebra (Localization.AtPrime p) K := localFractionAlgebra K p
+  letI : IsScalarTower k (Localization.AtPrime p) K := localFractionBaseTower p
+  (KaehlerDifferential.map k k (Localization.AtPrime p) K).toAddMonoidHom
+
+theorem localToRational_map (p : Ideal A) [p.IsPrime] (ω : Ω[A⁄k]) :
+    localToRational p (KaehlerDifferential.map k k A (Localization.AtPrime p) ω) =
+      KaehlerDifferential.map k k A K ω := by
+  letI : Algebra (Localization.AtPrime p) K := localFractionAlgebra K p
+  letI : IsScalarTower A (Localization.AtPrime p) K := localFractionTower p
+  letI : IsScalarTower k (Localization.AtPrime p) K := localFractionBaseTower p
+  exact map_tower ω
+
+variable (c : Ω[A⁄k] ≃ₗ[A] A)
+
+private theorem local_coefficient (p : MaximalSpectrum A) (ω : Ω[Localization.AtPrime p.asIdeal⁄k]) :
+    ∃ a : Localization.AtPrime p.asIdeal,
+      fractionCoordinates c (localToRational p.asIdeal ω) = localFractionMap K p.asIdeal a := by
+  let R := Localization.AtPrime p.asIdeal
+  letI : Algebra R K := localFractionAlgebra K p.asIdeal
+  letI : IsScalarTower A R K := localFractionTower p.asIdeal
+  letI : IsScalarTower k R K := localFractionBaseTower p.asIdeal
+  let e : R →ₐ[A] K := localFractionMap K p.asIdeal
+  let m := KaehlerDifferential.map k k A R
+  let l := KaehlerDifferential.map k k R K
+  change ∃ a : R, fractionCoordinates c (l ω) = e a
+  have h : ω ∈ Submodule.span R (Set.range (m ∘ D k A)) := by
+    rw [KaehlerDifferential.span_range_map_derivation_of_isLocalization k A R p.asIdeal.primeCompl]
+    trivial
+  induction h using Submodule.span_induction with
+  | mem x hx =>
+    obtain ⟨a,rfl⟩ := hx
+    refine ⟨algebraMap A R (c (D k A a)),?_⟩
+    change fractionCoordinates c (l (m (D k A a))) = _
+    rw [show l (m (D k A a)) = mapRegular (D k A a) from map_tower _,regular_coordinates]
+    exact (e.commutes (c (D k A a))).symm
+  | zero => exact ⟨0,by simp only [map_zero]⟩
+  | add x y _ _ hx hy =>
+    obtain ⟨a,ha⟩ := hx
+    obtain ⟨b,hb⟩ := hy
+    exact ⟨a+b,by rw [map_add,map_add,map_add,ha,hb]⟩
+  | smul a v _ hv =>
+    obtain ⟨b,hb⟩ := hv
+    refine ⟨a*b,?_⟩
+    rw [map_smul,← IsScalarTower.algebraMap_smul K,map_smul,hb,smul_eq_mul,map_mul]
+    rfl
+
+include c in
+theorem regular_at_closedPoints_iff (ω : Ω[K⁄k]) :
+    (∀ p : MaximalSpectrum A, ∃ η : Ω[Localization.AtPrime p.asIdeal⁄k],
+      ω = localToRational p.asIdeal η) ↔ ∃ η : Ω[A⁄k], ω = mapRegular η := by
+  constructor
+  · intro h
+    apply (regular_iff_coordinates c ω).2
+    have hi : fractionCoordinates c ω ∈
+        ⨅ p : MaximalSpectrum A, Localization.subalgebra.ofField K p.asIdeal.primeCompl
+          p.asIdeal.primeCompl_le_nonZeroDivisors := by
+      rw [Algebra.mem_iInf]
+      intro p
+      obtain ⟨η,hη⟩ := h p
+      obtain ⟨a,ha⟩ := local_coefficient (K := K) c p η
+      rw [hη,ha]
+      exact (Localization.subalgebra.mem_range_mapToFractionRing_iff_ofField K
+        p.asIdeal.primeCompl p.asIdeal.primeCompl_le_nonZeroDivisors
+        (Localization.AtPrime p.asIdeal) (localFractionMap K p.asIdeal a)).mp ⟨a,rfl⟩
+    rw [MaximalSpectrum.iInf_localization_eq_bot] at hi
+    obtain ⟨u,hu⟩ := Algebra.mem_bot.mp hi
+    exact ⟨u,hu.symm⟩
+  · rintro ⟨η,rfl⟩ p
+    exact ⟨KaehlerDifferential.map k k A (Localization.AtPrime p.asIdeal) η,
+      (localToRational_map p.asIdeal η).symm⟩
+
+end CycleQ2AffineCurveRegularity
+
+#print axioms CycleQ2AffineCurveRegularity.regular_at_closedPoints_iff
+
+end
+
+section
+
+/-!
+# Local-ring and function-field squares at finite curve points
+
+For a point over a point, the induced map of the literal local
+rings is local and has the original fraction-field map after
+localization. The equality follows from the universal property
+of the localizations of the original affine rings.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2ClosedValuationSquare
+
+open Algebra CycleQ2AffineCurveRegularity
+
+variable {k A B K E : Type} [CommRing k] [CommRing A] [IsDomain A]
+  [CommRing B] [IsDomain B] [Field K] [Field E]
+  [Algebra k A] [Algebra k B] [Algebra k K] [Algebra k E]
+  [Algebra A K] [IsFractionRing A K] [Algebra B E] [IsFractionRing B E]
+  (i : A →ₐ[k] B) (p : Ideal A) (q : Ideal B) [p.IsPrime] [q.IsPrime]
+  (h : p = q.comap i.toRingHom)
+
+def localizationMap : Localization.AtPrime p →ₐ[k] Localization.AtPrime q where
+  toRingHom := Localization.localRingHom p q i.toRingHom h
+  commutes' a := by
+    change Localization.localRingHom p q i.toRingHom h
+      (algebraMap k (Localization.AtPrime p) a) = algebraMap k (Localization.AtPrime q) a
+    rw [IsScalarTower.algebraMap_apply k A (Localization.AtPrime p),
+      Localization.localRingHom_to_map,IsScalarTower.algebraMap_apply k B (Localization.AtPrime q)]
+    exact congrArg (algebraMap B (Localization.AtPrime q)) (i.commutes a)
+
+instance : IsLocalHom (localizationMap i p q h).toRingHom :=
+  Localization.isLocalHom_localRingHom p q i.toRingHom h
+
+variable (j : K →ₐ[k] E)
+  (hsq : ∀ a : A, j (algebraMap A K a) = algebraMap B E (i a))
+
+include hsq in
+theorem localization_square (x : Localization.AtPrime p) :
+    j (localFractionMap K p x) = localFractionMap E q (localizationMap i p q h x) := by
+  let R := Localization.AtPrime p
+  let a : R →+* E := j.toRingHom.comp (localFractionMap K p).toRingHom
+  let b : R →+* E := (localFractionMap E q).toRingHom.comp (localizationMap i p q h).toRingHom
+  have he : a = b := by
+    apply IsLocalization.ringHom_ext p.primeCompl
+    ext y
+    change j (localFractionMap K p (algebraMap A R y)) =
+      localFractionMap E q (Localization.localRingHom p q i.toRingHom h (algebraMap A R y))
+    rw [(localFractionMap K p).commutes, Localization.localRingHom_to_map]
+    change j (algebraMap A K y) = localFractionMap E q (algebraMap B (Localization.AtPrime q) (i y))
+    rw [(localFractionMap E q).commutes]
+    exact hsq y
+  exact RingHom.congr_fun he x
+
+end CycleQ2ClosedValuationSquare
+
+#print axioms CycleQ2ClosedValuationSquare.localization_square
+
+end
+
+section
+
+/-!
+# Conjugate pullbacks are regular in the integral closure
+
+Every embedding into a finite normal field maps the original
+integral coordinate ring into its integral closure. The ordinary
+Kähler maps in this ring square give actual regular representatives
+of the conjugate differentials, including at ramification.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2IntegralClosureConjugates
+
+open Algebra KaehlerDifferential
+open CycleQ2ExactFrameThreeDeRham (onePullback)
+open CycleQ2AffineDeRhamFunctorial (onePullback_comp)
+open CycleQ2CotangentLocalizationTower (pullback_algebraMap)
+
+variable {k A B K L E : Type} [Field k] [CommRing A] [CommRing B]
+  [Field K] [Field L] [Field E]
+  [Algebra k A] [Algebra k B] [Algebra k K] [Algebra k L] [Algebra k E]
+  [Algebra A B] [Algebra A K] [Algebra A L] [Algebra A E]
+  [Algebra B L] [Algebra K E] [Algebra L E]
+  [IsScalarTower k A B] [IsScalarTower k A E] [IsScalarTower k B L]
+  [IsScalarTower k K E] [IsScalarTower k L E]
+  [IsScalarTower A B L] [IsScalarTower A L E] [IsScalarTower A K E]
+  [Algebra.IsIntegral A B]
+
+abbrev C := integralClosure A E
+
+variable (γ : E ≃ₐ[K] E)
+
+private def toClosureField : B →ₐ[A] E :=
+  (γ.toAlgHom.restrictScalars A).comp
+    ((IsScalarTower.toAlgHom A L E).comp (IsScalarTower.toAlgHom A B L))
+
+def conjugateRing : B →ₐ[A] C (A := A) (E := E) :=
+  (toClosureField (L := L) γ).codRestrict (integralClosure A E) fun b =>
+    (Algebra.IsIntegral.isIntegral b).map (toClosureField (L := L) γ)
+
+theorem conjugateRing_apply (b : B) :
+    (conjugateRing (A := A) (L := L) γ b : E) = γ (algebraMap L E (algebraMap B L b)) := rfl
+
+variable [Algebra k (C (A := A) (E := E))]
+  [IsScalarTower k A (C (A := A) (E := E))]
+  [IsScalarTower k (C (A := A) (E := E)) E]
+
+theorem conjugate_regular (ω : Ω[B⁄k]) :
+    onePullback (γ.toAlgHom.restrictScalars k)
+      (KaehlerDifferential.map k k L E (KaehlerDifferential.map k k B L ω)) =
+    KaehlerDifferential.map k k (C (A := A) (E := E)) E
+      (onePullback ((conjugateRing (A := A) (L := L) γ).restrictScalars k) ω) := by
+  rw [← pullback_algebraMap (A := L) (B := E) (KaehlerDifferential.map k k B L ω),
+      ← pullback_algebraMap (A := B) (B := L) ω,
+      ← pullback_algebraMap (A := C (A := A) (E := E)) (B := E)
+        (onePullback ((conjugateRing (A := A) (L := L) γ).restrictScalars k) ω),
+      ← onePullback_comp,← onePullback_comp,← onePullback_comp]
+  have h : ((γ.toAlgHom.restrictScalars k).comp (IsScalarTower.toAlgHom k L E)).comp
+      (IsScalarTower.toAlgHom k B L) =
+      (IsScalarTower.toAlgHom k (C (A := A) (E := E)) E).comp
+        ((conjugateRing (A := A) (L := L) γ).restrictScalars k) :=
+    AlgHom.ext fun b => (conjugateRing_apply (A := A) γ b).symm
+  rw [h]
+
+end CycleQ2IntegralClosureConjugates
+
+#print axioms CycleQ2IntegralClosureConjugates.conjugate_regular
+
+end
+
+section
+
+/-!
+# Descent of a sum of regular conjugate differentials
+
+At a closed valuation the sum of the regular conjugate pullbacks is
+regular. The tame descent calculation forces the trace to be regular
+downstairs. The same conclusion for a finite subfield follows by
+dividing by the degree of the extra extension.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2GaloisTraceRegularity
+
+open Algebra KaehlerDifferential IsLocalRing
+open CycleQ2ExactFrameThreeDeRham (onePullback)
+open CycleQ2FractionOneForms (mapRegular)
+open CycleQ2FiniteFieldOneFormTrace (traceOne)
+open CycleQ2CotangentLocalizationTower (pullback_algebraMap)
+open CycleQ2ValuationOneFormDescent (regular_descends)
+open CycleQ2DifferentialTraceTower (trace_of_further_pullback)
+open CycleQ2GaloisDifferentialTrace (trace_eq_sum_pullbacks)
+
+variable {k R S F E : Type} [Field k] [CharZero k]
+  [CommRing R] [IsDomain R] [IsDiscreteValuationRing R]
+  [CommRing S] [IsDomain S] [IsDiscreteValuationRing S]
+  [Field F] [Field E] [Algebra k R] [Algebra k S] [Algebra k F] [Algebra k E]
+  [Algebra R F] [IsFractionRing R F] [IsScalarTower k R F]
+  [Algebra S E] [IsFractionRing S E] [IsScalarTower k S E]
+  [Algebra.IsSeparable k (ResidueField R)] [Algebra.IsSeparable k (ResidueField S)]
+  [Algebra F E] [IsScalarTower k F E] [FiniteDimensional F E] [IsGalois F E]
+
+variable (i : R →ₐ[k] S) [IsLocalHom i.toRingHom]
+  (hsq : ∀ x : R, algebraMap F E (algebraMap R F x) = algebraMap S E (i x))
+  (r : Ω[R⁄k] ≃ₗ[R] R) (s : Ω[S⁄k] ≃ₗ[S] S)
+  {π : R} (hπ : Irreducible π) {σ : S} (hσ : Irreducible σ)
+
+include hsq r s hπ hσ in
+theorem trace_regular (ω : Ω[E⁄k])
+    (hω : ∀ γ : E ≃ₐ[F] E, ∃ a : Ω[S⁄k],
+      onePullback (γ.toAlgHom.restrictScalars k) ω = mapRegular a) :
+    ∃ a : Ω[R⁄k], traceOne (K := F) ω = mapRegular a := by
+  classical
+  apply regular_descends i (IsScalarTower.toAlgHom k F E) hsq r s hπ hσ
+  choose v hv using hω
+  refine ⟨∑ γ : E ≃ₐ[F] E, v γ,?_⟩
+  rw [pullback_algebraMap,trace_eq_sum_pullbacks,map_sum]
+  exact Finset.sum_congr rfl (fun γ _ => hv γ)
+
+private theorem regular_of_nsmul {n : ℕ} (hn : n ≠ 0) {ω : Ω[F⁄k]}
+    (h : ∃ a : Ω[R⁄k], n • ω = mapRegular a) :
+    ∃ a : Ω[R⁄k], ω = mapRegular a := by
+  obtain ⟨a,ha⟩ := h
+  have hn' : (n : k) ≠ 0 := Nat.cast_ne_zero.mpr hn
+  refine ⟨(n : k)⁻¹ • a,?_⟩
+  rw [LinearMap.map_smul_of_tower,← ha,← Nat.cast_smul_eq_nsmul k,
+    smul_smul,inv_mul_cancel₀ hn',one_smul]
+
+variable {L : Type} [Field L] [Algebra k L] [Algebra F L] [Algebra L E]
+  [IsScalarTower k F L] [IsScalarTower k L E] [IsScalarTower F L E]
+  [FiniteDimensional F L] [Algebra.IsSeparable F L]
+  [FiniteDimensional L E] [Algebra.IsSeparable L E]
+
+include hsq r s hπ hσ in
+theorem trace_subfield_regular (ω : Ω[L⁄k])
+    (hω : ∀ γ : E ≃ₐ[F] E, ∃ a : Ω[S⁄k],
+      onePullback (γ.toAlgHom.restrictScalars k) (KaehlerDifferential.map k k L E ω) = mapRegular a) :
+    ∃ a : Ω[R⁄k], traceOne (K := F) ω = mapRegular a := by
+  have h := trace_regular i hsq r s hπ hσ _ hω
+  rw [trace_of_further_pullback (L := L)] at h
+  exact regular_of_nsmul (Nat.ne_of_gt Module.finrank_pos) h
+
+end CycleQ2GaloisTraceRegularity
+
+#print axioms CycleQ2GaloisTraceRegularity.trace_regular
+#print axioms CycleQ2GaloisTraceRegularity.trace_subfield_regular
 
 end

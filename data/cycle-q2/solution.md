@@ -238,6 +238,37 @@ primitive. The class with that value and vanishing restriction is still
 to be constructed.
 [Derived localization and the protected form](GeometricMonicGenericSupport.lean)
 
+## Regular finite traces on affine curve charts
+
+The ordinary finite field trace of a regular one-form is regular on the
+entire affine target curve. At every closed point its conjugates come
+from the integral closure in a normal overfield. The trace there is
+regular, and the tame valuation calculation detects regularity in the
+target local ring. The fraction comparison and the localization
+intersection then give a unique original regular differential.
+The finite trace on functions and this trace on regular one-forms
+commute with differentiation. Tracing a pulled-back regular one-form
+multiplies it by the degree of the field extension.
+[Regular affine curve trace](GeometricMonicGenericSupport.lean)
+
+The projective line is separated. A nonzero rational function on an
+integral scheme with valuation local rings gives an actual map to this
+line by gluing the regular loci of the function and its reciprocal.
+For a proper integral Noetherian curve of dimension at most one, a
+transcendental choice makes this map finite. The polynomial affine
+chart identifies the image of the generic point, and each fibre is
+finite by the dimension bound. This gives an affine cover on which
+to glue the trace for such a proper curve.
+[Finite curve projection](GeometricMonicGenericSupport.lean)
+
+The degree-two two-term triangle now also handles curves with
+nonzero first cohomology of the structure sheaf. When its second
+cohomology vanishes, the upper one-form cohomology surjects onto
+degree-two hypercohomology with kernel the image of the derived
+differential. A trace killing this image descends to the actual
+degree-two de Rham group.
+[Upper-term quotient](GeometricMonicGenericSupport.lean)
+
 ## The projective-line de Rham trace and smooth valuation coordinates
 
 Glue two ordinary affine lines along their Laurent overlap, with the

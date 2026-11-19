@@ -87,6 +87,12 @@ import Proposal.GeometricAffineHigherChartRestriction
 import Mathlib.Algebra.Homology.DerivedCategory.Ext.Basic
 import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 import Mathlib.RingTheory.LocalProperties.Projective
+import Mathlib.FieldTheory.Normal.Closure
+import Mathlib.FieldTheory.Galois.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.Constructors
+import Mathlib.AlgebraicGeometry.Morphisms.ClosedImmersion
+import Mathlib.RingTheory.Valuation.ValuationRing
+import Mathlib.Topology.KrullDimension
 
 /-!
 # The proper graph has strict support in the native generic threefold
@@ -8826,5 +8832,1393 @@ end CycleQ2NormalCurveLocalFrames
 
 #print axioms CycleQ2NormalCurveLocalFrames.localFrame
 #print axioms CycleQ2NormalCurveLocalFrames.residue_separable
+
+end
+
+section
+
+/-!
+# The finite trace sends regular affine curve differentials to regular forms
+
+For a finite separable extension, use any finite Galois overfield
+and its integral closure over the original affine ring. At a
+closed point choose a point above it. All conjugate differentials
+are regular there, so tame descent gives regularity of the original
+finite trace at every closed point of the original chart.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2AffineFiniteCurveTrace
+
+open Algebra IsLocalRing KaehlerDifferential Module
+open CycleQ2AffineCurveRegularity CycleQ2ClosedValuationSquare
+open CycleQ2FractionOneForms (fractionCoordinates mapRegular)
+open CycleQ2NormalCurveLocalFrames (localFrame residue_separable)
+open CycleQ2IntegralClosureConjugates (conjugateRing conjugate_regular)
+open CycleQ2GaloisTraceRegularity (trace_subfield_regular)
+open CycleQ2FiniteFieldOneFormTrace (traceOne)
+open CycleQ2ExactFrameThreeDeRham (onePullback)
+
+variable {k A B K L E : Type} [Field k] [CharZero k]
+  [CommRing A] [IsDedekindDomain A] [CommRing B] [IsDomain B]
+  [Field K] [Field L] [Field E] [Algebra k A] [Algebra.FiniteType k A]
+  [Algebra k B] [Algebra k K] [Algebra k L] [Algebra k E]
+  [Algebra A B] [Algebra A K] [Algebra A L] [Algebra A E]
+  [Algebra B L] [Algebra K L] [Algebra K E] [Algebra L E]
+  [IsScalarTower k A B] [IsScalarTower k A K] [IsScalarTower k A E] [IsScalarTower k B L]
+  [IsScalarTower k K L] [IsScalarTower k K E] [IsScalarTower k L E]
+  [IsScalarTower A B L] [IsScalarTower A L E] [IsScalarTower A K E] [IsScalarTower K L E]
+  [Algebra.IsIntegral A B] [IsFractionRing A K] [IsFractionRing B L]
+  [FiniteDimensional K L] [Algebra.IsSeparable K L]
+  [FiniteDimensional K E] [IsGalois K E]
+
+private abbrev C := integralClosure A E
+local instance : Algebra k (C (A := A) (E := E)) :=
+  ((algebraMap A (C (A := A) (E := E))).comp (algebraMap k A)).toAlgebra
+local instance : IsScalarTower k A (C (A := A) (E := E)) :=
+  IsScalarTower.of_algebraMap_eq' rfl
+local instance : IsScalarTower k (C (A := A) (E := E)) E :=
+  IsScalarTower.of_algebraMap_eq (fun x => IsScalarTower.algebraMap_apply k A E x)
+
+variable (c : Ω[A⁄k] ≃ₗ[A] A)
+
+include c in
+private theorem source_rank : Module.finrank K Ω[K⁄k] = 1 := by
+  simpa only [Module.finrank_self] using (fractionCoordinates (K := K) c).finrank_eq
+
+include c K in
+private theorem closure_rank : Module.finrank E Ω[E⁄k] = 1 := by
+  letI : Algebra.FormallyEtale K E := Algebra.FormallyEtale.of_isSeparable K E
+  let b := (Basis.singleton (Fin 1) K).map (fractionCoordinates (K := K) c).symm
+  let e := (b.baseChange E).map (tensorKaehlerEquivOfFormallyEtale k K E)
+  rw [Module.finrank_eq_card_basis e,Fintype.card_fin]
+
+include c E in
+theorem trace_regular_of_normalExtension (hA : ¬IsField A) (ω : Ω[B⁄k]) :
+    ∃ η : Ω[A⁄k], traceOne (K := K) (KaehlerDifferential.map k k B L ω) = mapRegular η := by
+  let D := C (A := A) (E := E)
+  letI : IsDedekindDomain D := integralClosure.isDedekindDomain A K E
+  letI : Module.Finite A D := IsIntegralClosure.finite A K E D
+  letI : Algebra.FiniteType k D := Algebra.FiniteType.trans (inferInstance : Algebra.FiniteType k A) inferInstance
+  letI : IsFractionRing D E := IsIntegralClosure.isFractionRing_of_finite_extension A K E D
+  letI : FiniteDimensional L E := FiniteDimensional.right K L E
+  letI : Algebra.IsSeparable L E := Algebra.isSeparable_tower_top_of_isSeparable K L E
+  apply (regular_at_closedPoints_iff c _).1
+  intro p
+  have hp : p.asIdeal ≠ ⊥ := Ring.ne_bot_of_isMaximal_of_not_isField p.isMaximal hA
+  have hinj : Function.Injective (algebraMap A D) := by
+    intro a b h
+    apply (IsFractionRing.injective A K)
+    apply (algebraMap K E).injective
+    have he := congrArg (algebraMap D E) h
+    simpa only [← IsScalarTower.algebraMap_apply A D E,IsScalarTower.algebraMap_apply A K E]
+      using he
+  obtain ⟨q,hq,hpq⟩ := Ideal.exists_ideal_over_maximal_of_isIntegral (S := D) p.asIdeal
+    (by rw [(RingHom.injective_iff_ker_eq_bot _).mp hinj]; exact bot_le)
+  letI : q.IsMaximal := hq
+  have hq₀ : q ≠ ⊥ := by
+    intro h
+    apply hp
+    rw [← hpq,h,Ideal.comap_bot_of_injective _ hinj]
+  let R := Localization.AtPrime p.asIdeal
+  let S := Localization.AtPrime q
+  letI : IsDiscreteValuationRing R :=
+    IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain A hp R
+  letI : IsDiscreteValuationRing S :=
+    IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain D hq₀ S
+  letI : Algebra R K := localFractionAlgebra K p.asIdeal
+  letI : Algebra S E := localFractionAlgebra E q
+  letI : IsFractionRing R K := localFractionField p.asIdeal
+  letI : IsFractionRing S E := localFractionField q
+  letI : IsScalarTower A R K := localFractionTower p.asIdeal
+  letI : IsScalarTower D S E := localFractionTower q
+  letI : IsScalarTower k R K := localFractionBaseTower p.asIdeal
+  letI : IsScalarTower k S E := localFractionBaseTower q
+  letI : Algebra.IsSeparable k (ResidueField R) := residue_separable p.asIdeal
+  letI : Algebra.IsSeparable k (ResidueField S) := residue_separable q
+  let r := localFrame p.asIdeal (source_rank (K := K) c)
+  let s := localFrame q (closure_rank (K := K) (E := E) c)
+  obtain ⟨π,hπ⟩ := IsDiscreteValuationRing.exists_irreducible R
+  obtain ⟨σ,hσ⟩ := IsDiscreteValuationRing.exists_irreducible S
+  let i := IsScalarTower.toAlgHom k A D
+  let j := IsScalarTower.toAlgHom k K E
+  let f := localizationMap i p.asIdeal q hpq.symm
+  letI : IsLocalHom f.toRingHom :=
+    Localization.isLocalHom_localRingHom p.asIdeal q i.toRingHom hpq.symm
+  have hsq (a : R) : algebraMap K E (algebraMap R K a) = algebraMap S E (f a) :=
+    localization_square i p.asIdeal q hpq.symm j
+      (fun t => (IsScalarTower.algebraMap_apply A K E t).symm.trans
+        (IsScalarTower.algebraMap_apply A D E t)) a
+  change ∃ a : Ω[R⁄k], _ = mapRegular a
+  refine trace_subfield_regular f hsq r s hπ hσ _ ?_
+  intro γ
+  let β : Ω[D⁄k] := onePullback ((conjugateRing (A := A) (L := L) γ).restrictScalars k) ω
+  refine ⟨KaehlerDifferential.map k k D S β,?_⟩
+  have hγ := conjugate_regular (A := A) (L := L) γ ω
+  change onePullback (γ.toAlgHom.restrictScalars k)
+    (KaehlerDifferential.map k k L E (KaehlerDifferential.map k k B L ω)) =
+    KaehlerDifferential.map k k D E β at hγ
+  exact hγ.trans (localToRational_map q β).symm
+
+end CycleQ2AffineFiniteCurveTrace
+
+#print axioms CycleQ2AffineFiniteCurveTrace.trace_regular_of_normalExtension
+
+end
+
+section
+
+/-!
+# Regularity of trace for an arbitrary finite separable curve extension
+
+The finite Galois comparison field is the actual normal closure in
+an algebraic closure of the source field. No presentation or
+unramified hypothesis is imposed on the affine finite map.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2TraceRegularFiniteExtension
+
+open Algebra KaehlerDifferential IntermediateField
+open CycleQ2AffineFiniteCurveTrace (trace_regular_of_normalExtension)
+open CycleQ2FiniteFieldOneFormTrace (traceOne)
+open CycleQ2FractionOneForms (mapRegular)
+
+variable {k A B K L : Type} [Field k] [CharZero k]
+  [CommRing A] [IsDedekindDomain A] [CommRing B] [IsDomain B]
+  [Field K] [Field L] [Algebra k A] [Algebra.FiniteType k A]
+  [Algebra k B] [Algebra k K] [Algebra k L]
+  [Algebra A B] [Algebra A K] [Algebra A L]
+  [Algebra B L] [Algebra K L]
+  [IsScalarTower k A B] [IsScalarTower k A K] [IsScalarTower k B L]
+  [IsScalarTower k K L] [IsScalarTower A B L] [IsScalarTower A K L]
+  [Algebra.IsIntegral A B] [IsFractionRing A K] [IsFractionRing B L]
+  [FiniteDimensional K L] [Algebra.IsSeparable K L]
+
+theorem trace_regular (c : Ω[A⁄k] ≃ₗ[A] A) (hA : ¬ IsField A) (ω : Ω[B⁄k]) :
+    ∃ η : Ω[A⁄k], traceOne (K := K) (KaehlerDifferential.map k k B L ω) = mapRegular η := by
+  letI : CharZero K := charZero_of_injective_algebraMap (algebraMap k K).injective
+  let F := AlgebraicClosure L
+  letI : Algebra.IsAlgebraic K F := Algebra.IsAlgebraic.trans K L F
+  let E := normalClosure K L F
+  letI : FiniteDimensional K E := normalClosure.is_finiteDimensional K L F
+  letI : IsGalois K E := inferInstanceAs (IsGalois K (normalClosure K L F))
+  letI : Algebra A E := ((algebraMap K E).comp (algebraMap A K)).toAlgebra
+  letI : IsScalarTower A K E := IsScalarTower.of_algebraMap_eq' (R := A) (S := K) (A := E) rfl
+  letI : IsScalarTower A L E := IsScalarTower.to₁₃₄ A K L E
+  letI : Algebra k E := ((algebraMap K E).comp (algebraMap k K)).toAlgebra
+  letI : IsScalarTower k K E := IsScalarTower.of_algebraMap_eq' (R := k) (S := K) (A := E) rfl
+  letI : IsScalarTower k L E := IsScalarTower.to₁₃₄ k K L E
+  letI : IsScalarTower k A E := IsScalarTower.to₁₂₄ k A K E
+  exact trace_regular_of_normalExtension (E := E) c hA ω
+
+end CycleQ2TraceRegularFiniteExtension
+
+#print axioms CycleQ2TraceRegularFiniteExtension.trace_regular
+
+end
+
+section
+
+/-!
+# The regular finite cochain trace on affine curve charts
+
+Both terms of the trace are uniquely determined by their actual
+function-field images. They commute with the ordinary derivative
+and the composite of pullback and trace is the degree on forms.
+These comparison identities are independent of affine presentations.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2RegularCurveCochainTrace
+
+open Algebra KaehlerDifferential
+open CycleQ2FiniteFieldOneFormTrace (traceOne)
+open CycleQ2DifferentialTraceEmbeddings (traceOne_D traceOne_pullback_degree)
+open CycleQ2CotangentLocalizationTower (map_tower)
+open CycleQ2FractionOneForms (fractionCoordinates regular_coordinates mapRegular)
+
+variable {k A B K L : Type} [Field k] [CharZero k]
+  [CommRing A] [IsDedekindDomain A] [CommRing B] [IsDomain B]
+  [Field K] [Field L] [Algebra k A] [Algebra.FiniteType k A]
+  [Algebra k B] [Algebra k K] [Algebra k L]
+  [Algebra A B] [Algebra A K] [Algebra A L] [Algebra B L] [Algebra K L]
+  [IsScalarTower k A B] [IsScalarTower k A K] [IsScalarTower k B L]
+  [IsScalarTower k K L] [IsScalarTower A B L] [IsScalarTower A K L]
+  [Algebra.IsIntegral A B] [IsFractionRing A K] [IsFractionRing B L]
+  [FiniteDimensional K L] [Algebra.IsSeparable K L]
+
+variable (c : Ω[A⁄k] ≃ₗ[A] A) (hA : ¬IsField A)
+
+include c in
+theorem regularMap_injective : Function.Injective (mapRegular (k := k) (A := A) (K := K)) := by
+  intro a b h
+  have he := congrArg (fractionCoordinates c) h
+  rw [regular_coordinates,regular_coordinates] at he
+  exact c.injective ((IsFractionRing.injective A K) he)
+
+private def rationalTrace : Ω[B⁄k] →ₗ[A] Ω[K⁄k] :=
+  ((traceOne (K := K) (L := L)).restrictScalars A).comp
+    ((KaehlerDifferential.map k k B L).restrictScalars A)
+
+private def traceToRange : Ω[B⁄k] →ₗ[A] LinearMap.range (mapRegular (k := k) (A := A) (K := K)) :=
+  (rationalTrace (K := K) (L := L)).codRestrict _ fun ω => by
+    obtain ⟨η,hη⟩ := CycleQ2TraceRegularFiniteExtension.trace_regular (K := K) (L := L) c hA ω
+    exact ⟨η,hη.symm⟩
+
+def traceForm : Ω[B⁄k] →ₗ[A] Ω[A⁄k] :=
+  (LinearEquiv.ofInjective mapRegular (regularMap_injective (K := K) c)).symm.toLinearMap.comp
+    (traceToRange (L := L) c hA)
+
+theorem traceForm_spec (ω : Ω[B⁄k]) :
+    mapRegular (traceForm (K := K) (L := L) c hA ω) =
+      traceOne (K := K) (KaehlerDifferential.map k k B L ω) := by
+  exact congrArg Subtype.val
+    ((LinearEquiv.ofInjective mapRegular (regularMap_injective (K := K) c)).apply_symm_apply
+      (traceToRange (K := K) (L := L) c hA ω))
+
+theorem traceForm_pullback (ω : Ω[A⁄k]) :
+    traceForm (K := K) (L := L) c hA (KaehlerDifferential.map k k A B ω) =
+      Module.finrank K L • ω := by
+  apply regularMap_injective (K := K) c
+  letI : IsScalarTower k A L := IsScalarTower.to₁₂₄ k A K L
+  rw [traceForm_spec,map_tower (B := B),← map_tower (B := K) ω,
+    traceOne_pullback_degree,map_nsmul]
+
+private def rationalFunctionTrace : B →ₗ[A] K :=
+  ((Algebra.trace K L).restrictScalars A).comp
+    (((IsScalarTower.toAlgHom A B L).toLinearMap))
+
+private theorem rationalFunctionTrace_mem (b : B) :
+    rationalFunctionTrace (A := A) (K := K) (L := L) b ∈ LinearMap.range (Algebra.linearMap A K) := by
+  have hb : IsIntegral A (algebraMap B L b) :=
+    (Algebra.IsIntegral.isIntegral b).map (IsScalarTower.toAlgHom A B L)
+  have ht : IsIntegral A (Algebra.trace K L (algebraMap B L b)) := Algebra.isIntegral_trace (R := A) (L := K) (F := L) hb
+  obtain ⟨a,ha⟩ := (isIntegrallyClosed_iff K).mp (inferInstance : IsIntegrallyClosed A) ht
+  exact ⟨a,ha⟩
+
+/-- The genuine ordinary trace restricted to regular functions. -/
+def traceFunction : B →ₗ[A] A :=
+  (LinearEquiv.ofInjective (Algebra.linearMap A K) (IsFractionRing.injective A K)).symm.toLinearMap.comp
+    ((rationalFunctionTrace (A := A) (K := K) (L := L)).codRestrict _
+      (rationalFunctionTrace_mem (K := K) (L := L)))
+
+theorem traceFunction_spec (b : B) :
+    algebraMap A K (traceFunction (K := K) (L := L) b) =
+      Algebra.trace K L (algebraMap B L b) := by
+  exact congrArg Subtype.val
+    ((LinearEquiv.ofInjective (Algebra.linearMap A K) (IsFractionRing.injective A K)).apply_symm_apply
+      ⟨rationalFunctionTrace (A := A) (K := K) (L := L) b,rationalFunctionTrace_mem (K := K) (L := L) b⟩)
+
+/-- The ordinary differential commutes with the trace of regular functions. -/
+theorem traceForm_derivative (b : B) :
+    traceForm (K := K) (L := L) c hA (D k B b) = D k A (traceFunction (K := K) (L := L) b) := by
+  letI : CharZero K := charZero_of_injective_algebraMap (algebraMap k K).injective
+  apply regularMap_injective (K := K) c
+  rw [traceForm_spec,KaehlerDifferential.map_D,traceOne_D]
+  change D k K (Algebra.trace K L (algebraMap B L b)) =
+    KaehlerDifferential.map k k A K (D k A (traceFunction (K := K) (L := L) b))
+  rw [KaehlerDifferential.map_D,traceFunction_spec]
+
+end CycleQ2RegularCurveCochainTrace
+
+#print axioms CycleQ2RegularCurveCochainTrace.traceForm_spec
+#print axioms CycleQ2RegularCurveCochainTrace.traceForm_pullback
+#print axioms CycleQ2RegularCurveCochainTrace.traceForm_derivative
+
+end
+
+section
+
+/-!
+# A surjective ring map checks one affine piece of a diagonal
+
+The overlap and both charts here are the actual schemes. The two
+coordinate restrictions determine the actual map into the product
+of the affine charts over the coefficient field.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2AffineDiagonalCriterion
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry Algebra.TensorProduct
+open scoped TensorProduct
+
+private theorem congr_fst {X Y Z : Scheme} {f₁ f₂ : X ⟶ Z} {g₁ g₂ : Y ⟶ Z}
+    (h₁ : f₁ = f₂) (h₂ : g₁ = g₂) :
+    (pullback.congrHom h₁ h₂).hom ≫ pullback.fst f₂ g₂ = pullback.fst f₁ g₁ := by
+  subst f₂
+  subst g₂
+  simp [pullback.congrHom]
+
+private theorem congr_snd {X Y Z : Scheme} {f₁ f₂ : X ⟶ Z} {g₁ g₂ : Y ⟶ Z}
+    (h₁ : f₁ = f₂) (h₂ : g₁ = g₂) :
+    (pullback.congrHom h₁ h₂).hom ≫ pullback.snd f₂ g₂ = pullback.snd f₁ g₁ := by
+  subst f₂
+  subst g₂
+  simp [pullback.congrHom]
+
+variable {k A B R : Type} [Field k] [CommRing A] [CommRing B] [CommRing R]
+  [Algebra k A] [Algebra k B] [Algebra k R] {Y : Scheme.{0}}
+  (f : Y ⟶ Spec (CommRingCat.of k))
+  (a : Spec (CommRingCat.of A) ⟶ Y) (b : Spec (CommRingCat.of B) ⟶ Y)
+  (ha : a ≫ f = Spec.map (CommRingCat.ofHom (algebraMap k A)))
+  (hb : b ≫ f = Spec.map (CommRingCat.ofHom (algebraMap k B)))
+  (φ : A →ₐ[k] R) (ψ : B →ₐ[k] R)
+  (e : Spec (CommRingCat.of R) ≅ pullback a b)
+  (he₁ : e.hom ≫ pullback.fst a b = Spec.map (CommRingCat.ofHom φ.toRingHom))
+  (he₂ : e.hom ≫ pullback.snd a b = Spec.map (CommRingCat.ofHom ψ.toRingHom))
+
+abbrev jointMap : A ⊗[k] B →ₐ[k] R := Algebra.TensorProduct.lift φ ψ (fun x y => Commute.all _ _)
+
+include ha hb he₁ he₂ in
+theorem closed_piece (h : Function.Surjective (jointMap φ ψ)) :
+    IsClosedImmersion (pullback.mapDesc a b f) := by
+  let d := pullback.mapDesc a b f
+  let q := pullback.congrHom ha hb
+  let t := pullbackSpecIso k A B
+  let g := Spec.map (CommRingCat.ofHom (jointMap φ ψ).toRingHom)
+  have e₁ : g ≫ t.inv ≫ pullback.fst _ _ = Spec.map (CommRingCat.ofHom φ.toRingHom) := by
+    rw [pullbackSpecIso_inv_fst,← Spec.map_comp]
+    congr 1
+    exact CommRingCat.hom_ext (RingHom.ext fun x =>
+      DFunLike.congr_fun (lift_comp_includeLeft φ ψ (fun x y => Commute.all _ _)) x)
+  have e₂ : g ≫ t.inv ≫ pullback.snd _ _ = Spec.map (CommRingCat.ofHom ψ.toRingHom) := by
+    rw [pullbackSpecIso_inv_snd,← Spec.map_comp]
+    congr 1
+    exact CommRingCat.hom_ext (RingHom.ext fun x =>
+      DFunLike.congr_fun (lift_comp_includeRight φ ψ (fun x y => Commute.all _ _)) x)
+  have hcomp : e.hom ≫ d ≫ q.hom = g ≫ t.inv := by
+    apply pullback.hom_ext
+    · simp only [Category.assoc, e₁, q, congr_fst, d, pullback.lift_fst, Category.comp_id]
+      exact he₁
+    · simp only [Category.assoc, e₂, q, congr_snd, d, pullback.lift_snd, Category.comp_id]
+      exact he₂
+  have hg : IsClosedImmersion g := IsClosedImmersion.spec_of_surjective _ h
+  have ht : IsClosedImmersion (g ≫ t.inv) := by infer_instance
+  have hh : IsClosedImmersion (e.hom ≫ d ≫ q.hom) := hcomp ▸ ht
+  have hh' := (MorphismProperty.cancel_left_of_respectsIso @IsClosedImmersion e.hom (d ≫ q.hom)).mp hh
+  exact (MorphismProperty.cancel_right_of_respectsIso @IsClosedImmersion d q.hom).mp hh'
+
+end CycleQ2AffineDiagonalCriterion
+
+#print axioms CycleQ2AffineDiagonalCriterion.closed_piece
+
+end
+
+section
+
+/-!
+# Separatedness of the actual glued projective line
+
+Both diagonal pieces from a single chart are ordinary affine
+diagonals. On the two mixed pieces, the overlap is the genuine
+Laurent scheme. The images of the polynomial charts generate
+its whole coordinate ring, so the mixed diagonals are closed.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2ProjectiveLineSeparated
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
+open Polynomial
+open CycleQ2LaurentProjectiveLine CycleQ2ProjectiveLineStructure
+open CycleQ2LaurentLogDerivative (L)
+open CycleQ2LaurentKahlerResidue (zeroRingMap infinityRingMap)
+open CycleQ2ProjectiveLineFunctions (laurent_decompose)
+open CycleQ2AffineDiagonalCriterion (jointMap closed_piece)
+open scoped TensorProduct
+
+variable (k : Type) [Field k]
+
+private def chart (i : Bool) : affineLine k ⟶ line k := if i then chartInfinity k else chartZero k
+
+private instance chart_open (i : Bool) : IsOpenImmersion (chart k i) := by
+  cases i
+  · exact inferInstanceAs (IsOpenImmersion (chartZero k))
+  · exact inferInstanceAs (IsOpenImmersion (chartInfinity k))
+
+def twoCharts : (line k).OpenCover where
+  I₀ := Bool
+  X _ := affineLine k
+  f := chart k
+  mem₀ := by
+    rw [Scheme.ofArrows_mem_precoverage_iff]
+    refine ⟨?_,fun _ => inferInstance⟩
+    intro x
+    have h : x ∈ openZero k ⊔ openInfinity k := by rw [cover]; trivial
+    rcases h with ⟨y,hy⟩ | ⟨y,hy⟩
+    · exact ⟨false,y,hy⟩
+    · exact ⟨true,y,hy⟩
+
+private theorem chart_over (i : Bool) : chart k i ≫ structureMap k = affineStructure k := by
+  cases i
+  · exact chartZero_over k
+  · exact chartInfinity_over k
+
+private theorem self_piece (i : Bool) :
+    IsClosedImmersion (pullback.mapDesc (chart k i) (chart k i) (structureMap k)) := by
+  let a := chart k i
+  let e : affineLine k ≅ pullback a a := asIso (pullback.diagonal a)
+  let φ : k[X] →ₐ[k] k[X] := AlgHom.id k k[X]
+  have h : Function.Surjective (jointMap φ φ) := by
+    intro x
+    refine ⟨x ⊗ₜ[k] (1 : k[X]),?_⟩
+    simp [jointMap,φ]
+  exact closed_piece (structureMap k) a a (chart_over k i) (chart_over k i)
+    φ φ e (by simp [e,φ]) (by simp [e,φ]) h
+
+private theorem mixed_piece (i j : Bool) (φ ψ : k[X] →ₐ[k] L k)
+    (h₁ : Spec.map (CommRingCat.ofHom φ.toRingHom) ≫ chart k i = chartTorus k)
+    (h₂ : Spec.map (CommRingCat.ofHom ψ.toRingHom) ≫ chart k j = chartTorus k)
+    (hr : Set.range (chartTorus k) = Set.range (chart k i) ∩ Set.range (chart k j))
+    (hs : ∀ z : L k, ∃ x y, z = φ x - ψ y) :
+    IsClosedImmersion (pullback.mapDesc (chart k i) (chart k j) (structureMap k)) := by
+  let a := chart k i
+  let b := chart k j
+  let v := pullback.fst a b ≫ a
+  letI : IsOpenImmersion v := by dsimp [v]; infer_instance
+  have he : Set.range (chartTorus k) = Set.range v := hr.trans
+    (IsOpenImmersion.range_pullback_to_base_of_left a b).symm
+  let e := IsOpenImmersion.isoOfRangeEq (chartTorus k) v he
+  have ea : e.hom ≫ pullback.fst a b = Spec.map (CommRingCat.ofHom φ.toRingHom) := by
+    apply (cancel_mono a).mp
+    rw [Category.assoc,h₁]
+    exact IsOpenImmersion.isoOfRangeEq_hom_fac (chartTorus k) v he
+  have eb : e.hom ≫ pullback.snd a b = Spec.map (CommRingCat.ofHom ψ.toRingHom) := by
+    apply (cancel_mono b).mp
+    rw [Category.assoc,h₂,← pullback.condition]
+    exact IsOpenImmersion.isoOfRangeEq_hom_fac (chartTorus k) v he
+  refine closed_piece (structureMap k) a b (chart_over k i) (chart_over k j) φ ψ e ea eb ?_
+  intro z
+  obtain ⟨x,y,hxy⟩ := hs z
+  refine ⟨x ⊗ₜ[k] (1 : k[X]) - (1 : k[X]) ⊗ₜ[k] y,?_⟩
+  rw [map_sub,jointMap,Algebra.TensorProduct.lift_tmul,Algebra.TensorProduct.lift_tmul,map_one,
+    map_one,mul_one,one_mul]
+  exact hxy.symm
+
+private theorem spec_infinity : Spec.map (CommRingCat.ofHom (infinityRingMap k).toRingHom) =
+    infinityMap k := by
+  rw [infinityMap,inversion,zeroMap,← Spec.map_comp]
+  rfl
+
+private theorem mixed_range : Set.range (chartTorus k) =
+    Set.range (chartZero k) ∩ Set.range (chartInfinity k) := by
+  exact congrArg (fun U : (line k).Opens => (U : Set (line k))) (overlap k).symm
+
+private theorem mixed_zero_infinity :
+    IsClosedImmersion (pullback.mapDesc (chartZero k) (chartInfinity k) (structureMap k)) := by
+  apply mixed_piece k false true (zeroRingMap k) (infinityRingMap k)
+  · exact torus_zero k
+  · rw [spec_infinity]
+    exact torus_infinity k
+  · exact mixed_range k
+  · exact laurent_decompose k
+
+private theorem mixed_infinity_zero :
+    IsClosedImmersion (pullback.mapDesc (chartInfinity k) (chartZero k) (structureMap k)) := by
+  apply mixed_piece k true false (infinityRingMap k) (zeroRingMap k)
+  · rw [spec_infinity]
+    exact torus_infinity k
+  · exact torus_zero k
+  · rw [Set.inter_comm]
+    exact mixed_range k
+  · intro z
+    obtain ⟨a,b,hab⟩ := laurent_decompose k z
+    exact ⟨-b,-a,by rw [hab,map_neg,map_neg]; abel⟩
+
+private abbrev Q : AffineTargetMorphismProperty :=
+  fun X _ f => IsAffine X ∧ Function.Surjective (f.appTop)
+
+/-- The actual structure morphism of the Laurent gluing is separated. -/
+theorem separated : IsSeparated (structureMap k) := by
+  letI : HasAffineProperty @IsClosedImmersion Q := IsClosedImmersion.hasAffineProperty
+  letI : Q.IsLocal := HasAffineProperty.isLocal_affineProperty @IsClosedImmersion
+  letI : ∀ i, IsAffine ((twoCharts k).X i) := fun _ => inferInstanceAs (IsAffine (affineLine k))
+  have h : Q.diagonal (structureMap k) := by
+    apply AffineTargetMorphismProperty.diagonal_of_openCover_source (Q := Q) (structureMap k) (twoCharts k)
+    intro i j
+    have he : IsClosedImmersion (pullback.mapDesc (chart k i) (chart k j) (structureMap k)) := by
+      cases i <;> cases j
+      · exact self_piece k false
+      · exact mixed_zero_infinity k
+      · exact mixed_infinity_zero k
+      · exact self_piece k true
+    letI : IsClosedImmersion (pullback.mapDesc ((twoCharts k).f i) ((twoCharts k).f j)
+        (structureMap k)) := he
+    exact IsClosedImmersion.isAffine_surjective_of_isAffine _
+  exact ⟨(HasAffineProperty.diagonal_iff @IsClosedImmersion).mp h⟩
+
+end CycleQ2ProjectiveLineSeparated
+
+#print axioms CycleQ2ProjectiveLineSeparated.separated
+
+end
+
+section
+
+/-!
+# The actual regular locus of a rational function
+
+The nonempty opens on which a rational function is represented
+form its maximal regular open. The representatives agree on
+overlaps by injectivity into the function field and therefore
+glue to a unique regular section on that open.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2RationalFunctionRegularLocus
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open TopCat.Presheaf
+
+variable (X : Scheme.{0}) [IsIntegral X]
+
+structure Representative (z : X.functionField) where
+  openSet : X.Opens
+  nonempty : Nonempty openSet
+  value : Γ(X,openSet)
+  germ_eq : letI : Nonempty openSet := nonempty
+    X.germToFunctionField openSet value = z
+
+def regularOpen (z : X.functionField) : X.Opens :=
+  ⨆ i : Representative X z, i.openSet
+
+private theorem generic_mem {U : X.Opens} [Nonempty U] : genericPoint X ∈ U :=
+  ((genericPoint_spec X).mem_open_set_iff U.isOpen).mpr (by simpa using (inferInstance : Nonempty U))
+
+private theorem representative_exists (z : X.functionField) : Nonempty (Representative X z) := by
+  obtain ⟨U,hU,s,hs⟩ := X.presheaf.exists_germ_eq z
+  let h : Nonempty U := ⟨genericPoint X,hU⟩
+  exact ⟨⟨U,h,s,hs⟩⟩
+
+instance (z : X.functionField) : Nonempty (regularOpen X z) := by
+  obtain ⟨i⟩ := representative_exists X z
+  letI : Nonempty i.openSet := i.nonempty
+  exact ⟨genericPoint X,(le_iSup (fun j : Representative X z => j.openSet) i) (generic_mem X)⟩
+
+theorem germ_restrict {U V : X.Opens} [Nonempty U] [Nonempty V] (h : V ≤ U) (s : Γ(X,U)) :
+    X.germToFunctionField V (X.presheaf.map (homOfLE h).op s) = X.germToFunctionField U s :=
+  germ_res_apply X.presheaf (homOfLE h) (genericPoint X) (generic_mem X) s
+
+private theorem sections_compatible (z : X.functionField) :
+    IsCompatible X.presheaf (fun i : Representative X z => i.openSet) (fun i => i.value) := by
+  intro i j
+  letI : Nonempty i.openSet := i.nonempty
+  letI : Nonempty j.openSet := j.nonempty
+  let O : X.Opens := i.openSet ⊓ j.openSet
+  letI : Nonempty O := ⟨⟨genericPoint X,⟨generic_mem X,generic_mem X⟩⟩⟩
+  apply (X.germToFunctionField_injective O)
+  let l : O ≤ i.openSet := inf_le_left
+  let r : O ≤ j.openSet := inf_le_right
+  change X.germToFunctionField O (X.presheaf.map (homOfLE l).op i.value) =
+    X.germToFunctionField O (X.presheaf.map (homOfLE r).op j.value)
+  calc
+    _ = X.germToFunctionField i.openSet i.value := germ_restrict X l i.value
+    _ = X.germToFunctionField j.openSet j.value := i.germ_eq.trans j.germ_eq.symm
+    _ = _ := (germ_restrict X r j.value).symm
+
+theorem section_exists (z : X.functionField) :
+    ∃ s : Γ(X,regularOpen X z), X.germToFunctionField (regularOpen X z) s = z := by
+  let U := regularOpen X z
+  let W := fun i : Representative X z => i.openSet
+  let leU (i : Representative X z) : i.openSet ≤ U := le_iSup W i
+  obtain ⟨s,hs,_⟩ := X.sheaf.existsUnique_gluing' W U (fun i => homOfLE (leU i))
+    le_rfl (fun i => i.value) (sections_compatible X z)
+  obtain ⟨i⟩ := representative_exists X z
+  letI : Nonempty i.openSet := i.nonempty
+  refine ⟨s,?_⟩
+  change X.germToFunctionField U s = z
+  have hsi : X.presheaf.map (homOfLE (leU i)).op s = i.value := hs i
+  rw [← germ_restrict X (leU i), hsi, i.germ_eq]
+
+/-- The original rational function as a regular section on its maximal domain. -/
+def sectionValue (z : X.functionField) : Γ(X,regularOpen X z) :=
+  (section_exists X z).choose
+
+theorem sectionValue_germ (z : X.functionField) :
+    X.germToFunctionField (regularOpen X z) (sectionValue X z) = z :=
+  (section_exists X z).choose_spec
+
+/-- Membership in the literal regular open is tested by the actual local ring. -/
+theorem mem_regularOpen_iff (z : X.functionField) (x : X) :
+    x ∈ regularOpen X z ↔ ∃ a : X.presheaf.stalk x,
+      algebraMap (X.presheaf.stalk x) X.functionField a = z := by
+  constructor
+  · intro hx
+    refine ⟨X.presheaf.germ (regularOpen X z) x hx (sectionValue X z),?_⟩
+    rw [Scheme.algebraMap_germ_eq_germToFunctionField,sectionValue_germ]
+  · rintro ⟨a,ha⟩
+    obtain ⟨W,hW,b,hb⟩ := X.presheaf.exists_germ_eq a
+    letI : Nonempty W := ⟨x,hW⟩
+    let i : Representative X z := ⟨W,inferInstance,b,?_⟩
+    · exact (le_iSup (fun j : Representative X z => j.openSet) i) hW
+    · rw [← Scheme.algebraMap_germ_eq_germToFunctionField X hW,hb,ha]
+
+end CycleQ2RationalFunctionRegularLocus
+
+#print axioms CycleQ2RationalFunctionRegularLocus.section_exists
+#print axioms CycleQ2RationalFunctionRegularLocus.mem_regularOpen_iff
+
+end
+
+section
+
+/-!
+# The inverse-coordinate cover on a curve with valuation local rings
+
+A rational function or its inverse is regular at every valuation
+point. On the actual overlap both regular sections multiply to
+one, since their images in the function field are inverse.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2RationalFunctionInverseCover
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2RationalFunctionRegularLocus
+
+variable (X : Scheme.{0}) [IsIntegral X]
+
+variable (z : X.functionField)
+
+abbrev reciprocalOpen := regularOpen X z⁻¹
+abbrev overlap := regularOpen X z ⊓ reciprocalOpen X z
+
+theorem inverse_cover (hv : ∀ x : X, ValuationRing (X.presheaf.stalk x)) :
+    regularOpen X z ⊔ reciprocalOpen X z = ⊤ := by
+  apply top_unique
+  intro x _
+  letI : ValuationRing (X.presheaf.stalk x) := hv x
+  rcases ValuationRing.isInteger_or_isInteger (↑(X.presheaf.stalk x)) z with h | h
+  · exact Or.inl ((mem_regularOpen_iff X z x).2 h)
+  · exact Or.inr ((mem_regularOpen_iff X z⁻¹ x).2 h)
+
+instance : Nonempty (overlap X z : X.Opens) := by
+  let U := regularOpen X z
+  let V := reciprocalOpen X z
+  have hU : genericPoint X ∈ U := ((genericPoint_spec X).mem_open_set_iff U.isOpen).mpr
+    (by simpa using (inferInstance : Nonempty U))
+  have hV : genericPoint X ∈ V := ((genericPoint_spec X).mem_open_set_iff V.isOpen).mpr
+    (by simpa using (inferInstance : Nonempty V))
+  exact ⟨⟨genericPoint X,hU,hV⟩⟩
+
+def onOverlap : Γ(X,overlap X z) :=
+  X.presheaf.map (homOfLE (show overlap X z ≤ regularOpen X z from inf_le_left)).op
+    (sectionValue X z)
+
+def inverseOnOverlap : Γ(X,overlap X z) :=
+  X.presheaf.map (homOfLE (show overlap X z ≤ reciprocalOpen X z from inf_le_right)).op
+    (sectionValue X z⁻¹)
+
+theorem onOverlap_germ :
+    X.germToFunctionField (overlap X z) (onOverlap X z) = z :=
+  (germ_restrict X inf_le_left (sectionValue X z)).trans (sectionValue_germ X z)
+
+theorem inverseOnOverlap_germ :
+    X.germToFunctionField (overlap X z) (inverseOnOverlap X z) = z⁻¹ :=
+  (germ_restrict X inf_le_right (sectionValue X z⁻¹)).trans (sectionValue_germ X z⁻¹)
+
+theorem inverse_mul (hz : z ≠ 0) : onOverlap X z * inverseOnOverlap X z = 1 := by
+  apply X.germToFunctionField_injective (overlap X z)
+  rw [map_mul, onOverlap_germ, inverseOnOverlap_germ, map_one, mul_inv_cancel₀ hz]
+
+/-- The actual overlap coordinate as a unit, with the actual inverse section. -/
+def overlapUnit (hz : z ≠ 0) : Γ(X,overlap X z)ˣ where
+  val := onOverlap X z
+  inv := inverseOnOverlap X z
+  val_inv := inverse_mul X z hz
+  inv_val := (mul_comm _ _).trans (inverse_mul X z hz)
+
+end CycleQ2RationalFunctionInverseCover
+
+#print axioms CycleQ2RationalFunctionInverseCover.inverse_cover
+#print axioms CycleQ2RationalFunctionInverseCover.overlapUnit
+
+end
+
+section
+
+/-!
+# The reciprocal chart maps of a rational function on a curve
+
+The two maps to the affine line are induced by the actual
+regular representatives. On their overlap the chosen unit maps
+to the Laurent torus and both restrictions are the corresponding
+polynomial maps, with inverse coordinate on the second chart.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2RationalFunctionLineCharts
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2LaurentProjectiveLine CycleQ2ProjectiveLineStructure
+open CycleQ2RationalFunctionRegularLocus (regularOpen sectionValue)
+open CycleQ2RationalFunctionInverseCover (reciprocalOpen overlap overlapUnit)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (restrict)
+open scoped Polynomial
+
+variable (k : Type) [Field k] {X : Scheme.{0}} [IsIntegral X]
+  (p : X ⟶ Spec (CommRingCat.of k)) (z : X.functionField)
+
+private abbrev A := regularOpen X z
+private abbrev B := reciprocalOpen X z
+private abbrev W := overlap X z
+
+def affineMap : (A z).toScheme ⟶ affineLine k :=
+  (A z).toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+    (Polynomial.eval₂RingHom (sectionCoefficients p (A z)) (sectionValue X z)))
+
+def torusMap (hz : z ≠ 0) : (W z).toScheme ⟶ torus k :=
+  (W z).toSpecΓ ≫ Spec.map (CommRingCat.ofHom
+    (LaurentPolynomial.eval₂ (sectionCoefficients p (W z)) (overlapUnit X z hz)))
+
+private theorem polynomial_eval_restrict {U V : X.Opens} (h : V ≤ U) (a : Γ(X,U)) :
+    (X.presheaf.map (homOfLE h).op).hom.comp (Polynomial.eval₂RingHom (sectionCoefficients p U) a) =
+      Polynomial.eval₂RingHom (sectionCoefficients p V) (X.presheaf.map (homOfLE h).op a) := by
+  letI : Algebra k Γ(X,U) := (sectionCoefficients p U).toAlgebra
+  letI : Algebra k Γ(X,V) := (sectionCoefficients p V).toAlgebra
+  apply Polynomial.ringHom_ext
+  · intro r
+    simp only [RingHom.comp_apply,Polynomial.coe_eval₂RingHom,Polynomial.eval₂_C]
+    exact (restrict p h).commutes r
+  · simp only [RingHom.comp_apply,Polynomial.coe_eval₂RingHom,Polynomial.eval₂_X]
+
+theorem zero_factor (hz : z ≠ 0) :
+    X.homOfLE (show W z ≤ A z from inf_le_left) ≫ affineMap k p z =
+      torusMap k p z hz ≫ zeroMap k := by
+  unfold affineMap torusMap zeroMap
+  rw [← Category.assoc, ← Scheme.Opens.toSpecΓ_SpecMap_presheaf_map,
+    Category.assoc, Category.assoc, ← Spec.map_comp, ← Spec.map_comp]
+  apply congrArg (fun f => (W z).toSpecΓ ≫ Spec.map f)
+  apply CommRingCat.hom_ext
+  let h : W z ≤ A z := inf_le_left
+  change (X.presheaf.map (homOfLE h).op).hom.comp
+    (Polynomial.eval₂RingHom (sectionCoefficients p (A z)) (sectionValue X z)) =
+    (LaurentPolynomial.eval₂ (sectionCoefficients p (W z)) (overlapUnit X z hz)).comp
+      Polynomial.toLaurent
+  rw [polynomial_eval_restrict k p h (sectionValue X z)]
+  apply RingHom.ext
+  intro q
+  exact (LaurentPolynomial.eval₂_toLaurent (sectionCoefficients p (W z)) (overlapUnit X z hz) q).symm
+
+private theorem eval_inverted (V : X.Opens) (u : Γ(X,V)ˣ) :
+    (LaurentPolynomial.eval₂ (sectionCoefficients p V) u).comp
+      ((LaurentPolynomial.invert : LaurentPolynomial k ≃ₐ[k] LaurentPolynomial k).toRingHom.comp
+        (Polynomial.toLaurentAlg : k[X] →ₐ[k] LaurentPolynomial k).toRingHom) =
+      Polynomial.eval₂RingHom (sectionCoefficients p V) (↑u⁻¹ : Γ(X,V)) := by
+  apply Polynomial.ringHom_ext
+  · intro r
+    simp only [RingHom.comp_apply,Polynomial.coe_eval₂RingHom,Polynomial.eval₂_C]
+    change LaurentPolynomial.eval₂ (sectionCoefficients p V) u
+      (LaurentPolynomial.invert (Polynomial.toLaurent (Polynomial.C r))) = _
+    rw [Polynomial.toLaurent_C,LaurentPolynomial.invert_C,LaurentPolynomial.eval₂_C]
+  · simp only [RingHom.comp_apply,Polynomial.coe_eval₂RingHom,Polynomial.eval₂_X]
+    change LaurentPolynomial.eval₂ (sectionCoefficients p V) u
+      (LaurentPolynomial.invert (Polynomial.toLaurent Polynomial.X)) = _
+    rw [Polynomial.toLaurent_X,LaurentPolynomial.invert_T,LaurentPolynomial.eval₂_T]
+    simp
+
+theorem infinity_factor (hz : z ≠ 0) :
+    X.homOfLE (show W z ≤ B z from inf_le_right) ≫ affineMap k p z⁻¹ =
+      torusMap k p z hz ≫ infinityMap k := by
+  unfold affineMap torusMap infinityMap inversion zeroMap
+  rw [← Category.assoc, ← Scheme.Opens.toSpecΓ_SpecMap_presheaf_map,
+    Category.assoc, Category.assoc, ← Spec.map_comp, ← Spec.map_comp, ← Spec.map_comp]
+  apply congrArg (fun f => (W z).toSpecΓ ≫ Spec.map f)
+  apply CommRingCat.hom_ext
+  let h : W z ≤ B z := inf_le_right
+  change (X.presheaf.map (homOfLE h).op).hom.comp
+    (Polynomial.eval₂RingHom (sectionCoefficients p (B z)) (sectionValue X z⁻¹)) = _
+  rw [polynomial_eval_restrict k p h (sectionValue X z⁻¹)]
+  change Polynomial.eval₂RingHom (sectionCoefficients p (W z))
+      (↑(overlapUnit X z hz)⁻¹ : Γ(X,W z)) = _
+  exact (eval_inverted k p (W z) (overlapUnit X z hz)).symm
+
+end CycleQ2RationalFunctionLineCharts
+
+#print axioms CycleQ2RationalFunctionLineCharts.zero_factor
+#print axioms CycleQ2RationalFunctionLineCharts.infinity_factor
+
+end
+
+section
+
+/-!
+# A rational function gives an actual projective-line morphism
+
+On an integral scheme with valuation local rings the regular
+loci of the function and its reciprocal cover the scheme. The
+two actual affine chart morphisms glue along the verified
+Laurent overlap by the scheme open-cover gluing theorem.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2RationalFunctionToLine
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2LaurentProjectiveLine
+open CycleQ2RationalFunctionRegularLocus (regularOpen)
+open CycleQ2RationalFunctionInverseCover (reciprocalOpen overlap inverse_cover)
+open CycleQ2RationalFunctionLineCharts (affineMap torusMap zero_factor infinity_factor)
+
+variable {X : Scheme.{0}}
+
+private theorem intersectionRange (U V : X.Opens) :
+    Set.range (U ⊓ V : X.Opens).ι = Set.range (pullback.fst U.ι V.ι ≫ U.ι) := by
+  rw [IsOpenImmersion.range_pullback_to_base_of_left,Scheme.Opens.range_ι,Scheme.Opens.range_ι,Scheme.Opens.range_ι]
+  rfl
+
+private def intersectionIso (U V : X.Opens) :
+    (U ⊓ V : X.Opens).toScheme ≅ pullback U.ι V.ι :=
+  IsOpenImmersion.isoOfRangeEq (U ⊓ V : X.Opens).ι (pullback.fst U.ι V.ι ≫ U.ι)
+    (intersectionRange U V)
+
+private theorem intersection_fst (U V : X.Opens) :
+    (intersectionIso U V).hom ≫ pullback.fst U.ι V.ι =
+      X.homOfLE (show U ⊓ V ≤ U from inf_le_left) := by
+  apply (cancel_mono U.ι).mp
+  rw [Category.assoc, Scheme.homOfLE_ι]
+  exact IsOpenImmersion.isoOfRangeEq_hom_fac (U ⊓ V : X.Opens).ι (pullback.fst U.ι V.ι ≫ U.ι) (intersectionRange U V)
+
+private theorem intersection_snd (U V : X.Opens) :
+    (intersectionIso U V).hom ≫ pullback.snd U.ι V.ι =
+      X.homOfLE (show U ⊓ V ≤ V from inf_le_right) := by
+  apply (cancel_mono V.ι).mp
+  rw [Category.assoc, Scheme.homOfLE_ι, ← pullback.condition]
+  exact IsOpenImmersion.isoOfRangeEq_hom_fac (U ⊓ V : X.Opens).ι (pullback.fst U.ι V.ι ≫ U.ι) (intersectionRange U V)
+
+variable [IsIntegral X] (z : X.functionField)
+
+private def domain : Bool → X.Opens
+  | false => regularOpen X z
+  | true => reciprocalOpen X z
+
+def inverseCover (hv : ∀ x : X, ValuationRing (X.presheaf.stalk x)) : X.OpenCover where
+  I₀ := Bool
+  X i := (domain z i).toScheme
+  f i := (domain z i).ι
+  mem₀ := by
+    rw [Scheme.ofArrows_mem_precoverage_iff]
+    refine ⟨?_,fun _ => inferInstance⟩
+    intro x
+    have hx : x ∈ regularOpen X z ⊔ reciprocalOpen X z := by rw [inverse_cover X z hv]; trivial
+    rcases hx with hx | hx
+    · exact ⟨false,⟨x,hx⟩,rfl⟩
+    · exact ⟨true,⟨x,hx⟩,rfl⟩
+
+variable (k : Type) [Field k] (p : X ⟶ Spec (CommRingCat.of k))
+
+private def piece (i : Bool) : (domain z i).toScheme ⟶ line k := by
+  cases i
+  · exact affineMap k p z ≫ chartZero k
+  · exact affineMap k p z⁻¹ ≫ chartInfinity k
+
+private theorem mixed (hz : z ≠ 0) :
+    pullback.fst (regularOpen X z).ι (reciprocalOpen X z).ι ≫ piece z k p false =
+      pullback.snd (regularOpen X z).ι (reciprocalOpen X z).ι ≫ piece z k p true := by
+  let U := regularOpen X z
+  let V := reciprocalOpen X z
+  apply (cancel_epi (intersectionIso U V).hom).mp
+  simp only [← Category.assoc]
+  rw [intersection_fst (regularOpen X z) (reciprocalOpen X z),
+    intersection_snd (regularOpen X z) (reciprocalOpen X z)]
+  change (X.homOfLE (show overlap X z ≤ U from inf_le_left) ≫ affineMap k p z) ≫ chartZero k =
+    (X.homOfLE (show overlap X z ≤ V from inf_le_right) ≫ affineMap k p z⁻¹) ≫ chartInfinity k
+  rw [zero_factor k p z hz, infinity_factor k p z hz,Category.assoc,Category.assoc,
+    torus_zero,torus_infinity]
+
+private theorem pieces_compatible (hz : z ≠ 0) (i j : Bool) :
+    pullback.fst (domain z i).ι (domain z j).ι ≫ piece z k p i =
+      pullback.snd (domain z i).ι (domain z j).ι ≫ piece z k p j := by
+  cases i <;> cases j
+  · rw [show pullback.fst (domain z false).ι (domain z false).ι = pullback.snd _ _ from
+      (cancel_mono (domain z false).ι).mp pullback.condition]
+  · exact mixed z k p hz
+  · change pullback.fst (reciprocalOpen X z).ι (regularOpen X z).ι ≫ piece z k p true =
+      pullback.snd (reciprocalOpen X z).ι (regularOpen X z).ι ≫ piece z k p false
+    apply (cancel_epi (pullbackSymmetry (regularOpen X z).ι (reciprocalOpen X z).ι).hom).mp
+    simpa only [← Category.assoc,pullbackSymmetry_hom_comp_fst,pullbackSymmetry_hom_comp_snd] using
+      (mixed z k p hz).symm
+  · rw [show pullback.fst (domain z true).ι (domain z true).ι = pullback.snd _ _ from
+      (cancel_mono (domain z true).ι).mp pullback.condition]
+
+def toLine (hv : ∀ x : X, ValuationRing (X.presheaf.stalk x)) (hz : z ≠ 0) :
+    X ⟶ line k :=
+  (inverseCover z hv).glueMorphisms (piece z k p) (pieces_compatible z k p hz)
+
+theorem zero_chart (hv : ∀ x : X, ValuationRing (X.presheaf.stalk x)) (hz : z ≠ 0) :
+    (regularOpen X z).ι ≫ toLine z k p hv hz = affineMap k p z ≫ chartZero k :=
+  (inverseCover z hv).ι_glueMorphisms (piece z k p) (pieces_compatible z k p hz) false
+
+theorem infinity_chart (hv : ∀ x : X, ValuationRing (X.presheaf.stalk x)) (hz : z ≠ 0) :
+    (reciprocalOpen X z).ι ≫ toLine z k p hv hz = affineMap k p z⁻¹ ≫ chartInfinity k :=
+  (inverseCover z hv).ι_glueMorphisms (piece z k p) (pieces_compatible z k p hz) true
+
+end CycleQ2RationalFunctionToLine
+
+#print axioms CycleQ2RationalFunctionToLine.zero_chart
+#print axioms CycleQ2RationalFunctionToLine.infinity_chart
+
+end
+
+section
+
+/-!
+# The rational-function map is over the original coefficient field
+
+The cohomological projections later use this literal scheme
+morphism over the given field. The affine factor is checked
+through the adjunction with global sections, including its
+induced coefficient ring homomorphism.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2RationalFunctionRelativeMap
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2LaurentProjectiveLine CycleQ2ProjectiveLineStructure
+open CycleQ2RationalFunctionRegularLocus (regularOpen sectionValue)
+open CycleQ2RationalFunctionInverseCover (reciprocalOpen)
+open CycleQ2RationalFunctionLineCharts (affineMap)
+open CycleQ2RationalFunctionToLine (toLine inverseCover zero_chart infinity_chart)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open scoped Polynomial
+
+variable (k : Type) [Field k] {X : Scheme.{0}} (p : X ⟶ Spec (CommRingCat.of k))
+
+theorem sectionCoefficients_Spec (U : X.Opens) :
+    U.toSpecΓ ≫ Spec.map (CommRingCat.ofHom (sectionCoefficients p U)) = U.ι ≫ p := by
+  let γ := Scheme.ΓSpecIso (CommRingCat.of k)
+  let r := X.presheaf.map (homOfLE (show U ≤ ⊤ from le_top)).op
+  change U.toSpecΓ ≫ Spec.map (γ.inv ≫ p.appTop ≫ r) = _
+  rw [Spec.map_comp,Spec.map_comp]
+  simp only [← Category.assoc]
+  rw [U.toSpecΓ_SpecMap_presheaf_map_top,Category.assoc U.ι,
+    ← Scheme.toSpecΓ_naturality, ← Category.assoc, Category.assoc (U.ι ≫ p),
+    toSpecΓ_SpecMap_ΓSpecIso_inv,Category.comp_id]
+
+variable [IsIntegral X] (z : X.functionField)
+
+theorem affineMap_over : affineMap k p z ≫ affineStructure k = (regularOpen X z).ι ≫ p := by
+  unfold affineMap affineStructure
+  rw [Category.assoc,← Spec.map_comp]
+  have h : CommRingCat.ofHom (algebraMap k k[X]) ≫ CommRingCat.ofHom
+      (Polynomial.eval₂RingHom (sectionCoefficients p (regularOpen X z)) (sectionValue X z)) =
+      CommRingCat.ofHom (sectionCoefficients p (regularOpen X z)) := by
+    apply CommRingCat.hom_ext
+    apply RingHom.ext
+    intro a
+    exact Polynomial.eval₂_C _ _
+  rw [h,sectionCoefficients_Spec]
+
+theorem toLine_over (hv : ∀ x : X, ValuationRing (X.presheaf.stalk x)) (hz : z ≠ 0) :
+    toLine z k p hv hz ≫ structureMap k = p := by
+  apply (inverseCover z hv).hom_ext
+  intro b
+  cases b
+  · change (regularOpen X z).ι ≫ toLine z k p hv hz ≫ structureMap k = _
+    rw [← Category.assoc,zero_chart,Category.assoc,chartZero_over,affineMap_over]
+    rfl
+  · change (reciprocalOpen X z).ι ≫ toLine z k p hv hz ≫ structureMap k = _
+    rw [← Category.assoc,infinity_chart,Category.assoc,chartInfinity_over,affineMap_over]
+    rfl
+
+theorem toLine_proper [IsProper p] (hv : ∀ x : X, ValuationRing (X.presheaf.stalk x)) (hz : z ≠ 0) :
+    IsProper (toLine z k p hv hz) := by
+  letI : IsSeparated (structureMap k) := CycleQ2ProjectiveLineSeparated.separated k
+  letI : IsProper (toLine z k p hv hz ≫ structureMap k) := (toLine_over k p z hv hz).symm ▸ inferInstance
+  exact IsProper.of_comp _ (structureMap k)
+
+end CycleQ2RationalFunctionRelativeMap
+
+#print axioms CycleQ2RationalFunctionRelativeMap.toLine_over
+#print axioms CycleQ2RationalFunctionRelativeMap.toLine_proper
+
+end
+
+section
+
+/-!
+# A nonconstant proper integral curve map is finite
+
+Every nongeneric point of an integral one-dimensional scheme is
+closed. A proper closed subset of a Noetherian integral curve is
+a finite union of such points. A proper morphism that sends the
+generic point to a nonclosed point therefore has finite fibers.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2ProperCurveFiniteFibres
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Order Set
+
+section Spaces
+
+variable {X : Type} [TopologicalSpace X] [T0Space X] [QuasiSober X] [IrreducibleSpace X]
+
+private def closureOf (x : X) : IrreducibleCloseds X :=
+  ⟨closure ({x} : Set X),isIrreducible_singleton.closure,isClosed_closure⟩
+
+theorem closed_nongeneric (hX : topologicalKrullDim X ≤ 1) {x : X}
+    (hx : x ≠ genericPoint X) : IsClosed ({x} : Set X) := by
+  by_contra h
+  have hn : ¬ closure ({x} : Set X) ⊆ {x} := fun hsub =>
+    h ((Set.Subset.antisymm hsub subset_closure) ▸ isClosed_closure)
+  obtain ⟨y,hy,hy'⟩ := Set.not_subset.mp hn
+  have h₁ : closureOf x < closureOf (genericPoint X) := by
+    refine lt_of_le_of_ne ?_ ?_
+    · change closure ({x} : Set X) ⊆ closure {genericPoint X}
+      rw [genericPoint_closure]
+      exact Set.subset_univ _
+    · intro hxy
+      apply hx
+      apply IsGenericPoint.eq (S := closure ({x} : Set X))
+      · rfl
+      · exact congrArg (fun s : IrreducibleCloseds X => (s : Set X)) hxy.symm
+  have h₂ : closureOf y < closureOf x := by
+    refine lt_of_le_of_ne (closure_minimal (Set.singleton_subset_iff.mpr hy) isClosed_closure) ?_
+    intro hxy
+    apply hy'
+    rw [Set.mem_singleton_iff]
+    apply IsGenericPoint.eq (S := closure ({y} : Set X))
+    · rfl
+    · exact congrArg (fun s : IrreducibleCloseds X => (s : Set X)) hxy.symm
+  let p : LTSeries (IrreducibleCloseds X) :=
+    (RelSeries.singleton _ (closureOf (genericPoint X))).cons (closureOf x) h₁
+  let q : LTSeries (IrreducibleCloseds X) := p.cons (closureOf y) (by
+    change closureOf y < p.head
+    simpa only [p,RelSeries.head_cons] using h₂)
+  have hd := LTSeries.length_le_krullDim q
+  change (2 : WithBot ℕ∞) ≤ topologicalKrullDim X at hd
+  exact (by decide : ¬(2 : WithBot ℕ∞) ≤ 1) (hd.trans hX)
+
+theorem finite_closed_proper [NoetherianSpace X] (hX : topologicalKrullDim X ≤ 1)
+    {S : Set X} (hS : IsClosed S) (hproper : S ≠ univ) : S.Finite := by
+  obtain ⟨T,hT,hcl,hirr,hcover⟩ := NoetherianSpace.exists_finite_set_isClosed_irreducible hS
+  rw [hcover]
+  apply hT.sUnion
+  intro W hW
+  have hgen := (hirr W hW).closure_genericPoint (hcl W hW)
+  have hng : (hirr W hW).genericPoint ≠ genericPoint X := by
+    intro h
+    rw [h,genericPoint_closure] at hgen
+    apply hproper
+    apply Set.eq_univ_of_univ_subset
+    rw [hgen,hcover]
+    exact Set.subset_sUnion_of_mem hW
+  rw [← hgen,(closed_nongeneric hX hng).closure_eq]
+  exact Set.finite_singleton _
+
+end Spaces
+
+variable {X Y : Scheme.{0}} [IsIntegral X] [NoetherianSpace X]
+  (f : X ⟶ Y) [IsProper f]
+
+theorem finite_fibers (hX : topologicalKrullDim X ≤ 1)
+    (hf : ¬ IsClosed ({f (genericPoint X)} : Set Y)) :
+    ∀ y : Y, (f ⁻¹' {y}).Finite := by
+  intro y
+  by_cases hy : IsClosed ({y} : Set Y)
+  · refine finite_closed_proper hX (hy.preimage f.continuous) ?_
+    intro h
+    have hz : genericPoint X ∈ f ⁻¹' ({y} : Set Y) := by rw [h]; trivial
+    change f (genericPoint X) = y at hz
+    exact hf (hz.symm ▸ hy)
+  · have hgen : ∀ x ∈ f ⁻¹' ({y} : Set Y), x = genericPoint X := by
+      intro x hx
+      by_contra hn
+      have h := f.isClosedMap _ (closed_nongeneric hX hn)
+      rw [Set.image_singleton] at h
+      change f x = y at hx
+      exact hy (hx ▸ h)
+    exact (Set.finite_singleton (genericPoint X)).subset (fun x hx => hgen x hx)
+
+theorem finite_map (hX : topologicalKrullDim X ≤ 1)
+    (hf : ¬ IsClosed ({f (genericPoint X)} : Set Y)) : IsFinite f := by
+  letI : LocallyQuasiFinite f := LocallyQuasiFinite.of_finite_preimage_singleton f (finite_fibers f hX hf)
+  exact IsFinite.of_isProper_of_locallyQuasiFinite f
+
+end CycleQ2ProperCurveFiniteFibres
+
+#print axioms CycleQ2ProperCurveFiniteFibres.finite_map
+
+end
+
+section
+
+/-!
+# A transcendental rational function gives a finite proper curve projection
+
+The actual glued morphism sends the generic point to the generic point
+of the polynomial chart. Properness and the dimension bound make its
+fibers finite.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2RationalFunctionFiniteMap
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2LaurentProjectiveLine
+open CycleQ2RationalFunctionRegularLocus (regularOpen sectionValue sectionValue_germ germ_restrict)
+open CycleQ2RationalFunctionLineCharts (affineMap)
+open CycleQ2RationalFunctionToLine (toLine zero_chart)
+open CycleQ2RationalFunctionRelativeMap (toLine_proper)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (restrict)
+open scoped Polynomial
+
+variable (k : Type) [Field k] {X : Scheme.{0}} [IsIntegral X]
+  (p : X ⟶ Spec (CommRingCat.of k)) (z : X.functionField)
+
+abbrev fieldCoefficients : k →+* X.functionField :=
+  (X.germToFunctionField (regularOpen X z)).hom.comp (sectionCoefficients p (regularOpen X z))
+
+private def evalChart {V : X.Opens} (h : V ≤ regularOpen X z) : k[X] →+* Γ(X,V) :=
+  Polynomial.eval₂RingHom (sectionCoefficients p V)
+    (X.presheaf.map (homOfLE h).op (sectionValue X z))
+
+private theorem evalChart_restrict {V : X.Opens} (h : V ≤ regularOpen X z) :
+    (X.presheaf.map (homOfLE h).op).hom.comp
+      (Polynomial.eval₂RingHom (sectionCoefficients p (regularOpen X z)) (sectionValue X z)) =
+    evalChart k p z h := by
+  letI : Algebra k Γ(X,regularOpen X z) := (sectionCoefficients p (regularOpen X z)).toAlgebra
+  letI : Algebra k Γ(X,V) := (sectionCoefficients p V).toAlgebra
+  apply Polynomial.ringHom_ext
+  · intro c
+    simp only [evalChart,RingHom.comp_apply,Polynomial.coe_eval₂RingHom,Polynomial.eval₂_C]
+    exact (restrict p h).commutes c
+  · simp only [evalChart,RingHom.comp_apply,Polynomial.coe_eval₂RingHom,Polynomial.eval₂_X]
+
+private theorem evalChart_injective {V : X.Opens} [Nonempty V] (h : V ≤ regularOpen X z)
+    (he : Function.Injective (Polynomial.eval₂RingHom (fieldCoefficients k p z) z)) :
+    Function.Injective (evalChart k p z h) := by
+  have e : (X.germToFunctionField V).hom.comp (evalChart k p z h) =
+      Polynomial.eval₂RingHom (fieldCoefficients k p z) z := by
+    rw [← evalChart_restrict,← RingHom.comp_assoc]
+    apply Polynomial.ringHom_ext
+    · intro c
+      simp only [fieldCoefficients,RingHom.comp_apply,Polynomial.coe_eval₂RingHom,Polynomial.eval₂_C]
+      exact germ_restrict X h _
+    · simp only [RingHom.comp_apply,Polynomial.coe_eval₂RingHom,Polynomial.eval₂_X]
+      exact (germ_restrict X h _).trans (sectionValue_germ X z)
+  intro a b hab
+  apply he
+  rw [← e]
+  exact congrArg (X.germToFunctionField V) hab
+
+private theorem affine_factor {V : X.Opens} (hV : IsAffineOpen V) (h : V ≤ regularOpen X z)
+    (hv : ∀ x : X, ValuationRing (X.presheaf.stalk x)) (hz : z ≠ 0) :
+    hV.fromSpec ≫ toLine z k p hv hz =
+      Spec.map (CommRingCat.ofHom (evalChart k p z h)) ≫ chartZero k := by
+  unfold IsAffineOpen.fromSpec
+  rw [Category.assoc, ← Scheme.homOfLE_ι X h,Category.assoc (X.homOfLE h),zero_chart]
+  unfold affineMap
+  simp only [Category.assoc]
+  rw [← Scheme.Opens.toSpecΓ_SpecMap_presheaf_map_assoc, ← Spec.map_comp_assoc]
+  have e : CommRingCat.ofHom (Polynomial.eval₂RingHom (sectionCoefficients p (regularOpen X z))
+        (sectionValue X z)) ≫ X.presheaf.map (homOfLE h).op =
+      CommRingCat.ofHom (evalChart k p z h) := CommRingCat.hom_ext (evalChart_restrict k p z h)
+  rw [e,← Category.assoc, hV.isoSpec_inv_toSpecΓ,Category.id_comp]
+
+private theorem generic_image (hv : ∀ x : X, ValuationRing (X.presheaf.stalk x)) (hz : z ≠ 0)
+    (he : Function.Injective (Polynomial.eval₂RingHom (fieldCoefficients k p z) z)) :
+    toLine z k p hv hz (genericPoint X) = chartZero k (genericPoint (affineLine k)) := by
+  have hm : genericPoint X ∈ regularOpen X z :=
+    ((genericPoint_spec X).mem_open_set_iff (regularOpen X z).isOpen).mpr
+      (by simpa using (inferInstance : Nonempty (regularOpen X z)))
+  obtain ⟨_,⟨V,hV,rfl⟩,hg,h⟩ := X.isBasis_affineOpens.exists_subset_of_mem_open hm
+    (regularOpen X z).isOpen
+  letI : Nonempty V := ⟨genericPoint X,hg⟩
+  have h₁ : hV.fromSpec (genericPoint (Spec Γ(X,V))) = genericPoint X :=
+    genericPoint_eq_of_isOpenImmersion hV.fromSpec
+  have h₂ : Spec.map (CommRingCat.ofHom (evalChart k p z h)) (genericPoint (Spec Γ(X,V))) =
+      genericPoint (affineLine k) := by
+    change _ = genericPoint (Spec (CommRingCat.of k[X]))
+    rw [genericPoint_eq_bot_of_affine,genericPoint_eq_bot_of_affine]
+    apply PrimeSpectrum.ext
+    exact Ideal.comap_bot_of_injective (evalChart k p z h) (evalChart_injective k p z h he)
+  have e := congrArg (fun f : Spec Γ(X,V) ⟶ line k => f (genericPoint (Spec Γ(X,V))))
+    (affine_factor k p z hV h hv hz)
+  change toLine z k p hv hz (hV.fromSpec (genericPoint (Spec Γ(X,V)))) =
+    chartZero k (Spec.map (CommRingCat.ofHom (evalChart k p z h)) (genericPoint (Spec Γ(X,V)))) at e
+  rwa [h₁,h₂] at e
+
+private theorem affine_generic_not_closed :
+    ¬ IsClosed ({genericPoint (affineLine k)} : Set (affineLine k)) := by
+  intro h
+  change IsClosed ({genericPoint (Spec (CommRingCat.of k[X]))} : Set (PrimeSpectrum k[X])) at h
+  rw [genericPoint_eq_bot_of_affine] at h
+  have hm : (⊥ : Ideal k[X]).IsMaximal := (PrimeSpectrum.isClosed_singleton_iff_isMaximal _).mp h
+  exact Polynomial.not_isField k (Ring.isField_iff_maximal_bot.mpr hm)
+
+theorem finite_projection [IsProper p] [NoetherianSpace X] (hX : topologicalKrullDim X ≤ 1)
+    (hv : ∀ x : X, ValuationRing (X.presheaf.stalk x)) (hz : z ≠ 0)
+    (he : Function.Injective (Polynomial.eval₂RingHom (fieldCoefficients k p z) z)) :
+    IsFinite (toLine z k p hv hz) := by
+  letI := toLine_proper k p z hv hz
+  refine CycleQ2ProperCurveFiniteFibres.finite_map _ hX ?_
+  rw [generic_image k p z hv hz he]
+  intro h
+  apply affine_generic_not_closed k
+  have e : (chartZero k) ⁻¹' ({chartZero k (genericPoint (affineLine k))} : Set (line k)) =
+      {genericPoint (affineLine k)} := by
+    ext x
+    simpa only [Set.mem_preimage,Set.mem_singleton_iff] using
+      ((chartZero k).isOpenEmbedding.injective.eq_iff :
+        chartZero k x = chartZero k (genericPoint (affineLine k)) ↔ _)
+  exact e ▸ h.preimage (chartZero k).continuous
+
+end CycleQ2RationalFunctionFiniteMap
+
+#print axioms CycleQ2RationalFunctionFiniteMap.finite_projection
+
+end
+
+section
+
+/-!
+# The upper hypercohomology of a two-term complex as a quotient
+
+The upper edge of the derived triangle is surjective once degree two
+of the function term vanishes. Its kernel is the image of degree-one
+cohomology under the original differential. This describes the upper
+group even when degree one of the function term is nonzero.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2TwoTermTopQuotient
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Abelian
+open CategoryTheory.Pretriangulated
+open CycleQ2TwoTermTopComparison (shiftedTriangle topGroup topMap topMap_surjective)
+
+variable {C : Type*} [Category C] [Abelian C] [HasExt.{1} C] [HasDerivedCategory.{1} C]
+  {A B : C} (d : A ⟶ B) (X : C)
+
+private abbrev E := DerivedCategory.singleFunctor C 0
+
+def upperDerivative : Ext X A 1 →+ Ext X B 1 where
+  toFun x := Ext.homEquiv.symm (x.hom ≫ (shiftedTriangle d).mor₁)
+  map_zero' := by
+    apply Ext.homEquiv.injective
+    simp only [Equiv.apply_symm_apply,Ext.zero_hom,zero_comp]
+  map_add' x y := by
+    apply Ext.homEquiv.injective
+    simp only [Equiv.apply_symm_apply,Ext.add_hom,Preadditive.add_comp]
+
+theorem upperDerivative_hom (x : Ext X A 1) :
+    (upperDerivative d X x).hom = x.hom ≫ (shiftedTriangle d).mor₁ :=
+  Equiv.apply_symm_apply Ext.homEquiv _
+
+theorem topMap_zero_iff (b : Ext X B 1) :
+    topMap d X b = 0 ↔ ∃ a : Ext X A 1, upperDerivative d X a = b := by
+  have hT : shiftedTriangle d ∈ distTriang (DerivedCategory C) :=
+    Triangle.shift_distinguished _ (DerivedCategory.mappingCone_triangle_distinguished _) _
+  constructor
+  · intro hb
+    obtain ⟨g,hg⟩ := Triangle.coyoneda_exact₂ _ hT b.hom hb
+    refine ⟨Ext.homEquiv.symm g,Ext.homEquiv.injective ?_⟩
+    change (upperDerivative d X (Ext.homEquiv.symm g)).hom = b.hom
+    rw [upperDerivative_hom]
+    change Ext.homEquiv (Ext.homEquiv.symm g) ≫ (shiftedTriangle d).mor₁ = b.hom
+    rw [Equiv.apply_symm_apply,hg]
+  · rintro ⟨a,rfl⟩
+    change (upperDerivative d X a).hom ≫ (shiftedTriangle d).mor₂ = 0
+    rw [upperDerivative_hom,Category.assoc,comp_distTriang_mor_zero₁₂ _ hT,comp_zero]
+
+/-- An additive functional that kills the derived upper differential
+descends uniquely to actual degree-two hypercohomology. -/
+def descend {M : Type*} [AddCommGroup M] (h₂ : Subsingleton (Ext X A 2))
+    (f : Ext X B 1 →+ M) (hf : ∀ a : Ext X A 1, f (upperDerivative d X a) = 0) :
+    topGroup d X →+ M :=
+  AddMonoidHom.liftOfSurjective (topMap d X) (topMap_surjective d X h₂)
+    ⟨f,fun b hb => by
+      obtain ⟨a,rfl⟩ := (topMap_zero_iff d X b).mp hb
+      exact hf a⟩
+
+theorem descend_topMap {M : Type*} [AddCommGroup M] (h₂ : Subsingleton (Ext X A 2))
+    (f : Ext X B 1 →+ M) (hf : ∀ a : Ext X A 1, f (upperDerivative d X a) = 0)
+    (b : Ext X B 1) :
+    descend d X h₂ f hf (topMap d X b) = f b := by
+  simp [descend]
+
+end CycleQ2TwoTermTopQuotient
+
+#print axioms CycleQ2TwoTermTopQuotient.topMap_zero_iff
+#print axioms CycleQ2TwoTermTopQuotient.descend_topMap
 
 end
