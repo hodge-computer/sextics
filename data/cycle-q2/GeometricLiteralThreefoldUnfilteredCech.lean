@@ -254,6 +254,25 @@ theorem test_closed : CycleQ2FourOpenDeRhamTotal.differential fixedOpen
   · change d2 One fixedOpen 0 - app functionDifferential _ 0 = 0
     rw [CycleQ2CechTwoComparison.d2_zero, map_zero, sub_self]
 
+/-- The signed correction equation on every ordered pair of original
+opens, including pairs in reverse order and the diagonal. -/
+theorem test_edge_correction (i j : Fin 4) :
+    app secondDifferential (fixedOpen i ⊓ fixedOpen j) ((hodgeCocycle nativeEdge face).val i j) =
+      res Three inf_le_right (-(vertexThree j)) - res Three inf_le_left (-(vertexThree i)) := by
+  let a : Zero Three fixedOpen := fun k => -(vertexThree k)
+  let W := fixedOpen i ⊓ fixedOpen j
+  have h := congrArg Prod.fst test_closed
+  change d0 Three fixedOpen a - mapOne fixedOpen secondDifferential edges = 0 at h
+  have hd : d0 Three fixedOpen a = mapOne fixedOpen secondDifferential edges := sub_eq_zero.mp h
+  have hp := congrArg (fun x : CycleQ2CechTwoToDerived.One Three fixedOpen =>
+    edgeAt fixedOpen x i j W inf_le_left inf_le_right) hd
+  have h₀ := edgeAt_d0 fixedOpen a i j W inf_le_left inf_le_right
+  have h₁ := edgeAt_mapOne fixedOpen secondDifferential edges i j W inf_le_left inf_le_right
+  have he : edgeAt fixedOpen edges i j W inf_le_left inf_le_right = (hodgeCocycle nativeEdge face).val i j :=
+    congrFun (congrFun asAlternatingEdges i) j
+  exact (congrArg (app secondDifferential W) he).symm.trans
+    (h₁.symm.trans (hp.symm.trans h₀))
+
 abbrev Cohomology := HThree fixedOpen functionDifferential differential secondDifferential
   function_differential_zero first_second_zero
 

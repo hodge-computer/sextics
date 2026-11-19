@@ -363,6 +363,47 @@ the complete protected de Rham class remain open.
 [Signed class equality](GeometricLiteralThreefoldCurvePairing.lean) and
 [nonvanishing and strict support](GeometricLiteralNonzeroSweptRestriction.lean)
 
+## The corrected test in derived de Rham cohomology
+
+Let \(U_i\) be the four original affine opens of the fixed threefold
+\(T\). The corrected cocycle consists of the two-forms \(\eta_{ij}\) on
+pair intersections and the three-forms \(a_i\) on the opens. Lean
+checks the correction on every ordered pair, with
+\[
+  d\eta_{ij}=a_j|_{U_i\cap U_j}-a_i|_{U_i\cap U_j}.
+\]
+[Exterior correction on the original cover](GeometricLiteralThreefoldUnfilteredCech.lean)
+
+The sum of the free additive sheaves of the opens augments to the
+constant integer sheaf. The pair differences generate the kernel
+because every compatible family of sections glues uniquely. An
+injective presentation of the two-form sheaf turns the original
+edge cocycle into a map from this kernel to \(\Omega^2_T\).
+The vertex corrections give the other map in a square with
+\(d:\Omega^2_T\to\Omega^3_T\). The map of cones gives a derived
+class. Its boundary projection is the original nonzero class in
+\(H^1(T,\Omega^2_T)\), and its restriction along each vertex is the
+given corrected three-form.
+
+To include the terms in degrees one and zero, attach the one-form
+and function sheaves in succession. Ordinary classes in
+\(H^1(T,\Omega^1_T)\) lift through the kernel of the exterior
+differential. The lift uses the closed logarithmic remainder of
+the checked Čech primitive and vanishing on the four affine charts.
+The ordinary group \(H^2(T,\mathcal O_T)\) is zero. The two cone
+triangles therefore give injections on maps from the constant
+integer sheaf. The original fixed test remains nonzero in the
+resulting full additive de Rham complex.
+
+The natural projection of this complex to the cokernel of the top
+differential sends each vertex restriction to the corrected form
+modulo exact forms. The derived calculation also gives a general
+local implication. If an exact stalk functor kills a class with
+this vertex comparison, the vertex value admits a primitive in the
+actual stalk. The generic weighted residue still needs a supported
+derived representative with that comparison.
+[Derived test, vertex maps, and stalk implication](GeometricLiteralDerivedResidue.lean)
+
 ## The proper graph over the normalized coefficient base
 
 The marked smooth time family base-changes to the scheme of monic
