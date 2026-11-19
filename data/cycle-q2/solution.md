@@ -460,6 +460,40 @@ The action on the global unfiltered de Rham complex and its nonzero
 pairing still require proof.
 [Generic smooth time curve and closed graph](GeometricMonicGenericSupport.lean)
 
+## Local relative de Rham maps and logarithmic classes
+
+On an exact rank-three affine frame the ordinary functions, one-forms,
+two-forms and three-forms form a cochain complex. Its operators pass
+through ordinary Kähler pullback. Standard smooth presentations provide
+such exact coordinates over the coefficient field. Restriction along
+an inclusion of affine opens is étale, and the Kähler base-change
+isomorphism identifies the restricted basis with the differentials of
+the restricted functions.
+
+Formal smoothness splits the transitivity sequence of relative
+Kähler modules. This extends a coefficient derivation to the chart.
+Subtracting its values on the exact coordinates gives the unique lift
+fixing those coordinates, and this lift commutes with the spatial
+derivations. Differentiating the form coefficients commutes with the
+three ordinary differentials in that frame. The coefficient variation
+of the wedge of two logarithmic differentials has an explicit exact
+primitive on their double localization.
+
+For a principal equation, the logarithmic class of a divisor function
+is its lift multiplied by the logarithmic differential of the equation,
+modulo regular forms. The analogous map for one-forms kills both the
+equation and its differential. The resulting quotient is canonically
+the ordinary Kähler module of the divisor. The maps intertwine the
+ordinary differentials with the sign required by the shift by one.
+
+For two equations, their logarithmic wedge is closed on the actual
+double localization. Its class in the quotient by the two single-open
+images is invariant under multiplying either equation by an original
+chart unit. These local identities give differential and equation-change
+formulas for a supported class. The global correspondence action and
+its comparison with the marked pairing are still open.
+[Relative de Rham complex, coefficient derivations and local logarithmic residue](GeometricUniversalWeightedDeRham.lean)
+
 ## The generic affine stalk criterion
 
 Write the regular weighted form on the native affine patch as a scalar

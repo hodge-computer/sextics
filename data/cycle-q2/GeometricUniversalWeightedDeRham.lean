@@ -3,6 +3,18 @@ import Proposal.GeometricTarget01Part01
 import Mathlib.LinearAlgebra.ExteriorPower.Basis
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 import Mathlib.RingTheory.Derivation.Lie
+import Proposal.GeometricExteriorSheaf
+import Mathlib.Algebra.Homology.HomologicalComplexAbelian
+import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
+import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+import Mathlib.AlgebraicGeometry.Morphisms.Etale
+import Mathlib.RingTheory.Etale.Kaehler
+import Mathlib.LinearAlgebra.TensorProduct.Basis
+import Mathlib.RingTheory.Smooth.Basic
+import Mathlib.Algebra.Homology.HomologicalComplex
+import Mathlib.RingTheory.Localization.Away.Basic
+import Mathlib.LinearAlgebra.Quotient.Basic
+import Mathlib.Algebra.Module.Torsion.Basic
 
 /-!
 # Relative exterior forms on the universal weighted function field
@@ -494,3 +506,1471 @@ end CycleQ2UniversalWeightedDeRham
 #print axioms CycleQ2UniversalWeightedDeRham.source_exact_iff
 #print axioms CycleQ2UniversalWeightedDeRham.primitive_of_finite_extension
 #print axioms CycleQ2UniversalWeightedDeRham.protected_exact_of_source_exact
+
+section
+
+noncomputable section
+
+/-!
+# The actual de Rham complex on an exact rank-three affine frame
+
+The coordinate construction of exterior differentiation is valid over
+the coefficient field of the generic threefold. The ordinary
+Kähler evaluation on every pair of exact frames is a cochain map.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2ExactFrameThreeDeRham
+
+open CategoryTheory CategoryTheory.Limits Module
+open CycleQ2WeightedCoordinateExterior
+open CycleQ2GeometricExteriorSheaf (exteriorMap exteriorMap_wedge)
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A]
+
+def wedge (α β : Ω[A⁄K]) : Form K A 2 := exteriorPower.ιMulti A 2 ![α,β]
+
+def wedgeLeft (β : Ω[A⁄K]) : Ω[A⁄K] →ₗ[A] Form K A 2 where
+  toFun α := wedge α β
+  map_add' α γ := (exteriorPower.ιMulti A 2).map_vecCons_add ![β] α γ
+  map_smul' a α := (exteriorPower.ιMulti A 2).map_vecCons_smul ![β] a α
+
+def wedgeRight (α : Ω[A⁄K]) : Ω[A⁄K] →ₗ[A] Form K A 2 where
+  toFun β := wedge α β
+  map_add' β γ := ((exteriorPower.ιMulti A 2).curryLeft α).map_vecCons_add ![] β γ
+  map_smul' a β := ((exteriorPower.ιMulti A 2).curryLeft α).map_vecCons_smul ![] a β
+
+theorem wedge_self (α : Ω[A⁄K]) : wedge α α = 0 :=
+  (exteriorPower.ιMulti A 2).map_eq_zero_of_eq ![α,α] (by rfl : ![α,α] (0 : Fin 2) = ![α,α] 1) (by decide)
+
+theorem wedge_swap (α β : Ω[A⁄K]) : wedge β α = -wedge α β := by
+  have he : ![β,α] = ![α,β] ∘ Equiv.swap (0 : Fin 2) 1 := by funext i; fin_cases i <;> rfl
+  unfold wedge
+  rw [he,AlternatingMap.map_swap _ _ (by decide : (0 : Fin 2) ≠ 1)]
+
+variable (b : Basis (Fin 3) A (Ω[A⁄K]))
+
+def differential : Ω[A⁄K] →+ Form K A 2 :=
+  ∑ i : Fin 3, (wedgeLeft (b i)).toAddMonoidHom.comp
+    ((KaehlerDifferential.D K A).toLinearMap.toAddMonoidHom.comp (b.coord i).toAddMonoidHom)
+
+theorem differential_apply (ω : Ω[A⁄K]) :
+    differential b ω = ∑ i : Fin 3, wedge (KaehlerDifferential.D K A (b.coord i ω)) (b i) := by
+  simp [differential,wedgeLeft]
+  rfl
+
+private theorem derivative_expansion (f : A) :
+    KaehlerDifferential.D K A f = ∑ i : Fin 3, exactFrameDirection b i f • b i :=
+  (b.sum_repr _).symm
+
+theorem differential_D (u : Fin 3 → A) (hu : ∀ i, b i = KaehlerDifferential.D K A (u i)) (f : A) :
+    differential b (KaehlerDifferential.D K A f) = 0 := by
+  rw [differential_apply]
+  change (∑ i : Fin 3, wedge (KaehlerDifferential.D K A (exactFrameDirection b i f)) (b i)) = 0
+  simp_rw [derivative_expansion b]
+  change (∑ i : Fin 3, wedgeLeft (b i) (∑ j : Fin 3,
+    exactFrameDirection b j (exactFrameDirection b i f) • b j)) = 0
+  simp only [map_sum,map_smul]
+  change (∑ i : Fin 3, ∑ j : Fin 3,
+    exactFrameDirection b j (exactFrameDirection b i f) • wedge (b j) (b i)) = 0
+  simp only [Fin.sum_univ_three,wedge_self,smul_zero,zero_add,add_zero]
+  rw [wedge_swap (b 1) (b 0),wedge_swap (b 2) (b 0),wedge_swap (b 2) (b 1),
+    exactFrameDirections_commute b u hu 1 0,exactFrameDirections_commute b u hu 2 0,exactFrameDirections_commute b u hu 2 1]
+  simp only [smul_neg]
+  abel
+
+theorem differential_smul (a : A) (ω : Ω[A⁄K]) :
+    differential b (a • ω) = a • differential b ω + wedge (KaehlerDifferential.D K A a) ω := by
+  rw [differential_apply]
+  simp only [map_smul,smul_eq_mul,Derivation.leibniz]
+  change (∑ i : Fin 3, wedgeLeft (b i)
+    (a • KaehlerDifferential.D K A (b.coord i ω) + b.coord i ω • KaehlerDifferential.D K A a)) = _
+  simp only [map_add,map_smul,Finset.sum_add_distrib,← Finset.smul_sum]
+  change a • differential b ω + (∑ i : Fin 3, b.coord i ω • wedgeRight (KaehlerDifferential.D K A a) (b i)) = _
+  simp only [← map_smul,← map_sum]
+  have he : (∑ i : Fin 3, b.coord i ω • b i) = ω := b.sum_repr ω
+  rw [he]
+  rfl
+
+theorem differential_symbol (u : Fin 3 → A) (hu : ∀ i, b i = KaehlerDifferential.D K A (u i)) (a f : A) :
+    differential b (a • KaehlerDifferential.D K A f) =
+      wedge (KaehlerDifferential.D K A a) (KaehlerDifferential.D K A f) := by
+  rw [differential_smul,differential_D b u hu,smul_zero,zero_add]
+
+theorem differential_log (u : Fin 3 → A) (hu : ∀ i, b i = KaehlerDifferential.D K A (u i)) (v : Aˣ) :
+    differential b ((v⁻¹ : Aˣ).val • KaehlerDifferential.D K A (v : A)) = 0 := by
+  rw [differential_symbol b u hu]
+  have hv : KaehlerDifferential.D K A ((v⁻¹ : Aˣ).val) =
+      -((v⁻¹ : Aˣ).val ^ 2) • KaehlerDifferential.D K A (v : A) :=
+    (KaehlerDifferential.D K A).leibniz_of_mul_eq_one (by simp)
+  rw [hv]
+  change wedgeLeft (KaehlerDifferential.D K A (v : A))
+    (-((v⁻¹ : Aˣ).val ^ 2) • KaehlerDifferential.D K A (v : A)) = 0
+  rw [map_smul]
+  change -((v⁻¹ : Aˣ).val ^ 2) • wedge (KaehlerDifferential.D K A (v : A)) (KaehlerDifferential.D K A (v : A)) = 0
+  rw [wedge_self,smul_zero]
+
+/-- Consecutive exterior differentials vanish on the actual forms. -/
+theorem differential_two_one (u : Fin 3 → A)
+    (hu : ∀ i, b i = KaehlerDifferential.D K A (u i)) (ω : Ω[A⁄K]) :
+    exteriorD2 b (exactFrameDirection b) (differential b ω) = 0 := by
+  rw [← b.sum_repr ω, map_sum, map_sum]
+  apply Finset.sum_eq_zero
+  intro i _
+  rw [hu, differential_symbol b u hu]
+  have he := exteriorD2_exactFrame b u hu 1 (b.coord i ω) (u i)
+  rw [one_smul] at he
+  change exteriorD2 b (exactFrameDirection b)
+    (exteriorPower.ιMulti A 2 (KaehlerDifferential.D K A ∘ ![b.coord i ω, u i])) = _
+  refine he.trans ?_
+  apply (exteriorPower.ιMulti A 3).map_coord_zero 0
+  exact (KaehlerDifferential.D K A).map_one_eq_zero
+
+variable {B : Type} [CommRing B] [Algebra K B]
+
+/-- The native ordinary Kähler pullback for any algebra map between charts. -/
+def onePullback (φ : A →ₐ[K] B) : Ω[A⁄K] →ₛₗ[φ.toRingHom] Ω[B⁄K] := by
+  letI : Algebra A B := φ.toRingHom.toAlgebra
+  letI : IsScalarTower K A B := IsScalarTower.of_algHom φ
+  let l := KaehlerDifferential.map K K A B
+  exact
+    { toFun := l
+      map_add' := l.map_add
+      map_smul' := fun a x => (l.map_smul a x).trans (IsScalarTower.algebraMap_smul B a (l x)).symm }
+
+theorem onePullback_d (φ : A →ₐ[K] B) (a : A) :
+    onePullback φ (KaehlerDifferential.D K A a) = KaehlerDifferential.D K B (φ a) := by
+  let : Algebra A B := φ.toRingHom.toAlgebra
+  let : IsScalarTower K A B := IsScalarTower.of_algHom φ
+  exact KaehlerDifferential.map_D K K A B a
+
+def exteriorPullback (φ : A →ₐ[K] B) (p : ℕ) :
+    Form K A p →ₛₗ[φ.toRingHom] Form K B p :=
+  exteriorMap φ.toRingHom (onePullback φ) p
+
+theorem exteriorPullback_d (φ : A →ₐ[K] B) (p : ℕ) (a : Fin p → A) :
+    exteriorPullback φ p (exteriorPower.ιMulti A p (KaehlerDifferential.D K A ∘ a)) =
+      exteriorPower.ιMulti B p (KaehlerDifferential.D K B ∘ (φ ∘ a)) := by
+  rw [exteriorPullback, exteriorMap_wedge]
+  exact congrArg (exteriorPower.ιMulti B p) (funext fun i => onePullback_d φ (a i))
+
+variable (u : Fin 3 → A) (hu : ∀ i, b i = KaehlerDifferential.D K A (u i))
+variable (φ : A →ₐ[K] B) (c : Basis (Fin 3) B Ω[B⁄K])
+variable (v : Fin 3 → B) (hv : ∀ i, c i = KaehlerDifferential.D K B (v i))
+
+include hu hv in
+theorem differential_natural (ω : Ω[A⁄K]) :
+    exteriorPullback φ 2 (differential b ω) = differential c (onePullback φ ω) := by
+  rw [← b.sum_repr ω]
+  simp only [map_sum]
+  apply Finset.sum_congr rfl
+  intro i _
+  rw [hu, differential_symbol b u hu, map_smulₛₗ, onePullback_d,
+    differential_symbol c v hv]
+  exact exteriorPullback_d φ 2 ![b.coord i ω, u i]
+
+include hu hv in
+theorem topDifferential_natural (ω : Form K A 2) :
+    exteriorPullback φ 3 (exteriorD2 b (exactFrameDirection b) ω) =
+      exteriorD2 c (exactFrameDirection c) (exteriorPullback φ 2 ω) := by
+  let f := (exteriorPullback φ 3).toAddMonoidHom.comp (exteriorD2 b (exactFrameDirection b)).toAddMonoidHom
+  let g := (exteriorD2 c (exactFrameDirection c)).toAddMonoidHom.comp (exteriorPullback φ 2).toAddMonoidHom
+  have he : f = g := by
+    apply twoFormMap_ext b u hu
+    intro a p q
+    change exteriorPullback φ 3 (exteriorD2 b (exactFrameDirection b) _) =
+      exteriorD2 c (exactFrameDirection c) (exteriorPullback φ 2 _)
+    rw [exteriorD2_exactFrame b u hu, exteriorPullback_d, map_smulₛₗ, exteriorPullback_d]
+    exact (exteriorD2_exactFrame c v hv (φ a) (φ p) (φ q)).symm
+  exact DFunLike.congr_fun he ω
+
+end CycleQ2ExactFrameThreeDeRham
+
+#print axioms CycleQ2ExactFrameThreeDeRham.differential_two_one
+#print axioms CycleQ2ExactFrameThreeDeRham.differential_natural
+#print axioms CycleQ2ExactFrameThreeDeRham.topDifferential_natural
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Exact differential frames from standard smooth presentations
+
+The complement of the relation variables in a submersive presentation provides
+actual functions whose differentials give a basis of the relative cotangent
+module. Its cardinality is the specified relative dimension.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2SmoothRelativeFrames
+
+open Algebra Module AlgebraicGeometry CategoryTheory
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A]
+
+theorem exists_exact_basis (n : ℕ) [IsStandardSmoothOfRelativeDimension n K A] :
+    ∃ (x : Fin n → A) (b : Basis (Fin n) A Ω[A⁄K]),
+      ∀ i, b i = KaehlerDifferential.D K A (x i) := by
+  classical
+  obtain ⟨ι, σ, hσ, hι, P, hn⟩ :=
+    (inferInstance : IsStandardSmoothOfRelativeDimension n K A).out
+  letI := Fintype.ofFinite ι
+  letI := Fintype.ofFinite σ
+  let J := (↥((Set.range P.map)ᶜ : Set ι))
+  letI : Fintype J := Fintype.ofFinite _
+  have hj : Fintype.card J = n := by
+    change Fintype.card ((Set.range P.map)ᶜ : Set ι) = n
+    rw [Fintype.card_compl_set, Set.card_range_of_injective P.map_inj]
+    simpa only [Presentation.dimension, Nat.card_eq_fintype_card] using hn
+  let e : J ≃ Fin n := Fintype.equivFinOfCardEq hj
+  refine ⟨fun i => P.val (e.symm i), P.basisKaehler.reindex e, ?_⟩
+  intro i
+  rw [Basis.reindex_apply, Algebra.SubmersivePresentation.basisKaehler_apply]
+
+section Schemes
+
+variable {F : Type} [Field F] {X : Scheme.{0}}
+variable (f : X ⟶ Spec (CommRingCat.of F))
+
+/-- The coefficient algebra on the original sections of an open of a scheme over a field. -/
+def sectionCoefficients (V : X.Opens) : F →+* Γ(X, V) :=
+  ((Scheme.ΓSpecIso (CommRingCat.of F)).inv ≫ f.appLE ⊤ V
+    (by rw [Scheme.Hom.preimage_top]; exact le_top)).hom
+
+/-- Each point of a smooth scheme over a field has an affine neighborhood on
+which exact relative differentials give a basis of the stated dimension. -/
+theorem exists_exact_affine_neighborhood (n : ℕ) [SmoothOfRelativeDimension n f] (x : X) :
+    ∃ (V : X.Opens), IsAffineOpen V ∧ x ∈ V ∧
+      letI : Algebra F Γ(X, V) := (sectionCoefficients f V).toAlgebra
+      ∃ (u : Fin n → Γ(X, V)) (b : Basis (Fin n) Γ(X, V) (KaehlerDifferential F Γ(X, V))),
+        ∀ i, b i = KaehlerDifferential.D F Γ(X, V) (u i) := by
+  obtain ⟨U, _, V, hV, hx, hle, hs⟩ :=
+    SmoothOfRelativeDimension.exists_isStandardSmoothOfRelativeDimension (n := n) (f := f) x
+  have hU : U = ⊤ := by
+    apply top_unique
+    intro y _
+    have e : y = f x := Subsingleton.elim _ _
+    rw [e]
+    exact hle hx
+  subst U
+  refine ⟨V, hV, hx, ?_⟩
+  letI : Algebra F Γ(X, V) := (sectionCoefficients f V).toAlgebra
+  have hIso : RingHom.IsStandardSmoothOfRelativeDimension 0
+      (Scheme.ΓSpecIso (CommRingCat.of F)).inv.hom := by
+    exact RingHom.IsStandardSmoothOfRelativeDimension.equiv
+      (asIso (Scheme.ΓSpecIso (CommRingCat.of F)).inv).commRingCatIsoToRingEquiv
+  have hstd : RingHom.IsStandardSmoothOfRelativeDimension n (sectionCoefficients f V) := by
+    change RingHom.IsStandardSmoothOfRelativeDimension n
+      ((f.appLE ⊤ V hle).hom.comp (Scheme.ΓSpecIso (CommRingCat.of F)).inv.hom)
+    simpa only [Nat.add_zero] using hs.comp hIso
+  letI : IsStandardSmoothOfRelativeDimension n F Γ(X, V) := hstd.toAlgebra
+  exact exists_exact_basis n
+
+end Schemes
+
+end CycleQ2SmoothRelativeFrames
+
+#print axioms CycleQ2SmoothRelativeFrames.exists_exact_basis
+#print axioms CycleQ2SmoothRelativeFrames.exists_exact_affine_neighborhood
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Exact frames on the native affine overlaps
+
+Restriction along an inclusion of affine opens is étale. The canonical
+Kähler base-change isomorphism carries the coordinate differentials to
+the differentials of the restricted functions. Thus the affine overlap
+complexes use the original restriction maps and the native relative
+exterior differential.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2RelativeAffineOverlap
+
+open AlgebraicGeometry CategoryTheory Opposite Module KaehlerDifferential
+open CycleQ2SmoothRelativeFrames
+
+variable {K A B : Type} [CommRing K] [CommRing A] [CommRing B]
+  [Algebra K A] [Algebra K B] [Algebra A B] [IsScalarTower K A B]
+
+section Algebra
+variable [Algebra.FormallyEtale A B] {n : ℕ} (b : Basis (Fin n) A Ω[A⁄K])
+
+def baseChangeFrame : Basis (Fin n) B Ω[B⁄K] :=
+  (b.baseChange B).map (tensorKaehlerEquivOfFormallyEtale K A B)
+
+theorem baseChangeFrame_apply (u : Fin n → A) (h : ∀ i, b i = D K A (u i)) (i : Fin n) :
+    baseChangeFrame b i = D K B (algebraMap A B (u i)) := by
+  rw [baseChangeFrame, Basis.map_apply, Basis.baseChange_apply, h,
+    ← LinearEquiv.eq_symm_apply]
+  exact (tensorKaehlerEquivOfFormallyEtale_symm_D_algebraMap K A B (u i)).symm
+
+end Algebra
+
+section Schemes
+
+variable {F : Type} [Field F] {X : Scheme.{0}}
+variable (f : X ⟶ Spec (CommRingCat.of F))
+
+/-- Restriction of sections over the given base field. -/
+def restrict {U V : X.Opens} (h : V ≤ U) :
+    letI : Algebra F Γ(X, U) := (sectionCoefficients f U).toAlgebra
+    letI : Algebra F Γ(X, V) := (sectionCoefficients f V).toAlgebra
+    Γ(X, U) →ₐ[F] Γ(X, V) := by
+  letI : Algebra F Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  letI : Algebra F Γ(X, V) := (sectionCoefficients f V).toAlgebra
+  refine { toRingHom := (X.presheaf.map (homOfLE h).op).hom, commutes' := ?_ }
+  intro a
+  change (X.presheaf.map (homOfLE h).op) (sectionCoefficients f U a) = sectionCoefficients f V a
+  unfold sectionCoefficients
+  change (((Scheme.ΓSpecIso _).inv ≫ f.appLE ⊤ U _) ≫ X.presheaf.map (homOfLE h).op) a =
+    ((Scheme.ΓSpecIso _).inv ≫ f.appLE ⊤ V _) a
+  rw [Category.assoc, Scheme.Hom.appLE_map]
+
+theorem restrict_etale {U V : X.Opens} (h : V ≤ U) (hU : IsAffineOpen U) (hV : IsAffineOpen V) :
+    (X.presheaf.map (homOfLE h).op).hom.Etale := by
+  let e := X.homOfLE h
+  letI : IsAffine U.toScheme := hU
+  letI : IsAffine V.toScheme := hV
+  have he : Etale e := inferInstance
+  have htop := HasRingHomProperty.appTop (P := @Etale) e he
+  let k := U.topIso.inv ≫ e.appTop ≫ V.topIso.hom
+  have hk : k.hom.Etale :=
+    RingHom.Etale.stableUnderComposition _ _
+      (RingHom.Etale.of_bijective (ConcreteCategory.bijective_of_isIso U.topIso.inv))
+      (RingHom.Etale.stableUnderComposition _ _ htop
+        (RingHom.Etale.of_bijective (ConcreteCategory.bijective_of_isIso V.topIso.hom)))
+  have eq : X.presheaf.map (homOfLE h).op = k := by
+    change X.presheaf.map (homOfLE h).op = U.topIso.inv ≫ e.appTop ≫ V.topIso.hom
+    dsimp only [e]
+    rw [Scheme.Opens.topIso_inv, Scheme.Opens.topIso_hom, Scheme.homOfLE_appTop]
+    erw [← X.presheaf.map_comp, ← X.presheaf.map_comp]
+    exact congrArg X.presheaf.map (Subsingleton.elim _ _)
+  have eq' := congrArg CommRingCat.Hom.hom eq
+  rw [eq']
+  exact hk
+
+/-- Keep the same coordinate functions after restriction to any affine subopen. -/
+theorem exact_on_affine_subopen {U V : X.Opens} (h : V ≤ U) (hU : IsAffineOpen U) (hV : IsAffineOpen V)
+    {n : ℕ} (u : Fin n → Γ(X, U)) :
+    letI : Algebra F Γ(X, U) := (sectionCoefficients f U).toAlgebra
+    letI : Algebra F Γ(X, V) := (sectionCoefficients f V).toAlgebra
+    ∀ (b : Basis (Fin n) Γ(X, U) (KaehlerDifferential F Γ(X, U))),
+      (∀ i, b i = D F Γ(X, U) (u i)) →
+      ∃ c : Basis (Fin n) Γ(X, V) (KaehlerDifferential F Γ(X, V)),
+        ∀ i, c i = D F Γ(X, V) (restrict f h (u i)) := by
+  letI : Algebra F Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  letI : Algebra F Γ(X, V) := (sectionCoefficients f V).toAlgebra
+  intro b hb
+  letI : Algebra Γ(X, U) Γ(X, V) := (restrict f h).toRingHom.toAlgebra
+  letI : IsScalarTower F Γ(X, U) Γ(X, V) := IsScalarTower.of_algHom (restrict f h)
+  let : Algebra.Etale Γ(X, U) Γ(X, V) := (restrict_etale h hU hV).toAlgebra
+  exact ⟨baseChangeFrame (B := Γ(X, V)) b, baseChangeFrame_apply b u hb⟩
+
+end Schemes
+
+end CycleQ2RelativeAffineOverlap
+
+#print axioms CycleQ2RelativeAffineOverlap.exact_on_affine_subopen
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Lifting coefficient derivations on actual smooth affine charts
+
+Formal smoothness splits the relative cotangent sequence. This extends each
+derivation of the coefficient algebra to the chart. Subtracting its three
+coordinate values gives the unique lift fixing an exact coordinate frame.
+This lift commutes with all three spatial derivations.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2RelativeDerivationLift
+
+open Algebra Module KaehlerDifferential
+open CycleQ2WeightedCoordinateExterior
+open scoped TensorProduct
+
+variable {k K A : Type} [CommRing k] [CommRing K] [CommRing A]
+  [Algebra k K] [Algebra K A] [Algebra k A] [IsScalarTower k K A]
+
+theorem exists_lift [FormallySmooth K A] (δ : Derivation k K K) :
+    ∃ d : Derivation k A A, ∀ x, d (algebraMap K A x) = algebraMap K A (δ x) := by
+  let α := KaehlerDifferential.mapBaseChange k K A
+  let β := KaehlerDifferential.map k K A A
+  have hs : Function.Exact α β := KaehlerDifferential.exact_mapBaseChange_map k K A
+  have hi : Function.Injective α := by
+    rw [injective_iff_map_eq_zero]
+    intro x hx
+    obtain ⟨y, rfl⟩ := (Algebra.H1Cotangent.exact_δ_mapBaseChange k K A x).mp hx
+    rw [Subsingleton.elim y 0, map_zero]
+  have hb : Function.Surjective β := KaehlerDifferential.map_surjective k K A
+  obtain ⟨s, hs'⟩ := Module.projective_lifting_property β LinearMap.id hb
+  obtain ⟨r, hr⟩ := ((hs.split_tfae').out 0 1 rfl rfl).mp ⟨hi, s, hs'⟩ |>.2
+  let baseDerivation := (Algebra.linearMap K A).comp δ.liftKaehlerDifferential
+  refine ⟨((baseDerivation.liftBaseChange A).comp r).compDer (D k A), ?_⟩
+  intro x
+  change (baseDerivation.liftBaseChange A) (r (D k A (algebraMap K A x))) = _
+  have hα : α (1 ⊗ₜ D k K x) = D k A (algebraMap K A x) := by
+    rw [KaehlerDifferential.mapBaseChange_tmul, one_smul, KaehlerDifferential.map_D]
+  rw [← hα]
+  have hr' : r (α (1 ⊗ₜ D k K x)) = 1 ⊗ₜ D k K x := DFunLike.congr_fun hr _
+  rw [hr', LinearMap.liftBaseChange_tmul, one_smul]
+  exact congrArg (algebraMap K A) (Derivation.liftKaehlerDifferential_comp_D δ x)
+
+/-- A base derivation vanishing on all coefficients is relative. -/
+def asRelative (d : Derivation k A A) (hd : ∀ x : K, d (algebraMap K A x) = 0) :
+    Derivation K A A where
+  toFun := d
+  map_one_eq_zero' := d.map_one_eq_zero
+  map_add' := d.map_add
+  leibniz' := d.leibniz
+  map_smul' a x := by
+    rw [RingHom.id_apply, Algebra.smul_def, Algebra.smul_def, d.leibniz, hd, smul_zero, add_zero]
+    rfl
+
+theorem exact_coordinate_unique (b : Basis (Fin 3) A Ω[A⁄K])
+    (u : Fin 3 → A) (hu : ∀ i, b i = D K A (u i))
+    (d : Derivation K A A) (hd : ∀ i, d (u i) = 0) : d = 0 := by
+  have h : d.liftKaehlerDifferential = 0 := by
+    apply b.ext
+    intro i
+    rw [hu, Derivation.liftKaehlerDifferential_comp_D, LinearMap.zero_apply]
+    exact hd i
+  ext a
+  have e := DFunLike.congr_fun h (D K A a)
+  rwa [Derivation.liftKaehlerDifferential_comp_D, LinearMap.zero_apply] at e
+
+private theorem sum_apply (f : Fin 3 → Derivation k A A) (a : A) :
+    (∑ i, f i) a = ∑ i, f i a := by
+  have h := congrFun (map_sum (Derivation.coeFnAddMonoidHom : Derivation k A A →+ A → A)
+    f Finset.univ) a
+  simpa only [Derivation.coeFnAddMonoidHom_apply, Finset.sum_apply] using h
+
+theorem exact_lift [FormallySmooth K A] (δ : Derivation k K K)
+    (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A) (hu : ∀ i, b i = D K A (u i)) :
+    ∃! d : Derivation k A A,
+      (∀ x, d (algebraMap K A x) = algebraMap K A (δ x)) ∧ ∀ i, d (u i) = 0 := by
+  obtain ⟨l, hl⟩ := exists_lift (A := A) δ
+  let d := l - ∑ i : Fin 3, l (u i) • (exactFrameDirection b i).restrictScalars k
+  have hc : ∀ x, d (algebraMap K A x) = algebraMap K A (δ x) := by
+    intro x
+    simp [d, hl, sum_apply]
+  have hd : ∀ i, d (u i) = 0 := by
+    intro i
+    simp only [d, Derivation.sub_apply, sum_apply]
+    change l (u i) - ∑ j : Fin 3, l (u j) * exactFrameDirection b j (u i) = 0
+    simp [exactFrameDirection_apply, ← hu, Finsupp.single_apply]
+  refine ⟨d, ⟨hc, hd⟩, ?_⟩
+  rintro e ⟨he, heu⟩
+  let rel := asRelative (K := K) (e - d) (by intro x; simp [he, hc])
+  have zero : rel = 0 := exact_coordinate_unique b u hu rel (by
+    intro i
+    change e (u i) - d (u i) = 0
+    rw [heu, hd, sub_zero])
+  ext x
+  have h := DFunLike.congr_fun zero x
+  change e x - d x = 0 at h
+  exact sub_eq_zero.mp h
+
+theorem commutes_spatial (δ : Derivation k K K) (d : Derivation k A A)
+    (hc : ∀ x, d (algebraMap K A x) = algebraMap K A (δ x))
+    (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A) (hu : ∀ i, b i = D K A (u i))
+    (hd : ∀ i, d (u i) = 0) (i : Fin 3) :
+    Function.Commute d (exactFrameDirection b i) := by
+  let p := (exactFrameDirection b i).restrictScalars k
+  let e := ⁅d,p⁆
+  have eA : ∀ x : K, e (algebraMap K A x) = 0 := by
+    intro x
+    change d (p (algebraMap K A x)) - p (d (algebraMap K A x)) = 0
+    simp [p,hc]
+  let E := asRelative (K := K) e eA
+  have eU : ∀ j, E (u j) = 0 := by
+    intro j
+    change d (exactFrameDirection b i (u j)) - exactFrameDirection b i (d (u j)) = 0
+    rw [hd, map_zero]
+    have coord : exactFrameDirection b i (u j) = if j = i then 1 else 0 := by
+      change b.coord i (D K A (u j)) = _
+      rw [← hu j, Basis.coord_apply, Basis.repr_self_apply]
+    rw [coord]
+    split <;> simp
+  have h := exact_coordinate_unique b u hu E eU
+  intro x
+  have hx := DFunLike.congr_fun h x
+  change d (exactFrameDirection b i x) - exactFrameDirection b i (d x) = 0 at hx
+  exact sub_eq_zero.mp hx
+
+end CycleQ2RelativeDerivationLift
+
+#print axioms CycleQ2RelativeDerivationLift.exact_lift
+#print axioms CycleQ2RelativeDerivationLift.commutes_spatial
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# The coefficient connection on the actual relative de Rham chart
+
+A lift fixing the exact coordinates differentiates each basis coefficient.
+The Leibniz rule and commutation with spatial derivations make it commute
+with the first and top ordinary de Rham differentials. This is the
+local coefficient operator before the overlap homotopies are introduced.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2RelativeChartConnection
+
+open Module KaehlerDifferential
+open CycleQ2RelativeDerivationLift CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+
+variable {k K A : Type} [CommRing k] [CommRing K] [CommRing A]
+  [Algebra k K] [Algebra K A] [Algebra k A] [IsScalarTower k K A]
+
+section Basis
+variable {I M : Type} [Fintype I] [AddCommGroup M] [Module A M]
+  (d : Derivation k A A) (B : Basis I A M)
+
+/-- Apply the lifted coefficient derivation to every coordinate. -/
+def onBasis : M →+ M :=
+  ∑ i, (LinearMap.toSpanSingleton A M (B i)).toAddMonoidHom.comp
+    (d.toLinearMap.toAddMonoidHom.comp (B.coord i).toAddMonoidHom)
+
+theorem onBasis_apply (w : M) :
+    onBasis d B w = ∑ i, d (B.repr w i) • B i := by
+  simp [onBasis, LinearMap.toSpanSingleton_apply]
+
+theorem onBasis_repr (w : M) (i : I) :
+    B.repr (onBasis d B w) i = d (B.repr w i) := by
+  classical
+  rw [onBasis_apply]
+  simp [Finsupp.single_apply]
+
+/-- The output has the connection Leibniz rule for every chart function. -/
+theorem onBasis_smul (a : A) (w : M) :
+    onBasis d B (a • w) = a • onBasis d B w + d a • w := by
+  apply B.repr.injective
+  ext i
+  simp only [onBasis_repr, map_smul, map_add, Finsupp.smul_apply, Finsupp.add_apply,
+    smul_eq_mul, Derivation.leibniz, mul_comm]
+
+theorem onBasis_reindex {J : Type} [Fintype J] (e : I ≃ J) :
+    onBasis d (B.reindex e) = onBasis d B := by
+  ext w
+  rw [onBasis_apply, onBasis_apply]
+  simp only [Basis.repr_reindex_apply, Basis.reindex_apply]
+  exact e.symm.sum_comp (fun i => d (B.repr w i) • B i)
+
+end Basis
+
+variable (δ : Derivation k K K) (d : Derivation k A A)
+  (hc : ∀ a, d (algebraMap K A a) = algebraMap K A (δ a))
+variable (B : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A)
+  (hu : ∀ i, B i = D K A (u i)) (hd : ∀ i, d (u i) = 0)
+
+include hc hu hd in
+/-- On exact one-forms, the local coefficient connection differentiates the
+function before taking the relative differential. -/
+theorem onOne_D (a : A) : onBasis d B (D K A a) = D K A (d a) := by
+  apply B.repr.injective
+  ext i
+  rw [onBasis_repr]
+  change d (exactFrameDirection B i a) = exactFrameDirection B i (d a)
+  exact commutes_spatial δ d hc B u hu hd i a
+
+include hc hu hd in
+theorem onOne_symbol (a x : A) :
+    onBasis d B (a • D K A x) = a • D K A (d x) + d a • D K A x := by
+  rw [onBasis_smul, onOne_D δ d hc B u hu hd]
+
+include hc hu hd in
+/-- Differentiating a logarithmic one-form in a coefficient direction is an
+ordinary exact relative one-form. -/
+theorem onOne_logarithm (v : Aˣ) :
+    onBasis d B ((↑v⁻¹ : A) • D K A (v : A)) =
+      D K A ((↑v⁻¹ : A) * d (v : A)) := by
+  rw [onOne_symbol δ d hc B u hu hd, Derivation.leibniz]
+  have hinv : d (↑v⁻¹ : A) = -((↑v⁻¹ : A) ^ 2) • d (v : A) :=
+    d.leibniz_of_mul_eq_one (by simp)
+  have hrel : D K A (↑v⁻¹ : A) = -((↑v⁻¹ : A) ^ 2) • D K A (v : A) :=
+    (D K A).leibniz_of_mul_eq_one (by simp)
+  simp only [hinv, hrel, smul_smul, smul_eq_mul, mul_comm (d (v : A))]
+
+private theorem wedge_repr (α β : Ω[A⁄K]) (j : Set.powersetCard (Fin 3) 2) :
+    (B.exteriorPower 2).repr (wedge α β) j =
+      (Matrix.of (fun i k => B.repr (![α,β] i) (Set.powersetCard.ofFinEmbEquiv.symm j k))).det := by
+  rw [wedge, exteriorPower.basis_repr_apply, exteriorPower.ιMultiDual_apply_ιMulti]
+  rfl
+
+/-- Coefficient differentiation on the two-form basis obeys the wedge rule. -/
+theorem onTwo_wedge (α β : Ω[A⁄K]) :
+    onBasis d (twoBasis B) (wedge α β) =
+      wedge (onBasis d B α) β + wedge α (onBasis d B β) := by
+  simp only [twoBasis, onBasis_reindex]
+  apply (B.exteriorPower 2).repr.injective
+  ext j
+  rw [onBasis_repr, map_add, Finsupp.add_apply, wedge_repr, wedge_repr, wedge_repr]
+  simp only [Matrix.det_fin_two, Matrix.of_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+    onBasis_repr, map_sub, Derivation.leibniz, smul_eq_mul]
+  ring
+
+include hc hu hd in
+theorem differential_onOne (ω : Ω[A⁄K]) :
+    differential B (onBasis d B ω) = onBasis d (twoBasis B) (differential B ω) := by
+  rw [← B.sum_repr ω]
+  simp only [map_sum]
+  apply Finset.sum_congr rfl
+  intro i _
+  have h : onBasis d B (B i) = 0 := by
+    rw [hu, onOne_D δ d hc B u hu hd, hd, map_zero]
+  rw [onBasis_smul, h, smul_zero, zero_add, hu, differential_symbol B u hu,
+    differential_symbol B u hu, onTwo_wedge, onOne_D δ d hc B u hu hd]
+  rw [← hu i, h]
+  change _ = _ + wedgeRight (D K A (B.repr ω i)) 0
+  rw [map_zero, add_zero, hu]
+
+include hc hu hd in
+/-- The coefficient variation of the two-equation logarithmic form has an
+explicit ordinary one-form primitive in the double localization. -/
+theorem onTwo_logarithms (f g : Aˣ) :
+    let l (v : Aˣ) := (↑v⁻¹ : A) • D K A (v : A)
+    let a (v : Aˣ) := (↑v⁻¹ : A) * d (v : A)
+    onBasis d (twoBasis B) (wedge (l f) (l g)) =
+      differential B (a f • l g - a g • l f) := by
+  dsimp only
+  have h (x : A) (v : Aˣ) :
+      differential B (x • ((↑v⁻¹ : A) • D K A (v : A))) =
+        wedge (D K A x) ((↑v⁻¹ : A) • D K A (v : A)) := by
+    calc
+      _ = x • differential B ((↑v⁻¹ : A) • D K A (v : A)) +
+          wedge (D K A x) ((↑v⁻¹ : A) • D K A (v : A)) := differential_smul B x _
+      _ = _ := by rw [differential_log B u hu v, smul_zero, zero_add]
+  rw [onTwo_wedge, onOne_logarithm δ d hc B u hu hd,
+    onOne_logarithm δ d hc B u hu hd, map_sub, h, h,
+    wedge_swap (D K A ((↑g⁻¹ : A) * d (g : A))), sub_eq_add_neg]
+
+/-- On top forms, the ordered volume identifies the connection with the
+lifted derivation of its scalar. -/
+def onVolume (a : A) : Form K A 3 := d a • volume B
+
+include hc hu hd in
+theorem exteriorD2_onBasis (η : Form K A 2) :
+    exteriorD2 B (exactFrameDirection B) (onBasis d (twoBasis B) η) =
+      onVolume d B (∑ i, exactFrameDirection B i (signedCoefficients B η i)) := by
+  rw [exteriorD2_divergence, onVolume, map_sum]
+  apply congrArg (fun a : A => a • volume B)
+  apply Finset.sum_congr rfl
+  intro i _
+  have e : signedCoefficients B (onBasis d (twoBasis B) η) i =
+      d (signedCoefficients B η i) := by
+    simp only [signedCoefficients, onBasis_repr, Derivation.leibniz, Derivation.leibniz_pow,
+      map_neg, Derivation.map_one_eq_zero, neg_zero, nsmul_zero, smul_eq_mul, mul_zero, add_zero]
+  rw [e]
+  exact (commutes_spatial δ d hc B u hu hd i (signedCoefficients B η i)).symm
+
+end CycleQ2RelativeChartConnection
+
+#print axioms CycleQ2RelativeChartConnection.onOne_D
+#print axioms CycleQ2RelativeChartConnection.exteriorD2_onBasis
+#print axioms CycleQ2RelativeChartConnection.onOne_logarithm
+#print axioms CycleQ2RelativeChartConnection.differential_onOne
+#print axioms CycleQ2RelativeChartConnection.onTwo_logarithms
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# The native affine de Rham cochain complex in dimension three
+
+Over the coefficient field the ordinary Kähler forms and the actual
+exterior derivatives form a cochain complex. An algebra map between
+two exact affine frames induces the ordinary pullback as a cochain map.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2AffineDeRhamComplex
+
+open CategoryTheory CategoryTheory.Limits Module KaehlerDifferential
+open CycleQ2ExactFrameThreeDeRham CycleQ2WeightedCoordinateExterior
+
+variable (K A : Type) [CommRing K] [CommRing A] [Algebra K A]
+
+def degree : ℕ → AddCommGrpCat.{0}
+  | 0 => AddCommGrpCat.of A
+  | 1 => AddCommGrpCat.of Ω[A⁄K]
+  | 2 => AddCommGrpCat.of (Form K A 2)
+  | 3 => AddCommGrpCat.of (Form K A 3)
+  | _ + 4 => AddCommGrpCat.of PUnit
+
+variable {K A} (b : Basis (Fin 3) A Ω[A⁄K])
+
+def next : ∀ p, degree K A p ⟶ degree K A (p + 1)
+  | 0 => AddCommGrpCat.ofHom (D K A).toLinearMap.toAddMonoidHom
+  | 1 => AddCommGrpCat.ofHom (differential b)
+  | 2 => AddCommGrpCat.ofHom (CycleQ2WeightedCoordinateExterior.exteriorD2 b (exactFrameDirection b)).toAddMonoidHom
+  | _ + 3 => 0
+
+variable (u : Fin 3 → A) (hu : ∀ i, b i = D K A (u i))
+
+include hu in
+theorem square : ∀ p, next b p ≫ next b (p + 1) = 0
+  | 0 => by
+    ext a
+    exact differential_D b u hu a
+  | 1 => by
+    ext ω
+    exact differential_two_one b u hu ω
+  | 2 => by
+    ext a
+    rfl
+  | _ + 3 => by simp only [next, zero_comp]
+
+def complex : CochainComplex AddCommGrpCat.{0} ℕ :=
+  CochainComplex.of (degree K A) (next b) (square b u hu)
+
+variable {B : Type} [CommRing B] [Algebra K B] (φ : A →ₐ[K] B)
+
+def pullDegree : ∀ p, degree K A p ⟶ degree K B p
+  | 0 => AddCommGrpCat.ofHom φ.toRingHom.toAddMonoidHom
+  | 1 => AddCommGrpCat.ofHom (onePullback φ).toAddMonoidHom
+  | 2 => AddCommGrpCat.ofHom (exteriorPullback φ 2).toAddMonoidHom
+  | 3 => AddCommGrpCat.ofHom (exteriorPullback φ 3).toAddMonoidHom
+  | _ + 4 => 0
+
+variable (c : Basis (Fin 3) B Ω[B⁄K]) (v : Fin 3 → B) (hv : ∀ i, c i = D K B (v i))
+
+include hu hv in
+theorem pull_comm : ∀ p, pullDegree φ p ≫ next c p = next b p ≫ pullDegree φ (p + 1)
+  | 0 => by
+    ext a
+    exact (onePullback_d φ a).symm
+  | 1 => by
+    ext ω
+    exact (differential_natural b u hu φ c v hv ω).symm
+  | 2 => by
+    ext ω
+    exact (topDifferential_natural b u hu φ c v hv ω).symm
+  | 3 => by simp only [next, comp_zero, zero_comp]
+  | _ + 4 => by simp only [next, pullDegree, comp_zero]
+
+/-- The cochain map is induced by the actual Kähler pullback in every degree. -/
+def pullComplex : complex b u hu ⟶ complex c v hv :=
+  CochainComplex.ofHom (pullDegree φ) (by
+    intro p
+    simp only [complex, CochainComplex.of_d]
+    exact pull_comm b u hu φ c v hv p)
+
+end CycleQ2AffineDeRhamComplex
+
+#print axioms CycleQ2AffineDeRhamComplex.square
+#print axioms CycleQ2AffineDeRhamComplex.pullComplex
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Principal residue class on actual functions
+
+In a localization where the equation f is invertible, a function on
+the divisor maps to its lift multiplied by df/f, modulo regular
+one-forms. Multiples of f map to regular forms. Changing f by a unit
+adds a regular logarithmic differential and gives the same class.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2PrincipalGysinFunctions
+
+variable {K A T : Type} [CommRing K] [CommRing A] [CommRing T]
+  [Algebra K A] [Algebra K T] [Algebra A T] [IsScalarTower K A T]
+
+local notation "dA" => KaehlerDifferential.D K A
+local notation "dT" => KaehlerDifferential.D K T
+
+abbrev regular : Ω[A⁄K] →ₗ[A] Ω[T⁄K] := KaehlerDifferential.map K K A T
+
+abbrev poleQuotient :=
+  Ω[T⁄K] ⧸ LinearMap.range (regular (K := K) (A := A) (T := T))
+
+abbrev toPole :=
+  (LinearMap.range (regular (K := K) (A := A) (T := T))).mkQ
+
+def logarithm (u : Tˣ) : Ω[T⁄K] := (↑u⁻¹ : T) • dT (u : T)
+
+theorem logarithm_mul (u v : Tˣ) : logarithm (K := K) (u * v) = logarithm u + logarithm v := by
+  unfold logarithm
+  rw [mul_inv_rev, Units.val_mul, Units.val_mul, Derivation.leibniz, smul_add, smul_smul, smul_smul]
+  have hu : (↑v⁻¹ : T) * (↑u⁻¹ : T) * (u : T) = (↑v⁻¹ : T) := by
+    rw [mul_assoc, Units.inv_mul, mul_one]
+  have hv : (↑v⁻¹ : T) * (↑u⁻¹ : T) * (v : T) = (↑u⁻¹ : T) := by
+    rw [mul_comm (↑v⁻¹ : T), mul_assoc, Units.inv_mul, mul_one]
+  rw [hu,hv,add_comm]
+
+theorem logarithm_regular (u : Aˣ) :
+    logarithm (K := K) (Units.map (algebraMap A T) u) =
+      regular (K := K) (A := A) (T := T) ((↑u⁻¹ : A) • dA (u : A)) := by
+  unfold logarithm
+  rw [map_smul, KaehlerDifferential.map_D]
+  change (algebraMap A T (↑u⁻¹ : A)) • dT (algebraMap A T (u : A)) =
+    (↑u⁻¹ : A) • dT (algebraMap A T (u : A))
+  exact IsScalarTower.algebraMap_smul T (↑u⁻¹ : A) _
+
+variable (f : A) (hf : IsUnit (algebraMap A T f))
+
+private def lift : A →ₗ[A] Ω[T⁄K] :=
+  LinearMap.toSpanSingleton A _ (logarithm (K := K) hf.unit)
+
+private theorem lift_f : lift (K := K) f hf f = regular (K := K) (T := T) (dA f) := by
+  change f • ((↑hf.unit⁻¹ : T) • dT (hf.unit : T)) = _
+  have hs : algebraMap A T f * (↑hf.unit⁻¹ : T) = 1 :=
+    (congrArg (fun a : T => a * (↑hf.unit⁻¹ : T)) hf.unit_spec.symm).trans (Units.mul_inv hf.unit)
+  rw [← IsScalarTower.algebraMap_smul T, smul_smul, hs, one_smul, hf.unit_spec,
+    KaehlerDifferential.map_D]
+
+/-- The principal equation cuts out the actual quotient of functions.
+Its image modulo regular forms is independent of the chosen lift. -/
+def classMap :
+    (A ⧸ (Ideal.span {f} : Ideal A)) →ₗ[A] poleQuotient (K := K) (A := A) (T := T) :=
+  (show Submodule A A from Ideal.span {f}).liftQ
+    ((toPole (K := K) (A := A) (T := T)).comp (lift (K := K) f hf)) (by
+    change Submodule.span A ({f} : Set A) ≤ _
+    apply Submodule.span_le.mpr
+    intro a ha
+    have h : a = f := Set.mem_singleton_iff.mp ha
+    subst a
+    apply LinearMap.mem_ker.mpr
+    change toPole (K := K) (A := A) (T := T) (lift (K := K) f hf f) = 0
+    rw [lift_f]
+    exact (Submodule.Quotient.mk_eq_zero _).mpr (LinearMap.mem_range_self _ _))
+
+theorem classMap_apply (a : A) :
+    classMap (K := K) f hf ((Ideal.Quotient.mk (Ideal.span {f})) a) =
+      toPole (a • logarithm (K := K) hf.unit) := rfl
+
+/-- Replacing the equation by an invertible multiple changes a lifted
+principal residue by a regular one-form. -/
+theorem same_lifted_class (u : Aˣ) (a : A) :
+    toPole (K := K) (A := A) (T := T) (a • logarithm (K := K) (Units.map (algebraMap A T) u * hf.unit)) =
+      toPole (K := K) (A := A) (T := T) (a • logarithm (K := K) hf.unit) := by
+  rw [logarithm_mul, smul_add, map_add, logarithm_regular]
+  have hz : toPole (K := K) (A := A) (T := T) (a • regular (K := K) (T := T) ((↑u⁻¹ : A) • dA (u : A))) = 0 := by
+    rw [← map_smul]
+    exact (Submodule.Quotient.mk_eq_zero _).mpr (LinearMap.mem_range_self _ _)
+  rw [hz, zero_add]
+
+end CycleQ2PrincipalGysinFunctions
+
+#print axioms CycleQ2PrincipalGysinFunctions.classMap
+#print axioms CycleQ2PrincipalGysinFunctions.same_lifted_class
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Principal residue class on the conormal quotient of one-forms
+
+The map from a divisor one-form to its logarithmic lift modulo regular
+two-forms kills the equation and the conormal differential. It is
+compatible with the actual exterior differentials with the sign
+required by the degree-one shift.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2PrincipalGysinOneForms
+
+open CycleQ2PrincipalGysinFunctions CycleQ2ExactFrameThreeDeRham
+open CycleQ2WeightedCoordinateExterior
+open CycleQ2GeometricExteriorSheaf (exteriorMap_wedge)
+open Module
+
+variable {K A T : Type} [CommRing K] [CommRing A] [CommRing T]
+  [Algebra K A] [Algebra K T] [Algebra A T] [IsScalarTower K A T]
+
+local notation "dA" => KaehlerDifferential.D K A
+local notation "dT" => KaehlerDifferential.D K T
+
+private abbrev φ : A →ₐ[K] T := IsScalarTower.toAlgHom K A T
+
+def regularTwo : Form K A 2 →ₗ[A] Form K T 2 :=
+  let map := exteriorPullback (φ (K := K) (A := A) (T := T)) 2
+  { toFun := map
+    map_add' := map.map_add
+    map_smul' := fun a x => (map.map_smulₛₗ a x).trans (IsScalarTower.algebraMap_smul T a _).symm }
+
+abbrev poleTwo := Form K T 2 ⧸ LinearMap.range (regularTwo (K := K) (A := A) (T := T))
+
+abbrev toPoleTwo := (LinearMap.range (regularTwo (K := K) (A := A) (T := T))).mkQ
+
+private theorem onePullback_regular (ω : Ω[A⁄K]) :
+    onePullback (φ (K := K) (A := A) (T := T)) ω = regular (K := K) (T := T) ω := by
+  let map := onePullback (φ (K := K) (A := A) (T := T))
+  let l : Ω[A⁄K] →ₗ[A] Ω[T⁄K] :=
+    { toFun := map
+      map_add' := map.map_add
+      map_smul' := fun a x => by
+        have h : map (a • x) = (algebraMap A T a) • map x := map.map_smulₛₗ a x
+        exact h.trans (IsScalarTower.algebraMap_smul T a (map x)) }
+  have h : l = regular (K := K) (T := T) := by
+    apply Derivation.liftKaehlerDifferential_unique
+    ext a
+    exact (onePullback_d φ a).trans (KaehlerDifferential.map_D K K A T a).symm
+  exact DFunLike.congr_fun h ω
+
+private theorem regularTwo_wedge (ω η : Ω[A⁄K]) :
+    regularTwo (K := K) (A := A) (T := T) (wedge ω η) =
+      wedge (regular (K := K) (T := T) ω) (regular (K := K) (T := T) η) := by
+  change exteriorPullback (φ (K := K) (A := A) (T := T)) 2 (exteriorPower.ιMulti A 2 ![ω,η]) = _
+  rw [exteriorPullback, exteriorMap_wedge]
+  apply congrArg (exteriorPower.ιMulti T 2)
+  funext i
+  fin_cases i
+  · exact onePullback_regular ω
+  · exact onePullback_regular η
+
+variable (f : A) (hf : IsUnit (algebraMap A T f))
+
+abbrev conormal : Submodule A Ω[A⁄K] :=
+  LinearMap.range (f • LinearMap.id : Ω[A⁄K] →ₗ[A] Ω[A⁄K]) ⊔ Submodule.span A {dA f}
+
+private def lift : Ω[A⁄K] →ₗ[A] Form K T 2 :=
+  ((wedgeRight (logarithm (K := K) hf.unit)).restrictScalars A).comp (regular (K := K))
+
+private theorem f_log : f • logarithm (K := K) hf.unit = regular (K := K) (T := T) (dA f) := by
+  change f • ((↑hf.unit⁻¹ : T) • dT (hf.unit : T)) = _
+  have hs : algebraMap A T f * (↑hf.unit⁻¹ : T) = 1 :=
+    (congrArg (fun a : T => a * (↑hf.unit⁻¹ : T)) hf.unit_spec.symm).trans (Units.mul_inv hf.unit)
+  rw [← IsScalarTower.algebraMap_smul T, smul_smul, hs, one_smul, hf.unit_spec,
+    KaehlerDifferential.map_D]
+
+private theorem lift_f_smul (ω : Ω[A⁄K]) :
+    lift (K := K) f hf (f • ω) = regularTwo (K := K) (T := T) (wedge (dA f) ω) := by
+  rw [map_smul]
+  change f • wedgeLeft (regular (K := K) (T := T) ω) (logarithm (K := K) hf.unit) = _
+  rw [← LinearMap.map_smul_of_tower, f_log f hf, regularTwo_wedge]
+  rfl
+
+private theorem lift_df : lift (K := K) f hf (dA f) = 0 := by
+  have hD : regular (K := K) (T := T) (dA f) = dT (hf.unit : T) := by
+    rw [KaehlerDifferential.map_D, hf.unit_spec]
+  change wedge (logarithm (K := K) hf.unit) (regular (K := K) (T := T) (dA f)) = 0
+  rw [hD, logarithm]
+  change wedgeLeft (dT (hf.unit : T)) ((↑hf.unit⁻¹ : T) • dT (hf.unit : T)) = 0
+  rw [map_smul]
+  change (↑hf.unit⁻¹ : T) • wedge (dT (hf.unit : T)) (dT (hf.unit : T)) = 0
+  rw [wedge_self, smul_zero]
+
+def classMapOne :
+    (Ω[A⁄K] ⧸ conormal (K := K) f) →ₗ[A] poleTwo (K := K) (A := A) (T := T) :=
+  (conormal (K := K) f).liftQ ((toPoleTwo (K := K) (A := A) (T := T)).comp (lift (K := K) f hf)) (by
+    rw [conormal, sup_le_iff, Submodule.span_le]
+    constructor
+    · rintro _ ⟨ω, rfl⟩
+      apply LinearMap.mem_ker.mpr
+      change toPoleTwo (K := K) (A := A) (T := T) (lift f hf (f • ω)) = 0
+      rw [lift_f_smul]
+      exact (Submodule.Quotient.mk_eq_zero _).mpr (LinearMap.mem_range_self _ _)
+    · intro ω hω
+      rw [Set.mem_singleton_iff.mp hω]
+      apply LinearMap.mem_ker.mpr
+      change toPoleTwo (K := K) (A := A) (T := T) (lift f hf (dA f)) = 0
+      rw [lift_df, map_zero])
+
+theorem classMapOne_apply (ω : Ω[A⁄K]) :
+    classMapOne (K := K) f hf ((conormal (K := K) f).mkQ ω) =
+      toPoleTwo (wedge (logarithm (K := K) hf.unit) (regular (K := K) ω)) := rfl
+
+def divisorD : (A ⧸ (Ideal.span {f} : Ideal A)) →+ (Ω[A⁄K] ⧸ conormal (K := K) f) :=
+  QuotientAddGroup.lift (show Submodule A A from Ideal.span {f}).toAddSubgroup
+    (((conormal (K := K) f).mkQ).toAddMonoidHom.comp (dA).toLinearMap.toAddMonoidHom) (by
+    intro a ha
+    have ha' : a ∈ Submodule.span A ({f} : Set A) := ha
+    obtain ⟨c, hc⟩ := Submodule.mem_span_singleton.mp ha'
+    change (conormal (K := K) f).mkQ (dA a) = 0
+    rw [← hc, smul_eq_mul, Derivation.leibniz, add_comm]
+    apply (Submodule.Quotient.mk_eq_zero _).mpr
+    exact Submodule.add_mem_sup
+      (LinearMap.mem_range_self (f • LinearMap.id) (dA c))
+      ((Submodule.span A {dA f}).smul_mem c (Submodule.subset_span (by simp))))
+
+theorem divisorD_apply (a : A) :
+    divisorD (K := K) f ((Ideal.Quotient.mk (Ideal.span {f})) a) =
+      (conormal (K := K) f).mkQ (dA a) := rfl
+
+variable (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A)
+  (hu : ∀ i, b i = KaehlerDifferential.D K A (u i))
+  (c : Basis (Fin 3) T Ω[T⁄K]) (v : Fin 3 → T)
+  (hv : ∀ i, c i = KaehlerDifferential.D K T (v i))
+
+def poleD (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A)
+    (hu : ∀ i, b i = KaehlerDifferential.D K A (u i))
+    (c : Basis (Fin 3) T Ω[T⁄K]) (v : Fin 3 → T)
+    (hv : ∀ i, c i = KaehlerDifferential.D K T (v i)) : poleQuotient (K := K) (A := A) (T := T) →+ poleTwo (K := K) (A := A) (T := T) :=
+  QuotientAddGroup.lift (LinearMap.range (regular (K := K) (A := A) (T := T))).toAddSubgroup
+    ((toPoleTwo (K := K) (A := A) (T := T)).toAddMonoidHom.comp (differential c)) (by
+    rintro _ ⟨ω, rfl⟩
+    change toPoleTwo (K := K) (A := A) (T := T) (differential c (regular (K := K) ω)) = 0
+    have he := differential_natural b u hu (φ (K := K) (A := A) (T := T)) c v hv ω
+    rw [onePullback_regular] at he
+    have ea : regularTwo (K := K) (A := A) (T := T) (differential b ω) =
+        differential c (regular (K := K) ω) := he
+    rw [← ea]
+    exact (Submodule.Quotient.mk_eq_zero _).mpr (LinearMap.mem_range_self _ _))
+
+include hu hv in
+theorem poleD_apply (ω : Ω[T⁄K]) :
+    poleD (K := K) (A := A) (T := T) b u hu c v hv (toPole (K := K) (A := A) (T := T) ω) =
+      toPoleTwo (K := K) (A := A) (T := T) (differential c ω) := rfl
+
+include hu hv in
+theorem differential_classMap (a : A ⧸ (Ideal.span {f} : Ideal A)) :
+    poleD (K := K) (A := A) (T := T) b u hu c v hv (classMap (K := K) f hf a) =
+      - classMapOne (K := K) f hf (divisorD f a) := by
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective a
+  rw [classMap_apply, divisorD_apply, classMapOne_apply, poleD_apply b u hu c v hv]
+  rw [← IsScalarTower.algebraMap_smul T, differential_smul]
+  have hz : differential c (logarithm (K := K) hf.unit) = 0 := differential_log c v hv hf.unit
+  rw [hz, smul_zero, zero_add, wedge_swap (logarithm (K := K) hf.unit), map_neg,
+    KaehlerDifferential.map_D]
+
+end CycleQ2PrincipalGysinOneForms
+
+#print axioms CycleQ2PrincipalGysinOneForms.classMapOne
+#print axioms CycleQ2PrincipalGysinOneForms.differential_classMap
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# The actual Kähler module of the principal divisor
+
+The quotient by the equation and its differential is identified with the
+ordinary Kähler module of the quotient ring. The map from functions used
+in the local logarithmic class is its universal derivation.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2PrincipalConormalQuotient
+
+open CycleQ2PrincipalGysinOneForms KaehlerDifferential
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A] (f : A)
+
+abbrev Q := A ⧸ (Ideal.span {f} : Ideal A)
+abbrev M := Ω[A⁄K] ⧸ conormal (K := K) f
+
+private abbrev toQ := Ideal.Quotient.mk (Ideal.span {f} : Ideal A)
+private abbrev toM := (conormal (K := K) f).mkQ
+
+private theorem torsion : Module.IsTorsionBySet A (M (K := K) f) (Ideal.span {f} : Ideal A) := by
+  apply (Module.isTorsionBySet_span_singleton_iff f).mpr
+  apply (Module.isTorsionBy_quotient_iff _ f).mpr
+  intro x
+  exact (show LinearMap.range (f • LinearMap.id : Ω[A⁄K] →ₗ[A] Ω[A⁄K]) ≤ conormal (K := K) f
+    from le_sup_left) (LinearMap.mem_range_self _ x)
+
+local instance : Module (Q f) (M (K := K) f) := (torsion (K := K) f).module
+
+local instance : IsScalarTower A (Q f) (M (K := K) f) := (torsion (K := K) f).isScalarTower
+
+local instance : IsScalarTower K (Q f) (M (K := K) f) := (torsion (K := K) f).isScalarTower
+
+private theorem quotient_smul (c : A) (x : M (K := K) f) :
+    toQ f c • x = c • x := rfl
+
+/-- The principal quotient derivation on the original cotangent quotient. -/
+def derivation : Derivation K (Q f) (M (K := K) f) where
+  toFun := divisorD f
+  map_add' := (divisorD f).map_add
+  map_one_eq_zero' := by
+    change divisorD (K := K) f (toQ f 1) = 0
+    rw [divisorD_apply, Derivation.map_one_eq_zero, map_zero]
+  map_smul' c x := by
+    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+    have eq : c • toQ f a = toQ f (c • a) :=
+      ((Ideal.Quotient.mkₐ K (Ideal.span {f})).toLinearMap.map_smul c a).symm
+    rw [RingHom.id_apply, eq, divisorD_apply, divisorD_apply, (D K A).map_smul,
+      (toM (K := K) f).map_smul_of_tower]
+  leibniz' x y := by
+    obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective x
+    obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective y
+    change divisorD (K := K) f (toQ f a * toQ f b) =
+      toQ f a • divisorD (K := K) f (toQ f b) + toQ f b • divisorD (K := K) f (toQ f a)
+    rw [← map_mul, divisorD_apply, divisorD_apply, divisorD_apply, Derivation.leibniz, map_add,
+      quotient_smul, quotient_smul, map_smul, map_smul]
+
+private abbrev ordinaryMap : Ω[A⁄K] →ₗ[A] Ω[Q f⁄K] := KaehlerDifferential.map K K A (Q f)
+
+private theorem ordinaryMap_conormal : conormal (K := K) f ≤ LinearMap.ker (ordinaryMap (K := K) f) := by
+  have hz : algebraMap A (Q f) f = 0 :=
+    (Ideal.Quotient.eq_zero_iff_mem).mpr (Ideal.subset_span (by simp))
+  rw [conormal, sup_le_iff, Submodule.span_le]
+  constructor
+  · rintro _ ⟨x,rfl⟩
+    apply LinearMap.mem_ker.mpr
+    change ordinaryMap (K := K) f (f • x) = 0
+    rw [map_smul, ← IsScalarTower.algebraMap_smul (Q f), hz, zero_smul]
+  · intro x hx
+    rw [Set.mem_singleton_iff.mp hx]
+    exact LinearMap.mem_ker.mpr (by rw [KaehlerDifferential.map_D, hz, map_zero])
+
+def fromQuotient : M (K := K) f →ₗ[A] Ω[Q f⁄K] :=
+  (conormal (K := K) f).liftQ (ordinaryMap f) (ordinaryMap_conormal f)
+
+private def inverse : Ω[Q f⁄K] →ₗ[A] M (K := K) f :=
+  (derivation (K := K) f).liftKaehlerDifferential.restrictScalars A
+
+private theorem inverse_comp_mk :
+    (inverse (K := K) f).comp (ordinaryMap f) = toM f := by
+  apply Derivation.liftKaehlerDifferential_unique
+  ext a
+  change inverse (K := K) f (ordinaryMap f (D K A a)) = _
+  rw [KaehlerDifferential.map_D]
+  change (derivation (K := K) f).liftKaehlerDifferential (D K (Q f) (toQ f a)) = _
+  rw [Derivation.liftKaehlerDifferential_comp_D]
+  exact divisorD_apply f a
+
+/-- The conormal quotient is the actual module of relative one-forms on the divisor. -/
+def cotangentEquiv : M (K := K) f ≃ₗ[A] Ω[Q f⁄K] := by
+  apply LinearEquiv.ofBijective (fromQuotient (K := K) f)
+  constructor
+  · apply Function.LeftInverse.injective (g := inverse f)
+    intro x
+    obtain ⟨ω, rfl⟩ := (conormal (K := K) f).mkQ_surjective x
+    change (inverse f).comp (ordinaryMap f) ω = (toM f) ω
+    rw [inverse_comp_mk]
+  · have hs : Function.Surjective (ordinaryMap (K := K) f) :=
+      KaehlerDifferential.map_surjective_of_surjective K K A (Q f) Ideal.Quotient.mk_surjective
+    intro ω
+    obtain ⟨α, rfl⟩ := hs ω
+    exact ⟨(toM f) α, rfl⟩
+
+theorem cotangentEquiv_divisorD (q : Q f) :
+    cotangentEquiv (K := K) f (divisorD f q) = D K (Q f) q := by
+  obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective q
+  rw [divisorD_apply]
+  exact KaehlerDifferential.map_D K K A (Q f) a
+
+end CycleQ2PrincipalConormalQuotient
+
+#print axioms CycleQ2PrincipalConormalQuotient.cotangentEquiv
+#print axioms CycleQ2PrincipalConormalQuotient.cotangentEquiv_divisorD
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# The local two-equation class in the localization quotient
+
+The logarithmic wedge is closed. In the quotient by the two single-open
+images, multiplying one equation by a unit of the original chart leaves
+the class unchanged. Swapping the equations changes its sign.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2DoubleLogarithmicClass
+
+open CycleQ2PrincipalGysinFunctions CycleQ2ExactFrameThreeDeRham
+open CycleQ2WeightedCoordinateExterior
+open CycleQ2GeometricExteriorSheaf (exteriorMap_wedge)
+open Module KaehlerDifferential
+
+variable {K A U V T : Type} [CommRing K] [CommRing A] [CommRing U] [CommRing V] [CommRing T]
+  [Algebra K A] [Algebra K U] [Algebra K V] [Algebra K T]
+
+/-- The wedge of the logarithmic derivatives of two units. -/
+def twoLog (f g : Tˣ) : Form K T 2 :=
+  wedge (logarithm (K := K) f) (logarithm (K := K) g)
+
+theorem onePullback_log {B : Type} [CommRing B] [Algebra K B] (φ : B →ₐ[K] T) (f : Bˣ) :
+    onePullback φ (logarithm (K := K) f) = logarithm (K := K) (Units.map φ.toRingHom f) := by
+  rw [logarithm, map_smulₛₗ, onePullback_d, logarithm]
+  rfl
+
+theorem pullback_twoLog {B : Type} [CommRing B] [Algebra K B] (φ : B →ₐ[K] T) (f g : Bˣ) :
+    exteriorPullback φ 2 (twoLog (K := K) f g) =
+      twoLog (K := K) (Units.map φ.toRingHom f) (Units.map φ.toRingHom g) := by
+  unfold twoLog wedge
+  rw [exteriorPullback, exteriorMap_wedge]
+  apply congrArg (exteriorPower.ιMulti T 2)
+  funext i
+  fin_cases i
+  · exact onePullback_log φ f
+  · exact onePullback_log φ g
+
+theorem twoLog_swap (f g : Tˣ) :
+    twoLog (K := K) g f = -twoLog (K := K) f g :=
+  wedge_swap _ _
+
+theorem twoLog_mul_left (f₁ f₂ g : Tˣ) :
+    twoLog (K := K) (f₁ * f₂) g = twoLog (K := K) f₁ g + twoLog (K := K) f₂ g := by
+  rw [twoLog,logarithm_mul]
+  exact (wedgeLeft (logarithm (K := K) g)).map_add _ _
+
+theorem twoLog_mul_right (f g₁ g₂ : Tˣ) :
+    twoLog (K := K) f (g₁ * g₂) = twoLog (K := K) f g₁ + twoLog (K := K) f g₂ := by
+  rw [twoLog,logarithm_mul]
+  exact (wedgeRight (logarithm (K := K) f)).map_add _ _
+
+/-- The two-log cochain itself is closed in the actual relative complex. -/
+theorem closed (b : Basis (Fin 3) T Ω[T⁄K])
+    (u : Fin 3 → T) (hu : ∀ i, b i = D K T (u i)) (f g : Tˣ) :
+    exteriorD2 b (exactFrameDirection b) (twoLog (K := K) f g) = 0 := by
+  have h : twoLog (K := K) f g = ((↑f⁻¹ : T) * (↑g⁻¹ : T)) •
+      exteriorPower.ιMulti T 2 (D K T ∘ ![(f : T),(g : T)]) := by
+    change wedgeLeft ((↑g⁻¹ : T) • D K T (g : T)) ((↑f⁻¹ : T) • D K T (f : T)) = _
+    rw [map_smul]
+    change (↑f⁻¹ : T) • wedgeRight (D K T (f : T)) ((↑g⁻¹ : T) • D K T (g : T)) = _
+    rw [map_smul, smul_smul]
+    rfl
+  rw [h, exteriorD2_exactFrame b u hu]
+  have hdF : D K T (↑f⁻¹ : T) = -((↑f⁻¹ : T) ^ 2) • D K T (f : T) :=
+    (D K T).leibniz_of_mul_eq_one (by simp)
+  have hdG : D K T (↑g⁻¹ : T) = -((↑g⁻¹ : T) ^ 2) • D K T (g : T) :=
+    (D K T).leibniz_of_mul_eq_one (by simp)
+  let e : (Ω[T⁄K]) [⋀^Fin 3]→ₗ[T] Form K T 3 := exteriorPower.ιMulti T 3
+  change e ![D K T ((↑f⁻¹ : T) * (↑g⁻¹ : T)), D K T (f : T), D K T (g : T)] = 0
+  rw [Derivation.leibniz, hdF, hdG, smul_smul, smul_smul]
+  rw [e.map_vecCons_add ![D K T (f : T),D K T (g : T)], e.map_vecCons_smul,
+    e.map_vecCons_smul]
+  have hg : e ![D K T (g : T),D K T (f : T),D K T (g : T)] = 0 :=
+    e.map_eq_zero_of_eq _ (by rfl : ![D K T (g : T),D K T (f : T),D K T (g : T)] (0 : Fin 3) =
+      ![D K T (g : T),D K T (f : T),D K T (g : T)] 2) (by decide)
+  have hf : e ![D K T (f : T),D K T (f : T),D K T (g : T)] = 0 :=
+    e.map_eq_zero_of_eq _ (by rfl : ![D K T (f : T),D K T (f : T),D K T (g : T)] (0 : Fin 3) =
+      ![D K T (f : T),D K T (f : T),D K T (g : T)] 1) (by decide)
+  rw [hg,hf,smul_zero,smul_zero,add_zero]
+
+variable (φ : U →ₐ[K] T) (ψ : V →ₐ[K] T)
+
+private abbrev images : AddSubgroup (Form K T 2) :=
+  (exteriorPullback φ 2).toAddMonoidHom.range ⊔ (exteriorPullback ψ 2).toAddMonoidHom.range
+
+/-- The degree-two localization quotient by the two single-open images. -/
+abbrev supportQuotient := Form K T 2 ⧸ images φ ψ
+
+def localClass (f g : Tˣ) : supportQuotient φ ψ :=
+  QuotientAddGroup.mk' (images φ ψ) (twoLog (K := K) f g)
+
+theorem localClass_first_unit (f : Tˣ) (g q : Vˣ) :
+    localClass φ ψ (Units.map ψ.toRingHom q * f) (Units.map ψ.toRingHom g) =
+      localClass φ ψ f (Units.map ψ.toRingHom g) := by
+  unfold localClass
+  rw [twoLog_mul_left,map_add]
+  have hz : QuotientAddGroup.mk' (images φ ψ)
+      (twoLog (K := K) (Units.map ψ.toRingHom q) (Units.map ψ.toRingHom g)) = 0 := by
+    rw [← pullback_twoLog]
+    apply (QuotientAddGroup.eq_zero_iff _).mpr
+    exact (show (exteriorPullback ψ 2).toAddMonoidHom.range ≤ images φ ψ from le_sup_right)
+      ⟨twoLog (K := K) q g, rfl⟩
+  rw [hz,zero_add]
+
+theorem localClass_second_unit (f q : Uˣ) (g : Tˣ) :
+    localClass φ ψ (Units.map φ.toRingHom f) (Units.map φ.toRingHom q * g) =
+      localClass φ ψ (Units.map φ.toRingHom f) g := by
+  unfold localClass
+  rw [twoLog_mul_right,map_add]
+  have hz : QuotientAddGroup.mk' (images φ ψ)
+      (twoLog (K := K) (Units.map φ.toRingHom f) (Units.map φ.toRingHom q)) = 0 := by
+    rw [← pullback_twoLog]
+    apply (QuotientAddGroup.eq_zero_iff _).mpr
+    exact (show (exteriorPullback φ 2).toAddMonoidHom.range ≤ images φ ψ from le_sup_left)
+      ⟨twoLog (K := K) f q, rfl⟩
+  rw [hz,zero_add]
+
+end CycleQ2DoubleLogarithmicClass
+
+#print axioms CycleQ2DoubleLogarithmicClass.closed
+#print axioms CycleQ2DoubleLogarithmicClass.localClass_first_unit
+#print axioms CycleQ2DoubleLogarithmicClass.localClass_second_unit
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Binding the local two-equation class to the original localizations
+
+For actual equations f and g, the two restriction maps are those of
+localization away from f and g into localization away from fg.
+The logarithmic class is the image of a closed ordinary two-form
+on the double localization. Units on the original affine chart
+give the checked equation-change identities in this quotient.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2NativeDoubleLocalization
+
+open CycleQ2DoubleLogarithmicClass CycleQ2RelativeAffineOverlap
+open CycleQ2WeightedCoordinateExterior Module KaehlerDifferential
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A] (f g : A)
+
+abbrev U := Localization.Away f
+abbrev V := Localization.Away g
+abbrev T := Localization.Away (f * g)
+
+private theorem fUnit : IsUnit (algebraMap A (T f g) f) :=
+  IsLocalization.Away.isUnit_of_dvd (f * g) (dvd_mul_right f g)
+
+private theorem gUnit : IsUnit (algebraMap A (T f g) g) :=
+  IsLocalization.Away.isUnit_of_dvd (f * g) (dvd_mul_left g f)
+
+def fromU : U f →ₐ[K] T f g :=
+  IsLocalization.Away.liftAlgHom (f := IsScalarTower.toAlgHom K A (T f g)) f (fUnit f g)
+
+def fromV : V g →ₐ[K] T f g :=
+  IsLocalization.Away.liftAlgHom (f := IsScalarTower.toAlgHom K A (T f g)) g (gUnit f g)
+
+private theorem fromU_algebraMap (a : A) :
+    fromU (K := K) f g (algebraMap A (U f) a) = algebraMap A (T f g) a :=
+  IsLocalization.Away.lift_eq (S := U f) (g := algebraMap A (T f g)) f (fUnit f g) a
+
+private theorem fromV_algebraMap (a : A) :
+    fromV (K := K) f g (algebraMap A (V g) a) = algebraMap A (T f g) a :=
+  IsLocalization.Away.lift_eq (S := V g) (g := algebraMap A (T f g)) g (gUnit f g) a
+
+private def uf : (U f)ˣ :=
+  (IsLocalization.Away.algebraMap_isUnit f).unit
+
+private def ug : (V g)ˣ :=
+  (IsLocalization.Away.algebraMap_isUnit g).unit
+
+def localizedF : (T f g)ˣ := Units.map (fromU (K := K) f g).toRingHom (uf f)
+def localizedG : (T f g)ˣ := Units.map (fromV (K := K) f g).toRingHom (ug g)
+
+theorem localizedF_val : (localizedF (K := K) f g : T f g) = algebraMap A (T f g) f := by
+  change fromU (K := K) f g (↑(uf f) : U f) = _
+  rw [uf, IsUnit.unit_spec]
+  exact fromU_algebraMap f g _
+
+theorem localizedG_val : (localizedG (K := K) f g : T f g) = algebraMap A (T f g) g := by
+  change fromV (K := K) f g (↑(ug g) : V g) = _
+  rw [ug, IsUnit.unit_spec]
+  exact fromV_algebraMap f g _
+
+def cochain : Form K (T f g) 2 := twoLog (K := K) (localizedF (K := K) f g) (localizedG (K := K) f g)
+
+def supportClass : supportQuotient (fromU (K := K) f g) (fromV (K := K) f g) :=
+  localClass (fromU (K := K) f g) (fromV (K := K) f g) (localizedF (K := K) f g) (localizedG (K := K) f g)
+
+local instance : Algebra.FormallyEtale A (T f g) :=
+  Algebra.FormallyEtale.of_isLocalization (Submonoid.powers (f * g))
+
+theorem cochain_closed (b : Basis (Fin 3) A Ω[A⁄K]) (u : Fin 3 → A) (hu : ∀ i, b i = D K A (u i)) :
+    exteriorD2 (baseChangeFrame b) (exactFrameDirection (baseChangeFrame b)) (cochain (K := K) f g) = 0 :=
+  closed (baseChangeFrame b) (fun i => algebraMap A (T f g) (u i)) (baseChangeFrame_apply b u hu) _ _
+
+theorem first_equation_unit (a : Aˣ) :
+    localClass (fromU (K := K) f g) (fromV (K := K) f g)
+      (Units.map (algebraMap A (T f g)).toMonoidHom a * localizedF (K := K) f g) (localizedG (K := K) f g) =
+      supportClass (K := K) f g := by
+  have he : Units.map (fromV (K := K) f g).toRingHom (Units.map (algebraMap A (V g)).toMonoidHom a) =
+      Units.map (algebraMap A (T f g)).toMonoidHom a := by
+    apply Units.ext
+    exact fromV_algebraMap f g _
+  rw [← he]
+  exact localClass_first_unit _ _ _ _ _
+
+theorem second_equation_unit (a : Aˣ) :
+    localClass (fromU (K := K) f g) (fromV (K := K) f g)
+      (localizedF (K := K) f g) (Units.map (algebraMap A (T f g)).toMonoidHom a * localizedG (K := K) f g) =
+      supportClass (K := K) f g := by
+  have he : Units.map (fromU (K := K) f g).toRingHom (Units.map (algebraMap A (U f)).toMonoidHom a) =
+      Units.map (algebraMap A (T f g)).toMonoidHom a := by
+    apply Units.ext
+    exact fromU_algebraMap f g _
+  rw [← he]
+  exact localClass_second_unit _ _ _ _ _
+
+end CycleQ2NativeDoubleLocalization
+
+#print axioms CycleQ2NativeDoubleLocalization.cochain_closed
+#print axioms CycleQ2NativeDoubleLocalization.first_equation_unit
+#print axioms CycleQ2NativeDoubleLocalization.second_equation_unit
+
+end
+
+end
