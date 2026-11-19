@@ -40,9 +40,9 @@ private def omittedEquiv : Fin 3 ≃ Set.powersetCard (Fin 3) 2 := Equiv.ofBijec
 
 section Coordinates
 
-variable {L W : Type*} [Field L] [Field W] [Algebra L W]
+variable {L W : Type*} [CommRing L] [CommRing W] [Algebra L W]
 
-abbrev Form (L W : Type*) [Field L] [Field W] [Algebra L W] (p : ℕ) := ⋀[W]^p Ω[W⁄L]
+abbrev Form (L W : Type*) [CommRing L] [CommRing W] [Algebra L W] (p : ℕ) := ⋀[W]^p Ω[W⁄L]
 
 variable (B : Module.Basis (Fin 3) W Ω[W⁄L]) (D : Fin 3 → Derivation L W W)
 
@@ -157,7 +157,7 @@ theorem exact_volume_iff_divergence (ρ : W) :
 
 /-- The derivative of a scalar times the signed minor vector is the
 Jacobian determinant. The mixed second-derivative terms cancel in pairs. -/
-private theorem divergence_minors {L W : Type*} [Field L] [Field W] [Algebra L W]
+private theorem divergence_minors {L W : Type*} [CommRing L] [CommRing W] [Algebra L W]
     (D : Fin 3 → Derivation L W W) (hD : ∀ i j, Function.Commute (D i) (D j)) (a b c : W) :
     (∑ i : Fin 3, (-1 : W) ^ i.val *
       D i (a * (Matrix.of fun s t : Fin 2 => D (i.succAbove t) (![b, c] s)).det)) =
@@ -186,6 +186,53 @@ theorem exteriorD2_smul_exact_pair
   simp only [map_smul, Finsupp.smul_apply, smul_eq_mul, twoBasis_repr_wedge, Function.comp_apply,
     hB]
   rw [divergence_minors D hD]
+
+/-- The dual derivations of an exact Kähler frame over any ground ring. -/
+def exactFrameDirection (i : Fin 3) : Derivation L W W :=
+  (KaehlerDifferential.linearMapEquivDerivation L W) (B.coord i)
+
+theorem exactFrameDirection_apply (x : W) (i : Fin 3) :
+    exactFrameDirection B i x = B.repr (KaehlerDifferential.D L W x) i := rfl
+
+theorem exactFrameDirections_commute (u : Fin 3 → W)
+    (hu : ∀ i, B i = KaehlerDifferential.D L W (u i)) (i j : Fin 3) :
+    Function.Commute (exactFrameDirection B i) (exactFrameDirection B j) := by
+  intro f
+  let δ := ⁅exactFrameDirection B i, exactFrameDirection B j⁆
+  have hδ : δ.liftKaehlerDifferential = 0 := by
+    apply B.ext
+    intro k
+    rw [hu, Derivation.liftKaehlerDifferential_comp_D]
+    have he (m n : Fin 3) : exactFrameDirection B m (u n) = if n = m then 1 else 0 := by
+      rw [exactFrameDirection_apply, ← hu, Module.Basis.repr_self, Finsupp.single_apply]
+    simp only [δ, Derivation.commutator_apply, he, LinearMap.zero_apply]
+    split <;> split <;> simp
+  apply sub_eq_zero.mp
+  change δ f = 0
+  rw [← Derivation.liftKaehlerDifferential_comp_D δ, hδ]
+  rfl
+
+theorem exteriorD2_exactFrame (u : Fin 3 → W)
+    (hu : ∀ i, B i = KaehlerDifferential.D L W (u i)) (a b c : W) :
+    exteriorD2 B (exactFrameDirection B) (a • exteriorPower.ιMulti W 2 (KaehlerDifferential.D L W ∘ ![b,c])) =
+      exteriorPower.ιMulti W 3 (KaehlerDifferential.D L W ∘ ![a,b,c]) :=
+  exteriorD2_smul_exact_pair B (exactFrameDirection B) (fun x i => (exactFrameDirection_apply B x i).symm)
+    (exactFrameDirections_commute B u hu) a b c
+
+/-- The top form on a rank-three exact frame is a single scalar
+multiple of the ordered volume. -/
+theorem topForm_scalar (ω : Form L W 3) :
+    ∃ r : W, ω = r • volume B := by
+  refine ⟨(B.exteriorPower 3).repr ω topIndex, ?_⟩
+  calc
+    _ = ∑ s, (B.exteriorPower 3).repr ω s • (B.exteriorPower 3) s :=
+      ((B.exteriorPower 3).sum_repr ω).symm
+    _ = _ := by
+      rw [Finset.sum_eq_single topIndex]
+      · rw [topBasis_apply]
+      · intro s _ hs
+        exact (hs (topIndex_unique s)).elim
+      · simp
 
 end Coordinates
 

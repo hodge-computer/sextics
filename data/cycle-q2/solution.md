@@ -404,6 +404,35 @@ actual stalk. The generic weighted residue still needs a supported
 derived representative with that comparison.
 [Derived test, vertex maps, and stalk implication](GeometricLiteralDerivedResidue.lean)
 
+## A regular representative on the generic complement
+
+On the native generic affine chart, the weight-two variable satisfies a
+monic cubic over the three free polynomial coordinates. The derivative
+of this cubic is nonzero in the chart ring because it has degree two.
+Inverting it gives a standard étale algebra. Base change of the
+polynomial cotangent basis gives an exact Kähler frame on that open.
+
+The function-field identification preserves the entire coefficient
+field. This follows first on the common integral chart and then on
+fractions of coefficients. The exact frame persists under further
+principal localization and at the function point.
+
+The actual weighted three-form has one coefficient in the top exterior
+power of this frame. Clearing that coefficient's denominator gives a
+regular representative. The denominator can include the nonzero chart
+function defining an open disjoint from the generic swept image, so the
+representative lies on a nonempty affine open in the complement.
+
+On that open the ordinary differential satisfies
+\[
+ d(a\,db\wedge dc)=da\wedge db\wedge dc .
+\]
+The rational restriction of any boundary is therefore a boundary of
+the actual weighted form and would give the protected fourfold
+primitive. The existence of this boundary remains open.
+[Exact-frame derivative](GeometricUniversalWeightedDeRham.lean) and
+[native affine representative and transfer](GeometricMonicGenericSupport.lean)
+
 ## The proper graph over the normalized coefficient base
 
 The marked smooth time family base-changes to the scheme of monic

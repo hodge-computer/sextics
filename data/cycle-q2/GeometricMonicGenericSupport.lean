@@ -14,6 +14,13 @@ import Mathlib.Topology.NoetherianSpace
 import Proposal.GeometricSmoothImageDimension
 import Proposal.GeometricClosedEmbeddingSheafExact
 import Mathlib.Algebra.Homology.DerivedCategory.ExactFunctor
+import Mathlib.RingTheory.Etale.StandardEtale
+import Mathlib.RingTheory.Etale.Kaehler
+import Mathlib.RingTheory.Kaehler.Polynomial
+import Mathlib.LinearAlgebra.TensorProduct.Basis
+import Proposal.GeometricUniversalWeightedDeRham
+import Mathlib.RingTheory.Localization.LocalizationLocalization
+import Proposal.GeometricWeightedPoleThree
 
 /-!
 # The proper graph has strict support in the native generic threefold
@@ -931,5 +938,511 @@ end CycleQ2GenericGraphFunctionStalk
 #print axioms CycleQ2GenericGraphFunctionStalk.weightedFieldEquiv
 #print axioms CycleQ2GenericGraphFunctionStalk.derivedStalk_factor_zero
 #print axioms CycleQ2GenericGraphFunctionStalk.exists_supported_marked_family
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# The exact Kähler frame on the native weighted normal open
+
+The original generic chart is a monic cubic over the three free
+coordinates. Localizing its normal derivative gives a usual standard
+étale algebra. The three polynomial-coordinate differentials then give
+an exact Kähler basis on this actual nonempty affine open.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2NormalWeightedCotangent
+
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits Polynomial
+  CycleQ2MonicGenericAmbientChart CycleQ2MonicGenericAmbientDomain
+  CycleQ2GeometricHodgeThreefoldCubic
+open CycleQ2GenericProperGraphSupport (chart chart_over)
+
+abbrev B := MvPolynomial (Fin 3) K
+
+private theorem vertex_unit : IsUnit ((genericCoeff.comp rawPoint) CycleQ2GeometricHodgeThreefold.vertexCoefficient) := by
+  rw [genericCoeff_vertex]
+  exact isUnit_one
+
+abbrev polynomial : B[X] := cubic (genericCoeff.comp rawPoint) 0 vertex_unit
+
+private theorem monic : polynomial.Monic := cubic_monic _ _ _
+
+private theorem degree : polynomial.natDegree = 3 := cubic_natDegree _ _ _
+
+abbrev Cubic := AdjoinRoot polynomial
+
+def cubicIso : genericChartRing ≃ₐ[K] Cubic :=
+  chartEquivAdjoinRoot (genericCoeff.comp rawPoint) 0 vertex_unit
+
+instance : IsDomain Cubic := cubicIso.symm.injective.isDomain cubicIso.symm
+
+def normal : Cubic := AdjoinRoot.mk polynomial polynomial.derivative
+
+theorem normal_ne_zero : normal ≠ 0 := by
+  have hder : polynomial.derivative.natDegree = 2 := by rw [natDegree_derivative, degree]
+  have hn : polynomial.derivative ≠ 0 := fun h => by
+    have hzero : polynomial.derivative.natDegree = 0 := (congrArg natDegree h).trans natDegree_zero
+    exact (by decide : (0 : ℕ) ≠ 2) (hzero.symm.trans hder)
+  intro h
+  have hd : polynomial ∣ polynomial.derivative :=
+    (AdjoinRoot.mk_eq_zero).mp h
+  exact monic.not_dvd_of_natDegree_lt hn (by rw [degree, hder]; decide) hd
+
+abbrev A := Localization.Away normal
+
+private def pair : StandardEtalePair B where
+  f := polynomial
+  monic_f := monic
+  g := polynomial.derivative
+  cond := ⟨1, 0, 1, by rw [mul_one, mul_zero, add_zero, pow_one]⟩
+
+instance : Algebra.Etale B A :=
+  Algebra.Etale.of_equiv pair.equivAwayAdjoinRoot
+
+abbrev coordinate (i : Fin 3) : A := algebraMap B A (MvPolynomial.X i)
+
+def basis : Module.Basis (Fin 3) A Ω[A⁄K] :=
+  ((KaehlerDifferential.mvPolynomialBasis K (Fin 3)).baseChange A).map
+    (KaehlerDifferential.tensorKaehlerEquivOfFormallyEtale K B A)
+
+theorem basis_apply (i : Fin 3) : basis i = KaehlerDifferential.D K A (coordinate i) := by
+  let e := KaehlerDifferential.tensorKaehlerEquivOfFormallyEtale K B A
+  apply e.symm.injective
+  change e.symm (e (((KaehlerDifferential.mvPolynomialBasis K (Fin 3)).baseChange A) i)) =
+    e.symm (KaehlerDifferential.D K A (algebraMap B A (MvPolynomial.X i)))
+  rw [LinearEquiv.symm_apply_apply, Module.Basis.baseChange_apply,
+    KaehlerDifferential.mvPolynomialBasis_apply]
+  exact (KaehlerDifferential.tensorKaehlerEquivOfFormallyEtale_symm_D_algebraMap K B A _).symm
+
+/-- The normal chart maps into the original generic projective threefold. -/
+def inclusion : Spec (CommRingCat.of A) ⟶ CycleQ2LiteralIncidenceGenericCorrespondence.genericAmbient :=
+  Spec.map (CommRingCat.ofHom ((algebraMap Cubic A).comp cubicIso.toRingHom)) ≫ chart
+
+theorem algebraMap_normal_isUnit : IsUnit (algebraMap Cubic A normal) :=
+  IsLocalization.Away.algebraMap_isUnit normal
+
+end CycleQ2NormalWeightedCotangent
+
+#print axioms CycleQ2NormalWeightedCotangent.normal_ne_zero
+#print axioms CycleQ2NormalWeightedCotangent.basis_apply
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# The actual function-field identification is coefficient-linear
+
+The native generic chart and the weighted residue field use the same
+coefficient extension. This is checked on the common integral chart
+and then on fractions of coefficients.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2NativeWeightedFieldAlgebra
+
+open CycleQ2MonicGenericAmbientDomain CycleQ2MonicGenericAmbientChart
+  CycleQ2MonicGenericAmbientChartBaseChange CycleQ2LiteralIncidenceNormalizedSlice
+  CycleQ2MonicWeightedAffineEquation CycleQ2GenericGraphFunctionStalk
+open CycleQ2UniversalWeightedDeRham (W coefficients)
+open CycleQ2GenericWeightedSpatialDenominator (universalAffine)
+open CycleQ2UniversalWeightedTransfer (separate_universal)
+open CycleQ2MonicWeightedPrimitiveSpecialization (ChartRing fieldValue)
+open scoped TensorProduct
+
+attribute [local instance] Algebra.TensorProduct.rightAlgebra
+
+theorem integralToGeneric_scalar (a : MonicRing) :
+    integralToGeneric (algebraMap MonicRing integralChart a) =
+      algebraMap K genericChartRing (algebraMap MonicRing K a) := by
+  let T := K ⊗[MonicRing] integralChart
+  let e : T ≃ₐ[K] genericChartRing :=
+    tensorChartEquiv (S := K) (rawToMonic.comp rawPoint) 0
+  have h :
+      algebraMap integralChart T (algebraMap MonicRing integralChart a) =
+        algebraMap K T (algebraMap MonicRing K a) :=
+    ((IsScalarTower.algebraMap_apply MonicRing integralChart T a).symm).trans
+      (IsScalarTower.algebraMap_apply MonicRing K T a)
+  exact (congrArg e h).trans (e.commutes _)
+
+private def quotientEquiv : AdjoinRoot universalEquation ≃ₐ[MonicRing] ChartRing universalAffine :=
+  AdjoinRoot.algEquivOfEq MonicRing _ _ separate_universal.symm
+
+private def fractionsEquiv : FractionRing (AdjoinRoot universalEquation) ≃+* W :=
+  IsFractionRing.ringEquivOfRingEquiv quotientEquiv.toRingEquiv
+
+def fieldEquiv : chartField ≃+* W := functionFieldEquiv.trans fractionsEquiv
+
+theorem fieldEquiv_integral (a : integralChart) :
+    fieldEquiv (algebraMap genericChartRing chartField (integralToGeneric a)) =
+      algebraMap (ChartRing universalAffine) W (quotientEquiv (integralChartEquiv a)) := by
+  exact (congrArg fractionsEquiv (functionFieldEquiv_integral a)).trans
+    (IsFractionRing.ringEquivOfRingEquiv_algebraMap quotientEquiv.toRingEquiv _)
+
+private theorem coeff_value (a : MonicRing) :
+    algebraMap K W (algebraMap MonicRing K a) =
+      algebraMap (ChartRing universalAffine) W (algebraMap MonicRing (ChartRing universalAffine) a) := by
+  change coefficients (algebraMap MonicRing K a) = _
+  have h : coefficients (algebraMap MonicRing K a) = fieldValue universalAffine (MvPolynomial.C a) :=
+    IsFractionRing.lift_algebraMap _ _
+  have hs : separate (MvPolynomial.C a) = Polynomial.C (MvPolynomial.C a) := separate.commutes a
+  exact h.trans (congrArg (fun q => algebraMap (ChartRing universalAffine) W
+    (AdjoinRoot.mk (separate universalAffine) q)) hs)
+
+theorem fieldEquiv_coefficients :
+    fieldEquiv.toRingHom.comp (algebraMap K chartField) = algebraMap K W := by
+  apply IsFractionRing.ringHom_ext (A := MonicRing)
+  intro a
+  change fieldEquiv (algebraMap K chartField (algebraMap MonicRing K a)) = _
+  let e := integralChartEquiv.trans quotientEquiv
+  calc
+    _ = fieldEquiv (algebraMap genericChartRing chartField
+        (integralToGeneric (algebraMap MonicRing integralChart a))) := by
+      rw [integralToGeneric_scalar, ← IsScalarTower.algebraMap_apply K genericChartRing chartField]
+    _ = algebraMap (ChartRing universalAffine) W (e (algebraMap MonicRing integralChart a)) :=
+      fieldEquiv_integral _
+    _ = _ := (congrArg (algebraMap (ChartRing universalAffine) W) (e.commutes a)).trans
+        (coeff_value a).symm
+
+def fieldAlgEquiv : chartField ≃ₐ[K] W :=
+  { fieldEquiv with commutes' := RingHom.congr_fun fieldEquiv_coefficients }
+
+end CycleQ2NativeWeightedFieldAlgebra
+
+#print axioms CycleQ2NativeWeightedFieldAlgebra.fieldEquiv_coefficients
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# The weighted residue field is the fraction field on the normal open
+
+The normal open is the derivative localization of the cubic chart.
+Its actual map to the universal weighted field is linear over the
+monic coefficient field and identifies the latter with its fraction field.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2NativeNormalFunctionField
+
+open CycleQ2NormalWeightedCotangent CycleQ2NativeWeightedFieldAlgebra
+  CycleQ2MonicGenericAmbientChart CycleQ2GenericGraphFunctionStalk
+open CycleQ2UniversalWeightedDeRham (W)
+open scoped nonZeroDivisors
+
+private def cubicToField : Cubic →ₐ[K] W :=
+  fieldAlgEquiv.toAlgHom.comp ((Algebra.ofId genericChartRing chartField).restrictScalars K |>.comp cubicIso.symm.toAlgHom)
+
+private theorem cubicMap_injective : Function.Injective cubicToField :=
+  fieldAlgEquiv.injective.comp ((IsFractionRing.injective genericChartRing chartField).comp cubicIso.symm.injective)
+
+private theorem normalUnit : IsUnit (cubicToField normal) :=
+  isUnit_iff_ne_zero.mpr ((map_ne_zero_iff cubicToField cubicMap_injective).mpr normal_ne_zero)
+
+def toField : A →ₐ[K] W :=
+  IsLocalization.Away.liftAlgHom normal (f := cubicToField) normalUnit
+
+theorem toField_algebraMap (x : Cubic) : toField (algebraMap Cubic A x) = cubicToField x :=
+  IsLocalization.Away.lift_eq normal normalUnit x
+
+instance : Algebra A W := toField.toRingHom.toAlgebra
+
+instance cubicAlgebra : Algebra Cubic W := cubicToField.toRingHom.toAlgebra
+
+instance : IsScalarTower K A W := IsScalarTower.of_algebraMap_eq (fun x => (toField.commutes x).symm)
+
+instance : IsScalarTower Cubic A W :=
+  IsScalarTower.of_algebraMap_eq (fun x => (toField_algebraMap x).symm)
+
+theorem cubicFractionField : IsFractionRing Cubic W := by
+  let J : genericChartRing ≃+* Cubic := cubicIso.toRingEquiv
+  let : Algebra genericChartRing W := (fieldEquiv.toRingHom.comp (algebraMap genericChartRing chartField)).toAlgebra
+  let F : chartField ≃ₐ[genericChartRing] W := {fieldEquiv with commutes' := fun _ => rfl}
+  let : IsFractionRing genericChartRing W := IsFractionRing.of_algEquiv F
+  apply IsFractionRing.of_ringEquiv_left J.symm
+  intro x
+  rfl
+
+instance : IsFractionRing A W := by
+  let : IsFractionRing Cubic W := cubicFractionField
+  apply IsFractionRing.isFractionRing_of_isLocalization (Submonoid.powers normal) A W
+  exact Submonoid.powers_le.mpr (mem_nonZeroDivisors_iff_ne_zero.mpr normal_ne_zero)
+
+/-- The coefficient-preserving map on the chart is the given native
+function-point map composed with the fixed field identification. -/
+theorem toField_native (x : genericChartRing) :
+    toField (algebraMap Cubic A (cubicIso x)) =
+      fieldAlgEquiv (algebraMap genericChartRing chartField x) := by
+  rw [toField_algebraMap]
+  change fieldAlgEquiv (algebraMap genericChartRing chartField (cubicIso.symm (cubicIso x))) = _
+  rw [AlgEquiv.symm_apply_apply]
+
+end CycleQ2NativeNormalFunctionField
+
+#print axioms CycleQ2NativeNormalFunctionField.cubicFractionField
+#print axioms CycleQ2NativeNormalFunctionField.toField_native
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# A regular representative of the weighted source on the normal open
+
+The top exterior power is a line in the derivative-localized chart.
+The fraction-field residue has one coordinate in this line. Clearing
+that coordinate's denominator gives a regular form on a further
+principal open and allows any prescribed nonzero principal constraint.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2NativeNormalResidue
+
+open CycleQ2NormalWeightedCotangent CycleQ2NativeNormalFunctionField
+  CycleQ2WeightedCoordinateExterior CycleQ2WeightedRationalRestriction
+open CycleQ2MonicGenericAmbientChart (K)
+open CycleQ2UniversalWeightedDeRham (W sourceForm)
+
+instance : IsDomain A := IsLocalization.isDomain_of_le_nonZeroDivisors A
+  (Submonoid.powers_le.mpr (mem_nonZeroDivisors_iff_ne_zero.mpr normal_ne_zero))
+
+section LiftBasis
+
+variable (T : Type) [CommRing T] [Algebra A T] [Algebra K T] [IsScalarTower K A T]
+  [Algebra.FormallyEtale A T]
+
+def liftedBasis : Module.Basis (Fin 3) T Ω[T⁄K] :=
+  (basis.baseChange T).map (KaehlerDifferential.tensorKaehlerEquivOfFormallyEtale K A T)
+
+theorem liftedBasis_apply (i : Fin 3) :
+    liftedBasis T i = KaehlerDifferential.D K T (algebraMap A T (coordinate i)) := by
+  let e := KaehlerDifferential.tensorKaehlerEquivOfFormallyEtale K A T
+  apply e.symm.injective
+  change e.symm (e ((basis.baseChange T) i)) = _
+  rw [LinearEquiv.symm_apply_apply, Module.Basis.baseChange_apply, basis_apply]
+  exact (KaehlerDifferential.tensorKaehlerEquivOfFormallyEtale_symm_D_algebraMap K A T _).symm
+
+end LiftBasis
+
+instance : Algebra.FormallyEtale A W :=
+  Algebra.FormallyEtale.of_isLocalization (Rₘ := W) (nonZeroDivisors A)
+
+abbrev Patch (s : A) := Localization.Away s
+
+instance (s : A) : Algebra.FormallyEtale A (Patch s) :=
+  Algebra.FormallyEtale.of_isLocalization (Rₘ := Patch s) (Submonoid.powers s)
+
+private theorem nonzero_field (s : A) (hs : s ≠ 0) : IsUnit (toField s) :=
+  isUnit_iff_ne_zero.mpr ((map_ne_zero_iff toField (IsFractionRing.injective A W)).mpr hs)
+
+def evaluatePatch (s : A) (hs : s ≠ 0) : Patch s →ₐ[K] W :=
+  IsLocalization.Away.liftAlgHom s (f := toField) (nonzero_field s hs)
+
+theorem evaluatePatch_algebraMap (s : A) (hs : s ≠ 0) (x : A) :
+    evaluatePatch s hs (algebraMap A (Patch s) x) = toField x :=
+  IsLocalization.Away.lift_eq s (nonzero_field s hs) x
+
+private theorem evaluate_volume (s : A) (hs : s ≠ 0) :
+    evaluate (evaluatePatch s hs) 3 (volume (liftedBasis (Patch s))) = volume (liftedBasis W) := by
+  let φ := evaluatePatch s hs
+  let a : Fin 3 → Patch s := fun i => algebraMap A (Patch s) (coordinate i)
+  let b : Fin 3 → W := fun i => algebraMap A W (coordinate i)
+  have ha : volume (liftedBasis (Patch s)) =
+      exteriorPower.ιMulti (Patch s) 3 (KaehlerDifferential.D K (Patch s) ∘ a) :=
+    congrArg (exteriorPower.ιMulti (Patch s) 3) (funext (liftedBasis_apply (Patch s)))
+  have hb : exteriorPower.ιMulti W 3 (KaehlerDifferential.D K W ∘ b) = volume (liftedBasis W) :=
+    congrArg (exteriorPower.ιMulti W 3) (funext (liftedBasis_apply W)).symm
+  have h : φ ∘ a = b := funext fun i => evaluatePatch_algebraMap s hs (coordinate i)
+  exact (congrArg (evaluate φ 3) ha).trans ((evaluate_wedge φ 3 a).trans
+    ((congrArg (fun c => exteriorPower.ιMulti W 3 (KaehlerDifferential.D K W ∘ c)) h).trans hb))
+
+private theorem inverse_image (s : A) (hs : s ≠ 0) (q : A)
+    (hq : IsUnit (algebraMap A (Patch s) q)) :
+    evaluatePatch s hs (↑(hq.unit⁻¹) : Patch s) = (toField q)⁻¹ := by
+  have h := (evaluatePatch s hs).isUnit_map hq
+  have hh : toField q ≠ 0 := isUnit_iff_ne_zero.mp
+    ((evaluatePatch_algebraMap s hs q) ▸ h)
+  apply (mul_right_cancel₀ hh)
+  have hu : (↑(hq.unit⁻¹) : Patch s) * algebraMap A (Patch s) q = 1 := by
+    exact (congrArg (fun r : Patch s => (↑(hq.unit⁻¹) : Patch s) * r) hq.unit_spec.symm).trans
+      (Units.inv_mul hq.unit)
+  rw [← evaluatePatch_algebraMap s hs q, ← map_mul, hu, map_one,
+    evaluatePatch_algebraMap s hs q, inv_mul_cancel₀ hh]
+
+/-- The actual universal form has a regular representative on a principal
+subopen in any prescribed nonempty principal open of the normal chart. -/
+theorem exists_regular_representative (g : A) (hg : g ≠ 0) :
+    ∃ q : A, ∃ hs : g * q ≠ 0, ∃ ω : Form K (Patch (g * q)) 3,
+      evaluate (evaluatePatch (g * q) hs) 3 ω = sourceForm := by
+  obtain ⟨r,hr⟩ := topForm_scalar (liftedBasis W) sourceForm
+  obtain ⟨p,q,hq,he⟩ := IsFractionRing.div_surjective A r
+  have hq₀ : q ≠ 0 := mem_nonZeroDivisors_iff_ne_zero.mp hq
+  let s := g * q
+  have hs : s ≠ 0 := mul_ne_zero hg hq₀
+  let P := Patch s
+  have hu : IsUnit (algebraMap A P q) := by
+    have h : IsUnit (algebraMap A P s) := IsLocalization.Away.algebraMap_isUnit s
+    change IsUnit (algebraMap A P (g * q)) at h
+    exact isUnit_of_mul_isUnit_right ((map_mul (algebraMap A P) g q) ▸ h)
+  let f := algebraMap A P p * (↑(hu.unit⁻¹) : P)
+  refine ⟨q,hs,f • volume (liftedBasis P),?_⟩
+  have hf : evaluatePatch s hs f = r := by
+    rw [show f = algebraMap A P p * (↑(hu.unit⁻¹) : P) from rfl, map_mul,
+      evaluatePatch_algebraMap, inverse_image s hs q hu, ← div_eq_mul_inv]
+    exact he
+  change evaluate (evaluatePatch s hs) 3 (f • volume (liftedBasis P)) = sourceForm
+  exact (LinearMap.map_smulₛₗ _ _ _).trans
+    ((congrArg₂ (fun (a : W) (b : Form K W 3) => a • b) hf (evaluate_volume s hs)).trans hr.symm)
+
+/-- On each further principal open the actual rank-three exterior
+derivative has the exact-wedge rule needed for the rational transfer. -/
+theorem exact_wedge_on_patch (s : A) :
+    ExactWedgeRule (exteriorD2 (liftedBasis (Patch s))
+      (exactFrameDirection (liftedBasis (Patch s)))).toAddMonoidHom := by
+  intro a b c
+  exact exteriorD2_exactFrame (liftedBasis (Patch s))
+    (fun i => algebraMap A (Patch s) (coordinate i)) (liftedBasis_apply _ ) a b c
+
+end CycleQ2NativeNormalResidue
+
+#print axioms CycleQ2NativeNormalResidue.exists_regular_representative
+#print axioms CycleQ2NativeNormalResidue.exact_wedge_on_patch
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# The actual residue form on an affine open off the generic graph
+
+Choose a principal complement of the strict swept image and impose its
+nonvanishing before clearing the source form's denominator. The resulting
+regular form lies on a nonempty open of the native generic threefold and
+restricts to the original weighted residue at its function point.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2NativeResidueOffGraph
+
+open AlgebraicGeometry CategoryTheory TopologicalSpace
+  CycleQ2NormalWeightedCotangent CycleQ2NativeNormalFunctionField
+  CycleQ2NativeNormalResidue CycleQ2GenericProperGraphSupport
+open CycleQ2MonicGenericAmbientChart (K genericChartRing)
+open CycleQ2GenericGraphFunctionStalk (chartField)
+open CycleQ2LiteralIncidenceGenericCorrespondence (genericAmbient)
+open CycleQ2GenericProperGraphOpen (surfaceStructure graphStructure)
+open CycleQ2IncidenceEtaleParameter (parameterScheme)
+open CycleQ2WeightedCoordinateExterior (Form exactFrameDirection exteriorD2)
+open CycleQ2WeightedRationalRestriction (evaluate protected_exact_of_affine_boundary)
+open CycleQ2UniversalWeightedDeRham (W sourceForm)
+
+private def normalImage : genericChartRing →+* A :=
+  (algebraMap Cubic A).comp cubicIso.toRingHom
+
+private theorem normalImage_injective : Function.Injective normalImage := by
+  intro x y h
+  have h' : toField (algebraMap Cubic A (cubicIso x)) =
+      toField (algebraMap Cubic A (cubicIso y)) := congrArg toField h
+  exact (IsFractionRing.injective genericChartRing chartField)
+    (CycleQ2NativeWeightedFieldAlgebra.fieldAlgEquiv.injective
+      ((toField_native x).symm.trans (h'.trans (toField_native y))))
+
+def patchInclusion (s : A) : Spec (CommRingCat.of (Patch s)) ⟶ genericAmbient :=
+  Spec.map (CommRingCat.ofHom (algebraMap A (Patch s))) ≫ inclusion
+
+private theorem normal_open : IsOpenImmersion inclusion := by
+  let e := (Scheme.Spec.mapIso cubicIso.toRingEquiv.toCommRingCatIso.op).hom
+  have he : IsOpenImmersion e := inferInstance
+  have hf : inclusion = Spec.map (CommRingCat.ofHom (algebraMap Cubic A)) ≫ e ≫ chart := by
+    unfold inclusion
+    change _ = Spec.map (CommRingCat.ofHom (algebraMap Cubic A)) ≫
+      Spec.map (CommRingCat.ofHom cubicIso.toRingHom) ≫ chart
+    rw [← Category.assoc, ← Spec.map_comp]
+    rfl
+  rw [hf]
+  infer_instance
+
+instance (s : A) : IsOpenImmersion (patchInclusion s) := by
+  let : IsOpenImmersion inclusion := normal_open
+  change IsOpenImmersion (Spec.map (CommRingCat.ofHom (algebraMap A (Patch s))) ≫ inclusion)
+  infer_instance
+
+private theorem patch_off {V : parameterScheme.Opens} {t : Fin 3 → ℂ}
+    {s : genericChartRing} (h : PrimeSpectrum.basicOpen s ≤ chart ⁻¹ᵁ complement V t)
+    (q : A) (x : Spec (CommRingCat.of (Patch (normalImage s * q)))) :
+    patchInclusion (normalImage s * q) x ∈ complement V t := by
+  let g := normalImage s
+  let B := Patch (g * q)
+  let α : genericChartRing →+* B := (algebraMap A B).comp normalImage
+  have hf : patchInclusion (g * q) = Spec.map (CommRingCat.ofHom α) ≫ chart := by
+    unfold patchInclusion inclusion
+    erw [← Category.assoc, ← Spec.map_comp]
+    rfl
+  have hu : IsUnit (algebraMap A B (g * q)) := IsLocalization.Away.algebraMap_isUnit (g * q)
+  have hg : IsUnit (algebraMap A B g) :=
+    isUnit_of_mul_isUnit_left ((map_mul (algebraMap A B) g q) ▸ hu)
+  rw [hf, Scheme.Hom.comp_apply]
+  let : x.asIdeal.IsPrime := x.isPrime
+  have hb : (Spec.map (CommRingCat.ofHom α)) x ∈ PrimeSpectrum.basicOpen s :=
+    (PrimeSpectrum.mem_basicOpen s _).mpr (x.asIdeal.notMem_of_isUnit hg)
+  exact h hb
+
+/-- A regular representative of the actual weighted source exists on a
+nonempty affine open disjoint from the original generic swept image. -/
+theorem exists_off_graph {V : parameterScheme.Opens} {t : Fin 3 → ℂ}
+    (hs : SmoothOfRelativeDimension 2 (surfaceStructure V t))
+    (hp : IsProper (graphStructure V t)) :
+    ∃ s : A, ∃ hs₀ : s ≠ 0,
+      (∀ x : Spec (CommRingCat.of (Patch s)), patchInclusion s x ∈ complement V t) ∧
+        ∃ ω : Form K (Patch s) 3, evaluate (evaluatePatch s hs₀) 3 ω = sourceForm := by
+  obtain ⟨g,hg,hc⟩ := exists_basic_open V t hs hp
+  have hga : normalImage g ≠ 0 := (map_ne_zero_iff _ normalImage_injective).mpr hg
+  obtain ⟨q, hq, ω, hw⟩ := exists_regular_representative (normalImage g) hga
+  exact ⟨normalImage g * q, hq, patch_off hc q, ω, hw⟩
+
+/-- Exactness on the actual affine patch for its ordinary differential
+would already discharge the protected exactness obligation. -/
+theorem protected_exact_of_boundary {s : A} (hs : s ≠ 0) (ω : Form K (Patch s) 3)
+    (hw : evaluate (evaluatePatch s hs) 3 ω = sourceForm)
+    (η : Form K (Patch s) 2)
+    (h : exteriorD2 (liftedBasis (Patch s)) (exactFrameDirection (liftedBasis (Patch s))) η = ω) :
+    ∃ η : CycleQ2AffineExterior.Form 3, CycleQ2AffineExterior.exteriorD3 η =
+      CycleQ2AffineExactness.residueSourceForm CycleQ2AffineClearing.affineA :=
+  protected_exact_of_affine_boundary (evaluatePatch s hs) _
+    (exact_wedge_on_patch s) ω hw η h
+
+end CycleQ2NativeResidueOffGraph
+
+#print axioms CycleQ2NativeResidueOffGraph.exists_off_graph
+#print axioms CycleQ2NativeResidueOffGraph.protected_exact_of_boundary
 
 end
