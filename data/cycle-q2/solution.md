@@ -85,6 +85,36 @@ The input \(\exists (v_0,v_1,v_2)\) on the universal chart is still
 open. The checked transfer determines the exact existence statement
 that the geometric support argument must supply.
 
+### The universal rational source and its normal residue
+
+The field of fractions of the 44 coefficients embeds in the weighted
+function field as constants. The three spatial partials annihilate it
+and commute. Their values on the differentials of the free coordinates
+are the three dual basis vectors of the relative Kähler cotangent space.
+The exterior differential in that basis sends
+\(a\,db\wedge dc\) to \(da\wedge db\wedge dc\). Its top coefficient
+is the sum of the three derivatives of the signed two-form coefficients.
+Hence exactness of the genuine relative rational source three-form is
+equivalent to the universal divergence equation. A primitive over a finite
+extension also gives one over the universal function field by normalized
+trace with the canonical lifted derivations.
+[Relative exterior differentiation and finite descent](GeometricUniversalWeightedDeRham.lean)
+
+On the ordinary affine chart let \(f\) be the universal equation,
+\(n=\partial_0 f\), \(N=n^{-1}\partial_0\), and \(\varphi=b/n\).
+Then \(Nf=1\), and \(N\) kills the three free coordinates.
+The rational normal coefficient satisfies
+\[
+ \frac{\varphi}{f^3}
+ = N\!\left(-\frac{\varphi}{2f^2}-\frac{N\varphi}{2f}\right)
+    +\frac{N^2\varphi}{2f}.
+\]
+The numerator \(N^2\varphi/2\) of the simple pole comes from the
+original localization away from \(n\). Its restriction to the
+hypersurface function field is exactly \(\rho_b\). This binds the
+specified pole-three numerator to the density in the universal
+divergence equation. [Normal pole reduction and evaluation](GeometricWeightedPoleThree.lean)
+
 ## The fixed threefold and its moving curves
 
 The curve calculation takes place on the cubic section \(D\) of the weighted
