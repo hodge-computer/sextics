@@ -380,10 +380,32 @@ The relative graph retains the original embedded curve over the marked
 point and along the marked first-order time direction. On the generic
 monic fiber the graph is nonempty and proper, and its ambient projection
 is proper with closed image. The same section vector and marked open give
-the original nonzero coherent pullback on the fixed threefold. Extending
-this nonzero calculation to the generic relative de Rham correspondence
-and proving that its generic image is a strict closed subset remain open.
-[Relative graph, marked recovery and generic projection](GeometricMonicIncidenceCorrespondence.lean)
+the original nonzero coherent pullback on the fixed threefold. [Relative graph, marked recovery and generic projection](GeometricMonicIncidenceCorrespondence.lean)
+
+## Strict support in the generic monic threefold
+
+The function field of the monic coefficient ring is a flat localization,
+so the original smooth surface remains dense in the proper graph after
+base change to the generic point. Its image has the same closure as the
+image of the proper graph. The native first affine chart of the ambient
+threefold projects dominantly to affine three-space by the monic cubic
+projection. If the closed image contained that entire chart, the open
+restriction of the smooth surface would map dominantly to affine
+three-space. This contradicts the checked relative dimension bound.
+
+The complement therefore contains a principal open of the native chart
+defined by a nonzero denominator. The chart is an integral domain. Its
+function field is identified with the field of the actual universal
+weighted residue, compatibly with functions on the integral coefficient
+chart. The function point factors through the complement. A morphism in
+the additive derived category that factors through a complex pushed
+forward from the graph's closed image vanishes at the derived stalk of
+that point. The chosen family has both this strict generic support and
+the original nonzero coherent class on the fixed threefold.
+[Native chart, proper support and derived stalk](GeometricMonicGenericSupport.lean)
+
+The comparison of the fixed calculation with a nonzero unfiltered
+relative de Rham correspondence on this support remains open.
 
 ## The corrected filtered Cech three-cocycle
 
