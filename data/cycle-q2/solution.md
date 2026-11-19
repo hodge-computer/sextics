@@ -433,6 +433,33 @@ primitive. The existence of this boundary remains open.
 [Exact-frame derivative](GeometricUniversalWeightedDeRham.lean) and
 [native affine representative and transfer](GeometricMonicGenericSupport.lean)
 
+## The generic affine stalk criterion
+
+Write the regular weighted form on the native affine patch as a scalar
+times its exact coordinate volume. The associated sheaf of two-forms
+has three signed components in this frame. Applying the corresponding
+relative derivations on the actual structure sheaf and summing gives
+the top exterior differential. The resulting additive cokernel sheaf
+contains the scalar of the original source.
+
+At the zero prime, the local ring is the fraction ring of the chart.
+Evaluation there commutes with all three coordinate derivations.
+The verification first compares them on the chart ring via the
+Kähler base-change isomorphism. The Leibniz rule and cancellation
+of the nonzero denominator then give the comparison on every local
+function. The exact-wedge formula identifies the resulting derivative
+with the specified universal exterior differential.
+
+If the scalar has zero cokernel germ, a local section of the
+two-form sheaf maps to it on a neighborhood of the generic point.
+The evaluated components give a primitive of the actual universal
+three-form and hence the protected fourfold primitive. The same
+conclusion follows from a derived class killed by the generic stalk
+whose vertex projection is the scalar's map into this cokernel.
+The required supported class with that vertex comparison remains
+to be constructed.
+[Weighted cokernel germ and derived-stalk comparison](GeometricMonicGenericSupport.lean)
+
 ## The proper graph over the normalized coefficient base
 
 The marked smooth time family base-changes to the scheme of monic

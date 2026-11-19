@@ -234,6 +234,27 @@ theorem topForm_scalar (ω : Form L W 3) :
         exact (hs (topIndex_unique s)).elim
       · simp
 
+/-- A fixed exact frame generates all two-forms by scalar multiples
+of pairs of exact differentials. Equality on those generators suffices
+for equality of the additive maps. -/
+theorem twoFormMap_ext {N : Type*} [AddCommMonoid N] (u : Fin 3 → W)
+    (hu : ∀ i, B i = KaehlerDifferential.D L W (u i))
+    (f g : Form L W 2 →+ N)
+    (h : ∀ a b c : W,
+      f (a • exteriorPower.ιMulti W 2 (KaehlerDifferential.D L W ∘ ![b,c])) =
+      g (a • exteriorPower.ιMulti W 2 (KaehlerDifferential.D L W ∘ ![b,c]))) :
+    f = g := by
+  apply AddMonoidHom.ext
+  intro η
+  rw [← (twoBasis B).sum_repr η, map_sum, map_sum]
+  apply Finset.sum_congr rfl
+  intro j _
+  have hj : j.removeNth B = KaehlerDifferential.D L W ∘ ![u (j.succAbove 0), u (j.succAbove 1)] := by
+    funext i
+    fin_cases i <;> apply hu
+  rw [twoBasis_apply, hj]
+  apply h
+
 end Coordinates
 
 end CycleQ2WeightedCoordinateExterior

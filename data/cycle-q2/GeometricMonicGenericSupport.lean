@@ -21,6 +21,12 @@ import Mathlib.LinearAlgebra.TensorProduct.Basis
 import Proposal.GeometricUniversalWeightedDeRham
 import Mathlib.RingTheory.Localization.LocalizationLocalization
 import Proposal.GeometricWeightedPoleThree
+import Proposal.GeometricAffineDerivations
+import Mathlib.RingTheory.Localization.FractionRing
+import Proposal.GeometricLiteralResidueLocalImage
+import Mathlib.AlgebraicGeometry.Modules.Tilde
+import Proposal.GeometricLiteralDerivedResidue
+import Mathlib.Topology.Sheaves.Abelian
 
 /-!
 # The proper graph has strict support in the native generic threefold
@@ -1444,5 +1450,560 @@ end CycleQ2NativeResidueOffGraph
 
 #print axioms CycleQ2NativeResidueOffGraph.exists_off_graph
 #print axioms CycleQ2NativeResidueOffGraph.protected_exact_of_boundary
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Relative coordinate derivations under affine localization
+
+The exact frame of a smooth affine chart base changes through a
+formally étale algebra. Its coordinate derivations therefore agree
+with the original derivations on functions from the chart. This
+applies in particular to the fraction field and to the residue
+field of the generic point on an integral chart.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2EtaleFrameDerivations
+
+open CycleQ2WeightedCoordinateExterior
+open scoped TensorProduct
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A]
+variable (B : Module.Basis (Fin 3) A Ω[A⁄K])
+variable (T : Type) [CommRing T] [Algebra K T] [Algebra A T] [IsScalarTower K A T]
+  [Algebra.FormallyEtale A T]
+
+def frame : Module.Basis (Fin 3) T Ω[T⁄K] :=
+  (B.baseChange T).map (KaehlerDifferential.tensorKaehlerEquivOfFormallyEtale K A T)
+
+theorem frame_apply (u : Fin 3 → A) (hu : ∀ i, B i = KaehlerDifferential.D K A (u i))
+    (i : Fin 3) :
+    frame B T i = KaehlerDifferential.D K T (algebraMap A T (u i)) := by
+  let e := KaehlerDifferential.tensorKaehlerEquivOfFormallyEtale K A T
+  apply e.symm.injective
+  change e.symm (e ((B.baseChange T) i)) = _
+  rw [LinearEquiv.symm_apply_apply, Module.Basis.baseChange_apply, hu]
+  exact (KaehlerDifferential.tensorKaehlerEquivOfFormallyEtale_symm_D_algebraMap K A T _).symm
+
+theorem direction_algebraMap (a : A) (i : Fin 3) :
+    exactFrameDirection (frame B T) i (algebraMap A T a) =
+      algebraMap A T (exactFrameDirection B i a) := by
+  rw [exactFrameDirection_apply, exactFrameDirection_apply]
+  change (B.baseChange T).repr
+    ((KaehlerDifferential.tensorKaehlerEquivOfFormallyEtale K A T).symm
+      (KaehlerDifferential.D K T (algebraMap A T a))) i = _
+  rw [KaehlerDifferential.tensorKaehlerEquivOfFormallyEtale_symm_D_algebraMap,
+    Module.Basis.baseChange_repr_tmul, Algebra.smul_def, mul_one]
+
+end CycleQ2EtaleFrameDerivations
+
+#print axioms CycleQ2EtaleFrameDerivations.direction_algebraMap
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Evaluation of the affine derivative at the generic point
+
+The local ring at the zero prime of an integral affine scheme is its
+fraction ring. Evaluation of regular functions at that point commutes
+with the coordinate derivations transported through the actual field
+extension.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2AffineGenericEvaluation
+
+open AlgebraicGeometry TopologicalSpace Opposite
+  CycleQ2GeometricLocalizedDerivations CycleQ2GeometricAffineDerivations
+  CycleQ2WeightedCoordinateExterior CycleQ2EtaleFrameDerivations
+open scoped nonZeroDivisors
+
+variable {K A W : Type} [CommRing K] [CommRing A] [IsDomain A] [Field W]
+  [Algebra ℂ K] [Algebra ℂ A] [Algebra K A] [IsScalarTower ℂ K A]
+  [Algebra K W] [Algebra A W] [IsScalarTower K A W] [IsFractionRing A W]
+
+private abbrev genericPoint : PrimeSpectrum A := ⊥
+private abbrev M := (genericPoint (A := A)).asIdeal.primeCompl
+private abbrev R := StructureSheaf.Localizations A (genericPoint (A := A))
+
+omit [Algebra ℂ A] in
+private theorem denominator_eq : M (A := A) = A⁰ := by
+  apply Submonoid.ext
+  intro x
+  change x ∉ (⊥ : Ideal A) ↔ x ∈ A⁰
+  rw [mem_nonZeroDivisors_iff_ne_zero, Ideal.mem_bot]
+
+private instance : IsFractionRing A (R (A := A)) := by
+  have h : IsLocalization (M (A := A)) (R (A := A)) := inferInstance
+  change IsLocalization A⁰ (R (A := A))
+  exact (denominator_eq (A := A)) ▸ h
+
+private def pointEquiv : R (A := A) ≃ₐ[A] W :=
+  IsLocalization.algEquiv (A⁰) _ _
+
+def eval {U : Opens (PrimeSpectrum.Top A)} (hx : genericPoint (A := A) ∈ U) :
+    AffineSections U →+* W where
+  toFun f := pointEquiv (f.1 ⟨genericPoint, hx⟩)
+  map_zero' := map_zero pointEquiv
+  map_one' := map_one pointEquiv
+  map_add' _ _ := map_add pointEquiv _ _
+  map_mul' _ _ := map_mul pointEquiv _ _
+
+theorem eval_algebraMap {U : Opens (PrimeSpectrum.Top A)} (hx : genericPoint (A := A) ∈ U)
+    (a : A) :
+    letI : Algebra A (AffineSections U) := StructureSheaf.openAlgebra A (op U)
+    eval (W := W) hx (algebraMap A (AffineSections U) a) = algebraMap A W a :=
+  pointEquiv.commutes a
+
+variable (B : Module.Basis (Fin 3) A Ω[A⁄K])
+
+def baseDerivation (i : Fin 3) : Derivation ℂ A A :=
+  (exactFrameDirection B i).restrictScalars ℂ
+
+local instance : Algebra.FormallyEtale A W :=
+  Algebra.FormallyEtale.of_isLocalization (Rₘ := W) A⁰
+
+def fieldDerivation (i : Fin 3) : Derivation K W W := exactFrameDirection (frame B W) i
+
+private theorem map_localized_derivation (i : Fin 3) (z : R (A := A)) :
+    pointEquiv (W := W) (localizedDerivation (M (A := A)) _ (baseDerivation B i) z) =
+      fieldDerivation B i (pointEquiv z) := by
+  let D := localizedDerivation (M (A := A)) (R (A := A)) (baseDerivation B i)
+  let E := fieldDerivation (W := W) B i
+  let e := pointEquiv (A := A) (W := W)
+  obtain ⟨⟨p, q⟩, h⟩ := IsLocalization.surj (M (A := A)) z
+  change z * algebraMap A (R (A := A)) q = algebraMap A (R (A := A)) p at h
+  have he : e z * algebraMap A W (q : A) = algebraMap A W p := by
+    simpa only [map_mul, e.commutes] using congrArg e h
+  have hq : algebraMap A W (q : A) ≠ 0 :=
+    isUnit_iff_ne_zero.mp (IsLocalization.map_units W
+      (⟨(q : A), denominator_eq (A := A) ▸ q.property⟩ : nonZeroDivisors A))
+  have hD := congrArg (fun x => e (D x)) h
+  have hE := congrArg E he
+  change e (D (z * algebraMap A (R (A := A)) q)) = e (D (algebraMap A (R (A := A)) p)) at hD
+  change E (e z * algebraMap A W q) = E (algebraMap A W p) at hE
+  have dh (a : A) : D (algebraMap A (R (A := A)) a) =
+      algebraMap A (R (A := A)) (exactFrameDirection B i a) :=
+    localizedDerivation_algebraMap (M (A := A)) _ (baseDerivation B i) a
+  have eh (a : A) : E (algebraMap A W a) = algebraMap A W (exactFrameDirection B i a) :=
+    direction_algebraMap B W a i
+  rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul, dh, dh, map_add, map_mul, map_mul,
+    e.commutes, e.commutes, e.commutes] at hD
+  rw [Derivation.leibniz, smul_eq_mul, smul_eq_mul, eh, eh] at hE
+  apply (mul_left_cancel₀ hq)
+  exact add_left_cancel (hD.trans hE.symm)
+
+theorem eval_sectionDerivative {U : Opens (PrimeSpectrum.Top A)}
+    (hx : genericPoint (A := A) ∈ U) (i : Fin 3) (f : AffineSections U) :
+    eval hx (sectionDerivative (baseDerivation B i) U f) = fieldDerivation (W := W) B i (eval hx f) :=
+  map_localized_derivation B i (f.1 ⟨genericPoint, hx⟩)
+
+end CycleQ2AffineGenericEvaluation
+
+#print axioms CycleQ2AffineGenericEvaluation.eval_sectionDerivative
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# The top exterior differential on a relative affine threefold chart
+
+In exact coordinates the differential is the divergence of the signed
+components of a two-form. Applying the coordinate derivations to the
+actual structure sheaf gives an additive morphism out of the associated
+two-form sheaf. At the generic point its coefficients are the original
+relative coordinate derivations on the fraction field.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2AffineRelativeTopSheaf
+
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
+  CycleQ2GeometricAffineDerivations CycleQ2AffineGenericEvaluation
+  CycleQ2WeightedCoordinateExterior CycleQ2EtaleFrameDerivations
+open CycleQ2LiteralResidueLocalImage (exists_principal_preimage)
+
+variable {K A : Type} [CommRing K] [CommRing A]
+  [Algebra ℂ K] [Algebra ℂ A] [Algebra K A] [IsScalarTower ℂ K A]
+
+abbrev X := Spec (CommRingCat.of A)
+abbrev AddSheaf := TopCat.Sheaf AddCommGrpCat.{0} (PrimeSpectrum.Top A)
+
+abbrev twoForms := tilde (R := CommRingCat.of A) (ModuleCat.of A (Form K A 2))
+abbrev functions := SheafOfModules.unit.{0} (X (A := A)).ringCatSheaf
+abbrev addForms := (SheafOfModules.toSheaf (X (A := A)).ringCatSheaf).obj (twoForms (K := K) (A := A))
+abbrev addFunctions := (SheafOfModules.toSheaf (X (A := A)).ringCatSheaf).obj (functions (A := A))
+
+variable (B : Module.Basis (Fin 3) A Ω[A⁄K])
+
+def signedCoordinate (i : Fin 3) : twoForms (K := K) (A := A) ⟶ functions :=
+  tilde.map (ModuleCat.ofHom (((-1 : A) ^ i.val) • (twoBasis B).coord i)) ≫
+    (tildeSelf (R := CommRingCat.of A)).hom
+
+def derivative (i : Fin 3) : addFunctions (A := A) ⟶ addFunctions (A := A) where
+  hom.app U := AddCommGrpCat.ofHom (sectionDerivativeAddHom (baseDerivation B i) U.unop)
+  hom.naturality _ _ _ := rfl
+
+/-- The actual additive map in an exact volume frame. -/
+def topDifferential : addForms (K := K) (A := A) ⟶ addFunctions (A := A) :=
+  ∑ i, (SheafOfModules.toSheaf (X (A := A)).ringCatSheaf).map (signedCoordinate B i) ≫ derivative B i
+
+theorem topDifferential_apply (U : Opens (PrimeSpectrum.Top A))
+    (w : (addForms (K := K) (A := A)).obj.obj (op U)) :
+    (topDifferential B).hom.app (op U) w =
+      ∑ i, sectionDerivative (baseDerivation B i) U ((signedCoordinate B i).val.app (op U) w) := by
+  unfold topDifferential
+  simp only [Fin.sum_univ_three]
+  rfl
+
+def scalarSection (a : A) (U : Opens (PrimeSpectrum.Top A)) : AffineSections U :=
+  letI : Algebra A (AffineSections U) := StructureSheaf.openAlgebra A (op U)
+  algebraMap A (AffineSections U) a
+
+omit [Algebra ℂ A] in
+theorem scalarSection_restrict (a : A) {U V : Opens (PrimeSpectrum.Top A)} (h : V ≤ U) :
+    (addFunctions (A := A)).obj.map (homOfLE h).op (scalarSection a U) = scalarSection a V := rfl
+
+section Fraction
+
+variable {W : Type} [IsDomain A] [Field W]
+    [Algebra K W] [Algebra A W] [IsScalarTower K A W] [IsFractionRing A W]
+
+local instance : Algebra.FormallyEtale A W := Algebra.FormallyEtale.of_isLocalization (Rₘ := W) (nonZeroDivisors A)
+
+/-- Actual equality with a top exterior derivative on an open through
+the generic point gives a primitive of the coefficient times the
+ordered volume in the fraction field. -/
+theorem exact_of_boundary (a : A) {U : Opens (PrimeSpectrum.Top A)} (hx : (⊥ : PrimeSpectrum A) ∈ U)
+    (w : (addForms (K := K) (A := A)).obj.obj (op U))
+    (hw : (topDifferential B).hom.app (op U) w = scalarSection a U) :
+    ∃ η : Form K W 2,
+      exteriorD2 (frame B W) (fieldDerivation B) η = algebraMap A W a • volume (frame B W) := by
+  apply (exact_volume_iff_divergence (frame B W) (fieldDerivation B) (algebraMap A W a)).mpr
+  refine ⟨fun i => eval hx ((signedCoordinate B i).val.app (op U) w), ?_⟩
+  have h := congrArg (eval (W := W) hx) ((topDifferential_apply B U w).symm.trans hw)
+  simp only [map_sum] at h
+  have he : (∑ i : Fin 3, fieldDerivation (W := W) B i
+      (eval hx ((signedCoordinate B i).val.app (op U) w))) =
+    ∑ i : Fin 3, eval hx (sectionDerivative (baseDerivation B i) U ((signedCoordinate B i).val.app (op U) w)) :=
+    Finset.sum_congr rfl fun i _ => (eval_sectionDerivative (W := W) B hx i _).symm
+  exact he.trans (h.trans (eval_algebraMap hx a))
+
+abbrev cokernelPresheaf : TopCat.Presheaf AddCommGrpCat.{0} (PrimeSpectrum.Top A) :=
+  (cokernel (topDifferential B)).obj
+
+/-- A zero of the cokernel germ gives an actual local primitive and
+therefore a primitive at the function point. -/
+theorem exact_of_cokernel_germ (a : A)
+    (h : (cokernelPresheaf B).Γgerm (⊥ : PrimeSpectrum A)
+      ((cokernel.π (topDifferential B)).hom.app (op ⊤) (scalarSection a ⊤)) = 0) :
+    ∃ η : Form K W 2,
+      exteriorD2 (frame B W) (fieldDerivation B) η = algebraMap A W a • volume (frame B W) := by
+  let x : PrimeSpectrum A := ⊥
+  let E := cokernelPresheaf B
+  let s := (cokernel.π (topDifferential B)).hom.app (op ⊤) (scalarSection a ⊤)
+  have he : E.germ ⊤ x trivial s = E.germ ⊤ x trivial 0 :=
+    h.trans (map_zero _).symm
+  obtain ⟨U, hx, i, j, hi⟩ := E.germ_eq (U := ⊤) (V := ⊤) x trivial trivial _ _ he
+  have hs : (cokernel.π (topDifferential B)).hom.app (op U) (scalarSection a U) = 0 := by
+    have hi' : E.map i.op s = 0 := hi.trans (map_zero _)
+    rw [← scalarSection_restrict a (leOfHom i)]
+    have hn : E.map i.op s =
+        (cokernel.π (topDifferential B)).hom.app (op U)
+          ((addFunctions (A := A)).obj.map i.op (scalarSection a ⊤)) :=
+      (NatTrans.naturality_apply (cokernel.π (topDifferential B)).hom i.op (scalarSection a ⊤)).symm
+    exact hn.symm.trans hi'
+  obtain ⟨r, hr, hxr, w, hw⟩ :=
+    exists_principal_preimage (topDifferential B) U (scalarSection a U) hs x hx
+  exact exact_of_boundary B a hxr w (hw.trans (scalarSection_restrict a hr))
+
+end Fraction
+
+end CycleQ2AffineRelativeTopSheaf
+
+#print axioms CycleQ2AffineRelativeTopSheaf.exact_of_cokernel_germ
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# The actual weighted residue class in an affine cokernel sheaf
+
+On a nonempty native normal patch the top three-form is read in its
+exact volume frame. Its additive cokernel germ is a concrete local
+criterion for the protected theorem. The fraction-field comparison
+uses the exterior derivative in the actual universal field.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2WeightedStalkExactness
+
+open AlgebraicGeometry TopologicalSpace CategoryTheory CategoryTheory.Limits Opposite
+  CycleQ2NormalWeightedCotangent CycleQ2NativeNormalFunctionField CycleQ2NativeNormalResidue
+  CycleQ2WeightedCoordinateExterior CycleQ2EtaleFrameDerivations CycleQ2AffineRelativeTopSheaf
+  CycleQ2AffineGenericEvaluation
+open CycleQ2MonicGenericAmbientChart (K)
+open CycleQ2UniversalWeightedDeRham (W sourceForm exteriorDerivative exteriorDerivative_exact_pair
+  protected_exact_of_source_exact)
+open CycleQ2WeightedRationalRestriction (evaluate evaluate_wedge)
+open scoped nonZeroDivisors
+
+variable (s : A) [NeZero s]
+abbrev P := Patch s
+
+private abbrev value : P s →ₐ[K] W := evaluatePatch s (NeZero.ne s)
+
+private instance : Algebra (P s) W := (value s).toRingHom.toAlgebra
+
+private instance : IsScalarTower A (P s) W :=
+  IsScalarTower.of_algebraMap_eq (fun a => (evaluatePatch_algebraMap s (NeZero.ne s) a).symm)
+
+private instance : IsScalarTower K (P s) W :=
+  IsScalarTower.of_algebraMap_eq (fun a => ((value s).commutes a).symm)
+
+private instance : IsDomain (P s) :=
+  IsLocalization.isDomain_of_le_nonZeroDivisors (P s)
+    (Submonoid.powers_le.mpr (mem_nonZeroDivisors_iff_ne_zero.mpr (NeZero.ne s)))
+
+private instance : IsFractionRing (P s) W :=
+  IsFractionRing.isFractionRing_of_isLocalization (Submonoid.powers s) (P s) W
+    (Submonoid.powers_le.mpr (mem_nonZeroDivisors_iff_ne_zero.mpr (NeZero.ne s)))
+
+private instance : Algebra.FormallyEtale (P s) W :=
+  Algebra.FormallyEtale.of_isLocalization (Rₘ := W) (nonZeroDivisors (P s))
+
+private abbrev affineBasis := liftedBasis (P s)
+private abbrev fieldBasis := frame (affineBasis s) W
+private abbrev affineCoordinate (i : Fin 3) := algebraMap A (P s) (coordinate i)
+
+private theorem weightedVolume_eval :
+    evaluate (value s) 3 (volume (affineBasis s)) = volume (fieldBasis s) := by
+  let u := affineCoordinate s
+  have ha : volume (affineBasis s) = exteriorPower.ιMulti (P s) 3 (KaehlerDifferential.D K (P s) ∘ u) :=
+    congrArg (exteriorPower.ιMulti (P s) 3) (funext (liftedBasis_apply (P s)))
+  have hw : volume (fieldBasis s) =
+      exteriorPower.ιMulti W 3 (KaehlerDifferential.D K W ∘ (value s ∘ u)) :=
+    congrArg (exteriorPower.ιMulti W 3)
+      (funext (frame_apply (affineBasis s) W u (liftedBasis_apply (P s))))
+  exact (congrArg (evaluate (value s) 3) ha).trans
+    ((evaluate_wedge (value s) 3 u).trans hw.symm)
+
+/-- The scalar of the original source in the ordinary affine chart's
+exact volume frame, interpreted in the universal field. -/
+def RepresentsSource (a : P s) : Prop :=
+  algebraMap (P s) W a • volume (fieldBasis s) = sourceForm
+
+theorem representative_has_scalar (ω : Form K (P s) 3)
+    (h : evaluate (value s) 3 ω = sourceForm) :
+    ∃ a : P s, RepresentsSource s a := by
+  obtain ⟨a,ha⟩ := topForm_scalar (affineBasis s) ω
+  refine ⟨a, ?_⟩
+  change (value s) a • volume (fieldBasis s) = sourceForm
+  have he := (LinearMap.map_smulₛₗ (evaluate (value s) 3) a (volume (affineBasis s))).trans
+    (congrArg (fun x => (value s) a • x) (weightedVolume_eval s))
+  exact he.symm.trans ((congrArg (evaluate (value s) 3) ha).symm.trans h)
+
+private theorem same_field_derivative :
+    (exteriorD2 (fieldBasis s) (fieldDerivation (affineBasis s))).toAddMonoidHom =
+      exteriorDerivative.toAddMonoidHom := by
+  let u := affineCoordinate s
+  let a : Fin 3 → W := value s ∘ u
+  have ha : ∀ i, fieldBasis s i = KaehlerDifferential.D K W (a i) :=
+    frame_apply (affineBasis s) W u (liftedBasis_apply (P s))
+  apply twoFormMap_ext (fieldBasis s) a ha
+  intro f g h
+  exact (exteriorD2_exactFrame (fieldBasis s) a ha f g h).trans
+    (exteriorDerivative_exact_pair f g h).symm
+
+/-- The actual source section, modulo the honest exterior derivative,
+at the generic point of this affine patch. -/
+def weightedGerm (a : P s) :=
+  (cokernelPresheaf (affineBasis s)).Γgerm (⊥ : PrimeSpectrum (P s))
+    ((cokernel.π (topDifferential (affineBasis s))).hom.app (op ⊤) (scalarSection a ⊤))
+
+/-- Vanishing of the germ of a scalar representing the weighted source
+is sufficient for the exact protected four-form. -/
+theorem protected_exact_of_germ_zero (a : P s) (ha : RepresentsSource s a)
+    (h : weightedGerm s a = 0) :
+    ∃ η : CycleQ2AffineExterior.Form 3, CycleQ2AffineExterior.exteriorD3 η =
+      CycleQ2AffineExactness.residueSourceForm CycleQ2AffineClearing.affineA := by
+  obtain ⟨η, hη⟩ := exact_of_cokernel_germ (W := W) (affineBasis s) a h
+  apply protected_exact_of_source_exact
+  refine ⟨η, ?_⟩
+  have h' := DFunLike.congr_fun (same_field_derivative s) η
+  exact h'.symm.trans (hη.trans ha)
+
+/-- The original weighted class has a scalar representative on one
+actual affine open disjoint from the generic swept image. -/
+theorem exists_source_scalar_off_graph
+    {V : CycleQ2IncidenceEtaleParameter.parameterScheme.Opens} {t : Fin 3 → ℂ}
+    (h₁ : SmoothOfRelativeDimension 2 (CycleQ2GenericProperGraphOpen.surfaceStructure V t))
+    (h₂ : IsProper (CycleQ2GenericProperGraphOpen.graphStructure V t)) :
+    ∃ u : A, ∃ hu : u ≠ 0,
+      (∀ x : Spec (CommRingCat.of (Patch u)),
+        CycleQ2NativeResidueOffGraph.patchInclusion u x ∈ CycleQ2GenericProperGraphSupport.complement V t) ∧
+      (letI : NeZero u := ⟨hu⟩
+       ∃ a : Patch u, RepresentsSource u a) := by
+  obtain ⟨u,hu,hc,ω,hω⟩ := CycleQ2NativeResidueOffGraph.exists_off_graph h₁ h₂
+  refine ⟨u,hu,hc,?_⟩
+  letI : NeZero u := ⟨hu⟩
+  exact representative_has_scalar u ω hω
+
+end CycleQ2WeightedStalkExactness
+
+#print axioms CycleQ2WeightedStalkExactness.representative_has_scalar
+#print axioms CycleQ2WeightedStalkExactness.protected_exact_of_germ_zero
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# From a supported derived vertex value to the protected exact form
+
+A degree-zero map from the free sheaf on the affine patch represents
+the scalar of the actual source. Applying the derived stalk at the
+generic point and the vertex comparison gives the zero cokernel germ.
+The checked affine exactness theorem then produces the protected
+rational primitive.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2WeightedDerivedStalkBridge
+
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
+  CycleQ2InjectiveCech CycleQ2WeightedStalkExactness CycleQ2NormalWeightedCotangent
+  CycleQ2NativeNormalResidue CycleQ2AffineRelativeTopSheaf CycleQ2CechTwoToDerived
+
+attribute [local instance] HasDerivedCategory.standard
+
+variable (s : A) [NeZero s]
+
+private abbrev Z := PrimeSpectrum.Top (Patch s)
+private abbrev C := AbSheaf (Z s)
+private abbrev S := DerivedCategory.singleFunctor (C s) 0
+private abbrev d := topDifferential (liftedBasis (Patch s))
+private abbrev x := (⊥ : PrimeSpectrum (Patch s))
+
+private abbrev stalk (Y : TopCat.{0}) (p : Y) : AbSheaf Y ⥤ AddCommGrpCat.{0} :=
+  TopCat.Sheaf.forget AddCommGrpCat.{0} Y ⋙ TopCat.Presheaf.stalkFunctor AddCommGrpCat.{0} p
+
+private theorem stalkAdditive (Y : TopCat.{0}) (p : Y) : (stalk Y p).Additive := by
+  exact inferInstanceAs ((TopCat.Sheaf.forget AddCommGrpCat.{0} Y ⋙
+    TopCat.Presheaf.stalkFunctor AddCommGrpCat.{0} p).Additive)
+
+private theorem stalkLimits (Y : TopCat.{0}) (p : Y) : PreservesFiniteLimits (stalk Y p) := by
+  exact inferInstanceAs (PreservesFiniteLimits (TopCat.Sheaf.forget AddCommGrpCat.{0} Y ⋙
+    TopCat.Presheaf.stalkFunctor AddCommGrpCat.{0} p))
+
+private theorem stalkColimits (Y : TopCat.{0}) (p : Y) : PreservesFiniteColimits (stalk Y p) := by
+  exact inferInstanceAs (PreservesFiniteColimits (TopCat.Sheaf.forget AddCommGrpCat.{0} Y ⋙
+    TopCat.Presheaf.stalkFunctor AddCommGrpCat.{0} p))
+
+abbrev stalkAtGeneric : C s ⥤ AddCommGrpCat.{0} := stalk (Z s) (x (s := s))
+
+private instance : (stalkAtGeneric s).Additive := stalkAdditive _ _
+private instance : PreservesFiniteLimits (stalkAtGeneric s) := stalkLimits _ _
+private instance : PreservesFiniteColimits (stalkAtGeneric s) := stalkColimits _ _
+
+def scalarMap (a : Patch s) : freeOpen (⊤ : Opens (Z s)) ⟶ addFunctions (A := Patch s) :=
+  (freeOpenSections (addFunctions (A := Patch s)) ⊤).symm (scalarSection a ⊤)
+
+private theorem scalarMap_app (a : Patch s) :
+    app (scalarMap s a) ⊤ (freeOpenSections (freeOpen (⊤ : Opens (Z s))) ⊤ (𝟙 _)) =
+      scalarSection a ⊤ := by
+  refine (freeOpenSections_postcomp ⊤ (𝟙 _) (scalarMap s a)).trans ?_
+  let F := freeOpenSections (addFunctions (A := Patch s)) (⊤ : Opens (Z s))
+  exact (congrArg F (Category.id_comp (scalarMap s a))).trans (F.apply_symm_apply _)
+
+private theorem germ_of_cokernel_comp (a : Patch s)
+    (h : (stalkAtGeneric s).map (scalarMap s a ≫ cokernel.π (d (s := s))) = 0) :
+    weightedGerm s a = 0 := by
+  let P := freeOpen (⊤ : Opens (Z s))
+  let f : P ⟶ cokernel (d (s := s)) := scalarMap s a ≫ cokernel.π (d (s := s))
+  let u := freeOpenSections P ⊤ (𝟙 P)
+  let P₀ : TopCat.Presheaf AddCommGrpCat.{0} (Z s) := P.obj
+  let e := P₀.Γgerm (x (s := s)) u
+  have hg : (stalkAtGeneric s).map f e = 0 := by
+    exact ConcreteCategory.congr_hom h e
+  have hv : (stalkAtGeneric s).map f e =
+      (cokernelPresheaf (liftedBasis (Patch s))).Γgerm (x (s := s))
+        (app f ⊤ u) :=
+    TopCat.Presheaf.stalkFunctor_map_germ_apply (X := Z s)
+      (C := AddCommGrpCat.{0}) ⊤ (x (s := s)) trivial f.hom u
+  have ha : app f ⊤ u = app (cokernel.π (d (s := s))) ⊤ (scalarSection a ⊤) :=
+    (app_comp (scalarMap s a) (cokernel.π (d (s := s))) ⊤ u).symm.trans
+      (congrArg (app (cokernel.π (d (s := s))) ⊤) (scalarMap_app s a))
+  exact (congrArg ((cokernelPresheaf (liftedBasis (Patch s))).Γgerm (x (s := s))) ha).symm.trans
+    (hv.symm.trans hg)
+
+/-- A derived class with the stated native vertex comparison gives the
+protected primitive if its image at the generic point vanishes. -/
+theorem protected_exact_of_derived_stalk
+    (a : Patch s) (ha : RepresentsSource s a) {M N : DerivedCategory (C s)}
+    (vertex : (S s).obj (freeOpen (⊤ : Opens (Z s))) ⟶ M)
+    (c : M ⟶ N) (projection : N ⟶ (S s).obj (cokernel (d (s := s))))
+    (hvertex : vertex ≫ c ≫ projection =
+      (S s).map (scalarMap s a ≫ cokernel.π (d (s := s))))
+    (h : (stalkAtGeneric s).mapDerivedCategory.map c = 0) :
+    ∃ η : CycleQ2AffineExterior.Form 3, CycleQ2AffineExterior.exteriorD3 η =
+      CycleQ2AffineExactness.residueSourceForm CycleQ2AffineClearing.affineA := by
+  have hz : (stalkAtGeneric s).mapDerivedCategory.map
+      ((S s).map (scalarMap s a ≫ cokernel.π (d (s := s)))) = 0 := by
+    let F := (stalkAtGeneric s).mapDerivedCategory
+    have hf : F.map (vertex ≫ c ≫ projection) = F.map vertex ≫ F.map c ≫ F.map projection :=
+      (F.map_comp vertex _).trans (congrArg (fun k => F.map vertex ≫ k) (F.map_comp c projection))
+    exact (congrArg F.map hvertex.symm).trans (hf.trans
+      ((congrArg (fun k => F.map vertex ≫ k ≫ F.map projection) h).trans
+        ((congrArg (fun k => F.map vertex ≫ k) zero_comp).trans comp_zero)))
+  exact protected_exact_of_germ_zero s a ha
+    (germ_of_cokernel_comp s a
+      (CycleQ2DerivedVertexExactness.map_zero_of_single_map_zero (stalkAtGeneric s) _ hz))
+
+end CycleQ2WeightedDerivedStalkBridge
+
+#print axioms CycleQ2WeightedDerivedStalkBridge.protected_exact_of_derived_stalk
+
+end
 
 end
