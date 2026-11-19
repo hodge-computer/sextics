@@ -198,6 +198,27 @@ quotient. The formula uses the actual restriction maps from \(D(fg)\)
 and \(D(fh)\).
 [Triangular equation change](GeometricUniversalWeightedDeRham.lean)
 
+## Pullback to the smooth generic surface
+
+The rank-two exact affine basis of the original generic surface
+gives its ordinary functions and exterior forms on the same section
+rings. Its degree-three exterior power is zero. The two nonzero
+differentials commute with restriction, so the dense-site comparison
+gives an actual relative de Rham complex on the surface.
+
+For each ambient framed affine open and each surface framed affine
+subopen of its preimage, the scheme map on their section rings
+commutes with the original coefficient map. The induced maps on
+functions and exterior forms assemble to a cochain map into the
+direct image on the ambient threefold. The adjoint maps the exact
+inverse image of the ambient complex to the surface complex and
+therefore acts on degree-three derived cohomology. This applies to
+the original generic projection, with the same base field and the
+same weighted ambient complex.
+The pairing after proper completion and integration over the
+curves, and its comparison with the marked test, remain open.
+[Actual generic relative de Rham pullback](GeometricMonicGenericSupport.lean)
+
 ## Localization on the actual swept complement
 
 For an open immersion (j:U\hookrightarrow X), restriction followed by

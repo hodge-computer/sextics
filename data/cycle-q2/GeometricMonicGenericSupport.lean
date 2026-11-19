@@ -78,6 +78,7 @@ import Mathlib.Algebra.Homology.HomologicalComplexAbelian
 import Mathlib.Algebra.Category.Grp.FilteredColimits
 import Mathlib.Algebra.Homology.DerivedCategory.DerivabilityStructureInjectives
 import Mathlib.Algebra.Category.Grp.AB
+import Mathlib.Algebra.Homology.Embedding.HomEquiv
 
 /-!
 # The proper graph has strict support in the native generic threefold
@@ -6357,5 +6358,1058 @@ end CycleQ2NativeAffineCoefficientLifts
 
 #print axioms CycleQ2NativeAffineCoefficientLifts.chartLift
 #print axioms CycleQ2NativeAffineCoefficientLifts.overlapLift
+
+end
+
+section
+
+/-!
+# Pullback to a smooth surface on ordinary affine charts
+
+The one-form derivative uses the checked formula for an exact frame
+of arbitrary rank. A surface has no relative three-forms, so the
+ordinary pullback from a threefold commutes with all differentials.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2SurfaceDeRhamChart
+
+open CategoryTheory CategoryTheory.Limits Module KaehlerDifferential
+open CycleQ2WeightedCoordinateExterior CycleQ2AffineDeRhamComplex CycleQ2AffineDeRhamFunctorial
+open CycleQ2ExactFrameFirstDifferential
+
+variable {K A B C : Type} [Field K] [CharZero K] [CommRing A] [CommRing B] [CommRing C]
+  [Algebra K A] [Algebra K B] [Algebra K C]
+
+theorem exterior_subsingleton {p : ℕ} {n : ℕ} (b : Basis (Fin n) A Ω[A⁄K]) (h : n < p) :
+    Subsingleton (Form K A p) := by
+  classical
+  haveI : IsEmpty (Set.powersetCard (Fin n) p) := ⟨fun i => by
+    have hi := Finset.card_le_univ i.val
+    rw [i.property, Fintype.card_fin] at hi
+    exact (Nat.not_le_of_lt h) hi⟩
+  exact b.exteriorPower p |>.equivFun.injective.subsingleton
+
+variable (b : Basis (Fin 2) A Ω[A⁄K]) (u : Fin 2 → A) (hu : ∀ i, b i = D K A (u i))
+
+def next : ∀ p, degree K A p ⟶ degree K A (p + 1)
+  | 0 => AddCommGrpCat.ofHom (D K A).toLinearMap.toAddMonoidHom
+  | 1 => AddCommGrpCat.ofHom (onOne b)
+  | _ + 2 => 0
+
+include hu in
+private theorem square : ∀ p, next b p ≫ next b (p + 1) = 0
+  | 0 => by
+    ext a
+    exact onOne_D b u hu a
+  | 1 => comp_zero
+  | _ + 2 => zero_comp
+
+def complex : CochainComplex AddCommGrpCat.{0} ℕ :=
+  CochainComplex.of (degree K A) (next b) (square b u hu)
+
+variable (c : Basis (Fin 2) B Ω[B⁄K]) (v : Fin 2 → B) (hv : ∀ i, c i = D K B (v i))
+  (φ : A →ₐ[K] B)
+
+include hu hv in
+theorem pull_comm : ∀ p, pullDegree φ p ≫ next c p = next b p ≫ pullDegree φ (p + 1)
+  | 0 => by
+    ext a
+    exact (CycleQ2ExactFrameThreeDeRham.onePullback_d φ a).symm
+  | 1 => by
+    ext ω
+    exact (onOne_natural b u hu φ c v hv ω).symm
+  | _ + 2 => by simp only [next, comp_zero, zero_comp]
+
+def pull : complex b u hu ⟶ complex c v hv :=
+  CochainComplex.ofHom (pullDegree φ) (by
+    intro p
+    simp only [complex, CochainComplex.of_d]
+    exact pull_comm b u hu c v hv φ p)
+
+variable (a : Basis (Fin 3) A Ω[A⁄K]) (x : Fin 3 → A) (hx : ∀ i, a i = D K A (x i))
+
+include hx hv in
+theorem pull_from_three_comm :
+    ∀ p, pullDegree φ p ≫ next c p = CycleQ2AffineDeRhamComplex.next a p ≫ pullDegree φ (p + 1)
+  | 0 => by
+    ext f
+    exact (CycleQ2ExactFrameThreeDeRham.onePullback_d φ f).symm
+  | 1 => by
+    ext ω
+    exact (onOne_natural a x hx φ c v hv ω).symm
+  | 2 => by
+    ext ω
+    exact (exterior_subsingleton c (by decide : 2 < 3)).elim _ _
+  | _ + 3 => by simp only [next, CycleQ2AffineDeRhamComplex.next, comp_zero, zero_comp]
+
+/-- The pullback from the actual rank-three formula to the rank-two formula. -/
+def pullFromThree : CycleQ2AffineDeRhamComplex.complex a x hx ⟶ complex c v hv :=
+  CochainComplex.ofHom (pullDegree φ) (by
+    intro p
+    simp only [CycleQ2AffineDeRhamComplex.complex, complex, CochainComplex.of_d]
+    exact pull_from_three_comm c v hv φ a x hx p)
+
+end CycleQ2SurfaceDeRhamChart
+
+#print axioms CycleQ2SurfaceDeRhamChart.pull
+#print axioms CycleQ2SurfaceDeRhamChart.pullFromThree
+
+end
+
+section
+
+/-!
+# Pullback of the original section rings over the coefficient field
+
+A scheme morphism over a field gives the ordinary algebra map on
+sections for every open in the target and subopen of its preimage.
+These are the maps on functions used to pull the native differential
+forms back to the generic surface.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2RelativeSectionPullback
+
+open AlgebraicGeometry CategoryTheory Opposite TopologicalSpace
+open CycleQ2SmoothRelativeFrames CycleQ2RelativeAffineOverlap
+
+variable {K : Type} [Field K] {X Y : Scheme.{0}}
+  (f : X ⟶ Spec (CommRingCat.of K)) (g : Y ⟶ Spec (CommRingCat.of K))
+  (q : Y ⟶ X) (hq : q ≫ f = g)
+
+def sectionPull (U : X.Opens) (V : Y.Opens) (h : V ≤ q ⁻¹ᵁ U) :
+    letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+    letI : Algebra K Γ(Y, V) := (sectionCoefficients g V).toAlgebra
+    Γ(X, U) →ₐ[K] Γ(Y, V) := by
+  letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  letI : Algebra K Γ(Y, V) := (sectionCoefficients g V).toAlgebra
+  refine { toRingHom := (q.appLE U V h).hom, commutes' := ?_ }
+  intro a
+  unfold sectionCoefficients
+  change (((Scheme.ΓSpecIso _).inv ≫ f.appLE ⊤ U _) ≫ q.appLE U V h) a =
+    ((Scheme.ΓSpecIso _).inv ≫ g.appLE ⊤ V _) a
+  rw [Category.assoc, Scheme.Hom.appLE_comp_appLE, hq]
+
+theorem sectionPull_restrict_source {U : X.Opens} {V W : Y.Opens}
+    (h : V ≤ q ⁻¹ᵁ U) (j : W ≤ V) :
+    letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+    letI : Algebra K Γ(Y, V) := (sectionCoefficients g V).toAlgebra
+    letI : Algebra K Γ(Y, W) := (sectionCoefficients g W).toAlgebra
+    (restrict g j).comp (sectionPull f g q hq U V h) =
+      sectionPull f g q hq U W (j.trans h) := by
+  letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  letI : Algebra K Γ(Y, V) := (sectionCoefficients g V).toAlgebra
+  letI : Algebra K Γ(Y, W) := (sectionCoefficients g W).toAlgebra
+  apply AlgHom.ext
+  intro a
+  exact congrArg (fun z : Γ(X,U) ⟶ Γ(Y,W) => z a) (q.appLE_map h (homOfLE j).op)
+
+theorem sectionPull_restrict_target {U U' : X.Opens} {V : Y.Opens}
+    (h : V ≤ q ⁻¹ᵁ U') (j : U' ≤ U) :
+    letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+    letI : Algebra K Γ(X, U') := (sectionCoefficients f U').toAlgebra
+    letI : Algebra K Γ(Y, V) := (sectionCoefficients g V).toAlgebra
+    (sectionPull f g q hq U' V h).comp (restrict f j) =
+      sectionPull f g q hq U V (h.trans ((Opens.map q.base).map (homOfLE j)).le) := by
+  letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  letI : Algebra K Γ(X, U') := (sectionCoefficients f U').toAlgebra
+  letI : Algebra K Γ(Y, V) := (sectionCoefficients g V).toAlgebra
+  apply AlgHom.ext
+  intro a
+  exact congrArg (fun z : Γ(X,U) ⟶ Γ(Y,V) => z a) (q.map_appLE h (homOfLE j).op)
+
+end CycleQ2RelativeSectionPullback
+
+#print axioms CycleQ2RelativeSectionPullback.sectionPull_restrict_source
+#print axioms CycleQ2RelativeSectionPullback.sectionPull_restrict_target
+
+end
+
+section
+
+/-!
+# The actual de Rham complex on a smooth generic surface
+
+The rank-two framed affine site has ordinary functions and Kähler
+forms with their original restriction maps. Coordinates in the frame
+of a target open glue as ordinary functions. The dense-site comparison
+extends this complex to the actual surface.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2SurfaceFramedAffineSite
+
+open AlgebraicGeometry CategoryTheory Opposite TopologicalSpace Module KaehlerDifferential
+open CycleQ2SmoothRelativeFrames CycleQ2FiniteExactAffineAtlas CycleQ2RelativeAffineOverlap
+open CycleQ2AffineDeRhamFunctorial
+open CycleQ2FramedAffineSite (restrict_id restrict_comp)
+
+variable {K : Type} [Field K] [CharZero K] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of K))
+
+abbrev FramedOpen := {U : X.Opens // IsAffineOpen U ∧ HasFrame f 2 U}
+
+def inclusion : FramedOpen f ⥤ X.Opens where
+  obj U := U.1
+  map g := homOfLE g.le
+
+instance : (inclusion f).Full where
+  map_surjective g := ⟨homOfLE g.le, Subsingleton.elim _ _⟩
+
+instance : (inclusion f).Faithful where
+  map_injective := fun _ => Subsingleton.elim _ _
+
+theorem cover_dense [SmoothOfRelativeDimension 2 f] :
+    (inclusion f).IsCoverDense (Opens.grothendieckTopology X) := by
+  apply (TopCat.Opens.coverDense_iff_isBasis _).mpr
+  have h : Set.range (inclusion f).obj = {U : X.Opens | IsAffineOpen U ∧ HasFrame f 2 U} := by
+    ext U
+    constructor
+    · rintro ⟨⟨W,hW⟩,rfl⟩
+      exact hW
+    · intro hU
+      exact ⟨⟨U,hU⟩,rfl⟩
+  rw [h]
+  exact CycleQ2FiniteExactAffineAtlas.isBasis f 2
+
+def functions (U : FramedOpen f) : Fin 2 → Γ(X, U.1) := U.2.2.choose
+
+def frame (U : FramedOpen f) :
+    letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+    Basis (Fin 2) Γ(X, U.1) Ω[Γ(X,U.1)⁄K] :=
+  U.2.2.choose_spec.choose
+
+theorem frame_apply (U : FramedOpen f) :
+    letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+    ∀ i, frame f U i = KaehlerDifferential.D K Γ(X, U.1) (functions f U i) :=
+  U.2.2.choose_spec.choose_spec
+
+abbrev chartComplex (U : FramedOpen f) : CochainComplex AddCommGrpCat.{0} ℕ :=
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  CycleQ2SurfaceDeRhamChart.complex (frame f U) (functions f U) (frame_apply f U)
+
+def restriction {U V : FramedOpen f} (h : V ⟶ U) : chartComplex f U ⟶ chartComplex f V :=
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  CycleQ2SurfaceDeRhamChart.pull (frame f U) (functions f U) (frame_apply f U)
+    (frame f V) (functions f V) (frame_apply f V) (restrict f (show V.1 ≤ U.1 from h.le))
+
+theorem restrict_id (U : X.Opens) :
+    letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+    restrict f (le_rfl : U ≤ U) = AlgHom.id K Γ(X, U) := by
+  letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  ext a
+  change (X.presheaf.map (homOfLE (le_rfl : U ≤ U)).op) a = a
+  have h : (homOfLE (le_rfl : U ≤ U)).op = 𝟙 (op U) := Subsingleton.elim _ _
+  rw [h, CategoryTheory.Functor.map_id X.presheaf (op U)]
+  rfl
+
+theorem restrict_comp {U V W : X.Opens} (h : V ≤ U) (k : W ≤ V) :
+    letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+    letI : Algebra K Γ(X, V) := (sectionCoefficients f V).toAlgebra
+    letI : Algebra K Γ(X, W) := (sectionCoefficients f W).toAlgebra
+    restrict f (k.trans h) = (restrict f k).comp (restrict f h) := by
+  letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  letI : Algebra K Γ(X, V) := (sectionCoefficients f V).toAlgebra
+  letI : Algebra K Γ(X, W) := (sectionCoefficients f W).toAlgebra
+  ext a
+  change (X.presheaf.map (homOfLE (k.trans h)).op) a =
+    ((X.presheaf.map (homOfLE h).op) ≫ (X.presheaf.map (homOfLE k).op)) a
+  rw [← Functor.map_comp]
+  exact congrArg (fun x => (X.presheaf.map x) a) (Subsingleton.elim _ _)
+
+def deRham : (FramedOpen f)ᵒᵖ ⥤ CochainComplex AddCommGrpCat.{0} ℕ where
+  obj U := chartComplex f U.unop
+  map h := restriction f h.unop
+  map_id U := by
+    letI : Algebra K Γ(X, U.unop.1) := (sectionCoefficients f U.unop.1).toAlgebra
+    have h := restrict_id f U.unop.1
+    apply HomologicalComplex.hom_ext
+    intro p
+    change CycleQ2AffineDeRhamComplex.pullDegree (restrict f (show U.unop.1 ≤ U.unop.1 from le_rfl)) p = _
+    rw [h]
+    exact pullDegree_id p
+  map_comp {U V W} h k := by
+    letI : Algebra K Γ(X, U.unop.1) := (sectionCoefficients f U.unop.1).toAlgebra
+    letI : Algebra K Γ(X, V.unop.1) := (sectionCoefficients f V.unop.1).toAlgebra
+    letI : Algebra K Γ(X, W.unop.1) := (sectionCoefficients f W.unop.1).toAlgebra
+    have e := restrict_comp f (show V.unop.1 ≤ U.unop.1 from h.unop.le)
+      (show W.unop.1 ≤ V.unop.1 from k.unop.le)
+    apply HomologicalComplex.hom_ext
+    intro p
+    change CycleQ2AffineDeRhamComplex.pullDegree (restrict f (k.unop.le.trans h.unop.le)) p =
+      CycleQ2AffineDeRhamComplex.pullDegree (restrict f h.unop.le) p ≫
+        CycleQ2AffineDeRhamComplex.pullDegree (restrict f k.unop.le) p
+    rw [e]
+    exact pullDegree_comp _ _ p
+
+def forms (p : ℕ) : (FramedOpen f)ᵒᵖ ⥤ AddCommGrpCat.{0} :=
+  deRham f ⋙ HomologicalComplex.eval _ _ p
+
+def exterior (p : ℕ) : forms f p ⟶ forms f (p+1) where
+  app U := ((deRham f).obj U).d p (p+1)
+  naturality U V h := by
+    exact ((deRham f).map h).comm p (p+1)
+
+theorem exterior_square (p : ℕ) :
+    exterior f p ≫ exterior f (p+1) = 0 := by
+  apply NatTrans.ext
+  funext U
+  exact ((deRham f).obj U).d_comp_d _ _ _
+
+end CycleQ2SurfaceFramedAffineSite
+
+namespace CycleQ2SurfaceFramedAffineCoordinates
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite Module
+open CycleQ2FiniteExactAffineAtlas CycleQ2SmoothRelativeFrames CycleQ2RelativeAffineOverlap
+open CycleQ2SurfaceFramedAffineSite CycleQ2ExactFrameThreeDeRham CycleQ2WeightedCoordinateExterior
+open CycleQ2FramedAffineCoordinates (coefficients_natural)
+
+section Algebra
+
+variable {A B I M N : Type} [CommRing A] [CommRing B] [Fintype I]
+  [AddCommGroup M] [AddCommGroup N] [Module A M] [Module B N]
+
+theorem exteriorBasis_natural (φ : A →+* B) (r : M →ₛₗ[φ] N)
+    (b : Basis (Fin 2) A M) (c : Basis (Fin 2) B N)
+    (hr : ∀ i, r (b i) = c i) (p : ℕ) (i : Set.powersetCard (Fin 2) p) :
+    CycleQ2GeometricExteriorSheaf.exteriorMap φ r p (b.exteriorPower p i) =
+      c.exteriorPower p i := by
+  rw [exteriorPower.basis_apply, exteriorPower.basis_apply]
+  unfold exteriorPower.ιMulti_family
+  rw [CycleQ2GeometricExteriorSheaf.exteriorMap_wedge]
+  congr 1
+  funext j
+  exact hr _
+
+end Algebra
+
+variable {K : Type} [Field K] [CharZero K] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of K))
+variable {U V W : FramedOpen f}
+
+def transported (a : V ⟶ U) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    Basis (Fin 2) Γ(X, V.1) Ω[Γ(X,V.1)⁄K] :=
+  (exact_on_affine_subopen f a.le U.2.1 V.2.1 (functions f U) (frame f U) (frame_apply f U)).choose
+
+theorem transported_apply (a : V ⟶ U) (i : Fin 2) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    transported f a i = KaehlerDifferential.D K Γ(X, V.1) (restrict f a.le (functions f U i)) :=
+  (exact_on_affine_subopen f a.le U.2.1 V.2.1 (functions f U) (frame f U) (frame_apply f U)).choose_spec i
+
+theorem transported_natural (a : V ⟶ U) (g : W ⟶ V) (i : Fin 2) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+    onePullback (restrict f g.le) (transported f a i) = transported f (g ≫ a) i := by
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+  rw [transported_apply, onePullback_d, transported_apply]
+  apply congrArg (KaehlerDifferential.D K Γ(X,W.1))
+  exact (DFunLike.congr_fun (CycleQ2FramedAffineSite.restrict_comp f a.le g.le) (functions f U i)).symm
+
+theorem oneCoordinates_natural (a : V ⟶ U) (g : W ⟶ V) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+    ∀ (ω : Ω[Γ(X,V.1)⁄K]) (i : Fin 2),
+      ((transported f (g ≫ a)).equivFun (onePullback (restrict f g.le) ω)) i =
+        restrict f g.le ((transported f a).equivFun ω i) := by
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+  intro ω i
+  exact coefficients_natural _ _ _ _ (transported_natural f a g) ω i
+
+theorem exteriorCoordinates_natural (a : V ⟶ U) (g : W ⟶ V) (p : ℕ) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+    ∀ (ω : Form K Γ(X,V.1) p) (i : Set.powersetCard (Fin 2) p),
+      ((transported f (g ≫ a)).exteriorPower p).equivFun (exteriorPullback (restrict f g.le) p ω) i =
+        restrict f g.le (((transported f a).exteriorPower p).equivFun ω i) := by
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+  intro ω i
+  classical
+  exact coefficients_natural _ _ _ _ (exteriorBasis_natural _ _ _ _ (transported_natural f a g) p) ω i
+
+end CycleQ2SurfaceFramedAffineCoordinates
+
+namespace CycleQ2SurfaceDeRhamSheaves
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite AlgebraicGeometry Module
+open CycleQ2SurfaceFramedAffineSite CycleQ2SurfaceFramedAffineCoordinates CycleQ2SmoothRelativeFrames
+open CycleQ2RelativeAffineOverlap CycleQ2WeightedCoordinateExterior
+
+variable {K : Type} [Field K] [CharZero K] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of K))
+
+abbrev topology := (inclusion f).inducedTopology (Opens.grothendieckTopology X)
+
+private abbrev ringPresheaf : (FramedOpen f)ᵒᵖ ⥤ Type :=
+  (inclusion f).op ⋙ X.presheaf ⋙ forget CommRingCat
+
+private abbrev formsType (p : ℕ) : (FramedOpen f)ᵒᵖ ⥤ Type :=
+  forms f p ⋙ forget AddCommGrpCat
+
+private theorem ring_isSheaf [SmoothOfRelativeDimension 2 f] :
+    Presheaf.IsSheaf (topology f) (ringPresheaf f) := by
+  have : (inclusion f).IsCoverDense (Opens.grothendieckTopology X) := cover_dense f
+  have h : Presheaf.IsSheaf (topology f) ((inclusion f).op ⋙ X.presheaf) :=
+    Functor.op_comp_isSheaf _ _ _ X.sheaf
+  exact Presheaf.isSheaf_comp_of_isSheaf _ ((inclusion f).op ⋙ X.presheaf) (forget CommRingCat) h
+
+private def functionCoordinates (V : FramedOpen f) :
+    (formsType f 0).obj (op V) ≃ (Unit → (ringPresheaf f).obj (op V)) :=
+  { toFun := fun x _ => x
+    invFun := fun y => y ()
+    left_inv := fun _ => rfl
+    right_inv := fun _ => funext fun i => by cases i; rfl }
+
+private def oneCoordinates {U V : FramedOpen f} (a : V ⟶ U) :
+    (formsType f 1).obj (op V) ≃ (Fin 2 → (ringPresheaf f).obj (op V)) :=
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  (transported f a).equivFun.toEquiv
+
+private def twoCoordinates {U V : FramedOpen f} (a : V ⟶ U) :
+    (formsType f 2).obj (op V) ≃ (Set.powersetCard (Fin 2) 2 → (ringPresheaf f).obj (op V)) := by
+  classical
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  exact ((transported f a).exteriorPower 2).equivFun.toEquiv
+
+private def threeCoordinates {U V : FramedOpen f} (a : V ⟶ U) :
+    (formsType f 3).obj (op V) ≃ (Set.powersetCard (Fin 2) 3 → (ringPresheaf f).obj (op V)) := by
+  classical
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  exact ((transported f a).exteriorPower 3).equivFun.toEquiv
+
+private def trivialCoordinates (V : FramedOpen f) (p : ℕ) :
+    (formsType f (p+4)).obj (op V) ≃ (Empty → (ringPresheaf f).obj (op V)) :=
+  { toFun := fun _ i => i.elim
+    invFun := fun _ => PUnit.unit
+    left_inv := fun x => by change PUnit.unit = (x : PUnit); cases x; rfl
+    right_inv := fun _ => funext fun i => i.elim }
+
+private theorem formsType_isSheaf [SmoothOfRelativeDimension 2 f] (p : ℕ) :
+    Presheaf.IsSheaf (topology f) (formsType f p) := by
+  apply (isSheaf_iff_isSheaf_of_type _ _).mpr
+  intro U S hS
+  have h := (ring_isSheaf f).isSheafFor S hS
+  cases p with
+  | zero =>
+    exact CycleQ2SheafForLocalCoordinates.isSheafFor (fun {V} _ => functionCoordinates f V)
+      (fun a g x i => rfl) h
+  | succ p =>
+    cases p with
+    | zero =>
+      exact CycleQ2SheafForLocalCoordinates.isSheafFor (oneCoordinates f)
+        (fun a g x i => oneCoordinates_natural f a g x i) h
+    | succ p =>
+      cases p with
+      | zero =>
+        exact CycleQ2SheafForLocalCoordinates.isSheafFor (twoCoordinates f)
+          (fun a g x i => exteriorCoordinates_natural f a g 2 x i) h
+      | succ p =>
+        cases p with
+        | zero =>
+          exact CycleQ2SheafForLocalCoordinates.isSheafFor (threeCoordinates f)
+            (fun a g x i => exteriorCoordinates_natural f a g 3 x i) h
+        | succ p =>
+          exact CycleQ2SheafForLocalCoordinates.isSheafFor (fun {V} _ => trivialCoordinates f V p)
+            (fun a g x i => i.elim) h
+
+theorem forms_isSheaf [SmoothOfRelativeDimension 2 f] (p : ℕ) :
+    Presheaf.IsSheaf (topology f) (forms f p) :=
+  (Presheaf.isSheaf_iff_isSheaf_forget _ _ (forget AddCommGrpCat)).mpr (formsType_isSheaf f p)
+
+def basisForms [SmoothOfRelativeDimension 2 f] (p : ℕ) : Sheaf (topology f) AddCommGrpCat :=
+  ⟨forms f p, forms_isSheaf f p⟩
+
+def basisDifferential [SmoothOfRelativeDimension 2 f] (p : ℕ) :
+    basisForms f p ⟶ basisForms f (p+1) :=
+  ⟨exterior f p⟩
+
+def compare [SmoothOfRelativeDimension 2 f] :
+    Sheaf (topology f) AddCommGrpCat.{0} ≌ TopCat.Sheaf AddCommGrpCat.{0} X := by
+  have : (inclusion f).IsCoverDense (Opens.grothendieckTopology X) := cover_dense f
+  exact (inclusion f).sheafInducedTopologyEquivOfIsCoverDense _ _
+
+/-- The actual additive sheaves on the original Zariski opens. -/
+abbrev sheafForms [SmoothOfRelativeDimension 2 f] (p : ℕ) : TopCat.Sheaf AddCommGrpCat.{0} X :=
+  (compare f).functor.obj (basisForms f p)
+
+def differential [SmoothOfRelativeDimension 2 f] (p : ℕ) : sheafForms f p ⟶ sheafForms f (p+1) :=
+  (compare f).functor.map (basisDifferential f p)
+
+theorem differential_square [SmoothOfRelativeDimension 2 f] (p : ℕ) :
+    differential f p ≫ differential f (p+1) = 0 := by
+  unfold differential
+  rw [← Functor.map_comp]
+  have h : basisDifferential f p ≫ basisDifferential f (p+1) = 0 := by
+    apply (sheafToPresheaf (topology f) AddCommGrpCat).map_injective
+    exact exterior_square f p
+  letI : (compare f).functor.Full := (compare f).fullyFaithfulFunctor.full
+  rw [h, CategoryTheory.Functor.map_zero]
+
+def relativeDeRham [SmoothOfRelativeDimension 2 f] :
+    CochainComplex (TopCat.Sheaf AddCommGrpCat.{0} X) ℕ :=
+  CochainComplex.of (sheafForms f) (differential f) (differential_square f)
+
+/-- The relative forms on every original basis open are the ordinary forms
+over its actual function ring, compatibly with all restrictions. -/
+def onBasisIso [SmoothOfRelativeDimension 2 f] (p : ℕ) :
+    (inclusion f).op ⋙ (sheafForms f p).obj ≅ forms f p :=
+  (sheafToPresheaf (topology f) AddCommGrpCat).mapIso
+    (((compare f).unitIso.app (basisForms f p)).symm)
+
+theorem onBasisIso_d [SmoothOfRelativeDimension 2 f] (p : ℕ) (U : FramedOpen f) :
+    (differential f p).hom.app (op U.1) ≫ (onBasisIso f (p+1)).hom.app (op U) =
+      (onBasisIso f p).hom.app (op U) ≫ (exterior f p).app (op U) :=
+  congrArg (fun k => k.hom.app (op U)) ((compare f).unitIso.inv.naturality (basisDifferential f p))
+
+/-- The same native relative complex in integer degrees for the derived category. -/
+def relativeDeRhamInt [SmoothOfRelativeDimension 2 f] :
+    CochainComplex (TopCat.Sheaf AddCommGrpCat.{0} X) ℤ :=
+  (relativeDeRham f).extend (ComplexShape.embeddingUpIntGE 0)
+
+end CycleQ2SurfaceDeRhamSheaves
+
+#print axioms CycleQ2SurfaceDeRhamSheaves.forms_isSheaf
+#print axioms CycleQ2SurfaceDeRhamSheaves.relativeDeRham
+
+end
+
+section
+
+/-!
+# Presheaves of ordinary forms and pullback on every open
+
+The relative functions and exterior forms on the original section
+rings give additive presheaves. Every map over the coefficient field
+gives a natural pullback into the direct image of these presheaves.
+Their restrictions to the exact affine bases are the ordinary terms
+used in the actual relative de Rham complexes.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2RawRelativeForms
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2SmoothRelativeFrames CycleQ2RelativeAffineOverlap
+open CycleQ2AffineDeRhamComplex CycleQ2AffineDeRhamFunctorial
+open CycleQ2FramedAffineSite (restrict_id restrict_comp)
+open CycleQ2RelativeSectionPullback
+
+variable {K : Type} [Field K] {X Y : Scheme.{0}}
+  (f : X ⟶ Spec (CommRingCat.of K)) (g : Y ⟶ Spec (CommRingCat.of K))
+
+def forms (p : ℕ) : X.Opensᵒᵖ ⥤ AddCommGrpCat.{0} where
+  obj W :=
+    letI : Algebra K Γ(X, W.unop) := (sectionCoefficients f W.unop).toAlgebra
+    degree K Γ(X, W.unop) p
+  map {U V} h :=
+    letI : Algebra K Γ(X, U.unop) := (sectionCoefficients f U.unop).toAlgebra
+    letI : Algebra K Γ(X, V.unop) := (sectionCoefficients f V.unop).toAlgebra
+    pullDegree (restrict f h.unop.le) p
+  map_id U := by
+    letI : Algebra K Γ(X, U.unop) := (sectionCoefficients f U.unop).toAlgebra
+    change pullDegree (restrict f (le_rfl : U.unop ≤ U.unop)) p = _
+    rw [restrict_id]
+    exact pullDegree_id p
+  map_comp {U V W} h k := by
+    letI : Algebra K Γ(X, U.unop) := (sectionCoefficients f U.unop).toAlgebra
+    letI : Algebra K Γ(X, V.unop) := (sectionCoefficients f V.unop).toAlgebra
+    letI : Algebra K Γ(X, W.unop) := (sectionCoefficients f W.unop).toAlgebra
+    change pullDegree (restrict f (k.unop.le.trans h.unop.le)) p =
+      pullDegree (restrict f h.unop.le) p ≫ pullDegree (restrict f k.unop.le) p
+    rw [restrict_comp]
+    exact pullDegree_comp _ _ p
+
+variable (q : Y ⟶ X) (hq : q ≫ f = g)
+
+abbrev directImage (P : Y.Opensᵒᵖ ⥤ AddCommGrpCat.{0}) : X.Opensᵒᵖ ⥤ AddCommGrpCat.{0} :=
+  (Opens.map q.base).op ⋙ P
+
+def pullToSubopen (p : ℕ) (U : X.Opens) (V : Y.Opens) (h : V ≤ q ⁻¹ᵁ U) :
+    (forms f p).obj (op U) ⟶ (forms g p).obj (op V) :=
+  letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  letI : Algebra K Γ(Y, V) := (sectionCoefficients g V).toAlgebra
+  pullDegree (sectionPull f g q hq U V h) p
+
+@[reassoc]
+theorem pullToSubopen_restrict_source (p : ℕ) {U : X.Opens} {V W : Y.Opens}
+    (h : V ≤ q ⁻¹ᵁ U) (j : W ≤ V) :
+    pullToSubopen f g q hq p U V h ≫ (forms g p).map (homOfLE j).op =
+      pullToSubopen f g q hq p U W (j.trans h) := by
+  letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  letI : Algebra K Γ(Y, V) := (sectionCoefficients g V).toAlgebra
+  letI : Algebra K Γ(Y, W) := (sectionCoefficients g W).toAlgebra
+  change pullDegree (sectionPull f g q hq U V h) p ≫ pullDegree (restrict g j) p =
+    pullDegree (sectionPull f g q hq U W (j.trans h)) p
+  rw [← pullDegree_comp, sectionPull_restrict_source]
+
+@[reassoc]
+theorem pullToSubopen_restrict_target (p : ℕ) {U U' : X.Opens} {V : Y.Opens}
+    (h : V ≤ q ⁻¹ᵁ U') (j : U' ≤ U) :
+    (forms f p).map (homOfLE j).op ≫ pullToSubopen f g q hq p U' V h =
+      pullToSubopen f g q hq p U V (h.trans ((Opens.map q.base).map (homOfLE j)).le) := by
+  letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  letI : Algebra K Γ(X, U') := (sectionCoefficients f U').toAlgebra
+  letI : Algebra K Γ(Y, V) := (sectionCoefficients g V).toAlgebra
+  change pullDegree (restrict f j) p ≫ pullDegree (sectionPull f g q hq U' V h) p =
+    pullDegree (sectionPull f g q hq U V (h.trans ((Opens.map q.base).map (homOfLE j)).le)) p
+  rw [← pullDegree_comp, sectionPull_restrict_target]
+
+def pull (p : ℕ) : forms f p ⟶ directImage q (forms g p) where
+  app U := pullToSubopen f g q hq p U.unop (q ⁻¹ᵁ U.unop) le_rfl
+  naturality U V i := by
+    have h₁ : i = (homOfLE i.unop.le).op := Subsingleton.elim _ _
+    have h₂ : ((Opens.map q.base).op.map i) =
+        (homOfLE (((Opens.map q.base).map (homOfLE i.unop.le)).le)).op := Subsingleton.elim _ _
+    change (forms f p).map i ≫ pullToSubopen f g q hq p V.unop (q ⁻¹ᵁ V.unop) le_rfl =
+      pullToSubopen f g q hq p U.unop (q ⁻¹ᵁ U.unop) le_rfl ≫
+        (forms g p).map ((Opens.map q.base).op.map i)
+    rw [h₂, pullToSubopen_restrict_source]
+    rw [h₁]
+    exact pullToSubopen_restrict_target f g q hq p le_rfl i.unop.le
+
+end CycleQ2RawRelativeForms
+
+#print axioms CycleQ2RawRelativeForms.pull
+
+end
+
+section
+
+/-!
+# Pullback of the actual de Rham sheaves to a smooth surface
+
+The ordinary maps of forms on pairs of affine charts determine a map
+into the actual direct image. Dense comparison is used twice, first
+to attach regular forms on the preimage open to the surface sheaf,
+then to extend the result across the ambient scheme.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2SurfacePullbackSheaves
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CategoryTheory.Functor (whiskerLeft)
+open CycleQ2RawRelativeForms
+open CycleQ2ClosedEmbeddingSheafExact (push)
+open CycleQ2RelativeDeRhamSheaves (sheafForms onBasisIso)
+open CycleQ2FramedAffineSite (FramedOpen inclusion)
+
+variable {K : Type} [Field K] [CharZero K] {X Y : Scheme.{0}}
+  (f : X ⟶ Spec (CommRingCat.of K)) (g : Y ⟶ Spec (CommRingCat.of K))
+  [SmoothOfRelativeDimension 3 f] [SmoothOfRelativeDimension 2 g]
+
+local instance sourceDense :
+    (CycleQ2SurfaceFramedAffineSite.inclusion g).IsCoverDense (Opens.grothendieckTopology Y) :=
+  CycleQ2SurfaceFramedAffineSite.cover_dense g
+
+local instance targetDense : (inclusion f).IsCoverDense (Opens.grothendieckTopology X) :=
+  CycleQ2FramedAffineSite.cover_dense f
+
+/-- Map the ordinary presheaf into the actual surface differential sheaf. -/
+def toSurface (p : ℕ) : forms g p ⟶ (CycleQ2SurfaceDeRhamSheaves.sheafForms g p).obj :=
+  Functor.IsCoverDense.sheafHom (G := CycleQ2SurfaceFramedAffineSite.inclusion g)
+    (K := Opens.grothendieckTopology Y) (ℱ := forms g p) (ℱ' := CycleQ2SurfaceDeRhamSheaves.sheafForms g p)
+    (CycleQ2SurfaceDeRhamSheaves.onBasisIso g p).inv
+
+theorem toSurface_on_basis (p : ℕ) (V : CycleQ2SurfaceFramedAffineSite.FramedOpen g) :
+    (toSurface g p).app (op V.1) = (CycleQ2SurfaceDeRhamSheaves.onBasisIso g p).inv.app (op V) := by
+  have e := Functor.IsCoverDense.sheafHom_restrict_eq
+    (G := CycleQ2SurfaceFramedAffineSite.inclusion g) (K := Opens.grothendieckTopology Y) (ℱ := forms g p)
+    (ℱ' := CycleQ2SurfaceDeRhamSheaves.sheafForms g p)
+    (CycleQ2SurfaceDeRhamSheaves.onBasisIso g p).inv
+  exact NatTrans.congr_app e (op V)
+
+variable (q : Y ⟶ X) (hq : q ≫ f = g)
+
+abbrev target (p : ℕ) := (push q.base).obj (CycleQ2SurfaceDeRhamSheaves.sheafForms g p)
+
+def onAmbientBasis (p : ℕ) :
+    (inclusion f).op ⋙ (sheafForms f p).obj ⟶ (inclusion f).op ⋙ (target g q p).obj :=
+  (onBasisIso f p).hom ≫ whiskerLeft (inclusion f).op
+    (CycleQ2RawRelativeForms.pull f g q hq p ≫ whiskerLeft (Opens.map q.base).op (toSurface g p))
+
+def pullbackSheaf (p : ℕ) : sheafForms f p ⟶ target g q p :=
+  ⟨Functor.IsCoverDense.sheafHom (G := inclusion f) (K := Opens.grothendieckTopology X)
+    (ℱ' := target g q p) (onAmbientBasis f g q hq p)⟩
+
+theorem pullbackSheaf_on_ambient_basis (p : ℕ) (U : FramedOpen f) :
+    (pullbackSheaf f g q hq p).hom.app (op U.1) = (onAmbientBasis f g q hq p).app (op U) := by
+  have e := Functor.IsCoverDense.sheafHom_restrict_eq
+    (G := inclusion f) (K := Opens.grothendieckTopology X) (ℱ' := target g q p)
+    (onAmbientBasis f g q hq p)
+  exact NatTrans.congr_app e (op U)
+
+set_option backward.isDefEq.respectTransparency false in
+set_option backward.isDefEq.respectTransparency.types false in
+@[reassoc]
+theorem pullbackSheaf_on_charts (p : ℕ) (U : FramedOpen f)
+    (V : CycleQ2SurfaceFramedAffineSite.FramedOpen g) (h : V.1 ≤ q ⁻¹ᵁ U.1) :
+    (pullbackSheaf f g q hq p).hom.app (op U.1) ≫
+      (CycleQ2SurfaceDeRhamSheaves.sheafForms g p).obj.map (homOfLE h).op ≫
+      (CycleQ2SurfaceDeRhamSheaves.onBasisIso g p).hom.app (op V) =
+    (onBasisIso f p).hom.app (op U) ≫ pullToSubopen f g q hq p U.1 V.1 h := by
+  rw [pullbackSheaf_on_ambient_basis]
+  change ((onBasisIso f p).hom.app (op U) ≫
+       (pullToSubopen f g q hq p U.1 (q ⁻¹ᵁ U.1) le_rfl ≫
+         (toSurface g p).app (op (q ⁻¹ᵁ U.1)))) ≫ _ ≫ _ = _
+  simp only [Category.assoc]
+  have e := (toSurface g p).naturality (homOfLE h).op
+  change (forms g p).map (homOfLE h).op ≫ (toSurface g p).app (op V.1) =
+    (toSurface g p).app (op (q ⁻¹ᵁ U.1)) ≫
+      (CycleQ2SurfaceDeRhamSheaves.sheafForms g p).obj.map (homOfLE h).op at e
+  rw [← Category.assoc ((toSurface g p).app _), ← e, Category.assoc, pullToSubopen_restrict_source_assoc, toSurface_on_basis,
+    Iso.inv_hom_id_app]
+  let a := (onBasisIso f p).hom.app (op U)
+  let b := pullToSubopen f g q hq p U.1 V.1 h
+  exact congrArg (fun c => a ≫ c) (Category.comp_id b)
+
+end CycleQ2SurfacePullbackSheaves
+
+#print axioms CycleQ2SurfacePullbackSheaves.pullbackSheaf_on_charts
+
+end
+
+section
+
+/-!
+# The actual de Rham pullback as a morphism of complexes
+
+Commutation with every differential is checked on the two dense
+affine bases. The termwise maps therefore give one cochain morphism
+on the original schemes.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2SurfacePullbackComplex
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CategoryTheory.Functor (whiskerLeft)
+open CycleQ2ClosedEmbeddingSheafExact (push)
+open CycleQ2SurfacePullbackSheaves (pullbackSheaf pullbackSheaf_on_charts)
+open CycleQ2RelativeDeRhamSheaves (sheafForms onBasisIso onBasisIso_d differential relativeDeRham)
+open CycleQ2FramedAffineSite (FramedOpen inclusion exterior)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeSectionPullback (sectionPull)
+open CycleQ2RawRelativeForms (pullToSubopen)
+
+variable {K : Type} [Field K] [CharZero K] {X Y : Scheme.{0}}
+  (f : X ⟶ Spec (CommRingCat.of K)) (g : Y ⟶ Spec (CommRingCat.of K))
+  [SmoothOfRelativeDimension 3 f] [SmoothOfRelativeDimension 2 g]
+  (q : Y ⟶ X) (hq : q ≫ f = g)
+
+local instance sourceDense :
+    (CycleQ2SurfaceFramedAffineSite.inclusion g).IsCoverDense (Opens.grothendieckTopology Y) :=
+  CycleQ2SurfaceFramedAffineSite.cover_dense g
+
+local instance targetDense : (inclusion f).IsCoverDense (Opens.grothendieckTopology X) :=
+  CycleQ2FramedAffineSite.cover_dense f
+
+private theorem chart_square (p : ℕ) (U : FramedOpen f)
+    (V : CycleQ2SurfaceFramedAffineSite.FramedOpen g) (h : V.1 ≤ q ⁻¹ᵁ U.1) :
+    pullToSubopen f g q hq p U.1 V.1 h ≫ (CycleQ2SurfaceFramedAffineSite.exterior g p).app (op V) =
+      (exterior f p).app (op U) ≫ pullToSubopen f g q hq (p+1) U.1 V.1 h := by
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  letI : Algebra K Γ(Y, V.1) := (sectionCoefficients g V.1).toAlgebra
+  let φ := sectionPull f g q hq U.1 V.1 h
+  let P := CycleQ2SurfaceDeRhamChart.pullFromThree (CycleQ2SurfaceFramedAffineSite.frame g V)
+    (CycleQ2SurfaceFramedAffineSite.functions g V) (CycleQ2SurfaceFramedAffineSite.frame_apply g V)
+    φ (CycleQ2FramedAffineSite.frame f U) (CycleQ2FramedAffineSite.functions f U)
+    (CycleQ2FramedAffineSite.frame_apply f U)
+  exact P.comm p (p+1)
+
+private theorem morphism_on_chart_ext (p : ℕ) (W : Y.Opens) {A : AddCommGrpCat.{0}}
+    {m n : A ⟶ (CycleQ2SurfaceDeRhamSheaves.sheafForms g p).obj.obj (op W)}
+    (h : ∀ (V : CycleQ2SurfaceFramedAffineSite.FramedOpen g) (hV : V.1 ≤ W),
+      m ≫ (CycleQ2SurfaceDeRhamSheaves.sheafForms g p).obj.map (homOfLE hV).op =
+        n ≫ (CycleQ2SurfaceDeRhamSheaves.sheafForms g p).obj.map (homOfLE hV).op) :
+    m = n := by
+  let F := CycleQ2SurfaceDeRhamSheaves.sheafForms g p
+  let E : Sheaf (Opens.grothendieckTopology Y) (Type) :=
+    ⟨F.obj ⋙ forget AddCommGrpCat, Presheaf.isSheaf_comp_of_isSheaf _ F.obj _ F.property⟩
+  ext x
+  change (m x : E.obj.obj (op W)) = n x
+  apply Functor.IsCoverDense.ext (CycleQ2SurfaceFramedAffineSite.inclusion g) E W
+  intro V i
+  exact ConcreteCategory.congr_hom (h V i.le) x
+
+private theorem differential_on_ambient_basis (p : ℕ) (U : FramedOpen f) :
+    (pullbackSheaf f g q hq p).hom.app (op U.1) ≫
+        (CycleQ2SurfaceDeRhamSheaves.differential g p).hom.app (op (q ⁻¹ᵁ U.1)) =
+      (differential f p).hom.app (op U.1) ≫ (pullbackSheaf f g q hq (p+1)).hom.app (op U.1) := by
+  apply morphism_on_chart_ext g (p+1) (q ⁻¹ᵁ U.1)
+  intro V h
+  apply (cancel_mono ((CycleQ2SurfaceDeRhamSheaves.onBasisIso g (p+1)).hom.app (op V))).mp
+  simp only [Category.assoc]
+  rw [← (CycleQ2SurfaceDeRhamSheaves.differential g p).hom.naturality_assoc (homOfLE h).op,
+    CycleQ2SurfaceDeRhamSheaves.onBasisIso_d g p V]
+  simp only [← Category.assoc]
+  rw [Category.assoc ((pullbackSheaf f g q hq p).hom.app _),
+    pullbackSheaf_on_charts, Category.assoc,
+    chart_square f g q hq p U V h,
+    ← Category.assoc, ← onBasisIso_d f p U]
+  simp only [Category.assoc, pullbackSheaf_on_charts]
+
+theorem differential_comm (p : ℕ) :
+    pullbackSheaf f g q hq p ≫ (push q.base).map (CycleQ2SurfaceDeRhamSheaves.differential g p) =
+      differential f p ≫ pullbackSheaf f g q hq (p+1) := by
+  apply Sheaf.hom_ext
+  let E := Functor.IsCoverDense.restrictHomEquivHom
+    (G := inclusion f) (K := Opens.grothendieckTopology X) (ℱ := (sheafForms f p).obj)
+    (ℱ' := (push q.base).obj (CycleQ2SurfaceDeRhamSheaves.sheafForms g (p+1)))
+  apply E.symm.injective
+  apply NatTrans.ext
+  funext U
+  exact differential_on_ambient_basis f g q hq p U.unop
+
+/-- The literal cochain pullback to the direct image of the surface complex. -/
+def pullbackComplex :
+    relativeDeRham f ⟶ ((push q.base).mapHomologicalComplex (.up ℕ)).obj
+      (CycleQ2SurfaceDeRhamSheaves.relativeDeRham g) :=
+  CochainComplex.ofHom (pullbackSheaf f g q hq) (by
+    intro p
+    change pullbackSheaf f g q hq p ≫
+        (push q.base).map ((CycleQ2SurfaceDeRhamSheaves.relativeDeRham g).d p (p+1)) =
+      (relativeDeRham f).d p (p+1) ≫ pullbackSheaf f g q hq (p+1)
+    simp only [relativeDeRham, CycleQ2SurfaceDeRhamSheaves.relativeDeRham, CochainComplex.of_d]
+    exact differential_comm f g q hq p)
+
+end CycleQ2SurfacePullbackComplex
+
+#print axioms CycleQ2SurfacePullbackComplex.pullbackComplex
+
+end
+
+section
+
+/-!
+# Actual derived pullback to the smooth graph open
+
+Pullback of additive sheaves is exact. The adjoint of the relative
+de Rham cochain map gives an actual morphism of integer-graded
+complexes, hence a map on degree-three hypercohomology classes.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+
+namespace CycleQ2SurfacePullbackDerived
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2ClosedEmbeddingSheafExact (push)
+open CycleQ2InjectiveCech (AbSheaf freeOpen freeOpenSections)
+open CycleQ2CechTwoToDerived (app)
+
+attribute [local instance] HasDerivedCategory.standard
+attribute [local instance] reflectsLimits_of_reflectsIsomorphisms
+  preservesBinaryBiproducts_of_preservesBinaryCoproducts
+
+section Inverse
+
+variable {X Y : TopCat.{0}} (j : Y ⟶ X)
+
+abbrev inverse := TopCat.Sheaf.pullback AddCommGrpCat.{0} j
+
+abbrev adjunction : inverse j ⊣ push j := TopCat.Sheaf.pullbackPushforwardAdjunction AddCommGrpCat.{0} j
+
+local instance : PreservesFiniteLimits (inverse j) := by
+  unfold inverse TopCat.Sheaf.pullback
+  exact Functor.sheafPullbackConstruction.preservesFiniteLimits _ _ _ _
+
+local instance : (inverse j).IsLeftAdjoint := (adjunction j).isLeftAdjoint
+
+local instance : (inverse j).Additive := Functor.additive_of_preservesBinaryBiproducts _
+
+variable {ι : Type} {c : ComplexShape ι}
+
+/-- Adjunction on sheaves commutes with the differential equation of a cochain map. -/
+def adjointOnComplex {K : HomologicalComplex (AbSheaf X) c}
+    {L : HomologicalComplex (AbSheaf Y) c}
+    (ψ : K ⟶ ((push j).mapHomologicalComplex c).obj L) :
+    ((inverse j).mapHomologicalComplex c).obj K ⟶ L where
+  f n := ((adjunction j).homEquiv _ _).symm (ψ.f n)
+  comm' i k _ := ((adjunction j).homEquiv_naturality_right_square
+    (K.d i k) (ψ.f k) (ψ.f i) (L.d i k) (ψ.comm i k).symm).symm
+
+private abbrev e := ComplexShape.embeddingUpIntGE 0
+
+private def restrictionIso (K : CochainComplex (AbSheaf X) ℕ) :
+    (K.extend e).restriction e ≅ K :=
+  HomologicalComplex.Hom.isoOfComponents (fun _ => K.extendXIso e rfl) (by
+    intro p r h
+    change (K.extendXIso e rfl).hom ≫ K.d p r =
+      (K.extend e).d (e.f p) (e.f r) ≫ (K.extendXIso e rfl).hom
+    simp only [K.extend_d_eq e rfl rfl, Category.assoc, Iso.inv_hom_id, Category.comp_id])
+
+def adjointOnComplexInt {K : CochainComplex (AbSheaf X) ℕ}
+    {L : CochainComplex (AbSheaf Y) ℕ}
+    (ψ : K ⟶ ((push j).mapHomologicalComplex (.up ℕ)).obj L) :
+    ((inverse j).mapHomologicalComplex (.up ℤ)).obj (K.extend e) ⟶ L.extend e := by
+  let F := inverse j
+  let M := (F.mapHomologicalComplex (.up ℤ)).obj (K.extend e)
+  let φ : M.restriction e ⟶ L :=
+    (F.mapHomologicalComplex (.up ℕ)).map (restrictionIso K).hom ≫ adjointOnComplex j ψ
+  refine e.liftExtend φ ?_
+  intro n hn i hi
+  have hz : IsZero (M.X i) :=
+    F.map_isZero (K.isZero_extend_X e i (fun l hl => hn.notMem hi l hl))
+  exact hz.eq_of_src _ _
+
+/-- The actual derived morphism induced by a pullback cochain map. -/
+def derivedPull {K : CochainComplex (AbSheaf X) ℕ} {L : CochainComplex (AbSheaf Y) ℕ}
+    (ψ : K ⟶ ((push j).mapHomologicalComplex (.up ℕ)).obj L) :
+    (inverse j).mapDerivedCategory.obj (DerivedCategory.Q.obj (K.extend e)) ⟶
+      DerivedCategory.Q.obj (L.extend e) :=
+  (inverse j).mapDerivedCategoryFactors.hom.app (K.extend e) ≫
+    DerivedCategory.Q.map (adjointOnComplexInt j ψ)
+
+/-- The inverse image of the global-section generator receives the
+canonical global-section generator on the source. -/
+def globalSectionsSource :
+    freeOpen (⊤ : Opens Y) ⟶ (inverse j).obj (freeOpen (⊤ : Opens X)) :=
+  (freeOpenSections _ ⊤).symm (app ((adjunction j).unit.app (freeOpen (⊤ : Opens X))) ⊤
+    (freeOpenSections _ ⊤ (𝟙 (freeOpen (⊤ : Opens X)))))
+
+def derivedGlobalPull {K : CochainComplex (AbSheaf X) ℕ} {L : CochainComplex (AbSheaf Y) ℕ}
+    (ψ : K ⟶ ((push j).mapHomologicalComplex (.up ℕ)).obj L) (n : ℤ)
+    (a : (DerivedCategory.singleFunctor (AbSheaf X) n).obj (freeOpen (⊤ : Opens X)) ⟶
+      DerivedCategory.Q.obj (K.extend e)) :
+    (DerivedCategory.singleFunctor (AbSheaf Y) n).obj (freeOpen (⊤ : Opens Y)) ⟶
+      DerivedCategory.Q.obj (L.extend e) :=
+  (DerivedCategory.singleFunctor (AbSheaf Y) n).map (globalSectionsSource j) ≫
+    ((inverse j).mapDerivedCategorySingleFunctor n).inv.app _ ≫
+      (inverse j).mapDerivedCategory.map a ≫ derivedPull j ψ
+
+end Inverse
+
+section Surface
+
+variable {K : Type} [Field K] [CharZero K] {X Y : Scheme.{0}}
+  (f : X ⟶ Spec (CommRingCat.of K)) (g : Y ⟶ Spec (CommRingCat.of K))
+  [SmoothOfRelativeDimension 3 f] [SmoothOfRelativeDimension 2 g]
+  (q : Y ⟶ X) (hq : q ≫ f = g)
+
+/-- Pullback on degree-three derived de Rham classes for the actual map of schemes. -/
+def pullH3
+    (a : (DerivedCategory.singleFunctor (AbSheaf (show TopCat from X)) 3).obj (freeOpen (⊤ : X.Opens)) ⟶
+      DerivedCategory.Q.obj (CycleQ2RelativeDeRhamSheaves.relativeDeRhamInt f)) :
+    (DerivedCategory.singleFunctor (AbSheaf (show TopCat from Y)) 3).obj (freeOpen (⊤ : Y.Opens)) ⟶
+      DerivedCategory.Q.obj (CycleQ2SurfaceDeRhamSheaves.relativeDeRhamInt g) :=
+  derivedGlobalPull q.base (CycleQ2SurfacePullbackComplex.pullbackComplex f g q hq) 3 a
+
+end Surface
+
+end CycleQ2SurfacePullbackDerived
+
+#print axioms CycleQ2SurfacePullbackDerived.pullH3
+
+end
+
+section
+
+/-!
+# Pullback along the original generic surface projection
+
+The smooth generic surface is the actual pullback of the original
+time-family open. The projection to the monic weighted threefold is
+over the same coefficient field, so the constructed derived map
+applies to the original relative complexes.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2GenericSurfaceDerivedPull
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace AlgebraicGeometry Opposite
+open CycleQ2GenericProperGraphOpen
+open CycleQ2LiteralIncidenceGenericCorrespondence
+open CycleQ2NativeWeightedCover (ambientToField)
+open CycleQ2IncidenceEtaleParameter (parameterScheme)
+open CycleQ2InjectiveCech (AbSheaf freeOpen)
+
+attribute [local instance] HasDerivedCategory.standard
+
+variable (V : parameterScheme.Opens) (t : Fin 3 → ℂ)
+
+abbrev projection : GenericSurface V t ⟶ genericAmbient :=
+  graphOpen V t ≫ genericAmbientProjection V t
+
+theorem projection_over : projection V t ≫ ambientToField = genericSurfaceStructure V t := by
+  unfold projection
+  rw [Category.assoc]
+  have h₁ : genericAmbientProjection V t ≫ ambientToField = toGenericField V t := by
+    unfold genericAmbientProjection
+    exact CycleQ2CoefficientBaseChange.changeMap_snd _ _ _
+  rw [h₁]
+  unfold graphOpen
+  exact CycleQ2CoefficientBaseChange.changeMap_snd _ _ _
+
+local instance : SmoothOfRelativeDimension 3 ambientToField :=
+  CycleQ2NativeGenericSmooth.ambient_smooth
+
+/-- The actual pullback from the generic threefold to the smooth graph
+open, defined on the native relative de Rham cochain complexes. -/
+def nativePull (hs : SmoothOfRelativeDimension 2 (surfaceStructure V t)) :
+    letI : SmoothOfRelativeDimension 2 (genericSurfaceStructure V t) := graphOpen_smooth V t hs
+    CycleQ2RelativeDeRhamSheaves.relativeDeRham ambientToField ⟶
+      ((CycleQ2ClosedEmbeddingSheafExact.push (projection V t).base).mapHomologicalComplex
+        (.up ℕ)).obj (CycleQ2SurfaceDeRhamSheaves.relativeDeRham (genericSurfaceStructure V t)) := by
+  exact @CycleQ2SurfacePullbackComplex.pullbackComplex
+    _ _ _ _ _ ambientToField (genericSurfaceStructure V t)
+    CycleQ2NativeGenericSmooth.ambient_smooth (graphOpen_smooth V t hs)
+    (projection V t) (projection_over V t)
+
+/-- The induced pullback of arbitrary actual degree-three classes on the generic fibre. -/
+def nativePullH3 (hs : SmoothOfRelativeDimension 2 (surfaceStructure V t))
+    (a : (DerivedCategory.singleFunctor (AbSheaf (show TopCat from genericAmbient)) 3).obj
+      (freeOpen (⊤ : genericAmbient.Opens)) ⟶ DerivedCategory.Q.obj CycleQ2NativeWeightedDeRham.complex) :
+    letI : SmoothOfRelativeDimension 2 (genericSurfaceStructure V t) := graphOpen_smooth V t hs
+    (DerivedCategory.singleFunctor (AbSheaf (show TopCat from GenericSurface V t)) 3).obj
+      (freeOpen (⊤ : (GenericSurface V t).Opens)) ⟶
+      DerivedCategory.Q.obj (CycleQ2SurfaceDeRhamSheaves.relativeDeRhamInt (genericSurfaceStructure V t)) := by
+  letI : SmoothOfRelativeDimension 2 (genericSurfaceStructure V t) := graphOpen_smooth V t hs
+  exact CycleQ2SurfacePullbackDerived.pullH3 ambientToField (genericSurfaceStructure V t)
+    (projection V t) (projection_over V t) a
+
+end CycleQ2GenericSurfaceDerivedPull
+
+#print axioms CycleQ2GenericSurfaceDerivedPull.nativePull
+#print axioms CycleQ2GenericSurfaceDerivedPull.nativePullH3
 
 end
