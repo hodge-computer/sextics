@@ -27,6 +27,40 @@ import Proposal.GeometricLiteralResidueLocalImage
 import Mathlib.AlgebraicGeometry.Modules.Tilde
 import Proposal.GeometricLiteralDerivedResidue
 import Mathlib.Topology.Sheaves.Abelian
+import Mathlib.Analysis.Complex.Basic
+import Mathlib.RingTheory.NoetherNormalization
+import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+import Mathlib.RingTheory.Polynomial.UniqueFactorization
+import Mathlib.RingTheory.Localization.Finiteness
+import Mathlib.RingTheory.Algebraic.Integral
+import Mathlib.Algebra.Algebra.Pi
+import Mathlib.RingTheory.FiniteType
+import Mathlib.RingTheory.Ideal.MinimalPrime.Localization
+import Mathlib.RingTheory.Ideal.MinimalPrime.Noetherian
+import Mathlib.RingTheory.IntegralClosure.IsIntegralClosure.Basic
+import Mathlib.RingTheory.Noetherian.Basic
+import Mathlib.AlgebraicGeometry.Morphisms.SchemeTheoreticallyDominant
+import Mathlib.AlgebraicGeometry.Noetherian
+import Mathlib.RingTheory.Ideal.AssociatedPrime.Finiteness
+import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
+import Mathlib.AlgebraicGeometry.Morphisms.OpenImmersion
+import Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Mathlib.AlgebraicGeometry.ZariskisMainTheorem
+import Mathlib.AlgebraicGeometry.FunctionField
+import Mathlib.AlgebraicGeometry.ResidueField
+import Mathlib.AlgebraicGeometry.Normalization
+import Mathlib.AlgebraicGeometry.Morphisms.Smooth
+import Mathlib.RingTheory.DedekindDomain.Dvr
+import Mathlib.RingTheory.Finiteness.Quotient
+import Mathlib.RingTheory.Flat.TorsionFree
+import Mathlib.RingTheory.Jacobson.Ring
+import Mathlib.RingTheory.LocalRing.ResidueField.Instances
+import Mathlib.RingTheory.Smooth.Fiber
+import Mathlib.RingTheory.Smooth.Field
+import Mathlib.RingTheory.Unramified.LocalRing
+import Mathlib.AlgebraicGeometry.Morphisms.Proper
+import Mathlib.AlgebraicGeometry.SpreadingOut
+import Mathlib.RingTheory.DedekindDomain.Basic
 
 /-!
 # The proper graph has strict support in the native generic threefold
@@ -2003,6 +2037,1889 @@ theorem protected_exact_of_derived_stalk
 end CycleQ2WeightedDerivedStalkBridge
 
 #print axioms CycleQ2WeightedDerivedStalkBridge.protected_exact_of_derived_stalk
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Finite normalization of complex affine domains
+
+Noether normalization realizes a finite-type complex domain as an algebra
+finite over a polynomial subring. The extension of fraction fields is finite
+and separable, so the integral closure is finite over the polynomial ring.
+The same generators suffice over the original affine domain.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+namespace CycleQ2FiniteTypeNormalization
+
+open scoped nonZeroDivisors
+
+/-- The integral closure of a complex affine domain in any finite extension
+of its fraction field is module-finite. -/
+theorem finiteExtensionNormalizationFinite (A L : Type*) [CommRing A] [IsDomain A]
+    [Algebra ℂ A] [Algebra.FiniteType ℂ A] [Field L] [Algebra A L]
+    [Algebra (FractionRing A) L] [IsScalarTower A (FractionRing A) L]
+    [FiniteDimensional (FractionRing A) L] :
+    Module.Finite A (integralClosure A L) := by
+  obtain ⟨n, g, hinj, hfin⟩ := exists_finite_inj_algHom_of_fg ℂ A
+  let P := MvPolynomial (Fin n) ℂ
+  let K := FractionRing A
+  let N := integralClosure A L
+  let : Algebra P A := g.toRingHom.toAlgebra
+  let : Module.Finite P A := hfin
+  let : FaithfulSMul P A := (faithfulSMul_iff_algebraMap_injective P A).mpr hinj
+  let : FaithfulSMul P K := (faithfulSMul_iff_algebraMap_injective P K).mpr (by
+    rw [IsScalarTower.algebraMap_eq P A K]
+    exact (IsFractionRing.injective A K).comp hinj)
+  let : Algebra (FractionRing P) K := FractionRing.liftAlgebra P K
+  let : FiniteDimensional (FractionRing P) K := Module.Finite.of_isLocalization P A P⁰
+  let : Algebra P L := ((algebraMap A L).comp g.toRingHom).toAlgebra
+  let : IsScalarTower P A L := IsScalarTower.of_algebraMap_eq' (R := P) (S := A) (A := L) rfl
+  let : IsScalarTower P K L := IsScalarTower.to₁₃₄ P A K L
+  let : Algebra (FractionRing P) L :=
+    ((algebraMap K L).comp (algebraMap (FractionRing P) K)).toAlgebra
+  let : IsScalarTower (FractionRing P) K L :=
+    IsScalarTower.of_algebraMap_eq' (R := FractionRing P) (S := K) (A := L) rfl
+  let : IsScalarTower P (FractionRing P) L := IsScalarTower.to₁₂₄ P (FractionRing P) K L
+  let : FiniteDimensional (FractionRing P) L := Module.Finite.trans K L
+  let : Algebra P N := ((algebraMap A N).comp g.toRingHom).toAlgebra
+  let : IsScalarTower P A N := IsScalarTower.of_algebraMap_eq' (R := P) (S := A) (A := N) rfl
+  let : IsScalarTower P N L := IsScalarTower.of_algebraMap_eq' (R := P) (S := N) (A := L) rfl
+  let : IsIntegralClosure N P L := {
+    algebraMap_injective := Subtype.val_injective
+    isIntegral_iff := by
+      intro x
+      exact ⟨fun hx => ⟨⟨x, hx.tower_top⟩, rfl⟩,
+        fun ⟨y, hy⟩ => hy ▸ isIntegral_trans (R := P) (y : L) y.property⟩ }
+  let : Module.Finite P N := IsIntegralClosure.finite P (FractionRing P) L N
+  exact Module.Finite.of_restrictScalars_finite P A N
+
+/-- An affine domain of finite type over the complex field has finite normalization. -/
+theorem domainNormalizationFinite (A : Type*) [CommRing A] [IsDomain A]
+    [Algebra ℂ A] [Algebra.FiniteType ℂ A] :
+    Module.Finite A (integralClosure A (FractionRing A)) :=
+  finiteExtensionNormalizationFinite A (FractionRing A)
+
+end CycleQ2FiniteTypeNormalization
+end
+
+#print axioms CycleQ2FiniteTypeNormalization.finiteExtensionNormalizationFinite
+#print axioms CycleQ2FiniteTypeNormalization.domainNormalizationFinite
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Finiteness of normalization across the minimal primes
+
+The total fraction ring of a reduced ring embeds in the product of the
+fraction fields of its minimal components. Integral elements land in the
+product of the component normalizations. Over a Noetherian ring the finite
+component normalizations thus bound the integral closure of every subalgebra
+of the total fraction ring.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+namespace CycleQ2ReducedNormalizationFinite
+
+open scoped nonZeroDivisors
+
+variable (A : Type*) [CommRing A]
+
+local instance prime (p : minimalPrimes A) : p.1.IsPrime := p.2.isPrime
+
+abbrev ComponentRing (p : minimalPrimes A) := A ⧸ p.1
+abbrev ComponentField (p : minimalPrimes A) := FractionRing (ComponentRing A p)
+
+private theorem component_denominator (p : minimalPrimes A) (s : A⁰) :
+    IsUnit (algebraMap A (ComponentField A p) s) := by
+  apply isUnit_iff_ne_zero.mpr
+  rw [IsScalarTower.algebraMap_apply A (ComponentRing A p) (ComponentField A p)]
+  intro he
+  have he' : Ideal.Quotient.mk p.1 s = 0 :=
+    (IsFractionRing.injective (ComponentRing A p) (ComponentField A p)) (by simpa using he)
+  exact notMem_nonZeroDivisors_of_mem_mem_minimalPrimes
+    (Ideal.Quotient.eq_zero_iff_mem.mp he') p.2 s.2
+
+/-- The component fraction maps extend across all non-zero-divisors. -/
+def fractionComponent (p : minimalPrimes A) : FractionRing A →ₐ[A] ComponentField A p :=
+  IsLocalization.liftAlgHom (f := Algebra.ofId A (ComponentField A p)) (component_denominator A p)
+
+private theorem componentProduct_injective [IsReduced A] :
+    Function.Injective (algebraMap A (∀ p : minimalPrimes A, ComponentField A p)) := by
+  rw [injective_iff_map_eq_zero]
+  intro x hx
+  have hmem : x ∈ sInf (minimalPrimes A) := by
+    apply Ideal.mem_sInf.mpr
+    intro P hP
+    let p : minimalPrimes A := ⟨P, hP⟩
+    have h := congrFun hx p
+    change algebraMap A (ComponentField A p) x = 0 at h
+    rw [IsScalarTower.algebraMap_apply A (ComponentRing A p) (ComponentField A p)] at h
+    apply Ideal.Quotient.eq_zero_iff_mem.mp
+    exact (IsFractionRing.injective (ComponentRing A p) (ComponentField A p)) (by simpa using h)
+  change x ∈ sInf (⊥ : Ideal A).minimalPrimes at hmem
+  rw [Ideal.sInf_minimalPrimes] at hmem
+  change x ∈ nilradical A at hmem
+  rw [nilradical_eq_zero] at hmem
+  exact hmem
+
+/-- The minimal-component maps jointly detect elements of the total ring of fractions. -/
+theorem fractionComponent_injective [IsReduced A] :
+    Function.Injective (AlgHom.pi (fractionComponent A)) := by
+  apply (IsLocalization.injective_iff_map_algebraMap_eq A⁰ (AlgHom.pi (fractionComponent A)).toRingHom).mpr
+  intro x y
+  simp only [AlgHom.toRingHom_eq_coe, RingHom.coe_coe, AlgHom.commutes]
+  rw [(IsFractionRing.injective A (FractionRing A)).eq_iff, (componentProduct_injective A).eq_iff]
+
+variable {A} {B : Type*} [CommRing B] [Algebra A B]
+
+/-- Jointly injective component maps suffice for finiteness of integral closure. -/
+theorem finite_of_component_embeddings [IsNoetherianRing A]
+    (h : ∀ p : minimalPrimes A, Module.Finite (ComponentRing A p)
+      (integralClosure (ComponentRing A p) (ComponentField A p)))
+    (f : ∀ p : minimalPrimes A, B →ₐ[A] ComponentField A p)
+    (hf : Function.Injective (AlgHom.pi f)) : Module.Finite A (integralClosure A B) := by
+  let : Finite (minimalPrimes A) := (minimalPrimes.finite_of_isNoetherianRing A).to_subtype
+  let N (p : minimalPrimes A) := integralClosure (ComponentRing A p) (ComponentField A p)
+  let (p : minimalPrimes A) : Module.Finite A (N p) :=
+    letI := h p
+    Module.Finite.trans (ComponentRing A p) (N p)
+  let g (p : minimalPrimes A) : integralClosure A B →ₐ[A] N p :=
+    ((f p).domRestrict (integralClosure A B)).codRestrict ((N p).restrictScalars A)
+      (fun x => (x.2.map (f p)).tower_top)
+  apply Module.Finite.of_injective (AlgHom.pi g).toLinearMap
+  intro x y he
+  apply Subtype.ext
+  apply hf
+  exact funext (fun p => congrArg Subtype.val (congrFun he p))
+
+variable (A)
+
+/-- The normalization of a reduced Noetherian ring is finite whenever all of
+its irreducible component rings have finite normalization. -/
+theorem finite_integralClosure_of_domainQuotients [IsNoetherianRing A] [IsReduced A]
+    (h : ∀ p : minimalPrimes A, Module.Finite (ComponentRing A p)
+      (integralClosure (ComponentRing A p) (ComponentField A p))) :
+    Module.Finite A (integralClosure A (FractionRing A)) :=
+  finite_of_component_embeddings h (fractionComponent A) (fractionComponent_injective A)
+
+/-- The same bound applies to the actual ring of sections once it embeds in
+the total fraction ring of the reduced affine chart. -/
+theorem finite_integralClosure_of_fraction_embedding [IsNoetherianRing A] [IsReduced A]
+    (h : ∀ p : minimalPrimes A, Module.Finite (ComponentRing A p)
+      (integralClosure (ComponentRing A p) (ComponentField A p)))
+    (f : B →ₐ[A] FractionRing A) (hf : Function.Injective f) :
+    Module.Finite A (integralClosure A B) :=
+  finite_of_component_embeddings h (fun p => (fractionComponent A p).comp f)
+    ((fractionComponent_injective A).comp hf)
+
+universe u
+
+/-- Finiteness of normalization for finite-type domains over a field extends
+to every reduced finite-type algebra and every subalgebra of its total
+fraction ring. The minimal-prime quotients carry their induced algebras. -/
+theorem finiteType_integralClosure_of_fraction_embedding
+    (k : Type*) [Field k]
+    (domainFinite : ∀ (D : Type u) [CommRing D] [IsDomain D] [Algebra k D]
+      [Algebra.FiniteType k D], Module.Finite D (integralClosure D (FractionRing D)))
+    (R : Type u) [CommRing R] [IsReduced R] [Algebra k R] [Algebra.FiniteType k R]
+    {S : Type*} [CommRing S] [Algebra R S] (f : S →ₐ[R] FractionRing R)
+    (hf : Function.Injective f) : Module.Finite R (integralClosure R S) := by
+  let : IsNoetherianRing R := Algebra.FiniteType.isNoetherianRing k R
+  exact finite_integralClosure_of_fraction_embedding R
+    (fun p => domainFinite (ComponentRing R p)) f hf
+
+#print axioms fractionComponent_injective
+#print axioms finite_integralClosure_of_domainQuotients
+#print axioms finite_integralClosure_of_fraction_embedding
+#print axioms finiteType_integralClosure_of_fraction_embedding
+
+end CycleQ2ReducedNormalizationFinite
+end
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Regular sections on a dense open in a reduced affine Noetherian scheme
+
+The complement ideal of the open has zero annihilator. In a Noetherian
+ring this implies that the ideal contains a nonzero divisor. Restricting
+to its principal open identifies every section with an element of the
+total ring of fractions, also when the affine scheme is reducible.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+namespace CycleQ2DenseOpenTotalFractions
+
+open AlgebraicGeometry CategoryTheory Opposite PrimeSpectrum TopologicalSpace
+
+variable (A : Type) [CommRing A] [IsReduced A] [IsNoetherianRing A]
+
+/-- A dense open in a reduced Noetherian spectrum contains a principal open
+cut out by a regular element. -/
+theorem exists_regular_basicOpen (W : Opens (PrimeSpectrum A))
+    (hW : Dense (W : Set (PrimeSpectrum A))) :
+    ∃ s ∈ nonZeroDivisors A, basicOpen s ≤ W := by
+  classical
+  let I := vanishingIdeal (W : Set (PrimeSpectrum A))ᶜ
+  have hI : zeroLocus (I : Set A) = (W : Set (PrimeSpectrum A))ᶜ :=
+    (zeroLocus_vanishingIdeal_eq_closure _).trans W.isOpen.isClosed_compl.closure_eq
+  have hV : vanishingIdeal (W : Set (PrimeSpectrum A)) = ⊥ := by
+    rw [← vanishingIdeal_closure, hW.closure_eq, vanishingIdeal_univ, nilradical_eq_zero]
+    rfl
+  have hi : ((I : Set A) ∩ nonZeroDivisors A).Nonempty := by
+    by_contra hn
+    obtain ⟨x, hx, hne⟩ := (SetLike.lt_iff_le_and_exists.mp
+      (Ideal.bot_lt_annihilator_of_disjoint_nonZeroDivisors (I := I)
+        (Set.disjoint_iff_inter_eq_empty.mpr (Set.not_nonempty_iff_eq_empty.mp hn)))).2
+    apply hne
+    rw [← hV, mem_vanishingIdeal]
+    intro p hp
+    have hnot : ¬ (I : Set A) ⊆ p.asIdeal := by
+      intro h
+      exact (hI ▸ (mem_zeroLocus p I).mpr h) hp
+    obtain ⟨a, ha, hpa⟩ := Set.not_subset.mp hnot
+    have hz : x * a = 0 := congrArg Subtype.val ((Module.mem_annihilator.mp hx) ⟨a, ha⟩)
+    exact (p.isPrime.mem_or_mem (hz ▸ p.asIdeal.zero_mem)).resolve_right hpa
+  obtain ⟨s, hsi, hs⟩ := hi
+  refine ⟨s, hs, ?_⟩
+  intro p hp
+  by_contra hn
+  have : p ∈ zeroLocus (I : Set A) := by rw [hI]; exact hn
+  exact hp ((mem_zeroLocus _ _).mp this hsi)
+
+omit [_root_.IsReduced A] [IsNoetherianRing A] in
+private theorem dense_regular_basicOpen (s : A) (hs : s ∈ nonZeroDivisors A) :
+    Dense (basicOpen s : Set (PrimeSpectrum A)) := by
+  have hinj : Function.Injective (algebraMap A (Localization.Away s)) :=
+    IsLocalization.injective (Localization.Away s) (Submonoid.powers_le.mpr hs)
+  rw [← localization_away_comap_range (Localization.Away s) s]
+  apply (denseRange_comap_iff_ker_le_nilRadical _).mpr
+  rw [(RingHom.injective_iff_ker_eq_bot _).mp hinj]
+  exact bot_le
+
+/-- Sections on the specified open, with their canonical algebra structure
+over the ring of the ambient spectrum. -/
+abbrev Sections (W : (Spec (CommRingCat.of A)).Opens) :=
+  (Spec.structureSheaf A).obj.obj (op W)
+
+local instance sectionsAlgebra (W : (Spec (CommRingCat.of A)).Opens) :
+    Algebra A (Sections A W) :=
+  AlgebraicGeometry.StructureSheaf.openAlgebra (R := A) (op W)
+
+/-- The dense principal-open restriction embeds sections in the total
+quotient ring as an algebra over the original ring. -/
+theorem sections_embedding (W : (Spec (CommRingCat.of A)).Opens)
+    (hW : Dense (W : Set (Spec (CommRingCat.of A)))) :
+    ∃ φ : Sections A W →ₐ[A] FractionRing A, Function.Injective φ := by
+  obtain ⟨s, hs, hle⟩ := exists_regular_basicOpen A W hW
+  let X := Spec (CommRingCat.of A)
+  let D : X.Opens := basicOpen s
+  have : IsDominant D.ι := ⟨by
+    change Dense (Set.range D.ι)
+    rw [Scheme.Opens.range_ι]
+    exact dense_regular_basicOpen A s hs⟩
+  have : IsSchemeTheoreticallyDominant D.ι := .of_isDominant _
+  let res : Sections A W →ₐ[A] Sections A D :=
+    { (X.presheaf.map (homOfLE hle).op).hom with
+      commutes' := fun x =>
+        congrArg (fun k : CommRingCat.of A ⟶ X.presheaf.obj (op D) => k x)
+          (AlgebraicGeometry.StructureSheaf.algebraMap_self_map A (op D) (op W) (homOfLE hle).op) }
+  have hinj : Function.Injective res := by
+    intro z w h
+    apply D.ι.app_injective W
+    let i := homOfLE (D.ι_image_le (D.ι ⁻¹ᵁ W))
+    have H := congrArg (X.presheaf.map i.op) h
+    change (X.presheaf.map (homOfLE hle).op ≫ X.presheaf.map i.op) z =
+      (X.presheaf.map (homOfLE hle).op ≫ X.presheaf.map i.op) w at H
+    erw [← Functor.map_comp] at H
+    exact H
+  letI : IsLocalization.Away s (Sections A D) :=
+    AlgebraicGeometry.StructureSheaf.IsLocalization.to_basicOpen A s
+  let incl : Sections A D →ₐ[A] FractionRing A :=
+    IsLocalization.Away.liftAlgHom s (f := Algebra.ofId A (FractionRing A))
+      (IsLocalization.map_units (FractionRing A) ⟨s, hs⟩)
+  have hi : Function.Injective incl := by
+    apply IsLocalization.injective_of_map_algebraMap_zero
+      (M := Submonoid.powers s) (Sections A D) incl.toRingHom
+    intro a ha
+    have hzero : algebraMap A (FractionRing A) a = 0 :=
+      (incl.commutes a).symm.trans ha
+    have hz : a = 0 := IsFractionRing.injective A (FractionRing A)
+      (hzero.trans (map_zero (algebraMap A (FractionRing A))).symm)
+    simp [hz]
+  exact ⟨incl.comp res, hi.comp hinj⟩
+
+end CycleQ2DenseOpenTotalFractions
+end
+
+#print axioms CycleQ2DenseOpenTotalFractions.exists_regular_basicOpen
+#print axioms CycleQ2DenseOpenTotalFractions.sections_embedding
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Sections of a dense open on an affine chart
+
+Intersecting a dense open subscheme with an affine chart gives a dense open
+in the spectrum of the chart ring. The induced identification of sections
+respects the original coordinate algebra.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+namespace CycleQ2DenseOpenAffineSections
+open CategoryTheory AlgebraicGeometry
+
+variable {X Y : Scheme} (j : X ⟶ Y) [IsOpenImmersion j]
+variable {V : Y.Opens} (hV : IsAffineOpen V)
+
+def chart : (j ⁻¹ᵁ V).toScheme ⟶ Spec Γ(Y,V) := (j ∣_ V) ≫ hV.isoSpec.hom
+
+instance : IsOpenImmersion (chart j hV) := by unfold chart; infer_instance
+
+def chartOpen : (Spec Γ(Y,V)).Opens := chart j hV ''ᵁ ⊤
+
+theorem dense [IsDominant j] : Dense (chartOpen j hV : Set (Spec Γ(Y, V))) := by
+  let : IsDominant (j ∣_ V) := IsZariskiLocalAtTarget.restrict (P := @IsDominant) inferInstance V
+  let : IsDominant (chart j hV) := by unfold chart; infer_instance
+  rw [chartOpen, Scheme.Hom.image_top_eq_opensRange]
+  exact (chart j hV).denseRange
+
+def sectionIso : Γ(Spec Γ(Y,V), chartOpen j hV) ≅ Γ(X, j ⁻¹ᵁ V) :=
+  ((chart j hV).appIso ⊤) ≪≫ (j ⁻¹ᵁ V).topIso
+
+theorem sectionIso_over :
+    CommRingCat.ofHom (algebraMap Γ(Y,V) Γ(Spec Γ(Y,V), chartOpen j hV)) ≫
+      (sectionIso j hV).hom = j.app V := by
+  let g := chart j hV
+  have hle : g ''ᵁ ⊤ ≤ ⊤ := le_top
+  have hres : (Spec Γ(Y,V)).presheaf.map (homOfLE hle).op ≫ (g.appIso ⊤).hom = g.appTop := by
+    rw [g.appIso_hom', g.map_appLE (g.preimage_image_eq ⊤).ge (homOfLE hle).op]
+    exact g.appLE_eq_app (U := ⊤)
+  change ((Scheme.ΓSpecIso Γ(Y,V)).inv ≫ (Spec Γ(Y,V)).presheaf.map (homOfLE hle).op) ≫
+    (sectionIso j hV).hom = j.app V
+  erw [sectionIso, Iso.trans_hom]
+  erw [Category.assoc, ← Category.assoc _ (g.appIso ⊤).hom, hres]
+  have hg : g.appTop = hV.isoSpec.hom.appTop ≫ (j ∣_ V).appTop :=
+    Scheme.Hom.comp_appTop _ _
+  erw [hg, hV.isoSpec_hom_appTop, Category.assoc, Category.assoc, Category.assoc,
+    Iso.inv_hom_id_assoc]
+  let e := arrowResLEAppIso j V (j ⁻¹ᵁ V) le_rfl
+  have he : V.topIso.hom ≫ j.app V =
+      (j ∣_ V).appTop ≫ (j ⁻¹ᵁ V).topIso.hom := by
+    have h := e.hom.w
+    change V.topIso.hom ≫ j.appLE V (j ⁻¹ᵁ V) le_rfl =
+      (j.resLE V (j ⁻¹ᵁ V) le_rfl).appTop ≫ (j ⁻¹ᵁ V).topIso.hom at h
+    erw [j.resLE_eq_morphismRestrict, ← j.app_eq_appLE] at h
+    exact h
+  exact (congrArg (fun k => V.topIso.inv ≫ k) he.symm).trans (Iso.inv_hom_id_assoc _ _)
+
+/-- Actual section algebra on the restricted open, in chart coordinates. -/
+def sectionEquiv :
+    letI := (j.app V).hom.toAlgebra
+    Γ(X, j ⁻¹ᵁ V) ≃ₐ[Γ(Y,V)] Γ(Spec Γ(Y,V), chartOpen j hV) := by
+  letI := (j.app V).hom.toAlgebra
+  let e := (sectionIso j hV).symm.commRingCatIsoToRingEquiv
+  refine AlgEquiv.ofRingEquiv (f := e) ?_
+  intro r
+  apply (sectionIso j hV).commRingCatIsoToRingEquiv.injective
+  exact (e.symm_apply_apply _).trans (ConcreteCategory.congr_hom (sectionIso_over j hV) r).symm
+
+end CycleQ2DenseOpenAffineSections
+
+#print axioms CycleQ2DenseOpenAffineSections.dense
+#print axioms CycleQ2DenseOpenAffineSections.sectionEquiv
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Finite relative normalization of the monic time compactification
+
+Normalize the projective graph closure in its original smooth time open.
+This map is finite and its inverse image of the whole time open is unchanged.
+The resulting model stays proper over the original normalized coefficient base.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+namespace CycleQ2LiteralIncidenceRelativeNormalization
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry Opposite
+  CycleQ2IncidenceEtaleParameter CycleQ2LiteralIncidenceRelativeSpread
+  CycleQ2LiteralIncidenceNormalizedSlice CycleQ2LiteralIncidenceRelativeCompletion
+open scoped TensorProduct
+
+private theorem reduced_etale_over_domain {P A : Type} [CommRing P] [IsDomain P] [CommRing A]
+    [Algebra P A] [Algebra.Etale P A] : _root_.IsReduced A := by
+  let K := FractionRing P
+  let : _root_.IsReduced (K ⊗[P] A) := Algebra.FormallyUnramified.isReduced_of_field K _
+  exact isReduced_of_injective
+    (Algebra.TensorProduct.includeRight : A →ₐ[P] K ⊗[P] A)
+    (Algebra.TensorProduct.includeRight_injective (IsFractionRing.injective P K))
+
+private theorem reduced_chart {R A : Type} [CommRing R] [IsDomain R] [CommRing A]
+    (n : ℕ) (f : R →+* A) (hf : RingHom.Locally (RingHom.IsStandardSmoothOfRelativeDimension n) f) :
+    _root_.IsReduced A := by
+  obtain ⟨s, hs, h⟩ := hf
+  let (a : s) : _root_.IsReduced (Localization.Away a.val) := by
+    obtain ⟨g, _, hg⟩ := (h _ a.property).exists_etale_mvPolynomial
+    let := g.toAlgebra
+    let : Algebra.Etale (MvPolynomial (Fin n) R) (Localization.Away a.val) := hg.toAlgebra
+    exact reduced_etale_over_domain (P := MvPolynomial (Fin n) R)
+  exact isReduced_of_injective _ (Localization.algebraMap_injective_of_span_eq_top s hs)
+
+/-- A smooth scheme of fixed relative dimension over an affine integral base is reduced. -/
+theorem reduced_of_smooth_over_domain {R : Type} [CommRing R] [IsDomain R] {X : Scheme}
+    (n : ℕ) (f : X ⟶ Spec (CommRingCat.of R)) [SmoothOfRelativeDimension n f] :
+    AlgebraicGeometry.IsReduced X := by
+  apply (IsReduced.iff_of_openCover (X := X) X.affineCover).mpr
+  intro a
+  let Y := X.affineCover.X a
+  let p := X.affineCover.f a ≫ f
+  let c := (Scheme.ΓSpecIso (CommRingCat.of R)).inv ≫ p.appTop
+  have hp : SmoothOfRelativeDimension n p := by
+    simpa only [Nat.zero_add, p] using smoothOfRelativeDimension_comp 0 n (X.affineCover.f a) f
+  have he : Y.toSpecΓ ≫ Spec.map c = p := by
+    dsimp only [c]
+    rw [Spec.map_comp, ← Category.assoc, ← Scheme.toSpecΓ_naturality, Category.assoc,
+      toSpecΓ_SpecMap_ΓSpecIso_inv, Category.comp_id]
+  have h : SmoothOfRelativeDimension n (Spec.map c) := by
+    let : SmoothOfRelativeDimension n p := hp
+    let e := Y.toSpecΓ
+    have hcomp : inv e ≫ p = Spec.map c :=
+      (congrArg (fun k => inv e ≫ k) he.symm).trans (IsIso.inv_hom_id_assoc e _)
+    rw [← hcomp]
+    simpa only [Nat.zero_add] using smoothOfRelativeDimension_comp 0 n (inv e) p
+  let : _root_.IsReduced Γ(Y, ⊤) := reduced_chart n c.hom
+    ((HasRingHomProperty.Spec_iff (P := @SmoothOfRelativeDimension n)).mp h)
+  exact isReduced_of_isAffine_isReduced (X := Y)
+
+instance time_reduced (V : parameterScheme.Opens) : AlgebraicGeometry.IsReduced (Time toRaw V) := by
+  exact @reduced_of_smooth_over_domain MonicRing _ _ (Time toRaw V) 1
+    (timeMap toRaw V) (timeMap_smooth toRaw V)
+
+instance completion_reduced (V : parameterScheme.Opens) : IsReduced (Completion V) := by
+  let f := graph V
+  apply (IsReduced.iff_of_openCover (X := f.image) f.ker.subschemeCover.openCover).mpr
+  change ∀ W : ProjectiveBundle.affineOpens, IsReduced (Spec (CommRingCat.of (Γ(ProjectiveBundle, W.1) ⧸ f.ker.ideal W)))
+  intro W
+  apply (affine_isReduced_iff _).mpr
+  let : _root_.IsReduced Γ(f.image, f.imageι ⁻¹ᵁ W.1) :=
+    isReduced_of_injective (f.toImage.app _).hom (f.toImage_app_injective W)
+  exact isReduced_of_injective (f.ker.subschemeObjIso W).inv.hom
+    (f.ker.subschemeObjIso W).symm.commRingCatIsoToRingEquiv.injective
+
+/-- For a reduced scheme locally of finite type over the complex numbers, normalization
+in any quasi-compact dense open is finite. -/
+theorem dense_open_normalization_finite {X Y : Scheme} (j : X ⟶ Y)
+    [IsOpenImmersion j] [QuasiCompact j] [IsDominant j] [IsReduced Y]
+    (p : Y ⟶ Spec (CommRingCat.of ℂ)) [LocallyOfFiniteType p] : IsFinite j.fromNormalization := by
+  refine { toIsAffineHom := inferInstance, finite_app := ?_ }
+  intro V hV
+  let A := Γ(Y, V)
+  let B := Γ(X, j ⁻¹ᵁ V)
+  let hle : V ≤ p ⁻¹ᵁ ⊤ := by simp
+  let c := (Scheme.ΓSpecIso (CommRingCat.of ℂ)).inv ≫ p.appLE ⊤ V hle
+  let : Algebra ℂ A := c.hom.toAlgebra
+  let : Algebra.FiniteType ℂ A :=
+    (p.finiteType_appLE (isAffineOpen_top _) hV hle).comp (RingHom.FiniteType.of_surjective _
+      (Scheme.ΓSpecIso (CommRingCat.of ℂ)).symm.commRingCatIsoToRingEquiv.surjective)
+  let : IsNoetherianRing A := Algebra.FiniteType.isNoetherianRing ℂ A
+  let : Algebra A B := (j.app V).hom.toAlgebra
+  obtain ⟨φ, hφ⟩ := CycleQ2DenseOpenTotalFractions.sections_embedding A
+    (CycleQ2DenseOpenAffineSections.chartOpen j hV) (CycleQ2DenseOpenAffineSections.dense j hV)
+  let C := CycleQ2DenseOpenTotalFractions.Sections A (CycleQ2DenseOpenAffineSections.chartOpen j hV)
+  let : Algebra A C := StructureSheaf.openAlgebra (R := A)
+    (op (CycleQ2DenseOpenAffineSections.chartOpen j hV))
+  let e : B ≃ₐ[A] C := CycleQ2DenseOpenAffineSections.sectionEquiv j hV
+  let : Module.Finite A (integralClosure A B) :=
+    CycleQ2ReducedNormalizationFinite.finiteType_integralClosure_of_fraction_embedding ℂ
+      CycleQ2FiniteTypeNormalization.domainNormalizationFinite A (φ.comp e.toAlgHom)
+        (hφ.comp e.injective)
+  rw [j.fromNormalization_app hV, CommRingCat.hom_comp]
+  exact (RingHom.Finite.of_surjective _
+    (j.normalizationObjIso hV).symm.commRingCatIsoToRingEquiv.surjective).comp
+      (RingHom.finite_algebraMap.mpr inferInstance)
+
+variable (V : parameterScheme.Opens)
+
+abbrev Model := (inclusion V).normalization
+
+def toCompletion : Model V ⟶ Completion V := (inclusion V).fromNormalization
+
+def openInclusion : Time toRaw V ⟶ Model V := (inclusion V).toNormalization
+
+def normalizedMap : Model V ⟶ monicBase := toCompletion V ≫ structureMap V
+
+instance : IsOpenImmersion (openInclusion V) := inferInstanceAs (IsOpenImmersion (inclusion V).toNormalization)
+
+instance : IsDominant (openInclusion V) := inferInstanceAs (IsDominant (inclusion V).toNormalization)
+
+instance : IsFinite (toCompletion V) := by
+  have : LocallyOfFiniteType toComplex := by
+    apply (HasRingHomProperty.Spec_iff (P := @LocallyOfFiniteType)).mpr
+    exact RingHom.finiteType_algebraMap.mpr (inferInstance : Algebra.FiniteType ℂ MonicRing)
+  exact dense_open_normalization_finite (inclusion V) (structureMap V ≫ toComplex)
+
+instance : IsProper (normalizedMap V) := by unfold normalizedMap; infer_instance
+
+@[reassoc (attr := simp)] theorem open_toCompletion :
+    openInclusion V ≫ toCompletion V = inclusion V := (inclusion V).toNormalization_fromNormalization
+
+@[reassoc (attr := simp)] theorem open_over :
+    openInclusion V ≫ normalizedMap V = timeMap toRaw V := by
+  rw [normalizedMap, open_toCompletion_assoc, inclusion_over]
+
+/-- The finite proper model contains exactly the original scheme over its marked time open. -/
+theorem recovers_time_open : IsIso (pullback.snd (toCompletion V) (inclusion V)) := by
+  let f := inclusion V
+  change IsIso (pullback.snd f.fromNormalization f)
+  rw [← isIso_comp_left_iff (f.normalizationPullback f), f.normalizationPullback_snd,
+    ← isIso_comp_left_iff (pullback.snd f f).toNormalization,
+    Scheme.Hom.toNormalization_fromNormalization]
+  infer_instance
+
+theorem normalized_time_model :
+    IsProper (normalizedMap V) ∧ IsFinite (toCompletion V) ∧
+      IsIso (pullback.snd (toCompletion V) (inclusion V)) ∧
+      SmoothOfRelativeDimension 1 (openInclusion V ≫ normalizedMap V) := by
+  refine ⟨inferInstance, inferInstance, recovers_time_open V, ?_⟩
+  rw [open_over]
+  exact timeMap_smooth _ _
+
+end CycleQ2LiteralIncidenceRelativeNormalization
+end
+
+#print axioms CycleQ2LiteralIncidenceRelativeNormalization.normalized_time_model
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Integral proper components meeting a prescribed time open
+
+A nonempty open of a Noetherian space contains a nonempty irreducible open.
+Taking its schematic image in a proper compactification gives an integral
+proper model. Its smooth time open maps openly to the irreducible base, so
+the model surjects onto that base.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+namespace CycleQ2IncidenceIntegralComponent
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace
+
+/-- Every nonempty open in a Noetherian space contains an irreducible open. -/
+theorem exists_irreducible_open {T : Type*} [TopologicalSpace T] [NoetherianSpace T]
+    (W : Opens T) (hW : (W : Set T).Nonempty) :
+    ∃ U : Opens T, U ≤ W ∧ IsIrreducible (U : Set T) := by
+  obtain ⟨w, hw⟩ := hW
+  have : NoetherianSpace W := NoetherianSpace.set (W : Set T)
+  let Z := irreducibleComponent (⟨w, hw⟩ : W)
+  have hZ : Z ∈ irreducibleComponents W := irreducibleComponent_mem_irreducibleComponents _
+  obtain ⟨Q, hQ, hn, hQZ⟩ := NoetherianSpace.exists_isOpen_nonempty_subset_irreducibleComponent Z hZ
+  have hcut : Z ∩ Q = Q := Set.inter_eq_right.mpr hQZ
+  have hd : Z ⊆ closure Q := by
+    rw [← hcut]
+    exact subset_closure_inter_of_isPreirreducible_of_isOpen hZ.1.2 hQ (hcut.symm ▸ hn)
+  have hc : closure Q = Z := (closure_minimal hQZ (isClosed_of_mem_irreducibleComponents _ hZ)).antisymm hd
+  have hirr : IsIrreducible Q := isIrreducible_iff_closure.mp (hc.symm ▸ hZ.1)
+  exact ⟨⟨Subtype.val '' Q, W.isOpen.isOpenMap_subtype_val _ hQ⟩,
+    fun _ ⟨y, _, hy⟩ ↦ hy ▸ y.property, hirr.image _ continuous_subtype_val.continuousOn⟩
+
+universe u
+variable {X Y B : Scheme.{u}}
+
+/-- The schematic image of a quasi-compact morphism from an integral scheme is integral. -/
+theorem integral_image (f : X ⟶ Y) [QuasiCompact f] [IsIntegral X] : IsIntegral f.image := by
+  have hr : IsIrreducible (Set.range f.toImage) := by
+    simpa using (IrreducibleSpace.isIrreducible_univ X).image f.toImage f.toImage.continuous.continuousOn
+  have hirr : IrreducibleSpace f.image := by
+    apply (irreducibleSpace_def _).mpr
+    change IsIrreducible (Set.univ : Set f.image)
+    rw [← f.toImage.denseRange.closure_range]
+    exact hr.closure
+  apply (isIntegral_iff_irreducibleSpace_and_isReduced _).mpr ⟨hirr, ?_⟩
+  apply (IsReduced.iff_of_openCover (X := f.image) f.ker.subschemeCover.openCover).mpr
+  change ∀ V : Y.affineOpens, IsReduced (Spec (CommRingCat.of (Γ(Y, V.1) ⧸ f.ker.ideal V)))
+  intro V
+  apply (affine_isReduced_iff _).mpr
+  let : _root_.IsReduced Γ(f.image, f.imageι ⁻¹ᵁ V.1) :=
+    isReduced_of_injective (f.toImage.app _).hom (f.toImage_app_injective V)
+  exact isReduced_of_injective (f.ker.subschemeObjIso V).inv.hom
+    (f.ker.subschemeObjIso V).symm.commRingCatIsoToRingEquiv.injective
+
+variable [NoetherianSpace X] (j : X ⟶ Y) [IsOpenImmersion j]
+
+private instance compact_open_map (U : X.Opens) : QuasiCompact (U.ι ≫ j) := by
+  have : NoetherianSpace U.toScheme := NoetherianSpace.set (U : Set X)
+  infer_instance
+
+/-- The schematic closure in the given compactification of the chosen test open. -/
+abbrev Model (U : X.Opens) := (U.ι ≫ j).image
+
+def openInclusion (U : X.Opens) : U.toScheme ⟶ Model j U := (U.ι ≫ j).toImage
+
+instance (U : X.Opens) : IsOpenImmersion (openInclusion j U) :=
+  inferInstanceAs (IsOpenImmersion (U.ι ≫ j).toImage)
+
+instance (U : X.Opens) : IsDominant (openInclusion j U) :=
+  inferInstanceAs (IsDominant (U.ι ≫ j).toImage)
+
+instance (U : X.Opens) : QuasiCompact (openInclusion j U) := by
+  have : NoetherianSpace U.toScheme := NoetherianSpace.set (U : Set X)
+  infer_instance
+
+def toBase (p : Y ⟶ B) (U : X.Opens) : Model j U ⟶ B := (U.ι ≫ j).imageι ≫ p
+
+omit [NoetherianSpace X] [IsOpenImmersion j] in
+@[reassoc (attr := simp)] theorem openInclusion_over (p : Y ⟶ B) (U : X.Opens) :
+    openInclusion j U ≫ toBase j p U = U.ι ≫ j ≫ p := by
+  simp [openInclusion, toBase, ← Category.assoc]
+
+instance proper (p : Y ⟶ B) [IsProper p] (U : X.Opens) : IsProper (toBase j p U) := by
+  unfold toBase
+  infer_instance
+
+/-- A prescribed nonempty open contains the dense open of an integral proper model
+dominating the coefficient space. -/
+theorem exists_model [IsReduced X] [IrreducibleSpace B] (p : Y ⟶ B) [IsProper p]
+    [SmoothOfRelativeDimension 1 (j ≫ p)] (W : X.Opens) (hW : (W : Set X).Nonempty) :
+    ∃ U : X.Opens, U ≤ W ∧ IsIntegral U.toScheme ∧ IsIntegral (Model j U) ∧
+      SmoothOfRelativeDimension 1 (openInclusion j U ≫ toBase j p U) ∧
+      IsDominant (toBase j p U) ∧ Surjective (toBase j p U) := by
+  obtain ⟨D, hle, hD⟩ := exists_irreducible_open W hW
+  let U : X.Opens := D
+  have hU : IsIrreducible (U : Set X) := hD
+  have : IrreducibleSpace U.toScheme := Subtype.irreducibleSpace hU
+  have hint : IsIntegral U.toScheme := isIntegral_of_irreducibleSpace_of_isReduced _
+  have hs : SmoothOfRelativeDimension 1 (U.ι ≫ j ≫ p) := by
+    simpa only [Nat.zero_add] using smoothOfRelativeDimension_comp 0 1 U.ι (j ≫ p)
+  have : Smooth (U.ι ≫ j ≫ p) := SmoothOfRelativeDimension.smooth 1 _
+  have hd : IsDominant (openInclusion j U ≫ toBase j p U) := by
+    rw [openInclusion_over]
+    exact ⟨IsOpenMap.denseRange_of_isPreirreducibleSpace _ (U.ι ≫ j ≫ p).isOpenMap⟩
+  have hbase := IsDominant.of_comp (openInclusion j U) (toBase j p U)
+  refine ⟨U, hle, hint, integral_image (U.ι ≫ j), ?_, hbase, ?_⟩
+  · rwa [openInclusion_over]
+  · exact surjective_of_isDominant_of_isClosed_range _ (toBase j p U).isClosedMap.isClosed_range
+
+open CategoryTheory.Limits CycleQ2IncidenceEtaleParameter CycleQ2IncidenceTimeCurve
+  CycleQ2LiteralIncidenceRelativeSpread CycleQ2LiteralIncidenceNormalizedSlice
+  CycleQ2LiteralIncidenceRelativeCompletion
+
+attribute [local instance] CycleQ2IncidenceTimeCurve.timeParameterCommRing
+
+/-- The monic time family has Noetherian underlying space. -/
+instance time_noetherian (V : parameterScheme.Opens) : NoetherianSpace (Time toRaw V) := by
+  let _ := Algebra.FiniteType.isNoetherianRing SexticRing ParameterAlgebra
+  have : NoetherianSpace parameterScheme :=
+    inferInstanceAs (NoetherianSpace (Spec (CommRingCat.of ParameterAlgebra)))
+  have : NoetherianSpace V.toScheme := NoetherianSpace.set (V : Set parameterScheme)
+  exact (pullback.snd toRaw (V.ι ≫ parameterToSextics)).isClosedEmbedding.isInducing.noetherianSpace
+
+theorem monic_exists_model (V : parameterScheme.Opens)
+    (W : (Time toRaw V).Opens) (hW : (W : Set (Time toRaw V)).Nonempty) :
+    ∃ U : (Time toRaw V).Opens, U ≤ W ∧ IsIntegral U.toScheme ∧ IsIntegral (Model (inclusion V) U) ∧
+      SmoothOfRelativeDimension 1 (openInclusion (inclusion V) U ≫ toBase (inclusion V) (structureMap V) U) ∧
+      IsDominant (toBase (inclusion V) (structureMap V) U) ∧ Surjective (toBase (inclusion V) (structureMap V) U) := by
+  have : IrreducibleSpace monicBase :=
+    inferInstanceAs (IrreducibleSpace (Spec (CommRingCat.of MonicRing)))
+  have : SmoothOfRelativeDimension 1 (inclusion V ≫ structureMap V) := by
+    rw [inclusion_over]
+    exact timeMap_smooth toRaw V
+  exact exists_model (inclusion V) (structureMap V) W hW
+
+end CycleQ2IncidenceIntegralComponent
+
+#print axioms CycleQ2IncidenceIntegralComponent.exists_model
+#print axioms CycleQ2IncidenceIntegralComponent.monic_exists_model
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# The fraction field on the inverse image of a nonempty affine under the generic point
+
+The actual map on sections induced by the generic residue-field point factors
+as the germ into the function field followed by a ring isomorphism. Thus the
+native section ring used by scheme normalization is the affine fraction field.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+namespace CycleQ2GenericPointAffineSections
+
+open AlgebraicGeometry CategoryTheory TopologicalSpace
+
+universe u
+variable (X : Scheme.{u}) [IsIntegral X]
+
+abbrev point := X.fromSpecResidueField (genericPoint X)
+
+abbrev pointScheme := Spec (X.residueField (genericPoint X))
+
+theorem residue_isIso : IsIso (X.residue (genericPoint X)) :=
+  (ConcreteCategory.isIso_iff_bijective _).mpr
+    ⟨(X.residue (genericPoint X)).hom.injective, X.residue_surjective _⟩
+
+variable (U : X.Opens) [Nonempty U]
+
+private theorem generic_mem : genericPoint X ∈ U :=
+  ((genericPoint_spec X).mem_open_set_iff U.isOpen).mpr (by simpa using ‹Nonempty U›)
+
+private theorem stalkPreimage_eq_top :
+    (X.fromSpecStalk (genericPoint X)) ⁻¹ᵁ U = ⊤ := by
+  apply top_unique
+  intro s _
+  change (X.fromSpecStalk (genericPoint X)) s ∈ U
+  let : Subsingleton (Spec (X.presheaf.stalk (genericPoint X))) :=
+    inferInstanceAs (Subsingleton (PrimeSpectrum X.functionField))
+  rw [Subsingleton.elim s (IsLocalRing.closedPoint X.functionField), Scheme.fromSpecStalk_closedPoint]
+  exact generic_mem X U
+
+private def chartIsoHom : X.functionField ⟶ Γ(pointScheme X, point X ⁻¹ᵁ U) :=
+  (Scheme.ΓSpecIso X.functionField).inv ≫
+    (Spec X.functionField).presheaf.map (homOfLE
+      (show (X.fromSpecStalk (genericPoint X)) ⁻¹ᵁ U ≤ ⊤ from le_top)).op ≫
+      (Spec.map (X.residue (genericPoint X))).app ((X.fromSpecStalk (genericPoint X)) ⁻¹ᵁ U)
+
+private instance : IsIso (chartIsoHom X U) := by
+  let T := Spec X.functionField
+  let V : T.Opens := (X.fromSpecStalk (genericPoint X)) ⁻¹ᵁ U
+  let i : V ⟶ ⊤ := homOfLE le_top
+  let f := Spec.map (X.residue (genericPoint X))
+  let : IsIso i := homOfLE_isIso_of_eq (show V ≤ ⊤ from le_top) (stalkPreimage_eq_top X U)
+  let : IsIso (T.presheaf.map i.op) := inferInstance
+  let : IsIso (X.residue (genericPoint X)) := residue_isIso X
+  let : IsIso f := inferInstanceAs (IsIso (Spec.map (X.residue (genericPoint X))))
+  let : IsIso (f.app V) := inferInstance
+  change IsIso ((Scheme.ΓSpecIso X.functionField).inv ≫ T.presheaf.map i.op ≫ f.app V)
+  exact IsIso.comp_isIso
+
+def chartIso : X.functionField ≅ Γ(pointScheme X, point X ⁻¹ᵁ U) := asIso (chartIsoHom X U)
+
+@[reassoc] theorem germ_chartIso :
+    X.germToFunctionField U ≫ (chartIso X U).hom = (point X).app U := by
+  change _ = (Spec.map (X.residue (genericPoint X)) ≫ X.fromSpecStalk (genericPoint X)).app U
+  rw [Scheme.Hom.comp_app, Scheme.fromSpecStalk_app (generic_mem X U)]
+  simp only [chartIso, asIso_hom, chartIsoHom, Category.assoc]
+  rfl
+
+theorem native_isField : IsField Γ(pointScheme X, point X ⁻¹ᵁ U) :=
+  (chartIso X U).symm.commRingCatIsoToRingEquiv.isField (Field.toIsField X.functionField)
+
+def chartAlgEquiv :
+    let := ((point X).app U).hom.toAlgebra
+    X.functionField ≃ₐ[Γ(X,U)] Γ(pointScheme X, point X ⁻¹ᵁ U) := by
+  let := ((point X).app U).hom.toAlgebra
+  exact { (chartIso X U).commRingCatIsoToRingEquiv with
+    commutes' := fun a => congrArg (fun f : Γ(X,U) ⟶ _ => f a) (germ_chartIso X U) }
+
+theorem native_isFractionRing (hU : IsAffineOpen U) :
+    let := ((point X).app U).hom.toAlgebra
+    IsFractionRing Γ(X,U) Γ(pointScheme X, point X ⁻¹ᵁ U) := by
+  let := ((point X).app U).hom.toAlgebra
+  have := functionField_isFractionRing_of_isAffineOpen X U hU
+  exact IsFractionRing.of_algEquiv (chartAlgEquiv X U)
+
+end CycleQ2GenericPointAffineSections
+end
+
+#print axioms CycleQ2GenericPointAffineSections.native_isFractionRing
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Smoothness of a finite-type Dedekind domain over a perfect field
+
+A local uniformizer at a closed point gives an étale coordinate over the
+affine line. Smoothness then follows at every generalization of the point.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+open IsLocalRing Polynomial
+open scoped Polynomial
+
+namespace CycleQ2NormalCurveSmooth
+
+variable {K A : Type*} [Field K] [PerfectField K] [CommRing A]
+  [Algebra K A] [Algebra.FiniteType K A]
+
+/-- A uniformizer on the localization at a nonzero prime can be chosen in the original ring. -/
+theorem exists_local_parameter [IsDedekindDomain A] (q : Ideal A) [q.IsPrime] (hq : q ≠ ⊥) :
+    ∃ a ∈ q, a ≠ 0 ∧ maximalIdeal (Localization.AtPrime q) =
+      Ideal.span {algebraMap A (Localization.AtPrime q) a} := by
+  let B := Localization.AtPrime q
+  have : IsDiscreteValuationRing B :=
+    IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain A hq B
+  obtain ⟨z, hz⟩ := IsDiscreteValuationRing.exists_irreducible B
+  obtain ⟨⟨a, s⟩, hs⟩ := IsLocalization.surj q.primeCompl z
+  change z * algebraMap A B s = algebraMap A B a at hs
+  have ha : Associated z (algebraMap A B a) := by
+    rw [← hs]
+    exact associated_mul_unit_right _ _ (IsLocalization.map_units B s)
+  have hgen := hz.maximalIdeal_eq.trans (Ideal.span_singleton_eq_span_singleton.mpr ha)
+  refine ⟨a, (IsLocalization.AtPrime.to_map_mem_maximal_iff B q a).mp ?_, ?_, hgen⟩
+  · rw [hgen]
+    exact Ideal.subset_span (Set.mem_singleton _)
+  · intro he
+    exact (ha.irreducible hz).ne_zero (by simp [he])
+
+/-- A uniformizer defines an étale coordinate, giving smoothness at the closed point. -/
+theorem isSmoothAt_of_local_parameter [IsDomain A] (q : Ideal A) [q.IsMaximal] (a : A) (ha : a ∈ q)
+    (h0 : a ≠ 0) (hgen : maximalIdeal (Localization.AtPrime q) =
+      Ideal.span {algebraMap A (Localization.AtPrime q) a}) : Algebra.IsSmoothAt K q := by
+  let : Algebra K[X] A := (aeval a).toAlgebra
+  have : IsScalarTower K K[X] A := .of_algebraMap_eq fun x ↦ ((aeval a).commutes x).symm
+  have : Algebra.FiniteType K[X] A := .of_restrictScalars_finiteType K _ _
+  have : Algebra.FinitePresentation K[X] A := Algebra.FinitePresentation.of_finiteType.mp ‹_›
+  have : Module.IsTorsionFree K[X] A := Module.isTorsionFree_iff_algebraMap_injective.mpr
+    (transcendental_iff_injective.mp fun h ↦ (inferInstance : q.IsPrime).ne_top <|
+      Ideal.eq_top_of_isUnit_mem _ ha ((isAlgebraic_iff_isIntegral.mp h).isUnit h0))
+  let p := q.under K[X]
+  have hX : (X : K[X]) ∈ p := by
+    change aeval a (X : K[X]) ∈ q
+    simpa using ha
+  have : p.IsMaximal := Ideal.IsPrime.isMaximal inferInstance fun h ↦
+    Polynomial.X_ne_zero (R := K) (by simpa [h] using hX)
+  let := Localization.AtPrime.algebraOfLiesOver p q
+  let := Ideal.Quotient.field p
+  let := Ideal.Quotient.field q
+  have : Module.Finite K (K[X] ⧸ p) := finite_of_finite_type_of_isJacobsonRing _ _
+  have : PerfectField (K[X] ⧸ p) := Algebra.IsAlgebraic.perfectField K
+  have : Module.Finite (K[X] ⧸ p) (A ⧸ q) :=
+    finite_of_finite_type_of_isJacobsonRing _ _
+  have : Algebra.IsUnramifiedAt K[X] q := by
+    apply (Algebra.isUnramifiedAt_iff_map_eq _ p q).mpr
+    refine ⟨inferInstance, le_antisymm ?_ ?_⟩
+    · refine Ideal.map_le_iff_le_comap.mpr fun x hx ↦ ?_
+      rw [Ideal.mem_comap, IsScalarTower.algebraMap_apply K[X] A (Localization.AtPrime q)]
+      exact (IsLocalization.AtPrime.to_map_mem_maximal_iff _ q _).mpr hx
+    · rw [hgen, Ideal.span_singleton_le_iff_mem]
+      have he : algebraMap K[X] (Localization.AtPrime q) X =
+          algebraMap A (Localization.AtPrime q) a := by
+        rw [IsScalarTower.algebraMap_apply K[X] A (Localization.AtPrime q)]
+        change algebraMap A (Localization.AtPrime q) (aeval a (X : K[X])) = _
+        rw [aeval_X]
+      rw [← he]
+      exact Ideal.mem_map_of_mem _ hX
+  have := Algebra.IsEtaleAt.of_isUnramifiedAt_of_flat (R := K[X]) q
+  exact Algebra.FormallySmooth.comp K K[X] (Localization.AtPrime q)
+
+/-- A finite-type normal affine curve over a perfect field is smooth. -/
+theorem smooth_of_isDedekindDomain [IsDedekindDomain A] : Algebra.Smooth K A := by
+  have : Algebra.FinitePresentation K A := Algebra.FinitePresentation.of_finiteType.mp ‹_›
+  by_cases hF : IsField A
+  · letI := hF.toField
+    exact ⟨inferInstance, inferInstance⟩
+  refine ⟨Algebra.smoothLocus_eq_univ_iff.mp (Set.eq_univ_iff_forall.mpr fun x ↦ ?_), ‹_›⟩
+  obtain ⟨m, hm, hxm⟩ := x.asIdeal.exists_le_maximal x.isPrime.ne_top
+  obtain ⟨a, ha, h0, hgen⟩ := exists_local_parameter m (Ring.ne_bot_of_isMaximal_of_not_isField hm hF)
+  have hsm : (⟨m, hm.isPrime⟩ : PrimeSpectrum A) ∈ Algebra.smoothLocus K A :=
+    isSmoothAt_of_local_parameter m a ha h0 hgen
+  exact ((PrimeSpectrum.le_iff_specializes x ⟨m, hm.isPrime⟩).mp hxm).mem_open
+    Algebra.isOpen_smoothLocus hsm
+
+/-- Smoothness written in terms of normality, dimension and finite type on an affine chart. -/
+theorem smooth_of_normal_affine_curve (K B : Type*) [Field K] [PerfectField K] [CommRing B]
+    [IsDomain B] [Algebra K B] [Algebra.FiniteType K B]
+    [Ring.KrullDimLE 1 B] [IsIntegrallyClosed B] : Algebra.Smooth K B := by
+  have : Ring.DimensionLEOne B := ⟨fun hn hp ↦ hp.isMaximal_of_ne_bot hn⟩
+  have : IsNoetherianRing B := Algebra.FiniteType.isNoetherianRing K B
+  have : IsDedekindDomain B := { ‹IsDomain B›, ‹IsNoetherianRing B›,
+    ‹Ring.DimensionLEOne B›, ‹IsIntegrallyClosed B› with }
+  exact smooth_of_isDedekindDomain
+
+/-- The finite integral closure of an affine curve domain in a field is smooth
+over its perfect coefficient field. -/
+theorem smooth_finite_integralClosure (K R L : Type*) [Field K] [PerfectField K]
+    [CommRing R] [IsDomain R] [Algebra K R] [Algebra.FiniteType K R] [Ring.KrullDimLE 1 R]
+    [Field L] [Algebra R L] [Module.Finite R (integralClosure R L)] :
+    let := ((algebraMap R (integralClosure R L)).comp (algebraMap K R)).toAlgebra
+    Algebra.Smooth K (integralClosure R L) := by
+  have : Ring.DimensionLEOne R := ⟨fun hn hp ↦ hp.isMaximal_of_ne_bot hn⟩
+  let B := integralClosure R L
+  let := ((algebraMap R B).comp (algebraMap K R)).toAlgebra
+  have : IsScalarTower K R B := .of_algebraMap_eq' rfl
+  have : Algebra.FiniteType K B :=
+    Algebra.FiniteType.trans (inferInstance : Algebra.FiniteType K R) inferInstance
+  have : IsIntegrallyClosed B := IsIntegrallyClosed.of_isIntegrallyClosedIn B L
+  exact smooth_of_normal_affine_curve K B
+
+open AlgebraicGeometry CategoryTheory
+
+universe u
+
+/-- Normal affine curve charts cover a smooth scheme over a perfect field. -/
+theorem smooth_of_normal_affine_cover (K : Type u) [Field K] [PerfectField K]
+    {X : Scheme.{u}} (f : X ⟶ Spec (CommRingCat.of K)) (C : X.OpenCover)
+    (B : C.I₀ → Type u) [∀ i, CommRing (B i)] [∀ i, IsDomain (B i)]
+    [∀ i, Algebra K (B i)] [∀ i, Algebra.FiniteType K (B i)]
+    [∀ i, Ring.KrullDimLE 1 (B i)] [∀ i, IsIntegrallyClosed (B i)]
+    (e : ∀ i, C.X i ≅ Spec (CommRingCat.of (B i)))
+    (he : ∀ i, C.f i ≫ f = (e i).hom ≫ Spec.map (CommRingCat.ofHom (algebraMap K (B i)))) :
+    Smooth f := by
+  have hl : IsZariskiLocalAtSource (@Smooth.{u} : MorphismProperty Scheme.{u}) :=
+    HasRingHomProperty.instIsZariskiLocalAtSource (P := @Smooth.{u}) (Q := RingHom.Smooth)
+  refine (@IsZariskiLocalAtSource.iff_of_openCover (@Smooth.{u}) hl _ _ f C).mpr fun i ↦ ?_
+  rw [he]
+  have : Smooth (Spec.map (CommRingCat.ofHom (algebraMap K (B i)))) :=
+    (HasRingHomProperty.Spec_iff (P := @Smooth)).mpr
+      (RingHom.smooth_algebraMap.mpr (smooth_of_normal_affine_curve K (B i)))
+  infer_instance
+
+end CycleQ2NormalCurveSmooth
+
+#print axioms CycleQ2NormalCurveSmooth.smooth_of_normal_affine_curve
+
+#print axioms CycleQ2NormalCurveSmooth.smooth_finite_integralClosure
+
+#print axioms CycleQ2NormalCurveSmooth.smooth_of_normal_affine_cover
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Absolute normalization of an integral proper curve
+
+Normalizing in the scheme's own generic residue field gives a finite map.
+In dimension at most one its source is smooth over the characteristic-zero
+base field, and it is proper whenever the original curve is proper.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+namespace CycleQ2IntegralCurveNormalization
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace CycleQ2GenericPointAffineSections
+open scoped nonZeroDivisors
+
+/-- Noether normalization and separability give a finite integral closure inside
+any chosen fraction field of a finite-type domain over a characteristic-zero field. -/
+theorem finite_fraction_integralClosure (k A L : Type*) [Field k] [CharZero k] [CommRing A]
+    [IsDomain A] [Algebra k A] [Algebra.FiniteType k A] [Field L] [Algebra A L]
+    [IsFractionRing A L] : Module.Finite A (integralClosure A L) := by
+  obtain ⟨n, g, hinj, hfin⟩ := exists_finite_inj_algHom_of_fg k A
+  let P := MvPolynomial (Fin n) k
+  let N := integralClosure A L
+  let : Algebra P A := g.toRingHom.toAlgebra
+  let : Module.Finite P A := hfin
+  let : FaithfulSMul P A := (faithfulSMul_iff_algebraMap_injective P A).mpr hinj
+  let : Algebra P L := ((algebraMap A L).comp g.toRingHom).toAlgebra
+  let : IsScalarTower P A L := .of_algebraMap_eq' rfl
+  let : FaithfulSMul P L := (faithfulSMul_iff_algebraMap_injective P L).mpr
+    ((IsFractionRing.injective A L).comp hinj)
+  let : Algebra (FractionRing P) L := FractionRing.liftAlgebra P L
+  let : FiniteDimensional (FractionRing P) L := Module.Finite.of_isLocalization P A P⁰
+  let : Algebra P N := ((algebraMap A N).comp g.toRingHom).toAlgebra
+  let : IsScalarTower P A N := .of_algebraMap_eq' rfl
+  let : IsScalarTower P N L := .of_algebraMap_eq' rfl
+  let : IsIntegralClosure N P L := {
+    algebraMap_injective := Subtype.val_injective
+    isIntegral_iff := by
+      intro x
+      exact ⟨fun h => ⟨⟨x, h.tower_top⟩, rfl⟩,
+        fun ⟨y, hy⟩ => hy ▸ isIntegral_trans (R := P) (y : L) y.property⟩ }
+  let : Module.Finite P N := IsIntegralClosure.finite P (FractionRing P) L N
+  exact Module.Finite.of_restrictScalars_finite P A N
+
+universe u
+
+variable (k : Type u) [Field k] [CharZero k] {X : Scheme.{u}} [IsIntegral X]
+
+abbrev Model (X : Scheme.{u}) [IsIntegral X] := (point X).normalization
+
+abbrev normalize (X : Scheme.{u}) [IsIntegral X] : Model X ⟶ X := (point X).fromNormalization
+
+variable (p : X ⟶ Spec (CommRingCat.of k)) [LocallyOfFiniteType p]
+
+def coefficientMap (U : X.Opens) : CommRingCat.of k ⟶ Γ(X,U) :=
+  (Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ p.appLE ⊤ U (by simp)
+
+omit [CharZero k] [IsIntegral X] in
+theorem finiteType_coefficients {U : X.Opens} (hU : IsAffineOpen U) :
+    (coefficientMap k p U).hom.FiniteType :=
+  (p.finiteType_appLE (isAffineOpen_top _) hU (by simp)).comp
+    (RingHom.FiniteType.of_surjective _ (Scheme.ΓSpecIso (CommRingCat.of k)).symm.commRingCatIsoToRingEquiv.surjective)
+
+omit [CharZero k] [IsIntegral X] [LocallyOfFiniteType p] in
+theorem fromSpec_over {U : X.Opens} (hU : IsAffineOpen U) :
+    hU.fromSpec ≫ p = Spec.map (coefficientMap k p U) := by
+  rw [coefficientMap, Spec.map_comp]
+  have h := IsAffineOpen.SpecMap_appLE_fromSpec p (isAffineOpen_top _) hU (by simp)
+  rw [IsAffineOpen.fromSpec_top, Scheme.isoSpec_Spec_inv] at h
+  exact h.symm
+
+omit [IsIntegral X] in
+theorem nonempty_chart {U : X.Opens} (hU : IsAffineOpen U)
+    [Nontrivial Γ(X,U)] : Nonempty U :=
+  Nonempty.map hU.isoSpec.inv (inferInstance : Nonempty (Spec Γ(X,U)))
+
+include p in
+theorem finite_chart {U : X.Opens} (hU : IsAffineOpen U) :
+    let := ((point X).app U).hom.toAlgebra
+    Module.Finite Γ(X,U) (integralClosure Γ(X,U) Γ(pointScheme X, point X ⁻¹ᵁ U)) := by
+  let A := Γ(X,U)
+  let L := Γ(pointScheme X, point X ⁻¹ᵁ U)
+  let : Algebra A L := ((point X).app U).hom.toAlgebra
+  rcases subsingleton_or_nontrivial A with h | h
+  · let : Subsingleton (integralClosure A L) := Algebra.subsingleton A _
+    infer_instance
+  let : Nonempty U := nonempty_chart hU
+  let : Field L := (native_isField X U).toField
+  let : IsFractionRing A L := native_isFractionRing X U hU
+  let : Algebra k A := (coefficientMap k p U).hom.toAlgebra
+  let : Algebra.FiniteType k A := finiteType_coefficients k p hU
+  exact finite_fraction_integralClosure k A L
+
+include p in
+theorem finite : IsFinite (normalize X) := by
+  refine { toIsAffineHom := inferInstance, finite_app := ?_ }
+  intro U hU
+  rw [Scheme.Hom.fromNormalization_app _ hU, CommRingCat.hom_comp]
+  let := ((point X).app U).hom.toAlgebra
+  exact (RingHom.Finite.of_surjective _ ((point X).normalizationObjIso hU).symm.commRingCatIsoToRingEquiv.surjective).comp
+    (RingHom.finite_algebraMap.mpr (finite_chart k p hU))
+
+omit [LocallyOfFiniteType p] in
+theorem proper [IsProper p] : IsProper (normalize X ≫ p) := by
+  have := finite k p
+  infer_instance
+
+theorem smooth_of_affine_dimension (hdim : ∀ U : X.affineOpens, Ring.KrullDimLE 1 Γ(X, U.1)) :
+    Smooth (normalize X ≫ p) := by
+  let j := point X
+  have hl : IsZariskiLocalAtSource (@Smooth.{u} : MorphismProperty Scheme.{u}) :=
+    HasRingHomProperty.instIsZariskiLocalAtSource (P := @Smooth.{u}) (Q := RingHom.Smooth)
+  apply (@IsZariskiLocalAtSource.iff_of_openCover (@Smooth.{u}) hl _ _
+    (j.fromNormalization ≫ p) j.normalizationOpenCover).mpr
+  intro i
+  let U : X.affineOpens := i
+  change Smooth (j.normalizationOpenCover.f U ≫ j.fromNormalization ≫ p)
+  erw [j.ι_fromNormalization_assoc, Category.assoc, fromSpec_over k p U.2, ← Spec.map_comp]
+  apply (HasRingHomProperty.Spec_iff (P := @Smooth)).mpr
+  let A := Γ(X,U.1)
+  let L := Γ(pointScheme X, j ⁻¹ᵁ U.1)
+  let : Algebra A L := (j.app U.1).hom.toAlgebra
+  let N := integralClosure A L
+  let : Algebra k A := (coefficientMap k p U.1).hom.toAlgebra
+  let : Algebra k N := ((algebraMap A N).comp (algebraMap k A)).toAlgebra
+  change (algebraMap k N).Smooth
+  apply RingHom.smooth_algebraMap.mpr
+  rcases subsingleton_or_nontrivial A with h | h
+  · let : Subsingleton N := Algebra.subsingleton A _
+    infer_instance
+  let : Nonempty U.1 := nonempty_chart U.2
+  let : Field L := (native_isField X U.1).toField
+  let : Algebra.FiniteType k A := finiteType_coefficients k p U.2
+  let : Ring.KrullDimLE 1 A := hdim U
+  let : Module.Finite A N := finite_chart k p U.2
+  exact CycleQ2NormalCurveSmooth.smooth_finite_integralClosure k A L
+
+theorem smooth (hdim : topologicalKrullDim X ≤ 1) : Smooth (normalize X ≫ p) := by
+  apply smooth_of_affine_dimension k p
+  intro U
+  apply Ring.krullDimLE_iff.mpr
+  rw [← PrimeSpectrum.topologicalKrullDim_eq_ringKrullDim]
+  let : IsOpenImmersion U.2.fromSpec := IsAffineOpen.isOpenImmersion_fromSpec U.2
+  exact (U.2.fromSpec.isOpenEmbedding.isInducing.topologicalKrullDim_le).trans hdim
+
+end CycleQ2IntegralCurveNormalization
+end
+
+#print axioms CycleQ2IntegralCurveNormalization.finite
+#print axioms CycleQ2IntegralCurveNormalization.proper
+#print axioms CycleQ2IntegralCurveNormalization.smooth_of_affine_dimension
+#print axioms CycleQ2IntegralCurveNormalization.smooth
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Recovering a neighborhood of the generic point through the normalization
+
+The section at the generic stalk spreads to an actual open of the curve.
+Pullback by this section recovers the original family on that open.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+namespace CycleQ2IntegralCurveNormalization
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace CycleQ2GenericPointAffineSections
+
+universe u
+variable (k : Type u) [Field k] [CharZero k] {X : Scheme.{u}} [IsIntegral X]
+variable (p : X ⟶ Spec (CommRingCat.of k)) [LocallyOfFiniteType p]
+
+include p in
+/-- A section of the finite normalization exists on an open containing the
+actual generic point of the original curve. -/
+theorem dominant_section_over_generic_open : ∃ (U : X.Opens), genericPoint X ∈ U ∧
+    ∃ σ : U.toScheme ⟶ Model X, IsDominant σ ∧ σ ≫ normalize X = U.ι := by
+  have := finite k p
+  have := residue_isIso X
+  let φ := Spec.map (inv (X.residue (genericPoint X))) ≫ (point X).toNormalization
+  have hφ : φ ≫ normalize X = X.fromSpecStalk (genericPoint X) ≫ 𝟙 X := by
+    rw [Category.comp_id]
+    change (_ ≫ (point X).toNormalization) ≫ (point X).fromNormalization = _
+    rw [Category.assoc, Scheme.Hom.toNormalization_fromNormalization]
+    change Spec.map (inv _) ≫ Spec.map (X.residue (genericPoint X)) ≫ X.fromSpecStalk _ = _
+    rw [← Spec.map_comp_assoc, IsIso.hom_inv_id, Spec.map_id, Category.id_comp]
+  obtain ⟨U, hU, σ, hφσ, hσ⟩ := spread_out_of_isGermInjective' (𝟙 X) (normalize X) φ hφ
+  have : IsDominant φ := by dsimp [φ]; infer_instance
+  have : IsDominant (U.fromSpecStalkOfMem _ hU ≫ σ) := by rw [← hφσ]; infer_instance
+  exact ⟨U, hU, σ, IsDominant.of_comp (U.fromSpecStalkOfMem _ hU) σ, hσ.trans (Category.comp_id _)⟩
+
+include p in
+theorem section_over_generic_open : ∃ (U : X.Opens), genericPoint X ∈ U ∧
+    ∃ σ : U.toScheme ⟶ Model X, σ ≫ normalize X = U.ι := by
+  obtain ⟨U, hU, σ, _, hσ⟩ := dominant_section_over_generic_open k p
+  exact ⟨U, hU, σ, hσ⟩
+
+private theorem restriction_iso_of_dominant_section {N Y : Scheme.{u}} [IsReduced N]
+    (ν : N ⟶ Y) [IsSeparated ν] (U : Y.Opens) (σ : U.toScheme ⟶ N) [IsDominant σ]
+    (hσ : σ ≫ ν = U.ι) : IsIso (ν ∣_ U) := by
+  let h := isPullback_morphismRestrict ν U
+  have w : 𝟙 _ ≫ U.ι = σ ≫ ν := by rw [Category.id_comp, hσ]
+  let τ := h.lift (𝟙 _) σ w
+  have hτ : τ ≫ (ν ∣_ U) = 𝟙 _ := h.lift_fst _ _ _
+  have hτ' : τ ≫ (ν ⁻¹ᵁ U).ι = σ := h.lift_snd _ _ _
+  have : IsDominant (τ ≫ (ν ⁻¹ᵁ U).ι) := by rw [hτ']; infer_instance
+  have : IsDominant τ := IsDominant.of_comp_of_isOpenImmersion _ (ν ⁻¹ᵁ U).ι
+  have : IsClosedImmersion (τ ≫ (ν ∣_ U)) := by rw [hτ]; infer_instance
+  have : IsClosedImmersion τ := IsClosedImmersion.of_comp _ (ν ∣_ U)
+  have : Surjective τ := surjective_of_isDominant_of_isClosed_range τ τ.isClosedEmbedding.isClosed_range
+  have := isIso_of_isClosedImmersion_of_surjective τ
+  exact IsIso.of_isIso_fac_left hτ
+
+include p in
+/-- The absolute normalization is an isomorphism above a neighborhood of the
+generic point. The whole inverse image recovers the original open. -/
+theorem iso_over_generic_open :
+    ∃ U : X.Opens, genericPoint X ∈ U ∧ IsIso (normalize X ∣_ U) := by
+  obtain ⟨U, hU, σ, hdom, hσ⟩ := dominant_section_over_generic_open k p
+  have := finite k p
+  exact ⟨U, hU, restriction_iso_of_dominant_section (normalize X) U σ hσ⟩
+
+end CycleQ2IntegralCurveNormalization
+end
+
+#print axioms CycleQ2IntegralCurveNormalization.section_over_generic_open
+#print axioms CycleQ2IntegralCurveNormalization.iso_over_generic_open
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# Affine chart dimension from a dense smooth curve
+
+A Noether normalization of an affine chart maps its dense smooth open to
+affine space. The residue-field transcendence-degree bound for that image
+forces the normalization to have at most one polynomial variable.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+namespace CycleQ2CurveChartDimension
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace CycleQ2SweptSupport
+
+private def affinePresentation (K : Type) [Field K] (s : ℕ) :
+    Algebra.PreSubmersivePresentation K (MvPolynomial (Fin s) K) (Fin s) Empty where
+  toPresentation :=
+    { toGenerators := Algebra.Generators.mvPolynomial K (Fin s)
+      relation := Empty.elim
+      span_range_relation_eq_ker := by rw [Algebra.Generators.ker_mvPolynomial]; simp }
+  map := Empty.elim
+  map_inj := by intro a; exact a.elim
+
+private theorem affine_smooth (K : Type) [Field K] (s : ℕ) : SmoothOfRelativeDimension s
+    (Spec.map (CommRingCat.ofHom (MvPolynomial.C : K →+* MvPolynomial (Fin s) K))) := by
+  let P : Algebra.SubmersivePresentation K (MvPolynomial (Fin s) K) (Fin s) Empty :=
+    { toPreSubmersivePresentation := affinePresentation K s
+      jacobian_isUnit := by
+        rw [Algebra.PreSubmersivePresentation.jacobian_eq_jacobiMatrix_det,
+          Matrix.det_isEmpty, map_one]
+        exact isUnit_one }
+  have hs : Algebra.IsStandardSmoothOfRelativeDimension s K (MvPolynomial (Fin s) K) :=
+    P.isStandardSmoothOfRelativeDimension (by
+      change Nat.card (Fin s) - Nat.card Empty = s
+      simp [Nat.card_eq_fintype_card])
+  apply (HasRingHomProperty.Spec_iff (P := @SmoothOfRelativeDimension s)).mpr
+  exact RingHom.locally_of RingHom.isStandardSmoothOfRelativeDimension_respectsIso _
+    ((RingHom.isStandardSmoothOfRelativeDimension_algebraMap s).mpr hs)
+
+private theorem polynomial_dim (K : Type) [Field K] {s : ℕ} (hs : s ≤ 1) :
+    Ring.DimensionLEOne (MvPolynomial (Fin s) K) := by
+  interval_cases s
+  · exact Ring.DimensionLEOne.of_ringEquiv (MvPolynomial.isEmptyRingEquiv K (Fin 0))
+  · exact Ring.DimensionLEOne.of_ringEquiv (MvPolynomial.uniqueAlgEquiv K (Fin 1)).toRingEquiv
+
+private theorem dim_of_finite {K : Type} [Field K] {s : ℕ} {A : Type} [CommRing A] [Algebra K A]
+    (g : MvPolynomial (Fin s) K →ₐ[K] A) (hf : g.IsIntegral) (hs : s ≤ 1) :
+    Ring.KrullDimLE 1 A := by
+  let P := MvPolynomial (Fin s) K
+  let : Algebra P A := g.toRingHom.toAlgebra
+  let : Algebra.IsIntegral P A := ⟨hf⟩
+  have hP : Ring.DimensionLEOne P := polynomial_dim K hs
+  rw [Ring.krullDimLE_iff]
+  have hdim : ringKrullDim A ≤ ringKrullDim P :=
+    Order.krullDim_le_of_strictMono (PrimeSpectrum.comap (algebraMap P A)) (fun _ _ h =>
+      Ideal.IsIntegral.comap_lt_comap h)
+  exact hdim.trans (Ring.krullDimLE_iff.mp inferInstance)
+
+/-- Every affine chart of a finite-type scheme with a dense smooth curve open has dimension at most one. -/
+theorem chart_dimension {K : Type} [Field K] {X B : Scheme.{0}} [NoetherianSpace X]
+    (j : X ⟶ B) [IsOpenImmersion j] [IsDominant j]
+    (p : B ⟶ Spec (CommRingCat.of K)) [LocallyOfFiniteType p]
+    [SmoothOfRelativeDimension 1 (j ≫ p)] {V : B.Opens} (hV : IsAffineOpen V) :
+    Ring.KrullDimLE 1 Γ(B, V) := by
+  let A := Γ(B, V)
+  rcases subsingleton_or_nontrivial A with h | h
+  · exact Ring.krullDimLE_iff.mpr (by rw [ringKrullDim_eq_bot_of_subsingleton]; exact bot_le)
+  let hle : V ≤ p ⁻¹ᵁ ⊤ := by simp
+  let c := (Scheme.ΓSpecIso (CommRingCat.of K)).inv ≫ p.appLE ⊤ V hle
+  let : Algebra K A := c.hom.toAlgebra
+  let : Algebra.FiniteType K A := (p.finiteType_appLE (isAffineOpen_top _) hV hle).comp
+    (RingHom.FiniteType.of_surjective _
+      (Scheme.ΓSpecIso (CommRingCat.of K)).symm.commRingCatIsoToRingEquiv.surjective)
+  obtain ⟨s, g, hg, hi⟩ := exists_integral_inj_algHom_of_fg K A
+  apply dim_of_finite g hi
+  by_contra! hs
+  let Y := (j ⁻¹ᵁ V).toScheme
+  let a : Y ⟶ Spec A := CycleQ2DenseOpenAffineSections.chart j hV
+  let b := Spec.map (CommRingCat.ofHom g.toRingHom)
+  let q := Spec.map (CommRingCat.ofHom (MvPolynomial.C : K →+* MvPolynomial (Fin s) K))
+  let px := (j ⁻¹ᵁ V).ι ≫ j ≫ p
+  let : NoetherianSpace Y := NoetherianSpace.set (j ⁻¹ᵁ V : Set X)
+  let : SmoothOfRelativeDimension 1 px := by
+    simpa only [Nat.zero_add] using smoothOfRelativeDimension_comp 0 1 (j ⁻¹ᵁ V).ι (j ≫ p)
+  let : SmoothOfRelativeDimension s q := affine_smooth K s
+  have ha : DenseRange a := by
+    have : IsDominant (j ∣_ V) := IsZariskiLocalAtTarget.restrict (P := @IsDominant) inferInstance V
+    let : IsDominant a := by dsimp [a, CycleQ2DenseOpenAffineSections.chart]; infer_instance
+    exact a.denseRange
+  have hb : DenseRange b := by
+    apply (PrimeSpectrum.denseRange_comap_iff_ker_le_nilRadical g.toRingHom).mpr
+    rw [(RingHom.injective_iff_ker_eq_bot g.toRingHom).mp hg]
+    exact bot_le
+  have hc : Spec.map c = hV.fromSpec ≫ p := by
+    rw [Spec.map_comp, ← IsAffineOpen.SpecMap_appLE_fromSpec p (isAffineOpen_top _) hV hle,
+      IsAffineOpen.fromSpec_top, Scheme.isoSpec_Spec_inv]
+  have hbq : b ≫ q = Spec.map c := by
+    rw [← Spec.map_comp]
+    apply congrArg Spec.map
+    apply CommRingCat.hom_ext
+    exact RingHom.ext g.commutes
+  have fac : (a ≫ b) ≫ q = px := by
+    rw [Category.assoc, hbq, hc]
+    change ((j ∣_ V) ≫ hV.isoSpec.hom) ≫ hV.fromSpec ≫ p = _
+    simp only [IsAffineOpen.fromSpec, Iso.hom_inv_id_assoc, Category.assoc,
+      morphismRestrict_ι_assoc, px]
+  exact (closure_range_ne_univ 1 s hs px q (genericPolynomialPoint K s) (a ≫ b) fac)
+    (denseRange_iff_closure_range.mp (hb.comp ha b.continuous))
+
+/-- On an integral scheme of finite type over a field, a single nonempty smooth curve
+open bounds the dimension of all affine charts. -/
+theorem chart_dimension_of_nonempty_smooth_open {K : Type} [Field K] {B : Scheme.{0}}
+    [IsIntegral B] (p : B ⟶ Spec (CommRingCat.of K)) [LocallyOfFiniteType p] [QuasiCompact p]
+    (U : B.Opens) (hU : (U : Set B).Nonempty) [SmoothOfRelativeDimension 1 (U.ι ≫ p)]
+    {V : B.Opens} (hV : IsAffineOpen V) : Ring.KrullDimLE 1 Γ(B, V) := by
+  have : IsDominant U.ι := ⟨by
+    change Dense (Set.range U.ι)
+    simpa using U.isOpen.dense hU⟩
+  have : IsLocallyNoetherian B := LocallyOfFiniteType.isLocallyNoetherian p
+  have : CompactSpace B := QuasiCompact.compactSpace_of_compactSpace p
+  have : IsNoetherian B := ⟨⟩
+  have : NoetherianSpace U.toScheme := NoetherianSpace.set (U : Set B)
+  exact chart_dimension U.ι p hV
+
+end CycleQ2CurveChartDimension
+
+#print axioms CycleQ2CurveChartDimension.chart_dimension
+#print axioms CycleQ2CurveChartDimension.chart_dimension_of_nonempty_smooth_open
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# The proper generic parameter curve over the monic sextic function field
+
+On the generic coefficient fiber the original smooth time open is dense in
+the finite model. Every affine chart of the proper fiber has Krull dimension
+at most one. The generic fiber is nonempty for the marked time neighborhood.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+namespace CycleQ2LiteralIncidenceGenericModel
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
+  CycleQ2IncidenceEtaleParameter CycleQ2IncidenceSeedFiberCover
+  CycleQ2LiteralIncidenceRelativeSpread CycleQ2LiteralIncidenceNormalizedSlice
+  CycleQ2LiteralIncidenceRelativeCompletion CycleQ2LiteralIncidenceRelativeNormalization
+
+abbrev K := FractionRing MonicRing
+
+def genericMorphism : Spec (CommRingCat.of K) ⟶ monicBase :=
+  Spec.map (CommRingCat.ofHom (algebraMap MonicRing K))
+
+instance : Flat genericMorphism := by
+  apply (HasRingHomProperty.Spec_iff (P := @Flat)).mpr
+  exact RingHom.flat_algebraMap_iff.mpr inferInstance
+
+theorem generic_value (s : Spec (CommRingCat.of K)) :
+    IsGenericPoint (genericMorphism s) Set.univ := by
+  have hd : DenseRange genericMorphism := by
+    apply (PrimeSpectrum.denseRange_comap_iff_ker_le_nilRadical (algebraMap MonicRing K)).mpr
+    rw [(RingHom.injective_iff_ker_eq_bot _).mp (IsFractionRing.injective MonicRing K)]
+    exact bot_le
+  have hr : Set.range genericMorphism = {genericMorphism s} := by
+    ext y
+    constructor
+    · rintro ⟨z, rfl⟩
+      exact congrArg genericMorphism (Subsingleton.elim z s)
+    · rintro rfl
+      exact ⟨s, rfl⟩
+  change closure {genericMorphism s} = Set.univ
+  rw [← hr]
+  exact hd.closure_range
+
+variable (V : parameterScheme.Opens)
+
+abbrev Fiber := pullback genericMorphism (normalizedMap V)
+
+abbrev projection : Fiber V ⟶ Spec (CommRingCat.of K) := pullback.fst _ _
+
+abbrev TimeFiber := pullback (pullback.snd genericMorphism (normalizedMap V)) (openInclusion V)
+
+abbrev inclusion : TimeFiber V ⟶ Fiber V := pullback.fst _ _
+
+theorem noetherian_of_proper {X Y : Scheme} [IsNoetherian Y] (p : X ⟶ Y)
+    [IsProper p] : NoetherianSpace X := by
+  have := QuasiCompact.compactSpace_of_compactSpace p
+  have : IsLocallyNoetherian X := LocallyOfFiniteType.isLocallyNoetherian p
+  have : IsNoetherian X := ⟨⟩
+  infer_instance
+
+instance : IsDominant (inclusion V) := by
+  have : IsNoetherian monicBase := inferInstanceAs (IsNoetherian (Spec (CommRingCat.of MonicRing)))
+  have : NoetherianSpace (Model V) := noetherian_of_proper (normalizedMap V)
+  have : NoetherianSpace (Time toRaw V) :=
+    (openInclusion V).isOpenEmbedding.isInducing.noetherianSpace
+  exact CycleQ2DominantFlatBaseChange.pullback_fst_dominant _ _
+
+theorem generic_open_smooth {X Y : Scheme} (j : X ⟶ Y) (p : Y ⟶ monicBase)
+    (hs : SmoothOfRelativeDimension 1 (j ≫ p)) :
+    SmoothOfRelativeDimension 1
+      (pullback.fst (pullback.snd genericMorphism p) j ≫ pullback.fst genericMorphism p) := by
+  let e := pullbackLeftPullbackSndIso genericMorphism p j
+  let q := pullback.fst (pullback.snd genericMorphism p) j ≫ pullback.fst genericMorphism p
+  let a := pullback.fst genericMorphism (j ≫ p)
+  have he : e.inv ≫ q = a := pullbackLeftPullbackSndIso_inv_fst ..
+  have hq : q = e.hom ≫ a := by
+    exact (e.hom_inv_id_assoc q).symm.trans
+      ((Category.assoc _ _ _).trans (congrArg (fun k => e.hom ≫ k) he))
+  have ha : SmoothOfRelativeDimension 1 a :=
+    (smoothOfRelativeDimension_isStableUnderBaseChange 1).of_isPullback
+      (IsPullback.of_hasPullback genericMorphism (j ≫ p)).flip hs
+  letI : SmoothOfRelativeDimension 1 a := ha
+  change SmoothOfRelativeDimension 1 q
+  rw [hq]
+  simpa only [Nat.zero_add] using smoothOfRelativeDimension_comp 0 1 e.hom a
+
+instance : SmoothOfRelativeDimension 1 (inclusion V ≫ projection V) :=
+  generic_open_smooth _ _ (normalized_time_model V).2.2.2
+
+instance : AlgebraicGeometry.IsReduced (TimeFiber V) :=
+  reduced_of_smooth_over_domain 1 (inclusion V ≫ projection V)
+
+/-- Any nonempty marked test open survives on the generic coefficient fiber. -/
+theorem test_meets_generic (W : (Time toRaw V).Opens) (hW : (W : Set (Time toRaw V)).Nonempty) :
+    ∃ x : TimeFiber V, pullback.snd (pullback.snd genericMorphism (normalizedMap V)) (openInclusion V) x ∈ W := by
+  have := timeMap_smooth toRaw V
+  have : Smooth (timeMap toRaw V) := SmoothOfRelativeDimension.smooth 1 _
+  have hg := ((generic_value default).mem_open_set_iff ((timeMap toRaw V).isOpenMap _ W.isOpen)).mpr
+    (by simpa only [Set.univ_inter] using hW.image (timeMap toRaw V))
+  obtain ⟨y, hy, he⟩ := hg
+  have h : genericMorphism default = (openInclusion V ≫ normalizedMap V) y := by
+    rw [open_over]
+    exact he.symm
+  obtain ⟨z, _, hz⟩ := Scheme.Pullback.exists_preimage_pullback
+    (f := genericMorphism) (g := openInclusion V ≫ normalizedMap V) default y h
+  refine ⟨(pullbackLeftPullbackSndIso genericMorphism (normalizedMap V) (openInclusion V)).inv z, ?_⟩
+  rwa [← Scheme.Hom.comp_apply, pullbackLeftPullbackSndIso_inv_snd_snd, hz]
+
+/-- The dimension bound holds on every affine chart, including those meeting the boundary. -/
+theorem chart_dimension {W : (Fiber V).Opens} (hW : IsAffineOpen W) :
+    Ring.KrullDimLE 1 Γ(Fiber V, W) := by
+  have : NoetherianSpace (Fiber V) := noetherian_of_proper (projection V)
+  have : NoetherianSpace (TimeFiber V) := (inclusion V).isOpenEmbedding.isInducing.noetherianSpace
+  exact CycleQ2CurveChartDimension.chart_dimension (inclusion V) (projection V) hW
+
+/-- A marked neighborhood has a nonempty proper generic fiber and its smooth open is dense. -/
+theorem exists_proper_generic_curve (t : Fin 3 → ℂ) (hi : AlgebraicIndependent ℚ t) :
+    ∃ V : parameterScheme.Opens, seedBasePoint ∈ V ∧ Surjective (projection V) ∧
+      IsProper (projection V) ∧ IsDominant (inclusion V) ∧
+      SmoothOfRelativeDimension 1 (inclusion V ≫ projection V) ∧
+      ∀ W : (Fiber V).affineOpens, Ring.KrullDimLE 1 Γ(Fiber V, W.1) := by
+  obtain ⟨W, hW, _, _, _, _, _, hsur⟩ := exists_surjective_completion t hi
+  have : IsDominant (openInclusion W ≫ toCompletion W) := by rw [open_toCompletion]; infer_instance
+  have := IsDominant.of_comp (openInclusion W) (toCompletion W)
+  have : Surjective (toCompletion W) :=
+    surjective_of_isDominant_of_isClosed_range _ (toCompletion W).isClosedMap.isClosed_range
+  have : Surjective (normalizedMap W) := by unfold normalizedMap; infer_instance
+  exact ⟨W, hW, inferInstance, inferInstance, inferInstance, inferInstance, fun U =>
+    chart_dimension W U.2⟩
+
+end CycleQ2LiteralIncidenceGenericModel
+end
+
+#print axioms CycleQ2LiteralIncidenceGenericModel.test_meets_generic
+#print axioms CycleQ2LiteralIncidenceGenericModel.exists_proper_generic_curve
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# A proper smooth generic curve retaining a prescribed time test
+
+Take the schematic closure of an irreducible open of the generic time fiber
+inside the proper fiber and normalize in its function field. A dense open of the
+resulting smooth proper integral curve comes from the original test through the
+original time and fiber maps.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+namespace CycleQ2LiteralIncidenceGenericSmoothCurve
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
+  CycleQ2IncidenceEtaleParameter CycleQ2LiteralIncidenceRelativeSpread
+  CycleQ2LiteralIncidenceNormalizedSlice CycleQ2LiteralIncidenceGenericModel
+
+variable (V : parameterScheme.Opens)
+
+abbrev testMap : TimeFiber V ⟶ Time toRaw V :=
+  pullback.snd _ (CycleQ2LiteralIncidenceRelativeNormalization.openInclusion V)
+
+private theorem recover_open {T X : Scheme} [IsIntegral X] (p : X ⟶ Spec (CommRingCat.of K))
+    [LocallyOfFiniteType p] (a : T ⟶ X) [IsOpenImmersion a] [IsDominant a] :
+    ∃ D : T.Opens, (D : Set T).Nonempty ∧
+      ∃ d : D.toScheme ⟶ CycleQ2IntegralCurveNormalization.Model X,
+        IsOpenImmersion d ∧ IsDominant d ∧
+        d ≫ CycleQ2IntegralCurveNormalization.normalize X = D.ι ≫ a := by
+  let n := CycleQ2IntegralCurveNormalization.normalize X
+  obtain ⟨G, hG, hi⟩ := CycleQ2IntegralCurveNormalization.iso_over_generic_open K p
+  let D := a ⁻¹ᵁ G
+  have hD : (D : Set T).Nonempty := a.denseRange.exists_mem_open G.isOpen ⟨_, hG⟩
+  let d := (a ∣_ G) ≫ inv (n ∣_ G) ≫ (n ⁻¹ᵁ G).ι
+  have : IsOpenImmersion d := by dsimp only [d]; infer_instance
+  have : Nonempty D.toScheme := hD.to_subtype
+  have hd : IsDominant d := ⟨IsOpenMap.denseRange_of_isPreirreducibleSpace _ d.isOpenMap⟩
+  refine ⟨D, hD, d, inferInstance, hd, ?_⟩
+  change (a ∣_ G ≫ inv (n ∣_ G) ≫ (n ⁻¹ᵁ G).ι) ≫ n = D.ι ≫ a
+  rw [Category.assoc, Category.assoc, ← morphismRestrict_ι n G,
+    ← Category.assoc (inv (n ∣_ G)) (n ∣_ G), IsIso.inv_hom_id, Category.id_comp]
+  exact morphismRestrict_ι a G
+
+private instance time_noetherian : NoetherianSpace (TimeFiber V) := by
+  have : NoetherianSpace (Fiber V) := noetherian_of_proper (projection V)
+  exact (inclusion V).isOpenEmbedding.isInducing.noetherianSpace
+
+/-- The smooth proper generic curve contains a dense open from the original test.
+The maps to the compactified fiber and to the test agree with the given projections. -/
+theorem test_proper_smooth_curve (W : (Time toRaw V).Opens) (hW : (W : Set (Time toRaw V)).Nonempty) :
+    ∃ (U : (TimeFiber V).Opens) (hle : U ≤ (testMap V) ⁻¹ᵁ W), IsIntegral U.toScheme ∧
+      ∃ hI : IsIntegral (CycleQ2IncidenceIntegralComponent.Model (inclusion V) U),
+        let C := @CycleQ2IntegralCurveNormalization.Model _ hI
+        let n := @CycleQ2IntegralCurveNormalization.normalize _ hI
+        let p := CycleQ2IncidenceIntegralComponent.toBase (inclusion V) (projection V) U
+        IsIntegral C ∧ IsFinite n ∧ IsProper (n ≫ p) ∧ Smooth (n ≫ p) ∧ Surjective (n ≫ p) ∧
+        (∀ A : C.affineOpens, Ring.KrullDimLE 1 Γ(C, A.1)) ∧
+        ∃ D : U.toScheme.Opens, (D : Set U.toScheme).Nonempty ∧
+          ∃ d : D.toScheme ⟶ C, IsOpenImmersion d ∧ IsDominant d ∧
+            SmoothOfRelativeDimension 1 (d ≫ n ≫ p) ∧
+            d ≫ n = D.ι ≫ CycleQ2IncidenceIntegralComponent.openInclusion (inclusion V) U ∧
+            d ≫ n ≫ (U.ι ≫ inclusion V).imageι = D.ι ≫ U.ι ≫ inclusion V ∧
+            (D.ι ≫ (testMap V).resLE W U hle) ≫ W.ι = D.ι ≫ U.ι ≫ testMap V ∧
+            ∃ O : C.Opens, Dense (O : Set C) ∧
+              ∃ e : D.toScheme ≅ O.toScheme, e.hom ≫ O.ι = d := by
+  obtain ⟨x, hx⟩ := test_meets_generic V W hW
+  obtain ⟨U, hle, hU, hI, hs, _, _⟩ :=
+    CycleQ2IncidenceIntegralComponent.exists_model (inclusion V) (projection V)
+      ((testMap V) ⁻¹ᵁ W) ⟨x, hx⟩
+  let Y := CycleQ2IncidenceIntegralComponent.Model (inclusion V) U
+  let p := CycleQ2IncidenceIntegralComponent.toBase (inclusion V) (projection V) U
+  let a := CycleQ2IncidenceIntegralComponent.openInclusion (inclusion V) U
+  let n := CycleQ2IntegralCurveNormalization.normalize Y
+  have : IsFinite n := CycleQ2IntegralCurveNormalization.finite K p
+  have : NoetherianSpace U.toScheme := NoetherianSpace.set (U : Set (TimeFiber V))
+  have hdY (A : Y.affineOpens) : Ring.KrullDimLE 1 Γ(Y,A.1) :=
+    CycleQ2CurveChartDimension.chart_dimension a p A.2
+  have hp := CycleQ2IntegralCurveNormalization.proper K p
+  have hsm := CycleQ2IntegralCurveNormalization.smooth_of_affine_dimension K p hdY
+  have hsur : Surjective (n ≫ p) :=
+    ⟨fun z => ⟨Classical.choice (inferInstance : Nonempty (CycleQ2IntegralCurveNormalization.Model Y)),
+      Subsingleton.elim _ z⟩⟩
+  obtain ⟨D, hD, d, hdo, hdd, hdn⟩ := recover_open p a
+  have : NoetherianSpace D.toScheme := NoetherianSpace.set (D : Set U.toScheme)
+  have hdsm : SmoothOfRelativeDimension 1 (d ≫ n ≫ p) := by
+    rw [← Category.assoc, hdn, Category.assoc]
+    simpa only [Nat.zero_add] using smoothOfRelativeDimension_comp 0 1 D.ι (a ≫ p)
+  refine ⟨U, hle, hU, hI, inferInstance, inferInstance, hp, hsm, hsur, fun A =>
+    CycleQ2CurveChartDimension.chart_dimension d (n ≫ p) A.2, D, hD, d, hdo, hdd, hdsm, hdn, ?_, ?_, ?_⟩
+  · rw [← Category.assoc, hdn, Category.assoc]
+    simp [a, CycleQ2IncidenceIntegralComponent.openInclusion]
+  · rw [Category.assoc, Scheme.Hom.resLE_comp_ι]
+  · exact ⟨d.opensRange, d.denseRange, d.isoOpensRange, d.isoOpensRange_hom_ι⟩
+
+end CycleQ2LiteralIncidenceGenericSmoothCurve
+end
+
+#print axioms CycleQ2LiteralIncidenceGenericSmoothCurve.test_proper_smooth_curve
+
+end
+
+end
+
+section
+
+noncomputable section
+
+/-!
+# The actual closed graph over the smooth generic time curve
+
+Pulling back the original closed graph to a generic time model gives a
+closed correspondence with the same strict target support. Over any
+open which maps to the original time family this base change recovers
+the original embedded curves by a cartesian square.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2GenericSmoothCurveGraph
+
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits
+  CycleQ2LiteralIncidenceRelativeSpread CycleQ2LiteralIncidenceNormalizedSlice
+  CycleQ2LiteralIncidenceRelativeCompletion CycleQ2LiteralIncidenceRelativeCorrespondence
+  CycleQ2LiteralIncidenceGenericCorrespondence
+open CycleQ2IncidenceEtaleParameter (parameterScheme)
+
+variable (V : parameterScheme.Opens) (t : Fin 3 → ℂ)
+variable {C : Scheme} (p : C ⟶ Completion V)
+
+abbrev Graph := pullback p (timeProjection V t)
+
+abbrev toCurve : Graph V t p ⟶ C := pullback.fst _ _
+abbrev toGraph : Graph V t p ⟶ Correspondence V t := pullback.snd _ _
+
+abbrev product := pullback (p ≫ structureMap V) ambientStructure
+
+private theorem projection_over :
+    ambientProjection V t ≫ ambientStructure = timeProjection V t ≫ structureMap V := by
+  change (embedding V t ≫ pullback.snd _ _) ≫ ambientStructure =
+    (embedding V t ≫ pullback.fst _ _) ≫ structureMap V
+  rw [Category.assoc, Category.assoc, pullback.condition]
+
+def embeddingOver : Graph V t p ⟶ product V p :=
+  pullback.lift (toCurve V t p) (toGraph V t p ≫ ambientProjection V t) <| by
+    have h : toCurve V t p ≫ p = toGraph V t p ≫ timeProjection V t :=
+      pullback.condition
+    rw [← Category.assoc, h, Category.assoc, Category.assoc, projection_over]
+
+private abbrev mapProduct : product V p ⟶ Product V :=
+  CycleQ2RelativeGraphClosure.productMap (p ≫ structureMap V) (structureMap V)
+    ambientStructure p rfl
+
+theorem embeddingOver_square :
+    IsPullback (embeddingOver V t p) (toGraph V t p) (mapProduct V p) (embedding V t) := by
+  have e : embeddingOver V t p ≫ mapProduct V p =
+      toGraph V t p ≫ embedding V t := by
+    apply pullback.hom_ext
+    · simp only [Category.assoc, mapProduct, CycleQ2RelativeGraphClosure.productMap_fst,
+        pullback.lift_fst_assoc, embeddingOver]
+      change toCurve V t p ≫ p = toGraph V t p ≫ timeProjection V t
+      exact pullback.condition
+    · simp only [Category.assoc, mapProduct, CycleQ2RelativeGraphClosure.productMap_snd,
+        embeddingOver, pullback.lift_snd]
+      rfl
+  have ef : embeddingOver V t p ≫ pullback.fst _ _ = toCurve V t p :=
+    pullback.lift_fst _ _ _
+  have h := CycleQ2RelativeGraphClosure.product_square (p ≫ structureMap V)
+    (structureMap V) ambientStructure p rfl
+  have outer : IsPullback (embeddingOver V t p ≫ pullback.fst _ _) (toGraph V t p) p
+      (timeProjection V t) := by
+    rw [ef]
+    exact IsPullback.of_hasPullback p (timeProjection V t)
+  exact outer.of_right e h
+
+instance : IsClosedImmersion (embeddingOver V t p) :=
+  MorphismProperty.of_isPullback (embeddingOver_square V t p).flip
+    (inferInstance : IsClosedImmersion (embedding V t))
+
+instance : IsProper (toCurve V t p) :=
+  IsProper.isStableUnderBaseChange.of_isPullback (IsPullback.of_hasPullback p (timeProjection V t)).flip
+    (inferInstance : IsProper (timeProjection V t))
+
+variable (c : C ⟶ Spec (CommRingCat.of genericField))
+  (hc : p ≫ structureMap V = c ≫ genericPoint)
+
+def toGenericGraph : Graph V t p ⟶ genericCorrespondence V t :=
+  pullback.lift (toGraph V t p) (toCurve V t p ≫ c) <| by
+    have h : toCurve V t p ≫ p = toGraph V t p ≫ timeProjection V t :=
+      pullback.condition
+    calc
+      toGraph V t p ≫ (timeProjection V t ≫ structureMap V) =
+          (toGraph V t p ≫ timeProjection V t) ≫ structureMap V := (Category.assoc _ _ _).symm
+      _ = (toCurve V t p ≫ p) ≫ structureMap V :=
+        congrArg (fun k => k ≫ structureMap V) h.symm
+      _ = (toCurve V t p ≫ c) ≫ genericPoint := by
+        rw [Category.assoc, hc, Category.assoc]
+
+abbrev target : Graph V t p ⟶ genericAmbient :=
+  toGenericGraph V t p c hc ≫ genericAmbientProjection V t
+
+theorem target_in_original_support :
+    Set.range (target V t p c hc) ⊆ Set.range (genericAmbientProjection V t) := by
+  rintro _ ⟨x, rfl⟩
+  exact ⟨toGenericGraph V t p c hc x, rfl⟩
+
+abbrev genericProduct := pullback c (pullback.snd ambientStructure genericPoint)
+
+include hc in
+private theorem genericProduct_square :
+    IsPullback (pullback.fst c (pullback.snd ambientStructure genericPoint))
+      (pullback.snd c (pullback.snd ambientStructure genericPoint) ≫
+        pullback.fst ambientStructure genericPoint)
+      (p ≫ structureMap V) ambientStructure := by
+  rw [hc]
+  exact (IsPullback.of_hasPullback c (pullback.snd ambientStructure genericPoint)).paste_vert
+    (IsPullback.of_hasPullback ambientStructure genericPoint).flip
+
+/-- The base changed graph is an actual closed subscheme of the product over the coefficient field. -/
+def embeddingGeneric : Graph V t p ⟶ genericProduct c :=
+  embeddingOver V t p ≫ (genericProduct_square V p c hc).isoPullback.inv
+
+instance : IsClosedImmersion (embeddingGeneric V t p c hc) := by
+  unfold embeddingGeneric
+  infer_instance
+
+@[reassoc]
+theorem embeddingGeneric_toCurve :
+    embeddingGeneric V t p c hc ≫ pullback.fst _ _ = toCurve V t p := by
+  rw [embeddingGeneric, Category.assoc, (genericProduct_square V p c hc).isoPullback_inv_fst]
+  exact pullback.lift_fst _ _ _
+
+@[reassoc]
+theorem embeddingGeneric_toAmbient :
+    embeddingGeneric V t p c hc ≫ pullback.snd _ _ = target V t p c hc := by
+  let α := pullback.snd ambientStructure (CycleQ2LiteralIncidenceGenericCorrespondence.genericPoint)
+  let β := pullback.fst ambientStructure (CycleQ2LiteralIncidenceGenericCorrespondence.genericPoint)
+  have hfst : embeddingGeneric V t p c hc ≫ pullback.snd c α ≫ β =
+      toGraph V t p ≫ ambientProjection V t := by
+    rw [embeddingGeneric, Category.assoc, (genericProduct_square V p c hc).isoPullback_inv_snd]
+    exact pullback.lift_snd _ _ _
+  have hsnd : embeddingGeneric V t p c hc ≫ pullback.snd c α ≫ α = toCurve V t p ≫ c := by
+    rw [← pullback.condition (f := c) (g := α), embeddingGeneric_toCurve_assoc]
+  apply pullback.hom_ext
+  · rw [Category.assoc, hfst]
+    simp only [target, Category.assoc, genericAmbientProjection,
+      CycleQ2CoefficientBaseChange.changeMap_fst, toGenericGraph, pullback.lift_fst_assoc]
+  · rw [Category.assoc, hsnd]
+    simp only [target, Category.assoc, genericAmbientProjection,
+      CycleQ2CoefficientBaseChange.changeMap_snd, toGenericGraph, pullback.lift_snd]
+
+theorem target_proper [IsProper c] : IsProper (target V t p c hc) := by
+  rw [← embeddingGeneric_toAmbient]
+  infer_instance
+
+variable {D : Scheme} (k : D ⟶ C) (u : D ⟶ Time toRaw V)
+  (h : k ≫ p = u ≫ CycleQ2LiteralIncidenceRelativeCompletion.inclusion V)
+
+abbrev TestSurface := pullback u (curveMap toRaw V t)
+
+def fromTest : TestSurface V t u ⟶ Graph V t p :=
+  pullback.lift (pullback.fst _ _ ≫ k) (pullback.snd _ _ ≫ fromSurface V t) <| by
+    rw [Category.assoc, h, ← Category.assoc, pullback.condition, Category.assoc, Category.assoc,
+      fromSurface_toTime]
+
+/-- The original time family gives exactly the graph on the retracted test open. -/
+theorem test_square :
+    IsPullback (pullback.fst u (curveMap toRaw V t)) (fromTest V t p k u h) k (toCurve V t p) := by
+  have h₁ : fromTest V t p k u h ≫ toCurve V t p = pullback.fst _ _ ≫ k :=
+    pullback.lift_fst _ _ _
+  have h₂ : fromTest V t p k u h ≫ toGraph V t p = pullback.snd _ _ ≫ fromSurface V t :=
+    pullback.lift_snd _ _ _
+  have outer := (IsPullback.of_hasPullback u (curveMap toRaw V t)).flip.paste_horiz
+    (timeOpen_pullback V t).flip
+  rw [← h, ← h₂] at outer
+  exact (outer.of_right h₁ (IsPullback.of_hasPullback p (timeProjection V t)).flip).flip
+
+theorem test_to_original_ambient :
+    fromTest V t p k u h ≫ toGraph V t p ≫ ambientProjection V t =
+      pullback.snd _ _ ≫ CycleQ2LiteralIncidenceRelativeCylinder.relativeQ toRaw V t := by
+  have hs : fromTest V t p k u h ≫ toGraph V t p = pullback.snd _ _ ≫ fromSurface V t :=
+    pullback.lift_snd _ _ _
+  rw [← Category.assoc, hs, Category.assoc, fromSurface_toAmbient]
+
+section Marked
+
+open CycleQ2LiteralIncidenceGenericModel
+open CycleQ2LiteralIncidenceGenericSmoothCurve
+
+variable {V t}
+
+/-- The generic proper graph can be based on a smooth proper integral curve.
+Its test open maps into the chosen original time open, and carries the same
+embedded surface. -/
+theorem exists_smooth_curve_graph (W : (Time toRaw V).Opens) (hW : (W : Set (Time toRaw V)).Nonempty) :
+    ∃ (C : Scheme) (c : C ⟶ Spec (CommRingCat.of genericField)) (r : C ⟶ Completion V)
+      (hr : r ≫ structureMap V = c ≫ CycleQ2LiteralIncidenceGenericCorrespondence.genericPoint),
+      IsIntegral C ∧ IsProper c ∧ Smooth c ∧
+      IsClosedImmersion (embeddingGeneric V t r c hr) ∧ IsProper (toCurve V t r) ∧
+      IsProper (target V t r c hr) ∧
+      Set.range (target V t r c hr) ⊆ Set.range (genericAmbientProjection V t) ∧
+      ∃ (D : Scheme) (j : D ⟶ C) (a : D ⟶ Time toRaw V)
+        (ha : j ≫ r = a ≫ CycleQ2LiteralIncidenceRelativeCompletion.inclusion V),
+        IsOpenImmersion j ∧ IsDominant j ∧ Nonempty D ∧ Set.range a ⊆ (W : Set (Time toRaw V)) ∧
+        IsPullback (pullback.fst a (curveMap toRaw V t)) (fromTest V t r j a ha) j (toCurve V t r) := by
+  obtain ⟨U, hle, hU, hI, hC, _, hp, hs, _, _, E, hE, j, hj, hjd, _, _, hjr, _, _⟩ :=
+    test_proper_smooth_curve V W hW
+  let n := @CycleQ2IntegralCurveNormalization.normalize _ hI
+  let e := (U.ι ≫ CycleQ2LiteralIncidenceGenericModel.inclusion V).imageι
+  let f := n ≫ e
+  let c := f ≫ projection V
+  let r := f ≫ pullback.snd genericMorphism (CycleQ2LiteralIncidenceRelativeNormalization.normalizedMap V) ≫
+    CycleQ2LiteralIncidenceRelativeNormalization.toCompletion V
+  have hc : r ≫ structureMap V = c ≫ CycleQ2LiteralIncidenceGenericCorrespondence.genericPoint := by
+    simp only [r, c, Category.assoc, projection]
+    change f ≫ pullback.snd _ _ ≫ CycleQ2LiteralIncidenceRelativeNormalization.normalizedMap V =
+      f ≫ pullback.fst _ _ ≫ genericMorphism
+    rw [pullback.condition]
+  let a := E.ι ≫ U.ι ≫ testMap V
+  have ha : j ≫ r = a ≫ CycleQ2LiteralIncidenceRelativeCompletion.inclusion V := by
+    have H : j ≫ f = E.ι ≫ U.ι ≫ CycleQ2LiteralIncidenceGenericModel.inclusion V :=
+      (Category.assoc _ _ _).symm.trans hjr
+    change j ≫ f ≫ _ = _
+    rw [← Category.assoc j f, H]
+    simp only [Category.assoc, a, testMap]
+    rw [pullback.condition_assoc, CycleQ2LiteralIncidenceRelativeNormalization.open_toCompletion]
+  have hpc : IsProper c := by
+    dsimp only [c, f]
+    rw [Category.assoc]
+    exact hp
+  have hsc : Smooth c := by
+    dsimp only [c, f]
+    rw [Category.assoc]
+    exact hs
+  refine ⟨_, c, r, hc, hC, hpc, hsc, inferInstance, inferInstance,
+    target_proper V t r c hc, target_in_original_support V t r c hc, E.toScheme, j, a, ha, hj, hjd, hE.to_subtype, ?_,
+    test_square V t r j a ha⟩
+  rintro _ ⟨x, rfl⟩
+  exact hle ((E.ι x).property)
+
+end Marked
+
+end CycleQ2GenericSmoothCurveGraph
+
+#print axioms CycleQ2GenericSmoothCurveGraph.embeddingOver_square
+#print axioms CycleQ2GenericSmoothCurveGraph.test_square
+#print axioms CycleQ2GenericSmoothCurveGraph.exists_smooth_curve_graph
 
 end
 

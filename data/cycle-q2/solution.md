@@ -433,6 +433,33 @@ primitive. The existence of this boundary remains open.
 [Exact-frame derivative](GeometricUniversalWeightedDeRham.lean) and
 [native affine representative and transfer](GeometricMonicGenericSupport.lean)
 
+## A smooth proper generic time curve for the closed graph
+
+Normalize the finite type time completion along its dense reduced open.
+Flat base change to the monic coefficient field preserves the dense open.
+Every nonempty original time test open meets this smooth one-dimensional
+generic fiber because the original time map is smooth and open.
+
+In that test choose a nonempty integral open of an irreducible component,
+take its schematic closure in the proper fiber, and normalize in its own
+function field. The normalization is finite. Its affine charts have
+dimension at most one, so normality and characteristic zero imply
+smoothness over the coefficient field. Restriction to the nonempty open
+where the normalization is an isomorphism recovers a dense part of the
+original test with the original maps to the time completion and base.
+
+Base change of the actual closed incidence graph gives a closed subscheme
+of the product of this smooth proper curve and the generic threefold.
+Its projection to the threefold is proper and factors through the prior
+generic graph, so its image is contained in the same strict swept
+support. Over the recovered test open the original surface of embedded
+curves identifies with the new graph by a Cartesian square. The ambient
+projection there is the original curve embedding. This supplies an
+actual proper smooth curve for the correspondence construction.
+The action on the global unfiltered de Rham complex and its nonzero
+pairing still require proof.
+[Generic smooth time curve and closed graph](GeometricMonicGenericSupport.lean)
+
 ## The generic affine stalk criterion
 
 Write the regular weighted form on the native affine patch as a scalar
