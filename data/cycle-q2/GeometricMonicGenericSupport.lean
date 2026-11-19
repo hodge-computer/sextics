@@ -5409,3 +5409,454 @@ end CycleQ2NativeWeightedDeRham
 #print axioms CycleQ2NativeWeightedDeRham.exists_weighted_vertex
 
 end
+
+section
+
+/-!
+# Evaluation of the actual relative forms at a field-valued point
+
+Evaluation on an open through a field-valued point commutes with
+restriction of the original section rings. Over an affine chart it
+is the given ring map from the chart's coordinate ring.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2RelativePointEvaluation
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2SmoothRelativeFrames CycleQ2RelativeAffineOverlap
+open CycleQ2AffineFrameBinding
+
+variable {K L : Type} [Field K] [Field L] [Algebra K L] {X : Scheme.{0}}
+  (f : X ⟶ Spec (CommRingCat.of K)) (q : Spec (CommRingCat.of L) ⟶ X)
+  (hq : q ≫ f = Spec.map (CommRingCat.ofHom (algebraMap K L)))
+
+abbrev point := q (IsLocalRing.closedPoint L)
+
+private theorem point_top {U : X.Opens} (h : point q ∈ U) :
+    ⊤ ≤ q ⁻¹ᵁ U := fun y _ => by
+  have e : y = IsLocalRing.closedPoint L := Subsingleton.elim _ _
+  rw [e]
+  exact h
+
+private def ringValue (U : X.Opens) (h : point q ∈ U) : Γ(X, U) ⟶ CommRingCat.of L :=
+  q.appLE U ⊤ (point_top q h) ≫ (Scheme.ΓSpecIso (CommRingCat.of L)).hom
+
+include hq in
+theorem ringValue_coefficients (U : X.Opens) (h : point q ∈ U) (a : K) :
+    ringValue q U h (sectionCoefficients f U a) = algebraMap K L a := by
+  let m := CommRingCat.ofHom (algebraMap K L)
+  have e : (Scheme.ΓSpecIso (CommRingCat.of K)).inv ≫ f.appLE ⊤ U
+      (by rw [Scheme.Hom.preimage_top]; exact le_top) ≫ ringValue q U h = m := by
+    rw [ringValue, ← Category.assoc (f.appLE _ _ _) (q.appLE _ _ _) _,
+      Scheme.Hom.appLE_comp_appLE]
+    have ha : (q ≫ f).appLE ⊤ ⊤ le_rfl = (q ≫ f).appTop :=
+      Scheme.Hom.appLE_eq_app (q ≫ f)
+    erw [ha, hq]
+    change (Scheme.ΓSpecIso (CommRingCat.of K)).inv ≫ (Spec.map m).appTop ≫ _ = m
+    rw [← Category.assoc, ← Scheme.ΓSpecIso_inv_naturality m,
+      Category.assoc, Iso.inv_hom_id, Category.comp_id]
+  exact congrArg (fun g => g a) e
+
+def value (U : X.Opens) (h : point q ∈ U) :
+    letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+    Γ(X, U) →ₐ[K] L :=
+  letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  { (ringValue q U h).hom with commutes' := ringValue_coefficients f q hq U h }
+
+theorem value_restrict {U V : X.Opens} (k : V ≤ U) (h : point q ∈ V) :
+    letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+    letI : Algebra K Γ(X, V) := (sectionCoefficients f V).toAlgebra
+    (value f q hq V h).comp (restrict f k) = value f q hq U (k h) := by
+  letI : Algebra K Γ(X, U) := (sectionCoefficients f U).toAlgebra
+  letI : Algebra K Γ(X, V) := (sectionCoefficients f V).toAlgebra
+  have e : X.presheaf.map (homOfLE k).op ≫ ringValue q V h = ringValue q U (k h) := by
+    unfold ringValue
+    rw [← Category.assoc, Scheme.Hom.map_appLE]
+  apply AlgHom.ext
+  intro a
+  exact congrArg (fun m => m a) e
+
+variable {A : Type} [CommRing A] [Algebra K A]
+  (j : Spec (CommRingCat.of A) ⟶ X) [IsOpenImmersion j]
+  (hj : j ≫ f = Spec.map (CommRingCat.ofHom (algebraMap K A))) (φ : A →ₐ[K] L)
+
+abbrev ofChart := Spec.map (CommRingCat.ofHom φ.toRingHom) ≫ j
+
+include hj in
+theorem chart_over : ofChart j φ ≫ f = Spec.map (CommRingCat.ofHom (algebraMap K L)) := by
+  rw [ofChart, Category.assoc, hj, ← Spec.map_comp]
+  congr 1
+  ext a
+  exact φ.commutes a
+
+theorem point_mem_chart : point (ofChart j φ) ∈ j ''ᵁ ⊤ := by
+  exact ⟨Spec.map (CommRingCat.ofHom φ.toRingHom) (IsLocalRing.closedPoint L), trivial, rfl⟩
+
+theorem value_chart :
+    letI : Algebra K Γ(X, j ''ᵁ ⊤) := (sectionCoefficients f (j ''ᵁ ⊤)).toAlgebra
+    value f (ofChart j φ) (chart_over f j hj φ) (j ''ᵁ ⊤) (point_mem_chart j φ) =
+      φ.comp (sectionEquiv f j hj).toAlgHom := by
+  letI : Algebra K Γ(X, j ''ᵁ ⊤) := (sectionCoefficients f (j ''ᵁ ⊤)).toAlgebra
+  let m := CommRingCat.ofHom φ.toRingHom
+  have e : ringValue (ofChart j φ) (j ''ᵁ ⊤) (point_mem_chart j φ) =
+      (j.appIso ⊤).hom ≫ (Scheme.ΓSpecIso (CommRingCat.of A)).hom ≫ m := by
+    unfold ringValue ofChart
+    rw [Scheme.Hom.appIso_hom', ← Scheme.ΓSpecIso_naturality m, ← Category.assoc]
+    congr 1
+  apply AlgHom.ext
+  intro a
+  exact congrArg (fun n => n a) e
+
+end CycleQ2RelativePointEvaluation
+
+#print axioms CycleQ2RelativePointEvaluation.value_restrict
+#print axioms CycleQ2RelativePointEvaluation.value_chart
+
+end
+
+section
+
+/-!
+# Local top-degree boundaries in the native relative de Rham complex
+
+At a field-valued point, a zero top cokernel germ has a primitive on an
+actual affine neighborhood of that point. Evaluation of the ordinary
+form on the neighborhood commutes with restriction and exterior
+differentiation, including when the neighborhood lies inside the
+original weighted chart.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2ActualTopGerm
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite AlgebraicGeometry
+open CycleQ2SmoothRelativeFrames CycleQ2RelativeAffineOverlap CycleQ2FramedAffineSite
+open CycleQ2RelativeDeRhamSheaves CycleQ2ExactFrameThreeDeRham
+open CycleQ2WeightedCoordinateExterior CycleQ2AffineDeRhamFunctorial
+open CycleQ2RelativePointEvaluation
+
+section LocalPreimage
+
+variable {X : TopCat.{0}} {F G : TopCat.Sheaf AddCommGrpCat.{0} X} (d : F ⟶ G)
+  {U : Opens X} (ω : G.obj.obj (op U)) (x : X) (hx : x ∈ U)
+
+/-- An actual local boundary on the original topological space. -/
+theorem exists_local_primitive
+    (h : TopCat.Presheaf.germ (X := X) (cokernel d).obj U x hx ((cokernel.π d).hom.app (op U) ω) = 0) :
+    ∃ (V : Opens X) (i : V ⟶ U), x ∈ V ∧
+      ∃ η : F.obj.obj (op V), d.hom.app (op V) η = G.obj.map i.op ω := by
+  let A : X.Presheaf AddCommGrpCat.{0} := F.obj
+  let B : X.Presheaf AddCommGrpCat.{0} := G.obj
+  let q := cokernel.π d
+  let St := TopCat.Sheaf.forget AddCommGrpCat.{0} X ⋙ TopCat.Presheaf.stalkFunctor AddCommGrpCat.{0} x
+  letI : St.Additive := by dsimp [St]; infer_instance
+  letI : PreservesFiniteLimits St := by dsimp [St]; infer_instance
+  letI : PreservesFiniteColimits St := by dsimp [St]; infer_instance
+  let S := ShortComplex.mk d q (cokernel.condition d)
+  have hS : S.Exact := ShortComplex.exact_cokernel d
+  have hE : (S.map St).Exact := hS.map St
+  have hq : St.map q (B.germ U x hx ω) = 0 :=
+    (TopCat.Presheaf.stalkFunctor_map_germ_apply U x hx q.hom ω).trans h
+  obtain ⟨b, hb⟩ := (ShortComplex.ab_exact_iff (S.map St)).mp hE (B.germ U x hx ω) hq
+  obtain ⟨V, hxV, η, hη⟩ := A.exists_germ_eq b
+  have he : B.germ V x hxV (d.hom.app (op V) η) = B.germ U x hx ω :=
+    (TopCat.Presheaf.stalkFunctor_map_germ_apply V x hxV d.hom η).symm.trans
+      ((congrArg (St.map d) hη).trans hb)
+  obtain ⟨W, hxW, k, i, hi⟩ := B.germ_eq x hxV hx _ _ he
+  refine ⟨W, i, hxW, A.map k.op η, ?_⟩
+  exact (NatTrans.naturality_apply d.hom k.op η).trans hi
+
+end LocalPreimage
+
+section FieldValue
+
+variable {K L : Type} [Field K] [Field L] [Algebra K L] {X : Scheme.{0}}
+  (f : X ⟶ Spec (CommRingCat.of K)) [SmoothOfRelativeDimension 3 f]
+  (q : Spec (CommRingCat.of L) ⟶ X)
+  (hq : q ≫ f = Spec.map (CommRingCat.ofHom (algebraMap K L)))
+
+abbrev Sections (p : ℕ) (U : FramedOpen f) := (sheafForms f p).obj.obj (op U.1)
+
+def evalForm (U : FramedOpen f) (hU : point q ∈ U.1) (ω : Sections f 3 U) :
+    Form K L 3 :=
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  exteriorPullback (value f q hq U.1 hU) 3 ((onBasisIso f 3).hom.app (op U) ω)
+
+theorem evalForm_restrict {U V : FramedOpen f} (k : V ⟶ U)
+    (hV : point q ∈ V.1) (ω : Sections f 3 U) :
+    evalForm f q hq V hV ((sheafForms f 3).obj.map (homOfLE k.le).op ω) =
+      evalForm f q hq U (k.le hV) ω := by
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  unfold evalForm
+  have hE := NatTrans.naturality_apply (onBasisIso f 3).hom k.op ω
+  change (onBasisIso f 3).hom.app (op V) ((sheafForms f 3).obj.map (homOfLE k.le).op ω) =
+    exteriorPullback (restrict f k.le) 3 ((onBasisIso f 3).hom.app (op U) ω) at hE
+  exact (congrArg (exteriorPullback (value f q hq V.1 hV) 3) hE).trans
+    ((exteriorPullback_comp (restrict f k.le) (value f q hq V.1 hV) 3
+      ((onBasisIso f 3).hom.app (op U) ω)).symm.trans <| by
+        rw [value_restrict])
+
+/-- The actual top differential is the ordinary exact-frame formula at
+an affine member of the basis. -/
+theorem onBasis_top (U : FramedOpen f) (η : Sections f 2 U) :
+    letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+    (onBasisIso f 3).hom.app (op U) ((differential f 2).hom.app (op U.1) η) =
+      exteriorD2 (frame f U) (exactFrameDirection (frame f U))
+        ((onBasisIso f 2).hom.app (op U) η) := by
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  exact congrArg (fun m => m η) (onBasisIso_d f 2 U)
+
+end FieldValue
+
+end CycleQ2ActualTopGerm
+
+#print axioms CycleQ2ActualTopGerm.exists_local_primitive
+#print axioms CycleQ2ActualTopGerm.evalForm_restrict
+#print axioms CycleQ2ActualTopGerm.onBasis_top
+
+end
+
+section
+
+/-!
+# The original weighted form in the top cokernel of the full native complex
+
+A zero germ of the top cokernel class of the actual weighted vertex
+produces a local ordinary two-form primitive on the generic threefold.
+Evaluating at the original function field gives the protected exactness.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2NativeWeightedTopGerm
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry Opposite TopologicalSpace
+open CycleQ2RelativePointEvaluation CycleQ2ActualTopGerm CycleQ2NativeWeightedDeRham
+open CycleQ2NativeWeightedCover CycleQ2NativeResidueOffGraph
+open CycleQ2NativeNormalResidue
+open CycleQ2NormalWeightedCotangent (A)
+open CycleQ2LiteralIncidenceGenericCorrespondence (genericAmbient)
+open CycleQ2MonicGenericAmbientChart (K)
+open CycleQ2FramedAffineSite CycleQ2RelativeDeRhamSheaves CycleQ2SmoothRelativeFrames
+open CycleQ2ExactFrameThreeDeRham CycleQ2WeightedRationalRestriction
+open CycleQ2WeightedCoordinateExterior
+open CycleQ2UniversalWeightedDeRham (W sourceForm)
+open CycleQ2AffineDeRhamFunctorial
+open CycleQ2IncidenceEtaleParameter (parameterScheme)
+
+local instance : SmoothOfRelativeDimension 3 ambientToField :=
+  CycleQ2NativeGenericSmooth.ambient_smooth
+
+abbrev functionPoint (s : A) (hs : s ≠ 0) : Spec (CommRingCat.of W) ⟶ genericAmbient :=
+  ofChart (patchInclusion s) (evaluatePatch s hs)
+
+theorem functionPoint_over (s : A) (hs : s ≠ 0) :
+    functionPoint s hs ≫ ambientToField = Spec.map (CommRingCat.ofHom (algebraMap K W)) :=
+  chart_over ambientToField (patchInclusion s) (patch_over s) (evaluatePatch s hs)
+
+abbrev x (s : A) (hs : s ≠ 0) : genericAmbient := point (functionPoint s hs)
+
+theorem x_mem_vertex (s : A) (hs : s ≠ 0) : x s hs ∈ (vertex s).1 :=
+  point_mem_chart (patchInclusion s) (evaluatePatch s hs)
+
+theorem eval_vertex (s : A) (hs : s ≠ 0) (ω : VertexSections s) :
+    evalForm ambientToField (functionPoint s hs) (functionPoint_over s hs)
+      (vertex s) (x_mem_vertex s hs) ω = evaluate (evaluatePatch s hs) 3 (asOrdinaryForm s ω) := by
+  letI : Algebra K Γ(genericAmbient, (vertex s).1) :=
+    (sectionCoefficients ambientToField (vertex s).1).toAlgebra
+  unfold evalForm asOrdinaryForm
+  have hv : value ambientToField (functionPoint s hs) (functionPoint_over s hs) _ (x_mem_vertex s hs) =
+      (evaluatePatch s hs).comp (vertexRingIso s).toAlgHom :=
+    value_chart ambientToField (patchInclusion s) (patch_over s) (evaluatePatch s hs)
+  rw [hv]
+  exact exteriorPullback_comp (vertexRingIso s).toAlgHom (evaluatePatch s hs) 3
+    ((onBasisIso ambientToField 3).hom.app (op (vertex s)) ω)
+
+abbrev topMap := differential ambientToField 2
+
+def topGerm (s : A) (hs : s ≠ 0) (ω : VertexSections s) :
+    TopCat.Presheaf.stalk (C := AddCommGrpCat.{0}) (X := (show TopCat from genericAmbient)) (cokernel topMap).obj (x s hs) :=
+  TopCat.Presheaf.germ (X := (show TopCat from genericAmbient)) (cokernel topMap).obj
+    (vertex s).1 (x s hs) (x_mem_vertex s hs)
+    ((cokernel.π topMap).hom.app (op (vertex s).1) ω)
+
+theorem protected_of_zero_topGerm (s : A) (hs : s ≠ 0) (ω : VertexSections s)
+    (hω : evaluate (evaluatePatch s hs) 3 (asOrdinaryForm s ω) = sourceForm)
+    (h : topGerm s hs ω = 0) :
+    ∃ η : CycleQ2AffineExterior.Form 3, CycleQ2AffineExterior.exteriorD3 η =
+      CycleQ2AffineExactness.residueSourceForm CycleQ2AffineClearing.affineA := by
+  obtain ⟨U, k, hx, η, hη⟩ := exists_local_primitive topMap ω (x s hs) (x_mem_vertex s hs) h
+  obtain ⟨V, hV, hxV, hle⟩ :=
+    (Opens.isBasis_iff_nbhd.mp (CycleQ2FiniteExactAffineAtlas.isBasis ambientToField 3)) hx
+  let v : FramedOpen ambientToField := ⟨V, hV⟩
+  let j : v ⟶ vertex s := homOfLE (hle.trans (leOfHom k))
+  let i : V ⟶ U := homOfLE hle
+  let ζ : Sections ambientToField 2 v := (sheafForms ambientToField 2).obj.map i.op η
+  have hζ : topMap.hom.app (op v.1) ζ =
+      (sheafForms ambientToField 3).obj.map (homOfLE j.le).op ω := by
+    have hn := NatTrans.naturality_apply topMap.hom i.op η
+    rw [hη] at hn
+    exact hn.trans ((sheafForms ambientToField 3).obj.map_comp_apply k.op i.op ω).symm
+  letI : Algebra K Γ(genericAmbient, v.1) := (sectionCoefficients ambientToField v.1).toAlgebra
+  let b := frame ambientToField v
+  let D := (exteriorD2 b (exactFrameDirection b)).toAddMonoidHom
+  let φ := value ambientToField (functionPoint s hs) (functionPoint_over s hs) v.1 hxV
+  let θ := (onBasisIso ambientToField 2).hom.app (op v) ζ
+  have hD : ExactWedgeRule D :=
+    exteriorD2_exactFrame b (functions ambientToField v) (frame_apply ambientToField v)
+  let α := (sheafForms ambientToField 3).obj.map (homOfLE j.le).op ω
+  have he : D θ = (onBasisIso ambientToField 3).hom.app (op v) α :=
+    (onBasis_top ambientToField v ζ).symm.trans
+      (congrArg ((onBasisIso ambientToField 3).hom.app (op v)) hζ)
+  have hv : evalForm ambientToField (functionPoint s hs) (functionPoint_over s hs) v hxV α = sourceForm :=
+    (evalForm_restrict ambientToField (functionPoint s hs) (functionPoint_over s hs)
+      j hxV ω).trans ((eval_vertex s hs ω).trans hω)
+  exact protected_exact_of_affine_boundary φ D hD _ hv θ he
+
+end CycleQ2NativeWeightedTopGerm
+
+#print axioms CycleQ2NativeWeightedTopGerm.protected_of_zero_topGerm
+
+end
+
+section
+
+/-!
+# The canonical top projection of the native relative de Rham complex
+
+The full integer-graded complex maps canonically to its top cokernel
+placed in degree three. A class factoring through the strict swept
+support has zero function-point stalk. If its top value is the class
+of the original weighted vertex, it gives the protected primitive.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2NativeDerivedTop
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry Opposite TopologicalSpace
+open CycleQ2NativeWeightedDeRham CycleQ2NativeWeightedTopGerm CycleQ2NativeWeightedCover
+open CycleQ2RelativeDeRhamSheaves CycleQ2WeightedRationalRestriction
+open CycleQ2NativeNormalResidue CycleQ2GenericProperGraphSupport CycleQ2GenericGraphFunctionStalk
+open CycleQ2NormalWeightedCotangent (A)
+open CycleQ2LiteralIncidenceGenericCorrespondence (genericAmbient)
+open CycleQ2UniversalWeightedDeRham (sourceForm)
+open CycleQ2InjectiveCech (AbSheaf freeOpen freeOpenSections)
+open CycleQ2CechTwoToDerived (app app_comp freeOpenSections_postcomp)
+open CycleQ2IncidenceEtaleParameter (parameterScheme)
+
+attribute [local instance] HasDerivedCategory.standard
+
+local instance : SmoothOfRelativeDimension 3 ambientToField :=
+  CycleQ2NativeGenericSmooth.ambient_smooth
+
+private abbrev C := sheaves genericAmbient
+private abbrev embedding := ComplexShape.embeddingUpIntGE 0
+private abbrev Q := DerivedCategory.Q (C := C)
+private abbrev S := DerivedCategory.singleFunctor C 3
+
+private def termIso (n : ℕ) : complex.X (n : ℤ) ≅ sheafForms ambientToField n :=
+  (relativeDeRham ambientToField).extendXIso embedding
+    (show embedding.f n = (n : ℤ) from Int.zero_add _)
+
+private theorem topDifferential_eq : complex.d 2 3 =
+    (termIso 2).hom ≫ topMap ≫ (termIso 3).inv := by
+  exact (relativeDeRham ambientToField).extend_d_eq embedding
+    (Int.zero_add 2) (Int.zero_add 3)
+
+/-- The genuine map of complexes from the native de Rham complex to
+its top cokernel placed in degree three. -/
+def topProjectionComplex : complex ⟶ (CochainComplex.singleFunctor C 3).obj (cokernel topMap) :=
+  HomologicalComplex.mkHomToSingle (j := (3 : ℤ)) ((termIso 3).hom ≫ cokernel.π topMap) (by
+    intro n hn
+    have h : n + 1 = 3 := hn
+    have hn' : n = 2 := by omega
+    subst n
+    change complex.d 2 3 ≫ (termIso 3).hom ≫ cokernel.π topMap = 0
+    simp only [topDifferential_eq, Category.assoc, Iso.inv_hom_id_assoc, cokernel.condition, comp_zero])
+
+def topProjection : Q.obj complex ⟶ S.obj (cokernel topMap) :=
+  Q.map topProjectionComplex
+
+private abbrev U (s : A) : Opens (show TopCat from genericAmbient) := (vertex s).1
+private abbrev topSheaf : AbSheaf (show TopCat from genericAmbient) := sheafForms ambientToField 3
+
+def vertexMap (s : A) (ω : VertexSections s) : freeOpen (U s) ⟶ topSheaf :=
+  (freeOpenSections topSheaf (U s)).symm ω
+
+private theorem vertexMap_app (s : A) (ω : VertexSections s) :
+    app (vertexMap s ω) (U s) (freeOpenSections (freeOpen (U s)) (U s) (𝟙 _)) = ω := by
+  refine (freeOpenSections_postcomp (U s) (𝟙 _) (vertexMap s ω)).trans ?_
+  let E := freeOpenSections topSheaf (U s)
+  exact (congrArg E (Category.id_comp (vertexMap s ω))).trans (E.apply_symm_apply ω)
+
+private theorem topGerm_zero_of_map_zero (s : A) (hs : s ≠ 0) (ω : VertexSections s)
+    (h : (stalkAt (x s hs)).map (vertexMap s ω ≫ cokernel.π topMap) = 0) : topGerm s hs ω = 0 := by
+  let U := U s
+  let P := freeOpen U
+  let g := vertexMap s ω ≫ cokernel.π topMap
+  let u := freeOpenSections P U (𝟙 P)
+  let P₀ : TopCat.Presheaf AddCommGrpCat.{0} (show TopCat from genericAmbient) := P.obj
+  let a := P₀.germ U (x s hs) (x_mem_vertex s hs) u
+  have hzero : (stalkAt (x s hs)).map g a = 0 := ConcreteCategory.congr_hom h a
+  have he := TopCat.Presheaf.stalkFunctor_map_germ_apply U (x s hs) (x_mem_vertex s hs) g.hom u
+  have ha : app g U u = app (cokernel.π topMap) U ω :=
+    (app_comp (vertexMap s ω) (cokernel.π topMap) U u).symm.trans
+      (congrArg (app (cokernel.π topMap) U) (vertexMap_app s ω))
+  unfold topGerm
+  exact (congrArg (TopCat.Presheaf.germ (cokernel topMap).obj U (x s hs) (x_mem_vertex s hs)) ha).symm.trans
+    (he.symm.trans hzero)
+
+private theorem stalkMap_zero (s : A) (hs : s ≠ 0) {P T : C} (g : P ⟶ T)
+    (h : (stalkAt (x s hs)).mapDerivedCategory.map (S.map g) = 0) :
+    (stalkAt (x s hs)).map g = 0 := by
+  let F := stalkAt (x s hs)
+  let J := F.mapDerivedCategorySingleFunctor 3
+  let B := DerivedCategory.singleFunctor AddCommGrpCat.{0} 3
+  have hn : F.mapDerivedCategory.map (S.map g) ≫ J.hom.app T =
+      J.hom.app P ≫ B.map (F.map g) := J.hom.naturality g
+  apply B.map_injective
+  rw [Functor.map_zero]
+  apply (cancel_epi (J.hom.app P)).mp
+  rw [← hn, h, zero_comp, comp_zero]
+
+/-- The remaining geometric input can now be stated for the actual
+full complex, the actual support, and its canonical top projection. -/
+theorem protected_of_supported_source {V : parameterScheme.Opens} {t : Fin 3 → ℂ}
+    (s : A) (hs : s ≠ 0) (ω : VertexSections s)
+    (hoff : (vertex s).1 ≤ complement V t)
+    (hω : evaluate (evaluatePatch s hs) 3 (asOrdinaryForm s ω) = sourceForm)
+    (G : CochainComplex (sheaves (support V t)) ℤ)
+    (a : S.obj (freeOpen (U s)) ⟶ Q.obj (supportedComplex G))
+    (b : Q.obj (supportedComplex G) ⟶ Q.obj complex)
+    (hc : a ≫ b ≫ topProjection = S.map (vertexMap s ω ≫ cokernel.π topMap)) :
+    (∃ η : CycleQ2AffineExterior.Form 3, CycleQ2AffineExterior.exteriorD3 η =
+      CycleQ2AffineExactness.residueSourceForm CycleQ2AffineClearing.affineA) := by
+  let F := (stalkAt (x s hs)).mapDerivedCategory
+  have hz := derivedStalk_off (hoff (x_mem_vertex s hs)) G
+  have he : F.map (S.map (vertexMap s ω ≫ cokernel.π topMap)) = 0 := by
+    rw [← hc, Functor.map_comp, hz.eq_of_tgt (F.map a) 0, zero_comp]
+  exact protected_of_zero_topGerm s hs ω hω
+    (topGerm_zero_of_map_zero s hs ω (stalkMap_zero s hs _ he))
+
+end CycleQ2NativeDerivedTop
+
+#print axioms CycleQ2NativeDerivedTop.protected_of_supported_source
+
+end

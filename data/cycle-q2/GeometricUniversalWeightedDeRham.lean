@@ -2198,3 +2198,227 @@ end CycleQ2AffineDeRhamFunctorial
 #print axioms CycleQ2AffineDeRhamFunctorial.frameIso
 
 end
+
+section
+
+/-!
+# A triangular change in an actual two-equation residue
+
+On the common refinement, replacing g by g + af changes the two-log
+cochain by a form defined where g and g + af are both invertible.
+Thus the change is a boundary in the localization quotient.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2LogarithmicGeneratorChange
+
+open CycleQ2DoubleLogarithmicClass CycleQ2PrincipalGysinFunctions
+open CycleQ2ExactFrameThreeDeRham CycleQ2WeightedCoordinateExterior
+open CycleQ2GeometricExteriorSheaf (exteriorMap_wedge)
+open KaehlerDifferential
+
+variable {K T : Type} [CommRing K] [CommRing T] [Algebra K T]
+
+local notation "dT" => D K T
+
+private theorem scaledWedge (x y : Ω[T⁄K]) (a b : T) :
+    wedge (a • x) (b • y) = (a * b) • wedge x y := by
+  change wedgeLeft (b • y) (a • x) = _
+  rw [map_smul]
+  change a • wedgeRight x (b • y) = _
+  rw [map_smul, smul_smul]
+  rfl
+
+private theorem wedge_add_right (x y z : Ω[T⁄K]) :
+    wedge x (y+z) = wedge x y + wedge x z := (wedgeRight x).map_add y z
+
+private theorem wedge_smul_right (x y : Ω[T⁄K]) (a : T) :
+    wedge x (a • y) = a • wedge x y := (wedgeRight x).map_smul a y
+
+private theorem coefficients (f g h : Tˣ) (a : T) (he : (h : T) = (g : T) + a * (f : T)) :
+    (↑f⁻¹ : T) * (↑h⁻¹ : T) - (↑f⁻¹ : T) * (↑g⁻¹ : T) =
+      -(a * (↑g⁻¹ : T) * (↑h⁻¹ : T)) := by
+  have e₁ : (↑g⁻¹ : T) * (↑h⁻¹ : T) * (h : T) = (↑g⁻¹ : T) := by
+    rw [mul_assoc, Units.inv_mul, mul_one]
+  have e₂ : (↑g⁻¹ : T) * (↑h⁻¹ : T) * (g : T) = (↑h⁻¹ : T) := by
+    rw [mul_comm (↑g⁻¹ : T), mul_assoc, Units.inv_mul, mul_one]
+  have e₃ : (↑f⁻¹ : T) * (f : T) = 1 := Units.inv_mul f
+  linear_combination (↑f⁻¹ : T) * e₁ - (↑f⁻¹ : T) * e₂ -
+    (↑f⁻¹ : T) * (↑g⁻¹ : T) * (↑h⁻¹ : T) * he - a * (↑g⁻¹ : T) * (↑h⁻¹ : T) * e₃
+
+/-- The change uses no inverse of the unchanged equation on its right. -/
+theorem twoLog_shear (f g h : Tˣ) (a : T) (he : (h : T) = (g : T) + a * (f : T)) :
+    twoLog (K := K) f h - twoLog (K := K) f g =
+      (↑h⁻¹ : T) • wedge (dT (f : T)) (dT a) -
+      (a * (↑g⁻¹ : T) * (↑h⁻¹ : T)) • wedge (dT (f : T)) (dT (g : T)) := by
+  let x := dT (f : T)
+  let y := dT (g : T)
+  let z := dT a
+  have hd : dT (h : T) = y + (a • x + (f : T) • z) := by
+    rw [he, map_add, Derivation.leibniz]
+  have hc : (↑f⁻¹ : T) * (↑h⁻¹ : T) * (f : T) = (↑h⁻¹ : T) := by
+    rw [mul_comm (↑f⁻¹ : T), mul_assoc, Units.inv_mul, mul_one]
+  rw [twoLog, twoLog, logarithm, logarithm, logarithm,
+    scaledWedge, scaledWedge, hd, wedge_add_right, wedge_add_right,
+    wedge_smul_right, wedge_smul_right]
+  change ((↑f⁻¹ : T) * (↑h⁻¹ : T)) •
+      (wedge x y + (a • wedge x x + (f : T) • wedge x z)) -
+    ((↑f⁻¹ : T) * (↑g⁻¹ : T)) • wedge x y = _
+  rw [wedge_self, smul_zero, zero_add, smul_add, smul_smul, hc, add_comm,
+    add_sub_assoc, ← sub_smul, coefficients f g h a he, neg_smul, sub_eq_add_neg]
+
+private theorem pullback_wedge {B : Type} [CommRing B] [Algebra K B] (φ : B →ₐ[K] T)
+    (x y : Ω[B⁄K]) :
+    exteriorPullback φ 2 (wedge x y) = wedge (onePullback φ x) (onePullback φ y) := by
+  unfold exteriorPullback wedge
+  rw [exteriorMap_wedge]
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+variable {B C : Type} [CommRing B] [CommRing C] [Algebra K B] [Algebra K C]
+  (φ : B →ₐ[K] T) (ψ : C →ₐ[K] T)
+
+/-- The two Čech representatives agree on a common refinement whose
+second open inverts both old and new second equations. -/
+theorem localClass_shear (f g h : Tˣ) (a₀ f₀ : C) (g₀ h₀ : Cˣ)
+    (hf : ψ f₀ = (f : T)) (hg : Units.map ψ.toRingHom g₀ = g)
+    (hh : Units.map ψ.toRingHom h₀ = h)
+    (he : (h : T) = (g : T) + ψ a₀ * (f : T)) :
+    localClass φ ψ f h = localClass φ ψ f g := by
+  let dC := D K C
+  let correction : Form K C 2 :=
+    (↑h₀⁻¹ : C) • wedge (dC f₀) (dC a₀) -
+    (a₀ * (↑g₀⁻¹ : C) * (↑h₀⁻¹ : C)) • wedge (dC f₀) (dC (g₀ : C))
+  have hc : exteriorPullback ψ 2 correction = twoLog (K := K) f h - twoLog (K := K) f g := by
+    rw [twoLog_shear f g h (ψ a₀) he]
+    have hg' : ψ (g₀ : C) = (g : T) := congrArg Units.val hg
+    have hg'' : ψ (↑g₀⁻¹ : C) = (↑g⁻¹ : T) := congrArg (fun u : Tˣ => (↑u⁻¹ : T)) hg
+    have hh'' : ψ (↑h₀⁻¹ : C) = (↑h⁻¹ : T) := congrArg (fun u : Tˣ => (↑u⁻¹ : T)) hh
+    dsimp only [correction, dC]
+    rw [map_sub, map_smulₛₗ, map_smulₛₗ, pullback_wedge, pullback_wedge]
+    simp only [onePullback_d]
+    change ψ (↑h₀⁻¹ : C) • wedge (dT (ψ f₀)) (dT (ψ a₀)) -
+      ψ (a₀ * (↑g₀⁻¹ : C) * (↑h₀⁻¹ : C)) • wedge (dT (ψ f₀)) (dT (ψ (g₀ : C))) = _
+    rw [map_mul, map_mul, hf, hg', hg'', hh'']
+  rw [← sub_eq_zero]
+  change QuotientAddGroup.mk' _ (twoLog (K := K) f h) - QuotientAddGroup.mk' _ (twoLog (K := K) f g) = 0
+  rw [← map_sub, ← hc]
+  apply (QuotientAddGroup.eq_zero_iff _).mpr
+  exact (show (exteriorPullback ψ 2).toAddMonoidHom.range ≤ _ from le_sup_right) ⟨correction, rfl⟩
+
+end CycleQ2LogarithmicGeneratorChange
+
+#print axioms CycleQ2LogarithmicGeneratorChange.twoLog_shear
+#print axioms CycleQ2LogarithmicGeneratorChange.localClass_shear
+
+end
+
+section
+
+/-!
+# The triangular change on the original localization intersections
+
+The two original cocycles compare after restriction from D(fg) and
+D(fh) to D(fgh). Their correction comes from D(gh), so the comparison
+uses the ordinary Čech localization maps.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2NativeGeneratorChange
+
+open CycleQ2DoubleLogarithmicClass CycleQ2NativeDoubleLocalization
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+open CycleQ2LogarithmicGeneratorChange
+
+variable {K A : Type} [CommRing K] [CommRing A] [Algebra K A] (f g h : A)
+
+private abbrev R := Localization.Away (g * h)
+private abbrev S := Localization.Away (f * (g * h))
+private abbrev φ := fromU (K := K) f (g * h)
+private abbrev ψ := fromV (K := K) f (g * h)
+
+private def gR : (R g h)ˣ :=
+  (IsLocalization.Away.isUnit_of_dvd (S := R g h) (g * h) (dvd_mul_right g h)).unit
+
+private def hR : (R g h)ˣ :=
+  (IsLocalization.Away.isUnit_of_dvd (S := R g h) (g * h) (dvd_mul_left h g)).unit
+
+private theorem ψ_algebra (a : A) : ψ (K := K) f g h (algebraMap A (R g h) a) = algebraMap A (S f g h) a :=
+  IsLocalization.Away.lift_eq (S := R g h) (g := algebraMap A (S f g h)) (g * h)
+    (IsLocalization.Away.isUnit_of_dvd (f * (g * h)) (dvd_mul_left (g * h) f)) a
+
+private abbrev F : (S f g h)ˣ := localizedF (K := K) f (g * h)
+private abbrev G : (S f g h)ˣ := Units.map (ψ (K := K) f g h).toRingHom (gR g h)
+private abbrev H : (S f g h)ˣ := Units.map (ψ (K := K) f g h).toRingHom (hR g h)
+
+private theorem F_val : (F (K := K) f g h : S f g h) = algebraMap A (S f g h) f :=
+  localizedF_val f (g * h)
+
+private theorem G_val : (G (K := K) f g h : S f g h) = algebraMap A (S f g h) g := by
+  change ψ (K := K) f g h (↑(gR g h) : R g h) = _
+  rw [gR, IsUnit.unit_spec, ψ_algebra]
+
+private theorem H_val : (H (K := K) f g h : S f g h) = algebraMap A (S f g h) h := by
+  change ψ (K := K) f g h (↑(hR g h) : R g h) = _
+  rw [hR, IsUnit.unit_spec, ψ_algebra]
+
+def refinement (q : A) (hq : q ∣ g * h) :
+    Localization.Away (f * q) →ₐ[K] S f g h :=
+  IsLocalization.Away.liftAlgHom (f := IsScalarTower.toAlgHom K A (S f g h)) (f * q)
+    (IsLocalization.Away.isUnit_of_dvd (f * (g * h))
+      (mul_dvd_mul_left f hq))
+
+private theorem refinement_algebra (q : A) (hq : q ∣ g * h) (a : A) :
+    refinement (K := K) f g h q hq (algebraMap A (Localization.Away (f * q)) a) =
+      algebraMap A (S f g h) a :=
+  IsLocalization.Away.lift_eq (S := Localization.Away (f * q))
+    (g := algebraMap A (S f g h)) (f * q)
+    (IsLocalization.Away.isUnit_of_dvd (f * (g * h)) (mul_dvd_mul_left f hq)) a
+
+private theorem refine_cochain (q : A) (hq : q ∣ g * h) (u : (S f g h)ˣ)
+    (hu : (u : S f g h) = algebraMap A (S f g h) q) :
+    exteriorPullback (refinement (K := K) f g h q hq) 2 (cochain (K := K) f q) =
+      twoLog (K := K) (F (K := K) f g h) u := by
+  let r := refinement (K := K) f g h q hq
+  have e₁ : Units.map r.toRingHom (localizedF (K := K) f q) = F (K := K) f g h := by
+    apply Units.ext
+    change r (localizedF (K := K) f q : Localization.Away (f*q)) = (F (K := K) f g h : S f g h)
+    rw [localizedF_val, refinement_algebra, F_val]
+  have e₂ : Units.map r.toRingHom (localizedG (K := K) f q) = u := by
+    apply Units.ext
+    change r (localizedG (K := K) f q : Localization.Away (f*q)) = (u : S f g h)
+    rw [localizedG_val, refinement_algebra, hu]
+  unfold cochain
+  rw [pullback_twoLog, show refinement (K := K) f g h q hq = r from rfl, e₁, e₂]
+
+/-- The restrictions of the original cochains yield equal classes
+modulo the two single-open images in the common refinement. -/
+theorem same_class (a : A) (he : h = g + a * f) :
+    let Q := supportQuotient (φ (K := K) f g h) (ψ (K := K) f g h)
+    (↑(exteriorPullback (refinement (K := K) f g h h (dvd_mul_left h g)) 2 (cochain (K := K) f h)) : Q) =
+      (↑(exteriorPullback (refinement (K := K) f g h g (dvd_mul_right g h)) 2 (cochain (K := K) f g)) : Q) := by
+  dsimp only
+  rw [refine_cochain f g h h _ (H (K := K) f g h) (H_val f g h),
+    refine_cochain f g h g _ (G (K := K) f g h) (G_val f g h)]
+  apply localClass_shear (φ (K := K) f g h) (ψ (K := K) f g h)
+    (F (K := K) f g h) (G (K := K) f g h) (H (K := K) f g h)
+    (algebraMap A (R g h) a) (algebraMap A (R g h) f) (gR g h) (hR g h)
+  · rw [ψ_algebra, F_val]
+  · rfl
+  · rfl
+  · rw [ψ_algebra, F_val, G_val, H_val, ← map_mul, ← map_add, ← he]
+
+end CycleQ2NativeGeneratorChange
+
+#print axioms CycleQ2NativeGeneratorChange.same_class
+
+end

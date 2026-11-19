@@ -167,6 +167,37 @@ class represented by this section and coming from the closed support
 still has to be constructed.
 [Generic smoothness, exact affine cover and relative de Rham sheaves](GeometricMonicGenericSupport.lean)
 
+## The full complex at the weighted function point
+
+Evaluation at a field-valued point on each framed affine open uses the
+actual scheme map on its functions. It commutes with restrictions and
+with the given affine coordinate-ring map. The top exterior differential
+on each open has the ordinary rule \(d(a\,db\wedge dc)=da\wedge db\wedge dc\).
+If the weighted section has zero top cokernel germ, exactness of the
+additive stalk gives a primitive germ. It is represented on a framed
+affine neighborhood, where the local boundary evaluates to the original
+weighted form in the function field. The checked specialization then
+gives the protected rational primitive.
+
+The full derived de Rham complex has its canonical map to the cokernel
+of the last differential in degree three. The actual top section on
+the off-graph patch defines a map from the free additive sheaf on that
+open. A derived class with this top value gives the protected primitive
+if it factors through a complex pushed forward from the strict swept
+image. The proof applies the derived stalk at that same weighted
+function point and then uses the affine calculation above. Constructing
+the supported class with this top value remains open.
+[Canonical top projection and support implication](GeometricMonicGenericSupport.lean)
+
+For local cycle calculations, replace the second equation \(g\) by
+\(h=g+af\). In the common triple localization, the difference of the
+original two logarithmic cochains comes from the single open \(D(gh)\).
+Explicitly it is \(h^{-1}df\wedge da-ag^{-1}h^{-1}df\wedge dg\).
+The two representatives therefore agree in the common localization
+quotient. The formula uses the actual restriction maps from \(D(fg)\)
+and \(D(fh)\).
+[Triangular equation change](GeometricUniversalWeightedDeRham.lean)
+
 ## The fixed threefold and its moving curves
 
 The curve calculation takes place on the cubic section \(D\) of the weighted
