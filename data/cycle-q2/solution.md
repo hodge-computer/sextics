@@ -363,6 +363,28 @@ the complete protected de Rham class remain open.
 [Signed class equality](GeometricLiteralThreefoldCurvePairing.lean) and
 [nonvanishing and strict support](GeometricLiteralNonzeroSweptRestriction.lean)
 
+## The proper graph over the normalized coefficient base
+
+The marked smooth time family base-changes to the scheme of monic
+weighted sextics with the same 44 independently varying coefficients
+as the universal rational chart. On a neighborhood of the marked point,
+the time and curve maps are smooth of relative dimension one. The time map
+has dense image in the coefficient space. Its immersion into a projective
+bundle over that base gives a proper scheme-theoretic closure, and its
+original open embeds in the closure. The curve family embeds as a closed
+subscheme of the product of that original time open and the relative
+threefold. Taking its closure in the proper product recovers the original
+curve family over the time open.
+
+The relative graph retains the original embedded curve over the marked
+point and along the marked first-order time direction. On the generic
+monic fiber the graph is nonempty and proper, and its ambient projection
+is proper with closed image. The same section vector and marked open give
+the original nonzero coherent pullback on the fixed threefold. Extending
+this nonzero calculation to the generic relative de Rham correspondence
+and proving that its generic image is a strict closed subset remain open.
+[Relative graph, marked recovery and generic projection](GeometricMonicIncidenceCorrespondence.lean)
+
 ## The corrected filtered Cech three-cocycle
 
 Retain the first-order variation \(a_i\) of the relative residue
