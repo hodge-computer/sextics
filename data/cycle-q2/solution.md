@@ -562,6 +562,34 @@ filtered test cochains. The full unfiltered comparison, invariant Gysin
 spanning, specialization, and protected primitive remain open. No full
 unfiltered de Rham theorem or protected primitive is claimed.
 
+## Strict growth of the Fermat Higgs maps
+
+The weight-one argument of [Chapter 3D, Section 3D.7](../../docs/03d-hodge-loci.md)
+reduces the spanning question to a dimension bound on the image of a curve
+correspondence and a strict growth property of the Higgs maps. At the
+Fermat member, Lean now proves the finite strict growth property for
+arbitrary subspaces of the actual Jacobian pieces.
+
+The leading coordinates of a subspace count its dimension. Each ordered
+monomial multiplication carries any leading coordinate in its domain to
+a leading coordinate of the image. In the graph of the existing 33 upper
+and 33 lower labels, a cycle through every label gives the forward and
+backward matchings. Their relative permutation is transitive because
+the cycle has odd length. Consequently every proper nonempty set of
+leading coordinates has strictly more neighbors than elements.
+[Leading coordinates and expansion](GeometricHiggsStrictGrowth.lean)
+and [Fermat matching certificate](GeometricFermatStrictGrowth.lean)
+
+The coordinate result applies to multiplication by the degree-six
+invariant tangent classes in the actual Fermat Jacobian quotient. If
+\(W\) and \(W'\) are upper and lower subspaces preserved by all
+these maps and \(\dim W'\le\dim W\), they are both zero or both
+full. This identifies the finite input to the weight-one argument.
+The corresponding family comparison, persistence away from Fermat,
+and curve positivity needed to apply it to the correspondence are
+still open in Lean.
+[Actual Jacobian multiplication](GeometricFermatJacobianStrictGrowth.lean)
+
 ## An exact rational correction on the genus-ten chart
 
 In the normal coordinates \(T,h\), the explicitly defined rational
