@@ -318,6 +318,33 @@ comparison. The global class on the strict sweep and the comparison
 with the marked pairing remain open.
 [Local supported classes and tensor trace](GeometricMonicGenericSupport.lean)
 
+## The intrinsic de Rham complex on affine product opens
+
+The intersection of the inverse images of two chosen affine opens
+is the spectrum of the tensor product of their section rings over
+the original field. The isomorphism respects the two projections,
+the field map, and restriction along inclusions in both factors.
+It identifies all ordinary relative exterior powers. On a chart
+with one exact curve coordinate, those powers split into a
+horizontal part and a mixed part in which the curve direction
+comes first.
+
+The exterior differential in every degree is given on an exact
+symbol by differentiating the coefficient and wedging it before
+the exact one-forms. The coordinate derivations commute, and the
+alternating insertions give square zero. The symbol formula is
+natural under all coefficient-algebra maps between exact frames.
+On the dense affine basis it therefore glues to a complex of
+sheaves on the original Zariski opens. On each actual product
+chart the coordinate comparison is an isomorphism of the full
+affine complexes.
+
+Interchanging the two defining equations reverses the logarithmic
+form and the Mayer–Vietoris boundary. These sign changes cancel in
+the local supported degree-four class. The proper graph Gysin map
+and its marked pairing comparison remain open.
+[Intrinsic product complexes and the supported sign comparison](GeometricMonicGenericSupport.lean)
+
 ## Finite curve trace on the actual degree-two de Rham group
 
 A finite dominant projection from an integral curve to the projective

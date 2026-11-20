@@ -119,6 +119,11 @@ import Mathlib.RingTheory.LocalRing.Basic
 import Mathlib.RingTheory.Spectrum.Prime.Topology
 import Mathlib.Algebra.Homology.DerivedCategory.Ext.ExtClass
 import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Kernels
+import Proposal.GeometricLiteralThreefoldResidueContraction
+import Mathlib.LinearAlgebra.Alternating.Curry
+import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
+import Mathlib.RingTheory.Derivation.Lie
+import Mathlib.LinearAlgebra.Basis.Prod
 
 /-!
 # The proper graph has strict support in the native generic threefold
@@ -16052,5 +16057,2034 @@ theorem shear_invariant :
 end CycleQ2PrincipalShearInvariant
 
 #print axioms CycleQ2PrincipalShearInvariant.shear_invariant
+
+end
+
+noncomputable section
+
+/-!
+# The tensor coordinate ring on the literal affine product chart
+
+The ring is the tensor product over the original coefficient field.
+The chart is the intersection of the inverse images of the two chosen
+opens along the two projections of the actual scheme fibre product.
+Its comparison isomorphism commutes with both projections.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2ProductAffineOpen
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open Algebra.TensorProduct TensorProduct
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+
+variable {k : Type} [Field k] {C X : Scheme.{0}}
+  (p : C ⟶ Spec (CommRingCat.of k)) (q : X ⟶ Spec (CommRingCat.of k))
+  {U : C.Opens} {V : X.Opens}
+
+
+abbrev productOpen (U : C.Opens) (V : X.Opens) : (pullback p q).Opens :=
+  (pullback.fst p q) ⁻¹ᵁ U ⊓ (pullback.snd p q) ⁻¹ᵁ V
+
+abbrev coordinateRing (U : C.Opens) (V : X.Opens) : CommRingCat :=
+  letI : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+  letI : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+  CommRingCat.of (Γ(C,U) ⊗[k] Γ(X,V))
+
+private abbrev affineOver (p : C ⟶ Spec (CommRingCat.of k)) (U : C.Opens) :=
+  Spec.map (CommRingCat.ofHom (sectionCoefficients p U))
+
+private theorem fromSpec_over (hU : IsAffineOpen U) : hU.fromSpec ≫ p = affineOver p U := by
+  exact CycleQ2IntegralCurveNormalization.fromSpec_over k p hU
+
+variable (hU : IsAffineOpen U) (hV : IsAffineOpen V)
+
+private def mapSquares : pullback (affineOver p U) (affineOver q V) ⟶ pullback p q :=
+  pullback.map (affineOver p U) (affineOver q V) p q hU.fromSpec hV.fromSpec (𝟙 _)
+    (by rw [Category.comp_id,fromSpec_over]) (by rw [Category.comp_id,fromSpec_over])
+
+private instance : IsOpenImmersion (mapSquares p q hU hV) := by
+  unfold mapSquares
+  infer_instance
+
+private abbrev affineComparison :
+    pullback (affineOver p U) (affineOver q V) ≅ Spec (coordinateRing p q U V) :=
+  letI : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+  letI : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+  pullbackSpecIso k Γ(C,U) Γ(X,V)
+
+/-- The morphism from the spectrum of the tensor ring to the product. -/
+def chart : Spec (coordinateRing p q U V) ⟶ pullback p q :=
+  (affineComparison (p := p) (q := q)).inv ≫ mapSquares p q hU hV
+
+instance : IsOpenImmersion (chart p q hU hV) := by
+  unfold chart
+  infer_instance
+
+private theorem range_iso_inv :
+    Set.range (affineComparison (p := p) (q := q) (U := U) (V := V)).inv = Set.univ := by
+  apply Set.range_eq_univ.mpr
+  exact (ConcreteCategory.bijective_of_isIso (affineComparison (p := p) (q := q) (U := U) (V := V)).inv.base).surjective
+
+/-- This is the literal product open, including its full scheme structure. -/
+theorem chart_range : Set.range (chart p q hU hV) = (productOpen p q U V).1 := by
+  change Set.range (mapSquares p q hU hV ∘ ⇑(affineComparison (p := p) (q := q)).inv) = _
+  rw [Set.range_comp, range_iso_inv, Set.image_univ, mapSquares,
+      Scheme.Pullback.range_map]
+  exact congrArg₂ (fun L R => (pullback.fst p q) ⁻¹' L ∩ (pullback.snd p q) ⁻¹' R)
+    hU.range_fromSpec hV.range_fromSpec
+
+/-- The designated product chart is affine in the given coordinate ring. -/
+def chartIso : Spec (coordinateRing p q U V) ≅ (productOpen p q U V).toScheme :=
+  IsOpenImmersion.isoOfRangeEq (chart p q hU hV) (productOpen p q U V).ι
+    ((chart_range p q hU hV).trans (productOpen p q U V).range_ι.symm)
+
+theorem chartIso_over : (chartIso p q hU hV).hom ≫ (productOpen p q U V).ι = chart p q hU hV :=
+  IsOpenImmersion.isoOfRangeEq_hom_fac _ _ _
+
+include hU hV in
+theorem isAffineOpen_product : IsAffineOpen (productOpen p q U V) :=
+  .of_isIso (chartIso p q hU hV).inv
+
+abbrev leftInclusion : Γ(C,U) ⟶ coordinateRing p q U V :=
+  letI : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+  letI : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+  CommRingCat.ofHom includeLeftRingHom
+
+abbrev rightInclusion : Γ(X,V) ⟶ coordinateRing p q U V :=
+  letI : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+  letI : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+  CommRingCat.ofHom ((includeRight (R := k) (A := Γ(C,U)) (B := Γ(X,V))).toRingHom)
+
+theorem chart_fst : chart p q hU hV ≫ pullback.fst p q =
+    Spec.map (leftInclusion (U := U) (V := V) p q) ≫ hU.fromSpec := by
+  letI : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+  letI : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+  simp only [chart,mapSquares,pullback.map,Category.assoc,pullback.lift_fst]
+  rw [← Category.assoc]
+  exact congrArg (fun a => a ≫ hU.fromSpec) (pullbackSpecIso_inv_fst k Γ(C,U) Γ(X,V))
+
+theorem chart_snd : chart p q hU hV ≫ pullback.snd p q =
+    Spec.map (rightInclusion (U := U) (V := V) p q) ≫ hV.fromSpec := by
+  letI : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+  letI : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+  simp only [chart,mapSquares,pullback.map,Category.assoc,pullback.lift_snd]
+  rw [← Category.assoc]
+  exact congrArg (fun a => a ≫ hV.fromSpec) (pullbackSpecIso_inv_snd k Γ(C,U) Γ(X,V))
+
+end CycleQ2ProductAffineOpen
+
+#print axioms CycleQ2ProductAffineOpen.chartIso_over
+#print axioms CycleQ2ProductAffineOpen.chart_fst
+#print axioms CycleQ2ProductAffineOpen.chart_snd
+
+end
+
+noncomputable section
+
+/-!
+# The tensor product chart comparison respects both restrictions
+
+A refinement of the two chosen affine opens induces the tensor
+product of the ordinary section restrictions. On spectra this is
+exactly the map of the original product charts. Neither projection
+nor comparison of coordinate rings changes the chosen opens.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2ProductOpenRestrictions
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2ProductAffineOpen
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (restrict)
+open Algebra.TensorProduct TensorProduct
+
+variable {k : Type} [Field k] {C X : Scheme.{0}}
+  (p : C ⟶ Spec (CommRingCat.of k)) (q : X ⟶ Spec (CommRingCat.of k))
+  {U U' : C.Opens} {V V' : X.Opens} (h₁ : U' ≤ U) (h₂ : V' ≤ V)
+
+def restrictTensor : coordinateRing p q U V ⟶ coordinateRing p q U' V' :=
+  letI : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+  letI : Algebra k Γ(C,U') := (sectionCoefficients p U').toAlgebra
+  letI : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+  letI : Algebra k Γ(X,V') := (sectionCoefficients q V').toAlgebra
+  CommRingCat.ofHom (Algebra.TensorProduct.map (restrict p h₁) (restrict q h₂)).toRingHom
+
+private theorem restrict_left :
+    leftInclusion (U := U) (V := V) p q ≫ restrictTensor p q h₁ h₂ =
+      C.presheaf.map (homOfLE h₁).op ≫ leftInclusion (U := U') (V := V') p q := by
+  let : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+  let : Algebra k Γ(C,U') := (sectionCoefficients p U').toAlgebra
+  let : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+  let : Algebra k Γ(X,V') := (sectionCoefficients q V').toAlgebra
+  apply CommRingCat.hom_ext
+  exact Algebra.TensorProduct.map_comp_includeLeftRingHom (restrict p h₁) (restrict q h₂)
+
+private theorem restrict_right :
+    rightInclusion (U := U) (V := V) p q ≫ restrictTensor p q h₁ h₂ =
+      X.presheaf.map (homOfLE h₂).op ≫ rightInclusion (U := U') (V := V') p q := by
+  let : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+  let : Algebra k Γ(C,U') := (sectionCoefficients p U').toAlgebra
+  let : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+  let : Algebra k Γ(X,V') := (sectionCoefficients q V').toAlgebra
+  apply CommRingCat.hom_ext
+  exact congrArg AlgHom.toRingHom
+    (Algebra.TensorProduct.map_comp_includeRight (restrict p h₁) (restrict q h₂))
+
+variable (hU : IsAffineOpen U) (hV : IsAffineOpen V) (hU' : IsAffineOpen U') (hV' : IsAffineOpen V')
+
+/-- The tensor restriction respects the chart morphism to the actual scheme. -/
+theorem chart_restrict : Spec.map (restrictTensor p q h₁ h₂) ≫ chart p q hU hV =
+    chart p q hU' hV' := by
+  apply pullback.hom_ext
+  · rw [Category.assoc,chart_fst,chart_fst,← Spec.map_comp_assoc,restrict_left,Spec.map_comp_assoc,
+      hU.map_fromSpec]
+  · rw [Category.assoc,chart_snd,chart_snd,← Spec.map_comp_assoc,restrict_right,Spec.map_comp_assoc,
+      hV.map_fromSpec]
+
+include h₁ h₂ in
+theorem productOpen_mono : productOpen p q U' V' ≤ productOpen p q U V :=
+  fun _ hx => ⟨h₁ hx.1,h₂ hx.2⟩
+
+/-- The chart comparison commutes with the actual inclusion of the opens. -/
+theorem chartIso_restrict : Spec.map (restrictTensor p q h₁ h₂) ≫ (chartIso p q hU hV).hom =
+    (chartIso p q hU' hV').hom ≫ (pullback p q).homOfLE (productOpen_mono p q h₁ h₂) := by
+  rw [← cancel_mono (productOpen p q U V).ι,Category.assoc,chartIso_over,chart_restrict,
+    Category.assoc,Scheme.homOfLE_ι,chartIso_over]
+
+end CycleQ2ProductOpenRestrictions
+
+#print axioms CycleQ2ProductOpenRestrictions.chartIso_restrict
+
+end
+
+noncomputable section
+
+/-!
+# Actual section rings on product charts
+
+The chart isomorphisms give the tensor coordinate algebra on the
+literal product opens. Their restriction maps are tensor products
+of the original restriction maps. This statement identifies the
+maps of sections on the ambient product itself.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2ProductSectionRings
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2ProductAffineOpen CycleQ2ProductOpenRestrictions
+
+variable {k : Type} [Field k] {C X : Scheme.{0}}
+  (p : C ⟶ Spec (CommRingCat.of k)) (q : X ⟶ Spec (CommRingCat.of k))
+  {U U' : C.Opens} {V V' : X.Opens}
+  (hU : IsAffineOpen U) (hV : IsAffineOpen V) (hU' : IsAffineOpen U') (hV' : IsAffineOpen V')
+  (h₁ : U' ≤ U) (h₂ : V' ≤ V)
+
+/-- Global sections on this open are the tensor product of the two rings. -/
+def sectionsIso : Γ(pullback p q,productOpen p q U V) ≅ coordinateRing p q U V :=
+  (productOpen p q U V).topIso.symm ≪≫
+    asIso ((chartIso p q hU hV).hom.appTop) ≪≫ Scheme.ΓSpecIso (coordinateRing p q U V)
+
+@[reassoc]
+private theorem top_restrict {Y : Scheme.{0}} {W W' : Y.Opens} (h : W' ≤ W) :
+    W.topIso.inv ≫ (Y.homOfLE h).appTop = Y.presheaf.map (homOfLE h).op ≫ W'.topIso.inv := by
+  simp only [Scheme.Opens.topIso_inv, Scheme.homOfLE_appTop, ← Functor.map_comp]
+  exact congrArg (fun f => Y.presheaf.map f) (Subsingleton.elim _ _)
+
+/-- Actual section restriction corresponds to the tensor restriction. -/
+theorem sectionsIso_restrict :
+    (pullback p q).presheaf.map (homOfLE (productOpen_mono p q h₁ h₂)).op ≫
+      (sectionsIso p q hU' hV').hom =
+    (sectionsIso p q hU hV).hom ≫ restrictTensor p q h₁ h₂ := by
+  simp only [sectionsIso, Iso.trans_hom, Iso.symm_hom, asIso_hom, Category.assoc]
+  rw [← top_restrict_assoc, ← Scheme.Hom.comp_appTop_assoc, ← chartIso_restrict,
+    Scheme.Hom.comp_appTop, Category.assoc, Scheme.ΓSpecIso_naturality]
+
+end CycleQ2ProductSectionRings
+
+#print axioms CycleQ2ProductSectionRings.sectionsIso_restrict
+
+end
+
+noncomputable section
+
+/-!
+# The product chart comparison uses the original base field
+
+The tensor section isomorphism commutes with the specified map
+from the field. This identifies the section rings as coefficient
+algebras, so it also compares their relative cotangent modules.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2ProductCoefficients
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open Algebra.TensorProduct TensorProduct
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2ProductAffineOpen CycleQ2ProductSectionRings
+
+variable {k : Type} [Field k] {C X : Scheme.{0}}
+  (p : C ⟶ Spec (CommRingCat.of k)) (q : X ⟶ Spec (CommRingCat.of k))
+  {U : C.Opens} {V : X.Opens} (hU : IsAffineOpen U) (hV : IsAffineOpen V)
+
+abbrev productBase := pullback.fst p q ≫ p
+
+abbrev tensorCoeff : CommRingCat.of k ⟶ coordinateRing p q U V :=
+  letI : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+  letI : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+  CommRingCat.ofHom (algebraMap k (Γ(C,U) ⊗[k] Γ(X,V)))
+
+private theorem chart_coefficients : chart p q hU hV ≫ productBase p q =
+    Spec.map (tensorCoeff (U := U) (V := V) p q) := by
+  rw [productBase, ← Category.assoc, chart_fst, Category.assoc,
+    CycleQ2IntegralCurveNormalization.fromSpec_over k p hU, ← Spec.map_comp]
+  rfl
+
+private theorem open_appTop {Y : Scheme.{0}} (f : Y ⟶ Spec (CommRingCat.of k)) (W : Y.Opens) :
+    f.appLE ⊤ W (by simp) ≫ W.topIso.inv = (W.ι ≫ f).appTop := by
+  rw [Scheme.Hom.comp_appTop]
+  simp only [Scheme.Hom.appLE, Scheme.Opens.topIso_inv, Scheme.Opens.ι_appTop, Category.assoc,
+    ← Functor.map_comp]
+  congr 1
+
+/-- The section-ring isomorphism respects the specified coefficient maps. -/
+theorem sectionsIso_coefficients :
+    CommRingCat.ofHom (sectionCoefficients (productBase p q) (productOpen p q U V)) ≫
+      (sectionsIso p q hU hV).hom = tensorCoeff (U := U) (V := V) p q := by
+  change ((Scheme.ΓSpecIso _).inv ≫ (productBase p q).appLE ⊤ _ _) ≫
+    (sectionsIso p q hU hV).hom = _
+  simp only [sectionsIso,Iso.trans_hom,Iso.symm_hom,asIso_hom,Category.assoc]
+  rw [← Category.assoc ((productBase p q).appLE ⊤ _ _) _,open_appTop,
+    ← Scheme.Hom.comp_appTop_assoc, ← Category.assoc (chartIso p q hU hV).hom,
+    chartIso_over,chart_coefficients,Scheme.ΓSpecIso_naturality,Iso.inv_hom_id_assoc]
+
+/-- The tensor ring is the actual coefficient algebra on the chosen open. -/
+def sectionsAlgEquiv :
+    letI : Algebra k Γ(pullback p q,productOpen p q U V) :=
+      (sectionCoefficients (productBase p q) (productOpen p q U V)).toAlgebra
+    letI : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+    letI : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+    Γ(pullback p q,productOpen p q U V) ≃ₐ[k] (Γ(C,U) ⊗[k] Γ(X,V)) := by
+  letI : Algebra k Γ(pullback p q,productOpen p q U V) :=
+    (sectionCoefficients (productBase p q) (productOpen p q U V)).toAlgebra
+  letI : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+  letI : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+  exact { (sectionsIso p q hU hV).commRingCatIsoToRingEquiv with
+    commutes' := fun c => DFunLike.congr_fun (congrArg CommRingCat.Hom.hom (sectionsIso_coefficients p q hU hV)) c }
+
+end CycleQ2ProductCoefficients
+
+#print axioms CycleQ2ProductCoefficients.sectionsAlgEquiv
+
+end
+
+noncomputable section
+
+/-!
+# Exterior powers with one distinguished free direction
+
+Project onto the horizontal part and contract against the dual of the
+free direction to extract the mixed part. Their two sections are the
+horizontal inclusion and its exterior product with the distinguished
+generator as the first argument.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2RankOneExteriorSplit
+
+open CycleQ2LiteralThreefoldResidueContraction (interior interior_wedge)
+
+variable (R M : Type) [CommRing R] [AddCommGroup M] [Module R M] (n : ℕ)
+
+private abbrev axis : R × M := (1,0)
+private abbrev hIn := LinearMap.inr R R M
+private abbrev hOut := LinearMap.snd R R M
+private abbrev vOut := LinearMap.fst R R M
+
+/-- Include a purely horizontal exterior form. -/
+def liftHorizontal : (⋀[R]^(n+1) M) →ₗ[R] (⋀[R]^(n+1) (R × M)) :=
+  exteriorPower.map (n+1) (hIn R M)
+
+/-- Prepend the chosen vertical direction to a horizontal exterior form. -/
+def liftMixed : (⋀[R]^n M) →ₗ[R] (⋀[R]^(n+1) (R × M)) :=
+  exteriorPower.alternatingMapLinearEquiv
+    (((exteriorPower.ιMulti R (n+1)).curryLeft (axis R M)).compLinearMap (hIn R M))
+
+theorem liftMixed_wedge (m : Fin n → M) :
+    liftMixed R M n (exteriorPower.ιMulti R n m) =
+      exteriorPower.ιMulti R (n+1) (Matrix.vecCons (axis R M) (hIn R M ∘ m)) := by
+  simp only [liftMixed, exteriorPower.alternatingMapLinearEquiv_apply_ιMulti,
+    AlternatingMap.compLinearMap_apply, AlternatingMap.curryLeft_apply_apply, Function.comp_def]
+
+/-- Project to the purely horizontal component. -/
+def horizontal : (⋀[R]^(n+1) (R × M)) →ₗ[R] (⋀[R]^(n+1) M) :=
+  exteriorPower.map (n+1) (hOut R M)
+
+/-- Contract the first component, then project all remaining slots. -/
+def mixed : (⋀[R]^(n+1) (R × M)) →ₗ[R] (⋀[R]^n M) :=
+  (exteriorPower.map n (hOut R M)).comp (interior n (vOut R M))
+
+private theorem hOut_hIn : (hOut R M).comp (hIn R M) = LinearMap.id := by
+  ext x
+  rfl
+
+@[simp] theorem horizontal_liftHorizontal (w : ⋀[R]^(n+1) M) :
+    horizontal R M n (liftHorizontal R M n w) = w := by
+  change ((exteriorPower.map (n+1) (hOut R M)).comp (exteriorPower.map (n+1) (hIn R M))) w = _
+  rw [← exteriorPower.map_comp, hOut_hIn, exteriorPower.map_id]
+  rfl
+
+@[simp] theorem mixed_liftHorizontal : (mixed R M n).comp (liftHorizontal R M n) = 0 := by
+  apply exteriorPower.linearMap_ext
+  apply AlternatingMap.ext
+  intro m
+  simp only [LinearMap.compAlternatingMap_apply, LinearMap.comp_apply, liftHorizontal, exteriorPower.map_apply_ιMulti, mixed, interior_wedge]
+  simp [Function.comp_def]
+
+@[simp] theorem horizontal_liftMixed : (horizontal R M n).comp (liftMixed R M n) = 0 := by
+  apply exteriorPower.linearMap_ext
+  apply AlternatingMap.ext
+  intro m
+  simp only [LinearMap.compAlternatingMap_apply, LinearMap.comp_apply,liftMixed_wedge,horizontal,exteriorPower.map_apply_ιMulti,LinearMap.zero_apply]
+  exact (exteriorPower.ιMulti R (n+1)).toMultilinearMap.map_coord_zero 0 (by simp [Function.comp_def,axis])
+
+@[simp] theorem mixed_liftMixed : (mixed R M n).comp (liftMixed R M n) = LinearMap.id := by
+  apply exteriorPower.linearMap_ext
+  apply AlternatingMap.ext
+  intro m
+  simp only [LinearMap.compAlternatingMap_apply, LinearMap.comp_apply,liftMixed_wedge,mixed,interior_wedge,map_sum,LinearMap.id_apply]
+  rw [Fin.sum_univ_succ]
+  simp [Matrix.vecCons,Function.comp_def,axis,exteriorPower.map_apply_ιMulti]
+
+end CycleQ2RankOneExteriorSplit
+
+#print axioms CycleQ2RankOneExteriorSplit.horizontal_liftHorizontal
+#print axioms CycleQ2RankOneExteriorSplit.mixed_liftMixed
+
+end
+
+noncomputable section
+
+/-!
+# The horizontal and mixed components exhaust the exterior power
+
+Expanding an exterior product along the two summands leaves only the
+purely horizontal term and terms with one vertical slot. Terms with
+two vertical slots vanish by alternation, since they lie on the
+same free rank-one axis.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2RankOneExteriorEquiv
+
+open CycleQ2RankOneExteriorSplit
+open Function Fin
+
+variable (R M : Type) [CommRing R] [AddCommGroup M] [Module R M] (n : ℕ)
+
+private abbrev axis : R × M := (1,0)
+private abbrev ins : M →ₗ[R] R × M := LinearMap.inr R R M
+private abbrev wedge := exteriorPower.ιMulti R (n+1) (M := R × M)
+
+/-- Assemble a form from its horizontal and mixed components. -/
+def assemble : (⋀[R]^(n+1) M) × (⋀[R]^n M) →ₗ[R] (⋀[R]^(n+1) (R × M)) :=
+  (liftHorizontal R M n).coprod (liftMixed R M n)
+
+private abbrev image := LinearMap.range (assemble R M n)
+
+private theorem horizontal_mem (m : Fin (n+1) → M) :
+    wedge R M n (ins R M ∘ m) ∈ image R M n := by
+  refine ⟨(exteriorPower.ιMulti R (n+1) m,0),?_⟩
+  simp [assemble,liftHorizontal]
+
+private theorem mixed_mem (i : Fin (n+1)) (c : R) (m : Fin n → M) :
+    wedge R M n (i.insertNth (c • axis R M) (ins R M ∘ m)) ∈ image R M n := by
+  have h : wedge R M n (Matrix.vecCons (axis R M) (ins R M ∘ m)) ∈ image R M n := by
+    refine ⟨(0, exteriorPower.ιMulti R n m),?_⟩
+    simp only [assemble,LinearMap.coprod_apply,map_zero,zero_add,liftMixed_wedge]
+  rw [AlternatingMap.map_insertNth]
+  apply (image R M n).toAddSubgroup.zsmul_mem
+  have eq : Matrix.vecCons (c • axis R M) (ins R M ∘ m) =
+      Function.update (Matrix.vecCons (axis R M) (ins R M ∘ m)) 0 (c • axis R M) := by
+    funext j
+    refine Fin.cases ?_ (fun i => ?_) j <;> simp
+  rw [eq, AlternatingMap.map_update_smul]
+  have hu : Function.update (Matrix.vecCons (axis R M) (ins R M ∘ m)) 0 (axis R M) =
+      Matrix.vecCons (axis R M) (ins R M ∘ m) := by
+    simp
+  rw [hu]
+  exact Submodule.smul_mem _ _ h
+
+private theorem double_axis_zero (m : Fin (n+1) → R × M) {i j : Fin (n+1)}
+    (hij : i ≠ j) (a b : R) (ha : m i = a • axis R M) (hb : m j = b • axis R M) :
+    wedge R M n m = 0 := by
+  let u := Function.update (Function.update m i (axis R M)) j (axis R M)
+  have h₂ : Function.update u j (b • axis R M) =
+      Function.update (Function.update m i (axis R M)) j (m j) := by
+    rw [hb,Function.update_idem]
+  have h₁ : Function.update (Function.update u j (b • axis R M)) i (a • axis R M) = m := by
+    rw [h₂]
+    funext t
+    by_cases hi : t = i
+    · subst t
+      simp [ha]
+    by_cases hj : t = j
+    · subst t
+      simp [hij.symm]
+    simp [hi,hj]
+  have h₂' : Function.update u j (axis R M) = u := by
+    exact Function.update_eq_self_iff.mpr (by simp [u])
+  have h₁' : Function.update (Function.update u j (b • axis R M)) i (axis R M) =
+      Function.update u j (b • axis R M) := by
+    apply Function.update_eq_self_iff.mpr
+    simp [u,hij]
+  rw [← h₁,AlternatingMap.map_update_smul,h₁',AlternatingMap.map_update_smul,h₂']
+  have hz := (wedge R M n).map_eq_zero_of_eq u (i := i) (j := j) (by simp [u,hij]) hij
+  rw [hz,smul_zero,smul_zero]
+
+private theorem wedge_mem (v : Fin (n+1) → R × M) : wedge R M n v ∈ image R M n := by
+  classical
+  let h : Fin (n+1) → M := fun j => (v j).2
+  let a : Fin (n+1) → R × M := fun j => (v j).1 • axis R M
+  let b : Fin (n+1) → R × M := ins R M ∘ h
+  have hv : v = a + b := by
+    funext j
+    ext <;> simp [a,b,h,axis,ins,Function.comp_def]
+  have he := (wedge R M n).toMultilinearMap.map_add_univ a b
+  change wedge R M n (a+b) = ∑ s : Finset (Fin (n+1)), wedge R M n (s.piecewise a b) at he
+  rw [hv,he]
+  apply Submodule.sum_mem
+  intro s _
+  rcases s.eq_empty_or_nonempty with rfl | hs
+  · simpa [b] using horizontal_mem R M n h
+  by_cases hc : s.card ≤ 1
+  · obtain ⟨i,rfl⟩ := Finset.card_eq_one.mp (le_antisymm hc (Finset.card_pos.mpr hs))
+    have eq : ({i} : Finset (Fin (n+1))).piecewise a b =
+        i.insertNth ((v i).1 • axis R M) (ins R M ∘ i.removeNth h) := by
+      rw [show ins R M ∘ i.removeNth h = i.removeNth b by rfl, Fin.insertNth_removeNth]
+      funext j
+      by_cases hj : j = i <;> simp [Finset.piecewise,hj,a]
+    rw [eq]
+    exact mixed_mem R M n i _ _
+  · have hs₂ := not_congr (@Finset.card_le_one (Fin (n+1)) s) |>.mp hc
+    push Not at hs₂
+    obtain ⟨i,hi,j,hj,hij⟩ := hs₂
+    rw [double_axis_zero R M n _ hij (v i).1 (v j).1
+      (by simp [Finset.piecewise,hi,a]) (by simp [Finset.piecewise,hj,a])]
+    exact Submodule.zero_mem _
+
+theorem assemble_surjective : Function.Surjective (assemble R M n) := by
+  rw [← LinearMap.range_eq_top]
+  apply top_unique
+  rw [← exteriorPower.ιMulti_span]
+  apply Submodule.span_le.mpr
+  rintro _ ⟨m,rfl⟩
+  exact wedge_mem R M n m
+
+private theorem split_assemble (a : ⋀[R]^(n+1) M) (b : ⋀[R]^n M) :
+    (horizontal R M n (assemble R M n (a,b)), mixed R M n (assemble R M n (a,b))) = (a,b) := by
+  have h₁ : horizontal R M n (liftMixed R M n b) = 0 :=
+    LinearMap.congr_fun (horizontal_liftMixed R M n) b
+  have h₂ : mixed R M n (liftHorizontal R M n a) = 0 :=
+    LinearMap.congr_fun (mixed_liftHorizontal R M n) a
+  have h₃ : mixed R M n (liftMixed R M n b) = b :=
+    LinearMap.congr_fun (mixed_liftMixed R M n) b
+  apply Prod.ext
+  · simp only [assemble,LinearMap.coprod_apply,map_add,horizontal_liftHorizontal,h₁,add_zero]
+  · simp only [assemble,LinearMap.coprod_apply,map_add,h₂,h₃,zero_add]
+
+/-- Exterior powers split into exactly the two indicated degrees. -/
+def split : (⋀[R]^(n+1) (R × M)) ≃ₗ[R] ((⋀[R]^(n+1) M) × (⋀[R]^n M)) where
+  __ := (horizontal R M n).prod (mixed R M n)
+  invFun := assemble R M n
+  left_inv x := by
+    obtain ⟨⟨a,b⟩,rfl⟩ := assemble_surjective R M n x
+    exact congrArg (assemble R M n) (split_assemble R M n a b)
+  right_inv x := split_assemble R M n x.1 x.2
+
+end CycleQ2RankOneExteriorEquiv
+
+#print axioms CycleQ2RankOneExteriorEquiv.split
+
+end
+
+noncomputable section
+
+/-!
+# The exterior components of the actual tensor algebra
+
+A rank-one frame of the curve cotangent module pulls back to a
+basis of the vertical summand. The exterior components then use
+the ordinary relative cotangent module of the product, with the
+single curve direction placed first in every mixed product.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2ProductExteriorComponents
+
+open Algebra KaehlerDifferential Module
+open scoped TensorProduct KaehlerDifferential
+open CycleQ2ProductCotangent (T fromLeft fromRight split toLeft toRight)
+
+attribute [local instance] Algebra.TensorProduct.rightAlgebra
+
+variable (k A B : Type) [CommRing k] [CommRing A] [CommRing B] [Algebra k A] [Algebra k B]
+
+private abbrev S := T k A B
+abbrev BaseForms := Ω[S k A B⁄A]
+
+/-- The given curve cotangent basis in the actual product cotangent module
+relative to its other coordinate ring. -/
+def verticalBasis (b : Basis (Fin 1) A Ω[A⁄k]) : Basis (Fin 1) (S k A B) Ω[S k A B⁄B] :=
+  (b.baseChange (S k A B)).map (KaehlerDifferential.tensorKaehlerEquiv k B A (S k A B))
+
+theorem verticalBasis_exact (b : Basis (Fin 1) A Ω[A⁄k]) (u : A) (hu : b 0 = D k A u) :
+    verticalBasis k A B b 0 = D B (S k A B) (algebraMap A (S k A B) u) := by
+  rw [verticalBasis,Basis.map_apply,Basis.baseChange_apply,hu,
+    KaehlerDifferential.tensorKaehlerEquiv_tmul_D,one_smul]
+
+private def coordinate (b : Basis (Fin 1) A Ω[A⁄k]) : Ω[S k A B⁄B] ≃ₗ[S k A B] S k A B :=
+  (verticalBasis k A B b).equivFun.trans (LinearEquiv.funUnique (Fin 1) (S k A B) (S k A B))
+
+private theorem coordinate_basis (b : Basis (Fin 1) A Ω[A⁄k]) :
+    coordinate k A B b (verticalBasis k A B b 0) = 1 := by
+  simp [coordinate,Basis.equivFun_self,show (default : Fin 1) = 0 by decide]
+
+/-- The product's ordinary relative forms have one curve coordinate and
+one horizontal cotangent factor. -/
+def cotangentSplit (b : Basis (Fin 1) A Ω[A⁄k]) :
+    Ω[S k A B⁄k] ≃ₗ[S k A B] S k A B × BaseForms k A B :=
+  (split k A B).trans ((coordinate k A B b).prodCongr (LinearEquiv.refl _ _))
+
+theorem cotangentSplit_vertical (b : Basis (Fin 1) A Ω[A⁄k]) (u : A) (hu : b 0 = D k A u) :
+    cotangentSplit k A B b (D k _ (algebraMap A (S k A B) u)) = (1,0) := by
+  apply Prod.ext
+  · change coordinate k A B b (toLeft k A B (D k _ (algebraMap A (S k A B) u))) = 1
+    rw [CycleQ2ProductCotangent.toLeft_D,← verticalBasis_exact k A B b u hu,coordinate_basis]
+  · change toRight k A B (D k _ (algebraMap A (S k A B) u)) = 0
+    rw [CycleQ2ProductCotangent.toRight_D,Derivation.map_algebraMap]
+
+theorem cotangentSplit_horizontal (b : Basis (Fin 1) A Ω[A⁄k]) (v : B) :
+    cotangentSplit k A B b (D k _ (algebraMap B (S k A B) v)) =
+      (0,D A _ (algebraMap B (S k A B) v)) := by
+  apply Prod.ext
+  · change coordinate k A B b (toLeft k A B (D k _ (algebraMap B (S k A B) v))) = 0
+    rw [CycleQ2ProductCotangent.toLeft_D,Derivation.map_algebraMap,map_zero]
+  · exact CycleQ2ProductCotangent.toRight_D k A B _
+
+private def extEquiv {R M N : Type} [CommRing R] [AddCommGroup M] [Module R M]
+    [AddCommGroup N] [Module R N] (n : ℕ) (e : M ≃ₗ[R] N) : (⋀[R]^n M) ≃ₗ[R] (⋀[R]^n N) :=
+  LinearEquiv.ofLinearMap (exteriorPower.map n e.toLinearMap) (exteriorPower.map n e.symm.toLinearMap)
+    (by rw [← exteriorPower.map_comp,LinearEquiv.comp_symm,exteriorPower.map_id])
+    (by rw [← exteriorPower.map_comp,LinearEquiv.symm_comp,exteriorPower.map_id])
+
+/-- In positive degree, all forms come from either the horizontal degree or
+one curve form wedged with the preceding horizontal degree. -/
+def exteriorSplit (b : Basis (Fin 1) A Ω[A⁄k]) (n : ℕ) :
+    (⋀[S k A B]^(n+1) Ω[S k A B⁄k]) ≃ₗ[S k A B]
+      (⋀[S k A B]^(n+1) (BaseForms k A B)) × (⋀[S k A B]^n (BaseForms k A B)) :=
+  (extEquiv (n+1) (cotangentSplit k A B b)).trans
+    (CycleQ2RankOneExteriorEquiv.split (S k A B) (BaseForms k A B) n)
+
+end CycleQ2ProductExteriorComponents
+
+#print axioms CycleQ2ProductExteriorComponents.exteriorSplit
+#print axioms CycleQ2ProductExteriorComponents.cotangentSplit_vertical
+
+end
+
+noncomputable section
+
+/-!
+# The actual relative exterior forms on the product opens
+
+The coefficient-algebra comparison induces the usual pullback on
+actual Kähler exterior powers. The comparison is invertible in every
+degree, takes wedges of exact differentials to the corresponding
+wedges on the tensor chart, and respects both restriction maps.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2ProductOpenForms
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite Module KaehlerDifferential
+open scoped TensorProduct
+open CycleQ2ProductAffineOpen CycleQ2ProductOpenRestrictions CycleQ2ProductSectionRings
+  CycleQ2ProductCoefficients
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (restrict)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback exteriorPullback_d)
+open CycleQ2AffineDeRhamFunctorial (exteriorPullback_comp exteriorPullback_id)
+open CycleQ2WeightedCoordinateExterior (Form)
+
+variable {k : Type} [Field k] {C X : Scheme.{0}}
+  (p : C ⟶ Spec (CommRingCat.of k)) (q : X ⟶ Spec (CommRingCat.of k))
+  {U U' : C.Opens} {V V' : X.Opens}
+  (hU : IsAffineOpen U) (hV : IsAffineOpen V) (hU' : IsAffineOpen U') (hV' : IsAffineOpen V')
+  (h₁ : U' ≤ U) (h₂ : V' ≤ V)
+
+private abbrev Z := pullback p q
+private abbrev P := productOpen p q U V
+private abbrev P' := productOpen p q U' V'
+private abbrev A := Γ(Z p q,P p q (U := U) (V := V))
+private abbrev A' := Γ(Z p q,P' p q (U' := U') (V' := V'))
+private abbrev T := coordinateRing p q U V
+private abbrev T' := coordinateRing p q U' V'
+
+private abbrev AlgA : Algebra k (A p q (U := U) (V := V)) :=
+  (sectionCoefficients (productBase p q) (P p q)).toAlgebra
+private abbrev AlgT : Algebra k (T p q (U := U) (V := V)) :=
+  letI : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+  letI : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+  inferInstanceAs (Algebra k (Γ(C,U) ⊗[k] Γ(X,V)))
+
+private def pullLinear {L M : Type} [CommRing L] [CommRing M] [Algebra k L] [Algebra k M]
+    (φ : L →ₐ[k] M) (n : ℕ) : Form k L n →ₗ[k] Form k M n where
+  toFun := exteriorPullback φ n
+  map_add' := map_add _
+  map_smul' c ω := by
+    change exteriorPullback φ n (c • ω) = c • exteriorPullback φ n ω
+    rw [← IsScalarTower.algebraMap_smul L c ω, map_smulₛₗ]
+    change φ (algebraMap k L c) • exteriorPullback φ n ω = _
+    rw [φ.commutes,IsScalarTower.algebraMap_smul]
+
+/-- The actual product exterior modules identify with those of the tensor algebra. -/
+def formsEquiv (n : ℕ) :
+    letI := AlgA (U := U) (V := V) p q
+    letI := AlgT (U := U) (V := V) p q
+    Form k (A (U := U) (V := V) p q) n ≃ₗ[k] Form k (T (U := U) (V := V) p q) n := by
+  letI := AlgA (U := U) (V := V) p q
+  letI := AlgT (U := U) (V := V) p q
+  let e : A (U := U) (V := V) p q ≃ₐ[k] T (U := U) (V := V) p q := sectionsAlgEquiv p q hU hV
+  refine LinearEquiv.ofLinearMap (pullLinear e.toAlgHom n) (pullLinear e.symm.toAlgHom n) ?_ ?_
+  · apply LinearMap.ext
+    intro ω
+    change exteriorPullback e.toAlgHom n (exteriorPullback e.symm.toAlgHom n ω) = _
+    rw [← exteriorPullback_comp,AlgEquiv.comp_symm,exteriorPullback_id,LinearMap.id_apply]
+  · apply LinearMap.ext
+    intro ω
+    change exteriorPullback e.symm.toAlgHom n (exteriorPullback e.toAlgHom n ω) = _
+    rw [← exteriorPullback_comp,AlgEquiv.symm_comp,exteriorPullback_id,LinearMap.id_apply]
+
+abbrev tensorRestriction :
+    letI := AlgT (U := U) (V := V) p q
+    letI := AlgT (U := U') (V := V') p q
+    T (U := U) (V := V) p q →ₐ[k] T' (U' := U') (V' := V') p q :=
+  letI : Algebra k Γ(C,U) := (sectionCoefficients p U).toAlgebra
+  letI : Algebra k Γ(C,U') := (sectionCoefficients p U').toAlgebra
+  letI : Algebra k Γ(X,V) := (sectionCoefficients q V).toAlgebra
+  letI : Algebra k Γ(X,V') := (sectionCoefficients q V').toAlgebra
+  Algebra.TensorProduct.map (restrict p h₁) (restrict q h₂)
+
+private theorem sections_commute :
+    letI := AlgA (U := U) (V := V) p q
+    letI := AlgA (U := U') (V := V') p q
+    letI := AlgT (U := U) (V := V) p q
+    letI := AlgT (U := U') (V := V') p q
+    (sectionsAlgEquiv p q hU' hV').toAlgHom.comp (restrict (productBase p q) (productOpen_mono p q h₁ h₂)) =
+      (tensorRestriction p q h₁ h₂).comp (sectionsAlgEquiv p q hU hV).toAlgHom := by
+  let := AlgA (U := U) (V := V) p q
+  let := AlgA (U := U') (V := V') p q
+  let := AlgT (U := U) (V := V) p q
+  let := AlgT (U := U') (V := V') p q
+  apply AlgHom.ext
+  intro a
+  exact DFunLike.congr_fun (congrArg CommRingCat.Hom.hom (sectionsIso_restrict p q hU hV hU' hV' h₁ h₂)) a
+
+theorem forms_restrict (n : ℕ) :
+    letI := AlgA (U := U) (V := V) p q
+    letI := AlgA (U := U') (V := V') p q
+    letI := AlgT (U := U) (V := V) p q
+    letI := AlgT (U := U') (V := V') p q
+    ∀ ω : Form k (A (U := U) (V := V) p q) n,
+      formsEquiv p q hU' hV' n
+        (exteriorPullback (restrict (productBase p q) (productOpen_mono p q h₁ h₂)) n ω) =
+      exteriorPullback (tensorRestriction p q h₁ h₂) n (formsEquiv p q hU hV n ω) := by
+  let := AlgA (U := U) (V := V) p q
+  let := AlgA (U := U') (V := V') p q
+  let := AlgT (U := U) (V := V) p q
+  let := AlgT (U := U') (V := V') p q
+  intro ω
+  change exteriorPullback (sectionsAlgEquiv p q hU' hV').toAlgHom n (exteriorPullback _ n ω) =
+    exteriorPullback _ n (exteriorPullback (sectionsAlgEquiv p q hU hV).toAlgHom n ω)
+  rw [← exteriorPullback_comp,← exteriorPullback_comp,sections_commute]
+
+end CycleQ2ProductOpenForms
+
+#print axioms CycleQ2ProductOpenForms.forms_restrict
+
+end
+
+noncomputable section
+
+/-!
+# Exterior differentiation in a finite exact cotangent frame
+
+Differentiate the coefficient of each ordered basis wedge and put
+its differential in the first slot of that wedge. The formula works
+in every degree. It gives the scalar Leibniz rule on all forms.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2ArbitraryFrameDifferential
+
+open Module KaehlerDifferential
+open scoped KaehlerDifferential
+open CycleQ2WeightedCoordinateExterior (Form)
+
+section Front
+
+variable {R M : Type} [CommRing R] [AddCommGroup M] [Module R M] (n : ℕ)
+
+/-- Place a vector before all the entries in an exterior product. -/
+def front : M →ₗ[R] ((⋀[R]^n M) →ₗ[R] (⋀[R]^(n+1) M)) :=
+  exteriorPower.alternatingMapLinearEquiv.toLinearMap.comp (exteriorPower.ιMulti R (n+1)).curryLeft
+
+theorem front_wedge (v : M) (w : Fin n → M) :
+    front n v (exteriorPower.ιMulti R n w) = exteriorPower.ιMulti R (n+1) (Matrix.vecCons v w) := by
+  simp only [front,LinearMap.comp_apply,LinearEquiv.coe_coe,
+    exteriorPower.alternatingMapLinearEquiv_apply_ιMulti,AlternatingMap.curryLeft_apply_apply]
+
+end Front
+
+variable {k A I : Type} [CommRing k] [CommRing A] [Algebra k A] [Fintype I] [LinearOrder I]
+  (b : Basis I A Ω[A⁄k]) (n : ℕ)
+
+/-- In an exact frame this is relative exterior differentiation. -/
+def d : Form k A n →ₗ[k] Form k A (n+1) :=
+  ∑ J : Set.powersetCard I n,
+    (((front (R := A) n).flip (b.exteriorPower n J)).restrictScalars k).comp
+      ((D k A).toLinearMap.comp (((b.exteriorPower n).coord J).restrictScalars k))
+
+theorem d_apply (ω : Form k A n) :
+    d b n ω = ∑ J : Set.powersetCard I n,
+      front n (D k A ((b.exteriorPower n).repr ω J)) (b.exteriorPower n J) := by
+  simp only [d,LinearMap.sum_apply,LinearMap.comp_apply,LinearMap.coe_restrictScalars,
+    LinearMap.flip_apply,Basis.coord_apply,Derivation.coeFn_coe]
+
+theorem d_smul_basis (a : A) (J : Set.powersetCard I n) :
+    d b n (a • b.exteriorPower n J) = front n (D k A a) (b.exteriorPower n J) := by
+  classical
+  rw [d_apply,Finset.sum_eq_single J]
+  · simp
+  · intro L _ hL
+    simp only [map_smul,Basis.repr_self,Finsupp.smul_apply,Finsupp.single_eq_of_ne hL,
+      smul_zero,map_zero,LinearMap.zero_apply]
+  · simp
+
+@[simp] theorem d_basis (J : Set.powersetCard I n) : d b n (b.exteriorPower n J) = 0 := by
+  simpa only [one_smul,Derivation.map_one_eq_zero,map_zero,LinearMap.zero_apply] using
+    d_smul_basis b n 1 J
+
+theorem d_smul (a : A) (ω : Form k A n) :
+    d b n (a • ω) = front n (D k A a) ω + a • d b n ω := by
+  classical
+  calc
+    _ = ∑ J : Set.powersetCard I n,
+          (front n (D k A a) (((b.exteriorPower n).repr ω J) • b.exteriorPower n J) +
+            a • front n (D k A ((b.exteriorPower n).repr ω J)) (b.exteriorPower n J)) := by
+      rw [d_apply]
+      apply Finset.sum_congr rfl
+      intro J _
+      simp only [map_smul,Finsupp.smul_apply,smul_eq_mul,Derivation.leibniz,
+        map_add,LinearMap.add_apply,LinearMap.smul_apply]
+      exact add_comm _ _
+    _ = _ := by
+      rw [Finset.sum_add_distrib,← map_sum, (b.exteriorPower n).sum_repr,
+        ← Finset.smul_sum,← d_apply]
+
+end CycleQ2ArbitraryFrameDifferential
+
+#print axioms CycleQ2ArbitraryFrameDifferential.d_smul
+
+end
+
+noncomputable section
+
+/-!
+# Identities for exterior differentiation in arbitrary exact frames
+
+The coordinate derivations commute. Exterior multiplication in two
+new slots anticommutes, and every wedge of coordinate basis vectors
+has zero derivative even when the coordinates are listed out of order.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2FrameExteriorIdentities
+
+open Module KaehlerDifferential Function
+open CycleQ2ArbitraryFrameDifferential (front front_wedge d d_smul d_basis)
+open CycleQ2WeightedCoordinateExterior (Form)
+
+section Exterior
+variable {R M : Type} [CommRing R] [AddCommGroup M] [Module R M] (n : ℕ)
+
+theorem front_swap (x y : M) (ω : ⋀[R]^n M) :
+    front (n+1) x (front n y ω) = -front (n+1) y (front n x ω) := by
+  have h : (front (R := R) (n+1) x).comp (front n y) = -((front (n+1) y).comp (front n x)) := by
+    apply exteriorPower.linearMap_ext
+    apply AlternatingMap.ext
+    intro v
+    simp only [LinearMap.compAlternatingMap_apply,LinearMap.comp_apply,LinearMap.neg_apply,front_wedge]
+    let a : Fin (n+2) := 0
+    let b : Fin (n+2) := Fin.succ 0
+    let w := Matrix.vecCons y (Matrix.vecCons x v)
+    have e : Matrix.vecCons x (Matrix.vecCons y v) = w ∘ Equiv.swap a b := by
+      funext j
+      refine Fin.cases ?_ (fun j => Fin.cases ?_ (fun j => ?_) j) j
+      · simp [a,b,w]
+      · simp [a,b,w]
+      · rw [Function.comp_apply,Equiv.swap_apply_of_ne_of_ne]
+        · simp [w]
+        · simp [a]
+        · intro h
+          have he := congrArg Fin.val h
+          simp [b] at he
+    rw [e,AlternatingMap.map_perm]
+    simp [a,b,w,Units.smul_def]
+  exact LinearMap.congr_fun h ω
+
+end Exterior
+
+variable {k A I : Type} [CommRing k] [CommRing A] [Algebra k A] [Fintype I] [LinearOrder I]
+  (b : Basis I A Ω[A⁄k]) (n : ℕ)
+
+/-- The dual to the indicated cotangent vector, as a derivation. -/
+def direction (i : I) : Derivation k A A :=
+  (KaehlerDifferential.linearMapEquivDerivation k A) (b.coord i)
+
+omit [Fintype I] [LinearOrder I] in
+theorem direction_apply (i : I) (a : A) :
+    direction b i a = b.repr (D k A a) i := rfl
+
+theorem directions_commute (u : I → A) (hu : ∀ i, b i = D k A (u i)) (i j : I) :
+    Function.Commute (direction b i) (direction b j) := by
+  intro a
+  let δ := ⁅direction b i, direction b j⁆
+  have hδ : δ.liftKaehlerDifferential = 0 := by
+    apply b.ext
+    intro s
+    rw [hu,Derivation.liftKaehlerDifferential_comp_D]
+    have he (l m : I) : direction b l (u m) = if m = l then 1 else 0 := by
+      rw [direction_apply,← hu,Basis.repr_self,Finsupp.single_apply]
+    simp only [δ,Derivation.commutator_apply,he,LinearMap.zero_apply]
+    split <;> split <;> simp
+  apply sub_eq_zero.mp
+  change δ a = 0
+  rw [← Derivation.liftKaehlerDifferential_comp_D δ,hδ]
+  rfl
+
+/-- The differential vanishes on every wedge of basis vectors. -/
+theorem d_coordinate_wedge (α : Fin n → I) : d b n (exteriorPower.ιMulti A n (b ∘ α)) = 0 := by
+  classical
+  by_cases hα : Function.Injective α
+  · let s : Set.powersetCard I n := ⟨Finset.image α Finset.univ,
+      (Finset.card_image_of_injective Finset.univ hα).trans (Finset.card_fin n)⟩
+    let σ : Equiv.Perm (Fin n) := (Finset.orderIsoOfFin s.val s.prop).toEquiv.trans
+      ((Equiv.setCongr Fintype.coe_image_univ).trans (Equiv.ofInjective α hα).symm)
+    have h : exteriorPower.ιMulti A n ((b ∘ α) ∘ σ) = b.exteriorPower n s := by
+      rw [exteriorPower.basis_apply, exteriorPower.ιMulti_family,Function.comp_assoc]
+      congr 1
+      funext j
+      simp [σ,Equiv.apply_ofInjective_symm]
+      rfl
+    rw [AlternatingMap.map_perm] at h
+    have hzero := congrArg (d b n) h
+    change d b n ((↑σ.sign : ℤ) • exteriorPower.ιMulti A n (b ∘ α)) = _ at hzero
+    rw [map_zsmul,d_basis] at hzero
+    rw [← Units.smul_def] at hzero
+    have h' := congrArg (fun x => σ.sign⁻¹ • x) hzero
+    simpa only [smul_smul,inv_mul_cancel,one_smul,smul_zero] using h'
+  · rw [AlternatingMap.map_eq_zero_of_not_injective _ _ (fun h => hα (Injective.of_comp h)),map_zero]
+
+end CycleQ2FrameExteriorIdentities
+
+#print axioms CycleQ2FrameExteriorIdentities.directions_commute
+#print axioms CycleQ2FrameExteriorIdentities.d_coordinate_wedge
+
+end
+
+noncomputable section
+
+/-!
+# The actual exterior differential squares to zero in arbitrary rank
+
+In an exact frame, the two derivatives in every second derivative
+commute. The two exterior insertions anticommute. This cancels the
+full square on the actual exterior powers of the cotangent module.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2ExactFrameComplex
+
+open Module KaehlerDifferential
+open CycleQ2ArbitraryFrameDifferential
+open CycleQ2FrameExteriorIdentities
+open CycleQ2WeightedCoordinateExterior (Form)
+
+variable {k A I : Type} [Field k] [CharZero k] [CommRing A] [Algebra k A] [Fintype I] [LinearOrder I]
+  (b : Basis I A Ω[A⁄k]) (u : I → A) (hu : ∀ i, b i = D k A (u i)) (n : ℕ)
+
+private abbrev wedge (J : Set.powersetCard I n) := b.exteriorPower n J
+
+theorem front_basis_closed (i : I) (J : Set.powersetCard I n) :
+    d b (n+1) (front n (b i) (wedge b n J)) = 0 := by
+  change d b (n+1) (front n (b i) (b.exteriorPower n J)) = 0
+  rw [exteriorPower.basis_apply,exteriorPower.ιMulti_family,front_wedge]
+  let v := Set.powersetCard.ofFinEmbEquiv.symm J
+  have he : Matrix.vecCons (b i) (b ∘ v) = b ∘ Matrix.vecCons i v := by
+    funext j
+    cases j using Fin.cases <;> simp [Function.comp_def]
+  rw [he]
+  exact d_coordinate_wedge b (n+1) _
+
+omit [CharZero k] [LinearOrder I] in
+theorem front_derivative_expansion (a : A) (ω : Form k A n) :
+    front n (D k A a) ω = ∑ i, direction b i a • front n (b i) ω := by
+  rw [← b.sum_repr (D k A a),map_sum,LinearMap.sum_apply]
+  apply Finset.sum_congr rfl
+  intro i _
+  simp only [map_smul,LinearMap.smul_apply,direction_apply]
+
+include hu in
+theorem second_scalar (a : A) (ω : Form k A n) :
+    (∑ i, front (n+1) (D k A (direction b i a)) (front n (b i) ω)) = 0 := by
+  let F : I → I → Form k A (n+2) := fun i j =>
+    direction b j (direction b i a) • front (n+1) (b j) (front n (b i) ω)
+  have hF (i j : I) : F i j = -F j i := by
+    change direction b j (direction b i a) • front (n+1) (b j) (front n (b i) ω) = _
+    rw [directions_commute b u hu j i a,front_swap n (b j) (b i),smul_neg]
+  let s := ∑ i, ∑ j, F i j
+  have hneg : s = -s := by
+    calc
+      s = ∑ i, ∑ j, -F j i := by simp only [s,← hF]
+      _ = -(∑ i, ∑ j, F j i) := by simp only [Finset.sum_neg_distrib]
+      _ = -s := congrArg Neg.neg (Finset.sum_comm)
+  have hzero : (2 : k) • s = 0 := by
+    rw [two_smul]
+    exact (congrArg (fun t => s + t) hneg).trans (add_neg_cancel s)
+  simp_rw [front_derivative_expansion b (n+1)]
+  exact (smul_eq_zero.mp hzero).resolve_left (by norm_num)
+
+include hu in
+private theorem square_symbol (a : A) (J : Set.powersetCard I n) :
+    d b (n+1) (d b n (a • wedge b n J)) = 0 := by
+  rw [d_smul_basis b n,front_derivative_expansion b n,map_sum]
+  simp_rw [d_smul b (n+1),front_basis_closed b n,smul_zero,add_zero]
+  exact second_scalar b u hu n a (wedge b n J)
+
+include hu in
+/-- The formula on positive and zero degrees defines an actual complex. -/
+theorem exterior_square (ω : Form k A n) : d b (n+1) (d b n ω) = 0 := by
+  rw [← (b.exteriorPower n).sum_repr ω,map_sum,map_sum]
+  exact Finset.sum_eq_zero fun J _ => square_symbol b u hu n _ J
+
+end CycleQ2ExactFrameComplex
+
+#print axioms CycleQ2ExactFrameComplex.exterior_square
+
+end
+
+noncomputable section
+
+/-!
+# Exterior differentiation is intrinsic to the exact forms
+
+A wedge of exact one-forms has zero derivative. The derivative of a
+coefficient times that wedge consequently puts only the differential
+of the coefficient into the first slot. This formula is independent
+of the chosen exact cotangent frame.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2FrameCanonicalDifferential
+
+open Module KaehlerDifferential
+open CycleQ2ArbitraryFrameDifferential
+open CycleQ2FrameExteriorIdentities
+open CycleQ2ExactFrameComplex
+open CycleQ2WeightedCoordinateExterior (Form)
+
+variable {k A I : Type} [Field k] [CharZero k] [CommRing A] [Algebra k A] [Fintype I] [LinearOrder I]
+  (b : Basis I A Ω[A⁄k]) (u : I → A) (hu : ∀ i, b i = D k A (u i))
+
+private theorem d_front_basis (n : ℕ) (i : I) (ω : Form k A n) :
+    d b (n+1) (front n (b i) ω) = -front (n+1) (b i) (d b n ω) := by
+  rw [← (b.exteriorPower n).sum_repr ω]
+  simp only [map_sum,← Finset.sum_neg_distrib]
+  apply Finset.sum_congr rfl
+  intro J _
+  rw [map_smul,d_smul b (n+1),front_basis_closed b n,smul_zero,add_zero,d_smul_basis b n]
+  exact front_swap n _ _ _
+
+include hu in
+theorem d_front_exact (n : ℕ) (a : A) (ω : Form k A n) :
+    d b (n+1) (front n (D k A a) ω) = -front (n+1) (D k A a) (d b n ω) := by
+  rw [front_derivative_expansion b n,map_sum]
+  simp_rw [d_smul b (n+1),d_front_basis b n,smul_neg]
+  rw [Finset.sum_add_distrib,second_scalar b u hu n,zero_add,Finset.sum_neg_distrib,
+      ← front_derivative_expansion b (n+1)]
+
+include hu in
+/-- Every wedge of exact one-forms is closed in the intrinsic differential. -/
+theorem d_exact_wedge (n : ℕ) (a : Fin n → A) :
+    d b n (exteriorPower.ιMulti A n (D k A ∘ a)) = 0 := by
+  induction n with
+  | zero =>
+    let J : Set.powersetCard I 0 := ⟨∅,rfl⟩
+    have h : exteriorPower.ιMulti A 0 (D k A ∘ a) = b.exteriorPower 0 J := by
+      rw [exteriorPower.basis_apply,exteriorPower.ιMulti_family]
+      exact congrArg (exteriorPower.ιMulti A 0) (funext fun i => Fin.elim0 i)
+    rw [h,d_basis]
+  | succ n ih =>
+    have h : D k A ∘ a = Matrix.vecCons (D k A (a 0)) (D k A ∘ fun i => a i.succ) := by
+      funext j
+      cases j using Fin.cases <;> simp [Function.comp_def]
+    rw [h,← front_wedge,d_front_exact b u hu n,ih,map_zero,neg_zero]
+
+include hu in
+/-- The derivative of a scalar times an exact wedge depends only on
+that scalar and the exact functions. -/
+theorem d_exact_symbol (n : ℕ) (c : A) (a : Fin n → A) :
+    d b n (c • exteriorPower.ιMulti A n (D k A ∘ a)) =
+      exteriorPower.ιMulti A (n+1) (Matrix.vecCons (D k A c) (D k A ∘ a)) := by
+  rw [d_smul b n,d_exact_wedge b u hu n,smul_zero,add_zero,front_wedge]
+
+end CycleQ2FrameCanonicalDifferential
+
+#print axioms CycleQ2FrameCanonicalDifferential.d_exact_symbol
+
+end
+
+noncomputable section
+
+/-!
+# Pullback in the intrinsic exact-frame de Rham complex
+
+An algebra homomorphism pulls back the exact functions in a symbol
+and preserves the exterior derivative. The argument works between
+frames of different ranks and constructs the actual cochain map.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+
+
+namespace CycleQ2FrameDifferentialNaturality
+
+open CategoryTheory Module KaehlerDifferential
+open CycleQ2ArbitraryFrameDifferential (d)
+open CycleQ2ExactFrameComplex (exterior_square)
+open CycleQ2FrameCanonicalDifferential (d_exact_symbol)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback exteriorPullback_d)
+open CycleQ2AffineDeRhamFunctorial (exteriorPullback_id exteriorPullback_comp)
+open CycleQ2WeightedCoordinateExterior (Form)
+
+variable {k A B I J : Type} [Field k] [CharZero k] [CommRing A] [CommRing B]
+  [Algebra k A] [Algebra k B] [Fintype I] [LinearOrder I] [Fintype J] [LinearOrder J]
+  (b : Basis I A Ω[A⁄k]) (u : I → A) (hu : ∀ i, b i = D k A (u i))
+  (c : Basis J B Ω[B⁄k]) (v : J → B) (hv : ∀ i, c i = D k B (v i)) (φ : A →ₐ[k] B)
+
+include hu hv in
+private theorem pull_symbol (n : ℕ) (a : A) (r : Fin n → A) :
+    exteriorPullback φ (n+1) (d b n (a • exteriorPower.ιMulti A n (D k A ∘ r))) =
+      d c n (exteriorPullback φ n (a • exteriorPower.ιMulti A n (D k A ∘ r))) := by
+  rw [map_smulₛₗ (exteriorPullback φ n),exteriorPullback_d,d_exact_symbol b u hu,d_exact_symbol c v hv]
+  have h (T : Type) (M : Type) (f : T → M) (x : T) (w : Fin n → T) :
+      Matrix.vecCons (f x) (f ∘ w) = f ∘ Matrix.vecCons x w := by
+    funext i
+    cases i using Fin.cases <;> simp [Function.comp_def]
+  rw [h A (Ω[A⁄k]) (D k A) a r,exteriorPullback_d]
+  apply congrArg (exteriorPower.ιMulti B (n+1))
+  funext i
+  cases i using Fin.cases <;> rfl
+
+include hu hv in
+/-- Pullback commutes with the actual exterior differential in all degrees. -/
+theorem differential_natural (n : ℕ) (ω : Form k A n) :
+    exteriorPullback φ (n+1) (d b n ω) = d c n (exteriorPullback φ n ω) := by
+  rw [← (b.exteriorPower n).sum_repr ω,map_sum,map_sum,map_sum,map_sum]
+  apply Finset.sum_congr rfl
+  intro L _
+  let r := u ∘ Set.powersetCard.ofFinEmbEquiv.symm L
+  have e : b.exteriorPower n L = exteriorPower.ιMulti A n (D k A ∘ r) := by
+    rw [exteriorPower.basis_apply,exteriorPower.ιMulti_family]
+    apply congrArg (exteriorPower.ιMulti A n)
+    funext i
+    exact hu _
+  rw [e]
+  exact pull_symbol b u hu c v hv φ n _ r
+
+/-- The complex with actual relative exterior powers in every degree. -/
+def affineComplex (b : Basis I A Ω[A⁄k]) (u : I → A) (hu : ∀ i, b i = D k A (u i)) :
+    CochainComplex AddCommGrpCat.{0} ℕ :=
+  CochainComplex.of (fun n => AddCommGrpCat.of (Form k A n))
+    (fun n => AddCommGrpCat.ofHom (d b n).toAddMonoidHom)
+    (by
+      intro n
+      apply AddCommGrpCat.hom_ext
+      apply AddMonoidHom.ext
+      intro ω
+      exact exterior_square b u hu n ω)
+
+/-- The cochain map whose components are the ordinary Kähler pullbacks. -/
+def affinePullback : affineComplex b u hu ⟶ affineComplex c v hv :=
+  CochainComplex.ofHom (fun n => AddCommGrpCat.ofHom (exteriorPullback φ n).toAddMonoidHom)
+    (by
+      intro n
+      simp only [affineComplex,CochainComplex.of_d]
+      apply AddCommGrpCat.hom_ext
+      apply AddMonoidHom.ext
+      intro ω
+      exact (differential_natural b u hu c v hv φ n ω).symm)
+
+end CycleQ2FrameDifferentialNaturality
+
+#print axioms CycleQ2FrameDifferentialNaturality.affinePullback
+
+end
+
+noncomputable section
+
+/-!
+# The product of two exact cotangent frames
+
+The exact curve coordinate comes first. The remaining coordinates
+are the exact functions on the base chart. The basis is formed in
+the ordinary relative cotangent module of the tensor algebra.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2ProductExactFrame
+
+open Algebra KaehlerDifferential Module
+open scoped TensorProduct KaehlerDifferential
+open CycleQ2ProductCotangent (T split fromLeft fromRight)
+open CycleQ2ProductExteriorComponents (verticalBasis)
+
+attribute [local instance] Algebra.TensorProduct.rightAlgebra
+
+variable (k A B : Type) [CommRing k] [CommRing A] [CommRing B] [Algebra k A] [Algebra k B]
+  {m : ℕ}
+
+private abbrev S := T k A B
+
+def horizontalBasis (c : Basis (Fin m) B Ω[B⁄k]) : Basis (Fin m) (S k A B) Ω[S k A B⁄A] :=
+  (c.baseChange (S k A B)).map (KaehlerDifferential.tensorKaehlerEquiv k A B (S k A B))
+
+theorem horizontalBasis_exact (c : Basis (Fin m) B Ω[B⁄k]) (v : Fin m → B)
+    (hv : ∀ i, c i = D k B (v i)) (i : Fin m) :
+    horizontalBasis k A B c i = D A (S k A B) (algebraMap B (S k A B) (v i)) := by
+  rw [horizontalBasis,Basis.map_apply,Basis.baseChange_apply,hv,
+    KaehlerDifferential.tensorKaehlerEquiv_tmul_D,one_smul]
+
+/-- A basis ordered with the curve coordinate before the base coordinates. -/
+def productBasis (b : Basis (Fin 1) A Ω[A⁄k]) (c : Basis (Fin m) B Ω[B⁄k]) :
+    Basis (Fin (1 + m)) (S k A B) Ω[S k A B⁄k] :=
+  (((verticalBasis k A B b).prod (horizontalBasis k A B c)).map (split k A B).symm).reindex finSumFinEquiv
+
+private theorem on_curve (b : Basis (Fin 1) A Ω[A⁄k]) (c : Basis (Fin m) B Ω[B⁄k])
+    (u : Fin 1 → A) (hu : ∀ i, b i = D k A (u i)) (i : Fin 1) :
+    productBasis k A B b c (finSumFinEquiv (Sum.inl i)) =
+      D k _ (algebraMap A (S k A B) (u i)) := by
+  rw [productBasis,Basis.reindex_apply,Equiv.symm_apply_apply,Basis.map_apply]
+  have h : ((verticalBasis k A B b).prod (horizontalBasis k A B c)) (Sum.inl i) =
+      (verticalBasis k A B b i,0) := by
+    apply Prod.ext <;> simp
+  rw [h]
+  change fromLeft k A B (verticalBasis k A B b i) + fromRight k A B 0 = _
+  have hi : i = 0 := Subsingleton.elim _ _
+  rw [hi,CycleQ2ProductExteriorComponents.verticalBasis_exact k A B b (u 0) (hu 0),
+    map_zero,add_zero,CycleQ2ProductCotangent.fromLeft_D]
+
+private theorem on_base (b : Basis (Fin 1) A Ω[A⁄k]) (c : Basis (Fin m) B Ω[B⁄k])
+    (v : Fin m → B) (hv : ∀ i, c i = D k B (v i)) (i : Fin m) :
+    productBasis k A B b c (finSumFinEquiv (Sum.inr i)) =
+      D k _ (algebraMap B (S k A B) (v i)) := by
+  rw [productBasis,Basis.reindex_apply,Equiv.symm_apply_apply,Basis.map_apply]
+  have h : ((verticalBasis k A B b).prod (horizontalBasis k A B c)) (Sum.inr i) =
+      (0,horizontalBasis k A B c i) := by
+    apply Prod.ext <;> simp
+  rw [h]
+  change fromLeft k A B 0 + fromRight k A B (horizontalBasis k A B c i) = _
+  rw [horizontalBasis_exact k A B c v hv,map_zero,zero_add,CycleQ2ProductCotangent.fromRight_D]
+
+/-- Functions on the tensor chart whose differentials are the product basis. -/
+def coordinates (u : Fin 1 → A) (v : Fin m → B) : Fin (1 + m) → S k A B :=
+  Sum.elim (algebraMap A (S k A B) ∘ u) (algebraMap B (S k A B) ∘ v) ∘ finSumFinEquiv.symm
+
+theorem productBasis_exact (b : Basis (Fin 1) A Ω[A⁄k]) (c : Basis (Fin m) B Ω[B⁄k])
+    (u : Fin 1 → A) (v : Fin m → B) (hu : ∀ i, b i = D k A (u i)) (hv : ∀ i, c i = D k B (v i))
+    (j : Fin (1 + m)) : productBasis k A B b c j = D k _ (coordinates k A B u v j) := by
+  obtain ⟨i,rfl⟩ := finSumFinEquiv.surjective j
+  cases i with
+  | inl i =>
+    simpa only [coordinates,Function.comp_apply,Equiv.symm_apply_apply,Sum.elim_inl] using on_curve k A B b c u hu i
+  | inr i =>
+    simpa only [coordinates,Function.comp_apply,Equiv.symm_apply_apply,Sum.elim_inr] using on_base k A B b c v hv i
+
+end CycleQ2ProductExactFrame
+
+#print axioms CycleQ2ProductExactFrame.productBasis_exact
+
+end
+
+noncomputable section
+
+/-!
+# Intrinsic de Rham complexes on an exact affine basis
+
+The exact affine basis of a smooth scheme carries the native
+exterior complexes of its actual section algebras. The restriction
+maps are the ordinary Kähler pullbacks in every exterior degree.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2IntrinsicFramedAffineSite
+
+open AlgebraicGeometry CategoryTheory Opposite TopologicalSpace Module KaehlerDifferential
+open CycleQ2SmoothRelativeFrames CycleQ2FiniteExactAffineAtlas CycleQ2RelativeAffineOverlap
+open CycleQ2FrameDifferentialNaturality (affineComplex affinePullback)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open CycleQ2AffineDeRhamFunctorial (exteriorPullback_id exteriorPullback_comp)
+open CycleQ2FramedAffineSite (restrict_id restrict_comp)
+
+variable {K : Type} [Field K] [CharZero K] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of K)) (r : ℕ)
+
+abbrev FramedOpen := {U : X.Opens // IsAffineOpen U ∧ HasFrame f r U}
+
+def inclusion : FramedOpen f r ⥤ X.Opens where
+  obj U := U.1
+  map g := homOfLE g.le
+
+instance : (inclusion f r).Full where
+  map_surjective g := ⟨homOfLE g.le, Subsingleton.elim _ _⟩
+
+instance : (inclusion f r).Faithful where
+  map_injective := fun _ => Subsingleton.elim _ _
+
+omit [CharZero K] in
+theorem cover_dense [SmoothOfRelativeDimension r f] :
+    (inclusion f r).IsCoverDense (Opens.grothendieckTopology X) := by
+  apply (TopCat.Opens.coverDense_iff_isBasis _).mpr
+  have h : Set.range (inclusion f r).obj = {U : X.Opens | IsAffineOpen U ∧ HasFrame f r U} := by
+    ext U
+    constructor
+    · rintro ⟨⟨W,hW⟩,rfl⟩
+      exact hW
+    · intro hU
+      exact ⟨⟨U,hU⟩,rfl⟩
+  rw [h]
+  exact CycleQ2FiniteExactAffineAtlas.isBasis f r
+
+def functions (U : FramedOpen f r) : Fin r → Γ(X, U.1) := U.2.2.choose
+
+def frame (U : FramedOpen f r) :
+    letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+    Basis (Fin r) Γ(X, U.1) Ω[Γ(X,U.1)⁄K] :=
+  U.2.2.choose_spec.choose
+
+omit [CharZero K] in
+theorem frame_apply (U : FramedOpen f r) :
+    letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+    ∀ i, frame f r U i = KaehlerDifferential.D K Γ(X, U.1) (functions f r U i) :=
+  U.2.2.choose_spec.choose_spec
+
+abbrev chartComplex (U : FramedOpen f r) : CochainComplex AddCommGrpCat.{0} ℕ :=
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  affineComplex (frame f r U) (functions f r U) (frame_apply f r U)
+
+def restriction {U V : FramedOpen f r} (h : V ⟶ U) : chartComplex f r U ⟶ chartComplex f r V :=
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  affinePullback (frame f r U) (functions f r U) (frame_apply f r U)
+    (frame f r V) (functions f r V) (frame_apply f r V)
+    (restrict f (show V.1 ≤ U.1 from h.le))
+
+def deRham : (FramedOpen f r)ᵒᵖ ⥤ CochainComplex AddCommGrpCat.{0} ℕ where
+  obj U := chartComplex f r U.unop
+  map h := restriction f r h.unop
+  map_id U := by
+    let : Algebra K Γ(X,U.unop.1) := (sectionCoefficients f U.unop.1).toAlgebra
+    apply HomologicalComplex.hom_ext
+    intro n
+    apply AddCommGrpCat.hom_ext
+    apply AddMonoidHom.ext
+    intro ω
+    change exteriorPullback (restrict f (le_rfl : U.unop.1 ≤ U.unop.1)) n ω = ω
+    rw [restrict_id f,exteriorPullback_id]
+  map_comp {U V W} h k := by
+    let : Algebra K Γ(X,U.unop.1) := (sectionCoefficients f U.unop.1).toAlgebra
+    let : Algebra K Γ(X,V.unop.1) := (sectionCoefficients f V.unop.1).toAlgebra
+    let : Algebra K Γ(X,W.unop.1) := (sectionCoefficients f W.unop.1).toAlgebra
+    apply HomologicalComplex.hom_ext
+    intro n
+    apply AddCommGrpCat.hom_ext
+    apply AddMonoidHom.ext
+    intro ω
+    change exteriorPullback (restrict f
+       ((show W.unop.1 ≤ V.unop.1 from k.unop.le).trans (show V.unop.1 ≤ U.unop.1 from h.unop.le))) n ω =
+      exteriorPullback (restrict f k.unop.le) n (exteriorPullback (restrict f h.unop.le) n ω)
+    have he := restrict_comp f (show V.unop.1 ≤ U.unop.1 from h.unop.le)
+      (show W.unop.1 ≤ V.unop.1 from k.unop.le)
+    rw [he]
+    exact exteriorPullback_comp (restrict f h.unop.le) (restrict f k.unop.le) n ω
+
+def forms (p : ℕ) : (FramedOpen f r)ᵒᵖ ⥤ AddCommGrpCat.{0} :=
+  deRham f r ⋙ HomologicalComplex.eval _ _ p
+
+def exterior (p : ℕ) : forms f r p ⟶ forms f r (p+1) where
+  app U := ((deRham f r).obj U).d p (p+1)
+  naturality U V h := by
+    exact ((deRham f r).map h).comm p (p+1)
+
+theorem exterior_square (p : ℕ) :
+    exterior f r p ≫ exterior f r (p+1) = 0 := by
+  apply NatTrans.ext
+  funext U
+  exact ((deRham f r).obj U).d_comp_d _ _ _
+
+end CycleQ2IntrinsicFramedAffineSite
+
+#print axioms CycleQ2IntrinsicFramedAffineSite.deRham
+
+end
+
+noncomputable section
+
+/-!
+# Restriction in a transported exact frame
+
+A chosen exact frame restricts to any affine subopen by the
+original section map. All exterior coordinate functions then
+restrict as the corresponding ordinary coefficient functions.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2IntrinsicFramedAffineCoordinates
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite Module
+open CycleQ2FiniteExactAffineAtlas CycleQ2SmoothRelativeFrames CycleQ2RelativeAffineOverlap
+open CycleQ2IntrinsicFramedAffineSite CycleQ2ExactFrameThreeDeRham CycleQ2WeightedCoordinateExterior
+open CycleQ2FramedAffineSite (restrict_comp)
+open CycleQ2FramedAffineCoordinates (coefficients_natural)
+
+section Algebra
+
+variable {A B I M N : Type} [CommRing A] [CommRing B] [LinearOrder I]
+  [AddCommGroup M] [AddCommGroup N] [Module A M] [Module B N]
+
+theorem exteriorBasis_natural (φ : A →+* B) (r : M →ₛₗ[φ] N)
+    (b : Basis I A M) (c : Basis I B N)
+    (hr : ∀ i, r (b i) = c i) (p : ℕ) (i : Set.powersetCard I p) :
+    CycleQ2GeometricExteriorSheaf.exteriorMap φ r p (b.exteriorPower p i) =
+      c.exteriorPower p i := by
+  rw [exteriorPower.basis_apply, exteriorPower.basis_apply]
+  unfold exteriorPower.ιMulti_family
+  rw [CycleQ2GeometricExteriorSheaf.exteriorMap_wedge]
+  congr 1
+  funext j
+  exact hr _
+
+end Algebra
+
+variable {K : Type} [Field K] [CharZero K] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of K)) (r : ℕ)
+variable {U V W : FramedOpen f r}
+
+def transported (a : V ⟶ U) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    Basis (Fin r) Γ(X, V.1) Ω[Γ(X,V.1)⁄K] :=
+  (exact_on_affine_subopen f a.le U.2.1 V.2.1 (functions f r U) (frame f r U) (frame_apply f r U)).choose
+
+theorem transported_apply (a : V ⟶ U) (i : Fin r) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    transported f r a i = KaehlerDifferential.D K Γ(X, V.1) (restrict f a.le (functions f r U i)) :=
+  (exact_on_affine_subopen f a.le U.2.1 V.2.1 (functions f r U) (frame f r U) (frame_apply f r U)).choose_spec i
+
+theorem transported_natural (a : V ⟶ U) (g : W ⟶ V) (i : Fin r) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+    onePullback (restrict f g.le) (transported f r a i) = transported f r (g ≫ a) i := by
+  letI : Algebra K Γ(X, U.1) := (sectionCoefficients f U.1).toAlgebra
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+  rw [transported_apply, onePullback_d, transported_apply]
+  apply congrArg (KaehlerDifferential.D K Γ(X,W.1))
+  exact (DFunLike.congr_fun (restrict_comp f a.le g.le) (functions f r U i)).symm
+
+theorem exteriorCoordinates_natural (a : V ⟶ U) (g : W ⟶ V) (p : ℕ) :
+    letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+    letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+    ∀ (ω : Form K Γ(X,V.1) p) (i : Set.powersetCard (Fin r) p),
+      ((transported f r (g ≫ a)).exteriorPower p).equivFun (exteriorPullback (restrict f g.le) p ω) i =
+        restrict f g.le (((transported f r a).exteriorPower p).equivFun ω i) := by
+  letI : Algebra K Γ(X, V.1) := (sectionCoefficients f V.1).toAlgebra
+  letI : Algebra K Γ(X, W.1) := (sectionCoefficients f W.1).toAlgebra
+  intro ω i
+  classical
+  exact coefficients_natural _ _ _ _ (exteriorBasis_natural _ _ _ _ (transported_natural f r a g) p) ω i
+
+end CycleQ2IntrinsicFramedAffineCoordinates
+
+#print axioms CycleQ2IntrinsicFramedAffineCoordinates.exteriorCoordinates_natural
+
+end
+
+noncomputable section
+
+/-!
+# The intrinsic de Rham complex on the original scheme
+
+In each degree the underlying sheaf is the ordinary exterior
+sheaf, obtained by compatible gluing of the affine forms. The
+computed affine differential descends to its original Zariski site.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2IntrinsicDeRhamSheaves
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite AlgebraicGeometry Module
+open CycleQ2IntrinsicFramedAffineSite CycleQ2IntrinsicFramedAffineCoordinates CycleQ2SmoothRelativeFrames
+open CycleQ2RelativeAffineOverlap CycleQ2WeightedCoordinateExterior
+
+variable {K : Type} [Field K] [CharZero K] {X : Scheme.{0}} (f : X ⟶ Spec (CommRingCat.of K)) (r : ℕ)
+
+abbrev topology := (inclusion f r).inducedTopology (Opens.grothendieckTopology X)
+
+private abbrev ringPresheaf : (FramedOpen f r)ᵒᵖ ⥤ Type :=
+  (inclusion f r).op ⋙ X.presheaf ⋙ forget CommRingCat
+
+private abbrev formsType (p : ℕ) : (FramedOpen f r)ᵒᵖ ⥤ Type :=
+  forms f r p ⋙ forget AddCommGrpCat
+
+private theorem ring_isSheaf [SmoothOfRelativeDimension r f] :
+    Presheaf.IsSheaf (topology f r) (ringPresheaf f r) := by
+  have : (inclusion f r).IsCoverDense (Opens.grothendieckTopology X) := cover_dense f r
+  have h : Presheaf.IsSheaf (topology f r) ((inclusion f r).op ⋙ X.presheaf) :=
+    Functor.op_comp_isSheaf _ _ _ X.sheaf
+  exact Presheaf.isSheaf_comp_of_isSheaf _ ((inclusion f r).op ⋙ X.presheaf) (forget CommRingCat) h
+
+private def coordinates (p : ℕ) {U V : FramedOpen f r} (a : V ⟶ U) :
+    (formsType f r p).obj (op V) ≃ (Set.powersetCard (Fin r) p → (ringPresheaf f r).obj (op V)) :=
+  letI : Algebra K Γ(X,V.1) := (sectionCoefficients f V.1).toAlgebra
+  ((transported f r a).exteriorPower p).equivFun.toEquiv
+
+private theorem formsType_isSheaf [SmoothOfRelativeDimension r f] (p : ℕ) :
+    Presheaf.IsSheaf (topology f r) (formsType f r p) := by
+  apply (isSheaf_iff_isSheaf_of_type _ _).mpr
+  intro U S hS
+  exact CycleQ2SheafForLocalCoordinates.isSheafFor (coordinates f r p)
+    (fun a g x i => exteriorCoordinates_natural f r a g p x i)
+    ((ring_isSheaf f r).isSheafFor S hS)
+
+theorem forms_isSheaf [SmoothOfRelativeDimension r f] (p : ℕ) :
+    Presheaf.IsSheaf (topology f r) (forms f r p) :=
+  (Presheaf.isSheaf_iff_isSheaf_forget _ _ (forget AddCommGrpCat)).mpr (formsType_isSheaf f r p)
+
+def basisForms [SmoothOfRelativeDimension r f] (p : ℕ) : Sheaf (topology f r) AddCommGrpCat :=
+  ⟨forms f r p, forms_isSheaf f r p⟩
+
+def basisDifferential [SmoothOfRelativeDimension r f] (p : ℕ) :
+    basisForms f r p ⟶ basisForms f r (p+1) :=
+  ⟨exterior f r p⟩
+
+def compare [SmoothOfRelativeDimension r f] :
+    Sheaf (topology f r) AddCommGrpCat.{0} ≌ TopCat.Sheaf AddCommGrpCat.{0} X := by
+  have : (inclusion f r).IsCoverDense (Opens.grothendieckTopology X) := cover_dense f r
+  exact (inclusion f r).sheafInducedTopologyEquivOfIsCoverDense _ _
+
+/-- The actual additive sheaves on the original Zariski opens. -/
+abbrev sheafForms [SmoothOfRelativeDimension r f] (p : ℕ) : TopCat.Sheaf AddCommGrpCat.{0} X :=
+  (compare f r).functor.obj (basisForms f r p)
+
+def differential [SmoothOfRelativeDimension r f] (p : ℕ) : sheafForms f r p ⟶ sheafForms f r (p+1) :=
+  (compare f r).functor.map (basisDifferential f r p)
+
+theorem differential_square [SmoothOfRelativeDimension r f] (p : ℕ) :
+    differential f r p ≫ differential f r (p+1) = 0 := by
+  unfold differential
+  rw [← Functor.map_comp]
+  have h : basisDifferential f r p ≫ basisDifferential f r (p+1) = 0 := by
+    apply (sheafToPresheaf (topology f r) AddCommGrpCat).map_injective
+    exact exterior_square f r p
+  letI : (compare f r).functor.Full := (compare f r).fullyFaithfulFunctor.full
+  rw [h, CategoryTheory.Functor.map_zero]
+
+def relativeDeRham [SmoothOfRelativeDimension r f] :
+    CochainComplex (TopCat.Sheaf AddCommGrpCat.{0} X) ℕ :=
+  CochainComplex.of (sheafForms f r) (differential f r) (differential_square f r)
+
+/-- The relative forms on every original basis open are the ordinary forms
+over its actual function ring, compatibly with all restrictions. -/
+def onBasisIso [SmoothOfRelativeDimension r f] (p : ℕ) :
+    (inclusion f r).op ⋙ (sheafForms f r p).obj ≅ forms f r p :=
+  (sheafToPresheaf (topology f r) AddCommGrpCat).mapIso
+    (((compare f r).unitIso.app (basisForms f r p)).symm)
+
+theorem onBasisIso_d [SmoothOfRelativeDimension r f] (p : ℕ) (U : FramedOpen f r) :
+    (differential f r p).hom.app (op U.1) ≫ (onBasisIso f r (p+1)).hom.app (op U) =
+      (onBasisIso f r p).hom.app (op U) ≫ (exterior f r p).app (op U) :=
+  congrArg (fun k => k.hom.app (op U)) ((compare f r).unitIso.inv.naturality (basisDifferential f r p))
+
+/-- The same native relative complex in integer degrees for the derived category. -/
+def relativeDeRhamInt [SmoothOfRelativeDimension r f] :
+    CochainComplex (TopCat.Sheaf AddCommGrpCat.{0} X) ℤ :=
+  (relativeDeRham f r).extend (ComplexShape.embeddingUpIntGE 0)
+
+end CycleQ2IntrinsicDeRhamSheaves
+
+#print axioms CycleQ2IntrinsicDeRhamSheaves.relativeDeRhamInt
+
+end
+
+noncomputable section
+
+/-!
+# Exact product frames on the literal product affine opens
+
+The relative dimensions add for the scheme fibre product. The exact
+coordinates of the tensor algebra give an exact frame on the actual
+section ring of each chosen product open. The affine exterior
+comparison is a cochain isomorphism on that open.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2ProductFramedOpen
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open Module KaehlerDifferential
+open scoped TensorProduct
+open CycleQ2ProductAffineOpen CycleQ2ProductCoefficients CycleQ2ProductExactFrame
+open CycleQ2IntrinsicFramedAffineSite (FramedOpen frame functions frame_apply)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (baseChangeFrame baseChangeFrame_apply)
+open CycleQ2FrameDifferentialNaturality (affineComplex affinePullback)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open CycleQ2AffineDeRhamFunctorial (exteriorPullback_id exteriorPullback_comp)
+
+variable {k : Type} [Field k] [CharZero k] {C X : Scheme.{0}}
+  (p : C ⟶ Spec (CommRingCat.of k)) (q : X ⟶ Spec (CommRingCat.of k)) (m : ℕ)
+
+theorem smooth_product [SmoothOfRelativeDimension 1 p] [SmoothOfRelativeDimension m q] :
+    SmoothOfRelativeDimension (1+m) (productBase p q) := by
+  let : MorphismProperty.IsStableUnderBaseChange (@SmoothOfRelativeDimension m) :=
+    smoothOfRelativeDimension_isStableUnderBaseChange m
+  let : SmoothOfRelativeDimension m (pullback.fst p q) :=
+    MorphismProperty.pullback_fst (P := @SmoothOfRelativeDimension m) p q inferInstance
+  have h : SmoothOfRelativeDimension (m+1) (productBase p q) :=
+    AlgebraicGeometry.smoothOfRelativeDimension_comp m 1 (pullback.fst p q) p
+  simpa only [Nat.add_comm] using h
+
+variable (U : FramedOpen p 1) (V : FramedOpen q m)
+
+private abbrev W := productOpen p q U.1 V.1
+private abbrev R := Γ(pullback p q,W p q m U V)
+private abbrev S := coordinateRing p q U.1 V.1
+private abbrev hW : IsAffineOpen (W p q m U V) := isAffineOpen_product p q U.2.1 V.2.1
+
+def framedOpen : FramedOpen (productBase p q) (1+m) := by
+  refine ⟨W p q m U V,hW p q m U V,?_⟩
+  let : Algebra k Γ(C,U.1) := (sectionCoefficients p U.1).toAlgebra
+  let : Algebra k Γ(X,V.1) := (sectionCoefficients q V.1).toAlgebra
+  let : Algebra k (R p q m U V) := (sectionCoefficients (productBase p q) (W p q m U V)).toAlgebra
+  let e := sectionsAlgEquiv p q U.2.1 V.2.1
+  let φ := e.symm.toAlgHom
+  let : Algebra (S p q m U V) (R p q m U V) := φ.toRingHom.toAlgebra
+  let : IsScalarTower k (S p q m U V) (R p q m U V) := IsScalarTower.of_algHom φ
+  let : Algebra.Etale (S p q m U V) (R p q m U V) :=
+    (RingHom.Etale.of_bijective e.symm.bijective).toAlgebra
+  let f := functions p 1 U
+  let g := functions q m V
+  let b := productBasis k Γ(C,U.1) Γ(X,V.1) (frame p 1 U) (frame q m V)
+  let u := coordinates k Γ(C,U.1) Γ(X,V.1) f g
+  have hb : ∀ i, b i = D k (S p q m U V) (u i) :=
+    productBasis_exact k Γ(C,U.1) Γ(X,V.1) _ _ f g (frame_apply p 1 U) (frame_apply q m V)
+  exact ⟨φ ∘ u,baseChangeFrame b,baseChangeFrame_apply b u hb⟩
+
+omit [CharZero k] in
+theorem framedOpen_val : (framedOpen p q m U V).1 = productOpen p q U.1 V.1 := rfl
+
+end CycleQ2ProductFramedOpen
+
+#print axioms CycleQ2ProductFramedOpen.smooth_product
+#print axioms CycleQ2ProductFramedOpen.framedOpen
+
+end
+
+noncomputable section
+
+/-!
+# Cochain comparison on literal affine product opens
+
+The coefficient-algebra isomorphism compares the full local de Rham
+complex, including the derivative in every degree. The comparison
+uses the original Kähler exterior pullback and its inverse.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2ProductAffineComplex
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open Module KaehlerDifferential
+open scoped TensorProduct
+open CycleQ2ProductAffineOpen CycleQ2ProductCoefficients CycleQ2ProductExactFrame
+open CycleQ2ProductFramedOpen (framedOpen)
+open CycleQ2IntrinsicFramedAffineSite (FramedOpen frame functions frame_apply chartComplex)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2FrameDifferentialNaturality (affineComplex affinePullback)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open CycleQ2AffineDeRhamFunctorial (exteriorPullback_id exteriorPullback_comp)
+
+variable {k : Type} [Field k] [CharZero k] {C X : Scheme.{0}}
+  (p : C ⟶ Spec (CommRingCat.of k)) (q : X ⟶ Spec (CommRingCat.of k)) (m : ℕ)
+  (U : FramedOpen p 1) (V : FramedOpen q m)
+
+private abbrev W := framedOpen p q m U V
+private abbrev A : Type := Γ(C,U.1)
+private abbrev B : Type := Γ(X,V.1)
+private abbrev S := coordinateRing p q U.1 V.1
+private abbrev R := Γ(pullback p q,(W p q m U V).1)
+
+private abbrev AlgA : Algebra k (A p U) := (sectionCoefficients p U.1).toAlgebra
+private abbrev AlgB : Algebra k (B q m V) := (sectionCoefficients q V.1).toAlgebra
+private abbrev AlgS : Algebra k (S p q m U V) :=
+  letI := AlgA p U
+  letI := AlgB q m V
+  inferInstanceAs (Algebra k ((A p U) ⊗[k] (B q m V)))
+private abbrev AlgR : Algebra k (R p q m U V) :=
+  (sectionCoefficients (productBase p q) (W p q m U V).1).toAlgebra
+
+private abbrev b :=
+  letI := AlgA p U
+  letI := AlgB q m V
+  productBasis k (A p U) (B q m V) (frame p 1 U) (frame q m V)
+
+private abbrev u :=
+  letI := AlgA p U
+  letI := AlgB q m V
+  coordinates k (A p U) (B q m V) (functions p 1 U) (functions q m V)
+
+private theorem hb :
+    letI := AlgS p q m U V
+    ∀ i, b p q m U V i = D k (S p q m U V) (u p q m U V i) := by
+  let := AlgA p U
+  let := AlgB q m V
+  exact productBasis_exact k (A p U) (B q m V) (frame p 1 U) (frame q m V) _ _
+    (frame_apply p 1 U) (frame_apply q m V)
+
+/-- The tensor chart's ordinary relative complex with the product frame. -/
+abbrev tensorComplex : CochainComplex AddCommGrpCat.{0} ℕ :=
+  letI := AlgS p q m U V
+  affineComplex (b p q m U V) (u p q m U V) (hb p q m U V)
+
+/-- The scheme chart comparison identifies the entire exterior complex. -/
+def chartComplexIso : chartComplex (productBase p q) (1+m) (W p q m U V) ≅ tensorComplex p q m U V := by
+  letI := AlgS p q m U V
+  letI := AlgR p q m U V
+  let e : R p q m U V ≃ₐ[k] S p q m U V := sectionsAlgEquiv p q U.2.1 V.2.1
+  let w := W p q m U V
+  let bR := frame (productBase p q) (1+m) w
+  let uR := functions (productBase p q) (1+m) w
+  let hR := frame_apply (productBase p q) (1+m) w
+  let bS := b p q m U V
+  let uS := u p q m U V
+  let hS := hb p q m U V
+  refine ⟨affinePullback bR uR hR bS uS hS e.toAlgHom,
+    affinePullback bS uS hS bR uR hR e.symm.toAlgHom,?_,?_⟩
+  · apply HomologicalComplex.hom_ext
+    intro n
+    apply AddCommGrpCat.hom_ext
+    apply AddMonoidHom.ext
+    intro ω
+    change exteriorPullback e.symm.toAlgHom n (exteriorPullback e.toAlgHom n ω) = ω
+    rw [← exteriorPullback_comp,AlgEquiv.symm_comp,exteriorPullback_id]
+  · apply HomologicalComplex.hom_ext
+    intro n
+    apply AddCommGrpCat.hom_ext
+    apply AddMonoidHom.ext
+    intro ω
+    change exteriorPullback e.toAlgHom n (exteriorPullback e.symm.toAlgHom n ω) = ω
+    rw [← exteriorPullback_comp,AlgEquiv.comp_symm,exteriorPullback_id]
+
+end CycleQ2ProductAffineComplex
+
+#print axioms CycleQ2ProductAffineComplex.chartComplexIso
+
+end
+
+noncomputable section
+
+/-!
+# Swapping the two opens reverses the overlap orientation
+
+The genuine Mayer–Vietoris sequences are related by the negative
+intersection map, the interchange of the two terms in the middle
+biproduct, and the ordinary map of the union. The two connecting
+morphisms preserve this relation in the derived category.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2DerivedSupportSwap
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf freeOpen freeOpenMap freeOpenSections freeOpenSections_naturality)
+open CycleQ2MayerVietorisRestriction (freeOpenSheaf)
+open CycleQ2DerivedDoubleSupport (ofClosedSection supportedClass sectionMap)
+open CycleQ2DerivedSupportNaturality (supportSequenceMap supported_natural)
+
+variable {X : TopCat.{0}} (U V : Opens X)
+local instance : HasDerivedCategory.{1} (AbSheaf X) := HasDerivedCategory.standard _
+
+private abbrev G := freeOpenSheaf (X := X)
+private abbrev S := Opens.mayerVietorisSquare U V
+private abbrev T := Opens.mayerVietorisSquare V U
+
+abbrev overlapLE : V ⊓ U ≤ U ⊓ V := (inf_comm V U).le
+abbrev unionLE : V ⊔ U ≤ U ⊔ V := (sup_comm V U).le
+
+def swapSequence : (T U V).shortComplex ⟶ (S U V).shortComplex where
+  τ₁ := -freeOpenMap (overlapLE U V)
+  τ₂ := biprod.lift biprod.snd biprod.fst
+  τ₃ := freeOpenMap (unionLE U V)
+  comm₁₂ := by
+    change (-(G.map (homOfLE (overlapLE U V)))) ≫
+      biprod.lift (G.map (homOfLE (inf_le_left : U ⊓ V ≤ U))) (-(G.map (homOfLE (inf_le_right : U ⊓ V ≤ V)))) =
+      biprod.lift (G.map (homOfLE (inf_le_left : V ⊓ U ≤ V))) (-(G.map (homOfLE (inf_le_right : V ⊓ U ≤ U)))) ≫
+        biprod.lift biprod.snd biprod.fst
+    apply biprod.hom_ext
+    · simp only [Category.assoc,biprod.lift_fst,biprod.lift_snd,Preadditive.neg_comp,← Functor.map_comp]
+      congr 2
+    · simp only [Category.assoc,biprod.lift_fst,biprod.lift_snd,Preadditive.neg_comp,
+        Preadditive.comp_neg,neg_neg,← Functor.map_comp]
+      congr 1
+  comm₂₃ := by
+    change biprod.lift biprod.snd biprod.fst ≫
+      biprod.desc (G.map (homOfLE (le_sup_left : U ≤ U ⊔ V))) (G.map (homOfLE (le_sup_right : V ≤ U ⊔ V))) =
+      biprod.desc (G.map (homOfLE (le_sup_left : V ≤ V ⊔ U))) (G.map (homOfLE (le_sup_right : U ≤ V ⊔ U))) ≫
+        G.map (homOfLE (unionLE U V))
+    have h := congrArg Iso.hom (biprod.braiding'_eq_braiding (P := G.obj V) (Q := G.obj U)).symm
+    change biprod.lift biprod.snd biprod.fst = biprod.desc biprod.inr biprod.inl at h
+    rw [h]
+    apply biprod.hom_ext'
+    · simp only [Category.assoc,biprod.inl_desc_assoc,biprod.inr_desc,← Functor.map_comp]
+      congr 1
+    · simp only [Category.assoc,biprod.inr_desc_assoc,biprod.inl_desc,← Functor.map_comp]
+      congr 1
+
+variable {K : CochainComplex (AbSheaf X) ℤ} (q : ℤ)
+private abbrev F := ((K⟦q⟧).X 0).obj
+private abbrev d := (K⟦q⟧).d 0 1
+private abbrev E := DerivedCategory.singleFunctor (AbSheaf X) 0
+
+private theorem section_neg_restrict (z : (F (K := K) q).obj (op (U ⊓ V))) :
+    (-freeOpenMap (overlapLE U V)) ≫ sectionMap q (S U V) z =
+      sectionMap q (T U V) (-((F q).map (homOfLE (overlapLE U V)).op z)) := by
+  let e := freeOpenSections ((K⟦q⟧).X 0) (V ⊓ U)
+  apply e.injective
+  rw [Preadditive.neg_comp,map_neg]
+  change -(freeOpenSections ((K⟦q⟧).X 0) (V ⊓ U))
+    (freeOpenMap (overlapLE U V) ≫ sectionMap q (S U V) z) = _
+  rw [freeOpenSections_naturality]
+  change -((F q).map (homOfLE (overlapLE U V)).op
+    (freeOpenSections ((K⟦q⟧).X 0) (U ⊓ V)
+      ((freeOpenSections ((K⟦q⟧).X 0) (U ⊓ V)).symm z))) =
+    e (e.symm (-((F q).map (homOfLE (overlapLE U V)).op z)))
+  rw [AddEquiv.apply_symm_apply,AddEquiv.apply_symm_apply]
+
+theorem swap_class (z : (F (K := K) q).obj (op (U ⊓ V)))
+    (hz : (d q).hom.app (op (U ⊓ V)) z = 0)
+    (w : (F (K := K) q).obj (op (V ⊓ U)))
+    (hw : (d q).hom.app (op (V ⊓ U)) w = 0)
+    (he : w = -((F q).map (homOfLE (overlapLE U V)).op z)) :
+    (E (X := X)).map (supportSequenceMap (unionLE U V)).τ₃ ≫ ofClosedSection q (S U V) z hz =
+      ofClosedSection q (T U V) w hw := by
+  unfold ofClosedSection
+  have h := supported_natural q (T U V) (S U V) (unionLE U V)
+    (swapSequence U V) rfl (sectionMap q (S U V) z)
+    (CycleQ2DerivedDoubleSupport.sectionMap_closed q (S U V) z hz)
+  have hsec : (swapSequence U V).τ₁ ≫ sectionMap q (S U V) z = sectionMap q (T U V) w := by
+    rw [he]
+    exact section_neg_restrict U V q z
+  simpa only [hsec] using h
+
+end CycleQ2DerivedSupportSwap
+
+#print axioms CycleQ2DerivedSupportSwap.swap_class
+
+end
+
+noncomputable section
+
+/-!
+# Swapping the two original equations preserves their supported class
+
+The overlap logarithm changes sign. The reversed Mayer–Vietoris
+boundary carries the opposite sign. The two changes cancel on
+the actual supported degree-four class.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2PrincipalSwapInvariant
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf)
+open CycleQ2FramedAffineSite (FramedOpen)
+open CycleQ2FiniteExactAffineAtlas (HasFrame)
+open CycleQ2RelativeDeRhamSheaves (relativeDeRhamInt)
+open CycleQ2NativeLogSupportClass
+open CycleQ2PrincipalLogSupportClass (classOf restrictionUnit square)
+open CycleQ2PrincipalLogRestriction (unit_restrict log_restrict)
+open CycleQ2DerivedSupportSwap (overlapLE unionLE swap_class)
+open CycleQ2DerivedSupportNaturality (supportSequenceMap)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+
+variable {k : Type} [Field k] {X : Scheme.{0}} (p : X ⟶ Spec (CommRingCat.of k))
+  [SmoothOfRelativeDimension 3 p] (f g : Γ(X,⊤))
+
+private abbrev A := AbSheaf (show TopCat from X)
+private abbrev K : CochainComplex (A (X := X)) ℤ := relativeDeRhamInt p
+local instance : HasDerivedCategory.{1} (A (X := X)) := HasDerivedCategory.standard _
+private abbrev E := DerivedCategory.singleFunctor (A (X := X)) 0
+
+private theorem shifted_neg (B : FramedOpen p) (ω : OrdinaryTwo p B) :
+    shiftedSection p B (-ω) = -shiftedSection p B ω := by
+  have h₀ : shiftedSection p B 0 = 0 := by
+    have h := shiftedSection_add p B 0 0
+    rw [zero_add] at h
+    exact add_left_cancel (h.symm.trans (add_zero _).symm)
+  have h := shiftedSection_add p B (-ω) ω
+  rw [neg_add_cancel,h₀] at h
+  exact eq_neg_of_add_eq_zero_left h.symm
+
+variable (hOld : IsAffineOpen (square f g).X₁ ∧ HasFrame p 3 (square f g).X₁)
+  (hNew : IsAffineOpen (square g f).X₁ ∧ HasFrame p 3 (square g f).X₁)
+
+private abbrev Bo : FramedOpen p := ⟨(square f g).X₁,hOld⟩
+private abbrev Bn : FramedOpen p := ⟨(square g f).X₁,hNew⟩
+private abbrev old := logForm p (Bo p f g hOld) (restrictionUnit f inf_le_left) (restrictionUnit g inf_le_right)
+private abbrev new := logForm p (Bn p f g hNew) (restrictionUnit g inf_le_left) (restrictionUnit f inf_le_right)
+
+private theorem reverse_log :
+    new p f g hNew = -ordinaryRestrict p (Bo p f g hOld)
+      (B' := Bn p f g hNew) (homOfLE (overlapLE (X.basicOpen f) (X.basicOpen g))) (old p f g hOld) := by
+  rw [old,log_restrict,unit_restrict,unit_restrict]
+  let : Algebra k Γ(X,X.basicOpen g ⊓ X.basicOpen f) :=
+    (sectionCoefficients p (X.basicOpen g ⊓ X.basicOpen f)).toAlgebra
+  exact CycleQ2DoubleLogarithmicClass.twoLog_swap (K := k)
+    (restrictionUnit f (show X.basicOpen g ⊓ X.basicOpen f ≤ X.basicOpen f from inf_le_right))
+    (restrictionUnit g (show X.basicOpen g ⊓ X.basicOpen f ≤ X.basicOpen g from inf_le_left))
+
+/-- The support quotient maps are the ordinary ones on the equal unions. -/
+theorem swap_invariant :
+    (E (X := X)).map (supportSequenceMap (unionLE (X.basicOpen f) (X.basicOpen g))).τ₃ ≫
+      classOf p f g hOld = classOf p g f hNew := by
+  have hO := shiftedSection_closed p (Bo p f g hOld) (old p f g hOld)
+    (logForm_closed p (Bo p f g hOld) _ _)
+  have hN := shiftedSection_closed p (Bn p f g hNew) (new p f g hNew)
+    (logForm_closed p (Bn p f g hNew) _ _)
+  refine swap_class (K := K p) (X.basicOpen f) (X.basicOpen g) 2
+    (shiftedSection p (Bo p f g hOld) (old p f g hOld)) hO
+    (shiftedSection p (Bn p f g hNew) (new p f g hNew)) hN ?_
+  let j : Bn p f g hNew ⟶ Bo p f g hOld :=
+    homOfLE (overlapLE (X.basicOpen f) (X.basicOpen g))
+  have h := shiftedSection_restrict p (Bo p f g hOld) (B' := Bn p f g hNew) j (old p f g hOld)
+  exact (congrArg (shiftedSection p (Bn p f g hNew)) (reverse_log p f g hOld hNew)).trans
+    ((shifted_neg p (Bn p f g hNew) _).trans (congrArg Neg.neg h.symm))
+
+end CycleQ2PrincipalSwapInvariant
+
+#print axioms CycleQ2PrincipalSwapInvariant.swap_invariant
 
 end
