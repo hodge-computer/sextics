@@ -140,6 +140,8 @@ Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
 -/
 
 set_option autoImplicit false
+set_option maxRecDepth 4000
+set_option maxHeartbeats 1600000
 
 section
 
