@@ -345,6 +345,47 @@ the local supported degree-four class. The proper graph Gysin map
 and its marked pairing comparison remain open.
 [Intrinsic product complexes and the supported sign comparison](GeometricMonicGenericSupport.lean)
 
+## The affine tensor complex on the actual product scheme
+
+Each framed curve chart has only two exterior contributions to
+the product. The horizontal summand is the tensor of curve
+functions with the base forms. The mixed summand is the tensor
+of curve one-forms with base forms one degree lower. The
+comparison sends pure tensors to their ordinary pulled-back
+products and orders the curve form first. The curve derivative
+has positive sign and the base derivative of the mixed component
+has negative sign.
+
+The two-row tensor formula gives an actual cochain isomorphism.
+On every product of two selected exact affine frames, it is an
+isomorphism to sections of the intrinsic de Rham sheaf complex
+on that literal scheme open. Products of covering families
+cover the scheme product, and their finite intersections are
+the products of the corresponding intersections in the factors.
+The global comparison between the Čech tensor complex and the
+proper graph pairing remains open.
+
+## Supported logarithmic classes for equations on a chosen open
+
+The degree-four logarithmic class exists in arbitrary smooth rank,
+including rank four on the product. Multiplication by a unit,
+swapping the equations and shearing the second equation all
+preserve the class under the indicated comparison of support
+quotients. The underlying class restricts to zero on the
+complement.
+
+When the equations are defined only on a smaller open, the
+supported quotient uses the free sheaf of that open. Its stalks
+vanish outside the common zero locus inside the designated chart,
+including all points outside the chart. Both connecting morphisms
+are natural for compatible refinements of the ambient opens and
+their deleted unions. This construction applies on charts where
+the proper correspondence is cut out by two such equations.
+The passage to a global Gysin
+map and the comparison with the marked nonzero pairing remain
+to be proved.
+[Affine tensor comparison and local supported classes](GeometricMonicGenericSupport.lean)
+
 ## Finite curve trace on the actual degree-two de Rham group
 
 A finite dominant projection from an integral curve to the projective
