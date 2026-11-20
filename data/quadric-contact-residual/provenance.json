@@ -16,10 +16,12 @@
   "mathematicalChecks": "checks.json",
   "checkCommand": "python3 scripts/audit-cubic-frontier.py",
   "references": [
+    "docs/03d-hodge-loci.md \u00a73D.8",
+    "docs/03b-weighted-threefolds.md \u00a73B.9",
+    "docs/03-geometric-support.md \u00a7\u00a73.2\u20133.3, 3.6",
     "data/quadric-contact-broken/solution.md",
-    "docs/02-explicit-constructions.md",
     "docs/04-known-locus-and-frontier.md"
   ],
-  "existenceStatus": "No existence conclusion for this target follows from the specified quotient-density constructions.",
+  "existenceStatus": "Certificate existence follows from the paired-exchange support theorem in docs/03d-hodge-loci.md.",
   "discussionUrl": "https://github.com/hodge-computer/sextics/discussions/125"
 }
