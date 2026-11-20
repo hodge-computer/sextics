@@ -1,6 +1,6 @@
 import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
-import Proposal.GeometricFormalInputs03Part03
+import Proposal.AffineChartResiduePrimitive
 
 /-!
 # A genuine smooth affine open of the protected hypersurface

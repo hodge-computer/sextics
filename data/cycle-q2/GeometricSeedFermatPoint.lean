@@ -38,7 +38,8 @@ def polynomialEvaluation : SeedPolynomial →+* ℂ :=
 theorem polynomialEvaluation_seedFamily (r : ℂ) (hr : r ^ 3 = 2) :
     polynomialEvaluation (seedFamily r 0) = 0 := by
   rw [seedFamily_zero_of_cube_two r hr]
-  norm_num [polynomialEvaluation, pointCoordinates]
+  norm_num [polynomialEvaluation, pointCoordinates, Matrix.cons_val_two,
+    Matrix.cons_val_three, Matrix.cons_val_four]
 
 theorem coneIdeal_le_evaluation_kernel (r : ℂ) (hr : r ^ 3 = 2) :
     Ideal.span {seedFamily r 0} ≤ RingHom.ker polynomialEvaluation := by

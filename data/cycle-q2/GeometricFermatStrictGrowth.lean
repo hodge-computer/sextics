@@ -47,7 +47,7 @@ private theorem orbit_zero : ∀ j : Fin 33, ∃ n : Fin 33, ((backward.trans fo
   decide +kernel
 
 private theorem loop : ((backward.trans forward.symm)^[33]) (0 : Fin 33) = 0 := by
-  decide
+  decide +kernel
 
 private theorem connected (i j : Fin 33) : ∃ n : ℕ, ((backward.trans forward.symm)^[n]) i = j := by
   obtain ⟨a, ha⟩ := orbit_zero i

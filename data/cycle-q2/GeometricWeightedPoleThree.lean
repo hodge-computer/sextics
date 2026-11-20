@@ -342,6 +342,7 @@ def ExactWedgeRule : Prop :=
 
 variable (hδ : ExactWedgeRule δ)
 
+set_option maxHeartbeats 8000000 in
 include hδ in
 /-- Exterior differentiation commutes with restriction to the generic point
 as soon as the source derivative has the ordinary exact-wedge rule. -/

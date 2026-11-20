@@ -1,7 +1,7 @@
 import Mathlib.Algebra.Category.ModuleCat.Abelian
 import Mathlib.Algebra.Homology.ShortComplex.HomologicalComplex
 import Mathlib.Algebra.Homology.ShortComplex.ModuleCat
-import Proposal.GeometricFormalInputs04
+import Proposal.AffineResidueDeRhamComplex
 
 /-!
 # The actual rational de Rham complex as a Mathlib cochain complex

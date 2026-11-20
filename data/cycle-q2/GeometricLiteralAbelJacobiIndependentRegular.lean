@@ -1,5 +1,5 @@
 import Proposal.GeometricSeedConeSection
-import Proposal.GeometricFormalInputs03Part02
+import Mathlib.Data.Finsupp.Encodable
 import Mathlib.LinearAlgebra.Dual.Lemmas
 import Mathlib.RingTheory.AlgebraicIndependent.Basic
 

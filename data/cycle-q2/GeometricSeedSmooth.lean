@@ -1,4 +1,4 @@
-import Proposal.GeometricTarget02Part03
+import Proposal.SegreIncidencePresentation
 
 /-!
 # A nonsingular member of the actual fixed-parameter seed family

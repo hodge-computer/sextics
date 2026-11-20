@@ -1,4 +1,5 @@
 import Proposal.IncidencePolynomialNaturality
+import Proposal.SeedCechResidueTrace
 
 /-!
 # Čech data on the seed surface

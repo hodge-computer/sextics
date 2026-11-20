@@ -1,5 +1,4 @@
 import Proposal.GeometricProjectiveCurve
-import Proposal.SolutionSupport07Part01
 import Mathlib.RingTheory.Smooth.StandardSmoothCotangent
 import Mathlib.RingTheory.Smooth.Flat
 

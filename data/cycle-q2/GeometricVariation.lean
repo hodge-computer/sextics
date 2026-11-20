@@ -3,7 +3,7 @@ import Mathlib.LinearAlgebra.Dual.Basis
 import Mathlib.LinearAlgebra.Dimension.Constructions
 import Mathlib.LinearAlgebra.Prod
 import Mathlib.LinearAlgebra.BilinearMap
-import Proposal.GeometricTarget11Part04
+import Proposal.FermatSupportedProjectors
 
 /-!
 # The paired graded Higgs model at the actual Fermat quotient
@@ -315,6 +315,8 @@ theorem compatible_graded_projector_range
 section ActualLowerPiece
 
 open CycleQ2FermatHiggs MvPolynomial
+
+attribute [local simp] Matrix.cons_val_two Matrix.cons_val_three Matrix.cons_val_four
 
 /-- Complementary exponents for the actual degree-six monomial basis. -/
 def lowerExponent (i : Fin 33) (k : Fin 5) : ℕ :=

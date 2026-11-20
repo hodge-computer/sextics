@@ -1,4 +1,5 @@
 import Proposal.SeedCechThetaData
+import Proposal.SegreLocalSections
 
 /-!
 # Regularity of the seed linkage

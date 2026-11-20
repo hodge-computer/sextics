@@ -1,4 +1,5 @@
 import Proposal.GeometricLiteralProjectiveIntersectionComplex
+import Mathlib.RingTheory.Derivation.Lie
 
 /-!
 # Actual native splitting-difference derivations on the twelve-chart atlas

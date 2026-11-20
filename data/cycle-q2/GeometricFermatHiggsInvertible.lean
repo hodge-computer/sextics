@@ -60,9 +60,7 @@ private def inverse : Matrix (Fin 33) (Fin 33) ℤ := ![
 
 private theorem inverse_eq :
     combined (ordered ℤ) * inverse = 1 := by
-  ext i j
-  revert j
-  fin_cases i <;> decide +kernel
+  decide +kernel
 
 theorem combined_map {R S : Type*} [Semiring R] [Semiring S] (f : R →+* S)
     (M : Fin 35 → Matrix (Fin 33) (Fin 33) R) :

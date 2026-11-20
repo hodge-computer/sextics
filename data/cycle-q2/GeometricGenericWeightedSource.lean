@@ -1,5 +1,5 @@
 import Proposal.GeometricGenericWeightedCoordinates
-import Proposal.GeometricFormalInputs04
+import Proposal.AffineResidueDeRhamComplex
 
 /-!
 # The weighted numerator in the generic pencil

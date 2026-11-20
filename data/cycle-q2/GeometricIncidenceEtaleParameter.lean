@@ -1,4 +1,4 @@
-import Proposal.SolutionSupport07Part01
+import Proposal.IncidenceTraceGenericPoint
 import Mathlib.RingTheory.Etale.Kaehler
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
 

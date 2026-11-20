@@ -1,4 +1,5 @@
 import Proposal.NormalizedCertificateAssembly
+import Proposal.CurveRestrictionModularMatrix
 
 /-!
 # Right inverse for the curve restriction

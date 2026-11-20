@@ -1,5 +1,5 @@
 import Proposal.GeometricKoszulTrace
-import Proposal.GeometricFormalInputs02Part03
+import Proposal.SparseSeedDegreeNineTrace
 
 /-!
 # The finite sparse trace kills the actual homogeneous Cech class

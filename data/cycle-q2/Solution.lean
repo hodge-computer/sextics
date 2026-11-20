@@ -1,4 +1,5 @@
-import Proposal.SolutionSupport09
+import Proposal.IncidenceTraceCharacterComponent
+import Proposal.ProtectedResidueSpecialization
 import Proposal.GeometricSeedSmooth
 import Proposal.GeometricProjector
 import Proposal.GeometricExistence

@@ -1,4 +1,4 @@
-import Proposal.GeometricFormalInputs04
+import Proposal.AffineResidueDeRhamComplex
 import Mathlib.FieldTheory.RatFunc.AsPolynomial
 import Mathlib.FieldTheory.Perfect
 

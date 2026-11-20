@@ -1,4 +1,4 @@
-import Proposal.SolutionSupport02Part03
+import Proposal.CurveAndSeedCechCoordinates
 
 /-!
 # An explicit trace-one direction at the literal smooth incidence seed

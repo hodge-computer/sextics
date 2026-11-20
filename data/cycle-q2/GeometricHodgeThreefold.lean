@@ -1,6 +1,5 @@
 import Proposal.GeometricIncidenceFamilyContainment
 import Proposal.GeometricSeedFermatProj
-import Proposal.SolutionSupport02Part02
 import Mathlib.Algebra.MvPolynomial.Division
 
 /-!

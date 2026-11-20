@@ -1,7 +1,6 @@
 import Mathlib.LinearAlgebra.Matrix.Adjugate
 import Mathlib.LinearAlgebra.Matrix.Nondegenerate
 import Proposal.GeometricUniversalJacobianFrames
-import Proposal.SolutionSupport02Part02
 
 set_option autoImplicit false
 

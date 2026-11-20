@@ -1,4 +1,5 @@
 import Proposal.SeedResidualLinkage
+import Proposal.SegreTangentCoefficients
 
 /-!
 # The first block row of the Gaussian action

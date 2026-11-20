@@ -1,4 +1,4 @@
-import Proposal.SolutionSupport03Part01
+import Proposal.SeedLinkageGluing
 
 /-!
 # Negative-degree sections vanish on the original three seed charts

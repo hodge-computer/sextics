@@ -1,5 +1,4 @@
 import Proposal.GeometricUniversalWeightedClosure
-import Proposal.GeometricTarget01Part01
 import Mathlib.LinearAlgebra.ExteriorPower.Basis
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
 import Mathlib.RingTheory.Derivation.Lie

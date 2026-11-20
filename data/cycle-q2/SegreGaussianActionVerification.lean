@@ -3,7 +3,8 @@ import Proposal.SeedCechCoefficientSpecialization
 /-!
 # Checking the Segre action
 
-Finite checks on all nine blocks and their standard-polynomial consequences.
+The eight block checks from (0, 0) through (2, 1) and their standard-polynomial
+consequences. The (2, 2) check uses the sparse normalization in `SegreActionNormalForms`.
 -/
 
 set_option Elab.async false

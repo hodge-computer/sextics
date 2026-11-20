@@ -1,6 +1,6 @@
 import Mathlib.Analysis.InnerProductSpace.Adjoint
 import Mathlib.LinearAlgebra.Charpoly.Basic
-import Proposal.GeometricTarget11Part04
+import Proposal.FermatSupportedProjectors
 
 /-!
 # Positive adjoints and rational supported projectors

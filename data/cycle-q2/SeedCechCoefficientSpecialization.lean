@@ -1,4 +1,5 @@
 import Proposal.SegreModularBinding
+import Proposal.ImplicitPolynomialTrace
 
 /-!
 # Specializing the seed Čech coefficients

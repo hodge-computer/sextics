@@ -3431,7 +3431,7 @@ are \(f_2\) and \(f_1\), with original transition
 Let \(\omega_L\in H^0(D,K_D)\) be the canonical form corresponding to
 the original retained invariant cubic. Its substitution on the curve
 is exactly the existing cubicDeformation, by substitute_cubic in
-[SolutionSupport02Part02.lean](SolutionSupport02Part02.lean).
+[CurveAndSeedCechCoordinates.lean](CurveAndSeedCechCoordinates.lean).
 Contraction induces \(c_{\omega_L}:N_{C/D}\to K_C\). Multiplication by
 \(\omega_L\) identifies the preceding boundary with the canonical
 residue boundary: locally, if \(\omega_L=da\wedge\eta\) and
@@ -5383,20 +5383,23 @@ The exact entry-identification certificate proves
        P^tH_m=H_mP\text{ for every }m\in\mathcal T\}=\mathbb C I.
  \qquad\text{(9)}
 \]
-For completeness, the verification rule is particularly simple. Put
-\(\operatorname{partner}_m(a)=s-m-a\) if this belongs to \(\mathcal E\).
-Each matrix equation identifies
+Index the monomials in \(\mathcal E\) by \(0,\ldots,32\), with exponent
+vectors \(e_i\). Let \(p_m(i)=j\) when \(e_j=s-m-e_i\), leaving the partner
+undefined if there is no such \(j\). Each matrix equation then reads
 \[
- P_{\operatorname{partner}_m(b),a}
-   =P_{\operatorname{partner}_m(a),b},
+ P_{p_m(b),a}=P_{p_m(a),b},
 \]
-where an undefined partner means zero. The resulting graph on \(1089\)
-matrix entries and a zero node has two components: all \(1056\)
-off-diagonal entries together with zero, and the \(33\) diagonal
-entries. The retained \(1088\)-edge forest explicitly certifies those
-components. This is an integer equality argument, valid over
-\(\mathbb C\). The full forest, exponents, and equation labels are in
-[Appendix A](#appendix-a-complete-integer-higgs-forest-certificate).
+with a missing partner contributing zero. For each \(i\ne j\) one of the
+35 tangent monomials pairs \(i\) with some \(k\) and leaves \(j\) unpaired.
+Then \(p_m(k)=i\), so the equation at \((a,b)=(j,k)\) gives \(P_{ij}=0\).
+For diagonal entries, every pair \(p_m(i)=j\) gives \(P_{ii}=P_{jj}\).
+Each basis index reaches index zero in at most two such steps. Thus every
+diagonal entry equals \(P_{00}\), which proves (9). Lean checks separation
+and reachability on the finite monomial lists. [Scalar-commutant proof](FermatJacobianHiggsForms.lean)
+
+The original integer certificate records a spanning forest with \(1088\)
+edges for the same equations. Its exponents and equation labels are preserved
+in [Appendix A](#appendix-a-complete-integer-higgs-forest-certificate).
 
 ### 3. The seed ranks give actual moving algebraic curves
 
@@ -15205,7 +15208,7 @@ Consequently the restriction of the full residue class is represented by
 \qquad\text{(R)}
 \]
 This is exactly the source already bound in
-[the pole-reduction module](GeometricFormalInputs04.lean). The normal
+[the pole-reduction module](AffineResidueDeRhamComplex.lean). The normal
 derivation satisfies \(D_tf=1\); the displayed calculation is a residue
 identification in the ambient ring.
 
@@ -15511,7 +15514,7 @@ modules in that closure require no source migration in this proposal:
 | Shared module | Compatibility finding |
 | --- | --- |
 | `CertificateOperations` | Proof cleanup preserves the public interface. |
-| `FiniteAlgebra.FractionDerivation` | Unused inferred arguments were removed. The existing `rationalPartial_map` proof in [GeometricFormalInputs01Part03.lean](GeometricFormalInputs01Part03.lean) uses `rw [QuadricContactFraction.extend_map]` without explicit instance arguments. |
+| `FiniteAlgebra.FractionDerivation` | Unused inferred arguments were removed. The existing `rationalPartial_map` proof in [ProtectedHypersurfaceCertificate.lean](ProtectedHypersurfaceCertificate.lean) uses `rw [QuadricContactFraction.extend_map]` without explicit instance arguments. |
 | `HigherResidues.HigherResidue` | The proposal does not call `normal_cofactor_contraction`, whose unused normal-row hypothesis was removed. |
 | `HoldoutCover.FiniteDifferentials` | The proposal does not call `derivations_ext_finite_quotient_fraction`, whose unused domain instance was removed. |
 | `HoldoutCover.GenericIncidence` | The removed elaborator option does not change its public declarations. |
@@ -15841,15 +15844,16 @@ equality proofs.
 | GeometricTarget | 11 | 31 | 1,894 |
 | SolutionSupport | 8 | 30 | 3,240 |
 
-Three complete proof blocks intentionally exceed 2,000 lines:
+At that checkpoint the three complete proof blocks exceeding 2,000 lines were
 [Assembly01Part02.lean](https://github.com/fqlx/sextics/blob/a8b2182123e3d25d7865058aaa08bc84420ebfb8/data/cycle-q2/Assembly01Part02.lean),
-[GeometricFormalInputs01Part02.lean](GeometricFormalInputs01Part02.lean), and
-[SolutionSupport04Part01.lean](SolutionSupport04Part01.lean).
-The first and third retain tightly coupled private helper proofs; the second
-contains the existing long `scalar_of_entryConstraints` theorem. Further
-division would require a proof refactor. Sparse arithmetic components also
-remain intact. The largest new part is 141,460 bytes, compared with 594,392
-bytes for the largest module before this refactor.
+[GeometricFormalInputs01Part02.lean](https://github.com/fqlx/sextics/blob/db2973666de21b352474759703a715e9e561f54a/data/cycle-q2/GeometricFormalInputs01Part02.lean), and
+[SolutionSupport04Part01.lean](https://github.com/fqlx/sextics/blob/db2973666de21b352474759703a715e9e561f54a/data/cycle-q2/SolutionSupport04Part01.lean).
+The first and third kept tightly coupled private helper proofs. The second
+contained the original forest proof of `scalar_of_entryConstraints`. The
+current argument is given in [the Higgs certificate](#the-higgs-certificate).
+Sparse arithmetic components also remained intact. The largest new part was
+141,460 bytes, compared with 594,392 bytes for the largest module before
+that refactor.
 
 The proposal now has 181 permitted files, approximately 7.0 MiB of source,
 within the current upstream limits of 256 files and 16 MiB. The verifier and
@@ -16117,13 +16121,13 @@ Abel--Jacobi derivative, remains essential. These scheme definitions do
 not supply the Abel--Jacobi comparison or establish closed immersions.
 
 The existing graded linkage duality specifies which line bundle must be
-constructed. In [SolutionSupport05Part03.lean](SolutionSupport05Part03.lean),
+constructed. In [SegreFactorCechComplex.lean](SegreFactorCechComplex.lean),
 `actualImage_selected` identifies the selected right-ideal sections with
 the actual matrix columns, `actualDuality_grade` retains the degree-four
 twist, `actualImage_grade` gives the degree-fourteen columns, and
 `actualDuality_restriction` supplies their compatibility. Together with
 `localized_linkageIdeal_eq_components` in
-[SolutionSupport03Part03.lean](SolutionSupport03Part03.lean), these give concrete
+[SeedLinkageGluing.lean](SeedLinkageGluing.lean), these give concrete
 algebraic data for the missing sheafification and identification with
 \(\mathcal O_D(E+4H)\). This identification has not yet been proved at
 the scheme/sheaf level. Likewise, the existing nonzero character vector
@@ -16335,7 +16339,7 @@ Lean module, including unused ones. The 55 `Current*.lean` files, which are
 outside the active geometric proof's import closure, are therefore retained
 at the pinned checkpoint rather than submitted with this geometric route.
 The [preserved current route](#preserved-current-route) remains available for
-further work. The [source layout](#source-layout) below lists the new helpers.
+further work. The [historical source layout](#historical-source-layout) records the helpers at that checkpoint.
 
 At this modular checkpoint, the proposal contained **50 Lean modules and 52
 total proposal files**, leaving 12 file slots below the limit. There are 43 numbered body modules,
@@ -16835,7 +16839,7 @@ states that equivalent exterior-form assertion. The final theorem applies
 
     CycleQ2AffineExactness.protected_certificate_of_exact_residueSourceForm
 
-from [GeometricFormalInputs04.lean](GeometricFormalInputs04.lean).
+from [AffineChartResiduePrimitive.lean](AffineChartResiduePrimitive.lean).
 That implication has no assumed grading, regular lift, residue
 homomorphism, derivative compatibility, or desired defect identity:
 all of these have been proved for the actual target. It does not prove
@@ -17169,7 +17173,7 @@ For \(\omega^3=1,\ \omega\ne1\), use
 \beta:(X_2,Y_2)\mapsto(-X_2,-Y_2),\qquad
 \gamma=\operatorname{diag}(\omega^2,\omega^2,1,\omega,1,1).
 \]
-[GeometricTarget11Part04.lean](GeometricTarget11Part04.lean) proves that \(F\) is fixed
+[ProtectedResidueSpecialization.lean](ProtectedResidueSpecialization.lean) proves that \(F\) is fixed
 and that the determinant-weighted source is fixed. The numerator's
 \(\gamma\)-weight is \(10\equiv1\pmod3\), while the volume form's
 determinant weight is \(5\equiv2\pmod3\); their product is invariant.
@@ -18612,6 +18616,28 @@ The denominator, normal-gauge, tangent and ambient-lift developments remain
 available at the same immutable checkpoint. No claim about the unresolved
 current correction changes in this refactor.
 
+## Algebraic inputs to the geometric proof
+
+On the protected affine chart, reducing the triple pole gives the residue
+four-form. A rational three-form with that exterior derivative would give
+the certificate. The existence of the three-form remains open.
+[Pole reduction](AffineResidueDeRhamComplex.lean) ·
+[Exactness implies the certificate](AffineChartResiduePrimitive.lean)
+
+The incidence equations and their Jacobian describe the first-order
+deformations of the seed. On its two curve charts, the Čech residue
+calculation identifies the trace. The construction at the generic incidence
+point carries the detected tangent and its trace to that family.
+[Incidence presentation](SegreIncidencePresentation.lean) ·
+[Seed residue and trace](SeedCechResidueTrace.lean) ·
+[Generic tangent and trace](IncidenceTraceGenericPoint.lean)
+
+At the Fermat fiber, the Jacobian multiplication forms force a compatible
+self-adjoint matrix to be scalar. Idempotence then gives the zero and identity
+possibilities for a projector.
+[Higgs forms](FermatJacobianHiggsForms.lean) ·
+[Fermat projectors](FermatSupportedProjectors.lean)
+
 ## Assembly and modular data
 
 The conditional certificate assembly and the modular right inverse for curve
@@ -18641,28 +18667,21 @@ follow as complete units.
 
 ## Historical source layout
 
-The five formerly large files retain their names as compatibility modules
-or the final entry point. Their declarations now live in numbered helper
-modules, ordered as in the original sources. `Workspace` and `GeometricSeed`
-retain their original source bodies. Each helper imports its predecessor,
-and the first helper in a group imports the original prerequisite modules.
+This table records the November 12 modularization. The five original files
+served as compatibility modules or as the final entry point. The numbered
+helpers followed the original declaration order.
 
 | Compatibility module or entry point | Numbered helpers | Largest helper, lines | Mathematical scope |
 | --- | --- | ---: | --- |
-| [GeometricFormalInputs04.lean](GeometricFormalInputs04.lean) | `GeometricFormalInputs01`–`04` (4) | 4,758 | Affine residue/certificate bridge, foundational inputs, pole reduction, and exterior differentials. |
-| [GeometricTarget11Part04.lean](GeometricTarget11Part04.lean) | `GeometricTarget01`–`11` (11) | 4,795 | Target actions, finite descent, incidence and seed calculations, projectors, and finite top de Rham constructions. |
+| [GeometricFormalInputs04.lean](https://github.com/fqlx/sextics/blob/db2973666de21b352474759703a715e9e561f54a/data/cycle-q2/GeometricFormalInputs04.lean) | `GeometricFormalInputs01`–`04` (4) | 4,758 | Affine residue/certificate bridge, foundational inputs, pole reduction, and exterior differentials. |
+| [GeometricTarget11Part04.lean](https://github.com/fqlx/sextics/blob/db2973666de21b352474759703a715e9e561f54a/data/cycle-q2/GeometricTarget11Part04.lean) | `GeometricTarget01`–`11` (11) | 4,795 | Target actions, finite descent, incidence and seed calculations, projectors, and finite top de Rham constructions. |
 | [Assembly10Part02.lean](https://github.com/fqlx/sextics/blob/a8b2182123e3d25d7865058aaa08bc84420ebfb8/data/cycle-q2/Assembly10Part02.lean) | `Assembly01`–`10` (10) | 4,757 | Conditional assembly, restriction calculations, actual Gaussian-action data, and Cech components. |
 | [Normalization09Part02.lean](https://github.com/fqlx/sextics/blob/a8b2182123e3d25d7865058aaa08bc84420ebfb8/data/cycle-q2/Normalization09Part02.lean) | `Normalization01`–`09` (9) | 4,621 | Radial normalization and the remaining modular-action and cubic literal data. |
 | [Solution.lean](Solution.lean) | `SolutionSupport01`–`09` (9) | 4,786 | Normal and conormal classes, residue and surface comparisons, character components, and orbit trace; the final obligation remains in `Solution.lean`. |
 
-The large basepoint, Gaussian-action, and cubic-data components are split
-between complete definitions, retaining each original literal coefficient.
-Every supporting declaration precedes the final admitted theorem in the
-import graph, so the new helpers cannot depend on that admission. The exact
-existence theorem and certificate bodies remain unchanged. Counts and the
-source-preservation audit for this modular layout are recorded in the
-current checkpoint above; the historical component totals below describe
-their earlier consolidation checkpoints.
+At that checkpoint the large coefficient tables were split between complete
+definitions. The helper import graph placed the final existence obligation
+downstream of the arithmetic proofs.
 
 ## Historical verification of earlier source checkpoints
 

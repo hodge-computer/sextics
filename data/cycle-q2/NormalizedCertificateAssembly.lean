@@ -1,5 +1,4 @@
 import Proposal.Workspace
-import Proposal.GeometricTarget11Part04
 
 /-!
 # Assembling a certificate from normalized data

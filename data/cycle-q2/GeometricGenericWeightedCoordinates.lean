@@ -1,4 +1,4 @@
-import Proposal.GeometricTarget01Part01
+import Proposal.ProtectedResidueSpecialization
 
 /-!
 # Relative weighted coordinates on the generic pencil

@@ -1,4 +1,4 @@
-import Proposal.SolutionSupport02Part02
+import Proposal.IncidenceBasepointCharts
 import Proposal.GeometricHodgeEulerChartDerivations
 import Proposal.GeometricSurfaceBindings
 import Mathlib.RingTheory.MvPolynomial.EulerIdentity

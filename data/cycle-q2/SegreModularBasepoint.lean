@@ -1,4 +1,9 @@
 import Proposal.SegreFlatActionThirdRow
+import Proposal.SegreBasepointSOne
+import Proposal.SegreBasepointSThree
+import Proposal.SegreBasepointSTwo
+import Proposal.SegreBasepointSZero
+import Proposal.SegreBasepointW
 
 /-!
 # The modular Segre basepoint

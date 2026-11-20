@@ -1,4 +1,4 @@
-import Proposal.GeometricFormalInputs03Part02
+import Proposal.FormalNormalChartResidue
 
 /-!
 # Derivations of the normalized affine hypersurface chart

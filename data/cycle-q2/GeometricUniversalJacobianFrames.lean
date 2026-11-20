@@ -1,6 +1,6 @@
 import Mathlib.RingTheory.MvPolynomial.EulerIdentity
 import Proposal.GeometricVariation
-import Proposal.SolutionSupport02Part02
+import Proposal.IncidenceBasepointCharts
 
 set_option autoImplicit false
 

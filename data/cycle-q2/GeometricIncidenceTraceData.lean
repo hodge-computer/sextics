@@ -1,6 +1,6 @@
 import Mathlib.Tactic.LinearCombination
 import Proposal.GeometricKoszulTrace
-import Proposal.GeometricFormalInputs01Part04
+import Proposal.SparseSeedQuotientTrace
 
 section PrimalIncidenceIdentities
 

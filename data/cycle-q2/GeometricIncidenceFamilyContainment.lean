@@ -1,5 +1,4 @@
 import Proposal.GeometricProjectiveCurve
-import Proposal.SolutionSupport07Part01
 
 /-!
 # The actual incidence family in the weighted sextic hypersurface

@@ -1,6 +1,6 @@
 import Proposal.GeometricDegreeOneCech
 import Proposal.GeometricIncidenceTraceData
-import Proposal.GeometricFormalInputs02Part03
+import Proposal.SparseSeedDegreeNineTrace
 import Proposal.GeometricCurveCoordinates
 import Proposal.GeometricKoszulTrace
 import Mathlib.Data.Finsupp.Weight

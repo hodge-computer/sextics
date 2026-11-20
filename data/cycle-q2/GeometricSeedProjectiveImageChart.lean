@@ -1,4 +1,4 @@
-import Proposal.SolutionSupport05Part03
+import Proposal.SegreFactorCechComplex
 import Proposal.GeometricSurfaceCoordinateSections
 import Mathlib.AlgebraicGeometry.Modules.Tilde
 

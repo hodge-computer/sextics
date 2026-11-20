@@ -1,4 +1,5 @@
-import Proposal.GeometricTarget01Part01
+import Proposal.IncidenceGradedNormalForms
+import Proposal.ProtectedResidueSpecialization
 import Proposal.GeometricCartierOrbit
 import Mathlib.Analysis.Complex.Polynomial.Basic
 import Mathlib.Algebra.MvPolynomial.Funext

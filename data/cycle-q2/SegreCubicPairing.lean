@@ -1,4 +1,5 @@
 import Proposal.SegreGaussianActionThirdRow
+import Proposal.SegreThreeBlockDetectors
 
 /-!
 # The Segre cubic pairing
