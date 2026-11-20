@@ -42,10 +42,12 @@ jobs:
           python3 scripts/verify-hodge-locus-span.py
       - name: Identify affected Lean modules and solves
         id: scope
-        env:
-          BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          python3 scripts/check-library.py --base "$BASE" --plan > /tmp/lean-plan.json
+          # HEAD is GitHub's candidate merge of this pull request into main. Its first parent is the
+          # main tip it merges into, so the plan covers exactly what the merge would change.
+          git rev-parse --verify --quiet 'HEAD^2' > /dev/null ||
+            { echo 'Expected the candidate merge commit of a pull request.' >&2; exit 1; }
+          python3 scripts/check-library.py --base 'HEAD^1' --plan > /tmp/lean-plan.json
           python3 - <<'PY'
           import json, os
           plan = json.load(open('/tmp/lean-plan.json'))
@@ -92,9 +94,7 @@ jobs:
         working-directory: formal/lean
         run: lake exe cache get
       - name: Build every shared dependency needed by the affected checks
-        env:
-          BASE: ${{ github.event.pull_request.base.sha }}
-        run: python3 scripts/check-library.py --base "$BASE" --phase build
+        run: python3 scripts/check-library.py --base 'HEAD^1' --phase build
       - name: Export compiled shared library
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -147,7 +147,6 @@ jobs:
           path: formal/lean/.lake/build
       - name: Recheck affected mathematics without rebuilding the shared library
         env:
-          BASE: ${{ github.event.pull_request.base.sha }}
           PHASE: ${{ matrix.phase }}
           INSTANCE: ${{ matrix.instance }}
-        run: python3 scripts/check-library.py --base "$BASE" --phase "$PHASE" --instance "$INSTANCE" --prepared
+        run: python3 scripts/check-library.py --base 'HEAD^1' --phase "$PHASE" --instance "$INSTANCE" --prepared
