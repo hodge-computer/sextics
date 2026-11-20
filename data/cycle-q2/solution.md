@@ -238,6 +238,49 @@ primitive. The class with that value and vanishing restriction is still
 to be constructed.
 [Derived localization and the protected form](GeometricMonicGenericSupport.lean)
 
+## Degree-two de Rham trace over the generic coefficient field
+
+On each smooth affine curve chart the actual one-form sheaf is the
+sheaf of the ordinary relative Kähler module. The comparison is
+compatible with the original restriction maps and the differential.
+The Kähler module is finite projective. Its associated sheaf has
+vanishing first cohomology on affine opens, over any characteristic-zero
+coefficient field.
+
+The chosen smooth proper generic incidence curve admits a finite
+dominant map to the projective line over that field. This is the same
+normalized component that carries the closed graph with the original
+strict target support and the original marked test surface. A
+nonempty rank-one open supplies a transcendental rational function.
+Properness and the valuation local rings of the normalization extend
+it to a finite projection, and the local relative dimension extends
+to the whole smooth curve.
+
+For any such finite projection, the regular overlap trace gives an
+additive trace on the actual degree-two de Rham group. The
+pullback of the logarithmic overlap form has trace equal to the
+nonzero degree of the projection. The chosen incidence graph and its
+marked test open carry this same nonzero trace. The comparison with the marked
+pairing through the proper graph remains open.
+[Generic curve trace](GeometricMonicGenericSupport.lean)
+
+## Free-open Čech resolution and derived cocycle classes
+
+For an arbitrary set-indexed open cover, the genuine augmented
+alternating face complex on free-open sheaves is a resolution.
+Each stalk discards precisely the summands from opens missing the
+point. The remaining augmented membership diagram has a contracting
+extra degeneracy, given by any cover member containing the point.
+Exactness is detected at the stalks. The construction uses the
+actual coproduct maps and preserves all the face maps.
+
+Extending that resolution to nonpositive cochain degrees gives a
+quasi-isomorphism to a sheaf in degree zero. Its derived inverse
+turns a chain map to a shifted complex into a hypercohomology class
+and is compatible with addition and postcomposition. This supplies
+the passage from Čech cocycles to the genuine derived category.
+[Derived Čech resolution](GeometricMonicGenericSupport.lean)
+
 ## Finite curve trace on the actual degree-two de Rham group
 
 A finite dominant projection from an integral curve to the projective
@@ -264,9 +307,9 @@ group. The derived class of the pulled-back logarithmic form gives
 the same nonzero value.
 [Global curve trace](GeometricMonicGenericSupport.lean)
 
-The last comparison is over the complex numbers. Its extension to
-the generic coefficient field and its identification with the
-marked pairing in the proper graph remain to be proved.
+The preceding comparison has now been extended to the generic
+coefficient field. Identification with the marked pairing in the
+proper graph remains to be proved.
 
 ## Regular finite traces on affine curve charts
 
