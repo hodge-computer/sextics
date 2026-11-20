@@ -90,21 +90,39 @@ characters (2, 2, 1, 0; 0) modulo three.
    Hodge decomposition of the <tau, P>-invariant primitive cohomology,
    surjectivity of R(F0)_6^H * R(F0)_6^[chi*det] -> R(F0)_12^[chi*det]
    (rank 102/102), and that the matrices P on the 33-dimensional space
-   R(F0)_6^[chi*det] satisfying P^T H_{g,h} = H_{g,h} P for three linear
-   combinations of the products g*h (g, h in R(F0)_6^H) are the scalars.
+   R(F0)_6^[chi*det] satisfying P^T H = H P for three linear combinations H
+   of the forms H_{g,h}(a, b) = soc(g*h*a*b) (g, h in R(F0)_6^H) are the
+   scalars.  Write
+
+       d0 = X0^2 - Y0^2,   d1 = X1^2 - Y1^2,   q_s = d0 + s*d1.
+
    For the mod-5-smooth seed
 
        F* = F0 + 5*(X0^2 + Y0^2)*X1*Y1*X2*Y2,
-       R2 = 5*(X0^2 + Y0^2 + X1^2 + Y1^2 + X2^2 + 2*Y2^2),   s = 2,
-       F' = F* - R2*((X0^2 - Y0^2)^2 - 4*(X1^2 - Y1^2)^2),
+       R  = 5*(X0^2 + Y0^2 + X1^2 + Y1^2 + X2^2 + 2*Y2^2),   s = 2,
+       F' = F* - R*q_2*q_{-2},
 
    and the explicit polynomial
    lambda = (X0^9*Y0 - X0*Y0^9)*(X1^2 - Y1^2) + (X0^8 - Y0^8)*(X1^3*Y1 - X1*Y1^3),
    it checks modulo 109 that dim R(F')_18^[det] = 3 and dim R(F')_24^H = 1
    (establishing Z_(109)-freeness from smoothness modulo 5), that mu_lambda on
-   the five-dimensional space T_b B has rank 3, and that on its two-dimensional
-   kernel the socle pairing
-   soc(lambda * X0^3*Y0^3 * (dR1*ds2 - dR2*ds1) * P2*Q2) is nonzero.
+   the five-dimensional tangent space of the pairs (R, s) has rank 3, and that
+   for a basis (dR_1, ds_1), (dR_2, ds_2) of its kernel, with
+   kappa = dR_1*ds_2 - dR_2*ds_1, the socle pairing
+   soc(lambda * X0^3*Y0^3 * kappa * d0*d1) is nonzero.  It also checks that
+   soc(lambda * l(F*) * kappa * d1*q_{-2}) vanishes for the 36 vector fields
+   l = Z_i * d/dZ_j: the residue of l(F*) has no (3, 1)-part, so the two-form
+   formula of the chapter must vanish on it.
+
+7. The coefficient family of the paired-exchange sextics (Chapter 4, section
+   4.1).  At the Fermat member, the span of S_6^H and of the 18 orbit
+   derivatives Z_i * dF0/dZ_j, with Z_i and Z_j in the same block, has
+   dimension 54.  For the member
+
+       F0 + sum_i (X_i^4*Y_i^2 + X_i^2*Y_i^4) + X0*X1*Y0*Y1*(X2^2 + Y2^2)
+          + X0*X2*Y0*Y2*(X1^2 + Y1^2) + X1*X2*Y1*Y2*(X0^2 + Y0^2),
+
+   the contractions of bidegrees (4, 2) and (2, 4) both have rank six.
 """
 import argparse
 import json
@@ -704,6 +722,65 @@ def paired_exchange_higgs():
             'commutantRank': comm_rank, 'solutionDimension': n * n - comm_rank}
 
 
+def paired_exchange_family():
+    """Saturated dimension and contraction ranks of the paired-exchange coefficient family."""
+    basis = _h64_orbits(6, 1, 1, 0)
+    assert len(basis) == 40
+    columns = {e: i for i, e in enumerate(_compositions6(6))}
+
+    def rank_of(polys):
+        M = np.zeros((len(polys), len(columns)), dtype=np.int32)
+        for i, f in enumerate(polys):
+            for e, c in f.items():
+                M[i, columns[e]] = c % P
+        return _echelon(M)[0]
+
+    # Orbit derivatives Z_i * dF0/dZ_j = 6 * Z_i * Z_j^5 of GL_3(X) x GL_3(Y) at the Fermat member.
+    orbit = []
+    for block in ((0, 1, 2), (3, 4, 5)):
+        for i in block:
+            for j in block:
+                e = [0] * 6
+                e[j] += 5
+                e[i] += 1
+                orbit.append({tuple(e): 6})
+    assert rank_of(orbit) == 18
+    saturated = rank_of(basis + orbit)
+    assert saturated == 54
+
+    def monomial(**powers):
+        e = [0] * 6
+        for name, k in powers.items():
+            e['XY'.index(name[0]) * 3 + int(name[1])] = k
+        return tuple(e)
+
+    member = {}
+    for i in range(3):
+        member[monomial(**{f'X{i}': 6})] = 1
+        member[monomial(**{f'Y{i}': 6})] = 1
+        member[monomial(**{f'X{i}': 4, f'Y{i}': 2})] = 1
+        member[monomial(**{f'X{i}': 2, f'Y{i}': 4})] = 1
+        j, k = [m for m in range(3) if m != i]
+        for square in (f'X{i}', f'Y{i}'):
+            member[monomial(**{f'X{j}': 1, f'Y{j}': 1, f'X{k}': 1, f'Y{k}': 1, square: 2})] = 1
+    # The member lies in S_6^H: it is a combination of the orbit sums.
+    assert rank_of(basis + [member]) == 40
+
+    def contraction_rank(x_degree):
+        rows = {}
+        for e, c in member.items():
+            if sum(e[:3]) == x_degree:
+                rows.setdefault(e[:3], {})[e[3:]] = c
+        ys = sorted({y for row in rows.values() for y in row})
+        M = np.array([[row.get(y, 0) for y in ys] for row in rows.values()], dtype=np.int32)
+        return _echelon(M)[0]
+
+    ranks = (contraction_rank(4), contraction_rank(2))
+    assert ranks == (6, 6)
+    return {'prime': P, 'coefficients': len(basis), 'orbitRank': 18, 'saturatedDimension': saturated,
+            'contractionRanks': list(ranks)}
+
+
 def paired_exchange_seed():
     """Verify the mod-5-smooth paired-exchange seed modulo 109 without Groebner software."""
     def int_add(a, b, scale=1):
@@ -738,14 +815,15 @@ def paired_exchange_seed():
     F0 = {(6, 0, 0, 0, 0, 0): 1, (0, 6, 0, 0, 0, 0): 1, (0, 0, 6, 0, 0, 0): 1,
           (0, 0, 0, 6, 0, 0): 1, (0, 0, 0, 0, 6, 0): 1, (0, 0, 0, 0, 0, 6): 1}
     F_star_Z = int_add(F0, {(2, 1, 1, 0, 1, 1): 5, (0, 1, 1, 2, 1, 1): 5})
-    P2_Z = {(2, 0, 0, 0, 0, 0): 1, (0, 0, 0, 2, 0, 0): -1}
-    Q2_Z = {(0, 2, 0, 0, 0, 0): 1, (0, 0, 0, 0, 2, 0): -1}
+    # d0 = X0^2 - Y0^2 and d1 = X1^2 - Y1^2; q_s = d0 + s*d1, and qq = q_s*q_{-s} = d0^2 - s^2*d1^2.
+    D0_Z = {(2, 0, 0, 0, 0, 0): 1, (0, 0, 0, 2, 0, 0): -1}
+    D1_Z = {(0, 2, 0, 0, 0, 0): 1, (0, 0, 0, 0, 2, 0): -1}
     R2_Z = {(2, 0, 0, 0, 0, 0): 5, (0, 0, 0, 2, 0, 0): 5,
             (0, 2, 0, 0, 0, 0): 5, (0, 0, 0, 0, 2, 0): 5,
             (0, 0, 2, 0, 0, 0): 5, (0, 0, 0, 0, 0, 2): 10}
     s = 2
-    P2sq_m_s2Q2sq_Z = int_add(int_mul(P2_Z, P2_Z), int_mul(Q2_Z, Q2_Z), -s * s)
-    F_prime_Z = int_add(F_star_Z, int_mul(R2_Z, P2sq_m_s2Q2sq_Z), -1)
+    qq_Z = int_add(int_mul(D0_Z, D0_Z), int_mul(D1_Z, D1_Z), -s * s)
+    F_prime_Z = int_add(F_star_Z, int_mul(R2_Z, qq_Z), -1)
     assert is_h_invariant(F_star_Z) and is_h_invariant(F_prime_Z)
     # Smoothness over Q: both F* and F' reduce to the Fermat sextic modulo 5.
     assert all(c % 5 == 0 for c in int_add(F_star_Z, F0, -1).values())
@@ -753,8 +831,10 @@ def paired_exchange_seed():
 
     # Reduce modulo P = 109.
     F_prime = poly(F_prime_Z)
-    P2, Q2, R2 = poly(P2_Z), poly(Q2_Z), poly(R2_Z)
-    P2sq_m_s2Q2sq = poly(P2sq_m_s2Q2sq_Z)
+    D0, D1, R2 = poly(D0_Z), poly(D1_Z), poly(R2_Z)
+    qq = poly(qq_Z)
+    q_minus = poly(int_add(D0_Z, D1_Z, -s))
+    F_star = poly(F_star_Z)
     dF = [diff(F_prime, i) for i in range(6)]
 
     # Buchberger first criterion: dF/dX2 = 6*X2^5 + (deg_{X2,Y2} <= 1) and likewise for Y2.
@@ -858,8 +938,8 @@ def paired_exchange_seed():
                {(0, 2, 0, 0, 0, 0): 1, (0, 0, 0, 0, 2, 0): 1},
                {(0, 0, 2, 0, 0, 0): 1},
                {(0, 0, 0, 0, 0, 2): 1}]
-    dFp_dirs = [mul({e: (-v) % P for e, v in r.items()}, P2sq_m_s2Q2sq) for r in R_basis]
-    dFp_dirs.append(mul(mul({(0, 0, 0, 0, 0, 0): (2 * s) % P}, R2), mul(Q2, Q2)))
+    dFp_dirs = [mul({e: (-v) % P for e, v in r.items()}, qq) for r in R_basis]
+    dFp_dirs.append(mul(mul({(0, 0, 0, 0, 0, 0): (2 * s) % P}, R2), mul(D1, D1)))
 
     mu_mat = np.zeros((3, 5), dtype=np.int32)
     for j, ddir in enumerate(dFp_dirs):
@@ -938,29 +1018,45 @@ def paired_exchange_seed():
     free24 = [c for c in range(ncol24) if c not in piv_map]
     assert len(free24) == 1
 
-    # Evaluate the two-form numerator W24 = lambda * X0^3*Y0^3 * (dR1*ds2 - dR2*ds1) * P2 * Q2.
+    def socle_coordinate(w):
+        """Coordinate of the invariant part of a polynomial of degree 24 on the socle of R(F')."""
+        vec = np.zeros(ncol24, dtype=np.int32)
+        for e, v in nf_poly(w).items():
+            if e in m2c24:
+                col, _ = m2c24[e]
+                vec[col] = (vec[col] + v) % P
+        for c in piv_cols:
+            if vec[c]:
+                vec[c:] = (vec[c:] - vec[c] * piv_map[c][c:]) % P
+        return int(vec[free24[0]])
+
+    # The two-form numerator lambda * X0^3*Y0^3 * kappa * d0*d1, with kappa = dR1*ds2 - dR2*ds1.
     v1, v2 = ker_mu
-    dR_wedge = {}
+    kappa = {}
     for k in range(4):
         coeff = (v1[k] * v2[4] - v2[k] * v1[4]) % P
         if coeff:
-            dR_wedge = add(dR_wedge, {e: coeff * c % P for e, c in R_basis[k].items()})
+            kappa = add(kappa, {e: coeff * c % P for e, c in R_basis[k].items()})
     A0 = {(3, 0, 0, 3, 0, 0): 1}
-    W24_raw = mul(mul(mul(lam, A0), dR_wedge), mul(P2, Q2))
+    W24_raw = mul(mul(mul(lam, A0), kappa), mul(D0, D1))
     assert is_h_invariant(W24_raw)
-    W24 = nf_poly(W24_raw)
-    vec24 = np.zeros(ncol24, dtype=np.int32)
-    for e, v in W24.items():
-        if e in m2c24:
-            col, _ = m2c24[e]
-            vec24[col] = (vec24[col] + v) % P
-    for c in piv_cols:
-        if vec24[c]:
-            vec24[c:] = (vec24[c:] - vec24[c] * piv_map[c][c:]) % P
-    pairing_residue = int(vec24[free24[0]])
+    pairing_residue = socle_coordinate(W24_raw)
     assert pairing_residue != 0
+    # The formula before symmetrization has d1*q_{-s} in place of d0*d1; the term with d1^2 is odd.
+    general = mul(mul(lam, kappa), mul(D1, q_minus))
+    assert socle_coordinate(mul(general, A0)) == pairing_residue
+    # It vanishes on A = l(F*) for the vector fields l = Z_i * d/dZ_j.
+    fields = 0
+    for j in range(6):
+        dF_star = diff(F_star, j)
+        for i in range(6):
+            shift = tuple(1 if k == i else 0 for k in range(6))
+            lF = {tuple(x + y for x, y in zip(e, shift)): c for e, c in dF_star.items()}
+            assert socle_coordinate(mul(general, lF)) == 0
+            fields += 1
     return {'prime': P, 's': s, 'dimR18Det': dim_R18, 'rankMu': rank_mu, 'kernel': len(ker_mu),
-            'dimR24H': ncol24 - len(piv_map), 'pairingResidueModP': pairing_residue}
+            'dimR24H': ncol24 - len(piv_map), 'pairingResidueModP': pairing_residue,
+            'vectorFieldsChecked': fields}
 
 
 def main():
@@ -1007,14 +1103,22 @@ def main():
           f"{pe_seed['dimR18Det']}, mu_lambda has rank {pe_seed['rankMu']} with kernel of "
           f"dimension {pe_seed['kernel']}, dim R(F')_24^H = {pe_seed['dimR24H']}, and the "
           f"two-form pairing on X0^3*Y0^3 is nonzero ({pe_seed['pairingResidueModP']} mod "
-          f"{pe_seed['prime']}).", flush=True)
+          f"{pe_seed['prime']}); the pairing vanishes on l(F*) for the "
+          f"{pe_seed['vectorFieldsChecked']} vector fields l = Z_i d/dZ_j.", flush=True)
+    pe_family = paired_exchange_family()
+    print(f"Paired-exchange coefficient family modulo {pe_family['prime']}: S_6^H and the "
+          f"{pe_family['orbitRank']} Fermat orbit derivatives span dimension "
+          f"{pe_family['saturatedDimension']}; the contractions of bidegrees (4, 2) and (2, 4) of "
+          f"the displayed member have ranks {pe_family['contractionRanks'][0]} and "
+          f"{pe_family['contractionRanks'][1]}.", flush=True)
     print(f'All Hodge-locus checks passed in {time.time() - start:.0f}s.')
     if args.output:
         with open(args.output, 'w') as handle:
             json.dump({'seedDivisor': seed, 'higgsField': higgs, 'fermatFourfold': fermat,
                        'seedFourfold': fourfold, 'sectorSeed': sector,
                        'sectorHiggsField': sector_field, 'pairedExchangeHiggs': pe_higgs,
-                       'pairedExchangeSeed': pe_seed}, handle, indent=2)
+                       'pairedExchangeSeed': pe_seed,
+                       'pairedExchangeFamily': pe_family}, handle, indent=2)
             handle.write('\n')
 
 

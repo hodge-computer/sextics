@@ -14,7 +14,7 @@
     "quadric-contact-broken"
   ],
   "mathematicalChecks": "checks.json",
-  "checkCommand": "python3 scripts/verify-hodge-locus-span.py",
+  "checkCommand": "python3 scripts/audit-cubic-frontier.py",
   "references": [
     "docs/03d-hodge-loci.md \u00a73D.8",
     "docs/03b-weighted-threefolds.md \u00a73B.9",
