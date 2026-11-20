@@ -108,7 +108,10 @@ with no workflow concurrency cap. The deploy workflow builds and publishes main
 without rerunning these checks.
 
 Use `python3 scripts/check-library.py --base <commit> --plan` to inspect the
-selection for a committed change. Changes to accepted Lean sources, manifests,
+selection for a committed change. On a pull request, CI passes the first parent
+of GitHub's candidate merge commit, which is the tip of main that the pull
+request would merge into, so the selection covers exactly what the merge would
+change. Changes to accepted Lean sources, manifests,
 witnesses, or targets select those instances; shared Lean changes select their
 dependents and applications. Verifier changes and non-Lean changes under
 `formal/lean/` select the full shared library and its accepted applications.
