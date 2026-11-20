@@ -17,7 +17,7 @@ The intended reader knows basic algebraic geometry, differential forms and Hodge
 | [3A. Split sextics and K3 surfaces](03a-split-and-k3.md) | Elliptic companions, polarized splitting and the algebraic Kuga–Satake criterion |
 | [3B. Weighted threefolds and two-reflection sextics](03b-weighted-threefolds.md) | Norm-contact curves, Abel–Jacobi residues, finite-jet spanning, two-reflection support and sextics with a binary summand |
 | [3C. Quadratic nets and pair correspondences](03c-quadratic-nets.md) | Finite-cover incidence, discriminant conics, Fano threefolds and support without extra reflections |
-| [3D. Hodge loci of surface sections](03d-hodge-loci.md) | Invariant sections, trace formulas for moving curves, a Higgs-field criterion and order-three weighted sextics |
+| [3D. Hodge loci of surface sections](03d-hodge-loci.md) | Invariant sections, trace formulas for moving curves, a Higgs-field criterion, order-three weighted sextics and split quadric sections on a paired-exchange family |
 | [4. Families, representations and deformation](04-known-locus-and-frontier.md) | Invariant sectors, coefficient families, generic-target reduction, curve incidence and interpolation |
 | [5. Computing and checking certificates](05-computation.md) | Strictification, exact coefficient systems, rational integration and cubic currents |
 

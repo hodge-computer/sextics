@@ -32,7 +32,7 @@ Let \(G=GL_{3}(X)\times GL_{3}(Y)\), of dimension eighteen. For a linear coeffic
 
 The same eighteen independent derivatives give affine orbit dimension eighteen at \(F_{0}\) and generically on each family below. Projectivization removes the common scalar direction, so the generic projective orbit has dimension seventeen. The equation-locus dimensions below include all block coordinate changes; their rational quotient dimensions are seventeen smaller. In particular, the ambient quotient has dimension 218.
 
-Each family in the following table has \(H^4(X)^\tau\subset N^1H^4(X)\) throughout its smooth locus. The support mechanisms are proved in Chapters 3A–3C and §4.2 below.
+Each family in the following table has \(H^4(X)^\tau\subset N^1H^4(X)\) throughout its smooth locus. The support mechanisms are proved in Chapters 3A–3D and §4.2 below.
 
 | Smooth sextic family | Support mechanism | Projective equation locus | Quotient |
 | --- | --- | ---: | ---: |
@@ -41,6 +41,7 @@ Each family in the following table has \(H^4(X)^\tau\subset N^1H^4(X)\) througho
 | Cyclic-six family of §4.2 | Deck/exchange descent | 91 | 74 |
 | Additive \(4+2\) splitting | Binary summand theorem | 60 | 43 |
 | Block-sign split \(f(X)+g(Y)\) | Elliptic companions and contraction | 55 | 38 |
+| Paired signs with two coordinate exchanges | Split quadric Hodge loci, paired signs and reflections | 53 | 36 |
 | Polarized split \(f(X+Y)+f(X-Y)\), with the order-three plane family | Algebraic Kuga–Satake correspondence | 24 | 7 |
 
 The order-three family is \(f(z_0,z_1,z_2)=g_6(z_0,z_1)+z_2^3g_3(z_0,z_1)+a z_2^6\).
@@ -70,6 +71,8 @@ The cyclic-six family has 88 coefficients. Its preserving subgroup \(GL_3(X)\tim
 For the [binary summand theorem](03b-weighted-threefolds.md#3b10-sextics-with-a-binary-summand), put both binary variables in the same parity block first. There are seven binary coefficients and \(28+15+6+1=50\) core coefficients, counted by the exponent of the lone core variable in that parity block. Varying the complementary line and plane in this three-space adds four dimensions. At Fermat the four orbit derivatives mixing the line and plane lie outside the coefficient space, giving projective dimension \(57+4-1=60\). When the binary variables have opposite parities, there are four binary coefficients and \(7+15+15+7=44\) core coefficients. Each parity block now has a line and a complementary plane. The eight mixing derivatives at Fermat give eight independent directions outside the coefficient space, so this stratum has projective dimension \(48+8-1=55\). It lies in the two-reflection family.
 
 The block-sign split family has \(28+28=56\) coefficients and is already \(G\)-stable, giving projective dimension 55 and quotient dimension 38.
+
+For the [paired-exchange family of Chapter 3D, §3D.8](03d-hodge-loci.md#3d8-split-quadric-sections-and-a-paired-exchange-fourfold-family), the \(H\)-invariant sextics have 40 coefficients. The connected subgroup of \(G\) preserving this space is the four-dimensional torus \(\operatorname{diag}(t_0,t_1,t_2,t_0,t_1,t_3)\), where the paired signs force diagonal matrices and the two exchanges equate the first two pairs of multipliers. At Fermat, all twelve off-diagonal orbit derivatives and the two diagonal differences \(X_0^6-Y_0^6\) and \(X_1^6-Y_1^6\) lie outside \(S_6^H\). Hence the saturated cone has dimension \(40+14=54\), giving projective normal-form, saturated and quotient dimensions \((39,53,36)\). Its bidegree-\((4,2)\) and bidegree-\((2,4)\) contractions both have full rank six, and a general member has no block reflection, so it is incomparable with the quadratic-net and two-reflection families.
 
 For the polarized family, the twelve coefficients are \(7+4+1\). Put \(U=X+Y\) and \(V=X-Y\). At \(f=\sum z_{i}^{6}\) the family tangent consists of \(h(U)+h(V)\) for the twelve order-three monomials \(h\). A block-linear infinitesimal change in \(X,Y\) becomes
 
@@ -726,4 +729,4 @@ where \(s\) marks odd degree in \(Y\) and \(a_i\) is \(0\) or \(1\) as \(h_i\) i
 
 The best case is two linear forms of the same parity: two motions against three invariant two-forms. For linear sections that are not \(\tau\)-stable, \(h^0(N_{D/X})=8\) and \(p_g(D)=10\). The command `python3 scripts/verify-extension-dimensions.py` reconstructs the table.
 
-This count concerns classes whose locus is cut out transversally, on complete-intersection surfaces of these degrees. It gives no obstruction to loci of excess dimension, to surfaces that are not complete intersections, or to curve families constructed directly as in [Chapter 3B](03b-weighted-threefolds.md).
+This count concerns classes whose locus is cut out transversally, on complete-intersection surfaces of these degrees. It gives no obstruction to loci of excess dimension, to surfaces that are not complete intersections, to curve families constructed directly as in [Chapter 3B](03b-weighted-threefolds.md), or to Hodge loci on a second fourfold cut by singular quadric sections as in [Chapter 3D, §3D.8](03d-hodge-loci.md#3d8-split-quadric-sections-and-a-paired-exchange-fourfold-family).

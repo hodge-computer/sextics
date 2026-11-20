@@ -493,7 +493,7 @@ The proof of the two-reflection theorem uses the two reflections only through th
 
 The weighted threefold theorem and the relative support lemma apply as before. ∎
 
-No further involution is assumed, and \(H^{4,0}(X)\) is \(P\)-invariant. When the planes are the pairs \((X_i,Y_i)\), the \(Y\)-even invariant sextics form the 74-coefficient family of [Chapter 4, §4.6](04-known-locus-and-frontier.md). On its smooth members the proposition supports the part of type \((150,636,150)\) of the \(Y\)-even primitive cohomology, and leaves the \(P\)-invariant part, of type \((58,230,58)\). A \(Y\)-odd numerator is served when it has odd degree in at least one pair \((X_i,Y_i)\). [Chapter 3D](03d-hodge-loci.md) supports part of the remaining sector in the presence of an order-three symmetry.
+No further involution is assumed, and \(H^{4,0}(X)\) is \(P\)-invariant. When the planes are the pairs \((X_i,Y_i)\), the \(Y\)-even invariant sextics form the 74-coefficient family of [Chapter 4, §4.6](04-known-locus-and-frontier.md). On its smooth members the proposition supports the part of type \((150,636,150)\) of the \(Y\)-even primitive cohomology, and leaves the \(P\)-invariant part, of type \((58,230,58)\). A \(Y\)-odd numerator is served when it has odd degree in at least one pair \((X_i,Y_i)\). [Chapter 3D](03d-hodge-loci.md) supports part of the remaining sector in the presence of an order-three symmetry, and [§3D.8](03d-hodge-loci.md#3d8-split-quadric-sections-and-a-paired-exchange-fourfold-family) together with the reflection theorem supports the entire remaining sector when two coordinate exchanges \(X_0\leftrightarrow Y_0\) and \(X_1\leftrightarrow Y_1\) also preserve the equation.
 
 ## 3B.10 Sextics with a binary summand
 
