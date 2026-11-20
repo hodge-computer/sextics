@@ -34,6 +34,8 @@ import Mathlib.RingTheory.Flat.FaithfullyFlat.Basic
 import Mathlib.RingTheory.Spectrum.Maximal.Localization
 import Mathlib.RingTheory.Localization.LocalizationLocalization
 import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+import Mathlib.RingTheory.Ideal.GoingUp
+import Mathlib.RingTheory.RingHom.Finite
 
 /-!
 # Relative exterior forms on the universal weighted function field
@@ -6845,5 +6847,76 @@ end CycleQ2GaloisTraceRegularity
 
 #print axioms CycleQ2GaloisTraceRegularity.trace_regular
 #print axioms CycleQ2GaloisTraceRegularity.trace_subfield_regular
+
+end
+
+section
+
+/-!
+# A finite extension of domains is finite on their fraction fields
+
+A nonzero denominator in the larger domain divides a nonzero element
+from the smaller domain by integrality. The actual larger fraction
+field is therefore already the localization at the smaller
+denominators, where module finiteness localizes.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+noncomputable section
+
+namespace CycleQ2FiniteFractionExtension
+
+open Algebra Ideal
+open scoped nonZeroDivisors
+
+variable {A B K L : Type} [CommRing A] [IsDomain A] [CommRing B] [IsDomain B]
+  [Field K] [Field L] [Algebra A B] [Algebra A K] [Algebra A L]
+  [Algebra B L] [Algebra K L] [IsScalarTower A B L] [IsScalarTower A K L]
+  [IsFractionRing A K] [IsFractionRing B L]
+
+theorem localizes_smaller [Algebra.IsIntegral A B] (hinj : Function.Injective (algebraMap A B)) :
+    IsLocalization (Algebra.algebraMapSubmonoid B A⁰) L := by
+  refine (isLocalization_iff (Algebra.algebraMapSubmonoid B A⁰) L).mpr ⟨?_,?_,?_⟩
+  · rintro ⟨b,a,ha,rfl⟩
+    change IsUnit (algebraMap B L (algebraMap A B a))
+    have hn : algebraMap A B a ≠ 0 := by
+      intro e
+      exact nonZeroDivisors.ne_zero ha (hinj (e.trans (map_zero _).symm))
+    exact IsUnit.mk0 _ (fun h => hn ((IsFractionRing.injective B L) (h.trans (map_zero _).symm)))
+  · intro z
+    obtain ⟨⟨b,v⟩,hv⟩ := IsLocalization.surj B⁰ z
+    let I : Ideal B := Ideal.span {(v : B)}
+    have hI : I.comap (algebraMap A B) ≠ ⊥ :=
+      Ideal.comap_ne_bot_of_integral_mem (nonZeroDivisors.ne_zero v.2) (Ideal.subset_span rfl)
+        (Algebra.IsIntegral.isIntegral (v : B))
+    obtain ⟨a,ha,ha0⟩ := Submodule.exists_mem_ne_zero_of_ne_bot hI
+    have had : (v : B) ∣ algebraMap A B a := Ideal.mem_span_singleton.mp ha
+    obtain ⟨w,hw⟩ := had
+    have hA : a ∈ A⁰ := mem_nonZeroDivisors_iff_ne_zero.mpr ha0
+    refine ⟨⟨b*w,⟨algebraMap A B a,⟨a,hA,rfl⟩⟩⟩,?_⟩
+    change z * algebraMap B L (algebraMap A B a) = algebraMap B L (b * w)
+    rw [hw,map_mul,map_mul,← mul_assoc]
+    exact congrArg (fun x : L => x * algebraMap B L w) hv
+  · intro x y h
+    have eq := (IsFractionRing.injective B L) h
+    exact ⟨1,by simp [eq]⟩
+
+theorem finite [Module.Finite A B] : FiniteDimensional K L := by
+  have h : Function.Injective (algebraMap A L) := by
+    rw [IsScalarTower.algebraMap_eq A K L]
+    exact (algebraMap K L).injective.comp (IsFractionRing.injective A K)
+  have hi : Function.Injective (algebraMap A B) := by
+    intro a b hab
+    apply h
+    rw [IsScalarTower.algebraMap_apply A B L,IsScalarTower.algebraMap_apply A B L,hab]
+  letI : IsLocalization (Algebra.algebraMapSubmonoid B A⁰) L := localizes_smaller hi
+  exact Module.Finite.of_isLocalization A B A⁰
+
+end CycleQ2FiniteFractionExtension
+
+#print axioms CycleQ2FiniteFractionExtension.localizes_smaller
+#print axioms CycleQ2FiniteFractionExtension.finite
 
 end

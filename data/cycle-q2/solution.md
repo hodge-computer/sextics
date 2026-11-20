@@ -238,6 +238,36 @@ primitive. The class with that value and vanishing restriction is still
 to be constructed.
 [Derived localization and the protected form](GeometricMonicGenericSupport.lean)
 
+## Finite curve trace on the actual degree-two de Rham group
+
+A finite dominant projection from an integral curve to the projective
+line pulls back the two polynomial charts and Laurent overlap to affine
+opens. On all three charts, the target and source function fields are
+the original generic stalks. Their common pullback map is the actual
+stalk map, and the induced extension of function fields is finite.
+
+The regular traces on the three chart rings are uniquely determined
+by the two traces in these function fields. They commute with the
+original restrictions and with differentiation. The Laurent residue
+after trace therefore vanishes on both chart images and on the
+derivative of every overlap function. Its value on the pulled-back
+logarithmic form is the degree of the projection, which is nonzero.
+
+For a smooth complex integral curve with such a projection, the
+original one-form sheaf is the sheaf of its ordinary Kähler module
+on every affine chart. Affine vanishing and Mayer--Vietoris make
+the two actual connecting maps surjective and kill degree two of the
+structure sheaf. The overlap trace descends to one-form cohomology.
+Naturality of the connecting map and the exact sign of the shifted
+triangle then descend it to the actual degree-two two-term de Rham
+group. The derived class of the pulled-back logarithmic form gives
+the same nonzero value.
+[Global curve trace](GeometricMonicGenericSupport.lean)
+
+The last comparison is over the complex numbers. Its extension to
+the generic coefficient field and its identification with the
+marked pairing in the proper graph remain to be proved.
+
 ## Regular finite traces on affine curve charts
 
 The ordinary finite field trace of a regular one-form is regular on the
