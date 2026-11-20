@@ -109,6 +109,16 @@ import Mathlib.Algebra.Homology.QuasiIso
 import Mathlib.AlgebraicTopology.ExtraDegeneracy
 import Mathlib.Algebra.Homology.Embedding.ExtendHomology
 import Mathlib.Algebra.Homology.DerivedCategory.Basic
+import Mathlib.Algebra.Category.ModuleCat.Basic
+import Mathlib.Algebra.Homology.Monoidal
+import Mathlib.Algebra.Category.ModuleCat.Monoidal.Basic
+import Mathlib.Algebra.Category.ModuleCat.Colimits
+import Mathlib.Algebra.Homology.TotalComplexShift
+import Mathlib.Algebra.Homology.HomotopyCategory.SingleFunctors
+import Mathlib.RingTheory.LocalRing.Basic
+import Mathlib.RingTheory.Spectrum.Prime.Topology
+import Mathlib.Algebra.Homology.DerivedCategory.Ext.ExtClass
+import Mathlib.CategoryTheory.Limits.Preserves.Shapes.Kernels
 
 /-!
 # The proper graph has strict support in the native generic threefold
@@ -14195,5 +14205,1852 @@ def shiftedClass (n : ℤ) (hU : (⨆ i, U.obj i) = ⊤) (z : coverComplex U ⟶
 end CycleQ2CechDerivedRoof
 
 #print axioms CycleQ2CechDerivedRoof.classOf_comp
+
+end
+
+noncomputable section
+
+/-!
+# Coefficient-linearity of the projected curve trace
+
+The native Laurent coefficient is linear in ordinary one-forms
+under the actual coordinate identification. Composing it with the
+regular finite trace gives a linear functional on the overlap.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2CurveOverlapLinearTrace
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2LaurentProjectiveLine (line chartTorus)
+open CycleQ2ProjectiveLineStructure (structureMap chartTorus_over)
+open CycleQ2ProjectiveLineExactCharts (torusFramed)
+open CycleQ2ProjectiveLineNativeResidue (toLaurent residue)
+open CycleQ2RankOneDifferentialSheaf (onBasisIso)
+open CycleQ2NativeAffineFiniteTrace (Forms)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2AffineFrameBinding (sectionEquiv)
+open CycleQ2ExactFrameThreeDeRham (onePullback)
+open scoped KaehlerDifferential
+
+variable (k : Type) [Field k] [CharZero k]
+
+private abbrev W := (torusFramed k).1
+
+theorem residue_smul (a : k) (ω : Forms (structureMap k) (W k)) :
+    letI : Algebra k Γ(line k,W k) := (sectionCoefficients (structureMap k) (W k)).toAlgebra
+    residue k (a • ω) = a • residue k ω := by
+  letI : Algebra k Γ(line k,W k) := (sectionCoefficients (structureMap k) (W k)).toAlgebra
+  letI : Algebra k Γ(line k,(chartTorus k) ''ᵁ ⊤) :=
+    (sectionCoefficients (structureMap k) ((chartTorus k) ''ᵁ ⊤)).toAlgebra
+  let φ := sectionEquiv (structureMap k) (chartTorus k) (chartTorus_over k)
+  letI : SmoothOfRelativeDimension 1 (structureMap k) := CycleQ2ProjectiveLineStructure.smooth k
+  let e := (onBasisIso (structureMap k)).app (op (torusFramed k))
+  let R := CycleQ2LaurentKahlerResidue.differentialResidue k
+  change R (onePullback φ.toAlgHom (e.hom (e.inv (a • ω)))) =
+    a • R (onePullback φ.toAlgHom (e.hom (e.inv ω)))
+  rw [Iso.inv_hom_id_apply,Iso.inv_hom_id_apply,← map_smul]
+  apply congrArg R
+  let A := Γ(line k,(chartTorus k) ''ᵁ ⊤)
+  let L := CycleQ2LaurentLogDerivative.L k
+  let u : Ω[A⁄k] := ω
+  change onePullback φ.toAlgHom (a • u) = a • onePullback φ.toAlgHom u
+  rw [← IsScalarTower.algebraMap_smul A a u, map_smulₛₗ]
+  change φ (algebraMap k A a) • onePullback φ.toAlgHom u = _
+  exact (congrArg (fun b : L => b • onePullback φ.toAlgHom u)
+    (φ.toAlgHom.commutes a)).trans (IsScalarTower.algebraMap_smul L a _)
+
+variable {X : Scheme.{0}} [IsIntegral X] (q : X ⟶ line k) [IsFinite q] [IsDominant q]
+
+private instance torus_nonempty : Nonempty (W k) := by
+  let v : Spec (CommRingCat.of (CycleQ2LaurentLogDerivative.L k)) := Classical.choice inferInstance
+  exact ⟨⟨chartTorus k v,⟨v,trivial,rfl⟩⟩⟩
+
+private instance source_nonempty : Nonempty (q ⁻¹ᵁ W k) :=
+  CycleQ2FiniteCurveCover.source_nonempty k q (CycleQ2ProperCurveOverlapTrace.generic_image k q)
+
+theorem overlap_smul (a : k) (ω : Forms (q ≫ structureMap k) (q ⁻¹ᵁ W k)) :
+    letI : Algebra k Γ(X,q ⁻¹ᵁ W k) :=
+      (sectionCoefficients (q ≫ structureMap k) (q ⁻¹ᵁ W k)).toAlgebra
+    CycleQ2ProperCurveOverlapTrace.overlapTrace k q (a • ω) =
+      a • CycleQ2ProperCurveOverlapTrace.overlapTrace k q ω := by
+  letI : Algebra k Γ(X,q ⁻¹ᵁ W k) :=
+    (sectionCoefficients (q ≫ structureMap k) (q ⁻¹ᵁ W k)).toAlgebra
+  unfold CycleQ2ProperCurveOverlapTrace.overlapTrace
+  simp only [AddMonoidHom.comp_apply]
+  rw [CycleQ2NativeTraceLinearity.regular_smul q (structureMap k) _ _ (W k)
+    (torusFramed k).2.1 (CycleQ2ProjectiveLineTraceCharts.frame k
+      (structureMap k) (torusFramed k))]
+  exact residue_smul k a _
+
+def overlapLinear :
+    letI : Algebra k Γ(X,q ⁻¹ᵁ W k) :=
+      (sectionCoefficients (q ≫ structureMap k) (q ⁻¹ᵁ W k)).toAlgebra
+    Forms (q ≫ structureMap k) (q ⁻¹ᵁ W k) →ₗ[k] k := by
+  letI : Algebra k Γ(X,q ⁻¹ᵁ W k) :=
+    (sectionCoefficients (q ≫ structureMap k) (q ⁻¹ᵁ W k)).toAlgebra
+  exact { __ := CycleQ2ProperCurveOverlapTrace.overlapTrace k q
+          map_smul' := overlap_smul k q }
+
+end CycleQ2CurveOverlapLinearTrace
+
+#print axioms CycleQ2CurveOverlapLinearTrace.overlapLinear
+
+end
+
+noncomputable section
+
+/-!
+# The degree-two trace on the two-chart de Rham cochain complex
+
+The three nonzero terms are functions on the charts, overlap
+functions with chart one-forms, and overlap one-forms. The two
+differentials use the Čech sign of the overlap derivative. A
+coefficient-linear trace that kills the two restrictions and the
+overlap derivative therefore gives a map to the coefficient field
+in cochain degree two.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2TwoChartTraceComplex
+
+open CategoryTheory CategoryTheory.Limits HomologicalComplex
+
+variable {k : Type} [Field k]
+  {A₀ A₁ B₀ B₁ M₀ M₁ : Type}
+  [AddCommGroup A₀] [Module k A₀] [AddCommGroup A₁] [Module k A₁]
+  [AddCommGroup B₀] [Module k B₀] [AddCommGroup B₁] [Module k B₁]
+  [AddCommGroup M₀] [Module k M₀] [AddCommGroup M₁] [Module k M₁]
+  (dA : A₀ →ₗ[k] A₁) (dB : B₀ →ₗ[k] B₁) (dM : M₀ →ₗ[k] M₁)
+  (rA₀ : A₀ →ₗ[k] M₀) (rB₀ : B₀ →ₗ[k] M₀)
+  (rA₁ : A₁ →ₗ[k] M₁) (rB₁ : B₁ →ₗ[k] M₁)
+
+private def diffZero : (A₀ × B₀) →ₗ[k] (M₀ × A₁ × B₁) :=
+  ((rA₀.comp (LinearMap.fst k A₀ B₀)) - (rB₀.comp (LinearMap.snd k A₀ B₀))).prod
+    ((dA.comp (LinearMap.fst k A₀ B₀)).prod (dB.comp (LinearMap.snd k A₀ B₀)))
+
+private def diffOne : (M₀ × A₁ × B₁) →ₗ[k] M₁ :=
+  ((rA₁.comp (LinearMap.fst k A₁ B₁)).comp (LinearMap.snd k M₀ (A₁ × B₁))) -
+  ((rB₁.comp (LinearMap.snd k A₁ B₁)).comp (LinearMap.snd k M₀ (A₁ × B₁))) -
+  (dM.comp (LinearMap.fst k M₀ (A₁ × B₁)))
+
+variable (hA : ∀ a, rA₁ (dA a) = dM (rA₀ a))
+  (hB : ∀ b, rB₁ (dB b) = dM (rB₀ b))
+
+private abbrev term : ℕ → ModuleCat.{0} k
+  | 0 => ModuleCat.of k (A₀ × B₀)
+  | 1 => ModuleCat.of k (M₀ × A₁ × B₁)
+  | 2 => ModuleCat.of k M₁
+  | _ + 3 => ModuleCat.of k (Fin 0 → k)
+
+local notation "terms" => term (k := k) (A₀ := A₀) (B₀ := B₀) (A₁ := A₁)
+  (B₁ := B₁) (M₀ := M₀) (M₁ := M₁)
+
+private def differential : (n : ℕ) → terms n ⟶ terms (n+1)
+  | 0 => ModuleCat.ofHom (diffZero dA dB rA₀ rB₀)
+  | 1 => ModuleCat.ofHom (diffOne dM rA₁ rB₁)
+  | _ + 2 => 0
+
+include hA hB in
+private theorem square (n : ℕ) :
+    differential dA dB dM rA₀ rB₀ rA₁ rB₁ n ≫ differential dA dB dM rA₀ rB₀ rA₁ rB₁ (n+1) = 0 := by
+  cases n with
+  | zero =>
+    apply ModuleCat.hom_ext
+    apply LinearMap.ext
+    intro x
+    change rA₁ (dA x.1) - rB₁ (dB x.2) - dM (rA₀ x.1 - rB₀ x.2) = 0
+    rw [hA,hB,map_sub,sub_self]
+  | succ n => cases n <;> exact comp_zero
+
+abbrev complex : CochainComplex (ModuleCat.{0} k) ℕ :=
+  CochainComplex.of terms (differential dA dB dM rA₀ rB₀ rA₁ rB₁)
+    (square dA dB dM rA₀ rB₀ rA₁ rB₁ hA hB)
+
+variable (τ : M₁ →ₗ[k] k)
+  (h₁ : ∀ a, τ (rA₁ a) = 0) (h₂ : ∀ b, τ (rB₁ b) = 0) (h₃ : ∀ c, τ (dM c) = 0)
+
+include h₁ h₂ h₃ in
+private theorem trace_annihilates (x : M₀ × A₁ × B₁) :
+    τ (diffOne dM rA₁ rB₁ x) = 0 := by
+  change τ (rA₁ x.2.1 - rB₁ x.2.2 - dM x.1) = 0
+  rw [map_sub,map_sub,h₁,h₂,h₃,sub_zero,sub_zero]
+
+include h₁ h₂ h₃ in
+/-- The cochain trace, with its target in degree two. -/
+def traceMap :
+    complex dA dB dM rA₀ rB₀ rA₁ rB₁ hA hB ⟶
+      (single (ModuleCat.{0} k) (ComplexShape.up ℕ) 2).obj (ModuleCat.of k k) :=
+  mkHomToSingle (ModuleCat.ofHom τ) (fun i hi => by
+    have he : i = 1 := by change i+1 = 2 at hi; omega
+    subst i
+    change CochainComplex.of.d terms (differential dA dB dM rA₀ rB₀ rA₁ rB₁) 1 (1+1) ≫
+      ModuleCat.ofHom τ = 0
+    rw [CochainComplex.of_d]
+    apply ModuleCat.hom_ext
+    apply LinearMap.ext
+    intro x
+    exact trace_annihilates dM rA₁ rB₁ τ h₁ h₂ h₃ x)
+
+@[simp]
+theorem traceMap_degreeTwo :
+    (traceMap dA dB dM rA₀ rB₀ rA₁ rB₁ hA hB τ h₁ h₂ h₃).f 2 ≫
+      (singleObjXSelf (ComplexShape.up ℕ) 2 (ModuleCat.of k k)).hom = ModuleCat.ofHom τ := by
+  rw [traceMap,mkHomToSingle_f,Category.assoc,Iso.inv_hom_id,Category.comp_id]
+
+abbrev complexInt := (complex dA dB dM rA₀ rB₀ rA₁ rB₁ hA hB).extend ComplexShape.embeddingUpNat
+
+/-- The same trace in the integer-indexed cochain category. -/
+def traceMapInt : complexInt dA dB dM rA₀ rB₀ rA₁ rB₁ hA hB ⟶
+    (single (ModuleCat.{0} k) (ComplexShape.up ℤ) 2).obj (ModuleCat.of k k) :=
+  extendMap (traceMap dA dB dM rA₀ rB₀ rA₁ rB₁ hA hB τ h₁ h₂ h₃) ComplexShape.embeddingUpNat ≫
+    (extendSingleIso ComplexShape.embeddingUpNat (ModuleCat.of k k) 2 2 rfl).hom
+
+end CycleQ2TwoChartTraceComplex
+
+#print axioms CycleQ2TwoChartTraceComplex.traceMapInt
+
+end
+
+noncomputable section
+
+/-!
+# The cochain trace on the actual affine curve charts
+
+The complex uses the original three section rings, their universal
+derivations and the actual open restrictions. Its trace in degree
+two is the ordinary Laurent residue after finite trace, with the
+normalization from the pulled-back logarithmic class.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2NativeCurveTraceComplex
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open HomologicalComplex
+open CycleQ2NativeAffineFiniteTrace (Forms fieldDegree)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (restrict)
+open CycleQ2ExactFrameThreeDeRham (onePullback onePullback_d)
+open CycleQ2LaurentProjectiveLine (line)
+open CycleQ2ProjectiveLineStructure (structureMap)
+open CycleQ2ProjectiveLineExactCharts (zeroFramed infinityFramed torusFramed)
+open CycleQ2ProjectiveLineFormRestrictions (torusInZero torusInInfinity)
+open scoped KaehlerDifferential
+
+section Relative
+
+variable {k A B : Type} [CommRing k] [CommRing A] [CommRing B] [Algebra k A] [Algebra k B]
+
+/-- The native semilinear cotangent map viewed over the original
+coefficient ring. -/
+def pullLinear (f : A →ₐ[k] B) : Ω[A⁄k] →ₗ[k] Ω[B⁄k] where
+  __ := (onePullback f).toAddMonoidHom
+  map_smul' a ω := by
+    change onePullback f (a • ω) = a • onePullback f ω
+    rw [← IsScalarTower.algebraMap_smul A a ω, map_smulₛₗ]
+    change f (algebraMap k A a) • onePullback f ω = _
+    rw [f.commutes,IsScalarTower.algebraMap_smul B]
+
+end Relative
+
+variable (k : Type) [Field k] [CharZero k] {X : Scheme.{0}}
+  [IsIntegral X] (q : X ⟶ line k) [IsFinite q] [IsDominant q]
+
+private abbrev p := q ≫ structureMap k
+private abbrev U := q ⁻¹ᵁ (zeroFramed k).1
+private abbrev V := q ⁻¹ᵁ (infinityFramed k).1
+private abbrev W := q ⁻¹ᵁ (torusFramed k).1
+
+private abbrev uRestrict : W k q ≤ U k q := ((Opens.map q.base).map (homOfLE (torusInZero k))).le
+private abbrev vRestrict : W k q ≤ V k q := ((Opens.map q.base).map (homOfLE (torusInInfinity k))).le
+
+private abbrev result :=
+  Σ K : CochainComplex (ModuleCat.{0} k) ℕ,
+    K ⟶ (single (ModuleCat.{0} k) (ComplexShape.up ℕ) 2).obj (ModuleCat.of k k)
+
+private def paired : result k := by
+  letI : Algebra k Γ(X,U k q) := (sectionCoefficients (p k q) (U k q)).toAlgebra
+  letI : Algebra k Γ(X,V k q) := (sectionCoefficients (p k q) (V k q)).toAlgebra
+  letI : Algebra k Γ(X,W k q) := (sectionCoefficients (p k q) (W k q)).toAlgebra
+  let du := (KaehlerDifferential.D k Γ(X,U k q)).toLinearMap
+  let dv := (KaehlerDifferential.D k Γ(X,V k q)).toLinearMap
+  let dw := (KaehlerDifferential.D k Γ(X,W k q)).toLinearMap
+  let ru := restrict (p k q) (uRestrict k q)
+  let rv := restrict (p k q) (vRestrict k q)
+  let lu := pullLinear ru
+  let lv := pullLinear rv
+  have hu : ∀ a, lu (du a) = dw (ru.toLinearMap a) := onePullback_d ru
+  have hv : ∀ a, lv (dv a) = dw (rv.toLinearMap a) := onePullback_d rv
+  let τ := CycleQ2CurveOverlapLinearTrace.overlapLinear k q
+  exact ⟨_, CycleQ2TwoChartTraceComplex.traceMap du dv dw ru.toLinearMap rv.toLinearMap
+    lu lv hu hv τ (CycleQ2ProperCurveOverlapTrace.restrict_zero k q)
+    (CycleQ2ProperCurveOverlapTrace.restrict_infinity k q) (CycleQ2ProperCurveOverlapTrace.exact_zero k q)⟩
+
+abbrev complex := (paired k q).1
+
+def traceMap : complex k q ⟶
+    (single (ModuleCat.{0} k) (ComplexShape.up ℕ) 2).obj (ModuleCat.of k k) :=
+  (paired k q).2
+
+theorem degreeTwo :
+    (traceMap k q).f 2 ≫ (singleObjXSelf (ComplexShape.up ℕ) 2 (ModuleCat.of k k)).hom =
+      letI : Algebra k Γ(X,W k q) := (sectionCoefficients (p k q) (W k q)).toAlgebra
+      ModuleCat.ofHom (CycleQ2CurveOverlapLinearTrace.overlapLinear k q) := by
+  letI : Algebra k Γ(X,W k q) := (sectionCoefficients (p k q) (W k q)).toAlgebra
+  letI : Algebra k Γ(X,U k q) := (sectionCoefficients (p k q) (U k q)).toAlgebra
+  letI : Algebra k Γ(X,V k q) := (sectionCoefficients (p k q) (V k q)).toAlgebra
+  unfold traceMap paired
+  apply CycleQ2TwoChartTraceComplex.traceMap_degreeTwo
+  · exact CycleQ2ProperCurveOverlapTrace.restrict_zero k q
+  · exact CycleQ2ProperCurveOverlapTrace.restrict_infinity k q
+  · exact CycleQ2ProperCurveOverlapTrace.exact_zero k q
+
+end CycleQ2NativeCurveTraceComplex
+
+#print axioms CycleQ2NativeCurveTraceComplex.degreeTwo
+
+end
+
+noncomputable section
+
+/-!
+# Extending the curve cochain trace to a tensor total complex
+
+The trace on the actual curve charts gives a morphism from the
+tensor total complex with any horizontal complex. On each
+bidegree the map is the trace component tensored with the identity
+on the original horizontal term.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2CurveTensorTrace
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.MonoidalCategory
+open AlgebraicGeometry TopologicalSpace
+open HomologicalComplex CycleQ2LaurentProjectiveLine
+
+variable (k : Type) [Field k]
+
+abbrev C := CochainComplex (ModuleCat.{0} k) ℤ
+abbrev unitTwo := (single (ModuleCat.{0} k) (ComplexShape.up ℤ) 2).obj (ModuleCat.of k k)
+
+variable [CharZero k] {X : Scheme.{0}} [IsIntegral X] (q : X ⟶ line k)
+  [IsFinite q] [IsDominant q]
+
+abbrev curve : C k :=
+  (CycleQ2NativeCurveTraceComplex.complex k q).extend ComplexShape.embeddingUpNat
+
+def trace : curve k q ⟶ unitTwo k :=
+  extendMap (CycleQ2NativeCurveTraceComplex.traceMap k q) ComplexShape.embeddingUpNat ≫
+    (extendSingleIso ComplexShape.embeddingUpNat (ModuleCat.of k k) 2 2 rfl).hom
+
+variable (L : C k)
+
+def integrate : tensorObj (curve k q) L ⟶ tensorObj (unitTwo k) L :=
+  tensorHom (trace k q) (𝟙 L)
+
+theorem integrate_on_summand (i j n : ℤ) (h : i+j = n) :
+    ιTensorObj (curve k q) L i j n h ≫ (integrate k q L).f n =
+      ((curriedTensor (ModuleCat.{0} k)).map ((trace k q).f i)).app (L.X j) ≫
+        ιTensorObj (unitTwo k) L i j n h := by
+  rw [integrate,ι_mapBifunctorMap,HomologicalComplex.id_f]
+  simp only [CategoryTheory.Functor.map_id,Category.id_comp]
+
+end CycleQ2CurveTensorTrace
+
+#print axioms CycleQ2CurveTensorTrace.integrate_on_summand
+
+end
+
+noncomputable section
+
+/-!
+# The tensor trace lowers degree by two
+
+The scalar target in degree two is the shifted tensor unit.
+The actual total complex commutes with the shift of its first
+factor. The left unitor then identifies the scalar target with
+the original horizontal complex shifted by two degrees.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2CurveTensorDegree
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.MonoidalCategory
+open AlgebraicGeometry HomologicalComplex
+open CycleQ2CurveTensorTrace (C unitTwo curve integrate)
+open CycleQ2LaurentProjectiveLine (line)
+
+variable (k : Type) [Field k]
+
+private abbrev M := ModuleCat.{0} k
+private abbrev bip := (curriedTensor (M k)).mapBifunctorHomologicalComplex (ComplexShape.up ℤ) (ComplexShape.up ℤ)
+private abbrev unitZero := tensorUnit (M k) (ComplexShape.up ℤ)
+private abbrev bicomplex (A B : C k) := ((bip k).obj A).obj B
+
+private theorem bicomplex_even_shift (A B : C k) :
+    bicomplex k (A⟦(-2:ℤ)⟧) B =
+      ((HomologicalComplex₂.shiftFunctor₁ (M k) (-2:ℤ)).obj (bicomplex k A B)) := by
+  let P := bicomplex k (A⟦(-2:ℤ)⟧) B
+  let R := (HomologicalComplex₂.shiftFunctor₁ (M k) (-2:ℤ)).obj (bicomplex k A B)
+  refine HomologicalComplex.ext (C₁ := P) (C₂ := R) rfl ?_
+  intro i j hij
+  simp only [congr_fun_rfl,eqToHom_refl,Category.id_comp,Category.comp_id]
+  dsimp only [P,R,bicomplex]
+  ext n
+  simp only [CategoryTheory.Functor.mapBifunctorHomologicalComplex_obj_obj_d_f,
+    CochainComplex.shiftFunctor_obj_d']
+  rw [Int.negOnePow_even (-2) ⟨-1,by decide⟩,one_smul,one_smul]
+  rfl
+
+private def shiftUnit : unitTwo k ≅ (unitZero k)⟦(-2:ℤ)⟧ :=
+  (((CochainComplex.singleFunctors (M k)).shiftIso (-2:ℤ) 2 0 (by decide)).app
+    (ModuleCat.of k k)).symm
+
+def scalarTensorIso (L : C k) : tensorObj (unitTwo k) L ≅ L⟦(-2:ℤ)⟧ := by
+  let e₁ := (((curriedTensor (M k)).map₂CochainComplex).mapIso (shiftUnit k)).app L
+  let B := bicomplex k (unitZero k) L
+  let e₂ := eqToIso (congrArg (fun K : HomologicalComplex₂ (M k) (ComplexShape.up ℤ) (ComplexShape.up ℤ) =>
+    K.total (ComplexShape.up ℤ)) (bicomplex_even_shift k (unitZero k) L))
+  let e₃ := HomologicalComplex₂.totalShift₁Iso B (-2)
+  exact e₁ ≪≫ e₂ ≪≫ e₃ ≪≫
+    (shiftFunctor (C k) (-2:ℤ)).mapIso (HomologicalComplex.leftUnitor L)
+
+variable [CharZero k] {X : Scheme.{0}} [IsIntegral X] (q : X ⟶ line k)
+  [IsFinite q] [IsDominant q]
+
+/-- The curve cochain trace with values in the horizontal complex
+and with its exact cohomological shift. -/
+def integrateInto (L : C k) : tensorObj (curve k q) L ⟶ L⟦(-2:ℤ)⟧ :=
+  integrate k q L ≫ (scalarTensorIso k L).hom
+
+end CycleQ2CurveTensorDegree
+
+#print axioms CycleQ2CurveTensorDegree.integrateInto
+
+end
+
+noncomputable section
+
+/-!
+# The two cotangent summands on an affine product
+
+The ordinary differential on a tensor product separates into the
+relative forms for the two projections. The two summands retain
+the actual coefficient rings and are identified by the canonical
+cotangent base-change maps.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2ProductCotangent
+
+open Algebra KaehlerDifferential
+open scoped TensorProduct KaehlerDifferential
+
+variable (k A B : Type) [CommRing k] [CommRing A] [CommRing B] [Algebra k A] [Algebra k B]
+
+attribute [local instance] Algebra.TensorProduct.rightAlgebra
+
+abbrev T := A ⊗[k] B
+
+def toLeft : Ω[T k A B⁄k] →ₗ[T k A B] Ω[T k A B⁄B] :=
+  ((D B (T k A B)).restrictScalars k).liftKaehlerDifferential
+
+def toRight : Ω[T k A B⁄k] →ₗ[T k A B] Ω[T k A B⁄A] :=
+  ((D A (T k A B)).restrictScalars k).liftKaehlerDifferential
+
+def fromLeft : Ω[T k A B⁄B] →ₗ[T k A B] Ω[T k A B⁄k] :=
+  (KaehlerDifferential.mapBaseChange k A (T k A B)).comp
+    (KaehlerDifferential.tensorKaehlerEquiv k B A (T k A B)).symm.toLinearMap
+
+def fromRight : Ω[T k A B⁄A] →ₗ[T k A B] Ω[T k A B⁄k] :=
+  (KaehlerDifferential.mapBaseChange k B (T k A B)).comp
+    (KaehlerDifferential.tensorKaehlerEquiv k A B (T k A B)).symm.toLinearMap
+
+@[simp]
+theorem toLeft_D (x : T k A B) : toLeft k A B (D k _ x) = D B _ x :=
+  Derivation.liftKaehlerDifferential_comp_D _ _
+
+@[simp]
+theorem toRight_D (x : T k A B) : toRight k A B (D k _ x) = D A _ x :=
+  Derivation.liftKaehlerDifferential_comp_D _ _
+
+@[simp]
+theorem fromLeft_D (a : A) :
+    fromLeft k A B (D B _ (algebraMap A (T k A B) a)) =
+      D k _ (algebraMap A (T k A B) a) := by
+  let E := KaehlerDifferential.tensorKaehlerEquiv k B A (T k A B)
+  have h : E ((1 : T k A B) ⊗ₜ[A] D k A a) = D B _ (algebraMap A (T k A B) a) := by
+    simp only [E,KaehlerDifferential.tensorKaehlerEquiv_tmul_D,one_smul]
+  change KaehlerDifferential.mapBaseChange k A (T k A B) (E.symm _) = _
+  rw [← h, LinearEquiv.symm_apply_apply, KaehlerDifferential.mapBaseChange_tmul, one_smul,
+    KaehlerDifferential.map_D]
+
+@[simp]
+theorem fromRight_D (b : B) :
+    fromRight k A B (D A _ (algebraMap B (T k A B) b)) =
+      D k _ (algebraMap B (T k A B) b) := by
+  let E := KaehlerDifferential.tensorKaehlerEquiv k A B (T k A B)
+  have h : E ((1 : T k A B) ⊗ₜ[B] D k B b) = D A _ (algebraMap B (T k A B) b) := by
+    simp only [E,KaehlerDifferential.tensorKaehlerEquiv_tmul_D,one_smul]
+  change KaehlerDifferential.mapBaseChange k B (T k A B) (E.symm _) = _
+  rw [← h, LinearEquiv.symm_apply_apply, KaehlerDifferential.mapBaseChange_tmul, one_smul,
+    KaehlerDifferential.map_D]
+
+private theorem tmul_eq (a : A) (b : B) :
+    (a ⊗ₜ[k] b) = algebraMap A (T k A B) a * algebraMap B (T k A B) b := by
+  change (a ⊗ₜ[k] b) = (a ⊗ₜ[k] (1 : B)) * ((1 : A) ⊗ₜ[k] b)
+  rw [Algebra.TensorProduct.tmul_mul_tmul,mul_one,one_mul]
+
+@[simp]
+theorem left_D_tmul (a : A) (b : B) :
+    D B (T k A B) (a ⊗ₜ[k] b) =
+      algebraMap B (T k A B) b • D B _ (algebraMap A (T k A B) a) := by
+  rw [tmul_eq k A B a b, Derivation.leibniz, Derivation.map_algebraMap,
+    smul_zero, zero_add]
+
+@[simp]
+theorem right_D_tmul (a : A) (b : B) :
+    D A (T k A B) (a ⊗ₜ[k] b) =
+      algebraMap A (T k A B) a • D A _ (algebraMap B (T k A B) b) := by
+  rw [tmul_eq k A B a b, Derivation.leibniz, Derivation.map_algebraMap,
+    smul_zero, add_zero]
+
+theorem sum_from_to :
+    (fromLeft k A B).comp (toLeft k A B) + (fromRight k A B).comp (toRight k A B) =
+      LinearMap.id := by
+  apply Derivation.liftKaehlerDifferential_unique
+  ext t
+  change fromLeft k A B (toLeft k A B (D k _ t)) +
+    fromRight k A B (toRight k A B (D k _ t)) = D k _ t
+  simp only [toLeft_D,toRight_D]
+  induction t using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a b =>
+    rw [left_D_tmul,right_D_tmul,map_smul,map_smul,fromLeft_D,fromRight_D,tmul_eq,Derivation.leibniz]
+    exact add_comm _ _
+  | add t u ht hu => simp only [map_add,add_add_add_comm,ht,hu]
+
+theorem toLeft_fromLeft : (toLeft k A B).comp (fromLeft k A B) = LinearMap.id := by
+  apply Derivation.liftKaehlerDifferential_unique
+  ext t
+  change toLeft k A B (fromLeft k A B (D B _ t)) = D B _ t
+  induction t using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a b => rw [left_D_tmul,map_smul,map_smul,fromLeft_D,toLeft_D]
+  | add t u ht hu => simp only [map_add,ht,hu]
+
+theorem toRight_fromRight : (toRight k A B).comp (fromRight k A B) = LinearMap.id := by
+  apply Derivation.liftKaehlerDifferential_unique
+  ext t
+  change toRight k A B (fromRight k A B (D A _ t)) = D A _ t
+  induction t using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a b => rw [right_D_tmul,map_smul,map_smul,fromRight_D,toRight_D]
+  | add t u ht hu => simp only [map_add,ht,hu]
+
+theorem toLeft_fromRight : (toLeft k A B).comp (fromRight k A B) = 0 := by
+  apply Derivation.liftKaehlerDifferential_unique
+  ext t
+  change toLeft k A B (fromRight k A B (D A _ t)) = 0
+  induction t using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a b => rw [right_D_tmul,map_smul,map_smul,fromRight_D,toLeft_D,
+      Derivation.map_algebraMap,smul_zero]
+  | add t u ht hu => simp only [map_add,ht,hu,zero_add]
+
+theorem toRight_fromLeft : (toRight k A B).comp (fromLeft k A B) = 0 := by
+  apply Derivation.liftKaehlerDifferential_unique
+  ext t
+  change toRight k A B (fromLeft k A B (D B _ t)) = 0
+  induction t using TensorProduct.induction_on with
+  | zero => simp
+  | tmul a b => rw [left_D_tmul,map_smul,map_smul,fromLeft_D,toRight_D,
+      Derivation.map_algebraMap,smul_zero]
+  | add t u ht hu => simp only [map_add,ht,hu,zero_add]
+
+/-- The relative cotangent modules of the two projections split the
+absolute relative cotangent module over the coefficient field. -/
+def split : Ω[T k A B⁄k] ≃ₗ[T k A B] (Ω[T k A B⁄B] × Ω[T k A B⁄A]) where
+  __ := (toLeft k A B).prod (toRight k A B)
+  invFun := (fromLeft k A B).coprod (fromRight k A B)
+  left_inv x := LinearMap.congr_fun (sum_from_to k A B) x
+  right_inv x := by
+    apply Prod.ext
+    · change toLeft k A B (fromLeft k A B x.1 + fromRight k A B x.2) = x.1
+      rw [map_add]
+      exact congrArg₂ (· + ·) (LinearMap.congr_fun (toLeft_fromLeft k A B) x.1)
+        (LinearMap.congr_fun (toLeft_fromRight k A B) x.2) |>.trans (add_zero x.1)
+    · change toRight k A B (fromLeft k A B x.1 + fromRight k A B x.2) = x.2
+      rw [map_add]
+      exact congrArg₂ (· + ·) (LinearMap.congr_fun (toRight_fromLeft k A B) x.1)
+        (LinearMap.congr_fun (toRight_fromRight k A B) x.2) |>.trans (zero_add x.2)
+
+end CycleQ2ProductCotangent
+
+#print axioms CycleQ2ProductCotangent.split
+
+end
+
+noncomputable section
+
+/-!
+# Common opens for changes of regular generators
+
+An elementary shear gives a common two-open refinement of the
+complement of the two equations. Over a local ring every invertible
+change of two generators is a composition of the elementary moves
+used by the logarithmic class.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+
+
+namespace CycleQ2GysinGeneratorCovers
+
+open TopologicalSpace PrimeSpectrum
+
+variable {R : Type} [CommRing R]
+
+theorem shear_cover (f g a : R) :
+    basicOpen f ⊔ (basicOpen g ⊓ basicOpen (g + a * f)) = basicOpen f ⊔ basicOpen g := by
+  ext x
+  change (x ∈ basicOpen f ∨ (x ∈ basicOpen g ∧ x ∈ basicOpen (g + a * f))) ↔
+    (x ∈ basicOpen f ∨ x ∈ basicOpen g)
+  simp only [mem_basicOpen]
+  constructor
+  · rintro (hf | ⟨hg, _⟩)
+    · exact Or.inl hf
+    · exact Or.inr hg
+  · rintro (hf | hg)
+    · exact Or.inl hf
+    · by_cases hf : f ∈ x.asIdeal
+      · refine Or.inr ⟨hg, fun hh => hg ?_⟩
+        have h := x.asIdeal.sub_mem hh (x.asIdeal.mul_mem_left a hf)
+        simpa only [add_sub_cancel_right] using h
+      · exact Or.inl hf
+
+theorem shear_cover_new (f g a : R) :
+    basicOpen f ⊔ (basicOpen g ⊓ basicOpen (g + a * f)) =
+      basicOpen f ⊔ basicOpen (g + a * f) := by
+  have he : (g + a * f) + (-a) * f = g := by ring
+  simpa only [he, inf_comm] using shear_cover f (g + a * f) (-a)
+
+section Invariant
+
+variable (P : R → R → Prop)
+  (scaleFirst : ∀ (u : Rˣ) f g, P f g → P ((u : R) * f) g)
+  (scaleSecond : ∀ (u : Rˣ) f g, P f g → P f ((u : R) * g))
+  (shearFirst : ∀ r f g, P f g → P (f + r * g) g)
+  (shearSecond : ∀ r f g, P f g → P f (g + r * f))
+
+include scaleFirst scaleSecond shearFirst shearSecond in
+private theorem preserve_with_pivot (f g a b c d : R) (h : P f g)
+    (ha : IsUnit a) (hΔ : IsUnit (a * d - b * c)) :
+    P (a * f + b * g) (c * f + d * g) := by
+  obtain ⟨u,rfl⟩ := ha
+  let i : R := ↑u⁻¹
+  let Δ : R := ↑u * d - b * c
+  obtain ⟨v,hv⟩ := u⁻¹.isUnit.mul hΔ
+  have h₁ := shearFirst b (↑u * f) g (scaleFirst u f g h)
+  have h₂ := scaleSecond v (↑u * f + b * g) g h₁
+  have h₃ := shearSecond (i*c) (↑u * f + b * g) (↑v * g) h₂
+  have he : (↑v : R) * g + (i*c) * (↑u * f + b * g) = c*f + d*g := by
+    rw [hv]
+    have hi : i * (u : R) = 1 := Units.inv_mul u
+    change i * ((u : R) * d - b * c) * g + (i*c) * (↑u * f + b * g) = c*f + d*g
+    linear_combination (c*f + d*g) * hi
+  exact he ▸ h₃
+
+include scaleFirst scaleSecond shearFirst shearSecond in
+/-- The shear, unit, and swap laws suffice for an arbitrary invertible
+change of a pair of generators at a local point. -/
+theorem preserve [IsLocalRing R] (swap : ∀ f g, P f g → P g f)
+    (f g a b c d : R) (h : P f g) (hΔ : IsUnit (a * d - b * c)) :
+    P (a * f + b * g) (c * f + d * g) := by
+  have hUnit := IsLocalRing.isUnit_or_isUnit_of_isUnit_add
+    (show IsUnit (a*d + -(b*c)) by simpa only [sub_eq_add_neg] using hΔ)
+  rcases hUnit with h₁ | h₂
+  · exact preserve_with_pivot P scaleFirst scaleSecond shearFirst shearSecond
+      f g a b c d h (isUnit_of_mul_isUnit_left h₁) hΔ
+  · have hbc : IsUnit (b*c) := by simpa only [neg_neg] using h₂.neg
+    have hcd : IsUnit (c*b - d*a) := by
+      convert hΔ.neg using 1
+      ring
+    exact swap _ _ (preserve_with_pivot P scaleFirst scaleSecond shearFirst shearSecond
+      f g c d a b h (isUnit_of_mul_isUnit_right hbc) hcd)
+
+end Invariant
+end CycleQ2GysinGeneratorCovers
+
+#print axioms CycleQ2GysinGeneratorCovers.shear_cover_new
+#print axioms CycleQ2GysinGeneratorCovers.preserve
+
+end
+
+noncomputable section
+
+/-!
+# A closed overlap form yields an actual derived class
+
+For any Mayer–Vietoris square and any complex of abelian sheaves,
+a closed section on the overlap defines a morphism from the
+degree-zero free-open sheaf. Composing with the actual short
+exact sequence's connecting morphism raises its degree by one.
+An overlap section coming from a closed pair of chart sections
+has zero derived connecting class.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2DerivedOverlapClass
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Abelian TopologicalSpace
+open HomologicalComplex
+open CycleQ2InjectiveCech (AbSheaf)
+
+variable {X : TopCat.{0}}
+local instance : HasExt.{1} (AbSheaf X) := HasExt.standard _
+local instance : HasDerivedCategory.{1} (AbSheaf X) := HasDerivedCategory.standard _
+
+private abbrev A := AbSheaf X
+private abbrev Dcat := DerivedCategory (A (X := X))
+private abbrev E := DerivedCategory.singleFunctor (A (X := X)) 0
+private abbrev I := CochainComplex.singleFunctor (A (X := X)) 0
+private abbrev Q := DerivedCategory.Q (C := A (X := X))
+
+variable {K : CochainComplex (A (X := X)) ℤ} (q : ℤ)
+variable {M N : A (X := X)}
+
+private theorem no_differential_other (j : ℤ) (h : (ComplexShape.up ℤ).Rel 0 j) : j = 1 := by
+  simpa only [ComplexShape.up_Rel,zero_add] using h.symm
+
+def sectionChainMap (z : M ⟶ (K⟦q⟧).X 0) (hz : z ≫ (K⟦q⟧).d 0 1 = 0) :
+    (I (X := X)).obj M ⟶ K⟦q⟧ :=
+  mkHomFromSingle z (fun j h => no_differential_other j h ▸ hz)
+
+def sectionClass (z : M ⟶ (K⟦q⟧).X 0) (hz : z ≫ (K⟦q⟧).d 0 1 = 0) :
+    (E (X := X)).obj M ⟶ ((Q (X := X)).obj K)⟦q⟧ :=
+  (Q (X := X)).map (sectionChainMap q z hz) ≫
+    (Functor.commShiftIso (Q (X := X)) q).hom.app K
+
+@[reassoc]
+theorem sectionClass_precomp (f : M ⟶ N) (z : N ⟶ (K⟦q⟧).X 0)
+    (hz : z ≫ (K⟦q⟧).d 0 1 = 0) :
+    (E (X := X)).map f ≫ sectionClass q z hz =
+      sectionClass q (f ≫ z) (by rw [Category.assoc,hz,comp_zero]) := by
+  have hChain : (I (X := X)).map f ≫ sectionChainMap q z hz =
+      sectionChainMap q (f ≫ z) (by rw [Category.assoc,hz,comp_zero]) := by
+    apply from_single_hom_ext
+    simp only [HomologicalComplex.comp_f,sectionChainMap,mkHomFromSingle_f]
+    change ((single (AbSheaf X) (ComplexShape.up ℤ) 0).map f).f 0 ≫
+      (singleObjXSelf (ComplexShape.up ℤ) 0 N).hom ≫ z = _
+    rw [single_map_f_self,Category.assoc,Category.assoc,Iso.inv_hom_id_assoc]
+  change (Q (X := X)).map ((I (X := X)).map f) ≫
+      ((Q (X := X)).map (sectionChainMap q z hz) ≫ _) = _
+  rw [← Category.assoc,← Functor.map_comp,hChain]
+  rfl
+
+variable (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+
+def overlapClass (z : S.shortComplex.X₁ ⟶ (K⟦q⟧).X 0)
+    (hz : z ≫ (K⟦q⟧).d 0 1 = 0) :
+    (E (X := X)).obj S.shortComplex.X₃ ⟶ ((Q (X := X)).obj K)⟦q+1⟧ :=
+  S.shortComplex_shortExact.extClass.hom ≫
+    (shiftFunctor (Dcat (X := X)) (1 : ℤ)).map (sectionClass q z hz) ≫
+    (shiftFunctorAdd (Dcat (X := X)) q 1).inv.app ((Q (X := X)).obj K)
+
+private theorem boundary_comp_f :
+    S.shortComplex_shortExact.extClass.hom ≫
+      (shiftFunctor (Dcat (X := X)) (1 : ℤ)).map
+        ((E (X := X)).map S.shortComplex.f) = 0 := by
+  have h := congrArg Ext.hom S.shortComplex_shortExact.extClass_comp
+  rw [Ext.comp_hom,Ext.mk₀_hom,ShiftedHom.comp_mk₀,Ext.zero_hom] at h
+  exact h
+
+/-- A closed Čech boundary gives zero in the derived category. -/
+theorem overlapClass_boundary (z : S.shortComplex.X₂ ⟶ (K⟦q⟧).X 0)
+    (hz : z ≫ (K⟦q⟧).d 0 1 = 0) :
+    overlapClass q S (S.shortComplex.f ≫ z) (by rw [Category.assoc,hz,comp_zero]) = 0 := by
+  rw [overlapClass,← sectionClass_precomp q S.shortComplex.f z hz,Functor.map_comp,
+    ← Category.assoc,← Category.assoc,boundary_comp_f,zero_comp,zero_comp]
+
+end CycleQ2DerivedOverlapClass
+
+#print axioms CycleQ2DerivedOverlapClass.overlapClass_boundary
+
+end
+
+noncomputable section
+
+/-!
+# The second connecting class with closed support
+
+The cokernel of the free-open map is supported on the complement.
+Composing its actual connecting morphism with a closed overlap
+class gives a class of degree two higher with that closed support.
+The class remains zero on closed Čech boundaries.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2DerivedDoubleSupport
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Abelian TopologicalSpace TopCat Opposite
+open CycleQ2InjectiveCech (AbSheaf freeOpen freeOpenMap freeOpenSections)
+open CycleQ2FreeOpenStalk (St)
+open CycleQ2DerivedOverlapClass (overlapClass overlapClass_boundary)
+open CycleQ2CechTwoToDerived (app app_comp freeOpenSections_postcomp)
+
+variable {X : TopCat.{0}}
+local instance : HasExt.{1} (AbSheaf X) := HasExt.standard _
+local instance : HasDerivedCategory.{1} (AbSheaf X) := HasDerivedCategory.standard _
+
+private abbrev Dcat := DerivedCategory (AbSheaf X)
+private abbrev E := DerivedCategory.singleFunctor (AbSheaf X) 0
+private abbrev Q := DerivedCategory.Q (C := AbSheaf X)
+
+private abbrev j (U : Opens X) := freeOpenMap (show U ≤ ⊤ from le_top)
+
+abbrev supportSequence (U : Opens X) := ShortComplex.cokernelSequence (j U)
+
+abbrev supportQuotient (U : Opens X) : AbSheaf X := (supportSequence U).X₃
+
+private theorem supportShortExact (U : Opens X) : (supportSequence U).ShortExact where
+  exact := ShortComplex.cokernelSequence_exact (j U)
+  mono_f := inferInstanceAs (Mono (j U))
+  epi_g := inferInstance
+
+theorem support_stalk_zero (U : Opens X) (x : X) (h : x ∈ U) :
+    IsZero ((St x).obj (supportQuotient U)) := by
+  let F := St x
+  letI : IsIso (F.map (j U)) := CycleQ2FreeOpenAtPoint.inside_iso x h
+  exact (PreservesCokernel.iso F (j U)).isZero_iff.mpr (isZero_cokernel_of_epi _)
+
+variable {K : CochainComplex (AbSheaf X) ℤ} (q : ℤ)
+  (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+
+def supportedClass (z : S.shortComplex.X₁ ⟶ (K⟦q⟧).X 0)
+    (hz : z ≫ (K⟦q⟧).d 0 1 = 0) :
+    (E (X := X)).obj (supportQuotient S.X₄) ⟶ ((Q (X := X)).obj K)⟦q+1+1⟧ :=
+  (supportShortExact S.X₄).extClass.hom ≫
+    (shiftFunctor (Dcat (X := X)) (1 : ℤ)).map (overlapClass q S z hz) ≫
+    (shiftFunctorAdd (Dcat (X := X)) (q+1) 1).inv.app ((Q (X := X)).obj K)
+
+theorem supportedClass_boundary (z : S.shortComplex.X₂ ⟶ (K⟦q⟧).X 0)
+    (hz : z ≫ (K⟦q⟧).d 0 1 = 0) :
+    supportedClass q S (S.shortComplex.f ≫ z) (by rw [Category.assoc,hz,comp_zero]) = 0 := by
+  rw [supportedClass,overlapClass_boundary q S z hz,Functor.map_zero,zero_comp,comp_zero]
+
+def sectionMap (z : (K⟦q⟧).X 0 |>.obj.obj (op S.X₁)) :
+    S.shortComplex.X₁ ⟶ (K⟦q⟧).X 0 :=
+  (freeOpenSections ((K⟦q⟧).X 0) S.X₁).symm z
+
+theorem sectionMap_closed (z : (K⟦q⟧).X 0 |>.obj.obj (op S.X₁))
+    (hz : ((K⟦q⟧).d 0 1).hom.app (op S.X₁) z = 0) :
+    sectionMap q S z ≫ (K⟦q⟧).d 0 1 = 0 := by
+  let f : freeOpen S.X₁ ⟶ (K⟦q⟧).X 0 := sectionMap q S z
+  let d := (K⟦q⟧).d 0 1
+  change f ≫ d = 0
+  apply (freeOpenSections ((K⟦q⟧).X 1) S.X₁).injective
+  rw [← freeOpenSections_postcomp S.X₁ f d, map_zero]
+  change d.hom.app (op S.X₁) (freeOpenSections ((K⟦q⟧).X 0) S.X₁ f) = 0
+  have hf : freeOpenSections ((K⟦q⟧).X 0) S.X₁ f = z :=
+    (freeOpenSections ((K⟦q⟧).X 0) S.X₁).apply_symm_apply z
+  rw [hf]
+  exact hz
+
+/-- The supported class applies to an ordinary closed section on the overlap. -/
+def ofClosedSection (z : (K⟦q⟧).X 0 |>.obj.obj (op S.X₁))
+    (hz : ((K⟦q⟧).d 0 1).hom.app (op S.X₁) z = 0) :
+    (E (X := X)).obj (supportQuotient S.X₄) ⟶ ((Q (X := X)).obj K)⟦q+1+1⟧ :=
+  supportedClass q S (sectionMap q S z) (sectionMap_closed q S z hz)
+
+end CycleQ2DerivedDoubleSupport
+
+#print axioms CycleQ2DerivedDoubleSupport.support_stalk_zero
+#print axioms CycleQ2DerivedDoubleSupport.ofClosedSection
+
+end
+
+noncomputable section
+
+/-!
+# Refining a supported overlap class
+
+Both connecting morphisms are natural for the original maps of
+short exact sequences. Under a refinement, pulling the logarithmic
+cochain to the smaller overlap and forming its supported class
+equals the pullback of the original class along the actual map
+between the two support quotients.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2DerivedSupportNaturality
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Abelian TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf freeOpen freeOpenMap)
+open CycleQ2MayerVietorisRestriction (freeOpenSheaf)
+open CycleQ2DerivedOverlapClass (sectionClass sectionClass_precomp overlapClass)
+open CycleQ2DerivedDoubleSupport (supportSequence supportQuotient supportedClass)
+
+variable {X : TopCat.{0}}
+local instance : HasExt.{1} (AbSheaf X) := HasExt.standard _
+local instance : HasDerivedCategory.{1} (AbSheaf X) := HasDerivedCategory.standard _
+
+private abbrev E := DerivedCategory.singleFunctor (AbSheaf X) 0
+private abbrev Q := DerivedCategory.Q (C := AbSheaf X)
+private abbrev shiftOne := shiftFunctor (DerivedCategory (AbSheaf X)) (1 : ℤ)
+
+theorem connecting_natural {S T : ShortComplex (AbSheaf X)} (hS : S.ShortExact) (hT : T.ShortExact)
+    (f : S ⟶ T) :
+    hS.extClass.hom ≫ (shiftOne (X := X)).map ((E (X := X)).map f.τ₁) =
+      (E (X := X)).map f.τ₃ ≫ hT.extClass.hom := by
+  have h := congrArg Ext.hom (ShortComplex.ShortExact.extClass_naturality hS hT f)
+  simp only [Ext.comp_hom,Ext.mk₀_hom,ShiftedHom.comp_mk₀,ShiftedHom.mk₀_comp] at h
+  exact h
+
+variable {K : CochainComplex (AbSheaf X) ℤ} (q : ℤ)
+  (S T : (Opens.grothendieckTopology X).MayerVietorisSquare)
+
+theorem overlap_natural (f : S.shortComplex ⟶ T.shortComplex) (z : T.shortComplex.X₁ ⟶ (K⟦q⟧).X 0)
+    (hz : z ≫ (K⟦q⟧).d 0 1 = 0) :
+    (E (X := X)).map f.τ₃ ≫ overlapClass q T z hz =
+      overlapClass q S (f.τ₁ ≫ z) (by rw [Category.assoc,hz,comp_zero]) := by
+  rw [overlapClass,overlapClass,← sectionClass_precomp q f.τ₁ z hz,Functor.map_comp]
+  simp only [← Category.assoc]
+  rw [connecting_natural S.shortComplex_shortExact T.shortComplex_shortExact f]
+
+private theorem freeOpenMap_comp {U V W : Opens X} (h : U ≤ V) (g : V ≤ W) :
+    freeOpenMap h ≫ freeOpenMap g = freeOpenMap (h.trans g) :=
+  (freeOpenSheaf.map_comp (homOfLE h) (homOfLE g)).symm
+
+def supportSequenceMap {U V : Opens X} (h : U ≤ V) :
+    supportSequence U ⟶ supportSequence V where
+  τ₁ := freeOpenMap h
+  τ₂ := 𝟙 _
+  τ₃ := cokernel.desc (freeOpenMap (show U ≤ ⊤ from le_top))
+    (cokernel.π (freeOpenMap (show V ≤ ⊤ from le_top))) (by
+      rw [← freeOpenMap_comp h (show V ≤ ⊤ from le_top),Category.assoc,cokernel.condition,comp_zero])
+  comm₁₂ := by
+    change freeOpenMap h ≫ freeOpenMap (show V ≤ ⊤ from le_top) =
+      freeOpenMap (show U ≤ ⊤ from le_top) ≫ 𝟙 _
+    rw [Category.comp_id,freeOpenMap_comp]
+  comm₂₃ := by
+    change 𝟙 _ ≫ cokernel.π _ = cokernel.π _ ≫ cokernel.desc _ _ _
+    rw [Category.id_comp,cokernel.π_desc]
+
+private theorem shortExact (U : Opens X) : (supportSequence U).ShortExact where
+  exact := ShortComplex.cokernelSequence_exact _
+  mono_f := inferInstanceAs (Mono (freeOpenMap (show U ≤ ⊤ from le_top)))
+  epi_g := inferInstance
+
+theorem supported_natural (h : S.X₄ ≤ T.X₄) (f : S.shortComplex ⟶ T.shortComplex)
+    (hf : f.τ₃ = freeOpenMap h) (z : T.shortComplex.X₁ ⟶ (K⟦q⟧).X 0)
+    (hz : z ≫ (K⟦q⟧).d 0 1 = 0) :
+    (E (X := X)).map (supportSequenceMap h).τ₃ ≫ supportedClass q T z hz =
+      supportedClass q S (f.τ₁ ≫ z) (by rw [Category.assoc,hz,comp_zero]) := by
+  let m := supportSequenceMap h
+  let F := shiftOne (X := X)
+  let S₀ := shortExact S.X₄
+  let T₀ := shortExact T.X₄
+  let G := E (X := X)
+  let j := (shiftFunctorAdd (DerivedCategory (AbSheaf X)) (q+1) 1).inv.app ((Q (X := X)).obj K)
+  let b : G.obj (supportSequence T.X₄).X₁ ⟶ _ := overlapClass q T z hz
+  let b' : G.obj (supportSequence S.X₄).X₁ ⟶ _ :=
+    overlapClass q S (f.τ₁ ≫ z) (by rw [Category.assoc,hz,comp_zero])
+  have hb : G.map m.τ₁ ≫ b = b' := by
+    change G.map (freeOpenMap h) ≫ overlapClass q T z hz = _
+    exact (congrArg (fun a => G.map a ≫ b) hf.symm).trans (overlap_natural q S T f z hz)
+  have hcomp : G.map m.τ₃ ≫ T₀.extClass.hom =
+      S₀.extClass.hom ≫ F.map (G.map m.τ₁) :=
+    (connecting_natural S₀ T₀ m).symm
+  change G.map m.τ₃ ≫ T₀.extClass.hom ≫ F.map b ≫ j = S₀.extClass.hom ≫ F.map b' ≫ j
+  calc
+    _ = (G.map m.τ₃ ≫ T₀.extClass.hom) ≫ F.map b ≫ j := by simp only [Category.assoc]
+    _ = S₀.extClass.hom ≫ F.map (G.map m.τ₁ ≫ b) ≫ j := by
+      rw [hcomp,F.map_comp]
+      simp only [Category.assoc]
+    _ = _ := by rw [hb]
+
+end CycleQ2DerivedSupportNaturality
+
+#print axioms CycleQ2DerivedSupportNaturality.supported_natural
+
+end
+
+noncomputable section
+
+/-!
+# Closed boundaries preserve the supported class
+
+The actual derived maps are additive on the closed overlap forms.
+A difference that comes from the restriction of closed chart forms
+therefore vanishes after the two connecting maps.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2DerivedSupportAdditivity
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace
+open HomologicalComplex
+open CycleQ2InjectiveCech (AbSheaf)
+open CycleQ2DerivedOverlapClass (sectionChainMap sectionClass overlapClass)
+open CycleQ2DerivedDoubleSupport (supportedClass supportedClass_boundary)
+
+variable {X : TopCat.{0}} {K : CochainComplex (AbSheaf X) ℤ} {M : AbSheaf X} (q : ℤ)
+  (z w : M ⟶ (K⟦q⟧).X 0) (hz : z ≫ (K⟦q⟧).d 0 1 = 0) (hw : w ≫ (K⟦q⟧).d 0 1 = 0)
+
+include hz hw in
+private theorem closed_add : (z+w) ≫ (K⟦q⟧).d 0 1 = 0 := by
+  rw [Preadditive.add_comp,hz,hw,add_zero]
+
+theorem sectionChainMap_add :
+    sectionChainMap q (z+w) (closed_add q z w hz hw) =
+      sectionChainMap q z hz + sectionChainMap q w hw := by
+  apply from_single_hom_ext
+  simp only [sectionChainMap,mkHomFromSingle_f,HomologicalComplex.add_f_apply,Preadditive.comp_add]
+
+theorem sectionClass_add :
+    sectionClass q (z+w) (closed_add q z w hz hw) = sectionClass q z hz + sectionClass q w hw := by
+  simp only [sectionClass,sectionChainMap_add q z w hz hw,Functor.map_add,Preadditive.add_comp]
+
+variable (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+  (a b : S.shortComplex.X₁ ⟶ (K⟦q⟧).X 0)
+  (ha : a ≫ (K⟦q⟧).d 0 1 = 0) (hb : b ≫ (K⟦q⟧).d 0 1 = 0)
+
+theorem overlapClass_add :
+    overlapClass q S (a+b) (closed_add q a b ha hb) =
+      overlapClass q S a ha + overlapClass q S b hb := by
+  simp only [overlapClass,sectionClass_add q a b ha hb,Functor.map_add,Preadditive.comp_add,Preadditive.add_comp]
+
+theorem supportedClass_add :
+    supportedClass q S (a+b) (closed_add q a b ha hb) =
+      supportedClass q S a ha + supportedClass q S b hb := by
+  simp only [supportedClass,overlapClass_add q S a b ha hb,Functor.map_add,Preadditive.comp_add,Preadditive.add_comp]
+
+theorem supportedClass_eq_of_closed_boundary
+    (w : S.shortComplex.X₂ ⟶ (K⟦q⟧).X 0) (hw : w ≫ (K⟦q⟧).d 0 1 = 0)
+    (h : b = a + S.shortComplex.f ≫ w) :
+    supportedClass q S b hb = supportedClass q S a ha := by
+  subst b
+  have he : (S.shortComplex.f ≫ w) ≫ (K⟦q⟧).d 0 1 = 0 := by rw [Category.assoc,hw,comp_zero]
+  rw [supportedClass_add q S a _ ha he,supportedClass_boundary q S w hw,add_zero]
+
+end CycleQ2DerivedSupportAdditivity
+
+#print axioms CycleQ2DerivedSupportAdditivity.supportedClass_eq_of_closed_boundary
+
+end
+
+noncomputable section
+
+/-!
+# A closed form on the second chart gives a supported boundary
+
+Restriction of sections agrees with precomposition by the
+free-open map. The minus sign in the Mayer–Vietoris map is
+absorbed by the second biproduct component. This identifies
+the difference of closed overlap sections with an actual
+derived boundary whenever it extends to the second chart.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2SupportedChartBoundary
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf freeOpen freeOpenMap freeOpenSections freeOpenSections_naturality)
+open CycleQ2CechTwoToDerived (freeOpenSections_postcomp)
+open CycleQ2DerivedDoubleSupport (supportQuotient sectionMap ofClosedSection)
+open CycleQ2DerivedSupportAdditivity (supportedClass_eq_of_closed_boundary)
+open CycleQ2DerivedSupportNaturality (supportSequenceMap supported_natural)
+
+variable {X : TopCat.{0}} {K : CochainComplex (AbSheaf X) ℤ} (q : ℤ)
+
+private abbrev F := (K⟦q⟧).X 0
+private abbrev d := (K⟦q⟧).d 0 1
+
+private def sectionHom {U : Opens X} (z : (F (K := K) q).obj.obj (op U)) :
+    freeOpen U ⟶ F (K := K) q :=
+  (freeOpenSections (F (K := K) q) U).symm z
+
+private theorem sectionHom_closed {U : Opens X} (z : (F (K := K) q).obj.obj (op U))
+    (hz : (d (K := K) q).hom.app (op U) z = 0) : sectionHom q z ≫ d q = 0 := by
+  apply (freeOpenSections ((K⟦q⟧).X 1) U).injective
+  rw [← freeOpenSections_postcomp U (sectionHom q z) (d q),map_zero]
+  change (d q).hom.app (op U) ((freeOpenSections (F q) U) (sectionHom q z)) = 0
+  have h : (freeOpenSections (F q) U) (sectionHom q z) = z :=
+    (freeOpenSections (F q) U).apply_symm_apply z
+  rw [h,hz]
+
+private theorem sectionHom_restrict {U V : Opens X} (h : V ≤ U)
+    (z : (F (K := K) q).obj.obj (op U)) :
+    freeOpenMap h ≫ sectionHom q z = sectionHom q ((F q).obj.map (homOfLE h).op z) := by
+  apply (freeOpenSections (F q) V).injective
+  rw [freeOpenSections_naturality (F q) h (sectionHom q z)]
+  change (F q).obj.map (homOfLE h).op ((freeOpenSections (F q) U) (sectionHom q z)) =
+    (freeOpenSections (F q) V) (sectionHom q ((F q).obj.map (homOfLE h).op z))
+  simp only [sectionHom,AddEquiv.apply_symm_apply]
+
+variable (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+
+private def fromSecond (w : (F (K := K) q).obj.obj (op S.X₃)) :
+    S.shortComplex.X₂ ⟶ F (K := K) q :=
+  -(biprod.snd ≫ sectionHom q w)
+
+private theorem fromSecond_closed (w : (F (K := K) q).obj.obj (op S.X₃))
+    (hw : (d (K := K) q).hom.app (op S.X₃) w = 0) :
+    fromSecond q S w ≫ d q = 0 := by
+  rw [fromSecond,Preadditive.neg_comp,Category.assoc,sectionHom_closed q w hw,comp_zero,neg_zero]
+
+private theorem second_boundary (w : (F (K := K) q).obj.obj (op S.X₃)) :
+    S.shortComplex.f ≫ fromSecond q S w = sectionHom q ((F q).obj.map S.f₁₃.op w) := by
+  change biprod.lift (freeOpenMap S.f₁₂.le) (-(freeOpenMap S.f₁₃.le)) ≫
+    (-(biprod.snd ≫ sectionHom q w)) = _
+  rw [Preadditive.comp_neg,← Category.assoc,biprod.lift_snd,Preadditive.neg_comp,neg_neg]
+  exact sectionHom_restrict q S.f₁₃.le w
+
+theorem class_eq_of_second_restriction
+    (a b : (F (K := K) q).obj.obj (op S.X₁))
+    (ha : (d (K := K) q).hom.app (op S.X₁) a = 0)
+    (hb : (d (K := K) q).hom.app (op S.X₁) b = 0)
+    (w : (F (K := K) q).obj.obj (op S.X₃))
+    (hw : (d (K := K) q).hom.app (op S.X₃) w = 0)
+    (h : b = a + (F q).obj.map S.f₁₃.op w) :
+    ofClosedSection q S b hb = ofClosedSection q S a ha := by
+  unfold ofClosedSection
+  apply supportedClass_eq_of_closed_boundary q S _ _ _ _ (fromSecond q S w)
+    (fromSecond_closed q S w hw)
+  rw [second_boundary q S w]
+  change sectionHom q b = sectionHom q a + sectionHom q ((F q).obj.map S.f₁₃.op w)
+  rw [h]
+  exact (freeOpenSections (F q) S.X₁).symm.map_add _ _
+
+end CycleQ2SupportedChartBoundary
+
+#print axioms CycleQ2SupportedChartBoundary.class_eq_of_second_restriction
+
+end
+
+noncomputable section
+
+/-!
+# Pulling back an overlap representative along an actual cover refinement
+
+The maps on supports come from the cokernels of the original free-open
+maps. On the two chart overlaps the pulled-back class is represented
+by the ordinary restriction of the original section.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2SupportedOpenRefinement
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf freeOpen freeOpenMap freeOpenSections freeOpenSections_naturality)
+open CycleQ2DerivedDoubleSupport (supportQuotient ofClosedSection sectionMap sectionMap_closed supportedClass)
+open CycleQ2DerivedSupportNaturality (supportSequenceMap supported_natural)
+
+variable {X : TopCat.{0}} {K : CochainComplex (AbSheaf X) ℤ} (q : ℤ)
+local instance : HasDerivedCategory.{1} (AbSheaf X) := HasDerivedCategory.standard _
+
+private abbrev F := (K⟦q⟧).X 0
+private abbrev d := (K⟦q⟧).d 0 1
+
+theorem restrict_closed {U V : Opens X} (h : V ≤ U)
+    (z : (F (K := K) q).obj.obj (op U))
+    (hz : (d (K := K) q).hom.app (op U) z = 0) :
+    (d (K := K) q).hom.app (op V) ((F q).obj.map (homOfLE h).op z) = 0 := by
+  refine (NatTrans.naturality_apply (d (K := K) q).hom (homOfLE h).op z).trans ?_
+  rw [hz,map_zero]
+
+private theorem sectionMap_congr (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+    (u v : S.shortComplex.X₁ ⟶ (K⟦q⟧).X 0)
+    (hu : u ≫ (K⟦q⟧).d 0 1 = 0) (hv : v ≫ (K⟦q⟧).d 0 1 = 0)
+    (h : u = v) : supportedClass q S u hu = supportedClass q S v hv := by
+  subst v
+  rfl
+
+variable {U' V' U V : Opens X} (hU : U' ≤ U) (hV : V' ≤ V)
+
+abbrev square (L R : Opens X) := Opens.mayerVietorisSquare L R
+
+private abbrev m := CycleQ2MayerVietorisRestriction.shortComplexMap hU hV
+
+abbrev supportMap := (supportSequenceMap (sup_le_sup hU hV)).τ₃
+
+private theorem restrictedSections (z : (F (K := K) q).obj.obj (op (U ⊓ V))) :
+    (m hU hV).τ₁ ≫ sectionMap q (square U V) z =
+      sectionMap q (square U' V') ((F q).obj.map (homOfLE (inf_le_inf hU hV)).op z) := by
+  let e := freeOpenSections (F (K := K) q) (U' ⊓ V')
+  let zMap : freeOpen (U ⊓ V) ⟶ F (K := K) q := sectionMap q (square U V) z
+  change freeOpenMap (inf_le_inf hU hV) ≫ zMap =
+    e.symm ((F q).obj.map (homOfLE (inf_le_inf hU hV)).op z)
+  apply e.injective
+  have he := freeOpenSections_naturality (F (K := K) q) (inf_le_inf hU hV) zMap
+  have hz : freeOpenSections (F (K := K) q) (U ⊓ V) zMap = z :=
+    (freeOpenSections (F (K := K) q) (U ⊓ V)).apply_symm_apply z
+  rw [he,hz,e.apply_symm_apply]
+  rfl
+
+theorem pullback_class (z : (F (K := K) q).obj.obj (op (U ⊓ V)))
+    (hz : (d (K := K) q).hom.app (op (U ⊓ V)) z = 0) :
+    (DerivedCategory.singleFunctor (AbSheaf X) 0).map (supportMap hU hV) ≫
+        ofClosedSection q (square U V) z hz =
+      ofClosedSection q (square U' V') ((F q).obj.map (homOfLE (inf_le_inf hU hV)).op z)
+        (restrict_closed q (inf_le_inf hU hV) z hz) := by
+  let zMap := sectionMap q (square U V) z
+  have hzMap := sectionMap_closed q (square U V) z hz
+  unfold ofClosedSection
+  refine (supported_natural q (square U' V') (square U V) (sup_le_sup hU hV)
+    (m hU hV) rfl zMap hzMap).trans ?_
+  exact sectionMap_congr q (square U' V') _ _ _ _ (restrictedSections q hU hV z)
+
+end CycleQ2SupportedOpenRefinement
+
+#print axioms CycleQ2SupportedOpenRefinement.pullback_class
+
+end
+
+noncomputable section
+
+/-!
+# A refinement with the same union identifies the supports
+
+The induced map on support cokernels is the identity when the
+opens agree. Thus the support maps for equal unions are
+isomorphisms of the original abelian sheaves.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2EqualSupportRefinement
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace
+open CycleQ2InjectiveCech (AbSheaf freeOpenMap)
+open CycleQ2DerivedDoubleSupport (supportSequence supportQuotient)
+open CycleQ2DerivedSupportNaturality (supportSequenceMap)
+
+variable {X : TopCat.{0}}
+
+theorem reflexive_supportMap (U : Opens X) :
+    (supportSequenceMap (le_rfl : U ≤ U)).τ₃ = 𝟙 (supportQuotient U) := by
+  let j := freeOpenMap (show U ≤ ⊤ from le_top)
+  apply (cancel_epi (cokernel.π j)).mp
+  change cokernel.π j ≫ cokernel.desc j (cokernel.π j) _ = cokernel.π j ≫ 𝟙 _
+  rw [cokernel.π_desc,Category.comp_id]
+
+theorem supportMap_isIso_of_eq {U V : Opens X} (h : U ≤ V) (eq : U = V) :
+    IsIso (supportSequenceMap h).τ₃ := by
+  subst V
+  rw [reflexive_supportMap]
+  infer_instance
+
+end CycleQ2EqualSupportRefinement
+
+#print axioms CycleQ2EqualSupportRefinement.supportMap_isIso_of_eq
+
+end
+
+noncomputable section
+
+/-!
+# A local logarithmic class in the actual relative de Rham complex
+
+On a framed overlap, the two-equation logarithmic form is closed in
+the ordinary exterior complex. The same form gives a closed section
+of the actual degree-two sheaf. The two genuine connecting maps then
+place its class in degree four with support in the closed complement
+of the union of the two chart opens.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2NativeLogSupportClass
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf)
+open CycleQ2FramedAffineSite (FramedOpen frame functions frame_apply exterior)
+open CycleQ2RelativeDeRhamSheaves (sheafForms differential relativeDeRham relativeDeRhamInt onBasisIso onBasisIso_d)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2FiniteExactAffineAtlas (HasFrame)
+open CycleQ2DoubleLogarithmicClass (twoLog closed)
+open CycleQ2DerivedDoubleSupport (ofClosedSection supportQuotient)
+open CycleQ2WeightedCoordinateExterior (Form exteriorD2)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open CycleQ2RelativeAffineOverlap (restrict)
+open CycleQ2WeightedCoordinateExterior (exactFrameDirection)
+
+variable {k : Type} [Field k] {X : Scheme.{0}}
+  (p : X ⟶ Spec (CommRingCat.of k)) [SmoothOfRelativeDimension 3 p]
+
+private abbrev A := AbSheaf (show TopCat from X)
+private abbrev K : CochainComplex (A (X := X)) ℤ := relativeDeRhamInt p
+
+local instance : HasDerivedCategory.{1} (A (X := X)) :=
+  HasDerivedCategory.standard _
+
+private def termIso (n : ℕ) : (K p).X (n : ℤ) ≅ sheafForms p n :=
+  (relativeDeRham p).extendXIso (ComplexShape.embeddingUpIntGE 0)
+    (show (ComplexShape.embeddingUpIntGE 0).f n = (n : ℤ) from Int.zero_add _)
+
+private theorem shiftDifferential :
+    ((K p)⟦(2:ℤ)⟧).d 0 1 = (termIso p 2).hom ≫ differential p 2 ≫ (termIso p 3).inv := by
+  rw [CochainComplex.shiftFunctor_obj_d',Int.negOnePow_even 2 ⟨1,rfl⟩,one_smul]
+  change (K p).d 2 3 = _
+  exact (relativeDeRham p).extend_d_eq (ComplexShape.embeddingUpIntGE 0) (Int.zero_add 2) (Int.zero_add 3)
+
+variable (B : FramedOpen p)
+
+abbrev OrdinaryTwo :=
+  letI : Algebra k Γ(X,B.1) := (sectionCoefficients p B.1).toAlgebra
+  Form k Γ(X,B.1) 2
+
+private def sectionTwo (ω : OrdinaryTwo p B) : (sheafForms p 2).obj.obj (op B.1) :=
+  (onBasisIso p 2).inv.app (op B) ω
+
+/-- The original two-form sits in the zero term after shifting by two. -/
+def shiftedSection (ω : OrdinaryTwo p B) : ((K p)⟦(2:ℤ)⟧).X 0 |>.obj.obj (op B.1) :=
+  (termIso p 2).inv.hom.app (op B.1) (sectionTwo p B ω)
+
+theorem shiftedSection_add (ω η : OrdinaryTwo p B) :
+    shiftedSection p B (ω + η) = shiftedSection p B ω + shiftedSection p B η := by
+  simp only [shiftedSection,sectionTwo,map_add]
+
+def ordinaryRestrict {B' : FramedOpen p} (h : B' ⟶ B) (ω : OrdinaryTwo p B) : OrdinaryTwo p B' := by
+  letI : Algebra k Γ(X,B.1) := (sectionCoefficients p B.1).toAlgebra
+  letI : Algebra k Γ(X,B'.1) := (sectionCoefficients p B'.1).toAlgebra
+  exact exteriorPullback (restrict p (show B'.1 ≤ B.1 from h.le)) 2 ω
+
+theorem shiftedSection_restrict {B' : FramedOpen p} (h : B' ⟶ B) (ω : OrdinaryTwo p B) :
+    (((K p)⟦(2:ℤ)⟧).X 0).obj.map (homOfLE (show B'.1 ≤ B.1 from h.le)).op
+      (shiftedSection p B ω) = shiftedSection p B' (ordinaryRestrict p B h ω) := by
+  let j : B'.1 ⟶ B.1 := homOfLE (show B'.1 ≤ B.1 from h.le)
+  have h₀ := NatTrans.naturality_apply (termIso p 2).inv.hom j.op (sectionTwo p B ω)
+  change (termIso p 2).inv.hom.app (op B'.1)
+    ((sheafForms p 2).obj.map j.op (sectionTwo p B ω)) = _ at h₀
+  have h₁ := NatTrans.naturality_apply (onBasisIso p 2).inv h.op ω
+  change sectionTwo p B' (ordinaryRestrict p B h ω) =
+    (sheafForms p 2).obj.map j.op (sectionTwo p B ω) at h₁
+  exact h₀.symm.trans (congrArg ((termIso p 2).inv.hom.app (op B'.1)) h₁.symm)
+
+abbrev ordinaryDerivative (ω : OrdinaryTwo p B) :=
+  letI : Algebra k Γ(X,B.1) := (sectionCoefficients p B.1).toAlgebra
+  exteriorD2 (frame p B) (exactFrameDirection (frame p B)) ω
+
+private theorem sectionTwo_closed (ω : OrdinaryTwo p B) (hw : ordinaryDerivative p B ω = 0) :
+    (differential p 2).hom.app (op B.1) (sectionTwo p B ω) = 0 := by
+  letI : Algebra k Γ(X,B.1) := (sectionCoefficients p B.1).toAlgebra
+  let e := (onBasisIso p 3).app (op B)
+  apply (ConcreteCategory.bijective_of_isIso e.hom).injective
+  rw [map_zero]
+  have h := ConcreteCategory.congr_hom (onBasisIso_d p 2 B) (sectionTwo p B ω)
+  change e.hom ((differential p 2).hom.app (op B.1) (sectionTwo p B ω)) =
+    (exterior p 2).app (op B) (((onBasisIso p 2).app (op B)).hom (sectionTwo p B ω)) at h
+  rw [h]
+  change (exterior p 2).app (op B) (((onBasisIso p 2).app (op B)).hom
+    (((onBasisIso p 2).app (op B)).inv ω)) = 0
+  rw [Iso.inv_hom_id_apply]
+  exact hw
+
+theorem shiftedSection_closed (ω : OrdinaryTwo p B) (hw : ordinaryDerivative p B ω = 0) :
+    (((K p)⟦(2:ℤ)⟧).d 0 1).hom.app (op B.1) (shiftedSection p B ω) = 0 := by
+  rw [shiftDifferential]
+  change (termIso p 3).inv.hom.app (op B.1) ((differential p 2).hom.app (op B.1)
+    ((termIso p 2).hom.hom.app (op B.1) ((termIso p 2).inv.hom.app (op B.1) (sectionTwo p B ω)))) = 0
+  have h := ConcreteCategory.congr_hom
+    (NatTrans.congr_app (congrArg (fun m => m.hom) (termIso p 2).inv_hom_id) (op B.1))
+    (sectionTwo p B ω)
+  change (termIso p 2).hom.hom.app (op B.1) ((termIso p 2).inv.hom.app (op B.1) (sectionTwo p B ω)) =
+    sectionTwo p B ω at h
+  rw [h,sectionTwo_closed p B ω hw,map_zero]
+
+def logForm (a b : Γ(X,B.1)ˣ) : OrdinaryTwo p B :=
+  letI : Algebra k Γ(X,B.1) := (sectionCoefficients p B.1).toAlgebra
+  twoLog (K := k) a b
+
+theorem logForm_closed (a b : Γ(X,B.1)ˣ) : ordinaryDerivative p B (logForm p B a b) = 0 := by
+  letI : Algebra k Γ(X,B.1) := (sectionCoefficients p B.1).toAlgebra
+  exact closed (frame p B) (functions p B) (frame_apply p B) a b
+
+variable (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+  (hW : IsAffineOpen S.X₁ ∧ HasFrame p 3 S.X₁)
+
+/-- The local closed overlap logarithm gives a degree-four class on
+the actual closed support. -/
+def logSupportedClass (a b : Γ(X,S.X₁)ˣ) :
+    (DerivedCategory.singleFunctor (A (X := X)) 0).obj (supportQuotient S.X₄) ⟶
+      (DerivedCategory.Q.obj (K p))⟦(4:ℤ)⟧ :=
+  ofClosedSection 2 S (shiftedSection p ⟨S.X₁,hW⟩ (logForm p ⟨S.X₁,hW⟩ a b))
+    (shiftedSection_closed p ⟨S.X₁,hW⟩ _ (logForm_closed p ⟨S.X₁,hW⟩ a b))
+
+end CycleQ2NativeLogSupportClass
+
+#print axioms CycleQ2NativeLogSupportClass.logSupportedClass
+
+end
+
+noncomputable section
+
+/-!
+# The logarithmic class of two actual equations
+
+The equations restrict to units on the double principal open.
+The source of the derived class is supported precisely where
+both original equations vanish. The common open for an elementary
+shear is computed in the actual scheme by its local rings.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2PrincipalLogSupportClass
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf)
+open CycleQ2DerivedDoubleSupport (supportQuotient support_stalk_zero)
+open CycleQ2FreeOpenStalk (St)
+open CycleQ2RelativeDeRhamSheaves (relativeDeRhamInt)
+open CycleQ2FiniteExactAffineAtlas (HasFrame)
+
+variable {X : Scheme.{0}} {U : X.Opens}
+
+def restrictionUnit (r : Γ(X,U)) {W : X.Opens} (h : W ≤ X.basicOpen r) : Γ(X,W)ˣ :=
+  ((X.toRingedSpace.isUnit_res_basicOpen r).map (X.presheaf.map (homOfLE h).op).hom).unit
+
+theorem restrictionUnit_val (r : Γ(X,U)) {W : X.Opens} (h : W ≤ X.basicOpen r) :
+    (restrictionUnit r h : Γ(X,W)) =
+      X.presheaf.map (homOfLE (h.trans (X.basicOpen_le r))).op r := by
+  rw [restrictionUnit, IsUnit.unit_spec]
+  change (X.presheaf.map (homOfLE h).op)
+    (X.presheaf.map (homOfLE (X.basicOpen_le r)).op r) = _
+  rw [← CommRingCat.comp_apply, ← Functor.map_comp]
+  exact congrArg (fun i => X.presheaf.map i r) (Subsingleton.elim _ _)
+
+theorem shear_refined_cover (f g a : Γ(X,U)) :
+    X.basicOpen f ⊔ (X.basicOpen g ⊓ X.basicOpen (g + a * f)) =
+      X.basicOpen f ⊔ X.basicOpen g := by
+  ext x
+  change (x ∈ X.basicOpen f ∨ (x ∈ X.basicOpen g ∧ x ∈ X.basicOpen (g + a * f))) ↔
+    (x ∈ X.basicOpen f ∨ x ∈ X.basicOpen g)
+  constructor
+  · rintro (hf | ⟨hg,_⟩)
+    · exact Or.inl hf
+    · exact Or.inr hg
+  · rintro (hf | hg)
+    · exact Or.inl hf
+    · by_cases hf : x ∈ X.basicOpen f
+      · exact Or.inl hf
+      · have hx : x ∈ U := X.basicOpen_le g hg
+        let e := X.presheaf.germ U x hx
+        have hF : ¬IsUnit (e f) := fun h => hf ((X.mem_basicOpen f x hx).mpr h)
+        have hP : ¬IsUnit (e a * e f) := fun h => hF (isUnit_of_mul_isUnit_right h)
+        have hN : ¬IsUnit (-(e a * e f)) := fun h => hP (by simpa only [neg_neg] using h.neg)
+        refine Or.inr ⟨hg,(X.mem_basicOpen (g+a*f) x hx).mpr ?_⟩
+        by_contra hbad
+        have h := IsLocalRing.nonunits_add hbad hN
+        have he : e (g + a*f) + -(e a * e f) = e g := by
+          change e.hom (g + a*f) + -(e.hom a * e.hom f) = e.hom g
+          simp only [map_add,map_mul,add_neg_cancel_right]
+        rw [he] at h
+        exact h ((X.mem_basicOpen g x hx).mp hg)
+
+theorem shear_refined_cover_new (f g a : Γ(X,U)) :
+    X.basicOpen f ⊔ (X.basicOpen g ⊓ X.basicOpen (g + a * f)) =
+      X.basicOpen f ⊔ X.basicOpen (g + a * f) := by
+  have he : (g + a * f) + (-a) * f = g := by ring
+  simpa only [he,inf_comm] using shear_refined_cover f (g+a*f) (-a)
+
+theorem support_eq_zeroLocus (f g : Γ(X,U)) :
+    (↑(X.basicOpen f ⊔ X.basicOpen g) : Set X)ᶜ = X.zeroLocus {f,g} := by
+  ext x
+  change (¬ (x ∈ X.basicOpen f ∨ x ∈ X.basicOpen g)) ↔
+    x ∈ X.zeroLocus ({f,g} : Set Γ(X,U))
+  rw [Scheme.mem_zeroLocus_iff]
+  constructor
+  · intro hn t ht
+    rcases (show t = f ∨ t = g from ht) with rfl | rfl
+    · exact fun h => hn (Or.inl h)
+    · exact fun h => hn (Or.inr h)
+  · intro h hx
+    rcases hx with hx | hx
+    · exact h f (Or.inl rfl) hx
+    · exact h g (Or.inr rfl) hx
+
+variable {k : Type} [Field k] (p : X ⟶ Spec (CommRingCat.of k)) [SmoothOfRelativeDimension 3 p]
+  (f g : Γ(X,⊤))
+
+private abbrev F := AbSheaf (show TopCat from X)
+local instance : HasDerivedCategory.{1} (F (X := X)) := HasDerivedCategory.standard _
+
+abbrev square := Opens.mayerVietorisSquare (X.basicOpen f) (X.basicOpen g)
+
+abbrev support := supportQuotient (square f g).X₄
+
+theorem stalk_zero_off (x : X) (hx : x ∉ X.zeroLocus ({f,g} : Set Γ(X,⊤))) :
+    IsZero ((St x).obj (support f g)) := by
+  rw [← support_eq_zeroLocus] at hx
+  change IsZero ((St x).obj (supportQuotient (X.basicOpen f ⊔ X.basicOpen g)))
+  by_cases h : x ∈ (X.basicOpen f ⊔ X.basicOpen g : X.Opens)
+  · exact support_stalk_zero _ x h
+  · exact (hx h).elim
+
+/-- The actual local class of the two original equations. -/
+def classOf (hW : IsAffineOpen (square f g).X₁ ∧ HasFrame p 3 (square f g).X₁) :
+    (DerivedCategory.singleFunctor (F (X := X)) 0).obj (support f g) ⟶
+      (DerivedCategory.Q.obj (relativeDeRhamInt p))⟦(4:ℤ)⟧ :=
+  CycleQ2NativeLogSupportClass.logSupportedClass p (square f g) hW
+    (restrictionUnit f inf_le_left) (restrictionUnit g inf_le_right)
+
+end CycleQ2PrincipalLogSupportClass
+
+#print axioms CycleQ2PrincipalLogSupportClass.stalk_zero_off
+#print axioms CycleQ2PrincipalLogSupportClass.classOf
+
+end
+
+noncomputable section
+
+/-!
+# Restricting the two ordinary logarithms
+
+The units are the restrictions of the original defining sections.
+On a smaller framed open, their two-form is taken to the literal
+logarithmic form of those same restricted units.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2PrincipalLogRestriction
+
+open CategoryTheory AlgebraicGeometry Opposite
+open CycleQ2PrincipalLogSupportClass (restrictionUnit restrictionUnit_val)
+open CycleQ2FramedAffineSite (FramedOpen)
+open CycleQ2NativeLogSupportClass (logForm ordinaryRestrict)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (restrict)
+open CycleQ2DoubleLogarithmicClass (pullback_twoLog)
+
+variable {X : Scheme.{0}} {U V W : X.Opens} (r : Γ(X,U)) (h : W ≤ X.basicOpen r) (j : V ≤ W)
+
+theorem unit_restrict :
+    Units.map (X.presheaf.map (homOfLE j).op).hom (restrictionUnit r h) =
+      restrictionUnit r (j.trans h) := by
+  apply Units.ext
+  change (X.presheaf.map (homOfLE j).op) (restrictionUnit r h : Γ(X,W)) =
+    (restrictionUnit r (j.trans h) : Γ(X,V))
+  rw [restrictionUnit_val,restrictionUnit_val]
+  change (X.presheaf.map (homOfLE j).op)
+    (X.presheaf.map (homOfLE (h.trans (X.basicOpen_le r))).op r) = _
+  rw [← CommRingCat.comp_apply,← Functor.map_comp]
+  exact congrArg (fun i => X.presheaf.map i r) (Subsingleton.elim _ _)
+
+variable {k : Type} [Field k] (p : X ⟶ Spec (CommRingCat.of k))
+  [SmoothOfRelativeDimension 3 p]
+
+theorem log_restrict {B C : FramedOpen p} (i : C ⟶ B) (f g : Γ(X,B.1)ˣ) :
+    ordinaryRestrict p B i (logForm p B f g) =
+      logForm p C (Units.map (X.presheaf.map (homOfLE (show C.1 ≤ B.1 from i.le)).op).hom f)
+        (Units.map (X.presheaf.map (homOfLE (show C.1 ≤ B.1 from i.le)).op).hom g) := by
+  letI : Algebra k Γ(X,B.1) := (sectionCoefficients p B.1).toAlgebra
+  letI : Algebra k Γ(X,C.1) := (sectionCoefficients p C.1).toAlgebra
+  exact pullback_twoLog (restrict p (show C.1 ≤ B.1 from i.le)) f g
+
+end CycleQ2PrincipalLogRestriction
+
+#print axioms CycleQ2PrincipalLogRestriction.unit_restrict
+#print axioms CycleQ2PrincipalLogRestriction.log_restrict
+
+end
+
+noncomputable section
+
+/-!
+# The closed correction on the actual common principal opens
+
+The two equation changes live on the same scheme opens. The
+correction lives on the intersection of the two second opens.
+Its ordinary restriction to the triple intersection is the
+difference of the two original logarithmic forms.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2NativeShearCorrection
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2FramedAffineSite (FramedOpen frame frame_apply functions)
+open CycleQ2FiniteExactAffineAtlas (HasFrame)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (restrict)
+open CycleQ2NativeLogSupportClass (OrdinaryTwo ordinaryDerivative ordinaryRestrict logForm)
+open CycleQ2PrincipalLogSupportClass (restrictionUnit restrictionUnit_val)
+open CycleQ2PrincipalLogRestriction (unit_restrict log_restrict)
+
+variable {k : Type} [Field k] {X : Scheme.{0}} (p : X ⟶ Spec (CommRingCat.of k))
+  [SmoothOfRelativeDimension 3 p] (f g a : Γ(X,⊤))
+
+abbrev changed := g + a*f
+abbrev left := X.basicOpen f
+abbrev right := X.basicOpen g
+abbrev newRight := X.basicOpen (changed f g a)
+abbrev commonRight := right g ⊓ newRight f g a
+abbrev commonOverlap := left f ⊓ commonRight f g a
+abbrev oldOverlap := left f ⊓ right g
+abbrev newOverlap := left f ⊓ newRight f g a
+
+abbrev allowed (U : X.Opens) := IsAffineOpen U ∧ HasFrame p 3 U
+
+variable (hOld : allowed p (oldOverlap f g)) (hNew : allowed p (newOverlap f g a))
+  (hRight : allowed p (commonRight f g a)) (hOverlap : allowed p (commonOverlap f g a))
+
+abbrev oldFrame : FramedOpen p := ⟨oldOverlap f g,hOld⟩
+abbrev newFrame : FramedOpen p := ⟨newOverlap f g a,hNew⟩
+abbrev rightFrame : FramedOpen p := ⟨commonRight f g a,hRight⟩
+abbrev overlapFrame : FramedOpen p := ⟨commonOverlap f g a,hOverlap⟩
+
+abbrev left_old : commonOverlap f g a ≤ oldOverlap f g := inf_le_inf le_rfl inf_le_left
+abbrev left_new : commonOverlap f g a ≤ newOverlap f g a := inf_le_inf le_rfl inf_le_right
+
+def oldLog : OrdinaryTwo p (oldFrame p f g hOld) :=
+  logForm p (oldFrame p f g hOld) (restrictionUnit f inf_le_left) (restrictionUnit g inf_le_right)
+
+def newLog : OrdinaryTwo p (newFrame p f g a hNew) :=
+  logForm p (newFrame p f g a hNew) (restrictionUnit f inf_le_left)
+    (restrictionUnit (changed f g a) inf_le_right)
+
+theorem exists_correction :
+    ∃ η : OrdinaryTwo p (rightFrame p f g a hRight),
+      ordinaryDerivative p (rightFrame p f g a hRight) η = 0 ∧
+      ordinaryRestrict p (rightFrame p f g a hRight) (B' := overlapFrame p f g a hOverlap)
+        (homOfLE (show commonOverlap f g a ≤ commonRight f g a from inf_le_right)) η =
+        ordinaryRestrict p (newFrame p f g a hNew) (B' := overlapFrame p f g a hOverlap)
+          (homOfLE (left_new f g a)) (newLog p f g a hNew) -
+        ordinaryRestrict p (oldFrame p f g hOld) (B' := overlapFrame p f g a hOverlap)
+          (homOfLE (left_old f g a)) (oldLog p f g hOld) := by
+  let C := commonRight f g a
+  let E := commonOverlap f g a
+  letI : Algebra k Γ(X,C) := (sectionCoefficients p C).toAlgebra
+  letI : Algebra k Γ(X,E) := (sectionCoefficients p E).toAlgebra
+  let φ := restrict p (show E ≤ C from inf_le_right)
+  let ρ := X.presheaf.map (homOfLE (show C ≤ ⊤ from le_top)).op
+  let fC := ρ f
+  let aC := ρ a
+  let gC : Γ(X,C)ˣ := restrictionUnit g inf_le_left
+  let hC : Γ(X,C)ˣ := restrictionUnit (changed f g a) inf_le_right
+  let fE : Γ(X,E)ˣ := restrictionUnit f inf_le_left
+  have hf : φ fC = ↑fE := by
+    change (X.presheaf.map (homOfLE (show E ≤ C from inf_le_right)).op) (ρ f) =
+      (restrictionUnit f (show E ≤ left f from inf_le_left) : Γ(X,E))
+    rw [restrictionUnit_val, ← CommRingCat.comp_apply, ← Functor.map_comp]
+    exact congrArg (fun i => X.presheaf.map i f) (Subsingleton.elim _ _)
+  have he : (hC : Γ(X,C)) = (gC : Γ(X,C)) + aC*fC := by
+    change (restrictionUnit (changed f g a) (show C ≤ newRight f g a from inf_le_right) : Γ(X,C)) =
+      (restrictionUnit g (show C ≤ right g from inf_le_left) : Γ(X,C)) + ρ a * ρ f
+    rw [restrictionUnit_val,restrictionUnit_val]
+    change ρ.hom (g+a*f) = ρ.hom g + ρ.hom a * ρ.hom f
+    rw [map_add,map_mul]
+  let B := rightFrame p f g a hRight
+  obtain ⟨η,hη,hφ⟩ := CycleQ2ClosedGeneratorWitness.exists_closed_correction φ
+    (frame p B) (functions p B) (frame_apply p B) fC aC gC hC fE hf he
+  refine ⟨η,hη,?_⟩
+  rw [newLog,oldLog,log_restrict,log_restrict,
+    unit_restrict,unit_restrict,unit_restrict,unit_restrict]
+  change _ = CycleQ2DoubleLogarithmicClass.twoLog (K := k) fE
+      (restrictionUnit (changed f g a) (show E ≤ newRight f g a from inf_le_right.trans inf_le_right)) -
+    CycleQ2DoubleLogarithmicClass.twoLog (K := k) fE
+      (restrictionUnit g (show E ≤ right g from inf_le_right.trans inf_le_left))
+  have hg := unit_restrict g (show C ≤ right g from inf_le_left) (show E ≤ C from inf_le_right)
+  have hh := unit_restrict (changed f g a) (show C ≤ newRight f g a from inf_le_right)
+    (show E ≤ C from inf_le_right)
+  rw [← hg,← hh]
+  exact hφ
+
+end CycleQ2NativeShearCorrection
+
+#print axioms CycleQ2NativeShearCorrection.exists_correction
+
+end
+
+noncomputable section
+
+/-!
+# The actual supported logarithmic class is invariant under a shear
+
+The two descriptions of the equations are pulled back to their
+common two-open cover. The closed correction on its second chart
+accounts for their difference. The two degree-four derived
+classes therefore agree under the original maps of support
+quotients.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+
+namespace CycleQ2PrincipalShearInvariant
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf)
+open CycleQ2NativeShearCorrection
+open CycleQ2NativeLogSupportClass (shiftedSection shiftedSection_restrict shiftedSection_closed
+  shiftedSection_add logForm_closed)
+open CycleQ2PrincipalLogSupportClass (classOf shear_refined_cover shear_refined_cover_new)
+open CycleQ2SupportedOpenRefinement (supportMap pullback_class restrict_closed)
+open CycleQ2SupportedChartBoundary (class_eq_of_second_restriction)
+open CycleQ2RelativeDeRhamSheaves (relativeDeRhamInt)
+
+variable {k : Type} [Field k] {X : Scheme.{0}} (p : X ⟶ Spec (CommRingCat.of k))
+  [SmoothOfRelativeDimension 3 p] (f g a : Γ(X,⊤))
+  (hOld : allowed p (oldOverlap f g)) (hNew : allowed p (newOverlap f g a))
+  (hRight : allowed p (commonRight f g a)) (hOverlap : allowed p (commonOverlap f g a))
+
+private abbrev A := AbSheaf (show TopCat from X)
+private abbrev K : CochainComplex (A (X := X)) ℤ := relativeDeRhamInt p
+local instance : HasDerivedCategory.{1} (A (X := X)) := HasDerivedCategory.standard _
+
+private abbrev E := DerivedCategory.singleFunctor (A (X := X)) 0
+private abbrev S := Opens.mayerVietorisSquare (left f) (commonRight f g a)
+
+private abbrev newSection := shiftedSection p (newFrame p f g a hNew) (newLog p f g a hNew)
+private abbrev oldSection := shiftedSection p (oldFrame p f g hOld) (oldLog p f g hOld)
+
+private theorem newClosed :
+    (((K p)⟦(2:ℤ)⟧).d 0 1).hom.app (op (newOverlap f g a)) (newSection p f g a hNew) = 0 :=
+  shiftedSection_closed p (newFrame p f g a hNew) _ (logForm_closed p (newFrame p f g a hNew) _ _)
+
+private theorem oldClosed :
+    (((K p)⟦(2:ℤ)⟧).d 0 1).hom.app (op (oldOverlap f g)) (oldSection p f g hOld) = 0 :=
+  shiftedSection_closed p (oldFrame p f g hOld) _ (logForm_closed p (oldFrame p f g hOld) _ _)
+
+private abbrev W := (((K p)⟦(2:ℤ)⟧).X 0).obj
+
+include hRight hOverlap in
+/-- Equality of the two genuine derived classes on the common cover.
+The common cover has the same union as each original cover. -/
+theorem shear_invariant :
+    (E (X := X)).map (supportMap (show left f ≤ left f from le_rfl)
+        (show commonRight f g a ≤ newRight f g a from inf_le_right)) ≫
+      classOf p f (changed f g a) hNew =
+    (E (X := X)).map (supportMap (show left f ≤ left f from le_rfl)
+        (show commonRight f g a ≤ right g from inf_le_left)) ≫ classOf p f g hOld := by
+  let U := left f
+  let V := right g
+  let V' := newRight f g a
+  let R := commonRight f g a
+  let hU : U ≤ U := le_rfl
+  let hV : R ≤ V := inf_le_left
+  let hV' : R ≤ V' := inf_le_right
+  let n := newSection p f g a hNew
+  let m := oldSection p f g hOld
+  have hn := newClosed p f g a hNew
+  have hm := oldClosed p f g hOld
+  have eNew := pullback_class (K := K p) 2 hU hV' n hn
+  have eOld := pullback_class (K := K p) 2 hU hV m hm
+  refine eNew.trans (Eq.trans ?_ eOld.symm)
+  obtain ⟨η,hη,hcorr⟩ := exists_correction p f g a hOld hNew hRight hOverlap
+  let w := shiftedSection p (rightFrame p f g a hRight) η
+  have hw := shiftedSection_closed p (rightFrame p f g a hRight) η hη
+  apply class_eq_of_second_restriction (K := K p) 2 (S f g a)
+    _ _ _ _ w hw
+  change (W p).map (homOfLE (left_new f g a)).op n =
+    (W p).map (homOfLE (left_old f g a)).op m +
+      (W p).map (homOfLE (show commonOverlap f g a ≤ R from inf_le_right)).op w
+  dsimp only [n,m,w,W,newSection,oldSection]
+  rw [shiftedSection_restrict p (newFrame p f g a hNew)
+        (B' := overlapFrame p f g a hOverlap) (homOfLE (left_new f g a)),
+      shiftedSection_restrict p (oldFrame p f g hOld)
+        (B' := overlapFrame p f g a hOverlap) (homOfLE (left_old f g a)),
+      shiftedSection_restrict p (rightFrame p f g a hRight)
+        (B' := overlapFrame p f g a hOverlap)
+          (homOfLE (show commonOverlap f g a ≤ commonRight f g a from inf_le_right)),
+      ← shiftedSection_add]
+  apply congrArg (shiftedSection p (overlapFrame p f g a hOverlap))
+  rw [hcorr]
+  abel
+
+end CycleQ2PrincipalShearInvariant
+
+#print axioms CycleQ2PrincipalShearInvariant.shear_invariant
 
 end

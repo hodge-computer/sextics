@@ -281,6 +281,43 @@ and is compatible with addition and postcomposition. This supplies
 the passage from Čech cocycles to the genuine derived category.
 [Derived Čech resolution](GeometricMonicGenericSupport.lean)
 
+## The coefficient-linear curve trace on the tensor complex
+
+The native two-chart curve complex has an explicit map to the
+coefficient field in total degree two. It annihilates both the
+alternating restrictions of regular one-forms and the derivative of
+functions on the overlap. The trace is linear over the generic
+coefficient field. Tensoring with a second cochain complex gives a
+chain map lowering total degree by two. Its only contributing
+bidegree has curve degree two, where it applies the actual overlap
+trace to the curve factor.
+
+For the tensor product of two affine coordinate algebras, the actual
+relative cotangent module splits into the scalar extensions of the two
+cotangent modules. On a pure tensor of functions the derivation has
+the corresponding two Leibniz terms. Comparison of the resulting
+total complex with the de Rham complex on the proper graph remains open.
+
+## Supported degree-four logarithmic classes on principal opens
+
+The logarithmic two-form on the framed intersection of two principal
+opens is closed in the actual relative de Rham sheaf. The two
+Mayer–Vietoris connecting morphisms give a class in degree four with
+support on the common zero locus of the two original equations. The
+support quotient has zero stalk away from that locus. Both connecting
+morphisms are natural under open refinement. A difference of closed
+overlap forms that extends to a closed form on the second open
+contributes zero to the supported class.
+
+Replacing the second generator by its sum with a multiple of the
+first preserves the union of the two opens. On the common refinement,
+the two logarithmic forms differ by the restriction of a closed form
+on the refined second open. The resulting supported classes agree
+under the canonical refinements. This supplies the local shear
+comparison. The global class on the strict sweep and the comparison
+with the marked pairing remain open.
+[Local supported classes and tensor trace](GeometricMonicGenericSupport.lean)
+
 ## Finite curve trace on the actual degree-two de Rham group
 
 A finite dominant projection from an integral curve to the projective
