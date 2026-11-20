@@ -15842,7 +15842,7 @@ equality proofs.
 | SolutionSupport | 8 | 30 | 3,240 |
 
 Three complete proof blocks intentionally exceed 2,000 lines:
-[Assembly01Part02.lean](Assembly01Part02.lean),
+[Assembly01Part02.lean](https://github.com/fqlx/sextics/blob/a8b2182123e3d25d7865058aaa08bc84420ebfb8/data/cycle-q2/Assembly01Part02.lean),
 [GeometricFormalInputs01Part02.lean](GeometricFormalInputs01Part02.lean), and
 [SolutionSupport04Part01.lean](SolutionSupport04Part01.lean).
 The first and third retain tightly coupled private helper proofs; the second
@@ -18612,7 +18612,34 @@ The denominator, normal-gauge, tangent and ambient-lift developments remain
 available at the same immutable checkpoint. No claim about the unresolved
 current correction changes in this refactor.
 
-## Source layout
+## Assembly and modular data
+
+The conditional certificate assembly and the modular right inverse for curve
+restriction are separate modules. Incidence polynomial specialization, seed
+Čech data and residual linkage follow in dependency order.
+[Certificate assembly](NormalizedCertificateAssembly.lean) ·
+[Curve restriction](CurveRestrictionRightInverse.lean) ·
+[Incidence specialization](IncidencePolynomialNaturality.lean) ·
+[Seed Čech data](SeedCechThetaData.lean) ·
+[Residual linkage](SeedResidualLinkage.lean)
+
+Each Gaussian action file contains a complete block row. The modular binding
+and the finite checks connect these coefficients with the incidence model.
+The flattened action retains the sparse coefficient lists and their exact
+equalities with the towers.
+[Gaussian action](SegreGaussianActionFirstRow.lean) ·
+[Modular binding](SegreModularBinding.lean) ·
+[Finite action checks](SegreGaussianActionVerification.lean) ·
+[Flattened action](SegreFlatActionFirstRow.lean)
+
+The cubic pairing and its right inverse have a dedicated module. The
+modular basepoint has its own source, and the three rows of cubic coefficients
+follow as complete units.
+[Cubic pairing](SegreCubicPairing.lean) ·
+[Modular basepoint](SegreModularBasepoint.lean) ·
+[Modular cubic data](SegreModularCubicFirstRow.lean)
+
+## Historical source layout
 
 The five formerly large files retain their names as compatibility modules
 or the final entry point. Their declarations now live in numbered helper
@@ -18624,8 +18651,8 @@ and the first helper in a group imports the original prerequisite modules.
 | --- | --- | ---: | --- |
 | [GeometricFormalInputs04.lean](GeometricFormalInputs04.lean) | `GeometricFormalInputs01`–`04` (4) | 4,758 | Affine residue/certificate bridge, foundational inputs, pole reduction, and exterior differentials. |
 | [GeometricTarget11Part04.lean](GeometricTarget11Part04.lean) | `GeometricTarget01`–`11` (11) | 4,795 | Target actions, finite descent, incidence and seed calculations, projectors, and finite top de Rham constructions. |
-| [Assembly10Part02.lean](Assembly10Part02.lean) | `Assembly01`–`10` (10) | 4,757 | Conditional assembly, restriction calculations, actual Gaussian-action data, and Cech components. |
-| [Normalization09Part02.lean](Normalization09Part02.lean) | `Normalization01`–`09` (9) | 4,621 | Radial normalization and the remaining modular-action and cubic literal data. |
+| [Assembly10Part02.lean](https://github.com/fqlx/sextics/blob/a8b2182123e3d25d7865058aaa08bc84420ebfb8/data/cycle-q2/Assembly10Part02.lean) | `Assembly01`–`10` (10) | 4,757 | Conditional assembly, restriction calculations, actual Gaussian-action data, and Cech components. |
+| [Normalization09Part02.lean](https://github.com/fqlx/sextics/blob/a8b2182123e3d25d7865058aaa08bc84420ebfb8/data/cycle-q2/Normalization09Part02.lean) | `Normalization01`–`09` (9) | 4,621 | Radial normalization and the remaining modular-action and cubic literal data. |
 | [Solution.lean](Solution.lean) | `SolutionSupport01`–`09` (9) | 4,786 | Normal and conormal classes, residue and surface comparisons, character components, and orbit trace; the final obligation remains in `Solution.lean`. |
 
 The large basepoint, Gaussian-action, and cubic-data components are split

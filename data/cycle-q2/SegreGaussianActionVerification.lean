@@ -1,11 +1,116 @@
-import Proposal.Workspace
-import Proposal.GeometricTarget11Part04
-import Proposal.Assembly07Part04
-import Proposal.Assembly08Part01
+import Proposal.SeedCechCoefficientSpecialization
 
-/-! Source partition of Assembly08.lean; declarations and proofs are preserved. -/
+/-!
+# Checking the Segre action
+
+Finite checks on all nine blocks and their standard-polynomial consequences.
+-/
 
 set_option Elab.async false
+
+/- Component: continuation_3/SegreGaussianActionChecks00.lean -/
+section
+set_option maxHeartbeats 0
+set_option maxRecDepth 100000
+set_option Elab.async false
+namespace CycleQ2SegreGaussianActionData
+open CycleQ2SparseGaussianPolynomial CycleQ2SegreGaussianTangentData
+def actionError00 (a b : ℕ) : Towers :=
+  addTowers (normalizeTower a0 a1 b0 32 (mulTowers m00 (monomialTower oneLayers a b)))
+    (negTowers (action00 a b))
+private theorem checked_00_0_0 : checkTowers (actionError00 0 0) = true := by
+  decide +kernel
+
+private theorem checked_00_0_1 : checkTowers (actionError00 0 1) = true := by
+  decide +kernel
+
+private theorem checked_00_0_2 : checkTowers (actionError00 0 2) = true := by
+  decide +kernel
+
+private theorem checked_00_1_0 : checkTowers (actionError00 1 0) = true := by
+  decide +kernel
+
+private theorem checked_00_1_1 : checkTowers (actionError00 1 1) = true := by
+  decide +kernel
+
+private theorem checked_00_1_2 : checkTowers (actionError00 1 2) = true := by
+  decide +kernel
+
+private theorem checked_00_2_0 : checkTowers (actionError00 2 0) = true := by
+  decide +kernel
+
+private theorem checked_00_2_1 : checkTowers (actionError00 2 1) = true := by
+  decide +kernel
+
+private theorem checked_00_2_2 : checkTowers (actionError00 2 2) = true := by
+  decide +kernel
+
+theorem action_check00 (a b : Fin 3) : checkTowers (actionError00 a b) = true := by
+  fin_cases a <;> fin_cases b
+  · exact checked_00_0_0
+  · exact checked_00_0_1
+  · exact checked_00_0_2
+  · exact checked_00_1_0
+  · exact checked_00_1_1
+  · exact checked_00_1_2
+  · exact checked_00_2_0
+  · exact checked_00_2_1
+  · exact checked_00_2_2
+end CycleQ2SegreGaussianActionData
+#print axioms CycleQ2SegreGaussianActionData.action_check00
+end
+
+/- Component: continuation_3/SegreGaussianActionChecks01.lean -/
+section
+set_option maxHeartbeats 0
+set_option maxRecDepth 100000
+set_option Elab.async false
+namespace CycleQ2SegreGaussianActionData
+open CycleQ2SparseGaussianPolynomial CycleQ2SegreGaussianTangentData
+def actionError01 (a b : ℕ) : Towers :=
+  addTowers (normalizeTower a0 a1 b0 32 (mulTowers m01 (monomialTower oneLayers a b)))
+    (negTowers (action01 a b))
+private theorem checked_01_0_0 : checkTowers (actionError01 0 0) = true := by
+  decide +kernel
+
+private theorem checked_01_0_1 : checkTowers (actionError01 0 1) = true := by
+  decide +kernel
+
+private theorem checked_01_0_2 : checkTowers (actionError01 0 2) = true := by
+  decide +kernel
+
+private theorem checked_01_1_0 : checkTowers (actionError01 1 0) = true := by
+  decide +kernel
+
+private theorem checked_01_1_1 : checkTowers (actionError01 1 1) = true := by
+  decide +kernel
+
+private theorem checked_01_1_2 : checkTowers (actionError01 1 2) = true := by
+  decide +kernel
+
+private theorem checked_01_2_0 : checkTowers (actionError01 2 0) = true := by
+  decide +kernel
+
+private theorem checked_01_2_1 : checkTowers (actionError01 2 1) = true := by
+  decide +kernel
+
+private theorem checked_01_2_2 : checkTowers (actionError01 2 2) = true := by
+  decide +kernel
+
+theorem action_check01 (a b : Fin 3) : checkTowers (actionError01 a b) = true := by
+  fin_cases a <;> fin_cases b
+  · exact checked_01_0_0
+  · exact checked_01_0_1
+  · exact checked_01_0_2
+  · exact checked_01_1_0
+  · exact checked_01_1_1
+  · exact checked_01_1_2
+  · exact checked_01_2_0
+  · exact checked_01_2_1
+  · exact checked_01_2_2
+end CycleQ2SegreGaussianActionData
+#print axioms CycleQ2SegreGaussianActionData.action_check01
+end
 
 /- Component: continuation_3/SegreGaussianActionChecks02.lean -/
 section
@@ -59,7 +164,6 @@ end CycleQ2SegreGaussianActionData
 #print axioms CycleQ2SegreGaussianActionData.action_check02
 end
 
-
 /- Component: continuation_3/SegreGaussianActionChecks10.lean -/
 section
 set_option maxHeartbeats 0
@@ -111,7 +215,6 @@ theorem action_check10 (a b : Fin 3) : checkTowers (actionError10 a b) = true :=
 end CycleQ2SegreGaussianActionData
 #print axioms CycleQ2SegreGaussianActionData.action_check10
 end
-
 
 /- Component: continuation_3/SegreGaussianActionChecks11.lean -/
 section
@@ -165,7 +268,6 @@ end CycleQ2SegreGaussianActionData
 #print axioms CycleQ2SegreGaussianActionData.action_check11
 end
 
-
 /- Component: continuation_3/SegreGaussianActionChecks12.lean -/
 section
 set_option maxHeartbeats 0
@@ -217,7 +319,6 @@ theorem action_check12 (a b : Fin 3) : checkTowers (actionError12 a b) = true :=
 end CycleQ2SegreGaussianActionData
 #print axioms CycleQ2SegreGaussianActionData.action_check12
 end
-
 
 /- Component: continuation_3/SegreGaussianActionChecks20.lean -/
 section
@@ -271,7 +372,6 @@ end CycleQ2SegreGaussianActionData
 #print axioms CycleQ2SegreGaussianActionData.action_check20
 end
 
-
 /- Component: continuation_3/SegreGaussianActionChecks21.lean -/
 section
 set_option maxHeartbeats 0
@@ -323,7 +423,6 @@ theorem action_check21 (a b : Fin 3) : checkTowers (actionError21 a b) = true :=
 end CycleQ2SegreGaussianActionData
 #print axioms CycleQ2SegreGaussianActionData.action_check21
 end
-
 
 /- Component: continuation_3/SegreGaussianActionStandard.lean -/
 section
@@ -379,5 +478,3 @@ end CycleQ2SegreGaussianActionData
 #print axioms CycleQ2SegreGaussianActionData.action00_standard
 #print axioms CycleQ2SegreGaussianActionData.action22_standard
 end
-
-

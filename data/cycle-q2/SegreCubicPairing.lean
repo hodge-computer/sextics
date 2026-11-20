@@ -1,11 +1,83 @@
-import Proposal.Workspace
-import Proposal.GeometricTarget11Part04
-import Proposal.Assembly06Part03
-import Proposal.Assembly07Part03
+import Proposal.SegreGaussianActionThirdRow
 
-/-! Source partition of Assembly07.lean; declarations and proofs are preserved. -/
+/-!
+# The Segre cubic pairing
+
+The cubic monomials, right inverse and trace normalization for the pairing.
+-/
 
 set_option Elab.async false
+
+/- Component: continuation_3/SegreModularCubicMonomials.lean -/
+section
+namespace CycleQ2SegreModularCubicData
+open CycleQ2SparseGaussianPolynomial
+
+def monomialCubic0 : Towers :=
+[
+  [],
+  [[[((0,0,0,1,0),⟨1,0⟩)]]]
+]
+
+def monomialCubic1 : Towers :=
+[
+  [[[((0,0,0,3,0),⟨1,0⟩)]]]
+]
+
+def monomialCubic2 : Towers :=
+[
+  [[[((0,0,3,0,0),⟨1,0⟩)]]]
+]
+
+def monomialCubic3 : Towers :=
+[
+  [[[],
+    [((0,0,1,1,0),⟨1,0⟩)]]]
+]
+
+def monomialCubic4 : Towers :=
+[
+  [[[],
+    [],
+    [],
+    [((0,0,0,0,0),⟨1,0⟩)]]]
+]
+
+def monomialCubic5 : Towers :=
+[
+  [[],
+   [[((0,0,1,1,0),⟨1,0⟩)]]]
+]
+
+def monomialCubic6 : Towers :=
+[
+  [[],
+   [[],
+    [],
+    [((0,0,0,0,0),⟨1,0⟩)]]]
+]
+
+def monomialCubic7 : Towers :=
+[
+  [[],
+   [],
+   [[],
+    [((0,0,0,0,0),⟨1,0⟩)]]]
+]
+
+def monomialCubic8 : Towers :=
+[
+  [[],
+   [],
+   [],
+   [[((0,0,0,0,0),⟨1,0⟩)]]]
+]
+
+def monomialCubic : Fin 9 → Towers := ![monomialCubic0, monomialCubic1, monomialCubic2, monomialCubic3, monomialCubic4, monomialCubic5, monomialCubic6, monomialCubic7, monomialCubic8]
+
+def literalQ : Fin 3 → Towers := ![CycleQ2SegreGaussianTangentData.q00, CycleQ2SegreGaussianTangentData.q01, CycleQ2SegreGaussianTangentData.q02]
+end CycleQ2SegreModularCubicData
+end
 
 /- Component: continuation_3/SegreModularCubicRightInverse.lean -/
 section
@@ -47,5 +119,3 @@ end CycleQ2SegreModularDetectorCertificate
 #print axioms CycleQ2SegreModularDetectorCertificate.pairing_kernelCubic
 #print axioms CycleQ2SegreModularDetectorCertificate.kernelCubic_trace
 end
-
-

@@ -19,7 +19,7 @@ import HodgeTarget
 import Proposal.GeometricTarget11Part04
 import Proposal.GeometricSeed
 import Proposal.GeometricFormalInputs04
-import Proposal.Normalization09Part02
+import Proposal.SegreModularCubicThirdRow
 import Proposal.SolutionSupport02Part03
 
 /-! Components extracted from SolutionSupport03.lean, in their original order.

@@ -21,7 +21,7 @@ import Proposal.GeometricTarget11Part04
 import Proposal.GeometricSeed
 import Proposal.GeometricRankRetraction
 import Proposal.GeometricFormalInputs04
-import Proposal.Normalization09Part02
+import Proposal.SegreModularCubicThirdRow
 
 /-! Components extracted from SolutionSupport01.lean, in their original order.
 See solution.md for the mathematical and verification status. -/

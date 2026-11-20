@@ -1,7 +1,11 @@
 import Proposal.Workspace
 import Proposal.GeometricTarget11Part04
 
-/-! Source partition of Assembly01.lean; declarations and proofs are preserved. -/
+/-!
+# Assembling a certificate from normalized data
+
+The normalized rational solution supplies the correction identity and the certificate.
+-/
 
 set_option Elab.async false
 
@@ -88,4 +92,3 @@ end CycleQ2Assembly
 
 end
 end
-

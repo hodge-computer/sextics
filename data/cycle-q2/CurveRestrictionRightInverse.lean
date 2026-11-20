@@ -1,8 +1,10 @@
-import Proposal.Workspace
-import Proposal.GeometricTarget11Part04
-import Proposal.Assembly01Part01
+import Proposal.NormalizedCertificateAssembly
 
-/-! Source partition of Assembly01.lean; declarations and proofs are preserved. -/
+/-!
+# Right inverse for the curve restriction
+
+The modular checks prove that the chosen restriction minor is invertible.
+-/
 
 set_option Elab.async false
 
@@ -2542,5 +2544,3 @@ end CycleQ2CurveRestrictionModularChecks
 
 #print axioms CycleQ2CurveRestrictionModularChecks.right_minor_det_ne_zero
 end
-
-
