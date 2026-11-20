@@ -84,29 +84,20 @@ private theorem coord_restrict {V W : Over U} (a : V ⟶ W) (k : Set.powersetCar
       X.presheaf.map a.left.op ((wedgeBasis e f h b n W).coord k ω) := by
   classical
   let B := wedgeBasis e f h b n W
-  have hw : ω ∈ Submodule.span Γ(X,W.left) (Set.range B) := by
-    rw [B.span_eq]
-    trivial
-  induction hw using Submodule.span_induction with
-  | mem z hz =>
-    obtain ⟨j, rfl⟩ := hz
-    change (wedgeBasis e f h b n V).coord k (wedgeRestriction f n a (B j)) =
-      X.presheaf.map a.left.op (B.coord k (B j))
+  let ρ := (X.presheaf.map a.left.op).hom
+  let u := wedgeRestriction f n a
+  let v := (wedgeBasis e f h b n V).coord k
+  have hcoord : v.comp u = ρ.toSemilinearMap.comp (B.coord k) := by
+    apply B.ext
+    intro j
+    change (wedgeBasis e f h b n V).coord k (wedgeRestriction f n a (B j)) = ρ (B.coord k (B j))
     rw [show wedgeRestriction f n a (B j) = wedgeBasis e f h b n V j from
       wedgeBasis_restrict e f h b n a j]
     by_cases hj : j = k
     · subst j
-      simp only [Basis.coord_apply, Basis.repr_self_apply, if_true]
-      exact ((X.presheaf.map a.left.op).hom.map_one).symm
+      simp only [Basis.coord_apply, Basis.repr_self_apply, if_true, map_one]
     · simp only [Basis.coord_apply, Basis.repr_self_apply, if_neg hj, map_zero]
-  | zero => simp only [map_zero]
-  | add x y _ _ hx hy =>
-    erw [map_add, map_add, hx, hy]
-    let ρ := (X.presheaf.map a.left.op).hom
-    let c := (wedgeBasis e f h b n W).coord k
-    exact ((ρ.map_add (c x) (c y)).symm).trans (congrArg ρ (c.map_add x y).symm)
-  | smul c x _ hx =>
-    erw [map_smulₛₗ, map_smul, map_smul, smul_eq_mul, map_mul, hx]
+  exact LinearMap.congr_fun hcoord ω
 
 private def rawCoordinate (k : Set.powersetCard (Fin d) n) :
     overPresheaf (ringSheaf X.sheaf) (P f n) U ⟶ (UnitOn (X := X) (U := U)).val where
@@ -500,8 +491,11 @@ private theorem local_second {A : Type} [CommRing A] [Algebra ℂ A]
   have hDiff := differential_represents hA ω
     (RingOn V.carrier) φ (nativeFrame V) (coordinates V) (nativeFrame_apply V)
   have hR := evaluate_eq_ordinary φ 3 (CycleQ2LiteralThreefoldExteriorDescent.differential hA ω)
-  exact hL.trans (hApp.trans (hD.trans
-    ((congrArg (realizeOrdinary V.carrier 3) hDiff.symm).trans hR.symm)))
+  refine hL.trans ?_
+  refine hApp.trans ?_
+  refine hD.trans ?_
+  refine Eq.trans ?_ hR.symm
+  exact congrArg (realizeOrdinary V.carrier 3) hDiff.symm
 
 private abbrev pairOpen (i : Fin 4) (k : Fin 3) := fixedOpen i ⊓ fixedOpen (i.succAbove k)
 

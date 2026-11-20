@@ -279,6 +279,7 @@ abbrev Cohomology := HThree fixedOpen functionDifferential differential secondDi
 /-- The fixed test in total degree three, with the lower cochains allowed. -/
 def testClass : Cohomology := QuotientAddGroup.mk ⟨test, test_closed⟩
 
+set_option maxHeartbeats 1200000 in
 private theorem faceAt_add {Y : TopCat.{0}} (F : AbSheaf Y) (U : Fin 4 → Opens Y)
     (a b : CycleQ2CechTwoToDerived.Two F U)
     (i j k : Fin 4) (W : Opens Y) (hi : W ≤ U i) (hj : W ≤ U j) (hk : W ≤ U k) :
