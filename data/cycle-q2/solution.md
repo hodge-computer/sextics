@@ -424,6 +424,15 @@ to the surface gives \(\omega|_S\). This computes the local projection
 for the chart that represents the given supported class.
 [Local double-residue formula](GeometricLocalGysinProjection.lean)
 
+On the marked dual-number chart, take the common incidence logarithmic form
+and wedge it with \(dH_{\mathrm{seed}}\wedge\beta\), where \(\beta\) is any
+regular one-form. Multiplying by the cubic and the row clears both poles.
+On the seed curve, the coefficient of the resulting fourfold wedge is the
+velocity of the fixed cubic along any lift of the marked tangent with
+\(d\epsilon/dt=1\). This identifies the first-order coefficient of the
+actual incidence form before taking a projective Čech class.
+[Marked residue numerator](GeometricMarkedGysinNumerator.lean)
+
 On the dense marked time open, the ideal of the proper graph closure
 restricts to the ideal of the original joint incidence family. After
 pullback to an affine time test and localization at a projective pivot,
