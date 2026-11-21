@@ -167,12 +167,15 @@ private theorem relative_finiteType (V : parameterScheme.Opens) (t : Fin 3 → �
 
 /-- The same independent original section has a seed detector in every open
 parameter neighborhood of the marked point. -/
-theorem exists_quasiFiniteAt_seed_and_relative :
-    ∃ t : Fin 3 → ℂ, AlgebraicIndependent ℚ t ∧ ∀ (V : parameterScheme.Opens),
-      seedBasePoint ∈ V → ∃ x : family V t, (q V t).QuasiFiniteAt x ∧ (relativeQ toRaw V t).QuasiFiniteAt
-        (fixedToSurface toRaw V t seedPoint seedPoint_toRaw x) := by
-  obtain ⟨t,j,_,_,hi,⟨z⟩,_⟩ := exists_nonempty_embedded_thick_chart
-  refine ⟨t,hi,?_⟩
+private theorem exists_quasiFiniteAt_marked_seed_and_relative :
+    ∃ t : Fin 3 → ℂ, AlgebraicIndependent ℚ t ∧ HasTracedSeedCurve t ∧ ∀ (V : parameterScheme.Opens),
+      ∀ hV : seedBasePoint ∈ V, ∃ x : family V t, (q V t).QuasiFiniteAt x ∧ (relativeQ toRaw V t).QuasiFiniteAt
+        (fixedToSurface toRaw V t seedPoint seedPoint_toRaw x) ∧
+      (curveMap toRaw V t) (fixedToSurface toRaw V t seedPoint seedPoint_toRaw x) =
+        (seedLift V hV ≫ fixedToTime toRaw V seedPoint seedPoint_toRaw)
+          (default : Spec (CommRingCat.of ℂ)) := by
+  obtain ⟨t,j,_,_,hi,htrace,⟨z⟩,_⟩ := exists_traced_embedded_thick_chart
+  refine ⟨t,hi,htrace,?_⟩
   intro V hV
   have himm := actual_thick_immersion t j.succ V hV
   let i := chartOpen t j.succ ≫ thickChart V t hV j.succ
@@ -181,10 +184,57 @@ theorem exists_quasiFiniteAt_seed_and_relative :
   have : LocallyOfFiniteType (q V t) := MorphismProperty.of_isPullback (seed_square V t).flip inferInstance
   have hq : (q V t).QuasiFiniteAt (i z) := quasiFiniteAt_of_chart i _ z ((i ≫ q V t).stalkMap_surjective z)
     (marked_chart_kernel_le_square V hV t j.succ z)
-  exact ⟨i z,hq,(seed_quasiFiniteAt_iff V t _).mp hq⟩
+  refine ⟨i z, hq, (seed_quasiFiniteAt_iff V t _).mp hq, ?_⟩
+  change (fixedToSurface toRaw V t seedPoint seedPoint_toRaw ≫ curveMap toRaw V t) (i z) = _
+  rw [fixedToSurface_fst]
+  change fixedToTime toRaw V seedPoint seedPoint_toRaw
+    ((thickChart V t hV j.succ ≫ projection V t) (chartOpen t j.succ z)) = _
+  rw [thickChart_toBase]
+  have hmark (y : Spec (CommRingCat.of (DualNumber ℂ))) :
+      relativeTangent toRaw V seedPoint seedPoint_toRaw hV y =
+        (seedLift V hV ≫ fixedToTime toRaw V seedPoint seedPoint_toRaw)
+          (default : Spec (CommRingCat.of ℂ)) := by
+    rw [CycleQ2FirstOrderNeighborhood.firstOrderPoint_eq_closedPoint y]
+    change (CycleQ2IncidenceFirstOrder.firstOrderClosedPoint ≫
+      relativeTangent toRaw V seedPoint seedPoint_toRaw hV) _ = _
+    rw [tangent_seed]
+  exact hmark _
+
+theorem exists_quasiFiniteAt_seed_and_relative :
+    ∃ t : Fin 3 → ℂ, AlgebraicIndependent ℚ t ∧ ∀ (V : parameterScheme.Opens),
+      seedBasePoint ∈ V → ∃ x : family V t, (q V t).QuasiFiniteAt x ∧ (relativeQ toRaw V t).QuasiFiniteAt
+        (fixedToSurface toRaw V t seedPoint seedPoint_toRaw x) := by
+  obtain ⟨t, ht, _, h⟩ := exists_quasiFiniteAt_marked_seed_and_relative
+  refine ⟨t, ht, fun V hV => ?_⟩
+  obtain ⟨x, hx, hx', _⟩ := h V hV
+  exact ⟨x, hx, hx'⟩
 
 /-- Every time test in the selected nonempty open has a point in the original
 relative quasi-finite locus above every one of its own points. -/
+theorem exists_marked_time_open_meeting_quasiFinite :
+    ∃ (t : Fin 3 → ℂ), AlgebraicIndependent ℚ t ∧ HasTracedSeedCurve t ∧ ∀ (V : parameterScheme.Opens),
+      ∀ hV : seedBasePoint ∈ V, Smooth (curveMap toRaw V t) →
+      ∃ W : (Time toRaw V).Opens, (seedLift V hV ≫ fixedToTime toRaw V seedPoint seedPoint_toRaw)
+        (default : Spec (CommRingCat.of ℂ)) ∈ W ∧
+        ∀ {D : Scheme} (a : D ⟶ Time toRaw V), Set.range a ⊆ (W : Set (Time toRaw V)) →
+        ∀ d : D, ∃ z : (pullback a (curveMap toRaw V t) : Scheme),
+          (pullback.fst a (curveMap toRaw V t)) z = d ∧
+          (relativeQ toRaw V t).QuasiFiniteAt ((pullback.snd a (curveMap toRaw V t)) z) := by
+  obtain ⟨t,hi,htrace,ht⟩ := exists_quasiFiniteAt_marked_seed_and_relative
+  refine ⟨t,hi,htrace,?_⟩
+  intro V hV hcurve
+  obtain ⟨x,_,hx, hxseed⟩ := ht V hV
+  let s := curveMap toRaw V t
+  let q := relativeQ toRaw V t
+  have : LocallyOfFiniteType q := relative_finiteType V t
+  let L := q.quasiFiniteLocus
+  let W : (Time toRaw V).Opens := ⟨s '' (L : Set _), s.isOpenMap _ L.isOpen⟩
+  refine ⟨W, ⟨_, hx, hxseed⟩, ?_⟩
+  intro D a ha d
+  obtain ⟨y,hy,hy'⟩ := ha ⟨d,rfl⟩
+  obtain ⟨z,hz,hz'⟩ := Scheme.Pullback.exists_preimage_pullback (f := a) (g := s) d y hy'.symm
+  exact ⟨z,hz,hz' ▸ hy⟩
+
 theorem exists_time_open_meeting_quasiFinite :
     ∃ (t : Fin 3 → ℂ), AlgebraicIndependent ℚ t ∧ ∀ (V : parameterScheme.Opens),
       seedBasePoint ∈ V → Smooth (curveMap toRaw V t) →
@@ -193,20 +243,10 @@ theorem exists_time_open_meeting_quasiFinite :
         ∀ d : D, ∃ z : (pullback a (curveMap toRaw V t) : Scheme),
           (pullback.fst a (curveMap toRaw V t)) z = d ∧
           (relativeQ toRaw V t).QuasiFiniteAt ((pullback.snd a (curveMap toRaw V t)) z) := by
-  obtain ⟨t,hi,ht⟩ := exists_quasiFiniteAt_seed_and_relative
-  refine ⟨t,hi,?_⟩
-  intro V hV hcurve
-  obtain ⟨x,_,hx⟩ := ht V hV
-  let s := curveMap toRaw V t
-  let q := relativeQ toRaw V t
-  have : LocallyOfFiniteType q := relative_finiteType V t
-  let L := q.quasiFiniteLocus
-  let W : (Time toRaw V).Opens := ⟨s '' (L : Set _), s.isOpenMap _ L.isOpen⟩
-  refine ⟨W,⟨_,_,hx,rfl⟩,?_⟩
-  intro D a ha d
-  obtain ⟨y,hy,hy'⟩ := ha ⟨d,rfl⟩
-  obtain ⟨z,hz,hz'⟩ := Scheme.Pullback.exists_preimage_pullback (f := a) (g := s) d y hy'.symm
-  exact ⟨z,hz,hz' ▸ hy⟩
+  obtain ⟨t, ht, _, h⟩ := exists_marked_time_open_meeting_quasiFinite
+  refine ⟨t, ht, fun V hV hs => ?_⟩
+  obtain ⟨W, hw, hW⟩ := h V hV hs
+  exact ⟨W, ⟨_, hw⟩, hW⟩
 
 end CycleQ2MarkedCylinderQuasiFinite
 

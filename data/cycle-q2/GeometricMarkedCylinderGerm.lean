@@ -1,3 +1,4 @@
+import Proposal.GeometricLiteralMovingCurveDifferentialNonzero
 import Proposal.GeometricMonicGenericSupport
 import Proposal.GeometricLiteralAbelJacobiEvaluationFiber
 import Proposal.GeometricLiteralThreefoldVertexMotion
@@ -142,14 +143,28 @@ theorem actual_thick_immersion (V : parameterScheme.Opens) (hV : seedBasePoint �
   rw [← Category.assoc, hm, Category.assoc]
   infer_instance
 
+open CycleQ2LiteralMovingCurveDifferentialNonzero
+
+/-- The contracted differential on this particular seed curve has nonzero trace. -/
+def HasTracedSeedCurve (t : Fin 3 → ℂ) : Prop :=
+  ∃ h : ∀ i, CycleQ2SeedSectionAffineInjective.ChartRegular t i,
+    differentialTrace t h (curveClass t) ≠ 0
+
+theorem exists_traced_embedded_thick_chart :
+    ∃ (t : Fin 3 → ℂ) (j : Fin 3) (V : parameterScheme.Opens) (hV : seedBasePoint ∈ V), AlgebraicIndependent ℚ t ∧ HasTracedSeedCurve t ∧
+      Nonempty (PrimeSpectrum (Localization.Away (toFamily t j.succ (detector j.succ)))) ∧
+      IsImmersion (chartOpen t j.succ ≫ thickChart V t hV j.succ ≫ q V t) := by
+  obtain ⟨t,ht,hreg,V,hV,_,_,_,_,_,_,hf,j,hn⟩ := exists_smooth_time_family
+  have := hf j.succ
+  rw [relativeNormal_cubic] at hn
+  exact ⟨t,j,V,hV,ht,⟨hreg,differentialTrace_curveClass_ne_zero t hreg⟩,thick_chart_nonempty t j.succ ht (neg_ne_zero.mp hn),actual_thick_immersion t j.succ V hV⟩
+
 theorem exists_nonempty_embedded_thick_chart :
     ∃ (t : Fin 3 → ℂ) (j : Fin 3) (V : parameterScheme.Opens) (hV : seedBasePoint ∈ V), AlgebraicIndependent ℚ t ∧
       Nonempty (PrimeSpectrum (Localization.Away (toFamily t j.succ (detector j.succ)))) ∧
       IsImmersion (chartOpen t j.succ ≫ thickChart V t hV j.succ ≫ q V t) := by
-  obtain ⟨t,ht,_,V,hV,_,_,_,_,_,_,hf,j,hn⟩ := exists_smooth_time_family
-  have := hf j.succ
-  rw [relativeNormal_cubic] at hn
-  exact ⟨t,j,V,hV,ht,thick_chart_nonempty t j.succ ht (neg_ne_zero.mp hn),actual_thick_immersion t j.succ V hV⟩
+  obtain ⟨t,j,V,hV,ht,_,hz,hi⟩ := exists_traced_embedded_thick_chart
+  exact ⟨t,j,V,hV,ht,hz,hi⟩
 
 end CycleQ2MarkedThickCylinderChart
 

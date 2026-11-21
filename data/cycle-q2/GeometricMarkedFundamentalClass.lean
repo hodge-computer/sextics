@@ -244,9 +244,9 @@ abbrev ProductProperty := ∀ {Y S : Scheme.{0}},
   (Y ⟶ genericAmbient) → genericAmbient.Opens → (Y ⟶ Spec (CommRingCat.of genericField)) →
     (S ⟶ Y) → Prop
 
-/-- A marked product after deleting the projected boundary, with a given property of its
-support and its projection to the ambient threefold. -/
-def SurvivesWith (P : ProductProperty) : Prop :=
+/-- On the product outside the projected boundary, the first argument of `P` records
+whether the dense time test comes from a neighborhood of the first-order seed. -/
+def SurvivesWithSeed (P : Prop → ProductProperty) : Prop :=
     ∃ (t : Fin 3 → ℂ), AlgebraicIndependent ℚ t ∧ ∃ V : parameterScheme.Opens, seedBasePoint ∈ V ∧
       ∃ (C : Scheme) (c : C ⟶ Spec (CommRingCat.of genericField)) (r : C ⟶ Completion V)
         (hc : r ≫ structureMap V = c ≫ genericPoint) (D : Scheme) (j : D ⟶ C)
@@ -265,14 +265,19 @@ def SurvivesWith (P : ProductProperty) : Prop :=
           IsPullback (W.ι ≫ pullback.fst c T) pr c (U.ι ≫ T) ∧
           ∃ (S : Scheme) (i : S ⟶ W.toScheme) (v : S ⟶ TestSurface V t a),
             IsPullback i (v ≫ m.toImage) W.ι b ∧ IsOpenImmersion v ∧ IsProper (i ≫ pr) ∧
-            (∃ s : S, g.QuasiFiniteAt (m (v s))) ∧ P (W.ι ≫ pullback.snd c T) U (W.ι ≫ productBase c T) i
+            (∃ s : S, g.QuasiFiniteAt (m (v s))) ∧
+              P (∃ hV : seedBasePoint ∈ V, CycleQ2MarkedGenericSurvives.SeedCompatible t V hV c r j a)
+                (W.ι ≫ pullback.snd c T) U (W.ι ≫ productBase c T) i
 
-private theorem exists_surviving_with (P : ProductProperty)
-    (hP : ∀ {Y S : Scheme.{0}} (π : Y ⟶ genericAmbient) (U : genericAmbient.Opens)
+/-- The original product and support data, with a property of the supported class. -/
+def SurvivesWith (P : ProductProperty) : Prop := SurvivesWithSeed (fun _ => @P)
+
+private theorem exists_surviving_with (P : Prop → ProductProperty)
+    (hP : ∀ {seed : Prop} {Y S : Scheme.{0}} (π : Y ⟶ genericAmbient) (U : genericAmbient.Opens)
       (p : Y ⟶ Spec (CommRingCat.of genericField)) (i : S ⟶ Y),
-      HasNonzeroNormalizedClass π U p i → P π U p i) : SurvivesWith P := by
-  obtain ⟨t,ht,V,hV,C,c,r,hc,D,j,a,ha,hC,hp,hc₁,hproj,hj,hjd,hs,_,hB,hd,z,hz,hout⟩ :=
-    CycleQ2MarkedGenericSurvives.exists_marked_point_outside_projected_boundary
+      seed → HasNonzeroNormalizedClass π U p i → P seed π U p i) : SurvivesWithSeed P := by
+  obtain ⟨t,ht,V,hV,C,c,r,hc,D,j,a,ha,hCompatible,hC,hp,hc₁,hproj,hj,hjd,hs,_,hB,hd,z,hz,hout⟩ :=
+    CycleQ2MarkedGenericSurvives.exists_compatible_marked_point_outside_projected_boundary
   let m := fromTest V t r j a ha
   let G := embeddingGeneric V t r c hc
   let g := target V t r c hc
@@ -333,7 +338,7 @@ private theorem exists_surviving_with (P : ProductProperty)
   have hi : i ≫ q = p := by
     simp [i,q,CycleQ2ProperProductGysin.embedding,overField,p,v]
   let : SmoothOfRelativeDimension 2 p := smoothOfRelativeDimension_comp 0 2 _ _
-  refine ⟨hproper,⟨s,hsv.symm ▸ hz⟩,hP _ _ _ _ ?_⟩
+  refine ⟨hproper,⟨s,hsv.symm ▸ hz⟩,hP _ _ _ _ ⟨hV, hCompatible⟩ ?_⟩
   exact ⟨inferInstance,inferInstance,z',CycleQ2LogDetection.normalized_ne_zero p q i hi s z' hlog,
     hlog,CycleQ2MarkedFunctionPoint.vanishes V t r c hc j a ha hs U hU i v square _ z'⟩
 
@@ -341,7 +346,7 @@ private theorem exists_surviving_with (P : ProductProperty)
 on a nonempty marked surface after deleting a target subset of dimension at most one. -/
 theorem exists_surviving_product : SurvivesWith (fun _ _ p i => HasNormalizedClass p i) :=
   exists_surviving_with _ (by
-    intro Y S π U p i h
+    intro _ Y S π U p i _ h
     obtain ⟨ci,sm,z,_,hz,_⟩ := h
     exact ⟨ci,sm,z,hz⟩)
 
@@ -350,9 +355,19 @@ vanishes over a neighborhood of the function point. -/
 theorem exists_surviving_nonzero_product :
     SurvivesWith (fun π U p i => HasNonzeroNormalizedClass π U p i) :=
   exists_surviving_with _ (by
-    intro Y S π U p i h
+    intro _ Y S π U p i _ h
     exact h)
+
+/-- The curve bearing the nonzero class and its marked surface share the integral
+time neighborhood through the original first-order seed. -/
+theorem exists_seed_compatible_nonzero_product :
+    SurvivesWithSeed (fun seed {_ _} π U p i => seed ∧ HasNonzeroNormalizedClass π U p i) :=
+  exists_surviving_with _ (by
+    intro _ _ _ _ _ _ _ hs h
+    exact ⟨hs, h⟩)
 
 end CycleQ2SurvivingProductGysin
 #print axioms CycleQ2SurvivingProductGysin.exists_surviving_product
 #print axioms CycleQ2SurvivingProductGysin.exists_surviving_nonzero_product
+
+#print axioms CycleQ2SurvivingProductGysin.exists_seed_compatible_nonzero_product

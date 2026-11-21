@@ -1,4 +1,4 @@
-import Proposal.GeometricMarkedRelativeCylinderDetector
+import Proposal.GeometricMarkedParameterSpread
 import Proposal.GeometricMarkedClosureBoundaryDimension
 import Proposal.GeometricSmoothDimensionLower
 
@@ -121,12 +121,32 @@ open CycleQ2LiteralIncidenceRelativeSpread CycleQ2LiteralIncidenceNormalizedSlic
 open CycleQ2IncidenceSeedFiberCover (seedBasePoint)
 open CycleQ2MarkedCylinderQuasiFinite
 
-theorem exists_marked_point_outside_projected_boundary :
-    ∃ (t : Fin 3 → ℂ), AlgebraicIndependent ℚ t ∧ ∃ (V : parameterScheme.Opens), seedBasePoint ∈ V ∧
+open CycleQ2LiteralIncidenceGenericModel (Fiber TimeFiber projection genericMorphism)
+open CycleQ2LiteralIncidenceGenericSmoothCurve (testMap)
+open CycleQ2LiteralIncidenceRelativeNormalization (normalizedMap toCompletion)
+
+/-- The dense test on the proper generic parameter curve is a dense open of the
+generic fiber of an integral affine neighborhood containing the seed tangent. -/
+def SeedCompatible (t : Fin 3 → ℂ) (V : parameterScheme.Opens) (hV : seedBasePoint ∈ V) {C D : Scheme}
+    (c : C ⟶ Spec (CommRingCat.of genericField)) (r : C ⟶ Completion V)
+    (j : D ⟶ C) (a : D ⟶ Time toRaw V) : Prop :=
+  CycleQ2MarkedThickCylinderChart.HasTracedSeedCurve t ∧
+  ∃ U : (Time toRaw V).Opens, IsAffineOpen U ∧ CycleQ2MarkedParameterSpread.marked V hV ∈ U ∧
+    IsIntegral U.toScheme ∧ IsIntegral ((testMap V) ⁻¹ᵁ U).toScheme ∧
+    (∃ e : Spec (CommRingCat.of (DualNumber ℂ)) ⟶ U.toScheme,
+      e ≫ U.ι = CycleQ2MarkedParameterSpread.tangent V hV) ∧
+    ∃ (rK : C ⟶ Fiber V) (k : D ⟶ ((testMap V) ⁻¹ᵁ U).toScheme),
+      IsOpenImmersion k ∧ IsDominant k ∧ k ≫ ((testMap V) ⁻¹ᵁ U).ι ≫ testMap V = a ∧
+      k ≫ ((testMap V) ⁻¹ᵁ U).ι ≫ CycleQ2LiteralIncidenceGenericModel.inclusion V = j ≫ rK ∧
+      rK ≫ projection V = c ∧ rK ≫ pullback.snd genericMorphism (normalizedMap V) ≫ toCompletion V = r
+
+theorem exists_compatible_marked_point_outside_projected_boundary :
+    ∃ (t : Fin 3 → ℂ), AlgebraicIndependent ℚ t ∧ ∃ (V : parameterScheme.Opens) (hV : seedBasePoint ∈ V),
       ∃ (C : Scheme) (c : C ⟶ Spec (CommRingCat.of genericField)) (r : C ⟶ Completion V)
         (hc : r ≫ structureMap V = c ≫ CycleQ2LiteralIncidenceGenericCorrespondence.genericPoint)
         (D : Scheme) (j : D ⟶ C) (a : D ⟶ Time toRaw V)
         (ha : j ≫ r = a ≫ CycleQ2LiteralIncidenceRelativeCompletion.inclusion V),
+        SeedCompatible t V hV c r j a ∧
         let m := fromTest V t r j a ha
         let g := target V t r c hc
         let B := (m.imageι ≫ g) '' (Set.range m.toImage)ᶜ
@@ -137,22 +157,38 @@ theorem exists_marked_point_outside_projected_boundary :
         IsProper (m.imageι ≫ g) ∧ topologicalKrullDim B ≤ 1 ∧
         (2 : WithBot ℕ∞) ≤ topologicalKrullDim (Set.range (m ≫ g)) ∧
         ∃ z : TestSurface V t a, g.QuasiFiniteAt (m z) ∧ g (m z) ∉ B := by
-  obtain ⟨t,ht,hw⟩ := exists_time_open_meeting_quasiFinite
-  have : IrreducibleSpace monicBase := inferInstanceAs (IrreducibleSpace (Spec (CommRingCat.of MonicRing)))
-  obtain ⟨V,hV,_,hsCurve,_,_,_,_,_,_⟩ := spread_of_independent toRaw seedPoint seedPoint_toRaw t ht
-  have : Smooth (curveMap toRaw V t) := hsCurve.smooth
-  obtain ⟨W,hW,hq⟩ := hw V hV inferInstance
-  obtain ⟨C,c,r,hc,hC,hp,_,_,_,_,_,⟨q,hqfin,hqdom,hqc,hqd⟩,D,j,a,ha,hj,hjd,hD,hW',haq,_⟩ :=
-    CycleQ2GenericGraphFiniteProjection.exists_smooth_curve_graph_with_quasiFinite_test (t := t) W hW
-  have hqCurve : ∃ l : C ⟶ CycleQ2LaurentProjectiveLine.line genericField, IsFinite l ∧ IsDominant l ∧
-      l ≫ CycleQ2ProjectiveLineStructure.structureMap genericField = c := ⟨q,hqfin,hqdom,hqc⟩
-  have hc₁ : SmoothOfRelativeDimension 1 c := hqc ▸ hqd
+  obtain ⟨t,ht,htrace,V,hV,hsCurve,U,hUA,hmark,hUI,hUK,hε,hq⟩ := CycleQ2MarkedParameterSpread.exists_detected
+  obtain ⟨C,rK,hC,hp,hc₁,hqCurve,D,k,j,hk,hkd,hj,hjd,hkj⟩ :=
+    CycleQ2MarkedParameterSpread.normalized_completion V U
+  let c := rK ≫ projection V
+  let n := pullback.snd genericMorphism (normalizedMap V) ≫ toCompletion V
+  let r := rK ≫ n
+  let a := k ≫ ((testMap V) ⁻¹ᵁ U).ι ≫ testMap V
+  have hc : r ≫ structureMap V = c ≫ CycleQ2LiteralIncidenceGenericCorrespondence.genericPoint := by
+    change (rK ≫ _ ≫ _) ≫ _ = (rK ≫ _) ≫ _
+    simp only [Category.assoc]
+    change rK ≫ pullback.snd _ _ ≫ normalizedMap V = rK ≫ pullback.fst _ _ ≫ genericMorphism
+    rw [pullback.condition]
+  have ha : j ≫ r = a ≫ CycleQ2LiteralIncidenceRelativeCompletion.inclusion V := by
+    change j ≫ rK ≫ n = _
+    rw [← Category.assoc j rK,← hkj]
+    simp only [a,n,Category.assoc,CycleQ2LiteralIncidenceGenericModel.inclusion,testMap,
+      pullback.condition_assoc,CycleQ2LiteralIncidenceRelativeNormalization.open_toCompletion]
+  have hCompat : SeedCompatible t V hV c r j a :=
+    ⟨htrace,U,hUA,hmark,hUI,hUK,hε,rK,k,hk,hkd,rfl,hkj,rfl,rfl⟩
+  have : LocallyQuasiFinite genericMorphism :=
+    (HasRingHomProperty.Spec_iff (P := @LocallyQuasiFinite)).mpr
+      (RingHom.quasiFinite_algebraMap.mpr (inferInstance : Algebra.QuasiFinite MonicRing genericField))
+  have : LocallyQuasiFinite (testMap V) := by dsimp only [testMap]; infer_instance
+  have : LocallyQuasiFinite a := by dsimp only [a]; infer_instance
+  have hW' : Set.range a ⊆ (U : Set (Time toRaw V)) := by rintro _ ⟨w,rfl⟩; exact (k w).property
+  obtain ⟨d,_⟩ := j.denseRange.exists_mem_open isOpen_univ (Set.univ_nonempty : (Set.univ : Set C).Nonempty)
   have := smoothOfRelativeDimension_isStableUnderBaseChange 1
   have : SmoothOfRelativeDimension 1 (pullback.fst a (curveMap toRaw V t)) :=
     MorphismProperty.pullback_fst _ _ hsCurve
   have : SmoothOfRelativeDimension 1 (j ≫ c) := smoothOfRelativeDimension_comp 0 1 j c
   have hd := smoothOfRelativeDimension_comp 1 1 (pullback.fst a (curveMap toRaw V t)) (j ≫ c)
-  obtain ⟨z,_,hrel⟩ := hq a hW' (Classical.choice hD)
+  obtain ⟨z,_,hrel⟩ := hq a hW' d
   have hz := marked_target_quasiFinite V t r c hc j a ha z hrel
   let m := fromTest V t r j a ha
   let g := target V t r c hc
@@ -170,9 +206,30 @@ theorem exists_marked_point_outside_projected_boundary :
       exact CycleQ2SmoothDimensionLower.le_topologicalKrullDim 2 (U.ι ≫ p)
   obtain ⟨himage,w,hw,hout⟩ := dimension_and_outside_of_quasiFiniteAt (m ≫ g) z
     (Scheme.Hom.quasiFiniteAt_comp_iff_of_isOpenImmersion.mpr hz) B hB hdim
-  exact ⟨t,ht,V,hV,C,c,r,hc,D,j,a,ha,hC,hp,hc₁,hqCurve,hj,hjd,hsCurve,inferInstance,hB,himage,w,
+  exact ⟨t,ht,V,hV,C,c,r,hc,D,j,a,ha,hCompat,hC,hp,hc₁,hqCurve,hj,hjd,hsCurve,inferInstance,hB,himage,w,
     Scheme.Hom.quasiFiniteAt_comp_iff_of_isOpenImmersion.mp hw,hout⟩
+
+theorem exists_marked_point_outside_projected_boundary :
+    ∃ (t : Fin 3 → ℂ), AlgebraicIndependent ℚ t ∧ ∃ (V : parameterScheme.Opens), seedBasePoint ∈ V ∧
+      ∃ (C : Scheme) (c : C ⟶ Spec (CommRingCat.of genericField)) (r : C ⟶ Completion V)
+        (hc : r ≫ structureMap V = c ≫ CycleQ2LiteralIncidenceGenericCorrespondence.genericPoint)
+        (D : Scheme) (j : D ⟶ C) (a : D ⟶ Time toRaw V)
+        (ha : j ≫ r = a ≫ CycleQ2LiteralIncidenceRelativeCompletion.inclusion V),
+        let m := fromTest V t r j a ha
+        let g := target V t r c hc
+        let B := (m.imageι ≫ g) '' (Set.range m.toImage)ᶜ
+        IsIntegral C ∧ IsProper c ∧ SmoothOfRelativeDimension 1 c ∧
+        (∃ q : C ⟶ CycleQ2LaurentProjectiveLine.line genericField, IsFinite q ∧ IsDominant q ∧
+          q ≫ CycleQ2ProjectiveLineStructure.structureMap genericField = c) ∧
+        IsOpenImmersion j ∧ IsDominant j ∧ SmoothOfRelativeDimension 1 (curveMap toRaw V t) ∧
+        IsProper (m.imageι ≫ g) ∧ topologicalKrullDim B ≤ 1 ∧
+        (2 : WithBot ℕ∞) ≤ topologicalKrullDim (Set.range (m ≫ g)) ∧
+        ∃ z : TestSurface V t a, g.QuasiFiniteAt (m z) ∧ g (m z) ∉ B := by
+  obtain ⟨t,ht,V,hV,C,c,r,hc,D,j,a,ha,_,h⟩ := exists_compatible_marked_point_outside_projected_boundary
+  exact ⟨t,ht,V,hV,C,c,r,hc,D,j,a,ha,h⟩
 
 end CycleQ2MarkedGenericSurvives
 
 #print axioms CycleQ2MarkedGenericSurvives.exists_marked_point_outside_projected_boundary
+
+#print axioms CycleQ2MarkedGenericSurvives.exists_compatible_marked_point_outside_projected_boundary

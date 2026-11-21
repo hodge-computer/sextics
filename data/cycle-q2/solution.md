@@ -242,9 +242,14 @@ coefficient field still has a quasi-finite point. The quasi-finite locus
 is open, so it contains a nonempty open of the smooth surface. Its image
 has dimension at least two and cannot be contained in the projected
 boundary. Thus the marked surface has a quasi-finite point outside that
-boundary. The same proper time curve carries a finite dominant projection
-to the projective line for the curve trace.
-[Marked point and generic sweep](GeometricMarkedProjectionSurvives.lean)
+boundary. One can choose an integral affine time neighborhood that contains the
+marked point and through which its dual-number tangent factors. Its generic
+fiber is integral and shares a dense open with the proper parameter curve
+used for this sweep and its finite projection to the projective line. The
+contracted differential on the seed curve cut out by these same section
+coefficients has nonzero trace.
+[Marked parameter neighborhood](GeometricMarkedParameterSpread.lean) and
+[marked point on the generic sweep](GeometricMarkedProjectionSurvives.lean)
 
 ## Localization on the actual swept complement
 
@@ -375,8 +380,10 @@ curve. On this product the closure lies entirely in its smooth marked
 part and its projection is proper. At a surviving surface point, the
 coefficient of the double logarithmic pole detects the local class. This
 proves that the global degree-four class is nonzero with support on the
-surface. After forgetting support, the same class restricts to zero over
-a target open containing the function-field point of the protected residue.
+surface. The proper parameter curve carrying this class and the original
+marked dual-number tangent come from the same integral time neighborhood.
+After forgetting support, the class restricts to zero over a target open
+containing the function-field point of the protected residue.
 The remaining comparison must identify the prescribed residue in the image
 obtained by pairing with degree-one cohomology of the parameter curve and
 integrating along that curve. The two-equation logarithmic form has a
