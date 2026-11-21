@@ -447,8 +447,15 @@ regular one-form. Multiplying by the cubic and the row clears both poles.
 On the seed curve, the coefficient of the resulting fourfold wedge is the
 velocity of the fixed cubic along any lift of the marked tangent with
 \(d\epsilon/dt=1\). This identifies the first-order coefficient of the
-actual incidence form before taking a projective Čech class.
-[Marked residue numerator](GeometricMarkedGysinNumerator.lean)
+actual incidence form. On the original projective overlaps, use the
+two-form obtained by subtracting the two chart lifts of the ambient
+test. The resulting coefficients form a Čech one-cocycle on the twelve
+vertex opens. Its class in \(H^1(\Omega^1)\) is minus the original
+marked curve class, so its differential trace is nonzero. The same
+section and proper parameter curve carry the normalized supported
+degree-four class on the generic fiber. Identifying the specialization
+of its global cylinder pairing with this marked trace remains open.
+[Projective numerator and signed trace](GeometricMarkedGysinNumerator.lean)
 
 On the dense marked time open, the ideal of the proper graph closure
 restricts to the ideal of the original joint incidence family. After
