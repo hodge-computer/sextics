@@ -4,6 +4,11 @@ import Mathlib.Data.Fin.Rev
 import Mathlib.LinearAlgebra.Prod
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 
+import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Mathlib.RingTheory.Valuation.ValuationSubring
+import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+
 /-!
 # The Fermat Higgs maps grow strictly
 
@@ -413,3 +418,192 @@ end CycleQ2FermatStrictGrowth
 #print axioms CycleQ2FermatStrictGrowth.opposite_rank_dichotomy
 #print axioms CycleQ2FermatStrictGrowth.nonsplit_dichotomy
 #print axioms CycleQ2FermatStrictGrowth.rankProfile_eq_of_projection_ranks
+
+namespace CycleQ2FermatValuationFrame
+
+open Matrix
+
+variable {K Γ : Type*} [Field K] [LinearOrderedCommGroupWithZero Γ] (v : Valuation K Γ)
+variable {n d : ℕ}
+
+private theorem exists_minor (A : Matrix (Fin n) (Fin d) K) (ha : A.rank = d) :
+    ∃ I : Fin d → Fin n, (A.submatrix I id).det ≠ 0 := by
+  classical
+  have hd : Module.finrank K (Submodule.span K (Set.range A.row)) = d :=
+    A.rank_eq_finrank_span_row.symm.trans ha
+  have b := Submodule.exists_fun_fin_finrank_span_eq K (Set.range A.row)
+  rw [hd] at b
+  obtain ⟨b,hb,_,hli⟩ := b
+  choose I hI using hb
+  refine ⟨I, ?_⟩
+  apply IsUnit.ne_zero
+  apply (Matrix.isUnit_iff_isUnit_det _).mp
+  apply Matrix.linearIndependent_rows_iff_isUnit.mp
+  have hrows : (A.submatrix I id).row = b := funext hI
+  rwa [hrows]
+
+private theorem det_replace (D : Matrix (Fin n) (Fin d) K) (I : Fin d → Fin n)
+    (hI : D.submatrix I id = 1) (j : Fin d) (i : Fin n) :
+    (D.submatrix (Function.update I j i) id).det = D i j := by
+  classical
+  have h : D.submatrix (Function.update I j i) id = (1 : Matrix (Fin d) (Fin d) K).updateRow j (D i) := by
+    ext k l
+    by_cases eq : k = j
+    · subst k
+      simp [Matrix.submatrix_apply]
+    · rw [Matrix.updateRow_ne eq]
+      simp only [Matrix.submatrix_apply, Function.update_of_ne eq, id_eq]
+      exact congrArg (fun B : Matrix (Fin d) (Fin d) K => B k l) hI
+  rw [h, ← Matrix.cramer_transpose_apply, Matrix.transpose_one, Matrix.cramer_one]
+  rfl
+
+/-- A full column-rank matrix over a valued field has a basis of the same column space
+in the valuation ring with a specified identity row minor. -/
+theorem exists_integral_frame (A : Matrix (Fin n) (Fin d) K) (ha : A.rank = d) :
+    ∃ (I : Fin d → Fin n) (P : Matrix (Fin n) (Fin d) v.valuationSubring),
+      P.submatrix I id = 1 ∧
+      LinearMap.range (P.map ((↑) : v.valuationSubring → K)).mulVecLin =
+        LinearMap.range A.mulVecLin := by
+  classical
+  obtain ⟨J,hJ⟩ := exists_minor A ha
+  let minor (I : Fin d → Fin n) := (A.submatrix I id).det
+  obtain ⟨I,_,best⟩ := Finset.exists_max_image Finset.univ (fun i => v (minor i))
+    ⟨J,Finset.mem_univ _⟩
+  let B := A.submatrix I id
+  have pos : 0 < v B.det := lt_of_lt_of_le (pos_iff_ne_zero.mpr ((map_ne_zero v).mpr hJ))
+    (best J (Finset.mem_univ _))
+  have unit : IsUnit B.det := isUnit_iff_ne_zero.mpr (fun h => by simp [h] at pos)
+  let D := A * B⁻¹
+  have hI : D.submatrix I id = 1 := B.mul_nonsing_inv unit
+  have hA : D * B = A := B.nonsing_inv_mul_cancel_right A unit
+  have integral (i : Fin n) (j : Fin d) : D i j ∈ v.valuationSubring := by
+    let L := Function.update I j i
+    have hminor : minor L = D i j * B.det := by
+      calc
+        _ = ((D.submatrix L id) * B).det := congrArg Matrix.det
+          (congrArg (fun M : Matrix (Fin n) (Fin d) K => M.submatrix L id) hA.symm)
+        _ = _ := by rw [Matrix.det_mul, det_replace D I hI]
+    have bound := best L (Finset.mem_univ _)
+    change v (minor L) ≤ v B.det at bound
+    rw [hminor, map_mul] at bound
+    change v (D i j) ≤ 1
+    by_contra! hn
+    exact (not_lt_of_ge bound) (by simpa only [one_mul] using mul_lt_mul_of_pos_right hn pos)
+  let P : Matrix (Fin n) (Fin d) v.valuationSubring := fun i j => ⟨D i j, integral i j⟩
+  refine ⟨I,P,?_,?_⟩
+  · ext i j
+    change D (I i) j = _
+    rw [show D (I i) j = (1 : Matrix (Fin d) (Fin d) K) i j from
+      congrArg (fun M : Matrix (Fin d) (Fin d) K => M i j) hI]
+    by_cases he : i = j <;> simp [Matrix.one_apply,he]
+  · change LinearMap.range D.mulVecLin = LinearMap.range A.mulVecLin
+    apply le_antisymm
+    · rintro _ ⟨x,rfl⟩
+      refine ⟨B⁻¹.mulVec x, ?_⟩
+      exact Matrix.mulVec_mulVec x A B⁻¹
+    · rintro _ ⟨x,rfl⟩
+      refine ⟨B.mulVec x, ?_⟩
+      change D.mulVec (B.mulVec x) = A.mulVec x
+      rw [Matrix.mulVec_mulVec, hA]
+
+/-- An operator stabilizing a framed column space has coefficients given by the pivot rows
+of its product with the frame. -/
+private theorem pivot_factorization {R : Type*} [CommRing R]
+    (P : Matrix (Fin n) (Fin d) R) (I : Fin d → Fin n) (hI : P.submatrix I id = 1)
+    (F : Matrix (Fin n) (Fin n) R)
+    (hF : Set.MapsTo F.mulVec (LinearMap.range P.mulVecLin) (LinearMap.range P.mulVecLin)) :
+    F * P = P * (F * P).submatrix I id := by
+  classical
+  have pivot (y : Fin d → R) : (P.mulVec y) ∘ I = y := by
+    change (P.submatrix I id).mulVec y = y
+    rw [hI, Matrix.one_mulVec]
+  ext i j
+  have hj : P.col j ∈ LinearMap.range P.mulVecLin :=
+    ⟨Pi.single j 1, Matrix.mulVec_single_one P j⟩
+  obtain ⟨y,hy⟩ := hF hj
+  have hc : P.mulVec y = (F * P).col j := hy
+  have hc' : y = ((F * P).submatrix I id).col j :=
+    (pivot y).symm.trans (congrArg (fun z : Fin n → R => z ∘ I) hc)
+  exact (congrFun hc i).symm.trans (congrFun (congrArg P.mulVec hc') i)
+
+private theorem pivot_map {R S : Type*} [CommRing R] [CommRing S] (s : R →+* S)
+    (P : Matrix (Fin n) (Fin d) R) (I : Fin d → Fin n) (hI : P.submatrix I id = 1) :
+    (P.map s).submatrix I id = 1 :=
+  (congrArg (fun M : Matrix (Fin d) (Fin d) R => M.map s) hI).trans
+    (Matrix.map_one s s.map_zero s.map_one)
+
+private theorem pivot_rank {R L : Type*} [CommRing R] [Field L] (ρ : R →+* L)
+    (I : Fin d → Fin n) (P : Matrix (Fin n) (Fin d) R) (hI : P.submatrix I id = 1) :
+    (P.map ρ).rank = d := by
+  have hle := (P.map ρ).rank_submatrix_le I (id : Fin d → Fin d)
+  apply le_antisymm ((P.map ρ).rank_le_card_width.trans_eq (Fintype.card_fin _))
+  simpa only [pivot_map ρ P I hI, Matrix.rank_one, Fintype.card_fin] using hle
+
+/-- A normalized integral frame has full rank after every field-valued specialization.
+Integral operators stabilizing its fraction-field space act by the specialized pivot coefficients. -/
+theorem specialize_frame {L : Type*} [Field L] (ρ : v.valuationSubring →+* L)
+    (I : Fin d → Fin n) (P : Matrix (Fin n) (Fin d) v.valuationSubring)
+    (hI : P.submatrix I id = 1)
+    (F : Matrix (Fin n) (Fin n) v.valuationSubring)
+    (hF : Set.MapsTo (F.map ((↑) : v.valuationSubring → K)).mulVec
+      (LinearMap.range (P.map ((↑) : v.valuationSubring → K)).mulVecLin)
+      (LinearMap.range (P.map ((↑) : v.valuationSubring → K)).mulVecLin)) :
+    (P.map ρ).rank = d ∧
+      F * P = P * (F * P).submatrix I id ∧
+      (F.map ρ) * (P.map ρ) = (P.map ρ) * (((F * P).submatrix I id).map ρ) ∧
+      Set.MapsTo (F.map ρ).mulVec (LinearMap.range (P.map ρ).mulVecLin)
+        (LinearMap.range (P.map ρ).mulVecLin) := by
+  classical
+  let h := v.valuationSubring.toSubring.subtype
+  have hf := pivot_factorization (P.map h) I (pivot_map h P I hI) (F.map h) hF
+  have he : F * P = P * (F * P).submatrix I id := by
+    ext i j
+    change h ((F * P) i j) = h ((P * (F * P).submatrix I id) i j)
+    have hh : (F * P).map h = (P * (F * P).submatrix I id).map h := by
+      simp only [← Matrix.submatrix_map, Matrix.map_mul]
+      exact hf
+    exact congrArg (fun M : Matrix (Fin n) (Fin d) K => M i j) hh
+  have hρ := congrArg (fun M : Matrix (Fin n) (Fin d) v.valuationSubring => M.map ρ) he
+  simp only [Matrix.map_mul] at hρ
+  refine ⟨pivot_rank ρ I P hI, he, hρ, ?_⟩
+  · rintro _ ⟨y,rfl⟩
+    refine ⟨(((F * P).submatrix I id).map ρ).mulVec y,?_⟩
+    change (P.map ρ).mulVec _ = (F.map ρ).mulVec ((P.map ρ).mulVec y)
+    rw [Matrix.mulVec_mulVec, Matrix.mulVec_mulVec, hρ]
+
+/-- For every original fraction-field subspace, a single integral frame realizes it and yields
+a residue subspace of the same rank stabilized by each integral operator preserving the original. -/
+theorem residue_of_subspace (W : Submodule K (Fin n → K)) :
+    let d := Module.finrank K W
+    let O := v.valuationSubring
+    let red := IsLocalRing.residue O
+    ∃ (I : Fin d → Fin n) (P : Matrix (Fin n) (Fin d) O),
+      P.submatrix I id = 1 ∧ LinearMap.range (P.map ((↑) : O → K)).mulVecLin = W ∧
+      (P.map red).rank = d ∧ ∀ F : Matrix (Fin n) (Fin n) O,
+        Set.MapsTo (F.map ((↑) : O → K)).mulVec W W →
+        F * P = P * (F * P).submatrix I id ∧
+          (F.map red) * (P.map red) = (P.map red) * (((F * P).submatrix I id).map red) ∧
+          Set.MapsTo (F.map red).mulVec (LinearMap.range (P.map red).mulVecLin)
+            (LinearMap.range (P.map red).mulVecLin) := by
+  classical
+  let d := Module.finrank K W
+  let b := Module.finBasis K W
+  let A : Matrix (Fin n) (Fin d) K := fun i j => (b j : Fin n → K) i
+  have span : LinearMap.range A.mulVecLin = W := by
+    calc
+      _ = Submodule.span K (Set.range (W.subtype ∘ b)) := Matrix.range_mulVecLin _
+      _ = (Submodule.span K (Set.range b)).map W.subtype := by rw [Submodule.map_span, Set.range_comp]
+      _ = W := by rw [b.span_eq, Submodule.map_top, Submodule.range_subtype]
+  have ha : A.rank = d := congrArg (fun M : Submodule K (Fin n → K) => Module.finrank K M) span
+  obtain ⟨I,P,hI,hW⟩ := exists_integral_frame v A ha
+  have hr := hW.trans span
+  let red := IsLocalRing.residue v.valuationSubring
+  refine ⟨I,P,hI,hr,pivot_rank red I P hI,?_⟩
+  intro F hF
+  exact (specialize_frame v red I P hI F (hr.symm ▸ hF)).2
+
+end CycleQ2FermatValuationFrame
+
+#print axioms CycleQ2FermatValuationFrame.exists_integral_frame
+#print axioms CycleQ2FermatValuationFrame.specialize_frame
+#print axioms CycleQ2FermatValuationFrame.residue_of_subspace

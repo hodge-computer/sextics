@@ -1586,12 +1586,30 @@ nonzero entries instead subtract \(m\) from the lower monomial. These
 are opposite directions on the same graph of 33 upper and 33 lower
 basis monomials.
 
+These entries are also coordinates of the actual iterated parameter
+derivative in the quotient of polynomial poles by the five divergence
+relations. The normalization absorbs the factorials before reduction
+modulo a prime. At Fermat a linear functional on this quotient reads
+off each standard monomial and kills every divergence relation. It
+follows that the 66 monomial classes are independent there, and that
+their coordinates after differentiating the monic family and then
+specializing are the computed entries. Over the complex coefficient
+field, three Jacobian minors give pole reductions in degrees 6, 12,
+and 18. In particular the prescribed numerator lies in the span of
+the 66 polynomial pole classes.
+[Polynomial pole quotient and reduction](GeometricUniversalJacobianFrames.lean)
+
 The two computed families of matrices force a common subspace to be zero
 or full under a precise specialization hypothesis. In each characteristic
 the corresponding subspace must be stable under all 35 matrices, and its
 dimensions of projection to and intersection with the two coordinate
 summands must agree across the two characteristics. The proof allows
-subspaces that mix the two summands. To apply this calculation to the
+subspaces that mix the two summands. For a subspace over a valued
+field one can choose a basis matrix with integral entries and an
+identity minor of full column rank. Reduction therefore preserves its
+dimension. Each integral matrix preserving the subspace also preserves
+its reduction, by the same matrix identity on the pivot rows.
+To apply this calculation to the
 prescribed form requires identifying the matrices on reductions of the
 actual function-field residue relations, and finding a nonzero relation
 that persists over the generic coefficient field.

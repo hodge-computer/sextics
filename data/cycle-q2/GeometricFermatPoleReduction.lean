@@ -1060,3 +1060,339 @@ end
 #print axioms CycleQ2FermatPrimePencil.denominator_unit
 #print axioms CycleQ2FermatPrimePencil.matrix_integer_fraction
 #print axioms CycleQ2FermatPrimePencil.derivative_matrix
+
+noncomputable section
+namespace CycleQ2FermatSymbolDetector
+open CycleQ2PolynomialPoleSymbols (Poles Symbols relations symbol)
+
+open CycleQ2FermatHiggs (socle basisMonomial basis_properties basis_injective weightedDegree)
+open CycleQ2FermatJacobian (Exp exponent)
+open CycleQ2FermatVariationAlgebra (lowerExponent lowerExponent_properties)
+open CycleQ2FermatPrimeCoefficient (degree Sector source pole)
+open MvPolynomial
+
+variable (K : Type*) [Field K]
+
+abbrev Polynomial := MvPolynomial (Fin 5) K
+
+def fermatPolynomial : Polynomial K :=
+  X 0 ^ 6 + X 1 ^ 6 + X 2 ^ 6 + X 3 ^ 6 + X 4 ^ 3
+
+theorem fermatPolynomial_complex : fermatPolynomial ℂ = CycleQ2FermatJacobian.fermat := rfl
+
+private theorem partial_fermat (i : Fin 5) :
+    pderiv i (fermatPolynomial K) = C (degree i : K) * X i ^ (degree i - 1) := by
+  fin_cases i <;> norm_num [fermatPolynomial,degree,socle,Pi.single_apply,Fin.ext_iff,map_ofNat] <;> first | rfl | exact Or.inl rfl
+
+-- The contribution of one exponent to a chosen standard remainder.
+private def coefficient (d b n : ℕ) : K :=
+  if n % d = b then ∏ j ∈ Finset.range (n / d), (((b + 1 + d*j : ℕ) : K) / d) else 0
+
+private theorem coefficient_step {d b : ℕ} (hd : 0 < d) (n : ℕ) :
+    coefficient K d b (n+d) = coefficient K d b n * ((n+1 : ℕ) : K) / d := by
+  unfold coefficient
+  rw [Nat.add_mod_right, Nat.add_div_right _ hd]
+  by_cases h : n % d = b
+  · rw [if_pos h,if_pos h,Finset.prod_range_succ]
+    have he : b+1+d*(n/d) = n+1 := by have := Nat.mod_add_div n d; omega
+    rw [he,mul_div_assoc]
+  · simp [h]
+
+private theorem bounded (s : Sector) (i : Fin 5) : source s i < degree i - 1 := by
+  rcases s with s|s
+  · simpa [source,degree,Nat.lt_succ_iff] using (basis_properties s).2.2 i
+  · simpa [source,degree,Nat.lt_succ_iff] using (lowerExponent_properties s).2.2 i
+
+private def component (s : Sector) (a : Exp) (i : Fin 5) := coefficient K (degree i) (source s i) (a i)
+
+private def weight (s : Sector) (a : Exp) : K := ∏ i, component K s a i
+
+variable [NeZero (6 : K)]
+
+private theorem degree_ne (i : Fin 5) : (degree i : K) ≠ 0 := by
+  have h₆ := NeZero.ne (6 : K)
+  have h₃ : (3 : K) ≠ 0 := by
+    intro e
+    apply h₆
+    calc
+      (6 : K) = 3 * 2 := by norm_num
+      _ = 0 := by rw [e,zero_mul]
+  rcases (show degree i = 6 ∨ degree i = 3 by fin_cases i <;> decide) with e|e
+  · simpa only [e,Nat.cast_ofNat] using h₆
+  · simpa only [e,Nat.cast_ofNat] using h₃
+
+private theorem weight_axis (s : Sector) (i : Fin 5) (a : Exp) :
+    (degree i : K) * weight K s (a + Finsupp.single i (degree i-1)) =
+      (a i : K) * weight K s (a - Finsupp.single i 1) := by
+  classical
+  let R := ∏ k ∈ (Finset.univ : Finset (Fin 5)).erase i, component K s a k
+  have same (v : Exp) (h : ∀ j, j ≠ i → v j = a j) :
+      weight K s v = component K s v i * R := by
+    rw [weight,← Finset.mul_prod_erase _ _ (Finset.mem_univ i)]
+    congr 1
+    exact Finset.prod_congr rfl fun j hj => congrArg _ (h j (Finset.mem_erase.mp hj).1)
+  rw [same _ (by intro j hj; simp [hj.symm]),same _ (by intro j hj; simp [hj.symm])]
+  dsimp only [component]
+  simp only [Finsupp.add_apply,Finsupp.tsub_apply,Finsupp.single_eq_same]
+  have hd : 0 < degree i := by simp [degree]
+  have hdeg := degree_ne K i
+  by_cases hz : a i = 0
+  · have hrest : (degree i-1)%degree i = degree i-1 := Nat.mod_eq_of_lt (by omega)
+    have hne : degree i-1 ≠ source s i := (bounded s i).ne'
+    simp [hz,coefficient,hrest,hne]
+  · have he : a i + (degree i - 1) = (a i - 1) + degree i := by omega
+    rw [he,coefficient_step K hd,show a i-1+1 = a i by omega]
+    field_simp
+
+private def onPolynomial (s : Sector) : Polynomial K →ₗ[K] K :=
+  (basisMonomials (Fin 5) K).constr K (weight K s)
+
+omit [NeZero (6 : K)] in
+private theorem monomial_value (s : Sector) (a : Exp) (c : K) :
+    onPolynomial K s (monomial a c) = c * weight K s a := by
+  have e : monomial a c = c • basisMonomials (Fin 5) K a := by
+    rw [coe_basisMonomials,smul_monomial]; simp
+  rw [e,map_smul]
+  exact congrArg (c * ·) ((basisMonomials (Fin 5) K).constr_basis K (weight K s) a)
+
+private theorem polynomial_divergence (s : Sector) (i : Fin 5) (G : Polynomial K) :
+    onPolynomial K s (G * pderiv i (fermatPolynomial K)) = onPolynomial K s (pderiv i G) := by
+  induction G using MvPolynomial.induction_on' with
+  | monomial a c =>
+    rw [partial_fermat,X_pow_eq_monomial,C_mul_monomial,
+      monomial_mul,pderiv_monomial,monomial_value,monomial_value,mul_one]
+    change c * (degree i : K) * weight K s (a + Finsupp.single i (degree i-1)) =
+      c * (a i : K) * weight K s (a - Finsupp.single i 1)
+    rw [mul_assoc,mul_assoc,weight_axis]
+  | add P Q hP hQ => simp only [add_mul,map_add,hP,hQ]
+
+/-- Fermat coefficient at one of the 66 invariant monomials. -/
+def normalForm (s : Sector) : Symbols K (fermatPolynomial K) →ₗ[K] K :=
+  let L : Poles K →ₗ[K] K := Finsupp.lsum K (fun _ => onPolynomial K s)
+  (relations K (fermatPolynomial K)).liftQ L (Submodule.span_le.mpr (by
+    rintro _ ⟨n,i,G,rfl⟩
+    change L _ = 0
+    simp only [L,map_sub,Finsupp.lsum_single,polynomial_divergence,sub_self]))
+
+private theorem normalForm_symbol (s : Sector) (n : ℕ) (P : Polynomial K) :
+    normalForm K s (symbol K (fermatPolynomial K) n P) = onPolynomial K s P := by
+  change Finsupp.lsum K (fun _ : ℕ => onPolynomial K s) (Finsupp.single n P) = _
+  exact Finsupp.lsum_single _ _ _ _
+
+/-- The value on an arbitrary monomial, including every pole and every forbidden remainder. -/
+theorem normalForm_monomial (s : Sector) (n : ℕ) (a : Exp) (c : K) :
+    normalForm K s (symbol K (fermatPolynomial K) n (monomial a c)) =
+      c * ∏ i, (if a i % degree i = source s i then
+        ∏ j ∈ Finset.range (a i / degree i), (((source s i + 1 + degree i*j : ℕ) : K) / degree i)
+        else 0) := (normalForm_symbol K s n _).trans (monomial_value K s a c)
+
+private theorem injective : Function.Injective source := by
+  rintro (i|i) (j|j) h
+  · exact congrArg Sum.inl (basis_injective h)
+  · have eq := congrArg weightedDegree h
+    simp [source,(basis_properties i).1,(lowerExponent_properties j).1] at eq
+  · have eq := congrArg weightedDegree h
+    simp [source,(basis_properties j).1,(lowerExponent_properties i).1] at eq
+  · apply congrArg Sum.inr
+    apply basis_injective
+    funext k
+    have e := congrFun h k
+    change socle k - basisMonomial i k = socle k - basisMonomial j k at e
+    have := (basis_properties i).2.2 k
+    have := (basis_properties j).2.2 k
+    omega
+
+def frame (s : Sector) : Symbols K (fermatPolynomial K) := symbol K (fermatPolynomial K) (pole s - 1) (monomial (exponent (source s)) 1)
+
+theorem normalForm_frame (s t : Sector) : normalForm K s (frame K t) = if t = s then 1 else 0 := by
+  classical
+  rw [frame,normalForm_symbol,monomial_value,one_mul,weight]
+  have entry (i : Fin 5) : component K s (exponent (source t)) i =
+      if source t i = source s i then 1 else 0 := by
+    have h := bounded t i
+    have hlt : source t i < degree i := by omega
+    simp [component,coefficient,Nat.mod_eq_of_lt hlt,Nat.div_eq_of_lt hlt]
+  simp only [entry]
+  split_ifs with h
+  · subst t; simp
+  · obtain ⟨i,hi⟩ := Function.ne_iff.mp fun e => h (injective e)
+    exact Finset.prod_eq_zero (Finset.mem_univ i) (if_neg hi)
+
+/-- No polynomial divergence relation at any pole can kill a nonzero
+linear combination of the 33 upper and 33 lower standard residue symbols. -/
+theorem frame_linearIndependent : LinearIndependent K (frame K) := by
+  classical
+  rw [Fintype.linearIndependent_iff]
+  intro g h s
+  have e := congrArg (normalForm K s) h
+  simp only [map_sum,map_smul,normalForm_frame,map_zero,smul_eq_mul,mul_ite,mul_one,mul_zero] at e
+  simpa only [Finset.sum_ite_eq', Finset.mem_univ,if_true] using e
+
+
+/-- The unnormalized standard form at its ordinary pole order. -/
+def ordinaryFrame (s : Sector) : Symbols K (fermatPolynomial K) :=
+  ((pole s-1).factorial : K)⁻¹ • frame K s
+
+/-- Coordinates dual to the ordinary (unnormalized) standard forms. -/
+def ordinaryCoordinate (s : Sector) : Symbols K (fermatPolynomial K) →ₗ[K] K :=
+  ((pole s-1).factorial : K) • normalForm K s
+
+theorem ordinaryCoordinate_frame (s t : Sector) :
+    ordinaryCoordinate K s (ordinaryFrame K t) = if t = s then 1 else 0 := by
+  have h₂ : (2 : K) ≠ 0 := by
+    intro e
+    apply NeZero.ne (6 : K)
+    calc
+      (6 : K) = 2 * 3 := by norm_num
+      _ = 0 := by rw [e,zero_mul]
+  have h (u : Sector) : ((pole u-1).factorial : K) ≠ 0 := by cases u <;> simp [pole,h₂]
+  change ((pole s-1).factorial : K) * normalForm K s _ = _
+  rw [ordinaryFrame,map_smul,smul_eq_mul,normalForm_frame]
+  split_ifs with he
+  · subst t; rw [mul_one,mul_inv_cancel₀ (h s)]
+  · rw [mul_zero,mul_zero]
+
+section PrimeCoordinates
+open CycleQ2FermatHiggs (tangentMonomial)
+open CycleQ2FermatPrimeCoefficient (Tuple terminal count rowFactor reducedEntry reducedPole_eq primeEntry)
+
+variable (p : ℕ) [Fact p.Prime] [NeZero (6 : ZMod p)]
+
+theorem normalForm_prime_monomial (s : Sector) (a m : Tuple) (n : ℕ) :
+    normalForm (ZMod p) s (symbol (ZMod p) (fermatPolynomial (ZMod p)) n
+      (monomial (exponent fun i => a i + p*m i) 1)) =
+    reducedEntry p a m (source s) := by
+  classical
+  rw [normalForm_monomial,one_mul,reducedEntry]
+  change (∏ i, if (a i+p*m i)%degree i = source s i then
+    ∏ j ∈ Finset.range ((a i + p*m i)/degree i), (((source s i+1+degree i*j : ℕ) : ZMod p) / degree i)
+    else 0) = _
+  split_ifs with h
+  · apply Finset.prod_congr rfl
+    intro i _
+    have he := congrFun h i
+    change (a i+p*m i)%degree i = source s i at he
+    have hg : source s i + 1 ≠ degree i := by have := bounded s i; omega
+    rw [if_pos he]
+    simp only [count,terminal,rowFactor,he,if_neg hg,Finset.prod_div_distrib,Finset.prod_const,
+      Finset.card_range]
+  · obtain ⟨i,hi⟩ := Function.ne_iff.mp h
+    exact Finset.prod_eq_zero (Finset.mem_univ i) (if_neg hi)
+
+/-- The coefficient of the normalized p-fold monomial derivative in the
+ordinary Fermat residue frame is exactly the signed arithmetic matrix entry. -/
+theorem primeCoordinate (s u : Sector) (m : Fin 35) :
+    ordinaryCoordinate (ZMod p) u (((-1 : ZMod p)^p / (pole s - 1).factorial) •
+        symbol (ZMod p) (fermatPolynomial (ZMod p)) ((pole s - 1)+p)
+          (monomial (exponent fun i => source s i + p*tangentMonomial m i) 1)) =
+        primeEntry p s m u := by
+  change ((pole u - 1).factorial : ZMod p) * normalForm (ZMod p) u _ = _
+  rw [map_smul,smul_eq_mul,normalForm_prime_monomial,primeEntry]
+  by_cases e : terminal p (source s) (tangentMonomial m) = source u
+  · rw [reducedPole_eq s u m e]
+    ring
+  · simp only [reducedEntry,if_neg e,mul_zero]
+
+end PrimeCoordinates
+
+end CycleQ2FermatSymbolDetector
+
+#print axioms CycleQ2FermatSymbolDetector.normalForm_monomial
+#print axioms CycleQ2FermatSymbolDetector.frame_linearIndependent
+#print axioms CycleQ2FermatSymbolDetector.primeCoordinate
+end
+
+noncomputable section
+namespace CycleQ2FermatSymbolDetector
+
+open CycleQ2PolynomialPoleSymbols CycleQ2IncidenceNormalForm MvPolynomial
+open CycleQ2FermatHiggs (tangentMonomial tangent_properties socle)
+open CycleQ2FermatJacobian (exponent)
+open CycleQ2FermatPrimeCoefficient (Sector source pole primeEntry)
+
+variable (K : Type*) [Field K]
+
+private theorem fermatFullHomogeneous :
+    (fermatPolynomial K).IsWeightedHomogeneous fullGrading (6,0) := by
+  have H (j : Fin 5) : (X j ^ CycleQ2GenericSexticGradient.purePower j :
+      MvPolynomial (Fin 5) K).IsWeightedHomogeneous fullGrading (6,0) := by
+    rw [X_pow_eq_monomial]
+    apply isWeightedHomogeneous_monomial
+    rw [Finsupp.weight_single]
+    fin_cases j <;> decide
+  exact ((((H 0).add (H 1)).add (H 2)).add (H 3)).add (H 4)
+
+private theorem fermatLeading : (fermatPolynomial K).coeff (Finsupp.single 4 3) = 1 := by
+  classical
+  norm_num [fermatPolynomial,coeff_X_pow,Finsupp.single_eq_single_iff,Fin.ext_iff]
+
+variable {R : Type*} [CommRing R] (t : R →+* K)
+
+/-- Evaluate the universal monic family on the Fermat polynomial over the target field. -/
+def fermatSpecialize :
+    Symbols (TailRing R) (monicFamily R) →ₛₗ[monicEvaluation R t (fermatPolynomial K)]
+        Symbols K (fermatPolynomial K) :=
+  (Submodule.quotEquivOfEq _ _ (congrArg (relations K)
+      (map_monicFamily R t _ (fermatFullHomogeneous K) (fermatLeading K)))).toLinearMap.comp
+    (specialize (monicEvaluation R t (fermatPolynomial K)) (monicFamily R))
+
+theorem fermatSpecialize_iterate (a : FullSexticTailIndex) (s : Fin 5 →₀ ℕ) (n r : ℕ) :
+    fermatSpecialize K t ((connection (pderiv a) (monicFamily R))^[r]
+        (symbol (TailRing R) (monicFamily R) n (monomial s 1))) =
+      (-1 : K)^r • symbol K (fermatPolynomial K) (n+r)
+        (monomial (r • fullExponentOf a.val.val + s) 1) := by
+  simp only [fermatSpecialize, LinearMap.comp_apply]
+  rw [specialize_monic_iterate, map_smul]
+  rfl
+
+/-- The tangent monomial labels in the Fermat frame select actual monic coefficient coordinates. -/
+def tangentTail (m : Fin 35) : FullSexticTailIndex := by
+  let e := exponent (tangentMonomial m)
+  have H : Finsupp.weight fullGrading e = (6,0) :=
+    (fullGrading_eq_iff _ 6).mpr
+      ⟨(tangent_properties m).1, (tangent_properties m).2.1⟩
+  refine ⟨fullIndexOf e H, ?_⟩
+  change tangentMonomial m 4 < 3
+  have hb : tangentMonomial m 4 ≤ 1 := (tangent_properties m).2.2 4
+  omega
+
+@[simp] theorem tangentTail_exponent (m : Fin 35) :
+    fullExponentOf (tangentTail m).val.val = exponent (tangentMonomial m) :=
+  fullIndexOf_exponent (exponent (tangentMonomial m))
+    ((fullGrading_eq_iff (exponent (tangentMonomial m)) 6).mpr
+    ⟨(tangent_properties m).1, (tangent_properties m).2.1⟩)
+
+private theorem iterate_constant (a : FullSexticTailIndex) (b : R)
+    (x : Symbols (TailRing R) (monicFamily R)) (r : ℕ) :
+    (connection (pderiv a) (monicFamily R))^[r] ((C b : TailRing R) • x) =
+      (C b : TailRing R) • (connection (pderiv a) (monicFamily R))^[r] x := by
+  induction r with
+  | zero => rfl
+  | succ r ih =>
+    rw [Function.iterate_succ_apply', Function.iterate_succ_apply', ih,connection_smul,pderiv_C,
+      zero_smul,add_zero]
+
+/-- The p-fold coefficient derivative on the actual monic parameter space,
+projected to the ordinary Fermat frame, is the arithmetic prime matrix. -/
+theorem prime_monic_coordinate (p : ℕ) [Fact p.Prime] [NeZero (6 : ZMod p)]
+    (s u : Sector) (m : Fin 35) :
+    ordinaryCoordinate (ZMod p) u
+        (fermatSpecialize (ZMod p) (RingHom.id (ZMod p))
+        ((connection (pderiv (tangentTail m)) (monicFamily (ZMod p)))^[p]
+          ((C (((pole s - 1).factorial : ZMod p)⁻¹) : TailRing (ZMod p)) •
+            symbol (TailRing (ZMod p)) (monicFamily (ZMod p)) (pole s - 1)
+              (monomial (exponent (source s)) 1)))) = primeEntry p s m u := by
+  have h : p • fullExponentOf (tangentTail m).val.val + exponent (source s) =
+      exponent (fun i => source s i + p * tangentMonomial m i) := by
+    rw [tangentTail_exponent]
+    ext i
+    simp [Nat.add_comm]
+  rw [iterate_constant,map_smulₛₗ,fermatSpecialize_iterate,h,smul_smul]
+  simp only [monicEvaluation,eval₂Hom_C, RingHom.id_apply]
+  rw [mul_comm,← div_eq_mul_inv]
+  exact primeCoordinate p s u m
+
+end CycleQ2FermatSymbolDetector
+
+#print axioms CycleQ2FermatSymbolDetector.prime_monic_coordinate
+end
