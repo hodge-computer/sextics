@@ -2,13 +2,40 @@
    Floating point is presentation only; accepted proof data is never changed. */
 (() => {
   'use strict';
+  /* A jet is a value and its six ambient derivatives, times 2^e. Carrying the exponent
+     separately keeps high-degree factors inside single-precision range: a product is brought
+     back near 1 whenever it drifts, and a sum first aligns its two exponents. Only ratios
+     within one jet are ever used, so the exponent itself never reaches the screen. */
   const GLSL = `
-struct DivJet { float v; vec3 a; vec3 b; };
-DivJet dc(float v) { return DivJet(v,vec3(0.0),vec3(0.0)); }
-DivJet da(DivJet x,DivJet y) { return DivJet(x.v+y.v,x.a+y.a,x.b+y.b); }
-DivJet dm(DivJet x,DivJet y) { return DivJet(x.v*y.v,x.a*y.v+x.v*y.a,x.b*y.v+x.v*y.b); }
-DivJet ds(DivJet x,float s) { return DivJet(x.v/s,x.a/s,x.b/s); }
+struct DivJet { float v; vec3 a; vec3 b; float e; };
+const float DIV_NONE=-1e30;
+DivJet dc(float v) { return DivJet(v,vec3(0.0),vec3(0.0),v==0.0?DIV_NONE:0.0); }
+DivJet dn(DivJet x) {
+  vec3 g=max(abs(x.a),abs(x.b));
+  float m=max(abs(x.v),max(g.x,max(g.y,g.z)));
+  if(m==0.0) x.e=DIV_NONE;
+  else if(m<1e-8||m>1e8) {
+    float k=floor(log2(m)),s=exp2(-k);
+    x.v*=s; x.a*=s; x.b*=s; x.e+=k;
+  }
+  return x;
+}
+void dalign(inout DivJet x,inout DivJet y) {
+  float d=x.e-y.e;
+  if(d>0.0) { float s=exp2(-d); y.v*=s; y.a*=s; y.b*=s; y.e=x.e; }
+  else if(d<0.0) { float s=exp2(d); x.v*=s; x.a*=s; x.b*=s; x.e=y.e; }
+}
+DivJet da(DivJet x,DivJet y) {
+  dalign(x,y);
+  DivJet r=DivJet(x.v+y.v,x.a+y.a,x.b+y.b,x.e);
+  if(r.v==0.0) r=dn(r);
+  return r;
+}
+DivJet dm(DivJet x,DivJet y) {
+  return dn(DivJet(x.v*y.v,x.a*y.v+x.v*y.a,x.b*y.v+x.v*y.b,x.e+y.e));
+}
 float divisorDistance(DivJet r,DivJet i,bool complexValue) {
+  dalign(r,i);
   float scale=max(max(max(abs(r.a.x),abs(r.a.y)),max(abs(r.a.z),abs(r.b.x))),max(abs(r.b.y),abs(r.b.z)));
   scale=max(scale,max(max(max(abs(i.a.x),abs(i.a.y)),max(abs(i.a.z),abs(i.b.x))),max(abs(i.b.y),abs(i.b.z))));
   if(scale==0.0) return complexValue?length(vec2(r.v,i.v)):r.v;
@@ -177,69 +204,23 @@ float divisorDistance(DivJet r,DivJet i,bool complexValue) {
       const s = String(x);
       return /[.e]/i.test(s) ? s : s + '.0';
     };
-    // Evaluate a homogeneous polynomial in its quadratic inputs at their own
-    // projective scale. The same factor divides its value and gradient, so
-    // divisorDistance is unchanged without forming tiny high-degree products.
-    const degrees = nodes.map(([op]) => (op === 'v' ? 1 : 0));
-    for (let n = 0; n < nodes.length; n++) {
-      const [op, a, b] = nodes[n];
-      if (op === '+') degrees[n] = Math.max(degrees[a], degrees[b]);
-      else if (op === '*') degrees[n] = degrees[a] + degrees[b];
-    }
-    const quadratic = new Set(),
-      cuts = new Map();
-    function quadraticCut(n) {
-      if (cuts.has(n)) return cuts.get(n);
-      if (degrees[n] === 0) return true;
-      if (degrees[n] === 2) {
-        quadratic.add(n);
-        return true;
-      }
-      if (degrees[n] < 2) return false;
-      const [, a, b] = nodes[n];
-      const valid = quadraticCut(a) && quadraticCut(b);
-      cuts.set(n, valid);
-      return valid;
-    }
-    const canRescale = factors.flat().every((n) => degrees[n] <= 1 || quadraticCut(n));
-    if (!canRescale) quadratic.clear();
-    const basis = new Set();
-    function visitBasis(n) {
-      if (basis.has(n)) return;
-      const [op, a, b] = nodes[n];
-      if (op === '+' || op === '*') {
-        visitBasis(a);
-        visitBasis(b);
-      }
-      basis.add(n);
-    }
-    quadratic.forEach(visitBasis);
-    const order = quadratic.size
-      ? [...basis, ...[...used].filter((n) => !basis.has(n))]
-      : [...used];
+    const order = [...used];
     const lines = surface
       ? ['DivJet surfaceField(vec3 a,vec3 b) {']
       : [GLSL, 'float divisorField(vec3 a,vec3 b) {'];
-    // All factors are homogeneous. Projectively rescaling the coordinates
-    // prevents degree-48/60 values from underflowing on small saved sections.
+    // All factors are homogeneous, so the coordinates may be rescaled to unit size.
     lines.push(
       'float scale=max(max(max(abs(a.x),abs(a.y)),max(abs(a.z),abs(b.x))),max(abs(b.y),abs(b.z)));',
       'a/=max(scale,1e-20); b/=max(scale,1e-20);'
     );
-    for (const [at, n] of order.entries()) {
-      if (quadratic.size && at === basis.size) {
-        const values = [...quadratic].map((n) => `abs(d${n}.v)`);
-        const maximum = values.reduce((a, b) => `max(${a},${b})`);
-        lines.push(`float quadraticScale=max(${maximum},1e-20);`);
-        quadratic.forEach((n) => lines.push(`d${n}=ds(d${n},quadraticScale);`));
-      }
+    for (const n of order) {
       const [op, a, b] = nodes[n];
       let expr;
       if (op === 'c') expr = `dc(${literal(a)})`;
       else if (op === 'v') {
         const unit = [0, 0, 0, 0, 0, 0];
         unit[a] = 1;
-        expr = `DivJet(${a < 3 ? 'a' : 'b'}[${a % 3}],vec3(${unit.slice(0, 3).map(literal)}),vec3(${unit.slice(3).map(literal)}))`;
+        expr = `DivJet(${a < 3 ? 'a' : 'b'}[${a % 3}],vec3(${unit.slice(0, 3).map(literal)}),vec3(${unit.slice(3).map(literal)}),0.0)`;
       } else expr = `${op === '+' ? 'da' : 'dm'}(d${a},d${b})`;
       lines.push(`DivJet d${n}=${expr};`);
     }
@@ -248,7 +229,7 @@ float divisorDistance(DivJet r,DivJet i,bool complexValue) {
       if (factors.length !== 1 || (r !== zero && i !== zero))
         throw new Error('The surface polynomial must be scalar-real on this slice.');
       const value = `d${r === zero ? i : r}`;
-      lines.push(`return DivJet(${value}.v,${value}.a/max(scale,1e-20),${value}.b/max(scale,1e-20));`, '}');
+      lines.push(`return DivJet(${value}.v,${value}.a/max(scale,1e-20),${value}.b/max(scale,1e-20),${value}.e);`, '}');
       return { source: lines.join('\n'), operations: used.size };
     }
     lines.push('float distance=1e30,orientation=1.0;');
