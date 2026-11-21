@@ -1570,6 +1570,34 @@ with conjugation, the comparison of its graded spaces, and Higgs stability
 from Gauss–Manin horizontality. The conditional theorem concerns any fiber
 of the checked dense open.
 
+### Fermat pole reduction at two prime residue classes
+
+For the Fermat polynomial the coordinate degrees are \((6,6,6,6,3)\).
+Differentiate a pole \(p\) times in an invariant sextic monomial direction
+\(m\), then reduce its five exponents by the Fermat partial derivatives.
+On the linear pencil in that direction, the derivative specializes at
+Fermat to a sum of the 66 monomial pole classes. This equality holds
+modulo rational divergences on the cone whose denominators are powers
+of the Fermat polynomial. The rising factorial from differentiating
+cancels the denominators from lowering the pole order. For every prime \(p>6\) with \(p\equiv1\pmod6\),
+the resulting coefficient is nonzero exactly when adding \(m\) keeps
+the upper monomial in the standard basis. For \(p\equiv5\pmod6\) the
+nonzero entries instead subtract \(m\) from the lower monomial. These
+are opposite directions on the same graph of 33 upper and 33 lower
+basis monomials.
+
+The two computed families of matrices force a common subspace to be zero
+or full under a precise specialization hypothesis. In each characteristic
+the corresponding subspace must be stable under all 35 matrices, and its
+dimensions of projection to and intersection with the two coordinate
+summands must agree across the two characteristics. The proof allows
+subspaces that mix the two summands. To apply this calculation to the
+prescribed form requires identifying the matrices on reductions of the
+actual function-field residue relations, and finding a nonzero relation
+that persists over the generic coefficient field.
+[Fermat pole coefficients](GeometricFermatPoleReduction.lean) and
+[rank growth for the two directions](GeometricFermatStrictGrowth.lean)
+
 ## An exact rational correction on the genus-ten chart
 
 In the normal coordinates \(T,h\), the explicitly defined rational
