@@ -316,14 +316,29 @@ alternating restrictions of regular one-forms and the derivative of
 functions on the overlap. The trace is linear over the generic
 coefficient field. Tensoring with a second cochain complex gives a
 chain map lowering total degree by two. Its only contributing
-bidegree has curve degree two, where it applies the actual overlap
-trace to the curve factor.
+bidegree has curve degree two, where it applies the overlap trace to
+the curve factor.
 
-For the tensor product of two affine coordinate algebras, the actual
-relative cotangent module splits into the scalar extensions of the two
-cotangent modules. On a pure tensor of functions the derivation has
-the corresponding two Leibniz terms. Comparison of the resulting
-total complex with the de Rham complex on the proper graph remains open.
+For a closed degree-one curve cochain, cup product followed by this
+trace lowers total degree by one on the tensor complex. Changing the
+curve cochain by a boundary gives a homotopy, so the resulting map on
+cohomology depends only on its class. The overlap formula agrees with the
+proper curve’s de Rham trace. In degree four the map lands in degree three
+of the horizontal complex and commutes with restriction to a smaller open.
+[Curve cup product and trace](GeometricCurveCupTrace.lean)
+
+For the tensor product of two affine coordinate algebras, the relative
+cotangent module splits into the scalar extensions of the two cotangent
+modules. On a pure tensor of functions the derivation has the corresponding
+two Leibniz terms. For every smooth affine open, sections of its exterior
+differential sheaves are the exterior powers of its module of differentials,
+and their higher cohomology vanishes. This computes the ordinary degree-four
+class on the product using the two affine curve charts. Identifying that
+complex with the tensor complex still requires matching the exterior products,
+the differential, and restriction to the overlap.
+[Exterior powers under localization](GeometricAffineExteriorLocalization.lean),
+[affine de Rham acyclicity](GeometricAffineExteriorAcyclicity.lean), and
+[two-chart cohomology](GeometricRectangularHypercohomology.lean)
 
 ## Supported degree-four logarithmic classes on principal opens
 
