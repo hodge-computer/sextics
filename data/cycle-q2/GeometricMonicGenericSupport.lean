@@ -13162,7 +13162,7 @@ open CycleQ2GenericSmoothCurveGraph
 
 variable {V : parameterScheme.Opens} {t : Fin 3 → ℂ}
 
-theorem exists_smooth_curve_graph_with_projection (W : (Time toRaw V).Opens) (hW : (W : Set (Time toRaw V)).Nonempty) :
+theorem exists_smooth_curve_graph_with_quasiFinite_test (W : (Time toRaw V).Opens) (hW : (W : Set (Time toRaw V)).Nonempty) :
     ∃ (C : Scheme) (c : C ⟶ Spec (CommRingCat.of genericField)) (r : C ⟶ Completion V)
       (hr : r ≫ structureMap V = c ≫ CycleQ2LiteralIncidenceGenericCorrespondence.genericPoint),
       IsIntegral C ∧ IsProper c ∧ Smooth c ∧
@@ -13175,7 +13175,7 @@ theorem exists_smooth_curve_graph_with_projection (W : (Time toRaw V).Opens) (hW
       ∃ (D : Scheme) (j : D ⟶ C) (a : D ⟶ Time toRaw V)
         (ha : j ≫ r = a ≫ CycleQ2LiteralIncidenceRelativeCompletion.inclusion V),
         IsOpenImmersion j ∧ IsDominant j ∧ Nonempty D ∧ Set.range a ⊆ (W : Set (Time toRaw V)) ∧
-        IsPullback (pullback.fst a (curveMap toRaw V t)) (fromTest V t r j a ha) j (toCurve V t r) := by
+        LocallyQuasiFinite a ∧ IsPullback (pullback.fst a (curveMap toRaw V t)) (fromTest V t r j a ha) j (toCurve V t r) := by
   obtain ⟨U, hle, hU, hI, hC, _, hp, hs, _, hdim, E, hE, j, hj, hjd, hjs, _, hjr, _, _⟩ :=
     test_proper_smooth_curve V W hW
   let n := @CycleQ2IntegralCurveNormalization.normalize _ hI
@@ -13189,7 +13189,12 @@ theorem exists_smooth_curve_graph_with_projection (W : (Time toRaw V).Opens) (hW
     change f ≫ pullback.snd _ _ ≫ CycleQ2LiteralIncidenceRelativeNormalization.normalizedMap V =
       f ≫ pullback.fst _ _ ≫ genericMorphism
     rw [pullback.condition]
+  have : LocallyQuasiFinite genericMorphism :=
+    (HasRingHomProperty.Spec_iff (P := @LocallyQuasiFinite)).mpr
+      (RingHom.quasiFinite_algebraMap.mpr (inferInstance : Algebra.QuasiFinite MonicRing K))
+  have : LocallyQuasiFinite (testMap V) := by dsimp only [testMap]; infer_instance
   let a := E.ι ≫ U.ι ≫ testMap V
+  have : LocallyQuasiFinite a := by dsimp only [a]; infer_instance
   have ha : j ≫ r = a ≫ CycleQ2LiteralIncidenceRelativeCompletion.inclusion V := by
     have H : j ≫ f = E.ι ≫ U.ι ≫ CycleQ2LiteralIncidenceGenericModel.inclusion V :=
       (Category.assoc _ _ _).symm.trans hjr
@@ -13228,9 +13233,27 @@ theorem exists_smooth_curve_graph_with_projection (W : (Time toRaw V).Opens) (hW
       (q ≫ CycleQ2ProjectiveLineStructure.structureMap genericField) := hq.symm ▸ hcDim
   refine ⟨_, c, r, hc, hC, hpc, hsc, inferInstance, inferInstance,
     target_proper V t r c hc, target_in_original_support V t r c hc, ⟨q,hqf,hqd,hqc,hqDim⟩, E.toScheme, j, a, ha, hj, hjd, hE.to_subtype, ?_,
-    test_square V t r j a ha⟩
+    inferInstance, test_square V t r j a ha⟩
   rintro _ ⟨x, rfl⟩
   exact hle ((E.ι x).property)
+
+theorem exists_smooth_curve_graph_with_projection (W : (Time toRaw V).Opens) (hW : (W : Set (Time toRaw V)).Nonempty) :
+    ∃ (C : Scheme) (c : C ⟶ Spec (CommRingCat.of genericField)) (r : C ⟶ Completion V)
+      (hr : r ≫ structureMap V = c ≫ CycleQ2LiteralIncidenceGenericCorrespondence.genericPoint),
+      IsIntegral C ∧ IsProper c ∧ Smooth c ∧
+      IsClosedImmersion (embeddingGeneric V t r c hr) ∧ IsProper (toCurve V t r) ∧
+      IsProper (target V t r c hr) ∧
+      Set.range (target V t r c hr) ⊆ Set.range (genericAmbientProjection V t) ∧
+      (∃ q : C ⟶ CycleQ2LaurentProjectiveLine.line genericField,
+        IsFinite q ∧ IsDominant q ∧ q ≫ CycleQ2ProjectiveLineStructure.structureMap genericField = c ∧
+        SmoothOfRelativeDimension 1 (q ≫ CycleQ2ProjectiveLineStructure.structureMap genericField)) ∧
+      ∃ (D : Scheme) (j : D ⟶ C) (a : D ⟶ Time toRaw V)
+        (ha : j ≫ r = a ≫ CycleQ2LiteralIncidenceRelativeCompletion.inclusion V),
+        IsOpenImmersion j ∧ IsDominant j ∧ Nonempty D ∧ Set.range a ⊆ (W : Set (Time toRaw V)) ∧
+        IsPullback (pullback.fst a (curveMap toRaw V t)) (fromTest V t r j a ha) j (toCurve V t r) := by
+  obtain ⟨C,c,r,hr,hC,hp,hs,he,hcurve,ht,hrange,hproj,D,j,a,ha,hj,hd,hD,hw,_,hpull⟩ :=
+    exists_smooth_curve_graph_with_quasiFinite_test (t := t) W hW
+  exact ⟨C,c,r,hr,hC,hp,hs,he,hcurve,ht,hrange,hproj,D,j,a,ha,hj,hd,hD,hw,hpull⟩
 
 end CycleQ2GenericGraphFiniteProjection
 

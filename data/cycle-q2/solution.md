@@ -231,10 +231,20 @@ Noether normalization bounds the dimension of each affine chart of the
 closure by two. A chain of irreducible closed subsets of the boundary can be
 extended by an ambient component, which gives the bound of one. Properness
 makes the projection closed, so the projected boundary satisfies the same
-bound. To use this estimate in the residue pairing, one still needs to show
-that the generic sweep has dimension two and identify the trace of its
-supported class with the prescribed residue.
+bound.
 [Marked closure and boundary dimension](GeometricMarkedClosureBoundaryDimension.lean)
+
+There is an algebraically independent choice of section coefficients for
+which the generic sweep has dimension two. At the seed, the marked
+first-order curve detects a quasi-finite point of the projection. This
+gives a nonempty time open on which the test surface over the generic
+coefficient field still has a quasi-finite point. The quasi-finite locus
+is open, so it contains a nonempty open of the smooth surface. Its image
+has dimension at least two and cannot be contained in the projected
+boundary. Thus the marked surface has a quasi-finite point outside that
+boundary. The same proper time curve carries a finite dominant projection
+to the projective line for the curve trace.
+[Marked point and generic sweep](GeometricMarkedProjectionSurvives.lean)
 
 ## Localization on the actual swept complement
 
