@@ -313,7 +313,7 @@ and is compatible with addition and postcomposition. This supplies
 the passage from Čech cocycles to the genuine derived category.
 [Derived Čech resolution](GeometricMonicGenericSupport.lean)
 
-## The coefficient-linear curve trace on the tensor complex
+## The proper-curve trace on the product
 
 The native two-chart curve complex has an explicit map to the
 coefficient field in total degree two. It annihilates both the
@@ -349,14 +349,24 @@ the tensor rows identify with the de Rham sections of their product.
 The identification commutes with the differential in every degree and with
 restriction in both factors. For an affine curve open without a single
 frame, the proof glues functions and Kähler one-forms tensored with the
-target sections. Passing from these row isomorphisms to a trace on the
-degree-four class still requires comparing the two cones.
+target sections. A single injective resolution computes the ordinary
+class on all affine target opens. Under restriction, the representative
+of each supported class maps to its representative on the smaller open.
 [Affine product cochain map](GeometricUnframedTensorAssembly.lean),
 [descent on the curve opens](GeometricAffinePairDescent.lean),
 [native curve tensor and its mapping fiber](GeometricCurveTensorFiber.lean),
 [exterior powers under localization](GeometricAffineExteriorLocalization.lean),
 [affine de Rham acyclicity](GeometricAffineExteriorAcyclicity.lean), and
 [two-chart cohomology](GeometricRectangularHypercohomology.lean)
+
+The two signed mapping cones agree, including the minus sign on the
+overlap. This gives an action of each closed degree-one curve cochain
+on ordinary degree-four de Rham cohomology of the actual product over
+a framed affine target open. Its value lies in degree three of that
+open and depends only on the cohomology class of the curve cochain.
+[Tensor product of the two curve rows](GeometricTensorTwoRows.lean),
+[signed mapping cone](GeometricSignedRowComparison.lean), and
+[proper-product trace](GeometricProperRectangleTrace.lean)
 
 ## Supported degree-four logarithmic classes on principal opens
 
@@ -395,12 +405,19 @@ coefficient of the double logarithmic pole detects the local class. This
 proves that the global degree-four class is nonzero with support on the
 surface. The proper parameter curve carrying this class and the original
 marked dual-number tangent come from the same integral time neighborhood.
-After forgetting support, the class restricts to zero over a target open
-containing the function-field point of the protected residue.
-The remaining comparison must identify the prescribed residue in the image
-obtained by pairing with degree-one cohomology of the parameter curve and
-integrating along that curve. On the affine incidence sextic, the cubic
-and the section row define one logarithmic two-form. Pullback to the generic
+On the product of this curve with the complement of the boundary,
+take a framed affine neighborhood of the protected function-field point
+whose inverse image misses the marked surface. After forgetting support,
+the class restricts to zero there. Every degree-one curve cocycle therefore
+sends it to zero under the proper-product trace. The same affine open
+carries the actual weighted three-form. Vanishing of its degree-three
+class supplies a two-form primitive there, which specializes to a rational
+primitive on the protected fourfold. What remains is to put the class of
+that particular weighted three-form in the span of the cylinder values.
+[Marked cylinder and primitive criterion](GeometricProperRectangleTrace.lean)
+
+On the affine incidence sextic, the cubic and the section row define
+one logarithmic two-form. Pullback to the generic
 time charts gives their logarithmic form over the generic coefficient field.
 Pullback to the marked dual numbers gives the two original equation jets over
 the complex numbers. After clearing the two equations and wedging with the

@@ -114,7 +114,8 @@ open CycleQ2ClosedGraphSupport (complement support)
 local instance derived (X : TopCat.{0}) : HasDerivedCategory.{1} (AbSheaf X) :=
   HasDerivedCategory.standard _
 
-private theorem forget_off {Y S : Scheme.{0}} (i : S ⟶ Y) [IsClosedImmersion i] (O : Y.Opens)
+/-- A supported class has zero ordinary restriction on each open disjoint from its support. -/
+theorem forget_off {Y S : Scheme.{0}} (i : S ⟶ Y) [IsClosedImmersion i] (O : Y.Opens)
     (off : O ≤ complement i) {K : DerivedCategory.{1} (AbSheaf (show TopCat from Y))}
     (z : (DerivedCategory.singleFunctor (AbSheaf (show TopCat from Y)) 0).obj (support i ⊤) ⟶ K) :
     let E := DerivedCategory.singleFunctor (AbSheaf (show TopCat from Y)) 0
@@ -146,18 +147,14 @@ local notation "W" => π ⁻¹ᵁ U
 local notation "E" => DerivedCategory.singleFunctor (AbSheaf (show TopCat from (W).toScheme)) 0
 
 include hs in
-/-- The graph square gives a single target open containing the function point on
-which the ordinary image of the specified supported class restricts to zero. -/
-theorem vanishes
+/-- A target neighborhood of the function point misses the marked surface. -/
+theorem avoiding
     (hU : (U : Set genericAmbient) = (((m).imageι ≫ g) '' (Set.range (m).toImage)ᶜ)ᶜ)
     (i : S ⟶ (W).toScheme) [IsClosedImmersion i] (v : S ⟶ TestSurface V t a)
-    (square : IsPullback i (v ≫ (m).toImage) (W).ι ((m).imageι ≫ embeddingGeneric V t r c hc))
-    (K : DerivedCategory.{1} (AbSheaf (show TopCat from (W).toScheme)))
-    (z : (E).obj (support i ⊤) ⟶ K) :
+    (square : IsPullback i (v ≫ (m).toImage) (W).ι ((m).imageι ≫ embeddingGeneric V t r c hc)) :
     ∃ A : genericAmbient.Opens, A ≤ U ∧
       Set.range CycleQ2GenericGraphFunctionStalk.functionPoint ⊆ (A : Set genericAmbient) ∧
-      (E).map (freeOpenMap (show ((W).ι ≫ π) ⁻¹ᵁ A ≤ ⊤ from le_top)) ≫
-        (E).map (CycleQ2SupportMV.π (complement i) ⊤) ≫ z = 0 := by
+      ((W).ι ≫ π) ⁻¹ᵁ A ≤ complement i := by
   let A := CycleQ2GenericProperGraphSupport.complement V t
   have outside (x : Graph V t r) : g x ∉ A := fun hx =>
     hx (target_in_original_support V t r c hc ⟨x,rfl⟩)
@@ -184,7 +181,24 @@ theorem vanishes
       have hpoint : ((W).ι ≫ π) (i s) = g (m (v s)) :=
         congrArg (fun (f : S ⟶ genericAmbient) => f s) fac
       exact outside (m (v s)) (hpoint ▸ hx)
-    exact forget_off i O off z
+    exact off
+
+set_option maxHeartbeats 1200000 in
+include hs in
+/-- The graph square gives a single target open containing the function point on
+which the ordinary image of the specified supported class restricts to zero. -/
+theorem vanishes
+    (hU : (U : Set genericAmbient) = (((m).imageι ≫ g) '' (Set.range (m).toImage)ᶜ)ᶜ)
+    (i : S ⟶ (W).toScheme) [IsClosedImmersion i] (v : S ⟶ TestSurface V t a)
+    (square : IsPullback i (v ≫ (m).toImage) (W).ι ((m).imageι ≫ embeddingGeneric V t r c hc))
+    (K : DerivedCategory.{1} (AbSheaf (show TopCat from (W).toScheme)))
+    (z : (E).obj (support i ⊤) ⟶ K) :
+    ∃ A : genericAmbient.Opens, A ≤ U ∧
+      Set.range CycleQ2GenericGraphFunctionStalk.functionPoint ⊆ (A : Set genericAmbient) ∧
+      (E).map (freeOpenMap (show ((W).ι ≫ π) ⁻¹ᵁ A ≤ ⊤ from le_top)) ≫
+        (E).map (CycleQ2SupportMV.π (complement i) ⊤) ≫ z = 0 := by
+  obtain ⟨A,hAU,hpoint,hoff⟩ := avoiding V t r c hc j a ha hs U hU i v square
+  exact ⟨A,hAU,hpoint,forget_off i _ hoff z⟩
 
 end CycleQ2MarkedFunctionPoint
 
@@ -240,13 +254,108 @@ def HasNonzeroNormalizedClass (π : Y ⟶ genericAmbient) (U : genericAmbient.Op
         E.map (CycleQ2InjectiveCech.freeOpenMap (show π ⁻¹ᵁ A ≤ ⊤ from le_top)) ≫
           E.map (CycleQ2SupportMV.π (complement i) ⊤) ≫ z = 0
 
+/-- The Cartesian presentation of the open product as a literal fiber product. -/
+theorem literalSquare {C : Scheme} (c : C ⟶ Spec (CommRingCat.of genericField))
+    (U : genericAmbient.Opens) :
+    IsPullback ((pullback.snd c T ⁻¹ᵁ U).ι ≫ pullback.fst c T)
+      (pullback.snd c T ∣_ U) c (U.ι ≫ T) :=
+  (isPullback_morphismRestrict (pullback.snd c T) U).flip.paste_horiz
+    (IsPullback.of_hasPullback c T)
+
+abbrev literalIso {C : Scheme} (c : C ⟶ Spec (CommRingCat.of genericField))
+    (U : genericAmbient.Opens) := (literalSquare c U).isoPullback
+
+abbrev literalOpen {C : Scheme} (c : C ⟶ Spec (CommRingCat.of genericField))
+    (U : genericAmbient.Opens) := (literalIso c U).inv ≫ (pullback.snd c T ⁻¹ᵁ U).ι
+
+@[reassoc]
+theorem literalOpen_fst {C : Scheme} (c : C ⟶ Spec (CommRingCat.of genericField))
+    (U : genericAmbient.Opens) :
+    literalOpen c U ≫ pullback.fst c T = pullback.fst c (U.ι ≫ T) :=
+  (Category.assoc _ _ _).trans (literalSquare c U).isoPullback_inv_fst
+
+@[reassoc]
+theorem literalOpen_snd {C : Scheme} (c : C ⟶ Spec (CommRingCat.of genericField))
+    (U : genericAmbient.Opens) :
+    literalOpen c U ≫ pullback.snd c T = pullback.snd c (U.ι ≫ T) ≫ U.ι := by
+  rw [literalOpen, Category.assoc, ← morphismRestrict_ι, ← Category.assoc,
+    (literalSquare c U).isoPullback_inv_snd]
+
+theorem literalOpen_overField {C : Scheme} (c : C ⟶ Spec (CommRingCat.of genericField))
+    (U : genericAmbient.Opens) : literalOpen c U ≫ productBase c T = productBase c (U.ι ≫ T) :=
+  (Category.assoc _ _ _).symm.trans (congrArg (fun f => f ≫ c) (literalOpen_fst c U))
+
+private theorem literal_cartesian {S X C B : Scheme} {i : S ⟶ X} {v : S ⟶ C}
+    {u : X ⟶ B} {b : C ⟶ B} (h : IsPullback i v u b) {Y : Scheme} (e : X ≅ Y) :
+    IsPullback (i ≫ e.hom) v (e.inv ≫ u) b := by
+  apply h.of_iso (Iso.refl _) e (Iso.refl _) (Iso.refl _) <;> simp
+
+/-- A normalized supported class on the literal product with the proper curve. Its support
+projects properly and misses a target neighborhood of the function point. -/
+def LiteralClass {C S : Scheme} (c : C ⟶ Spec (CommRingCat.of genericField))
+    (U : genericAmbient.Opens) (i : S ⟶ pullback c (U.ι ≫ T)) : Prop :=
+  let ρ := pullback.snd c (U.ι ≫ T)
+  let q := productBase c (U.ι ≫ T)
+  IsProper (i ≫ ρ) ∧ SmoothOfRelativeDimension 2 (i ≫ q) ∧
+    ∃ (h : IsClosedImmersion i) (h₄ : SmoothOfRelativeDimension 4 q),
+      let := h
+      let := h₄
+      ∃ z : SupportedClass q i, z ≠ 0 ∧ IsNormalized q i z ∧
+        ∃ A : genericAmbient.Opens, A ≤ U ∧
+          Set.range CycleQ2GenericGraphFunctionStalk.functionPoint ⊆ (A : Set genericAmbient) ∧
+          (ρ ≫ U.ι) ⁻¹ᵁ A ≤ complement i ∧
+          let E := DerivedCategory.singleFunctor (AbSheaf (show TopCat from (pullback c (U.ι ≫ T) : Scheme))) 0
+          E.map (CycleQ2InjectiveCech.freeOpenMap (show (ρ ≫ U.ι) ⁻¹ᵁ A ≤ ⊤ from le_top)) ≫
+            E.map (CycleQ2SupportMV.π (complement i) ⊤) ≫ z = 0
+
+private theorem make_literal {C S : Scheme} (c : C ⟶ Spec (CommRingCat.of genericField))
+    (U : genericAmbient.Opens) (i : S ⟶ (pullback.snd c T ⁻¹ᵁ U).toScheme)
+    (x : S) [IsClosedImmersion i] [IsProper c]
+    [NoetherianSpace (pullback.snd c T ⁻¹ᵁ U).toScheme]
+    [SmoothOfRelativeDimension 4 ((pullback.snd c T ⁻¹ᵁ U).ι ≫ productBase c T)]
+    [SmoothOfRelativeDimension 2 (i ≫ (pullback.snd c T ⁻¹ᵁ U).ι ≫ productBase c T)]
+    (A : genericAmbient.Opens) (hAU : A ≤ U)
+    (hpoint : Set.range CycleQ2GenericGraphFunctionStalk.functionPoint ⊆ (A : Set genericAmbient))
+    (hoff : ((pullback.snd c T ⁻¹ᵁ U).ι ≫ pullback.snd c T) ⁻¹ᵁ A ≤ complement i) :
+    LiteralClass c U (i ≫ (literalIso c U).hom) := by
+  let e := literalIso c U
+  let I := i ≫ e.hom
+  let W := pullback.snd c T ⁻¹ᵁ U
+  let q := productBase c (U.ι ≫ T)
+  let ρ := pullback.snd c (U.ι ≫ T)
+  have field : e.hom ≫ q = W.ι ≫ productBase c T := by
+    change e.hom ≫ pullback.fst _ _ ≫ c = W.ι ≫ pullback.fst c T ≫ c
+    rw [← Category.assoc, (literalSquare c U).isoPullback_hom_fst, Category.assoc]
+  have proj : e.hom ≫ ρ ≫ U.ι = W.ι ≫ pullback.snd c T := by
+    rw [← Category.assoc, (literalSquare c U).isoPullback_hom_snd, morphismRestrict_ι]
+  let _ : NoetherianSpace (pullback c (U.ι ≫ T) : Scheme) := e.inv.isOpenEmbedding.isInducing.noetherianSpace
+  have hq : q = e.inv ≫ (W.ι ≫ productBase c T) := by rw [← field, Iso.inv_hom_id_assoc]
+  let _ : SmoothOfRelativeDimension 4 q := by
+    rw [hq]
+    exact smoothOfRelativeDimension_comp 0 4 _ _
+  let _ : SmoothOfRelativeDimension 2 (I ≫ q) := by
+    change SmoothOfRelativeDimension 2 ((i ≫ e.hom) ≫ q)
+    rw [Category.assoc, field]
+    infer_instance
+  obtain ⟨z,hz⟩ := CycleQ2SmoothSurfaceGysin.exists_global (I ≫ q) q I rfl
+  have away : (ρ ≫ U.ι) ⁻¹ᵁ A ≤ complement I := by
+    rintro _ hy ⟨s,rfl⟩
+    apply hoff (show i s ∈ (W.ι ≫ pullback.snd c T) ⁻¹ᵁ A from ?_) ⟨s,rfl⟩
+    have eqn := congrArg (fun f : W.toScheme ⟶ genericAmbient => f (i s)) proj
+    change (W.ι ≫ pullback.snd c T) (i s) ∈ A
+    rw [← eqn]
+    exact hy
+  exact ⟨inferInstance, inferInstance, inferInstance, inferInstance, z,
+    CycleQ2LogDetection.normalized_ne_zero (I ≫ q) q I rfl x z hz, hz,
+    A,hAU,hpoint,away,CycleQ2MarkedFunctionPoint.forget_off I _ away z⟩
+
 abbrev ProductProperty := ∀ {Y S : Scheme.{0}},
   (Y ⟶ genericAmbient) → genericAmbient.Opens → (Y ⟶ Spec (CommRingCat.of genericField)) →
     (S ⟶ Y) → Prop
 
 /-- A surviving product with a property depending on seed compatibility, the open time test,
 and smoothness of its marked surface over the generic field. -/
-def SurvivesWithGeometry (P : Prop → Prop → ProductProperty) : Prop :=
+def SurvivesOnProduct (P : Prop → Prop → Prop → ProductProperty) : Prop :=
     ∃ (t : Fin 3 → ℂ), AlgebraicIndependent ℚ t ∧ ∃ V : parameterScheme.Opens, seedBasePoint ∈ V ∧
       ∃ (C : Scheme) (c : C ⟶ Spec (CommRingCat.of genericField)) (r : C ⟶ Completion V)
         (hc : r ≫ structureMap V = c ≫ genericPoint) (D : Scheme) (j : D ⟶ C)
@@ -268,7 +377,13 @@ def SurvivesWithGeometry (P : Prop → Prop → ProductProperty) : Prop :=
             (∃ s : S, g.QuasiFiniteAt (m (v s))) ∧
               P (∃ hV : seedBasePoint ∈ V, CycleQ2MarkedGenericSurvives.SeedCompatible t V hV c r j a)
                 (IsOpenImmersion j ∧ SmoothOfRelativeDimension 2 (i ≫ W.ι ≫ productBase c T))
+                (IsPullback (i ≫ (literalIso c U).hom) (v ≫ m.toImage) (literalOpen c U) b ∧
+                  LiteralClass c U (i ≫ (literalIso c U).hom))
                 (W.ι ≫ pullback.snd c T) U (W.ι ≫ productBase c T) i
+
+/-- The surface and its relative smoothness on the corresponding open of the original product. -/
+abbrev SurvivesWithGeometry (P : Prop → Prop → ProductProperty) : Prop :=
+  SurvivesOnProduct (fun seed facts _ {_ _} π U p i => P seed facts π U p i)
 
 /-- A surviving product with a property depending on its first-order seed compatibility. -/
 abbrev SurvivesWithSeed (P : Prop → ProductProperty) : Prop :=
@@ -277,10 +392,10 @@ abbrev SurvivesWithSeed (P : Prop → ProductProperty) : Prop :=
 /-- The original product and support data, with a property of the supported class. -/
 def SurvivesWith (P : ProductProperty) : Prop := SurvivesWithSeed (fun _ => @P)
 
-private theorem exists_surviving_with (P : Prop → Prop → ProductProperty)
-    (hP : ∀ {seed facts : Prop} {Y S : Scheme.{0}} (π : Y ⟶ genericAmbient) (U : genericAmbient.Opens)
+private theorem exists_surviving_on_product (P : Prop → Prop → Prop → ProductProperty)
+    (hP : ∀ {seed facts literal : Prop} {Y S : Scheme.{0}} (π : Y ⟶ genericAmbient) (U : genericAmbient.Opens)
       (p : Y ⟶ Spec (CommRingCat.of genericField)) (i : S ⟶ Y),
-      seed → facts → HasNonzeroNormalizedClass π U p i → P seed facts π U p i) : SurvivesWithGeometry P := by
+      seed → facts → literal → HasNonzeroNormalizedClass π U p i → P seed facts literal π U p i) : SurvivesOnProduct P := by
   obtain ⟨t,ht,V,hV,C,c,r,hc,D,j,a,ha,hCompatible,hC,hp,hc₁,hproj,hj,hjd,hs,_,hB,hd,z,hz,hout⟩ :=
     CycleQ2MarkedGenericSurvives.exists_compatible_marked_point_outside_projected_boundary
   let m := fromTest V t r j a ha
@@ -345,9 +460,21 @@ private theorem exists_surviving_with (P : Prop → Prop → ProductProperty)
   let : SmoothOfRelativeDimension 2 p := smoothOfRelativeDimension_comp 0 2 _ _
   have hsource : SmoothOfRelativeDimension 2 (i ≫ q) := hi.symm ▸ inferInstanceAs
     (SmoothOfRelativeDimension 2 p)
-  refine ⟨hproper,⟨s,hsv.symm ▸ hz⟩,hP _ _ _ _ ⟨hV, hCompatible⟩ ⟨hj, hsource⟩ ?_⟩
+  let _ : NoetherianSpace W.toScheme := W.ι.isOpenEmbedding.isInducing.noetherianSpace
+  obtain ⟨A,hAU,hpt,hoff⟩ :=
+    CycleQ2MarkedFunctionPoint.avoiding V t r c hc j a ha hs U hU i v square
+  refine ⟨hproper,⟨s,hsv.symm ▸ hz⟩,hP _ _ _ _ ⟨hV, hCompatible⟩ ⟨hj, hsource⟩
+    ⟨literal_cartesian square (literalIso c U), make_literal c U i s A hAU hpt hoff⟩ ?_⟩
   exact ⟨inferInstance,inferInstance,z',CycleQ2LogDetection.normalized_ne_zero p q i hi s z' hlog,
-    hlog,CycleQ2MarkedFunctionPoint.vanishes V t r c hc j a ha hs U hU i v square _ z'⟩
+    hlog,A,hAU,hpt,CycleQ2MarkedFunctionPoint.forget_off i _ hoff z'⟩
+
+private theorem exists_surviving_with (P : Prop → Prop → ProductProperty)
+    (hP : ∀ {seed facts : Prop} {Y S : Scheme.{0}} (π : Y ⟶ genericAmbient) (U : genericAmbient.Opens)
+      (p : Y ⟶ Spec (CommRingCat.of genericField)) (i : S ⟶ Y),
+      seed → facts → HasNonzeroNormalizedClass π U p i → P seed facts π U p i) : SurvivesWithGeometry P :=
+  exists_surviving_on_product _ (by
+    intro seed facts L Y S π U p i hs hf _ hn
+    exact hP π U p i hs hf hn)
 
 /-- The product with the whole proper curve carries the normalized logarithmic class
 on a nonempty marked surface after deleting a target subset of dimension at most one. -/
@@ -380,6 +507,15 @@ theorem exists_seed_compatible_framed_product :
     intro _ _ _ _ _ _ _ _ hs hf h
     exact ⟨hs, hf, h⟩)
 
+/-- The literal fiber product carries a normalized nonzero class on the same marked surface
+as the open-product class, with a proper projection and an open missing the support. -/
+theorem exists_seed_compatible_literal_product :
+    SurvivesOnProduct (fun seed facts literal {_ _} π U p i =>
+      seed ∧ facts ∧ literal ∧ HasNonzeroNormalizedClass π U p i) :=
+  exists_surviving_on_product _ (by
+    intro _ _ _ _ _ _ _ _ _ hs hf hl hn
+    exact ⟨hs,hf,hl,hn⟩)
+
 end CycleQ2SurvivingProductGysin
 #print axioms CycleQ2SurvivingProductGysin.exists_surviving_product
 #print axioms CycleQ2SurvivingProductGysin.exists_surviving_nonzero_product
@@ -387,3 +523,5 @@ end CycleQ2SurvivingProductGysin
 #print axioms CycleQ2SurvivingProductGysin.exists_seed_compatible_nonzero_product
 
 #print axioms CycleQ2SurvivingProductGysin.exists_seed_compatible_framed_product
+
+#print axioms CycleQ2SurvivingProductGysin.exists_seed_compatible_literal_product
