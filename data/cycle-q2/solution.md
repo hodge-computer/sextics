@@ -413,6 +413,17 @@ minus the velocity of the cubic.
 [nonvanishing with support](GeometricSupportedClassNonvanishing.lean), and
 [the marked class near the function point](GeometricMarkedFundamentalClass.lean)
 
+For a normalized supported class, choose a chart with ordered equations
+\(f,g\) and a point of the surface on that chart. There is a smaller
+chart through the point on which the restricted equations are the first
+two coordinates of an exact frame. For every regular two-form \(\omega\),
+the four-form \(d\log f\wedge d\log g\wedge\omega\) on their common
+principal open has a unique regular numerator after multiplication by
+\(fg\). Taking its two normal coefficients in order and restricting
+to the surface gives \(\omega|_S\). This computes the local projection
+for the chart that represents the given supported class.
+[Local double-residue formula](GeometricLocalGysinProjection.lean)
+
 On the dense marked time open, the ideal of the proper graph closure
 restricts to the ideal of the original joint incidence family. After
 pullback to an affine time test and localization at a projective pivot,
