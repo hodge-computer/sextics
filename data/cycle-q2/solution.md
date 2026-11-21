@@ -442,6 +442,19 @@ computes its projective coordinates as the original homogeneous fractions.
 [Restriction of the closure ideal](GeometricMarkedDenseTestIdeal.lean) and
 [the two equations on a pivot chart](GeometricMarkedPivotEquations.lean)
 
+At every surviving point the pivot also embeds in the ambient product
+with the proper parameter curve. Its pullback of each original homogeneous
+fraction agrees with dehomogenization. The two maps from the pivot surface
+into the full product agree, including the projection to the original
+sextic. Thus on a smaller framed chart through the point, the two equations
+of the normalized supported class are the restrictions of the original
+cubic and the moving row, in that order. On this same chart the ordered
+double-residue formula holds for every regular two-form. This applies to
+the nonzero class whose ordinary image vanishes near the function point.
+[Projection to the original sextic](GeometricGenericTimeRawProjection.lean),
+[the pivot in the proper product](GeometricMarkedProductPivot.lean), and
+[equation charts of the surviving class](GeometricMarkedGraphCharts.lean)
+
 ## The intrinsic de Rham complex on affine product opens
 
 The intersection of the inverse images of two chosen affine opens

@@ -244,9 +244,9 @@ abbrev ProductProperty := ∀ {Y S : Scheme.{0}},
   (Y ⟶ genericAmbient) → genericAmbient.Opens → (Y ⟶ Spec (CommRingCat.of genericField)) →
     (S ⟶ Y) → Prop
 
-/-- On the product outside the projected boundary, the first argument of `P` records
-whether the dense time test comes from a neighborhood of the first-order seed. -/
-def SurvivesWithSeed (P : Prop → ProductProperty) : Prop :=
+/-- A surviving product with a property depending on seed compatibility, the open time test,
+and smoothness of its marked surface over the generic field. -/
+def SurvivesWithGeometry (P : Prop → Prop → ProductProperty) : Prop :=
     ∃ (t : Fin 3 → ℂ), AlgebraicIndependent ℚ t ∧ ∃ V : parameterScheme.Opens, seedBasePoint ∈ V ∧
       ∃ (C : Scheme) (c : C ⟶ Spec (CommRingCat.of genericField)) (r : C ⟶ Completion V)
         (hc : r ≫ structureMap V = c ≫ genericPoint) (D : Scheme) (j : D ⟶ C)
@@ -267,15 +267,20 @@ def SurvivesWithSeed (P : Prop → ProductProperty) : Prop :=
             IsPullback i (v ≫ m.toImage) W.ι b ∧ IsOpenImmersion v ∧ IsProper (i ≫ pr) ∧
             (∃ s : S, g.QuasiFiniteAt (m (v s))) ∧
               P (∃ hV : seedBasePoint ∈ V, CycleQ2MarkedGenericSurvives.SeedCompatible t V hV c r j a)
+                (IsOpenImmersion j ∧ SmoothOfRelativeDimension 2 (i ≫ W.ι ≫ productBase c T))
                 (W.ι ≫ pullback.snd c T) U (W.ι ≫ productBase c T) i
+
+/-- A surviving product with a property depending on its first-order seed compatibility. -/
+abbrev SurvivesWithSeed (P : Prop → ProductProperty) : Prop :=
+  SurvivesWithGeometry (fun seed _ {_ _} π U p i => P seed π U p i)
 
 /-- The original product and support data, with a property of the supported class. -/
 def SurvivesWith (P : ProductProperty) : Prop := SurvivesWithSeed (fun _ => @P)
 
-private theorem exists_surviving_with (P : Prop → ProductProperty)
-    (hP : ∀ {seed : Prop} {Y S : Scheme.{0}} (π : Y ⟶ genericAmbient) (U : genericAmbient.Opens)
+private theorem exists_surviving_with (P : Prop → Prop → ProductProperty)
+    (hP : ∀ {seed facts : Prop} {Y S : Scheme.{0}} (π : Y ⟶ genericAmbient) (U : genericAmbient.Opens)
       (p : Y ⟶ Spec (CommRingCat.of genericField)) (i : S ⟶ Y),
-      seed → HasNonzeroNormalizedClass π U p i → P seed π U p i) : SurvivesWithSeed P := by
+      seed → facts → HasNonzeroNormalizedClass π U p i → P seed facts π U p i) : SurvivesWithGeometry P := by
   obtain ⟨t,ht,V,hV,C,c,r,hc,D,j,a,ha,hCompatible,hC,hp,hc₁,hproj,hj,hjd,hs,_,hB,hd,z,hz,hout⟩ :=
     CycleQ2MarkedGenericSurvives.exists_compatible_marked_point_outside_projected_boundary
   let m := fromTest V t r j a ha
@@ -338,15 +343,17 @@ private theorem exists_surviving_with (P : Prop → ProductProperty)
   have hi : i ≫ q = p := by
     simp [i,q,CycleQ2ProperProductGysin.embedding,overField,p,v]
   let : SmoothOfRelativeDimension 2 p := smoothOfRelativeDimension_comp 0 2 _ _
-  refine ⟨hproper,⟨s,hsv.symm ▸ hz⟩,hP _ _ _ _ ⟨hV, hCompatible⟩ ?_⟩
+  have hsource : SmoothOfRelativeDimension 2 (i ≫ q) := hi.symm ▸ inferInstanceAs
+    (SmoothOfRelativeDimension 2 p)
+  refine ⟨hproper,⟨s,hsv.symm ▸ hz⟩,hP _ _ _ _ ⟨hV, hCompatible⟩ ⟨hj, hsource⟩ ?_⟩
   exact ⟨inferInstance,inferInstance,z',CycleQ2LogDetection.normalized_ne_zero p q i hi s z' hlog,
     hlog,CycleQ2MarkedFunctionPoint.vanishes V t r c hc j a ha hs U hU i v square _ z'⟩
 
 /-- The product with the whole proper curve carries the normalized logarithmic class
 on a nonempty marked surface after deleting a target subset of dimension at most one. -/
 theorem exists_surviving_product : SurvivesWith (fun _ _ p i => HasNormalizedClass p i) :=
-  exists_surviving_with _ (by
-    intro _ Y S π U p i _ h
+  exists_surviving_with (fun _ _ {_ _} _ _ p i => HasNormalizedClass p i) (by
+    intro _ _ Y S π U p i _ _ h
     obtain ⟨ci,sm,z,_,hz,_⟩ := h
     exact ⟨ci,sm,z,hz⟩)
 
@@ -354,20 +361,29 @@ theorem exists_surviving_product : SurvivesWith (fun _ _ p i => HasNormalizedCla
 vanishes over a neighborhood of the function point. -/
 theorem exists_surviving_nonzero_product :
     SurvivesWith (fun π U p i => HasNonzeroNormalizedClass π U p i) :=
-  exists_surviving_with _ (by
-    intro _ Y S π U p i _ h
-    exact h)
+  exists_surviving_with (fun _ _ {_ _} π U p i => HasNonzeroNormalizedClass π U p i)
+    (by intro _ _ _ _ _ _ _ _ _ _ h; exact h)
 
 /-- The curve bearing the nonzero class and its marked surface share the integral
 time neighborhood through the original first-order seed. -/
 theorem exists_seed_compatible_nonzero_product :
     SurvivesWithSeed (fun seed {_ _} π U p i => seed ∧ HasNonzeroNormalizedClass π U p i) :=
+  exists_surviving_with (fun seed _ {_ _} π U p i => seed ∧ HasNonzeroNormalizedClass π U p i)
+    (by intro _ _ _ _ _ _ _ _ hs _ h; exact ⟨hs, h⟩)
+
+/-- The same seed-compatible nonzero class retains its open dense time test and smooth
+two-dimensional source over the generic field. -/
+theorem exists_seed_compatible_framed_product :
+    SurvivesWithGeometry (fun seed facts {_ _} π U p i =>
+      seed ∧ facts ∧ HasNonzeroNormalizedClass π U p i) :=
   exists_surviving_with _ (by
-    intro _ _ _ _ _ _ _ hs h
-    exact ⟨hs, h⟩)
+    intro _ _ _ _ _ _ _ _ hs hf h
+    exact ⟨hs, hf, h⟩)
 
 end CycleQ2SurvivingProductGysin
 #print axioms CycleQ2SurvivingProductGysin.exists_surviving_product
 #print axioms CycleQ2SurvivingProductGysin.exists_surviving_nonzero_product
 
 #print axioms CycleQ2SurvivingProductGysin.exists_seed_compatible_nonzero_product
+
+#print axioms CycleQ2SurvivingProductGysin.exists_seed_compatible_framed_product

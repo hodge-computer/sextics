@@ -205,12 +205,12 @@ instance chartToTest_isOpenImmersion [IsOpenImmersion u] : IsOpenImmersion (char
   unfold chartToTest
   infer_instance
 
-@[reassoc] private theorem congr_snd {X Y Z : Scheme} {f f' : X ⟶ Z} {g g' : Y ⟶ Z}
+@[reassoc] theorem congr_snd {X Y Z : Scheme} {f f' : X ⟶ Z} {g g' : Y ⟶ Z}
     (ef : f = f') (eg : g = g') :
     (pullback.congrHom ef eg).hom ≫ pullback.snd f' g' = pullback.snd f g := by
   rw [pullback.congrHom_hom,pullback.lift_snd,Category.comp_id]
 
-private theorem tensor_second {A B S : Type} [CommRing A] [CommRing B] [CommRing S]
+theorem tensor_second {A B S : Type} [CommRing A] [CommRing B] [CommRing S]
     [Algebra A B] [Algebra A S] {X : Scheme} (f : X ⟶ Spec (CommRingCat.of A))
     (k : Spec (CommRingCat.of B) ⟶ X) (hk : k ≫ f = Spec.map (CommRingCat.ofHom (algebraMap A B))) :
     tensorInclusion (S := S) f k hk ≫ pullback.snd _ _ =
