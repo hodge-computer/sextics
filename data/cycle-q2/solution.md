@@ -357,11 +357,22 @@ prescribed logarithmic class on every equation chart.
 For the marked incidence surface, take the complement of its projected
 boundary in the threefold and form the product with the proper parameter
 curve. On this product the closure lies entirely in its smooth marked
-part, its projection is proper, and it carries this degree-four class.
-To obtain the protected residue one must pair with degree-one cohomology
-of the parameter curve and identify the resulting degree-three classes
-on the threefold.
-[Marked graph and proper projection](GeometricMarkedFundamentalClass.lean)
+part and its projection is proper. At a surviving surface point, the
+coefficient of the double logarithmic pole detects the local class. This
+proves that the global degree-four class is nonzero with support on the
+surface. After forgetting support, the same class restricts to zero over
+a target open containing the function-field point of the protected residue.
+The remaining comparison must identify the prescribed residue in the image
+obtained by pairing with degree-one cohomology of the parameter curve and
+integrating along that curve. The two-equation logarithmic form has a
+checked first-order calculation on the marked cubic chart. After clearing
+the two equations and wedging with the cubic differential, the velocity of
+the second equation cancels and the coefficient is minus the velocity of
+the cubic polynomial.
+[Marked cubic calculation](GeometricMarkedLogarithmicVelocity.lean),
+[logarithmic coefficient](GeometricLogarithmicNonvanishing.lean),
+[nonvanishing with support](GeometricSupportedClassNonvanishing.lean), and
+[the marked class near the function point](GeometricMarkedFundamentalClass.lean)
 
 ## The intrinsic de Rham complex on affine product opens
 

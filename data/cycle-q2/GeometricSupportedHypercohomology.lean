@@ -374,6 +374,43 @@ theorem map_bounded_acyclic (P : C) (K : CochainComplex C ℤ) (k : ℤ)
     (Category.assoc y' _ _).symm).trans
       ((congrArg (fun z => z ≫ K.iCycles (j+1)) hy).trans he)
 
+/-- A termwise Hom-acyclic bounded-below complex computes sections after passage
+to a bounded-below injective resolution. -/
+theorem sections_quasiIso (P : C) {K I : CochainComplex C ℤ} (f : K ⟶ I)
+    [Mono f] [QuasiIso f] (b : ℤ) [I.IsStrictlyGE b]
+    (hK : ∀ i, AcyclicFor P (K.X i)) (hI : ∀ i, AcyclicFor P (I.X i)) :
+    QuasiIso ((sectionComplex P).map f) := by
+  let S := ShortComplex.mk f (cokernel.π f) (cokernel.condition f)
+  have hs : S.ShortExact := { exact := ShortComplex.exact_cokernel f }
+  have hn (i : ℤ) := (hs.map (eval C (.up ℤ) i))
+  let T := S.map (sectionComplex P)
+  have ht : T.ShortExact := shortExact_of_degreewise_shortExact _ (fun i =>
+    sections_shortExact P (hn i) (hK i))
+  have hz (i : ℤ) (hi : i < b) : IsZero (S.X₃.X i) := by
+    have := (hn i).epi_g
+    exact IsZero.of_epi_eq_zero (S.g.f i) ((I.isZero_of_isStrictlyGE b i hi).eq_of_src _ _)
+  let : S.X₃.IsStrictlyGE b := (S.X₃.isStrictlyGE_iff b).2 hz
+  have hc : T.X₃.Acyclic := map_bounded_acyclic P S.X₃ b (hs.acyclic_X₃ inferInstance)
+    (fun i => acyclic_coker P (hn i) (hK i) (hI i))
+  rw [quasiIso_iff]
+  intro j
+  rw [quasiIsoAt_iff_isIso_homologyMap]
+  change IsIso (homologyMap T.f j)
+  have zeroH (i : ℤ) : IsZero (T.X₃.homology i) := (hc i).isZero_homology
+  have := (ht.homology_exact₂ j).epi_f_iff.mpr ((zeroH j).eq_of_tgt _ _)
+  have := (ht.homology_exact₁ (j-1) j (by simp)).mono_g_iff.mpr ((zeroH (j-1)).eq_of_src _ _)
+  exact isIso_of_mono_of_epi _
+
+theorem exists_injective_sections_resolution [EnoughInjectives C] (P : C)
+    (K : CochainComplex C ℤ) (b : ℤ) [K.IsStrictlyGE b]
+    (hK : ∀ i, AcyclicFor P (K.X i)) :
+    ∃ (I : CochainComplex C ℤ) (f : K ⟶ I), Mono f ∧ QuasiIso f ∧
+      (∀ n, Injective (I.X n)) ∧ I.IsStrictlyGE (b-1) ∧ QuasiIso ((sectionComplex P).map f) := by
+  obtain ⟨I,f,hm,hq,hi,hb⟩ := CochainComplex.Plus.modelCategoryQuillen.exists_mono_quasiIso_injective K (b-1) b
+  have ht (i : ℤ) : AcyclicFor P (I.X i) := fun n =>
+    Ext.subsingleton_of_injective P (I.X i) n
+  exact ⟨I,f,hm,hq,hi,hb,sections_quasiIso P f (b-1) hK ht⟩
+
 end CycleQ2AffineHypercohomologyComparison
 
 section

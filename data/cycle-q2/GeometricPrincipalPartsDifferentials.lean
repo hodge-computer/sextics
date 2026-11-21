@@ -513,7 +513,7 @@ end CycleQ2NormalCechDerivation
 namespace CycleQ2SupportedWeyl
 variable {V : Type*} [AddCommGroup V] [Module ℚ V]
 
-private theorem power_rule (X D : Module.End ℚ V) (h : ∀ m, D (X m) = m + X (D m))
+theorem power_rule (X D : Module.End ℚ V) (h : ∀ m, D (X m) = m + X (D m))
     (m : V) (n : ℕ) : D ((X ^ (n+1)) m) = ((n+1 : ℕ) : ℚ) • (X ^ n) m + (X ^ (n+1)) (D m) := by
   induction n with
   | zero => simp [h]
@@ -652,7 +652,7 @@ def localFrame (M : Submonoid R) [IsLocalization M T] : Basis (Fin n) T Ω[T⁄k
   (b.baseChange T).map (tensorKaehlerEquivOfFormallyEtale k R T)
 
 omit [CharZero k] in
-private theorem direction_extends (M : Submonoid R) [IsLocalization M T] (i : Fin n) :
+theorem direction_extends (M : Submonoid R) [IsLocalization M T] (i : Fin n) :
     (spatialDerivative (localFrame (T := T) b M) i).restrictScalars ℂ =
       localizedDerivation M T ((spatialDerivative b i).restrictScalars ℂ) := by
   apply sub_eq_zero.mp
@@ -818,7 +818,7 @@ variable {k R U V T : Type} [Field k] [CharZero k] [Algebra ℂ k]
 
 include hu
 omit [CharZero k] [Algebra ℂ k] [Algebra ℂ R] [Algebra ℂ T] [IsScalarTower ℂ k R] [IsScalarTower ℂ k T] [IsScalarTower ℂ R T] in
-private theorem frame_exact (M : Submonoid R) [IsLocalization M T] (i : Fin n) :
+theorem frame_exact (M : Submonoid R) [IsLocalization M T] (i : Fin n) :
     localFrame (T := T) b M i = D k T (algebraMap R T (u i)) := by
   let := Algebra.FormallyEtale.of_isLocalization (Rₘ := T) M
   let e := tensorKaehlerEquivOfFormallyEtale k R T
