@@ -467,15 +467,19 @@
 
     /* Curvature refinement. Split edges whose endpoint normals disagree and
        whose exact midpoint departs from the chord, placing the new vertex on
-       F = 0; triangles are split conformingly. Splits that would reverse a
-       face are withheld. Distances are in display coordinates. */
+       F = 0; triangles are split conformingly. A split is withheld when its
+       midpoint did not reach the surface or a child triangle would oppose the
+       surface normals. Across a tight fold the midpoint lies far from the
+       chord and the children turn away from the flat parent; both are
+       expected there. Distances are in display coordinates. */
     async function refine(tris) {
       const CURVED = 0.985,
         SHARP = 0.9659,
         MIDPOINT_ERROR = 0.0003,
         MIN_SHARP_EDGE = 0.00025,
         STEP_FRACTION = 0.1,
-        SAFE_SHIFT = 0.4;
+        // Eight bounded steps cover at most 0.8 of the edge; a midpoint that far has not converged.
+        SAFE_SHIFT = 0.75;
       const dotNormals = (a, b) =>
         V[9 * a + 3] * V[9 * b + 3] + V[9 * a + 4] * V[9 * b + 4] + V[9 * a + 5] * V[9 * b + 5];
       for (let pass = 0; pass < 4; pass++) {
@@ -542,7 +546,7 @@
           normal[2] = midpoints[i + 5];
           emit();
         }
-        // Retry until no child triangle opposes its normals or its parent.
+        // Retry until no child triangle opposes its normals.
         for (let attempt = 0; ; attempt++) {
           const replaced = new Map(),
             bad = [];
@@ -573,9 +577,6 @@
                         : mask === 5
                           ? [ca, a, ab, c, ca, b, ca, ab, b]
                           : [a, ab, ca, b, bc, ab, c, ca, bc, ab, bc, ca];
-            const px = facing(a, b, c, 1, 0, 0),
-              py = facing(a, b, c, 0, 1, 0),
-              pz = facing(a, b, c, 0, 0, 1);
             for (let j = 0; j < children.length; j += 3) {
               const u = children[j],
                 v = children[j + 1],
@@ -588,8 +589,7 @@
                   normalSum(u, v, w, 0),
                   normalSum(u, v, w, 1),
                   normalSum(u, v, w, 2)
-                ) <= 0 ||
-                facing(u, v, w, px, py, pz) <= 0
+                ) <= 0
               ) {
                 bad.push(i);
                 return;
