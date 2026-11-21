@@ -340,10 +340,28 @@ Replacing the second generator by its sum with a multiple of the
 first preserves the union of the two opens. On the common refinement,
 the two logarithmic forms differ by the restriction of a closed form
 on the refined second open. The resulting supported classes agree
-under the canonical refinements. This supplies the local shear
-comparison. The global class on the strict sweep and the comparison
-with the marked pairing remain open.
+under the canonical refinements.
 [Local supported classes and tensor trace](GeometricMonicGenericSupport.lean)
+
+Over the generic coefficient field, the two local equations of a smooth
+surface closed in a smooth fourfold extend to étale coordinates near
+each surface point. In these
+coordinates the supported de Rham groups in degrees below four vanish.
+In the Mayer–Vietoris sequence, degree-three vanishing makes a degree-four
+class on a union unique once its restrictions are fixed. The logarithmic
+classes therefore glue to a single supported class. It restricts to the
+prescribed logarithmic class on every equation chart.
+[Local purity](GeometricLocalDeRhamPurity.lean) and
+[global supported class](GeometricSmoothSurfaceGysin.lean)
+
+For the marked incidence surface, take the complement of its projected
+boundary in the threefold and form the product with the proper parameter
+curve. On this product the closure lies entirely in its smooth marked
+part, its projection is proper, and it carries this degree-four class.
+To obtain the protected residue one must pair with degree-one cohomology
+of the parameter curve and identify the resulting degree-three classes
+on the threefold.
+[Marked graph and proper projection](GeometricMarkedFundamentalClass.lean)
 
 ## The intrinsic de Rham complex on affine product opens
 
@@ -408,9 +426,8 @@ including all points outside the chart. Both connecting morphisms
 are natural for compatible refinements of the ambient opens and
 their deleted unions. This construction applies on charts where
 the proper correspondence is cut out by two such equations.
-The passage to a global Gysin
-map and the comparison with the marked nonzero pairing remain
-to be proved.
+The comparison of the proper correspondence with the marked nonzero
+pairing remains to be proved.
 [Affine tensor comparison and local supported classes](GeometricMonicGenericSupport.lean)
 
 ## Finite curve trace on the actual degree-two de Rham group
