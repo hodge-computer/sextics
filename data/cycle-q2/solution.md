@@ -338,10 +338,16 @@ modules. On a pure tensor of functions the derivation has the corresponding
 two Leibniz terms. For every smooth affine open, sections of its exterior
 differential sheaves are the exterior powers of its module of differentials,
 and their higher cohomology vanishes. This computes the ordinary degree-four
-class on the product using the two affine curve charts. Identifying that
-complex with the tensor complex still requires matching the exterior products,
-the differential, and restriction to the overlap.
-[Exterior powers under localization](GeometricAffineExteriorLocalization.lean),
+class on the product using the two affine curve charts. A zero representative
+near the function-field point stays zero on a smaller affine target open
+with an exact differential frame. On the tensor side, the native curve
+complex is the mapping fiber of the difference of the two restrictions.
+Tensoring with the target complex commutes with this construction, so its
+degree-four cohomology is the degree-three cohomology of the ordinary
+mapping cone. Comparing the two cones still requires identifying their
+geometric rows compatibly with the differential and the two restrictions.
+[Native curve tensor and its mapping fiber](GeometricCurveTensorFiber.lean),
+[exterior powers under localization](GeometricAffineExteriorLocalization.lean),
 [affine de Rham acyclicity](GeometricAffineExteriorAcyclicity.lean), and
 [two-chart cohomology](GeometricRectangularHypercohomology.lean)
 

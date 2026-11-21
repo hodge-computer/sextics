@@ -530,26 +530,10 @@ private abbrev F := curriedTensor (ModuleCat.{0} k)
 private theorem shift_left_natural (K L M : C k) (r : L ⟶ M) (d : ℤ) :
     tensorHom (𝟙 (K⟦d⟧)) r ≫ (CochainComplex.mapBifunctorShift₁Iso K M (F k) d).hom =
     (CochainComplex.mapBifunctorShift₁Iso K L (F k) d).hom ≫ (tensorHom (𝟙 K) r)⟦d⟧' := by
-  ext n : 1
-  apply mapBifunctor.hom_ext
-  intro a b hab
-  change a + b = n at hab
-  change _ ≫ (mapBifunctorMap (𝟙 (K⟦d⟧)) r (F k) (.up ℤ)).f n ≫ _ =
-    _ ≫ (CochainComplex.mapBifunctorShift₁Iso K L (F k) d).hom.f n ≫ _
-  rw [ι_mapBifunctorMap_assoc]
-  erw [CochainComplex.ι_mapBifunctorShift₁Iso_hom_f K M (F k) d a b n hab
-    (a+d) (n+d) rfl rfl,
-    CochainComplex.ι_mapBifunctorShift₁Iso_hom_f_assoc K L (F k) d a b n hab
-    (a+d) (n+d) rfl rfl]
-  simp [F,CochainComplex.shiftFunctorObjXIso]
-  have id_on (N : ModuleCat.{0} k) :
-      ((F k).map (𝟙 (K.X (a+d)))).app N = 𝟙 _ :=
-    NatTrans.congr_app ((F k).map_id (K.X (a+d))) N
-  let ι := HomologicalComplex.ιMapBifunctor K M (F k) (.up ℤ) (a+d) b (n+d) (by dsimp; omega)
-  change K.X (a+d) ◁ r.f b ≫ ((F k).map (𝟙 (K.X (a+d)))).app (M.X b) ≫ ι ≫ 𝟙 _ =
-    ((F k).map (𝟙 (K.X (a+d)))).app (L.X b) ≫ K.X (a+d) ◁ r.f b ≫ ι
-  rw [id_on, id_on]
-  simp
+  have h := NatTrans.shift_app_comm ((F k).map₂CochainComplex.flip.map r) d K
+  rw [CategoryTheory.Functor.commShiftIso_map₂CochainComplex_flip_hom_app,
+    CategoryTheory.Functor.commShiftIso_map₂CochainComplex_flip_hom_app] at h
+  exact h.symm
 
 private theorem scalar_natural (d : ℤ) (L M : C k) (r : L ⟶ M) :
     tensorHom (𝟙 ((single (ModuleCat.{0} k) (.up ℤ) d).obj (ModuleCat.of k k))) r ≫

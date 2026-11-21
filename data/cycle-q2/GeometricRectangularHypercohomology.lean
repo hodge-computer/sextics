@@ -293,6 +293,24 @@ theorem exists_affine_zero {F : Type} [Field F] (x : Spec (CommRingCat.of F) ⟶
   rintro _ ⟨b,rfl⟩
   exact (congrArg (fun a : PrimeSpectrum F => x a ∈ V) (Subsingleton.elim s b)).mp hs
 
+/-- A zero rectangular representative can be retained on an exact affine
+frame of the target around the same field-valued point. -/
+theorem refine_zero_to_frame (n : ℕ) [SmoothOfRelativeDimension n t]
+    (hU : IsAffineOpen U) {F : Type} [Field F] (x : Spec (CommRingCat.of F) ⟶ X)
+    (hx : Set.range x ⊆ (U : Set X)) (D : Y.Opens)
+    (z : (sing Y).obj (CycleQ2SupportMV.M D ⊤) ⟶
+      (DerivedCategory.Q.obj (relativeDeRhamInt p r))⟦(4:ℤ)⟧)
+    (hz : supportedRepresentative f t U i p r hU D z = 0) :
+    ∃ V : CycleQ2IntrinsicFramedAffineSite.FramedOpen t n, V.1 ≤ U ∧
+      Set.range x ⊆ (V.1 : Set X) ∧ supportedRepresentative f t V.1 i p r V.2.1 D z = 0 := by
+  let s := (default : PrimeSpectrum F)
+  obtain ⟨V,hV,hxV,hVU⟩ := (Opens.isBasis_iff_nbhd.mp
+    (CycleQ2FiniteExactAffineAtlas.isBasis t n)) (hx ⟨s,rfl⟩)
+  refine ⟨⟨V,hV⟩,hVU,?_,supportedRepresentative_zero_of_le f t V i p r hV.1 hVU D z ?_⟩
+  · rintro _ ⟨b,rfl⟩
+    exact (congrArg (fun a : PrimeSpectrum F => x a ∈ V) (Subsingleton.elim s b)).mp hxV
+  · exact ((affineRectangleClasses f t U i p r hU 4).symm.map_eq_zero_iff).mp hz
+
 section RestrictedProduct
 
 private abbrev proj := pullback.snd (f ≫ structureMap k) t
@@ -356,3 +374,5 @@ end
 
 #print axioms CycleQ2RectangularTrace.affineRectangleClasses
 #print axioms CycleQ2RectangularTrace.exists_affine_zero_in_restricted_product
+
+#print axioms CycleQ2RectangularTrace.refine_zero_to_frame
