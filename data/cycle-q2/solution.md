@@ -121,6 +121,22 @@ is \(d(-\varphi/(2f^2)-N\varphi/(2f))\wedge\xi\). The residue of the
 simple pole in genuine relative exterior forms is the specified universal
 source three-form. [Normal form reduction and residue](GeometricWeightedPoleThree.lean)
 
+This reduction extends to every pole order on the same function field.
+Let \(r_k(P)\) be the coefficient of the simple pole obtained from
+\(P/f^k\). For a coefficient direction \(\delta\) with \(m=\delta f\),
+the lift fixing the equation satisfies
+\[
+  \widetilde\delta\,r_k(P)=r_k(\delta P)-k\,r_{k+1}(mP).
+\]
+The proof computes each coefficient using a polynomial numerator divided
+by a power of the normal derivative. This permits evaluation on the
+hypersurface. The analogous formula in a free spatial direction is an
+actual exterior boundary. All 44 coefficient directions commute with
+the spatial derivations and preserve rational exactness. At pole order
+three this definition gives the prescribed source form. These identities
+allow a relation among generic rational residues to be differentiated.
+[All pole orders on the universal chart](GeometricWeightedPoleThree.lean)
+
 On any affine \(K\)-algebra with an evaluation into the weighted function
 field, the canonical Kähler map induces an evaluation of its exterior
 powers. It commutes with the ordinary derivative

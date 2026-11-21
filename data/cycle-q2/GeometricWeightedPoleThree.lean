@@ -1,12 +1,15 @@
 import Proposal.GeometricUniversalWeightedDeRham
 import Proposal.GeometricExteriorSheaf
 import HodgeComputer.Constructions.HoldoutCover.FiniteDifferentials
+import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
 import Mathlib.RingTheory.Localization.Away.Basic
 
 /-!
 # Pole-three reduction for the actual weighted source
 
 The normal derivation differentiates the chart equation to one.
+For arbitrary pole order, coefficient differentiation commutes with the
+normal residue rule and preserves rational exterior boundaries.
 Subtracting the specified rational differential reduces the source
 from a triple pole to a simple pole. Its coefficient is regular when
 the normal derivative of the equation is invertible, and evaluates
@@ -403,3 +406,419 @@ end CycleQ2WeightedRationalRestriction
 
 #print axioms CycleQ2WeightedRationalRestriction.protected_exact_of_affine_boundary
 #print axioms CycleQ2WeightedRationalRestriction.ExactWedgeRule
+
+namespace CycleQ2WeightedPoleJets
+
+section Algebra
+variable {A : Type*} [Field A] [CharZero A] (f : A) (dx δ : Derivation ℤ A A)
+
+/-- Differentiation in the equation, with all free coordinates held fixed. -/
+private abbrev N := (dx f)⁻¹ • dx
+/-- Infinitesimal change of parameters at fixed value of the equation. -/
+def tangent := δ - δ f • N f dx
+
+omit [CharZero A] in
+private theorem N_apply (u : A) : N f dx u = dx u / dx f := by
+  rw [Derivation.smul_apply, smul_eq_mul, div_eq_mul_inv, mul_comm]
+
+omit [CharZero A] in
+theorem tangent_apply (u : A) : tangent f dx δ u = δ u - δ f * (dx u / dx f) := by
+  simp only [tangent, Derivation.sub_apply, Derivation.smul_apply, smul_eq_mul, div_eq_mul_inv, mul_comm (dx u)]
+
+omit [CharZero A] in
+theorem commutes (hn : dx f ≠ 0) (h : Function.Commute δ dx) :
+    Function.Commute (tangent f dx δ) (N f dx) := by
+  intro u
+  simp only [tangent_apply,N_apply,Derivation.leibniz_div,map_sub,Derivation.leibniz,
+    smul_eq_mul,h f,h u]
+  field_simp
+  ring
+
+omit [CharZero A] in
+private theorem tangent_density (hn : dx f ≠ 0) (h : Function.Commute δ dx) (u : A) :
+    tangent f dx δ (u / dx f) = δ u / dx f - N f dx (δ f * u / dx f) := by
+  simp only [tangent_apply,N_apply,Derivation.leibniz_div,Derivation.leibniz,
+    smul_eq_mul,h f]
+  field_simp
+  ring
+
+omit [CharZero A] in
+private theorem iterate_sub (d : Derivation ℤ A A) (k : ℕ) (x y : A) :
+    d^[k] (x-y) = d^[k] x - d^[k] y := by
+  induction k with
+  | zero => rfl
+  | succ k ih => simp only [Function.iterate_succ_apply',ih,map_sub]
+
+/-- The iterated normal residue coefficient before factorial normalization. -/
+def jet (k : ℕ) (u : A) : A := (N f dx)^[k] (u / dx f)
+
+omit [CharZero A] in
+theorem tangent_jet (hn : dx f ≠ 0) (h : Function.Commute δ dx) (k : ℕ) (u : A) :
+    tangent f dx δ (jet f dx k u) =
+      jet f dx k (δ u) - jet f dx (k+1) (δ f * u) := by
+  unfold jet
+  rw [(commutes f dx δ hn h).iterate_right k (u / dx f),tangent_density f dx δ hn h,
+    iterate_sub,Function.iterate_succ_apply]
+
+/-- The simple-pole coefficient coming from a pole of order k+1. -/
+def residue (k : ℕ) (u : A) : A := jet f dx k u / k.factorial
+
+theorem tangent_residue (hn : dx f ≠ 0) (h : Function.Commute δ dx) (k : ℕ) (u : A) :
+    tangent f dx δ (residue f dx k u) =
+      residue f dx k (δ u) - ((k+1:ℕ):A) * residue f dx (k+1) (δ f * u) := by
+  simp only [residue,Derivation.leibniz_div,Derivation.map_natCast,smul_eq_mul,mul_zero,sub_zero,
+    tangent_jet f dx δ hn h,Nat.factorial_succ,Nat.cast_mul]
+  have hn' : (k.factorial : A) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)
+  have hs : ((k+1 : ℕ) : A) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.succ_ne_zero k)
+  field_simp
+end Algebra
+
+section Chart
+open MvPolynomial
+open CycleQ2MonicWeightedAffineEquation (Coeff)
+open CycleQ2GenericWeightedSpatialDenominator (universalAffine)
+open CycleQ2MonicWeightedPrimitiveIdentity (normal b density)
+open CycleQ2MonicWeightedPrimitiveSpecialization (projection projection_kernel projection_surjective fieldValue direction)
+open CycleQ2UniversalWeightedTransfer (universal_normal_ne_zero)
+open CycleQ2WeightedPoleThree (PolynomialRing Ambient W ambientPartial normalDirection)
+
+local instance : Algebra ℤ PolynomialRing := Ring.toIntAlgebra _
+local instance : Algebra ℤ Ambient := Ring.toIntAlgebra _
+local instance : Algebra ℤ W := Ring.toIntAlgebra _
+
+private abbrev F := universalAffine
+private abbrev n := normal F
+private abbrev v := fieldValue F
+private abbrev ι := algebraMap PolynomialRing Ambient
+private abbrev dx := HoldoutConstruction.integerPartial (R := Coeff) (0 : Fin 4)
+
+private theorem hnAmbient : ι n ≠ 0 := by
+  intro h
+  have hz : n = 0 := (IsFractionRing.injective PolynomialRing Ambient) (h.trans (map_zero ι).symm)
+  exact universal_normal_ne_zero ((congrArg v hz).trans v.map_zero)
+
+private abbrev ambientLift (Δ : Derivation ℤ PolynomialRing PolynomialRing) :=
+  HoldoutConstruction.extendRingDerivation (L := Ambient) Δ
+
+/-- The ambient parameter derivative at fixed value of the actual weighted equation. -/
+def ambientTangent (Δ : Derivation ℤ PolynomialRing PolynomialRing) : Derivation ℤ Ambient Ambient :=
+  tangent (ι F) ambientPartial (ambientLift Δ)
+
+private theorem ambientDx (p : PolynomialRing) : ambientPartial (ι p) = ι (dx p) :=
+  HoldoutConstruction.extendRingDerivation_apply (L := Ambient) dx p
+
+theorem ambient_commutes (Δ : Derivation ℤ PolynomialRing PolynomialRing) (h : Function.Commute Δ dx) :
+    Function.Commute (ambientTangent Δ) normalDirection := by
+  have hn : ambientPartial (ι F) ≠ 0 := (ambientDx F).symm ▸ hnAmbient
+  have he : N (ι F) ambientPartial = normalDirection := by
+    unfold N normalDirection
+    rw [ambientDx]
+    rfl
+  rw [← he]
+  exact commutes _ _ _ hn (HoldoutConstruction.extendRingDerivation_commute Δ dx h)
+
+/-- Quotient descent of a parameter or coordinate tangent to the actual hypersurface field. -/
+def fiberTangent (Δ : Derivation ℤ PolynomialRing PolynomialRing) : Derivation ℤ W W :=
+  HoldoutConstruction.residueTangent (projection F) (projection_surjective F) dx Δ F
+    (projection_kernel F) universal_normal_ne_zero
+
+private theorem fiberTangent_poly (Δ : Derivation ℤ PolynomialRing PolynomialRing) (p : PolynomialRing) :
+    fiberTangent Δ (v p) = v (Δ p) - v (Δ F) / v n * v (dx p) :=
+  HoldoutConstruction.residueTangent_apply _ _ dx Δ F _ _ p
+
+private theorem ambientTangent_poly (Δ : Derivation ℤ PolynomialRing PolynomialRing) (p : PolynomialRing) :
+    ambientTangent Δ (ι p) = ι (Δ p) - ι (Δ F) / ι n * ι (dx p) := by
+  rw [ambientTangent,tangent_apply,ambientDx,ambientDx]
+  simp only [ambientLift,HoldoutConstruction.extendRingDerivation_apply,div_eq_mul_inv]
+  change _ - _ * (_ * (ι n)⁻¹) = _
+  ring
+
+/-- A polynomial numerator divided by a power of the chart normal. -/
+private structure Fraction where
+  num : PolynomialRing
+  power : ℕ
+
+private def atField {L : Type*} [Field L] (φ : PolynomialRing →+* L) (a : Fraction) : L :=
+  φ a.num / (φ n)^a.power
+
+private def minus (a b : Fraction) : Fraction :=
+  ⟨a.num * n^b.power - b.num * n^a.power, a.power + b.power⟩
+
+private theorem minus_at {L : Type*} [Field L] (φ : PolynomialRing →+* L) (hn : φ n ≠ 0) (a b : Fraction) :
+    atField φ (minus a b) = atField φ a - atField φ b := by
+  simp only [atField,minus,map_sub,map_mul,map_pow,pow_add]
+  field_simp
+
+private theorem specialize {a b : Fraction} (h : atField ι a = atField ι b) :
+    atField v a = atField v b := by
+  have e := (div_eq_div_iff (pow_ne_zero a.power hnAmbient) (pow_ne_zero b.power hnAmbient)).mp h
+  have ep : a.num * n^b.power = b.num * n^a.power := (IsFractionRing.injective PolynomialRing Ambient)
+    (by simpa only [map_mul,map_pow] using e)
+  apply (div_eq_div_iff (pow_ne_zero a.power universal_normal_ne_zero) (pow_ne_zero b.power universal_normal_ne_zero)).mpr
+  simpa only [map_mul,map_pow] using congrArg v ep
+
+private def normalStep (a : Fraction) : Fraction :=
+  ⟨n * dx a.num - a.power * a.num * dx n, a.power+2⟩
+
+private def tangentStep (Δ : Derivation ℤ PolynomialRing PolynomialRing) (a : Fraction) : Fraction :=
+  let T := fun g => n * Δ g - Δ F * dx g
+  ⟨n * T a.num - a.power * a.num * T n, a.power+2⟩
+
+private theorem quotient_rule {L : Type*} [Field L] (d : Derivation ℤ L L) (u v : L)
+    (hv : v ≠ 0) (k : ℕ) :
+    d (u/v^k) = (v*d u - k*u*d v)/v^(k+1) := by
+  induction k with
+  | zero => simp [hv]
+  | succ k ih =>
+    rw [pow_succ v k,← div_div,Derivation.leibniz_div,ih]
+    simp only [smul_eq_mul,Nat.cast_succ,pow_succ]
+    field_simp
+    ring
+
+private theorem normalStep_at (a : Fraction) :
+    atField ι (normalStep a) = normalDirection (atField ι a) := by
+  rw [normalDirection,Derivation.smul_apply,smul_eq_mul,atField,atField,
+    quotient_rule ambientPartial _ _ hnAmbient]
+  simp only [normalStep,map_sub,map_mul,map_natCast,ambientDx]
+  rw [pow_succ (ι n) (a.power+1)]
+  ring
+
+private theorem tangentStep_at {L : Type*} [Field L] (φ : PolynomialRing →+* L) (hn : φ n ≠ 0)
+    (Δ : Derivation ℤ PolynomialRing PolynomialRing) (d : Derivation ℤ L L)
+    (hp : ∀ p, d (φ p) = φ (Δ p) - φ (Δ F) / φ n * φ (dx p)) (a : Fraction) :
+    atField φ (tangentStep Δ a) = d (atField φ a) := by
+  simp only [atField,tangentStep,map_sub,map_mul,map_natCast,quotient_rule d _ _ hn,hp]
+  simp only [pow_succ]
+  field_simp
+
+private def normalFraction (k : ℕ) (p : PolynomialRing) : Fraction := normalStep^[k] ⟨p,1⟩
+
+private theorem normalFraction_at (k : ℕ) (p : PolynomialRing) :
+    atField ι (normalFraction k p) = jet (ι F) ambientPartial k (ι p) := by
+  have h : N (ι F) ambientPartial = normalDirection := by
+    unfold N normalDirection
+    rw [ambientDx]
+    rfl
+  unfold jet
+  rw [h]
+  induction k with
+  | zero => simp [atField,normalFraction,ambientDx,normal]
+  | succ k ih => change atField ι (normalStep^[k+1] _) = _
+                 rw [Function.iterate_succ_apply',Function.iterate_succ_apply',normalStep_at]
+                 exact congrArg normalDirection ih
+
+/-- The actual field residue coming from an affine numerator and pole of order k+1. -/
+def fiberResidue (k : ℕ) (p : PolynomialRing) : W := atField v (normalFraction k p) / k.factorial
+
+theorem fiberTangent_residue (Δ : Derivation ℤ PolynomialRing PolynomialRing) (h : Function.Commute Δ dx)
+    (k : ℕ) (p : PolynomialRing) :
+    fiberTangent Δ (fiberResidue k p) = fiberResidue k (Δ p) - ((k+1:ℕ):W) * fiberResidue (k+1) (Δ F*p) := by
+  have hn : ambientPartial (ι F) ≠ 0 := (ambientDx F).symm ▸ hnAmbient
+  have heA : atField ι (tangentStep Δ (normalFraction k p)) =
+      atField ι (minus (normalFraction k (Δ p)) (normalFraction (k+1) (Δ F*p))) := by
+    rw [tangentStep_at ι hnAmbient Δ (ambientTangent Δ) (ambientTangent_poly Δ),minus_at ι hnAmbient]
+    simp only [normalFraction_at,ambientTangent,map_mul]
+    simpa only [ambientLift,HoldoutConstruction.extendRingDerivation_apply,map_mul] using
+      tangent_jet (ι F) ambientPartial (ambientLift Δ) hn
+        (HoldoutConstruction.extendRingDerivation_commute Δ dx h) k (ι p)
+  have he := specialize heA
+  rw [tangentStep_at v universal_normal_ne_zero Δ (fiberTangent Δ) (fiberTangent_poly Δ),
+    minus_at v universal_normal_ne_zero] at he
+  simp only [fiberResidue,Derivation.leibniz_div,Derivation.map_natCast,smul_eq_mul,mul_zero,sub_zero,he,
+    Nat.factorial_succ,Nat.cast_mul]
+  have hk : (k.factorial : W) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)
+  have hs : ((k+1:ℕ):W) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.succ_ne_zero k)
+  field_simp
+
+open CycleQ2IncidenceNormalForm (FullSexticTailIndex normalizedFullSextic)
+open CycleQ2PolynomialCoefficientDerivation (coefficientDerivation coefficientDerivation_C
+  coefficientDerivation_X coefficientDerivation_monomial)
+open CycleQ2MonicWeightedAffineEquation (chart)
+
+/-- The literal partial derivative in one coefficient of the monic family; it fixes all four chart variables. -/
+abbrev coefficientPartial (e : FullSexticTailIndex) : Derivation ℤ PolynomialRing PolynomialRing :=
+  coefficientDerivation (HoldoutConstruction.integerPartial (R := ℂ) e)
+
+private theorem coefficient_commutes (e : FullSexticTailIndex) (i : Fin 4) :
+    Function.Commute (coefficientPartial e) (HoldoutConstruction.integerPartial i) := by
+  let D := coefficientPartial e
+  let E : Derivation ℤ PolynomialRing PolynomialRing := HoldoutConstruction.integerPartial i
+  intro p
+  change D (E p) = E (D p)
+  induction p using MvPolynomial.induction_on with
+  | C a =>
+    change D ((pderiv i) (C a)) = (pderiv i) (coefficientDerivation _ (C a))
+    rw [pderiv_C,map_zero,coefficientDerivation_C,pderiv_C]
+  | add p q hp hq => rw [map_add,map_add,map_add,map_add,hp,hq]
+  | mul_X p j hp =>
+    have hX : D (X j) = 0 := coefficientDerivation_X _ _
+    have hE : D (E (X j)) = 0 := by
+      change D ((pderiv i) (X j)) = _
+      by_cases h : j = i
+      · subst j; rw [pderiv_X_self,Derivation.map_one_eq_zero]
+      · rw [pderiv_X_of_ne h,map_zero]
+    simp only [Derivation.leibniz,smul_eq_mul,map_add,hX,hE,mul_zero,add_zero,zero_add,hp]
+    ring
+
+private theorem coefficient_chart (e : FullSexticTailIndex) (p : MvPolynomial (Fin 5) Coeff) :
+    coefficientPartial e (chart p) =
+      chart (coefficientDerivation (HoldoutConstruction.integerPartial (R := ℂ) e) p) := by
+  induction p using MvPolynomial.induction_on with
+  | C a =>
+    simp only [chart,aeval_C,coefficientPartial,coefficientDerivation_C]
+    exact coefficientDerivation_C (σ := Fin 4) _ _
+  | add p q hp hq => rw [map_add,map_add,map_add,map_add,hp,hq]
+  | mul_X p j hp =>
+    have hz : coefficientPartial e (chart (X j)) = 0 := by
+      refine Fin.cases ?_ (fun j => ?_) j
+      · rw [show chart (X (0:Fin 5) : MvPolynomial (Fin 5) Coeff) = 1 by simp [chart], Derivation.map_one_eq_zero]
+      · rw [show chart (X j.succ : MvPolynomial (Fin 5) Coeff) = X j by simp [chart]]
+        exact coefficientDerivation_X _ _
+    simp only [map_mul,Derivation.leibniz,smul_eq_mul,coefficientDerivation_X,
+      hz,mul_zero,zero_add,hp]
+
+/-- The velocity of the displayed monic chart equation is the chosen dehomogenized sextic monomial. -/
+theorem coefficient_equation (e : FullSexticTailIndex) :
+    coefficientPartial e F = chart (monomial (CycleQ2IncidenceNormalForm.fullExponentOf e.val.val) 1) := by
+  classical
+  change coefficientPartial e (chart _) = _
+  rw [coefficient_chart]
+  congr 1
+  simp only [normalizedFullSextic,map_add,map_sum,coefficientDerivation_monomial,
+    Derivation.map_one_eq_zero,map_zero,zero_add]
+  rw [Finset.sum_eq_single e]
+  · rw [HoldoutConstruction.integerPartial_X_self]
+  · intro j _ hje
+    rw [HoldoutConstruction.integerPartial_X_of_ne _ _ hje,map_zero]
+  · simp
+
+theorem coefficient_residue (e : FullSexticTailIndex) (k : ℕ) (p : PolynomialRing) :
+    fiberTangent (coefficientPartial e) (fiberResidue k p) =
+      fiberResidue k (coefficientPartial e p) -
+        ((k+1:ℕ):W)*fiberResidue (k+1) (chart (monomial
+          (CycleQ2IncidenceNormalForm.fullExponentOf e.val.val) 1)*p) := by
+  rw [← coefficient_equation]
+  exact fiberTangent_residue _ (coefficient_commutes e 0) k p
+
+/-- On the hypersurface, the two homogeneous pole terms differ by the actual spatial derivative. -/
+theorem spatial_residue (j : Fin 3) (k : ℕ) (p : PolynomialRing) :
+    direction F universal_normal_ne_zero j (fiberResidue k p) =
+      fiberResidue k (pderiv j.succ p) - ((k+1:ℕ):W) * fiberResidue (k+1) (pderiv j.succ F * p) :=
+  fiberTangent_residue (HoldoutConstruction.integerPartial j.succ)
+    (HoldoutConstruction.integerPartials_commute j.succ 0) k p
+
+/-- The two normal derivatives at the protected pole give the original rational source density. -/
+theorem fiberResidue_two : fiberResidue 2 b = density v F := by
+  unfold fiberResidue
+  rw [show normalFraction 2 b = normalStep (normalStep ⟨b,1⟩) from rfl]
+  simp only [atField,normalStep,density]
+  change _ = SplitHigherResidue.normalSourceTwo (v b) (v (dx b)) (v (dx (dx b)))
+      (v n) (v (dx n)) (v (dx (dx n))) / v n
+  norm_num only [Nat.factorial_succ,Nat.factorial_zero,Nat.cast_one,Nat.cast_ofNat,
+    Nat.reduceAdd,Nat.reduceMul,Nat.cast_mul,mul_one]
+  simp only [one_mul,map_sub,Derivation.leibniz,smul_eq_mul,map_mul,map_add,map_ofNat,
+    SplitHigherResidue.normalSourceTwo]
+  field_simp [universal_normal_ne_zero]
+  ring
+
+/-- A numerator derivative in the normal variable has no residual divergence term. -/
+theorem normal_residue (k : ℕ) (p : PolynomialRing) :
+    fiberResidue k (normal p) = ((k+1:ℕ):W) * fiberResidue (k+1) (n*p) := by
+  have hz : fiberTangent dx = 0 := by
+    apply HoldoutConstruction.FieldValuedFraction.derivation_ext (P := CycleQ2MonicWeightedPrimitiveSpecialization.ChartRing F)
+    intro a
+    obtain ⟨q,rfl⟩ := projection_surjective F a
+    change fiberTangent dx (v q) = 0
+    refine (fiberTangent_poly dx q).trans ?_
+    have hz' (a z : W) (hn : z ≠ 0) : a-z/z*a=0 := by rw [div_self hn,one_mul,sub_self]
+    exact hz' (v (dx q)) (v n) universal_normal_ne_zero
+  have e := fiberTangent_residue dx (Function.Commute.refl _) k p
+  rw [hz] at e
+  exact sub_eq_zero.mp e.symm
+
+private def times (c : PolynomialRing) (a : Fraction) : Fraction := ⟨c*a.num,a.power⟩
+
+private theorem times_at {L : Type*} [Field L] (φ : PolynomialRing →+* L) (c : PolynomialRing) (a : Fraction) :
+    atField φ (times c a) = φ c * atField φ a := by simp only [atField,times,map_mul,mul_div_assoc]
+
+private theorem product_derivative {L : Type*} [Field L] (d : Derivation ℤ L L) (x u : L) (hx : d x = 1) (k : ℕ) :
+    d^[k+1] (x*u) = x*d^[k+1] u + ((k+1:ℕ):L)*d^[k] u := by
+  induction k with
+  | zero =>
+    simp [Derivation.leibniz,hx]
+  | succ k ih =>
+    have hd : d ((k+1:ℕ):L) = 0 := d.map_natCast _
+    have h₁ : d (d^[k] u) = d^[k+1] u := (Function.iterate_succ_apply' _ _ _).symm
+    have h₂ : d (d^[k+1] u) = d^[(k+1)+1] u := (Function.iterate_succ_apply' _ _ _).symm
+    rw [Function.iterate_succ_apply' _ (k+1) (x*u),ih,map_add,Derivation.leibniz,Derivation.leibniz]
+    simp only [hx,smul_eq_mul,hd,mul_zero,add_zero,mul_one,h₁,h₂]
+    change _ = x*d^[(k+1)+1] u + (((k+1)+1:ℕ):L)*d^[k+1] u
+    rw [show (((k+1)+1:ℕ):L) = ((k+1:ℕ):L)+1 from Nat.cast_succ _,add_mul,one_mul]
+    abel
+
+/-- Multiplying the numerator by the defining equation cancels a pole in the actual hypersurface field. -/
+theorem cancel_equation (k : ℕ) (p : PolynomialRing) : fiberResidue (k+1) (F*p) = fiberResidue k p := by
+  have hN : N (ι F) ambientPartial = normalDirection := by unfold N normalDirection; rw [ambientDx]; rfl
+  have he : atField ι (minus (normalFraction (k+1) (F*p)) (times ((k+1:ℕ):PolynomialRing) (normalFraction k p))) =
+      atField ι (times F (normalFraction (k+1) p)) := by
+    rw [minus_at ι hnAmbient,times_at,times_at,normalFraction_at,normalFraction_at,normalFraction_at]
+    simp only [map_mul,map_natCast,jet,hN,mul_div_assoc]
+    rw [product_derivative normalDirection (ι F) _ CycleQ2WeightedPoleThree.normalDirection_equation]
+    exact add_sub_cancel_right _ _
+  have hF : v F = 0 := by
+    change algebraMap (CycleQ2MonicWeightedPrimitiveSpecialization.ChartRing F) W (projection F F) = 0
+    rw [(projection_kernel F F).mpr (dvd_refl F),map_zero]
+  have h := specialize he
+  rw [minus_at v universal_normal_ne_zero,times_at,times_at,map_natCast,hF,zero_mul] at h
+  simp only [fiberResidue,sub_eq_zero.mp h,Nat.factorial_succ,Nat.cast_mul]
+  have hk : ((k+1:ℕ):W) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.succ_ne_zero k)
+  field_simp
+
+theorem coefficient_commutes_spatial (e : FullSexticTailIndex) (j : Fin 3) :
+    Function.Commute (fiberTangent (coefficientPartial e)) (direction F universal_normal_ne_zero j) :=
+  HoldoutConstruction.residueTangent_commute (projection F) (projection_surjective F)
+    dx (coefficientPartial e) (HoldoutConstruction.integerPartial j.succ) F (projection_kernel F)
+    universal_normal_ne_zero (coefficient_commutes e 0) (HoldoutConstruction.integerPartials_commute _ 0)
+    (coefficient_commutes e j.succ)
+
+open CycleQ2UniversalWeightedDeRham (K coordinateBasis coordinateDerivation exteriorDerivative sourceForm)
+open CycleQ2WeightedCoordinateExterior (Form volume exact_volume_iff_divergence)
+
+theorem weighted_source : fiberResidue 2 b • volume coordinateBasis = sourceForm := by
+  rw [fiberResidue_two]; rfl
+
+/-- The spatial pole-reduction relation gives a genuine rational exterior boundary on the weighted threefold. -/
+theorem spatial_exact (j : Fin 3) (k : ℕ) (p : PolynomialRing) :
+    ∃ η : Form K W 2, exteriorDerivative η =
+      (fiberResidue k (pderiv j.succ p) - ((k+1:ℕ):W) * fiberResidue (k+1) (pderiv j.succ F * p)) •
+        volume coordinateBasis := by
+  rw [← spatial_residue]
+  apply (exact_volume_iff_divergence coordinateBasis coordinateDerivation _).mpr
+  refine ⟨fun i => if i = j then fiberResidue k p else 0,?_⟩
+  calc
+    _ = coordinateDerivation j (if j = j then fiberResidue k p else 0) :=
+      Finset.sum_eq_single j (fun i _ hij => by simp [hij]) (by simp)
+    _ = _ := by rw [if_pos rfl]; rfl
+
+/-- Every coefficient derivative takes a rationally exact density times the
+three free-coordinate differentials to another exact rational three-form. -/
+theorem coefficient_preserves_exact (e : FullSexticTailIndex) (u : W)
+    (h : ∃ η : Form K W 2, exteriorDerivative η = u • volume coordinateBasis) :
+    ∃ η : Form K W 2, exteriorDerivative η = fiberTangent (coefficientPartial e) u • volume coordinateBasis := by
+  obtain ⟨w,hw⟩ := (exact_volume_iff_divergence coordinateBasis coordinateDerivation u).mp h
+  let D := fiberTangent (coefficientPartial e)
+  apply (exact_volume_iff_divergence coordinateBasis coordinateDerivation (D u)).mpr
+  refine ⟨fun j => D (w j),?_⟩
+  rw [← hw,map_sum]
+  exact Finset.sum_congr rfl fun j _ => (coefficient_commutes_spatial e j (w j)).symm
+
+end Chart
+end CycleQ2WeightedPoleJets
+#print axioms CycleQ2WeightedPoleJets.fiberTangent_residue
+
+#print axioms CycleQ2WeightedPoleJets.coefficient_residue
+#print axioms CycleQ2WeightedPoleJets.spatial_residue
+#print axioms CycleQ2WeightedPoleJets.weighted_source
+#print axioms CycleQ2WeightedPoleJets.coefficient_preserves_exact
+
+#print axioms CycleQ2WeightedPoleJets.cancel_equation
