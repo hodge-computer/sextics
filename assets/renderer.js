@@ -91,7 +91,7 @@ vec4 contactBlock(vec3 u){
     (3.0*y*y+10.0*y*z-22.0*z*z)*k+c*(3.0*y*y-20.0*y*z+z*z),
     12.0*h*z*z+(5.0*y*y-44.0*y*z-168.0*z*z)*k+c*(-10.0*y*y+2.0*y*z+360.0*z*z));
 }
-vec4 projectContact(vec4 sphere){
+vec4 projectContact(vec4 sphere,out vec4 normal){
   // Correct flat-triangle interpolation to the curved F=0 slice before
   // evaluating D. This changes shading only, not the accepted polynomial.
   for(int step=0;step<3;step++){
@@ -104,13 +104,14 @@ vec4 projectContact(vec4 sphere){
     vec4 correction=(plus.x+minus.x)*g/max(dot(g,g),1e-25);
     correction*=min(1.0,0.025/max(length(correction),1e-20));
     sphere=normalize(sphere-correction);
+    normal=g;
   }
   return sphere;
 }
 float contactCubic(vec3 u) {
   return (u.y-4.0*u.z)*(u.y+2.0*u.z)*(u.y+7.0*u.z);
 }
-vec4 projectSurface(vec4 sphere){
+vec4 projectSurface(vec4 sphere,out vec4 normal){
   // Atlas triangles approximate F=0. Correct their interpolated points before
   // evaluating D, so flat faces cannot introduce false divisor contours.
   for(int step=0;step<4;step++){
@@ -122,6 +123,7 @@ vec4 projectSurface(vec4 sphere){
     vec4 correction=f.v*g/max(dot(g,g),1e-25);
     correction*=min(1.0,0.025/max(length(correction),1e-20));
     sphere=normalize(sphere-correction);
+    normal=g;
   }
   return sphere;
 }
@@ -129,8 +131,19 @@ float pixelDivisor(out vec2 complexValue) {
   vec3 p=vPosition*uDisplayScale+uOriginalCenter;
   float r2=dot(p,p);
   vec4 sphere=vec4(2.0*p,r2-1.0)/(1.0+r2);
-  if(uHomeScene)sphere=projectContact(sphere);
-  else if(uDivisorStrength>0.0)sphere=projectSurface(sphere);
+  // The point's motion across one pixel, from the smooth interpolated position.
+  vec4 sx=dFdx(sphere),sy=dFdy(sphere),normal=vec4(0.0);
+  if(uHomeScene)sphere=projectContact(sphere,normal);
+  else if(uDivisorStrength>0.0)sphere=projectSurface(sphere,normal);
+  // Flat triangles are not tangent to the surface. Keep only the motion along it, so a factor
+  // that meets the surface at a shallow angle is measured by how it changes on the surface.
+  normal/=max(length(normal),1e-30);
+  sx-=sphere*dot(sphere,sx); sx-=normal*dot(normal,sx);
+  sy-=sphere*dot(sphere,sy); sy-=normal*dot(normal,sy);
+  divAx=vec3(dot(uDivisorPlane[0],sx),dot(uDivisorPlane[1],sx),dot(uDivisorPlane[2],sx));
+  divBx=vec3(dot(uDivisorPlane[3],sx),dot(uDivisorPlane[4],sx),dot(uDivisorPlane[5],sx));
+  divAy=vec3(dot(uDivisorPlane[0],sy),dot(uDivisorPlane[1],sy),dot(uDivisorPlane[2],sy));
+  divBy=vec3(dot(uDivisorPlane[3],sy),dot(uDivisorPlane[4],sy),dot(uDivisorPlane[5],sy));
   vec3 a=vec3(dot(uDivisorPlane[0],sphere),dot(uDivisorPlane[1],sphere),dot(uDivisorPlane[2],sphere));
   vec3 b=vec3(dot(uDivisorPlane[3],sphere),dot(uDivisorPlane[4],sphere),dot(uDivisorPlane[5],sphere));
   // Preserve the homepage's contact-cubic palette at its corrected point.
@@ -213,9 +226,8 @@ void main() {
   // Derivatives need neighbouring fragments, including those subsequently
   // discarded by x-ray depth peeling. Evaluate before divergent discards.
   vec2 complexValue;
-  float field = pixelDivisor(complexValue);
-  float pixelWidth = max(length(vec2(dFdx(field),dFdy(field))),1e-35);
-  float divisor = 1.0-smoothstep(0.55,1.45,abs(field)/pixelWidth);
+  // The distance to the divisor, already in pixels.
+  float divisor = 1.0-smoothstep(0.55,1.45,pixelDivisor(complexValue));
   float alpha = distanceOpacity(length(uCamera-vPosition));
   if(uRenderPass == 1 && alpha < 1.0) discard;
   if(uRenderPass == 2) {

@@ -2,28 +2,32 @@
    Floating point is presentation only; accepted proof data is never changed. */
 (() => {
   'use strict';
-  /* A jet is a value and its six ambient derivatives, times 2^e. Carrying the exponent
-     separately keeps high-degree factors inside single-precision range: a product is brought
-     back near 1 whenever it drifts, and a sum first aligns its two exponents. Only ratios
-     within one jet are ever used, so the exponent itself never reaches the screen. */
+  /* A jet is a value and its six ambient derivatives, times 2^(64 e). Carrying the exponent
+     separately keeps factors of any degree inside single-precision range: a product is brought
+     back near 1 whenever it drifts, and a sum first aligns its two exponents. Every rescaling
+     multiplies by a literal power of two, which is exact on any hardware. Only ratios within
+     one jet are ever used, so the exponent itself never reaches the screen. */
   const GLSL = `
 struct DivJet { float v; vec3 a; vec3 b; float e; };
 const float DIV_NONE=-1e30;
+const float DIV_UP=18446744073709551616.0;      // 2^64
+const float DIV_DOWN=5.421010862427522e-20;     // 2^-64
+// How the six coordinates change across one pixel, horizontally and vertically.
+vec3 divAx,divAy,divBx,divBy;
 DivJet dc(float v) { return DivJet(v,vec3(0.0),vec3(0.0),v==0.0?DIV_NONE:0.0); }
 DivJet dn(DivJet x) {
   vec3 g=max(abs(x.a),abs(x.b));
   float m=max(abs(x.v),max(g.x,max(g.y,g.z)));
   if(m==0.0) x.e=DIV_NONE;
-  else if(m<1e-8||m>1e8) {
-    float k=floor(log2(m)),s=exp2(-k);
-    x.v*=s; x.a*=s; x.b*=s; x.e+=k;
-  }
+  else if(m<2.3283064365386963e-10) { x.v*=DIV_UP; x.a*=DIV_UP; x.b*=DIV_UP; x.e-=1.0; }
+  else if(m>4294967296.0) { x.v*=DIV_DOWN; x.a*=DIV_DOWN; x.b*=DIV_DOWN; x.e+=1.0; }
   return x;
 }
 void dalign(inout DivJet x,inout DivJet y) {
   float d=x.e-y.e;
-  if(d>0.0) { float s=exp2(-d); y.v*=s; y.a*=s; y.b*=s; y.e=x.e; }
-  else if(d<0.0) { float s=exp2(d); x.v*=s; x.a*=s; x.b*=s; x.e=y.e; }
+  // One step apart is an exact shift; further apart, the smaller term is below rounding.
+  if(d>0.0) { float s=d>1.5?0.0:DIV_DOWN; y.v*=s; y.a*=s; y.b*=s; y.e=x.e; }
+  else if(d<0.0) { float s=d<-1.5?0.0:DIV_DOWN; x.v*=s; x.a*=s; x.b*=s; x.e=y.e; }
 }
 DivJet da(DivJet x,DivJet y) {
   dalign(x,y);
@@ -34,20 +38,26 @@ DivJet da(DivJet x,DivJet y) {
 DivJet dm(DivJet x,DivJet y) {
   return dn(DivJet(x.v*y.v,x.a*y.v+x.v*y.a,x.b*y.v+x.v*y.b,x.e+y.e));
 }
-float divisorDistance(DivJet r,DivJet i,bool complexValue) {
-  dalign(r,i);
-  float scale=max(max(max(abs(r.a.x),abs(r.a.y)),max(abs(r.a.z),abs(r.b.x))),max(abs(r.b.y),abs(r.b.z)));
-  scale=max(scale,max(max(max(abs(i.a.x),abs(i.a.y)),max(abs(i.a.z),abs(i.b.x))),max(abs(i.b.y),abs(i.b.z))));
-  if(scale==0.0) return complexValue?length(vec2(r.v,i.v)):r.v;
-  vec3 a=r.a/scale,b=r.b/scale,c=i.a/scale,d=i.b/scale;
-  float norm=sqrt(dot(a,a)+dot(b,b)+dot(c,c)+dot(d,d));
-  return (complexValue?length(vec2(r.v,i.v)/scale):r.v/scale)/norm;
+// Newton's step from this pixel to a factor's zero set, in pixels, from the exact derivatives.
+vec2 divisorStep(DivJet x) {
+  vec2 g=vec2(dot(x.a,divAx)+dot(x.b,divBx),dot(x.a,divAy)+dot(x.b,divBy));
+  float scale=max(abs(g.x),abs(g.y));
+  if(scale==0.0) return vec2(1e15);
+  g/=scale;
+  return clamp(x.v/scale,-1e15,1e15)*g/dot(g,g);
+}
+// A zero of order k lies k steps away, and walking one pixel towards it shortens the step by
+// 1/k of a pixel. That change, read from the neighbouring pixels, supplies k; the step itself
+// is exact, so simple curves owe nothing to differences between pixels.
+float divisorPixels(vec2 step) {
+  float size=length(step),change=length(step.x*dFdx(step)+step.y*dFdy(step));
+  return size*max(1.0,size/max(change,1e-30));
 }
 `;
   function compile(formula, signs, surface = false) {
     if (!formula || (Array.isArray(formula) && !formula.length))
       return {
-        source: GLSL + 'float divisorField(vec3 a,vec3 b){return 1.0;}',
+        source: GLSL + 'float divisorField(vec3 a,vec3 b){return 1e30;}',
         operations: 0,
         factors: 0
       };
@@ -198,7 +208,11 @@ float divisorDistance(DivJet r,DivJet i,bool complexValue) {
       }
       used.add(n);
     }
-    factors.flat().forEach(visit);
+    // A complex factor vanishes where its squared modulus does, to twice the order.
+    const real = factors.map(([r, i]) =>
+      r === zero ? i : i === zero ? r : add(mul(r, r), mul(i, i))
+    );
+    real.forEach(visit);
     visit(zero);
     const literal = (x) => {
       const s = String(x);
@@ -213,6 +227,8 @@ float divisorDistance(DivJet r,DivJet i,bool complexValue) {
       'float scale=max(max(max(abs(a.x),abs(a.y)),max(abs(a.z),abs(b.x))),max(abs(b.y),abs(b.z)));',
       'a/=max(scale,1e-20); b/=max(scale,1e-20);'
     );
+    if (!surface)
+      lines.push('divAx/=max(scale,1e-20); divAy/=max(scale,1e-20); divBx/=max(scale,1e-20); divBy/=max(scale,1e-20);');
     for (const n of order) {
       const [op, a, b] = nodes[n];
       let expr;
@@ -228,19 +244,13 @@ float divisorDistance(DivJet r,DivJet i,bool complexValue) {
       const [r, i] = factors[0];
       if (factors.length !== 1 || (r !== zero && i !== zero))
         throw new Error('The surface polynomial must be scalar-real on this slice.');
-      const value = `d${r === zero ? i : r}`;
+      const value = `d${real[0]}`;
       lines.push(`return DivJet(${value}.v,${value}.a/max(scale,1e-20),${value}.b/max(scale,1e-20),${value}.e);`, '}');
       return { source: lines.join('\n'), operations: used.size };
     }
-    lines.push('float distance=1e30,orientation=1.0;');
-    factors.forEach(([r, i], n) => {
-      const complex = r !== zero && i !== zero;
-      lines.push(
-        `float f${n}=divisorDistance(d${r === zero ? i : r},d${complex ? i : zero},${complex ? 'true' : 'false'});`,
-        `distance=min(distance,abs(f${n}));orientation*=sign(f${n});`
-      );
-    });
-    lines.push('return orientation*distance;', '}');
+    lines.push('float distance=1e30;');
+    for (const n of real) lines.push(`distance=min(distance,divisorPixels(divisorStep(d${n})));`);
+    lines.push('return distance;', '}');
     return { source: lines.join('\n'), operations: used.size, factors: factors.length };
   }
   globalThis.HodgeDivisor = Object.freeze({
