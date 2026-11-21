@@ -29,6 +29,7 @@ import Proposal.GeometricLiteralDerivedResidue
 import Mathlib.Topology.Sheaves.Abelian
 import Mathlib.Analysis.Complex.Basic
 import Mathlib.RingTheory.NoetherNormalization
+import Mathlib.RingTheory.KrullDimension.Polynomial
 import Mathlib.RingTheory.DedekindDomain.IntegralClosure
 import Mathlib.RingTheory.Polynomial.UniqueFactorization
 import Mathlib.RingTheory.Localization.Finiteness
@@ -3358,9 +3359,9 @@ noncomputable section
 /-!
 # Affine chart dimension from a dense smooth curve
 
-A Noether normalization of an affine chart maps its dense smooth open to
-affine space. The residue-field transcendence-degree bound for that image
-forces the normalization to have at most one polynomial variable.
+A Noether normalization of an affine chart maps its dominant smooth source
+to affine space. The residue-field transcendence-degree bound limits the
+number of polynomial variables by the dimension of the smooth source.
 
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
 -/
@@ -3395,31 +3396,12 @@ private theorem affine_smooth (K : Type) [Field K] (s : ℕ) : SmoothOfRelativeD
   exact RingHom.locally_of RingHom.isStandardSmoothOfRelativeDimension_respectsIso _
     ((RingHom.isStandardSmoothOfRelativeDimension_algebraMap s).mpr hs)
 
-private theorem polynomial_dim (K : Type) [Field K] {s : ℕ} (hs : s ≤ 1) :
-    Ring.DimensionLEOne (MvPolynomial (Fin s) K) := by
-  interval_cases s
-  · exact Ring.DimensionLEOne.of_ringEquiv (MvPolynomial.isEmptyRingEquiv K (Fin 0))
-  · exact Ring.DimensionLEOne.of_ringEquiv (MvPolynomial.uniqueAlgEquiv K (Fin 1)).toRingEquiv
-
-private theorem dim_of_finite {K : Type} [Field K] {s : ℕ} {A : Type} [CommRing A] [Algebra K A]
-    (g : MvPolynomial (Fin s) K →ₐ[K] A) (hf : g.IsIntegral) (hs : s ≤ 1) :
-    Ring.KrullDimLE 1 A := by
-  let P := MvPolynomial (Fin s) K
-  let : Algebra P A := g.toRingHom.toAlgebra
-  let : Algebra.IsIntegral P A := ⟨hf⟩
-  have hP : Ring.DimensionLEOne P := polynomial_dim K hs
-  rw [Ring.krullDimLE_iff]
-  have hdim : ringKrullDim A ≤ ringKrullDim P :=
-    Order.krullDim_le_of_strictMono (PrimeSpectrum.comap (algebraMap P A)) (fun _ _ h =>
-      Ideal.IsIntegral.comap_lt_comap h)
-  exact hdim.trans (Ring.krullDimLE_iff.mp inferInstance)
-
-/-- Every affine chart of a finite-type scheme with a dense smooth curve open has dimension at most one. -/
-theorem chart_dimension {K : Type} [Field K] {X B : Scheme.{0}} [NoetherianSpace X]
-    (j : X ⟶ B) [IsOpenImmersion j] [IsDominant j]
+/-- A dominant smooth source of relative dimension `n` bounds all affine charts of its image. -/
+theorem chart_dimension_le {K : Type} [Field K] {X B : Scheme.{0}} [NoetherianSpace X]
+    (n : ℕ) (j : X ⟶ B) [IsDominant j]
     (p : B ⟶ Spec (CommRingCat.of K)) [LocallyOfFiniteType p]
-    [SmoothOfRelativeDimension 1 (j ≫ p)] {V : B.Opens} (hV : IsAffineOpen V) :
-    Ring.KrullDimLE 1 Γ(B, V) := by
+    [SmoothOfRelativeDimension n (j ≫ p)] {V : B.Opens} (hV : IsAffineOpen V) :
+    Ring.KrullDimLE n Γ(B, V) := by
   let A := Γ(B, V)
   rcases subsingleton_or_nontrivial A with h | h
   · exact Ring.krullDimLE_iff.mpr (by rw [ringKrullDim_eq_bot_of_subsingleton]; exact bot_le)
@@ -3430,20 +3412,32 @@ theorem chart_dimension {K : Type} [Field K] {X B : Scheme.{0}} [NoetherianSpace
     (RingHom.FiniteType.of_surjective _
       (Scheme.ΓSpecIso (CommRingCat.of K)).symm.commRingCatIsoToRingEquiv.surjective)
   obtain ⟨s, g, hg, hi⟩ := exists_integral_inj_algHom_of_fg K A
-  apply dim_of_finite g hi
+  have mono : ringKrullDim A ≤ ringKrullDim (MvPolynomial (Fin s) K) := by
+    let P := MvPolynomial (Fin s) K
+    let : Algebra P A := g.toRingHom.toAlgebra
+    let : Algebra.IsIntegral P A := ⟨hi⟩
+    exact Order.krullDim_le_of_strictMono (PrimeSpectrum.comap (algebraMap P A))
+      (fun _ _ h => Ideal.IsIntegral.comap_lt_comap h)
+  have hfield : ringKrullDim K = 0 := Order.krullDim_eq_zero_of_unique
+  have polynomial_bound : ringKrullDim (MvPolynomial (Fin s) K) = s := by
+    simp [MvPolynomial.ringKrullDim_of_isNoetherianRing, hfield, Nat.card_eq_fintype_card]
+  apply Ring.krullDimLE_iff.mpr
+  rw [polynomial_bound] at mono
+  refine mono.trans ?_
+  suffices h : s ≤ n by exact_mod_cast h
   by_contra! hs
   let Y := (j ⁻¹ᵁ V).toScheme
-  let a : Y ⟶ Spec A := CycleQ2DenseOpenAffineSections.chart j hV
+  let a : Y ⟶ Spec A := (j ∣_ V) ≫ hV.isoSpec.hom
   let b := Spec.map (CommRingCat.ofHom g.toRingHom)
   let q := Spec.map (CommRingCat.ofHom (MvPolynomial.C : K →+* MvPolynomial (Fin s) K))
   let px := (j ⁻¹ᵁ V).ι ≫ j ≫ p
   let : NoetherianSpace Y := NoetherianSpace.set (j ⁻¹ᵁ V : Set X)
-  let : SmoothOfRelativeDimension 1 px := by
-    simpa only [Nat.zero_add] using smoothOfRelativeDimension_comp 0 1 (j ⁻¹ᵁ V).ι (j ≫ p)
+  let : SmoothOfRelativeDimension n px := by
+    simpa only [Nat.zero_add] using smoothOfRelativeDimension_comp 0 n (j ⁻¹ᵁ V).ι (j ≫ p)
   let : SmoothOfRelativeDimension s q := affine_smooth K s
   have ha : DenseRange a := by
     have : IsDominant (j ∣_ V) := IsZariskiLocalAtTarget.restrict (P := @IsDominant) inferInstance V
-    let : IsDominant a := by dsimp [a, CycleQ2DenseOpenAffineSections.chart]; infer_instance
+    let : IsDominant a := by dsimp [a]; infer_instance
     exact a.denseRange
   have hb : DenseRange b := by
     apply (PrimeSpectrum.denseRange_comap_iff_ker_le_nilRadical g.toRingHom).mpr
@@ -3462,8 +3456,16 @@ theorem chart_dimension {K : Type} [Field K] {X B : Scheme.{0}} [NoetherianSpace
     change ((j ∣_ V) ≫ hV.isoSpec.hom) ≫ hV.fromSpec ≫ p = _
     simp only [IsAffineOpen.fromSpec, Iso.hom_inv_id_assoc, Category.assoc,
       morphismRestrict_ι_assoc, px]
-  exact (closure_range_ne_univ 1 s hs px q (genericPolynomialPoint K s) (a ≫ b) fac)
+  exact (closure_range_ne_univ n s hs px q (genericPolynomialPoint K s) (a ≫ b) fac)
     (denseRange_iff_closure_range.mp (hb.comp ha b.continuous))
+
+/-- Every affine chart of a finite-type scheme with a dense smooth curve open has dimension at most one. -/
+theorem chart_dimension {K : Type} [Field K] {X B : Scheme.{0}} [NoetherianSpace X]
+    (j : X ⟶ B) [IsOpenImmersion j] [IsDominant j]
+    (p : B ⟶ Spec (CommRingCat.of K)) [LocallyOfFiniteType p]
+    [SmoothOfRelativeDimension 1 (j ≫ p)] {V : B.Opens} (hV : IsAffineOpen V) :
+    Ring.KrullDimLE 1 Γ(B, V) :=
+  chart_dimension_le 1 j p hV
 
 /-- On an integral scheme of finite type over a field, a single nonempty smooth curve
 open bounds the dimension of all affine charts. -/
@@ -12797,11 +12799,9 @@ noncomputable section
 /-!
 # The affine dimension bound is a bound on the curve itself
 
-Three strictly nested irreducible closed subsets would remain
-strict on any affine chart meeting the smallest one: a nonempty
-open in an irreducible closed set is dense. Thus the common
-affine ring dimension bound gives the global bound used for
-finiteness of a proper projection.
+Every chain of irreducible closed subsets remains strict on an affine chart
+meeting its smallest member. The common bound on the dimensions of the
+affine charts therefore also holds globally.
 
 Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
 -/
@@ -12850,33 +12850,34 @@ end Spaces
 
 variable (X : Scheme.{0})
 
-theorem dim_le_one (h : ∀ U : X.affineOpens, Ring.KrullDimLE 1 Γ(X,U.1)) :
-    topologicalKrullDim X ≤ 1 := by
-  change krullDim (IrreducibleCloseds X) ≤ 1
-  rw [krullDim_le_one_iff]
-  intro S
-  by_contra! hh
-  obtain ⟨T,hTS⟩ := not_isMin_iff.mp hh.1
-  obtain ⟨B,hSB⟩ := not_isMax_iff.mp hh.2
-  obtain ⟨x,hx⟩ := T.isIrreducible.nonempty
+/-- An affine bound controls every finite chain of irreducible closed subsets. -/
+theorem dim_le_of_affines (n : ℕ)
+    (h : ∀ U : X.affineOpens, Ring.KrullDimLE n Γ(X,U.1)) :
+    topologicalKrullDim X ≤ n := by
+  apply iSup_le
+  intro (p : LTSeries (IrreducibleCloseds X))
+  obtain ⟨x,hx⟩ := p.head.isIrreducible.nonempty
   obtain ⟨_,⟨U,hU,rfl⟩,hxU,_⟩ :=
     X.isBasis_affineOpens.exists_subset_of_mem_open (Set.mem_univ x) isOpen_univ
   let f := hU.fromSpec
-  let hf := f.isOpenEmbedding
   have hxR : x ∈ Set.range f := by
-    have hxO : x ∈ f.opensRange := hU.opensRange_fromSpec.symm ▸ hxU
-    exact hxO
-  have hT : ((T : Set X) ∩ Set.range f).Nonempty := ⟨x,hx,hxR⟩
-  have hS : ((S : Set X) ∩ Set.range f).Nonempty := ⟨x,hTS.le hx,hxR⟩
-  have hB : ((B : Set X) ∩ Set.range f).Nonempty := ⟨x,hSB.le (hTS.le hx),hxR⟩
-  have hd : topologicalKrullDim (Spec Γ(X,U)) ≤ 1 := by
-    change topologicalKrullDim (PrimeSpectrum Γ(X,U)) ≤ 1
+    change x ∈ Set.range hU.fromSpec
+    rwa [hU.range_fromSpec]
+  have hp (i : Fin (p.length + 1)) : ((p i : Set X) ∩ Set.range f).Nonempty :=
+    ⟨x, p.head_le i hx, hxR⟩
+  let q := LTSeries.mk p.length
+    (fun i => restrict f.isOpenEmbedding (p i) (hp i))
+    (fun i j hij => restrict_strict f.isOpenEmbedding
+      (p.strictMono hij) (hp i) (hp j))
+  have hd : topologicalKrullDim (Spec Γ(X,U)) ≤ n := by
+    change topologicalKrullDim (PrimeSpectrum Γ(X,U)) ≤ n
     rw [PrimeSpectrum.topologicalKrullDim_eq_ringKrullDim]
     exact Ring.krullDimLE_iff.mp (h ⟨U,hU⟩)
-  have hm := (krullDim_le_one_iff.mp hd) (restrict hf S hS)
-  rcases hm with hm | hm
-  · exact (not_isMin_iff.mpr ⟨_,restrict_strict hf hTS hT hS⟩) hm
-  · exact (not_isMax_iff.mpr ⟨_,restrict_strict hf hSB hS hB⟩) hm
+  exact (LTSeries.length_le_krullDim q).trans hd
+
+theorem dim_le_one (h : ∀ U : X.affineOpens, Ring.KrullDimLE 1 Γ(X,U.1)) :
+    topologicalKrullDim X ≤ 1 :=
+  dim_le_of_affines X 1 h
 
 end CycleQ2CurveTopologicalDimension
 

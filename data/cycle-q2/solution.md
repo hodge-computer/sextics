@@ -219,6 +219,23 @@ The pairing after proper completion and integration over the
 curves, and its comparison with the marked test, remain open.
 [Actual generic relative de Rham pullback](GeometricMonicGenericSupport.lean)
 
+For each algebraically independent choice of the three section coefficients,
+every nonempty time open in a suitable seed neighborhood yields a nonempty
+marked incidence surface. Take its scheme-theoretic image in the graph over
+the completed parameter curve. The projection of this closure to the
+threefold is proper. Both the boundary added in taking the closure and its
+image in the threefold have dimension at most one.
+
+The marked surface is smooth of dimension two and dense in the closure.
+Noether normalization bounds the dimension of each affine chart of the
+closure by two. A chain of irreducible closed subsets of the boundary can be
+extended by an ambient component, which gives the bound of one. Properness
+makes the projection closed, so the projected boundary satisfies the same
+bound. To use this estimate in the residue pairing, one still needs to show
+that the generic sweep has dimension two and identify the trace of its
+supported class with the prescribed residue.
+[Marked closure and boundary dimension](GeometricMarkedClosureBoundaryDimension.lean)
+
 ## Localization on the actual swept complement
 
 For an open immersion (j:U\hookrightarrow X), restriction followed by
