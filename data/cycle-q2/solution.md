@@ -386,12 +386,16 @@ After forgetting support, the class restricts to zero over a target open
 containing the function-field point of the protected residue.
 The remaining comparison must identify the prescribed residue in the image
 obtained by pairing with degree-one cohomology of the parameter curve and
-integrating along that curve. The two-equation logarithmic form has a
-checked first-order calculation on the marked cubic chart. After clearing
-the two equations and wedging with the cubic differential, the velocity of
-the second equation cancels and the coefficient is minus the velocity of
-the cubic polynomial.
-[Marked cubic calculation](GeometricMarkedLogarithmicVelocity.lean),
+integrating along that curve. On the affine incidence sextic, the cubic
+and the section row define one logarithmic two-form. Pullback to the generic
+time charts gives their logarithmic form over the generic coefficient field.
+Pullback to the marked dual numbers gives the two original equation jets over
+the complex numbers. After clearing the two equations and wedging with the
+cubic differential, the velocity of the row cancels and the coefficient is
+minus the velocity of the cubic.
+[Affine charts of the generic family](GeometricGenericTimeAffineCharts.lean),
+[specialization of the logarithmic form](GeometricIncidenceLogarithmicSpecialization.lean),
+[marked cubic calculation](GeometricMarkedLogarithmicVelocity.lean),
 [logarithmic coefficient](GeometricLogarithmicNonvanishing.lean),
 [nonvanishing with support](GeometricSupportedClassNonvanishing.lean), and
 [the marked class near the function point](GeometricMarkedFundamentalClass.lean)

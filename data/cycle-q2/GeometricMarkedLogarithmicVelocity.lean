@@ -111,7 +111,7 @@ def jet {A : Type} [CommRing A] (ρ : ChartPolynomial ℂ →+* A) :
     ChartPolynomial (DualNumber ℂ) →+* DualNumber A :=
   eval₂Hom (dualMap (ρ.comp C)) (fun i => algebraMap A (DualNumber A) (ρ (X i)))
 
-private theorem jet_constant {A : Type} [CommRing A] (ρ : ChartPolynomial ℂ →+* A)
+theorem jet_constant {A : Type} [CommRing A] (ρ : ChartPolynomial ℂ →+* A)
     (f : ChartPolynomial ℂ) :
     jet ρ (MvPolynomial.map (algebraMap ℂ (DualNumber ℂ)) f) = algebraMap A (DualNumber A) (ρ f) := by
   have eq : (jet ρ).comp (MvPolynomial.map (algebraMap ℂ (DualNumber ℂ))) =
