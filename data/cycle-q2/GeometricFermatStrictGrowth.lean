@@ -8,6 +8,7 @@ import Mathlib.LinearAlgebra.Matrix.Rank
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.RingTheory.Valuation.ValuationSubring
 import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+import HodgeComputer.Constructions.HoldoutCover.Piola
 
 /-!
 # The Fermat Higgs maps grow strictly
@@ -607,3 +608,227 @@ end CycleQ2FermatValuationFrame
 #print axioms CycleQ2FermatValuationFrame.exists_integral_frame
 #print axioms CycleQ2FermatValuationFrame.specialize_frame
 #print axioms CycleQ2FermatValuationFrame.residue_of_subspace
+
+/-!
+# Differential stability of the minor ideals of a connection-stable matrix
+
+If a finite generating matrix satisfies `D(P) = P C - B P`, differentiation
+preserves every ideal of minors of P. The proof retains both terms: changing
+the generators replaces columns, while the ambient connection replaces rows.
+Together with differential simplicity of a coefficient ring, this gives a
+unit minor ideal whenever one of its generators is nonzero.
+
+This is a statement over a commutative ring, before any passage to a generic
+fiber or any assertion about the rational residue kernel.
+-/
+
+namespace CycleQ2DifferentialMinorStability
+
+open Matrix
+
+variable {R : Type*} [CommRing R]
+
+section Square
+variable {r : ℕ}
+
+private def variation (A H : Matrix (Fin r) (Fin r) R) : R :=
+  ∑ j, A.cramer (fun i => H i j) j
+
+private theorem variation_sub (A H G : Matrix (Fin r) (Fin r) R) :
+    variation A (H - G) = variation A H - variation A G := by
+  unfold variation
+  rw [← Finset.sum_sub_distrib]
+  apply Finset.sum_congr rfl
+  intro j _
+  exact congrFun (map_sub A.cramer (fun i => H i j) (fun i => G i j)) j
+
+private theorem variation_rows (A H : Matrix (Fin r) (Fin r) R) :
+    variation A H = ∑ i, (A.updateRow i (H i)).det := by
+  have rows (i : Fin r) : (A.updateRow i (H i)).det =
+      ∑ j, A.adjugate j i * H i j := by
+    rw [← cramer_transpose_apply, cramer_eq_adjugate_mulVec, ← adjugate_transpose]
+    rfl
+  simp only [variation, rows, cramer_eq_adjugate_mulVec, mulVec, dotProduct]
+  exact Finset.sum_comm
+
+private theorem derivation_det_variation (D : Derivation ℤ R R)
+    (A : Matrix (Fin r) (Fin r) R) :
+    D A.det = variation A (A.map D) := by
+  simpa only [variation, cramer_apply, map_apply] using
+    HoldoutConstruction.derivation_det_columns D A
+
+end Square
+
+section Rectangular
+variable {n s : Type*} [Fintype n] [Fintype s]
+
+/-- All minors of a fixed size. Repeated row or column labels are allowed;
+their zero determinants do not change the generated ideal. -/
+def minorIdeal (P : Matrix n s R) (r : ℕ) : Ideal R :=
+  Ideal.span (Set.range fun ij : (Fin r → n) × (Fin r → s) =>
+    (P.submatrix ij.1 ij.2).det)
+
+theorem minor_mem (P : Matrix n s R) (r : ℕ) (I : Fin r → n) (J : Fin r → s) :
+    (P.submatrix I J).det ∈ minorIdeal P r :=
+  Ideal.subset_span ⟨(I,J), rfl⟩
+
+private theorem variation_right (P : Matrix n s R) (C : Matrix s s R)
+    (r : ℕ) (I : Fin r → n) (J : Fin r → s) :
+    variation (P.submatrix I J) ((P * C).submatrix I J) =
+      ∑ j : Fin r, ∑ k : s, C k (J j) *
+        (P.submatrix I (Function.update J j k)).det := by
+  classical
+  unfold variation
+  apply Finset.sum_congr rfl
+  intro j _
+  have hcol : (fun i : Fin r => (P * C) (I i) (J j)) =
+      ∑ k : s, C k (J j) • (fun i : Fin r => P (I i) k) := by
+    ext i
+    simp only [mul_apply, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+    apply Finset.sum_congr rfl
+    intro k _
+    exact mul_comm _ _
+  change (P.submatrix I J).cramer (fun i => (P * C) (I i) (J j)) j = _
+  rw [hcol, map_sum]
+  simp only [map_smul, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+  apply Finset.sum_congr rfl
+  intro k _
+  congr 1
+  rw [cramer_apply]
+  apply congrArg Matrix.det
+  ext a b
+  by_cases hb : b = j
+  · subst b
+    simp
+  · simp [updateCol_ne hb, submatrix_apply, Function.update_of_ne hb]
+
+private theorem variation_left (P : Matrix n s R) (B : Matrix n n R)
+    (r : ℕ) (I : Fin r → n) (J : Fin r → s) :
+    variation (P.submatrix I J) ((B * P).submatrix I J) =
+      ∑ i : Fin r, ∑ k : n, B (I i) k *
+        (P.submatrix (Function.update I i k) J).det := by
+  classical
+  rw [variation_rows]
+  apply Finset.sum_congr rfl
+  intro i _
+  have hrow : (fun j : Fin r => (B * P) (I i) (J j)) =
+      ∑ k : n, B (I i) k • (fun j : Fin r => P k (J j)) := by
+    ext j
+    simp only [mul_apply, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+  rw [← cramer_transpose_apply]
+  change (P.submatrix I J).transpose.cramer (fun j => (B * P) (I i) (J j)) i = _
+  rw [hrow, map_sum]
+  simp only [map_smul, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+  apply Finset.sum_congr rfl
+  intro k _
+  congr 1
+  rw [cramer_transpose_apply]
+  apply congrArg Matrix.det
+  ext a b
+  by_cases ha : a = i
+  · subst a
+    simp
+  · simp [updateRow_ne ha, submatrix_apply, Function.update_of_ne ha]
+
+/-- The full derivative of a minor, including the change of generators and
+the ambient connection. Every term is another minor of the same size. -/
+theorem derivation_minor (D : Derivation ℤ R R) (P : Matrix n s R)
+    (B : Matrix n n R) (C : Matrix s s R)
+    (h : P.map D = P * C - B * P)
+    (r : ℕ) (I : Fin r → n) (J : Fin r → s) :
+    D (P.submatrix I J).det =
+      (∑ j : Fin r, ∑ k : s, C k (J j) *
+        (P.submatrix I (Function.update J j k)).det) -
+      (∑ i : Fin r, ∑ k : n, B (I i) k *
+        (P.submatrix (Function.update I i k) J).det) := by
+  classical
+  rw [derivation_det_variation]
+  have hm : (P.submatrix I J).map D =
+      (P * C).submatrix I J - (B * P).submatrix I J := by
+    ext i j
+    exact congrArg (fun M : Matrix n s R => M (I i) (J j)) h
+  rw [hm, variation_sub, variation_right, variation_left]
+
+/-- Every determinantal ideal of a matrix stable under a connection is
+stable under its coefficient derivation. No choice of a nonvanishing minor
+or restriction on the rank is needed for this statement. -/
+theorem derivation_mem (D : Derivation ℤ R R) (P : Matrix n s R)
+    (B : Matrix n n R) (C : Matrix s s R)
+    (h : P.map D = P * C - B * P) (r : ℕ)
+    {x : R} (hx : x ∈ minorIdeal P r) : D x ∈ minorIdeal P r := by
+  classical
+  change x ∈ Ideal.span _ at hx
+  induction hx using Submodule.span_induction with
+  | mem x hx =>
+    obtain ⟨⟨I,J⟩,rfl⟩ := hx
+    rw [derivation_minor D P B C h]
+    apply (minorIdeal P r).sub_mem
+    · exact (minorIdeal P r).sum_mem fun j _ =>
+        (minorIdeal P r).sum_mem fun k _ =>
+          (minorIdeal P r).mul_mem_left _ (minor_mem P r I (Function.update J j k))
+    · exact (minorIdeal P r).sum_mem fun i _ =>
+        (minorIdeal P r).sum_mem fun k _ =>
+          (minorIdeal P r).mul_mem_left _ (minor_mem P r (Function.update I i k) J)
+  | zero => simpa only [map_zero] using (minorIdeal P r).zero_mem
+  | add x y hx hy ihx ihy =>
+    simpa only [map_add] using (minorIdeal P r).add_mem ihx ihy
+  | smul a x hx ih =>
+    rw [smul_eq_mul, D.leibniz]
+    apply (minorIdeal P r).add_mem ((minorIdeal P r).smul_mem a ih)
+    simpa only [smul_eq_mul, mul_comm] using (minorIdeal P r).smul_mem (D a) hx
+
+/-- Differential simplicity upgrades a nonzero minor ideal to the unit
+ideal for a whole family of coefficient connections. -/
+theorem minorIdeal_eq_top {ι : Type*} (D : ι → Derivation ℤ R R)
+    (simple : ∀ J : Ideal R, J ≠ ⊥ → (∀ i x, x ∈ J → D i x ∈ J) → J = ⊤)
+    (P : Matrix n s R) (B : ι → Matrix n n R) (C : ι → Matrix s s R)
+    (h : ∀ i, P.map (D i) = P * C i - B i * P) (r : ℕ)
+    (hne : ∃ I : Fin r → n, ∃ J : Fin r → s, (P.submatrix I J).det ≠ 0) :
+    minorIdeal P r = ⊤ := by
+  apply simple (minorIdeal P r)
+  · intro hz
+    obtain ⟨I,J,hm⟩ := hne
+    exact hm (by simpa only [hz, Submodule.mem_bot] using minor_mem P r I J)
+  · exact fun i _ hx => derivation_mem (D i) P (B i) (C i) (h i) r hx
+
+/-- A unit minor ideal has a nonzero minor at every point valued in a
+nontrivial commutative ring. The surviving minor may depend on the point. -/
+theorem exists_specialized_minor (P : Matrix n s R) (r : ℕ)
+    (htop : minorIdeal P r = ⊤)
+    {L : Type*} [CommRing L] [Nontrivial L] (ρ : R →+* L) :
+    ∃ I : Fin r → n, ∃ J : Fin r → s,
+      ((P.map ρ).submatrix I J).det ≠ 0 := by
+  classical
+  by_contra h
+  push_neg at h
+  have hker : minorIdeal P r ≤ RingHom.ker ρ := by
+    apply Ideal.span_le.mpr
+    rintro _ ⟨⟨I,J⟩, rfl⟩
+    change ρ (P.submatrix I J).det = 0
+    rw [ρ.map_det]
+    exact h I J
+  have h1 : (1 : R) ∈ minorIdeal P r := by rw [htop]; trivial
+  have hz : ρ 1 = 0 := hker h1
+  exact one_ne_zero (by simpa only [map_one] using hz)
+
+/-- The unit ideal of `r`-minors prevents the matrix rank from dropping
+below `r` under any field specialization. -/
+theorem rank_specialize_ge (P : Matrix n s R) (r : ℕ)
+    (htop : minorIdeal P r = ⊤)
+    {L : Type*} [Field L] (ρ : R →+* L) :
+    r ≤ (P.map ρ).rank := by
+  classical
+  obtain ⟨I,J,hminor⟩ := exists_specialized_minor P r htop ρ
+  have hr : ((P.map ρ).submatrix I J).rank = r := by
+    simpa only [Fintype.card_fin] using Matrix.rank_of_det_ne_zero hminor
+  rw [← hr]
+  exact Matrix.rank_submatrix_le _ I J
+
+end Rectangular
+end CycleQ2DifferentialMinorStability
+
+#print axioms CycleQ2DifferentialMinorStability.derivation_minor
+#print axioms CycleQ2DifferentialMinorStability.derivation_mem
+#print axioms CycleQ2DifferentialMinorStability.minorIdeal_eq_top
+#print axioms CycleQ2DifferentialMinorStability.exists_specialized_minor
+#print axioms CycleQ2DifferentialMinorStability.rank_specialize_ge

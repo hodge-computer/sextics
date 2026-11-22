@@ -660,7 +660,8 @@ private theorem coefficient_commutes (e : FullSexticTailIndex) (i : Fin 4) :
     simp only [Derivation.leibniz,smul_eq_mul,map_add,hX,hE,mul_zero,add_zero,zero_add,hp]
     ring
 
-private theorem coefficient_chart (e : FullSexticTailIndex) (p : MvPolynomial (Fin 5) Coeff) :
+/-- The actual coefficient derivative commutes with dehomogenizing a polynomial numerator. -/
+theorem coefficient_chart (e : FullSexticTailIndex) (p : MvPolynomial (Fin 5) Coeff) :
     coefficientPartial e (chart p) =
       chart (coefficientDerivation (HoldoutConstruction.integerPartial (R := ℂ) e) p) := by
   induction p using MvPolynomial.induction_on with
@@ -721,19 +722,21 @@ theorem fiberResidue_two : fiberResidue 2 b = density v F := by
   field_simp [universal_normal_ne_zero]
   ring
 
+/-- Removing the normal component from the normal coordinate derivative gives zero on the fiber. -/
+theorem fiberTangent_normal : fiberTangent dx = 0 := by
+  apply HoldoutConstruction.FieldValuedFraction.derivation_ext (P := CycleQ2MonicWeightedPrimitiveSpecialization.ChartRing F)
+  intro a
+  obtain ⟨q,rfl⟩ := projection_surjective F a
+  change fiberTangent dx (v q) = 0
+  refine (fiberTangent_poly dx q).trans ?_
+  have hz (a z : W) (hn : z ≠ 0) : a-z/z*a=0 := by rw [div_self hn,one_mul,sub_self]
+  exact hz (v (dx q)) (v n) universal_normal_ne_zero
+
 /-- A numerator derivative in the normal variable has no residual divergence term. -/
 theorem normal_residue (k : ℕ) (p : PolynomialRing) :
     fiberResidue k (normal p) = ((k+1:ℕ):W) * fiberResidue (k+1) (n*p) := by
-  have hz : fiberTangent dx = 0 := by
-    apply HoldoutConstruction.FieldValuedFraction.derivation_ext (P := CycleQ2MonicWeightedPrimitiveSpecialization.ChartRing F)
-    intro a
-    obtain ⟨q,rfl⟩ := projection_surjective F a
-    change fiberTangent dx (v q) = 0
-    refine (fiberTangent_poly dx q).trans ?_
-    have hz' (a z : W) (hn : z ≠ 0) : a-z/z*a=0 := by rw [div_self hn,one_mul,sub_self]
-    exact hz' (v (dx q)) (v n) universal_normal_ne_zero
   have e := fiberTangent_residue dx (Function.Commute.refl _) k p
-  rw [hz] at e
+  rw [fiberTangent_normal] at e
   exact sub_eq_zero.mp e.symm
 
 private def times (c : PolynomialRing) (a : Fraction) : Fraction := ⟨c*a.num,a.power⟩
@@ -774,6 +777,200 @@ theorem cancel_equation (k : ℕ) (p : PolynomialRing) : fiberResidue (k+1) (F*p
   have hk : ((k+1:ℕ):W) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.succ_ne_zero k)
   field_simp
 
+/-- The actual residue with the factorial convention of polynomial pole symbols:
+the summand indexed by `k` represents `k!` times a pole of order `k+1`. -/
+def normalizedFiberResidue (k : ℕ) (p : PolynomialRing) : W :=
+  atField v (normalFraction k p)
+
+theorem normalizedFiberResidue_eq (k : ℕ) (p : PolynomialRing) :
+    normalizedFiberResidue k p = (k.factorial : W) * fiberResidue k p := by
+  have hk : (k.factorial : W) ≠ 0 := Nat.cast_ne_zero.mpr (Nat.factorial_ne_zero k)
+  simp only [normalizedFiberResidue,fiberResidue]
+  field_simp
+
+theorem normalizedFiberResidue_sub (k : ℕ) (p q : PolynomialRing) :
+    normalizedFiberResidue k (p-q) = normalizedFiberResidue k p - normalizedFiberResidue k q := by
+  have h : atField ι (normalFraction k (p-q)) =
+      atField ι (minus (normalFraction k p) (normalFraction k q)) := by
+    rw [minus_at ι hnAmbient]
+    simp only [normalFraction_at,jet,map_sub,sub_div,iterate_sub]
+  exact (specialize h).trans (minus_at v universal_normal_ne_zero _ _)
+
+@[simp] theorem normalizedFiberResidue_zero (k : ℕ) : normalizedFiberResidue k 0 = 0 := by
+  simpa only [sub_self] using normalizedFiberResidue_sub k 0 0
+
+theorem normalizedFiberResidue_add (k : ℕ) (p q : PolynomialRing) :
+    normalizedFiberResidue k (p+q) = normalizedFiberResidue k p + normalizedFiberResidue k q := by
+  have h := normalizedFiberResidue_sub k (p+q) q
+  rw [add_sub_cancel_right] at h
+  exact (eq_sub_iff_add_eq.mp h).symm
+
+/-- Additivity takes place in the actual hypersurface field, before quotienting by boundaries. -/
+def normalizedFiberResidueAdd (k : ℕ) : PolynomialRing →+ W where
+  toFun := normalizedFiberResidue k
+  map_zero' := normalizedFiberResidue_zero k
+  map_add' := normalizedFiberResidue_add k
+
+private theorem iterate_mul_constant {L : Type*} [Field L] (d : Derivation ℤ L L)
+    (c u : L) (hc : d c = 0) (k : ℕ) : d^[k] (c*u) = c*d^[k] u := by
+  induction k with
+  | zero => rfl
+  | succ k ih =>
+    rw [Function.iterate_succ_apply',ih,Derivation.leibniz]
+    simp only [smul_eq_mul,hc,mul_zero,add_zero,Function.iterate_succ_apply']
+
+/-- A factor constant in the chosen normal coordinate passes through every normalized residue. -/
+theorem normalizedFiberResidue_mul_constant (k : ℕ) (c p : PolynomialRing) (hc : normal c = 0) :
+    normalizedFiberResidue k (c*p) = v c * normalizedFiberResidue k p := by
+  have hz : N (ι F) ambientPartial (ι c) = 0 := by
+    rw [N_apply,ambientDx]
+    change ι (normal c) / _ = 0
+    rw [hc,map_zero,zero_div]
+  have h : atField ι (normalFraction k (c*p)) =
+      atField ι (times c (normalFraction k p)) := by
+    simp only [times_at,normalFraction_at,jet,map_mul,mul_div_assoc]
+    exact iterate_mul_constant _ _ _ hz k
+  exact (specialize h).trans (times_at v c _)
+
+theorem normalizedFiberResidue_C_mul (k : ℕ) (c : Coeff) (p : PolynomialRing) :
+    normalizedFiberResidue k (C c*p) = v (C c) * normalizedFiberResidue k p :=
+  normalizedFiberResidue_mul_constant k (C c) p (by simp only [normal,pderiv_C])
+
+/-- Coefficient or coordinate differentiation has precisely the factorial-free
+connection formula used by the normalized polynomial pole quotient. -/
+theorem normalized_tangent_residue (Δ : Derivation ℤ PolynomialRing PolynomialRing)
+    (h : Function.Commute Δ dx) (k : ℕ) (p : PolynomialRing) :
+    fiberTangent Δ (normalizedFiberResidue k p) =
+      normalizedFiberResidue k (Δ p) - normalizedFiberResidue (k+1) (Δ F*p) := by
+  simp only [normalizedFiberResidue_eq,Derivation.leibniz,Derivation.map_natCast,
+    smul_eq_mul,mul_zero,add_zero,fiberTangent_residue Δ h,Nat.factorial_succ,Nat.cast_mul]
+  ring
+
+theorem normalized_coefficient_residue (e : FullSexticTailIndex) (k : ℕ) (p : PolynomialRing) :
+    fiberTangent (coefficientPartial e) (normalizedFiberResidue k p) =
+      normalizedFiberResidue k (coefficientPartial e p) -
+        normalizedFiberResidue (k+1) (chart (monomial
+          (CycleQ2IncidenceNormalForm.fullExponentOf e.val.val) 1)*p) := by
+  rw [← coefficient_equation]
+  exact normalized_tangent_residue _ (coefficient_commutes e 0) k p
+
+theorem normalized_spatial_residue (j : Fin 3) (k : ℕ) (p : PolynomialRing) :
+    direction F universal_normal_ne_zero j (normalizedFiberResidue k p) =
+      normalizedFiberResidue k (pderiv j.succ p) -
+        normalizedFiberResidue (k+1) (pderiv j.succ F*p) :=
+  normalized_tangent_residue (HoldoutConstruction.integerPartial j.succ)
+    (HoldoutConstruction.integerPartials_commute j.succ 0) k p
+
+theorem normalized_normal_residue (k : ℕ) (p : PolynomialRing) :
+    normalizedFiberResidue (k+1) (n*p) = normalizedFiberResidue k (normal p) := by
+  simp only [normalizedFiberResidue_eq,normal_residue,Nat.factorial_succ,Nat.cast_mul]
+  ring
+
+theorem normalized_cancel_equation (k : ℕ) (p : PolynomialRing) :
+    normalizedFiberResidue (k+1) (F*p) = ((k+1:ℕ):W) * normalizedFiberResidue k p := by
+  simp only [normalizedFiberResidue_eq,cancel_equation,Nat.factorial_succ,Nat.cast_mul]
+  ring
+
+open CycleQ2GeometricIncidenceProj (geometricWeight homogeneous_of_character)
+
+private abbrev homogeneousEquation : MvPolynomial (Fin 5) Coeff :=
+  normalizedFullSextic (fun e : FullSexticTailIndex => (X e : Coeff))
+
+private theorem chart_weighted_euler (p : MvPolynomial (Fin 5) Coeff) (d : ℕ)
+    (hp : p.IsWeightedHomogeneous geometricWeight d) :
+    chart (pderiv (0 : Fin 5) p) +
+      ∑ i : Fin 4, geometricWeight i.succ • (X i * pderiv i (chart p)) = d • chart p := by
+  have h := congrArg (chart (R := Coeff)) hp.sum_weight_X_mul_pderiv
+  rw [Fin.sum_univ_succ] at h
+  have hx0 : chart (X (0 : Fin 5) : MvPolynomial (Fin 5) Coeff) = 1 := by simp [chart]
+  have hx (i : Fin 4) : chart (X i.succ : MvPolynomial (Fin 5) Coeff) = X i := by simp [chart]
+  simpa only [map_add,map_sum,map_nsmul,map_mul,hx0,hx,
+    show geometricWeight (0 : Fin 5) = 1 from rfl,one_nsmul,one_mul,
+    ← CycleQ2WeightedAffineChartJets.pderiv_chart] using h
+
+private theorem normalized_affine_coordinate_residue (i : Fin 4) (k : ℕ) (p : PolynomialRing) :
+    normalizedFiberResidue (k+1) ((X i*pderiv i F)*p) =
+      normalizedFiberResidue k p + normalizedFiberResidue k (X i*pderiv i p) -
+        fiberTangent (HoldoutConstruction.integerPartial i) (normalizedFiberResidue k (X i*p)) := by
+  have h := normalized_tangent_residue (HoldoutConstruction.integerPartial i)
+    (HoldoutConstruction.integerPartials_commute i 0) k (X i*p)
+  change fiberTangent (HoldoutConstruction.integerPartial i) (normalizedFiberResidue k (X i*p)) =
+    normalizedFiberResidue k (pderiv i (X i*p)) -
+      normalizedFiberResidue (k+1) (pderiv i F*(X i*p)) at h
+  have hd : pderiv i (X i*p) = p+X i*pderiv i p := by
+    rw [pderiv_mul,pderiv_X_self]
+    ring
+  have hm : pderiv i F*(X i*p) = (X i*pderiv i F)*p := by ring
+  rw [hd,hm,normalizedFiberResidue_add] at h
+  rw [h]
+  ring
+
+private theorem normalized_chart_zero_residue (k : ℕ) (p : MvPolynomial (Fin 5) Coeff)
+    (hp : p.IsWeightedHomogeneous geometricWeight (6*k+1)) :
+    normalizedFiberResidue (k+1) (chart (pderiv (0 : Fin 5) homogeneousEquation)*chart p) -
+      normalizedFiberResidue k (chart (pderiv (0 : Fin 5) p)) =
+        ∑ i : Fin 4, (geometricWeight i.succ : W) *
+          fiberTangent (HoldoutConstruction.integerPartial i)
+            (normalizedFiberResidue k (X i*chart p)) := by
+  have hF : homogeneousEquation.IsWeightedHomogeneous geometricWeight 6 :=
+    homogeneous_of_character (CycleQ2IncidenceNormalForm.normalizedFullSextic_homogeneous _)
+  have hf := congrArg (fun q : PolynomialRing => normalizedFiberResidueAdd (k+1) (q*chart p))
+    (chart_weighted_euler homogeneousEquation 6 hF)
+  simp only [add_mul,Finset.sum_mul,smul_mul_assoc,map_add,map_sum,map_nsmul] at hf
+  change normalizedFiberResidue (k+1) (chart (pderiv (0 : Fin 5) homogeneousEquation)*chart p) +
+    (∑ i : Fin 4, geometricWeight i.succ • normalizedFiberResidue (k+1) ((X i*pderiv i F)*chart p)) =
+      6 • normalizedFiberResidue (k+1) (F*chart p) at hf
+  rw [normalized_cancel_equation] at hf
+  have hg := congrArg (normalizedFiberResidueAdd k) (chart_weighted_euler p (6*k+1) hp)
+  simp only [map_add,map_sum,map_nsmul] at hg
+  change normalizedFiberResidue k (chart (pderiv (0 : Fin 5) p)) +
+    (∑ i : Fin 4, geometricWeight i.succ • normalizedFiberResidue k (X i*pderiv i (chart p))) =
+      (6*k+1) • normalizedFiberResidue k (chart p) at hg
+  simp only [nsmul_eq_mul] at hf hg
+  simp_rw [normalized_affine_coordinate_residue] at hf
+  have hw : (∑ i : Fin 4, (geometricWeight i.succ : W)) = 5 := by
+    norm_num [geometricWeight,Fin.sum_univ_succ]
+  simp only [mul_add,mul_sub,Finset.sum_add_distrib,Finset.sum_sub_distrib,
+    ← Finset.sum_mul,hw] at hf
+  have hs : (∑ i : Fin 4, (geometricWeight i.succ : W) *
+      normalizedFiberResidue k (X i*pderiv i (chart p))) =
+      ((6*k+1 : ℕ) : W)*normalizedFiberResidue k (chart p) -
+        normalizedFiberResidue k (chart (pderiv (0 : Fin 5) p)) :=
+    eq_sub_iff_add_eq.mpr ((add_comm _ _).trans hg)
+  rw [hs] at hf
+  apply sub_eq_zero.mp
+  calc
+    _ = (normalizedFiberResidue (k+1) (chart (pderiv (0 : Fin 5) homogeneousEquation)*chart p) +
+        (5*normalizedFiberResidue k (chart p) +
+          (((6*k+1 : ℕ) : W)*normalizedFiberResidue k (chart p) -
+            normalizedFiberResidue k (chart (pderiv (0 : Fin 5) p))) -
+          ∑ i : Fin 4, (geometricWeight i.succ : W) *
+            fiberTangent (HoldoutConstruction.integerPartial i)
+              (normalizedFiberResidue k (X i*chart p)))) -
+        6*(((k+1 : ℕ) : W)*normalizedFiberResidue k (chart p)) := by
+      simp only [Nat.cast_add,Nat.cast_mul,Nat.cast_one,Nat.cast_ofNat]
+      ring
+    _ = 0 := sub_eq_zero.mpr hf
+
+/-- Weighted Euler supplies the projective-coordinate relation omitted by the
+affine chart. Its residue is the displayed divergence in the three free coordinates. -/
+theorem normalized_zero_residue (k : ℕ) (p : MvPolynomial (Fin 5) Coeff)
+    (hp : p.IsWeightedHomogeneous geometricWeight (6*k+1)) :
+    normalizedFiberResidue (k+1) (chart (pderiv (0 : Fin 5) homogeneousEquation)*chart p) -
+      normalizedFiberResidue k (chart (pderiv (0 : Fin 5) p)) =
+        ∑ j : Fin 3, direction F universal_normal_ne_zero j
+          ((geometricWeight j.succ.succ : W)*normalizedFiberResidue k (X j.succ*chart p)) := by
+  have h := normalized_chart_zero_residue k p hp
+  rw [Fin.sum_univ_succ,fiberTangent_normal] at h
+  simp only [Derivation.zero_apply,mul_zero,zero_add] at h
+  calc
+    _ = ∑ j : Fin 3, (geometricWeight j.succ.succ : W) *
+        direction F universal_normal_ne_zero j (normalizedFiberResidue k (X j.succ*chart p)) := h
+    _ = _ := by
+      apply Finset.sum_congr rfl
+      intro j _
+      simp only [Derivation.leibniz,Derivation.map_natCast,smul_eq_mul,mul_zero,add_zero]
+
 theorem coefficient_commutes_spatial (e : FullSexticTailIndex) (j : Fin 3) :
     Function.Commute (fiberTangent (coefficientPartial e)) (direction F universal_normal_ne_zero j) :=
   HoldoutConstruction.residueTangent_commute (projection F) (projection_surjective F)
@@ -812,6 +1009,163 @@ theorem coefficient_preserves_exact (e : FullSexticTailIndex) (u : W)
   rw [← hw,map_sum]
   exact Finset.sum_congr rfl fun j _ => (coefficient_commutes_spatial e j (w j)).symm
 
+/-- The signed normalized polynomial-pole relation is an actual exterior boundary;
+its primitive has the single free-coordinate coefficient `-normalizedFiberResidue k p`. -/
+theorem normalized_spatial_exact (j : Fin 3) (k : ℕ) (p : PolynomialRing) :
+    ∃ η : Form K W 2, exteriorDerivative η =
+      (normalizedFiberResidue (k+1) (pderiv j.succ F*p) -
+        normalizedFiberResidue k (pderiv j.succ p)) • volume coordinateBasis := by
+  apply (exact_volume_iff_divergence coordinateBasis coordinateDerivation _).mpr
+  refine ⟨fun i => if i = j then -normalizedFiberResidue k p else 0,?_⟩
+  calc
+    _ = coordinateDerivation j (if j = j then -normalizedFiberResidue k p else 0) :=
+      Finset.sum_eq_single j (fun i _ hij => by simp [hij]) (by simp)
+    _ = _ := by
+      rw [if_pos rfl,map_neg]
+      change -direction F universal_normal_ne_zero j (normalizedFiberResidue k p) = _
+      rw [normalized_spatial_residue]
+      ring
+
+/-- Every degree-compatible homogeneous polynomial-pole relation is a genuine
+rational exterior boundary, including the coordinate set to one in this chart. -/
+theorem normalized_homogeneous_exact (i : Fin 5) (k : ℕ) (p : MvPolynomial (Fin 5) Coeff)
+    (hp : p.IsWeightedHomogeneous geometricWeight (6*k+geometricWeight i)) :
+    ∃ η : Form K W 2, exteriorDerivative η =
+      (normalizedFiberResidue (k+1) (chart (pderiv i homogeneousEquation*p)) -
+        normalizedFiberResidue k (chart (pderiv i p))) • volume coordinateBasis := by
+  revert hp
+  refine Fin.cases ?_ (fun i => ?_) i
+  · intro hp
+    apply (exact_volume_iff_divergence coordinateBasis coordinateDerivation _).mpr
+    refine ⟨fun j => (geometricWeight j.succ.succ : W)*
+      normalizedFiberResidue k (X j.succ*chart p),?_⟩
+    simpa only [map_mul] using (normalized_zero_residue k p hp).symm
+  · intro _
+    refine Fin.cases ?_ (fun j => ?_) i
+    · simp only [map_mul,← CycleQ2WeightedAffineChartJets.pderiv_chart]
+      change ∃ η : Form K W 2, exteriorDerivative η =
+        (normalizedFiberResidue (k+1) (n*chart p) -
+          normalizedFiberResidue k (normal (chart p))) • volume coordinateBasis
+      rw [normalized_normal_residue,sub_self,zero_smul]
+      exact ⟨0,map_zero _⟩
+    · simpa only [map_mul,← CycleQ2WeightedAffineChartJets.pderiv_chart] using
+        normalized_spatial_exact j k (chart p)
+
+/-- Projection and a coordinate derivative commute with the corresponding shift
+in weighted degree. Zero variable weights are allowed. -/
+theorem component_pderiv {R σ : Type*} [CommRing R] (w : σ → ℕ) (d : ℕ)
+    (i : σ) (p : MvPolynomial σ R) :
+    weightedHomogeneousComponent w d (pderiv i p) =
+      pderiv i (weightedHomogeneousComponent w (d+w i) p) := by
+  classical
+  ext m
+  simp only [coeff_weightedHomogeneousComponent,coeff_pderiv,map_add,
+    Finsupp.weight_single,one_smul]
+  by_cases hm : Finsupp.weight w m = d
+  · have hs : Finsupp.weight w m+w i = d+w i := congrArg (fun a => a+w i) hm
+    rw [if_pos hm,if_pos hs]
+  · have hs : Finsupp.weight w m+w i ≠ d+w i := fun h => hm (Nat.add_right_cancel h)
+    rw [if_neg hm,if_neg hs,zero_mul]
+
+/-- A gradient factor shifts the numerator projection by exactly its weighted degree. -/
+theorem component_gradient_mul (k : ℕ) (i : Fin 5) (p : MvPolynomial (Fin 5) Coeff) :
+    weightedHomogeneousComponent geometricWeight (6*(k+1)) (p*pderiv i homogeneousEquation) =
+      weightedHomogeneousComponent geometricWeight (6*k+geometricWeight i) p *
+        pderiv i homogeneousEquation := by
+  have hF : homogeneousEquation.IsWeightedHomogeneous geometricWeight 6 :=
+    homogeneous_of_character (CycleQ2IncidenceNormalForm.normalizedFullSextic_homogeneous _)
+  have hi : geometricWeight i ≤ 6 := by fin_cases i <;> decide
+  have hpartial : (pderiv i homogeneousEquation).IsWeightedHomogeneous geometricWeight
+      (6-geometricWeight i) := hF.pderiv (Nat.sub_add_cancel hi)
+  have hd : (6*k+geometricWeight i)+(6-geometricWeight i) = 6*(k+1) := by omega
+  simpa only [hd] using CycleQ2WeightedComponent.component_mul geometricWeight p
+    (pderiv i homogeneousEquation) (6*k+geometricWeight i) (6-geometricWeight i) hpartial
+
+/-- The underlying module of the normalized polynomial pole presentation. -/
+abbrev RawPoles := ℕ →₀ MvPolynomial (Fin 5) Coeff
+
+/-- In pole summand `k`, retain precisely the homogeneous numerator of weight `6*k`. -/
+def degreeProjection : RawPoles →ₗ[Coeff] RawPoles :=
+  Finsupp.lsum Coeff (fun k => (Finsupp.lsingle k).comp
+    (weightedHomogeneousComponent geometricWeight (6*k)))
+
+theorem degreeProjection_single (k : ℕ) (p : MvPolynomial (Fin 5) Coeff) :
+    degreeProjection (Finsupp.single k p) =
+      Finsupp.single k (weightedHomogeneousComponent geometricWeight (6*k) p) := by
+  rw [degreeProjection,Finsupp.lsum_single]
+  rfl
+
+/-- An arbitrary raw relation projects to the same relation with the uniquely
+appropriate homogeneous component of its multiplier. -/
+theorem degreeProjection_relation (k : ℕ) (i : Fin 5) (p : MvPolynomial (Fin 5) Coeff) :
+    degreeProjection (Finsupp.single (k+1) (p*pderiv i homogeneousEquation) -
+      Finsupp.single k (pderiv i p)) =
+        Finsupp.single (k+1)
+          (weightedHomogeneousComponent geometricWeight (6*k+geometricWeight i) p *
+            pderiv i homogeneousEquation) -
+        Finsupp.single k
+          (pderiv i (weightedHomogeneousComponent geometricWeight (6*k+geometricWeight i) p)) := by
+  rw [map_sub,degreeProjection_single,degreeProjection_single,component_gradient_mul,component_pderiv]
+
+theorem degreeProjection_idempotent (p : RawPoles) : degreeProjection (degreeProjection p) = degreeProjection p := by
+  induction p using Finsupp.induction_linear with
+  | zero => simp
+  | add p q hp hq => simp only [map_add,hp,hq]
+  | single k p =>
+    simp only [degreeProjection_single]
+    exact congrArg (Finsupp.single k)
+      (weightedHomogeneousComponent_eq_self (weightedHomogeneousComponent_isWeightedHomogeneous _ _))
+
+private def rawPoleResidue : RawPoles →+ W :=
+  Finsupp.liftAddHom (fun k => (normalizedFiberResidueAdd k).comp
+    (chart (R := Coeff)).toLinearMap.toAddMonoidHom)
+
+private theorem rawPoleResidue_single (k : ℕ) (p : MvPolynomial (Fin 5) Coeff) :
+    rawPoleResidue (Finsupp.single k p) = normalizedFiberResidue k (chart p) := by
+  rw [rawPoleResidue,Finsupp.liftAddHom_apply_single]
+  rfl
+
+/-- The actual additive residue realization of raw poles after the necessary
+degree projection. Boundary descent is established on arbitrary raw relations below. -/
+def projectedPoleResidue : RawPoles →+ W :=
+  rawPoleResidue.comp degreeProjection.toAddMonoidHom
+
+theorem projectedPoleResidue_single (k : ℕ) (p : MvPolynomial (Fin 5) Coeff) :
+    projectedPoleResidue (Finsupp.single k p) =
+      normalizedFiberResidue k (chart (weightedHomogeneousComponent geometricWeight (6*k) p)) := by
+  change rawPoleResidue (degreeProjection (Finsupp.single k p)) = _
+  rw [degreeProjection_single,rawPoleResidue_single]
+
+/-- No homogeneity hypothesis is imposed on the raw multiplier: projection
+selects the correct component, whose relation is an actual rational boundary. -/
+theorem projectedPoleResidue_relation_exact (k : ℕ) (i : Fin 5) (p : MvPolynomial (Fin 5) Coeff) :
+    ∃ η : Form K W 2, exteriorDerivative η =
+      projectedPoleResidue (Finsupp.single (k+1) (p*pderiv i homogeneousEquation) -
+        Finsupp.single k (pderiv i p)) • volume coordinateBasis := by
+  rw [map_sub,projectedPoleResidue_single,projectedPoleResidue_single,
+    component_gradient_mul,component_pderiv]
+  simpa only [mul_comm] using normalized_homogeneous_exact i k
+    (weightedHomogeneousComponent geometricWeight (6*k+geometricWeight i) p)
+    (weightedHomogeneousComponent_isWeightedHomogeneous _ _)
+
+/-- Differentiating an exact normalized residue gives the exact literal
+polynomial-pole connection expression, with no extra pole-order factor. -/
+theorem normalized_coefficient_preserves_exact (e : FullSexticTailIndex) (k : ℕ)
+    (p : PolynomialRing)
+    (h : ∃ η : Form K W 2, exteriorDerivative η =
+      normalizedFiberResidue k p • volume coordinateBasis) :
+    ∃ η : Form K W 2, exteriorDerivative η =
+      (normalizedFiberResidue k (coefficientPartial e p) -
+        normalizedFiberResidue (k+1) (chart (monomial
+          (CycleQ2IncidenceNormalForm.fullExponentOf e.val.val) 1)*p)) • volume coordinateBasis := by
+  simpa only [normalized_coefficient_residue] using
+    coefficient_preserves_exact e (normalizedFiberResidue k p) h
+
+theorem normalized_weighted_source :
+    normalizedFiberResidue 2 b • volume coordinateBasis = (2 : W) • sourceForm := by
+  rw [normalizedFiberResidue_eq,mul_smul,weighted_source]
+  norm_num
+
 end Chart
 end CycleQ2WeightedPoleJets
 #print axioms CycleQ2WeightedPoleJets.fiberTangent_residue
@@ -822,3 +1176,8 @@ end CycleQ2WeightedPoleJets
 #print axioms CycleQ2WeightedPoleJets.coefficient_preserves_exact
 
 #print axioms CycleQ2WeightedPoleJets.cancel_equation
+#print axioms CycleQ2WeightedPoleJets.normalized_spatial_exact
+#print axioms CycleQ2WeightedPoleJets.normalized_homogeneous_exact
+#print axioms CycleQ2WeightedPoleJets.degreeProjection_relation
+#print axioms CycleQ2WeightedPoleJets.projectedPoleResidue_relation_exact
+#print axioms CycleQ2WeightedPoleJets.normalized_coefficient_preserves_exact

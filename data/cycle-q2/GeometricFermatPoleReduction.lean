@@ -2,6 +2,7 @@ import Proposal.GeometricFermatStrictGrowth
 import Mathlib.Algebra.Module.LinearMap.Rat
 import Proposal.GeometricUniversalJacobianFrames
 import Proposal.IncidenceBasepointCharts
+import Proposal.GeometricLocalizedDerivations
 import HodgeComputer.Constructions.HoldoutCover.FiniteDifferentials
 
 /-!
@@ -1396,3 +1397,215 @@ end CycleQ2FermatSymbolDetector
 
 #print axioms CycleQ2FermatSymbolDetector.prime_monic_coordinate
 end
+
+/-!
+# The universal residue frame at the Fermat coefficient point
+
+The universal upper and lower labels have exactly the same exponents and
+normalized poles as the detector frame. Transport along the equality of the
+defining equations therefore identifies the actual specialized frame with the
+66 independently detected symbols.
+-/
+
+noncomputable section
+namespace CycleQ2FermatSymbolDetector
+
+open CycleQ2PolynomialPoleSymbols (Symbols relations symbol)
+open CycleQ2UniversalPoleFrame (equation basisSymbol Label)
+open CycleQ2GenericSexticGradient (CoeffRing seedEvaluation universalF_seed)
+open CycleQ2GeometricHiggsGradedIndices (exp_upperIndex exp_lowerIndex)
+open CycleQ2FermatPrimeCoefficient (source pole)
+open MvPolynomial
+
+variable {K : Type} [Field K] (φ : CoeffRing →+* K)
+    (hF : equation φ = fermatPolynomial K)
+
+/-- Change only the presentation of the equation, using the induced equality
+of the normalized polynomial-pole relation submodules. -/
+def fermatEquationEquiv :
+    Symbols K (equation φ) ≃ₗ[K] Symbols K (fermatPolynomial K) :=
+  Submodule.quotEquivOfEq _ _ (congrArg (relations K) hF)
+
+@[simp] theorem fermatEquationEquiv_symbol (n : ℕ) (P : MvPolynomial (Fin 5) K) :
+    fermatEquationEquiv φ hF (symbol K (equation φ) n P) =
+      symbol K (fermatPolynomial K) n P := rfl
+
+/-- Both lower frames use the complementary socle order without reindexing. -/
+@[simp] theorem fermatEquationEquiv_basisSymbol (s : Label) :
+    fermatEquationEquiv φ hF (basisSymbol φ s) = frame K s := by
+  rcases s with i | i
+  · simp only [basisSymbol, CycleQ2UniversalPoleFrame.pole, exp_upperIndex,
+      fermatEquationEquiv_symbol, frame, source, pole]
+  · simp only [basisSymbol, CycleQ2UniversalPoleFrame.pole, exp_lowerIndex,
+      fermatEquationEquiv_symbol, frame, source, pole]
+
+/-- The universal frame is linearly independent whenever its equation is
+the Fermat equation, as witnessed by the explicit detector coordinates. -/
+theorem basisSymbol_linearIndependent [NeZero (6 : K)] :
+    LinearIndependent K (basisSymbol φ) := by
+  classical
+  rw [Fintype.linearIndependent_iff]
+  intro c hc s
+  have h := congrArg (fermatEquationEquiv φ hF) hc
+  simp only [map_sum, map_smul, fermatEquationEquiv_basisSymbol, map_zero] at h
+  exact (Fintype.linearIndependent_iff.mp (frame_linearIndependent K)) c h s
+
+/-- The actual frame evaluated at the Fermat coefficient point is independent. -/
+theorem seed_basisSymbol_linearIndependent :
+    LinearIndependent ℂ (basisSymbol seedEvaluation) :=
+  basisSymbol_linearIndependent seedEvaluation universalF_seed
+
+/-- Coefficient specialization of the universal frame is independent whenever
+the specialized equation is Fermat. This is the form needed by the regular
+connection criterion, with the specialization map retained explicitly. -/
+theorem specialized_basisSymbol_linearIndependent [NeZero (6 : K)]
+    {R : Type} [CommRing R] (ψ : CoeffRing →+* R) (ρ : R →+* K)
+    (h : MvPolynomial.map ρ (equation ψ) = fermatPolynomial K) :
+    LinearIndependent K (fun i =>
+      CycleQ2PolynomialPoleSymbols.specialize ρ (equation ψ) (basisSymbol ψ i)) := by
+  classical
+  let E := Submodule.quotEquivOfEq _ _ (congrArg (relations K) h)
+  have hs (n : ℕ) (P : MvPolynomial (Fin 5) K) :
+      E (symbol K (MvPolynomial.map ρ (equation ψ)) n P) =
+        symbol K (fermatPolynomial K) n P := rfl
+  have hf (s : Label) :
+      E (CycleQ2PolynomialPoleSymbols.specialize ρ (equation ψ) (basisSymbol ψ s)) =
+        frame K s := by
+    rcases s with i | i
+    · simp only [basisSymbol, CycleQ2UniversalPoleFrame.pole,
+        CycleQ2PolynomialPoleSymbols.specialize_symbol, map_monomial, map_one,
+        exp_upperIndex, hs, frame, source, pole]
+    · simp only [basisSymbol, CycleQ2UniversalPoleFrame.pole,
+        CycleQ2PolynomialPoleSymbols.specialize_symbol, map_monomial, map_one,
+        exp_lowerIndex, hs, frame, source, pole]
+  rw [Fintype.linearIndependent_iff]
+  intro c hc s
+  have ht := congrArg E hc
+  simp only [map_sum, map_smul, hf, map_zero] at ht
+  exact (Fintype.linearIndependent_iff.mp (frame_linearIndependent K)) c ht s
+
+end CycleQ2FermatSymbolDetector
+end
+
+#print axioms CycleQ2FermatSymbolDetector.fermatEquationEquiv_basisSymbol
+#print axioms CycleQ2FermatSymbolDetector.seed_basisSymbol_linearIndependent
+#print axioms CycleQ2FermatSymbolDetector.specialized_basisSymbol_linearIndependent
+
+/-!
+# Independence on the actual coefficient open
+
+Invert exactly the three universal Jacobian-frame determinants. Their Fermat
+values are one, so the Fermat point remains on this open. Every coefficient
+partial extends to the localization. Differential simplicity and the regular
+connection matrices then promote the independent Fermat specialization to an
+independent universal frame on the entire open.
+-/
+
+noncomputable section
+namespace CycleQ2FermatCoefficientOpen
+
+open MvPolynomial
+open CycleQ2IncidenceNormalForm (FullInvariantIndex)
+open CycleQ2GenericSexticGradient (CoeffRing seedEvaluation universalF_seed)
+open CycleQ2HiggsJacobianFrames (frameDet seed_frameDet)
+open CycleQ2UniversalPoleFrame (equation basisSymbol vectorRealize)
+open CycleQ2GeometricLocalizedDerivations
+
+def denominator : CoeffRing := frameDet 6 1 * frameDet 12 1 * frameDet 18 1
+
+abbrev OpenCoefficients := Localization.Away denominator
+
+def coefficientMap : CoeffRing →+* OpenCoefficients := algebraMap _ _
+
+theorem seed_denominator : seedEvaluation denominator = 1 := by
+  simp only [denominator, map_mul, seed_frameDet, one_mul]
+
+theorem frame_units :
+    IsUnit (coefficientMap (frameDet 6 1)) ∧
+      IsUnit (coefficientMap (frameDet 12 1)) ∧
+      IsUnit (coefficientMap (frameDet 18 1)) := by
+  have h : IsUnit (coefficientMap denominator) :=
+    IsLocalization.Away.algebraMap_isUnit denominator
+  simp only [denominator, map_mul, IsUnit.mul_iff] at h
+  exact ⟨h.1.1, h.1.2, h.2⟩
+
+/-- The Fermat point extends across the chosen coefficient localization. -/
+def fermatEvaluation : OpenCoefficients →+* ℂ :=
+  IsLocalization.Away.lift denominator
+    (show IsUnit (seedEvaluation denominator) by
+      rw [seed_denominator]
+      exact isUnit_one)
+
+@[simp] theorem fermatEvaluation_coefficientMap (p : CoeffRing) :
+    fermatEvaluation (coefficientMap p) = seedEvaluation p :=
+  IsLocalization.Away.lift_eq denominator _ p
+
+theorem fermatEvaluation_comp : fermatEvaluation.comp coefficientMap = seedEvaluation := by
+  ext p
+  exact fermatEvaluation_coefficientMap p
+
+theorem equation_atFermat :
+    MvPolynomial.map fermatEvaluation (equation coefficientMap) =
+      CycleQ2FermatSymbolDetector.fermatPolynomial ℂ := by
+  rw [equation, MvPolynomial.map_map, fermatEvaluation_comp]
+  exact universalF_seed
+
+/-- All 45 coefficient partials, extended to the actual localization. -/
+def coefficientPartial (i : FullInvariantIndex 6) :
+    Derivation ℤ OpenCoefficients OpenCoefficients :=
+  (localizedDerivation (Submonoid.powers denominator) OpenCoefficients
+    (pderiv i : Derivation ℂ CoeffRing CoeffRing)).restrictScalars ℤ
+
+theorem coefficientPartial_coefficientMap (i : FullInvariantIndex 6) (p : CoeffRing) :
+    coefficientPartial i (coefficientMap p) = coefficientMap (pderiv i p) :=
+  localizedDerivation_algebraMap (Submonoid.powers denominator) OpenCoefficients (pderiv i) p
+
+theorem differential_ideal_eq_top (I : Ideal OpenCoefficients) (hI : I ≠ ⊥)
+    (stable : ∀ i x, x ∈ I → coefficientPartial i x ∈ I) : I = ⊤ := by
+  classical
+  exact CycleQ2DifferentialCoefficientIdeals.localization_eq_top
+    (Submonoid.powers denominator) OpenCoefficients coefficientPartial
+      coefficientPartial_coefficientMap I hI stable
+
+/-- The 66 normalized residue symbols are independent on this explicit
+coefficient open; regular connection matrices and Fermat detection supply
+the proof without assuming generic frame independence. -/
+theorem vectorRealize_injective : Function.Injective (vectorRealize coefficientMap) := by
+  obtain ⟨h6, h12, h18⟩ := frame_units
+  exact CycleQ2UniversalPoleFrame.vectorRealize_injective_of_specialized_independent
+    coefficientMap h6 h12 h18 coefficientPartial differential_ideal_eq_top fermatEvaluation
+    (CycleQ2FermatSymbolDetector.specialized_basisSymbol_linearIndependent
+      coefficientMap fermatEvaluation equation_atFermat)
+
+theorem basisSymbol_linearIndependent : LinearIndependent OpenCoefficients
+    (basisSymbol coefficientMap) := by
+  classical
+  rw [Fintype.linearIndependent_iff]
+  intro c hc s
+  have hz : vectorRealize coefficientMap c = 0 := hc
+  have he : c = 0 := vectorRealize_injective
+    (hz.trans (map_zero (vectorRealize coefficientMap)).symm)
+  exact congrFun he s
+
+/-- A generating matrix preserved by the coefficient connections cannot lose
+an existing `r`-minor at every row and column choice after field specialization.
+In particular this applies at the Fermat point of the same coefficient open. -/
+theorem rank_specialize_ge {n s : Type*} [Fintype n] [Fintype s]
+    (P : Matrix n s OpenCoefficients)
+    (B : FullInvariantIndex 6 → Matrix n n OpenCoefficients)
+    (C : FullInvariantIndex 6 → Matrix s s OpenCoefficients)
+    (h : ∀ i, P.map (coefficientPartial i) = P * C i - B i * P) (r : ℕ)
+    (hne : ∃ I : Fin r → n, ∃ J : Fin r → s, (P.submatrix I J).det ≠ 0)
+    {L : Type*} [Field L] (ρ : OpenCoefficients →+* L) :
+    r ≤ (P.map ρ).rank :=
+  CycleQ2DifferentialMinorStability.rank_specialize_ge P r
+    (CycleQ2DifferentialMinorStability.minorIdeal_eq_top coefficientPartial
+      differential_ideal_eq_top P B C h r hne) ρ
+
+end CycleQ2FermatCoefficientOpen
+end
+
+#print axioms CycleQ2FermatCoefficientOpen.differential_ideal_eq_top
+#print axioms CycleQ2FermatCoefficientOpen.vectorRealize_injective
+#print axioms CycleQ2FermatCoefficientOpen.basisSymbol_linearIndependent
+#print axioms CycleQ2FermatCoefficientOpen.rank_specialize_ge

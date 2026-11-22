@@ -2,6 +2,7 @@ import Proposal.GeometricMonicGenericSupport
 import Mathlib.Algebra.Homology.BifunctorShift
 import Mathlib.Algebra.Homology.BifunctorHomotopy
 import Mathlib.Algebra.Homology.Embedding.ExtendHomotopy
+import Mathlib.LinearAlgebra.Dual.Lemmas
 
 /-! The proper-curve trace on degree-two de Rham hypercohomology agrees with the
 Laurent trace on the overlap of the two affine curve charts. On the tensor
@@ -592,3 +593,101 @@ end CycleQ2CurveOnePairing
 #print axioms CycleQ2CurveOnePairing.traceAgainst_eq_proper_trace
 #print axioms CycleQ2CurveTraceComparison.trace_tensor_factor
 #print axioms CycleQ2CurveOnePairing.cylinder_cohomologous
+
+/-!
+# Detecting a nonboundary by a scalar cochain map
+
+Over the coefficient field, a class can be tested by an arbitrary linear
+functional on the quotient by boundaries. Realizing that functional as cup
+product with another curve class is unnecessary for this detection step.
+The corresponding map to the scalar complex in degree one can be tensored
+with the target complex, just as the proper-curve pairing map above can.
+
+This does not assert that the marked graph has a nonzero mixed component,
+or identify such a component with the polynomial pole frame. Those are
+separate geometric comparisons still required for the protected source.
+-/
+
+namespace CycleQ2CochainFunctionalDetector
+
+open CategoryTheory HomologicalComplex
+
+section Linear
+
+variable {k A B : Type*} [Field k] [AddCommGroup A] [Module k A]
+  [AddCommGroup B] [Module k B]
+
+/-- A vector outside a boundary range is detected by a scalar linear map
+that kills that entire range. No finite-dimensionality assumption is needed. -/
+theorem exists_functional (d : A →ₗ[k] B) (x : B)
+    (hx : x ∉ LinearMap.range d) :
+    ∃ l : B →ₗ[k] k, (∀ a, l (d a) = 0) ∧ l x ≠ 0 := by
+  let W := LinearMap.range d
+  have hn : W.mkQ x ≠ 0 := fun h =>
+    hx ((Submodule.Quotient.mk_eq_zero W).mp h)
+  obtain ⟨f, hf⟩ := Module.Projective.exists_dual_ne_zero k hn
+  refine ⟨f.comp W.mkQ, ?_, hf⟩
+  intro a
+  change f (W.mkQ (d a)) = 0
+  rw [show W.mkQ (d a) = 0 from
+    (Submodule.Quotient.mk_eq_zero W).mpr ⟨a, rfl⟩, map_zero]
+
+/-- The scalar test is equivalent to failure to be a boundary, rather
+than an additional nondegeneracy assumption on a prescribed pairing. -/
+theorem not_mem_range_iff (d : A →ₗ[k] B) (x : B) :
+    x ∉ LinearMap.range d ↔
+      ∃ l : B →ₗ[k] k, (∀ a, l (d a) = 0) ∧ l x ≠ 0 := by
+  refine ⟨exists_functional d x, ?_⟩
+  rintro ⟨l, hl, hx⟩ ⟨a, rfl⟩
+  exact hx (hl a)
+
+end Linear
+
+section Cochain
+
+variable (k : Type) [Field k]
+  (C : CochainComplex (ModuleCat.{0} k) ℕ)
+
+/-- Any scalar functional on degree-one cochains that kills incoming
+boundaries is an actual cochain map to the scalar complex in degree one. -/
+def toSingle (l : C.X 1 →ₗ[k] k)
+    (hl : ∀ a : C.X 0, l (C.d 0 1 a) = 0) :
+    C ⟶ (single (ModuleCat.{0} k) (ComplexShape.up ℕ) 1).obj (ModuleCat.of k k) := by
+  refine mkHomToSingle (ModuleCat.ofHom l) (fun i hi => ?_)
+  have ei : i = 0 := by change i + 1 = 1 at hi; omega
+  subst i
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro a
+  exact hl a
+
+@[simp]
+theorem toSingle_degreeOne (l : C.X 1 →ₗ[k] k)
+    (hl : ∀ a : C.X 0, l (C.d 0 1 a) = 0) :
+    (toSingle k C l hl).f 1 ≫
+      (singleObjXSelf (ComplexShape.up ℕ) 1 (ModuleCat.of k k)).hom =
+        ModuleCat.ofHom l := by
+  rw [toSingle, mkHomToSingle_f, Category.assoc, Iso.inv_hom_id, Category.comp_id]
+
+/-- A nonboundary degree-one cochain has a detecting cochain map. In
+particular this applies to a closed representative of a nonzero class.
+The result does not require a perfect curve pairing or a trace isomorphism. -/
+theorem exists_toSingle (x : C.X 1)
+    (hx : ¬ ∃ a : C.X 0, C.d 0 1 a = x) :
+    ∃ l : C.X 1 →ₗ[k] k, ∃ hl : ∀ a : C.X 0, l (C.d 0 1 a) = 0,
+      l x ≠ 0 ∧
+        (((toSingle k C l hl).f 1 ≫
+          (singleObjXSelf (ComplexShape.up ℕ) 1 (ModuleCat.of k k)).hom) x) ≠ 0 := by
+  have hn : x ∉ LinearMap.range (C.d 0 1).hom := hx
+  obtain ⟨l, hl, hne⟩ := exists_functional (C.d 0 1).hom x hn
+  refine ⟨l, hl, hne, ?_⟩
+  rw [toSingle_degreeOne]
+  exact hne
+
+end Cochain
+
+end CycleQ2CochainFunctionalDetector
+
+#print axioms CycleQ2CochainFunctionalDetector.exists_functional
+#print axioms CycleQ2CochainFunctionalDetector.not_mem_range_iff
+#print axioms CycleQ2CochainFunctionalDetector.exists_toSingle
