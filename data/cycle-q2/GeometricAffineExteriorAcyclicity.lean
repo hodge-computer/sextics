@@ -1,5 +1,6 @@
 import Proposal.GeometricAffineExteriorLocalization
 import Proposal.GeometricFramedAffineAcyclicity
+import Proposal.GeometricSupportedClassNonvanishing
 
 /-! On every affine open of a smooth scheme, intrinsic de Rham terms are the associated sheaves of their ordinary exterior modules. All their positive section cohomology vanishes.
 
@@ -1016,3 +1017,1541 @@ end
 
 #print axioms CycleQ2IntrinsicOrdinaryExterior.toSheaf_bijective
 #print axioms CycleQ2LiteralIntrinsicExterior.canonicalAffineSections
+
+/-! Ordinary forms on the actual four-open torus.  The coefficient
+equivalence below is the original scheme-section pullback followed by
+the original cubic localization, with its complex algebra structure
+verified on the native chart coefficients. -/
+
+noncomputable section
+namespace CycleQ2LiteralTorusOrdinaryForms
+
+open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
+open CycleQ2LiteralThreefoldFirstDifferential (X structural coeff)
+open CycleQ2LiteralThreefoldTopTrace (Face Torus faceSectionEquiv face_affine)
+open CycleQ2LiteralThreefoldCubicSectionComparison (toCubicSections
+  toCubicSections_chartAlgebraMap)
+open CycleQ2LiteralThreefoldCubicCoordinates (LocalCubic localizedMap)
+open CycleQ2HodgeTwistLocalization (inverted)
+open CycleQ2GeometricSectionDifferentials (sectionAlgebra)
+open CycleQ2LiteralIntrinsicExterior (Literal canonicalAffineSections toExterior_bijective)
+open CycleQ2WeightedCoordinateExterior (Form)
+open CycleQ2ExteriorSectionNaturality (exteriorDifferentialMap)
+open CycleQ2OrdinaryExteriorSections (toExterior)
+
+/-- The actual section equivalence is complex-linear because its
+commuting square is already proved on the original affine chart. -/
+def sectionEquiv (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S) :
+    letI := sectionAlgebra X.sheaf coeff (Face S)
+    Γ(X,Face S) ≃ₐ[ℂ] LocalCubic i (inverted i S) := by
+  letI := sectionAlgebra X.sheaf coeff (Face S)
+  refine AlgEquiv.ofRingEquiv
+    (f := (faceSectionEquiv S).trans (toCubicSections i S hi)) ?_
+  intro a
+  change toCubicSections i S hi (faceSectionEquiv S
+    (algebraMap ℂ Γ(X,Face S) a)) = algebraMap ℂ (LocalCubic i (inverted i S)) a
+  simpa only [AlgHom.commutes] using
+    toCubicSections_chartAlgebraMap i S hi
+      (algebraMap ℂ (CycleQ2LiteralAbelJacobiContraction.T i) a)
+
+theorem sectionEquiv_chart (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S)
+    (a : CycleQ2LiteralAbelJacobiContraction.T i) :
+    sectionEquiv i S hi
+      (CycleQ2LiteralThreefoldHodgeCech.chartAlgebraMap i (Face S) (Finset.inf_le hi) a) =
+        localizedMap i (inverted i S) a :=
+  toCubicSections_chartAlgebraMap i S hi a
+
+abbrev Cubic := LocalCubic 0 (inverted 0 Finset.univ)
+abbrev nativeMap := localizedMap 0 (inverted 0 Finset.univ)
+
+private theorem torus_affine : IsAffineOpen Torus := face_affine Finset.univ (by simp)
+
+local instance : Algebra ℂ Γ(X,Torus) := sectionAlgebra X.sheaf coeff Torus
+
+def torusEquiv : Γ(X,Torus) ≃ₐ[ℂ] Cubic := sectionEquiv 0 Finset.univ (Finset.mem_univ 0)
+
+/-- Every ordinary form on the cubic localization is realized as an
+actual exterior sheaf section, and every such section is obtained. -/
+def realize (n : ℕ) : Form ℂ Cubic n ≃+ (Literal n).obj.obj (op Torus) :=
+  (CycleQ2AffineExteriorForms.extAlgEquiv ℂ torusEquiv.symm n).trans
+    (canonicalAffineSections torus_affine n).toAddEquiv
+
+theorem realize_apply (n : ℕ) (ω : Form ℂ Cubic n) :
+    realize n ω = toExterior X.sheaf coeff Torus n
+      (exteriorDifferentialMap torusEquiv.symm.toAlgHom n ω) := rfl
+
+theorem realize_smul (n : ℕ) (a : Cubic) (ω : Form ℂ Cubic n) :
+    realize n (a • ω) = torusEquiv.symm a • realize n ω := by
+  rw [realize_apply, map_smulₛₗ, map_smul, realize_apply]
+
+private theorem native_coefficient_map : torusEquiv.symm.toAlgHom.comp nativeMap =
+    CycleQ2LiteralThreefoldHodgeCech.chartAlgebraMap 0 Torus
+      (Finset.inf_le (Finset.mem_univ 0)) := by
+  ext a
+  apply torusEquiv.injective
+  rw [AlgHom.comp_apply, AlgEquiv.apply_symm_apply]
+  exact (sectionEquiv_chart 0 Finset.univ (Finset.mem_univ 0) a).symm
+
+/-- The realization of an original affine chart form is its actual
+chart section; this fixes the coefficient and orientation normalization. -/
+theorem realize_native (n : ℕ)
+    (ω : Form ℂ (CycleQ2LiteralAbelJacobiContraction.T 0) n) :
+    realize n (exteriorDifferentialMap nativeMap n ω) =
+      CycleQ2ExteriorSectionNaturality.chartExteriorSheafSection
+        (CycleQ2LiteralAmbientCharts.fixedChart 0).symm structural
+        (by simpa only [Iso.symm_inv, ← Category.assoc,
+          CycleQ2LiteralAmbientCharts.chartInclusion] using
+            CycleQ2LiteralAmbientCharts.chartInclusion_overComplex 0)
+        n (Over.mk (homOfLE (Finset.inf_le (Finset.mem_univ 0)))) ω := by
+  rw [realize_apply]
+  change toExterior X.sheaf coeff Torus n
+    (CycleQ2ExactFrameThreeDeRham.exteriorPullback torusEquiv.symm.toAlgHom n
+      (CycleQ2ExactFrameThreeDeRham.exteriorPullback nativeMap n ω)) = _
+  rw [← CycleQ2AffineDeRhamFunctorial.exteriorPullback_comp, native_coefficient_map]
+  exact CycleQ2ChartExteriorBinding.exteriorSectionLift_differentialMap
+    X.sheaf coeff CycleQ2LiteralThreefoldFirstDifferential.OneModule
+    (CycleQ2GeometricDifferentialSheaf.universalDifferential X.sheaf coeff) Torus
+    _ _ (RingHom.id _) (fun _ => rfl)
+    (CycleQ2LiteralThreefoldHodgeCech.chartAlgebraMap 0 Torus
+      (Finset.inf_le (Finset.mem_univ 0))) (fun _ => rfl) n ω
+
+/-- Exact two-wedges on the original localized cubic are differentiated
+by the original sheaf differential. -/
+theorem realize_d_pair (a b c : Cubic) :
+    CycleQ2LiteralThreefoldSecondDifferential.secondDifferential.hom.app (op Torus)
+      (realize 2 (a • exteriorPower.ιMulti Cubic 2
+        ![KaehlerDifferential.D ℂ Cubic b, KaehlerDifferential.D ℂ Cubic c])) =
+      realize 3 (exteriorPower.ιMulti Cubic 3
+        ![KaehlerDifferential.D ℂ Cubic a, KaehlerDifferential.D ℂ Cubic b,
+          KaehlerDifferential.D ℂ Cubic c]) := by
+  let φ := torusEquiv.symm.toAlgHom
+  have hpair : exteriorDifferentialMap φ 2
+      (exteriorPower.ιMulti Cubic 2
+        ![KaehlerDifferential.D ℂ Cubic b, KaehlerDifferential.D ℂ Cubic c]) =
+      exteriorPower.ιMulti Γ(X,Torus) 2
+        ![KaehlerDifferential.D ℂ Γ(X,Torus) (φ b),
+          KaehlerDifferential.D ℂ Γ(X,Torus) (φ c)] := by
+    rw [CycleQ2ExteriorSectionNaturality.exteriorDifferentialMap_wedge]
+    congr 1
+    funext j
+    fin_cases j <;> apply CycleQ2GeometricAffineOverlap.differentialMap_D
+  have htriple : exteriorDifferentialMap φ 3
+      (exteriorPower.ιMulti Cubic 3
+        ![KaehlerDifferential.D ℂ Cubic a, KaehlerDifferential.D ℂ Cubic b,
+          KaehlerDifferential.D ℂ Cubic c]) =
+      exteriorPower.ιMulti Γ(X,Torus) 3
+        ![KaehlerDifferential.D ℂ Γ(X,Torus) (φ a),
+          KaehlerDifferential.D ℂ Γ(X,Torus) (φ b),
+          KaehlerDifferential.D ℂ Γ(X,Torus) (φ c)] := by
+    rw [CycleQ2ExteriorSectionNaturality.exteriorDifferentialMap_wedge]
+    congr 1
+    funext j
+    fin_cases j <;> apply CycleQ2GeometricAffineOverlap.differentialMap_D
+  rw [realize_apply, realize_apply, map_smulₛₗ, hpair, htriple]
+  exact CycleQ2LiteralIntrinsicExterior.secondDifferential_exact_wedge Torus (φ a) (φ b) (φ c)
+
+end CycleQ2LiteralTorusOrdinaryForms
+end
+
+#print axioms CycleQ2LiteralTorusOrdinaryForms.sectionEquiv_chart
+#print axioms CycleQ2LiteralTorusOrdinaryForms.realize_native
+#print axioms CycleQ2LiteralTorusOrdinaryForms.realize_d_pair
+
+noncomputable section
+namespace CycleQ2LiteralTorusOrdinaryForms
+
+open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
+open CycleQ2LiteralThreefoldFirstDifferential (X structural coeff)
+open CycleQ2LiteralThreefoldTopTrace (Torus faceSectionEquiv)
+open CycleQ2GeometricHodgeThreefoldIncidence (literalEval literal_vertex_unit)
+open CycleQ2GeometricHodgeThreefold (threefold coordinateOpen)
+open CycleQ2HodgeTwistCech (sections negativeExponent)
+open CycleQ2HodgeTwistLocalization (inverted intersectionCoordinates localizationOffset)
+open CycleQ2HodgeTwistDehom (chartCoordinates exponentEquiv)
+open CycleQ2HodgeTwistCubicFaces (structureCoordinates)
+open CycleQ2LiteralThreefoldCubicSectionComparison (toCubicSections)
+open CycleQ2LiteralThreefoldCanonicalFrame (canonicalIso)
+open CycleQ2LiteralThreefoldChartVolume (chartVolume)
+open CycleQ2LiteralThreefoldChartVolumeFrame (chartVolumeEquiv)
+open CycleQ2ExteriorSectionNaturality (exteriorDifferentialMap)
+open CycleQ2GeometricSectionDifferentials (sectionAlgebra)
+
+local instance : Algebra ℂ Γ(X,Torus) := sectionAlgebra X.sheaf coeff Torus
+
+private theorem intersection_top_coefficient (p : sections ℂ 0 Finset.univ) :
+    (CycleQ2SeedCechLocalization.localizationToLaurent ℂ (inverted 0 Finset.univ)
+      (intersectionCoordinates ℂ 0 Finset.univ 0 (Finset.mem_univ 0) p 2)).coeff
+        (fun _ => -1) = p.val 2 negativeExponent := by
+  let e : {e : CycleQ2HodgeTwistCech.Exp //
+      CycleQ2HodgeTwistCech.Allowed 0 Finset.univ 2 e} := ⟨negativeExponent, by decide⟩
+  let d := exponentEquiv 0 2 0 Finset.univ (Finset.mem_univ 0) e
+  have h := DFunLike.congr_fun
+    ((localizationOffset ℂ 0 Finset.univ).apply_symm_apply
+      (chartCoordinates 0 0 Finset.univ (Finset.mem_univ 0) p 2)) d
+  change (CycleQ2SeedCechLocalization.localizationToLaurent ℂ (inverted 0 Finset.univ)
+      (intersectionCoordinates ℂ 0 Finset.univ 0 (Finset.mem_univ 0) p 2)).coeff
+        (fun _ => -1) =
+    (chartCoordinates 0 0 Finset.univ (Finset.mem_univ 0) p 2) d at h
+  refine h.trans ?_
+  change Finsupp.equivMapDomain
+    (exponentEquiv 0 2 0 Finset.univ (Finset.mem_univ 0))
+    ((p.val 2).subtypeDomain (CycleQ2HodgeTwistCech.Allowed 0 Finset.univ 2))
+    (exponentEquiv 0 2 0 Finset.univ (Finset.mem_univ 0) e) = _
+  rw [Finsupp.equivMapDomain_apply, Equiv.symm_apply_apply]
+  rfl
+
+/-- The actual structure-sheaf trace reads the ordinary all-minus-one
+coefficient of the original cubic power coordinate. -/
+theorem structure_trace_cubic
+    (s : Γ(threefold literalEval, Finset.univ.inf (coordinateOpen literalEval))) :
+    CycleQ2HodgeTwistTorusChart.structureTopSectionTrace literalEval literal_vertex_unit s =
+      CycleQ2TorusCubicTrace.residueTrace literalEval 0 literal_vertex_unit
+        (inverted 0 Finset.univ) (toCubicSections 0 Finset.univ (Finset.mem_univ 0) s) := by
+  let E := intersectionCoordinates ℂ 0 Finset.univ 0 (Finset.mem_univ 0)
+  let b := CycleQ2GeometricHodgeThreefoldCubic.localizedBasis
+    literalEval 0 literal_vertex_unit
+    (Submonoid.powers (CycleQ2SeedCechLocalization.baseProduct ℂ (inverted 0 Finset.univ)))
+  let x := toCubicSections 0 Finset.univ (Finset.mem_univ 0) s
+  let p := E.symm (b.equivFun x)
+  have hp : CycleQ2HodgeTwistCoordinates.read
+      (CycleQ2HodgeTwistTorusChart.structureChart literalEval literal_vertex_unit)
+      (CycleQ2HodgeTwistAnchor.torus_le_face literalEval Finset.univ) s = p.val := by
+    rw [CycleQ2HodgeTwistTorusChart.read_structure_face
+      literalEval literal_vertex_unit 0 Finset.univ (Finset.mem_univ 0)]
+    change (structureCoordinates literalEval 0 literal_vertex_unit Finset.univ
+      (Finset.mem_univ 0) 0
+      (CycleQ2GeometricProjectiveCurve.Twisted.resEquiv (threefold literalEval).sheaf
+        (CycleQ2HodgeTwistFaces.face_inf literalEval 0 Finset.univ (Finset.mem_univ 0)).le
+        (CycleQ2HodgeTwistFaces.face_inf literalEval 0 Finset.univ (Finset.mem_univ 0)).ge
+        ((CycleQ2HodgeThreefoldTwist.chartFrame literalEval 0 0 _
+          (Finset.inf_le (Finset.mem_univ 0)))
+          ((CycleQ2HodgeThreefoldTwist.chartFrame literalEval 0 0 _
+            (Finset.inf_le (Finset.mem_univ 0))).symm s)))).val = p.val
+    rw [LinearEquiv.apply_symm_apply]
+    rfl
+  have hc := intersection_top_coefficient p
+  change (CycleQ2SeedCechLocalization.localizationToLaurent ℂ (inverted 0 Finset.univ)
+    (E (E.symm (b.equivFun x)) 2)).coeff (fun _ => -1) = p.val 2 negativeExponent at hc
+  rw [AddEquiv.apply_symm_apply] at hc
+  change (CycleQ2HodgeTwistCoordinates.read
+      (CycleQ2HodgeTwistTorusChart.structureChart literalEval literal_vertex_unit)
+      (CycleQ2HodgeTwistAnchor.torus_le_face literalEval Finset.univ) s) 2 negativeExponent =
+    (CycleQ2SeedCechLocalization.localizationToLaurent ℂ (inverted 0 Finset.univ)
+      (b.equivFun x 2)).coeff (fun _ => -1)
+  rw [hp]
+  exact hc.symm
+
+abbrev volume : CycleQ2WeightedCoordinateExterior.Form ℂ Cubic 3 :=
+  exteriorDifferentialMap nativeMap 3 (chartVolume 0)
+
+private theorem realize_volume_coefficient :
+    canonicalIso.hom.val.app (op Torus) (realize 3 volume) = 1 := by
+  rw [realize_native, CycleQ2LiteralThreefoldCanonicalFrame.canonicalIso_hom_native]
+  have hv : (chartVolumeEquiv 0).symm (chartVolume 0) = 1 := by
+    apply (chartVolumeEquiv 0).injective
+    rw [LinearEquiv.apply_symm_apply]
+    change chartVolume 0 = (1 : CycleQ2LiteralAbelJacobiContraction.T 0) • chartVolume 0
+    rw [one_smul]
+  simp only [Fin.val_zero, pow_zero, one_mul, hv, map_one]
+
+/-- The canonical-form trace is exactly the scalar cubic residue trace
+in the original affine volume, with the zeroth-chart orientation. -/
+theorem canonical_trace_realize_volume (a : Cubic) :
+    CycleQ2LiteralThreefoldTopTrace.canonicalSectionTrace (realize 3 (a • volume)) =
+      CycleQ2TorusCubicTrace.residueTrace literalEval 0 literal_vertex_unit
+        (inverted 0 Finset.univ) a := by
+  rw [CycleQ2LiteralThreefoldTopTrace.canonicalSectionTrace_coefficient,
+    realize_smul, map_smul, realize_volume_coefficient, smul_eq_mul, mul_one,
+    structure_trace_cubic]
+  change CycleQ2TorusCubicTrace.residueTrace literalEval 0 literal_vertex_unit
+    (inverted 0 Finset.univ) (torusEquiv (torusEquiv.symm a)) = _
+  rw [AlgEquiv.apply_symm_apply]
+
+end CycleQ2LiteralTorusOrdinaryForms
+end
+
+#print axioms CycleQ2LiteralTorusOrdinaryForms.structure_trace_cubic
+#print axioms CycleQ2LiteralTorusOrdinaryForms.canonical_trace_realize_volume
+
+/-! The genuine canonical section trace annihilates the exterior
+derivative of every actual two-form section on the four-open torus. -/
+
+noncomputable section
+namespace CycleQ2LiteralTorusOrdinaryForms
+
+open CategoryTheory Opposite
+open CycleQ2LiteralThreefoldTopTrace (Torus canonicalSectionTrace)
+open CycleQ2LiteralThreefoldSecondDifferential (secondDifferential)
+open CycleQ2LiteralThreefoldCubicCoordinates
+open CycleQ2LiteralThreefoldResidueMinors (coord)
+open CycleQ2LiteralThreefoldTorusForms (pairLeft pairRight)
+open CycleQ2HodgeTwistLocalization (inverted)
+open CycleQ2CubicCoefficientTrace (normal)
+
+theorem canonical_trace_d_coordinatePair (a : Cubic) (p : Fin 6) :
+    canonicalSectionTrace (secondDifferential.hom.app (op Torus)
+      (realize 2 (a • coordinatePair 0 (inverted 0 Finset.univ) p))) = 0 := by
+  obtain ⟨b,hb⟩ := exists_native_normal 0 (inverted 0 Finset.univ) a
+  rw [← hb]
+  change canonicalSectionTrace (secondDifferential.hom.app (op Torus)
+    (realize 2 (normal (nativeMap (coord 0 0)) b •
+      exteriorPower.ιMulti Cubic 2
+        ![KaehlerDifferential.D ℂ Cubic (nativeMap (coord 0 (pairLeft p))),
+          KaehlerDifferential.D ℂ Cubic (nativeMap (coord 0 (pairRight p)))]))) = 0
+  rw [realize_d_pair,
+    native_normal_coordinate_wedge 0 (inverted 0 Finset.univ) b p,
+    canonical_trace_realize_volume, nativePairCoefficient_residue_zero]
+
+/-- This is the original sheaf differential and original fixed
+canonical trace. The six coordinate wedges span the ordinary module,
+and the proved affine comparison realizes every actual sheaf section. -/
+theorem canonical_trace_secondDifferential
+    (s : (CycleQ2LiteralIntrinsicExterior.Literal 2).obj.obj (op Torus)) :
+    canonicalSectionTrace (secondDifferential.hom.app (op Torus) s) = 0 := by
+  classical
+  obtain ⟨ω,rfl⟩ := (realize 2).surjective s
+  obtain ⟨a,ha⟩ := exists_coordinatePair_sum 0 (inverted 0 Finset.univ) ω
+  rw [← ha, map_sum, map_sum, map_sum]
+  apply Finset.sum_eq_zero
+  intro p _
+  exact canonical_trace_d_coordinatePair (a p) p
+
+end CycleQ2LiteralTorusOrdinaryForms
+end
+
+#print axioms CycleQ2LiteralTorusOrdinaryForms.canonical_trace_d_coordinatePair
+#print axioms CycleQ2LiteralTorusOrdinaryForms.canonical_trace_secondDifferential
+
+/-! Complete the original finite four-open total complex.  Its middle
+maps are the already constructed unfiltered degree-two and degree-three
+maps; the upper maps retain the same sign convention. -/
+
+noncomputable section
+namespace CycleQ2FourOpenDeRhamTotal
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace
+open CycleQ2InjectiveCech CycleQ2CechTwoToDerived CycleQ2CechTwoComparison
+
+variable {X : TopCat.{0}} (U : Fin 4 → Opens X) (F₀ F₁ F₂ F₃ : AbSheaf X)
+
+abbrev TotalZero := Zero F₀ U
+abbrev TotalOne := Zero F₁ U × One F₀ U
+abbrev TotalFive := Two F₃ U × Three F₂ U
+abbrev TotalSix := Three F₃ U
+
+variable {F₀ F₁ F₂ F₃}
+  (d : F₀ ⟶ F₁) (e : F₁ ⟶ F₂) (f : F₂ ⟶ F₃)
+
+def differentialZero : TotalZero U F₀ →+ TotalOne U F₀ F₁ where
+  toFun x := (mapZero U d x, d0 F₀ U x)
+  map_zero' := by rw [mapZero_zero, d0_zero] <;> rfl
+  map_add' x y := by rw [mapZero_add, d0_add] <;> rfl
+
+def differentialOne : TotalOne U F₀ F₁ →+ TotalTwo U F₀ F₁ F₂ where
+  toFun x := (mapZero U e x.1, d0 F₁ U x.1 - mapOne U d x.2, d1 F₀ U x.2)
+  map_zero' := by
+    simp only [Prod.fst_zero, Prod.snd_zero, mapZero_zero, d0_zero,
+      mapOne_zero, d1_zero, sub_self] <;> rfl
+  map_add' x y := by
+    simp only [Prod.fst_add, Prod.snd_add, mapZero_add, d0_add, mapOne_add, d1_add]
+    refine Prod.ext rfl (Prod.ext ?_ rfl)
+    change _ = (_ - _) + (_ - _)
+    abel
+
+def differentialFour : TotalFour U F₁ F₂ F₃ →+ TotalFive U F₂ F₃ where
+  toFun x := (d1 F₃ U x.1 + mapTwo U f x.2.1,
+    d2 F₂ U x.2.1 - app e _ x.2.2)
+  map_zero' := by
+    simp only [Prod.fst_zero, Prod.snd_zero, d1_zero, mapTwo_zero,
+      d2_zero, map_zero, add_zero, sub_self] <;> rfl
+  map_add' x y := by
+    simp only [Prod.fst_add, Prod.snd_add, d1_add, mapTwo_add, d2_add, map_add]
+    refine Prod.ext ?_ ?_ <;>
+      simp only [Prod.fst_add, Prod.snd_add] <;> abel
+
+/-- The only incoming map to total degree six is the actual four-face
+restriction minus the exterior derivative on the quadruple intersection. -/
+def differentialFive : TotalFive U F₂ F₃ →+ TotalSix U F₃ where
+  toFun x := d2 F₃ U x.1 - app f _ x.2
+  map_zero' := by simp only [Prod.fst_zero, Prod.snd_zero, d2_zero, map_zero, sub_self]
+  map_add' x y := by
+    simp only [Prod.fst_add, Prod.snd_add, d2_add, map_add]
+    abel
+
+theorem differentialOne_zero (hd : d ≫ e = 0) (x : TotalZero U F₀) :
+    differentialOne U d e (differentialZero U d x) = 0 := by
+  change (mapZero U e (mapZero U d x),
+    d0 F₁ U (mapZero U d x) - mapOne U d (d0 F₀ U x),
+    d1 F₀ U (d0 F₀ U x)) = 0
+  rw [mapZero_comp, hd, mapZero_zeroHom, mapOne_d0, sub_self, d1_d0] <;> rfl
+
+theorem boundary_differentialOne (hd : d ≫ e = 0) (he : e ≫ f = 0)
+    (x : TotalOne U F₀ F₁) : boundary U d e f (differentialOne U d e x) = 0 := by
+  refine Prod.ext ?_ (Prod.ext ?_ (Prod.ext ?_ ?_))
+  · change mapZero U f (mapZero U e x.1) = 0
+    rw [mapZero_comp, he, mapZero_zeroHom]
+  · change d0 F₂ U (mapZero U e x.1) -
+      mapOne U e (d0 F₁ U x.1 - mapOne U d x.2) = 0
+    rw [mapOne_sub, mapOne_comp, hd, mapOne_zeroHom, sub_zero, mapOne_d0, sub_self]
+  · change d1 F₁ U (d0 F₁ U x.1 - mapOne U d x.2) + mapTwo U d (d1 F₀ U x.2) = 0
+    rw [d1_sub, d1_d0, mapTwo_d1, zero_sub, neg_add_cancel]
+  · exact d2_d1 F₀ U x.2
+
+theorem differentialFour_three (hd : d ≫ e = 0) (he : e ≫ f = 0)
+    (x : TotalThree U F₀ F₁ F₂ F₃) :
+    differentialFour U e f (differential U d e f x) = 0 := by
+  refine Prod.ext ?_ ?_
+  · change d1 F₃ U (d0 F₃ U x.1 - mapOne U f x.2.1) +
+      mapTwo U f (d1 F₂ U x.2.1 + mapTwo U e x.2.2.1) = 0
+    rw [d1_sub, d1_d0, mapTwo_add, mapTwo_comp, he, mapTwo_zeroHom,
+      add_zero, mapTwo_d1, zero_sub, neg_add_cancel]
+  · change d2 F₂ U (d1 F₂ U x.2.1 + mapTwo U e x.2.2.1) -
+      app e _ (d2 F₁ U x.2.2.1 - app d _ x.2.2.2) = 0
+    rw [d2_add, d2_d1, map_sub, app_comp, hd, app_zero, sub_zero,
+      zero_add, mapThree_d2, sub_self]
+
+theorem differentialFive_four (he : e ≫ f = 0) (x : TotalFour U F₁ F₂ F₃) :
+    differentialFive U f (differentialFour U e f x) = 0 := by
+  change d2 F₃ U (d1 F₃ U x.1 + mapTwo U f x.2.1) -
+    app f _ (d2 F₂ U x.2.1 - app e _ x.2.2) = 0
+  rw [d2_add, d2_d1, map_sub, app_comp, he, app_zero, sub_zero,
+    zero_add, mapThree_d2, sub_self]
+
+variable (F₀ F₁ F₂ F₃)
+
+/-- All terms of the original finite total complex, with its genuine
+zero tail beyond the dimension of the cover and the threefold. -/
+def object : ℕ → AddCommGrpCat.{0}
+  | 0 => AddCommGrpCat.of (TotalZero U F₀)
+  | 1 => AddCommGrpCat.of (TotalOne U F₀ F₁)
+  | 2 => AddCommGrpCat.of (TotalTwo U F₀ F₁ F₂)
+  | 3 => AddCommGrpCat.of (TotalThree U F₀ F₁ F₂ F₃)
+  | 4 => AddCommGrpCat.of (TotalFour U F₁ F₂ F₃)
+  | 5 => AddCommGrpCat.of (TotalFive U F₂ F₃)
+  | 6 => AddCommGrpCat.of (TotalSix U F₃)
+  | _ + 7 => AddCommGrpCat.of PUnit
+
+variable {F₀ F₁ F₂ F₃}
+
+def next : (n : ℕ) → object U F₀ F₁ F₂ F₃ n ⟶ object U F₀ F₁ F₂ F₃ (n+1)
+  | 0 => AddCommGrpCat.ofHom (differentialZero U d)
+  | 1 => AddCommGrpCat.ofHom (differentialOne U d e)
+  | 2 => AddCommGrpCat.ofHom (boundary U d e f)
+  | 3 => AddCommGrpCat.ofHom (differential U d e f)
+  | 4 => AddCommGrpCat.ofHom (differentialFour U e f)
+  | 5 => AddCommGrpCat.ofHom (differentialFive U f)
+  | _ + 6 => 0
+
+theorem next_square (hd : d ≫ e = 0) (he : e ≫ f = 0) :
+    ∀ n, next U d e f n ≫ next U d e f (n+1) = 0
+  | 0 => by ext x; exact differentialOne_zero U d e hd x
+  | 1 => by ext x; exact boundary_differentialOne U d e f hd he x
+  | 2 => by ext x; exact differential_boundary U d e f hd he x
+  | 3 => by ext x; exact differentialFour_three U d e f hd he x
+  | 4 => by ext x; exact differentialFive_four U e f he x
+  | 5 => by simp only [next, comp_zero]
+  | _ + 6 => by simp only [next, zero_comp]
+
+def complex (hd : d ≫ e = 0) (he : e ≫ f = 0) :
+    CochainComplex AddCommGrpCat.{0} ℕ :=
+  CochainComplex.of (object U F₀ F₁ F₂ F₃) (next U d e f)
+    (next_square U d e f hd he)
+
+theorem complex_d (hd : d ≫ e = 0) (he : e ≫ f = 0) (n : ℕ) :
+    (complex U d e f hd he).d n (n+1) = next U d e f n :=
+  CochainComplex.of_d _ _ n
+
+end CycleQ2FourOpenDeRhamTotal
+end
+
+#print axioms CycleQ2FourOpenDeRhamTotal.differentialFive_four
+#print axioms CycleQ2FourOpenDeRhamTotal.complex
+
+noncomputable section
+namespace CycleQ2LiteralTopDeRhamTrace
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace
+open CycleQ2InjectiveCech (AbSheaf Sections)
+open CycleQ2CechTwoToDerived (Two Three app app_res d2)
+open CycleQ2GeometricSheafLocalIso (res res_comp res_self)
+open CycleQ2LiteralAmbientCharts (fixedOpen fixedOpen_cover)
+open CycleQ2LiteralThreefoldFirstDifferential
+  (X functionDifferential differential function_differential_zero)
+open CycleQ2LiteralThreefoldSecondDifferential
+  (secondDifferential first_second_zero)
+open CycleQ2LiteralThreefoldCanonicalFrame
+  (CanonicalForms CanonicalAdditiveSheaf globalFrame)
+open CycleQ2LiteralThreefoldTopTrace
+  (Torus canonicalSectionTrace canonicalTrace canonicalTrace_connecting
+    framedGenerator framedSectionTrace_generator)
+open CycleQ2HodgeTwistTopDerived
+  (nativeTopOpen_eq_ordered nativeTopOrdered nativeTopConnecting_boundary)
+open CycleQ2HodgeTwistCoordinates (NativeTopFaces nativeTopBoundary)
+
+/-- The full total complex uses the unchanged original three sheaf
+differentials and all four original weight-one opens. -/
+abbrev complex : CochainComplex AddCommGrpCat.{0} ℕ :=
+  CycleQ2FourOpenDeRhamTotal.complex fixedOpen
+    functionDifferential differential secondDifferential
+    function_differential_zero first_second_zero
+
+private abbrev F := CanonicalAdditiveSheaf
+private abbrev OrderedTop := (((fixedOpen 0 ⊓ fixedOpen 1) ⊓ fixedOpen 2) ⊓ fixedOpen 3)
+
+/-- This only transports a section along equality of its two original
+open-set expressions. -/
+def toNative (G : AbSheaf (show TopCat from X)) : Three G fixedOpen →+ Sections G Torus :=
+  res G (nativeTopOpen_eq_ordered fixedOpen).le
+
+theorem toNative_nativeTopOrdered (G : AbSheaf (show TopCat from X))
+    (s : Sections G Torus) : toNative G (nativeTopOrdered G fixedOpen s) = s := by
+  change res G _ (res G _ s) = s
+  rw [res_comp, res_self]
+
+private theorem face₀ : (Finset.univ.erase (0 : Fin 4)).inf fixedOpen =
+    ((fixedOpen 1 ⊓ fixedOpen 2) ⊓ fixedOpen 3) := by
+  rw [show Finset.univ.erase (0 : Fin 4) = {1,2,3} from by decide]
+  simp [inf_assoc]
+
+private theorem face₁ : (Finset.univ.erase (1 : Fin 4)).inf fixedOpen =
+    ((fixedOpen 0 ⊓ fixedOpen 2) ⊓ fixedOpen 3) := by
+  rw [show Finset.univ.erase (1 : Fin 4) = {0,2,3} from by decide]
+  simp [inf_assoc]
+
+private theorem face₂ : (Finset.univ.erase (2 : Fin 4)).inf fixedOpen =
+    ((fixedOpen 0 ⊓ fixedOpen 1) ⊓ fixedOpen 3) := by
+  rw [show Finset.univ.erase (2 : Fin 4) = {0,1,3} from by decide]
+  simp [inf_assoc]
+
+private theorem face₃ : (Finset.univ.erase (3 : Fin 4)).inf fixedOpen =
+    ((fixedOpen 0 ⊓ fixedOpen 1) ⊓ fixedOpen 2) := by
+  rw [show Finset.univ.erase (3 : Fin 4) = {0,1,2} from by decide]
+  simp [inf_assoc]
+
+private def nativeFaces (c : Two F fixedOpen) : NativeTopFaces (F := F) (U := fixedOpen) := by
+  intro i
+  fin_cases i
+  · exact res F face₀.le c.2.2.2
+  · exact res F face₁.le c.2.2.1
+  · exact res F face₂.le c.2.1
+  · exact res F face₃.le c.1
+
+private theorem toNative_d2 (c : Two F fixedOpen) :
+    toNative F (d2 F fixedOpen c) = nativeTopBoundary (nativeFaces c) := by
+  change res F _
+      (res F _ c.2.2.2 - res F _ c.2.2.1 + res F _ c.2.1 - res F _ c.1) =
+    res F _ (res F _ c.2.2.2) - res F _ (res F _ c.2.2.1) +
+      res F _ (res F _ c.2.1) - res F _ (res F _ c.1)
+  simp only [map_sub, map_add, res_comp]
+
+def sectionTrace : Three F fixedOpen →+ ℂ := canonicalSectionTrace.comp (toNative F)
+
+theorem sectionTrace_cech_boundary (c : Two F fixedOpen) :
+    sectionTrace (d2 F fixedOpen c) = 0 := by
+  change canonicalSectionTrace (toNative F (d2 F fixedOpen c)) = 0
+  rw [toNative_d2, ← canonicalTrace_connecting, nativeTopConnecting_boundary, map_zero]
+
+theorem sectionTrace_exterior_boundary
+    (η : Three CycleQ2LiteralThreefoldFirstDifferential.Two fixedOpen) :
+    sectionTrace (app secondDifferential OrderedTop η) = 0 := by
+  change canonicalSectionTrace (res F (nativeTopOpen_eq_ordered fixedOpen).le
+    (app secondDifferential OrderedTop η)) = 0
+  rw [← app_res]
+  exact CycleQ2LiteralTorusOrdinaryForms.canonical_trace_secondDifferential
+    (toNative CycleQ2LiteralThreefoldFirstDifferential.Two η)
+
+/-- The trace annihilates the actual degree-five differential of the
+full total complex, including both incoming components. -/
+theorem sectionTrace_differentialFive
+    (x : CycleQ2FourOpenDeRhamTotal.TotalFive fixedOpen
+      CycleQ2LiteralThreefoldFirstDifferential.Two F) :
+    sectionTrace (CycleQ2FourOpenDeRhamTotal.differentialFive fixedOpen secondDifferential x) = 0 := by
+  change sectionTrace (d2 F fixedOpen x.1 - app secondDifferential OrderedTop x.2) = 0
+  rw [map_sub, sectionTrace_cech_boundary, sectionTrace_exterior_boundary, sub_self]
+
+private abbrev topShort : ShortComplex AddCommGrpCat.{0} := complex.sc' 5 6 7
+
+private def topHomologyIso : complex.homology 6 ≅ topShort.homology :=
+  complex.homologyIsoSc' 5 6 7
+    ((ComplexShape.up ℕ).prev_eq' (show (ComplexShape.up ℕ).Rel 5 6 from rfl))
+    ((ComplexShape.up ℕ).next_eq' (show (ComplexShape.up ℕ).Rel 6 7 from rfl))
+
+private def homologyCoordinates : complex.homology 6 ≃+
+    (topShort.g.hom.ker ⧸ topShort.abToCycles.range) :=
+  (topHomologyIso ≪≫ topShort.abHomologyIso).addCommGroupIsoToAddEquiv
+
+private def topCycle : Three F fixedOpen →+ topShort.g.hom.ker where
+  toFun s := ⟨s, by
+    change complex.d 6 7 s = 0
+    rw [CycleQ2FourOpenDeRhamTotal.complex_d] <;> rfl⟩
+  map_zero' := Subtype.ext rfl
+  map_add' s t := Subtype.ext rfl
+
+/-- The canonical class map into Mathlib homology of the actual finite
+Čech–de Rham complex. -/
+def sectionClass : Three F fixedOpen →+ complex.homology 6 :=
+  homologyCoordinates.symm.toAddMonoidHom.comp
+    ((QuotientAddGroup.mk' topShort.abToCycles.range).comp topCycle)
+
+private def quotientTrace : (topShort.g.hom.ker ⧸ topShort.abToCycles.range) →+ ℂ :=
+  QuotientAddGroup.lift topShort.abToCycles.range
+    (sectionTrace.comp topShort.g.hom.ker.subtype) (by
+      rintro _ ⟨x,rfl⟩
+      change sectionTrace (complex.d 5 6 x) = 0
+      rw [CycleQ2FourOpenDeRhamTotal.complex_d]
+      exact sectionTrace_differentialFive x)
+
+/-- The fixed canonical trace on genuine total degree-six homology. -/
+def trace : complex.homology 6 →+ ℂ :=
+  quotientTrace.comp homologyCoordinates.toAddMonoidHom
+
+theorem trace_sectionClass (s : Three F fixedOpen) :
+    trace (sectionClass s) = sectionTrace s := by
+  change quotientTrace (homologyCoordinates (homologyCoordinates.symm
+    (QuotientAddGroup.mk (topCycle s)))) = sectionTrace s
+  rw [AddEquiv.apply_symm_apply] <;> rfl
+
+/-- The same normalized Laurent generator used by the original fixed
+canonical trace, expressed on the ordered quadruple intersection. -/
+def generator (a : ℂ) : Three F fixedOpen :=
+  nativeTopOrdered F fixedOpen (framedGenerator CanonicalForms globalFrame a)
+
+theorem sectionTrace_generator (a : ℂ) : sectionTrace (generator a) = a := by
+  change canonicalSectionTrace (toNative F (nativeTopOrdered F fixedOpen
+    (framedGenerator CanonicalForms globalFrame a))) = a
+  rw [toNative_nativeTopOrdered]
+  exact framedSectionTrace_generator CanonicalForms globalFrame a
+
+def normalizedClass (a : ℂ) : complex.homology 6 := sectionClass (generator a)
+
+theorem trace_normalizedClass (a : ℂ) : trace (normalizedClass a) = a := by
+  rw [normalizedClass, trace_sectionClass, sectionTrace_generator]
+
+/-- The original residue-one generator survives every degree-five
+boundary in the unfiltered finite Čech–de Rham total complex. -/
+theorem normalizedClass_one_ne_zero : normalizedClass 1 ≠ 0 := by
+  intro h
+  have ht := congrArg trace h
+  rw [trace_normalizedClass, map_zero] at ht
+  exact one_ne_zero ht
+
+end CycleQ2LiteralTopDeRhamTrace
+end
+
+#print axioms CycleQ2LiteralTopDeRhamTrace.sectionTrace_differentialFive
+#print axioms CycleQ2LiteralTopDeRhamTrace.trace_normalizedClass
+#print axioms CycleQ2LiteralTopDeRhamTrace.normalizedClass_one_ne_zero
+
+/-! The top-degree comparison uses the original source Mayer--Vietoris
+triangles and affine representatives. No total-complex comparison or
+degeneration of a spectral sequence is supplied as an assumption. -/
+
+noncomputable section
+
+namespace CycleQ2DerivedSourceBoundary
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Pretriangulated
+
+universe w v u
+variable {C : Type u} [Category.{v} C] [Abelian C]
+  [HasDerivedCategory.{w} C] [HasExt.{w} C]
+
+private abbrev E := DerivedCategory.singleFunctor C 0
+private abbrev shiftOne := shiftFunctor (DerivedCategory C) (1 : ℤ)
+
+/-- The actual source connecting map, with the target shifted by one. -/
+def connecting {S : ShortComplex C} (hS : S.ShortExact)
+    (T : DerivedCategory C) (n : ℤ) :
+    (E.obj S.X₁ ⟶ T⟦n⟧) →+ (E.obj S.X₃ ⟶ T⟦n+1⟧) where
+  toFun a := hS.singleδ ≫ shiftOne.map a ≫
+    (shiftFunctorAdd (DerivedCategory C) n 1).inv.app T
+  map_zero' := by simp
+  map_add' a b := by simp [Functor.map_add,Preadditive.comp_add,Preadditive.add_comp]
+
+theorem connecting_image {S : ShortComplex C} (hS : S.ShortExact)
+    (T : DerivedCategory C) (n : ℤ) (b : E.obj S.X₂ ⟶ T⟦n⟧) :
+    connecting hS T n (E.map S.f ≫ b) = 0 := by
+  have hz : hS.singleδ ≫ shiftOne.map (E.map S.f) = 0 :=
+    comp_distTriang_mor_zero₃₁ hS.singleTriangle hS.singleTriangle_distinguished
+  change hS.singleδ ≫ shiftOne.map (E.map S.f ≫ b) ≫ _ = 0
+  simp only [Functor.map_comp,← Category.assoc,hz,zero_comp]
+
+theorem connecting_eq_zero_iff {S : ShortComplex C} (hS : S.ShortExact)
+    (T : DerivedCategory C) (n : ℤ) (a : E.obj S.X₁ ⟶ T⟦n⟧) :
+    connecting hS T n a = 0 ↔ ∃ b : E.obj S.X₂ ⟶ T⟦n⟧, E.map S.f ≫ b = a := by
+  constructor
+  · intro ha
+    have hz : hS.extClass.hom ≫ shiftOne.map a = 0 := by
+      rw [hS.extClass_hom]
+      apply (cancel_mono ((shiftFunctorAdd (DerivedCategory C) n 1).inv.app T)).mp
+      simpa only [Category.assoc,zero_comp] using ha
+    obtain ⟨b,hb⟩ := CycleQ2LogDetection.extension_of_connecting_zero hS a hz
+    exact ⟨b,hb.symm⟩
+  · rintro ⟨b,rfl⟩
+    exact connecting_image hS T n b
+
+/-- Vanishing on the two middle source summands makes the source
+connecting map surjective. -/
+theorem connecting_surjective {S : ShortComplex C} (hS : S.ShortExact)
+    (T : DerivedCategory C) (n : ℤ)
+    (hmid : ∀ b : E.obj S.X₂ ⟶ T⟦n+1⟧, b = 0) :
+    Function.Surjective (connecting hS T n) := by
+  intro y
+  obtain ⟨c,hc⟩ := hS.singleTriangle.yoneda_exact₃
+    hS.singleTriangle_distinguished y (hmid _)
+  let J := (shiftFunctorAdd (DerivedCategory C) n 1).app T
+  refine ⟨shiftOne.preimage (c ≫ J.hom),?_⟩
+  change hS.singleδ ≫ shiftOne.map (shiftOne.preimage (c ≫ J.hom)) ≫ J.inv = y
+  simpa only [Functor.map_preimage,Category.assoc,J.hom_inv_id,Category.comp_id] using hc.symm
+
+/-- Naturality uses the morphism of the original short exact source
+triangles, including their prescribed signs. -/
+theorem connecting_natural {S R : ShortComplex C}
+    (hS : S.ShortExact) (hR : R.ShortExact) (m : S ⟶ R)
+    (T : DerivedCategory C) (n : ℤ) (a : E.obj R.X₁ ⟶ T⟦n⟧) :
+    E.map m.τ₃ ≫ connecting hR T n a =
+      connecting hS T n (E.map m.τ₁ ≫ a) := by
+  have hm := (ShortComplex.ShortExact.singleTriangle.map hS hR m).comm₃
+  change E.map m.τ₃ ≫ hR.singleδ = hS.singleδ ≫ shiftOne.map (E.map m.τ₁) at hm
+  change E.map m.τ₃ ≫ (hR.singleδ ≫ shiftOne.map a ≫ _) =
+    hS.singleδ ≫ shiftOne.map (E.map m.τ₁ ≫ a) ≫ _
+  simpa only [Category.assoc,Functor.map_comp] using
+    congrArg (fun v => v ≫ shiftOne.map a ≫
+      (shiftFunctorAdd (DerivedCategory C) n 1).inv.app T) hm
+
+end CycleQ2DerivedSourceBoundary
+
+namespace CycleQ2DerivedCoverTop
+
+open CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf freeOpen)
+open CycleQ2MayerVietorisRestriction (freeOpenSheaf)
+open CycleQ2ThreeOpenCechH2 (TripleOpen)
+open CycleQ2FourOpenH3 (QuadOpen)
+
+variable {X : TopCat.{0}}
+local instance : HasExt.{1} (AbSheaf X) := HasExt.standard _
+local instance : HasDerivedCategory.{1} (AbSheaf X) := HasDerivedCategory.standard _
+private abbrev E := DerivedCategory.singleFunctor (AbSheaf X) 0
+
+variable (T : DerivedCategory (AbSheaf X))
+
+abbrev H (n : ℤ) (U : Opens X) := E.obj (freeOpen U) ⟶ T⟦n⟧
+
+def restriction (n : ℤ) {U V : Opens X} (h : U ≤ V) : H T n V →+ H T n U where
+  toFun a := E.map ((freeOpenSheaf (X := X)).map (homOfLE h)) ≫ a
+  map_zero' := by simp
+  map_add' a b := Preadditive.comp_add _ a b
+
+theorem restriction_comp (n : ℤ) {U V W : Opens X} (h : U ≤ V) (j : V ≤ W)
+    (a : H T n W) : restriction T n h (restriction T n j a) =
+      restriction T n (h.trans j) a := by
+  change E.map _ ≫ (E.map _ ≫ a) = E.map _ ≫ a
+  rw [← Category.assoc,← Functor.map_comp,← Functor.map_comp]
+  rfl
+
+theorem restriction_self (n : ℤ) (U : Opens X) (a : H T n U) :
+    restriction T n (le_refl U) a = a := by
+  change E.map ((freeOpenSheaf (X := X)).map (𝟙 U)) ≫ a = a
+  rw [Functor.map_id,Functor.map_id,Category.id_comp]
+
+def restrictionEquiv (n : ℤ) {U V : Opens X} (h : U = V) : H T n U ≃+ H T n V where
+  toFun := restriction T n h.ge
+  invFun := restriction T n h.le
+  left_inv a := by rw [restriction_comp,restriction_self]
+  right_inv a := by rw [restriction_comp,restriction_self]
+  map_add' a b := map_add (restriction T n h.ge) a b
+
+def delta (S : (Opens.grothendieckTopology X).MayerVietorisSquare) (n : ℤ) :
+    H T n S.X₁ →+ H T (n+1) S.X₄ :=
+  CycleQ2DerivedSourceBoundary.connecting S.shortComplex_shortExact T n
+
+theorem delta_pair_zero (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+    (n : ℤ) (a : H T n S.X₂) (b : H T n S.X₃) :
+    delta T S n (restriction T n S.f₁₂.le a - restriction T n S.f₁₃.le b) = 0 := by
+  let v : E.obj S.shortComplex.X₂ ⟶ T⟦n⟧ :=
+    E.map biprod.fst ≫ a + E.map biprod.snd ≫ b
+  have hv : E.map S.shortComplex.f ≫ v =
+      restriction T n S.f₁₂.le a - restriction T n S.f₁₃.le b := by
+    change E.map (biprod.lift _ (-_)) ≫ v = E.map _ ≫ a - E.map _ ≫ b
+    simp only [v,Preadditive.comp_add,← Category.assoc,← Functor.map_comp,
+      biprod.lift_fst,biprod.lift_snd,Functor.map_neg,Preadditive.neg_comp,sub_eq_add_neg]
+  rw [← hv]
+  exact CycleQ2DerivedSourceBoundary.connecting_image S.shortComplex_shortExact T n v
+
+theorem delta_left_zero (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+    (n : ℤ) (a : H T n S.X₂) : delta T S n (restriction T n S.f₁₂.le a) = 0 := by
+  simpa only [map_zero,sub_zero] using delta_pair_zero T S n a 0
+
+theorem delta_right_zero (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+    (n : ℤ) (b : H T n S.X₃) : delta T S n (restriction T n S.f₁₃.le b) = 0 := by
+  simpa only [map_zero,map_neg,zero_sub,neg_neg] using delta_pair_zero T S n 0 (-b)
+
+theorem delta_eq_zero_iff (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+    (n : ℤ) (x : H T n S.X₁) : delta T S n x = 0 ↔
+    ∃ (a : H T n S.X₂) (b : H T n S.X₃),
+      restriction T n S.f₁₂.le a - restriction T n S.f₁₃.le b = x := by
+  constructor
+  · intro hx
+    obtain ⟨v,hv⟩ := (CycleQ2DerivedSourceBoundary.connecting_eq_zero_iff
+      S.shortComplex_shortExact T n x).mp hx
+    refine ⟨E.map biprod.inl ≫ v,E.map biprod.inr ≫ v,?_⟩
+    change E.map (biprod.lift _ (-_)) ≫ v = x at hv
+    change E.map _ ≫ (E.map biprod.inl ≫ v) - E.map _ ≫ (E.map biprod.inr ≫ v) = x
+    simpa only [biprod.lift_eq,Functor.map_add,Functor.map_comp,Functor.map_neg,
+      Preadditive.add_comp,Preadditive.neg_comp,Category.assoc,sub_eq_add_neg] using hv
+  · rintro ⟨a,b,rfl⟩
+    exact delta_pair_zero T S n a b
+
+theorem delta_surjective (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+    (n : ℤ) (h₂ : Subsingleton (H T (n+1) S.X₂))
+    (h₃ : Subsingleton (H T (n+1) S.X₃)) : Function.Surjective (delta T S n) := by
+  apply CycleQ2DerivedSourceBoundary.connecting_surjective S.shortComplex_shortExact T n
+  intro b
+  have hi : E.map (biprod.inl : freeOpen S.X₂ ⟶ freeOpen S.X₂ ⊞ freeOpen S.X₃) ≫ b = 0 :=
+    h₂.elim _ _
+  have hj : E.map (biprod.inr : freeOpen S.X₃ ⟶ freeOpen S.X₂ ⊞ freeOpen S.X₃) ≫ b = 0 :=
+    h₃.elim _ _
+  calc
+    b = E.map (𝟙 (freeOpen S.X₂ ⊞ freeOpen S.X₃)) ≫ b := by simp
+    _ = E.map (biprod.fst ≫ biprod.inl + biprod.snd ≫ biprod.inr) ≫ b := by
+      rw [biprod.total]
+    _ = 0 := by
+      simp only [Functor.map_add,Functor.map_comp,Preadditive.add_comp,
+        Category.assoc,hi,hj,comp_zero,add_zero]
+
+theorem union_zero (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+    (n : ℤ) (h₁ : Subsingleton (H T n S.X₁))
+    (h₂ : Subsingleton (H T (n+1) S.X₂)) (h₃ : Subsingleton (H T (n+1) S.X₃)) :
+    Subsingleton (H T (n+1) S.X₄) := by
+  apply subsingleton_of_forall_eq 0
+  intro y
+  obtain ⟨a,rfl⟩ := delta_surjective T S n h₂ h₃ y
+  rw [h₁.elim a 0,map_zero]
+
+theorem delta_natural (S R : (Opens.grothendieckTopology X).MayerVietorisSquare)
+    (h₁ : S.X₁ ≤ R.X₁) (h₂ : S.X₂ ≤ R.X₂)
+    (h₃ : S.X₃ ≤ R.X₃) (h₄ : S.X₄ ≤ R.X₄) (n : ℤ) (a : H T n R.X₁) :
+    restriction T (n+1) h₄ (delta T R n a) = delta T S n (restriction T n h₁ a) :=
+  CycleQ2DerivedSourceBoundary.connecting_natural S.shortComplex_shortExact
+    R.shortComplex_shortExact (CycleQ2FourOpenH3.squareMap S R h₁ h₂ h₃ h₄) T n a
+
+theorem delta_restriction {U' V' U V : Opens X} (hU : U' ≤ U) (hV : V' ≤ V)
+    (n : ℤ) (a : H T n (U ⊓ V)) :
+    restriction T (n+1) (sup_le_sup hU hV)
+      (delta T (Opens.mayerVietorisSquare U V) n a) =
+    delta T (Opens.mayerVietorisSquare U' V') n
+      (restriction T n (inf_le_inf hU hV) a) :=
+  delta_natural T _ _ (inf_le_inf hU hV) hU hV (sup_le_sup hU hV) n a
+
+def tripleBoundary (n : ℤ) (U V W : Opens X) :
+    (H T n (U ⊓ V) × H T n (U ⊓ W) × H T n (V ⊓ W)) →+
+      H T n (TripleOpen U V W) where
+  toFun a := restriction T n inf_le_right a.2.2 - restriction T n inf_le_left a.2.1 +
+    restriction T n (inf_le_inf inf_le_left inf_le_left) a.1
+  map_zero' := by simp
+  map_add' a b := by
+    simp only [Prod.fst_add,Prod.snd_add,map_add]
+    abel
+
+def tripleConnecting (n : ℤ) (U V W : Opens X) :
+    H T n (TripleOpen U V W) →+ H T (n+1+1) ((U ⊔ V) ⊔ W) :=
+  (delta T (CycleQ2ThreeOpenCechH2.outerSquare U V W) (n+1)).comp
+    (delta T (Opens.mayerVietorisSquare (U ⊓ W) (V ⊓ W)) n)
+
+private theorem triple_restrict01 (n : ℤ) (U V W : Opens X) (a : H T n (U ⊓ V)) :
+    tripleConnecting T n U V W
+      (restriction T n (inf_le_inf inf_le_left inf_le_left) a) = 0 := by
+  let S := Opens.mayerVietorisSquare (U ⊓ W) (V ⊓ W)
+  let R := CycleQ2ThreeOpenCechH2.outerSquare U V W
+  have hn := delta_restriction T (inf_le_left : U ⊓ W ≤ U)
+    (inf_le_left : V ⊓ W ≤ V) n a
+  change delta T R (n+1) (delta T S n _) = 0
+  rw [← hn]
+  exact delta_left_zero T R (n+1) (delta T (Opens.mayerVietorisSquare U V) n a)
+
+theorem triple_boundary_zero (n : ℤ) (U V W : Opens X)
+    (a : H T n (U ⊓ V) × H T n (U ⊓ W) × H T n (V ⊓ W)) :
+    tripleConnecting T n U V W (tripleBoundary T n U V W a) = 0 := by
+  have h02 : tripleConnecting T n U V W (restriction T n inf_le_left a.2.1) = 0 := by
+    change delta T _ (n+1) (delta T _ n _) = 0
+    rw [delta_left_zero,map_zero]
+  have h12 : tripleConnecting T n U V W (restriction T n inf_le_right a.2.2) = 0 := by
+    change delta T _ (n+1) (delta T _ n _) = 0
+    rw [delta_right_zero,map_zero]
+  change tripleConnecting T n U V W
+    (restriction T n inf_le_right a.2.2 - restriction T n inf_le_left a.2.1 +
+      restriction T n (inf_le_inf inf_le_left inf_le_left) a.1) = 0
+  rw [map_add,map_sub,h12,h02,triple_restrict01,sub_self,zero_add]
+
+theorem triple_eq_zero_iff (n : ℤ) (U V W : Opens X)
+    (hU : Subsingleton (H T (n+1) U)) (hV : Subsingleton (H T (n+1) V))
+    (hW : Subsingleton (H T (n+1) W)) (x : H T n (TripleOpen U V W)) :
+    tripleConnecting T n U V W x = 0 ↔
+      ∃ a, tripleBoundary T n U V W a = x := by
+  constructor
+  · intro hx
+    let S := Opens.mayerVietorisSquare (U ⊓ W) (V ⊓ W)
+    let R := CycleQ2ThreeOpenCechH2.outerSquare U V W
+    obtain ⟨a₁,b₁,hab⟩ := (delta_eq_zero_iff T R (n+1) _).mp hx
+    have hb : b₁ = 0 := hW.elim _ _
+    have ha : restriction T (n+1) R.f₁₂.le a₁ = delta T S n x := by
+      simpa only [hb,map_zero,sub_zero] using hab
+    obtain ⟨a,ha₀⟩ := delta_surjective T (Opens.mayerVietorisSquare U V) n hU hV a₁
+    have he : delta T S n
+        (restriction T n (inf_le_inf inf_le_left inf_le_left) a) = delta T S n x :=
+      (delta_restriction T (inf_le_left : U ⊓ W ≤ U)
+        (inf_le_left : V ⊓ W ≤ V) n a).symm.trans
+        ((congrArg (restriction T (n+1) R.f₁₂.le) ha₀).trans ha)
+    have hz : delta T S n
+        (x - restriction T n (inf_le_inf inf_le_left inf_le_left) a) = 0 := by
+      rw [map_sub,he,sub_self]
+    obtain ⟨b,c,hbc⟩ := (delta_eq_zero_iff T S n _).mp hz
+    refine ⟨(a,-b,-c),?_⟩
+    change restriction T n inf_le_right (-c) - restriction T n inf_le_left (-b) +
+      restriction T n (inf_le_inf inf_le_left inf_le_left) a = x
+    rw [map_neg,map_neg]
+    change restriction T n inf_le_left b - restriction T n inf_le_right c =
+      x - restriction T n (inf_le_inf inf_le_left inf_le_left) a at hbc
+    calc
+      _ = (restriction T n inf_le_left b - restriction T n inf_le_right c) +
+          restriction T n (inf_le_inf inf_le_left inf_le_left) a := by abel
+      _ = x := by rw [hbc]; abel
+  · rintro ⟨a,rfl⟩
+    exact triple_boundary_zero T n U V W a
+
+theorem triple_surjective (n : ℤ) (U V W : Opens X)
+    (hU : Subsingleton (H T (n+1+1) U)) (hV : Subsingleton (H T (n+1+1) V))
+    (hW : Subsingleton (H T (n+1+1) W))
+    (hUV : Subsingleton (H T (n+1) (U ⊓ V)))
+    (hUW : Subsingleton (H T (n+1) (U ⊓ W)))
+    (hVW : Subsingleton (H T (n+1) (V ⊓ W))) :
+    Function.Surjective (tripleConnecting T n U V W) := by
+  have huv := union_zero T (Opens.mayerVietorisSquare U V) (n+1) hUV hU hV
+  intro y
+  obtain ⟨z,hz⟩ := delta_surjective T (CycleQ2ThreeOpenCechH2.outerSquare U V W)
+    (n+1) huv hW y
+  obtain ⟨s,hs⟩ := delta_surjective T
+    (Opens.mayerVietorisSquare (U ⊓ W) (V ⊓ W)) n hUW hVW z
+  exact ⟨s,(congrArg (delta T _ (n+1)) hs).trans hz⟩
+
+theorem triple_natural (n : ℤ) {U' V' W' U V W : Opens X}
+    (hU : U' ≤ U) (hV : V' ≤ V) (hW : W' ≤ W) (a : H T n (TripleOpen U V W)) :
+    restriction T (n+1+1) (sup_le_sup (sup_le_sup hU hV) hW)
+      (tripleConnecting T n U V W a) =
+    tripleConnecting T n U' V' W'
+      (restriction T n (inf_le_inf (inf_le_inf hU hW) (inf_le_inf hV hW)) a) := by
+  let S := CycleQ2ThreeOpenCechH2.outerSquare U V W
+  let R := CycleQ2ThreeOpenCechH2.outerSquare U' V' W'
+  change restriction T (n+1+1) _ (delta T S (n+1) (delta T _ n a)) =
+    delta T R (n+1) (delta T _ n _)
+  rw [delta_natural T R S
+    (sup_le_sup (inf_le_inf hU hW) (inf_le_inf hV hW))
+    (sup_le_sup hU hV) hW (sup_le_sup (sup_le_sup hU hV) hW)]
+  rw [delta_restriction T (inf_le_inf hU hW) (inf_le_inf hV hW)]
+
+abbrev TripleClasses (n : ℤ) (U V W Z : Opens X) :=
+  H T n (TripleOpen U V W) × H T n ((U ⊓ Z) ⊓ (V ⊓ Z)) ×
+    H T n ((U ⊓ Z) ⊓ (W ⊓ Z)) × H T n ((V ⊓ Z) ⊓ (W ⊓ Z))
+
+private theorem quad_le_triple (U V W Z : Opens X) : QuadOpen U V W Z ≤ TripleOpen U V W :=
+  inf_le_inf (inf_le_inf inf_le_left inf_le_left) (inf_le_inf inf_le_left inf_le_left)
+
+def fourBoundary (n : ℤ) (U V W Z : Opens X) :
+    TripleClasses T n U V W Z →+ H T n (QuadOpen U V W Z) where
+  toFun a := tripleBoundary T n (U ⊓ Z) (V ⊓ Z) (W ⊓ Z) (a.2.1,a.2.2.1,a.2.2.2) -
+    restriction T n (quad_le_triple U V W Z) a.1
+  map_zero' := by simp
+  map_add' a b := by
+    change tripleBoundary T n (U ⊓ Z) (V ⊓ Z) (W ⊓ Z)
+      ((a.2.1,a.2.2.1,a.2.2.2) + (b.2.1,b.2.2.1,b.2.2.2)) -
+      restriction T n (quad_le_triple U V W Z) (a.1+b.1) = _
+    rw [map_add,map_add]
+    abel
+
+def fourConnecting (n : ℤ) (U V W Z : Opens X) :
+    H T n (QuadOpen U V W Z) →+ H T (n+1+1+1) (((U ⊔ V) ⊔ W) ⊔ Z) :=
+  (delta T (CycleQ2FourOpenH3.outerSquare U V W Z) (n+1+1)).comp
+    (tripleConnecting T n (U ⊓ Z) (V ⊓ Z) (W ⊓ Z))
+
+private theorem four_restrict012 (n : ℤ) (U V W Z : Opens X)
+    (a : H T n (TripleOpen U V W)) :
+    fourConnecting T n U V W Z (restriction T n (quad_le_triple U V W Z) a) = 0 := by
+  change delta T (CycleQ2FourOpenH3.outerSquare U V W Z) (n+1+1)
+    (tripleConnecting T n (U ⊓ Z) (V ⊓ Z) (W ⊓ Z) _) = 0
+  rw [← triple_natural T n (inf_le_left : U ⊓ Z ≤ U)
+    (inf_le_left : V ⊓ Z ≤ V) (inf_le_left : W ⊓ Z ≤ W)]
+  exact delta_left_zero T _ (n+1+1) (tripleConnecting T n U V W a)
+
+theorem four_boundary_zero (n : ℤ) (U V W Z : Opens X)
+    (a : TripleClasses T n U V W Z) :
+    fourConnecting T n U V W Z (fourBoundary T n U V W Z a) = 0 := by
+  change fourConnecting T n U V W Z
+    (tripleBoundary T n (U ⊓ Z) (V ⊓ Z) (W ⊓ Z) (a.2.1,a.2.2.1,a.2.2.2) -
+      restriction T n (quad_le_triple U V W Z) a.1) = 0
+  rw [map_sub,four_restrict012,sub_zero]
+  change delta T _ (n+1+1) (tripleConnecting T n _ _ _ _) = 0
+  rw [triple_boundary_zero,map_zero]
+
+theorem four_eq_zero_iff (n : ℤ) (U V W Z : Opens X)
+    (hU : Subsingleton (H T (n+1+1) U)) (hV : Subsingleton (H T (n+1+1) V))
+    (hW : Subsingleton (H T (n+1+1) W)) (hZ : Subsingleton (H T (n+1+1) Z))
+    (hUV : Subsingleton (H T (n+1) (U ⊓ V)))
+    (hUW : Subsingleton (H T (n+1) (U ⊓ W)))
+    (hVW : Subsingleton (H T (n+1) (V ⊓ W)))
+    (hUZ : Subsingleton (H T (n+1) (U ⊓ Z)))
+    (hVZ : Subsingleton (H T (n+1) (V ⊓ Z)))
+    (hWZ : Subsingleton (H T (n+1) (W ⊓ Z))) (s : H T n (QuadOpen U V W Z)) :
+    fourConnecting T n U V W Z s = 0 ↔ ∃ a, fourBoundary T n U V W Z a = s := by
+  constructor
+  · intro hs
+    let S := CycleQ2FourOpenH3.outerSquare U V W Z
+    let g := tripleConnecting T n (U ⊓ Z) (V ⊓ Z) (W ⊓ Z)
+    obtain ⟨a,b,hab⟩ := (delta_eq_zero_iff T S (n+1+1) (g s)).mp hs
+    have hb : b = 0 := hZ.elim _ _
+    have ha : restriction T (n+1+1) S.f₁₂.le a = g s := by
+      simpa only [hb,map_zero,sub_zero] using hab
+    obtain ⟨v,hv⟩ := triple_surjective T n U V W hU hV hW hUV hUW hVW a
+    have he : g (restriction T n (quad_le_triple U V W Z) v) = g s :=
+      (triple_natural T n (inf_le_left : U ⊓ Z ≤ U)
+        (inf_le_left : V ⊓ Z ≤ V) (inf_le_left : W ⊓ Z ≤ W) v).symm.trans
+        ((congrArg (restriction T (n+1+1) S.f₁₂.le) hv).trans ha)
+    have hz : g (s - restriction T n (quad_le_triple U V W Z) v) = 0 := by
+      rw [map_sub,he,sub_self]
+    obtain ⟨⟨a₀,b₀,c₀⟩,h₀⟩ :=
+      (triple_eq_zero_iff T n (U ⊓ Z) (V ⊓ Z) (W ⊓ Z) hUZ hVZ hWZ _).mp hz
+    refine ⟨(-v,a₀,b₀,c₀),?_⟩
+    change tripleBoundary T n (U ⊓ Z) (V ⊓ Z) (W ⊓ Z) (a₀,b₀,c₀) -
+      restriction T n (quad_le_triple U V W Z) (-v) = s
+    rw [h₀,map_neg]
+    abel
+  · rintro ⟨a,rfl⟩
+    exact four_boundary_zero T n U V W Z a
+
+theorem four_surjective (n : ℤ) (U V W Z : Opens X)
+    (hU : Subsingleton (H T (n+1+1+1) U)) (hV : Subsingleton (H T (n+1+1+1) V))
+    (hW : Subsingleton (H T (n+1+1+1) W)) (hZ : Subsingleton (H T (n+1+1+1) Z))
+    (hUV : Subsingleton (H T (n+1+1) (U ⊓ V)))
+    (hUW : Subsingleton (H T (n+1+1) (U ⊓ W)))
+    (hVW : Subsingleton (H T (n+1+1) (V ⊓ W)))
+    (hUZ : Subsingleton (H T (n+1+1) (U ⊓ Z)))
+    (hVZ : Subsingleton (H T (n+1+1) (V ⊓ Z)))
+    (hWZ : Subsingleton (H T (n+1+1) (W ⊓ Z)))
+    (hUVW : Subsingleton (H T (n+1) (TripleOpen U V W)))
+    (hUVZ : Subsingleton (H T (n+1) ((U ⊓ Z) ⊓ (V ⊓ Z))))
+    (hUWZ : Subsingleton (H T (n+1) ((U ⊓ Z) ⊓ (W ⊓ Z))))
+    (hVWZ : Subsingleton (H T (n+1) ((V ⊓ Z) ⊓ (W ⊓ Z)))) :
+    Function.Surjective (fourConnecting T n U V W Z) := by
+  have huv := union_zero T (Opens.mayerVietorisSquare U V) (n+1+1) hUV hU hV
+  have hint := union_zero T (Opens.mayerVietorisSquare (U ⊓ W) (V ⊓ W))
+    (n+1) hUVW hUW hVW
+  have huvw := union_zero T (CycleQ2ThreeOpenCechH2.outerSquare U V W)
+    (n+1+1) hint huv hW
+  intro y
+  obtain ⟨z,hz⟩ := delta_surjective T (CycleQ2FourOpenH3.outerSquare U V W Z)
+    (n+1+1) huvw hZ y
+  obtain ⟨s,hs⟩ := triple_surjective T n (U ⊓ Z) (V ⊓ Z) (W ⊓ Z)
+    hUZ hVZ hWZ hUVZ hUWZ hVWZ z
+  exact ⟨s,(congrArg (delta T _ (n+1+1)) hs).trans hz⟩
+
+end CycleQ2DerivedCoverTop
+
+end
+
+noncomputable section
+namespace CycleQ2LiteralDerivedTop
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf Sections freeOpen freeOpenMap freeOpenSections
+  freeOpenSections_naturality)
+open CycleQ2CechTwoToDerived (freeOpenSections_postcomp)
+open CycleQ2GeometricSheafLocalIso (res)
+open CycleQ2LiteralThreefoldFirstDifferential (X structural FramedAffine framed_isBasis
+  nativeFrame coeff)
+open CycleQ2LiteralIntrinsicExterior (Literal Intrinsic comparison)
+open CycleQ2IntrinsicDeRhamSheaves (relativeDeRham relativeDeRhamInt)
+open CycleQ2LiteralThreefoldSecondDifferential (ordinaryExteriorIso secondDifferential)
+open CycleQ2GeometricSectionDifferentials (sectionAlgebra)
+open CycleQ2DerivedCoverTop (H)
+
+local instance : SmoothOfRelativeDimension 3 structural :=
+  CycleQ2LiteralAmbientSmooth.literal_fiber_smooth
+local instance : HasExt.{1} (AbSheaf (show TopCat from X)) := HasExt.standard _
+local instance : HasDerivedCategory.{1} (AbSheaf (show TopCat from X)) := HasDerivedCategory.standard _
+
+abbrev deRham := relativeDeRhamInt structural 3
+abbrev target := DerivedCategory.Q.obj deRham
+
+local instance : deRham.IsStrictlyGE 0 := by
+  change ((relativeDeRham structural 3).extend (ComplexShape.embeddingUpIntGE 0)).IsStrictlySupported
+    (ComplexShape.embeddingUpIntGE 0)
+  infer_instance
+
+def termIso (n : ℕ) : deRham.X (n : ℤ) ≅ Literal n :=
+  (relativeDeRham structural 3).extendXIso (ComplexShape.embeddingUpIntGE 0)
+    (Int.zero_add _) ≪≫ comparison n
+
+def coefficients (W : X.Opens) (n : ℕ) :
+    Sections (deRham.X (n : ℤ)) W ≃+ Sections (Literal n) W :=
+  (((sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat).mapIso
+    (termIso n)).app (op W)).addCommGroupIsoToAddEquiv
+
+theorem coefficients_restrict {U V : X.Opens} (h : U ≤ V) (n : ℕ)
+    (s : Sections (deRham.X (n : ℤ)) V) :
+    coefficients U n (res _ h s) = res _ h (coefficients V n s) :=
+  NatTrans.naturality_apply (termIso n).hom.hom (homOfLE h).op s
+
+theorem literal_above (W : X.Opens) (n : ℕ) (hn : 3 < n)
+    (s : Sections (Literal n) W) : s = 0 := by
+  apply TopCat.Presheaf.IsSheaf.section_ext (Literal n).property
+  intro x hx
+  obtain ⟨_,⟨V,rfl⟩,hxV,hVW⟩ := Opens.isBasis_iff_nbhd.mp framed_isBasis hx
+  refine ⟨V.carrier,hVW,hxV,?_⟩
+  letI := sectionAlgebra X.sheaf coeff V.carrier
+  have hz := CycleQ2SurfaceDeRhamChart.exterior_subsingleton (nativeFrame V) hn
+  apply (ordinaryExteriorIso V n).symm.injective
+  exact hz.elim _ _
+
+theorem term_above (W : X.Opens) (n : ℕ) (hn : 3 < n)
+    (s : Sections (deRham.X (n : ℤ)) W) : s = 0 := by
+  apply (coefficients W n).injective
+  rw [map_zero]
+  exact literal_above W n hn _
+
+theorem affine_above {W : X.Opens} (hW : IsAffineOpen W) (n : ℕ) (hn : 3 < n) :
+    Subsingleton (H target (n : ℤ) W) := by
+  let P := freeOpen W
+  have terms := CycleQ2AffineExteriorComparison.term_acyclic structural 3 hW
+  apply subsingleton_of_forall_eq 0
+  intro y
+  obtain ⟨a,ha,rfl⟩ := CycleQ2AcyclicSectionRepresentatives.surjective P deRham 0 terms (n : ℤ) y
+  have ha₀ : a = 0 := by
+    apply (freeOpenSections _ W).injective
+    rw [map_zero]
+    exact term_above W n hn _
+  apply (CycleQ2AcyclicSectionRepresentatives.zero_iff P deRham 0 terms (n : ℤ) a ha).mpr
+  exact ⟨0,by rw [zero_comp,ha₀]⟩
+
+def representative (W : X.Opens) : Sections (Literal 3) W →+ (freeOpen W ⟶ deRham.X 3) :=
+  (freeOpenSections _ W).symm.toAddMonoidHom.comp (coefficients W 3).symm.toAddMonoidHom
+
+theorem representative_sections (W : X.Opens) (s : Sections (Literal 3) W) :
+    freeOpenSections _ W (representative W s) = (coefficients W 3).symm s :=
+  (freeOpenSections _ W).apply_symm_apply _
+
+theorem representative_closed (W : X.Opens) (s : Sections (Literal 3) W) :
+    representative W s ≫ deRham.d 3 4 = 0 := by
+  apply (freeOpenSections _ W).injective
+  rw [map_zero]
+  exact term_above W 4 (by decide) _
+
+private def rawClass (W : X.Opens) (s : Sections (Literal 3) W) : H target 3 W :=
+  CycleQ2KInjectiveSections.closedClass (freeOpen W) deRham 3
+    (representative W s) (representative_closed W s)
+
+private theorem rawClass_sub (W : X.Opens) (s t : Sections (Literal 3) W) :
+    rawClass W (s-t) = rawClass W s - rawClass W t := by
+  unfold rawClass
+  rw [map_sub]
+  exact CycleQ2AcyclicSectionRepresentatives.closedClass_sub (K := deRham) (freeOpen W) 3
+    (representative W s) (representative W t) (representative_closed W s) (representative_closed W t)
+
+/-- A literal three-form defines its actual derived de Rham class. -/
+def localTop (W : X.Opens) : Sections (Literal 3) W →+ H target 3 W :=
+  AddMonoidHom.mk' (rawClass W) (by
+    intro s t
+    have h := rawClass_sub W (s+t) t
+    rw [add_sub_cancel_right] at h
+    exact eq_add_of_sub_eq h.symm)
+
+theorem localTop_surjective {W : X.Opens} (hW : IsAffineOpen W) :
+    Function.Surjective (localTop W) := by
+  intro y
+  have terms := CycleQ2AffineExteriorComparison.term_acyclic structural 3 hW
+  obtain ⟨a,ha,hy⟩ := CycleQ2AcyclicSectionRepresentatives.surjective
+    (freeOpen W) deRham 0 terms 3 y
+  refine ⟨coefficients W 3 (freeOpenSections _ W a),?_⟩
+  have hr : representative W (coefficients W 3 (freeOpenSections _ W a)) = a := by
+    change (freeOpenSections _ W).symm
+      ((coefficients W 3).symm (coefficients W 3 (freeOpenSections _ W a))) = a
+    rw [AddEquiv.symm_apply_apply,AddEquiv.symm_apply_apply]
+  change CycleQ2KInjectiveSections.closedClass _ deRham 3 _ _ = y
+  simpa only [hr] using hy
+
+theorem differential_two : deRham.d 2 3 =
+    (termIso 2).hom ≫ secondDifferential ≫ (termIso 3).inv := by
+  let a := (relativeDeRham structural 3).extendXIso (ComplexShape.embeddingUpIntGE 0) (Int.zero_add 2)
+  let b := (relativeDeRham structural 3).extendXIso (ComplexShape.embeddingUpIntGE 0) (Int.zero_add 3)
+  have hd : deRham.d 2 3 = a.hom ≫
+      CycleQ2IntrinsicDeRhamSheaves.differential structural 3 2 ≫ b.inv :=
+    (relativeDeRham structural 3).extend_d_eq (ComplexShape.embeddingUpIntGE 0)
+      (Int.zero_add 2) (Int.zero_add 3)
+  rw [hd]
+  change a.hom ≫ _ ≫ b.inv =
+    (a.hom ≫ (comparison 2).hom) ≫ secondDifferential ≫ ((comparison 3).inv ≫ b.inv)
+  simp only [Category.assoc]
+  rw [reassoc_of% CycleQ2LiteralIntrinsicExterior.comparison_secondDifferential,
+    Iso.hom_inv_id_assoc]
+
+theorem coefficients_differential_two (W : X.Opens) (s : Sections (deRham.X 2) W) :
+    coefficients W 3 ((deRham.d 2 3).hom.app (op W) s) =
+      secondDifferential.hom.app (op W) (coefficients W 2 s) := by
+  have hd : deRham.d 2 3 ≫ (termIso 3).hom = (termIso 2).hom ≫ secondDifferential := by
+    rw [differential_two]
+    simp only [Category.assoc,Iso.inv_hom_id_assoc]
+  exact ConcreteCategory.congr_hom (congrArg (fun f => f.hom.app (op W)) hd) s
+
+theorem localTop_eq_zero_iff {W : X.Opens} (hW : IsAffineOpen W)
+    (s : Sections (Literal 3) W) : localTop W s = 0 ↔
+      ∃ t : Sections (Literal 2) W, secondDifferential.hom.app (op W) t = s := by
+  have terms := CycleQ2AffineExteriorComparison.term_acyclic structural 3 hW
+  change CycleQ2KInjectiveSections.closedClass _ deRham 3 _ _ = 0 ↔ _
+  rw [CycleQ2AcyclicSectionRepresentatives.zero_iff (freeOpen W) deRham 0 terms]
+  constructor
+  · rintro ⟨a,ha⟩
+    refine ⟨coefficients W 2 (freeOpenSections _ W a),?_⟩
+    rw [← coefficients_differential_two,freeOpenSections_postcomp,ha,representative_sections]
+    exact (coefficients W 3).apply_symm_apply s
+  · rintro ⟨t,ht⟩
+    refine ⟨(freeOpenSections _ W).symm ((coefficients W 2).symm t),?_⟩
+    apply (freeOpenSections _ W).injective
+    apply (coefficients W 3).injective
+    rw [representative_sections,← freeOpenSections_postcomp,coefficients_differential_two]
+    simpa only [AddEquiv.apply_symm_apply] using ht
+
+theorem representative_restrict {U V : X.Opens} (h : U ≤ V)
+    (s : Sections (Literal 3) V) : representative U (res _ h s) =
+      freeOpenMap h ≫ representative V s := by
+  apply (freeOpenSections _ U).injective
+  rw [representative_sections,freeOpenSections_naturality,representative_sections]
+  apply (coefficients U 3).injective
+  rw [AddEquiv.apply_symm_apply,coefficients_restrict,AddEquiv.apply_symm_apply]
+
+theorem localTop_restrict {U V : X.Opens} (h : U ≤ V) (s : Sections (Literal 3) V) :
+    CycleQ2DerivedCoverTop.restriction target 3 h (localTop V s) = localTop U (res _ h s) := by
+  change _ = CycleQ2KInjectiveSections.closedClass _ deRham 3 (representative U (res _ h s)) _
+  rw [representative_restrict]
+  exact (CycleQ2KInjectiveSections.closedClass_precomp (freeOpen V) deRham (freeOpenMap h) 3
+    (representative V s) (representative_closed V s)).symm
+
+open CycleQ2LiteralAmbientCharts (fixedOpen fixedOpen_cover)
+open CycleQ2LiteralThreefoldTopTrace (Face Torus face_affine)
+open CycleQ2ThreeOpenCechH2 (TripleOpen)
+open CycleQ2FourOpenH3 (QuadOpen)
+open CycleQ2CechTwoToDerived (Two Three d2 app app_res)
+open CycleQ2GeometricSheafLocalIso (res_comp res_self)
+
+private abbrev Quad := QuadOpen (fixedOpen 0) (fixedOpen 1) (fixedOpen 2) (fixedOpen 3)
+private abbrev Union := ((fixedOpen 0 ⊔ fixedOpen 1) ⊔ fixedOpen 2) ⊔ fixedOpen 3
+
+private theorem vertex_affine (i : Fin 4) : IsAffineOpen (fixedOpen i) := by
+  simpa only [Face,Finset.inf_singleton] using face_affine {i} (by simp)
+
+private theorem pair_affine (i j : Fin 4) : IsAffineOpen (fixedOpen i ⊓ fixedOpen j) := by
+  simpa only [Face,Finset.inf_insert,Finset.inf_singleton] using face_affine {i,j} (by simp)
+
+private theorem triple_affine (i j k : Fin 4) :
+    IsAffineOpen (TripleOpen (fixedOpen i) (fixedOpen j) (fixedOpen k)) := by
+  have he : TripleOpen (fixedOpen i) (fixedOpen j) (fixedOpen k) = Face {i,j,k} := by
+    simp only [TripleOpen,Face,Finset.inf_insert,Finset.inf_singleton,
+      inf_assoc,inf_left_comm,inf_comm,inf_idem]
+  rw [he]
+  exact face_affine _ (by simp)
+
+private theorem quad_eq_torus : Quad = Torus := by
+  have hu : (Finset.univ : Finset (Fin 4)) = {0,1,2,3} := by decide
+  simp only [Quad,QuadOpen,TripleOpen,Torus,Face,hu,Finset.inf_insert,Finset.inf_singleton,
+    inf_assoc,inf_left_comm,inf_comm,inf_idem]
+
+private theorem quad_affine : IsAffineOpen Quad := by
+  rw [quad_eq_torus]
+  exact face_affine _ (by simp)
+
+private theorem union_eq_top : Union = ⊤ := by
+  apply le_antisymm le_top
+  rw [← fixedOpen_cover]
+  apply iSup_le
+  intro i
+  fin_cases i
+  · exact le_sup_left.trans (le_sup_left.trans le_sup_left)
+  · exact le_sup_right.trans (le_sup_left.trans le_sup_left)
+  · exact le_sup_right.trans le_sup_left
+  · exact le_sup_right
+
+private theorem ordered_triple_eq (i j k : Fin 4) :
+    (fixedOpen i ⊓ fixedOpen j) ⊓ fixedOpen k =
+      TripleOpen (fixedOpen i) (fixedOpen j) (fixedOpen k) := by
+  simp only [TripleOpen,inf_assoc,inf_left_comm,inf_comm,inf_idem]
+
+private theorem ordered_quad_eq :
+    ((fixedOpen 0 ⊓ fixedOpen 1) ⊓ fixedOpen 2) ⊓ fixedOpen 3 = Quad := by
+  simp only [Quad,QuadOpen,TripleOpen,inf_assoc,inf_left_comm,inf_comm,inf_idem]
+
+private def sectionsEquivOfEq (F : AbSheaf (show TopCat from X))
+    {U V : X.Opens} (h : U = V) : Sections F U ≃+ Sections F V where
+  toFun := res F h.ge
+  invFun := res F h.le
+  left_inv s := by rw [res_comp,res_self]
+  right_inv s := by rw [res_comp,res_self]
+  map_add' a b := map_add (res F h.ge) a b
+
+def quadSections (F : AbSheaf (show TopCat from X)) : Three F fixedOpen ≃+ Sections F Quad :=
+  sectionsEquivOfEq F ordered_quad_eq
+
+private def quadFaces (F : AbSheaf (show TopCat from X)) : Two F fixedOpen ≃+
+    CycleQ2FourOpenH3.TripleSections F (fixedOpen 0) (fixedOpen 1) (fixedOpen 2) (fixedOpen 3) :=
+  AddEquiv.prodCongr (sectionsEquivOfEq F (ordered_triple_eq 0 1 2))
+    (AddEquiv.prodCongr (sectionsEquivOfEq F (ordered_triple_eq 0 1 3))
+      (AddEquiv.prodCongr (sectionsEquivOfEq F (ordered_triple_eq 0 2 3))
+        (sectionsEquivOfEq F (ordered_triple_eq 1 2 3))))
+
+private theorem quadSections_boundary (F : AbSheaf (show TopCat from X)) (c : Two F fixedOpen) :
+    quadSections F (d2 F fixedOpen c) = CycleQ2FourOpenH3.boundary F
+      (fixedOpen 0) (fixedOpen 1) (fixedOpen 2) (fixedOpen 3) (quadFaces F c) := by
+  change res F _ (res F _ c.2.2.2 - res F _ c.2.2.1 + res F _ c.2.1 - res F _ c.1) =
+    res F _ (res F _ c.2.2.2) - res F _ (res F _ c.2.2.1) +
+      res F _ (res F _ c.2.1) - res F _ (res F _ c.1)
+  simp only [map_sub,map_add,res_comp]
+
+private def faceClasses (c : Two (Literal 3) fixedOpen) :
+    CycleQ2DerivedCoverTop.TripleClasses target 3
+      (fixedOpen 0) (fixedOpen 1) (fixedOpen 2) (fixedOpen 3) :=
+  (localTop _ (quadFaces (Literal 3) c).1,localTop _ (quadFaces (Literal 3) c).2.1,
+    localTop _ (quadFaces (Literal 3) c).2.2.1,localTop _ (quadFaces (Literal 3) c).2.2.2)
+
+private theorem faceClasses_surjective : Function.Surjective faceClasses := by
+  rintro ⟨a,b,c,d⟩
+  obtain ⟨a,rfl⟩ := localTop_surjective (triple_affine 0 1 2) a
+  obtain ⟨b,rfl⟩ := localTop_surjective (triple_affine 0 1 3) b
+  obtain ⟨c,rfl⟩ := localTop_surjective (triple_affine 0 2 3) c
+  obtain ⟨d,rfl⟩ := localTop_surjective (triple_affine 1 2 3) d
+  refine ⟨(quadFaces (Literal 3)).symm (a,b,c,d),?_⟩
+  simp only [faceClasses,AddEquiv.apply_symm_apply]
+
+private theorem localTop_quad_boundary (c : Two (Literal 3) fixedOpen) :
+    localTop Quad (quadSections (Literal 3) (d2 (Literal 3) fixedOpen c)) =
+      CycleQ2DerivedCoverTop.fourBoundary target 3
+        (fixedOpen 0) (fixedOpen 1) (fixedOpen 2) (fixedOpen 3) (faceClasses c) := by
+  rw [quadSections_boundary]
+  change localTop Quad (res _ _ (quadFaces (Literal 3) c).2.2.2 -
+      res _ _ (quadFaces (Literal 3) c).2.2.1 + res _ _ (quadFaces (Literal 3) c).2.1 -
+      res _ _ (quadFaces (Literal 3) c).1) = _
+  simp only [map_sub,map_add,← localTop_restrict] <;> rfl
+
+theorem quadSections_differential (s : Three (Literal 2) fixedOpen) :
+    quadSections (Literal 3) (app secondDifferential _ s) =
+      app secondDifferential Quad (quadSections (Literal 2) s) :=
+  (app_res secondDifferential ordered_quad_eq.ge s).symm
+
+/-- Three original source boundaries take a literal top Čech section
+to an actual global derived de Rham class in degree six. -/
+def connectingSection : Three (Literal 3) fixedOpen →+ H target 6 ⊤ :=
+  (CycleQ2DerivedCoverTop.restrictionEquiv target 6 union_eq_top).toAddMonoidHom.comp
+    ((CycleQ2DerivedCoverTop.fourConnecting target 3
+      (fixedOpen 0) (fixedOpen 1) (fixedOpen 2) (fixedOpen 3)).comp
+        ((localTop Quad).comp (quadSections (Literal 3)).toAddMonoidHom))
+
+private theorem four_surjective : Function.Surjective
+    (CycleQ2DerivedCoverTop.fourConnecting target 3
+      (fixedOpen 0) (fixedOpen 1) (fixedOpen 2) (fixedOpen 3)) :=
+  CycleQ2DerivedCoverTop.four_surjective target 3 _ _ _ _
+    (affine_above (vertex_affine 0) 6 (by decide)) (affine_above (vertex_affine 1) 6 (by decide))
+    (affine_above (vertex_affine 2) 6 (by decide)) (affine_above (vertex_affine 3) 6 (by decide))
+    (affine_above (pair_affine 0 1) 5 (by decide)) (affine_above (pair_affine 0 2) 5 (by decide))
+    (affine_above (pair_affine 1 2) 5 (by decide)) (affine_above (pair_affine 0 3) 5 (by decide))
+    (affine_above (pair_affine 1 3) 5 (by decide)) (affine_above (pair_affine 2 3) 5 (by decide))
+    (affine_above (triple_affine 0 1 2) 4 (by decide))
+    (affine_above (triple_affine 0 1 3) 4 (by decide))
+    (affine_above (triple_affine 0 2 3) 4 (by decide))
+    (affine_above (triple_affine 1 2 3) 4 (by decide))
+
+theorem connectingSection_surjective : Function.Surjective connectingSection :=
+  (CycleQ2DerivedCoverTop.restrictionEquiv target 6 union_eq_top).surjective.comp
+    (four_surjective.comp ((localTop_surjective quad_affine).comp
+      (quadSections (Literal 3)).surjective))
+
+private theorem four_eq_zero_iff (s : H target 3 Quad) :
+    CycleQ2DerivedCoverTop.fourConnecting target 3
+      (fixedOpen 0) (fixedOpen 1) (fixedOpen 2) (fixedOpen 3) s = 0 ↔
+    ∃ a, CycleQ2DerivedCoverTop.fourBoundary target 3
+      (fixedOpen 0) (fixedOpen 1) (fixedOpen 2) (fixedOpen 3) a = s :=
+  CycleQ2DerivedCoverTop.four_eq_zero_iff target 3 _ _ _ _
+    (affine_above (vertex_affine 0) 5 (by decide)) (affine_above (vertex_affine 1) 5 (by decide))
+    (affine_above (vertex_affine 2) 5 (by decide)) (affine_above (vertex_affine 3) 5 (by decide))
+    (affine_above (pair_affine 0 1) 4 (by decide)) (affine_above (pair_affine 0 2) 4 (by decide))
+    (affine_above (pair_affine 1 2) 4 (by decide)) (affine_above (pair_affine 0 3) 4 (by decide))
+    (affine_above (pair_affine 1 3) 4 (by decide)) (affine_above (pair_affine 2 3) 4 (by decide)) s
+
+theorem connectingSection_cech (c : Two (Literal 3) fixedOpen) :
+    connectingSection (d2 (Literal 3) fixedOpen c) = 0 := by
+  change (CycleQ2DerivedCoverTop.restrictionEquiv target 6 union_eq_top)
+    (CycleQ2DerivedCoverTop.fourConnecting target 3 _ _ _ _
+      (localTop Quad (quadSections (Literal 3) (d2 (Literal 3) fixedOpen c)))) = 0
+  rw [localTop_quad_boundary,CycleQ2DerivedCoverTop.four_boundary_zero,map_zero]
+
+theorem connectingSection_exterior (s : Three (Literal 2) fixedOpen) :
+    connectingSection (app secondDifferential _ s) = 0 := by
+  change (CycleQ2DerivedCoverTop.restrictionEquiv target 6 union_eq_top)
+    (CycleQ2DerivedCoverTop.fourConnecting target 3 _ _ _ _
+      (localTop Quad (quadSections (Literal 3) (app secondDifferential _ s)))) = 0
+  rw [quadSections_differential]
+  have hs := (localTop_eq_zero_iff quad_affine
+    (app secondDifferential Quad (quadSections (Literal 2) s))).mpr
+      ⟨quadSections (Literal 2) s,rfl⟩
+  rw [hs,map_zero,map_zero]
+
+theorem connectingSection_differentialFive
+    (b : CycleQ2FourOpenDeRhamTotal.TotalFive fixedOpen (Literal 2) (Literal 3)) :
+    connectingSection (CycleQ2FourOpenDeRhamTotal.differentialFive fixedOpen secondDifferential b) = 0 := by
+  change connectingSection (d2 (Literal 3) fixedOpen b.1 - app secondDifferential _ b.2) = 0
+  rw [map_sub,connectingSection_cech,connectingSection_exterior,sub_self]
+
+/-- The exact kernel is the degree-five differential of the original
+finite Čech--de Rham total complex, including its minus sign on dΩ². -/
+theorem connectingSection_eq_zero_iff (s : Three (Literal 3) fixedOpen) :
+    connectingSection s = 0 ↔
+    ∃ b : CycleQ2FourOpenDeRhamTotal.TotalFive fixedOpen (Literal 2) (Literal 3),
+      CycleQ2FourOpenDeRhamTotal.differentialFive fixedOpen secondDifferential b = s := by
+  constructor
+  · intro hs
+    have hfour : CycleQ2DerivedCoverTop.fourConnecting target 3 _ _ _ _
+        (localTop Quad (quadSections (Literal 3) s)) = 0 := by
+      apply (CycleQ2DerivedCoverTop.restrictionEquiv target 6 union_eq_top).injective
+      simpa only [map_zero] using hs
+    obtain ⟨a,ha⟩ := (four_eq_zero_iff _).mp hfour
+    obtain ⟨c,hc⟩ := faceClasses_surjective a
+    have he : localTop Quad
+        (quadSections (Literal 3) (s - d2 (Literal 3) fixedOpen c)) = 0 := by
+      rw [map_sub,map_sub,localTop_quad_boundary,hc,ha,sub_self]
+    obtain ⟨η,hη⟩ := (localTop_eq_zero_iff quad_affine _).mp he
+    let t := (quadSections (Literal 2)).symm η
+    have ht : app secondDifferential _ t = s - d2 (Literal 3) fixedOpen c := by
+      apply (quadSections (Literal 3)).injective
+      rw [quadSections_differential]
+      change app secondDifferential Quad
+        (quadSections (Literal 2) ((quadSections (Literal 2)).symm η)) = _
+      rw [AddEquiv.apply_symm_apply]
+      exact hη
+    refine ⟨(c,-t),?_⟩
+    change d2 (Literal 3) fixedOpen c - app secondDifferential _ (-t) = s
+    rw [map_neg,ht]
+    abel
+  · rintro ⟨b,rfl⟩
+    exact connectingSection_differentialFive b
+
+end CycleQ2LiteralDerivedTop
+end
+
+noncomputable section
+namespace CycleQ2LiteralTopDeRhamTrace
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace
+open CycleQ2InjectiveCech (AbSheaf)
+open CycleQ2CechTwoToDerived (Three)
+open CycleQ2LiteralAmbientCharts (fixedOpen)
+open CycleQ2LiteralThreefoldFirstDifferential (X)
+open CycleQ2LiteralThreefoldSecondDifferential (secondDifferential)
+open CycleQ2LiteralDerivedTop (target connectingSection)
+
+local instance : HasDerivedCategory.{1} (AbSheaf (show TopCat from X)) := HasDerivedCategory.standard _
+
+theorem sectionClass_surjective : Function.Surjective sectionClass := by
+  intro x
+  obtain ⟨z,hz⟩ := QuotientAddGroup.mk_surjective (homologyCoordinates x)
+  refine ⟨z.val,homologyCoordinates.injective ?_⟩
+  change homologyCoordinates (homologyCoordinates.symm (QuotientAddGroup.mk (topCycle z.val))) = _
+  rw [AddEquiv.apply_symm_apply]
+  have he : topCycle z.val = z := Subtype.ext rfl
+  exact (congrArg QuotientAddGroup.mk he).trans hz
+
+theorem sectionClass_eq_zero_iff (s : Three F fixedOpen) : sectionClass s = 0 ↔
+    ∃ b : CycleQ2FourOpenDeRhamTotal.TotalFive fixedOpen
+      (CycleQ2LiteralIntrinsicExterior.Literal 2) F,
+      CycleQ2FourOpenDeRhamTotal.differentialFive fixedOpen secondDifferential b = s := by
+  have hzero : sectionClass s = 0 ↔
+      (QuotientAddGroup.mk (topCycle s) : topShort.g.hom.ker ⧸ topShort.abToCycles.range) = 0 := by
+    change homologyCoordinates.symm _ = 0 ↔ _
+    rw [← map_zero homologyCoordinates.symm]
+    exact homologyCoordinates.symm.injective.eq_iff
+  rw [hzero,QuotientAddGroup.eq_zero_iff]
+  change (∃ b,topShort.abToCycles b = topCycle s) ↔ _
+  refine exists_congr fun b => ?_
+  rw [Subtype.ext_iff]
+  change complex.d 5 6 b = s ↔ _
+  rw [CycleQ2FourOpenDeRhamTotal.complex_d] <;> rfl
+
+private def quotientDerived :
+    (topShort.g.hom.ker ⧸ topShort.abToCycles.range) →+
+      CycleQ2DerivedCoverTop.H target 6 ⊤ :=
+  QuotientAddGroup.lift topShort.abToCycles.range
+    (connectingSection.comp topShort.g.hom.ker.subtype) (by
+      rintro _ ⟨b,rfl⟩
+      change connectingSection (complex.d 5 6 b) = 0
+      rw [CycleQ2FourOpenDeRhamTotal.complex_d]
+      exact CycleQ2LiteralDerivedTop.connectingSection_differentialFive b)
+
+/-- The comparison is induced by the original three source
+Mayer--Vietoris boundaries, applied to the actual top-form class. -/
+def toDerived : complex.homology 6 →+ CycleQ2DerivedCoverTop.H target 6 ⊤ :=
+  quotientDerived.comp homologyCoordinates.toAddMonoidHom
+
+theorem toDerived_sectionClass (s : Three F fixedOpen) :
+    toDerived (sectionClass s) = connectingSection s := by
+  change quotientDerived
+    (homologyCoordinates (homologyCoordinates.symm (QuotientAddGroup.mk (topCycle s)))) = _
+  rw [AddEquiv.apply_symm_apply]
+  rfl
+
+theorem toDerived_bijective : Function.Bijective toDerived := by
+  constructor
+  · apply (injective_iff_map_eq_zero _).mpr
+    intro x hx
+    obtain ⟨s,rfl⟩ := sectionClass_surjective x
+    rw [toDerived_sectionClass] at hx
+    exact (sectionClass_eq_zero_iff s).mpr
+      ((CycleQ2LiteralDerivedTop.connectingSection_eq_zero_iff s).mp hx)
+  · intro y
+    obtain ⟨s,hs⟩ := CycleQ2LiteralDerivedTop.connectingSection_surjective y
+    exact ⟨sectionClass s,(toDerived_sectionClass s).trans hs⟩
+
+/-- The complete degree-six homology of the original finite total
+complex is actual global derived de Rham cohomology of the fixed fiber. -/
+def derivedEquiv : complex.homology 6 ≃+ CycleQ2DerivedCoverTop.H target 6 ⊤ :=
+  AddEquiv.ofBijective toDerived toDerived_bijective
+
+/-- The native Laurent trace on actual global derived de Rham degree six. -/
+def derivedTrace : CycleQ2DerivedCoverTop.H target 6 ⊤ →+ ℂ :=
+  trace.comp derivedEquiv.symm.toAddMonoidHom
+
+def derivedNormalizedClass (a : ℂ) : CycleQ2DerivedCoverTop.H target 6 ⊤ :=
+  derivedEquiv (normalizedClass a)
+
+/-- The original normalized generator is sent to its actual three
+Mayer--Vietoris image; no independent choice of a derived generator is made. -/
+theorem derivedNormalizedClass_eq_connecting (a : ℂ) :
+    derivedNormalizedClass a = connectingSection (generator a) :=
+  toDerived_sectionClass (generator a)
+
+theorem derivedTrace_normalizedClass (a : ℂ) :
+    derivedTrace (derivedNormalizedClass a) = a := by
+  change trace (derivedEquiv.symm (derivedEquiv (normalizedClass a))) = a
+  rw [AddEquiv.symm_apply_apply,trace_normalizedClass]
+
+theorem derivedTrace_connecting_generator (a : ℂ) :
+    derivedTrace (connectingSection (generator a)) = a := by
+  rw [← derivedNormalizedClass_eq_connecting,derivedTrace_normalizedClass]
+
+theorem derivedNormalizedClass_one_ne_zero : derivedNormalizedClass 1 ≠ 0 := by
+  intro h
+  have hh := congrArg derivedTrace h
+  rw [derivedTrace_normalizedClass,map_zero] at hh
+  exact one_ne_zero hh
+
+end CycleQ2LiteralTopDeRhamTrace
+end
+
+#print axioms CycleQ2LiteralDerivedTop.localTop_eq_zero_iff
+#print axioms CycleQ2LiteralDerivedTop.connectingSection_eq_zero_iff
+#print axioms CycleQ2LiteralTopDeRhamTrace.derivedEquiv
+#print axioms CycleQ2LiteralTopDeRhamTrace.derivedTrace_connecting_generator
+#print axioms CycleQ2LiteralTopDeRhamTrace.derivedNormalizedClass_one_ne_zero

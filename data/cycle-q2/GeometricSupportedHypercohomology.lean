@@ -172,7 +172,7 @@ variable {C : Type u} [Category.{v} C] [Abelian C] [HasExt.{w} C] [EnoughInjecti
 variable (P : C) (K : CochainComplex C ℤ) (b : ℤ) [K.IsStrictlyGE b]
 
 omit [HasExt.{w} C] [EnoughInjectives C] in
-private theorem bounded_quotient {L M : CochainComplex C ℤ} (f : L ⟶ M) (j : ℤ)
+theorem bounded_quotient {L M : CochainComplex C ℤ} (f : L ⟶ M) (j : ℤ)
     [M.IsStrictlyGE j] : (cokernel f).IsStrictlyGE j := by
   have H (i : ℤ) : Epi ((cokernel.π f).f i) := inferInstance
   apply ((cokernel f).isStrictlyGE_iff j).2
@@ -493,3 +493,174 @@ theorem vanishing (b : ℤ) [K.IsStrictlyGE b] (h₀ : ∀ j, Subsingleton (Ext 
   exact (Iso.homCongr (Iso.refl _) s).injective.subsingleton
 
 end CycleQ2SupportedSingleRow
+
+/-!
+## A surviving third Ext row
+
+For three normal equations the top principal-parts row is Ext³. Three
+bounded injective cosyzygies give its actual derived shift. The middle
+step is an ordinary one-degree homology boundary because Ext¹ of the
+first cosyzygy vanishes; it must not be replaced by a second two-degree
+shift.
+-/
+
+namespace CycleQ2SupportedCosyzygy
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Abelian HomologicalComplex
+open CycleQ2SupportedExtComplex
+
+universe w v u
+variable {C : Type u} [Category.{v} C] [Abelian C] [HasExt.{w} C]
+  (P : C) {S : ShortComplex (CochainComplex C ℤ)} (hS : S.ShortExact)
+
+/-- If the degree-one Ext row of the first term vanishes, represented
+degree-zero Ext gives an actual short exact sequence of complexes. -/
+def sectionsShortExact (h₁ : ∀ j, Subsingleton (Ext P (S.X₁.X j) 1)) :
+    (S.map (EFunctor P 0)).ShortExact := by
+  refine { exact := ?_, mono_f := ?_, epi_g := ?_ }
+  · apply exact_of_degreewise_exact
+    exact fun j => Ext.covariant_sequence_exact₂' P
+      (hS.map_of_exact (HomologicalComplex.eval C (ComplexShape.up ℤ) j)) 0
+  · apply HomologicalComplex.mono_of_mono_f
+    intro j
+    let h := hS.map_of_exact (HomologicalComplex.eval C (ComplexShape.up ℤ) j)
+    letI : Mono (S.f.f j) := h.mono_f
+    exact Ext.mono_postcomp_mk₀_of_mono P (S.f.f j)
+  · apply HomologicalComplex.epi_of_epi_f
+    intro j
+    apply (AddCommGrpCat.epi_iff_surjective _).mpr
+    intro z
+    exact Ext.covariant_sequence_exact₃ P
+      (hS.map_of_exact (HomologicalComplex.eval C (ComplexShape.up ℤ) j))
+      z rfl ((h₁ j).elim _ _)
+
+/-- The actual one-degree boundary across an acyclic middle section
+complex. The two degree indices are explicit to retain integer shifts. -/
+def oneShift (h₁ : ∀ j, Subsingleton (Ext P (S.X₁.X j) 1))
+    (hI : (E P 0 S.X₂).Acyclic) (n m : ℤ) (hnm : n + 1 = m) :
+    (E P 0 S.X₃).homology n ≅ (E P 0 S.X₁).homology m :=
+  (sectionsShortExact P hS h₁).δIso n m hnm
+    (hI n).isZero_homology (hI m).isZero_homology
+
+end CycleQ2SupportedCosyzygy
+
+namespace CycleQ2SupportedThreeResolutions
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Abelian HomologicalComplex
+open CycleQ2SupportedExtComplex CycleQ2SupportedCosyzygy
+open CycleQ2SupportedTwoResolutions (bounded_quotient)
+
+universe w v u
+variable {C : Type u} [Category.{v} C] [Abelian C] [HasExt.{w} C] [EnoughInjectives C]
+  (P : C) (K : CochainComplex C ℤ) (b : ℤ) [K.IsStrictlyGE b]
+
+/-- Three actual bounded injective resolutions identify the only
+surviving coefficient Ext row with derived sections in degree shifted
+by three. No degeneration hypothesis on a spectral sequence is used. -/
+theorem exists_resolution_with_shift
+    (h₀ : ∀ j, Subsingleton (Ext P (K.X j) 0))
+    (h₁ : ∀ j, Subsingleton (Ext P (K.X j) 1))
+    (h₂ : ∀ j, Subsingleton (Ext P (K.X j) 2))
+    (hhi : ∀ j n, Subsingleton (Ext P (K.X j) (n+4)))
+    (sections_acyclic : ∀ (M : CochainComplex C ℤ) (c : ℤ), M.IsStrictlyGE c → M.Acyclic →
+      (∀ i n, Subsingleton (Ext P (M.X i) (n+1))) → (E P 0 M).Acyclic) :
+    ∃ (I : CochainComplex C ℤ) (f : K ⟶ I), QuasiIso f ∧
+      (∀ i, Injective (I.X i)) ∧ I.IsStrictlyGE (b-1) ∧
+      ∀ n : ℤ, Nonempty ((E P 3 K).homology n ≅ (E P 0 I).homology (n+3)) := by
+  obtain ⟨I, f, hm, hq, hI, hBI⟩ :=
+    CochainComplex.Plus.modelCategoryQuillen.exists_mono_quasiIso_injective K (b-1) b
+  let S := ShortComplex.cokernelSequence f
+  have hS : S.ShortExact := {
+    exact := ShortComplex.cokernelSequence_exact f
+    mono_f := hm
+    epi_g := inferInstanceAs (Epi (cokernel.π f)) }
+  let R := S.X₃
+  have hR : R.Acyclic := hS.acyclic_X₃ hq
+  have hBR : R.IsStrictlyGE (b-1) := bounded_quotient f (b-1)
+  have hR₁ (j : ℤ) : Subsingleton (Ext P (R.X j) 1) := by
+    let e := (HomologicalComplex.eval _ _ j).mapIso (deltaIso P hS 0 hI)
+    letI := h₂ j
+    exact e.addCommGroupIsoToAddEquiv.injective.subsingleton
+  obtain ⟨J, g, gm, gq, hJ, hBJ⟩ :=
+    CochainComplex.Plus.modelCategoryQuillen.exists_mono_quasiIso_injective R (b-2) (b-1)
+  let T := ShortComplex.cokernelSequence g
+  have hT : T.ShortExact := {
+    exact := ShortComplex.cokernelSequence_exact g
+    mono_f := gm
+    epi_g := inferInstanceAs (Epi (cokernel.π g)) }
+  have hJac : J.Acyclic := fun j => (quasiIsoAt_iff_exactAt g j (hR j)).mp inferInstance
+  let B := T.X₃
+  have hB : B.Acyclic := hT.acyclic_X₃ gq
+  have hBB : B.IsStrictlyGE (b-2) := bounded_quotient g (b-2)
+  obtain ⟨L, a, am, aq, hL, hBL⟩ :=
+    CochainComplex.Plus.modelCategoryQuillen.exists_mono_quasiIso_injective B (b-3) (b-2)
+  let V := ShortComplex.cokernelSequence a
+  have hV : V.ShortExact := {
+    exact := ShortComplex.cokernelSequence_exact a
+    mono_f := am
+    epi_g := inferInstanceAs (Epi (cokernel.π a)) }
+  have hLac : L.Acyclic := fun j => (quasiIsoAt_iff_exactAt a j (hB j)).mp inferInstance
+  have hVac : V.X₃.Acyclic := hV.acyclic_X₃ aq
+  have hBV : V.X₃.IsStrictlyGE (b-3) := bounded_quotient a (b-3)
+  have hVE (j : ℤ) (n : ℕ) : Subsingleton (Ext P (V.X₃.X j) (n+1)) := by
+    let e := (deltaIso P hV n hL) ≪≫ (deltaIso P hT (n+1) hJ) ≪≫
+      (deltaIso P hS (n+2) hI)
+    let d := (HomologicalComplex.eval _ _ j).mapIso e
+    letI : Subsingleton (Ext P (K.X j) (n+4)) := hhi j n
+    exact d.addCommGroupIsoToAddEquiv.injective.subsingleton
+  have hEJ := sections_acyclic J (b-2) hBJ hJac (fun j n => by
+    letI := hJ j
+    exact Ext.subsingleton_of_injective P (J.X j) n)
+  have hEL := sections_acyclic L (b-3) hBL hLac (fun j n => by
+    letI := hL j
+    exact Ext.subsingleton_of_injective P (L.X j) n)
+  have hEV := sections_acyclic V.X₃ (b-3) hBV hVac hVE
+  refine ⟨I, f, hq, hI, hBI, fun n => ⟨?_⟩⟩
+  exact (homologyFunctor _ _ n).mapIso
+      ((deltaIso P hT 0 hJ) ≪≫ (deltaIso P hS 1 hI)).symm ≪≫
+    secondShift P hV hL hEL hEV n ≪≫
+    oneShift P hT hR₁ hEJ (n+2) (n+3) (by omega) ≪≫
+    (homologyFunctor _ _ (n+3)).mapIso (firstIso P hS h₀ h₁).symm
+
+end CycleQ2SupportedThreeResolutions
+
+namespace CycleQ2SupportedSingleRow
+
+open CategoryTheory CategoryTheory.Abelian CategoryTheory.Limits HomologicalComplex Opposite
+open CycleQ2SupportedExtComplex
+
+universe w v u
+variable {C : Type u} [Category.{v} C] [Abelian C] [HasExt.{w} C] [HasDerivedCategory.{w} C]
+  [EnoughInjectives C] (P : C) (K : CochainComplex C ℤ)
+
+/-- The actual derived degree shifted by three vanishes when the
+surviving third Ext row is exact at the displayed horizontal degree. -/
+theorem vanishing_three (b : ℤ) [K.IsStrictlyGE b]
+    (h₀ : ∀ j, Subsingleton (Ext P (K.X j) 0))
+    (h₁ : ∀ j, Subsingleton (Ext P (K.X j) 1))
+    (h₂ : ∀ j, Subsingleton (Ext P (K.X j) 2))
+    (hhi : ∀ j n, Subsingleton (Ext P (K.X j) (n+4)))
+    (n : ℤ) (hn : (E P 3 K).ExactAt n) :
+    Subsingleton ((DerivedCategory.singleFunctor C 0).obj P ⟶
+      (DerivedCategory.Q.obj K)⟦n+3⟧) := by
+  obtain ⟨I, f, hq, hI, hBI, c⟩ :=
+    CycleQ2SupportedThreeResolutions.exists_resolution_with_shift P K b h₀ h₁ h₂ hhi
+      (fun M k hM hAc ht j => by
+        letI := hM
+        exact (E0_exactAt_iff P M j).mpr
+          (CycleQ2AffineHypercohomologyComparison.map_bounded_acyclic P M k hAc ht j))
+  obtain ⟨e⟩ := c n
+  have hI0 : (E P 0 I).ExactAt (n+3) :=
+    (exactAt_iff_isZero_homology _ _).mpr (e.isZero_iff.mp hn.isZero_homology)
+  have : I.IsKInjective := CochainComplex.isKInjective_of_injective I (b-1)
+  have : Subsingleton ((DerivedCategory.singleFunctor C 0).obj P ⟶
+      (DerivedCategory.Q.obj I)⟦n+3⟧) :=
+    CycleQ2KInjectiveSections.derived_subsingleton P I (n+3) ((E0_exactAt_iff P I _).mp hI0)
+  let s := (shiftFunctor (DerivedCategory C) (n+3)).mapIso (asIso (DerivedCategory.Q.map f))
+  exact (Iso.homCongr (Iso.refl _) s).injective.subsingleton
+
+end CycleQ2SupportedSingleRow
+
+#print axioms CycleQ2SupportedCosyzygy.sectionsShortExact
+#print axioms CycleQ2SupportedThreeResolutions.exists_resolution_with_shift
+#print axioms CycleQ2SupportedSingleRow.vanishing_three

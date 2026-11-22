@@ -935,6 +935,7 @@ theorem row_one (t : Basis (Fin n) T Ω[T⁄k]) (v : Fin n → T) (ht : ∀ i, t
 end Local
 end CycleQ2NormalCechFormBoundary
 
+
 namespace CycleQ2NormalChartForms
 open Module KaehlerDifferential CycleQ2WeightedCoordinateExterior
 open CycleQ2ArbitraryFrameDifferential CycleQ2NormalCechFormBoundary
@@ -969,3 +970,1198 @@ theorem low_degrees (t : Basis (Fin n) T Ω[T⁄k]) (v : Fin n → T) (ht : ∀ 
   exact ⟨row_zero B u hu a c hac t, row_one B u hu a c hac t v ht⟩
 
 end CycleQ2NormalChartForms
+
+namespace CycleQ2SupportedWeyl
+
+variable {V : Type*} [AddCommGroup V] [Module ℚ V]
+
+/-- With three normal coordinates, the degree-two normal de Rham complex is
+exact, including every tangential coefficient. The proof first solves the
+degree-one problem modulo the image of the first derivative, then uses its
+injectivity to recover all the remaining coefficient identities. -/
+theorem ambient_two_form_exact {ι : Type*} (a b c : ι)
+    (X Y Z : Module.End ℚ V) (D : ι → Module.End ℚ V)
+    (hxx : ∀ m, D a (X m) = m + X (D a m))
+    (hyy : ∀ m, D b (Y m) = m + Y (D b m))
+    (hzz : ∀ m, D c (Z m) = m + Z (D c m))
+    (hyx : ∀ m, Y (D a m) = D a (Y m))
+    (hzx : ∀ m, Z (D a m) = D a (Z m))
+    (hzy : ∀ m, Z (D b m) = D b (Z m))
+    (hdd : ∀ i j m, D i (D j m) = D j (D i m))
+    (hnx : ∀ m, ∃ n : ℕ, (X ^ n) m = 0)
+    (hny : ∀ m, ∃ n : ℕ, (Y ^ n) m = 0)
+    (hnz : ∀ m, ∃ n : ℕ, (Z ^ n) m = 0)
+    (p : ι → ι → V)
+    (hc : ∀ i j, D a (p i j) = D i (p a j) - D j (p a i)) :
+    ∃ f : ι → V, ∀ i j, D i (f j) - D j (f i) = p i j := by
+  classical
+  let S := LinearMap.range (D a)
+  have stableD (i : ι) : ∀ m ∈ S, D i m ∈ S := by
+    rintro _ ⟨m,rfl⟩
+    exact ⟨D i m,(hdd i a m).symm⟩
+  have stableY : ∀ m ∈ S, Y m ∈ S := by
+    rintro _ ⟨m,rfl⟩
+    exact ⟨Y m,(hyx m).symm⟩
+  have stableZ : ∀ m ∈ S, Z m ∈ S := by
+    rintro _ ⟨m,rfl⟩
+    exact ⟨Z m,(hzx m).symm⟩
+  let E (i : ι) : Module.End ℚ (V ⧸ S) := S.mapQ S (D i) (stableD i)
+  let y : Module.End ℚ (V ⧸ S) := S.mapQ S Y stableY
+  let z : Module.End ℚ (V ⧸ S) := S.mapQ S Z stableZ
+  have yy (v : V ⧸ S) : E b (y v) = v + y (E b v) := by
+    obtain ⟨m,rfl⟩ := S.mkQ_surjective v
+    change S.mkQ (D b (Y m)) = S.mkQ m + S.mkQ (Y (D b m))
+    rw [hyy,map_add]
+  have zz (v : V ⧸ S) : E c (z v) = v + z (E c v) := by
+    obtain ⟨m,rfl⟩ := S.mkQ_surjective v
+    change S.mkQ (D c (Z m)) = S.mkQ m + S.mkQ (Z (D c m))
+    rw [hzz,map_add]
+  have zy (v : V ⧸ S) : z (E b v) = E b (z v) := by
+    obtain ⟨m,rfl⟩ := S.mkQ_surjective v
+    exact congrArg S.mkQ (hzy m)
+  have dd (i : ι) (v : V ⧸ S) : E i (E b v) = E b (E i v) := by
+    obtain ⟨m,rfl⟩ := S.mkQ_surjective v
+    exact congrArg S.mkQ (hdd i b m)
+  have powY (n : ℕ) (m : V) : (y ^ n) (S.mkQ m) = S.mkQ ((Y ^ n) m) := by
+    induction n with
+    | zero => rfl
+    | succ n ih =>
+      rw [pow_succ' y,pow_succ' Y,Module.End.mul_apply,Module.End.mul_apply,ih]
+      rfl
+  have powZ (n : ℕ) (m : V) : (z ^ n) (S.mkQ m) = S.mkQ ((Z ^ n) m) := by
+    induction n with
+    | zero => rfl
+    | succ n ih =>
+      rw [pow_succ' z,pow_succ' Z,Module.End.mul_apply,Module.End.mul_apply,ih]
+      rfl
+  have ny (v : V ⧸ S) : ∃ n : ℕ, (y ^ n) v = 0 := by
+    obtain ⟨m,rfl⟩ := S.mkQ_surjective v
+    obtain ⟨n,hn⟩ := hny m
+    exact ⟨n,by rw [powY,hn,map_zero]⟩
+  have nz (v : V ⧸ S) : ∃ n : ℕ, (z ^ n) v = 0 := by
+    obtain ⟨m,rfl⟩ := S.mkQ_surjective v
+    obtain ⟨n,hn⟩ := hnz m
+    exact ⟨n,by rw [powZ,hn,map_zero]⟩
+  let q (i : ι) : V ⧸ S := S.mkQ (p a i)
+  have closed (i : ι) : E i (q b) = E b (q i) := by
+    apply (Submodule.Quotient.eq S).mpr
+    change D i (p a b) - D b (p a i) ∈ S
+    have he : D i (p a b) - D b (p a i) = D a (-p b i) := by
+      rw [map_neg,hc]
+      abel
+    rw [he]
+    exact ⟨-p b i,rfl⟩
+  obtain ⟨v,hv⟩ := ambient_one_form_exact b c y z E yy zz zy dd ny nz q closed
+  obtain ⟨v,rfl⟩ := S.mkQ_surjective v
+  have lifts (i : ι) : ∃ f : V, D a f = p a i - D i v := by
+    have hi := S.neg_mem ((Submodule.Quotient.eq S).mp (hv i))
+    change -(D i v - p a i) ∈ S at hi
+    apply LinearMap.mem_range.mp
+    simpa only [neg_sub] using hi
+  choose f hf using lifts
+  refine ⟨f,fun i j => derivative_injective X (D a) hxx hnx ?_⟩
+  rw [map_sub,hdd a i,hdd a j,hf,hf,map_sub,map_sub,hc,hdd i j]
+  abel
+
+end CycleQ2SupportedWeyl
+
+namespace CycleQ2FinitePrincipalParts
+
+open CycleQ2GeometricLocalizedDerivations CycleQ2NormalCechDerivation
+
+variable {ι : Type} [Fintype ι] [DecidableEq ι]
+    {R T : Type} [CommRing R] [CommRing T] [Algebra R T]
+    (U : ι → Type) [∀ i, CommRing (U i)] [∀ i, Algebra R (U i)] (x : ι → R)
+
+def denominator : R := ∏ i, x i
+
+def faceDenominator (i : ι) : R := ∏ j ∈ Finset.univ.erase i, x j
+
+theorem mul_faceDenominator (i : ι) : x i * faceDenominator x i = denominator x :=
+  Finset.mul_prod_erase Finset.univ x (Finset.mem_univ i)
+
+variable [∀ i, IsLocalization.Away (faceDenominator x i) (U i)]
+    [IsLocalization.Away (denominator x) T]
+
+/-- The actual restriction from the face omitting one normal coordinate
+to the full intersection of the principal opens. -/
+def faceToTop (i : ι) : U i →ₐ[R] T :=
+  IsLocalization.Away.liftAlgHom (faceDenominator x i) (f := Algebra.ofId R T)
+    (IsLocalization.Away.isUnit_of_dvd (denominator x)
+      ⟨x i,by rw [← mul_faceDenominator x i]; exact mul_comm _ _⟩)
+
+/-- The top Čech boundary submodule: sums of the actual restrictions from
+the faces omitting one coordinate. For three equations these are the three
+double principal opens, not the three single principal opens. -/
+def boundaries : Submodule R T :=
+  Submodule.span R {z | ∃ i, ∃ a : U i, faceToTop U x i a = z}
+
+theorem face_mem (i : ι) (a : U i) : faceToTop U x i a ∈ boundaries U x :=
+  Submodule.subset_span ⟨i,a,rfl⟩
+
+def sumFaces : (∀ i, U i) →ₗ[R] T where
+  toFun a := ∑ i, faceToTop U x i (a i)
+  map_add' a b := by simp only [Pi.add_apply,map_add,Finset.sum_add_distrib]
+  map_smul' r a := by simp only [Pi.smul_apply,map_smul,Finset.smul_sum]
+
+/-- The span description retains actual representatives on each omitted
+face; no infinite family of denominators is introduced by taking the span. -/
+theorem boundaries_eq_range : boundaries U x = LinearMap.range (sumFaces U x) := by
+  apply le_antisymm
+  · apply Submodule.span_le.mpr
+    rintro _ ⟨i,a,rfl⟩
+    refine ⟨Pi.single i a,?_⟩
+    change (∑ j, faceToTop U x j (Pi.single i a j)) = faceToTop U x i a
+    rw [Finset.sum_eq_single i]
+    · simp only [Pi.single_eq_same]
+    · intro j _ hji
+      rw [Pi.single_eq_of_ne hji,map_zero]
+    · intro hi
+      exact (hi (Finset.mem_univ i)).elim
+  · rintro a ⟨v,rfl⟩
+    exact Submodule.sum_mem _ (fun i _ => face_mem U x i (v i))
+
+theorem mem_boundaries_iff (a : T) :
+    a ∈ boundaries U x ↔ ∃ v : ∀ i, U i, (∑ i, faceToTop U x i (v i)) = a := by
+  rw [boundaries_eq_range]
+  rfl
+
+abbrev Parts := T ⧸ boundaries U x
+
+/-- Every normal coordinate acts locally nilpotently on the actual top
+Čech quotient, by clearing the denominator into its omitted face. -/
+theorem powers_kill (i : ι) (v : Parts U x) : ∃ n : ℕ, x i ^ n • v = 0 := by
+  obtain ⟨a,rfl⟩ := (boundaries U x).mkQ_surjective v
+  obtain ⟨n,c,hc⟩ := IsLocalization.Away.surj (denominator x) a
+  have hfactor : algebraMap R T (denominator x) =
+      algebraMap R T (x i) * algebraMap R T (faceDenominator x i) := by
+    rw [← mul_faceDenominator x i,map_mul]
+  rw [hfactor] at hc
+  have hclear := CycleQ2CechDenominatorTorsion.clears_other
+    (faceToTop U x i) a n c hc
+  obtain ⟨b,hb⟩ := hclear
+  refine ⟨n,?_⟩
+  rw [← LinearMap.map_smul,Submodule.mkQ_apply,Submodule.Quotient.mk_eq_zero]
+  exact hb ▸ face_mem U x i b
+
+section Derivatives
+
+variable [Algebra ℂ R] [Algebra ℂ T] [IsScalarTower ℂ R T]
+    [∀ i, Algebra ℂ (U i)] [∀ i, IsScalarTower ℂ R (U i)]
+
+private theorem preserves (d : Derivation ℂ R R) {a : T}
+    (ha : a ∈ boundaries U x) :
+    localizedDerivation (.powers (denominator x)) T d a ∈ boundaries U x := by
+  induction ha using Submodule.span_induction with
+  | mem a ha =>
+      obtain ⟨i,b,rfl⟩ := ha
+      rw [localization_natural (.powers (faceDenominator x i))
+        (.powers (denominator x)) (faceToTop U x i)]
+      exact face_mem U x i _
+  | zero => rw [map_zero]; exact Submodule.zero_mem _
+  | add a b _ _ ha hb => rw [map_add]; exact Submodule.add_mem _ ha hb
+  | smul r a ha hd =>
+      change localizedDerivation (.powers (denominator x)) T d
+        (algebraMap R T r * a) ∈ boundaries U x
+      rw [Derivation.leibniz,localizedDerivation_algebraMap]
+      change r • localizedDerivation (.powers (denominator x)) T d a + d r • a ∈ boundaries U x
+      exact Submodule.add_mem _ (Submodule.smul_mem _ r hd) (Submodule.smul_mem _ (d r) ha)
+
+/-- Coordinate differentiation on the literal top Čech quotient. -/
+def onParts (d : Derivation ℂ R R) : Module.End ℂ (Parts U x) :=
+  let S := (boundaries U x).restrictScalars ℂ
+  S.mapQ S (localizedDerivation (.powers (denominator x)) T d).toLinearMap
+    (by intro a ha; exact preserves U x d ha)
+
+@[simp] theorem onParts_mk (d : Derivation ℂ R R) (a : T) :
+    onParts U x d (Submodule.Quotient.mk a) =
+      Submodule.Quotient.mk (localizedDerivation (.powers (denominator x)) T d a) := rfl
+
+theorem onParts_smul (d : Derivation ℂ R R) (r : R) (v : Parts U x) :
+    onParts U x d (r • v) = r • onParts U x d v + d r • v := by
+  obtain ⟨a,rfl⟩ := (boundaries U x).mkQ_surjective v
+  change Submodule.Quotient.mk (localizedDerivation (.powers (denominator x)) T d (r • a)) =
+    (Submodule.Quotient.mk (r • localizedDerivation (.powers (denominator x)) T d a + d r • a) : Parts U x)
+  congr 1
+  simp [Algebra.smul_def,Derivation.leibniz,localizedDerivation_algebraMap,mul_comm,add_comm]
+
+theorem onParts_commute (d e : Derivation ℂ R R) (h : ∀ r, d (e r) = e (d r))
+    (v : Parts U x) : onParts U x d (onParts U x e v) = onParts U x e (onParts U x d v) := by
+  obtain ⟨a,rfl⟩ := (boundaries U x).mkQ_surjective v
+  exact congrArg Submodule.Quotient.mk
+    (localizations_commute (.powers (denominator x)) T d e h a)
+
+local instance ratModule : Module ℚ (Parts U x) :=
+  Module.compHom (Parts U x) (algebraMap ℚ ℂ)
+
+local instance ratTower : IsScalarTower ℚ ℂ (Parts U x) :=
+  IsScalarTower.of_compHom ℚ ℂ (Parts U x)
+
+private def derivativeOperator (d : Derivation ℂ R R) : Module.End ℚ (Parts U x) :=
+  (onParts U x d).restrictScalars ℚ
+
+private def coordinateOperator (r : R) : Module.End ℚ (Parts U x) :=
+  ((LinearMap.lsmul R (Parts U x) r).restrictScalars ℂ).restrictScalars ℚ
+
+private theorem coordinateOperator_pow (r : R) (v : Parts U x) (n : ℕ) :
+    (coordinateOperator U x r ^ n) v = r ^ n • v := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+      rw [pow_succ',Module.End.mul_apply,ih,pow_succ' r]
+      exact (mul_smul r (r ^ n) v).symm
+
+private theorem coordinateOperator_nilpotent (i : ι) (v : Parts U x) :
+    ∃ n : ℕ, (coordinateOperator U x (x i) ^ n) v = 0 := by
+  obtain ⟨n,hn⟩ := powers_kill U x i v
+  exact ⟨n,(coordinateOperator_pow U x (x i) v n).trans hn⟩
+
+private theorem operator_Weyl (d : Derivation ℂ R R) (r : R) (hr : d r = 1)
+    (v : Parts U x) :
+    derivativeOperator U x d (coordinateOperator U x r v) =
+      v + coordinateOperator U x r (derivativeOperator U x d v) := by
+  change onParts U x d (r • v) = v + r • onParts U x d v
+  rw [onParts_smul,hr,one_smul,add_comm]
+
+private theorem operator_cross (d : Derivation ℂ R R) (r : R) (hr : d r = 0)
+    (v : Parts U x) :
+    coordinateOperator U x r (derivativeOperator U x d v) =
+      derivativeOperator U x d (coordinateOperator U x r v) := by
+  change r • onParts U x d v = onParts U x d (r • v)
+  rw [onParts_smul,hr,zero_smul,add_zero]
+
+/-- A normal coordinate derivative is injective on this actual top Čech
+quotient. In particular a horizontal degree-zero representative is zero. -/
+theorem derivative_injective (a : ι) (d : Derivation ℂ R R) (hd : d (x a) = 1) :
+    Function.Injective (onParts U x d) :=
+  CycleQ2SupportedWeyl.derivative_injective (coordinateOperator U x (x a))
+    (derivativeOperator U x d) (operator_Weyl U x d (x a) hd)
+    (coordinateOperator_nilpotent U x a)
+
+/-- Exactness of all one-form coefficients on the top Čech row. The two
+specified normal derivatives are genuine derivations of the unlocalized
+chart, and every other coefficient is recovered from closedness. -/
+theorem closed_one_exact {η : Type} (a b : ι) (i j : η)
+    (D : η → Derivation ℂ R R)
+    (hxx : D i (x a) = 1) (hyy : D j (x b) = 1) (hxy : D i (x b) = 0)
+    (hcomm : ∀ q r, D q (D i r) = D i (D q r))
+    (p : η → Parts U x)
+    (hp : ∀ q, onParts U x (D q) (p i) = onParts U x (D i) (p q)) :
+    ∃ f : Parts U x, ∀ q, onParts U x (D q) f = p q :=
+  CycleQ2SupportedWeyl.ambient_one_form_exact i j
+    (coordinateOperator U x (x a)) (coordinateOperator U x (x b))
+    (fun q => derivativeOperator U x (D q))
+    (operator_Weyl U x (D i) (x a) hxx)
+    (operator_Weyl U x (D j) (x b) hyy)
+    (operator_cross U x (D i) (x b) hxy)
+    (fun q v => onParts_commute U x (D q) (D i) (hcomm q) v)
+    (coordinateOperator_nilpotent U x a) (coordinateOperator_nilpotent U x b) p hp
+
+/-- Exactness in degree two on the actual triple (or higher) principal-open
+Čech quotient. Only three normal coordinates are needed; the result includes
+all tangential pairs as well. Its closedness equation has the ordinary
+exterior-differential signs, ∂ᵢpᵤᵥ − ∂ᵤpᵢᵥ + ∂ᵥpᵢᵤ = 0. -/
+theorem closed_two_exact {η : Type} (a b c : ι) (i j l : η)
+    (D : η → Derivation ℂ R R)
+    (hxx : D i (x a) = 1) (hyy : D j (x b) = 1) (hzz : D l (x c) = 1)
+    (hyx : D i (x b) = 0) (hzx : D i (x c) = 0) (hzy : D j (x c) = 0)
+    (hcomm : ∀ u v r, D u (D v r) = D v (D u r))
+    (p : η → η → Parts U x)
+    (hp : ∀ u v, onParts U x (D i) (p u v) =
+      onParts U x (D u) (p i v) - onParts U x (D v) (p i u)) :
+    ∃ f : η → Parts U x, ∀ u v,
+      onParts U x (D u) (f v) - onParts U x (D v) (f u) = p u v :=
+  CycleQ2SupportedWeyl.ambient_two_form_exact i j l
+    (coordinateOperator U x (x a)) (coordinateOperator U x (x b))
+    (coordinateOperator U x (x c)) (fun q => derivativeOperator U x (D q))
+    (operator_Weyl U x (D i) (x a) hxx) (operator_Weyl U x (D j) (x b) hyy)
+    (operator_Weyl U x (D l) (x c) hzz)
+    (operator_cross U x (D i) (x b) hyx) (operator_cross U x (D i) (x c) hzx)
+    (operator_cross U x (D j) (x c) hzy)
+    (fun u v z => onParts_commute U x (D u) (D v) (hcomm u v) z)
+    (coordinateOperator_nilpotent U x a) (coordinateOperator_nilpotent U x b)
+    (coordinateOperator_nilpotent U x c) p hp
+
+end Derivatives
+end CycleQ2FinitePrincipalParts
+
+namespace CycleQ2FrameCurl
+
+open Module KaehlerDifferential CycleQ2ArbitraryFrameDifferential
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+open CycleQ2CartanContraction CycleQ2ExactFrameFirstDifferential
+
+variable {k A : Type} [Field k] [CommRing A] [Algebra k A]
+    {n : ℕ} (b : Basis (Fin n) A Ω[A⁄k])
+
+/-- An ordered triple coefficient, using the same contraction order as
+the ordered pair coefficient above. -/
+def triple (i j l : Fin n) : Form k A 3 →ₗ[A] A :=
+  (pair b j l).comp (three (spatialDerivative b i))
+
+theorem triple_wedge (i j l : Fin n) (α β γ : Ω[A⁄k]) :
+    triple b i j l (exteriorPower.ιMulti A 3 ![α,β,γ]) =
+      b.coord i α * (b.coord j β * b.coord l γ - b.coord j γ * b.coord l β) -
+      b.coord i β * (b.coord j α * b.coord l γ - b.coord j γ * b.coord l α) +
+      b.coord i γ * (b.coord j α * b.coord l β - b.coord j β * b.coord l α) := by
+  simp only [triple,LinearMap.comp_apply,three_wedge,map_add,map_sub,map_smul,
+    smul_eq_mul,pair_wedge,contractions]
+
+theorem triple_front (i j l : Fin n) (α : Ω[A⁄k]) (ω : Form k A 2) :
+    triple b i j l (front 2 α ω) =
+      b.coord i α * pair b j l ω - b.coord j α * pair b i l ω +
+        b.coord l α * pair b i j ω := by
+  have hω : ω ∈ Submodule.span A (Set.range (exteriorPower.ιMulti A 2)) := by
+    rw [exteriorPower.ιMulti_span]
+    trivial
+  induction hω using Submodule.span_induction with
+  | mem ω hω =>
+      obtain ⟨v,rfl⟩ := hω
+      have hv : v = ![v 0,v 1] := by funext i; fin_cases i <;> rfl
+      rw [hv,front_wedge]
+      change triple b i j l (exteriorPower.ιMulti A 3 ![α,v 0,v 1]) = _
+      rw [triple_wedge]
+      change _ = b.coord i α * pair b j l (wedge (v 0) (v 1)) -
+        b.coord j α * pair b i l (wedge (v 0) (v 1)) +
+        b.coord l α * pair b i j (wedge (v 0) (v 1))
+      simp only [pair_wedge]
+      ring
+  | zero => simp only [map_zero,mul_zero,sub_zero,add_zero]
+  | add ω ν _ _ hω hν => simp only [map_add,hω,hν]; ring
+  | smul r ω _ hω => simp only [map_smul,smul_eq_mul,hω]; ring
+
+/-- The sorted exterior coordinate is precisely the corresponding ordered
+pair coefficient. This fixes the coefficient normalization without a factor
+of two or a choice of a different exterior basis. -/
+theorem exterior_coord_pair (s : Set.powersetCard (Fin n) 2) :
+    (b.exteriorPower 2).coord s =
+      pair b (Set.powersetCard.ofFinEmbEquiv.symm s 0)
+        (Set.powersetCard.ofFinEmbEquiv.symm s 1) := by
+  apply exteriorPower.linearMap_ext
+  apply AlternatingMap.ext
+  intro v
+  change (b.exteriorPower 2).coord s (exteriorPower.ιMulti A 2 v) = _
+  rw [exteriorPower.basis_coord,exteriorPower.ιMultiDual_apply_ιMulti,Matrix.det_fin_two]
+  have hv : v = ![v 0,v 1] := by funext i; fin_cases i <;> rfl
+  conv_rhs => rw [hv]
+  change _ = pair b _ _ (wedge (v 0) (v 1))
+  rw [pair_wedge]
+  simp only [Matrix.of_apply]
+  ring
+
+private theorem pair_basis_derivative (δ : Derivation k A A)
+    (i j : Fin n) (s : Set.powersetCard (Fin n) 2) :
+    δ (pair b i j (b.exteriorPower 2 s)) = 0 := by
+  rw [exteriorPower.basis_apply,exteriorPower.ιMulti_family]
+  let v := Set.powersetCard.ofFinEmbEquiv.symm s
+  have hv : b ∘ v = ![b (v 0),b (v 1)] := by funext i; fin_cases i <;> rfl
+  rw [hv]
+  change δ (pair b i j (wedge (b (v 0)) (b (v 1)))) = 0
+  simp [pair_wedge,Basis.coord_apply,Basis.repr_self,Finsupp.single_apply,
+    mul_ite,ite_mul,apply_ite]
+
+/-- The three-component curl of a two-form is the ordered triple
+coefficient of its genuine exterior differential. -/
+theorem triple_d_two (i j l : Fin n) (ω : Form k A 2) :
+    triple b i j l (d b 2 ω) =
+      spatialDerivative b i (pair b j l ω) -
+      spatialDerivative b j (pair b i l ω) +
+      spatialDerivative b l (pair b i j ω) := by
+  classical
+  have basisCase (s : Set.powersetCard (Fin n) 2) (a : A) :
+      triple b i j l (d b 2 (a • b.exteriorPower 2 s)) =
+        spatialDerivative b i (pair b j l (a • b.exteriorPower 2 s)) -
+        spatialDerivative b j (pair b i l (a • b.exteriorPower 2 s)) +
+        spatialDerivative b l (pair b i j (a • b.exteriorPower 2 s)) := by
+    rw [d_smul_basis,triple_front]
+    simp only [map_smul,smul_eq_mul,Derivation.leibniz,
+      pair_basis_derivative,mul_zero,zero_add,partial_apply]
+    ring
+  nth_rw 1 [← (b.exteriorPower 2).sum_repr ω]
+  rw [map_sum,map_sum]
+  simp_rw [basisCase]
+  simp only [Finset.sum_add_distrib,Finset.sum_sub_distrib,← map_sum,
+    (b.exteriorPower 2).sum_repr]
+
+end CycleQ2FrameCurl
+
+namespace CycleQ2NormalCechFormBoundary
+
+open Module KaehlerDifferential CycleQ2FrameCurl
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+
+variable {k A B : Type} [Field k] [CommRing A] [CommRing B] [Algebra k A] [Algebra k B]
+    {n : ℕ} (b : Basis (Fin n) A Ω[A⁄k]) (t : Basis (Fin n) B Ω[B⁄k]) (φ : A →ₐ[k] B)
+    (hb : ∀ i, onePullback φ (b i) = t i)
+
+/-- Ordered triple coefficients commute with the original Kähler
+pullback whenever the exact frames do. -/
+include hb in
+theorem triple_pull (i j l : Fin n) (ω : Form k A 3) :
+    triple t i j l (exteriorPullback φ 3 ω) = φ (triple b i j l ω) := by
+  have hω : ω ∈ Submodule.span A (Set.range (exteriorPower.ιMulti A 3)) := by
+    rw [exteriorPower.ιMulti_span]
+    trivial
+  induction hω using Submodule.span_induction with
+  | mem ω hω =>
+      obtain ⟨v,rfl⟩ := hω
+      have hv : v = ![v 0,v 1,v 2] := by funext i; fin_cases i <;> rfl
+      rw [hv,exteriorPullback,CycleQ2GeometricExteriorSheaf.exteriorMap_wedge]
+      change triple t i j l (exteriorPower.ιMulti B 3
+        ![onePullback φ (v 0),onePullback φ (v 1),onePullback φ (v 2)]) = _
+      simp only [triple_wedge,coord_pull b t φ hb,map_add,map_sub,map_mul]
+  | zero => simp only [map_zero]
+  | add ω ν _ _ hω hν => simp only [map_add,hω,hν]
+  | smul r ω _ hω => simp only [map_smulₛₗ,map_smul,smul_eq_mul,map_mul,hω]
+
+end CycleQ2NormalCechFormBoundary
+
+namespace CycleQ2FinitePrincipalFormBoundary
+
+open Module KaehlerDifferential CycleQ2WeightedCoordinateExterior
+open CycleQ2ExactFrameThreeDeRham CycleQ2FrameCurl
+open CycleQ2FinitePrincipalParts CycleQ2NormalCechFormBoundary
+open CycleQ2AffineZeroOneForms (scalar one pull_scalar pull_one)
+
+variable {ι : Type} [Fintype ι] [DecidableEq ι]
+    {k R T : Type} [Field k] [CommRing R] [CommRing T]
+    [Algebra k R] [Algebra k T] [Algebra R T] [IsScalarTower k R T]
+    (U : ι → Type) [∀ i, CommRing (U i)] [∀ i, Algebra R (U i)]
+    [∀ i, Algebra k (U i)] [∀ i, IsScalarTower k R (U i)] (x : ι → R)
+    [∀ i, IsLocalization.Away (faceDenominator x i) (U i)]
+    [IsLocalization.Away (denominator x) T]
+
+abbrev restriction (i : ι) : U i →ₐ[k] T := (faceToTop U x i).restrictScalars k
+
+/-- The unsigned top Čech image on the actual exterior forms. Alternating
+Čech signs give the same subgroup by negating the corresponding face. -/
+def IsBoundary (q : ℕ) (ω : Form k T q) : Prop :=
+  ∃ α : ∀ i, Form k (U i) q, ω = ∑ i, exteriorPullback (restriction U x i) q (α i)
+
+variable {n : ℕ} (b : Basis (Fin n) T Ω[T⁄k])
+    (c : ∀ i, Basis (Fin n) (U i) Ω[U i⁄k])
+    (hc : ∀ i j, onePullback (restriction U x i) (c i j) = b j)
+
+/-- The literal face-image condition is equivalent to its scalar coordinate
+conditions in the transported exterior bases. Both implications retain
+actual forms on the omitted-coordinate faces. -/
+include hc in
+theorem iff_coordinates (q : ℕ) (ω : Form k T q) :
+    IsBoundary U x q ω ↔
+      ∀ s, (b.exteriorPower q).equivFun ω s ∈ boundaries U x := by
+  classical
+  constructor
+  · rintro ⟨α,rfl⟩ s
+    rw [map_sum,Finset.sum_apply]
+    apply Submodule.sum_mem
+    intro i _
+    rw [CycleQ2NormalExteriorCech.pull_coordinates (c i) b (restriction U x i) (hc i)]
+    exact face_mem U x i _
+  · intro h
+    choose a ha using fun s => (mem_boundaries_iff U x _).mp (h s)
+    refine ⟨fun i => ((c i).exteriorPower q).equivFun.symm (fun s => a s i),?_⟩
+    apply (b.exteriorPower q).equivFun.injective
+    funext s
+    rw [map_sum,Finset.sum_apply]
+    simp_rw [CycleQ2NormalExteriorCech.pull_coordinates (c _) b (restriction U x _) (hc _)]
+    simp only [LinearEquiv.apply_symm_apply]
+    exact (ha s).symm
+
+include hc in
+theorem pair_mem (i j : Fin n) (ω : Form k T 2) (hω : IsBoundary U x 2 ω) :
+    pair b i j ω ∈ boundaries U x := by
+  obtain ⟨α,rfl⟩ := hω
+  rw [map_sum]
+  apply Submodule.sum_mem
+  intro a _
+  rw [pair_pull (c a) b (restriction U x a) (hc a)]
+  exact face_mem U x a _
+
+include hc in
+theorem triple_mem (i j l : Fin n) (ω : Form k T 3) (hω : IsBoundary U x 3 ω) :
+    triple b i j l ω ∈ boundaries U x := by
+  obtain ⟨α,rfl⟩ := hω
+  rw [map_sum]
+  apply Submodule.sum_mem
+  intro a _
+  rw [triple_pull (c a) b (restriction U x a) (hc a)]
+  exact face_mem U x a _
+
+include hc in
+theorem of_pair_mem (ω : Form k T 2)
+    (hω : ∀ i j, pair b i j ω ∈ boundaries U x) : IsBoundary U x 2 ω := by
+  apply (iff_coordinates U x b c hc 2 ω).mpr
+  intro s
+  change (b.exteriorPower 2).coord s ω ∈ boundaries U x
+  rw [exterior_coord_pair]
+  exact hω _ _
+
+/-- The degree-zero exterior equivalence identifies this boundary image
+with the original top scalar Čech image. -/
+theorem scalar_iff (a : T) : IsBoundary U x 0 (scalar a) ↔ a ∈ boundaries U x := by
+  constructor
+  · rintro ⟨α,hα⟩
+    choose v hv using fun i => (scalar (k := k) (A := U i)).surjective (α i)
+    have he : a = ∑ i, faceToTop U x i (v i) := by
+      apply (scalar (k := k) (A := T)).injective
+      rw [hα,map_sum]
+      apply Finset.sum_congr rfl
+      intro i _
+      rw [← hv i,pull_scalar]
+      rfl
+    rw [he]
+    exact Submodule.sum_mem _ (fun i _ => face_mem U x i (v i))
+  · intro ha
+    obtain ⟨v,hv⟩ := (mem_boundaries_iff U x a).mp ha
+    refine ⟨fun i => scalar (v i),?_⟩
+    simp_rw [pull_scalar]
+    rw [← map_sum]
+    exact congrArg (scalar (k := k) (A := T)) hv.symm
+
+/-- Degree-one boundaries retain the actual Kähler coefficients and the
+original face pullbacks. -/
+include hc in
+theorem one_iff (ω : Ω[T⁄k]) :
+    IsBoundary U x 1 (one ω) ↔ ∀ j, b.coord j ω ∈ boundaries U x := by
+  classical
+  constructor
+  · rintro ⟨α,hα⟩ j
+    choose β hβ using fun i => (one (k := k) (A := U i)).surjective (α i)
+    have he : ω = ∑ i, onePullback (restriction U x i) (β i) := by
+      apply (one (k := k) (A := T)).injective
+      rw [hα,map_sum]
+      apply Finset.sum_congr rfl
+      intro i _
+      rw [← hβ i,pull_one]
+    rw [he,map_sum]
+    apply Submodule.sum_mem
+    intro i _
+    rw [coord_pull (c i) b (restriction U x i) (hc i)]
+    exact face_mem U x i _
+  · intro hω
+    choose a ha using fun j => (mem_boundaries_iff U x _).mp (hω j)
+    let β (i : ι) : Ω[U i⁄k] := (c i).equivFun.symm (fun j => a j i)
+    have he : ω = ∑ i, onePullback (restriction U x i) (β i) := by
+      apply b.equivFun.injective
+      funext j
+      change b.coord j ω = b.coord j _
+      rw [map_sum]
+      simp_rw [coord_pull (c _) b (restriction U x _) (hc _)]
+      simp only [β,Basis.coord_equivFun_symm]
+      exact (ha j).symm
+    refine ⟨fun i => one (β i),?_⟩
+    simp_rw [pull_one]
+    rw [← map_sum,← he]
+
+end CycleQ2FinitePrincipalFormBoundary
+
+namespace CycleQ2FiniteNormalChartForms
+
+open Module KaehlerDifferential CycleQ2WeightedCoordinateExterior
+open CycleQ2ExactFrameThreeDeRham CycleQ2FrameCurl
+open CycleQ2ExactFrameFirstDifferential CycleQ2ArbitraryFrameDifferential
+open CycleQ2NormalCechKahler CycleQ2NormalCechFormBoundary
+open CycleQ2FinitePrincipalParts CycleQ2FinitePrincipalFormBoundary
+open CycleQ2GeometricLocalizedDerivations
+open CycleQ2AffineZeroOneForms (scalar one d_scalar)
+
+variable {ι : Type} [Fintype ι] [DecidableEq ι]
+    {k R T : Type} [Field k] [CharZero k] [Algebra ℂ k]
+    [CommRing R] [CommRing T] [Algebra R T]
+    [Algebra k R] [Algebra k T] [IsScalarTower k R T]
+    [Algebra ℂ R] [Algebra ℂ T] [IsScalarTower ℂ k R] [IsScalarTower ℂ k T]
+    [IsScalarTower ℂ R T]
+    (U : ι → Type) [∀ i, CommRing (U i)] [∀ i, Algebra R (U i)]
+    [∀ i, Algebra k (U i)] [∀ i, IsScalarTower k R (U i)]
+    [∀ i, Algebra ℂ (U i)] [∀ i, IsScalarTower ℂ R (U i)]
+    {n : ℕ} (b : Basis (Fin n) R Ω[R⁄k]) (u : Fin n → R)
+    (hu : ∀ i, b i = D k R (u i)) (normal : ι → Fin n)
+
+abbrev equations : ι → R := u ∘ normal
+
+variable [∀ i, IsLocalization.Away (faceDenominator (equations u normal) i) (U i)]
+    [IsLocalization.Away (denominator (equations u normal)) T]
+
+abbrev topFrame : Basis (Fin n) T Ω[T⁄k] :=
+  localFrame (T := T) b (.powers (denominator (equations u normal)))
+
+abbrev faceFrame (i : ι) : Basis (Fin n) (U i) Ω[U i⁄k] :=
+  localFrame (T := U i) b (.powers (faceDenominator (equations u normal) i))
+
+include hu in
+theorem frame_restrict (i : ι) (j : Fin n) :
+    onePullback (restriction U (equations u normal) i) (faceFrame U b u normal i j) =
+      topFrame (T := T) b u normal j := by
+  rw [frame_exact b u hu _ j,onePullback_d,frame_exact b u hu _ j]
+  exact congrArg (D k T) ((faceToTop U (equations u normal) i).commutes (u j))
+
+private abbrev δ (i : Fin n) := (spatialDerivative b i).restrictScalars ℂ
+
+private theorem derivative_extends (i : Fin n) (a : T) :
+    localizedDerivation (.powers (denominator (equations u normal))) T (δ b i) a =
+      spatialDerivative (topFrame (T := T) b u normal) i a :=
+  DFunLike.congr_fun (direction_extends (T := T) b
+    (.powers (denominator (equations u normal))) i).symm a
+
+include hu in
+private theorem normal_value (i : Fin n) (j : ι) :
+    δ b i (equations u normal j) = if normal j = i then 1 else 0 :=
+  partial_coordinate b u hu i (normal j)
+
+/-- The actual degree-zero top Čech row has no closed supported function. -/
+include hu in
+theorem row_zero (s : ι) (ω : Form k T 0)
+    (hω : IsBoundary U (equations u normal) 1
+      (d (topFrame (T := T) b u normal) 0 ω)) :
+    IsBoundary U (equations u normal) 0 ω := by
+  let x := equations u normal
+  let B := topFrame (T := T) b u normal
+  let C := faceFrame U b u normal
+  have hC := frame_restrict (T := T) U b u hu normal
+  obtain ⟨f,rfl⟩ := (scalar (k := k) (A := T)).surjective ω
+  rw [d_scalar] at hω
+  have hf := ((one_iff U x B C hC (D k T f)).mp hω) (normal s)
+  apply (scalar_iff U x f).mpr
+  apply (Submodule.Quotient.mk_eq_zero (boundaries U x)).mp
+  apply derivative_injective U x s (δ b (normal s))
+    (by simp [x,normal_value b u hu normal])
+  rw [map_zero,onParts_mk,Submodule.Quotient.mk_eq_zero]
+  rw [derivative_extends]
+  exact hf
+
+/-- Closed ordinary one-forms on the full intersection have actual
+function primitives modulo the sum of the omitted-face restrictions. -/
+include hu in
+theorem row_one (s t : ι) (hst : normal s ≠ normal t) (ω : Form k T 1)
+    (hω : IsBoundary U (equations u normal) 2
+      (d (topFrame (T := T) b u normal) 1 ω)) :
+    ∃ f : Form k T 0, IsBoundary U (equations u normal) 1
+      (ω - d (topFrame (T := T) b u normal) 0 f) := by
+  let x := equations u normal
+  let B := topFrame (T := T) b u normal
+  let C := faceFrame U b u normal
+  let S := boundaries (T := T) U x
+  have hC := frame_restrict (T := T) U b u hu normal
+  obtain ⟨ω,rfl⟩ := (one (k := k) (A := T)).surjective ω
+  let p (i : Fin n) : Parts (T := T) U x := Submodule.Quotient.mk (B.coord i ω)
+  have hp (i : Fin n) : onParts U x (δ b i) (p (normal s)) =
+      onParts U x (δ b (normal s)) (p i) := by
+    have hh := pair_mem U x B C hC i (normal s) _ hω
+    rw [first_eq,pair_onOne] at hh
+    apply (Submodule.Quotient.eq S).mpr
+    change localizedDerivation (.powers (denominator x)) T (δ b i) (B.coord (normal s) ω) -
+      localizedDerivation (.powers (denominator x)) T (δ b (normal s)) (B.coord i ω) ∈ S
+    rw [derivative_extends,derivative_extends]
+    exact hh
+  obtain ⟨f,hf⟩ := closed_one_exact U x s t (normal s) (normal t) (δ b)
+    (by simp [x,normal_value b u hu normal])
+    (by simp [x,normal_value b u hu normal])
+    (by simp [x,normal_value b u hu normal,hst,hst.symm])
+    (fun i r => partials_commute b u hu i (normal s) r) p hp
+  obtain ⟨f,rfl⟩ := Submodule.Quotient.mk_surjective S f
+  refine ⟨scalar f,?_⟩
+  rw [d_scalar,← map_sub]
+  apply (one_iff U x B C hC (ω - D k T f)).mpr
+  intro i
+  have hi := S.neg_mem ((Submodule.Quotient.eq S).mp (hf i))
+  change -(localizedDerivation (.powers (denominator x)) T (δ b i) f - B.coord i ω) ∈ S at hi
+  rw [neg_sub,derivative_extends] at hi
+  rw [map_sub]
+  exact hi
+
+/-- The degree-two exactness needed for codimension-three purity. The
+primitive is an ordinary one-form on the actual full intersection, and its
+error is a sum of actual two-forms restricted from the double principal opens. -/
+include hu in
+theorem row_two (s t r : ι)
+    (hst : normal s ≠ normal t) (hsr : normal s ≠ normal r) (htr : normal t ≠ normal r)
+    (ω : Form k T 2)
+    (hω : IsBoundary U (equations u normal) 3
+      (d (topFrame (T := T) b u normal) 2 ω)) :
+    ∃ α : Form k T 1, IsBoundary U (equations u normal) 2
+      (ω - d (topFrame (T := T) b u normal) 1 α) := by
+  classical
+  let x := equations u normal
+  let B := topFrame (T := T) b u normal
+  let C := faceFrame U b u normal
+  let S := boundaries (T := T) U x
+  have hC := frame_restrict (T := T) U b u hu normal
+  let p (i j : Fin n) : Parts (T := T) U x := Submodule.Quotient.mk (pair B i j ω)
+  have hp (i j : Fin n) : onParts U x (δ b (normal s)) (p i j) =
+      onParts U x (δ b i) (p (normal s) j) - onParts U x (δ b j) (p (normal s) i) := by
+    have hh := triple_mem U x B C hC (normal s) i j _ hω
+    rw [triple_d_two] at hh
+    apply (Submodule.Quotient.eq S).mpr
+    change localizedDerivation (.powers (denominator x)) T (δ b (normal s)) (pair B i j ω) -
+      (localizedDerivation (.powers (denominator x)) T (δ b i) (pair B (normal s) j ω) -
+        localizedDerivation (.powers (denominator x)) T (δ b j) (pair B (normal s) i ω)) ∈ S
+    rw [derivative_extends,derivative_extends,derivative_extends]
+    convert hh using 1 <;> abel
+  obtain ⟨f,hf⟩ := closed_two_exact U x s t r (normal s) (normal t) (normal r) (δ b)
+    (by simp [x,normal_value b u hu normal])
+    (by simp [x,normal_value b u hu normal])
+    (by simp [x,normal_value b u hu normal])
+    (by simp [x,normal_value b u hu normal,hst,hst.symm])
+    (by simp [x,normal_value b u hu normal,hsr,hsr.symm])
+    (by simp [x,normal_value b u hu normal,htr,htr.symm])
+    (fun i j a => partials_commute b u hu i j a) p hp
+  choose v hv using fun i => Submodule.Quotient.mk_surjective S (f i)
+  let α := B.equivFun.symm v
+  refine ⟨one α,of_pair_mem U x B C hC _ ?_⟩
+  intro i j
+  have hij := hf i j
+  rw [← hv i,← hv j,onParts_mk,onParts_mk] at hij
+  change S.mkQ (localizedDerivation (.powers (denominator x)) T (δ b i) (v j)) -
+    S.mkQ (localizedDerivation (.powers (denominator x)) T (δ b j) (v i)) =
+      S.mkQ (pair B i j ω) at hij
+  rw [← map_sub] at hij
+  have hh := S.neg_mem ((Submodule.Quotient.eq S).mp hij)
+  rw [neg_sub,derivative_extends,derivative_extends] at hh
+  rw [map_sub,first_eq,pair_onOne]
+  simpa only [α,Basis.coord_equivFun_symm] using hh
+
+/-- The three low rows in any exact frame on the intersection. This is
+the ordinary-form input for the genuine supported Ext³ row calculation. -/
+include hu in
+theorem low_degrees (s t r : ι)
+    (hst : normal s ≠ normal t) (hsr : normal s ≠ normal r) (htr : normal t ≠ normal r)
+    (B : Basis (Fin n) T Ω[T⁄k]) (v : Fin n → T) (hB : ∀ i, B i = D k T (v i)) :
+    (∀ ω : Form k T 0, IsBoundary U (equations u normal) 1 (d B 0 ω) →
+      IsBoundary U (equations u normal) 0 ω) ∧
+    (∀ ω : Form k T 1, IsBoundary U (equations u normal) 2 (d B 1 ω) →
+      ∃ f : Form k T 0, IsBoundary U (equations u normal) 1 (ω - d B 0 f)) ∧
+    (∀ ω : Form k T 2, IsBoundary U (equations u normal) 3 (d B 2 ω) →
+      ∃ α : Form k T 1, IsBoundary U (equations u normal) 2 (ω - d B 1 α)) := by
+  let C := topFrame (T := T) b u normal
+  have hC (i : Fin n) : C i = D k T (algebraMap R T (u i)) := frame_exact b u hu _ i
+  have he (q : ℕ) (ω : Form k T q) : d B q ω = d C q ω := by
+    simpa only [CycleQ2AffineDeRhamFunctorial.exteriorPullback_id] using
+      CycleQ2FrameDifferentialNaturality.differential_natural B v hB C
+        (fun i => algebraMap R T (u i)) hC (AlgHom.id k T) q ω
+  constructor
+  · intro ω hω
+    rw [he] at hω
+    exact row_zero U b u hu normal s ω hω
+  constructor
+  · intro ω hω
+    rw [he] at hω
+    obtain ⟨f,hf⟩ := row_one U b u hu normal s t hst ω hω
+    exact ⟨f,by rwa [he]⟩
+  · intro ω hω
+    rw [he] at hω
+    obtain ⟨α,hα⟩ := row_two U b u hu normal s t r hst hsr htr ω hω
+    exact ⟨α,by rwa [he]⟩
+
+end CycleQ2FiniteNormalChartForms
+
+namespace CycleQ2ThirdCoordinateSaturation
+
+open CycleQ2CechDenominatorTorsion
+
+section Quotient
+
+variable {k R : Type} [Field k] [CharZero k] [CommRing R] [Algebra k R]
+    [IsNoetherianRing R] (d : Derivation k R R) (f g h : R)
+    (hf : d f = 0) (hg : d g = 0) (hh : d h = 1)
+
+/-- A third exact coordinate is a nonzerodivisor modulo every pair of
+powers of the first two equations. The third coordinate derivation descends
+to the actual quotient, so no regular-sequence power theorem is assumed. -/
+include hf hg hh in
+theorem regular_mod_powers (m n : ℕ) :
+    IsLeftRegular (Ideal.Quotient.mk (Ideal.span {f ^ m,g ^ n}) h) := by
+  let I : Ideal R := Ideal.span {f ^ m,g ^ n}
+  let π := Ideal.Quotient.mkₐ k I
+  have hfm : π (f ^ m) = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr
+    (Ideal.subset_span (by simp))
+  have hgn : π (g ^ n) = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr
+    (Ideal.subset_span (by simp))
+  have stable (a : R) (ha : π a = 0) : π (d a) = 0 := by
+    obtain ⟨u,v,huv⟩ := Ideal.mem_span_pair.mp (Ideal.Quotient.eq_zero_iff_mem.mp ha)
+    rw [← huv]
+    simp only [map_add,Derivation.leibniz,Derivation.leibniz_pow,hf,hg,
+      smul_zero,smul_eq_mul,zero_add,map_mul,hfm,hgn,mul_zero,zero_mul,add_zero,map_zero]
+  let d' := Derivation.liftOfSurjective (Ideal.Quotient.mkₐ_surjective k I) stable
+  apply CycleQ2RegularPairDifferentiation.isLeftRegular_of_derivative_one d'
+  change Derivation.liftOfSurjective _ stable (π h) = 1
+  rw [Derivation.liftOfSurjective_apply,hh,map_one]
+
+include hf hg hh in
+theorem powers_saturated (m n r : ℕ) (a : R)
+    (ha : h ^ r * a ∈ Ideal.span {f ^ m,g ^ n}) :
+    a ∈ Ideal.span {f ^ m,g ^ n} := by
+  let I : Ideal R := Ideal.span {f ^ m,g ^ n}
+  let π := Ideal.Quotient.mk I
+  apply Ideal.Quotient.eq_zero_iff_mem.mp
+  apply (regular_mod_powers d f g h hf hg hh m n).pow r
+  rw [mul_zero,← map_pow,← map_mul,Ideal.Quotient.eq_zero_iff_mem]
+  exact ha
+
+end Quotient
+
+section Fractions
+
+variable {R U V T : Type} [CommRing R] [CommRing U] [CommRing V] [CommRing T]
+    [Algebra R U] [Algebra R V] [Algebra R T]
+    (f g : R) [IsLocalization.Away f U] [IsLocalization.Away g V]
+    [IsLocalization.Away (f*g) T]
+
+/-- A genuine pair Čech boundary has a common denominator whose numerator
+belongs to the corresponding ideal generated by the two denominator powers. -/
+theorem boundary_clears (a : T) (ha : a ∈ boundaries U V T f g) :
+    ∃ n : ℕ, ∃ c : R,
+      a * algebraMap R T (f*g) ^ n = algebraMap R T c ∧ c ∈ Ideal.span {f ^ n,g ^ n} := by
+  obtain ⟨_,⟨u,rfl⟩,_,⟨v,rfl⟩,rfl⟩ := Submodule.mem_sup.mp ha
+  obtain ⟨m,c,hc⟩ := IsLocalization.Away.surj f u
+  obtain ⟨n,e,he⟩ := IsLocalization.Away.surj g v
+  have hc' := congrArg (fromFirst (A := U) (T := T) f g) hc
+  have he' := congrArg (fromSecond (B := V) (T := T) f g) he
+  simp only [map_mul,map_pow,AlgHom.commutes] at hc' he'
+  refine ⟨m+n,c*f^n*g^(m+n)+e*f^(m+n)*g^m,?_,?_⟩
+  · calc
+      (fromFirst f g u + fromSecond f g v) * algebraMap R T (f*g) ^ (m+n) =
+          (fromFirst f g u * algebraMap R T f ^ m) * algebraMap R T f ^ n *
+              algebraMap R T g ^ (m+n) +
+            (fromSecond f g v * algebraMap R T g ^ n) * algebraMap R T f ^ (m+n) *
+              algebraMap R T g ^ m := by
+        rw [map_mul,mul_pow]
+        simp only [pow_add]
+        ring
+      _ = algebraMap R T (c*f^n*g^(m+n)+e*f^(m+n)*g^m) := by
+        rw [hc',he']
+        simp only [map_add,map_mul,map_pow]
+  · exact Ideal.mem_span_pair.mpr ⟨e*g^m,c*f^n,by ring⟩
+
+private theorem inverse_fraction {L : Type} [CommRing L] [Algebra R L]
+    (x : R) [IsLocalization.Away x L] (a : R) (n : ℕ) :
+    (algebraMap R L a * IsLocalization.Away.invSelf x ^ n) * algebraMap R L x ^ n =
+      algebraMap R L a := by
+  calc
+    _ = algebraMap R L a * (algebraMap R L x * IsLocalization.Away.invSelf x) ^ n := by
+      rw [mul_pow]
+      ring
+    _ = algebraMap R L a := by rw [IsLocalization.Away.mul_invSelf,one_pow,mul_one]
+
+/-- The converse denominator calculation supplies literal forms on the
+two single opens, rather than merely a formal numerator criterion. -/
+theorem boundary_of_clears (a : T) (n : ℕ) (c : R)
+    (ha : a * algebraMap R T (f*g) ^ n = algebraMap R T c)
+    (hc : c ∈ Ideal.span {f ^ n,g ^ n}) : a ∈ boundaries U V T f g := by
+  obtain ⟨b,e,hbe⟩ := Ideal.mem_span_pair.mp hc
+  let u : U := algebraMap R U e * IsLocalization.Away.invSelf f ^ n
+  let v : V := algebraMap R V b * IsLocalization.Away.invSelf g ^ n
+  have hu : fromFirst (A := U) (T := T) f g u * algebraMap R T f ^ n = algebraMap R T e := by
+    simpa only [u,map_mul,map_pow,AlgHom.commutes] using
+      congrArg (fromFirst (A := U) (T := T) f g) (inverse_fraction (L := U) f e n)
+  have hv : fromSecond (B := V) (T := T) f g v * algebraMap R T g ^ n = algebraMap R T b := by
+    simpa only [v,map_mul,map_pow,AlgHom.commutes] using
+      congrArg (fromSecond (B := V) (T := T) f g) (inverse_fraction (L := V) g b n)
+  have he : (fromFirst f g u + fromSecond f g v) * algebraMap R T (f*g) ^ n =
+      algebraMap R T c := by
+    calc
+      _ = (fromFirst f g u * algebraMap R T f ^ n) * algebraMap R T g ^ n +
+          (fromSecond f g v * algebraMap R T g ^ n) * algebraMap R T f ^ n := by
+        rw [map_mul,mul_pow]
+        ring
+      _ = algebraMap R T e * algebraMap R T g ^ n +
+          algebraMap R T b * algebraMap R T f ^ n := by rw [hu,hv]
+      _ = algebraMap R T c := by
+        rw [← map_pow,← map_mul,← map_pow,← map_mul,← map_add]
+        exact congrArg (algebraMap R T) ((add_comm _ _).trans hbe)
+  have hea : a = fromFirst f g u + fromSecond f g v :=
+    (IsLocalization.Away.algebraMap_pow_isUnit (S := T) (f*g) n).mul_right_cancel (ha.trans he.symm)
+  rw [hea]
+  exact Submodule.add_mem_sup ⟨u,rfl⟩ ⟨v,rfl⟩
+
+/-- If a prescribed cleared numerator represents a pair Čech boundary,
+it lies in the appropriate ideal after multiplying by a further power of
+the original denominator. This retains possible denominator torsion. -/
+theorem shifted_numerator_mem (a : T) (n : ℕ) (c : R)
+    (ha : a * algebraMap R T (f*g) ^ n = algebraMap R T c)
+    (hb : a ∈ boundaries U V T f g) :
+    ∃ m : ℕ, (f*g) ^ m * c ∈ Ideal.span {f ^ (n+m),g ^ (n+m)} := by
+  obtain ⟨l,e,he,heI⟩ := boundary_clears f g a hb
+  have heq : algebraMap R T ((f*g)^l*c) = algebraMap R T ((f*g)^n*e) := by
+    rw [map_mul,map_pow,map_mul,map_pow,← ha,← he]
+    ring
+  obtain ⟨r,hr⟩ := IsLocalization.Away.exists_of_eq (f*g) heq
+  obtain ⟨b,d,hbd⟩ := Ideal.mem_span_pair.mp heI
+  refine ⟨l+r,Ideal.mem_span_pair.mpr ⟨b*g^(n+r),d*f^(n+r),?_⟩⟩
+  calc
+    b*g^(n+r)*f^(n+(l+r)) + d*f^(n+r)*g^(n+(l+r)) = (f*g)^r*((f*g)^n*e) := by
+      rw [← hbd]
+      simp only [pow_add,mul_pow]
+      ring
+    _ = (f*g)^r*((f*g)^l*c) := hr.symm
+    _ = (f*g)^(l+r)*c := by rw [pow_add]; ring
+
+end Fractions
+
+section Saturation
+
+variable {k R U V T : Type} [Field k] [CharZero k]
+    [CommRing R] [Algebra k R] [IsNoetherianRing R]
+    [CommRing U] [CommRing V] [CommRing T]
+    [Algebra R U] [Algebra R V] [Algebra R T]
+    (f g h : R) [IsLocalization.Away f U] [IsLocalization.Away g V]
+    [IsLocalization.Away (f*g) T]
+    (d : Derivation k R R) (hf : d f = 0) (hg : d g = 0) (hh : d h = 1)
+
+/-- The third coordinate has no torsion on the actual top Čech module
+of the first two principal opens. This is the scalar injectivity input
+for the augmented three-open Čech row. -/
+include hf hg hh in
+theorem pair_boundary_saturated (a : T) (r : ℕ)
+    (ha : h ^ r • a ∈ boundaries U V T f g) : a ∈ boundaries U V T f g := by
+  obtain ⟨n,c,hc⟩ := IsLocalization.Away.surj (f*g) a
+  have hclear : (h^r • a) * algebraMap R T (f*g)^n = algebraMap R T (h^r*c) := by
+    rw [Algebra.smul_def,mul_assoc,hc,map_mul]
+  obtain ⟨m,hm⟩ := shifted_numerator_mem f g (h^r • a) n (h^r*c) hclear ha
+  have hm' : h^r*((f*g)^m*c) ∈ Ideal.span {f^(n+m),g^(n+m)} := by
+    convert hm using 1 <;> ring
+  have hnum := powers_saturated d f g h hf hg hh (n+m) (n+m) r ((f*g)^m*c) hm'
+  apply boundary_of_clears f g a (n+m) ((f*g)^m*c) _ hnum
+  calc
+    a * algebraMap R T (f*g) ^ (n+m) =
+        (a * algebraMap R T (f*g)^n) * algebraMap R T (f*g)^m := by rw [pow_add]; ring
+    _ = algebraMap R T ((f*g)^m*c) := by rw [hc,map_mul,map_pow]; ring
+
+end Saturation
+end CycleQ2ThirdCoordinateSaturation
+
+namespace CycleQ2ThirdCoordinateRestriction
+
+open CycleQ2CechDenominatorTorsion CycleQ2ThirdCoordinateSaturation
+
+section Refinement
+
+variable {R A B : Type} [CommRing R] [CommRing A] [CommRing B]
+    [Algebra R A] [Algebra R B] (x h : R)
+    [IsLocalization.Away x A] [IsLocalization.Away (x*h) B]
+
+/-- A section on a twice localized open clears a power of the added
+coordinate into an actual section of the original principal open. -/
+theorem clears_refinement (b : B) :
+    ∃ n : ℕ, ∃ a : A, fromFirst x h a = h ^ n • b := by
+  obtain ⟨n,c,hc⟩ := IsLocalization.Away.surj (x*h) b
+  rw [map_mul] at hc
+  have he := CycleQ2CechDenominatorTorsion.clears_other (a := h) (t := x)
+    (fromFirst (A := A) (T := B) x h) b n c (by
+      simpa only [mul_comm (algebraMap R B h) (algebraMap R B x)] using hc)
+  obtain ⟨a,ha⟩ := he
+  exact ⟨n,a,ha⟩
+
+/-- The actual map from `R[1/x]` to `R[1/(xh)]` has exactly the
+expected added-coordinate torsion kernel, even when the original ring
+has zero divisors. -/
+theorem kernel_clears (φ : A →ₐ[R] B) (a : A) (ha : φ a = 0) :
+    ∃ n : ℕ, h ^ n • a = 0 := by
+  obtain ⟨m,c,hc⟩ := IsLocalization.Away.surj x a
+  have hc' := congrArg φ hc
+  simp only [map_mul,map_pow,AlgHom.commutes,ha,zero_mul] at hc'
+  obtain ⟨n,hn⟩ := IsLocalization.Away.exists_of_eq (x*h)
+    (hc'.symm.trans (map_zero (algebraMap R B)).symm)
+  rw [mul_zero] at hn
+  have hz : algebraMap R A h ^ n * algebraMap R A c = 0 := by
+    apply (IsLocalization.Away.algebraMap_pow_isUnit (S := A) x n).mul_left_cancel
+    rw [mul_zero]
+    simpa only [map_mul,map_pow,mul_pow,map_zero,mul_assoc] using
+      congrArg (algebraMap R A) hn
+  refine ⟨n,?_⟩
+  rw [Algebra.smul_def,map_pow]
+  apply (IsLocalization.Away.algebraMap_pow_isUnit (S := A) x m).mul_right_cancel
+  rw [zero_mul,mul_assoc,hc]
+  exact hz
+
+end Refinement
+
+section Pair
+
+variable {k R U V A P Q Z : Type} [Field k] [CharZero k]
+    [CommRing R] [Algebra k R] [IsNoetherianRing R]
+    [CommRing U] [CommRing V] [CommRing A] [CommRing P] [CommRing Q] [CommRing Z]
+    [Algebra R U] [Algebra R V] [Algebra R A]
+    [Algebra R P] [Algebra R Q] [Algebra R Z]
+    (f g h : R)
+    [IsLocalization.Away f U] [IsLocalization.Away g V]
+    [IsLocalization.Away (f*g) A]
+    [IsLocalization.Away (f*h) P] [IsLocalization.Away (g*h) Q]
+    [IsLocalization.Away ((f*g)*h) Z]
+    (d : Derivation k R R) (hf : d f = 0) (hg : d g = 0) (hh : d h = 1)
+
+private theorem localization_algHom_unique {S L : Type} [CommRing S] [CommRing L]
+    [Algebra R S] [Algebra R L] (a : R) [IsLocalization.Away a S]
+    (φ ψ : S →ₐ[R] L) : φ = ψ := by
+  apply IsLocalization.algHom_ext (R := R) (A := R) (.powers a)
+  ext r
+  simp only [AlgHom.comp_apply,IsScalarTower.coe_toAlgHom,AlgHom.commutes]
+
+/-- Restriction from the two-equation Čech cokernel to the complement
+where the third coordinate is invertible is injective. The three maps
+in the statement are the actual ring restrictions; their compatibility
+is proved from their original localization universal properties. -/
+include hf hg hh in
+theorem pair_boundary_of_refinement (α : A →ₐ[R] Z) (β : P →ₐ[R] Z) (γ : Q →ₐ[R] Z)
+    (a : A) (p : P) (q : Q) (ha : α a = β p + γ q) :
+    a ∈ boundaries U V A f g := by
+  obtain ⟨m,u,hu⟩ := clears_refinement (A := U) f h p
+  obtain ⟨n,v,hv⟩ := clears_refinement (A := V) g h q
+  let u' : U := h^n • u
+  let v' : V := h^m • v
+  have hu' : fromFirst (A := U) (T := P) f h u' = h^(m+n) • p := by
+    change fromFirst f h (h^n • u) = _
+    rw [map_smul,hu,smul_smul,pow_add]
+    congr 1
+    exact mul_comm _ _
+  have hv' : fromFirst (A := V) (T := Q) g h v' = h^(m+n) • q := by
+    change fromFirst g h (h^m • v) = _
+    rw [map_smul,hv,smul_smul,pow_add]
+  have ku (b : U) : α (fromFirst f g b) = β (fromFirst f h b) :=
+    AlgHom.congr_fun (localization_algHom_unique f
+      (α.comp (fromFirst (A := U) f g)) (β.comp (fromFirst (A := U) f h))) b
+  have kv (b : V) : α (fromSecond f g b) = γ (fromFirst g h b) :=
+    AlgHom.congr_fun (localization_algHom_unique g
+      (α.comp (fromSecond (B := V) f g)) (γ.comp (fromFirst (A := V) g h))) b
+  let b : A := fromFirst f g u' + fromSecond f g v'
+  have hb : b ∈ boundaries U V A f g := Submodule.add_mem_sup ⟨u',rfl⟩ ⟨v',rfl⟩
+  have hz : α (h^(m+n) • a - b) = 0 := by
+    change α (h^(m+n) • a - (fromFirst f g u' + fromSecond f g v')) = 0
+    rw [map_sub,map_smul,ha,smul_add,map_add,ku,kv,hu',hv',map_smul,map_smul,sub_self]
+  obtain ⟨r,hr⟩ := kernel_clears (f*g) h α (h^(m+n) • a - b) hz
+  have he : h^r • (h^(m+n) • a) = h^r • b := by
+    apply sub_eq_zero.mp
+    simpa only [smul_sub] using hr
+  have hs : h^(r+(m+n)) • a ∈ boundaries U V A f g := by
+    rw [pow_add,mul_smul,he]
+    exact Submodule.smul_mem _ (h^r) hb
+  exact pair_boundary_saturated f g h d hf hg hh a (r+(m+n)) hs
+
+end Pair
+end CycleQ2ThirdCoordinateRestriction
+
+namespace CycleQ2ExactFrameThirdCoordinate
+
+open Module KaehlerDifferential CycleQ2ExactFrameFirstDifferential
+open CycleQ2CechDenominatorTorsion
+open CycleQ2NormalCechKahler CycleQ2NormalCechFormBoundary
+open CycleQ2WeightedCoordinateExterior CycleQ2ExactFrameThreeDeRham
+
+variable {k R : Type} [Field k] [CharZero k] [CommRing R] [Algebra k R]
+    [IsNoetherianRing R] {n : ℕ}
+    (b : Basis (Fin n) R Ω[R⁄k]) (u : Fin n → R)
+    (hu : ∀ i, b i = D k R (u i)) (i j l : Fin n) (hil : i ≠ l) (hjl : j ≠ l)
+
+/-- The saturation uses the original derivative dual to the third exact
+coordinate, which annihilates both earlier normal coordinates. -/
+include hu hil hjl in
+theorem regular_mod_powers (a c : ℕ) :
+    IsLeftRegular (Ideal.Quotient.mk (Ideal.span {(u i)^a,(u j)^c}) (u l)) :=
+  CycleQ2ThirdCoordinateSaturation.regular_mod_powers (spatialDerivative b l)
+    (u i) (u j) (u l)
+    (by simp [partial_coordinate b u hu,hil])
+    (by simp [partial_coordinate b u hu,hjl])
+    (by simp [partial_coordinate b u hu]) a c
+
+include hu in
+private theorem local_frame_pull {S T : Type} [CommRing S] [CommRing T]
+    [Algebra R S] [Algebra R T] [Algebra k S] [Algebra k T]
+    [IsScalarTower k R S] [IsScalarTower k R T]
+    (M N : Submonoid R) [IsLocalization M S] [IsLocalization N T]
+    (φ : S →ₐ[R] T) (a : Fin n) :
+    onePullback (φ.restrictScalars k) (localFrame (T := S) b M a) =
+      localFrame (T := T) b N a := by
+  rw [frame_exact b u hu M a,onePullback_d,frame_exact b u hu N a]
+  exact congrArg (D k T) (φ.commutes (u a))
+
+section Pair
+
+variable {U V A : Type} [CommRing U] [CommRing V] [CommRing A]
+    [Algebra R U] [Algebra R V] [Algebra R A]
+    [IsLocalization.Away (u i) U] [IsLocalization.Away (u j) V]
+    [IsLocalization.Away (u i*u j) A]
+
+include hu hil hjl in
+theorem pair_boundary_saturated (a : A) (r : ℕ)
+    (ha : (u l)^r • a ∈ boundaries U V A (u i) (u j)) :
+    a ∈ boundaries U V A (u i) (u j) :=
+  CycleQ2ThirdCoordinateSaturation.pair_boundary_saturated (u i) (u j) (u l)
+    (spatialDerivative b l)
+    (by simp [partial_coordinate b u hu,hil])
+    (by simp [partial_coordinate b u hu,hjl])
+    (by simp [partial_coordinate b u hu]) a r ha
+
+variable {P Q Z : Type} [CommRing P] [CommRing Q] [CommRing Z]
+    [Algebra R P] [Algebra R Q] [Algebra R Z]
+    [IsLocalization.Away (u i*u l) P] [IsLocalization.Away (u j*u l) Q]
+    [IsLocalization.Away ((u i*u j)*u l) Z]
+
+/-- Actual restriction injectivity on the first pair Čech cokernel in
+an adapted triple chart. This is the lower-row input for the outer
+Mayer–Vietoris square of the three principal opens. -/
+include hu hil hjl in
+theorem pair_boundary_of_refinement
+    (α : A →ₐ[R] Z) (β : P →ₐ[R] Z) (γ : Q →ₐ[R] Z)
+    (a : A) (p : P) (q : Q) (ha : α a = β p + γ q) :
+    a ∈ boundaries U V A (u i) (u j) :=
+  CycleQ2ThirdCoordinateRestriction.pair_boundary_of_refinement (u i) (u j) (u l)
+    (spatialDerivative b l)
+    (by simp [partial_coordinate b u hu,hil])
+    (by simp [partial_coordinate b u hu,hjl])
+    (by simp [partial_coordinate b u hu]) α β γ a p q ha
+
+variable [Algebra k U] [Algebra k V] [Algebra k A]
+    [Algebra k P] [Algebra k Q] [Algebra k Z]
+    [IsScalarTower k R U] [IsScalarTower k R V] [IsScalarTower k R A]
+    [IsScalarTower k R P] [IsScalarTower k R Q] [IsScalarTower k R Z]
+
+/-- The same restriction injectivity for the original ordinary exterior
+forms in every degree. It returns actual forms on the two original single
+opens, with the signed Čech boundary used by the supported Ext row. -/
+include hu hil hjl in
+theorem forms_boundary_of_refinement
+    (α : A →ₐ[R] Z) (β : P →ₐ[R] Z) (γ : Q →ₐ[R] Z)
+    (q : ℕ) (ω : Form k A q) (η : Form k P q) (ν : Form k Q q)
+    (hω : exteriorPullback (α.restrictScalars k) q ω =
+      exteriorPullback (β.restrictScalars k) q η + exteriorPullback (γ.restrictScalars k) q ν) :
+    CycleQ2NormalCechFormBoundary.IsBoundary
+      ((fromFirst (A := U) (T := A) (u i) (u j)).restrictScalars k)
+      ((fromSecond (B := V) (T := A) (u i) (u j)).restrictScalars k) q ω := by
+  classical
+  let bU := localFrame (T := U) b (.powers (u i))
+  let bV := localFrame (T := V) b (.powers (u j))
+  let bA := localFrame (T := A) b (.powers (u i*u j))
+  let bP := localFrame (T := P) b (.powers (u i*u l))
+  let bQ := localFrame (T := Q) b (.powers (u j*u l))
+  let bZ := localFrame (T := Z) b (.powers ((u i*u j)*u l))
+  have hα := local_frame_pull b u hu (.powers (u i*u j)) (.powers ((u i*u j)*u l)) α
+  have hβ := local_frame_pull b u hu (.powers (u i*u l)) (.powers ((u i*u j)*u l)) β
+  have hγ := local_frame_pull b u hu (.powers (u j*u l)) (.powers ((u i*u j)*u l)) γ
+  have hU := local_frame_pull b u hu (.powers (u i)) (.powers (u i*u j))
+    (fromFirst (A := U) (T := A) (u i) (u j))
+  have hV := local_frame_pull b u hu (.powers (u j)) (.powers (u i*u j))
+    (fromSecond (B := V) (T := A) (u i) (u j))
+  have coeff (s : Set.powersetCard (Fin n) q) :
+      (bA.exteriorPower q).equivFun ω s ∈ boundaries U V A (u i) (u j) := by
+    have hs := congrArg (fun z => (bZ.exteriorPower q).equivFun z s) hω
+    rw [CycleQ2NormalExteriorCech.pull_coordinates bA bZ _ hα,
+      map_add,Pi.add_apply,CycleQ2NormalExteriorCech.pull_coordinates bP bZ _ hβ,
+      CycleQ2NormalExteriorCech.pull_coordinates bQ bZ _ hγ] at hs
+    exact pair_boundary_of_refinement b u hu i j l hil hjl α β γ
+      ((bA.exteriorPower q).equivFun ω s) ((bP.exteriorPower q).equivFun η s)
+      ((bQ.exteriorPower q).equivFun ν s) hs
+  have reps (s : Set.powersetCard (Fin n) q) : ∃ a : U, ∃ c : V,
+      fromFirst (u i) (u j) a + fromSecond (u i) (u j) c = (bA.exteriorPower q).equivFun ω s := by
+    obtain ⟨_,⟨a,rfl⟩,_,⟨c,rfl⟩,hc⟩ := Submodule.mem_sup.mp (coeff s)
+    exact ⟨a,c,hc⟩
+  choose a c hc using reps
+  refine ⟨(bU.exteriorPower q).equivFun.symm a,-(bV.exteriorPower q).equivFun.symm c,?_⟩
+  apply (bA.exteriorPower q).equivFun.injective
+  funext s
+  rw [map_sub,Pi.sub_apply,CycleQ2NormalExteriorCech.pull_coordinates bU bA _ hU,
+    CycleQ2NormalExteriorCech.pull_coordinates bV bA _ hV,
+    map_neg,Pi.neg_apply,LinearEquiv.apply_symm_apply,LinearEquiv.apply_symm_apply,
+    map_neg,sub_neg_eq_add]
+  exact (hc s).symm
+
+end Pair
+end CycleQ2ExactFrameThirdCoordinate

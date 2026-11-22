@@ -640,3 +640,127 @@ end
 
 #print axioms CycleQ2CubicCoefficientTrace.translatedBasis_apply
 #print axioms CycleQ2CubicCoefficientTrace.top_translatedBasis
+
+noncomputable section
+namespace CycleQ2TorusLogDerivatives
+
+open CycleQ2SeedCechLocalization
+open CycleQ2SeedQuotientFiniteFree (Base)
+
+variable (R : Type*) [CommRing R] (S : Finset (Fin 3))
+
+private theorem differential_polynomial (p : Base R) :
+    KaehlerDifferential.D R (coordinateLocalization R S)
+        (algebraMap (Base R) (coordinateLocalization R S) p) =
+      ∑ j : Fin 3,
+        algebraMap (Base R) (coordinateLocalization R S) (MvPolynomial.pderiv j p) •
+          KaehlerDifferential.D R (coordinateLocalization R S)
+            (algebraMap (Base R) (coordinateLocalization R S) (MvPolynomial.X j)) := by
+  induction p using MvPolynomial.induction_on with
+  | C a => simp
+  | add p q hp hq =>
+      simp only [map_add, hp, hq, add_smul, Finset.sum_add_distrib]
+  | mul_X p j hp =>
+      simp only [map_mul, Derivation.leibniz, hp, smul_eq_mul, map_add,
+        MvPolynomial.pderiv_X, add_smul, Finset.sum_add_distrib, mul_smul]
+      simp [Pi.single_apply, Finset.smul_sum]
+
+/-- The universal differential on the actual base localization is the
+sum of its three ordinary coordinate partials. -/
+theorem localized_differential (a : coordinateLocalization R S) :
+    KaehlerDifferential.D R (coordinateLocalization R S) a =
+      ∑ j : Fin 3, localizedPartial R S j a •
+        KaehlerDifferential.D R (coordinateLocalization R S)
+          (algebraMap (Base R) (coordinateLocalization R S) (MvPolynomial.X j)) := by
+  let L := coordinateLocalization R S
+  let x := fun j : Fin 3 => algebraMap (Base R) L (MvPolynomial.X j)
+  obtain ⟨⟨p,s⟩,hs⟩ := IsLocalization.surj (Submonoid.powers (baseProduct R S)) a
+  have hd := congrArg (KaehlerDifferential.D R L) hs
+  rw [Derivation.leibniz] at hd
+  have he : algebraMap (Base R) L s • KaehlerDifferential.D R L a =
+      KaehlerDifferential.D R L (algebraMap (Base R) L p) -
+        a • KaehlerDifferential.D R L (algebraMap (Base R) L s) :=
+    eq_sub_of_add_eq (by simpa only [add_comm] using hd)
+  have hp (j : Fin 3) :
+      algebraMap (Base R) L (MvPolynomial.pderiv j p) -
+          a * algebraMap (Base R) L (MvPolynomial.pderiv j (s : Base R)) =
+        algebraMap (Base R) L s * localizedPartial R S j a := by
+    have h := congrArg (localizedPartial R S j) hs
+    simp only [Derivation.leibniz, smul_eq_mul, localizedPartial_algebraMap] at h
+    exact (eq_sub_of_add_eq (by simpa only [add_comm] using h)).symm
+  apply (IsUnit.smul_left_cancel (IsLocalization.map_units L s)).mp
+  calc
+    algebraMap (Base R) L s • KaehlerDifferential.D R L a =
+        KaehlerDifferential.D R L (algebraMap (Base R) L p) -
+          a • KaehlerDifferential.D R L (algebraMap (Base R) L s) := he
+    _ = ∑ j : Fin 3,
+        (algebraMap (Base R) L (MvPolynomial.pderiv j p) -
+          a * algebraMap (Base R) L (MvPolynomial.pderiv j (s : Base R))) •
+            KaehlerDifferential.D R L (x j) := by
+      rw [differential_polynomial, differential_polynomial, Finset.smul_sum,
+        ← Finset.sum_sub_distrib]
+      apply Finset.sum_congr rfl
+      intro j _
+      rw [sub_smul, mul_smul]
+    _ = algebraMap (Base R) L s •
+        ∑ j : Fin 3, localizedPartial R S j a • KaehlerDifferential.D R L (x j) := by
+      rw [Finset.smul_sum]
+      apply Finset.sum_congr rfl
+      intro j _
+      rw [hp, mul_smul]
+
+theorem localized_differential_map {B : Type*} [CommRing B] [Algebra R B]
+    [Algebra (coordinateLocalization R S) B] [IsScalarTower R (coordinateLocalization R S) B]
+    (a : coordinateLocalization R S) :
+    KaehlerDifferential.D R B (algebraMap (coordinateLocalization R S) B a) =
+      ∑ j : Fin 3, algebraMap (coordinateLocalization R S) B (localizedPartial R S j a) •
+        KaehlerDifferential.D R B
+          (algebraMap (coordinateLocalization R S) B
+            (algebraMap (Base R) (coordinateLocalization R S) (MvPolynomial.X j))) := by
+  have h := congrArg (KaehlerDifferential.map R R (coordinateLocalization R S) B)
+    (localized_differential R S a)
+  simpa only [KaehlerDifferential.map_D, map_sum, map_smul,
+    IsScalarTower.algebraMap_smul] using h
+
+end CycleQ2TorusLogDerivatives
+
+namespace CycleQ2TorusCubicTrace
+
+open CycleQ2SeedCechLocalization
+open CycleQ2SeedQuotientFiniteFree (Base)
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold (vertexCoefficient)
+open CycleQ2CubicCoefficientTrace (normal)
+
+variable {R : Type} [CommRing R] [Nontrivial R]
+  (φ : CoeffRing →+* R) (i : Fin 4) (h : IsUnit (φ vertexCoefficient))
+  (S : Finset (Fin 3))
+
+/-- Differentiating the actual finite cubic normal form separates the
+normal derivative and the three base-coordinate derivatives. -/
+theorem normal_differential (z : Cubic φ i h S) (a : Fin 3 → Coefficients (R := R) S) :
+    KaehlerDifferential.D R (Cubic φ i h S) (normal z a) =
+      normal z ![a 1, 2*a 2, 0] • KaehlerDifferential.D R (Cubic φ i h S) z +
+        ∑ j : Fin 3,
+          normal z ((CycleQ2TorusLogDerivatives.localizedPartial R S j) ∘ a) •
+            KaehlerDifferential.D R (Cubic φ i h S)
+              (algebraMap (Coefficients (R := R) S) (Cubic φ i h S)
+                (algebraMap (Base R) (Coefficients (R := R) S) (MvPolynomial.X j))) := by
+  simp only [normal, map_add, Derivation.leibniz, Derivation.leibniz_pow,
+    CycleQ2TorusLogDerivatives.localized_differential_map, Fin.sum_univ_three,
+    Function.comp_apply, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.cons_val_two, map_zero, map_mul, map_ofNat, zero_mul, add_zero,
+    show 2 - 1 = 1 from rfl, pow_one]
+  module
+
+/-- The ordinary residue coefficient in the original cubic power basis. -/
+def residueTrace : Cubic φ i h S →+ R where
+  toFun a := (localizationToLaurent R S (topCoefficient φ i h S a)).coeff (fun _ => -1)
+  map_zero' := by simp [topCoefficient]
+  map_add' a b := by simp only [map_add, AddMonoidAlgebra.coeff_add, Finsupp.add_apply]
+
+end CycleQ2TorusCubicTrace
+end
+
+#print axioms CycleQ2TorusLogDerivatives.localized_differential
+#print axioms CycleQ2TorusCubicTrace.normal_differential

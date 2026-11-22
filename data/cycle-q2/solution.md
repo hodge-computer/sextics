@@ -1,5 +1,197 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Continuation: total de Rham trace and the original closure boundary
+
+**Status, 22 November 2026, fifth checkpoint.** This continuation supplies
+the actual top de Rham trace for the fixed threefold and the low-degree
+boundary vanishing needed to extend the normalized marked class to the
+full fourfold. The constructions below are source-reviewed and remain
+uncompiled; no Lean build or kernel replay has been run. The original
+`sorry` in `Submission.missing_geometric_existence` remains unchanged.
+The protected target and all 996 proposal files, including 994 Lean
+files, are retained. No additional admission or axiom has been introduced.
+
+### The original canonical trace kills both incoming differentials
+
+Every ordinary two-form on the original localized cubic chart is a sum
+of the six coordinate wedges with actual coefficients in that chart
+ring. The proof clears the existing localization denominator and uses
+its certified unit; it does not invert the cubic branch derivative.
+The native gradient identity expresses the derivative of each summand
+in the original canonical volume. Its Laurent trace is zero, including
+the negative sign in the middle horizontal coordinate. The canonical
+ordinary-form-to-sheaf comparison therefore gives
+\[
+  \operatorname{Tr}_{\mathrm{can}}(d\omega)=0
+  \qquad\text{for every actual torus section }\omega\in\Omega^2.
+\]
+The statement is about the original section differential, not only
+formal derivatives of native polynomial expressions.
+[Coordinate spanning and native residue calculation](GeometricLiteralThreefoldResidueContraction.lean)
+[Localized ordinary derivatives](GeometricHodgeTwistTorus.lean)
+
+The finite four-open total complex now includes every degree through
+six, with zero objects above it and proofs that all adjacent
+differentials compose to zero. The convention is
+\(\delta+(-1)^{p}d\), where \(p\) is the Cech degree. In particular,
+the incoming differential in degree six is
+\[
+ C^2(\Omega^3)\oplus C^3(\Omega^2)
+   \longrightarrow C^3(\Omega^3),
+ \qquad (a,b)\longmapsto\delta a-db.
+\]
+The original canonical section trace kills both summands. It descends
+to the degree-six homology of this actual cochain complex, and its
+value on the original normalized canonical generator is exactly one.
+
+The same quotient is compared with the actual derived de Rham group
+on the fixed threefold. On each affine face, acyclic section
+representatives identify degree three with top forms modulo exact
+two-forms; higher degrees vanish. The three original source
+Mayer--Vietoris boundaries then identify the global degree-six group
+with the same finite quotient. Their naturality is proved with the
+original source triangles and shift isomorphisms. The resulting
+`derivedEquiv` and `derivedTrace` preserve the specified generator:
+`derivedTrace_connecting_generator a` has value \(a\).
+Thus this trace is available on genuine derived cohomology, with its
+normalization fixed by the original sections.
+[Total complex, actual derived comparison, and normalized trace](GeometricAffineExteriorAcyclicity.lean)
+
+### Three-coordinate purity uses the actual chart rings
+
+For three distinct exact normal coordinates, the top principal-parts
+module is the localization at their product modulo the sum of the
+three omitted-coordinate localizations. Multiplication by each
+coordinate is locally nilpotent on this quotient. The localized
+coordinate derivatives descend and satisfy their actual Weyl
+relations. These relations prove the required degree-zero,
+degree-one, and degree-two exactness statements. The argument does
+not assume that a derivative is surjective on principal parts.
+
+The lower Cech rows are also proved. After localization at the third
+coordinate, an apparent two-open boundary descends to an actual
+boundary before that localization. The algebraic step is saturation
+of the two-coordinate boundary module: the third derivative is zero
+on the first two coordinates and one on the third, so Noetherianity
+gives regularity modulo every pair of powers. The proof keeps
+localization torsion when clearing denominators. Transport through
+the original affine section maps gives the form-valued statement
+with the original alternating sign.
+[Finite principal parts and third-coordinate saturation](GeometricPrincipalPartsDifferentials.lean)
+
+The actual outer Mayer--Vietoris sequence now proves that ambient
+sections map bijectively to sections on the three-open complement
+and that the complement has zero first cohomology for every de Rham
+term. A three-step bounded injective resolution shifts the supported
+Ext-three row to actual derived morphisms. Together with the ordinary
+low-degree form calculation, this proves
+`below_six_of_exact_coordinates` with no assumed lower-row vanishing:
+\[
+ H^n_{\{u_1=u_2=u_3=0\}}(W,\Omega^\bullet)=0
+ \qquad(n<6).
+\]
+All rings, localizations, restrictions, and source quotients in this
+statement belong to the original framed affine chart.
+[Supported Cech Ext-three quotient](GeometricSupportedCechRows.lean)
+[Three injective shifts](GeometricSupportedHypercohomology.lean)
+[Actual lower rows and affine purity](GeometricLocalDeRhamPurity.lean)
+
+### The dimension estimate applies to the original fourfold boundary
+
+Let \(e:Z\hookrightarrow Y\) be the original closure in the smooth
+fourfold, and let \(j:M\hookrightarrow Z\) be its original marked
+smooth surface open. The boundary used here is precisely
+\[
+ B=e\bigl(Z\setminus j(M)\bigr),\qquad G=Y\setminus B.
+\]
+Its dimension is at most one by the existing closure-boundary estimate
+and the actual closed embedding. Deleting the image of this boundary
+in the threefold can remove a larger part of the surface from the
+product. No dimension bound for that larger deleted part is used.
+
+For each actual generic point of a boundary component, the
+scheme-theoretic image of its residue-field point gives an integral
+closed component in the same ambient scheme. Its smooth locus
+contains its generic point. A standard-smooth neighborhood and the
+existing dimension lower bound show that this neighborhood has
+relative dimension at most one. An ambient open isolates this
+component from the others and avoids precisely its discarded closed
+part. The remaining boundary is a finite set of closed points; this
+is proved for reducible boundaries as well. Each remaining point is
+treated through its own integral singleton image, without assuming
+that it is rational over the coefficient field.
+[Actual component charts and finite residual](GeometricMarkedClosureBoundaryDimension.lean)
+
+Near every smooth curve or point piece, an exact four-coordinate
+frame has its first three members in the ideal of the original
+closed immersion. Their common zero locus contains the actual
+support. The actual nested-support short exact sequence transfers
+the three-coordinate vanishing to that smaller support, including
+the point case. No separate codimension-four Ext calculation is
+assumed. Noetherian descent applies this argument on every subopen,
+always using the original ambient de Rham complex.
+[Adapted marked frames and curve/point purity](GeometricSmoothSurfaceGysin.lean)
+[Nested supports and open-relative descent](GeometricSupportedMayerVietorisDescent.lean)
+
+Joining the smooth component opens and the finite residual with the
+same support filtration proves vanishing below degree six for the
+whole original boundary. In particular, its supported degree-four
+and degree-five groups vanish.
+
+### The normalized class extends to the full closure
+
+The marked surface is closed on \(G\), and its original logarithmic
+equation-chart classes glue there in the ambient complex. For the
+actual free-open support quotients, the filtration is
+\[
+ 0\longrightarrow M_{Z}(G)
+   \longrightarrow M_{Z}(Y)
+   \longrightarrow M_{B}(Y)
+   \longrightarrow0.
+\]
+The proved boundary vanishings in degrees five and four respectively
+give existence and uniqueness of extension of the specified
+degree-four class. `exists_unique_normalized` constructs that class
+on the full original closure in the full ambient fourfold. A surviving
+marked point detects its nonzero logarithmic restriction, proving
+`exists_nonzero_normalized`. Its restriction to the earlier product
+open agrees with any representative normalized in this same ambient
+complex. This does not identify two separately defined intrinsic
+complexes without their open-restriction comparison.
+[Original-boundary class, boundary purity, and unique extension](GeometricMarkedFundamentalClass.lean)
+
+### The remaining ordinary-component comparison
+
+The new full supported class and the fixed top trace still do not
+supply a nonzero vector in the actual 66-dimensional generic residue
+kernel. The remaining task is a paired marked-class/test comparison
+that controls the primitive ordinary component over the same integral
+marked coefficient neighborhood. The original first-order calculation
+fixes a nonzero scalar, but it cannot detect an arbitrary de Rham
+class without the necessary filtration compatibility: a locally exact
+one-form can have a nonzero first-order contraction. In particular,
+the ordinary extension theorem above does not silently assert an
+extension in Hodge filtration two. A filtered lift or a directly
+controlled representative for the single traced cup class must still
+be constructed and compared with the original marked calculation.
+
+Once this comparison supplies a genuinely nonzero generic residue
+kernel vector, the existing arithmetic-simplicity theorem and
+`protected_exact_of_genericFrameKernel_ne_bot` reach the unchanged
+protected exterior-form exactness statement. The original admission
+is retained until that vector is proved.
+
+### Verification for this checkpoint
+
+Independent source review covered the algebraic chart calculations,
+derived shifts, total-complex signs, and boundary extension. Static
+checks found 993 acyclic helper modules and exactly the original
+admission in `Solution.lean`, with the endpoint and manifest unchanged.
+All changed paths are existing proposal files. The repository's
+explanation renderer resolved the local links, and KaTeX accepted all
+3,364 explanation formulas. These checks do not replace Lean
+elaboration or kernel replay.
+
 ## Continuation: the signed canonical residue sequence
 
 **Status, 22 November 2026, fourth checkpoint.** This continuation

@@ -2,6 +2,7 @@ import Proposal.GeometricMonicGenericSupport
 import Mathlib.Algebra.Homology.DerivedCategory.Ext.ExactSequences
 import Mathlib.GroupTheory.QuotientGroup.Basic
 import Proposal.GeometricSupportedHypercohomology
+import Proposal.GeometricThreeOpenH2Surjectivity
 
 /-! The two-open Čech cokernel computes the second Ext group of the support quotient and identifies its induced differential.
 
@@ -260,3 +261,257 @@ theorem E2_exactAt_iff (i : ℤ)
     exact eq.symm
 
 end CycleQ2SupportedExtComplex
+
+/-! The corresponding row for three opens in an affine ambient open.
+The map is the original three-open Mayer--Vietoris class followed by
+the boundary of the actual relative support sequence. -/
+
+namespace CycleQ2ThreeOpenSupportedCechExt
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Abelian TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf freeOpen Sections)
+open CycleQ2RelativeOpenSupport (quotient shortExact)
+open CycleQ2ThreeOpenCechH2 (TripleOpen outerSquare)
+
+variable {X : TopCat.{0}}
+local instance : HasExt.{1} (AbSheaf X) := HasExt.standard _
+variable (U V T : Opens X) {W : Opens X} (h : (U ⊔ V) ⊔ T ≤ W) (F : AbSheaf X)
+
+abbrev boundary := CycleQ2ThreeOpenSectionH2.boundary F U V T
+
+/-- Three genuine source connecting maps, with the original +−+
+restriction boundary on the three pair intersections. -/
+def tripleConnecting : Sections F (TripleOpen U V T) →+ Ext (quotient h) F 3 :=
+  ((shortExact h).extClass.precomp F (show 1+2=3 by rfl)).comp
+    (CycleQ2ThreeOpenSectionH2.connecting F U V T)
+
+theorem tripleConnecting_apply (s : Sections F (TripleOpen U V T)) :
+    tripleConnecting U V T h F s = (shortExact h).extClass.comp
+      (CycleQ2ThreeOpenSectionH2.connecting F U V T s) rfl := rfl
+
+theorem tripleConnecting_boundary
+    (s : Sections F (U ⊓ V) × Sections F (U ⊓ T) × Sections F (V ⊓ T)) :
+    tripleConnecting U V T h F (boundary U V T F s) = 0 := by
+  rw [tripleConnecting_apply, CycleQ2ThreeOpenSectionH2.connecting_boundary]
+  exact Ext.comp_zero ..
+
+theorem connecting_surjective
+    (hw : Subsingleton (Ext (freeOpen W) F 3))
+    (hU : Subsingleton (F.H' 2 U)) (hV : Subsingleton (F.H' 2 V))
+    (hT : Subsingleton (F.H' 2 T))
+    (hUV : Subsingleton (F.H' 1 (U ⊓ V)))
+    (hUT : Subsingleton (F.H' 1 (U ⊓ T)))
+    (hVT : Subsingleton (F.H' 1 (V ⊓ T))) :
+    Function.Surjective (tripleConnecting U V T h F) := by
+  letI := hU
+  letI := hV
+  letI := hT
+  letI := hUV
+  letI := hUT
+  letI := hVT
+  intro x
+  obtain ⟨y,hy⟩ := Ext.contravariant_sequence_exact₃ (shortExact h) F x
+    (hw.elim _ _) (rfl : 1+2=3)
+  obtain ⟨s,hs⟩ := CycleQ2ThreeOpenH2Surjectivity.connecting_surjective F U V T y
+  refine ⟨s,?_⟩
+  rw [tripleConnecting_apply,hs,hy]
+
+theorem ker_connecting
+    (hw : Subsingleton (Ext (freeOpen W) F 2))
+    (hU : Subsingleton (F.H' 1 U)) (hV : Subsingleton (F.H' 1 V))
+    (hT : Subsingleton (F.H' 1 T)) :
+    (tripleConnecting U V T h F).ker = (boundary U V T F).range := by
+  letI := hU
+  letI := hV
+  letI := hT
+  ext s
+  change tripleConnecting U V T h F s = 0 ↔ ∃ z, boundary U V T F z = s
+  constructor
+  · intro hs
+    rw [tripleConnecting_apply] at hs
+    obtain ⟨b,hb⟩ := Ext.contravariant_sequence_exact₁ (shortExact h) F
+      (CycleQ2ThreeOpenSectionH2.connecting F U V T s) rfl hs
+    have hz : CycleQ2ThreeOpenSectionH2.connecting F U V T s = 0 := by
+      rw [← hb,hw.elim b 0]
+      exact Ext.comp_zero ..
+    obtain ⟨a,b,c,hc⟩ := (CycleQ2ThreeOpenSectionH2.connecting_eq_zero_iff F U V T s).mp hz
+    exact ⟨(a,b,c),hc⟩
+  · rintro ⟨z,rfl⟩
+    exact tripleConnecting_boundary U V T h F z
+
+/-- The actual row map commutes with every coefficient morphism,
+including each differential of the de Rham complex. -/
+theorem tripleConnecting_natural {G : AbSheaf X} (d : F ⟶ G)
+    (s : Sections F (TripleOpen U V T)) :
+    (tripleConnecting U V T h F s).comp (Ext.mk₀ d) (add_zero 3) =
+      tripleConnecting U V T h G (d.hom.app (op (TripleOpen U V T)) s) := by
+  have hd := CycleQ2ThreeOpenH2Naturality.connecting_naturality d U V T s
+  change (CycleQ2ThreeOpenSectionH2.connecting F U V T s).comp (Ext.mk₀ d)
+    (add_zero 2) = CycleQ2ThreeOpenSectionH2.connecting G U V T
+      (d.hom.app (op (TripleOpen U V T)) s) at hd
+  rw [tripleConnecting_apply, tripleConnecting_apply,
+    Ext.comp_assoc_of_third_deg_zero, hd]
+
+abbrev SectionQuotient := Sections F (TripleOpen U V T) ⧸ (boundary U V T F).range
+
+def toSupportedH3 : SectionQuotient U V T F →+ Ext (quotient h) F 3 :=
+  QuotientAddGroup.lift (boundary U V T F).range (tripleConnecting U V T h F)
+    (by rintro _ ⟨s,rfl⟩; exact tripleConnecting_boundary U V T h F s)
+
+theorem toSupportedH3_injective
+    (hw : Subsingleton (Ext (freeOpen W) F 2))
+    (hU : Subsingleton (F.H' 1 U)) (hV : Subsingleton (F.H' 1 V))
+    (hT : Subsingleton (F.H' 1 T)) : Function.Injective (toSupportedH3 U V T h F) :=
+  (QuotientAddGroup.injective_lift_iff _ _ _).2
+    (ker_connecting U V T h F hw hU hV hT).symm
+
+theorem toSupportedH3_surjective
+    (hw : Subsingleton (Ext (freeOpen W) F 3))
+    (hU : Subsingleton (F.H' 2 U)) (hV : Subsingleton (F.H' 2 V))
+    (hT : Subsingleton (F.H' 2 T))
+    (hUV : Subsingleton (F.H' 1 (U ⊓ V)))
+    (hUT : Subsingleton (F.H' 1 (U ⊓ T)))
+    (hVT : Subsingleton (F.H' 1 (V ⊓ T))) :
+    Function.Surjective (toSupportedH3 U V T h F) := by
+  intro y
+  obtain ⟨s,hs⟩ := connecting_surjective U V T h F hw hU hV hT hUV hUT hVT y
+  exact ⟨QuotientAddGroup.mk s,hs⟩
+
+/-- The native triple-overlap quotient is the actual supported third
+Ext group through these original connecting maps. -/
+def toSupportedH3Equiv
+    (hw₂ : Subsingleton (Ext (freeOpen W) F 2))
+    (hw₃ : Subsingleton (Ext (freeOpen W) F 3))
+    (hU₁ : Subsingleton (F.H' 1 U)) (hV₁ : Subsingleton (F.H' 1 V))
+    (hT₁ : Subsingleton (F.H' 1 T))
+    (hU₂ : Subsingleton (F.H' 2 U)) (hV₂ : Subsingleton (F.H' 2 V))
+    (hT₂ : Subsingleton (F.H' 2 T))
+    (hUV : Subsingleton (F.H' 1 (U ⊓ V)))
+    (hUT : Subsingleton (F.H' 1 (U ⊓ T)))
+    (hVT : Subsingleton (F.H' 1 (V ⊓ T))) :
+    SectionQuotient U V T F ≃+ Ext (quotient h) F 3 :=
+  AddEquiv.ofBijective (toSupportedH3 U V T h F)
+    ⟨toSupportedH3_injective U V T h F hw₂ hU₁ hV₁ hT₁,
+      toSupportedH3_surjective U V T h F hw₃ hU₂ hV₂ hT₂ hUV hUT hVT⟩
+
+private theorem square_vanishing
+    (S : (Opens.grothendieckTopology X).MayerVietorisSquare) (n : ℕ)
+    (hi : Subsingleton (Ext (freeOpen S.X₁) F n))
+    (h₂ : Subsingleton (Ext (freeOpen S.X₂) F (n+1)))
+    (h₃ : Subsingleton (Ext (freeOpen S.X₃) F (n+1))) :
+    Subsingleton (Ext (freeOpen S.X₄) F (n+1)) := by
+  apply subsingleton_of_forall_eq 0
+  intro x
+  obtain ⟨y,hy⟩ := Ext.contravariant_sequence_exact₃ S.shortComplex_shortExact F x
+    ((CycleQ2SupportedCechExt.middle_subsingleton S F (n+1) h₂ h₃).elim _ _)
+    (show 1+n=n+1 by omega)
+  rw [← hy,hi.elim y 0]
+  exact Ext.comp_zero ..
+
+/-- Positive affine cohomology on all faces kills every supported row
+above the actual third row. -/
+theorem higher_vanishing (n : ℕ)
+    (hw : Subsingleton (Ext (freeOpen W) F (n+4)))
+    (hU : Subsingleton (F.H' (n+3) U)) (hV : Subsingleton (F.H' (n+3) V))
+    (hT : Subsingleton (F.H' (n+3) T))
+    (hUV : Subsingleton (F.H' (n+2) (U ⊓ V)))
+    (hUT : Subsingleton (F.H' (n+2) (U ⊓ T)))
+    (hVT : Subsingleton (F.H' (n+2) (V ⊓ T)))
+    (hUVT : Subsingleton (F.H' (n+1) (TripleOpen U V T))) :
+    Subsingleton (Ext (quotient h) F (n+4)) := by
+  have huv := square_vanishing F (Opens.mayerVietorisSquare U V) (n+2) hUV hU hV
+  have hint := square_vanishing F (Opens.mayerVietorisSquare (U ⊓ T) (V ⊓ T))
+    (n+1) hUVT hUT hVT
+  have hcomp := square_vanishing F (outerSquare U V T) (n+2) hint huv hT
+  apply subsingleton_of_forall_eq 0
+  intro x
+  obtain ⟨y,hy⟩ := Ext.contravariant_sequence_exact₃ (shortExact h) F x (hw.elim _ _)
+    (show 1+(n+3)=n+4 by omega)
+  rw [← hy,hcomp.elim y 0]
+  exact Ext.comp_zero ..
+
+/-- The lower second row vanishes once the genuine first cohomology of
+the open complement and the ambient second group vanish. -/
+theorem supported_two_vanishing
+    (hw : Subsingleton (Ext (freeOpen W) F 2))
+    (hc : Subsingleton (F.H' 1 ((U ⊔ V) ⊔ T))) :
+    Subsingleton (Ext (quotient h) F 2) := by
+  apply subsingleton_of_forall_eq 0
+  intro x
+  obtain ⟨y,hy⟩ := Ext.contravariant_sequence_exact₃ (shortExact h) F x (hw.elim _ _)
+    (rfl : 1+1=2)
+  rw [← hy,hc.elim y 0]
+  exact Ext.comp_zero ..
+
+end CycleQ2ThreeOpenSupportedCechExt
+
+namespace CycleQ2SupportedExtComplex
+
+open CategoryTheory CategoryTheory.Abelian CategoryTheory.Limits TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf Sections freeOpen)
+open CycleQ2RelativeOpenSupport (quotient)
+open CycleQ2ThreeOpenCechH2 (TripleOpen)
+open CycleQ2ThreeOpenSupportedCechExt
+
+variable {X : TopCat.{0}}
+local instance : HasExt.{1} (AbSheaf X) := HasExt.standard _
+variable (U V T : Opens X) {W : Opens X} (h : (U ⊔ V) ⊔ T ≤ W)
+  (K : CochainComplex (AbSheaf X) ℤ)
+
+/-- Exactness of the actual third supported Ext row is precisely
+closed-implies-exact for triple-overlap forms modulo the three original
+pair restrictions. -/
+theorem E3_exactAt_iff (i : ℤ)
+    (hw₂ : ∀ j, Subsingleton (Ext (freeOpen W) (K.X j) 2))
+    (hw₃ : ∀ j, Subsingleton (Ext (freeOpen W) (K.X j) 3))
+    (hU₁ : ∀ j, Subsingleton ((K.X j).H' 1 U))
+    (hV₁ : ∀ j, Subsingleton ((K.X j).H' 1 V))
+    (hT₁ : ∀ j, Subsingleton ((K.X j).H' 1 T))
+    (hU₂ : ∀ j, Subsingleton ((K.X j).H' 2 U))
+    (hV₂ : ∀ j, Subsingleton ((K.X j).H' 2 V))
+    (hT₂ : ∀ j, Subsingleton ((K.X j).H' 2 T))
+    (hUV : ∀ j, Subsingleton ((K.X j).H' 1 (U ⊓ V)))
+    (hUT : ∀ j, Subsingleton ((K.X j).H' 1 (U ⊓ T)))
+    (hVT : ∀ j, Subsingleton ((K.X j).H' 1 (V ⊓ T))) :
+    (E (quotient h) 3 K).ExactAt i ↔
+      ∀ s : Sections (K.X i) (TripleOpen U V T),
+        (K.dFrom i).hom.app (op (TripleOpen U V T)) s ∈
+          (boundary U V T (K.xNext i)).range →
+        ∃ t : Sections (K.xPrev i) (TripleOpen U V T),
+          s - (K.dTo i).hom.app (op (TripleOpen U V T)) t ∈
+            (boundary U V T (K.X i)).range := by
+  have lift (j : ℤ) := connecting_surjective U V T h (K.X j) (hw₃ j)
+    (hU₂ j) (hV₂ j) (hT₂ j) (hUV j) (hUT j) (hVT j)
+  have ker (j : ℤ) (s : Sections (K.X j) (TripleOpen U V T)) :
+      tripleConnecting U V T h (K.X j) s = 0 ↔
+        s ∈ (boundary U V T (K.X j)).range := by
+    change s ∈ (tripleConnecting U V T h (K.X j)).ker ↔ _
+    rw [ker_connecting U V T h (K.X j) (hw₂ j) (hU₁ j) (hV₁ j) (hT₁ j)]
+  rw [HomologicalComplex.ExactAt, ShortComplex.ab_exact_iff]
+  change (∀ z : Ext (quotient h) (K.X i) 3,
+    z.comp (Ext.mk₀ (K.dFrom i)) (add_zero 3) = 0 →
+      ∃ y : Ext (quotient h) (K.xPrev i) 3,
+        y.comp (Ext.mk₀ (K.dTo i)) (add_zero 3) = z) ↔ _
+  constructor
+  · intro he s hs
+    obtain ⟨y,hy⟩ := he (tripleConnecting U V T h (K.X i) s) (by
+      rw [tripleConnecting_natural]
+      exact (ker _ _).mpr hs)
+    obtain ⟨t,rfl⟩ := lift _ y
+    refine ⟨t,(ker i _).mp ?_⟩
+    rw [map_sub, ← tripleConnecting_natural, hy, sub_self]
+  · intro he z hz
+    obtain ⟨s,rfl⟩ := lift i z
+    rw [tripleConnecting_natural] at hz
+    obtain ⟨t,ht⟩ := he s ((ker _ _).mp hz)
+    refine ⟨tripleConnecting U V T h _ t,?_⟩
+    rw [tripleConnecting_natural]
+    have ht' := (ker i _).mpr ht
+    rw [map_sub, sub_eq_zero] at ht'
+    exact ht'.symm
+
+end CycleQ2SupportedExtComplex
+
+#print axioms CycleQ2ThreeOpenSupportedCechExt.toSupportedH3Equiv
+#print axioms CycleQ2ThreeOpenSupportedCechExt.higher_vanishing
+#print axioms CycleQ2SupportedExtComplex.E3_exactAt_iff
