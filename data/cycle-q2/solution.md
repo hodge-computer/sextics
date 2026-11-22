@@ -1,5 +1,146 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Continuation: generic top trace, finite pencils, and the full product cover
+
+**Status, 22 November 2026, seventh checkpoint.** This continuation
+constructs the canonical trace on the actual generic threefold and
+transports its degree-six de Rham interpretation to the original
+generic ambient scheme. It also constructs finite relative pencils
+near the missing time fibers, extends the regular two-form trace
+calculation to integral source algebras, and computes ordinary de Rham
+cohomology using the full original curve and target covers. These are
+source developments with independent source review. No Lean build or
+kernel replay has been run. The sole original `sorry` in
+`Submission.missing_geometric_existence` remains. The protected target,
+manifest, and 996-file proposal, including 994 Lean files, are unchanged.
+
+### The generic trace uses the actual canonical forms
+
+The coefficient-general hypersurface calculation constructs the
+residue volume from the gradient unit ideal. It identifies the third
+ordinary exterior power with the chart ring, and carries that
+identification through the actual affine chart maps to intrinsic
+three-form sections. The coordinate-change calculation retains both
+the projective orientation and the weighted transition factor. Thus
+the oriented volume frames agree on overlaps of the original four
+weight-one charts.
+
+The resulting torus functional kills the genuine intrinsic
+two-form differential and the original alternating four-face Cech
+boundary. The latter includes the face with coordinates 1, 2, and 3,
+which requires changing the anchor from chart zero to chart one.
+Its kernel is exactly the image of that Cech boundary. Its value on
+the original homogeneous normalized section is the prescribed
+coefficient. These statements apply to the monic generic coefficient
+map using its proved smoothness and actual gradient witnesses.
+[Coefficient-general volume, overlap identities, and both boundary cancellations](GeometricAffineExteriorAcyclicity.lean)
+
+For a smooth threefold with four affine coordinate opens, the actual
+intrinsic top-term inclusion and ordered Mayer--Vietoris maps give
+a surjection from torus three-forms to degree-six de Rham cohomology.
+Its kernel has the explicit form
+\[
+ s=\delta c-d\eta,
+\]
+where \(c\) is a cochain on the original four triple intersections and
+\(\eta\) is an actual intrinsic two-form on the torus. Applying the
+proved generic functional therefore gives an additive isomorphism
+\[
+ H^6_{\mathrm{dR}}(T_K/K)\simeq K.
+\]
+The map from canonical \(H^3\) to this group is the actual top-term
+inclusion and is itself an isomorphism. The class obtained from the
+original normalized section has trace one.
+[Intrinsic top-term comparison and generic de Rham trace](GeometricLocalGysinProjection.lean)
+
+This calculation is also bound to the original generic ambient
+scheme. The coefficient change is proved Cartesian on the actual
+four coordinate charts, producing a scheme isomorphism over the
+unchanged coefficient field. Its open-image comparison commutes
+with the differential in every exterior degree. The induced exact
+equivalence on sheaves then transports both Hodge cohomology and
+global derived de Rham cohomology. The trace-one class on the
+original generic ambient scheme is the image of the same normalized
+section through these specific maps.
+[Actual generic scheme isomorphism](GeometricMonicGenericSupport.lean)
+[All-degree differential and cohomology transport](GeometricLocalGysinProjection.lean)
+
+### Finite pencils retain the marked time curve and the full fibers
+
+Two actual weight-one linear forms cover the added boundary of the
+original marked closure. Removing the proper image of their common
+zero locus gives a time neighborhood \(W\) such that
+\[
+ j(D)\cup W=C.
+\]
+Over every affine time subopen of \(W\), the reciprocal homogeneous
+fractions define a map from the finite relative normalization to
+the product of that time subopen with the original projective line.
+Its two chart inverse images are the original linear-form opens.
+They are affine, and the map is proper, so it is finite. The
+normalization retains an isomorphic copy of the entire original
+marked smooth open. This construction does not assert smoothness
+of the completed surface.
+[Boundary pencil, actual chart inverse images, and finite relative model](GeometricMarkedProjectionSurvives.lean)
+
+The algebraic trace calculation now uses a genuine two-form over
+the original base field. Contracting its distinguished coefficient
+direction gives the original relative one-form trace, and wedging
+back produces a regular two-form on the base curve algebra. The
+field-level construction is independent of the chosen differential
+frame. A further corollary removes smoothness of the integral source
+algebra: it maps that algebra into the integral closure in its
+unchanged function field, proves smoothness of this normal curve,
+and proves that the pulled-back field form is exactly the original
+one. The base algebra is still required to be a finite-type Dedekind
+curve algebra with the stated differential frame; binding all of
+these algebraic inputs to the finite pencil is a remaining step.
+[Two-form contraction and field-trace identities](GeometricUniversalWeightedDeRham.lean)
+[Regular two-form trace over a smooth source curve](GeometricMonicGenericSupport.lean)
+[Integral-source trace through the same function field](GeometricMarkedProjectionSurvives.lean)
+
+### The original full product has a finite-face cohomology comparison
+
+Ordinary forms on every affine rectangle now agree with the tensor
+description without requiring either affine factor to have a global
+cotangent frame. This comparison retains the actual restrictions
+and the signed differential.
+
+The finite target cover is assembled by successive mapping
+cocones, with the actual positive augmentation from sections and
+the original alternating overlap map. A single bounded-below
+injective resolution proves the comparison on every ambient open.
+Applying the original two curve charts outside the four target
+charts retains the three curve faces and all fifteen nonempty
+target faces. Each required intersection is an actual affine
+rectangle; no union of target charts is assumed affine. The
+resulting `globalClasses` equivalence computes the ordinary derived
+de Rham classes of the full product, and `classes_natural` identifies
+its actual restriction maps.
+[Affine rectangle descent and full two-curve/four-target comparison](GeometricProperRectangleTrace.lean)
+
+### Remaining work before the original admission can be removed
+
+The new degree-six trace identifies the generic target trace, but
+does not by itself supply the required degree-three residue relation.
+The outstanding comparisons are still substantive:
+
+1. Bind the finite-pencil algebras to the regular trace theorem,
+   glue the traced marked pairing into a global regular one-form
+   on the completed time curve, and identify it with the original
+   Gysin pairing at the marked point.
+2. Spread the original fixed test representative and its nonzero
+   marked pairing over the same coefficient neighborhood. The
+   coefficient-general canonical trace alone does not construct
+   that test class.
+3. Bind the full finite-face comparison to the tensor product,
+   cup pairing, and ordinary invariant cylinder of the original
+   full-product class, with the existing signs and restrictions.
+4. Compare its relevant component with the original 66 pole
+   generators and obtain a nonzero vector in the actual
+   `genericFrameKernel`. The arithmetic simplicity theorem would
+   then imply the unchanged protected exterior-form exactness.
+
 ## Continuation: intrinsic pairing maps and the completed time curve
 
 **Status, 22 November 2026, sixth checkpoint.** This continuation binds

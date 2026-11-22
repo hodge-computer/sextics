@@ -2985,3 +2985,2362 @@ end
 #print axioms CycleQ2LiteralCubicDeRham.toDeRham_ambientResidueClass
 #print axioms CycleQ2LiteralCubicDeRham.surfaceToDeRham_ne_zero
 #print axioms CycleQ2LiteralCubicDeRham.derivedTrace_surface_residueGenerator
+
+/-! A coefficient-general affine hypersurface residue. This is formed in
+the actual Kähler module of the polynomial quotient. The gradient span
+is later supplied by the original fixed and generic Jacobian certificates. -/
+
+noncomputable section
+namespace CycleQ2HodgeHypersurfaceVolume
+
+open Module MvPolynomial
+open CycleQ2HodgeEulerChartDerivations (Poly Hyp mk)
+open CycleQ2HodgeEulerContractionCharts
+  (gradientEntry dx Patch patchMap basis basis_apply residueAlong
+    partial_smul_residueAlong patchResidue patchResidue_eq patchUnit)
+open CycleQ2LiteralThreefoldResidueMinors (signedOmitted signedOmitted_cross)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback onePullback_d)
+open CycleQ2AffineDeRhamFunctorial (exteriorPullback_id)
+open CycleQ2GeometricExteriorSheaf (exteriorMap_wedge)
+open CycleQ2ExteriorTopBaseChange (topCoordinateEquiv)
+open scoped KaehlerDifferential
+
+variable {K : Type} [CommRing K] (q : Poly K)
+  (hg : Ideal.span (Set.range (gradientEntry q)) = ⊤)
+
+theorem bezout : ∃ c : Fin 4 → Hyp q, ∑ j, c j * gradientEntry q j = 1 :=
+  Ideal.mem_span_range_iff_exists_fun.mp ((Ideal.eq_top_iff_one _).mp hg)
+
+private def coefficient : Fin 4 → Hyp q := Classical.choose (bezout q hg)
+
+private theorem coefficient_identity : ∑ j, coefficient q hg j * gradientEntry q j = 1 :=
+  Classical.choose_spec (bezout q hg)
+
+/-- The regular residue on the whole actual affine hypersurface chart. -/
+def volume : ⋀[Hyp q]^3 Ω[Hyp q⁄K] :=
+  ∑ j, coefficient q hg j • signedOmitted (Hyp q) (dx q (AlgHom.id K (Hyp q))) j
+
+variable {S : Type} [CommRing S] [Algebra K S] (f : Hyp q →ₐ[K] S)
+
+private theorem mapped_coefficient_identity :
+    ∑ j, f (coefficient q hg j) * f (gradientEntry q j) = 1 := by
+  simpa only [map_sum,map_mul,map_one] using congrArg f (coefficient_identity q hg)
+
+private theorem pull_signedOmitted (j : Fin 4) :
+    exteriorPullback f 3 (signedOmitted (Hyp q) (dx q (AlgHom.id K (Hyp q))) j) =
+      signedOmitted S (dx q f) j := by
+  rw [signedOmitted,map_smulₛₗ,CycleQ2ExactFrameThreeDeRham.exteriorPullback,
+    exteriorMap_wedge]
+  simp only [map_pow,map_neg,map_one]
+  apply congrArg ((-1 : S)^j.val • ·)
+  apply congrArg (exteriorPower.ιMulti S 3)
+  funext a
+  exact onePullback_d f (mk q (X (j.succAbove a)))
+
+/-- All four gradient equations hold after the original algebra map,
+including when some individual partials are zero divisors. -/
+theorem gradient_smul_volume (j : Fin 4) :
+    f (gradientEntry q j) • exteriorPullback f 3 (volume q hg) =
+      signedOmitted S (dx q f) j := by
+  let z := signedOmitted S (dx q f)
+  have hc (a : Fin 4) : f (gradientEntry q j) • z a = f (gradientEntry q a) • z j :=
+    signedOmitted_cross _ _ (CycleQ2HodgeEulerContractionCharts.gradient_relation q f) a j
+  rw [volume,map_sum]
+  simp only [map_smulₛₗ,pull_signedOmitted,Finset.smul_sum]
+  change (∑ a, f (gradientEntry q j) • (f (coefficient q hg a) • z a)) = z j
+  calc
+    _ = ∑ a, (f (coefficient q hg a) * f (gradientEntry q a)) • z j := by
+      apply Finset.sum_congr rfl
+      intro a _
+      rw [smul_comm (f (gradientEntry q j)),hc,mul_smul]
+    _ = _ := by rw [← Finset.sum_smul,mapped_coefficient_identity,one_smul]
+
+/-- These equations determine the residue uniquely, so its normalization
+does not depend on the chosen Bézout coefficients. -/
+theorem volume_unique (ω : ⋀[S]^3 Ω[S⁄K])
+    (hω : ∀ j, f (gradientEntry q j) • ω = signedOmitted S (dx q f) j) :
+    ω = exteriorPullback f 3 (volume q hg) := by
+  let v := exteriorPullback f 3 (volume q hg)
+  calc
+    ω = (∑ j, f (coefficient q hg j) * f (gradientEntry q j)) • ω := by
+      rw [mapped_coefficient_identity,one_smul]
+    _ = (∑ j, f (coefficient q hg j) * f (gradientEntry q j)) • v := by
+      simp only [Finset.sum_smul,mul_smul]
+      exact Finset.sum_congr rfl fun j _ =>
+        congrArg (fun a => f (coefficient q hg j) • a)
+          ((hω j).trans (gradient_smul_volume q hg f j).symm)
+    _ = _ := by rw [mapped_coefficient_identity,one_smul]
+
+theorem volume_eq_residue (j : Fin 4) (hj : IsUnit (f (gradientEntry q j))) :
+    exteriorPullback f 3 (volume q hg) = residueAlong q f j hj :=
+  (IsUnit.smul_left_cancel hj).mp ((gradient_smul_volume q hg f j).trans
+    (partial_smul_residueAlong q f j hj).symm)
+
+theorem volume_on_patch (j : Fin 4) :
+    exteriorPullback (patchMap q j) 3 (volume q hg) = patchResidue q j :=
+  volume_eq_residue q hg (patchMap q j) j
+    (IsLocalization.Away.algebraMap_isUnit (S := Patch q j) _)
+
+theorem coordinateForms_span :
+    Submodule.span (Hyp q) (Set.range (dx q (AlgHom.id K (Hyp q)))) = ⊤ := by
+  rw [eq_top_iff]
+  intro ω _
+  obtain ⟨v,rfl⟩ := CycleQ2HodgeCotangentChartPresentation.coordinateMap_surjective q ω
+  rw [CycleQ2HodgeCotangentChartPresentation.coordinateMap_apply]
+  apply Submodule.sum_mem
+  intro j _
+  exact Submodule.smul_mem _ _ (Submodule.subset_span ⟨j,rfl⟩)
+
+private theorem omitted_coordinate (s : Set.powersetCard (Fin 4) 3) :
+    ∃ j : Fin 4, Set.powersetCard.ofFinEmbEquiv.symm s = Fin.succAboveOrderEmb j := by
+  obtain ⟨s,hs⟩ := s
+  change s.card = 3 at hs
+  have hcard : sᶜ.card = 1 := by simp [Finset.card_compl,hs]
+  obtain ⟨j,hj⟩ := Finset.card_eq_one.mp hcard
+  have he : s = {j}ᶜ := by rw [← hj,compl_compl]
+  subst s
+  exact ⟨j,Finset.orderEmbOfFin_compl_singleton_eq_succAboveOrderEmb j⟩
+
+private theorem wedge_coefficient (s : Set.powersetCard (Fin 4) 3) :
+    ∃ c : Hyp q, c • volume q hg =
+      exteriorPower.ιMulti_family (Hyp q) 3 (dx q (AlgHom.id K (Hyp q))) s := by
+  obtain ⟨j,hj⟩ := omitted_coordinate s
+  refine ⟨(-1 : Hyp q)^j.val * gradientEntry q j,?_⟩
+  have hw := gradient_smul_volume q hg (AlgHom.id K (Hyp q)) j
+  rw [exteriorPullback_id] at hw
+  rw [exteriorPower.ιMulti_family,hj,mul_smul,hw]
+  change (-1 : Hyp q)^j.val • ((-1 : Hyp q)^j.val • _) = _
+  rw [← mul_smul,← mul_pow,neg_mul_neg,one_mul,one_pow,one_smul]
+
+private theorem volume_surjective : Function.Surjective (fun c : Hyp q => c • volume q hg) := by
+  let m := LinearMap.toSpanSingleton (Hyp q) (⋀[Hyp q]^3 Ω[Hyp q⁄K]) (volume q hg)
+  have hle : Submodule.span (Hyp q)
+      (Set.range (exteriorPower.ιMulti_family (Hyp q) 3 (dx q (AlgHom.id K (Hyp q))))) ≤
+      LinearMap.range m := by
+    apply Submodule.span_le.mpr
+    rintro _ ⟨s,rfl⟩
+    exact wedge_coefficient q hg s
+  have htop := exteriorPower.ιMulti_family_span_of_span (n := 3) (Hyp q) (coordinateForms_span q)
+  exact LinearMap.range_eq_top.mp (top_le_iff.mp (htop ▸ hle) : LinearMap.range m = ⊤)
+
+private theorem patch_volume_bijective (j : Fin 4) :
+    Function.Bijective (fun c : Patch q j => c • patchResidue q j) := by
+  let u : (Patch q j)ˣ := (patchUnit q j)⁻¹ * (-1 : (Patch q j)ˣ)^j.val
+  let e := (LinearEquiv.smulOfUnit u : Patch q j ≃ₗ[Patch q j] Patch q j).trans
+    (topCoordinateEquiv (basis q j)).symm
+  have he (a : Patch q j) : e a = a • patchResidue q j := by
+    rw [patchResidue_eq]
+    change ((u : Patch q j) * a) • exteriorPower.ιMulti (Patch q j) 3 (basis q j) =
+      a • ((u : Patch q j) • exteriorPower.ιMulti (Patch q j) 3 (basis q j))
+    rw [smul_smul,mul_comm]
+  simpa only [he] using e.bijective
+
+private theorem volume_injective : Function.Injective (fun c : Hyp q => c • volume q hg) := by
+  intro c d hcd
+  apply Localization.algebraMap_injective_of_span_eq_top _ hg
+  funext a
+  obtain ⟨a,⟨j,rfl⟩⟩ := a
+  simp only [Pi.algebraMap_apply]
+  apply (patch_volume_bijective q j).injective
+  have he := congrArg (exteriorPullback (patchMap q j) 3) hcd
+  simp only [map_smulₛₗ] at he
+  rw [volume_on_patch q hg j] at he
+  simpa only [AlgHom.toRingHom_eq_coe,patchMap,IsScalarTower.coe_toAlgHom] using he
+
+/-- Every actual three-form has a unique coefficient in this regular
+residue, over the coefficient ring itself. -/
+theorem volume_bijective : Function.Bijective (fun c : Hyp q => c • volume q hg) :=
+  ⟨volume_injective q hg,volume_surjective q hg⟩
+
+def volumeEquiv : Hyp q ≃ₗ[Hyp q] (⋀[Hyp q]^3 Ω[Hyp q⁄K]) :=
+  LinearEquiv.ofBijective (LinearMap.toSpanSingleton (Hyp q) _ (volume q hg))
+    (volume_bijective q hg)
+
+theorem volumeEquiv_apply (c : Hyp q) : volumeEquiv q hg c = c • volume q hg := rfl
+
+end CycleQ2HodgeHypersurfaceVolume
+end
+
+#print axioms CycleQ2HodgeHypersurfaceVolume.gradient_smul_volume
+#print axioms CycleQ2HodgeHypersurfaceVolume.volume_bijective
+
+noncomputable section
+namespace CycleQ2HodgeHypersurfaceVolume
+
+open Module TensorProduct
+open CycleQ2HodgeEulerChartDerivations (Poly Hyp)
+open CycleQ2HodgeEulerContractionCharts (gradientEntry)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open CycleQ2ProjectiveExteriorBaseChange (raw)
+open scoped KaehlerDifferential TensorProduct
+
+variable {K S : Type} [CommRing K] [CommRing S] [Algebra K S]
+  (q : Poly K) (hg : Ideal.span (Set.range (gradientEntry q)) = ⊤)
+  [Algebra (Hyp q) S] [IsScalarTower K (Hyp q) S]
+  [Algebra.FormallyEtale (Hyp q) S]
+  [Module.Finite (Hyp q) Ω[Hyp q⁄K]] [Module.Projective (Hyp q) Ω[Hyp q⁄K]]
+
+private theorem cotangent_baseChange :
+    IsBaseChange S (KaehlerDifferential.map K K (Hyp q) S) :=
+  KaehlerDifferential.isBaseChange_of_formallyEtale K (Hyp q) S
+
+private theorem top_baseChange :
+    IsBaseChange S (raw (S := S) 3 (KaehlerDifferential.map K K (Hyp q) S)) :=
+  CycleQ2ProjectiveExteriorBaseChange.isBaseChange 3 (cotangent_baseChange (S := S) q)
+
+/-- On every formally étale scalar extension, in particular every
+actual chart localization, the same residue remains a basis. -/
+def localizedVolumeEquiv : S ≃ₗ[S] (⋀[S]^3 Ω[S⁄K]) :=
+  (TensorProduct.AlgebraTensorModule.rid (Hyp q) S S).symm.trans
+    (((volumeEquiv q hg).baseChange (Hyp q) S _ _).trans (top_baseChange (S := S) q).equiv)
+
+theorem localizedVolumeEquiv_apply (a : S) :
+    localizedVolumeEquiv (S := S) q hg a =
+      a • exteriorPullback (IsScalarTower.toAlgHom K (Hyp q) S) 3 (volume q hg) := by
+  have ha : (TensorProduct.AlgebraTensorModule.rid (Hyp q) S S).symm a = a ⊗ₜ[Hyp q] (1 : Hyp q) := by
+    apply (TensorProduct.AlgebraTensorModule.rid (Hyp q) S S).injective
+    rw [LinearEquiv.apply_symm_apply,TensorProduct.AlgebraTensorModule.rid_tmul,one_smul]
+  change (top_baseChange (S := S) q).equiv
+    (((volumeEquiv q hg).baseChange (Hyp q) S _ _)
+      ((TensorProduct.AlgebraTensorModule.rid (Hyp q) S S).symm a)) = _
+  rw [ha,LinearEquiv.baseChange_tmul,volumeEquiv_apply,one_smul,IsBaseChange.equiv_tmul] <;> rfl
+
+end CycleQ2HodgeHypersurfaceVolume
+end
+
+#print axioms CycleQ2HodgeHypersurfaceVolume.localizedVolumeEquiv_apply
+
+noncomputable section
+namespace CycleQ2IntrinsicOrdinaryExterior
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite Module
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms differential onBasisIso onBasisIso_d)
+open CycleQ2IntrinsicFramedAffineSite (FramedOpen frame functions frame_apply)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (restrict)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback onePullback_d)
+open CycleQ2GeometricExteriorSheaf (exteriorMap_wedge)
+open scoped KaehlerDifferential
+
+section Algebra
+
+variable {k A B : Type} [CommRing k] [CommRing A] [CommRing B]
+  [Algebra k A] [Algebra k B] (e : A →ₐ[k] B)
+
+theorem pullback_exact_wedge (n : ℕ) (a : Fin n → A) :
+    exteriorPullback e n (exteriorPower.ιMulti A n (KaehlerDifferential.D k A ∘ a)) =
+      exteriorPower.ιMulti B n (KaehlerDifferential.D k B ∘ (e ∘ a)) := by
+  rw [CycleQ2ExactFrameThreeDeRham.exteriorPullback,exteriorMap_wedge]
+  apply congrArg (exteriorPower.ιMulti B n)
+  funext j
+  exact onePullback_d e (a j)
+
+theorem pullback_exact_symbol (n : ℕ) (c : A) (a : Fin n → A) :
+    exteriorPullback e n (c • exteriorPower.ιMulti A n (KaehlerDifferential.D k A ∘ a)) =
+      e c • exteriorPower.ιMulti B n (KaehlerDifferential.D k B ∘ (e ∘ a)) := by
+  rw [map_smulₛₗ,pullback_exact_wedge]
+
+end Algebra
+
+variable {k : Type} [Field k] [CharZero k] {X : Scheme.{0}}
+  (f : X ⟶ Spec (CommRingCat.of k)) (r : ℕ)
+  [SmoothOfRelativeDimension r f]
+
+/-- The actual intrinsic differential has its native exact-symbol
+formula on every open. Affineness or a chosen frame on that open is
+not required; the equality is checked on its original exact affine
+basis and retains the canonical ordinary-to-sheaf section map. -/
+theorem differential_exact_symbol (U : X.Opens) (n : ℕ)
+    (c : Γ(X,U)) (a : Fin n → Γ(X,U)) :
+    letI : Algebra k Γ(X,U) := (sectionCoefficients f U).toAlgebra
+    (differential f r n).hom.app (op U)
+      ((toSheaf f r n).app (op U)
+        (c • exteriorPower.ιMulti Γ(X,U) n (KaehlerDifferential.D k Γ(X,U) ∘ a))) =
+      (toSheaf f r (n+1)).app (op U)
+        (exteriorPower.ιMulti Γ(X,U) (n+1)
+          (KaehlerDifferential.D k Γ(X,U) ∘ Matrix.vecCons c a)) := by
+  letI : Algebra k Γ(X,U) := (sectionCoefficients f U).toAlgebra
+  apply TopCat.Presheaf.IsSheaf.section_ext (sheafForms f r (n+1)).property
+  intro x hx
+  obtain ⟨V,hV,hxV,hVU⟩ := Opens.isBasis_iff_nbhd.mp
+    (CycleQ2FiniteExactAffineAtlas.isBasis f r) hx
+  let W : FramedOpen f r := ⟨V,hV⟩
+  letI : Algebra k Γ(X,V) := (sectionCoefficients f V).toAlgebra
+  let e := restrict f hVU
+  let s := c • exteriorPower.ιMulti Γ(X,U) n (KaehlerDifferential.D k Γ(X,U) ∘ a)
+  let t := exteriorPower.ιMulti Γ(X,U) (n+1)
+    (KaehlerDifferential.D k Γ(X,U) ∘ Matrix.vecCons c a)
+  refine ⟨V,hVU,hxV,?_⟩
+  change (sheafForms f r (n+1)).obj.map (homOfLE hVU).op
+      ((differential f r n).hom.app (op U) ((toSheaf f r n).app (op U) s)) =
+    (sheafForms f r (n+1)).obj.map (homOfLE hVU).op
+      ((toSheaf f r (n+1)).app (op U) t)
+  rw [← (differential f r n).hom.naturality_apply,
+    ← (toSheaf f r n).naturality_apply,
+    ← (toSheaf f r (n+1)).naturality_apply]
+  change (differential f r n).hom.app (op V)
+      ((toSheaf f r n).app (op V) (exteriorPullback e n s)) =
+    (toSheaf f r (n+1)).app (op V) (exteriorPullback e (n+1) t)
+  rw [show s = c • exteriorPower.ιMulti Γ(X,U) n
+      (KaehlerDifferential.D k Γ(X,U) ∘ a) from rfl,
+    show t = exteriorPower.ιMulti Γ(X,U) (n+1)
+      (KaehlerDifferential.D k Γ(X,U) ∘ Matrix.vecCons c a) from rfl,
+    pullback_exact_symbol,pullback_exact_wedge,
+    toSheaf_onBasis f r n W,toSheaf_onBasis f r (n+1) W]
+  apply (ConcreteCategory.bijective_of_isIso
+    ((onBasisIso f r (n+1)).hom.app (op W))).injective
+  rw [Iso.inv_hom_id_apply]
+  have hd := ConcreteCategory.congr_hom (onBasisIso_d f r n W)
+    ((onBasisIso f r n).inv.app (op W)
+      (e c • exteriorPower.ιMulti Γ(X,V) n
+        (KaehlerDifferential.D k Γ(X,V) ∘ (e ∘ a))))
+  rw [Iso.inv_hom_id_apply] at hd
+  rw [hd,CycleQ2FrameCanonicalDifferential.d_exact_symbol
+    (frame f r W) (functions f r W) (frame_apply f r W)]
+  apply congrArg (exteriorPower.ιMulti Γ(X,V) (n+1))
+  funext j
+  cases j using Fin.cases <;> rfl
+
+end CycleQ2IntrinsicOrdinaryExterior
+end
+
+#print axioms CycleQ2IntrinsicOrdinaryExterior.differential_exact_symbol
+
+noncomputable section
+namespace CycleQ2RelativeAffineChartSections
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2GeometricAffineChartSections
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2GenericAffineKahlerLocalization (p)
+open CycleQ2RelativeSectionPullback (sectionPull)
+
+attribute [local instance] CycleQ2GenericAffineKahlerLocalization.sectionsAlgebra
+
+variable {k A : Type} [Field k] [CommRing A] [Algebra k A]
+  {X : Scheme.{0}} {U : X.Opens}
+  (e : U.toScheme ≅ Spec (CommRingCat.of A))
+  (f : X ⟶ Spec (CommRingCat.of k))
+  (h : e.inv ≫ U.ι ≫ f = p k A)
+
+theorem chartSectionIso_coefficients (V : Over U) (c : k) :
+    (chartSectionIso e V).hom (sectionCoefficients f V.left c) =
+      algebraMap A Γ(Spec (CommRingCat.of A),(chartOpensEquiv e).functor.obj V)
+        (algebraMap k A c) := by
+  let j := e.inv ≫ U.ι
+  let W := (chartOpensEquiv e).functor.obj V
+  letI : Algebra k Γ(X,V.left) := (sectionCoefficients f V.left).toAlgebra
+  letI : Algebra k Γ(Spec (CommRingCat.of A),W) :=
+    (sectionCoefficients (p k A) W).toAlgebra
+  have hj : j ≫ f = p k A := by simpa only [j,Category.assoc] using h
+  have hc := (sectionPull f (p k A) j hj V.left W le_rfl).commutes c
+  change j.appLE V.left W le_rfl (sectionCoefficients f V.left c) =
+    sectionCoefficients (p k A) W c at hc
+  rw [Scheme.Hom.appLE_eq_app] at hc
+  exact hc.trans (CycleQ2GenericAffineKahlerLocalization.sectionCoefficients_affine k A W c)
+
+/-- Actual affine chart functions preserve the relative coefficient
+field on every subopen, over an arbitrary field. -/
+theorem chartSection_coefficients (V : Over U) (c : k) :
+    chartSection e V (algebraMap k A c) = sectionCoefficients f V.left c := by
+  apply (ConcreteCategory.bijective_of_isIso (chartSectionIso e V).hom).injective
+  change (chartSectionIso e V).hom ((chartSectionIso e V).inv
+    (algebraMap A Γ(Spec (CommRingCat.of A),(chartOpensEquiv e).functor.obj V)
+      (algebraMap k A c))) = _
+  rw [Iso.inv_hom_id_apply,chartSectionIso_coefficients e f h]
+
+def chartAlgHom (V : Over U) :
+    letI : Algebra k Γ(X,V.left) := (sectionCoefficients f V.left).toAlgebra
+    A →ₐ[k] Γ(X,V.left) := by
+  letI : Algebra k Γ(X,V.left) := (sectionCoefficients f V.left).toAlgebra
+  exact { toRingHom := chartSection e V
+          commutes' := chartSection_coefficients e f h V }
+
+theorem chartAlgHom_restrict {V W : Over U} (a : V ⟶ W) (z : A) :
+    X.presheaf.map a.left.op (chartAlgHom e f h W z) = chartAlgHom e f h V z :=
+  chartSection_naturality e a z
+
+theorem chartAlgHom_top_bijective :
+    Function.Bijective (chartAlgHom e f h (Over.mk (𝟙 U))) := by
+  haveI : IsIso (CommRingCat.ofHom (chartSection e (Over.mk (𝟙 U)))) := by
+    rw [chartSection_top]
+    infer_instance
+  exact ConcreteCategory.bijective_of_isIso
+    (CommRingCat.ofHom (chartSection e (Over.mk (𝟙 U))))
+
+def chartAlgEquiv :
+    letI : Algebra k Γ(X,U) := (sectionCoefficients f U).toAlgebra
+    A ≃ₐ[k] Γ(X,U) := by
+  letI : Algebra k Γ(X,U) := (sectionCoefficients f U).toAlgebra
+  exact AlgEquiv.ofBijective (chartAlgHom e f h (Over.mk (𝟙 U)))
+    (chartAlgHom_top_bijective e f h)
+
+theorem chartAlgHom_etale (hU : IsAffineOpen U) (V : Over U)
+    (hV : IsAffineOpen V.left) : (chartAlgHom e f h V).toRingHom.Etale := by
+  have he : (chartAlgHom e f h V).toRingHom =
+      (X.presheaf.map V.hom.op).hom.comp
+        (chartAlgHom e f h (Over.mk (𝟙 U))).toRingHom := by
+    apply RingHom.ext
+    intro a
+    exact (chartAlgHom_restrict e f h
+      (Over.homMk V.hom : V ⟶ Over.mk (𝟙 U)) a).symm
+  rw [he]
+  exact RingHom.Etale.stableUnderComposition _ _
+    (RingHom.Etale.of_bijective (chartAlgHom_top_bijective e f h))
+    (CycleQ2RelativeAffineOverlap.restrict_etale V.hom.le hU hV)
+
+end CycleQ2RelativeAffineChartSections
+end
+
+#print axioms CycleQ2RelativeAffineChartSections.chartSection_coefficients
+
+noncomputable section
+namespace CycleQ2HodgeHypersurfaceSheafVolume
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite Module
+open CycleQ2HodgeEulerChartDerivations (Poly Hyp)
+open CycleQ2HodgeEulerContractionCharts (gradientEntry)
+open CycleQ2HodgeHypersurfaceVolume (volume localizedVolumeEquiv localizedVolumeEquiv_apply)
+open CycleQ2RelativeAffineChartSections (chartAlgHom chartAlgHom_etale)
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms)
+open CycleQ2IntrinsicOrdinaryExterior (toSheaf toSheaf_bijective)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2RelativeAffineOverlap (restrict)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open CycleQ2AffineDeRhamFunctorial (exteriorPullback_comp)
+open CycleQ2WeightedCoordinateExterior (Form)
+
+variable {k : Type} [Field k] [CharZero k] (q : Poly k)
+  (hg : Ideal.span (Set.range (gradientEntry q)) = ⊤)
+  {X : Scheme.{0}} {U : X.Opens}
+  (e : U.toScheme ≅ Spec (CommRingCat.of (Hyp q)))
+  (f : X ⟶ Spec (CommRingCat.of k))
+  (h : e.inv ≫ U.ι ≫ f = CycleQ2GenericAffineKahlerLocalization.p k (Hyp q))
+  [SmoothOfRelativeDimension 3 f]
+
+private theorem chart_smooth : Algebra.Smooth k (Hyp q) := by
+  let j := e.inv ≫ U.ι
+  have hd := smoothOfRelativeDimension_comp 0 3 j f
+  have hj : j ≫ f = CycleQ2GenericAffineKahlerLocalization.p k (Hyp q) := by
+    simpa only [j,Category.assoc] using h
+  rw [hj] at hd
+  letI := hd
+  have hs : Smooth (CycleQ2GenericAffineKahlerLocalization.p k (Hyp q)) :=
+    SmoothOfRelativeDimension.smooth 3 _
+  exact RingHom.smooth_algebraMap.mp ((HasRingHomProperty.Spec_iff (P := @Smooth)).mp hs)
+
+/-- The actual affine-chart residue as a genuine intrinsic three-form
+section on any subopen of the chart. -/
+def sectionVolume (V : Over U) : (sheafForms f 3 3).obj.obj (op V.left) :=
+  letI : Algebra k Γ(X,V.left) := (sectionCoefficients f V.left).toAlgebra
+  (toSheaf f 3 3).app (op V.left)
+    (exteriorPullback (chartAlgHom e f h V) 3 (volume q hg))
+
+theorem sectionVolume_restrict {V W : Over U} (a : V ⟶ W) :
+    (sheafForms f 3 3).obj.map a.left.op (sectionVolume q hg e f h W) =
+      sectionVolume q hg e f h V := by
+  letI : Algebra k Γ(X,V.left) := (sectionCoefficients f V.left).toAlgebra
+  letI : Algebra k Γ(X,W.left) := (sectionCoefficients f W.left).toAlgebra
+  change (sheafForms f 3 3).obj.map a.left.op
+    ((toSheaf f 3 3).app (op W.left)
+      (exteriorPullback (chartAlgHom e f h W) 3 (volume q hg))) = _
+  rw [← (toSheaf f 3 3).naturality_apply]
+  change (toSheaf f 3 3).app (op V.left)
+    (exteriorPullback (restrict f a.left.le) 3
+      (exteriorPullback (chartAlgHom e f h W) 3 (volume q hg))) = _
+  rw [← exteriorPullback_comp]
+  have he : (restrict f a.left.le).comp (chartAlgHom e f h W) = chartAlgHom e f h V := by
+    ext z
+    exact CycleQ2RelativeAffineChartSections.chartAlgHom_restrict e f h a z
+  rw [he]
+  rfl
+
+/-- On an arbitrary affine subopen, every actual intrinsic three-form
+has a unique coefficient in this same chart residue. The proof uses
+the genuine chart restriction, whose étaleness was established from
+the actual open immersion. -/
+def affineSectionEquiv (hU : IsAffineOpen U) (V : Over U) (hV : IsAffineOpen V.left) :
+    Γ(X,V.left) ≃+ (sheafForms f 3 3).obj.obj (op V.left) := by
+  letI : Algebra k Γ(X,V.left) := (sectionCoefficients f V.left).toAlgebra
+  letI : Algebra (Hyp q) Γ(X,V.left) := (chartAlgHom e f h V).toRingHom.toAlgebra
+  letI : IsScalarTower k (Hyp q) Γ(X,V.left) := IsScalarTower.of_algHom (chartAlgHom e f h V)
+  letI : Algebra.Etale (Hyp q) Γ(X,V.left) := (chartAlgHom_etale e f h hU V hV).toAlgebra
+  letI : Algebra.Smooth k (Hyp q) := chart_smooth q e f h
+  exact (localizedVolumeEquiv (S := Γ(X,V.left)) q hg).toAddEquiv.trans
+    (AddEquiv.ofBijective ((toSheaf f 3 3).app (op V.left)).hom
+      (toSheaf_bijective f 3 3 hV))
+
+theorem affineSectionEquiv_apply (hU : IsAffineOpen U) (V : Over U)
+    (hV : IsAffineOpen V.left) (c : Γ(X,V.left)) :
+    letI : Algebra k Γ(X,V.left) := (sectionCoefficients f V.left).toAlgebra
+    affineSectionEquiv q hg e f h hU V hV c =
+      (toSheaf f 3 3).app (op V.left)
+        (c • exteriorPullback (chartAlgHom e f h V) 3 (volume q hg)) := by
+  letI : Algebra k Γ(X,V.left) := (sectionCoefficients f V.left).toAlgebra
+  letI : Algebra (Hyp q) Γ(X,V.left) := (chartAlgHom e f h V).toRingHom.toAlgebra
+  letI : IsScalarTower k (Hyp q) Γ(X,V.left) := IsScalarTower.of_algHom (chartAlgHom e f h V)
+  letI : Algebra.Etale (Hyp q) Γ(X,V.left) := (chartAlgHom_etale e f h hU V hV).toAlgebra
+  letI : Algebra.Smooth k (Hyp q) := chart_smooth q e f h
+  change (toSheaf f 3 3).app (op V.left)
+    (localizedVolumeEquiv (S := Γ(X,V.left)) q hg c) = _
+  rw [localizedVolumeEquiv_apply]
+  rfl
+
+theorem affineSectionEquiv_one (hU : IsAffineOpen U) (V : Over U)
+    (hV : IsAffineOpen V.left) :
+    affineSectionEquiv q hg e f h hU V hV 1 = sectionVolume q hg e f h V := by
+  rw [affineSectionEquiv_apply,one_smul]
+  rfl
+
+theorem affineSectionEquiv_restrict (hU : IsAffineOpen U) {V W : Over U}
+    (hV : IsAffineOpen V.left) (hW : IsAffineOpen W.left)
+    (a : V ⟶ W) (c : Γ(X,W.left)) :
+    (sheafForms f 3 3).obj.map a.left.op (affineSectionEquiv q hg e f h hU W hW c) =
+      affineSectionEquiv q hg e f h hU V hV (X.presheaf.map a.left.op c) := by
+  letI : Algebra k Γ(X,V.left) := (sectionCoefficients f V.left).toAlgebra
+  letI : Algebra k Γ(X,W.left) := (sectionCoefficients f W.left).toAlgebra
+  rw [affineSectionEquiv_apply,affineSectionEquiv_apply,
+    ← (toSheaf f 3 3).naturality_apply]
+  change (toSheaf f 3 3).app (op V.left)
+    (exteriorPullback (restrict f a.left.le) 3
+      (c • exteriorPullback (chartAlgHom e f h W) 3 (volume q hg))) = _
+  rw [map_smulₛₗ,← exteriorPullback_comp]
+  have he : (restrict f a.left.le).comp (chartAlgHom e f h W) = chartAlgHom e f h V := by
+    ext z
+    exact CycleQ2RelativeAffineChartSections.chartAlgHom_restrict e f h a z
+  rw [he]
+  rfl
+
+end CycleQ2HodgeHypersurfaceSheafVolume
+end
+
+#print axioms CycleQ2HodgeHypersurfaceSheafVolume.affineSectionEquiv_restrict
+
+noncomputable section
+namespace CycleQ2HodgeCubicSectionComparison
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold
+open CycleQ2HodgeEulerChartBinding (affineChart chartEquiv)
+open CycleQ2GeometricHodgeThreefoldCubic (Stage chartEquivAdjoinRoot)
+open CycleQ2GeometricAffineChartSections (chartSection chartSection_top chartSection_naturality)
+open CycleQ2HodgeTwistLocalization (inverted)
+open CycleQ2HodgeTwistFaces (face face_inf sectionsEquiv toFace toFace_section)
+open CycleQ2HodgeTwistCubicFaces (faceStage faceStage_toFace)
+open CycleQ2TorusCubicTrace (Cubic)
+
+variable {R : Type} [CommRing R] (φ : CoeffRing →+* R)
+
+theorem coordinateChartSection_top (i : Fin 4) (p : ChartRing φ i) :
+    chartSection (coordinateChart φ i) (Over.mk (𝟙 (coordinateOpen φ i))) p =
+      Proj.awayToSection (grade φ) (coord φ i.castSucc) p := by
+  have h : CommRingCat.ofHom (chartSection (coordinateChart φ i)
+      (Over.mk (𝟙 (coordinateOpen φ i)))) =
+      Proj.awayToSection (grade φ) (coord φ i.castSucc) := by
+    rw [chartSection_top]
+    simp only [coordinateChart,Proj.basicOpenIsoSpec_hom,
+      Proj.basicOpenToSpec_app_top,Category.assoc,Iso.inv_hom_id_assoc,
+      Iso.inv_hom_id,Category.comp_id]
+  exact ConcreteCategory.congr_hom h p
+
+theorem affineChartSection (i : Fin 4) (W : (threefold φ).Opens)
+    (hW : W ≤ coordinateOpen φ i) (p : ChartRing φ i) :
+    chartSection (affineChart φ i) (Over.mk (homOfLE hW)) (chartEquiv φ i p) =
+      (threefold φ).presheaf.map (homOfLE hW).op
+        (Proj.awayToSection (grade φ) (coord φ i.castSucc) p) := by
+  have hc : (affineChart φ i).inv ≫ (coordinateOpen φ i).ι ≫ 𝟙 (threefold φ) =
+      Spec.map (CommRingCat.ofHom (chartEquiv φ i).toRingHom) ≫
+        (coordinateChart φ i).inv ≫ (coordinateOpen φ i).ι := by
+    change (Spec.map (CommRingCat.ofHom (chartEquiv φ i).toRingHom) ≫
+      (coordinateChart φ i).inv) ≫ (coordinateOpen φ i).ι ≫ 𝟙 _ = _
+    simp only [Category.comp_id,Category.assoc]
+  have ht : chartSection (coordinateChart φ i) (Over.mk (𝟙 (coordinateOpen φ i))) p =
+      chartSection (affineChart φ i) (Over.mk (𝟙 (coordinateOpen φ i)))
+        (chartEquiv φ i p) := by
+    simpa only [Scheme.Hom.appLE_eq_app,Scheme.Hom.id_app,ConcreteCategory.id_apply] using
+      CycleQ2ChartSectionPullback.chartSection_pullback_top
+        (𝟙 (threefold φ)) (coordinateChart φ i) (affineChart φ i)
+        (chartEquiv φ i).toRingHom (le_refl _) hc p
+  rw [coordinateChartSection_top] at ht
+  exact (chartSection_naturality (affineChart φ i)
+    (Over.homMk (homOfLE hW) : Over.mk (homOfLE hW) ⟶
+      Over.mk (𝟙 (coordinateOpen φ i))) (chartEquiv φ i p)).symm.trans
+    (congrArg ((threefold φ).presheaf.map (homOfLE hW).op) ht.symm)
+
+variable (h : IsUnit (φ vertexCoefficient))
+
+def localizedMap (i : Fin 4) (B : Finset (Fin 3)) :
+    CycleQ2HodgeEuler.chart φ i →ₐ[R] Cubic φ i h B :=
+  (IsScalarTower.toAlgHom R (Stage φ i h) (Cubic φ i h B)).comp
+    (chartEquivAdjoinRoot φ i h).toAlgHom
+
+/-- This is the actual structure-section equivalence on each nonempty
+face of the original projective cover, over the coefficient ring. -/
+def toCubicSections (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S) :
+    Γ(threefold φ,S.inf (coordinateOpen φ)) ≃+* Cubic φ i h (inverted i S) :=
+  (CycleQ2GeometricProjectiveCurve.Twisted.resEquiv (threefold φ).sheaf
+    (face_inf φ i S hi).le (face_inf φ i S hi).ge).trans
+      ((sectionsEquiv φ i (inverted i S)).symm.trans (faceStage φ i h (inverted i S)))
+
+theorem toCubicSections_chartSection (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S)
+    (a : CycleQ2HodgeEuler.chart φ i) :
+    toCubicSections φ h i S hi
+      (chartSection (affineChart φ i) (Over.mk (homOfLE (Finset.inf_le hi))) a) =
+        localizedMap φ h i (inverted i S) a := by
+  obtain ⟨p,rfl⟩ := (chartEquiv φ i).surjective a
+  let hW : face φ i (inverted i S) ≤ coordinateOpen φ i :=
+    (face_inf φ i S hi).le.trans (Finset.inf_le hi)
+  have he :
+      CycleQ2GeometricProjectiveCurve.Twisted.resEquiv (threefold φ).sheaf
+        (face_inf φ i S hi).le (face_inf φ i S hi).ge
+        (chartSection (affineChart φ i) (Over.mk (homOfLE (Finset.inf_le hi)))
+          (chartEquiv φ i p)) =
+      sectionsEquiv φ i (inverted i S) (toFace φ i (inverted i S) p) := by
+    calc
+      _ = chartSection (affineChart φ i) (Over.mk (homOfLE hW)) (chartEquiv φ i p) :=
+        chartSection_naturality (affineChart φ i)
+          (Over.homMk (homOfLE (face_inf φ i S hi).le) :
+            Over.mk (homOfLE hW) ⟶ Over.mk (homOfLE (Finset.inf_le hi))) _
+      _ = (threefold φ).presheaf.map (homOfLE hW).op
+          (Proj.awayToSection (grade φ) (coord φ i.castSucc) p) :=
+        affineChartSection φ i _ hW p
+      _ = _ := (toFace_section φ i (inverted i S) p).symm
+  change faceStage φ i h (inverted i S)
+    ((sectionsEquiv φ i (inverted i S)).symm _) = _
+  rw [he,RingEquiv.symm_apply_apply]
+  exact faceStage_toFace φ i h (inverted i S) p
+
+end CycleQ2HodgeCubicSectionComparison
+end
+
+noncomputable section
+namespace CycleQ2HodgeCubicIntrinsicForms
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite Module
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold (threefold toBase coordinateOpen vertexCoefficient)
+open CycleQ2HodgeEulerChartBinding (affineChart affineChart_overBase)
+open CycleQ2HodgeTwistLocalization (inverted)
+open CycleQ2HodgeCubicSectionComparison (toCubicSections toCubicSections_chartSection localizedMap)
+open CycleQ2RelativeAffineChartSections (chartSection_coefficients)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms differential)
+open CycleQ2IntrinsicOrdinaryExterior (toSheaf toSheaf_bijective)
+open CycleQ2WeightedCoordinateExterior (Form)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open CycleQ2TorusCubicTrace (Cubic)
+
+variable {k : Type} [Field k] [CharZero k] (φ : CoeffRing →+* k)
+  (h : IsUnit (φ vertexCoefficient))
+
+/-- The original projective section comparison is linear over its
+actual relative coefficient field, as checked on the original chart. -/
+def sectionEquiv (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S) :
+    letI : Algebra k Γ(threefold φ,S.inf (coordinateOpen φ)) :=
+      (sectionCoefficients (toBase φ) (S.inf (coordinateOpen φ))).toAlgebra
+    Γ(threefold φ,S.inf (coordinateOpen φ)) ≃ₐ[k] Cubic φ i h (inverted i S) := by
+  letI : Algebra k Γ(threefold φ,S.inf (coordinateOpen φ)) :=
+    (sectionCoefficients (toBase φ) (S.inf (coordinateOpen φ))).toAlgebra
+  refine AlgEquiv.ofRingEquiv (f := toCubicSections φ h i S hi) ?_
+  intro a
+  rw [show algebraMap k Γ(threefold φ,S.inf (coordinateOpen φ)) a =
+      CycleQ2GeometricAffineChartSections.chartSection (affineChart φ i)
+        (Over.mk (homOfLE (Finset.inf_le hi)))
+        (algebraMap k (CycleQ2HodgeEuler.chart φ i) a) from
+      (chartSection_coefficients (affineChart φ i) (toBase φ) (affineChart_overBase φ i)
+        (Over.mk (homOfLE (Finset.inf_le hi))) a).symm,
+    toCubicSections_chartSection,AlgHom.commutes]
+
+theorem face_affine (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S) :
+    IsAffineOpen (S.inf (coordinateOpen φ)) := by
+  rw [← CycleQ2HodgeTwistFaces.face_inf φ i S hi]
+  exact CycleQ2HodgeTwistFaces.face_affine φ i (inverted i S)
+
+variable [SmoothOfRelativeDimension 3 (toBase φ)]
+
+/-- Ordinary forms on the original cubic localization and actual
+intrinsic exterior sections on the same projective face. -/
+def realize (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S) (n : ℕ) :
+    Form k (Cubic φ i h (inverted i S)) n ≃+
+      (sheafForms (toBase φ) 3 n).obj.obj (op (S.inf (coordinateOpen φ))) := by
+  letI : Algebra k Γ(threefold φ,S.inf (coordinateOpen φ)) :=
+    (sectionCoefficients (toBase φ) (S.inf (coordinateOpen φ))).toAlgebra
+  exact (CycleQ2AffineExteriorForms.extAlgEquiv k (sectionEquiv φ h i S hi).symm n).trans
+    (AddEquiv.ofBijective ((toSheaf (toBase φ) 3 n).app (op (S.inf (coordinateOpen φ)))).hom
+      (toSheaf_bijective (toBase φ) 3 n (face_affine φ i S hi)))
+
+theorem realize_exact_symbol (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S)
+    (n : ℕ) (c : Cubic φ i h (inverted i S))
+    (a : Fin n → Cubic φ i h (inverted i S)) :
+    (differential (toBase φ) 3 n).hom.app (op (S.inf (coordinateOpen φ)))
+      (realize φ h i S hi n
+        (c • exteriorPower.ιMulti (Cubic φ i h (inverted i S)) n
+          (KaehlerDifferential.D k (Cubic φ i h (inverted i S)) ∘ a))) =
+      realize φ h i S hi (n+1)
+        (exteriorPower.ιMulti (Cubic φ i h (inverted i S)) (n+1)
+          (KaehlerDifferential.D k (Cubic φ i h (inverted i S)) ∘ Matrix.vecCons c a)) := by
+  letI : Algebra k Γ(threefold φ,S.inf (coordinateOpen φ)) :=
+    (sectionCoefficients (toBase φ) (S.inf (coordinateOpen φ))).toAlgebra
+  change (differential (toBase φ) 3 n).hom.app _
+    ((toSheaf (toBase φ) 3 n).app _
+      (exteriorPullback (sectionEquiv φ h i S hi).symm.toAlgHom n _)) =
+    (toSheaf (toBase φ) 3 (n+1)).app _
+      (exteriorPullback (sectionEquiv φ h i S hi).symm.toAlgHom (n+1) _)
+  rw [CycleQ2IntrinsicOrdinaryExterior.pullback_exact_symbol,
+    CycleQ2IntrinsicOrdinaryExterior.pullback_exact_wedge,
+    CycleQ2IntrinsicOrdinaryExterior.differential_exact_symbol]
+  apply congrArg ((toSheaf (toBase φ) 3 (n+1)).app _)
+  apply congrArg (exteriorPower.ιMulti _ (n+1))
+  funext j
+  cases j using Fin.cases <;> rfl
+
+end CycleQ2HodgeCubicIntrinsicForms
+end
+
+#print axioms CycleQ2HodgeCubicSectionComparison.toCubicSections_chartSection
+#print axioms CycleQ2HodgeCubicIntrinsicForms.realize_exact_symbol
+
+noncomputable section
+namespace CycleQ2HodgeNormalFirstChart
+
+open CategoryTheory AlgebraicGeometry MvPolynomial Module
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold (vertexCoefficient coordinateOpen toBase)
+open CycleQ2HodgeEuler (F chart chartMap)
+open CycleQ2HodgeEulerChartDerivations (Poly Hyp mk)
+open CycleQ2HodgeEulerContractionCharts (gradientEntry)
+open CycleQ2GeometricHodgeThreefoldCubic
+  (Base cubic cubic_monic cubic_natDegree pack pack_F Stage chartEquivAdjoinRoot)
+open CycleQ2CubicCoefficientTrace (normal)
+open CycleQ2TorusCubicTrace (Cubic Coefficients root coefficients)
+open CycleQ2TorusLogDerivatives (localizedPartial localizedPartial_algebraMap)
+
+variable {R : Type} [CommRing R] (φ : CoeffRing →+* R)
+
+/-- This only permutes the original four affine variables: w first,
+then the three retained weight-one coordinates in their original order. -/
+def polynomial (i : Fin 4) : Poly R := rename (finRotate 4) (F φ i)
+
+def chartEquiv (i : Fin 4) : chart φ i ≃ₐ[R] Hyp (polynomial φ i) :=
+  Ideal.quotientEquivAlg _ _ (MvPolynomial.renameEquiv R (finRotate 4)) (by
+    rw [Ideal.map_span,Set.image_singleton]
+    rfl)
+
+theorem chartEquiv_polynomial (i : Fin 4) (p : Poly R) :
+    chartEquiv φ i (chartMap φ i p) = mk (polynomial φ i) (rename (finRotate 4) p) := rfl
+
+theorem gradient_entry (i j : Fin 4) :
+    gradientEntry (polynomial φ i) (finRotate 4 j) =
+      chartEquiv φ i (gradientEntry (F φ i) j) := by
+  change mk (polynomial φ i) (pderiv (finRotate 4 j) (rename (finRotate 4) (F φ i))) =
+    mk (polynomial φ i) (rename (finRotate 4) (pderiv j (F φ i)))
+  rw [pderiv_rename (finRotate 4).injective]
+
+/-- The original Jacobian unit-ideal certificate is transported by the
+actual quotient isomorphism, rather than assumed again after reordering. -/
+theorem gradient_span (i : Fin 4)
+    (hg : Ideal.span (Set.range (gradientEntry (F φ i))) = ⊤) :
+    Ideal.span (Set.range (gradientEntry (polynomial φ i))) = ⊤ := by
+  have hm := congrArg (Ideal.map (chartEquiv φ i).toRingHom) hg
+  rw [Ideal.map_span,Ideal.map_top] at hm
+  have he : Set.range (gradientEntry (polynomial φ i)) =
+      (chartEquiv φ i) '' Set.range (gradientEntry (F φ i)) := by
+    ext a
+    constructor
+    · rintro ⟨j,rfl⟩
+      refine ⟨gradientEntry (F φ i) ((finRotate 4).symm j),⟨_,rfl⟩,?_⟩
+      simpa only [Equiv.apply_symm_apply] using
+        (gradient_entry φ i ((finRotate 4).symm j)).symm
+    · rintro ⟨a,⟨j,rfl⟩,rfl⟩
+      exact ⟨finRotate 4 j,gradient_entry φ i j⟩
+  rw [he]
+  exact hm
+
+/-- The same genuine affine chart, with precisely this variable order. -/
+def affineChart (i : Fin 4) : (coordinateOpen φ i).toScheme ≅
+    Spec (CommRingCat.of (Hyp (polynomial φ i))) :=
+  CycleQ2HodgeEulerChartBinding.affineChart φ i ≪≫
+    Scheme.Spec.mapIso (chartEquiv φ i).toRingEquiv.toCommRingCatIso.symm.op
+
+theorem affineChart_overBase (i : Fin 4) :
+    (affineChart φ i).inv ≫ (coordinateOpen φ i).ι ≫ toBase φ =
+      Spec.map (CommRingCat.ofHom (algebraMap R (Hyp (polynomial φ i)))) := by
+  change (Spec.map (CommRingCat.ofHom (chartEquiv φ i).toRingHom) ≫
+    (CycleQ2HodgeEulerChartBinding.affineChart φ i).inv) ≫
+      (coordinateOpen φ i).ι ≫ toBase φ = _
+  rw [Category.assoc,CycleQ2HodgeEulerChartBinding.affineChart_overBase,← Spec.map_comp]
+  exact congrArg Spec.map (CommRingCat.hom_ext (RingHom.ext (chartEquiv φ i).commutes))
+
+variable [Nontrivial R] (hm : φ vertexCoefficient = 1)
+
+def monicUnit : IsUnit (φ vertexCoefficient) := by
+  rw [hm]
+  exact isUnit_one
+
+private abbrev normalPack : Poly R ≃ₐ[R] Polynomial (Base R) := MvPolynomial.finSuccEquiv R 3
+
+theorem normalPack_equation (i : Fin 4) :
+    normalPack (polynomial φ i) = cubic φ i (monicUnit φ hm) := by
+  change pack (F φ i) = _
+  rw [pack_F φ i (monicUnit φ hm),hm,map_one,map_one,one_mul]
+
+def cubicEquiv (i : Fin 4) :
+    Hyp (polynomial φ i) ≃ₐ[R] Stage φ i (monicUnit φ hm) :=
+  Ideal.quotientEquivAlg _ _ normalPack (by
+    rw [Ideal.map_span,Set.image_singleton,normalPack_equation φ hm])
+
+theorem cubicEquiv_polynomial (i : Fin 4) (p : Poly R) :
+    cubicEquiv φ hm i (mk (polynomial φ i) p) =
+      AdjoinRoot.mk (cubic φ i (monicUnit φ hm)) (normalPack p) := rfl
+
+theorem cubicEquiv_chartEquiv (i : Fin 4) (a : chart φ i) :
+    cubicEquiv φ hm i (chartEquiv φ i a) = chartEquivAdjoinRoot φ i (monicUnit φ hm) a := by
+  obtain ⟨p,rfl⟩ := Ideal.Quotient.mk_surjective a
+  rfl
+
+def baseCoefficients (i : Fin 4) (j : Fin 3) : Base R :=
+  (cubic φ i (monicUnit φ hm)).coeff j.val
+
+private theorem cubic_decomposition (i : Fin 4) :
+    cubic φ i (monicUnit φ hm) = Polynomial.X^3 +
+      Polynomial.C (baseCoefficients φ hm i 0) +
+      Polynomial.C (baseCoefficients φ hm i 1) * Polynomial.X +
+      Polynomial.C (baseCoefficients φ hm i 2) * Polynomial.X^2 := by
+  let p := cubic φ i (monicUnit φ hm)
+  have h3 : p.coeff 3 = 1 := by
+    have he := (cubic_monic φ i (monicUnit φ hm)).leadingCoeff
+    change p.coeff p.natDegree = 1 at he
+    simpa only [p,cubic_natDegree] using he
+  have hp : p = ∑ j : Fin 4, Polynomial.C (p.coeff j.val) * Polynomial.X^j.val := by
+    rw [Fin.sum_univ_eq_sum_range (fun j => Polynomial.C (p.coeff j) * Polynomial.X^j)]
+    exact p.as_sum_range_C_mul_X_pow' (by
+      rw [show p.natDegree = 3 from cubic_natDegree φ i (monicUnit φ hm)]
+      decide)
+  calc
+    p = ∑ j : Fin 4, Polynomial.C (p.coeff j.val) * Polynomial.X^j.val := hp
+    _ = _ := by
+      rw [Fin.sum_univ_four]
+      simp only [Fin.val_zero,Fin.val_one,show (2 : Fin 4).val = 2 from rfl,
+        show (3 : Fin 4).val = 3 from rfl,h3,map_one,pow_zero,pow_one,one_mul,mul_one]
+      change _ = Polynomial.X^3 + Polynomial.C (p.coeff 0) +
+        Polynomial.C (p.coeff 1) * Polynomial.X + Polynomial.C (p.coeff 2) * Polynomial.X^2
+      ring
+
+private theorem normalPack_base (p : Base R) :
+    normalPack (rename Fin.succ p) = Polynomial.C p := by
+  induction p using MvPolynomial.induction_on with
+  | C a => simpa only [rename_C] using (normalPack : Poly R ≃ₐ[R] _).commutes a
+  | add p q hp hq => simp only [map_add,hp,hq]
+  | mul_X p j hp => simp only [map_mul,rename_X,hp,MvPolynomial.finSuccEquiv_X_succ]
+
+/-- The original monic chart equation, in its actual reordered
+polynomial quotient, is the cubic with these three base coefficients. -/
+theorem polynomial_cubic (i : Fin 4) :
+    polynomial φ i = (X 0 : Poly R)^3 + rename Fin.succ (baseCoefficients φ hm i 0) +
+      rename Fin.succ (baseCoefficients φ hm i 1) * X 0 +
+      rename Fin.succ (baseCoefficients φ hm i 2) * X 0^2 := by
+  apply (normalPack : Poly R ≃ₐ[R] _).injective
+  rw [normalPack_equation φ hm]
+  simp only [map_add,map_mul,map_pow,normalPack_base,MvPolynomial.finSuccEquiv_X_zero]
+  exact cubic_decomposition φ hm i
+
+private theorem pderiv_base_normal (p : Base R) : pderiv 0 (rename Fin.succ p) = 0 := by
+  apply MvPolynomial.pderiv_eq_zero_of_notMem_vars
+  intro h
+  obtain ⟨j,_,hj⟩ := MvPolynomial.mem_vars_rename Fin.succ p h
+  exact Fin.succ_ne_zero j hj
+
+theorem pderiv_normal (i : Fin 4) :
+    pderiv 0 (polynomial φ i) = rename Fin.succ (baseCoefficients φ hm i 1) +
+      2 * rename Fin.succ (baseCoefficients φ hm i 2) * X 0 + 3 * X 0^2 := by
+  rw [polynomial_cubic φ hm]
+  simp only [map_add,pderiv_pow,pderiv_mul,pderiv_X_self,pderiv_base_normal]
+  norm_num <;> ring
+
+theorem pderiv_coordinate (i : Fin 4) (j : Fin 3) :
+    pderiv j.succ (polynomial φ i) = rename Fin.succ (pderiv j (baseCoefficients φ hm i 0)) +
+      rename Fin.succ (pderiv j (baseCoefficients φ hm i 1)) * X 0 +
+      rename Fin.succ (pderiv j (baseCoefficients φ hm i 2)) * X 0^2 := by
+  have hn : pderiv j.succ (X 0 : Poly R) = 0 := pderiv_X_of_ne (Fin.succ_ne_zero j)
+  rw [polynomial_cubic φ hm]
+  simp only [map_add,pderiv_pow,pderiv_mul,pderiv_rename (Fin.succ_injective 3),hn,
+    mul_zero,add_zero,zero_add]
+
+def localizedMap (i : Fin 4) (S : Finset (Fin 3)) :
+    Hyp (polynomial φ i) →ₐ[R] Cubic φ i (monicUnit φ hm) S :=
+  (IsScalarTower.toAlgHom R (Stage φ i (monicUnit φ hm))
+    (Cubic φ i (monicUnit φ hm) S)).comp (cubicEquiv φ hm i).toAlgHom
+
+private def polynomialEval (i : Fin 4) (S : Finset (Fin 3)) :
+    Poly R →ₐ[R] Cubic φ i (monicUnit φ hm) S :=
+  (localizedMap φ hm i S).comp (Ideal.Quotient.mkₐ R (Ideal.span {polynomial φ i}))
+
+theorem localizedMap_normal (i : Fin 4) (S : Finset (Fin 3)) :
+    localizedMap φ hm i S (mk (polynomial φ i) (X 0)) = root φ i (monicUnit φ hm) S := by
+  change algebraMap (Stage φ i (monicUnit φ hm)) _
+    (AdjoinRoot.mk _ (normalPack (X 0 : Poly R))) = _
+  rw [MvPolynomial.finSuccEquiv_X_zero,AdjoinRoot.mk_X]
+  rfl
+
+theorem localizedMap_base (i : Fin 4) (S : Finset (Fin 3)) (p : Base R) :
+    localizedMap φ hm i S (mk (polynomial φ i) (rename Fin.succ p)) =
+      algebraMap (Coefficients (R := R) S) (Cubic φ i (monicUnit φ hm) S)
+        (algebraMap (Base R) (Coefficients (R := R) S) p) := by
+  change algebraMap (Stage φ i (monicUnit φ hm)) _
+    (AdjoinRoot.mk _ (normalPack (rename Fin.succ p))) = _
+  rw [normalPack_base,AdjoinRoot.mk_C]
+  simp only [← IsScalarTower.algebraMap_apply]
+
+theorem localizedMap_coordinate (i : Fin 4) (S : Finset (Fin 3)) (j : Fin 3) :
+    localizedMap φ hm i S (mk (polynomial φ i) (X j.succ)) =
+      algebraMap (Coefficients (R := R) S) (Cubic φ i (monicUnit φ hm) S)
+        (algebraMap (Base R) (Coefficients (R := R) S) (X j)) := by
+  simpa only [rename_X] using localizedMap_base φ hm i S (X j)
+
+theorem localizedMap_gradient_normal (i : Fin 4) (S : Finset (Fin 3)) :
+    localizedMap φ hm i S (gradientEntry (polynomial φ i) 0) =
+      normal (root φ i (monicUnit φ hm) S)
+        ![coefficients φ i (monicUnit φ hm) S 1,
+          2*coefficients φ i (monicUnit φ hm) S 2,3] := by
+  change polynomialEval φ hm i S (pderiv 0 (polynomial φ i)) = _
+  rw [pderiv_normal φ hm]
+  simp only [map_add,map_mul,map_pow,map_ofNat,polynomialEval,
+    AlgHom.comp_apply,localizedMap_base,localizedMap_normal,normal,coefficients,
+    baseCoefficients,Matrix.cons_val_zero,Matrix.cons_val_one,Matrix.cons_val_two]
+
+theorem localizedMap_gradient_coordinate (i : Fin 4) (S : Finset (Fin 3)) (j : Fin 3) :
+    localizedMap φ hm i S (gradientEntry (polynomial φ i) j.succ) =
+      normal (root φ i (monicUnit φ hm) S)
+        ((localizedPartial R S j) ∘ coefficients φ i (monicUnit φ hm) S) := by
+  change polynomialEval φ hm i S (pderiv j.succ (polynomial φ i)) = _
+  rw [pderiv_coordinate φ hm]
+  simp only [map_add,map_mul,map_pow,polynomialEval,AlgHom.comp_apply,
+    localizedMap_base,localizedMap_normal,normal,coefficients,baseCoefficients,
+    Function.comp_apply,localizedPartial_algebraMap]
+
+end CycleQ2HodgeNormalFirstChart
+end
+
+#print axioms CycleQ2HodgeNormalFirstChart.gradient_span
+#print axioms CycleQ2HodgeNormalFirstChart.affineChart_overBase
+#print axioms CycleQ2HodgeNormalFirstChart.polynomial_cubic
+#print axioms CycleQ2HodgeNormalFirstChart.localizedMap_gradient_coordinate
+
+noncomputable section
+namespace CycleQ2HodgeHypersurfaceVolume
+
+open Module
+open CycleQ2HodgeEulerChartDerivations (Poly Hyp)
+open CycleQ2HodgeEulerContractionCharts (gradientEntry dx)
+open CycleQ2LiteralThreefoldResidueMinors (signedOmitted)
+open CycleQ2LiteralThreefoldTorusForms (pairLeft pairRight pairCoefficient expand_pair)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open scoped KaehlerDifferential
+
+variable {K S : Type} [CommRing K] [CommRing S] [Algebra K S]
+  (q : Poly K) (hg : Ideal.span (Set.range (gradientEntry q)) = ⊤) (f : Hyp q →ₐ[K] S)
+
+theorem coordinate_triple (j : Fin 4) :
+    exteriorPower.ιMulti S 3 (dx q f ∘ j.succAbove) =
+      ((-1 : S)^j.val * f (gradientEntry q j)) • exteriorPullback f 3 (volume q hg) := by
+  have h := congrArg (fun ω : ⋀[S]^3 Ω[S⁄K] => (-1 : S)^j.val • ω)
+    (gradient_smul_volume q hg f j)
+  simpa only [signedOmitted,smul_smul,← mul_pow,neg_mul_neg,one_mul,one_pow,one_smul] using h.symm
+
+/-- The same six ordered-pair coefficients apply to every actual
+smooth affine hypersurface residue, over its relative base ring. -/
+theorem coordinate_wedge (v : Fin 4 → S) (p : Fin 6) :
+    exteriorPower.ιMulti S 3 ![∑ j, v j • dx q f j,
+      dx q f (pairLeft p),dx q f (pairRight p)] =
+      pairCoefficient (fun j => f (gradientEntry q j)) v p • exteriorPullback f 3 (volume q hg) := by
+  let e := dx q f
+  let g := fun j => f (gradientEntry q j)
+  let ω := exteriorPullback f 3 (volume q hg)
+  have h0 : e ∘ (0 : Fin 4).succAbove = ![e 1,e 2,e 3] := by
+    funext j; fin_cases j <;> rfl
+  have h1 : e ∘ (1 : Fin 4).succAbove = ![e 0,e 2,e 3] := by
+    funext j; fin_cases j <;> rfl
+  have h2 : e ∘ (2 : Fin 4).succAbove = ![e 0,e 1,e 3] := by
+    funext j; fin_cases j <;> rfl
+  have h3 : e ∘ (3 : Fin 4).succAbove = ![e 0,e 1,e 2] := by
+    funext j; fin_cases j <;> rfl
+  have he (j : Fin 4) : exteriorPower.ιMulti S 3 (e ∘ j.succAbove) =
+      ((-1 : S)^j.val*g j) • ω := coordinate_triple q hg f j
+  apply expand_pair e g v ω
+  · simpa only [h3,show (3 : Fin 4).val = 3 from rfl,
+      pow_succ,pow_zero,mul_one,neg_mul_neg,one_mul,neg_one_mul,neg_smul] using he 3
+  · simpa only [h2,show (2 : Fin 4).val = 2 from rfl,neg_one_sq,one_mul] using he 2
+  · simpa only [h1,Fin.val_one,pow_one,neg_one_mul,neg_smul] using he 1
+  · simpa only [h0,Fin.val_zero,pow_zero,one_mul] using he 0
+
+end CycleQ2HodgeHypersurfaceVolume
+
+namespace CycleQ2HodgeNormalFirstChart
+
+open Module MvPolynomial
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold (vertexCoefficient)
+open CycleQ2HodgeEulerContractionCharts (gradientEntry dx)
+open CycleQ2HodgeHypersurfaceVolume (volume coordinate_wedge)
+open CycleQ2LiteralThreefoldTorusForms (pairLeft pairRight pairCoefficient)
+open CycleQ2CubicCoefficientTrace (normal)
+open CycleQ2TorusCubicTrace (Cubic Coefficients root coefficients powerBasis powerBasis_apply residueTrace)
+open CycleQ2TorusLogDerivatives (localizedPartial)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open scoped KaehlerDifferential
+
+variable {R : Type} [CommRing R] [Nontrivial R]
+  (φ : CoeffRing →+* R) (hm : φ vertexCoefficient = 1) (i : Fin 4) (S : Finset (Fin 3))
+
+def differentialCoefficients (a : Fin 3 → Coefficients (R := R) S) :
+    Fin 4 → Cubic φ i (monicUnit φ hm) S :=
+  Fin.cons (normal (root φ i (monicUnit φ hm) S) ![a 1,2*a 2,0])
+    (fun j => normal (root φ i (monicUnit φ hm) S) ((localizedPartial R S j) ∘ a))
+
+theorem normal_differential (a : Fin 3 → Coefficients (R := R) S) :
+    KaehlerDifferential.D R (Cubic φ i (monicUnit φ hm) S)
+      (normal (root φ i (monicUnit φ hm) S) a) =
+        ∑ j : Fin 4, differentialCoefficients φ hm i S a j •
+          dx (polynomial φ i) (localizedMap φ hm i S) j := by
+  rw [Fin.sum_univ_succ]
+  simpa only [differentialCoefficients,Fin.cons_zero,Fin.cons_succ,dx,
+    localizedMap_normal,localizedMap_coordinate] using
+    CycleQ2TorusCubicTrace.normal_differential φ i (monicUnit φ hm) S
+      (root φ i (monicUnit φ hm) S) a
+
+theorem exists_normal (a : Cubic φ i (monicUnit φ hm) S) :
+    ∃ b : Fin 3 → Coefficients (R := R) S, normal (root φ i (monicUnit φ hm) S) b = a :=
+  ⟨fun j => (powerBasis φ i (monicUnit φ hm) S).repr a j,
+    CycleQ2CubicCoefficientTrace.normal_repr (powerBasis φ i (monicUnit φ hm) S)
+      (root φ i (monicUnit φ hm) S) (powerBasis_apply φ i (monicUnit φ hm) S) a⟩
+
+/-- The power-basis differential formula proves spanning directly on
+the actual cubic localization, including its branch locus. -/
+theorem coordinateForms_span :
+    Submodule.span (Cubic φ i (monicUnit φ hm) S)
+      (Set.range (dx (polynomial φ i) (localizedMap φ hm i S))) = ⊤ := by
+  let Q := Submodule.span (Cubic φ i (monicUnit φ hm) S)
+    (Set.range (dx (polynomial φ i) (localizedMap φ hm i S)))
+  change Q = ⊤
+  rw [eq_top_iff,← KaehlerDifferential.span_range_derivation R (Cubic φ i (monicUnit φ hm) S),
+    Submodule.span_le]
+  rintro _ ⟨a,rfl⟩
+  obtain ⟨b,rfl⟩ := exists_normal φ hm i S a
+  rw [normal_differential]
+  apply Submodule.sum_mem
+  intro j _
+  exact Q.smul_mem _ (Submodule.subset_span ⟨j,rfl⟩)
+
+def coordinatePair (p : Fin 6) : ⋀[Cubic φ i (monicUnit φ hm) S]^2
+    Ω[Cubic φ i (monicUnit φ hm) S⁄R] :=
+  exteriorPower.ιMulti (Cubic φ i (monicUnit φ hm) S) 2
+    ![dx (polynomial φ i) (localizedMap φ hm i S) (pairLeft p),
+      dx (polynomial φ i) (localizedMap φ hm i S) (pairRight p)]
+
+theorem coordinatePair_span :
+    Submodule.span (Cubic φ i (monicUnit φ hm) S) (Set.range (coordinatePair φ hm i S)) = ⊤ := by
+  have htwo := exteriorPower.ιMulti_family_span_of_span (n := 2)
+    (Cubic φ i (monicUnit φ hm) S) (coordinateForms_span φ hm i S)
+  rw [eq_top_iff,← htwo,Submodule.span_le]
+  rintro _ ⟨s,rfl⟩
+  let v := Set.powersetCard.ofFinEmbEquiv.symm s
+  have hall : ∀ a b : Fin 4, a < b →
+      ∃ p : Fin 6, pairLeft p = a ∧ pairRight p = b := by decide
+  obtain ⟨p,hp,hq⟩ := hall (v 0) (v 1) (v.strictMono (by decide))
+  have hv : dx (polynomial φ i) (localizedMap φ hm i S) ∘ v =
+      ![dx (polynomial φ i) (localizedMap φ hm i S) (v 0),
+        dx (polynomial φ i) (localizedMap φ hm i S) (v 1)] := by
+    funext j; fin_cases j <;> rfl
+  change exteriorPower.ιMulti (Cubic φ i (monicUnit φ hm) S) 2
+    (dx (polynomial φ i) (localizedMap φ hm i S) ∘ v) ∈ _
+  rw [hv,← hp,← hq]
+  exact Submodule.subset_span ⟨p,rfl⟩
+
+theorem exists_coordinatePair_sum (ω : ⋀[Cubic φ i (monicUnit φ hm) S]^2
+    Ω[Cubic φ i (monicUnit φ hm) S⁄R]) :
+    ∃ a : Fin 6 → Cubic φ i (monicUnit φ hm) S,
+      ∑ p, a p • coordinatePair φ hm i S p = ω := by
+  apply Submodule.mem_span_range_iff_exists_fun.mp
+  rw [coordinatePair_span]
+  exact Submodule.mem_top
+
+def pairResidueCoefficient (a : Fin 3 → Coefficients (R := R) S) (p : Fin 6) :
+    Cubic φ i (monicUnit φ hm) S :=
+  pairCoefficient (fun j => localizedMap φ hm i S (gradientEntry (polynomial φ i) j))
+    (differentialCoefficients φ hm i S a) p
+
+theorem normal_coordinate_wedge
+    (hg : Ideal.span (Set.range (gradientEntry (polynomial φ i))) = ⊤)
+    (a : Fin 3 → Coefficients (R := R) S) (p : Fin 6) :
+    exteriorPower.ιMulti (Cubic φ i (monicUnit φ hm) S) 3
+      ![KaehlerDifferential.D R (Cubic φ i (monicUnit φ hm) S)
+          (normal (root φ i (monicUnit φ hm) S) a),
+        dx (polynomial φ i) (localizedMap φ hm i S) (pairLeft p),
+        dx (polynomial φ i) (localizedMap φ hm i S) (pairRight p)] =
+      pairResidueCoefficient φ hm i S a p •
+        exteriorPullback (localizedMap φ hm i S) 3 (volume (polynomial φ i) hg) := by
+  rw [normal_differential]
+  exact coordinate_wedge (polynomial φ i) hg (localizedMap φ hm i S)
+    (differentialCoefficients φ hm i S a) p
+
+theorem pairResidueCoefficient_trace_zero (a : Fin 3 → Coefficients (R := R) S) (p : Fin 6) :
+    residueTrace φ i (monicUnit φ hm) S (pairResidueCoefficient φ hm i S a p) = 0 := by
+  have hH (j : Fin 3) : residueTrace φ i (monicUnit φ hm) S
+      (differentialCoefficients φ hm i S a j.succ *
+          localizedMap φ hm i S (gradientEntry (polynomial φ i) 0) -
+       differentialCoefficients φ hm i S a 0 *
+          localizedMap φ hm i S (gradientEntry (polynomial φ i) j.succ)) = 0 := by
+    simpa only [differentialCoefficients,Fin.cons_zero,Fin.cons_succ,
+      localizedMap_gradient_normal,localizedMap_gradient_coordinate,mul_comm] using
+      CycleQ2TorusCubicTrace.residueTrace_horizontal φ i (monicUnit φ hm) S j a
+  have hM (j k : Fin 3) : residueTrace φ i (monicUnit φ hm) S
+      (differentialCoefficients φ hm i S a k.succ *
+          localizedMap φ hm i S (gradientEntry (polynomial φ i) j.succ) -
+       differentialCoefficients φ hm i S a j.succ *
+          localizedMap φ hm i S (gradientEntry (polynomial φ i) k.succ)) = 0 := by
+    simpa only [differentialCoefficients,Fin.cons_succ,localizedMap_gradient_coordinate] using
+      CycleQ2TorusCubicTrace.residueTrace_mixed φ i (monicUnit φ hm) S j k a
+  fin_cases p
+  · exact hM 1 2
+  · exact hM 2 0
+  · exact hM 0 1
+  · exact hH 2
+  · let v := differentialCoefficients φ hm i S a
+    let g := fun j => localizedMap φ hm i S (gradientEntry (polynomial φ i) j)
+    change residueTrace φ i (monicUnit φ hm) S (v 0*g 2-v 2*g 0) = 0
+    rw [show v 0*g 2-v 2*g 0 = -(v 2*g 0-v 0*g 2) by abel,map_neg]
+    have he := hH 1
+    change residueTrace φ i (monicUnit φ hm) S (v 2*g 0-v 0*g 2) = 0 at he
+    rw [he,neg_zero]
+  · exact hH 0
+
+end CycleQ2HodgeNormalFirstChart
+end
+
+#print axioms CycleQ2HodgeNormalFirstChart.coordinateForms_span
+#print axioms CycleQ2HodgeNormalFirstChart.normal_coordinate_wedge
+#print axioms CycleQ2HodgeNormalFirstChart.pairResidueCoefficient_trace_zero
+
+noncomputable section
+namespace CycleQ2HodgeMonicFaceTrace
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite Module
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold (threefold toBase coordinateOpen vertexCoefficient)
+open CycleQ2HodgeEulerChartDerivations (Hyp mk)
+open CycleQ2HodgeEulerContractionCharts (gradientEntry dx)
+open CycleQ2HodgeNormalFirstChart
+  (polynomial chartEquiv affineChart affineChart_overBase monicUnit cubicEquiv
+    cubicEquiv_chartEquiv localizedMap coordinatePair exists_normal exists_coordinatePair_sum
+    normal_coordinate_wedge pairResidueCoefficient_trace_zero)
+open CycleQ2GeometricAffineChartSections (chartSection)
+open CycleQ2RelativeAffineChartSections (chartAlgHom)
+open CycleQ2HodgeHypersurfaceSheafVolume (affineSectionEquiv affineSectionEquiv_apply)
+open CycleQ2HodgeHypersurfaceVolume (volume)
+open CycleQ2HodgeCubicIntrinsicForms (sectionEquiv realize realize_exact_symbol face_affine)
+open CycleQ2HodgeTwistLocalization (inverted)
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms differential)
+open CycleQ2IntrinsicOrdinaryExterior (toSheaf)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open CycleQ2AffineDeRhamFunctorial (exteriorPullback_comp)
+open CycleQ2TorusCubicTrace (Cubic residueTrace)
+open CycleQ2LiteralThreefoldTorusForms (pairLeft pairRight)
+open scoped KaehlerDifferential
+
+variable {k : Type} [Field k] [CharZero k]
+  (φ : CoeffRing →+* k) (hm : φ vertexCoefficient = 1)
+  (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S)
+
+theorem normalSection_raw (W : (threefold φ).Opens) (hW : W ≤ coordinateOpen φ i)
+    (a : CycleQ2HodgeEuler.chart φ i) :
+    chartSection (CycleQ2HodgeEulerChartBinding.affineChart φ i) (Over.mk (homOfLE hW)) a =
+      chartSection (affineChart φ i) (Over.mk (homOfLE hW)) (chartEquiv φ i a) := by
+  have hc : (affineChart φ i).inv ≫ (coordinateOpen φ i).ι ≫ 𝟙 (threefold φ) =
+      Spec.map (CommRingCat.ofHom (chartEquiv φ i).toRingHom) ≫
+        (CycleQ2HodgeEulerChartBinding.affineChart φ i).inv ≫ (coordinateOpen φ i).ι := by
+    change (Spec.map (CommRingCat.ofHom (chartEquiv φ i).toRingHom) ≫
+      (CycleQ2HodgeEulerChartBinding.affineChart φ i).inv) ≫
+        (coordinateOpen φ i).ι ≫ 𝟙 _ = _
+    simp only [Category.comp_id,Category.assoc]
+  simpa only [Scheme.Hom.appLE_eq_app,Scheme.Hom.id_app,ConcreteCategory.id_apply] using
+    CycleQ2ChartSectionPullback.chartSection_pullback (𝟙 (threefold φ))
+      (CycleQ2HodgeEulerChartBinding.affineChart φ i) (affineChart φ i)
+      (chartEquiv φ i).toRingHom (le_refl _) hc W hW W hW (le_refl _) a
+
+theorem sectionEquiv_chart (a : Hyp (polynomial φ i)) :
+    sectionEquiv φ (monicUnit φ hm) i S hi
+      (chartSection (affineChart φ i) (Over.mk (homOfLE (Finset.inf_le hi))) a) =
+        localizedMap φ hm i (inverted i S) a := by
+  obtain ⟨a,rfl⟩ := (chartEquiv φ i).surjective a
+  rw [← normalSection_raw φ i]
+  change CycleQ2HodgeCubicSectionComparison.toCubicSections φ (monicUnit φ hm) i S hi
+    (chartSection (CycleQ2HodgeEulerChartBinding.affineChart φ i)
+      (Over.mk (homOfLE (Finset.inf_le hi))) a) = _
+  rw [CycleQ2HodgeCubicSectionComparison.toCubicSections_chartSection]
+  change algebraMap (CycleQ2GeometricHodgeThreefoldCubic.Stage φ i (monicUnit φ hm)) _
+      (CycleQ2GeometricHodgeThreefoldCubic.chartEquivAdjoinRoot φ i (monicUnit φ hm) a) =
+    algebraMap _ _ (cubicEquiv φ hm i (chartEquiv φ i a))
+  rw [cubicEquiv_chartEquiv]
+
+variable (hg : Ideal.span (Set.range (gradientEntry (polynomial φ i))) = ⊤)
+  [SmoothOfRelativeDimension 3 (toBase φ)]
+
+private theorem coordinate_affine : IsAffineOpen (coordinateOpen φ i) :=
+  Proj.isAffineOpen_basicOpen (CycleQ2GeometricHodgeThreefold.grade φ)
+    (CycleQ2GeometricHodgeThreefold.coord φ i.castSucc)
+    (CycleQ2GeometricHodgeThreefold.weightOne_mem_grade φ i) (by decide)
+
+private abbrev frame : Γ(threefold φ,S.inf (coordinateOpen φ)) ≃+
+    (sheafForms (toBase φ) 3 3).obj.obj (op (S.inf (coordinateOpen φ))) :=
+  affineSectionEquiv (polynomial φ i) hg (affineChart φ i) (toBase φ)
+    (affineChart_overBase φ i) (coordinate_affine φ i)
+    (Over.mk (homOfLE (Finset.inf_le hi))) (face_affine φ i S hi)
+
+def nativeVolume : ⋀[Cubic φ i (monicUnit φ hm) (inverted i S)]^3
+    Ω[Cubic φ i (monicUnit φ hm) (inverted i S)⁄k] :=
+  exteriorPullback (localizedMap φ hm i (inverted i S)) 3 (volume (polynomial φ i) hg)
+
+theorem realize_volume_coefficient (c : Cubic φ i (monicUnit φ hm) (inverted i S)) :
+    realize φ (monicUnit φ hm) i S hi 3 (c • nativeVolume φ hm i S hg) =
+      frame φ i S hi hg ((sectionEquiv φ (monicUnit φ hm) i S hi).symm c) := by
+  letI : Algebra k Γ(threefold φ,S.inf (coordinateOpen φ)) :=
+    (sectionCoefficients (toBase φ) (S.inf (coordinateOpen φ))).toAlgebra
+  have he : (sectionEquiv φ (monicUnit φ hm) i S hi).symm.toAlgHom.comp
+      (localizedMap φ hm i (inverted i S)) =
+    chartAlgHom (affineChart φ i) (toBase φ) (affineChart_overBase φ i)
+      (Over.mk (homOfLE (Finset.inf_le hi))) := by
+    ext a
+    apply (sectionEquiv φ (monicUnit φ hm) i S hi).injective
+    rw [AlgHom.comp_apply,AlgEquiv.apply_symm_apply]
+    exact (sectionEquiv_chart φ hm i S hi a).symm
+  change (toSheaf (toBase φ) 3 3).app _
+    (exteriorPullback (sectionEquiv φ (monicUnit φ hm) i S hi).symm.toAlgHom 3
+      (c • exteriorPullback (localizedMap φ hm i (inverted i S)) 3
+        (volume (polynomial φ i) hg))) = _
+  rw [map_smulₛₗ,← exteriorPullback_comp,he]
+  exact (affineSectionEquiv_apply (polynomial φ i) hg (affineChart φ i) (toBase φ)
+    (affineChart_overBase φ i) (coordinate_affine φ i)
+    (Over.mk (homOfLE (Finset.inf_le hi))) (face_affine φ i S hi) _).symm
+
+/-- The actual relative canonical section trace in this original
+projective face, with its normal-first affine residue normalization. -/
+def sectionTrace : (sheafForms (toBase φ) 3 3).obj.obj (op (S.inf (coordinateOpen φ))) →+ k :=
+  (residueTrace φ i (monicUnit φ hm) (inverted i S)).comp
+    ((sectionEquiv φ (monicUnit φ hm) i S hi).toAddMonoidHom.comp
+      (frame φ i S hi hg).symm.toAddMonoidHom)
+
+theorem sectionTrace_realize_volume (c : Cubic φ i (monicUnit φ hm) (inverted i S)) :
+    sectionTrace φ hm i S hi hg
+      (realize φ (monicUnit φ hm) i S hi 3 (c • nativeVolume φ hm i S hg)) =
+        residueTrace φ i (monicUnit φ hm) (inverted i S) c := by
+  rw [realize_volume_coefficient]
+  change residueTrace φ i (monicUnit φ hm) (inverted i S)
+    (sectionEquiv φ (monicUnit φ hm) i S hi
+      ((frame φ i S hi hg).symm ((frame φ i S hi hg)
+        ((sectionEquiv φ (monicUnit φ hm) i S hi).symm c)))) = _
+  rw [AddEquiv.symm_apply_apply,AlgEquiv.apply_symm_apply]
+
+private theorem trace_coordinate_pair (c : Cubic φ i (monicUnit φ hm) (inverted i S)) (p : Fin 6) :
+    sectionTrace φ hm i S hi hg
+      ((differential (toBase φ) 3 2).hom.app (op (S.inf (coordinateOpen φ)))
+        (realize φ (monicUnit φ hm) i S hi 2
+          (c • coordinatePair φ hm i (inverted i S) p))) = 0 := by
+  obtain ⟨a,rfl⟩ := exists_normal φ hm i (inverted i S) c
+  let c' := CycleQ2CubicCoefficientTrace.normal
+    (CycleQ2TorusCubicTrace.root φ i (monicUnit φ hm) (inverted i S)) a
+  let v : Fin 2 → Cubic φ i (monicUnit φ hm) (inverted i S) :=
+    ![localizedMap φ hm i (inverted i S) (mk (polynomial φ i) (MvPolynomial.X (pairLeft p))),
+      localizedMap φ hm i (inverted i S) (mk (polynomial φ i) (MvPolynomial.X (pairRight p)))]
+  have h2 : KaehlerDifferential.D k _ ∘ v =
+      ![dx (polynomial φ i) (localizedMap φ hm i (inverted i S)) (pairLeft p),
+        dx (polynomial φ i) (localizedMap φ hm i (inverted i S)) (pairRight p)] := by
+    funext j; fin_cases j <;> rfl
+  have h3 : KaehlerDifferential.D k _ ∘ Matrix.vecCons c' v =
+      ![KaehlerDifferential.D k _ c',
+        dx (polynomial φ i) (localizedMap φ hm i (inverted i S)) (pairLeft p),
+        dx (polynomial φ i) (localizedMap φ hm i (inverted i S)) (pairRight p)] := by
+    funext j; fin_cases j <;> rfl
+  have hd := realize_exact_symbol φ (monicUnit φ hm) i S hi 2 c' v
+  rw [h2,h3] at hd
+  change (differential (toBase φ) 3 2).hom.app _
+      (realize φ (monicUnit φ hm) i S hi 2 (_ • coordinatePair φ hm i (inverted i S) p)) =
+    realize φ (monicUnit φ hm) i S hi 3
+      (exteriorPower.ιMulti (Cubic φ i (monicUnit φ hm) (inverted i S)) 3
+        ![KaehlerDifferential.D k _ _,
+          dx (polynomial φ i) (localizedMap φ hm i (inverted i S)) (pairLeft p),
+          dx (polynomial φ i) (localizedMap φ hm i (inverted i S)) (pairRight p)]) at hd
+  rw [hd,normal_coordinate_wedge φ hm i (inverted i S) hg,
+    sectionTrace_realize_volume,pairResidueCoefficient_trace_zero]
+
+/-- Every actual intrinsic two-form section has derivative of zero
+trace. The proof covers all six coordinate pairs with arbitrary
+coefficients in the original cubic localization. -/
+theorem sectionTrace_differential
+    (η : (sheafForms (toBase φ) 3 2).obj.obj (op (S.inf (coordinateOpen φ)))) :
+    sectionTrace φ hm i S hi hg
+      ((differential (toBase φ) 3 2).hom.app (op (S.inf (coordinateOpen φ))) η) = 0 := by
+  obtain ⟨ω,rfl⟩ := (realize φ (monicUnit φ hm) i S hi 2).surjective η
+  obtain ⟨a,ha⟩ := exists_coordinatePair_sum φ hm i (inverted i S) ω
+  rw [← ha,map_sum,map_sum,map_sum]
+  exact Finset.sum_eq_zero fun p _ => trace_coordinate_pair φ hm i S hi hg (a p) p
+
+end CycleQ2HodgeMonicFaceTrace
+end
+
+#print axioms CycleQ2HodgeMonicFaceTrace.sectionEquiv_chart
+#print axioms CycleQ2HodgeMonicFaceTrace.realize_volume_coefficient
+#print axioms CycleQ2HodgeMonicFaceTrace.sectionTrace_differential
+
+noncomputable section
+namespace CycleQ2HodgeCubicSectionComparison
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold (threefold coordinateOpen vertexCoefficient)
+open CycleQ2HodgeTwistCech (sections negativeExponent)
+open CycleQ2HodgeTwistDehom (exponentEquiv chartCoordinates)
+open CycleQ2HodgeTwistLocalization (inverted intersectionCoordinates localizationOffset)
+open CycleQ2HodgeTwistCubicFaces (structureCoordinates)
+
+variable {R : Type} [CommRing R] [Nontrivial R]
+  (φ : CoeffRing →+* R) (h : IsUnit (φ vertexCoefficient))
+
+private theorem intersection_top_coefficient (p : sections R 0 Finset.univ) :
+    (CycleQ2SeedCechLocalization.localizationToLaurent R (inverted 0 Finset.univ)
+      (intersectionCoordinates R 0 Finset.univ 0 (Finset.mem_univ 0) p 2)).coeff
+        (fun _ => -1) = p.val 2 negativeExponent := by
+  let e : {e : CycleQ2HodgeTwistCech.Exp //
+      CycleQ2HodgeTwistCech.Allowed 0 Finset.univ 2 e} := ⟨negativeExponent,by decide⟩
+  let d := exponentEquiv 0 2 0 Finset.univ (Finset.mem_univ 0) e
+  have he := DFunLike.congr_fun
+    ((localizationOffset R 0 Finset.univ).apply_symm_apply
+      (chartCoordinates 0 0 Finset.univ (Finset.mem_univ 0) p 2)) d
+  change (CycleQ2SeedCechLocalization.localizationToLaurent R (inverted 0 Finset.univ)
+      (intersectionCoordinates R 0 Finset.univ 0 (Finset.mem_univ 0) p 2)).coeff
+        (fun _ => -1) =
+    (chartCoordinates 0 0 Finset.univ (Finset.mem_univ 0) p 2) d at he
+  refine he.trans ?_
+  change Finsupp.equivMapDomain (exponentEquiv 0 2 0 Finset.univ (Finset.mem_univ 0))
+    ((p.val 2).subtypeDomain (CycleQ2HodgeTwistCech.Allowed 0 Finset.univ 2))
+    (exponentEquiv 0 2 0 Finset.univ (Finset.mem_univ 0) e) = _
+  rw [Finsupp.equivMapDomain_apply,Equiv.symm_apply_apply]
+  rfl
+
+/-- The original homogeneous top trace is the same ordinary cubic
+residue under the actual scheme-section equivalence, over the entire
+coefficient ring. -/
+theorem structure_trace_cubic
+    (s : Γ(threefold φ,Finset.univ.inf (coordinateOpen φ))) :
+    CycleQ2HodgeTwistTorusChart.structureTopSectionTrace φ h s =
+      CycleQ2TorusCubicTrace.residueTrace φ 0 h (inverted 0 Finset.univ)
+        (toCubicSections φ h 0 Finset.univ (Finset.mem_univ 0) s) := by
+  let E := intersectionCoordinates R 0 Finset.univ 0 (Finset.mem_univ 0)
+  let b := CycleQ2GeometricHodgeThreefoldCubic.localizedBasis φ 0 h
+    (Submonoid.powers (CycleQ2SeedCechLocalization.baseProduct R (inverted 0 Finset.univ)))
+  let x := toCubicSections φ h 0 Finset.univ (Finset.mem_univ 0) s
+  let p := E.symm (b.equivFun x)
+  have hp : CycleQ2HodgeTwistCoordinates.read
+      (CycleQ2HodgeTwistTorusChart.structureChart φ h)
+      (CycleQ2HodgeTwistAnchor.torus_le_face φ Finset.univ) s = p.val := by
+    rw [CycleQ2HodgeTwistTorusChart.read_structure_face φ h 0 Finset.univ (Finset.mem_univ 0)]
+    change (structureCoordinates φ 0 h Finset.univ (Finset.mem_univ 0) 0
+      (CycleQ2GeometricProjectiveCurve.Twisted.resEquiv (threefold φ).sheaf
+        (CycleQ2HodgeTwistFaces.face_inf φ 0 Finset.univ (Finset.mem_univ 0)).le
+        (CycleQ2HodgeTwistFaces.face_inf φ 0 Finset.univ (Finset.mem_univ 0)).ge
+        ((CycleQ2HodgeThreefoldTwist.chartFrame φ 0 0 _ (Finset.inf_le (Finset.mem_univ 0)))
+          ((CycleQ2HodgeThreefoldTwist.chartFrame φ 0 0 _
+            (Finset.inf_le (Finset.mem_univ 0))).symm s)))).val = p.val
+    rw [LinearEquiv.apply_symm_apply]
+    rfl
+  have hc := intersection_top_coefficient p
+  change (CycleQ2SeedCechLocalization.localizationToLaurent R (inverted 0 Finset.univ)
+    (E (E.symm (b.equivFun x)) 2)).coeff (fun _ => -1) = p.val 2 negativeExponent at hc
+  rw [AddEquiv.apply_symm_apply] at hc
+  change (CycleQ2HodgeTwistCoordinates.read (CycleQ2HodgeTwistTorusChart.structureChart φ h)
+      (CycleQ2HodgeTwistAnchor.torus_le_face φ Finset.univ) s) 2 negativeExponent =
+    (CycleQ2SeedCechLocalization.localizationToLaurent R (inverted 0 Finset.univ)
+      (b.equivFun x 2)).coeff (fun _ => -1)
+  rw [hp]
+  exact hc.symm
+
+end CycleQ2HodgeCubicSectionComparison
+
+namespace CycleQ2HodgeMonicFaceTrace
+
+open CategoryTheory AlgebraicGeometry Opposite
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold (threefold toBase coordinateOpen vertexCoefficient)
+open CycleQ2HodgeEulerContractionCharts (gradientEntry)
+open CycleQ2HodgeNormalFirstChart (polynomial monicUnit)
+open CycleQ2HodgeCubicIntrinsicForms (sectionEquiv realize)
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms)
+
+variable {k : Type} [Field k] [CharZero k]
+  (φ : CoeffRing →+* k) (hm : φ vertexCoefficient = 1)
+  (hg : Ideal.span (Set.range (gradientEntry (polynomial φ 0))) = ⊤)
+  [SmoothOfRelativeDimension 3 (toBase φ)]
+
+/-- The original homogeneous residue generator, multiplied by the
+actual relative chart volume and realized in the intrinsic sheaf. -/
+def normalizedSection (a : k) :
+    (sheafForms (toBase φ) 3 3).obj.obj (op (Finset.univ.inf (coordinateOpen φ))) :=
+  realize φ (monicUnit φ hm) 0 Finset.univ (Finset.mem_univ 0) 3
+    (sectionEquiv φ (monicUnit φ hm) 0 Finset.univ (Finset.mem_univ 0)
+      (CycleQ2HodgeTwistTorusChart.structureTopGenerator φ (monicUnit φ hm) a) •
+        nativeVolume φ hm 0 Finset.univ hg)
+
+theorem sectionTrace_normalizedSection (a : k) :
+    sectionTrace φ hm 0 Finset.univ (Finset.mem_univ 0) hg
+      (normalizedSection φ hm hg a) = a := by
+  rw [normalizedSection,sectionTrace_realize_volume]
+  change CycleQ2TorusCubicTrace.residueTrace φ 0 (monicUnit φ hm)
+    (CycleQ2HodgeTwistLocalization.inverted 0 Finset.univ)
+    (CycleQ2HodgeCubicSectionComparison.toCubicSections φ (monicUnit φ hm)
+      0 Finset.univ (Finset.mem_univ 0)
+      (CycleQ2HodgeTwistTorusChart.structureTopGenerator φ (monicUnit φ hm) a)) = a
+  rw [← CycleQ2HodgeCubicSectionComparison.structure_trace_cubic,
+    CycleQ2HodgeTwistTorusChart.structureTopSectionTrace_generator]
+
+theorem normalizedSection_ne_zero {a : k} (ha : a ≠ 0) : normalizedSection φ hm hg a ≠ 0 := by
+  intro hz
+  have he := congrArg (sectionTrace φ hm 0 Finset.univ (Finset.mem_univ 0) hg) hz
+  rw [sectionTrace_normalizedSection,map_zero] at he
+  exact ha he
+
+end CycleQ2HodgeMonicFaceTrace
+
+namespace CycleQ2GenericHodgeCanonicalTrace
+
+open CategoryTheory AlgebraicGeometry Opposite
+open CycleQ2MonicGenericAmbientChart (K genericCoeff_vertex)
+open CycleQ2MonicGenericSmooth (coeff gradientOpen_unit explicit_projective_smooth)
+open CycleQ2GeometricHodgeThreefold (toBase coordinateOpen chartGradient_span)
+open CycleQ2HodgeEulerContractionCharts (gradientEntry)
+open CycleQ2HodgeNormalFirstChart (polynomial gradient_span)
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms differential)
+
+local instance : SmoothOfRelativeDimension 3 (toBase coeff) := explicit_projective_smooth
+
+theorem normalGradient_span (i : Fin 4) :
+    Ideal.span (Set.range (gradientEntry (polynomial coeff i))) = ⊤ :=
+  gradient_span coeff i (chartGradient_span coeff gradientOpen_unit i)
+
+def torusSectionTrace :
+    (sheafForms (toBase coeff) 3 3).obj.obj (op (Finset.univ.inf (coordinateOpen coeff))) →+ K :=
+  CycleQ2HodgeMonicFaceTrace.sectionTrace coeff genericCoeff_vertex 0 Finset.univ
+    (Finset.mem_univ 0) (normalGradient_span 0)
+
+theorem torusSectionTrace_differential
+    (η : (sheafForms (toBase coeff) 3 2).obj.obj (op (Finset.univ.inf (coordinateOpen coeff)))) :
+    torusSectionTrace ((differential (toBase coeff) 3 2).hom.app _ η) = 0 :=
+  CycleQ2HodgeMonicFaceTrace.sectionTrace_differential coeff genericCoeff_vertex 0 Finset.univ
+    (Finset.mem_univ 0) (normalGradient_span 0) η
+
+def normalizedSection (a : K) :
+    (sheafForms (toBase coeff) 3 3).obj.obj (op (Finset.univ.inf (coordinateOpen coeff))) :=
+  CycleQ2HodgeMonicFaceTrace.normalizedSection coeff genericCoeff_vertex (normalGradient_span 0) a
+
+theorem torusSectionTrace_normalizedSection (a : K) : torusSectionTrace (normalizedSection a) = a :=
+  CycleQ2HodgeMonicFaceTrace.sectionTrace_normalizedSection coeff genericCoeff_vertex
+    (normalGradient_span 0) a
+
+theorem normalizedSection_one_ne_zero : normalizedSection 1 ≠ 0 :=
+  CycleQ2HodgeMonicFaceTrace.normalizedSection_ne_zero coeff genericCoeff_vertex
+    (normalGradient_span 0) one_ne_zero
+
+end CycleQ2GenericHodgeCanonicalTrace
+end
+
+#print axioms CycleQ2HodgeCubicSectionComparison.structure_trace_cubic
+#print axioms CycleQ2GenericHodgeCanonicalTrace.torusSectionTrace_differential
+#print axioms CycleQ2GenericHodgeCanonicalTrace.normalizedSection_one_ne_zero
+
+noncomputable section
+namespace CycleQ2HodgeNormalCoordinateChange
+
+open MvPolynomial Module
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricIncidenceProj (geometricWeight)
+open CycleQ2IncidenceDehomogenizedChart (weight_last weight_castSucc)
+open CycleQ2GeometricHodgeThreefold (equation equation_homogeneous)
+open CycleQ2HodgeEuler (dehom)
+open CycleQ2HodgeEulerChartDerivations (Poly Hyp mk)
+open CycleQ2HodgeNormalFirstChart (polynomial)
+open CycleQ2LiteralThreefoldResidueCoordinates
+  (linearValues linearDirections jacobianColumns jacobianColumns_det changedCoordinate)
+open scoped TensorProduct
+
+variable {K : Type} [CommRing K]
+
+/-- Dehomogenization of the original weighted polynomial, in the
+normal-first order used by the actual residue frame. -/
+def normalDehom (i : Fin 4) : MvPolynomial (Fin 5) K →ₐ[K] Poly K :=
+  (MvPolynomial.renameEquiv K (finRotate 4)).toAlgHom.comp (dehom i)
+
+theorem normalDehom_equation (φ : CoeffRing →+* K) (i : Fin 4) :
+    normalDehom i (equation φ) = polynomial φ i := rfl
+
+@[simp] theorem normalDehom_last (i : Fin 4) :
+    normalDehom (K := K) i (X (Fin.last 4)) = X 0 := by
+  have hj : i.castSucc.succAbove (Fin.last 3) = Fin.last 4 := by fin_cases i <;> decide
+  change rename (finRotate 4) (dehom i (X (Fin.last 4))) = X 0
+  rw [← hj,CycleQ2HodgeEuler.dehom_X_succAbove,rename_X] <;> rfl
+
+@[simp] theorem normalDehom_linear (i l : Fin 4) :
+    normalDehom (K := K) i (X l.castSucc) =
+      Fin.insertNth i 1 (fun a : Fin 3 => (X a.succ : Poly K)) l := by
+  refine Fin.succAboveCases i ?_ (fun a => ?_) l
+  · change rename (finRotate 4) (dehom i (X i.castSucc)) = 1
+    rw [CycleQ2HodgeEuler.dehom_X_self,map_one]
+  · have hj : i.castSucc.succAbove a.castSucc = (i.succAbove a).castSucc := by
+      fin_cases i <;> fin_cases a <;> decide
+    change rename (finRotate 4) (dehom i (X (i.succAbove a).castSucc)) = _
+    rw [Fin.insertNth_apply_succAbove,← hj,CycleQ2HodgeEuler.dehom_X_succAbove,rename_X]
+    congr 1
+    fin_cases a <;> decide
+
+variable {R : Type} [CommRing R] [Algebra K R]
+
+theorem eval_linear (i l : Fin 4) (x : Option (Fin 3) → R) :
+    aeval (x ∘ finSuccEquiv 3) (normalDehom (K := K) i (X l.castSucc)) =
+      linearValues i x l := by
+  rw [normalDehom_linear]
+  refine Fin.succAboveCases i ?_ (fun a => ?_) l
+  · simp [linearValues]
+  · simp [linearValues,Function.comp_def]
+
+theorem changed_linear (i j l : Fin 4) (x : Option (Fin 3) → R) (t : R)
+    (ht : t * linearValues i x j = 1) :
+    linearValues j (changedCoordinate i j x t) l = t * linearValues i x l := by
+  refine Fin.succAboveCases j ?_ (fun a => ?_) l
+  · simpa only [linearValues,Fin.insertNth_apply_same] using ht.symm
+  · simp only [linearValues,Fin.insertNth_apply_succAbove,changedCoordinate]
+    exact mul_comm _ _
+
+/-- The weighted homogeneity of the original equation gives its exact
+change in the actual normal-first affine variables over any coefficient
+algebra. -/
+theorem homogeneous_change (i j : Fin 4) (x : Option (Fin 3) → R) (t : R)
+    (ht : t * linearValues i x j = 1) (p : MvPolynomial (Fin 5) K)
+    {n : ℕ} (hp : p.IsWeightedHomogeneous geometricWeight n) :
+    aeval (changedCoordinate i j x t ∘ finSuccEquiv 3) (normalDehom j p) =
+      t^n * aeval (x ∘ finSuccEquiv 3) (normalDehom i p) := by
+  let f := (aeval (x ∘ finSuccEquiv 3)).comp (normalDehom (K := K) i)
+  let y : Fin 5 → R := fun l => f (X l)
+  have hf : aeval y = f := by ext l; exact aeval_X y l
+  have he : (aeval (changedCoordinate i j x t ∘ finSuccEquiv 3)).comp
+      (normalDehom (K := K) j) = aeval (fun l => t^geometricWeight l * y l) := by
+    apply MvPolynomial.algHom_ext
+    intro l
+    rw [aeval_X]
+    change aeval (changedCoordinate i j x t ∘ finSuccEquiv 3)
+      (normalDehom (K := K) j (X l)) =
+        t^geometricWeight l * aeval (x ∘ finSuccEquiv 3) (normalDehom (K := K) i (X l))
+    refine Fin.lastCases ?_ (fun a => ?_) l
+    · rw [normalDehom_last,normalDehom_last,aeval_X,aeval_X,weight_last]
+      change x none * t^2 = t^2 * x none
+      exact mul_comm _ _
+    · rw [eval_linear,eval_linear,weight_castSucc,pow_one,changed_linear i j a x t ht]
+  change ((aeval (changedCoordinate i j x t ∘ finSuccEquiv 3)).comp
+      (normalDehom (K := K) j)) p = t^n * f p
+  rw [he,← hf]
+  exact CycleQ2IncidenceDehomogenizedChart.weighted_homogeneous_eval_scale
+    (algebraMap K R) y t p n hp
+
+theorem equation_change (φ : CoeffRing →+* K) (i j : Fin 4)
+    (x : Option (Fin 3) → R) (t : R) (ht : t * linearValues i x j = 1) :
+    aeval (changedCoordinate i j x t ∘ finSuccEquiv 3) (polynomial φ j) =
+      t^6 * aeval (x ∘ finSuccEquiv 3) (polynomial φ i) :=
+  homogeneous_change i j x t ht (equation φ) (equation_homogeneous φ)
+
+private def realization (x : Option (Fin 3) → R) :
+    (Fin 4 → R) →ₗ[R] KaehlerDifferential K R :=
+  (Pi.basisFun R (Fin 4)).constr R
+    (fun l => KaehlerDifferential.D K R (x (finSuccEquiv 3 l)))
+
+private theorem realization_basis (x : Option (Fin 3) → R) (l : Fin 4) :
+    realization (K := K) x (Pi.basisFun R (Fin 4) l) =
+      KaehlerDifferential.D K R (x (finSuccEquiv 3 l)) :=
+  Basis.constr_basis _ _ _ _
+
+private theorem realization_direction (i : Fin 4) (x : Option (Fin 3) → R) (l : Fin 4) :
+    realization (K := K) x (linearDirections (R := R) i l) =
+      KaehlerDifferential.D K R (linearValues i x l) := by
+  refine Fin.succAboveCases i ?_ (fun a => ?_) l
+  · simp [linearDirections,linearValues]
+  · simp only [linearDirections,linearValues,Fin.insertNth_apply_succAbove,
+      realization_basis,finSuccEquiv_succ]
+
+private theorem realizedColumn (i : Fin 4) (k : Fin 3) (x : Option (Fin 3) → R) (t : R)
+    (ht : t * x (some k) = 1) (l : Fin 4) :
+    realization (K := K) x (jacobianColumns i k x t l) =
+      KaehlerDifferential.D K R (changedCoordinate i (i.succAbove k) x t (finSuccEquiv 3 l)) := by
+  have hinv := (KaehlerDifferential.D K R).leibniz_of_mul_eq_one ht
+  induction l using Fin.cases with
+  | zero =>
+    simp only [jacobianColumns,Fin.cons_zero,map_sub,map_smul,realization_basis,
+      finSuccEquiv_zero,finSuccEquiv_succ,changedCoordinate,Derivation.leibniz,
+      Derivation.leibniz_pow,hinv,Nat.reduceSub,pow_one]
+    rw [← Nat.cast_smul_eq_nsmul R]
+    simp only [Nat.cast_ofNat,smul_smul]
+    module
+  | succ l =>
+    simp only [jacobianColumns,Fin.cons_succ,map_sub,map_smul,realization_direction,
+      realization_basis,finSuccEquiv_succ,changedCoordinate,Derivation.leibniz,hinv,
+      linearValues,smul_smul]
+    module
+
+def coordinateVolume (x : Option (Fin 3) → R) : ⋀[R]^4 (KaehlerDifferential K R) :=
+  exteriorPower.ιMulti R 4 (fun l => KaehlerDifferential.D K R (x (finSuccEquiv 3 l)))
+
+theorem coordinateVolume_change (i : Fin 4) (k : Fin 3) (x : Option (Fin 3) → R) (t : R)
+    (ht : t * x (some k) = 1) :
+    coordinateVolume (K := K) (changedCoordinate i (i.succAbove k) x t) =
+      ((-1 : R)^(i.val+(i.succAbove k).val)*t^6) • coordinateVolume (K := K) x := by
+  have he := congrArg (exteriorPower.map 4 (realization (K := K) x))
+    (CycleQ2ResidueWedgeLinear.topWedge_eq_det_smul
+      (Pi.basisFun R (Fin 4)) (jacobianColumns i k x t))
+  simpa only [exteriorPower.map_apply_ιMulti,map_smul,Function.comp_def,
+    realizedColumn i k x t ht,realization_basis,coordinateVolume,jacobianColumns_det] using he
+
+end CycleQ2HodgeNormalCoordinateChange
+end
+
+#print axioms CycleQ2HodgeNormalCoordinateChange.equation_change
+#print axioms CycleQ2HodgeNormalCoordinateChange.coordinateVolume_change
+
+noncomputable section
+namespace CycleQ2HodgeNormalCoordinateChange
+
+open MvPolynomial Module
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2HodgeEulerChartDerivations (Poly Hyp mk)
+open CycleQ2HodgeNormalFirstChart (polynomial)
+open CycleQ2HodgeEulerContractionCharts (gradientEntry dx gradient_relation)
+open CycleQ2HodgeHypersurfaceVolume (volume bezout gradient_smul_volume)
+open CycleQ2LiteralThreefoldResidueCoordinates (linearValues changedCoordinate)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open CycleQ2ExteriorTopBaseChange
+open scoped TensorProduct KaehlerDifferential
+
+variable {K R S : Type} [CommRing K] [CommRing R] [Algebra K R]
+  [CommRing S] [Algebra R S] [Algebra K S] [IsScalarTower K R S]
+
+private theorem tensor_scale (a : R) (m : Ω[R⁄K]) :
+    (1 : S) ⊗ₜ[R] (a • m) = algebraMap R S a • ((1 : S) ⊗ₜ[R] m) := by
+  rw [TensorProduct.tmul_smul]
+  exact (IsScalarTower.algebraMap_smul S a _).symm
+
+def chartMap (q : Poly K) (x : Option (Fin 3) → R)
+    (hz : algebraMap R S (aeval (x ∘ finSuccEquiv 3) q) = 0) : Hyp q →ₐ[K] S :=
+  Ideal.Quotient.liftₐ _
+    ((IsScalarTower.toAlgHom K R S).comp (aeval (x ∘ finSuccEquiv 3)))
+    (fun _ hx => (Ideal.span_singleton_le_iff_mem
+      (RingHom.ker ((IsScalarTower.toAlgHom K R S).comp
+        (aeval (x ∘ finSuccEquiv 3))).toRingHom)).mpr hz hx)
+
+@[simp] theorem chartMap_mk (q : Poly K) (x : Option (Fin 3) → R)
+    (hz : algebraMap R S (aeval (x ∘ finSuccEquiv 3) q) = 0) (p : Poly K) :
+    chartMap q x hz (mk q p) = algebraMap R S (aeval (x ∘ finSuccEquiv 3) p) := rfl
+
+def restrictedDifferentials (x : Option (Fin 3) → R) (l : Fin 4) : S ⊗[R] Ω[R⁄K] :=
+  (1 : S) ⊗ₜ[R] KaehlerDifferential.D K R (x (finSuccEquiv 3 l))
+
+theorem map_restrictedDifferentials (q : Poly K) (x : Option (Fin 3) → R)
+    (hz : algebraMap R S (aeval (x ∘ finSuccEquiv 3) q) = 0) (l : Fin 4) :
+    KaehlerDifferential.mapBaseChange K R S (restrictedDifferentials (K := K) (S := S) x l) =
+      dx q (chartMap q x hz) l := by
+  rw [restrictedDifferentials,KaehlerDifferential.mapBaseChange_tmul,one_smul,
+    KaehlerDifferential.map_D]
+  change KaehlerDifferential.D K S _ = KaehlerDifferential.D K S _
+  rw [chartMap_mk,aeval_X] <;> rfl
+
+theorem conormal_gradient (q : Poly K) (x : Option (Fin 3) → R)
+    (hz : algebraMap R S (aeval (x ∘ finSuccEquiv 3) q) = 0) :
+    (1 : S) ⊗ₜ[R] KaehlerDifferential.D K R (aeval (x ∘ finSuccEquiv 3) q) =
+      ∑ l : Fin 4, chartMap q x hz (gradientEntry q l) •
+        restrictedDifferentials (K := K) (S := S) x l := by
+  rw [CycleQ2PolynomialChainRule.apply (aeval (x ∘ finSuccEquiv 3))
+    (KaehlerDifferential.D K R),TensorProduct.tmul_sum]
+  apply Finset.sum_congr rfl
+  intro l _
+  rw [tensor_scale]
+  simp only [gradientEntry,chartMap_mk,restrictedDifferentials,aeval_X,Function.comp_apply]
+
+theorem targetEquation_zero (φ : CoeffRing →+* K) (i j : Fin 4)
+    (x : Option (Fin 3) → R) (t : R) (ht : t * linearValues i x j = 1)
+    (hz : algebraMap R S (aeval (x ∘ finSuccEquiv 3) (polynomial φ i)) = 0) :
+    algebraMap R S
+      (aeval (changedCoordinate i j x t ∘ finSuccEquiv 3) (polynomial φ j)) = 0 := by
+  rw [equation_change φ i j x t ht,map_mul,hz,mul_zero]
+
+theorem conormal_change (φ : CoeffRing →+* K) (i j : Fin 4)
+    (x : Option (Fin 3) → R) (t : R) (ht : t * linearValues i x j = 1)
+    (hz : algebraMap R S (aeval (x ∘ finSuccEquiv 3) (polynomial φ i)) = 0) :
+    (1 : S) ⊗ₜ[R] KaehlerDifferential.D K R
+      (aeval (changedCoordinate i j x t ∘ finSuccEquiv 3) (polynomial φ j)) =
+      (algebraMap R S t)^6 • ((1 : S) ⊗ₜ[R] KaehlerDifferential.D K R
+        (aeval (x ∘ finSuccEquiv 3) (polynomial φ i))) := by
+  rw [equation_change φ i j x t ht,Derivation.leibniz,TensorProduct.tmul_add,
+    tensor_scale,tensor_scale,hz,zero_smul,add_zero,map_pow]
+
+abbrev Ambient (K : Type) [CommRing K] (k : Fin 3) :=
+  Localization.Away (X k.succ : Poly K)
+
+def overlapCoordinates (k : Fin 3) (a : Option (Fin 3)) : Ambient K k :=
+  algebraMap (Poly K) (Ambient K k) (X ((finSuccEquiv 3).symm a))
+
+def overlapInverse (k : Fin 3) : Ambient K k :=
+  IsLocalization.Away.invSelf (X k.succ : Poly K)
+
+theorem overlapInverse_mul (k : Fin 3) :
+    overlapInverse (K := K) k * overlapCoordinates k (some k) = 1 := by
+  rw [mul_comm]
+  exact IsLocalization.Away.mul_invSelf _
+
+def overlapBasis (k : Fin 3) : Basis (Fin 4) (Ambient K k) Ω[Ambient K k⁄K] := by
+  letI : Algebra.FormallyEtale (Poly K) (Ambient K k) :=
+    Algebra.FormallyEtale.of_isLocalization (Rₘ := Ambient K k)
+      (Submonoid.powers (X k.succ : Poly K))
+  exact ((KaehlerDifferential.mvPolynomialBasis K (Fin 4)).baseChange (Ambient K k)).map
+    (KaehlerDifferential.tensorKaehlerEquivOfFormallyEtale K (Poly K) (Ambient K k))
+
+@[simp] theorem overlapBasis_apply (k : Fin 3) (l : Fin 4) :
+    overlapBasis (K := K) k l = KaehlerDifferential.D K (Ambient K k)
+      (overlapCoordinates k (finSuccEquiv 3 l)) := by
+  simp only [overlapBasis,Basis.map_apply,Basis.baseChange_apply,
+    KaehlerDifferential.mvPolynomialBasis_apply]
+  change KaehlerDifferential.mapBaseChange K (Poly K) (Ambient K k) _ = _
+  rw [KaehlerDifferential.mapBaseChange_tmul,one_smul,KaehlerDifferential.map_D]
+  simp only [overlapCoordinates,Equiv.symm_apply_apply]
+
+variable (φ : CoeffRing →+* K) (i : Fin 4) (k : Fin 3)
+  (B : Type) [CommRing B] [Algebra (Ambient K k) B]
+  [Algebra K B] [IsScalarTower K (Ambient K k) B]
+
+private theorem overlap_linear_inverse :
+    overlapInverse (K := K) k * linearValues i (overlapCoordinates k) (i.succAbove k) = 1 := by
+  simpa only [linearValues,Fin.insertNth_apply_succAbove] using overlapInverse_mul (K := K) k
+
+private theorem overlap_factor_unit :
+    IsUnit ((algebraMap (Ambient K k) B (overlapInverse k))^6) := by
+  have hu : IsUnit (overlapInverse (K := K) k) :=
+    isUnit_of_dvd_one ⟨overlapCoordinates k (some k),(overlapInverse_mul k).symm⟩
+  exact (hu.map (algebraMap (Ambient K k) B)).pow 6
+
+private theorem restricted_volume_change :
+    exteriorPower.ιMulti B 4
+      (restrictedDifferentials (K := K) (S := B)
+        (changedCoordinate i (i.succAbove k) (overlapCoordinates k) (overlapInverse k))) =
+      ((-1 : B)^(i.val+(i.succAbove k).val) *
+        (algebraMap (Ambient K k) B (overlapInverse k))^6) •
+      exteriorPower.ιMulti B 4 (restrictedDifferentials (K := K) (S := B) (overlapCoordinates k)) := by
+  have he := congrArg (topBaseChange (S := B) (overlapBasis (K := K) k))
+    (coordinateVolume_change (K := K) i k (overlapCoordinates k) (overlapInverse k)
+      (overlapInverse_mul k))
+  simpa only [coordinateVolume,restrictedDifferentials,topBaseChange_wedge,
+    map_smulₛₗ,map_mul,map_pow,map_neg,map_one] using he
+
+/-- The two actual regular quotient residues agree after their projective
+orientation signs. Both conormals and both ambient volumes have been
+computed from the same original weighted equation over the coefficient
+ring; no choice of a Jacobian pivot enters this equality. -/
+theorem volume_overlap
+    (hgi : Ideal.span (Set.range (gradientEntry (polynomial φ i))) = ⊤)
+    (hgj : Ideal.span (Set.range (gradientEntry (polynomial φ (i.succAbove k)))) = ⊤)
+    (hf : algebraMap (Ambient K k) B
+      (aeval (overlapCoordinates k ∘ finSuccEquiv 3) (polynomial φ i)) = 0) :
+    (-1 : B)^(i.succAbove k).val • exteriorPullback
+      (chartMap (polynomial φ (i.succAbove k))
+        (changedCoordinate i (i.succAbove k) (overlapCoordinates k) (overlapInverse k))
+        (targetEquation_zero φ i (i.succAbove k) (overlapCoordinates k) (overlapInverse k)
+          (overlap_linear_inverse i k) hf)) 3 (volume (polynomial φ (i.succAbove k)) hgj) =
+      (-1 : B)^i.val • exteriorPullback
+        (chartMap (polynomial φ i) (overlapCoordinates k) hf) 3 (volume (polynomial φ i) hgi) := by
+  let j := i.succAbove k
+  let x := overlapCoordinates (K := K) k
+  let y := changedCoordinate i j x (overlapInverse k)
+  let fx := chartMap (polynomial φ i) x hf
+  let fy := chartMap (polynomial φ j) y
+    (targetEquation_zero φ i j x (overlapInverse k) (overlap_linear_inverse i k) hf)
+  let b := (overlapBasis (K := K) k).baseChange B
+  let v := restrictedDifferentials (K := K) (S := B) y
+  let q := KaehlerDifferential.mapBaseChange K (Ambient K k) B
+  let g := (algebraMap (Ambient K k) B (overlapInverse k))^6
+  let a : Fin 4 → B := fun l => fx (gradientEntry (polynomial φ i) l)
+  let a' : Fin 4 → B := fun l => fy (gradientEntry (polynomial φ j) l)
+  have hb : ⇑b = restrictedDifferentials (K := K) (S := B) x := by
+    funext l
+    simp only [b,Basis.baseChange_apply,overlapBasis_apply] <;> rfl
+  have hx : q ∘ b = dx (polynomial φ i) fx := by
+    rw [hb]
+    exact funext (map_restrictedDifferentials (polynomial φ i) x hf)
+  have hy : q ∘ v = dx (polynomial φ j) fy :=
+    funext (map_restrictedDifferentials (polynomial φ j) y _)
+  have hz : ∑ l, a l • q (b l) = 0 := by
+    change ∑ l, a l • (q ∘ b) l = 0
+    rw [hx]
+    exact gradient_relation (polynomial φ i) fx
+  have hn : ∑ l, a' l • v l = g • ∑ l, a l • b l := by
+    rw [hb]
+    change (∑ l, fy (gradientEntry (polynomial φ j) l) •
+      restrictedDifferentials (K := K) (S := B) y l) = _
+    rw [← conormal_gradient,← conormal_gradient]
+    exact conormal_change φ i j x (overlapInverse k) (overlap_linear_inverse i k) hf
+  have hv0 : b.det v = (-1 : B)^(i.val+j.val) * g := by
+    have hw := restricted_volume_change i k B
+    rw [← hb] at hw
+    have he := congrArg (topCoordinate b) hw
+    simpa only [map_smul,topCoordinate_wedge,topCoordinate_basis,smul_eq_mul,mul_one] using he
+  have hv : (-1 : B)^j.val * b.det v = g * (-1 : B)^i.val := by
+    rw [hv0,pow_add]
+    have hs : (-1 : B)^j.val * (-1 : B)^j.val = 1 := by rw [← mul_pow]; simp
+    calc
+      _ = ((-1 : B)^j.val * (-1 : B)^j.val) * (g * (-1 : B)^i.val) := by ring
+      _ = _ := by rw [hs,one_mul]
+  obtain ⟨c,hc⟩ := bezout (polynomial φ i) hgi
+  obtain ⟨c',hc'⟩ := bezout (polynomial φ j) hgj
+  have hcx : ∑ l, fx (c l) * a l = 1 := by
+    simpa only [a,map_sum,map_mul,map_one] using congrArg fx hc
+  have hcy : ∑ l, fy (c' l) * a' l = 1 := by
+    simpa only [a',map_sum,map_mul,map_one] using congrArg fy hc'
+  apply CycleQ2LiteralThreefoldResidueGluing.bezout_residue_change
+    b q a a' _ _ hcx hcy v g _ _ (overlap_factor_unit k B) hv hn hz
+  · intro l
+    rw [hx]
+    exact gradient_smul_volume (polynomial φ i) hgi fx l
+  · intro l
+    rw [hy]
+    exact gradient_smul_volume (polynomial φ j) hgj fy l
+
+end CycleQ2HodgeNormalCoordinateChange
+end
+
+#print axioms CycleQ2HodgeNormalCoordinateChange.volume_overlap
+
+noncomputable section
+namespace CycleQ2HodgeCanonicalChartVolumes
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite MvPolynomial
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricIncidenceProj (geometricWeight)
+open CycleQ2IncidenceDehomogenizedChart (weight_last weight_castSucc)
+open CycleQ2GeometricHodgeThreefold
+  (threefold toBase coordinateOpen coord grade quotient quotient_mem_grade
+    coord_mem_grade weightOne_mem_grade)
+open CycleQ2HodgeEulerChartDerivations (Poly Hyp mk mk_equation)
+open CycleQ2HodgeEulerContractionCharts (gradientEntry)
+open CycleQ2HodgeNormalFirstChart (polynomial affineChart affineChart_overBase)
+open CycleQ2HodgeNormalCoordinateChange
+  (normalDehom normalDehom_last normalDehom_linear Ambient overlapCoordinates overlapInverse)
+open CycleQ2LiteralThreefoldResidueCoordinates (linearValues changedCoordinate)
+open CycleQ2HodgeHypersurfaceVolume (volume)
+open CycleQ2HodgeTwistRatios (normalized ratio ratio_self ratio_comp normalized_change transition)
+open CycleQ2RelativeAffineChartSections (chartAlgHom)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open scoped KaehlerDifferential
+
+variable {K : Type} [Field K] [CharZero K] (φ : CoeffRing →+* K)
+
+local instance sectionAlgebra (W : (threefold φ).Opens) : Algebra K Γ(threefold φ,W) :=
+  (sectionCoefficients (toBase φ) W).toAlgebra
+
+def sectionMap (i : Fin 4) (W : (threefold φ).Opens) (hi : W ≤ coordinateOpen φ i) :
+    Hyp (polynomial φ i) →ₐ[K] Γ(threefold φ,W) :=
+  chartAlgHom (affineChart φ i) (toBase φ) (affineChart_overBase φ i)
+    (Over.mk (homOfLE hi))
+
+/-- The actual normal-first affine chart map sends every homogeneous
+polynomial to its original projective fraction. -/
+theorem sectionMap_normalized (i : Fin 4) (W : (threefold φ).Opens)
+    (hi : W ≤ coordinateOpen φ i) (n : ℕ) (p : MvPolynomial (Fin 5) K)
+    (hp : p.IsWeightedHomogeneous geometricWeight n) :
+    sectionMap φ i W hi (mk (polynomial φ i) (normalDehom i p)) =
+      normalized φ i (quotient φ p) (by simpa using quotient_mem_grade φ p hp) W hi := by
+  change CycleQ2GeometricAffineChartSections.chartSection (affineChart φ i)
+    (Over.mk (homOfLE hi))
+    (CycleQ2HodgeNormalFirstChart.chartEquiv φ i
+      (CycleQ2HodgeEuler.chartMap φ i (CycleQ2HodgeEuler.dehom i p))) = _
+  rw [← CycleQ2HodgeMonicFaceTrace.normalSection_raw φ i,
+    ← CycleQ2HodgeEulerChartBinding.chartEquiv_fraction φ i n p hp,
+    CycleQ2HodgeCubicSectionComparison.affineChartSection] <;> rfl
+
+theorem sectionMap_normal (i : Fin 4) (W : (threefold φ).Opens)
+    (hi : W ≤ coordinateOpen φ i) :
+    sectionMap φ i W hi (mk (polynomial φ i) (X 0)) =
+      normalized φ i (coord φ (Fin.last 4))
+        (show coord φ (Fin.last 4) ∈ grade φ 2 from coord_mem_grade φ (Fin.last 4)) W hi := by
+  simpa only [normalDehom_last,weight_last] using sectionMap_normalized φ i W hi 2
+    (X (Fin.last 4)) (by simpa only [weight_last] using
+      isWeightedHomogeneous_X K geometricWeight (Fin.last 4))
+
+theorem sectionMap_base (i : Fin 4) (W : (threefold φ).Opens)
+    (hi : W ≤ coordinateOpen φ i) (a : Fin 3) :
+    sectionMap φ i W hi (mk (polynomial φ i) (X a.succ)) = ratio φ i (i.succAbove a) W hi := by
+  simpa only [normalDehom_linear,Fin.insertNth_apply_succAbove,weight_castSucc] using
+    sectionMap_normalized φ i W hi 1 (X (i.succAbove a).castSucc)
+      (by simpa only [weight_castSucc] using
+        isWeightedHomogeneous_X K geometricWeight (i.succAbove a).castSucc)
+
+def coordinateValues (i : Fin 4) (W : (threefold φ).Opens)
+    (hi : W ≤ coordinateOpen φ i) (a : Option (Fin 3)) : Γ(threefold φ,W) :=
+  sectionMap φ i W hi (mk (polynomial φ i) (X ((finSuccEquiv 3).symm a)))
+
+theorem linearValues_eq_ratio (i : Fin 4) (W : (threefold φ).Opens)
+    (hi : W ≤ coordinateOpen φ i) (l : Fin 4) :
+    linearValues i (coordinateValues φ i W hi) l = ratio φ i l W hi := by
+  refine Fin.succAboveCases i ?_ (fun a => ?_) l
+  · rw [ratio_self] <;> rfl
+  · change sectionMap φ i W hi (mk (polynomial φ i) (X a.succ)) = _
+    exact sectionMap_base φ i W hi a
+
+/-- The scheme-theoretic fractions give exactly the weighted coordinate
+change used by the ambient conormal calculation. -/
+theorem coordinateValues_change (i j : Fin 4) (W : (threefold φ).Opens)
+    (hi : W ≤ coordinateOpen φ i) (hj : W ≤ coordinateOpen φ j) :
+    coordinateValues φ j W hj =
+      changedCoordinate i j (coordinateValues φ i W hi) (ratio φ j i W hj) := by
+  funext a
+  cases a with
+  | none =>
+    change sectionMap φ j W hj (mk (polynomial φ j) (X 0)) =
+      sectionMap φ i W hi (mk (polynomial φ i) (X 0)) * ratio φ j i W hj ^ 2
+    rw [sectionMap_normal,sectionMap_normal,
+      normalized_change φ j i _ _ W hj hi,mul_comm]
+  | some a =>
+    change sectionMap φ j W hj (mk (polynomial φ j) (X a.succ)) =
+      linearValues i (coordinateValues φ i W hi) (j.succAbove a) * ratio φ j i W hj
+    rw [sectionMap_base,linearValues_eq_ratio,mul_comm,ratio_comp]
+
+variable (i : Fin 4) (k : Fin 3) (W : (threefold φ).Opens)
+  (hi : W ≤ coordinateOpen φ i) (hj : W ≤ coordinateOpen φ (i.succAbove k))
+
+private theorem overlap_coordinate_unit :
+    IsUnit (sectionMap φ i W hi (mk (polynomial φ i) (X k.succ))) := by
+  rw [sectionMap_base]
+  exact (transition φ i (i.succAbove k) W hi hj).isUnit
+
+def overlapMap : Ambient K k →ₐ[K] Γ(threefold φ,W) where
+  toRingHom := IsLocalization.Away.lift (X k.succ : Poly K)
+    (g := ((sectionMap φ i W hi).comp (mk (polynomial φ i))).toRingHom)
+    (overlap_coordinate_unit φ i k W hi hj)
+  commutes' a := by
+    rw [IsScalarTower.algebraMap_apply K (Poly K) (Ambient K k),IsLocalization.Away.lift_eq]
+    exact ((sectionMap φ i W hi).comp (mk (polynomial φ i))).commutes a
+
+theorem overlapMap_polynomial (p : Poly K) :
+    overlapMap φ i k W hi hj (algebraMap (Poly K) (Ambient K k) p) =
+      sectionMap φ i W hi (mk (polynomial φ i) p) :=
+  IsLocalization.Away.lift_eq _ _ _
+
+theorem overlapMap_coordinate (a : Option (Fin 3)) :
+    overlapMap φ i k W hi hj (overlapCoordinates k a) = coordinateValues φ i W hi a :=
+  overlapMap_polynomial φ i k W hi hj _
+
+theorem overlapMap_inverse :
+    overlapMap φ i k W hi hj (overlapInverse k) = ratio φ (i.succAbove k) i W hj := by
+  apply (overlap_coordinate_unit φ i k W hi hj).mul_left_cancel
+  have he := congrArg (overlapMap φ i k W hi hj)
+    (CycleQ2HodgeNormalCoordinateChange.overlapInverse_mul (K := K) k)
+  rw [map_mul,overlapMap_coordinate,map_one] at he
+  change overlapMap φ i k W hi hj (overlapInverse k) *
+    sectionMap φ i W hi (mk (polynomial φ i) (X k.succ)) = 1 at he
+  rw [sectionMap_base]
+  rw [sectionMap_base] at he
+  rw [mul_comm,he,ratio_comp,ratio_self]
+
+private theorem overlap_evaluation (p : Poly K) :
+    overlapMap φ i k W hi hj (aeval (overlapCoordinates k ∘ finSuccEquiv 3) p) =
+      sectionMap φ i W hi (mk (polynomial φ i) p) := by
+  have he : aeval (overlapCoordinates (K := K) k ∘ finSuccEquiv 3) =
+      IsScalarTower.toAlgHom K (Poly K) (Ambient K k) := by
+    apply MvPolynomial.algHom_ext
+    intro l
+    simp only [aeval_X,Function.comp_apply,overlapCoordinates,Equiv.symm_apply_apply] <;> rfl
+  rw [he]
+  exact overlapMap_polynomial φ i k W hi hj p
+
+/-- The actual affine residue volumes on every common subopen obey the
+same projective orientation identity. The comparison ring map is the
+original scheme chart-section map, proved on the homogeneous fractions. -/
+theorem volume_overlap
+    (hgi : Ideal.span (Set.range (gradientEntry (polynomial φ i))) = ⊤)
+    (hgj : Ideal.span (Set.range (gradientEntry (polynomial φ (i.succAbove k)))) = ⊤) :
+    (-1 : Γ(threefold φ,W))^(i.succAbove k).val •
+      exteriorPullback (sectionMap φ (i.succAbove k) W hj) 3
+        (volume (polynomial φ (i.succAbove k)) hgj) =
+    (-1 : Γ(threefold φ,W))^i.val • exteriorPullback (sectionMap φ i W hi) 3
+      (volume (polynomial φ i) hgi) := by
+  letI : Algebra (Ambient K k) Γ(threefold φ,W) := (overlapMap φ i k W hi hj).toRingHom.toAlgebra
+  letI : IsScalarTower K (Ambient K k) Γ(threefold φ,W) :=
+    IsScalarTower.of_algHom (overlapMap φ i k W hi hj)
+  have hf : algebraMap (Ambient K k) Γ(threefold φ,W)
+      (aeval (overlapCoordinates k ∘ finSuccEquiv 3) (polynomial φ i)) = 0 := by
+    rw [show algebraMap (Ambient K k) Γ(threefold φ,W) = (overlapMap φ i k W hi hj).toRingHom from rfl,
+      overlap_evaluation,mk_equation,map_zero]
+  let x := overlapCoordinates (K := K) k
+  let y := changedCoordinate i (i.succAbove k) x (overlapInverse k)
+  have htarget : algebraMap (Ambient K k) Γ(threefold φ,W)
+      (aeval (y ∘ finSuccEquiv 3) (polynomial φ (i.succAbove k))) = 0 :=
+    CycleQ2HodgeNormalCoordinateChange.targetEquation_zero φ i (i.succAbove k) x
+      (overlapInverse k) (by
+        simpa only [linearValues,Fin.insertNth_apply_succAbove] using
+          CycleQ2HodgeNormalCoordinateChange.overlapInverse_mul (K := K) k) hf
+  have hs : CycleQ2HodgeNormalCoordinateChange.chartMap (polynomial φ i) x hf =
+      sectionMap φ i W hi := by
+    ext a
+    obtain ⟨p,rfl⟩ := Ideal.Quotient.mk_surjective a
+    exact overlap_evaluation φ i k W hi hj p
+  have he : (IsScalarTower.toAlgHom K (Ambient K k) Γ(threefold φ,W)).comp
+      (aeval (y ∘ finSuccEquiv 3)) =
+        (sectionMap φ (i.succAbove k) W hj).comp (mk (polynomial φ (i.succAbove k))) := by
+    apply MvPolynomial.algHom_ext
+    intro l
+    rw [AlgHom.comp_apply,aeval_X]
+    have hc := congrFun (coordinateValues_change φ i (i.succAbove k) W hi hj) (finSuccEquiv 3 l)
+    change _ = coordinateValues φ (i.succAbove k) W hj (finSuccEquiv 3 l)
+    rw [hc]
+    cases l using Fin.cases with
+    | zero =>
+      change overlapMap φ i k W hi hj (x none * overlapInverse k^2) = _
+      rw [map_mul,map_pow,overlapMap_coordinate,overlapMap_inverse]
+    | succ l =>
+      change overlapMap φ i k W hi hj
+        (linearValues i x ((i.succAbove k).succAbove l) * overlapInverse k) = _
+      rw [map_mul,overlapMap_inverse]
+      congr 1
+      refine Fin.succAboveCases i ?_ (fun a => ?_) ((i.succAbove k).succAbove l)
+      · simp [linearValues]
+      · simp only [linearValues,Fin.insertNth_apply_succAbove,overlapMap_coordinate]
+  have ht : CycleQ2HodgeNormalCoordinateChange.chartMap
+      (polynomial φ (i.succAbove k)) y htarget = sectionMap φ (i.succAbove k) W hj := by
+    ext a
+    obtain ⟨p,rfl⟩ := Ideal.Quotient.mk_surjective a
+    exact DFunLike.congr_fun he p
+  have hv := CycleQ2HodgeNormalCoordinateChange.volume_overlap φ i k Γ(threefold φ,W) hgi hgj hf
+  rw [hs,ht] at hv
+  exact hv
+
+end CycleQ2HodgeCanonicalChartVolumes
+end
+
+#print axioms CycleQ2HodgeCanonicalChartVolumes.sectionMap_normalized
+#print axioms CycleQ2HodgeCanonicalChartVolumes.volume_overlap
+
+noncomputable section
+namespace CycleQ2HodgeCanonicalChartVolumes
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold (threefold toBase coordinateOpen grade coord weightOne_mem_grade)
+open CycleQ2HodgeNormalFirstChart (polynomial affineChart affineChart_overBase)
+open CycleQ2HodgeEulerContractionCharts (gradientEntry)
+open CycleQ2HodgeHypersurfaceVolume (volume)
+open CycleQ2HodgeHypersurfaceSheafVolume (affineSectionEquiv affineSectionEquiv_apply)
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms)
+open CycleQ2IntrinsicOrdinaryExterior (toSheaf)
+open CycleQ2RelativeAffineOverlap (restrict)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open CycleQ2AffineDeRhamFunctorial (exteriorPullback_comp)
+open CycleQ2GeometricSheafLocalIso (res)
+
+variable {K : Type} [Field K] [CharZero K] (φ : CoeffRing →+* K)
+  (hg : ∀ i : Fin 4, Ideal.span (Set.range (gradientEntry (polynomial φ i))) = ⊤)
+  [SmoothOfRelativeDimension 3 (toBase φ)]
+
+local instance sectionAlgebra' (W : (threefold φ).Opens) : Algebra K Γ(threefold φ,W) :=
+  (sectionCoefficients (toBase φ) W).toAlgebra
+
+theorem coordinate_affine (i : Fin 4) : IsAffineOpen (coordinateOpen φ i) :=
+  Proj.isAffineOpen_basicOpen (grade φ) (coord φ i.castSucc) (weightOne_mem_grade φ i) (by decide)
+
+/-- The residue frame on any actual affine subopen, with the original
+projective orientation. -/
+def affineFrame (i : Fin 4) (W : (threefold φ).Opens)
+    (hi : W ≤ coordinateOpen φ i) (hW : IsAffineOpen W) :
+    Γ(threefold φ,W) ≃+ (sheafForms (toBase φ) 3 3).obj.obj (op W) :=
+  (LinearEquiv.smulOfUnit ((-1 : Γ(threefold φ,W)ˣ)^i.val) :
+    Γ(threefold φ,W) ≃ₗ[Γ(threefold φ,W)] Γ(threefold φ,W)).toAddEquiv.trans
+      (affineSectionEquiv (polynomial φ i) (hg i) (affineChart φ i) (toBase φ)
+        (affineChart_overBase φ i) (coordinate_affine φ i) (Over.mk (homOfLE hi)) hW)
+
+theorem affineFrame_apply (i : Fin 4) (W : (threefold φ).Opens)
+    (hi : W ≤ coordinateOpen φ i) (hW : IsAffineOpen W) (c : Γ(threefold φ,W)) :
+    affineFrame φ hg i W hi hW c =
+      (toSheaf (toBase φ) 3 3).app (op W)
+        (c • ((-1 : Γ(threefold φ,W))^i.val • exteriorPullback (sectionMap φ i W hi) 3
+          (volume (polynomial φ i) (hg i)))) := by
+  change affineSectionEquiv (polynomial φ i) (hg i) (affineChart φ i) (toBase φ)
+    (affineChart_overBase φ i) (coordinate_affine φ i) (Over.mk (homOfLE hi)) hW
+      ((↑((-1 : Γ(threefold φ,W)ˣ)^i.val) : Γ(threefold φ,W)) • c) = _
+  rw [affineSectionEquiv_apply]
+  simp only [Units.val_pow_eq_pow_val,Units.val_neg,Units.val_one,smul_eq_mul]
+  apply congrArg ((toSheaf (toBase φ) 3 3).app (op W))
+  rw [smul_smul]
+  congr 1
+  exact mul_comm _ _
+
+/-- On a common affine open the coefficient frame is independent of
+the chosen projective anchor, by the actual residue-volume identity. -/
+theorem affineFrame_eq (i j : Fin 4) (W : (threefold φ).Opens)
+    (hi : W ≤ coordinateOpen φ i) (hj : W ≤ coordinateOpen φ j) (hW : IsAffineOpen W) :
+    affineFrame φ hg i W hi hW = affineFrame φ hg j W hj hW := by
+  obtain rfl | ⟨k,rfl⟩ := i.eq_self_or_eq_succAbove j
+  · rfl
+  · ext c
+    rw [affineFrame_apply,affineFrame_apply,
+      volume_overlap φ i k W hi hj (hg i) (hg (i.succAbove k))]
+
+theorem affineFrame_restrict (i : Fin 4) (W V : (threefold φ).Opens)
+    (hi : W ≤ coordinateOpen φ i) (hW : IsAffineOpen W) (hV : IsAffineOpen V)
+    (h : V ≤ W) (c : Γ(threefold φ,W)) :
+    res (sheafForms (toBase φ) 3 3) h (affineFrame φ hg i W hi hW c) =
+      affineFrame φ hg i V (h.trans hi) hV ((threefold φ).presheaf.map (homOfLE h).op c) := by
+  rw [affineFrame_apply,affineFrame_apply]
+  change (sheafForms (toBase φ) 3 3).obj.map (homOfLE h).op
+    ((toSheaf (toBase φ) 3 3).app (op W) _) = _
+  rw [← (toSheaf (toBase φ) 3 3).naturality_apply]
+  change (toSheaf (toBase φ) 3 3).app (op V)
+    (exteriorPullback (restrict (toBase φ) h) 3
+      (c • ((-1 : Γ(threefold φ,W))^i.val • exteriorPullback (sectionMap φ i W hi) 3 _))) = _
+  rw [map_smulₛₗ,map_smulₛₗ,map_pow,map_neg,map_one,← exteriorPullback_comp]
+  have he : (restrict (toBase φ) h).comp (sectionMap φ i W hi) =
+      sectionMap φ i V (h.trans hi) := by
+    ext a
+    exact CycleQ2RelativeAffineChartSections.chartAlgHom_restrict
+      (affineChart φ i) (toBase φ) (affineChart_overBase φ i)
+      (Over.homMk (homOfLE h) : Over.mk (homOfLE (h.trans hi)) ⟶ Over.mk (homOfLE hi)) a
+  rw [he] <;> rfl
+
+theorem coefficient_restrict (i j : Fin 4) (W V : (threefold φ).Opens)
+    (hi : V ≤ coordinateOpen φ i) (hj : W ≤ coordinateOpen φ j)
+    (hW : IsAffineOpen W) (hV : IsAffineOpen V) (h : V ≤ W)
+    (s : (sheafForms (toBase φ) 3 3).obj.obj (op W)) :
+    (affineFrame φ hg i V hi hV).symm (res (sheafForms (toBase φ) 3 3) h s) =
+      (threefold φ).presheaf.map (homOfLE h).op ((affineFrame φ hg j W hj hW).symm s) := by
+  obtain ⟨c,rfl⟩ := (affineFrame φ hg j W hj hW).surjective s
+  rw [AddEquiv.symm_apply_apply,affineFrame_restrict,
+    affineFrame_eq φ hg i j V hi (h.trans hj) hV,AddEquiv.symm_apply_apply]
+
+theorem affineFrame_zero (W : (threefold φ).Opens)
+    (h0 : W ≤ coordinateOpen φ 0) (hW : IsAffineOpen W) :
+    affineFrame φ hg 0 W h0 hW =
+      affineSectionEquiv (polynomial φ 0) (hg 0) (affineChart φ 0) (toBase φ)
+        (affineChart_overBase φ 0) (coordinate_affine φ 0) (Over.mk (homOfLE h0)) hW := by
+  ext c
+  change affineSectionEquiv (polynomial φ 0) (hg 0) (affineChart φ 0) (toBase φ)
+    (affineChart_overBase φ 0) (coordinate_affine φ 0) (Over.mk (homOfLE h0)) hW
+      ((↑((-1 : Γ(threefold φ,W)ˣ)^(0 : Fin 4).val) : Γ(threefold φ,W)) • c) = _
+  simp only [Fin.val_zero,pow_zero,Units.val_one,one_smul]
+
+end CycleQ2HodgeCanonicalChartVolumes
+end
+
+#print axioms CycleQ2HodgeCanonicalChartVolumes.affineFrame_eq
+#print axioms CycleQ2HodgeCanonicalChartVolumes.coefficient_restrict
+
+noncomputable section
+namespace CycleQ2HodgeMonicCanonicalTrace
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold (threefold toBase coordinateOpen vertexCoefficient)
+open CycleQ2HodgeEulerContractionCharts (gradientEntry)
+open CycleQ2HodgeNormalFirstChart (polynomial monicUnit)
+open CycleQ2HodgeCanonicalChartVolumes (affineFrame coefficient_restrict affineFrame_zero)
+open CycleQ2HodgeCubicIntrinsicForms (face_affine)
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms differential)
+open CycleQ2GeometricProjectiveHOne (structureAdditiveSheaf)
+open CycleQ2GeometricSheafLocalIso (res)
+open CycleQ2HodgeTwistCoordinates (NativeTopFaces nativeTopBoundary)
+open CycleQ2HodgeTwistTorusChart
+  (structureTopSectionTrace structure_top_boundary_iff_trace_zero)
+
+variable {K : Type} [Field K] [CharZero K] (φ : CoeffRing →+* K)
+  (hm : φ vertexCoefficient = 1)
+  (hg : ∀ i : Fin 4, Ideal.span (Set.range (gradientEntry (polynomial φ i))) = ⊤)
+  [SmoothOfRelativeDimension 3 (toBase φ)]
+
+private abbrev Torus := Finset.univ.inf (coordinateOpen φ)
+private abbrev Canonical := sheafForms (toBase φ) 3 3
+private abbrev Structure := structureAdditiveSheaf (threefold φ)
+
+private def faceAnchor (i : Fin 4) : Fin 4 := if i = 0 then 1 else 0
+
+private theorem faceAnchor_mem (i : Fin 4) : faceAnchor i ∈ Finset.univ.erase i := by
+  fin_cases i <;> decide
+
+private theorem top_le_face (i : Fin 4) :
+    Torus φ ≤ (Finset.univ.erase i).inf (coordinateOpen φ) :=
+  Finset.le_inf (fun j _ => Finset.inf_le (Finset.mem_univ j))
+
+/-- The coefficient of an actual torus three-form in the original
+oriented chart-zero volume. -/
+def torusCoefficient : (Canonical φ).obj.obj (op (Torus φ)) ≃+ Γ(threefold φ,Torus φ) :=
+  (affineFrame φ hg 0 (Torus φ) (Finset.inf_le (Finset.mem_univ 0))
+    (face_affine φ 0 Finset.univ (Finset.mem_univ 0))).symm
+
+/-- Every face coefficient is read in an actual chart containing that
+face; the 123 face uses chart one, with its orientation sign. -/
+def faceCoefficients (c : NativeTopFaces (F := Canonical φ) (U := coordinateOpen φ)) :
+    NativeTopFaces (F := Structure φ) (U := coordinateOpen φ) := fun i =>
+  (affineFrame φ hg (faceAnchor i) ((Finset.univ.erase i).inf (coordinateOpen φ))
+    (Finset.inf_le (faceAnchor_mem i))
+    (face_affine φ (faceAnchor i) (Finset.univ.erase i) (faceAnchor_mem i))).symm (c i)
+
+theorem torusCoefficient_boundary
+    (c : NativeTopFaces (F := Canonical φ) (U := coordinateOpen φ)) :
+    torusCoefficient φ hg (nativeTopBoundary c) = nativeTopBoundary (faceCoefficients φ hg c) := by
+  have he (i : Fin 4) :
+      torusCoefficient φ hg (res (Canonical φ) (top_le_face φ i) (c i)) =
+        res (Structure φ) (top_le_face φ i) (faceCoefficients φ hg c i) :=
+    coefficient_restrict φ hg 0 (faceAnchor i)
+      ((Finset.univ.erase i).inf (coordinateOpen φ)) (Torus φ)
+      (Finset.inf_le (Finset.mem_univ 0)) (Finset.inf_le (faceAnchor_mem i))
+      (face_affine φ (faceAnchor i) (Finset.univ.erase i) (faceAnchor_mem i))
+      (face_affine φ 0 Finset.univ (Finset.mem_univ 0)) (top_le_face φ i) (c i)
+  change torusCoefficient φ hg
+    (res (Canonical φ) (top_le_face φ 0) (c 0) - res (Canonical φ) (top_le_face φ 1) (c 1) +
+      res (Canonical φ) (top_le_face φ 2) (c 2) - res (Canonical φ) (top_le_face φ 3) (c 3)) = _
+  rw [map_sub,map_add,map_sub,he 0,he 1,he 2,he 3] <;> rfl
+
+/-- The canonical torus trace uses the genuine homogeneous structure
+trace after the actual oriented residue coefficient. -/
+def sectionTrace : (Canonical φ).obj.obj (op (Torus φ)) →+ K :=
+  (structureTopSectionTrace φ (monicUnit φ hm)).comp (torusCoefficient φ hg).toAddMonoidHom
+
+theorem sectionTrace_eq : sectionTrace φ hm hg =
+    CycleQ2HodgeMonicFaceTrace.sectionTrace φ hm 0 Finset.univ (Finset.mem_univ 0) (hg 0) := by
+  ext s
+  change structureTopSectionTrace φ (monicUnit φ hm) (torusCoefficient φ hg s) = _
+  rw [CycleQ2HodgeCubicSectionComparison.structure_trace_cubic,torusCoefficient,affineFrame_zero] <;> rfl
+
+/-- The genuine four-open Čech boundary has zero trace, including the
+face not contained in chart zero. -/
+theorem sectionTrace_boundary
+    (c : NativeTopFaces (F := Canonical φ) (U := coordinateOpen φ)) :
+    sectionTrace φ hm hg (nativeTopBoundary c) = 0 := by
+  change structureTopSectionTrace φ (monicUnit φ hm)
+    (torusCoefficient φ hg (nativeTopBoundary c)) = 0
+  rw [torusCoefficient_boundary]
+  exact (structure_top_boundary_iff_trace_zero φ (monicUnit φ hm) _).mp
+    ⟨faceCoefficients φ hg c,rfl⟩
+
+theorem sectionTrace_differential
+    (η : (sheafForms (toBase φ) 3 2).obj.obj (op (Torus φ))) :
+    sectionTrace φ hm hg ((differential (toBase φ) 3 2).hom.app (op (Torus φ)) η) = 0 := by
+  rw [sectionTrace_eq]
+  exact CycleQ2HodgeMonicFaceTrace.sectionTrace_differential φ hm 0 Finset.univ
+    (Finset.mem_univ 0) (hg 0) η
+
+theorem sectionTrace_normalizedSection (a : K) :
+    sectionTrace φ hm hg (CycleQ2HodgeMonicFaceTrace.normalizedSection φ hm (hg 0) a) = a := by
+  rw [sectionTrace_eq]
+  exact CycleQ2HodgeMonicFaceTrace.sectionTrace_normalizedSection φ hm (hg 0) a
+
+end CycleQ2HodgeMonicCanonicalTrace
+
+namespace CycleQ2GenericHodgeCanonicalTrace
+
+open CategoryTheory AlgebraicGeometry Opposite
+open CycleQ2MonicGenericAmbientChart (K genericCoeff_vertex)
+open CycleQ2MonicGenericSmooth (coeff explicit_projective_smooth)
+open CycleQ2GeometricHodgeThreefold (toBase coordinateOpen)
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms)
+open CycleQ2HodgeTwistCoordinates (NativeTopFaces nativeTopBoundary)
+
+local instance : SmoothOfRelativeDimension 3 (toBase coeff) := explicit_projective_smooth
+
+theorem torusSectionTrace_boundary
+    (c : NativeTopFaces (F := sheafForms (toBase coeff) 3 3) (U := coordinateOpen coeff)) :
+    torusSectionTrace (nativeTopBoundary c) = 0 := by
+  change CycleQ2HodgeMonicFaceTrace.sectionTrace coeff genericCoeff_vertex 0 Finset.univ
+    (Finset.mem_univ 0) (normalGradient_span 0) (nativeTopBoundary c) = 0
+  rw [← CycleQ2HodgeMonicCanonicalTrace.sectionTrace_eq coeff genericCoeff_vertex normalGradient_span]
+  exact CycleQ2HodgeMonicCanonicalTrace.sectionTrace_boundary coeff genericCoeff_vertex
+    normalGradient_span c
+
+end CycleQ2GenericHodgeCanonicalTrace
+end
+
+#print axioms CycleQ2HodgeMonicCanonicalTrace.torusCoefficient_boundary
+#print axioms CycleQ2HodgeMonicCanonicalTrace.sectionTrace_differential
+#print axioms CycleQ2GenericHodgeCanonicalTrace.torusSectionTrace_boundary
+
+noncomputable section
+namespace CycleQ2HodgeMonicCanonicalTrace
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold (toBase coordinateOpen vertexCoefficient)
+open CycleQ2HodgeEulerContractionCharts (gradientEntry)
+open CycleQ2HodgeNormalFirstChart (polynomial monicUnit)
+open CycleQ2HodgeCanonicalChartVolumes (affineFrame)
+open CycleQ2HodgeCubicIntrinsicForms (face_affine)
+open CycleQ2HodgeTwistCoordinates (NativeTopFaces nativeTopBoundary)
+open CycleQ2HodgeTwistTorusChart (structure_top_boundary_iff_trace_zero)
+
+variable {K : Type} [Field K] [CharZero K] (φ : CoeffRing →+* K)
+  (hm : φ vertexCoefficient = 1)
+  (hg : ∀ i : Fin 4, Ideal.span (Set.range (gradientEntry (polynomial φ i))) = ⊤)
+  [SmoothOfRelativeDimension 3 (toBase φ)]
+
+theorem faceCoefficients_surjective : Function.Surjective (faceCoefficients φ hg) := by
+  intro c
+  refine ⟨fun i => affineFrame φ hg (faceAnchor i)
+    ((Finset.univ.erase i).inf (coordinateOpen φ)) (Finset.inf_le (faceAnchor_mem i))
+    (face_affine φ (faceAnchor i) (Finset.univ.erase i) (faceAnchor_mem i)) (c i),?_⟩
+  funext i
+  exact AddEquiv.symm_apply_apply _ _
+
+/-- Zero trace is exactly the actual native Čech boundary condition,
+because every face coefficient is realized by the same residue frame. -/
+theorem sectionTrace_eq_zero_iff (s : (Canonical φ).obj.obj (op (Torus φ))) :
+    sectionTrace φ hm hg s = 0 ↔
+      ∃ c : NativeTopFaces (F := Canonical φ) (U := coordinateOpen φ), nativeTopBoundary c = s := by
+  constructor
+  · intro hs
+    have h : torusCoefficient φ hg s ∈
+        (nativeTopBoundary (F := Structure φ) (U := coordinateOpen φ)).range :=
+      (structure_top_boundary_iff_trace_zero φ (monicUnit φ hm) _).mpr hs
+    obtain ⟨d,hd⟩ := h
+    obtain ⟨c,hc⟩ := faceCoefficients_surjective φ hg d
+    refine ⟨c,(torusCoefficient φ hg).injective ?_⟩
+    rw [torusCoefficient_boundary,hc]
+    exact hd
+  · rintro ⟨c,rfl⟩
+    exact sectionTrace_boundary φ hm hg c
+
+end CycleQ2HodgeMonicCanonicalTrace
+
+namespace CycleQ2GenericHodgeCanonicalTrace
+
+open CategoryTheory AlgebraicGeometry Opposite
+open CycleQ2MonicGenericAmbientChart (genericCoeff_vertex)
+open CycleQ2MonicGenericSmooth (coeff explicit_projective_smooth)
+open CycleQ2GeometricHodgeThreefold (toBase coordinateOpen)
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms)
+open CycleQ2HodgeTwistCoordinates (NativeTopFaces nativeTopBoundary)
+
+local instance : SmoothOfRelativeDimension 3 (toBase coeff) := explicit_projective_smooth
+
+theorem torusSectionTrace_eq_zero_iff
+    (s : (sheafForms (toBase coeff) 3 3).obj.obj (op (Finset.univ.inf (coordinateOpen coeff)))) :
+    torusSectionTrace s = 0 ↔
+      ∃ c : NativeTopFaces (F := sheafForms (toBase coeff) 3 3) (U := coordinateOpen coeff),
+        nativeTopBoundary c = s := by
+  change CycleQ2HodgeMonicFaceTrace.sectionTrace coeff genericCoeff_vertex 0 Finset.univ
+    (Finset.mem_univ 0) (normalGradient_span 0) s = 0 ↔ _
+  rw [← CycleQ2HodgeMonicCanonicalTrace.sectionTrace_eq coeff genericCoeff_vertex normalGradient_span]
+  exact CycleQ2HodgeMonicCanonicalTrace.sectionTrace_eq_zero_iff coeff genericCoeff_vertex
+    normalGradient_span s
+
+end CycleQ2GenericHodgeCanonicalTrace
+end
+
+#print axioms CycleQ2HodgeMonicCanonicalTrace.sectionTrace_eq_zero_iff
+#print axioms CycleQ2GenericHodgeCanonicalTrace.torusSectionTrace_eq_zero_iff

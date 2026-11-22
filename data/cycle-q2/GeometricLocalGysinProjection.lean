@@ -1219,3 +1219,1233 @@ end CycleQ2DoubleGysinTwoDeRham
 #print axioms CycleQ2FourfoldTopSupport.topPost_doubleConnecting
 #print axioms CycleQ2DoubleGysinTwoDeRham.gysinTwo_projection
 #print axioms CycleQ2DoubleGysinTwoDeRham.graphGysinTwo_projection
+
+/-!
+# Intrinsic de Rham transport along the actual open immersion
+
+All exterior degrees use the original map on section rings. On the
+dense exact affine basis this map is an algebra isomorphism, and its
+ordinary Kähler pullback commutes with the intrinsic differential.
+The resulting comparison is therefore an isomorphism of the actual
+sheaf complexes, including their extension to integer degrees.
+-/
+
+namespace CycleQ2IntrinsicOpenTransport
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite Module
+open HomologicalComplex
+open CycleQ2IntrinsicFramedAffineSite (FramedOpen inclusion frame functions frame_apply cover_dense)
+open CycleQ2IntrinsicDeRhamSheaves
+  (sheafForms differential relativeDeRham relativeDeRhamInt onBasisIso onBasisIso_d)
+open CycleQ2RankOneOpenRestriction (onImage)
+open CycleQ2RelativeOpenKahler (sectionIso affine_image)
+open CycleQ2RelativeAffineOverlap (restrict baseChangeFrame baseChangeFrame_apply)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2ExactFrameThreeDeRham (exteriorPullback)
+open CycleQ2AffineDeRhamFunctorial (exteriorPullback_id exteriorPullback_comp)
+open CycleQ2IntrinsicOrdinaryExterior (forms toSheaf toSheaf_onBasis)
+open scoped KaehlerDifferential
+
+variable {k : Type} [Field k] [CharZero k] {X Y : Scheme.{0}}
+  (f : X ⟶ Spec (CommRingCat.of k)) (g : Y ⟶ Spec (CommRingCat.of k))
+  (j : Y ⟶ X) [IsOpenImmersion j] (hj : j ≫ f = g) (r : ℕ)
+  [SmoothOfRelativeDimension r f] [SmoothOfRelativeDimension r g]
+
+local instance : (inclusion g r).IsCoverDense (Opens.grothendieckTopology Y) :=
+  cover_dense g r
+
+local instance : (onImage j).Additive where
+
+/-- The image has an exact frame obtained by the actual section-ring
+isomorphism; it is not assigned a new unrelated cotangent basis. -/
+def imageFramed (V : FramedOpen g r) : FramedOpen f r := by
+  letI : Algebra k Γ(X,j ''ᵁ V.1) := (sectionCoefficients f (j ''ᵁ V.1)).toAlgebra
+  letI : Algebra k Γ(Y,V.1) := (sectionCoefficients g V.1).toAlgebra
+  let e := (sectionIso f g j hj V.1).symm
+  letI : Algebra Γ(Y,V.1) Γ(X,j ''ᵁ V.1) := e.toRingHom.toAlgebra
+  letI : IsScalarTower k Γ(Y,V.1) Γ(X,j ''ᵁ V.1) := IsScalarTower.of_algHom e.toAlgHom
+  letI : Algebra.Etale Γ(Y,V.1) Γ(X,j ''ᵁ V.1) :=
+    (RingHom.Etale.of_bijective e.bijective).toAlgebra
+  refine ⟨j ''ᵁ V.1,affine_image (j := j) V.2.1,?_⟩
+  obtain ⟨u,b,hb⟩ := V.2.2
+  exact ⟨fun i => e (u i),baseChangeFrame b,baseChangeFrame_apply b u hb⟩
+
+/-- Ordinary forms in every degree, via the genuine Kähler map. -/
+def formIso (n : ℕ) (V : Y.Opens) :
+    (forms f n).obj (op (j ''ᵁ V)) ≃+ (forms g n).obj (op V) := by
+  letI : Algebra k Γ(X,j ''ᵁ V) := (sectionCoefficients f (j ''ᵁ V)).toAlgebra
+  letI : Algebra k Γ(Y,V) := (sectionCoefficients g V).toAlgebra
+  let e := sectionIso f g j hj V
+  exact {
+    toFun := exteriorPullback e.toAlgHom n
+    invFun := exteriorPullback e.symm.toAlgHom n
+    left_inv := fun ω => by
+      rw [← exteriorPullback_comp,AlgEquiv.symm_comp,exteriorPullback_id]
+    right_inv := fun ω => by
+      rw [← exteriorPullback_comp,AlgEquiv.comp_symm,exteriorPullback_id]
+    map_add' := map_add _ }
+
+theorem formIso_restrict (n : ℕ) {V W : Y.Opens} (h : W ≤ V)
+    (ω : (forms f n).obj (op (j ''ᵁ V))) :
+    formIso f g j hj n W ((forms f n).map (homOfLE (j.image_mono h)).op ω) =
+      (forms g n).map (homOfLE h).op (formIso f g j hj n V ω) := by
+  letI : Algebra k Γ(X,j ''ᵁ V) := (sectionCoefficients f (j ''ᵁ V)).toAlgebra
+  letI : Algebra k Γ(X,j ''ᵁ W) := (sectionCoefficients f (j ''ᵁ W)).toAlgebra
+  letI : Algebra k Γ(Y,V) := (sectionCoefficients g V).toAlgebra
+  letI : Algebra k Γ(Y,W) := (sectionCoefficients g W).toAlgebra
+  change exteriorPullback (sectionIso f g j hj W).toAlgHom n
+      (exteriorPullback (restrict f (j.image_mono h)) n ω) =
+    exteriorPullback (restrict g h) n
+      (exteriorPullback (sectionIso f g j hj V).toAlgHom n ω)
+  rw [← exteriorPullback_comp,← exteriorPullback_comp]
+  have he : (sectionIso f g j hj W).toAlgHom.comp (restrict f (j.image_mono h)) =
+      (restrict g h).comp (sectionIso f g j hj V).toAlgHom := by
+    ext a
+    exact ConcreteCategory.congr_hom (j.appIso_hom_naturality (homOfLE h).op) a
+  rw [he]
+
+private abbrev F (n : ℕ) := (onImage j).obj (sheafForms f r n)
+
+def component (n : ℕ) (V : FramedOpen g r) :
+    (F f j r n).obj.obj (op V.1) ≃+ (sheafForms g r n).obj.obj (op V.1) :=
+  (((onBasisIso f r n).app (op (imageFramed f g j hj r V))).addCommGroupIsoToAddEquiv.trans
+    (formIso f g j hj n V.1)).trans
+    ((onBasisIso g r n).app (op V)).symm.addCommGroupIsoToAddEquiv
+
+theorem component_coordinates (n : ℕ) (V : FramedOpen g r)
+    (ω : (F f j r n).obj.obj (op V.1)) :
+    (onBasisIso g r n).hom.app (op V) (component f g j hj r n V ω) =
+      formIso f g j hj n V.1
+        ((onBasisIso f r n).hom.app (op (imageFramed f g j hj r V)) ω) := by
+  change ((onBasisIso g r n).app (op V)).hom
+    (((onBasisIso g r n).app (op V)).inv _) = _
+  exact Iso.inv_hom_id_apply _ _
+
+private theorem component_natural (n : ℕ) {V W : FramedOpen g r} (a : W ⟶ V)
+    (ω : (F f j r n).obj.obj (op V.1)) :
+    component f g j hj r n W ((F f j r n).obj.map (homOfLE a.le).op ω) =
+      (sheafForms g r n).obj.map (homOfLE a.le).op (component f g j hj r n V ω) := by
+  let e := (onBasisIso f r n).hom
+  let m := (onBasisIso g r n).inv
+  let a' : imageFramed f g j hj r W ⟶ imageFramed f g j hj r V :=
+    homOfLE (j.image_mono a.le)
+  have he := NatTrans.naturality_apply e a'.op ω
+  change e.app (op (imageFramed f g j hj r W))
+      ((F f j r n).obj.map (homOfLE a.le).op ω) =
+    (forms f n).map (homOfLE (j.image_mono a.le)).op
+      (e.app (op (imageFramed f g j hj r V)) ω) at he
+  change m.app (op W) (formIso f g j hj n W.1
+      (e.app (op (imageFramed f g j hj r W))
+        ((F f j r n).obj.map (homOfLE a.le).op ω))) =
+    (sheafForms g r n).obj.map (homOfLE a.le).op
+      (m.app (op V) (formIso f g j hj n V.1
+        (e.app (op (imageFramed f g j hj r V)) ω)))
+  rw [he,formIso_restrict f g j hj n a.le]
+  exact NatTrans.naturality_apply m a.op _
+
+def basisIso (n : ℕ) :
+    (inclusion g r).op ⋙ (F f j r n).obj ≅
+      (inclusion g r).op ⋙ (sheafForms g r n).obj :=
+  NatIso.ofComponents (fun V => (component f g j hj r n V.unop).toAddCommGrpIso)
+    (fun a => by ext ω; exact component_natural f g j hj r n a.unop ω)
+
+/-- Intrinsic exterior sheaves commute with the actual open immersion. -/
+def comparison (n : ℕ) : F f j r n ≅ sheafForms g r n :=
+  Functor.IsCoverDense.sheafIso (G := inclusion g r)
+    (K := Opens.grothendieckTopology Y) (basisIso f g j hj r n)
+
+theorem comparison_onBasis (n : ℕ) (V : FramedOpen g r)
+    (ω : (F f j r n).obj.obj (op V.1)) :
+    (comparison f g j hj r n).hom.hom.app (op V.1) ω = component f g j hj r n V ω := by
+  have h := Functor.IsCoverDense.sheafHom_restrict_eq (G := inclusion g r)
+    (K := Opens.grothendieckTopology Y) (ℱ' := sheafForms g r n) (basisIso f g j hj r n).hom
+  exact ConcreteCategory.congr_hom (NatTrans.congr_app h (op V)) ω
+
+/-- This comparison preserves the original differential in every
+exterior degree. It is not merely a termwise sheaf equivalence. -/
+theorem comparison_d (n : ℕ) :
+    (onImage j).map (differential f r n) ≫ (comparison f g j hj r (n+1)).hom =
+      (comparison f g j hj r n).hom ≫ differential g r n := by
+  apply (Functor.IsCoverDense.restrictHomEquivHom (G := inclusion g r)
+    (K := Opens.grothendieckTopology Y) (ℱ' := sheafForms g r (n+1))).symm.injective
+  ext V ω
+  let W := imageFramed f g j hj r V.unop
+  letI : Algebra k Γ(X,W.1) := (sectionCoefficients f W.1).toAlgebra
+  letI : Algebra k Γ(Y,V.unop.1) := (sectionCoefficients g V.unop.1).toAlgebra
+  change (comparison f g j hj r (n+1)).hom.hom.app (op V.unop.1)
+      ((differential f r n).hom.app (op W.1) ω) =
+    (differential g r n).hom.app (op V.unop.1)
+      ((comparison f g j hj r n).hom.hom.app (op V.unop.1) ω)
+  rw [comparison_onBasis,comparison_onBasis]
+  let e := (onBasisIso g r (n+1)).app V
+  apply (ConcreteCategory.bijective_of_isIso e.hom).injective
+  rw [component_coordinates]
+  have hf := ConcreteCategory.congr_hom (onBasisIso_d f r n W) ω
+  have hg := ConcreteCategory.congr_hom (onBasisIso_d g r n V.unop)
+    (component f g j hj r n V.unop ω)
+  change (onBasisIso f r (n+1)).hom.app (op W)
+      ((differential f r n).hom.app (op W.1) ω) =
+    CycleQ2ArbitraryFrameDifferential.d (frame f r W) n
+      ((onBasisIso f r n).hom.app (op W) ω) at hf
+  change e.hom ((differential g r n).hom.app (op V.unop.1)
+      (component f g j hj r n V.unop ω)) =
+    CycleQ2ArbitraryFrameDifferential.d (frame g r V.unop) n
+      ((onBasisIso g r n).hom.app V (component f g j hj r n V.unop ω)) at hg
+  rw [hf,hg,component_coordinates]
+  exact CycleQ2FrameDifferentialNaturality.differential_natural
+    (frame f r W) (functions f r W) (frame_apply f r W)
+    (frame g r V.unop) (functions g r V.unop) (frame_apply g r V.unop)
+    (sectionIso f g j hj V.unop.1).toAlgHom n _
+
+def complexIso :
+    ((onImage j).mapHomologicalComplex (.up ℕ)).obj (relativeDeRham f r) ≅
+      relativeDeRham g r := by
+  refine HomologicalComplex.Hom.isoOfComponents (fun n => comparison f g j hj r n) ?_
+  intro i l hil
+  have hl : i+1=l := hil
+  subst l
+  simpa only [Functor.mapHomologicalComplex_obj_d,relativeDeRham,CochainComplex.of_d] using
+    (comparison_d f g j hj r i).symm
+
+private def intTerm : (a : Option ℕ) →
+    (onImage j).obj (extend.X (relativeDeRham f r) a) ≅ extend.X (relativeDeRham g r) a
+  | some n => comparison f g j hj r n
+  | none => ((onImage j).map_isZero (isZero_zero _)).iso (isZero_zero _)
+
+private theorem intTerm_d (a b : Option ℕ) :
+    (intTerm f g j hj r a).hom ≫ extend.d (relativeDeRham g r) a b =
+      (onImage j).map (extend.d (relativeDeRham f r) a b) ≫ (intTerm f g j hj r b).hom := by
+  cases a with
+  | none => exact ((onImage j).map_isZero (isZero_zero _)).eq_of_src _ _
+  | some a => cases b with
+    | none => exact (isZero_zero _).eq_of_tgt _ _
+    | some b => exact (complexIso f g j hj r).hom.comm a b
+
+/-- The same actual de Rham transport in integer degrees, including
+the zero terms used by the derived support constructions. -/
+def complexIsoInt :
+    ((onImage j).mapHomologicalComplex (.up ℤ)).obj (relativeDeRhamInt f r) ≅
+      relativeDeRhamInt g r :=
+  HomologicalComplex.Hom.isoOfComponents
+    (fun n => intTerm f g j hj r ((ComplexShape.embeddingUpIntGE 0).r n))
+    (fun i l _ => intTerm_d f g j hj r _ _)
+
+end CycleQ2IntrinsicOpenTransport
+
+#print axioms CycleQ2IntrinsicOpenTransport.comparison_d
+#print axioms CycleQ2IntrinsicOpenTransport.complexIsoInt
+
+namespace CycleQ2GenericHodgeDeRham
+
+open CategoryTheory AlgebraicGeometry
+open CycleQ2NativeWeightedCover (ambientToField)
+open CycleQ2GenericHodgeModel (genericHodgeIso genericHodgeIso_over)
+open CycleQ2GeometricHodgeThreefold (toBase)
+open CycleQ2MonicGenericSmooth (coeff)
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms relativeDeRhamInt)
+open CycleQ2RankOneOpenRestriction (onImage)
+
+local instance : SmoothOfRelativeDimension 3 ambientToField := CycleQ2NativeGenericSmooth.ambient_smooth
+local instance : SmoothOfRelativeDimension 3 (toBase coeff) :=
+  CycleQ2MonicGenericSmooth.explicit_projective_smooth
+
+/-- The intrinsic generic forms are transported to the explicit Hodge
+model by the actual coefficient-preserving scheme isomorphism. -/
+def formsIso (n : ℕ) :
+    (onImage genericHodgeIso.hom).obj (sheafForms ambientToField 3 n) ≅
+      sheafForms (toBase coeff) 3 n :=
+  CycleQ2IntrinsicOpenTransport.comparison ambientToField (toBase coeff)
+    genericHodgeIso.hom genericHodgeIso_over 3 n
+
+local instance : (onImage genericHodgeIso.hom).Additive where
+
+/-- The actual relative de Rham complexes, not only their canonical
+terms, agree on the two already identified generic schemes. -/
+def deRhamIso :
+    ((onImage genericHodgeIso.hom).mapHomologicalComplex (.up ℤ)).obj
+      (relativeDeRhamInt ambientToField 3) ≅ relativeDeRhamInt (toBase coeff) 3 :=
+  CycleQ2IntrinsicOpenTransport.complexIsoInt ambientToField (toBase coeff)
+    genericHodgeIso.hom genericHodgeIso_over 3
+
+end CycleQ2GenericHodgeDeRham
+
+#print axioms CycleQ2GenericHodgeDeRham.deRhamIso
+
+/-!
+# Cohomology transport through the original generic scheme isomorphism
+
+The functor on sheaves is the same open-image functor used above.  Its
+inverse comes from the inverse scheme morphism.  Consequently its exact
+derived functor is an equivalence, and the comparison preserves the
+actual free source at the whole scheme and every de Rham degree.
+-/
+
+namespace CycleQ2ExactEquivalenceDerived
+
+open CategoryTheory CategoryTheory.Limits HomologicalComplex
+
+universe u v u' v' w w'
+variable {C : Type u} [Category.{v} C] [Abelian C] [HasDerivedCategory.{w} C]
+  {D : Type u'} [Category.{v'} D] [Abelian D] [HasDerivedCategory.{w'} D]
+  (E : C ≌ D) [E.functor.Additive]
+
+/-- An actual additive equivalence induces an equivalence of the
+localized categories.  Quasi-isomorphisms are both preserved and
+reflected by the same functor on complexes. -/
+def derivedEquiv : DerivedCategory C ≌ DerivedCategory D := by
+  let Φ := E.functor.mapHomologicalComplexUpToQuasiIsoLocalizerMorphism (.up ℤ)
+  letI : Φ.functor.IsEquivalence := (E.mapHomologicalComplex (.up ℤ)).isEquivalence_functor
+  letI : Φ.IsInduced := ⟨by
+    ext K L a
+    exact HomologicalComplex.quasiIso_map_iff_of_preservesHomology a E.functor⟩
+  letI : Φ.IsLocalizedEquivalence := Φ.isLocalizedEquivalence_of_isInduced
+  letI : E.functor.mapDerivedCategory.IsEquivalence := by
+    change (Φ.localizedFunctor DerivedCategory.Q DerivedCategory.Q).IsEquivalence
+    infer_instance
+  exact E.functor.mapDerivedCategory.asEquivalence
+
+theorem derived_faithful : E.functor.mapDerivedCategory.Faithful :=
+  (derivedEquiv E).fullyFaithfulFunctor.faithful
+
+theorem derived_full : E.functor.mapDerivedCategory.Full :=
+  (derivedEquiv E).fullyFaithfulFunctor.full
+
+end CycleQ2ExactEquivalenceDerived
+
+namespace CycleQ2SchemeIsoCohomology
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf freeOpen)
+open CycleQ2GeometricSheafCohomologyRestriction
+  (continuousSheafEquiv constantSourceIso terminalFreeSheafIso mapExt_bijective_of_fixedSource)
+open CycleQ2RankOneOpenRestriction (onImage)
+
+variable {X Y : Scheme.{0}} (e : Y ≅ X)
+
+/-- The inverse maps on opens are induced by the two original scheme
+morphisms, with their actual images as objects. -/
+def opensEquiv : Y.Opens ≌ X.Opens where
+  functor := e.hom.opensFunctor
+  inverse := e.inv.opensFunctor
+  unitIso := NatIso.ofComponents (fun U => eqToIso (by
+    change U = e.inv ''ᵁ (e.hom ''ᵁ U)
+    rw [← Scheme.Hom.comp_image,e.hom_inv_id,Scheme.Hom.id_image]))
+    (fun _ => Subsingleton.elim _ _)
+  counitIso := NatIso.ofComponents (fun U => eqToIso (by
+    change e.hom ''ᵁ (e.inv ''ᵁ U) = U
+    rw [← Scheme.Hom.comp_image,e.inv_hom_id,Scheme.Hom.id_image]))
+    (fun _ => Subsingleton.elim _ _)
+  functor_unitIso_comp _ := Subsingleton.elim _ _
+
+/-- The forward functor is definitionally the already used
+`onImage e.hom`, rather than a separately chosen equivalence. -/
+def sheafEquiv : AbSheaf (show TopCat from X) ≌ AbSheaf (show TopCat from Y) :=
+  continuousSheafEquiv (Opens.grothendieckTopology X) (Opens.grothendieckTopology Y)
+    (opensEquiv e.symm)
+
+local instance : (sheafEquiv e).functor.Additive where
+local instance : (onImage e.hom).Additive where
+local instance : HasExt.{1} (AbSheaf (show TopCat from X)) := HasExt.standard _
+local instance : HasExt.{1} (AbSheaf (show TopCat from Y)) := HasExt.standard _
+local instance : HasDerivedCategory.{1} (AbSheaf (show TopCat from X)) :=
+  HasDerivedCategory.standard _
+local instance : HasDerivedCategory.{1} (AbSheaf (show TopCat from Y)) :=
+  HasDerivedCategory.standard _
+
+def constantIso : (sheafEquiv e).functor.obj
+      ((constantSheaf (Opens.grothendieckTopology X) AddCommGrpCat).obj
+        (AddCommGrpCat.of (ULift.{0} ℤ))) ≅
+    (constantSheaf (Opens.grothendieckTopology Y) AddCommGrpCat).obj
+      (AddCommGrpCat.of (ULift.{0} ℤ)) :=
+  constantSourceIso (Opens.grothendieckTopology X) (Opens.grothendieckTopology Y)
+    (opensEquiv e.symm) ⊤ isTerminalTop
+
+/-- The actual integer source at the whole scheme is preserved. -/
+def freeTopIso : (sheafEquiv e).functor.obj (freeOpen (⊤ : X.Opens)) ≅
+    freeOpen (⊤ : Y.Opens) :=
+  (sheafEquiv e).functor.mapIso
+    (terminalFreeSheafIso (Opens.grothendieckTopology X) ⊤ isTerminalTop) ≪≫
+      constantIso e ≪≫
+        (terminalFreeSheafIso (Opens.grothendieckTopology Y) ⊤ isTerminalTop).symm
+
+/-- Cohomology of the transported sheaf in every degree, through the
+actual exact equivalence and its actual constant-source isomorphism. -/
+def sheafCohomologyEquiv (F : AbSheaf (show TopCat from X)) (n : ℕ) :
+    F.H n ≃+ ((sheafEquiv e).functor.obj F).H n :=
+  (AddEquiv.ofBijective ((sheafEquiv e).functor.mapExtAddHom _ F n)
+    (mapExt_bijective_of_fixedSource (sheafEquiv e).functor _
+      (fun _ => ⟨(sheafEquiv e).functor.map_injective,
+        (sheafEquiv e).functor.map_surjective⟩) F n)).trans
+      ((((extFunctor n).mapIso (constantIso e).op).app
+        ((sheafEquiv e).functor.obj F)).addCommGroupIsoToAddEquiv.symm)
+
+def derivedEquiv : DerivedCategory (AbSheaf (show TopCat from X)) ≌
+    DerivedCategory (AbSheaf (show TopCat from Y)) :=
+  CycleQ2ExactEquivalenceDerived.derivedEquiv (sheafEquiv e)
+
+private abbrev SX := DerivedCategory.singleFunctor (AbSheaf (show TopCat from X)) 0
+private abbrev SY := DerivedCategory.singleFunctor (AbSheaf (show TopCat from Y)) 0
+
+def derivedSourceIso : (derivedEquiv e).functor.obj (SX.obj (freeOpen (⊤ : X.Opens))) ≅
+    SY.obj (freeOpen (⊤ : Y.Opens)) :=
+  ((sheafEquiv e).functor.mapDerivedCategorySingleFunctor 0).app _ ≪≫
+    SY.mapIso (freeTopIso e)
+
+/-- A specified isomorphism of the actual transported complexes induces
+the corresponding target isomorphism in the actual derived category. -/
+def derivedTargetIso (K : CochainComplex (AbSheaf (show TopCat from X)) ℤ)
+    (L : CochainComplex (AbSheaf (show TopCat from Y)) ℤ)
+    (i : ((onImage e.hom).mapHomologicalComplex (.up ℤ)).obj K ≅ L) :
+    (derivedEquiv e).functor.obj (DerivedCategory.Q.obj K) ≅ DerivedCategory.Q.obj L :=
+  (sheafEquiv e).functor.mapDerivedCategoryFactors.app K ≪≫ DerivedCategory.Q.mapIso i
+
+def derivedShiftedTargetIso (K : CochainComplex (AbSheaf (show TopCat from X)) ℤ)
+    (L : CochainComplex (AbSheaf (show TopCat from Y)) ℤ)
+    (i : ((onImage e.hom).mapHomologicalComplex (.up ℤ)).obj K ≅ L) (n : ℤ) :
+    (derivedEquiv e).functor.obj ((DerivedCategory.Q.obj K)⟦n⟧) ≅
+      (DerivedCategory.Q.obj L)⟦n⟧ :=
+  ((sheafEquiv e).functor.mapDerivedCategory.commShiftIso n).app _ ≪≫
+    (shiftFunctor _ n).mapIso (derivedTargetIso e K L i)
+
+/-- Global hypercohomology transport, preserving the original source,
+the original complex, and the original integer degree. -/
+def globalCohomologyEquiv (K : CochainComplex (AbSheaf (show TopCat from X)) ℤ)
+    (L : CochainComplex (AbSheaf (show TopCat from Y)) ℤ)
+    (i : ((onImage e.hom).mapHomologicalComplex (.up ℤ)).obj K ≅ L) (n : ℤ) :
+    CycleQ2DerivedCoverTop.H (DerivedCategory.Q.obj K) n (⊤ : X.Opens) ≃+
+      CycleQ2DerivedCoverTop.H (DerivedCategory.Q.obj L) n (⊤ : Y.Opens) := by
+  let F := (derivedEquiv e).functor
+  let a := derivedSourceIso e
+  let b := derivedShiftedTargetIso e K L i n
+  let h : (F.obj (SX.obj (freeOpen (⊤ : X.Opens))) ⟶
+        F.obj ((DerivedCategory.Q.obj K)⟦n⟧)) ≃+
+      (SY.obj (freeOpen (⊤ : Y.Opens)) ⟶ (DerivedCategory.Q.obj L)⟦n⟧) :=
+    { Iso.homCongr a b with
+      map_add' x y := by
+        change a.inv ≫ (x+y) ≫ b.hom = (a.inv ≫ x ≫ b.hom) + (a.inv ≫ y ≫ b.hom)
+        simp only [Preadditive.comp_add,Preadditive.add_comp] }
+  exact (AddEquiv.ofBijective F.mapAddHom ⟨F.map_injective,F.map_surjective⟩).trans h
+
+end CycleQ2SchemeIsoCohomology
+
+namespace CycleQ2GenericHodgeDeRham
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace
+open CycleQ2NativeWeightedCover (ambientToField)
+open CycleQ2GenericHodgeModel (genericHodgeIso genericHodgeIso_over)
+open CycleQ2GeometricHodgeThreefold (toBase)
+open CycleQ2MonicGenericSmooth (coeff)
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms relativeDeRhamInt)
+open CycleQ2InjectiveCech (AbSheaf)
+
+local instance : SmoothOfRelativeDimension 3 ambientToField := CycleQ2NativeGenericSmooth.ambient_smooth
+local instance : SmoothOfRelativeDimension 3 (toBase coeff) :=
+  CycleQ2MonicGenericSmooth.explicit_projective_smooth
+local instance (Z : Scheme.{0}) : HasExt.{1} (AbSheaf (show TopCat from Z)) := HasExt.standard _
+local instance (Z : Scheme.{0}) : HasDerivedCategory.{1} (AbSheaf (show TopCat from Z)) :=
+  HasDerivedCategory.standard _
+
+/-- Actual Hodge sheaf cohomology agrees on the two generic models. -/
+def hodgeCohomologyEquiv (p q : ℕ) :
+    (sheafForms ambientToField 3 p).H q ≃+ (sheafForms (toBase coeff) 3 p).H q :=
+  (CycleQ2SchemeIsoCohomology.sheafCohomologyEquiv genericHodgeIso
+    (sheafForms ambientToField 3 p) q).trans
+      (((Sheaf.functorH _ q).mapIso (formsIso p)).addCommGroupIsoToAddEquiv)
+
+/-- The original generic derived de Rham classes, including the marked
+class, can be transported without changing whether they vanish. -/
+def globalDeRhamEquiv (n : ℤ) :
+    CycleQ2DerivedCoverTop.H (DerivedCategory.Q.obj (relativeDeRhamInt ambientToField 3)) n ⊤ ≃+
+      CycleQ2DerivedCoverTop.H (DerivedCategory.Q.obj (relativeDeRhamInt (toBase coeff) 3)) n ⊤ :=
+  CycleQ2SchemeIsoCohomology.globalCohomologyEquiv genericHodgeIso _ _ deRhamIso n
+
+theorem globalDeRhamEquiv_eq_zero_iff (n : ℤ)
+    (a : CycleQ2DerivedCoverTop.H
+      (DerivedCategory.Q.obj (relativeDeRhamInt ambientToField 3)) n ⊤) :
+    globalDeRhamEquiv n a = 0 ↔ a = 0 :=
+  (globalDeRhamEquiv n).map_eq_zero_iff
+
+end CycleQ2GenericHodgeDeRham
+
+#print axioms CycleQ2ExactEquivalenceDerived.derivedEquiv
+#print axioms CycleQ2GenericHodgeDeRham.hodgeCohomologyEquiv
+#print axioms CycleQ2GenericHodgeDeRham.globalDeRhamEquiv_eq_zero_iff
+
+/-!
+# The intrinsic top-form class on a smooth threefold
+
+This construction is over an arbitrary characteristic-zero field and
+uses the actual intrinsic relative de Rham complex.  In particular it
+does not specialize the coefficient field or substitute the fixed
+threefold's canonical sheaf for the generic one.
+-/
+
+namespace CycleQ2IntrinsicThreefoldTop
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Abelian
+  AlgebraicGeometry TopologicalSpace Opposite HomologicalComplex
+open CycleQ2InjectiveCech
+  (AbSheaf Sections freeOpen freeOpenMap freeOpenSections freeOpenSections_naturality)
+open CycleQ2CechTwoToDerived (freeOpenSections_postcomp sectionExtZero)
+open CycleQ2GeometricSheafLocalIso (res)
+open CycleQ2IntrinsicDeRhamSheaves
+  (relativeDeRham relativeDeRhamInt sheafForms differential basisForms compare topology)
+open CycleQ2IntrinsicFramedAffineSite (frame)
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2WeightedCoordinateExterior (Form)
+open CycleQ2DerivedCoverTop (H)
+
+variable {k : Type} [Field k] [CharZero k] {X : Scheme.{0}}
+  (p : X ⟶ Spec (CommRingCat.of k)) [SmoothOfRelativeDimension 3 p]
+
+local instance : HasExt.{1} (AbSheaf (show TopCat from X)) := HasExt.standard _
+local instance : HasDerivedCategory.{1} (AbSheaf (show TopCat from X)) :=
+  HasDerivedCategory.standard _
+
+abbrev deRham := relativeDeRhamInt p 3
+abbrev target := DerivedCategory.Q.obj (deRham p)
+
+variable {p}
+
+local notation "DR" => deRham p
+local notation "T" => target p
+local notation "F" => sheafForms p 3
+
+local instance : DR.IsStrictlyGE 0 := by
+  change ((relativeDeRham p 3).extend (ComplexShape.embeddingUpIntGE 0)).IsStrictlySupported
+    (ComplexShape.embeddingUpIntGE 0)
+  infer_instance
+
+def termIso (n : ℕ) : DR.X (n : ℤ) ≅ F n :=
+  (relativeDeRham p 3).extendXIso (ComplexShape.embeddingUpIntGE 0) (Int.zero_add n)
+
+def coefficients (W : X.Opens) (n : ℕ) : Sections (DR.X (n : ℤ)) W ≃+ Sections (F n) W :=
+  (((sheafToPresheaf (Opens.grothendieckTopology X) AddCommGrpCat).mapIso
+    (termIso n)).app (op W)).addCommGroupIsoToAddEquiv
+
+theorem coefficients_restrict {U V : X.Opens} (h : U ≤ V) (n : ℕ)
+    (s : Sections (DR.X (n : ℤ)) V) :
+    coefficients U n (res _ h s) = res _ h (coefficients V n s) :=
+  NatTrans.naturality_apply (termIso n).hom.hom (homOfLE h).op s
+
+/-- Exterior degrees above three vanish on the actual sheaf, as they
+vanish on every exact affine cotangent frame. -/
+theorem forms_above (W : X.Opens) (n : ℕ) (hn : 3 < n) (s : Sections (F n) W) : s = 0 := by
+  have hb : (𝟙 (basisForms p 3 n)) = 0 := by
+    apply (sheafToPresheaf (topology p 3) AddCommGrpCat).map_injective
+    apply NatTrans.ext
+    intro V
+    letI : Algebra k Γ(X,V.unop.1) := (sectionCoefficients p V.unop.1).toAlgebra
+    letI : Subsingleton (Form k Γ(X,V.unop.1) n) :=
+      CycleQ2SurfaceDeRhamChart.exterior_subsingleton (frame p 3 V.unop) hn
+    apply ConcreteCategory.hom_ext
+    intro ω
+    exact Subsingleton.elim _ _
+  letI : (compare p 3).functor.Full := (compare p 3).fullyFaithfulFunctor.full
+  have hf : (𝟙 (F n)) = 0 := by
+    simpa only [Functor.map_id,Functor.map_zero] using
+      congrArg (fun a => (compare p 3).functor.map a) hb
+  have hs := ConcreteCategory.congr_hom (congrArg (fun a => a.hom.app (op W)) hf) s
+  exact hs
+
+theorem term_above (W : X.Opens) (n : ℕ) (hn : 3 < n)
+    (s : Sections (DR.X (n : ℤ)) W) : s = 0 := by
+  apply (coefficients W n).injective
+  rw [map_zero]
+  exact forms_above W n hn _
+
+theorem affine_above {W : X.Opens} (hW : IsAffineOpen W) (n : ℕ) (hn : 3 < n) :
+    Subsingleton (H T (n : ℤ) W) := by
+  have terms := CycleQ2AffineExteriorComparison.term_acyclic p 3 hW
+  apply subsingleton_of_forall_eq 0
+  intro y
+  obtain ⟨a,ha,rfl⟩ := CycleQ2AcyclicSectionRepresentatives.surjective
+    (freeOpen W) DR 0 terms (n : ℤ) y
+  have ha₀ : a = 0 := by
+    apply (freeOpenSections _ W).injective
+    rw [map_zero]
+    exact term_above W n hn _
+  apply (CycleQ2AcyclicSectionRepresentatives.zero_iff (freeOpen W) DR 0 terms (n : ℤ) a ha).mpr
+  exact ⟨0,by rw [zero_comp,ha₀]⟩
+
+def representative (W : X.Opens) : Sections (F 3) W →+ (freeOpen W ⟶ DR.X 3) :=
+  (freeOpenSections _ W).symm.toAddMonoidHom.comp (coefficients W 3).symm.toAddMonoidHom
+
+theorem representative_sections (W : X.Opens) (s : Sections (F 3) W) :
+    freeOpenSections _ W (representative W s) = (coefficients W 3).symm s :=
+  (freeOpenSections _ W).apply_symm_apply _
+
+theorem representative_closed (W : X.Opens) (s : Sections (F 3) W) :
+    representative W s ≫ DR.d 3 4 = 0 := by
+  apply (freeOpenSections _ W).injective
+  rw [map_zero]
+  exact term_above W 4 (by decide) _
+
+private def rawClass (W : X.Opens) (s : Sections (F 3) W) : H T 3 W :=
+  CycleQ2KInjectiveSections.closedClass (freeOpen W) DR 3
+    (representative W s) (representative_closed W s)
+
+private theorem rawClass_sub (W : X.Opens) (s t : Sections (F 3) W) :
+    rawClass W (s-t) = rawClass W s - rawClass W t := by
+  unfold rawClass
+  rw [map_sub]
+  exact CycleQ2AcyclicSectionRepresentatives.closedClass_sub (K := DR) (freeOpen W) 3
+    (representative W s) (representative W t) (representative_closed W s) (representative_closed W t)
+
+def localTop (W : X.Opens) : Sections (F 3) W →+ H T 3 W :=
+  AddMonoidHom.mk' (rawClass W) (by
+    intro s t
+    have h := rawClass_sub W (s+t) t
+    rw [add_sub_cancel_right] at h
+    exact eq_add_of_sub_eq h.symm)
+
+theorem localTop_surjective {W : X.Opens} (hW : IsAffineOpen W) :
+    Function.Surjective (localTop (p := p) W) := by
+  intro y
+  have terms := CycleQ2AffineExteriorComparison.term_acyclic p 3 hW
+  obtain ⟨a,ha,hy⟩ := CycleQ2AcyclicSectionRepresentatives.surjective
+    (freeOpen W) DR 0 terms 3 y
+  refine ⟨coefficients W 3 (freeOpenSections _ W a),?_⟩
+  have hr : representative W (coefficients W 3 (freeOpenSections _ W a)) = a := by
+    change (freeOpenSections _ W).symm
+      ((coefficients W 3).symm (coefficients W 3 (freeOpenSections _ W a))) = a
+    rw [AddEquiv.symm_apply_apply,AddEquiv.symm_apply_apply]
+  change CycleQ2KInjectiveSections.closedClass _ DR 3 _ _ = y
+  simpa only [hr] using hy
+
+theorem differential_two : DR.d 2 3 =
+    (termIso 2).hom ≫ differential p 3 2 ≫ (termIso 3).inv := by
+  simpa only [relativeDeRham,CochainComplex.of_d] using
+    (relativeDeRham p 3).extend_d_eq (ComplexShape.embeddingUpIntGE 0)
+      (Int.zero_add 2) (Int.zero_add 3)
+
+theorem coefficients_differential_two (W : X.Opens) (s : Sections (DR.X 2) W) :
+    coefficients W 3 ((DR.d 2 3).hom.app (op W) s) =
+      (differential p 3 2).hom.app (op W) (coefficients W 2 s) := by
+  have hd : DR.d 2 3 ≫ (termIso 3).hom = (termIso 2).hom ≫ differential p 3 2 := by
+    rw [differential_two]
+    simp only [Category.assoc,Iso.inv_hom_id_assoc]
+  exact ConcreteCategory.congr_hom (congrArg (fun a => a.hom.app (op W)) hd) s
+
+theorem localTop_eq_zero_iff {W : X.Opens} (hW : IsAffineOpen W)
+    (s : Sections (F 3) W) : localTop W s = 0 ↔
+      ∃ t : Sections (F 2) W, (differential p 3 2).hom.app (op W) t = s := by
+  have terms := CycleQ2AffineExteriorComparison.term_acyclic p 3 hW
+  change CycleQ2KInjectiveSections.closedClass _ DR 3 _ _ = 0 ↔ _
+  rw [CycleQ2AcyclicSectionRepresentatives.zero_iff (freeOpen W) DR 0 terms]
+  constructor
+  · rintro ⟨a,ha⟩
+    refine ⟨coefficients W 2 (freeOpenSections _ W a),?_⟩
+    rw [← coefficients_differential_two,freeOpenSections_postcomp,ha,representative_sections]
+    exact (coefficients W 3).apply_symm_apply s
+  · rintro ⟨t,ht⟩
+    refine ⟨(freeOpenSections _ W).symm ((coefficients W 2).symm t),?_⟩
+    apply (freeOpenSections _ W).injective
+    apply (coefficients W 3).injective
+    rw [representative_sections,← freeOpenSections_postcomp,coefficients_differential_two]
+    simpa only [AddEquiv.apply_symm_apply] using ht
+
+theorem representative_restrict {U V : X.Opens} (h : U ≤ V)
+    (s : Sections (F 3) V) : representative U (res _ h s) = freeOpenMap h ≫ representative V s := by
+  apply (freeOpenSections _ U).injective
+  rw [representative_sections,freeOpenSections_naturality,representative_sections]
+  apply (coefficients U 3).injective
+  rw [AddEquiv.apply_symm_apply,coefficients_restrict,AddEquiv.apply_symm_apply]
+
+theorem localTop_restrict {U V : X.Opens} (h : U ≤ V) (s : Sections (F 3) V) :
+    CycleQ2DerivedCoverTop.restriction T 3 h (localTop V s) = localTop U (res _ h s) := by
+  change _ = CycleQ2KInjectiveSections.closedClass _ DR 3 (representative U (res _ h s)) _
+  rw [representative_restrict]
+  exact (CycleQ2KInjectiveSections.closedClass_precomp (freeOpen V) DR (freeOpenMap h) 3
+    (representative V s) (representative_closed V s)).symm
+
+private abbrev E := DerivedCategory.singleFunctor (AbSheaf (show TopCat from X)) 0
+
+private theorem top_closed : (termIso (p := p) 3).inv ≫ DR.d 3 4 = 0 := by
+  apply CategoryTheory.Sheaf.hom_ext
+  apply NatTrans.ext
+  intro W
+  apply ConcreteCategory.hom_ext
+  intro s
+  change _ = 0
+  exact term_above W.unop 4 (by decide) _
+
+/-- Inclusion of the intrinsic top sheaf, with its original differential. -/
+def topInclusion : E.obj (F 3) ⟶ T⟦(3 : ℤ)⟧ :=
+  CycleQ2KInjectiveSections.closedClass (F 3) DR 3 (termIso 3).inv top_closed
+
+private def topPostAt (P : AbSheaf (show TopCat from X)) (n : ℕ) (m : ℤ)
+    (h : 3 + (n : ℤ) = m) : Ext P (F 3) n →+ (E.obj P ⟶ T⟦m⟧) where
+  toFun a := a.hom.comp topInclusion h
+  map_zero' := by simp only [Ext.zero_hom,ShiftedHom.zero_comp]
+  map_add' a b := by simp only [Ext.add_hom,ShiftedHom.add_comp]
+
+def topPost (n : ℕ) (W : X.Opens) : (F 3).H' n W →+ H T (3 + (n : ℤ)) W :=
+  topPostAt (freeOpen W) n (3 + (n : ℤ)) rfl
+
+private theorem representative_eq_post (W : X.Opens) (s : Sections (F 3) W) :
+    representative W s = (freeOpenSections (F 3) W).symm s ≫ (termIso 3).inv := by
+  apply (freeOpenSections _ W).injective
+  rw [representative_sections,← freeOpenSections_postcomp,AddEquiv.apply_symm_apply]
+  rfl
+
+theorem topPost_section (W : X.Opens) (s : Sections (F 3) W) :
+    topPost 0 W (sectionExtZero W s) = localTop W s := by
+  change (Ext.mk₀ ((freeOpenSections (F 3) W).symm s)).hom.comp topInclusion _ = _
+  rw [Ext.mk₀_hom,ShiftedHom.mk₀_comp]
+  symm
+  change CycleQ2KInjectiveSections.closedClass (freeOpen W) DR 3 (representative W s) _ = _
+  rw [representative_eq_post]
+  exact CycleQ2KInjectiveSections.closedClass_precomp (F 3) DR
+    ((freeOpenSections (F 3) W).symm s) 3 (termIso 3).inv top_closed
+
+private theorem topPostAt_precomp {P Q : AbSheaf (show TopCat from X)}
+    (f : Q ⟶ P) (n : ℕ) (m : ℤ) (h : 3 + (n : ℤ) = m)
+    (a : Ext P (F 3) n) :
+    topPostAt Q n m h ((Ext.mk₀ f).comp a (zero_add n)) = E.map f ≫ topPostAt P n m h a := by
+  change ((Ext.mk₀ f).comp a (zero_add n)).hom.comp topInclusion h = _
+  rw [Ext.comp_hom,Ext.mk₀_hom]
+  simpa only [ShiftedHom.mk₀_comp] using
+    (ShiftedHom.comp_assoc (ShiftedHom.mk₀ (0 : ℤ) rfl (E.map f)) a.hom topInclusion
+      (add_zero _) h (by simpa only [add_zero] using h))
+
+theorem topPost_restrict (n : ℕ) {U V : X.Opens} (h : U ≤ V) (a : (F 3).H' n V) :
+    topPost n U (((F 3).cohomologyPresheaf n).map (homOfLE h).op a) =
+      CycleQ2DerivedCoverTop.restriction T (3 + (n : ℤ)) h (topPost n V a) :=
+  topPostAt_precomp (freeOpenMap h) n (3 + (n : ℤ)) rfl a
+
+private theorem topPostAt_boundary {S : ShortComplex (AbSheaf (show TopCat from X))}
+    (hS : S.ShortExact) {n n' : ℕ} (hn : 1 + n = n')
+    (m : ℤ) (hm : 3 + (n : ℤ) = m) (a : Ext S.X₁ (F 3) n) :
+    topPostAt S.X₃ n' (m+1) (by omega) (hS.extClass.comp a hn) =
+      CycleQ2DerivedSourceBoundary.connecting hS T m (topPostAt S.X₁ n m hm a) := by
+  change (hS.extClass.comp a hn).hom.comp topInclusion _ = _
+  rw [Ext.comp_hom,hS.extClass_hom]
+  calc
+    (hS.singleδ.comp a.hom _).comp topInclusion _ =
+        hS.singleδ.comp (a.hom.comp topInclusion hm) rfl :=
+      ShiftedHom.comp_assoc hS.singleδ a.hom topInclusion (by omega) hm (by omega)
+    _ = _ := by
+      rw [ShiftedHom.comp,shiftFunctorAdd'_eq_shiftFunctorAdd]
+      rfl
+
+private theorem topPost_delta_zero
+    (S : (Opens.grothendieckTopology X).MayerVietorisSquare) (a : (F 3).H' 0 S.X₁) :
+    topPost 1 S.X₄ (S.δ (F 3) 0 1 rfl a) =
+      CycleQ2DerivedCoverTop.delta T S 3 (topPost 0 S.X₁ a) :=
+  topPostAt_boundary S.shortComplex_shortExact rfl 3 rfl a
+
+private theorem topPost_delta_one
+    (S : (Opens.grothendieckTopology X).MayerVietorisSquare) (a : (F 3).H' 1 S.X₁) :
+    topPost 2 S.X₄ (S.δ (F 3) 1 2 rfl a) =
+      CycleQ2DerivedCoverTop.delta T S 4 (topPost 1 S.X₁ a) :=
+  topPostAt_boundary S.shortComplex_shortExact rfl 4 rfl a
+
+private theorem topPost_delta_two
+    (S : (Opens.grothendieckTopology X).MayerVietorisSquare) (a : (F 3).H' 2 S.X₁) :
+    topPost 3 S.X₄ (S.δ (F 3) 2 3 rfl a) =
+      CycleQ2DerivedCoverTop.delta T S 5 (topPost 2 S.X₁ a) :=
+  topPostAt_boundary S.shortComplex_shortExact rfl 5 rfl a
+
+/-- The top edge map commutes with the original three source
+Mayer--Vietoris boundaries, without a chosen scalar normalization. -/
+theorem topPost_four (U V W Z : X.Opens)
+    (s : Sections (F 3) (CycleQ2FourOpenH3.QuadOpen U V W Z)) :
+    topPost 3 (((U ⊔ V) ⊔ W) ⊔ Z) (CycleQ2FourOpenH3.connecting (F 3) U V W Z s) =
+      CycleQ2DerivedCoverTop.fourConnecting T 3 U V W Z
+        (localTop (CycleQ2FourOpenH3.QuadOpen U V W Z) s) := by
+  let S := CycleQ2FourOpenH3.outerSquare U V W Z
+  let R := CycleQ2ThreeOpenCechH2.outerSquare (U ⊓ Z) (V ⊓ Z) (W ⊓ Z)
+  let Q := Opens.mayerVietorisSquare ((U ⊓ Z) ⊓ (W ⊓ Z)) ((V ⊓ Z) ⊓ (W ⊓ Z))
+  change topPost 3 S.X₄
+    (S.δ (F 3) 2 3 rfl (R.δ (F 3) 1 2 rfl (Q.δ (F 3) 0 1 rfl
+      ((CycleQ2GeometricConeCech.HZero.sectionsEquiv (F 3) Q.X₁).symm s)))) = _
+  rw [topPost_delta_two,topPost_delta_one,topPost_delta_zero,
+    ← CycleQ2ThreeOpenInjectiveComparison.sectionExtZero_eq_hzero,topPost_section]
+  rfl
+
+end CycleQ2IntrinsicThreefoldTop
+
+#print axioms CycleQ2IntrinsicThreefoldTop.localTop_eq_zero_iff
+#print axioms CycleQ2IntrinsicThreefoldTop.topPost_four
+
+namespace CycleQ2IntrinsicFourOpenTop
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf Sections)
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms differential)
+open CycleQ2IntrinsicThreefoldTop
+  (target localTop localTop_restrict localTop_surjective localTop_eq_zero_iff affine_above topPost)
+open CycleQ2HodgeTwistCoordinates (NativeTopFaces nativeTopBoundary)
+open CycleQ2HodgeTwistTopDerived
+  (FaceAcyclic full_quad nativeQuadEquiv nativeTripleEquiv nativeQuad_boundary
+    union_cover nativeTopConnecting nativeTopConnecting_boundary nativeTopConnecting_surjective)
+open CycleQ2DerivedCoverTop (H)
+open CycleQ2CechTwoToDerived (app app_res)
+open CycleQ2ThreeOpenCechH2 (TripleOpen)
+open CycleQ2FourOpenH3 (QuadOpen)
+open CycleQ2GeometricSheafLocalIso (res)
+
+variable {k : Type} [Field k] [CharZero k] {X : Scheme.{0}}
+  {p : X ⟶ Spec (CommRingCat.of k)} [SmoothOfRelativeDimension 3 p]
+  {U : Fin 4 → X.Opens} (hcover : (⨆ i, U i) = ⊤)
+
+local instance : HasExt.{1} (AbSheaf (show TopCat from X)) := HasExt.standard _
+local instance : HasDerivedCategory.{1} (AbSheaf (show TopCat from X)) :=
+  HasDerivedCategory.standard _
+
+local notation "F" => sheafForms p 3
+local notation "T" => target p
+private abbrev Quad := QuadOpen (U 0) (U 1) (U 2) (U 3)
+private abbrev Torus := Finset.univ.inf U
+
+/-- The actual canonical class followed by the actual intrinsic
+top-term inclusion, with the original ordered source boundaries. -/
+def connectingNative : Sections (F 3) (Torus (U := U)) →+ H T 6 ⊤ :=
+  (topPost 3 ⊤).comp (nativeTopConnecting (F 3) U hcover)
+
+theorem connectingNative_eq_four (s : Sections (F 3) (Torus (U := U))) :
+    connectingNative hcover s =
+      (CycleQ2DerivedCoverTop.restrictionEquiv T 6 (union_cover U hcover))
+        (CycleQ2DerivedCoverTop.fourConnecting T 3 (U 0) (U 1) (U 2) (U 3)
+          (localTop (Quad (U := U)) (nativeQuadEquiv (F 3) U s))) := by
+  have he : (eqToHom (union_cover U hcover).symm :
+      (⊤ : X.Opens) ⟶ ((U 0 ⊔ U 1) ⊔ U 2) ⊔ U 3) =
+        homOfLE (union_cover U hcover).ge := Subsingleton.elim _ _
+  change topPost 3 ⊤ (((F 3).cohomologyPresheaf 3).map
+    (eqToHom (union_cover U hcover).symm).op
+      (CycleQ2FourOpenH3.connecting (F 3) (U 0) (U 1) (U 2) (U 3)
+        (nativeQuadEquiv (F 3) U s))) = _
+  rw [he,CycleQ2IntrinsicThreefoldTop.topPost_restrict,CycleQ2IntrinsicThreefoldTop.topPost_four]
+  rfl
+
+theorem connectingNative_boundary (c : NativeTopFaces (F := F 3) (U := U)) :
+    connectingNative hcover (nativeTopBoundary c) = 0 := by
+  change topPost 3 ⊤ (nativeTopConnecting (F 3) U hcover (nativeTopBoundary c)) = 0
+  rw [nativeTopConnecting_boundary,map_zero]
+
+variable (hface : ∀ (S : Finset (Fin 4)), S.Nonempty → IsAffineOpen (S.inf U))
+
+include hface in
+private theorem vertex_affine (i : Fin 4) : IsAffineOpen (U i) := by
+  simpa only [Finset.inf_singleton] using hface {i} (by simp)
+
+include hface in
+private theorem pair_affine (i j : Fin 4) : IsAffineOpen (U i ⊓ U j) := by
+  simpa only [Finset.inf_insert,Finset.inf_singleton] using hface {i,j} (by simp)
+
+include hface in
+private theorem triple_affine (i j l : Fin 4) : IsAffineOpen (TripleOpen (U i) (U j) (U l)) := by
+  simpa only [TripleOpen,Finset.inf_insert,Finset.inf_singleton,
+    inf_assoc,inf_left_comm,inf_comm,inf_idem] using hface {i,j,l} (by simp)
+
+include hface in
+private theorem quad_affine : IsAffineOpen (Quad (U := U)) := by
+  rw [← full_quad U]
+  exact hface _ (by simp)
+
+include hface in
+theorem forms_face_acyclic (n : ℕ) : FaceAcyclic (F n) U := fun S hS m =>
+  CycleQ2AffineExteriorComparison.forms_acyclic p 3 (hface S hS) n m
+
+include hface in
+private theorem four_surjective : Function.Surjective
+    (CycleQ2DerivedCoverTop.fourConnecting T 3 (U 0) (U 1) (U 2) (U 3)) :=
+  CycleQ2DerivedCoverTop.four_surjective T 3 _ _ _ _
+    (affine_above (vertex_affine hface 0) 6 (by decide))
+    (affine_above (vertex_affine hface 1) 6 (by decide))
+    (affine_above (vertex_affine hface 2) 6 (by decide))
+    (affine_above (vertex_affine hface 3) 6 (by decide))
+    (affine_above (pair_affine hface 0 1) 5 (by decide))
+    (affine_above (pair_affine hface 0 2) 5 (by decide))
+    (affine_above (pair_affine hface 1 2) 5 (by decide))
+    (affine_above (pair_affine hface 0 3) 5 (by decide))
+    (affine_above (pair_affine hface 1 3) 5 (by decide))
+    (affine_above (pair_affine hface 2 3) 5 (by decide))
+    (affine_above (triple_affine hface 0 1 2) 4 (by decide))
+    (affine_above (triple_affine hface 0 1 3) 4 (by decide))
+    (affine_above (triple_affine hface 0 2 3) 4 (by decide))
+    (affine_above (triple_affine hface 1 2 3) 4 (by decide))
+
+include hface in
+theorem connectingNative_surjective : Function.Surjective (connectingNative (p := p) hcover) := by
+  intro y
+  obtain ⟨z,hz⟩ := (CycleQ2DerivedCoverTop.restrictionEquiv T 6 (union_cover U hcover)).surjective y
+  obtain ⟨a,ha⟩ := four_surjective (p := p) hface z
+  obtain ⟨s,hs⟩ := localTop_surjective (p := p) (quad_affine hface) a
+  refine ⟨(nativeQuadEquiv (F 3) U).symm s,?_⟩
+  rw [connectingNative_eq_four,AddEquiv.apply_symm_apply,hs,ha,hz]
+
+include hcover hface in
+theorem topPost_surjective : Function.Surjective (topPost (p := p) 3 (⊤ : X.Opens)) := by
+  intro y
+  obtain ⟨s,hs⟩ := connectingNative_surjective hcover hface y
+  exact ⟨nativeTopConnecting (F 3) U hcover s,hs⟩
+
+include hface in
+private theorem four_eq_zero_iff (s : H T 3 (Quad (U := U))) :
+    CycleQ2DerivedCoverTop.fourConnecting T 3 (U 0) (U 1) (U 2) (U 3) s = 0 ↔
+    ∃ a, CycleQ2DerivedCoverTop.fourBoundary T 3 (U 0) (U 1) (U 2) (U 3) a = s :=
+  CycleQ2DerivedCoverTop.four_eq_zero_iff T 3 _ _ _ _
+    (affine_above (vertex_affine hface 0) 5 (by decide))
+    (affine_above (vertex_affine hface 1) 5 (by decide))
+    (affine_above (vertex_affine hface 2) 5 (by decide))
+    (affine_above (vertex_affine hface 3) 5 (by decide))
+    (affine_above (pair_affine hface 0 1) 4 (by decide))
+    (affine_above (pair_affine hface 0 2) 4 (by decide))
+    (affine_above (pair_affine hface 1 2) 4 (by decide))
+    (affine_above (pair_affine hface 0 3) 4 (by decide))
+    (affine_above (pair_affine hface 1 3) 4 (by decide))
+    (affine_above (pair_affine hface 2 3) 4 (by decide)) s
+
+private def faceClasses (c : NativeTopFaces (F := F 3) (U := U)) :
+    CycleQ2DerivedCoverTop.TripleClasses T 3 (U 0) (U 1) (U 2) (U 3) :=
+  (localTop _ (nativeTripleEquiv (F 3) U c).1,
+    localTop _ (nativeTripleEquiv (F 3) U c).2.1,
+    localTop _ (nativeTripleEquiv (F 3) U c).2.2.1,
+    localTop _ (nativeTripleEquiv (F 3) U c).2.2.2)
+
+include hface in
+private theorem faceClasses_surjective : Function.Surjective (faceClasses (p := p) (U := U)) := by
+  rintro ⟨a,b,c,d⟩
+  obtain ⟨a,rfl⟩ := localTop_surjective (triple_affine hface 0 1 2) a
+  obtain ⟨b,rfl⟩ := localTop_surjective (triple_affine hface 0 1 3) b
+  obtain ⟨c,rfl⟩ := localTop_surjective (triple_affine hface 0 2 3) c
+  obtain ⟨d,rfl⟩ := localTop_surjective (triple_affine hface 1 2 3) d
+  refine ⟨(nativeTripleEquiv (F 3) U).symm (a,b,c,d),?_⟩
+  simp only [faceClasses,AddEquiv.apply_symm_apply]
+
+private theorem localTop_native_boundary (c : NativeTopFaces (F := F 3) (U := U)) :
+    localTop (Quad (U := U)) (nativeQuadEquiv (F 3) U (nativeTopBoundary c)) =
+      CycleQ2DerivedCoverTop.fourBoundary T 3 (U 0) (U 1) (U 2) (U 3) (faceClasses c) := by
+  rw [nativeQuad_boundary]
+  change localTop (Quad (U := U))
+      (res _ _ (nativeTripleEquiv (F 3) U c).2.2.2 -
+        res _ _ (nativeTripleEquiv (F 3) U c).2.2.1 +
+        res _ _ (nativeTripleEquiv (F 3) U c).2.1 -
+        res _ _ (nativeTripleEquiv (F 3) U c).1) = _
+  simp only [map_sub,map_add,← localTop_restrict] <;> rfl
+
+theorem nativeQuad_differential (s : Sections (F 2) (Torus (U := U))) :
+    nativeQuadEquiv (F 3) U (app (differential p 3 2) _ s) =
+      app (differential p 3 2) (Quad (U := U)) (nativeQuadEquiv (F 2) U s) :=
+  (app_res (differential p 3 2) (full_quad U).ge s).symm
+
+include hface in
+theorem connectingNative_differential (s : Sections (F 2) (Torus (U := U))) :
+    connectingNative hcover (app (differential p 3 2) _ s) = 0 := by
+  rw [connectingNative_eq_four,nativeQuad_differential]
+  have hz := (localTop_eq_zero_iff (quad_affine hface)
+    (app (differential p 3 2) _ (nativeQuadEquiv (F 2) U s))).mpr
+      ⟨nativeQuadEquiv (F 2) U s,rfl⟩
+  rw [hz,map_zero,map_zero]
+
+/-- The kernel uses only the original four-face boundary and the
+actual intrinsic two-form differential on the original torus. -/
+include hface in
+theorem connectingNative_eq_zero_iff (s : Sections (F 3) (Torus (U := U))) :
+    connectingNative hcover s = 0 ↔
+      ∃ c : NativeTopFaces (F := F 3) (U := U),
+        ∃ η : Sections (F 2) (Torus (U := U)),
+          nativeTopBoundary c - app (differential p 3 2) _ η = s := by
+  constructor
+  · intro hs
+    rw [connectingNative_eq_four] at hs
+    have hfour : CycleQ2DerivedCoverTop.fourConnecting T 3 (U 0) (U 1) (U 2) (U 3)
+        (localTop (Quad (U := U)) (nativeQuadEquiv (F 3) U s)) = 0 := by
+      apply (CycleQ2DerivedCoverTop.restrictionEquiv T 6 (union_cover U hcover)).injective
+      simpa only [map_zero] using hs
+    obtain ⟨a,ha⟩ := (four_eq_zero_iff hface _).mp hfour
+    obtain ⟨c,hc⟩ := faceClasses_surjective hface a
+    have he : localTop (Quad (U := U))
+        (nativeQuadEquiv (F 3) U (s - nativeTopBoundary c)) = 0 := by
+      rw [map_sub,map_sub,localTop_native_boundary,hc,ha,sub_self]
+    obtain ⟨η,hη⟩ := (localTop_eq_zero_iff (quad_affine hface) _).mp he
+    let t := (nativeQuadEquiv (F 2) U).symm η
+    have ht : app (differential p 3 2) _ t = s - nativeTopBoundary c := by
+      apply (nativeQuadEquiv (F 3) U).injective
+      rw [nativeQuad_differential]
+      change app (differential p 3 2) _
+        (nativeQuadEquiv (F 2) U ((nativeQuadEquiv (F 2) U).symm η)) = _
+      rw [AddEquiv.apply_symm_apply]
+      exact hη
+    refine ⟨c,-t,?_⟩
+    rw [map_neg,ht]
+    abel
+  · rintro ⟨c,η,rfl⟩
+    rw [map_sub,connectingNative_boundary,connectingNative_differential hcover hface,sub_self]
+
+section SectionTrace
+
+variable {A : Type*} [AddCommGroup A] (τ : Sections (F 3) (Torus (U := U)) →+ A)
+  (hδ : ∀ c : NativeTopFaces (F := F 3) (U := U), τ (nativeTopBoundary c) = 0)
+  (hd : ∀ s : Sections (F 2) (Torus (U := U)), τ (app (differential p 3 2) _ s) = 0)
+
+/-- The native torus functional descends once it kills the two
+explicit kinds of boundary; no global volume frame is presumed. -/
+def traceOfSections : H T 6 ⊤ →+ A :=
+  AddMonoidHom.liftOfSurjective (connectingNative hcover)
+    (connectingNative_surjective hcover hface)
+    ⟨τ,fun s hs => by
+      obtain ⟨c,η,rfl⟩ := (connectingNative_eq_zero_iff hcover hface s).mp hs
+      rw [map_sub,hδ,hd,sub_self]⟩
+
+theorem traceOfSections_connecting (s : Sections (F 3) (Torus (U := U))) :
+    traceOfSections hcover hface τ hδ hd (connectingNative hcover s) = τ s := by
+  simp [traceOfSections]
+
+include hcover hface hδ hd in
+theorem connectingNative_ne_zero (s : Sections (F 3) (Torus (U := U))) (hs : τ s ≠ 0) :
+    connectingNative hcover s ≠ 0 := by
+  intro hz
+  apply hs
+  rw [← traceOfSections_connecting hcover hface τ hδ hd,hz,map_zero]
+
+/-- The same local functional also gives the canonical H³ trace,
+through the original native four-open cohomology map. -/
+def canonicalTraceOfSections : (F 3).H' 3 ⊤ →+ A :=
+  AddMonoidHom.liftOfSurjective (nativeTopConnecting (F 3) U hcover)
+    (nativeTopConnecting_surjective (F 3) U hcover (forms_face_acyclic hface 3))
+    ⟨τ,fun s hs => by
+      obtain ⟨c,rfl⟩ := (CycleQ2HodgeTwistTopDerived.nativeTopConnecting_eq_zero_iff
+        (F 3) U hcover (forms_face_acyclic hface 3) s).mp hs
+      exact hδ c⟩
+
+theorem canonicalTraceOfSections_connecting (s : Sections (F 3) (Torus (U := U))) :
+    canonicalTraceOfSections hcover hface τ hδ (nativeTopConnecting (F 3) U hcover s) = τ s := by
+  simp [canonicalTraceOfSections]
+
+theorem traceOfSections_topPost (a : (F 3).H' 3 ⊤) :
+    traceOfSections hcover hface τ hδ hd (topPost 3 ⊤ a) =
+      canonicalTraceOfSections hcover hface τ hδ a := by
+  obtain ⟨s,rfl⟩ := nativeTopConnecting_surjective (F 3) U hcover (forms_face_acyclic hface 3) a
+  rw [canonicalTraceOfSections_connecting]
+  exact traceOfSections_connecting hcover hface τ hδ hd s
+
+end SectionTrace
+
+section Trace
+
+variable {A : Type*} [AddCommGroup A] (τ : (F 3).H' 3 ⊤ →+ A)
+  (hτ : ∀ s : Sections (F 2) (Torus (U := U)),
+    τ (nativeTopConnecting (F 3) U hcover (app (differential p 3 2) _ s)) = 0)
+
+/-- A canonical trace that kills the genuine exterior differential
+descends to actual global derived de Rham cohomology. -/
+def derivedTrace : H T 6 ⊤ →+ A :=
+  AddMonoidHom.liftOfSurjective (connectingNative hcover)
+    (connectingNative_surjective hcover hface)
+    ⟨τ.comp (nativeTopConnecting (F 3) U hcover),fun s hs => by
+      obtain ⟨c,η,rfl⟩ := (connectingNative_eq_zero_iff hcover hface s).mp hs
+      change τ (nativeTopConnecting (F 3) U hcover
+        (nativeTopBoundary c - app (differential p 3 2) _ η)) = 0
+      rw [map_sub,nativeTopConnecting_boundary,map_sub,map_zero,hτ,sub_self]⟩
+
+theorem derivedTrace_connecting (s : Sections (F 3) (Torus (U := U))) :
+    derivedTrace hcover hface τ hτ (connectingNative hcover s) =
+      τ (nativeTopConnecting (F 3) U hcover s) := by
+  simp [derivedTrace]
+
+/-- The descended trace agrees with the given canonical trace on every
+actual H³ class, under the actual top-term inclusion. -/
+theorem derivedTrace_topPost (a : (F 3).H' 3 ⊤) :
+    derivedTrace hcover hface τ hτ (topPost 3 ⊤ a) = τ a := by
+  obtain ⟨s,rfl⟩ := nativeTopConnecting_surjective (F 3) U hcover (forms_face_acyclic hface 3) a
+  exact derivedTrace_connecting hcover hface τ hτ s
+
+include hcover hface hτ in
+theorem topPost_injective (hτi : Function.Injective τ) :
+    Function.Injective (topPost (p := p) 3 (⊤ : X.Opens)) := by
+  intro a b hab
+  apply hτi
+  rw [← derivedTrace_topPost hcover hface τ hτ,← derivedTrace_topPost hcover hface τ hτ,hab]
+
+end Trace
+
+end CycleQ2IntrinsicFourOpenTop
+
+#print axioms CycleQ2IntrinsicFourOpenTop.connectingNative_surjective
+#print axioms CycleQ2IntrinsicFourOpenTop.connectingNative_eq_zero_iff
+#print axioms CycleQ2IntrinsicFourOpenTop.derivedTrace_topPost
+
+/-!
+# The actual generic top trace on both coefficient models
+
+The coefficient-one homogeneous section is the same section used in
+the explicit torus calculation.  Both of its boundary cancellations
+are now applied to the intrinsic four-open comparison, and the result
+is carried back through the original generic scheme isomorphism.
+-/
+
+namespace CycleQ2GenericHodgeCanonicalTrace
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2MonicGenericAmbientChart (K genericCoeff_vertex)
+open CycleQ2MonicGenericSmooth (coeff explicit_projective_smooth)
+open CycleQ2GeometricHodgeThreefold (threefold toBase coordinateOpen coordinateOpens_cover)
+open CycleQ2IntrinsicDeRhamSheaves (sheafForms relativeDeRhamInt)
+open CycleQ2IntrinsicThreefoldTop (target topPost)
+open CycleQ2IntrinsicFourOpenTop
+  (connectingNative traceOfSections traceOfSections_connecting
+    canonicalTraceOfSections canonicalTraceOfSections_connecting traceOfSections_topPost)
+open CycleQ2InjectiveCech (AbSheaf Sections)
+open CycleQ2DerivedCoverTop (H)
+open CycleQ2NativeWeightedCover (ambientToField)
+open CycleQ2GenericHodgeDeRham (globalDeRhamEquiv)
+
+local instance : SmoothOfRelativeDimension 3 (toBase coeff) := explicit_projective_smooth
+local instance : SmoothOfRelativeDimension 3 ambientToField := CycleQ2NativeGenericSmooth.ambient_smooth
+local instance (Z : Scheme.{0}) : HasExt.{1} (AbSheaf (show TopCat from Z)) := HasExt.standard _
+local instance (Z : Scheme.{0}) : HasDerivedCategory.{1} (AbSheaf (show TopCat from Z)) :=
+  HasDerivedCategory.standard _
+
+private theorem cover : (⨆ i : Fin 4, coordinateOpen coeff i) = ⊤ :=
+  coordinateOpens_cover coeff (by rw [genericCoeff_vertex]; exact isUnit_one)
+
+private theorem affine_faces (S : Finset (Fin 4)) (hS : S.Nonempty) :
+    IsAffineOpen (S.inf (coordinateOpen coeff)) := by
+  obtain ⟨i,hi⟩ := hS
+  exact CycleQ2HodgeCubicIntrinsicForms.face_affine coeff i S hi
+
+/-- The generic torus functional on actual global degree-six intrinsic
+de Rham cohomology, with both original differentials accounted for. -/
+def deRhamTrace : H (target (toBase coeff)) 6 ⊤ →+ K :=
+  traceOfSections cover affine_faces torusSectionTrace
+    torusSectionTrace_boundary torusSectionTrace_differential
+
+/-- The same coefficient functional on actual canonical cohomology. -/
+def canonicalTrace : (sheafForms (toBase coeff) 3 3).H' 3 ⊤ →+ K :=
+  canonicalTraceOfSections cover affine_faces torusSectionTrace torusSectionTrace_boundary
+
+theorem deRhamTrace_connecting
+    (s : Sections (sheafForms (toBase coeff) 3 3)
+      (Finset.univ.inf (coordinateOpen coeff))) :
+    deRhamTrace (connectingNative cover s) = torusSectionTrace s :=
+  traceOfSections_connecting cover affine_faces torusSectionTrace
+    torusSectionTrace_boundary torusSectionTrace_differential s
+
+theorem canonicalTrace_connecting
+    (s : Sections (sheafForms (toBase coeff) 3 3)
+      (Finset.univ.inf (coordinateOpen coeff))) :
+    canonicalTrace (CycleQ2HodgeTwistTopDerived.nativeTopConnecting
+      (sheafForms (toBase coeff) 3 3) (coordinateOpen coeff) cover s) = torusSectionTrace s :=
+  canonicalTraceOfSections_connecting cover affine_faces torusSectionTrace
+    torusSectionTrace_boundary s
+
+theorem deRhamTrace_topPost (a : (sheafForms (toBase coeff) 3 3).H' 3 ⊤) :
+    deRhamTrace (topPost 3 ⊤ a) = canonicalTrace a :=
+  traceOfSections_topPost cover affine_faces torusSectionTrace
+    torusSectionTrace_boundary torusSectionTrace_differential a
+
+/-- The actual normalized homogeneous section followed by the actual
+ordered connecting maps and the intrinsic top-term inclusion. -/
+def normalizedDeRhamClass (a : K) : H (target (toBase coeff)) 6 ⊤ :=
+  connectingNative cover (normalizedSection a)
+
+theorem deRhamTrace_normalizedDeRhamClass (a : K) :
+    deRhamTrace (normalizedDeRhamClass a) = a := by
+  rw [normalizedDeRhamClass,deRhamTrace_connecting,torusSectionTrace_normalizedSection]
+
+theorem normalizedDeRhamClass_ne_zero {a : K} (ha : a ≠ 0) :
+    normalizedDeRhamClass a ≠ 0 := by
+  intro hz
+  apply ha
+  rw [← deRhamTrace_normalizedDeRhamClass a,hz,map_zero]
+
+theorem deRhamTrace_eq_zero_iff (a : H (target (toBase coeff)) 6 ⊤) :
+    deRhamTrace a = 0 ↔ a = 0 := by
+  constructor
+  · obtain ⟨s,rfl⟩ := CycleQ2IntrinsicFourOpenTop.connectingNative_surjective cover affine_faces a
+    intro hs
+    rw [deRhamTrace_connecting] at hs
+    obtain ⟨c,rfl⟩ := (torusSectionTrace_eq_zero_iff s).mp hs
+    exact CycleQ2IntrinsicFourOpenTop.connectingNative_boundary cover c
+  · rintro rfl
+    exact map_zero deRhamTrace
+
+theorem deRhamTrace_bijective : Function.Bijective deRhamTrace := by
+  constructor
+  · intro a b hab
+    apply sub_eq_zero.mp
+    apply (deRhamTrace_eq_zero_iff (a-b)).mp
+    rw [map_sub,hab,sub_self]
+  · intro a
+    exact ⟨normalizedDeRhamClass a,deRhamTrace_normalizedDeRhamClass a⟩
+
+/-- The actual top de Rham group is identified by the original
+homogeneous trace, with no abstractly chosen nonzero generator. -/
+def deRhamTraceEquiv : H (target (toBase coeff)) 6 ⊤ ≃+ K :=
+  AddEquiv.ofBijective deRhamTrace deRhamTrace_bijective
+
+theorem canonicalTrace_eq_zero_iff (a : (sheafForms (toBase coeff) 3 3).H' 3 ⊤) :
+    canonicalTrace a = 0 ↔ a = 0 := by
+  constructor
+  · obtain ⟨s,rfl⟩ := CycleQ2HodgeTwistTopDerived.nativeTopConnecting_surjective
+      (sheafForms (toBase coeff) 3 3) (coordinateOpen coeff) cover
+      (CycleQ2IntrinsicFourOpenTop.forms_face_acyclic affine_faces 3) a
+    intro hs
+    rw [canonicalTrace_connecting] at hs
+    obtain ⟨c,rfl⟩ := (torusSectionTrace_eq_zero_iff s).mp hs
+    exact CycleQ2HodgeTwistTopDerived.nativeTopConnecting_boundary
+      (sheafForms (toBase coeff) 3 3) (coordinateOpen coeff) cover c
+  · rintro rfl
+    exact map_zero canonicalTrace
+
+theorem canonicalTrace_injective : Function.Injective canonicalTrace := by
+  intro a b hab
+  apply sub_eq_zero.mp
+  apply (canonicalTrace_eq_zero_iff (a-b)).mp
+  rw [map_sub,hab,sub_self]
+
+theorem topPost_bijective : Function.Bijective
+    (topPost (p := toBase coeff) 3 (⊤ : (threefold coeff).Opens)) := by
+  refine ⟨?_,CycleQ2IntrinsicFourOpenTop.topPost_surjective cover affine_faces⟩
+  intro a b hab
+  apply canonicalTrace_injective
+  rw [← deRhamTrace_topPost,← deRhamTrace_topPost,hab]
+
+/-- The canonical class maps to de Rham cohomology by the actual
+top-term inclusion, and that very map is an isomorphism in top degree. -/
+def topPostEquiv : (sheafForms (toBase coeff) 3 3).H' 3 ⊤ ≃+
+    H (target (toBase coeff)) 6 ⊤ :=
+  AddEquiv.ofBijective (topPost 3 ⊤) topPost_bijective
+
+/-- The trace on the original generic ambient scheme is transported
+through its coefficient-preserving isomorphism, in every de Rham degree. -/
+def originalDeRhamTrace : H (target ambientToField) 6 ⊤ →+ K :=
+  deRhamTrace.comp (globalDeRhamEquiv 6).toAddMonoidHom
+
+def normalizedOriginalDeRhamClass (a : K) : H (target ambientToField) 6 ⊤ :=
+  (globalDeRhamEquiv 6).symm (normalizedDeRhamClass a)
+
+theorem originalDeRhamTrace_normalized (a : K) :
+    originalDeRhamTrace (normalizedOriginalDeRhamClass a) = a := by
+  change deRhamTrace ((globalDeRhamEquiv 6)
+    ((globalDeRhamEquiv 6).symm (normalizedDeRhamClass a))) = a
+  rw [AddEquiv.apply_symm_apply,deRhamTrace_normalizedDeRhamClass]
+
+theorem normalizedOriginalDeRhamClass_ne_zero {a : K} (ha : a ≠ 0) :
+    normalizedOriginalDeRhamClass a ≠ 0 := by
+  intro hz
+  apply ha
+  rw [← originalDeRhamTrace_normalized a,hz,map_zero]
+
+theorem normalizedOriginalDeRhamClass_one_ne_zero : normalizedOriginalDeRhamClass 1 ≠ 0 :=
+  normalizedOriginalDeRhamClass_ne_zero one_ne_zero
+
+/-- The same normalized trace identifies the original generic
+ambient top de Rham group through its actual scheme isomorphism. -/
+def originalDeRhamTraceEquiv : H (target ambientToField) 6 ⊤ ≃+ K :=
+  (globalDeRhamEquiv 6).trans deRhamTraceEquiv
+
+theorem originalDeRhamTrace_eq_zero_iff (a : H (target ambientToField) 6 ⊤) :
+    originalDeRhamTrace a = 0 ↔ a = 0 :=
+  originalDeRhamTraceEquiv.map_eq_zero_iff
+
+end CycleQ2GenericHodgeCanonicalTrace
+
+#print axioms CycleQ2GenericHodgeCanonicalTrace.deRhamTrace_topPost
+#print axioms CycleQ2GenericHodgeCanonicalTrace.topPost_bijective
+#print axioms CycleQ2GenericHodgeCanonicalTrace.originalDeRhamTrace_eq_zero_iff
+#print axioms CycleQ2GenericHodgeCanonicalTrace.originalDeRhamTrace_normalized
+#print axioms CycleQ2GenericHodgeCanonicalTrace.normalizedOriginalDeRhamClass_one_ne_zero

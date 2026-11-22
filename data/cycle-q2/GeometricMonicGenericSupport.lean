@@ -202,6 +202,18 @@ def tensorChartEquiv (φ : CoeffRing →+* R) (i : Fin 4) :
   exact (Algebra.TensorProduct.tensorQuotientEquiv (R := R) S (Poly R) S I).trans
     (Ideal.quotientEquivAlg _ J e hI.symm)
 
+/-- The chart base-change equivalence carries the actual polynomial
+class to the class obtained by changing its coefficients. -/
+theorem tensorChartEquiv_tmul (φ : CoeffRing →+* R) (i : Fin 4)
+    (p : MvPolynomial (Fin 4) R) :
+    tensorChartEquiv (S := S) φ i (1 ⊗ₜ[R] chartMap φ i p) =
+      chartMap ((algebraMap R S).comp φ) i (MvPolynomial.map (algebraMap R S) p) := by
+  change _ = Ideal.Quotient.mk _ _
+  simp only [tensorChartEquiv, AlgEquiv.trans_apply,
+    Algebra.TensorProduct.tensorQuotientEquiv_apply_tmul]
+  exact congrArg (Ideal.Quotient.mk _)
+    ((MvPolynomial.algebraTensorAlgEquiv_tmul R S 1 p).trans (one_smul S _))
+
 theorem congr_fst {X Y Z : Scheme} {f f' : X ⟶ Z} {g g' : Y ⟶ Z}
     (ef : f = f') (eg : g = g') :
     (pullback.congrHom ef eg).hom ≫ pullback.fst f' g' = pullback.fst f g := by
@@ -4643,6 +4655,289 @@ end CycleQ2NativeGenericSmooth
 
 #print axioms CycleQ2NativeGenericSmooth.chartIn_cover
 #print axioms CycleQ2NativeGenericSmooth.ambient_smooth
+
+end
+
+/-!
+# The generic Hodge model is the original generic ambient scheme
+
+The comparison is the actual coefficient-change map on the homogeneous
+quotient. Its four degree-one charts are Cartesian by the explicit
+polynomial tensor equivalence. The proof does not assume that the map
+to the generic coefficient field is split or surjective.
+-/
+
+noncomputable section
+namespace CycleQ2GenericHodgeModel
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
+open HomogeneousLocalization MvPolynomial
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold
+open CycleQ2HodgeEuler (chart)
+open CycleQ2HodgeEulerChartBinding (chartEquiv fraction)
+open CycleQ2MonicGenericAmbientChartBaseChange (tensorChartEquiv tensorChartEquiv_tmul)
+open scoped TensorProduct
+
+section Coefficients
+
+variable {R S : Type} [CommRing R] [CommRing S] [Algebra R S]
+  (φ : CoeffRing →+* R)
+
+private abbrev changed : CoeffRing →+* S := (algebraMap R S).comp φ
+
+/-- The map of the original dehomogenized hypersurface rings. -/
+def dehomMap (i : Fin 4) : chart φ i →+* chart (changed φ) i :=
+  (tensorChartEquiv (S := S) φ i).toRingHom.comp
+    (Algebra.TensorProduct.includeRight (R := R) (A := S) (B := chart φ i)).toRingHom
+
+theorem dehomMap_polynomial (i : Fin 4) (p : MvPolynomial (Fin 4) R) :
+    dehomMap (S := S) φ i (CycleQ2HodgeEuler.chartMap φ i p) =
+      CycleQ2HodgeEuler.chartMap (changed φ) i (MvPolynomial.map (algebraMap R S) p) :=
+  tensorChartEquiv_tmul φ i p
+
+/-- The affine tensor comparison and the genuine homogeneous-fraction
+map agree, before passing to schemes or cohomology. -/
+theorem chartEquiv_change (i : Fin 4) (z : ChartRing φ i) :
+    dehomMap (S := S) φ i (chartEquiv φ i z) =
+      chartEquiv (changed φ) i
+        (CycleQ2HodgeTwistCoefficientChange.chartMap φ (algebraMap R S) i z) := by
+  obtain ⟨n,a,ha,rfl⟩ := Away.mk_surjective (grade φ) (weightOne_mem_grade φ i) z
+  obtain ⟨p,hp,rfl⟩ := ha
+  have hp' : p.IsWeightedHomogeneous CycleQ2GeometricIncidenceProj.geometricWeight n := by
+    simpa using hp
+  have hps : (MvPolynomial.map (algebraMap R S) p).IsWeightedHomogeneous
+      CycleQ2GeometricIncidenceProj.geometricWeight n := by
+    intro d hd
+    apply hp'
+    intro hz
+    apply hd
+    rw [MvPolynomial.coeff_map,hz,map_zero]
+  have hfrac : CycleQ2HodgeTwistCoefficientChange.chartMap φ (algebraMap R S) i
+      (fraction φ i n p hp') =
+        fraction (changed φ) i n (MvPolynomial.map (algebraMap R S) p) hps := by
+    unfold CycleQ2HodgeTwistCoefficientChange.chartMap fraction
+    rw [CycleQ2GradedAwaySpecialization.awayMapOfEq_mk,
+      CycleQ2HodgeTwistCoefficientChange.gradedMap_quotient]
+  change dehomMap (S := S) φ i (chartEquiv φ i (fraction φ i n p hp')) = _
+  rw [hfrac,CycleQ2HodgeEulerChartBinding.chartEquiv_fraction,
+    CycleQ2HodgeEulerChartBinding.chartEquiv_fraction,dehomMap_polynomial]
+  exact congrArg (CycleQ2HodgeEuler.chartMap (changed φ) i)
+    (CycleQ2MonicGenericAmbientChartBaseChange.map_dehom i (algebraMap R S) p)
+
+theorem morphism_overBase :
+    CycleQ2HodgeTwistCoefficientChange.morphism φ (algebraMap R S) ≫ toBase φ =
+      toBase (changed φ) ≫ Spec.map (CommRingCat.ofHom (algebraMap R S)) := by
+  unfold CycleQ2HodgeTwistCoefficientChange.morphism toBase
+  rw [← Category.assoc,CycleQ2IncidenceFamilyContainment.projectiveMap_toSpecZero]
+  simp only [Category.assoc]
+  rw [← Spec.map_comp,← Spec.map_comp]
+  apply congrArg (fun a => Proj.toSpecZero (grade (changed φ)) ≫ a)
+  apply congrArg Spec.map
+  apply CommRingCat.hom_ext
+  apply RingHom.ext
+  intro a
+  apply Subtype.ext
+  change CycleQ2HodgeTwistCoefficientChange.gradedMap φ (algebraMap R S)
+      (quotient φ (C a)) = quotient (changed φ) (C (algebraMap R S a))
+  rw [CycleQ2HodgeTwistCoefficientChange.gradedMap_quotient,MvPolynomial.map_C]
+
+private theorem affine_tensor_square
+    {A B : Type} [CommRing A] [CommRing B] [Algebra R A] [Algebra S B]
+    (g : A →+* B) (e : S ⊗[R] A ≃ₐ[S] B)
+    (he : ∀ a, e (1 ⊗ₜ[R] a) = g a) :
+    IsPullback (Spec.map (CommRingCat.ofHom (algebraMap S B)))
+      (Spec.map (CommRingCat.ofHom g))
+      (Spec.map (CommRingCat.ofHom (algebraMap R S)))
+      (Spec.map (CommRingCat.ofHom (algebraMap R A))) := by
+  let E := Scheme.Spec.mapIso e.toRingEquiv.toCommRingCatIso.op ≪≫
+    (pullbackSpecIso R S A).symm
+  have h₁ : E.hom ≫ pullback.fst _ _ =
+      Spec.map (CommRingCat.ofHom (algebraMap S B)) := by
+    change (Spec.map (CommRingCat.ofHom e.toRingHom) ≫
+      (pullbackSpecIso R S A).inv) ≫ _ = _
+    rw [Category.assoc,pullbackSpecIso_inv_fst',← Spec.map_comp]
+    exact congrArg Spec.map (CommRingCat.hom_ext (RingHom.ext e.commutes))
+  have h₂ : E.hom ≫ pullback.snd _ _ = Spec.map (CommRingCat.ofHom g) := by
+    change (Spec.map (CommRingCat.ofHom e.toRingHom) ≫
+      (pullbackSpecIso R S A).inv) ≫ _ = _
+    rw [Category.assoc,pullbackSpecIso_inv_snd,← Spec.map_comp]
+    exact congrArg Spec.map (CommRingCat.hom_ext (RingHom.ext he))
+  apply IsPullback.of_iso_pullback _ E h₁ h₂
+  constructor
+  rw [← h₁,← h₂,Category.assoc,Category.assoc,pullback.condition]
+
+theorem coordinate_square (i : Fin 4) :
+    IsPullback
+      (Proj.awayι (grade (changed φ)) (coord (changed φ) i.castSucc)
+        (weightOne_mem_grade (changed φ) i) (by decide) ≫ toBase (changed φ))
+      (Spec.map (CommRingCat.ofHom
+        (CycleQ2HodgeTwistCoefficientChange.chartMap φ (algebraMap R S) i)))
+      (Spec.map (CommRingCat.ofHom (algebraMap R S)))
+      (Proj.awayι (grade φ) (coord φ i.castSucc)
+        (weightOne_mem_grade φ i) (by decide) ≫ toBase φ) := by
+  have H := affine_tensor_square (dehomMap (S := S) φ i)
+    (tensorChartEquiv (S := S) φ i) (fun _ => rfl)
+  have H' : IsPullback
+      (Spec.map (CommRingCat.ofHom (algebraMap S (ChartRing (changed φ) i))))
+      (Spec.map (CommRingCat.ofHom
+        (CycleQ2HodgeTwistCoefficientChange.chartMap φ (algebraMap R S) i)))
+      (Spec.map (CommRingCat.ofHom (algebraMap R S)))
+      (Spec.map (CommRingCat.ofHom (algebraMap R (ChartRing φ i)))) := by
+    refine H.of_iso
+      (Scheme.Spec.mapIso (chartEquiv (changed φ) i).toRingEquiv.toCommRingCatIso.op)
+      (Iso.refl _) (Scheme.Spec.mapIso (chartEquiv φ i).toRingEquiv.toCommRingCatIso.op)
+      (Iso.refl _) ?_ ?_ ?_ ?_
+    · simp only [Iso.refl_hom,Category.comp_id]
+      change Spec.map (CommRingCat.ofHom (algebraMap S (chart (changed φ) i))) =
+        Spec.map (CommRingCat.ofHom (chartEquiv (changed φ) i).toRingHom) ≫ _
+      rw [← Spec.map_comp]
+      exact congrArg Spec.map (CommRingCat.hom_ext
+        (RingHom.ext (fun a => ((chartEquiv (changed φ) i).commutes a).symm)))
+    · change Spec.map (CommRingCat.ofHom (dehomMap (S := S) φ i)) ≫
+          Spec.map (CommRingCat.ofHom (chartEquiv φ i).toRingHom) =
+        Spec.map (CommRingCat.ofHom (chartEquiv (changed φ) i).toRingHom) ≫ _
+      rw [← Spec.map_comp,← Spec.map_comp]
+      exact congrArg Spec.map (CommRingCat.hom_ext (RingHom.ext (chartEquiv_change φ i)))
+    · simp
+    · simp only [Iso.refl_hom,Category.comp_id]
+      change Spec.map (CommRingCat.ofHom (algebraMap R (chart φ i))) =
+        Spec.map (CommRingCat.ofHom (chartEquiv φ i).toRingHom) ≫ _
+      rw [← Spec.map_comp]
+      exact congrArg Spec.map (CommRingCat.hom_ext
+        (RingHom.ext (fun a => ((chartEquiv φ i).commutes a).symm)))
+  convert H' using 1 <;>
+    rw [toBase,Proj.awayι_toSpecZero_assoc,← Spec.map_comp] <;> rfl
+
+theorem coordinate_awaySquare (i : Fin 4) :
+    CycleQ2LiteralAmbientProjFiberGluing.AwaySquare
+      (CycleQ2HodgeTwistCoefficientChange.gradedMap φ (algebraMap R S))
+      (Spec.map (CommRingCat.ofHom (algebraMap R S))) (toBase φ) (toBase (changed φ))
+      (coord φ i.castSucc) (weightOne_mem_grade φ i) (by decide) := by
+  have H := coordinate_square (S := S) φ i
+  have aux (b : cone (changed φ))
+      (hb : CycleQ2HodgeTwistCoefficientChange.gradedMap φ (algebraMap R S)
+        (coord φ i.castSucc) = b)
+      (hb' : b ∈ grade (changed φ) 1)
+      (h : IsPullback
+        (Proj.awayι (grade (changed φ)) b hb' (by decide) ≫ toBase (changed φ))
+        (Spec.map (CommRingCat.ofHom
+          (CycleQ2GradedAwaySpecialization.awayMapOfEq
+            (CycleQ2HodgeTwistCoefficientChange.gradedMap φ (algebraMap R S))
+            (coord φ i.castSucc) b hb)))
+        (Spec.map (CommRingCat.ofHom (algebraMap R S)))
+        (Proj.awayι (grade φ) (coord φ i.castSucc)
+          (weightOne_mem_grade φ i) (by decide) ≫ toBase φ)) :
+      CycleQ2LiteralAmbientProjFiberGluing.AwaySquare
+        (CycleQ2HodgeTwistCoefficientChange.gradedMap φ (algebraMap R S))
+        (Spec.map (CommRingCat.ofHom (algebraMap R S))) (toBase φ) (toBase (changed φ))
+        (coord φ i.castSucc) (weightOne_mem_grade φ i) (by decide) := by
+    subst b
+    exact h
+  exact aux _ (CycleQ2HodgeTwistCoefficientChange.gradedMap_coord φ (algebraMap R S) i.castSucc)
+    (weightOne_mem_grade (changed φ) i) H
+
+end Coefficients
+
+open CycleQ2MonicGenericAmbientChart (Raw K rawPoint genericCoeff genericCoeff_vertex)
+open CycleQ2MonicGenericSmooth (coeff)
+open CycleQ2NativeGenericSmooth (Fibre toField nativeComparison nativeComparison_over)
+open CycleQ2LiteralIncidenceGenericCorrespondence
+open CycleQ2LiteralIncidenceRelativeCorrespondence
+
+local instance : Algebra Raw K := genericCoeff.toAlgebra
+
+private theorem fibre_coordinate_cover :
+    (⨆ i : Fin 4,
+      pullback.snd (Spec.map (CommRingCat.ofHom genericCoeff)) (toBase rawPoint) ⁻¹ᵁ
+        coordinateOpen rawPoint i) = ⊤ := by
+  apply top_unique
+  intro z _
+  let q := pullback.snd (Spec.map (CommRingCat.ofHom genericCoeff)) (toBase rawPoint) z
+  have hq : toBase rawPoint q = Spec.map (CommRingCat.ofHom genericCoeff) (toField z) :=
+    congrArg (fun f : Fibre ⟶ Spec (CommRingCat.of Raw) => f z) pullback.condition.symm
+  have hne : rawPoint vertexCoefficient ∉ (toBase rawPoint q).asIdeal := by
+    rw [hq]
+    change genericCoeff (rawPoint vertexCoefficient) ∉ (toField z).asIdeal
+    rw [genericCoeff_vertex]
+    intro h
+    exact Ideal.IsPrime.ne_top (toField z).isPrime ((Ideal.eq_top_iff_one _).mpr h)
+  obtain ⟨i,hi⟩ := CycleQ2NativeGenericSmooth.weightOne_at_point rawPoint q hne
+  exact Opens.mem_iSup.mpr ⟨i,hi⟩
+
+/-- The explicit generic homogeneous hypersurface is Cartesian over the
+same raw coefficient scheme as the original incidence ambient. -/
+theorem generic_cartesian :
+    IsPullback (toBase coeff)
+      (CycleQ2HodgeTwistCoefficientChange.morphism rawPoint genericCoeff)
+      (Spec.map (CommRingCat.ofHom genericCoeff)) (toBase rawPoint) := by
+  apply CycleQ2LiteralAmbientProjFiberGluing.isPullback_of_away
+    (CycleQ2HodgeTwistCoefficientChange.gradedMap rawPoint genericCoeff)
+    (CycleQ2HodgeTwistCoefficientChange.gradedMap_irrelevant rawPoint genericCoeff)
+    (Spec.map (CommRingCat.ofHom genericCoeff)) (toBase rawPoint) (toBase coeff)
+    (morphism_overBase (S := K) rawPoint).symm
+    (fun i : Fin 4 => coord rawPoint i.castSucc) (fun _ => 1)
+    (weightOne_mem_grade rawPoint) (fun _ => by decide)
+  · exact fibre_coordinate_cover
+  · exact coordinate_awaySquare (S := K) rawPoint
+
+def genericHodgeFibreIso : threefold coeff ≅ Fibre := generic_cartesian.isoPullback
+
+@[reassoc] theorem genericHodgeFibreIso_over :
+    genericHodgeFibreIso.hom ≫ toField = toBase coeff :=
+  generic_cartesian.isoPullback_hom_fst
+
+@[reassoc] theorem genericHodgeFibreIso_toRaw :
+    genericHodgeFibreIso.hom ≫
+      pullback.snd (Spec.map (CommRingCat.ofHom genericCoeff)) (toBase rawPoint) =
+        CycleQ2HodgeTwistCoefficientChange.morphism rawPoint genericCoeff :=
+  generic_cartesian.isoPullback_hom_snd
+
+/-- This isomorphism identifies the explicit Hodge model with the actual
+generic ambient scheme appearing in the marked closed graph. -/
+def genericHodgeIso : threefold coeff ≅ genericAmbient :=
+  genericHodgeFibreIso ≪≫ nativeComparison
+
+@[reassoc] theorem genericHodgeIso_over :
+    genericHodgeIso.hom ≫ pullback.snd ambientStructure genericPoint = toBase coeff := by
+  rw [genericHodgeIso,Iso.trans_hom,Category.assoc,nativeComparison_over,
+    genericHodgeFibreIso_over]
+
+@[reassoc] theorem genericHodgeIso_inv_over :
+    genericHodgeIso.inv ≫ toBase coeff = pullback.snd ambientStructure genericPoint := by
+  rw [← genericHodgeIso_over,Iso.inv_hom_id_assoc]
+
+/-- The original four coefficient-chart opens, viewed on the original
+generic ambient through its already fixed native comparison. -/
+def nativeCoordinateOpen (i : Fin 4) : genericAmbient.Opens :=
+  nativeComparison.inv ⁻¹ᵁ
+    (pullback.snd (Spec.map (CommRingCat.ofHom genericCoeff)) (toBase rawPoint) ⁻¹ᵁ
+      coordinateOpen rawPoint i)
+
+theorem genericHodgeIso_preimage_coordinate (i : Fin 4) :
+    genericHodgeIso.hom ⁻¹ᵁ nativeCoordinateOpen i = coordinateOpen coeff i := by
+  unfold nativeCoordinateOpen
+  rw [← Scheme.Hom.comp_preimage,← Scheme.Hom.comp_preimage]
+  have h : genericHodgeIso.hom ≫ nativeComparison.inv ≫
+      pullback.snd (Spec.map (CommRingCat.ofHom genericCoeff)) (toBase rawPoint) =
+        CycleQ2HodgeTwistCoefficientChange.morphism rawPoint genericCoeff := by
+    rw [genericHodgeIso,Iso.trans_hom,Category.assoc,Iso.hom_inv_id_assoc,
+      genericHodgeFibreIso_toRaw]
+  rw [Category.assoc,h,CycleQ2HodgeTwistCoefficientChange.morphism_preimage_coordinate]
+
+theorem genericHodgeIso_preimage_face (B : Finset (Fin 4)) :
+    genericHodgeIso.hom ⁻¹ᵁ B.inf nativeCoordinateOpen = B.inf (coordinateOpen coeff) := by
+  classical
+  induction B using Finset.induction_on with
+  | empty => simp
+  | insert i B hi ih =>
+    simp only [Finset.inf_insert,Scheme.Hom.preimage_inf,genericHodgeIso_preimage_coordinate,ih]
+
+end CycleQ2GenericHodgeModel
+
+#print axioms CycleQ2GenericHodgeModel.generic_cartesian
+#print axioms CycleQ2GenericHodgeModel.genericHodgeIso_over
+#print axioms CycleQ2GenericHodgeModel.genericHodgeIso_preimage_face
 
 end
 
@@ -20341,5 +20636,117 @@ def tensorSectionIso : (forgetComplex (k := k)).obj (chartTensor p q m U V) ≅
 end CycleQ2LiteralProductTensorChart
 
 #print axioms CycleQ2LiteralProductTensorChart.tensorSectionIso
+
+end
+
+section
+
+/-!
+# A regular absolute two-form trace from the proved relative curve trace
+
+Fix a coefficient field F and an element x with a k-derivation satisfying
+δ(x)=1. A source algebra formally smooth over F supplies a regular lift
+of δ. Its Cartan contraction turns each original absolute two-form into
+a regular relative one-form. The existing finite-curve trace theorem
+then gives a regular relative form on the base. Lifting through the
+actual cotangent quotient and wedging with dx produces a regular
+absolute two-form whose function-field image is the finite trace.
+
+All maps below are the original algebra inclusions and Kähler maps.
+The only absolute frame is on the base function field, with first
+element dx. No global regularity of a compactified correspondence and
+no geometric finite projection are asserted here.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+noncomputable section
+
+namespace CycleQ2RegularFiniteTwoFormTrace
+
+open Algebra Module KaehlerDifferential
+open CycleQ2WeightedCoordinateExterior (Form)
+open CycleQ2ExactFrameThreeDeRham (wedge onePullback exteriorPullback)
+open CycleQ2FiniteFieldTwoFormTrace
+open CycleQ2TwoFormRelativeContraction (exists_regular_relative quotient_pullback)
+
+variable {k F A B K L : Type} [CommRing k] [Field F] [CharZero F]
+  [CommRing A] [IsDedekindDomain A] [CommRing B] [IsDomain B] [Field K] [Field L]
+  [Algebra k F] [Algebra k A] [Algebra k B] [Algebra k K] [Algebra k L]
+  [Algebra F A] [Algebra F B] [Algebra F K] [Algebra F L]
+  [Algebra A B] [Algebra A K] [Algebra A L] [Algebra B L] [Algebra K L]
+  [IsScalarTower k F A] [IsScalarTower k F B] [IsScalarTower k F K] [IsScalarTower k F L]
+  [IsScalarTower k A K] [IsScalarTower k B L] [IsScalarTower k K L]
+  [IsScalarTower F A B] [IsScalarTower F A K] [IsScalarTower F B L]
+  [IsScalarTower F K L] [IsScalarTower A B L] [IsScalarTower A K L]
+  [Algebra.FiniteType F A] [Algebra.IsIntegral A B] [Algebra.FormallySmooth F B]
+  [IsFractionRing A K] [IsFractionRing B L]
+  [FiniteDimensional K L] [Algebra.IsSeparable K L]
+
+private theorem pull_wedge {R S : Type} [CommRing R] [CommRing S] [Algebra k R] [Algebra k S]
+    (φ : R →ₐ[k] S) (α β : Ω[R⁄k]) :
+    exteriorPullback φ 2 (wedge α β) = wedge (onePullback φ α) (onePullback φ β) := by
+  unfold exteriorPullback wedge
+  rw [CycleQ2GeometricExteriorSheaf.exteriorMap_wedge]
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+private theorem relative_second_ne_zero (c : Ω[A⁄F] ≃ₗ[A] A) (x : F)
+    (b : Basis (Fin 2) K Ω[K⁄k]) (hb : b 0 = D k K (algebraMap F K x)) :
+    KaehlerDifferential.map k F K K (b 1) ≠ 0 := by
+  intro h1
+  have h0 : KaehlerDifferential.map k F K K (b 0) = 0 := by
+    rw [hb, KaehlerDifferential.map_D]
+    exact (D F K).map_algebraMap x
+  let e : Ω[K⁄F] ≃ₗ[K] K := CycleQ2FractionOneForms.fractionCoordinates (K := K) c
+  obtain ⟨α, hα⟩ := KaehlerDifferential.map_surjective k F K (e.symm 1)
+  have he : α = b.coord 0 α • b 0 + b.coord 1 α • b 1 := by
+    simpa only [Fin.sum_univ_two, Basis.coord_apply] using (b.sum_repr α).symm
+  have hz : KaehlerDifferential.map k F K K α = 0 := by
+    rw [he, map_add, map_smul, map_smul, h0, h1, smul_zero, smul_zero, add_zero]
+  have hz' : e.symm (1 : K) = 0 := hα.symm.trans hz
+  have h10 : (1 : K) = 0 := by
+    simpa only [LinearEquiv.apply_symm_apply, map_zero] using congrArg e hz'
+  exact one_ne_zero h10
+
+/-- The actual finite separable trace of every regular absolute two-form
+has a regular absolute representative on the original base algebra. -/
+theorem trace_regular (c : Ω[A⁄F] ≃ₗ[A] A) (hA : ¬ IsField A)
+    (δ : Derivation k F F) (x : F) (hx : δ x = 1)
+    (b : Basis (Fin 2) K Ω[K⁄k]) (hb : b 0 = D k K (algebraMap F K x))
+    (ω : Form k B 2) :
+    ∃ θ : Form k A 2,
+      traceTwo b (exteriorPullback (IsScalarTower.toAlgHom k B L) 2 ω) =
+        exteriorPullback (IsScalarTower.toAlgHom k A K) 2 θ := by
+  let bL := extendedFrame (L := L) b
+  have hbL : bL 0 = D k L (algebraMap F L x) := by
+    change extendedFrame (L := L) b 0 = _
+    rw [extendedFrame_apply, hb, KaehlerDifferential.map_D,
+      ← IsScalarTower.algebraMap_apply F K L]
+  obtain ⟨ηB, hηB⟩ := exists_regular_relative (A := B) (L := L) F δ x hx bL hbL ω
+  obtain ⟨ηA, hηA⟩ := CycleQ2TraceRegularFiniteExtension.trace_regular
+    (k := F) (K := K) (L := L) c hA ηB
+  obtain ⟨α, hα⟩ := KaehlerDifferential.map_surjective k F A ηA
+  have h0 : KaehlerDifferential.map k F K K (b 0) = 0 := by
+    rw [hb, KaehlerDifferential.map_D]
+    exact (D F K).map_algebraMap x
+  refine ⟨wedge (D k A (algebraMap F A x)) α, ?_⟩
+  apply (relativeOne_bijective F b h0 (relative_second_ne_zero c x b hb)).injective
+  rw [traceTwo_relativeOne, hηB, hηA]
+  change KaehlerDifferential.map F F A K ηA = _
+  symm
+  rw [pull_wedge, CycleQ2ExactFrameThreeDeRham.onePullback_d]
+  change relativeOne F b
+      (wedge (D k K (algebraMap A K (algebraMap F A x)))
+        (onePullback (IsScalarTower.toAlgHom k A K) α)) = _
+  rw [← IsScalarTower.algebraMap_apply F A K, ← hb, relativeOne_wedge_first F b h0,
+    CycleQ2CotangentLocalizationTower.pullback_algebraMap, quotient_pullback, hα]
+
+end CycleQ2RegularFiniteTwoFormTrace
+
+#print axioms CycleQ2RegularFiniteTwoFormTrace.trace_regular
+
+end
 
 end

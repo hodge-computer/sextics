@@ -361,14 +361,14 @@ private theorem face_three : (Finset.univ.erase (3 : Vertex)).inf U =
   rw [show Finset.univ.erase (3 : Vertex) = {0,1,2} from by decide]
   simp [TripleOpen, inf_assoc, inf_left_comm, inf_comm]
 
-private theorem full_quad : Finset.univ.inf U = QuadOpen (U 0) (U 1) (U 2) (U 3) := by
+theorem full_quad : Finset.univ.inf U = QuadOpen (U 0) (U 1) (U 2) (U 3) := by
   rw [show (Finset.univ : Finset Vertex) = {0,1,2,3} from by decide]
   simp [QuadOpen, TripleOpen, inf_assoc, inf_left_comm, inf_comm]
 
-private def nativeQuadEquiv : Sections F (Finset.univ.inf U) ≃+
+def nativeQuadEquiv : Sections F (Finset.univ.inf U) ≃+
     Sections F (QuadOpen (U 0) (U 1) (U 2) (U 3)) := sectionEq F (full_quad U)
 
-private def nativeTripleEquiv : NativeTopFaces (F := F) (U := U) ≃+
+def nativeTripleEquiv : NativeTopFaces (F := F) (U := U) ≃+
     CycleQ2FourOpenH3.TripleSections F (U 0) (U 1) (U 2) (U 3) where
   toFun c := (sectionEq F (face_three U) (c 3), sectionEq F (face_two U) (c 2),
     sectionEq F (face_one U) (c 1), sectionEq F (face_zero U) (c 0))
@@ -387,7 +387,7 @@ private def nativeTripleEquiv : NativeTopFaces (F := F) (U := U) ≃+
   map_add' c d := by
     simp only [Pi.add_apply, map_add, Prod.mk_add_mk]
 
-private theorem nativeQuad_boundary (c : NativeTopFaces (F := F) (U := U)) :
+theorem nativeQuad_boundary (c : NativeTopFaces (F := F) (U := U)) :
     nativeQuadEquiv F U (nativeTopBoundary c) =
       CycleQ2FourOpenH3.boundary F (U 0) (U 1) (U 2) (U 3) (nativeTripleEquiv F U c) := by
   change res F _
@@ -396,7 +396,7 @@ private theorem nativeQuad_boundary (c : NativeTopFaces (F := F) (U := U)) :
       res F _ (res F _ (c 2)) - res F _ (res F _ (c 3))
   simp only [map_sub, map_add, res_comp]
 
-private theorem union_cover (hcover : (⨆ i, U i) = ⊤) :
+theorem union_cover (hcover : (⨆ i, U i) = ⊤) :
     ((U 0 ⊔ U 1) ⊔ U 2) ⊔ U 3 = ⊤ := by
   have he : ((U 0 ⊔ U 1) ⊔ U 2) ⊔ U 3 = ⨆ i, U i := by
     apply le_antisymm
@@ -410,7 +410,7 @@ private theorem union_cover (hcover : (⨆ i, U i) = ⊤) :
       · exact le_sup_right
   exact he.trans hcover
 
-private def unionCohomologyEquiv (hcover : (⨆ i, U i) = ⊤) :
+def unionCohomologyEquiv (hcover : (⨆ i, U i) = ⊤) :
     F.H' 3 (((U 0 ⊔ U 1) ⊔ U 2) ⊔ U 3) ≃+ F.H' 3 ⊤ :=
   ((F.cohomologyPresheaf 3).mapIso (eqToIso (union_cover U hcover).symm).op).addCommGroupIsoToAddEquiv
 

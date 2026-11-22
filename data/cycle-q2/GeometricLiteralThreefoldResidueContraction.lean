@@ -229,7 +229,7 @@ def pairCoefficient (g v : Fin 4 → B) : Fin 6 → B :=
   ![v 3*g 2-v 2*g 3, v 1*g 3-v 3*g 1, v 2*g 1-v 1*g 2,
     v 3*g 0-v 0*g 3, v 0*g 2-v 2*g 0, v 1*g 0-v 0*g 1]
 
-private theorem expand_pair (e : Fin 4 → N) (g v : Fin 4 → B) (ω : ⋀[B]^3 N)
+theorem expand_pair (e : Fin 4 → N) (g v : Fin 4 → B) (ω : ⋀[B]^3 N)
     (h012 : three (e 0) (e 1) (e 2) = -(g 3 • ω))
     (h013 : three (e 0) (e 1) (e 3) = g 2 • ω)
     (h023 : three (e 0) (e 2) (e 3) = -(g 1 • ω))

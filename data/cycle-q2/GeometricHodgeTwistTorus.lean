@@ -764,3 +764,56 @@ end
 
 #print axioms CycleQ2TorusLogDerivatives.localized_differential
 #print axioms CycleQ2TorusCubicTrace.normal_differential
+
+noncomputable section
+namespace CycleQ2TorusCubicTrace
+
+open CycleQ2SeedCechLocalization
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold (vertexCoefficient)
+open CycleQ2CubicCoefficientTrace (normal)
+open CycleQ2TorusLogDerivatives (localizedPartial localizedPartial_commute localizedPartial_residue)
+
+variable {R : Type} [CommRing R] [Nontrivial R]
+  (φ : CoeffRing →+* R) (i : Fin 4) (h : IsUnit (φ vertexCoefficient))
+  (S : Finset (Fin 3))
+
+/-- The ordinary residue, in the original monic cubic power basis,
+annihilates the normal/base-coordinate derivative cross-term. -/
+theorem residueTrace_horizontal (j : Fin 3) (a : Fin 3 → Coefficients (R := R) S) :
+    let D := localizedPartial R S j
+    residueTrace φ i h S
+      (normal (root φ i h S) ![coefficients φ i h S 1,2*coefficients φ i h S 2,3] *
+        normal (root φ i h S) (D ∘ a) -
+       normal (root φ i h S) (D ∘ coefficients φ i h S) *
+        normal (root φ i h S) ![a 1,2*a 2,0]) = 0 := by
+  dsimp only
+  change (localizationToLaurent R S (topCoefficient φ i h S _)).coeff (fun _ => -1) = 0
+  rw [horizontal_identity,localizedPartial_residue]
+
+/-- The same actual residue annihilates the two-base-coordinate
+cross-term. Commutation is supplied by the original localized partials. -/
+theorem residueTrace_mixed (j k : Fin 3) (a : Fin 3 → Coefficients (R := R) S) :
+    let D := localizedPartial R S j
+    let E := localizedPartial R S k
+    residueTrace φ i h S
+      (normal (root φ i h S) (E ∘ a) * normal (root φ i h S) (D ∘ coefficients φ i h S) -
+       normal (root φ i h S) (D ∘ a) * normal (root φ i h S) (E ∘ coefficients φ i h S)) = 0 := by
+  dsimp only
+  let D := localizedPartial R S j
+  let E := localizedPartial R S k
+  have hm := CycleQ2CubicCoefficientTrace.mixed_identity (powerBasis φ i h S) (root φ i h S)
+    (powerBasis_apply φ i h S) (coefficients φ i h S) (root_relation φ i h S) D E
+    (localizedPartial_commute R S j k) a
+  change (localizationToLaurent R S (CycleQ2CubicCoefficientTrace.top (powerBasis φ i h S) _)).coeff
+    (fun _ => -1) = 0
+  rw [← hm,map_sub]
+  change (localizationToLaurent R S (E _)).coeff (fun _ => -1) -
+    (localizationToLaurent R S (D _)).coeff (fun _ => -1) = 0
+  rw [localizedPartial_residue,localizedPartial_residue,sub_self]
+
+end CycleQ2TorusCubicTrace
+end
+
+#print axioms CycleQ2TorusCubicTrace.residueTrace_horizontal
+#print axioms CycleQ2TorusCubicTrace.residueTrace_mixed

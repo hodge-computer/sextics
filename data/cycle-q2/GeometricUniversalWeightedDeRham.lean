@@ -6919,3 +6919,476 @@ end CycleQ2FiniteFractionExtension
 #print axioms CycleQ2FiniteFractionExtension.finite
 
 end
+
+section
+
+/-!
+# Finite trace of absolute two-forms and a relative one-form comparison
+
+For a finite separable extension, the actual formally étale cotangent
+base-change isomorphism extends an ordered rank-two frame. Tracing its
+top coefficient defines a map on genuine exterior two-forms. The
+projection formula below shows that this trace is independent of the
+chosen frame.
+
+For a coefficient tower k → F → K, the determinant projection sends
+b₀ ∧ b₁ to the actual image of b₁ in Ω[K/F]. When b₀ is killed by the
+relative cotangent map, this is precisely the dx-first convention:
+b₀ ∧ α maps to the relative image of α. Its compatibility with the
+finite trace is an equality of the original Kähler maps. In the intended
+vertical calculation F can be k(x); no extension or regularity of a
+global surface class is assumed here.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+noncomputable section
+
+namespace CycleQ2FiniteFieldTwoFormTrace
+
+open Algebra Module KaehlerDifferential TensorProduct
+open scoped BigOperators TensorProduct
+open CycleQ2WeightedCoordinateExterior (Form)
+open CycleQ2ExactFrameThreeDeRham (wedge exteriorPullback)
+open CycleQ2GeometricExteriorSheaf (exteriorMap_wedge)
+
+section Frame
+
+variable {k A : Type} [CommRing k] [CommRing A] [Algebra k A]
+  (b : Basis (Fin 2) A Ω[A⁄k])
+
+private def topIndex : Set.powersetCard (Fin 2) 2 := ⟨Finset.univ, by simp⟩
+
+private theorem topIndex_unique (s : Set.powersetCard (Fin 2) 2) : s = topIndex := by
+  apply Subtype.ext
+  exact Finset.eq_of_subset_of_card_le (Finset.subset_univ _) (by simp)
+
+private theorem top_order (j : Fin 2) : Set.powersetCard.ofFinEmbEquiv.symm topIndex j = j := by
+  have h : (fun i : Fin 2 => i) = (Finset.univ : Finset (Fin 2)).orderEmbOfFin (by simp) :=
+    Finset.orderEmbOfFin_unique _ (fun _ => Finset.mem_univ _) strictMono_id
+  exact (congrFun h j).symm
+
+/-- The ordered absolute two-form of the given cotangent frame. -/
+def volume : Form k A 2 := exteriorPower.ιMulti A 2 b
+
+theorem volume_eq_wedge : volume b = wedge (b 0) (b 1) := by
+  unfold volume wedge
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+private theorem topBasis_apply : b.exteriorPower 2 topIndex = volume b := by
+  rw [exteriorPower.basis_apply]
+  unfold exteriorPower.ιMulti_family volume
+  congr 1
+  funext j
+  simp only [Function.comp_apply, top_order]
+
+/-- The coefficient in the actual top exterior basis. -/
+def coefficient : Form k A 2 →ₗ[A] A := (b.exteriorPower 2).coord topIndex
+
+@[simp] theorem coefficient_volume : coefficient b (volume b) = 1 := by
+  rw [← topBasis_apply]
+  simp [coefficient]
+
+theorem volume_expansion (ω : Form k A 2) : ω = coefficient b ω • volume b := by
+  classical
+  calc
+    ω = ∑ s, (b.exteriorPower 2).repr ω s • (b.exteriorPower 2) s :=
+      ((b.exteriorPower 2).sum_repr ω).symm
+    _ = _ := by
+      rw [Finset.sum_eq_single topIndex]
+      · rw [topBasis_apply]
+        rfl
+      · intro s _ hs
+        exact (hs (topIndex_unique s)).elim
+      · simp
+
+theorem exists_smul_volume (ω : Form k A 2) : ∃ a : A, ω = a • volume b :=
+  ⟨coefficient b ω, volume_expansion b ω⟩
+
+theorem coefficient_wedge (α β : Ω[A⁄k]) :
+    coefficient b (wedge α β) =
+      b.coord 0 α * b.coord 1 β - b.coord 1 α * b.coord 0 β := by
+  change (b.exteriorPower 2).repr (exteriorPower.ιMulti A 2 ![α,β]) topIndex = _
+  rw [exteriorPower.basis_repr_apply, exteriorPower.ιMultiDual_apply_ιMulti]
+  simp only [top_order, Matrix.det_fin_two, Matrix.of_apply,
+    Matrix.cons_val_zero, Matrix.cons_val_one]
+
+theorem coefficient_wedge_first (α : Ω[A⁄k]) :
+    coefficient b (wedge (b 0) α) = b.coord 1 α := by
+  rw [coefficient_wedge]
+  simp
+
+private theorem one_expansion (α : Ω[A⁄k]) :
+    α = b.coord 0 α • b 0 + b.coord 1 α • b 1 := by
+  simpa only [Fin.sum_univ_two, Basis.coord_apply] using (b.sum_repr α).symm
+
+end Frame
+
+section Relative
+
+variable {k A : Type} [CommRing k] [CommRing A] [Algebra k A]
+  (F : Type) [CommRing F] [Algebra k F] [Algebra F A] [IsScalarTower k F A]
+  (b : Basis (Fin 2) A Ω[A⁄k])
+
+/-- Determinant projection with the first frame element placed on the left.
+The value is in the original relative cotangent module. -/
+def relativeOne : Form k A 2 →ₗ[A] Ω[A⁄F] :=
+  (LinearMap.toSpanSingleton A Ω[A⁄F] (KaehlerDifferential.map k F A A (b 1))).comp
+    (coefficient b)
+
+theorem relativeOne_apply (ω : Form k A 2) :
+    relativeOne F b ω = coefficient b ω • KaehlerDifferential.map k F A A (b 1) := rfl
+
+@[simp] theorem relativeOne_volume :
+    relativeOne F b (volume b) = KaehlerDifferential.map k F A A (b 1) := by
+  rw [relativeOne_apply, coefficient_volume, one_smul]
+
+/-- The determinant projection agrees with the actual relative quotient
+on a wedge with the first direction, with the positive dx-first sign. -/
+theorem relativeOne_wedge_first
+    (h0 : KaehlerDifferential.map k F A A (b 0) = 0) (α : Ω[A⁄k]) :
+    relativeOne F b (wedge (b 0) α) = KaehlerDifferential.map k F A A α := by
+  rw [relativeOne_apply, coefficient_wedge_first]
+  conv_rhs => rw [one_expansion b α]
+  rw [map_add, map_smul, map_smul, h0, smul_zero, zero_add]
+
+theorem relativeOne_wedge_second
+    (h0 : KaehlerDifferential.map k F A A (b 0) = 0) (α : Ω[A⁄k]) :
+    relativeOne F b (wedge α (b 0)) = -KaehlerDifferential.map k F A A α := by
+  rw [CycleQ2ExactFrameThreeDeRham.wedge_swap (b 0) α, map_neg,
+    relativeOne_wedge_first F b h0]
+
+theorem relativeOne_wedge_base (x : F)
+    (h0 : b 0 = D k A (algebraMap F A x)) (α : Ω[A⁄k]) :
+    relativeOne F b (wedge (b 0) α) = KaehlerDifferential.map k F A A α := by
+  apply relativeOne_wedge_first
+  rw [h0, KaehlerDifferential.map_D]
+  exact (D F A).map_algebraMap x
+
+/-- Changing the complementary frame element does not change the
+dx-first determinant map. -/
+theorem relativeOne_eq (c : Basis (Fin 2) A Ω[A⁄k])
+    (h0 : KaehlerDifferential.map k F A A (b 0) = 0) (hc : c 0 = b 0) :
+    relativeOne F b = relativeOne F c := by
+  have hc0 : KaehlerDifferential.map k F A A (c 0) = 0 := by rw [hc, h0]
+  apply LinearMap.ext
+  intro ω
+  obtain ⟨a, rfl⟩ := exists_smul_volume b ω
+  rw [map_smul, map_smul]
+  congr 1
+  calc
+    relativeOne F b (volume b) = KaehlerDifferential.map k F A A (b 1) :=
+      relativeOne_volume F b
+    _ = relativeOne F c (wedge (c 0) (b 1)) :=
+      (relativeOne_wedge_first F c hc0 (b 1)).symm
+    _ = relativeOne F c (volume b) := by rw [hc, ← volume_eq_wedge]
+
+end Relative
+
+section RelativeField
+
+variable {k K : Type} [CommRing k] [Field K] [Algebra k K]
+  (F : Type) [CommRing F] [Algebra k F] [Algebra F K] [IsScalarTower k F K]
+  (b : Basis (Fin 2) K Ω[K⁄k])
+
+theorem relativeOne_bijective
+    (h0 : KaehlerDifferential.map k F K K (b 0) = 0)
+    (h1 : KaehlerDifferential.map k F K K (b 1) ≠ 0) :
+    Function.Bijective (relativeOne F b) := by
+  constructor
+  · rw [injective_iff_map_eq_zero]
+    intro ω hω
+    have hc : coefficient b ω = 0 :=
+      (smul_eq_zero.mp (show coefficient b ω • KaehlerDifferential.map k F K K (b 1) = 0
+        from hω)).resolve_right h1
+    rw [volume_expansion b ω, hc, zero_smul]
+  · intro η
+    obtain ⟨α, rfl⟩ := KaehlerDifferential.map_surjective k F K η
+    exact ⟨wedge (b 0) α, relativeOne_wedge_first F b h0 α⟩
+
+/-- If the remaining relative direction is nonzero, determinant projection
+is an isomorphism to the genuine relative cotangent space. -/
+def relativeEquiv
+    (h0 : KaehlerDifferential.map k F K K (b 0) = 0)
+    (h1 : KaehlerDifferential.map k F K K (b 1) ≠ 0) :
+    Form k K 2 ≃ₗ[K] Ω[K⁄F] :=
+  LinearEquiv.ofBijective (relativeOne F b) (relativeOne_bijective F b h0 h1)
+
+theorem relativeEquiv_symm_map
+    (h0 : KaehlerDifferential.map k F K K (b 0) = 0)
+    (h1 : KaehlerDifferential.map k F K K (b 1) ≠ 0) (α : Ω[K⁄k]) :
+    (relativeEquiv F b h0 h1).symm (KaehlerDifferential.map k F K K α) = wedge (b 0) α := by
+  apply (relativeEquiv F b h0 h1).injective
+  rw [LinearEquiv.apply_symm_apply]
+  exact (relativeOne_wedge_first F b h0 α).symm
+
+end RelativeField
+
+section Trace
+
+variable {k K L : Type} [CommRing k] [Field K] [Field L]
+  [Algebra k K] [Algebra k L] [Algebra K L] [IsScalarTower k K L]
+  [FiniteDimensional K L] [Algebra.IsSeparable K L]
+  (b : Basis (Fin 2) K Ω[K⁄k])
+
+local instance : Algebra.FormallyEtale K L := Algebra.FormallyEtale.of_isSeparable K L
+
+/-- The frame transported by the actual cotangent base-change isomorphism. -/
+def extendedFrame : Basis (Fin 2) L Ω[L⁄k] :=
+  CycleQ2RelativeAffineOverlap.baseChangeFrame (B := L) b
+
+theorem extendedFrame_apply (i : Fin 2) :
+    extendedFrame (L := L) b i = KaehlerDifferential.map k k K L (b i) := by
+  rw [extendedFrame, CycleQ2RelativeAffineOverlap.baseChangeFrame,
+    Basis.map_apply, Basis.baseChange_apply, tensorKaehlerEquivOfFormallyEtale_apply,
+    mapBaseChange_tmul, one_smul]
+
+abbrev pullTwo : Form k K 2 →ₛₗ[(IsScalarTower.toAlgHom k K L).toRingHom] Form k L 2 :=
+  exteriorPullback (IsScalarTower.toAlgHom k K L) 2
+
+theorem pullTwo_volume : pullTwo (L := L) (volume b) = volume (extendedFrame (L := L) b) := by
+  change exteriorPullback (IsScalarTower.toAlgHom k K L) 2 (exteriorPower.ιMulti K 2 b) =
+    exteriorPower.ιMulti L 2 (extendedFrame (L := L) b)
+  rw [exteriorPullback, exteriorMap_wedge]
+  apply congrArg (exteriorPower.ιMulti L 2)
+  funext i
+  exact (CycleQ2CotangentLocalizationTower.pullback_algebraMap (A := K) (B := L) (b i)).trans
+    (extendedFrame_apply (L := L) b i).symm
+
+/-- Finite separable trace on genuine absolute exterior two-forms. -/
+def traceTwo : Form k L 2 →ₗ[K] Form k K 2 :=
+  (LinearMap.toSpanSingleton K (Form k K 2) (volume b)).comp
+    ((Algebra.trace K L).comp ((coefficient (extendedFrame (L := L) b)).restrictScalars K))
+
+theorem traceTwo_apply (ω : Form k L 2) :
+    traceTwo b ω = Algebra.trace K L (coefficient (extendedFrame (L := L) b) ω) • volume b := rfl
+
+theorem traceTwo_smul_volume (a : L) :
+    traceTwo b (a • volume (extendedFrame (L := L) b)) = Algebra.trace K L a • volume b := by
+  rw [traceTwo_apply, map_smul, coefficient_volume, smul_eq_mul, mul_one]
+
+/-- The actual exterior pullback satisfies the finite trace projection formula. -/
+theorem traceTwo_smul_pullback (a : L) (ω : Form k K 2) :
+    traceTwo b (a • pullTwo (L := L) ω) = Algebra.trace K L a • ω := by
+  obtain ⟨c, rfl⟩ := exists_smul_volume b ω
+  rw [map_smulₛₗ, pullTwo_volume, smul_smul, traceTwo_smul_volume]
+  have ht : Algebra.trace K L (a * algebraMap K L c) = c * Algebra.trace K L a := by
+    rw [mul_comm a, ← Algebra.smul_def, map_smul, smul_eq_mul]
+  rw [ht, smul_smul, mul_comm c]
+
+/-- This is the same finite trace for every absolute rank-two frame. -/
+theorem traceTwo_eq (c : Basis (Fin 2) K Ω[K⁄k]) :
+    traceTwo (L := L) b = traceTwo (L := L) c := by
+  apply LinearMap.ext
+  intro ω
+  obtain ⟨a, rfl⟩ := exists_smul_volume (extendedFrame (L := L) b) ω
+  rw [← pullTwo_volume (L := L) b, traceTwo_smul_pullback b, traceTwo_smul_pullback c]
+
+end Trace
+
+section RelativeTrace
+
+variable {k K L : Type} [CommRing k] [Field K] [Field L]
+  [Algebra k K] [Algebra k L] [Algebra K L] [IsScalarTower k K L]
+  [FiniteDimensional K L] [Algebra.IsSeparable K L]
+  (F : Type) [CommRing F] [Algebra k F] [Algebra F K] [Algebra F L]
+  [IsScalarTower k F K] [IsScalarTower k F L] [IsScalarTower F K L]
+
+/-- The absolute-to-relative quotient commutes with the original field
+pullback; both sides are proved equal on universal differentials. -/
+theorem relative_map_pullback (α : Ω[K⁄k]) :
+    KaehlerDifferential.map k F L L (KaehlerDifferential.map k k K L α) =
+      KaehlerDifferential.map F F K L (KaehlerDifferential.map k F K K α) := by
+  let f : Ω[K⁄k] →ₗ[K] Ω[L⁄F] :=
+    ((KaehlerDifferential.map k F L L).restrictScalars K).comp (KaehlerDifferential.map k k K L)
+  let g : Ω[K⁄k] →ₗ[K] Ω[L⁄F] :=
+    (KaehlerDifferential.map F F K L).comp (KaehlerDifferential.map k F K K)
+  have h : f = g := by
+    apply Derivation.liftKaehlerDifferential_unique
+    ext x
+    change KaehlerDifferential.map k F L L (KaehlerDifferential.map k k K L (D k K x)) =
+      KaehlerDifferential.map F F K L (KaehlerDifferential.map k F K K (D k K x))
+    simp only [KaehlerDifferential.map_D]
+  exact LinearMap.congr_fun h α
+
+/-- Finite absolute two-form trace agrees with finite relative one-form
+trace under determinant projection. This is the k(x)-coefficient square
+needed in a vertical divisor calculation. -/
+theorem traceTwo_relativeOne (b : Basis (Fin 2) K Ω[K⁄k]) (ω : Form k L 2) :
+    relativeOne F b (traceTwo b ω) =
+      CycleQ2FiniteFieldOneFormTrace.traceOne (k := F) (K := K)
+        (relativeOne F (extendedFrame (L := L) b) ω) := by
+  obtain ⟨a, rfl⟩ := exists_smul_volume (extendedFrame (L := L) b) ω
+  rw [traceTwo_smul_volume, map_smul, relativeOne_volume, map_smul, relativeOne_volume,
+    extendedFrame_apply, relative_map_pullback, CycleQ2FiniteFieldOneFormTrace.traceOne_smul]
+
+end RelativeTrace
+
+end CycleQ2FiniteFieldTwoFormTrace
+
+#print axioms CycleQ2FiniteFieldTwoFormTrace.traceTwo_smul_pullback
+#print axioms CycleQ2FiniteFieldTwoFormTrace.traceTwo_eq
+#print axioms CycleQ2FiniteFieldTwoFormTrace.relativeOne_wedge_first
+#print axioms CycleQ2FiniteFieldTwoFormTrace.relativeEquiv_symm_map
+#print axioms CycleQ2FiniteFieldTwoFormTrace.traceTwo_relativeOne
+
+end
+
+end
+
+section
+
+/-!
+# A regular source for the relative determinant trace
+
+Cartan contraction followed by the actual relative cotangent quotient
+sends a regular absolute two-form to a regular relative one-form.
+For a derivation with d(x)=1 it agrees, after localization, with the
+dx-first determinant map above. The source does not need a chosen
+absolute cotangent frame. Formal smoothness supplies the derivation
+lift when one is needed; the localization comparison keeps the original
+field inclusion and the original regular form.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+noncomputable section
+
+namespace CycleQ2TwoFormRelativeContraction
+
+open Algebra Module KaehlerDifferential
+open CycleQ2WeightedCoordinateExterior (Form)
+open CycleQ2ExactFrameThreeDeRham (wedge exteriorPullback)
+open CycleQ2FiniteFieldTwoFormTrace
+
+section Ring
+
+variable {k A : Type} [CommRing k] [CommRing A] [Algebra k A]
+  (F : Type) [CommRing F] [Algebra k F] [Algebra F A] [IsScalarTower k F A]
+
+/-- Actual Cartan contraction followed by the actual relative quotient. -/
+def contraction (d : Derivation k A A) : Form k A 2 →ₗ[A] Ω[A⁄F] :=
+  (KaehlerDifferential.map k F A A).comp (CycleQ2CartanContraction.two d)
+
+theorem contraction_wedge (d : Derivation k A A) (α β : Ω[A⁄k]) :
+    contraction F d (wedge α β) =
+      d.liftKaehlerDifferential α • KaehlerDifferential.map k F A A β -
+        d.liftKaehlerDifferential β • KaehlerDifferential.map k F A A α := by
+  change KaehlerDifferential.map k F A A (CycleQ2CartanContraction.two d (wedge α β)) = _
+  rw [CycleQ2CartanContraction.two_wedge, map_sub, map_smul, map_smul]
+
+/-- A normalized lift of the first direction gives the same determinant
+map, independently of its value on the complementary direction. -/
+theorem contraction_eq_relativeOne (d : Derivation k A A) (b : Basis (Fin 2) A Ω[A⁄k])
+    (h0 : KaehlerDifferential.map k F A A (b 0) = 0)
+    (hd : d.liftKaehlerDifferential (b 0) = 1) :
+    contraction F d = relativeOne F b := by
+  have hv : contraction F d (volume b) = KaehlerDifferential.map k F A A (b 1) := by
+    rw [volume_eq_wedge, contraction_wedge, hd, h0, one_smul, smul_zero, sub_zero]
+  apply LinearMap.ext
+  intro ω
+  obtain ⟨a, rfl⟩ := exists_smul_volume b ω
+  rw [map_smul, map_smul, hv, relativeOne_volume]
+
+variable {B : Type} [CommRing B] [Algebra k B] [Algebra F B] [Algebra A B]
+  [IsScalarTower k F B] [IsScalarTower F A B] [IsScalarTower k A B]
+
+theorem quotient_pullback (α : Ω[A⁄k]) :
+    KaehlerDifferential.map k F B B (KaehlerDifferential.map k k A B α) =
+      KaehlerDifferential.map F F A B (KaehlerDifferential.map k F A A α) := by
+  let f : Ω[A⁄k] →ₗ[A] Ω[B⁄F] :=
+    ((KaehlerDifferential.map k F B B).restrictScalars A).comp (KaehlerDifferential.map k k A B)
+  let g : Ω[A⁄k] →ₗ[A] Ω[B⁄F] :=
+    (KaehlerDifferential.map F F A B).comp (KaehlerDifferential.map k F A A)
+  have h : f = g := by
+    apply Derivation.liftKaehlerDifferential_unique
+    ext a
+    change KaehlerDifferential.map k F B B (KaehlerDifferential.map k k A B (D k A a)) =
+      KaehlerDifferential.map F F A B (KaehlerDifferential.map k F A A (D k A a))
+    simp only [KaehlerDifferential.map_D]
+  exact LinearMap.congr_fun h α
+
+theorem contraction_natural (d : Derivation k A A) (e : Derivation k B B)
+    (h : ∀ a : A, e (algebraMap A B a) = algebraMap A B (d a)) (ω : Form k A 2) :
+    contraction F e (exteriorPullback (IsScalarTower.toAlgHom k A B) 2 ω) =
+      KaehlerDifferential.map F F A B (contraction F d ω) := by
+  change KaehlerDifferential.map k F B B
+      (CycleQ2CartanContraction.two e (exteriorPullback (IsScalarTower.toAlgHom k A B) 2 ω)) =
+    KaehlerDifferential.map F F A B
+      (KaehlerDifferential.map k F A A (CycleQ2CartanContraction.two d ω))
+  rw [CycleQ2CartanNaturality.two_natural (IsScalarTower.toAlgHom k A B) d e h,
+    CycleQ2CotangentLocalizationTower.pullback_algebraMap, quotient_pullback]
+
+variable [Algebra.FormallyEtale A B]
+
+/-- In particular, the construction commutes with the actual étale or
+localization map, using the unique extended derivation. -/
+theorem contraction_etale (d : Derivation k A A) (ω : Form k A 2) :
+    contraction F (CycleQ2EtaleCoefficientTransport.extend (B := B) d)
+        (exteriorPullback (IsScalarTower.toAlgHom k A B) 2 ω) =
+      KaehlerDifferential.map F F A B (contraction F d ω) :=
+  contraction_natural F d _ (CycleQ2EtaleCoefficientTransport.extend_apply d) ω
+
+/-- A regular source two-form maps to the relative determinant of its
+actual localization. No source cotangent frame is required. -/
+theorem relativeOne_etale (d : Derivation k A A) (x : F)
+    (hd : d (algebraMap F A x) = 1) (b : Basis (Fin 2) B Ω[B⁄k])
+    (hb : b 0 = D k B (algebraMap F B x)) (ω : Form k A 2) :
+    relativeOne F b (exteriorPullback (IsScalarTower.toAlgHom k A B) 2 ω) =
+      KaehlerDifferential.map F F A B (contraction F d ω) := by
+  let e := CycleQ2EtaleCoefficientTransport.extend (B := B) d
+  have h0 : KaehlerDifferential.map k F B B (b 0) = 0 := by
+    rw [hb, KaehlerDifferential.map_D]
+    exact (D F B).map_algebraMap x
+  have he : e.liftKaehlerDifferential (b 0) = 1 := by
+    rw [hb, Derivation.liftKaehlerDifferential_comp_D]
+    change CycleQ2EtaleCoefficientTransport.extend d (algebraMap F B x) = 1
+    rw [IsScalarTower.algebraMap_apply F A B, CycleQ2EtaleCoefficientTransport.extend_apply,
+      hd, map_one]
+  rw [← contraction_eq_relativeOne F e b h0 he]
+  exact contraction_etale F d ω
+
+end Ring
+
+section FractionField
+
+variable {k A L : Type} [CommRing k] [CommRing A] [IsDomain A] [Field L]
+  [Algebra k A] [Algebra k L] [Algebra A L] [IsScalarTower k A L] [IsFractionRing A L]
+  (F : Type) [CommRing F] [Algebra k F] [Algebra F A] [Algebra F L]
+  [IsScalarTower k F A] [IsScalarTower k F L] [IsScalarTower F A L]
+
+local instance : Algebra.FormallyEtale A L :=
+  Algebra.FormallyEtale.of_isLocalization (Rₘ := L) (nonZeroDivisors A)
+
+theorem relativeOne_fraction (d : Derivation k A A) (x : F)
+    (hd : d (algebraMap F A x) = 1) (b : Basis (Fin 2) L Ω[L⁄k])
+    (hb : b 0 = D k L (algebraMap F L x)) (ω : Form k A 2) :
+    relativeOne F b (exteriorPullback (IsScalarTower.toAlgHom k A L) 2 ω) =
+      KaehlerDifferential.map F F A L (contraction F d ω) :=
+  relativeOne_etale F d x hd b hb ω
+
+/-- Formal smoothness over the coefficient ring supplies a regular
+relative representative for every original regular absolute two-form. -/
+theorem exists_regular_relative [Algebra.FormallySmooth F A]
+    (δ : Derivation k F F) (x : F) (hx : δ x = 1)
+    (b : Basis (Fin 2) L Ω[L⁄k]) (hb : b 0 = D k L (algebraMap F L x))
+    (ω : Form k A 2) :
+    ∃ η : Ω[A⁄F], relativeOne F b (exteriorPullback (IsScalarTower.toAlgHom k A L) 2 ω) =
+      KaehlerDifferential.map F F A L η := by
+  obtain ⟨d, hd⟩ := CycleQ2RelativeDerivationLift.exists_lift (A := A) δ
+  have hd1 : d (algebraMap F A x) = 1 := by rw [hd, hx, map_one]
+  exact ⟨contraction F d ω, relativeOne_fraction F d x hd1 b hb ω⟩
+
+end FractionField
+
+end CycleQ2TwoFormRelativeContraction
+
+#print axioms CycleQ2TwoFormRelativeContraction.contraction_natural
+#print axioms CycleQ2TwoFormRelativeContraction.relativeOne_fraction
+#print axioms CycleQ2TwoFormRelativeContraction.exists_regular_relative
+
+end
+
+end
