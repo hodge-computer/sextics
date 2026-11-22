@@ -691,3 +691,262 @@ end CycleQ2CochainFunctionalDetector
 #print axioms CycleQ2CochainFunctionalDetector.exists_functional
 #print axioms CycleQ2CochainFunctionalDetector.not_mem_range_iff
 #print axioms CycleQ2CochainFunctionalDetector.exists_toSingle
+
+/-! Global regular one-forms on the original proper curve cannot be
+boundaries in its native two-chart de Rham complex. The constant field
+of the curve is allowed to be a nontrivial finite extension of the
+coefficient field. Its separability, rather than a rational-point
+assumption, makes the differential of every global function zero. -/
+
+namespace CycleQ2ProperCurveRegularForms
+
+open CategoryTheory AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2SmoothRelativeFrames (sectionCoefficients)
+open CycleQ2NativeTraceRestrictions (section_d)
+open CycleQ2RankOneDifferentialSheaf (oneForms derivative)
+open scoped KaehlerDifferential
+
+variable (k : Type) [Field k] [CharZero k] {X : Scheme.{0}} [IsIntegral X]
+  (p : X ⟶ Spec (CommRingCat.of k)) [IsProper p]
+
+/-- The actual coefficient map on global sections is finite, including
+when the proper integral curve has a larger field of constants. -/
+theorem global_coefficients_finite : (sectionCoefficients p ⊤).Finite := by
+  have h : ((Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ p.appTop).hom.Finite := by
+    apply RingHom.finite_respectsIso.2
+      (e := (Scheme.ΓSpecIso (CommRingCat.of k)).symm.commRingCatIsoToRingEquiv)
+    exact finite_appTop_of_universallyClosed k p
+  simpa only [sectionCoefficients, Scheme.Hom.appLE_eq_app] using h
+
+/-- The ordinary Kähler module of the original global section ring
+vanishes by the separability of its actual constant-field extension. -/
+theorem global_kahler_subsingleton :
+    letI : Algebra k Γ(X,⊤) := (sectionCoefficients p ⊤).toAlgebra
+    Subsingleton Ω[Γ(X,⊤)⁄k] := by
+  letI : Algebra k Γ(X,⊤) := (sectionCoefficients p ⊤).toAlgebra
+  letI : Field Γ(X,⊤) := (isField_of_universallyClosed k p).toField
+  letI : Module.Finite k Γ(X,⊤) := by
+    rw [← RingHom.finite_algebraMap]
+    exact global_coefficients_finite k p
+  letI : Algebra.FormallyUnramified k Γ(X,⊤) :=
+    Algebra.FormallyUnramified.of_isSeparable k Γ(X,⊤)
+  infer_instance
+
+/-- The genuine universal derivative of a global regular function is
+zero; the function itself need not lie in the image of the base field. -/
+theorem global_derivative_zero (s : Γ(X,⊤)) : section_d p ⊤ s = 0 := by
+  letI : Algebra k Γ(X,⊤) := (sectionCoefficients p ⊤).toAlgebra
+  letI : Subsingleton Ω[Γ(X,⊤)⁄k] := global_kahler_subsingleton k p
+  exact Subsingleton.elim _ _
+
+theorem global_sheaf_derivative_zero [SmoothOfRelativeDimension 1 p]
+    (s : Γ(X,⊤)) : (derivative p).hom.app (op ⊤) s = 0 := by
+  rw [CycleQ2RankOneRawComparison.derivative_eq]
+  change (CycleQ2RankOneRawComparison.toSheaf p).app (op ⊤) (section_d p ⊤ s) = 0
+  rw [global_derivative_zero, map_zero]
+
+end CycleQ2ProperCurveRegularForms
+
+#print axioms CycleQ2ProperCurveRegularForms.global_coefficients_finite
+#print axioms CycleQ2ProperCurveRegularForms.global_sheaf_derivative_zero
+
+namespace CycleQ2ProperCurveRegularForms
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace Opposite
+open CycleQ2InjectiveCech (AbSheaf Sections)
+open CycleQ2GeometricSheafLocalIso (res res_comp)
+open CycleQ2RankOneDifferentialSheaf (functions oneForms derivative)
+open CycleQ2RankOneAffineForms (affineForms restrict_affine affine_derivative)
+open CycleQ2NativeTraceRestrictions (section_d formRestriction)
+open CycleQ2NativeCurveTraceComplex (complex)
+open CycleQ2LaurentProjectiveLine (line)
+open CycleQ2ProjectiveLineStructure (structureMap)
+open CycleQ2FiniteCurveCover (square zero_affine infinity_affine torus_affine)
+
+private theorem glue_pair {Y : TopCat.{0}} (F : AbSheaf Y)
+    {U V W : Opens Y} (hW : W = U ⊓ V) (hcover : U ⊔ V = ⊤)
+    (a : Sections F U) (b : Sections F V)
+    (h : res F (hW.le.trans inf_le_left) a = res F (hW.le.trans inf_le_right) b) :
+    ∃ s : Sections F ⊤, res F le_top s = a ∧ res F le_top s = b := by
+  subst W
+  let O : Bool → Opens Y | false => U | true => V
+  let c : (i : Bool) → Sections F (O i) | false => a | true => b
+  have hO : (⨆ i, O i) = ⊤ := by
+    have he : (⨆ i, O i) = U ⊔ V := by
+      apply le_antisymm
+      · apply iSup_le
+        intro i
+        cases i
+        · exact le_sup_left
+        · exact le_sup_right
+      · exact sup_le (le_iSup O false) (le_iSup O true)
+    exact he.trans hcover
+  have compatible (T : Opens Y) (hU : T ≤ U) (hV : T ≤ V) :
+      res F hU a = res F hV b := by
+    have hh := congrArg (res F (le_inf hU hV)) h
+    simpa only [res_comp] using hh
+  obtain ⟨s,hs,_⟩ := (show TopCat.Sheaf AddCommGrpCat Y from F).existsUnique_gluing'
+    O ⊤ (fun _ => homOfLE le_top) (by rw [hO]) c (by
+      intro i j
+      cases i <;> cases j
+      · rfl
+      · exact compatible _ inf_le_left inf_le_right
+      · exact (compatible _ inf_le_right inf_le_left).symm
+      · rfl)
+  exact ⟨s,hs false,hs true⟩
+
+private theorem pair_section_zero {Y : TopCat.{0}} (F : AbSheaf Y)
+    {U V : Opens Y} (hcover : U ⊔ V = ⊤) (s : Sections F ⊤)
+    (hU : res F (show U ≤ ⊤ from le_top) s = 0)
+    (hV : res F (show V ≤ ⊤ from le_top) s = 0) : s = 0 := by
+  apply TopCat.Presheaf.IsSheaf.section_ext F.property
+  intro x hx
+  have h : x ∈ U ⊔ V := hcover.ge hx
+  rcases h with hxU | hxV
+  · refine ⟨U,le_top,hxU,?_⟩
+    simpa only [map_zero] using hU
+  · refine ⟨V,le_top,hxV,?_⟩
+    simpa only [map_zero] using hV
+
+variable (k : Type) [Field k] [CharZero k] {X : Scheme.{0}} [IsIntegral X]
+  (q : X ⟶ line k) [IsFinite q] [IsDominant q]
+  [SmoothOfRelativeDimension 1 (q ≫ structureMap k)]
+
+private abbrev p := q ≫ structureMap k
+private abbrev S := square k q
+private abbrev G := oneForms (p k q)
+private abbrev leftForms := affineForms (p k q) (S k q).X₂ (zero_affine k q)
+private abbrev rightForms := affineForms (p k q) (S k q).X₃ (infinity_affine k q)
+private abbrev overlapForms := affineForms (p k q) (S k q).X₁ (torus_affine k q)
+
+/-- A global regular one-form gives the native cochain with zero
+overlap-function component and its two actual chart restrictions. -/
+def regularCochain : Sections (G k q) ⊤ →+ (complex k q).X 1 where
+  toFun ω := (0,(leftForms k q).symm (res (G k q) le_top ω),
+    (rightForms k q).symm (res (G k q) le_top ω))
+  map_zero' := by simp only [map_zero]; rfl
+  map_add' ω η := by simp only [map_add,Prod.mk_add_mk,zero_add]
+
+private theorem formPart_restrict {U W : X.Opens} (h : W ≤ U)
+    (hU : IsAffineOpen U) (hW : IsAffineOpen W) (ω : Sections (G k q) ⊤) :
+    affineForms (p k q) W hW
+        (formRestriction (p k q) h ((affineForms (p k q) U hU).symm
+          (res (G k q) le_top ω))) = res (G k q) le_top ω := by
+  rw [← restrict_affine (p k q) h hU hW,AddEquiv.apply_symm_apply]
+  exact res_comp (G k q) le_top h ω
+
+theorem regularCochain_closed (ω : Sections (G k q) ⊤) :
+    (complex k q).d 1 2 (regularCochain k q ω) = 0 := by
+  apply (overlapForms k q).injective
+  change overlapForms k q
+    (formRestriction (p k q) (S k q).f₁₂.le
+        ((leftForms k q).symm (res (G k q) le_top ω)) -
+      formRestriction (p k q) (S k q).f₁₃.le
+        ((rightForms k q).symm (res (G k q) le_top ω)) -
+      section_d (p k q) (S k q).X₁ 0) = overlapForms k q 0
+  rw [map_sub,map_sub,
+    formPart_restrict k q (S k q).f₁₂.le (zero_affine k q) (torus_affine k q),
+    formPart_restrict k q (S k q).f₁₃.le (infinity_affine k q) (torus_affine k q)]
+  simp only [map_zero,sub_self,sub_zero]
+
+variable [IsProper (q ≫ structureMap k)]
+
+/-- A boundary with zero overlap function has two compatible function
+primitives. They glue on the same proper curve, where their derivative
+is zero. This proves injectivity without choosing a curve pairing. -/
+theorem regularCochain_boundary_iff (ω : Sections (G k q) ⊤) :
+    (∃ a : (complex k q).X 0, (complex k q).d 0 1 a = regularCochain k q ω) ↔ ω = 0 := by
+  constructor
+  · rintro ⟨a,ha⟩
+    have hzero := congrArg Prod.fst ha
+    change res (functions (X := X)) (S k q).f₁₂.le a.1 -
+      res (functions (X := X)) (S k q).f₁₃.le a.2 = 0 at hzero
+    obtain ⟨s,hsU,hsV⟩ := glue_pair (functions (X := X))
+      (CycleQ2FiniteCurveCover.overlap_eq k q) (CycleQ2FiniteCurveCover.cover_eq k q)
+      a.1 a.2 (sub_eq_zero.mp hzero)
+    have hd (T : X.Opens) : (derivative (p k q)).hom.app (op T)
+        (res (functions (X := X)) (show T ≤ ⊤ from le_top) s) = 0 := by
+      have hn := NatTrans.naturality_apply (derivative (p k q)).hom
+        (homOfLE (show T ≤ ⊤ from le_top)).op s
+      exact hn.trans (by rw [global_sheaf_derivative_zero,map_zero])
+    apply pair_section_zero (G k q) (CycleQ2FiniteCurveCover.cover_eq k q) ω
+    · have h := congrArg (fun z => z.2.1) ha
+      change section_d (p k q) (S k q).X₂ a.1 =
+        (leftForms k q).symm (res (G k q) le_top ω) at h
+      have he : (derivative (p k q)).hom.app (op (S k q).X₂) a.1 =
+          res (G k q) le_top ω := by
+        rw [affine_derivative (p k q) (S k q).X₂ (zero_affine k q),h,AddEquiv.apply_symm_apply]
+      rw [← he,← hsU]
+      exact hd _
+    · have h := congrArg (fun z => z.2.2) ha
+      change section_d (p k q) (S k q).X₃ a.2 =
+        (rightForms k q).symm (res (G k q) le_top ω) at h
+      have he : (derivative (p k q)).hom.app (op (S k q).X₃) a.2 =
+          res (G k q) le_top ω := by
+        rw [affine_derivative (p k q) (S k q).X₃ (infinity_affine k q),h,AddEquiv.apply_symm_apply]
+      rw [← he,← hsV]
+      exact hd _
+  · rintro rfl
+    exact ⟨0,by rw [map_zero,map_zero]⟩
+
+private abbrev nativeRow : ShortComplex (ModuleCat.{0} k) := (complex k q).sc' 0 1 2
+
+private def nativeHomologyIso : (complex k q).homology 1 ≅
+    (nativeRow k q).moduleCatLeftHomologyData.H :=
+  (complex k q).homologyIsoSc' 0 1 2
+    ((ComplexShape.up ℕ).prev_eq' (show (ComplexShape.up ℕ).Rel 0 1 from rfl))
+    ((ComplexShape.up ℕ).next_eq' (show (ComplexShape.up ℕ).Rel 1 2 from rfl)) ≪≫
+      (nativeRow k q).moduleCatHomologyIso
+
+private def regularCycles : Sections (G k q) ⊤ →+
+    (nativeRow k q).moduleCatLeftHomologyData.K where
+  toFun ω := ⟨regularCochain k q ω,regularCochain_closed k q ω⟩
+  map_zero' := Subtype.ext (map_zero (regularCochain k q))
+  map_add' ω η := Subtype.ext (map_add (regularCochain k q) ω η)
+
+/-- The original global regular one-form in degree-one cohomology of
+the very curve complex used in the tensor cylinder construction. -/
+def regularClass : Sections (G k q) ⊤ →+ (complex k q).homology 1 :=
+  (nativeHomologyIso k q).inv.hom.toAddMonoidHom.comp
+    ((nativeRow k q).moduleCatLeftHomologyData.π.hom.toAddMonoidHom.comp
+      (regularCycles k q))
+
+theorem regularClass_zero_iff (ω : Sections (G k q) ⊤) :
+    regularClass k q ω = 0 ↔ ω = 0 := by
+  have h : regularClass k q ω = 0 ↔
+      (nativeRow k q).moduleCatLeftHomologyData.π (regularCycles k q ω) = 0 := by
+    change (nativeHomologyIso k q).inv _ = 0 ↔ _
+    rw [← map_zero (nativeHomologyIso k q).inv.hom]
+    exact (ConcreteCategory.bijective_of_isIso (nativeHomologyIso k q).inv).injective.eq_iff
+  rw [h]
+  change (Submodule.mkQ (LinearMap.range (nativeRow k q).moduleCatToCycles)
+    (regularCycles k q ω) = 0) ↔ _
+  rw [Submodule.Quotient.mk_eq_zero]
+  change (∃ a, (nativeRow k q).moduleCatToCycles a = regularCycles k q ω) ↔ _
+  rw [show (∃ a, (nativeRow k q).moduleCatToCycles a = regularCycles k q ω) ↔
+      ∃ a : (complex k q).X 0, (complex k q).d 0 1 a = regularCochain k q ω from
+    exists_congr (fun _ => Subtype.ext_iff)]
+  exact regularCochain_boundary_iff k q ω
+
+theorem regularClass_injective : Function.Injective (regularClass k q) :=
+  (injective_iff_map_eq_zero (regularClass k q)).mpr
+    (fun ω h => (regularClass_zero_iff k q ω).mp h)
+
+/-- A nonzero global regular form is detected by a genuine scalar
+cochain map on the native proper-curve complex. No perfection of a
+specified cup pairing is added as a hypothesis. -/
+theorem exists_detecting_cochain (ω : Sections (G k q) ⊤) (hω : ω ≠ 0) :
+    ∃ l : (complex k q).X 1 →ₗ[k] k,
+      ∃ hl : ∀ a : (complex k q).X 0, l ((complex k q).d 0 1 a) = 0,
+        l (regularCochain k q ω) ≠ 0 ∧
+          (((CycleQ2CochainFunctionalDetector.toSingle k (complex k q) l hl).f 1 ≫
+            (HomologicalComplex.singleObjXSelf (ComplexShape.up ℕ) 1 (ModuleCat.of k k)).hom)
+            (regularCochain k q ω)) ≠ 0 :=
+  CycleQ2CochainFunctionalDetector.exists_toSingle k (complex k q) _
+    (fun h => hω ((regularCochain_boundary_iff k q ω).mp h))
+
+end CycleQ2ProperCurveRegularForms
+
+#print axioms CycleQ2ProperCurveRegularForms.regularCochain_boundary_iff
+#print axioms CycleQ2ProperCurveRegularForms.regularClass_injective
+#print axioms CycleQ2ProperCurveRegularForms.exists_detecting_cochain

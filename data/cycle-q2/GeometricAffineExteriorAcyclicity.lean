@@ -2555,3 +2555,433 @@ end
 #print axioms CycleQ2LiteralTopDeRhamTrace.derivedEquiv
 #print axioms CycleQ2LiteralTopDeRhamTrace.derivedTrace_connecting_generator
 #print axioms CycleQ2LiteralTopDeRhamTrace.derivedNormalizedClass_one_ne_zero
+
+/-! The top-form edge map below is composition with the actual last
+term of the intrinsic de Rham complex. Its compatibility with the
+original source Mayer--Vietoris maps fixes the derived trace on every
+canonical H³ class, including the signed cubic residue class. -/
+
+noncomputable section
+namespace CycleQ2LiteralDerivedTop
+
+open CategoryTheory CategoryTheory.Abelian CategoryTheory.Limits Opposite TopologicalSpace
+open CycleQ2InjectiveCech (AbSheaf Sections freeOpen freeOpenSections freeOpenMap)
+open CycleQ2CechTwoToDerived (Three sectionExtZero freeOpenSections_postcomp)
+open CycleQ2LiteralIntrinsicExterior (Literal)
+open CycleQ2LiteralThreefoldFirstDifferential (X)
+open CycleQ2LiteralAmbientCharts (fixedOpen fixedOpen_cover)
+
+local instance : HasExt.{1} (AbSheaf (show TopCat from X)) := HasExt.standard _
+local instance : HasDerivedCategory.{1} (AbSheaf (show TopCat from X)) := HasDerivedCategory.standard _
+
+private abbrev E := DerivedCategory.singleFunctor (AbSheaf (show TopCat from X)) 0
+
+private theorem top_closed : (termIso 3).inv ≫ deRham.d 3 4 = 0 := by
+  apply CategoryTheory.Sheaf.hom_ext
+  apply NatTrans.ext
+  intro W
+  apply ConcreteCategory.hom_ext
+  intro s
+  change _ = 0
+  exact term_above W.unop 4 (by decide) _
+
+/-- The actual top-term inclusion, with its original intrinsic-to-literal
+normalization, regarded as a derived morphism of degree three. -/
+def topInclusion : E.obj (Literal 3) ⟶ target⟦(3 : ℤ)⟧ :=
+  CycleQ2KInjectiveSections.closedClass (Literal 3) deRham 3 (termIso 3).inv top_closed
+
+private def topPostAt (P : AbSheaf (show TopCat from X)) (n : ℕ) (m : ℤ)
+    (h : 3 + (n : ℤ) = m) :
+    Ext P (Literal 3) n →+ (E.obj P ⟶ target⟦m⟧) where
+  toFun a := a.hom.comp topInclusion h
+  map_zero' := by simp only [Ext.zero_hom,ShiftedHom.zero_comp]
+  map_add' a b := by simp only [Ext.add_hom,ShiftedHom.add_comp]
+
+/-- The top-form edge map is actual shifted composition, not a choice
+of a scalar multiple of a generator. -/
+def topPost (n : ℕ) (W : X.Opens) :
+    (Literal 3).H' n W →+ CycleQ2DerivedCoverTop.H target (3 + (n : ℤ)) W :=
+  topPostAt (freeOpen W) n (3 + (n : ℤ)) rfl
+
+private theorem representative_eq_post (W : X.Opens) (s : Sections (Literal 3) W) :
+    representative W s = (freeOpenSections (Literal 3) W).symm s ≫ (termIso 3).inv := by
+  apply (freeOpenSections _ W).injective
+  rw [representative_sections,← freeOpenSections_postcomp,AddEquiv.apply_symm_apply]
+  rfl
+
+theorem topPost_section (W : X.Opens) (s : Sections (Literal 3) W) :
+    topPost 0 W (sectionExtZero W s) = localTop W s := by
+  change (Ext.mk₀ ((freeOpenSections (Literal 3) W).symm s)).hom.comp topInclusion _ = _
+  rw [Ext.mk₀_hom,ShiftedHom.mk₀_comp]
+  symm
+  change CycleQ2KInjectiveSections.closedClass (freeOpen W) deRham 3
+    (representative W s) _ = _
+  rw [representative_eq_post]
+  exact CycleQ2KInjectiveSections.closedClass_precomp (Literal 3) deRham
+    ((freeOpenSections (Literal 3) W).symm s) 3 (termIso 3).inv top_closed
+
+private theorem topPostAt_precomp {P Q : AbSheaf (show TopCat from X)}
+    (f : Q ⟶ P) (n : ℕ) (m : ℤ) (h : 3 + (n : ℤ) = m)
+    (a : Ext P (Literal 3) n) :
+    topPostAt Q n m h ((Ext.mk₀ f).comp a (zero_add n)) =
+      E.map f ≫ topPostAt P n m h a := by
+  change ((Ext.mk₀ f).comp a (zero_add n)).hom.comp topInclusion h = _
+  rw [Ext.comp_hom,Ext.mk₀_hom]
+  simpa only [ShiftedHom.mk₀_comp] using
+    (ShiftedHom.comp_assoc (ShiftedHom.mk₀ (0 : ℤ) rfl (E.map f)) a.hom topInclusion
+      (add_zero _) h (by simpa only [add_zero] using h))
+
+theorem topPost_restrict (n : ℕ) {U V : X.Opens} (h : U ≤ V)
+    (a : (Literal 3).H' n V) :
+    topPost n U (((Literal 3).cohomologyPresheaf n).map (homOfLE h).op a) =
+      CycleQ2DerivedCoverTop.restriction target (3 + (n : ℤ)) h (topPost n V a) :=
+  topPostAt_precomp (freeOpenMap h) n (3 + (n : ℤ)) rfl a
+
+private theorem topPostAt_boundary {S : ShortComplex (AbSheaf (show TopCat from X))}
+    (hS : S.ShortExact) {n n' : ℕ} (hn : 1 + n = n')
+    (m : ℤ) (hm : 3 + (n : ℤ) = m) (a : Ext S.X₁ (Literal 3) n) :
+    topPostAt S.X₃ n' (m+1) (by omega) (hS.extClass.comp a hn) =
+      CycleQ2DerivedSourceBoundary.connecting hS target m (topPostAt S.X₁ n m hm a) := by
+  change (hS.extClass.comp a hn).hom.comp topInclusion _ = _
+  rw [Ext.comp_hom,hS.extClass_hom]
+  calc
+    (hS.singleδ.comp a.hom _).comp topInclusion _ =
+        hS.singleδ.comp (a.hom.comp topInclusion hm) rfl :=
+      ShiftedHom.comp_assoc hS.singleδ a.hom topInclusion (by omega) hm (by omega)
+    _ = _ := by
+      rw [ShiftedHom.comp,shiftFunctorAdd'_eq_shiftFunctorAdd]
+      rfl
+
+private theorem topPost_delta_zero
+    (S : (Opens.grothendieckTopology X).MayerVietorisSquare) (a : (Literal 3).H' 0 S.X₁) :
+    topPost 1 S.X₄ (S.δ (Literal 3) 0 1 rfl a) =
+      CycleQ2DerivedCoverTop.delta target S 3 (topPost 0 S.X₁ a) :=
+  topPostAt_boundary S.shortComplex_shortExact rfl 3 rfl a
+
+private theorem topPost_delta_one
+    (S : (Opens.grothendieckTopology X).MayerVietorisSquare) (a : (Literal 3).H' 1 S.X₁) :
+    topPost 2 S.X₄ (S.δ (Literal 3) 1 2 rfl a) =
+      CycleQ2DerivedCoverTop.delta target S 4 (topPost 1 S.X₁ a) :=
+  topPostAt_boundary S.shortComplex_shortExact rfl 4 rfl a
+
+private theorem topPost_delta_two
+    (S : (Opens.grothendieckTopology X).MayerVietorisSquare) (a : (Literal 3).H' 2 S.X₁) :
+    topPost 3 S.X₄ (S.δ (Literal 3) 2 3 rfl a) =
+      CycleQ2DerivedCoverTop.delta target S 5 (topPost 2 S.X₁ a) :=
+  topPostAt_boundary S.shortComplex_shortExact rfl 5 rfl a
+
+theorem topPost_four (U V W Z : X.Opens)
+    (s : Sections (Literal 3) (CycleQ2FourOpenH3.QuadOpen U V W Z)) :
+    topPost 3 (((U ⊔ V) ⊔ W) ⊔ Z) (CycleQ2FourOpenH3.connecting (Literal 3) U V W Z s) =
+      CycleQ2DerivedCoverTop.fourConnecting target 3 U V W Z
+        (localTop (CycleQ2FourOpenH3.QuadOpen U V W Z) s) := by
+  let S := CycleQ2FourOpenH3.outerSquare U V W Z
+  let R := CycleQ2ThreeOpenCechH2.outerSquare (U ⊓ Z) (V ⊓ Z) (W ⊓ Z)
+  let Q := Opens.mayerVietorisSquare ((U ⊓ Z) ⊓ (W ⊓ Z)) ((V ⊓ Z) ⊓ (W ⊓ Z))
+  change topPost 3 S.X₄
+    (S.δ (Literal 3) 2 3 rfl (R.δ (Literal 3) 1 2 rfl (Q.δ (Literal 3) 0 1 rfl
+      ((CycleQ2GeometricConeCech.HZero.sectionsEquiv (Literal 3) Q.X₁).symm s)))) = _
+  rw [topPost_delta_two,topPost_delta_one,topPost_delta_zero,
+    ← CycleQ2ThreeOpenInjectiveComparison.sectionExtZero_eq_hzero,topPost_section]
+  rfl
+
+/-- The actual top-term inclusion commutes with the same ordered three
+source boundaries used in the literal residue calculation. -/
+theorem topPost_orderedConnecting (s : Three (Literal 3) fixedOpen) :
+    topPost 3 ⊤ (CycleQ2FourOpenTopMayerVietoris.orderedConnecting fixedOpen fixedOpen_cover s) =
+      connectingSection s := by
+  change topPost 3 ⊤ (((Literal 3).cohomologyPresheaf 3).map (homOfLE union_eq_top.ge).op
+    (CycleQ2FourOpenH3.connecting (Literal 3)
+      (fixedOpen 0) (fixedOpen 1) (fixedOpen 2) (fixedOpen 3)
+      (quadSections (Literal 3) s))) = _
+  rw [topPost_restrict,topPost_four]
+  rfl
+
+end CycleQ2LiteralDerivedTop
+
+namespace CycleQ2LiteralTopDeRhamTrace
+
+open CategoryTheory Opposite TopologicalSpace
+open CycleQ2InjectiveCech (AbSheaf)
+open CycleQ2CechTwoToDerived (Three)
+open CycleQ2LiteralAmbientCharts (fixedOpen fixedOpen_cover)
+open CycleQ2LiteralThreefoldFirstDifferential (X)
+open CycleQ2LiteralThreefoldCanonicalFrame (CanonicalForms CanonicalAdditiveSheaf globalFrame)
+open CycleQ2LiteralThreefoldTopTrace
+  (canonicalTrace canonicalTrace_connecting framed_face_acyclic canonicalSectionTrace)
+open CycleQ2LiteralDerivedTop (target topPost connectingSection)
+open CycleQ2HodgeTwistTopDerived
+  (nativeTopOrdered nativeTopConnecting nativeTopConnecting_surjective orderedConnecting_nativeTopOrdered)
+
+local instance : HasExt.{1} (AbSheaf (show TopCat from X)) := HasExt.standard _
+local instance : HasDerivedCategory.{1} (AbSheaf (show TopCat from X)) := HasDerivedCategory.standard _
+
+theorem derivedTrace_connectingSection (s : Three F fixedOpen) :
+    derivedTrace (connectingSection s) = sectionTrace s := by
+  rw [← toDerived_sectionClass]
+  change trace (derivedEquiv.symm (derivedEquiv (sectionClass s))) = sectionTrace s
+  rw [AddEquiv.symm_apply_apply,trace_sectionClass]
+
+/-- On every actual canonical H³ class, composition with the top de
+Rham term preserves the original native trace exactly. -/
+theorem derivedTrace_topPost (a : CanonicalAdditiveSheaf.H' 3 ⊤) :
+    derivedTrace (topPost 3 ⊤ a) = canonicalTrace a := by
+  obtain ⟨s,rfl⟩ := nativeTopConnecting_surjective CanonicalAdditiveSheaf fixedOpen fixedOpen_cover
+    (framed_face_acyclic CanonicalForms globalFrame) a
+  calc
+    derivedTrace (topPost 3 ⊤ (nativeTopConnecting CanonicalAdditiveSheaf fixedOpen fixedOpen_cover s)) =
+        derivedTrace (connectingSection (nativeTopOrdered F fixedOpen s)) := by
+      apply congrArg derivedTrace
+      rw [← orderedConnecting_nativeTopOrdered]
+      exact CycleQ2LiteralDerivedTop.topPost_orderedConnecting _
+    _ = canonicalSectionTrace s := by
+      rw [derivedTrace_connectingSection]
+      change canonicalSectionTrace (toNative F (nativeTopOrdered F fixedOpen s)) = canonicalSectionTrace s
+      rw [toNative_nativeTopOrdered]
+    _ = canonicalTrace (nativeTopConnecting CanonicalAdditiveSheaf fixedOpen fixedOpen_cover s) :=
+      (canonicalTrace_connecting s).symm
+
+theorem topPost_canonicalClass (a : ℂ) :
+    topPost 3 ⊤ (CycleQ2LiteralThreefoldTopTrace.canonicalClass a) = derivedNormalizedClass a := by
+  rw [derivedNormalizedClass_eq_connecting]
+  change topPost 3 ⊤ (nativeTopConnecting CanonicalAdditiveSheaf fixedOpen fixedOpen_cover
+    (CycleQ2LiteralThreefoldTopTrace.framedGenerator CanonicalForms globalFrame a)) = _
+  rw [← orderedConnecting_nativeTopOrdered]
+  exact CycleQ2LiteralDerivedTop.topPost_orderedConnecting _
+
+theorem topPost_injective : Function.Injective (topPost 3 (⊤ : X.Opens)) := by
+  intro a b hab
+  apply canonicalTrace.injective
+  rw [← derivedTrace_topPost,← derivedTrace_topPost,hab]
+
+/-- A nonzero original canonical cohomology class remains nonzero in
+the full actual derived de Rham complex. -/
+theorem topPost_ne_zero (a : CanonicalAdditiveSheaf.H' 3 ⊤) (ha : a ≠ 0) :
+    topPost 3 ⊤ a ≠ 0 := by
+  intro hz
+  exact ha (topPost_injective (by simpa only [map_zero] using hz))
+
+end CycleQ2LiteralTopDeRhamTrace
+end
+
+#print axioms CycleQ2LiteralDerivedTop.topInclusion
+#print axioms CycleQ2LiteralDerivedTop.topPost_orderedConnecting
+#print axioms CycleQ2LiteralTopDeRhamTrace.derivedTrace_topPost
+#print axioms CycleQ2LiteralTopDeRhamTrace.topPost_ne_zero
+
+noncomputable section
+namespace CycleQ2LiteralCubicDeRham
+
+open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
+open CycleQ2InjectiveCech (AbSheaf Sections)
+open CycleQ2GeometricSheafLocalIso (res)
+open CycleQ2GeometricHodgeThreefold (threefold coordinateOpen)
+open CycleQ2GeometricHodgeThreefoldIncidence (literalEval literal_vertex_unit)
+open CycleQ2HodgeThreefoldTwist (chartFrame chartFrame_transition)
+open CycleQ2HodgeTwistAnchor (torus torus_le torus_le_face)
+open CycleQ2HodgeTwistCoordinates (NativeTopFaces NativeTopQuotient nativeTopBoundary nativeTopSectionTrace)
+open CycleQ2HodgeTwistTopDerived
+  (nativeTopConnecting nativeTopConnecting_surjective nativeTopCohomologyEquiv)
+open CycleQ2LiteralAmbientCharts (fixedOpen fixedOpen_cover)
+open CycleQ2LiteralThreefoldCanonicalFrame (CanonicalForms CanonicalAdditiveSheaf globalFrame)
+open CycleQ2LiteralThreefoldTopTrace
+  (Face Torus faceSectionEquiv faceSectionEquiv_restrict framed_face_acyclic
+    framedSectionTrace_frame structureSectionTrace_pullback canonicalSectionTrace
+    canonicalTrace canonicalTrace_connecting canonicalClass framedGenerator)
+open CycleQ2LiteralCubicResidueDetection (ambientCover ambientCover_top)
+open CycleQ2LiteralCubicProjectiveCocycle
+  (RegularSheaf ambientResidueClass ambientResidueTrace ambientResidueTrace_class)
+open CycleQ2LiteralDerivedTop (target topPost)
+open CycleQ2LiteralTopDeRhamTrace
+  (derivedTrace derivedNormalizedClass derivedTrace_topPost topPost_canonicalClass)
+
+local instance (Y : TopCat.{0}) : HasExt.{1} (AbSheaf Y) := HasExt.standard _
+local instance : HasDerivedCategory.{1}
+    (AbSheaf (show TopCat from CycleQ2LiteralThreefoldFirstDifferential.X)) :=
+  HasDerivedCategory.standard _
+
+private theorem literal_torus_le_face (S : Finset (Fin 4)) : Torus ≤ Face S :=
+  Finset.le_inf (fun i _ => Finset.inf_le (Finset.mem_univ i))
+
+/-- The original zero-twist frame, inverse scheme-section pullback by
+`literalIso`, and the unchanged global canonical frame give this map
+on every actual nonempty standard intersection. -/
+def coefficientSection (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S) :
+    Sections RegularSheaf (S.inf ambientCover) ≃+ Sections CanonicalAdditiveSheaf (Face S) :=
+  (chartFrame literalEval 0 i (S.inf ambientCover) (Finset.inf_le hi)).toAddEquiv.trans
+    ((faceSectionEquiv S).symm.toAddEquiv.trans
+      (globalFrame.app (Face S) le_top).symm.toAddEquiv)
+
+theorem coefficientSection_frame (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S)
+    (s : Sections RegularSheaf (S.inf ambientCover)) :
+    globalFrame.app (Face S) le_top (coefficientSection i S hi s) =
+      (faceSectionEquiv S).symm (chartFrame literalEval 0 i (S.inf ambientCover) (Finset.inf_le hi) s) :=
+  (globalFrame.app (Face S) le_top).apply_symm_apply _
+
+def coefficientTopSection :
+    Sections RegularSheaf (torus literalEval) ≃+ Sections CanonicalAdditiveSheaf Torus :=
+  coefficientSection 0 Finset.univ (Finset.mem_univ 0)
+
+/-- The concrete face maps commute with the actual restrictions.
+Changing the zero-twist anchor contributes exactly the unit 1. -/
+theorem coefficientTopSection_restrict (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S)
+    (s : Sections RegularSheaf (S.inf ambientCover)) :
+    coefficientTopSection (res RegularSheaf (torus_le_face literalEval S) s) =
+      res CanonicalAdditiveSheaf (literal_torus_le_face S) (coefficientSection i S hi s) := by
+  apply (globalFrame.app Torus le_top).injective
+  change globalFrame.app Torus le_top
+      (coefficientSection 0 Finset.univ (Finset.mem_univ 0) (res RegularSheaf _ s)) = _
+  rw [coefficientSection_frame,← globalFrame.naturality,coefficientSection_frame]
+  apply (faceSectionEquiv Finset.univ).injective
+  rw [RingEquiv.apply_symm_apply,faceSectionEquiv_restrict,RingEquiv.apply_symm_apply]
+  rw [chartFrame_transition literalEval 0 0 i (torus literalEval)
+    (torus_le literalEval 0) (torus_le literalEval i)]
+  simp only [zpow_zero,Units.val_one,one_mul]
+  exact CycleQ2HodgeAtlasLine.coordinate_restrict
+    (CycleQ2HodgeThreefoldTwist.cocycle literalEval 0)
+    i (Finset.inf_le hi) (torus_le_face literalEval S) s
+
+private def faceAnchor (i : Fin 4) : Fin 4 := if i = 0 then 1 else 0
+
+private theorem faceAnchor_mem (i : Fin 4) : faceAnchor i ∈ Finset.univ.erase i := by
+  fin_cases i <;> decide
+
+private def coefficientFaces (c : NativeTopFaces (F := RegularSheaf) (U := ambientCover)) :
+    NativeTopFaces (F := CanonicalAdditiveSheaf) (U := fixedOpen) :=
+  fun i => coefficientSection (faceAnchor i) (Finset.univ.erase i) (faceAnchor_mem i) (c i)
+
+theorem coefficientTopSection_boundary (c : NativeTopFaces (F := RegularSheaf) (U := ambientCover)) :
+    coefficientTopSection (nativeTopBoundary c) = nativeTopBoundary (coefficientFaces c) := by
+  change coefficientTopSection
+    (res RegularSheaf (torus_le_face literalEval (Finset.univ.erase 0)) (c 0) -
+      res RegularSheaf (torus_le_face literalEval (Finset.univ.erase 1)) (c 1) +
+      res RegularSheaf (torus_le_face literalEval (Finset.univ.erase 2)) (c 2) -
+      res RegularSheaf (torus_le_face literalEval (Finset.univ.erase 3)) (c 3)) = _
+  rw [map_sub,map_add,map_sub,
+    coefficientTopSection_restrict (faceAnchor 0) _ (faceAnchor_mem 0),
+    coefficientTopSection_restrict (faceAnchor 1) _ (faceAnchor_mem 1),
+    coefficientTopSection_restrict (faceAnchor 2) _ (faceAnchor_mem 2),
+    coefficientTopSection_restrict (faceAnchor 3) _ (faceAnchor_mem 3)]
+  rfl
+
+/-- This quotient map is induced by the original scheme and frame
+maps, with their proved compatibility with all four boundary faces. -/
+def coefficientTopQuotient :
+    NativeTopQuotient (F := RegularSheaf) (U := ambientCover) →+
+      NativeTopQuotient (F := CanonicalAdditiveSheaf) (U := fixedOpen) :=
+  QuotientAddGroup.map _ _ coefficientTopSection.toAddMonoidHom (by
+    rintro _ ⟨c,rfl⟩
+    exact ⟨coefficientFaces c,(coefficientTopSection_boundary c).symm⟩)
+
+private def sourceComparison := nativeTopCohomologyEquiv RegularSheaf ambientCover ambientCover_top
+  (CycleQ2HodgeTwistTopCohomology.twist_face_acyclic literalEval 0)
+
+private def canonicalComparison := nativeTopCohomologyEquiv CanonicalAdditiveSheaf fixedOpen
+  fixedOpen_cover (framed_face_acyclic CanonicalForms globalFrame)
+
+/-- Actual native Čech transport followed by the two original
+Mayer--Vietoris comparisons gives the canonical cohomology map. -/
+def toCanonical : RegularSheaf.H' 3 ⊤ →+ CanonicalAdditiveSheaf.H' 3 ⊤ :=
+  canonicalComparison.toAddMonoidHom.comp
+    (coefficientTopQuotient.comp sourceComparison.symm.toAddMonoidHom)
+
+theorem toCanonical_connecting (s : Sections RegularSheaf (torus literalEval)) :
+    toCanonical (nativeTopConnecting RegularSheaf ambientCover ambientCover_top s) =
+      nativeTopConnecting CanonicalAdditiveSheaf fixedOpen fixedOpen_cover (coefficientTopSection s) := by
+  change canonicalComparison
+    (coefficientTopQuotient (sourceComparison.symm (sourceComparison (QuotientAddGroup.mk s)))) = _
+  rw [AddEquiv.symm_apply_apply]
+  rfl
+
+theorem canonicalSectionTrace_coefficientTopSection (s : Sections RegularSheaf (torus literalEval)) :
+    canonicalSectionTrace (coefficientTopSection s) =
+      nativeTopSectionTrace (CycleQ2HodgeTwistTorusChart.nativeLaurentSections
+        literalEval literal_vertex_unit 0) s := by
+  change CycleQ2LiteralThreefoldTopTrace.framedSectionTrace CanonicalForms globalFrame
+    (coefficientTopSection s) = _
+  rw [framedSectionTrace_frame]
+  change CycleQ2LiteralThreefoldTopTrace.structureSectionTrace
+    (globalFrame.app Torus le_top (coefficientSection 0 Finset.univ (Finset.mem_univ 0) s)) = _
+  rw [coefficientSection_frame,structureSectionTrace_pullback,RingEquiv.apply_symm_apply]
+  exact (CycleQ2HodgeTwistTorusChart.twistTopSectionTrace_frame literalEval literal_vertex_unit s).symm
+
+theorem canonicalTrace_toCanonical (a : RegularSheaf.H' 3 ⊤) :
+    canonicalTrace (toCanonical a) = ambientResidueTrace a := by
+  obtain ⟨s,rfl⟩ := nativeTopConnecting_surjective RegularSheaf ambientCover ambientCover_top
+    (CycleQ2HodgeTwistTopCohomology.twist_face_acyclic literalEval 0) a
+  rw [toCanonical_connecting,canonicalTrace_connecting,canonicalSectionTrace_coefficientTopSection]
+  exact (CycleQ2HodgeTwistTopDerived.derivedTopTrace_connecting RegularSheaf ambientCover
+    (CycleQ2HodgeTwistTorusChart.nativeLaurentSections literalEval literal_vertex_unit 0)
+    ambientCover_top (CycleQ2HodgeTwistTopCohomology.twist_face_acyclic literalEval 0) s).symm
+
+theorem coefficientTopSection_generator :
+    coefficientTopSection (CycleQ2HodgeTwistTorusChart.twistTopGenerator literalEval literal_vertex_unit) =
+      framedGenerator CanonicalForms globalFrame 1 := by
+  change (globalFrame.app Torus le_top).symm ((faceSectionEquiv Finset.univ).symm
+    (chartFrame literalEval 0 0 (torus literalEval) (torus_le literalEval 0)
+      (CycleQ2HodgeTwistTorusChart.twistTopGenerator literalEval literal_vertex_unit))) = _
+  rw [CycleQ2HodgeTwistTorusChart.twistTopGenerator_frame]
+  rfl
+
+/-- The already-computed negative cubic residue normalization survives
+the actual scheme-section and canonical-frame transport. -/
+theorem toCanonical_ambientResidueClass : toCanonical ambientResidueClass = -canonicalClass 1 := by
+  rw [CycleQ2LiteralCubicProjectiveCocycle.ambientResidueClass_eq_neg_nativeTop,
+    map_neg,toCanonical_connecting,coefficientTopSection_generator]
+  rfl
+
+/-- The original cubic boundary now lands in the full intrinsic
+derived de Rham complex of the fixed proper threefold. -/
+def toDeRham : RegularSheaf.H' 3 ⊤ →+ CycleQ2DerivedCoverTop.H target 6 ⊤ :=
+  (topPost 3 ⊤).comp toCanonical
+
+theorem derivedTrace_toDeRham (a : RegularSheaf.H' 3 ⊤) :
+    derivedTrace (toDeRham a) = ambientResidueTrace a :=
+  (derivedTrace_topPost (toCanonical a)).trans (canonicalTrace_toCanonical a)
+
+theorem toDeRham_ne_zero (a : RegularSheaf.H' 3 ⊤) (ha : a ≠ 0) : toDeRham a ≠ 0 := by
+  intro hz
+  have ht := congrArg derivedTrace hz
+  rw [derivedTrace_toDeRham,map_zero] at ht
+  apply ha
+  apply ambientResidueTrace.injective
+  simpa only [map_zero] using ht
+
+theorem toDeRham_ambientResidueClass :
+    toDeRham ambientResidueClass = -derivedNormalizedClass 1 := by
+  change topPost 3 ⊤ (toCanonical ambientResidueClass) = _
+  rw [toCanonical_ambientResidueClass,map_neg,topPost_canonicalClass]
+
+theorem derivedTrace_ambientResidueClass : derivedTrace (toDeRham ambientResidueClass) = -1 := by
+  rw [derivedTrace_toDeRham,ambientResidueTrace_class]
+
+/-- The unchanged surface closed-inclusion and residue boundary are
+followed by the concrete canonical transport and the actual top edge. -/
+def surfaceToDeRham : CycleQ2CanonicalCoordinateH2.CanonicalSheaf.H' 2 ⊤ →+
+    CycleQ2DerivedCoverTop.H target 6 ⊤ :=
+  toDeRham.comp CycleQ2LiteralCubicCanonicalRestriction.surfaceGysin
+
+theorem surfaceToDeRham_ne_zero (a : CycleQ2CanonicalCoordinateH2.CanonicalSheaf.H' 2 ⊤)
+    (ha : a ≠ 0) : surfaceToDeRham a ≠ 0 :=
+  toDeRham_ne_zero _ (CycleQ2LiteralCubicCanonicalRestriction.surfaceGysin_ne_zero a ha)
+
+theorem surfaceToDeRham_residueGenerator :
+    surfaceToDeRham (CycleQ2CanonicalCoordinateH2.canonicalConnecting
+      CycleQ2LiteralCanonicalResidueGenerator.canonicalResidueGenerator) = -derivedNormalizedClass 1 := by
+  change toDeRham (CycleQ2LiteralCubicCanonicalRestriction.surfaceGysin _) = _
+  rw [CycleQ2LiteralCubicProjectiveCocycle.surfaceGysin_residueGenerator,toDeRham_ambientResidueClass]
+
+theorem derivedTrace_surface_residueGenerator :
+    derivedTrace (surfaceToDeRham (CycleQ2CanonicalCoordinateH2.canonicalConnecting
+      CycleQ2LiteralCanonicalResidueGenerator.canonicalResidueGenerator)) = -1 := by
+  rw [surfaceToDeRham_residueGenerator,map_neg,
+    CycleQ2LiteralTopDeRhamTrace.derivedTrace_normalizedClass]
+
+end CycleQ2LiteralCubicDeRham
+end
+
+#print axioms CycleQ2LiteralCubicDeRham.coefficientTopSection_restrict
+#print axioms CycleQ2LiteralCubicDeRham.toCanonical_ambientResidueClass
+#print axioms CycleQ2LiteralCubicDeRham.toDeRham_ambientResidueClass
+#print axioms CycleQ2LiteralCubicDeRham.surfaceToDeRham_ne_zero
+#print axioms CycleQ2LiteralCubicDeRham.derivedTrace_surface_residueGenerator

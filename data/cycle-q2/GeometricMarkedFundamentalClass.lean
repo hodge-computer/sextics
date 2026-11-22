@@ -1329,3 +1329,158 @@ end CycleQ2MarkedClosureExtension
 #print axioms CycleQ2MarkedClosureExtension.unique_extension
 #print axioms CycleQ2MarkedClosureExtension.exists_unique_normalized
 #print axioms CycleQ2MarkedClosureExtension.exists_nonzero_normalized
+
+namespace CycleQ2SeedCompatibleClosureClass
+
+open CategoryTheory CategoryTheory.Limits AlgebraicGeometry TopologicalSpace
+open CycleQ2LiteralIncidenceRelativeSpread CycleQ2LiteralIncidenceNormalizedSlice
+open CycleQ2LiteralIncidenceRelativeCompletion CycleQ2LiteralIncidenceRelativeCorrespondence
+open CycleQ2LiteralIncidenceGenericCorrespondence CycleQ2GenericSmoothCurveGraph
+open CycleQ2IncidenceEtaleParameter (parameterScheme)
+open CycleQ2IncidenceSeedFiberCover (seedBasePoint)
+open CycleQ2NativeWeightedCover (ambientToField)
+open CycleQ2ProductCoefficients (productBase)
+open CycleQ2ClosedGraphSupport (complement)
+open CycleQ2MarkedClosureOpen (goodOpen)
+open CycleQ2MarkedOpenGysin (Normalized)
+open CycleQ2MarkedGenericSurvives (SeedCompatible)
+open CycleQ2SurvivingProductGysin (SupportedClass)
+open CycleQ2InjectiveCech (AbSheaf freeOpenMap)
+
+local instance derived (X : TopCat.{0}) : HasDerivedCategory.{1} (AbSheaf X) :=
+  HasDerivedCategory.standard _
+
+variable (V : parameterScheme.Opens) (t : Fin 3 → ℂ) {C D : Scheme.{0}}
+  (r : C ⟶ Completion V) (c : C ⟶ Spec (CommRingCat.of genericField))
+  (hc : r ≫ structureMap V = c ≫ genericPoint)
+  (j : D ⟶ C) (a : D ⟶ Time toRaw V)
+  (ha : j ≫ r = a ≫ CycleQ2LiteralIncidenceRelativeCompletion.inclusion V)
+
+/-- The original closed image in the full curve product misses a
+target neighborhood of the actual function point. No deletion of a
+projected boundary is needed for this support statement. -/
+theorem full_product_avoiding
+    (hs : SmoothOfRelativeDimension 1 (curveMap toRaw V t)) :
+    let m := fromTest V t r j a ha
+    let b := m.imageι ≫ embeddingGeneric V t r c hc
+    let π := pullback.snd c ambientToField
+    ∃ A : genericAmbient.Opens,
+      Set.range CycleQ2GenericGraphFunctionStalk.functionPoint ⊆ (A : Set genericAmbient) ∧
+      π ⁻¹ᵁ A ≤ complement b := by
+  let m := fromTest V t r j a ha
+  let b := m.imageι ≫ embeddingGeneric V t r c hc
+  let g := target V t r c hc
+  let π := pullback.snd c ambientToField
+  let A := CycleQ2GenericProperGraphSupport.complement V t
+  have htime := timeMap_smooth toRaw V
+  have hsurf : SmoothOfRelativeDimension 2 (CycleQ2GenericProperGraphOpen.surfaceStructure V t) :=
+    smoothOfRelativeDimension_comp 1 1 _ _
+  have hproper : IsProper (CycleQ2GenericProperGraphOpen.graphStructure V t) := by
+    unfold CycleQ2GenericProperGraphOpen.graphStructure
+    infer_instance
+  have hprojection : b ≫ π = m.imageι ≫ g := by
+    change (m.imageι ≫ embeddingGeneric V t r c hc) ≫ pullback.snd c ambientToField = _
+    rw [Category.assoc,embeddingGeneric_toAmbient]
+  refine ⟨A,?_,?_⟩
+  · rintro _ ⟨x,rfl⟩
+    exact CycleQ2GenericGraphFunctionStalk.functionPoint_mem hsurf hproper x
+  · rintro _ hy ⟨z,rfl⟩
+    have hpoint : π (b z) = g (m.imageι z) :=
+      congrArg (fun f : m.image ⟶ genericAmbient => f z) hprojection
+    have hy' : g (m.imageι z) ∈ A := hpoint ▸ hy
+    exact hy' (target_in_original_support V t r c hc ⟨m.imageι z,rfl⟩)
+
+/-- The original seed-compatible proper curve and marked point carry
+a nonzero supported class on the full product with the generic
+threefold. Its normalization is imposed only on the marked smooth
+open, and its ordinary image vanishes near the original function point.
+The complete closure is not assumed smooth. -/
+theorem exists_full_product_class :
+    ∃ (t : Fin 3 → ℂ) (ht : AlgebraicIndependent ℚ t)
+      (V : parameterScheme.Opens) (hV : seedBasePoint ∈ V)
+      (C : Scheme) (c : C ⟶ Spec (CommRingCat.of genericField))
+      (r : C ⟶ Completion V) (hc : r ≫ structureMap V = c ≫ genericPoint)
+      (D : Scheme) (j : D ⟶ C) (a : D ⟶ Time toRaw V)
+      (ha : j ≫ r = a ≫ CycleQ2LiteralIncidenceRelativeCompletion.inclusion V),
+      let m := fromTest V t r j a ha
+      let g := target V t r c hc
+      let b := m.imageι ≫ embeddingGeneric V t r c hc
+      let q := productBase c ambientToField
+      let π := pullback.snd c ambientToField
+      let B := (m.imageι ≫ g) '' (Set.range m.toImage)ᶜ
+      SeedCompatible t V hV c r j a ∧
+      IsIntegral C ∧ IsProper c ∧ SmoothOfRelativeDimension 1 c ∧
+      (∃ f : C ⟶ CycleQ2LaurentProjectiveLine.line genericField, IsFinite f ∧ IsDominant f ∧
+        f ≫ CycleQ2ProjectiveLineStructure.structureMap genericField = c) ∧
+      IsOpenImmersion j ∧ IsDominant j ∧ SmoothOfRelativeDimension 1 (curveMap toRaw V t) ∧
+      IsProper (b ≫ π) ∧
+      topologicalKrullDim ((Set.range m.toImage)ᶜ : Set m.image) ≤ 1 ∧
+      topologicalKrullDim B ≤ 1 ∧
+      (2 : WithBot ℕ∞) ≤ topologicalKrullDim (Set.range (m ≫ g)) ∧
+      ∃ (hm : IsOpenImmersion m) (hb : IsClosedImmersion b)
+        (h₄ : SmoothOfRelativeDimension 4 q),
+        letI := hm
+        letI := hb
+        letI := h₄
+        ∃ w : TestSurface V t a, g.QuasiFiniteAt (m w) ∧ g (m w) ∉ B ∧
+          ∃ Γ : SupportedClass q b, Γ ≠ 0 ∧
+            Normalized q b (goodOpen b m.toImage)
+              (CycleQ2NoetherianSupport.res (complement b)
+                (show goodOpen b m.toImage ≤ ⊤ from le_top) Γ) ∧
+            ∃ A : genericAmbient.Opens,
+              Set.range CycleQ2GenericGraphFunctionStalk.functionPoint ⊆ (A : Set genericAmbient) ∧
+              π ⁻¹ᵁ A ≤ complement b ∧
+              let E := DerivedCategory.singleFunctor (AbSheaf (show TopCat from genericProduct c)) 0
+              E.map (freeOpenMap (show π ⁻¹ᵁ A ≤ ⊤ from le_top)) ≫
+                E.map (CycleQ2SupportMV.π (complement b) ⊤) ≫ Γ = 0 := by
+  obtain ⟨t,ht,V,hV,C,c,r,hc,D,j,a,ha,hCompatible,hC,hp,hc₁,hproj,hj,hjd,hs,
+    _,hB,hd,w,hw,hout⟩ :=
+    CycleQ2MarkedGenericSurvives.exists_compatible_marked_point_outside_projected_boundary
+  letI : IsIntegral C := hC
+  letI : IsProper c := hp
+  letI : SmoothOfRelativeDimension 1 c := hc₁
+  letI : IsOpenImmersion j := hj
+  let m := fromTest V t r j a ha
+  let G := embeddingGeneric V t r c hc
+  let b := m.imageι ≫ G
+  let q := productBase c ambientToField
+  let π := pullback.snd c ambientToField
+  letI : IsOpenImmersion m :=
+    MorphismProperty.of_isPullback (test_square V t r j a ha) hj
+  letI : IsClosedImmersion b := inferInstanceAs (IsClosedImmersion (m.imageι ≫ G))
+  letI : SmoothOfRelativeDimension 3 ambientToField := CycleQ2NativeGenericSmooth.ambient_smooth
+  letI : IsProper ambientToField := CycleQ2NativeWeightedCover.ambient_proper
+  letI : NoetherianSpace (genericProduct c) :=
+    CycleQ2LiteralIncidenceGenericModel.noetherian_of_proper q
+  letI : SmoothOfRelativeDimension 4 q := CycleQ2ProductFramedOpen.smooth_product c ambientToField 3
+  have h : m.toImage ≫ b ≫ q =
+      pullback.fst a (curveMap toRaw V t) ≫ (j ≫ c) := by
+    change m.toImage ≫ (m.imageι ≫ G) ≫ pullback.fst c ambientToField ≫ c = _
+    calc
+      _ = m ≫ G ≫ pullback.fst c ambientToField ≫ c := by
+        simp only [Category.assoc,Scheme.Hom.toImage_imageι_assoc]
+      _ = m ≫ toCurve V t r ≫ c := by
+        rw [show G ≫ pullback.fst c ambientToField ≫ c = toCurve V t r ≫ c from
+          embeddingGeneric_toCurve_assoc V t r c hc c]
+      _ = _ := by rw [← Category.assoc m,← (test_square V t r j a ha).w,Category.assoc]
+  letI : SmoothOfRelativeDimension 2 (m.toImage ≫ b ≫ q) := by
+    rw [h]
+    letI : SmoothOfRelativeDimension 1 (pullback.fst a (curveMap toRaw V t)) :=
+      (smoothOfRelativeDimension_isStableUnderBaseChange 1).of_isPullback
+        (IsPullback.of_hasPullback a (curveMap toRaw V t)).flip hs
+    letI : SmoothOfRelativeDimension 1 (j ≫ c) := smoothOfRelativeDimension_comp 0 1 j c
+    exact smoothOfRelativeDimension_comp 1 1 _ _
+  have hdim := (CycleQ2MarkedClosureBoundaryDimension.boundary_dimensions
+    V t r c j a ha hc hs).1
+  obtain ⟨Γ,hΓ,hNorm⟩ :=
+    CycleQ2MarkedClosureExtension.exists_nonzero_normalized q b m.toImage hdim w
+  obtain ⟨A,hpoint,hoff⟩ := full_product_avoiding V t r c hc j a ha hs
+  refine ⟨t,ht,V,hV,C,c,r,hc,D,j,a,ha,hCompatible,hC,hp,hc₁,hproj,hj,hjd,hs,
+    inferInstance,hdim,hB,hd,inferInstance,inferInstance,inferInstance,w,hw,hout,
+    Γ,hΓ,hNorm,A,hpoint,hoff,?_⟩
+  exact CycleQ2MarkedFunctionPoint.forget_off b (π ⁻¹ᵁ A) hoff Γ
+
+end CycleQ2SeedCompatibleClosureClass
+
+#print axioms CycleQ2SeedCompatibleClosureClass.full_product_avoiding
+#print axioms CycleQ2SeedCompatibleClosureClass.exists_full_product_class

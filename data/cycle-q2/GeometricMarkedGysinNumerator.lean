@@ -458,6 +458,105 @@ theorem native_edge_projection (ht : AlgebraicIndependent ℚ t) :
       rw [(thick_pair_equations t i k p).2,map_zero]
     exact factor_contraction w F G hf hg ω
 
+/-- The ordinary two-equation quotient on this same marked projective
+overlap. No identification with a different surface presentation is used. -/
+abbrev graphQuotient :=
+  CycleQ2DoubleGysinCotangent.intersectionRing (cubic i k) (row t i k p)
+
+private abbrev graphQuotientMap : DualPair i k →ₐ[ℂ] graphQuotient t i k p :=
+  Ideal.Quotient.mkₐ ℂ (CycleQ2DoubleGysinCotangent.ideal (cubic i k) (row t i k p))
+
+/-- The actual moving-family evaluation factors through both original
+equations. This is a specified map, rather than a replacement isomorphism. -/
+def graphToThickening : graphQuotient t i k p →ₐ[ℂ] BPair t i k :=
+  Ideal.Quotient.liftₐ _ (thickEvaluation t i k) (by
+    have hker : CycleQ2DoubleGysinCotangent.ideal (cubic i k) (row t i k p) ≤
+        RingHom.ker (thickEvaluation t i k).toRingHom := by
+      rw [CycleQ2DoubleGysinCotangent.ideal,Ideal.span_le,Set.pair_subset_iff]
+      exact ⟨(thick_pair_equations t i k p).1,(thick_pair_equations t i k p).2⟩
+    exact fun _ hx => hker hx)
+
+theorem graphToThickening_comp :
+    (graphToThickening t i k p).comp (graphQuotientMap t i k p) = thickEvaluation t i k := by
+  ext a
+  rfl
+
+/-- Restrict the native ambient test edge to the literal equation quotient. -/
+def intrinsicTestEdge : Form ℂ (graphQuotient t i k p) 2 :=
+  exteriorPullback (graphQuotientMap t i k p) 2 (testEdge i k)
+
+theorem intrinsicTestEdge_toThickening :
+    exteriorPullback (graphToThickening t i k p) 2 (intrinsicTestEdge t i k p) =
+      exteriorPullback (thickEvaluation t i k) 2 (testEdge i k) := by
+  rw [intrinsicTestEdge,← CycleQ2AffineDeRhamFunctorial.exteriorPullback_comp,graphToThickening_comp]
+
+/-- The intrinsic edge gives a class in the same original pole quotient
+used by the marked incidence logarithm. -/
+def intrinsicGysinEdge :
+    CycleQ2DoubleGysinOneForms.poleForms (K := ℂ) (cubic i k) (row t i k p) 4 :=
+  CycleQ2DoubleGysinTwoForms.gysinTwo (cubic i k) (row t i k p) (intrinsicTestEdge t i k p)
+
+theorem intrinsicGysinEdge_eq :
+    intrinsicGysinEdge t i k p =
+      (CycleQ2DoubleGysinOneForms.singleImages (K := ℂ) (cubic i k) (row t i k p) 4).mkQ
+        (cup22 (poleSymbol t i k p)
+          (exteriorPullback (IsScalarTower.toAlgHom ℂ (DualPair i k) (PoleRing t i k p)) 2 (testEdge i k))) := by
+  rw [intrinsicGysinEdge,intrinsicTestEdge,CycleQ2DoubleGysinTwoForms.gysinTwo_projection,poleSymbol_eq]
+
+/-- Changing an ambient lift by a form vanishing on the literal
+equation quotient preserves its actual pole class. -/
+theorem intrinsicGysinEdge_of_lift (ω : Form ℂ (DualPair i k) 2)
+    (hω : exteriorPullback (graphQuotientMap t i k p) 2 ω = intrinsicTestEdge t i k p) :
+    (CycleQ2DoubleGysinOneForms.singleImages (K := ℂ) (cubic i k) (row t i k p) 4).mkQ
+      (cup22 (poleSymbol t i k p)
+        (exteriorPullback (IsScalarTower.toAlgHom ℂ (DualPair i k) (PoleRing t i k p)) 2 ω)) =
+      intrinsicGysinEdge t i k p := by
+  rw [poleSymbol_eq,← CycleQ2DoubleGysinTwoForms.gysinTwo_projection,hω]
+  rfl
+
+set_option maxRecDepth 4096 in
+/-- The intrinsic quotient Gysin class is represented by precisely the
+regular four-form numerator whose marked contraction gives the native
+moving edge. Both poles are divided out in their original localization;
+the order of the two conormals and coefficient +1 are unchanged. -/
+theorem intrinsic_edge_projection (ht : AlgebraicIndependent ℚ t) :
+    let C := APair t i k
+    let l := IsScalarTower.toAlgHom ℂ (DualPair i k) (PoleRing t i k p)
+    let F := cubic i k
+    let G := row t i k p
+    let denominator := localizedF (K := ℂ) F G * localizedG (K := ℂ) F G
+    let j := alongCurve (R := DualPair i k) (C := C)
+    let w := velocity t i k ht
+    let β := nativeCoefficient t i k ht
+    ∃ ν : Form ℂ (DualPair i k) 4,
+      intrinsicGysinEdge t i k p =
+        (CycleQ2DoubleGysinOneForms.singleImages (K := ℂ) F G 4).mkQ
+          ((↑denominator⁻¹ : PoleRing t i k p) • exteriorPullback l 4 ν) ∧
+      interior 3 (ambientVelocity w) (exteriorMap (algebraMap (DualPair i k) C) j 4 ν) =
+        front 2 (j (D ℂ (DualPair i k) F)) (front 1 (j (D ℂ (DualPair i k) G))
+          ((exteriorPower.oneEquiv C _).symm β)) ∧
+      toCurveForm β = contractRestrict ((pairVelocity t ht i k).compAlgebraMap (FixedOverlap i k))
+        (nativeEdge i k) := by
+  dsimp only
+  obtain ⟨ν,hν,hcontract,hcurve⟩ := native_edge_projection t i k p ht
+  refine ⟨ν,?_,hcontract,hcurve⟩
+  let l := IsScalarTower.toAlgHom ℂ (DualPair i k) (PoleRing t i k p)
+  let d := localizedF (K := ℂ) (cubic i k) (row t i k p) *
+    localizedG (K := ℂ) (cubic i k) (row t i k p)
+  have hd : (d : PoleRing t i k p) = l (cubic i k * row t i k p) := by
+    change (localizedF (K := ℂ) (cubic i k) (row t i k p) : PoleRing t i k p) *
+      localizedG (K := ℂ) (cubic i k) (row t i k p) = _
+    rw [localizedF_val,localizedG_val,map_mul]
+    rfl
+  have hcancel : (↑d⁻¹ : PoleRing t i k p) * l (cubic i k * row t i k p) = 1 := by
+    rw [← hd]
+    simp
+  change intrinsicGysinEdge t i k p =
+    (CycleQ2DoubleGysinOneForms.singleImages (K := ℂ) (cubic i k) (row t i k p) 4).mkQ
+      ((↑d⁻¹ : PoleRing t i k p) • exteriorPullback l 4 ν)
+  rw [hν,smul_smul,hcancel,one_smul]
+  exact intrinsicGysinEdge_eq t i k p
+
 section Cech
 open CategoryTheory AlgebraicGeometry TopologicalSpace
 open CycleQ2LiteralThreefoldCurveTestSections CycleQ2LiteralThreefoldVertexMotion
@@ -607,6 +706,7 @@ end Cech
 end ProjectiveEdge
 end CycleQ2MarkedGysinNumerator
 #print axioms CycleQ2MarkedGysinNumerator.ProjectiveEdge.native_edge_projection
+#print axioms CycleQ2MarkedGysinNumerator.ProjectiveEdge.intrinsic_edge_projection
 #print axioms CycleQ2MarkedGysinNumerator.ProjectiveEdge.numerator_class
 #print axioms CycleQ2MarkedGysinNumerator.ProjectiveEdge.numerator_trace_ne_zero
 

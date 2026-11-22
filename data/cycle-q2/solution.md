@@ -1,5 +1,191 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Continuation: intrinsic pairing maps and the completed time curve
+
+**Status, 22 November 2026, sixth checkpoint.** This continuation binds
+the local two-form Gysin calculation to the actual supported de Rham
+source, preserves the original signed cubic trace, and carries the same
+seed-compatible closure class to the full product. It also identifies
+the finite set of missing time fibers and proves that a nonzero global
+regular one-form on the proper time curve survives in its actual native
+de Rham complex. These are source developments with independent source
+review; no Lean build or kernel replay has been run. The sole original
+`sorry` in `Submission.missing_geometric_existence` is retained. The
+protected statement and the 996-file proposal, including 994 Lean
+files, are unchanged.
+
+### The full-product class retains the original marked data
+
+`CycleQ2SeedCompatibleClosureClass.exists_full_product_class` starts
+from the existing compatible marked point outside the projected
+boundary. It retains the same parameter triple, coefficient
+neighborhood, proper integral time curve, time-open map, test surface,
+and `SeedCompatible` witness. The class constructed on the full
+fourfold is normalized along the original smooth open and is nonzero
+at the surviving marked point. Its ordinary restriction vanishes on
+the inverse image of an actual target open containing the original
+function-field point, because that open misses its support. This is
+the full-product class itself, with its unchanged original source
+quotient; it is not an unrelated supported class chosen after the
+marked calculation.
+[Same-seed full-product class and actual restriction](GeometricMarkedFundamentalClass.lean)
+
+### The canonical class has an actual top-term de Rham map
+
+The top-term inclusion of the intrinsic threefold complex now gives
+the map from actual canonical cohomology to actual degree-six de Rham
+cohomology. Its composition with each ordered source boundary is
+proved using the same source triangles and explicit shift
+isomorphisms. The original canonical trace agrees with the resulting
+derived trace on every canonical class, so this particular map is
+injective on the one-dimensional canonical group.
+
+The original cubic construction is connected to this map through
+actual section maps on all native faces: its zero-twist frame, the
+literal-to-intrinsic section equivalence, and the original global
+canonical frame. These maps commute with the native restrictions and
+therefore descend through the original alternating Cech quotient.
+The original ambient residue class maps to the negative normalized
+de Rham generator. In particular,
+\[
+ \operatorname{Tr}_{\mathrm{dR}}
+   \bigl(\operatorname{surfaceToDeRham}
+      (\operatorname{residueGenerator})\bigr)=-1.
+\]
+This retains the previously determined cubic sign. The transport is
+constructed from the section maps, not by choosing a class solely
+because its scalar trace matches.
+[Top-term inclusion, original cubic transport, and signed trace](GeometricAffineExteriorAcyclicity.lean)
+
+### Intrinsic two-forms map to the original supported class
+
+For the actual pair of local equations \(f,g\) in a chart ring
+\(A\), the ordered two-log construction now descends from ambient
+two-forms to
+\[
+ \Omega^2_{(A/(f,g))/k}
+   \longrightarrow
+ \frac{\Omega^4_{A[1/(fg)]/k}}
+ {\operatorname{im}\Omega^4_{A[1/f]/k}
+  +\operatorname{im}\Omega^4_{A[1/g]/k}}.
+\]
+The proof kills the original ideal and both conormal differential
+slots. It constructs the quotient-ring action on the same pole-form
+quotient, without assuming a normal basis. Pulling an ambient
+two-form \(\omega\) to the intersection gives exactly the class of
+\[
+ d\log f\wedge d\log g\wedge\omega,
+\]
+with coefficient \(+1\) for this order of the equations.
+
+The three localization maps to the actual framed affine chart are
+the original restriction maps. Their section comparison kills the
+original signed Cech boundary and defines `toSupported` into the
+second Ext group with coefficients in the original four-form sheaf.
+The actual top-term inclusion of the rank-four de Rham complex then
+identifies this class with `relativeOfSection 4` of the same ordered
+four-form. `graphGysinTwo_projection` also uses the original graph
+support quotient and precisely the source map used by the earlier
+local fundamental class.
+[Intrinsic quotient descent and original supported de Rham map](GeometricLocalGysinProjection.lean)
+
+On the literal marked overlap, the two equations are the original
+cubic and moving row. The test edge descends to their actual quotient,
+and the original thickening evaluation factors through it. The
+intrinsic Gysin edge is independent of its ambient lift and is
+represented by exactly the same cleared numerator as
+`native_edge_projection`, divided by the same two units. Thus
+`intrinsic_edge_projection` preserves the already proved marked
+contraction. This identifies the local representative; it does not
+assert the missing global cup-class gluing.
+[Original quotient, thickening, and marked numerator](GeometricMarkedGysinNumerator.lean)
+
+### The original boundary lies over finitely many time points
+
+The actual test square gives the equality
+\[
+ m.\operatorname{image}\setminus
+     \operatorname{range}(m.\operatorname{toImage})
+ =
+ (\operatorname{toCurve}\circ\iota_m)^{-1}
+     \bigl(C\setminus\operatorname{range}(j)\bigr),
+\]
+where \(\iota_m\) is the original image immersion. The proof uses the pullback range identity and
+injectivity of the original image immersion. The complement of the
+nonempty time open in the proper integral smooth curve is finite, so
+only those finitely many actual time fibers meet the added boundary.
+
+There is also a finite relative normalization of this original
+closure over the generic coefficient field. The argument proves
+finiteness of normalization in a dense open over any
+characteristic-zero field, using the already constructed finite
+normalizations of affine domains and their minimal-prime components.
+Applied to the reduced marked closure, it gives a model proper over
+the same time curve whose pullback to the complete original smooth
+open is an isomorphism. This prepares a possible finite-trace
+construction. It does not make the completed surface smooth or a
+regular embedding, and the supported class remains on the original
+closure.
+[Exact vertical boundary and finite relative normalization](GeometricMarkedClosureBoundaryDimension.lean)
+
+### Regular one-forms are detected on the actual proper curve
+
+The pinned Mathlib properness theorem makes the ring of global
+functions of an integral proper curve a finite field extension of
+the base field. In characteristic zero it is separable, so its
+universal differential is zero. This argument allows a nontrivial
+constant-field extension and does not assume geometric integrality.
+
+For the actual two-chart curve complex, a boundary representing a
+global regular one-form would provide compatible function primitives
+on the two charts. They glue to a global function, whose derivative
+is zero by the preceding result. Consequently `regularClass_injective`
+embeds the global regular one-forms in the first cohomology of this
+specific native complex. A nonzero such form supplies an actual
+detecting cochain for the existing curve cup trace.
+[Proper global functions and native regular-form injection](GeometricCurveCupTrace.lean)
+
+### Remaining comparisons before the protected existence theorem
+
+The source now supplies the full supported class, its original local
+pairing representative, the fixed-target trace normalization, and
+the proper-curve detection statement. The remaining chain still
+contains distinct geometric comparisons:
+
+1. Construct the specific traced pairing as a global regular
+   one-form on the completed time curve. Its existing ordinary
+   de Rham extension does not provide a filtered extension or rule
+   out exact higher poles at the finitely many missing time points.
+2. Spread this actual pairing and test representative over the same
+   integral marked coefficient neighborhood. The new derived trace
+   is fixed to the original complex threefold; the universal
+   structure-sheaf trace alone does not identify the required
+   relative canonical-form trace.
+3. Assemble the global target Cech and proper-curve tensor comparison
+   for the ordinary character-one cylinder class. The existing
+   rectangle comparison has an affine target open.
+4. Identify its relevant primitive component with the original
+   66 residue generators and prove a nonzero vector in the actual
+   `genericFrameKernel`. The arithmetic simplicity theorem then
+   reaches the unchanged protected exterior-form exactness target.
+
+The first-order scalar calculation and the nonzero supported class
+are not substituted for any of these comparisons. In particular, a
+nonzero first-order contraction of a locally exact one-form is not
+treated as detection of an arbitrary de Rham class.
+
+### Verification for this checkpoint
+
+Independent source review covered the intrinsic quotient descent,
+original marked numerator, derived boundary shifts, graph source,
+proper-curve injection, full-product class, vertical boundary, and
+finite normalization. Static checks found all 993 helper modules
+acyclic, exactly the original admission at `Solution.lean:139`, and
+an unchanged endpoint and manifest. The repository's explanation
+renderer resolved the local links, and KaTeX accepted all 3,373
+formulas. Only existing proposal files were changed. These checks
+do not provide Lean elaboration or kernel validation.
+
 ## Continuation: total de Rham trace and the original closure boundary
 
 **Status, 22 November 2026, fifth checkpoint.** This continuation supplies

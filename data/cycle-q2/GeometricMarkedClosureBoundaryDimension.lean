@@ -628,3 +628,238 @@ theorem chart_at_closed_point (x : Y) (hx : x ∈ B) :
 end CycleQ2SmallBoundaryStrata
 
 #print axioms CycleQ2SmallBoundaryStrata.chart_at_closed_point
+
+namespace CycleQ2OpenPullbackBoundary
+
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits Set
+
+variable {M Z D C : Scheme.{0}} (a : M ⟶ D) (f : M ⟶ Z)
+  (j : D ⟶ C) (p : Z ⟶ C) (H : IsPullback a f j p)
+  [QuasiCompact f]
+
+/-- The original image factorization does not add points over the
+base open already present in a pullback. This is an equality on the
+original scheme-theoretic image, not on a new compactification. -/
+theorem boundary_eq_preimage :
+    ((Set.range f.toImage)ᶜ : Set f.image) =
+      (f.imageι ≫ p) ⁻¹' (Set.range j)ᶜ := by
+  have hr : Set.range f = p ⁻¹' Set.range j := by
+    rw [← H.isoPullback_hom_snd, Scheme.Hom.comp_base, TopCat.coe_comp,
+      Set.range_comp, H.isoPullback.hom.surjective.range_eq, Set.image_univ,
+      AlgebraicGeometry.Scheme.Pullback.range_snd]
+  have hi : Set.range f.toImage = f.imageι ⁻¹' Set.range f := by
+    ext x
+    constructor
+    · rintro ⟨y,rfl⟩
+      exact ⟨y,(congrArg (fun g : M ⟶ Z => g y) f.toImage_imageι).symm⟩
+    · rintro ⟨y,hy⟩
+      exact ⟨y,f.imageι.isClosedEmbedding.injective
+        ((congrArg (fun g : M ⟶ Z => g y) f.toImage_imageι).trans hy)⟩
+  rw [hi,hr]
+  ext x
+  rfl
+
+/-- Every point added to the original closure lies over a missing
+base point. In particular this boundary cannot acquire a horizontal
+component over the original base open. -/
+theorem image_boundary_subset :
+    (f.imageι ≫ p) '' (Set.range f.toImage)ᶜ ⊆ (Set.range j)ᶜ := by
+  rw [boundary_eq_preimage a f j p H]
+  exact Set.image_preimage_subset _ _
+
+end CycleQ2OpenPullbackBoundary
+
+namespace CycleQ2MarkedClosureBoundaryDimension
+
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace
+open CycleQ2LiteralIncidenceRelativeSpread CycleQ2LiteralIncidenceNormalizedSlice
+open CycleQ2LiteralIncidenceRelativeCompletion CycleQ2LiteralIncidenceGenericCorrespondence
+open CycleQ2GenericSmoothCurveGraph
+open CycleQ2IncidenceEtaleParameter (parameterScheme)
+
+variable (V : parameterScheme.Opens) (t : Fin 3 → ℂ) {C D : Scheme.{0}}
+  (r : C ⟶ Completion V) (c : C ⟶ Spec (CommRingCat.of genericField))
+  (j : D ⟶ C) (a : D ⟶ Time toRaw V)
+  (ha : j ≫ r = a ≫ CycleQ2LiteralIncidenceRelativeCompletion.inclusion V)
+  [IsOpenImmersion j] [IsProper c] [SmoothOfRelativeDimension 1 c]
+
+/-- The missing time points form a finite set on the actual proper
+integral curve used by the marked incidence construction. -/
+include c in
+theorem finite_time_complement [IsIntegral C] [Nonempty D] :
+    ((Set.range j)ᶜ : Set C).Finite := by
+  letI : NoetherianSpace C :=
+    CycleQ2LiteralIncidenceGenericModel.noetherian_of_proper c
+  have : SmoothOfRelativeDimension 1 ((𝟙 C) ≫ c) := by
+    simpa only [Category.id_comp] using inferInstanceAs (SmoothOfRelativeDimension 1 c)
+  have hdim := CycleQ2CurveTopologicalDimension.dim_le_of_affines C 1
+    (fun U => CycleQ2CurveChartDimension.chart_dimension_le 1 (𝟙 C) c U.2)
+  apply CycleQ2ProperCurveFiniteFibres.finite_closed_proper hdim
+    j.isOpenEmbedding.isOpen_range.isClosed_compl
+  intro h
+  let d : D := Classical.choice (inferInstance : Nonempty D)
+  have hd : j d ∈ (Set.range j)ᶜ := by rw [h]; exact Set.mem_univ _
+  exact hd ⟨d,rfl⟩
+
+/-- The boundary of the original marked closure is exactly its
+inverse image of the missing time points. No projected target
+boundary is substituted for this original boundary. -/
+include c in
+theorem boundary_eq_time_preimage :
+    let m := fromTest V t r j a ha
+    ((Set.range m.toImage)ᶜ : Set m.image) =
+      (m.imageι ≫ toCurve V t r) ⁻¹' (Set.range j)ᶜ := by
+  let m := fromTest V t r j a ha
+  let p := toCurve V t r ≫ c
+  have : IsProper p := inferInstanceAs (IsProper (toCurve V t r ≫ c))
+  letI : NoetherianSpace (Graph V t r) :=
+    CycleQ2LiteralIncidenceGenericModel.noetherian_of_proper p
+  have : IsOpenImmersion m :=
+    MorphismProperty.of_isPullback (test_square V t r j a ha) inferInstance
+  letI : NoetherianSpace (TestSurface V t a) :=
+    m.isOpenEmbedding.isInducing.noetherianSpace
+  exact CycleQ2OpenPullbackBoundary.boundary_eq_preimage
+    (pullback.fst a (curveMap toRaw V t)) m j (toCurve V t r)
+    (test_square V t r j a ha)
+
+/-- Only finitely many actual time fibers meet the added boundary
+of the original marked closure. This locates the possible poles; it
+does not assert that a filtered cohomology class extends there. -/
+include c in
+theorem finite_boundary_times [IsIntegral C] [Nonempty D] :
+    let m := fromTest V t r j a ha
+    ((m.imageι ≫ toCurve V t r) '' (Set.range m.toImage)ᶜ).Finite := by
+  let m := fromTest V t r j a ha
+  apply (finite_time_complement c j).subset
+  rw [boundary_eq_time_preimage V t r c j a ha]
+  exact Set.image_preimage_subset _ _
+
+end CycleQ2MarkedClosureBoundaryDimension
+
+#print axioms CycleQ2OpenPullbackBoundary.boundary_eq_preimage
+#print axioms CycleQ2MarkedClosureBoundaryDimension.finite_boundary_times
+
+namespace CycleQ2MarkedSurfaceNormalization
+
+open AlgebraicGeometry CategoryTheory CategoryTheory.Limits TopologicalSpace Opposite
+
+/-- The scheme-theoretic image of a reduced source is reduced. The
+proof uses the injective section map of the actual image factorization. -/
+theorem image_reduced {X Y : Scheme.{0}} (f : X ⟶ Y) [QuasiCompact f]
+    [IsReduced X] : IsReduced f.image := by
+  apply (IsReduced.iff_of_openCover (X := f.image) f.ker.subschemeCover.openCover).mpr
+  change ∀ W : Y.affineOpens, IsReduced (Spec (CommRingCat.of (Γ(Y,W.1) ⧸ f.ker.ideal W)))
+  intro W
+  apply (affine_isReduced_iff _).mpr
+  letI : _root_.IsReduced Γ(f.image,f.imageι ⁻¹ᵁ W.1) :=
+    isReduced_of_injective (f.toImage.app _).hom (f.toImage_app_injective W)
+  exact isReduced_of_injective (f.ker.subschemeObjIso W).inv.hom
+    (f.ker.subschemeObjIso W).symm.commRingCatIsoToRingEquiv.injective
+
+/-- Relative normalization in a dense open is finite over every
+reduced scheme of finite type over a characteristic-zero field. This
+version also applies to the actual generic coefficient field. -/
+theorem dense_open_finite {k : Type} [Field k] [CharZero k]
+    {X Y : Scheme.{0}} (j : X ⟶ Y)
+    [IsOpenImmersion j] [QuasiCompact j] [IsDominant j] [IsReduced Y]
+    (p : Y ⟶ Spec (CommRingCat.of k)) [LocallyOfFiniteType p] :
+    IsFinite j.fromNormalization := by
+  refine { toIsAffineHom := inferInstance, finite_app := ?_ }
+  intro V hV
+  let A := Γ(Y,V)
+  let B := Γ(X,j ⁻¹ᵁ V)
+  let hle : V ≤ p ⁻¹ᵁ ⊤ := by simp
+  let c := (Scheme.ΓSpecIso (CommRingCat.of k)).inv ≫ p.appLE ⊤ V hle
+  letI : Algebra k A := c.hom.toAlgebra
+  letI : Algebra.FiniteType k A :=
+    (p.finiteType_appLE (isAffineOpen_top _) hV hle).comp
+      (RingHom.FiniteType.of_surjective _
+        (Scheme.ΓSpecIso (CommRingCat.of k)).symm.commRingCatIsoToRingEquiv.surjective)
+  letI : IsNoetherianRing A := Algebra.FiniteType.isNoetherianRing k A
+  letI : Algebra A B := (j.app V).hom.toAlgebra
+  obtain ⟨φ,hφ⟩ := CycleQ2DenseOpenTotalFractions.sections_embedding A
+    (CycleQ2DenseOpenAffineSections.chartOpen j hV)
+    (CycleQ2DenseOpenAffineSections.dense j hV)
+  let C := CycleQ2DenseOpenTotalFractions.Sections A
+    (CycleQ2DenseOpenAffineSections.chartOpen j hV)
+  letI : Algebra A C := StructureSheaf.openAlgebra (R := A)
+    (op (CycleQ2DenseOpenAffineSections.chartOpen j hV))
+  let e : B ≃ₐ[A] C := CycleQ2DenseOpenAffineSections.sectionEquiv j hV
+  letI : Module.Finite A (integralClosure A B) :=
+    CycleQ2ReducedNormalizationFinite.finiteType_integralClosure_of_fraction_embedding k
+      (fun D _ _ _ _ => CycleQ2IntegralCurveNormalization.finite_fraction_integralClosure
+        k D (FractionRing D)) A (φ.comp e.toAlgHom) (hφ.comp e.injective)
+  rw [j.fromNormalization_app hV,CommRingCat.hom_comp]
+  exact (RingHom.Finite.of_surjective _
+    (j.normalizationObjIso hV).symm.commRingCatIsoToRingEquiv.surjective).comp
+      (RingHom.finite_algebraMap.mpr inferInstance)
+
+/-- Relative normalization preserves the complete original open,
+including its scheme structure and every marked infinitesimal base
+change supported in that open. -/
+theorem recovers_open {X Y : Scheme.{0}} (j : X ⟶ Y)
+    [IsOpenImmersion j] [QuasiCompact j] :
+    IsIso (pullback.snd j.fromNormalization j) := by
+  rw [← isIso_comp_left_iff (j.normalizationPullback j),j.normalizationPullback_snd,
+    ← isIso_comp_left_iff (pullback.snd j j).toNormalization,
+    Scheme.Hom.toNormalization_fromNormalization]
+  infer_instance
+
+open CycleQ2LiteralIncidenceRelativeSpread CycleQ2LiteralIncidenceNormalizedSlice
+open CycleQ2LiteralIncidenceRelativeCompletion CycleQ2LiteralIncidenceGenericCorrespondence
+open CycleQ2GenericSmoothCurveGraph
+open CycleQ2IncidenceEtaleParameter (parameterScheme)
+
+variable (V : parameterScheme.Opens) (t : Fin 3 → ℂ) {C D : Scheme.{0}}
+  (r : C ⟶ Completion V) (c : C ⟶ Spec (CommRingCat.of genericField))
+  (j : D ⟶ C) (a : D ⟶ Time toRaw V)
+  (ha : j ≫ r = a ≫ CycleQ2LiteralIncidenceRelativeCompletion.inclusion V)
+  [IsOpenImmersion j] [IsProper c] [SmoothOfRelativeDimension 1 c]
+
+/-- The actual marked surface has a finite relative normalization
+over its original closure, proper over the same time curve. Its full
+original smooth open is recovered by a pullback isomorphism. No
+smoothness or regular embedding of the completed surface is asserted. -/
+include c in
+theorem exists_finite_model
+    (hs : SmoothOfRelativeDimension 1 (curveMap toRaw V t)) :
+    let m := fromTest V t r j a ha
+    ∃ (N : Scheme.{0}) (ν : N ⟶ m.image) (ι : TestSurface V t a ⟶ N),
+      IsFinite ν ∧ IsOpenImmersion ι ∧ IsDominant ι ∧
+      ι ≫ ν = m.toImage ∧
+      IsIso (pullback.snd ν m.toImage) ∧
+      IsProper (ν ≫ m.imageι ≫ toCurve V t r) := by
+  let m := fromTest V t r j a ha
+  let p := toCurve V t r ≫ c
+  have : IsProper p := inferInstanceAs (IsProper (toCurve V t r ≫ c))
+  letI : NoetherianSpace (Graph V t r) :=
+    CycleQ2LiteralIncidenceGenericModel.noetherian_of_proper p
+  have : IsOpenImmersion m :=
+    MorphismProperty.of_isPullback (test_square V t r j a ha) inferInstance
+  letI : NoetherianSpace (TestSurface V t a) :=
+    m.isOpenEmbedding.isInducing.noetherianSpace
+  have h : m ≫ p = pullback.fst a (curveMap toRaw V t) ≫ (j ≫ c) := by
+    change fromTest V t r j a ha ≫ toCurve V t r ≫ c = _
+    rw [← Category.assoc,← (test_square V t r j a ha).w,Category.assoc]
+  letI : MorphismProperty.IsStableUnderBaseChange (@SmoothOfRelativeDimension 1) :=
+    smoothOfRelativeDimension_isStableUnderBaseChange 1
+  have : SmoothOfRelativeDimension 1 (pullback.fst a (curveMap toRaw V t)) :=
+    MorphismProperty.pullback_fst _ _ hs
+  have : SmoothOfRelativeDimension 1 (j ≫ c) := smoothOfRelativeDimension_comp 0 1 j c
+  have : SmoothOfRelativeDimension 2 (m ≫ p) := by
+    rw [h]
+    exact smoothOfRelativeDimension_comp 1 1 _ _
+  letI : IsReduced (TestSurface V t a) :=
+    CycleQ2LiteralIncidenceRelativeNormalization.reduced_of_smooth_over_domain 2 (m ≫ p)
+  letI : IsReduced m.image := image_reduced m
+  let ν := m.toImage.fromNormalization
+  let ι := m.toImage.toNormalization
+  have hfinite : IsFinite ν := dense_open_finite m.toImage (m.imageι ≫ p)
+  refine ⟨m.toImage.normalization,ν,ι,hfinite,inferInstance,inferInstance,
+    m.toImage.toNormalization_fromNormalization,recovers_open m.toImage,?_⟩
+  infer_instance
+
+end CycleQ2MarkedSurfaceNormalization
+
+#print axioms CycleQ2MarkedSurfaceNormalization.dense_open_finite
+#print axioms CycleQ2MarkedSurfaceNormalization.exists_finite_model
