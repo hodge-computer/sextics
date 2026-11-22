@@ -247,6 +247,59 @@ def hodgeComponent (c : differential.ker) : Hodge21 :=
 theorem hodgeComponent_testCocycle :
     hodgeComponent testCocycle = ambientTestClass := rfl
 
+section NormalPoleComparison
+
+open CycleQ2LiteralThreefoldVolumeVariationEvaluation
+  CycleQ2LiteralThreefoldVolumeVariationPatch
+  CycleQ2LiteralThreefoldCartan CycleQ2LiteralThreefoldSurfaceNormal
+
+private theorem additive_sign {S : Type} [CommRing S] [Algebra ℂ S]
+    (b : Module.Basis (Fin 3) S (OneForms S)) (n : ℕ) (η : Forms S 2) :
+    additive b ((-1 : S)^n • η) = (-1 : S)^n • additive b η := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    simp only [pow_succ, mul_neg_one]
+    exact (congrArg (additive b) (neg_smul ((-1 : S)^n) η)).trans
+      (((additive b).map_neg (((-1 : S)^n) • η)).trans
+        ((congrArg Neg.neg ih).trans (neg_smul ((-1 : S)^n) ((additive b) η)).symm))
+
+/-- The first normal pole residue of the marked numerator with both actual
+Čech conventions: projective chart orientation and the negative vertex term. -/
+def normalPoleVertex (i j : Fin 4) : Forms (Patch i j) 3 :=
+  -((-1 : Patch i j)^i.val •
+    (normalPoleCoefficient i j • orderedVolume (basis i j)))
+
+/-- The corresponding signed canonical-minus-normal contraction. -/
+def normalPolePrimitive (i j : Fin 4) : Forms (Patch i j) 2 :=
+  -((-1 : Patch i j)^i.val • normalPrimitive i j)
+
+/-- The actual filtered test cocycle has the prescribed normal pole residue
+as its local de Rham representative. Its Hodge edge remains `nativeEdge`,
+whose marked curve evaluation is computed by `GeometricMarkedGysinNumerator`.
+This equality is on the original gradient localization and supplies its
+two-form boundary explicitly. -/
+theorem testCochain_normal_pole (i j : Fin 4) :
+    exteriorDifferentialMap (patchMap i j) 3 (testCochain.1 i) - normalPoleVertex i j =
+      additive (basis i j) (normalPolePrimitive i j) := by
+  have hv : exteriorDifferentialMap (patchMap i j) 3 (testCochain.1 i) =
+      -((-1 : Patch i j)^i.val •
+        (patchMap i j (chartCoefficient i) •
+          exteriorDifferentialMap (patchMap i j) 3
+            (CycleQ2LiteralThreefoldChartVolume.chartVolume i))) := by
+    change exteriorDifferentialMap (patchMap i j) 3
+      (-(chartCoefficient i • ((-1 : T i)^i.val •
+        CycleQ2LiteralThreefoldChartVolume.chartVolume i))) = _
+    rw [map_neg, map_smulₛₗ, map_smulₛₗ]
+    simp only [map_pow, map_neg, map_one]
+    rw [smul_comm]
+  rw [hv, normalPoleVertex, normalPolePrimitive, map_neg, additive_sign]
+  have h := congrArg (fun ω : Forms (Patch i j) 3 => -((-1 : Patch i j)^i.val • ω))
+    (canonical_normal_difference i j)
+  simpa only [smul_sub, neg_sub, neg_sub_neg, additive] using h
+
+end NormalPoleComparison
+
 end CycleQ2LiteralThreefoldDeRhamTestClass
 end
 
@@ -255,3 +308,4 @@ end
 #print axioms CycleQ2LiteralThreefoldDeRhamTestClass.testCocycle
 #print axioms CycleQ2LiteralThreefoldDeRhamTestClass.increasingTestCocycle
 #print axioms CycleQ2LiteralThreefoldDeRhamTestClass.hodgeComponent_testCocycle
+#print axioms CycleQ2LiteralThreefoldDeRhamTestClass.testCochain_normal_pole

@@ -1,5 +1,110 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Continuation: generic residue kernel and arithmetic coefficient models
+
+**Status, 22 November 2026.** This checkpoint adds proof source and has
+received independent mathematical and API review. It has not been elaborated,
+compiled, or replayed by Lean in this session. The original admission in
+`Submission.missing_geometric_existence` remains unchanged. No new admission,
+axiom, or weaker replacement for the protected target has been introduced.
+
+### The actual monic generic frame and its rational realization
+
+The coefficient-open independence argument now applies to the actual monic
+44-parameter ring, not only to the full 45-parameter ring. The elementary
+`rawToMonic` substitution fixes the leading coefficient at one and carries
+the three frame determinants and Fermat evaluation to this ring.
+`CycleQ2MonicFermatCoefficientOpen` proves independence over its determinant
+open, over the polynomial coefficient ring itself, and over the literal
+fraction field `FractionRing (TailRing ℂ)`.
+
+The intervening `CycleQ2PoleSymbolLocalization` proves that localization
+commutes with the full polynomial-pole quotient. It localizes both nested
+coefficient modules and the entire relation submodule, gives a common
+denominator for every localized class, and characterizes zero by denominator
+torsion. The argument includes all polynomial multipliers of the relations.
+[Monic and generic independence; quotient localization](GeometricFermatPoleReduction.lean)
+
+The normalized residue map is now coefficient-linear and kills the full
+relation span. Its target is the actual rational three-form module modulo
+the range of the exterior derivative from two-forms. Localization extends
+this map to the same generic coefficient field used above. Clearing one
+denominator proves coefficient-connection stability of its kernel.
+
+Restricting to the independent 66-symbol frame gives the concrete linear map
+`genericFrameRealization`, its kernel `genericFrameKernel`, the actual
+pole-reduction connection matrices, and
+`genericFrameKernel_coefficient_stable` in every one of the 44 coefficient
+directions. `protected_source_in_genericFrame` binds the existing source form
+to this image, with the exact normalization factor two.
+This is a kernel of the rational de Rham realization, distinct from the
+formal-symbol realization whose injectivity was proved above. No assertion
+that the de Rham kernel is nonzero is made here.
+[Generic rational residue realization](GeometricWeightedPoleThree.lean)
+
+### Finite generators and arithmetic rank preservation
+
+The connection identities for a finite generator matrix are now derived
+from preservation of its column submodule. A finitely generated stable
+submodule supplies matrices satisfying
+\(\partial_i P=P C_i-B_iP\); the Noetherian corollary removes the explicit
+finite-generation premise. Independent generators or a chosen invertible
+pivot are not required.
+[Generator connection identities](GeometricFermatStrictGrowth.lean)
+
+`CycleQ2ArithmeticSpecialization` encodes finite integral polynomial
+equations and inequations in the first-order language of rings and applies
+mathlib's Lefschetz principle. A solution over any characteristic-zero
+field embeds into its algebraic closure and yields solutions over every
+algebraically closed field outside a finite set of prime characteristics.
+Finite presentations then give actual ring homomorphisms from finite-type
+integer algebras, preserving any selected finite list of nonzero elements.
+Dirichlet's theorem avoids the finite exceptional set in either the
+`1 mod 6` or `5 mod 6` residue class.
+
+For finite matrices, the source constructs a nonzero rank-sized minor and
+a factorization through the corresponding columns. The factorization gives
+an upper rank bound after specialization and the minor gives the matching
+lower bound. `finite_matrices_spread` constructs a common finite-type
+integer coefficient model preserving all the given ranks and every
+nonzero requested extra coefficient. The source field need not be
+algebraically closed; rank zero is included.
+
+For the connection argument, this theorem must be applied to finite lists
+of constants after clearing polynomial denominators, keeping the 44
+parameters as formal variables. The total and projected **Fermat-fiber**
+matrices must share that coefficient model. Specializing arbitrary rational
+functions as constants would not preserve their coefficient derivations.
+That concrete descent and the final two-prime simplicity assembly are not
+claimed by this checkpoint.
+[Arithmetic coefficient and rank models](GeometricHiggsAlgebraSpecialization.lean)
+
+### The native test cocycle and the actual normal pole
+
+On each actual gradient localization, the new literal normal lift of
+\(F-\varepsilon A_0\) fixes the free coordinates and moves the pivot by
+\(A_0/F_j\). Its first-order volume coefficient is computed as
+\[
+ (-1)^j\left(\frac{\partial_j A_0}{F_j^2}
+              -\frac{A_0\,\partial_j^2F}{F_j^3}\right).
+\]
+The existing Cartan comparison supplies an explicit two-form whose exterior
+derivative is the difference from the canonical chart lift.
+`testCochain_normal_pole` then identifies the restriction of the actual
+native filtered Čech vertex with this pole representative modulo that
+boundary. It includes the projective chart sign and the existing negative
+vertex convention, giving the total coefficient
+\(-(-1)^{i+j}(\partial_j A_0/F_j^2-A_0\partial_j^2F/F_j^3)\).
+[Normal lift and its actual boundary](GeometricLiteralThreefoldVolumeVariationEvaluation.lean)
+[Native test-cocycle comparison](GeometricLiteralThreefoldDeRhamTestClass.lean)
+
+This closes a concrete local comparison. It does not identify the marked
+numerator trace with the mixed component of the global proper graph class.
+The remaining geometric task is still to construct a nonzero generic frame
+vector whose rational residue class vanishes, including the proper-family
+and time-boundary comparison. A nonzero supported class alone does not
+establish nonvanishing of its ordinary image or its mixed component.
+
 ## Continuation: coefficient opens and actual residue relations
 
 **Status, 21 November 2026.** The continuation below is proof source only.

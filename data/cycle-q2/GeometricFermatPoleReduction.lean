@@ -4,6 +4,9 @@ import Proposal.GeometricUniversalJacobianFrames
 import Proposal.IncidenceBasepointCharts
 import Proposal.GeometricLocalizedDerivations
 import HodgeComputer.Constructions.HoldoutCover.FiniteDifferentials
+import Mathlib.Algebra.Module.LocalizedModule.Submodule
+import Mathlib.RingTheory.Localization.BaseChange
+import Mathlib.RingTheory.Localization.Module
 
 /-!
 # Reduction of Fermat residues at split and inert primes
@@ -1609,3 +1612,524 @@ end
 #print axioms CycleQ2FermatCoefficientOpen.vectorRealize_injective
 #print axioms CycleQ2FermatCoefficientOpen.basisSymbol_linearIndependent
 #print axioms CycleQ2FermatCoefficientOpen.rank_specialize_ge
+
+/-!
+# Polynomial parameter charts and the monic coefficient open
+
+The same argument applies after expressing the 45 raw coefficients in any
+polynomial parameter ring. Only a Fermat-valued point of that parameter ring
+is needed. In particular, fixing the leading coefficient to one leaves the
+44 independent tail coordinates of the actual monic family.
+-/
+
+noncomputable section
+namespace CycleQ2PolynomialCoefficientOpen
+
+open MvPolynomial
+open CycleQ2GenericSexticGradient (CoeffRing seedEvaluation universalF_seed)
+open CycleQ2HiggsJacobianFrames (frameDet)
+open CycleQ2UniversalPoleFrame (equation basisSymbol vectorRealize)
+open CycleQ2GeometricLocalizedDerivations
+
+abbrev Parameters (σ : Type) := MvPolynomial σ ℂ
+
+variable {σ : Type} [Fintype σ] [DecidableEq σ]
+    (ψ : CoeffRing →+* Parameters σ)
+
+def denominator : Parameters σ := ψ CycleQ2FermatCoefficientOpen.denominator
+
+abbrev OpenCoefficients := Localization.Away (denominator ψ)
+
+def toOpen : Parameters σ →+* OpenCoefficients ψ := algebraMap _ _
+
+def coefficientMap : CoeffRing →+* OpenCoefficients ψ := (toOpen ψ).comp ψ
+
+theorem frame_units :
+    IsUnit (coefficientMap ψ (frameDet 6 1)) ∧
+      IsUnit (coefficientMap ψ (frameDet 12 1)) ∧
+      IsUnit (coefficientMap ψ (frameDet 18 1)) := by
+  have h : IsUnit (coefficientMap ψ CycleQ2FermatCoefficientOpen.denominator) :=
+    IsLocalization.Away.algebraMap_isUnit (denominator ψ)
+  simp only [CycleQ2FermatCoefficientOpen.denominator, map_mul, IsUnit.mul_iff] at h
+  exact ⟨h.1.1, h.1.2, h.2⟩
+
+def coefficientPartial (i : σ) : Derivation ℤ (OpenCoefficients ψ) (OpenCoefficients ψ) :=
+  (localizedDerivation (Submonoid.powers (denominator ψ)) (OpenCoefficients ψ)
+    (pderiv i : Derivation ℂ (Parameters σ) (Parameters σ))).restrictScalars ℤ
+
+theorem coefficientPartial_toOpen (i : σ) (p : Parameters σ) :
+    coefficientPartial ψ i (toOpen ψ p) = toOpen ψ (pderiv i p) :=
+  localizedDerivation_algebraMap (Submonoid.powers (denominator ψ))
+    (OpenCoefficients ψ) (pderiv i) p
+
+theorem differential_ideal_eq_top (I : Ideal (OpenCoefficients ψ)) (hI : I ≠ ⊥)
+    (stable : ∀ i x, x ∈ I → coefficientPartial ψ i x ∈ I) : I = ⊤ :=
+  CycleQ2DifferentialCoefficientIdeals.localization_eq_top
+    (Submonoid.powers (denominator ψ)) (OpenCoefficients ψ) (coefficientPartial ψ)
+      (coefficientPartial_toOpen ψ) I hI stable
+
+variable (ρ₀ : Parameters σ →+* ℂ) (point : ρ₀.comp ψ = seedEvaluation)
+
+theorem point_denominator : ρ₀ (denominator ψ) = 1 := by
+  change (ρ₀.comp ψ) CycleQ2FermatCoefficientOpen.denominator = 1
+  rw [point, CycleQ2FermatCoefficientOpen.seed_denominator]
+
+def fermatEvaluation : OpenCoefficients ψ →+* ℂ :=
+  IsLocalization.Away.lift (denominator ψ)
+    (show IsUnit (ρ₀ (denominator ψ)) by
+      rw [point_denominator ψ ρ₀ point]
+      exact isUnit_one)
+
+@[simp] theorem fermatEvaluation_toOpen (p : Parameters σ) :
+    fermatEvaluation ψ ρ₀ point (toOpen ψ p) = ρ₀ p :=
+  IsLocalization.Away.lift_eq (denominator ψ) _ p
+
+theorem fermatEvaluation_comp :
+    (fermatEvaluation ψ ρ₀ point).comp (coefficientMap ψ) = seedEvaluation := by
+  ext p
+  change fermatEvaluation ψ ρ₀ point (toOpen ψ (ψ p)) = seedEvaluation p
+  rw [fermatEvaluation_toOpen]
+  exact congrArg (fun f : CoeffRing →+* ℂ => f p) point
+
+theorem equation_atFermat :
+    MvPolynomial.map (fermatEvaluation ψ ρ₀ point) (equation (coefficientMap ψ)) =
+      CycleQ2FermatSymbolDetector.fermatPolynomial ℂ := by
+  rw [equation, MvPolynomial.map_map, fermatEvaluation_comp ψ ρ₀ point]
+  exact universalF_seed
+
+theorem vectorRealize_injective : Function.Injective (vectorRealize (coefficientMap ψ)) := by
+  obtain ⟨h6, h12, h18⟩ := frame_units ψ
+  exact CycleQ2UniversalPoleFrame.vectorRealize_injective_of_specialized_independent
+    (coefficientMap ψ) h6 h12 h18 (coefficientPartial ψ) (differential_ideal_eq_top ψ)
+    (fermatEvaluation ψ ρ₀ point)
+    (CycleQ2FermatSymbolDetector.specialized_basisSymbol_linearIndependent
+      (coefficientMap ψ) (fermatEvaluation ψ ρ₀ point) (equation_atFermat ψ ρ₀ point))
+
+theorem basisSymbol_linearIndependent : LinearIndependent (OpenCoefficients ψ)
+    (basisSymbol (coefficientMap ψ)) := by
+  classical
+  rw [Fintype.linearIndependent_iff]
+  intro c hc s
+  have hz : vectorRealize (coefficientMap ψ) c = 0 := hc
+  have he : c = 0 := vectorRealize_injective ψ ρ₀ point
+    (hz.trans (map_zero (vectorRealize (coefficientMap ψ))).symm)
+  exact congrFun he s
+
+end CycleQ2PolynomialCoefficientOpen
+
+namespace CycleQ2MonicFermatCoefficientOpen
+
+open MvPolynomial CycleQ2IncidenceNormalForm
+open CycleQ2GenericSexticGradient (CoeffRing universalF seedEvaluation fermatCoefficients)
+open CycleQ2PolynomialPoleSymbols (TailRing monicFamily)
+
+abbrev Parameters := TailRing ℂ
+
+/-- The standard inclusion of the monic tail chart into all raw coefficients. -/
+def rawCoordinate (e : FullInvariantIndex 6) : Parameters :=
+  if h : (e.val 4).val < 3 then X ⟨e,h⟩ else 1
+
+@[simp] theorem rawCoordinate_tail (e : FullSexticTailIndex) :
+    rawCoordinate e.val = X e := by simp [rawCoordinate, e.property]
+
+@[simp] theorem rawCoordinate_leading : rawCoordinate fullSexticLeadingIndex = 1 := by
+  have h := (fullSextic_tail_iff_ne fullSexticLeadingIndex).not.mpr (not_not.mpr rfl)
+  simp [rawCoordinate, h]
+
+def rawToMonic : CoeffRing →+* Parameters := eval₂Hom C rawCoordinate
+
+@[simp] theorem rawToMonic_C (c : ℂ) : rawToMonic (C c) = C c := by simp [rawToMonic]
+@[simp] theorem rawToMonic_X (e : FullInvariantIndex 6) :
+    rawToMonic (X e) = rawCoordinate e := by simp [rawToMonic]
+
+theorem equation_rawToMonic : CycleQ2UniversalPoleFrame.equation rawToMonic = monicFamily ℂ := by
+  rw [CycleQ2UniversalPoleFrame.equation, universalF, map_fullInvariantPolynomial]
+  have h : rawToMonic ∘ (X : FullInvariantIndex 6 → CoeffRing) = rawCoordinate := by
+    funext e
+    exact rawToMonic_X e
+  rw [h, fullInvariantPolynomial_sextic, rawCoordinate_leading]
+  simp only [rawFullSextic, monicFamily, normalizedFullSextic, rawCoordinate_tail]
+
+def fermatPoint : Parameters →+* ℂ := eval (fun e : FullSexticTailIndex => fermatCoefficients e.val)
+
+private theorem seed_leading : seedEvaluation (X fullSexticLeadingIndex) = 1 := by
+  rw [CycleQ2GenericSexticGradient.seedEvaluation, eval_X, fermatCoefficients,
+    fullSexticLeadingIndex_exponent]
+  change (CycleQ2FermatSymbolDetector.fermatPolynomial ℂ).coeff (Finsupp.single 4 3) = 1
+  exact CycleQ2FermatSymbolDetector.fermatLeading ℂ
+
+theorem fermat_factor : fermatPoint.comp rawToMonic = seedEvaluation := by
+  apply MvPolynomial.ringHom_ext
+  · intro c
+    simp [fermatPoint, CycleQ2GenericSexticGradient.seedEvaluation]
+  · intro e
+    change fermatPoint (rawToMonic (X e)) = seedEvaluation (X e)
+    rw [rawToMonic_X]
+    by_cases h : (e.val 4).val < 3
+    · rw [rawCoordinate_tail (⟨e,h⟩ : FullSexticTailIndex)]
+      simp [fermatPoint, CycleQ2GenericSexticGradient.seedEvaluation]
+    · have he : e = fullSexticLeadingIndex := by
+        by_contra he
+        exact h ((fullSextic_tail_iff_ne e).mpr he)
+      subst e
+      rw [rawCoordinate_leading, map_one]
+      exact seed_leading.symm
+
+abbrev OpenCoefficients := CycleQ2PolynomialCoefficientOpen.OpenCoefficients rawToMonic
+
+abbrev coefficientMap : CoeffRing →+* OpenCoefficients :=
+  CycleQ2PolynomialCoefficientOpen.coefficientMap rawToMonic
+
+abbrev toOpen : Parameters →+* OpenCoefficients := CycleQ2PolynomialCoefficientOpen.toOpen rawToMonic
+
+abbrev coefficientPartial := CycleQ2PolynomialCoefficientOpen.coefficientPartial rawToMonic
+
+abbrev fermatEvaluation : OpenCoefficients →+* ℂ :=
+  CycleQ2PolynomialCoefficientOpen.fermatEvaluation rawToMonic fermatPoint fermat_factor
+
+theorem equation_monic : CycleQ2UniversalPoleFrame.equation coefficientMap =
+    MvPolynomial.map toOpen (monicFamily ℂ) := by
+  change MvPolynomial.map (toOpen.comp rawToMonic) universalF = _
+  rw [← MvPolynomial.map_map]
+  exact congrArg (MvPolynomial.map toOpen) equation_rawToMonic
+
+theorem vectorRealize_injective :
+    Function.Injective (CycleQ2UniversalPoleFrame.vectorRealize coefficientMap) :=
+  CycleQ2PolynomialCoefficientOpen.vectorRealize_injective rawToMonic fermatPoint fermat_factor
+
+theorem basisSymbol_linearIndependent : LinearIndependent OpenCoefficients
+    (CycleQ2UniversalPoleFrame.basisSymbol coefficientMap) :=
+  CycleQ2PolynomialCoefficientOpen.basisSymbol_linearIndependent rawToMonic fermatPoint fermat_factor
+
+theorem rank_specialize_ge {n s : Type*} [Fintype n] [Fintype s]
+    (P : Matrix n s OpenCoefficients)
+    (B : FullSexticTailIndex → Matrix n n OpenCoefficients)
+    (C : FullSexticTailIndex → Matrix s s OpenCoefficients)
+    (h : ∀ i, P.map (coefficientPartial i) = P * C i - B i * P) (r : ℕ)
+    (hne : ∃ I : Fin r → n, ∃ J : Fin r → s, (P.submatrix I J).det ≠ 0)
+    {L : Type*} [Field L] (ρ : OpenCoefficients →+* L) : r ≤ (P.map ρ).rank :=
+  CycleQ2DifferentialMinorStability.rank_specialize_ge P r
+    (CycleQ2DifferentialMinorStability.minorIdeal_eq_top coefficientPartial
+      (CycleQ2PolynomialCoefficientOpen.differential_ideal_eq_top rawToMonic) P B C h r hne) ρ
+
+end CycleQ2MonicFermatCoefficientOpen
+end
+
+#print axioms CycleQ2PolynomialCoefficientOpen.vectorRealize_injective
+#print axioms CycleQ2MonicFermatCoefficientOpen.equation_rawToMonic
+#print axioms CycleQ2MonicFermatCoefficientOpen.vectorRealize_injective
+#print axioms CycleQ2MonicFermatCoefficientOpen.rank_specialize_ge
+
+/-!
+# Clearing coefficient denominators in normalized pole symbols
+
+Changing the coefficient ring by a localization localizes the entire pole
+symbol module. This includes the relation submodule: a common denominator
+for the numerator of a relation gives a relation over the original ring.
+Consequently independence on the coefficient open persists over its field
+of fractions without a flatness assumption on the residue realization.
+-/
+
+noncomputable section
+namespace CycleQ2PoleSymbolLocalization
+
+open MvPolynomial CycleQ2PolynomialPoleSymbols
+
+variable {R : Type*} [CommRing R] (K : Type*) [CommRing K] [Algebra R K]
+
+def polynomialMap : MvPolynomial (Fin 5) R →ₗ[R] MvPolynomial (Fin 5) K :=
+  (AddMonoidAlgebra.coeffLinearEquiv R).symm.toLinearMap ∘ₗ
+    Finsupp.mapRange.linearMap (Algebra.linearMap R K) ∘ₗ
+    (AddMonoidAlgebra.coeffLinearEquiv R).toLinearMap
+
+@[simp] theorem polynomialMap_apply (P : MvPolynomial (Fin 5) R) :
+    polynomialMap K P = MvPolynomial.map (algebraMap R K) P := by
+  ext m
+  rw [MvPolynomial.coeff_map]
+  rfl
+
+def polesMap : Poles R →ₗ[R] Poles K :=
+  Finsupp.mapRange.linearMap (polynomialMap K)
+
+@[simp] theorem polesMap_single (n : ℕ) (P : MvPolynomial (Fin 5) R) :
+    polesMap K (Finsupp.single n P) =
+      Finsupp.single n (MvPolynomial.map (algebraMap R K) P) := by
+  simp [polesMap, Finsupp.mapRange.linearMap, polynomialMap_apply]
+
+private def relationVector (T : Type*) [CommRing T] (F : MvPolynomial (Fin 5) T)
+    (n : ℕ) (i : Fin 5) (P : MvPolynomial (Fin 5) T) : Poles T :=
+  Finsupp.single (n+1) (P * pderiv i F) - Finsupp.single n (pderiv i P)
+
+private theorem relationVector_smul (T : Type*) [CommRing T]
+    (F : MvPolynomial (Fin 5) T) (n : ℕ) (i : Fin 5)
+    (a : T) (P : MvPolynomial (Fin 5) T) :
+    relationVector T F n i (a • P) = a • relationVector T F n i P := by
+  simp only [relationVector, smul_mul_assoc, map_smul, smul_sub, Finsupp.smul_single]
+
+private theorem polesMap_relationVector (F : MvPolynomial (Fin 5) R)
+    (n : ℕ) (i : Fin 5) (P : MvPolynomial (Fin 5) R) :
+    polesMap K (relationVector R F n i P) =
+      relationVector K (MvPolynomial.map (algebraMap R K) F) n i
+        (MvPolynomial.map (algebraMap R K) P) := by
+  simp only [relationVector, map_sub, polesMap_single, map_mul, ← pderiv_map]
+
+variable (S : Submonoid R) [IsLocalization S K] (F : MvPolynomial (Fin 5) R)
+
+instance polynomialMap_isLocalizedModule : IsLocalizedModule S (polynomialMap K (R := R)) := by
+  unfold polynomialMap
+  infer_instance
+
+instance polesMap_isLocalizedModule : IsLocalizedModule S (polesMap K (R := R)) := by
+  unfold polesMap
+  infer_instance
+
+/-- The defining normalized relations commute with coefficient localization.
+Only one denominator is needed for each polynomial numerator. -/
+theorem relations_localized :
+    (relations R F).localized' K S (polesMap K) =
+      relations K (MvPolynomial.map (algebraMap R K) F) := by
+  simp only [relations, Submodule.localized'_span]
+  apply le_antisymm
+  · apply Submodule.span_le.mpr
+    rintro _ ⟨_, ⟨n, i, P, rfl⟩, rfl⟩
+    change polesMap K (relationVector R F n i P) ∈ _
+    rw [polesMap_relationVector]
+    exact Submodule.subset_span ⟨n, i, MvPolynomial.map (algebraMap R K) P, rfl⟩
+  · apply Submodule.span_le.mpr
+    rintro _ ⟨n, i, P, rfl⟩
+    obtain ⟨⟨Q, s⟩, hs⟩ := IsLocalizedModule.surj S (polynomialMap K) P
+    have hs' : (algebraMap R K (s : R)) • P = MvPolynomial.map (algebraMap R K) Q := by
+      simpa only [algebraMap_smul, Submonoid.smul_def, polynomialMap_apply] using hs
+    change relationVector K (MvPolynomial.map (algebraMap R K) F) n i P ∈ _
+    apply (Submodule.smul_mem_iff_of_isUnit _ (IsLocalization.map_units K s)).mp
+    rw [← relationVector_smul, hs', ← polesMap_relationVector]
+    exact Submodule.subset_span ⟨relationVector R F n i Q, ⟨n, i, Q, rfl⟩, rfl⟩
+
+def quotientEquiv :
+    (Poles K ⧸ (relations R F).localized' K S (polesMap K)) ≃ₗ[K]
+      Symbols K (MvPolynomial.map (algebraMap R K) F) :=
+  Submodule.quotEquivOfEq _ _ (relations_localized K S F)
+
+/-- The ordinary coefficient specialization, viewed as a linear localization
+map for the scalar action of the original coefficient ring. -/
+def localize : Symbols R F →ₗ[R] Symbols K (MvPolynomial.map (algebraMap R K) F) :=
+  (quotientEquiv K S F).restrictScalars R ∘ₗ
+    (relations R F).toLocalizedQuotient' K S (polesMap K)
+
+instance localize_isLocalizedModule : IsLocalizedModule S (localize K S F) := by
+  unfold localize
+  infer_instance
+
+@[simp] theorem localize_symbol (n : ℕ) (P : MvPolynomial (Fin 5) R) :
+    localize K S F (symbol R F n P) =
+      symbol K (MvPolynomial.map (algebraMap R K) F) n
+        (MvPolynomial.map (algebraMap R K) P) := by
+  change Submodule.Quotient.mk (polesMap K (Finsupp.single n P)) =
+    Submodule.Quotient.mk (Finsupp.single n (MvPolynomial.map (algebraMap R K) P))
+  rw [polesMap_single]
+
+theorem localize_eq_specialize (x : Symbols R F) :
+    localize K S F x = specialize (algebraMap R K) F x := by
+  refine Submodule.Quotient.induction_on _ x ?_
+  intro p
+  induction p using Finsupp.induction_linear with
+  | zero =>
+    change localize K S F 0 = specialize (algebraMap R K) F 0
+    simp
+  | add p q hp hq =>
+    change localize K S F (Submodule.Quotient.mk p + Submodule.Quotient.mk q) =
+      specialize (algebraMap R K) F (Submodule.Quotient.mk p + Submodule.Quotient.mk q)
+    rw [map_add, map_add, hp, hq]
+  | single n P =>
+    change localize K S F (symbol R F n P) =
+      specialize (algebraMap R K) F (symbol R F n P)
+    rw [localize_symbol, specialize_symbol]
+
+/-- Every localized symbol has a common coefficient denominator. -/
+theorem exists_denominator (x : Symbols K (MvPolynomial.map (algebraMap R K) F)) :
+    ∃ (a : S) (y : Symbols R F),
+      specialize (algebraMap R K) F y = (algebraMap R K (a : R)) • x := by
+  obtain ⟨⟨y, a⟩, h⟩ := IsLocalizedModule.surj S (localize K S F) x
+  exact ⟨a, y, by
+    simpa only [localize_eq_specialize, Submonoid.smul_def, algebraMap_smul] using h.symm⟩
+
+/-- A class becomes zero precisely when a coefficient denominator kills it. -/
+theorem specialize_eq_zero_iff (x : Symbols R F) :
+    specialize (algebraMap R K) F x = 0 ↔ ∃ a : S, (a : R) • x = 0 := by
+  rw [← localize_eq_specialize K S F x]
+  simpa only [Submonoid.smul_def] using IsLocalizedModule.eq_zero_iff S (localize K S F)
+
+/-- Independence survives coefficient localization, including passage to
+the generic coefficient field. -/
+theorem linearIndependent {ι : Type*} {v : ι → Symbols R F}
+    (hv : LinearIndependent R v) :
+    LinearIndependent K (fun i => specialize (algebraMap R K) F (v i)) := by
+  simpa only [Function.comp_apply, localize_eq_specialize] using
+    (LinearIndependent.of_isLocalizedModule K S (localize K S F) hv)
+
+end CycleQ2PoleSymbolLocalization
+end
+
+#print axioms CycleQ2PoleSymbolLocalization.relations_localized
+#print axioms CycleQ2PoleSymbolLocalization.localize_isLocalizedModule
+#print axioms CycleQ2PoleSymbolLocalization.linearIndependent
+
+noncomputable section
+namespace CycleQ2PoleSymbolLocalization
+
+open MvPolynomial CycleQ2PolynomialPoleSymbols
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2UniversalPoleFrame (equation basisSymbol Label)
+
+variable {R K : Type*} [CommRing R] [CommRing K]
+
+theorem exists_nonzero_denominator [IsDomain R] [Algebra R K] [IsFractionRing R K]
+    (F : MvPolynomial (Fin 5) R)
+    (x : Symbols K (MvPolynomial.map (algebraMap R K) F)) :
+    ∃ a : R, a ≠ 0 ∧ ∃ y : Symbols R F,
+      specialize (algebraMap R K) F y = (algebraMap R K a) • x := by
+  obtain ⟨a, y, h⟩ := exists_denominator K (nonZeroDivisors R) F x
+  exact ⟨a, mem_nonZeroDivisors_iff_ne_zero.mp a.property, y, h⟩
+
+/-- Identifies the equation obtained by two successive coefficient maps
+with the equation obtained from their composite. -/
+def equationMapEquiv (θ : R →+* K) (φ : CoeffRing →+* R) :
+    Symbols K (MvPolynomial.map θ (equation φ)) ≃ₗ[K] Symbols K (equation (θ.comp φ)) :=
+  Submodule.quotEquivOfEq _ _ (by simp only [equation, MvPolynomial.map_map])
+
+@[simp] theorem equationMapEquiv_symbol (θ : R →+* K) (φ : CoeffRing →+* R)
+    (n : ℕ) (P : MvPolynomial (Fin 5) K) :
+    equationMapEquiv θ φ (symbol K (MvPolynomial.map θ (equation φ)) n P) =
+      symbol K (equation (θ.comp φ)) n P := rfl
+
+@[simp] theorem equationMapEquiv_specialize_basisSymbol
+    (θ : R →+* K) (φ : CoeffRing →+* R) (i : Label) :
+    equationMapEquiv θ φ (specialize θ (equation φ) (basisSymbol φ i)) =
+      basisSymbol (θ.comp φ) i := by
+  rcases i with i | i <;>
+    simp only [basisSymbol, CycleQ2UniversalPoleFrame.pole, specialize_symbol,
+      map_monomial, map_one, equationMapEquiv_symbol]
+
+/-- Independence can be checked after any injective coefficient map for
+which the coefficient-changed frame is independent. -/
+theorem basisSymbol_linearIndependent_of_map (θ : R →+* K) (φ : CoeffRing →+* R)
+    (hθ : Function.Injective θ) (h : LinearIndependent K (basisSymbol (θ.comp φ))) :
+    LinearIndependent R (basisSymbol φ) := by
+  classical
+  rw [Fintype.linearIndependent_iff]
+  intro c hc i
+  have hz : ∑ j, θ (c j) • specialize θ (equation φ) (basisSymbol φ j) = 0 := by
+    simpa only [map_sum, map_smulₛₗ, map_zero] using
+      congrArg (specialize θ (equation φ)) hc
+  have he := congrArg (equationMapEquiv θ φ) hz
+  simp only [map_sum, map_smul, equationMapEquiv_specialize_basisSymbol, map_zero] at he
+  exact hθ (((Fintype.linearIndependent_iff.mp h) (fun j => θ (c j)) he i).trans
+    (map_zero θ).symm)
+
+/-- The literal universal basis, with its composite coefficient map,
+remains independent after localization. -/
+theorem basisSymbol_linearIndependent_localization (K : Type*) [CommRing K] [Algebra R K]
+    (S : Submonoid R) [IsLocalization S K] (φ : CoeffRing →+* R)
+    (h : LinearIndependent R (basisSymbol φ)) :
+    LinearIndependent K (basisSymbol ((algebraMap R K).comp φ)) := by
+  classical
+  have hi := linearIndependent K S (equation φ) h
+  rw [Fintype.linearIndependent_iff] at hi ⊢
+  intro c hc i
+  apply hi c ?_ i
+  apply (equationMapEquiv (algebraMap R K) φ).injective
+  simpa only [map_sum, map_smul, equationMapEquiv_specialize_basisSymbol, map_zero] using hc
+
+end CycleQ2PoleSymbolLocalization
+
+namespace CycleQ2PolynomialCoefficientOpen
+
+open MvPolynomial CycleQ2GenericSexticGradient
+
+variable {σ : Type} [Fintype σ] [DecidableEq σ]
+    (ψ : CoeffRing →+* Parameters σ) (ρ₀ : Parameters σ →+* ℂ)
+    (point : ρ₀.comp ψ = seedEvaluation)
+
+theorem denominator_ne_zero : denominator ψ ≠ 0 := by
+  intro h
+  have he := point_denominator ψ ρ₀ point
+  rw [h, map_zero] at he
+  exact zero_ne_one he
+
+theorem toOpen_injective : Function.Injective (toOpen ψ) :=
+  IsLocalization.injective (OpenCoefficients ψ)
+    (Submonoid.powers_le.mpr
+      (mem_nonZeroDivisors_iff_ne_zero.mpr (denominator_ne_zero ψ ρ₀ point)))
+
+/-- The frame is already independent over the polynomial parameter ring.
+Any polynomial-coefficient relation would persist on its coefficient open. -/
+theorem polynomial_basisSymbol_linearIndependent : LinearIndependent (Parameters σ)
+    (CycleQ2UniversalPoleFrame.basisSymbol ψ) :=
+  CycleQ2PoleSymbolLocalization.basisSymbol_linearIndependent_of_map (toOpen ψ) ψ
+    (toOpen_injective ψ ρ₀ point) (basisSymbol_linearIndependent ψ ρ₀ point)
+
+end CycleQ2PolynomialCoefficientOpen
+
+namespace CycleQ2MonicFermatCoefficientOpen
+
+open MvPolynomial CycleQ2GenericSexticGradient
+open CycleQ2HiggsJacobianFrames (frameDet seed_frameDet)
+open CycleQ2PolynomialPoleSymbols (monicFamily)
+
+abbrev GenericCoefficients := FractionRing Parameters
+
+def genericCoefficientMap : CoeffRing →+* GenericCoefficients :=
+  (algebraMap Parameters GenericCoefficients).comp rawToMonic
+
+theorem generic_equation_monic : CycleQ2UniversalPoleFrame.equation genericCoefficientMap =
+    MvPolynomial.map (algebraMap Parameters GenericCoefficients) (monicFamily ℂ) := by
+  change MvPolynomial.map ((algebraMap Parameters GenericCoefficients).comp rawToMonic) universalF = _
+  rw [← MvPolynomial.map_map]
+  exact congrArg (MvPolynomial.map (algebraMap Parameters GenericCoefficients)) equation_rawToMonic
+
+theorem polynomial_basisSymbol_linearIndependent : LinearIndependent Parameters
+    (CycleQ2UniversalPoleFrame.basisSymbol rawToMonic) :=
+  CycleQ2PolynomialCoefficientOpen.polynomial_basisSymbol_linearIndependent
+    rawToMonic fermatPoint fermat_factor
+
+/-- Independence of the actual 66 normalized symbols over the fraction field
+of the 44 monic coefficient parameters. -/
+theorem generic_basisSymbol_linearIndependent : LinearIndependent GenericCoefficients
+    (CycleQ2UniversalPoleFrame.basisSymbol genericCoefficientMap) :=
+  CycleQ2PoleSymbolLocalization.basisSymbol_linearIndependent_localization GenericCoefficients
+    (nonZeroDivisors Parameters) rawToMonic polynomial_basisSymbol_linearIndependent
+
+theorem generic_vectorRealize_injective :
+    Function.Injective (CycleQ2UniversalPoleFrame.vectorRealize genericCoefficientMap) := by
+  classical
+  intro v w h
+  funext i
+  apply sub_eq_zero.mp
+  apply (Fintype.linearIndependent_iff.mp generic_basisSymbol_linearIndependent) (v-w) ?_ i
+  change CycleQ2UniversalPoleFrame.vectorRealize genericCoefficientMap (v-w) = 0
+  rw [map_sub, h, sub_self]
+
+theorem generic_frame_units :
+    IsUnit (genericCoefficientMap (frameDet 6 1)) ∧
+      IsUnit (genericCoefficientMap (frameDet 12 1)) ∧
+      IsUnit (genericCoefficientMap (frameDet 18 1)) := by
+  have hu (n : ℕ) : IsUnit (genericCoefficientMap (frameDet n 1)) := by
+    apply isUnit_iff_ne_zero.mpr
+    intro h
+    change algebraMap Parameters GenericCoefficients (rawToMonic (frameDet n 1)) = 0 at h
+    have hz := IsFractionRing.injective Parameters GenericCoefficients
+      (h.trans (map_zero (algebraMap Parameters GenericCoefficients)).symm)
+    have hf := congrArg (fun f : CoeffRing →+* ℂ => f (frameDet n 1)) fermat_factor
+    simp only [RingHom.comp_apply, seed_frameDet] at hf
+    rw [hz, map_zero] at hf
+    exact zero_ne_one hf
+  exact ⟨hu 6, hu 12, hu 18⟩
+
+end CycleQ2MonicFermatCoefficientOpen
+end
+
+#print axioms CycleQ2PoleSymbolLocalization.basisSymbol_linearIndependent_localization
+#print axioms CycleQ2MonicFermatCoefficientOpen.polynomial_basisSymbol_linearIndependent
+#print axioms CycleQ2MonicFermatCoefficientOpen.generic_basisSymbol_linearIndependent
+#print axioms CycleQ2MonicFermatCoefficientOpen.generic_vectorRealize_injective
+#print axioms CycleQ2MonicFermatCoefficientOpen.generic_frame_units

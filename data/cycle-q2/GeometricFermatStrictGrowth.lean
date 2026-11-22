@@ -8,6 +8,7 @@ import Mathlib.LinearAlgebra.Matrix.Rank
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
 import Mathlib.RingTheory.Valuation.ValuationSubring
 import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+import Mathlib.RingTheory.Noetherian.Basic
 import HodgeComputer.Constructions.HoldoutCover.Piola
 
 /-!
@@ -832,3 +833,64 @@ end CycleQ2DifferentialMinorStability
 #print axioms CycleQ2DifferentialMinorStability.minorIdeal_eq_top
 #print axioms CycleQ2DifferentialMinorStability.exists_specialized_minor
 #print axioms CycleQ2DifferentialMinorStability.rank_specialize_ge
+
+namespace CycleQ2DifferentialMinorStability
+
+open Matrix
+
+variable {R n : Type*} [CommRing R] [Fintype n]
+
+/-- Preservation of the column span constructs the matrix on its generators.
+Neither independence of the generators nor a choice of pivots is required. -/
+theorem exists_generator_connection {s : Type*} [Fintype s]
+    (D : Derivation ℤ R R) (P : Matrix n s R) (B : Matrix n n R)
+    (N : Submodule R (n → R)) (hP : LinearMap.range P.mulVecLin = N)
+    (stable : ∀ v ∈ N, (fun i => D (v i) + B.mulVec v i) ∈ N) :
+    ∃ C : Matrix s s R, P.map D = P * C - B * P := by
+  classical
+  have hcol (j : s) : (fun i => P i j) ∈ N := by
+    rw [← hP, Matrix.range_mulVecLin]
+    exact Submodule.subset_span ⟨j, rfl⟩
+  have lifts (j : s) :
+      (fun i => D (P i j) + B.mulVec (fun k => P k j) i) ∈
+        LinearMap.range P.mulVecLin := by
+    rw [hP]
+    exact stable _ (hcol j)
+  choose c hc using lifts
+  let C : Matrix s s R := fun i j => c j i
+  refine ⟨C, ?_⟩
+  ext i j
+  have he := congrFun (hc j) i
+  change (∑ k, P i k * c j k) = D (P i j) + ∑ k, B i k * P k j at he
+  change D (P i j) = (∑ k, P i k * c j k) - ∑ k, B i k * P k j
+  exact eq_sub_iff_add_eq.mpr he.symm
+
+/-- A finitely generated stable submodule admits one finite generating matrix
+and generator connection matrices for an entire family of derivations. -/
+theorem exists_finite_generator_connections {ι : Type*}
+    (D : ι → Derivation ℤ R R) (B : ι → Matrix n n R)
+    (N : Submodule R (n → R)) (finite : N.FG)
+    (stable : ∀ a v, v ∈ N → (fun i => D a (v i) + (B a).mulVec v i) ∈ N) :
+    ∃ (s : ℕ) (P : Matrix n (Fin s) R) (C : ι → Matrix (Fin s) (Fin s) R),
+      LinearMap.range P.mulVecLin = N ∧ ∀ a, P.map (D a) = P * C a - B a * P := by
+  classical
+  obtain ⟨s, v, hv⟩ := Submodule.fg_iff_exists_fin_generating_family.mp finite
+  let P : Matrix n (Fin s) R := fun i j => v j i
+  have hP : LinearMap.range P.mulVecLin = N := (Matrix.range_mulVecLin P).trans hv
+  choose C hC using fun a => exists_generator_connection (D a) P (B a) N hP (stable a)
+  exact ⟨s, P, C, hP, hC⟩
+
+/-- Over a Noetherian coefficient ring, finite generation of the stable
+submodule follows from the finite ambient coordinate module. -/
+theorem exists_noetherian_generator_connections [IsNoetherianRing R] {ι : Type*}
+    (D : ι → Derivation ℤ R R) (B : ι → Matrix n n R)
+    (N : Submodule R (n → R))
+    (stable : ∀ a v, v ∈ N → (fun i => D a (v i) + (B a).mulVec v i) ∈ N) :
+    ∃ (s : ℕ) (P : Matrix n (Fin s) R) (C : ι → Matrix (Fin s) (Fin s) R),
+      LinearMap.range P.mulVecLin = N ∧ ∀ a, P.map (D a) = P * C a - B a * P :=
+  exists_finite_generator_connections D B N (IsNoetherian.noetherian N) stable
+
+end CycleQ2DifferentialMinorStability
+
+#print axioms CycleQ2DifferentialMinorStability.exists_generator_connection
+#print axioms CycleQ2DifferentialMinorStability.exists_noetherian_generator_connections

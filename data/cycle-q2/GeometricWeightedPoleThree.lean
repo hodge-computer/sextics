@@ -1,8 +1,11 @@
 import Proposal.GeometricUniversalWeightedDeRham
+import Proposal.GeometricUniversalJacobianFrames
+import Proposal.GeometricFermatPoleReduction
 import Proposal.GeometricExteriorSheaf
 import HodgeComputer.Constructions.HoldoutCover.FiniteDifferentials
 import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
 import Mathlib.RingTheory.Localization.Away.Basic
+import Mathlib.RingTheory.Localization.Module
 
 /-!
 # Pole-three reduction for the actual weighted source
@@ -1148,6 +1151,415 @@ theorem projectedPoleResidue_relation_exact (k : ℕ) (i : Fin 5) (p : MvPolynom
     (weightedHomogeneousComponent geometricWeight (6*k+geometricWeight i) p)
     (weightedHomogeneousComponent_isWeightedHomogeneous _ _)
 
+/-- Multiplication by a monic-family coefficient is multiplication by its actual
+constant value on the hypersurface, in every pole summand. -/
+theorem projectedPoleResidue_smul (a : Coeff) (p : RawPoles) :
+    projectedPoleResidue (a • p) = v (C a) * projectedPoleResidue p := by
+  induction p using Finsupp.induction_linear with
+  | zero => simp
+  | add p q hp hq => simp only [smul_add,map_add,hp,hq,mul_add]
+  | single k p =>
+    rw [Finsupp.smul_single,projectedPoleResidue_single,projectedPoleResidue_single,
+      map_smul,map_smul,smul_eq_C_mul,normalizedFiberResidue_C_mul]
+
+/-- The fraction-field coefficient embedding agrees with literal polynomial evaluation. -/
+theorem coefficient_fieldValue (a : Coeff) :
+    algebraMap K W (algebraMap Coeff K a) = v (C a) := by
+  change CycleQ2UniversalWeightedDeRham.coefficients (algebraMap Coeff K a) = _
+  exact IsFractionRing.lift_algebraMap _ a
+
+/-- Restriction of scalars on the existing relative Kähler exterior powers. -/
+instance coefficientFormModule (p : ℕ) : Module Coeff (Form K W p) :=
+  Module.compHom (Form K W p) (algebraMap Coeff K)
+
+instance coefficientFormTower (p : ℕ) : IsScalarTower Coeff K (Form K W p) where
+  smul_assoc a c ω := by
+    change (a • c) • ω = algebraMap Coeff K a • (c • ω)
+    rw [Algebra.smul_def,mul_smul]
+
+theorem coefficient_form_smul (a : Coeff) {p : ℕ} (ω : Form K W p) :
+    a • ω = v (C a) • ω := by
+  change algebraMap Coeff K a • ω = _
+  rw [← IsScalarTower.algebraMap_smul W (algebraMap Coeff K a),coefficient_fieldValue]
+
+/-- Actual rational exterior boundaries, viewed over the monic coefficient ring. -/
+def rationalBoundaries : Submodule Coeff (Form K W 3) :=
+  (LinearMap.range exteriorDerivative).restrictScalars Coeff
+
+/-- Rational top forms modulo the range of the actual exterior derivative. -/
+abbrev RationalResidueClasses := Form K W 3 ⧸ rationalBoundaries
+
+/-- The degree-projected raw polynomial poles as actual rational top forms. -/
+def rawResidueForm : RawPoles →ₗ[Coeff] Form K W 3 where
+  toFun p := projectedPoleResidue p • volume coordinateBasis
+  map_add' p q := by rw [map_add,add_smul]
+  map_smul' a p := by
+    rw [projectedPoleResidue_smul,mul_smul,coefficient_form_smul]
+
+def rawResidueClass : RawPoles →ₗ[Coeff] RationalResidueClasses :=
+  rationalBoundaries.mkQ.comp rawResidueForm
+
+theorem rawResidueClass_relation_zero (k : ℕ) (i : Fin 5) (p : MvPolynomial (Fin 5) Coeff) :
+    rawResidueClass (Finsupp.single (k+1) (p*pderiv i homogeneousEquation) -
+      Finsupp.single k (pderiv i p)) = 0 := by
+  change rationalBoundaries.mkQ
+    (projectedPoleResidue (Finsupp.single (k+1) (p*pderiv i homogeneousEquation) -
+      Finsupp.single k (pderiv i p)) • volume coordinateBasis) = 0
+  rw [Submodule.mkQ_apply,Submodule.Quotient.mk_eq_zero]
+  exact projectedPoleResidue_relation_exact k i p
+
+open CycleQ2PolynomialPoleSymbols (Symbols symbol relations monicFamily connection connection_symbol)
+
+/-- Every coefficient-linear combination of the raw polynomial relations has
+zero image in actual rational top forms modulo boundaries. -/
+theorem relations_le_residue_kernel :
+    relations Coeff (monicFamily ℂ) ≤ LinearMap.ker rawResidueClass := by
+  apply Submodule.span_le.mpr
+  rintro _ ⟨k,i,p,rfl⟩
+  change rawResidueClass _ = 0
+  exact rawResidueClass_relation_zero k i p
+
+/-- The normalized polynomial pole quotient of the literal 44-coefficient monic
+family maps coefficient-linearly to actual rational top forms modulo boundaries. -/
+def residueRealization : Symbols Coeff (monicFamily ℂ) →ₗ[Coeff] RationalResidueClasses :=
+  (relations Coeff (monicFamily ℂ)).liftQ rawResidueClass relations_le_residue_kernel
+
+theorem residueRealization_mkQ (p : RawPoles) :
+    residueRealization ((relations Coeff (monicFamily ℂ)).mkQ p) = rawResidueClass p := rfl
+
+theorem residueRealization_symbol (k : ℕ) (p : MvPolynomial (Fin 5) Coeff) :
+    residueRealization (symbol Coeff (monicFamily ℂ) k p) =
+      rationalBoundaries.mkQ
+        (normalizedFiberResidue k (chart (weightedHomogeneousComponent geometricWeight (6*k) p)) •
+          volume coordinateBasis) := by
+  change rationalBoundaries.mkQ
+    (projectedPoleResidue (Finsupp.single k p) • volume coordinateBasis) = _
+  rw [projectedPoleResidue_single]
+
+theorem residueRealization_symbol_eq_zero_iff (k : ℕ) (p : MvPolynomial (Fin 5) Coeff) :
+    residueRealization (symbol Coeff (monicFamily ℂ) k p) = 0 ↔
+      ∃ η : Form K W 2, exteriorDerivative η =
+        normalizedFiberResidue k (chart (weightedHomogeneousComponent geometricWeight (6*k) p)) •
+          volume coordinateBasis := by
+  rw [residueRealization_symbol,Submodule.mkQ_apply,Submodule.Quotient.mk_eq_zero]
+  rfl
+
+/-- The same actual rational quotient with its coefficient fraction-field scalar action. -/
+abbrev FieldResidueClasses := Form K W 3 ⧸ LinearMap.range exteriorDerivative
+
+def residueClassesEquiv : RationalResidueClasses ≃ₗ[Coeff] FieldResidueClasses :=
+  Submodule.Quotient.restrictScalarsEquiv Coeff (LinearMap.range exteriorDerivative)
+
+def fieldResidueRealization : Symbols Coeff (monicFamily ℂ) →ₗ[Coeff] FieldResidueClasses :=
+  residueClassesEquiv.toLinearMap.comp residueRealization
+
+theorem fieldResidueRealization_eq_zero_iff (x : Symbols Coeff (monicFamily ℂ)) :
+    fieldResidueRealization x = 0 ↔ residueRealization x = 0 := by
+  change residueClassesEquiv (residueRealization x) = 0 ↔ residueRealization x = 0
+  constructor
+  · intro h
+    exact residueClassesEquiv.injective (h.trans residueClassesEquiv.map_zero.symm)
+  · intro h
+    rw [h,map_zero]
+
+theorem coefficient_derivation_map {A B : Type*} [CommRing A] [CommRing B]
+    [Algebra ℤ A] [Algebra ℤ B] (θ : A →+* B) (D : Derivation ℤ A A) (E : Derivation ℤ B B)
+    (h : ∀ a, E (θ a) = θ (D a)) (p : MvPolynomial (Fin 5) A) :
+    coefficientDerivation E (MvPolynomial.map θ p) = MvPolynomial.map θ (coefficientDerivation D p) := by
+  induction p using MvPolynomial.induction_on' with
+  | monomial m c => simp only [map_monomial,coefficientDerivation_monomial,h]
+  | add p q hp hq => simp only [map_add,hp,hq]
+
+/-- A compatible coefficient derivation commutes with changing the coefficients
+of the actual normalized polynomial pole quotient. -/
+theorem connection_specialize {A B : Type*} [CommRing A] [CommRing B]
+    [Algebra ℤ A] [Algebra ℤ B] (θ : A →+* B) (D : Derivation ℤ A A) (E : Derivation ℤ B B)
+    (h : ∀ a, E (θ a) = θ (D a)) (G : MvPolynomial (Fin 5) A) (x : Symbols A G) :
+    connection E (MvPolynomial.map θ G) (CycleQ2PolynomialPoleSymbols.specialize θ G x) =
+      CycleQ2PolynomialPoleSymbols.specialize θ G (connection D G x) := by
+  refine Submodule.Quotient.induction_on _ x (fun p => ?_)
+  induction p using Finsupp.induction_linear with
+  | zero => simp
+  | add p q hp hq => simp only [map_add,hp,hq]
+  | single k p =>
+    change connection E (MvPolynomial.map θ G)
+      (CycleQ2PolynomialPoleSymbols.specialize θ G (symbol A G k p)) =
+        CycleQ2PolynomialPoleSymbols.specialize θ G (connection D G (symbol A G k p))
+    simp only [CycleQ2PolynomialPoleSymbols.specialize_symbol,connection_symbol,map_sub,
+      coefficient_derivation_map θ D E h,map_mul]
+
+private theorem coefficient_change_base (e : FullSexticTailIndex) (p : MvPolynomial (Fin 5) Coeff) :
+    coefficientDerivation (HoldoutConstruction.integerPartial (R := ℂ) e) p =
+      coefficientDerivation (pderiv e) p := by
+  induction p using MvPolynomial.induction_on' with
+  | monomial m c => rw [coefficientDerivation_monomial,coefficientDerivation_monomial]; rfl
+  | add p q hp hq => simp only [map_add,hp,hq]
+
+theorem integer_connection_eq (e : FullSexticTailIndex) :
+    connection (HoldoutConstruction.integerPartial (R := ℂ) e) (monicFamily ℂ) =
+      connection (pderiv e) (monicFamily ℂ) := by
+  apply AddMonoidHom.ext
+  intro x
+  refine Submodule.Quotient.induction_on _ x (fun p => ?_)
+  induction p using Finsupp.induction_linear with
+  | zero => simp
+  | add p q hp hq => simp only [map_add,hp,hq]
+  | single k p =>
+    change connection (HoldoutConstruction.integerPartial (R := ℂ) e) (monicFamily ℂ)
+      (symbol Coeff (monicFamily ℂ) k p) =
+        connection (pderiv e) (monicFamily ℂ) (symbol Coeff (monicFamily ℂ) k p)
+    simp only [connection_symbol,coefficient_change_base]
+
+/-- Coefficient differentiation preserves each weighted numerator component. -/
+theorem component_coefficient (e : FullSexticTailIndex) (d : ℕ) (p : MvPolynomial (Fin 5) Coeff) :
+    weightedHomogeneousComponent geometricWeight d (coefficientDerivation (pderiv e) p) =
+      coefficientDerivation (pderiv e) (weightedHomogeneousComponent geometricWeight d p) := by
+  classical
+  induction p using MvPolynomial.induction_on' with
+  | monomial m c =>
+    rw [coefficientDerivation_monomial,
+      weightedHomogeneousComponent_of_mem (isWeightedHomogeneous_monomial geometricWeight m (pderiv e c) rfl),
+      weightedHomogeneousComponent_of_mem (isWeightedHomogeneous_monomial geometricWeight m c rfl)]
+    split_ifs <;> simp only [coefficientDerivation_monomial,map_zero]
+  | add p q hp hq => simp only [map_add,hp,hq]
+
+private abbrev coefficientVelocity (e : FullSexticTailIndex) : MvPolynomial (Fin 5) Coeff :=
+  monomial (CycleQ2IncidenceNormalForm.fullExponentOf e.val.val) 1
+
+private theorem component_velocity_mul (e : FullSexticTailIndex) (k : ℕ)
+    (p : MvPolynomial (Fin 5) Coeff) :
+    weightedHomogeneousComponent geometricWeight (6*(k+1)) (coefficientVelocity e*p) =
+      coefficientVelocity e*weightedHomogeneousComponent geometricWeight (6*k) p := by
+  have hm : (coefficientVelocity e).IsWeightedHomogeneous geometricWeight 6 :=
+    homogeneous_of_character (isWeightedHomogeneous_monomial
+      CycleQ2IncidenceNormalForm.fullGrading _ _ (CycleQ2IncidenceNormalForm.fullGrading_of_invariant e.val))
+  have hd : 6+6*k = 6*(k+1) := by omega
+  simpa only [hd] using CycleQ2WeightedComponent.component_mul_left geometricWeight
+    (coefficientVelocity e) p 6 (6*k) hm
+
+/-- The literal coefficient connection on raw normalized polynomial poles. -/
+def rawPoleConnection (e : FullSexticTailIndex) : RawPoles →+ RawPoles :=
+  Finsupp.liftAddHom (fun k =>
+    (Finsupp.lsingle k : MvPolynomial (Fin 5) Coeff →ₗ[Coeff] RawPoles).toAddMonoidHom.comp
+      (coefficientDerivation (pderiv e)).toAddMonoidHom -
+    (Finsupp.lsingle (k+1) : MvPolynomial (Fin 5) Coeff →ₗ[Coeff] RawPoles).toAddMonoidHom.comp
+      (AddMonoidHom.mulLeft (coefficientVelocity e)))
+
+theorem rawPoleConnection_single (e : FullSexticTailIndex) (k : ℕ) (p : MvPolynomial (Fin 5) Coeff) :
+    rawPoleConnection e (Finsupp.single k p) =
+      Finsupp.single k (coefficientDerivation (pderiv e) p) -
+        Finsupp.single (k+1) (coefficientVelocity e*p) := by
+  rw [rawPoleConnection,Finsupp.liftAddHom_apply_single]
+  rfl
+
+/-- The formal coefficient connection is realized by the actual tangent
+derivation on the rational hypersurface field, before passing to boundaries. -/
+theorem projectedPoleResidue_connection (e : FullSexticTailIndex) (p : RawPoles) :
+    fiberTangent (coefficientPartial e) (projectedPoleResidue p) =
+      projectedPoleResidue (rawPoleConnection e p) := by
+  induction p using Finsupp.induction_linear with
+  | zero => simp
+  | add p q hp hq => simp only [map_add,hp,hq]
+  | single k p =>
+    rw [rawPoleConnection_single,map_sub,projectedPoleResidue_single,projectedPoleResidue_single,
+      projectedPoleResidue_single,normalized_coefficient_residue,coefficient_chart,
+      coefficient_change_base,component_coefficient,component_velocity_mul,map_mul]
+
+theorem connection_mkQ (e : FullSexticTailIndex) (p : RawPoles) :
+    connection (pderiv e) (monicFamily ℂ) ((relations Coeff (monicFamily ℂ)).mkQ p) =
+      (relations Coeff (monicFamily ℂ)).mkQ (rawPoleConnection e p) := by
+  induction p using Finsupp.induction_linear with
+  | zero => simp
+  | add p q hp hq => simp only [map_add,hp,hq]
+  | single k p =>
+    rw [rawPoleConnection_single,map_sub]
+    change connection (pderiv e) (monicFamily ℂ) (symbol Coeff (monicFamily ℂ) k p) =
+      symbol Coeff (monicFamily ℂ) k (coefficientDerivation (pderiv e) p) -
+        symbol Coeff (monicFamily ℂ) (k+1) (coefficientVelocity e*p)
+    rw [connection_symbol,CycleQ2PolynomialPoleSymbols.monic_velocity]
+
+/-- The actual rational-exactness kernel in the full polynomial pole quotient.
+Its restriction to the degree-compatible character frame is the relevant geometric kernel. -/
+def residueKernel : Submodule Coeff (Symbols Coeff (monicFamily ℂ)) := LinearMap.ker residueRealization
+
+/-- The actual residue kernel is stable under every monic coefficient connection. -/
+theorem residueKernel_coefficient_stable (e : FullSexticTailIndex)
+    (x : Symbols Coeff (monicFamily ℂ)) (hx : x ∈ residueKernel) :
+    connection (pderiv e) (monicFamily ℂ) x ∈ residueKernel := by
+  revert hx
+  refine Submodule.Quotient.induction_on _ x (fun p => ?_)
+  intro hp
+  change rawResidueClass p = 0 at hp
+  change rationalBoundaries.mkQ (projectedPoleResidue p • volume coordinateBasis) = 0 at hp
+  rw [Submodule.mkQ_apply,Submodule.Quotient.mk_eq_zero] at hp
+  have h := coefficient_preserves_exact e (projectedPoleResidue p) hp
+  change residueRealization (connection (pderiv e) (monicFamily ℂ)
+    ((relations Coeff (monicFamily ℂ)).mkQ p)) = 0
+  rw [connection_mkQ,residueRealization_mkQ]
+  change rationalBoundaries.mkQ
+    (projectedPoleResidue (rawPoleConnection e p) • volume coordinateBasis) = 0
+  rw [Submodule.mkQ_apply,Submodule.Quotient.mk_eq_zero]
+  rw [projectedPoleResidue_connection] at h
+  exact h
+
+/-- The literal monic equation after adjoining coefficient denominators. -/
+abbrev genericPoleEquation : MvPolynomial (Fin 5) K :=
+  MvPolynomial.map (algebraMap Coeff K) (monicFamily ℂ)
+
+abbrev GenericPoleSymbols := Symbols K genericPoleEquation
+
+local instance fieldResidueClasses_isLocalizedModule :
+    IsLocalizedModule (nonZeroDivisors Coeff)
+      (LinearMap.id : FieldResidueClasses →ₗ[Coeff] FieldResidueClasses) :=
+  isLocalizedModule_id (nonZeroDivisors Coeff) FieldResidueClasses K
+
+/-- The actual rational residue realization after coefficient localization.
+The codomain is still the quotient by actual exterior boundaries. -/
+def genericResidueRealization : GenericPoleSymbols →ₗ[K] FieldResidueClasses :=
+  IsLocalizedModule.mapExtendScalars (nonZeroDivisors Coeff)
+    (CycleQ2PoleSymbolLocalization.localize K (nonZeroDivisors Coeff) (monicFamily ℂ))
+    (LinearMap.id : FieldResidueClasses →ₗ[Coeff] FieldResidueClasses)
+    K fieldResidueRealization
+
+theorem genericResidueRealization_specialize (x : Symbols Coeff (monicFamily ℂ)) :
+    genericResidueRealization
+      (CycleQ2PolynomialPoleSymbols.specialize (algebraMap Coeff K) (monicFamily ℂ) x) =
+        fieldResidueRealization x := by
+  rw [← CycleQ2PoleSymbolLocalization.localize_eq_specialize K (nonZeroDivisors Coeff)
+    (monicFamily ℂ) x]
+  change IsLocalizedModule.map (nonZeroDivisors Coeff)
+    (CycleQ2PoleSymbolLocalization.localize K (nonZeroDivisors Coeff) (monicFamily ℂ))
+    (LinearMap.id : FieldResidueClasses →ₗ[Coeff] FieldResidueClasses)
+    fieldResidueRealization
+    (CycleQ2PoleSymbolLocalization.localize K (nonZeroDivisors Coeff) (monicFamily ℂ) x) = _
+  exact IsLocalizedModule.map_apply _ _ _ _ _
+
+/-- The coefficient partial on the actual coefficient fraction field. -/
+def fractionCoefficientPartial (e : FullSexticTailIndex) : Derivation ℤ K K :=
+  HoldoutConstruction.extendRingDerivation (L := K)
+    (HoldoutConstruction.integerPartial (R := ℂ) e)
+
+theorem fractionCoefficientPartial_apply (e : FullSexticTailIndex) (a : Coeff) :
+    fractionCoefficientPartial e (algebraMap Coeff K a) =
+      algebraMap Coeff K (HoldoutConstruction.integerPartial (R := ℂ) e a) :=
+  HoldoutConstruction.extendRingDerivation_apply _ _
+
+def genericResidueKernel : Submodule K GenericPoleSymbols :=
+  LinearMap.ker genericResidueRealization
+
+/-- Clearing one coefficient denominator transfers the proved integral kernel
+stability to the generic coefficient field. -/
+theorem genericResidueKernel_coefficient_stable (e : FullSexticTailIndex)
+    (x : GenericPoleSymbols) (hx : x ∈ genericResidueKernel) :
+    connection (fractionCoefficientPartial e) genericPoleEquation x ∈ genericResidueKernel := by
+  change genericResidueRealization x = 0 at hx
+  obtain ⟨a, ha, y, hy⟩ :=
+    CycleQ2PoleSymbolLocalization.exists_nonzero_denominator (monicFamily ℂ) x
+  have hy0 : residueRealization y = 0 := by
+    apply (fieldResidueRealization_eq_zero_iff y).mp
+    rw [← genericResidueRealization_specialize y,hy,map_smul,hx,smul_zero]
+  have hy1 : genericResidueRealization
+      (CycleQ2PolynomialPoleSymbols.specialize (algebraMap Coeff K) (monicFamily ℂ)
+        (connection (HoldoutConstruction.integerPartial (R := ℂ) e) (monicFamily ℂ) y)) = 0 := by
+    rw [genericResidueRealization_specialize,fieldResidueRealization_eq_zero_iff,
+      integer_connection_eq]
+    exact residueKernel_coefficient_stable e y hy0
+  have hd := congrArg (fun z => genericResidueRealization
+    (connection (fractionCoefficientPartial e) genericPoleEquation z)) hy
+  rw [connection_specialize (algebraMap Coeff K)
+    (HoldoutConstruction.integerPartial (R := ℂ) e) (fractionCoefficientPartial e)
+    (fractionCoefficientPartial_apply e),hy1,CycleQ2PolynomialPoleSymbols.connection_smul,
+    map_add,map_smul,map_smul,hx,smul_zero,add_zero] at hd
+  have haK : algebraMap Coeff K a ≠ 0 := by
+    intro h
+    exact ha (IsFractionRing.injective Coeff K
+      (h.trans (map_zero (algebraMap Coeff K)).symm))
+  change genericResidueRealization (connection (fractionCoefficientPartial e) genericPoleEquation x) = 0
+  exact (smul_eq_zero.mp hd.symm).resolve_left haK
+
+open CycleQ2UniversalPoleFrame (Label vectorRealize)
+open CycleQ2MonicFermatCoefficientOpen (genericCoefficientMap generic_equation_monic generic_frame_units)
+
+/-- The universal-frame equation and the literal monic equation have the same
+coefficient localization; this map only identifies their quotient presentations. -/
+def genericFrameEquationEquiv :
+    Symbols K (CycleQ2UniversalPoleFrame.equation genericCoefficientMap) ≃ₗ[K] GenericPoleSymbols :=
+  Submodule.quotEquivOfEq _ _ (congrArg (relations K) generic_equation_monic)
+
+theorem genericFrameEquationEquiv_symbol (k : ℕ) (p : MvPolynomial (Fin 5) K) :
+    genericFrameEquationEquiv
+      (symbol K (CycleQ2UniversalPoleFrame.equation genericCoefficientMap) k p) =
+        symbol K genericPoleEquation k p := rfl
+
+theorem genericFrameEquationEquiv_connection (D : Derivation ℤ K K)
+    (x : Symbols K (CycleQ2UniversalPoleFrame.equation genericCoefficientMap)) :
+    genericFrameEquationEquiv
+      (connection D (CycleQ2UniversalPoleFrame.equation genericCoefficientMap) x) =
+        connection D genericPoleEquation (genericFrameEquationEquiv x) := by
+  refine Submodule.Quotient.induction_on _ x (fun p => ?_)
+  induction p using Finsupp.induction_linear with
+  | zero => simp
+  | add p q hp hq => simp only [map_add,hp,hq]
+  | single k p =>
+    change genericFrameEquationEquiv
+      (connection D (CycleQ2UniversalPoleFrame.equation genericCoefficientMap)
+        (symbol K (CycleQ2UniversalPoleFrame.equation genericCoefficientMap) k p)) =
+      connection D genericPoleEquation
+        (genericFrameEquationEquiv
+          (symbol K (CycleQ2UniversalPoleFrame.equation genericCoefficientMap) k p))
+    simp only [connection_symbol,map_sub,genericFrameEquationEquiv_symbol]
+    rw [generic_equation_monic]
+
+/-- The actual independent 66-symbol frame, in the monic quotient presentation. -/
+def genericSymbolFrame : (Label → K) →ₗ[K] GenericPoleSymbols :=
+  genericFrameEquationEquiv.toLinearMap.comp (vectorRealize genericCoefficientMap)
+
+theorem genericSymbolFrame_injective : Function.Injective genericSymbolFrame := by
+  intro u v h
+  exact CycleQ2MonicFermatCoefficientOpen.generic_vectorRealize_injective
+    (genericFrameEquationEquiv.injective h)
+
+/-- The rational de Rham realization of the actual 66-dimensional frame. -/
+def genericFrameRealization : (Label → K) →ₗ[K] FieldResidueClasses :=
+  genericResidueRealization.comp genericSymbolFrame
+
+def genericFrameKernel : Submodule K (Label → K) := LinearMap.ker genericFrameRealization
+
+private theorem genericFrameConnection_exists (e : FullSexticTailIndex) :
+    ∃ B : Matrix Label Label K, ∀ u : Label → K,
+      vectorRealize genericCoefficientMap (fun i => fractionCoefficientPartial e (u i) + B.mulVec u i) =
+        connection (fractionCoefficientPartial e)
+          (CycleQ2UniversalPoleFrame.equation genericCoefficientMap)
+          (vectorRealize genericCoefficientMap u) :=
+  CycleQ2UniversalPoleFrame.exists_vector_connection genericCoefficientMap
+    generic_frame_units.1 generic_frame_units.2.1 generic_frame_units.2.2 (fractionCoefficientPartial e)
+
+/-- Matrices obtained by the proved pole reduction for the actual monic family. -/
+def genericFrameConnection (e : FullSexticTailIndex) : Matrix Label Label K :=
+  (genericFrameConnection_exists e).choose
+
+theorem genericSymbolFrame_connection (e : FullSexticTailIndex) (u : Label → K) :
+    genericSymbolFrame
+      (fun i => fractionCoefficientPartial e (u i) + (genericFrameConnection e).mulVec u i) =
+        connection (fractionCoefficientPartial e) genericPoleEquation (genericSymbolFrame u) := by
+  change genericFrameEquationEquiv
+    (vectorRealize genericCoefficientMap
+      (fun i => fractionCoefficientPartial e (u i) + (genericFrameConnection e).mulVec u i)) =
+    connection (fractionCoefficientPartial e) genericPoleEquation
+      (genericFrameEquationEquiv (vectorRealize genericCoefficientMap u))
+  rw [(genericFrameConnection_exists e).choose_spec u,genericFrameEquationEquiv_connection]
+
+/-- Restricting the actual residue kernel to the independent frame gives a
+66-vector submodule stable under all 44 coefficient connections. -/
+theorem genericFrameKernel_coefficient_stable (e : FullSexticTailIndex)
+    (u : Label → K) (hu : u ∈ genericFrameKernel) :
+    (fun i => fractionCoefficientPartial e (u i) + (genericFrameConnection e).mulVec u i) ∈
+      genericFrameKernel := by
+  change genericResidueRealization (genericSymbolFrame
+    (fun i => fractionCoefficientPartial e (u i) + (genericFrameConnection e).mulVec u i)) = 0
+  rw [genericSymbolFrame_connection]
+  exact genericResidueKernel_coefficient_stable e (genericSymbolFrame u) hu
+
 /-- Differentiating an exact normalized residue gives the exact literal
 polynomial-pole connection expression, with no extra pole-order factor. -/
 theorem normalized_coefficient_preserves_exact (e : FullSexticTailIndex) (k : ℕ)
@@ -1166,6 +1578,55 @@ theorem normalized_weighted_source :
   rw [normalizedFiberResidue_eq,mul_smul,weighted_source]
   norm_num
 
+/-- The protected degree-twelve numerator realizes as exactly twice the
+previously constructed universal rational source form. -/
+theorem residueRealization_protected_source :
+    residueRealization (symbol Coeff (monicFamily ℂ) 2
+      (CycleQ2UniversalPoleFrame.protectedNumerator (K := Coeff))) =
+        rationalBoundaries.mkQ ((2 : W) • sourceForm) := by
+  rw [residueRealization_symbol]
+  have hp : (CycleQ2UniversalPoleFrame.protectedNumerator (K := Coeff)).IsWeightedHomogeneous
+      geometricWeight 12 := homogeneous_of_character CycleQ2UniversalPoleFrame.protected_homogeneous
+  rw [weightedHomogeneousComponent_eq_self hp]
+  have hc : chart (CycleQ2UniversalPoleFrame.protectedNumerator (K := Coeff)) = b := by
+    simp [CycleQ2UniversalPoleFrame.protectedNumerator,chart,b]
+  rw [hc,normalized_weighted_source]
+
+theorem genericResidueRealization_protected_source :
+    genericResidueRealization (symbol K genericPoleEquation 2
+      (CycleQ2UniversalPoleFrame.protectedNumerator (K := K))) =
+        (LinearMap.range exteriorDerivative).mkQ ((2 : W) • sourceForm) := by
+  have hm : MvPolynomial.map (algebraMap Coeff K)
+      (CycleQ2UniversalPoleFrame.protectedNumerator (K := Coeff)) =
+        CycleQ2UniversalPoleFrame.protectedNumerator (K := K) := by
+    simp only [CycleQ2UniversalPoleFrame.protectedNumerator,map_mul,map_pow,map_X]
+  have hs := CycleQ2PolynomialPoleSymbols.specialize_symbol (algebraMap Coeff K)
+    (monicFamily ℂ) 2 (CycleQ2UniversalPoleFrame.protectedNumerator (K := Coeff))
+  rw [hm] at hs
+  rw [← hs,genericResidueRealization_specialize]
+  change residueClassesEquiv
+    (residueRealization (symbol Coeff (monicFamily ℂ) 2
+      (CycleQ2UniversalPoleFrame.protectedNumerator (K := Coeff)))) = _
+  rw [residueRealization_protected_source]
+  rfl
+
+/-- The protected source belongs to the actual rational realization of the
+independent 66-symbol frame, with its exact factorial normalization. -/
+theorem protected_source_in_genericFrame :
+    ∃ u : Label → K, genericFrameRealization u =
+      (LinearMap.range exteriorDerivative).mkQ ((2 : W) • sourceForm) := by
+  obtain ⟨u,hu⟩ := CycleQ2UniversalPoleFrame.protected_in_frame genericCoefficientMap
+    generic_frame_units.1 generic_frame_units.2.1 generic_frame_units.2.2
+  refine ⟨u,?_⟩
+  rw [CycleQ2UniversalPoleFrame.realize_eq_vectorRealize] at hu
+  change genericResidueRealization
+    (genericFrameEquationEquiv (vectorRealize genericCoefficientMap u)) = _
+  rw [hu]
+  change genericResidueRealization
+    (genericFrameEquationEquiv (symbol K (CycleQ2UniversalPoleFrame.equation genericCoefficientMap)
+      2 (CycleQ2UniversalPoleFrame.protectedNumerator (K := K)))) = _
+  rw [genericFrameEquationEquiv_symbol,genericResidueRealization_protected_source]
+
 end Chart
 end CycleQ2WeightedPoleJets
 #print axioms CycleQ2WeightedPoleJets.fiberTangent_residue
@@ -1180,4 +1641,13 @@ end CycleQ2WeightedPoleJets
 #print axioms CycleQ2WeightedPoleJets.normalized_homogeneous_exact
 #print axioms CycleQ2WeightedPoleJets.degreeProjection_relation
 #print axioms CycleQ2WeightedPoleJets.projectedPoleResidue_relation_exact
+#print axioms CycleQ2WeightedPoleJets.residueRealization
+#print axioms CycleQ2WeightedPoleJets.residueRealization_protected_source
+#print axioms CycleQ2WeightedPoleJets.projectedPoleResidue_connection
+#print axioms CycleQ2WeightedPoleJets.residueKernel_coefficient_stable
+#print axioms CycleQ2WeightedPoleJets.genericResidueRealization
+#print axioms CycleQ2WeightedPoleJets.genericResidueKernel_coefficient_stable
+#print axioms CycleQ2WeightedPoleJets.genericSymbolFrame_injective
+#print axioms CycleQ2WeightedPoleJets.genericFrameKernel_coefficient_stable
+#print axioms CycleQ2WeightedPoleJets.protected_source_in_genericFrame
 #print axioms CycleQ2WeightedPoleJets.normalized_coefficient_preserves_exact

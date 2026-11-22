@@ -1,9 +1,14 @@
 import Mathlib.Algebra.Algebra.Subalgebra.Lattice
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Mathlib.LinearAlgebra.Matrix.Rank
 import Mathlib.LinearAlgebra.Matrix.ToLin
 import Mathlib.RepresentationTheory.AlgebraRepresentation.Basic
 import Mathlib.RingTheory.SimpleModule.Basic
+import Mathlib.ModelTheory.Algebra.Field.IsAlgClosed
+import Mathlib.ModelTheory.Algebra.Ring.FreeCommRing
+import Mathlib.NumberTheory.LSeries.PrimesInAP
+import Mathlib.RingTheory.FinitePresentation
 
 set_option autoImplicit false
 
@@ -291,3 +296,421 @@ end CycleQ2HiggsNormalizedPair
 
 #print axioms CycleQ2HiggsNormalizedPair.generated_eq_top
 #print axioms CycleQ2HiggsNormalizedPair.stable_pair_of_generated_eq_top
+
+/-!
+# Arithmetic specialization of finite coefficient data
+
+The coefficient rings used by the connection argument contain a field of
+characteristic zero, so they cannot themselves be mapped to positive
+characteristic. Finite lists of coefficients instead generate an algebra of
+finite type over the integers. The Lefschetz principle supplies maps from
+that algebra to algebraically closed fields of every sufficiently large
+prime characteristic, preserving any specified finite list of nonzero
+elements. Thus denominators and selected minors can be retained together.
+
+This construction concerns finite algebraic data. It does not assert that a
+connection-stable lattice has been chosen, or identify its reduced
+connection with the Fermat prime matrices.
+-/
+
+noncomputable section
+namespace CycleQ2ArithmeticSpecialization
+
+open FirstOrder FirstOrder.Language FirstOrder.Ring MvPolynomial
+
+section PolynomialSystems
+
+variable {σ ι κ : Type*} [Finite σ] [Finite ι] [Finite κ]
+
+/-- An integral polynomial, viewed as a term in the language of rings. -/
+private def polynomialTerm (p : MvPolynomial σ ℤ) : Language.ring.Term σ :=
+  termOfFreeCommRing ((freeCommRingEquivMvPolynomialInt σ).symm p)
+
+private theorem polynomialTerm_realize {K : Type*} [CommRing K] [CompatibleRing K]
+    (p : MvPolynomial σ ℤ) (v : σ → K) :
+    (polynomialTerm p).realize v = eval₂Hom (Int.castRingHom K) v p := by
+  rw [polynomialTerm, realize_termOfFreeCommRing]
+  have h : (eval₂Hom (Int.castRingHom K) v).comp
+      (freeCommRingEquivMvPolynomialInt σ).toRingHom = FreeCommRing.lift v := by
+    apply FreeCommRing.hom_ext
+    intro i
+    simp [freeCommRingEquivMvPolynomialInt]
+  rw [← h, RingHom.comp_apply, RingEquiv.apply_symm_apply]
+
+/-- Finitely many polynomial equations and inequations, with integer
+coefficients and no named constants from the characteristic-zero field. -/
+private def systemFormula (E : ι → MvPolynomial σ ℤ) (N : κ → MvPolynomial σ ℤ) :
+    Language.ring.Formula σ :=
+  Formula.iInf (fun i => (polynomialTerm (E i)).equal 0) ⊓
+    Formula.iInf (fun j => ((polynomialTerm (N j)).equal 0).not)
+
+private theorem systemFormula_realize {K : Type*} [CommRing K] [CompatibleRing K]
+    (E : ι → MvPolynomial σ ℤ) (N : κ → MvPolynomial σ ℤ) (v : σ → K) :
+    (systemFormula E N).Realize v ↔
+      (∀ i, eval₂Hom (Int.castRingHom K) v (E i) = 0) ∧
+      (∀ j, eval₂Hom (Int.castRingHom K) v (N j) ≠ 0) := by
+  simp only [systemFormula, Formula.realize_inf, Formula.realize_iInf,
+    Formula.realize_equal, Formula.realize_not, polynomialTerm_realize, realize_zero]
+
+private def systemSentence (E : ι → MvPolynomial σ ℤ) (N : κ → MvPolynomial σ ℤ) :
+    Language.ring.Sentence :=
+  Formula.iExs σ ((systemFormula E N).relabel Sum.inr)
+
+private theorem systemSentence_realize {K : Type*} [CommRing K] [CompatibleRing K]
+    (E : ι → MvPolynomial σ ℤ) (N : κ → MvPolynomial σ ℤ) :
+    K ⊨ systemSentence E N ↔ ∃ v : σ → K,
+      (∀ i, eval₂Hom (Int.castRingHom K) v (E i) = 0) ∧
+      (∀ j, eval₂Hom (Int.castRingHom K) v (N j) ≠ 0) := by
+  simp only [systemSentence, Sentence.Realize, Formula.realize_iExs,
+    Formula.realize_relabel, Sum.elim_comp_inr, systemFormula_realize]
+
+/-- A finite system of integral polynomial equations and nonvanishing
+conditions with a characteristic-zero solution has solutions in every
+algebraically closed field outside a finite set of prime characteristics. -/
+private theorem polynomial_system_spreads_algebraicallyClosed
+    (E : ι → MvPolynomial σ ℤ) (N : κ → MvPolynomial σ ℤ)
+    {K : Type*} [Field K] [IsAlgClosed K] [CharZero K]
+    (v : σ → K) (hE : ∀ i, eval₂Hom (Int.castRingHom K) v (E i) = 0)
+    (hN : ∀ j, eval₂Hom (Int.castRingHom K) v (N j) ≠ 0) :
+    ∃ bad : Finset Nat.Primes, ∀ p : Nat.Primes, p ∉ bad →
+      ∀ (L : Type*) [Field L] [IsAlgClosed L] [CharP L (p : ℕ)],
+        ∃ w : σ → L,
+          (∀ i, eval₂Hom (Int.castRingHom L) w (E i) = 0) ∧
+          (∀ j, eval₂Hom (Int.castRingHom L) w (N j) ≠ 0) := by
+  classical
+  letI := compatibleRingOfRing K
+  have hzero : Theory.ACF 0 ⊨ᵇ systemSentence E N :=
+    (Field.ACF_isComplete (p := 0) (Or.inr rfl)).realize_sentence_iff
+      (systemSentence E N) K |>.mp
+        ((systemSentence_realize E N).mpr ⟨v, hE, hN⟩)
+  let hbad := Field.finite_ACF_prime_not_realize_of_ACF_zero_realize
+    (systemSentence E N) hzero
+  refine ⟨hbad.toFinset, fun p hp L _ _ _ => ?_⟩
+  letI := compatibleRingOfRing L
+  have hprime : Theory.ACF (p : ℕ) ⊨ᵇ systemSentence E N := by
+    by_contra hn
+    apply hp
+    simpa only [Set.Finite.mem_toFinset, Set.mem_setOf_eq] using hn
+  exact (systemSentence_realize E N).mp (hprime.realize_sentence L)
+
+/-- A characteristic-zero solution need not lie in an algebraically closed
+field: its image in the algebraic closure satisfies the same finite system
+and preserves every specified nonzero value. -/
+theorem polynomial_system_spreads
+    (E : ι → MvPolynomial σ ℤ) (N : κ → MvPolynomial σ ℤ)
+    {K : Type*} [Field K] [CharZero K]
+    (v : σ → K) (hE : ∀ i, eval₂Hom (Int.castRingHom K) v (E i) = 0)
+    (hN : ∀ j, eval₂Hom (Int.castRingHom K) v (N j) ≠ 0) :
+    ∃ bad : Finset Nat.Primes, ∀ p : Nat.Primes, p ∉ bad →
+      ∀ (L : Type*) [Field L] [IsAlgClosed L] [CharP L (p : ℕ)],
+        ∃ w : σ → L,
+          (∀ i, eval₂Hom (Int.castRingHom L) w (E i) = 0) ∧
+          (∀ j, eval₂Hom (Int.castRingHom L) w (N j) ≠ 0) := by
+  let f : K →+* AlgebraicClosure K := algebraMap K (AlgebraicClosure K)
+  let v' : σ → AlgebraicClosure K := fun i => f (v i)
+  have heval : eval₂Hom (Int.castRingHom (AlgebraicClosure K)) v' =
+      f.comp (eval₂Hom (Int.castRingHom K) v) := by
+    apply MvPolynomial.ringHom_ext
+    · intro z
+      simp
+    · intro i
+      simp [v']
+  apply polynomial_system_spreads_algebraicallyClosed E N v'
+  · intro i
+    rw [heval, RingHom.comp_apply, hE i, map_zero]
+  · intro j hj
+    rw [heval, RingHom.comp_apply] at hj
+    exact hN j (f.injective (hj.trans (map_zero f).symm))
+
+end PolynomialSystems
+
+section RankWitnesses
+
+variable {K m n : Type*} [Field K] [Fintype m] [Fintype n]
+
+/-- A matrix of rank `r` has a nonzero `r`-minor and a factorization through
+the corresponding `r` columns. Both conclusions are finite algebraic
+identities, so they can be transported together to another characteristic. -/
+theorem exists_rank_witness (M : Matrix m n K) :
+    ∃ (rows : Fin M.rank → m) (columns : Fin M.rank → n)
+      (Q : Matrix (Fin M.rank) n K),
+      (M.submatrix rows columns).det ≠ 0 ∧ M = (M.submatrix id columns) * Q := by
+  classical
+  have hb := Submodule.exists_fun_fin_finrank_span_eq K (Set.range M.col)
+  rw [← M.rank_eq_finrank_span_cols] at hb
+  obtain ⟨b, hb, hspan, hli⟩ := hb
+  choose columns hcolumns using hb
+  let P : Matrix m (Fin M.rank) K := M.submatrix id columns
+  have hcol : P.col = b := funext hcolumns
+  have hP : P.rank = M.rank := by
+    rw [Matrix.rank_eq_finrank_span_cols, hcol, hspan, ← M.rank_eq_finrank_span_cols]
+  have hrange : LinearMap.range P.mulVecLin = Submodule.span K (Set.range M.col) := by
+    rw [Matrix.range_mulVecLin, hcol, hspan]
+  have hc (j : n) : ∃ c : Fin M.rank → K, P.mulVec c = M.col j := by
+    apply LinearMap.mem_range.mp
+    rw [hrange]
+    exact Submodule.subset_span (Set.mem_range_self j)
+  choose c hc using hc
+  let Q : Matrix (Fin M.rank) n K := fun i j => c j i
+  have hQ : M = P * Q := by
+    ext i j
+    exact (congrFun (hc j) i).symm
+  have hd : Module.finrank K (Submodule.span K (Set.range P.row)) = M.rank :=
+    P.rank_eq_finrank_span_row.symm.trans hP
+  have hr := Submodule.exists_fun_fin_finrank_span_eq K (Set.range P.row)
+  rw [hd] at hr
+  obtain ⟨b', hb', _, hli'⟩ := hr
+  choose rows hrows using hb'
+  have hdet : (P.submatrix rows id).det ≠ 0 := by
+    apply IsUnit.ne_zero
+    apply (Matrix.isUnit_iff_isUnit_det _).mp
+    apply Matrix.linearIndependent_rows_iff_isUnit.mp
+    have he : (P.submatrix rows id).row = b' := funext hrows
+    rwa [he]
+  exact ⟨rows, columns, Q, hdet, hQ⟩
+
+/-- A column factorization bounds rank from above, and its selected
+nonzero minor bounds rank from below. This proves equality after any
+coefficient specialization preserving that determinant. -/
+theorem rank_map_of_witness {A L : Type*} [CommRing A] [Field L]
+    (M : Matrix m n A) (r : ℕ) (rows : Fin r → m) (columns : Fin r → n)
+    (Q : Matrix (Fin r) n A) (hQ : M = (M.submatrix id columns) * Q)
+    (ρ : A →+* L) (hdet : ρ (M.submatrix rows columns).det ≠ 0) :
+    (M.map ρ).rank = r := by
+  classical
+  have hminor : ((M.map ρ).submatrix rows columns).det ≠ 0 := by
+    change ((M.submatrix rows columns).map ρ).det ≠ 0
+    rwa [← RingHom.map_det]
+  have hlower : r ≤ (M.map ρ).rank := by
+    have he : ((M.map ρ).submatrix rows columns).rank = r := by
+      simpa only [Fintype.card_fin] using Matrix.rank_of_det_ne_zero hminor
+    rw [← he]
+    exact Matrix.rank_submatrix_le _ _ _
+  have hf : M.map ρ = ((M.map ρ).submatrix id columns) * Q.map ρ := by
+    simpa only [Matrix.map_mul] using congrArg (fun B : Matrix m n A => B.map ρ) hQ
+  have hupper : (M.map ρ).rank ≤ r := by
+    calc
+      _ = (((M.map ρ).submatrix id columns) * Q.map ρ).rank := congrArg Matrix.rank hf
+      _ ≤ ((M.map ρ).submatrix id columns).rank := Matrix.rank_mul_le_left _ _
+      _ ≤ r := by simpa only [Fintype.card_fin] using
+        (((M.map ρ).submatrix id columns).rank_le_card_width)
+  exact le_antisymm hupper hlower
+
+end RankWitnesses
+
+section FiniteAlgebras
+
+variable {A K : Type*} [CommRing A] [Algebra ℤ A]
+  [Field K] [CharZero K]
+
+/-- Every finitely presented integral algebra with a characteristic-zero
+point can be specialized in all but finitely many prime characteristics.
+The same specialization preserves every element in the requested finite
+list, including products of denominators and chosen determinants. -/
+theorem finite_presentation_spreads [Algebra.FinitePresentation ℤ A]
+    (point : A →+* K) (s : Finset A) (hs : ∀ a ∈ s, point a ≠ 0) :
+    ∃ bad : Finset Nat.Primes, ∀ p : Nat.Primes, p ∉ bad →
+      ∀ (L : Type*) [Field L] [IsAlgClosed L] [CharP L (p : ℕ)],
+        ∃ ρ : A →+* L, ∀ a ∈ s, ρ a ≠ 0 := by
+  classical
+  obtain ⟨n, f, hf, hker⟩ := Algebra.FinitePresentation.out (R := ℤ) (A := A)
+  obtain ⟨m, rel, hrel⟩ := Submodule.fg_iff_exists_fin_generating_family.mp hker
+  choose lifts hlifts using fun a : s => hf (a : A)
+  let v : Fin n → K := fun i => point (f (X i))
+  have heval : eval₂Hom (Int.castRingHom K) v = point.comp f.toRingHom := by
+    ext i <;> simp [v]
+  have hE (i : Fin m) : eval₂Hom (Int.castRingHom K) v (rel i) = 0 := by
+    rw [heval, RingHom.comp_apply]
+    have hi : rel i ∈ RingHom.ker f.toRingHom := by
+      rw [← hrel]
+      exact Ideal.subset_span ⟨i, rfl⟩
+    change f (rel i) = 0 at hi
+    rw [hi, map_zero]
+  have hN (a : s) : eval₂Hom (Int.castRingHom K) v (lifts a) ≠ 0 := by
+    rw [heval, RingHom.comp_apply]
+    change point (f (lifts a)) ≠ 0
+    rw [hlifts]
+    exact hs a.val a.property
+  obtain ⟨bad, hbad⟩ := polynomial_system_spreads rel lifts v hE hN
+  refine ⟨bad, fun p hp L _ _ _ => ?_⟩
+  obtain ⟨w, hwE, hwN⟩ := hbad p hp L
+  let ev : MvPolynomial (Fin n) ℤ →+* L := eval₂Hom (Int.castRingHom L) w
+  have hfactor : RingHom.ker f.toRingHom ≤ RingHom.ker ev := by
+    rw [← hrel]
+    apply Ideal.span_le.mpr
+    rintro _ ⟨i, rfl⟩
+    exact hwE i
+  let e := f.toRingHom.quotientKerEquivOfSurjective hf
+  let ρ : A →+* L := (Ideal.Quotient.lift _ ev (fun q hq => hfactor hq)).comp
+    e.symm.toRingHom
+  have hρ (q : MvPolynomial (Fin n) ℤ) : ρ (f q) = ev q := by
+    change (Ideal.Quotient.lift _ ev (fun q hq => hfactor hq)) (e.symm (f q)) = ev q
+    rw [show e.symm (f q) = Ideal.Quotient.mk _ q from
+      RingHom.quotientKerEquivOfSurjective_symm_apply hf q]
+    rfl
+  refine ⟨ρ, fun a ha => ?_⟩
+  rw [← hlifts ⟨a, ha⟩, hρ]
+  exact hwN ⟨a, ha⟩
+
+/-- Finite type over the integers is sufficient: the integer ring is
+Noetherian, so a finite list of coefficients has a finite presentation. -/
+theorem finite_type_spreads [Algebra.FiniteType ℤ A]
+    (point : A →+* K) (s : Finset A) (hs : ∀ a ∈ s, point a ≠ 0) :
+    ∃ bad : Finset Nat.Primes, ∀ p : Nat.Primes, p ∉ bad →
+      ∀ (L : Type*) [Field L] [IsAlgClosed L] [CharP L (p : ℕ)],
+        ∃ ρ : A →+* L, ∀ a ∈ s, ρ a ≠ 0 := by
+  letI : Algebra.FinitePresentation ℤ A :=
+    (Algebra.FinitePresentation.of_finiteType (R := ℤ) (A := A)).mp inferInstance
+  exact finite_presentation_spreads point s hs
+
+/-- The finite exceptional set can be avoided in any coprime residue
+class. In particular, the same finite coefficient data admits both the
+split `1 mod 6` and inert `5 mod 6` reductions used by the Fermat argument. -/
+theorem exists_prime_specialization [Algebra.FiniteType ℤ A]
+    (point : A →+* K) (s : Finset A) (hs : ∀ a ∈ s, point a ≠ 0)
+    (bound q a : ℕ) (hq : q ≠ 0) (ha : a.Coprime q) :
+    ∃ p : ℕ, bound < p ∧ p.Prime ∧ p ≡ a [MOD q] ∧
+      ∀ (L : Type*) [Field L] [IsAlgClosed L] [CharP L p],
+        ∃ ρ : A →+* L, ∀ x ∈ s, ρ x ≠ 0 := by
+  classical
+  obtain ⟨bad, hbad⟩ := finite_type_spreads point s hs
+  obtain ⟨p, hp, hprime, hmod⟩ := Nat.forall_exists_prime_gt_and_modEq
+    (max bound (bad.sup fun p => (p : ℕ))) hq ha
+  have hnot : (⟨p, hprime⟩ : Nat.Primes) ∉ bad := by
+    intro hin
+    have hle : p ≤ bad.sup (fun p => (p : ℕ)) := Finset.le_sup hin
+    exact (not_le_of_gt hp) (hle.trans (le_max_right _ _))
+  exact ⟨p, (le_max_left _ _).trans_lt hp, hprime, hmod,
+    hbad ⟨p, hprime⟩ hnot⟩
+
+end FiniteAlgebras
+
+section CoefficientModels
+
+variable {K : Type*} [Field K] [CharZero K]
+
+/-- The integral algebra generated by the actual finite coefficient list. -/
+def coefficientModel (s : Finset K) : Subalgebra ℤ K := Algebra.adjoin ℤ (s : Set K)
+
+instance coefficientModel_finiteType (s : Finset K) :
+    Algebra.FiniteType ℤ (coefficientModel s) :=
+  Algebra.FiniteType.adjoin_of_finite s.finite_toSet
+
+def coefficient (s : Finset K) (x : s) : coefficientModel s :=
+  ⟨x.val, Algebra.subset_adjoin x.property⟩
+
+/-- This applies arithmetic specialization to the algebra generated by a
+given finite list of field elements. Every nonzero listed element remains
+nonzero, while all ring identities in the generated algebra are preserved. -/
+theorem finite_coefficients_spread (s : Finset K) :
+    ∃ bad : Finset Nat.Primes, ∀ p : Nat.Primes, p ∉ bad →
+      ∀ (L : Type*) [Field L] [IsAlgClosed L] [CharP L (p : ℕ)],
+        ∃ ρ : coefficientModel s →+* L,
+          ∀ x : s, (x : K) ≠ 0 → ρ (coefficient s x) ≠ 0 := by
+  classical
+  let t : Finset (coefficientModel s) :=
+    (Finset.univ.filter fun x : s => (x : K) ≠ 0).image (coefficient s)
+  have ht : ∀ a ∈ t, (coefficientModel s).val.toRingHom a ≠ 0 := by
+    intro a ha
+    obtain ⟨x, hx, rfl⟩ := Finset.mem_image.mp ha
+    exact (Finset.mem_filter.mp hx).2
+  obtain ⟨bad, hbad⟩ := finite_type_spreads (coefficientModel s).val.toRingHom t ht
+  refine ⟨bad, fun p hp L _ _ _ => ?_⟩
+  obtain ⟨ρ, hρ⟩ := hbad p hp L
+  refine ⟨ρ, fun x hx => hρ _ ?_⟩
+  exact Finset.mem_image.mpr ⟨x, Finset.mem_filter.mpr ⟨Finset.mem_univ _, hx⟩, rfl⟩
+
+/-- Any finite family of matrices admits a common integral coefficient
+model whose good prime specializations preserve every matrix rank. The
+model may also contain an arbitrary extra finite list of coefficients,
+such as those occurring in connection and pole-reduction identities.
+
+Every nonzero element in the extra list remains nonzero under each good
+specialization, so that the same model protects coefficient denominators.
+The rank witnesses are constructed from the given matrices; no flatness,
+constant-rank model, or independently supplied minors are assumed. -/
+theorem finite_matrices_spread {ι m n : Type*}
+    [Fintype ι] [Fintype m] [Fintype n]
+    (M : ι → Matrix m n K) (extra : Finset K) :
+    ∃ S : Subalgebra ℤ K, Algebra.FiniteType ℤ S ∧
+      (∀ x ∈ extra, x ∈ S) ∧
+      ∃ P : ι → Matrix m n S,
+        (∀ i, (P i).map S.val.toRingHom = M i) ∧
+        ∃ bad : Finset Nat.Primes, ∀ p : Nat.Primes, p ∉ bad →
+          ∀ (L : Type*) [Field L] [IsAlgClosed L] [CharP L (p : ℕ)],
+            ∃ ρ : S →+* L,
+              (∀ i, ((P i).map ρ).rank = (M i).rank) ∧
+              ∀ x : S, (x : K) ∈ extra → (x : K) ≠ 0 → ρ x ≠ 0 := by
+  classical
+  choose rows columns Q hdet hQ using fun i => exists_rank_witness (M i)
+  let Index := (ι × m × n) ⊕ (Σ i : ι, Fin (M i).rank × n)
+  let value : Index → K := fun x => match x with
+    | Sum.inl (i, a, b) => M i a b
+    | Sum.inr ⟨i, a, b⟩ => Q i a b
+  let s : Finset K := extra ∪ Finset.univ.image value
+  let S := coefficientModel s
+  have hM (i : ι) (a : m) (b : n) : M i a b ∈ S := by
+    apply Algebra.subset_adjoin
+    exact Finset.mem_union_right _
+      (Finset.mem_image.mpr ⟨Sum.inl (i, a, b), Finset.mem_univ _, rfl⟩)
+  have hcoeff (i : ι) (a : Fin (M i).rank) (b : n) : Q i a b ∈ S := by
+    apply Algebra.subset_adjoin
+    exact Finset.mem_union_right _
+      (Finset.mem_image.mpr ⟨Sum.inr ⟨i, a, b⟩, Finset.mem_univ _, rfl⟩)
+  let P : ι → Matrix m n S := fun i a b => ⟨M i a b, hM i a b⟩
+  let Q' : ∀ i, Matrix (Fin (M i).rank) n S :=
+    fun i a b => ⟨Q i a b, hcoeff i a b⟩
+  have hfactor (i : ι) : P i = ((P i).submatrix id (columns i)) * Q' i := by
+    ext a b
+    apply Subtype.val_injective
+    change (P i).map S.val.toRingHom a b =
+      (((P i).submatrix id (columns i)) * Q' i).map S.val.toRingHom a b
+    rw [Matrix.map_mul]
+    exact congrArg (fun B : Matrix m n K => B a b) (hQ i)
+  let δ : ι → S := fun i => ((P i).submatrix (rows i) (columns i)).det
+  have hδ (i : ι) : S.val.toRingHom (δ i) ≠ 0 := by
+    change S.val.toRingHom ((P i).submatrix (rows i) (columns i)).det ≠ 0
+    rw [RingHom.map_det]
+    exact hdet i
+  let extraLift : extra → S := fun x =>
+    ⟨x.val, Algebra.subset_adjoin (Finset.mem_union_left _ x.property)⟩
+  let protectedExtra : Finset S :=
+    (Finset.univ.filter fun x : extra => (x : K) ≠ 0).image extraLift
+  let selected : Finset S := Finset.univ.image δ ∪ protectedExtra
+  have hselected : ∀ a ∈ selected, S.val.toRingHom a ≠ 0 := by
+    intro a ha
+    rcases Finset.mem_union.mp ha with hminor | hextra
+    · obtain ⟨i, _, rfl⟩ := Finset.mem_image.mp hminor
+      exact hδ i
+    · obtain ⟨x, hx, rfl⟩ := Finset.mem_image.mp hextra
+      exact (Finset.mem_filter.mp hx).2
+  obtain ⟨bad, hbad⟩ := finite_type_spreads S.val.toRingHom selected hselected
+  refine ⟨S, inferInstance, ?_, P, fun _ => rfl, bad, ?_⟩
+  · intro x hx
+    exact Algebra.subset_adjoin (Finset.mem_union_left _ hx)
+  · intro p hp L _ _ _
+    obtain ⟨ρ, hρ⟩ := hbad p hp L
+    refine ⟨ρ, ?_, ?_⟩
+    · intro i
+      apply rank_map_of_witness (P i) (M i).rank
+        (rows i) (columns i) (Q' i) (hfactor i) ρ
+      exact hρ (δ i) (Finset.mem_union_left _
+        (Finset.mem_image.mpr ⟨i, Finset.mem_univ _, rfl⟩))
+    · intro x hx hn
+      apply hρ x
+      apply Finset.mem_union_right
+      exact Finset.mem_image.mpr ⟨⟨x.val, hx⟩,
+        Finset.mem_filter.mpr ⟨Finset.mem_univ _, hn⟩, Subtype.ext rfl⟩
+
+end CoefficientModels
+end CycleQ2ArithmeticSpecialization
+end
+
+#print axioms CycleQ2ArithmeticSpecialization.polynomial_system_spreads
+#print axioms CycleQ2ArithmeticSpecialization.finite_presentation_spreads
+#print axioms CycleQ2ArithmeticSpecialization.finite_type_spreads
+#print axioms CycleQ2ArithmeticSpecialization.exists_prime_specialization
+#print axioms CycleQ2ArithmeticSpecialization.exists_rank_witness
+#print axioms CycleQ2ArithmeticSpecialization.rank_map_of_witness
+#print axioms CycleQ2ArithmeticSpecialization.finite_coefficients_spread
+#print axioms CycleQ2ArithmeticSpecialization.finite_matrices_spread
