@@ -1,5 +1,163 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Continuation: actual top traces and a nonzero cubic residue class
+
+**Status, 22 November 2026, third checkpoint.** This continuation adds
+source for the top Laurent trace, its actual derived-cohomology
+comparison, and a nonzero class for the literal cubic divisor. The new
+source has received mathematical and source/API review, but has not been
+elaborated, compiled, or replayed by Lean in this session. The original
+`sorry` in `Submission.missing_geometric_existence` is still unchanged.
+The proposal still has 996 files, including 994 Lean files. No new
+admission, axiom, or weaker replacement of the protected target is used.
+
+### The original Laurent quotient computes actual degree-three cohomology
+
+The finite Laurent complex now includes its top differential. On a
+triple intersection, the omitted coordinate has no pole. Consequently
+every top monomial with at least one nonnegative coordinate exponent is
+an actual alternating boundary of triple sections. The surviving part
+has all four coordinate exponents strictly negative. In twist zero, the
+weighted-degree equation leaves exactly
+\[
+ \frac{w^2}{x_0x_1x_2x_3}.
+\]
+Its coefficient gives an additive equivalence from the native top
+section quotient to the original coefficient ring. For every positive
+twist there is no such monomial, so the top boundary is surjective.
+[Finite Laurent top differential and coefficient trace](GeometricHodgeTwistCech.lean)
+[Actual section comparison and normalized generator](GeometricHodgeTwistTorusChart.lean)
+
+`CycleQ2FourOpenH3` constructs three successive genuine
+Mayer--Vietoris connecting maps. Its kernel is the alternating
+triple-section boundary, and it is surjective under the stated local
+vanishing hypotheses. The four coordinate opens and all their nonempty
+intersections are affine. Their original twist frames supply every
+positive-degree vanishing group needed here. The result is an actual
+equivalence
+\[
+ H^3(Y_\varphi,\mathcal O_{Y_\varphi})\simeq R
+\]
+for the unchanged moving weighted threefold over the original coefficient
+ring, with its generator and normalization specified. The same argument
+proves actual degree-three vanishing of every positive twist.
+[Four-open Mayer--Vietoris comparison](GeometricHodgeTwistDerived.lean)
+[Native derived comparison](GeometricHodgeTwistCoordinates.lean)
+[Actual affine vanishing and derived top trace](GeometricHodgeTwistConstantSections.lean)
+
+### Coefficient change preserves the trace of the same relative class
+
+Coefficient change now induces the original graded quotient map, its
+actual projective scheme morphism, and the scheme's section pullbacks
+on all fifteen nonempty standard intersections. Mapping the original
+homogeneous fractions proves that these pullbacks map Laurent
+coefficients by the specified ring homomorphism. They preserve the
+alternating boundaries and the normalized trace, both on the native
+section quotient and after the derived comparison.
+
+Thus, for a section or native class already defined over an integral
+coefficient ring, nonzero trace after a coefficient specialization
+implies nonzero trace over its fraction field. This conclusion uses the
+same relative class and the injective fraction-field map. It does not
+assume a general cohomology base-change theorem, and it does not
+construct the relative marked Gysin class still needed below.
+[Actual coefficient pullbacks and trace naturality](GeometricHodgeTwistConstantSections.lean)
+
+### The canonical frame belongs to the original fixed threefold
+
+The native gradient-chart bases now identify the actual canonical
+three-form sheaf of `IncidenceFiber 57` with its structure module. The
+four oriented residues glue as sheaf sections on the whole coordinate
+charts. Their transition identity retains the projective signs
+\((-1)^i\); the negative global frame is also recorded because it
+matches the existing surface adjunction orientation.
+
+Transport through `literalIso` uses its actual section maps. It gives
+the Laurent trace on the original fixed threefold's structure sheaf,
+then on its genuine canonical sheaf via the glued frame. In particular,
+`canonicalTrace` is an equivalence on actual derived
+\(H^3(\Omega^3)\), and `canonicalClass 1` has trace one and is nonzero.
+`canonicalSectionTrace_coefficient` identifies the trace on a native
+quadruple section with the coefficient obtained after the actual
+canonical-frame map and the actual scheme pullback.
+[Glued canonical module-sheaf frame](GeometricLiteralThreefoldResidueGluing.lean)
+[Trace on the original fixed canonical sheaf](GeometricHodgeGlobalConstants.lean)
+
+### An explicit class for the actual cubic coefficient sequence
+
+Multiplication by the original cubic gives an actual monomorphism of
+sheaves
+\[
+ 0\longrightarrow\mathcal O_Y
+   \xrightarrow{\;h\;}\mathcal O_Y(3)
+   \longrightarrow Q\longrightarrow0.
+\]
+The source proves regularity on every chart subopen and identifies the
+original surface inclusion as the same projective quotient morphism.
+The signed canonical restriction kills the cubic and therefore defines
+an actual morphism from \(Q\) to the pushforward of the original
+surface's canonical sheaf. A full isomorphism of these two sheaves is
+not asserted.
+
+The literal decomposition \(h=\sum_i x_i b_i\) defines four actual
+triple-face lifts in \(\mathcal O_Y(3)\). Their alternating boundary
+is multiplication by \(h\) of the specified top generator. Their
+images in \(Q\) therefore form an actual two-cocycle. A fraction
+calculation on the entire \((123)\) intersection, without inverting
+the omitted coordinate \(x_0\), proves that its canonical image is
+exactly the existing normalized surface residue generator
+\(x_0^2w^2/(x_1x_2x_3)\).
+
+If this quotient class were zero, its genuine edge primitive would map
+to an edge primitive of that known nonzero canonical residue. The
+finite Čech boundary criterion rules this out. The actual coefficient
+connecting map is injective because \(H^2(\mathcal O_Y(3))=0\),
+so the resulting `ambientResidueClass` is nonzero as well. This is a
+nonzero class for the original cubic sequence, with no added
+nonvanishing hypothesis.
+
+The equality between this short-exact-sequence connecting map and the
+chosen iterated Mayer--Vietoris top map is a separate comparison. Its
+sign must follow their actual conventions; the positive cochain
+boundary alone does not determine the sign of the derived comparison.
+The new `cechTwoClass_connecting` theorem already identifies the
+coefficient boundary with the choice-independent third injective-descent
+class of that literal top coboundary. The comparison of this class with
+the iterated Mayer--Vietoris map remains separate. The exact marked
+surface cubic/Chern class is also identified with its previously proved
+nonzero curve-trace scalar times this same canonical residue face; this
+identity does not assign an unconstructed ambient Gysin map.
+[Whole-face native fraction identities](GeometricHodgeTwistTorusChart.lean)
+[Literal quotient cocycle and nonzero ambient connecting class](GeometricLiteralThreefoldSurfaceAdjunction.lean)
+
+### Finite cubic differential identities and the remaining comparison
+
+The torus algebra now has commuting logarithmic coordinate derivations
+and an actual monic-cubic power-basis trace. Explicit finite identities
+show cancellation of the relevant horizontal and mixed derivative
+terms under the Laurent constant coefficient. The native Kähler
+one-forms and their six ordered two-form wedges span after arbitrary
+localization; the corresponding three-form coefficients are computed
+using the original gradient relation. The actual native chart algebra
+is identified with the original cubic normal form, including
+\(z=w+x_2^2\), and the top quadratic coefficient is invariant under
+this translation. These algebraic identities still need their complete
+attachment to the actual sheaf exterior differential.
+[Logarithmic derivations and finite cubic trace identities](GeometricHodgeTwistTorus.lean)
+[Native localized forms and the literal cubic coordinate map](GeometricLiteralThreefoldResidueContraction.lean)
+
+The remaining route to the protected theorem requires the global
+paired marked Gysin/test comparison, including the compactification
+and time-boundary terms; a relative representative over the same
+integral marked coefficient neighborhood; and identification of the
+resulting nonzero primitive class with a nonzero vector in the actual
+66-dimensional rational residue kernel. The new trace naturality can
+carry a *constructed* relative paired class from the seed to the
+fraction field. A nonzero supported graph class, or the fixed top
+residue class just proved, does not alone supply that vector. Once it
+is supplied, the preceding arithmetic-simplicity endpoint proves the
+unchanged target.
+
 ## Continuation: arithmetic simplicity and the literal cubic divisor
 
 **Status, 22 November 2026, second checkpoint.** The new source assembles

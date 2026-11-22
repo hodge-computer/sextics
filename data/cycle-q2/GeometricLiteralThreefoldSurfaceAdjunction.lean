@@ -2,6 +2,12 @@ import Proposal.GeometricLiteralThreefoldResidueGluing
 import Proposal.GeometricLiteralAbelJacobiRelativeNormal
 import Proposal.GeometricLiteralCanonicalResidueGenerator
 import Proposal.GeometricHodgeThreefoldLiteral
+import Proposal.GeometricHodgeTwistMultiplication
+import Proposal.GeometricHodgeTwistTorusChart
+import Proposal.GeometricLiteralThreefoldOrbitAction
+import Proposal.GeometricChartSectionPullback
+import Proposal.GeometricSurfaceCoordinateCubicFrames
+import Proposal.GeometricLiteralMovingCurveDifferentialNonzero
 
 /-!
 # Restriction of the threefold volume along the cubic surface
@@ -663,3 +669,1349 @@ end
 #print axioms CycleQ2LiteralProjectiveCubicDivisor.chartToSurface_surjective
 #print axioms CycleQ2LiteralProjectiveCubicDivisor.chartCubic_regular
 #print axioms CycleQ2LiteralProjectiveCubicDivisor.chartToSurface_ker
+
+/-!
+## The genuine multiplication sequence on the fixed projective threefold
+
+Multiplication by the original homogeneous cubic is injective on every
+section of the actual twist sheaves.  Regularity is checked in the
+homogeneous prime localizations defining the structure sheaf, and the
+existing atlas-kernel description of twists then proves global
+injectivity.  Its actual additive cokernel gives a short exact sequence
+and the degree-two-to-degree-three connecting map.
+
+The cokernel here is deliberately still the coefficient quotient.  Its
+identification with the pushed-forward surface canonical sheaf uses the
+separate adjunction frames.  In particular, the negative sign between the
+old global threefold volume and the surface's cubic orientation is not
+silently absorbed by this coefficient sequence.
+-/
+
+noncomputable section
+namespace CycleQ2LiteralProjectiveCubicDivisor
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2GeometricHodgeThreefold CycleQ2GeometricHodgeThreefoldIncidence
+  CycleQ2HodgeThreefoldTwist CycleQ2HodgeTwistRatios CycleQ2HodgeAtlasLine
+  CycleQ2GeometricModuleLocalIso
+
+abbrev Ambient := threefold literalEval
+
+/-- The original normalized cubic is regular on every subopen of a
+weight-one chart, without an affineness assumption on that subopen. -/
+theorem normalized_cubic_regular (i : Fin 4) (W : Ambient.Opens)
+    (hi : W ≤ U literalEval i) :
+    IsSMulRegular Γ(Ambient, W)
+      (normalized literalEval i cubic cubic_mem_grade W hi) := by
+  intro a b hab
+  apply Subtype.ext
+  funext q
+  apply HomogeneousLocalization.val_injective
+  let M := q.val.asHomogeneousIdeal.toIdeal.primeCompl
+  let d : M := ⟨coord literalEval i.castSucc, hi q.property⟩
+  have hv : ((normalized literalEval i cubic cubic_mem_grade W hi).val q).val =
+      Localization.mk cubic (d ^ 3) := rfl
+  have hq := congrArg (fun s : Γ(Ambient,W) => (s.val q).val) hab
+  change (((normalized literalEval i cubic cubic_mem_grade W hi).val q) * a.val q).val =
+    (((normalized literalEval i cubic cubic_mem_grade W hi).val q) * b.val q).val at hq
+  simp only [HomogeneousLocalization.val_mul, hv] at hq
+  have hr : Function.Injective (fun z : Localization M =>
+      algebraMap A (Localization M) cubic * z) :=
+    CycleQ2SeedImageLocalization.localization_regular M (Localization M) cubic
+      (show Function.Injective (fun z : A => cubic * z) from cubic_regular)
+  apply hr
+  have hnum : Localization.mk cubic (d ^ 3) *
+      algebraMap A (Localization M) ((d ^ 3 : M) : A) =
+        algebraMap A (Localization M) cubic := by
+    rw [Localization.mk_eq_mk']
+    exact IsLocalization.mk'_spec _ _ _
+  calc
+    algebraMap A (Localization M) cubic * (a.val q).val =
+        algebraMap A (Localization M) ((d ^ 3 : M) : A) *
+          (Localization.mk cubic (d ^ 3) * (a.val q).val) := by rw [← hnum]; ring
+    _ = algebraMap A (Localization M) ((d ^ 3 : M) : A) *
+        (Localization.mk cubic (d ^ 3) * (b.val q).val) :=
+      congrArg (fun z : Localization M => algebraMap A (Localization M) ((d ^ 3 : M) : A) * z) hq
+    _ = algebraMap A (Localization M) cubic * (b.val q).val := by rw [← hnum]; ring
+
+/-- Multiplication O(0) → O(3) by the unchanged cubic. -/
+def cubicMultiply : twist literalEval 0 ⟶ twist literalEval 3 :=
+  multiply literalEval cubic cubic_mem_grade 0 3 (by decide)
+
+theorem cubicMultiply_injective (W : Ambient.Opens) :
+    Function.Injective (cubicMultiply.app W) := by
+  intro s t hst
+  apply component_injective (cocycle literalEval 0) W s t
+  intro i
+  have h := congrArg (component (cocycle literalEval 3) i W) hst
+  change component (cocycle literalEval 3) i W
+      (product literalEval 3 0 3 (by decide) W
+        (homogeneousSection literalEval cubic cubic_mem_grade W) s) =
+    component (cocycle literalEval 3) i W
+      (product literalEval 3 0 3 (by decide) W
+        (homogeneousSection literalEval cubic cubic_mem_grade W) t) at h
+  simp only [product_component, homogeneousSection, component_pack] at h
+  exact normalized_cubic_regular i (W ⊓ U literalEval i) inf_le_right h
+
+/-- The same cubic map on the actual underlying additive sheaves. -/
+def coefficientInclusion : addSheaf (twist literalEval 0) ⟶ addSheaf (twist literalEval 3) :=
+  (SheafOfModules.toSheaf Ambient.ringCatSheaf).map cubicMultiply
+
+theorem coefficientInclusion_injective (W : Ambient.Opens) :
+    Function.Injective (coefficientInclusion.hom.app (op W)) :=
+  cubicMultiply_injective W
+
+theorem coefficientInclusion_mono : Mono coefficientInclusion :=
+  Sheaf.mono_of_injective _ (fun W => coefficientInclusion_injective W.unop)
+
+/-- The actual coefficient quotient by multiplication with the original cubic. -/
+abbrev coefficientQuotient := cokernel coefficientInclusion
+
+def coefficientComplex : ShortComplex (TopCat.Sheaf AddCommGrpCat.{0} Ambient) :=
+  ShortComplex.mk coefficientInclusion (cokernel.π _) (cokernel.condition _)
+
+theorem coefficientShortExact : coefficientComplex.ShortExact where
+  exact := ShortComplex.exact_cokernel coefficientInclusion
+  mono_f := coefficientInclusion_mono
+  epi_g := inferInstanceAs (Epi (cokernel.π coefficientInclusion))
+
+local instance : HasExt.{1}
+    (Sheaf (Opens.grothendieckTopology Ambient) AddCommGrpCat.{0}) := HasExt.standard _
+
+/-- The genuine H² → H³ boundary of the original cubic coefficient sequence. -/
+def coefficientConnecting (W : Ambient.Opens) :
+    coefficientQuotient.H' 2 W →+ (addSheaf (twist literalEval 0)).H' 3 W :=
+  CycleQ2GeometricIntrinsicCartierCohomology.openConnecting coefficientShortExact 2 W
+
+theorem coefficientConnecting_apply (W : Ambient.Opens) (z : coefficientQuotient.H' 2 W) :
+    coefficientConnecting W z = z.comp coefficientShortExact.extClass rfl := rfl
+
+/-- The middle term of the actual cubic sequence has no degree-two
+cohomology on the proper fixed threefold. -/
+theorem coefficientPole_hTwo :
+    Subsingleton ((addSheaf (twist literalEval 3)).H' 2 ⊤) := by
+  letI := (CycleQ2HodgeTwistTorusChart.ordinary_vanishing
+    literalEval literal_vertex_unit 3).2
+  exact (CycleQ2GeometricSheafCohomologyRestriction.terminalCohomologyEquiv _
+    (addSheaf (twist literalEval 3)) ⊤ isTerminalTop 2).injective.subsingleton
+
+/-- Every nonzero quotient class survives the genuine boundary to ambient
+H³.  This uses the already proved O(3) vanishing, rather than a choice of
+Čech representative or a further residue-trace hypothesis. -/
+theorem coefficientConnecting_injective :
+    Function.Injective (coefficientConnecting ⊤) := by
+  apply (injective_iff_map_eq_zero _).mpr
+  intro x hx
+  obtain ⟨y,hy⟩ := Ext.covariant_sequence_exact₃
+    (CycleQ2InjectiveCech.freeOpen (⊤ : Ambient.Opens)) coefficientShortExact x rfl hx
+  have hy0 : y = 0 := coefficientPole_hTwo.elim _ _
+  simpa only [hy0, Ext.zero_comp] using hy.symm
+
+theorem coefficientConnecting_ne_zero (z : coefficientQuotient.H' 2 ⊤)
+    (hz : z ≠ 0) : coefficientConnecting ⊤ z ≠ 0 := by
+  intro h
+  apply hz
+  apply coefficientConnecting_injective
+  simpa only [map_zero] using h
+
+end CycleQ2LiteralProjectiveCubicDivisor
+end
+
+#print axioms CycleQ2LiteralProjectiveCubicDivisor.normalized_cubic_regular
+#print axioms CycleQ2LiteralProjectiveCubicDivisor.coefficientShortExact
+#print axioms CycleQ2LiteralProjectiveCubicDivisor.coefficientConnecting_apply
+#print axioms CycleQ2LiteralProjectiveCubicDivisor.coefficientConnecting_injective
+
+/-!
+## The original surface inclusion in the Hodge presentation
+
+The graded quotient used by the coefficient sequence is the original
+projective surface inclusion after the already fixed `literalIso`.
+Transporting a bundle of a target and its incoming morphism along the
+literal equality of sextic ideals proves this without replacing the
+surface map by a map with merely the same point set.
+-/
+
+noncomputable section
+namespace CycleQ2LiteralProjectiveCubicDivisor
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  MvPolynomial HomogeneousLocalization CycleQ2GeometricHodgeThreefold
+  CycleQ2GeometricHodgeThreefoldIncidence CycleQ2GeometricIncidenceProj
+  CycleQ2CartierProjectiveCover CycleQ2GeometricSurfaceCoefficients
+  CycleQ2GeometricSeedNormalIdeals CycleQ2ConormalJacobian CycleQ2NormalConnecting
+
+abbrev Surface := projectiveSurface (57 : ℂ) 1
+
+theorem gradedToSurface_homogeneous_surjective (n : ℕ) (a : D) (ha : a ∈ DG n) :
+    ∃ b : A, b ∈ grade literalEval n ∧ gradedToSurface b = a := by
+  obtain ⟨p,hp,rfl⟩ := ha
+  exact ⟨quotient literalEval p, ⟨p,hp,rfl⟩, rfl⟩
+
+theorem surface_irrelevant : HomogeneousIdeal.irrelevant DG ≤
+    (HomogeneousIdeal.irrelevant (grade literalEval)).map gradedToSurface := by
+  apply toIdeal_le_toIdeal_iff.mp
+  apply (HomogeneousIdeal.toIdeal_irrelevant_le _).mpr
+  intro n hn a ha
+  obtain ⟨b,hb,rfl⟩ := gradedToSurface_homogeneous_surjective n a ha
+  exact Ideal.mem_map_of_mem gradedToSurface
+    (HomogeneousIdeal.mem_irrelevant_of_mem (grade literalEval) hn hb)
+
+/-- The unchanged cubic/sextic projective surface maps by its actual graded
+quotient to the full-family presentation of the fixed threefold. -/
+def surfaceToAmbient : Surface ⟶ Ambient := Proj.map gradedToSurface surface_irrelevant
+
+theorem surfaceToAmbient_isClosedImmersion : IsClosedImmersion surfaceToAmbient :=
+  CycleQ2LiteralAmbientSurface.projectiveMap_closedImmersion
+    (grade literalEval) DG gradedToSurface surface_irrelevant
+      gradedToSurface_homogeneous_surjective
+
+private abbrev ContainingIdeal :=
+  {I : {I : Ideal (MvPolynomial (Fin 5) ℂ) // I.IsHomogeneous (PolynomialGrade ℂ)} //
+    I.val ≤ surfaceIdeal 57 1}
+
+private abbrev containingGrade (I : ContainingIdeal) :=
+  CycleQ2GeometricProjectiveCurve.HomogeneousQuotient.grade (PolynomialGrade ℂ) I.val.val
+
+private instance containingGradedRing (I : ContainingIdeal) : GradedRing (containingGrade I) :=
+  CycleQ2GeometricProjectiveCurve.HomogeneousQuotient.gradedRing _ _ I.val.property
+
+private def containingMap (I : ContainingIdeal) : containingGrade I →+*ᵍ DG where
+  toRingHom := Ideal.Quotient.factor I.property
+  map_mem := by
+    rintro n _ ⟨p,hp,rfl⟩
+    exact ⟨p,hp,rfl⟩
+
+private theorem containing_irrelevant (I : ContainingIdeal) : HomogeneousIdeal.irrelevant DG ≤
+    (HomogeneousIdeal.irrelevant (containingGrade I)).map (containingMap I) := by
+  apply toIdeal_le_toIdeal_iff.mp
+  apply (HomogeneousIdeal.toIdeal_irrelevant_le _).mpr
+  rintro n hn _ ⟨p,hp,rfl⟩
+  exact Ideal.mem_map_of_mem (containingMap I)
+    (HomogeneousIdeal.mem_irrelevant_of_mem (containingGrade I) hn
+      (show Ideal.Quotient.mk I.val.val p ∈ containingGrade I n from ⟨p,hp,rfl⟩))
+
+private structure SurfaceMorphism where
+  target : Scheme.{0}
+  map : Surface ⟶ target
+
+private def fromContainingIdeal (I : ContainingIdeal) : SurfaceMorphism :=
+  ⟨Proj (containingGrade I), Proj.map (containingMap I) (containing_irrelevant I)⟩
+
+private def movingIdeal : ContainingIdeal :=
+  ⟨⟨Ideal.span {equation literalEval}, Ideal.homogeneous_span _ _ (by
+      rintro p (rfl : p = equation literalEval)
+      exact ⟨6,equation_homogeneous _⟩)⟩, by
+    apply (Ideal.span_singleton_le_iff_mem _).mpr
+    rw [equation_eq_literal]
+    exact Ideal.subset_span ⟨0,rfl⟩⟩
+
+private def nativeIdeal : ContainingIdeal :=
+  ⟨⟨sexticIdeal CycleQ2LiteralAmbientCylinder.point,
+      sexticIdeal_homogeneous CycleQ2LiteralAmbientCylinder.point⟩, by
+    apply (Ideal.span_singleton_le_iff_mem _).mpr
+    rw [← equation_eq CycleQ2LiteralAmbientCylinder.point, equation_eq_literal]
+    exact Ideal.subset_span ⟨0,rfl⟩⟩
+
+private theorem containingIdeal_eq : movingIdeal = nativeIdeal := by
+  apply Subtype.ext
+  apply Subtype.ext
+  exact congrArg (fun p : MvPolynomial (Fin 5) ℂ => Ideal.span {p})
+    (equation_eq CycleQ2LiteralAmbientCylinder.point)
+
+private def movingData : SurfaceMorphism := ⟨Ambient,surfaceToAmbient⟩
+private def nativeData : SurfaceMorphism :=
+  ⟨CycleQ2LiteralAmbientCylinder.Native,CycleQ2LiteralThreefoldOrbitAction.surfaceToNative⟩
+
+private theorem surfaceMorphism_eq : movingData = nativeData := by
+  have hm : gradedToSurface = containingMap movingIdeal := by
+    apply GradedRingHom.ext
+    intro a
+    obtain ⟨p,rfl⟩ := Ideal.Quotient.mk_surjective a
+    rfl
+  calc
+    movingData = fromContainingIdeal movingIdeal := by
+      change SurfaceMorphism.mk Ambient (Proj.map gradedToSurface surface_irrelevant) =
+        SurfaceMorphism.mk Ambient (Proj.map (containingMap movingIdeal)
+          (containing_irrelevant movingIdeal))
+      congr 1
+      exact CycleQ2IncidenceFamilyContainment.projectiveMap_congr _ _ _ _ hm
+    _ = fromContainingIdeal nativeIdeal := congrArg fromContainingIdeal containingIdeal_eq
+    _ = nativeData := rfl
+
+private theorem surfaceMorphism_transport {B C : SurfaceMorphism} (h : B = C)
+    (e : B.target ≅ C.target) (he : e = eqToIso (congrArg SurfaceMorphism.target h)) :
+    B.map ≫ e.hom = C.map := by
+  subst C
+  subst e
+  simp
+
+theorem surfaceToAmbient_toNative :
+    surfaceToAmbient ≫ (nativeIso CycleQ2LiteralAmbientCylinder.point).hom =
+      CycleQ2LiteralThreefoldOrbitAction.surfaceToNative :=
+  surfaceMorphism_transport surfaceMorphism_eq
+    (nativeIso CycleQ2LiteralAmbientCylinder.point) (by rfl)
+
+/-- Equality with the original marked surface morphism, including its
+scheme structure and all coordinate maps. -/
+theorem surfaceToAmbient_toIncidence : surfaceToAmbient ≫ literalIso.hom =
+    CycleQ2LiteralAmbientSurface.surfaceToFiber := by
+  rw [literalIso, Iso.trans_hom, ← Category.assoc, surfaceToAmbient_toNative,
+    CycleQ2LiteralThreefoldOrbitAction.surfaceToNative_toIncidence]
+
+theorem surfaceToAmbient_overComplex :
+    surfaceToAmbient ≫ toBase literalEval = projectiveToComplex 57 1 := by
+  rw [← literalIso_overComplex, ← Category.assoc, surfaceToAmbient_toIncidence,
+    CycleQ2LiteralAmbientSurface.surfaceToFiber_overComplex]
+
+theorem surfaceToAmbient_preimage (i : Fin 4) :
+    surfaceToAmbient ⁻¹ᵁ coordinateOpen literalEval i = coordinatePatch 57 1 i.castSucc :=
+  Proj.map_preimage_basicOpen gradedToSurface surface_irrelevant (coord literalEval i.castSucc)
+
+/-- The previously proved local quotient maps are the actual scheme
+restriction maps for this same surface inclusion. -/
+theorem chartToSurface_section_square (i : Fin 4) :
+    Proj.awayToSection (grade literalEval) (coord literalEval i.castSucc) ≫
+      surfaceToAmbient.appLE (coordinateOpen literalEval i)
+        (coordinatePatch 57 1 i.castSucc) (surfaceToAmbient_preimage i).ge =
+      CommRingCat.ofHom (chartToSurface i) ≫
+        Proj.awayToSection DG
+          (CycleQ2GeometricSurfaceOverlap.coordinateDen 57 1 i) :=
+  Proj.awayToSection_comp_appLE gradedToSurface surface_irrelevant
+    (weightOne_mem_grade literalEval i)
+
+/-- Pullback of an actual homogeneous coefficient is the original surface
+polynomial section, on every compatible pair of chart subopens. -/
+theorem normalized_toSurface (i : Fin 4) (n : ℕ)
+    (p : MvPolynomial (Fin 5) ℂ)
+    (hp : p.IsWeightedHomogeneous CycleQ2CartierSurfaceGrading.weight n)
+    (W : Ambient.Opens) (hWi : W ≤ coordinateOpen literalEval i)
+    (V : Surface.Opens) (hVi : V ≤ coordinatePatch 57 1 i.castSucc)
+    (hVW : V ≤ surfaceToAmbient ⁻¹ᵁ W) :
+    surfaceToAmbient.appLE W V hVW
+      (CycleQ2HodgeTwistRatios.normalized literalEval i (quotient literalEval p)
+        (quotient_mem_grade literalEval p hp) W hWi) =
+      CycleQ2SurfaceCoordinateSections.coordinatePolynomialSection 57 1 i V hVi p := by
+  let a : Chart i := Away.mk (grade literalEval) (weightOne_mem_grade literalEval i)
+    n (quotient literalEval p) (by simpa using quotient_mem_grade literalEval p hp)
+  have ht := ConcreteCategory.congr_hom (chartToSurface_section_square i) a
+  change surfaceToAmbient.appLE (coordinateOpen literalEval i)
+      (coordinatePatch 57 1 i.castSucc) (surfaceToAmbient_preimage i).ge
+      (Proj.awayToSection (grade literalEval) (coord literalEval i.castSucc) a) =
+    Proj.awayToSection DG (CycleQ2GeometricSurfaceOverlap.coordinateDen 57 1 i)
+      (chartToSurface i a) at ht
+  rw [CycleQ2SurfaceCoordinateSections.coordinatePolynomialSection_fraction
+    57 1 i V hVi n p hp, Proj.basicOpenIsoAway_hom]
+  calc
+    _ = Surface.presheaf.map (homOfLE hVi).op
+        (surfaceToAmbient.appLE (coordinateOpen literalEval i)
+          (coordinatePatch 57 1 i.castSucc) (surfaceToAmbient_preimage i).ge
+          (Proj.awayToSection (grade literalEval) (coord literalEval i.castSucc) a)) :=
+      CycleQ2ChartSectionPullback.restriction_square surfaceToAmbient hWi
+        (surfaceToAmbient_preimage i).ge hVi hVW _
+    _ = Surface.presheaf.map (homOfLE hVi).op
+        (Proj.awayToSection DG (CycleQ2GeometricSurfaceOverlap.coordinateDen 57 1 i)
+          (chartToSurface i a)) := congrArg (Surface.presheaf.map (homOfLE hVi).op) ht
+    _ = _ := by
+      apply congrArg (Surface.presheaf.map (homOfLE hVi).op)
+      apply congrArg (Proj.awayToSection DG
+        (CycleQ2GeometricSurfaceOverlap.coordinateDen 57 1 i))
+      exact Away.map_mk gradedToSurface (coord literalEval i.castSucc)
+        (weightOne_mem_grade literalEval i) n (quotient literalEval p)
+        (by simpa using quotient_mem_grade literalEval p hp)
+
+theorem cubic_toSurface_zero (i : Fin 4) (W : Ambient.Opens)
+    (hWi : W ≤ coordinateOpen literalEval i) (V : Surface.Opens)
+    (hVi : V ≤ coordinatePatch 57 1 i.castSucc) (hVW : V ≤ surfaceToAmbient ⁻¹ᵁ W) :
+    surfaceToAmbient.appLE W V hVW
+      (CycleQ2HodgeTwistRatios.normalized literalEval i cubic cubic_mem_grade W hWi) = 0 := by
+  rw [normalized_toSurface i 3 (thetaH 1)
+    (CycleQ2CartierSurfaceGrading.thetaH_homogeneous 1) W hWi V hVi hVW]
+  rw [CycleQ2SurfaceCoordinateSections.coordinatePolynomialSection_fraction
+    57 1 i V hVi 3 (thetaH 1)
+      (CycleQ2CartierSurfaceGrading.thetaH_homogeneous 1)]
+  have hz : CycleQ2GeometricSurfaceDehomogenizedCharts.homogeneousFraction 57 1 i 3
+      (thetaH 1)
+      (CycleQ2CartierSurfaceGrading.thetaH_homogeneous 1) = 0 := by
+    apply HomogeneousLocalization.val_injective
+    simp only [CycleQ2GeometricSurfaceDehomogenizedCharts.homogeneousFraction_val,
+      CycleQ2GeometricCartierNormalLift.surfaceQuotient_h,
+      map_zero, zero_mul, HomogeneousLocalization.val_zero]
+  rw [hz, map_zero, map_zero]
+
+end CycleQ2LiteralProjectiveCubicDivisor
+end
+
+#print axioms CycleQ2LiteralProjectiveCubicDivisor.surfaceToAmbient_toIncidence
+#print axioms CycleQ2LiteralProjectiveCubicDivisor.chartToSurface_section_square
+#print axioms CycleQ2LiteralProjectiveCubicDivisor.normalized_toSurface
+
+/-!
+## Restriction to the actual canonical surface sheaf
+
+On the three coordinate opens covering the original surface, restrict an
+O(3) coefficient through `surfaceToAmbient` and multiply it by the
+established surface orientation (+,-,+).  The original exterior frames
+then turn it into a genuine two-form.  Their checked transition agrees
+with the O(3) transition.  Together with zero away from the surface, these
+maps glue to an actual sheaf morphism on the whole fixed threefold.
+
+This sign is the one obtained from the negative global ambient volume.
+The construction below uses the original surface differential sheaf and
+the original scheme restriction, rather than a newly named copy of its
+coefficient cohomology.
+-/
+
+noncomputable section
+namespace CycleQ2LiteralCubicCanonicalRestriction
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  MvPolynomial CycleQ2LiteralProjectiveCubicDivisor CycleQ2GeometricHodgeThreefold
+  CycleQ2GeometricHodgeThreefoldIncidence CycleQ2HodgeThreefoldTwist
+  CycleQ2GeometricIntrinsicNormal CycleQ2GeometricModuleLocalIso
+  CycleQ2GeometricDifferentialSheaf CycleQ2SurfaceCoordinateFrames
+  CycleQ2SurfaceCoordinateCubicFrames CycleQ2SurfaceCoordinateSections
+
+attribute [local instance] CycleQ2GeometricIntrinsicNormal.overHomCommModuleMk
+  CycleQ2GeometricIntrinsicNormal.localLinearRingModule
+  CycleQ2GeometricIntrinsicNormal.moduleHomObjModule
+
+local instance : IsClosedImmersion surfaceToAmbient := surfaceToAmbient_isClosedImmersion
+
+abbrev Surface := CycleQ2LiteralProjectiveCubicDivisor.Surface
+abbrev CanonicalForms := CycleQ2SurfaceCoordinateFrames.CanonicalForms
+abbrev CubicSections := twist literalEval 3
+abbrev CanonicalTarget := (Scheme.Modules.pushforward surfaceToAmbient).obj CanonicalForms
+
+def chartOpen (i : Fin 3) : Ambient.Opens := coordinateOpen literalEval i.succ
+
+theorem preimage_chartOpen (i : Fin 3) : surfaceToAmbient ⁻¹ᵁ chartOpen i =
+    CycleQ2FullSurfaceResidueCover.coordinateOpen i := surfaceToAmbient_preimage i.succ
+
+theorem preimage_le_chart (i : Fin 3) (W : Ambient.Opens) (hW : W ≤ chartOpen i) :
+    surfaceToAmbient ⁻¹ᵁ W ≤ CycleQ2FullSurfaceResidueCover.coordinateOpen i :=
+  (surfaceToAmbient.preimage_mono hW).trans (preimage_chartOpen i).le
+
+theorem surface_app_restrict {V W : Ambient.Opens} (hWV : W ≤ V) (a : Γ(Ambient,V)) :
+    Surface.presheaf.map (homOfLE (surfaceToAmbient.preimage_mono hWV)).op
+      (surfaceToAmbient.app V a) =
+    surfaceToAmbient.app W (Ambient.presheaf.map (homOfLE hWV).op a) := by
+  simpa only [Scheme.Hom.appLE_eq_app] using
+    (CycleQ2ChartSectionPullback.restriction_square surfaceToAmbient hWV le_rfl
+      (surfaceToAmbient.preimage_mono hWV) le_rfl a).symm
+
+/-- The signed original surface residue frame applied to a restricted
+coefficient, on every subopen of a whole ambient coordinate chart. -/
+def localRestriction (i : Fin 3) (W : Ambient.Opens) (hW : W ≤ chartOpen i) :
+    Γ(CubicSections,W) →ₗ[Γ(Ambient,W)] CanonicalTarget.val.obj (op W) where
+  toFun s := ((coordinateExteriorFrame i).app (surfaceToAmbient ⁻¹ᵁ W)
+    (preimage_le_chart i W hW)).symm
+      ((orientation i : Γ(Surface,surfaceToAmbient ⁻¹ᵁ W)) *
+        surfaceToAmbient.app W (chartFrame literalEval 3 i.succ W hW s))
+  map_add' s t := by simp only [map_add, mul_add]
+  map_smul' c s := by
+    let e := ((coordinateExteriorFrame i).app (surfaceToAmbient ⁻¹ᵁ W)
+      (preimage_le_chart i W hW)).symm
+    change e ((orientation i : Γ(Surface,surfaceToAmbient ⁻¹ᵁ W)) *
+        surfaceToAmbient.app W (chartFrame literalEval 3 i.succ W hW (c • s))) =
+      surfaceToAmbient.app W c • e
+        ((orientation i : Γ(Surface,surfaceToAmbient ⁻¹ᵁ W)) *
+          surfaceToAmbient.app W (chartFrame literalEval 3 i.succ W hW s))
+    rw [map_smul, smul_eq_mul, map_mul]
+    rw [show (orientation i : Γ(Surface,surfaceToAmbient ⁻¹ᵁ W)) *
+        (surfaceToAmbient.app W c * surfaceToAmbient.app W
+          (chartFrame literalEval 3 i.succ W hW s)) =
+      surfaceToAmbient.app W c * ((orientation i : Γ(Surface,surfaceToAmbient ⁻¹ᵁ W)) *
+        surfaceToAmbient.app W (chartFrame literalEval 3 i.succ W hW s)) by ring]
+    exact e.map_smul _ _
+
+theorem localRestriction_coordinates (i : Fin 3) (W : Ambient.Opens)
+    (hW : W ≤ chartOpen i) (s : Γ(CubicSections,W)) :
+    (coordinateExteriorFrame i).app (surfaceToAmbient ⁻¹ᵁ W) (preimage_le_chart i W hW)
+      (localRestriction i W hW s) =
+    (orientation i : Γ(Surface,surfaceToAmbient ⁻¹ᵁ W)) *
+      surfaceToAmbient.app W (chartFrame literalEval 3 i.succ W hW s) :=
+  LinearEquiv.apply_symm_apply _ _
+
+theorem localRestriction_restrict (i : Fin 3) {V W : Ambient.Opens}
+    (hWV : W ≤ V) (hV : V ≤ chartOpen i) (s : Γ(CubicSections,V)) :
+    CanonicalTarget.val.map (homOfLE hWV).op (localRestriction i V hV s) =
+      localRestriction i W (hWV.trans hV) (CubicSections.val.map (homOfLE hWV).op s) := by
+  apply ((coordinateExteriorFrame i).app (surfaceToAmbient ⁻¹ᵁ W)
+    (preimage_le_chart i W (hWV.trans hV))).injective
+  change (coordinateExteriorFrame i).app (surfaceToAmbient ⁻¹ᵁ W) _
+      (CanonicalForms.val.map (homOfLE (surfaceToAmbient.preimage_mono hWV)).op
+        (localRestriction i V hV s)) = _
+  rw [← (coordinateExteriorFrame i).naturality (surfaceToAmbient.preimage_mono hWV)
+    (preimage_le_chart i V hV), localRestriction_coordinates, localRestriction_coordinates]
+  change Surface.presheaf.map (homOfLE (surfaceToAmbient.preimage_mono hWV)).op
+      ((orientation i : Γ(Surface,surfaceToAmbient ⁻¹ᵁ V)) *
+        surfaceToAmbient.app V (chartFrame literalEval 3 i.succ V hV s)) = _
+  rw [map_mul, map_intCast, surface_app_restrict]
+  exact congrArg (fun a : Γ(Ambient,W) =>
+    (orientation i : Γ(Surface,surfaceToAmbient ⁻¹ᵁ W)) * surfaceToAmbient.app W a)
+      (CycleQ2HodgeAtlasLine.coordinate_restrict (cocycle literalEval 3) i.succ hV hWV s).symm
+
+theorem localRestriction_overlap (i j : Fin 3) (W : Ambient.Opens)
+    (hi : W ≤ chartOpen i) (hj : W ≤ chartOpen j) (s : Γ(CubicSections,W)) :
+    localRestriction i W hi s = localRestriction j W hj s := by
+  let P := surfaceToAmbient ⁻¹ᵁ W
+  have hr : surfaceToAmbient.app W (CycleQ2HodgeTwistRatios.ratio
+      literalEval i.succ j.succ W hi) =
+      coordinatePolynomialSection 57 1 i.succ P (preimage_le_chart i W hi)
+        (X j.succ.castSucc) :=
+    normalized_toSurface i.succ 1 (X j.succ.castSucc)
+      (by simpa only [CycleQ2CartierSurfaceGrading.weight_castSucc] using
+        isWeightedHomogeneous_X ℂ CycleQ2CartierSurfaceGrading.weight j.succ.castSucc)
+      W hi P (preimage_le_chart i W hi) le_rfl
+  have hf : chartFrame literalEval 3 i.succ W hi s =
+      CycleQ2HodgeTwistRatios.ratio literalEval i.succ j.succ W hi ^ 3 *
+        chartFrame literalEval 3 j.succ W hj s := by
+    simpa only [zpow_natCast, Units.val_pow_eq_pow_val, CycleQ2HodgeTwistRatios.transition] using
+      chartFrame_transition literalEval 3 i.succ j.succ W hi hj s
+  apply ((coordinateExteriorFrame i).app P (preimage_le_chart i W hi)).injective
+  rw [localRestriction_coordinates,
+    coordinateExteriorFrame_transition i j P (preimage_le_chart i W hi)
+      (preimage_le_chart j W hj), localRestriction_coordinates,
+    hf, map_mul, map_pow, hr]
+  let r := coordinatePolynomialSection 57 1 i.succ P (preimage_le_chart i W hi)
+    (X j.succ.castSucc)
+  let b := surfaceToAmbient.app W (chartFrame literalEval 3 j.succ W hj s)
+  change (orientation i : Γ(Surface,P)) * (r ^ 3 * b) =
+    (((orientation i : Γ(Surface,P)) * (orientation j : Γ(Surface,P))) * r ^ 3) *
+      ((orientation j : Γ(Surface,P)) * b)
+  calc
+    _ = ((orientation i : Γ(Surface,P)) *
+        ((orientation j : Γ(Surface,P)) * (orientation j : Γ(Surface,P)))) *
+          (r ^ 3 * b) := by rw [orientation_mul_self, mul_one]
+    _ = _ := by ring
+
+def offSurface : Ambient.Opens :=
+  ⟨(Set.range surfaceToAmbient)ᶜ,
+    surfaceToAmbient.isClosedEmbedding.isClosed_range.isOpen_compl⟩
+
+theorem preimage_offSurface : surfaceToAmbient ⁻¹ᵁ offSurface = ⊥ := by
+  ext x
+  change (surfaceToAmbient x ∉ Set.range surfaceToAmbient) ↔ False
+  simp
+
+def restrictionCover : Option (Fin 3) → Ambient.Opens
+  | none => offSurface
+  | some i => chartOpen i
+
+theorem restrictionCover_top : (⨆ i, restrictionCover i) = ⊤ := by
+  apply le_antisymm le_top
+  intro y _
+  by_cases hy : ∃ x : Surface, surfaceToAmbient x = y
+  · obtain ⟨x,rfl⟩ := hy
+    have hx : x ∈ ⨆ i, CycleQ2FullSurfaceResidueCover.coordinateOpen i := by
+      rw [CycleQ2FullSurfaceResidueCover.coordinateOpen_cover]
+      trivial
+    obtain ⟨i,hi⟩ := Opens.mem_iSup.mp hx
+    apply le_iSup restrictionCover (some i)
+    change x ∈ surfaceToAmbient ⁻¹ᵁ chartOpen i
+    rwa [preimage_chartOpen]
+  · exact (le_iSup restrictionCover none) hy
+
+theorem target_empty_of_le {W : Ambient.Opens} (hW : W ≤ offSurface) :
+    Subsingleton (CanonicalTarget.val.obj (op W)) := by
+  have he : surfaceToAmbient ⁻¹ᵁ W = ⊥ := le_antisymm
+    ((surfaceToAmbient.preimage_mono hW).trans preimage_offSurface.le) bot_le
+  change Subsingleton (CanonicalForms.val.obj (op (surfaceToAmbient ⁻¹ᵁ W)))
+  rw [he]
+  have ht : IsTerminal ((addSheaf CanonicalForms).obj.obj (op (⊥ : Surface.Opens))) :=
+    TopCat.Sheaf.isTerminalOfEmpty (addSheaf CanonicalForms)
+  exact AddCommGrpCat.isZero_iff_subsingleton.mp ht.isZero
+
+def localRestrictionHom (i : Fin 3) :
+    LocalLinearHom Ambient.sheaf CubicSections CanonicalTarget (chartOpen i) :=
+  ⟨{
+    app V := AddCommGrpCat.ofHom
+      (localRestriction i V.unop.left V.unop.hom.le).toAddMonoidHom
+    naturality {V W} f := by
+      apply ConcreteCategory.hom_ext
+      intro s
+      exact (localRestriction_restrict i f.unop.left.le V.unop.hom.le s).symm
+  }, by
+    intro V r s
+    exact (localRestriction i V.left V.hom.le).map_smul r s⟩
+
+def coverRestriction : (i : Option (Fin 3)) →
+    LocalLinearHom Ambient.sheaf CubicSections CanonicalTarget (restrictionCover i)
+  | none => 0
+  | some i => localRestrictionHom i
+
+theorem coverRestriction_compatible : TopCat.Presheaf.IsCompatible
+    (addSheaf (moduleHomSheaf Ambient.sheaf CubicSections CanonicalTarget)).obj
+    restrictionCover coverRestriction := by
+  intro i j
+  apply localLinearHom_ext
+  intro V s
+  cases i with
+  | none => exact @Subsingleton.elim _ (target_empty_of_le (V.hom.le.trans inf_le_left)) _ _
+  | some i =>
+    cases j with
+    | none => exact @Subsingleton.elim _ (target_empty_of_le (V.hom.le.trans inf_le_right)) _ _
+    | some j => exact localRestriction_overlap i j V.left
+        (V.hom.le.trans inf_le_left) (V.hom.le.trans inf_le_right) s
+
+theorem restrictionSection_existsUnique :
+    ∃! H : LocalLinearHom Ambient.sheaf CubicSections CanonicalTarget ⊤, ∀ i,
+      restrictLocalLinearHom Ambient.sheaf CubicSections CanonicalTarget
+        (homOfLE (le_top : restrictionCover i ≤ ⊤)).op H = coverRestriction i := by
+  change ∃! H : (addSheaf (moduleHomSheaf Ambient.sheaf CubicSections CanonicalTarget)).obj.obj (op ⊤), ∀ i,
+    (addSheaf (moduleHomSheaf Ambient.sheaf CubicSections CanonicalTarget)).obj.map
+      (homOfLE (le_top : restrictionCover i ≤ ⊤)).op H = coverRestriction i
+  exact (addSheaf (moduleHomSheaf Ambient.sheaf CubicSections CanonicalTarget)).existsUnique_gluing'
+    restrictionCover ⊤ (fun _ => homOfLE le_top) restrictionCover_top.ge
+      coverRestriction coverRestriction_compatible
+
+def restrictionSection : LocalLinearHom Ambient.sheaf CubicSections CanonicalTarget ⊤ :=
+  Classical.choose restrictionSection_existsUnique
+
+theorem restrictionSection_restrict (i : Option (Fin 3)) :
+    restrictLocalLinearHom Ambient.sheaf CubicSections CanonicalTarget
+      (homOfLE (le_top : restrictionCover i ≤ ⊤)).op restrictionSection = coverRestriction i :=
+  (Classical.choose_spec restrictionSection_existsUnique).1 i
+
+/-- The actual O(3) restriction into the pushed-forward original surface
+canonical sheaf, with its fixed projective orientation. -/
+def canonicalRestriction : CubicSections ⟶ CanonicalTarget :=
+  localLinearHomTopEquiv Ambient.sheaf CubicSections CanonicalTarget restrictionSection
+
+theorem canonicalRestriction_local (i : Fin 3) (W : Ambient.Opens)
+    (hW : W ≤ chartOpen i) (s : Γ(CubicSections,W)) :
+    canonicalRestriction.val.app (op W) s = localRestriction i W hW s := by
+  exact congrArg
+    (fun f : LocalLinearHom Ambient.sheaf CubicSections CanonicalTarget (chartOpen i) =>
+      f.val.app (op (Over.mk (homOfLE hW))) s) (restrictionSection_restrict (some i))
+
+theorem localRestriction_cubicMultiply_zero (i : Fin 3) (W : Ambient.Opens)
+    (hW : W ≤ chartOpen i) (s : Γ(twist literalEval 0,W)) :
+    localRestriction i W hW (cubicMultiply.app W s) = 0 := by
+  apply ((coordinateExteriorFrame i).app (surfaceToAmbient ⁻¹ᵁ W)
+    (preimage_le_chart i W hW)).injective
+  rw [localRestriction_coordinates, map_zero, cubicMultiply, multiply_frame, map_mul,
+    cubic_toSurface_zero i.succ W hW (surfaceToAmbient ⁻¹ᵁ W)
+      (preimage_le_chart i W hW) le_rfl, zero_mul, mul_zero]
+
+theorem canonicalRestriction_cubicMultiply_section (W : Ambient.Opens)
+    (s : Γ(twist literalEval 0,W)) :
+    canonicalRestriction.val.app (op W) (cubicMultiply.app W s) = 0 := by
+  apply (addSheaf CanonicalTarget).eq_of_locally_eq'
+    (fun i => W ⊓ restrictionCover i) W (fun _ => homOfLE inf_le_left)
+    (by rw [← inf_iSup_eq, restrictionCover_top, inf_top_eq])
+  intro i
+  change CanonicalTarget.val.map
+      (homOfLE (show W ⊓ restrictionCover i ≤ W from inf_le_left)).op
+      (canonicalRestriction.val.app (op W) (cubicMultiply.app W s)) =
+    CanonicalTarget.val.map
+      (homOfLE (show W ⊓ restrictionCover i ≤ W from inf_le_left)).op 0
+  rw [map_zero]
+  refine (PresheafOfModules.naturality_apply canonicalRestriction.val
+    (homOfLE (show W ⊓ restrictionCover i ≤ W from inf_le_left)).op
+      (cubicMultiply.app W s)).symm.trans ?_
+  refine (congrArg (fun v : Γ(CubicSections,W ⊓ restrictionCover i) =>
+    canonicalRestriction.val.app (op (W ⊓ restrictionCover i)) v)
+      (PresheafOfModules.naturality_apply cubicMultiply.val
+        (homOfLE (show W ⊓ restrictionCover i ≤ W from inf_le_left)).op s).symm).trans ?_
+  cases i with
+  | none => exact @Subsingleton.elim _ (target_empty_of_le (show W ⊓ offSurface ≤ offSurface from inf_le_right)) _ _
+  | some i =>
+    exact (canonicalRestriction_local i (W ⊓ chartOpen i) inf_le_right _).trans
+      (localRestriction_cubicMultiply_zero i (W ⊓ chartOpen i) inf_le_right _)
+
+theorem cubicMultiply_comp_canonicalRestriction : cubicMultiply ≫ canonicalRestriction = 0 := by
+  apply SheafOfModules.hom_ext
+  apply PresheafOfModules.hom_ext
+  intro W
+  apply ModuleCat.hom_ext
+  apply LinearMap.ext
+  intro s
+  exact canonicalRestriction_cubicMultiply_section W.unop s
+
+def additiveRestriction : addSheaf CubicSections ⟶ addSheaf CanonicalTarget :=
+  (SheafOfModules.toSheaf Ambient.ringCatSheaf).map canonicalRestriction
+
+theorem coefficientInclusion_comp_restriction : coefficientInclusion ≫ additiveRestriction = 0 := by
+  ext W s
+  exact canonicalRestriction_cubicMultiply_section W.unop s
+
+/-- The genuine coefficient cokernel maps to the original pushed-forward
+canonical surface sheaf. Its formula is fixed by the actual restriction.
+The single-class argument below only uses this map; it does not assume
+that this map is an isomorphism. -/
+def quotientToCanonical : coefficientQuotient ⟶ addSheaf CanonicalTarget :=
+  cokernel.desc coefficientInclusion additiveRestriction coefficientInclusion_comp_restriction
+
+theorem quotientToCanonical_π : cokernel.π coefficientInclusion ≫ quotientToCanonical =
+    additiveRestriction := cokernel.π_desc _ _ _
+
+end CycleQ2LiteralCubicCanonicalRestriction
+end
+
+#print axioms CycleQ2LiteralCubicCanonicalRestriction.localRestriction_overlap
+#print axioms CycleQ2LiteralCubicCanonicalRestriction.canonicalRestriction_local
+#print axioms CycleQ2LiteralCubicCanonicalRestriction.quotientToCanonical_π
+
+/-!
+## Detecting the actual quotient class by the original residue generator
+
+The coefficient quotient has no H′¹ on the four affine coordinate opens.
+Consequently a zero two-class has a six-edge Čech primitive. Restriction
+of its 12, 13, and 23 edges to the original surface makes its 123 face a
+three-open boundary there. The original canonical generator has residue
+one, so a quotient cocycle with that face gives a nonzero class and a
+nonzero image under the genuine cubic connecting homomorphism.
+
+Only the actual quotient-to-canonical morphism is needed. No cokernel
+isomorphism or closed-immersion cohomology comparison is assumed.
+-/
+
+noncomputable section
+namespace CycleQ2LiteralCubicResidueDetection
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  CycleQ2LiteralProjectiveCubicDivisor CycleQ2LiteralCubicCanonicalRestriction
+  CycleQ2GeometricHodgeThreefold CycleQ2GeometricHodgeThreefoldIncidence
+  CycleQ2HodgeThreefoldTwist CycleQ2GeometricModuleLocalIso
+  CycleQ2GeometricSheafLocalIso CycleQ2InjectiveCech CycleQ2CechTwoToDerived
+  CycleQ2GeometricProjectiveHOne
+
+abbrev Ambient := CycleQ2LiteralProjectiveCubicDivisor.Ambient
+abbrev Surface := CycleQ2LiteralProjectiveCubicDivisor.Surface
+abbrev CanonicalSheaf := CycleQ2CanonicalCoordinateH2.CanonicalSheaf
+abbrev surfaceOpen := CycleQ2CanonicalCoordinateH2.CoordinateOpen
+abbrev surfaceTriple := CycleQ2CanonicalCoordinateH2.TripleOpen
+abbrev ambientCover : Fin 4 → Ambient.Opens := coordinateOpen literalEval
+
+local instance : HasExt.{1}
+    (Sheaf (Opens.grothendieckTopology Ambient) AddCommGrpCat.{0}) := HasExt.standard _
+local instance : HasExt.{1}
+    (Sheaf (Opens.grothendieckTopology Surface) AddCommGrpCat.{0}) := HasExt.standard _
+
+theorem ambientCover_top : (⨆ i, ambientCover i) = ⊤ :=
+  coordinateOpens_cover literalEval literal_vertex_unit
+
+private theorem coordinate_affine (i : Fin 4) : IsAffineOpen (ambientCover i) := by
+  have h := CycleQ2HodgeTwistFaces.face_affine literalEval i ∅
+  simpa only [CycleQ2HodgeTwistFaces.face_eq, Finset.inf_empty, inf_top_eq] using h
+
+private def additiveFrame (k : ℤ) (i : Fin 4) :
+    PatchIso (addSheaf (twist literalEval k)) (structureAdditiveSheaf Ambient)
+      (ambientCover i) where
+  app V hV := (chartFrame literalEval k i V hV).toAddEquiv
+  naturality hWV hV s :=
+    (CycleQ2HodgeAtlasLine.coordinate_restrict
+      (CycleQ2HodgeThreefoldTwist.cocycle literalEval k) i hV hWV s).symm
+
+private theorem twist_hOne (k : ℤ) (i : Fin 4) :
+    Subsingleton ((addSheaf (twist literalEval k)).H' 1 (ambientCover i)) :=
+  affineFrameHOne_subsingleton (coordinate_affine i).isoSpec _
+    (overIsoOfPatchIso (additiveFrame k i))
+
+private theorem twist_hTwo (k : ℤ) (i : Fin 4) :
+    Subsingleton ((addSheaf (twist literalEval k)).H' 2 (ambientCover i)) :=
+  affineFrameHTwo_subsingleton (coordinate_affine i).isoSpec _
+    (overIsoOfPatchIso (additiveFrame k i))
+    (CycleQ2GeometricAffineHTwo.affine_H_two_subsingleton _)
+
+/-- Local degree-one vanishing for the genuine coefficient cokernel
+follows from the same short exact sequence and the actual affine frames. -/
+theorem coefficientQuotient_hOne (i : Fin 4) :
+    Subsingleton (coefficientQuotient.H' 1 (ambientCover i)) := by
+  apply subsingleton_of_forall_eq 0
+  intro x
+  have hx : x.comp coefficientShortExact.extClass (show 1 + 1 = 2 from rfl) = 0 :=
+    (twist_hTwo 0 i).elim _ _
+  obtain ⟨y,hy⟩ := Ext.covariant_sequence_exact₃
+    (freeOpen (ambientCover i)) coefficientShortExact x rfl hx
+  have hy0 : y = 0 := (twist_hOne 3 i).elim _ _
+  simpa only [hy0, Ext.zero_comp] using hy.symm
+
+/-- Restriction through the actual coefficient quotient map, to any
+surface subopen of the inverse image of the ambient open. -/
+def pullCanonical {W : Ambient.Opens} {V : Surface.Opens}
+    (hVW : V ≤ surfaceToAmbient ⁻¹ᵁ W) :
+    Sections coefficientQuotient W →+ Sections CanonicalSheaf V :=
+  (res CanonicalSheaf hVW).comp (app quotientToCanonical W)
+
+theorem pullCanonical_res {P W : Ambient.Opens} {V : Surface.Opens}
+    (hVP : V ≤ surfaceToAmbient ⁻¹ᵁ P) (hPW : P ≤ W)
+    (s : Sections coefficientQuotient W) :
+    pullCanonical hVP (res coefficientQuotient hPW s) =
+      pullCanonical (hVP.trans (surfaceToAmbient.preimage_mono hPW)) s := by
+  change res CanonicalSheaf hVP
+      (app quotientToCanonical P (res coefficientQuotient hPW s)) = _
+  rw [app_res]
+  exact res_comp CanonicalSheaf (surfaceToAmbient.preimage_mono hPW) hVP _
+
+theorem pullCanonical_restrict {W : Ambient.Opens} {V P : Surface.Opens}
+    (hVP : V ≤ P) (hPW : P ≤ surfaceToAmbient ⁻¹ᵁ W)
+    (s : Sections coefficientQuotient W) :
+    res CanonicalSheaf hVP (pullCanonical hPW s) =
+      pullCanonical (hVP.trans hPW) s :=
+  res_comp CanonicalSheaf hPW hVP _
+
+theorem pullCanonical_π {W : Ambient.Opens} {V : Surface.Opens}
+    (hVW : V ≤ surfaceToAmbient ⁻¹ᵁ W)
+    (s : Sections (addSheaf (twist literalEval 3)) W) :
+    pullCanonical hVW (app (cokernel.π coefficientInclusion) W s) =
+      res CanonicalSheaf hVW (app additiveRestriction W s) := by
+  change res CanonicalSheaf hVW
+      (app quotientToCanonical W (app (cokernel.π coefficientInclusion) W s)) = _
+  rw [app_comp, quotientToCanonical_π]
+
+theorem coordinate_preimage (i : Fin 3) :
+    surfaceToAmbient ⁻¹ᵁ ambientCover i.succ = surfaceOpen i := by
+  rw [surfaceToAmbient_preimage]
+  fin_cases i <;> rfl
+
+theorem pair_le_preimage (i j : Fin 3) :
+    surfaceOpen i ⊓ surfaceOpen j ≤
+      surfaceToAmbient ⁻¹ᵁ (ambientCover i.succ ⊓ ambientCover j.succ) := by
+  change surfaceOpen i ⊓ surfaceOpen j ≤
+    (surfaceToAmbient ⁻¹ᵁ ambientCover i.succ) ⊓
+      (surfaceToAmbient ⁻¹ᵁ ambientCover j.succ)
+  exact inf_le_inf (coordinate_preimage i).ge (coordinate_preimage j).ge
+
+theorem triple_le_preimage : surfaceTriple ≤
+    surfaceToAmbient ⁻¹ᵁ ((ambientCover 1 ⊓ ambientCover 2) ⊓ ambientCover 3) := by
+  change (surfaceOpen 0 ⊓ surfaceOpen 2) ⊓ (surfaceOpen 1 ⊓ surfaceOpen 2) ≤
+    ((surfaceToAmbient ⁻¹ᵁ ambientCover 1) ⊓ (surfaceToAmbient ⁻¹ᵁ ambientCover 2)) ⊓
+      (surfaceToAmbient ⁻¹ᵁ ambientCover 3)
+  exact le_inf
+    (le_inf ((inf_le_left.trans inf_le_left).trans (coordinate_preimage 0).ge)
+      ((inf_le_right.trans inf_le_left).trans (coordinate_preimage 1).ge))
+    ((inf_le_left.trans inf_le_right).trans (coordinate_preimage 2).ge)
+
+def canonicalEdge (i j : Fin 3)
+    (s : Sections coefficientQuotient (ambientCover i.succ ⊓ ambientCover j.succ)) :
+    Sections CanonicalSheaf (surfaceOpen i ⊓ surfaceOpen j) :=
+  pullCanonical (pair_le_preimage i j) s
+
+/-- The actual surface restriction of the 123 face, on the original
+three-open trace domain with its unchanged intersection convention. -/
+def canonicalFace (c : Two coefficientQuotient ambientCover) :
+    Sections CanonicalSheaf surfaceTriple :=
+  pullCanonical triple_le_preimage c.2.2.2
+
+theorem canonicalFace_d1 (b : One coefficientQuotient ambientCover) :
+    canonicalFace (d1 coefficientQuotient ambientCover b) =
+      CycleQ2ThreeOpenSectionH2.boundary CanonicalSheaf
+        (surfaceOpen 0) (surfaceOpen 1) (surfaceOpen 2)
+        (canonicalEdge 0 1 b.2.2.2.1, canonicalEdge 0 2 b.2.2.2.2.1,
+          canonicalEdge 1 2 b.2.2.2.2.2) := by
+  change pullCanonical triple_le_preimage
+      (res coefficientQuotient _ b.2.2.2.2.2 -
+        res coefficientQuotient _ b.2.2.2.2.1 +
+        res coefficientQuotient _ b.2.2.2.1) =
+    res CanonicalSheaf _ (pullCanonical (pair_le_preimage 1 2) b.2.2.2.2.2) -
+      res CanonicalSheaf _ (pullCanonical (pair_le_preimage 0 2) b.2.2.2.2.1) +
+      res CanonicalSheaf _ (pullCanonical (pair_le_preimage 0 1) b.2.2.2.1)
+  rw [map_add, map_sub, pullCanonical_res, pullCanonical_res, pullCanonical_res,
+    pullCanonical_restrict, pullCanonical_restrict, pullCanonical_restrict]
+
+/-- The established residue-one generator detects this actual quotient
+class. The hypothesis is a single literal face equality, not an abstract
+injectivity or nonvanishing assumption about the quotient map. -/
+theorem quotientClass_ne_zero_of_residue
+    (c : Two coefficientQuotient ambientCover) (hc : d2 coefficientQuotient ambientCover c = 0)
+    (hface : canonicalFace c =
+      CycleQ2LiteralCanonicalResidueGenerator.canonicalResidueGenerator) :
+    cechTwoClass ambientCover ambientCover_top c hc ≠ 0 := by
+  apply cechTwoClass_ne_zero ambientCover ambientCover_top c hc coefficientQuotient_hOne
+  rintro ⟨b,rfl⟩
+  apply CycleQ2LiteralCanonicalResidueGenerator.canonicalConnecting_residueGenerator_ne_zero
+  apply (CycleQ2CanonicalCoordinateH2.canonicalConnecting_eq_zero_iff _).mpr
+  exact ⟨canonicalEdge 0 1 b.2.2.2.1, canonicalEdge 0 2 b.2.2.2.2.1,
+    canonicalEdge 1 2 b.2.2.2.2.2, (canonicalFace_d1 b).symm.trans hface⟩
+
+theorem coefficientConnecting_ne_zero_of_residue
+    (c : Two coefficientQuotient ambientCover) (hc : d2 coefficientQuotient ambientCover c = 0)
+    (hface : canonicalFace c =
+      CycleQ2LiteralCanonicalResidueGenerator.canonicalResidueGenerator) :
+    coefficientConnecting ⊤ (cechTwoClass ambientCover ambientCover_top c hc) ≠ 0 :=
+  coefficientConnecting_ne_zero _ (quotientClass_ne_zero_of_residue c hc hface)
+
+/-- The four actual pole lifts, reduced through the genuine sheaf cokernel. -/
+def quotientTwo (c : Two (addSheaf (twist literalEval 3)) ambientCover) :
+    Two coefficientQuotient ambientCover :=
+  mapTwo ambientCover (cokernel.π coefficientInclusion) c
+
+theorem quotientTwo_cocycle_of_cubic_boundary
+    (c : Two (addSheaf (twist literalEval 3)) ambientCover)
+    (a : Three (addSheaf (twist literalEval 0)) ambientCover)
+    (hc : d2 (addSheaf (twist literalEval 3)) ambientCover c =
+      app coefficientInclusion _ a) :
+    d2 coefficientQuotient ambientCover (quotientTwo c) = 0 := by
+  rw [quotientTwo, ← mapThree_d2, hc, app_comp, cokernel.condition, app_zero]
+
+theorem canonicalFace_quotientTwo
+    (c : Two (addSheaf (twist literalEval 3)) ambientCover) :
+    canonicalFace (quotientTwo c) = res CanonicalSheaf triple_le_preimage
+      (app additiveRestriction ((ambientCover 1 ⊓ ambientCover 2) ⊓ ambientCover 3) c.2.2.2) :=
+  pullCanonical_π triple_le_preimage c.2.2.2
+
+end CycleQ2LiteralCubicResidueDetection
+end
+
+#print axioms CycleQ2LiteralCubicResidueDetection.coefficientQuotient_hOne
+#print axioms CycleQ2LiteralCubicResidueDetection.canonicalFace_d1
+#print axioms CycleQ2LiteralCubicResidueDetection.quotientClass_ne_zero_of_residue
+#print axioms CycleQ2LiteralCubicResidueDetection.coefficientConnecting_ne_zero_of_residue
+#print axioms CycleQ2LiteralCubicResidueDetection.quotientTwo_cocycle_of_cubic_boundary
+
+/-!
+## The literal four-face quotient cocycle
+
+The four quadrics already used in the cone calculation now act on the
+actual native partial-fraction sections of O(1). The finite identity
+`h = ∑ xᵢ qᵢ` therefore proves the cubic boundary equation on the original
+projective cover. Reducing these four O(3) sections through the actual
+coefficient cokernel gives a closed two-cochain.
+-/
+
+noncomputable section
+namespace CycleQ2LiteralCubicProjectiveCocycle
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  MvPolynomial CycleQ2LiteralProjectiveCubicDivisor
+  CycleQ2LiteralCubicCanonicalRestriction CycleQ2LiteralCubicResidueDetection
+  CycleQ2GeometricHodgeThreefold CycleQ2GeometricHodgeThreefoldIncidence
+  CycleQ2HodgeThreefoldTwist CycleQ2GeometricModuleLocalIso
+  CycleQ2GeometricSheafLocalIso CycleQ2InjectiveCech CycleQ2CechTwoToDerived
+  CycleQ2HodgeTwistTorusChart CycleQ2HodgeTwistCoordinates
+
+abbrev Ambient := CycleQ2LiteralProjectiveCubicDivisor.Ambient
+abbrev PoleSheaf := addSheaf (twist literalEval 3)
+abbrev RegularSheaf := addSheaf (twist literalEval 0)
+
+local instance : HasExt.{1}
+    (Sheaf (Opens.grothendieckTopology Ambient) AddCommGrpCat.{0}) := HasExt.standard _
+
+def literalQuadrics (i : Fin 4) : cone literalEval :=
+  quotient literalEval (CycleQ2LiteralCubicResidueLift.quadric i)
+
+theorem literalQuadrics_homogeneous (i : Fin 4) :
+    literalQuadrics i ∈ grade literalEval 2 :=
+  quotient_mem_grade literalEval _ (CycleQ2LiteralCubicResidueLift.quadric_homogeneous i)
+
+theorem literal_assembledCubic : assembledCubic literalEval literalQuadrics = cubic := by
+  change (∑ i : Fin 4, quotient literalEval (X i.castSucc) *
+    quotient literalEval (CycleQ2LiteralCubicResidueLift.quadric i)) =
+      quotient literalEval (CycleQ2NormalConnecting.thetaH 1)
+  rw [CycleQ2LiteralCubicResidueLift.cubic_coordinate_division, map_sum]
+  simp only [map_mul]
+
+/-- The actual native lifts on the four omitted-coordinate faces. -/
+def nativeLifts : NativeTopFaces (F := PoleSheaf) (U := ambientCover) :=
+  quadricBoundaryLift literalEval literal_vertex_unit literalQuadrics literalQuadrics_homogeneous
+
+theorem nativeLifts_boundary : nativeTopBoundary nativeLifts =
+    app coefficientInclusion (CycleQ2HodgeTwistAnchor.torus literalEval)
+      (twistTopGenerator literalEval literal_vertex_unit) := by
+  have h := quadricBoundaryLift_boundary literalEval literal_vertex_unit
+    literalQuadrics literalQuadrics_homogeneous
+  rw [literal_assembledCubic] at h
+  exact h
+
+private theorem face_zero : (Finset.univ.erase (0 : Fin 4)).inf ambientCover =
+    (ambientCover 1 ⊓ ambientCover 2) ⊓ ambientCover 3 := by
+  rw [show Finset.univ.erase (0 : Fin 4) = {1,2,3} from by decide]
+  simp [inf_assoc]
+
+private theorem face_one : (Finset.univ.erase (1 : Fin 4)).inf ambientCover =
+    (ambientCover 0 ⊓ ambientCover 2) ⊓ ambientCover 3 := by
+  rw [show Finset.univ.erase (1 : Fin 4) = {0,2,3} from by decide]
+  simp [inf_assoc]
+
+private theorem face_two : (Finset.univ.erase (2 : Fin 4)).inf ambientCover =
+    (ambientCover 0 ⊓ ambientCover 1) ⊓ ambientCover 3 := by
+  rw [show Finset.univ.erase (2 : Fin 4) = {0,1,3} from by decide]
+  simp [inf_assoc]
+
+private theorem face_three : (Finset.univ.erase (3 : Fin 4)).inf ambientCover =
+    (ambientCover 0 ⊓ ambientCover 1) ⊓ ambientCover 2 := by
+  rw [show Finset.univ.erase (3 : Fin 4) = {0,1,2} from by decide]
+  simp [inf_assoc]
+
+private theorem full_ordered : Finset.univ.inf ambientCover =
+    ((ambientCover 0 ⊓ ambientCover 1) ⊓ ambientCover 2) ⊓ ambientCover 3 := by
+  rw [show (Finset.univ : Finset (Fin 4)) = {0,1,2,3} from by decide]
+  simp [inf_assoc]
+
+/-- The same four native sections, in the ordered two-cochain convention
+used by the proved Čech-to-derived comparison. -/
+def liftedTwo : Two PoleSheaf ambientCover :=
+  ⟨res PoleSheaf face_three.ge (nativeLifts 3),
+    res PoleSheaf face_two.ge (nativeLifts 2),
+    res PoleSheaf face_one.ge (nativeLifts 1),
+    res PoleSheaf face_zero.ge (nativeLifts 0)⟩
+
+def ambientTop : Three RegularSheaf ambientCover :=
+  res RegularSheaf full_ordered.ge (twistTopGenerator literalEval literal_vertex_unit)
+
+theorem liftedTwo_boundary : d2 PoleSheaf ambientCover liftedTwo =
+    app coefficientInclusion _ ambientTop := by
+  have h : d2 PoleSheaf ambientCover liftedTwo =
+      res PoleSheaf full_ordered.ge (nativeTopBoundary nativeLifts) := by
+    change res PoleSheaf _ (res PoleSheaf _ (nativeLifts 0)) -
+        res PoleSheaf _ (res PoleSheaf _ (nativeLifts 1)) +
+        res PoleSheaf _ (res PoleSheaf _ (nativeLifts 2)) -
+        res PoleSheaf _ (res PoleSheaf _ (nativeLifts 3)) =
+      res PoleSheaf _
+        (res PoleSheaf _ (nativeLifts 0) - res PoleSheaf _ (nativeLifts 1) +
+          res PoleSheaf _ (nativeLifts 2) - res PoleSheaf _ (nativeLifts 3))
+    simp only [map_sub, map_add, res_comp]
+  rw [h, nativeLifts_boundary]
+  exact (app_res coefficientInclusion full_ordered.ge
+    (twistTopGenerator literalEval literal_vertex_unit)).symm
+
+/-- A closed cochain in the genuine coefficient quotient. -/
+def residueCocycle : Two coefficientQuotient ambientCover := quotientTwo liftedTwo
+
+theorem residueCocycle_closed : d2 coefficientQuotient ambientCover residueCocycle = 0 :=
+  quotientTwo_cocycle_of_cubic_boundary liftedTwo ambientTop liftedTwo_boundary
+
+def residueClass : coefficientQuotient.H' 2 ⊤ :=
+  cechTwoClass ambientCover ambientCover_top residueCocycle residueCocycle_closed
+
+end CycleQ2LiteralCubicProjectiveCocycle
+end
+
+#print axioms CycleQ2LiteralCubicProjectiveCocycle.literal_assembledCubic
+#print axioms CycleQ2LiteralCubicProjectiveCocycle.nativeLifts_boundary
+#print axioms CycleQ2LiteralCubicProjectiveCocycle.liftedTwo_boundary
+#print axioms CycleQ2LiteralCubicProjectiveCocycle.residueCocycle_closed
+
+noncomputable section
+namespace CycleQ2LiteralCubicProjectiveCocycle
+
+open CategoryTheory CategoryTheory.Limits Opposite TopologicalSpace AlgebraicGeometry
+  MvPolynomial CycleQ2LiteralProjectiveCubicDivisor
+  CycleQ2LiteralCubicCanonicalRestriction CycleQ2LiteralCubicResidueDetection
+  CycleQ2GeometricHodgeThreefold CycleQ2GeometricHodgeThreefoldIncidence
+  CycleQ2HodgeThreefoldTwist CycleQ2GeometricModuleLocalIso
+  CycleQ2GeometricSheafLocalIso CycleQ2InjectiveCech CycleQ2CechTwoToDerived
+  CycleQ2SurfaceCoordinateFrames CycleQ2SurfaceCoordinateCubicFrames
+  CycleQ2SurfaceCoordinateSections CycleQ2SurfaceSectionCoefficients
+  CycleQ2CanonicalCoordinateCoefficients CycleQ2GeometricSurfaceCoordinates
+  CycleQ2ProjectiveCoordinateH2 CycleQ2ProjectiveCoordinateCohomology
+  CycleQ2GeometricSeedNormalIdeals
+
+abbrev Surface := CycleQ2LiteralProjectiveCubicDivisor.Surface
+
+local instance : HasExt.{1}
+    (Sheaf (Opens.grothendieckTopology Ambient) AddCommGrpCat.{0}) := HasExt.standard _
+local instance : HasExt.{1}
+    (Sheaf (Opens.grothendieckTopology Surface) AddCommGrpCat.{0}) := HasExt.standard _
+
+def nativeFaceZero : Ambient.Opens := (Finset.univ.erase (0 : Fin 4)).inf ambientCover
+
+theorem nativeFaceZero_le_chart : nativeFaceZero ≤ chartOpen 0 :=
+  Finset.inf_le (by decide : (1 : Fin 4) ∈ Finset.univ.erase 0)
+
+theorem surfaceTriple_le_nativeFace : surfaceTriple ≤ surfaceToAmbient ⁻¹ᵁ nativeFaceZero :=
+  triple_le_preimage.trans (surfaceToAmbient.preimage_mono face_zero.ge)
+
+theorem surfaceTriple_le_first : surfaceTriple ≤
+    CycleQ2FullSurfaceResidueCover.coordinateOpen 0 :=
+  (surfaceTriple_le_nativeFace.trans (surfaceToAmbient.preimage_mono nativeFaceZero_le_chart)).trans
+    (preimage_chartOpen 0).le
+
+/-- The actual coefficient of the literal 123 pole lift, restricted to
+the original surface triple open through the original scheme morphism. -/
+def surfacePoleCoefficient : Γ(Surface,surfaceTriple) :=
+  surfaceToAmbient.appLE nativeFaceZero surfaceTriple surfaceTriple_le_nativeFace
+    (chartFrame literalEval 3 1 nativeFaceZero nativeFaceZero_le_chart (nativeLifts 0))
+
+theorem canonicalFace_native : canonicalFace residueCocycle =
+    res CycleQ2LiteralCubicResidueDetection.CanonicalSheaf surfaceTriple_le_nativeFace
+      (app additiveRestriction nativeFaceZero (nativeLifts 0)) := by
+  rw [residueCocycle, canonicalFace_quotientTwo]
+  change res CycleQ2LiteralCubicResidueDetection.CanonicalSheaf triple_le_preimage
+      (app additiveRestriction _ (res PoleSheaf face_zero.ge (nativeLifts 0))) = _
+  rw [app_res]
+  exact res_comp CycleQ2LiteralCubicResidueDetection.CanonicalSheaf
+    (surfaceToAmbient.preimage_mono face_zero.ge) triple_le_preimage _
+
+/-- On the first surface chart the signed residue frame has sign +1.
+The quotient face therefore has exactly the restricted O(3) coefficient. -/
+theorem canonicalFace_firstFrame :
+    (coordinateExteriorFrame 0).app surfaceTriple surfaceTriple_le_first
+      (canonicalFace residueCocycle) = surfacePoleCoefficient := by
+  rw [canonicalFace_native]
+  change (coordinateExteriorFrame 0).app surfaceTriple surfaceTriple_le_first
+      (CycleQ2LiteralCubicCanonicalRestriction.CanonicalForms.val.map
+        (homOfLE surfaceTriple_le_nativeFace).op
+        (canonicalRestriction.val.app (op nativeFaceZero) (nativeLifts 0))) = _
+  rw [← (coordinateExteriorFrame 0).naturality surfaceTriple_le_nativeFace
+    (preimage_le_chart 0 nativeFaceZero nativeFaceZero_le_chart),
+    canonicalRestriction_local, localRestriction_coordinates]
+  change Surface.presheaf.map (homOfLE surfaceTriple_le_nativeFace).op
+      ((1 : Γ(Surface,surfaceToAmbient ⁻¹ᵁ nativeFaceZero)) *
+        surfaceToAmbient.app nativeFaceZero
+          (chartFrame literalEval 3 1 nativeFaceZero nativeFaceZero_le_chart (nativeLifts 0))) = _
+  rw [one_mul]
+  simpa only [surfacePoleCoefficient, Scheme.Hom.appLE_eq_app] using
+    (ConcreteCategory.congr_hom
+    (surfaceToAmbient.appLE_map (show surfaceToAmbient ⁻¹ᵁ nativeFaceZero ≤
+      surfaceToAmbient ⁻¹ᵁ nativeFaceZero from le_rfl)
+      (homOfLE surfaceTriple_le_nativeFace).op)
+      (chartFrame literalEval 3 1 nativeFaceZero nativeFaceZero_le_chart (nativeLifts 0)))
+
+private theorem triple_eq_intersection : surfaceTriple = coordinateIntersection 57 1 Finset.univ :=
+  (coordinateIntersection_univ 57 1).symm
+
+def tripleCoefficient : Γ(Surface,surfaceTriple) →+* CoordinateLocal 57 1 Finset.univ :=
+  sectionCoefficientAt 57 1 Finset.univ (by simp) surfaceTriple triple_eq_intersection
+
+/-- The unchanged canonical coefficient map reads a section in the
+first residue frame by multiplying its ordinary coefficient by x₁³. -/
+theorem canonicalCoefficient_firstFrame
+    (ω : CycleQ2LiteralCubicResidueDetection.CanonicalSheaf.obj.obj (op surfaceTriple)) :
+    canonicalCoefficient ω =
+      algebraMap (SurfaceRing 57 1) (CoordinateLocal 57 1 Finset.univ)
+        ((coordinateElement 57 1 0)^3) *
+      tripleCoefficient ((coordinateExteriorFrame 0).app surfaceTriple surfaceTriple_le_first ω) := by
+  suffices ∀ (O : Surface.Opens) (hO : O = coordinateIntersection 57 1 Finset.univ)
+      (hfirst : O ≤ CycleQ2FullSurfaceResidueCover.coordinateOpen 0)
+      (η : CycleQ2LiteralCubicCanonicalRestriction.CanonicalForms.val.obj (op O)),
+      canonicalCoefficientAt Finset.univ (by simp) O hO η =
+        algebraMap (SurfaceRing 57 1) (CoordinateLocal 57 1 Finset.univ)
+          ((coordinateElement 57 1 0)^3) *
+        sectionCoefficientAt 57 1 Finset.univ (by simp) O hO
+          ((coordinateExteriorFrame 0).app O hfirst η) from
+    this surfaceTriple triple_eq_intersection surfaceTriple_le_first ω
+  intro O hO hfirst η
+  subst O
+  change canonicalCoefficientOn Finset.univ (by simp) η = _
+  rw [canonicalCoefficientOn_eq Finset.univ (by simp) 0 (by simp)]
+  change (1 : CoordinateLocal 57 1 Finset.univ) *
+      algebraMap (SurfaceRing 57 1) (CoordinateLocal 57 1 Finset.univ)
+        ((coordinateElement 57 1 0)^3) *
+      sectionCoefficient 57 1 Finset.univ (by simp)
+        ((coordinateExteriorFrame 0).app _ hfirst η) = _
+  rw [one_mul] <;> rfl
+
+theorem canonicalCoefficient_residueCocycle :
+    canonicalCoefficient (canonicalFace residueCocycle) =
+      algebraMap (SurfaceRing 57 1) (CoordinateLocal 57 1 Finset.univ)
+        ((coordinateElement 57 1 0)^3) * tripleCoefficient surfacePoleCoefficient := by
+  rw [canonicalCoefficient_firstFrame, canonicalFace_firstFrame]
+
+private theorem tripleCoefficient_homogeneous (n : ℕ)
+    (p : MvPolynomial (Fin 5) ℂ)
+    (hp : p.IsWeightedHomogeneous CycleQ2CartierSurfaceGrading.weight n) :
+    tripleCoefficient
+        (coordinatePolynomialSection 57 1 1 surfaceTriple surfaceTriple_le_first p) *
+      algebraMap (SurfaceRing 57 1) (CoordinateLocal 57 1 Finset.univ)
+        ((coordinateElement 57 1 0)^n) =
+      algebraMap (SurfaceRing 57 1) (CoordinateLocal 57 1 Finset.univ)
+        (CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1 p) := by
+  suffices ∀ (O : Surface.Opens) (hO : O = coordinateIntersection 57 1 Finset.univ)
+      (hfirst : O ≤ CycleQ2FullSurfaceResidueCover.coordinateOpen 0),
+      sectionCoefficientAt 57 1 Finset.univ (by simp) O hO
+          (coordinatePolynomialSection 57 1 1 O hfirst p) *
+        algebraMap (SurfaceRing 57 1) (CoordinateLocal 57 1 Finset.univ)
+          ((coordinateElement 57 1 0)^n) =
+        algebraMap (SurfaceRing 57 1) (CoordinateLocal 57 1 Finset.univ)
+          (CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1 p) from
+    this surfaceTriple triple_eq_intersection surfaceTriple_le_first
+  intro O hO hfirst
+  subst O
+  exact sectionCoefficient_homogeneous 57 1 (by simp) 0 (by simp) n p hp
+
+private def faceDenominator : MvPolynomial (Fin 5) ℂ := X 1 * X 2 * X 3
+private def faceNumerator : MvPolynomial (Fin 5) ℂ := X 0 ^ 2 * X 4 ^ 2
+
+private theorem faceDenominator_homogeneous :
+    faceDenominator.IsWeightedHomogeneous CycleQ2CartierSurfaceGrading.weight 3 := by
+  have hx (j : Fin 4) : (X j.castSucc : MvPolynomial (Fin 5) ℂ).IsWeightedHomogeneous
+      CycleQ2CartierSurfaceGrading.weight 1 := by
+    simpa only [CycleQ2GeometricSurfaceDehomogenizedCharts.weight_castSucc] using
+      isWeightedHomogeneous_X ℂ CycleQ2CartierSurfaceGrading.weight j.castSucc
+  exact ((hx 1).mul (hx 2)).mul (hx 3)
+
+private theorem faceNumerator_homogeneous :
+    faceNumerator.IsWeightedHomogeneous CycleQ2CartierSurfaceGrading.weight 6 := by
+  have h0 : (X (0 : Fin 5) : MvPolynomial (Fin 5) ℂ).IsWeightedHomogeneous
+      CycleQ2CartierSurfaceGrading.weight 1 :=
+    isWeightedHomogeneous_X ℂ CycleQ2CartierSurfaceGrading.weight 0
+  have h4 : (X (4 : Fin 5) : MvPolynomial (Fin 5) ℂ).IsWeightedHomogeneous
+      CycleQ2CartierSurfaceGrading.weight 2 :=
+    isWeightedHomogeneous_X ℂ CycleQ2CartierSurfaceGrading.weight 4
+  exact (h0.pow 2).mul (h4.pow 2)
+
+private theorem partialDenominator_zero :
+    CycleQ2HodgeTwistTorusChart.partialDenominator literalEval 0 =
+      quotient literalEval faceDenominator := by
+  rw [CycleQ2HodgeTwistTorusChart.partialDenominator,
+    show Finset.univ.erase (0 : Fin 4) = {1,2,3} from by decide]
+  simp [faceDenominator, CycleQ2GeometricHodgeThreefold.coord, map_mul, mul_assoc]
+
+private theorem literalNumerator :
+    literalQuadrics 0 * coord literalEval (Fin.last 4) ^ 2 =
+      quotient literalEval faceNumerator := by
+  simp [literalQuadrics, CycleQ2LiteralCubicResidueLift.quadric, faceNumerator,
+    CycleQ2GeometricHodgeThreefold.coord, map_mul, map_pow]
+
+private theorem nativeLifts_zero : nativeLifts 0 =
+    CycleQ2HodgeTwistTorusChart.quadricLift literalEval literal_vertex_unit 0
+      (literalQuadrics 0) (literalQuadrics_homogeneous 0) := by
+  simp [nativeLifts, CycleQ2HodgeTwistTorusChart.quadricBoundaryLift]
+
+/-- The literal 123 lift satisfies its exact numerator equation on the
+whole 123 face. The omitted coordinate x₀ is not inverted. -/
+theorem nativeFace_fraction :
+    CycleQ2HodgeTwistRatios.normalized literalEval 1 (quotient literalEval faceDenominator)
+        (quotient_mem_grade literalEval _ faceDenominator_homogeneous)
+        nativeFaceZero nativeFaceZero_le_chart *
+      chartFrame literalEval 3 1 nativeFaceZero nativeFaceZero_le_chart (nativeLifts 0) =
+    CycleQ2HodgeTwistRatios.normalized literalEval 1 (quotient literalEval faceNumerator)
+      (quotient_mem_grade literalEval _ faceNumerator_homogeneous)
+      nativeFaceZero nativeFaceZero_le_chart := by
+  have h := CycleQ2HodgeTwistTorusChart.quadricLift_fraction literalEval literal_vertex_unit
+    0 1 (by decide) (literalQuadrics 0) (literalQuadrics_homogeneous 0)
+  rw [partialDenominator_zero, literalNumerator] at h
+  rw [nativeLifts_zero]
+  exact h
+
+theorem surfacePole_fraction :
+    coordinatePolynomialSection 57 1 1 surfaceTriple surfaceTriple_le_first faceDenominator *
+      surfacePoleCoefficient =
+    coordinatePolynomialSection 57 1 1 surfaceTriple surfaceTriple_le_first faceNumerator := by
+  have h := congrArg
+    (surfaceToAmbient.appLE nativeFaceZero surfaceTriple surfaceTriple_le_nativeFace)
+    nativeFace_fraction
+  rw [map_mul,
+    normalized_toSurface 1 3 faceDenominator faceDenominator_homogeneous
+      nativeFaceZero nativeFaceZero_le_chart surfaceTriple surfaceTriple_le_first
+      surfaceTriple_le_nativeFace,
+    normalized_toSurface 1 6 faceNumerator faceNumerator_homogeneous
+      nativeFaceZero nativeFaceZero_le_chart surfaceTriple surfaceTriple_le_first
+      surfaceTriple_le_nativeFace] at h
+  exact h
+
+private theorem faceDenominator_toSurface :
+    CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1 faceDenominator =
+      coordinateProduct 57 1 Finset.univ := by
+  simp [faceDenominator, coordinateProduct, coordinateElement,
+    CycleQ2SeedQuotientFiniteFree.remainingIndex, Fin.prod_univ_succ,
+    CycleQ2GeometricSurfaceCoordinates.quotientMap,
+    CycleQ2GeometricCartierNormalLift.surfaceQuotient, map_mul, mul_assoc]
+
+/-- Clearing the three original denominator coordinates identifies the
+actual quotient face with the original normalized canonical coefficient. -/
+theorem canonicalCoefficient_residueFraction :
+    canonicalCoefficient (canonicalFace residueCocycle) =
+      CycleQ2LiteralCanonicalResidueGenerator.residueFraction := by
+  let L := CoordinateLocal 57 1 Finset.univ
+  let e : SurfaceRing 57 1 →+* L := algebraMap (SurfaceRing 57 1) L
+  let x := e (coordinateElement 57 1 0)
+  let d := e (coordinateProduct 57 1 Finset.univ)
+  let r := tripleCoefficient surfacePoleCoefficient
+  let p := tripleCoefficient
+    (coordinatePolynomialSection 57 1 1 surfaceTriple surfaceTriple_le_first faceDenominator)
+  let n := tripleCoefficient
+    (coordinatePolynomialSection 57 1 1 surfaceTriple surfaceTriple_le_first faceNumerator)
+  have hpr : p * r = n := by
+    simpa only [map_mul] using congrArg tripleCoefficient surfacePole_fraction
+  have hp : p * x^3 = d := by
+    simpa only [map_pow, faceDenominator_toSurface] using
+      tripleCoefficient_homogeneous 3 faceDenominator faceDenominator_homogeneous
+  have hn : n * x^6 = e (CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1 faceNumerator) := by
+    simpa only [map_pow] using
+      tripleCoefficient_homogeneous 6 faceNumerator faceNumerator_homogeneous
+  have hc : canonicalCoefficient (canonicalFace residueCocycle) * d =
+      e (CycleQ2GeometricCartierNormalLift.surfaceQuotient 57 1 faceNumerator) := by
+    rw [canonicalCoefficient_residueCocycle, map_pow]
+    change (x^3 * r) * d = _
+    calc
+      (x^3 * r) * d = (p*r) * (x^3*x^3) := by rw [← hp]; ring
+      _ = n * x^6 := by rw [hpr]; ring
+      _ = _ := hn
+  change canonicalCoefficient (canonicalFace residueCocycle) =
+    CycleQ2GeometricCoordinateCharacter.polynomialFraction 57 1 faceNumerator
+  apply (IsLocalization.Away.algebraMap_isUnit
+    (S := CoordinateLocal 57 1 Finset.univ) (coordinateProduct 57 1 Finset.univ)).mul_right_cancel
+  exact hc.trans (by simpa only [pow_one] using
+    (CycleQ2GeometricCoordinateCharacter.polynomialFraction_spec 57 1 faceNumerator).symm)
+
+/-- The actual 123 face is the original residue-one canonical section,
+not merely another nonzero section of the same coefficient space. -/
+theorem canonicalFace_residueGenerator : canonicalFace residueCocycle =
+    CycleQ2LiteralCanonicalResidueGenerator.canonicalResidueGenerator :=
+  CycleQ2LiteralCanonicalResidueGenerator.eq_residueGenerator_of_coefficient _
+    canonicalCoefficient_residueFraction
+
+theorem residueClass_ne_zero : residueClass ≠ 0 :=
+  quotientClass_ne_zero_of_residue residueCocycle residueCocycle_closed
+    canonicalFace_residueGenerator
+
+/-- The actual cubic boundary of the explicit quotient cocycle in the
+fixed proper threefold's degree-three structure-twist cohomology. -/
+def ambientResidueClass : RegularSheaf.H' 3 ⊤ := coefficientConnecting ⊤ residueClass
+
+theorem ambientResidueClass_ne_zero : ambientResidueClass ≠ 0 :=
+  coefficientConnecting_ne_zero residueClass residueClass_ne_zero
+
+/-- The genuine cubic connecting image is the third injective-descent
+class of the retained scalar coboundary. This makes no comparison of
+sign conventions with the separate Mayer--Vietoris construction. -/
+theorem ambientResidueClass_eq_cechThreeClass : ambientResidueClass =
+    CycleQ2FourOpenTopCoefficientBoundary.cechThreeClass
+      ambientCover ambientCover_top ambientTop :=
+  CycleQ2FourOpenTopCoefficientBoundary.cechTwoClass_connecting
+    ambientCover coefficientShortExact ambientCover_top liftedTwo ambientTop liftedTwo_boundary
+
+end CycleQ2LiteralCubicProjectiveCocycle
+end
+
+#print axioms CycleQ2LiteralCubicProjectiveCocycle.canonicalFace_firstFrame
+#print axioms CycleQ2LiteralCubicProjectiveCocycle.canonicalCoefficient_residueCocycle
+#print axioms CycleQ2LiteralCubicProjectiveCocycle.nativeFace_fraction
+#print axioms CycleQ2LiteralCubicProjectiveCocycle.canonicalFace_residueGenerator
+#print axioms CycleQ2LiteralCubicProjectiveCocycle.residueClass_ne_zero
+#print axioms CycleQ2LiteralCubicProjectiveCocycle.ambientResidueClass_ne_zero
+#print axioms CycleQ2LiteralCubicProjectiveCocycle.ambientResidueClass_eq_cechThreeClass
+
+/-!
+## The original marked surface class uses this same residue face
+
+The existing marked moving-curve computation lands in canonical H² of
+the original surface. Its normalized trace determines its multiple of
+the residue-one generator. The literal face identification above binds
+that statement to the explicit coefficient cocycle, without introducing
+an ambient Gysin map or choosing an inverse to an unrelated homomorphism.
+-/
+
+noncomputable section
+namespace CycleQ2LiteralCubicProjectiveCocycle
+
+open CategoryTheory TopologicalSpace AlgebraicGeometry
+  CycleQ2LiteralCubicResidueDetection CycleQ2CanonicalCoordinateH2
+  CycleQ2SeedSectionAffineInjective CycleQ2LiteralMovingDivisorChern
+  CycleQ2CanonicalCubicDiagram CycleQ2IncidenceFirstOrderCanonicalH2
+  CycleQ2LiteralCotangentShortExact CycleQ2LiteralCotangentTrace
+  CycleQ2LiteralMovingCurveDifferentialNonzero
+
+local instance (X : Scheme.{0}) : HasExt.{1}
+    (Sheaf (Opens.grothendieckTopology X) AddCommGrpCat.{0}) := HasExt.standard _
+
+/-- The exact retained cubic paired with the actual moving Chern class
+is its known marked curve trace times the original quotient residue face. -/
+theorem marked_cubic_eq_trace_smul_residueFace
+    (t : Fin 3 → ℂ) (ht : ∀ i, ChartRegular t i) :
+    cubicH2 firstOrderWeightedCubic
+        ((movingClass t ht).comp cotangentAdditiveShortExact.extClass rfl) =
+      differentialTrace t ht (curveClass t) •
+        canonicalConnecting (canonicalFace residueCocycle) := by
+  rw [canonicalFace_residueGenerator, differentialTrace_curveClass]
+  exact eq_trace_smul_generator _
+
+end CycleQ2LiteralCubicProjectiveCocycle
+end
+
+#print axioms CycleQ2LiteralCubicProjectiveCocycle.marked_cubic_eq_trace_smul_residueFace

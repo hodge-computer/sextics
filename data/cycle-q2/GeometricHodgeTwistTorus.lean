@@ -1,5 +1,9 @@
 import Proposal.GeometricSurfaceCoordinates
+import Proposal.GeometricHodgeThreefoldCubicRestriction
+import Proposal.GeometricLocalizedDerivations
 import Mathlib.Algebra.MonoidAlgebra.Lift
+import Mathlib.Algebra.MvPolynomial.PDeriv
+import Mathlib.LinearAlgebra.Finsupp.LSum
 
 /-!
 # Evaluation of localized chart coefficients on the common torus
@@ -77,3 +81,408 @@ end CycleQ2HodgeTwistTorus
 end
 
 #print axioms CycleQ2HodgeTwistTorus.evaluate_restriction
+
+/-! The three logarithmic derivatives act on the same finite Laurent
+coefficients used by the native projective face coordinates. Their constant
+coefficients vanish, including after the original product localization. -/
+
+noncomputable section
+namespace CycleQ2TorusLogDerivatives
+
+open CycleQ2SeedCechThreeOpen CycleQ2SeedCechLocalization
+open CycleQ2SeedQuotientFiniteFree (Base)
+
+variable (R : Type*) [CommRing R]
+
+def linear (j : Fin 3) : Laurent (R := R) →ₗ[R] Laurent (R := R) :=
+  (Finsupp.lsum R (fun e : LaurentExponent =>
+    (e j : R) • (AddMonoidAlgebra.lsingle e : R →ₗ[R] Laurent (R := R)))).comp
+      (AddMonoidAlgebra.coeffLinearEquiv R).toLinearMap
+
+theorem linear_single (j : Fin 3) (e : LaurentExponent) (a : R) :
+    linear R j (AddMonoidAlgebra.single e a) =
+      AddMonoidAlgebra.single e ((e j : R) * a) := by
+  change Finsupp.lsum R (fun f : LaurentExponent =>
+    (f j : R) • (AddMonoidAlgebra.lsingle f : R →ₗ[R] Laurent (R := R)))
+      (Finsupp.single e a) = _
+  rw [Finsupp.lsum_single, LinearMap.smul_apply, AddMonoidAlgebra.lsingle_apply,
+    AddMonoidAlgebra.smul_single, smul_eq_mul]
+
+private theorem linear_leibniz (j : Fin 3) (x y : Laurent (R := R)) :
+    linear R j (x*y) = x * linear R j y + y * linear R j x := by
+  induction x using AddMonoidAlgebra.induction_linear with
+  | zero => simp
+  | add x z hx hz =>
+      rw [add_mul, map_add, hx, hz, map_add]
+      ring
+  | single e a =>
+      induction y using AddMonoidAlgebra.induction_linear with
+      | zero => simp
+      | add y z hy hz =>
+          rw [mul_add, map_add, hy, hz, map_add]
+          ring
+      | single f b =>
+          rw [AddMonoidAlgebra.single_mul_single, linear_single, linear_single,
+            linear_single, AddMonoidAlgebra.single_mul_single,
+            AddMonoidAlgebra.single_mul_single, add_comm f e,
+            ← AddMonoidAlgebra.single_add]
+          apply congrArg (AddMonoidAlgebra.single (e+f))
+          simp only [Pi.add_apply, Int.cast_add]
+          ring
+
+/-- The original Laurent-coordinate Euler derivation, with no completion
+or field extension. -/
+def logarithmic (j : Fin 3) : Derivation R (Laurent (R := R)) (Laurent (R := R)) where
+  toLinearMap := linear R j
+  map_one_eq_zero' := by
+    change linear R j (AddMonoidAlgebra.single 0 1) = 0
+    rw [linear_single]
+    simp
+  leibniz' := linear_leibniz R j
+
+theorem logarithmic_single (j : Fin 3) (e : LaurentExponent) (a : R) :
+    logarithmic R j (AddMonoidAlgebra.single e a) =
+      AddMonoidAlgebra.single e ((e j : R) * a) := linear_single R j e a
+
+theorem logarithmic_coeff (j : Fin 3) (p : Laurent (R := R)) (e : LaurentExponent) :
+    (logarithmic R j p).coeff e = (e j : R) * p.coeff e := by
+  classical
+  induction p using AddMonoidAlgebra.induction_linear with
+  | zero => simp
+  | add p q hp hq => simp only [map_add, AddMonoidAlgebra.coeff_add,
+      Finsupp.add_apply, hp, hq, mul_add]
+  | single f a =>
+      rw [logarithmic_single]
+      change (Finsupp.single f ((f j : R)*a)) e =
+        (e j : R) * (Finsupp.single f a) e
+      by_cases h : f = e
+      · subst f; simp
+      · simp [h]
+
+theorem logarithmic_commute (i j : Fin 3) :
+    Function.Commute (logarithmic R i) (logarithmic R j) := by
+  intro p
+  apply AddMonoidAlgebra.coeff_injective
+  ext e
+  simp only [logarithmic_coeff]
+  ring
+
+@[simp] theorem logarithmic_constant (j : Fin 3) (p : Laurent (R := R)) :
+    (logarithmic R j p).coeff 0 = 0 := by
+  rw [logarithmic_coeff]
+  simp
+
+def polynomialLogarithmic (j : Fin 3) : Derivation R (Base R) (Base R) :=
+  MvPolynomial.X j • MvPolynomial.pderiv j
+
+theorem logarithmic_polynomial (j : Fin 3) (p : Base R) :
+    logarithmic R j (baseToLaurent R p) =
+      baseToLaurent R (polynomialLogarithmic R j p) := by
+  induction p using MvPolynomial.induction_on' with
+  | add p q hp hq => simp only [map_add, hp, hq]
+  | monomial e a =>
+      change logarithmic R j (baseToLaurent R (MvPolynomial.monomial e a)) =
+        baseToLaurent R (MvPolynomial.X j * MvPolynomial.pderiv j (MvPolynomial.monomial e a))
+      rw [MvPolynomial.X_mul_pderiv_monomial, map_nsmul,
+        baseToLaurent_monomial, logarithmic_single, AddMonoidAlgebra.smul_single]
+      simp only [castExponent_apply, Int.cast_natCast, nsmul_eq_mul]
+
+/-- The same derivation on the actual localization of the three chart
+coordinates used in `localizedBasis`. -/
+def localizedLogarithmic (S : Finset (Fin 3)) (j : Fin 3) :
+    Derivation R (coordinateLocalization R S) (coordinateLocalization R S) :=
+  CycleQ2GeometricLocalizedDerivations.localizedBaseDerivation
+    (Submonoid.powers (baseProduct R S)) (coordinateLocalization R S)
+    (polynomialLogarithmic R j)
+
+theorem localizedLogarithmic_algebraMap (S : Finset (Fin 3)) (j : Fin 3) (p : Base R) :
+    localizedLogarithmic R S j (algebraMap (Base R) (coordinateLocalization R S) p) =
+      algebraMap (Base R) (coordinateLocalization R S) (polynomialLogarithmic R j p) :=
+  CycleQ2GeometricLocalizedDerivations.localizedBaseDerivation_algebraMap _ _ _ _
+
+theorem localizationToLaurent_logarithmic (S : Finset (Fin 3)) (j : Fin 3)
+    (p : coordinateLocalization R S) :
+    logarithmic R j (localizationToLaurent R S p) =
+      localizationToLaurent R S (localizedLogarithmic R S j p) := by
+  apply CycleQ2GeometricLocalizedDerivations.derivation_commutes_of_algebraMap
+    (Submonoid.powers (baseProduct R S))
+    ((localizedLogarithmic R S j).restrictScalars ℤ)
+    ((logarithmic R j).restrictScalars ℤ) (localizationToLaurent R S)
+  intro a
+  simp only [Derivation.restrictScalars_apply, localizedLogarithmic_algebraMap,
+    localizationToLaurent_algebraMap, logarithmic_polynomial]
+
+theorem localizedLogarithmic_commute (S : Finset (Fin 3)) (i j : Fin 3) :
+    Function.Commute (localizedLogarithmic R S i) (localizedLogarithmic R S j) := by
+  intro p
+  apply localizationToLaurent_injective R S
+  simp only [← localizationToLaurent_logarithmic]
+  exact logarithmic_commute R i j _
+
+@[simp] theorem localizedLogarithmic_constant (S : Finset (Fin 3)) (j : Fin 3)
+    (p : coordinateLocalization R S) :
+    (localizationToLaurent R S (localizedLogarithmic R S j p)).coeff 0 = 0 := by
+  rw [← localizationToLaurent_logarithmic, logarithmic_constant]
+
+end CycleQ2TorusLogDerivatives
+end
+
+#print axioms CycleQ2TorusLogDerivatives.localizationToLaurent_logarithmic
+#print axioms CycleQ2TorusLogDerivatives.localizedLogarithmic_constant
+
+/-! Finite cubic residue identities. The coefficient functional is the
+third coordinate of an actual power basis, not a field trace or a
+functional postulated to kill differentials. -/
+
+noncomputable section
+namespace CycleQ2CubicCoefficientTrace
+
+open Module
+
+variable {A B : Type*} [CommRing A] [CommRing B] [Algebra A B]
+
+def normal (w : B) (a : Fin 3 → A) : B :=
+  algebraMap A B (a 0) + algebraMap A B (a 1) * w + algebraMap A B (a 2) * w^2
+
+def top (b : Basis (Fin 3) A B) : B →ₗ[A] A := b.coord 2
+
+variable (b : Basis (Fin 3) A B) (w : B) (hw : ∀ j, b j = w^j.val)
+
+theorem normal_sum (a : Fin 3 → A) : normal w a = ∑ j, a j • b j := by
+  simp only [normal, Fin.sum_univ_three, hw, Algebra.smul_def, pow_zero, pow_one,
+    mul_one, Fin.val_zero, Fin.val_one, show (2 : Fin 3).val = 2 from rfl]
+
+theorem normal_repr (x : B) : normal w (fun j => b.repr x j) = x := by
+  rw [normal_sum b w hw]
+  exact b.sum_repr x
+
+theorem repr_normal (a : Fin 3 → A) (j : Fin 3) : b.repr (normal w a) j = a j := by
+  classical
+  rw [normal_sum b w hw]
+  simp [map_sum, map_smul, Basis.repr_self, Finsupp.single_apply]
+
+theorem top_normal (a : Fin 3 → A) : top b (normal w a) = a 2 :=
+  repr_normal b w hw a 2
+
+theorem normal_translate (u : A) (a : Fin 3 → A) :
+    normal (w + algebraMap A B u) a =
+      normal w ![a 0 + u*a 1 + u^2*a 2, a 1 + 2*u*a 2, a 2] := by
+  simp [normal] <;> ring
+
+/-- Translating the cubic root by a base coefficient preserves its top
+power-basis coordinate. This includes the literal change z=w+x₂². -/
+theorem top_translated_normal (u : A) (a : Fin 3 → A) :
+    top b (normal (w + algebraMap A B u) a) = a 2 := by
+  rw [normal_translate, top_normal b w hw]
+
+theorem exists_translated_normal (u : A) (x : B) :
+    ∃ a : Fin 3 → A, normal (w + algebraMap A B u) a = x := by
+  let a := fun j => b.repr x j
+  refine ⟨![a 0-u*a 1+u^2*a 2, a 1-2*u*a 2, a 2], ?_⟩
+  rw [normal_translate]
+  calc
+    _ = normal w a := by
+      apply congrArg (normal w)
+      funext j
+      fin_cases j <;> simp <;> ring
+    _ = x := normal_repr b w hw x
+
+private theorem top_power (j : Fin 3) :
+    top b (w^j.val) = if j = 2 then 1 else 0 := by
+  classical
+  rw [← hw j]
+  simp [top, Basis.coord_apply, Basis.repr_self, Finsupp.single_apply]
+
+theorem top_one : top b 1 = 0 := by simpa using top_power b w hw 0
+theorem top_root : top b w = 0 := by simpa using top_power b w hw 1
+theorem top_square : top b (w^2) = 1 := by simpa using top_power b w hw 2
+
+private theorem top_scalar_power (a : A) (n : ℕ) :
+    top b (algebraMap A B a * w^n) = a * top b (w^n) := by
+  simpa only [Algebra.smul_def, smul_eq_mul] using (top b).map_smul a (w^n)
+
+variable (c : Fin 3 → A) (hc : w^3 = -normal w c)
+
+theorem top_cube : top b (w^3) = -c 2 := by
+  rw [hc, map_neg, top_normal b w hw]
+
+theorem top_fourth : top b (w^4) = c 2 ^ 2 - c 1 := by
+  have h4 : w^4 = -(algebraMap A B (c 0)*w^1 +
+      algebraMap A B (c 1)*w^2 + algebraMap A B (c 2)*w^3) := by
+    calc
+      w^4 = w^3*w := by ring
+      _ = _ := by rw [hc]; simp only [normal]; ring
+  rw [h4, map_neg, map_add, map_add, top_scalar_power, top_scalar_power, top_scalar_power]
+  simp only [pow_one, top_root b w hw, top_square b w hw, top_cube b w hw c hc]
+  ring
+
+/-- Multiplication followed by the genuine third power coordinate uses
+only the reductions of w³ and w⁴. -/
+theorem top_mul_normal (a d : Fin 3 → A) :
+    top b (normal w a * normal w d) =
+      a 0*d 2 + a 1*d 1 + a 2*d 0 -
+        c 2*(a 1*d 2 + a 2*d 1) + (c 2^2-c 1)*a 2*d 2 := by
+  have hmul : normal w a * normal w d =
+      algebraMap A B (a 0*d 0)*w^0 +
+      algebraMap A B (a 0*d 1+a 1*d 0)*w^1 +
+      algebraMap A B (a 0*d 2+a 1*d 1+a 2*d 0)*w^2 +
+      algebraMap A B (a 1*d 2+a 2*d 1)*w^3 +
+      algebraMap A B (a 2*d 2)*w^4 := by
+    simp only [normal, map_add, map_mul]
+    ring
+  rw [hmul]
+  simp only [map_add, top_scalar_power, pow_zero, pow_one, top_one b w hw,
+    top_root b w hw, top_square b w hw, top_cube b w hw c hc, top_fourth b w hw c hc]
+  ring
+
+def traceValue (a : Fin 3 → A) : A :=
+  3*a 0-c 2*a 1+(c 2^2-2*c 1)*a 2
+
+variable {k : Type*} [CommRing k] [Algebra k A]
+
+/-- The coefficient of the derivative of a horizontal two-form is an
+actual derivative in the base algebra. D acts on the three normal-form
+coefficients and fixes the indeterminate w. -/
+theorem horizontal_identity (D : Derivation k A A) (a : Fin 3 → A) :
+    top b (normal w ![c 1,2*c 2,3] * normal w (D ∘ a) -
+      normal w (D ∘ c) * normal w ![a 1,2*a 2,0]) = D (traceValue c a) := by
+  rw [map_sub, top_mul_normal b w hw c hc, top_mul_normal b w hw c hc]
+  simp only [Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+    Function.comp_apply, traceValue, pow_two, map_sub, map_add,
+    Derivation.leibniz, Derivation.map_natCast, smul_eq_mul]
+  ring
+
+/-- The corresponding coefficient identity for a two-form containing dw.
+Mixed derivatives cancel because the two actual base derivations commute. -/
+theorem mixed_identity (D E : Derivation k A A) (hDE : Function.Commute D E)
+    (a : Fin 3 → A) :
+    E (top b (normal w a * normal w (D ∘ c))) -
+      D (top b (normal w a * normal w (E ∘ c))) =
+    top b (normal w (E ∘ a) * normal w (D ∘ c) -
+      normal w (D ∘ a) * normal w (E ∘ c)) := by
+  simp only [map_sub, top_mul_normal b w hw c hc, Function.comp_apply, pow_two,
+    map_add, Derivation.leibniz, smul_eq_mul, hDE]
+  ring
+
+end CycleQ2CubicCoefficientTrace
+end
+
+noncomputable section
+namespace CycleQ2TorusCubicTrace
+
+open Module Polynomial CycleQ2GeometricHodgeThreefoldCubic
+open CycleQ2SeedCechLocalization CycleQ2SeedQuotientFiniteFree
+open CycleQ2GenericSexticGradient (CoeffRing)
+open CycleQ2GeometricHodgeThreefold (vertexCoefficient)
+open CycleQ2CubicCoefficientTrace (normal)
+
+variable {R : Type} [CommRing R] [Nontrivial R]
+  (φ : CoeffRing →+* R) (i : Fin 4) (h : IsUnit (φ vertexCoefficient))
+  (S : Finset (Fin 3))
+
+abbrev Coefficients := coordinateLocalization R S
+abbrev Cubic := AwayStage φ i h (Submonoid.powers (baseProduct R S))
+
+def powerBasis : Basis (Fin 3) (Coefficients (R := R) S) (Cubic φ i h S) :=
+  localizedBasis φ i h (Submonoid.powers (baseProduct R S))
+
+def root : Cubic φ i h S :=
+  algebraMap (Stage φ i h) (Cubic φ i h S) (AdjoinRoot.root (cubic φ i h))
+
+theorem powerBasis_apply (j : Fin 3) : powerBasis φ i h S j = (root φ i h S)^j.val := by
+  simpa only [powerBasis, root, map_pow] using
+    localizedBasis_apply φ i h (Submonoid.powers (baseProduct R S)) j
+
+def coefficients (j : Fin 3) : Coefficients (R := R) S :=
+  algebraMap (Base R) (Coefficients (R := R) S) ((cubic φ i h).coeff j.val)
+
+/-- This is the relation of the original localized cubic, with its actual
+lower coefficients. No squarefreeness or branch denominator is required. -/
+theorem root_relation :
+    (root φ i h S)^3 = -normal (root φ i h S) (coefficients φ i h S) := by
+  let p := cubic φ i h
+  have h3 : p.coeff 3 = 1 := by
+    have hm := (cubic_monic φ i h).leadingCoeff
+    change p.coeff p.natDegree = 1 at hm
+    simpa only [p, cubic_natDegree] using hm
+  have hp : p = ∑ j : Fin 4, Polynomial.C (p.coeff j.val) * Polynomial.X^j.val := by
+    rw [Fin.sum_univ_eq_sum_range (fun j => Polynomial.C (p.coeff j) * Polynomial.X^j)]
+    exact p.as_sum_range_C_mul_X_pow' (by rw [show p.natDegree = 3 from cubic_natDegree φ i h]; decide)
+  have hz : aeval (AdjoinRoot.root p)
+      (∑ j : Fin 4, Polynomial.C (p.coeff j.val) * Polynomial.X^j.val) = 0 :=
+    (congrArg (aeval (AdjoinRoot.root p)) hp).symm.trans (by simp)
+  rw [Fin.sum_univ_four] at hz
+  simp only [map_add, map_mul, map_pow, aeval_C, aeval_X,
+    Fin.val_zero, Fin.val_one, show (2 : Fin 4).val = 2 from rfl,
+    show (3 : Fin 4).val = 3 from rfl, h3, map_one, pow_zero, pow_one,
+    one_mul, mul_one] at hz
+  have hz' := congrArg (algebraMap (Stage φ i h) (Cubic φ i h S)) hz
+  simp only [map_add, map_mul, map_pow, map_zero,
+    ← IsScalarTower.algebraMap_apply (Base R) (Stage φ i h) (Cubic φ i h S)] at hz'
+  change (root φ i h S)^3 = -(algebraMap (Coefficients (R := R) S) (Cubic φ i h S)
+    (coefficients φ i h S 0) + algebraMap (Coefficients (R := R) S) (Cubic φ i h S)
+    (coefficients φ i h S 1) * root φ i h S +
+    algebraMap (Coefficients (R := R) S) (Cubic φ i h S)
+      (coefficients φ i h S 2) * (root φ i h S)^2)
+  simp only [coefficients, ← IsScalarTower.algebraMap_apply]
+  dsimp only [root, p] at hz' ⊢
+  linear_combination hz'
+
+/-- The third coordinate of the same localized power basis used by the
+native projective torus chart. -/
+def topCoefficient : Cubic φ i h S →ₗ[Coefficients (R := R) S] Coefficients (R := R) S :=
+  (powerBasis φ i h S).coord 2
+
+def logarithmicTrace : Cubic φ i h S →+ R where
+  toFun a := (localizationToLaurent R S (topCoefficient φ i h S a)).coeff 0
+  map_zero' := by simp [topCoefficient]
+  map_add' a b := by simp only [map_add, AddMonoidAlgebra.coeff_add, Finsupp.add_apply]
+
+theorem horizontal_identity
+    (D : Derivation R (Coefficients (R := R) S) (Coefficients (R := R) S))
+    (a : Fin 3 → Coefficients (R := R) S) :
+    topCoefficient φ i h S
+      (normal (root φ i h S) ![coefficients φ i h S 1,2*coefficients φ i h S 2,3] *
+        normal (root φ i h S) (D ∘ a) -
+      normal (root φ i h S) (D ∘ coefficients φ i h S) *
+        normal (root φ i h S) ![a 1,2*a 2,0]) =
+      D (CycleQ2CubicCoefficientTrace.traceValue (coefficients φ i h S) a) :=
+  CycleQ2CubicCoefficientTrace.horizontal_identity (powerBasis φ i h S) (root φ i h S)
+    (powerBasis_apply φ i h S) (coefficients φ i h S) (root_relation φ i h S) D a
+
+theorem logarithmicTrace_horizontal (j : Fin 3) (a : Fin 3 → Coefficients (R := R) S) :
+    let D := CycleQ2TorusLogDerivatives.localizedLogarithmic R S j
+    logarithmicTrace φ i h S
+      (normal (root φ i h S) ![coefficients φ i h S 1,2*coefficients φ i h S 2,3] *
+        normal (root φ i h S) (D ∘ a) -
+      normal (root φ i h S) (D ∘ coefficients φ i h S) *
+        normal (root φ i h S) ![a 1,2*a 2,0]) = 0 := by
+  dsimp only
+  change (localizationToLaurent R S (topCoefficient φ i h S _)).coeff 0 = 0
+  rw [horizontal_identity, CycleQ2TorusLogDerivatives.localizedLogarithmic_constant]
+
+theorem logarithmicTrace_mixed (j k : Fin 3) (a : Fin 3 → Coefficients (R := R) S) :
+    let D := CycleQ2TorusLogDerivatives.localizedLogarithmic R S j
+    let E := CycleQ2TorusLogDerivatives.localizedLogarithmic R S k
+    logarithmicTrace φ i h S
+      (normal (root φ i h S) (E ∘ a) * normal (root φ i h S) (D ∘ coefficients φ i h S) -
+        normal (root φ i h S) (D ∘ a) * normal (root φ i h S) (E ∘ coefficients φ i h S)) = 0 := by
+  dsimp only
+  let D := CycleQ2TorusLogDerivatives.localizedLogarithmic R S j
+  let E := CycleQ2TorusLogDerivatives.localizedLogarithmic R S k
+  have hm := CycleQ2CubicCoefficientTrace.mixed_identity (powerBasis φ i h S) (root φ i h S)
+    (powerBasis_apply φ i h S) (coefficients φ i h S) (root_relation φ i h S) D E
+    (CycleQ2TorusLogDerivatives.localizedLogarithmic_commute R S j k) a
+  change (localizationToLaurent R S (CycleQ2CubicCoefficientTrace.top (powerBasis φ i h S) _)).coeff 0 = 0
+  rw [← hm, map_sub]
+  change (localizationToLaurent R S (E _) ).coeff 0 -
+    (localizationToLaurent R S (D _) ).coeff 0 = 0
+  rw [CycleQ2TorusLogDerivatives.localizedLogarithmic_constant,
+    CycleQ2TorusLogDerivatives.localizedLogarithmic_constant, sub_self]
+
+end CycleQ2TorusCubicTrace
+end
+
+#print axioms CycleQ2TorusCubicTrace.root_relation
+#print axioms CycleQ2TorusCubicTrace.logarithmicTrace_horizontal
+#print axioms CycleQ2TorusCubicTrace.logarithmicTrace_mixed

@@ -1,5 +1,10 @@
 import Proposal.GeometricLiteralThreefoldResidueChartMaps
 import Proposal.GeometricLiteralThreefoldChartVolume
+import Proposal.GeometricLiteralThreefoldChartVolumeFrame
+import Proposal.GeometricLiteralThreefoldGradientAtlas
+import Proposal.GeometricLiteralThreefoldDifferentialFrame
+import Proposal.GeometricLiteralThreefoldHodgeCech
+import Proposal.GeometricSurfaceCoordinateCubicFrames
 import Mathlib.LinearAlgebra.ExteriorPower.Basic
 import Mathlib.LinearAlgebra.Alternating.Uncurry.Fin
 import Mathlib.LinearAlgebra.Determinant
@@ -292,3 +297,417 @@ end
 #print axioms CycleQ2LiteralThreefoldResidueGluing.chartVolume_overlap
 #print axioms CycleQ2LiteralThreefoldResidueGluing.orientedResidue_overlap
 #print axioms CycleQ2LiteralThreefoldResidueGluing.fixedChartVolume_overlap
+
+/-!
+# The actual canonical sheaf of the fixed threefold is trivial
+
+The affine residue equivalences extend to genuine sheaf frames by the
+proved Kähler bases on the gradient opens. Their inverse-one sections are
+the original oriented chart residues. The overlap identity above therefore
+glues the four chart frames to a frame on the whole fixed threefold. This
+construction concerns `IncidenceFiber 57`; no relative or generic
+trivialization is substituted for the fixed geometric data.
+-/
+
+set_option backward.isDefEq.respectTransparency false
+set_option backward.isDefEq.respectTransparency.types false
+
+noncomputable section
+namespace CycleQ2LiteralThreefoldCanonicalFrame
+
+open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry Module
+open CycleQ2GeometricAffineChartSections CycleQ2GeometricDifferentialSheaf
+  CycleQ2GeometricExteriorSheaf CycleQ2GeometricCanonicalGluing
+  CycleQ2GeometricModuleOverFrame CycleQ2ChartExteriorBinding
+  CycleQ2LiteralThreefoldDifferentialFrame CycleQ2ExteriorTopBaseChange
+  CycleQ2LocalFrameGluing
+
+section ScaledBasis
+
+variable {X : Scheme.{0}} {U : X.Opens} {A : Type}
+  [CommRing A] [Algebra ℂ A]
+  (e : U.toScheme ≅ Spec (CommRingCat.of A))
+  (f : X ⟶ Spec (CommRingCat.of ℂ))
+  (h : e.inv ≫ U.ι ≫ f = Spec.map (CommRingCat.ofHom (algebraMap ℂ A)))
+  {n : ℕ} (b : Basis (Fin n) A (KaehlerDifferential ℂ A)) (u : Aˣ)
+
+/-- Multiplying the basis wedge by the specified affine unit changes its
+actual sheaf coordinate by the inverse unit on every subopen. -/
+def scaledBasisFrame : LocalFrame X.sheaf
+    (exteriorSheaf X.sheaf (differentialSheaf X.sheaf (schemeCoefficient f)).val n) U where
+  app O hO :=
+    ((patchIsoOfOverFrame (frameIso e f h b)).app O hO).trans
+      (LinearEquiv.smulOfUnit
+        (Units.map (chartSection e (Over.mk (homOfLE hO))).toMonoidHom u⁻¹))
+  naturality {O P} hPO hO s := by
+    let a : Over.mk (homOfLE (hPO.trans hO)) ⟶ Over.mk (homOfLE hO) :=
+      Over.homMk (homOfLE hPO)
+    change X.presheaf.map (homOfLE hPO).op
+        (chartSection e (Over.mk (homOfLE hO)) (↑u⁻¹ : A) *
+          (patchIsoOfOverFrame (frameIso e f h b)).app O hO s) =
+      chartSection e (Over.mk (homOfLE (hPO.trans hO))) (↑u⁻¹ : A) *
+        (patchIsoOfOverFrame (frameIso e f h b)).app P (hPO.trans hO)
+          ((exteriorSheaf X.sheaf
+            (differentialSheaf X.sheaf (schemeCoefficient f)).val n).val.map
+              (homOfLE hPO).op s)
+    rw [map_mul, chartSection_naturality e a,
+      (patchIsoOfOverFrame (frameIso e f h b)).naturality]
+
+theorem scaledBasisFrame_native (O : X.Opens) (hO : O ≤ U)
+    (ω : ⋀[A]^n (KaehlerDifferential ℂ A)) :
+    (scaledBasisFrame e f h b u).app O hO
+      (chartExteriorSheafSection e f h n (Over.mk (homOfLE hO)) ω) =
+      chartSection e (Over.mk (homOfLE hO))
+        ((↑u⁻¹ : A) * topCoordinate b ω) := by
+  change chartSection e (Over.mk (homOfLE hO)) (↑u⁻¹ : A) *
+      (frameIso e f h b).hom.val.app (op (Over.mk (homOfLE hO)))
+        (chartExteriorSheafSection e f h n (Over.mk (homOfLE hO)) ω) = _
+  rw [frameIso_on_section, map_mul]
+
+/-- The inverse-one section is the image of the specified native wedge,
+including its unit and its sign. -/
+theorem scaledBasisFrame_generator (O : X.Opens) (hO : O ≤ U) :
+    frameGenerator (scaledBasisFrame e f h b u) O hO =
+      chartExteriorSheafSection e f h n (Over.mk (homOfLE hO))
+        ((u : A) • exteriorPower.ιMulti A n b) := by
+  apply ((scaledBasisFrame e f h b u).app O hO).injective
+  change (scaledBasisFrame e f h b u).app O hO
+      (((scaledBasisFrame e f h b u).app O hO).symm (1 : Γ(X,O))) = _
+  rw [LinearEquiv.apply_symm_apply, scaledBasisFrame_native]
+  simp only [map_smul, topCoordinate_basis, smul_eq_mul, mul_one,
+    Units.inv_mul, map_one]
+
+end ScaledBasis
+
+open CycleQ2LiteralAmbientSmooth CycleQ2LiteralAmbientCharts
+  CycleQ2LiteralAbelJacobiContraction CycleQ2LiteralThreefoldResidueFrame
+  CycleQ2LiteralThreefoldResidueMinors CycleQ2LiteralThreefoldChartVolume
+  CycleQ2LiteralThreefoldChartVolumeFrame CycleQ2LiteralThreefoldGradientAtlas
+  CycleQ2LiteralThreefoldResidueCoordinates CycleQ2LiteralThreefoldResidueChartMaps
+  CycleQ2LiteralThreefoldOverlapAtlas CycleQ2ExteriorSectionNaturality
+  CycleQ2LiteralThreefoldHodgeCech (Threefold structureMap coefficients Cotangent)
+
+attribute [local instance] sourceFixedAlgebra sourceFixedTower
+
+/-- The actual exterior cube of the same differential sheaf used by the
+fixed threefold's test Čech complex. -/
+abbrev CanonicalForms := exteriorSheaf Threefold.sheaf Cotangent.val 3
+
+abbrev StructureModule := SheafOfModules.unit (ringSheaf Threefold.sheaf)
+
+abbrev CanonicalAdditiveSheaf := CycleQ2GeometricModuleLocalIso.addSheaf CanonicalForms
+
+private theorem chart_over (i : Fin 4) :
+    (fixedChart i).symm.inv ≫ (fixedOpen i).ι ≫ structureMap =
+      Spec.map (CommRingCat.ofHom (algebraMap ℂ (T i))) := by
+  simpa only [Category.assoc, Iso.symm_inv, chartInclusion] using chartInclusion_overComplex i
+
+private theorem gradient_over (i j : Fin 4) :
+    (gradientIso i j).inv ≫ (gOpen i j).ι ≫ structureMap =
+      Spec.map (CommRingCat.ofHom (algebraMap ℂ (Patch i j))) := by
+  rw [← Category.assoc, gradientIso_inv_ι, Category.assoc, chartInclusion_overComplex,
+    ← Spec.map_comp]
+  rfl_cat
+
+private theorem overlap_over (i : Fin 4) (k : Fin 3) :
+    (overlapIso i k).hom ≫ (fixedOpen i ⊓ fixedOpen (i.succAbove k)).ι ≫ structureMap =
+      Spec.map (CommRingCat.ofHom (algebraMap ℂ (FixedOverlap i k))) := by
+  rw [← Category.assoc, overlapIso_hom_ι, Category.assoc, chartInclusion_overComplex,
+    ← Spec.map_comp]
+  rfl_cat
+
+/-- The native projective orientation on the entire affine chart. -/
+def orientedChartVolume (i : Fin 4) : ⋀[T i]^3 (KaehlerDifferential ℂ (T i)) :=
+  (-1 : T i)^i.val • chartVolume i
+
+/-- The same native form as an actual canonical-sheaf section on a subopen. -/
+def orientedVolumeSection (i : Fin 4) (O : Threefold.Opens) (hO : O ≤ fixedOpen i) :
+    CanonicalForms.val.obj (op O) :=
+  chartExteriorSheafSection (fixedChart i).symm structureMap (chart_over i)
+    3 (Over.mk (homOfLE hO)) (orientedChartVolume i)
+
+theorem orientedVolumeSection_restrict (i : Fin 4) {O P : Threefold.Opens}
+    (hO : O ≤ fixedOpen i) (hPO : P ≤ O) :
+    CanonicalForms.val.map (homOfLE hPO).op (orientedVolumeSection i O hO) =
+      orientedVolumeSection i P (hPO.trans hO) :=
+  chartExteriorSheafSection_restrict (fixedChart i).symm structureMap (chart_over i)
+    (Over.homMk (homOfLE hPO) :
+      Over.mk (homOfLE (hPO.trans hO)) ⟶ Over.mk (homOfLE hO)) 3 _
+
+private def orientedPatchUnit (i j : Fin 4) : (Patch i j)ˣ :=
+  (-1 : (Patch i j)ˣ)^i.val *
+    (IsLocalization.Away.algebraMap_isUnit (S := Patch i j) (gradient i j)).unit⁻¹ *
+      (-1 : (Patch i j)ˣ)^j.val
+
+private theorem orientedChartVolume_gradient (i j : Fin 4) :
+    exteriorDifferentialMap (IsScalarTower.toAlgHom ℂ (T i) (Patch i j)) 3
+      (orientedChartVolume i) =
+        (orientedPatchUnit i j : Patch i j) • exteriorPower.ιMulti (Patch i j) 3 (basis i j) := by
+  have hb : (basis i j : Fin 3 → _) =
+      coordinateForm i (IsScalarTower.toAlgHom ℂ (T i) (Patch i j)) ∘ j.succAbove := by
+    funext k
+    exact basis_apply i j k
+  rw [orientedChartVolume, map_smulₛₗ, map_pow, map_neg, map_one, chartVolume_on_patch,
+    patchResidue, residue, signedOmitted, ← hb]
+  simp only [orientedPatchUnit, Units.val_mul, Units.val_pow_eq_pow_val,
+    Units.val_neg, Units.val_one, mul_smul]
+
+/-- The genuine residue frame on one of the sixteen gradient opens. -/
+def gradientCanonicalFrame (i j : Fin 4) : LocalFrame Threefold.sheaf CanonicalForms (gOpen i j) :=
+  scaledBasisFrame (gradientIso i j) structureMap (gradient_over i j)
+    (basis i j) (orientedPatchUnit i j)
+
+theorem gradientCanonicalFrame_generator (i j : Fin 4)
+    (O : Threefold.Opens) (hO : O ≤ gOpen i j) :
+    frameGenerator (gradientCanonicalFrame i j) O hO =
+      orientedVolumeSection i O (hO.trans (gOpen_le i j)) := by
+  rw [gradientCanonicalFrame, scaledBasisFrame_generator, ← orientedChartVolume_gradient]
+  exact chartExteriorSheafSection_differentialMap (fixedChart i).symm (gradientIso i j)
+    (gOpen_le i j) structureMap (chart_over i) (gradient_over i j)
+    (IsScalarTower.toAlgHom ℂ (T i) (Patch i j))
+    (by simpa only [Iso.symm_inv, ← Category.assoc, chartInclusion] using gradientIso_inv_ι i j)
+    (Over.mk (homOfLE hO)) 3 _
+
+private theorem gradient_generators_agree (i j k : Fin 4) :
+    frameGenerator (gradientCanonicalFrame i j) (gOpen i j ⊓ gOpen i k) inf_le_left =
+      frameGenerator (gradientCanonicalFrame i k) (gOpen i j ⊓ gOpen i k) inf_le_right := by
+  rw [gradientCanonicalFrame_generator, gradientCanonicalFrame_generator]
+
+/-- Extension of the affine chart residue frame to every genuine sheaf
+section on that entire affine chart. -/
+def chartCanonicalFrame (i : Fin 4) : LocalFrame Threefold.sheaf CanonicalForms (fixedOpen i) :=
+  glueLocalFrames Threefold.sheaf CanonicalForms (fixedOpen i) (gOpen i)
+    (gOpen_le i) (iSup_gOpen i).ge (gradientCanonicalFrame i) (gradient_generators_agree i)
+
+theorem chartCanonicalFrame_generator (i : Fin 4) (O : Threefold.Opens)
+    (hO : O ≤ fixedOpen i) :
+    frameGenerator (chartCanonicalFrame i) O hO = orientedVolumeSection i O hO := by
+  have hcover : O ≤ ⨆ j, O ⊓ gOpen i j := by
+    rw [← inf_iSup_eq, iSup_gOpen]
+    exact le_inf le_rfl hO
+  apply CanonicalAdditiveSheaf.eq_of_locally_eq' (fun j => O ⊓ gOpen i j) O
+    (fun _ => homOfLE inf_le_left) hcover
+  intro j
+  change CanonicalForms.val.map (homOfLE (show O ⊓ gOpen i j ≤ O from inf_le_left)).op
+      (frameGenerator (chartCanonicalFrame i) O hO) =
+    CanonicalForms.val.map (homOfLE (show O ⊓ gOpen i j ≤ O from inf_le_left)).op
+      (orientedVolumeSection i O hO)
+  rw [frameGenerator_naturality, orientedVolumeSection_restrict]
+  exact (glueLocalFrames_generator Threefold.sheaf CanonicalForms (fixedOpen i) (gOpen i)
+    (gOpen_le i) (iSup_gOpen i).ge (gradientCanonicalFrame i) (gradient_generators_agree i)
+    j (O ⊓ gOpen i j) inf_le_right).trans
+      (gradientCanonicalFrame_generator i j (O ⊓ gOpen i j) inf_le_right)
+
+/-- On native forms the sheaf coordinate is exactly the original affine
+`chartVolumeEquiv` coordinate, with the projective orientation retained. -/
+theorem chartCanonicalFrame_native (i : Fin 4) (O : Threefold.Opens)
+    (hO : O ≤ fixedOpen i) (ω : ⋀[T i]^3 (KaehlerDifferential ℂ (T i))) :
+    (chartCanonicalFrame i).app O hO
+      (chartExteriorSheafSection (fixedChart i).symm structureMap (chart_over i)
+        3 (Over.mk (homOfLE hO)) ω) =
+      chartSection (fixedChart i).symm (Over.mk (homOfLE hO))
+        ((-1 : T i)^i.val * (chartVolumeEquiv i).symm ω) := by
+  let c := (chartVolumeEquiv i).symm ω
+  have hc : c • chartVolume i = ω := (chartVolumeEquiv i).apply_symm_apply ω
+  have hs : (-1 : T i)^i.val * (-1 : T i)^i.val = 1 := by
+    rw [← mul_pow]
+    simp only [neg_mul_neg, one_mul, one_pow]
+  have ho : ((-1 : T i)^i.val * c) • orientedChartVolume i = ω := by
+    rw [orientedChartVolume, smul_smul]
+    have he : ((-1 : T i)^i.val * c) * (-1 : T i)^i.val = c := by
+      calc
+        _ = ((-1 : T i)^i.val * (-1 : T i)^i.val) * c := by ring
+        _ = c := by rw [hs, one_mul]
+    rw [he]
+    exact hc
+  conv_lhs => rw [← ho]
+  rw [map_smulₛₗ, map_smul]
+  change _ * (chartCanonicalFrame i).app O hO (orientedVolumeSection i O hO) = _
+  rw [← chartCanonicalFrame_generator]
+  change _ * (chartCanonicalFrame i).app O hO
+      (((chartCanonicalFrame i).app O hO).symm (1 : Γ(Threefold,O))) = _
+  rw [LinearEquiv.apply_symm_apply, mul_one]
+
+/-- The transition is an equality of the actual native oriented forms,
+with the scalars carried through their semilinear restriction maps. -/
+theorem orientedChartVolume_overlap (i : Fin 4) (k : Fin 3) :
+    exteriorDifferentialMap (fixedTargetMap i k) 3
+        (orientedChartVolume (i.succAbove k)) =
+      exteriorDifferentialMap (IsScalarTower.toAlgHom ℂ (T i) (FixedOverlap i k)) 3
+        (orientedChartVolume i) := by
+  simpa only [orientedChartVolume, map_smulₛₗ, map_pow, map_neg, map_one] using
+    CycleQ2LiteralThreefoldResidueGluing.fixedChartVolume_overlap i k
+
+/-- The native overlap equation gives equality in the genuine canonical
+sheaf on every common subopen of the two whole coordinate charts. -/
+theorem orientedVolumeSection_overlap (i : Fin 4) (k : Fin 3)
+    (O : Threefold.Opens) (hO : O ≤ fixedOpen i ⊓ fixedOpen (i.succAbove k)) :
+    orientedVolumeSection (i.succAbove k) O (hO.trans inf_le_right) =
+      orientedVolumeSection i O (hO.trans inf_le_left) := by
+  let V : Over (fixedOpen i ⊓ fixedOpen (i.succAbove k)) := Over.mk (homOfLE hO)
+  let r := chartExteriorSheafSection (overlapIso i k).symm structureMap
+    (overlap_over i k) 3 V
+  have ht := chartExteriorSheafSection_differentialMap
+    (fixedChart (i.succAbove k)).symm (overlapIso i k).symm inf_le_right structureMap
+    (chart_over (i.succAbove k)) (overlap_over i k) (fixedTargetMap i k)
+    (by simpa only [Iso.symm_inv, ← Category.assoc, chartInclusion] using overlapIso_hom_ι_target i k)
+    V 3 (orientedChartVolume (i.succAbove k))
+  have hs := chartExteriorSheafSection_differentialMap
+    (fixedChart i).symm (overlapIso i k).symm inf_le_left structureMap
+    (chart_over i) (overlap_over i k) (IsScalarTower.toAlgHom ℂ (T i) (FixedOverlap i k))
+    (by simpa only [Iso.symm_inv, ← Category.assoc, chartInclusion] using overlapIso_hom_ι i k)
+    V 3 (orientedChartVolume i)
+  exact ht.symm.trans ((congrArg r (orientedChartVolume_overlap i k)).trans hs)
+
+private theorem chart_generators_agree (i j : Fin 4) :
+    frameGenerator (chartCanonicalFrame i) (fixedOpen i ⊓ fixedOpen j) inf_le_left =
+      frameGenerator (chartCanonicalFrame j) (fixedOpen i ⊓ fixedOpen j) inf_le_right := by
+  rw [chartCanonicalFrame_generator, chartCanonicalFrame_generator]
+  by_cases hij : i = j
+  · subst j
+    rfl
+  · obtain ⟨k, rfl⟩ := Fin.exists_succAbove_eq (Ne.symm hij)
+    exact (orientedVolumeSection_overlap i k _ le_rfl).symm
+
+/-- The four actual chart frames glue to a canonical frame on every open
+of the fixed threefold, by unique sheaf gluing. -/
+def globalFrame : LocalFrame Threefold.sheaf CanonicalForms ⊤ :=
+  glueLocalFrames Threefold.sheaf CanonicalForms ⊤ fixedOpen (fun _ => le_top)
+    fixedOpen_cover.ge chartCanonicalFrame chart_generators_agree
+
+theorem globalFrame_app_on_chart (i : Fin 4) (O : Threefold.Opens)
+    (hO : O ≤ fixedOpen i) (s : CanonicalForms.val.obj (op O)) :
+    globalFrame.app O le_top s = (chartCanonicalFrame i).app O hO s :=
+  glueLocalFrames_app Threefold.sheaf CanonicalForms ⊤ fixedOpen (fun _ => le_top)
+    fixedOpen_cover.ge chartCanonicalFrame chart_generators_agree i O hO s
+
+theorem globalFrame_generator (i : Fin 4) (O : Threefold.Opens) (hO : O ≤ fixedOpen i) :
+    frameGenerator globalFrame O le_top = orientedVolumeSection i O hO :=
+  (glueLocalFrames_generator Threefold.sheaf CanonicalForms ⊤ fixedOpen (fun _ => le_top)
+    fixedOpen_cover.ge chartCanonicalFrame chart_generators_agree i O hO).trans
+      (chartCanonicalFrame_generator i O hO)
+
+/-- The globally glued canonical three-form, as an actual global sheaf section. -/
+def globalVolume : CanonicalForms.val.obj (op ⊤) := frameGenerator globalFrame ⊤ le_rfl
+
+theorem globalVolume_restrict (i : Fin 4) (O : Threefold.Opens) (hO : O ≤ fixedOpen i) :
+    CanonicalForms.val.map (homOfLE (show O ≤ ⊤ from le_top)).op globalVolume =
+      orientedVolumeSection i O hO :=
+  (frameGenerator_naturality globalFrame (show O ≤ ⊤ from le_top) le_rfl).trans
+    (globalFrame_generator i O hO)
+
+/-- An actual isomorphism of module sheaves, not only a statement about
+affine native forms or global sections. -/
+def canonicalIso : CanonicalForms ≅ StructureModule :=
+  CycleQ2GeometricModuleLocalIso.glueIso CanonicalForms StructureModule ⊤ ⊤ (by simp)
+    globalFrame globalFrame (fun _ _ _ _ => rfl)
+
+theorem canonicalIso_hom (O : Threefold.Opens) (s : CanonicalForms.val.obj (op O)) :
+    canonicalIso.hom.val.app (op O) s = globalFrame.app O le_top s :=
+  CycleQ2GeometricModuleLocalIso.glueIso_hom_app_of_leU CanonicalForms StructureModule
+    ⊤ ⊤ (by simp) globalFrame globalFrame (fun _ _ _ _ => rfl) O le_top s
+
+theorem canonicalIso_inv (O : Threefold.Opens) (a : Γ(Threefold,O)) :
+    canonicalIso.inv.val.app (op O) a = (globalFrame.app O le_top).symm a :=
+  CycleQ2GeometricModuleLocalIso.glueIso_inv_app_of_leU CanonicalForms StructureModule
+    ⊤ ⊤ (by simp) globalFrame globalFrame (fun _ _ _ _ => rfl) O le_top a
+
+theorem canonicalIso_hom_native (i : Fin 4) (O : Threefold.Opens)
+    (hO : O ≤ fixedOpen i) (ω : ⋀[T i]^3 (KaehlerDifferential ℂ (T i))) :
+    canonicalIso.hom.val.app (op O)
+      (chartExteriorSheafSection (fixedChart i).symm structureMap (chart_over i)
+        3 (Over.mk (homOfLE hO)) ω) =
+      chartSection (fixedChart i).symm (Over.mk (homOfLE hO))
+        ((-1 : T i)^i.val * (chartVolumeEquiv i).symm ω) := by
+  rw [canonicalIso_hom, globalFrame_app_on_chart i O hO, chartCanonicalFrame_native]
+
+theorem canonicalIso_inv_one : canonicalIso.inv.val.app (op ⊤) 1 = globalVolume :=
+  canonicalIso_inv ⊤ 1
+
+theorem canonicalIso_inv_on_chart (i : Fin 4) (O : Threefold.Opens)
+    (hO : O ≤ fixedOpen i) (a : Γ(Threefold,O)) :
+    canonicalIso.inv.val.app (op O) a = a • orientedVolumeSection i O hO := by
+  rw [canonicalIso_inv, ← globalFrame_generator i O hO]
+  change (globalFrame.app O le_top).symm a = a • (globalFrame.app O le_top).symm 1
+  rw [← map_smul]
+  exact congrArg (globalFrame.app O le_top).symm (mul_one a).symm
+
+/-- Negating the global generator gives the coefficient-one convention
+used by the original surface adjunction sequence. -/
+def negativeGlobalFrame : LocalFrame Threefold.sheaf CanonicalForms ⊤ where
+  app O hO :=
+    { toFun := fun s => -(globalFrame.app O hO s)
+      invFun := fun a => (globalFrame.app O hO).symm (-a)
+      left_inv := fun s => by rw [neg_neg, LinearEquiv.symm_apply_apply]
+      right_inv := fun a => by rw [LinearEquiv.apply_symm_apply, neg_neg]
+      map_add' := fun s t => by rw [map_add, neg_add]
+      map_smul' := fun a s => by rw [map_smul, smul_neg] }
+  naturality hPO hO s := by
+    change Threefold.presheaf.map (homOfLE hPO).op (-(globalFrame.app _ hO s)) =
+      -(globalFrame.app _ (hPO.trans hO) (CanonicalForms.val.map (homOfLE hPO).op s))
+    rw [map_neg, globalFrame.naturality]
+
+theorem negativeGlobalFrame_generator (O : Threefold.Opens) :
+    frameGenerator negativeGlobalFrame O le_top = -frameGenerator globalFrame O le_top :=
+  (globalFrame.app O le_top).symm.map_neg 1
+
+def negativeVolume : CanonicalForms.val.obj (op ⊤) :=
+  frameGenerator negativeGlobalFrame ⊤ le_rfl
+
+theorem negativeVolume_eq : negativeVolume = -globalVolume :=
+  negativeGlobalFrame_generator ⊤
+
+theorem negativeVolume_restrict (i : Fin 4) (O : Threefold.Opens) (hO : O ≤ fixedOpen i) :
+    CanonicalForms.val.map (homOfLE (show O ≤ ⊤ from le_top)).op negativeVolume =
+      -orientedVolumeSection i O hO := by
+  rw [negativeVolume_eq, map_neg, globalVolume_restrict i O hO]
+
+/-- The corresponding genuine module-sheaf isomorphism has the negative
+globally glued volume as its inverse-one section. -/
+def negativeCanonicalIso : CanonicalForms ≅ StructureModule :=
+  CycleQ2GeometricModuleLocalIso.glueIso CanonicalForms StructureModule ⊤ ⊤ (by simp)
+    negativeGlobalFrame negativeGlobalFrame (fun _ _ _ _ => rfl)
+
+theorem negativeCanonicalIso_inv (O : Threefold.Opens) (a : Γ(Threefold,O)) :
+    negativeCanonicalIso.inv.val.app (op O) a = (globalFrame.app O le_top).symm (-a) :=
+  CycleQ2GeometricModuleLocalIso.glueIso_inv_app_of_leU CanonicalForms StructureModule
+    ⊤ ⊤ (by simp) negativeGlobalFrame negativeGlobalFrame (fun _ _ _ _ => rfl) O le_top a
+
+theorem negativeCanonicalIso_inv_one :
+    negativeCanonicalIso.inv.val.app (op ⊤) 1 = negativeVolume :=
+  negativeCanonicalIso_inv ⊤ 1
+
+theorem negativeCanonicalIso_inv_on_chart (i : Fin 4) (O : Threefold.Opens)
+    (hO : O ≤ fixedOpen i) (a : Γ(Threefold,O)) :
+    negativeCanonicalIso.inv.val.app (op O) a = -a • orientedVolumeSection i O hO := by
+  rw [negativeCanonicalIso_inv]
+  rw [← canonicalIso_inv]
+  exact canonicalIso_inv_on_chart i O hO (-a)
+
+/-- The surface signs `(+,−,+)` are the negatives of the projective
+threefold signs on charts `1,2,3`, in every coefficient ring. -/
+theorem surface_orientation (R : Type*) [CommRing R] (j : Fin 3) :
+    (CycleQ2SurfaceCoordinateCubicFrames.orientation j : R) = -(-1 : R)^j.succ.val := by
+  fin_cases j <;> norm_num [CycleQ2SurfaceCoordinateCubicFrames.orientation]
+
+/-- The global frame with the surface convention restricts to exactly the
+established surface orientation times the original native chart volume. -/
+theorem negativeVolume_surface_chart (j : Fin 3) (O : Threefold.Opens)
+    (hO : O ≤ fixedOpen j.succ) :
+    CanonicalForms.val.map (homOfLE (show O ≤ ⊤ from le_top)).op negativeVolume =
+      chartExteriorSheafSection (fixedChart j.succ).symm structureMap (chart_over j.succ)
+        3 (Over.mk (homOfLE hO))
+          ((CycleQ2SurfaceCoordinateCubicFrames.orientation j : T j.succ) • chartVolume j.succ) := by
+  rw [negativeVolume_restrict, surface_orientation]
+  change -(chartExteriorSheafSection (fixedChart j.succ).symm structureMap (chart_over j.succ)
+    3 (Over.mk (homOfLE hO)) ((-1 : T j.succ)^j.succ.val • chartVolume j.succ)) = _
+  rw [neg_smul, map_neg]
+
+end CycleQ2LiteralThreefoldCanonicalFrame
+end
+
+#print axioms CycleQ2LiteralThreefoldCanonicalFrame.chartCanonicalFrame_native
+#print axioms CycleQ2LiteralThreefoldCanonicalFrame.globalVolume_restrict
+#print axioms CycleQ2LiteralThreefoldCanonicalFrame.canonicalIso
+#print axioms CycleQ2LiteralThreefoldCanonicalFrame.negativeCanonicalIso
+#print axioms CycleQ2LiteralThreefoldCanonicalFrame.negativeVolume_surface_chart

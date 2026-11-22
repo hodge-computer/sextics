@@ -1,6 +1,7 @@
 import Proposal.GeometricHodgeTwistConstantSections
 import Proposal.GeometricAffineChartSections
 import Proposal.GeometricHodgeThreefoldLiteral
+import Proposal.GeometricLiteralThreefoldResidueGluing
 
 /-!
 # Canonical constants on the original monic weighted threefold
@@ -148,3 +149,282 @@ end
 #print axioms CycleQ2HodgeGlobalConstants.scalar_surjective
 #print axioms CycleQ2HodgeGlobalConstants.scalarEquiv
 #print axioms CycleQ2HodgeGlobalConstants.original_scalar_surjective
+
+/-!
+## The top trace on the original fixed threefold and its canonical sheaf
+
+The Laurent comparison is transported by the actual section maps of
+`literalIso`. The canonical comparison then uses the glued native residue
+frame. Both derived traces use the same three Mayer--Vietoris boundaries
+on the original four weight-one opens.
+-/
+
+noncomputable section
+namespace CycleQ2LiteralThreefoldTopTrace
+
+open CategoryTheory Opposite TopologicalSpace AlgebraicGeometry
+open CycleQ2InjectiveCech (AbSheaf Sections)
+open CycleQ2GeometricProjectiveHOne (structureAdditiveSheaf overIsoOfPatchIso)
+open CycleQ2GeometricHodgeThreefold (threefold coordinateOpen)
+open CycleQ2GeometricHodgeThreefoldIncidence
+open CycleQ2LiteralAmbientCharts (fixedOpen fixedOpen_cover)
+open CycleQ2LiteralThreefoldHodgeCech (Threefold)
+open CycleQ2HodgeTwistCech (Vertex NormalForm sections)
+open CycleQ2HodgeTwistCoordinates (Chart HasLaurentSections read nativeTopSectionTrace)
+open CycleQ2HodgeTwistTopDerived
+open CycleQ2GeometricSheafLocalIso (res res_self)
+open CycleQ2GeometricModuleLocalIso (addSheaf)
+open CycleQ2GeometricCanonicalGluing (LocalFrame)
+
+local instance (X : TopCat.{0}) : HasExt.{1} (AbSheaf X) := HasExt.standard _
+
+abbrev Structure := structureAdditiveSheaf Threefold
+abbrev Face (S : Finset Vertex) : Threefold.Opens := S.inf fixedOpen
+abbrev Torus : Threefold.Opens := Face Finset.univ
+
+private theorem torus_le_face (S : Finset Vertex) : Torus ≤ Face S :=
+  Finset.le_inf (fun i _ => Finset.inf_le (Finset.mem_univ i))
+
+/-- The original scheme isomorphism identifies every standard intersection. -/
+theorem literalIso_preimage_face (S : Finset Vertex) :
+    literalIso.hom ⁻¹ᵁ Face S = S.inf (coordinateOpen literalEval) := by
+  classical
+  induction S using Finset.induction_on with
+  | empty => simp [Face]
+  | insert i S hi ih =>
+    simp only [Face, Finset.inf_insert, Scheme.Hom.preimage_inf,
+      literalIso_preimage] at ih ⊢
+    exact congrArg (coordinateOpen literalEval i ⊓ ·) ih
+
+private theorem iso_appLE_bijective {X Y : Scheme.{0}} (e : X ≅ Y)
+    (U : Y.Opens) (V : X.Opens) (h : e.hom ⁻¹ᵁ U = V) :
+    Function.Bijective (e.hom.appLE U V h.ge) := by
+  subst V
+  rw [Scheme.Hom.appLE_eq_app]
+  exact ConcreteCategory.bijective_of_isIso (e.hom.app U)
+
+/-- This equivalence is the original scheme's section pullback. -/
+def faceSectionEquiv (S : Finset Vertex) :
+    Γ(Threefold, Face S) ≃+* Γ(threefold literalEval, S.inf (coordinateOpen literalEval)) :=
+  RingEquiv.ofBijective
+    (literalIso.hom.appLE (Face S) (S.inf (coordinateOpen literalEval))
+      (literalIso_preimage_face S).ge).hom
+    (iso_appLE_bijective literalIso (Face S) _ (literalIso_preimage_face S))
+
+theorem faceSectionEquiv_restrict (S : Finset Vertex) (s : Γ(Threefold, Face S)) :
+    faceSectionEquiv Finset.univ (res Structure (torus_le_face S) s) =
+      res (structureAdditiveSheaf (threefold literalEval))
+        (CycleQ2HodgeTwistAnchor.torus_le_face literalEval S) (faceSectionEquiv S s) :=
+  CycleQ2ChartSectionPullback.restriction_square literalIso.hom (torus_le_face S)
+    (literalIso_preimage_face S).ge
+    (CycleQ2HodgeTwistAnchor.torus_le_face literalEval S)
+    (literalIso_preimage_face Finset.univ).ge s
+
+/-- Laurent coordinates of the actual fixed-fiber structure sections. -/
+def structureChart : Chart Structure fixedOpen ℂ where
+  common := Torus
+  le i := Finset.inf_le (Finset.mem_univ i)
+  coordinates :=
+    (CycleQ2HodgeTwistTorusChart.structureChart literalEval literal_vertex_unit).coordinates.comp
+      (faceSectionEquiv Finset.univ).toAddEquiv.toAddMonoidHom
+
+theorem read_structure_face (S : Finset Vertex) (s : Γ(Threefold, Face S)) :
+    read structureChart (torus_le_face S) s =
+      read (CycleQ2HodgeTwistTorusChart.structureChart literalEval literal_vertex_unit)
+        (CycleQ2HodgeTwistAnchor.torus_le_face literalEval S) (faceSectionEquiv S s) := by
+  change (CycleQ2HodgeTwistTorusChart.structureChart literalEval literal_vertex_unit).coordinates
+    (faceSectionEquiv Finset.univ (res Structure (torus_le_face S) s)) = _
+  rw [faceSectionEquiv_restrict]
+  rfl
+
+theorem structureLaurentSections : HasLaurentSections structureChart 0 where
+  injective S hS := by
+    intro x y hxy
+    apply (faceSectionEquiv S).injective
+    apply (CycleQ2HodgeTwistTorusChart.structureLaurentSections
+      literalEval literal_vertex_unit).injective S hS
+    exact (read_structure_face S x).symm.trans (hxy.trans (read_structure_face S y))
+  range_eq S hS := by
+    let H := CycleQ2HodgeTwistTorusChart.structureLaurentSections literalEval literal_vertex_unit
+    ext p
+    rw [← H.range_eq S hS]
+    constructor
+    · rintro ⟨s,rfl⟩
+      exact ⟨faceSectionEquiv S s, (read_structure_face S s).symm⟩
+    · rintro ⟨s,rfl⟩
+      refine ⟨(faceSectionEquiv S).symm s, ?_⟩
+      rw [read_structure_face, RingEquiv.apply_symm_apply]
+
+theorem face_affine (S : Finset Vertex) (hS : S.Nonempty) : IsAffineOpen (Face S) := by
+  obtain ⟨i,hi⟩ := hS
+  have h : IsAffineOpen (S.inf (coordinateOpen literalEval)) := by
+    rw [← CycleQ2HodgeTwistFaces.face_inf literalEval i S hi]
+    exact CycleQ2HodgeTwistFaces.face_affine literalEval i _
+  have e : literalIso.inv ⁻¹ᵁ (S.inf (coordinateOpen literalEval)) = Face S := by
+    rw [← literalIso_preimage_face, ← Scheme.Hom.comp_preimage, literalIso.inv_hom_id]
+    rfl
+  exact e ▸ h.preimage literalIso.inv
+
+theorem structure_face_acyclic : FaceAcyclic Structure fixedOpen := by
+  intro S hS n
+  exact CycleQ2GeometricAffineHThree.frame_subsingleton (face_affine S hS).isoSpec
+    Structure (Iso.refl _) (n+1)
+    (CycleQ2GeometricAffineHThree.affine_H_positive_subsingleton n Γ(Threefold,Face S))
+
+def structureSectionTrace : Γ(Threefold,Torus) →+ ℂ :=
+  nativeTopSectionTrace structureLaurentSections
+
+theorem structureSectionTrace_pullback (s : Γ(Threefold,Torus)) :
+    structureSectionTrace s = CycleQ2HodgeTwistTorusChart.structureTopSectionTrace
+      literalEval literal_vertex_unit (faceSectionEquiv Finset.univ s) := by
+  change ((CycleQ2HodgeTwistTorusChart.structureChart literalEval literal_vertex_unit).coordinates
+      (faceSectionEquiv Finset.univ (res Structure le_rfl s))) 2
+        CycleQ2HodgeTwistCech.negativeExponent =
+    ((CycleQ2HodgeTwistTorusChart.structureChart literalEval literal_vertex_unit).coordinates
+      (res (structureAdditiveSheaf (threefold literalEval)) le_rfl
+        (faceSectionEquiv Finset.univ s))) 2 CycleQ2HodgeTwistCech.negativeExponent
+  rw [res_self, res_self]
+
+def structureTrace : Structure.H' 3 ⊤ ≃+ ℂ :=
+  derivedTopTraceEquiv Structure fixedOpen structureLaurentSections fixedOpen_cover
+    structure_face_acyclic
+
+theorem structureTrace_connecting (s : Γ(Threefold,Torus)) :
+    structureTrace (nativeTopConnecting Structure fixedOpen fixedOpen_cover s) =
+      structureSectionTrace s :=
+  derivedTopTrace_connecting Structure fixedOpen structureLaurentSections fixedOpen_cover
+    structure_face_acyclic s
+
+section Framed
+
+variable (M : SheafOfModules.{0}
+    (CycleQ2GeometricProjectiveCurve.TwistedModule.ringSheaf Threefold.sheaf))
+  (e : LocalFrame Threefold.sheaf M ⊤)
+
+/-- A global native frame transports the same actual Laurent coordinates. -/
+def framedChart : Chart (addSheaf M) fixedOpen ℂ where
+  common := Torus
+  le i := Finset.inf_le (Finset.mem_univ i)
+  coordinates := structureChart.coordinates.comp
+    (e.app Torus le_top).toAddEquiv.toAddMonoidHom
+
+theorem read_framed_face (S : Finset Vertex) (s : M.val.obj (op (Face S))) :
+    read (framedChart M e) (torus_le_face S) s =
+      read structureChart (torus_le_face S) (e.app (Face S) le_top s) := by
+  change structureChart.coordinates
+    (e.app Torus le_top (res (addSheaf M) (torus_le_face S) s)) = _
+  rw [← e.naturality (torus_le_face S) le_top]
+  rfl
+
+theorem framedLaurentSections : HasLaurentSections (framedChart M e) 0 where
+  injective S hS := by
+    intro x y hxy
+    apply (e.app (Face S) le_top).injective
+    apply structureLaurentSections.injective S hS
+    exact (read_framed_face M e S x).symm.trans
+      (hxy.trans (read_framed_face M e S y))
+  range_eq S hS := by
+    ext p
+    rw [← structureLaurentSections.range_eq S hS]
+    constructor
+    · rintro ⟨s,rfl⟩
+      exact ⟨e.app (Face S) le_top s, (read_framed_face M e S s).symm⟩
+    · rintro ⟨s,rfl⟩
+      refine ⟨(e.app (Face S) le_top).symm s, ?_⟩
+      rw [read_framed_face, LinearEquiv.apply_symm_apply]
+
+theorem framed_face_acyclic : FaceAcyclic (addSheaf M) fixedOpen := by
+  intro S hS n
+  let fr : CycleQ2GeometricSheafLocalIso.PatchIso (addSheaf M) Structure (Face S) :=
+    { app O hO := (e.app O le_top).toAddEquiv
+      naturality hPO hO s := e.naturality hPO le_top s }
+  exact CycleQ2GeometricAffineHThree.frame_subsingleton (face_affine S hS).isoSpec
+    (addSheaf M) (overIsoOfPatchIso fr) (n+1)
+    (CycleQ2GeometricAffineHThree.affine_H_positive_subsingleton n Γ(Threefold,Face S))
+
+def framedSectionTrace : M.val.obj (op Torus) →+ ℂ :=
+  nativeTopSectionTrace (framedLaurentSections M e)
+
+theorem framedSectionTrace_frame (s : M.val.obj (op Torus)) :
+    framedSectionTrace M e s = structureSectionTrace (e.app Torus le_top s) := by
+  change (structureChart.coordinates
+    (e.app Torus le_top (res (addSheaf M) le_rfl s))) 2
+      CycleQ2HodgeTwistCech.negativeExponent =
+    (structureChart.coordinates (res Structure le_rfl (e.app Torus le_top s))) 2
+      CycleQ2HodgeTwistCech.negativeExponent
+  rw [res_self, res_self]
+
+def framedTrace : (addSheaf M).H' 3 ⊤ ≃+ ℂ :=
+  derivedTopTraceEquiv (addSheaf M) fixedOpen (framedLaurentSections M e)
+    fixedOpen_cover (framed_face_acyclic M e)
+
+theorem framedTrace_connecting (s : M.val.obj (op Torus)) :
+    framedTrace M e (nativeTopConnecting (addSheaf M) fixedOpen fixedOpen_cover s) =
+      framedSectionTrace M e s :=
+  derivedTopTrace_connecting (addSheaf M) fixedOpen (framedLaurentSections M e)
+    fixedOpen_cover (framed_face_acyclic M e) s
+
+/-- The generator is pulled back through the original scheme isomorphism
+and multiplied by the specified actual global frame. -/
+def framedGenerator (a : ℂ) : M.val.obj (op Torus) :=
+  (e.app Torus le_top).symm ((faceSectionEquiv Finset.univ).symm
+    (CycleQ2HodgeTwistTorusChart.structureTopGenerator literalEval literal_vertex_unit a))
+
+theorem framedSectionTrace_generator (a : ℂ) :
+    framedSectionTrace M e (framedGenerator M e a) = a := by
+  rw [framedSectionTrace_frame, framedGenerator, LinearEquiv.apply_symm_apply,
+    structureSectionTrace_pullback, RingEquiv.apply_symm_apply,
+    CycleQ2HodgeTwistTorusChart.structureTopSectionTrace_generator]
+
+def framedClass (a : ℂ) : (addSheaf M).H' 3 ⊤ :=
+  nativeTopConnecting (addSheaf M) fixedOpen fixedOpen_cover (framedGenerator M e a)
+
+theorem framedTrace_class (a : ℂ) : framedTrace M e (framedClass M e a) = a := by
+  rw [framedClass, framedTrace_connecting, framedSectionTrace_generator]
+
+theorem framedClass_ne_zero {a : ℂ} (ha : a ≠ 0) : framedClass M e a ≠ 0 := by
+  intro hz
+  apply ha
+  have he := congrArg (framedTrace M e) hz
+  rwa [framedTrace_class, map_zero] at he
+
+end Framed
+
+open CycleQ2LiteralThreefoldCanonicalFrame
+
+/-- Trace on the actual canonical three-form sheaf of `IncidenceFiber 57`. -/
+def canonicalTrace : CanonicalAdditiveSheaf.H' 3 ⊤ ≃+ ℂ :=
+  framedTrace CanonicalForms globalFrame
+
+def canonicalSectionTrace : CanonicalForms.val.obj (op Torus) →+ ℂ :=
+  framedSectionTrace CanonicalForms globalFrame
+
+theorem canonicalSectionTrace_coefficient (s : CanonicalForms.val.obj (op Torus)) :
+    canonicalSectionTrace s = CycleQ2HodgeTwistTorusChart.structureTopSectionTrace
+      literalEval literal_vertex_unit
+      (faceSectionEquiv Finset.univ (canonicalIso.hom.val.app (op Torus) s)) := by
+  rw [canonicalIso_hom]
+  exact (framedSectionTrace_frame CanonicalForms globalFrame s).trans
+    (structureSectionTrace_pullback _)
+
+theorem canonicalTrace_connecting (s : CanonicalForms.val.obj (op Torus)) :
+    canonicalTrace (nativeTopConnecting CanonicalAdditiveSheaf fixedOpen fixedOpen_cover s) =
+      canonicalSectionTrace s :=
+  framedTrace_connecting CanonicalForms globalFrame s
+
+def canonicalClass (a : ℂ) : CanonicalAdditiveSheaf.H' 3 ⊤ :=
+  framedClass CanonicalForms globalFrame a
+
+theorem canonicalTrace_class (a : ℂ) : canonicalTrace (canonicalClass a) = a :=
+  framedTrace_class CanonicalForms globalFrame a
+
+theorem canonicalClass_one_ne_zero : canonicalClass 1 ≠ 0 :=
+  framedClass_ne_zero CanonicalForms globalFrame one_ne_zero
+
+end CycleQ2LiteralThreefoldTopTrace
+end
+
+#print axioms CycleQ2LiteralThreefoldTopTrace.structureLaurentSections
+#print axioms CycleQ2LiteralThreefoldTopTrace.canonicalSectionTrace_coefficient
+#print axioms CycleQ2LiteralThreefoldTopTrace.canonicalTrace_connecting
+#print axioms CycleQ2LiteralThreefoldTopTrace.canonicalClass_one_ne_zero

@@ -38,7 +38,7 @@ def frameCoefficient (i : Vertex) : R →+* Γ(threefold φ,torus φ) :=
 
 def commonCoefficient : R →+* Γ(threefold φ,torus φ) := frameCoefficient φ 0
 
-private theorem coefficient_fraction (i : Vertex) (c : R) :
+theorem coefficient_fraction (i : Vertex) (c : R) :
     chartCoefficient φ i c =
       Away.mk (grade φ) (weightOne_mem_grade φ i) 0 (coefficient φ c).val (by
         simpa using (coefficient φ c).property) := by

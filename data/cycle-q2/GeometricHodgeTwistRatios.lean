@@ -46,6 +46,51 @@ private theorem value {V : (X φ).Opens} (i : Fin 4) (hi : V ≤ U φ i) {n : �
     (p : cone φ) (hp : p ∈ grade φ n) (q : V) :
     ((normalized φ i p hp V hi).val q).val = Localization.mk p (den φ i hi q ^ n) := rfl
 
+theorem normalized_zero (i : Fin 4) (n : ℕ) (V : (X φ).Opens) (hi : V ≤ U φ i) :
+    normalized φ i 0 (show (0 : cone φ) ∈ grade φ n from (grade φ n).zero_mem) V hi = 0 := by
+  apply Subtype.ext
+  funext q
+  apply HomogeneousLocalization.val_injective
+  rw [value, HomogeneousLocalization.val_zero, Localization.mk_zero]
+
+theorem normalized_add (i : Fin 4) {n : ℕ} (p q : cone φ)
+    (hp : p ∈ grade φ n) (hq : q ∈ grade φ n)
+    (V : (X φ).Opens) (hi : V ≤ U φ i) :
+    normalized φ i (p + q) ((grade φ n).add_mem hp hq) V hi =
+      normalized φ i p hp V hi + normalized φ i q hq V hi := by
+  apply Subtype.ext
+  funext a
+  apply HomogeneousLocalization.val_injective
+  rw [value, HomogeneousLocalization.val_add, value, value, Localization.add_mk_self]
+
+theorem normalized_mul (i : Fin 4) {n m : ℕ} (p q : cone φ)
+    (hp : p ∈ grade φ n) (hq : q ∈ grade φ m)
+    (V : (X φ).Opens) (hi : V ≤ U φ i) :
+    normalized φ i (p * q) (SetLike.mul_mem_graded hp hq) V hi =
+      normalized φ i p hp V hi * normalized φ i q hq V hi := by
+  apply Subtype.ext
+  funext a
+  apply HomogeneousLocalization.val_injective
+  rw [value, HomogeneousLocalization.val_mul, value, value, Localization.mk_mul, pow_add]
+
+/-- Normalization of one homogeneous degree is additive on the actual
+homogeneous component of the original cone. -/
+def normalizedAddHom (i : Fin 4) (n : ℕ) (V : (X φ).Opens) (hi : V ≤ U φ i) :
+    grade φ n →+ Γ(X φ,V) where
+  toFun p := normalized φ i p.val p.property V hi
+  map_zero' := normalized_zero φ i n V hi
+  map_add' p q := normalized_add φ i p.val q.val p.property q.property V hi
+
+theorem normalized_sum {ι : Type*} [Fintype ι] (i : Fin 4) {n : ℕ}
+    (p : ι → cone φ) (hp : ∀ j, p j ∈ grade φ n)
+    (V : (X φ).Opens) (hi : V ≤ U φ i) :
+    normalized φ i (∑ j, p j) ((grade φ n).sum_mem (fun j _ => hp j)) V hi =
+      ∑ j, normalized φ i (p j) (hp j) V hi := by
+  classical
+  have h := (normalizedAddHom φ i n V hi).map_sum
+    (fun j : ι => (⟨p j, hp j⟩ : grade φ n)) Finset.univ
+  simpa only [normalizedAddHom, AddMonoidHom.coe_mk, Submodule.coe_sum] using h
+
 def ratio (i j : Fin 4) (V : (X φ).Opens) (hi : V ≤ U φ i) : Γ(X φ,V) :=
   normalized φ i (x φ j) (weightOne_mem_grade φ j) V hi
 

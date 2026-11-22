@@ -146,6 +146,137 @@ theorem hTwo (hcover : (⨆ i, U i) = ⊤) (hvertex : ∀ i, Subsingleton (F.H' 
     (hedge : ∀ i j, Subsingleton (F.H' 1 (U i ⊓ U j))) : Subsingleton (F.H 2) :=
   CycleQ2HodgeTwistDerived.hTwo_of_primitives F U hcover hvertex hedge (two_primitive M)
 
+/-! ## The top trace on actual sheaf sections
+
+All quotients below are formed from sections of `F` on its actual standard
+intersections. The Laurent model is used only to compute the restriction
+map and its kernel.
+-/
+
+/-- Native sections of a nonempty intersection, in the common Laurent coordinates. -/
+def faceCoordinates (S : Finset Vertex) (hS : S.Nonempty) :
+    Sections F (S.inf U) ≃+ sections A t S := by
+  let f : Sections F (S.inf U) →+ sections A t S :=
+    (read C (common_le C S)).codRestrict _ (fun s =>
+      (M.range_eq S hS) ▸ (show read C (common_le C S) s ∈
+        (read C (common_le C S)).range from ⟨s, rfl⟩))
+  refine AddEquiv.ofBijective f ⟨?_, ?_⟩
+  · intro x y h
+    exact M.injective S hS (congrArg Subtype.val h)
+  · intro p
+    obtain ⟨s, hs⟩ := lift M hS rfl (common_le C S) p
+    exact ⟨s, Subtype.ext hs⟩
+
+@[simp] theorem faceCoordinates_val (S : Finset Vertex) (hS : S.Nonempty)
+    (s : Sections F (S.inf U)) :
+    (faceCoordinates M S hS s).val = read C (common_le C S) s := rfl
+
+omit M in
+private theorem topFace_nonempty (i : Vertex) : (Finset.univ.erase i).Nonempty := by
+  obtain ⟨j, hj⟩ := exists_ne i
+  exact ⟨j, Finset.mem_erase.mpr ⟨hj, Finset.mem_univ j⟩⟩
+
+omit M in
+private theorem top_le_face (i : Vertex) :
+    Finset.univ.inf U ≤ (Finset.univ.erase i).inf U :=
+  Finset.le_inf (fun j _ => Finset.inf_le (Finset.mem_univ j))
+
+abbrev NativeTopFaces := (i : Vertex) → Sections F ((Finset.univ.erase i).inf U)
+
+/-- The actual increasing four-open Čech restriction in degree two. -/
+def nativeTopBoundary : NativeTopFaces (F := F) (U := U) →+
+    Sections F (Finset.univ.inf U) where
+  toFun c := res F (top_le_face 0) (c 0) - res F (top_le_face 1) (c 1) +
+    res F (top_le_face 2) (c 2) - res F (top_le_face 3) (c 3)
+  map_zero' := by simp
+  map_add' c d := by
+    simp only [Pi.add_apply, map_add]
+    abel
+
+def nativeFaceCoordinates (c : NativeTopFaces (F := F) (U := U)) : TopFaces A t :=
+  fun i => faceCoordinates M (Finset.univ.erase i) (topFace_nonempty i) (c i)
+
+def nativeTopCoordinates : Sections F (Finset.univ.inf U) ≃+ Top A t :=
+  faceCoordinates M Finset.univ (by simp)
+
+theorem nativeTopCoordinates_boundary (c : NativeTopFaces (F := F) (U := U)) :
+    nativeTopCoordinates M (nativeTopBoundary c) = topBoundary (nativeFaceCoordinates M c) := by
+  apply Subtype.ext
+  change read C (common_le C Finset.univ)
+      (res F (top_le_face 0) (c 0) - res F (top_le_face 1) (c 1) +
+        res F (top_le_face 2) (c 2) - res F (top_le_face 3) (c 3)) = _
+  rw [map_sub, map_add, map_sub, read_res, read_res, read_res, read_res]
+  rfl
+
+theorem nativeFaceCoordinates_surjective :
+    Function.Surjective (nativeFaceCoordinates M) := by
+  intro c
+  refine ⟨fun i => (faceCoordinates M (Finset.univ.erase i)
+    (topFace_nonempty i)).symm (c i), ?_⟩
+  funext i
+  exact (faceCoordinates M (Finset.univ.erase i) (topFace_nonempty i)).apply_symm_apply (c i)
+
+/-- The top section extends from alternating triple sections exactly when its
+Laurent normal form has no strictly negative part. -/
+theorem native_top_mem_boundary_iff (s : Sections F (Finset.univ.inf U)) :
+    s ∈ (nativeTopBoundary (F := F) (U := U)).range ↔
+      negativePart (nativeTopCoordinates M s) = 0 := by
+  rw [← top_mem_boundary_iff]
+  constructor
+  · rintro ⟨c, rfl⟩
+    exact ⟨nativeFaceCoordinates M c, (nativeTopCoordinates_boundary M c).symm⟩
+  · rintro ⟨c, hc⟩
+    obtain ⟨b, rfl⟩ := nativeFaceCoordinates_surjective M c
+    refine ⟨b, (nativeTopCoordinates M).injective ?_⟩
+    exact (nativeTopCoordinates_boundary M b).trans hc
+
+/-- The degree-three section quotient, formed before choosing Laurent coordinates. -/
+abbrev NativeTopQuotient := Sections F (Finset.univ.inf U) ⧸
+  (nativeTopBoundary (F := F) (U := U)).range
+
+omit M in
+def nativeTopSectionTrace (H : HasLaurentSections C 0) :
+    Sections F (Finset.univ.inf U) →+ A :=
+  topCoefficient.comp (nativeTopCoordinates H).toAddMonoidHom
+
+omit M in
+theorem native_top_mem_boundary_iff_trace_zero (H : HasLaurentSections C 0)
+    (s : Sections F (Finset.univ.inf U)) :
+    s ∈ (nativeTopBoundary (F := F) (U := U)).range ↔ nativeTopSectionTrace H s = 0 :=
+  (native_top_mem_boundary_iff H s).trans (negativePart_eq_zero_iff _)
+
+omit M in
+/-- The distinguished Laurent residue on the actual degree-three section quotient. -/
+def nativeTopTrace (H : HasLaurentSections C 0) :
+    NativeTopQuotient (F := F) (U := U) →+ A :=
+  QuotientAddGroup.lift _ (nativeTopSectionTrace H) (fun s hs =>
+    (native_top_mem_boundary_iff_trace_zero H s).mp hs)
+
+omit M in
+theorem nativeTopTrace_bijective (H : HasLaurentSections C 0) :
+    Function.Bijective (nativeTopTrace H) := by
+  refine ⟨(QuotientAddGroup.injective_lift_iff _ _ _).2 ?_, ?_⟩
+  · ext s
+    exact native_top_mem_boundary_iff_trace_zero H s
+  · intro a
+    let s := (nativeTopCoordinates H).symm (topGenerator a)
+    refine ⟨QuotientAddGroup.mk s, ?_⟩
+    change topCoefficient (nativeTopCoordinates H s) = a
+    rw [show nativeTopCoordinates H s = topGenerator a from
+      (nativeTopCoordinates H).apply_symm_apply (topGenerator a), topCoefficient_topGenerator]
+
+omit M in
+def nativeTopTraceEquiv (H : HasLaurentSections C 0) :
+    NativeTopQuotient (F := F) (U := U) ≃+ A :=
+  AddEquiv.ofBijective (nativeTopTrace H) (nativeTopTrace_bijective H)
+
+theorem nativeTopBoundary_surjective_of_positive (ht : 0 < t) :
+    Function.Surjective (nativeTopBoundary (F := F) (U := U)) := by
+  intro s
+  obtain ⟨c, hc⟩ := topBoundary_surjective_of_positive ht (nativeTopCoordinates M s)
+  obtain ⟨b, rfl⟩ := nativeFaceCoordinates_surjective M c
+  exact ⟨b, (nativeTopCoordinates M).injective ((nativeTopCoordinates_boundary M b).trans hc)⟩
+
 omit M
 section AffineCharts
 
@@ -178,3 +309,221 @@ end
 #print axioms CycleQ2HodgeTwistCoordinates.hTwo
 
 #print axioms CycleQ2HodgeTwistCoordinates.ordinary_vanishing
+#print axioms CycleQ2HodgeTwistCoordinates.nativeTopTraceEquiv
+#print axioms CycleQ2HodgeTwistCoordinates.nativeTopBoundary_surjective_of_positive
+
+/-!
+## The same native quotient in derived H³
+
+The only changes of coordinates below are restrictions along proved
+equalities of opens. The actual three Mayer--Vietoris boundaries from
+`CycleQ2FourOpenH3` therefore compute the quotient already used above.
+-/
+
+noncomputable section
+namespace CycleQ2HodgeTwistTopDerived
+
+open CategoryTheory Opposite TopologicalSpace
+open CycleQ2InjectiveCech (AbSheaf Sections)
+open CycleQ2GeometricSheafLocalIso (res res_self res_comp)
+open CycleQ2HodgeTwistCech (Vertex)
+open CycleQ2HodgeTwistCoordinates
+open CycleQ2ThreeOpenCechH2 (TripleOpen)
+open CycleQ2FourOpenH3 (QuadOpen)
+
+variable {X : TopCat.{0}} (F : AbSheaf X) (U : Vertex → Opens X)
+local instance : HasExt.{1} (AbSheaf X) := HasExt.standard _
+
+private def sectionEq {V W : Opens X} (h : V = W) : Sections F V ≃+ Sections F W where
+  toFun := res F h.ge
+  invFun := res F h.le
+  left_inv s := by rw [res_comp, res_self]
+  right_inv s := by rw [res_comp, res_self]
+  map_add' := (res F h.ge).map_add
+
+private theorem face_zero : (Finset.univ.erase (0 : Vertex)).inf U =
+    (U 1 ⊓ U 3) ⊓ (U 2 ⊓ U 3) := by
+  rw [show Finset.univ.erase (0 : Vertex) = {1,2,3} from by decide]
+  simp [inf_assoc, inf_left_comm, inf_comm]
+
+private theorem face_one : (Finset.univ.erase (1 : Vertex)).inf U =
+    (U 0 ⊓ U 3) ⊓ (U 2 ⊓ U 3) := by
+  rw [show Finset.univ.erase (1 : Vertex) = {0,2,3} from by decide]
+  simp [inf_assoc, inf_left_comm, inf_comm]
+
+private theorem face_two : (Finset.univ.erase (2 : Vertex)).inf U =
+    (U 0 ⊓ U 3) ⊓ (U 1 ⊓ U 3) := by
+  rw [show Finset.univ.erase (2 : Vertex) = {0,1,3} from by decide]
+  simp [inf_assoc, inf_left_comm, inf_comm]
+
+private theorem face_three : (Finset.univ.erase (3 : Vertex)).inf U =
+    TripleOpen (U 0) (U 1) (U 2) := by
+  rw [show Finset.univ.erase (3 : Vertex) = {0,1,2} from by decide]
+  simp [TripleOpen, inf_assoc, inf_left_comm, inf_comm]
+
+private theorem full_quad : Finset.univ.inf U = QuadOpen (U 0) (U 1) (U 2) (U 3) := by
+  rw [show (Finset.univ : Finset Vertex) = {0,1,2,3} from by decide]
+  simp [QuadOpen, TripleOpen, inf_assoc, inf_left_comm, inf_comm]
+
+private def nativeQuadEquiv : Sections F (Finset.univ.inf U) ≃+
+    Sections F (QuadOpen (U 0) (U 1) (U 2) (U 3)) := sectionEq F (full_quad U)
+
+private def nativeTripleEquiv : NativeTopFaces (F := F) (U := U) ≃+
+    CycleQ2FourOpenH3.TripleSections F (U 0) (U 1) (U 2) (U 3) where
+  toFun c := (sectionEq F (face_three U) (c 3), sectionEq F (face_two U) (c 2),
+    sectionEq F (face_one U) (c 1), sectionEq F (face_zero U) (c 0))
+  invFun p i := by
+    fin_cases i
+    · exact (sectionEq F (face_zero U)).symm p.2.2.2
+    · exact (sectionEq F (face_one U)).symm p.2.2.1
+    · exact (sectionEq F (face_two U)).symm p.2.1
+    · exact (sectionEq F (face_three U)).symm p.1
+  left_inv c := by
+    funext i
+    fin_cases i <;> exact AddEquiv.symm_apply_apply _ _
+  right_inv p := by
+    rcases p with ⟨p₃,p₂,p₁,p₀⟩
+    simp only [AddEquiv.apply_symm_apply]
+  map_add' c d := by
+    simp only [Pi.add_apply, map_add, Prod.mk_add_mk]
+
+private theorem nativeQuad_boundary (c : NativeTopFaces (F := F) (U := U)) :
+    nativeQuadEquiv F U (nativeTopBoundary c) =
+      CycleQ2FourOpenH3.boundary F (U 0) (U 1) (U 2) (U 3) (nativeTripleEquiv F U c) := by
+  change res F _
+      (res F _ (c 0) - res F _ (c 1) + res F _ (c 2) - res F _ (c 3)) =
+    res F _ (res F _ (c 0)) - res F _ (res F _ (c 1)) +
+      res F _ (res F _ (c 2)) - res F _ (res F _ (c 3))
+  simp only [map_sub, map_add, res_comp]
+
+private theorem union_cover (hcover : (⨆ i, U i) = ⊤) :
+    ((U 0 ⊔ U 1) ⊔ U 2) ⊔ U 3 = ⊤ := by
+  have he : ((U 0 ⊔ U 1) ⊔ U 2) ⊔ U 3 = ⨆ i, U i := by
+    apply le_antisymm
+    · exact sup_le (sup_le (sup_le (le_iSup U 0) (le_iSup U 1)) (le_iSup U 2)) (le_iSup U 3)
+    · apply iSup_le
+      intro i
+      fin_cases i
+      · exact le_sup_left.trans (le_sup_left.trans le_sup_left)
+      · exact le_sup_right.trans (le_sup_left.trans le_sup_left)
+      · exact le_sup_right.trans le_sup_left
+      · exact le_sup_right
+  exact he.trans hcover
+
+private def unionCohomologyEquiv (hcover : (⨆ i, U i) = ⊤) :
+    F.H' 3 (((U 0 ⊔ U 1) ⊔ U 2) ⊔ U 3) ≃+ F.H' 3 ⊤ :=
+  ((F.cohomologyPresheaf 3).mapIso (eqToIso (union_cover U hcover).symm).op).addCommGroupIsoToAddEquiv
+
+/-- The actual three successive connecting maps on the native quadruple section. -/
+def nativeTopConnecting (hcover : (⨆ i, U i) = ⊤) :
+    Sections F (Finset.univ.inf U) →+ F.H' 3 ⊤ :=
+  (unionCohomologyEquiv F U hcover).toAddMonoidHom.comp
+    ((CycleQ2FourOpenH3.connecting F (U 0) (U 1) (U 2) (U 3)).comp
+      (nativeQuadEquiv F U).toAddMonoidHom)
+
+theorem nativeTopConnecting_boundary (hcover : (⨆ i, U i) = ⊤)
+    (c : NativeTopFaces (F := F) (U := U)) :
+    nativeTopConnecting F U hcover (nativeTopBoundary c) = 0 := by
+  change unionCohomologyEquiv F U hcover
+    (CycleQ2FourOpenH3.connecting F (U 0) (U 1) (U 2) (U 3)
+      (nativeQuadEquiv F U (nativeTopBoundary c))) = 0
+  rw [nativeQuad_boundary, CycleQ2FourOpenH3.connecting_boundary, map_zero]
+
+/-- Vanishing on the nonempty standard intersections; in the application
+these are the actual affine charts with the proved twist frames. -/
+def FaceAcyclic : Prop := ∀ (S : Finset Vertex), S.Nonempty → ∀ n : ℕ,
+  Subsingleton (F.H' (n+1) (S.inf U))
+
+private theorem single_vanishing (H : FaceAcyclic F U) (i : Vertex) (n : ℕ) :
+    Subsingleton (F.H' (n+1) (U i)) := by
+  simpa using H {i} (by simp) n
+
+private theorem pair_vanishing (H : FaceAcyclic F U) (i j : Vertex) (n : ℕ) :
+    Subsingleton (F.H' (n+1) (U i ⊓ U j)) := by
+  simpa using H {i,j} (by simp) n
+
+private theorem triple_vanishing (H : FaceAcyclic F U) (i j k : Vertex) (n : ℕ) :
+    Subsingleton (F.H' (n+1) (TripleOpen (U i) (U j) (U k))) := by
+  simpa [TripleOpen, inf_assoc, inf_left_comm, inf_comm] using H {i,j,k} (by simp) n
+
+theorem nativeTopConnecting_eq_zero_iff (hcover : (⨆ i, U i) = ⊤)
+    (H : FaceAcyclic F U) (s : Sections F (Finset.univ.inf U)) :
+    nativeTopConnecting F U hcover s = 0 ↔ s ∈ (nativeTopBoundary (F := F) (U := U)).range := by
+  letI singleTwo (i : Vertex) : Subsingleton (F.H' 2 (U i)) := single_vanishing F U H i 1
+  letI pairOne (i j : Vertex) : Subsingleton (F.H' 1 (U i ⊓ U j)) := pair_vanishing F U H i j 0
+  constructor
+  · intro hs
+    have hz : CycleQ2FourOpenH3.connecting F (U 0) (U 1) (U 2) (U 3)
+        (nativeQuadEquiv F U s) = 0 :=
+      (unionCohomologyEquiv F U hcover).injective
+        (hs.trans (unionCohomologyEquiv F U hcover).map_zero.symm)
+    obtain ⟨p, hp⟩ := (CycleQ2FourOpenH3.connecting_eq_zero_iff
+      F (U 0) (U 1) (U 2) (U 3) _).mp hz
+    obtain ⟨c, rfl⟩ := (nativeTripleEquiv F U).surjective p
+    exact ⟨c, (nativeQuadEquiv F U).injective ((nativeQuad_boundary F U c).trans hp)⟩
+  · rintro ⟨c, rfl⟩
+    exact nativeTopConnecting_boundary F U hcover c
+
+theorem nativeTopConnecting_surjective (hcover : (⨆ i, U i) = ⊤)
+    (H : FaceAcyclic F U) : Function.Surjective (nativeTopConnecting F U hcover) := by
+  letI singleThree (i : Vertex) : Subsingleton (F.H' 3 (U i)) := single_vanishing F U H i 2
+  letI pairTwo (i j : Vertex) : Subsingleton (F.H' 2 (U i ⊓ U j)) := pair_vanishing F U H i j 1
+  letI tripleOne (i j k : Vertex) : Subsingleton (F.H' 1 (TripleOpen (U i) (U j) (U k))) :=
+    triple_vanishing F U H i j k 0
+  exact (unionCohomologyEquiv F U hcover).surjective.comp
+    ((CycleQ2FourOpenH3.connecting_surjective F (U 0) (U 1) (U 2) (U 3)).comp
+      (nativeQuadEquiv F U).surjective)
+
+def nativeTopCohomology (hcover : (⨆ i, U i) = ⊤) :
+    NativeTopQuotient (F := F) (U := U) →+ F.H' 3 ⊤ :=
+  QuotientAddGroup.lift _ (nativeTopConnecting F U hcover)
+    (by rintro _ ⟨c,rfl⟩; exact nativeTopConnecting_boundary F U hcover c)
+
+theorem nativeTopCohomology_bijective (hcover : (⨆ i, U i) = ⊤)
+    (H : FaceAcyclic F U) : Function.Bijective (nativeTopCohomology F U hcover) := by
+  refine ⟨(QuotientAddGroup.injective_lift_iff _ _ _).2 ?_, ?_⟩
+  · ext s
+    exact (nativeTopConnecting_eq_zero_iff F U hcover H s).symm
+  · intro x
+    obtain ⟨s,hs⟩ := nativeTopConnecting_surjective F U hcover H x
+    exact ⟨QuotientAddGroup.mk s,hs⟩
+
+/-- This equivalence is induced by the actual Mayer--Vietoris maps. -/
+def nativeTopCohomologyEquiv (hcover : (⨆ i, U i) = ⊤) (H : FaceAcyclic F U) :
+    NativeTopQuotient (F := F) (U := U) ≃+ F.H' 3 ⊤ :=
+  AddEquiv.ofBijective (nativeTopCohomology F U hcover)
+    (nativeTopCohomology_bijective F U hcover H)
+
+variable {A : Type} [AddCommGroup A] {C : Chart F U A}
+
+/-- The coefficient-one residue on the actual derived degree-three group. -/
+def derivedTopTraceEquiv (M : HasLaurentSections C 0)
+    (hcover : (⨆ i, U i) = ⊤) (H : FaceAcyclic F U) : F.H' 3 ⊤ ≃+ A :=
+  (nativeTopCohomologyEquiv F U hcover H).symm.trans (nativeTopTraceEquiv M)
+
+theorem derivedTopTrace_connecting (M : HasLaurentSections C 0)
+    (hcover : (⨆ i, U i) = ⊤) (H : FaceAcyclic F U)
+    (s : Sections F (Finset.univ.inf U)) :
+    derivedTopTraceEquiv F U M hcover H (nativeTopConnecting F U hcover s) =
+      nativeTopSectionTrace M s := by
+  change nativeTopTraceEquiv M
+    ((nativeTopCohomologyEquiv F U hcover H).symm
+      ((nativeTopCohomologyEquiv F U hcover H) (QuotientAddGroup.mk s))) = _
+  rw [AddEquiv.symm_apply_apply]
+  rfl
+
+theorem derived_hThree_of_positive {t : ℤ} (M : HasLaurentSections C t)
+    (ht : 0 < t) (hcover : (⨆ i, U i) = ⊤) (H : FaceAcyclic F U) :
+    Subsingleton (F.H' 3 ⊤) := by
+  apply subsingleton_of_forall_eq 0
+  intro x
+  obtain ⟨s,rfl⟩ := nativeTopConnecting_surjective F U hcover H x
+  obtain ⟨c,rfl⟩ := nativeTopBoundary_surjective_of_positive M ht s
+  exact nativeTopConnecting_boundary F U hcover c
+
+end CycleQ2HodgeTwistTopDerived
+end
+
+#print axioms CycleQ2HodgeTwistTopDerived.nativeTopCohomologyEquiv
+#print axioms CycleQ2HodgeTwistTopDerived.derivedTopTraceEquiv
+#print axioms CycleQ2HodgeTwistTopDerived.derived_hThree_of_positive

@@ -54,6 +54,28 @@ theorem weightTwo_change (i k : Vertex) :
 def monomial (i : Vertex) (j : Fin 3) (e : Exp) : Γ(threefold φ,V) :=
   (units φ V hV i e : Γ(threefold φ,V)) * weightTwo φ V hV i ^ j.val
 
+/-- On the common torus a partial denominator differs from the full
+denominator by the actual omitted coordinate ratio. -/
+theorem partial_monomial (i a : Vertex) :
+    monomial φ V hV a 2 (partialExponent i) =
+      ratio φ a i V (hV a) * monomial φ V hV a 2 negativeExponent := by
+  have he (k : Vertex) : partialExponent i k =
+      (if k = i then (1 : ℤ) else 0) + negativeExponent k := by
+    by_cases hk : k = i <;> simp [partialExponent, negativeExponent, hk]
+  have hu : units φ V hV a (partialExponent i) =
+      transition φ a i V (hV a) (hV i) * units φ V hV a negativeExponent := by
+    simp only [units, he, zpow_add, Finset.prod_mul_distrib]
+    congr 1
+    have hp : (fun k : Vertex => transition φ a k V (hV a) (hV k) ^
+        (if k = i then (1 : ℤ) else 0)) =
+        fun k => if k = i then transition φ a k V (hV a) (hV k) else 1 := by
+      funext k
+      by_cases hk : k = i <;> simp [hk]
+    rw [hp]
+    simp
+  rw [monomial, hu, Units.val_mul, mul_assoc]
+  rfl
+
 /-- The literal homogeneous fraction transforms by the degree-t line-bundle cocycle. -/
 theorem monomial_change (i k : Vertex) (j : Fin 3) (e : Exp) {t : ℤ}
     (ht : (∑ a, e a) + 2 * (j.val : ℤ) = t) :
@@ -73,6 +95,18 @@ theorem monomial_change (i k : Vertex) (j : Fin 3) (e : Exp) {t : ℤ}
 /-- Evaluation of a finite Laurent expansion in a single frame of the common torus. -/
 def evaluate (ρ : R →+* Γ(threefold φ,V)) (i : Vertex) (p : NormalForm R) : Γ(threefold φ,V) :=
   ∑ j, (p j).sum fun e c => ρ c * monomial φ V hV i j e
+
+theorem evaluate_smul (ρ : R →+* Γ(threefold φ,V)) (i : Vertex) (a : R)
+    (p : NormalForm R) :
+    evaluate φ V hV ρ i (a • p) = ρ a * evaluate φ V hV ρ i p := by
+  rw [evaluate, evaluate, Finset.mul_sum]
+  apply Finset.sum_congr rfl
+  intro j _
+  change (a • p j).sum (fun e c => ρ c * monomial φ V hV i j e) = _
+  rw [Finsupp.sum_smul_index (fun _ => by rw [map_zero, zero_mul]), Finsupp.mul_sum]
+  apply Finsupp.sum_congr
+  intro e _
+  rw [map_mul, mul_assoc]
 
 theorem evaluate_change (ρ : R →+* Γ(threefold φ,V)) (i k : Vertex) {t : ℤ}
     {S : Finset Vertex} (p : sections R t S) :
