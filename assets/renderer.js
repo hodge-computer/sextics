@@ -207,39 +207,43 @@ float distanceOpacity(float distanceToCamera) {
   float strength = smoothstep(0.0, 0.18, uTransFar);
   return clamp(1.0 - (1.0-uTransMinAlpha)*strength*(1.0-smoothT), 0.0, 1.0);
 }
+// Whether this pass drops the fragment: the split between the opaque background and the peeled
+// layers, and the dissolve at the projection box. The depth prepass applies exactly these
+// tests, so the shading that follows runs only where its result is kept.
+bool dropped(float alpha, float screenNoise) {
+  if(uRenderPass == 1 && alpha < 1.0) return true;
+  if(uRenderPass == 2) {
+    if(alpha >= 1.0) return true; // this portion is already in the opaque background
+    ivec2 pixel = ivec2(gl_FragCoord.xy);
+    highp float z = gl_FragCoord.z;
+    if(z >= texelFetch(uOpaqueDepth,pixel,0).r) return true;
+    // Highp depth sampling is essential on mobile. Two 24-bit depth units
+    // avoid re-peeling the identical surface sample; lowp samplers break this.
+    if(uHasPreviousDepth && z <= texelFetch(uPreviousDepth,pixel,0).r + 1.2e-7) return true;
+    if(texelFetch(uAccumulated,pixel,0).a >= 0.9999) return true;
+  }
+  // The mathematical projection box is [-10,10]^3.  Dissolve the last shell
+  // instead of exposing marching-cube cut faces at the finite box boundary.
+  // Dropping fragments, rather than darkening them, leaves no opaque black
+  // pixels and no visible box cut.
+  vec3 stereo = vPosition*uDisplayScale + uOriginalCenter;
+  float boxDistance = max(abs(stereo.x),max(abs(stereo.y),abs(stereo.z)));
+  float edgeFade = uProjectionBox > 0.0 ? 1.0-smoothstep(0.825*uProjectionBox,0.992*uProjectionBox,boxDistance) : 1.0;
+  return screenNoise > edgeFade;
+}
 void main() {
+  float alpha = distanceOpacity(length(uCamera-vPosition));
+  float screenNoise = pixelNoise(ivec2(gl_FragCoord.xy));
   if(uDepthOnly) {
-    float alpha = distanceOpacity(length(uCamera-vPosition));
-    if(uRenderPass == 1 && alpha < 1.0) discard;
-    if(uRenderPass == 2) {
-      if(alpha >= 1.0) discard; // this portion is already in the opaque background
-      ivec2 pixel = ivec2(gl_FragCoord.xy);
-      highp float z = gl_FragCoord.z;
-      if(z >= texelFetch(uOpaqueDepth,pixel,0).r) discard;
-      // Highp depth sampling is essential on mobile. Two 24-bit depth units
-      // avoid re-peeling the identical surface sample; lowp samplers break this.
-      if(uHasPreviousDepth && z <= texelFetch(uPreviousDepth,pixel,0).r + 1.2e-7) discard;
-      if(texelFetch(uAccumulated,pixel,0).a >= 0.9999) discard;
-    }
+    if(dropped(alpha,screenNoise)) discard;
     outColor=vec4(0.0);return;
   }
-  // Derivatives need neighbouring fragments, including those subsequently
-  // discarded by x-ray depth peeling. Evaluate before divergent discards.
+  // Derivatives need neighbouring fragments, including those this pass drops,
+  // so the divisor is evaluated before any fragment is discarded.
   vec2 complexValue;
   // The distance to the divisor, already in pixels.
   float divisor = 1.0-smoothstep(0.55,1.45,pixelDivisor(complexValue));
-  float alpha = distanceOpacity(length(uCamera-vPosition));
-  if(uRenderPass == 1 && alpha < 1.0) discard;
-  if(uRenderPass == 2) {
-    if(alpha >= 1.0) discard; // this portion is already in the opaque background
-    ivec2 pixel = ivec2(gl_FragCoord.xy);
-    highp float z = gl_FragCoord.z;
-    if(z >= texelFetch(uOpaqueDepth,pixel,0).r) discard;
-    // Highp depth sampling is essential on mobile. Two 24-bit depth units
-    // avoid re-peeling the identical surface sample; lowp samplers break this.
-    if(uHasPreviousDepth && z <= texelFetch(uPreviousDepth,pixel,0).r + 1.2e-7) discard;
-    if(texelFetch(uAccumulated,pixel,0).a >= 0.9999) discard;
-  }
+  if(dropped(alpha,screenNoise)) discard;
   vec3 N = normalize(vNormal);
   if (!gl_FrontFacing) N = -N;
   vec3 V = normalize(uCamera-vPosition);
@@ -264,16 +268,6 @@ void main() {
   // A crisp, antialiased two-pixel curve, without a surrounding glow.
   vec3 divisorColor = mix(vec3(1.0,0.72,0.92),vec3(0.68,0.90,1.0),0.5+0.5*sin(TAU*phase));
   color += divisorColor*(0.96*divisor)*uDivisorStrength;
-
-  // The mathematical projection box is [-10,10]^3.  Dissolve the last shell
-  // instead of exposing marching-cube cut faces at the finite box boundary.
-  vec3 stereo = vPosition*uDisplayScale + uOriginalCenter;
-  float boxDistance = max(abs(stereo.x),max(abs(stereo.y),abs(stereo.z)));
-  float edgeFade = uProjectionBox > 0.0 ? 1.0-smoothstep(0.825*uProjectionBox,0.992*uProjectionBox,boxDistance) : 1.0;
-  float screenNoise = pixelNoise(ivec2(gl_FragCoord.xy));
-  // Apply the same coverage fade to every slice. Multiplying generic-slice
-  // colour by this fade left opaque black pixels and a visible box cut.
-  if (screenNoise > edgeFade) discard;
 
   color = aces(color);
   color = pow(color,vec3(1.0/2.2));
@@ -417,23 +411,7 @@ void main() {
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
       for (let i = 0; i < 3; i++) bindTexture(i, null);
     }
-    const depthOnlyLoc = gl.getUniformLocation(surfaceProgram, 'uDepthOnly');
-    function drawWithPrepass(drawSurface) {
-      gl.uniform1i(depthOnlyLoc, 1);
-      gl.colorMask(false, false, false, false);
-      gl.depthFunc(gl.LEQUAL);
-      gl.depthMask(true);
-      drawSurface();
-      gl.uniform1i(depthOnlyLoc, 0);
-      gl.colorMask(true, true, true, true);
-      gl.depthFunc(gl.EQUAL);
-      gl.depthMask(false);
-      drawSurface();
-      gl.depthFunc(gl.LEQUAL);
-      gl.depthMask(true);
-    }
-    function render(width, height, vao, drawSurface, layers = 6, usePrepass = false) {
-      const drawLayer = () => (usePrepass ? drawWithPrepass(drawSurface) : drawSurface());
+    function render(width, height, vao, drawLayer, layers = 6) {
       ensureTargets(width, height);
       const t = targets;
       gl.viewport(0, 0, width, height);
@@ -705,7 +683,8 @@ void main() {
           'TransNear',
           'TransFar',
           'TransMinAlpha',
-          'RenderPass'
+          'RenderPass',
+          'DepthOnly'
         ])
           U[name] = gl.getUniformLocation(p, 'u' + name);
         U.DivisorPlane = gl.getUniformLocation(p, 'uDivisorPlane[0]');
@@ -1313,7 +1292,23 @@ void main() {
       gl.uniform1f(U.TransNear, 0);
       gl.uniform1f(U.TransFar, 2);
       gl.uniform1f(U.TransMinAlpha, 0.18);
-      const draw = () => gl.drawElements(gl.TRIANGLES, activeCount, gl.UNSIGNED_INT, 0),
+      // Lay down depth with the cheap fragment tests alone, then shade only where the depth
+      // matches. Hidden fragments and those a pass drops never reach the divisor evaluation.
+      const triangles = () => gl.drawElements(gl.TRIANGLES, activeCount, gl.UNSIGNED_INT, 0),
+        draw = () => {
+          gl.uniform1i(U.DepthOnly, 1);
+          gl.colorMask(false, false, false, false);
+          gl.depthFunc(gl.LEQUAL);
+          gl.depthMask(true);
+          triangles();
+          gl.uniform1i(U.DepthOnly, 0);
+          gl.colorMask(true, true, true, true);
+          gl.depthFunc(gl.EQUAL);
+          gl.depthMask(false);
+          triangles();
+          gl.depthFunc(gl.LEQUAL);
+          gl.depthMask(true);
+        },
         bounds = Math.max(1.01, activeMeta.positionBound || 0),
         distanceToBounds = Math.hypot(...eye.map((c) => Math.max(0, Math.abs(c) - bounds)));
       if (distanceToBounds < 2) {
@@ -1324,8 +1319,7 @@ void main() {
             canvas.height,
             activeVao,
             draw,
-            6,
-            activeMeta.projectionBox === 0
+            6
           );
         } catch (error) {
           if (!usable()) return;
