@@ -9,6 +9,10 @@ import Mathlib.ModelTheory.Algebra.Field.IsAlgClosed
 import Mathlib.ModelTheory.Algebra.Ring.FreeCommRing
 import Mathlib.NumberTheory.LSeries.PrimesInAP
 import Mathlib.RingTheory.FinitePresentation
+import Mathlib.Algebra.MvPolynomial.PDeriv
+import Mathlib.RingTheory.Localization.Away.Basic
+import Proposal.GeometricLocalizedDerivations
+import Proposal.GeometricUniversalJacobianFrames
 
 set_option autoImplicit false
 
@@ -714,3 +718,901 @@ end
 #print axioms CycleQ2ArithmeticSpecialization.rank_map_of_witness
 #print axioms CycleQ2ArithmeticSpecialization.finite_coefficients_spread
 #print axioms CycleQ2ArithmeticSpecialization.finite_matrices_spread
+
+/-!
+# Finite constant models of the parameter localization
+
+The parameter variables remain indeterminates when the constant ring is
+reduced modulo a prime. A finite family of localized coefficients uses
+only finitely many constants in its polynomial numerators and in the
+common localization denominator. These constants give an injective model
+of that family, and every parameter partial commutes with its coefficient
+maps. Consequently an actual matrix connection identity descends to the
+model and survives every subsequent coefficient specialization.
+-/
+
+noncomputable section
+namespace CycleQ2ArithmeticSpecialization
+
+open MvPolynomial
+open CycleQ2GeometricLocalizedDerivations
+
+section ParameterLocalization
+
+variable {A B σ : Type*} [CommRing A] [CommRing B]
+
+/-- Formal differentiation of one parameter on its principal localization,
+over an arbitrary constant ring. -/
+def parameterPartial (d : MvPolynomial σ A) (i : σ) :
+    Derivation ℤ (Localization.Away d) (Localization.Away d) :=
+  (localizedBaseDerivation (Submonoid.powers d) (Localization.Away d)
+    (pderiv i : Derivation A (MvPolynomial σ A) (MvPolynomial σ A))).restrictScalars ℤ
+
+theorem parameterPartial_algebraMap (d : MvPolynomial σ A) (i : σ) (p : MvPolynomial σ A) :
+    parameterPartial d i (algebraMap (MvPolynomial σ A) (Localization.Away d) p) =
+      algebraMap (MvPolynomial σ A) (Localization.Away d) (pderiv i p) :=
+  localizedBaseDerivation_algebraMap (Submonoid.powers d) (Localization.Away d) (pderiv i) p
+
+/-- Change only the constants of a polynomial parameter localization. -/
+def coefficientOpenMap (θ : A →+* B) (d : MvPolynomial σ A) (e : MvPolynomial σ B)
+    (h : MvPolynomial.map θ d = e) : Localization.Away d →+* Localization.Away e :=
+  IsLocalization.Away.lift d
+    (g := (algebraMap (MvPolynomial σ B) (Localization.Away e)).comp (MvPolynomial.map θ))
+    (by
+      change IsUnit (algebraMap (MvPolynomial σ B) (Localization.Away e) (MvPolynomial.map θ d))
+      rw [h]
+      exact IsLocalization.Away.algebraMap_isUnit e)
+
+theorem coefficientOpenMap_algebraMap (θ : A →+* B) (d : MvPolynomial σ A)
+    (e : MvPolynomial σ B) (h : MvPolynomial.map θ d = e) (p : MvPolynomial σ A) :
+    coefficientOpenMap θ d e h
+      (algebraMap (MvPolynomial σ A) (Localization.Away d) p) =
+        algebraMap (MvPolynomial σ B) (Localization.Away e) (MvPolynomial.map θ p) :=
+  IsLocalization.Away.lift_eq d _ p
+
+theorem coefficientOpenMap_injective (θ : A →+* B) (hθ : Function.Injective θ)
+    (d : MvPolynomial σ A) (e : MvPolynomial σ B) (h : MvPolynomial.map θ d = e) :
+    Function.Injective (coefficientOpenMap θ d e h) := by
+  apply (IsLocalization.injective_iff_map_algebraMap_eq (Submonoid.powers d)
+    (coefficientOpenMap θ d e h)).mpr
+  intro a b
+  constructor
+  · exact congrArg (coefficientOpenMap θ d e h)
+  · intro hab
+    rw [coefficientOpenMap_algebraMap,coefficientOpenMap_algebraMap] at hab
+    obtain ⟨r,hr⟩ := IsLocalization.Away.exists_of_eq e hab
+    apply (IsLocalization.eq_iff_exists (Submonoid.powers d) (Localization.Away d)).mpr
+    refine ⟨⟨d^r,⟨r,rfl⟩⟩,?_⟩
+    apply MvPolynomial.map_injective θ hθ
+    simpa only [map_mul,map_pow,h] using hr
+
+/-- The parameter partials are unchanged by any change of constants,
+including changes to positive characteristic. -/
+theorem coefficientOpenMap_partial (θ : A →+* B) (d : MvPolynomial σ A)
+    (e : MvPolynomial σ B) (h : MvPolynomial.map θ d = e) (i : σ)
+    (z : Localization.Away d) :
+    parameterPartial e i (coefficientOpenMap θ d e h z) =
+      coefficientOpenMap θ d e h (parameterPartial d i z) := by
+  apply derivation_commutes_of_algebraMap (Submonoid.powers d)
+    (parameterPartial d i) (parameterPartial e i) (coefficientOpenMap θ d e h) ?_ z
+  intro p
+  rw [coefficientOpenMap_algebraMap,parameterPartial_algebraMap,
+    parameterPartial_algebraMap,coefficientOpenMap_algebraMap,pderiv_map]
+
+theorem coefficientOpenMap_fraction (θ : A →+* B) (d : MvPolynomial σ A)
+    (e : MvPolynomial σ B) (h : MvPolynomial.map θ d = e)
+    (p : MvPolynomial σ A) (r : ℕ) :
+    coefficientOpenMap θ d e h
+      (IsLocalization.mk' (Localization.Away d) p ⟨d^r,⟨r,rfl⟩⟩) *
+        (algebraMap (MvPolynomial σ B) (Localization.Away e) e)^r =
+      algebraMap (MvPolynomial σ B) (Localization.Away e) (MvPolynomial.map θ p) := by
+  have hs := congrArg (coefficientOpenMap θ d e h)
+    (IsLocalization.mk'_spec (Localization.Away d) p
+      (⟨d^r,⟨r,rfl⟩⟩ : Submonoid.powers d))
+  simpa only [map_mul,coefficientOpenMap_algebraMap,map_pow,h] using hs
+
+/-- An equality between actual parameter connections descends through an
+injective constant model. The model partials are constructed above. -/
+theorem connection_identity_descends {n s : Type*} [Fintype n] [Fintype s]
+    (θ : A →+* B) (hθ : Function.Injective θ)
+    (d : MvPolynomial σ A) (e : MvPolynomial σ B) (h : MvPolynomial.map θ d = e)
+    (i : σ) (P : Matrix n s (Localization.Away d))
+    (U : Matrix n n (Localization.Away d)) (V : Matrix s s (Localization.Away d))
+    (hid : (P.map (coefficientOpenMap θ d e h)).map (parameterPartial e i) =
+      P.map (coefficientOpenMap θ d e h) * V.map (coefficientOpenMap θ d e h) -
+        U.map (coefficientOpenMap θ d e h) * P.map (coefficientOpenMap θ d e h)) :
+    P.map (parameterPartial d i) = P * V - U * P := by
+  classical
+  ext a b
+  apply coefficientOpenMap_injective θ hθ d e h
+  have he := congrArg (fun M : Matrix n s (Localization.Away e) => M a b) hid
+  change parameterPartial e i (coefficientOpenMap θ d e h (P a b)) =
+    (∑ j, coefficientOpenMap θ d e h (P a j) * coefficientOpenMap θ d e h (V j b)) -
+      (∑ j, coefficientOpenMap θ d e h (U a j) * coefficientOpenMap θ d e h (P j b)) at he
+  simpa only [coefficientOpenMap_partial,Matrix.map_apply,Matrix.sub_apply,Matrix.mul_apply,
+    map_sub,map_sum,map_mul] using he
+
+/-- A modeled matrix connection identity survives arbitrary constant
+specialization while retaining the formal parameter derivatives. -/
+theorem connection_identity_map {n s : Type*} [Fintype n] [Fintype s]
+    (θ : A →+* B) (d : MvPolynomial σ A) (e : MvPolynomial σ B)
+    (h : MvPolynomial.map θ d = e) (i : σ) (P : Matrix n s (Localization.Away d))
+    (U : Matrix n n (Localization.Away d)) (V : Matrix s s (Localization.Away d))
+    (hid : P.map (parameterPartial d i) = P * V - U * P) :
+    (P.map (coefficientOpenMap θ d e h)).map (parameterPartial e i) =
+      P.map (coefficientOpenMap θ d e h) * V.map (coefficientOpenMap θ d e h) -
+        U.map (coefficientOpenMap θ d e h) * P.map (coefficientOpenMap θ d e h) := by
+  classical
+  ext a b
+  have he := congrArg (fun M : Matrix n s (Localization.Away d) =>
+    coefficientOpenMap θ d e h (M a b)) hid
+  simpa only [coefficientOpenMap_partial,Matrix.map_apply,Matrix.sub_apply,Matrix.mul_apply,
+    map_sub,map_sum,map_mul] using he
+
+/-- An integer-valued parameter point has the same meaning over every
+constant ring. The monic Fermat point has coordinates zero and one. -/
+def integerEvaluation (A : Type*) [CommRing A] (t : σ → ℤ) : MvPolynomial σ A →+* A :=
+  eval (fun i => (t i : A))
+
+theorem integerEvaluation_map (θ : A →+* B) (t : σ → ℤ) (p : MvPolynomial σ A) :
+    integerEvaluation B t (MvPolynomial.map θ p) = θ (integerEvaluation A t p) := by
+  simpa only [integerEvaluation,Function.comp_apply,map_intCast] using
+    (MvPolynomial.map_eval θ (fun i => (t i : A)) p).symm
+
+/-- When the denominator is one at an integral point, that point remains
+on the principal open over the entire constant model. -/
+def localizedIntegerEvaluation (d : MvPolynomial σ A) (t : σ → ℤ)
+    (hd : integerEvaluation A t d = 1) : Localization.Away d →+* A :=
+  IsLocalization.Away.lift d (g := integerEvaluation A t)
+    (by rw [hd]; exact isUnit_one)
+
+theorem localizedIntegerEvaluation_algebraMap (d : MvPolynomial σ A) (t : σ → ℤ)
+    (hd : integerEvaluation A t d = 1) (p : MvPolynomial σ A) :
+    localizedIntegerEvaluation d t hd (algebraMap (MvPolynomial σ A) (Localization.Away d) p) =
+      integerEvaluation A t p := IsLocalization.Away.lift_eq d _ p
+
+theorem integerEvaluation_eq_one_of_map (θ : A →+* B) (hθ : Function.Injective θ)
+    (d : MvPolynomial σ A) (e : MvPolynomial σ B) (h : MvPolynomial.map θ d = e)
+    (t : σ → ℤ) (he : integerEvaluation B t e = 1) : integerEvaluation A t d = 1 := by
+  apply hθ
+  rw [← integerEvaluation_map θ t d,h,he,map_one]
+
+theorem coefficientOpenMap_integerEvaluation (θ : A →+* B)
+    (d : MvPolynomial σ A) (e : MvPolynomial σ B) (h : MvPolynomial.map θ d = e)
+    (t : σ → ℤ) (hd : integerEvaluation A t d = 1) (he : integerEvaluation B t e = 1)
+    (z : Localization.Away d) :
+    localizedIntegerEvaluation e t he (coefficientOpenMap θ d e h z) =
+      θ (localizedIntegerEvaluation d t hd z) := by
+  have hhom : (localizedIntegerEvaluation e t he).comp (coefficientOpenMap θ d e h) =
+      θ.comp (localizedIntegerEvaluation d t hd) := by
+    apply IsLocalization.ringHom_ext (Submonoid.powers d)
+    apply RingHom.ext
+    intro p
+    change localizedIntegerEvaluation e t he
+      (coefficientOpenMap θ d e h (algebraMap (MvPolynomial σ A) (Localization.Away d) p)) =
+        θ (localizedIntegerEvaluation d t hd
+          (algebraMap (MvPolynomial σ A) (Localization.Away d) p))
+    rw [coefficientOpenMap_algebraMap,localizedIntegerEvaluation_algebraMap,
+      localizedIntegerEvaluation_algebraMap,integerEvaluation_map]
+  exact RingHom.congr_fun hhom z
+
+/-- A chosen constant matrix modeling the actual Fermat evaluation is
+necessarily the evaluation of its modeled parameter matrix. Thus the
+arithmetic rank witness applies to that same reduced parameter model. -/
+theorem integerEvaluation_matrix_identify {m n : Type*}
+    (θ : A →+* B) (hθ : Function.Injective θ)
+    (d : MvPolynomial σ A) (e : MvPolynomial σ B) (h : MvPolynomial.map θ d = e)
+    (t : σ → ℤ) (hd : integerEvaluation A t d = 1) (he : integerEvaluation B t e = 1)
+    (P : Matrix m n (Localization.Away d)) (Q : Matrix m n A)
+    (hq : Q.map θ = (P.map (coefficientOpenMap θ d e h)).map (localizedIntegerEvaluation e t he)) :
+    P.map (localizedIntegerEvaluation d t hd) = Q := by
+  ext a b
+  apply hθ
+  have hentry := congrArg (fun M : Matrix m n B => M a b) hq
+  simpa only [Matrix.map_apply,coefficientOpenMap_integerEvaluation] using hentry.symm
+
+end ParameterLocalization
+
+section ConstantSupport
+
+variable {K σ ι : Type*} [Field K] [CharZero K] [Fintype ι]
+
+local instance : DecidableEq K := Classical.decEq K
+
+/-- The constants occurring in the localization denominator and in fixed
+polynomial numerators for the given finite family of localized elements. -/
+def openDataConstants (d : MvPolynomial σ K) (x : ι → Localization.Away d) : Finset K := by
+  classical
+  exact d.coeffs ∪ Finset.univ.biUnion
+    (fun i => (IsLocalization.Away.sec d (x i)).1.coeffs)
+
+theorem polynomial_lift (S : Subalgebra ℤ K) (p : MvPolynomial σ K)
+    (h : ∀ c ∈ p.coeffs, c ∈ S) :
+    ∃ q : MvPolynomial σ S, MvPolynomial.map S.val.toRingHom q = p := by
+  apply MvPolynomial.mem_range_map_iff_coeffs_subset.mpr
+  intro c hc
+  exact ⟨⟨c,h c hc⟩,rfl⟩
+
+/-- Any constant subalgebra containing the finite numerator support carries
+the entire prescribed family on the same parameter principal open. -/
+theorem openData_lift (S : Subalgebra ℤ K) (d : MvPolynomial σ K)
+    (x : ι → Localization.Away d)
+    (h : ∀ c ∈ openDataConstants d x, c ∈ S) :
+    ∃ (dS : MvPolynomial σ S) (hdS : MvPolynomial.map S.val.toRingHom dS = d)
+      (y : ι → Localization.Away dS),
+      ∀ i, coefficientOpenMap S.val.toRingHom dS d hdS (y i) = x i := by
+  classical
+  obtain ⟨dS,hdS⟩ := polynomial_lift S d
+    (fun c hc => h c (Finset.mem_union_left _ hc))
+  have hn (i : ι) : ∃ p : MvPolynomial σ S,
+      MvPolynomial.map S.val.toRingHom p = (IsLocalization.Away.sec d (x i)).1 := by
+    apply polynomial_lift
+    intro c hc
+    apply h c
+    exact Finset.mem_union_right _
+      (Finset.mem_biUnion.mpr ⟨i,Finset.mem_univ _,hc⟩)
+  choose p hp using hn
+  let y : ι → Localization.Away dS := fun i =>
+    IsLocalization.mk' (Localization.Away dS) (p i)
+      ⟨dS^(IsLocalization.Away.sec d (x i)).2,⟨(IsLocalization.Away.sec d (x i)).2,rfl⟩⟩
+  refine ⟨dS,hdS,y,fun i => ?_⟩
+  apply ((IsLocalization.Away.algebraMap_isUnit d).pow
+    (IsLocalization.Away.sec d (x i)).2).mul_right_cancel
+  calc
+    _ = algebraMap (MvPolynomial σ K) (Localization.Away d)
+        (MvPolynomial.map S.val.toRingHom (p i)) :=
+      coefficientOpenMap_fraction S.val.toRingHom dS d hdS (p i) _
+    _ = algebraMap (MvPolynomial σ K) (Localization.Away d)
+        (IsLocalization.Away.sec d (x i)).1 := by rw [hp]
+    _ = _ := by
+      simpa only [map_pow] using (IsLocalization.Away.sec_spec d (x i)).symm
+
+/-- A finite family of actual localized coefficients has an integral
+constant model of finite type. The arbitrary extra constants can include
+the entries of rank witnesses at the Fermat point. -/
+theorem finite_open_data_model (d : MvPolynomial σ K) (x : ι → Localization.Away d)
+    (extra : Finset K) :
+    ∃ S : Subalgebra ℤ K, Algebra.FiniteType ℤ S ∧
+      (∀ c ∈ extra, c ∈ S) ∧
+      ∃ (dS : MvPolynomial σ S) (hdS : MvPolynomial.map S.val.toRingHom dS = d)
+        (y : ι → Localization.Away dS),
+        ∀ i, coefficientOpenMap S.val.toRingHom dS d hdS (y i) = x i := by
+  classical
+  let constants := extra ∪ openDataConstants d x
+  let S := coefficientModel constants
+  refine ⟨S,inferInstance,?_,?_⟩
+  · intro c hc
+    exact Algebra.subset_adjoin (Finset.mem_union_left _ hc)
+  · apply openData_lift S d x
+    intro c hc
+    exact Algebra.subset_adjoin (Finset.mem_union_right _ hc)
+
+/-- The same constant model can retain localized connection coefficients
+and the ranks of arbitrary prescribed constant matrices. In particular the
+matrices may be the generator matrix and its projections evaluated at the
+characteristic-zero Fermat point. No parameter variable is specialized by
+the maps of constant rings appearing here. -/
+theorem finite_open_matrices_spread {κ m n : Type*}
+    [Fintype κ] [Fintype m] [Fintype n]
+    (d : MvPolynomial σ K) (x : ι → Localization.Away d)
+    (M : κ → Matrix m n K) (extra : Finset K) :
+    ∃ S : Subalgebra ℤ K, Algebra.FiniteType ℤ S ∧
+      (∀ c ∈ extra ∪ openDataConstants d x, c ∈ S) ∧
+      ∃ (dS : MvPolynomial σ S) (hdS : MvPolynomial.map S.val.toRingHom dS = d)
+        (y : ι → Localization.Away dS),
+        (∀ i, coefficientOpenMap S.val.toRingHom dS d hdS (y i) = x i) ∧
+        ∃ P : κ → Matrix m n S,
+          (∀ i, (P i).map S.val.toRingHom = M i) ∧
+          ∃ bad : Finset Nat.Primes, ∀ p : Nat.Primes, p ∉ bad →
+            ∀ (L : Type*) [Field L] [IsAlgClosed L] [CharP L (p : ℕ)],
+              ∃ ρ : S →+* L,
+                (∀ i, ((P i).map ρ).rank = (M i).rank) ∧
+                ∀ c : S, (c : K) ∈ extra ∪ openDataConstants d x →
+                  (c : K) ≠ 0 → ρ c ≠ 0 := by
+  classical
+  obtain ⟨S,hfinite,hconstants,P,hP,bad,hbad⟩ :=
+    finite_matrices_spread M (extra ∪ openDataConstants d x)
+  obtain ⟨dS,hdS,y,hy⟩ := openData_lift S d x
+    (fun c hc => hconstants c (Finset.mem_union_right _ hc))
+  exact ⟨S,hfinite,hconstants,dS,hdS,y,hy,P,hP,bad,hbad⟩
+
+end ConstantSupport
+
+end CycleQ2ArithmeticSpecialization
+end
+
+#print axioms CycleQ2ArithmeticSpecialization.parameterPartial_algebraMap
+#print axioms CycleQ2ArithmeticSpecialization.coefficientOpenMap_injective
+#print axioms CycleQ2ArithmeticSpecialization.coefficientOpenMap_partial
+#print axioms CycleQ2ArithmeticSpecialization.connection_identity_descends
+#print axioms CycleQ2ArithmeticSpecialization.connection_identity_map
+#print axioms CycleQ2ArithmeticSpecialization.coefficientOpenMap_integerEvaluation
+#print axioms CycleQ2ArithmeticSpecialization.integerEvaluation_matrix_identify
+#print axioms CycleQ2ArithmeticSpecialization.openData_lift
+#print axioms CycleQ2ArithmeticSpecialization.finite_open_data_model
+#print axioms CycleQ2ArithmeticSpecialization.finite_open_matrices_spread
+
+/-!
+# Finite certificates for polynomial-pole relations
+
+A quotient connection formula is descended by retaining its actual finite
+raw relation certificate. Each certificate is a finitely supported family
+of polynomial multipliers, indexed by pole order and spatial derivative.
+All its scalar coefficients can therefore be included in the same finite
+constant model as the lattice and connection matrices. This identifies
+the reduced matrices with the actual polynomial-pole connection without
+requiring a map from the complex field to positive characteristic.
+-/
+
+noncomputable section
+namespace CycleQ2PoleRelationDescent
+
+open MvPolynomial
+open CycleQ2PolynomialPoleSymbols (Poles relations)
+
+section Relations
+
+variable {R : Type*} [CommRing R]
+
+abbrev RelationWitness (R : Type*) [CommRing R] :=
+  (ℕ × Fin 5) →₀ MvPolynomial (Fin 5) R
+
+def relationColumn (F : MvPolynomial (Fin 5) R) (q : ℕ × Fin 5) :
+    MvPolynomial (Fin 5) R →ₗ[R] Poles R where
+  toFun G := Finsupp.single (q.1+1) (G*pderiv q.2 F) - Finsupp.single q.1 (pderiv q.2 G)
+  map_add' G H := by
+    rw [add_mul,map_add,Finsupp.single_add,Finsupp.single_add]
+    abel
+  map_smul' a G := by
+    simp only [smul_mul_assoc,map_smul,Finsupp.smul_single,smul_sub,RingHom.id_apply]
+
+/-- A finite list of polynomial multipliers is an explicit raw relation certificate. -/
+def relationMap (F : MvPolynomial (Fin 5) R) : RelationWitness R →ₗ[R] Poles R :=
+  Finsupp.lsum R (relationColumn F)
+
+theorem relationMap_single (F : MvPolynomial (Fin 5) R) (n : ℕ) (i : Fin 5)
+    (G : MvPolynomial (Fin 5) R) :
+    relationMap F (Finsupp.single (n,i) G) =
+      Finsupp.single (n+1) (G*pderiv i F) - Finsupp.single n (pderiv i G) := by
+  rw [relationMap,Finsupp.lsum_single]
+  rfl
+
+/-- The full defining relation span has finite raw certificates. The
+polynomial multiplier absorbs arbitrary scalar multiples of generators. -/
+theorem relations_eq_range (F : MvPolynomial (Fin 5) R) :
+    relations R F = LinearMap.range (relationMap F) := by
+  apply le_antisymm
+  · apply Submodule.span_le.mpr
+    rintro _ ⟨n,i,G,rfl⟩
+    exact ⟨Finsupp.single (n,i) G,relationMap_single F n i G⟩
+  · rintro _ ⟨w,rfl⟩
+    induction w using Finsupp.induction_linear with
+    | zero => simpa only [map_zero] using (relations R F).zero_mem
+    | add w v hw hv => simpa only [map_add] using (relations R F).add_mem hw hv
+    | single q G =>
+      rcases q with ⟨n,i⟩
+      rw [relationMap_single]
+      exact Submodule.subset_span ⟨n,i,G,rfl⟩
+
+theorem exists_relationWitness (F : MvPolynomial (Fin 5) R) (z : Poles R)
+    (hz : z ∈ relations R F) : ∃ w : RelationWitness R, relationMap F w = z := by
+  rwa [relations_eq_range,LinearMap.mem_range] at hz
+
+theorem exists_relationWitness_of_quotient_eq (F : MvPolynomial (Fin 5) R)
+    (x y : Poles R) (h : (relations R F).mkQ x = (relations R F).mkQ y) :
+    ∃ w : RelationWitness R, relationMap F w = x-y := by
+  apply exists_relationWitness
+  apply (Submodule.Quotient.mk_eq_zero (relations R F)).mp
+  change (relations R F).mkQ (x-y) = 0
+  rw [map_sub,h,sub_self]
+
+theorem quotient_eq_of_relationWitness (F : MvPolynomial (Fin 5) R)
+    (x y : Poles R) (w : RelationWitness R) (h : relationMap F w = x-y) :
+    (relations R F).mkQ x = (relations R F).mkQ y := by
+  apply sub_eq_zero.mp
+  rw [← map_sub,Submodule.mkQ_apply,Submodule.Quotient.mk_eq_zero,← h,relations_eq_range]
+  exact ⟨w,rfl⟩
+
+theorem exists_relationFamily {κ : Type*} (F : MvPolynomial (Fin 5) R)
+    (x y : κ → Poles R) (h : ∀ i, (relations R F).mkQ (x i) = (relations R F).mkQ (y i)) :
+    ∃ w : κ → RelationWitness R, ∀ i, relationMap F (w i) = x i-y i := by
+  choose w hw using fun i => exists_relationWitness_of_quotient_eq F (x i) (y i) (h i)
+  exact ⟨w,hw⟩
+
+end Relations
+
+section CoefficientMaps
+
+variable {A B I : Type*} [CommRing A] [CommRing B]
+
+def polynomialCoefficientMap (θ : A →+* B) :
+    MvPolynomial (Fin 5) A →ₛₗ[θ] MvPolynomial (Fin 5) B where
+  __ := (MvPolynomial.map θ).toAddMonoidHom
+  map_smul' a p := by rw [smul_eq_C_mul,map_mul,map_C,smul_eq_C_mul]
+
+/-- Coefficient change for any finitely supported family of numerators,
+including raw poles and their relation certificates. -/
+def polynomialFamilyMap (θ : A →+* B) :
+    (I →₀ MvPolynomial (Fin 5) A) →ₛₗ[θ] I →₀ MvPolynomial (Fin 5) B :=
+  Finsupp.mapRange.linearMap (polynomialCoefficientMap θ)
+
+theorem polynomialFamilyMap_apply (θ : A →+* B) (w : I →₀ MvPolynomial (Fin 5) A) (i : I) :
+    polynomialFamilyMap θ w i = MvPolynomial.map θ (w i) := rfl
+
+theorem polynomialFamilyMap_single (θ : A →+* B) (i : I) (p : MvPolynomial (Fin 5) A) :
+    polynomialFamilyMap θ (Finsupp.single i p) = Finsupp.single i (MvPolynomial.map θ p) :=
+  Finsupp.mapRange_single
+
+theorem polynomialFamilyMap_injective (θ : A →+* B) (hθ : Function.Injective θ) :
+    Function.Injective (polynomialFamilyMap (I := I) θ) := by
+  intro u v h
+  ext i
+  apply MvPolynomial.map_injective θ hθ
+  exact congrArg (fun w : I →₀ MvPolynomial (Fin 5) B => w i) h
+
+/-- An explicit raw certificate survives any change of coefficient rings. -/
+theorem relationMap_map (θ : A →+* B) (F : MvPolynomial (Fin 5) A)
+    (w : RelationWitness A) :
+    polynomialFamilyMap θ (relationMap F w) =
+      relationMap (MvPolynomial.map θ F) (polynomialFamilyMap θ w) := by
+  induction w using Finsupp.induction_linear with
+  | zero => simp
+  | add w v hw hv => simp only [map_add,hw,hv]
+  | single q G =>
+    rcases q with ⟨n,i⟩
+    rw [relationMap_single,polynomialFamilyMap_single,
+      relationMap_single,map_sub,polynomialFamilyMap_single,polynomialFamilyMap_single]
+    simp only [map_mul,pderiv_map]
+
+/-- An actual raw relation identity descends once its polynomial
+certificate has been lifted into the same injective coefficient model. -/
+theorem relationWitness_descends (θ : A →+* B) (hθ : Function.Injective θ)
+    (F : MvPolynomial (Fin 5) A) (G : MvPolynomial (Fin 5) B)
+    (hF : MvPolynomial.map θ F = G) (w : RelationWitness A) (v : RelationWitness B)
+    (hw : polynomialFamilyMap θ w = v) (z : Poles A) (q : Poles B)
+    (hz : polynomialFamilyMap θ z = q) (hv : relationMap G v = q) : relationMap F w = z := by
+  apply polynomialFamilyMap_injective θ hθ
+  rw [relationMap_map,hF,hw,hv,hz]
+
+theorem specialize_mkQ (θ : A →+* B) (F : MvPolynomial (Fin 5) A) (z : Poles A) :
+    CycleQ2PolynomialPoleSymbols.specialize θ F ((relations A F).mkQ z) =
+      (relations B (MvPolynomial.map θ F)).mkQ (polynomialFamilyMap θ z) := by
+  induction z using Finsupp.induction_linear with
+  | zero => simp
+  | add z w hz hw => simp only [map_add,hz,hw]
+  | single n P =>
+    rw [polynomialFamilyMap_single]
+    exact CycleQ2PolynomialPoleSymbols.specialize_symbol θ F n P
+
+end CoefficientMaps
+
+section FiniteSupport
+
+variable {A B I : Type*} [CommRing A] [CommRing B]
+
+/-- All scalar coefficients in a finitely supported family of polynomial
+numerators. Applied to a relation witness, this is its finite certificate
+data to be retained in the arithmetic constant model. -/
+def polynomialFamilyCoefficients (w : I →₀ MvPolynomial (Fin 5) B) : Finset B := by
+  classical
+  exact w.support.biUnion (fun i => (w i).coeffs)
+
+theorem polynomialFamily_lift (θ : A →+* B) (w : I →₀ MvPolynomial (Fin 5) B)
+    (h : ∀ c ∈ polynomialFamilyCoefficients w, c ∈ Set.range θ) :
+    ∃ v : I →₀ MvPolynomial (Fin 5) A, polynomialFamilyMap θ v = w := by
+  classical
+  have hp (i : I) : ∃ p : MvPolynomial (Fin 5) A, MvPolynomial.map θ p = w i := by
+    by_cases hi : i ∈ w.support
+    · apply MvPolynomial.mem_range_map_iff_coeffs_subset.mpr
+      intro c hc
+      exact h c (Finset.mem_biUnion.mpr ⟨i,hi,hc⟩)
+    · exact ⟨0,by simp only [map_zero,Finsupp.not_mem_support_iff.mp hi]⟩
+  choose p hp using hp
+  refine ⟨∑ i ∈ w.support, Finsupp.single i (p i),?_⟩
+  simp only [map_sum,polynomialFamilyMap_single,hp]
+  exact Finsupp.sum_single w
+
+/-- The finite coefficient support of a whole finite list of relation
+certificates, such as every column of all 44 connection matrices. -/
+def relationFamilyCoefficients {κ : Type*} [Fintype κ]
+    (w : κ → RelationWitness B) : Finset B := by
+  classical
+  exact Finset.univ.biUnion (fun i => polynomialFamilyCoefficients (w i))
+
+theorem relationFamily_lift {κ : Type*} [Fintype κ] (θ : A →+* B)
+    (w : κ → RelationWitness B)
+    (h : ∀ c ∈ relationFamilyCoefficients w, c ∈ Set.range θ) :
+    ∃ v : κ → RelationWitness A, ∀ i, polynomialFamilyMap θ (v i) = w i := by
+  classical
+  have hi (i : κ) : ∃ v : RelationWitness A, polynomialFamilyMap θ v = w i := by
+    apply polynomialFamily_lift
+    intro c hc
+    exact h c (Finset.mem_biUnion.mpr ⟨i,Finset.mem_univ _,hc⟩)
+  exact ⟨fun i => (hi i).choose,fun i => (hi i).choose_spec⟩
+
+end FiniteSupport
+
+section GenericFrame
+
+open CycleQ2UniversalPoleFrame (Label)
+open CycleQ2HiggsJacobianFrames (exp)
+open CycleQ2GeometricHiggsGradedIndices (upperIndex lowerIndex)
+open CycleQ2PolynomialCoefficientDerivation (coefficientDerivation coefficientDerivation_monomial)
+open CycleQ2PolynomialPoleSymbols (Symbols symbol connection connection_symbol connection_smul)
+
+variable {R : Type*} [CommRing R]
+
+/-- The same 66 normalized basis poles, defined using only integer
+monomials and therefore over every coefficient ring. -/
+def rawBasis (R : Type*) [CommRing R] : Label → Poles R
+  | .inl i => Finsupp.single 1 (monomial (exp (upperIndex i).val) 1)
+  | .inr i => Finsupp.single 2 (monomial (exp (lowerIndex i).val) 1)
+
+def rawFrame (R : Type*) [CommRing R] : (Label → R) →ₗ[R] Poles R where
+  toFun v := ∑ i, v i • rawBasis R i
+  map_add' v w := by simp only [Pi.add_apply,add_smul,Finset.sum_add_distrib]
+  map_smul' a v := by simp only [Pi.smul_apply,RingHom.id_apply,Finset.smul_sum,smul_smul]
+
+theorem rawFrame_single (j : Label) : rawFrame R (Pi.single j 1) = rawBasis R j := by
+  classical
+  simp [rawFrame,Pi.single_apply,eq_comm]
+
+def frameBasis (F : MvPolynomial (Fin 5) R) (j : Label) : Symbols R F :=
+  (relations R F).mkQ (rawBasis R j)
+
+def frameRealization (F : MvPolynomial (Fin 5) R) : (Label → R) →ₗ[R] Symbols R F :=
+  (relations R F).mkQ.comp (rawFrame R)
+
+theorem frameRealization_apply (F : MvPolynomial (Fin 5) R) (v : Label → R) :
+    frameRealization F v = ∑ i, v i • frameBasis F i := by
+  change (relations R F).mkQ (∑ i, v i • rawBasis R i) = _
+  simp only [map_sum,map_smul,frameBasis]
+
+/-- The raw representative of the connection of a constant basis numerator. -/
+def rawRaised (V : MvPolynomial (Fin 5) R) : Label → Poles R
+  | .inl i => -Finsupp.single 2 (V*monomial (exp (upperIndex i).val) 1)
+  | .inr i => -Finsupp.single 3 (V*monomial (exp (lowerIndex i).val) 1)
+
+theorem rawRaised_connection (D : Derivation ℤ R R) (F : MvPolynomial (Fin 5) R) (j : Label) :
+    (relations R F).mkQ (rawRaised (coefficientDerivation D F) j) =
+      connection D F (frameBasis F j) := by
+  cases j <;>
+    simp only [rawRaised,frameBasis,rawBasis,map_neg,
+      show ∀ n P, (relations R F).mkQ (Finsupp.single n P) = symbol R F n P from fun _ _ => rfl,
+      connection_symbol,coefficientDerivation_monomial,Derivation.map_one_eq_zero,map_zero,zero_sub]
+
+def connectionDefect (D : Derivation ℤ R R) (F : MvPolynomial (Fin 5) R)
+    (B : Matrix Label Label R) (j : Label) : Poles R :=
+  rawFrame R (fun i => B i j) - rawRaised (coefficientDerivation D F) j
+
+/-- Actual quotient connection formulas produce finitely supported raw
+relation certificates, one for each of the 66 matrix columns. -/
+theorem exists_frame_connection_certificates (D : Derivation ℤ R R) (F : MvPolynomial (Fin 5) R)
+    (B : Matrix Label Label R)
+    (hB : ∀ v : Label → R,
+      frameRealization F (fun i => D (v i) + B.mulVec v i) =
+        connection D F (frameRealization F v)) :
+    ∃ w : Label → RelationWitness R, ∀ j, relationMap F (w j) = connectionDefect D F B j := by
+  classical
+  apply exists_relationFamily F (fun j => rawFrame R (fun i => B i j))
+    (rawRaised (coefficientDerivation D F))
+  intro j
+  have he := hB (Pi.single j 1)
+  have hv : (fun i => D (Pi.single j (1 : R) i) + B.mulVec (Pi.single j 1) i) =
+      fun i => B i j := by
+    funext i
+    rw [Matrix.mulVec_single_one]
+    by_cases hij : i = j <;> simp [Pi.single_apply,hij,eq_comm]
+  rw [hv] at he
+  change (relations R F).mkQ (rawFrame R (fun i => B i j)) =
+    connection D F ((relations R F).mkQ (rawFrame R (Pi.single j 1))) at he
+  rw [rawFrame_single] at he
+  exact he.trans (rawRaised_connection D F j).symm
+
+/-- A finite family of raw relation certificates proves the full matrix
+connection formula over its own coefficient ring. -/
+theorem frame_connection_of_certificates (D : Derivation ℤ R R) (F : MvPolynomial (Fin 5) R)
+    (B : Matrix Label Label R) (w : Label → RelationWitness R)
+    (hw : ∀ j, relationMap F (w j) = connectionDefect D F B j) :
+    ∀ v : Label → R, frameRealization F (fun i => D (v i) + B.mulVec v i) =
+      connection D F (frameRealization F v) := by
+  classical
+  have hcol (j : Label) : frameRealization F (fun i => B i j) =
+      connection D F (frameBasis F j) :=
+    (quotient_eq_of_relationWitness F _ _ (w j) (hw j)).trans (rawRaised_connection D F j)
+  have hmul (v : Label → R) : frameRealization F (B.mulVec v) =
+      ∑ j, v j • connection D F (frameBasis F j) := by
+    rw [frameRealization_apply]
+    change (∑ i, (∑ j, B i j * v j) • frameBasis F i) = _
+    simp only [Finset.sum_smul]
+    rw [Finset.sum_comm]
+    apply Finset.sum_congr rfl
+    intro j _
+    rw [← hcol j,frameRealization_apply]
+    simp only [Finset.smul_sum,smul_smul,mul_comm]
+  intro v
+  change frameRealization F ((fun i => D (v i)) + B.mulVec v) = _
+  rw [map_add,hmul,frameRealization_apply,frameRealization_apply]
+  simp only [map_sum,connection_smul,Finset.sum_add_distrib,add_comm]
+
+section Universality
+
+variable {A₀ : Type} [CommRing A₀] (φ : CycleQ2GenericSexticGradient.CoeffRing →+* A₀)
+
+theorem frameBasis_universal (j : Label) :
+    frameBasis (CycleQ2UniversalPoleFrame.equation φ) j = CycleQ2UniversalPoleFrame.basisSymbol φ j := by
+  cases j <;> rfl
+
+theorem frameRealization_universal :
+    frameRealization (CycleQ2UniversalPoleFrame.equation φ) =
+      CycleQ2UniversalPoleFrame.vectorRealize φ := by
+  apply LinearMap.ext
+  intro v
+  rw [frameRealization_apply]
+  simp only [frameBasis_universal,CycleQ2UniversalPoleFrame.vectorRealize,
+    LinearMap.coe_mk,AddHom.coe_mk]
+
+end Universality
+
+section Maps
+
+variable {A B : Type*} [CommRing A] [CommRing B]
+
+theorem rawBasis_map (θ : A →+* B) (j : Label) :
+    polynomialFamilyMap θ (rawBasis A j) = rawBasis B j := by
+  cases j <;> simp only [rawBasis,polynomialFamilyMap_single,map_monomial,map_one]
+
+theorem rawFrame_map (θ : A →+* B) (v : Label → A) :
+    polynomialFamilyMap θ (rawFrame A v) = rawFrame B (fun i => θ (v i)) := by
+  change polynomialFamilyMap θ (∑ i, v i • rawBasis A i) = ∑ i, θ (v i) • rawBasis B i
+  simp only [map_sum,map_smulₛₗ,rawBasis_map]
+
+theorem rawRaised_map (θ : A →+* B) (V : MvPolynomial (Fin 5) A) (j : Label) :
+    polynomialFamilyMap θ (rawRaised V j) = rawRaised (MvPolynomial.map θ V) j := by
+  cases j <;> simp only [rawRaised,map_neg,polynomialFamilyMap_single,map_mul,map_monomial,map_one]
+
+theorem coefficientDerivation_map (θ : A →+* B) (D : Derivation ℤ A A) (E : Derivation ℤ B B)
+    (h : ∀ a, E (θ a) = θ (D a)) (F : MvPolynomial (Fin 5) A) :
+    coefficientDerivation E (MvPolynomial.map θ F) = MvPolynomial.map θ (coefficientDerivation D F) := by
+  induction F using MvPolynomial.induction_on' with
+  | monomial m c => simp only [map_monomial,coefficientDerivation_monomial,h]
+  | add F G hF hG => simp only [map_add,hF,hG]
+
+theorem connectionDefect_map (θ : A →+* B) (D : Derivation ℤ A A) (E : Derivation ℤ B B)
+    (h : ∀ a, E (θ a) = θ (D a)) (F : MvPolynomial (Fin 5) A)
+    (U : Matrix Label Label A) (j : Label) :
+    polynomialFamilyMap θ (connectionDefect D F U j) =
+      connectionDefect E (MvPolynomial.map θ F) (U.map θ) j := by
+  simp only [connectionDefect,map_sub,rawFrame_map,rawRaised_map,Matrix.map_apply,
+    coefficientDerivation_map θ D E h]
+
+/-- Once the finite raw certificates are retained, the modeled matrix is
+proved to be the actual pole-symbol connection. -/
+theorem frame_connection_descends (θ : A →+* B) (hθ : Function.Injective θ)
+    (D : Derivation ℤ A A) (E : Derivation ℤ B B) (hD : ∀ a, E (θ a) = θ (D a))
+    (F : MvPolynomial (Fin 5) A) (G : MvPolynomial (Fin 5) B) (hF : MvPolynomial.map θ F = G)
+    (U : Matrix Label Label A) (V : Matrix Label Label B) (hU : U.map θ = V)
+    (w : Label → RelationWitness B)
+    (hw : ∀ j, relationMap G (w j) = connectionDefect E G V j)
+    (hc : ∀ c ∈ relationFamilyCoefficients w, c ∈ Set.range θ) :
+    ∀ v : Label → A, frameRealization F (fun i => D (v i) + U.mulVec v i) =
+      connection D F (frameRealization F v) := by
+  obtain ⟨wA,hwA⟩ := relationFamily_lift θ w hc
+  apply frame_connection_of_certificates D F U wA
+  intro j
+  apply relationWitness_descends θ hθ F G hF (wA j) (w j) (hwA j)
+    (connectionDefect D F U j) (connectionDefect E G V j) ?_ (hw j)
+  rw [connectionDefect_map θ D E hD,hF,hU]
+
+/-- The same retained certificates identify the matrix with the actual
+pole-symbol connection after arbitrary coefficient specialization. -/
+theorem frame_connection_map (θ : A →+* B)
+    (D : Derivation ℤ A A) (E : Derivation ℤ B B) (hD : ∀ a, E (θ a) = θ (D a))
+    (F : MvPolynomial (Fin 5) A) (U : Matrix Label Label A)
+    (w : Label → RelationWitness A)
+    (hw : ∀ j, relationMap F (w j) = connectionDefect D F U j) :
+    ∀ v : Label → B, frameRealization (MvPolynomial.map θ F)
+      (fun i => E (v i) + (U.map θ).mulVec v i) =
+        connection E (MvPolynomial.map θ F) (frameRealization (MvPolynomial.map θ F) v) := by
+  apply frame_connection_of_certificates E (MvPolynomial.map θ F) (U.map θ)
+    (fun j => polynomialFamilyMap θ (w j))
+  intro j
+  rw [← relationMap_map,hw,connectionDefect_map θ D E hD]
+
+end Maps
+end GenericFrame
+end CycleQ2PoleRelationDescent
+end
+
+#print axioms CycleQ2PoleRelationDescent.relations_eq_range
+#print axioms CycleQ2PoleRelationDescent.exists_relationWitness_of_quotient_eq
+#print axioms CycleQ2PoleRelationDescent.relationMap_map
+#print axioms CycleQ2PoleRelationDescent.relationWitness_descends
+#print axioms CycleQ2PoleRelationDescent.polynomialFamily_lift
+#print axioms CycleQ2PoleRelationDescent.relationFamily_lift
+#print axioms CycleQ2PoleRelationDescent.exists_frame_connection_certificates
+#print axioms CycleQ2PoleRelationDescent.frameRealization_universal
+#print axioms CycleQ2PoleRelationDescent.frame_connection_descends
+#print axioms CycleQ2PoleRelationDescent.frame_connection_map
+
+noncomputable section
+namespace CycleQ2ArithmeticSpecialization
+
+open MvPolynomial CycleQ2IncidenceNormalForm
+open CycleQ2PolynomialPoleSymbols (TailRing monicFamily)
+open CycleQ2PolynomialCoefficientDerivation (coefficientDerivation coefficientDerivation_monomial)
+
+variable {A B : Type*} [CommRing A] [CommRing B]
+
+theorem monicFamily_map_constants (θ : A →+* B) :
+    MvPolynomial.map (MvPolynomial.map θ) (monicFamily A) = monicFamily B := by
+  simp only [monicFamily,CycleQ2UniversalSurfaceCoefficientMap.map_sextic,map_X]
+
+/-- The literal universal monic family over a parameter principal open,
+defined over an arbitrary integral constant model or residue field. -/
+def monicOpenEquation (d : TailRing A) : MvPolynomial (Fin 5) (Localization.Away d) :=
+  MvPolynomial.map (algebraMap (TailRing A) (Localization.Away d)) (monicFamily A)
+
+theorem monicOpenEquation_map (θ : A →+* B) (d : TailRing A) (e : TailRing B)
+    (h : MvPolynomial.map θ d = e) :
+    MvPolynomial.map (coefficientOpenMap θ d e h) (monicOpenEquation d) = monicOpenEquation e := by
+  have he : (coefficientOpenMap θ d e h).comp (algebraMap (TailRing A) (Localization.Away d)) =
+      (algebraMap (TailRing B) (Localization.Away e)).comp (MvPolynomial.map θ) := by
+    apply RingHom.ext
+    intro p
+    exact coefficientOpenMap_algebraMap θ d e h p
+  change MvPolynomial.map (coefficientOpenMap θ d e h)
+    (MvPolynomial.map (algebraMap (TailRing A) (Localization.Away d)) (monicFamily A)) =
+      MvPolynomial.map (algebraMap (TailRing B) (Localization.Away e)) (monicFamily B)
+  rw [MvPolynomial.map_map,he,← MvPolynomial.map_map,monicFamily_map_constants]
+
+/-- The actual monic coordinate velocity remains its integer monomial
+on every constant model and after every prime specialization. -/
+theorem monicOpenEquation_velocity (d : TailRing A) (i : FullSexticTailIndex) :
+    coefficientDerivation (parameterPartial d i) (monicOpenEquation d) =
+      monomial (fullExponentOf i.val.val) 1 := by
+  classical
+  simp only [monicOpenEquation,monicFamily,normalizedFullSextic,map_add,map_sum,map_monomial,map_one,
+    coefficientDerivation_monomial,Derivation.map_one_eq_zero,map_zero,zero_add,
+    parameterPartial_algebraMap]
+  rw [Finset.sum_eq_single i]
+  · rw [pderiv_X_self,map_one]
+  · intro j _ hji
+    rw [pderiv_X_of_ne hji,map_zero,map_zero]
+  · simp
+
+/-- Retained finite certificates identify the changed-coefficient matrix
+with the literal monic pole connection, including in positive characteristic. -/
+theorem monic_frame_connection_map (θ : A →+* B) (d : TailRing A) (e : TailRing B)
+    (h : MvPolynomial.map θ d = e) (a : FullSexticTailIndex)
+    (U : Matrix CycleQ2UniversalPoleFrame.Label CycleQ2UniversalPoleFrame.Label (Localization.Away d))
+    (w : CycleQ2UniversalPoleFrame.Label → CycleQ2PoleRelationDescent.RelationWitness (Localization.Away d))
+    (hw : ∀ j, CycleQ2PoleRelationDescent.relationMap (monicOpenEquation d) (w j) =
+      CycleQ2PoleRelationDescent.connectionDefect (parameterPartial d a) (monicOpenEquation d) U j) :
+    ∀ v : CycleQ2UniversalPoleFrame.Label → Localization.Away e,
+      CycleQ2PoleRelationDescent.frameRealization (monicOpenEquation e)
+        (fun i => parameterPartial e a (v i) + (U.map (coefficientOpenMap θ d e h)).mulVec v i) =
+      CycleQ2PolynomialPoleSymbols.connection (parameterPartial e a) (monicOpenEquation e)
+        (CycleQ2PoleRelationDescent.frameRealization (monicOpenEquation e) v) := by
+  simpa only [monicOpenEquation_map] using
+    CycleQ2PoleRelationDescent.frame_connection_map (coefficientOpenMap θ d e h)
+      (parameterPartial d a) (parameterPartial e a) (coefficientOpenMap_partial θ d e h a)
+      (monicOpenEquation d) U w hw
+
+section FiniteConnectionModel
+
+open CycleQ2UniversalPoleFrame (Label)
+open CycleQ2PoleRelationDescent
+
+variable {K s κ m n : Type*} [Field K] [CharZero K]
+  [Fintype s] [Fintype κ] [Fintype m] [Fintype n]
+
+/-- One finite integral constant model retains the actual monic connection,
+a stable generating matrix, its generator connections, and arbitrary
+constant rank witnesses such as the three Fermat projection matrices.
+
+The model's pole-symbol connection formulas are proved by descending the
+actual finite raw relation certificates. They are not additional
+hypotheses on the model. Those same certificates can subsequently be
+mapped to every good prime characteristic. -/
+theorem finite_monic_connection_model
+    (d : TailRing K) (P : Matrix Label s (Localization.Away d))
+    (B : FullSexticTailIndex → Matrix Label Label (Localization.Away d))
+    (C : FullSexticTailIndex → Matrix s s (Localization.Away d))
+    (hP : ∀ e, P.map (parameterPartial d e) = P * C e - B e * P)
+    (hB : ∀ e v, frameRealization (monicOpenEquation d)
+      (fun i => parameterPartial d e (v i) + (B e).mulVec v i) =
+        CycleQ2PolynomialPoleSymbols.connection (parameterPartial d e) (monicOpenEquation d)
+          (frameRealization (monicOpenEquation d) v))
+    (M : κ → Matrix m n K) (extra : Finset K) :
+    ∃ S : Subalgebra ℤ K, Algebra.FiniteType ℤ S ∧ (∀ c ∈ extra, c ∈ S) ∧
+      ∃ (dS : TailRing S) (hdS : MvPolynomial.map S.val.toRingHom dS = d)
+        (PS : Matrix Label s (Localization.Away dS))
+        (BS : FullSexticTailIndex → Matrix Label Label (Localization.Away dS))
+        (CS : FullSexticTailIndex → Matrix s s (Localization.Away dS)),
+        PS.map (coefficientOpenMap S.val.toRingHom dS d hdS) = P ∧
+        (∀ e, (BS e).map (coefficientOpenMap S.val.toRingHom dS d hdS) = B e) ∧
+        (∀ e, (CS e).map (coefficientOpenMap S.val.toRingHom dS d hdS) = C e) ∧
+        (∀ e, PS.map (parameterPartial dS e) = PS * CS e - BS e * PS) ∧
+        ∃ wS : FullSexticTailIndex × Label → RelationWitness (Localization.Away dS),
+          (∀ e j, relationMap (monicOpenEquation dS) (wS (e,j)) =
+            connectionDefect (parameterPartial dS e) (monicOpenEquation dS) (BS e) j) ∧
+          ∃ Q : κ → Matrix m n S,
+            (∀ i, (Q i).map S.val.toRingHom = M i) ∧
+            ∃ bad : Finset Nat.Primes, ∀ p : Nat.Primes, p ∉ bad →
+              ∀ (L : Type*) [Field L] [IsAlgClosed L] [CharP L (p : ℕ)],
+                ∃ ρ : S →+* L,
+                  (∀ i, ((Q i).map ρ).rank = (M i).rank) ∧
+                  ∀ c : S, (c : K) ∈ extra → (c : K) ≠ 0 → ρ c ≠ 0 := by
+  classical
+  choose certificate hcertificate using fun e => exists_frame_connection_certificates
+    (parameterPartial d e) (monicOpenEquation d) (B e) (hB e)
+  let witnesses : FullSexticTailIndex × Label → RelationWitness (Localization.Away d) :=
+    fun q => certificate q.1 q.2
+  let certificateValues := relationFamilyCoefficients witnesses
+  let Index := (Label × s) ⊕ ((FullSexticTailIndex × Label × Label) ⊕
+    ((FullSexticTailIndex × s × s) ⊕ certificateValues))
+  let values : Index → Localization.Away d := fun q => match q with
+    | .inl (i,j) => P i j
+    | .inr (.inl (e,i,j)) => B e i j
+    | .inr (.inr (.inl (e,i,j))) => C e i j
+    | .inr (.inr (.inr c)) => c.val
+  obtain ⟨S,hfinite,hconstants,dS,hdS,y,hy,Q,hQ,bad,hbad⟩ :=
+    finite_open_matrices_spread d values M extra
+  let φ := coefficientOpenMap S.val.toRingHom dS d hdS
+  let PS : Matrix Label s (Localization.Away dS) := fun i j => y (.inl (i,j))
+  let BS : FullSexticTailIndex → Matrix Label Label (Localization.Away dS) :=
+    fun e i j => y (.inr (.inl (e,i,j)))
+  let CS : FullSexticTailIndex → Matrix s s (Localization.Away dS) :=
+    fun e i j => y (.inr (.inr (.inl (e,i,j))))
+  have hPS : PS.map φ = P := by
+    ext i j
+    exact hy (.inl (i,j))
+  have hBS (e : FullSexticTailIndex) : (BS e).map φ = B e := by
+    ext i j
+    exact hy (.inr (.inl (e,i,j)))
+  have hCS (e : FullSexticTailIndex) : (CS e).map φ = C e := by
+    ext i j
+    exact hy (.inr (.inr (.inl (e,i,j))))
+  have hmodeled (e : FullSexticTailIndex) :
+      PS.map (parameterPartial dS e) = PS * CS e - BS e * PS := by
+    apply connection_identity_descends S.val.toRingHom Subtype.val_injective
+      dS d hdS e PS (BS e) (CS e)
+    change (PS.map φ).map (parameterPartial d e) =
+      PS.map φ * (CS e).map φ - (BS e).map φ * PS.map φ
+    rw [hPS,hBS,hCS]
+    exact hP e
+  have hc : ∀ c ∈ relationFamilyCoefficients witnesses, c ∈ Set.range φ := by
+    intro c hc
+    refine ⟨y (.inr (.inr (.inr ⟨c,hc⟩))),?_⟩
+    exact hy (.inr (.inr (.inr ⟨c,hc⟩)))
+  obtain ⟨wS,hwS⟩ := relationFamily_lift φ witnesses hc
+  have hcert (e : FullSexticTailIndex) (j : Label) :
+      relationMap (monicOpenEquation dS) (wS (e,j)) =
+        connectionDefect (parameterPartial dS e) (monicOpenEquation dS) (BS e) j := by
+    apply relationWitness_descends φ
+      (coefficientOpenMap_injective S.val.toRingHom Subtype.val_injective dS d hdS)
+      (monicOpenEquation dS) (monicOpenEquation d)
+      (monicOpenEquation_map S.val.toRingHom dS d hdS)
+      (wS (e,j)) (witnesses (e,j)) (hwS (e,j))
+      (connectionDefect (parameterPartial dS e) (monicOpenEquation dS) (BS e) j)
+      (connectionDefect (parameterPartial d e) (monicOpenEquation d) (B e) j) ?_
+      (hcertificate e j)
+    rw [connectionDefect_map φ (parameterPartial dS e) (parameterPartial d e)
+      (coefficientOpenMap_partial S.val.toRingHom dS d hdS e),
+      monicOpenEquation_map,hBS]
+  refine ⟨S,hfinite,(fun c hc => hconstants c (Finset.mem_union_left _ hc)),
+    dS,hdS,PS,BS,CS,hPS,hBS,hCS,hmodeled,wS,hcert,Q,hQ,bad,?_⟩
+  intro p hp L _ _ _
+  obtain ⟨ρ,hρ,hprotected⟩ := hbad p hp L
+  exact ⟨ρ,hρ,fun c hc hn => hprotected c (Finset.mem_union_left _ hc) hn⟩
+
+end FiniteConnectionModel
+
+end CycleQ2ArithmeticSpecialization
+end
+
+#print axioms CycleQ2ArithmeticSpecialization.monicOpenEquation_map
+#print axioms CycleQ2ArithmeticSpecialization.monicOpenEquation_velocity
+#print axioms CycleQ2ArithmeticSpecialization.monic_frame_connection_map
+#print axioms CycleQ2ArithmeticSpecialization.finite_monic_connection_model

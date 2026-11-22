@@ -1,5 +1,146 @@
 # A nonconstructive geometric route for cycle-q2
 
+## Continuation: arithmetic simplicity and the literal cubic divisor
+
+**Status, 22 November 2026, second checkpoint.** The new source assembles
+the arithmetic simplicity argument for the actual generic rational residue
+kernel. It has received independent mathematical and source/API review,
+but has not been elaborated, compiled, or replayed by Lean in this session.
+The original `sorry` in `Submission.missing_geometric_existence` remains
+unchanged. No new admission, axiom, or weakened protected statement has
+been introduced. The remaining mathematical step in this route is a
+nonzero vector in that actual kernel, supplied by the global geometric
+trace/support comparison described below.
+
+### The actual kernel is zero or full
+
+The new theorem
+`CycleQ2ArithmeticKernelSimplicity.genericFrameKernel_eq_bot_or_top`
+concerns exactly the kernel of the rational de Rham realization
+\[
+ \mathcal R:K^{66}\longrightarrow
+ \Omega^3_{W/K}/d\Omega^2_{W/K},\qquad
+ K=\operatorname{Frac}(\mathbb C[t_1,\ldots,t_{44}]).
+\]
+The codomain uses the existing actual exterior derivative; no replacement
+cohomology object or unrelated invariant subspace enters the argument.
+The source proves that this kernel is zero or the whole normalized frame.
+
+The proof starts with the regular pullback of the same kernel to the
+principal coefficient open containing Fermat. A common denominator shows
+that this lattice spans the original generic kernel. Noetherianity gives
+finite generators \(P\), and the actual connection gives matrices \(C_e\)
+satisfying
+\[
+ \partial_eP=PC_e-B_eP.
+\]
+Independence of the generic symbol frame identifies the chosen generic
+connection matrix with the image of the regular \(B_e\).
+Differential stability of the minor ideals then proves that the total
+rank of \(P\) at Fermat equals the dimension of the original generic
+kernel. This step makes no assertion that either projection rank is
+constant as the parameters vary.
+[Actual regular lattice and connection](GeometricFermatPoleReduction.lean)
+[Kernel generators and constant total rank](GeometricWeightedPoleThree.lean)
+
+### Finite certificates retain the connection under reduction
+
+All 44 parameters remain variables when the constants are reduced.
+`finite_monic_connection_model` constructs one finite-type integer
+subalgebra of the complex numbers containing the polynomial numerator and
+denominator constants for \(P,B_e,C_e\), together with finite certificates
+for every column's pole-symbol connection identity.
+
+These certificates are finitely supported families of polynomial
+multipliers for the original relations
+\[
+ [G\,\partial_jF]_{n+1}-[\partial_jG]_n.
+\]
+Their entire scalar support is included in the same constant model.
+Thus the modeled matrices satisfy both the differential generator
+identities and the actual pole-symbol connection identities. Mapping
+those certificates to positive characteristic proves that the reduced
+\(B_e\) still describes that connection. The construction does not require
+an impossible field map from \(\mathbb C\) to positive characteristic.
+[Finite constants, relation witnesses, and the assembled model](GeometricHiggsAlgebraSpecialization.lean)
+
+For a connection \(T\) over a derivation \(D\), the iterated Leibniz rule
+and prime binomial divisibility give
+\[
+ T^p(av)=aT^p(v)+D^p(a)v.
+\]
+A polynomial coordinate partial has \(D^p=0\) in characteristic \(p\).
+The source proves the same assertion after arbitrary localization by
+differentiating a cleared denominator identity and cancelling its unit.
+Consequently the actual \(p\)-th connection iterate is scalar-linear and
+preserves the specialized generator span. Evaluation at Fermat is used
+only after this scalar-linearity is established.
+[Prime iterate and matrix specialization](GeometricUniversalJacobianFrames.lean)
+
+The explicit Fermat calculation identifies the evaluated operator with
+the normalized prime matrix. Its coefficient is the existing ordinary
+prime entry multiplied by the input pole factorial and divided by the
+output pole factorial. Only \(1!\) and \(2!\) occur in this change of
+frame; no inverse of \(p!\) is introduced.
+[Normalized prime entries and strict growth](GeometricFermatPoleReduction.lean)
+[Actual localized prime-operator identification](GeometricWeightedPoleThree.lean)
+
+### Two fixed Fermat fibers and the protected endpoint
+
+The same arithmetic model preserves the ranks of three constant matrices:
+the original Fermat generator matrix and its upper and lower row
+projections, with unused rows set to zero. These ranks determine all four
+entries of the existing rank profile. Integral Fermat evaluation
+identifies the modeled matrices with the evaluation of the same modeled
+parameter matrix; they are not independently selected fibers.
+
+Dirichlet's theorem supplies two good primes above six, respectively
+\(1\) and \(5\) modulo six, outside the finite exceptional set. The actual
+normalized prime operators act in opposite off-diagonal directions.
+Their proved strict growth, together with equality of the four rank
+profile entries, forces both specialized subspaces to be zero or full.
+The preserved total rank transfers this conclusion to the actual generic
+rational residue kernel.
+
+`protected_exact_of_genericFrameKernel_ne_bot` now carries any proof that
+this kernel is nonzero all the way to the unchanged affine exterior-form
+exactness statement. It uses `protected_source_in_genericFrame`, removes
+the exact source normalization factor two over the coefficient field, and
+applies the existing specialization/descent theorem.
+[Arithmetic simplicity and the exact protected endpoint](GeometricWeightedPoleThree.lean)
+
+### The literal cubic divisor and its residue normalization
+
+The geometric continuation proves that the original cubic \(h\) is
+regular in the original sextic cone quotient, that restriction to the
+existing surface has kernel \((h)\), and that quotienting by this ideal
+gives that same surface algebra. On each of the four actual projective
+coordinate charts, restriction is surjective and its kernel is generated
+by the regular element \(h/x_i^3\). The corresponding ideal frames are
+constructed on those original rings.
+
+An explicit four-face Čech lift uses the literal decomposition
+\(h=\sum_i x_i b_i\), with \(b_0=x_0^2\), and has boundary
+\[
+ \delta b=h\,\frac{w^2}{x_0x_1x_2x_3}.
+\]
+Its \((123)\) component restricts through the original cone-to-surface map
+to the already constructed canonical residue generator
+\(x_0^2w^2/(x_1x_2x_3)\). This fixes the prospective connecting-map
+normalization at \(+1\) as an equality of actual fractions and sections.
+This is the coefficient-sequence normalization; the identification with
+the global threefold canonical frame must also retain its projective chart
+orientation signs.
+[Actual cubic divisor, chart kernels, and finite residue lift](GeometricLiteralThreefoldSurfaceAdjunction.lean)
+
+The next geometric work is to bind these chart sequences to the global
+canonical residue sequence and its derived connecting map, then compare
+the marked graph/test cup and the proper-family trace. That comparison
+must produce a nonzero vector annihilated by \(\mathcal R\). Neither the
+finite Čech identity nor nonvanishing of a supported class alone proves
+this ordinary mixed-component nonvanishing. The original admission is
+therefore retained.
+
 ## Continuation: generic residue kernel and arithmetic coefficient models
 
 **Status, 22 November 2026.** This checkpoint adds proof source and has

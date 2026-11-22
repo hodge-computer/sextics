@@ -1,5 +1,10 @@
 import Mathlib.RingTheory.MvPolynomial.EulerIdentity
 import Mathlib.RingTheory.Localization.Basic
+import Mathlib.Data.Nat.Choose.Sum
+import Mathlib.Data.Nat.Choose.Dvd
+import Mathlib.Algebra.Module.NatInt
+import Mathlib.Algebra.Module.LinearMap.End
+import Mathlib.LinearAlgebra.Matrix.ToLin
 import HodgeComputer.Constructions.ResidueTransport.CoordinateIndependence
 import Proposal.GeometricVariation
 import Proposal.IncidenceBasepointCharts
@@ -1221,3 +1226,334 @@ end
 
 #print axioms CycleQ2UniversalPoleFrame.exists_vector_connection
 #print axioms CycleQ2UniversalPoleFrame.vectorRealize_injective_of_specialized_independent
+
+/-!
+# Prime iterates of the actual coefficient connection
+
+The prime-entry calculation acts on a whole specialized subspace only after
+the prime iterate of the connection is scalar-linear. This follows from the
+iterated Leibniz formula and the vanishing of a coordinate partial raised to
+the characteristic. The latter statement survives arbitrary localization;
+no inverse of a prime-dependent integer is introduced.
+-/
+
+noncomputable section
+namespace CycleQ2PrimeConnection
+
+open Finset Nat
+
+section Connection
+
+variable {R M : Type*} [CommRing R] [AddCommGroup M] [Module R M]
+
+/-- The full Leibniz formula for an additive connection, before reduction
+to prime characteristic. -/
+theorem iterate_smul (D : R →+ R) (T : M →+ M)
+    (h : ∀ a x, T (a • x) = a • T x + D a • x)
+    (n : ℕ) (a : R) (x : M) :
+    T^[n] (a • x) =
+      ∑ ij ∈ antidiagonal n, n.choose ij.1 • (D^[ij.1] a • T^[ij.2] x) := by
+  induction n with
+  | zero => simp
+  | succ n ih =>
+    rw [sum_antidiagonal_choose_succ_nsmul (M := M)
+      (fun i j => D^[i] a • T^[j] x) n]
+    simp only [Function.iterate_succ_apply', ih, map_sum, map_nsmul, h,
+      smul_add, sum_add_distrib, add_right_inj]
+    refine sum_congr rfl fun ⟨i,j⟩ hij => ?_
+    rw [n.choose_symm_of_eq_add (mem_antidiagonal.1 hij).symm]
+
+/-- In characteristic `p`, only the two endpoint terms of the prime
+binomial sum remain. The statement also includes `p = 2`. -/
+theorem prime_antidiagonal_sum (p : ℕ) (hp : p.Prime) [CharP R p]
+    (f : ℕ → ℕ → M) :
+    (∑ ij ∈ antidiagonal p, p.choose ij.1 • f ij.1 ij.2) = f 0 p + f p 0 := by
+  classical
+  have hsub : ({(0,p),(p,0)} : Finset (ℕ × ℕ)) ⊆ antidiagonal p := by
+    intro ij hij
+    simp only [mem_insert, mem_singleton] at hij
+    rcases hij with rfl | rfl <;> simp
+  have hsum := Finset.sum_subset hsub (f := fun ij : ℕ × ℕ =>
+      p.choose ij.1 • f ij.1 ij.2) (by
+    rintro ⟨i,j⟩ hij hnot
+    have heq : i + j = p := mem_antidiagonal.1 hij
+    have hi0 : i ≠ 0 := by
+      intro hi
+      have hj : j = p := by omega
+      exact hnot (by simp [hi,hj])
+    have hip : i < p := by
+      by_contra hi
+      have hieq : i = p := by omega
+      have hjeq : j = 0 := by omega
+      exact hnot (by simp [hieq,hjeq])
+    have hc : (p.choose i : R) = 0 :=
+      (CharP.cast_eq_zero_iff R p _).2 (hp.dvd_choose_self hi0 hip)
+    rw [← Nat.cast_smul_eq_nsmul R, hc, zero_smul])
+  rw [← hsum]
+  simp [hp.ne_zero, Ne.symm hp.ne_zero]
+
+/-- The prime iterate of a connection has the Leibniz rule for `D^[p]`. -/
+theorem iterate_prime_smul (D : R →+ R) (T : M →+ M)
+    (h : ∀ a x, T (a • x) = a • T x + D a • x)
+    (p : ℕ) (hp : p.Prime) [CharP R p] (a : R) (x : M) :
+    T^[p] (a • x) = a • T^[p] x + D^[p] a • x := by
+  rw [iterate_smul D T h, prime_antidiagonal_sum (R := R) p hp]
+  rfl
+
+theorem iterate_add (T : M →+ M) (n : ℕ) (x y : M) :
+    T^[n] (x + y) = T^[n] x + T^[n] y := by
+  induction n with
+  | zero => rfl
+  | succ n ih => simp only [Function.iterate_succ_apply', ih, map_add]
+
+/-- When the scalar derivation has zero prime iterate, the prime iterate
+of the connection is an actual linear endomorphism. -/
+def linearMap (D : R →+ R) (T : M →+ M)
+    (h : ∀ a x, T (a • x) = a • T x + D a • x)
+    (p : ℕ) (hp : p.Prime) [CharP R p] (hD : ∀ a, D^[p] a = 0) : M →ₗ[R] M where
+  toFun := T^[p]
+  map_add' := iterate_add T p
+  map_smul' a x := by
+    change T^[p] (a • x) = a • T^[p] x
+    rw [iterate_prime_smul D T h p hp, hD, zero_smul, add_zero]
+
+@[simp]
+theorem linearMap_apply (D : R →+ R) (T : M →+ M)
+    (h : ∀ a x, T (a • x) = a • T x + D a • x)
+    (p : ℕ) (hp : p.Prime) [CharP R p] (hD : ∀ a, D^[p] a = 0) (x : M) :
+    linearMap D T h p hp hD x = T^[p] x := rfl
+
+theorem iterate_mem (T : M →+ M) (N : Submodule R M)
+    (hN : ∀ x, x ∈ N → T x ∈ N) (n : ℕ) (x : M) (hx : x ∈ N) :
+    T^[n] x ∈ N := by
+  induction n with
+  | zero => exact hx
+  | succ n ih =>
+    rw [Function.iterate_succ_apply']
+    exact hN _ ih
+
+end Connection
+
+/-- The prime iterate of a derivation is again a derivation. -/
+def primeIterate {k R : Type*} [CommRing k] [CommRing R] [Algebra k R]
+    (D : Derivation k R R) (p : ℕ) (hp : p.Prime) [CharP R p] :
+    Derivation k R R :=
+  Derivation.mk' (D.toLinearMap ^ p) (by
+    intro a b
+    simp only [Module.End.pow_apply]
+    have h (a b : R) : D (a • b) = a • D b + D a • b := by
+      simpa only [smul_eq_mul, mul_comm] using D.leibniz a b
+    simpa only [smul_eq_mul, mul_comm] using
+      iterate_prime_smul D.toAddMonoidHom D.toAddMonoidHom h p hp a b)
+
+@[simp]
+theorem primeIterate_apply {k R : Type*} [CommRing k] [CommRing R] [Algebra k R]
+    (D : Derivation k R R) (p : ℕ) (hp : p.Prime) [CharP R p] (a : R) :
+    primeIterate D p hp a = D^[p] a := Module.End.pow_apply D.toLinearMap p a
+
+/-- A polynomial coordinate partial has zero prime iterate in the prime
+characteristic, with no restriction on the number of variables. -/
+theorem pderiv_prime_zero {k σ : Type*} [CommRing k] (i : σ)
+    (p : ℕ) (hp : p.Prime) [CharP k p] (f : MvPolynomial σ k) :
+    (MvPolynomial.pderiv i)^[p] f = 0 := by
+  have hz : primeIterate (MvPolynomial.pderiv i :
+      Derivation k (MvPolynomial σ k) (MvPolynomial σ k)) p hp = 0 := by
+    apply MvPolynomial.derivation_ext
+    intro j
+    change ((MvPolynomial.pderiv i).toLinearMap ^ p) (MvPolynomial.X j) = 0
+    apply Module.End.pow_map_zero_of_le hp.two_le
+    change MvPolynomial.pderiv i (MvPolynomial.pderiv i (MvPolynomial.X j)) = 0
+    by_cases hj : j = i
+    · subst j
+      simp
+    · rw [MvPolynomial.pderiv_X_of_ne hj, map_zero]
+  have h := congrArg (fun D : Derivation k (MvPolynomial σ k) (MvPolynomial σ k) => D f) hz
+  simpa only [primeIterate_apply, Derivation.zero_apply] using h
+
+/-- The same nilpotence holds for every extension of a coordinate partial
+to a localization. The proof differentiates a cleared denominator identity
+and cancels its unit; it does not impose a degree bound on denominators. -/
+theorem localizedPartial_prime_zero {k σ S : Type*} [CommRing k] [CommRing S]
+    [Algebra (MvPolynomial σ k) S] (M : Submonoid (MvPolynomial σ k))
+    [IsLocalization M S] (i : σ) (D : Derivation ℤ S S)
+    (hD : ∀ f : MvPolynomial σ k,
+      D (algebraMap (MvPolynomial σ k) S f) =
+        algebraMap (MvPolynomial σ k) S (MvPolynomial.pderiv i f))
+    (p : ℕ) (hp : p.Prime) [CharP k p] [CharP S p] (z : S) : D^[p] z = 0 := by
+  have hi (n : ℕ) (f : MvPolynomial σ k) :
+      D^[n] (algebraMap (MvPolynomial σ k) S f) =
+        algebraMap (MvPolynomial σ k) S ((MvPolynomial.pderiv i)^[n] f) := by
+    induction n with
+    | zero => rfl
+    | succ n ih => rw [Function.iterate_succ_apply', ih, hD,
+        Function.iterate_succ_apply']
+  let E := primeIterate D p hp
+  have hbase (f : MvPolynomial σ k) : E (algebraMap (MvPolynomial σ k) S f) = 0 := by
+    dsimp only [E]
+    rw [primeIterate_apply, hi, pderiv_prime_zero i p hp, map_zero]
+  have he : E z = 0 := by
+    obtain ⟨⟨a,s⟩,hs⟩ := IsLocalization.surj M z
+    have hz := congrArg E hs
+    simp only [Derivation.leibniz, hbase, smul_zero, zero_add, smul_eq_mul] at hz
+    exact (IsLocalization.map_units S s).mul_left_cancel
+      (by simpa only [mul_zero] using hz)
+  simpa only [E, primeIterate_apply] using he
+
+section Matrices
+
+variable {R L n : Type*} [CommRing R] [CommRing L] [Fintype n]
+
+/-- The actual coordinate connection `D + B` on a finite free module. -/
+def matrixConnection (D : Derivation ℤ R R) (B : Matrix n n R) :
+    (n → R) →+ (n → R) where
+  toFun v := fun i => D (v i) + B.mulVec v i
+  map_zero' := by ext i; simp
+  map_add' v w := by
+    ext i
+    change D (v i + w i) + B.mulVec (v + w) i =
+      (D (v i) + B.mulVec v i) + (D (w i) + B.mulVec w i)
+    rw [map_add, Matrix.mulVec_add]
+    change (D (v i) + D (w i)) + (B.mulVec v i + B.mulVec w i) = _
+    abel
+
+theorem matrixConnection_smul (D : Derivation ℤ R R) (B : Matrix n n R)
+    (a : R) (v : n → R) :
+    matrixConnection D B (a • v) = a • matrixConnection D B v + D a • v := by
+  ext i
+  have hB := congrFun (map_smul B.mulVecLin a v) i
+  change B.mulVec (a • v) i = a * B.mulVec v i at hB
+  change D (a * v i) + B.mulVec (a • v) i =
+    a * (D (v i) + B.mulVec v i) + D a * v i
+  rw [hB,D.leibniz]
+  simp only [smul_eq_mul]
+  ring
+
+theorem derivation_mulVec {s : Type*} [Fintype s]
+    (D : Derivation ℤ R R) (P : Matrix n s R) (w : s → R) :
+    (fun i => D (P.mulVec w i)) =
+      (P.map D).mulVec w + P.mulVec (fun j => D (w j)) := by
+  classical
+  ext i
+  change D (∑ j, P i j * w j) =
+    (∑ j, D (P i j) * w j) + ∑ j, P i j * D (w j)
+  rw [map_sum,← Finset.sum_add_distrib]
+  apply Finset.sum_congr rfl
+  intro j _
+  rw [D.leibniz]
+  simp only [smul_eq_mul]
+  ring
+
+/-- The descended generator identity gives the genuine connection on
+every linear combination of its columns. -/
+theorem matrixConnection_mulVec {s : Type*} [Fintype s]
+    (D : Derivation ℤ R R) (B : Matrix n n R) (P : Matrix n s R)
+    (C : Matrix s s R) (hP : P.map D = P * C - B * P) (w : s → R) :
+    matrixConnection D B (P.mulVec w) =
+      P.mulVec ((fun j => D (w j)) + C.mulVec w) := by
+  change (fun i => D (P.mulVec w i)) + B.mulVec (P.mulVec w) = _
+  rw [derivation_mulVec D P w,hP,Matrix.sub_mulVec,
+    ← Matrix.mulVec_mulVec,← Matrix.mulVec_mulVec,Matrix.mulVec_add]
+  abel
+
+theorem matrixConnection_range_stable {s : Type*} [Fintype s]
+    (D : Derivation ℤ R R) (B : Matrix n n R) (P : Matrix n s R)
+    (C : Matrix s s R) (hP : P.map D = P * C - B * P)
+    (v : n → R) (hv : v ∈ LinearMap.range P.mulVecLin) :
+    matrixConnection D B v ∈ LinearMap.range P.mulVecLin := by
+  obtain ⟨w,rfl⟩ := hv
+  exact ⟨(fun j => D (w j)) + C.mulVec w,
+    (matrixConnection_mulVec D B P C hP w).symm⟩
+
+/-- Coordinate matrix of the prime iterate of `D + B`. -/
+def primeMatrix [DecidableEq n] (D : Derivation ℤ R R) (B : Matrix n n R)
+    (p : ℕ) (hp : p.Prime) [CharP R p] (hD : ∀ a, D^[p] a = 0) : Matrix n n R :=
+  LinearMap.toMatrix' (linearMap D.toAddMonoidHom (matrixConnection D B)
+    (matrixConnection_smul D B) p hp hD)
+
+theorem primeMatrix_mulVec [DecidableEq n] (D : Derivation ℤ R R) (B : Matrix n n R)
+    (p : ℕ) (hp : p.Prime) [CharP R p] (hD : ∀ a, D^[p] a = 0) (v : n → R) :
+    (primeMatrix D B p hp hD).mulVec v = (matrixConnection D B)^[p] v :=
+  LinearMap.toMatrix'_mulVec _ v
+
+/-- A linear map preserving a finitely generated column space admits a
+matrix on those generators, without any independence assumption. -/
+theorem linearMap_generator_matrix [DecidableEq n] {s : Type*} [Fintype s]
+    (T : (n → R) →ₗ[R] (n → R)) (P : Matrix n s R)
+    (stable : ∀ v, v ∈ LinearMap.range P.mulVecLin →
+      T v ∈ LinearMap.range P.mulVecLin) :
+    ∃ Q : Matrix s s R, LinearMap.toMatrix' T * P = P * Q := by
+  classical
+  have hcol (j : s) : (fun i => P i j) ∈ LinearMap.range P.mulVecLin := by
+    rw [Matrix.range_mulVecLin]
+    exact Submodule.subset_span ⟨j,rfl⟩
+  choose c hc using fun j => stable (fun i => P i j) (hcol j)
+  let Q : Matrix s s R := fun i j => c j i
+  refine ⟨Q,?_⟩
+  ext i j
+  have hT := congrFun (LinearMap.toMatrix'_mulVec T (fun k => P k j)) i
+  exact hT.trans (congrFun (hc j) i).symm
+
+/-- A witnessed matrix-invariance identity survives every ring-valued
+point, including points at which the generator matrix loses rank. -/
+theorem specialized_range_stable {s : Type*} [Fintype s]
+    (ρ : R →+* L) (A : Matrix n n R) (P : Matrix n s R) (Q : Matrix s s R)
+    (h : A * P = P * Q) (v : n → L)
+    (hv : v ∈ LinearMap.range (P.map ρ).mulVecLin) :
+    (A.map ρ).mulVec v ∈ LinearMap.range (P.map ρ).mulVecLin := by
+  classical
+  have hm : A.map ρ * P.map ρ = P.map ρ * Q.map ρ := by
+    ext i j
+    have he := congrArg ρ (congrFun (congrFun h i) j)
+    simpa only [Matrix.mul_apply,Matrix.map_apply,map_sum,map_mul] using he
+  obtain ⟨w,rfl⟩ := hv
+  refine ⟨(Q.map ρ).mulVec w,?_⟩
+  change (P.map ρ).mulVec ((Q.map ρ).mulVec w) =
+    (A.map ρ).mulVec ((P.map ρ).mulVec w)
+  rw [Matrix.mulVec_mulVec,Matrix.mulVec_mulVec,hm]
+
+/-- An actual connection-stable lattice has a prime-iterate-stable fiber.
+Evaluation need not commute with the scalar derivative: it is applied only
+after the prime iterate has been proved scalar-linear. -/
+theorem primeMatrix_specialized_range_stable [DecidableEq n] {s : Type*} [Fintype s]
+    (D : Derivation ℤ R R) (B : Matrix n n R) (P : Matrix n s R)
+    (stable : ∀ v, v ∈ LinearMap.range P.mulVecLin →
+      matrixConnection D B v ∈ LinearMap.range P.mulVecLin)
+    (p : ℕ) (hp : p.Prime) [CharP R p] (hD : ∀ a, D^[p] a = 0)
+    (ρ : R →+* L) (v : n → L) (hv : v ∈ LinearMap.range (P.map ρ).mulVecLin) :
+    ((primeMatrix D B p hp hD).map ρ).mulVec v ∈
+      LinearMap.range (P.map ρ).mulVecLin := by
+  let T := linearMap D.toAddMonoidHom (matrixConnection D B)
+    (matrixConnection_smul D B) p hp hD
+  obtain ⟨Q,hQ⟩ := linearMap_generator_matrix T P (fun x hx =>
+    iterate_mem (matrixConnection D B) (LinearMap.range P.mulVecLin) stable p x hx)
+  exact specialized_range_stable ρ (primeMatrix D B p hp hD) P Q hQ v hv
+
+end Matrices
+
+end CycleQ2PrimeConnection
+
+namespace CycleQ2PolynomialPoleSymbols
+
+variable {k R : Type*} [CommRing k] [CommRing R] [Algebra k R]
+
+/-- The prime power of the actual polynomial-pole connection, bundled as
+an `R`-linear endomorphism when its scalar partial has zero prime power. -/
+def primeConnection (D : Derivation k R R) (F : MvPolynomial (Fin 5) R)
+    (p : ℕ) (hp : p.Prime) [CharP R p] (hD : ∀ a, D^[p] a = 0) :
+    Symbols R F →ₗ[R] Symbols R F :=
+  CycleQ2PrimeConnection.linearMap D.toAddMonoidHom (connection D F)
+    (connection_smul D F) p hp hD
+
+@[simp]
+theorem primeConnection_apply (D : Derivation k R R) (F : MvPolynomial (Fin 5) R)
+    (p : ℕ) (hp : p.Prime) [CharP R p] (hD : ∀ a, D^[p] a = 0)
+    (x : Symbols R F) : primeConnection D F p hp hD x = (connection D F)^[p] x := rfl
+
+end CycleQ2PolynomialPoleSymbols
+end
+
+#print axioms CycleQ2PrimeConnection.iterate_prime_smul
+#print axioms CycleQ2PrimeConnection.pderiv_prime_zero
+#print axioms CycleQ2PrimeConnection.localizedPartial_prime_zero
+#print axioms CycleQ2PrimeConnection.primeMatrix_specialized_range_stable
+#print axioms CycleQ2PolynomialPoleSymbols.primeConnection

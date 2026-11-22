@@ -7,6 +7,9 @@ import HodgeComputer.Constructions.HoldoutCover.FiniteDifferentials
 import Mathlib.Algebra.Module.LocalizedModule.Submodule
 import Mathlib.RingTheory.Localization.BaseChange
 import Mathlib.RingTheory.Localization.Module
+import Mathlib.RingTheory.Localization.AsSubring
+import Mathlib.RingTheory.Localization.Submodule
+import Mathlib.RingTheory.Polynomial.Basic
 
 /-!
 # Reduction of Fermat residues at split and inert primes
@@ -1237,6 +1240,15 @@ theorem frame_linearIndependent : LinearIndependent K (frame K) := by
 def ordinaryFrame (s : Sector) : Symbols K (fermatPolynomial K) :=
   ((pole s-1).factorial : K)⁻¹ • frame K s
 
+theorem pole_factor_ne_zero (s : Sector) : ((pole s - 1).factorial : K) ≠ 0 := by
+  have h₂ : (2 : K) ≠ 0 := by
+    intro h
+    apply NeZero.ne (6 : K)
+    calc
+      (6 : K) = 2 * 3 := by norm_num
+      _ = 0 := by rw [h,zero_mul]
+  cases s <;> simp [pole,h₂]
+
 /-- Coordinates dual to the ordinary (unnormalized) standard forms. -/
 def ordinaryCoordinate (s : Sector) : Symbols K (fermatPolynomial K) →ₗ[K] K :=
   ((pole s-1).factorial : K) • normalForm K s
@@ -1296,6 +1308,35 @@ theorem primeCoordinate (s u : Sector) (m : Fin 35) :
   · rw [reducedPole_eq s u m e]
     ring
   · simp only [reducedEntry,if_neg e,mul_zero]
+
+/-- The explicit prime-entry formula is unchanged after extending the
+prime field. This is the coefficient field used by arithmetic spreading. -/
+theorem primeCoordinate_map {L : Type*} [Field L] [NeZero (6 : L)]
+    (ι : ZMod p →+* L) (s u : Sector) (m : Fin 35) :
+    ordinaryCoordinate L u (((-1 : L)^p / (pole s - 1).factorial) •
+        symbol L (fermatPolynomial L) ((pole s - 1)+p)
+          (monomial (exponent fun i => source s i + p*tangentMonomial m i) 1)) =
+        ι (primeEntry p s m u) := by
+  have h := congrArg ι (primeCoordinate p s u m)
+  change ι (((pole u - 1).factorial : ZMod p) * normalForm (ZMod p) u _) = _ at h
+  rw [map_smul,smul_eq_mul,normalForm_monomial,one_mul] at h
+  change ((pole u - 1).factorial : L) * normalForm L u _ = _
+  rw [map_smul,smul_eq_mul,normalForm_monomial,one_mul]
+  simpa only [map_mul,map_div₀,map_pow,map_neg,map_one,map_natCast,
+    map_prod,apply_ite,map_zero] using h
+
+theorem normalized_primeCoordinate_map {L : Type*} [Field L] [NeZero (6 : L)]
+    (ι : ZMod p →+* L) (s u : Sector) (m : Fin 35) :
+    normalForm L u ((-1 : L)^p •
+        symbol L (fermatPolynomial L) ((pole s - 1)+p)
+          (monomial (exponent fun i => source s i + p*tangentMonomial m i) 1)) =
+      (((pole s - 1).factorial : L) / ((pole u - 1).factorial : L)) *
+        ι (primeEntry p s m u) := by
+  have h := primeCoordinate_map p ι s u m
+  change ((pole u - 1).factorial : L) * normalForm L u _ = _ at h
+  rw [map_smul,smul_eq_mul] at h ⊢
+  field_simp [pole_factor_ne_zero L s,pole_factor_ne_zero L u] at h ⊢
+  linear_combination h
 
 end PrimeCoordinates
 
@@ -1396,9 +1437,53 @@ theorem prime_monic_coordinate (p : ℕ) [Fact p.Prime] [NeZero (6 : ZMod p)]
   rw [mul_comm,← div_eq_mul_inv]
   exact primeCoordinate p s u m
 
+/-- The same actual monic coefficient derivative over an arbitrary field
+receiving the prime field. No choice of a separate prime matrix is made. -/
+theorem prime_monic_coordinate_map [NeZero (6 : K)]
+    (p : ℕ) [Fact p.Prime] [NeZero (6 : ZMod p)] (ι : ZMod p →+* K)
+    (s u : Sector) (m : Fin 35) :
+    ordinaryCoordinate K u
+        (fermatSpecialize K (RingHom.id K)
+        ((connection (pderiv (tangentTail m)) (monicFamily K))^[p]
+          ((C (((pole s - 1).factorial : K)⁻¹) : TailRing K) •
+            symbol (TailRing K) (monicFamily K) (pole s - 1)
+              (monomial (exponent (source s)) 1)))) = ι (primeEntry p s m u) := by
+  have h : p • fullExponentOf (tangentTail m).val.val + exponent (source s) =
+      exponent (fun i => source s i + p * tangentMonomial m i) := by
+    rw [tangentTail_exponent]
+    ext i
+    simp [Nat.add_comm]
+  rw [iterate_constant,map_smulₛₗ,fermatSpecialize_iterate,h,smul_smul]
+  simp only [monicEvaluation,eval₂Hom_C, RingHom.id_apply]
+  rw [mul_comm,← div_eq_mul_inv]
+  exact primeCoordinate_map p ι s u m
+
+/-- Coordinates in the normalized frame used by the regular connection.
+The ordinary prime matrix is conjugated by the explicit pole factorials. -/
+theorem normalized_prime_monic_coordinate_map [NeZero (6 : K)]
+    (p : ℕ) [Fact p.Prime] [NeZero (6 : ZMod p)] (ι : ZMod p →+* K)
+    (s u : Sector) (m : Fin 35) :
+    normalForm K u
+        (fermatSpecialize K (RingHom.id K)
+        ((connection (pderiv (tangentTail m)) (monicFamily K))^[p]
+          (symbol (TailRing K) (monicFamily K) (pole s - 1)
+            (monomial (exponent (source s)) 1)))) =
+      (((pole s - 1).factorial : K) / ((pole u - 1).factorial : K)) *
+        ι (primeEntry p s m u) := by
+  have h : p • fullExponentOf (tangentTail m).val.val + exponent (source s) =
+      exponent (fun i => source s i + p * tangentMonomial m i) := by
+    rw [tangentTail_exponent]
+    ext i
+    simp [Nat.add_comm]
+  rw [fermatSpecialize_iterate,h]
+  exact normalized_primeCoordinate_map p ι s u m
+
 end CycleQ2FermatSymbolDetector
 
 #print axioms CycleQ2FermatSymbolDetector.prime_monic_coordinate
+#print axioms CycleQ2FermatSymbolDetector.primeCoordinate_map
+#print axioms CycleQ2FermatSymbolDetector.prime_monic_coordinate_map
+#print axioms CycleQ2FermatSymbolDetector.normalized_prime_monic_coordinate_map
 end
 
 /-!
@@ -2133,3 +2218,605 @@ end
 #print axioms CycleQ2MonicFermatCoefficientOpen.generic_basisSymbol_linearIndependent
 #print axioms CycleQ2MonicFermatCoefficientOpen.generic_vectorRealize_injective
 #print axioms CycleQ2MonicFermatCoefficientOpen.generic_frame_units
+
+/-!
+# Regular monic connections inside the generic coefficient field
+
+The generic frame connection is the image of a connection on the explicit
+Fermat-containing coefficient open. This follows from coefficient-map
+naturality and the proved independence of the generic frame, so no extra
+regularity hypothesis is imposed on a chosen generic connection matrix.
+-/
+
+noncomputable section
+namespace CycleQ2MonicFermatCoefficientOpen
+
+open MvPolynomial CycleQ2PolynomialPoleSymbols
+open CycleQ2PolynomialCoefficientDerivation
+open CycleQ2UniversalPoleFrame (Label equation basisSymbol vectorRealize)
+open CycleQ2GeometricLocalizedDerivations
+open CycleQ2IncidenceNormalForm (FullSexticTailIndex)
+
+abbrev denominators : Submonoid Parameters :=
+  Submonoid.powers (CycleQ2PolynomialCoefficientOpen.denominator rawToMonic)
+
+theorem denominators_regular : denominators ≤ nonZeroDivisors Parameters :=
+  Submonoid.powers_le.mpr (mem_nonZeroDivisors_iff_ne_zero.mpr
+    (CycleQ2PolynomialCoefficientOpen.denominator_ne_zero rawToMonic fermatPoint fermat_factor))
+
+/-- The coefficient open embeds into the same fraction field as the monic
+polynomial parameter ring. -/
+def toGeneric : OpenCoefficients →ₐ[Parameters] GenericCoefficients :=
+  Localization.mapToFractionRing GenericCoefficients denominators OpenCoefficients denominators_regular
+
+@[simp] theorem toGeneric_toOpen (a : Parameters) :
+    toGeneric (toOpen a) = algebraMap Parameters GenericCoefficients a :=
+  toGeneric.commutes a
+
+theorem toGeneric_injective : Function.Injective toGeneric := by
+  change Function.Injective
+    (IsLocalization.lift (S := OpenCoefficients)
+      (Localization.map_isUnit_of_le GenericCoefficients denominators denominators_regular))
+  apply (IsLocalization.lift_injective_iff _).mpr
+  intro a b
+  exact ⟨fun h => congrArg (algebraMap Parameters GenericCoefficients)
+      (IsLocalization.injective OpenCoefficients denominators_regular h),
+    fun h => congrArg (algebraMap Parameters OpenCoefficients)
+      (IsFractionRing.injective Parameters GenericCoefficients h)⟩
+
+@[simp] theorem toGeneric_coefficientMap (a : CycleQ2GenericSexticGradient.CoeffRing) :
+    toGeneric (coefficientMap a) = genericCoefficientMap a :=
+  toGeneric.commutes (rawToMonic a)
+
+theorem toGeneric_comp : toGeneric.toRingHom.comp coefficientMap = genericCoefficientMap := by
+  ext a
+  exact toGeneric_coefficientMap a
+
+def genericCoefficientPartial (e : FullSexticTailIndex) :
+    Derivation ℤ GenericCoefficients GenericCoefficients :=
+  HoldoutConstruction.extendRingDerivation (L := GenericCoefficients)
+    (HoldoutConstruction.integerPartial (R := ℂ) e)
+
+theorem genericCoefficientPartial_algebraMap (e : FullSexticTailIndex) (a : Parameters) :
+    genericCoefficientPartial e (algebraMap Parameters GenericCoefficients a) =
+      algebraMap Parameters GenericCoefficients (pderiv e a) :=
+  HoldoutConstruction.extendRingDerivation_apply _ _
+
+/-- The regular coefficient partial and the generic partial agree through
+the actual embedding of the monic coefficient open. -/
+theorem partial_toGeneric (e : FullSexticTailIndex) (a : OpenCoefficients) :
+    genericCoefficientPartial e (toGeneric a) = toGeneric (coefficientPartial e a) := by
+  apply derivation_commutes_of_algebraMap denominators
+    (coefficientPartial e) (genericCoefficientPartial e) toGeneric.toRingHom
+  intro p
+  change genericCoefficientPartial e (toGeneric (toOpen p)) =
+    toGeneric (coefficientPartial e (toOpen p))
+  rw [toGeneric_toOpen, genericCoefficientPartial_algebraMap,
+    CycleQ2PolynomialCoefficientOpen.coefficientPartial_toOpen, toGeneric_toOpen]
+
+theorem equation_toGeneric :
+    MvPolynomial.map toGeneric.toRingHom (equation coefficientMap) = equation genericCoefficientMap := by
+  rw [equation, MvPolynomial.map_map, toGeneric_comp]
+
+private def equationToGenericEquiv :
+    Symbols GenericCoefficients (MvPolynomial.map toGeneric.toRingHom (equation coefficientMap)) ≃ₗ[GenericCoefficients]
+      Symbols GenericCoefficients (equation genericCoefficientMap) :=
+  Submodule.quotEquivOfEq _ _ (congrArg (relations GenericCoefficients) equation_toGeneric)
+
+/-- Coefficient specialization into the literal generic frame presentation. -/
+def toGenericSymbols : Symbols OpenCoefficients (equation coefficientMap) →ₛₗ[toGeneric.toRingHom]
+    Symbols GenericCoefficients (equation genericCoefficientMap) :=
+  equationToGenericEquiv.toLinearMap.comp
+    (specialize toGeneric.toRingHom (equation coefficientMap))
+
+@[simp] theorem toGenericSymbols_symbol (n : ℕ) (P : MvPolynomial (Fin 5) OpenCoefficients) :
+    toGenericSymbols (symbol OpenCoefficients (equation coefficientMap) n P) =
+      symbol GenericCoefficients (equation genericCoefficientMap) n
+        (MvPolynomial.map toGeneric.toRingHom P) := by
+  change equationToGenericEquiv
+    (specialize toGeneric.toRingHom (equation coefficientMap)
+      (symbol OpenCoefficients (equation coefficientMap) n P)) = _
+  rw [specialize_symbol]
+  rfl
+
+@[simp] theorem toGenericSymbols_basisSymbol (i : Label) :
+    toGenericSymbols (basisSymbol coefficientMap i) = basisSymbol genericCoefficientMap i := by
+  rcases i with i | i <;>
+    simp only [basisSymbol, CycleQ2UniversalPoleFrame.pole, toGenericSymbols_symbol,
+      map_monomial, map_one]
+
+@[simp] theorem toGenericSymbols_vectorRealize (v : Label → OpenCoefficients) :
+    toGenericSymbols (vectorRealize coefficientMap v) =
+      vectorRealize genericCoefficientMap (fun i => toGeneric (v i)) := by
+  change toGenericSymbols (∑ i, v i • basisSymbol coefficientMap i) =
+    ∑ i, toGeneric (v i) • basisSymbol genericCoefficientMap i
+  simp only [map_sum, map_smulₛₗ, toGenericSymbols_basisSymbol]
+
+private theorem coefficientDerivation_toGeneric (e : FullSexticTailIndex)
+    (P : MvPolynomial (Fin 5) OpenCoefficients) :
+    coefficientDerivation (genericCoefficientPartial e) (MvPolynomial.map toGeneric.toRingHom P) =
+      MvPolynomial.map toGeneric.toRingHom (coefficientDerivation (coefficientPartial e) P) := by
+  induction P using MvPolynomial.induction_on' with
+  | monomial m c => simp only [map_monomial, coefficientDerivation_monomial, partial_toGeneric]
+  | add P Q hP hQ => simp only [map_add, hP, hQ]
+
+theorem toGenericSymbols_connection (e : FullSexticTailIndex)
+    (x : Symbols OpenCoefficients (equation coefficientMap)) :
+    toGenericSymbols (connection (coefficientPartial e) (equation coefficientMap) x) =
+      connection (genericCoefficientPartial e) (equation genericCoefficientMap) (toGenericSymbols x) := by
+  refine Submodule.Quotient.induction_on _ x (fun P => ?_)
+  induction P using Finsupp.induction_linear with
+  | zero => simp
+  | add P Q hP hQ => simp only [map_add, hP, hQ]
+  | single n P =>
+    change toGenericSymbols (connection (coefficientPartial e) (equation coefficientMap)
+      (symbol OpenCoefficients (equation coefficientMap) n P)) =
+      connection (genericCoefficientPartial e) (equation genericCoefficientMap)
+        (toGenericSymbols (symbol OpenCoefficients (equation coefficientMap) n P))
+    have hF : coefficientDerivation (genericCoefficientPartial e) (equation genericCoefficientMap) =
+        MvPolynomial.map toGeneric.toRingHom
+          (coefficientDerivation (coefficientPartial e) (equation coefficientMap)) := by
+      rw [← equation_toGeneric, coefficientDerivation_toGeneric]
+    simp only [connection_symbol, map_sub, toGenericSymbols_symbol, map_mul,
+      coefficientDerivation_toGeneric, hF]
+
+private theorem regularConnection_exists (e : FullSexticTailIndex) :
+    ∃ B : Matrix Label Label OpenCoefficients, ∀ v : Label → OpenCoefficients,
+      vectorRealize coefficientMap (fun i => coefficientPartial e (v i) + B.mulVec v i) =
+        connection (coefficientPartial e) (equation coefficientMap) (vectorRealize coefficientMap v) := by
+  obtain ⟨h6, h12, h18⟩ := CycleQ2PolynomialCoefficientOpen.frame_units rawToMonic
+  exact CycleQ2UniversalPoleFrame.exists_vector_connection coefficientMap h6 h12 h18
+    (coefficientPartial e)
+
+def regularConnection (e : FullSexticTailIndex) : Matrix Label Label OpenCoefficients :=
+  (regularConnection_exists e).choose
+
+theorem regularConnection_spec (e : FullSexticTailIndex) (v : Label → OpenCoefficients) :
+    vectorRealize coefficientMap
+      (fun i => coefficientPartial e (v i) + (regularConnection e).mulVec v i) =
+      connection (coefficientPartial e) (equation coefficientMap) (vectorRealize coefficientMap v) :=
+  (regularConnection_exists e).choose_spec v
+
+/-- Every generic connection matrix satisfying the actual symbol identity is
+the image of the regular matrix on the monic coefficient open. -/
+theorem generic_connection_eq_map (e : FullSexticTailIndex)
+    (B : Matrix Label Label GenericCoefficients)
+    (hB : ∀ v : Label → GenericCoefficients,
+      vectorRealize genericCoefficientMap (fun i => genericCoefficientPartial e (v i) + B.mulVec v i) =
+        connection (genericCoefficientPartial e) (equation genericCoefficientMap)
+          (vectorRealize genericCoefficientMap v)) :
+    B = (regularConnection e).map toGeneric := by
+  classical
+  have hmul (v : Label → OpenCoefficients) (i : Label) :
+      B.mulVec (fun j => toGeneric (v j)) i = toGeneric ((regularConnection e).mulVec v i) := by
+    have ho := congrArg toGenericSymbols (regularConnection_spec e v)
+    rw [toGenericSymbols_vectorRealize, toGenericSymbols_connection,
+      toGenericSymbols_vectorRealize] at ho
+    have hv := generic_vectorRealize_injective ((hB (fun j => toGeneric (v j))).trans ho.symm)
+    have hi := congrFun hv i
+    rw [map_add, ← partial_toGeneric] at hi
+    exact add_left_cancel hi
+  ext i j
+  have hw : (fun k => toGeneric (Pi.single j (1 : OpenCoefficients) k)) =
+      Pi.single j (1 : GenericCoefficients) := by
+    funext k
+    by_cases h : k = j <;> simp [Pi.single_apply, h, eq_comm]
+  have hi := hmul (Pi.single j 1) i
+  rw [hw, Matrix.mulVec_single_one, Matrix.mulVec_single_one] at hi
+  exact hi
+
+/-- The mapped regular matrix gives the generic connection on every vector,
+including vectors whose coefficients have arbitrary generic denominators. -/
+theorem mapped_regularConnection_spec (e : FullSexticTailIndex) (v : Label → GenericCoefficients) :
+    vectorRealize genericCoefficientMap
+      (fun i => genericCoefficientPartial e (v i) + ((regularConnection e).map toGeneric).mulVec v i) =
+      connection (genericCoefficientPartial e) (equation genericCoefficientMap)
+        (vectorRealize genericCoefficientMap v) := by
+  obtain ⟨B, hB⟩ := CycleQ2UniversalPoleFrame.exists_vector_connection genericCoefficientMap
+    generic_frame_units.1 generic_frame_units.2.1 generic_frame_units.2.2 (genericCoefficientPartial e)
+  rw [← generic_connection_eq_map e B hB]
+  exact hB v
+
+end CycleQ2MonicFermatCoefficientOpen
+end
+
+#print axioms CycleQ2MonicFermatCoefficientOpen.toGeneric_injective
+#print axioms CycleQ2MonicFermatCoefficientOpen.partial_toGeneric
+#print axioms CycleQ2MonicFermatCoefficientOpen.generic_connection_eq_map
+#print axioms CycleQ2MonicFermatCoefficientOpen.mapped_regularConnection_spec
+
+/-!
+# The regular lattice of an actual generic invariant subspace
+
+Pullback through the coefficient-open embedding preserves the given generic
+subspace. A common denominator for its finitely many coordinates proves that
+the pullback spans the original subspace, rather than a replacement for it.
+The connection matrices on finite generators are then consequences of
+stability and Noetherianity.
+-/
+
+noncomputable section
+namespace CycleQ2MonicFermatCoefficientOpen
+
+open CycleQ2UniversalPoleFrame (Label)
+open CycleQ2IncidenceNormalForm (FullSexticTailIndex)
+
+/-- The coordinatewise embedding of the regular frame into the generic frame. -/
+def toGenericVector : (Label → OpenCoefficients) →ₛₗ[toGeneric.toRingHom]
+    (Label → GenericCoefficients) where
+  toFun v i := toGeneric (v i)
+  map_add' v w := by
+    funext i
+    exact map_add toGeneric (v i) (w i)
+  map_smul' a v := by
+    funext i
+    exact map_mul toGeneric a (v i)
+
+@[simp] theorem toGenericVector_apply (v : Label → OpenCoefficients) (i : Label) :
+    toGenericVector v i = toGeneric (v i) := rfl
+
+theorem toGenericVector_mulVec {s : Type*} [Fintype s]
+    (P : Matrix Label s OpenCoefficients) (v : s → OpenCoefficients) :
+    toGenericVector (P.mulVec v) = (P.map toGeneric).mulVec (fun j => toGeneric (v j)) := by
+  classical
+  funext i
+  change toGeneric (∑ j, P i j * v j) = ∑ j, toGeneric (P i j) * toGeneric (v j)
+  simp only [map_sum, map_mul]
+
+theorem toGenericVector_connection (e : FullSexticTailIndex) (v : Label → OpenCoefficients) :
+    toGenericVector (fun i => coefficientPartial e (v i) + (regularConnection e).mulVec v i) =
+      fun i => genericCoefficientPartial e (toGenericVector v i) +
+        ((regularConnection e).map toGeneric).mulVec (toGenericVector v) i := by
+  classical
+  funext i
+  change toGeneric (coefficientPartial e (v i) + ∑ j, regularConnection e i j * v j) =
+    genericCoefficientPartial e (toGeneric (v i)) +
+      ∑ j, toGeneric (regularConnection e i j) * toGeneric (v j)
+  simp only [map_add, map_sum, map_mul, partial_toGeneric]
+
+/-- This is the inverse image of the specified generic subspace. -/
+def regularLattice (W : Submodule GenericCoefficients (Label → GenericCoefficients)) :
+    Submodule OpenCoefficients (Label → OpenCoefficients) :=
+  W.comap toGenericVector
+
+@[simp] theorem mem_regularLattice
+    (W : Submodule GenericCoefficients (Label → GenericCoefficients))
+    (v : Label → OpenCoefficients) : v ∈ regularLattice W ↔ toGenericVector v ∈ W := Iff.rfl
+
+theorem regularLattice_stable
+    (W : Submodule GenericCoefficients (Label → GenericCoefficients))
+    (stable : ∀ e w, w ∈ W →
+      (fun i => genericCoefficientPartial e (w i) +
+        ((regularConnection e).map toGeneric).mulVec w i) ∈ W)
+    (e : FullSexticTailIndex) (v : Label → OpenCoefficients) (hv : v ∈ regularLattice W) :
+    (fun i => coefficientPartial e (v i) + (regularConnection e).mulVec v i) ∈ regularLattice W := by
+  change toGenericVector (fun i => coefficientPartial e (v i) +
+    (regularConnection e).mulVec v i) ∈ W
+  rw [toGenericVector_connection]
+  exact stable e _ hv
+
+/-- Pullback from a field subspace is saturated in the regular frame. -/
+theorem regularLattice_saturated
+    (W : Submodule GenericCoefficients (Label → GenericCoefficients))
+    {a : OpenCoefficients} (ha : a ≠ 0) {v : Label → OpenCoefficients}
+    (hv : a • v ∈ regularLattice W) : v ∈ regularLattice W := by
+  have hunit : IsUnit (toGeneric a) := isUnit_iff_ne_zero.mpr (by
+    intro h
+    exact ha (toGeneric_injective (h.trans (map_zero toGeneric).symm)))
+  change toGenericVector (a • v) ∈ W at hv
+  rw [map_smulₛₗ] at hv
+  exact (Submodule.smul_mem_iff_of_isUnit W hunit).mp hv
+
+/-- All 66 coordinate denominators can be cleared by one nonzero monic
+parameter polynomial. Its numerator vector already lies on the coefficient open. -/
+theorem exists_vector_denominator (w : Label → GenericCoefficients) :
+    ∃ (a : nonZeroDivisors Parameters) (v : Label → OpenCoefficients),
+      toGenericVector v = (algebraMap Parameters GenericCoefficients (a : Parameters)) • w := by
+  classical
+  obtain ⟨a, ha⟩ := IsLocalization.exist_integer_multiples_of_finite
+    (nonZeroDivisors Parameters) w
+  change ∀ i, ∃ b : Parameters, algebraMap Parameters GenericCoefficients b =
+    (a : Parameters) • w i at ha
+  choose b hb using ha
+  refine ⟨a, fun i => toOpen (b i), ?_⟩
+  funext i
+  change toGeneric (toOpen (b i)) = algebraMap Parameters GenericCoefficients (a : Parameters) * w i
+  rw [toGeneric_toOpen]
+  simpa only [Algebra.smul_def] using hb i
+
+/-- The regular pullback spans exactly the original generic subspace. -/
+theorem regularLattice_spans
+    (W : Submodule GenericCoefficients (Label → GenericCoefficients)) :
+    Submodule.span GenericCoefficients
+      (Set.range (fun v : regularLattice W => toGenericVector v.val)) = W := by
+  apply le_antisymm
+  · apply Submodule.span_le.mpr
+    rintro _ ⟨v, rfl⟩
+    exact v.property
+  · intro w hw
+    obtain ⟨a, v, hv⟩ := exists_vector_denominator w
+    have hvW : v ∈ regularLattice W := by
+      change toGenericVector v ∈ W
+      rw [hv]
+      exact W.smul_mem _ hw
+    apply (Submodule.smul_mem_iff_of_isUnit _
+      (IsLocalization.map_units GenericCoefficients a)).mp
+    rw [← hv]
+    exact Submodule.subset_span ⟨⟨v, hvW⟩, rfl⟩
+
+/-- Any finite regular generating matrix has generic column span equal to
+the original subspace; no constant-rank hypothesis is assumed here. -/
+theorem mapped_generator_range {s : Type*} [Fintype s]
+    (W : Submodule GenericCoefficients (Label → GenericCoefficients))
+    (P : Matrix Label s OpenCoefficients)
+    (hP : LinearMap.range P.mulVecLin = regularLattice W) :
+    LinearMap.range (P.map toGeneric).mulVecLin = W := by
+  classical
+  apply le_antisymm
+  · rw [Matrix.range_mulVecLin]
+    apply Submodule.span_le.mpr
+    rintro _ ⟨j, rfl⟩
+    have hcol : (fun i => P i j) ∈ regularLattice W := by
+      rw [← hP, Matrix.range_mulVecLin]
+      exact Submodule.subset_span ⟨j, rfl⟩
+    exact hcol
+  · intro w hw
+    obtain ⟨a, v, hv⟩ := exists_vector_denominator w
+    have hvW : v ∈ regularLattice W := by
+      change toGenericVector v ∈ W
+      rw [hv]
+      exact W.smul_mem _ hw
+    rw [← hP] at hvW
+    obtain ⟨c, hc⟩ := hvW
+    change P.mulVec c = v at hc
+    have he := congrArg toGenericVector hc
+    rw [toGenericVector_mulVec, hv] at he
+    apply (Submodule.smul_mem_iff_of_isUnit _
+      (IsLocalization.map_units GenericCoefficients a)).mp
+    exact ⟨fun j => toGeneric (c j), he⟩
+
+/-- A stable generic subspace supplies actual finite regular generators and
+all their connection identities on this fixed Fermat-containing open. -/
+theorem exists_regularLattice_generators
+    (W : Submodule GenericCoefficients (Label → GenericCoefficients))
+    (stable : ∀ e w, w ∈ W →
+      (fun i => genericCoefficientPartial e (w i) +
+        ((regularConnection e).map toGeneric).mulVec w i) ∈ W) :
+    ∃ (s : ℕ) (P : Matrix Label (Fin s) OpenCoefficients)
+      (C : FullSexticTailIndex → Matrix (Fin s) (Fin s) OpenCoefficients),
+      LinearMap.range P.mulVecLin = regularLattice W ∧
+      LinearMap.range (P.map toGeneric).mulVecLin = W ∧
+      ∀ e, P.map (coefficientPartial e) = P * C e - regularConnection e * P := by
+  obtain ⟨s, P, C, hP, hC⟩ :=
+    CycleQ2DifferentialMinorStability.exists_noetherian_generator_connections
+      coefficientPartial regularConnection (regularLattice W) (regularLattice_stable W stable)
+  exact ⟨s, P, C, hP, mapped_generator_range W P hP, hC⟩
+
+end CycleQ2MonicFermatCoefficientOpen
+end
+
+#print axioms CycleQ2MonicFermatCoefficientOpen.regularLattice_saturated
+#print axioms CycleQ2MonicFermatCoefficientOpen.regularLattice_spans
+#print axioms CycleQ2MonicFermatCoefficientOpen.exists_regularLattice_generators
+
+noncomputable section
+namespace CycleQ2MonicFermatCoefficientOpen
+
+open MvPolynomial CycleQ2IncidenceNormalForm (FullSexticTailIndex fullExponentOf)
+
+/-- An integral polynomial defining the same Fermat point over every
+constant ring. Its coefficients determine the integral tail assignment. -/
+def integralFermat : MvPolynomial (Fin 5) ℤ :=
+  X 0 ^ 6 + X 1 ^ 6 + X 2 ^ 6 + X 3 ^ 6 + X 4 ^ 3
+
+def integerFermatTail (e : FullSexticTailIndex) : ℤ :=
+  integralFermat.coeff (fullExponentOf e.val.val)
+
+theorem integerFermatTail_cast (e : FullSexticTailIndex) :
+    (integerFermatTail e : ℂ) = CycleQ2GenericSexticGradient.fermatCoefficients e.val := by
+  change (Int.castRingHom ℂ) (integralFermat.coeff (fullExponentOf e.val.val)) =
+    (CycleQ2FermatSymbolDetector.fermatPolynomial ℂ).coeff (fullExponentOf e.val.val)
+  rw [← MvPolynomial.coeff_map]
+  congr 1
+  simp only [integralFermat, CycleQ2FermatSymbolDetector.fermatPolynomial,
+    map_add, map_pow, map_X]
+
+theorem integerFermat_evaluation :
+    eval (fun e : FullSexticTailIndex => (integerFermatTail e : ℂ)) = fermatPoint := by
+  unfold fermatPoint
+  congr 1
+  funext e
+  exact integerFermatTail_cast e
+
+theorem integerFermat_denominator :
+    (eval (fun e : FullSexticTailIndex => (integerFermatTail e : ℂ)))
+      (CycleQ2PolynomialCoefficientOpen.denominator rawToMonic) = 1 := by
+  rw [integerFermat_evaluation]
+  exact CycleQ2PolynomialCoefficientOpen.point_denominator rawToMonic fermatPoint fermat_factor
+
+theorem integerFermatTail_cast_field (K : Type*) [Field K] (e : FullSexticTailIndex) :
+    (integerFermatTail e : K) =
+      (CycleQ2FermatSymbolDetector.fermatPolynomial K).coeff (fullExponentOf e.val.val) := by
+  change (Int.castRingHom K) (integralFermat.coeff (fullExponentOf e.val.val)) = _
+  rw [← MvPolynomial.coeff_map]
+  congr 1
+  simp only [integralFermat,CycleQ2FermatSymbolDetector.fermatPolynomial,
+    map_add,map_pow,map_X]
+
+/-- The same integral Fermat assignment recovers the actual Fermat
+polynomial after every change of constant characteristic. -/
+theorem map_monicFamily_integerFermat (K : Type*) [Field K] :
+    MvPolynomial.map (eval (fun e : FullSexticTailIndex => (integerFermatTail e : K)))
+      (CycleQ2PolynomialPoleSymbols.monicFamily K) =
+        CycleQ2FermatSymbolDetector.fermatPolynomial K := by
+  have he : eval (fun e : FullSexticTailIndex => (integerFermatTail e : K)) =
+      CycleQ2PolynomialPoleSymbols.monicEvaluation K (RingHom.id K)
+        (CycleQ2FermatSymbolDetector.fermatPolynomial K) := by
+    apply MvPolynomial.ringHom_ext
+    · intro c
+      simp [CycleQ2PolynomialPoleSymbols.monicEvaluation]
+    · intro e
+      simp only [eval_X,CycleQ2PolynomialPoleSymbols.monicEvaluation,eval₂Hom_X',
+        integerFermatTail_cast_field]
+  rw [he]
+  exact CycleQ2PolynomialPoleSymbols.map_monicFamily K (RingHom.id K) _
+    (CycleQ2FermatSymbolDetector.fermatFullHomogeneous K)
+    (CycleQ2FermatSymbolDetector.fermatLeading K)
+
+end CycleQ2MonicFermatCoefficientOpen
+end
+
+#print axioms CycleQ2MonicFermatCoefficientOpen.integerFermat_evaluation
+#print axioms CycleQ2MonicFermatCoefficientOpen.integerFermat_denominator
+
+/-!
+# Prime matrices in the normalized regular frame
+
+The regular connection was constructed on normalized pole symbols, whereas
+the arithmetic prime entries use ordinary pole forms. Their change of frame
+is the explicit diagonal matrix of pole factorials. These factors are units
+in every characteristic above six, so the two actual prime blocks retain
+the proved strict growth and the opposite-prime dichotomy.
+-/
+
+noncomputable section
+namespace CycleQ2FermatNormalizedPrime
+
+open CycleQ2FermatPrimeCoefficient (Sector pole primeEntry split_support inert_support)
+open CycleQ2FermatSymbolDetector (pole_factor_ne_zero)
+open CycleQ2FermatStrictGrowth
+
+variable {K : Type*} [Field K] [NeZero (6 : K)] {p : ℕ} [Fact p.Prime]
+
+def matrix (ι : ZMod p →+* K) (m : Fin 35) : Matrix Sector Sector K :=
+  fun u s => (((pole s - 1).factorial : K) / ((pole u - 1).factorial : K)) *
+    ι (primeEntry p s m u)
+
+theorem entry_ne_zero_iff (ι : ZMod p →+* K) (m : Fin 35) (s u : Sector) :
+    matrix ι m u s ≠ 0 ↔ primeEntry p s m u ≠ 0 := by
+  simp only [matrix,mul_ne_zero_iff,div_ne_zero_iff,pole_factor_ne_zero,
+    true_and,map_ne_zero]
+
+def splitBlock (ι : ZMod p →+* K) (m : Fin 35) : Matrix (Fin 33) (Fin 33) K :=
+  fun j i => matrix ι m (.inr j.rev) (.inl i)
+
+def inertBlock (ι : ZMod p →+* K) (m : Fin 35) : Matrix (Fin 33) (Fin 33) K :=
+  fun i j => matrix ι m (.inl i) (.inr j.rev)
+
+/-- The upper and lower coordinates, with the existing reversed lower
+ordering used by the strict-growth theorem. -/
+def totalEquiv (K : Type*) [Field K] : (Sector → K) ≃ₗ[K] Total K where
+  toFun v := (fun i => v (.inl i), fun j => v (.inr j.rev))
+  invFun v := Sum.elim v.1 (fun j => v.2 j.rev)
+  left_inv v := by
+    funext s
+    rcases s with i | i
+    · rfl
+    · simp only [Sum.elim_inr,Fin.rev_rev]
+  right_inv v := by
+    apply Prod.ext
+    · rfl
+    · funext j; simp only [Sum.elim_inr,Fin.rev_rev]
+  map_add' v w := rfl
+  map_smul' a v := rfl
+
+theorem split_action (ι : ZMod p →+* K) (hp : 6 < p) (hs : p ≡ 1 [MOD 6])
+    (m : Fin 35) (v : Sector → K) :
+    totalEquiv K ((matrix ι m).mulVec v) =
+      (0,(splitBlock ι m).mulVec (totalEquiv K v).1) := by
+  have hu (s : Sector) (i : Fin 33) : matrix ι m (.inl i) s = 0 := by
+    by_contra hn
+    have hz := (split_support hp hs s (.inl i) m).mp
+      ((entry_ne_zero_iff ι m s (.inl i)).mp hn)
+    cases s <;> exact hz
+  have hl (i j : Fin 33) : matrix ι m (.inr j) (.inr i) = 0 := by
+    by_contra hn
+    exact (split_support hp hs (.inr i) (.inr j) m).mp
+      ((entry_ne_zero_iff ι m (.inr i) (.inr j)).mp hn)
+  apply Prod.ext
+  · funext i
+    change (∑ s, matrix ι m (.inl i) s * v s) = 0
+    simp only [hu,zero_mul,Finset.sum_const_zero]
+  · funext j
+    change (∑ s, matrix ι m (.inr j.rev) s * v s) =
+      ∑ i, matrix ι m (.inr j.rev) (.inl i) * v (.inl i)
+    rw [Fintype.sum_sum_type]
+    simp only [hl,zero_mul,Finset.sum_const_zero,add_zero]
+
+theorem inert_action (ι : ZMod p →+* K) (hp : 6 < p) (hi : p ≡ 5 [MOD 6])
+    (m : Fin 35) (v : Sector → K) :
+    totalEquiv K ((matrix ι m).mulVec v) =
+      ((inertBlock ι m).mulVec (totalEquiv K v).2,0) := by
+  have hl (s : Sector) (j : Fin 33) : matrix ι m (.inr j) s = 0 := by
+    by_contra hn
+    have hz := (inert_support hp hi s (.inr j) m).mp
+      ((entry_ne_zero_iff ι m s (.inr j)).mp hn)
+    cases s <;> exact hz
+  have hu (i j : Fin 33) : matrix ι m (.inl i) (.inl j) = 0 := by
+    by_contra hn
+    exact (inert_support hp hi (.inl j) (.inl i) m).mp
+      ((entry_ne_zero_iff ι m (.inl j) (.inl i)).mp hn)
+  apply Prod.ext
+  · funext i
+    change (∑ s, matrix ι m (.inl i) s * v s) =
+      ∑ j, matrix ι m (.inl i) (.inr j.rev) * v (.inr j.rev)
+    rw [Fintype.sum_sum_type]
+    simp only [hu,zero_mul,Finset.sum_const_zero,zero_add]
+    simpa only [Fin.revPerm_apply] using
+      (Equiv.sum_comp Fin.revPerm
+        (fun j : Fin 33 => matrix ι m (.inl i) (.inr j) * v (.inr j))).symm
+  · funext j
+    change (∑ s, matrix ι m (.inr j.rev) s * v s) = 0
+    simp only [hl,zero_mul,Finset.sum_const_zero]
+
+theorem split_stable (ι : ZMod p →+* K) (hp : 6 < p) (hs : p ≡ 1 [MOD 6])
+    (W : Submodule K (Sector → K))
+    (hW : ∀ m v, v ∈ W → (matrix ι m).mulVec v ∈ W)
+    (m : Fin 35) (x : Total K) (hx : x ∈ W.map (totalEquiv K).toLinearMap) :
+    (0,(splitBlock ι m).mulVec x.1) ∈ W.map (totalEquiv K).toLinearMap := by
+  obtain ⟨v,hv,rfl⟩ := hx
+  exact ⟨(matrix ι m).mulVec v,hW m v hv,split_action ι hp hs m v⟩
+
+theorem inert_stable (ι : ZMod p →+* K) (hp : 6 < p) (hi : p ≡ 5 [MOD 6])
+    (W : Submodule K (Sector → K))
+    (hW : ∀ m v, v ∈ W → (matrix ι m).mulVec v ∈ W)
+    (m : Fin 35) (x : Total K) (hx : x ∈ W.map (totalEquiv K).toLinearMap) :
+    ((inertBlock ι m).mulVec x.2,0) ∈ W.map (totalEquiv K).toLinearMap := by
+  obtain ⟨v,hv,rfl⟩ := hx
+  exact ⟨(matrix ι m).mulVec v,hW m v hv,inert_action ι hp hi m v⟩
+
+theorem split_growth (ι : ZMod p →+* K) (hp : 6 < p) (hs : p ≡ 1 [MOD 6]) :
+    RankGrowth K (splitBlock ι) := by
+  apply weighted_forward_growth
+  intro m i j
+  change matrix ι m (.inr j.rev) (.inl i) ≠ 0 ↔ _
+  rw [entry_ne_zero_iff,exponentEdge_iff_complement]
+  exact split_support hp hs (.inl i) (.inr j.rev) m
+
+theorem inert_growth (ι : ZMod p →+* K) (hp : 6 < p) (hi : p ≡ 5 [MOD 6]) :
+    RankGrowth K (inertBlock ι) := by
+  apply weighted_reverse_growth
+  intro m i j
+  change matrix ι m (.inl i) (.inr j.rev) ≠ 0 ↔ _
+  rw [entry_ne_zero_iff,exponentEdge_iff_complement]
+  exact inert_support hp hi (.inr j.rev) (.inl i) m
+
+/-- The same two-prime conclusion for the literal normalization used by
+the regular residue frame and its actual connection matrices. -/
+theorem opposite_prime_dichotomy {L : Type*} [Field L] [NeZero (6 : L)]
+    {q : ℕ} [Fact q.Prime] (ι : ZMod p →+* K) (κ : ZMod q →+* L)
+    (hp : 6 < p) (hs : p ≡ 1 [MOD 6]) (hq : 6 < q) (hi : q ≡ 5 [MOD 6])
+    (W : Submodule K (Total K)) (W' : Submodule L (Total L))
+    (hW : ∀ m x, x ∈ W → (0,(splitBlock ι m).mulVec x.1) ∈ W)
+    (hW' : ∀ m x, x ∈ W' → ((inertBlock κ m).mulVec x.2,0) ∈ W')
+    (hprofile : rankProfile K W = rankProfile L W') :
+    (W = ⊥ ∧ W' = ⊥) ∨ (W = ⊤ ∧ W' = ⊤) :=
+  nonsplit_dichotomy K (split_growth ι hp hs) (inert_growth κ hq hi)
+    W W' hW hW' hprofile
+
+end CycleQ2FermatNormalizedPrime
+end
+
+#print axioms CycleQ2FermatNormalizedPrime.split_growth
+#print axioms CycleQ2FermatNormalizedPrime.inert_growth
+#print axioms CycleQ2FermatNormalizedPrime.opposite_prime_dichotomy

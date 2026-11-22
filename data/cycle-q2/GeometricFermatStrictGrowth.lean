@@ -277,12 +277,12 @@ private theorem projected_rank_add_intersection (W : Submodule K (Total K))
   rw [hp,hker] at h
   exact h
 
-private theorem upper_rank_decomposition (S : Submodule K (Total K)) :
+theorem upper_rank_decomposition (S : Submodule K (Total K)) :
       Module.finrank K (upperProjection K S) + Module.finrank K (lowerIntersection K S) =
         Module.finrank K S :=
     projected_rank_add_intersection K S _ _ (LinearMap.inr_injective ..) (LinearMap.ker_fst ..)
 
-private theorem lower_rank_decomposition (S : Submodule K (Total K)) :
+theorem lower_rank_decomposition (S : Submodule K (Total K)) :
       Module.finrank K (lowerProjection K S) + Module.finrank K (upperIntersection K S) =
         Module.finrank K S :=
     projected_rank_add_intersection K S _ _ (LinearMap.inl_injective ..) (LinearMap.ker_snd ..)

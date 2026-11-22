@@ -1,11 +1,13 @@
 import Proposal.GeometricUniversalWeightedDeRham
 import Proposal.GeometricUniversalJacobianFrames
 import Proposal.GeometricFermatPoleReduction
+import Proposal.GeometricHiggsAlgebraSpecialization
 import Proposal.GeometricExteriorSheaf
 import HodgeComputer.Constructions.HoldoutCover.FiniteDifferentials
 import HodgeComputer.Constructions.HoldoutCover.PolynomialCalculus
 import Mathlib.RingTheory.Localization.Away.Basic
 import Mathlib.RingTheory.Localization.Module
+import Mathlib.Algebra.CharP.Algebra
 
 /-!
 # Pole-three reduction for the actual weighted source
@@ -1560,6 +1562,43 @@ theorem genericFrameKernel_coefficient_stable (e : FullSexticTailIndex)
   rw [genericSymbolFrame_connection]
   exact genericResidueKernel_coefficient_stable e (genericSymbolFrame u) hu
 
+/-- The fraction-field partials used by the rational residue realization
+are the same extensions as those used by the regular monic frame. -/
+theorem fractionCoefficientPartial_eq_generic (e : FullSexticTailIndex) :
+    fractionCoefficientPartial e = CycleQ2MonicFermatCoefficientOpen.genericCoefficientPartial e := rfl
+
+/-- Independence identifies the chosen generic residue connection matrix
+with the image of the actual regular matrix on the determinant open. -/
+theorem genericFrameConnection_eq_regular (e : FullSexticTailIndex) :
+    genericFrameConnection e =
+      (CycleQ2MonicFermatCoefficientOpen.regularConnection e).map
+        CycleQ2MonicFermatCoefficientOpen.toGeneric :=
+  CycleQ2MonicFermatCoefficientOpen.generic_connection_eq_map e (genericFrameConnection e)
+    (by simpa only [fractionCoefficientPartial_eq_generic] using
+      (genericFrameConnection_exists e).choose_spec)
+
+/-- The regular pullback lattice of the actual rational de Rham kernel. -/
+def regularFrameKernel : Submodule CycleQ2MonicFermatCoefficientOpen.OpenCoefficients
+    (Label → CycleQ2MonicFermatCoefficientOpen.OpenCoefficients) :=
+  CycleQ2MonicFermatCoefficientOpen.regularLattice genericFrameKernel
+
+/-- Finite regular generators for the actual residue kernel, together
+with their original generic span and all 44 connection identities. -/
+theorem exists_regularFrameKernel_generators :
+    ∃ (s : ℕ)
+      (P : Matrix Label (Fin s) CycleQ2MonicFermatCoefficientOpen.OpenCoefficients)
+      (C : FullSexticTailIndex → Matrix (Fin s) (Fin s)
+        CycleQ2MonicFermatCoefficientOpen.OpenCoefficients),
+      LinearMap.range P.mulVecLin = regularFrameKernel ∧
+      LinearMap.range (P.map CycleQ2MonicFermatCoefficientOpen.toGeneric).mulVecLin =
+        genericFrameKernel ∧
+      ∀ e, P.map (CycleQ2MonicFermatCoefficientOpen.coefficientPartial e) =
+        P * C e - CycleQ2MonicFermatCoefficientOpen.regularConnection e * P := by
+  apply CycleQ2MonicFermatCoefficientOpen.exists_regularLattice_generators genericFrameKernel
+  intro e u hu
+  have h := genericFrameKernel_coefficient_stable e u hu
+  simpa only [fractionCoefficientPartial_eq_generic,genericFrameConnection_eq_regular] using h
+
 /-- Differentiating an exact normalized residue gives the exact literal
 polynomial-pole connection expression, with no extra pole-order factor. -/
 theorem normalized_coefficient_preserves_exact (e : FullSexticTailIndex) (k : ℕ)
@@ -1627,6 +1666,30 @@ theorem protected_source_in_genericFrame :
       2 (CycleQ2UniversalPoleFrame.protectedNumerator (K := K)))) = _
   rw [genericFrameEquationEquiv_symbol,genericResidueRealization_protected_source]
 
+/-- Fullness of the actual rational residue kernel supplies the unchanged
+protected exterior-form primitive. The factor two in the normalized source
+is removed over the coefficient field before the existing specialization
+and descent theorem is applied. -/
+theorem protected_exact_of_genericFrameKernel_eq_top (h : genericFrameKernel = ⊤) :
+    ∃ η : CycleQ2AffineExterior.Form 3, CycleQ2AffineExterior.exteriorD3 η =
+      CycleQ2AffineExactness.residueSourceForm CycleQ2AffineClearing.affineA := by
+  apply CycleQ2UniversalWeightedDeRham.protected_exact_of_source_exact
+  obtain ⟨u,hu⟩ := protected_source_in_genericFrame
+  have hz : genericFrameRealization u = 0 := by
+    change u ∈ genericFrameKernel
+    rw [h]
+    trivial
+  have hclass : (LinearMap.range exteriorDerivative).mkQ ((2 : W) • sourceForm) = 0 :=
+    hu.symm.trans hz
+  rw [Submodule.mkQ_apply,Submodule.Quotient.mk_eq_zero] at hclass
+  have hscale : (2 : W) • sourceForm = (2 : K) • sourceForm :=
+    (Nat.cast_smul_eq_nsmul W 2 sourceForm).trans
+      (Nat.cast_smul_eq_nsmul K 2 sourceForm).symm
+  rw [hscale] at hclass
+  obtain ⟨η,hη⟩ := hclass
+  refine ⟨(2 : K)⁻¹ • η,?_⟩
+  rw [map_smul,hη,smul_smul,inv_mul_cancel₀ (two_ne_zero : (2 : K) ≠ 0),one_smul]
+
 end Chart
 end CycleQ2WeightedPoleJets
 #print axioms CycleQ2WeightedPoleJets.fiberTangent_residue
@@ -1649,5 +1712,764 @@ end CycleQ2WeightedPoleJets
 #print axioms CycleQ2WeightedPoleJets.genericResidueKernel_coefficient_stable
 #print axioms CycleQ2WeightedPoleJets.genericSymbolFrame_injective
 #print axioms CycleQ2WeightedPoleJets.genericFrameKernel_coefficient_stable
+#print axioms CycleQ2WeightedPoleJets.genericFrameConnection_eq_regular
+#print axioms CycleQ2WeightedPoleJets.exists_regularFrameKernel_generators
 #print axioms CycleQ2WeightedPoleJets.protected_source_in_genericFrame
+#print axioms CycleQ2WeightedPoleJets.protected_exact_of_genericFrameKernel_eq_top
 #print axioms CycleQ2WeightedPoleJets.normalized_coefficient_preserves_exact
+
+/-!
+# Constant total rank of the actual regular kernel at Fermat
+
+A nonzero minor at one field-valued point is a nonzero minor over the
+coefficient open. Differential simplicity makes its minor ideal the unit
+ideal, so every other field-valued point has at least that rank. Applying
+this in both directions identifies the Fermat and generic total ranks.
+-/
+
+noncomputable section
+namespace CycleQ2MonicFermatCoefficientOpen
+
+open CycleQ2IncidenceNormalForm (FullSexticTailIndex)
+
+theorem rank_specialization_le {n s : Type*} [Fintype n] [Fintype s]
+    (P : Matrix n s OpenCoefficients)
+    (B : FullSexticTailIndex → Matrix n n OpenCoefficients)
+    (C : FullSexticTailIndex → Matrix s s OpenCoefficients)
+    (h : ∀ e, P.map (coefficientPartial e) = P * C e - B e * P)
+    {L₁ L₂ : Type*} [Field L₁] [Field L₂]
+    (ρ : OpenCoefficients →+* L₁) (τ : OpenCoefficients →+* L₂) :
+    (P.map ρ).rank ≤ (P.map τ).rank := by
+  classical
+  obtain ⟨I, J, _, hdet, _⟩ := CycleQ2ArithmeticSpecialization.exists_rank_witness (P.map ρ)
+  apply rank_specialize_ge P B C h (P.map ρ).rank ⟨I, J, ?_⟩ τ
+  intro hz
+  apply hdet
+  change ((P.submatrix I J).map ρ).det = 0
+  rw [← RingHom.map_det, hz, map_zero]
+
+/-- Stability makes total rank constant at every field-valued point of
+the fixed coefficient open. The statement concerns the full generator matrix. -/
+theorem rank_specializations_eq {n s : Type*} [Fintype n] [Fintype s]
+    (P : Matrix n s OpenCoefficients)
+    (B : FullSexticTailIndex → Matrix n n OpenCoefficients)
+    (C : FullSexticTailIndex → Matrix s s OpenCoefficients)
+    (h : ∀ e, P.map (coefficientPartial e) = P * C e - B e * P)
+    {L₁ L₂ : Type*} [Field L₁] [Field L₂]
+    (ρ : OpenCoefficients →+* L₁) (τ : OpenCoefficients →+* L₂) :
+    (P.map ρ).rank = (P.map τ).rank :=
+  le_antisymm (rank_specialization_le P B C h ρ τ) (rank_specialization_le P B C h τ ρ)
+
+theorem rank_fermat_eq_generic {n s : Type*} [Fintype n] [Fintype s]
+    (P : Matrix n s OpenCoefficients)
+    (B : FullSexticTailIndex → Matrix n n OpenCoefficients)
+    (C : FullSexticTailIndex → Matrix s s OpenCoefficients)
+    (h : ∀ e, P.map (coefficientPartial e) = P * C e - B e * P) :
+    (P.map fermatEvaluation).rank = (P.map toGeneric).rank :=
+  rank_specializations_eq P B C h fermatEvaluation toGeneric.toRingHom
+
+end CycleQ2MonicFermatCoefficientOpen
+
+namespace CycleQ2WeightedPoleJets
+
+open CycleQ2UniversalPoleFrame (Label)
+open CycleQ2IncidenceNormalForm (FullSexticTailIndex)
+open CycleQ2MonicFermatCoefficientOpen
+
+/-- The same finite generators retain the dimension of the actual generic
+rational residue kernel at the Fermat point. No rank-preservation hypothesis
+or replacement kernel occurs in this conclusion. -/
+theorem exists_regularFrameKernel_generators_with_rank :
+    ∃ (s : ℕ) (P : Matrix Label (Fin s) OpenCoefficients)
+      (C : FullSexticTailIndex → Matrix (Fin s) (Fin s) OpenCoefficients),
+      LinearMap.range P.mulVecLin = regularFrameKernel ∧
+      LinearMap.range (P.map toGeneric).mulVecLin = genericFrameKernel ∧
+      (∀ e, P.map (CycleQ2MonicFermatCoefficientOpen.coefficientPartial e) =
+        P * C e - regularConnection e * P) ∧
+      (P.map fermatEvaluation).rank = Module.finrank GenericCoefficients genericFrameKernel := by
+  obtain ⟨s, P, C, hP, hgeneric, hC⟩ := exists_regularFrameKernel_generators
+  refine ⟨s, P, C, hP, hgeneric, hC, ?_⟩
+  calc
+    (P.map fermatEvaluation).rank = (P.map toGeneric).rank :=
+      rank_fermat_eq_generic P regularConnection C hC
+    _ = Module.finrank GenericCoefficients genericFrameKernel := by
+      change Module.finrank GenericCoefficients (LinearMap.range (P.map toGeneric).mulVecLin) = _
+      rw [hgeneric]
+
+end CycleQ2WeightedPoleJets
+end
+
+#print axioms CycleQ2MonicFermatCoefficientOpen.rank_fermat_eq_generic
+#print axioms CycleQ2WeightedPoleJets.exists_regularFrameKernel_generators_with_rank
+
+/-!
+# The actual prime operator on a specialized coefficient lattice
+
+Finite relation certificates identify a modeled matrix with the literal
+polynomial-pole connection. Its prime iterate is scalar-linear, so it can
+be evaluated at Fermat. The explicit pole calculation identifies every
+column with the normalized arithmetic prime matrix. Consequently a lattice
+whose generator identities descend has an invariant Fermat fiber for
+exactly that matrix.
+-/
+
+noncomputable section
+namespace CycleQ2LocalizedPrimeFrame
+
+open MvPolynomial
+open CycleQ2PolynomialPoleSymbols
+open CycleQ2PolynomialCoefficientDerivation (coefficientDerivation coefficientDerivation_monomial)
+open CycleQ2UniversalPoleFrame (Label)
+open CycleQ2PoleRelationDescent
+open CycleQ2FermatPrimeCoefficient (Sector source pole)
+open CycleQ2FermatSymbolDetector
+open CycleQ2FermatJacobian (exponent)
+open CycleQ2FermatHiggs (tangentMonomial)
+open CycleQ2GeometricHiggsGradedIndices (exp_upperIndex exp_lowerIndex)
+open CycleQ2IncidenceNormalForm (fullExponentOf)
+open CycleQ2ArithmeticSpecialization (parameterPartial parameterPartial_algebraMap
+  monicOpenEquation monicOpenEquation_velocity)
+open CycleQ2PrimeConnection (matrixConnection primeMatrix primeMatrix_mulVec)
+
+section FermatEvaluation
+
+variable {R K : Type*} [CommRing R] [Field K]
+
+/-- Specialization of the actual pole quotient, retaining the equality
+with the Fermat equation rather than a second abstract frame. -/
+def atFermat (F : MvPolynomial (Fin 5) R) (ρ : R →+* K)
+    (hF : MvPolynomial.map ρ F = fermatPolynomial K) :
+    Symbols R F →ₛₗ[ρ] Symbols K (fermatPolynomial K) :=
+  (Submodule.quotEquivOfEq _ _ (congrArg (relations K) hF)).toLinearMap.comp
+    (specialize ρ F)
+
+theorem atFermat_symbol (F : MvPolynomial (Fin 5) R) (ρ : R →+* K)
+    (hF : MvPolynomial.map ρ F = fermatPolynomial K) (n : ℕ)
+    (P : MvPolynomial (Fin 5) R) :
+    atFermat F ρ hF (symbol R F n P) =
+      symbol K (fermatPolynomial K) n (MvPolynomial.map ρ P) := by
+  change (Submodule.quotEquivOfEq _ _ (congrArg (relations K) hF))
+    (specialize ρ F (symbol R F n P)) = _
+  rw [specialize_symbol]
+  rfl
+
+theorem frameBasis_eq_symbol (F : MvPolynomial (Fin 5) R) (s : Sector) :
+    frameBasis F s = symbol R F (pole s - 1) (monomial (exponent (source s)) 1) := by
+  have hsingle (n : ℕ) (P : MvPolynomial (Fin 5) R) :
+      (relations R F).mkQ (Finsupp.single n P) = symbol R F n P := rfl
+  cases s <;> simp only [frameBasis,rawBasis,hsingle,source,pole,exp_upperIndex,exp_lowerIndex]
+
+theorem atFermat_frameBasis (F : MvPolynomial (Fin 5) R) (ρ : R →+* K)
+    (hF : MvPolynomial.map ρ F = fermatPolynomial K) (s : Sector) :
+    atFermat F ρ hF (frameBasis F s) = frame K s := by
+  rw [frameBasis_eq_symbol,atFermat_symbol]
+  simp only [map_monomial,map_one,frame]
+
+theorem frameRealization_single (F : MvPolynomial (Fin 5) R) (s : Label) :
+    frameRealization F (Pi.single s 1) = frameBasis F s := by
+  change (relations R F).mkQ (rawFrame R (Pi.single s 1)) = _
+  rw [rawFrame_single]
+  rfl
+
+theorem atFermat_coordinates [NeZero (6 : K)]
+    (F : MvPolynomial (Fin 5) R) (ρ : R →+* K)
+    (hF : MvPolynomial.map ρ F = fermatPolynomial K) (v : Label → R) (s : Sector) :
+    normalForm K s (atFermat F ρ hF (frameRealization F v)) = ρ (v s) := by
+  classical
+  rw [frameRealization_apply]
+  simp only [map_sum,map_smulₛₗ,atFermat_frameBasis,map_smul,normalForm_frame,
+    smul_eq_mul,mul_ite,mul_one,mul_zero]
+  simp only [Finset.sum_ite_eq',Finset.mem_univ,if_true]
+
+theorem frameRealization_iterate (D : Derivation ℤ R R) (F : MvPolynomial (Fin 5) R)
+    (B : Matrix Label Label R)
+    (hB : ∀ v, frameRealization F (matrixConnection D B v) =
+      connection D F (frameRealization F v)) (n : ℕ) (v : Label → R) :
+    frameRealization F ((matrixConnection D B)^[n] v) =
+      (connection D F)^[n] (frameRealization F v) := by
+  induction n with
+  | zero => rfl
+  | succ n ih => rw [Function.iterate_succ_apply',hB,ih,Function.iterate_succ_apply']
+
+end FermatEvaluation
+
+section PrimeOperators
+
+variable {K : Type*} [Field K] [NeZero (6 : K)]
+variable (p : ℕ) [Fact p.Prime] [NeZero (6 : ZMod p)] (ι : ZMod p →+* K)
+variable (d : TailRing K) (ρ : Localization.Away d →+* K)
+    (hF : MvPolynomial.map ρ (monicOpenEquation d) = fermatPolynomial K)
+
+/-- The localized coefficient derivative has precisely the already
+computed normalized Fermat prime entries on each of the 66 basis symbols. -/
+theorem iterate_basis_coordinate (m : Fin 35) (s u : Sector) :
+    normalForm K u
+      (atFermat (monicOpenEquation d) ρ hF
+        ((connection (parameterPartial d (tangentTail m)) (monicOpenEquation d))^[p]
+          (frameBasis (monicOpenEquation d) s))) =
+      CycleQ2FermatNormalizedPrime.matrix ι m u s := by
+  let D := parameterPartial d (tangentTail m)
+  let F := monicOpenEquation d
+  let P : MvPolynomial (Fin 5) (Localization.Away d) := monomial (exponent (source s)) 1
+  have hP : coefficientDerivation D P = 0 := by
+    simp only [P,coefficientDerivation_monomial,Derivation.map_one_eq_zero,map_zero]
+  have hV : coefficientDerivation D (coefficientDerivation D F) = 0 := by
+    rw [monicOpenEquation_velocity]
+    simp only [coefficientDerivation_monomial,Derivation.map_one_eq_zero,map_zero]
+  have he : p • fullExponentOf (tangentTail m).val.val + exponent (source s) =
+      exponent (fun i => source s i + p*tangentMonomial m i) := by
+    rw [tangentTail_exponent]
+    ext i
+    simp [Nat.add_comm]
+  rw [frameBasis_eq_symbol,iterate_connection_symbol D F P (pole s - 1) hP hV p,
+    map_smulₛₗ,atFermat_symbol,monicOpenEquation_velocity]
+  simp only [map_pow,map_neg,map_one,map_mul,map_monomial,monomial_pow,
+    one_pow,monomial_mul,one_mul,he]
+  exact normalized_primeCoordinate_map p ι s u m
+
+/-- Evaluation of the prime iterate matrix is the actual normalized
+arithmetic matrix, column by column. -/
+theorem primeMatrix_atFermat [CharP (Localization.Away d) p]
+    (m : Fin 35) (B : Matrix Label Label (Localization.Away d))
+    (hB : ∀ v, frameRealization (monicOpenEquation d)
+      (matrixConnection (parameterPartial d (tangentTail m)) B v) =
+        connection (parameterPartial d (tangentTail m)) (monicOpenEquation d)
+          (frameRealization (monicOpenEquation d) v))
+    (hD : ∀ a, (parameterPartial d (tangentTail m))^[p] a = 0) :
+    (primeMatrix (parameterPartial d (tangentTail m)) B p (Fact.out : p.Prime) hD).map ρ =
+      CycleQ2FermatNormalizedPrime.matrix ι m := by
+  classical
+  ext u s
+  change ρ (primeMatrix (parameterPartial d (tangentTail m)) B p (Fact.out : p.Prime) hD u s) = _
+  calc
+    _ = normalForm K u (atFermat (monicOpenEquation d) ρ hF
+        (frameRealization (monicOpenEquation d)
+          ((primeMatrix (parameterPartial d (tangentTail m)) B p (Fact.out : p.Prime) hD).mulVec
+            (Pi.single s 1)))) := by
+      rw [atFermat_coordinates,Matrix.mulVec_single_one]
+    _ = normalForm K u (atFermat (monicOpenEquation d) ρ hF
+        ((connection (parameterPartial d (tangentTail m)) (monicOpenEquation d))^[p]
+          (frameBasis (monicOpenEquation d) s))) := by
+      rw [primeMatrix_mulVec,frameRealization_iterate _ _ B hB,frameRealization_single]
+    _ = _ := iterate_basis_coordinate p ι d ρ hF m s u
+
+/-- Both inputs here are literal descended identities: the ambient
+pole-connection formula and the finite generator connection formula.
+Together they give invariance of the actual Fermat fiber under the
+normalized arithmetic prime matrix. -/
+theorem normalized_prime_stable_fiber [CharP K p] [CharP (Localization.Away d) p]
+    {s : Type*} [Fintype s] (m : Fin 35)
+    (B : Matrix Label Label (Localization.Away d))
+    (P : Matrix Label s (Localization.Away d)) (C : Matrix s s (Localization.Away d))
+    (hB : ∀ v, frameRealization (monicOpenEquation d)
+      (matrixConnection (parameterPartial d (tangentTail m)) B v) =
+        connection (parameterPartial d (tangentTail m)) (monicOpenEquation d)
+          (frameRealization (monicOpenEquation d) v))
+    (hP : P.map (parameterPartial d (tangentTail m)) = P*C-B*P)
+    (v : Label → K) (hv : v ∈ LinearMap.range (P.map ρ).mulVecLin) :
+    (CycleQ2FermatNormalizedPrime.matrix ι m).mulVec v ∈
+      LinearMap.range (P.map ρ).mulVecLin := by
+  classical
+  have hD : ∀ a, (parameterPartial d (tangentTail m))^[p] a = 0 :=
+    CycleQ2PrimeConnection.localizedPartial_prime_zero (Submonoid.powers d)
+      (tangentTail m) (parameterPartial d (tangentTail m))
+      (parameterPartial_algebraMap d (tangentTail m)) p (Fact.out : p.Prime)
+  have h := CycleQ2PrimeConnection.primeMatrix_specialized_range_stable
+    (parameterPartial d (tangentTail m)) B P
+    (CycleQ2PrimeConnection.matrixConnection_range_stable _ B P C hP)
+    p (Fact.out : p.Prime) hD ρ v hv
+  rw [primeMatrix_atFermat p ι d ρ hF m B hB hD] at h
+  exact h
+
+end PrimeOperators
+end CycleQ2LocalizedPrimeFrame
+end
+
+#print axioms CycleQ2LocalizedPrimeFrame.primeMatrix_atFermat
+#print axioms CycleQ2LocalizedPrimeFrame.normalized_prime_stable_fiber
+
+/-!
+# A finite matrix family for the two-prime rank profile
+
+The full generator matrix and its two coordinate projections have identical
+shapes. Their three ranks determine all four entries of the existing rank
+profile by rank-nullity. This construction uses the same reversed lower
+ordering as the normalized prime actions and commutes with every change of
+constant field. It compares fixed fibers and imposes no constancy of
+projection ranks along the coefficient parameter space.
+-/
+
+noncomputable section
+namespace CycleQ2FermatRankProfile
+
+open CycleQ2FermatPrimeCoefficient (Sector)
+open CycleQ2FermatNormalizedPrime (totalEquiv)
+open CycleQ2FermatStrictGrowth
+
+section Matrices
+
+variable {R s : Type*} [Zero R]
+
+def upperRows (P : Matrix Sector s R) : Matrix Sector s R
+  | .inl i, j => P (.inl i) j
+  | .inr _, _ => 0
+
+def lowerRows (P : Matrix Sector s R) : Matrix Sector s R
+  | .inl _, _ => 0
+  | .inr i, j => P (.inr i) j
+
+/-- Three matrices of the same shape suffice for the total and both
+projection ranks at one specified fiber. -/
+def matrices (P : Matrix Sector s R) : Fin 3 → Matrix Sector s R :=
+  ![P, upperRows P, lowerRows P]
+
+end Matrices
+
+theorem matrices_map {A B s : Type*} [CommRing A] [CommRing B]
+    (ρ : A →+* B) (P : Matrix Sector s A) (i : Fin 3) :
+    matrices (P.map ρ) i = (matrices P i).map ρ := by
+  fin_cases i
+  · rfl
+  · ext u j
+    cases u <;> simp [matrices, upperRows, Matrix.map_apply]
+  · ext u j
+    cases u <;> simp [matrices, lowerRows, Matrix.map_apply]
+
+/-- An injective constant model of the three matrices retains their
+projection identities, rather than three unrelated matrices. -/
+theorem matrices_of_injective_model {A B s : Type*} [CommRing A] [CommRing B]
+    (θ : A →+* B) (hθ : Function.Injective θ)
+    (Q : Fin 3 → Matrix Sector s A) (P : Matrix Sector s B)
+    (hQ : ∀ i, (Q i).map θ = matrices P i) : Q = matrices (Q 0) := by
+  have hzero : (Q 0).map θ = P := by simpa [matrices] using hQ 0
+  funext i
+  have he : (Q i).map θ = (matrices (Q 0) i).map θ := by
+    rw [hQ i, ← matrices_map, hzero]
+  ext u j
+  apply hθ
+  exact congrArg (fun M : Matrix Sector s B => M u j) he
+
+section Fields
+
+variable {K s : Type*} [Field K] [Fintype s]
+
+/-- The column space in the exact upper/lower ordering of the prime
+strict-growth theorem. -/
+def subspace (P : Matrix Sector s K) : Submodule K (Total K) :=
+  (LinearMap.range P.mulVecLin).map (totalEquiv K).toLinearMap
+
+theorem subspace_finrank (P : Matrix Sector s K) :
+    Module.finrank K (subspace P) = P.rank :=
+  (totalEquiv K).finrank_map_eq _
+
+theorem totalEquiv_upperRows_mulVec (P : Matrix Sector s K) (v : s → K) :
+    totalEquiv K ((upperRows P).mulVec v) = ((totalEquiv K (P.mulVec v)).1, 0) := by
+  classical
+  apply Prod.ext
+  · rfl
+  · funext j
+    change (∑ k, (0 : K) * v k) = 0
+    simp only [zero_mul, Finset.sum_const_zero]
+
+theorem totalEquiv_lowerRows_mulVec (P : Matrix Sector s K) (v : s → K) :
+    totalEquiv K ((lowerRows P).mulVec v) = (0, (totalEquiv K (P.mulVec v)).2) := by
+  classical
+  apply Prod.ext
+  · funext i
+    change (∑ k, (0 : K) * v k) = 0
+    simp only [zero_mul, Finset.sum_const_zero]
+  · rfl
+
+theorem upperProjection_finrank (P : Matrix Sector s K) :
+    Module.finrank K (upperProjection K (subspace P)) = (upperRows P).rank := by
+  have he : (totalEquiv K).toLinearMap.comp (upperRows P).mulVecLin =
+      (LinearMap.inl K (Piece K) (Piece K)).comp
+        ((LinearMap.fst K (Piece K) (Piece K)).comp
+          ((totalEquiv K).toLinearMap.comp P.mulVecLin)) := by
+    apply LinearMap.ext
+    exact totalEquiv_upperRows_mulVec P
+  have hr := congrArg LinearMap.range he
+  simp only [LinearMap.range_comp] at hr
+  change (LinearMap.range (upperRows P).mulVecLin).map (totalEquiv K).toLinearMap =
+    (upperProjection K (subspace P)).map (LinearMap.inl K (Piece K) (Piece K)) at hr
+  calc
+    Module.finrank K (upperProjection K (subspace P)) =
+        Module.finrank K ((upperProjection K (subspace P)).map
+          (LinearMap.inl K (Piece K) (Piece K))) :=
+      (Submodule.equivMapOfInjective (LinearMap.inl K (Piece K) (Piece K))
+        (LinearMap.inl_injective ..) _).finrank_eq
+    _ = Module.finrank K ((LinearMap.range (upperRows P).mulVecLin).map
+        (totalEquiv K).toLinearMap) :=
+      congrArg (fun U : Submodule K (Total K) => Module.finrank K U) hr.symm
+    _ = (upperRows P).rank := (totalEquiv K).finrank_map_eq _
+
+theorem lowerProjection_finrank (P : Matrix Sector s K) :
+    Module.finrank K (lowerProjection K (subspace P)) = (lowerRows P).rank := by
+  have he : (totalEquiv K).toLinearMap.comp (lowerRows P).mulVecLin =
+      (LinearMap.inr K (Piece K) (Piece K)).comp
+        ((LinearMap.snd K (Piece K) (Piece K)).comp
+          ((totalEquiv K).toLinearMap.comp P.mulVecLin)) := by
+    apply LinearMap.ext
+    exact totalEquiv_lowerRows_mulVec P
+  have hr := congrArg LinearMap.range he
+  simp only [LinearMap.range_comp] at hr
+  change (LinearMap.range (lowerRows P).mulVecLin).map (totalEquiv K).toLinearMap =
+    (lowerProjection K (subspace P)).map (LinearMap.inr K (Piece K) (Piece K)) at hr
+  calc
+    Module.finrank K (lowerProjection K (subspace P)) =
+        Module.finrank K ((lowerProjection K (subspace P)).map
+          (LinearMap.inr K (Piece K) (Piece K))) :=
+      (Submodule.equivMapOfInjective (LinearMap.inr K (Piece K) (Piece K))
+        (LinearMap.inr_injective ..) _).finrank_eq
+    _ = Module.finrank K ((LinearMap.range (lowerRows P).mulVecLin).map
+        (totalEquiv K).toLinearMap) :=
+      congrArg (fun U : Submodule K (Total K) => Module.finrank K U) hr.symm
+    _ = (lowerRows P).rank := (totalEquiv K).finrank_map_eq _
+
+/-- All four profile entries are determined by the three same-shape
+matrices: upper projection, lower projection, and the two rank differences. -/
+theorem rankProfile_subspace (P : Matrix Sector s K) :
+    rankProfile K (subspace P) =
+      ![(upperRows P).rank, (lowerRows P).rank,
+        P.rank - (lowerRows P).rank, P.rank - (upperRows P).rank] := by
+  have hu := upper_rank_decomposition K (subspace P)
+  have hl := lower_rank_decomposition K (subspace P)
+  rw [upperProjection_finrank, subspace_finrank] at hu
+  rw [lowerProjection_finrank, subspace_finrank] at hl
+  funext i
+  fin_cases i
+  · exact upperProjection_finrank P
+  · exact lowerProjection_finrank P
+  · change Module.finrank K (upperIntersection K (subspace P)) = P.rank - (lowerRows P).rank
+    omega
+  · change Module.finrank K (lowerIntersection K (subspace P)) = P.rank - (upperRows P).rank
+    omega
+
+/-- Rank preservation of one finite family of three matrices gives the
+entire profile equality used by the opposite-prime dichotomy. -/
+theorem rankProfile_eq_of_matrix_ranks {L t : Type*} [Field L] [Fintype t]
+    (P : Matrix Sector s K) (Q : Matrix Sector t L)
+    (h : ∀ i : Fin 3, (matrices P i).rank = (matrices Q i).rank) :
+    rankProfile K (subspace P) = rankProfile L (subspace Q) := by
+  apply rankProfile_eq_of_projection_ranks K (subspace P) (subspace Q)
+  · rw [subspace_finrank, subspace_finrank]
+    simpa [matrices] using h 0
+  · rw [upperProjection_finrank, upperProjection_finrank]
+    simpa [matrices] using h 1
+  · rw [lowerProjection_finrank, lowerProjection_finrank]
+    simpa [matrices] using h 2
+
+end Fields
+
+/-- The three-matrix rank witnesses can be spread at a fixed characteristic
+zero fiber and then used directly for two different residue fields. -/
+theorem rankProfile_specializations_eq {R K L s : Type*}
+    [CommRing R] [Field K] [Field L] [Fintype s]
+    (P : Matrix Sector s R) (ρ : R →+* K) (τ : R →+* L)
+    (h : ∀ i : Fin 3, ((matrices P i).map ρ).rank = ((matrices P i).map τ).rank) :
+    rankProfile K (subspace (P.map ρ)) = rankProfile L (subspace (P.map τ)) := by
+  apply rankProfile_eq_of_matrix_ranks
+  intro i
+  rw [matrices_map, matrices_map]
+  exact h i
+
+end CycleQ2FermatRankProfile
+end
+
+#print axioms CycleQ2FermatRankProfile.rankProfile_subspace
+#print axioms CycleQ2FermatRankProfile.rankProfile_specializations_eq
+
+/-!
+# Prime choices and the literal Fermat point of each constant model
+
+These helpers avoid the finite exceptional prime set and put the same
+integer Fermat point on every modeled principal open. Its evaluation map
+also proves that the localized coefficient ring is nontrivial, so the
+residue-field characteristic is inherited by that localization.
+-/
+
+noncomputable section
+namespace CycleQ2FermatPrimeSpecialization
+
+open MvPolynomial CycleQ2ArithmeticSpecialization
+open CycleQ2MonicFermatCoefficientOpen (integerFermatTail)
+open CycleQ2PolynomialPoleSymbols (TailRing)
+open CycleQ2FermatSymbolDetector (fermatPolynomial)
+
+theorem exists_good_prime (bad : Finset Nat.Primes) (a : ℕ) (ha : a.Coprime 6) :
+    ∃ p : Nat.Primes, p ∉ bad ∧ 6 < (p : ℕ) ∧ (p : ℕ) ≡ a [MOD 6] := by
+  classical
+  obtain ⟨p, hp, hprime, hmod⟩ := Nat.forall_exists_prime_gt_and_modEq
+    (max 6 (bad.sup fun q => (q : ℕ))) (by decide : 6 ≠ 0) ha
+  have hnot : (⟨p, hprime⟩ : Nat.Primes) ∉ bad := by
+    intro hin
+    have hle : p ≤ bad.sup (fun q => (q : ℕ)) := Finset.le_sup hin
+    exact (not_le_of_gt hp) (hle.trans (le_max_right _ _))
+  exact ⟨⟨p, hprime⟩, hnot, (le_max_left _ _).trans_lt hp, hmod⟩
+
+theorem exists_split_prime (bad : Finset Nat.Primes) :
+    ∃ p : Nat.Primes, p ∉ bad ∧ 6 < (p : ℕ) ∧ (p : ℕ) ≡ 1 [MOD 6] :=
+  exists_good_prime bad 1 (by decide)
+
+theorem exists_inert_prime (bad : Finset Nat.Primes) :
+    ∃ p : Nat.Primes, p ∉ bad ∧ 6 < (p : ℕ) ∧ (p : ℕ) ≡ 5 [MOD 6] :=
+  exists_good_prime bad 5 (by decide)
+
+/-- This supplies both the residue-field and prime-field `NeZero` instances. -/
+theorem six_neZero (R : Type*) [Semiring R] (p : ℕ) [CharP R p] (hp : 6 < p) :
+    NeZero (6 : R) := by
+  constructor
+  intro h
+  have hdiv : p ∣ 6 := (CharP.cast_eq_zero_iff R p 6).mp h
+  exact (not_le_of_gt hp) (Nat.le_of_dvd (by decide : 0 < 6) hdiv)
+
+section FermatPoint
+
+variable {K : Type*} [Field K]
+
+/-- The actual integer Fermat assignment on the localized monic parameter ring. -/
+def fermatMap (d : TailRing K) (hd : integerEvaluation K integerFermatTail d = 1) :
+    Localization.Away d →+* K :=
+  localizedIntegerEvaluation d integerFermatTail hd
+
+theorem fermatMap_algebraMap (d : TailRing K)
+    (hd : integerEvaluation K integerFermatTail d = 1) (f : TailRing K) :
+    fermatMap d hd (algebraMap (TailRing K) (Localization.Away d) f) =
+      integerEvaluation K integerFermatTail f :=
+  localizedIntegerEvaluation_algebraMap d integerFermatTail hd f
+
+theorem fermatMap_equation (d : TailRing K)
+    (hd : integerEvaluation K integerFermatTail d = 1) :
+    MvPolynomial.map (fermatMap d hd) (monicOpenEquation d) = fermatPolynomial K := by
+  have he : (fermatMap d hd).comp (algebraMap (TailRing K) (Localization.Away d)) =
+      integerEvaluation K integerFermatTail := by
+    apply RingHom.ext
+    exact fermatMap_algebraMap d hd
+  rw [monicOpenEquation, MvPolynomial.map_map, he]
+  exact CycleQ2MonicFermatCoefficientOpen.map_monicFamily_integerFermat K
+
+theorem localization_nontrivial (d : TailRing K)
+    (hd : integerEvaluation K integerFermatTail d = 1) : Nontrivial (Localization.Away d) := by
+  refine ⟨⟨0, 1, ?_⟩⟩
+  intro h
+  have hz : (0 : K) = 1 := by
+    simpa only [map_zero, map_one] using congrArg (fermatMap d hd) h
+  exact zero_ne_one hz
+
+theorem localization_charP (d : TailRing K)
+    (hd : integerEvaluation K integerFermatTail d = 1) (p : ℕ) [CharP K p] :
+    CharP (Localization.Away d) p := by
+  letI : Nontrivial (Localization.Away d) := localization_nontrivial d hd
+  exact charP_of_injective_algebraMap (algebraMap K (Localization.Away d)).injective p
+
+end FermatPoint
+
+/-- At the original complex coefficient open, the arithmetic evaluation
+is the Fermat evaluation already used in the generic-rank theorem. -/
+theorem localizedIntegerEvaluation_eq_fermatEvaluation :
+    localizedIntegerEvaluation
+      (CycleQ2PolynomialCoefficientOpen.denominator CycleQ2MonicFermatCoefficientOpen.rawToMonic)
+      integerFermatTail CycleQ2MonicFermatCoefficientOpen.integerFermat_denominator =
+        CycleQ2MonicFermatCoefficientOpen.fermatEvaluation := by
+  apply IsLocalization.ringHom_ext (Submonoid.powers
+    (CycleQ2PolynomialCoefficientOpen.denominator CycleQ2MonicFermatCoefficientOpen.rawToMonic))
+  apply RingHom.ext
+  intro f
+  change localizedIntegerEvaluation
+      (CycleQ2PolynomialCoefficientOpen.denominator CycleQ2MonicFermatCoefficientOpen.rawToMonic)
+      integerFermatTail CycleQ2MonicFermatCoefficientOpen.integerFermat_denominator
+      (CycleQ2MonicFermatCoefficientOpen.toOpen f) =
+    CycleQ2MonicFermatCoefficientOpen.fermatEvaluation (CycleQ2MonicFermatCoefficientOpen.toOpen f)
+  rw [localizedIntegerEvaluation_algebraMap,
+    CycleQ2PolynomialCoefficientOpen.fermatEvaluation_toOpen]
+  exact congrArg (fun ρ : CycleQ2MonicFermatCoefficientOpen.Parameters →+* ℂ => ρ f)
+    CycleQ2MonicFermatCoefficientOpen.integerFermat_evaluation
+
+end CycleQ2FermatPrimeSpecialization
+end
+
+#print axioms CycleQ2FermatPrimeSpecialization.exists_split_prime
+#print axioms CycleQ2FermatPrimeSpecialization.exists_inert_prime
+#print axioms CycleQ2FermatPrimeSpecialization.fermatMap_equation
+#print axioms CycleQ2FermatPrimeSpecialization.localization_charP
+#print axioms CycleQ2FermatPrimeSpecialization.localizedIntegerEvaluation_eq_fermatEvaluation
+
+/-!
+# Arithmetic simplicity of the actual generic rational residue kernel
+
+The regular lattice, finite relation certificates, fixed Fermat rank
+witnesses, and literal prime operators now enter one argument. Two good
+prime fibers have the same four-part rank profile. Their opposite strict
+growth forces both fibers to be zero or full, and constant total rank
+transfers that conclusion to the original generic rational residue kernel.
+No nonzero kernel vector is asserted by this arithmetic argument.
+-/
+
+noncomputable section
+namespace CycleQ2ArithmeticKernelSimplicity
+
+open MvPolynomial
+open CycleQ2UniversalPoleFrame (Label)
+open CycleQ2IncidenceNormalForm (FullSexticTailIndex)
+open CycleQ2PolynomialPoleSymbols (TailRing monicFamily connection)
+open CycleQ2PoleRelationDescent
+open CycleQ2ArithmeticSpecialization
+open CycleQ2MonicFermatCoefficientOpen (integerFermatTail)
+open CycleQ2FermatPrimeSpecialization
+open CycleQ2FermatRankProfile (matrices subspace)
+open CycleQ2FermatSymbolDetector (tangentTail)
+
+/-- Specializing the constants in a retained monic connection model gives
+prime stability of the evaluation of that same generator matrix. -/
+private theorem model_prime_stable {A K s : Type*}
+    [CommRing A] [Field K] [Fintype s] [NeZero (6 : K)]
+    (p : ℕ) [Fact p.Prime] [CharP K p] [NeZero (6 : ZMod p)]
+    (ι : ZMod p →+* K) (θ : A →+* K)
+    (d : TailRing A) (hd : integerEvaluation A integerFermatTail d = 1)
+    (P : Matrix Label s (Localization.Away d))
+    (B : FullSexticTailIndex → Matrix Label Label (Localization.Away d))
+    (C : FullSexticTailIndex → Matrix s s (Localization.Away d))
+    (hP : ∀ e, P.map (parameterPartial d e) = P*C e-B e*P)
+    (w : FullSexticTailIndex × Label → RelationWitness (Localization.Away d))
+    (hw : ∀ e j, relationMap (monicOpenEquation d) (w (e,j)) =
+      connectionDefect (parameterPartial d e) (monicOpenEquation d) (B e) j)
+    (m : Fin 35) (v : Label → K)
+    (hv : v ∈ LinearMap.range
+      ((P.map (localizedIntegerEvaluation d integerFermatTail hd)).map θ).mulVecLin) :
+    (CycleQ2FermatNormalizedPrime.matrix ι m).mulVec v ∈ LinearMap.range
+      ((P.map (localizedIntegerEvaluation d integerFermatTail hd)).map θ).mulVecLin := by
+  let dK := MvPolynomial.map θ d
+  have hdK : integerEvaluation K integerFermatTail dK = 1 := by
+    rw [integerEvaluation_map,hd,map_one]
+  let φ := coefficientOpenMap θ d dK rfl
+  let ε := fermatMap dK hdK
+  letI : CharP (Localization.Away dK) p := localization_charP dK hdK p
+  have hpoint : (P.map φ).map ε =
+      (P.map (localizedIntegerEvaluation d integerFermatTail hd)).map θ := by
+    ext i j
+    exact coefficientOpenMap_integerEvaluation θ d dK rfl integerFermatTail hd hdK (P i j)
+  have hB' := monic_frame_connection_map θ d dK rfl (tangentTail m)
+    (B (tangentTail m)) (fun j => w (tangentTail m,j)) (hw (tangentTail m))
+  have hP' := connection_identity_map θ d dK rfl (tangentTail m)
+    P (B (tangentTail m)) (C (tangentTail m)) (hP (tangentTail m))
+  have hv' : v ∈ LinearMap.range ((P.map φ).map ε).mulVecLin := by
+    rw [hpoint]
+    exact hv
+  have h := CycleQ2LocalizedPrimeFrame.normalized_prime_stable_fiber p ι dK ε
+    (fermatMap_equation dK hdK) m ((B (tangentTail m)).map φ) (P.map φ)
+    ((C (tangentTail m)).map φ) hB' hP' v hv'
+  rwa [hpoint] at h
+
+/-- The actual generic rational residue kernel is zero or the whole
+66-dimensional normalized frame. This theorem uses the proved finite
+coefficient model and two actual good prime specializations. -/
+theorem genericFrameKernel_eq_bot_or_top :
+    CycleQ2WeightedPoleJets.genericFrameKernel = ⊥ ∨
+      CycleQ2WeightedPoleJets.genericFrameKernel = ⊤ := by
+  classical
+  obtain ⟨s,P,C,hregular,hgeneric,hconnection,hrank⟩ :=
+    CycleQ2WeightedPoleJets.exists_regularFrameKernel_generators_with_rank
+  let d := CycleQ2PolynomialCoefficientOpen.denominator CycleQ2MonicFermatCoefficientOpen.rawToMonic
+  let B := CycleQ2MonicFermatCoefficientOpen.regularConnection
+  have hP : ∀ e, P.map (parameterPartial d e) = P*C e-B e*P := hconnection
+  have hB : ∀ e v, frameRealization (monicOpenEquation d)
+      (fun i => parameterPartial d e (v i) + (B e).mulVec v i) =
+        connection (parameterPartial d e) (monicOpenEquation d)
+          (frameRealization (monicOpenEquation d) v) := by
+    intro e v
+    change frameRealization
+        (MvPolynomial.map CycleQ2MonicFermatCoefficientOpen.toOpen (monicFamily ℂ))
+        (fun i => CycleQ2MonicFermatCoefficientOpen.coefficientPartial e (v i) + (B e).mulVec v i) =
+      connection (CycleQ2MonicFermatCoefficientOpen.coefficientPartial e)
+        (MvPolynomial.map CycleQ2MonicFermatCoefficientOpen.toOpen (monicFamily ℂ))
+        (frameRealization
+          (MvPolynomial.map CycleQ2MonicFermatCoefficientOpen.toOpen (monicFamily ℂ)) v)
+    rw [← CycleQ2MonicFermatCoefficientOpen.equation_monic,frameRealization_universal]
+    exact CycleQ2MonicFermatCoefficientOpen.regularConnection_spec e v
+  let M := matrices (P.map CycleQ2MonicFermatCoefficientOpen.fermatEvaluation)
+  obtain ⟨S,hfinite,hextra,dS,hdS,PS,BS,CS,hPS,hBS,hCS,hPC,wS,hwS,Q,hQ,bad,hbad⟩ :=
+    finite_monic_connection_model d P B C hP hB M ∅
+  have hdS0 : integerEvaluation S integerFermatTail dS = 1 :=
+    integerEvaluation_eq_one_of_map S.val.toRingHom Subtype.val_injective
+      dS d hdS integerFermatTail CycleQ2MonicFermatCoefficientOpen.integerFermat_denominator
+  have hPS0 : PS.map (localizedIntegerEvaluation dS integerFermatTail hdS0) = Q 0 := by
+    apply integerEvaluation_matrix_identify S.val.toRingHom Subtype.val_injective
+      dS d hdS integerFermatTail hdS0
+      CycleQ2MonicFermatCoefficientOpen.integerFermat_denominator PS (Q 0)
+    rw [hPS,localizedIntegerEvaluation_eq_fermatEvaluation]
+    exact hQ 0
+  have hQprojection : Q = matrices (Q 0) :=
+    CycleQ2FermatRankProfile.matrices_of_injective_model S.val.toRingHom
+      Subtype.val_injective Q (P.map CycleQ2MonicFermatCoefficientOpen.fermatEvaluation) hQ
+  obtain ⟨p,hpbad,hp,hpsplit⟩ := exists_split_prime bad
+  obtain ⟨q,hqbad,hq,hqinert⟩ := exists_inert_prime bad
+  letI : Fact (p : ℕ).Prime := ⟨p.property⟩
+  letI : Fact (q : ℕ).Prime := ⟨q.property⟩
+  let L := AlgebraicClosure (ZMod (p : ℕ))
+  let L' := AlgebraicClosure (ZMod (q : ℕ))
+  letI : CharP L (p : ℕ) :=
+    charP_of_injective_algebraMap (algebraMap (ZMod (p : ℕ)) L).injective (p : ℕ)
+  letI : CharP L' (q : ℕ) :=
+    charP_of_injective_algebraMap (algebraMap (ZMod (q : ℕ)) L').injective (q : ℕ)
+  letI : NeZero (6 : ZMod (p : ℕ)) := six_neZero _ (p : ℕ) hp
+  letI : NeZero (6 : ZMod (q : ℕ)) := six_neZero _ (q : ℕ) hq
+  letI : NeZero (6 : L) := six_neZero L (p : ℕ) hp
+  letI : NeZero (6 : L') := six_neZero L' (q : ℕ) hq
+  obtain ⟨θ,hθ,_⟩ := hbad p hpbad L
+  obtain ⟨θ',hθ',_⟩ := hbad q hqbad L'
+  let ι : ZMod (p : ℕ) →+* L := algebraMap _ _
+  let κ : ZMod (q : ℕ) →+* L' := algebraMap _ _
+  have hstable : ∀ m v, v ∈ LinearMap.range ((Q 0).map θ).mulVecLin →
+      (CycleQ2FermatNormalizedPrime.matrix ι m).mulVec v ∈
+        LinearMap.range ((Q 0).map θ).mulVecLin := by
+    intro m v hv
+    rw [← hPS0] at hv ⊢
+    exact model_prime_stable (p : ℕ) ι θ dS hdS0 PS BS CS hPC wS hwS m v hv
+  have hstable' : ∀ m v, v ∈ LinearMap.range ((Q 0).map θ').mulVecLin →
+      (CycleQ2FermatNormalizedPrime.matrix κ m).mulVec v ∈
+        LinearMap.range ((Q 0).map θ').mulVecLin := by
+    intro m v hv
+    rw [← hPS0] at hv ⊢
+    exact model_prime_stable (q : ℕ) κ θ' dS hdS0 PS BS CS hPC wS hwS m v hv
+  have hprofile : CycleQ2FermatStrictGrowth.rankProfile L (subspace ((Q 0).map θ)) =
+      CycleQ2FermatStrictGrowth.rankProfile L' (subspace ((Q 0).map θ')) := by
+    apply CycleQ2FermatRankProfile.rankProfile_specializations_eq (Q 0) θ θ'
+    intro i
+    rw [← congrFun hQprojection i]
+    exact (hθ i).trans (hθ' i).symm
+  have hdim : Module.finrank L (subspace ((Q 0).map θ)) =
+      Module.finrank CycleQ2MonicFermatCoefficientOpen.GenericCoefficients
+        CycleQ2WeightedPoleJets.genericFrameKernel := by
+    rw [CycleQ2FermatRankProfile.subspace_finrank,hθ 0]
+    exact hrank
+  obtain (hzero | hfull) := CycleQ2FermatNormalizedPrime.opposite_prime_dichotomy
+    ι κ hp hpsplit hq hqinert (subspace ((Q 0).map θ)) (subspace ((Q 0).map θ'))
+    (CycleQ2FermatNormalizedPrime.split_stable ι hp hpsplit
+      (LinearMap.range ((Q 0).map θ).mulVecLin) hstable)
+    (CycleQ2FermatNormalizedPrime.inert_stable κ hq hqinert
+      (LinearMap.range ((Q 0).map θ').mulVecLin) hstable') hprofile
+  · left
+    apply Submodule.finrank_eq_zero.mp
+    rw [← hdim,hzero.1]
+    simp
+  · right
+    apply Submodule.eq_top_of_finrank_eq
+    rw [← hdim,hfull.1]
+    simp [CycleQ2FermatStrictGrowth.Total,CycleQ2FermatStrictGrowth.Piece,
+      CycleQ2UniversalPoleFrame.Label,Module.finrank_prod,Module.finrank_pi]
+
+/-- Once geometry supplies a nonzero vector in the actual rational
+residue kernel, arithmetic simplicity gives the unchanged protected
+exterior-form primitive. The nonzero vector remains the geometric task. -/
+theorem protected_exact_of_genericFrameKernel_ne_bot
+    (h : CycleQ2WeightedPoleJets.genericFrameKernel ≠ ⊥) :
+    ∃ η : CycleQ2AffineExterior.Form 3, CycleQ2AffineExterior.exteriorD3 η =
+      CycleQ2AffineExactness.residueSourceForm CycleQ2AffineClearing.affineA :=
+  CycleQ2WeightedPoleJets.protected_exact_of_genericFrameKernel_eq_top
+    (genericFrameKernel_eq_bot_or_top.resolve_left h)
+
+end CycleQ2ArithmeticKernelSimplicity
+end
+
+#print axioms CycleQ2ArithmeticKernelSimplicity.genericFrameKernel_eq_bot_or_top
+#print axioms CycleQ2ArithmeticKernelSimplicity.protected_exact_of_genericFrameKernel_ne_bot
