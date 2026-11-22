@@ -2,6 +2,8 @@ import Proposal.GeometricHodgeTwistConstantSections
 import Proposal.GeometricAffineChartSections
 import Proposal.GeometricHodgeThreefoldLiteral
 import Proposal.GeometricLiteralThreefoldResidueGluing
+import Proposal.GeometricLiteralThreefoldResidueContraction
+import Proposal.GeometricLiteralAbelJacobiQChartTarget
 
 /-!
 # Canonical constants on the original monic weighted threefold
@@ -428,3 +430,192 @@ end
 #print axioms CycleQ2LiteralThreefoldTopTrace.canonicalSectionTrace_coefficient
 #print axioms CycleQ2LiteralThreefoldTopTrace.canonicalTrace_connecting
 #print axioms CycleQ2LiteralThreefoldTopTrace.canonicalClass_one_ne_zero
+
+/-!
+## The original chart pullback in the localized cubic coordinates
+
+The shifted native chart algebra and the unshifted cubic are compared
+through the actual projective chart morphisms. Consequently the scalar
+map below is the pullback by `literalIso`, followed by the same genuine
+homogeneous localization used to define the Laurent trace.
+-/
+
+noncomputable section
+namespace CycleQ2LiteralThreefoldCubicSectionComparison
+
+open CategoryTheory AlgebraicGeometry
+open CycleQ2GeometricHodgeThreefold
+open CycleQ2GeometricHodgeThreefoldIncidence
+open CycleQ2LiteralAbelJacobiContraction (T)
+open CycleQ2LiteralAmbientCharts (fixedOpen fixedChart chartInclusion)
+open CycleQ2LiteralAmbientCylinder (point nativeToIncidence)
+open CycleQ2LiteralAbelJacobiQCoordinates
+open CycleQ2LiteralAbelJacobiQChartSource (sexticInclusion)
+open CycleQ2LiteralAbelJacobiQChartTarget
+open CycleQ2NativeSexticChartComparison (toAffine toAffine_fraction toAffine_inclusion)
+open CycleQ2LiteralThreefoldCubicCoordinates (LocalCubic localizedMap)
+open CycleQ2HodgeEulerChartBinding (affineChart)
+open CycleQ2GeometricHodgeThreefoldCubic (Stage chartEquivAdjoinRoot)
+open CycleQ2GeometricAffineChartSections (chartSection chartSection_top chartSection_naturality)
+open CycleQ2HodgeTwistLocalization (inverted)
+open CycleQ2HodgeTwistFaces (face face_inf sectionsEquiv toFace toFace_section)
+open CycleQ2HodgeTwistCubicFaces (faceStage faceStage_toFace)
+open CycleQ2LiteralThreefoldTopTrace (Face faceSectionEquiv literalIso_preimage_face)
+
+private theorem toAffine_eq_native (i : Fin 4) :
+    toAffine point i =
+      (CycleQ2LiteralThreefoldCubicCoordinates.chartEquiv i).toRingHom.comp (nativeToT i) := by
+  apply RingHom.ext
+  intro a
+  obtain ⟨n, p, hp, rfl⟩ := sexticFraction_surjective point i a
+  rw [toAffine_fraction, RingHom.comp_apply, nativeToT_fraction]
+  change CycleQ2HodgeEuler.chartMap literalEval i (CycleQ2HodgeEuler.dehom i p) =
+    CycleQ2HodgeEuler.chartMap literalEval i
+      (CycleQ2LiteralThreefoldCubicCoordinates.unshiftHom i
+        (CycleQ2IncidenceDehomogenizedChart.dehomogenize i p))
+  rw [CycleQ2LiteralThreefoldCubicCoordinates.unshiftHom_dehomogenize]
+
+/-- The native algebra equivalence describes the original fixed-fiber
+chart square, including the original projective isomorphism. -/
+theorem affineChart_toLiteral (i : Fin 4) :
+    (affineChart literalEval i).inv ≫ (coordinateOpen literalEval i).ι ≫ literalIso.hom =
+      Spec.map (CommRingCat.ofHom
+        (CycleQ2LiteralThreefoldCubicCoordinates.chartEquiv i).toRingHom) ≫
+        chartInclusion i := by
+  have he : Spec.map (CommRingCat.ofHom (toAffine point i)) =
+      Spec.map (CommRingCat.ofHom
+        (CycleQ2LiteralThreefoldCubicCoordinates.chartEquiv i).toRingHom) ≫
+        Spec.map (CommRingCat.ofHom (nativeToT i)) := by
+    rw [toAffine_eq_native]
+    change Spec.map (CommRingCat.ofHom (nativeToT i) ≫ CommRingCat.ofHom
+      (CycleQ2LiteralThreefoldCubicCoordinates.chartEquiv i).toRingHom) = _
+    rw [Spec.map_comp]
+  have h := congrArg (fun f => f ≫ nativeToIncidence.hom) (toAffine_inclusion point i)
+  rw [he] at h
+  have h' : (affineChart literalEval i).inv ≫ (coordinateOpen literalEval i).ι ≫
+      literalIso.hom =
+      Spec.map (CommRingCat.ofHom
+        (CycleQ2LiteralThreefoldCubicCoordinates.chartEquiv i).toRingHom) ≫
+        nativeChartInclusion i ≫ nativeToIncidence.hom := by
+    simpa only [literalIso, Iso.trans_hom, nativeChartInclusion, sexticInclusion,
+      Category.assoc] using h
+  rw [nativeChartInclusion_toIncidence] at h'
+  exact h'
+
+/-- Pulling back an original native chart coefficient gives exactly its
+unshifted chart polynomial on every standard intersection. -/
+theorem faceSectionEquiv_chartAlgebraMap (i : Fin 4) (S : Finset (Fin 4))
+    (hi : i ∈ S) (a : T i) :
+    faceSectionEquiv S
+      (CycleQ2LiteralThreefoldHodgeCech.chartAlgebraMap i (Face S) (Finset.inf_le hi) a) =
+      chartSection (affineChart literalEval i)
+        (Over.mk (homOfLE (Finset.inf_le hi)))
+        (CycleQ2LiteralThreefoldCubicCoordinates.chartEquiv i a) :=
+  CycleQ2ChartSectionPullback.chartSection_pullback literalIso.hom (fixedChart i).symm
+    (affineChart literalEval i)
+    (CycleQ2LiteralThreefoldCubicCoordinates.chartEquiv i).toRingHom
+    (literalIso_preimage i).ge (affineChart_toLiteral i)
+    (Face S) (Finset.inf_le hi) (S.inf (coordinateOpen literalEval)) (Finset.inf_le hi)
+    (literalIso_preimage_face S).ge a
+
+private theorem coordinateChartSection_top (i : Fin 4) (p : ChartRing literalEval i) :
+    chartSection (coordinateChart literalEval i)
+        (Over.mk (𝟙 (coordinateOpen literalEval i))) p =
+      Proj.awayToSection (grade literalEval) (coord literalEval i.castSucc) p := by
+  have h : CommRingCat.ofHom (chartSection (coordinateChart literalEval i)
+      (Over.mk (𝟙 (coordinateOpen literalEval i)))) =
+      Proj.awayToSection (grade literalEval) (coord literalEval i.castSucc) := by
+    rw [chartSection_top]
+    simp only [coordinateChart, Proj.basicOpenIsoSpec_hom,
+      Proj.basicOpenToSpec_app_top, Category.assoc, Iso.inv_hom_id_assoc,
+      Iso.inv_hom_id, Category.comp_id]
+  exact ConcreteCategory.congr_hom h p
+
+private theorem affineChartSection (i : Fin 4) (W : (threefold literalEval).Opens)
+    (hW : W ≤ coordinateOpen literalEval i) (p : ChartRing literalEval i) :
+    chartSection (affineChart literalEval i) (Over.mk (homOfLE hW))
+        (CycleQ2HodgeEulerChartBinding.chartEquiv literalEval i p) =
+      (threefold literalEval).presheaf.map (homOfLE hW).op
+        (Proj.awayToSection (grade literalEval) (coord literalEval i.castSucc) p) := by
+  have hc : (affineChart literalEval i).inv ≫ (coordinateOpen literalEval i).ι ≫
+      𝟙 (threefold literalEval) =
+      Spec.map (CommRingCat.ofHom
+        (CycleQ2HodgeEulerChartBinding.chartEquiv literalEval i).toRingHom) ≫
+        (coordinateChart literalEval i).inv ≫ (coordinateOpen literalEval i).ι := by
+    change (Spec.map (CommRingCat.ofHom
+      (CycleQ2HodgeEulerChartBinding.chartEquiv literalEval i).toRingHom) ≫
+      (coordinateChart literalEval i).inv) ≫ (coordinateOpen literalEval i).ι ≫ 𝟙 _ = _
+    simp only [Category.comp_id, Category.assoc]
+  have ht : chartSection (coordinateChart literalEval i)
+        (Over.mk (𝟙 (coordinateOpen literalEval i))) p =
+      chartSection (affineChart literalEval i)
+        (Over.mk (𝟙 (coordinateOpen literalEval i)))
+        (CycleQ2HodgeEulerChartBinding.chartEquiv literalEval i p) := by
+    simpa only [Scheme.Hom.appLE_eq_app, Scheme.Hom.id_app, ConcreteCategory.id_apply] using
+      CycleQ2ChartSectionPullback.chartSection_pullback_top
+      (𝟙 (threefold literalEval)) (coordinateChart literalEval i) (affineChart literalEval i)
+      (CycleQ2HodgeEulerChartBinding.chartEquiv literalEval i).toRingHom
+      (le_refl _) hc p
+  rw [coordinateChartSection_top] at ht
+  exact (chartSection_naturality (affineChart literalEval i)
+      (Over.homMk (homOfLE hW) : Over.mk (homOfLE hW) ⟶
+        Over.mk (𝟙 (coordinateOpen literalEval i)))
+      (CycleQ2HodgeEulerChartBinding.chartEquiv literalEval i p)).symm.trans
+    (congrArg ((threefold literalEval).presheaf.map (homOfLE hW).op) ht.symm)
+
+/-- Actual scheme sections of a standard intersection, expressed in its
+original cubic localization. The first map only identifies equal opens. -/
+def toCubicSections (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S) :
+    Γ(threefold literalEval, S.inf (coordinateOpen literalEval)) ≃+*
+      LocalCubic i (inverted i S) :=
+  (CycleQ2GeometricProjectiveCurve.Twisted.resEquiv (threefold literalEval).sheaf
+    (face_inf literalEval i S hi).le (face_inf literalEval i S hi).ge).trans
+      ((sectionsEquiv literalEval i (inverted i S)).symm.trans
+        (faceStage literalEval i literal_vertex_unit (inverted i S)))
+
+theorem toCubicSections_chartSection (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S)
+    (a : CycleQ2HodgeEuler.chart literalEval i) :
+    toCubicSections i S hi
+        (chartSection (affineChart literalEval i) (Over.mk (homOfLE (Finset.inf_le hi))) a) =
+      algebraMap (Stage literalEval i literal_vertex_unit) (LocalCubic i (inverted i S))
+        (chartEquivAdjoinRoot literalEval i literal_vertex_unit a) := by
+  obtain ⟨p, rfl⟩ := (CycleQ2HodgeEulerChartBinding.chartEquiv literalEval i).surjective a
+  let hW : face literalEval i (inverted i S) ≤ coordinateOpen literalEval i :=
+    (face_inf literalEval i S hi).le.trans (Finset.inf_le hi)
+  have he :
+      CycleQ2GeometricProjectiveCurve.Twisted.resEquiv (threefold literalEval).sheaf
+        (face_inf literalEval i S hi).le (face_inf literalEval i S hi).ge
+        (chartSection (affineChart literalEval i)
+          (Over.mk (homOfLE (Finset.inf_le hi)))
+          (CycleQ2HodgeEulerChartBinding.chartEquiv literalEval i p)) =
+      sectionsEquiv literalEval i (inverted i S) (toFace literalEval i (inverted i S) p) := by
+    calc
+      _ = chartSection (affineChart literalEval i) (Over.mk (homOfLE hW))
+          (CycleQ2HodgeEulerChartBinding.chartEquiv literalEval i p) :=
+        chartSection_naturality (affineChart literalEval i)
+          (Over.homMk (homOfLE (face_inf literalEval i S hi).le) :
+            Over.mk (homOfLE hW) ⟶ Over.mk (homOfLE (Finset.inf_le hi))) _
+      _ = (threefold literalEval).presheaf.map (homOfLE hW).op
+          (Proj.awayToSection (grade literalEval) (coord literalEval i.castSucc) p) :=
+        affineChartSection i _ hW p
+      _ = _ := (toFace_section literalEval i (inverted i S) p).symm
+  change faceStage literalEval i literal_vertex_unit (inverted i S)
+    ((sectionsEquiv literalEval i (inverted i S)).symm _) = _
+  rw [he, RingEquiv.symm_apply_apply]
+  exact faceStage_toFace literalEval i literal_vertex_unit (inverted i S) p
+
+/-- The original native coefficient map, actual `literalIso` section
+pullback and localized cubic map form a commuting square on every face. -/
+theorem toCubicSections_chartAlgebraMap (i : Fin 4) (S : Finset (Fin 4)) (hi : i ∈ S)
+    (a : T i) :
+    toCubicSections i S hi
+      (faceSectionEquiv S
+        (CycleQ2LiteralThreefoldHodgeCech.chartAlgebraMap i (Face S) (Finset.inf_le hi) a)) =
+      localizedMap i (inverted i S) a := by
+  rw [faceSectionEquiv_chartAlgebraMap, toCubicSections_chartSection] <;> rfl
+
+end CycleQ2LiteralThreefoldCubicSectionComparison
+end
+
+#print axioms CycleQ2LiteralThreefoldCubicSectionComparison.affineChart_toLiteral
+#print axioms CycleQ2LiteralThreefoldCubicSectionComparison.toCubicSections_chartAlgebraMap

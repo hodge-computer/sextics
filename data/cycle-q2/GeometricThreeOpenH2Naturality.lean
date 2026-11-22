@@ -302,3 +302,89 @@ theorem map_literalDerivedClassAtTop_eq {M : Type*}
 end CycleQ2CoordinateTopDescent
 
 end
+
+/-!
+## A three-open subcover of the original four-open Čech class
+
+The finite-family injective descent already restricts to every selected
+triple of opens.  When that triple covers the whole space, its two actual
+Mayer--Vietoris boundaries are the same derived class.  In particular,
+the last face of a four-open cocycle is retained without rescaling.
+-/
+
+noncomputable section
+namespace CycleQ2FourOpenThreeSubcover
+
+open CategoryTheory Opposite TopologicalSpace
+open CycleQ2InjectiveCech (AbSheaf Sections)
+open CycleQ2GeometricSheafLocalIso (res)
+open CycleQ2FiniteInjectiveCech (Two NormalizedTwo IsTwoCocycle)
+open CycleQ2FiniteCechDescent (cechTwoClass)
+open CycleQ2FourToFiniteCech
+  (extendTwo extendTwo_normalized extendTwo_closed finiteClass_eq_fourClass
+    faceValue_extendTwo)
+open CycleQ2ThreeOpenInjectiveComparison
+  (selectedTriple mv_eq_finiteClass_restriction)
+open CycleQ2ThreeOpenH2Naturality (connectingAtTop)
+open CycleQ2ThreeOpenCechH2 (TripleOpen)
+
+variable {X : TopCat.{0}}
+local instance subcoverHasExt : HasExt.{1} (AbSheaf X) := HasExt.standard _
+variable {F : AbSheaf X}
+
+/-- A selected three-open subcover computes the same existing finite
+Čech class through the original positive degree-two MV normalization. -/
+theorem finiteClass_eq_connectingAtTop {ι : Type} [Fintype ι]
+    (A : ι → Opens X) (hcover : (⨆ i, A i) = ⊤)
+    (c : Two F A) (hn : NormalizedTwo F A c) (hc : IsTwoCocycle F A c)
+    (i j k : ι) (hthree : (A i ⊔ A j) ⊔ A k = ⊤) :
+    cechTwoClass A hcover c hn hc =
+      connectingAtTop F (A i) (A j) (A k) hthree (selectedTriple A c i j k) := by
+  let e := ((F.cohomologyPresheaf 2).mapIso
+    (eqToIso hthree.symm).op).addCommGroupIsoToAddEquiv
+  apply e.symm.injective
+  change e.symm (cechTwoClass A hcover c hn hc) =
+    e.symm (e (CycleQ2ThreeOpenSectionH2.connecting F (A i) (A j) (A k)
+      (selectedTriple A c i j k)))
+  rw [AddEquiv.symm_apply_apply]
+  change (F.cohomologyPresheaf 2).map (eqToHom hthree).op
+    (cechTwoClass A hcover c hn hc) = _
+  have he : (eqToHom hthree : (A i ⊔ A j) ⊔ A k ⟶ (⊤ : Opens X)) =
+      homOfLE le_top := Subsingleton.elim _ _
+  rw [he]
+  exact (mv_eq_finiteClass_restriction A hcover c hn hc i j k).symm
+
+variable (U : Fin 4 → Opens X)
+
+/-- The literal 123 face, restricted only to the equivalent intersection
+used by the three-open Mayer--Vietoris construction. -/
+def lastFace (c : CycleQ2CechTwoToDerived.Two F U) :
+    Sections F (TripleOpen (U 1) (U 2) (U 3)) :=
+  res F (le_inf
+    (le_inf (inf_le_left.trans inf_le_left) (inf_le_right.trans inf_le_left))
+    (inf_le_left.trans inf_le_right)) c.2.2.2
+
+theorem selectedTriple_extendTwo_last (c : CycleQ2CechTwoToDerived.Two F U) :
+    selectedTriple U (extendTwo U c) 1 2 3 = lastFace U c := by
+  rw [selectedTriple, faceValue_extendTwo]
+  rfl
+
+/-- If the last three opens cover the space, the original four-open
+class is exactly the actual three-open connecting image of its 123 face.
+No affine vanishing or additional class-transport premise is used. -/
+theorem fourClass_eq_lastFace_connectingAtTop (hcover : (⨆ i, U i) = ⊤)
+    (hthree : (U 1 ⊔ U 2) ⊔ U 3 = ⊤)
+    (c : CycleQ2CechTwoToDerived.Two F U)
+    (hc : CycleQ2CechTwoToDerived.d2 F U c = 0) :
+    CycleQ2CechTwoToDerived.cechTwoClass U hcover c hc =
+      connectingAtTop F (U 1) (U 2) (U 3) hthree (lastFace U c) := by
+  have h := finiteClass_eq_connectingAtTop U hcover (extendTwo U c)
+    (extendTwo_normalized U c) (extendTwo_closed U hcover c hc) 1 2 3 hthree
+  rw [finiteClass_eq_fourClass U hcover c hc, selectedTriple_extendTwo_last] at h
+  exact h
+
+end CycleQ2FourOpenThreeSubcover
+end
+
+#print axioms CycleQ2FourOpenThreeSubcover.finiteClass_eq_connectingAtTop
+#print axioms CycleQ2FourOpenThreeSubcover.fourClass_eq_lastFace_connectingAtTop

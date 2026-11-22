@@ -421,6 +421,59 @@ def nativeTopConnecting (hcover : (⨆ i, U i) = ⊤) :
     ((CycleQ2FourOpenH3.connecting F (U 0) (U 1) (U 2) (U 3)).comp
       (nativeQuadEquiv F U).toAddMonoidHom)
 
+/-- The original finite intersection is the ordered quadruple
+intersection used by the injective Čech comparison. -/
+theorem nativeTopOpen_eq_ordered : Finset.univ.inf U =
+    ((U 0 ⊓ U 1) ⊓ U 2) ⊓ U 3 := by
+  rw [show (Finset.univ : Finset Vertex) = {0,1,2,3} from by decide]
+  simp [inf_assoc]
+
+/-- Only restriction along equality changes a native top section into
+the ordered four-open convention. -/
+def nativeTopOrdered : Sections F (Finset.univ.inf U) →+
+    CycleQ2CechTwoToDerived.Three F U :=
+  res F (nativeTopOpen_eq_ordered U).ge
+
+theorem orderedConnecting_nativeTopOrdered (hcover : (⨆ i, U i) = ⊤)
+    (s : Sections F (Finset.univ.inf U)) :
+    CycleQ2FourOpenTopMayerVietoris.orderedConnecting U hcover (nativeTopOrdered F U s) =
+      nativeTopConnecting F U hcover s := by
+  have he : (homOfLE (union_cover U hcover).ge :
+      (⊤ : Opens X) ⟶ ((U 0 ⊔ U 1) ⊔ U 2) ⊔ U 3) =
+      eqToHom (union_cover U hcover).symm := Subsingleton.elim _ _
+  change (F.cohomologyPresheaf 3).map (homOfLE (union_cover U hcover).ge).op
+      (CycleQ2FourOpenH3.connecting F (U 0) (U 1) (U 2) (U 3)
+        (res F _ (res F _ s))) =
+    (F.cohomologyPresheaf 3).map (eqToHom (union_cover U hcover).symm).op
+      (CycleQ2FourOpenH3.connecting F (U 0) (U 1) (U 2) (U 3) (res F _ s))
+  rw [res_comp, he]
+
+/-- The native top section represents the negative of its original
+three-Mayer--Vietoris image under the injective Čech convention. -/
+theorem cechThreeClass_nativeTopOrdered (hcover : (⨆ i, U i) = ⊤)
+    (s : Sections F (Finset.univ.inf U)) :
+    CycleQ2FourOpenTopCoefficientBoundary.cechThreeClass U hcover
+      (nativeTopOrdered F U s) = -nativeTopConnecting F U hcover s := by
+  rw [CycleQ2FourOpenTopMayerVietoris.cechThreeClass_eq_neg_orderedConnecting,
+    orderedConnecting_nativeTopOrdered]
+
+/-- The coefficient boundary of an actual four-face lift has precisely
+the native top section and the proved negative sign. -/
+theorem coefficient_connecting_nativeTop
+    {S : CategoryTheory.ShortComplex (AbSheaf X)} (hS : S.ShortExact)
+    (hcover : (⨆ i, U i) = ⊤) (b : CycleQ2CechTwoToDerived.Two S.X₂ U)
+    (s : Sections S.X₁ (Finset.univ.inf U))
+    (hb : CycleQ2CechTwoToDerived.d2 S.X₂ U b =
+      CycleQ2CechTwoToDerived.app S.f _ (nativeTopOrdered S.X₁ U s)) :
+    (CycleQ2CechTwoToDerived.cechTwoClass U hcover
+      (CycleQ2CechTwoToDerived.mapTwo U S.g b)
+      (CycleQ2FourOpenTopCoefficientBoundary.reducedTwo_closed U b
+        (nativeTopOrdered S.X₁ U s) hb)).comp hS.extClass rfl =
+      -nativeTopConnecting S.X₁ U hcover s :=
+  (CycleQ2FourOpenTopCoefficientBoundary.cechTwoClass_connecting U hS hcover b
+    (nativeTopOrdered S.X₁ U s) hb).trans
+      (cechThreeClass_nativeTopOrdered S.X₁ U hcover s)
+
 theorem nativeTopConnecting_boundary (hcover : (⨆ i, U i) = ⊤)
     (c : NativeTopFaces (F := F) (U := U)) :
     nativeTopConnecting F U hcover (nativeTopBoundary c) = 0 := by

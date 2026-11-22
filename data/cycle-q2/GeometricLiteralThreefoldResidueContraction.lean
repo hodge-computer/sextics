@@ -555,3 +555,209 @@ end
 #print axioms CycleQ2LiteralThreefoldCubicCoordinates.cubicEquiv
 #print axioms CycleQ2LiteralThreefoldCubicCoordinates.cubicEquiv_normal
 #print axioms CycleQ2LiteralThreefoldCubicCoordinates.topCoefficient_native_normal
+
+/-! The four original polynomial gradients in the same translated cubic
+coordinates.  The identity is proved before taking the hypersurface
+quotient, so it retains the native equation and all four partials. -/
+
+noncomputable section
+namespace CycleQ2LiteralThreefoldCubicCoordinates
+
+open MvPolynomial
+open CycleQ2IncidenceDehomogenizedChart
+open CycleQ2LiteralAbelJacobiEquations CycleQ2LiteralAbelJacobiContraction
+open CycleQ2LiteralThreefoldResidueMinors
+open CycleQ2LiteralThreefoldResidueFrame (gradient)
+open CycleQ2GeometricHodgeThreefoldIncidence (literalEval literal_vertex_unit)
+open CycleQ2GeometricHodgeThreefoldCubic
+open CycleQ2CubicCoefficientTrace (normal)
+
+private def nativePack (i : Fin 4) : P ≃ₐ[ℂ] Polynomial (Base ℂ) :=
+  (unshiftEquiv i).trans pack
+
+private theorem nativePack_coordinate (i : Fin 4) (j : Fin 3) :
+    nativePack i (X (some j)) = Polynomial.C (X j : Base ℂ) := by
+  change pack (unshiftHom i (X (some j))) = _
+  rw [← linearCoordinate_succAbove i j, unshiftHom_linear, pack_dehom]
+  simp only [expand, aeval_X, Fin.snoc_castSucc, baseValue,
+    Fin.insertNth_apply_succAbove]
+
+private theorem nativePack_normal (i : Fin 4) :
+    nativePack i (X none) =
+      Polynomial.X + Polynomial.C ((baseValue i 2 : Base ℂ)^2) := by
+  change pack (unshiftHom i (X none)) = _
+  rw [unshiftHom, AlgHom.comp_apply,
+    CycleQ2LiteralAmbientChartCoordinates.representative, aeval_X, pack_dehom]
+  simp only [map_add, map_pow, expand, aeval_X, Fin.snoc_last, Fin.snoc_castSucc]
+
+private theorem nativePack_base (i : Fin 4) (p : Base ℂ) :
+    nativePack i (rename Option.some p) = Polynomial.C p := by
+  induction p using MvPolynomial.induction_on with
+  | C a => simpa only [rename_C] using (nativePack i).commutes a
+  | add p q hp hq => simp only [map_add, hp, hq]
+  | mul_X p j hp =>
+      simp only [map_mul, rename_X, hp, nativePack_coordinate]
+
+private theorem literal_vertex_value :
+    literalEval CycleQ2GeometricHodgeThreefold.vertexCoefficient = 1 := by
+  change aeval (CycleQ2IncidenceGenericPointSemantics.pointSextic
+    CycleQ2LiteralAmbientCylinder.point)
+      (X CycleQ2IncidenceNormalForm.fullSexticLeadingIndex) = 1
+  rw [aeval_X]
+  change CycleQ2IncidenceEquations.seedSexticCoefficients (57 : ℂ) Complex.I
+    CycleQ2IncidenceNormalForm.fullSexticLeadingIndex = 1
+  rw [CycleQ2IncidenceEquations.seedSexticCoefficients,
+    CycleQ2IncidenceNormalForm.fullSexticLeadingIndex_exponent,
+    CycleQ2IncidenceEquations.smoothF_leading_coefficient]
+
+private theorem nativePack_seedF (i : Fin 4) :
+    nativePack i (seedF i) = cubic literalEval i literal_vertex_unit := by
+  change pack (unshiftEquiv i (seedF i)) = _
+  rw [unshift_seedF, pack_F, literal_vertex_value, map_one, map_one, one_mul]
+
+/-- The actual lower coefficients after substituting w=z-x₂². -/
+def nativeBaseCoefficients (i : Fin 4) : Fin 3 → Base ℂ :=
+  let c := fun j : Fin 3 => (cubic literalEval i literal_vertex_unit).coeff j.val
+  let u : Base ℂ := (baseValue i 2)^2
+  ![c 0-u*c 1+u^2*c 2-u^3, c 1-2*u*c 2+3*u^2, c 2-3*u]
+
+def nativeCoefficients (i : Fin 4) (S : Finset (Fin 3)) (j : Fin 3) : LocalBase S :=
+  algebraMap (Base ℂ) (LocalBase S) (nativeBaseCoefficients i j)
+
+theorem nativeCoefficients_eq_translated (i : Fin 4) (S : Finset (Fin 3)) :
+    nativeCoefficients i S =
+      let c := CycleQ2TorusCubicTrace.coefficients literalEval i literal_vertex_unit S
+      let u := shiftCoefficient i S
+      ![c 0-u*c 1+u^2*c 2-u^3, c 1-2*u*c 2+3*u^2, c 2-3*u] := by
+  funext j
+  fin_cases j <;>
+    simp only [nativeCoefficients, nativeBaseCoefficients,
+      CycleQ2TorusCubicTrace.coefficients, shiftCoefficient,
+      Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two,
+      map_sub, map_add, map_mul, map_pow, map_ofNat]
+
+private theorem cubic_decomposition (i : Fin 4) :
+    cubic literalEval i literal_vertex_unit = Polynomial.X^3 +
+      Polynomial.C ((cubic literalEval i literal_vertex_unit).coeff 0) +
+      Polynomial.C ((cubic literalEval i literal_vertex_unit).coeff 1) * Polynomial.X +
+      Polynomial.C ((cubic literalEval i literal_vertex_unit).coeff 2) * Polynomial.X^2 := by
+  let p := cubic literalEval i literal_vertex_unit
+  have h3 : p.coeff 3 = 1 := by
+    have hm := (cubic_monic literalEval i literal_vertex_unit).leadingCoeff
+    change p.coeff p.natDegree = 1 at hm
+    simpa only [p, cubic_natDegree] using hm
+  have hp : p = ∑ j : Fin 4, Polynomial.C (p.coeff j.val) * Polynomial.X^j.val := by
+    rw [Fin.sum_univ_eq_sum_range (fun j => Polynomial.C (p.coeff j) * Polynomial.X^j)]
+    exact p.as_sum_range_C_mul_X_pow' (by
+      rw [show p.natDegree = 3 from cubic_natDegree literalEval i literal_vertex_unit]
+      decide)
+  calc
+    p = ∑ j : Fin 4, Polynomial.C (p.coeff j.val) * Polynomial.X^j.val := hp
+    _ = _ := by
+      rw [Fin.sum_univ_four]
+      simp only [Fin.val_zero, Fin.val_one, show (2 : Fin 4).val = 2 from rfl,
+        show (3 : Fin 4).val = 3 from rfl, h3, map_one, pow_zero, pow_one,
+        one_mul, mul_one]
+      ring
+
+/-- This is an equality of the original chart polynomials, before
+passing to the equation quotient or any coordinate localization. -/
+theorem seedF_native_cubic (i : Fin 4) :
+    seedF i = (X none : P)^3 + rename Option.some (nativeBaseCoefficients i 0) +
+      rename Option.some (nativeBaseCoefficients i 1) * X none +
+      rename Option.some (nativeBaseCoefficients i 2) * X none^2 := by
+  apply (nativePack i).injective
+  rw [nativePack_seedF]
+  simp only [map_add, map_mul, map_pow, nativePack_base, nativePack_normal]
+  conv_lhs => rw [cubic_decomposition]
+  simp only [nativeBaseCoefficients, Matrix.cons_val_zero, Matrix.cons_val_one,
+    Matrix.cons_val_two, map_sub, map_add, map_mul, map_pow, map_ofNat]
+  ring
+
+private theorem pderiv_base_normal (p : Base ℂ) :
+    pderiv none (rename Option.some p) = 0 := by
+  apply MvPolynomial.pderiv_eq_zero_of_notMem_vars
+  intro h
+  obtain ⟨j, _, hj⟩ := MvPolynomial.mem_vars_rename Option.some p h
+  cases hj
+
+private theorem pderiv_base_coordinate (p : Base ℂ) (j : Fin 3) :
+    pderiv (some j) (rename Option.some p) = rename Option.some (pderiv j p) :=
+  MvPolynomial.pderiv_rename (Option.some_injective (Fin 3)) j p
+
+theorem pderiv_seedF_normal (i : Fin 4) :
+    pderiv none (seedF i) = rename Option.some (nativeBaseCoefficients i 1) +
+      2 * rename Option.some (nativeBaseCoefficients i 2) * X none + 3 * X none^2 := by
+  rw [seedF_native_cubic]
+  simp only [map_add, pderiv_pow, pderiv_mul, pderiv_X_self, pderiv_base_normal]
+  norm_num <;> ring
+
+theorem pderiv_seedF_coordinate (i : Fin 4) (j : Fin 3) :
+    pderiv (some j) (seedF i) = rename Option.some (pderiv j (nativeBaseCoefficients i 0)) +
+      rename Option.some (pderiv j (nativeBaseCoefficients i 1)) * X none +
+      rename Option.some (pderiv j (nativeBaseCoefficients i 2)) * X none^2 := by
+  have hn : pderiv (some j) (X none : P) = 0 := pderiv_X_of_ne (by simp)
+  rw [seedF_native_cubic]
+  simp only [map_add, pderiv_pow, pderiv_mul, pderiv_base_coordinate, hn,
+    mul_zero, add_zero, zero_add]
+
+private def nativeEval (i : Fin 4) (S : Finset (Fin 3)) : P →ₐ[ℂ] LocalCubic i S :=
+  (localizedMap i S).comp (Ideal.Quotient.mkₐ ℂ (fixedIdeal i))
+
+private theorem nativeEval_normal (i : Fin 4) (S : Finset (Fin 3)) :
+    nativeEval i S (X none) = localizedMap i S (coord i 0) := rfl
+
+private theorem nativeEval_base (i : Fin 4) (S : Finset (Fin 3)) (p : Base ℂ) :
+    nativeEval i S (rename Option.some p) =
+      algebraMap (LocalBase S) (LocalCubic i S)
+        (algebraMap (Base ℂ) (LocalBase S) p) := by
+  change algebraMap (Stage literalEval i literal_vertex_unit) (LocalCubic i S)
+    (AdjoinRoot.mk (cubic literalEval i literal_vertex_unit)
+      (nativePack i (rename Option.some p))) = _
+  rw [nativePack_base, AdjoinRoot.mk_C]
+  simp only [← IsScalarTower.algebraMap_apply]
+
+/-- The original normal partial is the derivative of this same cubic
+in z, with its original monic leading coefficient. -/
+theorem localizedMap_gradient_normal (i : Fin 4) (S : Finset (Fin 3)) :
+    localizedMap i S (gradient i 0) = normal (localizedMap i S (coord i 0))
+      ![nativeCoefficients i S 1, 2*nativeCoefficients i S 2, 3] := by
+  change nativeEval i S (pderiv none (seedF i)) = _
+  rw [pderiv_seedF_normal]
+  simp only [map_add, map_mul, map_pow, map_ofNat, nativeEval_base,
+    nativeEval_normal, normal, nativeCoefficients,
+    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val_two]
+
+/-- Each original retained-coordinate partial differentiates the actual
+three cubic coefficients while fixing the native z coordinate. -/
+theorem localizedMap_gradient_coordinate (i : Fin 4) (S : Finset (Fin 3)) (j : Fin 3) :
+    localizedMap i S (gradient i j.succ) = normal (localizedMap i S (coord i 0))
+      ((CycleQ2TorusLogDerivatives.localizedPartial ℂ S j) ∘ nativeCoefficients i S) := by
+  change nativeEval i S (pderiv (some j) (seedF i)) = _
+  rw [pderiv_seedF_coordinate]
+  simp only [map_add, map_mul, map_pow, nativeEval_base, nativeEval_normal,
+    normal, nativeCoefficients, Function.comp_apply,
+    CycleQ2TorusLogDerivatives.localizedPartial_algebraMap]
+
+/-- The translated root relation belongs to the same actual localized
+chart, including where the original normal partial vanishes. -/
+theorem native_root_relation (i : Fin 4) (S : Finset (Fin 3)) :
+    (localizedMap i S (coord i 0))^3 =
+      -normal (localizedMap i S (coord i 0)) (nativeCoefficients i S) := by
+  have hq : Ideal.Quotient.mk (fixedIdeal i) (seedF i) = 0 :=
+    Ideal.Quotient.eq_zero_iff_mem.mpr (Ideal.subset_span (by simp [fixedIdeal]))
+  have hz : nativeEval i S (seedF i) = 0 := by
+    change localizedMap i S (Ideal.Quotient.mk (fixedIdeal i) (seedF i)) = 0
+    rw [hq, map_zero]
+  rw [seedF_native_cubic] at hz
+  simp only [map_add, map_mul, map_pow, nativeEval_normal, nativeEval_base] at hz
+  simp only [normal, nativeCoefficients]
+  linear_combination hz
+
+end CycleQ2LiteralThreefoldCubicCoordinates
+end
+
+#print axioms CycleQ2LiteralThreefoldCubicCoordinates.seedF_native_cubic
+#print axioms CycleQ2LiteralThreefoldCubicCoordinates.localizedMap_gradient_normal
+#print axioms CycleQ2LiteralThreefoldCubicCoordinates.localizedMap_gradient_coordinate
+#print axioms CycleQ2LiteralThreefoldCubicCoordinates.native_root_relation

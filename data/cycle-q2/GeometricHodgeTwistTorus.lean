@@ -486,3 +486,157 @@ end
 #print axioms CycleQ2TorusCubicTrace.root_relation
 #print axioms CycleQ2TorusCubicTrace.logarithmicTrace_horizontal
 #print axioms CycleQ2TorusCubicTrace.logarithmicTrace_mixed
+
+/-! Ordinary coordinate derivatives on the same Laurent chart.  Their
+coefficient at (-1,-1,-1) vanishes.  This is the normalization appropriate
+for the original residue volume and exact coordinate two-wedges. -/
+
+noncomputable section
+namespace CycleQ2TorusLogDerivatives
+
+open CycleQ2SeedCechThreeOpen CycleQ2SeedCechLocalization
+open CycleQ2SeedQuotientFiniteFree (Base)
+
+variable (R : Type*) [CommRing R]
+
+def partial (j : Fin 3) : Derivation R (Laurent (R := R)) (Laurent (R := R)) :=
+  T R (-openExponent {j}) • logarithmic R j
+
+theorem partial_coeff (j : Fin 3) (p : Laurent (R := R)) (e : LaurentExponent) :
+    (partial R j p).coeff e =
+      ((e j + 1 : ℤ) : R) * p.coeff (e + openExponent {j}) := by
+  change (T R (-openExponent {j}) * logarithmic R j p).coeff e = _
+  rw [mul_comm, coeff_mul_T, sub_neg_eq_add, logarithmic_coeff]
+  simp only [Pi.add_apply, openExponent, Finset.mem_singleton, if_pos rfl]
+
+theorem partial_polynomial (j : Fin 3) (p : Base R) :
+    partial R j (baseToLaurent R p) = baseToLaurent R (MvPolynomial.pderiv j p) := by
+  change T R (-openExponent {j}) * logarithmic R j (baseToLaurent R p) = _
+  rw [logarithmic_polynomial]
+  change T R (-openExponent {j}) *
+    baseToLaurent R (MvPolynomial.X j * MvPolynomial.pderiv j p) = _
+  rw [map_mul, baseToLaurent_X, ← mul_assoc, T_mul, neg_add_cancel, T_zero, one_mul]
+
+theorem partial_commute (i j : Fin 3) : Function.Commute (partial R i) (partial R j) := by
+  intro p
+  apply AddMonoidAlgebra.coeff_injective
+  ext e
+  simp only [partial_coeff, Pi.add_apply]
+  have hshift : (e + openExponent {i}) + openExponent {j} =
+      (e + openExponent {j}) + openExponent {i} := by abel
+  rw [hshift]
+  by_cases hij : i = j
+  · subst j
+    rfl
+  · simp only [openExponent, Finset.mem_singleton, if_neg hij, if_neg hij.symm,
+      add_zero]
+    ring
+
+@[simp] theorem partial_residue (j : Fin 3) (p : Laurent (R := R)) :
+    (partial R j p).coeff (fun _ => -1) = 0 := by
+  rw [partial_coeff]
+  simp
+
+/-- The actual extension of the polynomial coordinate partial to the
+same base-product localization used by the cubic power basis. -/
+def localizedPartial (S : Finset (Fin 3)) (j : Fin 3) :
+    Derivation R (coordinateLocalization R S) (coordinateLocalization R S) :=
+  CycleQ2GeometricLocalizedDerivations.localizedBaseDerivation
+    (Submonoid.powers (baseProduct R S)) (coordinateLocalization R S)
+    (MvPolynomial.pderiv j)
+
+theorem localizedPartial_algebraMap (S : Finset (Fin 3)) (j : Fin 3) (p : Base R) :
+    localizedPartial R S j (algebraMap (Base R) (coordinateLocalization R S) p) =
+      algebraMap (Base R) (coordinateLocalization R S) (MvPolynomial.pderiv j p) :=
+  CycleQ2GeometricLocalizedDerivations.localizedBaseDerivation_algebraMap _ _ _ _
+
+theorem localizationToLaurent_partial (S : Finset (Fin 3)) (j : Fin 3)
+    (p : coordinateLocalization R S) :
+    partial R j (localizationToLaurent R S p) =
+      localizationToLaurent R S (localizedPartial R S j p) := by
+  apply CycleQ2GeometricLocalizedDerivations.derivation_commutes_of_algebraMap
+    (Submonoid.powers (baseProduct R S))
+    ((localizedPartial R S j).restrictScalars ℤ)
+    ((partial R j).restrictScalars ℤ) (localizationToLaurent R S)
+  intro a
+  simp only [Derivation.restrictScalars_apply, localizedPartial_algebraMap,
+    localizationToLaurent_algebraMap, partial_polynomial]
+
+theorem localizedPartial_commute (S : Finset (Fin 3)) (i j : Fin 3) :
+    Function.Commute (localizedPartial R S i) (localizedPartial R S j) := by
+  intro p
+  apply localizationToLaurent_injective R S
+  simp only [← localizationToLaurent_partial]
+  exact partial_commute R i j _
+
+@[simp] theorem localizedPartial_residue (S : Finset (Fin 3)) (j : Fin 3)
+    (p : coordinateLocalization R S) :
+    (localizationToLaurent R S (localizedPartial R S j p)).coeff (fun _ => -1) = 0 := by
+  rw [← localizationToLaurent_partial, partial_residue]
+
+end CycleQ2TorusLogDerivatives
+end
+
+#print axioms CycleQ2TorusLogDerivatives.localizedPartial_algebraMap
+#print axioms CycleQ2TorusLogDerivatives.localizedPartial_residue
+
+noncomputable section
+namespace CycleQ2CubicCoefficientTrace
+
+open Module
+
+variable {A B : Type*} [CommRing A] [CommRing B] [Algebra A B]
+  (b : Basis (Fin 3) A B) (w : B) (hw : ∀ j, b j = w^j.val)
+
+/-- The translated quadratic normal form is an actual linear
+equivalence, without dividing by the cubic derivative. -/
+def translatedEquiv (u : A) : (Fin 3 → A) ≃ₗ[A] B where
+  toFun a := normal (w + algebraMap A B u) a
+  invFun x := ![b.repr x 0 - u*b.repr x 1 + u^2*b.repr x 2,
+    b.repr x 1 - 2*u*b.repr x 2, b.repr x 2]
+  left_inv a := by
+    rw [normal_translate]
+    funext j
+    fin_cases j <;> simp only [Matrix.cons_val_zero, Matrix.cons_val_one,
+      Matrix.cons_val_two, repr_normal b w hw] <;> ring
+  right_inv x := by
+    rw [normal_translate]
+    calc
+      _ = normal w (fun j => b.repr x j) := by
+        congr 1
+        funext j
+        fin_cases j <;> simp only [Matrix.cons_val_zero, Matrix.cons_val_one,
+          Matrix.cons_val_two] <;> ring
+      _ = x := normal_repr b w hw x
+  map_add' a d := by
+    simp only [normal, Pi.add_apply, map_add]
+    ring
+  map_smul' r a := by
+    simp only [normal, Pi.smul_apply, smul_eq_mul, map_mul, Algebra.smul_def]
+    ring
+
+def translatedBasis (u : A) : Basis (Fin 3) A B :=
+  Basis.ofEquivFun (translatedEquiv b w hw u).symm
+
+theorem translatedBasis_apply (u : A) (j : Fin 3) :
+    translatedBasis b w hw u j = (w + algebraMap A B u)^j.val := by
+  rw [show translatedBasis b w hw u j =
+      (translatedEquiv b w hw u) (Pi.single j 1) from
+    congrFun (Basis.coe_ofEquivFun (translatedEquiv b w hw u).symm) j]
+  change normal (w + algebraMap A B u) (Pi.single j 1) = _
+  fin_cases j <;> simp [normal, Pi.single_apply]
+
+/-- Translation does not alter the top cubic-coordinate functional. -/
+theorem top_translatedBasis (u : A) (x : B) :
+    top (translatedBasis b w hw u) x = top b x := by
+  obtain ⟨a,rfl⟩ := (translatedEquiv b w hw u).surjective x
+  change top (translatedBasis b w hw u) (normal (w + algebraMap A B u) a) =
+    top b (normal (w + algebraMap A B u) a)
+  rw [top_normal (translatedBasis b w hw u) (w + algebraMap A B u)
+    (translatedBasis_apply b w hw u), top_translated_normal b w hw]
+
+end CycleQ2CubicCoefficientTrace
+end
+
+#print axioms CycleQ2CubicCoefficientTrace.translatedBasis_apply
+#print axioms CycleQ2CubicCoefficientTrace.top_translatedBasis

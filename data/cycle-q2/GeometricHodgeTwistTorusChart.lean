@@ -377,6 +377,30 @@ def twistTopGenerator : Γ(twist φ 0, torus φ) :=
     chartFrame φ 0 0 (torus φ) (torus_le φ 0) (twistTopGenerator φ h) =
       structureTopGenerator φ h 1 := LinearEquiv.apply_symm_apply _ _
 
+/-- The degree-zero twist trace reads the original structure coefficient
+in its zeroth chart frame. -/
+theorem twistTopSectionTrace_frame (s : Γ(twist φ 0, torus φ)) :
+    CycleQ2HodgeTwistCoordinates.nativeTopSectionTrace (nativeLaurentSections φ h 0) s =
+      structureTopSectionTrace φ h
+        (chartFrame φ 0 0 (torus φ) (torus_le φ 0) s) := by
+  change CycleQ2HodgeTwistCech.topCoefficient
+      (CycleQ2HodgeTwistCoordinates.nativeTopCoordinates (nativeLaurentSections φ h 0) s) =
+    CycleQ2HodgeTwistCech.topCoefficient
+      (CycleQ2HodgeTwistCoordinates.nativeTopCoordinates (structureLaurentSections φ h)
+        (chartFrame φ 0 0 (torus φ) (torus_le φ 0) s))
+  apply congrArg CycleQ2HodgeTwistCech.topCoefficient
+  apply Subtype.ext
+  change (chart φ h 0).coordinates (res (F φ 0) le_rfl s) =
+    (chart φ h 0).coordinates ((chartFrame φ 0 0 (torus φ) (torus_le φ 0)).symm
+      (res (structureAdditiveSheaf (threefold φ)) le_rfl
+        (chartFrame φ 0 0 (torus φ) (torus_le φ 0) s)))
+  rw [res_self, res_self, LinearEquiv.symm_apply_apply]
+
+@[simp] theorem twistTopSectionTrace_generator :
+    CycleQ2HodgeTwistCoordinates.nativeTopSectionTrace (nativeLaurentSections φ h 0)
+      (twistTopGenerator φ h) = 1 := by
+  rw [twistTopSectionTrace_frame, twistTopGenerator_frame, structureTopSectionTrace_generator]
+
 def assembledCubic (q : Vertex → CycleQ2GeometricHodgeThreefold.cone φ) :
     CycleQ2GeometricHodgeThreefold.cone φ :=
   ∑ i, CycleQ2GeometricHodgeThreefold.coord φ i.castSucc * q i

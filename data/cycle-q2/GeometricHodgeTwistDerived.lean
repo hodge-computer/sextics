@@ -599,3 +599,424 @@ end
 
 #print axioms CycleQ2FourOpenTopCoefficientBoundary.topLiftClass_independent
 #print axioms CycleQ2FourOpenTopCoefficientBoundary.cechTwoClass_connecting
+
+/-!
+## The sign of the three Mayer--Vietoris boundaries
+
+The source Mayer--Vietoris map is left minus right, whereas the ordered
+Čech differential is second minus first.  We retain actual maps from the
+source short exact sequences to injective presentations to compare the
+two conventions.
+-/
+
+noncomputable section
+namespace CycleQ2FourOpenTopMayerVietoris
+
+open CategoryTheory CategoryTheory.Limits CategoryTheory.Abelian
+  Opposite TopologicalSpace
+open CycleQ2InjectiveCech CycleQ2GeometricSheafLocalIso
+  CycleQ2CechTwoToDerived CycleQ2CechTwoComparison
+  CycleQ2FourOpenTopCoefficientBoundary
+open CycleQ2ThreeOpenInjectiveComparison
+  (sectionHom sectionHom_section sectionHom_restrict sectionHom_postcomp
+    sections_biprod_lift sectionExtZero_eq_hzero sectionExtZero_restrict
+    NormalizedData)
+
+variable {X : TopCat.{0}}
+local instance topMVHasExt : HasExt.{1} (AbSheaf X) := HasExt.standard _
+variable {F : AbSheaf X}
+
+/-- Extend an actual first-component map into the injective middle term
+and descend its quotient through the original source cokernel. -/
+private def sourcePresentationMap {S : ShortComplex (AbSheaf X)}
+    (hS : S.ShortExact) (a : S.X₁ ⟶ F) : S ⟶ presentation F := by
+  letI : Mono S.f := hS.mono_f
+  letI : Epi S.g := hS.epi_g
+  let m : S.X₂ ⟶ (presentation F).X₂ :=
+    Injective.factorThru (a ≫ (presentation F).f) S.f
+  have hm : S.f ≫ m = a ≫ (presentation F).f := Injective.comp_factorThru _ _
+  have hz : S.f ≫ (m ≫ (presentation F).g) = 0 := by
+    rw [← Category.assoc, hm, Category.assoc, (presentation F).zero, comp_zero]
+  exact
+    { τ₁ := a
+      τ₂ := m
+      τ₃ := hS.exact.desc (m ≫ (presentation F).g) hz
+      comm₁₂ := hm.symm
+      comm₂₃ := (hS.exact.g_desc (m ≫ (presentation F).g) hz).symm }
+
+/-- The actual section data of one source Mayer--Vietoris comparison.
+Its last field fixes the Ext normalization, including the sign. -/
+structure MayerVietorisLift
+    (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+    (c : Sections F S.X₁) where
+  left : Sections (presentation F).X₂ S.X₂
+  right : Sections (presentation F).X₂ S.X₃
+  quotient : Sections (presentation F).X₃ S.X₄
+  difference : res (presentation F).X₂ S.f₁₂.le left -
+      res (presentation F).X₂ S.f₁₃.le right = app (presentation F).f S.X₁ c
+  quotient_left : app (presentation F).g S.X₂ left =
+    res (presentation F).X₃ S.f₂₄.le quotient
+  quotient_right : app (presentation F).g S.X₃ right =
+    res (presentation F).X₃ S.f₃₄.le quotient
+  boundary : S.δ F 0 1 rfl
+      ((CycleQ2GeometricConeCech.HZero.sectionsEquiv F S.X₁).symm c) =
+    (sectionExtZero S.X₄ quotient).comp (presentation_shortExact F).extClass rfl
+
+theorem mayerVietorisLift_nonempty
+    (S : (Opens.grothendieckTopology X).MayerVietorisSquare)
+    (c : Sections F S.X₁) : Nonempty (MayerVietorisLift S c) := by
+  let m := sourcePresentationMap S.shortComplex_shortExact (sectionHom S.X₁ c)
+  let l := freeOpenSections (presentation F).X₂ S.X₂ (biprod.inl ≫ m.τ₂)
+  let r := freeOpenSections (presentation F).X₂ S.X₃ (biprod.inr ≫ m.τ₂)
+  let q := freeOpenSections (presentation F).X₃ S.X₄ m.τ₃
+  have hm : m.τ₂ = biprod.desc (sectionHom S.X₂ l) (sectionHom S.X₃ r) := by
+    apply biprod.hom_ext'
+    · rw [biprod.inl_desc]
+      exact ((freeOpenSections (presentation F).X₂ S.X₂).symm_apply_apply _).symm
+    · rw [biprod.inr_desc]
+      exact ((freeOpenSections (presentation F).X₂ S.X₃).symm_apply_apply _).symm
+  refine ⟨{
+    left := l
+    right := r
+    quotient := q
+    difference := ?_
+    quotient_left := ?_
+    quotient_right := ?_
+    boundary := ?_
+  }⟩
+  · have h := congrArg (freeOpenSections (presentation F).X₂ S.X₁) m.comm₁₂
+    change freeOpenSections (presentation F).X₂ S.X₁
+        (sectionHom S.X₁ c ≫ (presentation F).f) = _ at h
+    rw [sectionHom_postcomp, sectionHom_section, hm] at h
+    change app (presentation F).f S.X₁ c =
+      freeOpenSections (presentation F).X₂ S.X₁
+        (biprod.lift (freeOpenMap S.f₁₂.le) (-(freeOpenMap S.f₁₃.le)) ≫
+          biprod.desc (sectionHom S.X₂ l) (sectionHom S.X₃ r)) at h
+    rw [sections_biprod_lift] at h
+    exact h.symm
+  · have h : (biprod.inl ≫ m.τ₂) ≫ (presentation F).g =
+        freeOpenMap S.f₂₄.le ≫ m.τ₃ := by
+      simpa only [Category.assoc,
+        GrothendieckTopology.MayerVietorisSquare.shortComplex_g,
+        biprod.inl_desc_assoc] using
+        congrArg (fun k => biprod.inl ≫ k) m.comm₂₃
+    have hh := congrArg (freeOpenSections (presentation F).X₃ S.X₂) h
+    rw [← freeOpenSections_postcomp, freeOpenSections_naturality] at hh
+    exact hh
+  · have h : (biprod.inr ≫ m.τ₂) ≫ (presentation F).g =
+        freeOpenMap S.f₃₄.le ≫ m.τ₃ := by
+      simpa only [Category.assoc,
+        GrothendieckTopology.MayerVietorisSquare.shortComplex_g,
+        biprod.inr_desc_assoc] using
+        congrArg (fun k => biprod.inr ≫ k) m.comm₂₃
+    have hh := congrArg (freeOpenSections (presentation F).X₃ S.X₃) h
+    rw [← freeOpenSections_postcomp, freeOpenSections_naturality] at hh
+    exact hh
+  · have h := ShortComplex.ShortExact.extClass_naturality
+      S.shortComplex_shortExact (presentation_shortExact F) m
+    change S.shortComplex_shortExact.extClass.comp (sectionExtZero S.X₁ c)
+        (add_zero 1) = (Ext.mk₀ m.τ₃).comp
+          (presentation_shortExact F).extClass (zero_add 1) at h
+    change S.shortComplex_shortExact.extClass.comp
+      ((CycleQ2GeometricConeCech.HZero.sectionsEquiv F S.X₁).symm c)
+        (add_zero 1) = _
+    rw [← sectionExtZero_eq_hzero, h]
+    change (Ext.mk₀ m.τ₃).comp (presentation_shortExact F).extClass rfl =
+      (Ext.mk₀ ((freeOpenSections (presentation F).X₃ S.X₄).symm
+        (freeOpenSections (presentation F).X₃ S.X₄ m.τ₃))).comp
+          (presentation_shortExact F).extClass rfl
+    rw [AddEquiv.symm_apply_apply]
+
+/-- Every triple section has normalized two-stage comparison data.  The
+construction uses the actual two source sequences, so it also works when
+their union is a proper open of the ambient space. -/
+theorem normalizedData_nonempty (U V W : Opens X)
+    (c : Sections F (CycleQ2ThreeOpenCechH2.TripleOpen U V W)) :
+    Nonempty (NormalizedData F U V W c) := by
+  obtain ⟨a⟩ := mayerVietorisLift_nonempty
+    (Opens.mayerVietorisSquare (U ⊓ W) (V ⊓ W)) c
+  obtain ⟨b⟩ := mayerVietorisLift_nonempty
+    (CycleQ2ThreeOpenCechH2.outerSquare U V W) a.quotient
+  refine ⟨{
+    b02 := -a.left
+    b12 := -a.right
+    first_boundary := ?_
+    vUV := b.left
+    vW := b.right
+    second_left := ?_
+    second_right := ?_
+    t := b.quotient
+    global_left := b.quotient_left
+    global_right := b.quotient_right
+  }⟩
+  · rw [map_neg, map_neg]
+    rw [← a.difference]
+    abel
+  · have h := congrArg (res (presentation (presentation F).X₃).X₂
+      (show U ⊓ W ≤ (U ⊓ W) ⊔ (V ⊓ W) from le_sup_left)) b.difference
+    simp only [map_sub, res_comp, ← app_res] at h
+    rw [← a.quotient_left] at h
+    rw [map_neg, map_neg]
+    exact (by simpa only [neg_sub] using congrArg Neg.neg h)
+  · have h := congrArg (res (presentation (presentation F).X₃).X₂
+      (show V ⊓ W ≤ (U ⊓ W) ⊔ (V ⊓ W) from le_sup_right)) b.difference
+    simp only [map_sub, res_comp, ← app_res] at h
+    rw [← a.quotient_right] at h
+    rw [map_neg, map_neg]
+    exact (by simpa only [neg_sub] using congrArg Neg.neg h)
+
+private theorem cross_pair_eq (U V T : Opens X) :
+    (U ⊓ T) ⊓ (V ⊓ T) = (U ⊓ V) ⊓ T := by
+  simp only [inf_assoc, inf_left_comm, inf_comm, inf_idem]
+
+variable (U : Fin 4 → Opens X)
+
+private theorem ordered_quad_eq :
+    (((U 0 ⊓ U 1) ⊓ U 2) ⊓ U 3) =
+      CycleQ2FourOpenH3.QuadOpen (U 0) (U 1) (U 2) (U 3) := by
+  simp only [CycleQ2FourOpenH3.QuadOpen, CycleQ2ThreeOpenCechH2.TripleOpen,
+    inf_assoc, inf_left_comm, inf_comm, inf_idem]
+
+/-- The same ordered fourfold section on the redundant intersection
+used by the existing Mayer--Vietoris squares. -/
+def quadSection (c : Three F U) :
+    Sections F (CycleQ2FourOpenH3.QuadOpen (U 0) (U 1) (U 2) (U 3)) :=
+  res F (ordered_quad_eq U).ge c
+
+variable {c : Three F U}
+  (d : NormalizedData F (U 0 ⊓ U 3) (U 1 ⊓ U 3) (U 2 ⊓ U 3)
+    (quadSection U c))
+
+/-- The first injective lift has exactly the two last triple-face
+components retained by the inner two Mayer--Vietoris squares. -/
+def normalizedTopLift : TopLift U c where
+  primitive := ⟨0, 0,
+    res (presentation F).X₂ (cross_pair_eq (U 0) (U 2) (U 3)).ge d.b02,
+    res (presentation F).X₂ (cross_pair_eq (U 1) (U 2) (U 3)).ge d.b12⟩
+  differential := by
+    have h := congrArg (res (presentation F).X₂ (ordered_quad_eq U).le) d.first_boundary
+    simpa only [d2, map_zero, sub_zero, add_zero, map_sub, res_comp,
+      ← app_res, quadSection, res_self] using h
+
+/-- The retained second primitive occupies precisely the three edges
+meeting the last open. -/
+def middlePrimitive : One (presentation (presentation F).X₃).X₂ U :=
+  ⟨0, 0, res (presentation (presentation F).X₃).X₂ le_sup_left d.vUV,
+    0, res (presentation (presentation F).X₃).X₂ le_sup_right d.vUV, d.vW⟩
+
+theorem middlePrimitive_differential :
+    d1 (presentation (presentation F).X₃).X₂ U (middlePrimitive U d) =
+      mapTwo U (presentation (presentation F).X₃).f
+        (mapTwo U (presentation F).g (normalizedTopLift U d).primitive) := by
+  refine Prod.ext ?_ (Prod.ext ?_ (Prod.ext ?_ ?_))
+  · simp only [d1, middlePrimitive, mapTwo, normalizedTopLift, map_zero,
+      sub_self, add_zero]
+  · simp only [d1, middlePrimitive, mapTwo, normalizedTopLift, map_zero,
+      res_comp, sub_self, add_zero]
+  · have h := congrArg (res (presentation (presentation F).X₃).X₂
+      (cross_pair_eq (U 0) (U 2) (U 3)).ge) d.second_left
+    simpa only [d1, middlePrimitive, mapTwo, normalizedTopLift, map_zero,
+      add_zero, map_sub, res_comp, ← app_res] using h
+  · have h := congrArg (res (presentation (presentation F).X₃).X₂
+      (cross_pair_eq (U 1) (U 2) (U 3)).ge) d.second_right
+    simpa only [d1, middlePrimitive, mapTwo, normalizedTopLift, map_zero,
+      add_zero, map_sub, res_comp, ← app_res] using h
+
+variable (e : MayerVietorisLift
+  (CycleQ2FourOpenH3.outerSquare (U 0) (U 1) (U 2) (U 3)) d.t)
+
+/-- The last primitive is the negative of the actual outer source
+comparison on both union components. -/
+def lastPrimitive : Zero (presentation (presentation (presentation F).X₃).X₃).X₂ U :=
+  Fin.cases (-res (presentation (presentation (presentation F).X₃).X₃).X₂
+      (le_sup_left.trans le_sup_left) e.left)
+    (Fin.cases (-res (presentation (presentation (presentation F).X₃).X₃).X₂
+        (le_sup_right.trans le_sup_left) e.left)
+      (Fin.cases (-res (presentation (presentation (presentation F).X₃).X₃).X₂
+          le_sup_right e.left)
+        (Fin.cases (-e.right) (fun i => Fin.elim0 i))))
+
+theorem lastPrimitive_differential :
+    d0 (presentation (presentation (presentation F).X₃).X₃).X₂ U
+        (lastPrimitive U d e) =
+      mapOne U (presentation (presentation (presentation F).X₃).X₃).f
+        (mapOne U (presentation (presentation F).X₃).g (middlePrimitive U d)) := by
+  let I := (presentation (presentation (presentation F).X₃).X₃).X₂
+  let Q := (presentation (presentation F).X₃).X₃
+  have h0 : app (presentation (presentation F).X₃).g (U 0 ⊓ U 3)
+      (res (presentation (presentation F).X₃).X₂ le_sup_left d.vUV) =
+      res Q (le_sup_left.trans le_sup_left) d.t := by
+    rw [app_res, d.global_left, res_comp]
+  have h1 : app (presentation (presentation F).X₃).g (U 1 ⊓ U 3)
+      (res (presentation (presentation F).X₃).X₂ le_sup_right d.vUV) =
+      res Q (le_sup_right.trans le_sup_left) d.t := by
+    rw [app_res, d.global_left, res_comp]
+  refine Prod.ext ?_ (Prod.ext ?_ (Prod.ext ?_ (Prod.ext ?_ (Prod.ext ?_ ?_))))
+  · simp only [d0, lastPrimitive, middlePrimitive, mapOne, map_zero,
+      map_neg, res_comp, sub_self]
+  · simp only [d0, lastPrimitive, middlePrimitive, mapOne, map_zero,
+      map_neg, res_comp, sub_self]
+  · have h := congrArg (res I
+      (show U 0 ⊓ U 3 ≤ ((U 0 ⊓ U 3) ⊔ (U 1 ⊓ U 3)) ⊔ (U 2 ⊓ U 3) from
+        le_sup_left.trans le_sup_left)) e.difference
+    simp only [map_sub, res_comp, ← app_res] at h
+    change res I inf_le_right (-e.right) -
+        res I inf_le_left (-res I (le_sup_left.trans le_sup_left) e.left) =
+      app (presentation Q).f _ (app (presentation (presentation F).X₃).g _
+        (res (presentation (presentation F).X₃).X₂ le_sup_left d.vUV))
+    rw [map_neg, map_neg, res_comp, neg_sub_neg, h0]
+    exact h
+  · simp only [d0, lastPrimitive, middlePrimitive, mapOne, map_zero,
+      map_neg, res_comp, sub_self]
+  · have h := congrArg (res I
+      (show U 1 ⊓ U 3 ≤ ((U 0 ⊓ U 3) ⊔ (U 1 ⊓ U 3)) ⊔ (U 2 ⊓ U 3) from
+        le_sup_right.trans le_sup_left)) e.difference
+    simp only [map_sub, res_comp, ← app_res] at h
+    change res I inf_le_right (-e.right) -
+        res I inf_le_left (-res I (le_sup_right.trans le_sup_left) e.left) =
+      app (presentation Q).f _ (app (presentation (presentation F).X₃).g _
+        (res (presentation (presentation F).X₃).X₂ le_sup_right d.vUV))
+    rw [map_neg, map_neg, res_comp, neg_sub_neg, h1]
+    exact h
+  · have h := congrArg (res I
+      (show U 2 ⊓ U 3 ≤ ((U 0 ⊓ U 3) ⊔ (U 1 ⊓ U 3)) ⊔ (U 2 ⊓ U 3) from
+        le_sup_right)) e.difference
+    simp only [map_sub, res_comp, ← app_res] at h
+    change res I inf_le_right (-e.right) -
+        res I inf_le_left (-res I le_sup_right e.left) =
+      app (presentation Q).f _ (app (presentation (presentation F).X₃).g _ d.vW)
+    rw [map_neg, map_neg, res_comp, neg_sub_neg, d.global_right]
+    exact h
+
+private theorem cover_union_eq (hcover : (⨆ i, U i) = ⊤) :
+    ((U 0 ⊔ U 1) ⊔ U 2) ⊔ U 3 = ⊤ := by
+  apply le_antisymm le_top
+  rw [← hcover]
+  apply iSup_le
+  intro i
+  fin_cases i
+  · exact le_sup_left.trans (le_sup_left.trans le_sup_left)
+  · exact le_sup_right.trans (le_sup_left.trans le_sup_left)
+  · exact le_sup_right.trans le_sup_left
+  · exact le_sup_right
+
+/-- The three source comparisons give exactly retained descent data for
+the quotient of the first top lift. -/
+def normalizedDescent (hcover : (⨆ i, U i) = ⊤) :
+    TwoDescent U (mapTwo U (presentation F).g (normalizedTopLift U d).primitive) where
+  first := middlePrimitive U d
+  first_differential := middlePrimitive_differential U d
+  second := lastPrimitive U d e
+  second_differential := lastPrimitive_differential U d e
+  globalSection := -res (presentation (presentation (presentation F).X₃).X₃).X₃
+    (cover_union_eq U hcover).ge e.quotient
+  global_restriction := by
+    funext i
+    fin_cases i
+    · change res _ le_top (-res _ (cover_union_eq U hcover).ge e.quotient) =
+        app _ _ (-res _ (le_sup_left.trans le_sup_left) e.left)
+      rw [map_neg, map_neg, app_res, e.quotient_left, res_comp, res_comp]
+    · change res _ le_top (-res _ (cover_union_eq U hcover).ge e.quotient) =
+        app _ _ (-res _ (le_sup_right.trans le_sup_left) e.left)
+      rw [map_neg, map_neg, app_res, e.quotient_left, res_comp, res_comp]
+    · change res _ le_top (-res _ (cover_union_eq U hcover).ge e.quotient) =
+        app _ _ (-res _ le_sup_right e.left)
+      rw [map_neg, map_neg, app_res, e.quotient_left, res_comp, res_comp]
+    · change res _ le_top (-res _ (cover_union_eq U hcover).ge e.quotient) = app _ _ (-e.right)
+      rw [map_neg, map_neg, e.quotient_right, res_comp]
+
+/-- The original three Mayer--Vietoris boundaries on an ordered top
+section, transported from the proved covering union to the whole space. -/
+def orderedConnecting (hcover : (⨆ i, U i) = ⊤) : Three F U →+ F.H' 3 ⊤ :=
+  ((F.cohomologyPresheaf 3).map (homOfLE (cover_union_eq U hcover).ge).op).hom.comp
+    ((CycleQ2FourOpenH3.connecting F (U 0) (U 1) (U 2) (U 3)).comp
+      (res F (ordered_quad_eq U).ge))
+
+/-- Associativity of the actual three source extension classes gives
+the unsigned triple injective boundary of the retained outer quotient. -/
+theorem orderedConnecting_normalized (hcover : (⨆ i, U i) = ⊤) :
+    orderedConnecting U hcover c =
+      (((sectionExtZero ⊤
+        (res (presentation (presentation (presentation F).X₃).X₃).X₃
+          (cover_union_eq U hcover).ge e.quotient)).comp
+        (presentation_shortExact (presentation (presentation F).X₃).X₃).extClass rfl).comp
+          (presentation_shortExact (presentation F).X₃).extClass rfl).comp
+            (presentation_shortExact F).extClass rfl := by
+  let S := CycleQ2FourOpenH3.outerSquare (U 0) (U 1) (U 2) (U 3)
+  let g := S.shortComplex_shortExact.extClass
+  let p := sectionExtZero S.X₁ d.t
+  let a := (presentation_shortExact (presentation F).X₃).extClass
+  let b := (presentation_shortExact F).extClass
+  have he : g.comp p (add_zero 1) =
+      (sectionExtZero S.X₄ e.quotient).comp
+        (presentation_shortExact (presentation (presentation F).X₃).X₃).extClass rfl := by
+    change S.shortComplex_shortExact.extClass.comp (sectionExtZero S.X₁ d.t)
+      (add_zero 1) = _
+    rw [sectionExtZero_eq_hzero]
+    exact e.boundary
+  have hm : CycleQ2FourOpenH3.connecting F (U 0) (U 1) (U 2) (U 3)
+      (quadSection U c) =
+      (((sectionExtZero S.X₄ e.quotient).comp
+        (presentation_shortExact (presentation (presentation F).X₃).X₃).extClass rfl).comp
+          a rfl).comp b rfl := by
+    change g.comp
+      (CycleQ2ThreeOpenSectionH2.connecting F (U 0 ⊓ U 3) (U 1 ⊓ U 3)
+        (U 2 ⊓ U 3) (quadSection U c)) rfl = _
+    rw [d.mv_eq]
+    change g.comp ((p.comp a rfl).comp b rfl) rfl = _
+    rw [← Ext.comp_assoc g (p.comp a rfl) b rfl rfl rfl,
+      ← Ext.comp_assoc_of_second_deg_zero g p a rfl, he]
+  change (Ext.mk₀ (freeOpenMap (cover_union_eq U hcover).ge)).comp
+    (CycleQ2FourOpenH3.connecting F (U 0) (U 1) (U 2) (U 3)
+      (quadSection U c)) (zero_add 3) = _
+  rw [hm, sectionExtZero_restrict]
+  symm
+  rw [Ext.comp_assoc _ _ _ (zero_add 0) (zero_add 1) (by decide),
+    Ext.comp_assoc _ _ _ (zero_add 1) (by decide : 1 + 1 = 2) (by decide),
+    Ext.comp_assoc _ _ _ (zero_add 2) (by decide : 2 + 1 = 3) (by decide)]
+
+private theorem sectionExtZero_neg {G : AbSheaf X} (V : Opens X) (x : Sections G V) :
+    sectionExtZero V (-x) = -sectionExtZero V x := by
+  unfold sectionExtZero
+  rw [map_neg, Ext.mk₀_neg]
+
+/-- With the existing ordered Čech and source Mayer--Vietoris
+conventions, the third comparison has a minus sign.  This follows from
+three actual short-complex comparisons and retained injective descent. -/
+theorem cechThreeClass_eq_neg_orderedConnecting (hcover : (⨆ i, U i) = ⊤)
+    (c : Three F U) :
+    cechThreeClass U hcover c = -orderedConnecting U hcover c := by
+  obtain ⟨d⟩ := normalizedData_nonempty (U 0 ⊓ U 3) (U 1 ⊓ U 3) (U 2 ⊓ U 3)
+    (quadSection U c)
+  obtain ⟨e⟩ := mayerVietorisLift_nonempty
+    (CycleQ2FourOpenH3.outerSquare (U 0) (U 1) (U 2) (U 3)) d.t
+  rw [cechThreeClass_eq_topLiftClass U hcover c (normalizedTopLift U d)]
+  unfold topLiftClass
+  rw [cechTwoClass_eq_descentClass U hcover _ _ (normalizedDescent U d e hcover)]
+  change (((sectionExtZero ⊤
+      (-res (presentation (presentation (presentation F).X₃).X₃).X₃
+        (cover_union_eq U hcover).ge e.quotient)).comp
+        (presentation_shortExact (presentation (presentation F).X₃).X₃).extClass rfl).comp
+          (presentation_shortExact (presentation F).X₃).extClass rfl).comp
+            (presentation_shortExact F).extClass rfl = _
+  rw [sectionExtZero_neg, Ext.neg_comp, Ext.neg_comp, Ext.neg_comp,
+    orderedConnecting_normalized U d e hcover]
+
+/-- The actual coefficient boundary of a four-face lift is the negative
+of the original iterated Mayer--Vietoris map on its scalar coboundary. -/
+theorem cechTwoClass_connecting_eq_neg_orderedConnecting
+    {S : ShortComplex (AbSheaf X)} (hS : S.ShortExact)
+    (hcover : (⨆ i, U i) = ⊤) (b : Two S.X₂ U) (c : Three S.X₁ U)
+    (hb : d2 S.X₂ U b = app S.f _ c) :
+    (cechTwoClass U hcover (mapTwo U S.g b) (reducedTwo_closed U b c hb)).comp
+      hS.extClass rfl = -orderedConnecting U hcover c :=
+  (cechTwoClass_connecting U hS hcover b c hb).trans
+    (cechThreeClass_eq_neg_orderedConnecting U hcover c)
+
+end CycleQ2FourOpenTopMayerVietoris
+end
+
+#print axioms CycleQ2FourOpenTopMayerVietoris.mayerVietorisLift_nonempty
+#print axioms CycleQ2FourOpenTopMayerVietoris.normalizedData_nonempty
+#print axioms CycleQ2FourOpenTopMayerVietoris.cechThreeClass_eq_neg_orderedConnecting
+#print axioms CycleQ2FourOpenTopMayerVietoris.cechTwoClass_connecting_eq_neg_orderedConnecting
