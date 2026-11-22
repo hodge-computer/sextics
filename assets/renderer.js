@@ -117,13 +117,15 @@ vec4 projectSurface(vec4 sphere,out vec4 normal){
   for(int step=0;step<4;step++){
     vec3 a=vec3(dot(uDivisorPlane[0],sphere),dot(uDivisorPlane[1],sphere),dot(uDivisorPlane[2],sphere));
     vec3 b=vec3(dot(uDivisorPlane[3],sphere),dot(uDivisorPlane[4],sphere),dot(uDivisorPlane[5],sphere));
-    DivJet f=surfaceField(a,b);
-    vec4 g=f.a.x*uDivisorPlane[0]+f.a.y*uDivisorPlane[1]+f.a.z*uDivisorPlane[2]+f.b.x*uDivisorPlane[3]+f.b.y*uDivisorPlane[4]+f.b.z*uDivisorPlane[5];
-    g-=sphere*dot(sphere,g);
+    DivJet4 f=surfaceField(a,b);
+    vec4 g=f.g-sphere*dot(sphere,f.g);
     vec4 correction=f.v*g/max(dot(g,g),1e-25);
-    correction*=min(1.0,0.025/max(length(correction),1e-20));
+    float size=length(correction);
+    correction*=min(1.0,0.025/max(size,1e-20));
     sphere=normalize(sphere-correction);
     normal=g;
+    // A correction of two units in the last place leaves nothing for a further step.
+    if(size<2.4e-7)break;
   }
   return sphere;
 }
@@ -210,7 +212,7 @@ float distanceOpacity(float distanceToCamera) {
 // Whether this pass drops the fragment: the split between the opaque background and the peeled
 // layers, and the dissolve at the projection box. The depth prepass applies exactly these
 // tests, so the shading that follows runs only where its result is kept.
-bool dropped(float alpha, float screenNoise) {
+bool dropped(float alpha) {
   if(uRenderPass == 1 && alpha < 1.0) return true;
   if(uRenderPass == 2) {
     if(alpha >= 1.0) return true; // this portion is already in the opaque background
@@ -229,13 +231,12 @@ bool dropped(float alpha, float screenNoise) {
   vec3 stereo = vPosition*uDisplayScale + uOriginalCenter;
   float boxDistance = max(abs(stereo.x),max(abs(stereo.y),abs(stereo.z)));
   float edgeFade = uProjectionBox > 0.0 ? 1.0-smoothstep(0.825*uProjectionBox,0.992*uProjectionBox,boxDistance) : 1.0;
-  return screenNoise > edgeFade;
+  return edgeFade < 1.0 && pixelNoise(ivec2(gl_FragCoord.xy)) > edgeFade;
 }
 void main() {
   float alpha = distanceOpacity(length(uCamera-vPosition));
-  float screenNoise = pixelNoise(ivec2(gl_FragCoord.xy));
   if(uDepthOnly) {
-    if(dropped(alpha,screenNoise)) discard;
+    if(dropped(alpha)) discard;
     outColor=vec4(0.0);return;
   }
   // Derivatives need neighbouring fragments, including those this pass drops,
@@ -243,7 +244,7 @@ void main() {
   vec2 complexValue;
   // The distance to the divisor, already in pixels.
   float divisor = 1.0-smoothstep(0.55,1.45,pixelDivisor(complexValue));
-  if(dropped(alpha,screenNoise)) discard;
+  if(dropped(alpha)) discard;
   vec3 N = normalize(vNormal);
   if (!gl_FrontFacing) N = -N;
   vec3 V = normalize(uCamera-vPosition);
@@ -271,7 +272,7 @@ void main() {
 
   color = aces(color);
   color = pow(color,vec3(1.0/2.2));
-  color += (screenNoise-0.5)/420.0;
+  color += (pixelNoise(ivec2(gl_FragCoord.xy))-0.5)/420.0;
 
   // Only the peeled layer uses alpha. Normal/zero-reach rendering is exactly
   // the original depth-writing, unblended path; no edge-alpha multiplier.
@@ -1292,23 +1293,26 @@ void main() {
       gl.uniform1f(U.TransNear, 0);
       gl.uniform1f(U.TransFar, 2);
       gl.uniform1f(U.TransMinAlpha, 0.18);
-      // Lay down depth with the cheap fragment tests alone, then shade only where the depth
-      // matches. Hidden fragments and those a pass drops never reach the divisor evaluation.
+      // Where a divisor is evaluated, lay down depth with the cheap fragment tests alone and
+      // then shade only where the depth matches: hidden fragments, and those a pass drops,
+      // never reach the divisor. Other scenes shade cheaply and are drawn once.
       const triangles = () => gl.drawElements(gl.TRIANGLES, activeCount, gl.UNSIGNED_INT, 0),
-        draw = () => {
-          gl.uniform1i(U.DepthOnly, 1);
-          gl.colorMask(false, false, false, false);
-          gl.depthFunc(gl.LEQUAL);
-          gl.depthMask(true);
-          triangles();
-          gl.uniform1i(U.DepthOnly, 0);
-          gl.colorMask(true, true, true, true);
-          gl.depthFunc(gl.EQUAL);
-          gl.depthMask(false);
-          triangles();
-          gl.depthFunc(gl.LEQUAL);
-          gl.depthMask(true);
-        },
+        draw = !activeMeta.divisorVisible
+          ? triangles
+          : () => {
+              gl.uniform1i(U.DepthOnly, 1);
+              gl.colorMask(false, false, false, false);
+              gl.depthFunc(gl.LEQUAL);
+              gl.depthMask(true);
+              triangles();
+              gl.uniform1i(U.DepthOnly, 0);
+              gl.colorMask(true, true, true, true);
+              gl.depthFunc(gl.EQUAL);
+              gl.depthMask(false);
+              triangles();
+              gl.depthFunc(gl.LEQUAL);
+              gl.depthMask(true);
+            },
         bounds = Math.max(1.01, activeMeta.positionBound || 0),
         distanceToBounds = Math.hypot(...eye.map((c) => Math.max(0, Math.abs(c) - bounds)));
       if (distanceToBounds < 2) {

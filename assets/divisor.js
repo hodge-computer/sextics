@@ -2,48 +2,57 @@
    Floating point is presentation only; accepted proof data is never changed. */
 (() => {
   'use strict';
-  /* A jet is a value and its six ambient derivatives, times 2^(64 e). Carrying the exponent
-     separately keeps factors of any degree inside single-precision range: a product is brought
-     back near 1 whenever it drifts, and a sum first aligns its two exponents. Every rescaling
-     multiplies by a literal power of two, which is exact on any hardware. Only ratios within
-     one jet are ever used, so the exponent itself never reaches the screen. */
+  /* A jet is a value and its derivatives. It carries only the derivatives its use needs: D is
+     differentiated along the two directions of the screen, F along the four coordinates of
+     the sphere it is projected in.
+     Single precision spans 2^±126. A sub-expression of degree at most six whose coefficients
+     keep it within 2^±60 cannot leave that range, except closer than a fraction of a pixel
+     to where all its terms vanish, so it is evaluated in plain arithmetic (pa, pm). F is
+     always such an expression. Anything larger is a jet times 2^(64 e): a product is brought
+     back near 1 whenever it drifts, and a sum first aligns its two exponents (da, dm, with dn
+     admitting a plain jet). Every rescaling multiplies by a literal power of two, which is
+     exact on any hardware. Only ratios within one jet are ever used, so the exponent itself
+     never reaches the screen. */
+  const PLAIN_DEGREE = 6,
+    PLAIN_SIZE = 2 ** 60;
+  const jets = (n) => `
+struct DivJet${n} { float v; vec${n} g; float e; };
+DivJet${n} pa(DivJet${n} x,DivJet${n} y) { return DivJet${n}(x.v+y.v,x.g+y.g,0.0); }
+DivJet${n} pm(DivJet${n} x,DivJet${n} y) { return DivJet${n}(x.v*y.v,x.g*y.v+x.v*y.g,0.0); }
+DivJet${n} dn(DivJet${n} x) {
+  vec${n} g=abs(x.g);
+  float m=max(abs(x.v),${n === 2 ? 'max(g.x,g.y)' : 'max(max(g.x,g.y),max(g.z,g.w))'});
+  if(m==0.0) x.e=DIV_NONE;
+  else if(m<2.3283064365386963e-10) { x.v*=DIV_UP; x.g*=DIV_UP; x.e-=1.0; }
+  else if(m>4294967296.0) { x.v*=DIV_DOWN; x.g*=DIV_DOWN; x.e+=1.0; }
+  return x;
+}
+void dalign(inout DivJet${n} x,inout DivJet${n} y) {
+  float d=x.e-y.e;
+  // One step apart is an exact shift; further apart, the smaller term is below rounding.
+  if(d>0.0) { float s=d>1.5?0.0:DIV_DOWN; y.v*=s; y.g*=s; y.e=x.e; }
+  else if(d<0.0) { float s=d<-1.5?0.0:DIV_DOWN; x.v*=s; x.g*=s; x.e=y.e; }
+}
+DivJet${n} da(DivJet${n} x,DivJet${n} y) {
+  dalign(x,y);
+  DivJet${n} r=DivJet${n}(x.v+y.v,x.g+y.g,x.e);
+  if(r.v==0.0) r=dn(r);
+  return r;
+}
+DivJet${n} dm(DivJet${n} x,DivJet${n} y) {
+  return dn(DivJet${n}(x.v*y.v,x.g*y.v+x.v*y.g,x.e+y.e));
+}`;
   const GLSL = `
-struct DivJet { float v; vec3 a; vec3 b; float e; };
 const float DIV_NONE=-1e30;
 const float DIV_UP=18446744073709551616.0;      // 2^64
 const float DIV_DOWN=5.421010862427522e-20;     // 2^-64
 // How the six coordinates change across one pixel, horizontally and vertically.
-vec3 divAx,divAy,divBx,divBy;
-DivJet dc(float v) { return DivJet(v,vec3(0.0),vec3(0.0),v==0.0?DIV_NONE:0.0); }
-DivJet dn(DivJet x) {
-  vec3 g=max(abs(x.a),abs(x.b));
-  float m=max(abs(x.v),max(g.x,max(g.y,g.z)));
-  if(m==0.0) x.e=DIV_NONE;
-  else if(m<2.3283064365386963e-10) { x.v*=DIV_UP; x.a*=DIV_UP; x.b*=DIV_UP; x.e-=1.0; }
-  else if(m>4294967296.0) { x.v*=DIV_DOWN; x.a*=DIV_DOWN; x.b*=DIV_DOWN; x.e+=1.0; }
-  return x;
-}
-void dalign(inout DivJet x,inout DivJet y) {
-  float d=x.e-y.e;
-  // One step apart is an exact shift; further apart, the smaller term is below rounding.
-  if(d>0.0) { float s=d>1.5?0.0:DIV_DOWN; y.v*=s; y.a*=s; y.b*=s; y.e=x.e; }
-  else if(d<0.0) { float s=d<-1.5?0.0:DIV_DOWN; x.v*=s; x.a*=s; x.b*=s; x.e=y.e; }
-}
-DivJet da(DivJet x,DivJet y) {
-  dalign(x,y);
-  DivJet r=DivJet(x.v+y.v,x.a+y.a,x.b+y.b,x.e);
-  if(r.v==0.0) r=dn(r);
-  return r;
-}
-DivJet dm(DivJet x,DivJet y) {
-  return dn(DivJet(x.v*y.v,x.a*y.v+x.v*y.a,x.b*y.v+x.v*y.b,x.e+y.e));
-}
+vec3 divAx,divAy,divBx,divBy;${jets(2)}${jets(4)}
 // Newton's step from this pixel to a factor's zero set, in pixels, from the exact derivatives.
-vec2 divisorStep(DivJet x) {
-  vec2 g=vec2(dot(x.a,divAx)+dot(x.b,divBx),dot(x.a,divAy)+dot(x.b,divBy));
-  float scale=max(abs(g.x),abs(g.y));
+vec2 divisorStep(DivJet2 x) {
+  float scale=max(abs(x.g.x),abs(x.g.y));
   if(scale==0.0) return vec2(1e15);
-  g/=scale;
+  vec2 g=x.g/scale;
   return clamp(x.v/scale,-1e15,1e15)*g/dot(g,g);
 }
 // A zero of order k lies k steps away, and walking one pixel towards it shortens the step by
@@ -219,37 +228,73 @@ float divisorPixels(vec2 step) {
       return /[.e]/i.test(s) ? s : s + '.0';
     };
     const order = [...used];
-    const lines = surface
-      ? ['DivJet surfaceField(vec3 a,vec3 b) {']
-      : [GLSL, 'float divisorField(vec3 a,vec3 b) {'];
+    const n = surface ? 4 : 2,
+      lines = surface
+        ? ['DivJet4 surfaceField(vec3 a,vec3 b) {']
+        : [GLSL, 'float divisorField(vec3 a,vec3 b) {'];
     // All factors are homogeneous, so the coordinates may be rescaled to unit size.
     lines.push(
       'float scale=max(max(max(abs(a.x),abs(a.y)),max(abs(a.z),abs(b.x))),max(abs(b.y),abs(b.z)));',
-      'a/=max(scale,1e-20); b/=max(scale,1e-20);'
+      'scale=max(scale,1e-20); a/=scale; b/=scale;'
     );
-    if (!surface)
-      lines.push('divAx/=max(scale,1e-20); divAy/=max(scale,1e-20); divBx/=max(scale,1e-20); divBy/=max(scale,1e-20);');
-    for (const n of order) {
-      const [op, a, b] = nodes[n];
-      let expr;
-      if (op === 'c') expr = `dc(${literal(a)})`;
-      else if (op === 'v') {
-        const unit = [0, 0, 0, 0, 0, 0];
-        unit[a] = 1;
-        expr = `DivJet(${a < 3 ? 'a' : 'b'}[${a % 3}],vec3(${unit.slice(0, 3).map(literal)}),vec3(${unit.slice(3).map(literal)}),0.0)`;
-      } else expr = `${op === '+' ? 'da' : 'dm'}(d${a},d${b})`;
-      lines.push(`DivJet d${n}=${expr};`);
+    if (!surface) lines.push('divAx/=scale; divAy/=scale; divBx/=scale; divBy/=scale;');
+    // Degree and size bounds, taking each coordinate to be at most one, decide which
+    // sub-expressions need the exponent.
+    const plain = new Map(),
+      bound = new Map(),
+      admitted = new Set();
+    for (const m of order) {
+      const [op, a, b] = nodes[m];
+      let degree, high, low, expr;
+      if (op === 'c') {
+        [degree, high, low] = [0, Math.abs(a), a ? Math.abs(a) : Infinity];
+        expr = `DivJet${n}(${literal(a)},vec${n}(0.0),0.0)`;
+      } else if (op === 'v') {
+        [degree, high, low] = [1, 1, 1];
+        const side = a < 3 ? 'A' : 'B',
+          k = a % 3;
+        expr = surface
+          ? `DivJet4(${a < 3 ? 'a' : 'b'}[${k}],uDivisorPlane[${a}]/scale,0.0)`
+          : `DivJet2(${a < 3 ? 'a' : 'b'}[${k}],vec2(div${side}x[${k}],div${side}y[${k}]),0.0)`;
+      } else {
+        const [x, y] = [bound.get(a), bound.get(b)];
+        [degree, high, low] =
+          op === '+'
+            ? [Math.max(x[0], y[0]), x[1] + y[1], Math.min(x[2], y[2])]
+            : [x[0] + y[0], x[1] * y[1], x[2] * y[2]];
+      }
+      bound.set(m, [degree, high, low]);
+      plain.set(
+        m,
+        expr !== undefined ||
+          (plain.get(a) &&
+            plain.get(b) &&
+            degree <= PLAIN_DEGREE &&
+            high <= PLAIN_SIZE &&
+            low >= 1 / PLAIN_SIZE)
+      );
+      if (expr === undefined) {
+        const use = (x) => {
+          if (plain.get(m) || !plain.get(x)) return `d${x}`;
+          if (!admitted.has(x)) {
+            admitted.add(x);
+            lines.push(`DivJet${n} t${x}=dn(d${x});`);
+          }
+          return `t${x}`;
+        };
+        expr = `${(plain.get(m) ? 'p' : 'd') + (op === '+' ? 'a' : 'm')}(${use(a)},${use(b)})`;
+      }
+      lines.push(`DivJet${n} d${m}=${expr};`);
     }
     if (surface) {
       const [r, i] = factors[0];
       if (factors.length !== 1 || (r !== zero && i !== zero))
         throw new Error('The surface polynomial must be scalar-real on this slice.');
-      const value = `d${real[0]}`;
-      lines.push(`return DivJet(${value}.v,${value}.a/max(scale,1e-20),${value}.b/max(scale,1e-20),${value}.e);`, '}');
+      lines.push(`return d${real[0]};`, '}');
       return { source: lines.join('\n'), operations: used.size };
     }
     lines.push('float distance=1e30;');
-    for (const n of real) lines.push(`distance=min(distance,divisorPixels(divisorStep(d${n})));`);
+    for (const m of real) lines.push(`distance=min(distance,divisorPixels(divisorStep(d${m})));`);
     lines.push('return distance;', '}');
     return { source: lines.join('\n'), operations: used.size, factors: factors.length };
   }
