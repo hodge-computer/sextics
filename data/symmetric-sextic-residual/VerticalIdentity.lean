@@ -1,5 +1,5 @@
 import Proposal.K5Field
-import Proposal.EncodingCheck
+import HodgeComputer.Constructions.PolynomialEncoding.KroneckerCheck
 import Proposal.VerticalData
 import HodgeComputer.Constructions.PolynomialEncoding.BivariateDifferentiation
 
@@ -10,7 +10,7 @@ Verified via sparse `(x, y)`-bivariate `Biv` + 3-variable `(S, Q, T)` Kronecker 
 noncomputable section
 namespace SymmetricSexticResidual.VerticalIdentity
 open SymmetricSexticResidual SymmetricSexticResidual.K5Field
-open SymmetricSexticResidual.EncodingCheck SymmetricSexticResidual.VerticalData
+open PolynomialEncoding.KroneckerCheck SymmetricSexticResidual.VerticalData
 open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 open MvPolynomial
 open scoped BigOperators

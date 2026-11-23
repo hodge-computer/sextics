@@ -23,7 +23,7 @@ namespace SymmetricSexticResidual.Certificate
 open SymmetricSexticResidual.K5Field SymmetricSexticResidual.SymmetricPiola
   SymmetricSexticResidual.VerticalIdentity SymmetricSexticResidual.SheetCalculus
   SymmetricSexticResidual.CoverResidue SymmetricSexticResidual.LocalResidueU0
-  SymmetricSexticResidual.LocalResidueInf SymmetricSexticResidual.LocalResidueQ5
+  SymmetricSexticResidual.LocalResidueInf SymmetricSexticResidual.LocalResidueQ5 QuadraticCovers
 open scoped BigOperators Classical
 
 /-- Global residue theorem on `CoverL`: the sum of the 34 finite residues of `eta_L` over `R34`

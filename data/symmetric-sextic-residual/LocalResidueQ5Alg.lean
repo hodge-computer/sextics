@@ -1,8 +1,9 @@
 import Proposal.LocalResidueU0
 import Proposal.Q5WeightsData
+import HodgeComputer.Constructions.PolynomialEncoding.PolyOps
 
-/-! Part 1 of `LocalResidueQ5`: `PolyOps`/`PB` soundness engine, `Q5`/`Q7` Euler power-sum
-recurrences (`sum_RQ5_power_eq_W_k`), and regularity of `trace_AC eta_AC_reg` on `RQ5`. -/
+/-! Part 1 of `LocalResidueQ5`: `Q5`/`Q7` Euler power-sum recurrences (`sum_RQ5_power_eq_W_k`)
+and regularity of `trace_AC eta_AC_reg` on `RQ5`, built on `PolynomialEncoding.KroneckerCheck` and `PolyOps`. -/
 
 noncomputable section
 namespace SymmetricSexticResidual.LocalResidueQ5
@@ -10,828 +11,42 @@ open SymmetricSexticResidual.K5Field SymmetricSexticResidual.SheetCalculus
   SymmetricSexticResidual.CoverAlgebra SymmetricSexticResidual.CoverResidue
   SymmetricSexticResidual.LocalResidueData SymmetricSexticResidual.LocalResidueU0
   SymmetricSexticResidual.Q5WeightsData SymmetricSexticResidual.VerticalData
-  SymmetricSexticResidual.VerticalIdentity SymmetricSexticResidual.EncodingCheck
+  SymmetricSexticResidual.VerticalIdentity
+  PolynomialEncoding.KroneckerCheck QuadraticCovers
   CrossedRationalResidue Polynomial
 open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
+open PolynomialEncoding.PolyOps hiding dotW dotW_rel dotW_len
 open scoped BigOperators
 
 /-! ### Section 1: `PolyOps` / `PolBound` Centered Kronecker × Grid Engine and `Q5` Weight Traces -/
 
-structure PolyOps (α : Type*) where
-  zero : α
-  ofInt : ℤ → α
-  add : α → α → α
-  sub : α → α → α
-  neg : α → α
-  mul : α → α → α
-  pow : α → ℕ → α
-
-structure PB where
-  dS : ℕ
-  dQ : ℕ
-  dT : ℕ
-  M : ℕ
-  deriving DecidableEq
-
-def intOps : PolyOps ℤ where
-  zero := 0
-  ofInt n := n
-  add a b := Int.add a b
-  sub a b := Int.sub a b
-  neg a := Int.neg a
-  mul a b := Int.mul a b
-  pow a k := Int.pow a k
-
-def pbOps : PolyOps PB where
-  zero := ⟨0, 0, 0, 0⟩
-  ofInt n := ⟨0, 0, 0, Int.natAbs n⟩
-  add a b := ⟨Nat.max a.dS b.dS, Nat.max a.dQ b.dQ, Nat.max a.dT b.dT, Nat.add a.M b.M⟩
-  sub a b := ⟨Nat.max a.dS b.dS, Nat.max a.dQ b.dQ, Nat.max a.dT b.dT, Nat.add a.M b.M⟩
-  neg a := a
-  mul a b := ⟨Nat.add a.dS b.dS, Nat.add a.dQ b.dQ, Nat.add a.dT b.dT, Nat.mul a.M b.M⟩
-  pow a k := ⟨Nat.mul a.dS k, Nat.mul a.dQ k, Nat.mul a.dT k, Nat.pow a.M k⟩
-
-abbrev P3Z := MvPolynomial (Fin 3) ℤ
-
-def poly3Ops : PolyOps P3Z where
-  zero := 0
-  ofInt n := MvPolynomial.C n
-  add a b := a + b
-  sub a b := a - b
-  neg a := -a
-  mul a b := a * b
-  pow a k := a ^ k
-
-def k5Ops : PolyOps K5 where
-  zero := 0
-  ofInt n := (n : K5)
-  add a b := a + b
-  sub a b := a - b
-  neg a := -a
-  mul a b := a * b
-  pow a k := a ^ k
-
-structure PolyOpsRel {α β : Type*} (o1 : PolyOps α) (o2 : PolyOps β) (R : α → β → Prop) : Prop where
-  rel_zero : R o1.zero o2.zero
-  rel_ofInt : ∀ n, R (o1.ofInt n) (o2.ofInt n)
-  rel_add : ∀ {a1 a2 b1 b2}, R a1 b1 → R a2 b2 → R (o1.add a1 a2) (o2.add b1 b2)
-  rel_sub : ∀ {a1 a2 b1 b2}, R a1 b1 → R a2 b2 → R (o1.sub a1 a2) (o2.sub b1 b2)
-  rel_neg : ∀ {a b}, R a b → R (o1.neg a) (o2.neg b)
-  rel_mul : ∀ {a1 a2 b1 b2}, R a1 b1 → R a2 b2 → R (o1.mul a1 a2) (o2.mul b1 b2)
-  rel_pow : ∀ {a b} k, R a b → R (o1.pow a k) (o2.pow b k)
-
-def letB {α β : Type*} (x : α) (f : α → β) : β := f x
-
-lemma letB_rel {α₁ α₂ β₁ β₂ : Type*} {Ra : α₁ → α₂ → Prop} {Rb : β₁ → β₂ → Prop}
-    {x₁ : α₁} {x₂ : α₂} {f₁ : α₁ → β₁} {f₂ : α₂ → β₂}
-    (hx : Ra x₁ x₂) (hf : ∀ {a₁ a₂}, Ra a₁ a₂ → Rb (f₁ a₁) (f₂ a₂)) :
-    Rb (letB x₁ f₁) (letB x₂ f₂) := hf hx
-
-lemma letB_step {α β : Type*} {x y : α} {f : α → β} {z : β} (hxy : x = y) (hf : f y = z) :
-    letB x f = z := by rw [letB, hxy, hf]
-
-lemma letB_intro {α β : Type*} {P : β → Prop} {x : α} {f : α → β}
-    (h : ∀ a, a = x → P (f a)) : P (letB x f) := h x rfl
-
-def v3Int (s q t : ℤ) : Fin 3 → ℤ
-  | 0 => s
-  | 1 => q
-  | 2 => t
+abbrev k5Ops : PolyOps K5 := ringOps K5
+abbrev uOps : PolyOps Unit := unitOps
+abbrev v3P3_SQ : ℕ → P3Z := v3P3_01
+abbrev v3P3_SQT : ℕ → P3Z := v3P3_012
 
 def v3K5 : Fin 3 → K5
   | 0 => S_K
   | 1 => Q_K
   | 2 => T_K
 
-lemma poly3ToIntRel (s q t : ℤ) :
-    PolyOpsRel poly3Ops intOps (fun p z => MvPolynomial.eval (v3Int s q t) p = z) where
-  rel_zero := by simp [poly3Ops, intOps]
-  rel_ofInt n := by simp [poly3Ops, intOps]
-  rel_add h1 h2 := by simp [poly3Ops, intOps, h1, h2]
-  rel_sub h1 h2 := by simp [poly3Ops, intOps, h1, h2]; rfl
-  rel_neg h := by simp [poly3Ops, intOps, h]; rfl
-  rel_mul h1 h2 := by simp [poly3Ops, intOps, h1, h2]
-  rel_pow k h := by simp [poly3Ops, intOps, h]
-
 def evalP3K5 : P3Z →+* K5 :=
   MvPolynomial.eval₂Hom (Int.castRingHom K5) v3K5
 
-lemma poly3ToK5Rel :
-    PolyOpsRel poly3Ops k5Ops (fun p x => evalP3K5 p = x) where
-  rel_zero := by simp [poly3Ops, k5Ops]
-  rel_ofInt n := by simp [poly3Ops, k5Ops, evalP3K5]
-  rel_add h1 h2 := by simp [poly3Ops, k5Ops, h1, h2]
-  rel_sub h1 h2 := by simp [poly3Ops, k5Ops, h1, h2]
-  rel_neg h := by simp [poly3Ops, k5Ops, h]
-  rel_mul h1 h2 := by simp [poly3Ops, k5Ops, h1, h2]
-  rel_pow k h := by simp [poly3Ops, k5Ops, h]
+lemma poly3ToK5Rel : PolyOpsRel poly3Ops k5Ops (fun p x => evalP3K5 p = x) :=
+  poly3ToRingRel v3K5
 
-def evalQT (q t : ℤ) : P3Z →+* Polynomial ℤ :=
-  MvPolynomial.eval₂Hom Polynomial.C (fun i => match i with
-    | 0 => Polynomial.X
-    | 1 => Polynomial.C q
-    | 2 => Polynomial.C t)
+abbrev dotW {α : Type*} (o : PolyOps α) (A W : UPoly α) (shift : ℕ) : UPoly α :=
+  PolynomialEncoding.PolyOps.dotW o 13 5 A W shift
 
-lemma eval_evalQT (p : P3Z) (s q t : ℤ) :
-    (evalQT q t p).eval s = MvPolynomial.eval (v3Int s q t) p := by
-  induction p using MvPolynomial.induction_on' with
-  | add p1 p2 h1 h2 => simp only [map_add, Polynomial.eval_add, h1, h2]
-  | monomial m c =>
-    simp only [evalQT, MvPolynomial.eval₂Hom_monomial, MvPolynomial.eval_monomial,
-      Polynomial.eval_mul, Polynomial.eval_C, Finsupp.prod_fintype _ _ (fun _ => pow_zero _),
-      Fin.prod_univ_three, Polynomial.eval_pow, Polynomial.eval_X, v3Int]
+lemma dotW_rel {α β : Type*} {o1 : PolyOps α} {o2 : PolyOps β} {R : α → β → Prop}
+    (hR : PolyOpsRel o1 o2 R) {A1 A2 W1 W2} (hA : URel R A1 A2) (hW : URel R W1 W2) (shift : ℕ) :
+    URel R (dotW o1 A1 W1 shift) (dotW o2 A2 W2 shift) :=
+  PolynomialEncoding.PolyOps.dotW_rel hR hA hW 13 5 shift
 
-def polyL1 (f : Polynomial ℤ) : ℕ :=
-  ∑ i ∈ f.support, (f.coeff i).natAbs
-
-lemma polyL1_eq_sum_range (f : Polynomial ℤ) (N : ℕ) (hN : ∀ i ∈ f.support, i < N) :
-    polyL1 f = ∑ i ∈ Finset.range N, (f.coeff i).natAbs := by
-  unfold polyL1
-  apply Finset.sum_subset
-  · intro i hi; exact Finset.mem_range.mpr (hN i hi)
-  · intro i _ hi
-    have h0 : f.coeff i = 0 := by simpa [Polynomial.mem_support_iff] using hi
-    simp [h0]
-
-lemma polyL1_zero : polyL1 0 = 0 := by simp [polyL1]
-
-lemma polyL1_C (c : ℤ) : polyL1 (Polynomial.C c) = c.natAbs := by
-  by_cases hc : c = 0
-  · subst hc; simp [polyL1]
-  · simp only [polyL1, Polynomial.support_C hc, Finset.sum_singleton, Polynomial.coeff_C_zero]
-
-lemma polyL1_X : polyL1 Polynomial.X = 1 := by
-  rw [polyL1_eq_sum_range Polynomial.X 2 (fun i hi => by
-    have : i = 1 := by simpa [Polynomial.support_X] using hi
-    omega)]
-  simp [Finset.sum_range_succ]
-
-lemma polyL1_neg (f : Polynomial ℤ) : polyL1 (-f) = polyL1 f := by
-  simp [polyL1, Polynomial.support_neg]
-
-lemma polyL1_add (f g : Polynomial ℤ) : polyL1 (f + g) ≤ polyL1 f + polyL1 g := by
-  set N := max f.natDegree g.natDegree + 1
-  have hf : ∀ i ∈ f.support, i < N := fun i hi => Nat.lt_succ_of_le ((Polynomial.le_natDegree_of_mem_supp i hi).trans (le_max_left _ _))
-  have hg : ∀ i ∈ g.support, i < N := fun i hi => Nat.lt_succ_of_le ((Polynomial.le_natDegree_of_mem_supp i hi).trans (le_max_right _ _))
-  have hfg : ∀ i ∈ (f + g).support, i < N := fun i hi => by
-    rcases Finset.mem_union.mp (Polynomial.support_add hi) with h | h
-    · exact hf i h
-    · exact hg i h
-  rw [polyL1_eq_sum_range (f + g) N hfg, polyL1_eq_sum_range f N hf, polyL1_eq_sum_range g N hg,
-    ← Finset.sum_add_distrib]
-  exact Finset.sum_le_sum fun i _ => by rw [Polynomial.coeff_add]; exact Int.natAbs_add_le _ _
-
-lemma polyL1_sum_le {ι : Type*} (s : Finset ι) (f : ι → Polynomial ℤ) :
-    polyL1 (∑ i ∈ s, f i) ≤ ∑ i ∈ s, polyL1 (f i) := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simp [polyL1_zero]
-  | insert a s ha ih =>
-      rw [Finset.sum_insert ha, Finset.sum_insert ha]
-      exact (polyL1_add _ _).trans (Nat.add_le_add_left ih _)
-
-lemma polyL1_C_mul (c : ℤ) (g : Polynomial ℤ) :
-    polyL1 (Polynomial.C c * g) = c.natAbs * polyL1 g := by
-  set N := g.natDegree + 1
-  have hg : ∀ i ∈ g.support, i < N := fun i hi => Nat.lt_succ_of_le (Polynomial.le_natDegree_of_mem_supp i hi)
-  have hcg : ∀ i ∈ (Polynomial.C c * g).support, i < N := fun i hi => by
-    have h0 : (Polynomial.C c * g).coeff i ≠ 0 := Polynomial.mem_support_iff.mp hi
-    rw [Polynomial.coeff_C_mul] at h0
-    exact hg i (Polynomial.mem_support_iff.mpr (right_ne_zero_of_mul h0))
-  rw [polyL1_eq_sum_range (Polynomial.C c * g) N hcg, polyL1_eq_sum_range g N hg, Finset.mul_sum]
-  apply Finset.sum_congr rfl; intro i _
-  rw [Polynomial.coeff_C_mul, Int.natAbs_mul]
-
-lemma polyL1_X_pow_mul (n : ℕ) (g : Polynomial ℤ) :
-    polyL1 (Polynomial.X ^ n * g) = polyL1 g := by
-  set N := g.natDegree + 1
-  have hg : ∀ i ∈ g.support, i < N := fun i hi => Nat.lt_succ_of_le (Polynomial.le_natDegree_of_mem_supp i hi)
-  have hxg : ∀ i ∈ (Polynomial.X ^ n * g).support, i < n + N := fun i hi => by
-    have hle := Polynomial.le_natDegree_of_mem_supp i hi
-    have hdeg := (Polynomial.natDegree_mul_le (p := (Polynomial.X : Polynomial ℤ) ^ n) (q := g)).trans
-      (Nat.add_le_add_right (Polynomial.natDegree_X_pow_le n) _)
-    omega
-  rw [polyL1_eq_sum_range (Polynomial.X ^ n * g) (n + N) hxg, polyL1_eq_sum_range g N hg,
-    Finset.sum_range_add]
-  have hlo : ∑ x ∈ Finset.range n, ((Polynomial.X ^ n * g).coeff x).natAbs = 0 := by
-    apply Finset.sum_eq_zero; intro x hx
-    rw [Finset.mem_range] at hx
-    rw [Polynomial.coeff_X_pow_mul', ite_eq_right (by omega)]; rfl
-  rw [hlo, zero_add]
-  apply Finset.sum_congr rfl; intro x _
-  rw [add_comm, Polynomial.coeff_X_pow_mul]
-
-lemma polyL1_mul (f g : Polynomial ℤ) : polyL1 (f * g) ≤ polyL1 f * polyL1 g := by
-  conv_lhs => rw [f.as_sum_support_C_mul_X_pow]
-  rw [Finset.sum_mul]
-  refine (polyL1_sum_le _ _).trans ?_
-  rw [polyL1, Finset.sum_mul]
-  apply Finset.sum_le_sum; intro i _
-  rw [mul_assoc, polyL1_C_mul, polyL1_X_pow_mul]
-
-lemma polyL1_pow (f : Polynomial ℤ) (k : ℕ) : polyL1 (f ^ k) ≤ (polyL1 f) ^ k := by
-  induction k with
-  | zero => rw [pow_zero, pow_zero, ← Polynomial.C_1, polyL1_C]; rfl
-  | succ k ih =>
-    rw [pow_succ, pow_succ]
-    exact (polyL1_mul _ _).trans (Nat.mul_le_mul ih le_rfl)
-
-def RespectsBound (Qmax Tmax : ℕ) (p : P3Z) (b : PB) : Prop :=
-  (∀ m ∈ p.support, m 0 ≤ b.dS ∧ m 1 ≤ b.dQ ∧ m 2 ≤ b.dT) ∧
-  (∀ q t : ℤ, q.natAbs ≤ Qmax → t.natAbs ≤ Tmax → polyL1 (evalQT q t p) ≤ b.M)
-
-lemma respectsBoundRel (Qmax Tmax : ℕ) :
-    PolyOpsRel poly3Ops pbOps (RespectsBound Qmax Tmax) where
-  rel_zero := ⟨fun m hm => by simp [poly3Ops] at hm, fun _ _ _ _ => by simp [poly3Ops, pbOps, polyL1_zero]⟩
-  rel_ofInt n := ⟨fun m hm => by
-      have hm0 : m = 0 := by
-        by_contra hne
-        exact (MvPolynomial.mem_support_iff.mp hm) (by rw [poly3Ops, MvPolynomial.coeff_C, ite_eq_right (Ne.symm hne)])
-      subst hm0; simp [pbOps],
-    fun q t _ _ => by simp only [poly3Ops, pbOps, evalQT, MvPolynomial.eval₂Hom_C, polyL1_C, le_rfl]⟩
-  rel_add h1 h2 := ⟨fun m hm => by
-      rcases Finset.mem_union.mp (MvPolynomial.support_add hm) with h | h
-      · obtain ⟨a, b, c⟩ := h1.1 m h
-        exact ⟨a.trans (le_max_left _ _), b.trans (le_max_left _ _), c.trans (le_max_left _ _)⟩
-      · obtain ⟨a, b, c⟩ := h2.1 m h
-        exact ⟨a.trans (le_max_right _ _), b.trans (le_max_right _ _), c.trans (le_max_right _ _)⟩,
-    fun q t hq ht => by
-      simp only [poly3Ops, pbOps, map_add]
-      exact (polyL1_add _ _).trans (Nat.add_le_add (h1.2 q t hq ht) (h2.2 q t hq ht))⟩
-  rel_sub h1 h2 := ⟨fun m hm => by
-      dsimp only [poly3Ops] at hm
-      rw [sub_eq_add_neg] at hm
-      rcases Finset.mem_union.mp (MvPolynomial.support_add hm) with h | h
-      · obtain ⟨a, b, c⟩ := h1.1 m h
-        exact ⟨a.trans (le_max_left _ _), b.trans (le_max_left _ _), c.trans (le_max_left _ _)⟩
-      · rw [MvPolynomial.support_neg] at h
-        obtain ⟨a, b, c⟩ := h2.1 m h
-        exact ⟨a.trans (le_max_right _ _), b.trans (le_max_right _ _), c.trans (le_max_right _ _)⟩,
-    fun q t hq ht => by
-      simp only [poly3Ops, pbOps, map_sub]
-      rw [sub_eq_add_neg]
-      exact (polyL1_add _ _).trans (by rw [polyL1_neg]; exact Nat.add_le_add (h1.2 q t hq ht) (h2.2 q t hq ht))⟩
-  rel_neg h := ⟨fun m hm => h.1 m (by simpa [poly3Ops] using hm),
-    fun q t hq ht => by simp only [poly3Ops, pbOps, map_neg, polyL1_neg]; exact h.2 q t hq ht⟩
-  rel_mul h1 h2 := ⟨fun m hm => by
-      rcases Finset.mem_add.mp (MvPolynomial.support_mul _ _ hm) with ⟨m1, hm1, m2, hm2, rfl⟩
-      obtain ⟨a1, b1, c1⟩ := h1.1 m1 hm1
-      obtain ⟨a2, b2, c2⟩ := h2.1 m2 hm2
-      exact ⟨Nat.add_le_add a1 a2, Nat.add_le_add b1 b2, Nat.add_le_add c1 c2⟩,
-    fun q t hq ht => by
-      simp only [poly3Ops, pbOps, map_mul]
-      exact (polyL1_mul _ _).trans (Nat.mul_le_mul (h1.2 q t hq ht) (h2.2 q t hq ht))⟩
-  rel_pow k h := by
-    induction k with
-    | zero =>
-      refine ⟨fun m hm => by
-        have : m = 0 := by simpa [poly3Ops, MvPolynomial.support_one] using hm
-        subst this; simp [pbOps],
-        fun q t _ _ => by simp only [poly3Ops, pbOps, pow_zero, map_one]; rw [← Polynomial.C_1, polyL1_C]; rfl⟩
-    | succ k ih =>
-      refine ⟨fun m hm => by
-        rw [show poly3Ops.pow _ (k + 1) = _ ^ k * _ from pow_succ _ k] at hm
-        rcases Finset.mem_add.mp (MvPolynomial.support_mul _ _ hm) with ⟨m1, hm1, m2, hm2, rfl⟩
-        obtain ⟨a1, b1, c1⟩ := ih.1 m1 hm1
-        obtain ⟨a2, b2, c2⟩ := h.1 m2 hm2
-        simp only [pbOps]
-        exact ⟨Nat.add_le_add a1 a2, Nat.add_le_add b1 b2, Nat.add_le_add c1 c2⟩,
-        fun q t hq ht => by
-          simp only [poly3Ops, pbOps, map_pow]
-          exact (polyL1_pow _ _).trans (Nat.pow_le_pow_left (h.2 q t hq ht) _)⟩
-
-lemma respectsBound_X0 (Qmax Tmax : ℕ) :
-    RespectsBound Qmax Tmax (MvPolynomial.X 0) ⟨1, 0, 0, 1⟩ := by
-  refine ⟨fun m hm => by
-    have : m = Finsupp.single 0 1 := by simpa [MvPolynomial.support_X] using hm
-    subst this; simp,
-    fun q t _ _ => by simp [evalQT, polyL1_X]⟩
-
-lemma respectsBound_X1 (Qmax Tmax : ℕ) :
-    RespectsBound Qmax Tmax (MvPolynomial.X 1) ⟨0, 1, 0, Qmax⟩ := by
-  refine ⟨fun m hm => by
-    have : m = Finsupp.single 1 1 := by simpa [MvPolynomial.support_X] using hm
-    subst this; simp,
-    fun q t hq _ => by simp only [evalQT, MvPolynomial.eval₂Hom_X', polyL1_C, hq]⟩
-
-lemma respectsBound_X2 (Qmax Tmax : ℕ) :
-    RespectsBound Qmax Tmax (MvPolynomial.X 2) ⟨0, 0, 1, Tmax⟩ := by
-  refine ⟨fun m hm => by
-    have : m = Finsupp.single 2 1 := by simpa [MvPolynomial.support_X] using hm
-    subst this; simp,
-    fun q t _ ht => by simp only [evalQT, MvPolynomial.eval₂Hom_X', polyL1_C, ht]⟩
-
-lemma natDegree_divX_le_pred {R : Type*} [Semiring R] (g : R[X]) :
-    g.divX.natDegree ≤ g.natDegree - 1 := by
-  refine Polynomial.natDegree_le_iff_coeff_eq_zero.mpr fun i hi => ?_
-  rw [Polynomial.coeff_divX]
-  exact Polynomial.coeff_eq_zero_of_natDegree_lt (by omega)
-
-lemma poly_eq_zero_of_eval_base (f : Polynomial ℤ) (B : ℕ)
-    (hM : polyL1 f < B) (hev : f.eval (B : ℤ) = 0) : f = 0 := by
-  suffices h : ∀ n (g : Polynomial ℤ), g.natDegree ≤ n → polyL1 g < B → g.eval (B : ℤ) = 0 → g = 0 from
-    h f.natDegree f le_rfl hM hev
-  intro n
-  induction n with
-  | zero =>
-    intro g hdeg hMg hevg
-    rw [Polynomial.eq_C_of_natDegree_le_zero hdeg] at hevg ⊢
-    simp only [Polynomial.eval_C] at hevg
-    simp [hevg]
-  | succ n ih =>
-    intro g hdeg hMg hevg
-    by_cases hg0 : g = 0
-    · exact hg0
-    · have hc0_le : (g.coeff 0).natAbs ≤ polyL1 g := by
-        by_cases h0 : g.coeff 0 = 0
-        · simp [h0]
-        · unfold polyL1
-          exact Finset.single_le_sum (f := fun i => (g.coeff i).natAbs) (fun _ _ => Nat.zero_le _)
-            (Polynomial.mem_support_iff.mpr h0)
-      have hsplit : g = Polynomial.C (g.coeff 0) + Polynomial.X * g.divX := by
-        rw [add_comm]; exact (Polynomial.X_mul_divX_add g).symm
-      have hev' : g.coeff 0 + (B : ℤ) * g.divX.eval (B : ℤ) = 0 := by
-        have h := congrArg (fun p : Polynomial ℤ => p.eval (B : ℤ)) hsplit
-        simp only [hevg, Polynomial.eval_add, Polynomial.eval_C, Polynomial.eval_mul, Polynomial.eval_X] at h
-        exact h.symm
-      have hdvdZ : (B : ℤ) ∣ g.coeff 0 := ⟨-g.divX.eval (B : ℤ), by linarith⟩
-      have hdvdN : B ∣ (g.coeff 0).natAbs := Int.natCast_dvd.mp hdvdZ
-      have hc0_abs : (g.coeff 0).natAbs = 0 := Nat.eq_zero_of_dvd_of_lt hdvdN (lt_of_le_of_lt hc0_le hMg)
-      have hc0 : g.coeff 0 = 0 := Int.natAbs_eq_zero.mp hc0_abs
-      rw [hc0, zero_add] at hev'
-      have hB_ne : (B : ℤ) ≠ 0 := by omega
-      have hdiv_ev : g.divX.eval (B : ℤ) = 0 := (mul_eq_zero.mp hev').resolve_left hB_ne
-      have hdiv_L1 : polyL1 g.divX ≤ polyL1 g := by
-        rw [polyL1_eq_sum_range g.divX g.natDegree (fun i hi => by
-          have hlt := Polynomial.le_natDegree_of_mem_supp i hi
-          have hle := natDegree_divX_le_pred g
-          have hne : g.natDegree ≠ 0 := by
-            intro hz
-            have hgC := Polynomial.eq_C_of_natDegree_eq_zero hz
-            rw [hgC, Polynomial.divX_C] at hi
-            simp at hi
-          omega),
-          polyL1_eq_sum_range g (g.natDegree + 1) (fun i hi => Nat.lt_succ_of_le (Polynomial.le_natDegree_of_mem_supp i hi)),
-          Finset.sum_range_succ']
-        simp only [Polynomial.coeff_divX]
-        exact Nat.le_add_right _ _
-      have hdiv_deg : g.divX.natDegree ≤ n := (natDegree_divX_le_pred g).trans (by omega)
-      have hdiv0 : g.divX = 0 := ih g.divX hdiv_deg (lt_of_le_of_lt hdiv_L1 hMg) hdiv_ev
-      rw [hsplit, hc0, hdiv0]; simp
-
-lemma mvPoly3_eq_zero_of_kronecker_grid (p : P3Z) (b : PB) (Qmax Tmax B : ℕ)
-    (Q_pts T_pts : Finset ℤ)
-    (hR : RespectsBound Qmax Tmax p b)
-    (hQ_deg : b.dQ < Q_pts.card) (hQ_bd : ∀ q ∈ Q_pts, q.natAbs ≤ Qmax)
-    (hT_deg : b.dT < T_pts.card) (hT_bd : ∀ t ∈ T_pts, t.natAbs ≤ Tmax)
-    (hB : b.M < B)
-    (hev : ∀ q ∈ Q_pts, ∀ t ∈ T_pts, MvPolynomial.eval (v3Int (B : ℤ) q t) p = 0) :
-    p = 0 := by
-  have hevalQT_zero : ∀ q ∈ Q_pts, ∀ t ∈ T_pts, evalQT q t p = 0 := fun q hq t ht => by
-    apply poly_eq_zero_of_eval_base (evalQT q t p) B
-    · exact lt_of_le_of_lt (hR.2 q t (hQ_bd q hq) (hT_bd t ht)) hB
-    · rw [eval_evalQT]; exact hev q hq t ht
-  -- Slice coefficient of S^i as a polynomial in T (for fixed q):
-  let polyT_of (i : ℕ) (q : ℤ) : Polynomial ℤ :=
-    ∑ m ∈ p.support.filter (fun m => m 0 = i), Polynomial.C (p.coeff m * q ^ m 1) * Polynomial.X ^ m 2
-  have hpolyT_eval (i : ℕ) (q t : ℤ) : (polyT_of i q).eval t = (evalQT q t p).coeff i := by
-    conv_rhs => rw [p.as_sum]
-    dsimp only [polyT_of]
-    rw [Finset.sum_filter, show ∀ f : Polynomial ℤ, f.eval t = Polynomial.evalRingHom t f from fun _ => rfl,
-      map_sum, map_sum, ← Polynomial.lcoeff_apply, map_sum]
-    apply Finset.sum_congr rfl; intro m _
-    simp only [Polynomial.coe_evalRingHom, Polynomial.lcoeff_apply, evalQT, MvPolynomial.eval₂Hom_monomial,
-      Finsupp.prod_fintype _ _ (fun _ => pow_zero _), Fin.prod_univ_three]
-    have hcoeff : (Polynomial.C (p.coeff m) * (Polynomial.X ^ m 0 * Polynomial.C q ^ m 1 * Polynomial.C t ^ m 2)).coeff i =
-        if m 0 = i then p.coeff m * q ^ m 1 * t ^ m 2 else 0 := by
-      rw [show Polynomial.C (p.coeff m) * (Polynomial.X ^ m 0 * Polynomial.C q ^ m 1 * Polynomial.C t ^ m 2) =
-          Polynomial.C (p.coeff m * q ^ m 1 * t ^ m 2) * Polynomial.X ^ m 0 by simp only [map_mul, map_pow]; ring]
-      rw [Polynomial.coeff_C_mul_X_pow]
-      by_cases h : m 0 = i
-      · subst h; simp
-      · simp [h, Ne.symm h]
-    rw [hcoeff]
-    split_ifs with h0
-    · simp only [Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_pow, Polynomial.eval_X]
-    · simp only [Polynomial.eval_zero]
-  have hpolyT_zero (i : ℕ) (q : ℤ) (hq : q ∈ Q_pts) : polyT_of i q = 0 := by
-    apply Polynomial.eq_zero_of_natDegree_lt_card_of_eval_eq_zero' (polyT_of i q) T_pts
-    · intro t ht; rw [hpolyT_eval, hevalQT_zero q hq t ht, Polynomial.coeff_zero]
-    · refine lt_of_le_of_lt ?_ hT_deg
-      refine (Polynomial.natDegree_sum_le _ _).trans ?_
-      rw [Finset.fold_max_le]
-      refine ⟨Nat.zero_le _, fun m hm => ?_⟩
-      have hm' := (Finset.mem_filter.mp hm).1
-      exact (Polynomial.natDegree_C_mul_X_pow_le _ _).trans (hR.1 m hm').2.2
-  -- Slice coefficient of S^i * T^k as a polynomial in Q:
-  let polyQ_of (i k : ℕ) : Polynomial ℤ :=
-    ∑ m ∈ p.support.filter (fun m => m 0 = i ∧ m 2 = k), Polynomial.C (p.coeff m) * Polynomial.X ^ m 1
-  have hpolyQ_eval (i k : ℕ) (q : ℤ) : (polyQ_of i k).eval q = (polyT_of i q).coeff k := by
-    dsimp only [polyQ_of, polyT_of]
-    rw [Finset.sum_filter, Finset.sum_filter,
-      show ∀ f : Polynomial ℤ, f.eval q = Polynomial.evalRingHom q f from fun _ => rfl,
-      map_sum, ← Polynomial.lcoeff_apply, map_sum]
-    apply Finset.sum_congr rfl; intro m _
-    simp only [Polynomial.coe_evalRingHom, Polynomial.lcoeff_apply]
-    by_cases h0 : m 0 = i
-    · by_cases h2 : m 2 = k
-      · simp only [h0, h2, and_self, ↓reduceIte, Polynomial.eval_mul, Polynomial.eval_C,
-          Polynomial.eval_pow, Polynomial.eval_X, Polynomial.coeff_C_mul_X_pow]
-      · simp only [h0, h2, and_false, ↓reduceIte, Polynomial.eval_zero, Polynomial.coeff_C_mul_X_pow,
-          ite_eq_right (Ne.symm h2)]
-    · simp only [h0, false_and, ↓reduceIte, Polynomial.eval_zero, Polynomial.coeff_zero]
-  have hpolyQ_zero (i k : ℕ) : polyQ_of i k = 0 := by
-    apply Polynomial.eq_zero_of_natDegree_lt_card_of_eval_eq_zero' (polyQ_of i k) Q_pts
-    · intro q hq; rw [hpolyQ_eval, hpolyT_zero i q hq, Polynomial.coeff_zero]
-    · refine lt_of_le_of_lt ?_ hQ_deg
-      refine (Polynomial.natDegree_sum_le _ _).trans ?_
-      rw [Finset.fold_max_le]
-      refine ⟨Nat.zero_le _, fun m hm => ?_⟩
-      have hm' := (Finset.mem_filter.mp hm).1
-      exact (Polynomial.natDegree_C_mul_X_pow_le _ _).trans (hR.1 m hm').2.1
-  ext m
-  have hcm : (polyQ_of (m 0) (m 2)).coeff (m 1) = p.coeff m := by
-    dsimp only [polyQ_of]
-    rw [Finset.sum_filter, ← Polynomial.lcoeff_apply, map_sum]
-    have hterm : ∀ m' : Fin 3 →₀ ℕ,
-        Polynomial.lcoeff ℤ (m 1) (if m' 0 = m 0 ∧ m' 2 = m 2 then Polynomial.C (p.coeff m') * Polynomial.X ^ m' 1 else 0) =
-        if m' = m then p.coeff m' else 0 := fun m' => by
-      simp only [Polynomial.lcoeff_apply]
-      by_cases heq : m' = m
-      · subst heq; simp
-      · have hne : ¬(m' 0 = m 0 ∧ m' 2 = m 2 ∧ m 1 = m' 1) := by
-          rintro ⟨h0, h2, h1⟩
-          apply heq; ext j; fin_cases j
-          · exact h0
-          · exact h1.symm
-          · exact h2
-        by_cases h02 : m' 0 = m 0 ∧ m' 2 = m 2
-        · have h1 : m 1 ≠ m' 1 := fun h => hne ⟨h02.1, h02.2, h⟩
-          simp [heq, h02, h1]
-        · simp [heq, h02]
-    simp_rw [hterm]
-    by_cases hm : m ∈ p.support
-    · rw [Finset.sum_ite_eq' p.support m p.coeff, ite_eq_left hm]
-    · rw [Finset.sum_ite_eq' p.support m p.coeff, ite_eq_right hm]
-      symm; simpa [MvPolynomial.mem_support_iff] using hm
-  rw [← hcm, hpolyQ_zero, Polynomial.coeff_zero]
-  simp
-
-def evalT2D (D : ℕ) (t : ℤ) : P3Z →+* Polynomial ℤ :=
-  MvPolynomial.eval₂Hom Polynomial.C (fun i => match i with
-    | 0 => Polynomial.X
-    | 1 => Polynomial.X ^ D
-    | 2 => Polynomial.C t)
-
-lemma eval_evalT2D (D : ℕ) (p : P3Z) (B : ℕ) (t : ℤ) :
-    (evalT2D D t p).eval (B : ℤ) = MvPolynomial.eval (v3Int (B : ℤ) ((B ^ D : ℕ) : ℤ) t) p := by
-  induction p using MvPolynomial.induction_on' with
-  | add p1 p2 h1 h2 => simp only [map_add, Polynomial.eval_add, h1, h2]
-  | monomial m c =>
-    simp only [evalT2D, MvPolynomial.eval₂Hom_monomial, MvPolynomial.eval_monomial,
-      Polynomial.eval_mul, Polynomial.eval_C, Finsupp.prod_fintype _ _ (fun _ => pow_zero _),
-      Fin.prod_univ_three, Polynomial.eval_pow, Polynomial.eval_X, v3Int, Nat.cast_pow]
-
-def RespectsBound2D (D Tmax : ℕ) (p : P3Z) (b : PB) : Prop :=
-  (∀ m ∈ p.support, m 0 ≤ b.dS ∧ m 1 ≤ b.dQ ∧ m 2 ≤ b.dT) ∧
-  (∀ t : ℤ, t.natAbs ≤ Tmax → polyL1 (evalT2D D t p) ≤ b.M)
-
-lemma respectsBound2DRel (D Tmax : ℕ) :
-    PolyOpsRel poly3Ops pbOps (RespectsBound2D D Tmax) where
-  rel_zero := ⟨fun m hm => by simp [poly3Ops] at hm, fun _ _ => by simp [poly3Ops, pbOps, polyL1_zero]⟩
-  rel_ofInt n := ⟨fun m hm => by
-      have hm0 : m = 0 := by
-        by_contra hne
-        exact (MvPolynomial.mem_support_iff.mp hm) (by rw [poly3Ops, MvPolynomial.coeff_C, ite_eq_right (Ne.symm hne)])
-      subst hm0; simp [pbOps],
-    fun t _ => by simp only [poly3Ops, pbOps, evalT2D, MvPolynomial.eval₂Hom_C, polyL1_C, le_rfl]⟩
-  rel_add h1 h2 := ⟨fun m hm => by
-      rcases Finset.mem_union.mp (MvPolynomial.support_add hm) with h | h
-      · obtain ⟨a, b, c⟩ := h1.1 m h
-        exact ⟨a.trans (le_max_left _ _), b.trans (le_max_left _ _), c.trans (le_max_left _ _)⟩
-      · obtain ⟨a, b, c⟩ := h2.1 m h
-        exact ⟨a.trans (le_max_right _ _), b.trans (le_max_right _ _), c.trans (le_max_right _ _)⟩,
-    fun t ht => by
-      simp only [poly3Ops, pbOps, map_add]
-      exact (polyL1_add _ _).trans (Nat.add_le_add (h1.2 t ht) (h2.2 t ht))⟩
-  rel_sub h1 h2 := ⟨fun m hm => by
-      dsimp only [poly3Ops] at hm
-      rw [sub_eq_add_neg] at hm
-      rcases Finset.mem_union.mp (MvPolynomial.support_add hm) with h | h
-      · obtain ⟨a, b, c⟩ := h1.1 m h
-        exact ⟨a.trans (le_max_left _ _), b.trans (le_max_left _ _), c.trans (le_max_left _ _)⟩
-      · rw [MvPolynomial.support_neg] at h
-        obtain ⟨a, b, c⟩ := h2.1 m h
-        exact ⟨a.trans (le_max_right _ _), b.trans (le_max_right _ _), c.trans (le_max_right _ _)⟩,
-    fun t ht => by
-      simp only [poly3Ops, pbOps, map_sub]
-      rw [sub_eq_add_neg]
-      exact (polyL1_add _ _).trans (by rw [polyL1_neg]; exact Nat.add_le_add (h1.2 t ht) (h2.2 t ht))⟩
-  rel_neg h := ⟨fun m hm => h.1 m (by simpa [poly3Ops] using hm),
-    fun t ht => by simp only [poly3Ops, pbOps, map_neg, polyL1_neg]; exact h.2 t ht⟩
-  rel_mul h1 h2 := ⟨fun m hm => by
-      rcases Finset.mem_add.mp (MvPolynomial.support_mul _ _ hm) with ⟨m1, hm1, m2, hm2, rfl⟩
-      obtain ⟨a1, b1, c1⟩ := h1.1 m1 hm1
-      obtain ⟨a2, b2, c2⟩ := h2.1 m2 hm2
-      exact ⟨Nat.add_le_add a1 a2, Nat.add_le_add b1 b2, Nat.add_le_add c1 c2⟩,
-    fun t ht => by
-      simp only [poly3Ops, pbOps, map_mul]
-      exact (polyL1_mul _ _).trans (Nat.mul_le_mul (h1.2 t ht) (h2.2 t ht))⟩
-  rel_pow k h := by
-    induction k with
-    | zero =>
-      refine ⟨fun m hm => by
-        have : m = 0 := by simpa [poly3Ops, MvPolynomial.support_one] using hm
-        subst this; simp [pbOps],
-        fun t _ => by simp only [poly3Ops, pbOps, pow_zero, map_one]; rw [← Polynomial.C_1, polyL1_C]; rfl⟩
-    | succ k ih =>
-      refine ⟨fun m hm => by
-        rw [show poly3Ops.pow _ (k + 1) = _ ^ k * _ from pow_succ _ k] at hm
-        rcases Finset.mem_add.mp (MvPolynomial.support_mul _ _ hm) with ⟨m1, hm1, m2, hm2, rfl⟩
-        obtain ⟨a1, b1, c1⟩ := ih.1 m1 hm1
-        obtain ⟨a2, b2, c2⟩ := h.1 m2 hm2
-        simp only [pbOps]
-        exact ⟨Nat.add_le_add a1 a2, Nat.add_le_add b1 b2, Nat.add_le_add c1 c2⟩,
-        fun t ht => by
-          simp only [poly3Ops, pbOps, map_pow]
-          exact (polyL1_pow _ _).trans (Nat.pow_le_pow_left (h.2 t ht) _)⟩
-
-lemma respectsBound2D_X0 (D Tmax : ℕ) :
-    RespectsBound2D D Tmax (MvPolynomial.X 0) ⟨1, 0, 0, 1⟩ := by
-  refine ⟨fun m hm => by
-    have : m = Finsupp.single 0 1 := by simpa [MvPolynomial.support_X] using hm
-    subst this; simp,
-    fun t _ => by simp [evalT2D, polyL1_X]⟩
-
-lemma respectsBound2D_X1 (D Tmax : ℕ) :
-    RespectsBound2D D Tmax (MvPolynomial.X 1) ⟨0, 1, 0, 1⟩ := by
-  refine ⟨fun m hm => by
-    have : m = Finsupp.single 1 1 := by simpa [MvPolynomial.support_X] using hm
-    subst this; simp,
-    fun t _ => by
-      simp only [evalT2D, MvPolynomial.eval₂Hom_X']
-      rw [← mul_one ((Polynomial.X : Polynomial ℤ) ^ D), polyL1_X_pow_mul, ← Polynomial.C_1, polyL1_C]; rfl⟩
-
-lemma respectsBound2D_X2 (D Tmax : ℕ) :
-    RespectsBound2D D Tmax (MvPolynomial.X 2) ⟨0, 0, 1, Tmax⟩ := by
-  refine ⟨fun m hm => by
-    have : m = Finsupp.single 2 1 := by simpa [MvPolynomial.support_X] using hm
-    subst this; simp,
-    fun t ht => by simp only [evalT2D, MvPolynomial.eval₂Hom_X', polyL1_C, ht]⟩
-
-lemma mvPoly3_eq_zero_of_kronecker2D_gridT (p : P3Z) (b : PB) (D Tmax B : ℕ)
-    (T_pts : Finset ℤ)
-    (hR : RespectsBound2D D Tmax p b)
-    (hS_deg : b.dS < D)
-    (hT_deg : b.dT < T_pts.card) (hT_bd : ∀ t ∈ T_pts, t.natAbs ≤ Tmax)
-    (hB : b.M < B)
-    (hev : ∀ t ∈ T_pts, MvPolynomial.eval (v3Int (B : ℤ) ((B ^ D : ℕ) : ℤ) t) p = 0) :
-    p = 0 := by
-  have hevalT_zero : ∀ t ∈ T_pts, evalT2D D t p = 0 := fun t ht => by
-    apply poly_eq_zero_of_eval_base (evalT2D D t p) B
-    · exact lt_of_le_of_lt (hR.2 t (hT_bd t ht)) hB
-    · rw [eval_evalT2D]; exact hev t ht
-  let polyT_of (i j : ℕ) : Polynomial ℤ :=
-    ∑ m ∈ p.support.filter (fun m => m 0 = i ∧ m 1 = j), Polynomial.C (p.coeff m) * Polynomial.X ^ m 2
-  have hpolyT_eval (i j : ℕ) (hi : i < D) (t : ℤ) : (polyT_of i j).eval t = (evalT2D D t p).coeff (i + D * j) := by
-    conv_rhs => rw [p.as_sum]
-    dsimp only [polyT_of]
-    rw [Finset.sum_filter, show ∀ f : Polynomial ℤ, f.eval t = Polynomial.evalRingHom t f from fun _ => rfl,
-      map_sum, map_sum, ← Polynomial.lcoeff_apply, map_sum]
-    apply Finset.sum_congr rfl; intro m hm
-    simp only [Polynomial.coe_evalRingHom, Polynomial.lcoeff_apply, evalT2D, MvPolynomial.eval₂Hom_monomial,
-      Finsupp.prod_fintype _ _ (fun _ => pow_zero _), Fin.prod_univ_three]
-    have hrew : Polynomial.C (p.coeff m) * (Polynomial.X ^ m 0 * (Polynomial.X ^ D) ^ m 1 * Polynomial.C t ^ m 2) =
-        Polynomial.C (p.coeff m * t ^ m 2) * Polynomial.X ^ (m 0 + D * m 1) := by
-      rw [← pow_mul, ← pow_add]; simp only [map_mul, map_pow]; ring
-    rw [hrew, Polynomial.coeff_C_mul_X_pow]
-    have hlt0 : m 0 < D := lt_of_le_of_lt (hR.1 m hm).1 hS_deg
-    have hiff : i + D * j = m 0 + D * m 1 ↔ m 0 = i ∧ m 1 = j := by
-      constructor
-      · intro h
-        have h1 : m 1 = j := by
-          by_contra hne
-          rcases Nat.lt_or_gt_of_ne hne with hlt | hgt <;> nlinarith
-        subst h1
-        exact ⟨by omega, rfl⟩
-      · rintro ⟨rfl, rfl⟩; rfl
-    by_cases h : m 0 = i ∧ m 1 = j
-    · rw [ite_eq_left h, ite_eq_left (hiff.mpr h)]
-      simp only [Polynomial.eval_mul, Polynomial.eval_C, Polynomial.eval_pow, Polynomial.eval_X]
-    · rw [ite_eq_right h, ite_eq_right (fun heq => h (hiff.mp heq)), Polynomial.eval_zero]
-  have hpolyT_zero (i j : ℕ) (hi : i < D) : polyT_of i j = 0 := by
-    apply Polynomial.eq_zero_of_natDegree_lt_card_of_eval_eq_zero' (polyT_of i j) T_pts
-    · intro t ht; rw [hpolyT_eval i j hi t, hevalT_zero t ht, Polynomial.coeff_zero]
-    · refine lt_of_le_of_lt ?_ hT_deg
-      refine (Polynomial.natDegree_sum_le _ _).trans ?_
-      rw [Finset.fold_max_le]
-      refine ⟨Nat.zero_le _, fun m hm => ?_⟩
-      have hm' := (Finset.mem_filter.mp hm).1
-      exact (Polynomial.natDegree_C_mul_X_pow_le _ _).trans (hR.1 m hm').2.2
-  ext m
-  by_cases hm : m ∈ p.support
-  · have hlt0 : m 0 < D := lt_of_le_of_lt (hR.1 m hm).1 hS_deg
-    have hcm : (polyT_of (m 0) (m 1)).coeff (m 2) = p.coeff m := by
-      dsimp only [polyT_of]
-      rw [Finset.sum_filter, ← Polynomial.lcoeff_apply, map_sum]
-      have hterm : ∀ m' : Fin 3 →₀ ℕ,
-          Polynomial.lcoeff ℤ (m 2) (if m' 0 = m 0 ∧ m' 1 = m 1 then Polynomial.C (p.coeff m') * Polynomial.X ^ m' 2 else 0) =
-          if m' = m then p.coeff m' else 0 := fun m' => by
-        simp only [Polynomial.lcoeff_apply]
-        by_cases heq : m' = m
-        · subst heq; simp
-        · have hne : ¬(m' 0 = m 0 ∧ m' 1 = m 1 ∧ m 2 = m' 2) := by
-            rintro ⟨h0, h1, h2⟩
-            apply heq; ext j; fin_cases j
-            · exact h0
-            · exact h1
-            · exact h2.symm
-          by_cases h01 : m' 0 = m 0 ∧ m' 1 = m 1
-          · have h2 : m 2 ≠ m' 2 := fun h => hne ⟨h01.1, h01.2, h⟩
-            simp [heq, h01, h2]
-          · simp [heq, h01]
-      simp_rw [hterm]
-      rw [Finset.sum_ite_eq' p.support m p.coeff, ite_eq_left hm]
-    rw [← hcm, hpolyT_zero (m 0) (m 1) hlt0, Polynomial.coeff_zero, AddMonoidAlgebra.coeff_zero]
-    rfl
-  · simp [MvPolynomial.notMem_support_iff.mp hm]
-
-def allRange (lo : ℤ) : ℕ → (ℤ → Bool) → Bool
-  | 0, _ => true
-  | k + 1, f => f lo && allRange (Int.add lo 1) k f
-
-lemma allRange_append (lo : ℤ) (m n : ℕ) (f : ℤ → Bool) :
-    allRange lo (m + n) f = (allRange lo m f && allRange (lo + (m : ℤ)) n f) := by
-  induction m generalizing lo with
-  | zero => simp [allRange]
-  | succ k ih =>
-    rw [Nat.succ_add]
-    simp only [allRange, Bool.and_assoc]
-    congr 1
-    change allRange (lo + 1) (k + n) f = (allRange (lo + 1) k f && allRange (lo + ((k + 1 : ℕ) : ℤ)) n f)
-    rw [ih (lo + 1)]
-    congr 2; push_cast; ring
-
-def rangeInt (lo : ℤ) (n : ℕ) : Finset ℤ :=
-  (Finset.range n).image (fun k : ℕ => lo + (k : ℤ))
-
-lemma rangeInt_card (lo : ℤ) (n : ℕ) : (rangeInt lo n).card = n := by
-  rw [rangeInt, Finset.card_image_of_injective _ (fun a b h => by omega), Finset.card_range]
-
-lemma allRange_spec (lo : ℤ) (n : ℕ) (f : ℤ → Bool)
-    (h : allRange lo n f = true) : ∀ x ∈ rangeInt lo n, f x = true := by
-  induction n generalizing lo with
-  | zero => intro x hx; simp [rangeInt] at hx
-  | succ k ih =>
-    simp only [allRange, Bool.and_eq_true] at h
-    intro x hx
-    rcases Finset.mem_image.mp hx with ⟨j, hj, rfl⟩
-    rw [Finset.mem_range] at hj
-    cases j with
-    | zero => simpa using h.1
-    | succ j' =>
-      have hmem : (lo + 1) + (j' : ℤ) ∈ rangeInt (lo + 1) k :=
-        Finset.mem_image.mpr ⟨j', Finset.mem_range.mpr (by omega), rfl⟩
-      have hres := ih (lo + 1) h.2 _ hmem
-      rwa [show (lo + 1) + (j' : ℤ) = lo + ((j' + 1 : ℕ) : ℤ) by push_cast; ring] at hres
-
-lemma rangeInt_natAbs_le (lo : ℤ) (n M : ℕ)
-    (hlo : lo.natAbs ≤ M) (hhi : (lo + (n : ℤ) - 1).natAbs ≤ M) :
-    ∀ x ∈ rangeInt lo n, x.natAbs ≤ M := by
-  intro x hx
-  rcases Finset.mem_image.mp hx with ⟨k, hk, rfl⟩
-  rw [Finset.mem_range] at hk
-  omega
-
--- Power table & `Expr` evaluation over any `PolyOps α`
-def powList {α : Type*} (o : PolyOps α) (x : α) : ℕ → α → List α
-  | 0, _ => []
-  | n + 1, cur => cur :: powList o x n (o.mul cur x)
-
-def getPow {α : Type*} (o : PolyOps α) (x : α) (tbl : List α) (k : ℕ) : α :=
-  tbl.getD k (o.pow x k)
-
-lemma powList_rel {α β : Type*} {o1 : PolyOps α} {o2 : PolyOps β} {R : α → β → Prop}
-    (hR : PolyOpsRel o1 o2 R) {x1 : α} {x2 : β} (hx : R x1 x2) :
-    ∀ n {c1 c2}, R c1 c2 → List.Forall₂ R (powList o1 x1 n c1) (powList o2 x2 n c2)
-  | 0, _, _, _ => List.Forall₂.nil
-  | n + 1, _, _, hc => List.Forall₂.cons hc (powList_rel hR hx n (hR.rel_mul hc hx))
-
-lemma list_forall₂_getElem {α β : Type*} {R : α → β → Prop} :
-    ∀ {l1 : List α} {l2 : List β}, List.Forall₂ R l1 l2 →
-      ∀ (i : ℕ) (h1 : i < l1.length) (h2 : i < l2.length), R l1[i] l2[i]
-  | _ :: _, _ :: _, .cons h _, 0, _, _ => h
-  | _ :: _, _ :: _, .cons _ ht, i + 1, h1, h2 =>
-      list_forall₂_getElem ht i (Nat.lt_of_succ_lt_succ h1) (Nat.lt_of_succ_lt_succ h2)
-
-lemma list_getD_rel_gen {α β : Type*} {R : α → β → Prop} {d1 : α} {d2 : β} (hd : R d1 d2) :
-    ∀ {t1 : List α} {t2 : List β}, List.Forall₂ R t1 t2 → ∀ k : ℕ, R (t1.getD k d1) (t2.getD k d2)
-  | [], [], .nil, k => by simp only [List.getD_nil]; exact hd
-  | _ :: _, _ :: _, .cons h _, 0 => by simp only [List.getD_cons_zero]; exact h
-  | _ :: _, _ :: _, .cons _ ht, k + 1 => by simp only [List.getD_cons_succ]; exact list_getD_rel_gen hd ht k
-
-lemma getPow_rel {α β : Type*} {o1 : PolyOps α} {o2 : PolyOps β} {R : α → β → Prop}
-    (hR : PolyOpsRel o1 o2 R) {x1 : α} {x2 : β} (hx : R x1 x2)
-    {t1 : List α} {t2 : List β} (ht : List.Forall₂ R t1 t2) (k : ℕ) :
-    R (getPow o1 x1 t1 k) (getPow o2 x2 t2 k) :=
-  list_getD_rel_gen (hR.rel_pow k hx) ht k
-
-lemma powList_poly3_getD_gen (x d : P3Z) :
-    ∀ n m k, (powList poly3Ops x n (x ^ m)).getD k d = if k < n then x ^ (m + k) else d
-  | 0, _, _ => by simp [powList]
-  | n + 1, m, 0 => by simp [powList]
-  | n + 1, m, k + 1 => by
-    change (powList poly3Ops x n (x ^ m * x)).getD k d = _
-    rw [← pow_succ, powList_poly3_getD_gen x d n (m + 1) k]
-    by_cases hk : k < n
-    · have h1 : k + 1 < n + 1 := by omega
-      simp [hk, h1, show m + 1 + k = m + (k + 1) by omega]
-    · have h1 : ¬(k + 1 < n + 1) := by omega
-      simp [hk, h1]
-
-lemma getPow_poly3_eq (x : P3Z) (n k : ℕ) :
-    getPow poly3Ops x (powList poly3Ops x n (poly3Ops.ofInt 1)) k = x ^ k := by
-  have h1 : poly3Ops.ofInt 1 = x ^ 0 := by simp [poly3Ops]
-  rw [getPow, h1, powList_poly3_getD_gen]
-  simp [poly3Ops]
-
-def evalExpr2 {α : Type*} (o : PolyOps α) (S Q : α) (pS pQ : List α) : Expr → α
-  | .num c => o.ofInt c
-  | .natCast n => o.ofInt (n : ℤ)
-  | .intCast z => o.ofInt z
-  | .var 0 => S
-  | .var 1 => Q
-  | .var _ => o.zero
-  | .neg a => o.neg (evalExpr2 o S Q pS pQ a)
-  | .add a b => o.add (evalExpr2 o S Q pS pQ a) (evalExpr2 o S Q pS pQ b)
-  | .sub a b => o.sub (evalExpr2 o S Q pS pQ a) (evalExpr2 o S Q pS pQ b)
-  | .mul a b => o.mul (evalExpr2 o S Q pS pQ a) (evalExpr2 o S Q pS pQ b)
-  | .pow (.var 0) k => getPow o S pS k
-  | .pow (.var 1) k => getPow o Q pQ k
-  | .pow a k => o.pow (evalExpr2 o S Q pS pQ a) k
-
-lemma evalExpr2_rel {α β : Type*} {o1 : PolyOps α} {o2 : PolyOps β} {R : α → β → Prop}
-    (hR : PolyOpsRel o1 o2 R) {S1 Q1 : α} {S2 Q2 : β} (hS : R S1 S2) (hQ : R Q1 Q2)
-    {pS1 pQ1 : List α} {pS2 pQ2 : List β}
-    (hpS : List.Forall₂ R pS1 pS2) (hpQ : List.Forall₂ R pQ1 pQ2) :
-    ∀ e : Expr, R (evalExpr2 o1 S1 Q1 pS1 pQ1 e) (evalExpr2 o2 S2 Q2 pS2 pQ2 e)
-  | .num c => hR.rel_ofInt c
-  | .natCast n => hR.rel_ofInt n
-  | .intCast z => hR.rel_ofInt z
-  | .var 0 => hS
-  | .var 1 => hQ
-  | .var (_k + 2) => hR.rel_zero
-  | .neg a => hR.rel_neg (evalExpr2_rel hR hS hQ hpS hpQ a)
-  | .add a b => hR.rel_add (evalExpr2_rel hR hS hQ hpS hpQ a) (evalExpr2_rel hR hS hQ hpS hpQ b)
-  | .sub a b => hR.rel_sub (evalExpr2_rel hR hS hQ hpS hpQ a) (evalExpr2_rel hR hS hQ hpS hpQ b)
-  | .mul a b => hR.rel_mul (evalExpr2_rel hR hS hQ hpS hpQ a) (evalExpr2_rel hR hS hQ hpS hpQ b)
-  | .pow (.var 0) k => getPow_rel hR hS hpS k
-  | .pow (.var 1) k => getPow_rel hR hQ hpQ k
-  | .pow (.var (_j + 2)) k => hR.rel_pow k hR.rel_zero
-  | .pow (.num c) k => hR.rel_pow k (hR.rel_ofInt c)
-  | .pow (.natCast n) k => hR.rel_pow k (hR.rel_ofInt n)
-  | .pow (.intCast z) k => hR.rel_pow k (hR.rel_ofInt z)
-  | .pow (.neg a) k => hR.rel_pow k (hR.rel_neg (evalExpr2_rel hR hS hQ hpS hpQ a))
-  | .pow (.add a b) k => hR.rel_pow k (hR.rel_add (evalExpr2_rel hR hS hQ hpS hpQ a) (evalExpr2_rel hR hS hQ hpS hpQ b))
-  | .pow (.sub a b) k => hR.rel_pow k (hR.rel_sub (evalExpr2_rel hR hS hQ hpS hpQ a) (evalExpr2_rel hR hS hQ hpS hpQ b))
-  | .pow (.mul a b) k => hR.rel_pow k (hR.rel_mul (evalExpr2_rel hR hS hQ hpS hpQ a) (evalExpr2_rel hR hS hQ hpS hpQ b))
-  | .pow (.pow a j) k => hR.rel_pow k (evalExpr2_rel hR hS hQ hpS hpQ (.pow a j))
-
-def v3P3_SQ : ℕ → P3Z
-  | 0 => MvPolynomial.X 0
-  | 1 => MvPolynomial.X 1
-  | _ => 0
-
-lemma evalExpr2_poly3_eq (nS nQ : ℕ) :
-    ∀ e : Expr,
-      evalExpr2 poly3Ops (MvPolynomial.X 0) (MvPolynomial.X 1)
-        (powList poly3Ops (MvPolynomial.X 0) nS (poly3Ops.ofInt 1))
-        (powList poly3Ops (MvPolynomial.X 1) nQ (poly3Ops.ofInt 1)) e =
-      ringEval v3P3_SQ e
-  | .num c => by simp [evalExpr2, poly3Ops, ringEval]
-  | .natCast n => by simp [evalExpr2, poly3Ops, ringEval]
-  | .intCast z => by simp [evalExpr2, poly3Ops, ringEval]
-  | .var 0 => rfl
-  | .var 1 => rfl
-  | .var (_ + 2) => rfl
-  | .neg a => by rw [evalExpr2, ringEval, evalExpr2_poly3_eq nS nQ a]; rfl
-  | .add a b => by rw [evalExpr2, ringEval, evalExpr2_poly3_eq nS nQ a, evalExpr2_poly3_eq nS nQ b]; rfl
-  | .sub a b => by rw [evalExpr2, ringEval, evalExpr2_poly3_eq nS nQ a, evalExpr2_poly3_eq nS nQ b]; rfl
-  | .mul a b => by rw [evalExpr2, ringEval, evalExpr2_poly3_eq nS nQ a, evalExpr2_poly3_eq nS nQ b]; rfl
-  | .pow (.var 0) k => by simp [evalExpr2, getPow_poly3_eq, ringEval, v3P3_SQ]
-  | .pow (.var 1) k => by simp [evalExpr2, getPow_poly3_eq, ringEval, v3P3_SQ]
-  | .pow (.var (_ + 2)) k => by simp [evalExpr2, poly3Ops, ringEval, v3P3_SQ]
-  | .pow (.num c) k => by simp [evalExpr2, poly3Ops, ringEval]
-  | .pow (.natCast n) k => by simp [evalExpr2, poly3Ops, ringEval]
-  | .pow (.intCast z) k => by simp [evalExpr2, poly3Ops, ringEval]
-  | .pow (.neg a) k => by simp only [evalExpr2, ringEval]; rw [evalExpr2_poly3_eq nS nQ a]; rfl
-  | .pow (.add a b) k => by simp only [evalExpr2, ringEval]; rw [evalExpr2_poly3_eq nS nQ a, evalExpr2_poly3_eq nS nQ b]; rfl
-  | .pow (.sub a b) k => by simp only [evalExpr2, ringEval]; rw [evalExpr2_poly3_eq nS nQ a, evalExpr2_poly3_eq nS nQ b]; rfl
-  | .pow (.mul a b) k => by simp only [evalExpr2, ringEval]; rw [evalExpr2_poly3_eq nS nQ a, evalExpr2_poly3_eq nS nQ b]; rfl
-  | .pow (.pow a j) k => by
-      have ih := evalExpr2_poly3_eq nS nQ (.pow a j)
-      change poly3Ops.pow (evalExpr2 _ _ _ _ _ (.pow a j)) k = (ringEval v3P3_SQ (.pow a j)) ^ k
-      rw [ih]; rfl
+lemma dotW_len {α : Type*} (o : PolyOps α) (A W : UPoly α) (sh : ℕ) :
+    (dotW o A W sh).length = 5 :=
+  PolynomialEncoding.PolyOps.dotW_len o 13 5 A W sh
 
 def vK5_SQ : ℕ → K5
   | 0 => S_K
@@ -848,9 +63,9 @@ lemma evalP3K5_ringEval_SQ (e : Expr) :
   | intCast z => simp [evalP3K5, evalSQ_K5, ringEval]
   | var j =>
     match j with
-    | 0 => simp [evalP3K5, evalSQ_K5, ringEval, v3P3_SQ, v3K5, vK5_SQ]
-    | 1 => simp [evalP3K5, evalSQ_K5, ringEval, v3P3_SQ, v3K5, vK5_SQ]
-    | _ + 2 => simp [evalP3K5, evalSQ_K5, ringEval, v3P3_SQ, vK5_SQ]
+    | 0 => simp [evalP3K5, evalSQ_K5, ringEval, v3P3_SQ, v3P3_01, v3K5, vK5_SQ]
+    | 1 => simp [evalP3K5, evalSQ_K5, ringEval, v3P3_SQ, v3P3_01, v3K5, vK5_SQ]
+    | _ + 2 => simp [evalP3K5, evalSQ_K5, ringEval, v3P3_SQ, v3P3_01, vK5_SQ]
   | neg a ha => simp [evalSQ_K5, ringEval] at ha ⊢; rw [ha]
   | add a b ha hb => simp [evalSQ_K5, ringEval] at ha hb ⊢; rw [ha, hb]
   | sub a b ha hb => simp [evalSQ_K5, ringEval] at ha hb ⊢; rw [ha, hb]
@@ -1286,11 +501,11 @@ lemma q5q7RecList_poly3_zero :
   unfold checkQ5Q7Chunk at hv_ok
   have hrelB := q5q7RecList_rel (respectsBoundRel 25 0) (respectsBound_X0 25 0) (respectsBound_X1 25 0)
   have hrelV : ∀ q ∈ rangeInt (-24) 50,
-      List.Forall₂ (fun p z => MvPolynomial.eval (v3Int (2 ^ 455 : ℕ) q 0) p = z)
+      List.Forall₂ (fun p z => MvPolynomial.eval (v3Int q5q7Lim q 0) p = z)
         (q5q7RecList poly3Ops (MvPolynomial.X 0) (MvPolynomial.X 1))
         (q5q7RecList intOps q5q7B q) := fun q _ =>
-    q5q7RecList_rel (poly3ToIntRel (2 ^ 455 : ℕ) q 0) (by simp [v3Int, q5q7B, q5q7Lim]) (by simp [v3Int])
-  have hallB : ∀ b ∈ q5q7RecList pbOps ⟨1, 0, 0, 1⟩ ⟨0, 1, 0, 25⟩, b.dQ < 50 ∧ b.dT = 0 ∧ b.M < 2 ^ 455 := by
+    q5q7RecList_rel (poly3ToIntRel q5q7Lim q 0) (by rw [MvPolynomial.eval_X, v3Int]; rfl) (by rw [MvPolynomial.eval_X, v3Int])
+  have hallB : ∀ b ∈ q5q7RecList pbOps ⟨1, 0, 0, 1⟩ ⟨0, 1, 0, 25⟩, b.dQ < 50 ∧ b.dT = 0 ∧ b.M < q5q7Lim := by
     intro b hb
     have h := List.all_eq_true.mp hb_ok b hb
     simp only [Bool.and_eq_true, Nat.blt_eq, Nat.beq_eq] at h
@@ -1307,7 +522,7 @@ lemma q5q7RecList_poly3_zero :
       ((q5q7RecList pbOps ⟨1, 0, 0, 1⟩ ⟨0, 1, 0, 25⟩)[i]'(hlenB ▸ hi)) :=
     list_forall₂_getElem hrelB i hi (hlenB ▸ hi)
   obtain ⟨hdQ, hdT, hM⟩ := hallB _ (List.getElem_mem _)
-  apply mvPoly3_eq_zero_of_kronecker_grid _ _ 25 0 (2 ^ 455) (rangeInt (-24) 50) {0}
+  apply mvPoly3_eq_zero_of_kronecker_grid _ _ 25 0 q5q7Lim (rangeInt (-24) 50) {0}
     hb_rel (by rw [rangeInt_card]; exact hdQ)
     (rangeInt_natAbs_le (-24) 50 25 (by decide) (by decide))
     (by simp [hdT]) (fun t ht => by simp at ht; subst ht; simp) hM
@@ -1417,31 +632,31 @@ lemma Q5_Q7_recurrences_K5 :
         evalSQ_K5 fac_4 * evalSQ_K5 fac_5 ^ 4 * evalSQ_K5 fac_6 := rfl
     unfold q5q7RecList
     rw [letB, letB]
-    refine letB_step (y := evalSQ_K5 fac_2) (by simpa [k5Ops] using hf.2.2.1) ?_
-    refine letB_step (y := evalSQ_K5 fac_3) (by simpa [k5Ops] using hf.2.2.2.1) ?_
-    refine letB_step (y := evalSQ_K5 fac_4) (by simpa [k5Ops] using hf.2.2.2.2) ?_
+    refine letB_step (y := evalSQ_K5 fac_2) (by simpa [k5Ops, ringOps] using hf.2.2.1) ?_
+    refine letB_step (y := evalSQ_K5 fac_3) (by simpa [k5Ops, ringOps] using hf.2.2.2.1) ?_
+    refine letB_step (y := evalSQ_K5 fac_4) (by simpa [k5Ops, ringOps] using hf.2.2.2.2) ?_
     refine letB_step (hev_eq fac_5) ?_
     refine letB_step (hev_eq fac_6) ?_
-    refine letB_step (y := evalSQ_K5 fac_2 ^ 2) (by dsimp [k5Ops]; ring) ?_
-    refine letB_step (y := evalSQ_K5 fac_2 ^ 4) (by dsimp [k5Ops]; ring) ?_
-    refine letB_step (y := evalSQ_K5 fac_2 ^ 6) (by dsimp [k5Ops]; ring) ?_
-    refine letB_step (y := evalSQ_K5 fac_2 ^ 7) (by dsimp [k5Ops]; ring) ?_
-    refine letB_step (y := evalSQ_K5 fac_3 ^ 3) (by dsimp [k5Ops]; ring) ?_
-    refine letB_step (y := evalSQ_K5 fac_3 ^ 6) (by dsimp [k5Ops]; ring) ?_
-    refine letB_step (y := evalSQ_K5 fac_3 ^ 9) (by dsimp [k5Ops]; ring) ?_
-    refine letB_step (y := evalSQ_K5 fac_3 ^ 12) (by dsimp [k5Ops]; ring) ?_
-    refine letB_step (y := evalSQ_K5 fac_3 ^ 13) (by dsimp [k5Ops]; ring) ?_
-    refine letB_step (y := evalSQ_K5 fac_4 ^ 2) (by dsimp [k5Ops]; ring) ?_
-    refine letB_step (y := evalSQ_K5 (D_quot_expr 0)) (by dsimp [k5Ops]; rw [hD0]) ?_
-    refine letB_step (y := evalSQ_K5 (D_quot_expr 1)) (by dsimp [k5Ops]; rw [hD1, ← hf.2.1]) ?_
-    refine letB_step (y := evalSQ_K5 (D_quot_expr 2)) (by dsimp [k5Ops]; rw [hD2, ← hf.2.1]) ?_
-    refine letB_step (y := evalSQ_K5 (D_quot_expr 3)) (by dsimp [k5Ops]; rw [hD3, ← hf.2.1]) ?_
-    refine letB_step (y := evalSQ_K5 (D_quot_expr 4)) (by dsimp [k5Ops]; rw [hD4, ← hf.2.1]) ?_
-    refine letB_step (y := evalSQ_K5 (D_quot_expr 8)) (by dsimp [k5Ops]; rw [hD8, ← hf.2.1]) ?_
-    refine letB_step (y := evalSQ_K5 (D_quot_expr 9)) (by dsimp [k5Ops]; rw [hD9, ← hf.2.1]) ?_
-    refine letB_step (y := evalSQ_K5 (D_quot_expr 10)) (by dsimp [k5Ops]; rw [hD10, ← hf.2.1]) ?_
-    refine letB_step (y := evalSQ_K5 (D_quot_expr 11)) (by dsimp [k5Ops]; rw [hD11, ← hf.2.1]) ?_
-    refine letB_step (y := evalSQ_K5 (D_quot_expr 12)) (by dsimp [k5Ops]; rw [hD12, ← hf.2.1]) ?_
+    refine letB_step (y := evalSQ_K5 fac_2 ^ 2) (by dsimp [k5Ops, ringOps]; ring) ?_
+    refine letB_step (y := evalSQ_K5 fac_2 ^ 4) (by dsimp [k5Ops, ringOps]; ring) ?_
+    refine letB_step (y := evalSQ_K5 fac_2 ^ 6) (by dsimp [k5Ops, ringOps]; ring) ?_
+    refine letB_step (y := evalSQ_K5 fac_2 ^ 7) (by dsimp [k5Ops, ringOps]; ring) ?_
+    refine letB_step (y := evalSQ_K5 fac_3 ^ 3) (by dsimp [k5Ops, ringOps]; ring) ?_
+    refine letB_step (y := evalSQ_K5 fac_3 ^ 6) (by dsimp [k5Ops, ringOps]; ring) ?_
+    refine letB_step (y := evalSQ_K5 fac_3 ^ 9) (by dsimp [k5Ops, ringOps]; ring) ?_
+    refine letB_step (y := evalSQ_K5 fac_3 ^ 12) (by dsimp [k5Ops, ringOps]; ring) ?_
+    refine letB_step (y := evalSQ_K5 fac_3 ^ 13) (by dsimp [k5Ops, ringOps]; ring) ?_
+    refine letB_step (y := evalSQ_K5 fac_4 ^ 2) (by dsimp [k5Ops, ringOps]; ring) ?_
+    refine letB_step (y := evalSQ_K5 (D_quot_expr 0)) (by dsimp [k5Ops, ringOps]; rw [hD0]) ?_
+    refine letB_step (y := evalSQ_K5 (D_quot_expr 1)) (by dsimp [k5Ops, ringOps]; rw [hD1, ← hf.2.1]) ?_
+    refine letB_step (y := evalSQ_K5 (D_quot_expr 2)) (by dsimp [k5Ops, ringOps]; rw [hD2, ← hf.2.1]) ?_
+    refine letB_step (y := evalSQ_K5 (D_quot_expr 3)) (by dsimp [k5Ops, ringOps]; rw [hD3, ← hf.2.1]) ?_
+    refine letB_step (y := evalSQ_K5 (D_quot_expr 4)) (by dsimp [k5Ops, ringOps]; rw [hD4, ← hf.2.1]) ?_
+    refine letB_step (y := evalSQ_K5 (D_quot_expr 8)) (by dsimp [k5Ops, ringOps]; rw [hD8, ← hf.2.1]) ?_
+    refine letB_step (y := evalSQ_K5 (D_quot_expr 9)) (by dsimp [k5Ops, ringOps]; rw [hD9, ← hf.2.1]) ?_
+    refine letB_step (y := evalSQ_K5 (D_quot_expr 10)) (by dsimp [k5Ops, ringOps]; rw [hD10, ← hf.2.1]) ?_
+    refine letB_step (y := evalSQ_K5 (D_quot_expr 11)) (by dsimp [k5Ops, ringOps]; rw [hD11, ← hf.2.1]) ?_
+    refine letB_step (y := evalSQ_K5 (D_quot_expr 12)) (by dsimp [k5Ops, ringOps]; rw [hD12, ← hf.2.1]) ?_
     refine letB_step (y := evalSQ_K5 (W_num_expr 0)) (by rw [hev_eq, hW]; rfl) ?_
     refine letB_step (y := evalSQ_K5 (W_num_expr 1)) (by rw [hev_eq, hW]; rfl) ?_
     refine letB_step (y := evalSQ_K5 (W_num_expr 2)) (by rw [hev_eq, hW]; rfl) ?_
@@ -1469,8 +684,8 @@ lemma Q5_Q7_recurrences_K5 :
     refine letB_step (hev_eq Q7_c5) ?_
     refine letB_step (hev_eq Q7_c6) ?_
     refine letB_step (hev_eq Q7_c7) ?_
-    refine letB_step (y := evalSQ_K5 D_all_div_lc5_expr) (by dsimp [k5Ops]; rw [hDlc5, ← hf.1, ← hf.2.1]) ?_
-    simp only [q5Dot, q7Dot, k5Ops]; rfl
+    refine letB_step (y := evalSQ_K5 D_all_div_lc5_expr) (by dsimp [k5Ops, ringOps]; rw [hDlc5, ← hf.1, ← hf.2.1]) ?_
+    simp only [q5Dot, q7Dot, k5Ops, ringOps]; rfl
   rw [hlist_eq] at hallK
   refine ⟨?_, ?_, ?_⟩
   · intro k
@@ -1935,7 +1150,7 @@ lemma sum_RQ5_power_eq_W_k (k : Fin 13) :
     have h7L : (ιL_K5 1640558367 : CoverL) ≠ 0 := (map_ne_zero_iff _ ιL_K5.injective).mpr h1640
     have hsc : ιL_K5 (((sc5_den * sc7_den : ℤ) : K5) / ((sc5_num * sc7_num : ℤ) : K5)) =
         ιL_K5 2893401 * ιL_K5 1640558367 / ιL_K5 2 := by
-      simp only [sc5_num, sc5_den, sc7_num, sc7_den, map_div₀, map_mul, map_ofNat, 
+      simp only [sc5_num, sc5_den, sc7_num, sc7_den, map_div₀, map_mul, map_ofNat,
         Int.cast_mul, Int.cast_ofNat, one_mul]
     rw [hsc, hQ5d]
     have hq7_div : Q7L.eval r = ιL_K5 1640558367 * (k5Params.Q7_z.map ιL_K5).eval r / ιL_K5 2 := by

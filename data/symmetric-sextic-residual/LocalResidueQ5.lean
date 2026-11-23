@@ -9,9 +9,11 @@ open SymmetricSexticResidual.K5Field SymmetricSexticResidual.SheetCalculus
   SymmetricSexticResidual.CoverAlgebra SymmetricSexticResidual.CoverResidue
   SymmetricSexticResidual.LocalResidueData SymmetricSexticResidual.LocalResidueU0
   SymmetricSexticResidual.Q5WeightsData SymmetricSexticResidual.VerticalData
-  SymmetricSexticResidual.VerticalIdentity SymmetricSexticResidual.EncodingCheck
+  SymmetricSexticResidual.VerticalIdentity
+  PolynomialEncoding.KroneckerCheck QuadraticCovers
   CrossedRationalResidue Polynomial
 open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
+open PolynomialEncoding.PolyOps hiding dotW dotW_rel dotW_len
 open scoped BigOperators
 
 private lemma master_bivL_zero_K5 :
@@ -27,23 +29,24 @@ private lemma master_bivL_zero_K5 :
     evalTStep_rel (respectsBound2DRel masterDegS 10) (respectsBound2D_X0 masterDegS 10)
       (evalSQCache_rel (respectsBound2DRel masterDegS 10) (respectsBound2D_X0 masterDegS 10) (respectsBound2D_X1 masterDegS 10))
       (respectsBound2D_X2 masterDegS 10)
-  have hbQ_eq : (((2 ^ masterBits : ℕ) ^ masterDegS : ℕ) : ℤ) = bQ2D := by
-    have hpow : ∀ a b : ℕ, (((2 ^ a : ℕ) ^ b : ℕ) : ℤ) = Int.ofNat (Nat.pow 2 (b * a)) := by
-      intro a b; rw [← pow_mul, Nat.mul_comm]; rfl
+  have hbQ_eq : ((masterLim ^ masterDegS : ℕ) : ℤ) = bQ2D := by
+    have hpow : ∀ a b : ℕ, (((Nat.pow 2 a) ^ b : ℕ) : ℤ) = Int.ofNat (Nat.pow 2 (b * a)) := by
+      intro a b; rw [show Nat.pow 2 a = 2 ^ a from rfl, ← pow_mul, Nat.mul_comm]; rfl
+    unfold masterLim bQ2D
     exact hpow masterBits masterDegS
   have hrelV (t : ℤ) :
-      BRel (fun p z => MvPolynomial.eval (v3Int (2 ^ masterBits : ℕ) (((2 ^ masterBits : ℕ) ^ masterDegS : ℕ) : ℤ) t) p = z)
+      BRel (fun p z => MvPolynomial.eval (v3Int (masterLim : ℤ) ((masterLim ^ masterDegS : ℕ) : ℤ) t) p = z)
         bP3 (evalTStep intOps bS2D c2D t) :=
-    evalTStep_rel (poly3ToIntRel (2 ^ masterBits : ℕ) (((2 ^ masterBits : ℕ) ^ masterDegS : ℕ) : ℤ) t)
-      (by simp [v3Int, bS2D, masterLim])
-      (evalSQCache_rel (poly3ToIntRel (2 ^ masterBits : ℕ) (((2 ^ masterBits : ℕ) ^ masterDegS : ℕ) : ℤ) t)
-        (by simp [v3Int, bS2D, masterLim]) (by simp [v3Int, hbQ_eq]))
-      (by simp [v3Int])
+    evalTStep_rel (poly3ToIntRel (masterLim : ℤ) ((masterLim ^ masterDegS : ℕ) : ℤ) t)
+      (by rw [MvPolynomial.eval_X, v3Int]; rfl)
+      (evalSQCache_rel (poly3ToIntRel (masterLim : ℤ) ((masterLim ^ masterDegS : ℕ) : ℤ) t)
+        (by rw [MvPolynomial.eval_X, v3Int]; rfl) (by rw [MvPolynomial.eval_X, v3Int]; exact hbQ_eq))
+      (by rw [MvPolynomial.eval_X, v3Int])
   have hrelK : BRel (fun p x => evalP3K5 p = x) bP3 (evalTStep k5Ops S_K cacheK T_K) :=
     evalTStep_rel poly3ToK5Rel (by simp [evalP3K5, v3K5])
       (evalSQCache_rel poly3ToK5Rel (by simp [evalP3K5, v3K5]) (by simp [evalP3K5, v3K5]))
       (by simp [evalP3K5, v3K5])
-  have hallB : ∀ r ∈ bPB, ∀ b ∈ r, b.dS < masterDegS ∧ b.dT < 20 ∧ b.M < 2 ^ masterBits := by
+  have hallB : ∀ r ∈ bPB, ∀ b ∈ r, b.dS < masterDegS ∧ b.dT < 20 ∧ b.M < masterLim := by
     intro r hr b hb
     have h1 := List.all_eq_true.mp hb_ok r hr
     have h2 := List.all_eq_true.mp h1 b hb
@@ -98,7 +101,7 @@ private lemma master_bivL_zero_K5 :
             · simp [hv] at hz
             · simp only [hv, List.tail_cons] at hz
               exact haV t ht z (by simp [hv, hz])
-        simp only [evalYListK5, hk0, htail0, mul_zero, add_zero]
+        simp only [evalYListK5, evalYList, hk0, htail0, mul_zero, add_zero]
   have hzero_gen : ∀ (D B : ℕ) (bP : BivL P3Z) (bB : BivL PB)
       (bV : ℤ → BivL ℤ) (bK : BivL K5),
       BRel (RespectsBound2D D 10) bP bB →
@@ -146,8 +149,8 @@ private lemma master_bivL_zero_K5 :
             · simp [hv] at hr'
             · simp only [hv, List.tail_cons] at hr'
               exact haV t ht r' (by simp [hv, hr']) z hz
-        simp only [evalBivLK5, hr0, htail0, mul_zero, add_zero]
-  exact hzero_gen masterDegS (2 ^ masterBits) bP3 bPB (evalTStep intOps bS2D c2D) (evalTStep k5Ops S_K cacheK T_K) hrelB hrelV hrelK hallB hallV
+        simp only [evalBivLK5, evalBivL, hr0, htail0, mul_zero, add_zero]
+  exact hzero_gen masterDegS masterLim bP3 bPB (evalTStep intOps bS2D c2D) (evalTStep k5Ops S_K cacheK T_K) hrelB hrelV hrelK hallB hallV
 
 -- Exact bridge from `evalBivLK5 (evalTStep k5Ops S_K cacheK T_K) = 0` to `sum_RQ5_eta_L`!
 theorem sum_RQ5_eta_L :

@@ -578,3 +578,32 @@ A complete explicit check establishes:
 The identities may be checked in expanded, sparse or factored form. The representation changes the cost of the calculation, not the statement being proved. A **strict** certificate has \(Q=0\). A nonzero \(Q\) is equally valid: the problem asks for divisibility, not a zero residual. If an even denominator and the standard component parities have been imposed during discovery, check those too; averaging can enforce them, so they must not narrow the underlying existence problem.
 
 The criterion is independent of how the field was obtained. A geometric support theorem, a finite-cover construction, and a direct coefficient calculation all lead to the same existence statement. Finite algebraic extensions need not be expanded coefficient by coefficient: trace, determinant and norm expressions can represent the resulting rational functions, provided their nonvanishing, homogeneity and coprimality are established.
+
+## 5.8 Factored Kronecker-grid verification and algebraic residue evaluation
+
+Large rational-certificate constructions—especially moving-line and elimination-cover proofs such as [§3B.11](03b-weighted-threefolds.md#3b11-moving-lines-on-a-cubic-threefold-and-global-residue-cancellation)—reduce geometric claims to high-degree multivariate polynomial identities and local residue evaluations whose naive expanded normal forms are far too large to manipulate symbolically. Three algebraic techniques keep both discovery and kernel-checked formal verification compact.
+
+### Multi-variable Kronecker encoding and factored Kronecker-grid checks
+
+A polynomial \(p\in\mathbb Z[x_0,\ldots,x_{k-1}]\) whose exponent in each variable \(x_i\) is strictly bounded by \(d_i\) embeds injectively into \(\mathbb Z[X]\) via the mixed-radix Kronecker map \(x_i\mapsto X^{s_i}\), where \(s_i=\prod_{j<i}d_j\). Evaluating \(X\) at an integer base \(B\) strictly exceeding the \(\ell^1\)-norm \(\|p\|_1=\sum|c_\alpha|\) makes \(p=0\) equivalent to the single integer check \(p(B^{s_0},\ldots,B^{s_{k-1}})=0\). Splitting ring expressions into nonnegative parts gives certified degree and mass bounds directly from the syntax tree.
+
+For three-variable identities of high degree, full three-dimensional Kronecker substitution suffers rapid integer bit-width growth because the top stride \(d_0 d_1\) multiplies the base exponent. A factored hybrid strategy avoids this blow-up: evaluate \((x_0,x_1)\) by a two-dimensional Kronecker substitution \((B,B^D)\) with \(D>d_0\), while sweeping \(x_2\) across a centered integer grid \(t\in\{-T_{\max},\ldots,T_{\max}\}\) of cardinality strictly greater than \(d_2\). For every grid point \(t\), the univariate slice \(f_t(X)=p(X,X^D,t)\in\mathbb Z[X]\) has \(\ell^1\)-norm bounded uniformly by an explicit budget \(M(T_{\max})\), evaluated by running the exact same polynomial program over a bound-tracking backend (`PB`) alongside the integer backend (`ℤ`) and the symbolic backend (`MvPolynomial (Fin 3) ℤ`). When \(M(T_{\max})<B\) and \(f_t(B)=0\) for every grid point \(t\), positional uniqueness forces \(f_t=0\), Kronecker injectivity separates \((x_0,x_1)\)-monomials, and univariate root counting in \(x_2\) proves \(p=0\) identically. Parameterizing the computation over an abstract operation record (`PolyOps`) with an explicit sharing combinator (`letB`) lets a single relational proof transfer algebraic meaning, degree/norm bounds, and list-length invariants simultaneously without exponential term unfolding.
+
+### Formal Laurent jets and dual-number residue extraction
+
+Evaluating local residues of a quadratic-cover trace \(\eta=\operatorname{Tr}_{A_C/\operatorname{RatFunc}(K)}(\eta_{A_C})\) at \(U=0\) or \(U=\infty\) does not require clearing the full cover denominator. Passing to the formal Laurent field \(K((t))\) (with \(t=U\) or \(t=U^{-1}\)), a quadratic cover equation \(r^2+b(t)r+c(t)=0\) with \(b(0)\ne0\) and \(c(0)=0\) admits a unique formal Hensel root \(r=\sum_{n\ge1}r_n t^n\in K[[t]]\) determined recursively from its coefficients, splitting the trace into two explicit branch homomorphisms \(A_C\to K((t))\).
+
+Along each branch, tracking only the leading valuation and first two Laurent coefficients \((c_k,c_{k+1})\)—packaged as elements of the dual-number ring \(K[\varepsilon]/(\varepsilon^2)\)—suffices to propagate sums, products, powers, and inverses through the cover expression without expanding higher-order terms. When an intermediate numerator is a polynomial of bounded degree (such as degree four in an elimination variable), five-point Lagrange interpolation at \(\{0,\pm1,\pm2\}\) combined with uniform valuation bounds along scaled lines \(t^s c\) recovers sharp lower bounds on every coefficient valuation in one step.
+
+### Algebraic recurrence power sums at spurious poles
+
+Suppose a rational function \(\eta_{\mathrm{main}}=R(U)/(H(U)\,Q(U))\in\operatorname{RatFunc}(K)\) has simple poles at the roots \(R_Q\) of a squarefree polynomial \(Q(U)\in K[U]\) coprime to \(H(U)\). By linearity, the summed residue over \(R_Q\) is a linear combination of the Euler power sums
+
+\[
+W_k=\sum_{r\in R_Q}\frac{r^k}{H(r)\,Q'(r)}\in K
+\qquad(k\ge0).
+\]
+
+A single Bézout relation \(u(U)Q(U)+v(U)H(U)=c\in K^\times\) replaces \(1/H(r)\) by \(v(r)/c\) at every root \(r\in R_Q\), expressing each \(W_k\) through standard Lagrange–Euler traces \(\sum_{r\in R_Q} r^j/Q'(r)\) and hence satisfying the exact constant-coefficient linear recurrence of \(Q\) (and a coupled recurrence from \(H\)). Consequently, \(\sum_{r\in R_Q}\operatorname{Res}_{U=r}(\eta_{\mathrm{main}})\) evaluates in \(K\) via a finite bilinear contraction of the numerator polynomial coefficients against the precomputed weight list \((W_k)\), avoiding any root adjunction or polynomial division in \(K[U]\).
+
+These three verification engines are packaged in [`PolynomialEncoding`](../formal/lean/HodgeComputer/Constructions/PolynomialEncoding/README.md) (`KroneckerCheck`, `PolyOps`) and [`QuadraticCovers`](../formal/lean/HodgeComputer/Constructions/QuadraticCovers/README.md) (`PairAlgebra`, `LaurentJets`, `RationalCoverResidues`).

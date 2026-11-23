@@ -9,9 +9,11 @@ open SymmetricSexticResidual.K5Field SymmetricSexticResidual.SheetCalculus
   SymmetricSexticResidual.CoverAlgebra SymmetricSexticResidual.CoverResidue
   SymmetricSexticResidual.LocalResidueData SymmetricSexticResidual.LocalResidueU0
   SymmetricSexticResidual.Q5WeightsData SymmetricSexticResidual.VerticalData
-  SymmetricSexticResidual.VerticalIdentity SymmetricSexticResidual.EncodingCheck
+  SymmetricSexticResidual.VerticalIdentity
+  PolynomialEncoding.KroneckerCheck QuadraticCovers
   CrossedRationalResidue Polynomial
 open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
+open PolynomialEncoding.PolyOps hiding dotW dotW_rel dotW_len
 open scoped BigOperators
 
 lemma evalGeomSQ_K5_props :
@@ -103,55 +105,55 @@ lemma evalGeomSQ_K5_props :
   have hS2' : S2 = S_K * S_K := hS2
   have hSQ' : SQ = S_K * Q_K := hSQ
   have hQ2' : Q2 = Q_K * Q_K := hQ2
-  have hS3' : S3 = S_K ^ 3 := by rw [hS3, hS2']; dsimp only [k5Ops]; ring
-  have hS4' : S4 = S_K ^ 4 := by rw [hS4, hS2']; dsimp only [k5Ops]; ring
-  have hQ3' : Q3 = Q_K ^ 3 := by rw [hQ3, hQ2']; dsimp only [k5Ops]; ring
-  have hQ4' : Q4 = Q_K ^ 4 := by rw [hQ4, hQ2']; dsimp only [k5Ops]; ring
-  have hSm3Q' : Sm3Q = S_K - 3 * Q_K := by rw [hSm3Q]; dsimp only [k5Ops]; push_cast; ring
-  have hA5' : A5 = 5 * S_K - 9 * Q_K := by rw [hA5]; dsimp only [k5Ops]; push_cast; ring
-  have hS2x' : S2x = 2 * S_K := by rw [hS2x]; dsimp only [k5Ops]; push_cast; ring
+  have hS3' : S3 = S_K ^ 3 := by rw [hS3, hS2']; dsimp only [k5Ops, ringOps]; ring
+  have hS4' : S4 = S_K ^ 4 := by rw [hS4, hS2']; dsimp only [k5Ops, ringOps]; ring
+  have hQ3' : Q3 = Q_K ^ 3 := by rw [hQ3, hQ2']; dsimp only [k5Ops, ringOps]; ring
+  have hQ4' : Q4 = Q_K ^ 4 := by rw [hQ4, hQ2']; dsimp only [k5Ops, ringOps]; ring
+  have hSm3Q' : Sm3Q = S_K - 3 * Q_K := by rw [hSm3Q]; dsimp only [k5Ops, ringOps]; push_cast; ring
+  have hA5' : A5 = 5 * S_K - 9 * Q_K := by rw [hA5]; dsimp only [k5Ops, ringOps]; push_cast; ring
+  have hS2x' : S2x = 2 * S_K := by rw [hS2x]; dsimp only [k5Ops, ringOps]; push_cast; ring
   have hu3_eq : evalBivLK5 u3 = x_K - S_K + 2 * Q_K := by
-    rw [hu3]; simp only [evalBivLK5, evalYListK5, k5Ops, Int.cast_ofNat]; ring
+    rw [hu3]; simp only [evalBivLK5, evalBivL, evalYList, k5Ops, ringOps, Int.cast_ofNat]; ring
   have hu3_2_eq : evalBivLK5 u3_2 = (x_K - S_K + 2 * Q_K) ^ 2 := by
     rw [hu3_2, evalBivLK5_bivMul, hu3_eq]; ring
   have hLX0_eq : evalBivLK5 LX0 = 25 * S_K - 45 * Q_K := by
-    rw [hLX0]; simp only [bivConst, evalBivLK5, evalYListK5, k5Ops, Int.cast_ofNat]; ring
+    rw [hLX0]; simp only [bivConst, evalBivLK5, evalBivL, evalYList, k5Ops, ringOps, Int.cast_ofNat]; ring
   have hLX1_eq : evalBivLK5 LX1 = 45 * Q_K - 25 * S_K + 27 * x_K := by
-    rw [hLX1]; simp only [evalBivLK5, evalYListK5, k5Ops, Int.cast_ofNat]; ring
+    rw [hLX1]; simp only [evalBivLK5, evalBivL, evalYList, k5Ops, ringOps, Int.cast_ofNat]; ring
   have hLX_ac : polyC (evalUBivLK5 LX_27) = 27 * LX_of S Q x U_C := by
-    rw [hLX27]; simp only [evalUBivLK5, hLX0_eq, hLX1_eq, polyC_add, polyC_sub, polyC_mul, polyC_C, polyC_X, polyC_ofNat,
+    rw [hLX27]; simp only [evalUBivLK5, evalUBivL, hLX0_eq, hLX1_eq, polyC_add, polyC_sub, polyC_mul, polyC_C, polyC_X, polyC_ofNat,
       LX_of, u3_of, u_of, S, Q, x, map_add, map_sub, map_mul, map_ofNat, mul_zero, add_zero]; ring
   have hLX_e0 : (evalUBivLK5 LX_27).eval 0 = 25 * S_K - 45 * Q_K := by
-    rw [hLX27]; simp [evalUBivLK5, hLX0_eq]
+    rw [hLX27]; simp [evalUBivLK5, evalUBivL, hLX0_eq]
   have hLX_e1 : (evalUBivLK5 LX_27).eval 1 = 27 * x_K := by
-    rw [hLX27]; simp [evalUBivLK5, hLX0_eq, hLX1_eq]; ring
+    rw [hLX27]; simp [evalUBivLK5, evalUBivL, hLX0_eq, hLX1_eq]; ring
   have hd0_ac : polyC (evalUBivLK5 dLX_0) = 27 * dLX_fn 0 U_C := by
-    rw [hdLX0]; simp only [evalUBivLK5, bivConst, evalBivLK5, evalYListK5, k5Ops,
+    rw [hdLX0]; simp only [evalUBivLK5, evalUBivL, bivConst, evalBivL, evalYList, k5Ops, ringOps,
       polyC_add, polyC_neg, polyC_mul, polyC_X, polyC_ofNat, 
       dLX_fn, u_of, Int.cast_neg, Int.cast_ofNat,
       map_neg, map_ofNat, mul_zero, add_zero]; ring
   have hd0_e0 : (evalUBivLK5 dLX_0).eval 0 = 25 := by
-    rw [hdLX0]; simp [evalUBivLK5, bivConst, evalBivLK5, evalYListK5, k5Ops]
+    rw [hdLX0]; simp [evalUBivLK5, evalUBivL, bivConst, evalBivL, evalYList, k5Ops, ringOps]
   have hd0_e1 : (evalUBivLK5 dLX_0).eval 1 = 0 := by
-    rw [hdLX0]; simp [evalUBivLK5, bivConst, evalBivLK5, evalYListK5, k5Ops]
+    rw [hdLX0]; simp [evalUBivLK5, evalUBivL, bivConst, evalBivL, evalYList, k5Ops, ringOps]
   have hd1_ac : polyC (evalUBivLK5 dLX_1) = 27 * dLX_fn 1 U_C := by
-    rw [hdLX1]; simp only [evalUBivLK5, bivConst, evalBivLK5, evalYListK5, k5Ops,
+    rw [hdLX1]; simp only [evalUBivLK5, evalUBivL, bivConst, evalBivL, evalYList, k5Ops, ringOps,
       polyC_add, polyC_neg, polyC_mul, polyC_X, polyC_ofNat, 
       dLX_fn, u_of, Int.cast_neg, Int.cast_ofNat,
       map_neg, map_ofNat, mul_zero, add_zero]; ring
   have hd1_e0 : (evalUBivLK5 dLX_1).eval 0 = -45 := by
-    rw [hdLX1]; simp [evalUBivLK5, bivConst, evalBivLK5, evalYListK5, k5Ops]
+    rw [hdLX1]; simp [evalUBivLK5, evalUBivL, bivConst, evalBivL, evalYList, k5Ops, ringOps]
   have hd1_e1 : (evalUBivLK5 dLX_1).eval 1 = 0 := by
-    rw [hdLX1]; simp [evalUBivLK5, bivConst, evalBivLK5, evalYListK5, k5Ops]
+    rw [hdLX1]; simp [evalUBivLK5, evalUBivL, bivConst, evalBivL, evalYList, k5Ops, ringOps]
   have hd3_ac : polyC (evalUBivLK5 dLX_3) = 27 * dLX_fn 3 U_C := by
-    rw [hdLX3]; simp only [evalUBivLK5, bivConst, evalBivLK5, evalYListK5, k5Ops,
+    rw [hdLX3]; simp only [evalUBivLK5, evalUBivL, bivConst, evalBivL, evalYList, k5Ops, ringOps,
       polyC_add, polyC_mul, polyC_X, polyC_ofNat, polyC_zero,
       dLX_fn, Int.cast_ofNat,
       map_ofNat, map_zero, mul_zero, add_zero]; ring
   have hd3_e0 : (evalUBivLK5 dLX_3).eval 0 = 0 := by
-    rw [hdLX3]; simp [evalUBivLK5, evalBivLK5]
+    rw [hdLX3]; simp [evalUBivLK5, evalUBivL, evalBivL]
   have hd3_e1 : (evalUBivLK5 dLX_3).eval 1 = 27 := by
-    rw [hdLX3]; simp [evalUBivLK5, bivConst, evalBivLK5, evalYListK5, k5Ops]
+    rw [hdLX3]; simp [evalUBivLK5, evalUBivL, bivConst, evalBivL, evalYList, k5Ops, ringOps]
   have hqC0_eq :
       ((((((((((-5250 : K5) * S4 + 30450 * (S3 * Q_K)) + -64050 * (S2 * Q2)) + 63000 * (S_K * Q3)) +
         -28350 * Q4) + 6250 * (S2 * Q_K)) + -15000 * (S_K * Q2)) + 6750 * Q3) + 6250 * S2) +
@@ -171,28 +173,28 @@ lemma evalGeomSQ_K5_props :
   refine ⟨?_, hS2', ?_, ⟨?_, ?_, ?_⟩, ⟨?_, ?_, ?_, ?_, ?_, ?_⟩, ⟨hLX_ac, hLX_e0, hLX_e1⟩,
     ⟨hd0_ac, hd0_e0, hd0_e1⟩, ⟨hd1_ac, hd1_e0, hd1_e1⟩, ⟨hd3_ac, hd3_e0, hd3_e1⟩,
     ⟨?_, ?_, ?_, ?_, ?_, ?_⟩, ?_, ⟨?_, ?_, ?_, ?_, ?_⟩⟩
-  · rw [hH0SQ, hpS, hS3', hS2', hQ2', hQ3']; dsimp only [k5Ops]; push_cast; ring
-  · simp only [evalBivLK5_bivAdd, evalBivLK5_bivSc, bivConst, evalBivLK5, evalYListK5, hu3_eq, hu3_2_eq,
+  · rw [hH0SQ, hpS, hS3', hS2', hQ2', hQ3']; dsimp only [k5Ops, ringOps]; push_cast; ring
+  · simp only [evalBivLK5_bivAdd, evalBivLK5_bivSc, bivConst, evalBivLK5, evalBivL, evalYList, hu3_eq, hu3_2_eq,
       hS2', hSQ', hQ2', hQ3', DX2_of, u3_of, S, Q, x, map_add, map_sub, map_mul, map_pow,
-      map_ofNat, map_zero]; dsimp only [k5Ops]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_sub, map_pow, map_ofNat, mul_zero, add_zero]; ring
-  · simp only [evalBivLK5_bivAdd, evalBivLK5_bivSc, bivConst, evalBivLK5, evalYListK5, hu3_eq, hu3_2_eq,
+      map_ofNat, map_zero]; dsimp only [k5Ops, ringOps]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_sub, map_pow, map_ofNat, mul_zero, add_zero]; ring
+  · simp only [evalBivLK5_bivAdd, evalBivLK5_bivSc, bivConst, evalBivLK5, evalBivL, evalYList, hu3_eq, hu3_2_eq,
       hS2', hSQ', hQ2', dDX2_fn, u3_of, S, Q, x, map_add, map_sub, map_mul, map_pow,
-      map_ofNat, map_zero]; dsimp only [k5Ops]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_add, map_sub, map_ofNat, mul_zero, add_zero]; ring
-  · simp only [evalBivLK5_bivAdd, evalBivLK5_bivSc, bivConst, evalBivLK5, evalYListK5, hu3_eq,
+      map_ofNat, map_zero]; dsimp only [k5Ops, ringOps]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_add, map_sub, map_ofNat, mul_zero, add_zero]; ring
+  · simp only [evalBivLK5_bivAdd, evalBivLK5_bivSc, bivConst, evalBivLK5, evalBivL, evalYList, hu3_eq,
       hS2', hSQ', hQ2', dDX2_fn, u3_of, S, Q, x, map_add, map_sub, map_mul, 
-      map_ofNat, map_zero]; dsimp only [k5Ops]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_add, map_sub, map_ofNat, mul_zero, add_zero]; ring
-  · simp only [evalBivLK5_bivAdd, evalBivLK5_bivSc, bivConst, evalBivLK5, evalYListK5, hu3_eq,
+      map_ofNat, map_zero]; dsimp only [k5Ops, ringOps]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_add, map_sub, map_ofNat, mul_zero, add_zero]; ring
+  · simp only [evalBivLK5_bivAdd, evalBivLK5_bivSc, bivConst, evalBivLK5, evalBivL, evalYList, hu3_eq,
       hS2', hSQ', dDX2_fn, u3_of, S, Q, x, map_add, map_sub, map_mul, 
-      map_ofNat, map_zero]; dsimp only [k5Ops]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_add, map_ofNat, mul_zero, add_zero]; ring
-  · simp only [evalBivLK5, evalYListK5, hS2', hSQ', hQ2', k5Ops, dF5_fn, dH0_fn, S, Q, x, 
+      map_ofNat, map_zero]; dsimp only [k5Ops, ringOps]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_add, map_ofNat, mul_zero, add_zero]; ring
+  · simp only [evalBivLK5, evalBivL, evalYList, hS2', hSQ', hQ2', k5Ops, ringOps, dF5_fn, dH0_fn, S, Q, x, 
       map_add, map_sub, map_mul, map_neg, map_ofNat, map_zero, Int.cast_neg, Int.cast_ofNat]; ring
-  · simp only [evalBivLK5, evalYListK5, hS2', hSQ', hQ2', k5Ops, dF5_fn, dH0_fn, S, Q, 
+  · simp only [evalBivLK5, evalBivL, evalYList, hS2', hSQ', hQ2', k5Ops, ringOps, dF5_fn, dH0_fn, S, Q, 
       map_add, map_sub, map_mul, map_ofNat, map_zero, Int.cast_ofNat]; ring
-  · simp only [evalBivLK5, evalYListK5, k5Ops, dF5_fn, S, x, 
+  · simp only [evalBivLK5, evalBivL, evalYList, k5Ops, ringOps, dF5_fn, S, x, 
       map_add, map_mul, map_ofNat, map_zero, Int.cast_ofNat]; ring
-  · simp only [evalBivLK5, evalYListK5, hS2', hSQ', hQ2', k5Ops, q1_a0, dH_dS, Int.cast_neg, Int.cast_ofNat]; ring
-  · simp only [evalBivLK5, evalYListK5, hS2', hSQ', hQ2', k5Ops, q2_b0, dH_dQ, Int.cast_ofNat]; ring
-  · simp only [evalBivLK5, evalYListK5, k5Ops, Int.cast_ofNat]; ring
+  · simp only [evalBivLK5, evalBivL, evalYList, hS2', hSQ', hQ2', k5Ops, ringOps, q1_a0, dH_dS, Int.cast_neg, Int.cast_ofNat]; ring
+  · simp only [evalBivLK5, evalBivL, evalYList, hS2', hSQ', hQ2', k5Ops, ringOps, q2_b0, dH_dQ, Int.cast_ofNat]; ring
+  · simp only [evalBivLK5, evalBivL, evalYList, k5Ops, ringOps, Int.cast_ofNat]; ring
   · simp only [evalUBivLK5_ubAdd, evalUBivLK5_ubSc, polyC_add, polyC_mul, polyC_C, polyC_ofNat, hS2x', hd0_ac, hLX_ac,
       dLX_fn, LX_of, u3_of, u_of, S, Q, x, map_mul, map_ofNat]; ring
   · simp only [evalUBivLK5_ubAdd, evalUBivLK5_ubSc, Polynomial.eval_add, Polynomial.eval_mul, Polynomial.eval_C,
@@ -201,15 +203,15 @@ lemma evalGeomSQ_K5_props :
   · simp only [evalUBivLK5_ubSc, Polynomial.eval_mul, Polynomial.eval_C, hd1_e1, mul_zero]
   · simp only [evalUBivLK5_ubSc, polyC_mul, polyC_C, polyC_ofNat, hS2x', hd3_ac, dLX_fn, S, map_mul, map_ofNat]; ring
   · simp only [evalUBivLK5_ubSc, Polynomial.eval_mul, Polynomial.eval_C, hS2x', hd3_e1]; ring
-  · simp only [evalUPolyK5, hA5', hSm3Q', k5Ops, polyC_add, polyC_sub, polyC_neg, polyC_mul, polyC_C, polyC_X, polyC_ofNat, A1_of, S, Q,
+  · simp only [evalUPolyK5, evalUPoly, hA5', hSm3Q', k5Ops, ringOps, polyC_add, polyC_sub, polyC_neg, polyC_mul, polyC_C, polyC_X, polyC_ofNat, A1_of, S, Q,
       map_sub, map_mul, map_neg, map_ofNat, mul_zero, add_zero,
       Int.cast_neg, Int.cast_ofNat]; ring
-  · simp only [evalUPolyK5, k5Ops, Int.cast_neg, Int.cast_ofNat, hqC0_eq, hqC1_eq,
+  · simp only [evalUPolyK5, evalUPoly, k5Ops, ringOps, Int.cast_neg, Int.cast_ofNat, hqC0_eq, hqC1_eq,
       polyC_add, polyC_mul, polyC_C, polyC_X, mul_zero, add_zero]; ring
-  · simp only [List.getD_cons_zero, k5Ops, Int.cast_neg, Int.cast_ofNat, hqC0_eq]
-  · simp only [List.getD_cons_succ, List.getD_cons_zero, k5Ops, Int.cast_neg, Int.cast_ofNat, hqC1_eq]
-  · simp only [List.getD_cons_zero, k5Ops, Int.cast_neg, Int.cast_ofNat, hqEx0_eq]
-  · simp only [List.getD_cons_succ, List.getD_cons_zero, k5Ops, Int.cast_neg, Int.cast_ofNat, hqEx1_eq]
+  · simp only [List.getD_cons_zero, k5Ops, ringOps, Int.cast_neg, Int.cast_ofNat, hqC0_eq]
+  · simp only [List.getD_cons_succ, List.getD_cons_zero, k5Ops, ringOps, Int.cast_neg, Int.cast_ofNat, hqC1_eq]
+  · simp only [List.getD_cons_zero, k5Ops, ringOps, Int.cast_neg, Int.cast_ofNat, hqEx0_eq]
+  · simp only [List.getD_cons_succ, List.getD_cons_zero, k5Ops, ringOps, Int.cast_neg, Int.cast_ofNat, hqEx1_eq]
 
 -- Fast O(N) `letB_intro` bridge for `gtK` (`evalGeomT k5Ops S_K cacheK.ac.ca_p cacheK.ac.cb_p cacheK.gsq T_K`)!
 lemma evalGeomT_K5_props :
@@ -307,64 +309,64 @@ lemma evalGeomT_K5_props :
       q2_b0, dH_dQ]; ring
   -- Scalar identities
   have hT2' : T2 = T_K * T_K := hT2
-  have hT3' : T3 = T_K ^ 3 := by rw [hT3, hT2']; dsimp only [k5Ops]; ring
+  have hT3' : T3 = T_K ^ 3 := by rw [hT3, hT2']; dsimp only [k5Ops, ringOps]; ring
   have hH0 : H0_7 = 7 * H0_of S_K Q_K T_K := by
-    rw [hH0_7, hpT, hgsqP.1, hT3', hT2']; dsimp only [k5Ops, H0_of]; push_cast; ring
-  have hH0_2 : H0_7_2 = H0_7 ^ 2 := by rw [hH0_7_2]; dsimp only [k5Ops]; ring
+    rw [hH0_7, hpT, hgsqP.1, hT3', hT2']; dsimp only [k5Ops, ringOps, H0_of]; push_cast; ring
+  have hH0_2 : H0_7_2 = H0_7 ^ 2 := by rw [hH0_7_2]; dsimp only [k5Ops, ringOps]; ring
   have hAv0 : Av0_243 = 243 * k5Params.Av0 := by
-    rw [hAv0_243, hTm3]; simp only [k5Ops, CoverParams.Av0, CoverParams.inv243, k5Params_inv3, k5Params_T,
+    rw [hAv0_243, hTm3]; simp only [k5Ops, ringOps, CoverParams.Av0, CoverParams.inv243, k5Params_inv3, k5Params_T,
       Int.cast_neg, Int.cast_ofNat]; ring
   have hCv0 : Cv0_243 = 243 * k5Params.Cv0 := by
-    rw [hCv0_243, hCv0_int, hT59]; simp only [k5Ops, CoverParams.Cv0, CoverParams.inv243, k5Params_inv3, k5Params_T,
+    rw [hCv0_243, hCv0_int, hT59]; simp only [k5Ops, ringOps, CoverParams.Cv0, CoverParams.inv243, k5Params_inv3, k5Params_T,
       Int.cast_neg, Int.cast_ofNat]; ring
-  have hCv0i : Cv0_243 = -25 * Cv0_int := by rw [hCv0_243]; dsimp only [k5Ops]; push_cast; ring
+  have hCv0i : Cv0_243 = -25 * Cv0_int := by rw [hCv0_243]; dsimp only [k5Ops, ringOps]; push_cast; ring
   have hBv1701 : polyC (evalUPolyK5 cacheK.ac.Bv_SQ + Polynomial.C Bv1_T_1701 * Polynomial.X) =
       1701 * (ιC_K5 k5Params.Av0 * polyC k5Params.bW) := by
     have hbW : ιC_K5 k5Params.Av0 * polyC k5Params.bW = polyC k5Params.Bv := by
       rw [CoverParams.bW, polyC_mul, polyC_C, ← mul_assoc, ← map_mul,
         k5Params_Av0_mul_inv, map_one, one_mul]
     rw [hbW, polyC_add, polyC_mul, polyC_C, polyC_X, hacP.2.2.2.2.2.2.2.1, hBv1_T, hT3', hT2']
-    simp only [k5Ops, CoverParams.Bv, CoverParams.Bv0, CoverParams.Bv1, CoverParams.Bv2, CoverParams.quadU,
+    simp only [k5Ops, ringOps, CoverParams.Bv, CoverParams.Bv0, CoverParams.Bv1, CoverParams.Bv2, CoverParams.quadU,
       CoverParams.inv9, CoverParams.inv27, CoverParams.inv243, k5Params_inv3, k5Params_inv7,
       k5Params_S, k5Params_Q, k5Params_T, polyC_add, polyC_sub, polyC_neg, polyC_mul, polyC_pow, polyC_C, polyC_X, polyC_ofNat, 
       map_add, map_sub, map_mul, map_inv₀, map_neg, map_pow, map_ofNat, Int.cast_ofNat]; ring
   -- BivL & basic `A_C` evaluations
-  have hv3_eq : evalBivLK5 v3 = y_K - T_K + 2 := by rw [hv3]; simp only [evalBivLK5, evalYListK5, k5Ops, Int.cast_ofNat]; ring
+  have hv3_eq : evalBivLK5 v3 = y_K - T_K + 2 := by rw [hv3]; simp only [evalBivLK5, evalBivL, evalYList, k5Ops, ringOps, Int.cast_ofNat]; ring
   have hv3_2_eq : evalBivLK5 v3_2 = (y_K - T_K + 2) ^ 2 := by rw [hv3_2, evalBivLK5_bivMul, hv3_eq]; ring
   have hDY2 : ιC_K5 (evalBivLK5 DY2) = DY2_of T y := by
-    rw [hDY2_d]; simp only [evalBivLK5_bivAdd, evalBivLK5_bivSc, bivConst, evalBivLK5, evalYListK5,
+    rw [hDY2_d]; simp only [evalBivLK5_bivAdd, evalBivLK5_bivSc, bivConst, evalBivLK5, evalBivL, evalYList,
       hv3_eq, hv3_2_eq, hT2', DY2_of, v3_of, T, y, map_add, map_sub, map_mul, map_pow,
-      map_ofNat, map_zero]; dsimp only [k5Ops]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_sub, map_ofNat, mul_zero, add_zero]; ring
+      map_ofNat, map_zero]; dsimp only [k5Ops, ringOps]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_sub, map_ofNat, mul_zero, add_zero]; ring
   have hdDY2 : ιC_K5 (evalBivLK5 dDY2_dy) = dDY2_fn 4 T y := by
-    rw [hdDY2_d]; simp only [evalBivLK5_bivAdd, evalBivLK5_bivSc, bivConst, evalBivLK5, evalYListK5,
+    rw [hdDY2_d]; simp only [evalBivLK5_bivAdd, evalBivLK5_bivSc, bivConst, evalBivLK5, evalBivL, evalYList,
       hv3_eq, hT2', dDY2_fn, v3_of, T, y, map_add, map_sub, map_mul, map_ofNat, map_zero
-      ]; dsimp only [k5Ops]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_add, map_ofNat, mul_zero, add_zero]; ring
+      ]; dsimp only [k5Ops, ringOps]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_add, map_ofNat, mul_zero, add_zero]; ring
   have hST' : ST = S_K * T_K := hST
-  have hST2' : ST2 = 2 * (S_K * T_K) := by rw [hST2, hST']; dsimp only [k5Ops]; push_cast; ring
+  have hST2' : ST2 = 2 * (S_K * T_K) := by rw [hST2, hST']; dsimp only [k5Ops, ringOps]; push_cast; ring
   have hW2_eq : ιC_K5 (evalBivLK5 W2) = S * T * DX2_of S Q x * DY2_of T y := by
     rw [hW2, evalBivLK5_bivSc, evalBivLK5_bivMul, hST', map_mul, map_mul, map_mul, hgsqP.2.2.1, hDY2]; ring
   have hdF5_4_eq : ιC_K5 (evalBivLK5 dF5_4) = 7 * dF5_fn 4 S Q T x y := by
-    rw [hdF5_4]; simp only [evalBivLK5, evalYListK5, k5Ops, dF5_fn, T, y, map_add, map_mul, map_ofNat, map_zero, Int.cast_ofNat]; ring
+    rw [hdF5_4]; simp only [evalBivLK5, evalBivL, evalYList, k5Ops, ringOps, dF5_fn, T, y, map_add, map_mul, map_ofNat, map_zero, Int.cast_ofNat]; ring
   have hLY0_K : evalBivLK5 LY0 = 25 * T_K - 45 := by
-    rw [hLY0]; simp only [bivConst, evalBivLK5, evalYListK5, k5Ops, Int.cast_ofNat]; ring
+    rw [hLY0]; simp only [bivConst, evalBivLK5, evalBivL, evalYList, k5Ops, ringOps, Int.cast_ofNat]; ring
   have hLY1_K : evalBivLK5 LY1 = 45 - 25 * T_K + 27 * y_K := by
-    rw [hLY1]; simp only [evalBivLK5, evalYListK5, k5Ops, Int.cast_ofNat]; ring
+    rw [hLY1]; simp only [evalBivLK5, evalBivL, evalYList, k5Ops, ringOps, Int.cast_ofNat]; ring
   have hLY0_AC : ιC_K5 (evalBivLK5 LY0) = 27 * LY_of T y 0 := by
     rw [hLY0_K]; simp only [LY_of, v3_of, v_of, T, map_sub, map_mul, map_ofNat]; ring
   have hLY_eq : ιC_K5 (evalBivLK5 LY0) + V_C * ιC_K5 (evalBivLK5 LY1) = 27 * LY_of T y V_C := by
     rw [hLY0_K, hLY1_K]; simp only [LY_of, v3_of, v_of, T, y, map_add, map_sub, map_mul, map_ofNat]; ring
   have hPY_K : evalBivLK5 PY_4_1 = 54 * T_K := by
-    rw [hPY41]; simp only [bivConst, evalBivLK5, evalYListK5, k5Ops, Int.cast_ofNat]; ring
+    rw [hPY41]; simp only [bivConst, evalBivLK5, evalBivL, evalYList, k5Ops, ringOps, Int.cast_ofNat]; ring
   -- Evaluate `br0_0..br1_4`, `omF1_*`, `dYF*`, `QX*` at `U = 0`, `U = 1`, and in `A_C`!
   have hbr0_3_e0 : (evalUBivLK5 br0_3).eval 0 = 0 := by
     rw [hbr0_3, evalUBivLK5_ubSc, evalUBivLK5_ubBmul]; simp [hgsqP.2.2.2.2.2.2.2.2.1.2.1]
   have hbr0_0_e0 : (evalUBivLK5 br0_0).eval 0 = -(2 * (S_K * T_K)) * ((25 * T_K - 45) * 25) - T_K * ((25 * T_K - 45) * (25 * S_K - 45 * Q_K)) := by
     rw [hbr0_0]; simp only [evalUBivLK5_ubSub, evalUBivLK5_ubSc, evalUBivLK5_ubBmul,
       Polynomial.eval_sub, Polynomial.eval_mul, Polynomial.eval_C, hST2', hLY0_K,
-      hgsqP.2.2.2.2.2.2.1.2.1, hgsqP.2.2.2.2.2.1.2.1]; dsimp only [k5Ops]
+      hgsqP.2.2.2.2.2.2.1.2.1, hgsqP.2.2.2.2.2.1.2.1]; dsimp only [k5Ops, ringOps]
   have hbr0_1_e0 : (evalUBivLK5 br0_1).eval 0 = -(2 * (S_K * T_K)) * ((25 * T_K - 45) * (-45)) := by
     rw [hbr0_1]; simp only [evalUBivLK5_ubSc, evalUBivLK5_ubBmul,
-      Polynomial.eval_mul, Polynomial.eval_C, hST2', hLY0_K, hgsqP.2.2.2.2.2.2.2.1.2.1]; dsimp only [k5Ops]
+      Polynomial.eval_mul, Polynomial.eval_C, hST2', hLY0_K, hgsqP.2.2.2.2.2.2.2.1.2.1]; dsimp only [k5Ops, ringOps]
   have hbr0_cancel : (evalUBivLK5 br0_0).eval 0 * (evalUPolyK5 cacheK.ac.cb_p).eval 0 -
       (evalUBivLK5 br0_1).eval 0 * (evalUPolyK5 cacheK.ac.ca_p).eval 0 = 0 := by
     rw [hbr0_0_e0, hbr0_1_e0, hcb_e0, hca_e0]; ring
@@ -378,10 +380,10 @@ lemma evalGeomT_K5_props :
     refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
     · rw [hbr0_0]; simp [evalUBivLK5_ubSub, evalUBivLK5_ubSc, evalUBivLK5_ubBmul, hgsqP.2.2.2.2.2.2.1.2.2, hgsqP.2.2.2.2.2.1.2.2]
     · rw [hbr0_1]; simp [evalUBivLK5_ubSc, evalUBivLK5_ubBmul, hgsqP.2.2.2.2.2.2.2.1.2.2]
-    · rw [hbr0_3]; simp [evalUBivLK5_ubSc, evalUBivLK5_ubBmul, hST2', hgsqP.2.2.2.2.2.2.2.2.1.2.2]; dsimp only [k5Ops]; ring
+    · rw [hbr0_3]; simp [evalUBivLK5_ubSc, evalUBivLK5_ubBmul, hST2', hgsqP.2.2.2.2.2.2.2.2.1.2.2]; dsimp only [k5Ops, ringOps]; ring
     · rw [hbr1_0]; simp [evalUBivLK5_ubSub, evalUBivLK5_ubSc, evalUBivLK5_ubBmul, hgsqP.2.2.2.2.2.2.1.2.2, hgsqP.2.2.2.2.2.1.2.2]
     · rw [hbr1_1]; simp [evalUBivLK5_ubSc, evalUBivLK5_ubBmul, hgsqP.2.2.2.2.2.2.2.1.2.2]
-    · rw [hbr1_3]; simp [evalUBivLK5_ubSc, evalUBivLK5_ubBmul, hST2', hgsqP.2.2.2.2.2.2.2.2.1.2.2]; dsimp only [k5Ops]; ring
+    · rw [hbr1_3]; simp [evalUBivLK5_ubSc, evalUBivLK5_ubBmul, hST2', hgsqP.2.2.2.2.2.2.2.2.1.2.2]; dsimp only [k5Ops, ringOps]; ring
   have hdQX0_e1 : (evalUBivLK5 (ubSub k5Ops (ubMulU k5Ops cacheK.ac.cb_p QX0_0) (ubMulU k5Ops cacheK.ac.ca_p QX0_1))).eval 1 = 0 := by
     rw [hQX0_0, hQX0_1, hdYF0_0, hdYF0_1]
     simp only [evalUBivLK5_ubSub, evalUBivLK5_ubSc, evalUBivLK5_ubBmul, evalUBivLK5_ubMulU,
@@ -420,7 +422,7 @@ lemma evalGeomT_K5_props :
       map_mul, map_ofNat, hca_p, hcb_p, hgsqP.2.2.1, hDY2, hdDY2,
       hgsqP.2.2.2.2.1.1, hgsqP.2.2.2.2.1.2.1, hgsqP.2.2.2.2.1.2.2.1,
       hgsqP.2.2.2.2.2.1.1, hgsqP.2.2.2.2.2.2.1.1, hgsqP.2.2.2.2.2.2.2.1.1, hgsqP.2.2.2.2.2.2.2.2.1.1,
-      hgsqP.2.2.2.2.2.2.2.2.2.1.1, hgsqP.2.2.2.2.2.2.2.2.2.1.2.2.1, hgsqP.2.2.2.2.2.2.2.2.2.1.2.2.2.2.1]; dsimp only [k5Ops]; simp only [map_neg, map_mul, map_ofNat]
+      hgsqP.2.2.2.2.2.2.2.2.2.1.1, hgsqP.2.2.2.2.2.2.2.2.2.1.2.2.1, hgsqP.2.2.2.2.2.2.2.2.2.1.2.2.2.2.1]; dsimp only [k5Ops, ringOps]; simp only [map_neg, map_mul, map_ofNat]
     have hd0 : dDY2_fn 0 T y = 0 := rfl
     have hd1 : dDY2_fn 1 T y = 0 := rfl
     have hd3 : dDY2_fn 3 T y = 0 := rfl
@@ -450,7 +452,7 @@ lemma evalGeomT_K5_props :
     simp only [evalUBivLK5_ubSub, evalUBivLK5_ubNeg, evalUBivLK5_ubSc, evalUBivLK5_ubBmul, evalUBivLK5_ubMulU, polyC_sub, polyC_neg, polyC_mul, polyC_C, hST', hST2',
       map_mul, hca_p, hcb_p, hDY2, hdF5_4_eq, hLY0_AC,
       hgsqP.2.2.2.1.1, hgsqP.2.2.2.1.2.1, hgsqP.2.2.2.1.2.2,
-      hgsqP.2.2.2.2.2.1.1, hgsqP.2.2.2.2.2.2.1.1, hgsqP.2.2.2.2.2.2.2.1.1, hgsqP.2.2.2.2.2.2.2.2.1.1]; dsimp only [k5Ops]; simp only [map_neg, map_mul, map_ofNat]
+      hgsqP.2.2.2.2.2.1.1, hgsqP.2.2.2.2.2.2.1.1, hgsqP.2.2.2.2.2.2.2.1.1, hgsqP.2.2.2.2.2.2.2.2.1.1]; dsimp only [k5Ops, ringOps]; simp only [map_neg, map_mul, map_ofNat]
     have hd4 : dDX2_fn 4 S Q x = 0 := rfl
     have hdX4 : dLX_fn 4 U_C = 0 := rfl
     simp only [QY_num, Omega_F, dDX2_F, F_contract, om_fn, br_fn, hd4, hdX4, dLY_fn
@@ -466,7 +468,7 @@ lemma evalGeomT_K5_props :
             6750 * S * Q + 4050 * Q ^ 2 - 6750 * S + 4050 * Q) +
           (-420 * S ^ 3 + 2940 * S ^ 2 * Q - 6300 * S * Q ^ 2 + 3780 * Q ^ 3) * U_C)) / 63) := by
     rw [hDYqE, evalUBivLK5_ubBmul, polyC_mul, polyC_C, hDY2, hqE_63, hc4S2T2, hgsqP.2.1, hT2']
-    simp only [evalUBivLK5, evalBivLK5, evalYListK5, k5Ops, Int.cast_ofNat,
+    simp only [evalUBivLK5, evalUBivL, evalBivL, evalYList, k5Ops, ringOps, Int.cast_ofNat,
       hgsqP.2.2.2.2.2.2.2.2.2.2.2.2.1, hgsqP.2.2.2.2.2.2.2.2.2.2.2.2.2.1,
       hgsqP.2.2.2.2.2.2.2.2.2.2.2.2.2.2.1, hgsqP.2.2.2.2.2.2.2.2.2.2.2.2.2.2.2,
       polyC_add, polyC_sub, polyC_neg, polyC_mul, polyC_pow, polyC_C, polyC_X, polyC_ofNat, S, Q, T, x, y,
@@ -485,7 +487,7 @@ lemma evalGeomT_K5_props :
         189 * ιC_K5 Cv0_243 * U_C * polyC (evalUBivLK5 DY2_qE_63) := by
       rw [hqY0, evalUBivLK5_ubAdd, evalUBivLK5_ubNeg, evalUBivLK5_ubSc, evalUBivLK5_ubShift,
         polyC_add, polyC_neg, polyC_mul, polyC_mul, polyC_C, polyC_X, hQYd0_AC]
-      simp only [k5Ops, map_mul, map_ofNat, Int.cast_ofNat]; ring
+      simp only [k5Ops, ringOps, map_mul, map_ofNat, Int.cast_ofNat]; ring
     have hQY_lin : QY_dot = V_C * (QY_num S Q T x y U_C 1 0 * cb - QY_num S Q T x y U_C 1 1 * ca) -
         (V_C - 1) * (QY_num S Q T x y U_C 0 0 * cb - QY_num S Q T x y U_C 0 1 * ca) := by
       have h1 : ∀ i : Fin 3, QY_num S Q T x y U_C V_C i =
@@ -520,7 +522,7 @@ lemma evalGeomT_K5_props :
     rw [hEB0, hEB1, hbr0_3, hbr1_3, hbr1_4]
     simp only [evalUBivLK5_ubSub, evalUBivLK5_ubSc, evalUBivLK5_ubBmul,
       polyC_sub, polyC_mul, polyC_C, hST2', 
-      hW2_eq, hdF5_4_eq, hgsqP.2.2.2.2.1.2.2.1, hgsqP.2.2.2.2.2.2.2.2.1.1, hgsqP.2.2.2.2.2.1.1]; dsimp only [k5Ops]; simp only [Int.cast_ofNat, map_neg, map_mul, map_ofNat]
+      hW2_eq, hdF5_4_eq, hgsqP.2.2.2.2.1.2.2.1, hgsqP.2.2.2.2.2.2.2.2.1.1, hgsqP.2.2.2.2.2.1.1]; dsimp only [k5Ops, ringOps]; simp only [Int.cast_ofNat, map_neg, map_mul, map_ofNat]
     have hdX4 : dLX_fn 4 U_C = 0 := rfl
     simp only [EB_of, W2_of, br_fn, hdX4, dLY_fn]
     dsimp only [S, Q, T, x, y] at hLY_eq ⊢
@@ -562,7 +564,7 @@ lemma evalGeomT_K5_props :
     have hAv0_AC : ιC_K5 Av0_243 = 243 * ιC_K5 k5Params.Av0 := by rw [hAv0]; simp [map_ofNat]
     have hCv0_AC : ιC_K5 Cv0_243 = 243 * ιC_K5 k5Params.Cv0 := by rw [hCv0]; simp [map_ofNat]
     simp only [evalUBivLK5_ubAdd, evalUBivLK5_ubSub, evalUBivLK5_ubSc, evalUBivLK5_ubShift, evalUBivLK5_ubMulU, polyC_add, polyC_sub, polyC_mul, polyC_C, polyC_X, 
-      hgsqP.2.2.2.2.2.2.2.2.2.2.1]; dsimp only [k5Ops]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_ofNat, hH0_AC, hAv0_AC, hCv0_AC]
+      hgsqP.2.2.2.2.2.2.2.2.2.2.1]; dsimp only [k5Ops, ringOps]; simp only [Int.cast_neg, Int.cast_ofNat, map_neg, map_mul, map_ofNat, hH0_AC, hAv0_AC, hCv0_AC]
     dsimp only [q1_dot]
     rw [hA1_V, hB1_AC, hcA1_AC, show M_mid_int = 2250423 from rfl]
     push_cast
@@ -1065,42 +1067,8 @@ lemma ubSynDiv1Rem_len {α : Type*} (o : PolyOps α) :
       simp only [ubSynDiv1Rem, List.length_cons] at ih ⊢
       omega
 
-lemma evalBivLK5_combineBivDot_uAdd (B : UBivL K5) :
-    ∀ (t1 t2 : UPoly K5),
-      evalBivLK5 (combineBivDot k5Ops B (uAdd k5Ops t1 t2)) =
-      evalBivLK5 (combineBivDot k5Ops B t1) + evalBivLK5 (combineBivDot k5Ops B t2) := by
-  induction B with
-  | nil => intro _ _; simp [combineBivDot, evalBivLK5]
-  | cons b bs ih =>
-      intro t1 t2
-      cases t1 with
-      | nil => simp [uAdd, combineBivDot, evalBivLK5]
-      | cons x xs => cases t2 with
-        | nil => simp [uAdd, combineBivDot, evalBivLK5]
-        | cons y ys =>
-            simp only [uAdd, combineBivDot, evalBivLK5_bivAdd, evalBivLK5_bivSc, ih xs ys]
-            dsimp only [k5Ops]; ring
-
-lemma evalBivLK5_combineBivDot_uSc (c : K5) (B : UBivL K5) :
-    ∀ t : UPoly K5, evalBivLK5 (combineBivDot k5Ops B (uSc k5Ops c t)) =
-      c * evalBivLK5 (combineBivDot k5Ops B t) := by
-  induction B with
-  | nil => intro _; simp [combineBivDot, evalBivLK5]
-  | cons b bs ih =>
-      intro t; cases t with
-      | nil => simp [uSc, combineBivDot, evalBivLK5]
-      | cons x xs =>
-          rw [show uSc k5Ops c (x :: xs) = k5Ops.mul c x :: uSc k5Ops c xs from rfl]
-          simp only [combineBivDot, evalBivLK5_bivAdd, evalBivLK5_bivSc, ih xs]
-          dsimp only [k5Ops]; ring
-
 lemma uSc_len {α : Type*} (o : PolyOps α) (c : α) (a : UPoly α) : (uSc o c a).length = a.length :=
   List.length_map _
-
-lemma dotW_len {α : Type*} (o : PolyOps α) (A W : UPoly α) (sh : ℕ) : (dotW o A W sh).length = 5 := rfl
-
-def uOps : PolyOps Unit :=
-  ⟨(), fun _ => (), fun _ _ => (), fun _ _ => (), fun _ => (), fun _ _ => (), fun _ _ => ()⟩
 
 def acUnit : ACache Unit := evalACache uOps () ()
 def gsqUnit : GeomSQ Unit := evalGeomSQ uOps () ()

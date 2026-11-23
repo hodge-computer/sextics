@@ -518,3 +518,54 @@ The radical of \(T\) vanishes by smoothness, so \(p\) and \(p'\) commute. Their 
 If the binary plane has one coordinate of each sign, \(\tau\)-invariance and the even degree of \(B\) make \(B\) even in each coordinate separately. The two-reflection theorem applies. If the two signs agree, replace \(\tau\) by its projectively identical negative if necessary so that both are negative. The core then has just one negative coordinate \(y\). Reflection \(r_y\) preserves \(H\), and \(\tau=\beta r_y\). In \(H^4(X)^\tau\), the \(r_y\)-positive part is supported by the [reflection quotient](03-geometric-support.md#33-reflection-quotients), and the \(r_y\)-negative part is \(\beta\)-negative. ∎
 
 Consequently an even sextic with a binary summand admits certificates for every odd numerator at every positive pole order by [§3.5](03-geometric-support.md#35-from-divisor-support-to-every-pole-order) and the coefficient descent of [Chapter 1](01-certificates.md).
+
+## 3B.11 Moving lines on a cubic threefold and global residue cancellation
+
+When a finite symmetry quotient leaves a residual cohomology sector beyond Fano quotients, quadratic nets, and elliptic companions, a rational certificate can still be constructed algebraically from a one-parameter family of moving lines on an auxiliary cubic threefold, closed by the global rational residue theorem on \(\mathbb P^1\).
+
+### Quotient chart and vertical Poisson elimination
+
+Suppose a finite-group quotient map (such as the \(S_3\times S_3\) invariant map on symmetric even sextics) transforms the ambient sextic into a five-coordinate hypersurface quadratic in two normal coordinates \((x,y)\) over a three-variable base \((S,Q,T)\):
+
+\[
+F_5(S,Q,T,x,y)=3Sx^2+3Ty^2+H_0(S,Q,T)=0,
+\]
+
+with \(H_0\) a ternary cubic. Passing to a radial normal chart on the quotient function field \(K_5=\operatorname{Frac}(\mathbb C[S,Q,T,x,y]/(F_5))\) reduces the six-variable ambient certificate equation to a four-variable divergence equation
+
+\[
+\operatorname{resDiv}_W(w)=\frac{N_A}{2W_2H_0}
+\qquad\text{in }K_5.
+\]
+
+Because \(F_5\) is quadratic in \((x,y)\), explicit vertical Poisson brackets with denominators dividing \(H_0^2\) absorb every source component that depends on the vertical fiber, leaving a reduced horizontal residual \(P_{\mathrm{horiz}}\) that must be matched by a family of horizontal geometric correspondences.
+
+### Moving lines on an auxiliary cubic threefold
+
+Embed \(H_0(S,Q,T)\) as a hyperplane section of an auxiliary cubic threefold \(H_{\mathrm{cub}}(S,Q,T,1;U,V)=0\) by introducing two auxiliary coordinates \((U,V)\). A line through the moving base point \((S,Q,T,1)\) in direction \((a,b,1,0)\) at auxiliary coordinates \((U,V)\) is parametrized by \(t\mapsto(S+at,Q+bt,T+t,1;U,V)\). Requiring the line to lie on \(H_{\mathrm{cub}}=0\) imposes the four polynomial incidence equations
+
+\[
+E_0(U,V)=0,\qquad
+E_1(a,b,U,V)=0,\qquad
+E_2(a,b,U,V)=0,\qquad
+E_3(a,b,U,V)=0,
+\]
+
+corresponding to the coefficients of \(t^0,t^1,t^2,t^3\). Because \(E_0\) is independent of \((a,b)\) and quadratic in \(W=UV\), eliminating \((a,b)\) takes place over the quadratic extension \(A_C=\operatorname{RatFunc}(K_5)[W]/(W^2+b_W(U)W+c_W(U))\). On \(A_C\), \(E_1=0\) solves linearly for \(a\) in terms of \(b\), leaving a quadratic \(q_2 b^2+q_1 b+q_0=0\) from \(E_2=0\) and a cubic \(e_3 b^3+e_2 b^2+e_1 b+e_0=0\) from \(E_3=0\). Taking the \(5\times5\) Sylvester resultant \(\operatorname{syl}_5(q,e)\in A_C\) and descending via the quadratic norm \(\operatorname{Nm}_{A_C/\operatorname{RatFunc}(K_5)}\) yields a univariate cover polynomial \(P_m(U)\in K_5[U]\) whose roots \(R_m\) in a splitting field \(L/K_5\) parametrize the \(m\) nondegenerate moving lines passing through the base point.
+
+### Quadratic-cover trace and global residue cancellation
+
+Along each nondegenerate sheet \((a(r),b(r),r,V(r))\) above a simple root \(r\in R_m\), the moving-line incidence calculus supplies a divergence vector field whose source equals \(-P_{18}/(81\det J_{\mathrm{fib}})\), where \(J_{\mathrm{fib}}\) is the \(4\times4\) incidence Jacobian. Using the Schur complement of \(J_{\mathrm{fib}}\) and division-free quadratic remainders modulo \(q_2 b^2+q_1 b+q_0\), this sheet value equals the simple-pole residue at \(U=r\) of an explicit rational one-form \(\eta=\operatorname{Tr}_{A_C/\operatorname{RatFunc}(K_5)}(\eta_{A_C})\in\operatorname{RatFunc}(K_5)\).
+
+The global rational residue theorem on \(\mathbb P^1_U\) then equates the sum of the \(m\) inaccessible sheet residues to the negative sum of the complementary poles of \(\eta\):
+
+\[
+\sum_{r\in R_m}\operatorname{Res}_{U=r}(\eta)
+=\operatorname{coeff}_\infty(\eta)
+-\operatorname{Res}_{U=0}(\eta)
+-\sum_{r\in R_{\mathrm{sp}}}\operatorname{Res}_{U=r}(\eta),
+\]
+
+where \(R_{\mathrm{sp}}\) is the finite locus of spurious elimination poles where the leading elimination denominators vanish. The essential gain is algebraic: while \(R_m\) lives in a high-degree splitting field, the three terms on the right depend only on local Laurent expansions at \(U=0\) and \(U=\infty\) and a symmetric Euler power-sum trace over \(R_{\mathrm{sp}}\), all lying in \(K_5\). Once their sum is proved equal to \(P_{\mathrm{horiz}}\) in \(K_5\), adding the vertical Poisson field cancels \(P_{\mathrm{horiz}}\) over \(L\), finite normalized-trace descent ([Chapter 1](01-certificates.md#combining-certificates-and-descending-coefficients)) returns a rational solution in \(K_5^4\), and the ambient Piola lift produces a certificate on the sextic fourfold. Because the moving-line coordinates \((W,a,b)\) above each simple root \(r\in R_m\) are rational in \(r\) over \(K_5\), the summed horizontal field \(w_H=\sum_{r\in R_m}w_{\mathrm{horiz}}(r)=\operatorname{Tr}_{K_5[U]/(P_m)}(w_{\mathrm{horiz}})\) is already Galois-invariant in \(K_5^4\) and constructively determines an explicit cleared witness \((N,D)\); descending the residue-divergence equation on the cover avoids multiplying out the degree-\(m\) norms of the sheet denominators across all \(m\) branches.
+
+The worked formal realization of this mechanism is [symmetric-sextic-residual](../data/symmetric-sextic-residual/solution.md) (with \(m=34\) horizontal moving-line sheets and a degree-five spurious factor \(Q_5(U)\)); its target-independent quadratic-cover, Laurent-jet, and rational-residue infrastructure lives in [`QuadraticCovers`](../formal/lean/HodgeComputer/Constructions/QuadraticCovers/README.md), and the computational verification techniques for the resulting polynomial identities are developed in [Chapter 5, §5.8](05-computation.md#58-factored-kronecker-grid-verification-and-algebraic-residue-evaluation).

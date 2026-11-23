@@ -1467,7 +1467,7 @@ theorem certificate_of_K5_pde (w : Fin 4 → K5) (heq : srcX + resDivW w = 0) :
       fin_cases i <;>
         simp only [tanIdx, map_add, hH3, add_zero, Derivation.leibniz,
           Derivation.leibniz_pow, pderiv_ofNat, pderiv_X, smul_eq_mul, nsmul_eq_mul] <;>
-        simp <;> ring
+        simp; ring
     have hT_eval5 (i : Fin 4) (p : Poly5) :
         T_amb i (eval5_amb p) = eval5_amb (pderiv (tanIdx i) p) -
           (eval5_amb (pderiv (tanIdx i) F5) / eval5_amb (pderiv 3 F5)) * eval5_amb (pderiv 3 p) := by
@@ -1513,7 +1513,7 @@ theorem certificate_of_K5_pde (w : Fin 4 → K5) (heq : srcX + resDivW w = 0) :
       have hδ_div : δ i (toK5 (n i) / toK5 (poly4ToPoly5 d)) =
           (toK5 (poly4ToPoly5 d) * δ i (toK5 (n i)) - toK5 (n i) * δ i (toK5 (poly4ToPoly5 d))) /
             toK5 (poly4ToPoly5 d) ^ 2 := by
-        letI : Algebra ℤ K5 := Ring.toIntAlgebra K5
+        let : Algebra ℤ K5 := Ring.toIntAlgebra K5
         have h := congrArg (δ i) (div_mul_cancel₀ (toK5 (n i)) hdK)
         rw [(δ i).leibniz] at h; simp only [smul_eq_mul] at h
         have h2 := congrArg (toK5 (poly4ToPoly5 d) * ·) h

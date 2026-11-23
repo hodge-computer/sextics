@@ -29,7 +29,7 @@ Contribute through a direct GitHub pull request for one fixed instance. Add the 
 ### Start here
 
 1. Choose an instance without a merged proof and start a branch from the latest upstream `main`.
-2. Add only the solution files listed below. Do not edit or remove existing files.
+2. Add the solution files in `data/<instance-id>/` and, when your proof introduces genuinely reusable Lean machinery or new mathematical exposition, optionally include companion additions or edits to `formal/lean/HodgeComputer/Constructions/`, `formal/{TECHNIQUES,README}.md`, and `docs/`. Do not delete files or touch protected core, target, verifier, or generated files.
 3. Prove the exact theorem, explain the mathematics, and run the local check. Inspect the complete diff.
 4. Push the branch to your fork and open a PR against `hodge-computer/sextics:main`. Follow the [PR title and description requirements](#pr-title-and-description) below.
 5. Address verification failures in the same PR and follow the [review and acceptance procedure](#review-and-acceptance).
@@ -46,6 +46,14 @@ data/<instance-id>/
   solution.md        # ADD: mathematical explanation displayed on the website
   witness.json       # optional ADD: exact displayed polynomial witness
   Helper.lean        # optional ADD: flat Lean helper modules
+
+# Optional companion updates in the same solve PR (ADD or EDIT only; no deletions):
+formal/lean/HodgeComputer/Constructions/<Pkg>/*.lean
+formal/lean/HodgeComputer/Constructions/<Pkg>/README.md
+formal/TECHNIQUES.md
+formal/README.md
+docs/<chapter>.md
+docs/index.json
 ```
 
 The manifest has exactly these fields when no JSON witness is submitted:
@@ -112,11 +120,11 @@ This additional binding prevents a correct existence proof from being paired wit
 
 Name flat helper files with `[A-Z][A-Za-z0-9_]*.lean` and import them as `Proposal.Helper`. That namespace is the verifier's temporary compilation layout, not a permanent repository directory. `Target.lean`, `Checked.lean`, and `Audit.lean` are reserved. Imports must be on single lines at the start of the module, with no dependency cycles. Trusted imports may start with `Mathlib.`, `HodgeComputer.`, or `HodgeTestbed.`.
 
-Use the shared constructions indexed in the [technique guide](formal/TECHNIQUES.md) when their hypotheses apply. Keep target-specific identities in your instance's `Solution.lean` or permitted helpers; avoid copying a complete accepted proof package to reuse its machinery. Additions or changes to the shared library belong in a separate maintenance PR before the solve PR that imports them. The verifier audits the final theorem's transitive axioms, including those of imported results.
+Use the shared constructions indexed in the [technique guide](formal/TECHNIQUES.md) when their hypotheses apply. Keep target-specific identities, incidence seeds, and certificate closure in your instance's `Solution.lean` or permitted helpers; avoid copying a complete accepted proof package to reuse its machinery. Reusable, target-independent machinery may be added directly under `formal/lean/HodgeComputer/Constructions/` (together with `formal/TECHNIQUES.md`, `formal/README.md`, and book updates under `docs/`) either in the same solve PR or in a separate maintenance PR. Companion library modules must build without warnings, follow the same source restrictions (no banned tokens, no `Proposal.*` or `HodgeTarget` imports, no cycles), and are compiled and kernel-replayed inside the verifier's OS sandbox alongside the solve. The verifier audits the final theorem's transitive axioms, including those of imported results.
 
-Ordinary declarations and tactic proofs are accepted. Custom executable extensions, `axiom`, `sorry`, `admit`, and unchecked native decision procedures are refused. Do not submit binaries, compiled artifacts, symlinks, executable scripts, Lake configuration, nested directories, or unrelated files.
+Ordinary declarations and tactic proofs are accepted. Custom executable extensions, `axiom`, `sorry`, `admit`, and unchecked native decision procedures are refused. Do not submit binaries, compiled artifacts, symlinks, executable scripts, Lake configuration, nested directories inside `data/<instance-id>/`, or unrelated files.
 
-The complete committed diff must consist solely of newly added permitted solution files in **one existing instance folder**. Edits to `instance.rec`, `why.md`, the leaderboard, the website, the verifier, workflows, or any other existing file fail validation.
+The complete committed diff must consist solely of newly added permitted solution files in **one existing instance folder**, plus optional additions or edits in the allowed companion paths (`formal/lean/HodgeComputer/Constructions/**`, `formal/TECHNIQUES.md`, `formal/README.md`, `docs/*.md`, `docs/index.json`). Deletions and any edits to `instance.rec`, `why.md`, other instances, protected core Lean files (`HodgeComputer/{Verify,Sextic,CertificateOperations,CoordinateChanges}.lean`, `HodgeComputer.lean`, `HodgeTestbed/`, `lakefile.toml`, `lake-manifest.json`, `lean-toolchain`), generated `docs/*.html`, the leaderboard, the website, the verifier, or workflows fail validation.
 
 Limits are in `.github/solve-policy.json`: 996 files, a five-and-a-half-hour proof budget, and 14 GiB memory. The file count includes the manifest and explanation as well as Lean modules and any optional witness. With the four record files of an instance, it keeps the folder within the 1,000 entries that GitHub lists for one directory and shows in one pull request. Every submitted Lean module is compiled and independently replayed, so splitting a proof into more files does not extend its time budget. That budget sits inside GitHub's six-hour limit on a hosted job, with room for preparation and reporting. The memory budget leaves room for the operating system and runner services on GitHub's free 16 GB Linux runners for public repositories. The allowed axiom set is `propext`, `Classical.choice`, and `Quot.sound`.
 
@@ -184,7 +192,7 @@ print(json.dumps(verify(ROOT, files, instance, manifest, order, imports, policy,
 PY
 ```
 
-This checks the proof against the checkout's target and exports logs, without contacting GitHub. GitHub additionally validates the complete Git diff, file modes, manifest schema, source sizes, attribution, and the exact base/head commits used for that run. A local result is development feedback; acceptance follows the protected checks and owner merge. If you rely on CI rather than running Lean locally, say so in the PR.
+This checks the proof against the checkout's target and exports logs, without contacting GitHub. If your branch also adds or edits companion modules under `formal/lean/HodgeComputer/Constructions/` or book chapters under `docs/`, build and replay the changed library modules (`cd formal/lean && lake build <Module>` and `lake env leanchecker --verbose <Module>`) and run `python3 scripts/build-content.py && python3 scripts/validate-records.py && python3 scripts/check-content.py` (or pass `library_order`/`library_files` from `library_module_order` to `verify`). GitHub additionally validates the complete Git diff, file modes, manifest schema, source sizes, attribution, and the exact base/head commits used for that run. A local result is development feedback; acceptance follows the protected checks and owner merge. If you rely on CI rather than running Lean locally, say so in the PR.
 
 ### Review and acceptance
 
