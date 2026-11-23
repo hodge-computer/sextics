@@ -532,7 +532,7 @@ lemma numM_split_UV {R : Type*} [Field R] [CharZero R] (mi : Fin 10) (a b xS xQ 
       simp only [q1_a1, q1_a0, q2_b1, q2_b0]; ring
     rw [hre, hm1, hm2, hm3]
     simp only [d10_U3, d10_U2, d10_U1, d10_U0, dH_dS, dHS_2, dHS_1, dHS_0]; ring
-  fin_cases mi <;> (simp only [Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk, numM, numM_Uk]; rw [hd20, hd21, hd10]; ring)
+  fin_cases mi <;> (simp only [numM, numM_Uk]; rw [hd20, hd21, hd10]; ring)
 
 lemma AY_t3_U3_eq_zero {R : Type*} [Field R] [CharZero R] (a b xS xQ : R) :
     -(123236 / 24249375 : R) * (numM_Uk 3 0 a b xS xQ + (2790 / 77) * numM_Uk 3 6 a b xS xQ +
@@ -616,7 +616,7 @@ lemma A0V_Uk_eq {R : Type*} [Field R] [CharZero R] (k : Fin 4) (a b xS xQ : R) :
       (-(223 / 2916 : R) * a + (25 / 162) * b - (7 / 479)) * d10 +
       (-(223 / 1620 : R) * a + (5 / 18) * b - (25 / 162) * xQ + (223 / 2916) * xS - (35 / 958)) * d20 +
       (-(5 / 18 : R) * xQ + (223 / 1620) * xS - (441 / 23950)) * d21 := by
-  fin_cases k <;> (simp only [Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk, A0V_Uk, numM_Uk]; ring)
+  fin_cases k <;> (simp only [A0V_Uk, numM_Uk]; ring)
 
 lemma AX_Uk_eq {R : Type*} [Field R] [CharZero R] (k : Fin 4) (a b xS xQ : R) :
     let (d10, d20, d21) : R × R × R := match k with
@@ -628,7 +628,7 @@ lemma AX_Uk_eq {R : Type*} [Field R] [CharZero R] (k : Fin 4) (a b xS xQ : R) :
       (-(1 / 162 : R) * a - (119 / 5748)) * d10 +
       (-(1 / 90 : R) * a + (1 / 162) * xS - (140 / 1437)) * d20 +
       ((1 / 90 : R) * xS - (5187 / 47900)) * d21 := by
-  fin_cases k <;> (simp only [Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk, AX_Uk, numM_Uk]; ring)
+  fin_cases k <;> (simp only [AX_Uk, numM_Uk]; ring)
 
 lemma diff3_lin_mul {R : Type*} [Field R] [CharZero R] (p1 p0 : R) (D : R → R) :
     let g := fun z : R => (p1 * z + p0) * D z
@@ -1525,7 +1525,7 @@ lemma W1_inf_weights_alg {R : Type*} [Field R] [CharZero R] (S Q T d20e : R)
     have hcancel : ((4 / 27 : R) * (S - 3 * Q) ^ 2) ^ 3 *
         ((-(25 / 4 : R) * T * (5 * T - 9) ^ 2 / (S - 3 * Q) ^ 3) ^ 2 * -(625 / 243 : R)) =
         -(1562500 / 4782969 : R) * T ^ 2 * (5 * T - 9) ^ 4 := by
-      field_simp [hS3Q]; try ring
+      field_simp [hS3Q]; ring
     rw [hcancel]; ring
   have hD21_v : w1_D21_v S Q T = -(200 / 413343 : R) * (5 * T - 9) * (5 * T - 3) * (S - 3 * Q) *
       (-77 * S ^ 2 + 210 * S * Q - 45 * S - 135 * Q - 270) := by
@@ -1560,11 +1560,11 @@ lemma W1_inf_weights_alg {R : Type*} [Field R] [CharZero R] (S Q T d20e : R)
   have hC4_v : (w1_C4_D S Q T d20e).val = -((w1_D22 S Q).val * w1_D20_v S Q T ^ 2 * (w1_d1_main S Q T d20e).val) := by
     simp only [w1_C4_D, w1_P0_4_D, w1_d1_D, Dual.neg_val, Dual.mul_val, Dual.pow_eq, w1_D20]
   have hq32_33 : w1_D32_v S Q T / (w1_D33 S Q).val = -(375 / 2 : R) * (5 * T - 9) * (5 * T - 3) / (S - 3 * Q) ^ 2 := by
-    rw [hD32_v, hQ7_7]; field_simp [hS3Q]; try ring
+    rw [hD32_v, hQ7_7]; field_simp [hS3Q]; ring
   have hq22_20 : (w1_D22 S Q).val / w1_D20_v S Q T = -(4 / 39375 : R) * (77 * S - 210 * Q + 45) * (S - 3 * Q) ^ 3 / (5 * T - 9) ^ 2 := by
-    rw [hQ5_5, hD20_v]; field_simp [hS3Q, hT59]; try ring
+    rw [hQ5_5, hD20_v]; field_simp [hS3Q, hT59]; ring
   have hq30_33 : w1_D30_v S Q T / (w1_D33 S Q).val = (1687500 / 64 : R) * (5 * T - 1) * (5 * T - 9) ^ 3 / (S - 3 * Q) ^ 6 := by
-    rw [hD30_v, hQ7_7]; field_simp [hS3Q]; try ring
+    rw [hD30_v, hQ7_7]; field_simp [hS3Q]; ring
   have hA4_3 : (w1_num_pref S Q T).val * (w1_C4_D S Q T d20e).val = (w1_den_pref S Q T d20e).val * w1_A4_3 S Q T := by
     have hcore : -(w1_w0 S Q T * (w1_cbD S Q).val ^ 4) =
         81 * w1_Bv2 S Q * (w1_D22 S Q).val * (w1_D33 S Q).val * w1_A4_3 S Q T := by
@@ -1648,10 +1648,10 @@ lemma W1_inf_weights_alg {R : Type*} [Field R] [CharZero R] (S Q T d20e : R)
       have hcb2_ne : (w1_cbD S Q).val ≠ 0 :=
         mul_ne_zero (div_ne_zero (ofNat_ne_zero 4) (ofNat_ne_zero 27)) (pow_ne_zero 2 hS3Q)
       have hw_rel : (w1_WD S Q T).eps * w1_Bv2 S Q = -(w1_WD S Q T).val * w1_Bv1 S Q T := by
-        simp only [w1_WD, w1_w0, w1_w1]; field_simp [hBv2_ne]; try ring
+        simp only [w1_WD, w1_w0, w1_w1]; field_simp [hBv2_ne]
       have hA4_ratio : w1_A4_4 S Q T =
           w1_A4_3 S Q T * (-(1 / 4116 : R) * P44_fn S Q T / ((S - 3 * Q) ^ 3 * (77 * S - 210 * Q + 45))) := by
-        simp only [w1_A4_3, w1_A4_4]; field_simp [hS3Q, hL]; try ring
+        simp only [w1_A4_3, w1_A4_4]; field_simp [hS3Q, hL]; ring
       have hval_sym : (-((w1_WD S Q T).val * (w1_cbD S Q).val ^ 4)) *
             ((w1_D22 S Q).val ^ 2 * (w1_D20 S Q T d20e).val ^ 3 * (w1_D33 S Q).val) =
           (81 * w1_Bv2 S Q * (w1_D22 S Q).val ^ 3 * ((w1_D20 S Q T d20e).val ^ 3 * (w1_D33 S Q).val ^ 2)) * w1_A4_3 S Q T := by
@@ -1666,15 +1666,15 @@ lemma W1_inf_weights_alg {R : Type*} [Field R] [CharZero R] (S Q T d20e : R)
       have hr5678' := W1_inf_r5678_alg (w1_D22 S Q).val (w1_D20_v S Q T) (w1_D33 S Q).val
         (w1_D21_v S Q T) (w1_D32_v S Q T) (w1_D31_v S Q T) (w1_D30_v S Q T) hD22_ne hD20_ne hD33_ne
       have hq22_33 : (w1_D22 S Q).val / (w1_D33 S Q).val = (81 / 28 : R) * (77 * S - 210 * Q + 45) / (S - 3 * Q) ^ 2 := by
-        rw [hQ5_5, hQ7_7]; field_simp [hS3Q]; try ring
+        rw [hQ5_5, hQ7_7]; field_simp [hS3Q]; ring
       have hq31_33 : w1_D31_v S Q T / (w1_D33 S Q).val = (5625 / 112 : R) * (5 * T - 9) ^ 2 * (5 * T - 3) ^ 2 *
           (-49 * S ^ 2 + 140 * S * Q - 90 * Q - 90) / (S - 3 * Q) ^ 6 := by
-        rw [hD31_v, hQ7_7]; field_simp [hS3Q]; try ring
+        rw [hD31_v, hQ7_7]; field_simp [hS3Q]; ring
       have hq21_20 : w1_D21_v S Q T / w1_D20_v S Q T = (2 / 1575 : R) * (5 * T - 3) / (5 * T - 9) *
           (-77 * S ^ 2 + 210 * S * Q - 45 * S - 135 * Q - 270) := by
-        rw [hD21_v, hD20_v]; field_simp [hS3Q, hT59]; try ring
+        rw [hD21_v, hD20_v]; field_simp [hS3Q, hT59]; ring
       have hq30_20 : w1_D30_v S Q T / w1_D20_v S Q T = -(25 / 27 : R) * (5 * T - 1) * (5 * T - 9) / (S - 3 * Q) := by
-        rw [hD30_v, hD20_v]; field_simp [hS3Q, hT59]; try ring
+        rw [hD30_v, hD20_v]; field_simp [hS3Q, hT59]; ring
       have hr3 : -(w1_D22 S Q).eps / (w1_D22 S Q).val =
           -(238140 * Q ^ 4 + 1063692 * Q ^ 3 * S + 1224720 * Q ^ 3 - 1363572 * Q ^ 2 * S ^ 2 -
             1462860 * Q ^ 2 * S + 267300 * Q ^ 2 + 525084 * Q * S ^ 3 + 618030 * Q * S ^ 2 -

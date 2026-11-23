@@ -752,7 +752,7 @@ lemma W2_0_d1_d0_res :
       k5Params_inv2, k5Params_inv3, k5Params_invT3, k5Params_S, k5Params_Q, A, B]
     field_simp [hB]; ring
   have hw1_eq : -(k5Params.Bv1 * k5Params.Av0_inv) = (243 / 4 : K5) * k5Params.Bv1 / B ^ 3 := by
-    simp only [CoverParams.Av0_inv, CoverParams.inv4, k5Params_inv2, k5Params_inv3, k5Params_invT3, B]
+    simp only [CoverParams.Av0_inv, CoverParams.inv4, k5Params_inv2, k5Params_invT3, B]
     field_simp [hB]; ring
   -- Build `ValDual 0` for all `d2_2..0, d3_3..0` in `Dual K5`, then evaluate `remDeg3_d1/d0`!
   set caD : Dual K5 := ⟨k5Params.ca_h.coeff 0, k5Params.ca_h.coeff 1⟩
@@ -980,7 +980,7 @@ lemma W2_0_d1_d0_res :
     simp only [D22, Dual.add_val, Dual.sub_val, Dual.mul_val, Dual.pow_eq,
       q20D, q11D, q02D, caD, cbD, hq20_0, hq11_0, hq02_0, hca0, hcb0, A]; ring
   have hD21_v : D21_s.val = (15625 / 59049 : K5) * S_K * A ^ 4 * (-2 * w0n * S_K) := by
-    simp only [D21_s, c0W_s, Dual.add_val, Dual.mul_val, Dual.neg_val, Dual.pow_eq, h2v,
+    simp only [D21_s, c0W_s, Dual.add_val, Dual.mul_val, Dual.neg_val, h2v,
       q11D, q02D, caD, cbD, hq11_0, hq02_0, hca0, hcb0, w0n, A]; ring
   have hD20_v : D20_s.val = (15625 / 59049 : K5) * S_K * A ^ 4 * (w0n * S_K) ^ 2 := by
     simp only [D20_s, c0W_s, Wk2_s, Dual.add_val, Dual.mul_val, Dual.pow_eq,
@@ -1058,7 +1058,7 @@ lemma W2_0_d1_d0_res :
           k5Params_inv3, k5Params_inv7, k5Params_S, k5Params_Q, k5Params_T, A, B]
         ring
     rw [hsc, hpoly]
-    ext <;> simp [dual_C_val, dual_C_eps, d1_1, iB, div_eq_mul_inv, inv_pow] <;> ring
+    ext <;> simp [d1_1, iB, div_eq_mul_inv, inv_pow]; ring
   have hrem_d0 : remDeg3_d0 D22 D21 D20 D33 D32 D30 = ⟨0, d0_1⟩ := by
     have hsc : remDeg3_d0 D22 D21 D20 D33 D32 D30 = Dual.C (iB ^ 12) * remDeg3_d0 D22 D21_s D20_s D33 D32_s D30_s := by
       simp only [remDeg3_d0, hD21_sc, hD20_sc, hD32_sc, hD30_sc]
@@ -1089,7 +1089,7 @@ lemma W2_0_d1_d0_res :
           k5Params_inv3, k5Params_inv7, k5Params_S, k5Params_Q, k5Params_T, A, B]
         ring
     rw [hsc, hpoly]
-    ext <;> simp [dual_C_val, dual_C_eps, d0_1, iB, div_eq_mul_inv, inv_pow] <;> ring
+    ext <;> simp [d0_1, iB, div_eq_mul_inv, inv_pow]; ring
   rw [hrem_d1] at hd1_D
   rw [hrem_d0] at hd0_D
   have hd1_L : ValLead 1 (PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d1_z)) d1_1 :=
@@ -1125,7 +1125,7 @@ lemma W2_0_d1_d0_res :
         q20D, q11D, q02D, caD, cbD, hq20_0, hq11_0, hq02_0, hca0, hcb0, q2_0, A]; ring)
     have hq1_L : ValLead 0 q1s (-2 * q2_0 * z2) := hD21.toValLead.eq_c (by
       rw [hD21_sc]
-      simp only [D21_s, c0W_s, Dual.C, Dual.add_val, Dual.mul_val, Dual.neg_val, Dual.pow_eq, h2v,
+      simp only [D21_s, c0W_s, Dual.C, Dual.add_val, Dual.mul_val, Dual.neg_val, h2v,
         q11D, q02D, caD, cbD, hq11_0, hq02_0, hca0, hcb0, z2, hw0_iB, q2_0, w0n, A, div_eq_mul_inv]
       change iB ^ 4 * _ = _ * (-(25 / 4) * S_K * A ^ 2 * iB ^ 3 * S_K * iB); ring)
     have hq0_L : ValLead 0 q0s (q2_0 * z2 ^ 2) := hD20.toValLead.eq_c (by
@@ -1674,7 +1674,7 @@ private lemma br1_0_numM_bounds
     have h1 : HasValGe 2 (-(4 / 81 : LaurentSeries K5) * (s - 3 * q) ^ 2 * U ^ 2 * V) := by
       have hsq : HasValGe 0 ((s - 3 * q) ^ 2) := ((hs.val.sub ((HasValGe.of_nat 3).mul hq.val |>.mono (by omega))).pow 2).mono (by omega)
       have hc4 : HasValGe 0 (-(4 / 81 : LaurentSeries K5)) := by
-        have : -(4 / 81 : LaurentSeries K5) = HahnSeries.C (-(4 / 81 : K5)) := by simp only [map_div₀, map_neg, map_ofNat, map_one]
+        have : -(4 / 81 : LaurentSeries K5) = HahnSeries.C (-(4 / 81 : K5)) := by simp only [map_div₀, map_neg, map_ofNat]
         rw [this]; exact HasValGe.of_C _
       exact (((hc4.mul hsq).mul (hU_L.val.pow 2)).mul hV_L.val).mono (by omega)
     have h2 : HasValGe 2 (((143 / 81 : LaurentSeries K5) * s ^ 2 - (184 / 27) * s * q +
@@ -1682,20 +1682,20 @@ private lemma br1_0_numM_bounds
       have hq0 : HasValGe 0 ((143 / 81 : LaurentSeries K5) * s ^ 2 - (184 / 27) * s * q + (52 / 9) * q ^ 2) := by
         have hc (r : K5) : HasValGe 0 (HahnSeries.C r) := HasValGe.of_C r
         have ha : HasValGe 0 ((143 / 81 : LaurentSeries K5) * s ^ 2) := by
-          rw [show (143 / 81 : LaurentSeries K5) = HahnSeries.C (143 / 81 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+          rw [show (143 / 81 : LaurentSeries K5) = HahnSeries.C (143 / 81 : K5) by simp only [map_div₀, map_ofNat]]
           exact ((hc _).mul (hs.val.pow 2)).mono (by omega)
         have hb : HasValGe 0 ((184 / 27 : LaurentSeries K5) * s * q) := by
-          rw [show (184 / 27 : LaurentSeries K5) = HahnSeries.C (184 / 27 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+          rw [show (184 / 27 : LaurentSeries K5) = HahnSeries.C (184 / 27 : K5) by simp only [map_div₀, map_ofNat]]
           exact (((hc _).mul hs.val).mul hq.val).mono (by omega)
         have hcc : HasValGe 0 ((52 / 9 : LaurentSeries K5) * q ^ 2) := by
-          rw [show (52 / 9 : LaurentSeries K5) = HahnSeries.C (52 / 9 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+          rw [show (52 / 9 : LaurentSeries K5) = HahnSeries.C (52 / 9 : K5) by simp only [map_div₀, map_ofNat]]
           exact ((hc _).mul (hq.val.pow 2)).mono (by omega)
         exact (ha.sub hb).add hcc
       exact ((hq0.mul hU_L.val).mul hV_L.val).mono (by omega)
     have h3 : ValLead 1 ((25 / 243 : LaurentSeries K5) * (5 * s - 9 * q) * (15 * s - 9 * q) * V)
         ((25 / 243 : K5) * (5 * s0 - 9 * q0) * (15 * s0 - 9 * q0) * w2) := by
       have hc : ValLead 0 (25 / 243 : LaurentSeries K5) (25 / 243 : K5) := by
-        rw [show (25 / 243 : LaurentSeries K5) = HahnSeries.C (25 / 243 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]; exact ValLead.of_C _
+        rw [show (25 / 243 : LaurentSeries K5) = HahnSeries.C (25 / 243 : K5) by simp only [map_div₀, map_ofNat]]; exact ValLead.of_C _
       have hl1 : ValLead 0 (5 * s - 9 * q) (5 * s0 - 9 * q0) :=
         (((ValLead.of_nat 5).mul hs).eq_k (by omega)).sub (((ValLead.of_nat 9).mul hq).eq_k (by omega))
           |>.eq_c (by push_cast; rfl)
@@ -1709,7 +1709,7 @@ private lemma br1_0_numM_bounds
       ValLead 1 (dH_dQ s q (HahnSeries.C v0) U V) ((50 / 27 : K5) * s0 * (5 * s0 - 9 * q0) * w2) := by
     unfold dH_dQ
     have h1 : HasValGe 2 ((4 / 27 : LaurentSeries K5) * (s - 3 * q) ^ 2 * U ^ 2 * V) := by
-      rw [show (4 / 27 : LaurentSeries K5) = HahnSeries.C (4 / 27 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+      rw [show (4 / 27 : LaurentSeries K5) = HahnSeries.C (4 / 27 : K5) by simp only [map_div₀, map_ofNat]]
       have hsq : HasValGe 0 ((s - 3 * q) ^ 2) :=
         ((hs.val.sub ((HasValGe.of_nat 3).mul hq.val |>.mono (by omega))).pow 2).mono (by omega)
       exact ((((HasValGe.of_C _).mul hsq).mul (hU_L.val.pow 2)).mul hV_L.val).mono (by omega)
@@ -1719,26 +1719,26 @@ private lemma br1_0_numM_bounds
       have hq0 : HasValGe 0 (-(92 / 27 : LaurentSeries K5) * s ^ 2 + (104 / 9) * s * q -
           (22 / 3) * q ^ 2 + (10 / 7) * q * HahnSeries.C v0 + (10 / 7) * HahnSeries.C v0 ^ 2) := by
         have ha : HasValGe 0 (-(92 / 27 : LaurentSeries K5) * s ^ 2) := by
-          rw [show -(92 / 27 : LaurentSeries K5) = HahnSeries.C (-(92 / 27 : K5)) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+          rw [show -(92 / 27 : LaurentSeries K5) = HahnSeries.C (-(92 / 27 : K5)) by simp only [map_div₀, map_neg, map_ofNat]]
           exact ((HasValGe.of_C _).mul (hs.val.pow 2)).mono (by omega)
         have hb : HasValGe 0 ((104 / 9 : LaurentSeries K5) * s * q) := by
-          rw [show (104 / 9 : LaurentSeries K5) = HahnSeries.C (104 / 9 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+          rw [show (104 / 9 : LaurentSeries K5) = HahnSeries.C (104 / 9 : K5) by simp only [map_div₀, map_ofNat]]
           exact (((HasValGe.of_C _).mul hs.val).mul hq.val).mono (by omega)
         have hc : HasValGe 0 ((22 / 3 : LaurentSeries K5) * q ^ 2) := by
-          rw [show (22 / 3 : LaurentSeries K5) = HahnSeries.C (22 / 3 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+          rw [show (22 / 3 : LaurentSeries K5) = HahnSeries.C (22 / 3 : K5) by simp only [map_div₀, map_ofNat]]
           exact ((HasValGe.of_C _).mul (hq.val.pow 2)).mono (by omega)
         have hd : HasValGe 0 ((10 / 7 : LaurentSeries K5) * q * HahnSeries.C v0) := by
-          rw [show (10 / 7 : LaurentSeries K5) = HahnSeries.C (10 / 7 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+          rw [show (10 / 7 : LaurentSeries K5) = HahnSeries.C (10 / 7 : K5) by simp only [map_div₀, map_ofNat]]
           exact (((HasValGe.of_C _).mul hq.val).mul (HasValGe.of_C v0)).mono (by omega)
         have he : HasValGe 0 ((10 / 7 : LaurentSeries K5) * HahnSeries.C v0 ^ 2) := by
-          rw [show (10 / 7 : LaurentSeries K5) = HahnSeries.C (10 / 7 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+          rw [show (10 / 7 : LaurentSeries K5) = HahnSeries.C (10 / 7 : K5) by simp only [map_div₀, map_ofNat]]
           exact ((HasValGe.of_C _).mul ((HasValGe.of_C v0).pow 2)).mono (by omega)
         exact (((ha.add hb).sub hc).add hd).add he
       exact ((hq0.mul hU_L.val).mul hV_L.val).mono (by omega)
     have h3 : ValLead 1 ((50 / 27 : LaurentSeries K5) * s * (5 * s - 9 * q) * V)
         ((50 / 27 : K5) * s0 * (5 * s0 - 9 * q0) * w2) := by
       have hc : ValLead 0 (50 / 27 : LaurentSeries K5) (50 / 27 : K5) := by
-        rw [show (50 / 27 : LaurentSeries K5) = HahnSeries.C (50 / 27 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]; exact ValLead.of_C _
+        rw [show (50 / 27 : LaurentSeries K5) = HahnSeries.C (50 / 27 : K5) by simp only [map_div₀, map_ofNat]]; exact ValLead.of_C _
       have hl1 : ValLead 0 (5 * s - 9 * q) (5 * s0 - 9 * q0) :=
         (((ValLead.of_nat 5).mul hs).eq_k (by omega)).sub (((ValLead.of_nat 9).mul hq).eq_k (by omega))
           |>.eq_c (by push_cast; rfl)
@@ -1769,7 +1769,7 @@ private lemma br1_0_numM_bounds
            (50 / 27 : K5) * ξS0 * (5 * ξS0 - 9 * ξQ0) * w2) := by
         simpa only [map_zero] using hbase
       have hextra : HasValGe 2 ((10 / 7 : LaurentSeries K5) * b_s * U * V) := by
-        rw [show (10 / 7 : LaurentSeries K5) = HahnSeries.C (10 / 7 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+        rw [show (10 / 7 : LaurentSeries K5) = HahnSeries.C (10 / 7 : K5) by simp only [map_div₀, map_ofNat]]
         exact ((((HasValGe.of_C _).mul hb_L.val).mul hU_L.val).mul hV_L.val).mono (by omega)
       exact hbase'.add_high hextra
     let a2_0 : K5 := -(25 / 243 : K5) * (5 * a0 - 9 * b0) * (15 * a0 - 9 * b0) * w2
@@ -1871,7 +1871,7 @@ private lemma map_EB_of {R R' : Type*} [Field R] [Field R'] (f : R →+* R')
     EB_of (f S) (f Q) (f T) (f x) (f y) (f U) (f V) = f (EB_of S Q T x y U V) := by
   simp only [EB_of, W2_of, DX2_of, DY2_of, dF5_fn, br_fn, LX_of, LY_of,
     dLX_fn, dLY_fn, u3_of, v3_of, u_of, v_of,
-    map_add, map_sub, map_mul, map_div₀, map_neg, map_pow, map_ofNat, map_one, map_zero]
+    map_add, map_sub, map_mul, map_div₀, map_pow, map_ofNat, map_one, map_zero]
 
 private lemma map_QY_num {R R' : Type*} [Field R] [Field R'] (f : R →+* R')
     (S Q T x y U V : R) (i : Fin 3) :
@@ -2743,14 +2743,14 @@ private lemma evalBivK5_dF5_7 (k : Fin 5) : evalBivK5 (dF5_7_biv k) = 7 * dF5_fn
 
 private lemma evalBivK5_dDX2 (k : Fin 5) : evalBivK5 (dDX2_biv k) = dDX2_fn k S_K Q_K x_K := by
   fin_cases k <;>
-    (simp only [Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk, evalBivK5, dDX2_biv, dDX2_fn,
-       denote, ringEval, eS, eQ, vK5, u3_of, Int.cast_neg, Int.cast_ofNat]; try ring)
+    (simp only [evalBivK5, dDX2_biv, dDX2_fn,
+       denote, ringEval, eS, eQ, vK5, u3_of, Int.cast_neg, Int.cast_ofNat] <;> ring)
 
 private lemma evalBivK5_br_V0_243 (k : Fin 5) :
     evalBivK5 (br_V0_243_biv k) = 243 * (br_fn k S_K Q_K T_K x_K y_K 0 1 - br_fn k S_K Q_K T_K x_K y_K 0 0) := by
   fin_cases k <;>
     (simp only [Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk, evalBivK5, br_V0_243_biv, br_fn,
-      LY_V1_27_biv, LY_V1_9_biv, eA5, e5S3Q, evalBivK5_scale,
+      LY_V1_27_biv, LY_V1_9_biv, eA5, e5S3Q, 
       scale_denote, denote, ringEval, eS, eQ, eT, vK5,
       LX_of, LY_of, dLX_fn, dLY_fn, u3_of, v3_of, u_of, v_of,
       Int.cast_neg, Int.cast_ofNat]; ring)
@@ -2760,7 +2760,7 @@ private lemma evalBivK5_om_V0_81 (p q : Fin 5) :
   fin_cases p <;> fin_cases q <;>
     (rw [om_V0_81_biv, evalBivK5_bivSub]; simp only [evalBivK5_scale];
      simp only [Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk, omX0_e, omY_V1_biv, om_fn,
-       evalBivK5, denote, ringEval, eS, eQ, eT, vK5, Int.cast_neg, Int.cast_ofNat]; try ring)
+       evalBivK5, denote, ringEval, eS, eQ, eT, vK5, Int.cast_neg, Int.cast_ofNat]; ring)
 
 private lemma evalBivK5_QY_V0_1701 (i : Fin 3) :
     evalBivK5 (QY_V0_1701_biv i) =
@@ -2838,7 +2838,7 @@ private lemma map_numM_12_of {R R' : Type*} [CommRing R] [CommRing R']
     f (numM_12_of ι mi a b) = numM_12_of (f.comp ι) mi (f a) (f b) := by
   fin_cases mi <;>
     simp only [numM_12_of, dHS_12_of, dHQ_12_of, Dual.add_val, Dual.add_eps, Dual.sub_val, Dual.sub_eps,
-      Dual.mul_val, Dual.mul_eps, map_add, map_sub, map_mul, map_pow, map_ofNat, map_zero, map_one,
+      Dual.mul_eps, map_add, map_sub, map_mul, map_pow, map_ofNat, map_zero, map_one,
       RingHom.comp_apply]
 
 private lemma map_A0U_12_of {R R' : Type*} [CommRing R] [CommRing R']
@@ -2982,7 +2982,7 @@ private lemma br2_0_numM_bounds
       ValDual (-1) (dH_dS s q U V) (dHS_gen sD qD) := by
     unfold dH_dS
     have h1 : HasValGe 1 (-(4 / 81 : LaurentSeries K5) * (s - 3 * q) ^ 2 * U ^ 2 * V) := by
-      rw [show -(4 / 81 : LaurentSeries K5) = HahnSeries.C (-(4 / 81 : K5)) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+      rw [show -(4 / 81 : LaurentSeries K5) = HahnSeries.C (-(4 / 81 : K5)) by simp only [map_div₀, map_neg, map_ofNat]]
       have hsq : HasValGe 0 ((s - 3 * q) ^ 2) :=
         ((hs.val.sub ((HasValGe.of_nat 3).mul hq.val |>.mono (by omega))).pow 2).mono (by omega)
       exact ((((HasValGe.of_C _).mul hsq).mul (hU_L.val.pow 2)).mul hV_L.val).mono (by omega)
@@ -2990,19 +2990,19 @@ private lemma br2_0_numM_bounds
         (52 / 9) * q ^ 2) * U * V)
         (((143 / 81 : K5) * sD.val ^ 2 - (184 / 27) * sD.val * qD.val + (52 / 9) * qD.val ^ 2) * w0) := by
       have ha : ValLead 0 ((143 / 81 : LaurentSeries K5) * s ^ 2) ((143 / 81 : K5) * sD.val ^ 2) := by
-        rw [show (143 / 81 : LaurentSeries K5) = HahnSeries.C (143 / 81 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+        rw [show (143 / 81 : LaurentSeries K5) = HahnSeries.C (143 / 81 : K5) by simp only [map_div₀, map_ofNat]]
         exact ((ValLead.of_C _).mul (hs.toValLead.pow 2)).eq_k (by omega)
       have hb : ValLead 0 ((184 / 27 : LaurentSeries K5) * s * q) ((184 / 27 : K5) * sD.val * qD.val) := by
-        rw [show (184 / 27 : LaurentSeries K5) = HahnSeries.C (184 / 27 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+        rw [show (184 / 27 : LaurentSeries K5) = HahnSeries.C (184 / 27 : K5) by simp only [map_div₀, map_ofNat]]
         exact (((ValLead.of_C _).mul hs.toValLead).mul hq.toValLead).eq_k (by omega)
       have hc : ValLead 0 ((52 / 9 : LaurentSeries K5) * q ^ 2) ((52 / 9 : K5) * qD.val ^ 2) := by
-        rw [show (52 / 9 : LaurentSeries K5) = HahnSeries.C (52 / 9 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+        rw [show (52 / 9 : LaurentSeries K5) = HahnSeries.C (52 / 9 : K5) by simp only [map_div₀, map_ofNat]]
         exact ((ValLead.of_C _).mul (hq.toValLead.pow 2)).eq_k (by omega)
       exact ((((ha.sub hb).add hc).mul hU_L).mul hV_L).eq_k (by omega) |>.eq_c (by ring)
     have h3 : ValDual (-1) (-(25 / 243 : LaurentSeries K5) * (5 * s - 9 * q) * (15 * s - 9 * q) * V)
         (Dual.C (-(25 / 243 : K5)) * (5 * sD - 9 * qD) * (15 * sD - 9 * qD) * ⟨w0, V.coeff 0⟩) := by
       have hc : ValDual 0 (-(25 / 243 : LaurentSeries K5)) (Dual.C (-(25 / 243 : K5))) := by
-        rw [show -(25 / 243 : LaurentSeries K5) = HahnSeries.C (-(25 / 243 : K5)) by simp only [map_div₀, map_neg, map_ofNat, map_one]]; exact ValDual.of_C _
+        rw [show -(25 / 243 : LaurentSeries K5) = HahnSeries.C (-(25 / 243 : K5)) by simp only [map_div₀, map_neg, map_ofNat]]; exact ValDual.of_C _
       have hl1 : ValDual 0 (5 * s - 9 * q) (5 * sD - 9 * qD) :=
         (((ValDual.of_nat 5).mul hs).eq_k (by omega)).sub (((ValDual.of_nat 9).mul hq).eq_k (by omega))
       have hl2 : ValDual 0 (15 * s - 9 * q) (15 * sD - 9 * qD) :=
@@ -3020,7 +3020,7 @@ private lemma br2_0_numM_bounds
       ValDual (-1) (dH_dQ s q (HahnSeries.C v0) U V) (dHQ_gen sD qD v0) := by
     unfold dH_dQ
     have h1 : HasValGe 1 ((4 / 27 : LaurentSeries K5) * (s - 3 * q) ^ 2 * U ^ 2 * V) := by
-      rw [show (4 / 27 : LaurentSeries K5) = HahnSeries.C (4 / 27 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+      rw [show (4 / 27 : LaurentSeries K5) = HahnSeries.C (4 / 27 : K5) by simp only [map_div₀, map_ofNat]]
       have hsq : HasValGe 0 ((s - 3 * q) ^ 2) :=
         ((hs.val.sub ((HasValGe.of_nat 3).mul hq.val |>.mono (by omega))).pow 2).mono (by omega)
       exact ((((HasValGe.of_C _).mul hsq).mul (hU_L.val.pow 2)).mul hV_L.val).mono (by omega)
@@ -3029,25 +3029,25 @@ private lemma br2_0_numM_bounds
         ((-(92 / 27 : K5) * sD.val ^ 2 + (104 / 9) * sD.val * qD.val - (22 / 3) * qD.val ^ 2 +
           (10 / 7) * qD.val * v0 + (10 / 7) * v0 ^ 2) * w0) := by
       have ha : ValLead 0 (-(92 / 27 : LaurentSeries K5) * s ^ 2) (-(92 / 27 : K5) * sD.val ^ 2) := by
-        rw [show -(92 / 27 : LaurentSeries K5) = HahnSeries.C (-(92 / 27 : K5)) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+        rw [show -(92 / 27 : LaurentSeries K5) = HahnSeries.C (-(92 / 27 : K5)) by simp only [map_div₀, map_neg, map_ofNat]]
         exact ((ValLead.of_C _).mul (hs.toValLead.pow 2)).eq_k (by omega)
       have hb : ValLead 0 ((104 / 9 : LaurentSeries K5) * s * q) ((104 / 9 : K5) * sD.val * qD.val) := by
-        rw [show (104 / 9 : LaurentSeries K5) = HahnSeries.C (104 / 9 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+        rw [show (104 / 9 : LaurentSeries K5) = HahnSeries.C (104 / 9 : K5) by simp only [map_div₀, map_ofNat]]
         exact (((ValLead.of_C _).mul hs.toValLead).mul hq.toValLead).eq_k (by omega)
       have hc : ValLead 0 ((22 / 3 : LaurentSeries K5) * q ^ 2) ((22 / 3 : K5) * qD.val ^ 2) := by
-        rw [show (22 / 3 : LaurentSeries K5) = HahnSeries.C (22 / 3 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+        rw [show (22 / 3 : LaurentSeries K5) = HahnSeries.C (22 / 3 : K5) by simp only [map_div₀, map_ofNat]]
         exact ((ValLead.of_C _).mul (hq.toValLead.pow 2)).eq_k (by omega)
       have hd : ValLead 0 ((10 / 7 : LaurentSeries K5) * q * HahnSeries.C v0) ((10 / 7 : K5) * qD.val * v0) := by
-        rw [show (10 / 7 : LaurentSeries K5) = HahnSeries.C (10 / 7 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+        rw [show (10 / 7 : LaurentSeries K5) = HahnSeries.C (10 / 7 : K5) by simp only [map_div₀, map_ofNat]]
         exact (((ValLead.of_C _).mul hq.toValLead).mul (ValLead.of_C v0)).eq_k (by omega)
       have he : ValLead 0 ((10 / 7 : LaurentSeries K5) * HahnSeries.C v0 ^ 2) ((10 / 7 : K5) * v0 ^ 2) := by
-        rw [show (10 / 7 : LaurentSeries K5) = HahnSeries.C (10 / 7 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]
+        rw [show (10 / 7 : LaurentSeries K5) = HahnSeries.C (10 / 7 : K5) by simp only [map_div₀, map_ofNat]]
         exact ((ValLead.of_C _).mul ((ValLead.of_C v0).pow 2)).eq_k (by omega)
       exact ((((((ha.add hb).sub hc).add hd).add he).mul hU_L).mul hV_L).eq_k (by omega) |>.eq_c (by ring)
     have h3 : ValDual (-1) ((50 / 27 : LaurentSeries K5) * s * (5 * s - 9 * q) * V)
         (Dual.C (50 / 27 : K5) * sD * (5 * sD - 9 * qD) * ⟨w0, V.coeff 0⟩) := by
       have hc : ValDual 0 (50 / 27 : LaurentSeries K5) (Dual.C (50 / 27 : K5)) := by
-        rw [show (50 / 27 : LaurentSeries K5) = HahnSeries.C (50 / 27 : K5) by simp only [map_div₀, map_neg, map_ofNat, map_one]]; exact ValDual.of_C _
+        rw [show (50 / 27 : LaurentSeries K5) = HahnSeries.C (50 / 27 : K5) by simp only [map_div₀, map_ofNat]]; exact ValDual.of_C _
       have hl1 : ValDual 0 (5 * s - 9 * q) (5 * sD - 9 * qD) :=
         (((ValDual.of_nat 5).mul hs).eq_k (by omega)).sub (((ValDual.of_nat 9).mul hq).eq_k (by omega))
       exact (((hc.mul hs).mul hl1).mul hV_D).eq_k (by omega)
@@ -3194,7 +3194,7 @@ private lemma br2_0_numM_bounds
         (dHQ0_C (Dual.C a0 + Dual.C ξS0) (Dual.C b0 + Dual.C ξQ0) -
           dHQ0_C (Dual.C a0) (Dual.C b0) - dHQ0_C (Dual.C ξS0) (Dual.C ξQ0)) + ⟨0, db1⟩ := by
       rw [← map_add Dual.C, ← map_add Dual.C, hdQ0_C, hdQ0_C, hdQ0_C]
-      ext <;> simp only [dHQ_D, db1, Dual.add_val, Dual.sub_val, Dual.C_val, Dual.add_eps, Dual.sub_eps, Dual.C_eps] <;> ring
+      ext <;> simp only [dHQ_D, db1, Dual.add_val, Dual.sub_val, Dual.C_val, Dual.add_eps, Dual.sub_eps, Dual.C_eps]; ring
     have hcore := dual_minor_pair_eq_const aD bD ξSD ξQD wD u1 u0 da2 da1 da0 db2 db1 db0
     dsimp only at hcore
     have hL : (u1 * (5 * aD - 9 * bD)) * d10_g - (u1 * (5 * ξSD - 9 * ξQD) + u0 * (5 * aD - 9 * bD)) * d20_g +
@@ -3799,7 +3799,7 @@ private lemma br2_0_A0U_scaled_poly {F : Type*} [Field F] [CharZero F] (S Q T : 
       ⟨-(4000 / 7 : F) * B * Q * (-5 * S + 3 * Q) * (-A) * S ^ 4,
        (400 / 63 : F) * (-A) * B ^ 2 * S ^ 3 *
          (259 * S ^ 3 - 1722 * S ^ 2 * Q + 1932 * S * Q ^ 2 + 375 * S ^ 2 - 450 * S * Q + 405 * Q ^ 2)⟩ := by
-    ext <;> (simp only [d21, a2_v, a2_e, a1_v, a1_e, a0_v, a0_e, b2_v, b2_e, b1_v, b1_e, b0_v, b0_e,
+    ext <;> (simp only [d21, a2_v, a2_e, a1_v, a1_e, a0_v, a0_e, b2_v, b2_e, b1_v, b1_e, b0_v, 
       dHS_v, dHS_e, dHQ_v, dHQ_e, a_s, b_s, ξS_s, ξQ_s, d_ab, A, B,
       Dual.C_val, Dual.C_eps, Dual.add_val, Dual.sub_val, Dual.mul_val, Dual.pow_eq,
       Dual.add_eps, Dual.sub_eps, Dual.mul_eps, dual_ofNat_val, dual_ofNat_eps,
@@ -3844,13 +3844,12 @@ private lemma br2_0_A0U_scaled_poly {F : Type*} [Field F] [CharZero F] (S Q T : 
           Dual.C (1472 / 1257375 : F) * (5 * (ξS_s * ξQ_s) - 9 * ξQ_s ^ 2) +
           Dual.C (188 / 2025 : F) * (5 * (Dual.C d_ab * ξS_s) - 9 * (Dual.C d_ab * ξQ_s))) * d21) := by
     rw [hbr_m 0, hbr_m 1, hbr_m 2, hbr_m 3, hbr_m 4, hbr_m 5, hbr_m 6]
-    dsimp only []
     ring
   rw [hlin, hd10, hd20, hd21]
   ext <;> (simp only [a_s, b_s, ξS_s, ξQ_s, d_ab, A, B, Q_quad,
     Dual.C_val, Dual.C_eps, Dual.add_val, Dual.sub_val, Dual.mul_val, Dual.pow_eq,
     Dual.add_eps, Dual.sub_eps, Dual.mul_eps, dual_ofNat_val, dual_ofNat_eps,
-    Nat.cast_ofNat, Nat.reduceSub, pow_one, add_zero, mul_zero, zero_mul]; ring)
+    Nat.cast_ofNat, Nat.reduceSub, pow_one, add_zero, zero_mul]; ring)
 
 private lemma br2_0_A0U_Z2_eval :
     let A := 5 * S_K - 9 * Q_K
@@ -4117,7 +4116,7 @@ private lemma br2_0_q1_biv_eval (w0 : K5) :
       189 * (H0_of S_K Q_K T_K * dA1_fn k S_K Q_K 0 1 - A1_of S_K Q_K 0 1 * dH0_fn k S_K Q_K T_K) := by
     fin_cases k <;>
       (simp only [Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk,
-        cA1_21_div_A5_e, ringEval, hH0_ev, ringEval_dH0_7, eA5, eS, eQ, eT, vK5,
+        cA1_21_div_A5_e, ringEval, hH0_ev, ringEval_dH0_7, eA5, eS, eQ, vK5,
         A1_of, dA1_fn, Int.cast_neg, Int.cast_ofNat, A]; ring)
   have hA1_01 : A1_of S_K Q_K 0 1 = (25 / 27 : K5) * S_K * A ^ 2 := by
     simp only [A1_of, A]; ring
@@ -4496,7 +4495,7 @@ lemma br2_0_eta_AC_coeff_neg_one : (br2_0 eta_AC).coeff (-1) = toK5_RU := by
         ((hp 3 5).smul_left (16 / 729 : K5))).add
         ((hp 4 6).smul_left (188 / 2025 : K5))).congr (fun z => by rw [hPA_eval]; simp [A0U_12_of])
     rcases hdeg with ⟨Q_poly, hQ_deg, hQ_eval⟩
-    haveI : Infinite K5 := Infinite.of_injective (Nat.cast : ℕ → K5) Nat.cast_injective
+    have : Infinite K5 := Infinite.of_injective (Nat.cast : ℕ → K5) Nat.cast_injective
     have hEq : P_A = Q_poly := Polynomial.funext (fun z => hQ_eval z)
     rwa [hEq]
   let q1_c0 : K5 := 9 * w0 * (H0_of S_K Q_K T_K * A1_of S_K Q_K 0 1 *
@@ -4571,7 +4570,7 @@ lemma br2_0_eta_AC_coeff_neg_one : (br2_0 eta_AC).coeff (-1) = toK5_RU := by
   set b_du : Dual K5 := Dual.C inv_d * ⟨6 * S_K * Q_K, (5 * S_K - 3 * Q_K) * B⟩
   have haX_Z2 : aX.eval₂ Dual.C Z2 = a_du := by
     ext
-    · simp only [aX, Z2, a_du, eval₂_mul, eval₂_C, eval₂_X, Dual.C_val, Dual.C_eps, Dual.mul_val, z2]
+    · simp only [aX, Z2, a_du, eval₂_mul, eval₂_C, eval₂_X, Dual.C_val, Dual.mul_val, z2]
       apply mul_left_cancel₀ (mul_ne_zero hw0_ne hd_ab_ne)
       have h1 : w0 * d_ab * (1 / w0 * (w0 * S_K / B)) = 6 * S_K ^ 2 * w0 := by
         dsimp only [d_ab]; field_simp [hw0_ne, hB]
@@ -4642,13 +4641,13 @@ lemma br2_0_eta_AC_coeff_neg_one : (br2_0 eta_AC).coeff (-1) = toK5_RU := by
     rw [hq1v, hq1e]
     ext
     · simp only [P_Q, eval₂_add, eval₂_mul, eval₂_C, haX_Z2, hbX_Z2, a_du, b_du,
-        Dual.C_val, Dual.C_eps, Dual.add_val, Dual.mul_val]
+        Dual.C_val, Dual.add_val, Dual.mul_val]
       calc 35721 * d_ab * (q1_c0 * (inv_d * (6 * S_K ^ 2)) + q1_c1 * (inv_d * (6 * S_K * Q_K)) + q1_c2) =
             35721 * ((d_ab * inv_d) * (q1_c0 * (6 * S_K ^ 2) + q1_c1 * (6 * S_K * Q_K)) + q1_c2 * d_ab) := by ring
         _ = 35721 * (q1_c0 * (6 * S_K ^ 2) + q1_c1 * (6 * S_K * Q_K) + q1_c2 * (6 * S_K * B)) := by
             rw [hd_inv, one_mul]
     · simp only [P_Q, eval₂_add, eval₂_mul, eval₂_C, haX_Z2, hbX_Z2, a_du, b_du,
-        Dual.C_val, Dual.C_eps, Dual.add_eps, Dual.mul_eps, zero_mul, zero_add, add_zero]
+        Dual.C_val, Dual.C_eps, Dual.add_eps, Dual.mul_eps, zero_mul, add_zero]
       calc 35721 * d_ab * (q1_c0 * (inv_d * (6 * S_K * B)) + q1_c1 * (inv_d * ((5 * S_K - 3 * Q_K) * B))) =
             35721 * (d_ab * inv_d) * (q1_c0 * (6 * S_K * B) + q1_c1 * ((5 * S_K - 3 * Q_K) * B)) := by ring
         _ = 35721 * (q1_c0 * (6 * S_K * B) + q1_c1 * ((5 * S_K - 3 * Q_K) * B)) := by rw [hd_inv, mul_one]
