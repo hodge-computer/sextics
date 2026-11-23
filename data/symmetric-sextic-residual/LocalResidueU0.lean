@@ -20,7 +20,7 @@ namespace SymmetricSexticResidual.LocalResidueU0
 open SymmetricSexticResidual.K5Field SymmetricSexticResidual.SheetCalculus
   SymmetricSexticResidual.CoverAlgebra SymmetricSexticResidual.CoverResidue
   SymmetricSexticResidual.LocalResidueData SymmetricSexticResidual.VerticalIdentity
-  SymmetricSexticResidual.EncodingCheck CrossedRationalResidue Polynomial
+  PolynomialEncoding.KroneckerCheck QuadraticCovers CrossedRationalResidue Polynomial
 open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
 open scoped BigOperators LaurentSeries PowerSeries
 
@@ -151,416 +151,7 @@ lemma branchHom_eta_AC (ψ : RatFunc K5 →+* LaurentSeries K5)
     hp4, hp3, hp2, hp1, hp0]
   rfl
 
--- `HasValGe` helper for `(f * g).coeff (k + l + 1)` and inverses of Laurent series.
-lemma _root_.SymmetricSexticResidual.CoverAlgebra.HasValGe.coeff_mul_min_plus_one {K : Type*} [Field K]
-    {k l : ℤ} {f g : LaurentSeries K} (hf : HasValGe k f) (hg : HasValGe l g) :
-    (f * g).coeff (k + l + 1) = f.coeff k * g.coeff (l + 1) + f.coeff (k + 1) * g.coeff l := by
-  rw [HahnSeries.coeff_mul]
-  let S := Finset.antidiagonal f.isPWO_support g.isPWO_support (k + l + 1)
-  have hsub : ∀ p ∈ S, p ≠ (k, l + 1) → p ≠ (k + 1, l) → f.coeff p.1 * g.coeff p.2 = 0 := by
-    rintro ⟨i, j⟩ hp h1 h2
-    rw [Finset.mem_antidiagonal] at hp
-    by_cases hi : i < k
-    · simp [hf i hi]
-    · by_cases hj : j < l
-      · simp [hg j hj]
-      · have hcases : (i = k ∧ j = l + 1) ∨ (i = k + 1 ∧ j = l) := by omega
-        rcases hcases with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
-        · exact absurd rfl h1
-        · exact absurd rfl h2
-  have hsplit : ∑ p ∈ S, f.coeff p.1 * g.coeff p.2 =
-      (if (k, l + 1) ∈ S then f.coeff k * g.coeff (l + 1) else 0) +
-      (if (k + 1, l) ∈ S then f.coeff (k + 1) * g.coeff l else 0) := by
-    let T : Finset (ℤ × ℤ) := {(k, l + 1), (k + 1, l)}
-    have h1 : ∑ p ∈ S, f.coeff p.1 * g.coeff p.2 = ∑ p ∈ S ∩ T, f.coeff p.1 * g.coeff p.2 := by
-      symm
-      apply Finset.sum_subset Finset.inter_subset_left
-      intro p hp hnot
-      simp only [Finset.mem_inter, T, Finset.mem_insert, Finset.mem_singleton, not_and, not_or] at hnot
-      exact hsub p hp (hnot hp).1 (hnot hp).2
-    rw [h1]
-    have hne : (k, l + 1) ≠ (k + 1, l) := by intro h; have := congrArg Prod.fst h; omega
-    have h2 : ∑ p ∈ S ∩ T, f.coeff p.1 * g.coeff p.2 =
-        ∑ p ∈ T, if p ∈ S then f.coeff p.1 * g.coeff p.2 else 0 := by
-      rw [← Finset.sum_filter]
-      congr 1; ext p; simp [and_comm]
-    rw [h2, Finset.sum_pair hne]
-  rw [hsplit]
-  have ha : (if (k, l + 1) ∈ S then f.coeff k * g.coeff (l + 1) else 0) = f.coeff k * g.coeff (l + 1) := by
-    split_ifs with h
-    · rfl
-    · simp only [S, Finset.mem_antidiagonal, HahnSeries.mem_support, not_and] at h
-      by_cases hf0 : f.coeff k = 0
-      · simp [hf0]
-      · by_cases hg0 : g.coeff (l + 1) = 0
-        · simp [hg0]
-        · exact absurd (by omega) (h hf0 hg0)
-  have hb : (if (k + 1, l) ∈ S then f.coeff (k + 1) * g.coeff l else 0) = f.coeff (k + 1) * g.coeff l := by
-    split_ifs with h
-    · rfl
-    · simp only [S, Finset.mem_antidiagonal, HahnSeries.mem_support, not_and] at h
-      by_cases hf0 : f.coeff (k + 1) = 0
-      · simp [hf0]
-      · by_cases hg0 : g.coeff l = 0
-        · simp [hg0]
-        · exact absurd (by omega) (h hf0 hg0)
-  rw [ha, hb]
-
-lemma eq_ofPowerSeries_of_HasValGe_zero {K : Type*} [Field K] {f : LaurentSeries K}
-    (hf : HasValGe 0 f) :
-    f = ((PowerSeries.mk (fun n : ℕ => f.coeff (n : ℤ)) : PowerSeries K) : LaurentSeries K) := by
-  ext n
-  by_cases hn : n < 0
-  · rw [hf n hn, (HasValGe.of_powerSeries _ n hn)]
-  · set m : ℕ := n.toNat
-    have hnm : n = (m : ℤ) := by omega
-    rw [hnm, LaurentSeries.coeff_coe_powerSeries, PowerSeries.coeff_mk]
-
-lemma _root_.SymmetricSexticResidual.CoverAlgebra.HasValGe.inv_of_lead_ne {K : Type*} [Field K]
-    {l : ℤ} {g : LaurentSeries K} (hg : HasValGe l g) (hl : g.coeff l ≠ 0) :
-    HasValGe (-l) g⁻¹ ∧ g⁻¹.coeff (-l) = (g.coeff l)⁻¹ := by
-  let p : LaurentSeries K := HahnSeries.single (-l) (1 : K) * g
-  have hp0 : HasValGe 0 p := by
-    have h := (HasValGe.single (-l) (1 : K)).mul hg
-    simpa only [neg_add_cancel] using h
-  have hp_c0 : p.coeff 0 = g.coeff l := by
-    have h := (HasValGe.single (-l) (1 : K)).coeff_mul_min hg
-    simp only [neg_add_cancel, HahnSeries.coeff_single_same, one_mul] at h
-    exact h
-  let ps : PowerSeries K := PowerSeries.mk (fun n : ℕ => p.coeff (n : ℤ))
-  have hp_eq : p = ((ps : PowerSeries K) : LaurentSeries K) := eq_ofPowerSeries_of_HasValGe_zero hp0
-  have hunit : IsUnit ps := PowerSeries.isUnit_iff_constantCoeff.mpr (by
-    refine isUnit_iff_ne_zero.mpr ?_
-    change (PowerSeries.constantCoeff ps) ≠ 0
-    dsimp only [ps]
-    rw [PowerSeries.constantCoeff_mk]
-    simpa [hp_c0] using hl)
-  obtain ⟨u, hu⟩ := hunit
-  let q : LaurentSeries K := ((↑u⁻¹ : PowerSeries K) : LaurentSeries K)
-  have hpq : p * q = 1 := by
-    rw [hp_eq]
-    dsimp only [q]
-    rw [← map_mul (HahnSeries.ofPowerSeries ℤ K), ← hu, Units.mul_inv, map_one]
-  have hg_eq : g = HahnSeries.single l (1 : K) * p := by
-    dsimp only [p]
-    rw [← mul_assoc, HahnSeries.single_mul_single, add_neg_cancel, mul_one]
-    change g = 1 * g; rw [one_mul]
-  have hginv : g⁻¹ = HahnSeries.single (-l) (1 : K) * q := by
-    have hgne : g ≠ 0 := fun h0 => hl (by rw [h0]; rfl)
-    apply mul_left_cancel₀ hgne
-    rw [mul_inv_cancel₀ hgne, hg_eq]
-    symm
-    calc HahnSeries.single l (1 : K) * p * (HahnSeries.single (-l) (1 : K) * q)
-        = (HahnSeries.single l (1 : K) * HahnSeries.single (-l) (1 : K)) * (p * q) := by ring
-      _ = 1 * 1 := by rw [HahnSeries.single_mul_single, add_neg_cancel, mul_one, hpq]; rfl
-      _ = 1 := one_mul 1
-  have hq0 : HasValGe 0 q := HasValGe.of_powerSeries _
-  have hval : HasValGe (-l) g⁻¹ := by
-    rw [hginv]
-    simpa only [add_zero] using (HasValGe.single (-l) (1 : K)).mul hq0
-  have hc0 : g⁻¹.coeff (-l) = (g.coeff l)⁻¹ := by
-    have h1 := hg.coeff_mul_min hval
-    have hgne : g ≠ 0 := fun h0 => hl (by rw [h0]; rfl)
-    rw [mul_inv_cancel₀ hgne, add_neg_cancel, HahnSeries.coeff_one] at h1
-    simp only [ite_true] at h1
-    exact eq_inv_of_mul_eq_one_right h1.symm
-  exact ⟨hval, hc0⟩
-
-lemma _root_.SymmetricSexticResidual.CoverAlgebra.HasValGe.div_of_lead_ne {K : Type*} [Field K]
-    {k l : ℤ} {f g : LaurentSeries K} (hf : HasValGe k f) (hg : HasValGe l g) (hl : g.coeff l ≠ 0) :
-    HasValGe (k - l) (f / g) ∧ (f / g).coeff (k - l) = f.coeff k / g.coeff l := by
-  obtain ⟨hgi, hgic⟩ := hg.inv_of_lead_ne hl
-  rw [div_eq_mul_inv, sub_eq_add_neg]
-  refine ⟨hf.mul hgi, ?_⟩
-  rw [hf.coeff_mul_min hgi, hgic, div_eq_mul_inv]
-
-/-- Leading valuation and leading coefficient of a Laurent series over `K5`. -/
-structure ValLead (k : ℤ) (f : LaurentSeries K5) (c0 : K5) : Prop where
-  val : HasValGe k f
-  c0 : f.coeff k = c0
-
-namespace ValLead
-
-lemma of_C (c : K5) : ValLead 0 (HahnSeries.C c) c :=
-  ⟨HasValGe.of_C c, by simp [HahnSeries.C_apply]⟩
-
-lemma of_nat (n : ℕ) : ValLead 0 (n : LaurentSeries K5) (n : K5) := by
-  have h : (n : LaurentSeries K5) = HahnSeries.C (n : K5) := (map_natCast HahnSeries.C n).symm
-  rw [h]; exact of_C (n : K5)
-
-lemma of_single (k : ℤ) (c : K5) : ValLead k (HahnSeries.single k c) c :=
-  ⟨HasValGe.single k c, HahnSeries.coeff_single_same k c⟩
-
-lemma of_hasValGe_succ {k : ℤ} {f : LaurentSeries K5} (hf : HasValGe (k + 1) f) :
-    ValLead k f 0 :=
-  ⟨hf.mono (by omega), hf k (by omega)⟩
-
-lemma hasValGe_succ {k : ℤ} {f : LaurentSeries K5} (hf : ValLead k f 0) :
-    HasValGe (k + 1) f :=
-  hf.val.inc hf.c0
-
-lemma add {k : ℤ} {f g : LaurentSeries K5} {a b : K5}
-    (hf : ValLead k f a) (hg : ValLead k g b) : ValLead k (f + g) (a + b) :=
-  ⟨hf.val.add hg.val, by simp [hf.c0, hg.c0]⟩
-
-lemma sub {k : ℤ} {f g : LaurentSeries K5} {a b : K5}
-    (hf : ValLead k f a) (hg : ValLead k g b) : ValLead k (f - g) (a - b) :=
-  ⟨hf.val.sub hg.val, by simp [hf.c0, hg.c0]⟩
-
-lemma neg {k : ℤ} {f : LaurentSeries K5} {a : K5}
-    (hf : ValLead k f a) : ValLead k (-f) (-a) :=
-  ⟨hf.val.neg, by simp [hf.c0]⟩
-
-lemma add_high {k : ℤ} {f g : LaurentSeries K5} {a : K5}
-    (hf : ValLead k f a) (hg : HasValGe (k + 1) g) : ValLead k (f + g) a := by
-  simpa using hf.add (of_hasValGe_succ hg)
-
-lemma mul {k l : ℤ} {f g : LaurentSeries K5} {a b : K5}
-    (hf : ValLead k f a) (hg : ValLead l g b) : ValLead (k + l) (f * g) (a * b) :=
-  ⟨hf.val.mul hg.val, by rw [hf.val.coeff_mul_min hg.val, hf.c0, hg.c0]⟩
-
-lemma pow {k : ℤ} {f : LaurentSeries K5} {a : K5} (hf : ValLead k f a) (m : ℕ) :
-    ValLead (m * k) (f ^ m) (a ^ m) :=
-  ⟨hf.val.pow m, by rw [hf.val.coeff_pow_min m, hf.c0]⟩
-
-lemma div_of_ne {k l : ℤ} {f g : LaurentSeries K5} {a b : K5}
-    (hf : ValLead k f a) (hg : ValLead l g b) (hb : b ≠ 0) :
-    ValLead (k - l) (f / g) (a / b) := by
-  obtain ⟨hv, hc⟩ := hf.val.div_of_lead_ne hg.val (hg.c0.symm ▸ hb)
-  exact ⟨hv, by rw [hc, hf.c0, hg.c0]⟩
-
-lemma eq_k {k k' : ℤ} {f : LaurentSeries K5} {a : K5} (hk : k = k') (hf : ValLead k f a) :
-    ValLead k' f a := hk ▸ hf
-
-lemma eq_c {k : ℤ} {f : LaurentSeries K5} {a b : K5} (hab : a = b) (hf : ValLead k f a) :
-    ValLead k f b := hab ▸ hf
-
-lemma of_evalT (P : K5[X]) : ValLead 0 (evalT P) (P.coeff 0) :=
-  ⟨HasValGe.evalT P, by change (evalT P).coeff (0 : ℕ) = P.coeff 0; exact evalT_coeff P 0⟩
-
-lemma interp4_of {k : ℤ} {g : LaurentSeries K5 → LaurentSeries K5} {g0 : K5 → K5}
-    (hg : ∀ c : K5, ValLead k (g (HahnSeries.C c)) (g0 c)) :
-    let p := interp4 g
-    let q := interp4 g0
-    ValLead k p.1 q.1 ∧ ValLead k p.2.1 q.2.1 ∧ ValLead k p.2.2.1 q.2.2.1 ∧
-      ValLead k p.2.2.2.1 q.2.2.2.1 ∧ ValLead k p.2.2.2.2 q.2.2.2.2 := by
-  have h0 : ValLead k (g 0) (g0 0) := by simpa only [map_zero] using hg 0
-  have h1 : ValLead k (g 1) (g0 1) := by simpa only [map_one] using hg 1
-  have hm1 : ValLead k (g (-1)) (g0 (-1)) := by simpa only [map_neg, map_one] using hg (-1)
-  have h2 : ValLead k (g 2) (g0 2) := by simpa only [map_ofNat] using hg 2
-  have hm2 : ValLead k (g (-2)) (g0 (-2)) := by simpa only [map_neg, map_ofNat] using hg (-2)
-  have h24 : (24 : K5) ≠ 0 := by exact_mod_cast (by decide : (24 : ℕ) ≠ 0)
-  have h12 : (12 : K5) ≠ 0 := by exact_mod_cast (by decide : (12 : ℕ) ≠ 0)
-  have hdiv24 {f : LaurentSeries K5} {a : K5} (hf : ValLead k f a) :
-      ValLead k (f / 24) (a / 24) := by
-    simpa only [sub_zero, Nat.cast_ofNat] using hf.div_of_ne (of_nat 24) h24
-  have hdiv12 {f : LaurentSeries K5} {a : K5} (hf : ValLead k f a) :
-      ValLead k (f / 12) (a / 12) := by
-    simpa only [sub_zero, Nat.cast_ofNat] using hf.div_of_ne (of_nat 12) h12
-  have hmulN (n : ℕ) {f : LaurentSeries K5} {a : K5} (hf : ValLead k f a) :
-      ValLead k ((n : LaurentSeries K5) * f) ((n : K5) * a) := by
-    simpa only [zero_add] using (of_nat n).mul hf
-  refine ⟨?_, ?_, ?_, ?_, h0⟩
-  · have h4 : ValLead k (-4 * (g 1 + g (-1))) (-4 * (g0 1 + g0 (-1))) := by
-      simpa only [Nat.cast_ofNat, neg_mul] using (hmulN 4 (h1.add hm1)).neg
-    have h6 : ValLead k (6 * g 0) (6 * g0 0) := by
-      simpa only [Nat.cast_ofNat] using hmulN 6 h0
-    exact hdiv24 ((h4.add (h2.add hm2)).add h6)
-  · have h2s : ValLead k (-2 * (g 1 - g (-1))) (-2 * (g0 1 - g0 (-1))) := by
-      simpa only [Nat.cast_ofNat, neg_mul] using (hmulN 2 (h1.sub hm1)).neg
-    exact hdiv12 (h2s.add (h2.sub hm2))
-  · have h16 : ValLead k (16 * (g 1 + g (-1))) (16 * (g0 1 + g0 (-1))) := by
-      simpa only [Nat.cast_ofNat] using hmulN 16 (h1.add hm1)
-    have h30 : ValLead k (30 * g 0) (30 * g0 0) := by
-      simpa only [Nat.cast_ofNat] using hmulN 30 h0
-    exact hdiv24 ((h16.sub (h2.add hm2)).sub h30)
-  · have h8 : ValLead k (8 * (g 1 - g (-1))) (8 * (g0 1 - g0 (-1))) := by
-      simpa only [Nat.cast_ofNat] using hmulN 8 (h1.sub hm1)
-    exact hdiv12 (h8.sub (h2.sub hm2))
-
-end ValLead
-
-/-- Scaled degree-4 interpolation valuation bound: if `g` has degree `≤ 4` and
-`HasValGe k (g (single s c))` for all `c : K5`, then `(interp4 g)` has valuations `≥ k - m * s`. -/
-lemma _root_.SymmetricSexticResidual.CoverAlgebra.HasValGe.interp4_scaled
-    {s k : ℤ} {g : LaurentSeries K5 → LaurentSeries K5}
-    (hdeg : IsPolyDeg 4 g) (hg : ∀ c : K5, HasValGe k (g (HahnSeries.single s c))) :
-    let p := interp4 g
-    HasValGe (k - 4 * s) p.1 ∧ HasValGe (k - 3 * s) p.2.1 ∧
-      HasValGe (k - 2 * s) p.2.2.1 ∧ HasValGe (k - s) p.2.2.2.1 ∧ HasValGe k p.2.2.2.2 := by
-  set p := interp4 g
-  let gsc : LaurentSeries K5 → LaurentSeries K5 := fun u => g (HahnSeries.single s 1 * u)
-  have hgsc_eq : ∀ u : LaurentSeries K5,
-      gsc u = (HahnSeries.single (4 * s) 1 * p.1) * u ^ 4 +
-              (HahnSeries.single (3 * s) 1 * p.2.1) * u ^ 3 +
-              (HahnSeries.single (2 * s) 1 * p.2.2.1) * u ^ 2 +
-              (HahnSeries.single s 1 * p.2.2.2.1) * u + p.2.2.2.2 := by
-    intro u
-    dsimp only [gsc]
-    have h4 := hdeg.eq_deg4 (HahnSeries.single s 1 * u)
-    change g (HahnSeries.single s 1 * u) = p.1 * (HahnSeries.single s 1 * u) ^ 4 +
-      p.2.1 * (HahnSeries.single s 1 * u) ^ 3 + p.2.2.1 * (HahnSeries.single s 1 * u) ^ 2 +
-      p.2.2.2.1 * (HahnSeries.single s 1 * u) + p.2.2.2.2 at h4
-    rw [h4]
-    have hsp (m : ℕ) : (HahnSeries.single s (1 : K5)) ^ m = HahnSeries.single ((m : ℤ) * s) 1 := by
-      rw [HahnSeries.single_pow, one_pow, nsmul_eq_mul]
-    simp only [mul_pow, hsp, Nat.cast_ofNat]
-    ring
-  have hint_sc : interp4 gsc =
-      (HahnSeries.single (4 * s) 1 * p.1, HahnSeries.single (3 * s) 1 * p.2.1,
-       HahnSeries.single (2 * s) 1 * p.2.2.1, HahnSeries.single s 1 * p.2.2.2.1, p.2.2.2.2) :=
-    interp4_eq hgsc_eq
-  have hgsc_val : ∀ c : K5, HasValGe k (gsc (HahnSeries.C c)) := by
-    intro c
-    have heq : HahnSeries.single s (1 : K5) * HahnSeries.C c = HahnSeries.single s c := by
-      rw [HahnSeries.C_apply, HahnSeries.single_mul_single, add_zero, one_mul]
-    simpa only [gsc, heq] using hg c
-  have hval_all :
-      HasValGe k (interp4 gsc).1 ∧ HasValGe k (interp4 gsc).2.1 ∧
-      HasValGe k (interp4 gsc).2.2.1 ∧ HasValGe k (interp4 gsc).2.2.2.1 ∧
-      HasValGe k (interp4 gsc).2.2.2.2 := by
-    have hvl := ValLead.interp4_of (k := k - 1) (g := gsc) (g0 := fun _ => 0)
-      (fun c => ValLead.of_hasValGe_succ (by simpa [sub_add_cancel] using hgsc_val c))
-    have hq : interp4 (fun _ : K5 => (0 : K5)) = (0, 0, 0, 0, 0) := by simp [interp4]
-    rw [hq] at hvl
-    exact ⟨by simpa [sub_add_cancel] using hvl.1.hasValGe_succ,
-           by simpa [sub_add_cancel] using hvl.2.1.hasValGe_succ,
-           by simpa [sub_add_cancel] using hvl.2.2.1.hasValGe_succ,
-           by simpa [sub_add_cancel] using hvl.2.2.2.1.hasValGe_succ,
-           by simpa [sub_add_cancel] using hvl.2.2.2.2.hasValGe_succ⟩
-  rw [hint_sc] at hval_all
-  have hunshift (m : ℤ) (x : LaurentSeries K5) (hx : HasValGe k (HahnSeries.single m 1 * x)) :
-      HasValGe (k - m) x := by
-    have h := (HasValGe.single (-m) (1 : K5)).mul hx
-    have hmul : HahnSeries.single (-m) (1 : K5) * (HahnSeries.single m 1 * x) = x := by
-      rw [← mul_assoc, HahnSeries.single_mul_single, neg_add_cancel, mul_one]
-      change 1 * x = x; rw [one_mul]
-    rw [hmul] at h
-    exact h.mono (by omega)
-  exact ⟨hunshift (4 * s) p.1 hval_all.1,
-         hunshift (3 * s) p.2.1 hval_all.2.1,
-         hunshift (2 * s) p.2.2.1 hval_all.2.2.1,
-         hunshift s p.2.2.2.1 hval_all.2.2.2.1,
-         hval_all.2.2.2.2⟩
-
-/-- First two Laurent coefficients `(f.coeff k, f.coeff (k + 1))` packaged as a `Dual K5`. -/
-structure ValDual (k : ℤ) (f : LaurentSeries K5) (d : Dual K5) : Prop where
-  val : HasValGe k f
-  c0 : f.coeff k = d.val
-  c1 : f.coeff (k + 1) = d.eps
-
-namespace ValDual
-
-lemma toValLead {k : ℤ} {f : LaurentSeries K5} {d : Dual K5} (hf : ValDual k f d) :
-    ValLead k f d.val := ⟨hf.val, hf.c0⟩
-
-lemma of_C (c : K5) : ValDual 0 (HahnSeries.C c) (Dual.C c) :=
-  ⟨HasValGe.of_C c, by simp [HahnSeries.C_apply], by simp [HahnSeries.C_apply]⟩
-
-lemma of_nat (n : ℕ) : ValDual 0 (n : LaurentSeries K5) (n : Dual K5) := by
-  have h1 : (n : LaurentSeries K5) = HahnSeries.C (n : K5) := (map_natCast HahnSeries.C n).symm
-  have h2 : (n : Dual K5) = Dual.C (n : K5) := by
-    rw [map_natCast]
-  rw [h1, h2]; exact of_C (n : K5)
-
-lemma of_single (k : ℤ) (c : K5) : ValDual k (HahnSeries.single k c) (Dual.C c) :=
-  ⟨HasValGe.single k c, HahnSeries.coeff_single_same k c,
-   by rw [HahnSeries.coeff_single, ite_eq_right (by omega)]; rfl⟩
-
-lemma of_evalT (P : K5[X]) : ValDual 0 (evalT P) ⟨P.coeff 0, P.coeff 1⟩ :=
-  ⟨HasValGe.evalT P,
-   by change (evalT P).coeff (0 : ℕ) = P.coeff 0; exact evalT_coeff P 0,
-   by change (evalT P).coeff (1 : ℕ) = P.coeff 1; exact evalT_coeff P 1⟩
-
-lemma of_evalInvT (P : K5[X]) {d : ℕ} (hd : P.natDegree ≤ d) (hpos : 1 ≤ d) :
-    ValDual (-(d : ℤ)) (evalInvT P) ⟨P.coeff d, P.coeff (d - 1)⟩ :=
-  ⟨HasValGe.evalInvT_of_natDegree_le P hd,
-   evalInvT_coeff_neg P d,
-   by rw [show -(d : ℤ) + 1 = -((d - 1 : ℕ) : ℤ) by omega, evalInvT_coeff_neg]⟩
-
-lemma add {k : ℤ} {f g : LaurentSeries K5} {a b : Dual K5}
-    (hf : ValDual k f a) (hg : ValDual k g b) : ValDual k (f + g) (a + b) :=
-  ⟨hf.val.add hg.val, by simp [hf.c0, hg.c0], by simp [hf.c1, hg.c1]⟩
-
-lemma sub {k : ℤ} {f g : LaurentSeries K5} {a b : Dual K5}
-    (hf : ValDual k f a) (hg : ValDual k g b) : ValDual k (f - g) (a - b) :=
-  ⟨hf.val.sub hg.val, by simp [hf.c0, hg.c0], by simp [hf.c1, hg.c1]⟩
-
-lemma neg {k : ℤ} {f : LaurentSeries K5} {a : Dual K5}
-    (hf : ValDual k f a) : ValDual k (-f) (-a) :=
-  ⟨hf.val.neg, by simp [hf.c0], by simp [hf.c1]⟩
-
-lemma add_high {k : ℤ} {f g : LaurentSeries K5} {a : Dual K5}
-    (hf : ValDual k f a) (hg : HasValGe (k + 2) g) : ValDual k (f + g) a :=
-  ⟨hf.val.add (hg.mono (by omega)), by simp [hf.c0, hg k (by omega)],
-   by simp [hf.c1, hg (k + 1) (by omega)]⟩
-
-lemma add_shift1 {k : ℤ} {f g : LaurentSeries K5} {a : Dual K5} {b : K5}
-    (hf : ValDual k f a) (hg : ValLead (k + 1) g b) :
-    ValDual k (f + g) (a + ⟨0, b⟩) :=
-  ⟨hf.val.add (hg.val.mono (by omega)),
-   by simp [hf.c0, hg.val k (by omega)],
-   by simp [hf.c1, hg.c0]⟩
-
-lemma mul {k l : ℤ} {f g : LaurentSeries K5} {a b : Dual K5}
-    (hf : ValDual k f a) (hg : ValDual l g b) : ValDual (k + l) (f * g) (a * b) :=
-  ⟨hf.val.mul hg.val,
-   by rw [hf.val.coeff_mul_min hg.val, hf.c0, hg.c0]; rfl,
-   by rw [hf.val.coeff_mul_min_plus_one hg.val, hf.c0, hf.c1, hg.c0, hg.c1]; rfl⟩
-
-lemma pow {k : ℤ} {f : LaurentSeries K5} {a : Dual K5} (hf : ValDual k f a) (m : ℕ) :
-    ValDual (m * k) (f ^ m) (a ^ m) := by
-  induction m with
-  | zero => simpa using of_C 1
-  | succ m ih =>
-    rw [pow_succ, pow_succ, Nat.cast_add, Nat.cast_one, add_mul, one_mul]
-    exact ih.mul hf
-
-lemma inv_of_ne {l : ℤ} {g : LaurentSeries K5} {b : Dual K5}
-    (hg : ValDual l g b) (hb : b.val ≠ 0) :
-    ValDual (-l) g⁻¹ (Dual.invOfNe b hb) := by
-  obtain ⟨hvi, hci⟩ := hg.val.inv_of_lead_ne (hg.c0.symm ▸ hb)
-  have hgne : g ≠ 0 := fun h0 => hb (by rw [← hg.c0, h0]; rfl)
-  have h1 := hg.val.coeff_mul_min_plus_one hvi
-  rw [mul_inv_cancel₀ hgne, add_neg_cancel, zero_add] at h1
-  have hzero : (1 : LaurentSeries K5).coeff 1 = 0 := by
-    change (HahnSeries.single (0 : ℤ) (1 : K5)).coeff 1 = 0
-    rw [HahnSeries.coeff_single, ite_eq_right (by omega)]
-  rw [hzero, hg.c0, hg.c1, hci, hg.c0] at h1
-  have hc1 : g⁻¹.coeff (-l + 1) = -b.eps / b.val ^ 2 := by
-    apply mul_left_cancel₀ hb
-    have hmul : b.val * (-b.eps / b.val ^ 2) = -b.eps * b.val⁻¹ := by field_simp [hb]
-    rw [hmul]; linear_combination -h1
-  exact ⟨hvi, by rw [hci, hg.c0]; rfl, hc1⟩
-
-lemma div_of_ne {k l : ℤ} {f g : LaurentSeries K5} {a b : Dual K5}
-    (hf : ValDual k f a) (hg : ValDual l g b) (hb : b.val ≠ 0) :
-    ValDual (k - l) (f / g) (a * Dual.invOfNe b hb) := by
-  rw [div_eq_mul_inv, sub_eq_add_neg]
-  exact hf.mul (hg.inv_of_ne hb)
-
-lemma eq_k {k k' : ℤ} {f : LaurentSeries K5} {a : Dual K5} (hk : k = k') (hf : ValDual k f a) :
-    ValDual k' f a := hk ▸ hf
-
-lemma eq_d {k : ℤ} {f : LaurentSeries K5} {a b : Dual K5} (hab : a = b) (hf : ValDual k f a) :
-    ValDual k f b := hab ▸ hf
-
-end ValDual
-
 -- Unconditional mod-`F5` `Biv` reduction in `K5` (`21 * S_K * x_K^2 = -(21 * T_K * y_K^2 + 7 * H0_K)`).
-private lemma dual_ofNat_val {R : Type*} [CommRing R] (n : ℕ) [n.AtLeastTwo] :
-    (no_index (OfNat.ofNat n) : Dual R).val = OfNat.ofNat n := by
-  change ((n : ℕ) : Dual R).val = (n : R)
-  rw [show ((n : ℕ) : Dual R) = Dual.C (n : R) from (map_natCast Dual.C n).symm]; rfl
-
-private lemma dual_ofNat_eps {R : Type*} [CommRing R] (n : ℕ) [n.AtLeastTwo] :
-    (no_index (OfNat.ofNat n) : Dual R).eps = 0 := by
-  change ((n : ℕ) : Dual R).eps = 0
-  rw [show ((n : ℕ) : Dual R) = Dual.C (n : R) from (map_natCast Dual.C n).symm]; rfl
-
-private lemma dual_C_val (c : K5) : (Dual.C c).val = c := rfl
-private lemma dual_C_eps (c : K5) : (Dual.C c).eps = 0 := rfl
-
 def vK5 : ℕ → K5
   | 0 => S_K
   | 1 => Q_K
@@ -900,12 +491,12 @@ lemma W2_0_d1_d0_res :
     have hc0V2 : k5Params.c0_V2 = -(4 / 81 : K5) * B ^ 2 := by
       simp only [CoverParams.c0_V2, CoverParams.inv81, k5Params_inv3, k5Params_T, B]; ring
     ext
-    · simp only [c0WD, c0W_s, WD, Dual.add_val, Dual.mul_val, Dual.pow_eq, dual_C_val, hw0_iB, hc0V2]
+    · simp only [c0WD, c0W_s, WD, Dual.add_val, Dual.mul_val, Dual.pow_eq, Dual.C_val, hw0_iB, hc0V2]
       calc -(4 / 81 : K5) * B ^ 2 * (w0n * iB ^ 3) ^ 2 + k5Params.c0_V1 * 0 * (w0n * iB ^ 3) =
             -(4 / 81 : K5) * w0n ^ 2 * (B * iB) ^ 2 * iB ^ 4 := by ring
         _ = iB ^ 4 * (-(4 / 81 : K5) * w0n ^ 2) := by rw [hiB]; ring
     · simp only [c0WD, c0W_s, WD, Dual.add_eps, Dual.mul_eps, Dual.mul_val, Dual.pow_eq,
-        dual_C_val, dual_C_eps, Nat.cast_ofNat, Nat.reduceSub, pow_one, hw0_iB, hw1_iB, hc0V2]
+        Dual.C_val, Dual.C_eps, Nat.cast_ofNat, Nat.reduceSub, pow_one, hw0_iB, hw1_iB, hc0V2]
       calc -(4 / 81 : K5) * B ^ 2 * (2 * (w0n * iB ^ 3) * (w1n * iB ^ 3)) + 0 * (w0n * iB ^ 3) ^ 2 +
             (k5Params.c0_V1 * 0 * (w1n * iB ^ 3) + (k5Params.c0_V1 * 1 + 0 * 0) * (w0n * iB ^ 3)) =
             -(4 / 81 : K5) * (2 * w0n * w1n) * (B * iB) ^ 2 * iB ^ 4 +
@@ -918,12 +509,12 @@ lemma W2_0_d1_d0_res :
     have hk2V2 : k5Params.k2_V2 = -(4 / 81 : K5) * B := by
       simp only [CoverParams.k2_V2, CoverParams.inv81, k5Params_inv3, k5Params_T, B]; ring
     ext
-    · simp only [k2WD, Wk2_s, WD, Dual.add_val, Dual.mul_val, Dual.pow_eq, dual_C_val, hw0_iB, hk2V2]
+    · simp only [k2WD, Wk2_s, WD, Dual.add_val, Dual.mul_val, Dual.pow_eq, Dual.C_val, hw0_iB, hk2V2]
       calc w0n * iB ^ 3 * (-(4 / 81 : K5) * B * (w0n * iB ^ 3) ^ 2 + k5Params.k2_V1 * 0 * (w0n * iB ^ 3)) =
             -(4 / 81 : K5) * w0n ^ 3 * (B * iB) * iB ^ 8 := by ring
         _ = iB ^ 8 * (-(4 / 81 : K5) * w0n ^ 3) := by rw [hiB]; ring
     · simp only [k2WD, Wk2_s, WD, Dual.add_val, Dual.add_eps, Dual.mul_eps, Dual.mul_val,
-        Dual.pow_eq, dual_C_val, dual_C_eps, Nat.cast_ofNat, Nat.reduceSub, pow_one, hw0_iB, hw1_iB, hk2V2]
+        Dual.pow_eq, Dual.C_val, Dual.C_eps, Nat.cast_ofNat, Nat.reduceSub, pow_one, hw0_iB, hw1_iB, hk2V2]
       calc w0n * iB ^ 3 * (-(4 / 81 : K5) * B * (2 * (w0n * iB ^ 3) * (w1n * iB ^ 3)) + 0 * (w0n * iB ^ 3) ^ 2 +
               (k5Params.k2_V1 * 0 * (w1n * iB ^ 3) + (k5Params.k2_V1 * 1 + 0 * 0) * (w0n * iB ^ 3))) +
             w1n * iB ^ 3 * (-(4 / 81 : K5) * B * (w0n * iB ^ 3) ^ 2 + k5Params.k2_V1 * 0 * (w0n * iB ^ 3)) =
@@ -938,9 +529,9 @@ lemma W2_0_d1_d0_res :
     have hk3V2 : k5Params.k3_V2 = -(4 / 243 : K5) := by
       simp only [CoverParams.k3_V2, CoverParams.inv243, k5Params_inv3]; ring
     ext
-    · simp only [k3WD, W2k3_s, WD, Dual.add_val, Dual.mul_val, Dual.pow_eq, dual_C_val, hw0_iB, hk3V2]; ring
+    · simp only [k3WD, W2k3_s, WD, Dual.add_val, Dual.mul_val, Dual.pow_eq, Dual.C_val, hw0_iB, hk3V2]; ring
     · simp only [k3WD, W2k3_s, WD, Dual.add_val, Dual.add_eps, Dual.mul_eps, Dual.mul_val,
-        Dual.pow_eq, dual_C_val, dual_C_eps, Nat.cast_ofNat, Nat.reduceSub, pow_one, hw0_iB, hw1_iB, hk3V2]
+        Dual.pow_eq, Dual.C_val, Dual.C_eps, Nat.cast_ofNat, Nat.reduceSub, pow_one, hw0_iB, hw1_iB, hk3V2]
       calc (w0n * iB ^ 3) ^ 2 * (-(4 / 243 : K5) * (2 * (w0n * iB ^ 3) * (w1n * iB ^ 3)) + 0 * (w0n * iB ^ 3) ^ 2 +
               (k5Params.k3_V1 * 0 * (w1n * iB ^ 3) + (k5Params.k3_V1 * 1 + 0 * 0) * (w0n * iB ^ 3))) +
             2 * (w0n * iB ^ 3) * (w1n * iB ^ 3) * (-(4 / 243 : K5) * (w0n * iB ^ 3) ^ 2 + k5Params.k3_V1 * 0 * (w0n * iB ^ 3)) =
@@ -956,18 +547,18 @@ lemma W2_0_d1_d0_res :
   have hD21_sc : D21 = Dual.C (iB ^ 4) * D21_s := by dsimp only [D21, D21_s]; rw [hc0WD_eq]; ring
   have hD20_sc : D20 = Dual.C (iB ^ 8) * D20_s := by
     have hpow : Dual.C (iB ^ 4) ^ 2 = Dual.C (iB ^ 8) := by
-      ext <;> simp only [Dual.pow_eq, dual_C_val, dual_C_eps] <;> ring
+      ext <;> simp only [Dual.pow_eq, Dual.C_val, Dual.C_eps] <;> ring
     change q02D * c0WD ^ 2 + cbD ^ 2 * (WD * k2WD) = Dual.C (iB ^ 8) * (q02D * c0W_s ^ 2 + cbD ^ 2 * Wk2_s)
     rw [hc0WD_eq, hWk2_eq, mul_pow, hpow]; ring
   have hD32_sc : D32 = Dual.C (iB ^ 4) * D32_s := by dsimp only [D32, D32_s]; rw [hc0WD_eq]; ring
   have hD31_sc : D31 = Dual.C (iB ^ 8) * D31_s := by
     have hpow : Dual.C (iB ^ 4) ^ 2 = Dual.C (iB ^ 8) := by
-      ext <;> simp only [Dual.pow_eq, dual_C_val, dual_C_eps] <;> ring
+      ext <;> simp only [Dual.pow_eq, Dual.C_val, Dual.C_eps] <;> ring
     change (c12D * cbD - 3 * c03D * caD) * c0WD ^ 2 = Dual.C (iB ^ 8) * ((c12D * cbD - 3 * c03D * caD) * c0W_s ^ 2)
     rw [hc0WD_eq, mul_pow, hpow]; ring
   have hD30_sc : D30 = Dual.C (iB ^ 12) * D30_s := by
     have hpow : Dual.C (iB ^ 4) ^ 3 = Dual.C (iB ^ 12) := by
-      ext <;> simp only [Dual.pow_eq, dual_C_val, dual_C_eps] <;> ring
+      ext <;> simp only [Dual.pow_eq, Dual.C_val, Dual.C_eps] <;> ring
     change -c03D * c0WD ^ 3 + cbD ^ 3 * (WD ^ 2 * k3WD) = Dual.C (iB ^ 12) * (-c03D * c0W_s ^ 3 + cbD ^ 3 * W2k3_s)
     rw [hc0WD_eq, hW2k3_eq, mul_pow, hpow]; ring
   -- Flatten `D22..D30_s` into plain `K5` values first so `remDeg3_d1/d0` close in <0.1s!
@@ -1032,7 +623,7 @@ lemma W2_0_d1_d0_res :
     have hsc : remDeg3_d1 D22 D21 D20 D33 D32 D31 = Dual.C (iB ^ 8) * remDeg3_d1 D22 D21_s D20_s D33 D32_s D31_s := by
       simp only [remDeg3_d1, hD21_sc, hD20_sc, hD32_sc, hD31_sc]
       have hpow : Dual.C (iB ^ 4) * Dual.C (iB ^ 4) = Dual.C (iB ^ 8) := by
-        ext <;> simp only [Dual.mul_val, Dual.mul_eps, dual_C_val, dual_C_eps] <;> ring
+        ext <;> simp only [Dual.mul_val, Dual.mul_eps, Dual.C_val, Dual.C_eps] <;> ring
       calc D22 * (D22 * (Dual.C (iB ^ 8) * D31_s) - Dual.C (iB ^ 8) * D20_s * D33) -
             Dual.C (iB ^ 4) * D21_s * (D22 * (Dual.C (iB ^ 4) * D32_s) - Dual.C (iB ^ 4) * D21_s * D33) =
           Dual.C (iB ^ 8) * (D22 * (D22 * D31_s - D20_s * D33)) -
@@ -1063,7 +654,7 @@ lemma W2_0_d1_d0_res :
     have hsc : remDeg3_d0 D22 D21 D20 D33 D32 D30 = Dual.C (iB ^ 12) * remDeg3_d0 D22 D21_s D20_s D33 D32_s D30_s := by
       simp only [remDeg3_d0, hD21_sc, hD20_sc, hD32_sc, hD30_sc]
       have hpow : Dual.C (iB ^ 8) * Dual.C (iB ^ 4) = Dual.C (iB ^ 12) := by
-        ext <;> simp only [Dual.mul_val, Dual.mul_eps, dual_C_val, dual_C_eps] <;> ring
+        ext <;> simp only [Dual.mul_val, Dual.mul_eps, Dual.C_val, Dual.C_eps] <;> ring
       calc D22 * (D22 * (Dual.C (iB ^ 12) * D30_s)) -
             Dual.C (iB ^ 8) * D20_s * (D22 * (Dual.C (iB ^ 4) * D32_s) - Dual.C (iB ^ 4) * D21_s * D33) =
           Dual.C (iB ^ 12) * (D22 * (D22 * D30_s)) -
@@ -1270,8 +861,8 @@ lemma numM_ValLead_of {k1 : ℤ} {a_s b_s ξS_s ξQ_s U V : LaurentSeries K5}
     (hc16.mul ((((hm2.mul hd10).eq_k (k' := 2 * k1) (by omega)).sub
       ((hm1.mul hd20).eq_k (k' := 2 * k1) (by omega))).add
       ((hm0.mul hd21).eq_k (k' := 2 * k1) (by omega)))).eq_k (k' := 2 * k1) (by omega)
-  have h0L : ValLead 0 (0 : LaurentSeries K5) (0 : K5) := by simpa only [map_zero] using ValLead.of_C 0
-  have h1L : ValLead 0 (1 : LaurentSeries K5) (1 : K5) := by simpa only [map_one] using ValLead.of_C 1
+  have h0L : ValLead 0 (0 : LaurentSeries K5) (0 : K5) := by simpa only [map_zero] using ValLead.of_C (0 : K5)
+  have h1L : ValLead 0 (1 : LaurentSeries K5) (1 : K5) := by simpa only [map_one] using ValLead.of_C (1 : K5)
   have h2L : ValLead 0 (2 : LaurentSeries K5) (2 : K5) := by simpa only [one_add_one_eq_two] using h1L.add h1L
   fin_cases mi
   · dsimp only [numM]; exact hcomb ((ha.pow 2).eq_k (k' := 0) (by omega)) (((h2L.mul ha).mul hξS).eq_k (k' := 0) (by omega)) ((hξS.pow 2).eq_k (k' := 0) (by omega))
@@ -1328,8 +919,8 @@ lemma numM_ValDual_of {k1 : ℤ} {a_s b_s ξS_s ξQ_s U V : LaurentSeries K5}
     (hc16.mul ((((hm2.mul hd10).eq_k (k' := 2 * k1) (by omega)).sub
       ((hm1.mul hd20).eq_k (k' := 2 * k1) (by omega))).add
       ((hm0.mul hd21).eq_k (k' := 2 * k1) (by omega)))).eq_k (k' := 2 * k1) (by omega)
-  have h0D : ValDual 0 (0 : LaurentSeries K5) (0 : Dual K5) := by simpa only [map_zero] using ValDual.of_C 0
-  have h1D : ValDual 0 (1 : LaurentSeries K5) (1 : Dual K5) := by simpa only [map_one] using ValDual.of_C 1
+  have h0D : ValDual 0 (0 : LaurentSeries K5) (0 : Dual K5) := by simpa only [map_zero] using ValDual.of_C (0 : K5)
+  have h1D : ValDual 0 (1 : LaurentSeries K5) (1 : Dual K5) := by simpa only [map_one] using ValDual.of_C (1 : K5)
   have h2D : ValDual 0 (2 : LaurentSeries K5) (2 : Dual K5) := by simpa only [one_add_one_eq_two] using h1D.add h1D
   fin_cases mi
   · dsimp only [numM]; exact hcomb ((ha.pow 2).eq_k (k' := 0) (by omega)) (((h2D.mul ha).mul hξS).eq_k (k' := 0) (by omega)) ((hξS.pow 2).eq_k (k' := 0) (by omega))
@@ -2743,8 +2334,9 @@ private lemma evalBivK5_dF5_7 (k : Fin 5) : evalBivK5 (dF5_7_biv k) = 7 * dF5_fn
 
 private lemma evalBivK5_dDX2 (k : Fin 5) : evalBivK5 (dDX2_biv k) = dDX2_fn k S_K Q_K x_K := by
   fin_cases k <;>
-    (simp only [evalBivK5, dDX2_biv, dDX2_fn,
-       denote, ringEval, eS, eQ, vK5, u3_of, Int.cast_neg, Int.cast_ofNat] <;> ring)
+    simp only [evalBivK5, dDX2_biv, dDX2_fn,
+       denote, ringEval, eS, eQ, vK5, u3_of, Int.cast_neg, Int.cast_ofNat]
+  all_goals ring
 
 private lemma evalBivK5_br_V0_243 (k : Fin 5) :
     evalBivK5 (br_V0_243_biv k) = 243 * (br_fn k S_K Q_K T_K x_K y_K 0 1 - br_fn k S_K Q_K T_K x_K y_K 0 0) := by
@@ -3392,7 +2984,7 @@ private lemma br2_0_numM_bounds
         simp only [Dual.C_val, Dual.C_eps, Dual.add_eps, Dual.sub_eps, Dual.mul_eps]; ring
       fin_cases mi <;> (simp only [RingHom.id_apply]; rw [hscale, hC_rhs])
     simp only [A0U_D, A0U_12_of, Dual.C_val, Dual.C_eps, Dual.add_eps, Dual.sub_eps, Dual.mul_eps,
-      dual_ofNat_val, dual_ofNat_eps, RingHom.id_apply, hmi]
+      Dual.ofNat_val, Dual.ofNat_eps, RingHom.id_apply, hmi]
     ring
   exact ⟨hM0_L.eq_c (hA0U_D_eq a0 b0), hAY_m2, hAX_m1⟩
 
@@ -3793,7 +3385,7 @@ private lemma br2_0_A0U_scaled_poly {F : Type*} [Field F] [CharZero F] (S Q T : 
     ext <;> (simp only [d20, a2_v, a2_e, a0_v, a0_e, b2_v, b2_e, b0_v, b0_e,
       dHS_v, dHS_e, dHQ_v, dHQ_e, a_s, b_s, ξS_s, ξQ_s, d_ab, A, B,
       Dual.C_val, Dual.C_eps, Dual.add_val, Dual.sub_val, Dual.mul_val, Dual.pow_eq,
-      Dual.add_eps, Dual.sub_eps, Dual.mul_eps, dual_ofNat_val, dual_ofNat_eps,
+      Dual.add_eps, Dual.sub_eps, Dual.mul_eps, Dual.ofNat_val, Dual.ofNat_eps,
       Nat.cast_ofNat, Nat.reduceSub, pow_one, add_zero, mul_zero, zero_mul]; ring)
   have hd21 : d21 =
       ⟨-(4000 / 7 : F) * B * Q * (-5 * S + 3 * Q) * (-A) * S ^ 4,
@@ -3802,7 +3394,7 @@ private lemma br2_0_A0U_scaled_poly {F : Type*} [Field F] [CharZero F] (S Q T : 
     ext <;> (simp only [d21, a2_v, a2_e, a1_v, a1_e, a0_v, a0_e, b2_v, b2_e, b1_v, b1_e, b0_v, 
       dHS_v, dHS_e, dHQ_v, dHQ_e, a_s, b_s, ξS_s, ξQ_s, d_ab, A, B,
       Dual.C_val, Dual.C_eps, Dual.add_val, Dual.sub_val, Dual.mul_val, Dual.pow_eq,
-      Dual.add_eps, Dual.sub_eps, Dual.mul_eps, dual_ofNat_val, dual_ofNat_eps,
+      Dual.add_eps, Dual.sub_eps, Dual.mul_eps, Dual.ofNat_val, Dual.ofNat_eps,
       Nat.cast_ofNat, Nat.reduceSub, pow_one, add_zero, mul_zero, zero_mul]; ring)
   have hd10 : d10 =
       ⟨(12000 / 7 : F) * B * (-3 * Q + 2 * B) * (-5 * S + 3 * Q) * (-A) * S ^ 4,
@@ -3812,7 +3404,7 @@ private lemma br2_0_A0U_scaled_poly {F : Type*} [Field F] [CharZero F] (S Q T : 
     ext <;> (simp only [d10, a2_v, a2_e, a1_v, a1_e, a0_v, a0_e, b2_v, b2_e, b1_v, b1_e, b0_v, b0_e,
       dHS_v, dHS_e, dHQ_v, dHQ_e, a_s, b_s, ξS_s, ξQ_s, d_ab, A, B,
       Dual.C_val, Dual.C_eps, Dual.add_val, Dual.sub_val, Dual.mul_val, Dual.pow_eq,
-      Dual.add_eps, Dual.sub_eps, Dual.mul_eps, dual_ofNat_val, dual_ofNat_eps,
+      Dual.add_eps, Dual.sub_eps, Dual.mul_eps, Dual.ofNat_val, Dual.ofNat_eps,
       Nat.cast_ofNat, Nat.reduceSub, pow_one, add_zero, mul_zero, zero_mul]; ring)
   have hbr_m (mi : Fin 10) : br2_0_m_sc S Q T mi =
       let (m2, m1, m0) : Dual F × Dual F × Dual F := match mi with
@@ -3848,7 +3440,7 @@ private lemma br2_0_A0U_scaled_poly {F : Type*} [Field F] [CharZero F] (S Q T : 
   rw [hlin, hd10, hd20, hd21]
   ext <;> (simp only [a_s, b_s, ξS_s, ξQ_s, d_ab, A, B, Q_quad,
     Dual.C_val, Dual.C_eps, Dual.add_val, Dual.sub_val, Dual.mul_val, Dual.pow_eq,
-    Dual.add_eps, Dual.sub_eps, Dual.mul_eps, dual_ofNat_val, dual_ofNat_eps,
+    Dual.add_eps, Dual.sub_eps, Dual.mul_eps, Dual.ofNat_val, Dual.ofNat_eps,
     Nat.cast_ofNat, Nat.reduceSub, pow_one, add_zero, zero_mul]; ring)
 
 private lemma br2_0_A0U_Z2_eval :

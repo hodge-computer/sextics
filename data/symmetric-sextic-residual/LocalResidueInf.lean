@@ -31,7 +31,7 @@ open SymmetricSexticResidual.CoverAlgebra
 open SymmetricSexticResidual.CoverResidue
 open SymmetricSexticResidual.LocalResidueU0
 open SymmetricSexticResidual.LocalResidueInfAlg
-open SymmetricSexticResidual.EncodingCheck
+open PolynomialEncoding.KroneckerCheck QuadraticCovers
 
 /-! ### Section 1: `ψinf`, `infinityCoefficient_eq_coeff_one`, `br1_inf`, `br2_inf` -/
 

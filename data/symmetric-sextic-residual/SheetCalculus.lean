@@ -706,7 +706,7 @@ private lemma pderiv_poly4_comm (i j : Fin 4) (p : Poly4) :
   | C c => simp
   | add p q hp hq => simp [map_add, hp, hq]
   | mul_X p k hp =>
-    simp only [map_mul, Derivation.leibniz, pderiv_X, smul_eq_mul, map_add]
+    simp only [Derivation.leibniz, pderiv_X, smul_eq_mul, map_add]
     have hc (a b : Fin 4) : pderiv a ((Pi.single b (1 : Poly4) : Fin 4 → Poly4) k) = 0 := by
       by_cases h : k = b
       · subst h; simp
@@ -831,6 +831,7 @@ lemma δL_commute (i j : Fin 4) : Function.Commute (δL (L := L) i) (δL (L := L
   HoldoutConstruction.extendFiniteDerivation_commute (δ i) (δ j) (δ_commute i j)
 
 -- Generic derivation helpers on L (zero side-condition hypotheses!)
+omit [FiniteDimensional K5 L] in
 private lemma ofNat_ne_zero_L (n : ℕ) [hn : n.AtLeastTwo] :
     (no_index (OfNat.ofNat n) : L) ≠ 0 := by
   change (n : L) ≠ 0
@@ -850,10 +851,12 @@ private lemma D_div (D : Derivation ℤ L L) (a b : L) (hb : b ≠ 0) :
   rw [mul_add, ← mul_assoc, mul_div_cancel₀ _ hb] at h2
   rw [eq_div_iff (pow_ne_zero 2 hb)]; linear_combination h2
 
+omit [FiniteDimensional K5 L] in
 private lemma D_ofNat_div (D : Derivation ℤ L L) (a b : ℕ) [a.AtLeastTwo] [b.AtLeastTwo] :
     D ((no_index (OfNat.ofNat a) : L) / (no_index (OfNat.ofNat b) : L)) = 0 := by
   rw [D_div D _ _ (ofNat_ne_zero_L b), D_ofNat, D_ofNat]; ring
 
+omit [FiniteDimensional K5 L] in
 private lemma D_one_div (D : Derivation ℤ L L) (b : ℕ) [b.AtLeastTwo] :
     D ((1 : L) / (no_index (OfNat.ofNat b) : L)) = 0 := by
   rw [D_div D _ _ (ofNat_ne_zero_L b), D.map_one_eq_zero, D_ofNat]; ring
@@ -865,14 +868,21 @@ abbrev TL : L := ιL T_K
 abbrev xL : L := ιL x_K
 abbrev yL : L := ιL y_K
 
+omit [FiniteDimensional K5 L] in
 lemma SL_ne : (SL (L := L)) ≠ 0 := (map_ne_zero_iff ιL ιL.injective).mpr S_K_ne_zero
+omit [FiniteDimensional K5 L] in
 lemma TL_ne : (TL (L := L)) ≠ 0 := (map_ne_zero_iff ιL ιL.injective).mpr T_K_ne_zero
+omit [FiniteDimensional K5 L] in
 lemma xL_ne : (xL (L := L)) ≠ 0 := (map_ne_zero_iff ιL ιL.injective).mpr x_K_ne_zero
+omit [FiniteDimensional K5 L] in
 lemma FxL_ne : ιL (L := L) Fx_K ≠ 0 := (map_ne_zero_iff ιL ιL.injective).mpr Fx_K_ne_zero
+omit [FiniteDimensional K5 L] in
 lemma H0L_ne : ιL (L := L) H0_K ≠ 0 := (map_ne_zero_iff ιL ιL.injective).mpr H0_K_ne_zero
+omit [FiniteDimensional K5 L] in
 lemma W2L_ne : ιL (L := L) W2_K ≠ 0 := (map_ne_zero_iff ιL ιL.injective).mpr W2_K_ne_zero
 
 -- Match polymorphic *_of functions with ιL of K5 objects
+omit [FiniteDimensional K5 L] in
 lemma H0_of_L : H0_of (SL (L := L)) QL TL = ιL H0_K := by
   have h1 : H0_K = -2 * S_K ^ 3 + 6 * S_K ^ 2 * Q_K - 3 * S_K * Q_K ^ 2 - 2 * Q_K ^ 3 -
       2 * T_K ^ 3 + 6 * T_K ^ 2 - 3 * T_K - 2 + poly4ToK5 (C (5 / 7 : ℂ)) * Q_K ^ 2 +
@@ -901,27 +911,32 @@ lemma H0_of_L : H0_of (SL (L := L)) QL TL = ιL H0_K := by
   rw [h1]
   simp only [map_add, map_sub, map_mul, map_pow, map_neg, map_ofNat, h57, h107, H0_of, SL, QL, TL]
 
+omit [FiniteDimensional K5 L] in
 lemma F5_of_L : F5_of (SL (L := L)) QL TL xL yL = 0 := by
   have h : 3 * SL (L := L) * xL ^ 2 + 3 * TL * yL ^ 2 + ιL H0_K = 0 := by
     have := congrArg (ιL (L := L)) x_K_sq_relation
     simpa only [map_add, map_mul, map_pow, map_ofNat, map_zero, H0_K, SL, TL, xL, yL] using this
   rw [F5_of, H0_of_L]; exact h
 
+omit [FiniteDimensional K5 L] in
 lemma DX2_of_L : DX2_of (SL (L := L)) QL xL = ιL DX2_K := by
   simp only [DX2_K, DX2_5, u3_5, toK5, map_add, map_sub, map_mul, map_pow, map_ofNat,
     eval₂Hom_X', Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val,
     DX2_of, u3_of, SL, QL, xL]
 
+omit [FiniteDimensional K5 L] in
 lemma DY2_of_L : DY2_of (TL (L := L)) yL = ιL DY2_K := by
   simp only [DY2_K, DY2_5, v3_5, toK5, map_add, map_sub, map_mul, map_pow, map_ofNat,
-    eval₂Hom_X', Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val,
+    eval₂Hom_X', Matrix.cons_val,
     DY2_of, v3_of, TL, yL]
 
+omit [FiniteDimensional K5 L] in
 lemma W2_of_L : W2_of (SL (L := L)) QL TL xL yL = ιL W2_K := by
   rw [W2_of, DX2_of_L, DY2_of_L]
   simp only [W2_K, W2_5, DX2_K, DY2_K, toK5, map_mul, eval₂Hom_X',
-    Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val, SL, TL]
+    Matrix.cons_val_zero, Matrix.cons_val, SL, TL]
 
+omit [FiniteDimensional K5 L] in
 lemma dF5_fn_L (k : Fin 5) :
     dF5_fn k (SL (L := L)) QL TL xL yL = ιL (toK5 (pderiv k F5)) := by
   have hp : ∀ k : Fin 5, toK5 (pderiv k F5) =
@@ -960,7 +975,7 @@ lemma dF5_fn_L (k : Fin 5) :
         linear_combination X 1 * h107
       rw [this]
       simp only [toK5, poly4ToK5, map_add, map_sub, map_mul, map_pow, map_ofNat, eval₂Hom_X',
-        eval₂Hom_C, Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val]
+        eval₂Hom_C, Matrix.cons_val_zero, Matrix.cons_val_one]
       rfl
     | 2 =>
       have : pderiv (2 : Fin 5) F5 = 3 * X 4 ^ 2 + (-6 * X 2 ^ 2 + 12 * X 2 - 3) := by
@@ -983,7 +998,7 @@ lemma dF5_fn_L (k : Fin 5) :
     simp only [map_mul, map_ofNat] at this
     exact (eq_div_iff (by norm_num : (7 : L) ≠ 0)).mpr this
   rw [hp k]
-  fin_cases k <;> simp only [Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk,
+  fin_cases k <;> simp only [
     dF5_fn, dH0_fn, SL, QL, TL, xL, yL, map_add, map_sub, map_mul, map_pow, map_neg, map_ofNat, h107]
 
 lemma δL_S (i : Fin 4) : δL (L := L) i SL = if i = 0 then 1 else 0 := by
@@ -1002,6 +1017,7 @@ lemma δL_x (i : Fin 4) : δL (L := L) i xL = -dF5_fn (tanIdx i) SL QL TL xL yL 
   rw [xL, δL_apply, δ_x, map_div₀, map_neg, ← dF5_fn_L, Fx_K, ← dF5_fn_L]
 
 -- Chain rule for H_cub and E_fn under ANY derivation D on L
+omit [FiniteDimensional K5 L] in
 private lemma deriv_H_cub (D : Derivation ℤ L L) (S Q T V0 U V : L) (hV0 : D V0 = 0) :
     D (H_cub S Q T V0 U V) =
       dH_dS S Q U V * D S + dH_dQ S Q V0 U V * D Q + dH_dT T V0 U V * D T +
@@ -1012,6 +1028,7 @@ private lemma deriv_H_cub (D : Derivation ℤ L L) (S Q T V0 U V : L) (hV0 : D V
   norm_num only
   ring
 
+omit [FiniteDimensional K5 L] in
 lemma deriv_E_fn (D : Derivation ℤ L L) (k : Fin 4) (S Q T a b U V : L) :
     D (E_fn k S Q T a b U V) =
       dE_dS k S Q T a b U V * D S + dE_dQ k S Q T a b U V * D Q + dE_dT k S Q T a b U V * D T +
@@ -1063,11 +1080,13 @@ def w_of_1form (α : Fin 5 → L) (JS JQ JT : L) : Fin 4 → L :=
   ![cy * JS, cy * JQ, cy * JT,
     -((Fx * α 0 - FS * α 3) * JS + (Fx * α 1 - FQ * α 3) * JQ + (Fx * α 2 - FT * α 3) * JT)]
 
+omit [FiniteDimensional K5 L] in
 lemma w_of_1form_add (α β : Fin 5 → L) (JS JQ JT : L) :
     w_of_1form (fun k => α k + β k) JS JQ JT =
       fun i => w_of_1form α JS JQ JT i + w_of_1form β JS JQ JT i := by
   funext i; fin_cases i <;> simp [w_of_1form] <;> ring
 
+omit [FiniteDimensional K5 L] in
 lemma w_of_1form_smul (g : L) (α : Fin 5 → L) (JS JQ JT : L) :
     w_of_1form (fun k => g * α k) JS JQ JT = fun i => g * w_of_1form α JS JQ JT i := by
   funext i; fin_cases i <;> simp [w_of_1form] <;> ring
@@ -1125,7 +1144,7 @@ lemma resDivW_L_w_of_1form (α : Fin 5 → L) (dα : Fin 5 → Fin 5 → L) (dα
       (simp only [Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk,
          W2_of, DX2_of, DY2_of, u3_of, v3_of, dW2_fn, dDX2_fn, dDY2_fn, tanIdx,
          Matrix.cons_val_zero, Matrix.cons_val_one, Matrix.cons_val,
-         map_add, map_sub, map_neg, (δL _).leibniz, (δL _).leibniz_pow,
+         map_add, map_sub, (δL _).leibniz, (δL _).leibniz_pow,
          D_ofNat, δL_S, δL_Q, δL_T, δL_y, δL_x, Fin.reduceEq, ↓reduceIte,
          smul_eq_mul, nsmul_eq_mul, Nat.cast_ofNat];
        norm_num only; ring)
@@ -1202,12 +1221,12 @@ private def ddLX_dU (k : Fin 5) : L :=
 private def ddLY_dV (k : Fin 5) : L :=
   match k with | 2 => -(25 / 27) | 4 => 1 | _ => 0
 
-private def dbr_dU (k : Fin 5) (S Q T x y U V : L) : L :=
+private def dbr_dU (k : Fin 5) (S Q T x y _U V : L) : L :=
   let dlx := dLX_dU S Q x; let ly := LY_of T y V
   let base : L := match k with | 0 => -T * dlx * ly | 2 => S * dlx * ly | _ => 0
   base + 2 * S * T * (dlx * dLY_fn k V - ly * ddLX_dU k)
 
-private def dbr_dV (k : Fin 5) (S Q T x y U V : L) : L :=
+private def dbr_dV (k : Fin 5) (S Q T x y U _V : L) : L :=
   let lx := LX_of S Q x U; let dly := dLY_dV T y
   let base : L := match k with | 0 => -T * lx * dly | 2 => S * lx * dly | _ => 0
   base + 2 * S * T * (lx * ddLY_dV k - dly * dLX_fn k U)
@@ -1251,7 +1270,7 @@ private lemma deriv_br_L (i : Fin 4) (k : Fin 5) (U V : L) :
   have hdLY (j : Fin 4) (k' : Fin 5) : δL (L := L) j (dLY_fn k' V) = ddLY_dV k' * δL j V := by
     fin_cases k' <;>
       (simp only [Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk,
-         dLY_fn, ddLY_dV, map_add, map_sub, map_neg, hdiv3, (δL _).leibniz, hdv, D_ofNat, map_zero, smul_eq_mul];
+         dLY_fn, ddLY_dV, map_add, map_neg, hdiv3, (δL _).leibniz, hdv, D_ofNat, map_zero, smul_eq_mul];
        ring)
   fin_cases i <;> fin_cases k <;>
     (simp only [Fin.zero_eta, Fin.mk_one, Fin.reduceFinMk,
@@ -1340,18 +1359,21 @@ lemma resDivW_L_PhiX_div_G (U V JS JQ JT : L)
   simp only [smul_eq_mul]; ring
 
 -- Helper: any derivation D on L killing (a, b, ξS, ξQ, U, V) kills A_0U, A_0V, A_Y, A_X, det(S_ab_mat)!
+omit [FiniteDimensional K5 L] in
 private lemma D_kills_dH_dS (D : Derivation ℤ L L) (s q U V : L)
     (hs : D s = 0) (hq : D q = 0) (hU : D U = 0) (hV : D V = 0) :
     D (dH_dS s q U V) = 0 := by
   simp only [dH_dS, map_add, map_sub, map_neg, D.leibniz, D.leibniz_pow, hs, hq, hU, hV,
     D_ofNat, D_ofNat_div, smul_eq_mul, nsmul_eq_mul, mul_zero, add_zero, sub_zero, neg_zero]
 
+omit [FiniteDimensional K5 L] in
 private lemma D_kills_dH_dQ (D : Derivation ℤ L L) (s q v0 U V : L)
     (hs : D s = 0) (hq : D q = 0) (hv0 : D v0 = 0) (hU : D U = 0) (hV : D V = 0) :
     D (dH_dQ s q v0 U V) = 0 := by
   simp only [dH_dQ, map_add, map_sub, map_neg, D.leibniz, D.leibniz_pow, hs, hq, hv0, hU, hV,
     D_ofNat, D_ofNat_div, smul_eq_mul, nsmul_eq_mul, mul_zero, add_zero, sub_zero, neg_zero]
 
+omit [FiniteDimensional K5 L] in
 private lemma D_kills_q_coeffs (D : Derivation ℤ L L) (a b ξS ξQ U V : L)
     (ha : D a = 0) (hb : D b = 0) (hξS : D ξS = 0) (hξQ : D ξQ = 0) (hU : D U = 0) (hV : D V = 0) :
     D (q1_a2 a b U V) = 0 ∧ D (q1_a1 a b ξS ξQ U V) = 0 ∧ D (q1_a0 ξS ξQ U V) = 0 ∧
@@ -1370,6 +1392,7 @@ private lemma D_kills_q_coeffs (D : Derivation ℤ L L) (a b ξS ξQ U V : L)
       D_kills_dH_dQ D ξS ξQ 0 U V hξS hξQ h0 hU hV,
       D_ofNat_div, hb, hU, hV, smul_eq_mul, mul_zero, add_zero, sub_zero]
 
+omit [FiniteDimensional K5 L] in
 private lemma D_kills_numM (D : Derivation ℤ L L) (mi : Fin 10) (a b ξS ξQ U V : L)
     (ha : D a = 0) (hb : D b = 0) (hξS : D ξS = 0) (hξQ : D ξQ = 0) (hU : D U = 0) (hV : D V = 0) :
     D (numM mi a b ξS ξQ U V) = 0 := by
@@ -1379,6 +1402,7 @@ private lemma D_kills_numM (D : Derivation ℤ L L) (mi : Fin 10) (a b ξS ξQ U
       ha2, ha1, ha0, hb2, hb1, hb0, D_ofNat, D_one_div,
       D.map_one_eq_zero, map_zero, smul_eq_mul, nsmul_eq_mul, mul_zero, add_zero, sub_zero]
 
+omit [FiniteDimensional K5 L] in
 private lemma D_kills_weights (D : Derivation ℤ L L) (a b ξS ξQ U V : L)
     (ha : D a = 0) (hb : D b = 0) (hξS : D ξS = 0) (hξQ : D ξQ = 0) (hU : D U = 0) (hV : D V = 0) :
     D (A_0U a b ξS ξQ U V) = 0 ∧ D (A_0V a b ξS ξQ U V) = 0 ∧

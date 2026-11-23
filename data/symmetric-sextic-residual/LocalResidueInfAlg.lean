@@ -14,6 +14,7 @@ open SymmetricSexticResidual.K5Field
 open SymmetricSexticResidual.SheetCalculus
 open SymmetricSexticResidual.CoverAlgebra
 open SymmetricSexticResidual.CoverResidue
+open QuadraticCovers
 
 /-! ### Section 2: Polymorphic Polynomial Helpers & Exact Algebraic Identities -/
 

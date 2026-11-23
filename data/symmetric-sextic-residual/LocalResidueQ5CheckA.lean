@@ -8,9 +8,11 @@ open SymmetricSexticResidual.K5Field SymmetricSexticResidual.SheetCalculus
   SymmetricSexticResidual.CoverAlgebra SymmetricSexticResidual.CoverResidue
   SymmetricSexticResidual.LocalResidueData SymmetricSexticResidual.LocalResidueU0
   SymmetricSexticResidual.Q5WeightsData SymmetricSexticResidual.VerticalData
-  SymmetricSexticResidual.VerticalIdentity SymmetricSexticResidual.EncodingCheck
+  SymmetricSexticResidual.VerticalIdentity
+  PolynomialEncoding.KroneckerCheck QuadraticCovers
   CrossedRationalResidue Polynomial
 open Lean.Grind.CommRing PolynomialEncoding.SignedExpressions PolynomialEncoding.BivariateExpressions
+open PolynomialEncoding.PolyOps hiding dotW dotW_rel dotW_len
 open scoped BigOperators
 
 /-! ### Section 4: Factored Centered Grid × Kronecker Kernel Check (`sum_RQ5_eta_L`) -/
