@@ -12,8 +12,8 @@ List the checks actually run and their results. If relying on CI for Lean, say s
 
 For a solve:
 
-- [ ] Only permitted new files in one existing `data/<instance-id>/` folder are added.
-- [ ] `proof.json`, `Solution.lean`, and `solution.md` are present; optional files are an exact witness and flat Lean helpers.
-- [ ] The theorem proves the fixed protected statement without placeholders or unapproved axioms.
+- [ ] New solution files are added in one existing `data/<instance-id>/` folder; any companion edits are confined to `formal/lean/HodgeComputer/Constructions/`, `formal/{TECHNIQUES,README}.md`, `docs/*.md`, or `docs/index.json` with no deletions.
+- [ ] `proof.json`, `Solution.lean`, and `solution.md` are present; optional solve files are an exact witness and flat Lean helpers.
+- [ ] The theorem proves the fixed protected statement without placeholders or unapproved axioms, and any new shared library modules build without warnings.
 - [ ] Any JSON witness is bound to the additional protected witness theorem.
-- [ ] Existing target, context, verifier, website, and generated files are unchanged.
+- [ ] Protected core Lean files, existing target/context/solve records, verifier, website, and generated files are unchanged.

@@ -64,7 +64,7 @@
       "number": "3b",
       "title": "3B. Weighted threefolds and two-reflection sextics",
       "shortTitle": "Weighted threefolds",
-      "description": "Norm-contact curves, Abel–Jacobi residues, finite-jet spanning, two-reflection support, and sextics with a binary summand.",
+      "description": "Norm-contact curves, Abel–Jacobi residues, finite-jet spanning, two-reflection support, binary summands, and moving lines on cubic threefolds.",
       "source": "docs/03b-weighted-threefolds.md",
       "content": "docs/weighted-threefolds.html"
     },
@@ -100,7 +100,7 @@
       "number": "5",
       "title": "5. Computing and checking certificates",
       "shortTitle": "Computing certificates",
-      "description": "Complete coefficient systems, exactification, and the limits of numerical evidence.",
+      "description": "Complete coefficient systems, strictification, exactification, factored Kronecker-grid checks, and algebraic residue evaluation.",
       "source": "docs/05-computation.md",
       "content": "docs/computation.html"
     }

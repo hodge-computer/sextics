@@ -32,8 +32,17 @@ The 41 small explicit witnesses now share their assembly and legality interface.
 | Construct a contact field over a finite algebra | [FiniteAlgebra](lean/HodgeComputer/Constructions/FiniteAlgebra/README.md) | The contact line, finite algebra, source-span calculation, specialization and denominator checks. |
 | Correct a cubic-surface field from pole one to pole two | [CubicSurfaces](lean/HodgeComputer/Constructions/CubicSurfaces/README.md), `Q2Reduction.q2_equations` | A homogeneous cubic, a Jacobian representation of the source and a strict primitive for the resulting divergence. |
 | Correct and homogenize a rational field | [RationalFields](lean/HodgeComputer/Constructions/RationalFields/README.md) | Commuting derivations, a normal field and primitive, actual chart rules, and the Euler degree condition. |
+| Analyze rational 1-form traces from a quadratic cover | [QuadraticCovers](lean/HodgeComputer/Constructions/QuadraticCovers/README.md) | Cover polynomial, nondegeneracy coprimalities, local residue evaluations, and target transport. Supplies `PairAlg` / `syl5` Euler traces, Hensel `quadRootSeries` and Laurent jet calculus (`HasValGe`, `ValLead`, `ValDual`), 4×4 Schur complement, `remDeg4`/`interp4`, and functorial `mapRatFunc` residues. |
 
 Several broadly reusable steps still live under `HoldoutCover`: `PolynomialNormal` constructs normals from invertible coefficient matrices; `FiniteTrace` descends primitives; `ResidueClearing`, `FiniteResidueClearing` and `HomogeneousCertificate` clear and grade their polynomial witnesses. Those modules expose explicit hypotheses. In contrast, `GeneralizedCover` fixes the holdout hypersurface. The directory name does not make every theorem a result about arbitrary hypersurfaces.
+
+## Exact polynomial verification
+
+Large exact polynomial identities are verified without expanding symbolic normal forms by encoding them through [PolynomialEncoding](lean/HodgeComputer/Constructions/PolynomialEncoding/README.md):
+
+- `SignedExpressions`, `BivariateExpressions`, `BivariateDifferentiation`, and `PolynomialDigitCheck` split ring expressions into nonnegative parts, differentiate sparse bivariate expressions, and prove positional evaluation injectivity under a coefficient sum bound.
+- `KroneckerCheck` generalizes positional encoding to arbitrary arity (`identity_of_kronecker`, `identity_of_kronecker2`, `identity_of_kronecker3`, `biv_denote_eq_of_kronecker3`) and introduces the polymorphic backend abstraction `PolyOps` / `PolyOpsRel` / `letB` together with certified 3-variable hybrid Kronecker × grid vanishing theorems (`mvPoly3_eq_zero_of_kronecker_grid`, `mvPoly3_eq_zero_of_kronecker2D_gridT`).
+- `PolyOps` provides dense univariate (`UPoly`), bivariate (`BivL`), and trivariate (`UBivL`) list-polynomial arithmetic over any `PolyOps` backend, with relational lifts, synthetic division by `X - 1`, quadratic-relation reduction (`bivRedOnce`), bilinear weight contraction (`dotW` / `combineBivDot`), and ring-evaluation homomorphisms.
 
 ## Cubic covariants and moving maps
 
@@ -105,6 +114,7 @@ The following index covers every accepted solve. The construction column describ
 | [quadric-contact-broken](../data/quadric-contact-broken/solution.md) | A finite-algebra contact certificate for `quadric-contact-broken` | [FiniteAlgebra](lean/HodgeComputer/Constructions/FiniteAlgebra/README.md) |
 | [reflection-coupled-fano](../data/reflection-coupled-fano/solution.md) | A modular quartic, finite trace, and the reflection certificate | [PolynomialCurves](lean/HodgeComputer/Constructions/PolynomialCurves/README.md) |
 | [split-ternary-q2](../data/split-ternary-q2/solution.md) | Polynomial companions and higher residues for split ternaries | [HigherResidues and EllipticCompanions](lean/HodgeComputer/Constructions/HigherResidues/README.md) |
+| [symmetric-sextic-residual](../data/symmetric-sextic-residual/solution.md) | Moving lines on an auxiliary cubic threefold, quadratic cover trace, and global residue cancellation | [QuadraticCovers and PolynomialEncoding](lean/HodgeComputer/Constructions/QuadraticCovers/README.md) |
 | [ternary-collision-cb-d2](../data/ternary-collision-cb-d2/solution.md) | The first collision character | [Explicit witness](lean/HodgeComputer/Constructions/Explicit.lean) |
 | [ternary-collision-cbp-d2](../data/ternary-collision-cbp-d2/solution.md) | The second character of a contact collision | [Explicit witness](lean/HodgeComputer/Constructions/Explicit.lean) |
 | [ternary-tangent-residual-h2-d2](../data/ternary-tangent-residual-h2-d2/solution.md) | Contact geometry supplies a quadric | [Explicit witness](lean/HodgeComputer/Constructions/Explicit.lean) |
@@ -123,4 +133,4 @@ The following index covers every accepted solve. The construction column describ
 
 ## Reading and extending the library
 
-Read a module’s hypotheses before adapting its worked application. Keep a new target’s constants, incidence seeds and final protected binding together in its instance folder. The shared implementation is the place for parameterized identities and established constructions, with attribution to the proofs from which they came. [MAINTAINING.md](../MAINTAINING.md) describes shared-module kernel replay and verification of dependent applications.
+Read a module’s hypotheses before adapting its worked application. Keep a new target’s constants, incidence seeds and final protected binding together in its instance folder. The shared implementation under `formal/lean/HodgeComputer/Constructions/` is the place for parameterized identities and established constructions, with attribution to the proofs from which they came; new shared modules and book updates may accompany a solve PR directly or be consolidated in a maintenance PR. [MAINTAINING.md](../MAINTAINING.md) describes sandboxed verification, shared-module kernel replay, and rechecking of dependent applications.

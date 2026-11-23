@@ -12,6 +12,8 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--explanation', type=Path, help='Also check a proposed, rendered explanation before acceptance')
+parser.add_argument('--index', type=Path, help='Alternate docs/index.json to validate against')
+parser.add_argument('--doc', action='append', default=[], help='Override a rendered book chapter as SOURCE=HTML')
 args = parser.parse_args()
 
 def label(path):
@@ -32,14 +34,41 @@ class Content(HTMLParser):
     def handle_data(self,text):
         if self.current is not None: self.current.append(text)
 
-index=json.loads((ROOT/'docs/index.json').read_text())
+index=json.loads((args.index or (ROOT/'docs/index.json')).read_text())
 pages={p['id']:p for p in index['pages']}
-files=list((ROOT/'assets/atlas').glob('*/*.html'))+list((ROOT/'docs').glob('*.html'))+[ROOT/'index.html']
+doc_overrides={}
+for spec in args.doc:
+    source, sep, html_path = spec.partition('=')
+    if not sep:
+        raise SystemExit(f'Invalid --doc argument (expected SOURCE=HTML): {spec}')
+    doc_overrides[source] = Path(html_path).resolve()
+
+page_files = {}
+overridden_targets = set()
+for p in index['pages']:
+    default_target = (ROOT / p['content']).resolve()
+    if p['source'] in doc_overrides:
+        page_files[p['id']] = doc_overrides[p['source']]
+        overridden_targets.add(default_target)
+    else:
+        page_files[p['id']] = default_target
+if index.get('overview', {}).get('source') in doc_overrides:
+    overridden_targets.add((ROOT / index['overview']['content']).resolve())
+
+files = [p.resolve() for p in (ROOT/'assets/atlas').glob('*/*.html')]
+files += [p.resolve() for p in (ROOT/'docs').glob('*.html') if p.resolve() not in overridden_targets]
+files += [(ROOT/'index.html').resolve()]
+for html_path in doc_overrides.values():
+    if html_path not in files:
+        files.append(html_path)
 if args.explanation:
     files.append(args.explanation.resolve())
+
 REPOSITORY='https://github.com/hodge-computer/sextics/blob/main/'
-shown={p['source']:ROOT/p['content'] for p in index['pages']}
-shown.update({f'data/{s.parent.name}/solution.md':s for s in (ROOT/'assets/atlas').glob('*/solution.html')})
+shown={p['source']:page_files[p['id']] for p in index['pages']}
+for source, html_path in doc_overrides.items():
+    shown[source] = html_path
+shown.update({f'data/{s.parent.name}/solution.md':s.resolve() for s in (ROOT/'assets/atlas').glob('*/solution.html')})
 contents={}
 for p in files:
     c=Content(p);c.feed(p.read_text());contents[p]=c
@@ -59,7 +88,7 @@ for p,c in contents.items():
         if link.startswith('#technical-information/'):
             parts=link[1:].split('/');page=pages.get(parts[1])
             if not page: errors.append(f'{p.name}: unknown chapter {link}')
-            elif len(parts)>2 and '/'.join(parts[2:]) not in contents[ROOT/page['content']].ids:errors.append(f'{p.name}: missing chapter heading {link}')
+            elif len(parts)>2 and '/'.join(parts[2:]) not in contents[page_files[parts[1]]].ids:errors.append(f'{p.name}: missing chapter heading {link}')
         elif link.startswith('#') or not link:continue
         elif not is_public(link.split('#')[0].lstrip('/')) or not (ROOT/link.split('#')[0].lstrip('/')).is_file():errors.append(f'{p.name}: missing local link {link}')
 for p in (ROOT/'assets/atlas').glob('*/record.json'):
