@@ -318,6 +318,128 @@ private lemma quadU_valDual (a0 a1 a2 : K5) :
   simpa only [quadU_coeff_zero, quadU_coeff_one] using ValDual.of_evalT (CoverParams.quadU a0 a1 a2)
 
 -- Exact factored `d1_z`, `d0_z`, `res_z` on `W2_0`!
+/-- Polymorphic algebraic core for the `ε`-part of `remDeg3_d0` at `W2_0`.
+Evaluating `ring` over an abstract `[Field R] [CharZero R]` avoids carrying `K5`'s
+`AdjoinRoot` instance stack through the degree-25 expansion. -/
+private lemma hrem_d0_eps_alg {R : Type*} [Field R] [CharZero R] (S Q T : R)
+    (caD cbD q20D q11D q02D c30D c21D c12D c03D c0W_s Wk2_s W2k3_s : Dual R)
+    (hca : caD = ⟨-(25 / 81 : R) * (5 * S - 9 * Q) * (5 * S - 3 * Q),
+      (143 / 81 : R) * S ^ 2 - (184 / 27) * S * Q + (52 / 9) * Q ^ 2⟩)
+    (hcb : cbD = ⟨(50 / 27 : R) * S * (5 * S - 9 * Q),
+      -(92 / 27 : R) * S ^ 2 + (104 / 9) * S * Q - (22 / 3) * Q ^ 2 + (10 / 7) * Q + 10 / 7⟩)
+    (hq20 : q20D = ⟨-(625 / 81 : R) * S + (250 / 27) * Q, (143 / 81 : R) * S - (92 / 27) * Q⟩)
+    (hq11 : q11D = ⟨(500 / 27 : R) * S - (50 / 3) * Q, -(184 / 27 : R) * S + (104 / 9) * Q⟩)
+    (hq02 : q02D = ⟨-(25 / 3 : R) * S, (52 / 9 : R) * S - (22 / 3) * Q + 5 / 7⟩)
+    (hc30 : c30D = ⟨-(625 / 243 : R), (143 / 243 : R)⟩)
+    (hc21 : c21D = ⟨(250 / 27 : R), -(92 / 27 : R)⟩)
+    (hc12 : c12D = ⟨-(25 / 3 : R), (52 / 9 : R)⟩)
+    (hc03 : c03D = ⟨0, -(22 / 9 : R)⟩)
+    (hc0W : c0W_s =
+      let A := 5 * S - 9 * Q; let B := T - 3
+      let w0n := -(25 / 4 : R) * S * A ^ 2
+      let w1n := (243 / 4 : R) * (143 / 243 * S ^ 3 - 92 / 27 * S ^ 2 * Q + 52 / 9 * S * Q ^ 2 -
+        22 / 9 * Q ^ 3 + 143 / 243 * T ^ 3 - 92 / 27 * T ^ 2 + 52 / 9 * T - 22 / 9 +
+        5 / 7 * Q ^ 2 + 10 / 7 * Q)
+      ⟨-(4 / 81 : R) * w0n ^ 2,
+       -(4 / 81 : R) * (2 * w0n * w1n) + (143 / 81 * T ^ 2 - 184 / 27 * T + 52 / 9) * w0n * B⟩)
+    (hWk2 : Wk2_s =
+      let A := 5 * S - 9 * Q; let B := T - 3
+      let w0n := -(25 / 4 : R) * S * A ^ 2
+      let w1n := (243 / 4 : R) * (143 / 243 * S ^ 3 - 92 / 27 * S ^ 2 * Q + 52 / 9 * S * Q ^ 2 -
+        22 / 9 * Q ^ 3 + 143 / 243 * T ^ 3 - 92 / 27 * T ^ 2 + 52 / 9 * T - 22 / 9 +
+        5 / 7 * Q ^ 2 + 10 / 7 * Q)
+      ⟨-(4 / 81 : R) * w0n ^ 3,
+       -(4 / 81 : R) * (3 * w0n ^ 2 * w1n) + (143 / 81 * T - 92 / 27) * w0n ^ 2 * B ^ 2⟩)
+    (hW2k3 : W2k3_s =
+      let A := 5 * S - 9 * Q; let B := T - 3
+      let w0n := -(25 / 4 : R) * S * A ^ 2
+      let w1n := (243 / 4 : R) * (143 / 243 * S ^ 3 - 92 / 27 * S ^ 2 * Q + 52 / 9 * S * Q ^ 2 -
+        22 / 9 * Q ^ 3 + 143 / 243 * T ^ 3 - 92 / 27 * T ^ 2 + 52 / 9 * T - 22 / 9 +
+        5 / 7 * Q ^ 2 + 10 / 7 * Q)
+      ⟨-(4 / 243 : R) * w0n ^ 4,
+       -(4 / 243 : R) * (4 * w0n ^ 3 * w1n) + (143 / 243 : R) * w0n ^ 3 * B ^ 3⟩) :
+    let D22 : Dual R := q20D * cbD ^ 2 - q11D * caD * cbD + q02D * caD ^ 2
+    let D21_s : Dual R := (-q11D * cbD + 2 * q02D * caD) * c0W_s
+    let D20_s : Dual R := q02D * c0W_s ^ 2 + cbD ^ 2 * Wk2_s
+    let D33 : Dual R := c30D * cbD ^ 3 - c21D * caD * cbD ^ 2 + c12D * caD ^ 2 * cbD - c03D * caD ^ 3
+    let D32_s : Dual R := (-c21D * cbD ^ 2 + 2 * c12D * caD * cbD - 3 * c03D * caD ^ 2) * c0W_s
+    let D30_s : Dual R := -c03D * c0W_s ^ 3 + cbD ^ 3 * W2k3_s
+    (remDeg3_d0 D22 D21_s D20_s D33 D32_s D30_s).eps =
+      (-59604644775390625 / 103769130575703096 : R) *
+        (225 * S - 45 * Q + 77 * T - 189) * S ^ 8 * (-(5 * S - 9 * Q)) ^ 17 := by
+  subst hca hcb hq20 hq11 hq02 hc30 hc21 hc12 hc03 hc0W hWk2 hW2k3
+  intro D22 D21_s D20_s D33 D32_s D30_s
+  set A : R := 5 * S - 9 * Q
+  set w0n : R := -(25 / 4 : R) * S * A ^ 2
+  have h2v : (2 : Dual R).val = 2 := by rw [← one_add_one_eq_two, Dual.add_val]; exact one_add_one_eq_two
+  have h2e : (2 : Dual R).eps = 0 := by rw [← one_add_one_eq_two, Dual.add_eps]; exact add_zero 0
+  have h3v : (3 : Dual R).val = 3 := by
+    rw [show (3 : Dual R) = 2 + 1 by ring, Dual.add_val, h2v, show (1 : Dual R).val = 1 from rfl]; ring
+  have h3e : (3 : Dual R).eps = 0 := by rw [show (3 : Dual R) = 2 + 1 by ring, Dual.add_eps, h2e]; exact add_zero 0
+  have hD22_v : D22.val = (15625 / 59049 : R) * S * A ^ 4 := by
+    simp only [D22, Dual.add_val, Dual.sub_val, Dual.mul_val, Dual.pow_eq, A]; ring
+  have hD21_v : D21_s.val = (15625 / 59049 : R) * S * A ^ 4 * (-2 * w0n * S) := by
+    simp only [D21_s, Dual.add_val, Dual.mul_val, Dual.neg_val, h2v, w0n, A]; ring
+  have hD20_v : D20_s.val = (15625 / 59049 : R) * S * A ^ 4 * (w0n * S) ^ 2 := by
+    simp only [D20_s, Dual.add_val, Dual.mul_val, Dual.pow_eq, w0n, A]; ring
+  have hD33_v : D33.val = -(781250 / 4782969 : R) * S * A ^ 5 := by
+    simp only [D33, Dual.add_val, Dual.sub_val, Dual.mul_val, Dual.pow_eq, A]; ring
+  have hD32_v : D32_s.val = -(781250 / 4782969 : R) * S * A ^ 5 * (-6 * w0n * S) := by
+    simp only [D32_s, Dual.add_val, Dual.sub_val, Dual.mul_val, Dual.neg_val, Dual.pow_eq, h2v, h3v, w0n, A]; ring
+  have hD30_v : D30_s.val = -(781250 / 4782969 : R) * S * A ^ 5 * (-4 * (w0n * S) ^ 3) := by
+    simp only [D30_s, Dual.add_val, Dual.mul_val, Dual.neg_val, Dual.pow_eq, w0n, A]; ring
+  have hd0_eps_id :
+      (remDeg3_d0 D22 D21_s D20_s D33 D32_s D30_s).eps =
+        D22.val ^ 2 * D30_s.eps + (2 * D22.val * D30_s.val - D20_s.val * D32_s.val) * D22.eps +
+        D20_s.val * D33.val * D21_s.eps + (D21_s.val * D33.val - D22.val * D32_s.val) * D20_s.eps +
+        D20_s.val * D21_s.val * D33.eps - D20_s.val * D22.val * D32_s.eps := by
+    simp only [remDeg3_d0, Dual.sub_eps, Dual.mul_eps, Dual.sub_val, Dual.mul_val]; ring
+  have hd0_eps_simp :
+      (remDeg3_d0 D22 D21_s D20_s D33 D32_s D30_s).eps =
+        ((15625 / 59049 : R) * S * A ^ 4) ^ 2 *
+          (D30_s.eps - (w0n * S) ^ 2 * D32_s.eps - 2 * (w0n * S) ^ 3 * D33.eps) +
+        ((15625 / 59049 : R) * S * A ^ 4) * (-(781250 / 4782969 : R) * S * A ^ 5) * (w0n * S) *
+          (4 * D20_s.eps + (w0n * S) * D21_s.eps - 2 * (w0n * S) ^ 2 * D22.eps) := by
+    rw [hd0_eps_id, hD22_v, hD21_v, hD20_v, hD33_v, hD32_v, hD30_v]; ring
+  rw [hd0_eps_simp]
+  simp only [D22, D21_s, D20_s, D33, D32_s, D30_s,
+    Dual.add_val, Dual.sub_val, Dual.mul_val, Dual.neg_val, Dual.pow_eq,
+    Dual.add_eps, Dual.sub_eps, Dual.mul_eps, Dual.neg_eps, h2v, h2e, h3v, h3e,
+    Nat.cast_ofNat, Nat.reduceSub, pow_one, w0n, A]
+  ring
+
+/-- Abstract `ValLead 2` transport for `syl5` from the linear remainder `(d1_z, d0_z)`
+with opaque series and scalar arguments (avoids unfolding transparent `let`/`set` chains
+during `ValLead` arithmetic and kernel typechecking). -/
+private lemma valLead_syl5_of_rem {K : Type*} [Field K]
+    {q2s q1s q0s e3s e2s e1s e0s d1s d0s : LaurentSeries K}
+    {q2_0 z2 d1_1 d0_1 cd : K}
+    (hq2 : ValLead 0 q2s q2_0) (hq1 : ValLead 0 q1s (-2 * q2_0 * z2))
+    (hq0 : ValLead 0 q0s (q2_0 * z2 ^ 2))
+    (hd1 : ValLead 1 d1s d1_1) (hd0 : ValLead 1 d0s d0_1)
+    (hd1_eq : d1s = remDeg3_d1 q2s q1s q0s e3s e2s e1s)
+    (hd0_eq : d0s = remDeg3_d0 q2s q1s q0s e3s e2s e0s)
+    (hcd : d0_1 + z2 * d1_1 = cd) (hq2_ne : q2_0 ≠ 0) :
+    ValLead 2 (syl5 q2s q1s q0s e3s e2s e1s e0s) (cd ^ 2 / q2_0) := by
+  have hqs := q2_sq_mul_syl5 q2s q1s q0s e3s e2s e1s e0s
+  have hrhs_L : ValLead 2 (q2s * d0s ^ 2 - d0s * d1s * q1s + d1s ^ 2 * q0s) (q2_0 * cd ^ 2) := by
+    have ht1 : ValLead 2 (q2s * d0s ^ 2) (q2_0 * d0_1 ^ 2) :=
+      (hq2.mul (hd0.pow 2)).eq_k (by omega)
+    have ht2 : ValLead 2 (d0s * d1s * q1s) (d0_1 * d1_1 * (-2 * q2_0 * z2)) :=
+      ((hd0.mul hd1).mul hq1).eq_k (by omega)
+    have ht3 : ValLead 2 (d1s ^ 2 * q0s) (d1_1 ^ 2 * (q2_0 * z2 ^ 2)) :=
+      ((hd1.pow 2).mul hq0).eq_k (by omega)
+    refine ((ht1.sub ht2).add ht3).eq_c ?_
+    rw [← hcd]; ring
+  have hq2sq_L : ValLead 0 (q2s ^ 2) (q2_0 ^ 2) := (hq2.pow 2).eq_k (by omega)
+  have hq2s_ne : q2s ^ 2 ≠ 0 := fun h0 => pow_ne_zero 2 hq2_ne (by rw [← hq2sq_L.c0, h0]; rfl)
+  have hdiv : syl5 q2s q1s q0s e3s e2s e1s e0s =
+      (q2s * d0s ^ 2 - d0s * d1s * q1s + d1s ^ 2 * q0s) / q2s ^ 2 := by
+    rw [eq_div_iff hq2s_ne, _root_.mul_comm, hqs, hd1_eq, hd0_eq]; rfl
+  rw [hdiv]
+  exact (hrhs_L.div_of_ne hq2sq_L (pow_ne_zero 2 hq2_ne)).eq_k (by omega) |>.eq_c (by
+    field_simp [hq2_ne])
+
 lemma W2_0_d1_d0_res :
     let A := 5 * S_K - 9 * Q_K
     let B := T_K - 3
@@ -589,7 +711,7 @@ lemma W2_0_d1_d0_res :
     simp only [D30_s, c0W_s, W2k3_s, Dual.add_val, Dual.mul_val, Dual.neg_val, Dual.pow_eq,
       c03D, cbD, hc03_0, hcb0, w0n, A]; ring
   set d22e := D22.eps; set d21e := D21_s.eps; set d20e := D20_s.eps
-  set d33e := D33.eps; set d32e := D32_s.eps; set d31e := D31_s.eps; set d30e := D30_s.eps
+  set d33e := D33.eps; set d32e := D32_s.eps; set d31e := D31_s.eps
   have hd1_eps_id :
       (remDeg3_d1 D22 D21_s D20_s D33 D32_s D31_s).eps =
         D22.val ^ 2 * d31e + (2 * D22.val * D31_s.val - D20_s.val * D33.val - D21_s.val * D32_s.val) * d22e +
@@ -597,13 +719,6 @@ lemma W2_0_d1_d0_res :
         (D21_s.val ^ 2 - D22.val * D20_s.val) * d33e - D21_s.val * D22.val * d32e := by
     simp only [remDeg3_d1, Dual.sub_eps, Dual.mul_eps, Dual.sub_val, Dual.mul_val,
       d22e, d21e, d20e, d33e, d32e, d31e]; ring
-  have hd0_eps_id :
-      (remDeg3_d0 D22 D21_s D20_s D33 D32_s D30_s).eps =
-        D22.val ^ 2 * d30e + (2 * D22.val * D30_s.val - D20_s.val * D32_s.val) * d22e +
-        D20_s.val * D33.val * d21e + (D21_s.val * D33.val - D22.val * D32_s.val) * d20e +
-        D20_s.val * D21_s.val * d33e - D20_s.val * D22.val * d32e := by
-    simp only [remDeg3_d0, Dual.sub_eps, Dual.mul_eps, Dual.sub_val, Dual.mul_val,
-      d22e, d21e, d20e, d33e, d32e, d30e]; ring
   -- Notice the miracle: `D2_v(z) = D22_v*(z - r)^2`, `D3_v(z) = D33_v*(z - r)^2*(z - 4r)`!
   have hd1_eps_simp :
       (remDeg3_d1 D22 D21_s D20_s D33 D32_s D31_s).eps =
@@ -612,13 +727,6 @@ lemma W2_0_d1_d0_res :
         ((15625 / 59049 : K5) * S_K * A ^ 4) * (-(781250 / 4782969 : K5) * S_K * A ^ 5) *
           (d20e - 2 * (w0n * S_K) * d21e - 5 * (w0n * S_K) ^ 2 * d22e) := by
     rw [hd1_eps_id, hD22_v, hD21_v, hD20_v, hD33_v, hD32_v, hD31_v]; ring
-  have hd0_eps_simp :
-      (remDeg3_d0 D22 D21_s D20_s D33 D32_s D30_s).eps =
-        ((15625 / 59049 : K5) * S_K * A ^ 4) ^ 2 *
-          (d30e - (w0n * S_K) ^ 2 * d32e - 2 * (w0n * S_K) ^ 3 * d33e) +
-        ((15625 / 59049 : K5) * S_K * A ^ 4) * (-(781250 / 4782969 : K5) * S_K * A ^ 5) * (w0n * S_K) *
-          (4 * d20e + (w0n * S_K) * d21e - 2 * (w0n * S_K) ^ 2 * d22e) := by
-    rw [hd0_eps_id, hD22_v, hD21_v, hD20_v, hD33_v, hD32_v, hD30_v]; ring
   have hrem_d1 : remDeg3_d1 D22 D21 D20 D33 D32 D31 = ⟨0, d1_1⟩ := by
     have hsc : remDeg3_d1 D22 D21 D20 D33 D32 D31 = Dual.C (iB ^ 8) * remDeg3_d1 D22 D21_s D20_s D33 D32_s D31_s := by
       simp only [remDeg3_d1, hD21_sc, hD20_sc, hD32_sc, hD31_sc]
@@ -649,7 +757,9 @@ lemma W2_0_d1_d0_res :
           k5Params_inv3, k5Params_inv7, k5Params_S, k5Params_Q, k5Params_T, A, B]
         ring
     rw [hsc, hpoly]
-    ext <;> simp [d1_1, iB, div_eq_mul_inv, inv_pow]; ring
+    ext
+    · simp only [Dual.mul_val, Dual.C_val, mul_zero]
+    · simp only [Dual.mul_eps, Dual.C_val, Dual.C_eps, mul_zero, add_zero, d1_1, iB, div_eq_mul_inv, inv_pow]; ring
   have hrem_d0 : remDeg3_d0 D22 D21 D20 D33 D32 D30 = ⟨0, d0_1⟩ := by
     have hsc : remDeg3_d0 D22 D21 D20 D33 D32 D30 = Dual.C (iB ^ 12) * remDeg3_d0 D22 D21_s D20_s D33 D32_s D30_s := by
       simp only [remDeg3_d0, hD21_sc, hD20_sc, hD32_sc, hD30_sc]
@@ -666,21 +776,31 @@ lemma W2_0_d1_d0_res :
           (225 * S_K - 45 * Q_K + 77 * T_K - 189) * S_K ^ 8 * (-A) ^ 17⟩ := by
       ext
       · simp only [remDeg3_d0, Dual.sub_val, Dual.mul_val, hD22_v, hD21_v, hD20_v, hD33_v, hD32_v, hD30_v]; ring
-      · rw [hd0_eps_simp]
-        simp only [d22e, d21e, d20e, d33e, d32e, d30e, D22, D21_s, D20_s, D33, D32_s, D30_s, c0W_s, Wk2_s, W2k3_s,
-          Dual.add_val, Dual.sub_val, Dual.mul_val, Dual.neg_val, Dual.pow_eq,
-          Dual.add_eps, Dual.sub_eps, Dual.mul_eps, Dual.neg_eps, h2v, h2e, h3v, h3e,
-          Nat.cast_ofNat, Nat.reduceSub, pow_one,
-          q20D, q11D, q02D, c30D, c21D, c12D, c03D, caD, cbD,
-          hq20_0, hq20_1, hq11_0, hq11_1, hq02_0, hq02_1,
-          hc30_0, hc30_1, hc21_0, hc21_1, hc12_0, hc12_1, hc03_0, hc03_1,
-          hca0, hca1, hcb0, hcb1, w0n, w1n,
-          CoverParams.Bv1, CoverParams.c0_V1, CoverParams.k2_V1, CoverParams.k3_V1,
-          CoverParams.inv9, CoverParams.inv27, CoverParams.inv81, CoverParams.inv243,
-          k5Params_inv3, k5Params_inv7, k5Params_S, k5Params_Q, k5Params_T, A, B]
-        ring
+      · have hBv1 : k5Params.Bv1 =
+            143 / 243 * S_K ^ 3 - 92 / 27 * S_K ^ 2 * Q_K + 52 / 9 * S_K * Q_K ^ 2 -
+            22 / 9 * Q_K ^ 3 + 143 / 243 * T_K ^ 3 - 92 / 27 * T_K ^ 2 + 52 / 9 * T_K - 22 / 9 +
+            5 / 7 * Q_K ^ 2 + 10 / 7 * Q_K := by
+          simp only [CoverParams.Bv1, CoverParams.inv9, CoverParams.inv27, CoverParams.inv243,
+            k5Params_inv3, k5Params_inv7, k5Params_S, k5Params_Q, k5Params_T]; ring
+        have hc0V1 : k5Params.c0_V1 = 143 / 81 * T_K ^ 2 - 184 / 27 * T_K + 52 / 9 := by
+          simp only [CoverParams.c0_V1, CoverParams.inv9, CoverParams.inv27, CoverParams.inv81,
+            k5Params_inv3, k5Params_T]; ring
+        have hk2V1 : k5Params.k2_V1 = 143 / 81 * T_K - 92 / 27 := by
+          simp only [CoverParams.k2_V1, CoverParams.inv27, CoverParams.inv81,
+            k5Params_inv3, k5Params_T]; ring
+        have hk3V1 : k5Params.k3_V1 = 143 / 243 := by
+          simp only [CoverParams.k3_V1, CoverParams.inv243, k5Params_inv3]; ring
+        exact hrem_d0_eps_alg S_K Q_K T_K caD cbD q20D q11D q02D c30D c21D c12D c03D c0W_s Wk2_s W2k3_s
+          (Dual.ext hca0 hca1) (Dual.ext hcb0 hcb1) (Dual.ext hq20_0 hq20_1) (Dual.ext hq11_0 hq11_1)
+          (Dual.ext hq02_0 hq02_1) (Dual.ext hc30_0 hc30_1) (Dual.ext hc21_0 hc21_1)
+          (Dual.ext hc12_0 hc12_1) (Dual.ext hc03_0 hc03_1)
+          (by dsimp only [c0W_s, w0n, w1n, A, B]; rw [hBv1, hc0V1])
+          (by dsimp only [Wk2_s, w0n, w1n, A, B]; rw [hBv1, hk2V1])
+          (by dsimp only [W2k3_s, w0n, w1n, A, B]; rw [hBv1, hk3V1])
     rw [hsc, hpoly]
-    ext <;> simp [d0_1, iB, div_eq_mul_inv, inv_pow]; ring
+    ext
+    · simp only [Dual.mul_val, Dual.C_val, mul_zero]
+    · simp only [Dual.mul_eps, Dual.C_val, Dual.C_eps, mul_zero, add_zero, d0_1, iB, div_eq_mul_inv, inv_pow]; ring
   rw [hrem_d1] at hd1_D
   rw [hrem_d0] at hd0_D
   have hd1_L : ValLead 1 (PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d1_z)) d1_1 :=
@@ -690,7 +810,9 @@ lemma W2_0_d1_d0_res :
   have hcd_eq : d0_1 + z2 * d1_1 = cd := by
     dsimp only [d0_1, d1_1, z2, cd]
     rw [hw0_iB]
-    simp only [div_eq_mul_inv, inv_pow, w0n, iB]; ring
+    simp only [div_eq_mul_inv, inv_pow, w0n, iB]
+    clear_value A B
+    ring
   have hq2_ne : q2_0 ≠ 0 := by
     have hc : (15625 / 59049 : K5) ≠ 0 := div_ne_zero
       (by exact_mod_cast (by decide : (15625 : ℕ) ≠ 0))
@@ -711,20 +833,13 @@ lemma W2_0_d1_d0_res :
     set e2s := PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d3_2)
     set e1s := PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d3_1)
     set e0s := PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d3_0)
-    have hq2_L : ValLead 0 q2s q2_0 := hD22.toValLead.eq_c (by
-      simp only [D22, Dual.add_val, Dual.sub_val, Dual.mul_val, Dual.pow_eq,
-        q20D, q11D, q02D, caD, cbD, hq20_0, hq11_0, hq02_0, hca0, hcb0, q2_0, A]; ring)
+    have hq2_L : ValLead 0 q2s q2_0 := hD22.toValLead.eq_c hD22_v
     have hq1_L : ValLead 0 q1s (-2 * q2_0 * z2) := hD21.toValLead.eq_c (by
-      rw [hD21_sc]
-      simp only [D21_s, c0W_s, Dual.C, Dual.add_val, Dual.mul_val, Dual.neg_val, h2v,
-        q11D, q02D, caD, cbD, hq11_0, hq02_0, hca0, hcb0, z2, hw0_iB, q2_0, w0n, A, div_eq_mul_inv]
-      change iB ^ 4 * _ = _ * (-(25 / 4) * S_K * A ^ 2 * iB ^ 3 * S_K * iB); ring)
+      rw [hD21_sc, Dual.mul_val, Dual.C_val, hD21_v]
+      dsimp only [z2, q2_0]; rw [hw0_iB]; simp only [div_eq_mul_inv, iB]; ring)
     have hq0_L : ValLead 0 q0s (q2_0 * z2 ^ 2) := hD20.toValLead.eq_c (by
-      rw [hD20_sc]
-      simp only [D20_s, c0W_s, Wk2_s, Dual.C, Dual.add_val, Dual.mul_val, Dual.pow_eq,
-        q02D, cbD, hq02_0, hcb0, z2, hw0_iB, q2_0, w0n, A, div_eq_mul_inv]
-      change iB ^ 8 * _ = _ * (-(25 / 4) * S_K * A ^ 2 * iB ^ 3 * S_K * iB) ^ 2; ring)
-    have hqs := q2_sq_mul_syl5 q2s q1s q0s e3s e2s e1s e0s
+      rw [hD20_sc, Dual.mul_val, Dual.C_val, hD20_v]
+      dsimp only [z2, q2_0]; rw [hw0_iB]; simp only [div_eq_mul_inv, iB]; ring)
     have hres_eq : PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.res_z) =
         syl5 q2s q1s q0s e3s e2s e1s e0s := by
       rw [CoverParams.res_z, map_syl5Pair]
@@ -737,30 +852,8 @@ lemma W2_0_d1_d0_res :
         remDeg3_d0 q2s q1s q0s e3s e2s e0s := by
       simp only [CoverParams.d0_z, CoverParams.pmul, PairAlg.map_sub, PairAlg.map_mul,
         PairAlg.evalAt_sub, PairAlg.evalAt_mul _ _ W2_0 W2_0_eq, remDeg3_d0]; rfl
-    have hrhs_L : ValLead 2 (q2s * PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d0_z) ^ 2 -
-        PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d0_z) *
-          PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d1_z) * q1s +
-        PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d1_z) ^ 2 * q0s) (q2_0 * cd ^ 2) := by
-      have ht1 : ValLead 2 (q2s * PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d0_z) ^ 2)
-          (q2_0 * d0_1 ^ 2) := (hq2_L.mul (hd0_L.pow 2)).eq_k (by omega)
-      have ht2 : ValLead 2 (PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d0_z) *
-          PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d1_z) * q1s)
-          (d0_1 * d1_1 * (-2 * q2_0 * z2)) := ((hd0_L.mul hd1_L).mul hq1_L).eq_k (by omega)
-      have ht3 : ValLead 2 (PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d1_z) ^ 2 * q0s)
-          (d1_1 ^ 2 * (q2_0 * z2 ^ 2)) := ((hd1_L.pow 2).mul hq0_L).eq_k (by omega)
-      refine ((ht1.sub ht2).add ht3).eq_c ?_
-      rw [← hcd_eq]; ring
-    have hq2sq_L : ValLead 0 (q2s ^ 2) (q2_0 ^ 2) := (hq2_L.pow 2).eq_k (by omega)
-    have hq2s_ne : q2s ^ 2 ≠ 0 := fun h0 => pow_ne_zero 2 hq2_ne (by rw [← hq2sq_L.c0, h0]; rfl)
-    have hdiv : PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.res_z) =
-        (q2s * PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d0_z) ^ 2 -
-          PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d0_z) *
-            PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d1_z) * q1s +
-          PairAlg.evalAt W2_0 (PairAlg.map evalT k5Params.d1_z) ^ 2 * q0s) / q2s ^ 2 := by
-      rw [hres_eq, eq_div_iff hq2s_ne, _root_.mul_comm, hqs, hd1_eq, hd0_eq]; rfl
-    rw [hdiv]
-    exact (hrhs_L.div_of_ne hq2sq_L (pow_ne_zero 2 hq2_ne)).eq_k (by omega) |>.eq_c (by
-      field_simp [hq2_ne])
+    rw [hres_eq]
+    exact valLead_syl5_of_rem hq2_L hq1_L hq0_L hd1_L hd0_L hd1_eq hd0_eq hcd_eq hq2_ne
   exact ⟨hd1_L, hd0_L, hcd_eq, hres_L, hcd_ne, hq2_ne⟩
 
 lemma nm_z_coeff15_ne : (evalT k5Params.nm_z).coeff 15 ≠ 0 := by
