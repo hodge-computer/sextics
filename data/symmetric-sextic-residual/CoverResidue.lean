@@ -1,4 +1,5 @@
 import Proposal.CoverAlgebra
+import Proposal.SheetCalculus
 import HodgeComputer.Constructions.QuadraticCovers.RationalCoverResidues
 import Mathlib.RingTheory.AdjoinRoot
 import Mathlib.FieldTheory.SplittingField.Construction

@@ -2029,7 +2029,7 @@ private lemma br1_inf_g_valLead {W1s U V ca cb c0W : LaurentSeries K5} {w0 : K5}
     have ht1 : ValLead (-1) _ _ := ((hH0_L.mul hA1_L).mul hqY_L).eq_k (by omega)
     have ht2 : ValLead (-1) _ _ := ((hH0_L.mul hB1_L).mul hqX_L).eq_k (by omega)
     have ht3 : ValLead (-1) _ _ := ((hcA1_L.div_of_ne hv_L hneg19_ne).mul hEB_L).eq_k (by omega)
-    refine valLead_eq_fc ((ht1.add ht2).add ht3) rfl ?_
+    refine valLead_eq_fc ((ht1.add ht2).add ht3) (by ring) ?_
     have hS3Q_e : ringEval vK5 S3Q_e = S3Q := rfl
     have hT59_e : ringEval vK5 T59_e = T59 := rfl
     simp only [q1_m1_u1_biv, q1_m1_u0_biv, evalBivK5_bscE, evalBivK5_bivAdd, ringEval,
@@ -2360,7 +2360,7 @@ private lemma br1_inf_q1_lead1_valDual {U V aa ab b0s : LaurentSeries K5} {w0 w1
       dsimp only [hqY, dot_ab]; ring
     rw [heq]
     have hnum : ValDual (-1) _ _ := (((hQY_D 0).mul haa_D).eq_k (k' := -1) (by omega)).add (((hQY_D 1).mul hab_D).eq_k (k' := -1) (by omega))
-    refine valDual_eq_fd ((hnum.div_of_ne hv_D hneg19_ne).eq_k (k' := -1) (by omega)) rfl ?_
+    refine valDual_eq_fd ((hnum.div_of_ne hv_D hneg19_ne).eq_k (k' := -1) (by omega)) (by ring) ?_
     exact (dual_div_eq_iff _ _ _ hneg19_ne).mpr (by
       have hqy0 : 3 * evalBivK5 (QY10_biv 0) + evalBivK5 (QY10_biv 1) = 0 := by
         rw [evalBivK5_QY10, evalBivK5_QY10]; linear_combination 1701 * QY_10_u1_zero S_K Q_K T_K x_K y_K
@@ -2378,7 +2378,7 @@ private lemma br1_inf_q1_lead1_valDual {U V aa ab b0s : LaurentSeries K5} {w0 w1
       dsimp only [hqX, dot_ab]; ring
     rw [heq]
     have hnum : ValDual (-1) _ _ := (((hQX_D 0).mul haa_D).eq_k (k' := -1) (by omega)).add (((hQX_D 1).mul hab_D).eq_k (k' := -1) (by omega))
-    refine valDual_eq_fd ((hnum.div_of_ne hu_D h19_ne).eq_k (k' := 0) (by omega)) rfl ?_
+    refine valDual_eq_fd ((hnum.div_of_ne hu_D h19_ne).eq_k (k' := 0) (by omega)) (by ring) ?_
     exact (dual_div_eq_iff _ _ _ h19_ne).mpr (by
       have hBv1_1701 : ringEval vK5 Bv1_1701_exact_e = 1701 * k5Params.Bv1 := by
         simp only [Bv1_1701_exact_e, ringEval, eS, eQ, eT, vK5, CoverParams.Bv1, CoverParams.inv9,
@@ -2467,7 +2467,7 @@ private lemma br1_inf_q1_lead1_valDual {U V aa ab b0s : LaurentSeries K5} {w0 w1
     have hcA1_l1 : ValDual 0 _ _ := ((((hH0_D.mul hdA1_0_D).sub (hA1_D.mul (hdH0_D 0))).mul haa_D).eq_k (by omega)).add
       ((((hH0_D.mul hdA1_1_D).sub (hA1_D.mul (hdH0_D 1))).mul hab_D).eq_k (by omega))
     have ht3 : ValDual (-1) _ _ := ((hcA1_l1.div_of_ne hv_D hneg19_ne).mul hEB_D).eq_k (by omega)
-    refine valDual_eq_fd ((ht1.add ht2).add ht3) rfl ?_
+    refine valDual_eq_fd ((ht1.add ht2).add ht3) (by ring) ?_
     ext
     · simp only [Dual.add_val, Dual.mul_val, Dual.sub_val, Dual.C_val, Dual.invOfNe,
         q1_m1_u1_biv, evalBivK5_bscE, evalBivK5_bivAdd, ringEval, T59_e, eT, vK5, dH0_301_21_e, T59]
@@ -2960,6 +2960,7 @@ private lemma br1_inf_combine_K5 {w0 : K5}
   set eQX0 := evalBivK5 cQX_0_biv
   set eH0 := ringEval vK5 H0_int_e
   set eRInf := evalBivK5 RInf_biv
+  clear_value eP44 eM01 eA32_2 eA32_1 eLin eQ1_0 eQ1_1 eQ1_u0 eQX0 eH0 eRInf
   change M_c * S3Q * T_K ^ 2 * T59 ^ 3 * L_K ^ 2 *
       ((cA4v * T_K * T59 ^ 2 / (S3Q ^ 8 * L_K) *
           ((cwi * S3Q ^ 3 / (T_K * T59 ^ 2)) ^ 3 * (c73 * T59 * S3Q ^ 2) * (eQ1_0 / (28 * 107163 * S3Q ^ 3)) +
