@@ -1,0 +1,896 @@
+import Proposal.GeometricVariation
+import Proposal.GeometricHiggsStrictGrowth
+import Mathlib.Data.Fin.Rev
+import Mathlib.LinearAlgebra.Prod
+import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
+
+import Mathlib.LinearAlgebra.Matrix.Rank
+import Mathlib.LinearAlgebra.Matrix.NonsingularInverse
+import Mathlib.RingTheory.Valuation.ValuationSubring
+import Mathlib.RingTheory.LocalRing.ResidueField.Basic
+import Mathlib.RingTheory.Noetherian.Basic
+import HodgeComputer.Constructions.HoldoutCover.Piola
+
+/-!
+# The Fermat Higgs maps grow strictly
+
+A cycle visiting all 33 upper labels gives two matchings of upper labels
+with lower labels. Lower labels are reversed from the complementary
+socle order so that each partial multiplication is increasing.
+The cycle uses the very same complement table as the Fermat matrices.
+
+Prepared for fqlx with OpenAI ChatGPT assistance. See solution.md.
+-/
+
+set_option autoImplicit false
+noncomputable section
+namespace CycleQ2FermatStrictGrowth
+
+open CycleQ2FermatHiggs CycleQ2HiggsStrictGrowth
+
+/-- The output row is indexed in increasing lower monomial order. -/
+def ordered (K : Type*) [Zero K] [One K] (m : Fin 35) :
+    Matrix (Fin 33) (Fin 33) K :=
+  fun j i => higgsMatrix K m i j.rev
+
+private def successor : Fin 33 → Fin 33 := ![10, 6, 32, 26, 18, 28, 31, 16, 14, 13, 21, 30, 29, 22, 27, 9, 15, 23, 12, 2, 17, 1, 20, 24, 25, 0, 11, 19, 7, 3, 5, 8, 4]
+private def predecessor : Fin 33 → Fin 33 := ![25, 21, 19, 29, 32, 30, 1, 28, 31, 15, 0, 26, 18, 9, 8, 16, 7, 20, 4, 27, 22, 10, 13, 17, 23, 24, 3, 14, 5, 12, 11, 6, 2]
+
+private def cycle : Fin 33 ≃ Fin 33 where
+  toFun := successor
+  invFun := predecessor
+  left_inv := by decide
+  right_inv := by decide
+
+private def forward : Fin 33 ≃ Fin 33 := cycle.trans Fin.revPerm
+private def backward : Fin 33 ≃ Fin 33 := cycle.symm.trans Fin.revPerm
+
+private theorem next_edge : ∀ i : Fin 33, ∃ m : Fin 35, complement m i = some (successor i) := by
+  decide +kernel
+
+private theorem prev_edge : ∀ i : Fin 33, ∃ m : Fin 35, complement m i = some (predecessor i) := by
+  decide +kernel
+
+private theorem orbit_zero : ∀ j : Fin 33, ∃ n : Fin 33, ((backward.trans forward.symm)^[n.val]) 0 = j := by
+  decide +kernel
+
+private theorem loop : ((backward.trans forward.symm)^[33]) (0 : Fin 33) = 0 := by
+  decide +kernel
+
+private theorem connected (i j : Fin 33) : ∃ n : ℕ, ((backward.trans forward.symm)^[n]) i = j := by
+  obtain ⟨a, ha⟩ := orbit_zero i
+  obtain ⟨b, hb⟩ := orbit_zero j
+  let e := backward.trans forward.symm
+  have hi : (e^[33 - a.val]) i = 0 := by
+    rw [← ha, ← Function.iterate_add_apply, Nat.sub_add_cancel a.isLt.le]
+    exact loop
+  refine ⟨b.val + (33 - a.val), ?_⟩
+  change (e^[b.val + (33 - a.val)]) i = j
+  rw [Function.iterate_add_apply, hi]
+  exact hb
+
+private theorem entry_iff (K : Type*) [Field K] (m : Fin 35) (i j : Fin 33) :
+    ordered K m j i ≠ 0 ↔ complement m i = some j.rev := by
+  unfold ordered higgsMatrix
+  split <;> simp_all
+
+private def Increases (m : Fin 35) (i i' : Fin 33) : Prop :=
+  match complement m i, complement m i' with
+  | some j, some j' => i < i' → j.rev < j'.rev
+  | _, _ => True
+
+private instance (m : Fin 35) (i i' : Fin 33) : Decidable (Increases m i i') := by
+  unfold Increases
+  split <;> infer_instance
+
+private theorem increases (m : Fin 35) : ∀ i i' : Fin 33, Increases m i i' := by
+  fin_cases m <;> decide +kernel
+
+variable (K : Type*) [Field K]
+
+private theorem forward_edge (i : Fin 33) : Edge (ordered K) i (forward i) := by
+  obtain ⟨m, hm⟩ := next_edge i
+  refine ⟨m, (entry_iff K m i _).mpr ?_⟩
+  change complement m i = some (successor i).rev.rev
+  rwa [Fin.rev_rev]
+
+private theorem backward_edge (i : Fin 33) : Edge (ordered K) i (backward i) := by
+  obtain ⟨m, hm⟩ := prev_edge i
+  refine ⟨m, (entry_iff K m i _).mpr ?_⟩
+  change complement m i = some (predecessor i).rev.rev
+  rwa [Fin.rev_rev]
+
+private theorem column_unique (m : Fin 35) (i j j' : Fin 33)
+    (hj : ordered K m j i ≠ 0) (hj' : ordered K m j' i ≠ 0) : j = j' := by
+  apply Fin.rev_injective
+  exact Option.some.inj (((entry_iff K m i j).mp hj).symm.trans ((entry_iff K m i j').mp hj'))
+
+private theorem order_preserving (m : Fin 35) (i i' j j' : Fin 33) (hi : i < i')
+    (hj : ordered K m j i ≠ 0) (hj' : ordered K m j' i' ≠ 0) : j < j' := by
+  have h := increases m i i'
+  unfold Increases at h
+  rw [(entry_iff K m i j).mp hj, (entry_iff K m i' j').mp hj'] at h
+  simpa only [Fin.rev_rev] using h hi
+
+/-- All images of a space have total rank at least its original rank, with strict
+growth for every nonzero proper space. -/
+def RankGrowth (M : Fin 35 → Matrix (Fin 33) (Fin 33) K) : Prop :=
+  ∀ W V : Submodule K (Fin 33 → K),
+    (∀ (m : Fin 35) (x : Fin 33 → K), x ∈ W → (M m).mulVec x ∈ V) →
+    Module.finrank K W ≤ Module.finrank K V ∧
+      (0 < Module.finrank K W → Module.finrank K W < 33 → Module.finrank K W < Module.finrank K V)
+
+private theorem growth_of_matchings (M : Fin 35 → Matrix (Fin 33) (Fin 33) K)
+    (μ τ : Fin 33 ≃ Fin 33) (hμ : ∀ i, Edge M i (μ i)) (hτ : ∀ i, Edge M i (τ i))
+    (hc : ∀ i j, ∃ n : ℕ, ((τ.trans μ.symm)^[n]) i = j)
+    (cu : ∀ m i j j', M m j i ≠ 0 → M m j' i ≠ 0 → j = j')
+    (incr : ∀ m i i' j j', i < i' → M m j i ≠ 0 → M m j' i' ≠ 0 → j < j') :
+    RankGrowth K M := by
+  classical
+  intro W V hmap
+  have hs := neighbors_pivots_subset M W V cu incr hmap
+  have sub : (pivots W).image μ ⊆ neighbors M (pivots W) := by
+    intro j hj
+    obtain ⟨i,hi,rfl⟩ := Finset.mem_image.mp hj
+    exact (mem_neighbors M _ _).mpr ⟨i,hi,hμ i⟩
+  constructor
+  · have h := Finset.card_le_card (sub.trans hs)
+    simpa only [Finset.card_image_of_injective _ μ.injective, card_pivots] using h
+  · intro hpos hproper
+    have he := card_pivots W
+    have hne : (pivots W).Nonempty := Finset.card_pos.mp (he.symm ▸ hpos)
+    have hnot : pivots W ≠ Finset.univ := by
+      intro h
+      rw [h, Finset.card_univ, Fintype.card_fin] at he
+      exact (Nat.ne_of_lt hproper) he.symm
+    have h := (card_lt_neighbors M μ τ hμ hτ hc _ hne hnot).trans_le (Finset.card_le_card hs)
+    simpa only [card_pivots] using h
+
+private theorem weighted_forward (M : Fin 35 → Matrix (Fin 33) (Fin 33) K)
+    (h : ∀ m i j, M m j i ≠ 0 ↔ ordered K m j i ≠ 0) : RankGrowth K M := by
+  have edge {i j : Fin 33} (e : Edge (ordered K) i j) : Edge M i j := by
+    obtain ⟨m,hm⟩ := e
+    exact ⟨m,(h m i j).mpr hm⟩
+  exact growth_of_matchings K M forward backward (fun i => edge (forward_edge K i))
+    (fun i => edge (backward_edge K i)) connected
+    (fun m i j j' a b => column_unique K m i j j' ((h ..).mp a) ((h ..).mp b))
+    (fun m i i' j j' lt a b => order_preserving K m i i' j j' lt ((h ..).mp a) ((h ..).mp b))
+
+private theorem weighted_reverse (M : Fin 35 → Matrix (Fin 33) (Fin 33) K)
+    (h : ∀ m i j, M m i j ≠ 0 ↔ ordered K m j i ≠ 0) : RankGrowth K M := by
+  have edge {i j : Fin 33} (e : Edge (ordered K) i j) : Edge M j i := by
+    obtain ⟨m,hm⟩ := e
+    exact ⟨m,(h m i j).mpr hm⟩
+  apply growth_of_matchings K M backward.symm forward.symm
+  · intro i
+    simpa using edge (backward_edge K (backward.symm i))
+  · intro i
+    simpa using edge (forward_edge K (forward.symm i))
+  · intro i j
+    obtain ⟨n,hn⟩ := connected (forward.symm i) (forward.symm j)
+    have hsc : Function.Semiconj forward (backward.trans forward.symm) (forward.symm.trans backward) :=
+      fun x => by simp
+    refine ⟨n, ?_⟩
+    simpa using ((hsc.iterate_right n (forward.symm i)).symm.trans (congrArg forward hn))
+  · intro m i j j' a b
+    rcases lt_trichotomy j j' with lt | eq | gt
+    · exact (lt_irrefl i (order_preserving K m j j' i i lt ((h ..).mp a) ((h ..).mp b))).elim
+    · exact eq
+    · exact (lt_irrefl i (order_preserving K m j' j i i gt ((h ..).mp b) ((h ..).mp a))).elim
+  · intro m i i' j j' hii a b
+    rcases lt_trichotomy j j' with lt | rfl | gt
+    · exact lt
+    · exact (hii.ne (column_unique K m j i i' ((h ..).mp a) ((h ..).mp b))).elim
+    · exact (hii.not_gt (order_preserving K m j' j i' i gt ((h ..).mp b) ((h ..).mp a))).elim
+
+open CycleQ2FermatVariationAlgebra (lowerExponent)
+
+/-- An upper monomial times a tangent monomial equals the specified lower monomial
+when the exponents add in every coordinate. The lower labels use the checked socle basis. -/
+def exponentEdge (m : Fin 35) (i j : Fin 33) : Prop :=
+  ∀ k, basisMonomial i k + tangentMonomial m k = lowerExponent j.rev k
+
+theorem exponentEdge_iff_complement (m : Fin 35) (i j : Fin 33) :
+    exponentEdge m i j ↔ complement m i = some j.rev := by
+  rw [complement_spec]
+  constructor <;> intro h k <;> specialize h k <;> unfold lowerExponent at * <;>
+    have hb := (basis_properties j.rev).2.2 k <;> omega
+
+private theorem ordered_exponent (m : Fin 35) (i j : Fin 33) :
+    ordered K m j i ≠ 0 ↔ exponentEdge m i j :=
+  (entry_iff K m i j).trans (exponentEdge_iff_complement m i j).symm
+
+/-- Upper-to-lower addition with arbitrary nonzero coefficients on the Fermat edges. -/
+theorem weighted_forward_growth (M : Fin 35 → Matrix (Fin 33) (Fin 33) K)
+    (h : ∀ m i j, M m j i ≠ 0 ↔ exponentEdge m i j) : RankGrowth K M :=
+  weighted_forward K M fun m i j => (h m i j).trans (ordered_exponent K m i j).symm
+
+/-- Lower-to-upper subtraction with arbitrary nonzero coefficients on the reverse edges. -/
+theorem weighted_reverse_growth (M : Fin 35 → Matrix (Fin 33) (Fin 33) K)
+    (h : ∀ m i j, M m i j ≠ 0 ↔ exponentEdge m i j) : RankGrowth K M :=
+  weighted_reverse K M fun m i j => (h m i j).trans (ordered_exponent K m i j).symm
+
+/-- Subtraction in the lower monomial exists precisely on the same Fermat edges. -/
+theorem exponentEdge_iff_sub (m : Fin 35) (i j : Fin 33) :
+    exponentEdge m i j ↔ ∀ k, tangentMonomial m k ≤ lowerExponent j.rev k ∧
+      lowerExponent j.rev k - tangentMonomial m k = basisMonomial i k := by
+  constructor <;> intro h k <;> specialize h k <;> omega
+
+/-- A pair of ranks preserved in opposite directions over two fields must be either
+zero in both pieces or full in both pieces when both reductions have strict growth. -/
+theorem opposite_rank_dichotomy {L : Type*} [Field L]
+    {F : Fin 35 → Matrix (Fin 33) (Fin 33) K} {G : Fin 35 → Matrix (Fin 33) (Fin 33) L}
+    (hF : RankGrowth K F) (hG : RankGrowth L G)
+    (U V : Submodule K (Fin 33 → K)) (U' V' : Submodule L (Fin 33 → L))
+    (fu : ∀ m x, x ∈ U → (F m).mulVec x ∈ V)
+    (gv : ∀ m x, x ∈ V' → (G m).mulVec x ∈ U')
+    (hu : Module.finrank K U = Module.finrank L U')
+    (hv : Module.finrank K V = Module.finrank L V') :
+    (Module.finrank K U = 0 ∧ Module.finrank K V = 0) ∨
+      (Module.finrank K U = 33 ∧ Module.finrank K V = 33) := by
+  obtain ⟨huv,hstrict⟩ := hF U V fu
+  have hvu := (hG V' U' gv).1
+  rw [← hu, ← hv] at hvu
+  have bound := Submodule.finrank_le U
+  rw [Module.finrank_pi, Fintype.card_fin] at bound
+  by_cases hz : Module.finrank K U = 0
+  · exact Or.inl ⟨hz, by omega⟩
+  · by_contra! contrary
+    have mid : Module.finrank K U < 33 := by omega
+    have lt := hstrict (Nat.pos_of_ne_zero hz) mid
+    omega
+
+section TotalSpace
+
+abbrev Piece := Fin 33 → K
+abbrev Total := Piece K × Piece K
+
+abbrev upperProjection (W : Submodule K (Total K)) := W.map (LinearMap.fst K (Piece K) (Piece K))
+abbrev lowerProjection (W : Submodule K (Total K)) := W.map (LinearMap.snd K (Piece K) (Piece K))
+abbrev upperIntersection (W : Submodule K (Total K)) := W.comap (LinearMap.inl K (Piece K) (Piece K))
+abbrev lowerIntersection (W : Submodule K (Total K)) := W.comap (LinearMap.inr K (Piece K) (Piece K))
+
+/-- Ranks of the two coordinate projections followed by the intersections with the two axes. -/
+def rankProfile (W : Submodule K (Total K)) : Fin 4 → ℕ :=
+  ![Module.finrank K (upperProjection K W), Module.finrank K (lowerProjection K W),
+    Module.finrank K (upperIntersection K W), Module.finrank K (lowerIntersection K W)]
+
+private theorem projected_rank_add_intersection (W : Submodule K (Total K))
+    (p : Total K →ₗ[K] Piece K) (a : Piece K →ₗ[K] Total K)
+    (ha : Function.Injective a) (hk : LinearMap.ker p = LinearMap.range a) :
+    Module.finrank K (W.map p) + Module.finrank K (W.comap a) = Module.finrank K W := by
+  let pW := p.comp W.subtype
+  have hp : LinearMap.range pW = W.map p := by
+    dsimp only [pW]
+    rw [LinearMap.range_comp, Submodule.range_subtype]
+  have hs : (LinearMap.ker pW).map W.subtype = (W.comap a).map a := by
+    dsimp only [pW]
+    rw [LinearMap.ker_comp, Submodule.map_comap_eq, Submodule.map_comap_eq,
+      Submodule.range_subtype, hk, inf_comm]
+  have hker : Module.finrank K (LinearMap.ker pW) = Module.finrank K (W.comap a) := by
+    calc
+      _ = Module.finrank K ((LinearMap.ker pW).map W.subtype) :=
+        (Submodule.equivMapOfInjective W.subtype W.subtype_injective _).finrank_eq
+      _ = Module.finrank K ((W.comap a).map a) := congrArg (fun S : Submodule K (Total K) => Module.finrank K S) hs
+      _ = _ := (Submodule.equivMapOfInjective a ha _).finrank_eq.symm
+  have h := pW.finrank_range_add_finrank_ker
+  rw [hp,hker] at h
+  exact h
+
+theorem upper_rank_decomposition (S : Submodule K (Total K)) :
+      Module.finrank K (upperProjection K S) + Module.finrank K (lowerIntersection K S) =
+        Module.finrank K S :=
+    projected_rank_add_intersection K S _ _ (LinearMap.inr_injective ..) (LinearMap.ker_fst ..)
+
+theorem lower_rank_decomposition (S : Submodule K (Total K)) :
+      Module.finrank K (lowerProjection K S) + Module.finrank K (upperIntersection K S) =
+        Module.finrank K S :=
+    projected_rank_add_intersection K S _ _ (LinearMap.inl_injective ..) (LinearMap.ker_snd ..)
+
+/-- Stability of total rank and of the two projection ranks suffices to specialize all four
+entries of the rank profile, by rank-nullity of each restricted projection. -/
+theorem rankProfile_eq_of_projection_ranks {L : Type*} [Field L]
+    (W : Submodule K (Total K)) (W' : Submodule L (Total L))
+    (hd : Module.finrank K W = Module.finrank L W')
+    (hu : Module.finrank K (upperProjection K W) = Module.finrank L (upperProjection L W'))
+    (hl : Module.finrank K (lowerProjection K W) = Module.finrank L (lowerProjection L W')) :
+    rankProfile K W = rankProfile L W' := by
+  have hU := upper_rank_decomposition K W
+  have hU' := upper_rank_decomposition L W'
+  have hL := lower_rank_decomposition K W
+  have hL' := lower_rank_decomposition L W'
+  funext i
+  fin_cases i
+  · exact hu
+  · exact hl
+  · change Module.finrank K (upperIntersection K W) = Module.finrank L (upperIntersection L W')
+    omega
+  · change Module.finrank K (lowerIntersection K W) = Module.finrank L (lowerIntersection L W')
+    omega
+
+private theorem bot_of_projections (W : Submodule K (Total K))
+    (hu : Module.finrank K (upperProjection K W) = 0)
+    (hl : Module.finrank K (lowerProjection K W) = 0) : W = ⊥ := by
+  have hU := Submodule.finrank_eq_zero.mp hu
+  have hL := Submodule.finrank_eq_zero.mp hl
+  apply W.eq_bot_iff.mpr
+  intro x hx
+  have u : x.1 ∈ upperProjection K W := ⟨x,hx,rfl⟩
+  have l : x.2 ∈ lowerProjection K W := ⟨x,hx,rfl⟩
+  exact Prod.ext (hU ▸ u : x.1 ∈ (⊥ : Submodule K (Piece K)))
+    (hL ▸ l : x.2 ∈ (⊥ : Submodule K (Piece K)))
+
+private theorem top_of_intersections (W : Submodule K (Total K))
+    (hu : 33 ≤ Module.finrank K (upperIntersection K W))
+    (hl : 33 ≤ Module.finrank K (lowerIntersection K W)) : W = ⊤ := by
+  have full (A : Submodule K (Piece K)) (h : 33 ≤ Module.finrank K A) : A = ⊤ := by
+    apply Submodule.eq_top_of_finrank_eq
+    exact le_antisymm (Submodule.finrank_le A) (by simpa only [Piece, Module.finrank_pi, Fintype.card_fin] using h)
+  apply top_unique
+  rintro ⟨u,l⟩ _
+  have a : u ∈ upperIntersection K W := full _ hu ▸ Submodule.mem_top
+  have b : l ∈ lowerIntersection K W := full _ hl ▸ Submodule.mem_top
+  change (u,0) ∈ W at a
+  change (0,l) ∈ W at b
+  simpa using W.add_mem a b
+
+/-- Forward and reverse blocks in two specializations force an arbitrary invariant space to be
+zero or full when its two projection ranks and its two axis-intersection ranks specialize equally. -/
+theorem nonsplit_dichotomy {L : Type*} [Field L]
+    {F : Fin 35 → Matrix (Fin 33) (Fin 33) K} {G : Fin 35 → Matrix (Fin 33) (Fin 33) L}
+    (hF : RankGrowth K F) (hG : RankGrowth L G)
+    (W : Submodule K (Total K)) (W' : Submodule L (Total L))
+    (forward_stable : ∀ m x, x ∈ W → (0,(F m).mulVec x.1) ∈ W)
+    (reverse_stable : ∀ m x, x ∈ W' → ((G m).mulVec x.2,0) ∈ W')
+    (hr : rankProfile K W = rankProfile L W') :
+    (W = ⊥ ∧ W' = ⊥) ∨ (W = ⊤ ∧ W' = ⊤) := by
+  have pU : Module.finrank K (upperProjection K W) = Module.finrank L (upperProjection L W') :=
+    congrFun hr 0
+  have pL : Module.finrank K (lowerProjection K W) = Module.finrank L (lowerProjection L W') :=
+    congrFun hr 1
+  have iU : Module.finrank K (upperIntersection K W) = Module.finrank L (upperIntersection L W') :=
+    congrFun hr 2
+  have iL : Module.finrank K (lowerIntersection K W) = Module.finrank L (lowerIntersection L W') :=
+    congrFun hr 3
+  have f : ∀ m x, x ∈ upperProjection K W → (F m).mulVec x ∈ lowerIntersection K W := by
+    rintro m _ ⟨x,hx,rfl⟩
+    exact forward_stable m x hx
+  have g : ∀ m x, x ∈ lowerProjection L W' → (G m).mulVec x ∈ upperIntersection L W' := by
+    rintro m _ ⟨x,hx,rfl⟩
+    exact reverse_stable m x hx
+  have toLower : lowerIntersection K W ≤ lowerProjection K W := fun x hx => ⟨(0,x),hx,rfl⟩
+  have toUpper : upperIntersection L W' ≤ upperProjection L W' := fun x hx => ⟨(x,0),hx,rfl⟩
+  obtain (hz | hf) := opposite_rank_dichotomy K hF hG _ _ _ _
+    (fun m x hx => toLower (f m x hx)) (fun m x hx => toUpper (g m x hx)) pU pL
+  · exact Or.inl ⟨bot_of_projections K W hz.1 hz.2,
+      bot_of_projections L W' (pU.symm.trans hz.1) (pL.symm.trans hz.2)⟩
+  · have lfull := (hF _ _ f).1
+    have ufull := (hG _ _ g).1
+    rw [hf.1] at lfull
+    rw [← pL,hf.2] at ufull
+    exact Or.inr ⟨top_of_intersections K W (iU.symm ▸ ufull) lfull,
+      top_of_intersections L W' ufull (iL ▸ lfull)⟩
+
+end TotalSpace
+
+theorem strict_growth (W V : Submodule K (Fin 33 → K))
+    (hmap : ∀ (m : Fin 35) (x : Fin 33 → K), x ∈ W → (ordered K m).mulVec x ∈ V)
+    (hpos : 0 < Module.finrank K W) (hproper : Module.finrank K W < 33) :
+    Module.finrank K W < Module.finrank K V :=
+  ((weighted_forward K (ordered K) (fun _ _ _ => Iff.rfl)) W V hmap).2 hpos hproper
+
+/-- The images of the full upper space span all lower coordinates. -/
+theorem full_span (V : Submodule K (Fin 33 → K))
+    (hmap : ∀ (m : Fin 35) (x : Fin 33 → K), (ordered K m).mulVec x ∈ V) : V = ⊤ := by
+  apply Submodule.eq_top_of_finrank_eq
+  have h := ((weighted_forward K (ordered K) (fun _ _ _ => Iff.rfl))
+    ⊤ V (fun m x _ => hmap m x)).1
+  rw [finrank_top] at h
+  exact le_antisymm (Submodule.finrank_le V) h
+
+/-- In a Higgs-stable pair with lower dimension at most the upper
+dimension, both spaces are zero or both spaces are full. -/
+theorem stable_pair_trivial (W V : Submodule K (Fin 33 → K))
+    (hmap : ∀ (m : Fin 35) (x : Fin 33 → K), x ∈ W → (ordered K m).mulVec x ∈ V)
+    (hrank : Module.finrank K V ≤ Module.finrank K W) :
+    (W = ⊥ ∧ V = ⊥) ∨ (W = ⊤ ∧ V = ⊤) := by
+  by_cases hzero : W = ⊥
+  · left
+    refine ⟨hzero, Submodule.finrank_eq_zero.mp ?_⟩
+    rw [hzero, finrank_bot] at hrank
+    exact Nat.eq_zero_of_le_zero hrank
+  by_cases hfull : W = ⊤
+  · right
+    refine ⟨hfull, full_span K V ?_⟩
+    intro m x
+    exact hmap m x (hfull ▸ Submodule.mem_top)
+  · have h := Submodule.finrank_lt hfull
+    rw [Module.finrank_pi, Fintype.card_fin] at h
+    have hz : 0 < Module.finrank K W :=
+      Nat.pos_of_ne_zero (fun hz => hzero (Submodule.finrank_eq_zero.mp hz))
+    exact (not_lt_of_ge hrank (strict_growth K W V hmap hz h)).elim
+
+end CycleQ2FermatStrictGrowth
+
+#print axioms CycleQ2FermatStrictGrowth.strict_growth
+#print axioms CycleQ2FermatStrictGrowth.stable_pair_trivial
+
+#print axioms CycleQ2FermatStrictGrowth.weighted_forward_growth
+#print axioms CycleQ2FermatStrictGrowth.weighted_reverse_growth
+#print axioms CycleQ2FermatStrictGrowth.opposite_rank_dichotomy
+#print axioms CycleQ2FermatStrictGrowth.nonsplit_dichotomy
+#print axioms CycleQ2FermatStrictGrowth.rankProfile_eq_of_projection_ranks
+
+namespace CycleQ2FermatValuationFrame
+
+open Matrix
+
+variable {K Γ : Type*} [Field K] [LinearOrderedCommGroupWithZero Γ] (v : Valuation K Γ)
+variable {n d : ℕ}
+
+private theorem exists_minor (A : Matrix (Fin n) (Fin d) K) (ha : A.rank = d) :
+    ∃ I : Fin d → Fin n, (A.submatrix I id).det ≠ 0 := by
+  classical
+  have hd : Module.finrank K (Submodule.span K (Set.range A.row)) = d :=
+    A.rank_eq_finrank_span_row.symm.trans ha
+  have b := Submodule.exists_fun_fin_finrank_span_eq K (Set.range A.row)
+  rw [hd] at b
+  obtain ⟨b,hb,_,hli⟩ := b
+  choose I hI using hb
+  refine ⟨I, ?_⟩
+  apply IsUnit.ne_zero
+  apply (Matrix.isUnit_iff_isUnit_det _).mp
+  apply Matrix.linearIndependent_rows_iff_isUnit.mp
+  have hrows : (A.submatrix I id).row = b := funext hI
+  rwa [hrows]
+
+private theorem det_replace (D : Matrix (Fin n) (Fin d) K) (I : Fin d → Fin n)
+    (hI : D.submatrix I id = 1) (j : Fin d) (i : Fin n) :
+    (D.submatrix (Function.update I j i) id).det = D i j := by
+  classical
+  have h : D.submatrix (Function.update I j i) id = (1 : Matrix (Fin d) (Fin d) K).updateRow j (D i) := by
+    ext k l
+    by_cases eq : k = j
+    · subst k
+      simp [Matrix.submatrix_apply]
+    · rw [Matrix.updateRow_ne eq]
+      simp only [Matrix.submatrix_apply, Function.update_of_ne eq, id_eq]
+      exact congrArg (fun B : Matrix (Fin d) (Fin d) K => B k l) hI
+  rw [h, ← Matrix.cramer_transpose_apply, Matrix.transpose_one, Matrix.cramer_one]
+  rfl
+
+/-- A full column-rank matrix over a valued field has a basis of the same column space
+in the valuation ring with a specified identity row minor. -/
+theorem exists_integral_frame (A : Matrix (Fin n) (Fin d) K) (ha : A.rank = d) :
+    ∃ (I : Fin d → Fin n) (P : Matrix (Fin n) (Fin d) v.valuationSubring),
+      P.submatrix I id = 1 ∧
+      LinearMap.range (P.map ((↑) : v.valuationSubring → K)).mulVecLin =
+        LinearMap.range A.mulVecLin := by
+  classical
+  obtain ⟨J,hJ⟩ := exists_minor A ha
+  let minor (I : Fin d → Fin n) := (A.submatrix I id).det
+  obtain ⟨I,_,best⟩ := Finset.exists_max_image Finset.univ (fun i => v (minor i))
+    ⟨J,Finset.mem_univ _⟩
+  let B := A.submatrix I id
+  have pos : 0 < v B.det := lt_of_lt_of_le (pos_iff_ne_zero.mpr ((map_ne_zero v).mpr hJ))
+    (best J (Finset.mem_univ _))
+  have unit : IsUnit B.det := isUnit_iff_ne_zero.mpr (fun h => by simp [h] at pos)
+  let D := A * B⁻¹
+  have hI : D.submatrix I id = 1 := B.mul_nonsing_inv unit
+  have hA : D * B = A := B.nonsing_inv_mul_cancel_right A unit
+  have integral (i : Fin n) (j : Fin d) : D i j ∈ v.valuationSubring := by
+    let L := Function.update I j i
+    have hminor : minor L = D i j * B.det := by
+      calc
+        _ = ((D.submatrix L id) * B).det := congrArg Matrix.det
+          (congrArg (fun M : Matrix (Fin n) (Fin d) K => M.submatrix L id) hA.symm)
+        _ = _ := by rw [Matrix.det_mul, det_replace D I hI]
+    have bound := best L (Finset.mem_univ _)
+    change v (minor L) ≤ v B.det at bound
+    rw [hminor, map_mul] at bound
+    change v (D i j) ≤ 1
+    by_contra! hn
+    exact (not_lt_of_ge bound) (by simpa only [one_mul] using mul_lt_mul_of_pos_right hn pos)
+  let P : Matrix (Fin n) (Fin d) v.valuationSubring := fun i j => ⟨D i j, integral i j⟩
+  refine ⟨I,P,?_,?_⟩
+  · ext i j
+    change D (I i) j = _
+    rw [show D (I i) j = (1 : Matrix (Fin d) (Fin d) K) i j from
+      congrArg (fun M : Matrix (Fin d) (Fin d) K => M i j) hI]
+    by_cases he : i = j <;> simp [Matrix.one_apply,he]
+  · change LinearMap.range D.mulVecLin = LinearMap.range A.mulVecLin
+    apply le_antisymm
+    · rintro _ ⟨x,rfl⟩
+      refine ⟨B⁻¹.mulVec x, ?_⟩
+      exact Matrix.mulVec_mulVec x A B⁻¹
+    · rintro _ ⟨x,rfl⟩
+      refine ⟨B.mulVec x, ?_⟩
+      change D.mulVec (B.mulVec x) = A.mulVec x
+      rw [Matrix.mulVec_mulVec, hA]
+
+/-- An operator stabilizing a framed column space has coefficients given by the pivot rows
+of its product with the frame. -/
+private theorem pivot_factorization {R : Type*} [CommRing R]
+    (P : Matrix (Fin n) (Fin d) R) (I : Fin d → Fin n) (hI : P.submatrix I id = 1)
+    (F : Matrix (Fin n) (Fin n) R)
+    (hF : Set.MapsTo F.mulVec (LinearMap.range P.mulVecLin) (LinearMap.range P.mulVecLin)) :
+    F * P = P * (F * P).submatrix I id := by
+  classical
+  have pivot (y : Fin d → R) : (P.mulVec y) ∘ I = y := by
+    change (P.submatrix I id).mulVec y = y
+    rw [hI, Matrix.one_mulVec]
+  ext i j
+  have hj : P.col j ∈ LinearMap.range P.mulVecLin :=
+    ⟨Pi.single j 1, Matrix.mulVec_single_one P j⟩
+  obtain ⟨y,hy⟩ := hF hj
+  have hc : P.mulVec y = (F * P).col j := hy
+  have hc' : y = ((F * P).submatrix I id).col j :=
+    (pivot y).symm.trans (congrArg (fun z : Fin n → R => z ∘ I) hc)
+  exact (congrFun hc i).symm.trans (congrFun (congrArg P.mulVec hc') i)
+
+private theorem pivot_map {R S : Type*} [CommRing R] [CommRing S] (s : R →+* S)
+    (P : Matrix (Fin n) (Fin d) R) (I : Fin d → Fin n) (hI : P.submatrix I id = 1) :
+    (P.map s).submatrix I id = 1 :=
+  (congrArg (fun M : Matrix (Fin d) (Fin d) R => M.map s) hI).trans
+    (Matrix.map_one s s.map_zero s.map_one)
+
+private theorem pivot_rank {R L : Type*} [CommRing R] [Field L] (ρ : R →+* L)
+    (I : Fin d → Fin n) (P : Matrix (Fin n) (Fin d) R) (hI : P.submatrix I id = 1) :
+    (P.map ρ).rank = d := by
+  have hle := (P.map ρ).rank_submatrix_le I (id : Fin d → Fin d)
+  apply le_antisymm ((P.map ρ).rank_le_card_width.trans_eq (Fintype.card_fin _))
+  simpa only [pivot_map ρ P I hI, Matrix.rank_one, Fintype.card_fin] using hle
+
+/-- A normalized integral frame has full rank after every field-valued specialization.
+Integral operators stabilizing its fraction-field space act by the specialized pivot coefficients. -/
+theorem specialize_frame {L : Type*} [Field L] (ρ : v.valuationSubring →+* L)
+    (I : Fin d → Fin n) (P : Matrix (Fin n) (Fin d) v.valuationSubring)
+    (hI : P.submatrix I id = 1)
+    (F : Matrix (Fin n) (Fin n) v.valuationSubring)
+    (hF : Set.MapsTo (F.map ((↑) : v.valuationSubring → K)).mulVec
+      (LinearMap.range (P.map ((↑) : v.valuationSubring → K)).mulVecLin)
+      (LinearMap.range (P.map ((↑) : v.valuationSubring → K)).mulVecLin)) :
+    (P.map ρ).rank = d ∧
+      F * P = P * (F * P).submatrix I id ∧
+      (F.map ρ) * (P.map ρ) = (P.map ρ) * (((F * P).submatrix I id).map ρ) ∧
+      Set.MapsTo (F.map ρ).mulVec (LinearMap.range (P.map ρ).mulVecLin)
+        (LinearMap.range (P.map ρ).mulVecLin) := by
+  classical
+  let h := v.valuationSubring.toSubring.subtype
+  have hf := pivot_factorization (P.map h) I (pivot_map h P I hI) (F.map h) hF
+  have he : F * P = P * (F * P).submatrix I id := by
+    ext i j
+    change h ((F * P) i j) = h ((P * (F * P).submatrix I id) i j)
+    have hh : (F * P).map h = (P * (F * P).submatrix I id).map h := by
+      simp only [← Matrix.submatrix_map, Matrix.map_mul]
+      exact hf
+    exact congrArg (fun M : Matrix (Fin n) (Fin d) K => M i j) hh
+  have hρ := congrArg (fun M : Matrix (Fin n) (Fin d) v.valuationSubring => M.map ρ) he
+  simp only [Matrix.map_mul] at hρ
+  refine ⟨pivot_rank ρ I P hI, he, hρ, ?_⟩
+  · rintro _ ⟨y,rfl⟩
+    refine ⟨(((F * P).submatrix I id).map ρ).mulVec y,?_⟩
+    change (P.map ρ).mulVec _ = (F.map ρ).mulVec ((P.map ρ).mulVec y)
+    rw [Matrix.mulVec_mulVec, Matrix.mulVec_mulVec, hρ]
+
+/-- For every original fraction-field subspace, a single integral frame realizes it and yields
+a residue subspace of the same rank stabilized by each integral operator preserving the original. -/
+theorem residue_of_subspace (W : Submodule K (Fin n → K)) :
+    let d := Module.finrank K W
+    let O := v.valuationSubring
+    let red := IsLocalRing.residue O
+    ∃ (I : Fin d → Fin n) (P : Matrix (Fin n) (Fin d) O),
+      P.submatrix I id = 1 ∧ LinearMap.range (P.map ((↑) : O → K)).mulVecLin = W ∧
+      (P.map red).rank = d ∧ ∀ F : Matrix (Fin n) (Fin n) O,
+        Set.MapsTo (F.map ((↑) : O → K)).mulVec W W →
+        F * P = P * (F * P).submatrix I id ∧
+          (F.map red) * (P.map red) = (P.map red) * (((F * P).submatrix I id).map red) ∧
+          Set.MapsTo (F.map red).mulVec (LinearMap.range (P.map red).mulVecLin)
+            (LinearMap.range (P.map red).mulVecLin) := by
+  classical
+  let d := Module.finrank K W
+  let b := Module.finBasis K W
+  let A : Matrix (Fin n) (Fin d) K := fun i j => (b j : Fin n → K) i
+  have span : LinearMap.range A.mulVecLin = W := by
+    calc
+      _ = Submodule.span K (Set.range (W.subtype ∘ b)) := Matrix.range_mulVecLin _
+      _ = (Submodule.span K (Set.range b)).map W.subtype := by rw [Submodule.map_span, Set.range_comp]
+      _ = W := by rw [b.span_eq, Submodule.map_top, Submodule.range_subtype]
+  have ha : A.rank = d := congrArg (fun M : Submodule K (Fin n → K) => Module.finrank K M) span
+  obtain ⟨I,P,hI,hW⟩ := exists_integral_frame v A ha
+  have hr := hW.trans span
+  let red := IsLocalRing.residue v.valuationSubring
+  refine ⟨I,P,hI,hr,pivot_rank red I P hI,?_⟩
+  intro F hF
+  exact (specialize_frame v red I P hI F (hr.symm ▸ hF)).2
+
+end CycleQ2FermatValuationFrame
+
+#print axioms CycleQ2FermatValuationFrame.exists_integral_frame
+#print axioms CycleQ2FermatValuationFrame.specialize_frame
+#print axioms CycleQ2FermatValuationFrame.residue_of_subspace
+
+/-!
+# Differential stability of the minor ideals of a connection-stable matrix
+
+If a finite generating matrix satisfies `D(P) = P C - B P`, differentiation
+preserves every ideal of minors of P. The proof retains both terms: changing
+the generators replaces columns, while the ambient connection replaces rows.
+Together with differential simplicity of a coefficient ring, this gives a
+unit minor ideal whenever one of its generators is nonzero.
+
+This is a statement over a commutative ring, before any passage to a generic
+fiber or any assertion about the rational residue kernel.
+-/
+
+namespace CycleQ2DifferentialMinorStability
+
+open Matrix
+
+variable {R : Type*} [CommRing R]
+
+section Square
+variable {r : ℕ}
+
+private def variation (A H : Matrix (Fin r) (Fin r) R) : R :=
+  ∑ j, A.cramer (fun i => H i j) j
+
+private theorem variation_sub (A H G : Matrix (Fin r) (Fin r) R) :
+    variation A (H - G) = variation A H - variation A G := by
+  unfold variation
+  rw [← Finset.sum_sub_distrib]
+  apply Finset.sum_congr rfl
+  intro j _
+  exact congrFun (map_sub A.cramer (fun i => H i j) (fun i => G i j)) j
+
+private theorem variation_rows (A H : Matrix (Fin r) (Fin r) R) :
+    variation A H = ∑ i, (A.updateRow i (H i)).det := by
+  have rows (i : Fin r) : (A.updateRow i (H i)).det =
+      ∑ j, A.adjugate j i * H i j := by
+    rw [← cramer_transpose_apply, cramer_eq_adjugate_mulVec, ← adjugate_transpose]
+    rfl
+  simp only [variation, rows, cramer_eq_adjugate_mulVec, mulVec, dotProduct]
+  exact Finset.sum_comm
+
+private theorem derivation_det_variation (D : Derivation ℤ R R)
+    (A : Matrix (Fin r) (Fin r) R) :
+    D A.det = variation A (A.map D) := by
+  simpa only [variation, cramer_apply, map_apply] using
+    HoldoutConstruction.derivation_det_columns D A
+
+end Square
+
+section Rectangular
+variable {n s : Type*} [Fintype n] [Fintype s]
+
+/-- All minors of a fixed size. Repeated row or column labels are allowed;
+their zero determinants do not change the generated ideal. -/
+def minorIdeal (P : Matrix n s R) (r : ℕ) : Ideal R :=
+  Ideal.span (Set.range fun ij : (Fin r → n) × (Fin r → s) =>
+    (P.submatrix ij.1 ij.2).det)
+
+theorem minor_mem (P : Matrix n s R) (r : ℕ) (I : Fin r → n) (J : Fin r → s) :
+    (P.submatrix I J).det ∈ minorIdeal P r :=
+  Ideal.subset_span ⟨(I,J), rfl⟩
+
+private theorem variation_right (P : Matrix n s R) (C : Matrix s s R)
+    (r : ℕ) (I : Fin r → n) (J : Fin r → s) :
+    variation (P.submatrix I J) ((P * C).submatrix I J) =
+      ∑ j : Fin r, ∑ k : s, C k (J j) *
+        (P.submatrix I (Function.update J j k)).det := by
+  classical
+  unfold variation
+  apply Finset.sum_congr rfl
+  intro j _
+  have hcol : (fun i : Fin r => (P * C) (I i) (J j)) =
+      ∑ k : s, C k (J j) • (fun i : Fin r => P (I i) k) := by
+    ext i
+    simp only [mul_apply, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+    apply Finset.sum_congr rfl
+    intro k _
+    exact mul_comm _ _
+  change (P.submatrix I J).cramer (fun i => (P * C) (I i) (J j)) j = _
+  rw [hcol, map_sum]
+  simp only [map_smul, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+  apply Finset.sum_congr rfl
+  intro k _
+  congr 1
+  rw [cramer_apply]
+  apply congrArg Matrix.det
+  ext a b
+  by_cases hb : b = j
+  · subst b
+    simp
+  · simp [updateCol_ne hb, submatrix_apply, Function.update_of_ne hb]
+
+private theorem variation_left (P : Matrix n s R) (B : Matrix n n R)
+    (r : ℕ) (I : Fin r → n) (J : Fin r → s) :
+    variation (P.submatrix I J) ((B * P).submatrix I J) =
+      ∑ i : Fin r, ∑ k : n, B (I i) k *
+        (P.submatrix (Function.update I i k) J).det := by
+  classical
+  rw [variation_rows]
+  apply Finset.sum_congr rfl
+  intro i _
+  have hrow : (fun j : Fin r => (B * P) (I i) (J j)) =
+      ∑ k : n, B (I i) k • (fun j : Fin r => P k (J j)) := by
+    ext j
+    simp only [mul_apply, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+  rw [← cramer_transpose_apply]
+  change (P.submatrix I J).transpose.cramer (fun j => (B * P) (I i) (J j)) i = _
+  rw [hrow, map_sum]
+  simp only [map_smul, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
+  apply Finset.sum_congr rfl
+  intro k _
+  congr 1
+  rw [cramer_transpose_apply]
+  apply congrArg Matrix.det
+  ext a b
+  by_cases ha : a = i
+  · subst a
+    simp
+  · simp [updateRow_ne ha, submatrix_apply, Function.update_of_ne ha]
+
+/-- The full derivative of a minor, including the change of generators and
+the ambient connection. Every term is another minor of the same size. -/
+theorem derivation_minor (D : Derivation ℤ R R) (P : Matrix n s R)
+    (B : Matrix n n R) (C : Matrix s s R)
+    (h : P.map D = P * C - B * P)
+    (r : ℕ) (I : Fin r → n) (J : Fin r → s) :
+    D (P.submatrix I J).det =
+      (∑ j : Fin r, ∑ k : s, C k (J j) *
+        (P.submatrix I (Function.update J j k)).det) -
+      (∑ i : Fin r, ∑ k : n, B (I i) k *
+        (P.submatrix (Function.update I i k) J).det) := by
+  classical
+  rw [derivation_det_variation]
+  have hm : (P.submatrix I J).map D =
+      (P * C).submatrix I J - (B * P).submatrix I J := by
+    ext i j
+    exact congrArg (fun M : Matrix n s R => M (I i) (J j)) h
+  rw [hm, variation_sub, variation_right, variation_left]
+
+/-- Every determinantal ideal of a matrix stable under a connection is
+stable under its coefficient derivation. No choice of a nonvanishing minor
+or restriction on the rank is needed for this statement. -/
+theorem derivation_mem (D : Derivation ℤ R R) (P : Matrix n s R)
+    (B : Matrix n n R) (C : Matrix s s R)
+    (h : P.map D = P * C - B * P) (r : ℕ)
+    {x : R} (hx : x ∈ minorIdeal P r) : D x ∈ minorIdeal P r := by
+  classical
+  change x ∈ Ideal.span _ at hx
+  induction hx using Submodule.span_induction with
+  | mem x hx =>
+    obtain ⟨⟨I,J⟩,rfl⟩ := hx
+    rw [derivation_minor D P B C h]
+    apply (minorIdeal P r).sub_mem
+    · exact (minorIdeal P r).sum_mem fun j _ =>
+        (minorIdeal P r).sum_mem fun k _ =>
+          (minorIdeal P r).mul_mem_left _ (minor_mem P r I (Function.update J j k))
+    · exact (minorIdeal P r).sum_mem fun i _ =>
+        (minorIdeal P r).sum_mem fun k _ =>
+          (minorIdeal P r).mul_mem_left _ (minor_mem P r (Function.update I i k) J)
+  | zero => simpa only [map_zero] using (minorIdeal P r).zero_mem
+  | add x y hx hy ihx ihy =>
+    simpa only [map_add] using (minorIdeal P r).add_mem ihx ihy
+  | smul a x hx ih =>
+    rw [smul_eq_mul, D.leibniz]
+    apply (minorIdeal P r).add_mem ((minorIdeal P r).smul_mem a ih)
+    simpa only [smul_eq_mul, mul_comm] using (minorIdeal P r).smul_mem (D a) hx
+
+/-- Differential simplicity upgrades a nonzero minor ideal to the unit
+ideal for a whole family of coefficient connections. -/
+theorem minorIdeal_eq_top {ι : Type*} (D : ι → Derivation ℤ R R)
+    (simple : ∀ J : Ideal R, J ≠ ⊥ → (∀ i x, x ∈ J → D i x ∈ J) → J = ⊤)
+    (P : Matrix n s R) (B : ι → Matrix n n R) (C : ι → Matrix s s R)
+    (h : ∀ i, P.map (D i) = P * C i - B i * P) (r : ℕ)
+    (hne : ∃ I : Fin r → n, ∃ J : Fin r → s, (P.submatrix I J).det ≠ 0) :
+    minorIdeal P r = ⊤ := by
+  apply simple (minorIdeal P r)
+  · intro hz
+    obtain ⟨I,J,hm⟩ := hne
+    exact hm (by simpa only [hz, Submodule.mem_bot] using minor_mem P r I J)
+  · exact fun i _ hx => derivation_mem (D i) P (B i) (C i) (h i) r hx
+
+/-- A unit minor ideal has a nonzero minor at every point valued in a
+nontrivial commutative ring. The surviving minor may depend on the point. -/
+theorem exists_specialized_minor (P : Matrix n s R) (r : ℕ)
+    (htop : minorIdeal P r = ⊤)
+    {L : Type*} [CommRing L] [Nontrivial L] (ρ : R →+* L) :
+    ∃ I : Fin r → n, ∃ J : Fin r → s,
+      ((P.map ρ).submatrix I J).det ≠ 0 := by
+  classical
+  by_contra h
+  push_neg at h
+  have hker : minorIdeal P r ≤ RingHom.ker ρ := by
+    apply Ideal.span_le.mpr
+    rintro _ ⟨⟨I,J⟩, rfl⟩
+    change ρ (P.submatrix I J).det = 0
+    rw [ρ.map_det]
+    exact h I J
+  have h1 : (1 : R) ∈ minorIdeal P r := by rw [htop]; trivial
+  have hz : ρ 1 = 0 := hker h1
+  exact one_ne_zero (by simpa only [map_one] using hz)
+
+/-- The unit ideal of `r`-minors prevents the matrix rank from dropping
+below `r` under any field specialization. -/
+theorem rank_specialize_ge (P : Matrix n s R) (r : ℕ)
+    (htop : minorIdeal P r = ⊤)
+    {L : Type*} [Field L] (ρ : R →+* L) :
+    r ≤ (P.map ρ).rank := by
+  classical
+  obtain ⟨I,J,hminor⟩ := exists_specialized_minor P r htop ρ
+  have hr : ((P.map ρ).submatrix I J).rank = r := by
+    simpa only [Fintype.card_fin] using Matrix.rank_of_det_ne_zero hminor
+  rw [← hr]
+  exact Matrix.rank_submatrix_le _ I J
+
+end Rectangular
+end CycleQ2DifferentialMinorStability
+
+#print axioms CycleQ2DifferentialMinorStability.derivation_minor
+#print axioms CycleQ2DifferentialMinorStability.derivation_mem
+#print axioms CycleQ2DifferentialMinorStability.minorIdeal_eq_top
+#print axioms CycleQ2DifferentialMinorStability.exists_specialized_minor
+#print axioms CycleQ2DifferentialMinorStability.rank_specialize_ge
+
+namespace CycleQ2DifferentialMinorStability
+
+open Matrix
+
+variable {R n : Type*} [CommRing R] [Fintype n]
+
+/-- Preservation of the column span constructs the matrix on its generators.
+Neither independence of the generators nor a choice of pivots is required. -/
+theorem exists_generator_connection {s : Type*} [Fintype s]
+    (D : Derivation ℤ R R) (P : Matrix n s R) (B : Matrix n n R)
+    (N : Submodule R (n → R)) (hP : LinearMap.range P.mulVecLin = N)
+    (stable : ∀ v ∈ N, (fun i => D (v i) + B.mulVec v i) ∈ N) :
+    ∃ C : Matrix s s R, P.map D = P * C - B * P := by
+  classical
+  have hcol (j : s) : (fun i => P i j) ∈ N := by
+    rw [← hP, Matrix.range_mulVecLin]
+    exact Submodule.subset_span ⟨j, rfl⟩
+  have lifts (j : s) :
+      (fun i => D (P i j) + B.mulVec (fun k => P k j) i) ∈
+        LinearMap.range P.mulVecLin := by
+    rw [hP]
+    exact stable _ (hcol j)
+  choose c hc using lifts
+  let C : Matrix s s R := fun i j => c j i
+  refine ⟨C, ?_⟩
+  ext i j
+  have he := congrFun (hc j) i
+  change (∑ k, P i k * c j k) = D (P i j) + ∑ k, B i k * P k j at he
+  change D (P i j) = (∑ k, P i k * c j k) - ∑ k, B i k * P k j
+  exact eq_sub_iff_add_eq.mpr he.symm
+
+/-- A finitely generated stable submodule admits one finite generating matrix
+and generator connection matrices for an entire family of derivations. -/
+theorem exists_finite_generator_connections {ι : Type*}
+    (D : ι → Derivation ℤ R R) (B : ι → Matrix n n R)
+    (N : Submodule R (n → R)) (finite : N.FG)
+    (stable : ∀ a v, v ∈ N → (fun i => D a (v i) + (B a).mulVec v i) ∈ N) :
+    ∃ (s : ℕ) (P : Matrix n (Fin s) R) (C : ι → Matrix (Fin s) (Fin s) R),
+      LinearMap.range P.mulVecLin = N ∧ ∀ a, P.map (D a) = P * C a - B a * P := by
+  classical
+  obtain ⟨s, v, hv⟩ := Submodule.fg_iff_exists_fin_generating_family.mp finite
+  let P : Matrix n (Fin s) R := fun i j => v j i
+  have hP : LinearMap.range P.mulVecLin = N := (Matrix.range_mulVecLin P).trans hv
+  choose C hC using fun a => exists_generator_connection (D a) P (B a) N hP (stable a)
+  exact ⟨s, P, C, hP, hC⟩
+
+/-- Over a Noetherian coefficient ring, finite generation of the stable
+submodule follows from the finite ambient coordinate module. -/
+theorem exists_noetherian_generator_connections [IsNoetherianRing R] {ι : Type*}
+    (D : ι → Derivation ℤ R R) (B : ι → Matrix n n R)
+    (N : Submodule R (n → R))
+    (stable : ∀ a v, v ∈ N → (fun i => D a (v i) + (B a).mulVec v i) ∈ N) :
+    ∃ (s : ℕ) (P : Matrix n (Fin s) R) (C : ι → Matrix (Fin s) (Fin s) R),
+      LinearMap.range P.mulVecLin = N ∧ ∀ a, P.map (D a) = P * C a - B a * P :=
+  exists_finite_generator_connections D B N (IsNoetherian.noetherian N) stable
+
+end CycleQ2DifferentialMinorStability
+
+#print axioms CycleQ2DifferentialMinorStability.exists_generator_connection
+#print axioms CycleQ2DifferentialMinorStability.exists_noetherian_generator_connections
