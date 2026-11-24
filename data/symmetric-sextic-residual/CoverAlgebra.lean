@@ -1,5 +1,4 @@
 import Proposal.K5Field
-import Proposal.SheetCalculus
 import HodgeComputer.Constructions.QuadraticCovers.LaurentJets
 import Mathlib.Data.ZMod.Basic
 import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
@@ -15,7 +14,7 @@ import Mathlib.LinearAlgebra.Matrix.Determinant.Basic
    verified via computable `(ZMod 1009)[U]` Bézout certificates. -/
 
 namespace SymmetricSexticResidual.CoverAlgebra
-open SymmetricSexticResidual.K5Field SymmetricSexticResidual.SheetCalculus QuadraticCovers Polynomial
+open SymmetricSexticResidual.K5Field QuadraticCovers Polynomial
 open scoped BigOperators LaurentSeries PowerSeries
 
 noncomputable section SeriesAndVal
@@ -1263,7 +1262,8 @@ lemma pairToAlg_c_k3W : pairToAlg c_k3W = params1009.k3W := pairToAlg_c_toUW _ _
 lemma pairToAlg_c_d2_2 : pairToAlg c_d2_2 = params1009.d2_2 := by
   ext <;> simp [pairToAlg, c_d2_2, CoverParams.d2_2, PairAlg.ofScalar, toPoly_c_Q5, toPoly]
 lemma pairToAlg_c_d2_1 : pairToAlg c_d2_1 = params1009.d2_1 := by
-  rw [c_d2_1, pairToAlg_qsc, pairToAlg_c_c0W, CoverParams.d2_1]; congr 1
+  rw [c_d2_1, pairToAlg_qsc, pairToAlg_c_c0W, CoverParams.d2_1]
+  refine congrArg (fun p => PairAlg.smul p _) ?_
   simp only [toPoly_padd, toPoly_pmul, toPoly_pneg, toPoly_psmul, toPoly_c_q11, toPoly_c_cb_h,
     toPoly_c_q02, toPoly_c_ca_h, map_ofNat]
 lemma pairToAlg_c_d2_0 : pairToAlg c_d2_0 = params1009.d2_0 := by
@@ -1274,11 +1274,13 @@ lemma pairToAlg_c_d2_0 : pairToAlg c_d2_0 = params1009.d2_0 := by
 lemma pairToAlg_c_d3_3 : pairToAlg c_d3_3 = params1009.d3_3 := by
   ext <;> simp [pairToAlg, c_d3_3, CoverParams.d3_3, PairAlg.ofScalar, toPoly_c_Q7, toPoly]
 lemma pairToAlg_c_d3_2 : pairToAlg c_d3_2 = params1009.d3_2 := by
-  rw [c_d3_2, pairToAlg_qsc, pairToAlg_c_c0W, CoverParams.d3_2]; congr 1
+  rw [c_d3_2, pairToAlg_qsc, pairToAlg_c_c0W, CoverParams.d3_2]
+  refine congrArg (fun p => PairAlg.smul p _) ?_
   simp only [toPoly_psub, toPoly_padd, toPoly_pmul, toPoly_pneg, toPoly_psmul,
     toPoly_c_c21, toPoly_c_c12, toPoly_c_c03, toPoly_c_ca_h, toPoly_c_cb_h, map_ofNat]; ring
 lemma pairToAlg_c_d3_1 : pairToAlg c_d3_1 = params1009.d3_1 := by
-  rw [c_d3_1, pairToAlg_qsc, pairToAlg_qmul, pairToAlg_c_c0W, CoverParams.d3_1]; congr 1
+  rw [c_d3_1, pairToAlg_qsc, pairToAlg_qmul, pairToAlg_c_c0W, CoverParams.d3_1]
+  refine congrArg (fun p => PairAlg.smul p _) ?_
   simp only [toPoly_psub, toPoly_pmul, toPoly_psmul, toPoly_c_c12, toPoly_c_c03, toPoly_c_ca_h,
     toPoly_c_cb_h, map_ofNat]
 lemma pairToAlg_c_d3_0 : pairToAlg c_d3_0 = params1009.d3_0 := by
@@ -2508,6 +2510,7 @@ lemma X_pow_15_dvd_nm_z_K5 : (X : K5[X]) ^ 15 ∣ k5Params.nm_z := by
       simp only [CoverParams.c0_V0, CoverParams.k3_V0, CoverParams.inv81, CoverParams.inv243, k5Params_inv3, k5Params_T]
       generalize 5 * S_K - 9 * Q_K = A
       ring
+    clear_value q2 q1 q0 e3 e2 e1 e0 β
     exact HasValGe.syl5 hq2 hq1' hq0' he3 he2' he1' he0'
       (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
       (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
@@ -2695,6 +2698,7 @@ lemma X_pow_15_dvd_nm_z_K5 : (X : K5[X]) ^ 15 ∣ k5Params.nm_z := by
       generalize 5 * S_K - 9 * Q_K = A
       generalize T_K - 3 = B at hT ⊢
       field_simp [hT]; ring
+    clear_value q2 q1 q0 e3 e2 e1 e0 β
     exact HasValGe.syl5 hq2 hq1' hq0' he3 he2' he1' he0'
       (by omega) (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)
       (by omega) (by omega) (by omega) (by omega) (by omega) (by omega)

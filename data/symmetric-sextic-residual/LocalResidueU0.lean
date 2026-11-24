@@ -614,39 +614,21 @@ lemma W2_0_d1_d0_res :
       simp only [CoverParams.c0_V2, CoverParams.inv81, k5Params_inv3, k5Params_T, B]; ring
     ext
     · simp only [c0WD, c0W_s, WD, Dual.add_val, Dual.mul_val, Dual.pow_eq, Dual.C_val, hw0_iB, hc0V2]
-      calc -(4 / 81 : K5) * B ^ 2 * (w0n * iB ^ 3) ^ 2 + k5Params.c0_V1 * 0 * (w0n * iB ^ 3) =
-            -(4 / 81 : K5) * w0n ^ 2 * (B * iB) ^ 2 * iB ^ 4 := by ring
-        _ = iB ^ 4 * (-(4 / 81 : K5) * w0n ^ 2) := by rw [hiB]; ring
+      linear_combination -(4 / 81 : K5) * w0n ^ 2 * iB ^ 4 * (B * iB + 1) * hiB
     · simp only [c0WD, c0W_s, WD, Dual.add_eps, Dual.mul_eps, Dual.mul_val, Dual.pow_eq,
         Dual.C_val, Dual.C_eps, Nat.cast_ofNat, Nat.reduceSub, pow_one, hw0_iB, hw1_iB, hc0V2]
-      calc -(4 / 81 : K5) * B ^ 2 * (2 * (w0n * iB ^ 3) * (w1n * iB ^ 3)) + 0 * (w0n * iB ^ 3) ^ 2 +
-            (k5Params.c0_V1 * 0 * (w1n * iB ^ 3) + (k5Params.c0_V1 * 1 + 0 * 0) * (w0n * iB ^ 3)) =
-            -(4 / 81 : K5) * (2 * w0n * w1n) * (B * iB) ^ 2 * iB ^ 4 +
-              k5Params.c0_V1 * w0n * iB ^ 3 := by ring
-        _ = -(4 / 81 : K5) * (2 * w0n * w1n) * iB ^ 4 + k5Params.c0_V1 * w0n * (B * iB) * iB ^ 3 := by
-            rw [hiB]; ring
-        _ = iB ^ 4 * (-(4 / 81 : K5) * (2 * w0n * w1n) + k5Params.c0_V1 * w0n * B) + 0 * (-(4 / 81 : K5) * w0n ^ 2) := by
-            ring
+      linear_combination -(4 / 81 : K5) * (2 * w0n * w1n) * iB ^ 4 * (B * iB + 1) * hiB -
+        k5Params.c0_V1 * w0n * iB ^ 3 * hiB
   have hWk2_eq : WD * k2WD = Dual.C (iB ^ 8) * Wk2_s := by
     have hk2V2 : k5Params.k2_V2 = -(4 / 81 : K5) * B := by
       simp only [CoverParams.k2_V2, CoverParams.inv81, k5Params_inv3, k5Params_T, B]; ring
     ext
     · simp only [k2WD, Wk2_s, WD, Dual.add_val, Dual.mul_val, Dual.pow_eq, Dual.C_val, hw0_iB, hk2V2]
-      calc w0n * iB ^ 3 * (-(4 / 81 : K5) * B * (w0n * iB ^ 3) ^ 2 + k5Params.k2_V1 * 0 * (w0n * iB ^ 3)) =
-            -(4 / 81 : K5) * w0n ^ 3 * (B * iB) * iB ^ 8 := by ring
-        _ = iB ^ 8 * (-(4 / 81 : K5) * w0n ^ 3) := by rw [hiB]; ring
+      linear_combination -(4 / 81 : K5) * w0n ^ 3 * iB ^ 8 * hiB
     · simp only [k2WD, Wk2_s, WD, Dual.add_val, Dual.add_eps, Dual.mul_eps, Dual.mul_val,
         Dual.pow_eq, Dual.C_val, Dual.C_eps, Nat.cast_ofNat, Nat.reduceSub, pow_one, hw0_iB, hw1_iB, hk2V2]
-      calc w0n * iB ^ 3 * (-(4 / 81 : K5) * B * (2 * (w0n * iB ^ 3) * (w1n * iB ^ 3)) + 0 * (w0n * iB ^ 3) ^ 2 +
-              (k5Params.k2_V1 * 0 * (w1n * iB ^ 3) + (k5Params.k2_V1 * 1 + 0 * 0) * (w0n * iB ^ 3))) +
-            w1n * iB ^ 3 * (-(4 / 81 : K5) * B * (w0n * iB ^ 3) ^ 2 + k5Params.k2_V1 * 0 * (w0n * iB ^ 3)) =
-            -(4 / 81 : K5) * (3 * w0n ^ 2 * w1n) * (B * iB) * iB ^ 8 +
-              k5Params.k2_V1 * w0n ^ 2 * iB ^ 6 := by ring
-        _ = -(4 / 81 : K5) * (3 * w0n ^ 2 * w1n) * iB ^ 8 + k5Params.k2_V1 * w0n ^ 2 * (B * iB) ^ 2 * iB ^ 6 := by
-            rw [hiB]; ring
-        _ = iB ^ 8 * (-(4 / 81 : K5) * (3 * w0n ^ 2 * w1n) + k5Params.k2_V1 * w0n ^ 2 * B ^ 2) +
-              0 * (-(4 / 81 : K5) * w0n ^ 3) := by
-            ring
+      linear_combination -(4 / 81 : K5) * (3 * w0n ^ 2 * w1n) * iB ^ 8 * hiB -
+        k5Params.k2_V1 * w0n ^ 2 * iB ^ 6 * (B * iB + 1) * hiB
   have hW2k3_eq : WD ^ 2 * k3WD = Dual.C (iB ^ 12) * W2k3_s := by
     have hk3V2 : k5Params.k3_V2 = -(4 / 243 : K5) := by
       simp only [CoverParams.k3_V2, CoverParams.inv243, k5Params_inv3]; ring
@@ -654,13 +636,7 @@ lemma W2_0_d1_d0_res :
     · simp only [k3WD, W2k3_s, WD, Dual.add_val, Dual.mul_val, Dual.pow_eq, Dual.C_val, hw0_iB, hk3V2]; ring
     · simp only [k3WD, W2k3_s, WD, Dual.add_val, Dual.add_eps, Dual.mul_eps, Dual.mul_val,
         Dual.pow_eq, Dual.C_val, Dual.C_eps, Nat.cast_ofNat, Nat.reduceSub, pow_one, hw0_iB, hw1_iB, hk3V2]
-      calc (w0n * iB ^ 3) ^ 2 * (-(4 / 243 : K5) * (2 * (w0n * iB ^ 3) * (w1n * iB ^ 3)) + 0 * (w0n * iB ^ 3) ^ 2 +
-              (k5Params.k3_V1 * 0 * (w1n * iB ^ 3) + (k5Params.k3_V1 * 1 + 0 * 0) * (w0n * iB ^ 3))) +
-            2 * (w0n * iB ^ 3) * (w1n * iB ^ 3) * (-(4 / 243 : K5) * (w0n * iB ^ 3) ^ 2 + k5Params.k3_V1 * 0 * (w0n * iB ^ 3)) =
-            -(4 / 243 : K5) * (4 * w0n ^ 3 * w1n) * iB ^ 12 + k5Params.k3_V1 * w0n ^ 3 * (B * iB) ^ 3 * iB ^ 9 := by
-            rw [hiB]; ring
-        _ = iB ^ 12 * (-(4 / 243 : K5) * (4 * w0n ^ 3 * w1n) + k5Params.k3_V1 * w0n ^ 3 * B ^ 3) +
-              0 * (-(4 / 243 : K5) * w0n ^ 4) := by ring
+      linear_combination -k5Params.k3_V1 * w0n ^ 3 * iB ^ 9 * ((B * iB) ^ 2 + B * iB + 1) * hiB
   set D21_s : Dual K5 := (-q11D * cbD + 2 * q02D * caD) * c0W_s
   set D20_s : Dual K5 := q02D * c0W_s ^ 2 + cbD ^ 2 * Wk2_s
   set D32_s : Dual K5 := (-c21D * cbD ^ 2 + 2 * c12D * caD * cbD - 3 * c03D * caD ^ 2) * c0W_s
@@ -732,12 +708,7 @@ lemma W2_0_d1_d0_res :
       simp only [remDeg3_d1, hD21_sc, hD20_sc, hD32_sc, hD31_sc]
       have hpow : Dual.C (iB ^ 4) * Dual.C (iB ^ 4) = Dual.C (iB ^ 8) := by
         ext <;> simp only [Dual.mul_val, Dual.mul_eps, Dual.C_val, Dual.C_eps] <;> ring
-      calc D22 * (D22 * (Dual.C (iB ^ 8) * D31_s) - Dual.C (iB ^ 8) * D20_s * D33) -
-            Dual.C (iB ^ 4) * D21_s * (D22 * (Dual.C (iB ^ 4) * D32_s) - Dual.C (iB ^ 4) * D21_s * D33) =
-          Dual.C (iB ^ 8) * (D22 * (D22 * D31_s - D20_s * D33)) -
-            (Dual.C (iB ^ 4) * Dual.C (iB ^ 4)) * (D21_s * (D22 * D32_s - D21_s * D33)) := by ring
-        _ = Dual.C (iB ^ 8) * (D22 * (D22 * D31_s - D20_s * D33) - D21_s * (D22 * D32_s - D21_s * D33)) := by
-          rw [hpow]; ring
+      linear_combination -(D21_s * (D22 * D32_s - D21_s * D33)) * hpow
     have hpoly : remDeg3_d1 D22 D21_s D20_s D33 D32_s D31_s =
         ⟨0, (-2384185791015625 / 25942282643925774 : K5) *
           (225 * S_K - 45 * Q_K + 77 * T_K - 210) * S_K ^ 6 * (-A) ^ 15⟩ := by
@@ -765,12 +736,7 @@ lemma W2_0_d1_d0_res :
       simp only [remDeg3_d0, hD21_sc, hD20_sc, hD32_sc, hD30_sc]
       have hpow : Dual.C (iB ^ 8) * Dual.C (iB ^ 4) = Dual.C (iB ^ 12) := by
         ext <;> simp only [Dual.mul_val, Dual.mul_eps, Dual.C_val, Dual.C_eps] <;> ring
-      calc D22 * (D22 * (Dual.C (iB ^ 12) * D30_s)) -
-            Dual.C (iB ^ 8) * D20_s * (D22 * (Dual.C (iB ^ 4) * D32_s) - Dual.C (iB ^ 4) * D21_s * D33) =
-          Dual.C (iB ^ 12) * (D22 * (D22 * D30_s)) -
-            (Dual.C (iB ^ 8) * Dual.C (iB ^ 4)) * (D20_s * (D22 * D32_s - D21_s * D33)) := by ring
-        _ = Dual.C (iB ^ 12) * (D22 * (D22 * D30_s) - D20_s * (D22 * D32_s - D21_s * D33)) := by
-          rw [hpow]; ring
+      linear_combination -(D20_s * (D22 * D32_s - D21_s * D33)) * hpow
     have hpoly : remDeg3_d0 D22 D21_s D20_s D33 D32_s D30_s =
         ⟨0, (-59604644775390625 / 103769130575703096 : K5) *
           (225 * S_K - 45 * Q_K + 77 * T_K - 189) * S_K ^ 8 * (-A) ^ 17⟩ := by
@@ -1948,6 +1914,10 @@ lemma br1_0_eta_AC_coeff_neg_one : (br1_0 eta_AC).coeff (-1) = 0 := by
   set p := interp4 g
   set P1 := remDeg4_P1 d2_2 d2_1 d2_0 p.1 p.2.1 p.2.2.1 p.2.2.2.1
   set P0 := remDeg4_P0 d2_2 d2_1 d2_0 p.1 p.2.1 p.2.2.1 p.2.2.2.2
+  have hp_def : p = interp4 g := rfl
+  have hP1_def : P1 = remDeg4_P1 d2_2 d2_1 d2_0 p.1 p.2.1 p.2.2.1 p.2.2.2.1 := rfl
+  have hP0_def : P0 = remDeg4_P0 d2_2 d2_1 d2_0 p.1 p.2.1 p.2.2.1 p.2.2.2.2 := rfl
+  clear_value P1 P0 p
   -- Show `HasValGe 13` on denominator with nonzero coeff 13, and `HasValGe 13` on numerator!
   have hS := S_K_ne_zero; have hT := T_K_ne_zero
   have hA := fiveS_sub_9Q_ne; have hC := fiveT_sub_9_ne
@@ -1986,7 +1956,8 @@ lemma br1_0_eta_AC_coeff_neg_one : (br1_0 eta_AC).coeff (-1) = 0 := by
       have := k5Params_Av0_mul_inv; rw [h, mul_zero] at this; exact zero_ne_one this
     exact mul_ne_zero k5Params_Bv0_ne hAi
   -- Denominator has `HasValGe 13` and nonzero coeff 13!
-  obtain ⟨hres_val, hres_ne⟩ := res_z_W1_0_val_ne
+  obtain ⟨hres_val, hres_ne⟩ : HasValGe 13 res ∧ res.coeff 13 ≠ 0 := res_z_W1_0_val_ne
+  clear_value res
   have hden_L : ValLead 13
       (81 * HahnSeries.C k5Params.Av0 * (2 * W1_0 + evalT k5Params.bW) *
         evalT k5Params.Q5_z ^ 3 * res)
@@ -2099,6 +2070,19 @@ lemma br1_0_eta_AC_coeff_neg_one : (br1_0 eta_AC).coeff (-1) = 0 := by
       PairAlg.evalAt_sub, PairAlg.evalAt_mul _ _ W1_0 W1_0_eq]
     exact ((hd2_2_L.val.mul (hd2_2_L.val.mul hd3_0_L.val)).mono (by omega)).sub
       ((hd2_0_L.val.mul ((hd2_2_L.val.mul hd3_2_L.val).sub (hd2_1_L.val.mul hd3_3_L.val))).mono (by omega))
+  have hd1_eq : remDeg3_d1 d2_2 d2_1 d2_0
+      (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_3))
+      (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_2))
+      (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_1)) = d1 := by
+    simp only [d1, CoverParams.d1_z, CoverParams.pmul, PairAlg.map_sub, PairAlg.map_mul,
+      PairAlg.evalAt_sub, PairAlg.evalAt_mul _ _ W1_0 W1_0_eq, remDeg3_d1]; rfl
+  have hd0_eq : remDeg3_d0 d2_2 d2_1 d2_0
+      (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_3))
+      (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_2))
+      (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_0)) = d0 := by
+    simp only [d0, CoverParams.d0_z, CoverParams.pmul, PairAlg.map_sub, PairAlg.map_mul,
+      PairAlg.evalAt_sub, PairAlg.evalAt_mul _ _ W1_0 W1_0_eq, remDeg3_d0]; rfl
+  clear_value d2_2 d2_1 d2_0 d1 d0
   -- Common leading root `z1 = w2 * S_K / T_K` (`(5S - 9Q)^2 * z1 = -(5T - 9)^2`)!
   set z1 : K5 := w2 * S_K / T_K
   have hw2_eq : S_K * (5 * S_K - 9 * Q_K) ^ 2 * w2 = -T_K * (5 * T_K - 9) ^ 2 := by
@@ -2126,11 +2110,12 @@ lemma br1_0_eta_AC_coeff_neg_one : (br1_0 eta_AC).coeff (-1) = 0 := by
     congr 1
     · ring
     · field_simp [hW_ne, hcb_ne]; ring
-  obtain ⟨hp4, hp3, hp2, hp1, hp0⟩ := HasValGe.interp4_scaled (s := 2) (k := 3) hg_deg4
-    (fun c => (hg_scaled c).1)
+  obtain ⟨hp4, hp3, hp2, hp1, hp0⟩ : HasValGe (-5) p.1 ∧ HasValGe (-3) p.2.1 ∧
+      HasValGe (-1) p.2.2.1 ∧ HasValGe 1 p.2.2.2.1 ∧ HasValGe 3 p.2.2.2.2 :=
+    hp_def.symm ▸ HasValGe.interp4_scaled (s := 2) (k := 3) hg_deg4 (fun c => (hg_scaled c).1)
   -- Hence `HasValGe 1 P1` and `HasValGe 3 P0`!
   have hP1_val : HasValGe 1 P1 := by
-    simp only [P1, remDeg4_P1]
+    rw [hP1_def]; simp only [remDeg4_P1]
     have hr3 : HasValGe (-3) (d2_2 * p.2.1 - d2_1 * p.1) :=
       ((hd2_2_L.val.mul hp3).mono (by omega)).sub ((hd2_1_L.val.mul hp4).mono (by omega))
     have hr2 : HasValGe (-1) (d2_2 * p.2.2.1 - d2_0 * p.1) :=
@@ -2141,7 +2126,7 @@ lemma br1_0_eta_AC_coeff_neg_one : (br1_0 eta_AC).coeff (-1) = 0 := by
       (((hd2_2_L.val.pow 2).mul hp1).mono (by omega)).sub ((hd2_0_L.val.mul hr3).mono (by omega))
     exact ((hd2_2_L.val.mul hs1).mono (by omega)).sub ((hd2_1_L.val.mul hs2).mono (by omega))
   have hP0_val : HasValGe 3 P0 := by
-    simp only [P0, remDeg4_P0]
+    rw [hP0_def]; simp only [remDeg4_P0]
     have hr3 : HasValGe (-3) (d2_2 * p.2.1 - d2_1 * p.1) :=
       ((hd2_2_L.val.mul hp3).mono (by omega)).sub ((hd2_1_L.val.mul hp4).mono (by omega))
     have hr2 : HasValGe (-1) (d2_2 * p.2.2.1 - d2_0 * p.1) :=
@@ -2196,7 +2181,8 @@ lemma br1_0_eta_AC_coeff_neg_one : (br1_0 eta_AC).coeff (-1) = 0 := by
   -- By `remDeg4_eq` and `remDeg3_eq` at `β`: `P1.coeff 1 * z1 + P0.coeff 3 = 0` AND `d1.coeff 4 * z1 + d0.coeff 6 = 0`!
   have hP_lin : P1.coeff 1 * z1 + P0.coeff 3 = 0 := by
     have hrem := remDeg4_eq d2_2 d2_1 d2_0 p.1 p.2.1 p.2.2.1 p.2.2.2.1 p.2.2.2.2 β
-    conv_lhs at hrem => dsimp only [p, interp4]; rw [← hg_deg4.eq_deg4 β]
+    rw [← hP1_def, ← hP0_def] at hrem
+    conv_lhs at hrem => rw [hp_def]; dsimp only [interp4]; rw [← hg_deg4.eq_deg4 β]
     have hβ_def : β = HahnSeries.single 2 z1 := rfl
     have hgβ : HasValGe 4 (g β) := hβ_def.symm ▸ ((hg_scaled z1).1.inc ((hg_scaled z1).2 rfl))
     have hlhs : HasValGe 4 (d2_2 ^ 3 * g β) := ((hd2_2_L.val.pow 3).mul hgβ).mono (by omega)
@@ -2223,18 +2209,6 @@ lemma br1_0_eta_AC_coeff_neg_one : (br1_0 eta_AC).coeff (-1) = 0 := by
       (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_2))
       (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_1))
       (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_0)) β
-    have hd1_eq : remDeg3_d1 d2_2 d2_1 d2_0
-        (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_3))
-        (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_2))
-        (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_1)) = d1 := by
-      simp only [d1, CoverParams.d1_z, CoverParams.pmul, PairAlg.map_sub, PairAlg.map_mul,
-        PairAlg.evalAt_sub, PairAlg.evalAt_mul _ _ W1_0 W1_0_eq, remDeg3_d1]; rfl
-    have hd0_eq : remDeg3_d0 d2_2 d2_1 d2_0
-        (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_3))
-        (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_2))
-        (PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_0)) = d0 := by
-      simp only [d0, CoverParams.d0_z, CoverParams.pmul, PairAlg.map_sub, PairAlg.map_mul,
-        PairAlg.evalAt_sub, PairAlg.evalAt_mul _ _ W1_0 W1_0_eq, remDeg3_d0]; rfl
     rw [hd1_eq, hd0_eq] at hrem
     have hlhs : HasValGe 7 (d2_2 ^ 2 * _) := ((hd2_2_L.val.pow 2).mul hE3_β).mono (by omega)
     have hQ : HasValGe 2 (d2_2 * PairAlg.evalAt W1_0 (PairAlg.map evalT k5Params.d3_3) * β +
@@ -2796,34 +2770,27 @@ private lemma br2_0_numM_bounds
     exact (numM_ValDual_of ha_D hb_D hξS_D hξQ_D ha2 ha1 ha0 hb2 hb1 hb0 mi).eq_k (k' := -2) (by omega)
   -- Every pair `5 * numM_gen i - 9 * numM_gen j` for `(0,1), (1,2), (3,5), (4,6)` equals
   -- `⟨0, (5 * numM_D i a0 b0 - 9 * numM_D j a0 b0).eps⟩` (independent of `a1, b1, V.coeff 0`)!
-  have hpair_eq (u1 u0 : Dual K5) (hu1 : u1.val = u1.val) :
-      let mk := fun (a b xS xQ w u1' u0' : Dual K5) =>
-        let dHS0 := fun s q : Dual K5 => Dual.C (-(25 / 243 : K5)) * (5 * s - 9 * q) * (15 * s - 9 * q) * w
-        let dHQ0 := fun s q : Dual K5 => Dual.C (50 / 27 : K5) * s * (5 * s - 9 * q) * w
-        let A2 := dHS0 a b; let A0 := dHS0 xS xQ; let A1 := dHS0 (a + xS) (b + xQ) - A2 - A0
-        let B2 := dHQ0 a b; let B0 := dHQ0 xS xQ; let B1 := dHQ0 (a + xS) (b + xQ) - B2 - B0
-        let da2 := (dHS_D a0 b0).eps
-        let da0 := (dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K)).eps
-        let da1 := (dHS_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) - dHS_D a0 b0 -
-          dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K)).eps
-        let db2 := (dHQ_D a0 b0 0).eps
-        let db0 := (dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 1).eps
-        let db1 := (dHQ_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) 0 - dHQ_D a0 b0 0 -
-          dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩).eps
-        let a2 := A2 + ⟨0, da2⟩; let a1 := A1 + ⟨0, da1⟩; let a0' := A0 + ⟨0, da0⟩
-        let b2 := B2 + ⟨0, db2⟩; let b1 := B1 + ⟨0, db1⟩; let b0' := B0 + ⟨0, db0⟩
-        let d20 := a2 * b0' - a0' * b2; let d21 := a2 * b1 - a1 * b2; let d10 := a1 * b0' - a0' * b1
-        let m2 := u1' * (5 * a - 9 * b)
-        let m1 := u1' * (5 * xS - 9 * xQ) + u0' * (5 * a - 9 * b)
-        let m0 := u0' * (5 * xS - 9 * xQ)
-        m2 * d10 - m1 * d20 + m0 * d21
-      let ξS0 := S_K - a0 * T_K
-      let ξQ0 := Q_K - b0 * T_K
-      let d20_D := dHS_D a0 b0 * dHQ_D ξS0 ξQ0 1 - dHS_D ξS0 ξQ0 * dHQ_D a0 b0 0
-      let a1_D := dHS_D (a0 + ξS0) (b0 + ξQ0) - dHS_D a0 b0 - dHS_D ξS0 ξQ0
-      let b1_D := dHQ_D (a0 + ξS0) (b0 + ξQ0) 0 - dHQ_D a0 b0 0 - dHQ_D ξS0 ξQ0 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩
-      let d21_D := dHS_D a0 b0 * b1_D - a1_D * dHQ_D a0 b0 0
-      let d10_D := a1_D * dHQ_D ξS0 ξQ0 1 - dHS_D ξS0 ξQ0 * b1_D
+  set ξS0 : K5 := S_K - a0 * T_K
+  set ξQ0 : K5 := Q_K - b0 * T_K
+  set a1_D : Dual K5 := dHS_D (a0 + ξS0) (b0 + ξQ0) - dHS_D a0 b0 - dHS_D ξS0 ξQ0
+  set b1_D : Dual K5 := dHQ_D (a0 + ξS0) (b0 + ξQ0) 0 - dHQ_D a0 b0 0 - dHQ_D ξS0 ξQ0 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩
+  set d20_D : Dual K5 := dHS_D a0 b0 * dHQ_D ξS0 ξQ0 1 - dHS_D ξS0 ξQ0 * dHQ_D a0 b0 0
+  set d21_D : Dual K5 := dHS_D a0 b0 * b1_D - a1_D * dHQ_D a0 b0 0
+  set d10_D : Dual K5 := a1_D * dHQ_D ξS0 ξQ0 1 - dHS_D ξS0 ξQ0 * b1_D
+  have hnumM_D_eq (mi : Fin 10) : numM_D mi a0 b0 =
+      let (m2, m1, m0) : K5 × K5 × K5 := match mi with
+        | 0 => (a0 ^ 2, 2 * a0 * ξS0, ξS0 ^ 2)
+        | 1 => (a0 * b0, a0 * ξQ0 + b0 * ξS0, ξS0 * ξQ0)
+        | 2 => (b0 ^ 2, 2 * b0 * ξQ0, ξQ0 ^ 2)
+        | 3 => (a0, ξS0, 0)
+        | 4 => (0, a0, ξS0)
+        | 5 => (b0, ξQ0, 0)
+        | 6 => (0, b0, ξQ0)
+        | 7 => (1, 0, 0)
+        | 8 => (0, 1, 0)
+        | 9 => (0, 0, 1)
+      Dual.C (1 / 16 : K5) * (Dual.C m2 * d10_D - Dual.C m1 * d20_D + Dual.C m0 * d21_D) := rfl
+  have hpair_eq (u1 u0 : Dual K5) :
       Dual.C (1 / 16 : K5) *
         ((u1 * (5 * aD - 9 * bD)) * d10_g - (u1 * (5 * ξSD - 9 * ξQD) + u0 * (5 * aD - 9 * bD)) * d20_g +
          (u0 * (5 * ξSD - 9 * ξQD)) * d21_g) =
@@ -2831,11 +2798,7 @@ private lemma br2_0_numM_bounds
         (Dual.C (u1.val * (5 * a0 - 9 * b0)) * d10_D -
          Dual.C (u1.val * (5 * ξS0 - 9 * ξQ0) + u0.val * (5 * a0 - 9 * b0)) * d20_D +
          Dual.C (u0.val * (5 * ξS0 - 9 * ξQ0)) * d21_D)).eps⟩ := by
-    have _ := hu1
-    dsimp only
     set wD : Dual K5 := ⟨w0, V.coeff 0⟩
-    set ξS0 : K5 := S_K - a0 * T_K
-    set ξQ0 : K5 := Q_K - b0 * T_K
     set dHS0 : Dual K5 → Dual K5 → Dual K5 := fun s q => Dual.C (-(25 / 243 : K5)) * (5 * s - 9 * q) * (15 * s - 9 * q) * wD
     set dHQ0 : Dual K5 → Dual K5 → Dual K5 := fun s q => Dual.C (50 / 27 : K5) * s * (5 * s - 9 * q) * wD
     set dHS0_C : Dual K5 → Dual K5 → Dual K5 := fun s q => Dual.C (-(25 / 243 : K5)) * (5 * s - 9 * q) * (15 * s - 9 * q) * Dual.C w0
@@ -2849,12 +2812,12 @@ private lemma br2_0_numM_bounds
     have ha2_g : a2_g = dHS0 aD bD + ⟨0, da2⟩ := rfl
     have ha0_g : a0_g = dHS0 ξSD ξQD + ⟨0, da0⟩ := rfl
     have ha1_g : a1_g = (dHS0 (aD + ξSD) (bD + ξQD) - dHS0 aD bD - dHS0 ξSD ξQD) + ⟨0, da1⟩ := by
-      ext <;> simp only [a1_g, a2_g, a0_g, dHS_gen, dHS0, dHS_D, da1, aD, bD, ξSD, ξQD, wD,
+      ext <;> simp only [a1_g, a2_g, a0_g, dHS_gen, dHS0, dHS_D, da1, aD, bD, ξSD, ξQD, wD, ξS0, ξQ0,
         Dual.add_val, Dual.sub_val, Dual.add_eps, Dual.sub_eps] <;> ring
     have hb2_g : b2_g = dHQ0 aD bD + ⟨0, db2⟩ := rfl
     have hb0_g : b0_g = dHQ0 ξSD ξQD + ⟨0, db0⟩ := rfl
     have hb1_g : b1_g = (dHQ0 (aD + ξSD) (bD + ξQD) - dHQ0 aD bD - dHQ0 ξSD ξQD) + ⟨0, db1⟩ := by
-      ext <;> simp only [b1_g, b2_g, dHQ_gen, dHQ0, dHQ_D, db1, aD, bD, ξSD, ξQD, wD,
+      ext <;> simp only [b1_g, b2_g, dHQ_gen, dHQ0, dHQ_D, db1, aD, bD, ξSD, ξQD, wD, ξS0, ξQ0,
         Dual.add_val, Dual.sub_val, Dual.add_eps, Dual.sub_eps] <;> ring
     have hdS0_C (s q : K5) :
         dHS0_C (Dual.C s) (Dual.C q) = Dual.C (-(25 / 243 : K5) * (5 * s - 9 * q) * (15 * s - 9 * q) * w0) := by
@@ -2866,35 +2829,35 @@ private lemma br2_0_numM_bounds
       rw [hdS0_C]; ext <;> simp only [dHS_D, da2, Dual.add_val, Dual.C_val, Dual.add_eps, Dual.C_eps] <;> ring
     have ha0_D : dHS_D ξS0 ξQ0 = dHS0_C (Dual.C ξS0) (Dual.C ξQ0) + ⟨0, da0⟩ := by
       rw [hdS0_C]; ext <;> simp only [dHS_D, da0, Dual.add_val, Dual.C_val, Dual.add_eps, Dual.C_eps] <;> ring
-    have ha1_D : dHS_D (a0 + ξS0) (b0 + ξQ0) - dHS_D a0 b0 - dHS_D ξS0 ξQ0 =
+    have ha1_D : a1_D =
         (dHS0_C (Dual.C a0 + Dual.C ξS0) (Dual.C b0 + Dual.C ξQ0) -
           dHS0_C (Dual.C a0) (Dual.C b0) - dHS0_C (Dual.C ξS0) (Dual.C ξQ0)) + ⟨0, da1⟩ := by
+      dsimp only [a1_D]
       rw [← map_add Dual.C, ← map_add Dual.C, hdS0_C, hdS0_C, hdS0_C]
       ext <;> simp only [dHS_D, da1, Dual.add_val, Dual.sub_val, Dual.C_val, Dual.add_eps, Dual.sub_eps, Dual.C_eps] <;> ring
     have hb2_D : dHQ_D a0 b0 0 = dHQ0_C (Dual.C a0) (Dual.C b0) + ⟨0, db2⟩ := by
       rw [hdQ0_C]; ext <;> simp only [dHQ_D, db2, Dual.add_val, Dual.C_val, Dual.add_eps, Dual.C_eps] <;> ring
     have hb0_D : dHQ_D ξS0 ξQ0 1 = dHQ0_C (Dual.C ξS0) (Dual.C ξQ0) + ⟨0, db0⟩ := by
       rw [hdQ0_C]; ext <;> simp only [dHQ_D, db0, Dual.add_val, Dual.C_val, Dual.add_eps, Dual.C_eps] <;> ring
-    have hb1_D : dHQ_D (a0 + ξS0) (b0 + ξQ0) 0 - dHQ_D a0 b0 0 - dHQ_D ξS0 ξQ0 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩ =
+    have hb1_D : b1_D =
         (dHQ0_C (Dual.C a0 + Dual.C ξS0) (Dual.C b0 + Dual.C ξQ0) -
           dHQ0_C (Dual.C a0) (Dual.C b0) - dHQ0_C (Dual.C ξS0) (Dual.C ξQ0)) + ⟨0, db1⟩ := by
+      dsimp only [b1_D]
       rw [← map_add Dual.C, ← map_add Dual.C, hdQ0_C, hdQ0_C, hdQ0_C]
       ext <;> simp only [dHQ_D, db1, Dual.add_val, Dual.sub_val, Dual.C_val, Dual.add_eps, Dual.sub_eps, Dual.C_eps]; ring
     have hcore := dual_minor_pair_eq_const aD bD ξSD ξQD wD u1 u0 da2 da1 da0 db2 db1 db0
     dsimp only at hcore
     have hL : (u1 * (5 * aD - 9 * bD)) * d10_g - (u1 * (5 * ξSD - 9 * ξQD) + u0 * (5 * aD - 9 * bD)) * d20_g +
         (u0 * (5 * ξSD - 9 * ξQD)) * d21_g =
-        ⟨0, (Dual.C (u1.val * (5 * a0 - 9 * b0)) *
-          ((dHS_D (a0 + ξS0) (b0 + ξQ0) - dHS_D a0 b0 - dHS_D ξS0 ξQ0) * dHQ_D ξS0 ξQ0 1 -
-           dHS_D ξS0 ξQ0 * (dHQ_D (a0 + ξS0) (b0 + ξQ0) 0 - dHQ_D a0 b0 0 - dHQ_D ξS0 ξQ0 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩)) -
-         Dual.C (u1.val * (5 * ξS0 - 9 * ξQ0) + u0.val * (5 * a0 - 9 * b0)) *
-          (dHS_D a0 b0 * dHQ_D ξS0 ξQ0 1 - dHS_D ξS0 ξQ0 * dHQ_D a0 b0 0) +
-         Dual.C (u0.val * (5 * ξS0 - 9 * ξQ0)) *
-          (dHS_D a0 b0 * (dHQ_D (a0 + ξS0) (b0 + ξQ0) 0 - dHQ_D a0 b0 0 - dHQ_D ξS0 ξQ0 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩) -
-           (dHS_D (a0 + ξS0) (b0 + ξQ0) - dHS_D a0 b0 - dHS_D ξS0 ξQ0) * dHQ_D a0 b0 0)).eps⟩ := by
+        ⟨0, (Dual.C (u1.val * (5 * a0 - 9 * b0)) * d10_D -
+         Dual.C (u1.val * (5 * ξS0 - 9 * ξQ0) + u0.val * (5 * a0 - 9 * b0)) * d20_D +
+         Dual.C (u0.val * (5 * ξS0 - 9 * ξQ0)) * d21_D).eps⟩ := by
       rw [show d10_g = a1_g * b0_g - a0_g * b1_g from rfl,
           show d20_g = a2_g * b0_g - a0_g * b2_g from rfl,
           show d21_g = a2_g * b1_g - a1_g * b2_g from rfl,
+          show d10_D = a1_D * dHQ_D ξS0 ξQ0 1 - dHS_D ξS0 ξQ0 * b1_D from rfl,
+          show d20_D = dHS_D a0 b0 * dHQ_D ξS0 ξQ0 1 - dHS_D ξS0 ξQ0 * dHQ_D a0 b0 0 from rfl,
+          show d21_D = dHS_D a0 b0 * b1_D - a1_D * dHQ_D a0 b0 0 from rfl,
           ha2_g, ha1_g, ha0_g, hb2_g, hb1_g, hb0_g,
           ha1_D, ha2_D, ha0_D, hb1_D, hb2_D, hb0_D]
       have hm2C : Dual.C (u1.val * (5 * a0 - 9 * b0)) = Dual.C u1.val * (5 * Dual.C a0 - 9 * Dual.C b0) := by
@@ -2908,61 +2871,58 @@ private lemma br2_0_numM_bounds
       exact hcore
     rw [hL]
     ext <;> simp only [Dual.mul_val, Dual.mul_eps, Dual.C_val, Dual.C_eps] <;> ring
+  clear_value dHS_gen dHQ_gen a2_g a0_g a1_g b2_g b0_g b1_g d20_g d21_g d10_g a1_D b1_D d20_D d21_D d10_D
   have hp01_eq : 5 * numM_gen 0 - 9 * numM_gen 1 = ⟨0, (5 * numM_D 0 a0 b0 - 9 * numM_D 1 a0 b0).eps⟩ := by
-    have h := hpair_eq aD ξSD rfl
+    have h := hpair_eq aD ξSD
     have hL : 5 * numM_gen 0 - 9 * numM_gen 1 = Dual.C (1 / 16 : K5) *
         ((aD * (5 * aD - 9 * bD)) * d10_g - (aD * (5 * ξSD - 9 * ξQD) + ξSD * (5 * aD - 9 * bD)) * d20_g +
          (ξSD * (5 * ξSD - 9 * ξQD)) * d21_g) := by
       simp only [numM_gen]; ring
     have hR : 5 * numM_D 0 a0 b0 - 9 * numM_D 1 a0 b0 = Dual.C (1 / 16 : K5) *
-        (Dual.C (aD.val * (5 * a0 - 9 * b0)) * ((dHS_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) - dHS_D a0 b0 - dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K)) * dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 1 -
-           dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K) * (dHQ_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) 0 - dHQ_D a0 b0 0 - dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩)) -
-         Dual.C (aD.val * (5 * (S_K - a0 * T_K) - 9 * (Q_K - b0 * T_K)) + ξSD.val * (5 * a0 - 9 * b0)) * (dHS_D a0 b0 * dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 1 - dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K) * dHQ_D a0 b0 0) +
-         Dual.C (ξSD.val * (5 * (S_K - a0 * T_K) - 9 * (Q_K - b0 * T_K))) * (dHS_D a0 b0 * (dHQ_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) 0 - dHQ_D a0 b0 0 - dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩) -
-           (dHS_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) - dHS_D a0 b0 - dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K)) * dHQ_D a0 b0 0)) := by
-      simp only [numM_D, aD, ξSD, map_add, map_sub, map_mul, map_pow, map_ofNat]; ring
+        (Dual.C (aD.val * (5 * a0 - 9 * b0)) * d10_D -
+         Dual.C (aD.val * (5 * ξS0 - 9 * ξQ0) + ξSD.val * (5 * a0 - 9 * b0)) * d20_D +
+         Dual.C (ξSD.val * (5 * ξS0 - 9 * ξQ0)) * d21_D) := by
+      rw [hnumM_D_eq 0, hnumM_D_eq 1]; dsimp only [aD, ξSD, ξS0, ξQ0]
+      simp only [map_add, map_sub, map_mul, map_pow, map_ofNat]; ring
     rw [hL, hR]; exact h
   have hp12_eq : 5 * numM_gen 1 - 9 * numM_gen 2 = ⟨0, (5 * numM_D 1 a0 b0 - 9 * numM_D 2 a0 b0).eps⟩ := by
-    have h := hpair_eq bD ξQD rfl
+    have h := hpair_eq bD ξQD
     have hL : 5 * numM_gen 1 - 9 * numM_gen 2 = Dual.C (1 / 16 : K5) *
         ((bD * (5 * aD - 9 * bD)) * d10_g - (bD * (5 * ξSD - 9 * ξQD) + ξQD * (5 * aD - 9 * bD)) * d20_g +
          (ξQD * (5 * ξSD - 9 * ξQD)) * d21_g) := by
       simp only [numM_gen]; ring
     have hR : 5 * numM_D 1 a0 b0 - 9 * numM_D 2 a0 b0 = Dual.C (1 / 16 : K5) *
-        (Dual.C (bD.val * (5 * a0 - 9 * b0)) * ((dHS_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) - dHS_D a0 b0 - dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K)) * dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 1 -
-           dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K) * (dHQ_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) 0 - dHQ_D a0 b0 0 - dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩)) -
-         Dual.C (bD.val * (5 * (S_K - a0 * T_K) - 9 * (Q_K - b0 * T_K)) + ξQD.val * (5 * a0 - 9 * b0)) * (dHS_D a0 b0 * dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 1 - dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K) * dHQ_D a0 b0 0) +
-         Dual.C (ξQD.val * (5 * (S_K - a0 * T_K) - 9 * (Q_K - b0 * T_K))) * (dHS_D a0 b0 * (dHQ_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) 0 - dHQ_D a0 b0 0 - dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩) -
-           (dHS_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) - dHS_D a0 b0 - dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K)) * dHQ_D a0 b0 0)) := by
-      simp only [numM_D, bD, ξQD, map_add, map_sub, map_mul, map_pow, map_ofNat]; ring
+        (Dual.C (bD.val * (5 * a0 - 9 * b0)) * d10_D -
+         Dual.C (bD.val * (5 * ξS0 - 9 * ξQ0) + ξQD.val * (5 * a0 - 9 * b0)) * d20_D +
+         Dual.C (ξQD.val * (5 * ξS0 - 9 * ξQ0)) * d21_D) := by
+      rw [hnumM_D_eq 1, hnumM_D_eq 2]; dsimp only [bD, ξQD, ξS0, ξQ0]
+      simp only [map_add, map_sub, map_mul, map_pow, map_ofNat]; ring
     rw [hL, hR]; exact h
   have hp35_eq : 5 * numM_gen 3 - 9 * numM_gen 5 = ⟨0, (5 * numM_D 3 a0 b0 - 9 * numM_D 5 a0 b0).eps⟩ := by
-    have h := hpair_eq 1 0 rfl
+    have h := hpair_eq 1 0
     have hL : 5 * numM_gen 3 - 9 * numM_gen 5 = Dual.C (1 / 16 : K5) *
         ((1 * (5 * aD - 9 * bD)) * d10_g - (1 * (5 * ξSD - 9 * ξQD) + 0 * (5 * aD - 9 * bD)) * d20_g +
          (0 * (5 * ξSD - 9 * ξQD)) * d21_g) := by
       simp only [numM_gen]; ring
     have hR : 5 * numM_D 3 a0 b0 - 9 * numM_D 5 a0 b0 = Dual.C (1 / 16 : K5) *
-        (Dual.C ((1 : Dual K5).val * (5 * a0 - 9 * b0)) * ((dHS_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) - dHS_D a0 b0 - dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K)) * dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 1 -
-           dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K) * (dHQ_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) 0 - dHQ_D a0 b0 0 - dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩)) -
-         Dual.C ((1 : Dual K5).val * (5 * (S_K - a0 * T_K) - 9 * (Q_K - b0 * T_K)) + (0 : Dual K5).val * (5 * a0 - 9 * b0)) * (dHS_D a0 b0 * dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 1 - dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K) * dHQ_D a0 b0 0) +
-         Dual.C ((0 : Dual K5).val * (5 * (S_K - a0 * T_K) - 9 * (Q_K - b0 * T_K))) * (dHS_D a0 b0 * (dHQ_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) 0 - dHQ_D a0 b0 0 - dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩) -
-           (dHS_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) - dHS_D a0 b0 - dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K)) * dHQ_D a0 b0 0)) := by
-      simp only [numM_D, Dual.one_val, Dual.zero_val, map_add, map_sub, map_mul, map_zero, map_one, map_ofNat]; ring
+        (Dual.C ((1 : Dual K5).val * (5 * a0 - 9 * b0)) * d10_D -
+         Dual.C ((1 : Dual K5).val * (5 * ξS0 - 9 * ξQ0) + (0 : Dual K5).val * (5 * a0 - 9 * b0)) * d20_D +
+         Dual.C ((0 : Dual K5).val * (5 * ξS0 - 9 * ξQ0)) * d21_D) := by
+      rw [hnumM_D_eq 3, hnumM_D_eq 5]
+      simp only [Dual.one_val, Dual.zero_val, map_add, map_sub, map_mul, map_zero, map_one, map_ofNat]; ring
     rw [hL, hR]; exact h
   have hp46_eq : 5 * numM_gen 4 - 9 * numM_gen 6 = ⟨0, (5 * numM_D 4 a0 b0 - 9 * numM_D 6 a0 b0).eps⟩ := by
-    have h := hpair_eq 0 1 rfl
+    have h := hpair_eq 0 1
     have hL : 5 * numM_gen 4 - 9 * numM_gen 6 = Dual.C (1 / 16 : K5) *
         ((0 * (5 * aD - 9 * bD)) * d10_g - (0 * (5 * ξSD - 9 * ξQD) + 1 * (5 * aD - 9 * bD)) * d20_g +
          (1 * (5 * ξSD - 9 * ξQD)) * d21_g) := by
       simp only [numM_gen]; ring
     have hR : 5 * numM_D 4 a0 b0 - 9 * numM_D 6 a0 b0 = Dual.C (1 / 16 : K5) *
-        (Dual.C ((0 : Dual K5).val * (5 * a0 - 9 * b0)) * ((dHS_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) - dHS_D a0 b0 - dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K)) * dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 1 -
-           dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K) * (dHQ_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) 0 - dHQ_D a0 b0 0 - dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩)) -
-         Dual.C ((0 : Dual K5).val * (5 * (S_K - a0 * T_K) - 9 * (Q_K - b0 * T_K)) + (1 : Dual K5).val * (5 * a0 - 9 * b0)) * (dHS_D a0 b0 * dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 1 - dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K) * dHQ_D a0 b0 0) +
-         Dual.C ((1 : Dual K5).val * (5 * (S_K - a0 * T_K) - 9 * (Q_K - b0 * T_K))) * (dHS_D a0 b0 * (dHQ_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) 0 - dHQ_D a0 b0 0 - dHQ_D (S_K - a0 * T_K) (Q_K - b0 * T_K) 0 + ⟨0, (10 / 7 : K5) * b0 * w0⟩) -
-           (dHS_D (a0 + (S_K - a0 * T_K)) (b0 + (Q_K - b0 * T_K)) - dHS_D a0 b0 - dHS_D (S_K - a0 * T_K) (Q_K - b0 * T_K)) * dHQ_D a0 b0 0)) := by
-      simp only [numM_D, Dual.one_val, Dual.zero_val, map_add, map_sub, map_mul, map_zero, map_one, map_ofNat]; ring
+        (Dual.C ((0 : Dual K5).val * (5 * a0 - 9 * b0)) * d10_D -
+         Dual.C ((0 : Dual K5).val * (5 * ξS0 - 9 * ξQ0) + (1 : Dual K5).val * (5 * a0 - 9 * b0)) * d20_D +
+         Dual.C ((1 : Dual K5).val * (5 * ξS0 - 9 * ξQ0)) * d21_D) := by
+      rw [hnumM_D_eq 4, hnumM_D_eq 6]
+      simp only [Dual.one_val, Dual.zero_val, map_add, map_sub, map_mul, map_zero, map_one, map_ofNat]; ring
     rw [hL, hR]; exact h
   have hA0U_L : ValLead (-1) (A_0U a_s b_s ξS_s ξQ_s U V) (A0U_D a0 b0).eps := by
     have hVD := A0U_ValDual_of hnumM_VD
@@ -3562,16 +3522,12 @@ private lemma br2_0_A0U_Z2_eval :
   have hξS_eq : Dual.C S_K - a_du * Dual.C T_K = Dual.C inv_d * ξS_s := by
     ext
     · simp only [a_du, ξS_s, Dual.C_val, Dual.sub_val, Dual.mul_val]
-      calc S_K - inv_d * (6 * S_K ^ 2) * T_K =
-            S_K * (d_ab * inv_d) - inv_d * (6 * S_K ^ 2) * T_K := by rw [hd_inv, mul_one]
-        _ = inv_d * (-18 * S_K ^ 2) := by dsimp only [d_ab, B]; ring
+      have h := hd_inv; dsimp only [d_ab, B] at h ⊢; linear_combination -S_K * h
     · simp only [a_du, ξS_s, Dual.C_val, Dual.C_eps, Dual.sub_eps, Dual.mul_eps, Dual.mul_val]; ring
   have hξQ_eq : Dual.C Q_K - b_du * Dual.C T_K = Dual.C inv_d * ξQ_s := by
     ext
     · simp only [b_du, ξQ_s, Dual.C_val, Dual.sub_val, Dual.mul_val]
-      calc Q_K - inv_d * (6 * S_K * Q_K) * T_K =
-            Q_K * (d_ab * inv_d) - inv_d * (6 * S_K * Q_K) * T_K := by rw [hd_inv, mul_one]
-        _ = inv_d * (-18 * S_K * Q_K) := by dsimp only [d_ab, B]; ring
+      have h := hd_inv; dsimp only [d_ab, B] at h ⊢; linear_combination -Q_K * h
     · simp only [b_du, ξQ_s, Dual.C_val, Dual.C_eps, Dual.sub_eps, Dual.mul_eps, Dual.mul_val]; ring
   let dHS_v := fun s q : Dual K5 => Dual.C (-(25 / 243 : K5)) * (5 * s - 9 * q) * (15 * s - 9 * q)
   let dHS_e := fun s q : Dual K5 =>
@@ -3596,13 +3552,11 @@ private lemma br2_0_A0U_Z2_eval :
       Dual.C (inv_d ^ 2) * dHQ_e s q d_ab := by
     have h1 : Dual.C (10 / 7 : K5) * (Dual.C inv_d * q) = Dual.C (inv_d ^ 2) * (Dual.C ((10 / 7 : K5) * d_ab) * q) := by
       have : (10 / 7 : K5) * inv_d = inv_d ^ 2 * ((10 / 7 : K5) * d_ab) := by
-        calc (10 / 7 : K5) * inv_d = (10 / 7 : K5) * inv_d * (d_ab * inv_d) := by rw [hd_inv, mul_one]
-          _ = _ := by ring
+        linear_combination -((10 / 7 : K5) * inv_d) * hd_inv
       rw [← mul_assoc, ← map_mul, this, map_mul, mul_assoc]
     have h2 : Dual.C (10 / 7 : K5) = Dual.C (inv_d ^ 2) * Dual.C ((10 / 7 : K5) * d_ab ^ 2) := by
       rw [← map_mul]; congr 1
-      calc (10 / 7 : K5) = (10 / 7 : K5) * (d_ab * inv_d) ^ 2 := by rw [hd_inv]; ring
-        _ = _ := by ring
+      linear_combination -((10 / 7 : K5) * (d_ab * inv_d + 1)) * hd_inv
     simp only [dHQ_12_of, dHQ_e, mul_one, one_pow]
     rw [h1, h2]; simp only [map_pow]; ring
   let a2_v := dHS_v a_s b_s; let a2_e := dHS_e a_s b_s
@@ -3635,21 +3589,17 @@ private lemma br2_0_A0U_Z2_eval :
     have hq : b_du + Dual.C inv_d * ξQ_s = Dual.C inv_d * (b_s + ξQ_s) := by rw [hb_du_eq]; ring
     have hb_term : Dual.C (10 / 7 : K5) * b_du = Dual.C (inv_d ^ 2) * (Dual.C ((10 / 7 : K5) * d_ab) * b_s) := by
       have : (10 / 7 : K5) * inv_d = inv_d ^ 2 * ((10 / 7 : K5) * d_ab) := by
-        calc (10 / 7 : K5) * inv_d = (10 / 7 : K5) * inv_d * (d_ab * inv_d) := by rw [hd_inv, mul_one]
-          _ = _ := by ring
+        linear_combination -((10 / 7 : K5) * inv_d) * hd_inv
       rw [hb_du_eq, ← mul_assoc, ← map_mul, this, map_mul, mul_assoc]
     have hd_pow6 : Dual.C (d_ab ^ 6) * (Dual.C inv_d ^ 2 * Dual.C (inv_d ^ 4)) = (1 : Dual K5) := by
-      rw [← map_pow, ← map_mul, ← map_mul]
-      calc Dual.C (d_ab ^ 6 * (inv_d ^ 2 * inv_d ^ 4)) = Dual.C ((d_ab * inv_d) ^ 6) := by congr 1; ring
-        _ = 1 := by rw [hd_inv, one_pow, map_one]
+      rw [← map_pow, ← map_mul, ← map_mul, ← map_one Dual.C]; congr 1
+      rw [show d_ab ^ 6 * (inv_d ^ 2 * inv_d ^ 4) = (d_ab * inv_d) ^ 6 by ring, hd_inv, one_pow]
     have hd_pow5 : Dual.C (d_ab ^ 6) * (Dual.C inv_d * Dual.C (inv_d ^ 4)) = Dual.C d_ab := by
       rw [← map_mul, ← map_mul]; congr 1
-      calc d_ab ^ 6 * (inv_d * inv_d ^ 4) = d_ab * (d_ab * inv_d) ^ 5 := by ring
-        _ = d_ab := by rw [hd_inv]; ring
+      rw [show d_ab ^ 6 * (inv_d * inv_d ^ 4) = d_ab * (d_ab * inv_d) ^ 5 by ring, hd_inv, one_pow, mul_one]
     have hd_pow4 : Dual.C (d_ab ^ 6) * Dual.C (inv_d ^ 4) = Dual.C (d_ab ^ 2) := by
       rw [← map_mul]; congr 1
-      calc d_ab ^ 6 * inv_d ^ 4 = d_ab ^ 2 * (d_ab * inv_d) ^ 4 := by ring
-        _ = d_ab ^ 2 := by rw [hd_inv]; ring
+      rw [show d_ab ^ 6 * inv_d ^ 4 = d_ab ^ 2 * (d_ab * inv_d) ^ 4 by ring, hd_inv, one_pow, mul_one]
     have hdet : ∀ (x y z w : Dual (Dual K5)) (xv xe yv ye zv ze wv we : Dual K5),
         x.val = Dual.C (inv_d ^ 2) * xv → x.eps = Dual.C (inv_d ^ 2) * xe →
         y.val = Dual.C (inv_d ^ 2) * yv → y.eps = Dual.C (inv_d ^ 2) * ye →
@@ -3707,6 +3657,7 @@ private lemma br2_0_A0U_Z2_eval :
       · rw [hs, hq]; simp only [ha_du_eq, hb_du_eq, Dual.sub_eps, hdHS_e, a1_e, a2_e, a0_e]; ring
       · rw [ha_du_eq, hb_du_eq]; exact hdHQ_v _ _ _
       · rw [ha_du_eq, hb_du_eq]; exact hdHQ0_e _ _
+    clear_value a2_v a2_e a0_v a0_e a1_v a1_e b2_v b2_e b0_v b0_e b1_v b1_e d20_e d21_e d10_e
     have hbody (m2 m1 m0 : Dual K5) :
         Dual.C (d_ab ^ 6) * (Dual.C (1 / 16 : K5) *
           ((Dual.C inv_d ^ 2 * m2) * (Dual.C (inv_d ^ 4) * d10_e) -
@@ -3979,32 +3930,29 @@ private lemma br2_0_final_cancel
         (21 * S_K * (r35 * (6 * S_K * B) ^ 4 * P_eps) + L210 * B * (r35 * (6 * S_K * B) ^ 4 * P_val)) := by
     have h1 : w0 * (P1_0 * d0 - P0_0 * d1) = (P1_0 * w0) * cd - (P1_0 * (w0 * S_K / B) + P0_0) * (w0 * d1) := by
       rw [← hcd_eq]; ring
-    calc 21 * S_K * (r35 * (6 * S_K * B) ^ 4) * w0 * (-(P1_0 * d0 - P0_0 * d1) * w0 * (r50 * S_K * A) ^ 4) =
-          -(r35 * (6 * S_K * B) ^ 4) * (r50 * S_K * A) ^ 4 * w0 * (21 * S_K * (w0 * (P1_0 * d0 - P0_0 * d1))) := by ring
-      _ = -(r35 * (6 * S_K * B) ^ 4) * (r50 * S_K * A) ^ 4 * w0 *
-            (21 * S_K * (q2 ^ 3 * P_eps) * cd - q2 ^ 3 * P_val * (21 * S_K * (w0 * d1))) := by
-          rw [h1, ← hP_eps, ← hP_val]; ring
-      _ = _ := by rw [hw0_d1]; ring
+    rw [show 21 * S_K * (r35 * (6 * S_K * B) ^ 4) * w0 * (-(P1_0 * d0 - P0_0 * d1) * w0 * (r50 * S_K * A) ^ 4) =
+          -(r35 * (6 * S_K * B) ^ 4) * (r50 * S_K * A) ^ 4 * w0 * (21 * S_K * (w0 * (P1_0 * d0 - P0_0 * d1))) by ring,
+        h1, ← hP_eps, ← hP_val]
+    linear_combination (r35 * (6 * S_K * B) ^ 4 * (r50 * S_K * A) ^ 4 * w0 * q2 ^ 3 * P_val) * hw0_d1
   rw [hcomb, hinner]
   apply mul_left_cancel₀ (mul_ne_zero hB12 hB12)
   have hq2_div : q2 ^ 3 * (cd ^ 2 / q2) = q2 ^ 2 * cd ^ 2 := by
-    calc q2 ^ 3 * (cd ^ 2 / q2) = q2 ^ 2 * (cd ^ 2 / q2 * q2) := by ring
-      _ = q2 ^ 2 * cd ^ 2 := by rw [div_mul_cancel₀ _ hq2_ne]
+    rw [show q2 ^ 3 * (cd ^ 2 / q2) = q2 ^ 2 * (cd ^ 2 / q2 * q2) by ring, div_mul_cancel₀ _ hq2_ne]
   have hL : B ^ 12 * B ^ 12 * (-q2 ^ 3 * (r50 * S_K * A) ^ 4 * cd * w0 *
       (w0 ^ 3 * rinv * S_K ^ 3 * A ^ 4 * B * (r119 * S_K ^ 3 * A * (rDRU * RU_val)))) =
       (-r15 ^ 3 * r50 ^ 4 * rinv * r119 * rDRU * r25 ^ 4) * (B ^ 12 * B * S_K ^ 17 * A ^ 29 * cd * RU_val) := by
-    calc B ^ 12 * B ^ 12 * (-q2 ^ 3 * (r50 * S_K * A) ^ 4 * cd * w0 *
-            (w0 ^ 3 * rinv * S_K ^ 3 * A ^ 4 * B * (r119 * S_K ^ 3 * A * (rDRU * RU_val)))) =
-          -q2 ^ 3 * (r50 * S_K * A) ^ 4 * rinv * r119 * rDRU * B ^ 12 * B * S_K ^ 6 * A ^ 5 * cd * (w0 * B ^ 3) ^ 4 * RU_val := by ring
-      _ = _ := by rw [hw0_B3]; dsimp only [q2]; ring
+    rw [show B ^ 12 * B ^ 12 * (-q2 ^ 3 * (r50 * S_K * A) ^ 4 * cd * w0 *
+          (w0 ^ 3 * rinv * S_K ^ 3 * A ^ 4 * B * (r119 * S_K ^ 3 * A * (rDRU * RU_val)))) =
+        -q2 ^ 3 * (r50 * S_K * A) ^ 4 * rinv * r119 * rDRU * B ^ 12 * B * S_K ^ 6 * A ^ 5 * cd * (w0 * B ^ 3) ^ 4 * RU_val by ring,
+        hw0_B3]; dsimp only [q2]; ring
   have hR : B ^ 12 * B ^ 12 * (21 * S_K * (r35 * (6 * S_K * B) ^ 4) * w0 *
       (RU_val * (81 * (r4 * B ^ 3) * w0 * q2 ^ 3 * (cd ^ 2 / q2)))) =
       (21 * r35 * 81 * r4 * 6 ^ 4 * r15 ^ 2 * (-rcd) * r25 ^ 2) * (B ^ 12 * B * S_K ^ 17 * A ^ 29 * cd * RU_val) := by
-    rw [mul_assoc _ (q2 ^ 3), hq2_div]
-    calc B ^ 12 * B ^ 12 * (21 * S_K * (r35 * (6 * S_K * B) ^ 4) * w0 *
-            (RU_val * (81 * (r4 * B ^ 3) * w0 * (q2 ^ 2 * cd ^ 2)))) =
-          21 * r35 * 81 * r4 * 6 ^ 4 * S_K ^ 5 * B ^ 13 * q2 ^ 2 * (w0 * B ^ 3) ^ 2 * cd * (cd * B ^ 12) * RU_val := by ring
-      _ = _ := by rw [hw0_B3, hcd_B12]; dsimp only [q2]; ring
+    rw [mul_assoc _ (q2 ^ 3), hq2_div,
+        show B ^ 12 * B ^ 12 * (21 * S_K * (r35 * (6 * S_K * B) ^ 4) * w0 *
+          (RU_val * (81 * (r4 * B ^ 3) * w0 * (q2 ^ 2 * cd ^ 2)))) =
+        21 * r35 * 81 * r4 * 6 ^ 4 * S_K ^ 5 * B ^ 13 * q2 ^ 2 * (w0 * B ^ 3) ^ 2 * cd * (cd * B ^ 12) * RU_val by ring,
+        hw0_B3, hcd_B12]; dsimp only [q2]; ring
   rw [hL, hR, hk2]
 
 lemma br2_0_eta_AC_coeff_neg_one : (br2_0 eta_AC).coeff (-1) = toK5_RU := by
@@ -4150,6 +4098,7 @@ lemma br2_0_eta_AC_coeff_neg_one : (br2_0 eta_AC).coeff (-1) = toK5_RU := by
     exact (((hcomb.mul (hU_L.pow 3)).mul hw0_L).mul (hcb_L.pow 4)).eq_k (by omega) |>.eq_c (by ring)
   have hquot_L := (hnum_L.div_of_ne hden_L hden_ne).eq_k (k' := -1) (by omega)
   rw [hquot_L.c0]
+  clear_value U V ca cb c0W d2_2 d2_1 d2_0 d1 d0 res g p P1 P0
   -- Evaluate `P1_0` and `P0_0` at double root `z2` via `remDeg4_eq` in `Dual K5` at `Z2 = ⟨z2, w0⟩`!
   -- First build explicit polynomials `P_A, P_Q : K5[X]` for `g0 z = w0^2 * A0U_12(a(z), b(z)) * q1_lead0(a(z), b(z))`!
   set aX : K5[X] := C (1 / w0) * X
@@ -4260,8 +4209,7 @@ lemma br2_0_eta_AC_coeff_neg_one : (br2_0 eta_AC).coeff (-1) = toK5_RU := by
       have h1 : w0 * d_ab * (1 / w0 * (w0 * S_K / B)) = 6 * S_K ^ 2 * w0 := by
         dsimp only [d_ab]; field_simp [hw0_ne, hB]
       have h2 : w0 * d_ab * (inv_d * (6 * S_K ^ 2)) = 6 * S_K ^ 2 * w0 := by
-        calc w0 * d_ab * (inv_d * (6 * S_K ^ 2)) = w0 * (d_ab * inv_d) * (6 * S_K ^ 2) := by ring
-          _ = 6 * S_K ^ 2 * w0 := by rw [hd_inv]; ring
+        linear_combination (w0 * (6 * S_K ^ 2)) * hd_inv
       rw [h1, h2]
     · simp only [aX, Z2, a_du, eval₂_mul, eval₂_C, eval₂_X, Dual.C_val, Dual.C_eps, Dual.mul_eps]
       rw [zero_mul, add_zero, one_div, inv_mul_cancel₀ hw0_ne, zero_mul, add_zero]
@@ -4280,9 +4228,7 @@ lemma br2_0_eta_AC_coeff_neg_one : (br2_0 eta_AC).coeff (-1) = toK5_RU := by
       have hl : w0 * cb0 * d_ab * (-ca0 / (w0 * cb0) * z2 + -c0W0 / (w0 * cb0)) =
           -d_ab * (ca0 * z2 + c0W0) := by field_simp [hw0_ne, hcb0_ne]; ring
       have hr : w0 * cb0 * d_ab * (inv_d * (6 * S_K * Q_K)) = 6 * S_K * Q_K * w0 * cb0 := by
-        calc w0 * cb0 * d_ab * (inv_d * (6 * S_K * Q_K)) =
-              w0 * cb0 * (d_ab * inv_d) * (6 * S_K * Q_K) := by ring
-          _ = 6 * S_K * Q_K * w0 * cb0 := by rw [hd_inv]; ring
+        linear_combination (w0 * cb0 * (6 * S_K * Q_K)) * hd_inv
       rw [hl, hr]
       have hw0_mul : B ^ 3 * w0 = -(25 / 4 : K5) * S_K * A ^ 2 := by
         rw [hw0_eq, mul_div_cancel₀ _ (pow_ne_zero 3 hB)]
@@ -4300,10 +4246,9 @@ lemma br2_0_eta_AC_coeff_neg_one : (br2_0 eta_AC).coeff (-1) = toK5_RU := by
       have h1 : -ca0 / (w0 * cb0) * w0 = -ca0 / cb0 := by field_simp [hw0_ne, hcb0_ne]
       rw [h1, hca_cb]
       apply mul_left_cancel₀ hd_ab_ne
-      calc d_ab * ((5 * S_K - 3 * Q_K) / (6 * S_K)) = (5 * S_K - 3 * Q_K) * B := by
-              dsimp only [d_ab]; field_simp [h6_ne, hS]
-        _ = (d_ab * inv_d) * ((5 * S_K - 3 * Q_K) * B) := by rw [hd_inv, one_mul]
-        _ = d_ab * (inv_d * ((5 * S_K - 3 * Q_K) * B)) := by ring
+      have h2 : d_ab * ((5 * S_K - 3 * Q_K) / (6 * S_K)) = (5 * S_K - 3 * Q_K) * B := by
+        dsimp only [d_ab]; field_simp [h6_ne, hS]
+      rw [h2]; linear_combination -((5 * S_K - 3 * Q_K) * B) * hd_inv
   -- Evaluate `P_A.eval₂ Dual.C Z2 = A0U_12_of Dual.C a_du b_du` by clearing `d_ab ^ 6` (division-free `ring`!)
   set Q_quad : K5 := 11943020 * S_K ^ 2 - 876486 * S_K * Q_K + 8382500 * S_K * T_K +
     5029500 * Q_K * T_K - 14837025 * S_K - 33647355 * Q_K
@@ -4327,15 +4272,11 @@ lemma br2_0_eta_AC_coeff_neg_one : (br2_0 eta_AC).coeff (-1) = toK5_RU := by
     ext
     · simp only [P_Q, eval₂_add, eval₂_mul, eval₂_C, haX_Z2, hbX_Z2, a_du, b_du,
         Dual.C_val, Dual.add_val, Dual.mul_val]
-      calc 35721 * d_ab * (q1_c0 * (inv_d * (6 * S_K ^ 2)) + q1_c1 * (inv_d * (6 * S_K * Q_K)) + q1_c2) =
-            35721 * ((d_ab * inv_d) * (q1_c0 * (6 * S_K ^ 2) + q1_c1 * (6 * S_K * Q_K)) + q1_c2 * d_ab) := by ring
-        _ = 35721 * (q1_c0 * (6 * S_K ^ 2) + q1_c1 * (6 * S_K * Q_K) + q1_c2 * (6 * S_K * B)) := by
-            rw [hd_inv, one_mul]
+      have h := hd_inv; dsimp only [d_ab] at h ⊢
+      linear_combination (35721 * (q1_c0 * (6 * S_K ^ 2) + q1_c1 * (6 * S_K * Q_K))) * h
     · simp only [P_Q, eval₂_add, eval₂_mul, eval₂_C, haX_Z2, hbX_Z2, a_du, b_du,
         Dual.C_val, Dual.C_eps, Dual.add_eps, Dual.mul_eps, zero_mul, add_zero]
-      calc 35721 * d_ab * (q1_c0 * (inv_d * (6 * S_K * B)) + q1_c1 * (inv_d * ((5 * S_K - 3 * Q_K) * B))) =
-            35721 * (d_ab * inv_d) * (q1_c0 * (6 * S_K * B) + q1_c1 * ((5 * S_K - 3 * Q_K) * B)) := by ring
-        _ = 35721 * (q1_c0 * (6 * S_K * B) + q1_c1 * ((5 * S_K - 3 * Q_K) * B)) := by rw [hd_inv, mul_one]
+      linear_combination (35721 * (q1_c0 * (6 * S_K * B) + q1_c1 * ((5 * S_K - 3 * Q_K) * B))) * hd_inv
   -- Combine `hA0U_Z2_val_eps`, `hPQ_Z2`, `hP_val`, `hP_eps` and close via `br2_0_final_cancel`!
   have hPg0_Z2_prod : Dual.C (35721 * d_ab ^ 4) * (P_g0.eval₂ Dual.C Z2) =
       Dual.C (w0 ^ 2) *
