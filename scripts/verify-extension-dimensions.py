@@ -2,7 +2,9 @@
 """Reconstruct the dimension counts of Chapter 4, section 4.6.
 
 1. The ordinary sixfold dimension obstruction.
-2. Motions against invariant two-forms for the surface sections
+2. Moving weighted-Fano fourfold extensions W_6 subset P(1^5, 3) and
+   W_{(2,6)} subset P(1^6, 3).
+3. Motions against invariant two-forms for the surface sections
    D = X ∩ {h1 = h2 = 0} of an even sextic fourfold, from the parity-graded
    dimensions of C[Z]/(F, h1, h2) given by the Koszul formula.
 
@@ -73,6 +75,47 @@ def surface_sections():
     return best
 
 
+def weighted_fano_extensions():
+    """Verify moving weighted-Fano fourfold extension counts in P(1^5,3) and P(1^6,3)."""
+    def sgn_cnt(signs, degree, target):
+        return sum(character(e, signs) == target
+                   for e in compositions(len(signs), degree))
+
+    # 1. W_6 = {H_1 = 0, F + t*A_3 + t^2 = 0} subset P(1^5, 3):
+    #    unrestricted: dim(H_1) = 5, dim(A_3 on P^4) = 35, h^{3,1}(W_6) = dim S_4(P^4) = 70.
+    dim_A3_P4 = sum(1 for _ in compositions(5, 3))
+    h31_W6 = sum(1 for _ in compositions(5, 4))
+    assert (5 + dim_A3_P4, h31_W6) == (40, 70)
+    for signs5 in ((1, 1, -1, -1, -1), (1, 1, 1, -1, -1)):
+        det5 = prod(signs5)
+        for t_sgn in (1, -1):
+            params = 2 + sgn_cnt(signs5, 3, t_sgn)
+            h31_tau = sgn_cnt(signs5, 4, det5 * t_sgn)
+            expected = (18, 32) if det5 * t_sgn == -1 else (21, 38)
+            assert (params, h31_tau) == expected, (signs5, t_sgn, params, h31_tau)
+
+    # 2. W_{(2,6)} = {Q_2 = 0, F + t*A_3 + t^2 = 0} subset P(1^6, 3):
+    #    unrestricted: dim P(S_2) = 20, dim(S_3 / Q_2 S_1) = 56 - 6 = 50,
+    #    Cayley bidegree (1,5): h^{3,1} = dim S_1 + dim S_5 - dim S_3 - 6 = 6 + 252 - 56 - 6 = 196.
+    s_tot = {d: sum(1 for _ in compositions(6, d)) for d in (1, 2, 3, 5)}
+    assert (s_tot[2] - 1, s_tot[3] - s_tot[1]) == (20, 50)
+    assert s_tot[1] + s_tot[5] - s_tot[3] - 6 == 196
+    base = (1, 1, 1, -1, -1, -1)
+    det6 = prod(base)
+    for q_sgn in (1, -1):
+        dim_Q = sgn_cnt(base, 2, q_sgn) - 1
+        for t_sgn in (1, -1):
+            dim_A3 = sgn_cnt(base, 3, t_sgn) - sgn_cnt(base, 1, t_sgn * q_sgn)
+            sB5 = det6 * t_sgn * q_sgn
+            sB1 = det6 * t_sgn
+            sB3 = sB5 * q_sgn
+            dG_cnt = sum(1 for s in base if s == sB5)
+            h31_tau = (sgn_cnt(base, 1, sB1) + sgn_cnt(base, 5, sB5)
+                       - sgn_cnt(base, 3, sB3) - dG_cnt)
+            expected = (36, 98) if q_sgn == 1 else (33, 98)
+            assert (dim_Q + dim_A3, h31_tau) == expected, (q_sgn, t_sgn, dim_Q + dim_A3, h31_tau)
+
+
 def main():
     base = (1, 1, 1, -1, -1, -1)
     fixed = sum(character(e, base) == 1 for e in compositions(6, 6))
@@ -92,6 +135,9 @@ def main():
         print(f"Signs {added}: {raw + fixed} coefficients; "
               f"{raw} fixed-section directions; {raw - automorphisms} effective; "
               f"h42={h42}; h51={h51}")
+    weighted_fano_extensions()
+    print("Weighted Fano extensions: W_6 in P(1^5,3) (40 vs 70; tau: 18 vs 32 / 21 vs 38); "
+          "W_(2,6) in P(1^6,3) (70 vs 196; tau: 36 or 33 vs 98).")
     best = surface_sections()
     print("Surface sections, motions minus invariant two-forms: "
           + ", ".join(f"{e}: {v}" for e, v in sorted(best.items())))

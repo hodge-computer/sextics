@@ -942,6 +942,13 @@ For the second, \(\delta_1q^-=\delta_0\delta_1-s\,\delta_1^2\). If \(\lambda\in 
 
 The verifier below confirms the first check on its seed.
 
+**Remark: degree of the split section and Jacobian annihilators.** The same residue argument applies to a split-section family \(F'=F-R\,q_sq_{-s}\) with \(q_{\pm s}=\delta_0\pm s\,\delta_1\in S_d\) and \(R\in S_{6-2d}\) for \(d\in\{1,2,3\}\), whenever the base locus \(\{\delta_0=\delta_1=0\}\) is resolved: the pairing is proportional to \(\operatorname{soc}_{R(F')}(\lambda A\kappa\,\delta_0\delta_1)\) with \(\kappa=\dot R_1\dot s_2-\dot R_2\dot s_1\in S_{6-2d}\) (or, when \(d=3\) and \(R\) is constant while \(q_{\pm}=a\pm b\) vary, \(\operatorname{soc}_{R(F')}(\lambda A(\dot a_1\dot b_2-\dot a_2\dot b_1))\)). However, outside \(d=2\), symmetries of \(X'\) create automatic Jacobian annihilators that absorb kernel directions of \(\mu_\lambda\) without producing a nonzero two-form:
+
+- At \(d=1\), if \(X'\) retains separate sign changes on the linear forms \(\delta_0\) and \(\delta_1\) (for instance from a paired sign together with a coordinate exchange \(X_2\leftrightarrow Y_2\)), then \(F'\) is even in both, so \(G_4=\partial_{\delta_0}F'/(2\delta_0)\) and \(H_4=\partial_{\delta_1}F'/(2\delta_1)\) lie in \(S_4\) and satisfy \(\delta_0\delta_1G_4,\delta_0\delta_1H_4\in J(F')\). Two directions of \(\dot R\in S_4\) therefore pair to zero with \(\delta_0\delta_1\) modulo \(J(F')\), lowering the effective moving dimension by two.
+- At \(d=3\), if \(F'\) is invariant under \(X_2\leftrightarrow Y_2\) and \((X_2,Y_2)\mapsto(\omega X_2,\omega^2Y_2)\) and \(b=X_2^3-Y_2^3\) is fixed up to scale, every term of \((X_2\partial_{X_2}-Y_2\partial_{Y_2})F'\in J(F')\) is divisible by \(b\), yielding a symmetric cubic \(H_3\in S_3\) with \(bH_3\in J(F')\) that absorbs one kernel direction of \(\dot a\).
+
+At \(d=2\) the partial derivatives of \(F'\) have degree five and create no such annihilators in \(S_2\), allowing the two-dimensional kernel of \(\mu_\lambda\) below to produce a nonzero pairing.
+
 **Finite results.** Consider the \(H\)-invariant pencil \(F_\varepsilon=F_0+\varepsilon(X_0^2+Y_0^2)X_1Y_1X_2Y_2\), and at \(\varepsilon=5\) take
 
 \[

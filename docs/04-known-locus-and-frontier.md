@@ -709,6 +709,13 @@ The last column counts degree-ten monomials with each exponent at most four and 
 
 Consequently this fixed-section sixfold construction cannot provide the full invariant Hodge-bundle submersion used to obtain dense rational middle Hodge classes in the Voisin argument. The dimension bound concerns that density map: it gives no obstruction to divisor support from independently supplied cycles, smaller subvariations or different ambient geometry.
 
+A similar deficit persists for moving weighted-Fano fourfold extensions of a general even sextic, where the Hodge conjecture for rational \((2,2)\)-classes holds directly by [Chapter 3, §3.2](03-geometric-support.md) and the section inside \(X\) is allowed to move:
+
+- The double cover \(W_6=\{H_1(Z)=0,\;F(Z)+tA_3(Z)+t^2=0\}\subset\mathbb P(1^5,3)\) of a moving hyperplane is a smooth Fano fourfold of index two with \((h^{3,1},h^{2,2})=(70,382)\). The moving pairs \((H_1,A_3)\) have dimension \(40\) against \(h^{3,1}=70\); restricting to \(\tau\)-equivariant families gives \(18\) parameters against \(h^{3,1}(W_6)^\tau=32\), or \(21\) against \(38\), according to the \(\tau\)-parities of \(H_1\) and \(t\).
+- The double cover \(W_{(2,6)}=\{Q_2(Z)=0,\;F(Z)+tA_3(Z)+t^2=0\}\subset\mathbb P(1^6,3)\) of a moving quadric fourfold is a smooth Fano fourfold of index one with \((h^{3,1},h^{2,2})=(196,912)\). The moving pairs \((Q_2,A_3)\) modulo \(Q_2S_1\) have dimension \(20+50=70\) against \(h^{3,1}=196\); restricting to \(\tau\)-equivariant families gives \(36\) parameters (for \(\tau\)-even \(Q_2\)) or \(33\) (for \(\tau\)-odd \(Q_2\)) against \(h^{3,1}(W_{(2,6)})^\tau=98\).
+
+Both counts are reconstructed by `python3 scripts/verify-extension-dimensions.py`.
+
 The same comparison of dimensions can be favorable for the threefold fibers of a pencil. For a weighted Calabi–Yau threefold with a symmetry moving its holomorphic form, [Chapter 3D](03d-hodge-loci.md) computes the count for a divisor class on an invariant surface section and proves support of the invariant sector when the count is positive, one such class moves with nonzero Abel–Jacobi derivative, and the Higgs field admits only scalar symmetries.
 
 ### A dimension count for surface sections of the fourfold
